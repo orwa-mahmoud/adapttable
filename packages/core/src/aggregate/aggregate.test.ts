@@ -5,7 +5,9 @@ import {
   aggregate,
   AGGREGATE_NAMES,
   resolveAggregateValue,
+  toAggregateInstant,
   toAggregateNumber,
+  toAggregateOrdered,
 } from "./aggregate";
 
 interface Row {
@@ -133,5 +135,53 @@ describe("aggregate", () => {
 
   it("publishes its built-in names for a picker UI", () => {
     expect(AGGREGATE_NAMES).toEqual(["sum", "avg", "count", "min", "max"]);
+  });
+
+  it("compares ISO dates and times without locale guessing", () => {
+    const dated = [
+      { when: "2024-03-01" },
+      { when: "2024-01-15" },
+      { when: "2024-02-01" },
+    ];
+    expect(aggregate({ when: "min" })(dated)).toEqual({ when: "2024-01-15" });
+    expect(aggregate({ when: "max" })(dated)).toEqual({ when: "2024-03-01" });
+    expect(aggregate({ when: "count" })(dated)).toEqual({ when: 3 });
+    expect(toAggregateInstant("2024-01-15")).toBe(
+      Date.parse("2024-01-15T00:00:00Z")
+    );
+    expect(toAggregateInstant("09/09/2026")).toBeUndefined();
+    expect(toAggregateInstant("9 Sep 2026")).toBeUndefined();
+    expect(
+      toAggregateOrdered(new Date("2024-01-15T00:00:00Z"))?.result
+    ).toEqual(new Date("2024-01-15T00:00:00Z"));
+  });
+
+  it("skips invalid and missing temporal values, and keeps numeric min/max", () => {
+    const mixed = [
+      { when: "2024-01-15" },
+      { when: "" },
+      { when: null },
+      { when: "not-a-date" },
+    ];
+    expect(aggregate({ when: "min" })(mixed)).toEqual({ when: "2024-01-15" });
+    expect(aggregate({ when: "max" })(mixed)).toEqual({ when: "2024-01-15" });
+    expect(
+      aggregate({ score: "min" })([{ score: 3 }, { score: 1 }, { score: 9 }])
+    ).toEqual({ score: 1 });
+  });
+
+  it("respects sortValue for temporal min/max", () => {
+    const columns = [
+      {
+        key: "when",
+        sortValue: (row: { when: string }) => `${row.when}T00:00:00Z`,
+      },
+    ];
+    expect(
+      aggregate(
+        { when: "min" },
+        { columns }
+      )([{ when: "2024-06-01" }, { when: "2024-01-01" }])
+    ).toEqual({ when: "2024-01-01T00:00:00Z" });
   });
 });

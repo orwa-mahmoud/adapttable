@@ -98,10 +98,20 @@ session; they do not share revision or idempotency state.
 Stable catalog order:
 
 `columns.describe`, `view.describe`, `view.setPage`, `view.setSort`,
-`view.setSearch`, `view.setFilters`, `view.setGroupBy`, `view.pinColumn`,
+`view.setSearch`, `view.setFilters`, `view.setGroupBy`,
+`view.setAggregations`, `view.pinColumn`,
 `view.pinRow`, `view.setSelection`, `views.apply`, `rows.read`,
 `rows.resolve`, `export.run`, `edit.cells`, `rows.add`, `rows.delete`,
 `rows.reorder`.
+
+`view.setAggregations` takes `{ set?, remove?, restoreDefaults? }` — add or
+change specific column operations without replacing the others, remove
+specific aggregations with the same suppression semantics as the panel, or
+restore developer defaults. The whole request is validated before anything
+is applied. It is advertised only when grouping can actually execute
+aggregates. `describe` lists eligible columns and operation ids (never a
+`calculate` function). A server-side apply reports `pending: true` until the
+response that answers the new query arrives.
 
 `view.pinColumn` takes `{ key, side }` where `side` is the logical `"start"`
 or `null` to unpin. `view.pinRow` takes `{ side }` — `"top"`, `"bottom"` or

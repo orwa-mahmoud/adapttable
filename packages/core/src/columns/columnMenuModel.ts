@@ -422,11 +422,9 @@ function appendGroupingPanelActions<TRow>(
     disabled: false,
     run: () => (grouped ? panel.remove(row.key) : panel.add(row.key)),
   });
-  // A column the table is grouped by shows the group's own value where its
-  // aggregate would go, so it is not offered one here — exactly as the panel
-  // does not offer it. An aggregation already on it is left alone, not
-  // discarded, and stays visible in the panel.
-  if (panel.groupBy.length === 0 || grouped) return;
+  // Aggregation is independent of whether this column is also a grouping
+  // key. With nothing grouped yet there are no group cells to aggregate.
+  if (panel.groupBy.length === 0) return;
 
   // The same list the panel reads: same eligibility, same operations, same
   // current value, same mutation. A column offers one answer wherever a
@@ -436,23 +434,43 @@ function appendGroupingPanelActions<TRow>(
   );
   if (!candidate) return;
   const active = panel.aggregations.items.find(
-    (item) => item.columnKey === row.key && item.editable
+    (item) => item.columnKey === row.key
   );
+  if (active && !active.editable) return;
+  const options = candidate.operations.map((operation) => ({
+    value: operation.id,
+    label: operationLabel(operation, ctx.labels),
+  }));
+  if (active && active.operationId === undefined) {
+    options.unshift({
+      value: "",
+      label: ctx.labels.groupingAggregationCustom,
+    });
+  } else if (
+    active?.operationId &&
+    !options.some((option) => option.value === active.operationId)
+  ) {
+    options.unshift({
+      value: active.operationId,
+      label: operationLabel(
+        { id: active.operationId, builtIn: true },
+        ctx.labels
+      ),
+    });
+  }
   actions.push({
     kind: "choice",
     id: "group-aggregation",
     label: ctx.labels.groupingAggregation,
     disabled: !panel.canSetAggregates,
     value: active?.operationId ?? "",
-    options: candidate.operations.map((operation) => ({
-      value: operation.id,
-      label: operationLabel(operation, ctx.labels),
-    })),
+    options,
     onChange: (value) => {
+      if (value === "") return;
       panel.setAggregateOperation(row.key, value);
     },
   });
-  if (active) {
+  if (active?.editable) {
     actions.push({
       id: "remove-aggregation",
       label: ctx.labels.groupingRemoveAggregation(row.name),
@@ -573,6 +591,8 @@ export interface ColumnMenuLabels {
   groupingRemoveAggregation: (label: string) => string;
   /** Full average label used by aggregation choices. */
   groupingAverage: string;
+  /** Honest label for a host aggregate whose operation is unknown. */
+  groupingAggregationCustom: string;
   /** Count aggregation label. */
   selectionCount: string;
   /** Sum aggregation label. */

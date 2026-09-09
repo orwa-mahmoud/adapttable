@@ -82,6 +82,15 @@ describe("enabledKeys", () => {
         hasDelete: true,
         hasColumnPinning: true,
         hasRowPinning: true,
+        aggregations: {
+          columns: [
+            {
+              id: "salary",
+              operations: [{ id: "sum", label: "Sum" }],
+            },
+          ],
+          active: [],
+        },
       })
     );
     expect(keys).toEqual([...CAPABILITY_KEYS]);
@@ -345,6 +354,52 @@ describe("createAgentSession", () => {
     expect(apply.runExport).toHaveBeenCalledWith("csv");
     expect(apply.editCells).toHaveBeenCalled();
     expect(apply.reorderRows).toHaveBeenCalledWith("1", "2");
+  });
+
+  it("applies a whole aggregation patch or none of it", async () => {
+    const apply = { setAggregations: vi.fn() };
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: ["grouping"],
+          source: { ...PAGE_ONLY, grouping: "client" },
+          aggregations: {
+            columns: [
+              {
+                id: "salary",
+                operations: [
+                  { id: "sum", label: "Sum" },
+                  { id: "avg", label: "Average" },
+                ],
+              },
+            ],
+            active: [],
+          },
+        }),
+      apply,
+    });
+    const refused = await session.execute(
+      "view.setAggregations",
+      { set: { salary: "avg", ghost: "sum" } },
+      1,
+      "bad"
+    );
+    expect(refused.ok).toBe(false);
+    expect(apply.setAggregations).not.toHaveBeenCalled();
+    const ok = await session.execute(
+      "view.setAggregations",
+      { set: { salary: "avg" } },
+      1,
+      "good"
+    );
+    expect(ok.ok).toBe(true);
+    expect(ok.result).toMatchObject({ applied: true, pending: false });
+    expect(apply.setAggregations).toHaveBeenCalledWith({
+      set: { salary: "avg" },
+    });
+    const described = session.describe("view.setAggregations");
+    expect(described.guide).toContain("salary [sum (Sum), avg (Average)]");
+    expect(described.guide).not.toMatch(/calculate\s*:/);
   });
 
   it("clears sort when the key is null", async () => {

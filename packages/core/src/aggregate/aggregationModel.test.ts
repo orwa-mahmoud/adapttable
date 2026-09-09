@@ -19,8 +19,10 @@ import { aggregate, declaredAggregates } from "./aggregate";
 import {
   addAggregation,
   aggregationModel,
+  columnAggregationSignature,
   computedAggregateKeys,
   declaredByDeveloper,
+  effectiveAggregateOps,
   initialOperation,
   reconcileAggregations as reconcile,
   removeAggregation,
@@ -470,5 +472,120 @@ describe("what the table refuses", () => {
         { kind: "groupFooter", aggregateCells: { team: 3 } },
       ])
     ).toEqual(["team", "mystery"]);
+  });
+
+  it("keeps an opaque host aggregate visible on a reader-editable column", () => {
+    const columns: ColumnMetadata<Row>[] = [
+      { key: "budget", aggregatable: { operations: ["sum", "avg"] } },
+    ];
+    const { items, candidates } = aggregationModel<Row>({
+      columns,
+      overrides: {},
+      computedKeys: ["budget"],
+    });
+    expect(items).toEqual([
+      expect.objectContaining({
+        columnKey: "budget",
+        operationId: undefined,
+        editable: true,
+        origin: "host",
+      }),
+    ]);
+    expect(candidates[0]?.active).toBe(true);
+    expect(
+      declaredByDeveloper(columns[0]!, {
+        columns,
+        overrides: {},
+        computedKeys: ["budget"],
+      })
+    ).toBe(true);
+  });
+
+  it("keeps a host operation that is not on the reader's list", () => {
+    const { items } = aggregationModel<Row>({
+      columns: [
+        { key: "budget", aggregatable: { operations: ["avg", "count"] } },
+      ],
+      overrides: {},
+      declared: { budget: "sum" },
+    });
+    expect(items[0]).toMatchObject({
+      columnKey: "budget",
+      operationId: "sum",
+      origin: "host",
+      editable: true,
+    });
+  });
+
+  it("does not activate an unsupported default or hide the host result", () => {
+    const columns: ColumnMetadata<Row>[] = [
+      {
+        key: "budget",
+        aggregatable: {
+          default: "median",
+          operations: ["sum", { id: "median", label: "Median" }],
+        },
+      },
+    ];
+    const { items } = aggregationModel<Row>({
+      columns,
+      overrides: {},
+      declared: { budget: "sum" },
+      source: { grouping: "client" },
+    });
+    expect(items[0]).toMatchObject({
+      columnKey: "budget",
+      operationId: "sum",
+      origin: "host",
+    });
+  });
+
+  it("drops a stale suppression once the column is locked", () => {
+    const locked: ColumnMetadata<Row>[] = [{ key: "budget" }];
+    expect(reconcile({ budget: "none" }, locked)).toEqual({});
+    expect(
+      aggregationModel<Row>({
+        columns: locked,
+        overrides: { budget: "none" },
+        declared: { budget: "sum" },
+      }).items[0]
+    ).toMatchObject({
+      columnKey: "budget",
+      operationId: "sum",
+      origin: "host",
+    });
+  });
+
+  it("names the operation that will actually calculate, including defaults", () => {
+    expect(
+      effectiveAggregateOps<Row>({
+        columns: COLUMNS,
+        overrides: {},
+      })
+    ).toEqual({ budget: "sum" });
+    expect(
+      columnAggregationSignature({
+        key: "budget",
+        aggregatable: { operations: ["sum"] },
+      })
+    ).not.toBe(
+      columnAggregationSignature({
+        key: "budget",
+        aggregatable: { operations: ["avg"] },
+      })
+    );
+  });
+
+  it("does not keep a computed key from a different dataset", () => {
+    const columns: ColumnMetadata<Row>[] = [
+      { key: "budget", aggregatable: { operations: ["sum"] } },
+    ];
+    expect(
+      aggregationModel<Row>({
+        columns,
+        overrides: {},
+        computedKeys: [],
+      }).items
+    ).toEqual([]);
   });
 });

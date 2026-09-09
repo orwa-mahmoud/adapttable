@@ -257,6 +257,8 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly queryAggregates?: readonly QueryAggregate[];
     /** Operation ids the backend listed, when it named them. */
     readonly aggregateOperations?: readonly string[];
+    /** Whether a server source will honour aggregate requests. */
+    readonly honorsAggregates?: boolean;
     readonly setGroupBy: (key: string | undefined) => void;
     readonly initializeGroupBy?: (key: string) => void;
     readonly setAggregateOverrides?: (

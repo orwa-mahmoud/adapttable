@@ -1004,6 +1004,8 @@ export interface TableLabels {
   groupingAggregationFor?: (column: string) => string;
   /** Marks an aggregate the host owns and the reader cannot change. */
   groupingAggregationReadOnly?: string;
+  /** Honest label for a host aggregate whose operation is unknown. */
+  groupingAggregationCustom?: string;
   /** Polite announcement after a column's aggregate is taken away. */
   groupingAggregateRemoved?: (column: string) => string;
   /** Polite announcement after the declared aggregations are restored. */

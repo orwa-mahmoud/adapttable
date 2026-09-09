@@ -31,6 +31,13 @@ export function isBuiltInEnabled(
       return observation.hasFilters;
     case "view.setGroupBy":
       return observation.source.grouping !== false;
+    case "view.setAggregations": {
+      if (!features.has("grouping") && !features.has("grouping-panel")) {
+        return false;
+      }
+      if (observation.source.grouping === false) return false;
+      return (observation.aggregations?.columns.length ?? 0) > 0;
+    }
     // Pinning is advertised from the wired operation, never from a feature
     // name: a table can compose the column menu and still hand the agent no
     // way to change the layout.

@@ -223,16 +223,18 @@ export function useQuerySource<
     groupAggregateOverrides,
     extra,
   } = state;
-  const queryAggregationSource = useMemo(
-    () =>
-      supports?.aggregates || supports?.aggregateOperations
-        ? {
-            grouping: "server" as const,
-            aggregateOperations: supports.aggregateOperations,
-          }
-        : undefined,
-    [supports]
-  );
+  const queryAggregationSource = useMemo(() => {
+    if (supports?.aggregates || supports?.aggregateOperations) {
+      return {
+        grouping: "server" as const,
+        aggregateOperations: supports.aggregateOperations,
+      };
+    }
+    if (supports?.grouping) {
+      return { grouping: "server" as const, aggregateOperations: [] };
+    }
+    return undefined;
+  }, [supports]);
   const effectiveAggregates = useMemo(
     () =>
       withQueryAggregateOverrides(
@@ -468,6 +470,9 @@ export function useQuerySource<
       groupAggregations,
       queryAggregates: aggregates,
       aggregateOperations: supports?.aggregateOperations,
+      honorsAggregates: Boolean(
+        supports?.aggregates || supports?.aggregateOperations
+      ),
       extra,
       facets,
       filterTree: state.filterTree,

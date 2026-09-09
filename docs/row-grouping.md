@@ -79,7 +79,11 @@ type. Developer defaults (`aggregatable.default`, a declared
 an explicit suppression (`AGGREGATE_SUPPRESSED` / `"none"` in `groupAgg`);
 `restoreAggregationDefaults` puts the original developer configuration back,
 not the latest server response. The panel and column menu both read
-`aggregationModel`.
+`aggregationModel`. Display, local calculation and the server request share
+`resolveEffectiveAggregation`: a valid reader override or permitted
+suppression, then a valid executable column default, then the original host
+mapper or request. Defaults are not written into reader state — an untouched
+table stays at defaults, and those defaults actually calculate and request.
 
 ```tsx
 {
@@ -106,13 +110,33 @@ not the latest server response. The panel and column menu both read
 }
 ```
 
-`aggregatable: true` offers the operations that suit the column's declared
-filter or editor type — numeric for `number` / `numberRange`, min/max/count
-for a date, Count otherwise. `false` or omitted refuses reader changes; a
-host mapper or server aggregate on that column still shows as read-only.
+`aggregatable: true` offers the operations that suit the column's **declared**
+filter or editor type — never a sampled row, and never TypeScript's erased
+value type. Numeric for `number` / `numberRange`; min/max/count for
+`date` / `dateRange` / `datetime` / `time`; Count otherwise. A numeric column
+without that metadata can still list explicit `operations`. `false` or omitted
+refuses reader changes; a host mapper or server aggregate on that column still
+shows — read-only when the reader cannot replace it, or as a Custom /
+application-calculated item they may replace or suppress when they can.
 Empty `operations` offers nothing. A custom `{ id, label, calculate }` is
 addressed by `id`; omit `calculate` for an operation only the backend can
 answer, and list that id on `supports.aggregateOperations`.
+
+`min` and `max` compare numbers as before, and also `Date` values and strict
+ISO date / datetime / time strings (`YYYY-MM-DD`, `YYYY-MM-DDTHH:mm:ssZ`,
+`HH:mm`). Locale-dependent forms are skipped, not guessed. The winning
+original value is what `formatAggregate` receives — a number, a `Date`, or
+that ISO string — so a date column can format it without a numeric
+`sortValue`. `count` still counts present values. An explicit `sortValue`
+is respected first.
+
+Grouping a column does not remove its aggregation offer. A grouped column
+with Count (or any allowed operation) stays selectable; the group's row
+count is not a substitute — missing values make those different.
+
+`groupAgg` encodes both the column key and the operation id, so custom ids
+with colons, commas, percents or Unicode round-trip. Built-in
+`budget:sum` URLs stay compatible.
 
 A computed aggregate is a number, and a number under a money column should
 read as money. `formatAggregate` on the column says how one reads, and is

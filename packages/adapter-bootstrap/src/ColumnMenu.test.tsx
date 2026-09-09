@@ -48,6 +48,7 @@ const mockLabels: ColumnMenuProps<Row>["labels"] = {
   groupingAggregation: "Group aggregation",
   groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
   groupingAverage: "Average",
+  groupingAggregationCustom: "Custom",
   selectionCount: "Count",
   selectionSum: "Sum",
   selectionMin: "Minimum",

@@ -25,6 +25,7 @@ export const CAPABILITY_KEYS = [
   "view.setSearch",
   "view.setFilters",
   "view.setGroupBy",
+  "view.setAggregations",
   "view.pinColumn",
   "view.pinRow",
   "view.setSelection",

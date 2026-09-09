@@ -8,8 +8,10 @@ import {
   addAggregation,
   type AggregationSourceSupport,
   allowsReaderOperation,
+  columnAggregationSignature,
   declaredAggregates,
   declaredByDeveloper,
+  readerControlAllowed,
   formatGroupBy,
   type GroupAggregateOverride,
   GROUPING_COLUMN_DND_MIME,
@@ -75,9 +77,10 @@ function aggregationInputKey(
     .sort((left, right) => left.localeCompare(right))
     .join(",");
   const columns = (groupingState?.columns ?? [])
-    .map((column) => column.key)
+    .map((column) => columnAggregationSignature(column))
     .join(",");
-  return `${overrides}|${columns}`;
+  const listed = (groupingState?.aggregateOperations ?? []).join("/");
+  return `${overrides}|${columns}|${listed}`;
 }
 
 function activeKeys(runtime: ReturnType<typeof useTableRuntime>): string[] {
@@ -470,7 +473,16 @@ function GroupingPanelProvider({
     (key: string, value: GroupAggregateOverride | undefined) => {
       const groupingState: RuntimeGrouping = runtime.view()?.groupingState;
       if (!groupingState?.setAggregateOverrides) return;
-      if (value !== undefined && value !== "none") {
+      if (value === "none") {
+        const input = aggregationInput();
+        const column = input.columns.find((candidate) => candidate.key === key);
+        if (
+          column &&
+          !readerControlAllowed(resolveAggregatable(column), input.source)
+        ) {
+          return;
+        }
+      } else if (value !== undefined) {
         const input = aggregationInput();
         const column = input.columns.find((candidate) => candidate.key === key);
         // Columns the runtime does not yet know stay writable so a host can

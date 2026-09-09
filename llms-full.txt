@@ -969,7 +969,7 @@ backend could do, not an error.
 | Field        | Capability   | Carries                                                                                                                                                                                                                        |
 | ------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `groupBy`    | `grouping`   | Grouping keys, outermost first                                                                                                                                                                                                 |
-| `aggregates` | `aggregates` | `{ key, fn }` pairs to compute                                                                                                                                                                                                 |
+| `aggregates` | `aggregates` | `{ key, fn }` pairs to compute. Optional `supports.aggregateOperations` lists the ids the backend can answer; omit it and the five standard functions are assumed. Custom ids travel as strings, never as functions.           |
 | `filterTree` | `filterTree` | Nested AND/OR condition tree                                                                                                                                                                                                   |
 | `facets`     | `facets`     | Column keys needing distinct-value counts. The response returns the same keys as `facets` on the page (`PaginatedResponse.facets` / `PageSelector.facets`) — counts for the filtered set with each facet's own filter removed. |
 | `cursor`     | `cursor`     | Opaque cursor from the previous response                                                                                                                                                                                       |
@@ -1197,7 +1197,7 @@ the way you configured it, and these guarantees do not apply.
 | `loading`       | `boolean`                                                                                  | `false` | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise).                                                                              |
 | `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | —       | Server tier: fired per consolidated query change, once on mount included. `info.key` identifies the request; echo it back as `responseKey` to say which one the rows answer. |
 | `responseKey`   | `string`                                                                                   | —       | The `info.key` of the request the current `data` answers (see [Row grouping](./row-grouping.md#server-tiers)).                                                               |
-| `aggregates`    | `readonly QueryAggregate[]`                                                                | —       | Aggregates to send as `query.aggregates`; requires `supports.aggregates`.                                                                                                    |
+| `aggregates`    | `readonly QueryAggregate[]`                                                                | —       | Developer defaults sent as `query.aggregates`; requires `supports.aggregates`. Reader overrides overlay this; Restore defaults returns here, not to the last response.       |
 | `error`         | `Error \| null`                                                                            | `null`  | Forwarded error to display.                                                                                                                                                  |
 | `source`        | `TableSource<TRow>`                                                                        | —       | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.                                                                                        |
 
@@ -1359,29 +1359,31 @@ export function People() {
 
 ## Options
 
-| Prop            | Type                             | Default                      | Description                                                                                       |
-| --------------- | -------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------- |
-| `key`           | `string`                         | required                     | Unique id; data path for the cell value; the backend `sortBy` value.                              |
-| `header`        | `ReactNode`                      | humanised from `key`         | Header content, pre-translated by the caller.                                                     |
-| `renderHeader`  | `(ctx) => ReactNode`             | —                            | Custom caption; receives a controller so sort/resize stay available.                              |
-| `renderFooter`  | `(ctx) => ReactNode`             | —                            | Custom summary-row cell.                                                                          |
-| `headerTooltip` | `string`                         | —                            | Native tooltip on the caption.                                                                    |
-| `headerActions` | `ReactNode`                      | —                            | Host controls after the caption.                                                                  |
-| `renameable`    | `boolean`                        | `false`                      | Allow a host-persisted user display name from the Columns menu.                                   |
-| `accessor`      | `(row) => ReactNode`             | read the key's data path     | Lightweight cell renderer.                                                                        |
-| `Cell`          | `ComponentType<CellProps<TRow>>` | —                            | Component per row, receives `{ row, rowIndex }`; wins over `accessor`.                            |
-| `sortable`      | `boolean`                        | `false`                      | Enable sorting for this column.                                                                   |
-| `sortValue`     | `(row) => SortableValue`         | the generated accessor value | Primitive extractor for the client-side sort. See [sorting](./sorting.md).                        |
-| `exportValue`   | `(row) => unknown`               | the display value            | Value written to a CSV export when the file should carry something other than the formatted cell. |
-| `align`         | `"start" \| "center" \| "end"`   | `"start"`                    | Text alignment within the cell.                                                                   |
-| `width`         | `number \| string`               | —                            | Width passed through to the rendered header/cell.                                                 |
-| `mobileLabel`   | `string`                         | `header` (when a string)     | Label on mobile card layouts.                                                                     |
-| `hideOnMobile`  | `boolean`                        | `false`                      | Hide the column entirely on mobile.                                                               |
-| `hideOnDesktop` | `boolean`                        | `false`                      | Hide the column entirely on desktop.                                                              |
-| `group`         | `string`                         | —                            | Spanning header above adjacent columns sharing the name. See below.                               |
-| `i18n`          | `Record<string, string>`         | —                            | Per-locale data paths for the column's value.                                                     |
-| `meta`          | `Record<string, unknown>`        | —                            | Free-form bag your own code can read back.                                                        |
-| `locale`        | `string` (table prop)            | —                            | Active locale tag (`"ar"`, `"ar-EG"`); drives `i18n` path resolution.                             |
+| Prop              | Type                                        | Default                      | Description                                                                                                   |
+| ----------------- | ------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `key`             | `string`                                    | required                     | Unique id; data path for the cell value; the backend `sortBy` value.                                          |
+| `header`          | `ReactNode`                                 | humanised from `key`         | Header content, pre-translated by the caller.                                                                 |
+| `renderHeader`    | `(ctx) => ReactNode`                        | —                            | Custom caption; receives a controller so sort/resize stay available.                                          |
+| `renderFooter`    | `(ctx) => ReactNode`                        | —                            | Custom summary-row cell.                                                                                      |
+| `headerTooltip`   | `string`                                    | —                            | Native tooltip on the caption.                                                                                |
+| `headerActions`   | `ReactNode`                                 | —                            | Host controls after the caption.                                                                              |
+| `renameable`      | `boolean`                                   | `false`                      | Allow a host-persisted user display name from the Columns menu.                                               |
+| `accessor`        | `(row) => ReactNode`                        | read the key's data path     | Lightweight cell renderer.                                                                                    |
+| `Cell`            | `ComponentType<CellProps<TRow>>`            | —                            | Component per row, receives `{ row, rowIndex }`; wins over `accessor`.                                        |
+| `sortable`        | `boolean`                                   | `false`                      | Enable sorting for this column.                                                                               |
+| `sortValue`       | `(row) => SortableValue`                    | the generated accessor value | Primitive extractor for the client-side sort. See [sorting](./sorting.md).                                    |
+| `exportValue`     | `(row) => unknown`                          | the display value            | Value written to a CSV export when the file should carry something other than the formatted cell.             |
+| `align`           | `"start" \| "center" \| "end"`              | `"start"`                    | Text alignment within the cell.                                                                               |
+| `width`           | `number \| string`                          | —                            | Width passed through to the rendered header/cell.                                                             |
+| `mobileLabel`     | `string`                                    | `header` (when a string)     | Label on mobile card layouts.                                                                                 |
+| `hideOnMobile`    | `boolean`                                   | `false`                      | Hide the column entirely on mobile.                                                                           |
+| `hideOnDesktop`   | `boolean`                                   | `false`                      | Hide the column entirely on desktop.                                                                          |
+| `aggregatable`    | `false \| true \| { default?, operations }` | omitted                      | Whether a reader may aggregate this column, and with which operations. See [row grouping](./row-grouping.md). |
+| `formatAggregate` | `(value, context) => DisplayValue`          | —                            | How a group aggregate of this column reads. Presentation only.                                                |
+| `group`           | `string`                                    | —                            | Spanning header above adjacent columns sharing the name. See below.                                           |
+| `i18n`            | `Record<string, string>`                    | —                            | Per-locale data paths for the column's value.                                                                 |
+| `meta`            | `Record<string, unknown>`                   | —                            | Free-form bag your own code can read back.                                                                    |
+| `locale`          | `string` (table prop)                       | —                            | Active locale tag (`"ar"`, `"ar-EG"`); drives `i18n` path resolution.                                         |
 
 ## The cell as text
 
@@ -4318,12 +4320,81 @@ group's caption:
 }
 ```
 
-Every layout also provides **Add grouping column**, **Aggregate column**, and
-**Group aggregation** selects. Mobile uses these kit-native selects rather than
-header drag-and-drop. Aggregation choices are `sum`, `avg`, `min`, `max`,
-`count`, and `none`, plus **Default**. A choice is a session override for that
-column: Default (or no override) preserves the developer's
-`groupAggregates` result, while `none` explicitly hides it.
+Every layout also provides **Add grouping column**. Below the grouping chips,
+an **Aggregations** section lists every active aggregate as its own item —
+column name, operation selector, and remove — plus **Add columns** (a native
+checklist) and **Restore defaults**. Mobile uses these kit-native controls
+rather than header drag-and-drop.
+
+A column's `Aggregatable` declaration (`aggregatable`) decides what a reader
+may add — `AggregatableConfig` with `default` and `operations` of
+`AggregateOperation` values (a built-in name or a `CustomAggregateOperation`).
+`resolveAggregatable` / `resolveAggregatableColumns` validate that offer;
+`impliedOperations` is what `true` reads from the declared filter or editor
+type. Developer defaults (`aggregatable.default`, a declared
+`GroupAggregatesMapper` via `aggregate()`, or the original server
+`aggregates` query) appear immediately. Removing a developer default records
+an explicit suppression (`AGGREGATE_SUPPRESSED` / `"none"` in `groupAgg`);
+`restoreAggregationDefaults` puts the original developer configuration back,
+not the latest server response. The panel and column menu both read
+`aggregationModel`. Display, local calculation and the server request share
+`resolveEffectiveAggregation`: a valid reader override or permitted
+suppression, then a valid executable column default, then the original host
+mapper or request. Defaults are not written into reader state — an untouched
+table stays at defaults, and those defaults actually calculate and request.
+
+```tsx
+{
+  key: "budget",
+  aggregatable: {
+    default: "sum",
+    operations: ["sum", "avg", "min", "max", "count"],
+  },
+}
+{
+  key: "start",
+  aggregatable: { operations: ["min", "max", "count"] },
+}
+{
+  key: "score",
+  aggregatable: {
+    default: "median",
+    operations: [
+      "sum",
+      "avg",
+      { id: "median", label: "Median", calculate: median },
+    ],
+  },
+}
+```
+
+`aggregatable: true` offers the operations that suit the column's **declared**
+filter or editor type — never a sampled row, and never TypeScript's erased
+value type. Numeric for `number` / `numberRange`; min/max/count for
+`date` / `dateRange` / `datetime` / `time`; Count otherwise. A numeric column
+without that metadata can still list explicit `operations`. `false` or omitted
+refuses reader changes; a host mapper or server aggregate on that column still
+shows — read-only when the reader cannot replace it, or as a Custom /
+application-calculated item they may replace or suppress when they can.
+Empty `operations` offers nothing. A custom `{ id, label, calculate }` is
+addressed by `id`; omit `calculate` for an operation only the backend can
+answer, and list that id on `supports.aggregateOperations`.
+
+`min` and `max` compare numbers as before, and also `Date` values and strict
+ISO date / datetime / time strings (`YYYY-MM-DD`, `YYYY-MM-DDTHH:mm:ssZ`,
+`HH:mm`). Locale-dependent forms are skipped, not guessed. The winning
+original value is what `formatAggregate` receives — a number, a `Date`, or
+that ISO string — so a date column can format it without a numeric
+`sortValue`. `count` still counts present values. An explicit `sortValue`
+is respected first.
+
+Grouping a column does not remove its aggregation offer. A grouped column
+with Count (or any allowed operation) stays selectable; the group's row
+count is not a substitute — missing values make those different.
+
+`groupAgg` encodes both the column key and the operation id, so custom ids
+with colons, commas, percents or Unicode round-trip. Built-in
+`budget:sum` URLs stay compatible.
 
 A computed aggregate is a number, and a number under a money column should
 read as money. `formatAggregate` on the column says how one reads, and is
@@ -4779,9 +4850,11 @@ export function People() {
   `(rows) => Partial<Record<string, ReactNode>>` shape as `summaryRow`; reuse
   one function for both if the math is identical — or build both with
   `aggregate()` (below).
-- **Session aggregation overrides.** `sum`, `avg`, `min`, `max`, `count`, and
-  `none` overlay the developer mapper by column. An absent/default choice
-  preserves `groupAggregates`; the choices serialize as `groupAgg`.
+- **Session aggregation overrides.** Each active column has its own operation.
+  Reader choices overlay the developer's `aggregatable.default`, declared
+  `groupAggregates`, or original `query.aggregates`. Removing a developer
+  default writes `none`; **Restore defaults** clears the override map. The
+  choices serialize as `groupAgg`, including host-defined ids.
 - **Expand / collapse.** Groups start expanded. Collapse state can be paired
   with `useGroupCollapseUrlState`; `groupBy` and `groupAgg` use the table's
   ordinary URL state.
@@ -6826,37 +6899,38 @@ modals or drawers where the address bar shouldn't change.
 
 ## Param reference
 
-| Param                       | Example                        | Meaning                                                                                                                                                        |
-| --------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `atv`                       | `atv=1`                        | AdaptTable URL-state format. Missing also means version 1; unsupported versions recover to defaults for this table only.                                       |
-| `q`                         | `q=avery`                      | Committed search term.                                                                                                                                         |
-| `find`                      | `find=Ada`                     | Find-bar query (in-table walk). Empty or closed deletes the param; the current-match index is never stored.                                                    |
-| `page`                      | `page=3`                       | 1-based page; omitted at 1.                                                                                                                                    |
-| `limit`                     | `limit=50`                     | Page size, clamped to 1–500; omitted at the default (25).                                                                                                      |
-| `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`     | Single-column sort (`sortDir` falls back to `asc`).                                                                                                            |
-| `sort`                      | `sort=name:asc,age:desc`       | Multi-sort chain; supersedes `sortBy`/`sortDir` while present.                                                                                                 |
-| `groupBy`                   | `groupBy=team,status`          | Ordered row-grouping column keys, outermost first. Written by `groupingPanel()` and omitted when no grouping is active.                                        |
-| `groupAgg`                  | `groupAgg=budget:sum,age:none` | Per-column session aggregation overrides: `sum`, `avg`, `min`, `max`, `count`, or `none`. A missing column preserves the developer's `groupAggregates` result. |
-| `f_<key>`                   | `f_status=active`              | One filter value; `multiSelect` arrays are comma-separated with each entry percent-encoded.                                                                    |
-| `f_<key>From` / `f_<key>To` | `f_hiredAtFrom=2026-01-01`     | `dateRange` bounds (inclusive; the end bound keeps that whole day). A `relative` operator stores the token here (`today`, `last:7`) instead of a resolved day. |
-| `f_<key>Min` / `f_<key>Max` | `f_salaryMin=50000`            | `numberRange` bounds (inclusive; parsed as numbers).                                                                                                           |
-| `ft`                        | `ft=1.{"combinator":"and"}`    | Versioned AND/OR filter tree. Unknown versions are dropped, never reinterpreted.                                                                               |
-| `colHide`                   | `colHide=email,phone`          | Hidden columns (keys percent-encoded).                                                                                                                         |
-| `colPin`                    | `colPin=name:left`             | Pinned columns and their side.                                                                                                                                 |
-| `colOrder`                  | `colOrder=name,role,salary`    | Explicit column order.                                                                                                                                         |
-| `colW`                      | `colW=name:220`                | Per-column pixel widths.                                                                                                                                       |
-| `colName`                   | `colName=name:Account%20owner` | User display names by stable column key.                                                                                                                       |
+| Param                       | Example                        | Meaning                                                                                                                                                                                                                                |
+| --------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `atv`                       | `atv=1`                        | AdaptTable URL-state format. Missing also means version 1; unsupported versions recover to defaults for this table only.                                                                                                               |
+| `q`                         | `q=avery`                      | Committed search term.                                                                                                                                                                                                                 |
+| `find`                      | `find=Ada`                     | Find-bar query (in-table walk). Empty or closed deletes the param; the current-match index is never stored.                                                                                                                            |
+| `page`                      | `page=3`                       | 1-based page; omitted at 1.                                                                                                                                                                                                            |
+| `limit`                     | `limit=50`                     | Page size, clamped to 1–500; omitted at the default (25).                                                                                                                                                                              |
+| `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`     | Single-column sort (`sortDir` falls back to `asc`).                                                                                                                                                                                    |
+| `sort`                      | `sort=name:asc,age:desc`       | Multi-sort chain; supersedes `sortBy`/`sortDir` while present.                                                                                                                                                                         |
+| `groupBy`                   | `groupBy=team,status`          | Ordered row-grouping column keys, outermost first. Written by `groupingPanel()` and omitted when no grouping is active.                                                                                                                |
+| `groupAgg`                  | `groupAgg=budget:sum,age:none` | Per-column session aggregation overrides: a built-in name, a host operation id, or `none` (explicit suppression). A missing column preserves the developer's `groupAggregates` / `aggregatable.default` / original `query.aggregates`. |
+| `f_<key>`                   | `f_status=active`              | One filter value; `multiSelect` arrays are comma-separated with each entry percent-encoded.                                                                                                                                            |
+| `f_<key>From` / `f_<key>To` | `f_hiredAtFrom=2026-01-01`     | `dateRange` bounds (inclusive; the end bound keeps that whole day). A `relative` operator stores the token here (`today`, `last:7`) instead of a resolved day.                                                                         |
+| `f_<key>Min` / `f_<key>Max` | `f_salaryMin=50000`            | `numberRange` bounds (inclusive; parsed as numbers).                                                                                                                                                                                   |
+| `ft`                        | `ft=1.{"combinator":"and"}`    | Versioned AND/OR filter tree. Unknown versions are dropped, never reinterpreted.                                                                                                                                                       |
+| `colHide`                   | `colHide=email,phone`          | Hidden columns (keys percent-encoded).                                                                                                                                                                                                 |
+| `colPin`                    | `colPin=name:left`             | Pinned columns and their side.                                                                                                                                                                                                         |
+| `colOrder`                  | `colOrder=name,role,salary`    | Explicit column order.                                                                                                                                                                                                                 |
+| `colW`                      | `colW=name:220`                | Per-column pixel widths.                                                                                                                                                                                                               |
+| `colName`                   | `colName=name:Account%20owner` | User display names by stable column key.                                                                                                                                                                                               |
 
 With a `urlKey` every param is prefixed: `people.q`, `people.f_status`,
 `people.groupBy`, `people.groupAgg`, `people.colHide`, ….
 
 `groupAgg` is intentionally an override map, not a replacement aggregate
-configuration. Choosing **Default** deletes that column's entry and restores
-the result declared by the table's `groupAggregates`; choosing `none` keeps an
-explicit entry that hides the aggregate. Keys are percent-encoded, malformed
-or unknown choices are ignored independently, and equivalent maps serialize in
-stable column-key order. [Row grouping](./row-grouping.md) documents the panel,
-column-menu, mobile, and keyboard routes that write this state.
+configuration. Adding or changing an operation writes that column's id;
+removing a developer-declared aggregate writes `none` so the default does not
+come back; removing a reader-added aggregate deletes the entry. **Restore
+defaults** clears the whole map. Keys are percent-encoded, host-defined ids
+survive the round trip, and equivalent maps serialize in stable column-key
+order. [Row grouping](./row-grouping.md) documents the panel, column-menu,
+mobile, and keyboard routes that write this state.
 
 ### Defaults vs. explicit clears
 
@@ -8252,10 +8326,20 @@ session; they do not share revision or idempotency state.
 Stable catalog order:
 
 `columns.describe`, `view.describe`, `view.setPage`, `view.setSort`,
-`view.setSearch`, `view.setFilters`, `view.setGroupBy`, `view.pinColumn`,
+`view.setSearch`, `view.setFilters`, `view.setGroupBy`,
+`view.setAggregations`, `view.pinColumn`,
 `view.pinRow`, `view.setSelection`, `views.apply`, `rows.read`,
 `rows.resolve`, `export.run`, `edit.cells`, `rows.add`, `rows.delete`,
 `rows.reorder`.
+
+`view.setAggregations` takes `{ set?, remove?, restoreDefaults? }` — add or
+change specific column operations without replacing the others, remove
+specific aggregations with the same suppression semantics as the panel, or
+restore developer defaults. The whole request is validated before anything
+is applied. It is advertised only when grouping can actually execute
+aggregates. `describe` lists eligible columns and operation ids (never a
+`calculate` function). A server-side apply reports `pending: true` until the
+response that answers the new query arrives.
 
 `view.pinColumn` takes `{ key, side }` where `side` is the logical `"start"`
 or `null` to unpin. `view.pinRow` takes `{ side }` — `"top"`, `"bottom"` or
@@ -8819,18 +8903,23 @@ Opt in with `groupingPanel()` from the kit's `/grouping-panel` subpath — see
 [Row grouping](./row-grouping.md). The panel owns the grouped headers as well
 as the configuration strip; when it is dormant these parts are never mounted.
 
-| Part                          | Element                                                                         |
-| ----------------------------- | ------------------------------------------------------------------------------- |
-| `grouping-panel`              | The dedicated grouping strip above the table.                                   |
-| `grouping-drop-zone`          | A desktop insertion target for header/chip drag-and-drop.                       |
-| `grouping-item`               | One active grouping level: chip plus its following insertion target.            |
-| `grouping-chip`               | An active grouping field, with logical arrow-key movement and a remove control. |
-| `grouping-add`                | The Add grouping column select, present on desktop and mobile.                  |
-| `grouping-aggregate-controls` | Wrapper for the aggregate-column and aggregation selects.                       |
-| `grouping-aggregate-column`   | Select choosing which ungrouped data column an aggregation override applies to. |
-| `grouping-aggregate`          | `sum` / `avg` / `min` / `max` / `count` / `none` / Default select.              |
-| `grouping-remove-zone`        | Desktop drop target shown while dragging a grouping chip to remove it.          |
-| `grouping-announcer`          | Polite live region for add, move, remove, and aggregation-change feedback.      |
+| Part                             | Element                                                                            |
+| -------------------------------- | ---------------------------------------------------------------------------------- |
+| `grouping-panel`                 | The dedicated grouping strip above the table.                                      |
+| `grouping-drop-zone`             | A desktop insertion target for header/chip drag-and-drop.                          |
+| `grouping-item`                  | One active grouping level: chip plus its following insertion target.               |
+| `grouping-chip`                  | An active grouping field, with logical arrow-key movement and a remove control.    |
+| `grouping-add`                   | The Add grouping column select, present on desktop and mobile.                     |
+| `grouping-aggregations`          | The Aggregations section: every active item plus Add columns and Restore defaults. |
+| `grouping-aggregations-label`    | The section heading.                                                               |
+| `grouping-aggregation-item`      | One active aggregation: column name, operation select, remove.                     |
+| `grouping-aggregation-operation` | That item's operation select.                                                      |
+| `grouping-aggregation-remove`    | That item's remove control.                                                        |
+| `grouping-aggregation-add`       | The Add columns checklist.                                                         |
+| `grouping-aggregation-option`    | One checklist row.                                                                 |
+| `grouping-aggregations-restore`  | Restore defaults.                                                                  |
+| `grouping-remove-zone`           | Desktop drop target shown while dragging a grouping chip to remove it.             |
+| `grouping-announcer`             | Polite live region for add, move, remove, and aggregation-change feedback.         |
 
 | Part                | Element                                                               |
 | ------------------- | --------------------------------------------------------------------- |
@@ -11294,34 +11383,49 @@ turns any of its forms (`GroupByInput`) into the key list and `formatGroupBy`
 back into the single comma-separated value state is stored as.
 `groupingPanel(groupBy?, extras?)` from each kit's `/grouping-panel` subpath
 adds the interactive strip and still accepts every `GroupingExtras` option.
-It publishes `GroupingPanelState`: ordered `groupBy`, drag/drop and keyboard
-bindings, `add` / `remove` / `moveBy`, and `setAggregate`.
-`GroupAggregateOverride` is `"sum" | "avg" | "min" | "max" | "count" |
-"none"`; `GroupAggregateOverrides` maps those session choices by column.
-`serializeGroupAggregateOverrides` / `parseGroupAggregateOverrides` encode the
-`groupAgg` parameter. `withGroupAggregateOverrides` layers them over a
-developer `groupAggregates` mapper, while `withQueryAggregateOverrides` does
-the same for server `query.aggregates`, and `queryAggregateOps` reads those
-requested functions back as the operations a column is told about —
-`TableSource.groupAggregations`, which `useQuerySource` and `useServerData`
-publish as of the response being drawn — `useQuerySource` from the query's
-`dataUpdatedAt` read against its request, `useServerData` from the
-`responseKey` a host echoes back, without which a request it cannot place is
-reported as unknown; an absent key preserves the developer choice and
-`"none"` removes it. A column's `formatAggregate` says how the
-result reads, taking the value and an `AggregateFormatContext` — the column
-key, and the operation where the table knows it. It is applied where the cell
-is drawn: `groupRowLayout` and `groupAggregateEntries` take the group's
-`GroupAggregateOps` and hand each cell through it, and `groupAggregateNode`
-does one cell for a kit that lays out its own group rows.
+It publishes `GroupingPanelState`: ordered `groupBy`, the `aggregations`
+model every surface reads, drag/drop and keyboard bindings, `add` / `remove`
+/ `moveBy`, and `setAggregateOperation` / `addAggregate` / `removeAggregate`
+/ `restoreAggregateDefaults`. A column's `aggregatable` (`false` / `true` /
+`{ default?, operations }`) is the one offer the panel, the column menu, a
+URL and a request all resolve. `GroupAggregateOverride` is a built-in name, a
+host operation id, or `"none"`; `GroupAggregateOverrides` maps those session
+choices by column. `serializeGroupAggregateOverrides` /
+`parseGroupAggregateOverrides` encode both the column key and the operation
+id (`encodeURIComponent`, split on the first `:`), so custom ids with
+colons, commas, percents or Unicode round-trip. Built-in `budget:sum` URLs
+stay compatible. `withGroupAggregateOverrides` layers them over a developer
+`groupAggregates` mapper and refuses a disallowed id at execution, while
+`withQueryAggregateOverrides` does the same for server `query.aggregates`.
+`queryAggregateOps` reads those requested functions back as the operations a
+column is told about — `TableSource.groupAggregations`, which
+`useQuerySource` and `useServerData` publish as of the response being drawn —
+`useQuerySource` from the query's `dataUpdatedAt` read against its request,
+`useServerData` from the `responseKey` a host echoes back, without which a
+request it cannot place is reported as unknown. The developer's original
+`aggregates` option is published separately as `queryAggregates`, so Restore
+defaults never treats the current response as the initial query. An absent
+key preserves the host request; `"none"` removes it only while
+`readerControlAllowed` is true. `TableSource.honorsAggregates` is false when
+a server groups but drops `query.aggregates`, which hides the aggregation
+controls rather than letting them mutate unused local state. A column's
+`formatAggregate` says how the result reads, taking the value and an
+`AggregateFormatContext` — the column key, and the operation where the table
+knows it. It is applied where the cell is drawn: `groupRowLayout` and
+`groupAggregateEntries` take the group's `GroupAggregateOps` and hand each
+cell through it, and `groupAggregateNode` does one cell for a kit that lays
+out its own group rows.
 
 Adapter authors bind the `GROUPING_PANEL` slot with
 `createAdapterGroupingPanelFeature(AdapterGroupingPanelComponents)`.
 `GroupingPanelChrome` takes `GroupingPanelChromeProps` /
 `GroupingPanelSlotProps` and a `GroupingPanelSlots` object whose required
 pieces receive `GroupingPanelSurfaceProps`, `GroupingPanelDropZoneProps`,
-`GroupingPanelChipProps`, `GroupingPanelSelectProps`, and
-`GroupingPanelRemoveZoneProps`; select entries are `GroupingPanelOption`s and
+`GroupingPanelChipProps`, `GroupingPanelSelectProps`,
+`GroupingPanelRemoveZoneProps`, `GroupingPanelAggregationItemProps`,
+`GroupingPanelAggregationRemoveProps`, `GroupingPanelChecklistProps`,
+`GroupingPanelChecklistOption`, and
+`GroupingPanelRestoreProps`; select entries are `GroupingPanelOption`s and
 native event wiring uses `GroupingDragProps` / `GroupingDropProps`.
 `GroupingPanelInteractions` carries those callbacks,
 `GroupingChipKeyboardProps` defines the equal keyboard path, and
@@ -11471,7 +11575,9 @@ agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
 `RowAddressScope`, `createAgentSession`, `CreateAgentSessionOptions`,
 `buildManifest`, `enabledKeys`, `guideOf`, `summaryOf`, `validateSchema`,
 `eligibleSuggestions`, `assertUniqueSuggestions`, and
-the types `AgentApply`, `AgentCapabilityContext`, `AgentCapabilityDefinition`,
+the types `AgentApply`, `AgentAggregateOperation`, `AgentAggregationColumn`,
+`AgentAggregations`, `AgentAggregationsPatch`, `AgentCapabilityContext`,
+`AgentCapabilityDefinition`,
 `AgentCellEdit`, `AgentColumn`, `AgentLimits`,
 `AgentManifest`, `AgentObservation`, `AgentPolicy`, `AgentRowAddressing`,
 `AgentSession`, `ApprovalOutcome`, `CapabilityGuide`, `CatalogEntry`,
@@ -11896,7 +12002,7 @@ the source's shape. See [data tiers](./data-tiers.md#what-a-source-can-do--capab
 
 | Type                                                                                                                                                                                                                                                                                                                     | What it is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TableSource<TRow>`                                                                                                                                                                                                                                                                                                      | The uniform data + state contract a table consumes (rows, total, `defaultLimit`, `allFilteredRows`, `allSearchedRows`, `facets`, loading flags, state read/write).                                                                                                                                                                                                                                                                                                                                   |
+| `TableSource<TRow>`                                                                                                                                                                                                                                                                                                      | The uniform data + state contract a table consumes (rows, total, `defaultLimit`, `allFilteredRows`, `allSearchedRows`, `facets`, loading flags, state read/write). Server grouping that cannot honour `query.aggregates` sets `honorsAggregates: false`.                                                                                                                                                                                                                                            |
 | `TableQuery`                                                                                                                                                                                                                                                                                                             | The consolidated server-tier query: `page`, `limit`, `search`, `sortBy`, `sortDir`, `sortLevels`, `filters`.                                                                                                                                                                                                                                                                                                                                                                                         |
 | `TableQueryParams`                                                                                                                                                                                                                                                                                                       | Baseline query params a backend list endpoint receives.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `QuerySupport`                                                                                                                                                                                                                                                                                                           | What a server endpoint can answer: `grouping`, `aggregates`, `filterTree`, `facets`, `cursor`.                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -11905,6 +12011,16 @@ the source's shape. See [data tiers](./data-tiers.md#what-a-source-can-do--capab
 | `aggregate`                                                                                                                                                                                                                                                                                                              | Builds a `summaryRow` / `groupAggregates` mapper from a declaration — see [row grouping](./row-grouping.md).                                                                                                                                                                                                                                                                                                                                                                                         |
 | `AggregateName` / `AGGREGATE_NAMES`                                                                                                                                                                                                                                                                                      | The built-in aggregate names: `sum`, `avg`, `count`, `min`, `max`.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `Aggregator` / `AggregateSpec` / `AggregateOptions`                                                                                                                                                                                                                                                                      | A custom aggregate function, the per-column declaration, and `aggregate()`'s options (`columns`, `format`).                                                                                                                                                                                                                                                                                                                                                                                          |
+| `Aggregatable` / `AggregatableConfig` / `AggregateOperation` / `CustomAggregateOperation`                                                                                                                                                                                                                                | A column's reader-controlled offer: `false` / `true` / `{ default?, operations }`. `operations` is built-in names or `{ id, label, calculate? }`.                                                                                                                                                                                                                                                                                                                                                    |
+| `AggregateOperationId`                                                                                                                                                                                                                                                                                                   | A built-in name or a host's own stable id. Sent to a server; never a function.                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `ResolvedAggregatable` / `ResolvedAggregateOperation` / `resolveAggregatable` / `resolveAggregatableColumns` / `impliedOperations`                                                                                                                                                                                       | The validated offer for one column or every column. `aggregatable: true` reads `impliedOperations` from the declared filter/editor type.                                                                                                                                                                                                                                                                                                                                                             |
+| `allowsOperation` / `allowsReaderOperation` / `offerableOperations` / `AggregationSourceSupport`                                                                                                                                                                                                                         | The one execution gate: a column must offer the id, and the source must be able to compute it.                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `AggregationModel` / `AggregationModelInput` / `AggregationItem` / `AggregationCandidate` / `AggregationOrigin` / `aggregationModel`                                                                                                                                                                                     | The list the panel and column menu both draw: active items, addable candidates, and whether the reader is still at the developer's defaults.                                                                                                                                                                                                                                                                                                                                                         |
+| `resolveEffectiveAggregation` / `EffectiveAggregation` / `effectiveAggregateOps` / `readerControlAllowed` / `columnAggregationSignature`                                                                                                                                                                                 | Shared precedence for display and execution: a valid reader override or permitted suppression, then a valid executable column default, then the original host mapper or request. `effectiveAggregateOps` is the map the calculator and the first server request both use.                                                                                                                                                                                                                           |
+| `toAggregateInstant` / `toAggregateOrdered`                                                                                                                                                                                                                                                                              | How `min` / `max` compare a value: a `Date`, a finite number, or a strict ISO date / datetime / time string. Locale forms are skipped, not guessed.                                                                                                                                                                                                                                                                                                                                                  |
+| `addAggregation` / `removeAggregation` / `restoreAggregationDefaults` / `reconcileAggregations` / `initialOperation` / `declaredByDeveloper` / `AGGREGATE_SUPPRESSED`                                                                                                                                                    | Reader transitions and URL/saved-view cleanup. Removing a developer default writes `AGGREGATE_SUPPRESSED` (`"none"`) only while the reader may still choose that column.                                                                                                                                                                                                                                                                                                                             |
+| `computedAggregateKeys`                                                                                                                                                                                                                                                                                                  | Column keys that already have an aggregate cell in the current group rows — enough to show a read-only opaque mapper, not enough to name its operation.                                                                                                                                                                                                                                                                                                                                              |
+| `CUSTOM_AGGREGATE` / `DeclaredAggregates` / `declaredAggregates` / `GroupAggregatesMapper`                                                                                                                                                                                                                               | Metadata on `aggregate()`: a declared mapper's operation ids, or `CUSTOM_AGGREGATE` when the host supplied a function.                                                                                                                                                                                                                                                                                                                                                                               |
 | `AggregateFn`                                                                                                                                                                                                                                                                                                            | The standard aggregate names: `sum`, `avg`, `count`, `min`, `max`.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `QueryCondition` / `QueryFilterGroup`                                                                                                                                                                                                                                                                                    | A leaf condition (`key`, `op`, `value`) and a nestable AND/OR group of them.                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `isFilterGroup`                                                                                                                                                                                                                                                                                                          | Narrows a filter-tree child to a nested group while walking the tree.                                                                                                                                                                                                                                                                                                                                                                                                                                |

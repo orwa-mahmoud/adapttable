@@ -10,7 +10,9 @@ import {
   capabilityReason,
   computedAggregateKeys,
   computePagination,
+  declaredAggregates,
   devWarn,
+  effectiveAggregateOps,
   formatGroupBy,
   type GroupByInput,
   groupedEntriesForStrategy,
@@ -94,13 +96,15 @@ function LiveGrouping({
         groups: serverGroups,
         capabilities,
       }).grouping,
-      aggregateOperations: source.aggregateOperations,
+      aggregateOperations:
+        source.honorsAggregates === false ? [] : source.aggregateOperations,
     }),
     [
       capabilities,
       serverGroups,
       source.aggregateOperations,
       source.allFilteredRows,
+      source.honorsAggregates,
     ]
   );
   const effectiveGroupAggregates = useMemo(
@@ -144,12 +148,22 @@ function LiveGrouping({
       rowPageSize: groupRowPageSize,
       paging: groupPaging.paging,
       derivedKey: aggregateOverrideKey,
-      // What the answer on screen was actually asked for. A tier that talks
-      // to a server knows it exactly, including what the host declared before
-      // any reader touched it, and publishes it as of the response being
-      // drawn; otherwise the reader's own choices are all the table knows,
-      // and a host's own mapper declares nothing at all.
-      aggregateOps: source.groupAggregations ?? source.groupAggregateOverrides,
+      // Server groups: only metadata tied to the displayed response.
+      // `undefined` means the operation is unknown — never the reader's
+      // latest request. Local groups: the operation actually applied after
+      // defaults, host declarations and validated overrides.
+      aggregateOps:
+        kind === "source"
+          ? source.groupAggregations
+          : effectiveAggregateOps({
+              columns: chrome.allColumns,
+              overrides: source.groupAggregateOverrides ?? {},
+              declared:
+                declaredAggregates(effectiveGroupAggregates) ??
+                chrome.groupingPanel?.declaredAggregates,
+              queryAggregates: source.queryAggregates,
+              source: aggregationSource,
+            }),
     });
     const openGroups = entries.flatMap((entry) =>
       entry.kind === "group" ? [{ key: entry.key, level: entry.level }] : []
@@ -202,6 +216,10 @@ function LiveGrouping({
     extraRows,
     groupPaging,
     setGroupBy,
+    aggregationSource,
+    chrome.allColumns,
+    chrome.groupingPanel,
+    source.queryAggregates,
   ]);
 
   const viewSource =

@@ -3,6 +3,38 @@
   "generatedFrom": "etc/api-contract.json",
   "symbols": [
     {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
       "export": "AgentApply",
       "currentImport": "@adapttable/ai/assistant",
       "kind": "type",
@@ -412,6 +444,38 @@
     },
     {
       "export": "AGENT_SCHEMA_VERSION",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
       "class": "neutral-model",
@@ -899,6 +963,38 @@
       "behavior": ""
     },
     {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
       "export": "AgentApply",
       "currentImport": "@adapttable/ai/json",
       "kind": "type",
@@ -1283,6 +1379,38 @@
       "behavior": ""
     },
     {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
       "export": "AgentApply",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "type",
@@ -1656,6 +1784,38 @@
       "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
       "behavior": ""
     },
     {
@@ -2059,6 +2219,38 @@
       "behavior": ""
     },
     {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/react",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/ai/react",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/react",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/ai/react",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/react",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/ai/react",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/react",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/ai/react",
+      "behavior": ""
+    },
+    {
       "export": "AgentApply",
       "currentImport": "@adapttable/ai/react",
       "kind": "type",
@@ -2430,6 +2622,38 @@
       "export": "AGENT_SCHEMA_VERSION",
       "currentImport": "@adapttable/ai",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
@@ -9323,6 +9547,14 @@
       "behavior": ""
     },
     {
+      "export": "columnAggregationSignature",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "ColumnFilter",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -10167,6 +10399,38 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "effectiveAggregateOps",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EffectiveAggregation",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EffectiveAggregationInput",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EffectiveAggregationKind",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -13051,6 +13315,14 @@
       "behavior": ""
     },
     {
+      "export": "readerControlAllowed",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "readExtra",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -13391,6 +13663,14 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "resolveEffectiveAggregation",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -14483,6 +14763,22 @@
       "behavior": ""
     },
     {
+      "export": "toAggregateInstant",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "toAggregateOrdered",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "toFormulaValue",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -14708,6 +15004,14 @@
     },
     {
       "export": "windowGroupedEntries",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "withDeclaredAggregates",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",

@@ -105,6 +105,9 @@ export {
   type DeclaredAggregates,
   declaredAggregates,
   type GroupAggregatesMapper,
+  toAggregateInstant,
+  toAggregateOrdered,
+  withDeclaredAggregates,
 } from "./aggregate/aggregate";
 export {
   addAggregation,
@@ -115,11 +118,18 @@ export {
   aggregationModel,
   type AggregationModelInput,
   type AggregationOrigin,
+  columnAggregationSignature,
   computedAggregateKeys,
   declaredByDeveloper,
+  type EffectiveAggregation,
+  type EffectiveAggregationInput,
+  type EffectiveAggregationKind,
+  effectiveAggregateOps,
   initialOperation,
+  readerControlAllowed,
   reconcileAggregations,
   removeAggregation,
+  resolveEffectiveAggregation,
   restoreAggregationDefaults,
 } from "./aggregate/aggregationModel";
 export { columnText } from "./columns/columnText";

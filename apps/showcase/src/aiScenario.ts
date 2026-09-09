@@ -134,6 +134,21 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
     requires: ["view.setGroupBy"],
   },
   {
+    prompt: "Show average salary by team.",
+    ar: {
+      prompt: "اعرض متوسط الراتب حسب الفريق.",
+      title: "متوسط الراتب",
+      reply: "تم تجميع متوسط الراتب حسب الفريق.",
+    },
+    subject: () => ({ kind: "group", detail: "Average salary" }),
+    title: "Average salary by team",
+    kind: "group",
+    reply: "Showing average salary by team.",
+    capabilityKey: "view.setAggregations",
+    args: () => ({ set: { salary: "avg" } }),
+    requires: ["view.setGroupBy", "view.setAggregations"],
+  },
+  {
     prompt: "Raise Priya Nair's salary to 185.",
     ar: {
       prompt: "ارفع راتب Priya Nair إلى 185.",

@@ -140,6 +140,7 @@ function RuntimePublisher<TRow>({
         : undefined,
       queryAggregates: chrome.source.queryAggregates,
       aggregateOperations: chrome.source.aggregateOperations,
+      honorsAggregates: chrome.source.honorsAggregates,
       columnLabel: (key: string) => {
         const column = chrome.allColumns.find(
           (candidate) => candidate.key === key

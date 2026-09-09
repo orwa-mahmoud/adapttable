@@ -582,6 +582,9 @@ export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
 export const COLUMN_GROUP_STUB_WIDTH = 36;
 
 // @public
+export function columnAggregationSignature<TRow>(column: ColumnMetadata<TRow>): string;
+
+// @public
 export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
     label?: string;
 });
@@ -742,6 +745,7 @@ export interface ColumnMenuLabels {
     filterColumn: string;
     groupByColumn: (label: string) => string;
     groupingAggregation: string;
+    groupingAggregationCustom: string;
     groupingAverage: string;
     groupingRemoveAggregation: (label: string) => string;
     hideAllColumns: string;
@@ -1293,6 +1297,29 @@ export interface EditableColumnLike<TRow = unknown> {
 
 // @public
 export function editorInputType(editor: CellEditor | null): "text" | "number" | "date" | "datetime-local" | "time";
+
+// @public
+export function effectiveAggregateOps<TRow>(input: AggregationModelInput<TRow>): Readonly<Record<string, string>> | undefined;
+
+// @public
+export interface EffectiveAggregation {
+    readonly kind: EffectiveAggregationKind;
+    readonly operationId?: string;
+    readonly readerControl: boolean;
+}
+
+// @public
+export interface EffectiveAggregationInput<TRow> {
+    readonly column: ColumnMetadata<TRow>;
+    readonly computedKeys?: readonly string[];
+    readonly declared?: DeclaredAggregates;
+    readonly override?: string;
+    readonly queryAggregates?: readonly QueryAggregate[];
+    readonly source?: AggregationSourceSupport;
+}
+
+// @public
+export type EffectiveAggregationKind = "override" | "suppressed" | "default" | "host" | "inactive";
 
 // @public
 export type ElementRef<T> = ((node: T | null) => void) | {
@@ -3207,6 +3234,9 @@ export function readColumnLayout(params: URLSearchParams, prefix?: string): Colu
 export function readEditableCellValue<TRow>(row: TRow, column: EditableColumnLike<TRow>, host?: FeatureHostState): string;
 
 // @public
+export function readerControlAllowed(resolved: ResolvedAggregatable | undefined, source?: AggregationSourceSupport): boolean;
+
+// @public
 export function readExtra(params: URLSearchParams, numberKeys: readonly string[], arrayKeys: readonly string[], prefix?: string): ExtraFilters;
 
 // @public
@@ -3383,6 +3413,9 @@ export function resolveDisabledReason(reason: string | undefined): string | unde
 
 // @public
 export type ResolvedPaginationMode = "infinite" | "paged";
+
+// @public
+export function resolveEffectiveAggregation<TRow>(input: EffectiveAggregationInput<TRow>): EffectiveAggregation;
 
 // @public
 export function resolveExportColumns<TRow>(scope: ExportColumnScope | undefined, visible: readonly ColumnMetadata<TRow>[], all: readonly ColumnMetadata<TRow>[] | undefined): ColumnMetadata<TRow>[];
@@ -4130,6 +4163,7 @@ export interface TableLabels {
     groupingAggregateRemoved?: (column: string) => string;
     groupingAggregatesRestored?: string;
     groupingAggregation?: string;
+    groupingAggregationCustom?: string;
     groupingAggregationDefault?: string;
     groupingAggregationFor?: (column: string) => string;
     groupingAggregationNone?: string;
@@ -4449,6 +4483,7 @@ export interface TableSource<TRow> extends TableStateMutators {
     readonly groupBy: string | undefined;
     readonly groups?: readonly QueryGroupRow<TRow>[];
     readonly hasNextPage: boolean;
+    readonly honorsAggregates?: boolean;
     readonly isFetching: boolean;
     readonly isFetchingNextPage: boolean;
     readonly isLoading: boolean;
@@ -4520,6 +4555,15 @@ export const TEXT_OPS: readonly ["eq", "neq", "contains", "notContains", "starts
 
 // @public
 export type TextOp = (typeof TEXT_OPS)[number];
+
+// @public
+export function toAggregateInstant(value: SortableValue): number | undefined;
+
+// @public
+export function toAggregateOrdered(value: SortableValue): {
+    rank: number;
+    result: SortableValue;
+} | undefined;
 
 // @public
 export function toFormulaValue(raw: unknown): FormulaValue;
@@ -4669,6 +4713,9 @@ export type WidthColumn = Pick<ColumnModel<unknown>, "key" | "width">;
 
 // @public
 export function windowGroupedEntries<TEntry>(entries: readonly TEntry[], indices: readonly number[]): readonly TEntry[];
+
+// @public
+export function withDeclaredAggregates<TRow>(mapper: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>, declared: DeclaredAggregates): GroupAggregatesMapper<TRow>;
 
 // @public
 export function withFilterType(registry: FilterTypeRegistry, spec: FilterTypeSpec): FilterTypeRegistry;

@@ -306,6 +306,7 @@ export const ur: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `${column} کا مجموعہ ہٹائیں`,
   groupingAggregationFor: (column) => `${column} کا مجموعہ`,
   groupingAggregationReadOnly: "ایپ نے مقرر کیا",
+  groupingAggregationCustom: "حسب ضرورت",
   groupingAggregateRemoved: (column) => `${column} کا مجموعہ ہٹا دیا گیا`,
   groupingAggregatesRestored: "مجموعے طے شدہ پر بحال ہو گئے",
   groupingAverage: "اوسط",

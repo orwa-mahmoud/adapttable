@@ -9,6 +9,7 @@ import {
   type GroupingChipKeyboardProps as CoreGroupingChipKeyboardProps,
   type GroupingDragProps as CoreGroupingDragProps,
   type GroupingDropProps as CoreGroupingDropProps,
+  type AggregationItem,
   type GroupingPanelState,
   type ResolvedAggregateOperation,
   type TableLabels,
@@ -392,6 +393,29 @@ function operationLabel(
   return named[operation.id] ?? operation.id;
 }
 
+/** Options for one item, including an honest Custom current value. */
+function aggregationSelectOptions(
+  item: AggregationItem,
+  labels: Required<TableLabels>
+): { value: string; label: string }[] {
+  const options = item.operations.map((operation) => ({
+    value: operation.id,
+    label: operationLabel(operation, labels),
+  }));
+  if (item.operationId === undefined) {
+    options.unshift({
+      value: "",
+      label: labels.groupingAggregationCustom,
+    });
+  } else if (!options.some((option) => option.value === item.operationId)) {
+    options.unshift({
+      value: item.operationId,
+      label: operationLabel({ id: item.operationId, builtIn: true }, labels),
+    });
+  }
+  return options;
+}
+
 /**
  * Render a kit-native, keyboard-complete interactive grouping strip.
  *
@@ -442,12 +466,10 @@ export function GroupingPanelChrome<TRow>({
       removedIndex
     );
   }, [itemKeys, items]);
-  // A column the table is grouped by shows the group's own value where its
-  // aggregate would go, so it is not offered as something to add. An
-  // aggregation already on it stays visible above, and removable.
-  const offered = state.aggregations.candidates.filter(
-    (candidate) => !state.groupBy.includes(candidate.columnKey)
-  );
+  // Grouping and aggregation are independent: a grouped column may still
+  // carry a Count (or any other allowed operation). The group's row count
+  // is not a substitute — missing values make those different.
+  const offered = state.aggregations.candidates;
 
   // A chip dropped either side of itself lands exactly where it already is.
   // Those boundaries are the two nearest the reader's hand, so offering them
@@ -597,13 +619,11 @@ export function GroupingPanelChrome<TRow>({
                       <Select
                         label={labels.groupingAggregationFor(name)}
                         value={item.operationId ?? ""}
-                        options={item.operations.map((operation) => ({
-                          value: operation.id,
-                          label: operationLabel(operation, labels),
-                        }))}
-                        onChange={(value) =>
-                          state.setAggregateOperation(item.columnKey, value)
-                        }
+                        options={aggregationSelectOptions(item, labels)}
+                        onChange={(value) => {
+                          if (value === "") return;
+                          state.setAggregateOperation(item.columnKey, value);
+                        }}
                         disabled={!state.canSetAggregates}
                         data-adapttable-part="grouping-aggregation-operation"
                       />

@@ -266,6 +266,22 @@ describe("incremental aggregates — built-ins and rescans", () => {
     ).toEqual({ budget: 2 });
   });
 
+  it("keeps ISO date min/max consistent with a full aggregate pass", () => {
+    const rows = [
+      { id: "a", started: "2024-03-01" },
+      { id: "b", started: "2024-01-15" },
+      { id: "c", started: "2024-02-01" },
+    ];
+    const state = createIncrementalAggregate({ started: "min" }, rows);
+    expect(readIncrementalAggregate(state, rows)).toEqual({
+      started: "2024-01-15",
+    });
+    removeAggregateRow(state, rows[1]!);
+    expect(readIncrementalAggregate(state, [rows[0]!, rows[2]!])).toEqual({
+      started: "2024-02-01",
+    });
+  });
+
   it("falls back to a full pass for a custom aggregator", () => {
     const rows = [
       { id: "a", team: "Core" },

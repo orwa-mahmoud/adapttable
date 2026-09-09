@@ -796,7 +796,14 @@ export function useTableChrome<TRow>(
             ...groupingPanelInteractions,
             groupBy: groupByKeys,
             aggregateOverrides: source.groupAggregateOverrides ?? {},
-            canSetAggregates: source.setGroupAggregateOverrides !== undefined,
+            canSetAggregates:
+              source.setGroupAggregateOverrides !== undefined &&
+              (sourceCapabilities({
+                allFilteredRows: source.allFilteredRows,
+                groups: source.groups,
+                capabilities: source.capabilities,
+              }).grouping !== "server" ||
+                source.honorsAggregates === true),
             // Built here, from the choices this very render carries. Built
             // from a published view instead, the list would describe the
             // render before the reader's click — which is exactly what a
@@ -812,7 +819,10 @@ export function useTableChrome<TRow>(
                   groups: source.groups,
                   capabilities: source.capabilities,
                 }).grouping,
-                aggregateOperations: source.aggregateOperations,
+                aggregateOperations:
+                  source.honorsAggregates === false
+                    ? []
+                    : source.aggregateOperations,
               },
             }),
           }
@@ -828,6 +838,7 @@ export function useTableChrome<TRow>(
       source.groups,
       source.queryAggregates,
       source.setGroupAggregateOverrides,
+      source.honorsAggregates,
     ]
   );
 

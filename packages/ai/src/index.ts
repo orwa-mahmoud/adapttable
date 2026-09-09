@@ -48,6 +48,10 @@ export {
 export { buildManifest, enabledKeys } from "./manifest";
 export { createAgentSession, type CreateAgentSessionOptions } from "./session";
 export type {
+  AgentAggregateOperation,
+  AgentAggregationColumn,
+  AgentAggregations,
+  AgentAggregationsPatch,
   AgentApply,
   AgentCapabilityContext,
   AgentCapabilityDefinition,

@@ -307,6 +307,7 @@ export const hi: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `${column} एकत्रीकरण हटाएँ`,
   groupingAggregationFor: (column) => `${column} एकत्रीकरण`,
   groupingAggregationReadOnly: "ऐप द्वारा सेट",
+  groupingAggregationCustom: "कस्टम",
   groupingAggregateRemoved: (column) => `${column} एकत्रीकरण हटाया गया`,
   groupingAggregatesRestored: "एकत्रीकरण डिफ़ॉल्ट पर पुनर्स्थापित किए गए",
   groupingAverage: "औसत",

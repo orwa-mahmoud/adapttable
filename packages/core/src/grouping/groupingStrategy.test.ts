@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { groupRowLayout } from "./groupRowLayout";
 import {
   groupedEntriesForStrategy,
   groupingComputationKind,
@@ -70,5 +71,77 @@ describe("groupedEntriesForStrategy", () => {
     });
     expect(entries.some((entry) => entry.kind === "group")).toBe(true);
     expect(entries.filter((entry) => entry.kind === "row")).toHaveLength(2);
+  });
+
+  it("does not label a server group with a later Average override", () => {
+    const seen: (string | undefined)[] = [];
+    const columns = [
+      { key: "team", header: "Team" },
+      {
+        key: "budget",
+        formatAggregate: (
+          value: unknown,
+          context: { aggregation?: string }
+        ) => {
+          seen.push(context.aggregation);
+          return value;
+        },
+      },
+    ];
+    const entries = groupedEntriesForStrategy({
+      kind: "source",
+      groupByKeys: ["team"],
+      sourceGroups: [{ value: "eng", count: 2, aggregates: { budget: 40 } }],
+      columns,
+      getRowId,
+      collapsedGroupIds: new Set(),
+      aggregateOps: undefined,
+    });
+    const group = entries.find((entry) => entry.kind === "group");
+    groupRowLayout(
+      columns,
+      group && "aggregateCells" in group ? group.aggregateCells : undefined,
+      group && "aggregateOps" in group ? group.aggregateOps : undefined
+    );
+    expect(seen).toEqual([undefined]);
+  });
+
+  it("tells formatAggregate the local Count that actually ran", () => {
+    const seen: (string | undefined)[] = [];
+    const columns = [
+      { key: "team" },
+      {
+        key: "person",
+        formatAggregate: (
+          value: unknown,
+          context: { aggregation?: string }
+        ) => {
+          seen.push(context.aggregation);
+          return value;
+        },
+      },
+    ];
+    const entries = groupedEntriesForStrategy({
+      kind: "client",
+      groupByKeys: ["team"],
+      allFilteredRows: [
+        { id: "1", team: "eng", person: "Ada" },
+        { id: "2", team: "eng", person: "Grace" },
+      ],
+      columns,
+      getRowId,
+      collapsedGroupIds: new Set(),
+      aggregates: (rows: readonly { person: string }[]) => ({
+        person: rows.length,
+      }),
+      aggregateOps: { person: "count" },
+    });
+    const group = entries.find((entry) => entry.kind === "group");
+    groupRowLayout(
+      columns,
+      group && "aggregateCells" in group ? group.aggregateCells : undefined,
+      group && "aggregateOps" in group ? group.aggregateOps : undefined
+    );
+    expect(seen).toContain("count");
   });
 });

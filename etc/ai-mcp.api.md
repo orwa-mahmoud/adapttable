@@ -10,6 +10,34 @@ import { ApprovalPresentation } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 
 // @public
+export interface AgentAggregateOperation {
+    readonly id: string;
+    readonly label: string;
+}
+
+// @public
+export interface AgentAggregationColumn {
+    readonly id: string;
+    readonly operations: readonly AgentAggregateOperation[];
+}
+
+// @public
+export interface AgentAggregations {
+    readonly active: readonly {
+        readonly id: string;
+        readonly operation?: string;
+    }[];
+    readonly columns: readonly AgentAggregationColumn[];
+}
+
+// @public
+export interface AgentAggregationsPatch {
+    readonly remove?: readonly string[];
+    readonly restoreDefaults?: boolean;
+    readonly set?: Readonly<Record<string, string>>;
+}
+
+// @public
 export interface AgentApply {
     addRows?(rows: readonly Record<string, unknown>[]): unknown;
     applyView?(viewId: string): void;
@@ -21,6 +49,7 @@ export interface AgentApply {
     reorderRows?(fromKey: string, toKey: string): unknown;
     resolveRow?(ref: RowRef): Promise<ResolvedRow> | ResolvedRow;
     runExport?(format: string): unknown;
+    setAggregations?(patch: AgentAggregationsPatch): void;
     setFilters?(filters: unknown): void;
     setGroupBy?(key: string | undefined): void;
     setLimit?(limit: number): void;
@@ -106,6 +135,7 @@ export interface AgentManifest {
 
 // @public
 export interface AgentObservation {
+    readonly aggregations?: AgentAggregations;
     readonly approval?: ApprovalPolicy;
     readonly columns: readonly AgentColumn[];
     readonly commit?: CommitPolicy;
@@ -202,7 +232,7 @@ export interface AssistantSuggestion {
 }
 
 // @public
-export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
+export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setAggregations", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
 
 // @public
 export interface CapabilityGuide {

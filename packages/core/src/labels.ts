@@ -357,6 +357,7 @@ export const defaultLabels: Required<TableLabels> = {
   groupingRemoveAggregation: (column: string) => `Remove ${column} aggregation`,
   groupingAggregationFor: (column: string) => `${column} aggregation`,
   groupingAggregationReadOnly: "Set by the app",
+  groupingAggregationCustom: "Custom",
   groupingAggregateRemoved: (column: string) => `${column} aggregate removed`,
   groupingAggregatesRestored: "Aggregations restored to defaults",
   groupingAverage: "Average",

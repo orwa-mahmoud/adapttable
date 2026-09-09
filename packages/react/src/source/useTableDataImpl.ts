@@ -534,6 +534,7 @@ export function useTableDataWithEngine<TRow>(
       facetKeys: derivedFacetKeys,
       facets: serverFacets,
     }),
+    columns: resolvedColumns,
     total,
     loading,
     error,

@@ -303,6 +303,7 @@ export const ar: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `إزالة تجميع ${column}`,
   groupingAggregationFor: (column) => `تجميع ${column}`,
   groupingAggregationReadOnly: "تعيّنه التطبيق",
+  groupingAggregationCustom: "مخصص",
   groupingAggregateRemoved: (column) => `تمت إزالة تجميع ${column}`,
   groupingAggregatesRestored: "تمت استعادة التجميعات إلى الإعدادات الافتراضية",
   groupingAverage: "المتوسط",

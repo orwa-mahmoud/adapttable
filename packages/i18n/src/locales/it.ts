@@ -306,6 +306,7 @@ export const it: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `Rimuovi aggregazione di ${column}`,
   groupingAggregationFor: (column) => `Aggregazione di ${column}`,
   groupingAggregationReadOnly: "Impostata dall’app",
+  groupingAggregationCustom: "Personalizzata",
   groupingAggregateRemoved: (column) => `Aggregazione di ${column} rimossa`,
   groupingAggregatesRestored: "Aggregazioni ripristinate ai valori predefiniti",
   groupingAverage: "Media",

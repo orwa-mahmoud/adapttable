@@ -310,6 +310,7 @@ export const ru: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `Удалить агрегацию ${column}`,
   groupingAggregationFor: (column) => `Агрегация ${column}`,
   groupingAggregationReadOnly: "Задано приложением",
+  groupingAggregationCustom: "Пользовательская",
   groupingAggregateRemoved: (column) => `Агрегация ${column} удалена`,
   groupingAggregatesRestored:
     "Агрегации восстановлены до значений по умолчанию",

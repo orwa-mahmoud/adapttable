@@ -129,6 +129,34 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
     input: objectSchema({ key: { type: ["string", "null"] } }),
     output: OK,
   },
+  "view.setAggregations": {
+    key: "view.setAggregations",
+    guide:
+      "Add or change specific column aggregations without replacing the " +
+      "others, remove specific aggregations (suppression when a default or " +
+      "host baseline would otherwise return), or restore developer defaults. " +
+      "`restoreDefaults` cannot be combined with `set` or `remove`. The " +
+      "whole request is validated before anything is applied. Eligible " +
+      "columns and operation ids are listed when this capability is " +
+      "described against the live table. Never send a calculate function.",
+    input: objectSchema({
+      set: {
+        type: "object",
+        additionalProperties: { type: "string", minLength: 1 },
+      },
+      remove: {
+        type: "array",
+        items: { type: "string", minLength: 1 },
+      },
+      restoreDefaults: { type: "boolean" },
+    }),
+    output: objectSchema({
+      ok: { type: "boolean", const: true },
+      revision: { type: "integer", minimum: 1 },
+      applied: { type: "boolean" },
+      pending: { type: "boolean" },
+    }),
+  },
   "view.pinColumn": {
     key: "view.pinColumn",
     guide:
@@ -307,6 +335,7 @@ const SUMMARIES: Record<CapabilityKey, string> = {
   "view.setSearch": "Change the search query.",
   "view.setFilters": "Replace the active filters.",
   "view.setGroupBy": "Change or clear grouping.",
+  "view.setAggregations": "Add, change, remove or restore group aggregations.",
   "view.pinColumn": "Pin or unpin a column at a logical edge.",
   "view.pinRow": "Pin or unpin a row above or below the body.",
   "view.setSelection": "Replace or clear the current selection.",

@@ -156,8 +156,9 @@ describe("groupingPanel feature", () => {
     expect(ungroup).toBeDefined();
     if (ungroup && !("kind" in ungroup)) ungroup.run();
     expect(state.remove).toHaveBeenCalledWith("budget");
+    // Grouping the column does not take its aggregation offer away.
     expect(result.current.some((item) => item.id === "group-aggregation")).toBe(
-      false
+      true
     );
   });
 });
@@ -622,6 +623,24 @@ describe("groupingPanel provider", () => {
     expect(screen.getByTestId("announcement")).toHaveTextContent(
       "Aggregations restored to defaults"
     );
+  });
+
+  it("refuses suppression on a column the reader cannot control", () => {
+    const groupingState = mockGroupingState("team");
+    let panel: GroupingPanelInteractions | undefined;
+    mountProvider(
+      groupingPanel(),
+      defaultLabels,
+      (next) => {
+        panel = next;
+      },
+      runtimeView(groupingState)
+    );
+
+    act(() => {
+      panel!.setAggregate("team", "none");
+    });
+    expect(groupingState.setAggregateOverrides).not.toHaveBeenCalled();
   });
 
   it("refuses a disallowed operation at the panel, not only in the picker", () => {

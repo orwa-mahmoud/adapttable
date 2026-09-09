@@ -14,6 +14,7 @@ import {
   type AggregateSpec,
   resolveAggregateValue,
   toAggregateNumber,
+  toAggregateOrdered,
 } from "../aggregate/aggregate";
 import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
@@ -26,6 +27,8 @@ interface ColumnAcc {
   presentCount: number;
   min: number | undefined;
   max: number | undefined;
+  minResult: SortableValue;
+  maxResult: SortableValue;
   /** The old min or max left; `read` must rescan. */
   dirty: boolean;
 }
@@ -80,6 +83,8 @@ export function createIncrementalAggregate<TRow>(
         presentCount: 0,
         min: undefined,
         max: undefined,
+        minResult: undefined,
+        maxResult: undefined,
         dirty: kind === undefined,
       },
     });
@@ -198,24 +203,49 @@ function applyValue(acc: ColumnAcc, value: SortableValue, sign: 1 | -1): void {
   }
   if (value === undefined || value === null) return;
   acc.presentCount += sign;
+  if (acc.kind === "count") return;
+  if (acc.kind === "min" || acc.kind === "max") {
+    applyOrdered(acc, value, sign);
+    return;
+  }
   const n = toAggregateNumber(value);
   if (n === undefined) return;
   acc.sum += sign * n;
   acc.numericCount += sign;
+  if (sign === -1 && acc.numericCount <= 0) {
+    acc.sum = 0;
+    acc.numericCount = 0;
+  }
+}
+
+function applyOrdered(
+  acc: ColumnAcc,
+  value: SortableValue,
+  sign: 1 | -1
+): void {
+  const ordered = toAggregateOrdered(value);
+  if (!ordered) return;
+  acc.numericCount += sign;
   if (sign === 1) {
-    acc.min = acc.min === undefined ? n : Math.min(acc.min, n);
-    acc.max = acc.max === undefined ? n : Math.max(acc.max, n);
+    if (acc.min === undefined || ordered.rank < acc.min) {
+      acc.min = ordered.rank;
+      acc.minResult = ordered.result;
+    }
+    if (acc.max === undefined || ordered.rank > acc.max) {
+      acc.max = ordered.rank;
+      acc.maxResult = ordered.result;
+    }
     return;
   }
   if (acc.numericCount <= 0) {
-    acc.sum = 0;
-    acc.numericCount = 0;
     acc.min = undefined;
     acc.max = undefined;
+    acc.minResult = undefined;
+    acc.maxResult = undefined;
     acc.dirty = false;
     return;
   }
-  if (n === acc.min || n === acc.max) acc.dirty = true;
+  if (ordered.rank === acc.min || ordered.rank === acc.max) acc.dirty = true;
 }
 
 function rescan<TRow>(
@@ -228,17 +258,19 @@ function rescan<TRow>(
     acc.presentCount = 0;
     acc.min = undefined;
     acc.max = undefined;
+    acc.minResult = undefined;
+    acc.maxResult = undefined;
     acc.dirty = false;
   }
   for (const row of rows) addAggregateRow(state, row);
 }
 
-function cellOf(acc: ColumnAcc): number | undefined {
+function cellOf(acc: ColumnAcc): DisplayValue | undefined {
   if (acc.kind === "sum") return acc.sum;
   if (acc.kind === "count") return acc.presentCount;
   if (acc.kind === "avg") {
     return acc.numericCount ? acc.sum / acc.numericCount : undefined;
   }
-  if (acc.kind === "min") return acc.min;
-  return acc.max;
+  if (acc.kind === "min") return acc.minResult;
+  return acc.maxResult;
 }

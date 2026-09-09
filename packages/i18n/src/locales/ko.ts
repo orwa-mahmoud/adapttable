@@ -305,6 +305,7 @@ export const ko: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `${column} 집계 제거`,
   groupingAggregationFor: (column) => `${column} 집계`,
   groupingAggregationReadOnly: "앱에서 설정됨",
+  groupingAggregationCustom: "사용자 지정",
   groupingAggregateRemoved: (column) => `${column} 집계가 제거됨`,
   groupingAggregatesRestored: "집계가 기본값으로 복원됨",
   groupingAverage: "평균",

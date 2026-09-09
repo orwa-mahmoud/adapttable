@@ -66,6 +66,7 @@ const labels = {
   groupingAggregation: "Aggregation",
   groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
   groupingAverage: "Average",
+  groupingAggregationCustom: "Custom",
   selectionCount: "Count",
   selectionSum: "Sum",
   selectionMin: "Minimum",

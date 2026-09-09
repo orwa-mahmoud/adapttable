@@ -299,6 +299,7 @@ export const zh: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `移除 ${column} 聚合`,
   groupingAggregationFor: (column) => `${column} 聚合`,
   groupingAggregationReadOnly: "由应用设置",
+  groupingAggregationCustom: "自定义",
   groupingAggregateRemoved: (column) => `已移除 ${column} 聚合`,
   groupingAggregatesRestored: "已将聚合恢复为默认值",
   groupingAverage: "平均值",

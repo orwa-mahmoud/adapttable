@@ -300,6 +300,7 @@ export const zhTW: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `移除 ${column} 彙總`,
   groupingAggregationFor: (column) => `${column} 彙總`,
   groupingAggregationReadOnly: "由應用程式設定",
+  groupingAggregationCustom: "自訂",
   groupingAggregateRemoved: (column) => `已移除 ${column} 彙總`,
   groupingAggregatesRestored: "已將彙總還原為預設值",
   groupingAverage: "平均值",

@@ -301,6 +301,7 @@ export const he: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `הסרת צבירת ${column}`,
   groupingAggregationFor: (column) => `צבירת ${column}`,
   groupingAggregationReadOnly: "נקבע על ידי האפליקציה",
+  groupingAggregationCustom: "מותאם",
   groupingAggregateRemoved: (column) => `צבירת ${column} הוסרה`,
   groupingAggregatesRestored: "הצבירות שוחזרו לברירות המחדל",
   groupingAverage: "ממוצע",

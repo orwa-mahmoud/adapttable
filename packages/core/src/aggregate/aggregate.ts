@@ -136,6 +136,87 @@ export function toAggregateNumber(value: SortableValue): number | undefined {
   return undefined;
 }
 
+/** Strict ISO date: `YYYY-MM-DD`. */
+const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+/** Strict ISO datetime, optional seconds/fraction and a timezone. */
+const ISO_DATETIME =
+  /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?(Z|[+-]\d{2}:?\d{2})?$/;
+/** Strict ISO time: `HH:mm` with optional seconds. */
+const ISO_TIME = /^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/;
+
+/**
+ * Parse a temporal value the built-in min/max can compare.
+ *
+ * Accepts a `Date`, a finite number (including an epoch), a numeric string,
+ * or a strict ISO date / datetime / time string. Locale-dependent forms
+ * (`"9 Sep 2026"`, `"09/09/2026"`) are invalid and skipped — the same way a
+ * non-numeric string is skipped by {@link toAggregateNumber}.
+ *
+ * @param value - The resolved cell value, already through `sortValue` when
+ *   the column has one.
+ * @returns Milliseconds from epoch (or from midnight for a time-only string),
+ *   or `undefined` when the value is missing or not a supported temporal.
+ *
+ * @public
+ */
+export function toAggregateInstant(value: SortableValue): number | undefined {
+  if (value instanceof Date) {
+    const time = value.getTime();
+    return Number.isFinite(time) ? time : undefined;
+  }
+  if (typeof value === "string") {
+    const text = value.trim();
+    if (ISO_DATE.test(text)) {
+      const time = Date.parse(`${text}T00:00:00Z`);
+      return Number.isFinite(time) ? time : undefined;
+    }
+    if (ISO_DATETIME.test(text)) {
+      const time = Date.parse(text);
+      return Number.isFinite(time) ? time : undefined;
+    }
+    if (ISO_TIME.test(text)) {
+      const match = ISO_TIME.exec(text);
+      if (!match) return undefined;
+      const hours = Number(match[1]);
+      const minutes = Number(match[2]);
+      const seconds = match[3] === undefined ? 0 : Number(match[3]);
+      const fraction = match[4] === undefined ? 0 : Number(`0.${match[4]}`);
+      const time =
+        hours * 3_600_000 + minutes * 60_000 + seconds * 1000 + fraction * 1000;
+      return Number.isFinite(time) ? time : undefined;
+    }
+  }
+  return toAggregateNumber(value);
+}
+
+/**
+ * One comparable value for min/max: a rank plus the original cell to return.
+ *
+ * Numeric values keep returning a number. A `Date` stays a `Date`. An ISO
+ * string stays that string, so `formatAggregate` can format it as a date
+ * without guessing. Invalid and missing values are absent.
+ *
+ * @param value - The resolved cell value.
+ * @returns The rank and the result representation, or `undefined` to skip.
+ *
+ * @public
+ */
+export function toAggregateOrdered(
+  value: SortableValue
+): { rank: number; result: SortableValue } | undefined {
+  if (value instanceof Date) {
+    const rank = toAggregateInstant(value);
+    return rank === undefined ? undefined : { rank, result: value };
+  }
+  const numeric = toAggregateNumber(value);
+  if (numeric !== undefined) return { rank: numeric, result: numeric };
+  if (typeof value === "string") {
+    const rank = toAggregateInstant(value);
+    if (rank !== undefined) return { rank, result: value };
+  }
+  return undefined;
+}
+
 /** Numbers only — everything else is not summable, and silently skipped. */
 function numbers(values: readonly SortableValue[]): number[] {
   const out: number[] = [];
@@ -154,6 +235,11 @@ function numbers(values: readonly SortableValue[]): number[] {
  * what a "count" cell under that column is asking about. `sum` of nothing is
  * `0`; `avg`, `min` and `max` of nothing are `undefined`, because an average
  * of no numbers is not zero, it is unanswerable.
+ *
+ * `min` and `max` compare through {@link toAggregateOrdered}: numbers stay
+ * numbers; a `Date` or a strict ISO date/time string stays that value, so
+ * `formatAggregate` receives the winning original rather than a timestamp.
+ * Locale-dependent date strings are skipped, not guessed.
  */
 const BUILT_INS: Record<AggregateName, Aggregator> = {
   sum: (values) => numbers(values).reduce((a, b) => a + b, 0),
@@ -162,15 +248,27 @@ const BUILT_INS: Record<AggregateName, Aggregator> = {
     return ns.length ? ns.reduce((a, b) => a + b, 0) / ns.length : undefined;
   },
   count: (values) => values.length,
-  min: (values) => {
-    const ns = numbers(values);
-    return ns.length ? Math.min(...ns) : undefined;
-  },
-  max: (values) => {
-    const ns = numbers(values);
-    return ns.length ? Math.max(...ns) : undefined;
-  },
+  min: (values) => extreme(values, "min"),
+  max: (values) => extreme(values, "max"),
 };
+
+function extreme(
+  values: readonly SortableValue[],
+  which: "min" | "max"
+): SortableValue | undefined {
+  let best: { rank: number; result: SortableValue } | undefined;
+  for (const value of values) {
+    const ordered = toAggregateOrdered(value);
+    if (!ordered) continue;
+    if (
+      !best ||
+      (which === "min" ? ordered.rank < best.rank : ordered.rank > best.rank)
+    ) {
+      best = ordered;
+    }
+  }
+  return best?.result;
+}
 
 /**
  * Every built-in aggregate name, for a UI that offers a choice.
@@ -293,7 +391,7 @@ function declaredFrom(spec: AggregateSpec): DeclaredAggregates {
 }
 
 /** Attach a declaration to a mapper without making it enumerable state. */
-function withDeclaredAggregates<TRow>(
+export function withDeclaredAggregates<TRow>(
   mapper: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>,
   declared: DeclaredAggregates
 ): GroupAggregatesMapper<TRow> {

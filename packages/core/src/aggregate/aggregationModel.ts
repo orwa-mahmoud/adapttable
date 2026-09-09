@@ -38,6 +38,56 @@ export const AGGREGATE_SUPPRESSED = "none";
 export type AggregationOrigin = "reader" | "declared" | "host";
 
 /**
+ * Where one column's effective aggregation came from after the shared
+ * precedence is applied: reader override or permitted suppression, then a
+ * valid executable column default, then the original host mapper/request,
+ * then inactive.
+ *
+ * @public
+ */
+export type EffectiveAggregationKind =
+  "override" | "suppressed" | "default" | "host" | "inactive";
+
+/**
+ * The operation that should display, calculate and request for one column.
+ *
+ * Model and execution resolve this once so a default cannot appear active
+ * while the host's original operation still runs.
+ *
+ * @public
+ */
+export interface EffectiveAggregation {
+  /** Which precedence step won. */
+  readonly kind: EffectiveAggregationKind;
+  /**
+   * The named operation when it is known. Absent for suppression, a truly
+   * inactive column, or an opaque host mapper the table did not build.
+   */
+  readonly operationId?: string;
+  /** Whether the reader may change or remove this column's aggregation. */
+  readonly readerControl: boolean;
+}
+
+/** Inputs {@link resolveEffectiveAggregation} needs for one column. */
+export interface EffectiveAggregationInput<TRow> {
+  /** The column being resolved. */
+  readonly column: ColumnMetadata<TRow>;
+  /** The reader's choice for this column, when they made one. */
+  readonly override?: string;
+  /** What a mapper built by `aggregate()` declared. */
+  readonly declared?: DeclaredAggregates;
+  /** The developer's original server request. */
+  readonly queryAggregates?: readonly QueryAggregate[];
+  /**
+   * Keys a mapper actually produced in the current grouped model. Presence
+   * only — used to show a host cell, never to invent an operation.
+   */
+  readonly computedKeys?: readonly string[];
+  /** Where grouping runs and which operations a backend listed. */
+  readonly source?: AggregationSourceSupport;
+}
+
+/**
  * One active aggregation, as a reader sees it.
  *
  * @public
@@ -119,21 +169,166 @@ export interface AggregationModel {
   readonly atDefaults: boolean;
 }
 
-/** What the developer declared for one column, whatever declared it. */
-function developerOperation<TRow>(
-  column: ColumnMetadata<TRow>,
+/**
+ * Whether the reader may change this column's aggregation here.
+ *
+ * An offer with no executable operation is not control: the host still owns
+ * the cell, and a `"none"` override must not hide it.
+ *
+ * @public
+ */
+export function readerControlAllowed(
   resolved: ResolvedAggregatable | undefined,
-  input: AggregationModelInput<TRow>
-): string | undefined {
-  // An explicit `aggregatable.default` owns the column's initial operation;
-  // only without one does an existing mapper or request get to supply it.
-  if (resolved?.initial !== undefined) return resolved.initial;
-  const declared = input.declared?.[column.key];
-  if (declared !== undefined) return declared;
+  source?: AggregationSourceSupport
+): boolean {
+  return offerableOperations(resolved, source).length > 0;
+}
+
+/** What a host mapper or original request already computes for this column. */
+function hostBaseline<TRow>(
+  columnKey: string,
+  input: Pick<
+    EffectiveAggregationInput<TRow>,
+    "declared" | "queryAggregates" | "computedKeys"
+  >
+): { present: boolean; operationId?: string } {
+  const declared = input.declared?.[columnKey];
+  if (declared !== undefined) {
+    return {
+      present: true,
+      operationId: declared !== CUSTOM_AGGREGATE ? declared : undefined,
+    };
+  }
   const requested = input.queryAggregates?.find(
-    (aggregate) => aggregate.key === column.key
+    (aggregate) => aggregate.key === columnKey
   );
-  return requested?.fn;
+  if (requested?.fn) {
+    return { present: true, operationId: requested.fn };
+  }
+  if (input.computedKeys?.includes(columnKey) === true) {
+    return { present: true };
+  }
+  return { present: false };
+}
+
+/**
+ * Resolve the one aggregation that display, local calculation and the server
+ * request must all honour.
+ *
+ * Precedence: a valid reader override or permitted suppression; a valid
+ * executable column default; the original host mapper or request; inactive.
+ * Defaults are never written into reader state.
+ *
+ * @typeParam TRow - The row type.
+ * @param input - The column, the reader's choice, and the host baseline.
+ * @returns The effective aggregation for that column.
+ *
+ * @public
+ */
+export function resolveEffectiveAggregation<TRow>(
+  input: EffectiveAggregationInput<TRow>
+): EffectiveAggregation {
+  const resolved = resolveAggregatable(input.column);
+  const readerControl = readerControlAllowed(resolved, input.source);
+  const override = input.override;
+  const host = hostBaseline(input.column.key, input);
+
+  if (override !== undefined && readerControl) {
+    if (override === AGGREGATE_SUPPRESSED) {
+      return { kind: "suppressed", readerControl };
+    }
+    if (allowsReaderOperation(resolved, override, input.source)) {
+      return {
+        kind: "override",
+        operationId: override,
+        readerControl,
+      };
+    }
+  }
+
+  if (
+    resolved?.initial !== undefined &&
+    allowsReaderOperation(resolved, resolved.initial, input.source)
+  ) {
+    return {
+      kind: "default",
+      operationId: resolved.initial,
+      readerControl,
+    };
+  }
+
+  if (host.present) {
+    return {
+      kind: "host",
+      operationId: host.operationId,
+      readerControl,
+    };
+  }
+
+  return { kind: "inactive", readerControl };
+}
+
+/**
+ * The operations actually applied after defaults, host declarations and
+ * validated overrides — for locally computed groups. Opaque host functions
+ * stay unnamed.
+ *
+ * @typeParam TRow - The row type.
+ * @param input - The same input {@link aggregationModel} reads.
+ * @returns Named operations by column, or `undefined` when none are known.
+ *
+ * @public
+ */
+export function effectiveAggregateOps<TRow>(
+  input: AggregationModelInput<TRow>
+): Readonly<Record<string, string>> | undefined {
+  const ops: Record<string, string> = {};
+  for (const column of input.columns) {
+    const effective = resolveEffectiveAggregation({
+      column,
+      override: input.overrides[column.key],
+      declared: input.declared,
+      queryAggregates: input.queryAggregates,
+      computedKeys: input.computedKeys,
+      source: input.source,
+    });
+    if (
+      (effective.kind === "override" ||
+        effective.kind === "default" ||
+        effective.kind === "host") &&
+      effective.operationId
+    ) {
+      ops[column.key] = effective.operationId;
+    }
+  }
+  if (input.declared) {
+    for (const [key, id] of Object.entries(input.declared)) {
+      if (ops[key] === undefined && id !== CUSTOM_AGGREGATE) ops[key] = id;
+    }
+  }
+  return Object.keys(ops).length > 0 ? ops : undefined;
+}
+
+/**
+ * A column's offer, as a stable string the panel can watch.
+ *
+ * Changing allowed operations without changing the key used to leave a
+ * stale `"none"` or a forbidden id in reader state forever.
+ *
+ * @typeParam TRow - The row type.
+ * @param column - The column to fingerprint.
+ * @returns A signature of its current aggregation offer.
+ *
+ * @public
+ */
+export function columnAggregationSignature<TRow>(
+  column: ColumnMetadata<TRow>
+): string {
+  const resolved = resolveAggregatable(column);
+  if (!resolved) return `${column.key}:-`;
+  return `${column.key}:${resolved.initial ?? ""}:${resolved.operations
+    .map((operation) => operation.id)
+    .join("/")}`;
 }
 
 /**
@@ -180,93 +375,64 @@ function columnEntry<TRow>(
   input: AggregationModelInput<TRow>
 ): { item?: AggregationItem; candidate?: AggregationCandidate } {
   const resolved = resolveAggregatable(column);
-  const developer = developerOperation(column, resolved, input);
-  const override = input.overrides[column.key];
-  const active = activeOperation(resolved, override, developer, input.source);
+  const operations = offerableOperations(resolved, input.source);
+  const effective = resolveEffectiveAggregation({
+    column,
+    override: input.overrides[column.key],
+    declared: input.declared,
+    queryAggregates: input.queryAggregates,
+    computedKeys: input.computedKeys,
+    source: input.source,
+  });
 
-  if (resolved) {
-    const operations = offerableOperations(resolved, input.source);
-    if (operations.length === 0 && active === undefined) {
-      return { item: hostOnlyItem(column.key, developer, undefined, input) };
-    }
-    const candidate: AggregationCandidate = {
-      columnKey: column.key,
-      active: active !== undefined,
-      operations,
-    };
-    if (active === undefined) {
-      return {
-        candidate,
-        item: hostOnlyItem(column.key, developer, resolved, input),
-      };
-    }
+  const candidate: AggregationCandidate | undefined =
+    operations.length > 0
+      ? {
+          columnKey: column.key,
+          active:
+            effective.kind === "override" ||
+            effective.kind === "default" ||
+            effective.kind === "host",
+          operations,
+        }
+      : undefined;
+
+  if (effective.kind === "suppressed" || effective.kind === "inactive") {
+    return { candidate };
+  }
+  if (effective.kind === "override") {
     return {
       candidate,
       item: {
         columnKey: column.key,
-        operationId: active,
+        operationId: effective.operationId,
         editable: true,
-        origin: override === active ? "reader" : "declared",
+        origin: "reader",
         operations,
       },
     };
   }
-  // No reader-editable offer. A host aggregate may still exist here, and
-  // hiding it would be a lie about what the group row shows: report it, and
-  // say plainly that this one is not the reader's to change.
-  return { item: hostOnlyItem(column.key, developer, resolved, input) };
-}
-
-/**
- * Which operation is active on a reader-editable column: the reader's own
- * choice when the column still allows it, otherwise the developer's, and
- * nothing at all once the reader has taken it away.
- */
-function activeOperation(
-  resolved: ResolvedAggregatable | undefined,
-  override: string | undefined,
-  developer: string | undefined,
-  source?: AggregationSourceSupport
-): string | undefined {
-  if (!resolved) return undefined;
-  if (override === AGGREGATE_SUPPRESSED) return undefined;
-  // An operation the column no longer offers is ignored, not obeyed and not
-  // treated as a removal: the declared setup is what stands while a stale
-  // choice is on its way out.
-  if (
-    override !== undefined &&
-    allowsReaderOperation(resolved, override, source)
-  ) {
-    return override;
+  if (effective.kind === "default") {
+    return {
+      candidate,
+      item: {
+        columnKey: column.key,
+        operationId: effective.operationId,
+        editable: true,
+        origin: "declared",
+        operations,
+      },
+    };
   }
-  if (developer === undefined) return undefined;
-  return allowsReaderOperation(resolved, developer, source)
-    ? developer
-    : undefined;
-}
-
-/** A host aggregate the reader cannot change, when the column shows one. */
-function hostOnlyItem<TRow>(
-  columnKey: string,
-  developer: string | undefined,
-  resolved: ResolvedAggregatable | undefined,
-  input: AggregationModelInput<TRow>
-): AggregationItem | undefined {
-  // A column the reader may edit is never reported as the host's: it is
-  // either active above, or suppressed, and neither is read-only.
-  if (resolved) return undefined;
-  const computed = input.computedKeys?.includes(columnKey) === true;
-  if (developer === undefined && !computed) return undefined;
-  const named =
-    developer !== undefined && developer !== CUSTOM_AGGREGATE
-      ? developer
-      : undefined;
   return {
-    columnKey,
-    operationId: named,
-    editable: false,
-    origin: "host",
-    operations: [],
+    candidate,
+    item: {
+      columnKey: column.key,
+      operationId: effective.operationId,
+      editable: effective.readerControl,
+      origin: "host",
+      operations: effective.readerControl ? operations : [],
+    },
   };
 }
 
@@ -362,9 +528,14 @@ export function declaredByDeveloper<TRow>(
   column: ColumnMetadata<TRow>,
   input: AggregationModelInput<TRow>
 ): boolean {
-  return (
-    developerOperation(column, resolveAggregatable(column), input) !== undefined
-  );
+  const withoutOverride = resolveEffectiveAggregation({
+    column,
+    declared: input.declared,
+    queryAggregates: input.queryAggregates,
+    computedKeys: input.computedKeys,
+    source: input.source,
+  });
+  return withoutOverride.kind === "default" || withoutOverride.kind === "host";
 }
 
 /**
@@ -443,7 +614,13 @@ export function reconcileAggregations<TRow>(
       continue;
     }
     if (value === AGGREGATE_SUPPRESSED) {
-      next[key] = value;
+      // Suppression is a reader decision, and only while the column still
+      // lets the reader decide. A later lock must not keep hiding the host.
+      if (readerControlAllowed(resolveAggregatable(column), source)) {
+        next[key] = value;
+      } else {
+        changed = true;
+      }
       continue;
     }
     if (allowsReaderOperation(resolveAggregatable(column), value, source))

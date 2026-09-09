@@ -152,6 +152,13 @@ export interface TableSource<TRow> extends TableStateMutators {
    * `supports.aggregates`.
    */
   readonly aggregateOperations?: readonly string[];
+  /**
+   * Whether this source will honour `query.aggregates`. A server that
+   * groups but does not aggregate must not offer controls that only
+   * mutate local state while the request is dropped. Frontend sources
+   * omit it — local calculation always runs.
+   */
+  readonly honorsAggregates?: boolean;
 
   /* State (write) is the shared {@link TableStateMutators} contract. */
 }

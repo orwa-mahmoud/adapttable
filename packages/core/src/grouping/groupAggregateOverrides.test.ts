@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { aggregate, declaredAggregates } from "../aggregate/aggregate";
 import {
   parseGroupAggregateOverrides,
   queryAggregateOps,
@@ -56,7 +57,8 @@ describe("group aggregate overrides", () => {
       ]
     );
 
-    expect(mapper?.(rows)).toEqual({ budget: 20 });
+    // Person has no reader offer, so `"none"` cannot hide the host cell.
+    expect(mapper?.(rows)).toEqual({ budget: 20, person: 2 });
   });
 
   it("refuses a disallowed override at execution, and leaves the host cell", () => {
@@ -167,5 +169,159 @@ describe("group aggregate overrides", () => {
     const base = () => ({ budget: 40 });
     expect(withGroupAggregateOverrides(base, {}, [])).toBe(base);
     expect(withQueryAggregateOverrides(undefined, {})).toBeUndefined();
+  });
+
+  it("calculates a column default when the reader has not touched anything", () => {
+    const mapper = withGroupAggregateOverrides<Row>(undefined, {}, [
+      { key: "budget", aggregatable: { default: "sum", operations: ["sum"] } },
+    ]);
+    expect(mapper?.(rows)).toEqual({ budget: 40 });
+    expect(declaredAggregates(mapper)).toEqual({ budget: "sum" });
+  });
+
+  it("calculates the column default, not the host mapper, when they disagree", () => {
+    const mapper = withGroupAggregateOverrides<Row>(
+      aggregate<Row>({ budget: "sum" }),
+      {},
+      [
+        {
+          key: "budget",
+          aggregatable: { default: "avg", operations: ["sum", "avg"] },
+        },
+      ]
+    );
+    expect(mapper?.(rows)).toEqual({ budget: 20 });
+    expect(declaredAggregates(mapper)).toEqual({ budget: "avg" });
+  });
+
+  it("does not calculate an unsupported default over a valid host result", () => {
+    const mapper = withGroupAggregateOverrides<Row>(
+      () => ({ budget: 99 }),
+      {},
+      [
+        {
+          key: "budget",
+          aggregatable: {
+            default: "median",
+            operations: [{ id: "median", label: "Median" }],
+          },
+        },
+      ]
+    );
+    expect(mapper?.(rows)).toEqual({ budget: 99 });
+  });
+
+  it("ignores suppression on a locked or unknown column", () => {
+    const mapper = withGroupAggregateOverrides<Row>(
+      () => ({ budget: 7, ghost: 1 }),
+      { budget: "none", ghost: "none" },
+      [{ key: "budget" }]
+    );
+    expect(mapper?.(rows)).toEqual({ budget: 7, ghost: 1 });
+  });
+
+  it("requests a column default on the first server query", () => {
+    expect(
+      withQueryAggregateOverrides(
+        undefined,
+        {},
+        [
+          {
+            key: "budget",
+            aggregatable: { default: "sum", operations: ["sum", "avg"] },
+          },
+        ],
+        { grouping: "server" }
+      )
+    ).toEqual([{ key: "budget", fn: "sum" }]);
+  });
+
+  it("requests the column default instead of the host operation", () => {
+    expect(
+      withQueryAggregateOverrides(
+        [{ key: "budget", fn: "sum" }],
+        {},
+        [
+          {
+            key: "budget",
+            aggregatable: { default: "avg", operations: ["sum", "avg"] },
+          },
+        ],
+        { grouping: "server" }
+      )
+    ).toEqual([{ key: "budget", fn: "avg" }]);
+  });
+
+  it("preserves the host request when an override is undefined", () => {
+    expect(
+      withQueryAggregateOverrides(
+        [{ key: "budget", fn: "sum" }],
+        { budget: undefined },
+        [{ key: "budget", aggregatable: { operations: ["sum", "avg"] } }],
+        { grouping: "server" }
+      )
+    ).toEqual([{ key: "budget", fn: "sum" }]);
+  });
+
+  it("refuses URL-restored operations the column no longer allows", () => {
+    const columns = [
+      { key: "budget", aggregatable: false as const },
+      { key: "load", aggregatable: { operations: [] as const } },
+      { key: "note" },
+      { key: "score", aggregatable: { operations: ["sum"] as const } },
+      {
+        key: "p95",
+        aggregatable: {
+          operations: [{ id: "p95", label: "P95" }],
+        },
+      },
+      {
+        key: "median",
+        aggregatable: {
+          operations: [{ id: "median", label: "Median" }],
+        },
+      },
+    ];
+    expect(
+      withQueryAggregateOverrides(
+        [{ key: "budget", fn: "sum" }],
+        {
+          budget: "avg",
+          load: "sum",
+          note: "sum",
+          score: "avg",
+          p95: "p95",
+          median: "median",
+        },
+        columns,
+        {
+          grouping: "server",
+          aggregateOperations: ["sum", "avg", "median"],
+        }
+      )
+    ).toEqual([
+      { key: "budget", fn: "sum" },
+      { key: "median", fn: "median" },
+    ]);
+  });
+
+  it("round-trips custom ids that contain colons, commas, percents and Unicode", () => {
+    const overrides = {
+      "cost:center": "stats:median",
+      "pay,grade": "p50,p90",
+      "100%": "100%",
+      اسم: "متوسط الراتب",
+    };
+    const serialized = serializeGroupAggregateOverrides(overrides);
+    expect(serialized).toContain("stats%3Amedian");
+    expect(serialized).toContain("p50%2Cp90");
+    expect(parseGroupAggregateOverrides(serialized)).toEqual(overrides);
+    expect(parseGroupAggregateOverrides("budget:sum,person:none")).toEqual({
+      budget: "sum",
+      person: "none",
+    });
+    expect(parseGroupAggregateOverrides("broken:%")).toEqual({
+      broken: "%",
+    });
   });
 });

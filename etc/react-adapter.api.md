@@ -5080,6 +5080,7 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly computedAggregateKeys?: readonly string[];
         readonly queryAggregates?: readonly QueryAggregate[];
         readonly aggregateOperations?: readonly string[];
+        readonly honorsAggregates?: boolean;
         readonly setGroupBy: (key: string | undefined) => void;
         readonly initializeGroupBy?: (key: string) => void;
         readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;

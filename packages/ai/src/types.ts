@@ -76,6 +76,62 @@ export interface AgentColumn {
 }
 
 /**
+ * One operation a reader (or agent) may ask for on a column.
+ *
+ * Ids and labels only — never a `calculate` function.
+ *
+ * @public
+ */
+export interface AgentAggregateOperation {
+  /** Stable operation id. */
+  readonly id: string;
+  /** Human label. */
+  readonly label: string;
+}
+
+/**
+ * A column the live table will actually aggregate.
+ *
+ * @public
+ */
+export interface AgentAggregationColumn {
+  /** Column id. */
+  readonly id: string;
+  /** Operations this column offers right now. */
+  readonly operations: readonly AgentAggregateOperation[];
+}
+
+/**
+ * Live aggregation wiring, published only when the table can honour it.
+ *
+ * @public
+ */
+export interface AgentAggregations {
+  /** Eligible columns and their current operation ids and labels. */
+  readonly columns: readonly AgentAggregationColumn[];
+  /** Active aggregations as the model sees them. */
+  readonly active: readonly {
+    readonly id: string;
+    readonly operation?: string;
+  }[];
+}
+
+/**
+ * One aggregation mutation. `set` and `remove` are applied together after
+ * the whole request is validated; `restoreDefaults` is exclusive.
+ *
+ * @public
+ */
+export interface AgentAggregationsPatch {
+  /** Column id → operation id. Other aggregations stay. */
+  readonly set?: Readonly<Record<string, string>>;
+  /** Columns to suppress or drop, using the same semantics as the panel. */
+  readonly remove?: readonly string[];
+  /** Restore the developer's configuration and clear reader choices. */
+  readonly restoreDefaults?: boolean;
+}
+
+/**
  * How the session addresses a row without shipping the dataset.
  *
  * @public
@@ -672,6 +728,11 @@ export interface AgentObservation {
   readonly sortDir?: "asc" | "desc";
   /** Current group-by column, when set. */
   readonly groupBy?: string;
+  /**
+   * Live aggregation offer, when grouping can actually execute aggregates.
+   * Absent when the table cannot honour an aggregation request.
+   */
+  readonly aggregations?: AgentAggregations;
   /** Current filter model. */
   readonly filters?: unknown;
   /** Named view used for position addressing. */
@@ -700,6 +761,11 @@ export interface AgentApply {
   setFilters?(filters: unknown): void;
   /** Group by a column id, or clear grouping. */
   setGroupBy?(key: string | undefined): void;
+  /**
+   * Add, change or remove specific aggregations, or restore defaults.
+   * The session validates the whole patch before calling this.
+   */
+  setAggregations?(patch: AgentAggregationsPatch): void;
   /** Pin a column to a logical edge, or unpin it with `undefined`. */
   pinColumn?(key: string, side: "start" | "end" | undefined): void;
   /** Pin a row above or below the scrolled body, or unpin it. */

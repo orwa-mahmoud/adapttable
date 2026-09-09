@@ -1,14 +1,20 @@
 import {
   type AggregationSourceSupport,
-  allowsReaderOperation,
   resolveAggregatable,
 } from "../aggregate/aggregatable";
+import {
+  AGGREGATE_SUPPRESSED,
+  resolveEffectiveAggregation,
+} from "../aggregate/aggregationModel";
 import {
   aggregate,
   AGGREGATE_NAMES,
   type AggregateName,
   type AggregateOperationId,
   type AggregateSpec,
+  CUSTOM_AGGREGATE,
+  declaredAggregates,
+  withDeclaredAggregates,
 } from "../aggregate/aggregate";
 import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
@@ -49,11 +55,29 @@ export type GroupAggregateOverrides = Readonly<
  * host-defined operation on the way back from a URL.
  */
 function isOverride(value: string): value is GroupAggregateOverride {
-  return value !== "" && !value.includes(",");
+  return value !== "";
+}
+
+/** Encode one key or operation id so `:` and `,` cannot split a pair. */
+function encodePart(value: string): string {
+  return encodeURIComponent(value);
+}
+
+/** Decode one encoded part; a malformed escape stays the literal text. */
+function decodePart(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
 
 /**
  * Encode aggregate overrides for the `groupAgg` URL parameter.
+ *
+ * Both the column key and the operation id are percent-encoded so a custom
+ * id like `stats:median` or `p50,p90` round-trips. Built-in values
+ * (`budget:sum`) stay unchanged because they have nothing to escape.
  *
  * Keys are sorted so equivalent state has one stable URL representation.
  *
@@ -74,13 +98,16 @@ export function serializeGroupAggregateOverrides(
     });
   if (entries.length === 0) return undefined;
   return entries
-    .map(([key, fn]) => `${encodeURIComponent(key)}:${fn}`)
+    .map(([key, fn]) => `${encodePart(key)}:${encodePart(fn)}`)
     .join(",");
 }
 
 /**
  * Decode a `groupAgg` URL parameter. Malformed and unknown entries are
  * ignored so hand-edited and future-version links degrade safely.
+ *
+ * Splits on the first unencoded `:`. Encoded keys and ids may contain
+ * colons, commas, percents, spaces and Unicode; those survive as themselves.
  *
  * @public
  */
@@ -90,24 +117,24 @@ export function parseGroupAggregateOverrides(
   if (!value) return {};
   const overrides: Record<string, GroupAggregateOverride> = {};
   for (const entry of value.split(",")) {
-    const separator = entry.lastIndexOf(":");
+    const separator = entry.indexOf(":");
     if (separator <= 0) continue;
-    const rawKey = entry.slice(0, separator);
-    const fn = entry.slice(separator + 1);
-    if (!isOverride(fn)) continue;
-    let key = rawKey;
-    try {
-      key = decodeURIComponent(rawKey);
-    } catch {
-      // A malformed escape still names a literal key.
-    }
-    if (key !== "" && overrides[key] === undefined) overrides[key] = fn;
+    const key = decodePart(entry.slice(0, separator));
+    const fn = decodePart(entry.slice(separator + 1));
+    if (!isOverride(fn) || key === "") continue;
+    if (overrides[key] === undefined) overrides[key] = fn;
   }
   return overrides;
 }
 
 /**
- * Overlay session choices on the developer's group aggregate mapper.
+ * Overlay column defaults and session choices on the developer's group
+ * aggregate mapper.
+ *
+ * Empty overrides still apply a valid, executable column default. Defaults
+ * are never written into reader state — the untouched table stays at
+ * defaults. `"none"` only removes a cell when the column still allows
+ * reader control; a locked or unknown column keeps the host result.
  *
  * @public
  */
@@ -117,44 +144,59 @@ export function withGroupAggregateOverrides<TRow>(
   columns: readonly ColumnMetadata<TRow>[],
   source?: AggregationSourceSupport
 ): GroupAggregatesFn<TRow> | undefined {
-  const entries = Object.entries(overrides).filter(
-    (entry): entry is [string, GroupAggregateOverride] => entry[1] !== undefined
-  );
-  if (entries.length === 0) return base;
-
-  const byKey = new Map(columns.map((column) => [column.key, column]));
+  const declared = declaredAggregates(base);
   const spec: AggregateSpec = {};
   const applied = new Set<string>();
-  for (const [key, fn] of entries) {
-    if (fn === "none") continue;
-    const column = byKey.get(key);
-    const resolved = resolveAggregatable(column ?? { key });
-    // A stale URL or a programmatic write must not calculate something the
-    // column never offered. Leave the host's own cell alone.
-    if (!allowsReaderOperation(resolved, fn, source)) continue;
-    const operation = resolved?.operations.find(
-      (candidate) => candidate.id === fn
-    );
-    if (!operation) continue;
-    if (!operation.builtIn) {
-      if (!operation.calculate) continue;
-      spec[key] = operation.calculate;
-      applied.add(key);
+  const suppressed = new Set<string>();
+
+  for (const column of columns) {
+    const effective = resolveEffectiveAggregation({
+      column,
+      override: overrides[column.key],
+      declared,
+      source,
+    });
+    if (effective.kind === "suppressed") {
+      suppressed.add(column.key);
       continue;
     }
-    spec[key] = fn as AggregateName;
-    applied.add(key);
+    if (effective.kind !== "override" && effective.kind !== "default") {
+      continue;
+    }
+    const resolved = resolveAggregatable(column);
+    const operation = resolved?.operations.find(
+      (candidate) => candidate.id === effective.operationId
+    );
+    if (!operation || !effective.operationId) continue;
+    if (!operation.builtIn) {
+      if (!operation.calculate) continue;
+      spec[column.key] = operation.calculate;
+      applied.add(column.key);
+      continue;
+    }
+    spec[column.key] = effective.operationId as AggregateName;
+    applied.add(column.key);
   }
+
+  if (applied.size === 0 && suppressed.size === 0) return base;
+
   const calculate = aggregate<TRow>(spec, { columns });
-  return (rows) => {
+  const nextDeclared: Record<string, string> = {
+    ...(declared ?? {}),
+  };
+  for (const key of suppressed) delete nextDeclared[key];
+  for (const [key, fn] of Object.entries(spec)) {
+    if (!fn) continue;
+    nextDeclared[key] = typeof fn === "string" ? fn : CUSTOM_AGGREGATE;
+  }
+  const mapper = (rows: readonly TRow[]) => {
     const result: Partial<Record<string, DisplayValue>> = { ...base?.(rows) };
     const calculated = calculate(rows);
-    for (const [key, fn] of entries) {
-      if (fn === "none") delete result[key];
-      else if (applied.has(key)) result[key] = calculated[key];
-    }
+    for (const key of suppressed) delete result[key];
+    for (const key of applied) result[key] = calculated[key];
     return result;
   };
+  return withDeclaredAggregates(mapper, nextDeclared);
 }
 
 /**
@@ -183,7 +225,18 @@ export function queryAggregateOps(
 }
 
 /**
- * Overlay URL choices on the aggregate requests sent to a server source.
+ * Overlay column defaults and URL choices on the aggregate requests sent
+ * to a server source.
+ *
+ * When `columns` are provided — the built-in table always provides them —
+ * a valid executable default is requested even with empty overrides, and
+ * `"none"` only removes a host request the reader is still allowed to
+ * suppress. An `undefined` override is an absent choice: the base
+ * declaration stays.
+ *
+ * Without `columns`, only reader overrides are applied (the weaker
+ * standalone-helper contract). `"none"` still deletes; `undefined` does
+ * not. That must not become the normal built-in table path.
  *
  * @public
  */
@@ -194,18 +247,37 @@ export function withQueryAggregateOverrides<TRow = unknown>(
   source?: AggregationSourceSupport
 ): readonly QueryAggregate[] | undefined {
   const byKey = new Map(base?.map((aggregate) => [aggregate.key, aggregate]));
-  const byColumn = new Map(columns?.map((column) => [column.key, column]));
+  if (columns) {
+    for (const column of columns) {
+      const effective = resolveEffectiveAggregation({
+        column,
+        override: overrides[column.key],
+        queryAggregates: base,
+        source,
+      });
+      if (effective.kind === "suppressed") {
+        byKey.delete(column.key);
+        continue;
+      }
+      if (
+        (effective.kind === "override" || effective.kind === "default") &&
+        effective.operationId
+      ) {
+        byKey.set(column.key, {
+          key: column.key,
+          fn: effective.operationId,
+        });
+      }
+    }
+    return byKey.size > 0 ? [...byKey.values()] : undefined;
+  }
   for (const [key, fn] of Object.entries(overrides)) {
-    if (fn === undefined || fn === "none") {
+    if (fn === undefined) continue;
+    if (fn === AGGREGATE_SUPPRESSED) {
       byKey.delete(key);
       continue;
     }
-    if (columns) {
-      const resolved = resolveAggregatable(byColumn.get(key) ?? { key });
-      if (!allowsReaderOperation(resolved, fn, source)) continue;
-    } else if (!querySourceAllows(fn, source)) {
-      continue;
-    }
+    if (!querySourceAllows(fn, source)) continue;
     byKey.set(key, { key, fn });
   }
   return byKey.size > 0 ? [...byKey.values()] : undefined;

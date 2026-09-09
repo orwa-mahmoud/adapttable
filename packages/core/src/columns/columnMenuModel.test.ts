@@ -338,6 +338,11 @@ describe("columnMenuActions", () => {
         ],
         candidates: [
           {
+            columnKey: "team",
+            active: false,
+            operations: [{ id: "count", builtIn: true }],
+          },
+          {
             columnKey: "salary",
             active: true,
             operations: SALARY_OPERATIONS,
@@ -352,8 +357,8 @@ describe("columnMenuActions", () => {
     };
     const grouped = actionsFor("team", { groupingPanel: panel }).actions;
     expect(grouped.map((a) => a.id)).toContain("ungroup-column");
-    // A grouped column has no aggregation of its own to choose.
-    expect(grouped.map((a) => a.id)).not.toContain("group-aggregation");
+    // Grouping a column does not take its aggregation controls away.
+    expect(grouped.map((a) => a.id)).toContain("group-aggregation");
     runOf(grouped.find((a) => a.id === "ungroup-column"))?.();
     expect(panel.remove).toHaveBeenCalledWith("team");
 

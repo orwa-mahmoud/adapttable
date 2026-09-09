@@ -303,6 +303,7 @@ export const ja: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `${column} の集計を削除`,
   groupingAggregationFor: (column) => `${column} の集計`,
   groupingAggregationReadOnly: "アプリが設定",
+  groupingAggregationCustom: "カスタム",
   groupingAggregateRemoved: (column) => `${column} の集計を削除しました`,
   groupingAggregatesRestored: "集計を既定に戻しました",
   groupingAverage: "平均",

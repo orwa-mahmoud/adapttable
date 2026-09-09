@@ -15,6 +15,7 @@ import {
 } from "./keys";
 import { buildManifest } from "./manifest";
 import type {
+  AgentAggregationsPatch,
   AgentApply,
   AgentCapabilityContext,
   AgentCapabilityDefinition,
@@ -279,7 +280,11 @@ export function createAgentSession(
     if (!enabled.includes(key)) {
       throw new Error(`capability "${key}" is not wired on this table`);
     }
-    return registry.describe(key);
+    const guide = registry.describe(key);
+    if (key === "view.setAggregations") {
+      return describeAggregations(guide, options.observe());
+    }
+    return guide;
   };
 
   /**
@@ -736,6 +741,110 @@ function cancellationGuard(signal: AbortSignal | undefined): () => void {
   };
 }
 
+function describeAggregations(
+  guide: CapabilityGuide,
+  observation: AgentObservation
+): CapabilityGuide {
+  const columns = observation.aggregations?.columns ?? [];
+  const listed =
+    columns.length === 0
+      ? " No eligible columns right now."
+      : " Eligible now: " +
+        columns
+          .map(
+            (column) =>
+              `${column.id} [${column.operations
+                .map((operation) => `${operation.id} (${operation.label})`)
+                .join(", ")}]`
+          )
+          .join("; ") +
+        ".";
+  return { ...guide, guide: guide.guide + listed };
+}
+
+function validatedAggregationsPatch(
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): AgentAggregationsPatch {
+  const restoreDefaults = body.restoreDefaults === true;
+  const set = body.set;
+  const remove = body.remove;
+  if (restoreDefaults && (set !== undefined || remove !== undefined)) {
+    throw new ApplyError(
+      "apply-failed",
+      "restoreDefaults cannot be combined with set or remove"
+    );
+  }
+  if (restoreDefaults) return { restoreDefaults: true };
+  const eligible = new Map(
+    (observation.aggregations?.columns ?? []).map((column) => [
+      column.id,
+      column,
+    ])
+  );
+  const nextSet: Record<string, string> = {};
+  if (set !== undefined) {
+    if (set === null || typeof set !== "object" || Array.isArray(set)) {
+      throw new ApplyError(
+        "apply-failed",
+        "set must be an object of column ids"
+      );
+    }
+    for (const [key, operationId] of Object.entries(
+      set as Record<string, unknown>
+    )) {
+      if (typeof operationId !== "string" || operationId === "") {
+        throw new ApplyError(
+          "apply-failed",
+          `aggregation for "${key}" is not a named operation`
+        );
+      }
+      const column = eligible.get(key);
+      if (
+        !column ||
+        !column.operations.some((operation) => operation.id === operationId)
+      ) {
+        throw new ApplyError(
+          "apply-failed",
+          `"${key}" cannot use operation "${operationId}"`
+        );
+      }
+      nextSet[key] = operationId;
+    }
+  }
+  const nextRemove: string[] = [];
+  if (remove !== undefined) {
+    if (!Array.isArray(remove)) {
+      throw new ApplyError(
+        "apply-failed",
+        "remove must be an array of column ids"
+      );
+    }
+    for (const key of remove) {
+      if (typeof key !== "string" || key === "") {
+        throw new ApplyError(
+          "apply-failed",
+          "remove entries must be column ids"
+        );
+      }
+      if (!eligible.has(key)) {
+        throw new ApplyError("apply-failed", `"${key}" cannot be removed`);
+      }
+      nextRemove.push(key);
+    }
+  }
+  if (Object.keys(nextSet).length === 0 && nextRemove.length === 0) {
+    throw new ApplyError(
+      "apply-failed",
+      "set, remove or restoreDefaults is required"
+    );
+  }
+  return {
+    ...(Object.keys(nextSet).length > 0 ? { set: nextSet } : {}),
+    ...(nextRemove.length > 0 ? { remove: nextRemove } : {}),
+  };
+}
+
 function assertApply<K extends keyof AgentApply>(
   apply: AgentApply,
   name: K
@@ -889,6 +998,30 @@ async function dispatchBuiltIn(
       assertApply(apply, "setGroupBy");
       apply.setGroupBy(groupKey ?? undefined);
       return { ok: true, revision: observation.viewRevision + 1 };
+    }
+    case "view.setAggregations": {
+      assertApply(apply, "setAggregations");
+      const latest = guard.observe();
+      if (latest.viewRevision !== observation.viewRevision) {
+        throw new ApplyError(
+          "revision-mismatch",
+          `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+        );
+      }
+      if (!guard.isEnabled("view.setAggregations", latest)) {
+        throw new ApplyError(
+          "not-wired",
+          "view.setAggregations is not wired on this table"
+        );
+      }
+      apply.setAggregations(validatedAggregationsPatch(body, latest));
+      const pending = latest.source.grouping === "server";
+      return {
+        ok: true,
+        revision: latest.viewRevision + 1,
+        applied: !pending,
+        pending,
+      };
     }
     case "view.pinColumn": {
       assertApply(apply, "pinColumn");

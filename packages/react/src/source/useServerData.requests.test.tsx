@@ -79,6 +79,90 @@ describe("server-tier request guarantees", () => {
     expect(queries[0]?.aggregates).toEqual([{ key: "budget", fn: "avg" }]);
   });
 
+  it("validates URL-restored aggregates against columns on the first request", async () => {
+    const queries: TableQuery[] = [];
+    const adapter = createMemoryAdapter(
+      "groupAgg=budget%3Aavg%2Cscore%3Amedian"
+    );
+    function Harness() {
+      useServerData<{ id: string }>({
+        rows: [],
+        total: 0,
+        urlAdapter: adapter,
+        forceMobile: false,
+        supports: { grouping: true, aggregates: true },
+        aggregates: [{ key: "budget", fn: "sum" }],
+        columns: [
+          { key: "budget", aggregatable: { operations: ["sum"] } },
+          {
+            key: "score",
+            aggregatable: {
+              operations: [{ id: "median", label: "Median" }],
+            },
+          },
+        ],
+        onQueryChange: (query) => {
+          queries.push(query);
+        },
+      });
+      return null;
+    }
+    render(<Harness />);
+    await waitFor(() => expect(queries).toHaveLength(1));
+    // Average is no longer offered; Median is not listed by the server.
+    expect(queries[0]?.aggregates).toEqual([{ key: "budget", fn: "sum" }]);
+  });
+
+  it("requests a column default on the first emit, without reader state", async () => {
+    const queries: TableQuery[] = [];
+    function Harness() {
+      useServerData<{ id: string }>({
+        rows: [],
+        total: 0,
+        urlAdapter: createMemoryAdapter(""),
+        forceMobile: false,
+        supports: { grouping: true, aggregates: true },
+        columns: [
+          {
+            key: "budget",
+            aggregatable: { default: "sum", operations: ["sum", "avg"] },
+          },
+        ],
+        onQueryChange: (query) => {
+          queries.push(query);
+        },
+      });
+      return null;
+    }
+    render(<Harness />);
+    await waitFor(() => expect(queries).toHaveLength(1));
+    expect(queries[0]?.aggregates).toEqual([{ key: "budget", fn: "sum" }]);
+  });
+
+  it("does not send reader aggregates when the source groups but cannot aggregate", async () => {
+    const queries: TableQuery[] = [];
+    function Harness() {
+      useServerData<{ id: string }>({
+        rows: [],
+        total: 0,
+        urlAdapter: createMemoryAdapter("groupAgg=budget%3Aavg"),
+        forceMobile: false,
+        supports: { grouping: true },
+        columns: [
+          { key: "budget", aggregatable: { operations: ["sum", "avg"] } },
+        ],
+        onQueryChange: (query) => {
+          queries.push(query);
+        },
+      });
+      return null;
+    }
+    render(<Harness />);
+    await waitFor(() => expect(queries).toHaveLength(1));
+    expect(queries[0]?.aggregates).toBeUndefined();
+    expect(queries[0]).not.toHaveProperty("aggregates");
+  });
+
   it("emits once for a query, however many times the same value is set", async () => {
     const t = mount();
     await waitFor(() => expect(t.queries).toHaveLength(1));

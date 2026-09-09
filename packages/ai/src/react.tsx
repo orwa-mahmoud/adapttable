@@ -4,7 +4,16 @@
  * The root `@adapttable/ai` entry stays React-free. This subpath mounts a
  * provider that observes the live table and publishes a versioned manifest.
  */
-import type { ApprovalPresentation } from "@adapttable/core";
+import {
+  addAggregation,
+  type ApprovalPresentation,
+  declaredByDeveloper,
+  offerableOperations,
+  readerControlAllowed,
+  removeAggregation,
+  resolveAggregatable,
+  restoreAggregationDefaults,
+} from "@adapttable/core";
 import {
   AGENT_APPROVAL_STATE,
   type AgentApprovalDecision,
@@ -43,6 +52,8 @@ import {
 } from "./liveTable";
 import { createAgentSession } from "./session";
 import type {
+  AgentAggregations,
+  AgentAggregationsPatch,
   AgentApply,
   AgentCapabilityDefinition,
   AgentColumn,
@@ -277,24 +288,28 @@ function observationFromRuntime(
   const query = view?.query;
   const ids = runtime.featureIds();
   if (table) {
-    return observationFromNeutral(
-      table,
-      options,
-      revision,
-      apply,
-      ids,
-      query
-        ? {
-            page: query.page,
-            limit: query.limit,
-            search: query.search,
-            sortBy: query.sortBy,
-            sortDir: query.sortDir,
-            pinnedColumns: view?.pinning?.columns,
-            pinnedRows: view?.pinning?.rows,
-          }
-        : undefined
-    );
+    return {
+      ...observationFromNeutral(
+        table,
+        options,
+        revision,
+        apply,
+        ids,
+        query
+          ? {
+              page: query.page,
+              limit: query.limit,
+              search: query.search,
+              sortBy: query.sortBy,
+              sortDir: query.sortDir,
+              pinnedColumns: view?.pinning?.columns,
+              pinnedRows: view?.pinning?.rows,
+            }
+          : undefined
+      ),
+      groupBy: view?.groupingState?.groupBy,
+      aggregations: aggregationsFromView(view),
+    };
   }
   const columns = columnsForRuntime(options, runtime).map((column) =>
     mergeColumn(column, options.columns)
@@ -341,6 +356,8 @@ function observationFromRuntime(
     search: query?.search ?? "",
     sortBy: query?.sortBy,
     sortDir: query?.sortDir,
+    groupBy: view?.groupingState?.groupBy,
+    aggregations: aggregationsFromView(view),
     pageMax: view?.rows?.length ?? 10,
     readMax: options.readMax ?? 50,
     rowAddressScope: "visible",
@@ -512,6 +529,9 @@ function applyFromRuntime(
       if (!grouping) throw new Error("setGroupBy is not wired");
       grouping.setGroupBy(key);
     },
+    setAggregations: (patch) => {
+      applyAggregationsPatch(view()?.groupingState, patch);
+    },
     pinColumn: (key, side) => {
       const pinning = view()?.pinning;
       if (!pinning?.setColumnPin) throw new Error("pinColumn is not wired");
@@ -526,6 +546,118 @@ function applyFromRuntime(
     stageCells: (edits) => liveStageCells(runtime, extra, edits),
     setSelection: (ids) => liveSetSelection(runtime, extra, ids),
   };
+}
+
+const BUILTIN_AGGREGATE_LABELS: Readonly<Record<string, string>> = {
+  sum: "Sum",
+  avg: "Average",
+  min: "Minimum",
+  max: "Maximum",
+  count: "Count",
+};
+
+function aggregationsFromView(
+  view: ReturnType<ReturnType<typeof useTableRuntime>["view"]>
+): AgentAggregations | undefined {
+  const groupingState = view?.groupingState;
+  if (!groupingState?.setAggregateOverrides) return undefined;
+  const grouping = view?.sourceCapabilities?.grouping;
+  if (grouping === false) return undefined;
+  if (grouping === "server" && groupingState.honorsAggregates !== true) {
+    return undefined;
+  }
+  const source = {
+    grouping,
+    aggregateOperations: groupingState.aggregateOperations,
+  };
+  const columns: AgentAggregations["columns"] = [];
+  for (const column of groupingState.columns ?? []) {
+    const resolved = resolveAggregatable(column);
+    const operations = offerableOperations(resolved, source);
+    if (operations.length === 0) continue;
+    columns.push({
+      id: column.key,
+      operations: operations.map((operation) => ({
+        id: operation.id,
+        label:
+          operation.label ??
+          BUILTIN_AGGREGATE_LABELS[operation.id] ??
+          operation.id,
+      })),
+    });
+  }
+  if (columns.length === 0) return undefined;
+  return {
+    columns,
+    active: columns
+      .filter(
+        (column) => groupingState.aggregateOverrides[column.id] !== undefined
+      )
+      .map((column) => ({
+        id: column.id,
+        operation: groupingState.aggregateOverrides[column.id],
+      })),
+  };
+}
+
+function applyAggregationsPatch(
+  groupingState: NonNullable<
+    ReturnType<ReturnType<typeof useTableRuntime>["view"]>
+  >["groupingState"],
+  patch: AgentAggregationsPatch
+): void {
+  if (!groupingState?.setAggregateOverrides) {
+    throw new Error("setAggregations is not wired");
+  }
+  if (patch.restoreDefaults) {
+    groupingState.setAggregateOverrides(restoreAggregationDefaults());
+    return;
+  }
+  const source = {
+    grouping: undefined as "client" | "server" | false | undefined,
+    aggregateOperations: groupingState.aggregateOperations,
+  };
+  const byKey = new Map(
+    (groupingState.columns ?? []).map((column) => [column.key, column])
+  );
+  for (const [key, operationId] of Object.entries(patch.set ?? {})) {
+    const column = byKey.get(key);
+    const resolved = column ? resolveAggregatable(column) : undefined;
+    if (
+      !resolved ||
+      !offerableOperations(resolved, source).some(
+        (operation) => operation.id === operationId
+      )
+    ) {
+      throw new Error(`"${key}" cannot use operation "${operationId}"`);
+    }
+  }
+  for (const key of patch.remove ?? []) {
+    const column = byKey.get(key);
+    if (!column || !readerControlAllowed(resolveAggregatable(column), source)) {
+      throw new Error(`"${key}" cannot be removed`);
+    }
+  }
+  let next = { ...groupingState.aggregateOverrides };
+  for (const [key, operationId] of Object.entries(patch.set ?? {})) {
+    next = addAggregation(next, key, operationId);
+  }
+  for (const key of patch.remove ?? []) {
+    const column = byKey.get(key);
+    if (!column) continue;
+    next = removeAggregation(
+      next,
+      key,
+      declaredByDeveloper(column, {
+        columns: groupingState.columns ?? [],
+        overrides: groupingState.aggregateOverrides,
+        queryAggregates: groupingState.queryAggregates,
+        computedKeys: groupingState.computedAggregateKeys,
+        source,
+      })
+    );
+  }
+  groupingState.setAggregateOverrides(next);
 }
 
 function asCallable(

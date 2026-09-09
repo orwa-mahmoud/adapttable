@@ -308,6 +308,7 @@ export const tr: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `${column} toplamasını kaldır`,
   groupingAggregationFor: (column) => `${column} toplaması`,
   groupingAggregationReadOnly: "Uygulama tarafından ayarlandı",
+  groupingAggregationCustom: "Özel",
   groupingAggregateRemoved: (column) => `${column} toplaması kaldırıldı`,
   groupingAggregatesRestored: "Toplamalar varsayılanlara geri yüklendi",
   groupingAverage: "Ortalama",

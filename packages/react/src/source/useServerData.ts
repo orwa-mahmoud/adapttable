@@ -192,16 +192,20 @@ export function useServerData<TRow>(
     sortLevels,
     extra,
   } = state;
-  const queryAggregationSource = useMemo(
-    () =>
-      supports?.aggregates || supports?.aggregateOperations
-        ? {
-            grouping: "server" as const,
-            aggregateOperations: supports.aggregateOperations,
-          }
-        : undefined,
-    [supports]
-  );
+  const queryAggregationSource = useMemo(() => {
+    if (supports?.aggregates || supports?.aggregateOperations) {
+      return {
+        grouping: "server" as const,
+        aggregateOperations: supports.aggregateOperations,
+      };
+    }
+    // Grouping without aggregation: refuse every reader operation so a
+    // restored override cannot be requested and then silently dropped.
+    if (supports?.grouping) {
+      return { grouping: "server" as const, aggregateOperations: [] };
+    }
+    return undefined;
+  }, [supports]);
   const effectiveAggregates = useMemo(
     () =>
       withQueryAggregateOverrides(
@@ -438,6 +442,9 @@ export function useServerData<TRow>(
     groupAggregations,
     queryAggregates: aggregates,
     aggregateOperations: supports?.aggregateOperations,
+    honorsAggregates: Boolean(
+      supports?.aggregates || supports?.aggregateOperations
+    ),
     extra,
     facets,
     filterTree: state.filterTree,

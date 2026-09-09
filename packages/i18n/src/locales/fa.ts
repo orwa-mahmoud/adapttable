@@ -303,6 +303,7 @@ export const fa: Required<TableLabels> = {
   groupingRemoveAggregation: (column) => `حذف تجمیع ${column}`,
   groupingAggregationFor: (column) => `تجمیع ${column}`,
   groupingAggregationReadOnly: "تنظیم‌شده توسط برنامه",
+  groupingAggregationCustom: "سفارشی",
   groupingAggregateRemoved: (column) => `تجمیع ${column} حذف شد`,
   groupingAggregatesRestored: "تجمیع‌ها به پیش‌فرض بازگردانده شدند",
   groupingAverage: "میانگین",

@@ -216,6 +216,7 @@ function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
       accessor: (row) => row.salary,
       editable: true,
       editor: "number",
+      aggregatable: true,
       editValue: (row) => String(row.salary),
     },
     { key: "started", header: header.started, accessor: (row) => row.started },
