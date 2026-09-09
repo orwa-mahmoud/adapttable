@@ -5,6 +5,7 @@ import {
   type PaginationMode,
   parseGroupBy,
   type QueryAggregate,
+  queryAggregateOps,
   type QuerySupport,
   type TableQueryParams,
   type TableSource,
@@ -17,6 +18,7 @@ import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
+import { useSettledAggregateOps } from "./useSettledAggregateOps";
 
 /**
  * The minimal shape `useQuerySource` reads from a `useInfiniteQuery`
@@ -212,6 +214,12 @@ export function useQuerySource<
     const keys = parseGroupBy(groupBy);
     return keys.length > 0 ? keys : undefined;
   }, [groupBy]);
+  // What the request asks for, and what the answer on screen was asked for —
+  // the same thing only while nothing is in flight.
+  const requestedOps = useMemo(
+    () => queryAggregateOps(effectiveAggregates),
+    [effectiveAggregates]
+  );
 
   // Cursor mode keeps every token the server has handed out, indexed by the
   // page it opens: `cursors[0]` is always `undefined` (page 1 needs no token)
@@ -344,6 +352,12 @@ export function useQuerySource<
     return { rows: acc, total: lastTotal ?? acc.length, facets: lastFacets };
   }, [query.data, paged, selectorKey]);
 
+  const groupAggregations = useSettledAggregateOps(
+    requestedOps,
+    query.data,
+    query.isFetching
+  );
+
   // Clamp out-of-range pages (hand-edited / stale shared links) once the
   // total is known and nothing is in flight.
   useEffect(() => {
@@ -408,6 +422,7 @@ export function useQuerySource<
       sortDir,
       groupBy,
       groupAggregateOverrides,
+      groupAggregations,
       extra,
       facets,
       filterTree: state.filterTree,
@@ -446,6 +461,7 @@ export function useQuerySource<
       sortDir,
       groupBy,
       groupAggregateOverrides,
+      groupAggregations,
       extra,
       facets,
       state.filterTree,

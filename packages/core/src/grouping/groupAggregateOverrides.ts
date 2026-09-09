@@ -6,6 +6,7 @@ import {
 import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
 import type { QueryAggregate } from "../source/queryContract";
+import type { GroupAggregateOps } from "./groupRowLayout";
 import type { GroupAggregatesFn } from "./groupRows";
 
 /** A session-level aggregation choice for one grouped-table column. @public */
@@ -112,6 +113,33 @@ export function withGroupAggregateOverrides<TRow>(
     }
     return result;
   };
+}
+
+/**
+ * Which operation each aggregate a server was asked for carries.
+ *
+ * The request already says it — `{ key: "budget", fn: "avg" }` — so a column
+ * formatting a server's answer is told the same thing it would be told about
+ * one computed in the browser. A name the built-ins do not cover is a custom
+ * aggregator the server understands and the table does not: it is left out
+ * rather than guessed at, and the column is told nothing.
+ *
+ * @param aggregates - The aggregates the request carried, if any.
+ * @returns The operations by column key.
+ *
+ * @public
+ */
+export function queryAggregateOps(
+  aggregates: readonly QueryAggregate[] | undefined
+): GroupAggregateOps | undefined {
+  if (!aggregates || aggregates.length === 0) return undefined;
+  const ops: Record<string, AggregateName> = {};
+  for (const entry of aggregates) {
+    if (AGGREGATE_NAMES.includes(entry.fn as AggregateName)) {
+      ops[entry.key] = entry.fn as AggregateName;
+    }
+  }
+  return Object.keys(ops).length > 0 ? ops : undefined;
 }
 
 /**

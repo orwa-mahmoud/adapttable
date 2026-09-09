@@ -1104,6 +1104,7 @@
       "PivotZone",
       "Props",
       "QueryAggregate",
+      "queryAggregateOps",
       "QueryCondition",
       "QueryExtensions",
       "QueryFilterGroup",

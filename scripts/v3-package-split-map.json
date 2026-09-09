@@ -12523,6 +12523,14 @@
       "behavior": ""
     },
     {
+      "export": "queryAggregateOps",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "QueryCondition",
       "currentImport": "@adapttable/core",
       "kind": "type",

@@ -120,9 +120,12 @@ function LiveGrouping({
       rowPageSize: groupRowPageSize,
       paging: groupPaging.paging,
       derivedKey: aggregateOverrideKey,
-      // The reader's own choices are the operations the table knows about; a
-      // host's own mapper declares none, and a column is told so.
-      aggregateOps: source.groupAggregateOverrides,
+      // What the answer on screen was actually asked for. A tier that talks
+      // to a server knows it exactly, including what the host declared before
+      // any reader touched it, and publishes it as of the response being
+      // drawn; otherwise the reader's own choices are all the table knows,
+      // and a host's own mapper declares nothing at all.
+      aggregateOps: source.groupAggregations ?? source.groupAggregateOverrides,
     });
     const openGroups = entries.flatMap((entry) =>
       entry.kind === "group" ? [{ key: entry.key, level: entry.level }] : []
@@ -164,6 +167,7 @@ function LiveGrouping({
     groupCollapse,
     aggregateOverrideKey,
     source.groupAggregateOverrides,
+    source.groupAggregations,
     effectiveGroupAggregates,
     groupFooters,
     groupSort,

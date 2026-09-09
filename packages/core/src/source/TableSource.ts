@@ -1,6 +1,7 @@
 import type { TableEngine } from "../engine/createTableEngine";
 import type { FacetMap } from "../filters/facets";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
+import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 import type { TableStateMutators } from "../tableStateMutators";
 import type {
   ExtraFilters,
@@ -129,6 +130,15 @@ export interface TableSource<TRow> extends TableStateMutators {
    * not do correctly anyway with one page of the data.
    */
   readonly groups?: readonly QueryGroupRow<TRow>[];
+  /**
+   * Which operation each aggregate in those groups was asked for, as of the
+   * response now on screen — not one still in flight. `useQuerySource` and
+   * `useServerData` publish it from the request they sent; a source that
+   * computes its own groups may publish it too, and a source that says
+   * nothing leaves the table with the reader's own choices, which is what it
+   * knew before.
+   */
+  readonly groupAggregations?: GroupAggregateOps;
 
   /* State (write) is the shared {@link TableStateMutators} contract. */
 }

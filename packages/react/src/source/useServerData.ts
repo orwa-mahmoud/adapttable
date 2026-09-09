@@ -5,6 +5,7 @@ import {
   type PaginationMode,
   parseGroupBy,
   type QueryAggregate,
+  queryAggregateOps,
   type QuerySupport,
   stableKey,
   type TableQuery,
@@ -19,6 +20,7 @@ import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
+import { useSettledAggregateOps } from "./useSettledAggregateOps";
 
 /**
  * One consolidated snapshot of everything a server query needs.
@@ -173,6 +175,13 @@ export function useServerData<TRow>(
     const keys = parseGroupBy(groupBy);
     return keys.length > 0 ? keys : undefined;
   }, [groupBy]);
+  // What the request asks for. What the rows on screen were asked for is the
+  // same only while nothing is in flight — the host reports that as `loading`.
+  const requestedOps = useMemo(
+    () => queryAggregateOps(effectiveAggregates),
+    [effectiveAggregates]
+  );
+  const groupAggregations = useSettledAggregateOps(requestedOps, rows, loading);
 
   // Cursor mode keeps every token the server has handed out, indexed by the
   // page it opens: `cursors[0]` is always `undefined` (page 1 needs no token)
@@ -374,6 +383,7 @@ export function useServerData<TRow>(
     sortDir,
     groupBy,
     groupAggregateOverrides,
+    groupAggregations,
     extra,
     facets,
     filterTree: state.filterTree,

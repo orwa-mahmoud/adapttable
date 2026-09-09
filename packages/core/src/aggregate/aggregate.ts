@@ -87,6 +87,13 @@ export interface AggregateOptions<TRow> {
   /**
    * Format a computed value for display. Receives the raw result and the
    * column key: `format: (v, key) => key === "budget" ? money.format(v) : v`.
+   *
+   * This runs when the value is computed. A column's `formatAggregate` runs
+   * when a group cell is drawn, and the two compose: with both set, the
+   * column is handed what this returned and formats it again unless it is
+   * written to pass non-numbers through. For groups, leaving the value raw
+   * here and letting the column own presentation is the simpler pair; for a
+   * mapper used as `summaryRow`, this is the only one of the two that runs.
    */
   format?: (
     value: DisplayValue | undefined,

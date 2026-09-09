@@ -2957,6 +2957,9 @@ export interface QueryAggregate {
 }
 
 // @public
+export function queryAggregateOps(aggregates: readonly QueryAggregate[] | undefined): GroupAggregateOps | undefined;
+
+// @public
 export interface QueryCondition {
     key: string;
     op: string;
@@ -4283,6 +4286,7 @@ export interface TableSource<TRow> extends TableStateMutators {
     fetchNextPage: () => void;
     readonly filterTree?: QueryFilterGroup;
     readonly groupAggregateOverrides?: GroupAggregateOverrides;
+    readonly groupAggregations?: GroupAggregateOps;
     readonly groupBy: string | undefined;
     readonly groups?: readonly QueryGroupRow<TRow>[];
     readonly hasNextPage: boolean;

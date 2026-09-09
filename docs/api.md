@@ -1140,7 +1140,10 @@ bindings, `add` / `remove` / `moveBy`, and `setAggregate`.
 `serializeGroupAggregateOverrides` / `parseGroupAggregateOverrides` encode the
 `groupAgg` parameter. `withGroupAggregateOverrides` layers them over a
 developer `groupAggregates` mapper, while `withQueryAggregateOverrides` does
-the same for server `query.aggregates`; an absent key preserves the developer
+the same for server `query.aggregates`, and `queryAggregateOps` reads those
+requested functions back as the operations a column is told about —
+`TableSource.groupAggregations`, which `useQuerySource` and `useServerData`
+publish as of the response being drawn; an absent key preserves the developer
 choice and `"none"` removes it. A column's `formatAggregate` says how the
 result reads, taking the value and an `AggregateFormatContext` — the column
 key, and the operation where the table knows it. It is applied where the cell

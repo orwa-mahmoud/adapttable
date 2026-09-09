@@ -89,8 +89,23 @@ under the same column:
 
 It runs where the cell is drawn — group header, group footer and mobile group
 card alike — so the value the table holds, exports and compares stays the one
-the aggregate returned. A mapper that already returns something formatted is
-handed that, and a formatter that only touches numbers leaves it alone.
+the aggregate returned.
+
+**It composes with `aggregate({ format })`, and nothing stops it running
+twice.** The two happen at different moments: `format` runs when the value is
+computed, `formatAggregate` when the cell is drawn. Set both and the column's
+formatter is handed whatever the mapper produced — a string, a node — and will
+format that again unless it is written to pass non-numbers through, as the
+example above does. The simplest arrangement is to leave group aggregates raw
+and let the column own how they read; `format` still belongs on a mapper used
+for `summaryRow`, which `formatAggregate` does not touch.
+
+On a server tier the operation is the one the request carried, published as of
+the response being drawn — so a column is told what the numbers on screen were
+computed with, not what a request still in flight asks for. A source that
+publishes nothing leaves the table with the reader's own choices; an
+aggregate function only the server understands is reported as unknown rather
+than guessed at.
 
 Compose `columnMenu()` too and each column row gains **Group by…** or
 **Ungroup…**. While grouping is active, an ungrouped column also offers the

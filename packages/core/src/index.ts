@@ -519,6 +519,7 @@ export {
   type GroupAggregateOverride,
   type GroupAggregateOverrides,
   parseGroupAggregateOverrides,
+  queryAggregateOps,
   serializeGroupAggregateOverrides,
   withGroupAggregateOverrides,
   withQueryAggregateOverrides,
