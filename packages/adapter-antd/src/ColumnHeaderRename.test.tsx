@@ -35,7 +35,6 @@ const labels: ColumnMenuLabels = {
   groupByColumn: (name) => `Group by ${name}`,
   ungroupColumn: (name) => `Ungroup ${name}`,
   groupingAggregation: "Group aggregation",
-  groupingAggregationNone: "None",
   groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
   groupingAverage: "Average",
   selectionCount: "Count",

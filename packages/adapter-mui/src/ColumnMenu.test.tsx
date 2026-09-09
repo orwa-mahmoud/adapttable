@@ -72,7 +72,6 @@ const labels = {
   groupByColumn: (name: string) => `Group by ${name}`,
   ungroupColumn: (name: string) => `Ungroup ${name}`,
   groupingAggregation: "Group aggregation",
-  groupingAggregationNone: "None",
   groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
   groupingAverage: "Average",
   selectionCount: "Count",

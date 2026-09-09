@@ -164,7 +164,7 @@
         <h1>Row grouping in Base UI</h1>
         <p>Compose <code>groupingPanel(groupBy, extras)</code> and rows start nested by Team then Status. On desktop, drag any column header into the strip or drag its chips to reorder the levels.</p>
         <p>Every chip handle is keyboard movable with the arrow keys. On phones the same Base UI panel swaps drag targets for kit-native selects, without changing the grouping model.</p>
-        <p><code>groupAggregates</code> seeds the per-group subtotal, then the panel can override a value column. Group footers close each group. Independent pinned summary rows and the table footer total live on the aggregation page; moving rows inside a group lives on the row-reordering page.</p>
+        <p>A column's <code>aggregatable</code> declaration seeds the Aggregations section — every active column is its own item, with its own operation and remove. Group footers close each group. Independent pinned summary rows and the table footer total live on the aggregation page; moving rows inside a group lives on the row-reordering page.</p>
         <p>Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.</p>
         <p>A group header is a table row with a spanning cell carrying the indent, a Base UI Checkbox for the tri-state group selection, and the engine's chevron inside a Base UI Button.</p>
         <h2>The code</h2>
@@ -180,12 +180,6 @@ export function People({ rows, columns }) {
       features={[
         groupingPanel([&quot;team&quot;, &quot;status&quot;], {
           groupFooters: true,
-          groupAggregates: (group) =&gt; ({
-            budget: group.reduce(
-              (sum, row) =&gt; sum + row.budget,
-              0
-            ),
-          }),
         }),
       ]}
     /&gt;

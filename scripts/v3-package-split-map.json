@@ -6747,6 +6747,22 @@
       "behavior": ""
     },
     {
+      "export": "Aggregatable",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
+      "export": "AggregatableConfig",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
       "export": "AggregateFormatContext",
       "currentImport": "@adapttable/core/formula",
       "kind": "type",
@@ -6756,6 +6772,30 @@
     },
     {
       "export": "AggregateName",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOperation",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOperationId",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
+      "export": "Aggregator",
       "currentImport": "@adapttable/core/formula",
       "kind": "type",
       "class": "neutral-model",
@@ -6812,6 +6852,14 @@
     },
     {
       "export": "ColumnModelFilter",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
+      "export": "CustomAggregateOperation",
       "currentImport": "@adapttable/core/formula",
       "kind": "type",
       "class": "neutral-model",
@@ -7019,6 +7067,22 @@
       "behavior": ""
     },
     {
+      "export": "Aggregatable",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "AggregatableConfig",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
       "export": "AggregateFormatContext",
       "currentImport": "@adapttable/core/pdf",
       "kind": "type",
@@ -7028,6 +7092,30 @@
     },
     {
       "export": "AggregateName",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOperation",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOperationId",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "Aggregator",
       "currentImport": "@adapttable/core/pdf",
       "kind": "type",
       "class": "neutral-model",
@@ -7148,6 +7236,14 @@
     },
     {
       "export": "ColumnModelFilter",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "CustomAggregateOperation",
       "currentImport": "@adapttable/core/pdf",
       "kind": "type",
       "class": "neutral-model",
@@ -7347,6 +7443,22 @@
       "behavior": ""
     },
     {
+      "export": "Aggregatable",
+      "currentImport": "@adapttable/core/pivot",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pivot",
+      "behavior": ""
+    },
+    {
+      "export": "AggregatableConfig",
+      "currentImport": "@adapttable/core/pivot",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pivot",
+      "behavior": ""
+    },
+    {
       "export": "AggregateFormatContext",
       "currentImport": "@adapttable/core/pivot",
       "kind": "type",
@@ -7356,6 +7468,22 @@
     },
     {
       "export": "AggregateName",
+      "currentImport": "@adapttable/core/pivot",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pivot",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOperation",
+      "currentImport": "@adapttable/core/pivot",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pivot",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOperationId",
       "currentImport": "@adapttable/core/pivot",
       "kind": "type",
       "class": "neutral-model",
@@ -7412,6 +7540,14 @@
     },
     {
       "export": "ColumnModelFilter",
+      "currentImport": "@adapttable/core/pivot",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pivot",
+      "behavior": ""
+    },
+    {
+      "export": "CustomAggregateOperation",
       "currentImport": "@adapttable/core/pivot",
       "kind": "type",
       "class": "neutral-model",
@@ -8003,6 +8139,22 @@
       "behavior": ""
     },
     {
+      "export": "Aggregatable",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "AggregatableConfig",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
       "export": "AggregateFormatContext",
       "currentImport": "@adapttable/core/xlsx",
       "kind": "type",
@@ -8012,6 +8164,30 @@
     },
     {
       "export": "AggregateName",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOperation",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOperationId",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "Aggregator",
       "currentImport": "@adapttable/core/xlsx",
       "kind": "type",
       "class": "neutral-model",
@@ -8116,6 +8292,14 @@
     },
     {
       "export": "ColumnModelFilter",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "CustomAggregateOperation",
       "currentImport": "@adapttable/core/xlsx",
       "kind": "type",
       "class": "neutral-model",
@@ -8291,6 +8475,14 @@
       "behavior": ""
     },
     {
+      "export": "addAggregation",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "addFilterTreeCondition",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -8307,6 +8499,22 @@
       "behavior": ""
     },
     {
+      "export": "Aggregatable",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AggregatableConfig",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "aggregate",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -8316,6 +8524,14 @@
     },
     {
       "export": "AGGREGATE_NAMES",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AGGREGATE_SUPPRESSED",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-model",
@@ -8347,6 +8563,22 @@
       "behavior": ""
     },
     {
+      "export": "AggregateOperation",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOperationId",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "AggregateOptions",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -8363,10 +8595,82 @@
       "behavior": ""
     },
     {
+      "export": "AggregationCandidate",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AggregationItem",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "aggregationModel",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AggregationModel",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AggregationModelInput",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AggregationOrigin",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AggregationSourceSupport",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "Aggregator",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "allowsOperation",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "allowsReaderOperation",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -9355,6 +9659,14 @@
       "behavior": ""
     },
     {
+      "export": "computedAggregateKeys",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "ComputedColumnSpec",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -9595,6 +9907,22 @@
       "behavior": ""
     },
     {
+      "export": "CUSTOM_AGGREGATE",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "CustomAggregateOperation",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "CustomCellEditorConflict",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -9639,6 +9967,30 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "declaredAggregates",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "DeclaredAggregates",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "declaredByDeveloper",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -10915,6 +11267,14 @@
       "behavior": ""
     },
     {
+      "export": "GroupAggregatesMapper",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "GroupByInput",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -11235,6 +11595,14 @@
       "behavior": ""
     },
     {
+      "export": "impliedOperations",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "incrementalSearchText",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -11276,6 +11644,14 @@
     },
     {
       "export": "inflateBodyCellRowSpans",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "initialOperation",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -11839,6 +12215,14 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "offerableOperations",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -12747,6 +13131,14 @@
       "behavior": ""
     },
     {
+      "export": "reconcileAggregations",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "RELATIVE_NAMED",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -12796,6 +13188,14 @@
     },
     {
       "export": "relativeTokenLabel",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "removeAggregation",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -12891,6 +13291,22 @@
       "behavior": ""
     },
     {
+      "export": "resolveAggregatable",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "resolveAggregatableColumns",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "resolveAssembly",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -12935,6 +13351,22 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ResolvedAggregatable",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ResolvedAggregateOperation",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -13079,6 +13511,14 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "restoreAggregationDefaults",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -20899,6 +21339,38 @@
       "behavior": ""
     },
     {
+      "export": "GroupingPanelAggregationItemProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "GroupingPanelAggregationRemoveProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "GroupingPanelChecklistOption",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "GroupingPanelChecklistProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "GroupingPanelChipProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -20940,6 +21412,14 @@
     },
     {
       "export": "GroupingPanelRemoveZoneProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "GroupingPanelRestoreProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",

@@ -44,7 +44,6 @@ const labels: ColumnMenuLabels = {
   groupByColumn: (label) => `Group by ${label}`,
   ungroupColumn: (label) => `Ungroup ${label}`,
   groupingAggregation: "Group aggregation",
-  groupingAggregationNone: "None",
   groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
   groupingAverage: "Average",
   selectionCount: "Count",

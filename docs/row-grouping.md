@@ -68,12 +68,18 @@ column name, operation selector, and remove — plus **Add columns** (a native
 checklist) and **Restore defaults**. Mobile uses these kit-native controls
 rather than header drag-and-drop.
 
-A column's `aggregatable` declaration decides what a reader may add. Developer
-defaults (`aggregatable.default`, a declared `groupAggregates` mapper, or the
-original server `aggregates` query) appear immediately. Removing a developer
-default records an explicit suppression (`none` in `groupAgg`); **Restore
-defaults** puts the original developer configuration back, not the latest
-server response.
+A column's `Aggregatable` declaration (`aggregatable`) decides what a reader
+may add — `AggregatableConfig` with `default` and `operations` of
+`AggregateOperation` values (a built-in name or a `CustomAggregateOperation`).
+`resolveAggregatable` / `resolveAggregatableColumns` validate that offer;
+`impliedOperations` is what `true` reads from the declared filter or editor
+type. Developer defaults (`aggregatable.default`, a declared
+`GroupAggregatesMapper` via `aggregate()`, or the original server
+`aggregates` query) appear immediately. Removing a developer default records
+an explicit suppression (`AGGREGATE_SUPPRESSED` / `"none"` in `groupAgg`);
+`restoreAggregationDefaults` puts the original developer configuration back,
+not the latest server response. The panel and column menu both read
+`aggregationModel`.
 
 ```tsx
 {

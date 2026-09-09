@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   parseGroupAggregateOverrides,
+  queryAggregateOps,
   serializeGroupAggregateOverrides,
   withGroupAggregateOverrides,
   withQueryAggregateOverrides,
@@ -120,6 +121,43 @@ describe("group aggregate overrides", () => {
         [{ key: "budget", fn: "sum" }],
         { budget: "max" },
         [{ key: "budget", aggregatable: { operations: ["sum", "avg"] } }],
+        { grouping: "server" }
+      )
+    ).toEqual([{ key: "budget", fn: "sum" }]);
+  });
+
+  it("runs a custom local calculate and ignores an empty request name", () => {
+    const mapper = withGroupAggregateOverrides<Row>(
+      () => ({ budget: "developer" }),
+      { budget: "median" },
+      [
+        {
+          key: "budget",
+          aggregatable: {
+            operations: [
+              {
+                id: "median",
+                label: "Median",
+                calculate: (values) => values.length,
+              },
+            ],
+          },
+        },
+      ]
+    );
+    expect(mapper?.(rows)).toEqual({ budget: 2 });
+    expect(queryAggregateOps([{ key: "budget", fn: "" }])).toBeUndefined();
+    expect(queryAggregateOps([{ key: "budget", fn: "sum" }])).toEqual({
+      budget: "sum",
+    });
+  });
+
+  it("refuses an unlisted built-in when the server named no list", () => {
+    expect(
+      withQueryAggregateOverrides(
+        [{ key: "budget", fn: "sum" }],
+        { budget: "median" },
+        undefined,
         { grouping: "server" }
       )
     ).toEqual([{ key: "budget", fn: "sum" }]);

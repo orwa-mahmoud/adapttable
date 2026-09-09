@@ -62,7 +62,7 @@ const slots: GroupingPanelSlots = {
             alignItems: "center",
             gap: 0.75,
           },
-          "& > [data-adapttable-part='grouping-aggregate-controls']": {
+          "& > [data-adapttable-part='grouping-aggregations']": {
             display: "inline-flex",
             alignItems: "center",
             flexWrap: "wrap",

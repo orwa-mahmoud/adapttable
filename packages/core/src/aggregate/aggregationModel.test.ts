@@ -8,7 +8,13 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnMetadata } from "../columnModel";
 import { resetDevWarnings } from "../utils/devWarn";
-import { resolveAggregatable } from "./aggregatable";
+import {
+  allowsOperation,
+  allowsReaderOperation,
+  offerableOperations,
+  resolveAggregatable,
+  resolveAggregatableColumns,
+} from "./aggregatable";
 import { aggregate, declaredAggregates } from "./aggregate";
 import {
   addAggregation,
@@ -142,6 +148,80 @@ describe("what a column offers", () => {
       })
     ).toBeUndefined();
     expect(warn).toHaveBeenCalledTimes(2);
+    warn.mockRestore();
+    resetDevWarnings();
+  });
+
+  it("treats datetime and time as ordered, and ignores a typeless object", () => {
+    expect(
+      resolveAggregatable({
+        key: "when",
+        aggregatable: true,
+        editor: { type: "datetime" },
+      })?.operations.map((operation) => operation.id)
+    ).toEqual(["min", "max", "count"]);
+    expect(
+      resolveAggregatable({
+        key: "clock",
+        aggregatable: true,
+        filter: { type: "time" },
+      })?.operations.map((operation) => operation.id)
+    ).toEqual(["min", "max", "count"]);
+    expect(
+      resolveAggregatable({
+        key: "mystery",
+        aggregatable: true,
+        filter: { options: [] },
+      })?.operations.map((operation) => operation.id)
+    ).toEqual(["count"]);
+  });
+
+  it("exposes the shared allow and offer gates", () => {
+    const columns = [
+      COLUMNS[0]!,
+      COLUMNS[2]!,
+      { key: "when", aggregatable: true, editor: "date" },
+    ];
+    const resolved = resolveAggregatableColumns(columns);
+    expect([...resolved.keys()]).toEqual(["budget", "when"]);
+    const budget = resolved.get("budget");
+    expect(allowsOperation(budget, "sum")).toBe(true);
+    expect(allowsOperation(budget, "max")).toBe(false);
+    expect(allowsOperation(undefined, "sum")).toBe(false);
+    expect(allowsReaderOperation(budget, "median")).toBe(true);
+    expect(
+      allowsReaderOperation(budget, "median", { grouping: "server" })
+    ).toBe(false);
+    expect(
+      allowsReaderOperation(budget, "sum", {
+        grouping: "server",
+        aggregateOperations: ["avg"],
+      })
+    ).toBe(false);
+    expect(
+      offerableOperations(undefined).map((operation) => operation.id)
+    ).toEqual([]);
+    expect(
+      offerableOperations(budget, { grouping: "server" }).map(
+        (operation) => operation.id
+      )
+    ).toEqual(["sum", "avg"]);
+  });
+
+  it("refuses a second custom operation that repeats an id", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    expect(
+      resolveAggregatable({
+        key: "x",
+        aggregatable: {
+          operations: [
+            { id: "median", label: "Median", calculate: median },
+            { id: "median", label: "Again", calculate: median },
+          ],
+        },
+      })?.operations.map((operation) => operation.id)
+    ).toEqual(["median"]);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("twice"));
     warn.mockRestore();
     resetDevWarnings();
   });
@@ -326,6 +406,30 @@ describe("what the table refuses", () => {
         expect.objectContaining({ columnKey: "load", operationId: "avg" }),
       ])
     );
+  });
+
+  it("keeps a host cell when every offered operation is unavailable here", () => {
+    const columns: ColumnMetadata<Row>[] = [
+      {
+        key: "budget",
+        aggregatable: {
+          operations: [{ id: "median", label: "Median" }],
+        },
+      },
+    ];
+    const { items, candidates } = aggregationModel<Row>({
+      columns,
+      overrides: {},
+      computedKeys: ["budget"],
+      source: { grouping: "client" },
+    });
+    expect(candidates).toEqual([]);
+    expect(items).toEqual([
+      expect.objectContaining({
+        columnKey: "budget",
+        editable: false,
+      }),
+    ]);
   });
 
   it("offers a backend-only operation only where the server listed it", () => {

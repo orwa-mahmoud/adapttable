@@ -37,7 +37,7 @@ const PANEL_CLASS = "adapttable-radix-grouping-panel";
 const CONTENT_CLASS = "adapttable-radix-grouping-panel__content";
 const PANEL_CSS =
   `.${CONTENT_CLASS}>[data-adapttable-part="grouping-item"],` +
-  `.${CONTENT_CLASS}>[data-adapttable-part="grouping-aggregate-controls"]` +
+  `.${CONTENT_CLASS}>[data-adapttable-part="grouping-aggregations"]` +
   `{display:inline-flex;align-items:center;flex-wrap:wrap;gap:var(--space-2);min-width:0}` +
   `.${PANEL_CLASS}[data-mobile] .${CONTENT_CLASS}>[data-adapttable-part="grouping-item"]` +
   `{max-width:100%}` +

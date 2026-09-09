@@ -711,7 +711,7 @@ button.adapttable-btn:has([data-slot="select-value"]) {
 }
 
 [data-adapttable-part="grouping-item"],
-[data-adapttable-part="grouping-aggregate-controls"] {
+[data-adapttable-part="grouping-aggregations"] {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
