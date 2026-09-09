@@ -2,10 +2,12 @@
  * React column and header/footer render contracts.
  */
 import {
+  type AggregateFormatContext,
   type CellEditor,
   type ColumnFilter,
   type ColumnGroupDef,
   type ColumnMetadata,
+  type DisplayValue,
 } from "@adapttable/core";
 import type { ComponentType, ReactNode } from "react";
 
@@ -87,6 +89,15 @@ export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
   Cell?: ComponentType<CellProps<TRow>>;
   /** Lightweight alternative to `ColumnDef.Cell`; returns cell content. */
   accessor?: (row: TRow) => ReactNode;
+  /**
+   * How an aggregate of this column reads — narrowed from neutral metadata so
+   * it may return a node. Presentation only: what the table holds, exports and
+   * compares stays the value the aggregate returned.
+   */
+  formatAggregate?: (
+    value: DisplayValue | undefined,
+    context: AggregateFormatContext
+  ) => ReactNode;
 }
 
 /**

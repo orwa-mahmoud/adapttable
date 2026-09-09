@@ -12,6 +12,7 @@
  * the same rows, filled from a different source of truth.
  */
 import type { DisplayValue } from "../display";
+import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 import {
   formatGroupLabel,
   type GroupedFlatEntry,
@@ -78,6 +79,12 @@ export interface ServerGroupEntriesOptions<TRow> {
   blankLabel?: string;
   /** Close every group with a footer carrying its aggregates. */
   footers?: boolean;
+  /**
+   * Which operation each aggregate the server returned was asked for. The
+   * request declared it, so a column's `formatAggregate` is told the same
+   * thing here as it is for a grouping computed in the browser.
+   */
+  aggregateOps?: GroupAggregateOps;
 }
 
 /**
@@ -104,6 +111,7 @@ export function serverGroupEntries<TRow>(
     getRowId,
     blankLabel,
     footers = false,
+    aggregateOps,
   } = options;
   const flat: GroupedFlatEntry<TRow>[] = [];
   let leafIndex = 0;
@@ -135,6 +143,7 @@ export function serverGroupEntries<TRow>(
         leafIds: rows.map((row) => getRowId(row)),
         serverCount: node.count,
         aggregateCells: renderableAggregates(node.aggregates),
+        aggregateOps,
         collapsed,
       });
       if (collapsed) continue;
@@ -164,6 +173,7 @@ export function serverGroupEntries<TRow>(
           leafRows: rows,
           leafIds: rows.map((row) => getRowId(row)),
           aggregateCells: renderableAggregates(node.aggregates),
+          aggregateOps,
         });
       }
     }

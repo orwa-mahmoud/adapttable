@@ -45,6 +45,10 @@ export {
  * Member types the signatures above hand back, reachable from the entry that
  * returns them.
  */
+export type {
+  AggregateFormatContext,
+  AggregateName,
+} from "./aggregate/aggregate";
 export type { ColumnMetadata, SortableValue } from "./columnModel";
 export type { ColumnModel } from "./columnModel";
 export type {
@@ -52,3 +56,4 @@ export type {
   ColumnModelEditor,
   ColumnModelFilter,
 } from "./columnModel";
+export type { DisplayValue } from "./display";

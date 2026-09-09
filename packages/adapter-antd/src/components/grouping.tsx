@@ -1,4 +1,5 @@
 import {
+  type GroupAggregateOps,
   type GroupedFlatEntry,
   groupSelectionState,
   type TableLabels,
@@ -41,6 +42,8 @@ export interface AdaptTableGroupRow {
   leafIds: readonly string[];
   /** Footer aggregates for the group, by column key. */
   aggregateCells?: Partial<Record<string, ReactNode>>;
+  /** Which operation produced each of them, where the table knows. */
+  aggregateOps?: GroupAggregateOps;
   /** Whether the group is collapsed. */
   collapsed: boolean;
 }
@@ -124,6 +127,7 @@ function toGroupDataRecord<TRow>(
       entry.kind === "groupMore"
         ? undefined
         : (entry.aggregateCells as Partial<Record<string, ReactNode>>),
+    aggregateOps: entry.kind === "groupMore" ? undefined : entry.aggregateOps,
     collapsed: entry.kind === "group" && entry.collapsed,
   };
 }

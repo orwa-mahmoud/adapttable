@@ -114,7 +114,8 @@ export function GroupHeaderRow<TRow>({
   // as one when it sits under the column it totals.
   const layout = groupRowLayout<TRow, ColumnDef<TRow>>(
     columns,
-    entry.kind === "groupMore" ? undefined : entry.aggregateCells
+    entry.kind === "groupMore" ? undefined : entry.aggregateCells,
+    entry.kind === "groupMore" ? undefined : entry.aggregateOps
   );
 
   return (
@@ -282,7 +283,8 @@ export function GroupHeaderCard<TRow>({
         </HStack>
         {groupAggregateEntries<TRow, ColumnDef<TRow>>(
           columns,
-          entry.kind === "groupMore" ? undefined : entry.aggregateCells
+          entry.kind === "groupMore" ? undefined : entry.aggregateCells,
+          entry.kind === "groupMore" ? undefined : entry.aggregateOps
         ).map(({ column, node }) => (
           <HStack key={column.key} gap="2" mt="1">
             <Text as="span" {...subtleText}>

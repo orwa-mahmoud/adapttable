@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AggregateFormatContext } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
 import { CellEditorOption } from '@adapttable/core';
 import { CellProps } from '@adapttable/core';
@@ -16,6 +17,7 @@ import { ColumnMetadata } from '@adapttable/core';
 import { ComponentType } from 'react';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
+import { DisplayValue } from '@adapttable/core';
 import { FilterDef } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
@@ -36,6 +38,7 @@ export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
     Cell?: ComponentType<CellProps_2<TRow>>;
     editor?: CellEditor;
     filter?: ColumnFilter<TRow>;
+    formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => ReactNode;
     header?: ReactNode;
     headerActions?: ReactNode;
     renderFooter?: (ctx: ColumnFooterContext_2<TRow>) => ReactNode;

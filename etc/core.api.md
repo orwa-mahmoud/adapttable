@@ -42,6 +42,12 @@ export const AGGREGATE_NAMES: AggregateName[];
 export type AggregateFn = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
+export interface AggregateFormatContext {
+    readonly aggregation?: AggregateName | "none";
+    readonly columnKey: string;
+}
+
+// @public
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
@@ -228,6 +234,7 @@ export function buildGroupedFlatModel<TRow>(options: BuildGroupedFlatModelOption
 
 // @public
 export interface BuildGroupedFlatModelOptions<TRow> {
+    aggregateOps?: GroupAggregateOps;
     aggregates?: GroupAggregatesFn<TRow>;
     blankLabel?: string;
     collapsedGroupIds: ReadonlySet<string>;
@@ -746,6 +753,7 @@ export interface ColumnModel<TRow = unknown> {
     exportValue?: (row: TRow) => unknown;
     filter?: ColumnModelFilter;
     flex?: number;
+    formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => DisplayValue | undefined;
     formatValue?: (row: TRow) => string;
     group?: string | readonly string[];
     groupable?: boolean;
@@ -1914,7 +1922,15 @@ export interface GridKeyPress {
 }
 
 // @public
-export function groupAggregateEntries<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined): GroupRowCell<TRow, TCol>[];
+export function groupAggregateEntries<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined, aggregation?: GroupAggregateOps): GroupRowCell<TRow, TCol>[];
+
+// @public
+export function groupAggregateNode<TCol extends {
+    key: string;
+} & Pick<ColumnMetadata<never>, "formatAggregate">>(column: TCol, node: DisplayValue | undefined, aggregation: GroupAggregateOps | undefined): DisplayValue | undefined;
+
+// @public
+export type GroupAggregateOps = Readonly<Partial<Record<string, AggregateName | "none">>>;
 
 // @public
 export type GroupAggregateOverride = AggregateName | "none";
@@ -1933,6 +1949,7 @@ export function groupedEntriesForStrategy<TRow>(options: GroupedEntriesForStrate
 
 // @public
 export interface GroupedEntriesForStrategyOptions<TRow> {
+    aggregateOps?: GroupAggregateOps;
     // (undocumented)
     aggregates?: (rows: readonly TRow[]) => unknown;
     // (undocumented)
@@ -1978,6 +1995,7 @@ export type GroupedFlatEntry<TRow> = {
     leafIds: readonly string[];
     serverCount?: number;
     aggregateCells?: Partial<Record<string, DisplayValue>>;
+    aggregateOps?: GroupAggregateOps;
     collapsed: boolean;
 } | {
     kind: "groupFooter";
@@ -1989,6 +2007,7 @@ export type GroupedFlatEntry<TRow> = {
     leafRows: readonly TRow[];
     leafIds: readonly string[];
     aggregateCells?: Partial<Record<string, DisplayValue>>;
+    aggregateOps?: GroupAggregateOps;
 } | {
     kind: "groupMore";
     key: string;
@@ -2146,7 +2165,7 @@ export interface GroupRowLayout<TRow, TCol extends ColumnMetadata<TRow> = Column
 }
 
 // @public
-export function groupRowLayout<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined): GroupRowLayout<TRow, TCol>;
+export function groupRowLayout<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined, aggregation?: GroupAggregateOps): GroupRowLayout<TRow, TCol>;
 
 // @public
 export function groupSelectionState(leafIds: readonly string[], selectedIds: ReadonlySet<string>): HeaderSelectionState;
@@ -2238,6 +2257,7 @@ export interface IncrementalViewConfig<TRow> {
     getRowId: (row: TRow) => string;
     getSearchText?: (row: TRow) => string;
     getSortValue?: (row: TRow, columnKey: string) => SortableValue;
+    groupAggregateOps?: GroupAggregateOps;
     groupAggregates?: GroupAggregatesFn<TRow>;
     groupBy?: string | readonly string[];
     groupFilter?: (group: GroupNode<TRow>) => boolean;
@@ -3618,6 +3638,7 @@ export function serverGroupEntries<TRow>(options: ServerGroupEntriesOptions<TRow
 
 // @public
 export interface ServerGroupEntriesOptions<TRow> {
+    aggregateOps?: GroupAggregateOps;
     blankLabel?: string;
     collapsedGroupIds: ReadonlySet<string>;
     footers?: boolean;

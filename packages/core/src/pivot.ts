@@ -7,7 +7,11 @@
  *
  * @packageDocumentation
  */
-export type { AggregateName, Aggregator } from "./aggregate/aggregate";
+export type {
+  AggregateFormatContext,
+  AggregateName,
+  Aggregator,
+} from "./aggregate/aggregate";
 export {
   assignField,
   availableFields,

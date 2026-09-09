@@ -371,6 +371,7 @@ export const BASE_COLUMNS: ColumnDef<Person>[] = [
     key: "budget",
     accessor: (r) => formatMoney(budget(r)),
     sortValue: (r) => budget(r),
+    formatAggregate: (value, context) => formatBudgetAggregate(value, context),
     sortable: true,
     header: STRINGS.en.budget,
   },
@@ -816,6 +817,10 @@ export function makeColumns(
         </span>
       ),
       sortValue: (r) => budget(r),
+      // A subtotal of this column is money too — whether the table computed it
+      // or the reader chose the operation from the grouping strip.
+      formatAggregate: (value, context) =>
+        formatBudgetAggregate(value, context, locale),
       // The screen shows "$25,300"; a spreadsheet cannot sum that, so the file
       // carries the number underneath.
       exportValue: (r) => budget(r),
@@ -1509,6 +1514,37 @@ export const matchesDemoFilters = DEMO_FILTER_RUNTIME.filterFn;
  * Shares the `summaryRow` mapper shape — one function type for footer totals
  * and group headers.
  */
+/**
+ * What a subtotal of Budget reads like, whoever computed it.
+ *
+ * `groupAggregates` returns money already formatted; a reader who switches the
+ * column to average or minimum gets the raw number the table computed. This is
+ * what the column says about that — and it is told which operation produced
+ * the value, so a count of rows reads as a count rather than as dollars. A
+ * value that is not a number is already someone else's formatting and is left
+ * exactly as it is.
+ */
+const countFormat = formatter((tag) => new Intl.NumberFormat(tag));
+
+export function formatBudgetAggregate(
+  value: unknown,
+  context: { readonly aggregation?: string },
+  locale: Locale = "en"
+): ReactNode {
+  // Already formatted by whoever computed it — shown as it is, in a fragment
+  // so this always hands back one kind of thing.
+  if (typeof value !== "number") return <>{value as ReactNode}</>;
+  const text =
+    context.aggregation === "count"
+      ? countFormat(locale).format(value)
+      : formatMoney(value, locale);
+  return (
+    <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
+      {text}
+    </span>
+  );
+}
+
 export const DEMO_GROUP_AGGREGATES: SummaryRowFn<Person> = aggregate<Person>(
   { budget: "sum" },
   {

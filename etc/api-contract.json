@@ -834,6 +834,7 @@
     "core": [
       "ACTIONS_COLUMN_KEY",
       "AGGREGATE_NAMES",
+      "AggregateFormatContext",
       "AUTO_OPTIONS_LIMIT",
       "ActionAiOptions",
       "ActionApprovalPolicy",
@@ -1001,6 +1002,8 @@
       "FormulaNode",
       "FormulaScope",
       "FormulaValue",
+      "groupAggregateNode",
+      "GroupAggregateOps",
       "GROUPING_COLUMN_DND_MIME",
       "GetCellSpan",
       "GetCellSpanArgs",
@@ -1595,12 +1598,15 @@
       "xlsxWriter"
     ],
     "core-formula": [
+      "AggregateFormatContext",
+      "AggregateName",
       "BinaryOp",
       "ColumnGroupShow",
       "ColumnMetadata",
       "ColumnModel",
       "ColumnModelEditor",
       "ColumnModelFilter",
+      "DisplayValue",
       "FORMULA_BLANK",
       "FORMULA_ERRORS",
       "FORMULA_FUNCTIONS",
@@ -1628,6 +1634,8 @@
       "toFormulaValue"
     ],
     "core-pdf": [
+      "AggregateFormatContext",
+      "AggregateName",
       "CellEditor",
       "CellEditorOption",
       "CellProps",
@@ -1669,6 +1677,7 @@
       "printTable"
     ],
     "core-pivot": [
+      "AggregateFormatContext",
       "AggregateName",
       "Aggregator",
       "ColumnGroupShow",
@@ -1756,6 +1765,8 @@
       "parseRowPatchFrame"
     ],
     "core-xlsx": [
+      "AggregateFormatContext",
+      "AggregateName",
       "CellEditor",
       "CellEditorOption",
       "CellProps",

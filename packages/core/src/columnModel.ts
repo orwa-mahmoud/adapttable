@@ -1,6 +1,8 @@
 /**
  * Neutral column and primitive table types. This module imports no React.
  */
+import type { AggregateFormatContext } from "./aggregate/aggregate";
+import type { DisplayValue } from "./display";
 
 /**
  * Sort direction for a column.
@@ -149,6 +151,23 @@ export interface ColumnModel<TRow = unknown> {
    * The cell as plain text, for every context that cannot render JSX.
    */
   formatValue?: (row: TRow) => string;
+  /**
+   * How an aggregate of this column reads.
+   *
+   * A group header, a group footer and a mobile group card show what
+   * `groupAggregates` — or the reader's own choice of sum, average, count —
+   * computed for this column. That answer is a number, and a number under a
+   * money column should read as money. This turns the computed value into
+   * what is shown, and is given the operation that produced it where the
+   * table knows it, so a count can read as a count under the same column.
+   *
+   * Presentation only: the value the table holds, exports and compares stays
+   * exactly what the aggregate returned.
+   */
+  formatAggregate?: (
+    value: DisplayValue | undefined,
+    context: AggregateFormatContext
+  ) => DisplayValue | undefined;
   /** Enable sorting for this column. Off by default. */
   sortable?: boolean;
   /**

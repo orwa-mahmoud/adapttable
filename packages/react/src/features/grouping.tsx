@@ -120,6 +120,9 @@ function LiveGrouping({
       rowPageSize: groupRowPageSize,
       paging: groupPaging.paging,
       derivedKey: aggregateOverrideKey,
+      // The reader's own choices are the operations the table knows about; a
+      // host's own mapper declares none, and a column is told so.
+      aggregateOps: source.groupAggregateOverrides,
     });
     const openGroups = entries.flatMap((entry) =>
       entry.kind === "group" ? [{ key: entry.key, level: entry.level }] : []
@@ -160,6 +163,7 @@ function LiveGrouping({
     getRowId,
     groupCollapse,
     aggregateOverrideKey,
+    source.groupAggregateOverrides,
     effectiveGroupAggregates,
     groupFooters,
     groupSort,

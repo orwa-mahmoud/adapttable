@@ -80,6 +80,7 @@ export type {
 export {
   aggregate,
   AGGREGATE_NAMES,
+  type AggregateFormatContext,
   type AggregateName,
   type AggregateOptions,
   type AggregateSpec,
@@ -538,6 +539,8 @@ export {
 } from "./grouping/groupKeys";
 export {
   groupAggregateEntries,
+  groupAggregateNode,
+  type GroupAggregateOps,
   groupLeafCount,
   type GroupRowCell,
   type GroupRowLayout,

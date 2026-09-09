@@ -6,6 +6,7 @@
 
 import { ActionConfirm } from '@adapttable/core';
 import { AggregateFn } from '@adapttable/core';
+import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
 import { applyCollapsedColumnGroups } from '@adapttable/core';
@@ -1067,6 +1068,7 @@ export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
     Cell?: ComponentType<CellProps_2<TRow>>;
     editor?: CellEditor;
     filter?: ColumnFilter<TRow>;
+    formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => ReactNode;
     header?: ReactNode;
     headerActions?: ReactNode;
     renderFooter?: (ctx: ColumnFooterContext_2<TRow>) => ReactNode;

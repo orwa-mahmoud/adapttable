@@ -81,6 +81,10 @@ export type { FilterOption } from "./filters/filterDefs";
  * returns them.
  */
 export type {
+  AggregateFormatContext,
+  AggregateName,
+} from "./aggregate/aggregate";
+export type {
   ColumnMetadata,
   ColumnModelEditor,
   ColumnModelFilter,

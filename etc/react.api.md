@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateOptions } from '@adapttable/core';
 import { AggregateSpec } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
@@ -427,6 +428,7 @@ export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
     Cell?: ComponentType<CellProps<TRow>>;
     editor?: CellEditor;
     filter?: ColumnFilter<TRow>;
+    formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => ReactNode;
     header?: ReactNode;
     headerActions?: ReactNode;
     renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;

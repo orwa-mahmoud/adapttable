@@ -88,6 +88,57 @@ for (const kit of KITS) {
   });
 }
 
+/**
+ * What a subtotal reads like when the reader changes the operation.
+ *
+ * The developer's mapper returns money; choosing average recomputes the value
+ * and would hand back the bare number without the column saying what an
+ * aggregate of it reads like. Count is the other half of the same claim: the
+ * column is told which operation produced the value, so a count of rows is
+ * not dressed up as dollars.
+ */
+for (const kit of KITS) {
+  test(`${kit}: a subtotal keeps the column's formatting when the operation changes`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit}/aggregation/`);
+    const root = demo(page).locator(`[data-adapter="${kit}"]`);
+    const budget = root
+      .locator('[data-adapttable-part="group-row"] [data-column-key="budget"]')
+      .first();
+    await expect(budget).toBeVisible();
+    await expect(budget).toContainText("$");
+
+    // Each kit draws these with its own control: a listbox for most, a native
+    // <select> where the kit uses one.
+    const choose = async (part: string, label: string) => {
+      const select = root.locator(`[data-adapttable-part="${part}"]`).first();
+      const tag = await select.evaluate((el) => el.tagName);
+      if (tag === "SELECT") {
+        await select.selectOption({ label });
+        return;
+      }
+      await select.click();
+      // Whatever the kit pops open: a listbox, a menu, or antd's own dropdown.
+      await page
+        .locator(
+          '[role="listbox"]:visible, [role="menu"]:visible, .ant-select-dropdown:visible'
+        )
+        .last()
+        .getByText(label, { exact: true })
+        .first()
+        .click();
+    };
+
+    // The strip aggregates one column at a time; point it at the money one.
+    await choose("grouping-aggregate-column", "Budget");
+    await choose("grouping-aggregate", "Average");
+    await expect(budget).toContainText("$");
+    await choose("grouping-aggregate", "Count");
+    await expect(budget).not.toContainText("$");
+  });
+}
+
 test("mobile RTL keeps pinned totals and group headers", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/${KIT}/aggregation/`);
@@ -102,4 +153,10 @@ test("mobile RTL keeps pinned totals and group headers", async ({ page }) => {
       )
       .first()
   ).toBeVisible();
+  // A group card draws the same subtotal a group row does, so it reads the
+  // same way — through the column, in this locale's own currency.
+  await expect(root.getByText(/[$٬،]|\d/).first()).toBeVisible();
+  await expect(
+    root.locator('[data-adapttable-part="group-card"]').first()
+  ).toContainText(/\d/);
 });

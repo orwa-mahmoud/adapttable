@@ -51,6 +51,22 @@ export type Aggregator<TValue = SortableValue> = (
 ) => DisplayValue | undefined;
 
 /**
+ * What the table knows about the aggregate a column is about to show.
+ *
+ * @public
+ */
+export interface AggregateFormatContext {
+  /** The column the value belongs to. */
+  readonly columnKey: string;
+  /**
+   * The operation that produced it, when the table knows: the reader's own
+   * choice, or the one a server was asked for. A host's `groupAggregates`
+   * mapper declares nothing, so this is absent there.
+   */
+  readonly aggregation?: AggregateName | "none";
+}
+
+/**
  * What to compute per column: a built-in name, or your own function.
  *
  * @public

@@ -24,6 +24,7 @@ import type {
 } from "../columnModel";
 import type { DisplayValue } from "../display";
 import { cellSortValue } from "../engine/cellValue";
+import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 import {
   type BuildGroupedFlatModelOptions,
   flattenGroupPartitions,
@@ -116,6 +117,11 @@ export interface IncrementalViewConfig<TRow> {
   groupBy?: string | readonly string[];
   /** Per-group cells — same signature as `summaryRow`. */
   groupAggregates?: GroupAggregatesFn<TRow>;
+  /**
+   * Which operation produced each of those cells, where it is known. Carried
+   * onto every group so a column can format a total and a count differently.
+   */
+  groupAggregateOps?: GroupAggregateOps;
   /**
    * What the derived callbacks would answer, as a value.
    *
@@ -982,6 +988,7 @@ function groupFlattenOptions<TRow>(
     getRowId: config.getRowId,
     collapsedGroupIds: config.collapsedGroupIds ?? new Set(),
     aggregates: skipAggregates ? undefined : config.groupAggregates,
+    aggregateOps: config.groupAggregateOps,
     blankLabel: config.blankLabel,
     footers: config.groupFooters === true,
     sort: config.groupSort,
@@ -1002,8 +1009,10 @@ function paintGroups<TRow>(
     if (entry.kind === "group") {
       entry.aggregateCells = cellsForGroup(state, config, entry);
       seen.add(entry.key);
+      entry.aggregateOps = config.groupAggregateOps;
     } else if (entry.kind === "groupFooter") {
       entry.aggregateCells = state.groupCells.get(entry.groupKey);
+      entry.aggregateOps = config.groupAggregateOps;
     }
   }
   for (const key of state.groupCells.keys()) {

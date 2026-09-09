@@ -6747,6 +6747,22 @@
       "behavior": ""
     },
     {
+      "export": "AggregateFormatContext",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateName",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
       "export": "BinaryOp",
       "currentImport": "@adapttable/core/formula",
       "kind": "type",
@@ -6807,6 +6823,14 @@
       "currentImport": "@adapttable/core/formula",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
+      "export": "DisplayValue",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/formula",
       "behavior": ""
     },
@@ -6992,6 +7016,22 @@
       "kind": "value",
       "class": "neutral-operation",
       "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateFormatContext",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateName",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
       "behavior": ""
     },
     {
@@ -7304,6 +7344,14 @@
       "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateFormatContext",
+      "currentImport": "@adapttable/core/pivot",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pivot",
       "behavior": ""
     },
     {
@@ -7955,6 +8003,22 @@
       "behavior": ""
     },
     {
+      "export": "AggregateFormatContext",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateName",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
       "export": "buildTableXlsx",
       "currentImport": "@adapttable/core/xlsx",
       "kind": "value",
@@ -8260,6 +8324,14 @@
     },
     {
       "export": "AggregateFn",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateFormatContext",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
@@ -10799,6 +10871,22 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "groupAggregateNode",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "GroupAggregateOps",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },

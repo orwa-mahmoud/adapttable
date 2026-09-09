@@ -5,6 +5,15 @@
 ```ts
 
 // @public
+export interface AggregateFormatContext {
+    readonly aggregation?: AggregateName | "none";
+    readonly columnKey: string;
+}
+
+// @public
+export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
+
+// @public
 export function buildTableXlsx<TRow>(options: {
     rows: readonly TRow[];
     columns: readonly ColumnMetadata<TRow>[];
@@ -92,6 +101,7 @@ export interface ColumnModel<TRow = unknown> {
     exportValue?: (row: TRow) => unknown;
     filter?: ColumnModelFilter;
     flex?: number;
+    formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => DisplayValue | undefined;
     formatValue?: (row: TRow) => string;
     group?: string | readonly string[];
     groupable?: boolean;

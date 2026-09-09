@@ -1141,7 +1141,12 @@ bindings, `add` / `remove` / `moveBy`, and `setAggregate`.
 `groupAgg` parameter. `withGroupAggregateOverrides` layers them over a
 developer `groupAggregates` mapper, while `withQueryAggregateOverrides` does
 the same for server `query.aggregates`; an absent key preserves the developer
-choice and `"none"` removes it.
+choice and `"none"` removes it. A column's `formatAggregate` says how the
+result reads, taking the value and an `AggregateFormatContext` — the column
+key, and the operation where the table knows it. It is applied where the cell
+is drawn: `groupRowLayout` and `groupAggregateEntries` take the group's
+`GroupAggregateOps` and hand each cell through it, and `groupAggregateNode`
+does one cell for a kit that lays out its own group rows.
 
 Adapter authors bind the `GROUPING_PANEL` slot with
 `createAdapterGroupingPanelFeature(AdapterGroupingPanelComponents)`.

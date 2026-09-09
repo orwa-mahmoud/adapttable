@@ -3,6 +3,7 @@ import type { DisplayValue } from "../display";
 import type { ExtraEntry } from "../rows/extraRows";
 import { getPath } from "../utils/path";
 import { parseGroupBy } from "./groupKeys";
+import type { GroupAggregateOps } from "./groupRowLayout";
 
 /**
  * One field/value pair in a nested group's address.
@@ -76,6 +77,13 @@ export type GroupedFlatEntry<TRow> =
       serverCount?: number;
       /** Present when the host passed `groupAggregates`. */
       aggregateCells?: Partial<Record<string, DisplayValue>>;
+      /**
+       * Which operation produced each of those cells, where the table knows
+       * it: the reader's own choice, or the one a server was asked for. What
+       * a column's `formatAggregate` is told, so a count can read as a count
+       * under a money column.
+       */
+      aggregateOps?: GroupAggregateOps;
       collapsed: boolean;
     }
   | {
@@ -99,6 +107,8 @@ export type GroupedFlatEntry<TRow> =
       leafRows: readonly TRow[];
       leafIds: readonly string[];
       aggregateCells?: Partial<Record<string, DisplayValue>>;
+      /** Which operation produced each of those cells, where it is known. */
+      aggregateOps?: GroupAggregateOps;
     }
   | {
       /**
@@ -206,6 +216,12 @@ export interface BuildGroupedFlatModelOptions<TRow> {
   collapsedGroupIds: ReadonlySet<string>;
   /** Optional per-group cells — same shape as `summaryRow`. */
   aggregates?: GroupAggregatesFn<TRow>;
+  /**
+   * Which operation each of those cells came from, where it is known. Carried
+   * on every group so a column's `formatAggregate` can tell a total from a
+   * count without the kits threading it through themselves.
+   */
+  aggregateOps?: GroupAggregateOps;
   /** Override blank-group label (default `"(blank)"`). */
   blankLabel?: string;
   /**
@@ -429,6 +445,7 @@ export function flattenGroupPartitions<TRow>(
     getRowId,
     collapsedGroupIds,
     aggregates,
+    aggregateOps,
     blankLabel,
     footers = false,
     sort,
@@ -504,6 +521,7 @@ export function flattenGroupPartitions<TRow>(
         leafRows: part.rows,
         leafIds: part.rows.map((row) => getRowId(row)),
         aggregateCells,
+        aggregateOps,
         collapsed,
       });
       if (collapsed) continue;
@@ -539,6 +557,7 @@ export function flattenGroupPartitions<TRow>(
           leafRows: part.rows,
           leafIds: part.rows.map((row) => getRowId(row)),
           aggregateCells,
+          aggregateOps,
         });
       }
     }

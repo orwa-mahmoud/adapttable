@@ -636,6 +636,7 @@ export function MobileCards<TRow>({
       entry.kind === "groupMore"
         ? undefined
         : (entry.aggregateCells as Partial<Record<string, ReactNode>>),
+    aggregateOps: entry.kind === "groupMore" ? undefined : entry.aggregateOps,
     collapsed: entry.kind === "group" && entry.collapsed,
   });
 

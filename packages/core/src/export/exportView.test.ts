@@ -264,6 +264,16 @@ describe("viewFromGroupedEntries", () => {
   });
 });
 
+describe("a column's formatAggregate and the file", () => {
+  it("exports the value the aggregate returned, not the one on screen", () => {
+    // Formatting happens where the cell is drawn. A file that carried
+    // "$30" instead of 30 could not be summed by the spreadsheet opening it.
+    const view = viewFromGroupedEntries(GROUPED, (label) => `${label} total`);
+    const groups = view.filter((entry) => entry.role === "group");
+    expect(groups[0]).toMatchObject({ values: { budget: 30 } });
+  });
+});
+
 describe("viewFromTreeEntries", () => {
   it("keeps each row at its tree depth", () => {
     const entries: TreeEntry<Row>[] = [

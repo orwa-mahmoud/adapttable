@@ -15,6 +15,7 @@ import {
   type TableSourceCapabilities,
 } from "../source/capabilities";
 import { type QueryGroupRow, serverGroupEntries } from "../source/queryGroups";
+import type { GroupAggregateOps } from "./groupRowLayout";
 import {
   buildGroupedFlatModel,
   type GroupAggregatesFn,
@@ -86,6 +87,11 @@ export interface GroupedEntriesForStrategyOptions<TRow> {
    * choice is stored and never shown: the cached groups look unchanged.
    */
   derivedKey?: string;
+  /**
+   * Which operation produced each aggregate, where it is known — carried onto
+   * every group so a column can format a total and a count differently.
+   */
+  aggregateOps?: GroupAggregateOps;
 }
 
 /**
@@ -104,6 +110,7 @@ export function groupedEntriesForStrategy<TRow>(
       collapsedGroupIds: options.collapsedGroupIds,
       getRowId: options.getRowId,
       footers: options.footers === true,
+      aggregateOps: options.aggregateOps,
     });
   }
   const rows = options.allFilteredRows ?? [];
@@ -123,6 +130,7 @@ export function groupedEntriesForStrategy<TRow>(
         rowPageSize: options.rowPageSize,
         paging: options.paging,
         derivedKey: options.derivedKey,
+        groupAggregateOps: options.aggregateOps,
       })
     : undefined;
   return [
@@ -134,6 +142,7 @@ export function groupedEntriesForStrategy<TRow>(
         getRowId: options.getRowId,
         collapsedGroupIds: options.collapsedGroupIds,
         aggregates: options.aggregates as GroupAggregatesFn<TRow> | undefined,
+        aggregateOps: options.aggregateOps,
         footers: options.footers === true,
         sort: options.sort,
         filter: options.filter,

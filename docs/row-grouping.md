@@ -69,6 +69,29 @@ header drag-and-drop. Aggregation choices are `sum`, `avg`, `min`, `max`,
 column: Default (or no override) preserves the developer's
 `groupAggregates` result, while `none` explicitly hides it.
 
+A computed aggregate is a number, and a number under a money column should
+read as money. `formatAggregate` on the column says how one reads, and is
+given the operation that produced it where the table knows it — the reader's
+own choice, or the one a server was asked for — so a count reads as a count
+under the same column:
+
+```tsx
+{
+  key: "budget",
+  accessor: (row) => money.format(row.budget),
+  sortValue: (row) => row.budget,
+  formatAggregate: (value, { aggregation }) =>
+    typeof value !== "number" || aggregation === "count"
+      ? value
+      : money.format(value),
+}
+```
+
+It runs where the cell is drawn — group header, group footer and mobile group
+card alike — so the value the table holds, exports and compares stays the one
+the aggregate returned. A mapper that already returns something formatted is
+handed that, and a formatter that only touches numbers leaves it alone.
+
 Compose `columnMenu()` too and each column row gains **Group by…** or
 **Ungroup…**. While grouping is active, an ungrouped column also offers the
 same aggregation choice. Both routes write the same `groupBy` / `groupAgg`

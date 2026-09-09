@@ -5,6 +5,7 @@ import {
   type ConfirmHandler,
   type FilterDef,
   type FilterTypeRegistry,
+  groupAggregateNode,
   REORDER_COLUMN_KEY,
   type RowAction,
   type RowActionsLayout,
@@ -583,11 +584,23 @@ function renderGroupDataCell<TRow>(
         labels={options.labels}
         onToggle={() => options.grouping?.collapsed.toggle(record.key)}
         onShowMore={options.grouping?.showMore}
-        aggregate={record.aggregateCells?.[column.key]}
+        aggregate={
+          groupAggregateNode(
+            column,
+            record.aggregateCells?.[column.key],
+            record.aggregateOps
+          ) as ReactNode
+        }
       />
     );
   } else {
-    content = aggregateCellContent(record.aggregateCells?.[column.key]);
+    content = aggregateCellContent(
+      groupAggregateNode(
+        column,
+        record.aggregateCells?.[column.key],
+        record.aggregateOps
+      ) as ReactNode
+    );
   }
   return content;
 }
