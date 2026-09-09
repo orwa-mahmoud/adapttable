@@ -220,7 +220,14 @@ export function ExportPdfDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               : "Print is opt-in toolbar chrome — same view, browser dialog"}
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
           <Control label="Export mode">
             <Segmented
               label="Export mode"

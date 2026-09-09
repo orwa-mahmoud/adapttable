@@ -70,6 +70,41 @@ for (const { key, route } of PAGES) {
 }
 
 /**
+ * The same contract on a phone, at the narrowest width the site claims to
+ * serve. A control row that only wraps at a desktop width, or a code sample
+ * that widens the document instead of scrolling inside its own box, shows up
+ * here and nowhere else — the desktop widths above have room to hide it.
+ * 320px is the whole loop on purpose: a page that fits there fits the wider
+ * phones, and the suite stays a suite rather than a matrix.
+ */
+for (const { key, route } of PAGES) {
+  test(`${key}: the document does not scroll sideways at 320px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await page.goto(devPath(route));
+
+    const measured = await page.evaluate(() => {
+      const root = document.documentElement;
+      return {
+        overflow: root.scrollWidth - root.clientWidth,
+        clipped: [root, document.body].map(
+          (element) => getComputedStyle(element).overflowX
+        ),
+      };
+    });
+
+    expect(
+      measured.overflow,
+      `${devPath(route)} overflows its viewport by ${measured.overflow}px at 320px`
+    ).toBeLessThanOrEqual(1);
+    for (const overflowX of measured.clipped) {
+      expect(overflowX).not.toBe("hidden");
+    }
+  });
+}
+
+/**
  * The other half of the contract: a still page must not come from pinning the
  * demos' own scrollers. The scale page's wide column set is the case that tells
  * — forty columns scroll inside the table's scroll box while the document
