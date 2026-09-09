@@ -252,7 +252,12 @@ describe("an incoming row under a pending batch", () => {
     });
 
     expect(result.current.entries).toEqual([
-      { rowId: "1", seeds: { title: "Ship" }, drafts: { title: "mine" } },
+      {
+        rowId: "1",
+        openedRow: ROWS[0],
+        seeds: { title: "Ship" },
+        drafts: { title: "mine" },
+      },
     ]);
   });
 

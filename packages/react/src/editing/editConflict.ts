@@ -113,6 +113,14 @@ export interface EditConflictState<TRow> {
    */
   anyContested: boolean;
   /**
+   * Whether any field of this row is waiting on an answer.
+   *
+   * Every route that saves a row asks this, not whether the field the reader
+   * happens to be standing in is contested: Enter in an untouched field would
+   * otherwise write the draft of a field they have not looked at.
+   */
+  isRowContested: (rowId: string) => boolean;
+  /**
    * A digest of one row's contested cells, for a row memo comparator. A
    * memoized row that cannot see the question never redraws to show it.
    */
@@ -179,6 +187,11 @@ export interface ReconcileLiveEdit<TRow> {
 export interface ReconcileLiveRowEdit<TRow> {
   /** The open row's id, or `null` when no form is open. */
   activeRowId: string | null;
+  /**
+   * The row as it read when the form opened. A host comparing `row` with
+   * `previous` sees the change; without it both name the incoming row.
+   */
+  openedRow?: TRow;
   /**
    * What each field read when the form opened, or last accepted. A form is
    * measured field by field, not row against row: the reader typed into some
@@ -282,6 +295,12 @@ export interface ReconcileLiveBatchEdit<TRow> {
     readonly rowId: string;
     readonly seeds: Readonly<Record<string, string>>;
     readonly drafts: Readonly<Record<string, string>>;
+    /**
+     * The row as it read when the reader first changed it, so a host
+     * comparing `row` with `previous` sees the change rather than the same
+     * object twice. Untyped for the same reason the batch state leaves it so.
+     */
+    readonly openedRow?: unknown;
   }[];
   /** The rendered row set. */
   rows: readonly TRow[];
@@ -300,13 +319,21 @@ export interface ReconcileLiveBatchEdit<TRow> {
 }
 
 /** Whether two stores hold the same cells. */
-function sameKeys(
-  left: ReadonlyMap<string, unknown>,
-  right: ReadonlyMap<string, unknown>
+/**
+ * Whether two contested sets say the same thing to the reader.
+ *
+ * Keys alone are not enough: a second update to a field already waiting on an
+ * answer leaves the key set untouched while the value it carries changes, and
+ * a set treated as unchanged would go on showing — and taking — what arrived
+ * first.
+ */
+function sameContested<TRow>(
+  left: ReadonlyMap<string, ContestedCell<TRow>>,
+  right: ReadonlyMap<string, ContestedCell<TRow>>
 ): boolean {
   if (left.size !== right.size) return false;
-  for (const key of left.keys()) {
-    if (!right.has(key)) return false;
+  for (const [key, cell] of left) {
+    if (right.get(key)?.incoming !== cell.incoming) return false;
   }
   return true;
 }
@@ -495,6 +522,7 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
     settleFields({
       rowId: activeRowId,
       row: live,
+      previous: input.openedRow,
       moved: movedFields(seeds, live, input.columns),
       drafts: input.drafts,
       policy: input.policy,
@@ -526,6 +554,9 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
         settleFields({
           rowId: entry.rowId,
           row: live,
+          // The batch holds the snapshot as `unknown` so its state still fits
+          // the chrome's erased shape; it is this row, and nothing else.
+          previous: entry.openedRow as TRow | undefined,
           moved: movedFields(entry.seeds, live, input.columns),
           drafts: entry.drafts,
           policy: input.policy,
@@ -549,6 +580,8 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
     (input: {
       rowId: string;
       row: TRow;
+      /** What the row read when the reader started, for the host's compare. */
+      previous?: TRow;
       moved: readonly EditConflictChange[];
       drafts: Readonly<Record<string, string>>;
       policy: EditConflictPolicy;
@@ -583,7 +616,7 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
       const conflict: EditConflict<TRow> = {
         unit: "row",
         row: input.row,
-        previous: input.row,
+        previous: input.previous ?? input.row,
         rowId: input.rowId,
         // Each contested field carries its own question.
         columnKey: "",
@@ -633,8 +666,12 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
           incoming: change.incoming,
         });
       }
-      if (sameKeys(contestedRef.current, next)) return;
+      const settled = sameContested(contestedRef.current, next);
+      // The ref always takes the newest row and the callbacks bound to it, so
+      // an answer given later acts on what arrived last. Only what the reader
+      // can see decides whether to render again.
       contestedRef.current = next;
+      if (settled) return;
       setContested(next);
     }
   );
@@ -689,6 +726,16 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
     [contested]
   );
 
+  const isRowContested = useCallback(
+    (rowId: string) => {
+      for (const key of contested.keys()) {
+        if (key.startsWith(`${rowId}\u0000`)) return true;
+      }
+      return false;
+    },
+    [contested]
+  );
+
   const rowSignature = useCallback(
     (rowId: string) => {
       let digest = "";
@@ -721,6 +768,7 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
       takeCell,
       contestedCell,
       anyContested: contested.size > 0,
+      isRowContested,
       rowSignature,
       reconcile,
       reconcileRow,
@@ -736,6 +784,7 @@ export function useEditConflict<TRow>(): EditConflictState<TRow> {
       keepCell,
       takeCell,
       contestedCell,
+      isRowContested,
       rowSignature,
       contested,
       reconcile,

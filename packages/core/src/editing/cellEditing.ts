@@ -112,6 +112,27 @@ export interface CustomCellEditorCtrl {
   validating: boolean;
   /** `id` of the message element, for `aria-describedby`. */
   errorId: string;
+  /**
+   * The question this cell is waiting on, when the value moved underneath the
+   * draft. The table draws its own notice either way; an editor that wants the
+   * choice inside its own surface — a picker showing what arrived beside what
+   * was chosen — builds it from this.
+   */
+  conflict?: CustomCellEditorConflict;
+}
+
+/**
+ * What arrived under a draft, and the two ways out of it.
+ *
+ * @public
+ */
+export interface CustomCellEditorConflict {
+  /** What the cell reads now. */
+  readonly incomingValue: string;
+  /** Keep the draft; the incoming value becomes what it is measured against. */
+  readonly keep: () => void;
+  /** Replace the draft with the incoming value. */
+  readonly take: () => void;
 }
 
 /**

@@ -216,6 +216,7 @@ describe("rowEditingSignature", () => {
       isConflict: (rowId: string, columnKey: string) =>
         rowId === "1" && columnKey === "name",
       isRowConflict: () => false,
+      isRowContested: () => false,
       keepCell: () => undefined,
       takeCell: () => undefined,
       contestedCell: () => undefined,
@@ -369,6 +370,7 @@ describe("editableCellController — leaving an edit", () => {
       isConflict: (rowId: string, columnKey: string) =>
         rowId === "1" && columnKey === "name",
       isRowConflict: () => false,
+      isRowContested: () => false,
       keepCell: () => undefined,
       takeCell: () => undefined,
       contestedCell: () => undefined,

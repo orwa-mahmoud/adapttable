@@ -70,6 +70,12 @@ export interface BatchEditingState<TRow> {
   /** Every pending row, and what each changed field is measured against. */
   entries: readonly {
     readonly rowId: string;
+    /**
+     * The row as it read when the reader first changed it. Untyped because
+     * the chrome hands this state around as `BatchEditingState<never>`, and a
+     * row in an output position would stop it fitting there.
+     */
+    readonly openedRow: unknown;
     readonly seeds: Readonly<Record<string, string>>;
     readonly drafts: Readonly<Record<string, string>>;
   }[];
@@ -197,6 +203,7 @@ export function useBatchEditing<TRow>(
     () =>
       Object.entries(pending).map(([rowId, entry]) => ({
         rowId,
+        openedRow: entry.row,
         seeds: entry.seeds,
         drafts: entry.drafts,
       })),

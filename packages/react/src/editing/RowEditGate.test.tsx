@@ -22,6 +22,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   batchEditTestSlots,
+  editableCellTestSlots,
   rowEditTestSlots,
 } from "../internal/chromeTestSlots";
 import { useBatchEditing } from "./batchEditing";
@@ -258,6 +259,84 @@ describe("RowEditCell", () => {
     });
   });
 
+  it("refuses Enter in an untouched field while another one is asking", () => {
+    // The reader is standing in title; points is the field that moved. Saving
+    // from here would write the points draft they have not looked at.
+    const onRowEdit = vi.fn();
+    const result = openRow(onRowEdit);
+    render(
+      <RowEditCell
+        rowEditing={result.current}
+        column={COLUMNS[0]!}
+        display="Ship"
+        editLabel="Edit cell"
+        takesFocus
+        renderEditor={editorFor}
+        rowAsking
+      />
+    );
+    act(() => {
+      fireEvent.keyDown(screen.getByLabelText("field"), { key: "Enter" });
+    });
+    expect(onRowEdit).not.toHaveBeenCalled();
+    expect(result.current.activeRowId).toBe("1");
+  });
+
+  it("a custom editor gets the question, and cannot commit past it", () => {
+    const onRowEdit = vi.fn();
+    const result = openRow(onRowEdit);
+    const keep = vi.fn();
+    render(
+      <RowEditCell
+        rowEditing={result.current}
+        column={{
+          key: "title",
+          editable: true,
+          editor: {
+            type: "custom",
+            render: (ctrl: CustomCellEditorCtrl) => (
+              <>
+                <button type="button" onClick={() => ctrl.commit()}>
+                  {"commit"}
+                </button>
+                <span>{`incoming:${ctrl.conflict?.incomingValue ?? ""}`}</span>
+                <button type="button" onClick={() => ctrl.conflict?.keep()}>
+                  {"own keep"}
+                </button>
+              </>
+            ),
+          },
+        }}
+        display="Ship"
+        editLabel="Edit cell"
+        takesFocus
+        renderEditor={editorFor}
+        ask={{ incomingValue: "Arrived", keep, take: vi.fn() }}
+        rowAsking
+        conflictLabels={{
+          message: "This changed",
+          keepMine: "Keep mine",
+          takeTheirs: "Take theirs",
+          theirsValue: (value) => `Theirs: ${value}`,
+        }}
+        slots={editableCellTestSlots}
+      />
+    );
+    // The table's own notice is there, whatever the editor draws.
+    expect(screen.getByText("This changed")).toBeInTheDocument();
+    // ... and the editor is handed the question, so it can draw its own.
+    expect(screen.getByText("incoming:Arrived")).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "own keep" }));
+    });
+    expect(keep).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "commit" }));
+    });
+    expect(onRowEdit).not.toHaveBeenCalled();
+  });
+
   it("normalizes a chooser's options for either kind", () => {
     const result = openRow();
     const seen: EditableCellEditorCtrl[] = [];
@@ -391,7 +470,7 @@ describe("RowEditActions", () => {
     expect(part("row-edit-cancel")).not.toBeNull();
   });
 
-  it("offers no way to save while a field is waiting on an answer", () => {
+  it("offers no way to save while a field is waiting, but still to cancel", () => {
     const result = openRow(vi.fn());
     render(
       <RowEditActionsChrome
@@ -403,9 +482,10 @@ describe("RowEditActions", () => {
       />
     );
     // The fields that moved carry the question, each with its own notice.
-    // Saving past it would write over a value the reader has not looked at.
+    // Saving past it would write over a value the reader has not looked at —
+    // abandoning the draft is theirs to do at any time.
     expect(part("row-edit-save")).toBeNull();
-    expect(part("row-edit-cancel")).toBeNull();
+    expect(part("row-edit-cancel")).not.toBeNull();
   });
 
   it("leaves a row nobody is asking about alone", () => {
@@ -590,6 +670,50 @@ describe("BatchEditCell", () => {
     });
     expect(onBatchEdit).not.toHaveBeenCalled();
     expect(result.current.draftFor(TASK, "1", "title")).toBe("Ship it now");
+  });
+
+  it("a custom editor in a batch gets the question too", () => {
+    const { result } = mountBatch();
+    const take = vi.fn();
+    render(
+      <BatchEditCell
+        batch={result.current}
+        row={TASK}
+        rowId="1"
+        column={{
+          key: "title",
+          editable: true,
+          editor: {
+            type: "custom",
+            render: (ctrl: CustomCellEditorCtrl) => (
+              <>
+                <span>{`incoming:${ctrl.conflict?.incomingValue ?? ""}`}</span>
+                <button type="button" onClick={() => ctrl.conflict?.take()}>
+                  {"own take"}
+                </button>
+              </>
+            ),
+          },
+        }}
+        display="Ship"
+        editLabel="Edit cell"
+        renderEditor={editorFor}
+        ask={{ incomingValue: "Arrived", keep: vi.fn(), take }}
+        conflictLabels={{
+          message: "This changed",
+          keepMine: "Keep mine",
+          takeTheirs: "Take theirs",
+          theirsValue: (value) => `Theirs: ${value}`,
+        }}
+        slots={editableCellTestSlots}
+      />
+    );
+    expect(screen.getByText("This changed")).toBeInTheDocument();
+    expect(screen.getByText("incoming:Arrived")).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "own take" }));
+    });
+    expect(take).toHaveBeenCalledTimes(1);
   });
 
   it("marks only a changed cell, and hands a custom editor cancel-this-row", () => {

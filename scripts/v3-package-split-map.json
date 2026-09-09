@@ -7115,6 +7115,14 @@
       "behavior": ""
     },
     {
+      "export": "CustomCellEditorConflict",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
       "export": "CustomCellEditorCtrl",
       "currentImport": "@adapttable/core/pdf",
       "kind": "type",
@@ -8044,6 +8052,14 @@
     },
     {
       "export": "ColumnModelFilter",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "CustomCellEditorConflict",
       "currentImport": "@adapttable/core/xlsx",
       "kind": "type",
       "class": "neutral-model",
@@ -9503,6 +9519,14 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "CustomCellEditorConflict",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },

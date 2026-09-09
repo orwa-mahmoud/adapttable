@@ -75,6 +75,7 @@ import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuItemsFactory } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
 import { CSSProperties } from 'react';
+import { CustomCellEditorConflict } from '@adapttable/core';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
 import { DEFAULT_CARD_SIZE_PX } from '@adapttable/core';
@@ -732,6 +733,7 @@ export interface BatchEditingState<TRow> {
     draftFor: (row: TRow, rowId: string, columnKey: string) => string;
     entries: readonly {
         readonly rowId: string;
+        readonly openedRow: unknown;
         readonly seeds: Readonly<Record<string, string>>;
         readonly drafts: Readonly<Record<string, string>>;
     }[];
@@ -1478,6 +1480,8 @@ export function createAdapterTableAssistantFeature(TableAssistant: AdapterFeatur
 // @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): MemoExoticComponent<(props: Readonly<TProps>) => ReactElement>;
 
+export { CustomCellEditorConflict }
+
 export { CustomCellEditorCtrl }
 
 export { CustomCellEditorRender }
@@ -2070,6 +2074,7 @@ export interface EditConflictState<TRow> {
     current: EditConflict<TRow> | null;
     isConflict: (rowId: string, columnKey: string) => boolean;
     isRowConflict: (rowId: string) => boolean;
+    isRowContested: (rowId: string) => boolean;
     keep: () => void;
     keepCell: (rowId: string, columnKey: string) => void;
     reconcile: (input: ReconcileLiveEdit<TRow>) => void;
@@ -3607,6 +3612,7 @@ export interface ReconcileLiveBatchEdit<TRow> {
         readonly rowId: string;
         readonly seeds: Readonly<Record<string, string>>;
         readonly drafts: Readonly<Record<string, string>>;
+        readonly openedRow?: unknown;
     }[];
     onEditConflict?: EditConflictHandler<TRow>;
     policy: EditConflictPolicy;
@@ -3640,6 +3646,7 @@ export interface ReconcileLiveRowEdit<TRow> {
     columns: readonly EditableColumnLike<TRow>[];
     drafts: Readonly<Record<string, string>>;
     onEditConflict?: EditConflictHandler<TRow>;
+    openedRow?: TRow;
     policy: EditConflictPolicy;
     rowKey: (row: TRow) => string;
     rows: readonly TRow[];
@@ -3777,6 +3784,7 @@ export interface RowEditCellProps<TRow> {
     editLabel: string;
     errorClassName?: string;
     renderEditor: (ctrl: EditableCellEditorCtrl) => ReactElement;
+    rowAsking?: boolean;
     rowEditing: RowEditingState<TRow>;
     slots?: EditableCellSlots;
     takesFocus: boolean;

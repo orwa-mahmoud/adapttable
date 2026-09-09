@@ -1001,9 +1001,17 @@ export const csvWriter: ExportWriter;
 export function currentFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | undefined;
 
 // @public
+export interface CustomCellEditorConflict {
+    readonly incomingValue: string;
+    readonly keep: () => void;
+    readonly take: () => void;
+}
+
+// @public
 export interface CustomCellEditorCtrl {
     cancel: () => void;
     commit: () => void;
+    conflict?: CustomCellEditorConflict;
     draft: string;
     error?: string;
     errorId: string;

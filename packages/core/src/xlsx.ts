@@ -58,7 +58,10 @@ export type { ColumnHeaderController } from "./types";
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
  */
-export type { CustomCellEditorCtrl } from "./editing/cellEditing";
+export type {
+  CustomCellEditorConflict,
+  CustomCellEditorCtrl,
+} from "./editing/cellEditing";
 export type { ExportRowMeta } from "./export/exportWriter";
 export type { FilterOptionsSource } from "./filters/filterDefs";
 

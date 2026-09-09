@@ -234,11 +234,18 @@ describe("a row edited as one unit", () => {
       drafts?: Record<string, string>;
       activeRowId?: string | null;
       seeds?: Record<string, string>;
+      openedRow?: Task;
+      onEditConflict?: (conflict: {
+        row: Task;
+        previous: Task;
+      }) => "keep" | "take" | void;
     } = {}
   ) {
     act(() => {
       state.reconcileRow({
         activeRowId: over.activeRowId === undefined ? "1" : over.activeRowId,
+        openedRow: over.openedRow,
+        onEditConflict: over.onEditConflict,
         seeds: over.seeds ?? SEEDS,
         drafts: over.drafts ?? { title: "mine" },
         rows,
@@ -249,6 +256,56 @@ describe("a row edited as one unit", () => {
       });
     });
   }
+
+  it("a second update replaces what the question shows and what Take writes", () => {
+    // The keys do not change when a field that is already asking moves again.
+    // A set compared by keys alone would go on showing — and taking — the
+    // value that arrived first.
+    const { result } = renderHook(() => useEditConflict<Task>());
+    const take = vi.fn();
+    reconcile(result.current, [LIVE], { accept: vi.fn(), take });
+    expect(result.current.contestedCell("1", "title")?.incomingValue).toBe(
+      "Arrived"
+    );
+
+    const AGAIN: Task = { id: "1", title: "Arrived again", rev: 3 };
+    reconcile(result.current, [AGAIN], { accept: vi.fn(), take });
+    expect(result.current.contestedCell("1", "title")?.incomingValue).toBe(
+      "Arrived again"
+    );
+
+    act(() => {
+      result.current.takeCell("1", "title");
+    });
+    expect(take).toHaveBeenCalledWith(AGAIN, ["title"]);
+  });
+
+  it("tells a host what the row read before the change", () => {
+    const { result } = renderHook(() => useEditConflict<Task>());
+    const seen: { row: Task; previous: Task }[] = [];
+    reconcile(
+      result.current,
+      [LIVE],
+      { accept: vi.fn(), take: vi.fn() },
+      {
+        openedRow: OPENED,
+        onEditConflict: (conflict) => {
+          seen.push({ row: conflict.row, previous: conflict.previous });
+        },
+      }
+    );
+    expect(seen).toHaveLength(1);
+    expect(seen[0]?.row).toBe(LIVE);
+    expect(seen[0]?.previous).toBe(OPENED);
+  });
+
+  it("names every field of the row that is waiting on an answer", () => {
+    const { result } = renderHook(() => useEditConflict<Task>());
+    expect(result.current.isRowContested("1")).toBe(false);
+    reconcile(result.current, [LIVE], { accept: vi.fn(), take: vi.fn() });
+    expect(result.current.isRowContested("1")).toBe(true);
+    expect(result.current.isRowContested("2")).toBe(false);
+  });
 
   it("asks about a field the reader was working in", () => {
     const { result } = renderHook(() => useEditConflict<Task>());

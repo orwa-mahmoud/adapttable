@@ -398,6 +398,7 @@ export {
   type CellEditor,
   type CellEditorOption,
   type CellEditTarget,
+  type CustomCellEditorConflict,
   type CustomCellEditorCtrl,
   type CustomCellEditorRender,
   type EditableColumnLike,

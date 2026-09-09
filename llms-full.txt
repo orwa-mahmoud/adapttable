@@ -10726,6 +10726,10 @@ checkbox and multi-select with its own controls. A ninth kind,
 `CustomCellEditorRender` is the callback and `CustomCellEditorCtrl` what it
 receives (`draft`, `setDraft`, `commit`, `cancel`, `onKeyDown`, `onBlur`,
 `focusRef`, plus the validation trio), with `isCustomEditor` telling it apart.
+A cell whose value moved under the draft also carries
+`CustomCellEditorConflict` — the incoming value and the two ways out of it —
+so an editor can put the choice inside its own surface; the table draws its
+notice either way, in cell, row and batch editing alike.
 `EditableColumnLike` is the minimal column shape editing reads, and
 `isCellEditable` / `hasEditableColumns` are the two predicates the chrome uses.
 

@@ -10,6 +10,7 @@
  */
 import {
   type CellEditor,
+  type CustomCellEditorConflict,
   type DisplayValue,
   type EditableColumnLike,
   isCustomEditor,
@@ -73,6 +74,13 @@ export interface RowEditCellProps<TRow> {
    * the form and this is one of the fields that moved.
    */
   ask?: CellConflictAsk;
+  /**
+   * Whether any field of this row is waiting on an answer — not just this one.
+   * Saving is the row's gesture, so it is the row's state that gates it: Enter
+   * in an untouched field would otherwise write the draft of a field the
+   * reader has not looked at.
+   */
+  rowAsking?: boolean;
   /** Labels for the notice — already resolved. */
   conflictLabels?: NonNullable<EditableCellEditing<never>["conflictLabels"]>;
   /** Class for the notice. */
@@ -99,6 +107,7 @@ export function RowEditCell<TRow>({
   takesFocus,
   renderEditor,
   ask,
+  rowAsking,
   conflictLabels,
   errorClassName,
   slots,
@@ -107,6 +116,9 @@ export function RowEditCell<TRow>({
   if (!editor) return <>{display}</>;
   const focusRef = takesFocus ? focusEditorOnMount : () => undefined;
   const errorId = `adapttable-row-edit-${column.key}`;
+  // The row's question, not this field's: every route that saves the row is
+  // gated by the same answer.
+  const saveBlocked = rowAsking ?? ask !== undefined;
 
   const ctrl: EditableCellEditorCtrl = {
     draft: rowEditing.draftFor(column.key),
@@ -115,12 +127,13 @@ export function RowEditCell<TRow>({
     },
     // Enter saves the whole row, Escape cancels it: in row mode the unit is the
     // row, so a per-cell commit would be a different feature wearing this one's
-    // keys. Enter does nothing while a field is waiting on an answer — saving
-    // then would write over a value the reader has not looked at.
+    // keys. Enter does nothing while ANY field of the row is waiting on an
+    // answer — saving from an untouched field would write over a value the
+    // reader has not looked at.
     onEditorKeyDown: (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
-        if (!ask) rowEditing.save();
+        if (!saveBlocked) rowEditing.save();
       } else if (event.key === "Escape") {
         event.preventDefault();
         rowEditing.cancel();
@@ -137,18 +150,36 @@ export function RowEditCell<TRow>({
   };
 
   if (isCustomEditor(editor)) {
-    return editor.render({
-      draft: ctrl.draft,
-      setDraft: ctrl.setDraft,
-      commit: rowEditing.save,
-      cancel: rowEditing.cancel,
-      onKeyDown: ctrl.onEditorKeyDown,
-      onBlur: ctrl.commitOnBlur,
-      focusRef,
-      label: editLabel,
-      validating: false,
-      errorId: ctrl.errorId,
-    }) as ReactElement;
+    return (
+      <>
+        {
+          editor.render({
+            draft: ctrl.draft,
+            setDraft: ctrl.setDraft,
+            commit: () => {
+              if (!saveBlocked) rowEditing.save();
+            },
+            cancel: rowEditing.cancel,
+            onKeyDown: ctrl.onEditorKeyDown,
+            onBlur: ctrl.commitOnBlur,
+            focusRef,
+            label: editLabel,
+            validating: false,
+            errorId: ctrl.errorId,
+            conflict: conflictContext(ask),
+          }) as ReactElement
+        }
+        {slots ? (
+          <CellConflictNotice
+            ask={ask}
+            labels={conflictLabels}
+            errorId={errorId}
+            errorClassName={errorClassName}
+            slots={slots}
+          />
+        ) : null}
+      </>
+    );
   }
   return (
     <>
@@ -164,6 +195,18 @@ export function RowEditCell<TRow>({
       ) : null}
     </>
   );
+}
+
+/**
+ * The question a contested field is waiting on, in the shape a host's own
+ * editor is handed. The table still draws its notice; this is for an editor
+ * that wants the choice inside its own surface.
+ */
+function conflictContext(
+  ask: CellConflictAsk | undefined
+): CustomCellEditorConflict | undefined {
+  if (!ask) return undefined;
+  return { incomingValue: ask.incomingValue, keep: ask.keep, take: ask.take };
 }
 
 /** The options a chooser editor carries, normalized. */
@@ -381,10 +424,12 @@ export function RowEditActionsChrome<TRow>({
 }: Readonly<RowEditActionsChromeProps<TRow>>): ReactElement | null {
   const controls = rowEditControls(options);
   const Button = slots.Button;
-  // While the notice above the row holds the question, the row offers no way
-  // to save: a form measured against a row that has since moved would write
-  // over a change the reader never saw.
-  if (controls.editing && conflict?.asking === true) return null;
+  // While the notice holds the question, the row offers no way to SAVE: a
+  // form measured against a row that has since moved would write over a
+  // change the reader never saw. Cancel stays — abandoning a draft is always
+  // theirs to do, and taking away the way out leaves them holding a form they
+  // can neither finish nor drop.
+  const asking = controls.editing && conflict?.asking === true;
   if (!controls.editing) {
     // A host action already opens this row, so drawing the built-in control
     // would put two identical triggers side by side.
@@ -408,16 +453,18 @@ export function RowEditActionsChrome<TRow>({
       className={className}
       style={{ display: "inline-flex", gap: 4 }}
     >
-      <Button
-        label={controls.saveLabel}
-        part="row-edit-save"
-        icon={icons?.save}
-        className={buttonClassName}
-        onClick={(event) => {
-          event.stopPropagation();
-          controls.save();
-        }}
-      />
+      {asking ? null : (
+        <Button
+          label={controls.saveLabel}
+          part="row-edit-save"
+          icon={icons?.save}
+          className={buttonClassName}
+          onClick={(event) => {
+            event.stopPropagation();
+            controls.save();
+          }}
+        />
+      )}
       <Button
         label={controls.cancelLabel}
         part="row-edit-cancel"
@@ -516,20 +563,39 @@ export function BatchEditCell<TRow>({
   };
 
   if (isCustomEditor(editor)) {
-    return editor.render({
-      draft: ctrl.draft,
-      setDraft: ctrl.setDraft,
-      commit: () => undefined,
-      cancel: () => {
-        batch.cancelRow(rowId);
-      },
-      onKeyDown: ctrl.onEditorKeyDown,
-      onBlur: ctrl.commitOnBlur,
-      focusRef: ctrl.focusRef,
-      label: editLabel,
-      validating: false,
-      errorId: ctrl.errorId,
-    }) as ReactElement;
+    return (
+      <span
+        data-adapttable-part="batch-edit-cell"
+        data-changed={batch.isChanged(rowId, column.key) ? "" : undefined}
+      >
+        {
+          editor.render({
+            draft: ctrl.draft,
+            setDraft: ctrl.setDraft,
+            commit: () => undefined,
+            cancel: () => {
+              batch.cancelRow(rowId);
+            },
+            onKeyDown: ctrl.onEditorKeyDown,
+            onBlur: ctrl.commitOnBlur,
+            focusRef: ctrl.focusRef,
+            label: editLabel,
+            validating: false,
+            errorId: ctrl.errorId,
+            conflict: conflictContext(ask),
+          }) as ReactElement
+        }
+        {slots ? (
+          <CellConflictNotice
+            ask={ask}
+            labels={conflictLabels}
+            errorId={ctrl.errorId}
+            errorClassName={errorClassName}
+            slots={slots}
+          />
+        ) : null}
+      </span>
+    );
   }
   return (
     <span

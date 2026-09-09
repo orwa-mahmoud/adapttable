@@ -938,7 +938,11 @@ export type {
 export type { TableCommandOptions } from "@adapttable/core";
 export type { ConfirmRequest } from "@adapttable/core";
 export type { ContextMenuActions } from "@adapttable/core";
-export type { CellEditor, CustomCellEditorCtrl } from "@adapttable/core";
+export type {
+  CellEditor,
+  CustomCellEditorConflict,
+  CustomCellEditorCtrl,
+} from "@adapttable/core";
 export type { ExportPayload, ExportWriteContext } from "@adapttable/core";
 export type {
   ExportAllControls,

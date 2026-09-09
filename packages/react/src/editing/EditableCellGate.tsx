@@ -533,6 +533,7 @@ export function EditableCellGate<TRow>(
         takesFocus={isFirstEditableColumn(props.columns, props.column.key)}
         renderEditor={props.renderEditor}
         ask={cellAsk(props.editing, props.rowId, props.column.key)}
+        rowAsking={props.editing?.conflict?.isRowContested(props.rowId)}
         conflictLabels={props.editing?.conflictLabels}
         errorClassName={props.errorClassName}
         slots={props.slots}
@@ -584,6 +585,13 @@ export function EditableCellGate<TRow>(
       error: ctrl.error,
       validating: ctrl.validating,
       errorId,
+      conflict: ctrl.conflict
+        ? {
+            incomingValue: ctrl.conflict.incomingValue,
+            keep: ctrl.keepConflict,
+            take: ctrl.takeConflict,
+          }
+        : undefined,
     });
     return (
       <>

@@ -133,9 +133,17 @@ export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 // @public
+export interface CustomCellEditorConflict {
+    readonly incomingValue: string;
+    readonly keep: () => void;
+    readonly take: () => void;
+}
+
+// @public
 export interface CustomCellEditorCtrl {
     cancel: () => void;
     commit: () => void;
+    conflict?: CustomCellEditorConflict;
     draft: string;
     error?: string;
     errorId: string;

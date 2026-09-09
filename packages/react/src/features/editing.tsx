@@ -183,6 +183,7 @@ function LiveEditing({
     if (!rowModeArmed) return;
     conflict.reconcileRow({
       activeRowId: rowEditing.activeRowId,
+      openedRow: rowEditing.openedRow(),
       seeds: rowEditing.seeds(),
       drafts: rowEditing.drafts,
       rows: editingRows,

@@ -248,6 +248,7 @@ export interface BatchEditingState<TRow> {
     draftFor: (row: TRow, rowId: string, columnKey: string) => string;
     entries: readonly {
         readonly rowId: string;
+        readonly openedRow: unknown;
         readonly seeds: Readonly<Record<string, string>>;
         readonly drafts: Readonly<Record<string, string>>;
     }[];
@@ -781,6 +782,7 @@ export interface EditConflictState<TRow> {
     current: EditConflict<TRow> | null;
     isConflict: (rowId: string, columnKey: string) => boolean;
     isRowConflict: (rowId: string) => boolean;
+    isRowContested: (rowId: string) => boolean;
     keep: () => void;
     keepCell: (rowId: string, columnKey: string) => void;
     reconcile: (input: ReconcileLiveEdit<TRow>) => void;
@@ -1289,6 +1291,7 @@ export interface ReconcileLiveBatchEdit<TRow> {
         readonly rowId: string;
         readonly seeds: Readonly<Record<string, string>>;
         readonly drafts: Readonly<Record<string, string>>;
+        readonly openedRow?: unknown;
     }[];
     onEditConflict?: EditConflictHandler<TRow>;
     policy: EditConflictPolicy;
@@ -1322,6 +1325,7 @@ export interface ReconcileLiveRowEdit<TRow> {
     columns: readonly EditableColumnLike<TRow>[];
     drafts: Readonly<Record<string, string>>;
     onEditConflict?: EditConflictHandler<TRow>;
+    openedRow?: TRow;
     policy: EditConflictPolicy;
     rowKey: (row: TRow) => string;
     rows: readonly TRow[];
