@@ -74,6 +74,7 @@ export {
   type AdapterEditingComponents,
   type AdapterEditingFeatures,
   createAdapterEditingFeatures,
+  type EditableCellRenderProps,
 } from "./adapterFeatures/editing";
 export {
   ContextMenuLiveGate,

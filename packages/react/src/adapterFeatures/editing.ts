@@ -1,4 +1,4 @@
-import { createElement } from "react";
+import { createElement, type ReactNode } from "react";
 
 import type { BatchRowEdit } from "../editing/batchEditing";
 import type {
@@ -30,13 +30,31 @@ import type {
 import type { AdapterFeatureComponent } from "./component";
 
 /**
+ * What a kit's editable cell is handed: the slot's props with the display
+ * already resolved.
+ *
+ * The binding works the content out — the display the row precomputed, the
+ * column's own `Cell`, or its accessor — so every kit draws the same thing
+ * and none of them repeats the rule.
+ *
+ * @public
+ */
+export type EditableCellRenderProps<TRow = never> =
+  EditableCellSlotProps<TRow> & {
+    /** What the cell shows while nothing is being edited. */
+    readonly display: ReactNode;
+  };
+
+/**
  * Kit renderers for the editing feature family.
  *
  * @public
  */
 export interface AdapterEditingComponents {
   /** In-place cell editor. */
-  readonly EditableCell: AdapterFeatureComponent<EditableCellSlotProps<never>>;
+  readonly EditableCell: AdapterFeatureComponent<
+    EditableCellRenderProps<never>
+  >;
   /** Save/cancel actions for row editing. */
   readonly RowEditActions: AdapterFeatureComponent<RowEditActionsProps<never>>;
   /** Save/discard bar for batch editing. */
@@ -87,13 +105,39 @@ export interface AdapterEditingFeatures {
  *
  * @public
  */
+/**
+ * The kit's cell, with the content it shows when nothing is being edited
+ * already worked out.
+ *
+ * Every kit resolved this the same way — the display the row precomputed, or
+ * the column's own `Cell`, or its accessor — which is one rule in seven
+ * places. It stays a component rather than a call inside the slot renderer so
+ * the accessor keeps running in the cell's own memo scope: re-rendering a row
+ * for selection or expansion must not re-run its data accessors.
+ */
+function withResolvedDisplay(
+  Cell: AdapterFeatureComponent<EditableCellRenderProps<never>>
+): AdapterFeatureComponent<EditableCellSlotProps<never>> {
+  return function EditableCellWithDisplay(props) {
+    const column = props.column;
+    const display =
+      props.display ??
+      (column.Cell
+        ? createElement(column.Cell, {
+            row: props.row,
+            rowIndex: props.rowIndex,
+          })
+        : column.accessor?.(props.row));
+    return createElement(Cell, { ...props, display });
+  };
+}
+
 export function createAdapterEditingFeatures(
   components: AdapterEditingComponents
 ): AdapterEditingFeatures {
+  const EditableCell = withResolvedDisplay(components.EditableCell);
   const cellChrome = [
-    slotRender(EDITABLE_CELL, (props) =>
-      createElement(components.EditableCell, props)
-    ),
+    slotRender(EDITABLE_CELL, (props) => createElement(EditableCell, props)),
     slotRender(ROW_EDIT_ACTIONS, (props) =>
       createElement(components.RowEditActions, props)
     ),

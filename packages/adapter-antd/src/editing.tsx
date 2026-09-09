@@ -1,18 +1,11 @@
-import {
-  createAdapterEditingFeatures,
-  type EditableCellSlotProps,
-} from "@adapttable/react/adapter";
+import { createAdapterEditingFeatures } from "@adapttable/react/adapter";
 
 import { EditableDataCell } from "./components/EditableCell";
 import { BatchEditBar, RowEditActions } from "./components/kitControls";
 import { UndoRedoButtons } from "./components/toolbarExtras";
 
-function EditableSlot(props: Readonly<EditableCellSlotProps<never>>) {
-  return <EditableDataCell {...props} />;
-}
-
 const editingFeatures = createAdapterEditingFeatures({
-  EditableCell: EditableSlot,
+  EditableCell: EditableDataCell,
   RowEditActions,
   BatchEditBar,
   UndoRedoButtons,

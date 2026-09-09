@@ -149,16 +149,13 @@ export function EditableDataCell<TRow>(props: {
   readonly editLabel: string;
   /** `labels.undoEdit` — the control a failed save offers. */
   readonly undoLabel?: string;
-  readonly display?: ReactNode;
+  /**
+   * What the cell shows when nothing is being edited. The binding resolves it
+   * — the row's precomputed display, the column's `Cell`, or its accessor —
+   * so the accessor runs in this cell's own memo scope.
+   */
+  readonly display: ReactNode;
 }): ReactElement {
-  const display: ReactNode =
-    props.display ??
-    (props.column.Cell ? (
-      <props.column.Cell row={props.row} rowIndex={props.rowIndex} />
-    ) : (
-      props.column.accessor?.(props.row)
-    ));
-
   return (
     <EditableCellGate
       kitRendersError
@@ -171,7 +168,7 @@ export function EditableDataCell<TRow>(props: {
       rowKey={props.rowKey}
       editLabel={props.editLabel}
       undoLabel={props.undoLabel}
-      display={display}
+      display={props.display}
       slots={editableCellSlots}
       renderEditor={(ctrl) => (
         <MuiCellEditor ctrl={ctrl} label={props.editLabel} />

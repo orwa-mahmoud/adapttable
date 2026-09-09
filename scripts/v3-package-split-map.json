@@ -19715,6 +19715,14 @@
       "behavior": ""
     },
     {
+      "export": "EditableCellRenderProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "EditableCellSlotProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",

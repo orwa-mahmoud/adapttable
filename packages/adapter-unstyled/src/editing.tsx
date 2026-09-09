@@ -1,6 +1,6 @@
 import {
   createAdapterEditingFeatures,
-  type EditableCellSlotProps,
+  type EditableCellRenderProps,
 } from "@adapttable/react/adapter";
 
 import { useClassNames } from "./components/classNamesContext";
@@ -8,19 +8,11 @@ import { EditableDataCell } from "./components/EditableCell";
 import { BatchEditBar, RowEditActions } from "./components/kitControls";
 import { UndoRedoButtons } from "./components/toolbarExtras";
 
-function EditableSlot(props: Readonly<EditableCellSlotProps<never>>) {
+function EditableSlot(props: Readonly<EditableCellRenderProps<never>>) {
   const classNames = useClassNames();
   return (
     <EditableDataCell
       {...props}
-      display={
-        props.display ??
-        (props.column.Cell ? (
-          <props.column.Cell row={props.row} rowIndex={props.rowIndex} />
-        ) : (
-          props.column.accessor?.(props.row)
-        ))
-      }
       activateClassName={classNames.editCellActivate}
       errorClassName={classNames.editCellError}
       saveErrorClassName={classNames.editCellSaveError}

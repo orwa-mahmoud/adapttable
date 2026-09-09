@@ -326,7 +326,7 @@ export type AdapterContextMenuProps = Omit<ContextMenuChromeProps, "slots">;
 // @public
 export interface AdapterEditingComponents {
     readonly BatchEditBar: AdapterFeatureComponent<BatchEditBarProps<never>>;
-    readonly EditableCell: AdapterFeatureComponent<EditableCellSlotProps<never>>;
+    readonly EditableCell: AdapterFeatureComponent<EditableCellRenderProps<never>>;
     readonly historyIncludesControls?: boolean;
     readonly RowEditActions: AdapterFeatureComponent<RowEditActionsProps<never>>;
     readonly UndoRedoButtons: AdapterFeatureComponent<ToolbarExtrasSlotProps>;
@@ -1451,7 +1451,7 @@ export function createAdapterCommandPaletteFeature(CommandPalette: AdapterFeatur
 // @public
 export function createAdapterContextMenuFeature(ContextMenu: AdapterFeatureComponent<AdapterContextMenuProps>): AdapterContextMenuFeature;
 
-// @public
+// @public (undocumented)
 export function createAdapterEditingFeatures(components: AdapterEditingComponents): AdapterEditingFeatures;
 
 // @public
@@ -2002,6 +2002,11 @@ export interface EditableCellEditorCtrl {
 
 // @public
 export type EditableCellMode = "display" | "activatable" | "editing";
+
+// @public
+export type EditableCellRenderProps<TRow = never> = EditableCellSlotProps<TRow> & {
+    readonly display: ReactNode;
+};
 
 // @public
 export interface EditableCellSlotProps<TRow = never> {

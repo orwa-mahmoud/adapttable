@@ -205,7 +205,10 @@ Adapter authors bind those slots without copying feature lifecycle through
 `createAdapterCommandPaletteFeature` and
 `createAdapterAgentApprovalFeature`. Each accepts kit-owned
 `AdapterFeatureComponent`s and returns ordinary feature factories. Their
-contracts are `AdapterEditingComponents`, `AdapterEditingFeatures`,
+contracts are `AdapterEditingComponents` — whose `EditableCell` is handed
+`EditableCellRenderProps`, the slot's props with the display already worked
+out from the row, the column's `Cell` or its accessor, so no kit repeats that
+rule — `AdapterEditingFeatures`,
 `AdapterFiltersComponents`, `AdapterFiltersFeature`,
 `AdapterGroupingComponents`, `AdapterGroupingFeature`,
 `AdapterRowDetailComponents`, `AdapterRowDetailFeatures`,
