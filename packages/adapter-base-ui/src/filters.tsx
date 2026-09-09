@@ -37,10 +37,6 @@ function FiltersForm(props: Readonly<FiltersFormSlotProps<never>>) {
   );
 }
 
-function ChipsSlot(props: Parameters<typeof Chips>[0]) {
-  return <Chips {...props} />;
-}
-
 function DrawerSlot(props: Readonly<FilterOverlaySlotProps>) {
   const accentColor = props.accentColor as BaseUiAccentColor | undefined;
   return (
@@ -78,7 +74,7 @@ function PopoverSlot(props: Readonly<FilterOverlaySlotProps>) {
 /** Declarative filters with this kit's chip strip and panel. @public */
 export const filters = createAdapterFiltersFeature({
   FiltersForm,
-  ActiveFilterChips: ChipsSlot,
+  ActiveFilterChips: Chips,
   FilterDrawer: DrawerSlot,
   FilterPopover: PopoverSlot,
 });
