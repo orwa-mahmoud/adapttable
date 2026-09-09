@@ -8,7 +8,10 @@
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
-export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue | undefined;
+export type AggregateOrderedValue = SortableValue | Date;
+
+// @public
+export type Aggregator<TValue = AggregateOrderedValue> = (values: readonly TValue[]) => DisplayValue | undefined;
 
 // @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];

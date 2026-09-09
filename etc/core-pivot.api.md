@@ -5,10 +5,10 @@
 ```ts
 
 // @public
-export type Aggregatable<TValue = SortableValue> = boolean | AggregatableConfig<TValue>;
+export type Aggregatable<TValue = AggregateOrderedValue> = boolean | AggregatableConfig<TValue>;
 
 // @public
-export interface AggregatableConfig<TValue = SortableValue> {
+export interface AggregatableConfig<TValue = AggregateOrderedValue> {
     readonly default?: string;
     readonly operations: readonly AggregateOperation<TValue>[];
 }
@@ -23,13 +23,16 @@ export interface AggregateFormatContext {
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
-export type AggregateOperation<TValue = SortableValue> = AggregateName | CustomAggregateOperation<TValue>;
+export type AggregateOperation<TValue = AggregateOrderedValue> = AggregateName | CustomAggregateOperation<TValue>;
 
 // @public
 export type AggregateOperationId = AggregateName | (string & Record<never, never>);
 
 // @public
-export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue | undefined;
+export type AggregateOrderedValue = SortableValue | Date;
+
+// @public
+export type Aggregator<TValue = AggregateOrderedValue> = (values: readonly TValue[]) => DisplayValue | undefined;
 
 // @public
 export function assignField(config: PivotConfig, key: string, zone: PivotZone, index?: number): PivotConfig;
@@ -43,7 +46,7 @@ export type ColumnGroupShow = "open" | "closed" | "always";
 // @public
 export interface ColumnModel<TRow = unknown> {
     accessor?: (row: TRow) => unknown;
-    aggregatable?: Aggregatable<SortableValue>;
+    aggregatable?: Aggregatable;
     align?: "start" | "center" | "end";
     colSpan?: number | ((row: TRow) => number);
     editable?: boolean | ((row: TRow) => boolean);
@@ -89,7 +92,7 @@ export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 // @public
-export interface CustomAggregateOperation<TValue = SortableValue> {
+export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
     readonly calculate?: Aggregator<TValue>;
     readonly id: string;
     readonly label: string;

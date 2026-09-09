@@ -196,7 +196,7 @@ export interface ColumnModel<TRow = unknown> {
    * state and a server carry, so it stays stable while the label may be
    * localized freely.
    */
-  aggregatable?: Aggregatable<SortableValue>;
+  aggregatable?: Aggregatable;
   /** Column width passed through to the rendered header/cell. */
   width?: number | string;
   /** Floor for this column's width, in pixels. */

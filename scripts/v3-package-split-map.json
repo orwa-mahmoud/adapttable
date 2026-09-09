@@ -7019,6 +7019,14 @@
       "behavior": ""
     },
     {
+      "export": "AggregateOrderedValue",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
       "export": "Aggregator",
       "currentImport": "@adapttable/core/formula",
       "kind": "type",
@@ -7332,6 +7340,14 @@
     },
     {
       "export": "AggregateOperationId",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOrderedValue",
       "currentImport": "@adapttable/core/pdf",
       "kind": "type",
       "class": "neutral-model",
@@ -7715,6 +7731,14 @@
       "behavior": ""
     },
     {
+      "export": "AggregateOrderedValue",
+      "currentImport": "@adapttable/core/pivot",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pivot",
+      "behavior": ""
+    },
+    {
       "export": "Aggregator",
       "currentImport": "@adapttable/core/pivot",
       "kind": "type",
@@ -8028,6 +8052,14 @@
     },
     {
       "export": "AggregateName",
+      "currentImport": "@adapttable/core/query",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOrderedValue",
       "currentImport": "@adapttable/core/query",
       "kind": "type",
       "class": "neutral-model",
@@ -8404,6 +8436,14 @@
     },
     {
       "export": "AggregateOperationId",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOrderedValue",
       "currentImport": "@adapttable/core/xlsx",
       "kind": "type",
       "class": "neutral-model",
@@ -8804,6 +8844,14 @@
     },
     {
       "export": "AggregateOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AggregateOrderedValue",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",

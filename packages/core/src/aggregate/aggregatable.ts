@@ -9,11 +9,11 @@
  */
 import type { ColumnMetadata } from "../columnModel";
 import type { GroupingCapability } from "../source/capabilities";
-import type { SortableValue } from "../types";
 import { devWarn } from "../utils/devWarn";
 import {
   AGGREGATE_NAMES,
   type AggregateName,
+  type AggregateOrderedValue,
   type Aggregator,
 } from "./aggregate";
 
@@ -31,7 +31,7 @@ const RESERVED_OPERATION_IDS: readonly string[] = ["none", "custom"];
  *
  * @public
  */
-export interface CustomAggregateOperation<TValue = SortableValue> {
+export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
   /** Stable identifier, unique within the column. Never a display string. */
   readonly id: string;
   /** What the reader sees in the operation list. */
@@ -50,7 +50,7 @@ export interface CustomAggregateOperation<TValue = SortableValue> {
  *
  * @public
  */
-export type AggregateOperation<TValue = SortableValue> =
+export type AggregateOperation<TValue = AggregateOrderedValue> =
   AggregateName | CustomAggregateOperation<TValue>;
 
 /**
@@ -60,7 +60,7 @@ export type AggregateOperation<TValue = SortableValue> =
  *
  * @public
  */
-export interface AggregatableConfig<TValue = SortableValue> {
+export interface AggregatableConfig<TValue = AggregateOrderedValue> {
   /**
    * The operation this column starts with. It must name one of
    * `operations`; leave it out and the column is available but inactive
@@ -82,7 +82,7 @@ export interface AggregatableConfig<TValue = SortableValue> {
  *
  * @public
  */
-export type Aggregatable<TValue = SortableValue> =
+export type Aggregatable<TValue = AggregateOrderedValue> =
   boolean | AggregatableConfig<TValue>;
 
 /**

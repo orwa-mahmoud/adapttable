@@ -33,6 +33,7 @@
  */
 import {
   type AggregateName,
+  type AggregateOrderedValue,
   type Aggregator,
   resolveAggregateValue,
 } from "../aggregate/aggregate";
@@ -205,7 +206,7 @@ export interface PivotOptions<TRow> {
 }
 
 /** The label for a dimension value, with a bucket for "no value". */
-function dimensionLabel(value: SortableValue): string {
+function dimensionLabel(value: AggregateOrderedValue): string {
   if (value === undefined || value === null || value === "") return PIVOT_BLANK;
   return String(value);
 }
@@ -339,7 +340,7 @@ function cellsOf<TRow>(
               dimensionOf(row, columnDimensions[i] ?? "", byKey) === value
           )
         );
-    const values: SortableValue[] = [];
+    const values: AggregateOrderedValue[] = [];
     for (const row of matching) {
       const value = resolveAggregateValue(
         row,
@@ -582,7 +583,7 @@ function builtInAggregator(name: AggregateName): Aggregator {
 }
 
 /** The values that are actually numbers, in the aggregate module's sense. */
-function summableNumbers(values: readonly SortableValue[]): number[] {
+function summableNumbers(values: readonly AggregateOrderedValue[]): number[] {
   const numbers: number[] = [];
   for (const value of values) {
     if (typeof value === "number") {

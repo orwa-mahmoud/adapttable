@@ -52,6 +52,7 @@ import {
 } from "./liveTable";
 import { createAgentSession } from "./session";
 import type {
+  AgentAggregationColumn,
   AgentAggregations,
   AgentAggregationsPatch,
   AgentApply,
@@ -570,7 +571,7 @@ function aggregationsFromView(
     grouping,
     aggregateOperations: groupingState.aggregateOperations,
   };
-  const columns: AgentAggregations["columns"] = [];
+  const columns: AgentAggregationColumn[] = [];
   for (const column of groupingState.columns ?? []) {
     const resolved = resolveAggregatable(column);
     const operations = offerableOperations(resolved, source);

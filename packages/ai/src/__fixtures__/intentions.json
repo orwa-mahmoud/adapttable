@@ -64,6 +64,17 @@
       }
     },
     {
+      "text": "show average salary",
+      "expected": {
+        "key": "view.setAggregations",
+        "args": {
+          "set": {
+            "salary": "avg"
+          }
+        }
+      }
+    },
+    {
       "text": "pin the name column to the start edge",
       "expected": {
         "key": "view.pinColumn",

@@ -62,7 +62,10 @@ export type {
   AggregateOperation,
   CustomAggregateOperation,
 } from "./aggregate/aggregatable";
-export type { AggregateOperationId } from "./aggregate/aggregate";
+export type {
+  AggregateOperationId,
+  AggregateOrderedValue,
+} from "./aggregate/aggregate";
 export type { ColumnModel, SortableValue } from "./columnModel";
 export type {
   ColumnGroupShow,

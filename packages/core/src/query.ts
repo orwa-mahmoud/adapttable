@@ -35,7 +35,11 @@
  * @packageDocumentation
  */
 
-export type { AggregateName, Aggregator } from "./aggregate/aggregate";
+export type {
+  AggregateName,
+  AggregateOrderedValue,
+  Aggregator,
+} from "./aggregate/aggregate";
 export {
   FILTER_TREE_PARAM,
   FILTER_TREE_VERSION,

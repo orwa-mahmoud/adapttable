@@ -1,10 +1,21 @@
 import { describe, expect, it } from "vitest";
 
+import type { DisplayValue } from "../display";
 import { groupRowLayout } from "./groupRowLayout";
 import {
   groupedEntriesForStrategy,
   groupingComputationKind,
 } from "./groupingStrategy";
+
+function recordAggregation(
+  seen: (string | undefined)[],
+  value: unknown,
+  context: { aggregation?: string }
+): DisplayValue {
+  seen.push(context.aggregation);
+  if (typeof value === "number" || typeof value === "string") return value;
+  return "";
+}
 
 describe("groupingComputationKind", () => {
   it("is none when no keys are set", () => {
@@ -79,13 +90,8 @@ describe("groupedEntriesForStrategy", () => {
       { key: "team", header: "Team" },
       {
         key: "budget",
-        formatAggregate: (
-          value: unknown,
-          context: { aggregation?: string }
-        ) => {
-          seen.push(context.aggregation);
-          return value;
-        },
+        formatAggregate: (value: unknown, context: { aggregation?: string }) =>
+          recordAggregation(seen, value, context),
       },
     ];
     const entries = groupedEntriesForStrategy({
@@ -112,13 +118,8 @@ describe("groupedEntriesForStrategy", () => {
       { key: "team" },
       {
         key: "person",
-        formatAggregate: (
-          value: unknown,
-          context: { aggregation?: string }
-        ) => {
-          seen.push(context.aggregation);
-          return value;
-        },
+        formatAggregate: (value: unknown, context: { aggregation?: string }) =>
+          recordAggregation(seen, value, context),
       },
     ];
     const entries = groupedEntriesForStrategy({

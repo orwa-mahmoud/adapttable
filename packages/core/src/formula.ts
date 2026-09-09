@@ -55,6 +55,7 @@ export type {
   AggregateFormatContext,
   AggregateName,
   AggregateOperationId,
+  AggregateOrderedValue,
   Aggregator,
 } from "./aggregate/aggregate";
 export type { ColumnMetadata, SortableValue } from "./columnModel";

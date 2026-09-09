@@ -36,10 +36,10 @@ export function addFilterTreeCondition(tree: QueryFilterGroup | undefined, path:
 export function addFilterTreeGroup(tree: QueryFilterGroup | undefined, path: readonly number[]): QueryFilterGroup;
 
 // @public
-export type Aggregatable<TValue = SortableValue> = boolean | AggregatableConfig<TValue>;
+export type Aggregatable<TValue = AggregateOrderedValue> = boolean | AggregatableConfig<TValue>;
 
 // @public
-export interface AggregatableConfig<TValue = SortableValue> {
+export interface AggregatableConfig<TValue = AggregateOrderedValue> {
     readonly default?: string;
     readonly operations: readonly AggregateOperation<TValue>[];
 }
@@ -66,7 +66,7 @@ export interface AggregateFormatContext {
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 // @public
-export type AggregateOperation<TValue = SortableValue> = AggregateName | CustomAggregateOperation<TValue>;
+export type AggregateOperation<TValue = AggregateOrderedValue> = AggregateName | CustomAggregateOperation<TValue>;
 
 // @public
 export type AggregateOperationId = AggregateName | (string & Record<never, never>);
@@ -77,6 +77,9 @@ export interface AggregateOptions<TRow> {
     format?: (value: DisplayValue | undefined, key: string) => DisplayValue | undefined;
     host?: FeatureHostState;
 }
+
+// @public
+export type AggregateOrderedValue = SortableValue | Date;
 
 // @public
 export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
@@ -127,7 +130,7 @@ export interface AggregationSourceSupport {
 }
 
 // @public
-export type Aggregator<TValue = SortableValue> = (values: readonly TValue[]) => DisplayValue | undefined;
+export type Aggregator<TValue = AggregateOrderedValue> = (values: readonly TValue[]) => DisplayValue | undefined;
 
 // @public
 export function allowsOperation(resolved: ResolvedAggregatable | undefined, operationId: string): boolean;
@@ -820,7 +823,7 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 // @public
 export interface ColumnModel<TRow = unknown> {
     accessor?: (row: TRow) => unknown;
-    aggregatable?: Aggregatable<SortableValue>;
+    aggregatable?: Aggregatable;
     align?: "start" | "center" | "end";
     colSpan?: number | ((row: TRow) => number);
     editable?: boolean | ((row: TRow) => boolean);
@@ -1094,7 +1097,7 @@ export function currentFeatureHost<TRow = unknown>(): FeatureHostState<TRow> | u
 export const CUSTOM_AGGREGATE = "custom";
 
 // @public
-export interface CustomAggregateOperation<TValue = SortableValue> {
+export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
     readonly calculate?: Aggregator<TValue>;
     readonly id: string;
     readonly label: string;
@@ -4557,12 +4560,12 @@ export const TEXT_OPS: readonly ["eq", "neq", "contains", "notContains", "starts
 export type TextOp = (typeof TEXT_OPS)[number];
 
 // @public
-export function toAggregateInstant(value: SortableValue): number | undefined;
+export function toAggregateInstant(value: AggregateOrderedValue): number | undefined;
 
 // @public
-export function toAggregateOrdered(value: SortableValue): {
+export function toAggregateOrdered(value: AggregateOrderedValue): {
     rank: number;
-    result: SortableValue;
+    result: AggregateOrderedValue;
 } | undefined;
 
 // @public

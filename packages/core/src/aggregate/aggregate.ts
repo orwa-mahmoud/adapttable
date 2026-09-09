@@ -28,6 +28,17 @@ import type { SortableValue } from "../types";
 import { getPath } from "../utils/path";
 
 /**
+ * A value min/max can rank: the sortable primitives plus a `Date`.
+ *
+ * `SortableValue` stays the sort-key type. A date column's raw cell is a
+ * `Date` without a `sortValue`, and min/max keep that original rather than
+ * forcing it through a number first.
+ *
+ * @public
+ */
+export type AggregateOrderedValue = SortableValue | Date;
+
+/**
  * The aggregate functions available by name.
  *
  * @public
@@ -58,7 +69,7 @@ export type AggregateOperationId =
  *
  * @public
  */
-export type Aggregator<TValue = SortableValue> = (
+export type Aggregator<TValue = AggregateOrderedValue> = (
   values: readonly TValue[]
 ) => DisplayValue | undefined;
 
@@ -127,7 +138,9 @@ export interface AggregateOptions<TRow> {
  * @param value - The resolved cell value.
  * @returns The number, or `undefined` when it is not summable.
  */
-export function toAggregateNumber(value: SortableValue): number | undefined {
+export function toAggregateNumber(
+  value: AggregateOrderedValue
+): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim() !== "") {
     const n = Number(value);
@@ -159,7 +172,9 @@ const ISO_TIME = /^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/;
  *
  * @public
  */
-export function toAggregateInstant(value: SortableValue): number | undefined {
+export function toAggregateInstant(
+  value: AggregateOrderedValue
+): number | undefined {
   if (value instanceof Date) {
     const time = value.getTime();
     return Number.isFinite(time) ? time : undefined;
@@ -202,8 +217,8 @@ export function toAggregateInstant(value: SortableValue): number | undefined {
  * @public
  */
 export function toAggregateOrdered(
-  value: SortableValue
-): { rank: number; result: SortableValue } | undefined {
+  value: AggregateOrderedValue
+): { rank: number; result: AggregateOrderedValue } | undefined {
   if (value instanceof Date) {
     const rank = toAggregateInstant(value);
     return rank === undefined ? undefined : { rank, result: value };
@@ -218,7 +233,7 @@ export function toAggregateOrdered(
 }
 
 /** Numbers only — everything else is not summable, and silently skipped. */
-function numbers(values: readonly SortableValue[]): number[] {
+function numbers(values: readonly AggregateOrderedValue[]): number[] {
   const out: number[] = [];
   for (const v of values) {
     const n = toAggregateNumber(v);
@@ -253,10 +268,10 @@ const BUILT_INS: Record<AggregateName, Aggregator> = {
 };
 
 function extreme(
-  values: readonly SortableValue[],
+  values: readonly AggregateOrderedValue[],
   which: "min" | "max"
-): SortableValue | undefined {
-  let best: { rank: number; result: SortableValue } | undefined;
+): AggregateOrderedValue | undefined {
+  let best: { rank: number; result: AggregateOrderedValue } | undefined;
   for (const value of values) {
     const ordered = toAggregateOrdered(value);
     if (!ordered) continue;
@@ -291,9 +306,9 @@ export function resolveAggregateValue<TRow>(
   row: TRow,
   key: string,
   column: ColumnMetadata<TRow> | undefined
-): SortableValue {
+): AggregateOrderedValue {
   if (column?.sortValue) return column.sortValue(row);
-  return getPath(row, key) as SortableValue;
+  return getPath(row, key) as AggregateOrderedValue;
 }
 
 /**
@@ -327,7 +342,7 @@ export function aggregate<TRow>(
             (boundHost ?? currentFeatureHost())?.aggregators.get(fn))
           : fn;
       if (typeof aggregator !== "function") continue;
-      const values: SortableValue[] = [];
+      const values: AggregateOrderedValue[] = [];
       for (const row of rows) {
         const value = resolveAggregateValue(row, key, byKey.get(key));
         // A missing value is not a zero — skip it and let the aggregator see

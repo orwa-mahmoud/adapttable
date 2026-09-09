@@ -11,6 +11,7 @@ import {
   aggregate,
   type AggregateName,
   type AggregateOptions,
+  type AggregateOrderedValue,
   type AggregateSpec,
   resolveAggregateValue,
   toAggregateNumber,
@@ -18,7 +19,6 @@ import {
 } from "../aggregate/aggregate";
 import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
-import type { SortableValue } from "../types";
 
 interface ColumnAcc {
   kind: AggregateName | "custom";
@@ -27,8 +27,8 @@ interface ColumnAcc {
   presentCount: number;
   min: number | undefined;
   max: number | undefined;
-  minResult: SortableValue;
-  maxResult: SortableValue;
+  minResult: AggregateOrderedValue;
+  maxResult: AggregateOrderedValue;
   /** The old min or max left; `read` must rescan. */
   dirty: boolean;
 }
@@ -192,11 +192,15 @@ function valueOf<TRow>(
   state: IncrementalAggregate<TRow>,
   row: TRow,
   key: string
-): SortableValue {
+): AggregateOrderedValue {
   return resolveAggregateValue(row, key, state.columns.get(key));
 }
 
-function applyValue(acc: ColumnAcc, value: SortableValue, sign: 1 | -1): void {
+function applyValue(
+  acc: ColumnAcc,
+  value: AggregateOrderedValue,
+  sign: 1 | -1
+): void {
   if (acc.kind === "custom") {
     acc.dirty = true;
     return;
@@ -220,7 +224,7 @@ function applyValue(acc: ColumnAcc, value: SortableValue, sign: 1 | -1): void {
 
 function applyOrdered(
   acc: ColumnAcc,
-  value: SortableValue,
+  value: AggregateOrderedValue,
   sign: 1 | -1
 ): void {
   const ordered = toAggregateOrdered(value);

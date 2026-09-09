@@ -101,6 +101,7 @@ export {
   type AggregateOptions,
   type AggregateSpec,
   type Aggregator,
+  type AggregateOrderedValue,
   CUSTOM_AGGREGATE,
   type DeclaredAggregates,
   declaredAggregates,
