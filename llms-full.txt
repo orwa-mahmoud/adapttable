@@ -1197,6 +1197,7 @@ the way you configured it, and these guarantees do not apply.
 | `loading`       | `boolean`                                                                                  | `false` | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise).                                                                              |
 | `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | —       | Server tier: fired per consolidated query change, once on mount included. `info.key` identifies the request; echo it back as `responseKey` to say which one the rows answer. |
 | `responseKey`   | `string`                                                                                   | —       | The `info.key` of the request the current `data` answers (see [Row grouping](./row-grouping.md#server-tiers)).                                                               |
+| `aggregates`    | `readonly QueryAggregate[]`                                                                | —       | Aggregates to send as `query.aggregates`; requires `supports.aggregates`.                                                                                                    |
 | `error`         | `Error \| null`                                                                            | `null`  | Forwarded error to display.                                                                                                                                                  |
 | `source`        | `TableSource<TRow>`                                                                        | —       | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.                                                                                        |
 
@@ -4360,15 +4361,21 @@ for `summaryRow`, which `formatAggregate` does not touch.
 On a server tier the operation is the one the request carried, and it is
 published as of the response being drawn — so a column is told what the
 numbers on screen were computed with, not what a request still in flight asks
-for. Retained rows keep their own description: a fetch that fails, one that is
-cancelled, and a host that reports `loading` a tick late all leave the numbers
-where they are, so the operation stays where they are too.
+for. Each request's operations are held against its own key, and only a
+response that can be tied back to one of those requests moves what the table
+publishes. A request that cannot be tied to one is reported as unknown:
+`formatAggregate` is passed no operation, rather than one that may be wrong.
 
-`useQuerySource` reads that from the query's own `dataUpdatedAt`, which moves
-only when a fetch answered. `useServerData` cannot see it — a controlled tier's
-rows simply change, sometimes as the very array that was already there — so
-`onQueryChange` hands the handler an `info.key` naming the request, and
-`responseKey` is where the answer's key comes back:
+`useQuerySource` gets that association from the query itself: `dataUpdatedAt`
+says whether the query showing these pages has an answer of its own, read
+against the request it belongs to — two cached results can carry the same
+stamp, so a stamp alone is not identity.
+
+`useServerData` cannot see any of it. A controlled tier's rows simply change,
+sometimes as the very array that was already there, and a cancelled request
+looks exactly like an answered one from the outside. So `onQueryChange` hands
+the handler an `info.key` naming the request, and `responseKey` is where the
+answer's key comes back:
 
 ```tsx
 const [rows, setRows] = useState<Person[]>([]);
@@ -4389,11 +4396,15 @@ const [answered, setAnswered] = useState<string>();
 />;
 ```
 
-Leave `responseKey` out and the hook infers it from the request it emitted and
-the `loading` and `error` it is given, which is right for a host that reports
-both. A source that publishes nothing leaves the table with the reader's own
-choices; an aggregate function only the server understands is reported as
-unknown rather than guessed at.
+**A controlled tier needs `responseKey` to be accurate about this.** Without
+it, rows retained through an in-flight or failed request keep the operations
+they came with, but once a request simply stops the rows on screen are
+described as unknown — a stopped request is what an abort looks like too, and
+the table will not name an operation it cannot place. The same holds for a
+hand-rolled `TableSource`: publish `groupAggregations` yourself, or leave it
+unset and the table falls back to the reader's own choices. An aggregate
+function only the server understands is reported as unknown rather than
+guessed at.
 
 Compose `columnMenu()` too and each column row gains **Group by…** or
 **Ungroup…**. While grouping is active, an ungrouped column also offers the
@@ -10558,6 +10569,7 @@ Props beyond the core surface, with per-kit availability.
 | `loading`                   | `boolean`                                            | —              | all                                       | Server tier: a request is in flight.                                                                                                                                                                      |
 | `onQueryChange`             | `(query: TableQuery, info: { signal, key }) => void` | —              | all                                       | Server tier: fired with the consolidated query whenever it changes (mount included); fetch and hand back `data` + `total`. `info.key` identifies the request.                                             |
 | `responseKey`               | `string`                                             | —              | all                                       | Server tier: the `onQueryChange` `info.key` the current `data` answers, so aggregate metadata belongs to the rows on screen.                                                                              |
+| `aggregates`                | `readonly QueryAggregate[]`                          | —              | all                                       | Server tier: aggregates to send as `query.aggregates`; requires `supports.aggregates`. Reader overrides layer over these.                                                                                 |
 | `supports`                  | `QuerySupport`                                       | —              | all                                       | Server tier: capabilities this endpoint answers. `supports.facets` unlocks `query.facets`.                                                                                                                |
 | `facetKeys`                 | `readonly string[]`                                  | checklist keys | all                                       | Server tier: keys sent as `query.facets`. Defaults to every `checklist` definition.                                                                                                                       |
 | `facets`                    | `FacetMap`                                           | —              | all                                       | Server tier: distinct-value counts from the last fetch, surfaced on the source for the checklist.                                                                                                         |
@@ -11293,9 +11305,10 @@ the same for server `query.aggregates`, and `queryAggregateOps` reads those
 requested functions back as the operations a column is told about —
 `TableSource.groupAggregations`, which `useQuerySource` and `useServerData`
 publish as of the response being drawn — `useQuerySource` from the query's
-`dataUpdatedAt`, `useServerData` from the `responseKey` a host echoes back or,
-without one, from the request it emitted and the `loading` and `error` it is
-given; an absent key preserves the developer choice and `"none"` removes it. A column's `formatAggregate` says how the
+`dataUpdatedAt` read against its request, `useServerData` from the
+`responseKey` a host echoes back, without which a request it cannot place is
+reported as unknown; an absent key preserves the developer choice and
+`"none"` removes it. A column's `formatAggregate` says how the
 result reads, taking the value and an `AggregateFormatContext` — the column
 key, and the operation where the table knows it. It is applied where the cell
 is drawn: `groupRowLayout` and `groupAggregateEntries` take the group's

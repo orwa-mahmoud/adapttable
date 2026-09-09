@@ -1490,6 +1490,7 @@ export { CustomCellEditorRender }
 
 // @public
 export type DataModeProps<_TRow = unknown> = {
+    aggregates?: readonly QueryAggregate[];
     responseKey?: string;
 } & ({
     mode: "server";

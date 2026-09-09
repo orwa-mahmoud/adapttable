@@ -105,15 +105,21 @@ for `summaryRow`, which `formatAggregate` does not touch.
 On a server tier the operation is the one the request carried, and it is
 published as of the response being drawn — so a column is told what the
 numbers on screen were computed with, not what a request still in flight asks
-for. Retained rows keep their own description: a fetch that fails, one that is
-cancelled, and a host that reports `loading` a tick late all leave the numbers
-where they are, so the operation stays where they are too.
+for. Each request's operations are held against its own key, and only a
+response that can be tied back to one of those requests moves what the table
+publishes. A request that cannot be tied to one is reported as unknown:
+`formatAggregate` is passed no operation, rather than one that may be wrong.
 
-`useQuerySource` reads that from the query's own `dataUpdatedAt`, which moves
-only when a fetch answered. `useServerData` cannot see it — a controlled tier's
-rows simply change, sometimes as the very array that was already there — so
-`onQueryChange` hands the handler an `info.key` naming the request, and
-`responseKey` is where the answer's key comes back:
+`useQuerySource` gets that association from the query itself: `dataUpdatedAt`
+says whether the query showing these pages has an answer of its own, read
+against the request it belongs to — two cached results can carry the same
+stamp, so a stamp alone is not identity.
+
+`useServerData` cannot see any of it. A controlled tier's rows simply change,
+sometimes as the very array that was already there, and a cancelled request
+looks exactly like an answered one from the outside. So `onQueryChange` hands
+the handler an `info.key` naming the request, and `responseKey` is where the
+answer's key comes back:
 
 ```tsx
 const [rows, setRows] = useState<Person[]>([]);
@@ -134,11 +140,15 @@ const [answered, setAnswered] = useState<string>();
 />;
 ```
 
-Leave `responseKey` out and the hook infers it from the request it emitted and
-the `loading` and `error` it is given, which is right for a host that reports
-both. A source that publishes nothing leaves the table with the reader's own
-choices; an aggregate function only the server understands is reported as
-unknown rather than guessed at.
+**A controlled tier needs `responseKey` to be accurate about this.** Without
+it, rows retained through an in-flight or failed request keep the operations
+they came with, but once a request simply stops the rows on screen are
+described as unknown — a stopped request is what an abort looks like too, and
+the table will not name an operation it cannot place. The same holds for a
+hand-rolled `TableSource`: publish `groupAggregations` yourself, or leave it
+unset and the table falls back to the reader's own choices. An aggregate
+function only the server understands is reported as unknown rather than
+guessed at.
 
 Compose `columnMenu()` too and each column row gains **Group by…** or
 **Ungroup…**. While grouping is active, an ungrouped column also offers the

@@ -8,13 +8,18 @@ A column formatting a server's subtotal is told which operation produced it.
 from the aggregates their request carried — the ones the host declared, and
 whatever the reader has since chosen — so `formatAggregate` reads a
 server-computed count as a count and a server-computed total as money.
+Server-mode `<DataTable>` takes those declarations directly: `aggregates` is
+now a prop alongside `supports`.
 
-It describes the response being drawn, not one still in flight. Retained rows
-keep the operations they were computed with through a fetch that fails, one
-that is cancelled, and a host that reports `loading` a tick late.
-`useQuerySource` reads that from the query's `dataUpdatedAt`; on the server
-tier `onQueryChange` names each request in `info.key`, and the new
-`responseKey` prop is where the answer's key comes back.
+The operations belong to the response being drawn. Each request's operations
+are held against its own key, and only a response that can be tied back to one
+of them moves what is published; a response the table cannot place is reported
+as unknown, so `formatAggregate` is never handed an operation that may be
+wrong. `useQuerySource` gets that from the query's `dataUpdatedAt` read
+against its request. On the server tier `onQueryChange` names each request in
+`info.key`, and the new `responseKey` prop is where the answer's key comes
+back — the one way a controlled tier can be accurate about it, since a
+cancelled request is indistinguishable from an answered one from the outside.
 
 A source that publishes nothing is unchanged, and an aggregate function only
 the server understands is reported as unknown rather than guessed at.

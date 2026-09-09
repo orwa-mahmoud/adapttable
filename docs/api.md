@@ -410,6 +410,7 @@ Props beyond the core surface, with per-kit availability.
 | `loading`                   | `boolean`                                            | —              | all                                       | Server tier: a request is in flight.                                                                                                                                                                      |
 | `onQueryChange`             | `(query: TableQuery, info: { signal, key }) => void` | —              | all                                       | Server tier: fired with the consolidated query whenever it changes (mount included); fetch and hand back `data` + `total`. `info.key` identifies the request.                                             |
 | `responseKey`               | `string`                                             | —              | all                                       | Server tier: the `onQueryChange` `info.key` the current `data` answers, so aggregate metadata belongs to the rows on screen.                                                                              |
+| `aggregates`                | `readonly QueryAggregate[]`                          | —              | all                                       | Server tier: aggregates to send as `query.aggregates`; requires `supports.aggregates`. Reader overrides layer over these.                                                                                 |
 | `supports`                  | `QuerySupport`                                       | —              | all                                       | Server tier: capabilities this endpoint answers. `supports.facets` unlocks `query.facets`.                                                                                                                |
 | `facetKeys`                 | `readonly string[]`                                  | checklist keys | all                                       | Server tier: keys sent as `query.facets`. Defaults to every `checklist` definition.                                                                                                                       |
 | `facets`                    | `FacetMap`                                           | —              | all                                       | Server tier: distinct-value counts from the last fetch, surfaced on the source for the checklist.                                                                                                         |
@@ -1145,9 +1146,10 @@ the same for server `query.aggregates`, and `queryAggregateOps` reads those
 requested functions back as the operations a column is told about —
 `TableSource.groupAggregations`, which `useQuerySource` and `useServerData`
 publish as of the response being drawn — `useQuerySource` from the query's
-`dataUpdatedAt`, `useServerData` from the `responseKey` a host echoes back or,
-without one, from the request it emitted and the `loading` and `error` it is
-given; an absent key preserves the developer choice and `"none"` removes it. A column's `formatAggregate` says how the
+`dataUpdatedAt` read against its request, `useServerData` from the
+`responseKey` a host echoes back, without which a request it cannot place is
+reported as unknown; an absent key preserves the developer choice and
+`"none"` removes it. A column's `formatAggregate` says how the
 result reads, taking the value and an `AggregateFormatContext` — the column
 key, and the operation where the table knows it. It is applied where the cell
 is drawn: `groupRowLayout` and `groupAggregateEntries` take the group's

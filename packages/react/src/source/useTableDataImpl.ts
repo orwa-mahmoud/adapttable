@@ -10,6 +10,7 @@ import {
   type FilterTypeSpec,
   isDeclarativeFilters,
   type PaginationMode,
+  type QueryAggregate,
   type QuerySupport,
   type SortableValue,
   stableKey,
@@ -78,6 +79,8 @@ export interface UseTableDataOptions<TRow> extends Pick<
    * frontend; `data` + `onQueryChange` → server; `source` → source tier.
    */
   mode?: "frontend" | "server";
+  /** Server tier: see {@link UseServerDataOptions.aggregates}. */
+  aggregates?: readonly QueryAggregate[];
   /** Server tier: see {@link UseServerDataOptions.responseKey}. */
   responseKey?: string;
   /** Server tier: see {@link UseServerDataOptions.onQueryChange}. */
@@ -158,6 +161,13 @@ export type TableQueryHandler = (
  * @public
  */
 export type DataModeProps<_TRow = unknown> = {
+  /**
+   * Server tier: the aggregates to ask the endpoint for —
+   * `[{ key: "budget", fn: "sum" }]`. Sent only when `supports.aggregates`
+   * is declared, and layered under whatever the reader chooses in the
+   * grouping panel.
+   */
+  aggregates?: readonly QueryAggregate[];
   /**
    * Server tier: the `info.key` of the `onQueryChange` call the current
    * `data` answers. Echo it back and a column's `formatAggregate` is told
@@ -373,6 +383,7 @@ function serverTierInput<TRow>(input: {
   data: readonly TRow[] | undefined;
   runtime: FilterRuntime<TRow>;
   onQueryChange: TableQueryHandler | undefined;
+  aggregates: readonly QueryAggregate[] | undefined;
   responseKey: string | undefined;
   supports: UseServerDataOptions<TRow>["supports"];
   facetKeys: readonly string[] | undefined;
@@ -383,6 +394,7 @@ function serverTierInput<TRow>(input: {
     urlSync: activeOnly(active, input.urlSync, false),
     rows: activeOnly(active, input.data ?? [], [] as readonly TRow[]),
     onQueryChange: activeOnly(active, input.onQueryChange, undefined),
+    aggregates: activeOnly(active, input.aggregates, undefined),
     responseKey: activeOnly(active, input.responseKey, undefined),
     arrayExtraKeys: runtime.arrayExtraKeys,
     numberExtraKeys: runtime.numberExtraKeys,
@@ -404,6 +416,7 @@ export function useTableDataWithEngine<TRow>(
     error,
     mode,
     onQueryChange,
+    aggregates,
     responseKey,
     columns,
     filters,
@@ -515,6 +528,7 @@ export function useTableDataWithEngine<TRow>(
       data,
       runtime,
       onQueryChange,
+      aggregates,
       responseKey,
       supports,
       facetKeys: derivedFacetKeys,

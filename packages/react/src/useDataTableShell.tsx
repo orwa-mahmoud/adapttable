@@ -378,6 +378,7 @@ export function useDataTableShell<TRow>(
     error: props.error,
     mode: props.mode,
     onQueryChange: props.onQueryChange,
+    aggregates: props.aggregates,
     responseKey: props.responseKey,
     urlAdapter,
     // No `urlSync` here on purpose: the decision is already baked into WHICH

@@ -89,12 +89,15 @@ export interface UseServerDataOptions<TRow> extends Pick<
    *
    * A controlled tier cannot see which request a response belongs to: the
    * rows simply change, sometimes as the very array that was already there,
-   * sometimes not at all when a fetch fails. Echo the key back and the table
-   * knows exactly what the rows on screen were computed with — which is what
-   * a column's `formatAggregate` is told. Leave it out and the hook infers it
-   * from the request it emitted and the `loading` and `error` it is given,
-   * which is right for a host that reports both and conservative when it
-   * does not: retained rows keep the operations they came with.
+   * sometimes not at all when a fetch fails or is aborted. Echo the key back
+   * and the table knows exactly what the rows on screen were computed with —
+   * which is what a column's `formatAggregate` is told.
+   *
+   * This is the ONLY way a controlled tier can be accurate about it. Without
+   * it, rows retained through an in-flight or failed request keep the
+   * operations they came with, but a request that merely stops — the
+   * signature of an abort as much as of an answer — leaves the rows described
+   * as unknown, and `formatAggregate` is passed no operation at all.
    */
   responseKey?: string;
   /**

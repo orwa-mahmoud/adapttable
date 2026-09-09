@@ -2367,6 +2367,7 @@ export function useTableData<TRow>(options: UseTableDataOptions<TRow>): UseTable
 
 // @public
 export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey"> {
+    aggregates?: readonly QueryAggregate[];
     columns: readonly ColumnDef<TRow>[];
     data?: readonly TRow[];
     error?: Error | null;

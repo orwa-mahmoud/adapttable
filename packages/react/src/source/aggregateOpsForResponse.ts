@@ -6,15 +6,16 @@
  * asking for now. The two come apart constantly: a reader switches sum to
  * average and the old numbers stay up while the request travels; the request
  * fails and the old numbers stay up for good; a cancelled request never
- * answers at all. In every one of those the retained rows keep the operations
- * they were computed with.
+ * answers at all.
  *
- * Neither a loading flag nor a data reference is enough on its own. A failed
- * fetch clears `loading` without answering, a host may flip `loading` a tick
- * late, and a response can arrive as the very array that was already on
- * screen. So each set of operations is remembered against the request that
- * carried it, and only a response that can be tied back to one of those
- * requests moves what is published.
+ * Only provenance moves what is published. Each request's operations are
+ * remembered against its own key, and a response is tied back to one of those
+ * requests either because the tier is told its key or because the query
+ * carries a response marker for that exact request. A `loading` flag ending
+ * is not provenance — a cancellation ends it without answering — so a
+ * concluded request the table cannot trace publishes nothing rather than the
+ * operations of a request that may never have run. Unknown is a valid answer;
+ * another response's operation is not.
  */
 import type { GroupAggregateOps } from "@adapttable/core";
 import { useEffect, useRef, useState } from "react";
@@ -35,13 +36,16 @@ export interface AggregateOpsForResponse {
   /**
    * The request the displayed data answers, when it can be known exactly: a
    * fetching tier reads it from the query, a controlled one is told by the
-   * host. Given this, nothing else is consulted.
+   * host. Given this, nothing else is consulted — and a key that names no
+   * remembered request publishes nothing, since a response whose operations
+   * are gone is not described by another response's.
    */
   readonly responseKey?: string;
   /**
-   * A monotonic marker of the last SUCCESSFUL response, when the tier has
-   * one (`dataUpdatedAt`). It does not move for a failure or a cancellation,
-   * which is exactly what retained rows need.
+   * The query's own marker for the response it holds — TanStack's
+   * `dataUpdatedAt`. Read together with `requestKey`, never on its own: two
+   * cached results can carry the same timestamp, so a marker means "this
+   * request has an answer of its own", and `0` means it has none.
    */
   readonly respondedAt?: number;
   /** Whether anything is displayed at all. */
@@ -74,8 +78,10 @@ export function useAggregateOpsForResponse(
   } = input;
   const [displayed, setDisplayed] = useState(requested);
   const byRequest = useRef(new Map<string, GroupAggregateOps | undefined>());
-  const answered = useRef<number | undefined>(undefined);
-  const awaiting = useRef<{ key: string; started: boolean } | null>(null);
+  // Which request the displayed operations belong to, and the response marker
+  // that established them.
+  const shown = useRef<{ key: string; at: number } | null>(null);
+  const concluding = useRef<{ key: string; started: boolean } | null>(null);
 
   // Remember this request's operations before anything can answer it.
   const remembered = byRequest.current;
@@ -88,51 +94,26 @@ export function useAggregateOpsForResponse(
   }
 
   useEffect(() => {
-    const known = byRequest.current;
-    // Nothing on screen yet: there is no earlier answer to mislabel, so the
-    // request in flight is the best description available.
-    if (!hasData) {
-      setDisplayed((current) =>
-        same(current, requested) ? current : requested
-      );
-      awaiting.current = null;
-      return;
-    }
-    // Told outright which request the data answers.
-    if (responseKey !== undefined) {
-      if (!known.has(responseKey)) return;
-      const ops = known.get(responseKey);
-      setDisplayed((current) => (same(current, ops) ? current : ops));
-      awaiting.current = null;
-      return;
-    }
-    // A successful-response marker: it advances only when data actually
-    // arrived, so a failure or a cancellation leaves the rows described as
-    // they were.
-    if (respondedAt !== undefined) {
-      if (respondedAt === 0 || respondedAt === answered.current) return;
-      answered.current = respondedAt;
-      setDisplayed((current) =>
-        same(current, requested) ? current : requested
-      );
-      return;
-    }
-    // Nothing but the request/response cycle the host reports. A promotion
-    // needs a request that was seen to start and then to finish without
-    // failing — a `loading` flag that never rose, or one that fell because
-    // the request failed, is not an answer.
-    const pending = awaiting.current;
-    if (pending?.key !== requestKey) {
-      awaiting.current = { key: requestKey, started: fetching };
-      return;
-    }
-    if (fetching) {
-      pending.started = true;
-      return;
-    }
-    if (!pending.started || failed) return;
-    awaiting.current = null;
-    setDisplayed((current) => (same(current, requested) ? current : requested));
+    const settled = resolveOps(
+      {
+        requestKey,
+        requested,
+        responseKey,
+        respondedAt,
+        hasData,
+        fetching,
+        failed,
+      },
+      byRequest.current,
+      shown.current,
+      concluding
+    );
+    if (!settled) return;
+    shown.current = { key: settled.key, at: settled.at };
+    concluding.current = null;
+    setDisplayed((current) =>
+      same(current, settled.ops) ? current : settled.ops
+    );
   }, [
     requestKey,
     requested,
@@ -144,6 +125,104 @@ export function useAggregateOpsForResponse(
   ]);
 
   return displayed;
+}
+
+/** What the displayed operations are, and the response that established them. */
+interface Established {
+  readonly key: string;
+  readonly at: number;
+}
+
+/** A request whose start and stop are being watched, absent other provenance. */
+type Concluding = { key: string; started: boolean } | null;
+
+/** Operations to publish, or `null` to leave the displayed ones alone. */
+type Settled = {
+  readonly ops: GroupAggregateOps | undefined;
+  readonly key: string;
+  readonly at: number;
+} | null;
+
+/**
+ * Which of the four kinds of provenance applies, in order of what it can
+ * establish: nothing on screen, a named response, the query's own marker,
+ * and — last — a request seen only to start and stop.
+ */
+function resolveOps(
+  input: AggregateOpsForResponse,
+  known: Map<string, GroupAggregateOps | undefined>,
+  shown: Established | null,
+  concluding: { current: Concluding }
+): Settled {
+  const { requestKey, requested, responseKey, respondedAt, hasData } = input;
+  // Nothing on screen yet: there is no earlier answer to mislabel, so the
+  // request in flight is the best description available.
+  if (!hasData) return { ops: requested, key: requestKey, at: 0 };
+  if (responseKey !== undefined) return named(responseKey, known, shown);
+  if (respondedAt !== undefined) {
+    return marked(requestKey, respondedAt, known, shown);
+  }
+  return concluded(input, shown, concluding);
+}
+
+/**
+ * Told outright which request the data answers. A key the map no longer holds
+ * is an answer whose operations are unknown — never another response's.
+ */
+function named(
+  responseKey: string,
+  known: Map<string, GroupAggregateOps | undefined>,
+  shown: Established | null
+): Settled {
+  if (shown?.key === responseKey) return null;
+  return {
+    ops: known.has(responseKey) ? known.get(responseKey) : undefined,
+    key: responseKey,
+    at: 0,
+  };
+}
+
+/**
+ * The query's response marker, read against the request it belongs to. Zero
+ * means this request has no answer of its own — the rows on screen are
+ * another request's, and they keep its operations.
+ */
+function marked(
+  requestKey: string,
+  respondedAt: number,
+  known: Map<string, GroupAggregateOps | undefined>,
+  shown: Established | null
+): Settled {
+  if (respondedAt === 0) return null;
+  if (shown?.key === requestKey && shown.at === respondedAt) return null;
+  return { ops: known.get(requestKey), key: requestKey, at: respondedAt };
+}
+
+/**
+ * No provenance at all. While the displayed operations are the ones this
+ * request carries there is nothing to decide; once a different request has
+ * been made, watching it start and stop says only that something concluded,
+ * never that it answered — so the rows on screen are described as unknown
+ * rather than as a request that may have been cancelled.
+ */
+function concluded(
+  input: AggregateOpsForResponse,
+  shown: Established | null,
+  concluding: { current: Concluding }
+): Settled {
+  const { requestKey, fetching, failed } = input;
+  if (shown?.key === requestKey) return null;
+  const pending = concluding.current;
+  if (pending?.key !== requestKey) {
+    concluding.current = { key: requestKey, started: fetching };
+    return null;
+  }
+  if (fetching) {
+    pending.started = true;
+    return null;
+  }
+  if (!pending.started || failed) return null;
+  return { ops: undefined, key: requestKey, at: 0 };
 }
 
 /** Whether two operation maps say the same thing. */
