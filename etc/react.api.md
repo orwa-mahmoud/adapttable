@@ -1116,6 +1116,7 @@ export interface InfiniteQueryLike<TPage> {
         pages: TPage[];
         pageParams: unknown[];
     } | undefined;
+    dataUpdatedAt?: number;
     error: Error | null;
     fetchNextPage: () => Promise<unknown> | void;
     hasNextPage: boolean;
@@ -2338,8 +2339,10 @@ export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions
     nextCursor?: string | null;
     onQueryChange?: (query: TableQuery, info: {
         signal: AbortSignal;
+        key: string;
     }) => void | Promise<void>;
     paginationMode?: PaginationMode;
+    responseKey?: string;
     rows: readonly TRow[];
     supports?: QuerySupport;
     total: number;
@@ -2380,6 +2383,7 @@ export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions,
     mode?: "frontend" | "server";
     onQueryChange?: NonNullable<Parameters<typeof useServerData<TRow>>[0]["onQueryChange"]>;
     paginationMode?: PaginationMode;
+    responseKey?: string;
     source?: TableSource<TRow>;
     supports?: QuerySupport;
     total?: number;

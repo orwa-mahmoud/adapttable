@@ -21,8 +21,12 @@ export function MantineServerExample() {
   const [rows, setRows] = useState<Person[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  // Which request the rows on screen answer. Handed back as `responseKey`,
+  // it is what lets a column's `formatAggregate` be told the operation the
+  // numbers were computed with — including when a later fetch is aborted.
+  const [answered, setAnswered] = useState<string>();
 
-  async function load(query: TableQuery, signal: AbortSignal) {
+  async function load(query: TableQuery, signal: AbortSignal, key: string) {
     setLoading(true);
     try {
       const qs = new URLSearchParams({
@@ -37,6 +41,7 @@ export function MantineServerExample() {
       const page = (await res.json()) as { items: Person[]; total: number };
       setRows(page.items);
       setTotal(page.total);
+      setAnswered(key);
       setLoading(false);
     } catch (error) {
       // Aborted requests are expected (a newer query superseded this one).
@@ -53,7 +58,10 @@ export function MantineServerExample() {
         data={rows}
         total={total}
         loading={loading}
-        onQueryChange={(query, { signal }) => void load(query, signal)}
+        responseKey={answered}
+        onQueryChange={(query, { signal, key }) =>
+          void load(query, signal, key)
+        }
         columns={[
           { key: "name", sortable: true },
           {

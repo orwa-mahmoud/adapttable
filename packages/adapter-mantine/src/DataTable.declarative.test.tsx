@@ -241,7 +241,7 @@ describe("<DataTable> declarative columns + filters (Mantine)", () => {
         sortLevels: [],
         filters: { status: "active" },
       },
-      { signal: expect.any(AbortSignal) }
+      { signal: expect.any(AbortSignal), key: expect.any(String) }
     );
     // No client filtering on the server tier: the archived row stays even
     // though the URL carries f_status=active.

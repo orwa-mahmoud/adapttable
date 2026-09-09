@@ -7,6 +7,7 @@ import {
   type QueryAggregate,
   queryAggregateOps,
   type QuerySupport,
+  stableKey,
   type TableQueryParams,
   type TableSource,
   withQueryAggregateOverrides,
@@ -18,7 +19,7 @@ import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
-import { useSettledAggregateOps } from "./useSettledAggregateOps";
+import { useAggregateOpsForResponse } from "./aggregateOpsForResponse";
 
 /**
  * The minimal shape `useQuerySource` reads from a `useInfiniteQuery`
@@ -46,6 +47,14 @@ export interface InfiniteQueryLike<TPage> {
   refetch: () => Promise<unknown> | void;
   /** The failure from the last fetch, or null. */
   error: Error | null;
+  /**
+   * When the last SUCCESSFUL response landed, as a monotonic timestamp —
+   * TanStack's own `dataUpdatedAt`. Optional so a hand-rolled query object
+   * still satisfies this shape; with it, a column formatting a group's
+   * subtotal can be told which operation produced the rows on screen even
+   * when a later request failed, was cancelled, or is still travelling.
+   */
+  dataUpdatedAt?: number;
 }
 
 /**
@@ -220,6 +229,10 @@ export function useQuerySource<
     () => queryAggregateOps(effectiveAggregates),
     [effectiveAggregates]
   );
+  const queryKeyForOps = stableKey({
+    aggregates: effectiveAggregates,
+    groupBy: effectiveGroupBy,
+  });
 
   // Cursor mode keeps every token the server has handed out, indexed by the
   // page it opens: `cursors[0]` is always `undefined` (page 1 needs no token)
@@ -352,11 +365,17 @@ export function useQuerySource<
     return { rows: acc, total: lastTotal ?? acc.length, facets: lastFacets };
   }, [query.data, paged, selectorKey]);
 
-  const groupAggregations = useSettledAggregateOps(
-    requestedOps,
-    query.data,
-    query.isFetching
-  );
+  const groupAggregations = useAggregateOpsForResponse({
+    requestKey: queryKeyForOps,
+    requested: requestedOps,
+    // TanStack moves this only when a fetch actually answered, so retained
+    // pages keep the operations they were computed with through a failure,
+    // a cancellation and a `loading` flag that lands late.
+    respondedAt: query.dataUpdatedAt,
+    hasData: query.data !== undefined,
+    fetching: query.isFetching,
+    failed: query.error !== null,
+  });
 
   // Clamp out-of-range pages (hand-edited / stale shared links) once the
   // total is known and nothing is in flight.

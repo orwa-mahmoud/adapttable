@@ -100,12 +100,45 @@ example above does. The simplest arrangement is to leave group aggregates raw
 and let the column own how they read; `format` still belongs on a mapper used
 for `summaryRow`, which `formatAggregate` does not touch.
 
-On a server tier the operation is the one the request carried, published as of
-the response being drawn — so a column is told what the numbers on screen were
-computed with, not what a request still in flight asks for. A source that
-publishes nothing leaves the table with the reader's own choices; an
-aggregate function only the server understands is reported as unknown rather
-than guessed at.
+### Server tiers
+
+On a server tier the operation is the one the request carried, and it is
+published as of the response being drawn — so a column is told what the
+numbers on screen were computed with, not what a request still in flight asks
+for. Retained rows keep their own description: a fetch that fails, one that is
+cancelled, and a host that reports `loading` a tick late all leave the numbers
+where they are, so the operation stays where they are too.
+
+`useQuerySource` reads that from the query's own `dataUpdatedAt`, which moves
+only when a fetch answered. `useServerData` cannot see it — a controlled tier's
+rows simply change, sometimes as the very array that was already there — so
+`onQueryChange` hands the handler an `info.key` naming the request, and
+`responseKey` is where the answer's key comes back:
+
+```tsx
+const [rows, setRows] = useState<Person[]>([]);
+const [answered, setAnswered] = useState<string>();
+
+<DataTable
+  mode="server"
+  data={rows}
+  total={total}
+  loading={loading}
+  responseKey={answered}
+  onQueryChange={async (query, { signal, key }) => {
+    const res = await fetch(`/api/people?${toParams(query)}`, { signal });
+    const page = await res.json();
+    setRows(page.items);
+    setAnswered(key);
+  }}
+/>;
+```
+
+Leave `responseKey` out and the hook infers it from the request it emitted and
+the `loading` and `error` it is given, which is right for a host that reports
+both. A source that publishes nothing leaves the table with the reader's own
+choices; an aggregate function only the server understands is reported as
+unknown rather than guessed at.
 
 Compose `columnMenu()` too and each column row gains **Group by…** or
 **Ungroup…**. While grouping is active, an ungrouped column also offers the

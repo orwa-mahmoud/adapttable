@@ -78,6 +78,8 @@ export interface UseTableDataOptions<TRow> extends Pick<
    * frontend; `data` + `onQueryChange` → server; `source` → source tier.
    */
   mode?: "frontend" | "server";
+  /** Server tier: see {@link UseServerDataOptions.responseKey}. */
+  responseKey?: string;
   /** Server tier: see {@link UseServerDataOptions.onQueryChange}. */
   onQueryChange?: NonNullable<
     Parameters<typeof useServerData<TRow>>[0]["onQueryChange"]
@@ -143,7 +145,7 @@ type DataTier = "source" | "server" | "frontend";
  */
 export type TableQueryHandler = (
   query: TableQuery,
-  info: { signal: AbortSignal }
+  info: { signal: AbortSignal; key: string }
 ) => void | Promise<void>;
 
 /**
@@ -155,7 +157,15 @@ export type TableQueryHandler = (
  *
  * @public
  */
-export type DataModeProps<_TRow = unknown> =
+export type DataModeProps<_TRow = unknown> = {
+  /**
+   * Server tier: the `info.key` of the `onQueryChange` call the current
+   * `data` answers. Echo it back and a column's `formatAggregate` is told
+   * exactly which operation produced the numbers on screen, through a
+   * failure, a cancellation and a late `loading` flag alike.
+   */
+  responseKey?: string;
+} & (
   | {
       mode: "server";
       onQueryChange: TableQueryHandler;
@@ -163,7 +173,8 @@ export type DataModeProps<_TRow = unknown> =
   | {
       mode?: "frontend";
       onQueryChange?: TableQueryHandler;
-    };
+    }
+);
 
 function resolveTier(
   source: unknown,
@@ -230,7 +241,7 @@ function useQueryNotification<TRow>(
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
-    void notify(queryRef.current, { signal: controller.signal });
+    void notify(queryRef.current, { signal: controller.signal, key: queryKey });
     return () => controller.abort();
   }, [queryKey]);
 }
@@ -361,12 +372,8 @@ function serverTierInput<TRow>(input: {
   urlSync: boolean | undefined;
   data: readonly TRow[] | undefined;
   runtime: FilterRuntime<TRow>;
-  onQueryChange:
-    | ((
-        query: TableQuery,
-        info: { signal: AbortSignal }
-      ) => void | Promise<void>)
-    | undefined;
+  onQueryChange: TableQueryHandler | undefined;
+  responseKey: string | undefined;
   supports: UseServerDataOptions<TRow>["supports"];
   facetKeys: readonly string[] | undefined;
   facets: FacetMap | undefined;
@@ -376,6 +383,7 @@ function serverTierInput<TRow>(input: {
     urlSync: activeOnly(active, input.urlSync, false),
     rows: activeOnly(active, input.data ?? [], [] as readonly TRow[]),
     onQueryChange: activeOnly(active, input.onQueryChange, undefined),
+    responseKey: activeOnly(active, input.responseKey, undefined),
     arrayExtraKeys: runtime.arrayExtraKeys,
     numberExtraKeys: runtime.numberExtraKeys,
     supports: activeOnly(active, input.supports, undefined),
@@ -396,6 +404,7 @@ export function useTableDataWithEngine<TRow>(
     error,
     mode,
     onQueryChange,
+    responseKey,
     columns,
     filters,
     filterTypes,
@@ -506,6 +515,7 @@ export function useTableDataWithEngine<TRow>(
       data,
       runtime,
       onQueryChange,
+      responseKey,
       supports,
       facetKeys: derivedFacetKeys,
       facets: serverFacets,

@@ -1490,12 +1490,14 @@ export { CustomCellEditorRender }
 
 // @public
 export type DataModeProps<_TRow = unknown> = {
+    responseKey?: string;
+} & ({
     mode: "server";
     onQueryChange: TableQueryHandler;
 } | {
     mode?: "frontend";
     onQueryChange?: TableQueryHandler;
-};
+});
 
 // @public
 export type DataTableShellChromeProps<TRow> = DataTableShellProps<TRow> & {
@@ -4983,6 +4985,7 @@ export { TableQuery }
 // @public
 export type TableQueryHandler = (query: TableQuery, info: {
     signal: AbortSignal;
+    key: string;
 }) => void | Promise<void>;
 
 export { TableQueryParams }
@@ -5467,8 +5470,10 @@ export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions
     nextCursor?: string | null;
     onQueryChange?: (query: TableQuery, info: {
         signal: AbortSignal;
+        key: string;
     }) => void | Promise<void>;
     paginationMode?: PaginationMode;
+    responseKey?: string;
     rows: readonly TRow[];
     supports?: QuerySupport;
     total: number;

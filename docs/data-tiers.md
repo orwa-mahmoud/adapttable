@@ -351,14 +351,15 @@ the way you configured it, and these guarantees do not apply.
 
 ## Options
 
-| Prop            | Type                                                                          | Default | Description                                                                                     |
-| --------------- | ----------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------- |
-| `data`          | `readonly TRow[]`                                                             | —       | Frontend tier: all rows. Server tier: the current page, exactly as the server returned it.      |
-| `total`         | `number`                                                                      | `0`     | Server tier: total row count across all pages (drives the pager).                               |
-| `loading`       | `boolean`                                                                     | `false` | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise). |
-| `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal }) => void \| Promise<void>` | —       | Server tier: fired per consolidated query change, once on mount included.                       |
-| `error`         | `Error \| null`                                                               | `null`  | Forwarded error to display.                                                                     |
-| `source`        | `TableSource<TRow>`                                                           | —       | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.           |
+| Prop            | Type                                                                                       | Default | Description                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`          | `readonly TRow[]`                                                                          | —       | Frontend tier: all rows. Server tier: the current page, exactly as the server returned it.                                                                                   |
+| `total`         | `number`                                                                                   | `0`     | Server tier: total row count across all pages (drives the pager).                                                                                                            |
+| `loading`       | `boolean`                                                                                  | `false` | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise).                                                                              |
+| `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | —       | Server tier: fired per consolidated query change, once on mount included. `info.key` identifies the request; echo it back as `responseKey` to say which one the rows answer. |
+| `responseKey`   | `string`                                                                                   | —       | The `info.key` of the request the current `data` answers (see [Row grouping](./row-grouping.md#server-tiers)).                                                               |
+| `error`         | `Error \| null`                                                                            | `null`  | Forwarded error to display.                                                                                                                                                  |
+| `source`        | `TableSource<TRow>`                                                                        | —       | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.                                                                                        |
 
 ## Notes
 

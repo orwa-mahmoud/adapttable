@@ -1190,14 +1190,15 @@ the way you configured it, and these guarantees do not apply.
 
 ## Options
 
-| Prop            | Type                                                                          | Default | Description                                                                                     |
-| --------------- | ----------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------- |
-| `data`          | `readonly TRow[]`                                                             | —       | Frontend tier: all rows. Server tier: the current page, exactly as the server returned it.      |
-| `total`         | `number`                                                                      | `0`     | Server tier: total row count across all pages (drives the pager).                               |
-| `loading`       | `boolean`                                                                     | `false` | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise). |
-| `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal }) => void \| Promise<void>` | —       | Server tier: fired per consolidated query change, once on mount included.                       |
-| `error`         | `Error \| null`                                                               | `null`  | Forwarded error to display.                                                                     |
-| `source`        | `TableSource<TRow>`                                                           | —       | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.           |
+| Prop            | Type                                                                                       | Default | Description                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`          | `readonly TRow[]`                                                                          | —       | Frontend tier: all rows. Server tier: the current page, exactly as the server returned it.                                                                                   |
+| `total`         | `number`                                                                                   | `0`     | Server tier: total row count across all pages (drives the pager).                                                                                                            |
+| `loading`       | `boolean`                                                                                  | `false` | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise).                                                                              |
+| `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | —       | Server tier: fired per consolidated query change, once on mount included. `info.key` identifies the request; echo it back as `responseKey` to say which one the rows answer. |
+| `responseKey`   | `string`                                                                                   | —       | The `info.key` of the request the current `data` answers (see [Row grouping](./row-grouping.md#server-tiers)).                                                               |
+| `error`         | `Error \| null`                                                                            | `null`  | Forwarded error to display.                                                                                                                                                  |
+| `source`        | `TableSource<TRow>`                                                                        | —       | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.                                                                                        |
 
 ## Notes
 
@@ -4354,12 +4355,45 @@ example above does. The simplest arrangement is to leave group aggregates raw
 and let the column own how they read; `format` still belongs on a mapper used
 for `summaryRow`, which `formatAggregate` does not touch.
 
-On a server tier the operation is the one the request carried, published as of
-the response being drawn — so a column is told what the numbers on screen were
-computed with, not what a request still in flight asks for. A source that
-publishes nothing leaves the table with the reader's own choices; an
-aggregate function only the server understands is reported as unknown rather
-than guessed at.
+### Server tiers
+
+On a server tier the operation is the one the request carried, and it is
+published as of the response being drawn — so a column is told what the
+numbers on screen were computed with, not what a request still in flight asks
+for. Retained rows keep their own description: a fetch that fails, one that is
+cancelled, and a host that reports `loading` a tick late all leave the numbers
+where they are, so the operation stays where they are too.
+
+`useQuerySource` reads that from the query's own `dataUpdatedAt`, which moves
+only when a fetch answered. `useServerData` cannot see it — a controlled tier's
+rows simply change, sometimes as the very array that was already there — so
+`onQueryChange` hands the handler an `info.key` naming the request, and
+`responseKey` is where the answer's key comes back:
+
+```tsx
+const [rows, setRows] = useState<Person[]>([]);
+const [answered, setAnswered] = useState<string>();
+
+<DataTable
+  mode="server"
+  data={rows}
+  total={total}
+  loading={loading}
+  responseKey={answered}
+  onQueryChange={async (query, { signal, key }) => {
+    const res = await fetch(`/api/people?${toParams(query)}`, { signal });
+    const page = await res.json();
+    setRows(page.items);
+    setAnswered(key);
+  }}
+/>;
+```
+
+Leave `responseKey` out and the hook infers it from the request it emitted and
+the `loading` and `error` it is given, which is right for a host that reports
+both. A source that publishes nothing leaves the table with the reader's own
+choices; an aggregate function only the server understands is reported as
+unknown rather than guessed at.
 
 Compose `columnMenu()` too and each column row gains **Group by…** or
 **Ungroup…**. While grouping is active, an ungrouped column also offers the
@@ -10517,26 +10551,27 @@ operators, predicate, chips, tree projection, and optional `render`
 
 Props beyond the core surface, with per-kit availability.
 
-| Prop                        | Type                                            | Default        | Available on                              | Description                                                                                                                                                                                               |
-| --------------------------- | ----------------------------------------------- | -------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data`                      | `readonly TRow[]`                               | —              | all                                       | Frontend tier: raw rows the table filters/sorts/pages; with `onQueryChange` it is the current server page.                                                                                                |
-| `total`                     | `number`                                        | —              | all                                       | Server tier: total row count across all pages (drives the pager).                                                                                                                                         |
-| `loading`                   | `boolean`                                       | —              | all                                       | Server tier: a request is in flight.                                                                                                                                                                      |
-| `onQueryChange`             | `(query: TableQuery, info: { signal }) => void` | —              | all                                       | Server tier: fired with the consolidated query whenever it changes (mount included); fetch and hand back `data` + `total`.                                                                                |
-| `supports`                  | `QuerySupport`                                  | —              | all                                       | Server tier: capabilities this endpoint answers. `supports.facets` unlocks `query.facets`.                                                                                                                |
-| `facetKeys`                 | `readonly string[]`                             | checklist keys | all                                       | Server tier: keys sent as `query.facets`. Defaults to every `checklist` definition.                                                                                                                       |
-| `facets`                    | `FacetMap`                                      | —              | all                                       | Server tier: distinct-value counts from the last fetch, surfaced on the source for the checklist.                                                                                                         |
-| `closeHeaderFilterOnSelect` | `boolean`                                       | `false`        | all                                       | Close a header-filter overlay after a finished single-control write. Off by default so an operator pick on a multi-input field stays open.                                                                |
-| `urlKey`                    | `string`                                        | —              | all                                       | Namespace for this table's URL params (`urlKey="left"` → `left.q`, `left.page`, …).                                                                                                                       |
-| `urlAdapter`                | `UrlStateAdapter`                               | History API    | all                                       | URL-state backend for the `data`/`onQueryChange` tiers (router adapter, `createMemoryAdapter()` in tests).                                                                                                |
-| `urlSync`                   | `boolean`                                       | `true`         | all                                       | `false` keeps all state in memory — the address bar never changes, any `urlAdapter` is ignored.                                                                                                           |
-| `slots`                     | `{ skeleton?, empty?, noResults?, error? }`     | —              | all                                       | Replace sub-components. `empty` covers both empty states; `noResults` overrides just the filtered one; `error` takes a node or a `(state) => node` receiving the error and its retry (see customization). |
-| `classNames`                | `DataTableClassNames`                           | —              | mantine, chakra, radix, base-ui, unstyled | Per-part class overrides — five parts on Mantine/Chakra/Radix/Base UI (`root`/`toolbar`/`table`/`card`/`footer`), every part on unstyled.                                                                 |
-| `className`                 | `string`                                        | —              | mui, antd                                 | Class name applied to the root wrapper.                                                                                                                                                                   |
-| `animate`                   | `boolean`                                       | `false`        | all                                       | Animate rows/cards on mount (dependency-free; honors reduced motion).                                                                                                                                     |
-| `size`                      | kit-specific union                              | —              | chakra, antd, radix, base-ui, bootstrap   | Explicit kit table size, overriding the density mapping. MUI uses `density`; the listed kits retain native values density cannot express.                                                                 |
-| `accentColor`               | kit accent union (chakra: `string`)             | —              | chakra, radix, base-ui                    | Accent color for primary controls (buttons, badges, active page).                                                                                                                                         |
-| `bordered`                  | `boolean`                                       | `false`        | antd                                      | Render the table with cell borders.                                                                                                                                                                       |
+| Prop                        | Type                                                 | Default        | Available on                              | Description                                                                                                                                                                                               |
+| --------------------------- | ---------------------------------------------------- | -------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`                      | `readonly TRow[]`                                    | —              | all                                       | Frontend tier: raw rows the table filters/sorts/pages; with `onQueryChange` it is the current server page.                                                                                                |
+| `total`                     | `number`                                             | —              | all                                       | Server tier: total row count across all pages (drives the pager).                                                                                                                                         |
+| `loading`                   | `boolean`                                            | —              | all                                       | Server tier: a request is in flight.                                                                                                                                                                      |
+| `onQueryChange`             | `(query: TableQuery, info: { signal, key }) => void` | —              | all                                       | Server tier: fired with the consolidated query whenever it changes (mount included); fetch and hand back `data` + `total`. `info.key` identifies the request.                                             |
+| `responseKey`               | `string`                                             | —              | all                                       | Server tier: the `onQueryChange` `info.key` the current `data` answers, so aggregate metadata belongs to the rows on screen.                                                                              |
+| `supports`                  | `QuerySupport`                                       | —              | all                                       | Server tier: capabilities this endpoint answers. `supports.facets` unlocks `query.facets`.                                                                                                                |
+| `facetKeys`                 | `readonly string[]`                                  | checklist keys | all                                       | Server tier: keys sent as `query.facets`. Defaults to every `checklist` definition.                                                                                                                       |
+| `facets`                    | `FacetMap`                                           | —              | all                                       | Server tier: distinct-value counts from the last fetch, surfaced on the source for the checklist.                                                                                                         |
+| `closeHeaderFilterOnSelect` | `boolean`                                            | `false`        | all                                       | Close a header-filter overlay after a finished single-control write. Off by default so an operator pick on a multi-input field stays open.                                                                |
+| `urlKey`                    | `string`                                             | —              | all                                       | Namespace for this table's URL params (`urlKey="left"` → `left.q`, `left.page`, …).                                                                                                                       |
+| `urlAdapter`                | `UrlStateAdapter`                                    | History API    | all                                       | URL-state backend for the `data`/`onQueryChange` tiers (router adapter, `createMemoryAdapter()` in tests).                                                                                                |
+| `urlSync`                   | `boolean`                                            | `true`         | all                                       | `false` keeps all state in memory — the address bar never changes, any `urlAdapter` is ignored.                                                                                                           |
+| `slots`                     | `{ skeleton?, empty?, noResults?, error? }`          | —              | all                                       | Replace sub-components. `empty` covers both empty states; `noResults` overrides just the filtered one; `error` takes a node or a `(state) => node` receiving the error and its retry (see customization). |
+| `classNames`                | `DataTableClassNames`                                | —              | mantine, chakra, radix, base-ui, unstyled | Per-part class overrides — five parts on Mantine/Chakra/Radix/Base UI (`root`/`toolbar`/`table`/`card`/`footer`), every part on unstyled.                                                                 |
+| `className`                 | `string`                                             | —              | mui, antd                                 | Class name applied to the root wrapper.                                                                                                                                                                   |
+| `animate`                   | `boolean`                                            | `false`        | all                                       | Animate rows/cards on mount (dependency-free; honors reduced motion).                                                                                                                                     |
+| `size`                      | kit-specific union                                   | —              | chakra, antd, radix, base-ui, bootstrap   | Explicit kit table size, overriding the density mapping. MUI uses `density`; the listed kits retain native values density cannot express.                                                                 |
+| `accentColor`               | kit accent union (chakra: `string`)                  | —              | chakra, radix, base-ui                    | Accent color for primary controls (buttons, badges, active page).                                                                                                                                         |
+| `bordered`                  | `boolean`                                            | `false`        | antd                                      | Render the table with cell borders.                                                                                                                                                                       |
 
 Mantine also publishes the spacing its density mapping uses, as
 `DENSITY_SPACING` (`DensitySpacing`) from `@adapttable/mantine/density`, so a
@@ -11257,8 +11292,10 @@ developer `groupAggregates` mapper, while `withQueryAggregateOverrides` does
 the same for server `query.aggregates`, and `queryAggregateOps` reads those
 requested functions back as the operations a column is told about —
 `TableSource.groupAggregations`, which `useQuerySource` and `useServerData`
-publish as of the response being drawn; an absent key preserves the developer
-choice and `"none"` removes it. A column's `formatAggregate` says how the
+publish as of the response being drawn — `useQuerySource` from the query's
+`dataUpdatedAt`, `useServerData` from the `responseKey` a host echoes back or,
+without one, from the request it emitted and the `loading` and `error` it is
+given; an absent key preserves the developer choice and `"none"` removes it. A column's `formatAggregate` says how the
 result reads, taking the value and an `AggregateFormatContext` — the column
 key, and the operation where the table knows it. It is applied where the cell
 is drawn: `groupRowLayout` and `groupAggregateEntries` take the group's

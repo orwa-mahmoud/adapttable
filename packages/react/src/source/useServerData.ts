@@ -20,7 +20,7 @@ import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
-import { useSettledAggregateOps } from "./useSettledAggregateOps";
+import { useAggregateOpsForResponse } from "./aggregateOpsForResponse";
 
 /**
  * One consolidated snapshot of everything a server query needs.
@@ -85,6 +85,19 @@ export interface UseServerDataOptions<TRow> extends Pick<
   /** Aggregate requests to send when the endpoint supports them. */
   aggregates?: readonly QueryAggregate[];
   /**
+   * The `key` from the `onQueryChange` call these `rows` answer.
+   *
+   * A controlled tier cannot see which request a response belongs to: the
+   * rows simply change, sometimes as the very array that was already there,
+   * sometimes not at all when a fetch fails. Echo the key back and the table
+   * knows exactly what the rows on screen were computed with — which is what
+   * a column's `formatAggregate` is told. Leave it out and the hook infers it
+   * from the request it emitted and the `loading` and `error` it is given,
+   * which is right for a host that reports both and conservative when it
+   * does not: retained rows keep the operations they came with.
+   */
+  responseKey?: string;
+  /**
    * The tree nodes the reader has open, when the hierarchy lives on the server.
    * Sent as `query.expandedIds` only if the source declares
    * `supports: { tree: true }`, so the response can carry the children of every
@@ -110,7 +123,7 @@ export interface UseServerDataOptions<TRow> extends Pick<
    */
   onQueryChange?: (
     query: TableQuery,
-    info: { signal: AbortSignal }
+    info: { signal: AbortSignal; key: string }
   ) => void | Promise<void>;
 }
 
@@ -144,6 +157,7 @@ export function useServerData<TRow>(
     forceMobile,
     supports,
     aggregates,
+    responseKey,
     expandedIds,
     facetKeys,
     facets,
@@ -175,14 +189,6 @@ export function useServerData<TRow>(
     const keys = parseGroupBy(groupBy);
     return keys.length > 0 ? keys : undefined;
   }, [groupBy]);
-  // What the request asks for. What the rows on screen were asked for is the
-  // same only while nothing is in flight — the host reports that as `loading`.
-  const requestedOps = useMemo(
-    () => queryAggregateOps(effectiveAggregates),
-    [effectiveAggregates]
-  );
-  const groupAggregations = useSettledAggregateOps(requestedOps, rows, loading);
-
   // Cursor mode keeps every token the server has handed out, indexed by the
   // page it opens: `cursors[0]` is always `undefined` (page 1 needs no token)
   // and `cursors[n]` is the token for page n+1. Keeping the trail rather than
@@ -237,6 +243,25 @@ export function useServerData<TRow>(
   // Value-keyed, so re-renders and StrictMode double-mounts never re-fire
   // an identical query; `refetch` bumps the generation to force one.
   const queryKey = stableKey(query);
+
+  // What the request asks for. What the rows on screen were asked for is the
+  // same only while nothing is in flight — the host reports that as `loading`.
+  const requestedOps = useMemo(
+    () => queryAggregateOps(effectiveAggregates),
+    [effectiveAggregates]
+  );
+  const groupAggregations = useAggregateOpsForResponse({
+    requestKey: queryKey,
+    requested: requestedOps,
+    // The host can say outright which query these rows answer; without it the
+    // hook watches the request it emitted start and finish, and a failure or
+    // a request that never started leaves the rows described as they were.
+    responseKey,
+    hasData: rows.length > 0,
+    fetching: loading,
+    failed: error !== null,
+  });
+
   const [generation, setGeneration] = useState(0);
 
   const controllerRef = useRef<AbortController | null>(null);
@@ -248,7 +273,7 @@ export function useServerData<TRow>(
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
-    void onQueryChange(query, { signal: controller.signal });
+    void onQueryChange(query, { signal: controller.signal, key: queryKey });
     // Abort the in-flight request when the table unmounts.
     return () => controller.abort();
   });
