@@ -81,7 +81,10 @@ export function GroupingDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                   grouping
                   columnMenu
                   exportCsv={EXPORT_GROUPED_AS_XLSX}
-                  forceMobile={mobile}
+                  // The toggle FORCES the mobile selects on a desktop; it must
+                  // not force a desktop table onto a phone, which passing
+                  // `false` would do. Undefined leaves the breakpoint alone.
+                  forceMobile={mobile || undefined}
                   focused
                 />
               </DemoScenarioProvider>
