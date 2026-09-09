@@ -2,6 +2,7 @@ import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
 import type { ExtraEntry } from "../rows/extraRows";
 import { getPath } from "../utils/path";
+import { parseGroupBy } from "./groupKeys";
 
 /**
  * One field/value pair in a nested group's address.
@@ -349,13 +350,16 @@ export interface GroupPartition<TRow> {
  * The grouping keys {@link buildGroupedFlatModel} will actually use — blank
  * entries dropped, so `["", "team"]` is just `"team"`.
  *
- * @param groupBy - A single key or an ordered list.
+ * A string is read the way grouping is stored and travels: comma-separated.
+ * `formatGroupBy` writes `"team,status"` into state and the URL, so a caller
+ * handing that back must get two keys — reading it as one column name groups
+ * every row into a single blank bucket.
+ *
+ * @param groupBy - A single key, a comma-separated list, or an ordered list.
  * @returns The non-empty keys, outermost first.
  */
 export function groupingKeys(groupBy: string | readonly string[]): string[] {
-  return (typeof groupBy === "string" ? [groupBy] : groupBy).filter(
-    (key) => key.length > 0
-  );
+  return parseGroupBy(groupBy);
 }
 
 /**

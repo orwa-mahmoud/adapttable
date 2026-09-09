@@ -67,6 +67,25 @@ describe("resolveGroupValue / groupValueKey / formatGroupLabel", () => {
     expect(headers).toEqual(["Under 25", "25 and over"]);
   });
 
+  it("reads the stored comma-separated form as the list it is", () => {
+    // `formatGroupBy` writes "team,budget" into state and the URL, so a
+    // caller handing that back must get two keys: read as one column name it
+    // matches nothing and every row lands in a single blank bucket.
+    const model = buildGroupedFlatModel({
+      rows: ROWS,
+      groupBy: "team,budget",
+      columns: COLS,
+      getRowId: (r) => r.id,
+      collapsedGroupIds: new Set<string>(),
+    });
+    const headers = model.flatMap((entry) =>
+      entry.kind === "group" ? [entry.label] : []
+    );
+    expect(headers).not.toContain("(blank)");
+    expect(headers).toContain("Core");
+    expect(headers.filter((label) => label === "Core")).toHaveLength(1);
+  });
+
   it("uses path lookup when column has no sortValue", () => {
     expect(resolveGroupValue(ROWS[0]!, "missing", undefined)).toBeUndefined();
   });

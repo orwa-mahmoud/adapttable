@@ -238,3 +238,21 @@ test("the live demo windows an expanded page and still reaches every group", asy
     })
     .not.toBe(firstGroup);
 });
+
+/**
+ * Grouping travels as one comma-separated string — `groupBy=team,status` —
+ * and a link that carries the canonical form hands it straight back. Read as
+ * a single column name it matches nothing, and every row lands in one blank
+ * bucket: the panel showed two chips over a table grouped by neither.
+ */
+test("a link carrying the stored grouping form groups by every key in it", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/mantine/grouping/?grp.groupBy=team%2Cstatus&grp.atv=1");
+  const labels = page.locator('[data-adapttable-part="group-label"]');
+  await expect(labels.first()).toBeVisible();
+  const texts = await labels.allInnerTexts();
+  expect(texts.length).toBeGreaterThan(1);
+  expect(texts.map((text) => text.trim())).not.toContain("(blank)");
+});
