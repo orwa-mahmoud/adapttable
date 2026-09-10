@@ -40,6 +40,29 @@ Capabilities come from the live table:
 Package availability never participates. Installing `@adapttable/ai` does
 not enable grouping on a table that never imported it.
 
+## Filters
+
+`view.setFilters` is the extra bag the table already applies — the same
+keys the filter form writes (`team`, `salaryMin`, `salaryOp`). `describe`
+lists each visible filter's type, operators and, when the static list is
+short enough, its options. A `{ key, op, value }` array is accepted and
+converted to that bag.
+
+`FilterDef.ai` controls what the assistant sees. Omit it and the filter is
+visible, with options sent only when there are 50 or fewer static choices.
+`ai: false` hides the filter. `{ options: false }` keeps the filter and
+omits the values — the usual 10k-customer case. `{ options: 10 }` raises or
+lowers that cutoff. A list over the cutoff is omitted, not truncated, so a
+sample cannot look like the full set. `"auto"` and async loaders are never
+fetched into the prompt.
+
+`view.describe` reports the current extras and the same catalog
+(`AgentFilter` / `AgentFilterOption`).
+
+Pagination, sort and search already publish current state and a typed
+schema (`page` / `pageMax`, `sortBy` / sortable columns, the search
+string). Filters were the gap this catalog closes.
+
 ## Pinning
 
 Pinning is addressing, not styling, so both capabilities take identity rather

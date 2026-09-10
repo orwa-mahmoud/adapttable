@@ -1701,6 +1701,9 @@ export function fillSlot<TState>(slot: Slot<TState> | undefined, state: TState):
 export function fillTargetRange(source: CellRange, to: GridCell): CellRange;
 
 // @public
+export const FILTER_AI_OPTIONS_LIMIT = 50;
+
+// @public
 export const FILTER_ENGINE_IMPL: FilterEngine;
 
 // @public
@@ -1719,6 +1722,11 @@ export const FILTER_TREE_VERSION = 1;
 export const FILTER_TYPES: readonly ["text", "select", "multiSelect", "checklist", "boolean", "dateRange", "numberRange"];
 
 // @public
+export interface FilterAiOptions {
+    readonly options?: false | number;
+}
+
+// @public
 export type FilterChromeMode = "popover" | "drawer" | "header";
 
 // @public
@@ -1729,6 +1737,7 @@ export function filterCommands(commands: readonly Command[], query: string): Com
 
 // @public
 export interface FilterDef<TRow = unknown> {
+    ai?: false | FilterAiOptions;
     column?: string;
     getValue?: (row: TRow) => unknown;
     key: string;
@@ -3807,6 +3816,9 @@ export interface SelectionStatsOptions<TRow> {
     range: CellRange | null;
     rows: readonly TRow[];
 }
+
+// @public
+export function serializeAggregationDerivedKey<TRow>(input: AggregationModelInput<TRow>): string | undefined;
 
 // @public
 export function serializeFilterTree(tree: QueryFilterGroup | undefined): string | undefined;

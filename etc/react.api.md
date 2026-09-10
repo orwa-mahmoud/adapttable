@@ -173,6 +173,7 @@ export interface BaseDataTableProps<TRow> {
     filterDefs?: readonly FilterDef<TRow>[];
     filterFields?: boolean;
     filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
+    filterRegistry?: FilterTypeRegistry;
     filtersMode?: "popover" | "drawer" | "header";
     forceMobile?: boolean;
     formatEditError?: (error: unknown) => string;
@@ -1632,6 +1633,8 @@ export interface TableChrome<TRow> {
     emptyVariant: "noData" | "noResults";
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
+    filterDefs?: readonly FilterDef<TRow>[];
+    filterRegistry?: FilterTypeRegistry;
     getRowId: (row: TRow) => string;
     grouping?: {
         groupBy: readonly string[];

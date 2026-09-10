@@ -132,6 +132,44 @@ export interface AgentAggregationsPatch {
 }
 
 /**
+ * One choice a select-style filter published to the assistant.
+ *
+ * @public
+ */
+export interface AgentFilterOption {
+  /** Stored value. */
+  readonly value: string;
+  /** Caption shown for the entry. */
+  readonly label: string;
+}
+
+/**
+ * One filter the live table will actually honour.
+ *
+ * Ids, types and operators only — never a predicate function.
+ *
+ * @public
+ */
+export interface AgentFilter {
+  /** State key in the extra bag. */
+  readonly key: string;
+  /** Display label. */
+  readonly label: string;
+  /** Widget type (`text`, `select`, `numberRange`, …). */
+  readonly type: string;
+  /** Operators this filter offers right now. */
+  readonly operators: readonly string[];
+  /** Operator used until another is sent. */
+  readonly defaultOperator: string;
+  /** Extra-bag keys this filter writes. */
+  readonly valueKeys: readonly string[];
+  /** Static choices, when the list is short enough to publish. */
+  readonly options?: readonly AgentFilterOption[];
+  /** True when choices exist but were not listed (cap, `auto`, or async). */
+  readonly optionsOmitted?: boolean;
+}
+
+/**
  * How the session addresses a row without shipping the dataset.
  *
  * @public
@@ -733,7 +771,13 @@ export interface AgentObservation {
    * Absent when the table cannot honour an aggregation request.
    */
   readonly aggregations?: AgentAggregations;
-  /** Current filter model. */
+  /**
+   * Filters the assistant may mention, when the table published declarative
+   * defs. Absent when filters are host-owned and untyped. An empty array
+   * means every def was hidden.
+   */
+  readonly availableFilters?: readonly AgentFilter[];
+  /** Current extra filter bag. */
   readonly filters?: unknown;
   /** Named view used for position addressing. */
   readonly rowAddressScope: RowAddressScope;

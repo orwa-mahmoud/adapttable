@@ -706,7 +706,8 @@ The panel state is headless too. `GroupAggregateOverride` is
 `"sum" | "avg" | "min" | "max" | "count" | "none"`, and
 `GroupAggregateOverrides` maps column keys to those choices.
 `serializeGroupAggregateOverrides` / `parseGroupAggregateOverrides` implement
-the `groupAgg` codec; `withGroupAggregateOverrides` overlays choices on a
+the `groupAgg` codec; `serializeAggregationDerivedKey` is the cache key for
+the same effective operations. `withGroupAggregateOverrides` overlays choices on a
 client mapper, and `withQueryAggregateOverrides` overlays them on server
 aggregate requests. Adapter authors build the panel with
 `GroupingPanelChrome` and its required slots.

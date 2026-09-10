@@ -140,7 +140,8 @@ every filter lives on a column, or pass standalone defs as above. See
   and a Min/Max pair still infers at-least / at-most / between.
 - `select`/`multiSelect` options come from a static `{ value, label }[]`,
   `"auto"` (distinct values derived from the frontend dataset, sorted,
-  capped at `AUTO_OPTIONS_LIMIT` = 50), or an async loader — one shared fetch
+  capped at `AUTO_OPTIONS_LIMIT` = 50, the same number as
+  `FILTER_AI_OPTIONS_LIMIT`), or an async loader — one shared fetch
   serves both the form and the chip labels, and active chips re-label from
   raw values once it resolves.
 - A definition's `key` doubles as the row's dot path for the client-side
@@ -155,14 +156,15 @@ every filter lives on a column, or pass standalone defs as above. See
 `FilterDef` (entries of `filters`, and the column `filter` object minus
 `key`/`label`):
 
-| Prop          | Type                                                        | Default               | Description                                                                                      |
-| ------------- | ----------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------ |
-| `key`         | `string`                                                    | —                     | State key and `f_<key>` URL param. Doubles as the row's dot path unless `getValue` overrides it. |
-| `type`        | `string`                                                    | —                     | Built-in `FilterType` or a custom type registered on `filterTypes`.                              |
-| `label`       | `string`                                                    | humanized `key`       | Widget and chip label (`hiredAt` → "Hired At").                                                  |
-| `options`     | `FilterOption[] \| "auto" \| () => Promise<FilterOption[]>` | —                     | Choices for `select` / `multiSelect`.                                                            |
-| `getValue`    | `(row) => unknown`                                          | reads `key` as a path | Row-value extractor for the client-side predicate.                                               |
-| `placeholder` | `string`                                                    | —                     | Placeholder for text-like inputs.                                                                |
+| Prop          | Type                                                        | Default               | Description                                                                                                                                                                                                                                                     |
+| ------------- | ----------------------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `key`         | `string`                                                    | —                     | State key and `f_<key>` URL param. Doubles as the row's dot path unless `getValue` overrides it.                                                                                                                                                                |
+| `type`        | `string`                                                    | —                     | Built-in `FilterType` or a custom type registered on `filterTypes`.                                                                                                                                                                                             |
+| `label`       | `string`                                                    | humanized `key`       | Widget and chip label (`hiredAt` → "Hired At").                                                                                                                                                                                                                 |
+| `options`     | `FilterOption[] \| "auto" \| () => Promise<FilterOption[]>` | —                     | Choices for `select` / `multiSelect`.                                                                                                                                                                                                                           |
+| `getValue`    | `(row) => unknown`                                          | reads `key` as a path | Row-value extractor for the client-side predicate.                                                                                                                                                                                                              |
+| `placeholder` | `string`                                                    | —                     | Placeholder for text-like inputs.                                                                                                                                                                                                                               |
+| `ai`          | `false \| FilterAiOptions`                                  | visible, options ≤ 50 | Assistant catalog. `false` hides the filter. `{ options: false }` keeps it and omits values. A number sends values only when the static list is that long or shorter (`FILTER_AI_OPTIONS_LIMIT`). `"auto"` and async loaders are never fetched into the prompt. |
 
 | Factory / prop              | Type                                | Default        | Description                                                                                                                               |
 | --------------------------- | ----------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |

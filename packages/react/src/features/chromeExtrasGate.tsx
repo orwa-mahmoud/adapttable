@@ -130,6 +130,8 @@ function RuntimePublisher<TRow>({
       setExtras: chrome.source.setExtras,
       clearExtras: chrome.source.clearExtras,
     },
+    filterDefs: chrome.filterDefs,
+    filterRegistry: chrome.filterRegistry,
     grouping: chrome.grouping,
     groupingState: {
       groupBy: chrome.source.groupBy,

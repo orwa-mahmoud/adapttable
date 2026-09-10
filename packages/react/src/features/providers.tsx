@@ -31,6 +31,8 @@ import {
   type ColumnMetadata,
   devWarn,
   type ExtraFilters,
+  type FilterDef,
+  type FilterTypeRegistry,
   type GroupAggregateOverrides,
   type NeutralTable,
   type PinSide,
@@ -287,6 +289,13 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly setExtras?: (extra: ExtraFilters) => void;
     readonly clearExtras?: () => void;
   };
+  /**
+   * Declarative filter definitions the live chrome resolved. Absent when
+   * the host never published defs (a custom form with no catalog).
+   */
+  readonly filterDefs?: readonly FilterDef<TRow>[];
+  /** Type registry those defs were built against. */
+  readonly filterRegistry?: FilterTypeRegistry;
   /**
    * Declared source capabilities from the live `TableSource`, when the
    * source published a contract. Never inferred here.

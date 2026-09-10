@@ -117,6 +117,24 @@ export interface AgentColumn {
 }
 
 // @public
+export interface AgentFilter {
+    readonly defaultOperator: string;
+    readonly key: string;
+    readonly label: string;
+    readonly operators: readonly string[];
+    readonly options?: readonly AgentFilterOption[];
+    readonly optionsOmitted?: boolean;
+    readonly type: string;
+    readonly valueKeys: readonly string[];
+}
+
+// @public
+export interface AgentFilterOption {
+    readonly label: string;
+    readonly value: string;
+}
+
+// @public
 export interface AgentLimits {
     readonly pageMax: number;
     readonly readMax: number;
@@ -139,6 +157,7 @@ export interface AgentManifest {
 export interface AgentObservation {
     readonly aggregations?: AgentAggregations;
     readonly approval?: ApprovalPolicy;
+    readonly availableFilters?: readonly AgentFilter[];
     readonly columns: readonly AgentColumn[];
     readonly commit?: CommitPolicy;
     readonly featureIds: readonly string[];

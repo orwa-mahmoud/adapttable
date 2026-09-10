@@ -57,6 +57,8 @@ export type {
   AgentCapabilityDefinition,
   AgentCellEdit,
   AgentColumn,
+  AgentFilter,
+  AgentFilterOption,
   AgentLimits,
   AgentManifest,
   AgentObservation,

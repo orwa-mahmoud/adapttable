@@ -129,6 +129,23 @@ describe("resolveFilterDefs", () => {
     expect(defs).toHaveLength(1);
   });
 
+  it("preserves assistant visibility on standalone and column filters", () => {
+    const defs = resolveFilterDefs(
+      [
+        {
+          key: "customer",
+          header: "Customer",
+          filter: { type: "select", ai: { options: false } },
+        },
+      ],
+      [{ key: "internal", type: "text", ai: false }]
+    );
+    expect(defs.find((def) => def.key === "customer")?.ai).toEqual({
+      options: false,
+    });
+    expect(defs.find((def) => def.key === "internal")?.ai).toBe(false);
+  });
+
   it("a non-string column header falls back to the humanized key as label", () => {
     const defs = resolveFilterDefs(
       [{ key: "hiredAt", header: undefined, filter: "dateRange" }],

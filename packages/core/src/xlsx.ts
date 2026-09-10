@@ -47,7 +47,11 @@ export type {
   CustomCellEditorRender,
 } from "./editing/cellEditing";
 export type { ExportTable } from "./export/exportWriter";
-export type { FilterDef, FilterType } from "./filters/filterDefs";
+export type {
+  FilterAiOptions,
+  FilterDef,
+  FilterType,
+} from "./filters/filterDefs";
 export type { ColumnHeaderController } from "./types";
 
 /**

@@ -607,6 +607,7 @@ export interface BaseDataTableProps<TRow> {
     filterDefs?: readonly FilterDef<TRow>[];
     filterFields?: boolean;
     filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
+    filterRegistry?: FilterTypeRegistry;
     filtersMode?: "popover" | "drawer" | "header";
     forceMobile?: boolean;
     formatEditError?: (error: unknown) => string;
@@ -1508,6 +1509,7 @@ export type DataTableShellChromeProps<TRow> = DataTableShellProps<TRow> & {
     source: TableSource<TRow>;
     filters: ReactNode;
     filterDefs: readonly FilterDef<TRow>[];
+    filterRegistry: FilterTypeRegistry;
     filterLabels: Record<string, ChipLabelResolver>;
 };
 
@@ -4916,6 +4918,8 @@ export interface TableChrome<TRow> {
     emptyVariant: "noData" | "noResults";
     errorState?: TableErrorState;
     featureNotices: readonly FeatureNotice[];
+    filterDefs?: readonly FilterDef<TRow>[];
+    filterRegistry?: FilterTypeRegistry;
     getRowId: (row: TRow) => string;
     grouping?: {
         groupBy: readonly string[];
@@ -5070,6 +5074,8 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
         readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
     };
+    readonly filterDefs?: readonly FilterDef<TRow>[];
+    readonly filterRegistry?: FilterTypeRegistry;
     readonly getRowId: (row: TRow) => string;
     readonly grouping?: unknown;
     readonly groupingState?: {

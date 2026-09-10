@@ -104,6 +104,14 @@ Stable catalog order:
 `rows.resolve`, `export.run`, `edit.cells`, `rows.add`, `rows.delete`,
 `rows.reorder`.
 
+`view.setFilters` takes `{ filters }` — the extra bag the table already
+uses (`{ team: ["Core"] }`, `{ salaryMin: 10000, salaryOp: "gt" }`) or an
+array of `{ key, op, value }` conditions. `describe` lists the live
+filters, operators and (when the static list is short enough) options.
+`ai: false` on a `FilterDef` hides that filter; `{ options: false }` or a
+number cap omits a large list rather than truncating it. Without
+declarative defs the argument stays the host's own object.
+
 `view.setAggregations` takes `{ set?, remove?, restoreDefaults? }` — add or
 change specific column operations without replacing the others, remove
 specific aggregations with the same suppression semantics as the panel, or

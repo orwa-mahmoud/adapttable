@@ -39,6 +39,7 @@ import {
 } from "react";
 
 import { type SharedApproval, sharedApproval } from "./approvalConfig";
+import { agentFiltersFromDefs } from "./filterCatalog";
 
 export type { SharedApproval };
 import type { CommitPolicy, RowAddressScope, WritePolicy } from "./keys";
@@ -310,6 +311,12 @@ function observationFromRuntime(
       ),
       groupBy: view?.groupingState?.groupBy,
       aggregations: aggregationsFromView(view, options),
+      availableFilters: agentFiltersFromDefs(
+        view?.filterDefs,
+        view?.filterRegistry,
+        options.columns
+      ),
+      filters: query?.extra,
     };
   }
   const columns = columnsForRuntime(options, runtime).map((column) =>
@@ -359,6 +366,12 @@ function observationFromRuntime(
     sortDir: query?.sortDir,
     groupBy: view?.groupingState?.groupBy,
     aggregations: aggregationsFromView(view, options),
+    availableFilters: agentFiltersFromDefs(
+      view?.filterDefs,
+      view?.filterRegistry,
+      options.columns
+    ),
+    filters: query?.extra,
     pageMax: view?.rows?.length ?? 10,
     readMax: options.readMax ?? 50,
     rowAddressScope: "visible",

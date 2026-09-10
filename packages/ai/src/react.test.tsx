@@ -253,6 +253,74 @@ describe("tableAgent", () => {
     expect(setExtras).toHaveBeenCalledWith({ team: ["Core"] });
   });
 
+  it("publishes the live filter catalog and rejects an unknown option", async () => {
+    let session: AgentSession | undefined;
+    const setExtras = vi.fn();
+    render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "one",
+            columns: { salary: { readable: false } },
+            bridge: { attach: (s) => (session = s) },
+          }),
+          { id: "filters" },
+        ]}
+        view={{
+          rows: [],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+          filterDefs: [
+            {
+              key: "team",
+              type: "multiSelect",
+              label: "Team",
+              options: [
+                { value: "Core", label: "Core" },
+                { value: "Data", label: "Data" },
+              ],
+            },
+            { key: "salary", type: "numberRange", label: "Salary" },
+            { key: "internal", type: "text", ai: false },
+          ],
+          query: {
+            page: 1,
+            limit: 10,
+            search: "",
+            setPage: vi.fn(),
+            setLimit: vi.fn(),
+            setSearch: vi.fn(),
+            setSort: vi.fn(),
+            extra: { team: ["Core"] },
+            setExtras,
+            clearExtras: vi.fn(),
+          },
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    const guide = session!.describe("view.setFilters");
+    expect(guide.guide).toContain("team [");
+    expect(guide.guide).toContain("options: Core, Data");
+    expect(guide.guide).not.toContain("salary [");
+    expect(guide.guide).not.toContain("internal [");
+    const refused = await session!.execute(
+      "view.setFilters",
+      { filters: { team: ["Ghost"] } },
+      session!.manifest().viewRevision,
+      "bad-option"
+    );
+    expect(refused.ok).toBe(false);
+    expect(setExtras).not.toHaveBeenCalled();
+    await session!.execute(
+      "view.setFilters",
+      { filters: { team: ["Data"] } },
+      session!.manifest().viewRevision,
+      "good-option"
+    );
+    expect(setExtras).toHaveBeenCalledWith({ team: ["Data"] });
+  });
+
   it("keeps one session and bumps revision when the live view changes", async () => {
     const attached: AgentSession[] = [];
     const feature = tableAgent({

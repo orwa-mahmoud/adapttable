@@ -9,6 +9,7 @@ import {
   type ExtraFilters,
   type ExtraRow,
   type FilterDef,
+  type FilterTypeRegistry,
   type FilterTypeSpec,
   type GetCellSpan,
   type GroupNode,
@@ -964,6 +965,8 @@ export interface BaseDataTableProps<TRow> {
    * receives.
    */
   filterDefs?: readonly FilterDef<TRow>[];
+  /** Type registry those defs were built against. */
+  filterRegistry?: FilterTypeRegistry;
   /**
    * How the filter container opens. One mode at a time — never stacked.
    * `"popover"` (default) anchors a light card under the Filters button

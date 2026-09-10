@@ -351,15 +351,12 @@ function applyBatch(
 }
 
 /**
- * Read a team out of whatever filter model the caller sent.
+ * Read a team out of the extra bag the session already validated.
  *
- * `view.setFilters` takes `{ filters: unknown }` on purpose — the filter model
- * belongs to the application, so the capability cannot describe it and a model
- * has nothing to aim at. A real one sends what looks reasonable: this page has
- * seen both `{ team: ["Core"] }` from its own scripted transport and
- * `[{ column: "team", operator: "equals", value: "Core" }]` from gpt-5.4-nano.
- * A host that understands only its own spelling reports the filter as applied
- * and then shows every row, which is worse than refusing it.
+ * The live catalog lists this page's `team` multiSelect. Scripted examples
+ * send `{ team: ["Core"] }`; a connected model may send the same extras or
+ * `{ key, op, value }` conditions. Either way the bag that lands here is
+ * the table's, not an invented shape.
  */
 function teamFromFilters(filters: unknown): string | undefined {
   const asString = (value: unknown): string | undefined => {

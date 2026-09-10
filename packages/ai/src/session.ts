@@ -6,6 +6,7 @@ import {
   createCapabilityRegistry,
 } from "./capabilities/registry";
 import { errorMessage } from "./errorMessage";
+import { extrasFromAgentFilters, formatFilterCatalog } from "./filterCatalog";
 import { summaryOf } from "./guides";
 import {
   type ApprovalPolicy,
@@ -284,6 +285,9 @@ export function createAgentSession(
     const guide = registry.describe(key);
     if (key === "view.setAggregations") {
       return describeAggregations(guide, options.observe());
+    }
+    if (key === "view.setFilters") {
+      return describeFilters(guide, options.observe());
     }
     return guide;
   };
@@ -742,6 +746,16 @@ function cancellationGuard(signal: AbortSignal | undefined): () => void {
   };
 }
 
+function describeFilters(
+  guide: CapabilityGuide,
+  observation: AgentObservation
+): CapabilityGuide {
+  return {
+    ...guide,
+    guide: guide.guide + formatFilterCatalog(observation.availableFilters),
+  };
+}
+
 function describeAggregations(
   guide: CapabilityGuide,
   observation: AgentObservation
@@ -997,6 +1011,8 @@ async function dispatchBuiltIn(
         groupBy: observation.groupBy ?? null,
         pinnedColumns: observation.pinnedColumns ?? {},
         pinnedRows: observation.pinnedRows ?? { top: [], bottom: [] },
+        filters: observation.filters ?? null,
+        availableFilters: observation.availableFilters,
         revision: observation.viewRevision,
       };
     case "view.setPage": {
@@ -1032,7 +1048,9 @@ async function dispatchBuiltIn(
       return { ok: true, revision: observation.viewRevision + 1 };
     case "view.setFilters":
       assertApply(apply, "setFilters");
-      apply.setFilters(body.filters);
+      apply.setFilters(
+        extrasFromAgentFilters(body.filters, observation.availableFilters)
+      );
       return { ok: true, revision: observation.viewRevision + 1 };
     case "view.setGroupBy": {
       const groupKey = body.key as string | null | undefined;

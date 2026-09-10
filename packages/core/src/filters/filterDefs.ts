@@ -92,6 +92,32 @@ export type FilterOptionsSource =
 export const AUTO_OPTIONS_LIMIT = 50;
 
 /**
+ * Default maximum static choices published to an assistant. A longer list
+ * is omitted rather than truncated, so the model cannot treat a sample as
+ * the full set.
+ *
+ * @public
+ */
+export const FILTER_AI_OPTIONS_LIMIT = AUTO_OPTIONS_LIMIT;
+
+/**
+ * What an assistant may see of one filter. `false` on {@link FilterDef.ai}
+ * hides the filter entirely. This object keeps the filter visible and
+ * controls only the option list.
+ *
+ * @public
+ */
+export interface FilterAiOptions {
+  /**
+   * Option list for the assistant.
+   * `false` — never send values.
+   * a number — send values only when the static list is this long or shorter.
+   * Omit — {@link FILTER_AI_OPTIONS_LIMIT}.
+   */
+  readonly options?: false | number;
+}
+
+/**
  * A full, standalone filter definition (the `filters` array form).
  *
  * @public
@@ -122,6 +148,15 @@ export interface FilterDef<TRow = unknown> {
   getValue?: (row: TRow) => unknown;
   /** Placeholder for text-like inputs. */
   placeholder?: string;
+  /**
+   * What the assistant may see. `false` hides this filter.
+   * `{ options: false }` keeps the filter and omits the value list.
+   * `{ options: 10 }` sends values only when the static list is that
+   * long or shorter. Omit and the filter is visible, with values sent
+   * only when there are {@link FILTER_AI_OPTIONS_LIMIT} or fewer static
+   * choices.
+   */
+  ai?: false | FilterAiOptions;
 }
 
 /**

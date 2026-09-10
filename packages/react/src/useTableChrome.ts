@@ -6,6 +6,8 @@ import {
   type ConfirmHandler,
   defaultConfirm,
   type FeatureNotice,
+  type FilterDef,
+  type FilterTypeRegistry,
   type GroupAggregatesFn,
   type GroupByInput,
   type GroupedFlatEntry,
@@ -272,6 +274,10 @@ export interface TableChrome<TRow> {
   mergedChips: readonly ActiveFilterChip[];
   /** Active filter count (override, or merged chip count). */
   activeFilterCount: number;
+  /** Declarative filter definitions the shell resolved. */
+  filterDefs?: readonly FilterDef<TRow>[];
+  /** Type registry those defs were built against. */
+  filterRegistry?: FilterTypeRegistry;
   /** Whether the resolved pagination mode is `"paged"`. */
   isPaged: boolean;
   /**
@@ -906,6 +912,8 @@ export function useTableChrome<TRow>(
     getRowId,
     mergedChips,
     activeFilterCount,
+    filterDefs: props.filterDefs,
+    filterRegistry: props.filterRegistry,
     isPaged,
     rootRef,
     droppedColumns: responsive.dropped,

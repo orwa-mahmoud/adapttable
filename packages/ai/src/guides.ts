@@ -67,7 +67,7 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
   "view.describe": {
     key: "view.describe",
     guide:
-      "Read the current page, sort, search, grouping and revision. No rows.",
+      "Read the current page, sort, search, grouping, filters and revision. No rows.",
     input: objectSchema({}),
     output: objectSchema({
       page: { type: "integer", minimum: 1 },
@@ -76,6 +76,7 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
       sortBy: { type: ["string", "null"] },
       sortDir: { type: ["string", "null"] },
       groupBy: { type: ["string", "null"] },
+      filters: {},
       revision: { type: "integer", minimum: 1 },
     }),
   },
@@ -112,12 +113,13 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
   "view.setFilters": {
     key: "view.setFilters",
     guide:
-      "Replace the active filter model. The shape is the APPLICATION'S own " +
-      "filter value and is deliberately not described here — there is no " +
-      "schema for it to fetch, so asking again returns this same text. " +
-      "Send `{}` to clear filters. To set one, use the shape the application " +
-      "documented; if you do not know it, say so rather than guessing, and " +
-      "prefer view.setSearch, which takes a plain string.",
+      "Replace the extra filter bag. Send `{}` to clear. Eligible filters, " +
+      "operators and (when small enough) options are listed when this " +
+      "capability is described against the live table. Use those extra-bag " +
+      "keys — for a number filter that is `salaryMin` / `salaryMax` / " +
+      "`salaryOp`, not `{ salary: { gt: 10000 } }`. You may also send an " +
+      "array of `{ key, op, value }` conditions; they become the same bag. " +
+      "Never invent a filter, operator or option that is not listed.",
     input: objectSchema({ filters: {} }, ["filters"]),
     output: OK,
   },
@@ -329,7 +331,7 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
 
 const SUMMARIES: Record<CapabilityKey, string> = {
   "columns.describe": "List column metadata without row values.",
-  "view.describe": "Read page, sort, search and grouping.",
+  "view.describe": "Read page, sort, search, grouping and filters.",
   "view.setPage": "Change the current page.",
   "view.setSort": "Change or clear the sort.",
   "view.setSearch": "Change the search query.",

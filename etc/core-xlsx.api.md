@@ -253,7 +253,13 @@ export interface ExportWriter {
 }
 
 // @public
+export interface FilterAiOptions {
+    readonly options?: false | number;
+}
+
+// @public
 export interface FilterDef<TRow = unknown> {
+    ai?: false | FilterAiOptions;
     column?: string;
     getValue?: (row: TRow) => unknown;
     key: string;

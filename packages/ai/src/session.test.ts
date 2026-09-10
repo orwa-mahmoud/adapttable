@@ -398,6 +398,67 @@ describe("createAgentSession", () => {
     expect(apply.reorderRows).toHaveBeenCalledWith("1", "2");
   });
 
+  it("describes and validates filters against the live catalog", async () => {
+    const setFilters = vi.fn();
+    const availableFilters = [
+      {
+        key: "team",
+        label: "Team",
+        type: "multiSelect",
+        operators: ["in"],
+        defaultOperator: "in",
+        valueKeys: ["team"],
+        options: [{ value: "Core", label: "Core" }],
+      },
+      {
+        key: "salary",
+        label: "Salary",
+        type: "numberRange",
+        operators: ["gt", "gte", "between"],
+        defaultOperator: "gte",
+        valueKeys: ["salary", "salaryMin", "salaryMax", "salaryOp"],
+      },
+    ];
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: ["filters"],
+          hasFilters: true,
+          availableFilters,
+          filters: { team: ["Core"] },
+        }),
+      apply: { setFilters },
+    });
+    const described = session.describe("view.setFilters");
+    expect(described.guide).toContain("team [");
+    expect(described.guide).toContain("options: Core");
+    expect(described.guide).toContain("salary [");
+    const view = await session.execute("view.describe", {}, 1, "vf");
+    expect(view.result).toMatchObject({
+      filters: { team: ["Core"] },
+      availableFilters,
+    });
+    const refused = await session.execute(
+      "view.setFilters",
+      { filters: { salary: { gt: 10000 } } },
+      1,
+      "bad-shape"
+    );
+    expect(refused.ok).toBe(false);
+    expect(setFilters).not.toHaveBeenCalled();
+    const ok = await session.execute(
+      "view.setFilters",
+      { filters: [{ key: "salary", op: "gt", value: 10000 }] },
+      1,
+      "good-shape"
+    );
+    expect(ok.ok).toBe(true);
+    expect(setFilters).toHaveBeenCalledWith({
+      salaryMin: "10000",
+      salaryOp: "gt",
+    });
+  });
+
   it("applies a whole aggregation patch or none of it", async () => {
     const apply = { setAggregations: vi.fn() };
     const session = createAgentSession({

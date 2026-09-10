@@ -142,6 +142,8 @@ export type DataTableShellChromeProps<TRow> = DataTableShellProps<TRow> & {
   filters: ReactNode;
   /** Declarative filter definitions. */
   filterDefs: readonly FilterDef<TRow>[];
+  /** Type registry those defs were built against. */
+  filterRegistry: FilterTypeRegistry;
   /** Chip label resolvers keyed by filter id. */
   filterLabels: Record<string, ChipLabelResolver>;
 };
@@ -420,6 +422,7 @@ export function useDataTableShell<TRow>(
     source,
     filters: filtersNode,
     filterDefs: runtime.defs,
+    filterRegistry: runtime.registry,
     filterLabels: { ...runtime.filterLabels, ...props.filterLabels },
     summaryRow: bindFeatureHostFn(featureHost, props.summaryRow),
     groupAggregates: bindFeatureHostFn(featureHost, props.groupAggregates),
