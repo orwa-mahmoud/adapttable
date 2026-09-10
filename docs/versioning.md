@@ -16,7 +16,7 @@ Given `MAJOR.MINOR.PATCH`:
   unavoidable, it ships in a major with a migration note in the CHANGELOG.
 
 The published packages (`@adapttable/core`, the adapters, `@adapttable/i18n`,
-`@adapttable/server`, `@adapttable/ai`, and `@adapttable/cli`) each follow
+`@adapttable/server`, `@adapttable/ai`, `@adapttable/ai-react`, and `@adapttable/cli`) each follow
 [changesets](https://github.com/changesets/changesets) **independently**: a
 package only bumps when a changeset names it. Adapters, `@adapttable/i18n`
 and `@adapttable/server` depend on a concrete `@adapttable/core` version at
@@ -132,9 +132,14 @@ Locale presets (`en`, `ar`, …, `zhTW`), `getLabels` / `hasLocale` /
 
 ### `@adapttable/ai`
 
-`createAgentSession`, `tableAgent` (`@adapttable/ai/react`), the
-`adapttable.agent.v1` manifest and the `CAPABILITY_KEYS` catalog. Optional —
-core and adapter roots do not re-export it.
+`createAgentSession`, the `adapttable.agent.v1` manifest and the
+`CAPABILITY_KEYS` catalog. Optional — core and adapter roots do not
+re-export it.
+
+### `@adapttable/ai-react`
+
+`tableAgent` and `useTableAssistant`. Depends on `@adapttable/ai` and
+`@adapttable/react`. The AI root stays React-free.
 
 ### `@adapttable/server`
 

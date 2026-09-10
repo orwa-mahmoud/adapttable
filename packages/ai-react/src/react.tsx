@@ -1,9 +1,41 @@
 /**
- * Opt-in table feature — `@adapttable/ai/react`.
+ * Opt-in table feature — `@adapttable/ai-react`.
  *
- * The root `@adapttable/ai` entry stays React-free. This subpath mounts a
- * provider that observes the live table and publishes a versioned manifest.
+ * `@adapttable/ai` stays React-free. This package mounts a provider that
+ * observes the live table and publishes a versioned manifest.
  */
+import {
+  type AgentAggregationColumn,
+  type AgentAggregations,
+  type AgentAggregationsPatch,
+  type AgentApply,
+  type AgentCapabilityDefinition,
+  type AgentColumn,
+  agentColumnsFromNeutral,
+  agentFiltersFromDefs,
+  type AgentManifest,
+  type AgentObservation,
+  type AgentSession,
+  type ApprovalResult,
+  type ApprovalSubject,
+  type CommitPolicy,
+  createAgentSession,
+  monotonicRevision,
+  observationFromNeutral,
+  readRowsFromNeutral,
+  type ResolvedRow,
+  resolveRowFromNeutral,
+  revisionToken,
+  type RowAddressScope,
+  type RowReadQuery,
+  type RowRef,
+  type RowWindow,
+  type SharedApproval,
+  sharedApproval,
+  type TableAgentColumnPatch,
+  type WritePolicy,
+  type WriteProposal,
+} from "@adapttable/ai";
 import {
   addAggregation,
   type ApprovalPresentation,
@@ -38,48 +70,27 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import { type SharedApproval, sharedApproval } from "./approvalConfig";
-import { agentFiltersFromDefs } from "./filterCatalog";
+export type { SharedApproval, TableAgentColumnPatch };
 
-export type { SharedApproval };
-import type { CommitPolicy, RowAddressScope, WritePolicy } from "./keys";
-import {
-  agentColumnsFromNeutral,
-  monotonicRevision,
-  observationFromNeutral,
-  readRowsFromNeutral,
-  resolveRowFromNeutral,
-  revisionToken,
-} from "./liveTable";
-import { createAgentSession } from "./session";
-import type {
-  AgentAggregationColumn,
-  AgentAggregations,
-  AgentAggregationsPatch,
-  AgentApply,
-  AgentCapabilityDefinition,
-  AgentColumn,
-  AgentObservation,
-  AgentSession,
-  ApprovalResult,
-  ApprovalSubject,
-  ResolvedRow,
-  RowReadQuery,
-  RowRef,
-  RowWindow,
-  TableAgentBridge,
-  WriteProposal,
-} from "./types";
-
-export {
-  type ApprovalPolicy,
-  CAPABILITY_KEYS,
-  type CapabilityKey,
-  type CommitPolicy,
-  type RowAddressScope,
-  type WritePolicy,
-} from "./keys";
-export type * from "./types";
+/**
+ * How a host receives live updates.
+ *
+ * @public
+ */
+export interface TableAgentBridge {
+  /** Called when the published manifest changes. */
+  publish?(manifest: AgentManifest): void;
+  /** Called with the live session after mount. */
+  attach?(session: AgentSession): void;
+  /**
+   * Called when a write starts or stops waiting on a human.
+   *
+   * `execute` does not return while an approval is open, so a panel outside
+   * the table has no other way to know the turn is parked rather than
+   * thinking.
+   */
+  readonly approvals?: (pending: AgentApprovalPending | null) => void;
+}
 
 const PAGE_ONLY_SOURCE = {
   fullDataset: false,
@@ -95,24 +106,6 @@ const PAGE_ONLY_SOURCE = {
  * @public
  */
 export const TABLE_AGENT_STATE = featureStateKey<AgentSession>("table-agent");
-
-/**
- * Per-column overrides the React feature merges onto live columns.
- *
- * @public
- */
-export interface TableAgentColumnPatch {
-  /** Whether `rows.read` may return this column. */
-  readonly readable?: boolean;
-  /** Whether `edit.cells` may write this column. */
-  readonly writable?: boolean;
-  /** Declared value type. */
-  readonly type?: string;
-  /** Whether the column accepts sort. */
-  readonly sortable?: boolean;
-  /** Display label. */
-  readonly label?: string;
-}
 
 /**
  * Options for {@link tableAgent}.

@@ -5,7 +5,6 @@
 ```ts
 
 import { ActionAiOptions } from '@adapttable/core';
-import { AgentApprovalPending } from '@adapttable/react/adapter';
 import { ApprovalPresentation } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 
@@ -304,13 +303,13 @@ export interface AgentSystemPromptInput {
         readonly summary: string;
     }[];
     readonly manifest: {
+        readonly viewRevision: number;
         readonly columns: readonly {
             readonly id: string;
             readonly label: string;
             readonly readable: boolean;
             readonly writable: boolean;
         }[];
-        readonly viewRevision: number;
     };
     readonly tableId: string;
 }
@@ -544,13 +543,6 @@ export function runAgentHttpTurn(session: AgentSession, message: string, options
     returnResults?: boolean;
     signal?: AbortSignal;
 }): Promise<AgentHttpTurnResult>;
-
-// @public
-export interface TableAgentBridge {
-    readonly approvals?: (pending: AgentApprovalPending | null) => void;
-    attach?(session: AgentSession): void;
-    publish?(manifest: AgentManifest): void;
-}
 
 // @public
 export interface WriteExecuteResult {

@@ -16,8 +16,7 @@ import type {
   AgentSession,
   AssistantSuggestion,
 } from "@adapttable/ai";
-import { useTableAssistant } from "@adapttable/ai/assistant";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent, useTableAssistant } from "@adapttable/ai-react";
 import {
   type ApprovalPresentation,
   type FilterDef,

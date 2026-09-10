@@ -250,7 +250,7 @@ const table = (
       `import { useDataTable } from "@adapttable/react";`
     );
     expect(result.code).toContain(
-      `import { tableAgent } from "@adapttable/ai/react";`
+      `import { tableAgent } from "@adapttable/ai-react";`
     );
   });
 

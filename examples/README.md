@@ -25,7 +25,7 @@ complete, copy-pasteable React component — wrap it in your kit's provider
 | [ai-result-return.ts](./ai-result-return.ts)               | `@adapttable/ai/json`  | Optional ExecuteResult return loop               |
 | [ai-server-agent.ts](./ai-server-agent.ts)                 | `@adapttable/ai`       | Node session, envelope HTTP, salary idempotency  |
 | [ai-mcp-host.ts](./ai-mcp-host.ts)                         | `@adapttable/ai/mcp`   | MCP tools, resources, list-changed               |
-| [ai-browser-agent.tsx](./ai-browser-agent.tsx)             | `@adapttable/ai/react` | JSON tools, capability growth, stage vs commit   |
+| [ai-browser-agent.tsx](./ai-browser-agent.tsx)             | `@adapttable/ai-react` | JSON tools, capability growth, stage vs commit   |
 | [ai-http-backend.ts](./ai-http-backend.ts)                 | `@adapttable/ai/http`  | Runnable OpenAI/Anthropic/Gemini/DeepSeek server |
 
 Install the packages for the example you want (see each adapter's README),

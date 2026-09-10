@@ -1333,10 +1333,17 @@ the types `AgentApply`, `AgentAggregateOperation`, `AgentAggregationColumn`,
 `AgentCapabilityDefinition`,
 `AgentCellEdit`, `AgentColumn`, `AgentFilter`, `AgentFilterOption`, `AgentLimits`,
 `AgentManifest`, `AgentObservation`, `AgentPolicy`, `AgentRowAddressing`,
-`AgentSession`, `ApprovalOutcome`, `CapabilityGuide`, `CatalogEntry`,
+`AgentSession`, `ApprovalOutcome`, `ApprovalResult`, `ApprovalSubject`,
+`CapabilityGuide`, `CatalogEntry`,
 `ExecuteError`, `ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowKeyRef`,
 `RowPositionRef`, `RowReadQuery`, `RowRef`, `RowWindow`, `RowWindowRow`,
-`TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`, `WriteRowResult`,
+`WriteExecuteResult`, `WriteProposal`, `WriteRowResult`,
+`sharedApproval`, `SharedApproval`, `ResolvedApproval`,
+`agentFiltersFromDefs`, `FilterCatalogColumnPatch`,
+`agentColumnsFromNeutral`, `TableAgentColumnPatch`,
+`LiveObservationOptions`, `NeutralQueryOverlay`, `monotonicRevision`,
+`observationFromNeutral`, `readRowsFromNeutral`, `resolveRowFromNeutral`
+and `revisionToken`,
 and the assistant contracts `AssistantAction`, `AssistantConversation`,
 `AssistantOutcome`, `AssistantOutcomeStatus`, `AssistantPlanner`,
 `AssistantProposal`, `AssistantRequest`, `AssistantSuggestion`,
@@ -1344,9 +1351,11 @@ and the assistant contracts `AssistantAction`, `AssistantConversation`,
 `AssistantTransportReply` and `CapabilityPresentation`, plus the receipt
 readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
 `AssistantReceipt`, `AssistantReceiptStatus`, `AssistantTurnStatus`.
-`@adapttable/ai/assistant` exports `useTableAssistant`,
-`TableAssistantOptions`, `TableAssistantState`, `AssistantMessage` and
-`AssistantStatus`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
+`@adapttable/ai-react` exports `useTableAssistant`,
+`TableAssistantOptions`, `TableAssistantState`, `AssistantMessage`,
+`AssistantStatus`, `tableAgent`, `TableAgentOptions`,
+`TableAgentColumnPatch`, `TABLE_AGENT_STATE`, `TableAgentBridge` and
+`SharedApproval`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
 `receiptFromResult` and `receiptsFromResults` as `AssistantReceipt`, whose
 optional `AssistantReceiptSubject` names what changed so the panel can say
 "Filter applied — Team is Core" rather than a capability key.
@@ -1366,8 +1375,7 @@ a container of your own. `TableAssistantSlots` collects
 `TableAssistantReceiptSubject` — what an action changed, supplied by whoever
 ran it — and `TableAssistantSuggestionView`, plus `assistantIsBusy` and
 `assistantIsUsable`.
-`@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions`,
-`TableAgentColumnPatch` and `TABLE_AGENT_STATE`. Each published kit exports
+Each published kit exports
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome
 exports `AgentApprovalChrome` (`AgentApprovalChromeProps`),
 `AGENT_APPROVAL`, `AGENT_APPROVAL_STATE`, `AgentApprovalPending`,

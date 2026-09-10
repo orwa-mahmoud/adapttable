@@ -6,18 +6,20 @@
  * underneath, an unmount mid-turn. None of them is visible from the session
  * alone.
  */
+import {
+  type AgentObservation,
+  type AgentSession,
+  type AssistantSuggestion,
+  type AssistantTransport,
+  type AssistantTransportReply,
+  createAgentSession,
+  type ExecuteResult,
+} from "@adapttable/ai";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { useTableAssistant } from "./assistant";
-import type {
-  AssistantSuggestion,
-  AssistantTransport,
-  AssistantTransportReply,
-} from "./assistantContracts";
-import { createAgentSession } from "./session";
-import type { AgentObservation, AgentSession, ExecuteResult } from "./types";
 
 const observation = (
   patch: Partial<AgentObservation> = {}

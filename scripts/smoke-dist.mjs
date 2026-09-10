@@ -123,7 +123,7 @@ const SERVER_SAFE = [
     // Catalog, describe, execute, the JSON / OpenAI / MCP mappers and the HTTP
     // bridge all run in a host without React — the bridge posts a manifest and
     // executes what comes back, and imports no model SDK.
-    // `@adapttable/ai/react` is the client entry and is deliberately not
+    // `@adapttable/ai-react` is the client package and is deliberately not
     // listed here.
     pkg: "ai",
     only: /^\.\/dist\/(index|json|openai|mcp|http)\.(js|cjs)$/,

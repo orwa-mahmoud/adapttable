@@ -5,8 +5,12 @@
 ```ts
 
 import { ActionAiOptions } from '@adapttable/core';
-import { AgentApprovalPending } from '@adapttable/react/adapter';
 import { ApprovalPresentation } from '@adapttable/core';
+import { FilterDef } from '@adapttable/core';
+import { FilterTypeRegistry } from '@adapttable/core';
+import { NeutralTable } from '@adapttable/core';
+import { revisionToken } from '@adapttable/core';
+import { TableRevisions } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 
 // @public
@@ -118,6 +122,9 @@ export interface AgentColumn {
 }
 
 // @public
+export function agentColumnsFromNeutral<TRow>(table: NeutralTable<TRow>, patches?: Readonly<Record<string, TableAgentColumnPatch>>): readonly AgentColumn[];
+
+// @public
 export interface AgentFilter {
     readonly defaultOperator: string;
     readonly key: string;
@@ -134,6 +141,9 @@ export interface AgentFilterOption {
     readonly label: string;
     readonly value: string;
 }
+
+// @public
+export function agentFiltersFromDefs(defs: readonly FilterDef[] | undefined, registry: FilterTypeRegistry | undefined, patches?: Readonly<Record<string, FilterCatalogColumnPatch>>): readonly AgentFilter[] | undefined;
 
 // @public
 export interface AgentLimits {
@@ -453,6 +463,12 @@ export interface ExecuteResult {
 }
 
 // @public
+export interface FilterCatalogColumnPatch {
+    // (undocumented)
+    readonly readable?: boolean;
+}
+
+// @public
 export function guideOf(key: CapabilityKey): CapabilityGuide;
 
 // @public
@@ -472,7 +488,57 @@ export interface JsonSchema {
 }
 
 // @public
+export interface LiveObservationOptions {
+    // (undocumented)
+    readonly apply?: AgentApply;
+    // (undocumented)
+    readonly approval?: SharedApproval;
+    // (undocumented)
+    readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
+    // (undocumented)
+    readonly commit?: CommitPolicy;
+    // (undocumented)
+    readonly readMax?: number;
+    // (undocumented)
+    readonly tableId: string;
+    // (undocumented)
+    readonly writePolicy?: WritePolicy;
+}
+
+// @public (undocumented)
+export function monotonicRevision(revisions: TableRevisions, lastToken: string | undefined): {
+    token: string;
+    bumped: boolean;
+};
+
+// @public
+export interface NeutralQueryOverlay {
+    // (undocumented)
+    readonly limit?: number;
+    // (undocumented)
+    readonly page?: number;
+    readonly pinnedColumns?: Readonly<Record<string, "start" | "end">>;
+    // (undocumented)
+    readonly pinnedRows?: {
+        readonly top: readonly string[];
+        readonly bottom: readonly string[];
+    };
+    // (undocumented)
+    readonly search?: string;
+    // (undocumented)
+    readonly sortBy?: string;
+    // (undocumented)
+    readonly sortDir?: "asc" | "desc";
+}
+
+// @public (undocumented)
+export function observationFromNeutral<TRow>(table: NeutralTable<TRow>, options: LiveObservationOptions, viewRevision: number, apply: AgentApply, featureIds: readonly string[], query?: NeutralQueryOverlay): AgentObservation;
+
+// @public
 export function openAiToolNameMap(keys: readonly string[]): ReadonlyMap<string, string>;
+
+// @public
+export function readRowsFromNeutral<TRow>(table: NeutralTable<TRow>, columns: readonly AgentColumn[], query: RowReadQuery, readMax: number): RowWindow;
 
 // @public
 export function receiptFromResult(result: ExecuteResult, capabilityKey?: string, commit?: CommitPolicy, subject?: AssistantReceiptSubject): AssistantReceipt;
@@ -481,11 +547,22 @@ export function receiptFromResult(result: ExecuteResult, capabilityKey?: string,
 export function receiptsFromResults(results: readonly ExecuteResult[], keys?: readonly string[], commit?: CommitPolicy, subjects?: readonly (AssistantReceiptSubject | undefined)[]): readonly AssistantReceipt[];
 
 // @public
+export interface ResolvedApproval {
+    readonly policy: ApprovalPolicy;
+    readonly presentation: ApprovalPresentation;
+}
+
+// @public
 export interface ResolvedRow {
     readonly position?: number;
     readonly rowKey: string;
     readonly scope: RowAddressScope;
 }
+
+// @public
+export function resolveRowFromNeutral<TRow>(table: NeutralTable<TRow>, ref: RowRef): ResolvedRow;
+
+export { revisionToken }
 
 // @public
 export type RowAddressScope = "visible" | "page" | "full";
@@ -528,13 +605,29 @@ export interface RowWindowRow {
 }
 
 // @public
+export type SharedApproval = ApprovalPolicy | {
+    readonly policy?: ApprovalPolicy;
+    readonly presentation?: ApprovalPresentation;
+};
+
+// @public
+export function sharedApproval(approval: SharedApproval | undefined): ResolvedApproval;
+
+// @public
 export function summaryOf(key: CapabilityKey): string;
 
 // @public
-export interface TableAgentBridge {
-    readonly approvals?: (pending: AgentApprovalPending | null) => void;
-    attach?(session: AgentSession): void;
-    publish?(manifest: AgentManifest): void;
+export interface TableAgentColumnPatch {
+    // (undocumented)
+    readonly label?: string;
+    // (undocumented)
+    readonly readable?: boolean;
+    // (undocumented)
+    readonly sortable?: boolean;
+    // (undocumented)
+    readonly type?: string;
+    // (undocumented)
+    readonly writable?: boolean;
 }
 
 // @public

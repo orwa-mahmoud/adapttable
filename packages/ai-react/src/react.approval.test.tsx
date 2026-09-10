@@ -6,6 +6,7 @@
  * the proposals, and waits. Nothing about that is visible from the session
  * alone, so it is driven here the way the approval strip drives it.
  */
+import type { AgentApply, AgentSession, ExecuteResult } from "@adapttable/ai";
 import type { ActionAiOptions } from "@adapttable/core";
 import {
   AGENT_APPROVAL_STATE,
@@ -21,7 +22,6 @@ import { StrictMode, useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TABLE_AGENT_STATE, tableAgent } from "./react";
-import type { AgentApply, AgentSession, ExecuteResult } from "./types";
 
 interface Row {
   id: string;

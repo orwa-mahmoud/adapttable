@@ -116,6 +116,7 @@ place: **[the comparison page](https://orwa-mahmoud.github.io/adapttable/compari
 | `@adapttable/cli`      | `npx @adapttable/cli init` / `migrate-v3` — scaffold or upgrade v2 source. |
 | `@adapttable/server`   | React-free query parsing for a host backend.                               |
 | `@adapttable/ai`       | Optional provider-neutral table agent contract.                            |
+| `@adapttable/ai-react` | React bindings for the agent — `tableAgent` and `useTableAssistant`.       |
 
 ## Install
 

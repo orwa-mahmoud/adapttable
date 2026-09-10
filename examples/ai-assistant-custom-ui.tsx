@@ -9,10 +9,10 @@
 import type { AgentSession } from "@adapttable/ai";
 import {
   type AssistantSuggestion,
+  tableAgent,
   useTableAssistant,
-} from "@adapttable/ai/assistant";
+} from "@adapttable/ai-react";
 import { assistantHttpTransport } from "@adapttable/ai/http";
-import { tableAgent } from "@adapttable/ai/react";
 import { DataTable } from "@adapttable/mantine";
 import { useMemo, useState } from "react";
 

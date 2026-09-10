@@ -141,6 +141,7 @@ function classify({ dir, subpath, name, reportText }) {
     return "application-hook";
   }
   if (dir === "ai") return classifyAi(subpath, name);
+  if (dir === "ai-react") return "react-binding";
   return classifyCore({ subpath, name, reportText });
 }
 
@@ -279,9 +280,9 @@ export function representativeExamplesAgree(map) {
   if (!session || session.proposedImport !== "@adapttable/ai") {
     errors.push("createAgentSession must stay on @adapttable/ai");
   }
-  const agent = by("@adapttable/ai/react", "tableAgent");
-  if (!agent || agent.proposedImport !== "@adapttable/ai/react") {
-    errors.push("tableAgent must stay on @adapttable/ai/react");
+  const agent = by("@adapttable/ai-react", "tableAgent");
+  if (!agent || agent.proposedImport !== "@adapttable/ai-react") {
+    errors.push("tableAgent must live on @adapttable/ai-react");
   }
   const query = by("@adapttable/react", "useQuerySource");
   if (!query || query.proposedImport !== "@adapttable/react") {

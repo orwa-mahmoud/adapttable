@@ -17,7 +17,7 @@ The React feature is a separate import.
 
 ```ts
 import { createAgentSession } from "@adapttable/ai";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 ```
 
 ## `tableAgent({ tableId, bridge, writePolicy, approval, commit, columns, readMax })`
@@ -25,7 +25,7 @@ import { tableAgent } from "@adapttable/ai/react";
 Compose it next to the other features:
 
 ```tsx
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 import { DataTable } from "@adapttable/mui";
 import { agentApproval } from "@adapttable/mui";
 import { filters } from "@adapttable/mui/filters";

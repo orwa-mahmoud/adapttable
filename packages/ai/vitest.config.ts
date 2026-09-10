@@ -13,7 +13,7 @@ export default mergeConfig(sharedConfig, {
     },
   },
   test: {
-    environment: "jsdom",
+    environment: "node",
     coverage: {
       include: ["src/**/*.{ts,tsx}"],
       exclude: ["src/**/*.test.{ts,tsx}", "src/__snapshots__/**"],

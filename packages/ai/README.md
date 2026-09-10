@@ -12,7 +12,7 @@ npm install @adapttable/ai
 
 ```ts
 import { createAgentSession } from "@adapttable/ai";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 ```
 
 Compose `tableAgent({ tableId, bridge, writePolicy, approval, commit, columns })`

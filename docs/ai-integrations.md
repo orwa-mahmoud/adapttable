@@ -29,7 +29,7 @@ import { toOpenAITools } from "@adapttable/ai/openai";
 import { mcpListChanged, toMcpResources, toMcpTools } from "@adapttable/ai/mcp";
 ```
 
-The root entry stays React-free. `@adapttable/ai/react` is only for
+The root entry stays React-free. `@adapttable/ai-react` is only for
 `tableAgent`. The three integration subpaths never import a model SDK.
 
 ## Three integration levels

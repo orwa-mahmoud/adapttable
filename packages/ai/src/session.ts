@@ -1561,7 +1561,7 @@ type ReadRowWindow = (query: RowReadQuery) => Promise<RowWindow> | RowWindow;
  * A row the current scope does not reach therefore has no before-value here,
  * and that is correct. What the human approving the write sees is resolved
  * separately, from the table they are already looking at — see
- * `@adapttable/ai/react`.
+ * `@adapttable/ai-react`.
  */
 async function peekCell(
   apply: AgentApply,

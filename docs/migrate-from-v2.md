@@ -410,7 +410,7 @@ column / AI contracts.
 | `@adapttable/core/pivot` → `usePivotUrlState`      | `@adapttable/react/pivot`                         | React hook                                          |
 | `@adapttable/mui` → `DataTable`                    | `@adapttable/mui`                                 | Unchanged                                           |
 | `@adapttable/ai` → `createAgentSession`            | `@adapttable/ai`                                  | Unchanged                                           |
-| `@adapttable/ai/react` → `tableAgent`              | `@adapttable/ai/react`                            | Stays; depends on `@adapttable/react`               |
+| `@adapttable/ai/react` → `tableAgent`              | `@adapttable/ai-react`                            | React binding moved off `@adapttable/ai`            |
 | `@adapttable/ai/http` → `createAgentHttpClient`    | `@adapttable/ai/http`                             | Unchanged                                           |
 
 No public symbol is retired by this split. A row in the map whose
@@ -462,7 +462,7 @@ AI — root stays React-free; the React feature binds to the live engine:
 
 ```ts
 import { createAgentSession } from "@adapttable/ai";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 
 const session = createAgentSession({ observe, apply });
 const feature = tableAgent({ tableId: "orders" });

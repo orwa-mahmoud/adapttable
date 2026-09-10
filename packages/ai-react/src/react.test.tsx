@@ -1,3 +1,9 @@
+import type {
+  AgentAggregationsPatch,
+  AgentCapabilityDefinition,
+  AgentManifest,
+  AgentSession,
+} from "@adapttable/ai";
 import { createNeutralTable, createTableEngine } from "@adapttable/core";
 import {
   applyTableFeatures,
@@ -11,12 +17,6 @@ import { useLayoutEffect, useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TABLE_AGENT_STATE, tableAgent } from "./react";
-import type {
-  AgentAggregationsPatch,
-  AgentCapabilityDefinition,
-  AgentManifest,
-  AgentSession,
-} from "./types";
 
 function Harness({
   features,

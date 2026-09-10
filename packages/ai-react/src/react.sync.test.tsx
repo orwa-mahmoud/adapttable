@@ -12,6 +12,7 @@
  * publish nothing, or a host watching the bridge sees churn that says the
  * table changed when it did not.
  */
+import type { AgentManifest } from "@adapttable/ai";
 import {
   createNeutralTable,
   createTableEngine,
@@ -27,7 +28,6 @@ import { useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { tableAgent } from "./react";
-import type { AgentManifest } from "./types";
 
 interface Row {
   id: string;

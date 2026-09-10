@@ -1,5 +1,5 @@
 /**
- * `@adapttable/ai/assistant` — the conversation lifecycle, without a UI.
+ * `@adapttable/ai-react` — the conversation lifecycle, without a UI.
  *
  * This entry owns state and nothing else: no markup, no launcher, no
  * provider client. A host renders its own panel from what the hook returns,
@@ -22,48 +22,46 @@
 "use client";
 
 import {
+  type AgentSession,
+  type ApprovalPolicy,
+  type AssistantExchange,
+  type AssistantReceipt,
+  type AssistantReceiptStatus,
+  type AssistantReceiptSubject,
+  type AssistantSuggestion,
+  type AssistantTransport,
+  type AssistantTransportReply,
+  type AssistantTurnStatus,
+  type CommitPolicy,
+  eligibleSuggestions,
+  receiptsFromResults,
+  type RowAddressScope,
+  turnStatus,
+  type WritePolicy,
+} from "@adapttable/ai";
+import {
   AGENT_APPROVAL_STATE,
   type AgentApprovalPending,
   useFeatureState,
 } from "@adapttable/react/adapter";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  type AssistantExchange,
-  type AssistantSuggestion,
-  type AssistantTransport,
-  type AssistantTransportReply,
-  eligibleSuggestions,
-} from "./assistantContracts";
-import {
-  type AssistantReceipt,
-  type AssistantTurnStatus,
-  receiptsFromResults,
-  turnStatus,
-} from "./assistantReceipts";
-import type { AgentSession } from "./types";
-
 // The hook's own options and state name these, so the entry that publishes
 // the hook publishes them too — a consumer typing a variable from it should
 // not have to reach into another entry point for the pieces.
 export type {
+  ApprovalPolicy,
   AssistantExchange,
-  AssistantTransport,
-  AssistantTransportReply,
-} from "./assistantContracts";
-export type {
   AssistantReceipt,
   AssistantReceiptStatus,
   AssistantReceiptSubject,
+  AssistantTransport,
+  AssistantTransportReply,
   AssistantTurnStatus,
-} from "./assistantReceipts";
-export type {
-  ApprovalPolicy,
   CommitPolicy,
   RowAddressScope,
   WritePolicy,
-} from "./keys";
-export type * from "./types";
+};
 
 /**
  * Where the conversation is.

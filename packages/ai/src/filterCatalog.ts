@@ -18,6 +18,7 @@ import {
 
 import type { AgentFilter, AgentFilterOption } from "./types";
 
+/** Per-column readability the filter catalog consults. @public */
 export interface FilterCatalogColumnPatch {
   readonly readable?: boolean;
 }

@@ -5,7 +5,7 @@
  * evaluation feature. e2e drives this page across every published kit.
  */
 import type { AgentSession } from "@adapttable/ai";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 import { agentApproval as antdApproval } from "@adapttable/antd";
 import {
   batchEditing as antdBatch,

@@ -21,7 +21,7 @@ import type {
   RowWindow,
 } from "./types";
 
-/** Column overrides merged onto discovered engine columns. */
+/** Column overrides merged onto discovered engine columns. @public */
 export interface TableAgentColumnPatch {
   readonly readable?: boolean;
   readonly writable?: boolean;
@@ -30,7 +30,7 @@ export interface TableAgentColumnPatch {
   readonly label?: string;
 }
 
-/** Options the live bridge reads when building an observation. */
+/** Options the live bridge reads when building an observation. @public */
 export interface LiveObservationOptions {
   readonly tableId: string;
   readonly writePolicy?: WritePolicy;
@@ -238,6 +238,7 @@ export function rowAddressScopeForNeutral<TRow>(
   return "visible";
 }
 
+/** Query fields the live observation overlays onto the engine. @public */
 export interface NeutralQueryOverlay {
   readonly page?: number;
   readonly limit?: number;

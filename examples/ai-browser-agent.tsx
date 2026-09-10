@@ -11,7 +11,7 @@ import {
   executeJsonTool,
   toJsonTools,
 } from "@adapttable/ai/json";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 import { type ReactNode, useMemo, useRef, useState } from "react";
 
 const TABLE_ID = "employees";

@@ -2,12 +2,17 @@
  * `@adapttable/ai` — provider-neutral capability discovery for a live table.
  *
  * The root entry imports no React and no model SDK. Compose
- * `tableAgent` from `@adapttable/ai/react` when a table should publish
+ * `tableAgent` from `@adapttable/ai-react` when a table should publish
  * a manifest. `@adapttable/core`, every adapter root, and
  * `@adapttable/server` stay out of this graph.
  *
  * @packageDocumentation
  */
+export {
+  type ResolvedApproval,
+  type SharedApproval,
+  sharedApproval,
+} from "./approvalConfig";
 export {
   assertUniqueSuggestions,
   type AssistantAction,
@@ -35,6 +40,10 @@ export {
   turnStatus,
 } from "./assistantReceipts";
 export { openAiToolNameMap } from "./capabilities/registry";
+export {
+  agentFiltersFromDefs,
+  type FilterCatalogColumnPatch,
+} from "./filterCatalog";
 export { guideOf, summaryOf } from "./guides";
 export {
   AGENT_SCHEMA_VERSION,
@@ -45,6 +54,17 @@ export {
   type RowAddressScope,
   type WritePolicy,
 } from "./keys";
+export {
+  agentColumnsFromNeutral,
+  type LiveObservationOptions,
+  monotonicRevision,
+  type NeutralQueryOverlay,
+  observationFromNeutral,
+  readRowsFromNeutral,
+  resolveRowFromNeutral,
+  revisionToken,
+  type TableAgentColumnPatch,
+} from "./liveTable";
 export { buildManifest, enabledKeys } from "./manifest";
 export { createAgentSession, type CreateAgentSessionOptions } from "./session";
 export type {
@@ -83,7 +103,6 @@ export type {
   RowRef,
   RowWindow,
   RowWindowRow,
-  TableAgentBridge,
   WriteExecuteResult,
   WriteProposal,
   WriteRowResult,

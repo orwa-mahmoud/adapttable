@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@adapttable/ai": "workspace:*",
+    "@adapttable/ai-react": "workspace:*",
     "@adapttable/antd": "workspace:*",
     "@adapttable/base-ui": "workspace:*",
     "@adapttable/chakra": "workspace:*",

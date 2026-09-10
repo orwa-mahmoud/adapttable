@@ -251,6 +251,8 @@ const REDIRECTED_SPECIFIERS: Readonly<Record<string, string>> = {
   "@adapttable/core/adapter": "@adapttable/react/adapter",
   "@adapttable/core/features": "@adapttable/react/features",
   "@adapttable/core/sparkline": "@adapttable/react/sparkline",
+  "@adapttable/ai/react": "@adapttable/ai-react",
+  "@adapttable/ai/assistant": "@adapttable/ai-react",
 };
 
 const REMOVED_DATA_TABLE_PROPS = [

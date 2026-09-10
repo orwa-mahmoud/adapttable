@@ -10,7 +10,7 @@ the same permissions, validation and approval path.
 
 That contract lives in `@adapttable/ai`. It is optional. `@adapttable/core`,
 every adapter root, and `@adapttable/server` import none of it. Compose
-`tableAgent` from `@adapttable/ai/react` when a table should publish a
+`tableAgent` from `@adapttable/ai-react` when a table should publish a
 manifest; omit the import and the bytes stay out.
 
 ## What is wired, not what is installed
@@ -113,7 +113,7 @@ Nothing in these contracts imports React or calls a model.
 
 ## The headless assistant
 
-`@adapttable/ai/assistant` turns those contracts into a conversation, and
+`@adapttable/ai-react` turns those contracts into a conversation, and
 still renders nothing. `useTableAssistant({ session, transport, suggestions })`
 returns `status`, `messages`, `draft`/`setDraft`, `send`, `stop`, `clear`,
 the live `suggestions` and `moreSuggestions`, `runSuggestion`, `open`/`setOpen`
@@ -161,7 +161,7 @@ entry point on purpose: a table that never imports it carries none of it.
 
 ```tsx
 import { TableAssistant } from "@adapttable/mantine/assistant";
-import { useTableAssistant } from "@adapttable/ai/assistant";
+import { useTableAssistant } from "@adapttable/ai-react";
 
 const assistant = useTableAssistant({ session, transport, suggestions });
 
@@ -226,10 +226,10 @@ how much of the UI you keep.
 components, beside the table.
 
 ```tsx
-import { useTableAssistant } from "@adapttable/ai/assistant";
+import { useTableAssistant } from "@adapttable/ai-react";
 import { assistantHttpTransport } from "@adapttable/ai/http";
 import { TableAssistant } from "@adapttable/mantine/assistant";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 
 const transport = useMemo(
   () => assistantHttpTransport({ endpoint: "/api/table-agent" }),
@@ -457,7 +457,7 @@ The ready-made path is two props. The assistant hands you the write; the
 panel draws it:
 
 ```tsx
-import { useTableAssistant } from "@adapttable/ai/assistant";
+import { useTableAssistant } from "@adapttable/ai-react";
 import { TableAssistant } from "@adapttable/mantine/assistant";
 
 const assistant = useTableAssistant({ session, transport });

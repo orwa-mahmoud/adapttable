@@ -5,6 +5,7 @@
  * that publishes pin setters offers them, a table that does not stays silent,
  * and the call lands on the very setter the chrome uses.
  */
+import type { AgentSession } from "@adapttable/ai";
 import {
   applyTableFeatures,
   FeatureProviders,
@@ -16,7 +17,6 @@ import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TABLE_AGENT_STATE, tableAgent } from "./react";
-import type { AgentSession } from "./types";
 
 interface Row {
   id: string;

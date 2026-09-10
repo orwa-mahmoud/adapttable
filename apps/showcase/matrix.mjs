@@ -1341,9 +1341,9 @@ export function Sales({ rows, columns }) {
       "Three integration levels share that session: a custom bridge that maps any agent format onto `session.execute`, an `AgentEnvelope` on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.",
     ],
     card: "Native assistant, feature-aware prompts and governed action receipts.",
-    snippet: `import { useTableAssistant } from "@adapttable/ai/assistant";
+    snippet: `import { useTableAssistant } from "@adapttable/ai-react";
 import { assistantHttpTransport } from "@adapttable/ai/http";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 import { DataTable, agentApproval } from "{pkg}";
 import { TableAssistant } from "{pkg}/assistant";
 import { editing } from "{pkg}/editing";

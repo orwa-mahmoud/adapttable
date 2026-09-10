@@ -16,6 +16,7 @@ overrides:
   '@adapttable/shadcn': workspace:*
   '@adapttable/unstyled': workspace:*
   '@adapttable/ai': workspace:*
+  '@adapttable/ai-react': workspace:*
   eslint-plugin-sonarjs>minimatch: ^10.2.3
   undici: ^7.29.0
   fast-uri: ^3.1.5
@@ -179,6 +180,9 @@ importers:
       '@adapttable/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@adapttable/ai-react':
+        specifier: workspace:*
+        version: link:../../packages/ai-react
       '@adapttable/antd':
         specifier: workspace:*
         version: link:../../packages/adapter-antd
@@ -279,6 +283,9 @@ importers:
       '@adapttable/ai':
         specifier: workspace:*
         version: link:../packages/ai
+      '@adapttable/ai-react':
+        specifier: workspace:*
+        version: link:../packages/ai-react
       '@adapttable/antd':
         specifier: workspace:*
         version: link:../packages/adapter-antd
@@ -718,6 +725,15 @@ importers:
 
   packages/ai:
     dependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../core
+
+  packages/ai-react:
+    dependencies:
+      '@adapttable/ai':
+        specifier: workspace:*
+        version: link:../ai
       '@adapttable/core':
         specifier: workspace:*
         version: link:../core

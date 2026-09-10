@@ -5,7 +5,6 @@
 ```ts
 
 import { ActionAiOptions } from '@adapttable/core';
-import { AgentApprovalPending } from '@adapttable/react/adapter';
 import { ApprovalPresentation } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 
@@ -408,13 +407,6 @@ export interface RowWindow {
 export interface RowWindowRow {
     readonly cells: Readonly<Record<string, unknown>>;
     readonly rowKey: string;
-}
-
-// @public
-export interface TableAgentBridge {
-    readonly approvals?: (pending: AgentApprovalPending | null) => void;
-    attach?(session: AgentSession): void;
-    publish?(manifest: AgentManifest): void;
 }
 
 // @public

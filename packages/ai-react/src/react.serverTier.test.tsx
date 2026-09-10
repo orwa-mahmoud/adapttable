@@ -7,6 +7,7 @@
  * the chrome publishes. That fallback is the whole binding for anyone on
  * `useQuerySource`, and it is a separate code path from the engine one.
  */
+import type { AgentSession, ExecuteResult, RowWindow } from "@adapttable/ai";
 import {
   applyTableFeatures,
   FeatureProviders,
@@ -19,7 +20,6 @@ import { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TABLE_AGENT_STATE, tableAgent } from "./react";
-import type { AgentSession, ExecuteResult, RowWindow } from "./types";
 
 interface Row {
   id: string;

@@ -26,7 +26,7 @@ package. Do not treat this document as permission to add empty stubs.
 your application              columns, data / source, rowKey
 
 @adapttable/ai                neutral session / catalog / execute
-@adapttable/ai/react          tableAgent + live React session
+@adapttable/ai-react          tableAgent + live React session
 @adapttable/ai/{json,openai,mcp,http}
                               optional provider / transport helpers
 ```
@@ -39,7 +39,7 @@ Canonical names:
 | `@adapttable/react`    | `useDataTable`, hooks, Chrome, React `ColumnDef` / renderer types, feature **providers**                                                            | A UI kit, a model SDK                    |
 | `@adapttable/<kit>`    | `DataTable`, kit-native slots, kit feature entrypoints                                                                                              | Engine state, AI runtime                 |
 | `@adapttable/ai`       | Provider-neutral session, manifest, schemas, validation                                                                                             | React (root), model SDKs, hosted service |
-| `@adapttable/ai/react` | `tableAgent`, observation from a mounted React table                                                                                                | Kit components                           |
+| `@adapttable/ai-react` | `tableAgent`, observation from a mounted React table                                                                                                | Kit components                           |
 
 `@adapttable/server` parses and executes table queries on the server;
 `@adapttable/i18n` carries the locale bundles; `@adapttable/cli` scaffolds and
@@ -244,7 +244,7 @@ export interface NeutralTable<TRow = unknown> {
 `visible` is the rendered data-row order after grouping and tree expansion
 (today's runtime row list, not `source.rows` when they differ). `page` is the
 source page. `full` requires `capabilities.fullDataset`. Group headers are
-not writable data rows. `@adapttable/ai/react` adapts a React table onto this
+not writable data rows. `@adapttable/ai-react` adapts a React table onto this
 interface; `@adapttable/ai` consumes it without importing React.
 
 ## The three layers
