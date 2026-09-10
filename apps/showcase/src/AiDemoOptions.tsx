@@ -11,6 +11,10 @@
 import type { ApprovalPresentation } from "@adapttable/core";
 import { type ReactNode, useEffect, useRef } from "react";
 
+import { Segmented } from "./kitDemos";
+
+export type DemoEditingMode = "off" | "cell" | "row" | "batch";
+
 /** One feature switch. */
 export interface DemoFeature {
   readonly key: string;
@@ -37,6 +41,8 @@ export interface DemoActionApproval {
 export interface AiDemoOptionsProps {
   readonly open: boolean;
   readonly onClose: () => void;
+  readonly editingMode: DemoEditingMode;
+  readonly onEditingMode: (next: DemoEditingMode) => void;
   readonly features: readonly DemoFeature[];
   readonly actions: readonly DemoActionApproval[];
   readonly presentation: ApprovalPresentation;
@@ -111,6 +117,8 @@ function Section({
 export function AiDemoOptions({
   open,
   onClose,
+  editingMode,
+  onEditingMode,
   features,
   actions,
   presentation,
@@ -159,6 +167,26 @@ export function AiDemoOptions({
             Turn one off and the assistant offers less: it only ever suggests
             what this table currently wires.
           </p>
+          <div className="ai-opts__row ai-opts__row--mode">
+            <span>
+              <span className="ai-opts__label">Editing mode</span>
+              <span className="ai-opts__hint">
+                Cell and row stay ordinary fields until you open them. Batch
+                keeps every editable cell as an input.
+              </span>
+            </span>
+            <Segmented
+              label="Editing mode"
+              value={editingMode}
+              onChange={onEditingMode}
+              options={[
+                { value: "off", label: "Off", testId: "ai-editing-off" },
+                { value: "cell", label: "Cell", testId: "ai-editing-cell" },
+                { value: "row", label: "Row", testId: "ai-editing-row" },
+                { value: "batch", label: "Batch", testId: "ai-editing-batch" },
+              ]}
+            />
+          </div>
           {features.map((feature) => (
             <label key={feature.key} className="ai-opts__row">
               <input
@@ -249,6 +277,7 @@ export function AiDemoOptions({
                 aria-label={option.label}
                 value={option.value}
                 checked={commit === option.value}
+                disabled={option.value === "stage" && editingMode !== "batch"}
                 data-testid={`ai-commit-${option.value}`}
                 onChange={() => {
                   onCommit(option.value);

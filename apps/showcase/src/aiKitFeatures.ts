@@ -9,6 +9,7 @@ import {
   batchEditing as antdBatch,
   editHistory as antdHistory,
   editing as antdEditing,
+  rowEditing as antdRow,
   undoRedoButtons as antdUndo,
 } from "@adapttable/antd/editing";
 import { filters as antdFilters } from "@adapttable/antd/filters";
@@ -21,6 +22,7 @@ import {
   batchEditing as baseUiBatch,
   editHistory as baseUiHistory,
   editing as baseUiEditing,
+  rowEditing as baseUiRow,
   undoRedoButtons as baseUiUndo,
 } from "@adapttable/base-ui/editing";
 import { filters as baseUiFilters } from "@adapttable/base-ui/filters";
@@ -33,6 +35,7 @@ import {
   batchEditing as chakraBatch,
   editHistory as chakraHistory,
   editing as chakraEditing,
+  rowEditing as chakraRow,
   undoRedoButtons as chakraUndo,
 } from "@adapttable/chakra/editing";
 import { filters as chakraFilters } from "@adapttable/chakra/filters";
@@ -45,6 +48,7 @@ import {
   batchEditing as mantineBatch,
   editHistory as mantineHistory,
   editing as mantineEditing,
+  rowEditing as mantineRow,
   undoRedoButtons as mantineUndo,
 } from "@adapttable/mantine/editing";
 import { filters as mantineFilters } from "@adapttable/mantine/filters";
@@ -57,6 +61,7 @@ import {
   batchEditing as muiBatch,
   editHistory as muiHistory,
   editing as muiEditing,
+  rowEditing as muiRow,
   undoRedoButtons as muiUndo,
 } from "@adapttable/mui/editing";
 import { filters as muiFilters } from "@adapttable/mui/filters";
@@ -69,6 +74,7 @@ import {
   batchEditing as radixBatch,
   editHistory as radixHistory,
   editing as radixEditing,
+  rowEditing as radixRow,
   undoRedoButtons as radixUndo,
 } from "@adapttable/radix/editing";
 import { filters as radixFilters } from "@adapttable/radix/filters";
@@ -81,6 +87,7 @@ import {
   batchEditing as shadcnBatch,
   editHistory as shadcnHistory,
   editing as shadcnEditing,
+  rowEditing as shadcnRow,
   undoRedoButtons as shadcnUndo,
 } from "@adapttable/shadcn/editing";
 import { filters as shadcnFilters } from "@adapttable/shadcn/filters";
@@ -93,6 +100,7 @@ import {
   batchEditing as unstyledBatch,
   editHistory as unstyledHistory,
   editing as unstyledEditing,
+  rowEditing as unstyledRow,
   undoRedoButtons as unstyledUndo,
 } from "@adapttable/unstyled/editing";
 import { filters as unstyledFilters } from "@adapttable/unstyled/filters";
@@ -103,6 +111,7 @@ export const AI_KIT_FEATURES = {
   mantine: {
     approval: mantineApproval,
     editing: mantineEditing,
+    rowEditing: mantineRow,
     batch: mantineBatch,
     history: mantineHistory,
     undo: mantineUndo,
@@ -115,6 +124,7 @@ export const AI_KIT_FEATURES = {
   mui: {
     approval: muiApproval,
     editing: muiEditing,
+    rowEditing: muiRow,
     batch: muiBatch,
     history: muiHistory,
     undo: muiUndo,
@@ -127,6 +137,7 @@ export const AI_KIT_FEATURES = {
   chakra: {
     approval: chakraApproval,
     editing: chakraEditing,
+    rowEditing: chakraRow,
     batch: chakraBatch,
     history: chakraHistory,
     undo: chakraUndo,
@@ -139,6 +150,7 @@ export const AI_KIT_FEATURES = {
   antd: {
     approval: antdApproval,
     editing: antdEditing,
+    rowEditing: antdRow,
     batch: antdBatch,
     history: antdHistory,
     undo: antdUndo,
@@ -151,6 +163,7 @@ export const AI_KIT_FEATURES = {
   radix: {
     approval: radixApproval,
     editing: radixEditing,
+    rowEditing: radixRow,
     batch: radixBatch,
     history: radixHistory,
     undo: radixUndo,
@@ -163,6 +176,7 @@ export const AI_KIT_FEATURES = {
   "base-ui": {
     approval: baseUiApproval,
     editing: baseUiEditing,
+    rowEditing: baseUiRow,
     batch: baseUiBatch,
     history: baseUiHistory,
     undo: baseUiUndo,
@@ -175,6 +189,7 @@ export const AI_KIT_FEATURES = {
   shadcn: {
     approval: shadcnApproval,
     editing: shadcnEditing,
+    rowEditing: shadcnRow,
     batch: shadcnBatch,
     history: shadcnHistory,
     undo: shadcnUndo,
@@ -187,6 +202,7 @@ export const AI_KIT_FEATURES = {
   tailwind: {
     approval: unstyledApproval,
     editing: unstyledEditing,
+    rowEditing: unstyledRow,
     batch: unstyledBatch,
     history: unstyledHistory,
     undo: unstyledUndo,

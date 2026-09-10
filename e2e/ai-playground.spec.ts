@@ -239,9 +239,7 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
     expect(await visibleTableText(page)).toBe(before);
   });
 
-  test("parks an edit for approval and reports it as staged", async ({
-    page,
-  }) => {
+  test("parks an edit for approval and applies it", async ({ page }) => {
     await ask(page, "Raise Priya Nair's salary to 185.");
 
     const approve = page.locator(part("agent-approval-approve"));
@@ -252,33 +250,25 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
     await expect(page.locator(part("agent-approval"))).toHaveCount(0);
     await approve.click();
 
-    // The staging callback IS a host callback, so the session calls it
-    // applied. Telling the reader "done" while the table shows an unsaved row
-    // is the lie this asserts against.
     await expect
       .poll(async () => (await receipts(page)).join(" "))
-      .toContain("Edit staged");
-    await expect(page.locator(part("assistant-receipt-save"))).toContainText(
-      "Save in the table"
-    );
-    await expect(page.locator(part("batch-edit-bar"))).toContainText("unsaved");
+      .toContain("Saved");
+    await expect.poll(async () => visibleTableText(page)).toContain("185");
   });
 
   test("offers only what the table currently wires", async ({ page }) => {
-    // Grouping armed makes the table a nested list, so row pinning is inert
-    // and its examples must not be offered.
-    expect(await catalogText(page)).not.toContain("view.pinRow");
+    // Ungrouped by default, so row pinning is live.
+    expect(await catalogText(page)).toContain("view.pinRow");
 
     await openDemoOptions(page);
     await page.getByTestId("ai-toggle-grouping").click();
 
-    await expect.poll(async () => catalogText(page)).toContain("view.pinRow");
+    await expect
+      .poll(async () => catalogText(page))
+      .not.toContain("view.pinRow");
   });
 
   test("pins a column and a row through the assistant", async ({ page }) => {
-    await openDemoOptions(page);
-    await page.getByTestId("ai-toggle-grouping").click();
-    await closeDemoOptions(page);
     await expect.poll(async () => catalogText(page)).toContain("view.pinRow");
 
     await ask(page, "Pin Priya Nair to the top.");

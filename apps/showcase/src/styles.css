@@ -1086,6 +1086,11 @@ a {
 
 /* The conversational demo: table and assistant side by side, and the panel
    drops below the table once there is no longer room for both. */
+#ai-demo {
+  /* Kit switches are a new page; the hash must clear the sticky nav. */
+  scroll-margin-top: 72px;
+}
+
 .ai-demo__lede {
   margin: 0 0 10px;
   color: var(--ink-2);
@@ -1096,53 +1101,43 @@ a {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 10px 16px;
   margin-bottom: 10px;
 }
 .ai-demo__controls .ai-demo__kits {
   margin-bottom: 0;
 }
-/* Which conversation this is, readable before anything is opened. */
-.ai-demo__mode {
+.ai-demo__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
   margin-inline-start: auto;
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  color: var(--ink-2);
-}
-.ai-demo__mode[data-mode="backend"] {
-  border-color: currentColor;
-  color: var(--accent, inherit);
-}
-/* The way out of the script. Quiet next to the pill, plain to find. */
-.ai-demo__real {
-  font: inherit;
-  font-size: 12px;
-  font-weight: 650;
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid currentColor;
-  background: transparent;
-  color: var(--brand);
-  cursor: pointer;
-}
-.ai-demo__real:hover {
-  background: color-mix(in srgb, var(--brand) 10%, transparent);
-}
-.ai-demo__real:focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
 }
 .ai-demo__options-trigger {
   font: inherit;
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 9px;
+  border: 1px solid var(--page-border);
+  background: var(--page-surface);
+  color: var(--ink);
   cursor: pointer;
+}
+.ai-demo__options-trigger:hover {
+  border-color: var(--ink);
+}
+.ai-demo__options-trigger:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.ai-demo__options-trigger[aria-expanded="true"] {
+  background: var(--ink);
+  color: var(--page-bg);
+  border-color: var(--ink);
 }
 .ai-demo__options {
   display: flex;
@@ -2046,6 +2041,10 @@ a {
   font-size: 12px;
   line-height: 1.5;
   color: var(--ink-2);
+}
+.ai-opts__row--mode {
+  flex-wrap: wrap;
+  align-items: flex-start;
 }
 .ai-opts__row {
   display: flex;

@@ -42,12 +42,16 @@ import {
 import { createPortal } from "react-dom";
 
 import { AiConnectDialog, type AiConnection } from "./AiBackendConnect";
-import { AiDemoOptions, type DemoActionApproval } from "./AiDemoOptions";
+import {
+  AiDemoOptions,
+  type DemoActionApproval,
+  type DemoEditingMode,
+} from "./AiDemoOptions";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
 import { DEMO_SCENARIOS, demoTransport, UNSUPPORTED_REPLY } from "./aiScenario";
 import { setAssistantActive } from "./assistantActivity";
 import type { Locale } from "./data";
-import { DemoFallback } from "./kitDemos";
+import { DemoFallback, Segmented } from "./kitDemos";
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
 import { DOCS_URL, SHOWCASE_ADAPTERS } from "./matrix/content";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
@@ -207,9 +211,24 @@ const COLUMN_HEADERS: Record<Locale, Record<string, string>> = {
 function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
   const header = COLUMN_HEADERS[locale];
   return [
-    { key: "person", header: header.person, accessor: (row) => row.person },
-    { key: "team", header: header.team, accessor: (row) => row.team },
-    { key: "status", header: header.status, accessor: (row) => row.status },
+    {
+      key: "person",
+      header: header.person,
+      accessor: (row) => row.person,
+      editable: true,
+    },
+    {
+      key: "team",
+      header: header.team,
+      accessor: (row) => row.team,
+      editable: true,
+    },
+    {
+      key: "status",
+      header: header.status,
+      accessor: (row) => row.status,
+      editable: true,
+    },
     {
       key: "salary",
       header: header.salary,
@@ -219,7 +238,12 @@ function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
       aggregatable: true,
       editValue: (row) => String(row.salary),
     },
-    { key: "started", header: header.started, accessor: (row) => row.started },
+    {
+      key: "started",
+      header: header.started,
+      accessor: (row) => row.started,
+      editable: true,
+    },
   ];
 }
 
@@ -272,6 +296,29 @@ function readRtl(): boolean {
   return new URLSearchParams(window.location.search).get("dir") === "rtl";
 }
 
+function applyField(row: StaffRow, key: string, value: unknown): StaffRow {
+  if (key === "salary") return { ...row, salary: Number(value) };
+  if (
+    key === "person" ||
+    key === "team" ||
+    key === "status" ||
+    key === "started"
+  ) {
+    return { ...row, [key]: String(value) };
+  }
+  return row;
+}
+
+function applyPatch(
+  row: StaffRow,
+  patch: Readonly<Record<string, unknown>>
+): StaffRow {
+  return Object.entries(patch).reduce(
+    (current, [key, value]) => applyField(current, key, value),
+    row
+  );
+}
+
 function applyCell(
   rows: readonly StaffRow[],
   row: StaffRow,
@@ -279,9 +326,17 @@ function applyCell(
   value: unknown
 ): StaffRow[] {
   return rows.map((current) =>
-    current.id === row.id && key === "salary"
-      ? { ...current, salary: Number(value) }
-      : current
+    current.id === row.id ? applyField(current, key, value) : current
+  );
+}
+
+function applyRow(
+  rows: readonly StaffRow[],
+  row: StaffRow,
+  patch: Readonly<Record<string, unknown>>
+): StaffRow[] {
+  return rows.map((current) =>
+    current.id === row.id ? applyPatch(current, patch) : current
   );
 }
 
@@ -291,10 +346,7 @@ function applyBatch(
 ): StaffRow[] {
   return rows.map((current) => {
     const hit = edits.find((edit) => edit.rowId === current.id);
-    const salary = hit?.patch.salary;
-    return salary === undefined
-      ? current
-      : { ...current, salary: Number(salary) };
+    return hit ? applyPatch(current, hit.patch) : current;
   });
 }
 
@@ -335,15 +387,15 @@ function teamFromFilters(filters: unknown): string | undefined {
 
 /** Which optional capabilities the reader has turned on. */
 interface DemoToggles {
-  readonly editing: boolean;
+  readonly editingMode: DemoEditingMode;
   readonly grouping: boolean;
   readonly rowPinning: boolean;
   readonly columnPinning: boolean;
 }
 
 const INITIAL_TOGGLES: DemoToggles = {
-  editing: true,
-  grouping: true,
+  editingMode: "cell",
+  grouping: false,
   rowPinning: true,
   columnPinning: true,
 };
@@ -420,6 +472,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const Assistant = factories.Assistant;
 
   const features = useMemo((): TableFeature<StaffRow>[] => {
+    const canWrite = toggles.editingMode !== "off";
     const next: TableFeature<StaffRow>[] = [
       factories.filters([TEAM_FILTER]),
       tableAgent({
@@ -429,33 +482,35 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         // asks them separately. Turning cell editing off removes the action
         // rather than the approval, so the policy stays as the reader set it.
         approval: { policy: "writes", presentation },
-        commit,
+        // Staging needs the batch save path. Cell and row modes apply on
+        // approve, so the reader is not dropped into always-open fields.
+        commit: toggles.editingMode === "batch" ? commit : "immediate",
         // Labels in the reader's language: a column id is a developer key,
         // and the approval review shows this name rather than that key.
         columns: {
           person: {
             type: "string",
-            writable: false,
+            writable: canWrite,
             label: COLUMN_HEADERS[locale].person,
           },
           team: {
             type: "string",
-            writable: false,
+            writable: canWrite,
             label: COLUMN_HEADERS[locale].team,
           },
           status: {
             type: "string",
-            writable: false,
+            writable: canWrite,
             label: COLUMN_HEADERS[locale].status,
           },
           salary: {
             type: "number",
-            writable: toggles.editing,
+            writable: canWrite,
             label: COLUMN_HEADERS[locale].salary,
           },
           started: {
             type: "string",
-            writable: false,
+            writable: canWrite,
             label: COLUMN_HEADERS[locale].started,
           },
         },
@@ -472,8 +527,8 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         },
       }),
     ];
-    // Grouping is composed with the column the agent groups by; the agent
-    // still turns it on and off through `view.setGroupBy`.
+    // Off by default so this is a normal table. Group by team is an
+    // assistant example once this feature is on.
     if (toggles.grouping) next.push(factories.grouping("team"));
     if (toggles.rowPinning) {
       next.push(
@@ -484,19 +539,34 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       );
     }
     if (toggles.columnPinning) next.push(factories.columnMenu());
-    if (!toggles.editing) return next;
-    return [
+    if (toggles.editingMode === "off") return next;
+    const editing: TableFeature<StaffRow>[] = [
       factories.approval(),
-      factories.editing((row: StaffRow, key: string, value: unknown) => {
-        setRows((current) => applyCell(current, row, key, value));
-      }),
-      factories.batch((edits: readonly BatchRowEdit<StaffRow>[]) => {
-        setRows((current) => applyBatch(current, edits));
-      }),
       factories.history(),
       factories.undo(),
-      ...next,
     ];
+    if (toggles.editingMode === "cell") {
+      editing.push(
+        factories.editing((row: StaffRow, key: string, value: unknown) => {
+          setRows((current) => applyCell(current, row, key, value));
+        })
+      );
+    }
+    if (toggles.editingMode === "row") {
+      editing.push(
+        factories.rowEditing((row: StaffRow, patch) => {
+          setRows((current) => applyRow(current, row, patch));
+        })
+      );
+    }
+    if (toggles.editingMode === "batch") {
+      editing.push(
+        factories.batch((edits: readonly BatchRowEdit<StaffRow>[]) => {
+          setRows((current) => applyBatch(current, edits));
+        })
+      );
+    }
+    return [...editing, ...next];
   }, [factories, pinnedRowIds, toggles, presentation, commit, locale]);
 
   const assistant = useTableAssistant({
@@ -523,6 +593,13 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       setAssistantActive(false);
     };
   }, [conversationBusy]);
+
+  // Kit switches are a full page load. `#ai-demo` is not in the static HTML,
+  // so the browser cannot scroll to it until this mount.
+  useEffect(() => {
+    if (window.location.hash !== "#ai-demo") return;
+    document.getElementById("ai-demo")?.scrollIntoView();
+  }, []);
 
   // The table never owns the data, so a filter the agent asks for is applied
   // here to the rows the table is given. Memoised because a fresh array on
@@ -574,12 +651,12 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     });
   }, [manifest, actionPolicy]);
 
-  const toggle = (key: keyof DemoToggles) => () => {
+  const toggle = (key: "grouping" | "rowPinning" | "columnPinning") => () => {
     setToggles((current) => ({ ...current, [key]: !current[key] }));
   };
 
   return (
-    <div className="ai-demo" data-adapter={adapter}>
+    <div id="ai-demo" className="ai-demo" data-adapter={adapter}>
       {/* The demo's own controls stay in the page's language: they are
           scaffolding around the table, not part of it, and flipping English
           prose leaves its punctuation on the wrong side. Only the table and
@@ -597,64 +674,78 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
             {SHOWCASE_ADAPTERS.filter((kit) => kit.built).map((kit) => (
               <a
                 key={kit.key}
-                href={`../../${kit.key}/ai/`}
+                href={`../../${kit.key}/ai/#ai-demo`}
                 aria-current={kit.key === adapter ? "page" : undefined}
               >
                 {kit.label}
               </a>
             ))}
           </nav>
-          {/* Which conversation this is, without opening anything: "Ready"
-              alone would let a scripted demo read as a live model. */}
-          <span
-            className="ai-demo__mode"
-            data-mode={connection.mode}
-            data-testid="ai-demo-mode"
-          >
-            {connection.mode === "simulated"
-              ? "Simulated demo"
-              : "Connected backend"}
-          </span>
-          {/* The way out of the script, offered where the script is named. */}
-          <button
-            type="button"
-            className="ai-demo__real"
-            data-testid="ai-demo-try-real"
-            onClick={() => {
-              setSettingsOpen(true);
-            }}
-          >
-            Try it for real
-          </button>
-          <button
-            type="button"
-            className="ai-demo__options-trigger"
-            data-testid="ai-demo-options"
-            aria-expanded={demoOpen}
-            onClick={() => {
-              setDemoOpen((current) => !current);
-            }}
-          >
-            Demo options
-          </button>
+          <div className="ai-demo__toolbar">
+            <Segmented
+              label="Conversation source"
+              value={
+                connection.mode === "backend" || settingsOpen
+                  ? "backend"
+                  : "simulated"
+              }
+              onChange={(next) => {
+                if (next === "simulated") {
+                  setSettingsOpen(false);
+                  if (connection.mode === "backend") {
+                    setConnection({
+                      mode: "simulated",
+                      transport: scripted,
+                      key: "demo",
+                    });
+                  }
+                  return;
+                }
+                setSettingsOpen(true);
+              }}
+              options={[
+                {
+                  value: "simulated",
+                  label: "Simulated demo",
+                  testId: "ai-demo-mode",
+                },
+                {
+                  value: "backend",
+                  label:
+                    connection.mode === "backend"
+                      ? "Connected"
+                      : "Try it for real",
+                  testId: "ai-demo-try-real",
+                },
+              ]}
+            />
+            <button
+              type="button"
+              className="ai-demo__options-trigger"
+              data-testid="ai-demo-options"
+              aria-expanded={demoOpen}
+              onClick={() => {
+                setDemoOpen((current) => !current);
+              }}
+            >
+              Demo options
+            </button>
+          </div>
         </div>
         <AiDemoOptions
           open={demoOpen}
           onClose={() => {
             setDemoOpen(false);
           }}
+          editingMode={toggles.editingMode}
+          onEditingMode={(next) => {
+            setToggles((current) => ({ ...current, editingMode: next }));
+          }}
           features={[
             {
-              key: "editing",
-              label: "Cell editing",
-              help: "Whether the table accepts edits at all. With this off, no edit action exists to approve.",
-              on: toggles.editing,
-              onChange: toggle("editing"),
-            },
-            {
               key: "grouping",
-              label: "Grouping",
-              help: "A grouped table is a nested list, so the row pinning examples leave while it is on.",
+              label: "Group by team",
+              help: "Optional. Off by default so this starts as a normal table. A grouped table is a nested list, so row-pin examples leave while it is on.",
               on: toggles.grouping,
               onChange: toggle("grouping"),
             },

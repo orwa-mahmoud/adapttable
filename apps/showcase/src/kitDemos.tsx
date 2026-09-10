@@ -153,7 +153,13 @@ export function Segmented<T extends string>({
 }: Readonly<{
   value: T;
   onChange: (v: T) => void;
-  options: { value: T; label: string; disabled?: boolean; title?: string }[];
+  options: {
+    value: T;
+    label: string;
+    disabled?: boolean;
+    title?: string;
+    testId?: string;
+  }[];
   label: string;
 }>) {
   return (
@@ -166,6 +172,7 @@ export function Segmented<T extends string>({
           aria-pressed={value === o.value}
           disabled={o.disabled}
           title={o.title}
+          data-testid={o.testId}
           onClick={() => onChange(o.value)}
         >
           {o.label}
