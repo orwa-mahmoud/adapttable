@@ -104,6 +104,21 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
     requires: ["view.setFilters"],
   },
   {
+    prompt: "Show only Active.",
+    ar: {
+      prompt: "أظهر الحالة Active فقط.",
+      title: "تصفية الحالة",
+      reply: "تمت التصفية على الحالة Active.",
+    },
+    subject: () => ({ kind: "filter", detail: "Status is Active" }),
+    title: "Filter status",
+    kind: "filter",
+    reply: "Filtered to Active.",
+    capabilityKey: "view.setFilters",
+    args: () => ({ filters: { status: ["Active"] } }),
+    requires: ["view.setFilters"],
+  },
+  {
     prompt: "Sort by salary, highest first.",
     ar: {
       prompt: "رتّب حسب الراتب تنازليًا.",

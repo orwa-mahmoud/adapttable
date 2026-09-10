@@ -47,6 +47,11 @@ import {
   type DemoActionApproval,
   type DemoEditingMode,
 } from "./AiDemoOptions";
+import {
+  applyHostFilters,
+  hostFiltersFromBag,
+  type HostFilterState,
+} from "./aiHostFilters";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
 import { DEMO_SCENARIOS, demoTransport, UNSUPPORTED_REPLY } from "./aiScenario";
 import { setAssistantActive } from "./assistantActivity";
@@ -258,6 +263,17 @@ const TEAM_FILTER: FilterDef<StaffRow> = {
   getValue: (row) => row.team,
 };
 
+const STATUS_FILTER: FilterDef<StaffRow> = {
+  key: "status",
+  type: "multiSelect",
+  label: "Status",
+  options: ["Active", "On leave"].map((status) => ({
+    value: status,
+    label: status,
+  })),
+  getValue: (row) => row.status,
+};
+
 /** The row and column the scripted examples name. */
 
 /**
@@ -350,38 +366,6 @@ function applyBatch(
   });
 }
 
-/**
- * Read a team out of the extra bag the session already validated.
- *
- * The live catalog lists this page's `team` multiSelect. Scripted examples
- * send `{ team: ["Core"] }`; a connected model may send the same extras or
- * `{ key, op, value }` conditions. Either way the bag that lands here is
- * the table's, not an invented shape.
- */
-function teamFromFilters(filters: unknown): string | undefined {
-  const asString = (value: unknown): string | undefined => {
-    if (typeof value === "string") return value;
-    if (Array.isArray(value) && typeof value[0] === "string") return value[0];
-    return undefined;
-  };
-  if (Array.isArray(filters)) {
-    for (const entry of filters) {
-      if (!entry || typeof entry !== "object") continue;
-      const record = entry as Record<string, unknown>;
-      const column = record.column ?? record.key ?? record.field;
-      if (column !== "team") continue;
-      const value = asString(record.value);
-      if (value !== undefined) return value;
-    }
-    return undefined;
-  }
-  if (!filters || typeof filters !== "object") return undefined;
-  const record = filters as Record<string, unknown>;
-  // A model that wrapped the model in another `filters` key.
-  if (record.filters !== undefined) return teamFromFilters(record.filters);
-  return asString(record.team);
-}
-
 /** Which optional capabilities the reader has turned on. */
 interface DemoToggles {
   readonly editingMode: DemoEditingMode;
@@ -401,7 +385,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [rtl, setRtl] = useState(readRtl);
   const [toggles, setToggles] = useState<DemoToggles>(INITIAL_TOGGLES);
   const [rows, setRows] = useState<StaffRow[]>(() => [...SEED]);
-  const [teamFilter, setTeamFilter] = useState<string | undefined>();
+  const [hostFilters, setHostFilters] = useState<HostFilterState>({});
   const [pinnedRowIds, setPinnedRowIds] = useState<RowPinState>({
     top: [],
     bottom: [],
@@ -471,7 +455,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const features = useMemo((): TableFeature<StaffRow>[] => {
     const canWrite = toggles.editingMode !== "off";
     const next: TableFeature<StaffRow>[] = [
-      factories.filters([TEAM_FILTER]),
+      factories.filters([TEAM_FILTER, STATUS_FILTER]),
       tableAgent({
         tableId: "ai-assistant-demo",
         writePolicy: "allow",
@@ -512,7 +496,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           },
         },
         apply: {
-          setFilters: (filters) => setTeamFilter(teamFromFilters(filters)),
+          setFilters: (filters) => setHostFilters(hostFiltersFromBag(filters)),
         },
         bridge: {
           attach: setSession,
@@ -602,8 +586,8 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   // here to the rows the table is given. Memoised because a fresh array on
   // every render would bump the revision and republish the manifest — a loop.
   const visibleRows = useMemo(
-    () => (teamFilter ? rows.filter((row) => row.team === teamFilter) : rows),
-    [rows, teamFilter]
+    () => applyHostFilters(rows, hostFilters),
+    [rows, hostFilters]
   );
 
   const reset = useCallback(() => {
@@ -613,7 +597,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     assistant.clear();
     setToggles(INITIAL_TOGGLES);
     setRows([...SEED]);
-    setTeamFilter(undefined);
+    setHostFilters({});
     setPinnedRowIds({ top: [], bottom: [] });
   }, [assistant]);
 
