@@ -4,13 +4,17 @@ import { describe, it } from "node:test";
 import { AGENT_HTTP_SCHEMA, type AgentHttpRequest } from "@adapttable/ai/http";
 
 import {
+  clearExampleAgentPins,
   completeForProvider,
   exampleConfigError,
   exampleRequiresToken,
   handleExampleAgentTurn,
 } from "./ai-http-backend.ts";
 
-function request(kind: "hello" | "turn" = "turn"): AgentHttpRequest {
+function request(
+  kind: AgentHttpRequest["kind"] = "turn",
+  patch: Partial<AgentHttpRequest> = {}
+): AgentHttpRequest {
   return {
     schemaVersion: AGENT_HTTP_SCHEMA,
     kind,
@@ -34,6 +38,7 @@ function request(kind: "hello" | "turn" = "turn"): AgentHttpRequest {
         totalCount: "loaded",
       },
     },
+    ...patch,
   };
 }
 
@@ -48,6 +53,78 @@ describe("exampleRequiresToken", () => {
 });
 
 describe("handleExampleAgentTurn", () => {
+  it("pins hello and answers a question-only turn from that pin", async () => {
+    clearExampleAgentPins();
+    const hello = await handleExampleAgentTurn(
+      request("hello", {
+        catalog: [{ key: "view.setPage", summary: "Set the page." }],
+      }),
+      () => {
+        throw new Error("provider must not run on hello");
+      },
+      new AbortController().signal
+    );
+    assert.equal(hello.ok, true);
+    assert.ok(hello.sessionId);
+    let system = "";
+    const turn = await handleExampleAgentTurn(
+      {
+        schemaVersion: AGENT_HTTP_SCHEMA,
+        kind: "turn",
+        tableId: "orders",
+        sessionId: hello.sessionId,
+        message: "Go to page 2",
+      },
+      (args) => {
+        system = args.system;
+        return Promise.resolve(JSON.stringify({ text: "Moved." }));
+      },
+      new AbortController().signal
+    );
+    assert.equal(turn.ok, undefined);
+    assert.match(system, /view\.setPage/);
+  });
+
+  it("replaces the pin when schema is sent again", async () => {
+    clearExampleAgentPins();
+    const first = await handleExampleAgentTurn(
+      request("hello", {
+        catalog: [{ key: "view.setPage", summary: "Set the page." }],
+      }),
+      () => {
+        throw new Error("provider must not run on hello");
+      },
+      new AbortController().signal
+    );
+    await handleExampleAgentTurn(
+      request("schema", {
+        sessionId: first.sessionId,
+        catalog: [{ key: "view.setSort", summary: "Set the sort." }],
+      }),
+      () => {
+        throw new Error("provider must not run on schema");
+      },
+      new AbortController().signal
+    );
+    let system = "";
+    await handleExampleAgentTurn(
+      {
+        schemaVersion: AGENT_HTTP_SCHEMA,
+        kind: "turn",
+        tableId: "orders",
+        sessionId: first.sessionId,
+        message: "Sort salary",
+      },
+      (args) => {
+        system = args.system;
+        return Promise.resolve(JSON.stringify({ text: "Sorted." }));
+      },
+      new AbortController().signal
+    );
+    assert.match(system, /- view\.setSort: Set the sort\./);
+    assert.doesNotMatch(system, /- view\.setPage:/);
+  });
+
   it("returns a typed hello without calling the provider", async () => {
     const complete = () => {
       throw new Error("provider must not run on hello");

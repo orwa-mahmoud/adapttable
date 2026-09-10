@@ -102,7 +102,7 @@ describe("parseAgentHttpRequest rejects a malformed envelope by name", () => {
     [
       "an unknown kind",
       { ...validRequest(), kind: "chat" },
-      /kind must be "hello" or "turn"/,
+      /kind must be "hello", "schema", or "turn"/,
     ],
     ["an empty tableId", { ...validRequest(), tableId: "" }, /tableId/],
     [

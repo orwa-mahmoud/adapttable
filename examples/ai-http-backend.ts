@@ -26,10 +26,70 @@ import {
   AGENT_HTTP_SCHEMA,
   type AgentHttpRequest,
   type AgentHttpResponse,
+  type AgentSystemPromptInput,
   agentSystemPrompt,
   parseAgentHttpRequest,
   parseAgentHttpResponse,
 } from "@adapttable/ai/http";
+
+type ExamplePin = {
+  readonly tableId: string;
+  readonly catalog: NonNullable<AgentHttpRequest["catalog"]>;
+  readonly manifest: NonNullable<AgentHttpRequest["manifest"]>;
+};
+
+const examplePins = new Map<string, ExamplePin>();
+
+function examplePinKey(request: AgentHttpRequest): string {
+  return request.sessionId ?? `table:${request.tableId}`;
+}
+
+function pinExampleSchema(request: AgentHttpRequest): string {
+  if (!request.catalog || !request.manifest) {
+    throw new TypeError("hello / schema requires catalog and manifest");
+  }
+  const sessionId =
+    request.sessionId ?? `sess_${randomBytes(8).toString("hex")}`;
+  const pin: ExamplePin = {
+    tableId: request.tableId,
+    catalog: request.catalog,
+    manifest: request.manifest,
+  };
+  examplePins.set(sessionId, pin);
+  examplePins.set(`table:${request.tableId}`, pin);
+  return sessionId;
+}
+
+function resolveExampleSchema(
+  request: AgentHttpRequest
+): AgentSystemPromptInput | undefined {
+  if (request.catalog && request.manifest) {
+    pinExampleSchema(request);
+    return {
+      tableId: request.tableId,
+      catalog: request.catalog,
+      manifest: {
+        viewRevision: request.viewRevision ?? request.manifest.viewRevision,
+        columns: request.manifest.columns,
+      },
+    };
+  }
+  const pin = examplePins.get(examplePinKey(request));
+  if (!pin) return undefined;
+  return {
+    tableId: request.tableId,
+    catalog: pin.catalog,
+    manifest: {
+      viewRevision: request.viewRevision ?? pin.manifest.viewRevision,
+      columns: pin.manifest.columns,
+    },
+  };
+}
+
+/** Drop in-memory pins. Tests call this so one case cannot leak into the next. */
+export function clearExampleAgentPins(): void {
+  examplePins.clear();
+}
 
 /**
  * Read one `.env` file with Node's own parser. A variable already present in
@@ -247,15 +307,28 @@ export async function handleExampleAgentTurn(
   complete: ExampleComplete,
   signal: AbortSignal
 ): Promise<AgentHttpResponse> {
-  if (request.kind === "hello") {
+  if (request.kind === "hello" || request.kind === "schema") {
+    const sessionId = pinExampleSchema(request);
     return {
       schemaVersion: AGENT_HTTP_SCHEMA,
       ok: true,
-      text: "Connected. Messages and permitted table context go to this backend.",
+      sessionId,
+      text:
+        request.kind === "hello"
+          ? "Connected. Messages and permitted table context go to this backend."
+          : "Schema updated.",
+    };
+  }
+  const schema = resolveExampleSchema(request);
+  if (!schema) {
+    return {
+      schemaVersion: AGENT_HTTP_SCHEMA,
+      ok: false,
+      text: "schema required — send hello or schema before a question-only turn",
     };
   }
   const raw = await complete({
-    system: agentSystemPrompt(request),
+    system: agentSystemPrompt(schema),
     user: userPrompt(request),
     signal,
   });

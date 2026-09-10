@@ -161,18 +161,26 @@ transform — this client is optional. See [agent integrations](./ai-integration
 `POST` JSON. Schema family: `adapttable.agent.v1`.
 
 **Hello** (Connect). The client sends `kind: "hello"` plus `tableId`,
-`manifest` and `catalog`. The server must return the same `schemaVersion`.
-`ok: false` is a rejected hello.
+`manifest` and `catalog`. The server pins that snapshot on a session and
+should return `sessionId`. `ok: false` is a rejected hello.
 
-**Turn.** `kind: "turn"` and a `message` string. Optional `conversation`,
-`descriptions`, `rows`, and `results` appear only when the host is answering
-a previous `needs` or continuing with receipts.
+**Schema.** `kind: "schema"` replaces the pin when features or options
+change, so the system prompt stays current through summarization. Same
+payload as hello.
+
+**Turn.** `kind: "turn"` and a `message` string. While the pin is valid the
+client omits `catalog` and `manifest` and sends `viewRevision` (and
+`sessionId`) instead. Optional `conversation`, `descriptions`, `rows`, and
+`results` appear only when the host is answering a previous `needs` or
+continuing with receipts. A senior backend may ignore the pin and keep
+sending the compact snapshot on every turn (`pinCatalog: false`).
 
 **Response.**
 
 ```ts
 {
   schemaVersion: "adapttable.agent.v1",
+  sessionId?: string,
   text?: string,
   actions?: { key, args, idempotencyKey, expectedRevision? }[],
   needs?: { describe?: string[], read?: { offset, limit, columns?, scope? }[] },

@@ -100,7 +100,7 @@ describe("parseAgentHttpRequest / parseAgentHttpResponse", () => {
       message: "Show page 2",
     });
     expect(parsed.kind).toBe("turn");
-    expect(parsed.catalog.some((entry) => entry.key === "view.setPage")).toBe(
+    expect(parsed.catalog?.some((entry) => entry.key === "view.setPage")).toBe(
       true
     );
     expect(() =>
@@ -174,8 +174,8 @@ describe("createAgentHttpClient", () => {
       endpoint: "https://agent.example/turn",
       request: (body) => {
         expect(body.kind).toBe("hello");
-        expect(body.manifest.capabilities).toContain("view.setPage");
-        expect(body.manifest.capabilities).not.toContain("rows.add");
+        expect(body.manifest?.capabilities).toContain("view.setPage");
+        expect(body.manifest?.capabilities).not.toContain("rows.add");
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           ok: true,
@@ -196,6 +196,132 @@ describe("createAgentHttpClient", () => {
         request: () => Promise.reject(new Error("ECONNREFUSED")),
       })
     ).rejects.toThrow(/ECONNREFUSED/);
+  });
+
+  it("accepts a question-only turn and a schema pin", () => {
+    const parsed = parseAgentHttpRequest({
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      kind: "turn",
+      tableId: "orders",
+      sessionId: "sess-1",
+      viewRevision: 2,
+      message: "Show page 2",
+    });
+    expect(parsed.catalog).toBeUndefined();
+    expect(parsed.manifest).toBeUndefined();
+    expect(parsed.viewRevision).toBe(2);
+    const live = session();
+    const schema = parseAgentHttpRequest({
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      kind: "schema",
+      tableId: "orders",
+      sessionId: "sess-1",
+      manifest: live.manifest(),
+      catalog: live.catalog(),
+    });
+    expect(schema.kind).toBe("schema");
+    expect(schema.catalog?.length).toBeGreaterThan(0);
+    expect(() =>
+      parseAgentHttpRequest({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        kind: "hello",
+        tableId: "orders",
+      })
+    ).toThrow(/manifest/);
+  });
+
+  it("pins the catalog on hello and omits it on later turns", async () => {
+    const live = session();
+    const kinds: string[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      request: (body: {
+        kind: string;
+        catalog?: unknown;
+        manifest?: unknown;
+        sessionId?: string;
+        viewRevision?: number;
+      }) => {
+        kinds.push(body.kind);
+        if (body.kind === "hello") {
+          expect(body.catalog).toBeDefined();
+          expect(body.manifest).toBeDefined();
+        }
+        if (body.kind === "turn") {
+          expect(body.catalog).toBeUndefined();
+          expect(body.manifest).toBeUndefined();
+          expect(body.viewRevision).toBe(1);
+          expect(body.sessionId).toBe("sess-1");
+        }
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          ok: true,
+          sessionId: "sess-1",
+          text: body.kind === "turn" ? "Done" : "Ready",
+        });
+      },
+    };
+    await connectAgentHttp(live, options);
+    await runAgentHttpTurn(live, "Show page 2", options);
+    expect(kinds).toEqual(["hello", "turn"]);
+  });
+
+  it("re-sends schema when column options change", async () => {
+    let writable = false;
+    const live = createAgentSession({
+      observe: () =>
+        observation({
+          columns: [
+            {
+              id: "name",
+              label: "Name",
+              type: "string",
+              readable: true,
+              writable,
+              sortable: true,
+            },
+          ],
+        }),
+      apply: { setPage: vi.fn() },
+    });
+    const kinds: string[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      request: (body: { kind: string }) => {
+        kinds.push(body.kind);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          ok: true,
+          sessionId: "sess-2",
+          text: "ok",
+        });
+      },
+    };
+    await connectAgentHttp(live, options);
+    writable = true;
+    await runAgentHttpTurn(live, "Show page 2", options);
+    expect(kinds).toEqual(["hello", "schema", "turn"]);
+  });
+
+  it("keeps sending the snapshot when pinCatalog is false", async () => {
+    const live = session();
+    const catalogs: unknown[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      pinCatalog: false as const,
+      request: (body: { catalog?: unknown }) => {
+        catalogs.push(body.catalog);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          ok: true,
+          text: "Done",
+        });
+      },
+    };
+    await connectAgentHttp(live, options);
+    await runAgentHttpTurn(live, "Show page 2", options);
+    expect(catalogs[0]).toBeDefined();
+    expect(catalogs[1]).toBeDefined();
   });
 
   it("executes text-plus-actions without a second model call", async () => {

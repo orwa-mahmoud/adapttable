@@ -149,6 +149,7 @@ export interface AgentHttpClientOptions {
     readonly endpoint: string;
     readonly fetch?: typeof fetch;
     readonly headers?: HeadersInit | (() => HeadersInit | Promise<HeadersInit>);
+    readonly pinCatalog?: boolean;
     readonly request?: (body: AgentHttpRequest, signal: AbortSignal) => Promise<unknown>;
     readonly timeoutMs?: number;
 }
@@ -161,7 +162,7 @@ export class AgentHttpError extends Error {
 }
 
 // @public
-export type AgentHttpKind = "hello" | "turn";
+export type AgentHttpKind = "hello" | "schema" | "turn";
 
 // @public
 export interface AgentHttpMessage {
@@ -177,16 +178,18 @@ export interface AgentHttpNeeds {
 
 // @public
 export interface AgentHttpRequest {
-    readonly catalog: readonly CatalogEntry[];
+    readonly catalog?: readonly CatalogEntry[];
     readonly conversation?: readonly AgentHttpMessage[];
     readonly descriptions?: readonly CapabilityGuide[];
     readonly kind: AgentHttpKind;
-    readonly manifest: AgentManifest;
+    readonly manifest?: AgentManifest;
     readonly message?: string;
     readonly results?: readonly ExecuteResult[];
     readonly rows?: readonly RowWindow[];
     readonly schemaVersion: typeof AGENT_SCHEMA_VERSION;
+    readonly sessionId?: string;
     readonly tableId: string;
+    readonly viewRevision?: number;
 }
 
 // @public
@@ -196,6 +199,7 @@ export interface AgentHttpResponse {
     readonly needs?: AgentHttpNeeds;
     readonly ok?: boolean;
     readonly schemaVersion: typeof AGENT_SCHEMA_VERSION;
+    readonly sessionId?: string;
     readonly text?: string;
 }
 

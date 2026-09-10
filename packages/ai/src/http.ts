@@ -39,8 +39,8 @@ export {
 } from "./keys";
 export type * from "./types";
 
-/** Hello probe versus a user turn. @public */
-export type AgentHttpKind = "hello" | "turn";
+/** Hello / schema pin versus a user turn. @public */
+export type AgentHttpKind = "hello" | "schema" | "turn";
 
 /**
  * One conversation line the host may send back for context.
@@ -90,22 +90,28 @@ export interface AgentHttpAction {
 /**
  * Frontend → backend body.
  *
- * The compact manifest and catalog are always included. Full guides and
- * row windows appear only after the backend asked for them.
+ * `hello` and `schema` pin the compact manifest and catalog on a backend
+ * session. A later `turn` may omit them while that pin is valid. Full
+ * guides and row windows appear only after the backend asked for them.
+ * A senior backend may ignore the pin and keep sending the snapshot.
  *
  * @public
  */
 export interface AgentHttpRequest {
   /** Schema family. Must be `adapttable.agent.v1`. */
   readonly schemaVersion: typeof AGENT_SCHEMA_VERSION;
-  /** Hello probe or a user turn. */
+  /** Hello / schema pin, or a user turn. */
   readonly kind: AgentHttpKind;
   /** Table identity from the live session. */
   readonly tableId: string;
-  /** Compact capability snapshot. Never includes row payloads. */
-  readonly manifest: AgentManifest;
-  /** Enabled keys plus one-line summaries. */
-  readonly catalog: readonly CatalogEntry[];
+  /** Backend pin from the last hello / schema. */
+  readonly sessionId?: string;
+  /** Compact capability snapshot. Required on hello / schema. */
+  readonly manifest?: AgentManifest;
+  /** Enabled keys plus one-line summaries. Required on hello / schema. */
+  readonly catalog?: readonly CatalogEntry[];
+  /** Live view revision when the catalog is not re-attached. */
+  readonly viewRevision?: number;
   /** User text. Required for `kind: "turn"`. */
   readonly message?: string;
   /** Optional prior lines the host chooses to send. */
@@ -131,6 +137,8 @@ export interface AgentHttpResponse {
   readonly schemaVersion: typeof AGENT_SCHEMA_VERSION;
   /** Hello / health. Absent on a turn means the body was accepted. */
   readonly ok?: boolean;
+  /** Pin id the client should send on later turns. */
+  readonly sessionId?: string;
   /** Assistant text to show in the host UI. */
   readonly text?: string;
   /** Structured actions for `session.execute`. */
@@ -160,6 +168,11 @@ export interface AgentHttpClientOptions {
     body: AgentHttpRequest,
     signal: AbortSignal
   ) => Promise<unknown>;
+  /**
+   * When true (default), hello / schema pin the catalog and later turns
+   * omit it. Set false to attach the compact snapshot on every request.
+   */
+  readonly pinCatalog?: boolean;
 }
 
 /**
@@ -273,6 +286,56 @@ function asFiniteNumber(value: unknown): number | undefined {
     : undefined;
 }
 
+function asHttpKind(value: unknown): AgentHttpKind {
+  if (value === "hello" || value === "schema" || value === "turn") return value;
+  throw new TypeError('agent HTTP kind must be "hello", "schema", or "turn"');
+}
+
+function requireSessionId(value: unknown): string | undefined {
+  if (value === undefined) return undefined;
+  const id = asString(value);
+  if (!id)
+    throw new TypeError("agent HTTP sessionId must be a non-empty string");
+  return id;
+}
+
+function requireViewRevision(value: unknown): number | undefined {
+  if (value === undefined) return undefined;
+  const revision = asFiniteNumber(value);
+  if (revision === undefined) {
+    throw new TypeError("agent HTTP viewRevision must be a finite number");
+  }
+  return revision;
+}
+
+function readRequestSchema(
+  input: Record<string, unknown>,
+  kind: AgentHttpKind
+): {
+  readonly manifest?: AgentManifest;
+  readonly catalog?: CatalogEntry[];
+} {
+  const required = kind === "hello" || kind === "schema";
+  if (
+    !required &&
+    input.manifest === undefined &&
+    input.catalog === undefined
+  ) {
+    return {};
+  }
+  if (!isRecord(input.manifest)) {
+    throw new TypeError("agent HTTP manifest must be an object");
+  }
+  validateManifestShape(input.manifest);
+  if (!Array.isArray(input.catalog)) {
+    throw new TypeError("agent HTTP catalog must be an array");
+  }
+  return {
+    manifest: input.manifest as unknown as AgentManifest,
+    catalog: input.catalog as CatalogEntry[],
+  };
+}
+
 /**
  * Parse an unknown JSON body into {@link AgentHttpRequest}.
  *
@@ -287,28 +350,22 @@ export function parseAgentHttpRequest(input: unknown): AgentHttpRequest {
       `agent HTTP schemaVersion must be "${AGENT_SCHEMA_VERSION}"`
     );
   }
-  if (input.kind !== "hello" && input.kind !== "turn") {
-    throw new TypeError('agent HTTP kind must be "hello" or "turn"');
-  }
-  if (typeof input.tableId !== "string" || input.tableId.length === 0) {
+  const kind = asHttpKind(input.kind);
+  const tableId = asString(input.tableId);
+  if (!tableId) {
     throw new TypeError("agent HTTP tableId must be a non-empty string");
   }
-  if (!isRecord(input.manifest)) {
-    throw new TypeError("agent HTTP manifest must be an object");
-  }
-  validateManifestShape(input.manifest);
-  if (!Array.isArray(input.catalog)) {
-    throw new TypeError("agent HTTP catalog must be an array");
-  }
-  if (input.kind === "turn" && typeof input.message !== "string") {
+  if (kind === "turn" && typeof input.message !== "string") {
     throw new TypeError("agent HTTP turn requires a message string");
   }
+  const schema = readRequestSchema(input, kind);
   return {
     schemaVersion: AGENT_SCHEMA_VERSION,
-    kind: input.kind,
-    tableId: input.tableId,
-    manifest: input.manifest as unknown as AgentManifest,
-    catalog: input.catalog as CatalogEntry[],
+    kind,
+    tableId,
+    sessionId: requireSessionId(input.sessionId),
+    ...schema,
+    viewRevision: requireViewRevision(input.viewRevision),
     message: typeof input.message === "string" ? input.message : undefined,
     conversation: Array.isArray(input.conversation)
       ? (input.conversation as AgentHttpMessage[])
@@ -343,9 +400,17 @@ export function parseAgentHttpResponse(input: unknown): AgentHttpResponse {
   if (actions && actions.length > MAX_ACTIONS) {
     throw new TypeError(`agent HTTP actions exceed limit of ${MAX_ACTIONS}`);
   }
+  if (
+    input.sessionId !== undefined &&
+    (typeof input.sessionId !== "string" || input.sessionId.length === 0)
+  ) {
+    throw new TypeError("agent HTTP sessionId must be a non-empty string");
+  }
   return {
     schemaVersion: AGENT_SCHEMA_VERSION,
     ok: typeof input.ok === "boolean" ? input.ok : undefined,
+    sessionId:
+      typeof input.sessionId === "string" ? input.sessionId : undefined,
     text: typeof input.text === "string" ? input.text : undefined,
     actions,
     needs: isRecord(input.needs) ? asNeeds(input.needs) : undefined,
@@ -464,20 +529,95 @@ function asNeeds(value: Record<string, unknown>): AgentHttpNeeds {
   return { describe, read };
 }
 
+interface HttpPin {
+  readonly fingerprint: string;
+  readonly sessionId?: string;
+}
+
+const httpPins = new WeakMap<AgentSession, HttpPin>();
+
+function schemaFingerprint(session: AgentSession): string {
+  const manifest = session.manifest();
+  const columns = manifest.columns
+    .map(
+      (column) =>
+        `${column.id}:${column.readable ? "1" : "0"}:${column.writable ? "1" : "0"}`
+    )
+    .join(",");
+  return [
+    manifest.tableId,
+    manifest.capabilities.join(","),
+    columns,
+    manifest.policy.write,
+    manifest.policy.approval,
+    manifest.policy.commit,
+  ].join("|");
+}
+
+function rememberPin(session: AgentSession, response: AgentHttpResponse): void {
+  const current = httpPins.get(session);
+  httpPins.set(session, {
+    fingerprint: schemaFingerprint(session),
+    sessionId: response.sessionId ?? current?.sessionId,
+  });
+}
+
 function compactRequest(
   session: AgentSession,
   kind: AgentHttpKind,
-  extra: Partial<AgentHttpRequest> = {}
+  extra: Partial<AgentHttpRequest> = {},
+  mode: "full" | "question" = "full"
 ): AgentHttpRequest {
   const manifest = session.manifest();
+  const sessionId = extra.sessionId ?? httpPins.get(session)?.sessionId;
+  if (mode === "question") {
+    return {
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      kind,
+      tableId: manifest.tableId,
+      viewRevision: manifest.viewRevision,
+      ...(sessionId ? { sessionId } : {}),
+      ...extra,
+    };
+  }
   return {
     schemaVersion: AGENT_SCHEMA_VERSION,
     kind,
     tableId: manifest.tableId,
     manifest,
     catalog: session.catalog(),
+    ...(sessionId ? { sessionId } : {}),
     ...extra,
   };
+}
+
+function usesPinnedCatalog(
+  session: AgentSession,
+  options: AgentHttpClientOptions
+): boolean {
+  if (options.pinCatalog === false) return false;
+  return httpPins.get(session)?.fingerprint === schemaFingerprint(session);
+}
+
+async function refreshSchemaPin(
+  session: AgentSession,
+  options: AgentHttpClientOptions,
+  signal?: AbortSignal
+): Promise<void> {
+  if (options.pinCatalog === false) return;
+  const fingerprint = schemaFingerprint(session);
+  const current = httpPins.get(session);
+  if (!current || current.fingerprint === fingerprint) return;
+  const kind: AgentHttpKind = "schema";
+  const response = await exchange(
+    options,
+    compactRequest(session, kind),
+    signal
+  );
+  if (response.ok === false) {
+    throw new Error(response.text ?? "agent HTTP schema pin was rejected");
+  }
+  rememberPin(session, response);
 }
 
 function mergeSignals(
@@ -795,6 +935,7 @@ export async function connectAgentHttp(
   if (response.ok === false) {
     throw new Error(response.text ?? "agent HTTP hello was rejected");
   }
+  rememberPin(session, response);
   return response;
 }
 
@@ -807,6 +948,44 @@ export async function connectAgentHttp(
  * which is exactly what a small model does, every round, until the discovery
  * budget runs out with nothing done.
  */
+async function preparePinnedTurn(
+  session: AgentSession,
+  options: AgentHttpClientOptions,
+  signal?: AbortSignal
+): Promise<boolean> {
+  if (options.pinCatalog !== false) {
+    await refreshSchemaPin(session, options, signal);
+  }
+  return usesPinnedCatalog(session, options);
+}
+
+function absorbHttpRound(
+  last: AgentHttpResponse,
+  state: { actions: AgentHttpAction[]; text: string }
+): number {
+  if (last.actions?.length) {
+    state.actions = [...state.actions, ...last.actions];
+  }
+  // A backend that explained itself on one round and only acted on the next
+  // still said something; reading only the final round loses it.
+  if (last.text) state.text = last.text;
+  return (last.needs?.describe?.length ?? 0) + (last.needs?.read?.length ?? 0);
+}
+
+function discoveryBudgetExceeded(
+  round: number,
+  actions: readonly AgentHttpAction[]
+): boolean {
+  if (round !== MAX_NEED_ROUNDS) return false;
+  // Only a backend that produced NOTHING has really failed. One that kept
+  // asking while also choosing actions did its job badly, not not at all,
+  // so its work still runs.
+  if (actions.length === 0) {
+    throw new Error("agent HTTP asked for discovery too many times");
+  }
+  return true;
+}
+
 async function exchangeRounds(
   session: AgentSession,
   options: AgentHttpClientOptions,
@@ -826,39 +1005,31 @@ async function exchangeRounds(
   let descriptions: CapabilityGuide[] | undefined;
   let rows: RowWindow[] | undefined;
   let last: AgentHttpResponse | undefined;
-  let actions: AgentHttpAction[] = [];
-  let text = "";
+  const state = { actions: [] as AgentHttpAction[], text: "" };
   const fulfilled = { describe: 0, read: 0 };
+  const questionOnly = await preparePinnedTurn(session, options, input.signal);
 
   for (let round = 0; round <= MAX_NEED_ROUNDS; round += 1) {
     assertTurnContext(session, snapshot);
     last = await exchange(
       options,
-      compactRequest(session, "turn", {
-        message: input.message,
-        conversation: input.conversation,
-        descriptions,
-        rows,
-      }),
+      compactRequest(
+        session,
+        "turn",
+        {
+          message: input.message,
+          conversation: input.conversation,
+          descriptions,
+          rows,
+        },
+        questionOnly ? "question" : "full"
+      ),
       input.signal
     );
-    if (last.actions?.length) actions = [...actions, ...last.actions];
-    // A backend that explained itself on one round and only acted on the next
-    // still said something; reading only the final round loses it.
-    if (last.text) text = last.text;
-    const needs = last.needs;
-    const asked = (needs?.describe?.length ?? 0) + (needs?.read?.length ?? 0);
-    if (asked === 0) break;
-    if (round === MAX_NEED_ROUNDS) {
-      // Only a backend that produced NOTHING has really failed. One that kept
-      // asking while also choosing actions did its job badly, not not at all,
-      // so its work still runs.
-      if (actions.length === 0) {
-        throw new Error("agent HTTP asked for discovery too many times");
-      }
-      break;
-    }
-    const next = await fulfillNeeds(session, needs, snapshot);
+    if (!questionOnly) rememberPin(session, last);
+    const asked = absorbHttpRound(last, state);
+    if (asked === 0 || discoveryBudgetExceeded(round, state.actions)) break;
+    const next = await fulfillNeeds(session, last.needs, snapshot);
     descriptions = mergeGuides(descriptions, next.descriptions);
     rows = [...(rows ?? []), ...next.rows];
     assertContextSize(descriptions, rows);
@@ -866,7 +1037,7 @@ async function exchangeRounds(
     fulfilled.read += next.read;
   }
 
-  return { last, actions, text, fulfilled };
+  return { last, actions: state.actions, text: state.text, fulfilled };
 }
 
 /**
@@ -971,13 +1142,18 @@ async function continueTurn(
     assertTurnContext(session, snapshot);
     const continued = await exchange(
       options,
-      compactRequest(session, "turn", {
-        message: input.message,
-        conversation: input.conversation,
-        descriptions,
-        rows,
-        results,
-      }),
+      compactRequest(
+        session,
+        "turn",
+        {
+          message: input.message,
+          conversation: input.conversation,
+          descriptions,
+          rows,
+          results,
+        },
+        usesPinnedCatalog(session, options) ? "question" : "full"
+      ),
       input.signal
     );
     if (continued.actions?.length) {
