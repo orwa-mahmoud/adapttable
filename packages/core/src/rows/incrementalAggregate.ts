@@ -270,11 +270,12 @@ function rescan<TRow>(
 }
 
 function cellOf(acc: ColumnAcc): DisplayValue | undefined {
-  if (acc.kind === "sum") return acc.sum;
-  if (acc.kind === "count") return acc.presentCount;
-  if (acc.kind === "avg") {
-    return acc.numericCount ? acc.sum / acc.numericCount : undefined;
-  }
-  if (acc.kind === "min") return acc.minResult;
-  return acc.maxResult;
+  let result: DisplayValue | undefined;
+  if (acc.kind === "sum") result = acc.sum;
+  else if (acc.kind === "count") result = acc.presentCount;
+  else if (acc.kind === "avg") {
+    result = acc.numericCount ? acc.sum / acc.numericCount : undefined;
+  } else if (acc.kind === "min") result = acc.minResult;
+  else result = acc.maxResult;
+  return result;
 }

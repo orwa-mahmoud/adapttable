@@ -5,7 +5,7 @@ total per team **per quarter**" — and that second dimension has to become
 columns that were never in the data.
 
 `@adapttable/core/pivot` is a separate entry, so a table that never pivots
-never downloads the engine. It costs 1.5 KB gzipped to the tables that import
+never downloads the engine. It costs 2.1 KB gzipped to the tables that import
 it and nothing to the rest, which the bundle budget checks on every build.
 
 ## The shape

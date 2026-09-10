@@ -78,6 +78,70 @@ describe("Mantine GroupingPanel", () => {
     expect(state.add).toHaveBeenCalledWith("budget");
   });
 
+  it("edits aggregations and restores declared defaults", () => {
+    const state = panelState({
+      aggregations: {
+        items: [
+          {
+            columnKey: "budget",
+            operationId: "sum",
+            editable: true,
+            origin: "declared",
+            operations: [
+              { id: "sum", builtIn: true },
+              { id: "avg", builtIn: true },
+            ],
+          },
+        ],
+        candidates: [
+          {
+            columnKey: "budget",
+            active: true,
+            operations: [
+              { id: "sum", builtIn: true },
+              { id: "avg", builtIn: true },
+            ],
+          },
+          {
+            columnKey: "team",
+            active: false,
+            operations: [{ id: "count", builtIn: true }],
+          },
+        ],
+        atDefaults: false,
+        hasDefaults: true,
+      },
+    });
+    renderMantine(
+      <GroupingPanel
+        state={state}
+        columns={columns}
+        labels={resolveLabels(undefined)}
+        mobile={false}
+      />
+    );
+
+    const aggregate = screen.getByRole("combobox", {
+      name: "Budget aggregation",
+    });
+    fireEvent.click(aggregate);
+    fireEvent.click(screen.getByRole("option", { name: "Average" }));
+    expect(state.setAggregateOperation).toHaveBeenCalledWith("budget", "avg");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remove Budget aggregation" })
+    );
+    expect(state.removeAggregate).toHaveBeenCalledWith("budget");
+
+    fireEvent.click(
+      screen.getByRole("combobox", { name: "Add aggregation column" })
+    );
+    fireEvent.click(screen.getByRole("option", { name: "Team" }));
+    expect(state.addAggregate).toHaveBeenCalledWith("team");
+
+    fireEvent.click(screen.getByRole("button", { name: "Restore defaults" }));
+    expect(state.restoreAggregateDefaults).toHaveBeenCalled();
+  });
+
   it("shows active insertion and drop-to-remove states", () => {
     const state = panelState({
       groupBy: ["team", "budget"],

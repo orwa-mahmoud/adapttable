@@ -27,7 +27,12 @@ const columns: ColumnDef<Row>[] = [
     sortable: true,
   },
   { key: "name", header: "Name", accessor: (row) => row.name },
-  { key: "amount", header: "Amount", accessor: (row) => row.amount },
+  {
+    key: "amount",
+    header: "Amount",
+    accessor: (row) => row.amount,
+    aggregatable: { operations: ["sum", "avg"] },
+  },
 ];
 
 function renderTable() {
@@ -105,10 +110,10 @@ describe("grouping-panel feature (antd)", () => {
     await screen.findByText("Reset columns");
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Column actions: Name" })
+      screen.getByRole("button", { name: "Column actions: Amount" })
     );
     expect(
-      screen.getByRole("button", { name: "Group by Name" })
+      screen.getByRole("button", { name: "Group by Amount" })
     ).toBeInTheDocument();
 
     const submenu = document.querySelector(

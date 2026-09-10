@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import type { DisplayValue } from "../display";
-import { groupRowLayout } from "./groupRowLayout";
 import {
   groupedEntriesForStrategy,
   groupingComputationKind,
 } from "./groupingStrategy";
+import { groupRowLayout } from "./groupRowLayout";
 
 function recordAggregation(
   seen: (string | undefined)[],
@@ -13,8 +13,9 @@ function recordAggregation(
   context: { aggregation?: string }
 ): DisplayValue {
   seen.push(context.aggregation);
-  if (typeof value === "number" || typeof value === "string") return value;
-  return "";
+  const result: DisplayValue =
+    typeof value === "number" || typeof value === "string" ? value : "";
+  return result;
 }
 
 describe("groupingComputationKind", () => {

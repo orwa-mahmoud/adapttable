@@ -199,7 +199,7 @@ const REACT_FIXTURES = [
     kind: "react",
     pkg: "react",
     entryFile: "features.js",
-    budgetKB: 12,
+    budgetKB: 16,
     code: `export { groupingPanel } from "PKG";`,
     present: ["groupingPanel"],
   },

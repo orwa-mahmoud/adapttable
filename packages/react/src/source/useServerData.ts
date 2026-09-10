@@ -442,9 +442,8 @@ export function useServerData<TRow>(
     groupAggregations,
     queryAggregates: aggregates,
     aggregateOperations: supports?.aggregateOperations,
-    honorsAggregates: Boolean(
-      supports?.aggregates || supports?.aggregateOperations
-    ),
+    honorsAggregates:
+      Boolean(supports?.aggregates) || Boolean(supports?.aggregateOperations),
     extra,
     facets,
     filterTree: state.filterTree,

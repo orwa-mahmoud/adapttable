@@ -26,10 +26,12 @@ function addControlWidth(label: string): string {
   return `calc(${Math.max(label.length, 1)}ch + 2.75rem)`;
 }
 
-function selectWidth(part: string | undefined, label: string): string {
+function selectWidth(
+  part: GroupingPanelSelectProps["data-adapttable-part"],
+  label: string
+): string {
   if (part === "grouping-aggregation-operation") return "auto";
-  if (part === "grouping-add") return addControlWidth(label);
-  return "min(100%, 220px)";
+  return addControlWidth(label);
 }
 const GroupingPanelPortalContext = createContext<{
   dir: GroupingPanelSurfaceProps["dir"];

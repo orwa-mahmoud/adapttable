@@ -116,6 +116,55 @@ describe("GroupingPanel (antd)", () => {
     ).toHaveStyle({ minHeight: "40px" });
   });
 
+  it("edits aggregations and restores declared defaults", () => {
+    const { state } = panelState();
+    state.aggregations = {
+      items: [
+        {
+          columnKey: "amount",
+          operationId: "sum",
+          editable: true,
+          origin: "declared",
+          operations: [
+            { id: "sum", builtIn: true },
+            { id: "avg", builtIn: true },
+          ],
+        },
+      ],
+      candidates: [
+        {
+          columnKey: "amount",
+          active: true,
+          operations: [
+            { id: "sum", builtIn: true },
+            { id: "avg", builtIn: true },
+          ],
+        },
+        {
+          columnKey: "team",
+          active: false,
+          operations: [{ id: "count", builtIn: true }],
+        },
+      ],
+      atDefaults: false,
+      hasDefaults: true,
+    };
+    renderAntd(<GroupingPanel {...props(state)} />);
+
+    expect(
+      screen.getByRole("combobox", { name: "Amount aggregation" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: "Add aggregation column" })
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remove Amount aggregation" })
+    );
+    expect(state.removeAggregate).toHaveBeenCalledWith("amount");
+    fireEvent.click(screen.getByRole("button", { name: "Restore defaults" }));
+    expect(state.restoreAggregateDefaults).toHaveBeenCalled();
+  });
+
   it("shows a visible removal target during a chip drag", () => {
     const { state } = panelState();
     state.drag = { key: "team", source: "chip", overRemove: true };

@@ -73,6 +73,69 @@ describe("Chakra GroupingPanel", () => {
     expect(state.add).toHaveBeenCalledWith("budget");
   });
 
+  it("edits aggregations and restores declared defaults", () => {
+    const state = panelState({
+      aggregations: {
+        items: [
+          {
+            columnKey: "budget",
+            operationId: "sum",
+            editable: true,
+            origin: "declared",
+            operations: [
+              { id: "sum", builtIn: true },
+              { id: "avg", builtIn: true },
+            ],
+          },
+        ],
+        candidates: [
+          {
+            columnKey: "budget",
+            active: true,
+            operations: [
+              { id: "sum", builtIn: true },
+              { id: "avg", builtIn: true },
+            ],
+          },
+          {
+            columnKey: "team",
+            active: false,
+            operations: [{ id: "count", builtIn: true }],
+          },
+        ],
+        atDefaults: false,
+        hasDefaults: true,
+      },
+    });
+    renderChakra(
+      <GroupingPanel
+        state={state}
+        columns={columns}
+        labels={resolveLabels(undefined)}
+        mobile={false}
+      />
+    );
+
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Budget aggregation" }),
+      { target: { value: "avg" } }
+    );
+    expect(state.setAggregateOperation).toHaveBeenCalledWith("budget", "avg");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remove Budget aggregation" })
+    );
+    expect(state.removeAggregate).toHaveBeenCalledWith("budget");
+
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Add aggregation column" }),
+      { target: { value: "team" } }
+    );
+    expect(state.addAggregate).toHaveBeenCalledWith("team");
+
+    fireEvent.click(screen.getByRole("button", { name: "Restore defaults" }));
+    expect(state.restoreAggregateDefaults).toHaveBeenCalled();
+  });
+
   it("shows active insertion and drop-to-remove states", () => {
     const state = panelState({
       groupBy: ["team", "budget"],
