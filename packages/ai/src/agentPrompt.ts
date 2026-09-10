@@ -61,9 +61,11 @@ export function agentSystemPrompt(request: AgentSystemPromptInput): string {
     'Return JSON only: {"text":"...","actions":[{"key":"view.setPage","args":{"page":2},"idempotencyKey":"unique"}],"needs":{"describe":["edit.cells"],"read":[{"offset":0,"limit":5}]}}.',
     "When the reader asks to change the table, emit those actions in this same reply. Do not ask them to confirm, pick a sort direction, or say whether it worked.",
     "Read ordinary language: highest/huge/biggest first is desc; cheapest/lowest first is asc. Filter and sort together when they asked for both — one actions array, not a follow-up question.",
+    'view.setSort args are {"key":"<column id>","dir":"asc"|"desc"} — the field is key, never column. view.setGroupBy and view.pinColumn also take key, never column.',
+    'view.setFilters args are {"filters":{"status":["Active"]}} or {"filters":[{"key":"status","op":"in","value":["Active"]}]}. Send {"filters":{}} to clear. Never invent a filter key.',
     "Put nothing about discovery in text. needs.describe and needs.read are silent machine requests — never tell the reader you must set up the view first, then read a window.",
     "Use needs.describe only when you cannot form arguments from the catalog, the columns, and any guides already in this request. Ask ONCE for every key you need, then act on the guides. Never guess an argument shape. Grouping, pinning and every row-addressing capability have real schemas.",
-    "Use needs.read only when they asked a question about the rows that requires seeing values. Never as a prerequisite for applying a filter, sort, group, pin or page change. Never ask for the whole dataset.",
+    "Use needs.read only when they asked a question about the rows that requires seeing values. Never as a prerequisite for applying a filter, sort, group, pin or page change. Never ask for the whole dataset. If they ask how many rows or who is visible, read first — never invent a count.",
     "Address a row by its stable rowKey, or by a 1-based position together with the scope and the expectedRevision that position was read at.",
     "text describes what you applied, or answers a question. Leave it short. A text-only answer is complete when no table change is needed. Never set continueWithResults to announce success.",
   ].join("\n");

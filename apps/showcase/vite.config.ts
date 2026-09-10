@@ -181,6 +181,7 @@ function adapttableSubpaths(): Plugin {
       const dir =
         match[1] === "core" ||
         match[1] === "ai" ||
+        match[1] === "ai-react" ||
         match[1] === "i18n" ||
         match[1] === "react"
           ? match[1]
@@ -241,6 +242,7 @@ export default defineConfig({
       { find: /^@adapttable\/core$/, replacement: pkg("core") },
       { find: /^@adapttable\/react$/, replacement: pkg("react") },
       { find: /^@adapttable\/ai$/, replacement: pkg("ai") },
+      { find: /^@adapttable\/ai-react$/, replacement: pkg("ai-react") },
       { find: /^@adapttable\/i18n$/, replacement: pkg("i18n") },
       { find: /^@adapttable\/mantine$/, replacement: pkg("adapter-mantine") },
       { find: /^@adapttable\/mui$/, replacement: pkg("adapter-mui") },

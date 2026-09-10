@@ -169,6 +169,18 @@ describe("extrasFromAgentFilters", () => {
     ).toEqual({ salaryMin: "10000", salaryOp: "gt" });
     expect(extrasFromAgentFilters({}, catalog)).toEqual({});
     expect(extrasFromAgentFilters(null, catalog)).toEqual({});
+    expect(
+      extrasFromAgentFilters([{ column: "team", value: ["Core"] }], catalog)
+    ).toEqual({ team: ["Core"] });
+    expect(
+      extrasFromAgentFilters({ column: "team", value: "Core" }, catalog)
+    ).toEqual({ team: ["Core"] });
+    expect(
+      extrasFromAgentFilters(
+        [{ key: "team", op: "=", value: ["Core"] }],
+        catalog
+      )
+    ).toEqual({ team: ["Core"] });
   });
 
   it("rejects unknown keys, operators and options", () => {

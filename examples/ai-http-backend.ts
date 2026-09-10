@@ -26,17 +26,17 @@ import {
   AGENT_HTTP_SCHEMA,
   type AgentHttpRequest,
   type AgentHttpResponse,
-  type AgentSystemPromptInput,
   agentSystemPrompt,
+  type AgentSystemPromptInput,
   parseAgentHttpRequest,
   parseAgentHttpResponse,
 } from "@adapttable/ai/http";
 
-type ExamplePin = {
+interface ExamplePin {
   readonly tableId: string;
   readonly catalog: NonNullable<AgentHttpRequest["catalog"]>;
   readonly manifest: NonNullable<AgentHttpRequest["manifest"]>;
-};
+}
 
 const examplePins = new Map<string, ExamplePin>();
 

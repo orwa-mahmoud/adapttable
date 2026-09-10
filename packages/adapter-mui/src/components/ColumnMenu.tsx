@@ -23,6 +23,7 @@ import {
   showAllColumns,
   unpinAllColumns,
   useColumnRenameEditor,
+  useEscapeClose,
   useFeatureHost,
 } from "@adapttable/react/adapter";
 import {
@@ -493,6 +494,15 @@ export function ColumnMenu<TRow>({
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
   const [query, setQuery] = useState("");
   const rows = filterColumnMenuRows(columnMenuRows(allColumns, layout), query);
+  const open = anchor !== null;
+  // One owner for Escape. MUI's Modal closes the popover only when the
+  // dialog itself holds focus; after a cancelled rename, focus is back on
+  // the action that opened the editor, and the next Escape was swallowed.
+  // `useEscapeClose` closes from anywhere and leaves the key alone inside
+  // the rename field.
+  useEscapeClose(open, () => setAnchor(null), {
+    ignoreWithin: '[data-adapttable-part="column-rename-input"]',
+  });
   return (
     <>
       <Button
@@ -507,7 +517,7 @@ export function ColumnMenu<TRow>({
       </Button>
       <Popover
         anchorEl={anchor}
-        open={anchor !== null}
+        open={open}
         onClose={() => setAnchor(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}

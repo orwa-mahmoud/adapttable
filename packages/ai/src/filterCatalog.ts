@@ -146,6 +146,38 @@ function isCondition(value: unknown): value is {
   return typeof record.key === "string" && typeof record.op === "string";
 }
 
+function conditionKey(record: Record<string, unknown>): string | undefined {
+  if (typeof record.key === "string") return record.key;
+  if (typeof record.column === "string") return record.column;
+  return undefined;
+}
+
+function conditionValue(record: Record<string, unknown>): unknown {
+  if ("value" in record) return record.value;
+  if ("values" in record) return record.values;
+  return undefined;
+}
+
+/**
+ * A condition the model almost named: `key` or `column`, optional `op`.
+ * A bag like `{ team: ["Core"] }` is not this — that is extras.
+ */
+function namedCondition(
+  value: unknown,
+  catalog: readonly AgentFilter[]
+): { key: string; op: string; value?: unknown } | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  const key = conditionKey(record);
+  if (!key) return undefined;
+  const filter = catalog.find((item) => item.key === key);
+  if (!filter) return undefined;
+  const op = typeof record.op === "string" ? record.op : filter.defaultOperator;
+  return { key, op, value: conditionValue(record) };
+}
+
 function optionValues(filter: AgentFilter): ReadonlySet<string> | undefined {
   if (!filter.options) return undefined;
   return new Set(filter.options.map((option) => option.value));
@@ -186,14 +218,99 @@ function assertOptionValue(filter: AgentFilter, raw: unknown): void {
   }
 }
 
+function requireFilter(
+  catalog: readonly AgentFilter[],
+  key: string
+): AgentFilter {
+  const filter = catalog.find((item) => item.key === key);
+  if (!filter) {
+    throw new Error(`"${key}" is not a visible filter`);
+  }
+  return filter;
+}
+
+function asNamedCondition(
+  entry: unknown,
+  catalog: readonly AgentFilter[]
+): { key: string; op: string; value?: unknown } {
+  const condition = isCondition(entry) ? entry : namedCondition(entry, catalog);
+  if (!condition) {
+    throw new Error("each filter condition needs key and op");
+  }
+  return condition;
+}
+
+function extrasFromConditionList(
+  filters: readonly unknown[],
+  catalog: readonly AgentFilter[],
+  registry: FilterTypeRegistry
+): Record<string, unknown> {
+  const extras: Record<string, unknown> = {};
+  for (const entry of filters) {
+    const condition = asNamedCondition(entry, catalog);
+    Object.assign(
+      extras,
+      extrasFromCondition(
+        requireFilter(catalog, condition.key),
+        condition,
+        registry
+      )
+    );
+  }
+  return extras;
+}
+
+const CONDITION_FIELDS = new Set(["key", "column", "op", "value", "values"]);
+
+function extrasFromConditionObject(
+  filters: Record<string, unknown>,
+  catalog: readonly AgentFilter[],
+  registry: FilterTypeRegistry
+): Record<string, unknown> | undefined {
+  const keys = Object.keys(filters);
+  if (keys.length === 0 || keys.some((key) => !CONDITION_FIELDS.has(key))) {
+    return undefined;
+  }
+  const single = isCondition(filters)
+    ? filters
+    : namedCondition(filters, catalog);
+  if (!single) return undefined;
+  return extrasFromCondition(
+    requireFilter(catalog, single.key),
+    single,
+    registry
+  );
+}
+
+const OPERATOR_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  "=": ["eq", "in"],
+  "==": ["eq", "in"],
+  eq: ["in"],
+  equals: ["eq", "in"],
+  equal: ["eq", "in"],
+  "!=": ["neq", "notIn"],
+  "<>": ["neq", "notIn"],
+  neq: ["notIn"],
+};
+
+function resolveOperator(filter: AgentFilter, op: string): string {
+  if (filter.operators.includes(op)) return op;
+  for (const candidate of OPERATOR_ALIASES[op] ?? []) {
+    if (filter.operators.includes(candidate)) return candidate;
+  }
+  return op;
+}
+
 function extrasFromCondition(
   filter: AgentFilter,
   condition: { key: string; op: string; value?: unknown },
   registry: FilterTypeRegistry
 ): Record<string, unknown> {
-  if (!filter.operators.includes(condition.op)) {
+  const op = resolveOperator(filter, condition.op);
+  if (!filter.operators.includes(op)) {
     throw new Error(`"${filter.key}" cannot use operator "${condition.op}"`);
   }
+  condition = { ...condition, op };
   assertOptionValue(filter, condition.value);
   return conditionToExtra(
     { key: filter.key, type: filter.type },
@@ -245,22 +362,17 @@ export function extrasFromAgentFilters(
     return filters as Record<string, unknown>;
   }
   if (Array.isArray(filters)) {
-    const extras: Record<string, unknown> = {};
-    for (const entry of filters) {
-      if (!isCondition(entry)) {
-        throw new Error("each filter condition needs key and op");
-      }
-      const filter = catalog.find((item) => item.key === entry.key);
-      if (!filter) {
-        throw new Error(`"${entry.key}" is not a visible filter`);
-      }
-      Object.assign(extras, extrasFromCondition(filter, entry, registry));
-    }
-    return extras;
+    return extrasFromConditionList(filters, catalog, registry);
   }
   if (typeof filters !== "object") {
     throw new TypeError("setFilters requires a filter object");
   }
+  const asCondition = extrasFromConditionObject(
+    filters as Record<string, unknown>,
+    catalog,
+    registry
+  );
+  if (asCondition) return asCondition;
   const extras = filters as Record<string, unknown>;
   validateExtras(extras, catalog);
   return extras;

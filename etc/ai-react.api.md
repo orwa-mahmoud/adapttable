@@ -37,6 +37,8 @@ export interface AssistantMessage {
 // @public
 export type AssistantStatus = "idle" | "connecting" | "ready" | "sending" | "awaiting-approval" | "error" | "disconnected";
 
+export { AssistantSuggestion }
+
 export { SharedApproval }
 
 // @public

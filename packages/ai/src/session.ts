@@ -15,6 +15,7 @@ import {
   type RowAddressScope,
 } from "./keys";
 import { buildManifest } from "./manifest";
+import { normalizeCapabilityArgs } from "./normalizeArgs";
 import type {
   AgentAggregationColumn,
   AgentAggregationsPatch,
@@ -482,11 +483,12 @@ export function createAgentSession(
 
   const runExecute = async (
     key: string,
-    args: unknown,
+    rawArgs: unknown,
     expectedRevision: number,
     idempotencyKey: string,
     signal?: AbortSignal
   ): Promise<ExecuteResult> => {
+    const args = normalizeCapabilityArgs(key, rawArgs);
     const state = { invokedWrite: false };
     const record = (result: ExecuteResult): ExecuteResult => {
       replay.set(idempotencyKey, {

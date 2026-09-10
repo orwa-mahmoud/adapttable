@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
+import { createServer } from "node:http";
 import { describe, it } from "node:test";
 
-import { AGENT_HTTP_SCHEMA, type AgentHttpRequest } from "@adapttable/ai/http";
+import { createAgentSession } from "@adapttable/ai";
+import {
+  AGENT_HTTP_SCHEMA,
+  type AgentHttpRequest,
+  createAgentHttpClient,
+} from "@adapttable/ai/http";
 
 import {
   clearExampleAgentPins,
@@ -9,6 +15,7 @@ import {
   exampleConfigError,
   exampleRequiresToken,
   handleExampleAgentTurn,
+  handleExampleHttp,
 } from "./ai-http-backend.ts";
 
 function request(
@@ -123,6 +130,82 @@ describe("handleExampleAgentTurn", () => {
     );
     assert.match(system, /- view\.setSort: Set the sort\./);
     assert.doesNotMatch(system, /- view\.setPage:/);
+  });
+
+  it("speaks the same hello and text-plus-actions contract as the bridge", async () => {
+    clearExampleAgentPins();
+    let providerCalls = 0;
+    const complete = () => {
+      providerCalls += 1;
+      return Promise.resolve(
+        JSON.stringify({
+          text: "Showing page 2.",
+          actions: [
+            {
+              key: "view.setPage",
+              args: { page: 2 },
+              idempotencyKey: "page-2",
+            },
+          ],
+        })
+      );
+    };
+    const server = createServer((req, res) => {
+      void handleExampleHttp(req, res, complete);
+    });
+    await new Promise<void>((resolve) => {
+      server.listen(0, "127.0.0.1", resolve);
+    });
+    const address = server.address();
+    const port = address && typeof address === "object" ? address.port : 0;
+    const live = createAgentSession({
+      observe: () => ({
+        tableId: "orders",
+        viewRevision: 1,
+        featureIds: [],
+        columns: [],
+        source: {
+          fullDataset: false,
+          grouping: false,
+          selectAcrossPages: false,
+          exportScope: "page",
+          totalCount: "loaded",
+        },
+        writePolicy: "allow",
+        approval: "never",
+        commit: "immediate",
+        hasPagination: true,
+        hasSearch: false,
+        hasSort: false,
+        hasFilters: false,
+        hasExport: false,
+        hasEdit: false,
+        hasReorder: false,
+        page: 1,
+        limit: 10,
+        search: "",
+        pageMax: 50,
+        rowAddressScope: "visible",
+      }),
+      apply: { setPage: () => undefined },
+    });
+    const client = createAgentHttpClient({
+      endpoint: `http://127.0.0.1:${String(port)}`,
+      timeoutMs: 2_000,
+    });
+    try {
+      const hello = await client.connect(live);
+      assert.equal(hello.ok, true);
+      assert.equal(providerCalls, 0);
+      const result = await client.send(live, "Go to page 2");
+      assert.equal(result.text, "Showing page 2.");
+      assert.equal(result.results[0]?.ok, true);
+      assert.equal(providerCalls, 1);
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+      });
+    }
   });
 
   it("returns a typed hello without calling the provider", async () => {

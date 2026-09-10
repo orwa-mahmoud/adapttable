@@ -1,12 +1,13 @@
 /**
  * Close an overlay on Escape, from wherever focus happens to be.
  *
- * Kits disagree about this. Most close on their own, and two need help for
- * opposite reasons: Mantine's `Popover` reacts only once focus is inside the
- * dropdown, so a menu left with focus on its trigger never closes; Mantine's
- * and Chakra's both close too eagerly, dismissing the whole menu when a
- * control inside it — the column rename editor — was the one answering. Both
- * hand the key to this hook instead, so one rule covers every kit.
+ * Kits disagree about this. Most close on their own. Mantine's `Popover`
+ * reacts only once focus is inside the dropdown, so a menu left with focus
+ * on its trigger never closes. MUI's Modal is the same after a cancelled
+ * rename: focus is back on the action, and the next Escape is swallowed.
+ * Mantine and Chakra also close too eagerly, dismissing the whole menu when
+ * the column rename editor was the one answering. Those kits hand the key
+ * to this hook instead, so one rule covers every kit.
  *
  * **One key, one layer.** The listener runs in the capture phase, ahead of
  * every library handler, which is the only way to be reliable across kits.

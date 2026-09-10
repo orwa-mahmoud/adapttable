@@ -19,6 +19,14 @@
       "behavior": ""
     },
     {
+      "export": "AssistantSuggestion",
+      "currentImport": "@adapttable/ai-react",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/ai-react",
+      "behavior": ""
+    },
+    {
       "export": "SharedApproval",
       "currentImport": "@adapttable/ai-react",
       "kind": "type",

@@ -1353,7 +1353,7 @@ readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
 `AssistantReceipt`, `AssistantReceiptStatus`, `AssistantTurnStatus`.
 `@adapttable/ai-react` exports `useTableAssistant`,
 `TableAssistantOptions`, `TableAssistantState`, `AssistantMessage`,
-`AssistantStatus`, `tableAgent`, `TableAgentOptions`,
+`AssistantStatus`, `AssistantSuggestion`, `tableAgent`, `TableAgentOptions`,
 `TableAgentColumnPatch`, `TABLE_AGENT_STATE`, `TableAgentBridge` and
 `SharedApproval`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
 `receiptFromResult` and `receiptsFromResults` as `AssistantReceipt`, whose

@@ -110,9 +110,14 @@ for (const kit of KITS) {
     await expect(budget).toContainText("$");
 
     // Each kit draws these with its own control: a listbox for most, a native
-    // <select> where the kit uses one.
-    const choose = async (part: string, label: string) => {
-      const select = root.locator(`[data-adapttable-part="${part}"]`).first();
+    // <select> where the kit uses one. Budget is already on the strip from
+    // the column's aggregatable default — change its operation, not the set.
+    const choose = async (label: string) => {
+      const select = root
+        .locator(
+          '[data-adapttable-aggregation="budget"] [data-adapttable-part="grouping-aggregation-operation"]'
+        )
+        .first();
       const tag = await select.evaluate((el) => el.tagName);
       if (tag === "SELECT") {
         await select.selectOption({ label });
@@ -130,11 +135,9 @@ for (const kit of KITS) {
         .click();
     };
 
-    // The strip aggregates one column at a time; point it at the money one.
-    await choose("grouping-aggregate-column", "Budget");
-    await choose("grouping-aggregate", "Average");
+    await choose("Average");
     await expect(budget).toContainText("$");
-    await choose("grouping-aggregate", "Count");
+    await choose("Count");
     await expect(budget).not.toContainText("$");
   });
 }

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { applyHostFilters, hostFiltersFromBag } from "./aiHostFilters.ts";
+import { applyHostFilters, hostFiltersFromBag } from "./aiHostFilters";
 
 const rows = [
   { id: "c1", team: "Core", status: "Active" },

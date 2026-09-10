@@ -311,8 +311,9 @@ export const demoConfirm: ConfirmHandler = (request: ConfirmRequest) => {
  * the menu has no table `urlKey` to inherit its namespace from. The storage
  * key is scoped the same way, so each demo keeps its own views — and every
  * adapter on a page shares one key, so a view saved under Mantine is there
- * when you switch to MUI. Only the live demo writes views to the address
- * bar (`urlSync`); Feature Lab and kit pages do not.
+ * when you switch to MUI. The live demo, grouping, filtering, and
+ * aggregation pages write views to the address bar (`urlSync`); Feature
+ * Lab and every other kit page do not.
  */
 export function demoSavedViews(urlKey?: string): UseSavedViewsOptions {
   return {
@@ -323,13 +324,20 @@ export function demoSavedViews(urlKey?: string): UseSavedViewsOptions {
 }
 
 /**
- * The live demo on the home page is the one table whose state hits the
- * address bar — sharing and restoring a view is its subject. Every feature
- * page keeps its state to itself, so interacting with one never rewrites the
- * address.
+ * Pages whose subject is shareable table state write the address bar.
+ *
+ * The live demo is the home-page table. Grouping, filtering, and aggregation
+ * each own a namespace (`grp`, `flt`, `agg`) so a chip reorder, a find
+ * query, or a Core-team filter is a link. Other feature pages keep state
+ * off the address so opening one never rewrites another.
  */
 export function demoUrlSync(urlKey?: string): boolean {
-  return urlKey === "live";
+  return (
+    urlKey === "live" ||
+    urlKey === "grp" ||
+    urlKey === "flt" ||
+    urlKey === "agg"
+  );
 }
 
 /**

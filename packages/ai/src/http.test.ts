@@ -452,7 +452,7 @@ describe("createAgentHttpClient", () => {
             // A shape the schema refuses — the receipt still has to name it.
             {
               key: "view.setSort",
-              args: { column: "salary" },
+              args: { foo: "salary" },
               idempotencyKey: "b",
             },
           ],
@@ -1224,53 +1224,5 @@ describe("transport limits and cancellation", () => {
           ),
       })
     ).rejects.toThrow(/context exceeds/);
-  });
-});
-
-describe("example backend protocol", () => {
-  it("speaks the same hello and text-plus-actions contract as the bridge", async () => {
-    const { createServer } = await import("node:http");
-    const { handleExampleHttp } =
-      await import("../../../examples/ai-http-backend.ts");
-    const complete = vi.fn(() =>
-      Promise.resolve(
-        JSON.stringify({
-          text: "Showing page 2.",
-          actions: [
-            {
-              key: "view.setPage",
-              args: { page: 2 },
-              idempotencyKey: "page-2",
-            },
-          ],
-        })
-      )
-    );
-    const server = createServer((req, res) => {
-      void handleExampleHttp(req, res, complete);
-    });
-    await new Promise<void>((resolve) => {
-      server.listen(0, "127.0.0.1", resolve);
-    });
-    const address = server.address();
-    const port = address && typeof address === "object" ? address.port : 0;
-    const live = session();
-    const client = createAgentHttpClient({
-      endpoint: `http://127.0.0.1:${String(port)}`,
-      timeoutMs: 2_000,
-    });
-    try {
-      const hello = await client.connect(live);
-      expect(hello.ok).toBe(true);
-      expect(complete).not.toHaveBeenCalled();
-      const result = await client.send(live, "Go to page 2");
-      expect(result.text).toBe("Showing page 2.");
-      expect(result.results[0]?.ok).toBe(true);
-      expect(complete).toHaveBeenCalledTimes(1);
-    } finally {
-      await new Promise<void>((resolve, reject) => {
-        server.close((error) => (error ? reject(error) : resolve()));
-      });
-    }
   });
 });

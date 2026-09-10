@@ -20,3 +20,4 @@ export type {
   TableAgentOptions,
 } from "./react";
 export { TABLE_AGENT_STATE, tableAgent } from "./react";
+export type { AssistantSuggestion } from "@adapttable/ai";

@@ -82,7 +82,7 @@ describe("v3 showcase snippets compile", () => {
 
   it("ai imports published session factories", () => {
     const snippet = fill(featureBySlug("ai").snippet);
-    assert.match(snippet, /from "@adapttable\/ai\/react"/);
+    assert.match(snippet, /from "@adapttable\/ai-react"/);
     assert.match(snippet, /tableAgent/);
     assert.match(snippet, /from "@adapttable\/mantine"/);
     assert.match(snippet, /agentApproval/);

@@ -167,9 +167,9 @@
         <p>Three integration levels share that session: a custom bridge that maps any agent format onto <code>session.execute</code>, an <code>AgentEnvelope</code> on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.</p>
         <p>The optional shadcn assistant matches the table's preset. Keep its ready controls or use the headless controller with your own components and transport.</p>
         <h2>The code</h2>
-        <pre><code>import { useTableAssistant } from &quot;@adapttable/ai/assistant&quot;;
+        <pre><code>import { useTableAssistant } from &quot;@adapttable/ai-react&quot;;
 import { assistantHttpTransport } from &quot;@adapttable/ai/http&quot;;
-import { tableAgent } from &quot;@adapttable/ai/react&quot;;
+import { tableAgent } from &quot;@adapttable/ai-react&quot;;
 import { DataTable, agentApproval } from &quot;@adapttable/shadcn&quot;;
 import { TableAssistant } from &quot;@adapttable/shadcn/assistant&quot;;
 import { editing } from &quot;@adapttable/shadcn/editing&quot;;

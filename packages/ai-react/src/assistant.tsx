@@ -23,21 +23,15 @@
 
 import {
   type AgentSession,
-  type ApprovalPolicy,
   type AssistantExchange,
   type AssistantReceipt,
-  type AssistantReceiptStatus,
-  type AssistantReceiptSubject,
   type AssistantSuggestion,
   type AssistantTransport,
   type AssistantTransportReply,
   type AssistantTurnStatus,
-  type CommitPolicy,
   eligibleSuggestions,
   receiptsFromResults,
-  type RowAddressScope,
   turnStatus,
-  type WritePolicy,
 } from "@adapttable/ai";
 import {
   AGENT_APPROVAL_STATE,
@@ -51,16 +45,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // not have to reach into another entry point for the pieces.
 export type {
   ApprovalPolicy,
-  AssistantExchange,
-  AssistantReceipt,
   AssistantReceiptStatus,
   AssistantReceiptSubject,
-  AssistantTransport,
-  AssistantTransportReply,
-  AssistantTurnStatus,
   CommitPolicy,
   RowAddressScope,
   WritePolicy,
+} from "@adapttable/ai";
+export type {
+  AssistantExchange,
+  AssistantReceipt,
+  AssistantTransport,
+  AssistantTransportReply,
+  AssistantTurnStatus,
 };
 
 /**

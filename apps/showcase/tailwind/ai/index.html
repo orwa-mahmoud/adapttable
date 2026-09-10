@@ -167,9 +167,9 @@
         <p>Three integration levels share that session: a custom bridge that maps any agent format onto <code>session.execute</code>, an <code>AgentEnvelope</code> on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.</p>
         <p>The unstyled assistant provides native controls for a Tailwind-styled interface. It is optional: applications can render the same conversation state themselves.</p>
         <h2>The code</h2>
-        <pre><code>import { useTableAssistant } from &quot;@adapttable/ai/assistant&quot;;
+        <pre><code>import { useTableAssistant } from &quot;@adapttable/ai-react&quot;;
 import { assistantHttpTransport } from &quot;@adapttable/ai/http&quot;;
-import { tableAgent } from &quot;@adapttable/ai/react&quot;;
+import { tableAgent } from &quot;@adapttable/ai-react&quot;;
 import { DataTable, agentApproval } from &quot;@adapttable/unstyled&quot;;
 import { TableAssistant } from &quot;@adapttable/unstyled/assistant&quot;;
 import { editing } from &quot;@adapttable/unstyled/editing&quot;;

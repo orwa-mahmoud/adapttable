@@ -35,7 +35,7 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 65–75 kB min+gzip (measured 2026-09-07 from
+A plain adapter `DataTable` is 68–78 kB min+gzip (measured 2026-09-10 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -614,8 +614,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 65 kB gzipped and the same table with
-`standardFeatures()` composed is 116 kB.
+Measured on MUI, the table alone is 68 kB gzipped and the same table with
+`standardFeatures()` composed is 121 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -1958,7 +1958,8 @@ every filter lives on a column, or pass standalone defs as above. See
   and a Min/Max pair still infers at-least / at-most / between.
 - `select`/`multiSelect` options come from a static `{ value, label }[]`,
   `"auto"` (distinct values derived from the frontend dataset, sorted,
-  capped at `AUTO_OPTIONS_LIMIT` = 50), or an async loader — one shared fetch
+  capped at `AUTO_OPTIONS_LIMIT` = 50, the same number as
+  `FILTER_AI_OPTIONS_LIMIT`), or an async loader — one shared fetch
   serves both the form and the chip labels, and active chips re-label from
   raw values once it resolves.
 - A definition's `key` doubles as the row's dot path for the client-side
@@ -1973,14 +1974,15 @@ every filter lives on a column, or pass standalone defs as above. See
 `FilterDef` (entries of `filters`, and the column `filter` object minus
 `key`/`label`):
 
-| Prop          | Type                                                        | Default               | Description                                                                                      |
-| ------------- | ----------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------ |
-| `key`         | `string`                                                    | —                     | State key and `f_<key>` URL param. Doubles as the row's dot path unless `getValue` overrides it. |
-| `type`        | `string`                                                    | —                     | Built-in `FilterType` or a custom type registered on `filterTypes`.                              |
-| `label`       | `string`                                                    | humanized `key`       | Widget and chip label (`hiredAt` → "Hired At").                                                  |
-| `options`     | `FilterOption[] \| "auto" \| () => Promise<FilterOption[]>` | —                     | Choices for `select` / `multiSelect`.                                                            |
-| `getValue`    | `(row) => unknown`                                          | reads `key` as a path | Row-value extractor for the client-side predicate.                                               |
-| `placeholder` | `string`                                                    | —                     | Placeholder for text-like inputs.                                                                |
+| Prop          | Type                                                        | Default               | Description                                                                                                                                                                                                                                                     |
+| ------------- | ----------------------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `key`         | `string`                                                    | —                     | State key and `f_<key>` URL param. Doubles as the row's dot path unless `getValue` overrides it.                                                                                                                                                                |
+| `type`        | `string`                                                    | —                     | Built-in `FilterType` or a custom type registered on `filterTypes`.                                                                                                                                                                                             |
+| `label`       | `string`                                                    | humanized `key`       | Widget and chip label (`hiredAt` → "Hired At").                                                                                                                                                                                                                 |
+| `options`     | `FilterOption[] \| "auto" \| () => Promise<FilterOption[]>` | —                     | Choices for `select` / `multiSelect`.                                                                                                                                                                                                                           |
+| `getValue`    | `(row) => unknown`                                          | reads `key` as a path | Row-value extractor for the client-side predicate.                                                                                                                                                                                                              |
+| `placeholder` | `string`                                                    | —                     | Placeholder for text-like inputs.                                                                                                                                                                                                                               |
+| `ai`          | `false \| FilterAiOptions`                                  | visible, options ≤ 50 | Assistant catalog. `false` hides the filter. `{ options: false }` keeps it and omits values. A number sends values only when the static list is that long or shorter (`FILTER_AI_OPTIONS_LIMIT`). `"auto"` and async loaders are never fetched into the prompt. |
 
 | Factory / prop              | Type                                | Default        | Description                                                                                                                               |
 | --------------------------- | ----------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -4964,7 +4966,8 @@ The panel state is headless too. `GroupAggregateOverride` is
 `"sum" | "avg" | "min" | "max" | "count" | "none"`, and
 `GroupAggregateOverrides` maps column keys to those choices.
 `serializeGroupAggregateOverrides` / `parseGroupAggregateOverrides` implement
-the `groupAgg` codec; `withGroupAggregateOverrides` overlays choices on a
+the `groupAgg` codec; `serializeAggregationDerivedKey` is the cache key for
+the same effective operations. `withGroupAggregateOverrides` overlays choices on a
 client mapper, and `withQueryAggregateOverrides` overlays them on server
 aggregate requests. Adapter authors build the panel with
 `GroupingPanelChrome` and its required slots.
@@ -4992,7 +4995,7 @@ total per team **per quarter**" — and that second dimension has to become
 columns that were never in the data.
 
 `@adapttable/core/pivot` is a separate entry, so a table that never pivots
-never downloads the engine. It costs 1.5 KB gzipped to the tables that import
+never downloads the engine. It costs 2.1 KB gzipped to the tables that import
 it and nothing to the rest, which the bundle budget checks on every build.
 
 ## The shape
@@ -7531,7 +7534,7 @@ the same permissions, validation and approval path.
 
 That contract lives in `@adapttable/ai`. It is optional. `@adapttable/core`,
 every adapter root, and `@adapttable/server` import none of it. Compose
-`tableAgent` from `@adapttable/ai/react` when a table should publish a
+`tableAgent` from `@adapttable/ai-react` when a table should publish a
 manifest; omit the import and the bytes stay out.
 
 ## What is wired, not what is installed
@@ -7560,6 +7563,29 @@ Capabilities come from the live table:
 
 Package availability never participates. Installing `@adapttable/ai` does
 not enable grouping on a table that never imported it.
+
+## Filters
+
+`view.setFilters` is the extra bag the table already applies — the same
+keys the filter form writes (`team`, `salaryMin`, `salaryOp`). `describe`
+lists each visible filter's type, operators and, when the static list is
+short enough, its options. A `{ key, op, value }` array is accepted and
+converted to that bag.
+
+`FilterDef.ai` controls what the assistant sees. Omit it and the filter is
+visible, with options sent only when there are 50 or fewer static choices.
+`ai: false` hides the filter. `{ options: false }` keeps the filter and
+omits the values — the usual 10k-customer case. `{ options: 10 }` raises or
+lowers that cutoff. A list over the cutoff is omitted, not truncated, so a
+sample cannot look like the full set. `"auto"` and async loaders are never
+fetched into the prompt.
+
+`view.describe` reports the current extras and the same catalog
+(`AgentFilter` / `AgentFilterOption`).
+
+Pagination, sort and search already publish current state and a typed
+schema (`page` / `pageMax`, `sortBy` / sortable columns, the search
+string). Filters were the gap this catalog closes.
 
 ## Pinning
 
@@ -7611,7 +7637,7 @@ Nothing in these contracts imports React or calls a model.
 
 ## The headless assistant
 
-`@adapttable/ai/assistant` turns those contracts into a conversation, and
+`@adapttable/ai-react` turns those contracts into a conversation, and
 still renders nothing. `useTableAssistant({ session, transport, suggestions })`
 returns `status`, `messages`, `draft`/`setDraft`, `send`, `stop`, `clear`,
 the live `suggestions` and `moreSuggestions`, `runSuggestion`, `open`/`setOpen`
@@ -7659,7 +7685,7 @@ entry point on purpose: a table that never imports it carries none of it.
 
 ```tsx
 import { TableAssistant } from "@adapttable/mantine/assistant";
-import { useTableAssistant } from "@adapttable/ai/assistant";
+import { useTableAssistant } from "@adapttable/ai-react";
 
 const assistant = useTableAssistant({ session, transport, suggestions });
 
@@ -7724,10 +7750,10 @@ how much of the UI you keep.
 components, beside the table.
 
 ```tsx
-import { useTableAssistant } from "@adapttable/ai/assistant";
+import { useTableAssistant } from "@adapttable/ai-react";
 import { assistantHttpTransport } from "@adapttable/ai/http";
 import { TableAssistant } from "@adapttable/mantine/assistant";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 
 const transport = useMemo(
   () => assistantHttpTransport({ endpoint: "/api/table-agent" }),
@@ -7955,7 +7981,7 @@ The ready-made path is two props. The assistant hands you the write; the
 panel draws it:
 
 ```tsx
-import { useTableAssistant } from "@adapttable/ai/assistant";
+import { useTableAssistant } from "@adapttable/ai-react";
 import { TableAssistant } from "@adapttable/mantine/assistant";
 
 const assistant = useTableAssistant({ session, transport });
@@ -8246,7 +8272,7 @@ The React feature is a separate import.
 
 ```ts
 import { createAgentSession } from "@adapttable/ai";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 ```
 
 ## `tableAgent({ tableId, bridge, writePolicy, approval, commit, columns, readMax })`
@@ -8254,7 +8280,7 @@ import { tableAgent } from "@adapttable/ai/react";
 Compose it next to the other features:
 
 ```tsx
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 import { DataTable } from "@adapttable/mui";
 import { agentApproval } from "@adapttable/mui";
 import { filters } from "@adapttable/mui/filters";
@@ -8333,6 +8359,14 @@ Stable catalog order:
 `rows.resolve`, `export.run`, `edit.cells`, `rows.add`, `rows.delete`,
 `rows.reorder`.
 
+`view.setFilters` takes `{ filters }` — the extra bag the table already
+uses (`{ team: ["Core"] }`, `{ salaryMin: 10000, salaryOp: "gt" }`) or an
+array of `{ key, op, value }` conditions. `describe` lists the live
+filters, operators and (when the static list is short enough) options.
+`ai: false` on a `FilterDef` hides that filter; `{ options: false }` or a
+number cap omits a large list rather than truncating it. Without
+declarative defs the argument stays the host's own object.
+
 `view.setAggregations` takes `{ set?, remove?, restoreDefaults? }` — add or
 change specific column operations without replacing the others, remove
 specific aggregations with the same suppression semantics as the panel, or
@@ -8392,7 +8426,7 @@ import { toOpenAITools } from "@adapttable/ai/openai";
 import { mcpListChanged, toMcpResources, toMcpTools } from "@adapttable/ai/mcp";
 ```
 
-The root entry stays React-free. `@adapttable/ai/react` is only for
+The root entry stays React-free. `@adapttable/ai-react` is only for
 `tableAgent`. The three integration subpaths never import a model SDK.
 
 ## Three integration levels
@@ -8696,8 +8730,13 @@ Implement the protocol below, or adapt your agent runtime so it emits the
 same JSON. The showcase and `createAgentHttpClient` need no custom glue
 when the body matches.
 
+Junior backends import `agentSystemPrompt` and send that string as the
+model system prompt. Senior backends skip it and keep their own prompt
+or tools. The example calls the export; it does not keep a private copy
+of the skill text.
+
 ```ts
-import { createAgentHttpClient } from "@adapttable/ai/http";
+import { agentSystemPrompt, createAgentHttpClient } from "@adapttable/ai/http";
 
 const client = createAgentHttpClient({
   endpoint: "https://your.example/agent",
@@ -8717,18 +8756,26 @@ transform — this client is optional. See [agent integrations](./ai-integration
 `POST` JSON. Schema family: `adapttable.agent.v1`.
 
 **Hello** (Connect). The client sends `kind: "hello"` plus `tableId`,
-`manifest` and `catalog`. The server must return the same `schemaVersion`.
-`ok: false` is a rejected hello.
+`manifest` and `catalog`. The server pins that snapshot on a session and
+should return `sessionId`. `ok: false` is a rejected hello.
 
-**Turn.** `kind: "turn"` and a `message` string. Optional `conversation`,
-`descriptions`, `rows`, and `results` appear only when the host is answering
-a previous `needs` or continuing with receipts.
+**Schema.** `kind: "schema"` replaces the pin when features or options
+change, so the system prompt stays current through summarization. Same
+payload as hello.
+
+**Turn.** `kind: "turn"` and a `message` string. While the pin is valid the
+client omits `catalog` and `manifest` and sends `viewRevision` (and
+`sessionId`) instead. Optional `conversation`, `descriptions`, `rows`, and
+`results` appear only when the host is answering a previous `needs` or
+continuing with receipts. A senior backend may ignore the pin and keep
+sending the compact snapshot on every turn (`pinCatalog: false`).
 
 **Response.**
 
 ```ts
 {
   schemaVersion: "adapttable.agent.v1",
+  sessionId?: string,
   text?: string,
   actions?: { key, args, idempotencyKey, expectedRevision? }[],
   needs?: { describe?: string[], read?: { offset, limit, columns?, scope? }[] },
@@ -11393,7 +11440,8 @@ host operation id, or `"none"`; `GroupAggregateOverrides` maps those session
 choices by column. `serializeGroupAggregateOverrides` /
 `parseGroupAggregateOverrides` encode both the column key and the operation
 id (`encodeURIComponent`, split on the first `:`), so custom ids with
-colons, commas, percents or Unicode round-trip. Built-in `budget:sum` URLs
+colons, commas, percents or Unicode round-trip. `serializeAggregationDerivedKey`
+is the cache key for the effective set. Built-in `budget:sum` URLs
 stay compatible. `withGroupAggregateOverrides` layers them over a developer
 `groupAggregates` mapper and refuses a disallowed id at execution, while
 `withQueryAggregateOverrides` does the same for server `query.aggregates`.
@@ -11578,12 +11626,19 @@ agent contract. The root exports `AGENT_SCHEMA_VERSION`, `CAPABILITY_KEYS`,
 the types `AgentApply`, `AgentAggregateOperation`, `AgentAggregationColumn`,
 `AgentAggregations`, `AgentAggregationsPatch`, `AgentCapabilityContext`,
 `AgentCapabilityDefinition`,
-`AgentCellEdit`, `AgentColumn`, `AgentLimits`,
+`AgentCellEdit`, `AgentColumn`, `AgentFilter`, `AgentFilterOption`, `AgentLimits`,
 `AgentManifest`, `AgentObservation`, `AgentPolicy`, `AgentRowAddressing`,
-`AgentSession`, `ApprovalOutcome`, `CapabilityGuide`, `CatalogEntry`,
+`AgentSession`, `ApprovalOutcome`, `ApprovalResult`, `ApprovalSubject`,
+`CapabilityGuide`, `CatalogEntry`,
 `ExecuteError`, `ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowKeyRef`,
 `RowPositionRef`, `RowReadQuery`, `RowRef`, `RowWindow`, `RowWindowRow`,
-`TableAgentBridge`, `WriteExecuteResult`, `WriteProposal`, `WriteRowResult`,
+`WriteExecuteResult`, `WriteProposal`, `WriteRowResult`,
+`sharedApproval`, `SharedApproval`, `ResolvedApproval`,
+`agentFiltersFromDefs`, `FilterCatalogColumnPatch`,
+`agentColumnsFromNeutral`, `TableAgentColumnPatch`,
+`LiveObservationOptions`, `NeutralQueryOverlay`, `monotonicRevision`,
+`observationFromNeutral`, `readRowsFromNeutral`, `resolveRowFromNeutral`
+and `revisionToken`,
 and the assistant contracts `AssistantAction`, `AssistantConversation`,
 `AssistantOutcome`, `AssistantOutcomeStatus`, `AssistantPlanner`,
 `AssistantProposal`, `AssistantRequest`, `AssistantSuggestion`,
@@ -11591,9 +11646,11 @@ and the assistant contracts `AssistantAction`, `AssistantConversation`,
 `AssistantTransportReply` and `CapabilityPresentation`, plus the receipt
 readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
 `AssistantReceipt`, `AssistantReceiptStatus`, `AssistantTurnStatus`.
-`@adapttable/ai/assistant` exports `useTableAssistant`,
-`TableAssistantOptions`, `TableAssistantState`, `AssistantMessage` and
-`AssistantStatus`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
+`@adapttable/ai-react` exports `useTableAssistant`,
+`TableAssistantOptions`, `TableAssistantState`, `AssistantMessage`,
+`AssistantStatus`, `AssistantSuggestion`, `tableAgent`, `TableAgentOptions`,
+`TableAgentColumnPatch`, `TABLE_AGENT_STATE`, `TableAgentBridge` and
+`SharedApproval`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
 `receiptFromResult` and `receiptsFromResults` as `AssistantReceipt`, whose
 optional `AssistantReceiptSubject` names what changed so the panel can say
 "Filter applied — Team is Core" rather than a capability key.
@@ -11613,8 +11670,7 @@ a container of your own. `TableAssistantSlots` collects
 `TableAssistantReceiptSubject` — what an action changed, supplied by whoever
 ran it — and `TableAssistantSuggestionView`, plus `assistantIsBusy` and
 `assistantIsUsable`.
-`@adapttable/ai/react` exports `tableAgent`, `TableAgentOptions`,
-`TableAgentColumnPatch` and `TABLE_AGENT_STATE`. Each published kit exports
+Each published kit exports
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome
 exports `AgentApprovalChrome` (`AgentApprovalChromeProps`),
 `AGENT_APPROVAL`, `AGENT_APPROVAL_STATE`, `AgentApprovalPending`,
@@ -11634,7 +11690,10 @@ on subpaths: `@adapttable/ai/json` (`toJsonTools`, `JsonFunctionTool`,
 `toMcpResources`, `McpResource`, `mcpListChanged`, `executeMcpTool`),
 `@adapttable/ai/http` (`createAgentHttpClient`, `connectAgentHttp`,
 `runAgentHttpTurn`, `parseAgentHttpRequest`, `parseAgentHttpResponse`,
-`AGENT_HTTP_SCHEMA`, `AgentHttpKind`, `AgentHttpMessage`, `AgentHttpNeeds`,
+`agentSystemPrompt`, `AgentSystemPromptInput`,
+`AGENT_HTTP_SCHEMA`, `AgentHttpKind` (`hello` / `schema` / `turn`),
+`AgentHttpMessage`, `AgentHttpNeeds`, `sessionId`, `viewRevision`,
+`pinCatalog`,
 `AgentHttpAction`, `AgentHttpRequest`, `AgentHttpResponse`,
 `AgentHttpClientOptions`, `AgentHttpTurnResult`). See
 [adaptive capabilities](./agent-capabilities.md),
@@ -11951,6 +12010,7 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 `mergeProps`, `stableKey`, `getPath`, `humanizeKey`, `resolveLabels` /
 `defaultLabels`, `pageSizeOptions`, and the constants `DEFAULT_LIMIT` (25),
 `PAGE_SIZE_OPTIONS`, `SEARCH_DEBOUNCE_MS` (300), `AUTO_OPTIONS_LIMIT` (50),
+`FILTER_AI_OPTIONS_LIMIT` (same 50, the assistant option cutoff),
 `ACTIONS_COLUMN_KEY` (`"actions"`).
 
 ## Feature composition types
@@ -12042,7 +12102,7 @@ the source's shape. See [data tiers](./data-tiers.md#what-a-source-can-do--capab
 | `ActiveFilterChip` / `ChipLabelResolver`                                                                                                                                                                                                                                                                                 | One removable chip (`key`, `label`, `onRemove`) / value → chip-label function.                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `UrlStateAdapter`                                                                                                                                                                                                                                                                                                        | The router seam: `getSearch()`, `setSearch(search, { push? })`, `subscribe(onChange)`.                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `SavedView`                                                                                                                                                                                                                                                                                                              | `{ name, search }` — one captured view.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `FilterDef` / `FilterType` / `FilterOption` / `FilterOptionsSource`                                                                                                                                                                                                                                                      | The declarative filter surface (see [FilterDef](#filterdef)).                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `FilterDef` / `FilterType` / `FilterOption` / `FilterOptionsSource` / `FilterAiOptions`                                                                                                                                                                                                                                  | The declarative filter surface (see [FilterDef](#filterdef)), including what the assistant may see.                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `FilterTypeSpec` / `FilterTypeRegistry` / `FilterWidgetKind`                                                                                                                                                                                                                                                             | One registered type / the immutable registry / which built-in widget to draw. `register` / `extend` are deprecated — use `TableFeatureHost.registerFilterType` / `extendFilterType`.                                                                                                                                                                                                                                                                                                                 |
 | `FilterWidgetRenderProps`                                                                                                                                                                                                                                                                                                | Props a custom `FilterTypeSpec.render` receives.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `CellProps<TRow>`                                                                                                                                                                                                                                                                                                        | `{ row, rowIndex }` — what a `Cell` component receives.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -12465,14 +12525,14 @@ Every package sets `sideEffects: false` and ships ESM, so unused code is
 tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-09-02 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-09-10 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
-| `useFrontendData` + `useDataTable` (react) | ~22 kB    |
-| every core export                          | ~51 kB    |
-| `DataTable` from an adapter                | ~65–75 kB |
+| `useFrontendData` + `useDataTable` (react) | ~23 kB    |
+| every core export                          | ~55 kB    |
+| `DataTable` from an adapter                | ~68–78 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
@@ -12733,8 +12793,8 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation`, and anything that writes — paste, cut, fill — goes through editable columns and `onCellEdit`, the channel inline editing already uses. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 65–75 kB min+gzip (measured
-2026-09-07 from packed fixtures; React and the kit stay external). Competitor
+A plain AdaptTable adapter `DataTable` is 68–78 kB min+gzip (measured
+2026-09-10 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of
 the grid: [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
@@ -14521,7 +14581,7 @@ column / AI contracts.
 | `@adapttable/core/pivot` → `usePivotUrlState`      | `@adapttable/react/pivot`                         | React hook                                          |
 | `@adapttable/mui` → `DataTable`                    | `@adapttable/mui`                                 | Unchanged                                           |
 | `@adapttable/ai` → `createAgentSession`            | `@adapttable/ai`                                  | Unchanged                                           |
-| `@adapttable/ai/react` → `tableAgent`              | `@adapttable/ai/react`                            | Stays; depends on `@adapttable/react`               |
+| `@adapttable/ai/react` → `tableAgent`              | `@adapttable/ai-react`                            | React binding moved off `@adapttable/ai`            |
 | `@adapttable/ai/http` → `createAgentHttpClient`    | `@adapttable/ai/http`                             | Unchanged                                           |
 
 No public symbol is retired by this split. A row in the map whose
@@ -14573,7 +14633,7 @@ AI — root stays React-free; the React feature binds to the live engine:
 
 ```ts
 import { createAgentSession } from "@adapttable/ai";
-import { tableAgent } from "@adapttable/ai/react";
+import { tableAgent } from "@adapttable/ai-react";
 
 const session = createAgentSession({ observe, apply });
 const feature = tableAgent({ tableId: "orders" });
@@ -14736,7 +14796,7 @@ Given `MAJOR.MINOR.PATCH`:
   unavoidable, it ships in a major with a migration note in the CHANGELOG.
 
 The published packages (`@adapttable/core`, the adapters, `@adapttable/i18n`,
-`@adapttable/server`, `@adapttable/ai`, and `@adapttable/cli`) each follow
+`@adapttable/server`, `@adapttable/ai`, `@adapttable/ai-react`, and `@adapttable/cli`) each follow
 [changesets](https://github.com/changesets/changesets) **independently**: a
 package only bumps when a changeset names it. Adapters, `@adapttable/i18n`
 and `@adapttable/server` depend on a concrete `@adapttable/core` version at
@@ -14852,9 +14912,14 @@ Locale presets (`en`, `ar`, …, `zhTW`), `getLabels` / `hasLocale` /
 
 ### `@adapttable/ai`
 
-`createAgentSession`, `tableAgent` (`@adapttable/ai/react`), the
-`adapttable.agent.v1` manifest and the `CAPABILITY_KEYS` catalog. Optional —
-core and adapter roots do not re-export it.
+`createAgentSession`, the `adapttable.agent.v1` manifest and the
+`CAPABILITY_KEYS` catalog. Optional — core and adapter roots do not
+re-export it.
+
+### `@adapttable/ai-react`
+
+`tableAgent` and `useTableAssistant`. Depends on `@adapttable/ai` and
+`@adapttable/react`. The AI root stays React-free.
 
 ### `@adapttable/server`
 

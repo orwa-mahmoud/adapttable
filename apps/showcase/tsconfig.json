@@ -17,11 +17,10 @@
     "allowJs": true,
     "checkJs": true,
     "resolveJsonModule": true,
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "paths": {
       "@adapttable/core/pdf": ["../../packages/core/src/pdf.ts"]
     }
   },
-  "include": ["src", "vite.config.ts", "matrix.mjs", "pages.mjs"],
-  "exclude": ["src/**/*.test.ts"]
+  "include": ["src", "vite.config.ts", "matrix.mjs", "pages.mjs"]
 }

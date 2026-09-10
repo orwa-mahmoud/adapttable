@@ -39,6 +39,9 @@ describe("agentSystemPrompt", () => {
       "Do not ask them to confirm, pick a sort direction"
     );
     expect(prompt).toContain("highest/huge/biggest first is desc");
+    expect(prompt).toContain("never invent a count");
+    expect(prompt).toContain("the field is key, never column");
+    expect(prompt).toContain('"filters":{"status":["Active"]}');
     expect(prompt).toContain(
       "needs.describe and needs.read are silent machine requests"
     );

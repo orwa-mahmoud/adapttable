@@ -690,6 +690,7 @@
     "ai-react": [
       "AssistantMessage",
       "AssistantStatus",
+      "AssistantSuggestion",
       "SharedApproval",
       "TABLE_AGENT_STATE",
       "tableAgent",

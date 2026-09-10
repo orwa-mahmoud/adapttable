@@ -244,6 +244,14 @@ describe("createAgentSession", () => {
     );
     expect(apply.setSort).toHaveBeenCalledWith("name", "desc");
     expect(sort.ok).toBe(true);
+    const aliased = await session.execute(
+      "view.setSort",
+      { column: "salary", dir: "desc" },
+      2,
+      "o-column"
+    );
+    expect(aliased.ok).toBe(true);
+    expect(apply.setSort).toHaveBeenCalledWith("salary", "desc");
     const columns = await session.execute("columns.describe", {}, 2, "c1");
     expect(columns.result).toEqual({
       columns: observation().columns,

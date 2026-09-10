@@ -167,16 +167,21 @@ for (const kit of KITS) {
       .getByRole("combobox", { name: "Group aggregation" })
       .last();
     await expect(menuAggregation).toBeVisible();
+    // Budget already opens as sum. Choosing the current value does not
+    // fire onChange in every kit, so the URL would stay empty. Average
+    // is a real override — the same write the strip and a shared link use.
+    // antd's Select keeps options outside the combobox tree; arrowing
+    // from Sum lands on Average, which is the next built-in.
     if (kit === "antd") {
       await menuAggregation.click();
       await menuAggregation.press("ArrowDown");
       await menuAggregation.press("Enter");
     } else {
-      await choose(page, menuAggregation, "Sum");
+      await choose(page, menuAggregation, "Average");
     }
     await expect
       .poll(() => new URL(page.url()).searchParams.get("grp.groupAgg"))
-      .toContain("budget:sum");
+      .toContain("budget:avg");
     await page.keyboard.press("Escape");
     await page.keyboard.press("Escape");
     await page.keyboard.press("Escape");
