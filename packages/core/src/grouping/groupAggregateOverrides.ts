@@ -3,10 +3,6 @@ import {
   resolveAggregatable,
 } from "../aggregate/aggregatable";
 import {
-  AGGREGATE_SUPPRESSED,
-  resolveEffectiveAggregation,
-} from "../aggregate/aggregationModel";
-import {
   aggregate,
   AGGREGATE_NAMES,
   type AggregateName,
@@ -16,6 +12,10 @@ import {
   declaredAggregates,
   withDeclaredAggregates,
 } from "../aggregate/aggregate";
+import {
+  AGGREGATE_SUPPRESSED,
+  resolveEffectiveAggregation,
+} from "../aggregate/aggregationModel";
 import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
 import type { QueryAggregate } from "../source/queryContract";
@@ -122,9 +122,48 @@ export function parseGroupAggregateOverrides(
     const key = decodePart(entry.slice(0, separator));
     const fn = decodePart(entry.slice(separator + 1));
     if (!isOverride(fn) || key === "") continue;
-    if (overrides[key] === undefined) overrides[key] = fn;
+    overrides[key] ??= fn;
   }
   return overrides;
+}
+
+/** Overlay one column's effective choice onto the local mapper spec. */
+function applyColumnAggregate<TRow>(
+  column: ColumnMetadata<TRow>,
+  overrides: GroupAggregateOverrides,
+  declared: ReturnType<typeof declaredAggregates>,
+  source: AggregationSourceSupport | undefined,
+  spec: AggregateSpec,
+  applied: Set<string>,
+  suppressed: Set<string>
+): void {
+  const effective = resolveEffectiveAggregation({
+    column,
+    override: overrides[column.key],
+    declared,
+    source,
+  });
+  if (effective.kind === "suppressed") {
+    suppressed.add(column.key);
+    return;
+  }
+  if (effective.kind !== "override" && effective.kind !== "default") {
+    return;
+  }
+  const operationId = effective.operationId;
+  if (!operationId) return;
+  const operation = resolveAggregatable(column)?.operations.find(
+    (candidate) => candidate.id === operationId
+  );
+  if (!operation) return;
+  if (!operation.builtIn) {
+    if (!operation.calculate) return;
+    spec[column.key] = operation.calculate;
+    applied.add(column.key);
+    return;
+  }
+  spec[column.key] = operationId as AggregateName;
+  applied.add(column.key);
 }
 
 /**
@@ -150,40 +189,21 @@ export function withGroupAggregateOverrides<TRow>(
   const suppressed = new Set<string>();
 
   for (const column of columns) {
-    const effective = resolveEffectiveAggregation({
+    applyColumnAggregate(
       column,
-      override: overrides[column.key],
+      overrides,
       declared,
       source,
-    });
-    if (effective.kind === "suppressed") {
-      suppressed.add(column.key);
-      continue;
-    }
-    if (effective.kind !== "override" && effective.kind !== "default") {
-      continue;
-    }
-    const resolved = resolveAggregatable(column);
-    const operation = resolved?.operations.find(
-      (candidate) => candidate.id === effective.operationId
+      spec,
+      applied,
+      suppressed
     );
-    if (!operation || !effective.operationId) continue;
-    if (!operation.builtIn) {
-      if (!operation.calculate) continue;
-      spec[column.key] = operation.calculate;
-      applied.add(column.key);
-      continue;
-    }
-    spec[column.key] = effective.operationId as AggregateName;
-    applied.add(column.key);
   }
 
   if (applied.size === 0 && suppressed.size === 0) return base;
 
   const calculate = aggregate<TRow>(spec, { columns });
-  const nextDeclared: Record<string, string> = {
-    ...(declared ?? {}),
-  };
+  const nextDeclared: Record<string, string> = { ...declared };
   for (const key of suppressed) delete nextDeclared[key];
   for (const [key, fn] of Object.entries(spec)) {
     if (!fn) continue;
@@ -224,6 +244,54 @@ export function queryAggregateOps(
   return Object.keys(ops).length > 0 ? ops : undefined;
 }
 
+/** Apply column defaults and reader choices when the columns are known. */
+function applyQueryColumnAggregates<TRow>(
+  byKey: Map<string, QueryAggregate>,
+  columns: readonly ColumnMetadata<TRow>[],
+  overrides: GroupAggregateOverrides,
+  base: readonly QueryAggregate[] | undefined,
+  source?: AggregationSourceSupport
+): void {
+  for (const column of columns) {
+    const effective = resolveEffectiveAggregation({
+      column,
+      override: overrides[column.key],
+      queryAggregates: base,
+      source,
+    });
+    if (effective.kind === "suppressed") {
+      byKey.delete(column.key);
+      continue;
+    }
+    if (
+      (effective.kind === "override" || effective.kind === "default") &&
+      effective.operationId
+    ) {
+      byKey.set(column.key, {
+        key: column.key,
+        fn: effective.operationId,
+      });
+    }
+  }
+}
+
+/** Apply only reader overrides when the columns have not arrived yet. */
+function applyStandaloneQueryOverrides(
+  byKey: Map<string, QueryAggregate>,
+  overrides: GroupAggregateOverrides,
+  source?: AggregationSourceSupport
+): void {
+  for (const [key, fn] of Object.entries(overrides)) {
+    if (fn === undefined) continue;
+    if (fn === AGGREGATE_SUPPRESSED) {
+      byKey.delete(key);
+      continue;
+    }
+    if (!querySourceAllows(fn, source)) continue;
+    byKey.set(key, { key, fn });
+  }
+}
+
 /**
  * Overlay column defaults and URL choices on the aggregate requests sent
  * to a server source.
@@ -248,37 +316,9 @@ export function withQueryAggregateOverrides<TRow = unknown>(
 ): readonly QueryAggregate[] | undefined {
   const byKey = new Map(base?.map((aggregate) => [aggregate.key, aggregate]));
   if (columns) {
-    for (const column of columns) {
-      const effective = resolveEffectiveAggregation({
-        column,
-        override: overrides[column.key],
-        queryAggregates: base,
-        source,
-      });
-      if (effective.kind === "suppressed") {
-        byKey.delete(column.key);
-        continue;
-      }
-      if (
-        (effective.kind === "override" || effective.kind === "default") &&
-        effective.operationId
-      ) {
-        byKey.set(column.key, {
-          key: column.key,
-          fn: effective.operationId,
-        });
-      }
-    }
-    return byKey.size > 0 ? [...byKey.values()] : undefined;
-  }
-  for (const [key, fn] of Object.entries(overrides)) {
-    if (fn === undefined) continue;
-    if (fn === AGGREGATE_SUPPRESSED) {
-      byKey.delete(key);
-      continue;
-    }
-    if (!querySourceAllows(fn, source)) continue;
-    byKey.set(key, { key, fn });
+    applyQueryColumnAggregates(byKey, columns, overrides, base, source);
+  } else {
+    applyStandaloneQueryOverrides(byKey, overrides, source);
   }
   return byKey.size > 0 ? [...byKey.values()] : undefined;
 }

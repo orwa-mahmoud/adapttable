@@ -77,9 +77,11 @@ describe("unstyled GroupingPanel", () => {
     expect(panel.compareDocumentPosition(table)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );
-    expect(
-      document.querySelector('[data-adapttable-part="grouping-drop-zone"]')
-    ).not.toBeNull();
+    const drop = document.querySelector(
+      '[data-adapttable-part="grouping-drop-zone"]'
+    );
+    expect(drop).not.toBeNull();
+    expect(drop?.getAttribute("style") ?? "").not.toMatch(/border:\s*0/);
     expect(
       screen.getByRole("combobox", { name: "Add grouping column" }).tagName
     ).toBe("SELECT");

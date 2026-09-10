@@ -301,7 +301,7 @@ export const it: Required<TableLabels> = {
   groupingAggregationDefault: "Predefinita",
   groupingAggregationNone: "Nessuna",
   groupingAggregations: "Aggregazioni",
-  groupingAddAggregation: "Aggiungi colonne",
+  groupingAddAggregation: "Aggiungi colonna di aggregazione",
   groupingRestoreAggregations: "Ripristina valori predefiniti",
   groupingRemoveAggregation: (column) => `Rimuovi aggregazione di ${column}`,
   groupingAggregationFor: (column) => `Aggregazione di ${column}`,

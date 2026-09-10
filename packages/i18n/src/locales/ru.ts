@@ -305,7 +305,7 @@ export const ru: Required<TableLabels> = {
   groupingAggregationDefault: "По умолчанию",
   groupingAggregationNone: "Нет",
   groupingAggregations: "Агрегации",
-  groupingAddAggregation: "Добавить столбцы",
+  groupingAddAggregation: "Добавить столбец агрегации",
   groupingRestoreAggregations: "Восстановить значения по умолчанию",
   groupingRemoveAggregation: (column) => `Удалить агрегацию ${column}`,
   groupingAggregationFor: (column) => `Агрегация ${column}`,

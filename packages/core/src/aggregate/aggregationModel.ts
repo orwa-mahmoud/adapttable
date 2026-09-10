@@ -167,6 +167,12 @@ export interface AggregationModel {
   readonly candidates: readonly AggregationCandidate[];
   /** Whether the reader has changed anything away from the declared setup. */
   readonly atDefaults: boolean;
+  /**
+   * Whether restore would put back a developer default or host baseline.
+   *
+   * Restore is only meaningful when the developer actually sent one.
+   */
+  readonly hasDefaults: boolean;
 }
 
 /**
@@ -366,7 +372,19 @@ export function aggregationModel<TRow>(
     });
   }
 
-  return { items, candidates, atDefaults: isAtDefaults(input.overrides) };
+  return {
+    items,
+    candidates,
+    atDefaults: isAtDefaults(input.overrides),
+    hasDefaults: hasDeveloperDefaults(input),
+  };
+}
+
+/** Whether any column would restore to a developer default or host baseline. */
+function hasDeveloperDefaults<TRow>(
+  input: AggregationModelInput<TRow>
+): boolean {
+  return input.columns.some((column) => declaredByDeveloper(column, input));
 }
 
 /** What one column contributes: an active item, an offer, or neither. */

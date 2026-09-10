@@ -15,9 +15,14 @@ import {
   Text,
 } from "@chakra-ui/react";
 
-import { Checkbox, NativeSelect } from "./primitives";
+import { NativeSelect } from "./primitives";
 
 const TOUCH_SIZE = "44px";
+
+/** Closed add control: the shown placeholder plus the kit chevron. */
+function addControlWidth(label: string): string {
+  return `calc(${Math.max(label.length, 1)}ch + 2.75rem)`;
+}
 /** A caret between chips, grown into something aimable mid-drag. */
 // One width, dragging or not: a caret that grows on dragstart moves the chips
 // after it out from under the reader's cursor.
@@ -46,7 +51,7 @@ const slots: GroupingPanelSlots = {
     >
       <Flex
         gap={2}
-        align="flex-end"
+        align="center"
         wrap="wrap"
         data-mobile={mobile || undefined}
       >
@@ -132,19 +137,29 @@ const slots: GroupingPanelSlots = {
     disabled,
     "data-adapttable-part": part,
   }) => (
-    <Field.Root minW="160px" w="auto" disabled={disabled}>
-      <Field.Label fontSize="xs">{label}</Field.Label>
+    <Field.Root
+      w="auto"
+      maxW="100%"
+      disabled={disabled}
+      style={
+        part === "grouping-add"
+          ? { width: addControlWidth(label), flex: "0 0 auto" }
+          : undefined
+      }
+    >
       <NativeSelect
         size="sm"
-        minW="160px"
-        minH={TOUCH_SIZE}
+        w={part === "grouping-add" ? addControlWidth(label) : "auto"}
+        maxW="100%"
+        minW={part === "grouping-add" ? undefined : "4.75rem"}
+        minH={part === "grouping-add" ? TOUCH_SIZE : "32px"}
         aria-label={label}
         data-adapttable-part={part}
         value={value}
+        placeholder={part === "grouping-add" ? label : undefined}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
       >
-        {part === "grouping-add" ? <option value="">{label}</option> : null}
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -180,14 +195,16 @@ const slots: GroupingPanelSlots = {
   AggregationItem: ({ label, readOnly, readOnlyLabel, children, ...rest }) => (
     <HStack
       gap={1}
-      px={2}
-      py={1}
-      borderWidth="1px"
-      borderRadius="md"
+      pl={3}
+      pr={1}
+      minH="36px"
+      borderRadius="full"
+      bg="bg.muted"
+      maxW="100%"
       data-read-only={readOnly || undefined}
       {...rest}
     >
-      <Text fontSize="sm" fontWeight="medium">
+      <Text fontSize="sm" fontWeight="semibold" whiteSpace="nowrap">
         {label}
       </Text>
       {readOnly ? (
@@ -212,41 +229,40 @@ const slots: GroupingPanelSlots = {
       {"\u00d7"}
     </IconButton>
   ),
-  AggregationPicker: ({ label, options, onToggle, disabled, ...rest }) => (
-    <Flex
-      as="fieldset"
-      wrap="wrap"
-      align="center"
-      gap={2}
-      aria-label={label}
-      {...rest}
-    >
-      <Text fontSize="xs" color="fg.muted">
-        {label}
-      </Text>
-      {options.map((option) => (
-        <Text as="label" key={option.value} fontSize="sm">
-          <HStack gap={1}>
-            <Checkbox
-              size="sm"
-              aria-label={option.label}
-              checked={option.checked}
-              onToggle={
-                disabled
-                  ? undefined
-                  : () => onToggle(option.value, !option.checked)
-              }
-              data-adapttable-part="grouping-aggregation-option"
-            />
+  AggregationPicker: ({ label, options, onToggle, disabled, ...rest }) => {
+    const available = options.filter((option) => !option.checked);
+    return (
+      <NativeSelect
+        size="sm"
+        minH={TOUCH_SIZE}
+        w={addControlWidth(label)}
+        maxW="100%"
+        flex="0 0 auto"
+        aria-label={label}
+        placeholder={label}
+        disabled={disabled === true || available.length === 0}
+        value=""
+        onChange={(event) => {
+          const value = event.currentTarget.value;
+          if (value) onToggle(value, true);
+        }}
+        {...rest}
+      >
+        {available.map((option) => (
+          <option
+            key={option.value}
+            value={option.value}
+            data-adapttable-part="grouping-aggregation-option"
+          >
             {option.label}
-          </HStack>
-        </Text>
-      ))}
-    </Flex>
-  ),
+          </option>
+        ))}
+      </NativeSelect>
+    );
+  },
   AggregationRestore: ({ label, disabled, onRestore, ...rest }) => (
     <Button
-      variant="ghost"
+      variant="outline"
       size="xs"
       minH={TOUCH_SIZE}
       disabled={disabled}

@@ -298,7 +298,7 @@ export const ja: Required<TableLabels> = {
   groupingAggregationDefault: "既定",
   groupingAggregationNone: "なし",
   groupingAggregations: "集計",
-  groupingAddAggregation: "列を追加",
+  groupingAddAggregation: "集計する列を追加",
   groupingRestoreAggregations: "既定に戻す",
   groupingRemoveAggregation: (column) => `${column} の集計を削除`,
   groupingAggregationFor: (column) => `${column} の集計`,

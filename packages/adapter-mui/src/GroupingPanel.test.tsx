@@ -106,6 +106,7 @@ function Harness({
         },
       ],
       atDefaults: aggregateOverrides.amount === undefined,
+      hasDefaults: true,
     },
     setAggregateOperation: (key, value) =>
       setAggregateOverrides((current) => ({ ...current, [key]: value })),
@@ -153,6 +154,9 @@ describe("GroupingPanel", () => {
     fireEvent.mouseDown(
       document.querySelector('[aria-label="Add grouping column"]')!
     );
+    expect(
+      screen.queryByRole("option", { name: "Add grouping column" })
+    ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("option", { name: "Team" }));
 
     expect(chips()).toHaveLength(1);
@@ -180,6 +184,17 @@ describe("GroupingPanel", () => {
 
     expect(chips()).toHaveLength(1);
     expect(chips()[0]).toContain("Team");
+  });
+
+  it("shows the add aggregation label as a placeholder, not a menu item", () => {
+    render(<Harness initial={["team"]} />);
+
+    fireEvent.mouseDown(
+      document.querySelector('[aria-label="Add aggregation column"]')!
+    );
+    expect(
+      screen.queryByRole("option", { name: "Add aggregation column" })
+    ).not.toBeInTheDocument();
   });
 
   it("sets an aggregate override with labelled selects", () => {

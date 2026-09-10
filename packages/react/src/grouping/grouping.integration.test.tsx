@@ -221,9 +221,19 @@ describe("useTableChrome grouping bundle", () => {
         }),
       ],
       () => {
+        const columns = [
+          {
+            key: "team",
+            aggregatable: { operations: ["count"] as const },
+          },
+          {
+            key: "name",
+            aggregatable: { operations: ["count"] as const },
+          },
+        ];
         const source = useFrontendData<Row>({
           data: ROWS,
-          columns: [{ key: "team" }, { key: "name" }],
+          columns,
           urlAdapter: createMemoryAdapter(
             "groupAgg=name%3Acount%2Cteam%3Anone"
           ),
@@ -231,7 +241,7 @@ describe("useTableChrome grouping bundle", () => {
         });
         return {
           source,
-          columns: [{ key: "team" }, { key: "name" }],
+          columns,
           rowKey: (row) => row.id,
           groupBy: "team",
           groupAggregates: () => ({ name: "developer", team: "kept" }),

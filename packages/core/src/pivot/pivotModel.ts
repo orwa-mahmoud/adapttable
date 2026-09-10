@@ -40,15 +40,15 @@ import {
 import type { ColumnMetadata, ColumnModel } from "../columnModel";
 import type { DisplayValue } from "../display";
 import { compareValues } from "../sort/compare";
-import type { SortableValue } from "../types";
-
-export type { AggregateName, Aggregator, SortableValue };
 import {
   PIVOT_GRAND_TOTAL_KEY,
   pivotLeafKey,
   pivotPathKey,
   pivotTotalLeafKey,
 } from "./pivotKeys";
+
+export type { AggregateName, Aggregator } from "../aggregate/aggregate";
+export type { SortableValue } from "../types";
 
 // Keys are built in `./pivotKeys`, which the server translator and the URL
 // codec share, so the three agree by construction rather than by copying. The

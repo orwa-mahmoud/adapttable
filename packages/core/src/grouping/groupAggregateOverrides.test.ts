@@ -61,6 +61,32 @@ describe("group aggregate overrides", () => {
     expect(mapper?.(rows)).toEqual({ budget: 20, person: 2 });
   });
 
+  it("drops a reader-offered default when the reader writes none", () => {
+    const mapper = withGroupAggregateOverrides<Row>(
+      aggregate<Row>({ budget: "sum" }),
+      { budget: "none" },
+      [
+        {
+          key: "budget",
+          aggregatable: { default: "sum", operations: ["sum", "avg"] },
+        },
+      ]
+    );
+    expect(mapper?.(rows)).toEqual({});
+    expect(
+      withQueryAggregateOverrides(
+        [{ key: "budget", fn: "sum" }],
+        { budget: "none" },
+        [
+          {
+            key: "budget",
+            aggregatable: { operations: ["sum", "avg"] },
+          },
+        ]
+      )
+    ).toBeUndefined();
+  });
+
   it("refuses a disallowed override at execution, and leaves the host cell", () => {
     const mapper = withGroupAggregateOverrides<Row>(
       () => ({ budget: "developer", person: 2 }),

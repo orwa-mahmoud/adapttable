@@ -466,7 +466,16 @@ describe("the server props a `<DataTable>` host writes", () => {
           mode: "server",
           data: ROWS,
           total: ROWS.length,
-          columns: [{ key: "budget", header: "Budget" }],
+          columns: [
+            {
+              key: "budget",
+              header: "Budget",
+              aggregatable: {
+                default: "sum",
+                operations: ["sum", "count"],
+              },
+            },
+          ],
           urlAdapter: adapter,
           supports: { grouping: true, aggregates: true },
           aggregates: [{ key: "budget", fn: "sum" }],

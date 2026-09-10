@@ -5,11 +5,11 @@
  * transitions, part names, and the invisible live region only.
  */
 import {
+  type AggregationItem,
   type Direction,
   type GroupingChipKeyboardProps as CoreGroupingChipKeyboardProps,
   type GroupingDragProps as CoreGroupingDragProps,
   type GroupingDropProps as CoreGroupingDropProps,
-  type AggregationItem,
   type GroupingPanelState,
   type ResolvedAggregateOperation,
   type TableLabels,
@@ -255,7 +255,7 @@ export interface GroupingPanelChecklistProps {
 export interface GroupingPanelRestoreProps {
   /** Localized visible and accessible label. */
   label: string;
-  /** Whether the declared setup is already in place. */
+  /** Whether the reader cannot put the declared setup back. */
   disabled: boolean;
   /** Put the declared setup back. */
   onRestore: () => void;
@@ -368,7 +368,7 @@ function focusAfterAggregationRemoval(
   }
   firstFocusable(
     root,
-    `[data-adapttable-part="grouping-aggregations-restore"]`
+    `[data-adapttable-part="grouping-aggregation-add"], [data-adapttable-part="grouping-aggregations-restore"]`
   )?.focus();
 }
 
@@ -453,7 +453,7 @@ export function GroupingPanelChrome<TRow>({
     return column ? columnName(column) : key;
   };
   const items = state.aggregations.items;
-  const aggregationsRef = useRef<HTMLSpanElement>(null);
+  const aggregationsRef = useRef<HTMLFieldSetElement>(null);
   const pendingRemovalIndex = useRef<number | null>(null);
   const itemKeys = items.map((item) => item.columnKey).join("\0");
   useEffect(() => {
@@ -582,12 +582,12 @@ export function GroupingPanelChrome<TRow>({
         disabled={available.length === 0}
         data-adapttable-part="grouping-add"
       />
-      {/* Every active aggregation, on a row of its own: what is aggregated,
-          with which operation, and how to take it away. A reader never has to
-          point a picker at a column to discover what it is doing. */}
+      {/* Aggregations own the line under the grouping chips — never mixed
+          onto the chip row, even when the strip still has room. */}
       {state.groupBy.length > 0 && (items.length > 0 || offered.length > 0) ? (
-        <span
+        <fieldset
           ref={aggregationsRef}
+          aria-label={labels.groupingAggregations}
           data-adapttable-part="grouping-aggregations"
           style={{
             display: "flex",
@@ -596,11 +596,13 @@ export function GroupingPanelChrome<TRow>({
             flexWrap: "wrap",
             alignItems: "center",
             gap: "0.5rem",
+            minWidth: 0,
+            minInlineSize: 0,
+            margin: 0,
+            padding: 0,
+            border: "none",
           }}
         >
-          <span data-adapttable-part="grouping-aggregations-label">
-            {labels.groupingAggregations}
-          </span>
           {items.map((item) => {
             const name = nameOf(item.columnKey);
             return (
@@ -663,13 +665,15 @@ export function GroupingPanelChrome<TRow>({
             disabled={!state.canSetAggregates || offered.length === 0}
             data-adapttable-part="grouping-aggregation-add"
           />
-          <AggregationRestore
-            label={labels.groupingRestoreAggregations}
-            disabled={!state.canSetAggregates || state.aggregations.atDefaults}
-            onRestore={state.restoreAggregateDefaults}
-            data-adapttable-part="grouping-aggregations-restore"
-          />
-        </span>
+          {state.aggregations.hasDefaults && !state.aggregations.atDefaults ? (
+            <AggregationRestore
+              label={labels.groupingRestoreAggregations}
+              disabled={!state.canSetAggregates}
+              onRestore={state.restoreAggregateDefaults}
+              data-adapttable-part="grouping-aggregations-restore"
+            />
+          ) : null}
+        </fieldset>
       ) : null}
       <LiveRegion part="grouping-announcer" statusRole={false}>
         {state.announcement}

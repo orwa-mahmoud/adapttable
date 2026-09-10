@@ -15,6 +15,7 @@ import {
 } from "./keys";
 import { buildManifest } from "./manifest";
 import type {
+  AgentAggregationColumn,
   AgentAggregationsPatch,
   AgentApply,
   AgentCapabilityContext,
@@ -762,6 +763,69 @@ function describeAggregations(
   return { ...guide, guide: guide.guide + listed };
 }
 
+function eligibleAggregationColumns(
+  observation: AgentObservation
+): Map<string, AgentAggregationColumn> {
+  return new Map(
+    (observation.aggregations?.columns ?? []).map((column) => [
+      column.id,
+      column,
+    ])
+  );
+}
+
+function aggregationSetEntries(
+  set: unknown,
+  eligible: ReturnType<typeof eligibleAggregationColumns>
+): Record<string, string> {
+  if (set === null || typeof set !== "object" || Array.isArray(set)) {
+    throw new ApplyError("apply-failed", "set must be an object of column ids");
+  }
+  const nextSet: Record<string, string> = {};
+  for (const [key, operationId] of Object.entries(
+    set as Record<string, unknown>
+  )) {
+    if (typeof operationId !== "string" || operationId === "") {
+      throw new ApplyError(
+        "apply-failed",
+        `aggregation for "${key}" is not a named operation`
+      );
+    }
+    const column = eligible.get(key);
+    if (!column?.operations.some((operation) => operation.id === operationId)) {
+      throw new ApplyError(
+        "apply-failed",
+        `"${key}" cannot use operation "${operationId}"`
+      );
+    }
+    nextSet[key] = operationId;
+  }
+  return nextSet;
+}
+
+function aggregationRemoveKeys(
+  remove: unknown,
+  eligible: ReturnType<typeof eligibleAggregationColumns>
+): string[] {
+  if (!Array.isArray(remove)) {
+    throw new ApplyError(
+      "apply-failed",
+      "remove must be an array of column ids"
+    );
+  }
+  const nextRemove: string[] = [];
+  for (const key of remove) {
+    if (typeof key !== "string" || key === "") {
+      throw new ApplyError("apply-failed", "remove entries must be column ids");
+    }
+    if (!eligible.has(key)) {
+      throw new ApplyError("apply-failed", `"${key}" cannot be removed`);
+    }
+    nextRemove.push(key);
+  }
+  return nextRemove;
+}
+
 function validatedAggregationsPatch(
   body: Record<string, unknown>,
   observation: AgentObservation
@@ -776,63 +840,10 @@ function validatedAggregationsPatch(
     );
   }
   if (restoreDefaults) return { restoreDefaults: true };
-  const eligible = new Map(
-    (observation.aggregations?.columns ?? []).map((column) => [
-      column.id,
-      column,
-    ])
-  );
-  const nextSet: Record<string, string> = {};
-  if (set !== undefined) {
-    if (set === null || typeof set !== "object" || Array.isArray(set)) {
-      throw new ApplyError(
-        "apply-failed",
-        "set must be an object of column ids"
-      );
-    }
-    for (const [key, operationId] of Object.entries(
-      set as Record<string, unknown>
-    )) {
-      if (typeof operationId !== "string" || operationId === "") {
-        throw new ApplyError(
-          "apply-failed",
-          `aggregation for "${key}" is not a named operation`
-        );
-      }
-      const column = eligible.get(key);
-      if (
-        !column ||
-        !column.operations.some((operation) => operation.id === operationId)
-      ) {
-        throw new ApplyError(
-          "apply-failed",
-          `"${key}" cannot use operation "${operationId}"`
-        );
-      }
-      nextSet[key] = operationId;
-    }
-  }
-  const nextRemove: string[] = [];
-  if (remove !== undefined) {
-    if (!Array.isArray(remove)) {
-      throw new ApplyError(
-        "apply-failed",
-        "remove must be an array of column ids"
-      );
-    }
-    for (const key of remove) {
-      if (typeof key !== "string" || key === "") {
-        throw new ApplyError(
-          "apply-failed",
-          "remove entries must be column ids"
-        );
-      }
-      if (!eligible.has(key)) {
-        throw new ApplyError("apply-failed", `"${key}" cannot be removed`);
-      }
-      nextRemove.push(key);
-    }
-  }
+  const eligible = eligibleAggregationColumns(observation);
+  const nextSet = set === undefined ? {} : aggregationSetEntries(set, eligible);
+  const nextRemove =
+    remove === undefined ? [] : aggregationRemoveKeys(remove, eligible);
   if (Object.keys(nextSet).length === 0 && nextRemove.length === 0) {
     throw new ApplyError(
       "apply-failed",
@@ -842,6 +853,36 @@ function validatedAggregationsPatch(
   return {
     ...(Object.keys(nextSet).length > 0 ? { set: nextSet } : {}),
     ...(nextRemove.length > 0 ? { remove: nextRemove } : {}),
+  };
+}
+
+function applySetAggregations(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation,
+  guard: SessionGuard
+): Record<string, unknown> {
+  assertApply(apply, "setAggregations");
+  const latest = guard.observe();
+  if (latest.viewRevision !== observation.viewRevision) {
+    throw new ApplyError(
+      "revision-mismatch",
+      `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+    );
+  }
+  if (!guard.isEnabled("view.setAggregations", latest)) {
+    throw new ApplyError(
+      "not-wired",
+      "view.setAggregations is not wired on this table"
+    );
+  }
+  apply.setAggregations(validatedAggregationsPatch(body, latest));
+  const pending = latest.source.grouping === "server";
+  return {
+    ok: true,
+    revision: latest.viewRevision + 1,
+    applied: !pending,
+    pending,
   };
 }
 
@@ -999,30 +1040,8 @@ async function dispatchBuiltIn(
       apply.setGroupBy(groupKey ?? undefined);
       return { ok: true, revision: observation.viewRevision + 1 };
     }
-    case "view.setAggregations": {
-      assertApply(apply, "setAggregations");
-      const latest = guard.observe();
-      if (latest.viewRevision !== observation.viewRevision) {
-        throw new ApplyError(
-          "revision-mismatch",
-          `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
-        );
-      }
-      if (!guard.isEnabled("view.setAggregations", latest)) {
-        throw new ApplyError(
-          "not-wired",
-          "view.setAggregations is not wired on this table"
-        );
-      }
-      apply.setAggregations(validatedAggregationsPatch(body, latest));
-      const pending = latest.source.grouping === "server";
-      return {
-        ok: true,
-        revision: latest.viewRevision + 1,
-        applied: !pending,
-        pending,
-      };
-    }
+    case "view.setAggregations":
+      return applySetAggregations(apply, body, observation, guard);
     case "view.pinColumn": {
       assertApply(apply, "pinColumn");
       apply.pinColumn(...pinColumnArgs(body, observation));

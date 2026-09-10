@@ -214,6 +214,35 @@ export const tailwindClassNames: DataTableClassNames = {
   groupLabel: "text-sm font-semibold",
   groupCount: "text-xs text-gray-500 dark:text-zinc-400",
   groupAggregate: "ms-auto text-xs text-gray-500 dark:text-zinc-400",
+  // The unstyled adapter draws native controls. Without these keys the
+  // Tailwind tab shows raw chips, pipes and browser selects above a
+  // designed table — the strip has to match the indigo/gray toolbar.
+  groupingPanel:
+    "flex flex-wrap items-center gap-2 border-b border-gray-200 bg-gray-50 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800/50",
+  groupingDropZone:
+    "m-0 inline-flex min-h-8 min-w-3 items-center justify-center rounded-md border border-dashed border-gray-300 bg-white p-0 text-transparent [&:not([data-empty])>span]:hidden data-[empty]:min-w-48 data-[empty]:rounded-lg data-[empty]:px-3 data-[empty]:text-xs data-[empty]:font-medium data-[empty]:text-gray-400 data-[dragging]:border-indigo-400 data-[dragging]:bg-indigo-50 data-[active]:border-indigo-600 data-[active]:bg-indigo-100 dark:border-zinc-600 dark:bg-zinc-900 dark:data-[empty]:text-zinc-500 dark:data-[dragging]:border-indigo-400 dark:data-[dragging]:bg-indigo-500/15 dark:data-[active]:border-indigo-300 dark:data-[active]:bg-indigo-500/25",
+  groupingItem: "inline-flex max-w-full items-center gap-1",
+  groupingChip:
+    "inline-flex max-w-full items-center gap-0.5 rounded-lg border border-gray-200 bg-white py-0.5 ps-1 pe-0.5 shadow-sm dark:border-zinc-600 dark:bg-zinc-900",
+  groupingChipHandle:
+    "inline-flex min-w-0 cursor-grab items-center gap-1.5 whitespace-nowrap rounded-md px-1.5 py-1 text-sm font-medium text-gray-800 outline-none hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-indigo-200 data-[grouping-dragging]:cursor-grabbing data-[grouping-dragging]:opacity-60 dark:text-zinc-100 dark:hover:bg-zinc-800",
+  groupingChipRemove:
+    "inline-grid size-7 shrink-0 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-200",
+  groupingAdd:
+    "h-9 w-auto max-w-full rounded-md border border-gray-300 bg-white px-2 text-sm text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:focus:ring-indigo-900/40",
+  groupingAggregations: "flex w-full min-w-0 flex-wrap items-center gap-2",
+  groupingAggregationItem:
+    "inline-flex max-w-full min-w-0 items-center gap-1 whitespace-nowrap rounded-full bg-indigo-50 px-2 py-0.5 text-sm font-medium text-indigo-950 dark:bg-indigo-500/15 dark:text-indigo-100",
+  groupingAggregationOperation:
+    "h-8 max-w-full min-w-0 border-0 bg-transparent px-1 text-sm font-medium text-indigo-950 outline-none focus:ring-2 focus:ring-indigo-200 disabled:opacity-50 dark:text-indigo-100",
+  groupingAggregationRemove:
+    "inline-grid size-7 shrink-0 place-items-center rounded-full text-indigo-400 hover:bg-indigo-100 hover:text-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-500/25 dark:hover:text-indigo-50",
+  groupingAggregationAdd:
+    "h-9 w-auto max-w-full rounded-md border border-gray-300 bg-white px-2 text-sm text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:focus:ring-indigo-900/40",
+  groupingAggregationsRestore:
+    "inline-flex h-9 shrink-0 items-center rounded-md border border-gray-300 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800",
+  groupingRemoveZone:
+    "m-0 inline-flex min-h-9 items-center rounded-lg border border-dashed border-red-300 px-3 text-xs font-medium text-red-600 data-[active]:bg-red-50 dark:border-red-500/50 dark:text-red-300 dark:data-[active]:bg-red-500/15",
   summary:
     "border-t border-gray-200 bg-gray-50 font-medium dark:border-zinc-700 dark:bg-zinc-800/50",
   summaryRow: "align-middle",

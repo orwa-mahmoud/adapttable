@@ -11,7 +11,12 @@ import { useLayoutEffect, useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TABLE_AGENT_STATE, tableAgent } from "./react";
-import type { AgentManifest, AgentSession } from "./types";
+import type {
+  AgentAggregationsPatch,
+  AgentCapabilityDefinition,
+  AgentManifest,
+  AgentSession,
+} from "./types";
 
 function Harness({
   features,
@@ -693,5 +698,260 @@ describe("tableAgent", () => {
     );
     expect(result.ok).toBe(true);
     expect(result.result).toEqual({ echo: "live" });
+  });
+
+  it("executes view.setAggregations through the live grouping state", async () => {
+    const setAggregateOverrides = vi.fn();
+    let session: AgentSession | undefined;
+    const columns = [
+      {
+        key: "salary",
+        aggregatable: { default: "sum", operations: ["sum", "avg"] as const },
+      },
+    ];
+    const groupingState = {
+      groupBy: "team",
+      aggregateOverrides: { salary: "sum" },
+      columnLabel: (key: string) => key,
+      columns,
+      queryAggregates: [{ key: "salary", fn: "sum" as const }],
+      setGroupBy: vi.fn(),
+      setAggregateOverrides,
+    };
+    render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "agg",
+            columns: { salary: { label: "Salary", type: "number" } },
+            bridge: { attach: (s) => (session = s) },
+          }),
+          { id: "grouping" },
+        ]}
+        view={{
+          rows: [{ id: "1", salary: 10 }],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+          sourceCapabilities: {
+            fullDataset: true,
+            grouping: "client",
+            selectAcrossPages: false,
+            exportScope: "page",
+            totalCount: "loaded",
+          },
+          groupingState,
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.catalog().map((entry) => entry.key)).toContain(
+      "view.setAggregations"
+    );
+    const described = session!.describe("view.setAggregations");
+    expect(described.guide).toContain("salary");
+    expect(described.guide).toContain("avg");
+
+    const set = await session!.execute(
+      "view.setAggregations",
+      { set: { salary: "avg" } },
+      session!.manifest().viewRevision,
+      "set-avg"
+    );
+    expect(set.ok).toBe(true);
+    expect(set.result).toMatchObject({ applied: true, pending: false });
+    expect(setAggregateOverrides).toHaveBeenCalledWith({ salary: "avg" });
+
+    const removed = await session!.execute(
+      "view.setAggregations",
+      { remove: ["salary"] },
+      session!.manifest().viewRevision,
+      "remove-salary"
+    );
+    expect(removed.ok).toBe(true);
+    expect(setAggregateOverrides).toHaveBeenCalledWith({ salary: "none" });
+
+    const restored = await session!.execute(
+      "view.setAggregations",
+      { restoreDefaults: true },
+      session!.manifest().viewRevision,
+      "restore"
+    );
+    expect(restored.ok).toBe(true);
+    expect(setAggregateOverrides).toHaveBeenCalledWith({});
+  });
+
+  it("does not advertise aggregations the source will not honour", async () => {
+    let session: AgentSession | undefined;
+    render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "server",
+            bridge: { attach: (s) => (session = s) },
+          }),
+          { id: "grouping" },
+        ]}
+        view={{
+          rows: [{ id: "1" }],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+          sourceCapabilities: {
+            fullDataset: false,
+            grouping: "server",
+            selectAcrossPages: false,
+            exportScope: "page",
+            totalCount: "loaded",
+          },
+          groupingState: {
+            groupBy: "team",
+            aggregateOverrides: {},
+            columnLabel: (key) => key,
+            columns: [{ key: "salary", aggregatable: { operations: ["sum"] } }],
+            honorsAggregates: false,
+            setGroupBy: vi.fn(),
+            setAggregateOverrides: vi.fn(),
+          },
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.catalog().map((entry) => entry.key)).not.toContain(
+      "view.setAggregations"
+    );
+  });
+
+  it("applies aggregations only when the live grouping state can honour them", async () => {
+    const setAggregateOverrides = vi.fn();
+    let session: AgentSession | undefined;
+    const drive: AgentCapabilityDefinition = {
+      key: "demo.aggregations",
+      summary: "Drive live aggregations.",
+      kind: "view",
+      guide: {
+        guide: "Apply a raw aggregation patch.",
+        input: { type: "object" },
+        output: { type: "object" },
+      },
+      isEnabled: () => true,
+      execute: (context, args) => {
+        context.apply.setAggregations?.(args as AgentAggregationsPatch);
+        return { ok: true };
+      },
+    };
+    const { rerender } = render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "agg",
+            capabilities: [drive],
+            bridge: { attach: (s) => (session = s) },
+          }),
+          { id: "grouping" },
+        ]}
+        view={{
+          rows: [{ id: "1", salary: 10 }],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+          sourceCapabilities: {
+            fullDataset: true,
+            grouping: "client",
+            selectAcrossPages: false,
+            exportScope: "page",
+            totalCount: "loaded",
+          },
+          groupingState: {
+            groupBy: "team",
+            aggregateOverrides: {},
+            columnLabel: (key) => key,
+            columns: [
+              {
+                key: "salary",
+                aggregatable: { operations: ["sum", "avg"] as const },
+              },
+              { key: "note" },
+            ],
+            setGroupBy: vi.fn(),
+            setAggregateOverrides,
+          },
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    const badOp = await session!.execute(
+      "demo.aggregations",
+      { set: { salary: "median" } },
+      session!.manifest().viewRevision,
+      "bad-op"
+    );
+    expect(badOp.ok).toBe(false);
+    expect(badOp.error?.message).toMatch(/cannot use operation "median"/);
+    const badRemove = await session!.execute(
+      "demo.aggregations",
+      { remove: ["note"] },
+      session!.manifest().viewRevision,
+      "bad-remove"
+    );
+    expect(badRemove.ok).toBe(false);
+    expect(badRemove.error?.message).toMatch(/cannot be removed/);
+    const added = await session!.execute(
+      "demo.aggregations",
+      { set: { salary: "avg" } },
+      session!.manifest().viewRevision,
+      "add-reader"
+    );
+    expect(added.ok).toBe(true);
+    expect(setAggregateOverrides).toHaveBeenCalledWith({ salary: "avg" });
+    const dropped = await session!.execute(
+      "demo.aggregations",
+      { remove: ["salary"] },
+      session!.manifest().viewRevision,
+      "drop-reader"
+    );
+    expect(dropped.ok).toBe(true);
+    expect(setAggregateOverrides).toHaveBeenLastCalledWith({});
+
+    session = undefined;
+    rerender(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "agg",
+            capabilities: [drive],
+            bridge: { attach: (s) => (session = s) },
+          }),
+        ]}
+        view={{
+          rows: [{ id: "1" }],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+          sourceCapabilities: {
+            fullDataset: true,
+            grouping: false,
+            selectAcrossPages: false,
+            exportScope: "page",
+            totalCount: "loaded",
+          },
+          groupingState: {
+            groupBy: undefined,
+            aggregateOverrides: {},
+            columnLabel: (key) => key,
+            columns: [{ key: "salary", aggregatable: true }],
+            setGroupBy: vi.fn(),
+          },
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.catalog().map((entry) => entry.key)).not.toContain(
+      "view.setAggregations"
+    );
+    const unwired = await session!.execute(
+      "demo.aggregations",
+      { restoreDefaults: true },
+      session!.manifest().viewRevision,
+      "unwired"
+    );
+    expect(unwired.ok).toBe(false);
+    expect(unwired.error?.message).toMatch(/setAggregations is not wired/);
   });
 });

@@ -15,7 +15,7 @@ import {
   resolveAggregatable,
   resolveAggregatableColumns,
 } from "./aggregatable";
-import { aggregate, declaredAggregates } from "./aggregate";
+import { aggregate, CUSTOM_AGGREGATE, declaredAggregates } from "./aggregate";
 import {
   addAggregation,
   aggregationModel,
@@ -268,13 +268,26 @@ describe("what is active before anyone touches it", () => {
       ["load", false],
     ]);
     expect(atDefaults).toBe(true);
+    expect(model().hasDefaults).toBe(true);
   });
 
   it("activates nothing when no column declares a default", () => {
     const columns: ColumnMetadata<Row>[] = [
       { key: "budget", aggregatable: { operations: ["sum"] } },
     ];
-    expect(aggregationModel<Row>({ columns, overrides: {} }).items).toEqual([]);
+    const empty = aggregationModel<Row>({ columns, overrides: {} });
+    expect(empty.items).toEqual([]);
+    expect(empty.hasDefaults).toBe(false);
+  });
+
+  it("treats a host query aggregate as a restore baseline", () => {
+    expect(
+      aggregationModel<Row>({
+        columns: [{ key: "load", aggregatable: { operations: ["avg"] } }],
+        overrides: {},
+        queryAggregates: [{ key: "load", fn: "avg" }],
+      }).hasDefaults
+    ).toBe(true);
   });
 
   it("takes an initial operation from an existing declared mapper", () => {
@@ -310,6 +323,21 @@ describe("what a reader changes", () => {
   it("adds a column with its default, or its first operation", () => {
     expect(initialOperation(resolveAggregatable(COLUMNS[0]!)!)).toBe("sum");
     expect(initialOperation(resolveAggregatable(COLUMNS[1]!)!)).toBe("avg");
+    const resolved = resolveAggregatable(COLUMNS[0]!)!;
+    // A server that cannot run the declared default still has to pick something
+    // it can run — never a name it would then fail to calculate.
+    expect(
+      initialOperation(resolved, {
+        grouping: "server",
+        aggregateOperations: ["avg"],
+      })
+    ).toBe("avg");
+    expect(
+      initialOperation(resolved, {
+        grouping: "server",
+        aggregateOperations: [],
+      })
+    ).toBe("");
   });
 
   it("keeps two columns apart when one of them changes", () => {
@@ -391,6 +419,7 @@ describe("what the table refuses", () => {
   it("returns the same object when nothing had to change", () => {
     const overrides = { budget: "avg" };
     expect(reconcile(overrides, COLUMNS)).toBe(overrides);
+    expect(reconcile({ budget: undefined }, COLUMNS)).toEqual({});
   });
 
   it("takes the developer's original query aggregates, not a later response", () => {
@@ -472,6 +501,12 @@ describe("what the table refuses", () => {
         { kind: "groupFooter", aggregateCells: { team: 3 } },
       ])
     ).toEqual(["team", "mystery"]);
+    expect(
+      computedAggregateKeys([
+        { kind: "group" },
+        { kind: "groupFooter", aggregateCells: { budget: 1 } },
+      ])
+    ).toEqual(["budget"]);
   });
 
   it("keeps an opaque host aggregate visible on a reader-editable column", () => {
@@ -574,6 +609,26 @@ describe("what the table refuses", () => {
         aggregatable: { operations: ["avg"] },
       })
     );
+    expect(
+      effectiveAggregateOps<Row>({
+        columns: [{ key: "budget" }],
+        overrides: {},
+        declared: { extra: "sum", ghost: CUSTOM_AGGREGATE },
+      })
+    ).toEqual({ extra: "sum" });
+    expect(
+      effectiveAggregateOps<Row>({
+        columns: [{ key: "note" }],
+        overrides: {},
+      })
+    ).toBeUndefined();
+    expect(columnAggregationSignature({ key: "note" })).toBe("note:-");
+    expect(
+      columnAggregationSignature({
+        key: "load",
+        aggregatable: { operations: ["avg"] },
+      })
+    ).toBe("load::avg");
   });
 
   it("does not keep a computed key from a different dataset", () => {

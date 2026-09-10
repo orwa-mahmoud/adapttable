@@ -301,7 +301,7 @@ export const ur: Required<TableLabels> = {
   groupingAggregationDefault: "طے شدہ",
   groupingAggregationNone: "کوئی نہیں",
   groupingAggregations: "مجموعے",
-  groupingAddAggregation: "کالم شامل کریں",
+  groupingAddAggregation: "مجموعی کالم شامل کریں",
   groupingRestoreAggregations: "طے شدہ بحال کریں",
   groupingRemoveAggregation: (column) => `${column} کا مجموعہ ہٹائیں`,
   groupingAggregationFor: (column) => `${column} کا مجموعہ`,

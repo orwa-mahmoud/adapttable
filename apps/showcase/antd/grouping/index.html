@@ -164,7 +164,7 @@
         <h1>Row grouping in Ant Design</h1>
         <p>Compose <code>groupingPanel(groupBy, extras)</code> and rows start nested by Team then Status. On desktop, drag any column header into the strip or drag its chips to reorder the levels.</p>
         <p>Every chip handle is keyboard movable with the arrow keys. On phones the same Ant Design panel swaps drag targets for kit-native selects, without changing the grouping model.</p>
-        <p>A column's <code>aggregatable</code> declaration seeds the Aggregations section — every active column is its own item, with its own operation and remove. Group footers close each group. Independent pinned summary rows and the table footer total live on the aggregation page; moving rows inside a group lives on the row-reordering page.</p>
+        <p>A column's <code>aggregatable</code> declaration seeds the grouping strip — every active column is its own item, with its own operation and remove. Group footers close each group. Independent pinned summary rows and the table footer total live on the aggregation page; moving rows inside a group lives on the row-reordering page.</p>
         <p>Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.</p>
         <p>Group headers and footers are records spliced into antd's own dataSource and spanned through its onCell hook, so grouping happens inside antd's Table rather than around it; the summary row is antd's Table.Summary.</p>
         <h2>The code</h2>

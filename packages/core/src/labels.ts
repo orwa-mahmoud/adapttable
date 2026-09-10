@@ -352,7 +352,7 @@ export const defaultLabels: Required<TableLabels> = {
   groupingAggregationDefault: "Default",
   groupingAggregationNone: "None",
   groupingAggregations: "Aggregations",
-  groupingAddAggregation: "Add columns",
+  groupingAddAggregation: "Add aggregation column",
   groupingRestoreAggregations: "Restore defaults",
   groupingRemoveAggregation: (column: string) => `Remove ${column} aggregation`,
   groupingAggregationFor: (column: string) => `${column} aggregation`,

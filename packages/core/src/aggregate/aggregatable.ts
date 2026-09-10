@@ -18,7 +18,7 @@ import {
 } from "./aggregate";
 
 /** Ids that mean removal or "the host calculates this itself", never an offer. */
-const RESERVED_OPERATION_IDS: readonly string[] = ["none", "custom"];
+const RESERVED_OPERATION_IDS = new Set(["none", "custom"]);
 
 /**
  * An operation the host defines itself.
@@ -227,10 +227,7 @@ function resolveOperation(
     );
     return undefined;
   }
-  if (
-    isBuiltIn(operation.id) ||
-    RESERVED_OPERATION_IDS.includes(operation.id)
-  ) {
+  if (isBuiltIn(operation.id) || RESERVED_OPERATION_IDS.has(operation.id)) {
     devWarn(
       `column "${columnKey}" declares a custom aggregate operation with the reserved id "${operation.id}". Choose an id the table does not already own.`
     );

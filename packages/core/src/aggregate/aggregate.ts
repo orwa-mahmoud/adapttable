@@ -151,11 +151,63 @@ export function toAggregateNumber(
 
 /** Strict ISO date: `YYYY-MM-DD`. */
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
-/** Strict ISO datetime, optional seconds/fraction and a timezone. */
-const ISO_DATETIME =
-  /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?(Z|[+-]\d{2}:?\d{2})?$/;
-/** Strict ISO time: `HH:mm` with optional seconds. */
-const ISO_TIME = /^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/;
+/** Strict ISO clock: `HH:mm` with optional seconds and a fraction. */
+const ISO_CLOCK = /^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/;
+/** Strict ISO timezone: `Z`, `+HH:MM`, or `+HHMM`. */
+const ISO_TZ = /^(Z|[+-]\d{2}:?\d{2})$/;
+
+function finiteMs(time: number): number | undefined {
+  return Number.isFinite(time) ? time : undefined;
+}
+
+/** Milliseconds from midnight for a time-only ISO clock. */
+function instantFromClock(text: string): number | undefined {
+  const match = ISO_CLOCK.exec(text);
+  if (!match) return undefined;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const seconds = match[3] === undefined ? 0 : Number(match[3]);
+  const fraction = match[4] === undefined ? 0 : Number(`0.${match[4]}`);
+  return finiteMs(
+    hours * 3_600_000 + minutes * 60_000 + seconds * 1000 + fraction * 1000
+  );
+}
+
+/** Split `HH:mm[:ss][.frac][Z|+offset]` into the clock and its zone. */
+function peelTimeZone(rest: string): { clock: string; zone: string } {
+  if (rest.endsWith("Z")) {
+    return { clock: rest.slice(0, -1), zone: "Z" };
+  }
+  const plus = rest.lastIndexOf("+");
+  if (plus > 0 && ISO_TZ.test(rest.slice(plus))) {
+    return { clock: rest.slice(0, plus), zone: rest.slice(plus) };
+  }
+  const minus = rest.lastIndexOf("-");
+  if (minus > 0 && ISO_TZ.test(rest.slice(minus))) {
+    return { clock: rest.slice(0, minus), zone: rest.slice(minus) };
+  }
+  return { clock: rest, zone: "" };
+}
+
+/**
+ * Parse `YYYY-MM-DD[T ]HH:mm…` the same way `Date.parse` would, after the
+ * date, clock and optional zone have each been checked on their own.
+ */
+function instantFromDateTime(text: string): number | undefined {
+  const sep = text.includes("T") ? text.indexOf("T") : text.indexOf(" ");
+  if (sep < 0) return undefined;
+  if (!ISO_DATE.test(text.slice(0, sep))) return undefined;
+  const { clock } = peelTimeZone(text.slice(sep + 1));
+  if (!ISO_CLOCK.test(clock)) return undefined;
+  return finiteMs(Date.parse(text));
+}
+
+function instantFromIsoString(text: string): number | undefined {
+  if (ISO_DATE.test(text)) {
+    return finiteMs(Date.parse(`${text}T00:00:00Z`));
+  }
+  return instantFromDateTime(text) ?? instantFromClock(text);
+}
 
 /**
  * Parse a temporal value the built-in min/max can compare.
@@ -176,30 +228,11 @@ export function toAggregateInstant(
   value: AggregateOrderedValue
 ): number | undefined {
   if (value instanceof Date) {
-    const time = value.getTime();
-    return Number.isFinite(time) ? time : undefined;
+    return finiteMs(value.getTime());
   }
   if (typeof value === "string") {
-    const text = value.trim();
-    if (ISO_DATE.test(text)) {
-      const time = Date.parse(`${text}T00:00:00Z`);
-      return Number.isFinite(time) ? time : undefined;
-    }
-    if (ISO_DATETIME.test(text)) {
-      const time = Date.parse(text);
-      return Number.isFinite(time) ? time : undefined;
-    }
-    if (ISO_TIME.test(text)) {
-      const match = ISO_TIME.exec(text);
-      if (!match) return undefined;
-      const hours = Number(match[1]);
-      const minutes = Number(match[2]);
-      const seconds = match[3] === undefined ? 0 : Number(match[3]);
-      const fraction = match[4] === undefined ? 0 : Number(`0.${match[4]}`);
-      const time =
-        hours * 3_600_000 + minutes * 60_000 + seconds * 1000 + fraction * 1000;
-      return Number.isFinite(time) ? time : undefined;
-    }
+    const fromIso = instantFromIsoString(value.trim());
+    if (fromIso !== undefined) return fromIso;
   }
   return toAggregateNumber(value);
 }
@@ -307,8 +340,10 @@ export function resolveAggregateValue<TRow>(
   key: string,
   column: ColumnMetadata<TRow> | undefined
 ): AggregateOrderedValue {
-  if (column?.sortValue) return column.sortValue(row);
-  return getPath(row, key) as AggregateOrderedValue;
+  const value: AggregateOrderedValue = column?.sortValue
+    ? column.sortValue(row)
+    : (getPath(row, key) as AggregateOrderedValue);
+  return value;
 }
 
 /**

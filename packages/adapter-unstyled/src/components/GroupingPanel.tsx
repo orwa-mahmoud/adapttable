@@ -24,6 +24,11 @@ import {
 import type { DataTableClassNames } from "../types";
 import { useClassNames } from "./classNamesContext";
 
+/** Closed add control: the shown placeholder plus the native chevron. */
+function addControlWidth(label: string): string {
+  return `calc(${Math.max(label.length, 1)}ch + 2.75rem)`;
+}
+
 /**
  * Core owns two structural wrappers inside the surface. Add this kit's class
  * hooks without moving that structure out of shared chrome.
@@ -93,15 +98,6 @@ function DropZone({
       data-active={active || undefined}
       data-dragging={dragging || undefined}
       className={classNames.groupingDropZone}
-      // The way out of a grouping owns its row: a reader with a chip in the
-      // air has one obvious place to let go of it.
-      style={{
-        border: 0,
-        margin: 0,
-        padding: 0,
-        minInlineSize: 0,
-        flex: "1 1 auto",
-      }}
       {...dropProps}
       {...rest}
     >
@@ -162,6 +158,7 @@ function Select({
     "grouping-add": classNames.groupingAdd,
     "grouping-aggregation-operation": classNames.groupingAggregationOperation,
   }[part];
+  const addControl = part === "grouping-add";
   return (
     <select
       aria-label={label}
@@ -169,9 +166,22 @@ function Select({
       disabled={disabled}
       data-adapttable-part={part}
       className={className}
+      style={
+        addControl
+          ? {
+              width: addControlWidth(label),
+              maxWidth: "100%",
+              flex: "0 0 auto",
+            }
+          : undefined
+      }
       onChange={(event) => onChange(event.currentTarget.value)}
     >
-      {part === "grouping-add" ? <option value="">{label}</option> : null}
+      {addControl ? (
+        <option value="" disabled hidden>
+          {label}
+        </option>
+      ) : null}
       {options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
@@ -193,7 +203,6 @@ function RemoveZone({
       aria-label={label}
       data-active={active || undefined}
       className={classNames.groupingRemoveZone}
-      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
       {...dropProps}
       {...rest}
     >
@@ -249,28 +258,38 @@ function AggregationPicker({
   ...rest
 }: Readonly<GroupingPanelChecklistProps>): ReactElement {
   const classNames = useClassNames();
+  const available = options.filter((option) => !option.checked);
   return (
-    <fieldset
+    <select
       aria-label={label}
+      disabled={disabled === true || available.length === 0}
+      value=""
       className={classNames.groupingAggregationAdd}
-      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
+      style={{
+        width: addControlWidth(label),
+        maxWidth: "100%",
+        flex: "0 0 auto",
+      }}
+      onChange={(event) => {
+        if (event.currentTarget.value) {
+          onToggle(event.currentTarget.value, true);
+        }
+      }}
       {...rest}
     >
-      <span>{label}</span>
-      {options.map((option) => (
-        <label key={option.value}>
-          <input
-            type="checkbox"
-            checked={option.checked}
-            disabled={disabled}
-            aria-label={option.label}
-            onChange={(event) => onToggle(option.value, event.target.checked)}
-            data-adapttable-part="grouping-aggregation-option"
-          />
+      <option value="" disabled hidden>
+        {label}
+      </option>
+      {available.map((option) => (
+        <option
+          key={option.value}
+          value={option.value}
+          data-adapttable-part="grouping-aggregation-option"
+        >
           {option.label}
-        </label>
+        </option>
       ))}
-    </fieldset>
+    </select>
   );
 }
 

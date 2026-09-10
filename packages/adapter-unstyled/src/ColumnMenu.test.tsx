@@ -143,7 +143,12 @@ describe("unstyled ColumnMenu", () => {
       remove: () => undefined,
       moveBy: () => undefined,
       setAggregate: () => undefined,
-      aggregations: { items: [], candidates: [], atDefaults: true },
+      aggregations: {
+        items: [],
+        candidates: [],
+        atDefaults: true,
+        hasDefaults: false,
+      },
       setAggregateOperation: () => undefined,
       addAggregate: () => undefined,
       removeAggregate: () => undefined,

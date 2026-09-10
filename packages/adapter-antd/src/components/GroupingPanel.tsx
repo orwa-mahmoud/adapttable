@@ -13,9 +13,14 @@ import {
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
 } from "@adapttable/react/adapter";
-import { Button, Card, Checkbox, Flex, Select, Tag, Typography } from "antd";
+import { Button, Card, Flex, Select, Tag, Typography } from "antd";
 
 const TOUCH_TARGET = 40;
+
+/** Closed add control: the shown placeholder plus the kit chevron. */
+function addControlWidth(label: string): string {
+  return `calc(${Math.max(label.length, 1)}ch + 2.75rem)`;
+}
 
 const slots: GroupingPanelSlots = {
   Surface: ({
@@ -148,8 +153,13 @@ const slots: GroupingPanelSlots = {
         value={addControl && value === "" ? undefined : value}
         placeholder={addControl ? label : undefined}
         disabled={disabled}
+        variant={addControl ? undefined : "borderless"}
         options={options.map((option) => ({ ...option }))}
-        style={{ minWidth: 160 }}
+        style={{
+          width: addControl ? addControlWidth(label) : 76,
+          maxWidth: addControl ? "100%" : undefined,
+          flex: addControl ? "0 0 auto" : undefined,
+        }}
         getPopupContainer={(trigger: HTMLElement) =>
           trigger.parentElement ?? document.body
         }
@@ -198,21 +208,25 @@ const slots: GroupingPanelSlots = {
     children,
     ...rest
   }: GroupingPanelAggregationItemProps) => (
-    <Card
-      size="small"
+    <Flex
+      gap={4}
+      align="center"
       data-read-only={readOnly || undefined}
-      styles={{ body: { padding: "4px 8px" } }}
+      style={{
+        padding: "4px 6px 4px 12px",
+        borderRadius: 999,
+        background: "var(--ant-color-fill-tertiary, #f5f5f5)",
+        maxWidth: "100%",
+      }}
       {...rest}
     >
-      <Flex gap={4} align="center">
-        <Typography.Text strong>{label}</Typography.Text>
-        {readOnly ? (
-          <Typography.Text type="secondary">{readOnlyLabel}</Typography.Text>
-        ) : (
-          children
-        )}
-      </Flex>
-    </Card>
+      <Typography.Text strong>{label}</Typography.Text>
+      {readOnly ? (
+        <Typography.Text type="secondary">{readOnlyLabel}</Typography.Text>
+      ) : (
+        children
+      )}
+    </Flex>
   ),
   AggregationRemove: ({
     label,
@@ -235,44 +249,42 @@ const slots: GroupingPanelSlots = {
     onToggle,
     disabled,
     ...rest
-  }: GroupingPanelChecklistProps) => (
-    <Flex
-      component="fieldset"
-      wrap="wrap"
-      align="center"
-      gap={8}
-      aria-label={label}
-      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
-      {...rest}
-    >
-      <Typography.Text type="secondary">{label}</Typography.Text>
-      {options.map((option) => (
-        <Checkbox
-          key={option.value}
-          aria-label={option.label}
-          checked={option.checked}
-          disabled={disabled}
-          onChange={(event) => onToggle(option.value, event.target.checked)}
-          data-adapttable-part="grouping-aggregation-option"
-        >
-          {option.label}
-        </Checkbox>
-      ))}
-    </Flex>
-  ),
+  }: GroupingPanelChecklistProps) => {
+    const available = options.filter((option) => !option.checked);
+    return (
+      <Select
+        mode="multiple"
+        aria-label={label}
+        placeholder={label}
+        disabled={disabled === true || available.length === 0}
+        value={[]}
+        options={available.map((option) => ({
+          value: option.value,
+          label: option.label,
+        }))}
+        onChange={(values: string[]) => {
+          for (const value of values) onToggle(value, true);
+        }}
+        maxTagCount={0}
+        style={{
+          width: addControlWidth(label),
+          maxWidth: "100%",
+          flex: "0 0 auto",
+        }}
+        getPopupContainer={(trigger: HTMLElement) =>
+          trigger.parentElement ?? document.body
+        }
+        {...rest}
+      />
+    );
+  },
   AggregationRestore: ({
     label,
     disabled,
     onRestore,
     ...rest
   }: GroupingPanelRestoreProps) => (
-    <Button
-      type="link"
-      size="small"
-      disabled={disabled}
-      onClick={onRestore}
-      {...rest}
-    >
+    <Button size="small" disabled={disabled} onClick={onRestore} {...rest}>
       {label}
     </Button>
   ),

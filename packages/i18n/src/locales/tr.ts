@@ -303,7 +303,7 @@ export const tr: Required<TableLabels> = {
   groupingAggregationDefault: "Varsayılan",
   groupingAggregationNone: "Yok",
   groupingAggregations: "Toplamalar",
-  groupingAddAggregation: "Sütun ekle",
+  groupingAddAggregation: "Toplama sütunu ekle",
   groupingRestoreAggregations: "Varsayılanları geri yükle",
   groupingRemoveAggregation: (column) => `${column} toplamasını kaldır`,
   groupingAggregationFor: (column) => `${column} toplaması`,

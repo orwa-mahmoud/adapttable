@@ -992,9 +992,9 @@ export interface TableLabels {
   groupingAggregationDefault?: string;
   /** Explicitly hide a column's group aggregate. */
   groupingAggregationNone?: string;
-  /** Heading for the list of active aggregations. */
+  /** Accessible name of the aggregations group — there is no visible heading. */
   groupingAggregations?: string;
-  /** Opens the picker that adds a column's aggregation. */
+  /** Placeholder and accessible name of the control that adds an aggregation. */
   groupingAddAggregation?: string;
   /** Puts the developer's whole aggregation setup back. */
   groupingRestoreAggregations?: string;

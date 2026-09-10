@@ -294,7 +294,7 @@ export const zh: Required<TableLabels> = {
   groupingAggregationDefault: "默认",
   groupingAggregationNone: "无",
   groupingAggregations: "聚合",
-  groupingAddAggregation: "添加列",
+  groupingAddAggregation: "添加聚合列",
   groupingRestoreAggregations: "恢复默认",
   groupingRemoveAggregation: (column) => `移除 ${column} 聚合`,
   groupingAggregationFor: (column) => `${column} 聚合`,

@@ -30,7 +30,7 @@ function panelState(
     canSetAggregates: true,
     announcement: "",
     headerDragProps: () => ({}),
-    chipDragProps: () => ({}),
+    chipDragProps: () => ({ draggable: true }),
     chipKeyboardProps: (_key, label) => ({
       tabIndex: 0,
       role: "button",
@@ -67,6 +67,7 @@ function panelState(
         },
       ],
       atDefaults: true,
+      hasDefaults: true,
     },
     setAggregateOperation: vi.fn(),
     addAggregate: vi.fn(),
@@ -116,7 +117,11 @@ describe("GroupingPanel (radix)", () => {
     expect(state.add).toHaveBeenCalledWith("budget");
 
     const handle = screen.getByRole("button", { name: "Move Team" });
+    expect(handle).toHaveAttribute("draggable", "true");
     expect(handle).toHaveStyle({ minWidth: "44px", minHeight: "44px" });
+    expect(
+      screen.queryByText(defaultLabels.groupingPanel, { selector: "span" })
+    ).not.toBeInTheDocument();
     fireEvent.keyDown(handle, { key: "ArrowRight" });
     expect(keyboard).toHaveBeenCalled();
 

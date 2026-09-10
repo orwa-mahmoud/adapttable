@@ -104,6 +104,7 @@ export interface AggregationItem {
 export interface AggregationModel {
     readonly atDefaults: boolean;
     readonly candidates: readonly AggregationCandidate[];
+    readonly hasDefaults: boolean;
     readonly items: readonly AggregationItem[];
 }
 

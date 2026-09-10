@@ -62,11 +62,11 @@ group's caption:
 }
 ```
 
-Every layout also provides **Add grouping column**. Below the grouping chips,
-an **Aggregations** section lists every active aggregate as its own item —
-column name, operation selector, and remove — plus **Add columns** (a native
-checklist) and **Restore defaults**. Mobile uses these kit-native controls
-rather than header drag-and-drop.
+Every layout also provides **Add grouping column**. Beside the grouping chips,
+every active aggregate is its own item — column name, operation selector, and
+remove — plus **Add aggregation column** and **Restore defaults** when the
+developer sent defaults the reader has changed. Mobile uses these kit-native
+controls rather than header drag-and-drop.
 
 A column's `Aggregatable` declaration (`aggregatable`) decides what a reader
 may add — `AggregatableConfig` with `default` and `operations` of
@@ -80,7 +80,8 @@ an explicit suppression (`AGGREGATE_SUPPRESSED` / `"none"` in `groupAgg`);
 `restoreAggregationDefaults` puts the original developer configuration back,
 not the latest server response. The panel and column menu both read
 `aggregationModel`. Display, local calculation and the server request share
-`resolveEffectiveAggregation`: a valid reader override or permitted
+`resolveEffectiveAggregation` (`EffectiveAggregationInput` /
+`EffectiveAggregationKind`): a valid reader override or permitted
 suppression, then a valid executable column default, then the original host
 mapper or request. Defaults are not written into reader state — an untouched
 table stays at defaults, and those defaults actually calculate and request.

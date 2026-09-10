@@ -298,7 +298,7 @@ export const ar: Required<TableLabels> = {
   groupingAggregationDefault: "افتراضي",
   groupingAggregationNone: "بلا",
   groupingAggregations: "التجميعات",
-  groupingAddAggregation: "إضافة أعمدة",
+  groupingAddAggregation: "إضافة عمود تجميعة",
   groupingRestoreAggregations: "استعادة الإعدادات الافتراضية",
   groupingRemoveAggregation: (column) => `إزالة تجميع ${column}`,
   groupingAggregationFor: (column) => `تجميع ${column}`,

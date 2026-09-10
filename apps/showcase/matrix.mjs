@@ -876,7 +876,7 @@ export function People({ rows, columns, onArchive }) {
     intro: [
       "Compose `groupingPanel(groupBy, extras)` and rows start nested by Team then Status. On desktop, drag any column header into the strip or drag its chips to reorder the levels.",
       "Every chip handle is keyboard movable with the arrow keys. On phones the same {kit} panel swaps drag targets for kit-native selects, without changing the grouping model.",
-      "A column's `aggregatable` declaration seeds the Aggregations section — every active column is its own item, with its own operation and remove. Group footers close each group. Independent pinned summary rows and the table footer total live on the aggregation page; moving rows inside a group lives on the row-reordering page.",
+      "A column's `aggregatable` declaration seeds the grouping strip — every active column is its own item, with its own operation and remove. Group footers close each group. Independent pinned summary rows and the table footer total live on the aggregation page; moving rows inside a group lives on the row-reordering page.",
       "Collapse state travels in the URL, and export writes the grouped sheet — outline levels and all — rather than the flat rows underneath it.",
     ],
     card: "Drag, keyboard and mobile grouping controls with live aggregation overrides.",

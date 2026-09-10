@@ -9,14 +9,19 @@ import {
   ActionIcon,
   Box,
   Button,
-  Checkbox,
   Group,
+  MultiSelect,
   Paper,
   Select,
   Text,
 } from "@mantine/core";
 
 const TOUCH_SIZE = 44;
+
+/** Closed add control: the shown placeholder plus the kit chevron. */
+function addControlWidth(label: string): string {
+  return `calc(${Math.max(label.length, 1)}ch + 2.75rem)`;
+}
 /** A caret between chips, grown into something aimable mid-drag. */
 // One width, dragging or not. A caret that grows when a drag starts shoves
 // every chip after it sideways, and the reader is then aiming at a chip that
@@ -46,9 +51,14 @@ const slots: GroupingPanelSlots = {
     >
       <Group
         gap="xs"
-        align="flex-end"
+        align="center"
         wrap="wrap"
         data-mobile={mobile || undefined}
+        styles={{
+          root: {
+            minWidth: 0,
+          },
+        }}
       >
         {children}
       </Group>
@@ -142,28 +152,41 @@ const slots: GroupingPanelSlots = {
     onChange,
     disabled,
     "data-adapttable-part": part,
-  }) => (
-    <Select
-      label={label}
-      aria-label={label}
-      data-adapttable-part={part}
-      size="sm"
-      miw={160}
-      value={part === "grouping-add" && value === "" ? null : value}
-      placeholder={part === "grouping-add" ? label : undefined}
-      disabled={disabled}
-      allowDeselect={false}
-      data={options.map((option) => ({
-        value: option.value,
-        label: option.label,
-      }))}
-      comboboxProps={{ withinPortal: false }}
-      styles={{ input: { minHeight: TOUCH_SIZE } }}
-      onChange={(next) => {
-        if (next !== null) onChange(next);
-      }}
-    />
-  ),
+  }) => {
+    const addControl = part === "grouping-add";
+    return (
+      <Select
+        aria-label={label}
+        data-adapttable-part={part}
+        size="sm"
+        w={addControl ? addControlWidth(label) : undefined}
+        maw={addControl ? "100%" : undefined}
+        flex={addControl ? "0 0 auto" : "0 1 auto"}
+        value={addControl && value === "" ? null : value}
+        placeholder={addControl ? label : undefined}
+        disabled={disabled}
+        allowDeselect={false}
+        data={options.map((option) => ({
+          value: option.value,
+          label: option.label,
+        }))}
+        comboboxProps={{ withinPortal: false }}
+        variant={addControl ? "default" : "unstyled"}
+        styles={{
+          root: addControl ? undefined : { width: "auto", maxWidth: "8.5rem" },
+          input: {
+            minHeight: addControl ? TOUCH_SIZE : 32,
+            minWidth: addControl ? undefined : "4.75rem",
+            paddingInline: addControl ? undefined : 6,
+            fontWeight: addControl ? undefined : 500,
+          },
+        }}
+        onChange={(next) => {
+          if (next !== null) onChange(next);
+        }}
+      />
+    );
+  },
   RemoveZone: ({ label, active, dropProps, ...rest }) => (
     <Paper
       role="region"
@@ -196,25 +219,43 @@ const slots: GroupingPanelSlots = {
   ),
   AggregationItem: ({ label, readOnly, readOnlyLabel, children, ...rest }) => (
     <Group
-      gap={4}
+      gap={0}
       wrap="nowrap"
-      p={4}
+      pl={12}
+      pr={4}
+      mih={36}
+      maw="100%"
       style={{
-        border: "1px solid var(--mantine-color-default-border)",
-        borderRadius: "var(--mantine-radius-md)",
+        borderRadius: 999,
+        background: "var(--mantine-color-default-hover)",
+        minWidth: 0,
       }}
       data-read-only={readOnly || undefined}
       {...rest}
     >
-      <Text size="sm" fw={500}>
+      <Text
+        size="sm"
+        fw={600}
+        pr={readOnly ? 8 : 0}
+        style={{ whiteSpace: "nowrap" }}
+      >
         {label}
       </Text>
       {readOnly ? (
-        <Text size="xs" c="dimmed">
+        <Text size="xs" c="dimmed" pr={8} style={{ whiteSpace: "nowrap" }}>
           {readOnlyLabel}
         </Text>
       ) : (
-        children
+        <>
+          <Box
+            aria-hidden
+            w={1}
+            h={14}
+            mx={4}
+            style={{ background: "var(--mantine-color-default-border)" }}
+          />
+          {children}
+        </>
       )}
     </Group>
   ),
@@ -231,36 +272,41 @@ const slots: GroupingPanelSlots = {
       ×
     </ActionIcon>
   ),
-  AggregationPicker: ({ label, options, onToggle, disabled, ...rest }) => (
-    <Group
-      component="fieldset"
-      gap="xs"
-      wrap="wrap"
-      aria-label={label}
-      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
-      {...rest}
-    >
-      <Text size="xs" c="dimmed">
-        {label}
-      </Text>
-      {options.map((option) => (
-        <Checkbox
-          key={option.value}
-          size="sm"
-          label={option.label}
-          aria-label={option.label}
-          checked={option.checked}
-          disabled={disabled}
-          onChange={(event) => onToggle(option.value, event.target.checked)}
-          data-adapttable-part="grouping-aggregation-option"
-        />
-      ))}
-    </Group>
-  ),
+  AggregationPicker: ({ label, options, onToggle, disabled, ...rest }) => {
+    const available = options.filter((option) => !option.checked);
+    return (
+      <MultiSelect
+        aria-label={label}
+        placeholder={label}
+        size="sm"
+        searchable
+        maxDropdownHeight={240}
+        disabled={disabled === true || available.length === 0}
+        data={available.map((option) => ({
+          value: option.value,
+          label: option.label,
+        }))}
+        value={[]}
+        onChange={(values) => {
+          for (const value of values) onToggle(value, true);
+        }}
+        comboboxProps={{ withinPortal: false }}
+        nothingFoundMessage={label}
+        style={{
+          flex: "0 0 auto",
+          width: addControlWidth(label),
+          maxWidth: "100%",
+        }}
+        styles={{ input: { minHeight: TOUCH_SIZE } }}
+        {...rest}
+      />
+    );
+  },
   AggregationRestore: ({ label, disabled, onRestore, ...rest }) => (
     <Button
-      variant="subtle"
+      variant="light"
       size="compact-sm"
+      radius="xl"
       mih={TOUCH_SIZE}
       disabled={disabled}
       onClick={onRestore}

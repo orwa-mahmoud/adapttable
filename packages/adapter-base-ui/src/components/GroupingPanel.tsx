@@ -16,7 +16,12 @@ import {
 } from "@adapttable/react/adapter";
 
 import { Button, IconButton, Text } from "../ui";
-import { Checkbox, NativeSelect } from "./primitives";
+import { NativeSelect } from "./primitives";
+
+/** Closed add control: the shown placeholder plus the kit chevron. */
+function addControlWidth(label: string): string {
+  return `calc(${Math.max(label.length, 1)}ch + 2.75rem)`;
+}
 
 const slots: GroupingPanelSlots = {
   Surface: ({
@@ -31,15 +36,6 @@ const slots: GroupingPanelSlots = {
       data-mobile={mobile ? true : undefined}
       {...rest}
     >
-      <Text
-        as="span"
-        size="1"
-        weight="bold"
-        color="gray"
-        className="adapttable-grouping-panel__label"
-      >
-        {label}
-      </Text>
       {children}
     </section>
   ),
@@ -57,7 +53,6 @@ const slots: GroupingPanelSlots = {
       data-empty={empty ? true : undefined}
       data-active={active ? true : undefined}
       data-dragging={dragging ? true : undefined}
-      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
       {...dropProps}
       {...rest}
     >
@@ -118,6 +113,11 @@ const slots: GroupingPanelSlots = {
       options={options}
       onValueChange={onChange}
       {...rest}
+      width={
+        rest["data-adapttable-part"] === "grouping-add"
+          ? addControlWidth(label)
+          : undefined
+      }
     />
   ),
   RemoveZone: ({
@@ -130,7 +130,6 @@ const slots: GroupingPanelSlots = {
       aria-label={label}
       className="adapttable-grouping-remove-zone"
       data-active={active ? true : undefined}
-      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
       {...dropProps}
       {...rest}
     >
@@ -168,38 +167,32 @@ const slots: GroupingPanelSlots = {
     onToggle,
     disabled,
     ...rest
-  }: GroupingPanelChecklistProps) => (
-    <fieldset
-      aria-label={label}
-      className="adapttable-grouping-aggregation-add"
-      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
-      {...rest}
-    >
-      <Text>{label}</Text>
-      {options.map((option) => (
-        <label key={option.value}>
-          <Checkbox
-            checked={option.checked}
-            aria-label={option.label}
-            onToggle={
-              disabled
-                ? undefined
-                : () => onToggle(option.value, !option.checked)
-            }
-            data-adapttable-part="grouping-aggregation-option"
-          />
-          {option.label}
-        </label>
-      ))}
-    </fieldset>
-  ),
+  }: GroupingPanelChecklistProps) => {
+    const available = options.filter((option) => !option.checked);
+    return (
+      <NativeSelect
+        size="1"
+        aria-label={label}
+        value=""
+        placeholder={label}
+        disabled={disabled === true || available.length === 0}
+        options={available}
+        onValueChange={(value) => {
+          if (value) onToggle(value, true);
+        }}
+        className="adapttable-btn"
+        {...rest}
+        width={addControlWidth(label)}
+      />
+    );
+  },
   AggregationRestore: ({
     label,
     disabled,
     onRestore,
     ...rest
   }: GroupingPanelRestoreProps) => (
-    <Button disabled={disabled} onClick={onRestore} {...rest}>
+    <Button variant="outline" disabled={disabled} onClick={onRestore} {...rest}>
       {label}
     </Button>
   ),

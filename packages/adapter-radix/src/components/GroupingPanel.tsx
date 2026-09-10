@@ -14,20 +14,23 @@ import {
   type GroupingPanelSlots,
   type GroupingPanelSurfaceProps,
 } from "@adapttable/react/adapter";
-import {
-  Box,
-  Button,
-  Card,
-  Checkbox,
-  Flex,
-  IconButton,
-  Text,
-} from "@radix-ui/themes";
+import { Box, Button, Card, Flex, IconButton, Text } from "@radix-ui/themes";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 
 import { NativeSelect } from "./primitives";
 
 const TOUCH_TARGET = 44;
+
+/** Closed add control: the shown placeholder plus the kit chevron. */
+function addControlWidth(label: string): string {
+  return `calc(${Math.max(label.length, 1)}ch + 2.75rem)`;
+}
+
+function selectWidth(part: string | undefined, label: string): string {
+  if (part === "grouping-aggregation-operation") return "auto";
+  if (part === "grouping-add") return addControlWidth(label);
+  return "min(100%, 220px)";
+}
 const GroupingPanelPortalContext = createContext<{
   dir: GroupingPanelSurfaceProps["dir"];
   container?: HTMLElement;
@@ -36,13 +39,12 @@ const GroupingPanelPortalContext = createContext<{
 const PANEL_CLASS = "adapttable-radix-grouping-panel";
 const CONTENT_CLASS = "adapttable-radix-grouping-panel__content";
 const PANEL_CSS =
-  `.${CONTENT_CLASS}>[data-adapttable-part="grouping-item"],` +
-  `.${CONTENT_CLASS}>[data-adapttable-part="grouping-aggregations"]` +
+  `.${CONTENT_CLASS}>[data-adapttable-part="grouping-item"]` +
   `{display:inline-flex;align-items:center;flex-wrap:wrap;gap:var(--space-2);min-width:0}` +
+  `.${CONTENT_CLASS}>[data-adapttable-part="grouping-aggregations"]` +
+  `{display:flex;flex:1 0 100%;width:100%;align-items:center;flex-wrap:wrap;gap:var(--space-2);min-width:0}` +
   `.${PANEL_CLASS}[data-mobile] .${CONTENT_CLASS}>[data-adapttable-part="grouping-item"]` +
-  `{max-width:100%}` +
-  `.${PANEL_CLASS}[data-mobile] [data-adapttable-part^="grouping-a"]` +
-  `{flex:1 1 160px}`;
+  `{max-width:100%}`;
 
 function dropZoneWidth(empty: boolean): number {
   // One width, whatever is happening: a caret that grows mid-drag moves the
@@ -66,15 +68,11 @@ const slots: GroupingPanelSlots = {
         data-mobile={mobile || undefined}
         {...rest}
       >
-        <Text as="span" size="1" weight="bold" color="gray">
-          {label}
-        </Text>
         <Flex
           className={CONTENT_CLASS}
           gap="2"
           align="center"
           wrap="wrap"
-          mt="2"
           style={{ minWidth: 0 }}
         >
           {children}
@@ -149,23 +147,29 @@ const slots: GroupingPanelSlots = {
           overflow: "hidden",
         }}
       >
-        <IconButton
-          size="2"
-          variant="ghost"
-          color="gray"
+        <button
+          type="button"
           data-adapttable-part="grouping-chip-handle"
           {...dragProps}
           {...keyboardProps}
           style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
             minWidth: TOUCH_TARGET,
             minHeight: TOUCH_TARGET,
+            margin: 0,
+            padding: 0,
+            border: 0,
             borderRadius: 0,
+            background: "transparent",
+            color: "inherit",
             cursor: "grab",
             touchAction: "none",
           }}
         >
           <GripIcon />
-        </IconButton>
+        </button>
         <Text
           as="span"
           size="2"
@@ -212,10 +216,14 @@ const slots: GroupingPanelSlots = {
         options={options}
         dir={portal.dir}
         container={portal.container}
-        width="min(100%, 220px)"
-        minHeight={TOUCH_TARGET}
+        minHeight={
+          rest["data-adapttable-part"] === "grouping-aggregation-operation"
+            ? 32
+            : TOUCH_TARGET
+        }
         onValueChange={onChange}
         {...rest}
+        width={selectWidth(rest["data-adapttable-part"], label)}
       />
     );
   },
@@ -263,9 +271,20 @@ const slots: GroupingPanelSlots = {
     children,
     ...rest
   }: GroupingPanelAggregationItemProps) => (
-    <Card size="1" data-read-only={readOnly || undefined} {...rest}>
-      <Flex gap="1" align="center">
-        <Text size="2" weight="medium">
+    <Card asChild size="1">
+      <span
+        data-read-only={readOnly || undefined}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "var(--space-1)",
+          minBlockSize: TOUCH_TARGET,
+          maxWidth: "100%",
+          paddingInline: "var(--space-3)",
+        }}
+        {...rest}
+      >
+        <Text size="2" weight="medium" style={{ whiteSpace: "nowrap" }}>
           {label}
         </Text>
         {readOnly ? (
@@ -275,7 +294,7 @@ const slots: GroupingPanelSlots = {
         ) : (
           children
         )}
-      </Flex>
+      </span>
     </Card>
   ),
   AggregationRemove: ({
@@ -300,39 +319,28 @@ const slots: GroupingPanelSlots = {
     onToggle,
     disabled,
     ...rest
-  }: GroupingPanelChecklistProps) => (
-    <Flex
-      asChild
-      wrap="wrap"
-      align="center"
-      gap="2"
-      style={{ border: 0, margin: 0, padding: 0, minInlineSize: 0 }}
-      {...rest}
-    >
-      <fieldset aria-label={label}>
-        <Text size="1" color="gray">
-          {label}
-        </Text>
-        {options.map((option) => (
-          <Text as="label" size="2" key={option.value}>
-            <Flex gap="1" align="center">
-              <Checkbox
-                size="1"
-                checked={option.checked}
-                disabled={disabled}
-                onCheckedChange={(next) =>
-                  onToggle(option.value, next === true)
-                }
-                aria-label={option.label}
-                data-adapttable-part="grouping-aggregation-option"
-              />
-              {option.label}
-            </Flex>
-          </Text>
-        ))}
-      </fieldset>
-    </Flex>
-  ),
+  }: GroupingPanelChecklistProps) => {
+    const portal = useContext(GroupingPanelPortalContext);
+    const available = options.filter((option) => !option.checked);
+    return (
+      <NativeSelect
+        size="2"
+        aria-label={label}
+        value=""
+        placeholder={label}
+        disabled={disabled === true || available.length === 0}
+        options={available}
+        dir={portal.dir}
+        container={portal.container}
+        minHeight={TOUCH_TARGET}
+        onValueChange={(value) => {
+          if (value) onToggle(value, true);
+        }}
+        {...rest}
+        width={addControlWidth(label)}
+      />
+    );
+  },
   AggregationRestore: ({
     label,
     disabled,
@@ -340,7 +348,7 @@ const slots: GroupingPanelSlots = {
     ...rest
   }: GroupingPanelRestoreProps) => (
     <Button
-      variant="ghost"
+      variant="soft"
       size="1"
       disabled={disabled}
       onClick={onRestore}

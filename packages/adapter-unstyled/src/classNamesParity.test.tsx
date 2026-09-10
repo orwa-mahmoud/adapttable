@@ -204,7 +204,6 @@ const CORE_OWNED = new Set([
   "side-panel-body",
   "context-menu-anchor",
   "command-list",
-  "grouping-aggregations-label",
   "grouping-aggregation-option",
 ]);
 
@@ -584,6 +583,7 @@ async function renderAllStates(classNames?: DataTableClassNames) {
 
   // Interactive grouping panel and its drag-only remove target.
   const interactiveGrouping = mount({
+    url: "groupAgg=qty:avg",
     override: {
       features: [groupingPanel<Row>(["team"], {})],
     },

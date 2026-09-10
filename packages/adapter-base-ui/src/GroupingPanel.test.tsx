@@ -53,7 +53,12 @@ function panelState(
     remove: vi.fn(),
     moveBy: vi.fn(),
     setAggregate: vi.fn(),
-    aggregations: { items: [], candidates: [], atDefaults: true },
+    aggregations: {
+      items: [],
+      candidates: [],
+      atDefaults: true,
+      hasDefaults: false,
+    },
     setAggregateOperation: vi.fn(),
     addAggregate: vi.fn(),
     removeAggregate: vi.fn(),
@@ -83,12 +88,35 @@ describe("GroupingPanel (base-ui)", () => {
         "aria-label": defaultLabels.moveGroupingColumn(label),
         onKeyDown: onMoveKey,
       }),
+      aggregations: {
+        items: [],
+        candidates: [
+          {
+            columnKey: "amount",
+            active: false,
+            operations: [{ id: "sum", builtIn: true }],
+          },
+        ],
+        atDefaults: true,
+        hasDefaults: false,
+      },
     });
     renderPanel(state);
 
     expect(
       screen.getByRole("region", { name: defaultLabels.groupingPanel })
     ).toBeInTheDocument();
+    expect(
+      screen.queryByText(defaultLabels.groupingPanel)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: defaultLabels.addGroupingColumn })
+    ).toHaveClass("adapttable-btn");
+    expect(
+      screen.getByRole("combobox", {
+        name: defaultLabels.groupingAddAggregation,
+      })
+    ).toHaveClass("adapttable-btn");
     const handle = screen.getByRole("button", {
       name: defaultLabels.moveGroupingColumn("Team"),
     });
@@ -127,6 +155,9 @@ describe("GroupingPanel (base-ui)", () => {
     );
     expect(drops).toHaveLength(4);
     expect(drops[1]).toHaveAttribute("data-drop-active", "true");
+    for (const drop of drops) {
+      expect(drop.getAttribute("style") ?? "").not.toMatch(/border:\s*0/);
+    }
     expect(
       screen.getByText(defaultLabels.groupingDropToRemove)
     ).toHaveAttribute("data-drop-active", "true");

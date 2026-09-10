@@ -44,7 +44,12 @@ function panelState() {
     remove,
     moveBy,
     setAggregate: vi.fn(),
-    aggregations: { items: [], candidates: [], atDefaults: true },
+    aggregations: {
+      items: [],
+      candidates: [],
+      atDefaults: true,
+      hasDefaults: false,
+    },
     setAggregateOperation: vi.fn(),
     addAggregate: vi.fn(),
     removeAggregate: vi.fn(),

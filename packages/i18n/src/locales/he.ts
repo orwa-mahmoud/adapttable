@@ -296,7 +296,7 @@ export const he: Required<TableLabels> = {
   groupingAggregationDefault: "ברירת מחדל",
   groupingAggregationNone: "ללא",
   groupingAggregations: "צבירות",
-  groupingAddAggregation: "הוספת עמודות",
+  groupingAddAggregation: "הוספת עמודת צבירה",
   groupingRestoreAggregations: "שחזור ברירות מחדל",
   groupingRemoveAggregation: (column) => `הסרת צבירת ${column}`,
   groupingAggregationFor: (column) => `צבירת ${column}`,

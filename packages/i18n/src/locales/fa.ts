@@ -298,7 +298,7 @@ export const fa: Required<TableLabels> = {
   groupingAggregationDefault: "پیش‌فرض",
   groupingAggregationNone: "هیچ‌کدام",
   groupingAggregations: "تجمیع‌ها",
-  groupingAddAggregation: "افزودن ستون‌ها",
+  groupingAddAggregation: "افزودن ستون تجمیع",
   groupingRestoreAggregations: "بازگردانی پیش‌فرض‌ها",
   groupingRemoveAggregation: (column) => `حذف تجمیع ${column}`,
   groupingAggregationFor: (column) => `تجمیع ${column}`,

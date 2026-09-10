@@ -295,7 +295,7 @@ export const zhTW: Required<TableLabels> = {
   groupingAggregationDefault: "預設",
   groupingAggregationNone: "無",
   groupingAggregations: "彙總",
-  groupingAddAggregation: "新增欄",
+  groupingAddAggregation: "新增彙總欄",
   groupingRestoreAggregations: "還原預設",
   groupingRemoveAggregation: (column) => `移除 ${column} 彙總`,
   groupingAggregationFor: (column) => `${column} 彙總`,

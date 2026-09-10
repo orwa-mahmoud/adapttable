@@ -149,8 +149,16 @@ describe("aggregate", () => {
     expect(toAggregateInstant("2024-01-15")).toBe(
       Date.parse("2024-01-15T00:00:00Z")
     );
+    expect(toAggregateInstant("2024-01-15T08:30:00Z")).toBe(
+      Date.parse("2024-01-15T08:30:00Z")
+    );
+    expect(toAggregateInstant("2024-01-15 08:30:00+05:30")).toBe(
+      Date.parse("2024-01-15 08:30:00+05:30")
+    );
+    expect(toAggregateInstant("08:30:00.5")).toBe(30_600_500);
     expect(toAggregateInstant("09/09/2026")).toBeUndefined();
     expect(toAggregateInstant("9 Sep 2026")).toBeUndefined();
+    expect(toAggregateInstant("2024-01-15Tnot-a-time")).toBeUndefined();
     expect(
       toAggregateOrdered(new Date("2024-01-15T00:00:00Z"))?.result
     ).toEqual(new Date("2024-01-15T00:00:00Z"));

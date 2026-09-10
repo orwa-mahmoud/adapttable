@@ -353,7 +353,7 @@ export const shadcnClassNames = {
   groupingPanel:
     "flex flex-wrap items-center gap-2 border-b border-border bg-muted/20 px-3 py-2",
   groupingDropZone:
-    "inline-flex min-h-8 min-w-3 items-center justify-center rounded-md border border-dashed border-border px-2 text-xs text-muted-foreground data-[active]:border-primary data-[active]:bg-primary/10 data-[empty]:min-w-40",
+    "m-0 inline-flex min-h-8 min-w-3 items-center justify-center rounded-md border border-dashed border-border p-0 text-xs text-muted-foreground data-[active]:border-primary data-[active]:bg-primary/10 data-[empty]:min-w-40 data-[empty]:px-2",
   groupingItem: "inline-flex items-center gap-2",
   groupingChip:
     "inline-flex items-center gap-1 rounded-md border border-border bg-background p-1 shadow-sm",
@@ -362,16 +362,16 @@ export const shadcnClassNames = {
   groupingChipRemove:
     "inline-grid size-6 place-items-center rounded text-muted-foreground hover:bg-accent hover:text-foreground",
   groupingAdd:
-    "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
-  groupingAggregations: "inline-flex w-full flex-wrap items-center gap-2",
+    "h-8 w-auto max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+  groupingAggregations: "flex w-full min-w-0 flex-wrap items-center gap-2",
   groupingAggregationItem:
-    "inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-sm",
+    "inline-flex max-w-full items-center gap-0.5 rounded-full bg-muted px-3 py-1 text-sm font-semibold",
   groupingAggregationOperation:
-    "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+    "h-8 border-0 bg-transparent px-1 text-sm font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
   groupingAggregationRemove:
-    "inline-grid size-6 place-items-center rounded text-muted-foreground hover:bg-accent hover:text-foreground",
+    "inline-grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground",
   groupingAggregationAdd:
-    "inline-flex flex-wrap items-center gap-2 text-sm text-foreground",
+    "h-10 w-auto max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
   groupingAggregationsRestore:
     "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
   groupingRemoveZone:

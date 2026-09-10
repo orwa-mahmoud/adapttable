@@ -300,7 +300,7 @@ export const ko: Required<TableLabels> = {
   groupingAggregationDefault: "기본값",
   groupingAggregationNone: "없음",
   groupingAggregations: "집계",
-  groupingAddAggregation: "열 추가",
+  groupingAddAggregation: "집계 열 추가",
   groupingRestoreAggregations: "기본값 복원",
   groupingRemoveAggregation: (column) => `${column} 집계 제거`,
   groupingAggregationFor: (column) => `${column} 집계`,

@@ -123,6 +123,48 @@ describe("enabledKeys", () => {
       )
     ).not.toContain("view.setGroupBy");
   });
+
+  it("advertises aggregations from the grouping panel when columns are eligible", () => {
+    const keys = enabledKeys(
+      observation({
+        featureIds: ["grouping-panel"],
+        source: { ...PAGE_ONLY, grouping: "client" },
+        aggregations: {
+          columns: [
+            { id: "salary", operations: [{ id: "sum", label: "Sum" }] },
+          ],
+          active: [],
+        },
+      })
+    );
+    expect(keys).toContain("view.setAggregations");
+    expect(keys).not.toContain("view.setGroupBy");
+  });
+
+  it("does not advertise aggregations when grouping is off or no column is eligible", () => {
+    expect(
+      enabledKeys(
+        observation({
+          featureIds: ["grouping"],
+          source: { ...PAGE_ONLY, grouping: "client" },
+        })
+      )
+    ).not.toContain("view.setAggregations");
+    expect(
+      enabledKeys(
+        observation({
+          featureIds: ["grouping"],
+          source: PAGE_ONLY,
+          aggregations: {
+            columns: [
+              { id: "salary", operations: [{ id: "sum", label: "Sum" }] },
+            ],
+            active: [],
+          },
+        })
+      )
+    ).not.toContain("view.setAggregations");
+  });
 });
 
 describe("buildManifest", () => {
@@ -400,6 +442,178 @@ describe("createAgentSession", () => {
     const described = session.describe("view.setAggregations");
     expect(described.guide).toContain("salary [sum (Sum), avg (Average)]");
     expect(described.guide).not.toMatch(/calculate\s*:/);
+  });
+
+  it("restores, removes and holds a server aggregation until the host answers", async () => {
+    const apply = { setAggregations: vi.fn() };
+    const columns = [
+      {
+        id: "salary",
+        operations: [
+          { id: "sum", label: "Sum" },
+          { id: "avg", label: "Average" },
+        ],
+      },
+    ];
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: ["grouping"],
+          source: { ...PAGE_ONLY, grouping: "server" },
+          aggregations: {
+            columns,
+            active: [{ id: "salary", operation: "sum" }],
+          },
+        }),
+      apply,
+    });
+    const combined = await session.execute(
+      "view.setAggregations",
+      { restoreDefaults: true, set: { salary: "avg" } },
+      1,
+      "both"
+    );
+    expect(combined.ok).toBe(false);
+    expect(combined.error?.message).toMatch(
+      /restoreDefaults cannot be combined/
+    );
+    expect(apply.setAggregations).not.toHaveBeenCalled();
+
+    const restored = await session.execute(
+      "view.setAggregations",
+      { restoreDefaults: true },
+      1,
+      "restore"
+    );
+    expect(restored.ok).toBe(true);
+    expect(restored.result).toMatchObject({ applied: false, pending: true });
+    expect(apply.setAggregations).toHaveBeenCalledWith({
+      restoreDefaults: true,
+    });
+
+    const removed = await session.execute(
+      "view.setAggregations",
+      { remove: ["salary"] },
+      1,
+      "remove"
+    );
+    expect(removed.ok).toBe(true);
+    expect(apply.setAggregations).toHaveBeenCalledWith({ remove: ["salary"] });
+  });
+
+  it("refuses an aggregation patch that names nothing the table can do", async () => {
+    const apply = { setAggregations: vi.fn() };
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: ["grouping"],
+          source: { ...PAGE_ONLY, grouping: "client" },
+          aggregations: {
+            columns: [
+              {
+                id: "salary",
+                operations: [{ id: "sum", label: "Sum" }],
+              },
+            ],
+            active: [],
+          },
+        }),
+      apply,
+    });
+    const empty = await session.execute("view.setAggregations", {}, 1, "empty");
+    expect(empty.ok).toBe(false);
+    expect(empty.error?.message).toMatch(/set, remove or restoreDefaults/);
+    const badSet = await session.execute(
+      "view.setAggregations",
+      { set: [] },
+      1,
+      "set-array"
+    );
+    expect(badSet.ok).toBe(false);
+    const unnamed = await session.execute(
+      "view.setAggregations",
+      { set: { salary: 1 } },
+      1,
+      "unnamed"
+    );
+    expect(unnamed.ok).toBe(false);
+    const unknownOp = await session.execute(
+      "view.setAggregations",
+      { set: { salary: "median" } },
+      1,
+      "unknown-op"
+    );
+    expect(unknownOp.ok).toBe(false);
+    expect(unknownOp.error?.message).toMatch(/cannot use operation "median"/);
+    const badRemove = await session.execute(
+      "view.setAggregations",
+      { remove: "salary" },
+      1,
+      "remove-scalar"
+    );
+    expect(badRemove.ok).toBe(false);
+    const ghostRemove = await session.execute(
+      "view.setAggregations",
+      { remove: ["ghost"] },
+      1,
+      "ghost-remove"
+    );
+    expect(ghostRemove.ok).toBe(false);
+    expect(ghostRemove.error?.message).toMatch(/cannot be removed/);
+    expect(apply.setAggregations).not.toHaveBeenCalled();
+  });
+
+  it("re-checks aggregations against the table at apply time", async () => {
+    const apply = { setAggregations: vi.fn() };
+    const live = {
+      featureIds: ["grouping"],
+      source: { ...PAGE_ONLY, grouping: "client" as const },
+      aggregations: {
+        columns: [
+          { id: "salary", operations: [{ id: "avg", label: "Average" }] },
+        ],
+        active: [],
+      },
+    };
+    let observes = 0;
+    const stale = createAgentSession({
+      observe: () =>
+        observation({
+          ...live,
+          viewRevision: ++observes === 1 ? 1 : 2,
+        }),
+      apply,
+    });
+    const staleResult = await stale.execute(
+      "view.setAggregations",
+      { set: { salary: "avg" } },
+      1,
+      "stale"
+    );
+    expect(staleResult.ok).toBe(false);
+    expect(staleResult.error?.code).toBe("revision-mismatch");
+
+    observes = 0;
+    const unwired = createAgentSession({
+      observe: () => {
+        observes += 1;
+        return observation(
+          observes === 1
+            ? live
+            : { featureIds: [], source: { ...PAGE_ONLY, grouping: "client" } }
+        );
+      },
+      apply,
+    });
+    const unwiredResult = await unwired.execute(
+      "view.setAggregations",
+      { set: { salary: "avg" } },
+      1,
+      "unwired"
+    );
+    expect(unwiredResult.ok).toBe(false);
+    expect(unwiredResult.error?.code).toBe("not-wired");
+    expect(apply.setAggregations).not.toHaveBeenCalled();
   });
 
   it("clears sort when the key is null", async () => {

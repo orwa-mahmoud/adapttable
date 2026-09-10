@@ -13,8 +13,6 @@ import {
 import {
   Box,
   Button,
-  Checkbox,
-  FormControlLabel,
   IconButton,
   MenuItem,
   Paper,
@@ -24,6 +22,11 @@ import {
 } from "@mui/material";
 
 const TOUCH_TARGET = 44;
+
+/** Closed add control: the shown placeholder plus the kit chevron. */
+function addControlWidth(label: string): string {
+  return `calc(${Math.max(label.length, 1)}ch + 2.75rem)`;
+}
 
 /**
  * How wide one insertion boundary is — one width, whatever is happening.
@@ -63,12 +66,15 @@ const slots: GroupingPanelSlots = {
             gap: 0.75,
           },
           "& > [data-adapttable-part='grouping-aggregations']": {
-            display: "inline-flex",
+            display: "flex",
+            flex: "1 0 100%",
+            width: "100%",
             alignItems: "center",
             flexWrap: "wrap",
             gap: 0.75,
+            minWidth: 0,
           },
-          ...(mobile ? { alignItems: "stretch" } : {}),
+          ...(mobile ? { alignItems: "center" } : {}),
         }}
       >
         {children}
@@ -196,36 +202,50 @@ const slots: GroupingPanelSlots = {
     onChange,
     disabled,
     "data-adapttable-part": part,
-  }: GroupingPanelSelectProps) => (
-    <TextField
-      select
-      size="small"
-      label={label}
-      value={value}
-      disabled={disabled}
-      data-adapttable-part={part}
-      slotProps={{
-        select: { inputProps: { "aria-label": label } },
-      }}
-      sx={{
-        minWidth: 156,
-        flex: "0 1 220px",
-        "& .MuiInputBase-root": { minHeight: TOUCH_TARGET },
-      }}
-      onChange={(event) => onChange(event.target.value)}
-    >
-      {part === "grouping-add" ? (
-        <MenuItem value="" disabled>
-          {label}
-        </MenuItem>
-      ) : null}
-      {options.map((option) => (
-        <MenuItem key={option.value} value={option.value}>
-          {option.label}
-        </MenuItem>
-      ))}
-    </TextField>
-  ),
+  }: GroupingPanelSelectProps) => {
+    const addControl = part === "grouping-add";
+    return (
+      <TextField
+        select
+        size="small"
+        value={value}
+        disabled={disabled}
+        data-adapttable-part={part}
+        slotProps={{
+          select: {
+            displayEmpty: addControl,
+            renderValue: (selected) => {
+              if (addControl && selected === "") return label;
+              return (
+                options.find((option) => option.value === selected)?.label ??
+                String(selected)
+              );
+            },
+            inputProps: { "aria-label": label },
+          },
+        }}
+        sx={{
+          width: addControl ? addControlWidth(label) : undefined,
+          maxWidth: addControl ? "100%" : undefined,
+          flex: addControl ? "0 0 auto" : "0 1 auto",
+          "& .MuiInputBase-root": {
+            minHeight: addControl ? TOUCH_TARGET : 32,
+          },
+          "& .MuiOutlinedInput-notchedOutline":
+            part === "grouping-aggregation-operation"
+              ? { border: "none" }
+              : undefined,
+        }}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {options.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </TextField>
+    );
+  },
   RemoveZone: ({
     label,
     active,
@@ -265,20 +285,26 @@ const slots: GroupingPanelSlots = {
     </Paper>
   ),
   AggregationItem: ({ label, readOnly, readOnlyLabel, children, ...rest }) => (
-    <Paper
+    <Box
       component="span"
-      variant="outlined"
       sx={{
-        px: 1,
-        py: 0.5,
+        pl: 1.5,
+        pr: 0.5,
+        minHeight: 36,
         display: "inline-flex",
         alignItems: "center",
         gap: 0.5,
+        borderRadius: 999,
+        bgcolor: "action.hover",
+        maxWidth: "100%",
       }}
       data-read-only={readOnly || undefined}
       {...rest}
     >
-      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+      <Typography
+        variant="body2"
+        sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
+      >
         {label}
       </Typography>
       {readOnly ? (
@@ -288,53 +314,55 @@ const slots: GroupingPanelSlots = {
       ) : (
         children
       )}
-    </Paper>
+    </Box>
   ),
   AggregationRemove: ({ label, onRemove, ...rest }) => (
     <IconButton size="small" aria-label={label} onClick={onRemove} {...rest}>
       {"\u00d7"}
     </IconButton>
   ),
-  AggregationPicker: ({ label, options, onToggle, disabled, ...rest }) => (
-    <Stack
-      component="fieldset"
-      direction="row"
-      aria-label={label}
-      sx={{
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 1,
-        border: 0,
-        m: 0,
-        p: 0,
-        minInlineSize: 0,
-      }}
+  AggregationPicker: ({ label, options, onToggle, disabled, ...rest }) => {
+    const available = options.filter((option) => !option.checked);
+    return (
+      <TextField
+        select
+        size="small"
+        value=""
+        disabled={disabled === true || available.length === 0}
+        slotProps={{
+          select: {
+            displayEmpty: true,
+            renderValue: () => label,
+            inputProps: { "aria-label": label },
+          },
+        }}
+        sx={{
+          width: addControlWidth(label),
+          maxWidth: "100%",
+          flex: "0 0 auto",
+          "& .MuiInputBase-root": { minHeight: TOUCH_TARGET },
+        }}
+        onChange={(event) => {
+          if (event.target.value) onToggle(event.target.value, true);
+        }}
+        {...rest}
+      >
+        {available.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </TextField>
+    );
+  },
+  AggregationRestore: ({ label, disabled, onRestore, ...rest }) => (
+    <Button
+      size="small"
+      variant="outlined"
+      disabled={disabled}
+      onClick={onRestore}
       {...rest}
     >
-      <Typography variant="caption" color="text.secondary">
-        {label}
-      </Typography>
-      {options.map((option) => (
-        <FormControlLabel
-          key={option.value}
-          label={option.label}
-          slotProps={{ typography: { variant: "body2" } }}
-          control={
-            <Checkbox
-              size="small"
-              checked={option.checked}
-              disabled={disabled}
-              onChange={(event) => onToggle(option.value, event.target.checked)}
-              slotProps={{ input: { "aria-label": option.label } }}
-              data-adapttable-part="grouping-aggregation-option"
-            />
-          }
-        />
-      ))}
-    </Stack>
-  ),
-  AggregationRestore: ({ label, disabled, onRestore, ...rest }) => (
-    <Button size="small" disabled={disabled} onClick={onRestore} {...rest}>
       {label}
     </Button>
   ),

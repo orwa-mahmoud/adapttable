@@ -88,6 +88,7 @@ function panel(
         },
       ],
       atDefaults: true,
+      hasDefaults: false,
     },
     setAggregateOperation: vi.fn(),
     addAggregate: vi.fn(),

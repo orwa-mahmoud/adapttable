@@ -14,5 +14,7 @@
 
 The grouping panel now lists every active aggregation as its own item, driven
 by a column's `aggregatable` declaration. Developer defaults appear immediately;
-Add columns and Restore defaults keep multiple aggregations honest; a stale or
-disallowed operation is refused at execution, not only in the picker.
+Add aggregation column sits on its own row under the grouping chips;
+Restore defaults appears only when the developer sent a baseline the reader
+changed; a stale or disallowed operation is refused at execution, not only in
+the picker.

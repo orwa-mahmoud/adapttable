@@ -302,7 +302,7 @@ export const hi: Required<TableLabels> = {
   groupingAggregationDefault: "डिफ़ॉल्ट",
   groupingAggregationNone: "कोई नहीं",
   groupingAggregations: "एकत्रीकरण",
-  groupingAddAggregation: "स्तंभ जोड़ें",
+  groupingAddAggregation: "एकत्रीकरण स्तंभ जोड़ें",
   groupingRestoreAggregations: "डिफ़ॉल्ट पुनर्स्थापित करें",
   groupingRemoveAggregation: (column) => `${column} एकत्रीकरण हटाएँ`,
   groupingAggregationFor: (column) => `${column} एकत्रीकरण`,
