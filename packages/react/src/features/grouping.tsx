@@ -20,7 +20,7 @@ import {
   type GroupSort,
   insertExtraRows,
   parseGroupBy,
-  serializeGroupAggregateOverrides,
+  serializeAggregationDerivedKey,
   sourceCapabilities,
   withGroupAggregateOverrides,
 } from "@adapttable/core";
@@ -83,12 +83,6 @@ function LiveGrouping({
     onGroupLoadMore,
     extraRows,
   } = props;
-  // The reader's aggregation choices, as a value. The mapper below is a new
-  // closure every render, so nothing downstream can tell one choice from
-  // another by identity — this is what says the answer changed.
-  const aggregateOverrideKey = serializeGroupAggregateOverrides(
-    source.groupAggregateOverrides ?? {}
-  );
   const aggregationSource = useMemo(
     () => ({
       grouping: sourceCapabilities({
@@ -122,6 +116,17 @@ function LiveGrouping({
       source.groupAggregateOverrides,
     ]
   );
+  // Reader overrides alone are not enough: a host default changing from
+  // Sum to Average with the same rows must rebuild the cached groups.
+  const aggregateDerivedKey = serializeAggregationDerivedKey({
+    columns: chrome.allColumns,
+    overrides: source.groupAggregateOverrides ?? {},
+    declared:
+      declaredAggregates(effectiveGroupAggregates) ??
+      chrome.groupingPanel?.declaredAggregates,
+    queryAggregates: source.queryAggregates,
+    source: aggregationSource,
+  });
 
   const grouping = useMemo(() => {
     if (groupByKeys.length === 0) return undefined;
@@ -147,7 +152,7 @@ function LiveGrouping({
       groupPageSize,
       rowPageSize: groupRowPageSize,
       paging: groupPaging.paging,
-      derivedKey: aggregateOverrideKey,
+      derivedKey: aggregateDerivedKey,
       // Server groups: only metadata tied to the displayed response.
       // `undefined` means the operation is unknown — never the reader's
       // latest request. Local groups: the operation actually applied after
@@ -203,7 +208,7 @@ function LiveGrouping({
     chrome.columnLayout.visibleColumns,
     getRowId,
     groupCollapse,
-    aggregateOverrideKey,
+    aggregateDerivedKey,
     source.groupAggregateOverrides,
     source.groupAggregations,
     effectiveGroupAggregates,

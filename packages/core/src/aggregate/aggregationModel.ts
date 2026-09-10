@@ -316,6 +316,41 @@ export function effectiveAggregateOps<TRow>(
 }
 
 /**
+ * What the incremental groups must rebuild against — the operations that
+ * will actually run, not the mapper's identity or the reader's overrides
+ * alone.
+ *
+ * Changing a column default from Sum to Average with the same rows and the
+ * same (empty) overrides used to keep the Sum cache: the derived key only
+ * named reader state. Equivalent configurations still share one key.
+ *
+ * @typeParam TRow - The row type.
+ * @param input - The same input {@link effectiveAggregateOps} reads.
+ * @returns A stable fingerprint, or `undefined` when nothing is effective.
+ *
+ * @public
+ */
+export function serializeAggregationDerivedKey<TRow>(
+  input: AggregationModelInput<TRow>
+): string | undefined {
+  const ops = effectiveAggregateOps(input);
+  const parts = Object.entries(ops ?? {})
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, id]) => `${key}:${id}`);
+  const suppressed = Object.entries(input.overrides)
+    .filter(
+      ([key, value]) =>
+        value === AGGREGATE_SUPPRESSED && ops?.[key] === undefined
+    )
+    .map(([key]) => key)
+    .sort((left, right) => left.localeCompare(right));
+  if (parts.length === 0 && suppressed.length === 0) return undefined;
+  return suppressed.length === 0
+    ? parts.join(",")
+    : `${parts.join(",")}|none:${suppressed.join(",")}`;
+}
+
+/**
  * A column's offer, as a stable string the panel can watch.
  *
  * Changing allowed operations without changing the key used to leave a

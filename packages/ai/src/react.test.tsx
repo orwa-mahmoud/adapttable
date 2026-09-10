@@ -954,4 +954,174 @@ describe("tableAgent", () => {
     expect(unwired.ok).toBe(false);
     expect(unwired.error?.message).toMatch(/setAggregations is not wired/);
   });
+
+  it("executes a server-only custom aggregator the catalog advertised", async () => {
+    const setAggregateOverrides = vi.fn();
+    let session: AgentSession | undefined;
+    render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "server-median",
+            columns: { salary: { label: "Salary", type: "number" } },
+            bridge: { attach: (next) => (session = next) },
+          }),
+          { id: "grouping" },
+        ]}
+        view={{
+          rows: [{ id: "1", salary: 10 }],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+          sourceCapabilities: {
+            fullDataset: false,
+            grouping: "server",
+            selectAcrossPages: false,
+            exportScope: "page",
+            totalCount: "loaded",
+          },
+          groupingState: {
+            groupBy: "team",
+            aggregateOverrides: {},
+            columnLabel: (key) => key,
+            columns: [
+              {
+                key: "salary",
+                aggregatable: {
+                  operations: [{ id: "median", label: "Median" }],
+                },
+              },
+            ],
+            aggregateOperations: ["median"],
+            honorsAggregates: true,
+            setGroupBy: vi.fn(),
+            setAggregateOverrides,
+          },
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    const described = session!.describe("view.setAggregations");
+    expect(described.guide).toContain("median");
+    const set = await session!.execute(
+      "view.setAggregations",
+      { set: { salary: "median" } },
+      session!.manifest().viewRevision,
+      "set-median"
+    );
+    expect(set.ok).toBe(true);
+    expect(setAggregateOverrides).toHaveBeenCalledWith({ salary: "median" });
+  });
+
+  it("does not advertise or accept aggregations on an unreadable column", async () => {
+    const setAggregateOverrides = vi.fn();
+    let session: AgentSession | undefined;
+    const groupingState = {
+      groupBy: "team",
+      aggregateOverrides: {},
+      columnLabel: (key: string) => key,
+      columns: [
+        {
+          key: "salary",
+          aggregatable: { operations: ["sum", "avg"] as const },
+        },
+        {
+          key: "headcount",
+          aggregatable: { operations: ["count"] as const },
+        },
+      ],
+      setGroupBy: vi.fn(),
+      setAggregateOverrides,
+    };
+    const capabilities = {
+      fullDataset: true,
+      grouping: "client" as const,
+      selectAcrossPages: false,
+      exportScope: "page" as const,
+      totalCount: "loaded" as const,
+    };
+    const view = {
+      rows: [{ id: "1", salary: 10, headcount: 1 }],
+      getRowId: () => "1",
+      rowLabel: () => "1",
+      sourceCapabilities: capabilities,
+      groupingState,
+    };
+    const { rerender } = render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "hidden-agg",
+            columns: {
+              salary: { label: "Salary", type: "number", readable: false },
+              headcount: { label: "Headcount", type: "number" },
+            },
+            bridge: { attach: (next) => (session = next) },
+          }),
+          { id: "grouping" },
+        ]}
+        view={view}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    const described = session!.describe("view.setAggregations");
+    expect(described.guide).toContain("headcount");
+    expect(described.guide).not.toContain("salary");
+    const hidden = await session!.execute(
+      "view.setAggregations",
+      { set: { salary: "sum" } },
+      session!.manifest().viewRevision,
+      "hidden-sum"
+    );
+    expect(hidden.ok).toBe(false);
+    expect(hidden.error?.message).toMatch(/cannot use operation "sum"/);
+    expect(setAggregateOverrides).not.toHaveBeenCalled();
+
+    session = undefined;
+    rerender(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "hidden-agg",
+            columns: {
+              salary: { label: "Salary", type: "number" },
+              headcount: { label: "Headcount", type: "number" },
+            },
+            bridge: { attach: (next) => (session = next) },
+          }),
+          { id: "grouping" },
+        ]}
+        view={view}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.describe("view.setAggregations").guide).toContain("salary");
+
+    session = undefined;
+    rerender(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "hidden-agg",
+            columns: {
+              salary: { label: "Salary", type: "number", readable: false },
+              headcount: { label: "Headcount", type: "number" },
+            },
+            bridge: { attach: (next) => (session = next) },
+          }),
+          { id: "grouping" },
+        ]}
+        view={view}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    const revoked = await session!.execute(
+      "view.setAggregations",
+      { set: { salary: "avg" } },
+      session!.manifest().viewRevision,
+      "revoked-avg"
+    );
+    expect(revoked.ok).toBe(false);
+    expect(revoked.error?.message).toMatch(/cannot use operation "avg"/);
+    expect(setAggregateOverrides).not.toHaveBeenCalled();
+  });
 });

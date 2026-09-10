@@ -27,6 +27,7 @@ import {
   reconcileAggregations as reconcile,
   removeAggregation,
   restoreAggregationDefaults,
+  serializeAggregationDerivedKey,
 } from "./aggregationModel";
 
 interface Row {
@@ -629,6 +630,43 @@ describe("what the table refuses", () => {
         aggregatable: { operations: ["avg"] },
       })
     ).toBe("load::avg");
+  });
+
+  it("fingerprints the effective operations, not override identity alone", () => {
+    const sumDefault: ColumnMetadata<Row>[] = [
+      {
+        key: "budget",
+        aggregatable: { default: "sum", operations: ["sum", "avg"] },
+      },
+    ];
+    const avgDefault: ColumnMetadata<Row>[] = [
+      {
+        key: "budget",
+        aggregatable: { default: "avg", operations: ["sum", "avg"] },
+      },
+    ];
+    const sumOnly: ColumnMetadata<Row>[] = [
+      { key: "budget", aggregatable: { default: "sum", operations: ["sum"] } },
+    ];
+    expect(
+      serializeAggregationDerivedKey({ columns: sumDefault, overrides: {} })
+    ).toBe("budget:sum");
+    expect(
+      serializeAggregationDerivedKey({ columns: avgDefault, overrides: {} })
+    ).toBe("budget:avg");
+    // Narrowing the offer without changing the effective operation is the
+    // same configuration — the incremental cache must keep the groups.
+    expect(
+      serializeAggregationDerivedKey({ columns: sumOnly, overrides: {} })
+    ).toBe(
+      serializeAggregationDerivedKey({ columns: sumDefault, overrides: {} })
+    );
+    expect(
+      serializeAggregationDerivedKey({
+        columns: sumDefault,
+        overrides: { budget: "none" },
+      })
+    ).toBe("|none:budget");
   });
 
   it("does not keep a computed key from a different dataset", () => {

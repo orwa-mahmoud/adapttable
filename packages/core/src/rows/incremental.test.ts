@@ -6,9 +6,11 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { aggregate } from "../aggregate/aggregate";
+import { serializeAggregationDerivedKey } from "../aggregate/aggregationModel";
 import type { ColumnModel } from "../columnModel";
 import type { FilterDef } from "../filters/filterDefs";
 import { evaluateFilterTree } from "../filters/filterTree";
+import { withGroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import {
   buildGroupedFlatModel,
   type GroupedFlatEntry,
@@ -585,6 +587,73 @@ describe("configureIncrementalView", () => {
     });
     // Only the groups are rebuilt; the rows underneath keep their identity.
     expect(chosen.sorted).toBe(view.sorted);
+  });
+
+  it("rebuilds totals when a column default changes and keeps them when it does not", () => {
+    const withBudget = (
+      aggregatable: NonNullable<ColumnModel<Person>["aggregatable"]>
+    ): ColumnModel<Person>[] =>
+      COLS.map((column) =>
+        column.key === "budget" ? { ...column, aggregatable } : column
+      );
+    const sumColumns = withBudget({
+      default: "sum",
+      operations: ["sum", "avg"],
+    });
+    const avgColumns = withBudget({
+      default: "avg",
+      operations: ["sum", "avg"],
+    });
+    const sumOnlyColumns = withBudget({
+      default: "sum",
+      operations: ["sum"],
+    });
+    const keyOf = (columns: ColumnModel<Person>[]) =>
+      serializeAggregationDerivedKey({ columns, overrides: {} });
+    const mapperOf = (columns: ColumnModel<Person>[]) =>
+      withGroupAggregateOverrides(undefined, {}, columns);
+
+    const view = createIncrementalView(ROWS, {
+      getRowId: byId,
+      columns: sumColumns,
+      groupBy: "team",
+      groupAggregates: mapperOf(sumColumns),
+      derivedKey: keyOf(sumColumns),
+    });
+    const core = view.groups?.find(
+      (entry) => entry.kind === "group" && entry.label === "Core"
+    );
+    expect(core?.kind === "group" && core.aggregateCells).toEqual({
+      budget: 180,
+    });
+
+    const sameOffer = configureIncrementalView(view, {
+      columns: [...sumColumns],
+      groupAggregates: mapperOf([...sumColumns]),
+      derivedKey: keyOf([...sumColumns]),
+    });
+    expect(sameOffer.groups).toBe(view.groups);
+
+    const narrowed = configureIncrementalView(view, {
+      columns: sumOnlyColumns,
+      groupAggregates: mapperOf(sumOnlyColumns),
+      derivedKey: keyOf(sumOnlyColumns),
+    });
+    expect(narrowed.groups).toBe(view.groups);
+
+    const averaged = configureIncrementalView(view, {
+      columns: avgColumns,
+      groupAggregates: mapperOf(avgColumns),
+      derivedKey: keyOf(avgColumns),
+    });
+    expect(averaged.groups).not.toBe(view.groups);
+    const avgCore = averaged.groups?.find(
+      (entry) => entry.kind === "group" && entry.label === "Core"
+    );
+    expect(avgCore?.kind === "group" && avgCore.aggregateCells).toEqual({
+      budget: 90,
+    });
+    expect(averaged.sorted).toBe(view.sorted);
   });
 
   it("rebuilds groups without replacing filtered / sorted", () => {

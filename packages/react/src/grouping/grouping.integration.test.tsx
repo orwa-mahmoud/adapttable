@@ -313,3 +313,85 @@ describe("grouping panel integration", () => {
     expect(result.current.groupingPanel?.canSetAggregates).toBe(true);
   });
 });
+
+describe("incremental totals follow effective aggregation config", () => {
+  interface PaidRow {
+    id: string;
+    team: string;
+    salary: number;
+  }
+
+  const PAID: PaidRow[] = [
+    { id: "1", team: "Core", salary: 100 },
+    { id: "2", team: "Core", salary: 80 },
+    { id: "3", team: "Web", salary: 40 },
+  ];
+
+  it("rebuilds cached group totals when a column default changes", () => {
+    const chrome: { current: TableChrome<PaidRow> | undefined } = {
+      current: undefined,
+    };
+    function Probe({
+      aggregatable,
+    }: {
+      aggregatable: {
+        default: "sum" | "avg";
+        operations: readonly ("sum" | "avg")[];
+      };
+    }) {
+      const columns = [{ key: "team" }, { key: "salary", aggregatable }];
+      const applied = applyTableFeatures({
+        features: [grouping("team")],
+      });
+      function Live() {
+        const source = useFrontendData<PaidRow>({
+          data: PAID,
+          columns,
+          urlAdapter: createMemoryAdapter(""),
+          defaults: { limit: 10 },
+        });
+        const chromeProps = {
+          ...applied,
+          source,
+          columns,
+          rowKey: (row: PaidRow) => row.id,
+          groupBy: "team",
+        };
+        const base = useTableChrome<PaidRow>(chromeProps);
+        return (
+          <ChromeExtrasGate chrome={base} props={chromeProps}>
+            {(overlaid) => {
+              chrome.current = overlaid;
+              return null;
+            }}
+          </ChromeExtrasGate>
+        );
+      }
+      return (
+        <FeatureProviders props={applied}>
+          <Live />
+        </FeatureProviders>
+      );
+    }
+
+    const { rerender } = render(
+      <Probe aggregatable={{ default: "sum", operations: ["sum", "avg"] }} />
+    );
+    const coreSum = chrome.current?.grouping?.entries.find(
+      (entry) => entry.kind === "group" && entry.label === "Core"
+    );
+    expect(coreSum?.kind === "group" && coreSum.aggregateCells).toEqual({
+      salary: 180,
+    });
+
+    rerender(
+      <Probe aggregatable={{ default: "avg", operations: ["sum", "avg"] }} />
+    );
+    const coreAvg = chrome.current?.grouping?.entries.find(
+      (entry) => entry.kind === "group" && entry.label === "Core"
+    );
+    expect(coreAvg?.kind === "group" && coreAvg.aggregateCells).toEqual({
+      salary: 90,
+    });
+  });
+});

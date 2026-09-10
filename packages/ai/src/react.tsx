@@ -309,7 +309,7 @@ function observationFromRuntime(
           : undefined
       ),
       groupBy: view?.groupingState?.groupBy,
-      aggregations: aggregationsFromView(view),
+      aggregations: aggregationsFromView(view, options),
     };
   }
   const columns = columnsForRuntime(options, runtime).map((column) =>
@@ -358,7 +358,7 @@ function observationFromRuntime(
     sortBy: query?.sortBy,
     sortDir: query?.sortDir,
     groupBy: view?.groupingState?.groupBy,
-    aggregations: aggregationsFromView(view),
+    aggregations: aggregationsFromView(view, options),
     pageMax: view?.rows?.length ?? 10,
     readMax: options.readMax ?? 50,
     rowAddressScope: "visible",
@@ -531,7 +531,7 @@ function applyFromRuntime(
       grouping.setGroupBy(key);
     },
     setAggregations: (patch) => {
-      applyAggregationsPatch(view()?.groupingState, patch);
+      applyAggregationsPatch(view(), patch, options.columns);
     },
     pinColumn: (key, side) => {
       const pinning = view()?.pinning;
@@ -557,22 +557,45 @@ const BUILTIN_AGGREGATE_LABELS: Readonly<Record<string, string>> = {
   count: "Count",
 };
 
-function aggregationsFromView(
+function aggregationSourceFromView(
   view: ReturnType<ReturnType<typeof useTableRuntime>["view"]>
-): AgentAggregations | undefined {
+):
+  | {
+      grouping: "client" | "server" | false | undefined;
+      aggregateOperations: readonly string[] | undefined;
+    }
+  | undefined {
   const groupingState = view?.groupingState;
-  if (!groupingState?.setAggregateOverrides) return undefined;
+  if (!groupingState) return undefined;
   const grouping = view?.sourceCapabilities?.grouping;
   if (grouping === false) return undefined;
   if (grouping === "server" && groupingState.honorsAggregates !== true) {
     return undefined;
   }
-  const source = {
+  return {
     grouping,
     aggregateOperations: groupingState.aggregateOperations,
   };
+}
+
+function agentAllowsAggregationColumn(
+  key: string,
+  patches: TableAgentOptions["columns"]
+): boolean {
+  return patches?.[key]?.readable !== false;
+}
+
+function aggregationsFromView(
+  view: ReturnType<ReturnType<typeof useTableRuntime>["view"]>,
+  options: TableAgentOptions
+): AgentAggregations | undefined {
+  const groupingState = view?.groupingState;
+  if (!groupingState?.setAggregateOverrides) return undefined;
+  const source = aggregationSourceFromView(view);
+  if (!source) return undefined;
   const columns: AgentAggregationColumn[] = [];
   for (const column of groupingState.columns ?? []) {
+    if (!agentAllowsAggregationColumn(column.key, options.columns)) continue;
     const resolved = resolveAggregatable(column);
     const operations = offerableOperations(resolved, source);
     if (operations.length === 0) continue;
@@ -602,11 +625,11 @@ function aggregationsFromView(
 }
 
 function applyAggregationsPatch(
-  groupingState: NonNullable<
-    ReturnType<ReturnType<typeof useTableRuntime>["view"]>
-  >["groupingState"],
-  patch: AgentAggregationsPatch
+  view: ReturnType<ReturnType<typeof useTableRuntime>["view"]>,
+  patch: AgentAggregationsPatch,
+  patches: TableAgentOptions["columns"]
 ): void {
+  const groupingState = view?.groupingState;
   if (!groupingState?.setAggregateOverrides) {
     throw new Error("setAggregations is not wired");
   }
@@ -614,8 +637,8 @@ function applyAggregationsPatch(
     groupingState.setAggregateOverrides(restoreAggregationDefaults());
     return;
   }
-  const source = {
-    grouping: undefined as "client" | "server" | false | undefined,
+  const source = aggregationSourceFromView(view) ?? {
+    grouping: view?.sourceCapabilities?.grouping,
     aggregateOperations: groupingState.aggregateOperations,
   };
   const byKey = new Map(
@@ -625,6 +648,7 @@ function applyAggregationsPatch(
     const column = byKey.get(key);
     const resolved = column ? resolveAggregatable(column) : undefined;
     if (
+      !agentAllowsAggregationColumn(key, patches) ||
       !resolved ||
       !offerableOperations(resolved, source).some(
         (operation) => operation.id === operationId
@@ -635,7 +659,11 @@ function applyAggregationsPatch(
   }
   for (const key of patch.remove ?? []) {
     const column = byKey.get(key);
-    if (!column || !readerControlAllowed(resolveAggregatable(column), source)) {
+    if (
+      !agentAllowsAggregationColumn(key, patches) ||
+      !column ||
+      !readerControlAllowed(resolveAggregatable(column), source)
+    ) {
       throw new Error(`"${key}" cannot be removed`);
     }
   }
