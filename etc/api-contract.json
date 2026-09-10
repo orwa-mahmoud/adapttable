@@ -559,6 +559,8 @@
       "WritePolicy",
       "WriteProposal",
       "WriteRowResult",
+      "AgentSystemPromptInput",
+      "agentSystemPrompt",
       "assistantHttpTransport",
       "connectAgentHttp",
       "createAgentHttpClient",

@@ -42,7 +42,7 @@ import { toMcpTools, toMcpResources, mcpListChanged } from "@adapttable/ai/mcp";
 - `@adapttable/ai/json` — plain JSON function tools + `AgentEnvelope`
 - `@adapttable/ai/openai` — strict function tools with OpenAI-safe names (`view_setPage`); `{ deferred: true }` is the portable trio
 - `@adapttable/ai/mcp` — tools in catalog order, per-key guide resources, list-changed
-- `@adapttable/ai/http` — optional endpoint client; [connect a backend](https://orwa-mahmoud.github.io/adapttable/ai-http/)
+- `@adapttable/ai/http` — optional endpoint client and `agentSystemPrompt`; [connect a backend](https://orwa-mahmoud.github.io/adapttable/ai-http/)
 
 The catalog lists only enabled features, permissions, source support and
 host callbacks. A filtering + pagination table does not advertise

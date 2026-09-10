@@ -295,6 +295,27 @@ export interface AgentSession {
 }
 
 // @public
+export function agentSystemPrompt(request: AgentSystemPromptInput): string;
+
+// @public
+export interface AgentSystemPromptInput {
+    readonly catalog: readonly {
+        readonly key: string;
+        readonly summary: string;
+    }[];
+    readonly manifest: {
+        readonly columns: readonly {
+            readonly id: string;
+            readonly label: string;
+            readonly readable: boolean;
+            readonly writable: boolean;
+        }[];
+        readonly viewRevision: number;
+    };
+    readonly tableId: string;
+}
+
+// @public
 export type ApprovalOutcome = "pending" | "approved" | "partial" | "rejected" | "cancelled" | "not-required";
 
 // @public

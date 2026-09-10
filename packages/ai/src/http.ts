@@ -20,6 +20,7 @@ import type {
 
 // `assistantHttpTransport` hands back this interface, and its `send` names
 // these two, so the entry that publishes the function publishes them too.
+export { agentSystemPrompt, type AgentSystemPromptInput } from "./agentPrompt";
 export type {
   AssistantExchange,
   AssistantTransport,

@@ -26,6 +26,7 @@ import {
   AGENT_HTTP_SCHEMA,
   type AgentHttpRequest,
   type AgentHttpResponse,
+  agentSystemPrompt,
   parseAgentHttpRequest,
   parseAgentHttpResponse,
 } from "@adapttable/ai/http";
@@ -175,32 +176,6 @@ function writeJson(res: ServerResponse, status: number, body: unknown): void {
   res.end(JSON.stringify(body));
 }
 
-function catalogPrompt(request: AgentHttpRequest): string {
-  const lines = request.catalog.map(
-    (entry) => `- ${entry.key}: ${entry.summary}`
-  );
-  const columns = request.manifest.columns.map((column) => {
-    const flags = [
-      column.readable ? "readable" : "hidden",
-      column.writable ? "writable" : "read-only",
-    ].join(", ");
-    return `- ${column.id} (${column.label}, ${flags})`;
-  });
-  return [
-    `Table ${request.tableId} revision ${String(request.manifest.viewRevision)}.`,
-    "Enabled capabilities (do not invent others):",
-    ...lines,
-    "Columns:",
-    ...columns,
-    'Return JSON only: {"text":"...","actions":[{"key":"view.setPage","args":{"page":2},"idempotencyKey":"unique"}],"needs":{"describe":["edit.cells"],"read":[{"offset":0,"limit":5}]}}.',
-    "Use needs.describe when you need a capability schema. Use needs.read for a bounded window. Never ask for the whole dataset.",
-    "Never guess an argument shape. Grouping, pinning and every row-addressing capability have real schemas.",
-    "If you need schemas, ask ONCE: put every key you need in a single needs.describe, then act on the guides you get back. Repeating discovery instead of acting ends the turn with nothing done.",
-    "Address a row by its stable rowKey, or by a 1-based position together with the scope and the expectedRevision that position was read at.",
-    "actions may be omitted. A text-only answer is complete. Do not call a second model turn just to say done.",
-  ].join("\n");
-}
-
 function userPrompt(request: AgentHttpRequest): string {
   const parts = [request.message ?? ""];
   if (request.descriptions?.length) {
@@ -233,11 +208,7 @@ function userPrompt(request: AgentHttpRequest): string {
   return parts.join("\n\n");
 }
 
-function asReply(
-  raw: string,
-  request: AgentHttpRequest,
-  turnNonce: string
-): AgentHttpResponse {
+function asReply(raw: string, turnNonce: string): AgentHttpResponse {
   const body: unknown = JSON.parse(raw);
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     throw new TypeError("provider returned a non-object");
@@ -254,10 +225,9 @@ function asReply(
           key,
           args: item.args ?? {},
           idempotencyKey: `${turnNonce}:${String(index)}`,
-          expectedRevision:
-            typeof item.expectedRevision === "number"
-              ? item.expectedRevision
-              : request.manifest.viewRevision,
+          ...(typeof item.expectedRevision === "number"
+            ? { expectedRevision: item.expectedRevision }
+            : {}),
         };
       })
     : undefined;
@@ -266,7 +236,9 @@ function asReply(
     text: typeof record.text === "string" ? record.text : "",
     actions,
     needs: record.needs,
-    continueWithResults: record.continueWithResults === true,
+    // The table already applied the actions. A second model call that only
+    // says "done" is the confirmation loop the reader does not want.
+    continueWithResults: false,
   });
 }
 
@@ -283,11 +255,11 @@ export async function handleExampleAgentTurn(
     };
   }
   const raw = await complete({
-    system: catalogPrompt(request),
+    system: agentSystemPrompt(request),
     user: userPrompt(request),
     signal,
   });
-  return asReply(raw, request, randomBytes(8).toString("hex"));
+  return asReply(raw, randomBytes(8).toString("hex"));
 }
 
 async function completeOpenAI(

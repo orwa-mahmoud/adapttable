@@ -1387,6 +1387,7 @@ on subpaths: `@adapttable/ai/json` (`toJsonTools`, `JsonFunctionTool`,
 `toMcpResources`, `McpResource`, `mcpListChanged`, `executeMcpTool`),
 `@adapttable/ai/http` (`createAgentHttpClient`, `connectAgentHttp`,
 `runAgentHttpTurn`, `parseAgentHttpRequest`, `parseAgentHttpResponse`,
+`agentSystemPrompt`, `AgentSystemPromptInput`,
 `AGENT_HTTP_SCHEMA`, `AgentHttpKind`, `AgentHttpMessage`, `AgentHttpNeeds`,
 `AgentHttpAction`, `AgentHttpRequest`, `AgentHttpResponse`,
 `AgentHttpClientOptions`, `AgentHttpTurnResult`). See

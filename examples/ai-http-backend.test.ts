@@ -173,6 +173,8 @@ describe("handleExampleAgentTurn", () => {
 
     assert.match(seen, /needs\.describe/);
     assert.match(seen, /pinning/i);
+    assert.match(seen, /emit those actions in this same reply/);
+    assert.match(seen, /highest\/huge\/biggest first is desc/);
     // The prompt must not teach a shape the session owns: a hand-written
     // example would go stale the moment the schema changed.
     assert.doesNotMatch(seen, /"side"\s*:/);

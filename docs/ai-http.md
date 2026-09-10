@@ -135,8 +135,13 @@ Implement the protocol below, or adapt your agent runtime so it emits the
 same JSON. The showcase and `createAgentHttpClient` need no custom glue
 when the body matches.
 
+Junior backends import `agentSystemPrompt` and send that string as the
+model system prompt. Senior backends skip it and keep their own prompt
+or tools. The example calls the export; it does not keep a private copy
+of the skill text.
+
 ```ts
-import { createAgentHttpClient } from "@adapttable/ai/http";
+import { agentSystemPrompt, createAgentHttpClient } from "@adapttable/ai/http";
 
 const client = createAgentHttpClient({
   endpoint: "https://your.example/agent",

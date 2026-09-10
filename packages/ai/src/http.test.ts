@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  AgentHttpError,
   connectAgentHttp,
   createAgentHttpClient,
   parseAgentHttpRequest,
