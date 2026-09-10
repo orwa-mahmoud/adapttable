@@ -449,18 +449,50 @@ describe("createAgentHttpClient", () => {
     expect(reads).toBe(2);
   });
 
-  it("binds omitted expectedRevision to the request snapshot", async () => {
+  it("runs omitted expectedRevision against the live table after a view tick", async () => {
     let revision = 1;
     const setPage = vi.fn();
     const live = createAgentSession({
       observe: () => observation({ viewRevision: revision, approval: "never" }),
       apply: { setPage },
     });
+    const result = await runAgentHttpTurn(live, "Page 2", {
+      endpoint: "https://agent.example/turn",
+      request: () => {
+        revision = 2;
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          actions: [
+            {
+              key: "view.setPage",
+              args: { page: 2 },
+              idempotencyKey: "page-2",
+            },
+          ],
+        });
+      },
+    });
+    expect(result.results[0]?.ok).toBe(true);
+    expect(setPage).toHaveBeenCalledWith(2);
+  });
+
+  it("still fails the turn when policy changes mid-flight", async () => {
+    let writePolicy: "allow" | "deny" = "allow";
+    const setPage = vi.fn();
+    const live = createAgentSession({
+      observe: () =>
+        observation({
+          viewRevision: 1,
+          approval: "never",
+          writePolicy,
+        }),
+      apply: { setPage },
+    });
     await expect(
       runAgentHttpTurn(live, "Page 2", {
         endpoint: "https://agent.example/turn",
         request: () => {
-          revision = 2;
+          writePolicy = "deny";
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             actions: [
@@ -475,6 +507,42 @@ describe("createAgentHttpClient", () => {
       })
     ).rejects.toMatchObject({ code: "context-stale" });
     expect(setPage).not.toHaveBeenCalled();
+  });
+
+  it("chains filter then sort when the first apply advances the revision", async () => {
+    let revision = 1;
+    const setFilters = vi.fn(() => {
+      revision += 1;
+    });
+    const setSort = vi.fn(() => {
+      revision += 1;
+    });
+    const live = createAgentSession({
+      observe: () => observation({ viewRevision: revision, approval: "never" }),
+      apply: { setFilters, setSort },
+    });
+    const result = await runAgentHttpTurn(live, "Active, salary first", {
+      endpoint: "https://agent.example/turn",
+      request: () =>
+        Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          actions: [
+            {
+              key: "view.setFilters",
+              args: { filters: { status: ["Active"] } },
+              idempotencyKey: "filter-active",
+            },
+            {
+              key: "view.setSort",
+              args: { key: "salary", dir: "desc" },
+              idempotencyKey: "sort-salary",
+            },
+          ],
+        }),
+    });
+    expect(result.results.map((entry) => entry.ok)).toEqual([true, true]);
+    expect(setFilters).toHaveBeenCalledTimes(1);
+    expect(setSort).toHaveBeenCalledWith("salary", "desc");
   });
 
   it("skips remaining actions after cancel without undoing completed writes", async () => {
@@ -905,7 +973,7 @@ describe("createAgentHttpClient", () => {
     });
   });
 
-  it("rejects discovery when the table revision changes mid-turn", async () => {
+  it("keeps discovery going when only the view revision ticks mid-turn", async () => {
     let revision = 1;
     const live = createAgentSession({
       observe: () => observation({ viewRevision: revision }),
@@ -919,25 +987,25 @@ describe("createAgentHttpClient", () => {
       },
     });
     let round = 0;
-    await expect(
-      runAgentHttpTurn(live, "Who is visible?", {
-        endpoint: "https://agent.example/turn",
-        request: (_body) => {
-          round += 1;
-          if (round === 1) {
-            return Promise.resolve({
-              schemaVersion: AGENT_SCHEMA_VERSION,
-              needs: { read: [{ offset: 0, limit: 1, columns: ["name"] }] },
-            });
-          }
-          revision = 2;
+    const result = await runAgentHttpTurn(live, "Who is visible?", {
+      endpoint: "https://agent.example/turn",
+      request: (_body) => {
+        round += 1;
+        if (round === 1) {
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            text: "done",
+            needs: { read: [{ offset: 0, limit: 1, columns: ["name"] }] },
           });
-        },
-      })
-    ).rejects.toBeInstanceOf(AgentHttpError);
+        }
+        revision = 2;
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "done",
+        });
+      },
+    });
+    expect(result.text).toBe("done");
+    expect(result.needsFulfilled.read).toBe(1);
   });
 });
 

@@ -237,14 +237,15 @@ function assertTurnContext(
   snapshot: TurnSnapshot
 ): void {
   const manifest = session.manifest();
-  const nextPolicy = policyKey(manifest);
-  if (
-    manifest.viewRevision !== snapshot.revision ||
-    nextPolicy !== snapshot.policyKey
-  ) {
+  // A view revision tick during the model call is ordinary — React flushed a
+  // filter, or observe() advanced after a describe/read. Aborting the whole
+  // turn over that left actions unrun and showed ERROR. Policy is the thing
+  // that must not move: a table that dropped writes or capabilities mid-turn
+  // is no longer the one the backend answered.
+  if (policyKey(manifest) !== snapshot.policyKey) {
     throw new AgentHttpError(
       "context-stale",
-      `table context changed during turn (revision ${snapshot.revision} → ${manifest.viewRevision})`
+      `table policy changed during turn (revision ${snapshot.revision} → ${manifest.viewRevision})`
     );
   }
 }
@@ -716,11 +717,12 @@ async function fulfillNeeds(
   }
   for (const [index, query] of (needs?.read ?? []).entries()) {
     assertTurnContext(session, snapshot);
+    const revision = session.manifest().viewRevision;
     const result = await session.execute(
       "rows.read",
       query,
-      snapshot.revision,
-      readIdempotencyKey(snapshot.turnId, snapshot.revision, index, query)
+      revision,
+      readIdempotencyKey(snapshot.turnId, revision, index, query)
     );
     if (!result.ok) {
       throw new Error(result.error?.message ?? "rows.read failed");
@@ -741,24 +743,34 @@ async function fulfillNeeds(
 async function executeActions(
   session: AgentSession,
   actions: readonly AgentHttpAction[],
-  snapshotRevision: number,
+  originRevision: number,
   signal?: AbortSignal
 ): Promise<ExecuteResult[]> {
   const results: ExecuteResult[] = [];
+  // One reply often sends filter then sort. The first apply advances the
+  // live revision, so later actions that still name the turn-start revision
+  // (or omit one) must follow the table, not the snapshot they were minted
+  // against.
+  let revision = session.manifest().viewRevision;
   for (const action of actions) {
     if (signal?.aborted) {
       results.push(cancelledResult(session, action.idempotencyKey));
       continue;
     }
-    results.push(
-      await session.execute(
-        action.key,
-        action.args ?? {},
-        action.expectedRevision ?? snapshotRevision,
-        action.idempotencyKey,
-        signal
-      )
+    const expected =
+      action.expectedRevision === undefined ||
+      action.expectedRevision === originRevision
+        ? revision
+        : action.expectedRevision;
+    const result = await session.execute(
+      action.key,
+      action.args ?? {},
+      expected,
+      action.idempotencyKey,
+      signal
     );
+    results.push(result);
+    if (result.ok) revision = session.manifest().viewRevision;
   }
   return results;
 }
