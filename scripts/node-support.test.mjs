@@ -20,6 +20,7 @@ const README_CLAIM =
   "Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.";
 const PUBLISHED_SNAPSHOT = [
   "@adapttable/ai",
+  "@adapttable/ai-react",
   "@adapttable/antd",
   "@adapttable/base-ui",
   "@adapttable/chakra",
@@ -49,7 +50,7 @@ function packageManifests() {
 describe("supported Node contract", () => {
   it("declares one floor in the repo and every package", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
-    assert.equal(manifests.length, 16);
+    assert.equal(manifests.length, 17);
     for (const manifest of manifests) {
       assert.equal(json(manifest).engines?.node, FLOOR, manifest);
     }
@@ -93,7 +94,7 @@ describe("supported Node contract", () => {
   it("derives the packed set from non-private manifests, not a count", () => {
     const names = publishedPackageNames();
     assert.deepEqual(names, PUBLISHED_SNAPSHOT);
-    assert.equal(names.length, 14);
+    assert.equal(names.length, 15);
     assert.ok(!names.includes("@adapttable/bootstrap"));
   });
 
@@ -141,6 +142,22 @@ describe("supported Node contract", () => {
         (name) => routes.includes(name)
       )
     );
+  });
+
+  it("pins published @adapttable runtime deps to exact versions", () => {
+    const exact = /^\d+\.\d+\.\d+$/;
+    for (const path of packageManifests()) {
+      const pkg = json(path);
+      if (pkg.publishConfig?.access !== "public") continue;
+      for (const [name, range] of Object.entries(pkg.dependencies ?? {})) {
+        if (!name.startsWith("@adapttable/")) continue;
+        assert.match(
+          range,
+          exact,
+          `${pkg.name} dependency ${name} must be exact, got ${range}`
+        );
+      }
+    }
   });
 
   it("installs kit peers so every adapter root can load", () => {

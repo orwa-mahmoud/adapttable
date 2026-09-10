@@ -182,7 +182,7 @@ describe("dependency boundaries", () => {
       expect(pkg.peerDependencies ?? {}).not.toHaveProperty(name);
     }
     expect(pkg.dependencies).toMatchObject({
-      "@adapttable/core": "workspace:^",
+      "@adapttable/core": "2.9.0",
     });
   });
 });
