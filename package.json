@@ -59,7 +59,8 @@
     "check:api-contract": "node scripts/check-api-contract.mjs",
     "check:package-split": "node scripts/check-package-split-map.mjs",
     "check:static": "node scripts/run-parallel.mjs format:check lint lint:root check:readmes check:docsurface check:parts check:features check:api-contract check:package-split typecheck test:scripts",
-    "check:packaged": "node scripts/run-parallel.mjs api:check publint smoke:dist budget check:boundary"
+    "check:packaged": "node scripts/run-parallel.mjs api:check publint smoke:dist budget check:boundary",
+    "build:agent-schema": "node scripts/build-agent-schema.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",

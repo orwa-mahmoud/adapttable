@@ -26,6 +26,15 @@ import {
   type FinalizedCall,
   READ_TOOL,
 } from "./httpTurn";
+import {
+  type AgentContext,
+  type AgentContextContract,
+  type AgentContextInputs,
+  type AgentContextOptions,
+  type AgentContextSelection,
+  type AgentContextView,
+  buildAgentContext,
+} from "./context";
 import type {
   AgentHttpAnswer,
   AgentHttpQuestion,
@@ -33,6 +42,11 @@ import type {
   AgentHttpToolCall,
   AgentHttpToolResult,
 } from "./httpTypes";
+import {
+  agentHttpSchema,
+  type AgentWireLimits,
+  type JsonSchemaDocument,
+} from "./httpSchema";
 import { AGENT_SCHEMA_VERSION, type RowAddressScope } from "./keys";
 import type {
   AgentManifest,
@@ -63,6 +77,7 @@ export {
   type PinStatus,
 } from "./httpPins";
 export { AgentTurnError, type PhaseState } from "./httpTurn";
+export type { AgentWireLimits, JsonSchemaDocument } from "./httpSchema";
 export * from "./httpTypes";
 export {
   AGENT_SCHEMA_VERSION as AGENT_HTTP_SCHEMA,
@@ -75,6 +90,20 @@ export {
   type WritePolicy,
 } from "./keys";
 export type * from "./types";
+
+/**
+ * A recording the reader spoke instead of typing.
+ *
+ * @public
+ */
+export interface AgentHttpAudio {
+  /** Media type. Only the formats a browser actually records are accepted. */
+  readonly mimeType: string;
+  /** The clip, base64-encoded. */
+  readonly base64: string;
+  /** How long it runs, in milliseconds. */
+  readonly durationMs: number;
+}
 
 /** Hello / schema pin versus a user turn. @public */
 export type AgentHttpKind = "hello" | "schema" | "turn";
@@ -110,6 +139,17 @@ export interface AgentHttpRequest {
   readonly tableId: string;
   /** Backend pin from the last hello / schema. */
   readonly sessionId?: string;
+  /**
+   * The permitted contract and what was selected from it.
+   *
+   * Sent on hello and schema, and on every turn when pinning is off. This is
+   * what the backend answers against; `manifest` and `catalog` below are the
+   * compact form it replaces.
+   */
+  readonly context?: {
+    readonly contract: AgentContextContract;
+    readonly selection: AgentContextSelection;
+  };
   /** Compact capability snapshot. Required on hello / schema. */
   readonly manifest?: AgentManifest;
   /** Enabled keys plus one-line summaries. Required on hello / schema. */
@@ -117,14 +157,38 @@ export interface AgentHttpRequest {
   /** Live view revision when the catalog is not re-attached. */
   readonly viewRevision?: number;
   /**
+   * Where the table is right now, sent fresh on every turn.
+   *
+   * Separate from the contract because it moves on a different clock: pinning
+   * the contract does not pin this, and a backend answering a turn is always
+   * answering against the view in that request.
+   */
+  readonly view?: AgentContextView;
+  /**
    * Version of the contract this request carries or relies on.
    *
    * A reply acknowledges this exact string. A backend that echoes a different
    * one, or none, is not pinned and keeps being sent the contract.
    */
   readonly contractVersion?: string;
-  /** User text. Required for `kind: "turn"`. */
+  /**
+   * Version of the selection this request carries or relies on.
+   *
+   * Acknowledged alongside {@link AgentHttpRequest.contractVersion}, so a
+   * backend holding a compact selection cannot answer a request built from a
+   * full one.
+   */
+  readonly selectionVersion?: string;
+  /** User text. Required for `kind: "turn"` unless {@link audio} is sent. */
   readonly message?: string;
+  /**
+   * A recording, in place of typed text.
+   *
+   * Sent once, on the round that carries it. Its transcript comes back on the
+   * reply and is what later rounds of the same turn send — a clip is large,
+   * and re-sending it every round would be paying for it repeatedly.
+   */
+  readonly audio?: AgentHttpAudio;
   /** Optional prior lines the host chooses to send. */
   readonly conversation?: readonly AgentHttpMessage[];
   /** Host-generated identity of this user send, stable across its phases. */
@@ -166,6 +230,13 @@ export interface AgentHttpResponse {
   readonly toolCalls?: readonly AgentHttpToolCall[];
   /** A structured question for the reader, instead of asking in prose. */
   readonly askUser?: AgentHttpQuestion;
+  /**
+   * What the backend heard, when the turn carried audio.
+   *
+   * Shown to the reader in place of their own bubble, and sent as text on
+   * every later round of the turn — the clip travels once.
+   */
+  readonly transcript?: string;
   /** What the backend did with the contract this request named. */
   readonly pin?: AgentHttpPinAck;
   /** When true, the host may POST execute receipts back. */
@@ -236,6 +307,22 @@ export interface AgentHttpClientOptions {
    * or calls the client's `reset`.
    */
   readonly connectionId?: string;
+  /**
+   * How much context to send, and how to select it.
+   *
+   * Defaults to `compact`. Passed straight to `buildAgentContext`, so a host
+   * naming a budget, a tokenizer or a priority order here is turning the same
+   * dials the neutral builder exposes.
+   */
+  readonly context?: AgentContextOptions;
+  /**
+   * Live view and filter data the session's manifest does not carry.
+   *
+   * Called per exchange. A binding supplies its current query state here; a
+   * host that has none sends a contract with an explicitly unknown view rather
+   * than an invented one.
+   */
+  readonly contextInputs?: (session: AgentSession) => AgentContextInputs;
 }
 
 /**
@@ -300,6 +387,21 @@ const MAX_RESPONSE_BYTES = 512_000;
  * discovery as the thing that overflowed.
  */
 const MAX_CONTEXT_BYTES = 128_000;
+/**
+ * A recording is large and travels once. Its own cap, separate from the body
+ * limit, so a clip cannot quietly consume the room the context needs.
+ */
+const MAX_AUDIO_BYTES = 4_000_000;
+/** Longer than this is a recording nobody meant to send. */
+const MAX_AUDIO_MS = 120_000;
+/** What a browser actually records. Anything else is refused at the door. */
+const AUDIO_TYPES = new Set([
+  "audio/webm",
+  "audio/ogg",
+  "audio/mp4",
+  "audio/mpeg",
+  "audio/wav",
+]);
 
 /** Structured HTTP bridge failure with a stable machine code. @public */
 export class AgentHttpError extends Error {
@@ -428,8 +530,12 @@ export function parseAgentHttpRequest(input: unknown): AgentHttpRequest {
   if (!tableId) {
     throw new TypeError("agent HTTP tableId must be a non-empty string");
   }
-  if (kind === "turn" && typeof input.message !== "string") {
-    throw new TypeError("agent HTTP turn requires a message string");
+  if (
+    kind === "turn" &&
+    typeof input.message !== "string" &&
+    input.audio === undefined
+  ) {
+    throw new TypeError("agent HTTP turn requires a message string or audio");
   }
   const schema = readRequestSchema(input, kind);
   return {
@@ -439,11 +545,17 @@ export function parseAgentHttpRequest(input: unknown): AgentHttpRequest {
     sessionId: requireSessionId(input.sessionId),
     ...schema,
     viewRevision: requireViewRevision(input.viewRevision),
-    contractVersion: asString(input.contractVersion),
     message: typeof input.message === "string" ? input.message : undefined,
     conversation: Array.isArray(input.conversation)
       ? (input.conversation as AgentHttpMessage[])
       : undefined,
+    contractVersion: asString(input.contractVersion),
+    selectionVersion: asString(input.selectionVersion),
+    context: isRecord(input.context)
+      ? (input.context as AgentHttpRequest["context"])
+      : undefined,
+    view: isRecord(input.view) ? (input.view as AgentContextView) : undefined,
+    audio: input.audio === undefined ? undefined : asAudio(input.audio),
     turnId: asString(input.turnId),
     phaseId: asFiniteNumber(input.phaseId),
     toolResults: Array.isArray(input.toolResults)
@@ -492,6 +604,7 @@ export function parseAgentHttpResponse(input: unknown): AgentHttpResponse {
     askUser:
       input.askUser === undefined ? undefined : asQuestion(input.askUser),
     pin: input.pin === undefined ? undefined : asPinAck(input.pin),
+    transcript: asString(input.transcript),
     continueWithResults:
       typeof input.continueWithResults === "boolean"
         ? input.continueWithResults
@@ -600,6 +713,47 @@ function asQuestion(value: unknown): AgentHttpQuestion {
     );
   }
   return { id, question, ...(options ? { options } : {}), allowFreeText };
+}
+
+/**
+ * A recording, checked before anything else looks at it.
+ *
+ * Type, length and size are all refused at the parser rather than deeper in,
+ * because every one of them is a way to make the rest of the system do work on
+ * something nobody meant to send.
+ */
+function asAudio(value: unknown): AgentHttpAudio {
+  if (!isRecord(value)) {
+    throw new TypeError("agent HTTP audio must be an object");
+  }
+  const mimeType = asString(value.mimeType);
+  const base64 = asString(value.base64);
+  const durationMs = asFiniteNumber(value.durationMs);
+  if (!mimeType || !AUDIO_TYPES.has(mimeType.split(";")[0] ?? "")) {
+    throw new TypeError(
+      `agent HTTP audio.mimeType must be one of ${[...AUDIO_TYPES].join(", ")}`
+    );
+  }
+  if (!base64) throw new TypeError("agent HTTP audio.base64 is required");
+  if (durationMs === undefined || durationMs <= 0) {
+    throw new TypeError(
+      "agent HTTP audio.durationMs must be a positive number"
+    );
+  }
+  if (durationMs > MAX_AUDIO_MS) {
+    throw new TypeError(
+      `agent HTTP audio.durationMs exceeds limit of ${String(MAX_AUDIO_MS)}`
+    );
+  }
+  // Base64 carries three bytes in four characters; near enough to refuse an
+  // oversized clip without decoding it first.
+  const bytes = Math.floor((base64.length * 3) / 4);
+  if (bytes > MAX_AUDIO_BYTES) {
+    throw new TypeError(
+      `agent HTTP audio exceeds limit of ${String(MAX_AUDIO_BYTES)} bytes`
+    );
+  }
+  return { mimeType, base64, durationMs };
 }
 
 function asPinAck(value: unknown): AgentHttpPinAck {
@@ -779,25 +933,54 @@ function pinLost(response: AgentHttpResponse): boolean {
   );
 }
 
+/**
+ * The context this client would send, built once per exchange.
+ *
+ * Built from the live session through item 6's exporter, which has already
+ * applied the permission predicate, so nothing excluded can reach the wire.
+ * The caller decides whether it travels; this only decides what it says.
+ */
+function currentContext(
+  session: AgentSession,
+  options: AgentHttpClientOptions
+): AgentContext {
+  return buildAgentContext(session, options.context ?? {}, {
+    ...(options.contextInputs?.(session) ?? {}),
+  });
+}
+
 function compactRequest(
   session: AgentSession,
   kind: AgentHttpKind,
   extra: Partial<AgentHttpRequest> = {},
   mode: "full" | "question" = "full",
-  pin?: { readonly connectionId: string; readonly version: string }
+  pin?: {
+    readonly connectionId: string;
+    readonly version: string;
+    readonly context: AgentContext;
+  }
 ): AgentHttpRequest {
   const manifest = session.manifest();
   const record = pin ? pins.read(session, pin.connectionId) : undefined;
   const sessionId = extra.sessionId ?? record?.sessionId;
   const contractVersion = pin?.version;
+  const context = pin?.context;
+  const versions = {
+    ...(contractVersion ? { contractVersion } : {}),
+    ...(context ? { selectionVersion: context.selection.version } : {}),
+  };
   if (mode === "question") {
+    // The contract is pinned; the view is not, and never is. It moves on every
+    // turn, so a backend answering one is always answering against the view in
+    // that request.
     return {
       schemaVersion: AGENT_SCHEMA_VERSION,
       kind,
       tableId: manifest.tableId,
       viewRevision: manifest.viewRevision,
       ...(sessionId ? { sessionId } : {}),
-      ...(contractVersion ? { contractVersion } : {}),
+      ...versions,
+      ...(context ? { view: context.view } : {}),
       ...extra,
     };
   }
@@ -805,10 +988,22 @@ function compactRequest(
     schemaVersion: AGENT_SCHEMA_VERSION,
     kind,
     tableId: manifest.tableId,
+    // The contract is what a backend answers against. `manifest` and `catalog`
+    // travel beside it as the compact form, for an endpoint written against
+    // the earlier shape.
+    ...(context
+      ? {
+          context: {
+            contract: context.contract,
+            selection: context.selection,
+          },
+          view: context.view,
+        }
+      : {}),
     manifest,
     catalog: session.catalog(),
     ...(sessionId ? { sessionId } : {}),
-    ...(contractVersion ? { contractVersion } : {}),
+    ...versions,
     ...extra,
   };
 }
@@ -850,7 +1045,11 @@ async function refreshSchemaPin(
     const seq = pins.claim(session, connectionId);
     const response = await exchange(
       options,
-      compactRequest(session, "schema", {}, "full", { connectionId, version }),
+      compactRequest(session, "schema", {}, "full", {
+        connectionId,
+        version,
+        context: currentContext(session, options),
+      }),
       signal
     );
     if (response.ok === false) {
@@ -1167,7 +1366,11 @@ export async function connectAgentHttp(
   const seq = pins.claim(session, connectionId);
   const response = await exchange(
     options,
-    compactRequest(session, "hello", {}, "full", { connectionId, version }),
+    compactRequest(session, "hello", {}, "full", {
+      connectionId,
+      version,
+      context: currentContext(session, options),
+    }),
     signal
   );
   if (response.ok === false) {
@@ -1257,6 +1460,10 @@ async function runPhase(
     context = phaseContext(session, turn.turnId, input.phaseId);
     const version = schemaFingerprint(session);
     const seq = pins.claim(session, connectionId);
+    // Built once per round. With the contract pinned only the view travels;
+    // with `pinCatalog: false` the whole thing does, which is what that option
+    // means.
+    const context = currentContext(session, options);
     last = await exchange(
       options,
       compactRequest(
@@ -1271,7 +1478,7 @@ async function runPhase(
           ...(phase.pending().length ? { pendingCalls: phase.pending() } : {}),
         },
         questionOnly ? "question" : "full",
-        { connectionId, version }
+        { connectionId, version, context }
       ),
       input.signal
     );
@@ -1508,6 +1715,36 @@ async function askReader(
   if (!options.askUser) return undefined;
   const answer = await options.askUser(question, signal);
   return { id: question.id, result: answer };
+}
+
+/**
+ * The ceilings this client enforces, published so a backend can enforce them.
+ *
+ * @public
+ */
+export const AGENT_HTTP_LIMITS: AgentWireLimits = {
+  maxToolCalls: MAX_ACTIONS,
+  maxDescribeCalls: MAX_DESCRIBE_NEEDS,
+  maxReadCalls: MAX_READ_NEEDS,
+  maxRequestBytes: MAX_REQUEST_BYTES,
+  maxResponseBytes: MAX_RESPONSE_BYTES,
+  maxAudioBytes: MAX_AUDIO_BYTES,
+  maxAudioMs: MAX_AUDIO_MS,
+  audioTypes: [...AUDIO_TYPES],
+};
+
+/**
+ * This protocol as JSON Schema, for a backend in any language.
+ *
+ * Generated from the same constants the parsers use, so what is published and
+ * what is accepted cannot drift apart.
+ *
+ * @returns The request and reply schemas.
+ *
+ * @public
+ */
+export function agentHttpJsonSchema(): JsonSchemaDocument {
+  return agentHttpSchema(AGENT_HTTP_LIMITS);
 }
 
 /**

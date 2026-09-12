@@ -24,6 +24,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   AGENT_HTTP_SCHEMA,
+  type AgentContextView,
   type AgentHttpPinAck,
   type AgentHttpRequest,
   type AgentHttpResponse,
@@ -36,23 +37,42 @@ import {
 import { createExamplePinStore, EXAMPLE_PIN_TTL_MS } from "./ai-http-pins.ts";
 
 const examplePins = createExamplePinStore<
-  NonNullable<AgentHttpRequest["catalog"]>,
+  NonNullable<AgentHttpRequest["context"]>,
   NonNullable<AgentHttpRequest["manifest"]>
 >();
 
 function pinExampleSchema(request: AgentHttpRequest): string {
-  if (!request.catalog || !request.manifest) {
-    throw new TypeError("hello / schema requires catalog and manifest");
+  if (!request.context || !request.manifest) {
+    throw new TypeError("hello / schema requires the table context");
   }
   const sessionId =
     request.sessionId ?? `sess_${randomBytes(8).toString("hex")}`;
   examplePins.set(sessionId, {
     tableId: request.tableId,
-    catalog: request.catalog,
+    catalog: request.context,
     manifest: request.manifest,
     contractVersion: request.contractVersion,
   });
   return sessionId;
+}
+
+/**
+ * The view this request describes.
+ *
+ * Never taken from a pin: the contract is the part that holds still, and the
+ * view is the part that does not. A request that names no view is answered
+ * against a view that says so, rather than one invented from a revision.
+ */
+function requestView(request: AgentHttpRequest): AgentContextView {
+  return (
+    request.view ?? {
+      revision: request.viewRevision ?? 0,
+      page: 1,
+      limit: 10,
+      search: "",
+      unknown: ["page", "limit", "search"],
+    }
+  );
 }
 
 /**
@@ -68,17 +88,12 @@ function resolveExampleSchema(request: AgentHttpRequest): {
   readonly schema?: AgentSystemPromptInput;
   readonly pin: AgentHttpPinAck;
 } {
-  if (request.catalog && request.manifest) {
+  if (request.context && request.manifest) {
     pinExampleSchema(request);
     return {
-      schema: {
-        tableId: request.tableId,
-        catalog: request.catalog,
-        manifest: {
-          viewRevision: request.viewRevision ?? request.manifest.viewRevision,
-          columns: request.manifest.columns,
-        },
-      },
+      // The view is never pinned: it comes from THIS request, so a turn is
+      // always answered against the table as it is now.
+      schema: { context: { ...request.context, view: requestView(request) } },
       pin: {
         status: "acknowledged",
         ...(request.contractVersion
@@ -93,14 +108,7 @@ function resolveExampleSchema(request: AgentHttpRequest): {
     return { pin: { status: request.sessionId ? "expired" : "unknown" } };
   }
   return {
-    schema: {
-      tableId: request.tableId,
-      catalog: pin.catalog,
-      manifest: {
-        viewRevision: request.viewRevision ?? pin.manifest.viewRevision,
-        columns: pin.manifest.columns,
-      },
-    },
+    schema: { context: { ...pin.catalog, view: requestView(request) } },
     pin: {
       status: "acknowledged",
       ...(pin.contractVersion ? { contractVersion: pin.contractVersion } : {}),
@@ -260,7 +268,13 @@ function writeJson(res: ServerResponse, status: number, body: unknown): void {
 }
 
 function userPrompt(request: AgentHttpRequest): string {
-  const parts = [request.message ?? ""];
+  // A clip arrives once. A real backend transcribes it and answers the text;
+  // this one says so rather than pretending to have heard it, because a demo
+  // that fakes a transcript teaches the wrong shape.
+  const spoken = request.audio
+    ? `[the reader spoke for ${String(Math.round(request.audio.durationMs / 1000))}s — transcribe the attached ${request.audio.mimeType} clip and answer that]`
+    : "";
+  const parts = [request.message ?? spoken];
   if (request.pendingCalls?.length) {
     parts.push(
       "You already proposed these calls for this phase. Send the complete",

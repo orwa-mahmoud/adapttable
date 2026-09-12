@@ -57,6 +57,12 @@ export {
   MAX_CONTEXT_BYTES,
 };
 
+export {
+  agentInstructions,
+  type AgentInstructionsInput,
+  renderAgentContext,
+} from "./contextPrompt";
+
 /** What a model is given about this table. @public */
 export interface AgentContext {
   /** The table's permitted shape. Changes rarely. */

@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  AGENT_HTTP_LIMITS,
+  agentHttpJsonSchema,
   connectAgentHttp,
   createAgentHttpClient,
   parseAgentHttpRequest,
@@ -1374,6 +1376,212 @@ describe("createAgentHttpClient", () => {
     });
     expect(result.text).toBe("done");
     expect(result.needsFulfilled.read).toBe(1);
+  });
+});
+
+describe("carrying the context", () => {
+  it("sends the contract and the view on a full request", async () => {
+    const live = session();
+    let body: Record<string, unknown> | undefined;
+    await runAgentHttpTurn(live, "Page 2", {
+      endpoint: "https://agent.example/turn",
+      request: (sent) => {
+        body = sent as unknown as Record<string, unknown>;
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+        });
+      },
+    });
+
+    const context = body?.context as
+      | { contract?: { version?: string }; selection?: { profile?: string } }
+      | undefined;
+    expect(context?.contract?.version).toBeTruthy();
+    expect(context?.selection?.profile).toBe("compact");
+    expect(body?.view).toBeDefined();
+    expect(body?.contractVersion).toBeTruthy();
+    expect(body?.selectionVersion).toBeTruthy();
+  });
+
+  it("sends the view every turn even when the contract is pinned", async () => {
+    const live = session();
+    const seen: { context: boolean; view: boolean }[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      request: (sent: Record<string, unknown>) => {
+        seen.push({
+          context: sent.context !== undefined,
+          view: sent.view !== undefined,
+        });
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          pin: {
+            status: "acknowledged" as const,
+            contractVersion: sent.contractVersion as string,
+          },
+        });
+      },
+    } as unknown as Parameters<typeof runAgentHttpTurn>[2];
+    await runAgentHttpTurn(live, "One", options);
+    await runAgentHttpTurn(live, "Two", options);
+
+    // The contract is the part worth pinning; the view is not, and never is.
+    expect(seen[0]).toEqual({ context: true, view: true });
+    expect(seen[1]).toEqual({ context: false, view: true });
+  });
+
+  it("attaches the whole context every request when pinning is off", async () => {
+    const live = session();
+    const sent: boolean[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      pinCatalog: false,
+      request: (body: Record<string, unknown>) => {
+        sent.push(body.context !== undefined);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+        });
+      },
+    } as unknown as Parameters<typeof runAgentHttpTurn>[2];
+    await runAgentHttpTurn(live, "One", options);
+    await runAgentHttpTurn(live, "Two", options);
+
+    expect(sent).toEqual([true, true]);
+  });
+
+  it("carries the profile the host asked for", async () => {
+    const live = session();
+    let profile: string | undefined;
+    await runAgentHttpTurn(live, "One", {
+      endpoint: "https://agent.example/turn",
+      context: { profile: "full" },
+      request: (body) => {
+        profile = (
+          body as unknown as { context?: { selection?: { profile?: string } } }
+        ).context?.selection?.profile;
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+        });
+      },
+    });
+
+    expect(profile).toBe("full");
+  });
+
+  it("never puts a row value in the request outside a tool result", async () => {
+    const live = session();
+    let serialized = "";
+    await runAgentHttpTurn(live, "Who is visible?", {
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        serialized = JSON.stringify(body);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+        });
+      },
+    });
+
+    // The first request carries the contract and the view. Neither holds
+    // anybody's data — values reach a model only inside a tool result.
+    expect(serialized).not.toContain("Ada");
+  });
+});
+
+describe("a spoken turn", () => {
+  const clip = {
+    mimeType: "audio/webm",
+    base64: "AAAA",
+    durationMs: 1_500,
+  };
+
+  it("is accepted in place of a message", () => {
+    const parsed = parseAgentHttpRequest({
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      kind: "turn",
+      tableId: "orders",
+      audio: clip,
+    });
+
+    expect(parsed.audio?.mimeType).toBe("audio/webm");
+    expect(parsed.message).toBeUndefined();
+  });
+
+  it("still requires one or the other", () => {
+    expect(() =>
+      parseAgentHttpRequest({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        kind: "turn",
+        tableId: "orders",
+      })
+    ).toThrow(/message string or audio/);
+  });
+
+  it("refuses a format no browser records", () => {
+    expect(() =>
+      parseAgentHttpRequest({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        kind: "turn",
+        tableId: "orders",
+        audio: { ...clip, mimeType: "application/octet-stream" },
+      })
+    ).toThrow(/audio.mimeType must be one of/);
+  });
+
+  it("refuses a clip nobody meant to send", () => {
+    expect(() =>
+      parseAgentHttpRequest({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        kind: "turn",
+        tableId: "orders",
+        audio: { ...clip, durationMs: 600_000 },
+      })
+    ).toThrow(/durationMs exceeds limit/);
+    expect(() =>
+      parseAgentHttpRequest({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        kind: "turn",
+        tableId: "orders",
+        audio: { ...clip, base64: "A".repeat(8_000_000) },
+      })
+    ).toThrow(/audio exceeds limit/);
+    expect(() =>
+      parseAgentHttpRequest({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        kind: "turn",
+        tableId: "orders",
+        audio: { ...clip, durationMs: 0 },
+      })
+    ).toThrow(/durationMs must be a positive number/);
+  });
+
+  it("reads a transcript back off the reply", () => {
+    const parsed = parseAgentHttpResponse({
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      text: "Paged.",
+      transcript: "go to page two",
+    });
+
+    expect(parsed.transcript).toBe("go to page two");
+  });
+});
+
+describe("the published wire", () => {
+  it("says the same limits the parsers enforce", () => {
+    const schema = agentHttpJsonSchema() as {
+      limits: Record<string, number>;
+      $defs: Record<string, { properties?: Record<string, unknown> }>;
+    };
+
+    expect(schema.limits.maxToolCalls).toBe(AGENT_HTTP_LIMITS.maxToolCalls);
+    expect(schema.limits.maxAudioMs).toBe(AGENT_HTTP_LIMITS.maxAudioMs);
+    expect(schema.$defs.request?.properties).toHaveProperty("context");
+    expect(schema.$defs.request?.properties).toHaveProperty("view");
+    expect(schema.$defs.reply?.properties).toHaveProperty("toolCalls");
   });
 });
 
