@@ -13,6 +13,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import prettier from "prettier";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const { agentHttpJsonSchema } = await import(
@@ -22,10 +24,27 @@ const { agentInstructions } = await import(
   join(ROOT, "packages/ai/dist/context.js")
 );
 
+/**
+ * Write one artifact, formatted the way the repository formats that kind of
+ * file.
+ *
+ * A generator that emits its own house style produces a file the commit hook
+ * then rejects, which turns every regeneration into a second manual step. The
+ * repository's own Prettier configuration is the one authority on how a
+ * committed file looks, so the generator asks it rather than guessing —
+ * `.txt` has no parser and is written as it is.
+ */
 async function write(relative, contents) {
   const path = join(ROOT, relative);
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, contents, "utf8");
+  const info = await prettier.getFileInfo(path);
+  const formatted = info.inferredParser
+    ? await prettier.format(contents, {
+        ...(await prettier.resolveConfig(path)),
+        parser: info.inferredParser,
+      })
+    : contents;
+  await writeFile(path, formatted, "utf8");
   console.log(`wrote ${relative}`);
 }
 

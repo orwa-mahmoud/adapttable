@@ -41,24 +41,55 @@ const DOCS_DIR = join(REPO_ROOT, "docs");
 const REFERENCE_PAGE = "api.md";
 
 /**
+ * The built file a subpath resolves to, as the package itself declares it.
+ *
+ * Conditional exports nest, so the target is whatever string this branch
+ * bottoms out at; a non-JS condition (`./styles.css`) bottoms out at a string
+ * directly.
+ */
+function targetOf(value) {
+  if (typeof value === "string") return value;
+  if (value === null || typeof value !== "object") return undefined;
+  for (const condition of ["import", "require", "default"]) {
+    if (condition in value) {
+      const resolved = targetOf(value[condition]);
+      if (resolved !== undefined) return resolved;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Every published package's export surface, one audit per importable entry.
  *
- * The list is READ from each package's `exports` map rather than written here,
- * because a hand-written list is a second place to remember: `/pivot` and
- * `/formula` both shipped while this array still named five core entries, so
- * every export behind them was invisible to the gate that exists to see them.
- * Deriving it means a new subpath is audited the moment it is published.
+ * Both halves are READ from each package's `exports` map rather than written
+ * here, because anything restated is a second place to remember. The subpath
+ * list is read because `/pivot` and `/formula` shipped while a hand-written
+ * array still named five core entries. The SOURCE FILE is read from the same
+ * map because a subpath need not be spelled like the module behind it:
+ * `./ag-ui` is built from `agui.ts`, `./ai-sdk` from `aiSdk.ts`, and a guess
+ * from the subpath finds neither. Deriving both means a new entry is audited
+ * the moment it is published, whatever it is called.
+ *
  * Non-JS conditions (`./styles.css`) and `./package.json` are not APIs.
  */
 function entriesOf(pkg) {
   const manifest = JSON.parse(
     readFileSync(join(REPO_ROOT, "packages", pkg, "package.json"), "utf8")
   );
-  return Object.keys(manifest.exports ?? { ".": {} })
+  const exported = manifest.exports ?? { ".": "./dist/index.js" };
+  return Object.keys(exported)
     .filter((key) => key === "." || !key.slice(2).includes("."))
     .sort()
     .map((key) => {
-      const stem = join(pkg, "src", key === "." ? "index" : key.slice(2));
+      const target = targetOf(exported[key]);
+      const stem = join(
+        pkg,
+        "src",
+        (target ?? "index")
+          .replace(/^\.\/dist\//, "")
+          .replace(/\.[cm]?[jt]sx?$/, "")
+      );
       // A feature entry that renders is `.tsx`; the rest are `.ts`.
       const entry = existsSync(join(REPO_ROOT, "packages", `${stem}.ts`))
         ? `${stem}.ts`

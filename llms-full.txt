@@ -8263,6 +8263,105 @@ control of permissions, approval and persistence.
 For connection examples, read [OpenAI, MCP and JSON integrations](./ai-integrations.md)
 or [the HTTP backend guide](./ai-http.md).
 
+## Start here
+
+Three levels, in the order most teams want them. Each is complete on its own;
+none is a prerequisite for the next.
+
+**1. The ready experience.** A widget, a transport, and the table you already
+have. The capabilities come from the table's configuration — you do not copy a
+schema into a backend, and there is nothing to keep in step.
+
+```tsx
+import { tableAgent, useTableAssistant } from "@adapttable/ai-react";
+import { assistantHttpTransport } from "@adapttable/ai/http";
+import { TableAssistant } from "@adapttable/mantine/assistant";
+
+const transport = assistantHttpTransport({ endpoint: "/api/agent" });
+
+function Orders({ rows }: { rows: Order[] }) {
+  const [session, setSession] = useState<AgentSession | null>(null);
+  const assistant = useTableAssistant({
+    session: session ?? undefined,
+    transport,
+    // Only a genuine transport swap re-establishes the conversation.
+    transportKey: "orders",
+  });
+
+  return (
+    <>
+      <DataTable
+        data={rows}
+        columns={columns}
+        features={[
+          tableAgent({
+            tableId: "orders",
+            writePolicy: "allow",
+            approval: { policy: "writes", presentation: "widget" },
+            bridge: { attach: setSession },
+          }),
+        ]}
+      />
+      <TableAssistant
+        assistant={assistant}
+        open={assistant.open}
+        onOpenChange={assistant.setOpen}
+      />
+    </>
+  );
+}
+```
+
+`assistant.error` carries the last failure and each turn's receipts say what
+actually happened — `applied`, `staged`, `awaiting-approval`, `rejected`,
+`stale`, `failed` or `cancelled`. A staged write is not a saved one, and the
+panel says so rather than reporting success.
+
+**2. Your own agent, our executor.** You already have a model call and a reply
+to parse. Map whatever it produced onto a capability key and arguments, and
+call the session — the permission predicate, the revision check and the
+approval policy all apply, whichever route reaches them.
+
+```ts
+const result = await session.execute(
+  "view.setFilters",
+  { filters: { team: ["Core"] } },
+  session.manifest().viewRevision,
+  // Your own replay identity. The same key twice never runs twice.
+  `turn-${turnId}-1`
+);
+if (!result.ok) report(result.error); // never a silent retry
+```
+
+See [`examples/ai-custom-bridge.ts`](https://github.com/orwa-mahmoud/adapttable/blob/main/examples/ai-custom-bridge.ts).
+
+**3. The conversation, without React.** `@adapttable/ai/assistant` is the whole
+lifecycle — one send at a time, a draft that survives a failure, a late reply
+dropped rather than appended — with no DOM and no HTTP. A binding for another
+framework subscribes to it rather than re-deriving those rules.
+
+```ts
+import { createTableAssistant } from "@adapttable/ai/assistant";
+
+const store = createTableAssistant({ session, transport });
+const stop = store.subscribe(() => render(store.getState()));
+store.connect();
+// Always, on unmount or teardown: a disposed store drops its connection and
+// cannot write into a surface that has gone.
+onTeardown(() => {
+  stop();
+  store.dispose();
+});
+```
+
+See [`examples/ai-assistant-store.ts`](https://github.com/orwa-mahmoud/adapttable/blob/main/examples/ai-assistant-store.ts)
+and, for a custom panel in React,
+[`examples/ai-assistant-custom-ui.tsx`](https://github.com/orwa-mahmoud/adapttable/blob/main/examples/ai-assistant-custom-ui.tsx).
+
+The optional helpers add convenience, not permission. None of them is required
+to use an agent you already have, and none of them can reach past what the
+table wired.
+
 ```bash
 npm install @adapttable/ai
 ```
@@ -8392,6 +8491,108 @@ before write. The execute result is
 `createAgentSession({ observe, apply })` is the same contract without React —
 hand it the current observation and the apply hooks. See
 [adaptive capabilities](./agent-capabilities.md).
+
+## What the agent is told
+
+`buildAgentContext(session, options?, inputs?)` on `@adapttable/ai/context`
+produces the whole of it: the **contract** (what this table permits, which
+changes rarely) and the **view** (where it is right now, which changes
+constantly). Nothing else reaches a model, and the builder performs no I/O —
+it reads no rows and makes no request.
+
+```ts
+import { buildAgentContext } from "@adapttable/ai/context";
+
+const { contract, view, selection } = buildAgentContext(
+  session,
+  { profile: "compact" },
+  { filters: liveFilters, view: { page, limit, search } }
+);
+```
+
+**Profiles.** `compact` (the default) names every capability and attaches the
+full guide only for the ones a turn is likely to need; the rest are fetched on
+demand, in one batched discovery round rather than one request per key. `full`
+attaches every guide up front. `selection.selected` and `selection.deferred`
+say which went which way, and `selection.notes` says why.
+
+**Budgets and sizes.** `selection.contractBytes` and `selection.viewBytes` are
+UTF-8 bytes on the wire. `selection.estimatedTokens` is an estimate of prompt
+size and says so: `selection.estimated` is `true` when nobody counted, and you
+can pass your own `estimateTokens` to make it a measurement. Neither is a count
+of model invocations — a turn is one invocation whatever the context weighs.
+
+**Exclusions.** `createAgentSession({ excludeCapabilities })` and
+`tableAgent({ ... })`'s equivalent remove a capability from the contract, the
+suggestions and the executor at once. The table's own control is untouched: a
+person can still filter a table whose agent may not.
+
+**Versions.** `contract.version` names everything the contract says. Two
+requests carrying the same version describe the same table; a backend that
+pinned one and sees another knows to ask for the whole thing again.
+
+**Column examples.** `ai.examples` on a column is what the author wrote.
+`ai.sample: true` opts that column into live sampling, which is a separate,
+deliberate call — `sampleColumnValues(session, key)` reads through `rows.read`
+under the session's own permission predicate, caps at five distinct values,
+revalidates each against the column's declared type, and never touches an
+unreadable column. Hand the result in as `inputs.samples`; the contract marks
+those columns `sampled: true`, so nobody confuses an author's example with
+somebody's data.
+
+## Approval, undo and what a reader agreed to
+
+`approval` answers two questions separately: **which** capabilities need a
+human (`policy`), and **where** they are asked (`presentation`). An action can
+override either for itself.
+
+`alwaysAllow` is a third, and it is off unless you name the keys:
+
+```ts
+tableAgent({
+  tableId: "orders",
+  approval: { policy: "writes", alwaysAllow: ["edit.cells"] },
+});
+```
+
+The control appears only for a capability on that list. It never appears for a
+destructive one, never for a write that enumerates rows, and never for an
+action whose own configuration demands a human every time — and a host
+`onApprove` bypasses the chrome entirely, so nothing there can reach past it.
+What a reader waved through is readable from the store as `alwaysAllowed` and
+revocable with `revokeAlwaysAllow(key)`; it resets whenever the contract moves,
+because "allow this" was said about a table that no longer exists in that
+shape. A key that this table does not offer is an error at build time
+(`ApprovalAlwaysAllowError`), not a control that silently never appears.
+
+**Undo is per turn, and only for the view.** The sanitized view is captured
+before a turn's calls run and restored through the same capabilities the agent
+used. The offer stands only while the live revision is still the one that
+turn's own calls settled at — a reader changing the page, a second agent, a
+source refresh or a later turn all end it, and the panel says which. Writes are
+not part of it: staging, Save and the edit history own those.
+
+## Protocol adapters
+
+Each is an optional subpath. None is in the root graph, and each routes every
+call back through `session.execute`.
+
+| Subpath                    | For                                              |
+| -------------------------- | ------------------------------------------------ |
+| `@adapttable/ai/http`      | The wire, the client and the assistant transport |
+| `@adapttable/ai/assistant` | The framework-free conversation store            |
+| `@adapttable/ai/context`   | The permitted context, and column sampling       |
+| `@adapttable/ai/voice`     | Dictation, in the browser or through a backend   |
+| `@adapttable/ai/json`      | Plain JSON tools and `AgentEnvelope`             |
+| `@adapttable/ai/openai`    | Strict function tools with OpenAI-safe names     |
+| `@adapttable/ai/mcp`       | MCP tools, resources and annotations             |
+| `@adapttable/ai/mcp-apps`  | The table as a view an MCP host embeds           |
+| `@adapttable/ai/webmcp`    | The table as browser tools for a page agent      |
+| `@adapttable/ai/ag-ui`     | The table as an AG-UI run's frontend tools       |
+| `@adapttable/ai/ai-sdk`    | The table as AI SDK client tools                 |
+
+`@adapttable/ai-react` is the React binding: `tableAgent` and
+`useTableAssistant`. It is the only one of these that imports React.
 
 ---
 
@@ -8572,10 +8773,99 @@ also a resource at
 `adapttable://table/{tableId}/capability/{key}`. `mcpListChanged`
 decides when to emit `notifications/tools/list_changed`.
 
-`@adapttable/ai/http` is the optional ready-made transport: post the
-compact manifest to your endpoint and execute returned actions through
-the same session. Setup, protocol and the runnable example live on
+`@adapttable/ai/http` is the optional ready-made transport: post the permitted
+context to your endpoint and execute the calls that come back through the same
+session. Setup, protocol and the runnable example live on
 [connect a backend](./ai-http.md).
+
+## Protocol adapters
+
+Each of these speaks a protocol somebody else defined, and each ends in the
+same `session.execute` — the same exclusion predicate, the same revision check,
+the same approval policy and the same receipts. None adds an SDK dependency:
+the event and part types are this package's own, and the one seam a host fills
+is "send this, stream that back."
+
+An integration is described as supported here only once its recorded-event
+conformance fixture runs against the real adapter code.
+
+### MCP tools, and the table as an MCP App
+
+`toMcpTools` carries annotations derived from what each capability declares:
+`readOnlyHint` for view and read keys, `destructiveHint` true only for a
+destructive one and explicitly false elsewhere, `idempotentHint` where running
+it twice lands where running it once did, and `openWorldHint` always false —
+a capability acts on this table and nothing behind it. `toMcpToolList` and
+`toMcpResourceList` return the same lists as cacheable responses, stamped with
+the contract they describe. `mcpToolResult` maps one `execute` outcome into a
+`tools/call` result and keeps the provenance envelope on a row window.
+
+`@adapttable/ai/mcp-apps` publishes the table as a view an MCP host embeds:
+`mcpAppResource` for the `ui://adapttable/table/{tableId}` descriptor,
+`mcpAppCsp` for a policy built only from the domains you declared, and
+`createMcpAppBridge` for the view's side — `ui/initialize`, the tool-input and
+tool-result notifications, and `tools/call` for a reader's actions. The bridge
+requires the host's exact origin: a handshake posted to `"*"` would announce
+the table's contract to whatever else is listening. `approveThroughHost` and
+`askThroughHost` use the host's elicitation when it advertises one and return
+nothing when it does not, leaving the table's own approval in charge.
+
+### WebMCP — an agent in the page
+
+```ts
+import { registerWebMcpTools } from "@adapttable/ai/webmcp";
+
+const registration = registerWebMcpTools(session, {
+  exposedTo: ["view.setPage", "view.setSort", "rows.read"],
+  onWarning: (warning) => console.warn(warning.message),
+});
+// A contract change is a different set of tools: dispose and register again.
+onTeardown(() => registration.dispose());
+```
+
+Nothing happens at import: `document.modelContext` is read when you call it, so
+the module loads on a server and in a browser without the API and registers
+nothing in either. In React, `tableAgent({ webmcp: true })` does the same and
+re-registers on a contract change for you.
+
+### AG-UI — the table as a run's frontend tools
+
+```ts
+import { aguiTransport } from "@adapttable/ai/ag-ui";
+
+const transport = aguiTransport({
+  connection: { run: (input, signal) => yourEndpoint(input, signal) },
+  onApprove, // the same seam `session.execute` uses
+});
+```
+
+The enabled contract becomes the run's tool definitions, the sanitized view
+its `STATE_SNAPSHOT` and then RFC 6902 `STATE_DELTA`s, and the conversation its
+`MESSAGES_SNAPSHOT`. A `RUN_FINISHED` interrupt with `reason: "confirmation"`
+becomes an `ApprovalSubject` and resumes with `resume[{ interruptId, status,
+payload }]`; `input_required` becomes a question for the reader. A tool call
+this table does not own is left to whoever registered it.
+
+### AI SDK — client tools on your own route
+
+```ts
+// Your route, your provider, unchanged apart from the spread.
+import { aiSdkTools } from "@adapttable/ai/ai-sdk";
+
+streamText({
+  model,
+  system,
+  tools: { ...yourTools, ...aiSdkTools(session) },
+});
+```
+
+Every entry omits `execute`, which is how the AI SDK decides the client runs
+it. In the browser, `aiSdkTransport` answers those calls and returns each
+result as the tool output on the next request — the shape `addToolOutput`
+sends. `tool-approval-request` becomes an `ApprovalSubject` and answers as an
+approval response; `output-denied` carries the reject reason. A stream that
+declares a version this adapter does not speak is refused with
+`unknown-stream-version` rather than parsed as though it were one it does.
 
 ## Examples
 
@@ -8587,6 +8877,10 @@ the same session. Setup, protocol and the runnable example live on
 - [ai-browser-agent.tsx](../examples/ai-browser-agent.tsx) — `tableAgent` + JSON tools
 - [ai-http-backend.ts](../examples/ai-http-backend.ts) — runnable OpenAI/Anthropic/Gemini/DeepSeek server
 - [ai-assistant-custom-ui.tsx](../examples/ai-assistant-custom-ui.tsx) — a complete conversation panel with none of the shipped widget in it
+- [ai-assistant-store.ts](../examples/ai-assistant-store.ts) — the conversation with no React, no DOM and no HTTP
+- [ai-agui-host.ts](../examples/ai-agui-host.ts) — an AG-UI run driven from recorded events, including a confirmation interrupt
+- [ai-sdk-route.ts](../examples/ai-sdk-route.ts) — the route half: client tools declared beside a route tool
+- [ai-http-backend.py](../examples/ai-http-backend.py) — the same wire in Python, standard library only, run through `uv`
 
 Intention fixtures (no live model) live in
 `packages/ai/src/__fixtures__/intentions.json`.
@@ -8599,7 +8893,7 @@ This is the setup page for a real model behind a live table. The [interactive
 playground](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
 defaults to **Simulated**: local scripted buttons, no credentials, no network
 model call. Switch to **Connect backend**, paste an endpoint, and the same
-`tableAgent` session sends compact capabilities and executes returned actions.
+`tableAgent` session sends the permitted context and executes the calls that come back.
 
 A recorded walkthrough of this page will land here when it exists. Absence of
 that video is not a missing feature.
@@ -8612,23 +8906,32 @@ backend, or in the example server below.
 
 On each request the HTTP bridge sends:
 
-- the compact [manifest](./ai.md) (enabled keys, column permissions, revision,
-  write/approval/commit policy — never the dataset)
-- the live catalog (key + one-line summary)
-- the user message
+- the [permitted context](./ai.md#what-the-agent-is-told) — the contract
+  (capabilities, column permissions, filters, limits, write/approval/commit
+  policy) and the view (page, size, search, sort, grouping, filter state);
+  never the dataset
+- the user message, and the conversation so far
 
-It does **not** preload every capability guide. If the backend responds with
-`needs.describe` or `needs.read`, the bridge answers those through
-`session.describe` and `rows.read` (so unreadable columns stay redacted and
-`readMax` still applies), then continues the same turn.
+How much of each capability's guide travels is the **profile**. `compact`
+names every capability and explains the ones a turn is likely to need;
+anything else is asked for on demand, in one batched round rather than a
+request per key, and cached per connection and contract version. `full` sends
+every guide up front. Neither changes what the table permits — only how much
+explaining arrives before it is asked for.
 
-Returned `actions` run through `session.execute`. Revision checks, permissions,
-approval chrome, commit policy and idempotency stay on the session. The bridge
-never retries a mutation on its own.
+A backend that asks for a guide or a row window puts that in `toolCalls`
+alongside anything it wants run; the bridge answers through `session.describe`
+and `rows.read`, so an unreadable column stays redacted and `readMax` still
+applies, then continues the same turn.
 
-Text plus actions is a complete turn. A second model call is not required to
-say “done.” Sending execute receipts back is optional (`continueWithResults`
-on the response, `returnResults` on the client).
+Returned calls run through `session.execute`. Revision checks, permissions,
+approval chrome, commit policy and idempotency stay on the session, and the
+replay identity is the bridge's own — a backend cannot mint a second write by
+repeating one. The bridge never retries a mutation.
+
+Text plus calls is a complete turn. A second model call is not required to say
+“done.” Sending execute receipts back is optional (`continueWithResults` on the
+response, `returnResults` on the client).
 
 ## Path 1 — run our example
 
@@ -8753,42 +9056,123 @@ transform — this client is optional. See [agent integrations](./ai-integration
 
 ## Protocol
 
-`POST` JSON. Schema family: `adapttable.agent.v1`.
+`POST` JSON. Schema family: `adapttable.agent.v1`. Import
+`parseAgentHttpRequest` / `parseAgentHttpResponse` from `@adapttable/ai/http`
+rather than duplicating the shape; both refuse an unknown `schemaVersion`.
 
-**Hello** (Connect). The client sends `kind: "hello"` plus `tableId`,
-`manifest` and `catalog`. The server pins that snapshot on a session and
-should return `sessionId`. `ok: false` is a rejected hello.
+### Request
 
-**Schema.** `kind: "schema"` replaces the pin when features or options
-change, so the system prompt stays current through summarization. Same
-payload as hello.
+| Field              | When                                              | What                                                                                       |
+| ------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `schemaVersion`    | always                                            | `"adapttable.agent.v1"`                                                                    |
+| `kind`             | always                                            | `"hello"`, `"schema"` or `"turn"`                                                          |
+| `tableId`          | always                                            | The table's identity                                                                       |
+| `context`          | hello, schema, and every turn when pinning is off | `{ contract, selection }` — what this table permits, and what was selected from it         |
+| `contractVersion`  | with `context`                                    | Names everything the contract says                                                         |
+| `selectionVersion` | with `context`                                    | Names what was selected from it                                                            |
+| `sessionId`        | after a hello                                     | The pin the backend handed back                                                            |
+| `viewRevision`     | a pinned turn                                     | The revision the contract was read at                                                      |
+| `view`             | every turn                                        | Where the table is **now** — page, size, search, sort, grouping and permitted filter state |
+| `message`          | a turn                                            | What the reader said                                                                       |
+| `conversation`     | a turn                                            | Earlier exchanges, oldest first                                                            |
+| `toolResults`      | a continuation                                    | Results for calls the client just ran                                                      |
+| `audio`            | a voice turn                                      | One clip, travelling once                                                                  |
 
-**Turn.** `kind: "turn"` and a `message` string. While the pin is valid the
-client omits `catalog` and `manifest` and sends `viewRevision` (and
-`sessionId`) instead. Optional `conversation`, `descriptions`, `rows`, and
-`results` appear only when the host is answering a previous `needs` or
-continuing with receipts. A senior backend may ignore the pin and keep
-sending the compact snapshot on every turn (`pinCatalog: false`).
+The contract and the view move on different clocks, which is why they are
+separate fields: pinning the contract does not pin the view, and a backend
+answering a turn is always answering against the view in that request.
 
-**Response.**
+### Response
 
 ```ts
 {
   schemaVersion: "adapttable.agent.v1",
+  ok?: boolean,               // hello / health only
   sessionId?: string,
   text?: string,
-  actions?: { key, args, idempotencyKey, expectedRevision? }[],
-  needs?: { describe?: string[], read?: { offset, limit, columns?, scope? }[] },
+  toolCalls?: { id, name, args?, expectedRevision? }[],
+  askUser?: { id, question, options?, allowFreeText },
+  transcript?: string,        // what the backend heard, on a voice turn
+  pin?: { status, contractVersion?, ttlMs? },
   continueWithResults?: boolean
 }
 ```
 
-`idempotencyKey` is required on every action so a client retry cannot mint a
-new write. `needs` is how progressive discovery works — do not preload every
-guide to skip it.
+**`toolCalls`** is one list, whether a call runs a capability or asks for
+something: `name` is a capability key, or `describe` / `read`. A call's `id`
+is a correlation handle unique within the reply — it is **not** the replay
+identity. The client issues that itself, from the table, the turn, the phase
+and the call's position, so a backend cannot mint a second write by repeating
+a string.
 
-Import `parseAgentHttpRequest` / `parseAgentHttpResponse` from
-`@adapttable/ai/http` instead of duplicating the shape.
+**`expectedRevision`** is optional. Omitted means the view this request
+described, which is the ordinary case; a backend that names one is answering
+for a revision it observed itself, and a stale call is refused with
+`revision-mismatch` rather than rebased onto the live table.
+
+**`askUser`** puts a structured question to the reader instead of asking in
+prose. The turn stops at that call and resumes when they answer; the answer
+returns as that call's `toolResults` entry. A client with nowhere to draw one
+reports `unresolved: "no-reader-channel"` and still says what already ran, and
+a reader who declines reports `question-unanswered` — different facts.
+
+**`pin`** is the backend's answer about the contract it was sent:
+`acknowledged` (and only that) pins something; `expired` and `unknown` say a
+pin it once held is gone, which is recoverable by resending the contract;
+`unsupported` says this backend does not pin at all. A backend that echoes a
+different `contractVersion`, or none, is not pinned and keeps being sent the
+contract. None of these is ever the answer to a call whose outcome is unknown:
+a write is never retried.
+
+### Discovery
+
+A turn that needs a guide asks for it in the same `toolCalls` list, and the
+client answers in one batched round rather than one request per key. Guides
+are cached per connection and contract version, so a second turn that needs
+the same guide does not ask again. Send `profile: "compact"` and let discovery
+do this; send `profile: "full"` when you would rather pay the bytes up front.
+
+### Streaming
+
+Ask for `text/event-stream` and the same reply arrives as events:
+
+- `text-delta` — a piece of the answer, as it is produced
+- `transcript` — what the backend heard, on a voice turn
+- `ask-user` — the structured question
+- `tool-calls` — the calls, whole, exactly once
+- `done` — the calls are final
+- `error` — the turn failed; `{ code, message }`
+
+The calls travel whole and only before `done`: a client that loses the
+connection first has run nothing. A stream that ends without `done` is
+reported as `stream-incomplete` rather than treated as a short answer.
+
+### Voice
+
+`@adapttable/ai/voice` has two modes. In **browser** mode the recognizer runs
+locally and heard text becomes the composer's draft — never a send, so a
+misheard word is a typo the reader corrects. In **backend** mode one clip is
+recorded, released from the microphone on stop, and sent as `audio`; the
+backend answers with a `transcript`, which the panel shows in place of the
+reader's own bubble and sends as text on every later round of the turn.
+
+### Any language
+
+The wire is a wire. [`examples/ai-http-backend.py`](https://github.com/orwa-mahmoud/adapttable/blob/main/examples/ai-http-backend.py)
+is the same contract in Python with no model and no framework — standard
+library only, run through `uv`:
+
+```bash
+uv run --python 3.12 examples/ai-http-backend.py
+```
+
+It reads the contract out of the request, decides one call, and answers in the
+shape above. Swap its `decide` for a real model call and nothing else changes.
+
+The machine-readable schema and the general rules text are generated from
+`AGENT_HTTP_LIMITS` and `agentInstructions` into `schemas/agent-http.v1.json`
+and `docs/agent-rules.txt` — build the package and run
+`node scripts/build-agent-schema.mjs`.
 
 ## Live provider test (owner)
 
@@ -12311,6 +12695,217 @@ and `useTableUrlState` — the same mutations exist whether state lives in
 the URL, in memory, or behind a server query;
 `localizedColumnPath`, `normalizeLocaleTag` and `resolveLocaleTag` are
 the shared locale-resolution algorithm (see [i18n & RTL](./i18n-rtl.md)).
+
+## The AI packages
+
+`@adapttable/ai` is React-free and model-neutral: it turns a live table into a
+capability catalog an agent can read and call, and every protocol adapter below
+is a view over that one catalog. `@adapttable/ai-react` is the binding that
+mounts it on a React table. See [AI & agents](./ai.md), the
+[HTTP contract](./ai-http.md) and
+[protocol integrations](./ai-integrations.md).
+
+### `@adapttable/ai` — the session and its catalog
+
+`createAgentSession(options)` builds the session from a `CreateAgentSessionOptions`
+description of the table: `AgentApply` is the write seam the host fills,
+`AgentObservation` is what the table reports each time it is read, `AgentColumn`
+/ `AgentFilter` / `AgentFilterOption` describe its shape, `AgentLimits` and
+`AgentPolicy` its bounds, and `AgentRowAddressing` / `RowAddressScope` say how a
+row may be named. The result is an `AgentSession`: `buildManifest` renders its
+`AgentManifest`, `enabledKeys` lists what the table actually offers, and
+`CAPABILITY_KEYS` / `CapabilityKey` are the built-in names.
+
+A capability is a `CatalogEntry` backed by an `AgentCapabilityDefinition`.
+`AgentCapabilityKind` is its effect class (`read`, `view`, `write`,
+`destructive`), which is what decides how much ceremony a call needs;
+`CapabilityFamily` and `familyOf` group related keys for one-round discovery,
+capped at `MAX_FAMILY_GUIDES`. `CapabilityGuide` is the per-capability
+instruction, read with `guideOf` and `summaryOf`;
+`AgentCapabilityContext` is what a custom capability's handler receives, and
+`CapabilityPartial` / `CapabilityPlan` / `CapabilityStaging` describe work a
+capability can stage rather than apply at once. `JsonSchema` and
+`validateSchema` are the argument contract. Calls return an `ExecuteResult`
+(`WriteExecuteResult` for writes, with `WriteRowResult` per row) or an
+`ExecuteError`. `AgentColumnAuthoring` is the column-level authoring a table
+author supplies.
+
+**Discovery.** `discover(request)` answers a `DiscoveryRequest` with a
+`DiscoveryResult` drawn from a `DiscoverySource`, so a model asks once instead
+of being handed everything. `createDiscoveryCache` memoizes it as a
+`DiscoveryCache`, holding `DEFAULT_CACHE_GUIDES` guides across
+`DEFAULT_CACHE_VERSIONS` contract versions.
+
+**Context.** `buildAgentContext(session, options, inputs)` renders an
+`AgentContext` from `AgentContextOptions` and `AgentContextInputs`;
+`AgentContextProfile` picks how much to send (`DEFAULT_COMPACT_TOKENS` is the
+compact budget, `MAX_CONTEXT_BYTES` the hard ceiling) and `ContextIncludeError`
+names an `include` entry the table does not publish. `ContextCapability` and
+`ContextColumn` are the rendered pieces, `AgentContextContract`,
+`AgentContextView` and `AgentContextSelection` the halves a request carries.
+`renderAgentContext(context)` turns it into the prompt text and
+`agentInstructions(input)` writes the general rules beside it from an
+`AgentInstructionsInput`; `agentSystemPrompt` composes the two.
+`sampleColumnValues` and `sampleColumns` give a model real values to match on,
+bounded by `SAMPLE_CAP`, with `matchesType` deciding what is worth sampling.
+Row values reach a model only inside `rowProvenance`'s
+`RowProvenanceEnvelope`, which marks them untrusted; `RowWindow`,
+`RowWindowRow`, `RowReadQuery`, `RowRef`, `RowKeyRef`, `RowPositionRef` and
+`ResolvedRow` are the read surface behind it.
+
+**Approval.** `sharedApproval` and `resolveApproval` turn a `SharedApproval`
+into a `ResolvedApproval`. A turn opens with `openTransaction`, collects
+`PendingApproval`s, records answers with `recordDecision`, settles them with
+`settleDecisions` and ends at `closeTransaction`; `ApprovalTransaction`,
+`ApprovalSubject`, `ApprovalOutcome` and `ApprovalResult` are its types.
+"Always allow" is deliberate rather than sticky: `createApprovalMemory` holds an
+`ApprovalMemory` scoped to a contract version, `mayAlwaysAllow` says whether a
+capability is eligible, and `assertAlwaysAllow` validates an `AlwaysAllowInput`
+against the live catalog at build time, raising `ApprovalAlwaysAllowError` on a
+key no table offers — a typo opts nothing in silently.
+
+**Assistant.** `createTableAssistant(inputs)` is the headless conversation
+store: `TableAssistantInputs` configures it, `TableAssistantStore` is the
+handle and `TableAssistantSnapshot` the value a view renders, holding
+`AssistantMessage`s and an `AssistantStatus`. A turn is an `AssistantTurn` in an
+`AssistantConversation` of `AssistantExchange`s, produced by an
+`AssistantPlanner` or carried by an `AssistantTransport` (`AssistantRequest` in,
+`AssistantTransportReply` out). `AssistantAction`, `AssistantProposal` and
+`WriteProposal` are what it asks to do, `AssistantOutcome` /
+`AssistantOutcomeStatus` how it ended, and `AssistantUnresolved` why it could
+not. `AssistantQuestion`, `AssistantQuestionOption` and `AssistantAnswer` are
+the question channel. `AssistantSuggestion`s are filtered by
+`eligibleSuggestions` and checked by `assertUniqueSuggestions`;
+`CapabilityPresentation` says how a capability is shown. Receipts come from
+`receiptFromResult` / `receiptsFromResults` as `AssistantReceipt`s with an
+`AssistantReceiptStatus` and `AssistantReceiptSubject`, and `turnStatus` reads
+the `AssistantTurnStatus`.
+
+**Undo.** `planUndo` turns a finished turn into an `AssistantUndo` of
+`UndoCall`s, or an `UndoBlock` saying why not (`isUndoBlock` narrows it,
+`undoBlocked` explains it); `runUndo` applies one, and `AssistantUndoOffer` is
+what the panel shows.
+
+**The table binding.** `TableAgentBridge` connects a session to a live table
+through `BindingSnapshot`, `BindingQuery` and `BindingOperations`;
+`contractFingerprint` and `contractVersion` identify the contract a backend was
+sent, `displayProposals` and `ProposalResolver` render proposed writes.
+`observationFromNeutral`, `agentColumnsFromNeutral`, `readRowsFromNeutral`,
+`resolveRowFromNeutral`, `monotonicRevision`, `revisionToken`,
+`LiveObservationOptions`, `NeutralQueryOverlay` and `TableAgentColumnPatch`
+build that observation from the neutral engine, and `agentFiltersFromDefs` with
+`FilterCatalogColumnPatch` build the filter half. Aggregations are described by
+`AgentAggregations`, `AgentAggregationsPatch`, `AgentAggregationColumn` and
+`AgentAggregateOperation`, and applied with `aggregationsFor` /
+`applyAggregations` over `AggregationInputs` and `AggregationState`. Cell writes
+are `AgentCellEdit`s.
+
+**Streaming.** `createStreamReply` emits `AgentStreamEvent`s of
+`AgentStreamEventKind`, capped at `MAX_STREAM_EVENTS`; `splitRecords` and
+`parseStreamRecord` read them back, and `AgentStreamError` is the failure.
+
+### `@adapttable/ai/json` and `/openai`
+
+Two shapes of the same catalog: JSON Schema tool definitions, and OpenAI
+function tools whose names are mapped by `openAiToolNameMap` because the
+provider's naming rules are narrower than a capability key.
+
+### `@adapttable/ai/http` — the wire contract
+
+`agentHttpJsonSchema` is the published request schema as a
+`JsonSchemaDocument`, and `AGENT_HTTP_LIMITS` / `AgentWireLimits` are its
+bounds. A reply carries `AgentHttpToolCall`s and answers them with
+`AgentHttpToolResult` / `AgentHttpToolFailure`, whose payload is an
+`AgentHttpToolValue` (`isToolValue` narrows it); `AgentHttpAnswer` is the text,
+`AgentHttpQuestion` with `AgentHttpQuestionOption` the question channel,
+`AgentHttpAudio` a spoken turn, and `AgentHttpUnresolved` a turn that stopped.
+`AgentTurnError` is the typed failure. `PhaseState` is the phase-bound
+execution record that makes a replayed call identical rather than repeated.
+Contract pinning is a `PinRecord` with a `PinStatus`, held for
+`DEFAULT_PIN_TTL_MS` across at most `DEFAULT_PIN_CONNECTIONS` connections, and
+acknowledged with an `AgentHttpPinAck`.
+
+### `@adapttable/ai/webmcp` — in-page tools
+
+`registerWebMcpTools(session, options)` publishes the catalog on
+`document.modelContext` — `ModelContextLike` is the shape it needs, so a test
+or a polyfill can stand in. `WebMcpOptions` configures it, `WebMcpRegistration`
+is the handle, and each `WebMcpTool` carries `WebMcpAnnotations` derived from
+the capability's own `kind` rather than authored twice. Results are a
+`WebMcpResult` of `WebMcpContent`.
+
+### `@adapttable/ai/mcp` and `/mcp-apps` — MCP servers and embedded views
+
+`toMcpToolList(session)` and `toMcpResourceList(session)` render an
+`McpToolList` and `McpResourceList` with `McpListMeta`, each tool carrying
+`McpToolAnnotations`; `mcpToolResult` returns an `McpToolResult` of
+`McpContent`.
+
+MCP Apps puts a real table inside the conversation. `mcpAppResource(options)`
+declares an `McpAppResource` at a `mcpAppUri` with the `MCP_APP_MIME` type and
+an `McpAppSecurity` policy `mcpAppCsp` renders; `McpAppResourceOptions`
+configures it and `withMcpAppMeta` / `mcpAppToolMeta` attach the metadata that
+binds a tool to its view. Inside the frame, `createMcpAppBridge(options)` speaks
+JSON-RPC over an `McpAppChannel` to the host: `McpAppBridge` is the handle,
+`McpAppBridgeOptions` configures it, `McpAppHostCapabilities` is what the host
+admits to, and `McpAppToolInput` / `McpAppToolOutcome` report the host's own
+tool traffic. `approveThroughHost` and `askThroughHost` route approval and
+questions to the host's UI as an `McpAppElicitRequest` of
+`McpAppElicitOption`s, answered with an `McpAppElicitResult`.
+
+### `@adapttable/ai/ag-ui` — the AG-UI protocol
+
+`aguiTransport(options)` is an `AssistantTransport` over an `AgUiConnection`;
+`AgUiOptions` configures it. `aguiTools(session)` renders the catalog as
+`AgUiTool`s named by `aguiToolName`. A run takes an `AgUiRunInput` of
+`AgUiMessage`s and streams `AgUiEvent`s to an `AgUiRunOutcome`; an
+`AgUiInterrupt` pauses for approval or a question and is answered with an
+`AgUiResume` carrying an `AgUiResumeStatus`. `statePatch` emits RFC 6902
+`JsonPatchOperation`s for shared state, and `AgUiProtocolError` is a malformed
+or failed run.
+
+### `@adapttable/ai/ai-sdk` — the AI SDK UI message stream
+
+`aiSdkTransport(options)` is an `AssistantTransport` over an `AiSdkConnection`
+configured by `AiSdkOptions`; `aiSdkTools(session)` renders `AiSdkTool`s named
+by `aiSdkToolName`, and `aiSdkCapability` maps a tool name back to its
+capability. The route sends `AiSdkRequest`s and streams `AiSdkPart`s —
+`AI_SDK_STREAM_VERSION` is the version this adapter speaks and
+`assertAiSdkVersion` refuses a stream it does not understand. Tool results go
+back as `AiSdkToolOutput`s and approvals as `AiSdkApprovalResponse`s;
+`AiSdkProtocolError` is a malformed or failed stream.
+
+### `@adapttable/ai/voice` — dictation and clips
+
+`createSpeechInput(options)` returns a `SpeechInput` whose `SpeechState` holds a
+`SpeechStatus`. `SpeechMode` picks between the browser's own recognizer and
+recording an audio `SpeechClip` for a backend to transcribe;
+`SpeechInputOptions` and `VoiceOptions` configure it, and `rememberLanguage` /
+`readRememberedLanguage` keep the reader's dictation language between visits.
+
+### `@adapttable/ai-react` — the React binding
+
+`tableAgent` mounts a session on a live table and `useTableAssistant` drives the
+conversation, exposing the same `TableAssistantStore` and
+`TableAssistantSnapshot` as the headless store, including its `AssistantQuestion`
+and `AssistantAnswer` channel. `useSpeechInput(options)` is the hook form of the
+speech input, taking `UseSpeechInputOptions`.
+
+### The pieces in core and react
+
+`@adapttable/core` exports `ColumnAiOptions` — the per-column `ai` block a
+table author writes to describe a column to a model — and
+`BUILTIN_AGGREGATE_LABELS`, the localized names of the built-in aggregate
+functions, so a surface naming an aggregate reads the same word the table
+shows.
+
+`@adapttable/react/adapter` exports what an adapter needs to render the
+assistant: `AGENT_VIEW_STATE` / `AgentViewState` and
+`AGENT_ALWAYS_ALLOW_STATE` / `AgentAlwaysAllowState` are the shared state keys,
+`TableAssistantLanguageChipProps` is the dictation-language slot, and
+`SpeechInputHandle` / `SpeechInputState` / `SpeechInputStatus` are the
+structural view of a speech input — structural so that `@adapttable/react`
+describes dictation without depending on `@adapttable/ai`.
 
 ## Other packages
 

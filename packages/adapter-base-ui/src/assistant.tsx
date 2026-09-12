@@ -16,8 +16,8 @@ import {
 } from "@adapttable/react/adapter";
 import { Drawer } from "@base-ui/react/drawer";
 
-import { Badge, Button, Card, cx, IconButton } from "./ui";
 import { NativeSelect } from "./components/primitives";
+import { Badge, Button, Card, cx, IconButton } from "./ui";
 
 const BADGE_COLOR: Record<string, string> = {
   neutral: "gray",

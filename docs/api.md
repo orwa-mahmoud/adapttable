@@ -2017,6 +2017,217 @@ the URL, in memory, or behind a server query;
 `localizedColumnPath`, `normalizeLocaleTag` and `resolveLocaleTag` are
 the shared locale-resolution algorithm (see [i18n & RTL](./i18n-rtl.md)).
 
+## The AI packages
+
+`@adapttable/ai` is React-free and model-neutral: it turns a live table into a
+capability catalog an agent can read and call, and every protocol adapter below
+is a view over that one catalog. `@adapttable/ai-react` is the binding that
+mounts it on a React table. See [AI & agents](./ai.md), the
+[HTTP contract](./ai-http.md) and
+[protocol integrations](./ai-integrations.md).
+
+### `@adapttable/ai` — the session and its catalog
+
+`createAgentSession(options)` builds the session from a `CreateAgentSessionOptions`
+description of the table: `AgentApply` is the write seam the host fills,
+`AgentObservation` is what the table reports each time it is read, `AgentColumn`
+/ `AgentFilter` / `AgentFilterOption` describe its shape, `AgentLimits` and
+`AgentPolicy` its bounds, and `AgentRowAddressing` / `RowAddressScope` say how a
+row may be named. The result is an `AgentSession`: `buildManifest` renders its
+`AgentManifest`, `enabledKeys` lists what the table actually offers, and
+`CAPABILITY_KEYS` / `CapabilityKey` are the built-in names.
+
+A capability is a `CatalogEntry` backed by an `AgentCapabilityDefinition`.
+`AgentCapabilityKind` is its effect class (`read`, `view`, `write`,
+`destructive`), which is what decides how much ceremony a call needs;
+`CapabilityFamily` and `familyOf` group related keys for one-round discovery,
+capped at `MAX_FAMILY_GUIDES`. `CapabilityGuide` is the per-capability
+instruction, read with `guideOf` and `summaryOf`;
+`AgentCapabilityContext` is what a custom capability's handler receives, and
+`CapabilityPartial` / `CapabilityPlan` / `CapabilityStaging` describe work a
+capability can stage rather than apply at once. `JsonSchema` and
+`validateSchema` are the argument contract. Calls return an `ExecuteResult`
+(`WriteExecuteResult` for writes, with `WriteRowResult` per row) or an
+`ExecuteError`. `AgentColumnAuthoring` is the column-level authoring a table
+author supplies.
+
+**Discovery.** `discover(request)` answers a `DiscoveryRequest` with a
+`DiscoveryResult` drawn from a `DiscoverySource`, so a model asks once instead
+of being handed everything. `createDiscoveryCache` memoizes it as a
+`DiscoveryCache`, holding `DEFAULT_CACHE_GUIDES` guides across
+`DEFAULT_CACHE_VERSIONS` contract versions.
+
+**Context.** `buildAgentContext(session, options, inputs)` renders an
+`AgentContext` from `AgentContextOptions` and `AgentContextInputs`;
+`AgentContextProfile` picks how much to send (`DEFAULT_COMPACT_TOKENS` is the
+compact budget, `MAX_CONTEXT_BYTES` the hard ceiling) and `ContextIncludeError`
+names an `include` entry the table does not publish. `ContextCapability` and
+`ContextColumn` are the rendered pieces, `AgentContextContract`,
+`AgentContextView` and `AgentContextSelection` the halves a request carries.
+`renderAgentContext(context)` turns it into the prompt text and
+`agentInstructions(input)` writes the general rules beside it from an
+`AgentInstructionsInput`; `agentSystemPrompt` composes the two.
+`sampleColumnValues` and `sampleColumns` give a model real values to match on,
+bounded by `SAMPLE_CAP`, with `matchesType` deciding what is worth sampling.
+Row values reach a model only inside `rowProvenance`'s
+`RowProvenanceEnvelope`, which marks them untrusted; `RowWindow`,
+`RowWindowRow`, `RowReadQuery`, `RowRef`, `RowKeyRef`, `RowPositionRef` and
+`ResolvedRow` are the read surface behind it.
+
+**Approval.** `sharedApproval` and `resolveApproval` turn a `SharedApproval`
+into a `ResolvedApproval`. A turn opens with `openTransaction`, collects
+`PendingApproval`s, records answers with `recordDecision`, settles them with
+`settleDecisions` and ends at `closeTransaction`; `ApprovalTransaction`,
+`ApprovalSubject`, `ApprovalOutcome` and `ApprovalResult` are its types.
+"Always allow" is deliberate rather than sticky: `createApprovalMemory` holds an
+`ApprovalMemory` scoped to a contract version, `mayAlwaysAllow` says whether a
+capability is eligible, and `assertAlwaysAllow` validates an `AlwaysAllowInput`
+against the live catalog at build time, raising `ApprovalAlwaysAllowError` on a
+key no table offers — a typo opts nothing in silently.
+
+**Assistant.** `createTableAssistant(inputs)` is the headless conversation
+store: `TableAssistantInputs` configures it, `TableAssistantStore` is the
+handle and `TableAssistantSnapshot` the value a view renders, holding
+`AssistantMessage`s and an `AssistantStatus`. A turn is an `AssistantTurn` in an
+`AssistantConversation` of `AssistantExchange`s, produced by an
+`AssistantPlanner` or carried by an `AssistantTransport` (`AssistantRequest` in,
+`AssistantTransportReply` out). `AssistantAction`, `AssistantProposal` and
+`WriteProposal` are what it asks to do, `AssistantOutcome` /
+`AssistantOutcomeStatus` how it ended, and `AssistantUnresolved` why it could
+not. `AssistantQuestion`, `AssistantQuestionOption` and `AssistantAnswer` are
+the question channel. `AssistantSuggestion`s are filtered by
+`eligibleSuggestions` and checked by `assertUniqueSuggestions`;
+`CapabilityPresentation` says how a capability is shown. Receipts come from
+`receiptFromResult` / `receiptsFromResults` as `AssistantReceipt`s with an
+`AssistantReceiptStatus` and `AssistantReceiptSubject`, and `turnStatus` reads
+the `AssistantTurnStatus`.
+
+**Undo.** `planUndo` turns a finished turn into an `AssistantUndo` of
+`UndoCall`s, or an `UndoBlock` saying why not (`isUndoBlock` narrows it,
+`undoBlocked` explains it); `runUndo` applies one, and `AssistantUndoOffer` is
+what the panel shows.
+
+**The table binding.** `TableAgentBridge` connects a session to a live table
+through `BindingSnapshot`, `BindingQuery` and `BindingOperations`;
+`contractFingerprint` and `contractVersion` identify the contract a backend was
+sent, `displayProposals` and `ProposalResolver` render proposed writes.
+`observationFromNeutral`, `agentColumnsFromNeutral`, `readRowsFromNeutral`,
+`resolveRowFromNeutral`, `monotonicRevision`, `revisionToken`,
+`LiveObservationOptions`, `NeutralQueryOverlay` and `TableAgentColumnPatch`
+build that observation from the neutral engine, and `agentFiltersFromDefs` with
+`FilterCatalogColumnPatch` build the filter half. Aggregations are described by
+`AgentAggregations`, `AgentAggregationsPatch`, `AgentAggregationColumn` and
+`AgentAggregateOperation`, and applied with `aggregationsFor` /
+`applyAggregations` over `AggregationInputs` and `AggregationState`. Cell writes
+are `AgentCellEdit`s.
+
+**Streaming.** `createStreamReply` emits `AgentStreamEvent`s of
+`AgentStreamEventKind`, capped at `MAX_STREAM_EVENTS`; `splitRecords` and
+`parseStreamRecord` read them back, and `AgentStreamError` is the failure.
+
+### `@adapttable/ai/json` and `/openai`
+
+Two shapes of the same catalog: JSON Schema tool definitions, and OpenAI
+function tools whose names are mapped by `openAiToolNameMap` because the
+provider's naming rules are narrower than a capability key.
+
+### `@adapttable/ai/http` — the wire contract
+
+`agentHttpJsonSchema` is the published request schema as a
+`JsonSchemaDocument`, and `AGENT_HTTP_LIMITS` / `AgentWireLimits` are its
+bounds. A reply carries `AgentHttpToolCall`s and answers them with
+`AgentHttpToolResult` / `AgentHttpToolFailure`, whose payload is an
+`AgentHttpToolValue` (`isToolValue` narrows it); `AgentHttpAnswer` is the text,
+`AgentHttpQuestion` with `AgentHttpQuestionOption` the question channel,
+`AgentHttpAudio` a spoken turn, and `AgentHttpUnresolved` a turn that stopped.
+`AgentTurnError` is the typed failure. `PhaseState` is the phase-bound
+execution record that makes a replayed call identical rather than repeated.
+Contract pinning is a `PinRecord` with a `PinStatus`, held for
+`DEFAULT_PIN_TTL_MS` across at most `DEFAULT_PIN_CONNECTIONS` connections, and
+acknowledged with an `AgentHttpPinAck`.
+
+### `@adapttable/ai/webmcp` — in-page tools
+
+`registerWebMcpTools(session, options)` publishes the catalog on
+`document.modelContext` — `ModelContextLike` is the shape it needs, so a test
+or a polyfill can stand in. `WebMcpOptions` configures it, `WebMcpRegistration`
+is the handle, and each `WebMcpTool` carries `WebMcpAnnotations` derived from
+the capability's own `kind` rather than authored twice. Results are a
+`WebMcpResult` of `WebMcpContent`.
+
+### `@adapttable/ai/mcp` and `/mcp-apps` — MCP servers and embedded views
+
+`toMcpToolList(session)` and `toMcpResourceList(session)` render an
+`McpToolList` and `McpResourceList` with `McpListMeta`, each tool carrying
+`McpToolAnnotations`; `mcpToolResult` returns an `McpToolResult` of
+`McpContent`.
+
+MCP Apps puts a real table inside the conversation. `mcpAppResource(options)`
+declares an `McpAppResource` at a `mcpAppUri` with the `MCP_APP_MIME` type and
+an `McpAppSecurity` policy `mcpAppCsp` renders; `McpAppResourceOptions`
+configures it and `withMcpAppMeta` / `mcpAppToolMeta` attach the metadata that
+binds a tool to its view. Inside the frame, `createMcpAppBridge(options)` speaks
+JSON-RPC over an `McpAppChannel` to the host: `McpAppBridge` is the handle,
+`McpAppBridgeOptions` configures it, `McpAppHostCapabilities` is what the host
+admits to, and `McpAppToolInput` / `McpAppToolOutcome` report the host's own
+tool traffic. `approveThroughHost` and `askThroughHost` route approval and
+questions to the host's UI as an `McpAppElicitRequest` of
+`McpAppElicitOption`s, answered with an `McpAppElicitResult`.
+
+### `@adapttable/ai/ag-ui` — the AG-UI protocol
+
+`aguiTransport(options)` is an `AssistantTransport` over an `AgUiConnection`;
+`AgUiOptions` configures it. `aguiTools(session)` renders the catalog as
+`AgUiTool`s named by `aguiToolName`. A run takes an `AgUiRunInput` of
+`AgUiMessage`s and streams `AgUiEvent`s to an `AgUiRunOutcome`; an
+`AgUiInterrupt` pauses for approval or a question and is answered with an
+`AgUiResume` carrying an `AgUiResumeStatus`. `statePatch` emits RFC 6902
+`JsonPatchOperation`s for shared state, and `AgUiProtocolError` is a malformed
+or failed run.
+
+### `@adapttable/ai/ai-sdk` — the AI SDK UI message stream
+
+`aiSdkTransport(options)` is an `AssistantTransport` over an `AiSdkConnection`
+configured by `AiSdkOptions`; `aiSdkTools(session)` renders `AiSdkTool`s named
+by `aiSdkToolName`, and `aiSdkCapability` maps a tool name back to its
+capability. The route sends `AiSdkRequest`s and streams `AiSdkPart`s —
+`AI_SDK_STREAM_VERSION` is the version this adapter speaks and
+`assertAiSdkVersion` refuses a stream it does not understand. Tool results go
+back as `AiSdkToolOutput`s and approvals as `AiSdkApprovalResponse`s;
+`AiSdkProtocolError` is a malformed or failed stream.
+
+### `@adapttable/ai/voice` — dictation and clips
+
+`createSpeechInput(options)` returns a `SpeechInput` whose `SpeechState` holds a
+`SpeechStatus`. `SpeechMode` picks between the browser's own recognizer and
+recording an audio `SpeechClip` for a backend to transcribe;
+`SpeechInputOptions` and `VoiceOptions` configure it, and `rememberLanguage` /
+`readRememberedLanguage` keep the reader's dictation language between visits.
+
+### `@adapttable/ai-react` — the React binding
+
+`tableAgent` mounts a session on a live table and `useTableAssistant` drives the
+conversation, exposing the same `TableAssistantStore` and
+`TableAssistantSnapshot` as the headless store, including its `AssistantQuestion`
+and `AssistantAnswer` channel. `useSpeechInput(options)` is the hook form of the
+speech input, taking `UseSpeechInputOptions`.
+
+### The pieces in core and react
+
+`@adapttable/core` exports `ColumnAiOptions` — the per-column `ai` block a
+table author writes to describe a column to a model — and
+`BUILTIN_AGGREGATE_LABELS`, the localized names of the built-in aggregate
+functions, so a surface naming an aggregate reads the same word the table
+shows.
+
+`@adapttable/react/adapter` exports what an adapter needs to render the
+assistant: `AGENT_VIEW_STATE` / `AgentViewState` and
+`AGENT_ALWAYS_ALLOW_STATE` / `AgentAlwaysAllowState` are the shared state keys,
+`TableAssistantLanguageChipProps` is the dictation-language slot, and
+`SpeechInputHandle` / `SpeechInputState` / `SpeechInputStatus` are the
+structural view of a speech input — structural so that `@adapttable/react`
+describes dictation without depending on `@adapttable/ai`.
+
 ## Other packages
 
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
