@@ -283,7 +283,9 @@ describe("the protocol through the real example handler", () => {
     ];
     const complete = () => {
       rounds += 1;
-      return Promise.resolve(replies[rounds - 1] ?? replies[1]);
+      // `replies[1]` is the fallback, and indexing says it might be missing:
+      // the last reply is the one a repeated round gets.
+      return Promise.resolve(replies[rounds - 1] ?? replies[1] ?? "{}");
     };
     const client = createAgentHttpClient({
       endpoint: "http://example.invalid/turn",

@@ -81,6 +81,10 @@ export type {
   AssistantUnresolved,
 } from "./assistantContracts";
 export type { AssistantReceiptSubject } from "./assistantReceipts";
+// `AgentHttpRequest.view` is typed with these, so a consumer of this subpath
+// can name them without reaching for another entry point.
+export type { AgentContextContract, AgentContextView } from "./contextSnapshot";
+export type { AgentContextSelection } from "./contextSelection";
 export {
   contractFingerprint,
   DEFAULT_PIN_CONNECTIONS,

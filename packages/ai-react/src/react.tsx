@@ -131,6 +131,16 @@ export interface TableAgentOptions {
   /** Custom governed capabilities for this table. */
   readonly capabilities?: readonly AgentCapabilityDefinition[];
   /**
+   * Capability keys the agent may not use on this table.
+   *
+   * One list, for built-ins and custom definitions alike. It only ever denies:
+   * a key the table does not wire stays unavailable whatever this says, and no
+   * entry here can enable a forbidden operation. The table's own controls are
+   * untouched — denying `view.setFilters` to the agent leaves a person
+   * filtering exactly as before.
+   */
+  readonly excludeCapabilities?: readonly string[];
+  /**
    * Offer this table's capabilities to a browser-resident agent.
    *
    * `true` offers everything the session permits; an object narrows the
@@ -617,6 +627,11 @@ function viewInputsFromRuntime(
   };
 }
 
+/** One comparable string for an exclusion list, order-insensitive. */
+function exclusionKey(keys: readonly string[] | undefined): string {
+  return keys ? [...keys].sort((a, b) => a.localeCompare(b)).join("|") : "";
+}
+
 /**
  * What a capability does to the table, from the live catalog.
  *
@@ -815,6 +830,9 @@ function bindLiveSession(
     apply,
     onApprove,
     capabilities: optionsRef.current.capabilities,
+    ...(optionsRef.current.excludeCapabilities
+      ? { excludeCapabilities: optionsRef.current.excludeCapabilities }
+      : {}),
   });
   return {
     catalog: () => inner.catalog(),
@@ -863,9 +881,18 @@ function TableAgentProvider({
     (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>
   >(() => Promise.resolve(false));
   const tableIdRef = useRef(options.tableId);
+  // The registry is resolved when the session is built, so a change to what
+  // the agent may use is a different session — not a different answer from
+  // the same one.
+  const excludedRef = useRef(exclusionKey(options.excludeCapabilities));
+  const excluded = exclusionKey(options.excludeCapabilities);
   const sessionRef = useRef<AgentSession | null>(null);
-  if (tableIdRef.current !== options.tableId) {
+  if (
+    tableIdRef.current !== options.tableId ||
+    excludedRef.current !== excluded
+  ) {
     tableIdRef.current = options.tableId;
+    excludedRef.current = excluded;
     sessionRef.current = null;
     revisionCounterRef.current = createRevisionCounter();
   }

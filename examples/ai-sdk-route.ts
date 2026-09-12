@@ -120,7 +120,8 @@ const body = routeBody({
 
 console.log("client tools the route declares:");
 for (const [name, tool] of Object.entries(body.tools)) {
-  const clientRun = !("execute" in tool);
+  // No `execute` is the whole contract: the SDK hands that call to the client.
+  const clientRun = !(typeof tool === "object" && tool && "execute" in tool);
   console.log(` ${clientRun ? "browser" : "route  "} · ${name}`);
 }
 console.log("\nview sent as a data part:", body.data["data-adapttable-view"]);

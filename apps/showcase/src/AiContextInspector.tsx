@@ -141,7 +141,9 @@ export function AiContextInspector({
         <div>
           <dt>Asked for on demand</dt>
           <dd data-testid="ai-context-deferred">
-            {deferred.length > 0 ? deferred.join(", ") : "none"}
+            {deferred.length > 0
+              ? deferred.map((entry) => entry.key).join(", ")
+              : "none"}
           </dd>
         </div>
       </dl>
@@ -181,7 +183,9 @@ export function AiContextInspector({
           {capabilities.map((entry) => (
             <option key={entry.key} value={entry.key}>
               {entry.key}
-              {deferred.includes(entry.key) ? " (on demand)" : ""}
+              {deferred.some((left) => left.key === entry.key)
+                ? " (on demand)"
+                : ""}
             </option>
           ))}
         </select>
