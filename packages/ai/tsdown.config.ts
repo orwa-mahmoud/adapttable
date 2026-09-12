@@ -22,5 +22,6 @@ export default defineConfig({
     "src/openai.ts",
     "src/mcp.ts",
     "src/http.ts",
+    "src/assistant.ts",
   ],
 });

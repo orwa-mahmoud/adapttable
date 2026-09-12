@@ -54,37 +54,11 @@ export function isToolValue(
   return "result" in result;
 }
 
-/** One choice offered with a structured question. @public */
-export interface AgentHttpQuestionOption {
-  /** Stable id returned as the answer. */
-  readonly id: string;
-  /** Text shown to the reader. */
-  readonly label: string;
-}
-
-/**
- * A question for the person, asked as structure rather than prose.
- *
- * A backend that uses this never has its question rendered as ordinary
- * assistant text that the reader answers into the void.
- *
- * @public
- */
-export interface AgentHttpQuestion {
-  /** Correlation handle; the answer returns as the tool result for this id. */
-  readonly id: string;
-  /** What to ask. */
-  readonly question: string;
-  /** Offered choices, when the answer is a selection. */
-  readonly options?: readonly AgentHttpQuestionOption[];
-  /** Whether the reader may type an answer instead of choosing one. */
-  readonly allowFreeText: boolean;
-}
-
-/** What the reader answered. @public */
-export interface AgentHttpAnswer {
-  /** The chosen option's id, when they chose one. */
-  readonly optionId?: string;
-  /** What they typed, when free text was allowed. */
-  readonly text?: string;
-}
+// A structured question is not an HTTP idea — a scripted transport or an
+// in-process planner asks one the same way — so the shapes live with the other
+// assistant contracts and are named here under the wire's own spelling.
+export type {
+  AssistantAnswer as AgentHttpAnswer,
+  AssistantQuestion as AgentHttpQuestion,
+  AssistantQuestionOption as AgentHttpQuestionOption,
+} from "./assistantContracts";

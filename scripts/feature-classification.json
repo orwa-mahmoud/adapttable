@@ -582,7 +582,14 @@
       },
       {
         "pkg": "ai",
-        "subpaths": [".", "./json", "./openai", "./mcp", "./http"]
+        "subpaths": [
+          ".",
+          "./json",
+          "./openai",
+          "./mcp",
+          "./http",
+          "./assistant"
+        ]
       }
     ],
     "engineModules": [

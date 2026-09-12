@@ -77,6 +77,18 @@ export interface AssistantReceipt {
   readonly idempotencyKey: string;
   /** What changed, for a card a reader can act on. */
   readonly subject?: AssistantReceiptSubject;
+  /**
+   * Whether this turn can still be put back.
+   *
+   * A capability of the receipt, not of the conversation: whether an undo is
+   * possible depends on what ran and what the host kept, so the runtime that
+   * knows says so here and a surface offers the control only when it is true.
+   * Absent means nobody has established that it can be, which is not the same
+   * as established that it cannot.
+   */
+  readonly undoable?: boolean;
+  /** Why the reader refused, when they gave a reason. */
+  readonly approvalReason?: string;
 }
 
 /** How a whole turn ended. @public */
@@ -141,13 +153,22 @@ export function receiptFromResult(
   }
   const payload = result.result;
   if (!isWriteResult(payload)) return { ...base, status: "executed" };
+  // Carried through whatever the write turned out to be: a reader who said why
+  // they refused should not have to say it twice.
+  const reason = payload.approvalReason
+    ? { approvalReason: payload.approvalReason }
+    : {};
   // A write reports itself: applied means a host callback ran, and everything
   // else is decided by what the approval did. Under `commit: "stage"` the
   // callback that ran was the staging one, so the change is not saved yet.
   if (payload.applied) {
-    return { ...base, status: commit === "stage" ? "staged" : "executed" };
+    return {
+      ...base,
+      ...reason,
+      status: commit === "stage" ? "staged" : "executed",
+    };
   }
-  return { ...base, status: fromApproval(payload.approval) };
+  return { ...base, ...reason, status: fromApproval(payload.approval) };
 }
 
 /**

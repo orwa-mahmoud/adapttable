@@ -44,16 +44,28 @@ export {
   type AssistantExchange,
   type AssistantOutcome,
   type AssistantOutcomeStatus,
+  type AssistantAnswer,
   type AssistantPlanner,
   type AssistantProposal,
+  type AssistantQuestion,
+  type AssistantQuestionOption,
   type AssistantRequest,
   type AssistantSuggestion,
   type AssistantTransport,
   type AssistantTransportReply,
   type AssistantTurn,
+  type AssistantUnresolved,
   type CapabilityPresentation,
   eligibleSuggestions,
 } from "./assistantContracts";
+export {
+  type AssistantMessage,
+  type AssistantStatus,
+  createTableAssistant,
+  type TableAssistantInputs,
+  type TableAssistantSnapshot,
+  type TableAssistantStore,
+} from "./assistantStore";
 export {
   type AssistantReceipt,
   type AssistantReceiptStatus,

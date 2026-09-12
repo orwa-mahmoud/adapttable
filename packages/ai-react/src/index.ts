@@ -1,8 +1,10 @@
 /**
  * `@adapttable/ai-react` — bind an AdaptTable session from a React table.
  *
- * `tableAgent` publishes the live manifest. `useTableAssistant` owns the
- * conversation. `@adapttable/ai` stays React-free.
+ * `tableAgent` publishes the live manifest. `useTableAssistant` subscribes to
+ * the neutral controller at `@adapttable/ai/assistant` and supplies React's
+ * external-store mechanism, its live inputs and its controlled presentation
+ * state. `@adapttable/ai` stays React-free.
  *
  * @packageDocumentation
  */
@@ -20,4 +22,10 @@ export type {
   TableAgentOptions,
 } from "./react";
 export { TABLE_AGENT_STATE, tableAgent } from "./react";
-export type { AssistantSuggestion } from "@adapttable/ai";
+export type {
+  AssistantAnswer,
+  AssistantQuestion,
+  AssistantSuggestion,
+  TableAssistantSnapshot,
+  TableAssistantStore,
+} from "@adapttable/ai";

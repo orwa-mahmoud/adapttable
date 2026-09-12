@@ -24,21 +24,28 @@
 import {
   type AgentSession,
   type AssistantExchange,
+  type AssistantMessage,
+  type AssistantQuestion,
   type AssistantReceipt,
+  type AssistantStatus,
   type AssistantSuggestion,
   type AssistantTransport,
   type AssistantTransportReply,
   type AssistantTurnStatus,
-  eligibleSuggestions,
-  receiptsFromResults,
-  turnStatus,
+  createTableAssistant,
 } from "@adapttable/ai";
 import {
   AGENT_APPROVAL_STATE,
   type AgentApprovalPending,
   useFeatureState,
 } from "@adapttable/react/adapter";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 // The hook's own options and state name these, so the entry that publishes
 // the hook publishes them too — a consumer typing a variable from it should
@@ -53,44 +60,14 @@ export type {
 } from "@adapttable/ai";
 export type {
   AssistantExchange,
+  AssistantMessage,
+  AssistantQuestion,
   AssistantReceipt,
+  AssistantStatus,
   AssistantTransport,
   AssistantTransportReply,
   AssistantTurnStatus,
 };
-
-/**
- * Where the conversation is.
- *
- * @public
- */
-export type AssistantStatus =
-  | "idle"
-  | "connecting"
-  | "ready"
-  | "sending"
-  | "awaiting-approval"
-  | "error"
-  | "disconnected";
-
-/**
- * One record in the transcript.
- *
- * @public
- */
-export interface AssistantMessage {
-  /** Stable id. Never an array index — messages are keyed by it. */
-  readonly id: string;
-  readonly role: "user" | "assistant";
-  /** Untrusted text. Render as text, or as safely restricted markup. */
-  readonly text: string;
-  /** Milliseconds since the epoch. */
-  readonly at: number;
-  /** What the actions in this turn actually did. */
-  readonly receipts?: readonly AssistantReceipt[];
-  /** The turn's overall outcome, when it ran actions. */
-  readonly outcome?: AssistantTurnStatus;
-}
 
 /** How {@link useTableAssistant} is configured. @public */
 export interface TableAssistantOptions {
@@ -162,6 +139,14 @@ export interface TableAssistantState {
    * passing it costs nothing on a table reviewing elsewhere.
    */
   readonly approval: AgentApprovalPending | null;
+  /**
+   * A question the backend put to the reader, or nothing.
+   *
+   * The turn is parked rather than finished; answering resumes it.
+   */
+  readonly pendingQuestion: AssistantQuestion | null;
+  /** Answer the pending question and let the turn continue. */
+  readonly answer: (answer: { optionId?: string; text?: string }) => void;
   /** The suggestions this table can run right now, re-checked every render. */
   readonly suggestions: readonly AssistantSuggestion[];
   /** Eligible suggestions past `primarySuggestions`. */
@@ -174,24 +159,12 @@ export interface TableAssistantState {
   readonly error: string | undefined;
 }
 
-const DEFAULT_PRIMARY = 4;
-
-/** Ids only have to be unique within one transcript. */
-function messageId(role: string, seq: number): string {
-  return `${role}-${String(seq)}`;
-}
-
-function exchanges(
-  messages: readonly AssistantMessage[]
-): readonly AssistantExchange[] {
-  return messages.map((message) => ({
-    role: message.role,
-    text: message.text,
-  }));
-}
-
 /**
  * Run a table assistant.
+ *
+ * A thin subscriber to the neutral controller in `@adapttable/ai/assistant`:
+ * React supplies the external-store mechanism, the live inputs and the
+ * controlled presentation state, and owns none of the lifecycle.
  *
  * @param options - Session, transport and presentation.
  * @returns Everything a panel needs, and nothing about how it looks.
@@ -201,38 +174,45 @@ function exchanges(
 export function useTableAssistant(
   options: TableAssistantOptions
 ): TableAssistantState {
-  const { session, transport, transportKey, onOpenChange } = options;
-  const [messages, setMessages] = useState<readonly AssistantMessage[]>([]);
-  const [draft, setDraft] = useState("");
-  const [status, setStatus] = useState<AssistantStatus>("idle");
-  const [error, setError] = useState<string | undefined>(undefined);
+  const { onOpenChange } = options;
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   // The live approval, so a host wires the panel with one prop rather than
   // reaching for feature state itself.
   const approval = useFeatureState(AGENT_APPROVAL_STATE);
 
-  // Sending is reserved synchronously, before the first await. A state flag
-  // would not be: two clicks in one tick would both read "not sending".
-  const sending = useRef(false);
-  // The latest transport, so an inline object does not read as a new one.
-  const transportRef = useRef(transport);
-  transportRef.current = transport;
-  // The session and the authored list as they are NOW, so a click reads the
-  // current table rather than the one the last render saw.
-  const sessionRef = useRef(session);
-  sessionRef.current = session;
-  const suggestionsRef = useRef<readonly AssistantSuggestion[]>([]);
-  suggestionsRef.current = options.suggestions ?? [];
-  const abort = useRef<AbortController | undefined>(undefined);
-  // Identity for ONE send. A late turn must not have its reservation cleared
-  // by an earlier turn's finally block, and a reply must not land after the
-  // turn that asked for it was abandoned.
-  const turnId = useRef(0);
-  const seq = useRef(0);
-  // Identifies the conversation a reply belongs to. A reply that arrives
-  // after the table changed carries the old generation and is discarded.
-  const generation = useRef(0);
-  const alive = useRef(true);
+  // Created once, inert until the mount effect connects it. Constructing a
+  // store during render must not open a connection — a render can be thrown
+  // away, and Strict Mode throws the first one away on purpose.
+  const storeRef = useRef<ReturnType<typeof createTableAssistant> | null>(null);
+  storeRef.current ??= createTableAssistant(inputsOf(options, approval));
+  const store = storeRef.current;
+
+  // Live inputs, every render. The store decides what a change means: a new
+  // session resets the conversation, a new transport key reconnects, and an
+  // updated catalog or a newly arrived approval does neither.
+  useEffect(() => {
+    store.update(inputsOf(options, approval));
+  });
+
+  useEffect(() => {
+    store.connect();
+    return () => {
+      store.dispose();
+      // A disposed store is never reused. Strict Mode's second setup, and any
+      // later remount, builds a fresh one rather than reviving one that has
+      // already released its connection.
+      storeRef.current = null;
+    };
+    // Mount and unmount only: every other change reaches the store through
+    // `update` above, which is what keeps connection effects out of render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const state = useSyncExternalStore(
+    store.subscribe,
+    store.getState,
+    store.getState
+  );
 
   const open = options.open ?? uncontrolledOpen;
   const setOpen = useCallback(
@@ -243,261 +223,39 @@ export function useTableAssistant(
     [options.open, onOpenChange]
   );
 
-  useEffect(() => {
-    alive.current = true;
-    return () => {
-      alive.current = false;
-      // Abort the send in flight. Without this a transport keeps working — and
-      // keeps a request open — for a panel that no longer exists.
-      abort.current?.abort();
-      abort.current = undefined;
-      sending.current = false;
-    };
-  }, []);
-
-  // A new session is a new table, or a new identity for this one. The turn in
-  // flight belonged to the old one, so it is aborted and its transcript
-  // dropped rather than carried across.
-  useEffect(() => {
-    generation.current += 1;
-    abort.current?.abort();
-    abort.current = undefined;
-    sending.current = false;
-    setMessages([]);
-    setError(undefined);
-    const active = transportRef.current;
-    if (!session || !active) {
-      setStatus("disconnected");
-      return;
-    }
-    if (!active.connect) {
-      setStatus("ready");
-      return () => {
-        active.disconnect?.();
-      };
-    }
-    const mine = generation.current;
-    const controller = new AbortController();
-    setStatus("connecting");
-    void (async () => {
-      try {
-        await active.connect?.({ session, signal: controller.signal });
-        if (!alive.current || generation.current !== mine) return;
-        setStatus("ready");
-      } catch (cause) {
-        if (!alive.current || generation.current !== mine) return;
-        setStatus("error");
-        setError(cause instanceof Error ? cause.message : String(cause));
-      }
-    })();
-    return () => {
-      controller.abort();
-      active.disconnect?.();
-    };
-  }, [session, transportKey]);
-
-  // Read on EVERY render, never memoized on the session object. A table
-  // keeps one session and changes its capabilities in place, so caching by
-  // object identity is caching by the one thing that does not move: turn a
-  // feature off and the chip for it would sit there until something unrelated
-  // happened to rerender.
-  const available = session?.catalog().map((entry) => entry.key) ?? [];
-  const eligible = eligibleSuggestions(options.suggestions ?? [], available);
-  const primary = options.primarySuggestions ?? DEFAULT_PRIMARY;
-
-  /**
-   * Whether a reply still belongs here.
-   *
-   * A turn that outlived its panel or its table must not write anywhere: the
-   * transcript it was answering is gone.
-   */
-  const current = useCallback(
-    (mine: number) => alive.current && generation.current === mine,
-    []
-  );
-
-  /**
-   * Whether a reply may still be shown.
-   *
-   * Three ways it may not: the panel is gone, the table changed, or this turn
-   * was stopped. The last one is the reason `stop()` can be trusted with a
-   * transport that ignores its signal — a late reply is dropped rather than
-   * appended as if nothing had happened.
-   */
-  const deliverable = useCallback(
-    (mine: number, turn: number, controller: AbortController) =>
-      alive.current &&
-      generation.current === mine &&
-      turnId.current === turn &&
-      !controller.signal.aborted,
-    []
-  );
-
-  const push = useCallback((message: AssistantMessage) => {
-    setMessages((current) => [...current, message]);
-  }, []);
-
-  const receive = useCallback(
-    (reply: AssistantTransportReply) => {
-      // The table's own policy decides whether an applied write is saved or
-      // staged; the result cannot say on its own.
-      const receipts = receiptsFromResults(
-        reply.results ?? [],
-        reply.keys,
-        session?.manifest().policy.commit,
-        reply.subjects
-      );
-      seq.current += 1;
-      push({
-        id: messageId("assistant", seq.current),
-        role: "assistant",
-        text: reply.text,
-        at: Date.now(),
-        receipts: receipts.length > 0 ? receipts : undefined,
-        outcome: receipts.length > 0 ? turnStatus(receipts) : undefined,
-      });
-      setStatus(
-        receipts.some((receipt) => receipt.status === "awaiting-approval")
-          ? "awaiting-approval"
-          : "ready"
-      );
-    },
-    [push, session]
-  );
-
-  const recover = useCallback(
-    (cause: unknown, aborted: boolean, was: string) => {
-      // Put the draft back unless the reader has already typed something else,
-      // so a retry is one keystroke rather than retyping.
-      setDraft((current) => (current === "" ? was : current));
-      // Stopping before a reply is not a failure to report as one, and nothing
-      // is resent either way: an action whose outcome is unknown stays unknown.
-      setStatus(aborted ? "ready" : "error");
-      if (aborted) return;
-      setError(cause instanceof Error ? cause.message : String(cause));
-    },
-    []
-  );
-
-  const send = useCallback(
-    async (text?: string): Promise<void> => {
-      const outgoing = (text ?? draft).trim();
-      if (!outgoing || sending.current) return;
-      const active = transportRef.current;
-      if (!session || !active) {
-        setStatus("disconnected");
-        setError("no transport is connected");
-        return;
-      }
-      sending.current = true;
-      const mine = generation.current;
-      turnId.current += 1;
-      const turn = turnId.current;
-      const controller = new AbortController();
-      abort.current = controller;
-      seq.current += 1;
-      const userMessage: AssistantMessage = {
-        id: messageId("user", seq.current),
-        role: "user",
-        text: outgoing,
-        at: Date.now(),
-      };
-      push(userMessage);
-      setStatus("sending");
-      setError(undefined);
-      const previousDraft = draft;
-      if (text === undefined) setDraft("");
-
-      try {
-        const reply = await active.send({
-          session,
-          text: outgoing,
-          conversation: exchanges([...messages, userMessage]),
-          signal: controller.signal,
-        });
-        // A transport is asked to honour `signal`, but it is host code and
-        // may not. Stop has to hold either way, so delivery is gated on the
-        // signal as well as on the turn still being the current one.
-        if (deliverable(mine, turn, controller)) receive(reply);
-      } catch (cause) {
-        if (current(mine) && turnId.current === turn) {
-          recover(cause, controller.signal.aborted, previousDraft);
-        }
-      } finally {
-        // Only this turn's reservation, never a later turn's.
-        if (generation.current === mine && turnId.current === turn) {
-          sending.current = false;
-          abort.current = undefined;
-        }
-      }
-    },
-    [current, deliverable, draft, messages, push, receive, recover, session]
-  );
-
-  const stop = useCallback(() => {
-    if (!sending.current) return;
-    abort.current?.abort();
-    abort.current = undefined;
-    // Release the lane here rather than waiting for the transport. A
-    // transport that never settles would otherwise hold the panel busy
-    // forever; its eventual reply is already undeliverable, because the turn
-    // it belonged to is no longer the current one.
-    turnId.current += 1;
-    sending.current = false;
-    setStatus("ready");
-  }, []);
-
-  const clear = useCallback(() => {
-    // Clearing mid-turn would leave a reply with nowhere to land and hide an
-    // action that is still running.
-    if (sending.current) return;
-    setMessages([]);
-    setError(undefined);
-  }, []);
-
-  const runSuggestion = useCallback(
-    async (id: string): Promise<void> => {
-      const authored = suggestionsRef.current.find(
-        (candidate) => candidate.id === id
-      );
-      if (!authored) return;
-      // Re-read the catalog HERE, not from the list this render closed over.
-      // A capability can go away between a chip being drawn and being
-      // clicked, and the reader would otherwise send a prompt the table can
-      // no longer serve. The executor would refuse it anyway — this is so the
-      // refusal is not what the reader finds out from.
-      const live =
-        sessionRef.current?.catalog().map((entry) => entry.key) ?? [];
-      const [runnable] = eligibleSuggestions([authored], live);
-      if (!runnable) return;
-      await send(runnable.prompt);
-    },
-    [send]
-  );
-
   return {
-    messages,
-    draft,
-    setDraft,
-    send,
-    stop,
-    clear,
-    // What the badge says. A parked write is not "working", and a reader
-    // watching a spinner that will never resolve on its own is the reason
-    // this is separate from `busy`.
-    status:
-      status === "sending" && options.awaitingApproval
-        ? "awaiting-approval"
-        : status,
-    // Whether a turn can still be stopped. An approval parks the turn; it
-    // does not end it, so Stop stays on the composer.
-    busy: status === "sending",
+    messages: state.messages,
+    draft: state.draft,
+    setDraft: store.setDraft,
+    send: store.send,
+    stop: store.stop,
+    clear: store.clear,
+    status: state.status,
+    busy: state.busy,
     approval: approval ?? null,
-    suggestions: eligible.slice(0, primary),
-    moreSuggestions: eligible.slice(primary),
-    runSuggestion,
+    pendingQuestion: state.pendingQuestion,
+    answer: store.answer,
+    suggestions: state.suggestions,
+    moreSuggestions: state.moreSuggestions,
+    runSuggestion: store.runSuggestion,
     open,
     setOpen,
-    error,
+    error: state.error,
+  };
+}
+
+/** The hook's options as the store's live inputs. A projection, not a decision. */
+function inputsOf(
+  options: TableAssistantOptions,
+  approval: AgentApprovalPending | null | undefined
+) {
+  return {
+    session: options.session,
+    transport: options.transport,
+    transportKey: options.transportKey,
+    suggestions: options.suggestions,
+    primarySuggestions: options.primarySuggestions,
+    awaitingApproval: options.awaitingApproval,
+    approval: approval ?? null,
   };
 }

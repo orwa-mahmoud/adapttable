@@ -326,3 +326,38 @@ export interface AssistantTransport {
    */
   disconnect?(): void;
 }
+
+/** One choice offered with a structured question. @public */
+export interface AssistantQuestionOption {
+  /** Stable id returned as the answer. */
+  readonly id: string;
+  /** Text shown to the reader. */
+  readonly label: string;
+}
+
+/**
+ * A question for the person, asked as structure rather than prose.
+ *
+ * A backend that uses this never has its question rendered as ordinary
+ * assistant text that the reader answers into the void.
+ *
+ * @public
+ */
+export interface AssistantQuestion {
+  /** Correlation handle; the answer returns as the tool result for this id. */
+  readonly id: string;
+  /** What to ask. */
+  readonly question: string;
+  /** Offered choices, when the answer is a selection. */
+  readonly options?: readonly AssistantQuestionOption[];
+  /** Whether the reader may type an answer instead of choosing one. */
+  readonly allowFreeText: boolean;
+}
+
+/** What the reader answered. @public */
+export interface AssistantAnswer {
+  /** The chosen option's id, when they chose one. */
+  readonly optionId?: string;
+  /** What they typed, when free text was allowed. */
+  readonly text?: string;
+}
