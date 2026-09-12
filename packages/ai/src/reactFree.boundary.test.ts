@@ -21,6 +21,7 @@ const ENTRIES = [
   "context",
   "voice",
   "webmcp",
+  "agui",
 ];
 
 const REACT_IMPORT =

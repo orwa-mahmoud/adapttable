@@ -121,6 +121,16 @@
         "default": "./dist/webmcp.cjs"
       }
     },
+    "./ag-ui": {
+      "import": {
+        "types": "./dist/agui.d.ts",
+        "default": "./dist/agui.js"
+      },
+      "require": {
+        "types": "./dist/agui.d.cts",
+        "default": "./dist/agui.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

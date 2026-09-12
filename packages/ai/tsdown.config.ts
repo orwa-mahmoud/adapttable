@@ -26,5 +26,6 @@ export default defineConfig({
     "src/context.ts",
     "src/voice.ts",
     "src/webmcp.ts",
+    "src/agui.ts",
   ],
 });

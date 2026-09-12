@@ -591,7 +591,8 @@
           "./assistant",
           "./context",
           "./voice",
-          "./webmcp"
+          "./webmcp",
+          "./ag-ui"
         ]
       }
     ],
