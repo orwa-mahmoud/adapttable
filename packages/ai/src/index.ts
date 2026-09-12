@@ -166,6 +166,7 @@ export type {
   AgentApply,
   AgentCapabilityContext,
   AgentCapabilityDefinition,
+  AgentCapabilityKind,
   AgentCellEdit,
   AgentColumn,
   AgentColumnAuthoring,

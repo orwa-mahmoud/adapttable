@@ -104,38 +104,55 @@ function expand(
   request: DiscoveryRequest,
   source: DiscoverySource
 ): readonly string[] {
-  const available = source.available();
-  const offered = new Set(available);
-  const seed = [...(request.keys ?? [])];
-  if (request.bundle) {
-    // A family is expanded from what this table actually offers, so asking
-    // for one on a table that wires two of its five members gets two.
-    for (const key of available) {
-      if (source.family(key)?.family !== request.bundle) continue;
-      if (!seed.includes(key)) seed.push(key);
-    }
-  }
+  return walk(seedOf(request, source), source);
+}
 
+/**
+ * What the request asked about, before any dependency is followed.
+ *
+ * A family is expanded from what this table actually offers, so asking for one
+ * on a table that wires two of its five members gets two.
+ */
+function seedOf(
+  request: DiscoveryRequest,
+  source: DiscoverySource
+): readonly string[] {
+  const seed = [...(request.keys ?? [])];
+  if (!request.bundle) return seed;
+  for (const key of source.available()) {
+    if (source.family(key)?.family !== request.bundle) continue;
+    if (!seed.includes(key)) seed.push(key);
+  }
+  return seed;
+}
+
+/**
+ * The seed, then whatever its members depend on, breadth first.
+ *
+ * A dependency exists to make its capability usable, so one is followed only
+ * out of a capability this table offers: answering with a guide for something
+ * that cannot run reads to a model as an invitation to try it. The key itself
+ * still travels, so the answer still says it is unavailable.
+ */
+function walk(
+  seed: readonly string[],
+  source: DiscoverySource
+): readonly string[] {
+  const offered = new Set(source.available());
   const ordered: string[] = [];
   const visited = new Set<string>();
   const queue = [...seed];
-  while (queue.length > 0) {
-    const key = queue.shift();
-    if (key === undefined) break;
+
+  // The queue is appended to while it is walked, and an array iterator visits
+  // what arrives after it — which is the breadth-first order this wants.
+  for (const key of queue) {
     // Visited before ordered: a cycle revisits a key that is already queued,
     // and this is what stops it.
     if (visited.has(key)) continue;
     visited.add(key);
     ordered.push(key);
-    // A dependency exists to make its capability usable. Following one out of
-    // a capability this table does not offer would answer with a guide for
-    // something that cannot run — which reads to a model as an invitation to
-    // try it. The key itself still travels, so the answer still says it is
-    // unavailable.
     if (!offered.has(key)) continue;
-    for (const dependency of source.family(key)?.dependsOn ?? []) {
-      if (!visited.has(dependency)) queue.push(dependency);
-    }
+    queue.push(...(source.family(key)?.dependsOn ?? []));
   }
   return ordered;
 }

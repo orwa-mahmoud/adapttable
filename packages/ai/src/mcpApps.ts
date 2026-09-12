@@ -387,30 +387,27 @@ export function createMcpAppBridge(options: McpAppBridgeOptions): McpAppBridge {
     };
   }
 
-  const unsubscribe = channel.subscribe((data, origin) => {
-    // Anything from anywhere else is not the host, whatever it claims.
-    if (origin !== options.hostOrigin) return;
-    const message = asMessage(data);
-    if (!message) return;
-    if (typeof message.method === "string") {
-      if (message.method === "ui/notifications/tool-input") {
-        const params = message.params as McpAppToolInput | undefined;
-        if (params) options.onToolInput?.(params);
-        return;
-      }
-      if (message.method === "ui/notifications/tool-result") {
-        const params = message.params as McpAppToolOutcome | undefined;
-        if (params) options.onToolResult?.(params);
-        return;
-      }
-      options.onWarning?.({
-        code: "unknown-method",
-        message: `the host sent "${message.method}", which this view does not handle`,
-      });
+  /** A notification the host sent, which nothing is waiting for. */
+  const receiveNotification = (method: string, params: unknown): void => {
+    if (method === "ui/notifications/tool-input") {
+      const input = params as McpAppToolInput | undefined;
+      if (input) options.onToolInput?.(input);
       return;
     }
-    if (typeof message.id !== "number") return;
-    const entry = pending.get(message.id);
+    if (method === "ui/notifications/tool-result") {
+      const outcome = params as McpAppToolOutcome | undefined;
+      if (outcome) options.onToolResult?.(outcome);
+      return;
+    }
+    options.onWarning?.({
+      code: "unknown-method",
+      message: `the host sent "${method}", which this view does not handle`,
+    });
+  };
+
+  /** An answer to one request this view made. */
+  const receiveResponse = (message: JsonRpcMessage, id: number): void => {
+    const entry = pending.get(id);
     if (!entry) {
       options.onWarning?.({
         code: "unmatched-response",
@@ -418,19 +415,31 @@ export function createMcpAppBridge(options: McpAppBridgeOptions): McpAppBridge {
       });
       return;
     }
-    pending.delete(message.id);
+    pending.delete(id);
     clearTimeout(entry.timer);
-    if (message.error) {
-      entry.reject(
-        new Error(
-          typeof message.error.message === "string"
-            ? message.error.message
-            : "the host refused the request"
-        )
-      );
+    if (!message.error) {
+      entry.resolve(message.result);
       return;
     }
-    entry.resolve(message.result);
+    entry.reject(
+      new Error(
+        typeof message.error.message === "string"
+          ? message.error.message
+          : "the host refused the request"
+      )
+    );
+  };
+
+  const unsubscribe = channel.subscribe((data, origin) => {
+    // Anything from anywhere else is not the host, whatever it claims.
+    if (origin !== options.hostOrigin) return;
+    const message = asMessage(data);
+    if (!message) return;
+    if (typeof message.method === "string") {
+      receiveNotification(message.method, message.params);
+      return;
+    }
+    if (typeof message.id === "number") receiveResponse(message, message.id);
   });
 
   const request = (method: string, params: unknown): Promise<unknown> => {

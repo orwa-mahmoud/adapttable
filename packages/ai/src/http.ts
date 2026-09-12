@@ -1540,6 +1540,106 @@ export async function connectAgentHttp(
  * which is exactly what a small model does, every round, until the discovery
  * budget runs out with nothing done.
  */
+/**
+ * One round of the conversation: build the request, send it, record the pin.
+ *
+ * The contract travels when this connection holds no pin for it and only the
+ * view travels when it does — which is what `questionOnly` names. The pin is
+ * remembered from the reply before anything else reads it, because a backend
+ * that acknowledged one has it whatever the rest of the answer says.
+ */
+async function sendRound(
+  session: AgentSession,
+  options: AgentHttpClientOptions,
+  round: {
+    readonly connectionId: string;
+    readonly version: string;
+    readonly questionOnly: boolean;
+    readonly turn: HttpPhaseContext;
+    readonly phaseId: number;
+    readonly message: string;
+    readonly conversation?: readonly AgentHttpMessage[];
+    readonly toolResults?: readonly AgentHttpToolResult[];
+    readonly pendingCalls: readonly AgentHttpToolCall[];
+    readonly signal?: AbortSignal;
+  }
+): Promise<AgentHttpResponse> {
+  const seq = pins.claim(session, round.connectionId);
+  // The permitted context as it stands for this round. Named apart from the
+  // phase's own execution context on purpose: that one is identity, this one
+  // is what goes on the wire.
+  const wireContext = currentContext(
+    session,
+    options,
+    round.connectionId,
+    round.version
+  );
+  const reply = await exchange(
+    options,
+    compactRequest(
+      session,
+      "turn",
+      {
+        message: round.message,
+        conversation: round.conversation,
+        turnId: round.turn.turnId,
+        phaseId: round.phaseId,
+        ...(round.toolResults?.length
+          ? { toolResults: round.toolResults }
+          : {}),
+        ...(round.pendingCalls.length
+          ? { pendingCalls: round.pendingCalls }
+          : {}),
+      },
+      round.questionOnly ? "question" : "full",
+      {
+        connectionId: round.connectionId,
+        version: round.version,
+        context: wireContext,
+      }
+    ),
+    round.signal
+  );
+  rememberPin(
+    session,
+    round.connectionId,
+    { version: round.version, seq },
+    reply
+  );
+  return reply;
+}
+
+/**
+ * Drop everything this client remembers about one connection.
+ *
+ * The pin and the guides answered under it are the same promise — "you have
+ * already been told this" — so a backend that lost one has lost both.
+ */
+function forgetConnection(session: AgentSession, connectionId: string): void {
+  pins.forget(session, connectionId);
+  guideCache.forget(connectionId);
+}
+
+/**
+ * Why a turn stopped at a question nobody answered.
+ *
+ * Two different facts, and the reader is owed the difference: nothing here
+ * could put the question to them, or they were asked and declined.
+ */
+function unansweredQuestion(
+  kind: "no-channel" | "declined",
+  pending: readonly AgentHttpToolCall[]
+): AgentHttpUnresolved {
+  return {
+    code: kind === "no-channel" ? "no-reader-channel" : "question-unanswered",
+    message:
+      kind === "no-channel"
+        ? "the backend asked the reader a question and this client has no way to put it to them"
+        : "the backend asked a question and nobody answered",
+    pending: pending.map((call) => call.name),
+  };
+}
+
 async function preparePinnedTurn(
   session: AgentSession,
   options: AgentHttpClientOptions,
@@ -1610,44 +1710,29 @@ async function runPhase(
     // round trip, and the table is free to move while it happens.
     context = phaseContext(session, turn.turnId, input.phaseId);
     const version = schemaFingerprint(session);
-    const seq = pins.claim(session, connectionId);
     // Built once per round. With the contract pinned only the view travels;
     // with `pinCatalog: false` the whole thing does, which is what that option
     // means.
-    //
-    // Named apart from `context` above on purpose: that one is the phase's
-    // execution identity and this one is what goes on the wire. Sharing a name
-    // made the assignment above a write to a `const` declared below it, which
-    // threw on every turn.
-    const wireContext = currentContext(session, options, connectionId, version);
-    last = await exchange(
-      options,
-      compactRequest(
-        session,
-        "turn",
-        {
-          message: input.message,
-          conversation: input.conversation,
-          turnId: turn.turnId,
-          phaseId: input.phaseId,
-          ...(toolResults?.length ? { toolResults } : {}),
-          ...(phase.pending().length ? { pendingCalls: phase.pending() } : {}),
-        },
-        questionOnly ? "question" : "full",
-        { connectionId, version, context: wireContext }
-      ),
-      input.signal
-    );
-    rememberPin(session, connectionId, { version, seq }, last);
+    last = await sendRound(session, options, {
+      connectionId,
+      version,
+      questionOnly,
+      turn,
+      phaseId: input.phaseId,
+      message: input.message,
+      conversation: input.conversation,
+      toolResults,
+      pendingCalls: phase.pending(),
+      signal: input.signal,
+    });
 
     if (pinLost(last) && mayRecoverPin) {
       // The backend answered nothing but "I no longer have that contract".
       // Forget it, send the whole thing once, and let the same round run
       // again — no call of this phase has been dispatched.
       mayRecoverPin = false;
-      pins.forget(session, connectionId);
-      guideCache.forget(connectionId);
       questionOnly = false;
+      forgetConnection(session, connectionId);
       round -= 1;
       continue;
     }
@@ -1672,19 +1757,7 @@ async function runPhase(
           plan: [],
           text,
           fulfilled,
-          unresolved:
-            answered.kind === "no-channel"
-              ? {
-                  code: "no-reader-channel",
-                  message:
-                    "the backend asked the reader a question and this client has no way to put it to them",
-                  pending: phase.pending().map((call) => call.name),
-                }
-              : {
-                  code: "question-unanswered",
-                  message: "the backend asked a question and nobody answered",
-                  pending: phase.pending().map((call) => call.name),
-                },
+          unresolved: unansweredQuestion(answered.kind, phase.pending()),
         };
       }
       toolResults = mergeToolResults(toolResults, [answered.result]);

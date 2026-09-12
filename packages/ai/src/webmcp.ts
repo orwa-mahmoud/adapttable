@@ -22,11 +22,7 @@
  *
  * @packageDocumentation
  */
-import type {
-  AgentCapabilityDefinition,
-  AgentSession,
-  ExecuteResult,
-} from "./types";
+import type { AgentCapabilityKind, AgentSession, ExecuteResult } from "./types";
 
 /** What a WebMCP tool result looks like. @public */
 export interface WebMcpContent {
@@ -105,7 +101,7 @@ function modelContextOf(options: WebMcpOptions): ModelContextLike | undefined {
 }
 
 /** Whether a key only ever reads. */
-function isReadOnly(kind: AgentCapabilityDefinition["kind"]): boolean {
+function isReadOnly(kind: AgentCapabilityKind | undefined): boolean {
   return kind === "read" || kind === "view" || kind === undefined;
 }
 
@@ -117,7 +113,7 @@ function isReadOnly(kind: AgentCapabilityDefinition["kind"]): boolean {
  * the same claim the provenance envelope makes on the wire.
  */
 function annotationsFor(
-  kind: AgentCapabilityDefinition["kind"]
+  kind: AgentCapabilityKind | undefined
 ): WebMcpAnnotations {
   const readOnly = isReadOnly(kind);
   return {

@@ -192,7 +192,10 @@ export interface AgUiConnection {
   run(
     input: AgUiRunInput,
     signal?: AbortSignal
-  ): AsyncIterable<AgUiEvent> | Promise<AsyncIterable<AgUiEvent>>;
+  ):
+    | AsyncIterable<AgUiEvent>
+    | Iterable<AgUiEvent>
+    | Promise<AsyncIterable<AgUiEvent> | Iterable<AgUiEvent>>;
   /** Release whatever the connection holds. */
   close?(): void;
 }
@@ -348,6 +351,51 @@ export function aguiTools(session: AgentSession): readonly AgUiTool[] {
 /** The replay identity for one AG-UI tool call. */
 function callKey(threadId: string, runId: string, toolCallId: string): string {
   return `agui:${JSON.stringify({ threadId, runId, toolCallId })}`;
+}
+
+/**
+ * One field an event must carry, or the event is not the event it claims.
+ *
+ * Written once because every case needs it and each was spelling out the same
+ * three lines — which is how a check ends up missing from one of them.
+ */
+/**
+ * The refusal a RUN_ERROR stands for.
+ *
+ * Both fields are optional on the wire, and a run that fails without saying
+ * why is still a run that failed: the turn gets a code it can act on either
+ * way rather than an empty message.
+ */
+function runFailure(event: AgUiEvent): AgUiProtocolError {
+  return new AgUiProtocolError(
+    typeof event.code === "string" ? event.code : "run-error",
+    typeof event.message === "string"
+      ? event.message
+      : "the run failed without saying why"
+  );
+}
+
+/** The name a call was started with, or a refusal naming the call. */
+function assertStarted(
+  names: ReadonlyMap<string, string>,
+  id: string,
+  event: string
+): string {
+  const name = names.get(id);
+  if (name === undefined) {
+    throw new AgUiProtocolError(
+      "unknown-tool-call",
+      `${event} arrived for "${id}" before its TOOL_CALL_START`
+    );
+  }
+  return name;
+}
+
+function requiredString(value: unknown, message: string): string {
+  if (typeof value !== "string") {
+    throw new AgUiProtocolError("malformed-event", message);
+  }
+  return value;
 }
 
 /** Arguments as the backend sent them, or a refusal the session can name. */
@@ -623,7 +671,7 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
     session: AgentSession,
     turn: TurnState,
     runId: string,
-    events: AsyncIterable<AgUiEvent>,
+    events: AsyncIterable<AgUiEvent> | Iterable<AgUiEvent>,
     onPartialText?: (text: string) => void,
     signal?: AbortSignal
   ): Promise<RunOutcome> => {
@@ -645,63 +693,49 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
         case "TEXT_MESSAGE_START":
           break;
         case "TEXT_MESSAGE_CONTENT": {
-          if (typeof event.delta !== "string") {
-            throw new AgUiProtocolError(
-              "malformed-event",
-              "TEXT_MESSAGE_CONTENT needs a string delta"
-            );
-          }
-          text += event.delta;
+          text += requiredString(
+            event.delta,
+            "TEXT_MESSAGE_CONTENT needs a string delta"
+          );
           onPartialText?.(text);
           break;
         }
         case "TEXT_MESSAGE_END":
           break;
         case "TOOL_CALL_START": {
-          const id = event.toolCallId;
-          const name = event.toolCallName;
-          if (typeof id !== "string" || typeof name !== "string") {
-            throw new AgUiProtocolError(
-              "malformed-event",
+          const started = requiredString(
+            event.toolCallId,
+            "TOOL_CALL_START needs a toolCallId and a toolCallName"
+          );
+          names.set(
+            started,
+            requiredString(
+              event.toolCallName,
               "TOOL_CALL_START needs a toolCallId and a toolCallName"
-            );
-          }
-          names.set(id, name);
-          args.set(id, "");
+            )
+          );
+          args.set(started, "");
           break;
         }
         case "TOOL_CALL_ARGS": {
-          const id = event.toolCallId;
-          if (typeof id !== "string" || typeof event.delta !== "string") {
-            throw new AgUiProtocolError(
-              "malformed-event",
-              "TOOL_CALL_ARGS needs a toolCallId and a string delta"
-            );
-          }
-          if (!names.has(id)) {
-            throw new AgUiProtocolError(
-              "unknown-tool-call",
-              `TOOL_CALL_ARGS arrived for "${id}" before its TOOL_CALL_START`
-            );
-          }
-          args.set(id, (args.get(id) ?? "") + event.delta);
+          const id = requiredString(
+            event.toolCallId,
+            "TOOL_CALL_ARGS needs a toolCallId and a string delta"
+          );
+          const delta = requiredString(
+            event.delta,
+            "TOOL_CALL_ARGS needs a toolCallId and a string delta"
+          );
+          assertStarted(names, id, "TOOL_CALL_ARGS");
+          args.set(id, (args.get(id) ?? "") + delta);
           break;
         }
         case "TOOL_CALL_END": {
-          const id = event.toolCallId;
-          if (typeof id !== "string") {
-            throw new AgUiProtocolError(
-              "malformed-event",
-              "TOOL_CALL_END needs a toolCallId"
-            );
-          }
-          const name = names.get(id);
-          if (name === undefined) {
-            throw new AgUiProtocolError(
-              "unknown-tool-call",
-              `TOOL_CALL_END arrived for "${id}" before its TOOL_CALL_START`
-            );
-          }
+          const id = requiredString(
+            event.toolCallId,
+            "TOOL_CALL_END needs a toolCallId"
+          );
+          const name = assertStarted(names, id, "TOOL_CALL_END");
           const key = capabilityOf(tableId, name);
           // Somebody else's frontend tool. Answering it would be claiming a
           // result for work this table never did.
@@ -721,14 +755,8 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
           // A result the backend produced for its own tool. Recorded by the
           // host through `onEvent`; the table claims nothing about it.
           break;
-        case "RUN_ERROR": {
-          throw new AgUiProtocolError(
-            typeof event.code === "string" ? event.code : "run-error",
-            typeof event.message === "string"
-              ? event.message
-              : "the run failed without saying why"
-          );
-        }
+        case "RUN_ERROR":
+          throw runFailure(event);
         case "RUN_FINISHED": {
           finished = true;
           interrupt = event.outcome?.interrupt;

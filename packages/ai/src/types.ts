@@ -362,6 +362,17 @@ export interface CapabilityFamily {
 }
 
 /**
+ * What running a capability does to the table.
+ *
+ * A tool surface reads this to decide how much ceremony a call needs — a
+ * read-only annotation, a confirmation, a warning — so the answer lives with
+ * the capability rather than in a list beside it that can disagree.
+ *
+ * @public
+ */
+export type AgentCapabilityKind = "read" | "view" | "write" | "destructive";
+
+/**
  * Governed capability extension registered on one table session.
  *
  * @public
@@ -378,7 +389,7 @@ export interface AgentCapabilityDefinition {
     readonly output: JsonSchema;
   };
   /** Effect class used for approval defaults on custom writes. */
-  readonly kind?: "read" | "view" | "write" | "destructive";
+  readonly kind?: AgentCapabilityKind;
   /**
    * What this capability belongs with, for one-round discovery.
    *
@@ -523,7 +534,7 @@ export interface CatalogEntry {
    * ceremony a call needs reads it rather than keeping a second list that can
    * disagree.
    */
-  readonly kind?: AgentCapabilityDefinition["kind"];
+  readonly kind?: AgentCapabilityKind;
   /**
    * Whether running it twice lands where running it once did.
    *

@@ -58,17 +58,22 @@ afterEach(() => {
 /** A recognizer the test drives by hand. */
 function installRecognizer(): { live: () => FakeRecognition | undefined } {
   let made: FakeRecognition | undefined;
-  setGlobal("SpeechRecognition", function Recognition(this: FakeRecognition) {
-    this.lang = "";
-    this.continuous = false;
-    this.interimResults = false;
-    this.start = vi.fn();
-    this.stop = vi.fn();
-    this.abort = vi.fn();
-    this.onresult = null;
-    this.onerror = null;
-    this.onend = null;
-    made = this;
+  // Returning an object from a constructor is what `new` hands back, so the
+  // fake is built as a value the test already holds rather than assembled
+  // onto an instance it then has to reach back for.
+  setGlobal("SpeechRecognition", function Recognition(): FakeRecognition {
+    made = {
+      lang: "",
+      continuous: false,
+      interimResults: false,
+      start: vi.fn(),
+      stop: vi.fn(),
+      abort: vi.fn(),
+      onresult: null,
+      onerror: null,
+      onend: null,
+    };
+    return made;
   });
   return { live: () => made };
 }
@@ -193,20 +198,22 @@ describe("recording for a backend", () => {
       },
     });
     let live: Record<string, unknown> | undefined;
-    setGlobal(
-      "MediaRecorder",
-      function Recorder(this: Record<string, unknown>) {
-        this.state = "recording";
-        this.mimeType = "audio/webm;codecs=opus";
-        this.start = vi.fn();
-        this.stop = vi.fn(() => {
-          (this.onstop as (() => void) | null)?.();
-        });
-        this.ondataavailable = null;
-        this.onstop = null;
-        live = this;
-      }
-    );
+    setGlobal("MediaRecorder", function Recorder(): Record<string, unknown> {
+      const made: Record<string, unknown> = {
+        state: "recording",
+        mimeType: "audio/webm;codecs=opus",
+        start: vi.fn(),
+        ondataavailable: null,
+        onstop: null,
+      };
+      // Stopping is what fires `onstop` in a real recorder, and the handler
+      // the code under test installs is the whole point of this fake.
+      made.stop = vi.fn(() => {
+        (made.onstop as (() => void) | null)?.();
+      });
+      live = made;
+      return made;
+    });
 
     const onClip = vi.fn();
     const input = createSpeechInput({ mode: "backend", onClip });

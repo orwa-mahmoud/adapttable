@@ -241,6 +241,36 @@ export function createSpeechInput(
     live.start();
   };
 
+  /**
+   * Read a finished recording and hand it to the host.
+   *
+   * Lives out here rather than inside the recorder's `onstop` because the
+   * codec string a browser reports carries parameters the host did not ask
+   * for (`audio/webm;codecs=opus`), and a backend matching on the media type
+   * should see the type.
+   */
+  const deliverClip = (
+    blob: Blob,
+    recordedType: string,
+    durationMs: number
+  ): void => {
+    void toBase64(blob).then(
+      (base64) => {
+        if (disposed) return;
+        options.onClip?.({
+          mimeType: recordedType.split(";")[0] ?? "audio/webm",
+          base64,
+          durationMs,
+        });
+        status = "idle";
+        publish();
+      },
+      () => {
+        fail("error", "the recording could not be read");
+      }
+    );
+  };
+
   const startBackend = (): void => {
     if (!canRecord()) {
       fail("unsupported");
@@ -288,21 +318,7 @@ export function createSpeechInput(
           const blob = new Blob(chunks, { type: live.mimeType });
           status = "processing";
           publish();
-          void toBase64(blob).then(
-            (base64) => {
-              if (disposed) return;
-              options.onClip?.({
-                mimeType: live.mimeType.split(";")[0] ?? "audio/webm",
-                base64,
-                durationMs,
-              });
-              status = "idle";
-              publish();
-            },
-            () => {
-              fail("error", "the recording could not be read");
-            }
-          );
+          deliverClip(blob, live.mimeType, durationMs);
         };
         recorder = live;
         live.start();

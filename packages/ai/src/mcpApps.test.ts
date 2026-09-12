@@ -241,7 +241,7 @@ describe("the view's side of the handshake", () => {
     await expect(call).rejects.toThrow(/does not offer/);
   });
 
-  it("hands a tool the host is running to the view as it happens", async () => {
+  it("hands a tool the host is running to the view as it happens", () => {
     const onToolInput = vi.fn();
     const onToolResult = vi.fn();
     const host = fakeHost();
@@ -283,7 +283,7 @@ describe("the view's side of the handshake", () => {
     });
   });
 
-  it("ignores anything that did not come from the host", async () => {
+  it("ignores anything that did not come from the host", () => {
     const onToolInput = vi.fn();
     const onWarning = vi.fn();
     const host = fakeHost();

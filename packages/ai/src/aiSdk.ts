@@ -158,7 +158,10 @@ export interface AiSdkConnection {
   run(
     request: AiSdkRequest,
     signal?: AbortSignal
-  ): AsyncIterable<AiSdkPart> | Promise<AsyncIterable<AiSdkPart>>;
+  ):
+    | AsyncIterable<AiSdkPart>
+    | Iterable<AiSdkPart>
+    | Promise<AsyncIterable<AiSdkPart> | Iterable<AiSdkPart>>;
   /** Release whatever the connection holds. */
   close?(): void;
 }
@@ -371,10 +374,14 @@ function unresolvedTurn(
   return { code, message, pending: [...pending] };
 }
 
+/** One call the route reported as refused, and why. */
+interface DeniedCall {
+  capability: string;
+  reason?: string;
+}
+
 /** What a refused call leaves the turn with. */
-function deniedTurn(
-  denied: readonly { capability: string; reason?: string }[]
-): AssistantUnresolved {
+function deniedTurn(denied: readonly DeniedCall[]): AssistantUnresolved {
   const reason = denied.find((entry) => entry.reason)?.reason;
   return {
     code: "output-denied",
@@ -390,7 +397,7 @@ interface TurnState {
   readonly outputs: AiSdkToolOutput[];
   readonly approvals: AiSdkApprovalResponse[];
   /** Calls the route reported as refused, and why. */
-  readonly denied: { capability: string; reason?: string }[];
+  readonly denied: DeniedCall[];
   text: string;
 }
 
@@ -399,6 +406,59 @@ interface StreamOutcome {
   readonly finished: boolean;
   /** Whether anything came back that the next request has to carry. */
   readonly continues: boolean;
+}
+
+/**
+ * One field a part must carry, or it is not the part it claims to be.
+ *
+ * Written once because every case needs the same three lines, and a check
+ * spelled out per case is a check that eventually goes missing from one.
+ */
+function requiredString(value: unknown, message: string): string {
+  if (typeof value !== "string") {
+    throw new AiSdkProtocolError("malformed-part", message);
+  }
+  return value;
+}
+
+/**
+ * What the reader refused, named as the table names capabilities.
+ *
+ * The tool name is optional on the wire and may belong to a tool this table
+ * does not own, so the entry falls back to the name the route used and then to
+ * `unknown`: the panel always has something to show the reader.
+ */
+function deniedCall(session: AgentSession, part: AiSdkPart): DeniedCall {
+  const name = typeof part.toolName === "string" ? part.toolName : undefined;
+  const reason =
+    typeof part.errorText === "string" ? part.errorText : undefined;
+  return {
+    capability:
+      (name === undefined ? undefined : aiSdkCapability(session, name)) ??
+      name ??
+      "unknown",
+    ...(reason === undefined ? {} : { reason }),
+  };
+}
+
+/** The refusal an `error` part stands for. */
+function streamFailure(part: AiSdkPart): AiSdkProtocolError {
+  return new AiSdkProtocolError(
+    "stream-error",
+    typeof part.errorText === "string"
+      ? part.errorText
+      : "the route failed without saying why"
+  );
+}
+
+/** A part with no type is not a part from a newer SDK; it is not a part. */
+function assertPartShape(part: AiSdkPart): void {
+  if (typeof part.type !== "string" || part.type === "") {
+    throw new AiSdkProtocolError(
+      "unknown-stream-version",
+      "a stream part arrived with no type; this adapter speaks the AI SDK UI message stream"
+    );
+  }
 }
 
 /**
@@ -499,7 +559,7 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
   const consume = async (
     session: AgentSession,
     turn: TurnState,
-    parts: AsyncIterable<AiSdkPart>,
+    parts: AsyncIterable<AiSdkPart> | Iterable<AiSdkPart>,
     onPartialText?: (text: string) => void,
     signal?: AbortSignal
   ): Promise<StreamOutcome | AssistantUnresolved> => {
@@ -527,25 +587,21 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
         case "tool-input-delta":
           break;
         case "text-delta": {
-          if (typeof part.delta !== "string") {
-            throw new AiSdkProtocolError(
-              "malformed-part",
-              "text-delta needs a string delta"
-            );
-          }
-          turn.text += part.delta;
+          turn.text += requiredString(
+            part.delta,
+            "text-delta needs a string delta"
+          );
           onPartialText?.(turn.text);
           break;
         }
         case "tool-input-available": {
-          const name = part.toolName;
-          if (typeof name !== "string") {
-            throw new AiSdkProtocolError(
-              "malformed-part",
+          const key = aiSdkCapability(
+            session,
+            requiredString(
+              part.toolName,
               "tool-input-available needs a toolName"
-            );
-          }
-          const key = aiSdkCapability(session, name);
+            )
+          );
           // Somebody else's client tool. Answering it would claim a result
           // for work this table never did.
           if (key === undefined) break;
@@ -564,46 +620,24 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
           continues = true;
           break;
         }
-        case "output-denied": {
+        case "output-denied":
           // The reader refused and the route is saying so. Nothing ran, which
           // is what `unresolved` is for — and the reason travels with it, so
           // the panel can say why rather than only that.
-          const name = part.toolName;
-          const reason =
-            typeof part.errorText === "string" ? part.errorText : undefined;
-          turn.denied.push({
-            capability:
-              (typeof name === "string"
-                ? aiSdkCapability(session, name)
-                : undefined) ?? (typeof name === "string" ? name : "unknown"),
-            ...(reason === undefined ? {} : { reason }),
-          });
+          turn.denied.push(deniedCall(session, part));
           break;
-        }
-        case "error": {
-          throw new AiSdkProtocolError(
-            "stream-error",
-            typeof part.errorText === "string"
-              ? part.errorText
-              : "the route failed without saying why"
-          );
-        }
+        case "error":
+          throw streamFailure(part);
         case "finish": {
           finished = true;
           break;
         }
-        default: {
+        default:
           // `data-*` and anything a newer SDK adds: forwarded through
           // `onPart` and otherwise left alone. An unknown part is not a
           // malformed one — but a part that is not even shaped like one is.
-          if (typeof part.type !== "string" || part.type === "") {
-            throw new AiSdkProtocolError(
-              "unknown-stream-version",
-              "a stream part arrived with no type; this adapter speaks the AI SDK UI message stream"
-            );
-          }
+          assertPartShape(part);
           break;
-        }
       }
     }
 
