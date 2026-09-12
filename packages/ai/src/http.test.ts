@@ -574,7 +574,7 @@ describe("createAgentHttpClient", () => {
     expect(reads).toBe(2);
   });
 
-  it("runs omitted expectedRevision against the live table after a view tick", async () => {
+  it("refuses an omitted revision when the table was edited during the model call", async () => {
     let revision = 1;
     const setPage = vi.fn();
     const live = createAgentSession({
@@ -584,6 +584,8 @@ describe("createAgentHttpClient", () => {
     const result = await runAgentHttpTurn(live, "Page 2", {
       endpoint: "https://agent.example/turn",
       request: () => {
+        // Someone edits the table while the backend is still thinking. The
+        // reply below was decided on the view before that edit.
         revision = 2;
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
@@ -596,6 +598,31 @@ describe("createAgentHttpClient", () => {
           ],
         });
       },
+    });
+    expect(result.results[0]?.ok).toBe(false);
+    expect(result.results[0]?.error?.code).toBe("revision-mismatch");
+    expect(setPage).not.toHaveBeenCalled();
+  });
+
+  it("runs an omitted revision when the table held still", async () => {
+    const setPage = vi.fn();
+    const live = createAgentSession({
+      observe: () => observation({ viewRevision: 1, approval: "never" }),
+      apply: { setPage },
+    });
+    const result = await runAgentHttpTurn(live, "Page 2", {
+      endpoint: "https://agent.example/turn",
+      request: () =>
+        Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          actions: [
+            {
+              key: "view.setPage",
+              args: { page: 2 },
+              idempotencyKey: "page-2",
+            },
+          ],
+        }),
     });
     expect(result.results[0]?.ok).toBe(true);
     expect(setPage).toHaveBeenCalledWith(2);
@@ -891,6 +918,111 @@ describe("createAgentHttpClient", () => {
       { returnResults: true }
     );
     expect(text.text).toBe("Noted.");
+  });
+
+  it("binds a continuation to the view its own first action produced", async () => {
+    let revision = 1;
+    const setFilters = vi.fn(() => {
+      revision += 1;
+    });
+    const setSort = vi.fn();
+    const live = createAgentSession({
+      observe: () => observation({ viewRevision: revision, approval: "never" }),
+      apply: { setFilters, setSort },
+    });
+    const result = await runAgentHttpTurn(
+      live,
+      "Active only, then sort by name",
+      {
+        endpoint: "https://agent.example/turn",
+        request: (body) =>
+          Promise.resolve(
+            body.results
+              ? {
+                  schemaVersion: AGENT_SCHEMA_VERSION,
+                  text: "Sorted.",
+                  actions: [
+                    {
+                      key: "view.setSort",
+                      args: { key: "name", dir: "asc" },
+                      idempotencyKey: "sort-name",
+                    },
+                  ],
+                }
+              : {
+                  schemaVersion: AGENT_SCHEMA_VERSION,
+                  text: "Filtered.",
+                  continueWithResults: true,
+                  actions: [
+                    {
+                      key: "view.setFilters",
+                      args: { filters: { status: ["Active"] } },
+                      idempotencyKey: "filter-active",
+                    },
+                  ],
+                }
+          ),
+      },
+      { returnResults: true }
+    );
+    // The filter moved the table, and the dependent sort is answered on where
+    // the filter left it — not refused for a revision this turn produced.
+    expect(setFilters).toHaveBeenCalledTimes(1);
+    expect(setSort).toHaveBeenCalledWith("name", "asc");
+    expect(result.results.every((entry) => entry.ok)).toBe(true);
+  });
+
+  it("refuses continuation work when the table was edited while it asked", async () => {
+    let revision = 1;
+    const setPage = vi.fn();
+    const setSort = vi.fn();
+    const live = createAgentSession({
+      observe: () => observation({ viewRevision: revision, approval: "never" }),
+      apply: { setPage, setSort },
+    });
+    const result = await runAgentHttpTurn(
+      live,
+      "Page 2, then sort",
+      {
+        endpoint: "https://agent.example/turn",
+        request: (body) => {
+          if (!body.results) {
+            return Promise.resolve({
+              schemaVersion: AGENT_SCHEMA_VERSION,
+              text: "Paged.",
+              continueWithResults: true,
+              actions: [
+                {
+                  key: "view.setPage",
+                  args: { page: 2 },
+                  idempotencyKey: "p2-stale",
+                },
+              ],
+            });
+          }
+          // Someone edits the table while the continuation is being answered.
+          revision += 1;
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Sorted.",
+            actions: [
+              {
+                key: "view.setSort",
+                args: { key: "name", dir: "asc" },
+                idempotencyKey: "sort-stale",
+              },
+            ],
+          });
+        },
+      },
+      { returnResults: true }
+    );
+    // The page change already happened and keeps its receipt; only the work
+    // decided on the view that moved is refused.
+    expect(setPage).toHaveBeenCalledWith(2);
+    expect(setSort).not.toHaveBeenCalled();
+    expect(result.results[0]?.ok).toBe(true);
+    expect(result.results[1]?.error?.code).toBe("revision-mismatch");
   });
 
   it("rejects empty messages, empty bodies and a rejected hello", async () => {

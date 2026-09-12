@@ -1,0 +1,229 @@
+/**
+ * An HTTP turn driven against the real React binding.
+ *
+ * The revisions here are the table engine's own, arriving through the
+ * provider, rather than a counter a test increments. That is the only way to
+ * check the thing the executor exists to do: tell a filter that really moved
+ * the table apart from an edit that arrived from somewhere else, when both
+ * show up as the same number going up.
+ */
+import type { AgentSession } from "@adapttable/ai";
+import { AGENT_SCHEMA_VERSION, runAgentHttpTurn } from "@adapttable/ai/http";
+import {
+  createNeutralTable,
+  createTableEngine,
+  type NeutralTable,
+} from "@adapttable/core";
+import {
+  applyTableFeatures,
+  FeatureProviders,
+  usePublishTableRuntime,
+} from "@adapttable/react/adapter";
+import { act, render, waitFor } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+
+import { tableAgent } from "./react";
+
+type TurnResult = Awaited<ReturnType<typeof runAgentHttpTurn>>;
+
+interface Row {
+  id: string;
+  name: string;
+  salary: number;
+}
+
+const ROWS: Row[] = [
+  { id: "1", name: "Ada", salary: 120 },
+  { id: "2", name: "Grace", salary: 140 },
+];
+
+const WIRED = {
+  setPage: true,
+  setLimit: true,
+  setSearch: true,
+  setSort: true,
+  setFilters: true,
+};
+
+function makeTable() {
+  const engine = createTableEngine<Row>({
+    data: ROWS,
+    columns: [
+      { key: "name", header: "Name", sortable: true },
+      { key: "salary", header: "Salary", sortable: true },
+    ],
+    rowKey: (row) => row.id,
+  });
+  const neutral = createNeutralTable(engine, "http-binding", {
+    operations: () => WIRED,
+  }) as NeutralTable<unknown>;
+  return { engine, neutral };
+}
+
+type LiveTable = ReturnType<typeof makeTable>;
+
+function Publisher({ engine, neutral }: LiveTable) {
+  const rows = neutral.rows("visible");
+  usePublishTableRuntime(rows, undefined, {
+    rows,
+    visibleRows: rows,
+    neutralTable: neutral,
+    getRowId: (row: unknown) => (row as Row).id,
+    rowLabel: (row: unknown) => (row as Row).name,
+    query: {
+      page: 1,
+      limit: 10,
+      search: "",
+      setPage: (page: number) => engine.dispatch({ type: "setPage", page }),
+      setLimit: (limit: number) => engine.dispatch({ type: "setLimit", limit }),
+      setSearch: (search: string) =>
+        engine.dispatch({ type: "setSearch", search }),
+      setSort: (key?: string, dir?: "asc" | "desc") =>
+        engine.dispatch({ type: "setSort", key, dir }),
+      setExtras: (extra) =>
+        engine.dispatch({ type: "setFilters", filters: extra }),
+      clearExtras: () => engine.dispatch({ type: "setFilters", filters: {} }),
+    },
+  });
+  return null;
+}
+
+function Harness({
+  engine,
+  neutral,
+  onAttach,
+}: LiveTable & { onAttach: (session: AgentSession) => void }) {
+  const props = applyTableFeatures({
+    features: [
+      tableAgent({
+        tableId: "http-binding",
+        writePolicy: "allow",
+        approval: "never",
+        bridge: { attach: onAttach },
+      }),
+    ],
+  });
+  return (
+    <FeatureProviders props={props}>
+      <Publisher engine={engine} neutral={neutral} />
+    </FeatureProviders>
+  );
+}
+
+async function mounted() {
+  const { engine, neutral } = makeTable();
+  let session: AgentSession | undefined;
+  render(
+    <Harness
+      engine={engine}
+      neutral={neutral}
+      onAttach={(live) => {
+        session = live;
+      }}
+    />
+  );
+  await waitFor(() => {
+    expect(session).toBeDefined();
+  });
+  if (!session) throw new Error("the binding never attached a session");
+  return { engine, session };
+}
+
+describe("an HTTP turn over the live React binding", () => {
+  it("runs filter then sort in one reply, following the table it moved", async () => {
+    const { engine, session } = await mounted();
+
+    let result!: TurnResult;
+    await act(async () => {
+      result = await runAgentHttpTurn(session, "Active, salary first", {
+        endpoint: "https://agent.example/turn",
+        request: () =>
+          Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Done.",
+            actions: [
+              {
+                key: "view.setSearch",
+                args: { search: "ada" },
+                idempotencyKey: "search-ada",
+              },
+              {
+                key: "view.setSort",
+                args: { key: "salary", dir: "desc" },
+                idempotencyKey: "sort-salary",
+              },
+            ],
+          }),
+      });
+    });
+
+    // The search moved the engine's own view revision, and the sort was
+    // judged against where the search left it rather than being refused.
+    expect(result.results.map((entry) => entry.ok)).toEqual([true, true]);
+    expect(engine.snapshot().search).toBe("ada");
+    expect(engine.snapshot().sortBy).toBe("salary");
+    expect(engine.snapshot().sortDir).toBe("desc");
+  });
+
+  it("refuses the reply when the table was edited during the model call", async () => {
+    const { engine, session } = await mounted();
+
+    let result!: TurnResult;
+    await act(async () => {
+      result = await runAgentHttpTurn(session, "Sort by salary", {
+        endpoint: "https://agent.example/turn",
+        request: () => {
+          // A person searches the table while the backend is still thinking.
+          engine.dispatch({ type: "setSearch", search: "grace" });
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Sorted.",
+            actions: [
+              {
+                key: "view.setSort",
+                args: { key: "salary", dir: "desc" },
+                idempotencyKey: "sort-stale",
+              },
+            ],
+          });
+        },
+      });
+    });
+
+    expect(result.results[0]?.ok).toBe(false);
+    expect(result.results[0]?.error?.code).toBe("revision-mismatch");
+    // The person's search stands, and nothing was written over it.
+    expect(engine.snapshot().search).toBe("grace");
+    expect(engine.snapshot().sortBy).toBeUndefined();
+  });
+
+  it("leaves a rerender that changed nothing out of the way", async () => {
+    const { engine, session } = await mounted();
+
+    let result!: TurnResult;
+    await act(async () => {
+      result = await runAgentHttpTurn(session, "Page 2", {
+        endpoint: "https://agent.example/turn",
+        request: () => {
+          // Re-dispatching the search the table already has produces no
+          // change, so the engine publishes no revision and the action runs.
+          engine.dispatch({ type: "setSearch", search: "" });
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Paged.",
+            actions: [
+              {
+                key: "view.setPage",
+                args: { page: 2 },
+                idempotencyKey: "page-2",
+              },
+            ],
+          });
+        },
+      });
+    });
+
+    expect(result.results[0]?.ok).toBe(true);
+    expect(engine.snapshot().requestedPage).toBe(2);
+  });
+});

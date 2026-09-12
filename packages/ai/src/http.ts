@@ -7,6 +7,14 @@
  */
 import type { AssistantTransport } from "./assistantContracts";
 import { errorMessage } from "./errorMessage";
+import {
+  createTurnExecution,
+  type HttpPhaseContext,
+  type PhaseAction,
+  type PhaseBatch,
+  phaseContext,
+  policyKey,
+} from "./httpExecution";
 import { AGENT_SCHEMA_VERSION, type RowAddressScope } from "./keys";
 import type {
   AgentManifest,
@@ -222,44 +230,28 @@ export class AgentHttpError extends Error {
   }
 }
 
-interface TurnSnapshot {
-  readonly turnId: string;
-  readonly revision: number;
-  readonly policyKey: string;
-}
-
-function policyKey(manifest: AgentManifest): string {
-  return JSON.stringify({
-    write: manifest.policy.write,
-    approval: manifest.policy.approval,
-    commit: manifest.policy.commit,
-    capabilities: manifest.capabilities,
-  });
-}
-
-function turnSnapshot(session: AgentSession, turnId: string): TurnSnapshot {
-  const manifest = session.manifest();
-  return {
-    turnId,
-    revision: manifest.viewRevision,
-    policyKey: policyKey(manifest),
-  };
-}
-
 function assertTurnContext(
   session: AgentSession,
-  snapshot: TurnSnapshot
+  context: HttpPhaseContext
 ): void {
   const manifest = session.manifest();
   // A view revision tick during the model call is ordinary — React flushed a
-  // filter, or observe() advanced after a describe/read. Aborting the whole
-  // turn over that left actions unrun and showed ERROR. Policy is the thing
-  // that must not move: a table that dropped writes or capabilities mid-turn
-  // is no longer the one the backend answered.
-  if (policyKey(manifest) !== snapshot.policyKey) {
+  // filter, or an edit landed while the backend was thinking. That does not
+  // end the turn: every phase is answered against the view it was shown, and
+  // an action the table has moved past is rejected one action at a time, with
+  // a reason the caller can act on. Identity and policy are what must not
+  // move — a table that swapped underneath, or that dropped writes or
+  // capabilities mid-turn, is no longer the one the backend answered.
+  if (manifest.tableId !== context.tableId) {
     throw new AgentHttpError(
       "context-stale",
-      `table policy changed during turn (revision ${snapshot.revision} → ${manifest.viewRevision})`
+      `table changed during turn (${context.tableId} → ${manifest.tableId})`
+    );
+  }
+  if (policyKey(manifest) !== context.contractVersion) {
+    throw new AgentHttpError(
+      "context-stale",
+      `table policy changed during turn (revision ${context.viewRevision} → ${manifest.viewRevision})`
     );
   }
 }
@@ -816,22 +808,10 @@ function mergeGuides(
   return next;
 }
 
-function cancelledResult(
-  session: AgentSession,
-  idempotencyKey: string
-): ExecuteResult {
-  return {
-    ok: false,
-    revision: session.manifest().viewRevision,
-    idempotencyKey,
-    error: { code: "cancelled", message: "agent HTTP cancelled" },
-  };
-}
-
 async function fulfillNeeds(
   session: AgentSession,
   needs: AgentHttpNeeds | undefined,
-  snapshot: TurnSnapshot
+  turn: HttpPhaseContext
 ): Promise<{
   descriptions: CapabilityGuide[];
   /** Keys the backend asked about that this table does not offer. */
@@ -840,7 +820,7 @@ async function fulfillNeeds(
   describe: number;
   read: number;
 }> {
-  assertTurnContext(session, snapshot);
+  assertTurnContext(session, turn);
   const descriptions: CapabilityGuide[] = [];
   const unknown: string[] = [];
   const rows: RowWindow[] = [];
@@ -857,13 +837,18 @@ async function fulfillNeeds(
     descriptions.push(session.describe(key));
   }
   for (const [index, query] of (needs?.read ?? []).entries()) {
-    assertTurnContext(session, snapshot);
+    // Re-checked after every awaited read: a policy change between two row
+    // windows ends the turn rather than answering the rest of it under terms
+    // the backend never saw.
+    assertTurnContext(session, turn);
+    // A read is bound to the view it reads, not to the phase that asked for
+    // it — which is why the revision is part of its replay key.
     const revision = session.manifest().viewRevision;
     const result = await session.execute(
       "rows.read",
       query,
       revision,
-      readIdempotencyKey(snapshot.turnId, revision, index, query)
+      readIdempotencyKey(turn.turnId, revision, index, query)
     );
     if (!result.ok) {
       throw new Error(result.error?.message ?? "rows.read failed");
@@ -879,41 +864,6 @@ async function fulfillNeeds(
     describe: descriptions.length + unknown.length,
     read: rows.length,
   };
-}
-
-async function executeActions(
-  session: AgentSession,
-  actions: readonly AgentHttpAction[],
-  originRevision: number,
-  signal?: AbortSignal
-): Promise<ExecuteResult[]> {
-  const results: ExecuteResult[] = [];
-  // One reply often sends filter then sort. The first apply advances the
-  // live revision, so later actions that still name the turn-start revision
-  // (or omit one) must follow the table, not the snapshot they were minted
-  // against.
-  let revision = session.manifest().viewRevision;
-  for (const action of actions) {
-    if (signal?.aborted) {
-      results.push(cancelledResult(session, action.idempotencyKey));
-      continue;
-    }
-    const expected =
-      action.expectedRevision === undefined ||
-      action.expectedRevision === originRevision
-        ? revision
-        : action.expectedRevision;
-    const result = await session.execute(
-      action.key,
-      action.args ?? {},
-      expected,
-      action.idempotencyKey,
-      signal
-    );
-    results.push(result);
-    if (result.ok) revision = session.manifest().viewRevision;
-  }
-  return results;
 }
 
 /**
@@ -959,12 +909,24 @@ async function preparePinnedTurn(
   return usesPinnedCatalog(session, options);
 }
 
+/** Every action collected so far, in the order the rounds returned them. */
+function plannedActions(
+  batches: readonly PhaseBatch[]
+): readonly PhaseAction[] {
+  return batches.flatMap((batch) => [...batch.actions]);
+}
+
 function absorbHttpRound(
   last: AgentHttpResponse,
-  state: { actions: AgentHttpAction[]; text: string }
+  context: HttpPhaseContext,
+  state: { batches: PhaseBatch[]; text: string }
 ): number {
   if (last.actions?.length) {
-    state.actions = [...state.actions, ...last.actions];
+    // Each round is its own phase: the request that produced this reply
+    // described the view captured in `context`, so these actions belong to
+    // that view and not to whatever the table reaches by the time the round
+    // after them has finished asking questions.
+    state.batches = [...state.batches, { context, actions: last.actions }];
   }
   // A backend that explained itself on one round and only acted on the next
   // still said something; reading only the final round loses it.
@@ -974,7 +936,7 @@ function absorbHttpRound(
 
 function discoveryBudgetExceeded(
   round: number,
-  actions: readonly AgentHttpAction[]
+  actions: readonly PhaseAction[]
 ): boolean {
   if (round !== MAX_NEED_ROUNDS) return false;
   // Only a backend that produced NOTHING has really failed. One that kept
@@ -989,7 +951,7 @@ function discoveryBudgetExceeded(
 async function exchangeRounds(
   session: AgentSession,
   options: AgentHttpClientOptions,
-  snapshot: TurnSnapshot,
+  turn: HttpPhaseContext,
   input: {
     readonly message: string;
     readonly conversation?: readonly AgentHttpMessage[];
@@ -997,7 +959,10 @@ async function exchangeRounds(
   }
 ): Promise<{
   readonly last: AgentHttpResponse | undefined;
-  readonly actions: readonly AgentHttpAction[];
+  /** Each round's actions, with the view that round was answered against. */
+  readonly batches: readonly PhaseBatch[];
+  /** First phase id no round used, so a continuation can go on counting. */
+  readonly nextPhaseId: number;
   /** The last thing the backend actually SAID, across every round. */
   readonly text: string;
   readonly fulfilled: { describe: number; read: number };
@@ -1005,12 +970,20 @@ async function exchangeRounds(
   let descriptions: CapabilityGuide[] | undefined;
   let rows: RowWindow[] | undefined;
   let last: AgentHttpResponse | undefined;
-  const state = { actions: [] as AgentHttpAction[], text: "" };
+  let nextPhaseId = 1;
+  const state = { batches: [] as PhaseBatch[], text: "" };
   const fulfilled = { describe: 0, read: 0 };
   const questionOnly = await preparePinnedTurn(session, options, input.signal);
 
   for (let round = 0; round <= MAX_NEED_ROUNDS; round += 1) {
-    assertTurnContext(session, snapshot);
+    assertTurnContext(session, turn);
+    // The request below describes the table as it is right now, so this is
+    // the view the backend is about to answer — captured before it goes out,
+    // never inferred from where the table ends up afterwards. Round 0 needs
+    // its own capture as much as the rest: pinning the catalog is a network
+    // round trip, and the table is free to move while it happens.
+    const context = phaseContext(session, turn.turnId, round);
+    nextPhaseId = round + 1;
     last = await exchange(
       options,
       compactRequest(
@@ -1027,9 +1000,10 @@ async function exchangeRounds(
       input.signal
     );
     if (!questionOnly) rememberPin(session, last);
-    const asked = absorbHttpRound(last, state);
-    if (asked === 0 || discoveryBudgetExceeded(round, state.actions)) break;
-    const next = await fulfillNeeds(session, last.needs, snapshot);
+    const asked = absorbHttpRound(last, context, state);
+    if (asked === 0) break;
+    if (discoveryBudgetExceeded(round, plannedActions(state.batches))) break;
+    const next = await fulfillNeeds(session, last.needs, turn);
     descriptions = mergeGuides(descriptions, next.descriptions);
     rows = [...(rows ?? []), ...next.rows];
     assertContextSize(descriptions, rows);
@@ -1037,7 +1011,13 @@ async function exchangeRounds(
     fulfilled.read += next.read;
   }
 
-  return { last, actions: state.actions, text: state.text, fulfilled };
+  return {
+    last,
+    batches: state.batches,
+    nextPhaseId,
+    text: state.text,
+    fulfilled,
+  };
 }
 
 /**
@@ -1060,8 +1040,8 @@ export async function runAgentHttpTurn(
   if (!trimmed) throw new Error("agent HTTP turn requires a message");
 
   const turnId = newHttpTurnId();
-  const snapshot = turnSnapshot(session, turnId);
-  const exchanged = await exchangeRounds(session, options, snapshot, {
+  const turn = phaseContext(session, turnId, 0);
+  const exchanged = await exchangeRounds(session, options, turn, {
     message: trimmed,
     conversation: extras.conversation,
     signal: extras.signal,
@@ -1070,24 +1050,24 @@ export async function runAgentHttpTurn(
   let fulfilled = exchanged.fulfilled;
 
   if (!last) throw new Error("agent HTTP returned no response");
-  assertTurnContext(session, snapshot);
+  assertTurnContext(session, turn);
   // The keys, not the actions: what a receipt needs is which capability ran.
-  let ranKeys: readonly string[] = exchanged.actions.map(
+  let ranKeys: readonly string[] = plannedActions(exchanged.batches).map(
     (action) => action.key
   );
-  let results: readonly ExecuteResult[] = await executeActions(
-    session,
-    exchanged.actions,
-    snapshot.revision,
-    extras.signal
-  );
+  const execution = createTurnExecution(session, turn);
+  const executed: ExecuteResult[] = [];
+  for (const batch of exchanged.batches) {
+    executed.push(...(await execution.execute(batch, extras.signal)));
+  }
+  let results: readonly ExecuteResult[] = executed;
   let text = exchanged.text;
   if (extras.returnResults && last.continueWithResults) {
-    const continuation = await continueTurn(session, options, {
+    const continuation = await continueTurn(session, options, execution, turn, {
       message: trimmed,
       conversation: extras.conversation,
       signal: extras.signal,
-      turnId,
+      phaseId: exchanged.nextPhaseId,
       results,
     });
     results = continuation.results;
@@ -1109,18 +1089,21 @@ export async function runAgentHttpTurn(
 /**
  * Post execute receipts back and keep going while the backend still has work.
  *
- * The loop is governed like the first one: a fresh snapshot for the new
- * logical round, the context re-checked before every exchange, discovery
- * rounds bounded, and any actions run through the same session.
+ * The loop is governed like the first one: its own phase context per round,
+ * the table re-checked before every exchange, discovery rounds bounded, and
+ * any actions run through the turn's executor, so work that depends on a
+ * receipt is bound to the view that receipt produced.
  */
 async function continueTurn(
   session: AgentSession,
   options: AgentHttpClientOptions,
+  execution: ReturnType<typeof createTurnExecution>,
+  turn: HttpPhaseContext,
   input: {
     readonly message: string;
     readonly conversation?: readonly AgentHttpMessage[];
     readonly signal?: AbortSignal;
-    readonly turnId: string;
+    readonly phaseId: number;
     readonly results: readonly ExecuteResult[];
   }
 ): Promise<{
@@ -1130,7 +1113,6 @@ async function continueTurn(
   readonly text: string;
   readonly fulfilled: { describe: number; read: number };
 }> {
-  const snapshot = turnSnapshot(session, input.turnId);
   let descriptions: CapabilityGuide[] | undefined;
   let rows: RowWindow[] | undefined;
   let results = input.results;
@@ -1139,7 +1121,12 @@ async function continueTurn(
   const fulfilled = { describe: 0, read: 0 };
 
   for (let round = 0; round < MAX_NEED_ROUNDS; round += 1) {
-    assertTurnContext(session, snapshot);
+    assertTurnContext(session, turn);
+    // A continuation round carries the receipts of work that already applied,
+    // so its request describes a table that has legitimately moved. Capturing
+    // the view here is what lets dependent work run against what its
+    // predecessor produced without inheriting a revision it never saw.
+    const context = phaseContext(session, turn.turnId, input.phaseId + round);
     const continued = await exchange(
       options,
       compactRequest(
@@ -1159,10 +1146,8 @@ async function continueTurn(
     if (continued.actions?.length) {
       results = [
         ...results,
-        ...(await executeActions(
-          session,
-          continued.actions,
-          snapshot.revision,
+        ...(await execution.execute(
+          { context, actions: continued.actions },
           input.signal
         )),
       ];
@@ -1171,7 +1156,7 @@ async function continueTurn(
     const needs = continued.needs;
     const asked = (needs?.describe?.length ?? 0) + (needs?.read?.length ?? 0);
     if (asked > 0) {
-      const next = await fulfillNeeds(session, needs, snapshot);
+      const next = await fulfillNeeds(session, needs, turn);
       descriptions = mergeGuides(descriptions, next.descriptions);
       rows = [...(rows ?? []), ...next.rows];
       assertContextSize(descriptions, rows);
