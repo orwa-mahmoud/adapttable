@@ -33,7 +33,6 @@ import {
   type AssistantTransport,
   type AssistantTransportReply,
   type AssistantTurnStatus,
-  type AssistantUndoOffer,
   createTableAssistant,
 } from "@adapttable/ai";
 import {
@@ -164,9 +163,14 @@ export interface TableAssistantState {
    * Whether the last turn that moved the table can still be put back.
    *
    * Null when no turn moved it. Re-read every render, because the offer ends
-   * the moment anything else changes the view.
+   * the moment anything else changes the view. `blockedCode` is a token the
+   * labels translate — the panel never shows a reader a code.
    */
-  readonly undo: AssistantUndoOffer | null;
+  readonly undo: {
+    readonly messageId: string;
+    readonly available: boolean;
+    readonly blockedCode?: string;
+  } | null;
   /** Put that turn back. A no-op once the offer has expired. */
   readonly undoTurn: () => Promise<void>;
   /** Capability keys the reader said not to ask about again. */
@@ -266,7 +270,15 @@ export function useTableAssistant(
     approval: approval ?? null,
     pendingQuestion: state.pendingQuestion,
     answer: store.answer,
-    undo: state.undo,
+    undo: state.undo
+      ? {
+          messageId: state.undo.messageId,
+          available: state.undo.available,
+          ...(state.undo.blocked
+            ? { blockedCode: state.undo.blocked.code }
+            : {}),
+        }
+      : null,
     undoTurn: store.undoTurn,
     alwaysAllowed: state.alwaysAllowed,
     revokeAlwaysAllow: store.revokeAlwaysAllow,

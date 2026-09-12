@@ -34,8 +34,10 @@ import { AssistantComposer } from "./AssistantComposer";
 import type { SpeechInputHandle } from "./useSpeechInput";
 import { AssistantIcon, CloseIcon, SettingsIcon } from "./assistantIcons";
 import {
+  AssistantAlwaysAllowed,
   AssistantEmpty,
   AssistantMessage,
+  AssistantQuestion,
   AssistantSuggestions,
 } from "./AssistantMessages";
 import {
@@ -526,10 +528,28 @@ function Body({
                 labels={labels}
                 slots={slots}
                 action={messageAction?.(message)}
+                undo={
+                  assistant.undo?.messageId === message.id
+                    ? assistant.undo
+                    : undefined
+                }
+                onUndo={() => {
+                  void assistant.undoTurn?.();
+                }}
               />
             ))}
           </ul>
         )}
+        {/* A question belongs where the reader is already looking, not in a
+            second surface that competes with the approval. */}
+        {assistant.pendingQuestion && assistant.answer ? (
+          <AssistantQuestion
+            question={assistant.pendingQuestion}
+            labels={labels}
+            slots={slots}
+            onAnswer={assistant.answer}
+          />
+        ) : null}
         {/* A scripted demo is unusable if the one click that starts it also
             hides every other example, so they stay within reach. */}
         {assistant.messages.length > 0 && assistant.suggestions.length > 0 ? (
@@ -546,6 +566,16 @@ function Body({
               part="assistant-examples-list"
             />
           </details>
+        ) : null}
+        {/* A standing decision, not something this turn did — so it sits with
+            the examples rather than in the transcript. */}
+        {assistant.revokeAlwaysAllow ? (
+          <AssistantAlwaysAllowed
+            capabilities={assistant.alwaysAllowed ?? []}
+            labels={labels}
+            slots={slots}
+            onRevoke={assistant.revokeAlwaysAllow}
+          />
         ) : null}
       </div>
       {review && !expanded && mine ? (

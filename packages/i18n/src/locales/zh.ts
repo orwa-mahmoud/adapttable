@@ -16,6 +16,15 @@ const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   failed: "失败",
 };
 
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "编辑单元格",
+  "rows.add": "添加行",
+  "rows.delete": "删除行",
+  "rows.reorder": "重新排序行",
+  "export.run": "导出",
+};
+
 export const zh: Required<TableLabels> = {
   table: "数据表",
   search: "搜索",
@@ -206,6 +215,21 @@ export const zh: Required<TableLabels> = {
   assistantBackToTable: "返回表格",
   assistantDetail: "详情",
   assistantSaveInTable: "在表格中保存以保留此更改。",
+  assistantUndo: "撤销",
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "运行之后表格已发生变化。",
+        "cannot-restore": "其中一部分无法还原。",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "你的回答",
+  assistantAnswerPlaceholder: "输入回答",
+  assistantAnswerSend: "回答",
+  assistantAlwaysAllowedTitle: "不再询问",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `重新询问${CAPABILITY[capability] ?? capability}`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantExamples: "示例",
   assistantMoreExamples: "更多示例",
   assistantReceiptChange: ({ before, after }) => `已从 ${before} 改为 ${after}`,

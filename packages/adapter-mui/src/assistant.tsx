@@ -7,6 +7,7 @@ import {
   type TableAssistantButtonProps,
   TableAssistantChrome,
   type TableAssistantComposerProps,
+  type TableAssistantLanguageChipProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -291,6 +292,48 @@ function AssistantSuggestion({
  *
  * @public
  */
+/**
+ * The dictation language chooser, in MUI.
+ *
+ * Drawn only beside a mic that is already there, and only when more than one
+ * language is offered — the chrome decides both. This is the kit's own
+ * chooser, not a button with a list bolted on.
+ */
+function AssistantLanguageChip({
+  label,
+  value,
+  options,
+  part,
+  className,
+  onChange,
+  disabled,
+}: Readonly<TableAssistantLanguageChipProps>) {
+  return (
+    <TextField
+      select
+      size="small"
+      variant="standard"
+      className={className}
+      disabled={disabled}
+      value={value}
+      slotProps={{
+        select: { native: true },
+        htmlInput: { "aria-label": label, "data-adapttable-part": part },
+      }}
+      sx={{ minWidth: "7.5rem" }}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </TextField>
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -303,6 +346,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        LanguageChip: AssistantLanguageChip,
       }}
     />
   );

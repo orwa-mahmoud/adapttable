@@ -16,6 +16,15 @@ const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   failed: "başarısız",
 };
 
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "hücre düzenleme",
+  "rows.add": "satır ekleme",
+  "rows.delete": "satır silme",
+  "rows.reorder": "satır sıralama",
+  "export.run": "dışa aktarma",
+};
+
 export const tr: Required<TableLabels> = {
   table: "Veri tablosu",
   search: "Ara",
@@ -212,6 +221,21 @@ export const tr: Required<TableLabels> = {
   assistantBackToTable: "Tabloya dön",
   assistantDetail: "Ayrıntılar",
   assistantSaveInTable: "Bu değişikliği korumak için tabloda kaydedin.",
+  assistantUndo: "Geri al",
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "Bu çalıştıktan sonra tablo değişti.",
+        "cannot-restore": "Bunun bir kısmı geri alınamaz.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "Yanıtınız",
+  assistantAnswerPlaceholder: "Bir yanıt yazın",
+  assistantAnswerSend: "Yanıtla",
+  assistantAlwaysAllowedTitle: "Artık sorulmayanlar",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `${CAPABILITY[capability] ?? capability} için yeniden sor`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantExamples: "Örnekler",
   assistantMoreExamples: "Daha fazla örnek",
   assistantReceiptChange: ({ before, after }) =>

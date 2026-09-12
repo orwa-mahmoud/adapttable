@@ -7,6 +7,7 @@ import {
   type TableAssistantButtonProps,
   TableAssistantChrome,
   type TableAssistantComposerProps,
+  type TableAssistantLanguageChipProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -19,6 +20,7 @@ import {
   Button,
   Drawer,
   Paper,
+  Select,
   Text,
   Textarea,
   Tooltip,
@@ -312,6 +314,44 @@ function AssistantSheet({
  *
  * @public
  */
+/**
+ * The dictation language chooser, in Mantine.
+ *
+ * Drawn only beside a mic that is already there, and only when more than one
+ * language is offered — the chrome decides both. This is the kit's own
+ * chooser, not a button with a list bolted on.
+ */
+function AssistantLanguageChip({
+  label,
+  value,
+  options,
+  part,
+  className,
+  onChange,
+  disabled,
+}: Readonly<TableAssistantLanguageChipProps>) {
+  return (
+    <Select
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      size="xs"
+      w="7.5rem"
+      value={value}
+      disabled={disabled}
+      allowDeselect={false}
+      comboboxProps={{ withinPortal: true }}
+      data={options.map((option) => ({
+        value: option.value,
+        label: option.label,
+      }))}
+      onChange={(next) => {
+        if (next) onChange(next);
+      }}
+    />
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -324,6 +364,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        LanguageChip: AssistantLanguageChip,
       }}
     />
   );

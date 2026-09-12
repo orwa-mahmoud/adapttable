@@ -18,8 +18,10 @@ import { AssistantIcon, SuggestionIcon } from "./assistantIcons";
 import type { TableAssistantSlots } from "./assistantSlots";
 import type {
   TableAssistantMessageView,
+  TableAssistantQuestionView,
   TableAssistantReceiptView,
   TableAssistantSuggestionView,
+  TableAssistantUndoView,
 } from "./assistantView";
 
 /** A staged write is not finished, and the panel has to say so. */
@@ -198,6 +200,9 @@ export function AssistantMessage({
   readonly slots: TableAssistantSlots;
   /** An offer the host attached to this reply. */
   readonly action?: { readonly label: string; readonly onRun: () => void };
+  /** Whether this turn can be put back, when the offer belongs to it. */
+  readonly undo?: TableAssistantUndoView;
+  readonly onUndo?: () => void;
 }): ReactElement {
   const mine = message.role === "user";
   const speaker = mine
@@ -252,9 +257,14 @@ export function AssistantMessage({
             <AssistantIcon />
           </span>
         )}
-        {/* Backend text is untrusted: rendered as text, never as markup. */}
+        {/* Backend text is untrusted: rendered as text, never as markup.
+            While a reply is still arriving, what has landed is shown in its
+            place — marked as provisional, because words are not a receipt. */}
         <span
           data-adapttable-part="assistant-message-text"
+          data-streaming={
+            message.partialText === undefined ? undefined : "true"
+          }
           style={{
             padding: mine ? "0.5em 0.75em" : 0,
             borderRadius: "0.85em",
@@ -265,7 +275,7 @@ export function AssistantMessage({
             whiteSpace: "pre-wrap",
           }}
         >
-          {message.text}
+          {message.partialText ?? message.text}
         </span>
       </span>
       {action ? (
@@ -276,6 +286,32 @@ export function AssistantMessage({
             variant="secondary"
             onClick={action.onRun}
           />
+        </span>
+      ) : null}
+      {undo ? (
+        <span data-adapttable-part="assistant-undo">
+          <slots.Button
+            label={labels?.assistantUndo ?? "Undo"}
+            part="assistant-undo-button"
+            variant="secondary"
+            disabled={!undo.available}
+            tooltip={
+              undo.available
+                ? undefined
+                : (labels?.assistantUndoBlocked?.(undo.blockedCode ?? "") ??
+                  "The table has changed since this ran.")
+            }
+            onClick={() => onUndo?.()}
+          />
+          {undo.available ? null : (
+            <span
+              data-adapttable-part="assistant-undo-reason"
+              style={{ opacity: 0.8 }}
+            >
+              {labels?.assistantUndoBlocked?.(undo.blockedCode ?? "") ??
+                "The table has changed since this ran."}
+            </span>
+          )}
         </span>
       ) : null}
       {message.receipts && message.receipts.length > 0 ? (
@@ -413,6 +449,154 @@ export function AssistantEmpty({
         onRun={onRun}
         part="assistant-suggestions"
       />
+    </div>
+  );
+}
+
+/**
+ * A question the backend asked, drawn where the reader is already looking.
+ *
+ * Choices are chips rather than a column of submit buttons, and a free-text
+ * answer is offered only when the backend said it would accept one — an input
+ * beside a closed set is an invitation to type something that will be refused.
+ */
+export function AssistantQuestion({
+  question,
+  labels,
+  slots,
+  onAnswer,
+}: {
+  readonly question: TableAssistantQuestionView;
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  readonly onAnswer: (answer: { optionId?: string; text?: string }) => void;
+}): ReactElement {
+  const [typed, setTyped] = useState("");
+  const Suggestion = slots.Suggestion;
+  const options = question.options ?? [];
+  return (
+    <div
+      data-adapttable-part="assistant-question"
+      role="group"
+      aria-label={question.question}
+      style={{ display: "flex", flexDirection: "column", gap: "0.45em" }}
+    >
+      <p data-adapttable-part="assistant-question-text" style={{ margin: 0 }}>
+        {question.question}
+      </p>
+      {options.length > 0 ? (
+        <div
+          data-adapttable-part="assistant-question-options"
+          style={{ display: "flex", flexWrap: "wrap", gap: "0.35em" }}
+        >
+          {options.map((option) => (
+            <Suggestion
+              key={option.id}
+              title={option.label}
+              part="assistant-question-option"
+              onClick={() => {
+                onAnswer({ optionId: option.id });
+              }}
+            />
+          ))}
+        </div>
+      ) : null}
+      {question.allowFreeText ? (
+        <div style={{ display: "flex", gap: "0.35em", alignItems: "flex-end" }}>
+          <slots.Composer
+            label={labels?.assistantAnswerLabel ?? "Your answer"}
+            placeholder={labels?.assistantAnswerPlaceholder ?? "Type an answer"}
+            part="assistant-question-input"
+            value={typed}
+            onChange={setTyped}
+            onKeyDown={(event) => {
+              // The same rule as the composer: Enter answers, Shift+Enter is a
+              // newline, and an IME composition is left alone.
+              if (event.key !== "Enter" || event.shiftKey) return;
+              if (
+                (event.nativeEvent as { isComposing?: boolean }).isComposing
+              ) {
+                return;
+              }
+              event.preventDefault();
+              if (!typed.trim()) return;
+              onAnswer({ text: typed.trim() });
+              setTyped("");
+            }}
+          />
+          <slots.Button
+            label={labels?.assistantAnswerSend ?? "Answer"}
+            part="assistant-question-send"
+            variant="primary"
+            disabled={!typed.trim()}
+            onClick={() => {
+              onAnswer({ text: typed.trim() });
+              setTyped("");
+            }}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * What the reader has waved through, and the way back.
+ *
+ * Drawn wherever the panel keeps its settings rather than in the transcript:
+ * it is a standing decision, not something that happened in this turn.
+ */
+export function AssistantAlwaysAllowed({
+  capabilities,
+  labels,
+  slots,
+  onRevoke,
+}: {
+  readonly capabilities: readonly string[];
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  readonly onRevoke: (capability: string) => void;
+}): ReactElement | null {
+  if (capabilities.length === 0) return null;
+  return (
+    <div
+      data-adapttable-part="assistant-always-allowed"
+      style={{ display: "flex", flexDirection: "column", gap: "0.3em" }}
+    >
+      <span data-adapttable-part="assistant-always-allowed-title">
+        {labels?.assistantAlwaysAllowedTitle ?? "Not asking about"}
+      </span>
+      <ul
+        style={{
+          listStyle: "none",
+          margin: 0,
+          padding: 0,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "0.3em",
+        }}
+      >
+        {capabilities.map((capability) => (
+          <li
+            key={capability}
+            data-adapttable-part="assistant-always-allowed-item"
+          >
+            <slots.Button
+              label={
+                labels?.assistantAlwaysAllowedRevoke?.(capability) ??
+                `Ask about ${capability} again`
+              }
+              part="assistant-always-allowed-revoke"
+              variant="subtle"
+              onClick={() => {
+                onRevoke(capability);
+              }}
+            >
+              {labels?.assistantCapabilityName?.(capability) ?? capability}
+            </slots.Button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

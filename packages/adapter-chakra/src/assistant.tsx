@@ -7,6 +7,7 @@ import {
   type TableAssistantButtonProps,
   TableAssistantChrome,
   type TableAssistantComposerProps,
+  type TableAssistantLanguageChipProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -24,6 +25,7 @@ import {
 } from "@chakra-ui/react";
 
 import { KitPortal } from "./components/kitPortal";
+import { NativeSelect } from "./components/primitives";
 
 const BADGE_PALETTE: Record<string, string> = {
   neutral: "gray",
@@ -291,6 +293,44 @@ function AssistantSuggestion({
  *
  * @public
  */
+/**
+ * The dictation language chooser, in Chakra.
+ *
+ * Drawn only beside a mic that is already there, and only when more than one
+ * language is offered — the chrome decides both. This is the kit's own
+ * chooser, not a button with a list bolted on.
+ */
+function AssistantLanguageChip({
+  label,
+  value,
+  options,
+  part,
+  className,
+  onChange,
+  disabled,
+}: Readonly<TableAssistantLanguageChipProps>) {
+  return (
+    <NativeSelect
+      size="xs"
+      minW="7.5rem"
+      className={className}
+      aria-label={label}
+      data-adapttable-part={part}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </NativeSelect>
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -303,6 +343,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        LanguageChip: AssistantLanguageChip,
       }}
     />
   );

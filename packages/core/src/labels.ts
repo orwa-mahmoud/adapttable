@@ -31,6 +31,32 @@ const ASSISTANT_RECEIPT_ACTION: Readonly<Record<string, string>> = {
   "edit/rejected": "Edit refused",
 };
 
+/**
+ * Why an undo is not on offer, in English.
+ *
+ * Only the reasons a reader can act on. `nothing-to-undo` never reaches a
+ * surface — a turn that changed nothing is offered no control at all.
+ */
+const ASSISTANT_UNDO_BLOCKED: Readonly<Record<string, string>> = {
+  "table-moved": "The table has changed since this ran.",
+  "cannot-restore": "Part of this cannot be put back.",
+};
+
+/**
+ * A capability key as something a reader recognises, in English.
+ *
+ * Only the keys a reader is ever asked to confirm, which is the only place a
+ * key is shown to one. Anything else falls back to the key itself, which is
+ * a developer detail and honest about being one.
+ */
+const ASSISTANT_CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "editing cells",
+  "rows.add": "adding rows",
+  "rows.delete": "deleting rows",
+  "rows.reorder": "reordering rows",
+  "export.run": "exporting",
+};
+
 const ASSISTANT_RECEIPT: Readonly<Record<string, string>> = {
   executed: "done",
   staged: "staged",
@@ -234,6 +260,15 @@ export const defaultLabels: Required<TableLabels> = {
   assistantBackToTable: "Back to table",
   assistantDetail: "Details",
   assistantSaveInTable: "Save in the table to keep this change.",
+  assistantUndo: "Undo",
+  assistantUndoBlocked: (code) => ASSISTANT_UNDO_BLOCKED[code],
+  assistantAnswerLabel: "Your answer",
+  assistantAnswerPlaceholder: "Type an answer",
+  assistantAnswerSend: "Answer",
+  assistantAlwaysAllowedTitle: "Not asking about",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `Ask about ${ASSISTANT_CAPABILITY[capability] ?? capability} again`,
+  assistantCapabilityName: (capability) => ASSISTANT_CAPABILITY[capability],
   assistantConnection: (status) => ASSISTANT_CONNECTION[status] ?? "Ready",
   assistantReceipt: ({ capability, status }) => {
     const what = ASSISTANT_RECEIPT[status] ?? status;

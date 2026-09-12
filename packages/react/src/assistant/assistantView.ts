@@ -52,7 +52,48 @@ export interface TableAssistantMessageView {
   readonly role: "user" | "assistant";
   /** Untrusted text. The chrome renders it as text, never as markup. */
   readonly text: string;
+  /**
+   * What has arrived so far, while a reply is still streaming.
+   *
+   * Present only on a provisional message; the real one replaces it when the
+   * turn settles. Words arriving are never a claim that anything ran, so a
+   * message showing this carries no receipts.
+   */
+  readonly partialText?: string;
   readonly receipts?: readonly TableAssistantReceiptView[];
+}
+
+/** One choice offered with a question. @public */
+export interface TableAssistantQuestionOption {
+  readonly id: string;
+  readonly label: string;
+}
+
+/**
+ * A question the backend put to the reader, mid-turn.
+ *
+ * Structure rather than prose: a question rendered as ordinary assistant text
+ * is one the reader answers into the void, because nothing is waiting for
+ * what they type.
+ *
+ * @public
+ */
+export interface TableAssistantQuestionView {
+  readonly id: string;
+  readonly question: string;
+  readonly options?: readonly TableAssistantQuestionOption[];
+  /** Whether a typed answer is accepted as well as, or instead of, a choice. */
+  readonly allowFreeText: boolean;
+}
+
+/** Whether the last turn that moved the table can be put back. @public */
+export interface TableAssistantUndoView {
+  /** The message the offer belongs to. */
+  readonly messageId: string;
+  /** Whether the control is live right now. */
+  readonly available: boolean;
+  /** Why it is not, when it is not — a token the labels translate. */
+  readonly blockedCode?: string;
 }
 
 /** A prompt the reader can run without typing it. @public */
@@ -96,6 +137,23 @@ export interface TableAssistantView {
   readonly runSuggestion: (id: string) => void | Promise<void>;
   /** The last failure, when there is one. */
   readonly error?: string;
+  /**
+   * A question waiting on the reader, when the backend asked one.
+   *
+   * The turn is still in flight while this is set: answering resumes it, and
+   * Stop still ends it.
+   */
+  readonly pendingQuestion?: TableAssistantQuestionView | null;
+  /** Answer it. Ignored once the turn has moved on. */
+  readonly answer?: (answer: { optionId?: string; text?: string }) => void;
+  /** Whether the last turn that moved the table can still be put back. */
+  readonly undo?: TableAssistantUndoView | null;
+  /** Put that turn back. */
+  readonly undoTurn?: () => void | Promise<void>;
+  /** Capability keys the reader said not to ask about again. */
+  readonly alwaysAllowed?: readonly string[];
+  /** Ask about one of them again from now on. */
+  readonly revokeAlwaysAllow?: (capability: string) => void;
 }
 
 /** Whether a turn is running right now. @public */

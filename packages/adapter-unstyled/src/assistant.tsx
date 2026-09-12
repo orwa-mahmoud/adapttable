@@ -11,6 +11,7 @@ import {
   type TableAssistantButtonProps,
   TableAssistantChrome,
   type TableAssistantComposerProps,
+  type TableAssistantLanguageChipProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -200,6 +201,42 @@ function AssistantSuggestion({
  *
  * @public
  */
+/**
+ * The dictation language chooser, in native HTML.
+ *
+ * Drawn only beside a mic that is already there, and only when more than one
+ * language is offered — the chrome decides both. This is the kit's own
+ * chooser, not a button with a list bolted on.
+ */
+function AssistantLanguageChip({
+  label,
+  value,
+  options,
+  part,
+  className,
+  onChange,
+  disabled,
+}: Readonly<TableAssistantLanguageChipProps>) {
+  return (
+    <select
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -212,6 +249,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        LanguageChip: AssistantLanguageChip,
       }}
     />
   );

@@ -16,6 +16,15 @@ const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   failed: "失敗",
 };
 
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "セルの編集",
+  "rows.add": "行の追加",
+  "rows.delete": "行の削除",
+  "rows.reorder": "行の並べ替え",
+  "export.run": "エクスポート",
+};
+
 export const ja: Required<TableLabels> = {
   table: "データテーブル",
   search: "検索",
@@ -207,6 +216,21 @@ export const ja: Required<TableLabels> = {
   assistantBackToTable: "テーブルに戻る",
   assistantDetail: "詳細",
   assistantSaveInTable: "この変更を残すにはテーブルで保存してください。",
+  assistantUndo: "元に戻す",
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "実行後にテーブルが変わりました。",
+        "cannot-restore": "一部は元に戻せません。",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "回答",
+  assistantAnswerPlaceholder: "回答を入力",
+  assistantAnswerSend: "送信",
+  assistantAlwaysAllowedTitle: "確認しない操作",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `${CAPABILITY[capability] ?? capability}について再び確認する`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantExamples: "例",
   assistantMoreExamples: "他の例",
   assistantReceiptChange: ({ before, after }) =>

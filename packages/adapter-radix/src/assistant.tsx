@@ -10,6 +10,7 @@ import {
   type TableAssistantButtonProps,
   TableAssistantChrome,
   type TableAssistantComposerProps,
+  type TableAssistantLanguageChipProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -25,6 +26,8 @@ import {
   Text,
   TextArea,
 } from "@radix-ui/themes";
+
+import { NativeSelect } from "./components/primitives";
 
 const BADGE_COLOR = {
   neutral: "gray",
@@ -285,6 +288,37 @@ function AssistantSuggestion({
  *
  * @public
  */
+/**
+ * The dictation language chooser, in Radix Themes.
+ *
+ * Drawn only beside a mic that is already there, and only when more than one
+ * language is offered — the chrome decides both. This is the kit's own
+ * chooser, not a button with a list bolted on.
+ */
+function AssistantLanguageChip({
+  label,
+  value,
+  options,
+  part,
+  className,
+  onChange,
+  disabled,
+}: Readonly<TableAssistantLanguageChipProps>) {
+  return (
+    <NativeSelect
+      size="1"
+      width="7.5rem"
+      className={className}
+      aria-label={label}
+      data-adapttable-part={part}
+      value={value}
+      disabled={disabled}
+      options={options}
+      onValueChange={onChange}
+    />
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -297,6 +331,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        LanguageChip: AssistantLanguageChip,
       }}
     />
   );

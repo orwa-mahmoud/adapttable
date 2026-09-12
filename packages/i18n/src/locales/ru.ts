@@ -16,6 +16,15 @@ const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   failed: "не удалось",
 };
 
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "изменение ячеек",
+  "rows.add": "добавление строк",
+  "rows.delete": "удаление строк",
+  "rows.reorder": "изменение порядка строк",
+  "export.run": "экспорт",
+};
+
 export const ru: Required<TableLabels> = {
   table: "Таблица данных",
   search: "Поиск",
@@ -214,6 +223,21 @@ export const ru: Required<TableLabels> = {
   assistantBackToTable: "Вернуться к таблице",
   assistantDetail: "Подробности",
   assistantSaveInTable: "Сохраните в таблице, чтобы оставить это изменение.",
+  assistantUndo: "Отменить",
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "Таблица изменилась с тех пор.",
+        "cannot-restore": "Часть этого вернуть нельзя.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "Ваш ответ",
+  assistantAnswerPlaceholder: "Введите ответ",
+  assistantAnswerSend: "Ответить",
+  assistantAlwaysAllowedTitle: "Больше не спрашивать о",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `Снова спрашивать о: ${CAPABILITY[capability] ?? capability}`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantExamples: "Примеры",
   assistantMoreExamples: "Ещё примеры",
   assistantReceiptChange: ({ before, after }) =>

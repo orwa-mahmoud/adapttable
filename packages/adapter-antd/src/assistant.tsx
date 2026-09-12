@@ -7,13 +7,23 @@ import {
   type TableAssistantButtonProps,
   TableAssistantChrome,
   type TableAssistantComposerProps,
+  type TableAssistantLanguageChipProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
   type TableAssistantSuggestionProps,
   type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
-import { Button, Card, Drawer, Input, Tag, Tooltip, Typography } from "antd";
+import {
+  Button,
+  Card,
+  Drawer,
+  Input,
+  Select,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
 
 const TAG_COLOR: Record<string, string | undefined> = {
   neutral: undefined,
@@ -274,6 +284,40 @@ function AssistantSuggestion({
  *
  * @public
  */
+/**
+ * The dictation language chooser, in antd.
+ *
+ * Drawn only beside a mic that is already there, and only when more than one
+ * language is offered — the chrome decides both. This is the kit's own
+ * chooser, not a button with a list bolted on.
+ */
+function AssistantLanguageChip({
+  label,
+  value,
+  options,
+  part,
+  className,
+  onChange,
+  disabled,
+}: Readonly<TableAssistantLanguageChipProps>) {
+  return (
+    <Select
+      size="small"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={{ minWidth: "7.5rem" }}
+      value={value}
+      disabled={disabled}
+      options={options.map((option) => ({
+        value: option.value,
+        label: option.label,
+      }))}
+      onChange={onChange}
+    />
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -286,6 +330,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        LanguageChip: AssistantLanguageChip,
       }}
     />
   );

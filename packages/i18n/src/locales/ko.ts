@@ -16,6 +16,15 @@ const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   failed: "실패",
 };
 
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "셀 편집",
+  "rows.add": "행 추가",
+  "rows.delete": "행 삭제",
+  "rows.reorder": "행 순서 변경",
+  "export.run": "내보내기",
+};
+
 export const ko: Required<TableLabels> = {
   table: "데이터 테이블",
   search: "검색",
@@ -209,6 +218,21 @@ export const ko: Required<TableLabels> = {
   assistantBackToTable: "테이블로 돌아가기",
   assistantDetail: "세부 정보",
   assistantSaveInTable: "이 변경을 유지하려면 테이블에서 저장하세요.",
+  assistantUndo: "실행 취소",
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "실행 이후 표가 변경되었습니다.",
+        "cannot-restore": "일부는 되돌릴 수 없습니다.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "답변",
+  assistantAnswerPlaceholder: "답변 입력",
+  assistantAnswerSend: "보내기",
+  assistantAlwaysAllowedTitle: "묻지 않는 작업",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `${CAPABILITY[capability] ?? capability} 다시 확인하기`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantExamples: "예시",
   assistantMoreExamples: "예시 더 보기",
   assistantReceiptChange: ({ before, after }) =>

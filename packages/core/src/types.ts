@@ -780,6 +780,34 @@ export interface TableLabels {
   assistantDetail?: string;
   /** What a staged write still needs from the reader. */
   assistantSaveInTable?: string;
+  /** Puts back what one assistant turn changed. */
+  assistantUndo?: string;
+  /**
+   * Why the undo is not on offer, from a token.
+   *
+   * `table-moved` is the one a reader sees: something else changed the view
+   * after the turn settled. Returns `undefined` for a token this language has
+   * no sentence for, and the panel says nothing rather than showing a code.
+   */
+  assistantUndoBlocked?: (code: string) => string | undefined;
+  /** Accessible name for the free-text answer to a question. */
+  assistantAnswerLabel?: string;
+  /** Placeholder in that field. */
+  assistantAnswerPlaceholder?: string;
+  /** Sends a typed answer. */
+  assistantAnswerSend?: string;
+  /** Heading above the capabilities the reader stopped being asked about. */
+  assistantAlwaysAllowedTitle?: string;
+  /** Accessible name for the control that starts asking again. */
+  assistantAlwaysAllowedRevoke?: (capability: string) => string;
+  /**
+   * A capability key as a reader-facing name.
+   *
+   * Returns `undefined` for a key this language has no name for, and the
+   * surface shows the key — which is a developer detail, and the honest
+   * fallback when nobody has named it.
+   */
+  assistantCapabilityName?: (capability: string) => string | undefined;
   /**
    * The connection badge, from a status token.
    *
