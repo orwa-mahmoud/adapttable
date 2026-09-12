@@ -6,6 +6,22 @@
  * returned actions through the existing session. No model SDK.
  */
 import type { AssistantTransport } from "./assistantContracts";
+import {
+  type AgentContext,
+  type AgentContextContract,
+  type AgentContextInputs,
+  type AgentContextOptions,
+  type AgentContextSelection,
+  type AgentContextView,
+  buildAgentContext,
+} from "./context";
+import {
+  discover,
+  type DiscoveryRequest,
+  type DiscoverySource,
+  familyOf,
+} from "./discovery";
+import { createDiscoveryCache, type DiscoveryCache } from "./discoveryCache";
 import { errorMessage } from "./errorMessage";
 import {
   createTurnExecution,
@@ -21,32 +37,21 @@ import {
   type PinStatus,
 } from "./httpPins";
 import {
+  agentHttpSchema,
+  type AgentWireLimits,
+  type JsonSchemaDocument,
+} from "./httpSchema";
+import {
   createStreamReply,
   parseStreamRecord,
   splitRecords,
 } from "./httpStream";
-import {
-  discover,
-  type DiscoveryRequest,
-  type DiscoverySource,
-  familyOf,
-} from "./discovery";
-import { createDiscoveryCache, type DiscoveryCache } from "./discoveryCache";
 import {
   createPhasePlan,
   DESCRIBE_TOOL,
   type FinalizedCall,
   READ_TOOL,
 } from "./httpTurn";
-import {
-  type AgentContext,
-  type AgentContextContract,
-  type AgentContextInputs,
-  type AgentContextOptions,
-  type AgentContextSelection,
-  type AgentContextView,
-  buildAgentContext,
-} from "./context";
 import type {
   AgentHttpAnswer,
   AgentHttpQuestion,
@@ -54,11 +59,6 @@ import type {
   AgentHttpToolCall,
   AgentHttpToolResult,
 } from "./httpTypes";
-import {
-  agentHttpSchema,
-  type AgentWireLimits,
-  type JsonSchemaDocument,
-} from "./httpSchema";
 import { AGENT_SCHEMA_VERSION, type RowAddressScope } from "./keys";
 import type {
   AgentManifest,
@@ -83,8 +83,8 @@ export type {
 export type { AssistantReceiptSubject } from "./assistantReceipts";
 // `AgentHttpRequest.view` is typed with these, so a consumer of this subpath
 // can name them without reaching for another entry point.
-export type { AgentContextContract, AgentContextView } from "./contextSnapshot";
 export type { AgentContextSelection } from "./contextSelection";
+export type { AgentContextContract, AgentContextView } from "./contextSnapshot";
 export {
   contractFingerprint,
   DEFAULT_PIN_CONNECTIONS,
@@ -92,6 +92,7 @@ export {
   type PinRecord,
   type PinStatus,
 } from "./httpPins";
+export type { AgentWireLimits, JsonSchemaDocument } from "./httpSchema";
 export {
   AgentStreamError,
   type AgentStreamEvent,
@@ -102,7 +103,6 @@ export {
   splitRecords,
 } from "./httpStream";
 export { AgentTurnError, type PhaseState } from "./httpTurn";
-export type { AgentWireLimits, JsonSchemaDocument } from "./httpSchema";
 export * from "./httpTypes";
 export {
   AGENT_SCHEMA_VERSION as AGENT_HTTP_SCHEMA,

@@ -7,8 +7,8 @@ import type {
   AgentCapabilityDefinition,
   AgentObservation,
   CapabilityPlan,
-  RowReadQuery,
   RowProvenanceEnvelope,
+  RowReadQuery,
   RowWindow,
 } from "./types";
 

@@ -53,6 +53,8 @@
  *
  * @packageDocumentation
  */
+import type { ApprovalPresentation } from "@adapttable/core";
+
 import type {
   AssistantTransport,
   AssistantTransportReply,
@@ -64,8 +66,6 @@ import {
   buildAgentContext,
 } from "./context";
 import type { AgentContextView } from "./contextSnapshot";
-import type { ApprovalPresentation } from "@adapttable/core";
-
 import type {
   AgentSession,
   ApprovalResult,
@@ -216,9 +216,13 @@ export class AiSdkProtocolError extends Error {
  */
 export function assertAiSdkVersion(version: unknown): void {
   if (version === undefined || version === AI_SDK_STREAM_VERSION) return;
+  // Whatever arrived, said back safely: a stream that names an object as its
+  // version is exactly the case this refuses, and `[object Object]` in the
+  // message would tell nobody which one.
+  const named = JSON.stringify(version) ?? "unknown";
   throw new AiSdkProtocolError(
     "unknown-stream-version",
-    `this adapter speaks AI SDK UI message stream v${String(AI_SDK_STREAM_VERSION)}, not v${String(version)}`
+    `this adapter speaks AI SDK UI message stream v${String(AI_SDK_STREAM_VERSION)}, not v${named}`
   );
 }
 

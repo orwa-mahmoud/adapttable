@@ -1933,7 +1933,7 @@ describe("pinning the contract on a backend", () => {
 
   it("does not pin on a reply that says nothing about the contract", async () => {
     const live = session();
-    const bodies: (unknown | undefined)[] = [];
+    const bodies: unknown[] = [];
     const options = {
       endpoint: "https://agent.example/turn",
       request: (body: { catalog?: unknown }) => {
@@ -1954,7 +1954,7 @@ describe("pinning the contract on a backend", () => {
 
   it("stops sending the contract once a reply acknowledges it", async () => {
     const live = session();
-    const bodies: (unknown | undefined)[] = [];
+    const bodies: unknown[] = [];
     const options = {
       endpoint: "https://agent.example/turn",
       request: (body: { catalog?: unknown; contractVersion?: string }) => {

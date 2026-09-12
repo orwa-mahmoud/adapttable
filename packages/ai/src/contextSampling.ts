@@ -22,7 +22,7 @@
  *
  * @packageDocumentation
  */
-import { SAMPLE_CAP, matchesType } from "./contextSnapshot";
+import { matchesType, SAMPLE_CAP } from "./contextSnapshot";
 import type { AgentSession, RowProvenanceEnvelope } from "./types";
 
 /** How many rows are read to find {@link SAMPLE_CAP} distinct values. */

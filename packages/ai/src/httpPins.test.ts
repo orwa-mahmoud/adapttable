@@ -115,29 +115,28 @@ describe("naming a contract", () => {
   });
 
   it("cannot be spelled by a column id that contains a separator", () => {
-    const manifest = (columns: readonly string[]): AgentManifest =>
-      ({
-        schemaVersion: "adapttable.agent.v1",
-        tableId: "orders",
-        viewRevision: 1,
-        capabilities: [],
-        columns: columns.map((id) => ({
-          id,
-          label: id,
-          type: "string" as const,
-          readable: true,
-          writable: false,
-          sortable: false,
-        })),
-        rowAddressing: { scope: "visible" as const, key: "rowKey" as const },
-        limits: { pageMax: 10, readMax: 50 },
-        policy: {
-          write: "allow" as const,
-          approval: "never" as const,
-          commit: "immediate" as const,
-        },
-        source: PAGE_ONLY,
-      }) as unknown as AgentManifest;
+    const manifest = (columns: readonly string[]): AgentManifest => ({
+      schemaVersion: "adapttable.agent.v1",
+      tableId: "orders",
+      viewRevision: 1,
+      capabilities: [],
+      columns: columns.map((id) => ({
+        id,
+        label: id,
+        type: "string" as const,
+        readable: true,
+        writable: false,
+        sortable: false,
+      })),
+      rowAddressing: { scope: "visible" as const, key: "rowKey" as const },
+      limits: { pageMax: 10, readMax: 50 },
+      policy: {
+        write: "allow" as const,
+        approval: "never" as const,
+        commit: "immediate" as const,
+      },
+      source: PAGE_ONLY,
+    });
     const catalog: readonly CatalogEntry[] = [];
 
     expect(contractFingerprint(manifest(["a,b"]), catalog)).not.toBe(

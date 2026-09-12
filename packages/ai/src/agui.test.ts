@@ -3,10 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 import {
   type AgUiConnection,
   type AgUiEvent,
+  AgUiProtocolError,
   type AgUiRunInput,
   aguiToolName,
   aguiTransport,
-  AgUiProtocolError,
   statePatch,
 } from "./agui";
 import { createAgentSession } from "./session";
@@ -103,7 +103,9 @@ function recorded(
         const script = scripts[Math.min(run, scripts.length - 1)];
         run += 1;
         const events = script?.(input) ?? [];
-        return (async function* () {
+        // A recorded script has nothing to wait for; it is still an async
+        // iterable, which is what the adapter consumes.
+        return (function* () {
           for (const event of events) yield event;
         })();
       },

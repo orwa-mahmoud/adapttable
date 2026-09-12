@@ -176,7 +176,7 @@ export function createPinStore(
     },
     join: async (session, connectionId, version, run) => {
       const entry = state(session, connectionId);
-      if (entry.inflight && entry.inflight.version === version) {
+      if (entry.inflight?.version === version) {
         await entry.inflight.run;
         return;
       }

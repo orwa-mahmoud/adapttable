@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import {
   type AggregationInputs,
   aggregationsFor,
-  applyAggregations,
   type AggregationState,
+  applyAggregations,
 } from "./aggregationCommands";
 
 function column(key: string, patch: Record<string, unknown> = {}) {

@@ -10,13 +10,13 @@
  */
 export {
   type AggregationInputs,
-  type AggregationState,
   aggregationsFor,
+  type AggregationState,
   applyAggregations,
 } from "./aggregationCommands";
 export {
-  type ResolvedApproval,
   resolveApproval,
+  type ResolvedApproval,
   type SharedApproval,
   sharedApproval,
 } from "./approvalConfig";
@@ -24,8 +24,8 @@ export {
   type AlwaysAllowInput,
   ApprovalAlwaysAllowError,
   type ApprovalMemory,
-  assertAlwaysAllow,
   type ApprovalTransaction,
+  assertAlwaysAllow,
   closeTransaction,
   createApprovalMemory,
   mayAlwaysAllow,
@@ -35,22 +35,13 @@ export {
   settleDecisions,
 } from "./approvalTransaction";
 export {
-  type BindingOperations,
-  type BindingQuery,
-  type BindingSnapshot,
-  contractFingerprint,
-  displayProposals,
-  type ProposalResolver,
-  type TableAgentBridge,
-} from "./binding";
-export {
   assertUniqueSuggestions,
   type AssistantAction,
+  type AssistantAnswer,
   type AssistantConversation,
   type AssistantExchange,
   type AssistantOutcome,
   type AssistantOutcomeStatus,
-  type AssistantAnswer,
   type AssistantPlanner,
   type AssistantProposal,
   type AssistantQuestion,
@@ -64,6 +55,15 @@ export {
   type CapabilityPresentation,
   eligibleSuggestions,
 } from "./assistantContracts";
+export {
+  type AssistantReceipt,
+  type AssistantReceiptStatus,
+  type AssistantReceiptSubject,
+  type AssistantTurnStatus,
+  receiptFromResult,
+  receiptsFromResults,
+  turnStatus,
+} from "./assistantReceipts";
 export {
   type AssistantMessage,
   type AssistantStatus,
@@ -79,23 +79,19 @@ export {
   planUndo,
   runUndo,
   type UndoBlock,
-  type UndoCall,
   undoBlocked,
+  type UndoCall,
 } from "./assistantUndo";
 export {
-  type AssistantReceipt,
-  type AssistantReceiptStatus,
-  type AssistantReceiptSubject,
-  type AssistantTurnStatus,
-  receiptFromResult,
-  receiptsFromResults,
-  turnStatus,
-} from "./assistantReceipts";
+  type BindingOperations,
+  type BindingQuery,
+  type BindingSnapshot,
+  contractFingerprint,
+  displayProposals,
+  type ProposalResolver,
+  type TableAgentBridge,
+} from "./binding";
 export { openAiToolNameMap } from "./capabilities/registry";
-export {
-  agentFiltersFromDefs,
-  type FilterCatalogColumnPatch,
-} from "./filterCatalog";
 export {
   type AgentContext,
   type AgentContextContract,
@@ -127,6 +123,11 @@ export {
   type DiscoveryCache,
 } from "./discoveryCache";
 export {
+  agentFiltersFromDefs,
+  type FilterCatalogColumnPatch,
+} from "./filterCatalog";
+export { guideOf, summaryOf } from "./guides";
+export {
   AgentStreamError,
   type AgentStreamEvent,
   type AgentStreamEventKind,
@@ -135,7 +136,6 @@ export {
   parseStreamRecord,
   splitRecords,
 } from "./httpStream";
-export { guideOf, summaryOf } from "./guides";
 export {
   AGENT_SCHEMA_VERSION,
   type ApprovalPolicy,
@@ -168,6 +168,7 @@ export type {
   AgentCapabilityDefinition,
   AgentCellEdit,
   AgentColumn,
+  AgentColumnAuthoring,
   AgentFilter,
   AgentFilterOption,
   AgentLimits,
@@ -179,6 +180,7 @@ export type {
   ApprovalOutcome,
   ApprovalResult,
   ApprovalSubject,
+  CapabilityFamily,
   CapabilityGuide,
   CapabilityPartial,
   CapabilityPlan,
@@ -188,8 +190,6 @@ export type {
   ExecuteResult,
   JsonSchema,
   ResolvedRow,
-  AgentColumnAuthoring,
-  CapabilityFamily,
   RowKeyRef,
   RowPositionRef,
   RowProvenanceEnvelope,
@@ -203,16 +203,6 @@ export type {
 } from "./types";
 export { validateSchema } from "./validate";
 export {
-  type ModelContextLike,
-  registerWebMcpTools,
-  type WebMcpAnnotations,
-  type WebMcpContent,
-  type WebMcpOptions,
-  type WebMcpRegistration,
-  type WebMcpResult,
-  type WebMcpTool,
-} from "./webmcp";
-export {
   createSpeechInput,
   readRememberedLanguage,
   rememberLanguage,
@@ -224,3 +214,13 @@ export {
   type SpeechStatus,
   type VoiceOptions,
 } from "./voice";
+export {
+  type ModelContextLike,
+  registerWebMcpTools,
+  type WebMcpAnnotations,
+  type WebMcpContent,
+  type WebMcpOptions,
+  type WebMcpRegistration,
+  type WebMcpResult,
+  type WebMcpTool,
+} from "./webmcp";

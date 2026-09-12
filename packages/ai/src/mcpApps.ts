@@ -536,7 +536,7 @@ export async function askThroughHost(
     ...(question.options ? { options: question.options } : {}),
     allowFreeText: question.allowFreeText,
   });
-  if (!answered || answered.action !== "accept") return undefined;
+  if (answered?.action !== "accept") return undefined;
   const optionId = answered.content?.optionId;
   const text = answered.content?.text;
   if (optionId === undefined && text === undefined) return undefined;

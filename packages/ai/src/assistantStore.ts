@@ -47,8 +47,8 @@ import {
   type UndoBlock,
   undoBlocked,
 } from "./assistantUndo";
-import { type AgentContextView, buildView } from "./contextSnapshot";
 import type { AgentContextInputs } from "./context";
+import { type AgentContextView, buildView } from "./contextSnapshot";
 import type { AgentSession } from "./types";
 
 /** What a reader is offered about the last turn that moved the table. @public */
@@ -453,11 +453,7 @@ export function createTableAssistant(
     const primary = live.primarySuggestions ?? DEFAULT_PRIMARY;
     // Sliced once per eligibility answer, so an unchanged table hands back the
     // same arrays rather than equal ones.
-    if (
-      !sliceCache ||
-      sliceCache.offered !== offered ||
-      sliceCache.primary !== primary
-    ) {
+    if (sliceCache?.offered !== offered || sliceCache.primary !== primary) {
       sliceCache = {
         offered,
         primary,

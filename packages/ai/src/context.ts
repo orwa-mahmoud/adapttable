@@ -32,9 +32,9 @@ import {
   type AgentContextView,
   buildContract,
   buildView,
-  contractVersion,
   type ContextCapability,
   type ContextColumn,
+  contractVersion,
 } from "./contextSnapshot";
 import type {
   AgentAggregations,
@@ -50,9 +50,9 @@ export {
   type AgentContextProfile,
   type AgentContextSelection,
   type AgentContextView,
-  ContextIncludeError,
   type ContextCapability,
   type ContextColumn,
+  ContextIncludeError,
   DEFAULT_COMPACT_TOKENS,
   MAX_CONTEXT_BYTES,
 };
@@ -62,7 +62,6 @@ export {
   type AgentInstructionsInput,
   renderAgentContext,
 } from "./contextPrompt";
-
 export { sampleColumns, sampleColumnValues } from "./contextSampling";
 export { matchesType, SAMPLE_CAP } from "./contextSnapshot";
 

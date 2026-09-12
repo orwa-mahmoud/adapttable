@@ -138,11 +138,10 @@ describe("choosing what travels upfront", () => {
   });
 
   it("leaves the output schema out of upfront guidance", () => {
-    const withOutput = (key: string): CapabilityGuide =>
-      ({
-        ...guide(key),
-        output: { type: "object" },
-      }) as unknown as CapabilityGuide;
+    const withOutput = (key: string): CapabilityGuide => ({
+      ...guide(key),
+      output: { type: "object" },
+    });
     const chosen = selectGuides(ALL, withOutput, { profile: "full" });
 
     // Input is what lets a model call correctly; output is bulk it can read

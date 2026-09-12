@@ -69,7 +69,7 @@ function installRecognizer(): { live: () => FakeRecognition | undefined } {
     this.onerror = null;
     this.onend = null;
     made = this;
-  } as unknown as new () => FakeRecognition);
+  });
   return { live: () => made };
 }
 
@@ -193,19 +193,20 @@ describe("recording for a backend", () => {
       },
     });
     let live: Record<string, unknown> | undefined;
-    setGlobal("MediaRecorder", function Recorder(
-      this: Record<string, unknown>
-    ) {
-      this.state = "recording";
-      this.mimeType = "audio/webm;codecs=opus";
-      this.start = vi.fn();
-      this.stop = vi.fn(() => {
-        (this.onstop as (() => void) | null)?.();
-      });
-      this.ondataavailable = null;
-      this.onstop = null;
-      live = this;
-    } as unknown as new () => unknown);
+    setGlobal(
+      "MediaRecorder",
+      function Recorder(this: Record<string, unknown>) {
+        this.state = "recording";
+        this.mimeType = "audio/webm;codecs=opus";
+        this.start = vi.fn();
+        this.stop = vi.fn(() => {
+          (this.onstop as (() => void) | null)?.();
+        });
+        this.ondataavailable = null;
+        this.onstop = null;
+        live = this;
+      }
+    );
 
     const onClip = vi.fn();
     const input = createSpeechInput({ mode: "backend", onClip });
@@ -238,7 +239,7 @@ describe("recording for a backend", () => {
     });
     setGlobal("MediaRecorder", function Recorder() {
       /* never reached */
-    } as unknown as new () => unknown);
+    });
 
     const input = createSpeechInput({ mode: "backend" });
     input.start();

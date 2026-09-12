@@ -145,9 +145,8 @@ export function selectionOrder(
 export class ContextIncludeError extends Error {
   readonly code = "include-unavailable";
   constructor(keys: readonly string[]) {
-    super(
-      `cannot include ${keys.map((key) => `"${key}"`).join(", ")}: not available on this table`
-    );
+    const named = keys.map((key) => JSON.stringify(key)).join(", ");
+    super(`cannot include ${named}: not available on this table`);
     this.name = "ContextIncludeError";
   }
 }

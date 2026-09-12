@@ -101,9 +101,7 @@ describe("staying bounded", () => {
   it("still replaces a guide it already holds", () => {
     const cache = createDiscoveryCache({ maxGuides: 2 });
     cache.remember("conn", "v1", [guide("a"), guide("b")]);
-    cache.remember("conn", "v1", [
-      { ...guide("a"), guide: "Updated." } as CapabilityGuide,
-    ]);
+    cache.remember("conn", "v1", [{ ...guide("a"), guide: "Updated." }]);
 
     expect(cache.read("conn", "v1", "a")?.guide).toBe("Updated.");
     expect(cache.known("conn", "v1", ["a", "b"])).toEqual(["a", "b"]);

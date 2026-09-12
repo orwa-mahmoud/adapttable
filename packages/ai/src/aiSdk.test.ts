@@ -92,7 +92,9 @@ function recorded(
         const stream = streams[Math.min(at, streams.length - 1)];
         at += 1;
         const parts = stream?.(request) ?? [];
-        return (async function* () {
+        // A recorded stream has nothing to wait for; it is still an
+        // iterable, which is what the adapter consumes.
+        return (function* () {
           for (const part of parts) yield part;
         })();
       },

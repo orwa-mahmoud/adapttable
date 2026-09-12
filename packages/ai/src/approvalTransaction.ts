@@ -199,9 +199,8 @@ export interface ApprovalMemory {
 export class ApprovalAlwaysAllowError extends Error {
   readonly code = "always-allow-unavailable";
   constructor(keys: readonly string[]) {
-    super(
-      `cannot always-allow ${keys.map((key) => `"${key}"`).join(", ")}: not available on this table`
-    );
+    const named = keys.map((key) => JSON.stringify(key)).join(", ");
+    super(`cannot always-allow ${named}: not available on this table`);
     this.name = "ApprovalAlwaysAllowError";
   }
 }

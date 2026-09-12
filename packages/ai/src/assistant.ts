@@ -12,15 +12,6 @@
  *
  * @packageDocumentation
  */
-export {
-  type AssistantMessage,
-  type AssistantStatus,
-  type AssistantUndoOffer,
-  createTableAssistant,
-  type TableAssistantInputs,
-  type TableAssistantSnapshot,
-  type TableAssistantStore,
-} from "./assistantStore";
 export type {
   AssistantAnswer,
   AssistantExchange,
@@ -38,11 +29,20 @@ export type {
   AssistantTurnStatus,
 } from "./assistantReceipts";
 export {
+  type AssistantMessage,
+  type AssistantStatus,
+  type AssistantUndoOffer,
+  createTableAssistant,
+  type TableAssistantInputs,
+  type TableAssistantSnapshot,
+  type TableAssistantStore,
+} from "./assistantStore";
+export {
   type AssistantUndo,
   isUndoBlock,
   planUndo,
   runUndo,
   type UndoBlock,
-  type UndoCall,
   undoBlocked,
+  type UndoCall,
 } from "./assistantUndo";
