@@ -744,10 +744,12 @@ describe("createAgentSession", () => {
       "empty-read"
     );
     expect(result.ok).toBe(true);
+    // A read comes back inside the provenance envelope, always: rows are
+    // somebody's data, and the label is what says so on every path.
     expect(result.result).toMatchObject({
-      rows: [],
-      offset: 0,
-      limit: 10,
+      source: "table-rows",
+      untrusted: true,
+      rows: { rows: [], offset: 0, limit: 10 },
     });
   });
 

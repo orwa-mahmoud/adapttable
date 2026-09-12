@@ -203,8 +203,16 @@ describe("what never reaches an instruction sentence", () => {
     // Values reach a model only inside a tool result, inside the provenance
     // envelope that marks them untrusted. An instruction that quotes somebody's
     // data is an instruction a row can rewrite.
-    expect(rendered).not.toContain("rowKey");
-    expect(rendered).not.toContain("cells");
+    //
+    // The assertion is about values, not about field names: `rowKey` is how a
+    // row is addressed and `cells` is the shape a read comes back in, so a
+    // guide that could not name them would be a guide nobody could follow.
+    // What must never appear is a value out of the table.
+    for (const value of ["Ada", "Grace", "Core", "120000"]) {
+      expect(rendered).not.toContain(value);
+    }
+    // And no rendered row shape: a value would have to arrive inside one.
+    expect(rendered).not.toMatch(/"cells"\s*:\s*\{[^}]/);
   });
 
   it("says a bounded option list was cut rather than implying it is complete", () => {

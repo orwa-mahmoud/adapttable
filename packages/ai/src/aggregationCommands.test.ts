@@ -12,7 +12,11 @@ function column(key: string, patch: Record<string, unknown> = {}) {
   return {
     key,
     header: key,
-    type: "number",
+    // `aggregatable: true` means "whatever this column's type implies", and
+    // core reads that from the filter or the editor — a `ColumnMetadata` has
+    // no `type` of its own. Declaring it the way a real numeric column is
+    // declared is what makes sum, avg, min and max offerable here.
+    filter: "number",
     aggregatable: true,
     ...patch,
   } as unknown as ColumnMetadata<unknown>;

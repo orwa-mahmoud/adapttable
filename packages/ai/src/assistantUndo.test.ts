@@ -95,6 +95,21 @@ describe("working out how to put a turn back", () => {
     expect(planned).toEqual({ code: "nothing-to-undo" });
   });
 
+  it("names the size only when the size moved", () => {
+    // A table that wires no `setLimit` refuses a `view.setPage` that carries
+    // one, so an ordinary page undo must not name it.
+    const planned = planUndo(
+      view({ page: 1 }),
+      view({ page: 4 }),
+      session(),
+      5
+    );
+
+    expect((planned as AssistantUndo).calls).toEqual([
+      { key: "view.setPage", args: { page: 1 } },
+    ]);
+  });
+
   it("restores a page with one call, not two", () => {
     const planned = planUndo(
       view({ page: 1, limit: 25 }),
@@ -107,6 +122,7 @@ describe("working out how to put a turn back", () => {
     expect((planned as AssistantUndo).calls).toEqual([
       { key: "view.setPage", args: { page: 1, limit: 25 } },
     ]);
+    // Both moved here, so both travel.
     expect((planned as AssistantUndo).settledAt).toBe(7);
   });
 
@@ -211,14 +227,16 @@ describe("putting it back", () => {
       before: view(),
       settledAt: 1,
       calls: [
-        { key: "view.setPage", args: { page: 1, limit: 25 } },
+        // The size is not part of this one: the table wires no `setLimit`,
+        // and a plan that named the size would be refused rather than run.
+        { key: "view.setPage", args: { page: 1 } },
         { key: "view.setSearch", args: { query: "ada" } },
       ],
     };
 
     const results = await runUndo(live, undo, "undo:m1");
 
-    expect(setPage).toHaveBeenCalledWith(1, 25);
+    expect(setPage).toHaveBeenCalledWith(1);
     expect(setSearch).toHaveBeenCalledWith("ada");
     expect(results.every((result) => result.ok)).toBe(true);
     expect(results).toHaveLength(2);

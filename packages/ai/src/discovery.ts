@@ -105,6 +105,7 @@ function expand(
   source: DiscoverySource
 ): readonly string[] {
   const available = source.available();
+  const offered = new Set(available);
   const seed = [...(request.keys ?? [])];
   if (request.bundle) {
     // A family is expanded from what this table actually offers, so asking
@@ -126,6 +127,12 @@ function expand(
     if (visited.has(key)) continue;
     visited.add(key);
     ordered.push(key);
+    // A dependency exists to make its capability usable. Following one out of
+    // a capability this table does not offer would answer with a guide for
+    // something that cannot run — which reads to a model as an invitation to
+    // try it. The key itself still travels, so the answer still says it is
+    // unavailable.
+    if (!offered.has(key)) continue;
     for (const dependency of source.family(key)?.dependsOn ?? []) {
       if (!visited.has(dependency)) queue.push(dependency);
     }

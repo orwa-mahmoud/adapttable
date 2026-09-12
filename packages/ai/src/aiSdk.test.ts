@@ -207,7 +207,10 @@ describe("what a request carries", () => {
     expect(route.requests[1]?.toolOutputs).toEqual([
       {
         toolCallId: "c1",
-        output: { ok: true, revision: 2, result: undefined },
+        // The session's own receipt travels inside ours: `ok` and the
+        // revision are this adapter's, `result` is what the capability
+        // returned.
+        output: { ok: true, revision: 2, result: { ok: true, revision: 2 } },
       },
     ]);
     expect(reply.keys).toEqual(["view.setPage"]);

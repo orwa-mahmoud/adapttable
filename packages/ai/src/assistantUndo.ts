@@ -101,15 +101,26 @@ function same(a: unknown, b: unknown): boolean {
  * The call that puts one field back, or nothing when this field is restored
  * by a call another field already produced.
  */
-function restoreCall(field: ViewField, before: AgentContextView): UndoCall {
+function restoreCall(
+  field: ViewField,
+  before: AgentContextView,
+  moved: readonly ViewField[]
+): UndoCall {
   switch (field) {
     case "page":
     case "limit":
       // One call carries both: `view.setPage` takes the page and may take the
       // size, and issuing two would move the table twice.
+      //
+      // The size travels only when the size actually moved. `view.setPage`
+      // refuses a `limit` on a table that wires no `setLimit`, so naming one
+      // that changed nothing would turn an ordinary page undo into a refusal.
       return {
         key: "view.setPage",
-        args: { page: before.page, limit: before.limit },
+        args: {
+          page: before.page,
+          ...(moved.includes("limit") ? { limit: before.limit } : {}),
+        },
       };
     case "search":
       return { key: "view.setSearch", args: { query: before.search } };
@@ -174,7 +185,7 @@ export function planUndo(
 
   const calls: UndoCall[] = [];
   for (const field of moved) {
-    const call = restoreCall(field, before);
+    const call = restoreCall(field, before, moved);
     // `page` and `limit` — and `sortBy` and `sortDir` — share one call.
     if (calls.some((existing) => existing.key === call.key)) continue;
     calls.push(call);

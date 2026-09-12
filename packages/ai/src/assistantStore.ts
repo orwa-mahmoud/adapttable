@@ -298,6 +298,9 @@ export function createTableAssistant(
   let question: AssistantQuestion | null = null;
   // The last turn that actually moved the view, and which message it was.
   let undoPlan: { message: string; undo: AssistantUndo } | null = null;
+  // The provisional message of the turn in flight, so an abandoned turn can
+  // take it away itself rather than waiting for a transport to settle.
+  let streamingMessage: string | undefined;
   let resumeQuestion:
     ((answer: AssistantAnswer | undefined) => void) | undefined;
 
@@ -607,6 +610,7 @@ export function createTableAssistant(
     if (generation !== mine || turn !== id) return;
     sending = false;
     abort = undefined;
+    streamingMessage = undefined;
     settleQuestion(undefined);
     publish();
   };
@@ -640,16 +644,36 @@ export function createTableAssistant(
     })();
   };
 
-  const dropConnection = (): void => {
+  /**
+   * Close the open connection.
+   *
+   * `transport` is passed in rather than read from `live`, because the one
+   * case that matters is a swap: `update` has already replaced the inputs by
+   * the time this runs, and disconnecting the new transport would leave the
+   * old one holding whatever it acquired — an endpoint credential included.
+   */
+  const dropConnection = (transport = live.transport): void => {
     connection?.abort();
     connection = undefined;
-    live.transport?.disconnect?.();
+    transport?.disconnect?.();
+  };
+
+  /** Take away the provisional message of a turn nobody is waiting for. */
+  const dropStreamingMessage = (): void => {
+    if (streamingMessage === undefined) return;
+    const id = streamingMessage;
+    streamingMessage = undefined;
+    messages = messages.filter((entry) => entry.id !== id);
   };
 
   const cancelTurn = (): void => {
     if (!sending) return;
     abort?.abort();
     abort = undefined;
+    // A transport is asked to honour `signal`, but it is host code and may
+    // not: one that never settles would otherwise leave half a sentence in
+    // the transcript for good.
+    dropStreamingMessage();
     // Release the lane here rather than waiting for the transport. One that
     // never settles would otherwise hold the composer busy forever; its
     // eventual reply is already undeliverable, because the turn it belonged to
@@ -698,6 +722,7 @@ export function createTableAssistant(
     // per delta would make the transcript grow by a message a token.
     seq += 1;
     const streamingId = messageId("assistant", seq);
+    streamingMessage = streamingId;
     let streamed = "";
     let streamPending = false;
     const flushStream = (): void => {
@@ -755,7 +780,7 @@ export function createTableAssistant(
       });
       // The provisional message goes when the real one lands. A reply is the
       // authority for what happened; the words that preceded it are not.
-      messages = messages.filter((entry) => entry.id !== streamingId);
+      dropStreamingMessage();
       // A transport is asked to honour `signal`, but it is host code and may
       // not. Stop has to hold either way, so delivery is gated on the signal
       // as well as on the turn still being the current one.
@@ -764,7 +789,7 @@ export function createTableAssistant(
       // An abandoned stream leaves nothing behind: the partial message is
       // dropped, and nothing ran, because calls execute only after the reply
       // is complete.
-      messages = messages.filter((entry) => entry.id !== streamingId);
+      dropStreamingMessage();
       if (current(mine) && turn === id) {
         recover(cause, controller.signal.aborted, previousDraft);
       }
@@ -772,6 +797,13 @@ export function createTableAssistant(
       release(mine, id);
     }
   };
+
+  // Taken once, so `publish` always has something to compare against. Without
+  // it the first republish notifies whatever happened — which is precisely the
+  // case a binding hits when it hands over its live inputs on a render before
+  // anything has read the state. Building it is pure: no timer, no listener,
+  // no connection.
+  getState();
 
   return {
     getState,
@@ -862,6 +894,8 @@ export function createTableAssistant(
       if (disposed) return;
       const sessionChanged = next.session !== live.session;
       const transportChanged = next.transportKey !== live.transportKey;
+      // The one that is about to be replaced, so it can be told.
+      const previousTransport = live.transport;
       live = next;
       if (sessionChanged) {
         // A new session is a new table, or a new identity for this one. The
@@ -873,14 +907,14 @@ export function createTableAssistant(
         // A different table is not one this plan describes, and a revision
         // number from the old one could coincide with the new one's.
         undoPlan = null;
-        dropConnection();
+        dropConnection(previousTransport);
         startConnection();
         publish();
         return;
       }
       if (transportChanged) {
         cancelTurn();
-        dropConnection();
+        dropConnection(previousTransport);
         startConnection();
         publish();
         return;
