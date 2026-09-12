@@ -186,6 +186,48 @@ export interface ApprovalMemory {
   readonly clear: () => void;
 }
 
+/**
+ * An `alwaysAllow` list naming a capability this table does not offer.
+ *
+ * The same treatment `include` gets in the context selector, for the same
+ * reason: a typo that silently opts nothing in is a control the developer
+ * believes they shipped and the reader never sees. A request that cannot be
+ * met is an error, not a silence.
+ *
+ * @public
+ */
+export class ApprovalAlwaysAllowError extends Error {
+  readonly code = "always-allow-unavailable";
+  constructor(keys: readonly string[]) {
+    super(
+      `cannot always-allow ${keys.map((key) => `"${key}"`).join(", ")}: not available on this table`
+    );
+    this.name = "ApprovalAlwaysAllowError";
+  }
+}
+
+/**
+ * Check an `alwaysAllow` list against what this table actually offers.
+ *
+ * Call it where the configuration first meets a live catalog — once, when the
+ * contract is built, not on every approval.
+ *
+ * @param alwaysAllow - The keys the developer opted in.
+ * @param available - Every capability key the session permits right now.
+ * @throws {@link ApprovalAlwaysAllowError} when a key is not one of them.
+ *
+ * @public
+ */
+export function assertAlwaysAllow(
+  alwaysAllow: readonly string[],
+  available: Iterable<string>
+): void {
+  if (alwaysAllow.length === 0) return;
+  const offered = new Set(available);
+  const unknown = alwaysAllow.filter((key) => !offered.has(key));
+  if (unknown.length > 0) throw new ApprovalAlwaysAllowError(unknown);
+}
+
 /** What decides whether "don't ask again" may even be offered. @public */
 export interface AlwaysAllowInput {
   /**

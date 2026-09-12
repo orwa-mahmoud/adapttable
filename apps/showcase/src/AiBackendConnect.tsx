@@ -7,13 +7,21 @@
  * key. Model keys belong on the backend; this page never sees one.
  */
 import type { AgentSession, AssistantTransport } from "@adapttable/ai";
+import {
+  type AgUiConnection,
+  type AgUiEvent,
+  aguiTransport,
+} from "@adapttable/ai/ag-ui";
 import { assistantHttpTransport, connectAgentHttp } from "@adapttable/ai/http";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { DOCS_URL } from "./matrix/content";
 
 /** Which transport the conversation is using. @internal */
-export type AiPlayMode = "simulated" | "backend";
+export type AiPlayMode = "simulated" | "backend" | "ag-ui";
+
+/** Which protocol a connected endpoint speaks. @internal */
+export type AiProtocol = "http" | "ag-ui";
 
 /** A connected endpoint, or nothing. @internal */
 export interface AiConnection {
@@ -30,6 +38,54 @@ interface AiConnectionSettingsProps {
   readonly demoTransport: AssistantTransport;
   readonly onChange: (connection: AiConnection) => void;
   readonly onClose: () => void;
+}
+
+/**
+ * An AG-UI endpoint, over Server-Sent Events.
+ *
+ * The whole of what a host supplies: post the run input, read the events back.
+ * No agent framework is imported — the run input and the events are this
+ * package's own types, and a CopilotKit, Mastra or LangGraph endpoint is
+ * reached through exactly this.
+ */
+function sseAgUiConnection(endpoint: string, token: string): AgUiConnection {
+  return {
+    run: async function* (input, signal) {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        signal,
+        headers: {
+          "content-type": "application/json",
+          accept: "text/event-stream",
+          ...(token ? { authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(input),
+      });
+      if (!response.ok || !response.body) {
+        throw new Error(`the AG-UI endpoint answered ${response.status}`);
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      try {
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let split = buffer.indexOf("\n\n");
+          while (split >= 0) {
+            const frame = buffer.slice(0, split);
+            buffer = buffer.slice(split + 2);
+            const data = /^data: (.*)$/m.exec(frame)?.[1];
+            if (data) yield JSON.parse(data) as AgUiEvent;
+            split = buffer.indexOf("\n\n");
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    },
+  };
 }
 
 /**
@@ -50,6 +106,7 @@ export function AiConnectionSettings({
     connection.endpoint ?? "http://127.0.0.1:8787"
   );
   const [token, setToken] = useState("");
+  const [protocol, setProtocol] = useState<AiProtocol>("http");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -61,12 +118,29 @@ export function AiConnectionSettings({
     setBusy(true);
     setError("");
     try {
-      // One handshake, so a wrong endpoint is reported here rather than on
-      // the reader's first question.
       const options = {
         endpoint,
         ...(token ? { headers: { authorization: `Bearer ${token}` } } : {}),
       };
+      if (protocol === "ag-ui") {
+        // A different protocol, the same table: the contract goes out as the
+        // run's frontend tools and every call comes back through the same
+        // executor the HTTP path uses.
+        const transport = aguiTransport({
+          connection: sseAgUiConnection(endpoint, token),
+        });
+        await transport.connect?.({ session });
+        onChange({
+          mode: "ag-ui",
+          endpoint,
+          transport,
+          key: `ag-ui:${endpoint}`,
+        });
+        onClose();
+        return;
+      }
+      // One handshake, so a wrong endpoint is reported here rather than on
+      // the reader's first question.
       await connectAgentHttp(session, options);
       onChange({
         mode: "backend",
@@ -107,7 +181,9 @@ export function AiConnectionSettings({
           </>
         ) : (
           <>
-            <strong>Connected</strong>
+            <strong>
+              Connected · {connection.mode === "ag-ui" ? "AG-UI" : "HTTP"}
+            </strong>
             <span>{connection.endpoint}</span>
           </>
         )}
@@ -138,11 +214,12 @@ export function AiConnectionSettings({
         </ol>
       ) : null}
 
-      {connection.mode === "backend" ? (
+      {connection.mode === "simulated" ? null : (
         <button type="button" className="ai-conn__btn" onClick={disconnect}>
           Disconnect
         </button>
-      ) : (
+      )}
+      {connection.mode === "simulated" ? (
         <form
           className="ai-conn__form"
           onSubmit={(event) => {
@@ -150,6 +227,40 @@ export function AiConnectionSettings({
             void connect();
           }}
         >
+          <fieldset className="ai-conn__protocol">
+            <legend>What your endpoint speaks</legend>
+            <label>
+              <input
+                type="radio"
+                name="ai-protocol"
+                value="http"
+                checked={protocol === "http"}
+                onChange={() => {
+                  setProtocol("http");
+                }}
+              />
+              <span>
+                AdaptTable HTTP — one request per turn, the shape
+                <code> examples/ai-http-backend.ts</code> serves.
+              </span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="ai-protocol"
+                value="ag-ui"
+                checked={protocol === "ag-ui"}
+                onChange={() => {
+                  setProtocol("ag-ui");
+                }}
+              />
+              <span>
+                AG-UI — the table&apos;s capabilities become the run&apos;s
+                frontend tools, and its events stream back. Same executor, same
+                approvals.
+              </span>
+            </label>
+          </fieldset>
           <label htmlFor={endpointId}>Your endpoint</label>
           <input
             id={endpointId}
@@ -190,7 +301,7 @@ export function AiConnectionSettings({
             </button>
           </span>
         </form>
-      )}
+      ) : null}
     </div>
   );
 }

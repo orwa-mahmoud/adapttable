@@ -38,8 +38,10 @@ import {
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
+  AGENT_VIEW_STATE,
   type AgentAlwaysAllowState,
   type AgentApprovalPending,
+  type AgentViewState,
   useFeatureState,
 } from "@adapttable/react/adapter";
 import {
@@ -212,13 +214,16 @@ export function useTableAssistant(
   // What the reader has waved through, published by the binding whether or
   // not an approval is open.
   const alwaysAllow = useFeatureState(AGENT_ALWAYS_ALLOW_STATE);
+  // The table's own live view, published by `tableAgent`. A host that drives
+  // the panel from state of its own passes `contextInputs` and this is unused.
+  const viewState = useFeatureState(AGENT_VIEW_STATE);
 
   // Created once, inert until the mount effect connects it. Constructing a
   // store during render must not open a connection — a render can be thrown
   // away, and Strict Mode throws the first one away on purpose.
   const storeRef = useRef<ReturnType<typeof createTableAssistant> | null>(null);
   storeRef.current ??= createTableAssistant(
-    inputsOf(options, approval, alwaysAllow)
+    inputsOf(options, approval, alwaysAllow, viewState)
   );
   const store = storeRef.current;
 
@@ -226,7 +231,7 @@ export function useTableAssistant(
   // session resets the conversation, a new transport key reconnects, and an
   // updated catalog or a newly arrived approval does neither.
   useEffect(() => {
-    store.update(inputsOf(options, approval, alwaysAllow));
+    store.update(inputsOf(options, approval, alwaysAllow, viewState));
   });
 
   useEffect(() => {
@@ -295,8 +300,14 @@ export function useTableAssistant(
 function inputsOf(
   options: TableAssistantOptions,
   approval: AgentApprovalPending | null | undefined,
-  alwaysAllow: AgentAlwaysAllowState | null | undefined
+  alwaysAllow: AgentAlwaysAllowState | null | undefined,
+  viewState: AgentViewState | null | undefined
 ) {
+  // The host's own reader wins; otherwise the table's, which is what makes
+  // per-turn undo work without a host lifting page and sort into its state.
+  const contextInputs =
+    options.contextInputs ??
+    (viewState ? () => viewState.read() as AgentContextInputs : undefined);
   return {
     session: options.session,
     transport: options.transport,
@@ -305,7 +316,7 @@ function inputsOf(
     primarySuggestions: options.primarySuggestions,
     awaitingApproval: options.awaitingApproval,
     approval: approval ?? null,
-    ...(options.contextInputs ? { contextInputs: options.contextInputs } : {}),
+    ...(contextInputs ? { contextInputs } : {}),
     ...(alwaysAllow
       ? {
           alwaysAllowed: alwaysAllow.capabilities,

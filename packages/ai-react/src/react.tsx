@@ -7,6 +7,7 @@
 import {
   type AgentApply,
   type AgentCapabilityDefinition,
+  type AgentContextInputs,
   type AgentColumn,
   agentColumnsFromNeutral,
   agentFiltersFromDefs,
@@ -23,6 +24,7 @@ import {
   contractFingerprint,
   type CommitPolicy,
   createAgentSession,
+  assertAlwaysAllow,
   createApprovalMemory,
   displayProposals,
   mayAlwaysAllow,
@@ -52,8 +54,10 @@ import {
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
+  AGENT_VIEW_STATE,
   type AgentAlwaysAllowState,
   type AgentApprovalPending,
+  type AgentViewState,
   type FeatureProviderProps,
   featureStateKey,
   FeatureStateScope,
@@ -136,7 +140,18 @@ export interface TableAgentOptions {
    * approval rather than instead of it. Does nothing in a browser without the
    * API, and nothing on a server.
    */
-  readonly webmcp?: true | { readonly exposedTo?: readonly string[] };
+  readonly webmcp?:
+    | true
+    | {
+        readonly exposedTo?: readonly string[];
+        /**
+         * Told what was registered, and told `[]` when the registration goes.
+         *
+         * For a surface that lists the tools a browser agent can see. Nothing
+         * depends on it: a page that does not care never passes it.
+         */
+        readonly onRegister?: (names: readonly string[]) => void;
+      };
 }
 
 interface TableAgentFeature extends StaticTableFeature {
@@ -563,6 +578,55 @@ const BUILTIN_AGGREGATE_LABELS: Readonly<Record<string, string>> = {
 };
 
 /**
+ * The live view and filter catalog, in the shape the context builder takes.
+ *
+ * The same values the observation carries, read straight off the runtime so
+ * the caller does not have to rebuild an observation to get at them. What the
+ * table cannot answer for is simply absent, and the sanitized view names the
+ * gap rather than defaulting it.
+ */
+function viewInputsFromRuntime(
+  runtime: ReturnType<typeof useTableRuntime>,
+  options: TableAgentOptions
+): AgentContextInputs {
+  const view = runtime.view();
+  const query = view?.query;
+  const filters = agentFiltersFromDefs(
+    view?.filterDefs,
+    view?.filterRegistry,
+    options.columns
+  );
+  return {
+    ...(filters.length > 0 ? { filters } : {}),
+    view: {
+      ...(query?.page === undefined ? {} : { page: query.page }),
+      ...(query?.limit === undefined ? {} : { limit: query.limit }),
+      ...(query?.search === undefined ? {} : { search: query.search }),
+      ...(query?.sortBy ? { sortBy: query.sortBy } : {}),
+      ...(query?.sortDir ? { sortDir: query.sortDir } : {}),
+      ...(view?.groupingState?.groupBy
+        ? { groupBy: view.groupingState.groupBy }
+        : {}),
+      ...(query?.extra
+        ? { filters: query.extra as Readonly<Record<string, unknown>> }
+        : {}),
+      ...(view?.pinning?.columns
+        ? {
+            pinnedColumns: view.pinning.columns as Readonly<
+              Record<string, unknown>
+            >,
+          }
+        : {}),
+      ...(view?.pinning?.rows
+        ? {
+            pinnedRows: view.pinning.rows as Readonly<Record<string, unknown>>,
+          }
+        : {}),
+    },
+  };
+}
+
+/**
  * What a capability does to the table, from the live catalog.
  *
  * Read through the session rather than kept in a list here: the definition is
@@ -845,16 +909,21 @@ function TableAgentProvider({
   const webmcpVersion = webmcp ? contractVersion() : "";
   useEffect(() => {
     if (!webmcp) return;
+    const options = webmcp === true ? {} : webmcp;
     const registration = registerWebMcpTools(session, {
-      ...(webmcp === true ? {} : webmcp),
+      ...(options.exposedTo ? { exposedTo: options.exposedTo } : {}),
       onWarning: (warning) => {
         // A page whose policy forbids this is configured that way on purpose.
         // Saying so once beats throwing into a render.
         console.warn(`[adapttable] webmcp: ${warning.message}`);
       },
     });
+    options.onRegister?.(registration.names);
     return () => {
       registration.dispose();
+      // Said plainly rather than left standing: the tools are gone, and a
+      // surface listing them would otherwise show a set nothing can call.
+      options.onRegister?.([]);
     };
   }, [session, webmcp, webmcpVersion]);
   const waitForChrome = useRef<
@@ -975,9 +1044,22 @@ function TableAgentProvider({
     manifest: () => session.manifest(),
   };
 
+  // The live view, as the context builder wants it. Read through a stable
+  // callback rather than captured: the store calls it when a turn starts and
+  // again when it settles, and a value taken at render time would report that
+  // nothing moved between the two — which is exactly what per-turn undo has
+  // to be able to tell.
+  const viewStateValue = useRef<AgentViewState>({
+    read: () => viewInputsFromRuntime(runtimeRef.current, optionsRef.current),
+  }).current;
+
   useEffect(() => {
     options.bridge?.attach?.(session);
-  }, [options.bridge, session]);
+    // The reader is stable for the life of this feature, so a host takes it
+    // once and calls it whenever it needs the view — rather than being pushed
+    // a copy on every change and having to keep it in step.
+    options.bridge?.viewInputs?.(viewStateValue.read);
+  }, [options.bridge, session, viewStateValue]);
 
   const last = useRef<string>("");
   useLayoutEffect(() => {
@@ -1134,6 +1216,17 @@ function TableAgentProvider({
   // open — a reader goes looking for the list precisely when nothing is
   // waiting. `remembered` is read during render, and `revocations` is what
   // makes a revoke reach this render rather than the next approval.
+  // Checked once per contract, where the configuration first meets a live
+  // catalog. A key this table does not offer is a control the developer
+  // believes they shipped and the reader never sees, so it is an error rather
+  // than a silence — the same treatment `include` gets in the context builder.
+  useEffect(() => {
+    assertAlwaysAllow(
+      sharedApproval(optionsRef.current.approval).alwaysAllow,
+      session.catalog().map((entry) => entry.key)
+    );
+  }, [session, stamp]);
+
   const alwaysAllowValue = useMemo<AgentAlwaysAllowState>(
     () => ({
       capabilities: approvalMemory.current.remembered(contractVersion()),
@@ -1155,7 +1248,9 @@ function TableAgentProvider({
           stateKey={AGENT_ALWAYS_ALLOW_STATE}
           value={alwaysAllowValue}
         >
-          {children}
+          <FeatureStateScope stateKey={AGENT_VIEW_STATE} value={viewStateValue}>
+            {children}
+          </FeatureStateScope>
         </FeatureStateScope>
       </FeatureStateScope>
     </FeatureStateScope>

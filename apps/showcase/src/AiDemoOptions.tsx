@@ -37,6 +37,22 @@ export interface DemoActionApproval {
   readonly onChange: (policy: "required" | "automatic" | "inherit") => void;
 }
 
+/** One capability the reader can take away from the agent. */
+export interface DemoExclusion {
+  /** Capability key — stable, and never shown as the label. */
+  readonly key: string;
+  /** Reader-facing name. */
+  readonly label: string;
+  /** What taking it away costs, in one line. */
+  readonly help: string;
+  /** True when the agent may still use it. */
+  readonly offered: boolean;
+  readonly onChange: () => void;
+}
+
+/** How much of the contract a turn carries. */
+export type DemoContextProfile = "compact" | "full";
+
 /** Props for {@link AiDemoOptions}. */
 export interface AiDemoOptionsProps {
   readonly open: boolean;
@@ -52,6 +68,16 @@ export interface AiDemoOptionsProps {
   readonly rtl: boolean;
   readonly onRtl: (next: boolean) => void;
   readonly onReset: () => void;
+  /** How much of the contract each turn carries. */
+  readonly contextProfile: DemoContextProfile;
+  readonly onContextProfile: (next: DemoContextProfile) => void;
+  /** Capabilities the reader can take away from the agent. */
+  readonly exclusions: readonly DemoExclusion[];
+  /** Whether the table registers itself as browser tools. */
+  readonly webmcp: boolean;
+  readonly onWebmcp: (next: boolean) => void;
+  /** Whether this browser has the API at all. */
+  readonly webmcpAvailable: boolean;
 }
 
 const PRESENTATIONS: readonly {
@@ -73,6 +99,23 @@ const PRESENTATIONS: readonly {
     value: "modal",
     label: "In a dialog",
     help: "Reviewed in a dialog over the page. Nothing else is reachable until you answer.",
+  },
+];
+
+const PROFILES: readonly {
+  readonly value: DemoContextProfile;
+  readonly label: string;
+  readonly help: string;
+}[] = [
+  {
+    value: "compact",
+    label: "Compact",
+    help: "Every capability by name, with the full instructions only for the ones this turn is likely to need. The rest are asked for when they are.",
+  },
+  {
+    value: "full",
+    label: "Full",
+    help: "Every capability with its whole guide, up front. Larger, and nothing is deferred.",
   },
 ];
 
@@ -128,6 +171,12 @@ export function AiDemoOptions({
   rtl,
   onRtl,
   onReset,
+  contextProfile,
+  onContextProfile,
+  exclusions,
+  webmcp,
+  onWebmcp,
+  webmcpAvailable,
 }: Readonly<AiDemoOptionsProps>) {
   const ref = useRef<HTMLDialogElement>(null);
 
@@ -289,6 +338,80 @@ export function AiDemoOptions({
               </span>
             </label>
           ))}
+        </Section>
+
+        <Section title="What the agent is told">
+          <p className="ai-opts__help">
+            The contract each turn carries. Compact names everything and
+            explains what this turn needs; the rest is asked for on demand.
+          </p>
+          {PROFILES.map((option) => (
+            <label key={option.value} className="ai-opts__row">
+              <input
+                type="radio"
+                name="ai-context-profile"
+                aria-label={option.label}
+                value={option.value}
+                checked={contextProfile === option.value}
+                data-testid={`ai-profile-${option.value}`}
+                onChange={() => {
+                  onContextProfile(option.value);
+                }}
+              />
+              <span>
+                <span className="ai-opts__label">{option.label}</span>
+                <span className="ai-opts__hint">{option.help}</span>
+              </span>
+            </label>
+          ))}
+        </Section>
+
+        <Section title="What the agent may do">
+          <p className="ai-opts__help">
+            Taking one away removes it from the contract and from the
+            suggestions — and leaves the table's own control exactly where it
+            was, for the person using it.
+          </p>
+          {exclusions.map((exclusion) => (
+            <label key={exclusion.key} className="ai-opts__row">
+              <input
+                type="checkbox"
+                aria-label={exclusion.label}
+                checked={exclusion.offered}
+                data-testid={`ai-offer-${exclusion.key}`}
+                onChange={exclusion.onChange}
+              />
+              <span>
+                <span className="ai-opts__label">{exclusion.label}</span>
+                <span className="ai-opts__hint">{exclusion.help}</span>
+              </span>
+            </label>
+          ))}
+        </Section>
+
+        <Section title="Browser tools">
+          <label className="ai-opts__row">
+            <input
+              type="checkbox"
+              aria-label="Offer this table to a browser agent"
+              checked={webmcp && webmcpAvailable}
+              disabled={!webmcpAvailable}
+              data-testid="ai-toggle-webmcp"
+              onChange={() => {
+                onWebmcp(!webmcp);
+              }}
+            />
+            <span>
+              <span className="ai-opts__label">
+                Offer this table to a browser agent
+              </span>
+              <span className="ai-opts__hint">
+                {webmcpAvailable
+                  ? "Registers the permitted contract as WebMCP tools. The same executor, the same approvals — a browser agent gets no more than this page's assistant does."
+                  : "This browser has no model-context API, so there is nothing to register. The page works exactly the same without it."}
+              </span>
+            </span>
+          </label>
         </Section>
 
         <Section title="Language and direction">

@@ -419,3 +419,55 @@ describe("the floating window", () => {
     ).not.toBeNull();
   });
 });
+
+describe("the dictation language chooser", () => {
+  /** Dictation that offers a choice, so the chip has something to choose. */
+  const speech = {
+    available: true,
+    state: { status: "idle" as const, language: "en-US", interim: "" },
+    languages: ["en-US", "ar-SA"],
+    start: () => undefined,
+    stop: () => undefined,
+    setLanguage: vi.fn(),
+  };
+
+  it("fills the slot with this kit's own chooser", () => {
+    mount(
+      <TableAssistant
+        assistant={view()}
+        labels={defaultLabels}
+        speech={speech}
+        open
+        onOpenChange={() => undefined}
+      />
+    );
+
+    const chip = document.querySelector(
+      '[data-adapttable-part="assistant-voice-language"]'
+    );
+    expect(chip).not.toBeNull();
+    // The chrome names it; the kit draws it.
+    expect(
+      document.querySelector('[aria-label="Dictation language"]')
+    ).not.toBeNull();
+  });
+
+  it("draws no chip when there is only one language to choose", () => {
+    mount(
+      <TableAssistant
+        assistant={view()}
+        labels={defaultLabels}
+        speech={{ ...speech, languages: ["en-US"] }}
+        open
+        onOpenChange={() => undefined}
+      />
+    );
+
+    // A question with one answer is slower than typing.
+    expect(
+      document.querySelector(
+        '[data-adapttable-part="assistant-voice-language"]'
+      )
+    ).toBeNull();
+  });
+});

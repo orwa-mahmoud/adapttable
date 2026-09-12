@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import { resolveApproval, sharedApproval } from "./approvalConfig";
 import {
+  ApprovalAlwaysAllowError,
+  assertAlwaysAllow,
   closeTransaction,
   createApprovalMemory,
   mayAlwaysAllow,
@@ -221,5 +223,32 @@ describe("taking an allowance back", () => {
       memory.revoke("rows.add");
     }).not.toThrow();
     expect(memory.remembered("v1")).toEqual(["edit.cells"]);
+  });
+});
+
+describe("checking an always-allow list against the table", () => {
+  const offered = ["view.setPage", "edit.cells", "orders.reconcile"];
+
+  it("accepts a built-in key and a custom capability's own key alike", () => {
+    // A custom capability's key is the host's to choose, which is why the
+    // list is typed by what a key is rather than by the built-in union.
+    expect(() => {
+      assertAlwaysAllow(["edit.cells", "orders.reconcile"], offered);
+    }).not.toThrow();
+  });
+
+  it("refuses a key this table does not offer, and names it", () => {
+    expect(() => {
+      assertAlwaysAllow(["edit.cell", "rows.add"], offered);
+    }).toThrow(ApprovalAlwaysAllowError);
+    expect(() => {
+      assertAlwaysAllow(["edit.cell"], offered);
+    }).toThrow(/"edit.cell".*not available/);
+  });
+
+  it("says nothing about an empty list", () => {
+    expect(() => {
+      assertAlwaysAllow([], []);
+    }).not.toThrow();
   });
 });

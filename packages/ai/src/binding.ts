@@ -14,6 +14,7 @@
  */
 import type { AgentApprovalProposal, NeutralTable } from "@adapttable/core";
 
+import type { AgentContextInputs } from "./context";
 import type {
   AgentManifest,
   AgentSession,
@@ -42,6 +43,15 @@ export interface TableAgentBridge<TPending = unknown> {
    * thinking.
    */
   readonly approvals?: (pending: TPending | null) => void;
+  /**
+   * Called once with a reader for the table's live view and filter catalog.
+   *
+   * A reader rather than a value, and called once rather than per change: a
+   * panel or an inspector outside the table calls it when it needs the view,
+   * and gets what the table is showing at that moment. A value pushed on every
+   * change would be a second copy of the table's state to keep in step.
+   */
+  readonly viewInputs?: (read: () => AgentContextInputs) => void;
 }
 
 /**

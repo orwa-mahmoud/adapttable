@@ -60,6 +60,25 @@ export const AGENT_ALWAYS_ALLOW_STATE =
   featureStateKey<AgentAlwaysAllowState | null>("agent-always-allow");
 
 /**
+ * The live view and filter data the manifest does not carry.
+ *
+ * A reader rather than a value: it is read when a turn starts and again when
+ * it settles, and a value captured a render earlier would report that nothing
+ * moved — which is precisely what per-turn undo has to be able to tell.
+ *
+ * @public
+ */
+export interface AgentViewState {
+  /** Read the table's live view and filter catalog, right now. */
+  readonly read: () => unknown;
+}
+
+/** Feature-state key for that reader. @public */
+export const AGENT_VIEW_STATE = featureStateKey<AgentViewState | null>(
+  "agent-view-state"
+);
+
+/**
  * Kit button the approval chrome calls.
  *
  * @public

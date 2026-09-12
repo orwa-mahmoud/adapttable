@@ -882,3 +882,190 @@ describe("a write parked behind a closed panel", () => {
     expect(reject).not.toHaveBeenCalled();
   });
 });
+
+describe("a question the backend asked", () => {
+  const question = {
+    id: "q-1",
+    question: "Which quarter?",
+    options: [
+      { id: "q3", label: "Q3" },
+      { id: "q4", label: "Q4" },
+    ],
+    allowFreeText: false,
+  };
+
+  it("offers each choice as a chip and answers with the one pressed", () => {
+    const answer = vi.fn();
+    mount({ assistant: view({ pendingQuestion: question, answer }) });
+
+    const chips = parts("assistant-question-option");
+    expect(chips).toHaveLength(2);
+    fireEvent.click(chips[1] as HTMLElement);
+
+    expect(answer).toHaveBeenCalledWith({ optionId: "q4" });
+  });
+
+  it("offers no typed answer when the backend accepts only a choice", () => {
+    mount({ assistant: view({ pendingQuestion: question, answer: vi.fn() }) });
+
+    // An input beside a closed set invites an answer that will be refused.
+    expect(part("assistant-question-input")).toBeNull();
+  });
+
+  it("takes a typed answer when the backend said it would", () => {
+    const answer = vi.fn();
+    mount({
+      assistant: view({
+        pendingQuestion: {
+          ...question,
+          options: undefined,
+          allowFreeText: true,
+        },
+        answer,
+      }),
+    });
+
+    const input = part("assistant-question-input") as HTMLTextAreaElement;
+    fireEvent.change(input, { target: { value: "  Q4  " } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(answer).toHaveBeenCalledWith({ text: "Q4" });
+  });
+
+  it("leaves Shift+Enter and an IME composition alone", () => {
+    const answer = vi.fn();
+    mount({
+      assistant: view({
+        pendingQuestion: {
+          ...question,
+          options: undefined,
+          allowFreeText: true,
+        },
+        answer,
+      }),
+    });
+
+    const input = part("assistant-question-input") as HTMLTextAreaElement;
+    fireEvent.change(input, { target: { value: "Q4" } });
+    fireEvent.keyDown(input, { key: "Enter", shiftKey: true });
+    fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+
+    expect(answer).not.toHaveBeenCalled();
+  });
+
+  it("draws nothing when the host cannot answer one", () => {
+    mount({ assistant: view({ pendingQuestion: question }) });
+
+    expect(part("assistant-question")).toBeNull();
+  });
+});
+
+describe("putting a turn back", () => {
+  const message = {
+    id: "m-1",
+    role: "assistant" as const,
+    text: "Sorted by total.",
+  };
+
+  it("offers Undo on the turn the offer belongs to, and nowhere else", () => {
+    const undoTurn = vi.fn();
+    mount({
+      assistant: view({
+        messages: [{ id: "m-0", role: "user", text: "sort it" }, message],
+        undo: { messageId: "m-1", available: true },
+        undoTurn,
+      }),
+    });
+
+    expect(parts("assistant-undo")).toHaveLength(1);
+    fireEvent.click(part("assistant-undo-button") as HTMLElement);
+    expect(undoTurn).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables it and says why once the table has moved", () => {
+    const undoTurn = vi.fn();
+    mount({
+      assistant: view({
+        messages: [message],
+        undo: {
+          messageId: "m-1",
+          available: false,
+          blockedCode: "table-moved",
+        },
+        undoTurn,
+      }),
+    });
+
+    const button = part("assistant-undo-button") as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+    expect(part("assistant-undo-reason")?.textContent).toBe(
+      "The table has changed since this ran."
+    );
+  });
+
+  it("offers nothing when no turn moved the table", () => {
+    mount({ assistant: view({ messages: [message] }) });
+
+    expect(part("assistant-undo")).toBeNull();
+  });
+});
+
+describe("a reply still arriving", () => {
+  it("shows what has landed, marked provisional", () => {
+    mount({
+      assistant: view({
+        messages: [
+          {
+            id: "m-1",
+            role: "assistant",
+            text: "",
+            partialText: "Sorting by",
+          },
+        ],
+      }),
+    });
+
+    const text = part("assistant-message-text");
+    expect(text?.textContent).toBe("Sorting by");
+    expect(text?.dataset.streaming).toBe("true");
+  });
+
+  it("shows the settled reply once it lands, unmarked", () => {
+    mount({
+      assistant: view({
+        messages: [{ id: "m-1", role: "assistant", text: "Sorted by total." }],
+      }),
+    });
+
+    const text = part("assistant-message-text");
+    expect(text?.textContent).toBe("Sorted by total.");
+    expect(text?.dataset.streaming).toBeUndefined();
+  });
+});
+
+describe("what the reader stopped being asked about", () => {
+  it("lists each one with a way to start asking again", () => {
+    const revokeAlwaysAllow = vi.fn();
+    mount({
+      assistant: view({
+        alwaysAllowed: ["edit.cells"],
+        revokeAlwaysAllow,
+      }),
+    });
+
+    expect(parts("assistant-always-allowed-item")).toHaveLength(1);
+    const control = part("assistant-always-allowed-revoke") as HTMLElement;
+    // The key is a developer detail; the reader sees what it means.
+    expect(control.textContent).toBe("editing cells");
+    fireEvent.click(control);
+    expect(revokeAlwaysAllow).toHaveBeenCalledWith("edit.cells");
+  });
+
+  it("draws nothing when the reader has waved nothing through", () => {
+    mount({
+      assistant: view({ alwaysAllowed: [], revokeAlwaysAllow: vi.fn() }),
+    });
+
+    expect(part("assistant-always-allowed")).toBeNull();
+  });
+});

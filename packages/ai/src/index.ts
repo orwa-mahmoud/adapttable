@@ -22,7 +22,9 @@ export {
 } from "./approvalConfig";
 export {
   type AlwaysAllowInput,
+  ApprovalAlwaysAllowError,
   type ApprovalMemory,
+  assertAlwaysAllow,
   type ApprovalTransaction,
   closeTransaction,
   createApprovalMemory,

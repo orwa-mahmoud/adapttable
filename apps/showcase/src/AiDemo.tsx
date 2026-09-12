@@ -12,6 +12,7 @@
  * revision, so what the reader sees happen to the rows is the real thing.
  */
 import type {
+  AgentContextInputs,
   AgentManifest,
   AgentSession,
   AssistantSuggestion,
@@ -41,10 +42,13 @@ import {
 import { createPortal } from "react-dom";
 
 import { AiConnectDialog, type AiConnection } from "./AiBackendConnect";
+import { AiContextInspector } from "./AiContextInspector";
 import {
   AiDemoOptions,
   type DemoActionApproval,
+  type DemoContextProfile,
   type DemoEditingMode,
+  type DemoExclusion,
 } from "./AiDemoOptions";
 import {
   applyHostFilters,
@@ -390,6 +394,10 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     bottom: [],
   });
   const [session, setSession] = useState<AgentSession | null>(null);
+  // Handed over once by `tableAgent`, which publishes it inside the table —
+  // below this component, so feature state cannot reach it from here. Held in
+  // a ref because it is stable and calling it is what makes it current.
+  const viewInputs = useRef<(() => AgentContextInputs) | null>(null);
   // Held in state on purpose: the table republishes it whenever its wiring
   // changes, and that is what makes the developer panel re-read after the
   // table settles rather than one render early.
@@ -422,7 +430,14 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [actionPolicy, setActionPolicy] = useState<
     Readonly<Record<string, "required" | "automatic">>
   >({});
-  const [selectedKey, setSelectedKey] = useState("view.setFilters");
+  // Which capabilities the agent is offered, and how much it is told. Both
+  // are the reader's to change in the drawer, and both visibly change what the
+  // assistant suggests — which is the point of putting them there.
+  const [excluded, setExcluded] = useState<readonly string[]>([]);
+  const [contextProfile, setContextProfile] =
+    useState<DemoContextProfile>("compact");
+  const [webmcp, setWebmcp] = useState(false);
+  const [webmcpNames, setWebmcpNames] = useState<readonly string[]>([]);
   // Rebuilt from the live rows every render, so the bulk example proposes
   // the salaries actually on screen rather than the ones it was written
   // against.
@@ -461,7 +476,18 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         // Policy and presentation are separate questions, and the drawer
         // asks them separately. Turning cell editing off removes the action
         // rather than the approval, so the policy stays as the reader set it.
-        approval: { policy: "writes", presentation },
+        approval: {
+          policy: "writes",
+          presentation,
+          // Opt-in, and only for the one write where waving it through is a
+          // reasonable thing for a reader to want. Deleting is never on this
+          // list, and the neutral rule refuses it even if it were.
+          alwaysAllow: ["edit.cells"],
+        },
+        // What the reader took away in the drawer. The table's own controls
+        // are untouched: a person can still filter a table whose agent may not.
+        excludeCapabilities: excluded,
+        ...(webmcp ? { webmcp: { onRegister: setWebmcpNames } } : {}),
         // Staging needs the batch save path. Cell and row modes apply on
         // approve, so the reader is not dropped into always-open fields.
         commit: toggles.editingMode === "batch" ? commit : "immediate",
@@ -500,6 +526,11 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         bridge: {
           attach: setSession,
           publish: setManifest,
+          // The inspector reads the same live view a turn is judged against,
+          // rather than keeping a second copy of page, sort and filters.
+          viewInputs: (read) => {
+            viewInputs.current = read;
+          },
           // `execute` does not return while the approval sits above the
           // table, so without this the panel would show "Working…" at a
           // turn that is actually waiting on the reader.
@@ -547,7 +578,16 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       );
     }
     return [...editing, ...next];
-  }, [factories, pinnedRowIds, toggles, presentation, commit, locale]);
+  }, [
+    factories,
+    pinnedRowIds,
+    toggles,
+    presentation,
+    commit,
+    locale,
+    excluded,
+    webmcp,
+  ]);
 
   const assistant = useTableAssistant({
     session: session ?? undefined,
@@ -601,12 +641,59 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   }, [assistant]);
 
   const catalog = manifest ? (session?.catalog() ?? []) : [];
-  const selected = catalog.some((entry) => entry.key === selectedKey)
-    ? selectedKey
-    : (catalog[0]?.key ?? "");
-  const schema = selected
-    ? JSON.stringify(session?.describe(selected).input, null, 2)
-    : "";
+
+  /** Take one capability away from the agent, or give it back. */
+  const toggleOffer = useCallback((key: string) => {
+    setExcluded((current) =>
+      current.includes(key)
+        ? current.filter((entry) => entry !== key)
+        : [...current, key]
+    );
+  }, []);
+
+  // Three the reader can see the consequence of: the suggestion disappears,
+  // and the table's own control keeps working exactly as it did.
+  const exclusions: readonly DemoExclusion[] = useMemo(
+    () =>
+      [
+        {
+          key: "view.setFilters",
+          label: "Filter the table",
+          help: "Off: the filter suggestions go, and you can still filter it yourself.",
+        },
+        {
+          key: "rows.read",
+          label: "Read rows",
+          help: "Off: it can change the view but can no longer answer questions about what is in it.",
+        },
+        {
+          key: "edit.cells",
+          label: "Edit cells",
+          help: "Off: no write ever reaches the approval, because none is ever proposed.",
+        },
+      ].map((entry) => ({
+        ...entry,
+        offered: !excluded.includes(entry.key),
+        onChange: () => {
+          toggleOffer(entry.key);
+        },
+      })),
+    [excluded, toggleOffer]
+  );
+
+  // Read once: whether this browser has the API at all decides whether the
+  // switch is a choice or an explanation.
+  const webmcpAvailable = useMemo(
+    () =>
+      typeof document !== "undefined" &&
+      "modelContext" in (document as { modelContext?: unknown }),
+    []
+  );
+
+  // The same live view the assistant's turns are judged against, published by
+  // `tableAgent`. The inspector reads it rather than keeping a copy, so what
+  // it shows is what a backend would actually receive.
+  const inspectorInputs = useCallback(() => viewInputs.current?.() ?? {}, []);
 
   // Generated from what the table actually wires right now, so turning a
   // feature off removes its row rather than leaving a dead switch behind.
@@ -665,14 +752,14 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
             <Segmented
               label="Conversation source"
               value={
-                connection.mode === "backend" || settingsOpen
+                connection.mode !== "simulated" || settingsOpen
                   ? "backend"
                   : "simulated"
               }
               onChange={(next) => {
                 if (next === "simulated") {
                   setSettingsOpen(false);
-                  if (connection.mode === "backend") {
+                  if (connection.mode !== "simulated") {
                     setConnection({
                       mode: "simulated",
                       transport: scripted,
@@ -692,9 +779,9 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 {
                   value: "backend",
                   label:
-                    connection.mode === "backend"
-                      ? "Connected"
-                      : "Try it for real",
+                    connection.mode === "simulated"
+                      ? "Try it for real"
+                      : "Connected",
                   testId: "ai-demo-try-real",
                 },
               ]}
@@ -752,6 +839,12 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           rtl={rtl}
           onRtl={setRtl}
           onReset={reset}
+          contextProfile={contextProfile}
+          onContextProfile={setContextProfile}
+          exclusions={exclusions}
+          webmcp={webmcp}
+          onWebmcp={setWebmcp}
+          webmcpAvailable={webmcpAvailable}
         />
       </header>
 
@@ -817,57 +910,14 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           documentation column beside the integration example. A portal rather
           than a second copy: two would mean two subscriptions to one session. */}
       <InspectorPortal>
-        <section className="ai-demo__dev" data-testid="ai-inspector">
-          <h3 className="ai-demo__dev-title">Developer inspector</h3>
-          <p className="ai-demo__revision">
-            Revision {manifest?.viewRevision ?? "—"} · {catalog.length}{" "}
-            capabilities wired
-          </p>
-          <label className="ai-demo__pick">
-            <span>Capability</span>
-            <select
-              data-testid="ai-catalog"
-              value={selected}
-              onChange={(event) => {
-                setSelectedKey(event.target.value);
-              }}
-            >
-              {catalog.length === 0 ? (
-                <option value="">No capabilities wired</option>
-              ) : null}
-              {catalog.map((entry) => (
-                <option key={entry.key} value={entry.key}>
-                  {entry.key}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="ai-demo__schema-wrap">
-            <button
-              type="button"
-              className="ai-demo__copy"
-              data-testid="ai-schema-copy"
-              onClick={() => {
-                void navigator.clipboard?.writeText(schema);
-              }}
-            >
-              Copy
-            </button>
-            <pre
-              className="ai-demo__schema"
-              data-testid="ai-schema"
-              dir="ltr"
-              aria-label={`Schema for ${selected || "no capability"}`}
-            >
-              {schema || "Attach a session to inspect a capability."}
-            </pre>
-          </div>
-          <p className="ai-demo__refs">
-            <a href={`${DOCS_URL}ai-http/`}>Connect a backend</a>
-            <a href={`${DOCS_URL}ai-integrations/`}>AI integrations</a>
-            <a href={`${DOCS_URL}agent-capabilities/`}>Capabilities</a>
-          </p>
-        </section>
+        <AiContextInspector
+          session={session}
+          manifest={manifest}
+          contextInputs={inspectorInputs}
+          profile={contextProfile}
+          webmcpNames={webmcpNames}
+          docsUrl={DOCS_URL}
+        />
       </InspectorPortal>
     </div>
   );
