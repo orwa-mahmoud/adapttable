@@ -19,17 +19,38 @@ interface FakeRecognition {
 }
 
 const scope = globalThis as Record<string, unknown>;
-const saved = { ...scope };
+
+const PATCHED = [
+  "SpeechRecognition",
+  "webkitSpeechRecognition",
+  "MediaRecorder",
+  "navigator",
+  "localStorage",
+] as const;
+
+const saved = new Map<string, PropertyDescriptor | undefined>(
+  PATCHED.map((key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)])
+);
+
+/**
+ * Install a global the browser owns.
+ *
+ * `navigator` is a getter-only property on the real global, so a plain
+ * assignment throws. Defining it is how a test stands in for one, and how it
+ * puts the real one back afterwards.
+ */
+function setGlobal(key: string, value: unknown): void {
+  Object.defineProperty(globalThis, key, {
+    value,
+    configurable: true,
+    writable: true,
+  });
+}
 
 afterEach(() => {
-  for (const key of [
-    "SpeechRecognition",
-    "webkitSpeechRecognition",
-    "MediaRecorder",
-    "navigator",
-    "localStorage",
-  ]) {
-    if (key in saved) scope[key] = saved[key];
+  for (const key of PATCHED) {
+    const descriptor = saved.get(key);
+    if (descriptor) Object.defineProperty(globalThis, key, descriptor);
     else delete scope[key];
   }
 });
@@ -37,7 +58,7 @@ afterEach(() => {
 /** A recognizer the test drives by hand. */
 function installRecognizer(): { live: () => FakeRecognition | undefined } {
   let made: FakeRecognition | undefined;
-  scope.SpeechRecognition = function Recognition(this: FakeRecognition) {
+  setGlobal("SpeechRecognition", function Recognition(this: FakeRecognition) {
     this.lang = "";
     this.continuous = false;
     this.interimResults = false;
@@ -48,7 +69,7 @@ function installRecognizer(): { live: () => FakeRecognition | undefined } {
     this.onerror = null;
     this.onend = null;
     made = this;
-  } as unknown as new () => FakeRecognition;
+  } as unknown as new () => FakeRecognition);
   return { live: () => made };
 }
 
@@ -166,13 +187,15 @@ describe("recording for a backend", () => {
 
   it("hands the clip over once, with its duration", async () => {
     const track = { stop: vi.fn() };
-    scope.navigator = {
+    setGlobal("navigator", {
       mediaDevices: {
         getUserMedia: () => Promise.resolve({ getTracks: () => [track] }),
       },
-    };
+    });
     let live: Record<string, unknown> | undefined;
-    scope.MediaRecorder = function Recorder(this: Record<string, unknown>) {
+    setGlobal("MediaRecorder", function Recorder(
+      this: Record<string, unknown>
+    ) {
       this.state = "recording";
       this.mimeType = "audio/webm;codecs=opus";
       this.start = vi.fn();
@@ -182,7 +205,7 @@ describe("recording for a backend", () => {
       this.ondataavailable = null;
       this.onstop = null;
       live = this;
-    } as unknown as new () => unknown;
+    } as unknown as new () => unknown);
 
     const onClip = vi.fn();
     const input = createSpeechInput({ mode: "backend", onClip });
@@ -210,12 +233,12 @@ describe("recording for a backend", () => {
   });
 
   it("reports a refused microphone", async () => {
-    scope.navigator = {
+    setGlobal("navigator", {
       mediaDevices: { getUserMedia: () => Promise.reject(new Error("no")) },
-    };
-    scope.MediaRecorder = function Recorder() {
+    });
+    setGlobal("MediaRecorder", function Recorder() {
       /* never reached */
-    } as unknown as new () => unknown;
+    } as unknown as new () => unknown);
 
     const input = createSpeechInput({ mode: "backend" });
     input.start();
@@ -258,24 +281,24 @@ describe("disposal", () => {
 describe("remembering a language", () => {
   it("keeps and reads a choice", () => {
     const store = new Map<string, string>();
-    scope.localStorage = {
+    setGlobal("localStorage", {
       getItem: (key: string) => store.get(key) ?? null,
       setItem: (key: string, value: string) => store.set(key, value),
-    };
+    });
 
     rememberLanguage("de-DE");
     expect(readRememberedLanguage()).toBe("de-DE");
   });
 
   it("survives a browser that refuses storage", () => {
-    scope.localStorage = {
+    setGlobal("localStorage", {
       getItem: () => {
         throw new Error("blocked");
       },
       setItem: () => {
         throw new Error("blocked");
       },
-    };
+    });
 
     // Refusing to store a preference must not break dictation.
     expect(() => {

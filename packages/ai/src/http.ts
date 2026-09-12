@@ -948,7 +948,14 @@ let transportSeq = 0;
  */
 function connectionIdOf(options: AgentHttpClientOptions): string {
   if (options.connectionId) return options.connectionId;
-  const transport: object | undefined = options.request ?? options.fetch;
+  const supplied: unknown = options.request ?? options.fetch;
+  // Only an object can key a WeakMap. A host that passed something else has a
+  // real problem, and the transport guard says so in words — reaching it
+  // matters more than identifying a connection that will never open.
+  const transport =
+    typeof supplied === "function" || (typeof supplied === "object" && supplied)
+      ? (supplied as object)
+      : undefined;
   if (!transport) return `endpoint:${options.endpoint}`;
   let id = transportIds.get(transport);
   if (id === undefined) {

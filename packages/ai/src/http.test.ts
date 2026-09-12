@@ -1284,22 +1284,26 @@ describe("createAgentHttpClient", () => {
         throw new Error("read boom");
       },
     });
-    await expect(
-      runAgentHttpTurn(brokenRead, "Who?", {
-        endpoint: "https://agent.example/turn",
-        request: () =>
-          Promise.resolve({
-            schemaVersion: AGENT_SCHEMA_VERSION,
-            toolCalls: [
-              {
-                id: "r1",
-                name: "read",
-                args: { offset: 0, limit: 1, columns: ["name"] },
-              },
-            ],
-          }),
-      })
-    ).rejects.toThrow(/read boom/);
+    // A read the host could not answer is reported back to the backend as
+    // that call's error, not thrown: the turn is still a turn, and whatever
+    // else it did is still reported. The backend here keeps asking, so the
+    // turn ends unresolved rather than silently.
+    const failedRead = await runAgentHttpTurn(brokenRead, "Who?", {
+      endpoint: "https://agent.example/turn",
+      request: () =>
+        Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          toolCalls: [
+            {
+              id: "r1",
+              name: "read",
+              args: { offset: 0, limit: 1, columns: ["name"] },
+            },
+          ],
+        }),
+    });
+    expect(failedRead.results).toEqual([]);
+    expect(failedRead.unresolved?.code).toBeDefined();
 
     const already = new AbortController();
     already.abort();

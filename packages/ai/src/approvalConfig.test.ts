@@ -15,6 +15,7 @@ describe("the shared configuration", () => {
     expect(sharedApproval(undefined)).toEqual({
       policy: "writes",
       presentation: "widget",
+      alwaysAllow: [],
     });
   });
 
@@ -22,6 +23,7 @@ describe("the shared configuration", () => {
     expect(sharedApproval("destructive")).toEqual({
       policy: "destructive",
       presentation: "widget",
+      alwaysAllow: [],
     });
     expect(sharedApproval("never").policy).toBe("never");
   });
@@ -30,10 +32,12 @@ describe("the shared configuration", () => {
     expect(sharedApproval({ presentation: "modal" })).toEqual({
       policy: "writes",
       presentation: "modal",
+      alwaysAllow: [],
     });
     expect(sharedApproval({ policy: "never" })).toEqual({
       policy: "never",
       presentation: "widget",
+      alwaysAllow: [],
     });
   });
 });
@@ -50,13 +54,13 @@ describe("what one action may override", () => {
   it("keeps the shared presentation when only the policy is overridden", () => {
     expect(
       resolveApproval(shared, { approval: { policy: "required" } })
-    ).toEqual({ policy: "writes", presentation: "modal" });
+    ).toEqual({ policy: "writes", presentation: "modal", alwaysAllow: [] });
   });
 
   it("keeps the shared policy when only the presentation is overridden", () => {
     expect(
       resolveApproval(shared, { approval: { presentation: "table" } })
-    ).toEqual({ policy: "never", presentation: "table" });
+    ).toEqual({ policy: "never", presentation: "table", alwaysAllow: [] });
   });
 
   it("takes both when both are given", () => {
@@ -64,7 +68,7 @@ describe("what one action may override", () => {
       resolveApproval(shared, {
         approval: { policy: "automatic", presentation: "widget" },
       })
-    ).toEqual({ policy: "never", presentation: "widget" });
+    ).toEqual({ policy: "never", presentation: "widget", alwaysAllow: [] });
   });
 
   it("can require approval on one action of an otherwise automatic table", () => {
