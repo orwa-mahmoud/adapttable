@@ -272,6 +272,28 @@ export interface AssistantTransportReply {
    * without the sentence naming what moved.
    */
   readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
+  /**
+   * Why the turn stopped short, when it did.
+   *
+   * It travels beside `results` rather than instead of them, so a host can
+   * say that the remaining work was not applied and offer a retry without
+   * hiding what already ran.
+   */
+  readonly unresolved?: AssistantUnresolved;
+}
+
+/**
+ * A turn that ended with work still pending.
+ *
+ * @public
+ */
+export interface AssistantUnresolved {
+  /** Stable machine code. */
+  readonly code: string;
+  /** What happened, in one sentence. */
+  readonly message: string;
+  /** Capability keys that were proposed but never ran. */
+  readonly pending: readonly string[];
 }
 
 /**

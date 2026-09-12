@@ -238,53 +238,51 @@ function writeJson(res: ServerResponse, status: number, body: unknown): void {
 
 function userPrompt(request: AgentHttpRequest): string {
   const parts = [request.message ?? ""];
-  if (request.descriptions?.length) {
+  if (request.pendingCalls?.length) {
     parts.push(
-      "Requested guides:",
+      "You already proposed these calls for this phase. Send the complete",
+      "plan you want run — what you send replaces this, it is not added to it:",
       JSON.stringify(
-        request.descriptions.map((guide) => ({
-          key: guide.key,
-          guide: guide.guide,
-          input: guide.input,
+        request.pendingCalls.map((call) => ({
+          name: call.name,
+          args: call.args,
         }))
       )
     );
   }
-  if (request.rows?.length) {
-    parts.push("Requested row windows:", JSON.stringify(request.rows));
-  }
-  if (request.results?.length) {
-    parts.push(
-      "Action receipts:",
-      JSON.stringify(
-        request.results.map((result) => ({
-          ok: result.ok,
-          error: result.error,
-          idempotencyKey: result.idempotencyKey,
-        }))
-      )
-    );
+  if (request.toolResults?.length) {
+    parts.push("Tool results:", JSON.stringify(request.toolResults));
   }
   return parts.join("\n\n");
 }
 
-function asReply(raw: string, turnNonce: string): AgentHttpResponse {
+/**
+ * Turn the model's JSON into a reply, and issue the call ids ourselves.
+ *
+ * The ids are derived from the turn and phase the frontend named, plus each
+ * call's position — never minted at random per exchange, which is what used to
+ * give the same repeated call a fresh identity every round and turn one
+ * intention into two writes. A model that repeats itself now repeats the same
+ * ids, and the frontend recognises them.
+ */
+function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
   const body: unknown = JSON.parse(raw);
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     throw new TypeError("provider returned a non-object");
   }
   const record = body as Record<string, unknown>;
-  const actions = Array.isArray(record.actions)
-    ? record.actions.map((action, index) => {
+  const turnId = request.turnId ?? "turn";
+  const phaseId = request.phaseId ?? 0;
+  const toolCalls = Array.isArray(record.toolCalls)
+    ? record.toolCalls.map((call, index) => {
         const item =
-          action && typeof action === "object" && !Array.isArray(action)
-            ? (action as Record<string, unknown>)
+          call && typeof call === "object" && !Array.isArray(call)
+            ? (call as Record<string, unknown>)
             : {};
-        const key = typeof item.key === "string" ? item.key : "unknown";
         return {
-          key,
+          id: `${turnId}:${String(phaseId)}:${String(index)}`,
+          name: typeof item.name === "string" ? item.name : "unknown",
           args: item.args ?? {},
-          idempotencyKey: `${turnNonce}:${String(index)}`,
           ...(typeof item.expectedRevision === "number"
             ? { expectedRevision: item.expectedRevision }
             : {}),
@@ -294,10 +292,10 @@ function asReply(raw: string, turnNonce: string): AgentHttpResponse {
   return parseAgentHttpResponse({
     schemaVersion: AGENT_HTTP_SCHEMA,
     text: typeof record.text === "string" ? record.text : "",
-    actions,
-    needs: record.needs,
-    // The table already applied the actions. A second model call that only
-    // says "done" is the confirmation loop the reader does not want.
+    toolCalls,
+    askUser: record.askUser,
+    // The table already ran the calls. A second model call that only says
+    // "done" is the confirmation loop the reader does not want.
     continueWithResults: false,
   });
 }
@@ -332,7 +330,7 @@ export async function handleExampleAgentTurn(
     user: userPrompt(request),
     signal,
   });
-  return asReply(raw, randomBytes(8).toString("hex"));
+  return asReply(raw, request);
 }
 
 async function completeOpenAI(

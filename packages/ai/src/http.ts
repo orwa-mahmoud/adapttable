@@ -10,11 +10,22 @@ import { errorMessage } from "./errorMessage";
 import {
   createTurnExecution,
   type HttpPhaseContext,
-  type PhaseAction,
-  type PhaseBatch,
   phaseContext,
   policyKey,
 } from "./httpExecution";
+import {
+  createPhasePlan,
+  DESCRIBE_TOOL,
+  type FinalizedCall,
+  READ_TOOL,
+} from "./httpTurn";
+import type {
+  AgentHttpAnswer,
+  AgentHttpQuestion,
+  AgentHttpQuestionOption,
+  AgentHttpToolCall,
+  AgentHttpToolResult,
+} from "./httpTypes";
 import { AGENT_SCHEMA_VERSION, type RowAddressScope } from "./keys";
 import type {
   AgentManifest,
@@ -33,8 +44,11 @@ export type {
   AssistantExchange,
   AssistantTransport,
   AssistantTransportReply,
+  AssistantUnresolved,
 } from "./assistantContracts";
 export type { AssistantReceiptSubject } from "./assistantReceipts";
+export { AgentTurnError, type PhaseState } from "./httpTurn";
+export * from "./httpTypes";
 export {
   AGENT_SCHEMA_VERSION as AGENT_HTTP_SCHEMA,
   AGENT_SCHEMA_VERSION,
@@ -60,39 +74,6 @@ export interface AgentHttpMessage {
   readonly role: "user" | "assistant";
   /** Visible text. */
   readonly text: string;
-}
-
-/**
- * Progressive discovery the backend may request instead of guessing.
- *
- * Descriptions come from `session.describe`. Row windows go through
- * `rows.read`, so column permissions and `readMax` still apply.
- *
- * @public
- */
-export interface AgentHttpNeeds {
-  /** Capability keys whose guides the backend wants next. */
-  readonly describe?: readonly string[];
-  /** Permitted `rows.read` queries. Never a full-dataset dump. */
-  readonly read?: readonly RowReadQuery[];
-}
-
-/**
- * One action the backend wants the table to run.
- *
- * Execution always goes through `session.execute`.
- *
- * @public
- */
-export interface AgentHttpAction {
-  /** Catalog key. */
-  readonly key: string;
-  /** Arguments for that key. */
-  readonly args?: unknown;
-  /** Caller-supplied replay key. Required so a retry cannot mint a new write. */
-  readonly idempotencyKey: string;
-  /** Revision the backend observed. Defaults to the request snapshot. */
-  readonly expectedRevision?: number;
 }
 
 /**
@@ -124,12 +105,19 @@ export interface AgentHttpRequest {
   readonly message?: string;
   /** Optional prior lines the host chooses to send. */
   readonly conversation?: readonly AgentHttpMessage[];
-  /** Guides returned after `needs.describe`. */
-  readonly descriptions?: readonly CapabilityGuide[];
-  /** Permitted row windows returned after `needs.read`. */
-  readonly rows?: readonly RowWindow[];
-  /** Optional execute receipts when the host asked to continue. */
-  readonly results?: readonly ExecuteResult[];
+  /** Host-generated identity of this user send, stable across its phases. */
+  readonly turnId?: string;
+  /** Monotonic position of this phase within the turn. */
+  readonly phaseId?: number;
+  /** What the frontend's tools produced, answering the previous reply. */
+  readonly toolResults?: readonly AgentHttpToolResult[];
+  /**
+   * The commands this phase has proposed so far.
+   *
+   * Sent so the backend can revise its own plan rather than restate it from
+   * memory — and so a revision is a replacement, not a second copy.
+   */
+  readonly pendingCalls?: readonly AgentHttpToolCall[];
 }
 
 /**
@@ -149,10 +137,13 @@ export interface AgentHttpResponse {
   readonly sessionId?: string;
   /** Assistant text to show in the host UI. */
   readonly text?: string;
-  /** Structured actions for `session.execute`. */
-  readonly actions?: readonly AgentHttpAction[];
-  /** Ask the frontend for guides or permitted reads, then continue. */
-  readonly needs?: AgentHttpNeeds;
+  /**
+   * Tools for the frontend to run: capability keys to execute, or
+   * `describe` / `read` to ask.
+   */
+  readonly toolCalls?: readonly AgentHttpToolCall[];
+  /** A structured question for the reader, instead of asking in prose. */
+  readonly askUser?: AgentHttpQuestion;
   /** When true, the host may POST execute receipts back. */
   readonly continueWithResults?: boolean;
 }
@@ -181,6 +172,35 @@ export interface AgentHttpClientOptions {
    * omit it. Set false to attach the compact snapshot on every request.
    */
   readonly pinCatalog?: boolean;
+  /**
+   * Put a structured question to the reader and resolve with their answer.
+   *
+   * Without it a backend's `askUser` stops the turn with `unresolved` rather
+   * than hanging, and whatever already ran is still reported.
+   */
+  readonly askUser?: (
+    question: AgentHttpQuestion,
+    signal?: AbortSignal
+  ) => Promise<AgentHttpAnswer>;
+}
+
+/**
+ * Why a turn stopped without running everything it was asked for.
+ *
+ * It sits beside the receipts rather than replacing them: work an earlier
+ * phase completed is reported as completed, and only what is actually still
+ * pending is named, so a host can offer a retry instead of a total failure
+ * that hides a write.
+ *
+ * @public
+ */
+export interface AgentHttpUnresolved {
+  /** Stable machine code. */
+  readonly code: string;
+  /** What happened, in one sentence. */
+  readonly message: string;
+  /** Capability keys that were proposed but never ran. */
+  readonly pending: readonly string[];
 }
 
 /**
@@ -203,9 +223,16 @@ export interface AgentHttpTurnResult {
   readonly keys: readonly string[];
   /** How many describe / read needs this turn fulfilled. */
   readonly needsFulfilled: { readonly describe: number; readonly read: number };
+  /** Present only when the turn stopped short of running everything. */
+  readonly unresolved?: AgentHttpUnresolved;
 }
 
 const MAX_NEED_ROUNDS = 3;
+/**
+ * Dependent phases in one user send. Discovery is bounded per phase; this
+ * bounds how many times work may depend on the work before it.
+ */
+const MAX_CONTINUATIONS = 3;
 const MAX_DESCRIBE_NEEDS = 16;
 const MAX_READ_NEEDS = 16;
 const MAX_ACTIONS = 32;
@@ -362,12 +389,13 @@ export function parseAgentHttpRequest(input: unknown): AgentHttpRequest {
     conversation: Array.isArray(input.conversation)
       ? (input.conversation as AgentHttpMessage[])
       : undefined,
-    descriptions: Array.isArray(input.descriptions)
-      ? (input.descriptions as CapabilityGuide[])
+    turnId: asString(input.turnId),
+    phaseId: asFiniteNumber(input.phaseId),
+    toolResults: Array.isArray(input.toolResults)
+      ? input.toolResults.map(asToolResult)
       : undefined,
-    rows: Array.isArray(input.rows) ? (input.rows as RowWindow[]) : undefined,
-    results: Array.isArray(input.results)
-      ? (input.results as ExecuteResult[])
+    pendingCalls: Array.isArray(input.pendingCalls)
+      ? input.pendingCalls.map(asToolCall)
       : undefined,
   };
 }
@@ -386,12 +414,13 @@ export function parseAgentHttpResponse(input: unknown): AgentHttpResponse {
       `agent HTTP schemaVersion must be "${AGENT_SCHEMA_VERSION}"`
     );
   }
-  const actions = Array.isArray(input.actions)
-    ? input.actions.map(asAction)
+  const toolCalls = Array.isArray(input.toolCalls)
+    ? input.toolCalls.map(asToolCall)
     : undefined;
-  if (actions && actions.length > MAX_ACTIONS) {
-    throw new TypeError(`agent HTTP actions exceed limit of ${MAX_ACTIONS}`);
+  if (toolCalls && toolCalls.length > MAX_ACTIONS) {
+    throw new TypeError(`agent HTTP toolCalls exceed limit of ${MAX_ACTIONS}`);
   }
+  assertQuestionBudget(toolCalls);
   if (
     input.sessionId !== undefined &&
     (typeof input.sessionId !== "string" || input.sessionId.length === 0)
@@ -404,8 +433,9 @@ export function parseAgentHttpResponse(input: unknown): AgentHttpResponse {
     sessionId:
       typeof input.sessionId === "string" ? input.sessionId : undefined,
     text: typeof input.text === "string" ? input.text : undefined,
-    actions,
-    needs: isRecord(input.needs) ? asNeeds(input.needs) : undefined,
+    toolCalls,
+    askUser:
+      input.askUser === undefined ? undefined : asQuestion(input.askUser),
     continueWithResults:
       typeof input.continueWithResults === "boolean"
         ? input.continueWithResults
@@ -440,85 +470,158 @@ function validateManifestShape(value: Record<string, unknown>): void {
   }
 }
 
-function asAction(value: unknown): AgentHttpAction {
+function asToolCall(value: unknown): AgentHttpToolCall {
   if (!isRecord(value)) {
-    throw new TypeError("agent HTTP action must be an object");
+    throw new TypeError("agent HTTP tool call must be an object");
   }
-  const key = asString(value.key);
-  const idempotencyKey = asString(value.idempotencyKey);
-  if (!key) throw new TypeError("agent HTTP action.key is required");
-  if (!idempotencyKey) {
-    throw new TypeError("agent HTTP action.idempotencyKey is required");
-  }
+  const id = asString(value.id);
+  const name = asString(value.name);
+  if (!id) throw new TypeError("agent HTTP tool call.id is required");
+  if (!name) throw new TypeError("agent HTTP tool call.name is required");
   let expectedRevision: number | undefined;
   if ("expectedRevision" in value && value.expectedRevision !== undefined) {
     expectedRevision = asFiniteNumber(value.expectedRevision);
     if (expectedRevision === undefined) {
       throw new TypeError(
-        "agent HTTP action.expectedRevision must be a finite number"
+        "agent HTTP tool call.expectedRevision must be a finite number"
       );
     }
   }
+  const args = "args" in value ? value.args : {};
+  // The two asking tools are ours, so their arguments are checked here rather
+  // than at execution time: a malformed row window is a protocol error, and it
+  // should be reported where the body is read, not three awaits later.
+  if (name === READ_TOOL) {
+    return { id, name, args: asReadQuery(args), expectedRevision };
+  }
+  if (name === DESCRIBE_TOOL) {
+    return { id, name, args: { keys: asDescribeKeys(args) }, expectedRevision };
+  }
+  return { id, name, args, expectedRevision };
+}
+
+function asToolResult(value: unknown): AgentHttpToolResult {
+  if (!isRecord(value)) {
+    throw new TypeError("agent HTTP tool result must be an object");
+  }
+  const id = asString(value.id);
+  if (!id) throw new TypeError("agent HTTP tool result.id is required");
+  if (isRecord(value.error)) {
+    const code = asString(value.error.code) ?? "error";
+    const message = asString(value.error.message) ?? "tool call failed";
+    return { id, error: { code, message } };
+  }
+  return { id, result: value.result };
+}
+
+function asQuestionOption(value: unknown): AgentHttpQuestionOption {
+  if (!isRecord(value)) {
+    throw new TypeError("agent HTTP askUser option must be an object");
+  }
+  const id = asString(value.id);
+  const label = asString(value.label);
+  if (!id || !label) {
+    throw new TypeError("agent HTTP askUser option needs an id and a label");
+  }
+  return { id, label };
+}
+
+function asQuestion(value: unknown): AgentHttpQuestion {
+  if (!isRecord(value)) {
+    throw new TypeError("agent HTTP askUser must be an object");
+  }
+  const id = asString(value.id);
+  const question = asString(value.question);
+  if (!id) throw new TypeError("agent HTTP askUser.id is required");
+  if (!question) throw new TypeError("agent HTTP askUser.question is required");
+  const options = Array.isArray(value.options)
+    ? value.options.map(asQuestionOption)
+    : undefined;
+  const allowFreeText = value.allowFreeText !== false;
+  if (!allowFreeText && !options?.length) {
+    throw new TypeError(
+      "agent HTTP askUser must offer options or allow free text"
+    );
+  }
+  return { id, question, ...(options ? { options } : {}), allowFreeText };
+}
+
+/**
+ * The two asking tools keep their own ceilings.
+ *
+ * They were separate limits when they were separate fields, and folding them
+ * into one list is no reason for a backend to be able to ask for sixteen
+ * guides and sixteen row windows in a single reply that only counts as one.
+ */
+function assertQuestionBudget(
+  calls: readonly AgentHttpToolCall[] | undefined
+): void {
+  if (!calls) return;
+  const describes = calls.filter((call) => call.name === DESCRIBE_TOOL).length;
+  const reads = calls.filter((call) => call.name === READ_TOOL).length;
+  if (describes > MAX_DESCRIBE_NEEDS) {
+    throw new TypeError(
+      `agent HTTP describe calls exceed limit of ${MAX_DESCRIBE_NEEDS}`
+    );
+  }
+  if (reads > MAX_READ_NEEDS) {
+    throw new TypeError(
+      `agent HTTP read calls exceed limit of ${MAX_READ_NEEDS}`
+    );
+  }
+}
+
+/** The row window one `read` call is asking for. */
+function asReadQuery(args: unknown): RowReadQuery {
+  const entry = isRecord(args) ? args : {};
+  const columns = Array.isArray(entry.columns)
+    ? entry.columns.filter(
+        (column): column is string => typeof column === "string"
+      )
+    : undefined;
+  let scope: RowAddressScope | undefined;
+  if (
+    entry.scope === "visible" ||
+    entry.scope === "page" ||
+    entry.scope === "full"
+  ) {
+    scope = entry.scope;
+  } else if (entry.scope !== undefined) {
+    throw new TypeError(
+      'agent HTTP read.scope must be "visible", "page", or "full"'
+    );
+  }
+  const offset = asFiniteNumber(entry.offset);
+  const limit = asFiniteNumber(entry.limit);
+  if (entry.offset !== undefined && offset === undefined) {
+    throw new TypeError("agent HTTP read.offset must be a finite number");
+  }
+  if (entry.limit !== undefined && limit === undefined) {
+    throw new TypeError("agent HTTP read.limit must be a finite number");
+  }
   return {
-    key,
-    args: "args" in value ? value.args : {},
-    idempotencyKey,
-    expectedRevision,
+    offset: offset ?? 0,
+    limit: limit ?? 10,
+    ...(columns ? { columns } : {}),
+    ...(scope ? { scope } : {}),
   };
 }
 
-function asNeeds(value: Record<string, unknown>): AgentHttpNeeds {
-  const describe = Array.isArray(value.describe)
-    ? value.describe.filter(
-        (entry): entry is string => typeof entry === "string"
-      )
-    : undefined;
-  if (describe && describe.length > MAX_DESCRIBE_NEEDS) {
-    throw new TypeError(
-      `agent HTTP needs.describe exceeds limit of ${MAX_DESCRIBE_NEEDS}`
-    );
+/** The capability keys one `describe` call is asking about. */
+function asDescribeKeys(args: unknown): readonly string[] {
+  const entry = isRecord(args) ? args : {};
+  if (entry.keys === undefined) return [];
+  if (!Array.isArray(entry.keys)) {
+    throw new TypeError("agent HTTP describe.keys must be an array of strings");
   }
-  const read = Array.isArray(value.read)
-    ? value.read.filter(isRecord).map((entry) => {
-        const columns = Array.isArray(entry.columns)
-          ? entry.columns.filter(
-              (column): column is string => typeof column === "string"
-            )
-          : undefined;
-        let scope: RowAddressScope | undefined;
-        if (
-          entry.scope === "visible" ||
-          entry.scope === "page" ||
-          entry.scope === "full"
-        ) {
-          scope = entry.scope;
-        } else if (entry.scope !== undefined) {
-          throw new TypeError(
-            'agent HTTP read.scope must be "visible", "page", or "full"'
-          );
-        }
-        const offset = asFiniteNumber(entry.offset);
-        const limit = asFiniteNumber(entry.limit);
-        if (entry.offset !== undefined && offset === undefined) {
-          throw new TypeError("agent HTTP read.offset must be a finite number");
-        }
-        if (entry.limit !== undefined && limit === undefined) {
-          throw new TypeError("agent HTTP read.limit must be a finite number");
-        }
-        return {
-          offset: offset ?? 0,
-          limit: limit ?? 10,
-          ...(columns ? { columns } : {}),
-          ...(scope ? { scope } : {}),
-        };
-      })
-    : undefined;
-  if (read && read.length > MAX_READ_NEEDS) {
-    throw new TypeError(
-      `agent HTTP needs.read exceeds limit of ${MAX_READ_NEEDS}`
-    );
+  for (const key of entry.keys) {
+    if (typeof key !== "string" || key.length === 0) {
+      throw new TypeError(
+        "agent HTTP describe.keys must be an array of strings"
+      );
+    }
   }
-  return { describe, read };
+  return entry.keys as readonly string[];
 }
 
 interface HttpPin {
@@ -781,13 +884,20 @@ function newHttpTurnId(): string {
   return globalThis.crypto.randomUUID();
 }
 
+/**
+ * A read's replay identity.
+ *
+ * The revision is in it because a read is only current for the view it read;
+ * the query is not, because a replay key travels and a query names columns and
+ * bounds. Turn, phase and position already make it unique.
+ */
 function readIdempotencyKey(
   turnId: string,
+  phaseId: number,
   revision: number,
-  index: number,
-  query: RowReadQuery
+  index: number
 ): string {
-  return `http-read:${JSON.stringify({ turnId, revision, index, query })}`;
+  return `http-read:${JSON.stringify({ turnId, phaseId, revision, index })}`;
 }
 
 function mergeGuides(
@@ -808,62 +918,85 @@ function mergeGuides(
   return next;
 }
 
-async function fulfillNeeds(
+/**
+ * Run the asking tools and answer each one under its own call id.
+ *
+ * A failure answers that one call rather than ending the turn: a backend
+ * guessing a capability key this table does not offer, or asking for a window
+ * a policy now refuses, has made an ordinary mistake. Telling it so and
+ * carrying on is what a conversation does; throwing ended the whole turn over
+ * one bad name, with nothing run and nothing explained.
+ */
+async function answerQuestions(
   session: AgentSession,
-  needs: AgentHttpNeeds | undefined,
+  questions: readonly AgentHttpToolCall[],
   turn: HttpPhaseContext
 ): Promise<{
-  descriptions: CapabilityGuide[];
-  /** Keys the backend asked about that this table does not offer. */
-  unknown: string[];
-  rows: RowWindow[];
-  describe: number;
-  read: number;
+  readonly results: readonly AgentHttpToolResult[];
+  readonly guides: readonly CapabilityGuide[];
+  readonly windows: readonly RowWindow[];
+  readonly describe: number;
+  readonly read: number;
 }> {
   assertTurnContext(session, turn);
-  const descriptions: CapabilityGuide[] = [];
-  const unknown: string[] = [];
-  const rows: RowWindow[] = [];
-  for (const key of needs?.describe ?? []) {
-    // A backend asking about a capability this table does not offer is an
-    // ordinary mistake — a small model guessing a key, or a table that turned
-    // a feature off since the catalog was sent. Answering "no such thing" and
-    // carrying on is what a conversation does; throwing here ended the whole
-    // turn over one bad name, with nothing run and nothing explained.
-    if (!session.catalog().some((entry) => entry.key === key)) {
-      unknown.push(key);
-      continue;
-    }
-    descriptions.push(session.describe(key));
-  }
-  for (const [index, query] of (needs?.read ?? []).entries()) {
-    // Re-checked after every awaited read: a policy change between two row
+  const results: AgentHttpToolResult[] = [];
+  const guides: CapabilityGuide[] = [];
+  const windows: RowWindow[] = [];
+  let describe = 0;
+  let read = 0;
+
+  for (const [index, call] of questions.entries()) {
+    // Re-checked after every awaited answer: a policy change between two row
     // windows ends the turn rather than answering the rest of it under terms
     // the backend never saw.
     assertTurnContext(session, turn);
+
+    if (call.name === DESCRIBE_TOOL) {
+      // Counted by what was ASKED, not by what came back: a round that
+      // produced only unknown names still used a round.
+      const keys = asDescribeKeys(call.args);
+      describe += keys.length;
+      const catalog = session.catalog();
+      const known = keys.filter((key) =>
+        catalog.some((entry) => entry.key === key)
+      );
+      const missing = keys.filter((key) => !known.includes(key));
+      const answered = known.map((key) => session.describe(key));
+      guides.push(...answered);
+      results.push({
+        id: call.id,
+        result: { guides: answered, unavailable: missing },
+      });
+      continue;
+    }
+
     // A read is bound to the view it reads, not to the phase that asked for
-    // it — which is why the revision is part of its replay key.
+    // it, so the revision travels in its replay key while the arguments do
+    // not.
+    const query = asReadQuery(call.args);
     const revision = session.manifest().viewRevision;
     const result = await session.execute(
       "rows.read",
       query,
       revision,
-      readIdempotencyKey(turn.turnId, revision, index, query)
+      readIdempotencyKey(turn.turnId, turn.phaseId, revision, index)
     );
+    read += 1;
     if (!result.ok) {
-      throw new Error(result.error?.message ?? "rows.read failed");
+      results.push({
+        id: call.id,
+        error: {
+          code: result.error?.code ?? "read-failed",
+          message: result.error?.message ?? "rows.read failed",
+        },
+      });
+      continue;
     }
-    rows.push(result.result as RowWindow);
+    windows.push(result.result as RowWindow);
+    results.push({ id: call.id, result: result.result });
   }
-  return {
-    descriptions,
-    unknown,
-    rows,
-    // Count what was ASKED, not what came back: a round that produced only
-    // unknown names still used a round, and must not loop forever.
-    describe: descriptions.length + unknown.length,
-    read: rows.length,
-  };
+
+  return { results, guides, windows, describe, read };
 }
 
 /**
@@ -909,46 +1042,14 @@ async function preparePinnedTurn(
   return usesPinnedCatalog(session, options);
 }
 
-/** Every action collected so far, in the order the rounds returned them. */
-function plannedActions(
-  batches: readonly PhaseBatch[]
-): readonly PhaseAction[] {
-  return batches.flatMap((batch) => [...batch.actions]);
-}
-
-function absorbHttpRound(
-  last: AgentHttpResponse,
-  context: HttpPhaseContext,
-  state: { batches: PhaseBatch[]; text: string }
-): number {
-  if (last.actions?.length) {
-    // Each round is its own phase: the request that produced this reply
-    // described the view captured in `context`, so these actions belong to
-    // that view and not to whatever the table reaches by the time the round
-    // after them has finished asking questions.
-    state.batches = [...state.batches, { context, actions: last.actions }];
-  }
-  // A backend that explained itself on one round and only acted on the next
-  // still said something; reading only the final round loses it.
-  if (last.text) state.text = last.text;
-  return (last.needs?.describe?.length ?? 0) + (last.needs?.read?.length ?? 0);
-}
-
-function discoveryBudgetExceeded(
-  round: number,
-  actions: readonly PhaseAction[]
-): boolean {
-  if (round !== MAX_NEED_ROUNDS) return false;
-  // Only a backend that produced NOTHING has really failed. One that kept
-  // asking while also choosing actions did its job badly, not not at all,
-  // so its work still runs.
-  if (actions.length === 0) {
-    throw new Error("agent HTTP asked for discovery too many times");
-  }
-  return true;
-}
-
-async function exchangeRounds(
+/**
+ * One phase: ask until the backend stops asking, then hand back its plan.
+ *
+ * The plan is the reducer's, not an accumulation of every round's proposals —
+ * a reply while the phase is still discovering replaces what came before it,
+ * so a model that repeats itself across rounds still writes once.
+ */
+async function runPhase(
   session: AgentSession,
   options: AgentHttpClientOptions,
   turn: HttpPhaseContext,
@@ -956,24 +1057,35 @@ async function exchangeRounds(
     readonly message: string;
     readonly conversation?: readonly AgentHttpMessage[];
     readonly signal?: AbortSignal;
+    readonly phaseId: number;
+    /** Receipts of work an earlier phase completed, carried forward. */
+    readonly toolResults?: readonly AgentHttpToolResult[];
   }
 ): Promise<{
   readonly last: AgentHttpResponse | undefined;
-  /** Each round's actions, with the view that round was answered against. */
-  readonly batches: readonly PhaseBatch[];
-  /** First phase id no round used, so a continuation can go on counting. */
-  readonly nextPhaseId: number;
-  /** The last thing the backend actually SAID, across every round. */
+  /** The view this phase was answered against. */
+  readonly context: HttpPhaseContext;
+  /** The phase itself, so the caller can move it through executing. */
+  readonly phase: ReturnType<typeof createPhasePlan>;
+  readonly plan: readonly FinalizedCall[];
   readonly text: string;
   readonly fulfilled: { describe: number; read: number };
+  /** Set when the phase stopped without a plan it could run. */
+  readonly unresolved?: AgentHttpUnresolved;
 }> {
-  let descriptions: CapabilityGuide[] | undefined;
-  let rows: RowWindow[] | undefined;
-  let last: AgentHttpResponse | undefined;
-  let nextPhaseId = 1;
-  const state = { batches: [] as PhaseBatch[], text: "" };
-  const fulfilled = { describe: 0, read: 0 };
   const questionOnly = await preparePinnedTurn(session, options, input.signal);
+  const phase = createPhasePlan({
+    tableId: turn.tableId,
+    turnId: turn.turnId,
+    phaseId: input.phaseId,
+  });
+  let guides: readonly CapabilityGuide[] = [];
+  let windows: readonly RowWindow[] = [];
+  let toolResults = input.toolResults;
+  let last: AgentHttpResponse | undefined;
+  let context = turn;
+  let text = "";
+  const fulfilled = { describe: 0, read: 0 };
 
   for (let round = 0; round <= MAX_NEED_ROUNDS; round += 1) {
     assertTurnContext(session, turn);
@@ -982,8 +1094,7 @@ async function exchangeRounds(
     // never inferred from where the table ends up afterwards. Round 0 needs
     // its own capture as much as the rest: pinning the catalog is a network
     // round trip, and the table is free to move while it happens.
-    const context = phaseContext(session, turn.turnId, round);
-    nextPhaseId = round + 1;
+    context = phaseContext(session, turn.turnId, input.phaseId);
     last = await exchange(
       options,
       compactRequest(
@@ -992,31 +1103,77 @@ async function exchangeRounds(
         {
           message: input.message,
           conversation: input.conversation,
-          descriptions,
-          rows,
+          turnId: turn.turnId,
+          phaseId: input.phaseId,
+          ...(toolResults?.length ? { toolResults } : {}),
+          ...(phase.pending().length ? { pendingCalls: phase.pending() } : {}),
         },
         questionOnly ? "question" : "full"
       ),
       input.signal
     );
     if (!questionOnly) rememberPin(session, last);
-    const asked = absorbHttpRound(last, context, state);
-    if (asked === 0) break;
-    if (discoveryBudgetExceeded(round, plannedActions(state.batches))) break;
-    const next = await fulfillNeeds(session, last.needs, turn);
-    descriptions = mergeGuides(descriptions, next.descriptions);
-    rows = [...(rows ?? []), ...next.rows];
-    assertContextSize(descriptions, rows);
-    fulfilled.describe += next.describe;
-    fulfilled.read += next.read;
+    // A backend that explained itself on one round and only acted on the next
+    // still said something; reading only the final round loses it.
+    if (last.text) text = last.text;
+
+    const outcome = phase.absorb(last);
+    if (outcome.kind === "ready") {
+      return { last, context, phase, plan: outcome.plan, text, fulfilled };
+    }
+
+    if (outcome.kind === "ask-user") {
+      const answered = await askReader(options, outcome.question, input.signal);
+      if (!answered) {
+        phase.settle("failed");
+        return {
+          last,
+          context,
+          phase,
+          plan: [],
+          text,
+          fulfilled,
+          unresolved: {
+            code: "no-reader-channel",
+            message:
+              "the backend asked the reader a question and this client has no way to put it to them",
+            pending: phase.pending().map((call) => call.name),
+          },
+        };
+      }
+      toolResults = mergeToolResults(toolResults, [answered]);
+      continue;
+    }
+
+    const answers = await answerQuestions(session, outcome.questions, turn);
+    guides = mergeGuides(guides, answers.guides);
+    windows = [...windows, ...answers.windows];
+    assertContextSize(guides, windows);
+    fulfilled.describe += answers.describe;
+    fulfilled.read += answers.read;
+    // Results accumulate across the rounds of a phase. A backend that keeps no
+    // state per turn — which the shipped example deliberately does not — would
+    // otherwise be told the guide it asked for on one round and not on the
+    // next, and go on asking for what it has already been given.
+    toolResults = mergeToolResults(toolResults, answers.results);
   }
 
+  // Out of rounds. Whatever the backend last proposed was never finalized, so
+  // nothing from this phase runs — but the turn still reports truthfully, and
+  // any receipts an earlier phase earned are the caller's to keep.
+  phase.settle("failed");
   return {
     last,
-    batches: state.batches,
-    nextPhaseId,
-    text: state.text,
+    context,
+    phase,
+    plan: [],
+    text,
     fulfilled,
+    unresolved: {
+      code: "discovery-exhausted",
+      message: `the backend asked for discovery more than ${String(MAX_NEED_ROUNDS)} times without settling on a plan`,
+      pending: phase.pending().map((call) => call.name),
+    },
   };
 }
 
@@ -1041,133 +1198,141 @@ export async function runAgentHttpTurn(
 
   const turnId = newHttpTurnId();
   const turn = phaseContext(session, turnId, 0);
-  const exchanged = await exchangeRounds(session, options, turn, {
-    message: trimmed,
-    conversation: extras.conversation,
-    signal: extras.signal,
-  });
-  const last = exchanged.last;
-  let fulfilled = exchanged.fulfilled;
-
-  if (!last) throw new Error("agent HTTP returned no response");
-  assertTurnContext(session, turn);
-  // The keys, not the actions: what a receipt needs is which capability ran.
-  let ranKeys: readonly string[] = plannedActions(exchanged.batches).map(
-    (action) => action.key
-  );
   const execution = createTurnExecution(session, turn);
-  const executed: ExecuteResult[] = [];
-  for (const batch of exchanged.batches) {
-    executed.push(...(await execution.execute(batch, extras.signal)));
-  }
-  let results: readonly ExecuteResult[] = executed;
-  let text = exchanged.text;
-  if (extras.returnResults && last.continueWithResults) {
-    const continuation = await continueTurn(session, options, execution, turn, {
+  const results: ExecuteResult[] = [];
+  const keys: string[] = [];
+  const fulfilled = { describe: 0, read: 0 };
+  let text = "";
+  let unresolved: AgentHttpUnresolved | undefined;
+  let toolResults: readonly AgentHttpToolResult[] | undefined;
+  let phaseId = 0;
+
+  // Each pass is one dependent phase: ask until the backend settles, run what
+  // it settled on, and only continue when it asked for the receipts.
+  for (;;) {
+    const pass = await runPhase(session, options, turn, {
       message: trimmed,
       conversation: extras.conversation,
       signal: extras.signal,
-      phaseId: exchanged.nextPhaseId,
-      results,
+      phaseId,
+      toolResults,
     });
-    results = continuation.results;
-    ranKeys = [...ranKeys, ...continuation.keys];
-    if (continuation.text) text = continuation.text;
-    fulfilled = {
-      describe: fulfilled.describe + continuation.fulfilled.describe,
-      read: fulfilled.read + continuation.fulfilled.read,
-    };
+    if (!pass.last) throw new Error("agent HTTP returned no response");
+    assertTurnContext(session, turn);
+    if (pass.text) text = pass.text;
+    fulfilled.describe += pass.fulfilled.describe;
+    fulfilled.read += pass.fulfilled.read;
+
+    pass.phase.begin();
+    const ran = await execution.execute(
+      { context: pass.context, actions: pass.plan },
+      extras.signal
+    );
+    pass.phase.settle(
+      ran.some((entry) => entry.error?.code === "cancelled")
+        ? "cancelled"
+        : "settled"
+    );
+    results.push(...ran);
+    // The keys, not the calls: what a receipt needs is which capability ran.
+    keys.push(...pass.plan.map((call) => call.key));
+
+    if (pass.unresolved) {
+      unresolved = pass.unresolved;
+      break;
+    }
+    if (
+      !extras.returnResults ||
+      !pass.last.continueWithResults ||
+      pass.plan.length === 0
+    ) {
+      break;
+    }
+    phaseId += 1;
+    if (phaseId > MAX_CONTINUATIONS) {
+      unresolved = {
+        code: "continuation-exhausted",
+        message: `the backend asked to continue more than ${String(MAX_CONTINUATIONS)} times`,
+        pending: [],
+      };
+      break;
+    }
+    // The next phase depends on what this one produced, so it carries the
+    // actual receipts rather than a claim that the work happened.
+    toolResults = pass.plan.map((call, index) =>
+      receiptResult(call, ran[index])
+    );
   }
+
   return {
     text,
     results,
-    keys: ranKeys,
+    keys,
     needsFulfilled: fulfilled,
+    ...(unresolved ? { unresolved } : {}),
+  };
+}
+
+/** Later answers win, and a result is only ever carried once per call id. */
+function mergeToolResults(
+  current: readonly AgentHttpToolResult[] | undefined,
+  incoming: readonly AgentHttpToolResult[]
+): readonly AgentHttpToolResult[] {
+  const next = [...(current ?? [])];
+  const indexById = new Map(next.map((entry, index) => [entry.id, index]));
+  for (const entry of incoming) {
+    const existing = indexById.get(entry.id);
+    if (existing === undefined) {
+      indexById.set(entry.id, next.length);
+      next.push(entry);
+    } else {
+      next[existing] = entry;
+    }
+  }
+  return next;
+}
+
+/** One executed call, shaped as the tool result its caller is waiting for. */
+function receiptResult(
+  call: FinalizedCall,
+  result: ExecuteResult | undefined
+): AgentHttpToolResult {
+  if (!result) {
+    return {
+      id: call.id,
+      error: { code: "not-run", message: "the call was never reached" },
+    };
+  }
+  if (!result.ok) {
+    return {
+      id: call.id,
+      error: {
+        code: result.error?.code ?? "failed",
+        message: result.error?.message ?? "the call failed",
+      },
+    };
+  }
+  return {
+    id: call.id,
+    result: { ok: true, revision: result.revision, result: result.result },
   };
 }
 
 /**
- * Post execute receipts back and keep going while the backend still has work.
+ * Put a structured question to the reader.
  *
- * The loop is governed like the first one: its own phase context per round,
- * the table re-checked before every exchange, discovery rounds bounded, and
- * any actions run through the turn's executor, so work that depends on a
- * receipt is bound to the view that receipt produced.
+ * Without a channel the turn stops and says so rather than hanging or
+ * inventing an answer, and whatever an earlier phase completed is still
+ * reported.
  */
-async function continueTurn(
-  session: AgentSession,
+async function askReader(
   options: AgentHttpClientOptions,
-  execution: ReturnType<typeof createTurnExecution>,
-  turn: HttpPhaseContext,
-  input: {
-    readonly message: string;
-    readonly conversation?: readonly AgentHttpMessage[];
-    readonly signal?: AbortSignal;
-    readonly phaseId: number;
-    readonly results: readonly ExecuteResult[];
-  }
-): Promise<{
-  readonly results: readonly ExecuteResult[];
-  /** Capability keys for the actions THIS continuation ran, in order. */
-  readonly keys: readonly string[];
-  readonly text: string;
-  readonly fulfilled: { describe: number; read: number };
-}> {
-  let descriptions: CapabilityGuide[] | undefined;
-  let rows: RowWindow[] | undefined;
-  let results = input.results;
-  let keys: readonly string[] = [];
-  let text = "";
-  const fulfilled = { describe: 0, read: 0 };
-
-  for (let round = 0; round < MAX_NEED_ROUNDS; round += 1) {
-    assertTurnContext(session, turn);
-    // A continuation round carries the receipts of work that already applied,
-    // so its request describes a table that has legitimately moved. Capturing
-    // the view here is what lets dependent work run against what its
-    // predecessor produced without inheriting a revision it never saw.
-    const context = phaseContext(session, turn.turnId, input.phaseId + round);
-    const continued = await exchange(
-      options,
-      compactRequest(
-        session,
-        "turn",
-        {
-          message: input.message,
-          conversation: input.conversation,
-          descriptions,
-          rows,
-          results,
-        },
-        usesPinnedCatalog(session, options) ? "question" : "full"
-      ),
-      input.signal
-    );
-    if (continued.actions?.length) {
-      results = [
-        ...results,
-        ...(await execution.execute(
-          { context, actions: continued.actions },
-          input.signal
-        )),
-      ];
-      keys = [...keys, ...continued.actions.map((action) => action.key)];
-    }
-    const needs = continued.needs;
-    const asked = (needs?.describe?.length ?? 0) + (needs?.read?.length ?? 0);
-    if (asked > 0) {
-      const next = await fulfillNeeds(session, needs, turn);
-      descriptions = mergeGuides(descriptions, next.descriptions);
-      rows = [...(rows ?? []), ...next.rows];
-      assertContextSize(descriptions, rows);
-      fulfilled.describe += next.describe;
-      fulfilled.read += next.read;
-      continue;
-    }
-    if (continued.text) text = continued.text;
-    if (!continued.continueWithResults || !continued.actions?.length) break;
-  }
-  return { results, keys, text, fulfilled };
+  question: AgentHttpQuestion,
+  signal?: AbortSignal
+): Promise<AgentHttpToolResult | undefined> {
+  if (!options.askUser) return undefined;
+  const answer = await options.askUser(question, signal);
+  return { id: question.id, result: answer };
 }
 
 /**
@@ -1230,7 +1395,12 @@ export function assistantHttpTransport(
         returnResults: true,
         signal,
       });
-      return { text: turn.text, results: turn.results, keys: turn.keys };
+      return {
+        text: turn.text,
+        results: turn.results,
+        keys: turn.keys,
+        ...(turn.unresolved ? { unresolved: turn.unresolved } : {}),
+      };
     },
   };
 }

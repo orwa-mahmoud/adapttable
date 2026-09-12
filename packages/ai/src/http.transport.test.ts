@@ -181,76 +181,104 @@ describe("parseAgentHttpResponse holds the ceilings", () => {
     expect(() => parseAgentHttpResponse(["ok"])).toThrow(/must be an object/);
   });
 
-  it("refuses an action with no key", () => {
+  it("refuses a tool call with no name or no id", () => {
+    expect(() =>
+      parseAgentHttpResponse(response({ toolCalls: [{ id: "a1", args: {} }] }))
+    ).toThrow(/tool call.name is required/);
     expect(() =>
       parseAgentHttpResponse(
-        response({ actions: [{ idempotencyKey: "a1", args: {} }] })
+        response({ toolCalls: [{ name: "view.setPage", args: {} }] })
       )
-    ).toThrow(/action.key is required/);
+    ).toThrow(/tool call.id is required/);
   });
 
-  it("refuses more actions than one turn may carry", () => {
-    const actions = Array.from({ length: 33 }, (_, index) => ({
-      key: "view.setPage",
+  it("refuses more tool calls than one turn may carry", () => {
+    const toolCalls = Array.from({ length: 33 }, (_, index) => ({
+      id: `page-${String(index)}`,
+      name: "view.setPage",
       args: { page: index + 1 },
-      idempotencyKey: `page-${String(index)}`,
     }));
-    expect(() => parseAgentHttpResponse(response({ actions }))).toThrow(
-      /actions exceed limit of 32/
+    expect(() => parseAgentHttpResponse(response({ toolCalls }))).toThrow(
+      /toolCalls exceed limit of 32/
     );
   });
 
   it("refuses more describe asks than one turn may carry", () => {
-    const describe = Array.from({ length: 17 }, (_, i) => `view.k${String(i)}`);
-    expect(() =>
-      parseAgentHttpResponse(response({ needs: { describe } }))
-    ).toThrow(/needs.describe exceeds limit of 16/);
+    const toolCalls = Array.from({ length: 17 }, (_, i) => ({
+      id: `d${String(i)}`,
+      name: "describe",
+      args: { keys: [`view.k${String(i)}`] },
+    }));
+    expect(() => parseAgentHttpResponse(response({ toolCalls }))).toThrow(
+      /describe calls exceed limit of 16/
+    );
   });
 
   it("refuses more row windows than one turn may carry", () => {
-    const read = Array.from({ length: 17 }, (_, i) => ({
-      offset: i,
-      limit: 1,
+    const toolCalls = Array.from({ length: 17 }, (_, i) => ({
+      id: `r${String(i)}`,
+      name: "read",
+      args: { offset: i, limit: 1 },
     }));
-    expect(() => parseAgentHttpResponse(response({ needs: { read } }))).toThrow(
-      /needs.read exceeds limit of 16/
+    expect(() => parseAgentHttpResponse(response({ toolCalls }))).toThrow(
+      /read calls exceed limit of 16/
     );
   });
 
   it("refuses a row window it cannot address", () => {
+    const read = (args: unknown) =>
+      response({ toolCalls: [{ id: "r1", name: "read", args }] });
     expect(() =>
-      parseAgentHttpResponse(
-        response({ needs: { read: [{ offset: 0, limit: 1, scope: "all" }] } })
-      )
+      parseAgentHttpResponse(read({ offset: 0, limit: 1, scope: "all" }))
     ).toThrow(/read.scope must be "visible", "page", or "full"/);
     expect(() =>
-      parseAgentHttpResponse(
-        response({ needs: { read: [{ offset: "0", limit: 1 }] } })
-      )
+      parseAgentHttpResponse(read({ offset: "0", limit: 1 }))
     ).toThrow(/read.offset must be a finite number/);
     expect(() =>
-      parseAgentHttpResponse(
-        response({ needs: { read: [{ offset: 0, limit: Infinity }] } })
-      )
+      parseAgentHttpResponse(read({ offset: 0, limit: Infinity }))
     ).toThrow(/read.limit must be a finite number/);
+  });
+
+  it("refuses a describe that does not name string keys", () => {
+    expect(() =>
+      parseAgentHttpResponse(
+        response({
+          toolCalls: [{ id: "d1", name: "describe", args: { keys: [7] } }],
+        })
+      )
+    ).toThrow(/describe.keys must be an array of strings/);
   });
 
   it("defaults a window the model left open, and keeps what it named", () => {
     const parsed = parseAgentHttpResponse(
       response({
-        needs: {
-          describe: ["view.setPage"],
-          read: [{ scope: "page", columns: ["name", 7] }],
-        },
+        toolCalls: [
+          { id: "d1", name: "describe", args: { keys: ["view.setPage"] } },
+          {
+            id: "r1",
+            name: "read",
+            args: { scope: "page", columns: ["name", 7] },
+          },
+        ],
       })
     );
-    expect(parsed.needs?.read?.[0]).toEqual({
+    expect(parsed.toolCalls?.[1]?.args).toEqual({
       offset: 0,
       limit: 10,
       columns: ["name"],
       scope: "page",
     });
-    expect(parsed.needs?.describe).toEqual(["view.setPage"]);
+    expect(parsed.toolCalls?.[0]?.args).toEqual({ keys: ["view.setPage"] });
+  });
+
+  it("refuses a question that offers nothing and forbids typing", () => {
+    expect(() =>
+      parseAgentHttpResponse(
+        response({
+          askUser: { id: "q1", question: "Which?", allowFreeText: false },
+        })
+      )
+    ).toThrow(/must offer options or allow free text/);
   });
 });
 
@@ -319,21 +347,17 @@ describe("the HTTP client", () => {
     const replies = [
       {
         schemaVersion: AGENT_SCHEMA_VERSION,
-        actions: [
-          { key: "view.setPage", args: { page: 2 }, idempotencyKey: "p2" },
-        ],
+        toolCalls: [{ id: "p2", name: "view.setPage", args: { page: 2 } }],
         text: "Moved.",
         continueWithResults: true,
       },
       {
         schemaVersion: AGENT_SCHEMA_VERSION,
-        needs: { read: [{ offset: 0, limit: 1 }] },
+        toolCalls: [{ id: "r1", name: "read", args: { offset: 0, limit: 1 } }],
       },
       {
         schemaVersion: AGENT_SCHEMA_VERSION,
-        actions: [
-          { key: "view.setPage", args: { page: 3 }, idempotencyKey: "p3" },
-        ],
+        toolCalls: [{ id: "p3", name: "view.setPage", args: { page: 3 } }],
         text: "And again.",
         continueWithResults: false,
       },

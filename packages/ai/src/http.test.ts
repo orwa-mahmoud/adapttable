@@ -9,7 +9,7 @@ import {
 } from "./http";
 import { AGENT_SCHEMA_VERSION } from "./keys";
 import { createAgentSession } from "./session";
-import type { AgentObservation, ExecuteResult } from "./types";
+import type { AgentObservation } from "./types";
 
 const PAGE_ONLY = {
   fullDataset: false,
@@ -81,6 +81,24 @@ function session(apply = {}) {
   });
 }
 
+interface RowWindowResult {
+  readonly rows: readonly {
+    readonly rowKey: string;
+    readonly cells: unknown;
+  }[];
+  readonly redacted?: readonly string[];
+}
+
+/** What the frontend sent back for one call id, when it sent a value. */
+function toolValue<T>(
+  body: { toolResults?: readonly { id: string }[] },
+  id: string
+): T | undefined {
+  const entry = body.toolResults?.find((result) => result.id === id);
+  if (!entry || !("result" in entry)) return undefined;
+  return (entry as { result: T }).result;
+}
+
 function okResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -123,36 +141,37 @@ describe("parseAgentHttpRequest / parseAgentHttpResponse", () => {
     ).toThrow(/message/);
   });
 
-  it("requires action idempotency keys", () => {
+  it("requires a call id to correlate a result with", () => {
     expect(() =>
       parseAgentHttpResponse({
         schemaVersion: AGENT_SCHEMA_VERSION,
-        actions: [{ key: "view.setPage", args: { page: 2 } }],
+        toolCalls: [{ name: "view.setPage", args: { page: 2 } }],
       })
-    ).toThrow(/idempotencyKey/);
+    ).toThrow(/tool call.id is required/);
     const parsed = parseAgentHttpResponse({
       schemaVersion: AGENT_SCHEMA_VERSION,
       text: "Moved.",
-      actions: [
+      toolCalls: [
         {
-          key: "view.setPage",
+          name: "view.setPage",
           args: { page: 2 },
-          idempotencyKey: "page-2",
+          id: "page-2",
         },
       ],
     });
-    expect(parsed.actions?.[0]?.idempotencyKey).toBe("page-2");
+    expect(parsed.toolCalls?.[0]?.id).toBe("page-2");
+    expect(parsed.toolCalls?.[0]?.name).toBe("view.setPage");
   });
 
-  it("rejects a non-numeric action expectedRevision", () => {
+  it("rejects a non-numeric call expectedRevision", () => {
     expect(() =>
       parseAgentHttpResponse({
         schemaVersion: AGENT_SCHEMA_VERSION,
-        actions: [
+        toolCalls: [
           {
-            key: "view.setPage",
+            name: "view.setPage",
             args: { page: 2 },
-            idempotencyKey: "page-2",
+            id: "page-2",
             expectedRevision: "1",
           },
         ],
@@ -335,11 +354,11 @@ describe("createAgentHttpClient", () => {
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           text: "Showing page 2.",
-          actions: [
+          toolCalls: [
             {
-              key: "view.setPage",
+              name: "view.setPage",
               args: { page: 2 },
-              idempotencyKey: "page-2",
+              id: "page-2",
             },
           ],
         });
@@ -354,7 +373,7 @@ describe("createAgentHttpClient", () => {
     expect(posts).toEqual(["turn"]);
   });
 
-  it("runs the actions a backend chose even when it also asked to read", async () => {
+  it("runs a proposal the moment the backend stops asking", async () => {
     const setPage = vi.fn();
     const live = session({ setPage });
     let rounds = 0;
@@ -363,29 +382,56 @@ describe("createAgentHttpClient", () => {
       request: () => {
         rounds += 1;
         // What a small model actually sends: a decision AND a row window, in
-        // the same breath, every round. Discarding the actions leaves the
-        // reader with a burnt discovery budget and an untouched table.
+        // the same breath. The decision is not lost — it is held as the
+        // phase's proposal until a reply settles it.
+        if (rounds === 1) {
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Page 2 it is.",
+            toolCalls: [
+              { id: "p", name: "view.setPage", args: { page: 2 } },
+              { id: "r", name: "read", args: { offset: 0, limit: 5 } },
+            ],
+          });
+        }
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           text: "Page 2 it is.",
-          actions:
-            rounds === 1
-              ? [
-                  {
-                    key: "view.setPage",
-                    args: { page: 2 },
-                    idempotencyKey: "p",
-                  },
-                ]
-              : [],
-          needs: { read: [{ offset: 0, limit: 5 }] },
+          toolCalls: [{ id: "p", name: "view.setPage", args: { page: 2 } }],
         });
       },
     });
 
+    expect(setPage).toHaveBeenCalledTimes(1);
     expect(setPage).toHaveBeenCalledWith(2);
     expect(result.keys).toEqual(["view.setPage"]);
     expect(result.results[0]?.ok).toBe(true);
+  });
+
+  it("applies nothing when the backend never settles on a plan", async () => {
+    const setPage = vi.fn();
+    const live = session({ setPage });
+    const result = await runAgentHttpTurn(live, "Page 2 please", {
+      endpoint: "https://agent.example/turn",
+      // A model that proposes and asks forever. Running the proposal anyway
+      // because the budget ran out would be writing on a guess.
+      request: () =>
+        Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "Working on it.",
+          toolCalls: [
+            { id: "p", name: "view.setPage", args: { page: 2 } },
+            { id: "r", name: "read", args: { offset: 0, limit: 5 } },
+          ],
+        }),
+    });
+
+    expect(setPage).not.toHaveBeenCalled();
+    expect(result.results).toEqual([]);
+    // The reader is told what did not happen, and what was going to.
+    expect(result.unresolved?.code).toBe("discovery-exhausted");
+    expect(result.unresolved?.pending).toEqual(["view.setPage"]);
+    expect(result.text).toBe("Working on it.");
   });
 
   it("answers a describe for a capability that does not exist", async () => {
@@ -401,15 +447,19 @@ describe("createAgentHttpClient", () => {
           // leaves nothing run and nothing explained.
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            needs: { describe: ["view", "view.setPage"] },
+            toolCalls: [
+              {
+                id: "d1",
+                name: "describe",
+                args: { keys: ["view", "view.setPage"] },
+              },
+            ],
           });
         }
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           text: "Page 2 it is.",
-          actions: [
-            { key: "view.setPage", args: { page: 2 }, idempotencyKey: "p" },
-          ],
+          toolCalls: [{ name: "view.setPage", args: { page: 2 }, id: "p" }],
         });
       },
     });
@@ -428,7 +478,9 @@ describe("createAgentHttpClient", () => {
           rounds += 1;
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            needs: { describe: ["nope"] },
+            toolCalls: [
+              { id: "d1", name: "describe", args: { keys: ["nope"] } },
+            ],
           });
         },
       })
@@ -447,13 +499,13 @@ describe("createAgentHttpClient", () => {
         Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           text: "Tried two.",
-          actions: [
-            { key: "view.setPage", args: { page: 2 }, idempotencyKey: "a" },
+          toolCalls: [
+            { name: "view.setPage", args: { page: 2 }, id: "a" },
             // A shape the schema refuses — the receipt still has to name it.
             {
-              key: "view.setSort",
+              name: "view.setSort",
               args: { foo: "salary" },
-              idempotencyKey: "b",
+              id: "b",
             },
           ],
         }),
@@ -464,27 +516,33 @@ describe("createAgentHttpClient", () => {
     expect(result.results[1]?.ok).toBe(false);
   });
 
-  it("answers describe and read needs without sending the whole dataset", async () => {
+  it("answers describe and read calls without sending the whole dataset", async () => {
     const live = session();
-    const bodies: { describe?: number; rows?: number }[] = [];
+    const bodies: { guides?: number; rows?: number }[] = [];
     const result = await runAgentHttpTurn(live, "Who is visible?", {
       endpoint: "https://agent.example/turn",
       request: (body) => {
+        const guides = toolValue<{ guides: readonly unknown[] }>(body, "d1");
+        const window = toolValue<RowWindowResult>(body, "r1");
         bodies.push({
-          describe: body.descriptions?.length,
-          rows: body.rows?.[0]?.rows.length,
+          guides: guides?.guides.length,
+          rows: window?.rows.length,
         });
-        if (!body.descriptions) {
+        if (!body.toolResults) {
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            needs: {
-              describe: ["rows.read"],
-              read: [{ offset: 0, limit: 1, columns: ["name"] }],
-            },
+            toolCalls: [
+              { id: "d1", name: "describe", args: { keys: ["rows.read"] } },
+              {
+                id: "r1",
+                name: "read",
+                args: { offset: 0, limit: 1, columns: ["name"] },
+              },
+            ],
           });
         }
-        expect(body.rows?.[0]?.redacted).toContain("ssn");
-        expect(body.rows?.[0]?.rows[0]?.cells).not.toHaveProperty("ssn");
+        expect(window?.redacted).toContain("ssn");
+        expect(window?.rows[0]?.cells).not.toHaveProperty("ssn");
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           text: "Ada is visible.",
@@ -494,7 +552,7 @@ describe("createAgentHttpClient", () => {
     expect(result.text).toBe("Ada is visible.");
     expect(result.needsFulfilled).toEqual({ describe: 1, read: 1 });
     expect(bodies[0]).toEqual({});
-    expect(bodies[1]?.describe).toBe(1);
+    expect(bodies[1]?.guides).toBe(1);
     expect(bodies[1]?.rows).toBe(1);
   });
 
@@ -522,29 +580,44 @@ describe("createAgentHttpClient", () => {
     await runAgentHttpTurn(live, "Describe then read", {
       endpoint: "https://agent.example/turn",
       request: (body) => {
+        const described = toolValue<{ guides: readonly { key: string }[] }>(
+          body,
+          "d1"
+        );
+        const window = toolValue<RowWindowResult>(body, "r1");
         firstBodies.push({
-          guides: body.descriptions?.map((guide) => guide.key),
-          columns: body.rows?.[0]
-            ? Object.keys(body.rows[0].rows[0]?.cells ?? {})
+          guides: described?.guides.map((guide) => guide.key),
+          columns: window
+            ? Object.keys((window.rows[0]?.cells as object | undefined) ?? {})
             : undefined,
         });
-        if (!body.descriptions?.length) {
+        if (!described) {
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            needs: { describe: ["rows.read"] },
+            toolCalls: [
+              { id: "d1", name: "describe", args: { keys: ["rows.read"] } },
+            ],
           });
         }
-        if (!body.rows?.length) {
+        if (!window) {
           expect(
-            body.descriptions?.some((guide) => guide.key === "rows.read")
+            described.guides.some((guide) => guide.key === "rows.read")
           ).toBe(true);
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            needs: { read: [{ offset: 0, limit: 1, columns: ["name"] }] },
+            toolCalls: [
+              {
+                id: "r1",
+                name: "read",
+                args: { offset: 0, limit: 1, columns: ["name"] },
+              },
+            ],
           });
         }
+        // The guide asked for two rounds ago is still in the request: a
+        // stateless backend is never told something once.
         expect(
-          body.descriptions?.some((guide) => guide.key === "rows.read")
+          described.guides.some((guide) => guide.key === "rows.read")
         ).toBe(true);
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
@@ -558,13 +631,22 @@ describe("createAgentHttpClient", () => {
     await runAgentHttpTurn(live, "Read again", {
       endpoint: "https://agent.example/turn",
       request: (body) => {
-        if (!body.rows?.length) {
+        const window = toolValue<RowWindowResult>(body, "r1");
+        if (!window) {
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            needs: { read: [{ offset: 0, limit: 1, columns: ["name"] }] },
+            toolCalls: [
+              {
+                id: "r1",
+                name: "read",
+                args: { offset: 0, limit: 1, columns: ["name"] },
+              },
+            ],
           });
         }
-        expect(body.rows?.[0]?.rows[0]?.rowKey).toBe("r2");
+        // A new turn re-reads: a window cached under the previous turn is not
+        // current for this one.
+        expect(window.rows[0]?.rowKey).toBe("r2");
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           text: "Again.",
@@ -589,11 +671,11 @@ describe("createAgentHttpClient", () => {
         revision = 2;
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
-          actions: [
+          toolCalls: [
             {
-              key: "view.setPage",
+              name: "view.setPage",
               args: { page: 2 },
-              idempotencyKey: "page-2",
+              id: "page-2",
             },
           ],
         });
@@ -615,11 +697,11 @@ describe("createAgentHttpClient", () => {
       request: () =>
         Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
-          actions: [
+          toolCalls: [
             {
-              key: "view.setPage",
+              name: "view.setPage",
               args: { page: 2 },
-              idempotencyKey: "page-2",
+              id: "page-2",
             },
           ],
         }),
@@ -647,11 +729,11 @@ describe("createAgentHttpClient", () => {
           writePolicy = "deny";
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            actions: [
+            toolCalls: [
               {
-                key: "view.setPage",
+                name: "view.setPage",
                 args: { page: 2 },
-                idempotencyKey: "page-2",
+                id: "page-2",
               },
             ],
           });
@@ -678,16 +760,16 @@ describe("createAgentHttpClient", () => {
       request: () =>
         Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
-          actions: [
+          toolCalls: [
             {
-              key: "view.setFilters",
+              name: "view.setFilters",
               args: { filters: { status: ["Active"] } },
-              idempotencyKey: "filter-active",
+              id: "filter-active",
             },
             {
-              key: "view.setSort",
+              name: "view.setSort",
               args: { key: "salary", dir: "desc" },
-              idempotencyKey: "sort-salary",
+              id: "sort-salary",
             },
           ],
         }),
@@ -721,23 +803,23 @@ describe("createAgentHttpClient", () => {
         request: () =>
           Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            actions: [
+            toolCalls: [
               {
-                key: "view.setPage",
+                name: "view.setPage",
                 args: { page: 2 },
-                idempotencyKey: "page-done",
+                id: "page-done",
               },
               {
-                key: "edit.cells",
+                name: "edit.cells",
                 args: {
                   edits: [{ rowKey: "r1", column: "name", value: "Ada" }],
                 },
-                idempotencyKey: "edit-pending",
+                id: "edit-pending",
               },
               {
-                key: "view.setPage",
+                name: "view.setPage",
                 args: { page: 3 },
-                idempotencyKey: "page-skip",
+                id: "page-skip",
               },
             ],
           }),
@@ -760,16 +842,16 @@ describe("createAgentHttpClient", () => {
       request: () =>
         Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
-          actions: [
+          toolCalls: [
             {
-              key: "edit.cells",
+              name: "edit.cells",
               args: {
                 edits: [
                   { rowKey: "r1", column: "name", value: "Ada Lovelace" },
                 ],
               },
               expectedRevision: 9,
-              idempotencyKey: "edit-ada-stale",
+              id: "edit-ada-stale",
             },
           ],
         }),
@@ -782,15 +864,15 @@ describe("createAgentHttpClient", () => {
       request: () =>
         Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
-          actions: [
+          toolCalls: [
             {
-              key: "edit.cells",
+              name: "edit.cells",
               args: {
                 edits: [
                   { rowKey: "r1", column: "name", value: "Ada Lovelace" },
                 ],
               },
-              idempotencyKey: "edit-ada",
+              id: "edit-ada",
             },
           ],
         }),
@@ -800,15 +882,15 @@ describe("createAgentHttpClient", () => {
       request: () =>
         Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
-          actions: [
+          toolCalls: [
             {
-              key: "edit.cells",
+              name: "edit.cells",
               args: {
                 edits: [
                   { rowKey: "r1", column: "name", value: "Ada Lovelace" },
                 ],
               },
-              idempotencyKey: "edit-ada",
+              id: "edit-ada",
             },
           ],
         }),
@@ -857,24 +939,24 @@ describe("createAgentHttpClient", () => {
 
   it("returns execute receipts when the backend asks to continue", async () => {
     const live = session();
-    const seen: (readonly ExecuteResult[] | undefined)[] = [];
+    const seen: (readonly { id: string }[] | undefined)[] = [];
     await runAgentHttpTurn(
       live,
       "Page 2",
       {
         endpoint: "https://agent.example/turn",
         request: (body) => {
-          seen.push(body.results);
-          if (!body.results) {
+          seen.push(body.toolResults);
+          if (!body.toolResults) {
             return Promise.resolve({
               schemaVersion: AGENT_SCHEMA_VERSION,
               text: "Moved.",
               continueWithResults: true,
-              actions: [
+              toolCalls: [
                 {
-                  key: "view.setPage",
+                  name: "view.setPage",
                   args: { page: 2 },
-                  idempotencyKey: "p2",
+                  id: "p2",
                 },
               ],
             });
@@ -888,23 +970,25 @@ describe("createAgentHttpClient", () => {
       { returnResults: true }
     );
     expect(seen[0]).toBeUndefined();
-    expect(seen[1]?.[0]?.ok).toBe(true);
+    // The continuation carries the receipt of the call it depends on, under
+    // that call's own id.
+    expect(seen[1]?.[0]?.id).toBe("p2");
     const text = await runAgentHttpTurn(
       live,
       "Page 2",
       {
         endpoint: "https://agent.example/turn",
         request: (body) => {
-          if (!body.results) {
+          if (!body.toolResults) {
             return Promise.resolve({
               schemaVersion: AGENT_SCHEMA_VERSION,
               text: "Moved.",
               continueWithResults: true,
-              actions: [
+              toolCalls: [
                 {
-                  key: "view.setPage",
+                  name: "view.setPage",
                   args: { page: 2 },
-                  idempotencyKey: "p2-text",
+                  id: "p2-text",
                 },
               ],
             });
@@ -937,15 +1021,15 @@ describe("createAgentHttpClient", () => {
         endpoint: "https://agent.example/turn",
         request: (body) =>
           Promise.resolve(
-            body.results
+            body.toolResults
               ? {
                   schemaVersion: AGENT_SCHEMA_VERSION,
                   text: "Sorted.",
-                  actions: [
+                  toolCalls: [
                     {
-                      key: "view.setSort",
+                      name: "view.setSort",
                       args: { key: "name", dir: "asc" },
-                      idempotencyKey: "sort-name",
+                      id: "sort-name",
                     },
                   ],
                 }
@@ -953,11 +1037,11 @@ describe("createAgentHttpClient", () => {
                   schemaVersion: AGENT_SCHEMA_VERSION,
                   text: "Filtered.",
                   continueWithResults: true,
-                  actions: [
+                  toolCalls: [
                     {
-                      key: "view.setFilters",
+                      name: "view.setFilters",
                       args: { filters: { status: ["Active"] } },
-                      idempotencyKey: "filter-active",
+                      id: "filter-active",
                     },
                   ],
                 }
@@ -986,16 +1070,16 @@ describe("createAgentHttpClient", () => {
       {
         endpoint: "https://agent.example/turn",
         request: (body) => {
-          if (!body.results) {
+          if (!body.toolResults) {
             return Promise.resolve({
               schemaVersion: AGENT_SCHEMA_VERSION,
               text: "Paged.",
               continueWithResults: true,
-              actions: [
+              toolCalls: [
                 {
-                  key: "view.setPage",
+                  name: "view.setPage",
                   args: { page: 2 },
-                  idempotencyKey: "p2-stale",
+                  id: "p2-stale",
                 },
               ],
             });
@@ -1005,11 +1089,11 @@ describe("createAgentHttpClient", () => {
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             text: "Sorted.",
-            actions: [
+            toolCalls: [
               {
-                key: "view.setSort",
+                name: "view.setSort",
                 args: { key: "name", dir: "asc" },
-                idempotencyKey: "sort-stale",
+                id: "sort-stale",
               },
             ],
           });
@@ -1073,7 +1157,9 @@ describe("createAgentHttpClient", () => {
         request: () =>
           Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            needs: { describe: ["rows.read"] },
+            toolCalls: [
+              { id: "d1", name: "describe", args: { keys: ["rows.read"] } },
+            ],
           }),
       })
     ).rejects.toThrow(/too many times/);
@@ -1122,22 +1208,35 @@ describe("createAgentHttpClient", () => {
     expect(() =>
       parseAgentHttpResponse({
         schemaVersion: AGENT_SCHEMA_VERSION,
-        actions: ["nope"],
+        toolCalls: ["nope"],
       })
-    ).toThrow(/action/);
-    const withNeeds = parseAgentHttpResponse({
+    ).toThrow(/tool call must be an object/);
+    const asked = parseAgentHttpResponse({
       schemaVersion: AGENT_SCHEMA_VERSION,
-      needs: {
-        describe: ["rows.read", 1],
-        read: [{ offset: 0, limit: 2, columns: ["name", 2], scope: "visible" }],
-      },
+      toolCalls: [
+        { id: "d1", name: "describe", args: { keys: ["rows.read"] } },
+        {
+          id: "r1",
+          name: "read",
+          args: { offset: 0, limit: 2, columns: ["name", 2], scope: "visible" },
+        },
+      ],
     });
-    expect(withNeeds.needs?.describe).toEqual(["rows.read"]);
-    expect(withNeeds.needs?.read?.[0]?.scope).toBe("visible");
+    expect(asked.toolCalls?.[0]?.args).toEqual({ keys: ["rows.read"] });
+    expect(asked.toolCalls?.[1]?.args).toMatchObject({
+      scope: "visible",
+      columns: ["name"],
+    });
     expect(() =>
       parseAgentHttpResponse({
         schemaVersion: AGENT_SCHEMA_VERSION,
-        needs: { read: [{ offset: 0, limit: 1, scope: "nope" }] },
+        toolCalls: [
+          {
+            id: "r1",
+            name: "read",
+            args: { offset: 0, limit: 1, scope: "nope" },
+          },
+        ],
       })
     ).toThrow(/read\.scope/);
 
@@ -1189,7 +1288,13 @@ describe("createAgentHttpClient", () => {
         request: () =>
           Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            needs: { read: [{ offset: 0, limit: 1, columns: ["name"] }] },
+            toolCalls: [
+              {
+                id: "r1",
+                name: "read",
+                args: { offset: 0, limit: 1, columns: ["name"] },
+              },
+            ],
           }),
       })
     ).rejects.toThrow(/read boom/);
@@ -1251,7 +1356,13 @@ describe("createAgentHttpClient", () => {
         if (round === 1) {
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            needs: { read: [{ offset: 0, limit: 1, columns: ["name"] }] },
+            toolCalls: [
+              {
+                id: "r1",
+                name: "read",
+                args: { offset: 0, limit: 1, columns: ["name"] },
+              },
+            ],
           });
         }
         revision = 2;
@@ -1351,7 +1462,13 @@ describe("transport limits and cancellation", () => {
           Promise.resolve(
             okResponse({
               schemaVersion: AGENT_SCHEMA_VERSION,
-              needs: { read: [{ offset: 0, limit: 40, scope: "visible" }] },
+              toolCalls: [
+                {
+                  id: "r1",
+                  name: "read",
+                  args: { offset: 0, limit: 40, scope: "visible" },
+                },
+              ],
             })
           ),
       })

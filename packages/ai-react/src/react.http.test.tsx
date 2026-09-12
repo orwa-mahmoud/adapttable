@@ -141,16 +141,16 @@ describe("an HTTP turn over the live React binding", () => {
           Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             text: "Done.",
-            actions: [
+            toolCalls: [
               {
-                key: "view.setSearch",
+                id: "search-ada",
+                name: "view.setSearch",
                 args: { search: "ada" },
-                idempotencyKey: "search-ada",
               },
               {
-                key: "view.setSort",
+                id: "sort-salary",
+                name: "view.setSort",
                 args: { key: "salary", dir: "desc" },
-                idempotencyKey: "sort-salary",
               },
             ],
           }),
@@ -178,11 +178,11 @@ describe("an HTTP turn over the live React binding", () => {
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             text: "Sorted.",
-            actions: [
+            toolCalls: [
               {
-                key: "view.setSort",
+                id: "sort-stale",
+                name: "view.setSort",
                 args: { key: "salary", dir: "desc" },
-                idempotencyKey: "sort-stale",
               },
             ],
           });
@@ -211,12 +211,8 @@ describe("an HTTP turn over the live React binding", () => {
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
             text: "Paged.",
-            actions: [
-              {
-                key: "view.setPage",
-                args: { page: 2 },
-                idempotencyKey: "page-2",
-              },
+            toolCalls: [
+              { id: "page-2", name: "view.setPage", args: { page: 2 } },
             ],
           });
         },
