@@ -162,6 +162,23 @@ const INTERPOLATION_CASES: Record<
       }) ?? "",
     expects: [],
   },
+  // A token these turn into a sentence, not a value they interpolate: a
+  // translation that quoted the token back would be showing a reader a code.
+  assistantUndoBlocked: {
+    call: (fn) =>
+      (fn as (code: string) => string | undefined)("table-moved") ?? "",
+    expects: [],
+  },
+  assistantCapabilityName: {
+    call: (fn) =>
+      (fn as (capability: string) => string | undefined)("edit.cells") ?? "",
+    expects: [],
+  },
+  // This one does interpolate: the capability's own name, in this language.
+  assistantAlwaysAllowedRevoke: {
+    call: (fn) => (fn as (capability: string) => string)("edit.cells"),
+    expects: [],
+  },
   assistantReceiptChange: {
     call: (fn) =>
       (fn as (c: { before: string; after: string }) => string)({
