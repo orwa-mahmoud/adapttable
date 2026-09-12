@@ -5,9 +5,6 @@
  * observes the live table and publishes a versioned manifest.
  */
 import {
-  type AgentAggregationColumn,
-  type AgentAggregations,
-  type AgentAggregationsPatch,
   type AgentApply,
   type AgentCapabilityDefinition,
   type AgentColumn,
@@ -16,13 +13,25 @@ import {
   type AgentManifest,
   type AgentObservation,
   type AgentSession,
+  type AggregationInputs,
+  aggregationsFor,
+  applyAggregations,
   type ApprovalResult,
   type ApprovalSubject,
+  type ApprovalTransaction,
+  closeTransaction,
+  contractFingerprint,
   type CommitPolicy,
   createAgentSession,
+  createApprovalMemory,
+  displayProposals,
   monotonicRevision,
   observationFromNeutral,
+  openTransaction,
+  type PendingApproval,
+  type ProposalResolver,
   readRowsFromNeutral,
+  recordDecision,
   type ResolvedRow,
   resolveRowFromNeutral,
   revisionToken,
@@ -30,28 +39,16 @@ import {
   type RowReadQuery,
   type RowRef,
   type RowWindow,
+  settleDecisions,
   type SharedApproval,
   sharedApproval,
+  type TableAgentBridge as NeutralBridge,
   type TableAgentColumnPatch,
   type WritePolicy,
-  type WriteProposal,
 } from "@adapttable/ai";
 import {
-  addAggregation,
-  type ApprovalPresentation,
-  declaredByDeveloper,
-  offerableOperations,
-  readerControlAllowed,
-  removeAggregation,
-  resolveAggregatable,
-  restoreAggregationDefaults,
-} from "@adapttable/core";
-import {
   AGENT_APPROVAL_STATE,
-  type AgentApprovalDecision,
-  type AgentApprovalOperation,
   type AgentApprovalPending,
-  type AgentApprovalProposal,
   type FeatureProviderProps,
   featureStateKey,
   FeatureStateScope,
@@ -72,25 +69,11 @@ import {
 
 export type { SharedApproval, TableAgentColumnPatch };
 
-/**
- * How a host receives live updates.
- *
- * @public
- */
-export interface TableAgentBridge {
-  /** Called when the published manifest changes. */
-  publish?(manifest: AgentManifest): void;
-  /** Called with the live session after mount. */
-  attach?(session: AgentSession): void;
-  /**
-   * Called when a write starts or stops waiting on a human.
-   *
-   * `execute` does not return while an approval is open, so a panel outside
-   * the table has no other way to know the turn is parked rather than
-   * thinking.
-   */
-  readonly approvals?: (pending: AgentApprovalPending | null) => void;
-}
+// The bridge contract is `@adapttable/ai`'s — a manifest, a session and a
+// pending approval are what any binding publishes, none of it React. Named
+// here with this binding's own pending shape so every existing import keeps
+// working.
+export type TableAgentBridge = NeutralBridge<AgentApprovalPending>;
 
 const PAGE_ONLY_SOURCE = {
   fullDataset: false,
@@ -303,7 +286,7 @@ function observationFromRuntime(
           : undefined
       ),
       groupBy: view?.groupingState?.groupBy,
-      aggregations: aggregationsFromView(view, options),
+      aggregations: aggregationsFor(aggregationInputs(view, options)),
       availableFilters: agentFiltersFromDefs(
         view?.filterDefs,
         view?.filterRegistry,
@@ -358,7 +341,7 @@ function observationFromRuntime(
     sortBy: query?.sortBy,
     sortDir: query?.sortDir,
     groupBy: view?.groupingState?.groupBy,
-    aggregations: aggregationsFromView(view, options),
+    aggregations: aggregationsFor(aggregationInputs(view, options)),
     availableFilters: agentFiltersFromDefs(
       view?.filterDefs,
       view?.filterRegistry,
@@ -537,7 +520,7 @@ function applyFromRuntime(
       grouping.setGroupBy(key);
     },
     setAggregations: (patch) => {
-      applyAggregationsPatch(view(), patch, options.columns);
+      applyAggregations(aggregationInputs(view(), options), patch);
     },
     pinColumn: (key, side) => {
       const pinning = view()?.pinning;
@@ -563,136 +546,68 @@ const BUILTIN_AGGREGATE_LABELS: Readonly<Record<string, string>> = {
   count: "Count",
 };
 
-function aggregationSourceFromView(
-  view: ReturnType<ReturnType<typeof useTableRuntime>["view"]>
-):
-  | {
-      grouping: "client" | "server" | false | undefined;
-      aggregateOperations: readonly string[] | undefined;
-    }
-  | undefined {
-  const groupingState = view?.groupingState;
-  if (!groupingState) return undefined;
-  const grouping = view?.sourceCapabilities?.grouping;
-  if (grouping === false) return undefined;
-  if (grouping === "server" && groupingState.honorsAggregates !== true) {
-    return undefined;
-  }
+/**
+ * Capabilities a reader may never wave through for a session.
+ *
+ * Deleting rows is asked about every time however many times it has been
+ * allowed, and an action whose own configuration demands a human keeps
+ * demanding one — "don't ask again" is the reader's convenience, never a way
+ * around a rule the table set.
+ */
+const NEVER_REMEMBERED = new Set(["rows.delete"]);
+
+function mayRemember(capability: string): boolean {
+  return !NEVER_REMEMBERED.has(capability);
+}
+
+/**
+ * How this binding finds what the person in front of the table may see.
+ *
+ * The lookups are React's — only this side knows how to find a row in a
+ * runtime view. What is done with them is not: the enrichment algorithm lives
+ * in `@adapttable/ai`, so every binding reports an unreadable column the same
+ * way rather than each inventing its own blank cell.
+ */
+function readerResolver(
+  runtime: ReturnType<typeof useTableRuntime>,
+  columns: Readonly<Record<string, TableAgentColumnPatch>> | undefined
+): ProposalResolver {
+  const view = runtime.view();
+  const recordFor = (rowKey: string): Record<string, unknown> | undefined => {
+    const row = findRow(runtime, rowKey);
+    return row && typeof row === "object"
+      ? (row as Record<string, unknown>)
+      : undefined;
+  };
   return {
-    grouping,
-    aggregateOperations: groupingState.aggregateOperations,
+    rowLabel: (rowKey) => {
+      const row = findRow(runtime, rowKey);
+      return row !== undefined && view?.rowLabel
+        ? view.rowLabel(row)
+        : undefined;
+    },
+    cellValue: (rowKey, column) => recordFor(rowKey)?.[column],
+    readable: (column) => columns?.[column]?.readable !== false,
+    columnLabel: (column) => columns?.[column]?.label,
   };
 }
 
-function agentAllowsAggregationColumn(
-  key: string,
-  patches: TableAgentOptions["columns"]
-): boolean {
-  return patches?.[key]?.readable !== false;
-}
-
-function aggregationsFromView(
-  view: ReturnType<ReturnType<typeof useTableRuntime>["view"]>,
+/**
+ * The live table's grouping state, as the neutral rules want it.
+ *
+ * A projection, not a decision: it names where the facts are and which
+ * columns the agent may read. What may be offered and what may be set is
+ * `@adapttable/ai`'s to answer, so a second binding gets the same answers.
+ */
+function aggregationInputs(
+  view: TableRuntimeView<unknown> | undefined,
   options: TableAgentOptions
-): AgentAggregations | undefined {
-  const groupingState = view?.groupingState;
-  if (!groupingState?.setAggregateOverrides) return undefined;
-  const source = aggregationSourceFromView(view);
-  if (!source) return undefined;
-  const columns: AgentAggregationColumn[] = [];
-  for (const column of groupingState.columns ?? []) {
-    if (!agentAllowsAggregationColumn(column.key, options.columns)) continue;
-    const resolved = resolveAggregatable(column);
-    const operations = offerableOperations(resolved, source);
-    if (operations.length === 0) continue;
-    columns.push({
-      id: column.key,
-      operations: operations.map((operation) => ({
-        id: operation.id,
-        label:
-          operation.label ??
-          BUILTIN_AGGREGATE_LABELS[operation.id] ??
-          operation.id,
-      })),
-    });
-  }
-  if (columns.length === 0) return undefined;
+): AggregationInputs {
   return {
-    columns,
-    active: columns
-      .filter(
-        (column) => groupingState.aggregateOverrides[column.id] !== undefined
-      )
-      .map((column) => ({
-        id: column.id,
-        operation: groupingState.aggregateOverrides[column.id],
-      })),
-  };
-}
-
-function applyAggregationsPatch(
-  view: ReturnType<ReturnType<typeof useTableRuntime>["view"]>,
-  patch: AgentAggregationsPatch,
-  patches: TableAgentOptions["columns"]
-): void {
-  const groupingState = view?.groupingState;
-  if (!groupingState?.setAggregateOverrides) {
-    throw new Error("setAggregations is not wired");
-  }
-  if (patch.restoreDefaults) {
-    groupingState.setAggregateOverrides(restoreAggregationDefaults());
-    return;
-  }
-  const source = aggregationSourceFromView(view) ?? {
+    state: view?.groupingState,
     grouping: view?.sourceCapabilities?.grouping,
-    aggregateOperations: groupingState.aggregateOperations,
+    allows: (key) => options.columns?.[key]?.readable !== false,
   };
-  const byKey = new Map(
-    (groupingState.columns ?? []).map((column) => [column.key, column])
-  );
-  for (const [key, operationId] of Object.entries(patch.set ?? {})) {
-    const column = byKey.get(key);
-    const resolved = column ? resolveAggregatable(column) : undefined;
-    if (
-      !agentAllowsAggregationColumn(key, patches) ||
-      !resolved ||
-      !offerableOperations(resolved, source).some(
-        (operation) => operation.id === operationId
-      )
-    ) {
-      throw new Error(`"${key}" cannot use operation "${operationId}"`);
-    }
-  }
-  for (const key of patch.remove ?? []) {
-    const column = byKey.get(key);
-    if (
-      !agentAllowsAggregationColumn(key, patches) ||
-      !column ||
-      !readerControlAllowed(resolveAggregatable(column), source)
-    ) {
-      throw new Error(`"${key}" cannot be removed`);
-    }
-  }
-  let next = { ...groupingState.aggregateOverrides };
-  for (const [key, operationId] of Object.entries(patch.set ?? {})) {
-    next = addAggregation(next, key, operationId);
-  }
-  for (const key of patch.remove ?? []) {
-    const column = byKey.get(key);
-    if (!column) continue;
-    next = removeAggregation(
-      next,
-      key,
-      declaredByDeveloper(column, {
-        columns: groupingState.columns ?? [],
-        overrides: groupingState.aggregateOverrides,
-        queryAggregates: groupingState.queryAggregates,
-        computedKeys: groupingState.computedAggregateKeys,
-        source,
-      })
-    );
-  }
-  groupingState.setAggregateOverrides(next);
 }
 
 function asCallable(
@@ -834,136 +749,6 @@ function bindLiveSession(
 }
 
 /** One open approval, whichever shape the write took. */
-interface PendingApproval {
-  readonly proposals: readonly AgentApprovalProposal[];
-  readonly operation?: AgentApprovalOperation;
-  /** Whether the reader may decide the rows one at a time. */
-  readonly perItem: boolean;
-  /** Settles the waiting `execute`. Later calls are ignored. */
-  readonly resolve: (result: ApprovalResult) => void;
-}
-
-/**
- * One approval and what the reader has decided about it, as a single value.
- *
- * The two are born together and die together. Holding the decisions in their
- * own state and filling them from an effect left a frame where a new write's
- * proposals were on screen beside the previous write's decisions — and a
- * click landing in that frame decided the wrong rows.
- *
- * `id` is why a control can be trusted. Every decision handler closes over
- * the id it was made for and does nothing if the open transaction has moved
- * on, so a button rendered for approval A cannot answer approval B.
- */
-interface ApprovalTransaction {
-  readonly id: number;
-  readonly pending: PendingApproval;
-  readonly decisions: readonly AgentApprovalDecision[];
-  /** Where this write is reviewed, frozen with the transaction. */
-  readonly presentation: ApprovalPresentation;
-}
-
-/**
- * What the reader sees beside Approve, resolved from THEIR table.
- *
- * Deliberately not the model's `before`. That value is read at the agent's
- * addressing scope and travels back to the backend, so widening it to make
- * the approval strip read nicely would be a disclosure. This one never
- * leaves the browser: it is looked up in the table already on screen, which
- * is why a row the current filter hides still shows its real value.
- *
- * Viewing the table is not entitlement to every cell in it, so a column the
- * host marked unreadable resolves to nothing here too — and "nothing" is
- * reported as unavailable rather than drawn as an empty cell, because a
- * blank value and a value nobody could look up are different facts.
- */
-function displayProposals(
-  proposals: readonly WriteProposal[],
-  runtime: ReturnType<typeof useTableRuntime>,
-  columns: Readonly<Record<string, TableAgentColumnPatch>> | undefined
-): readonly AgentApprovalProposal[] {
-  const view = runtime.view();
-  return proposals.map((proposal) => {
-    const row = findRow(runtime, proposal.rowKey);
-    const label =
-      row !== undefined && view?.rowLabel ? view.rowLabel(row) : undefined;
-    const readable =
-      proposal.column === undefined ||
-      columns?.[proposal.column]?.readable !== false;
-    const record =
-      readable && row && typeof row === "object"
-        ? (row as Record<string, unknown>)
-        : undefined;
-    const before =
-      proposal.column !== undefined && record
-        ? record[proposal.column]
-        : undefined;
-    const known = before !== undefined;
-    const columnLabel = proposal.column
-      ? columns?.[proposal.column]?.label
-      : undefined;
-    return {
-      rowKey: proposal.rowKey,
-      ...(label ? { rowLabel: label } : {}),
-      ...(proposal.column ? { column: proposal.column } : {}),
-      ...(columnLabel ? { columnLabel } : {}),
-      ...(known ? { before } : { beforeUnavailable: true }),
-      ...(proposal.after !== undefined ? { after: proposal.after } : {}),
-    };
-  });
-}
-
-/** Clear the open transaction, but only if it is still this one. */
-function closeTransaction(
-  entry: PendingApproval
-): (current: ApprovalTransaction | null) => ApprovalTransaction | null {
-  return (current) => (current?.pending === entry ? null : current);
-}
-
-/**
- * Record one decision, or refuse to.
- *
- * Pure, so a replayed render cannot turn one click into two answers. Three
- * things make it a no-op: the open transaction is not the one this control
- * was made for, the position is not a row of that plan, or the decision is
- * already what it would set.
- */
-function recordDecision(
-  current: ApprovalTransaction | null,
-  id: number,
-  index: number,
-  approved: boolean
-): ApprovalTransaction | null {
-  if (current?.id !== id) return current ?? null;
-  if (!Number.isInteger(index)) return current;
-  if (index < 0 || index >= current.decisions.length) return current;
-  const next: AgentApprovalDecision = approved ? "approved" : "rejected";
-  if (current.decisions[index] === next) return current;
-  const decisions = [...current.decisions];
-  decisions[index] = next;
-  return { ...current, decisions };
-}
-
-/**
- * Settle an approval from what the reader decided.
- *
- * Undecided rows take the fallback, so "Approve" means the ones nobody has
- * answered yet and a row already refused stays refused. The result is always
- * the position list: whether that reads as approved, partial or rejected is
- * the session's judgement, made in one place rather than two.
- */
-function settle(
-  decisions: readonly AgentApprovalDecision[],
-  fallback: AgentApprovalDecision
-): { readonly approved: readonly number[] } {
-  const approved: number[] = [];
-  decisions.forEach((decision, index) => {
-    const settled = decision === "pending" ? fallback : decision;
-    if (settled === "approved") approved.push(index);
-  });
-  return { approved };
-}
-
 function TableAgentProvider({
   feature,
   children,
@@ -1002,12 +787,34 @@ function TableAgentProvider({
   useDebugValue(stamp);
 
   const hostApprove = options.onApprove;
+  // What the reader has said not to be asked about again. Scoped to the
+  // contract, so it forgets the moment the table is not the one they agreed
+  // about.
+  const approvalMemory = useRef(createApprovalMemory());
+  // The contract the reader agreed about. A label, a permission or a
+  // capability changing makes it a different table, and the memory clears.
+  const contractVersion = useCallback(
+    () => contractFingerprint(session.manifest(), session.catalog()),
+    [session]
+  );
   const waitForChrome = useRef<
     (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>
   >(() => Promise.resolve(false));
   waitForChrome.current = (subject, signal) => {
     if (pendingRef.current) {
       return Promise.reject(new Error("an approval is already pending"));
+    }
+    // Consulted only here, after the session has already decided a human
+    // would be asked. It can never turn `approval: "never"` into a write
+    // nobody saw, and it never answers for a write that enumerates rows.
+    const capability =
+      subject.kind === "operation" ? subject.capability : undefined;
+    if (
+      capability !== undefined &&
+      mayRemember(capability) &&
+      approvalMemory.current.allows(capability, contractVersion())
+    ) {
+      return Promise.resolve(true);
     }
     return new Promise<ApprovalResult>((resolve) => {
       // A write is either rows the reader can decide one at a time, or one
@@ -1017,14 +824,14 @@ function TableAgentProvider({
       const rows = subject.kind === "rows";
       let settled = false;
       const entry: PendingApproval = {
+        ...(rows ? {} : { capability: subject.capability }),
         // What the reader is shown, resolved from their own table. The
         // model's own `before` values stay in the session and never reach
         // this side.
         proposals: rows
           ? displayProposals(
               subject.proposals,
-              runtimeRef.current,
-              optionsRef.current.columns
+              readerResolver(runtimeRef.current, optionsRef.current.columns)
             )
           : [],
         perItem: rows && subject.perItem,
@@ -1054,14 +861,11 @@ function TableAgentProvider({
       // Identity and decisions in one write, so no render ever shows this
       // write's rows beside the last write's answers.
       transactionId.current += 1;
-      setTransaction({
-        id: transactionId.current,
-        pending: entry,
-        decisions: entry.proposals.map(() => "pending"),
-        // Resolved by the session for THIS action, so an override of
-        // `ai.approval.presentation` reaches the surface that draws it.
-        presentation: subject.presentation,
-      });
+      // Resolved by the session for THIS action, so an override of
+      // `ai.approval.presentation` reaches the surface that draws it.
+      setTransaction(
+        openTransaction(transactionId.current, entry, subject.presentation)
+      );
       if (signal?.aborted) {
         entry.resolve(false);
         return;
@@ -1186,7 +990,9 @@ function TableAgentProvider({
     // decided", it is "there was never anything to enumerate".
     if (transaction.pending.proposals.length === 0) return;
     if (transaction.decisions.includes("pending")) return;
-    transaction.pending.resolve(settle(transaction.decisions, "rejected"));
+    transaction.pending.resolve(
+      settleDecisions(transaction.decisions, "rejected")
+    );
   }, [transaction]);
 
   // Rebuilt every render on purpose: the published value is what subscribers
@@ -1209,17 +1015,38 @@ function TableAgentProvider({
           // custom operation, or one that enumerates no rows at all. Sending
           // positions for one of those reaches the session as a decision it
           // is right to refuse, and an empty list reads as "approved none".
+          ...(transaction.pending.capability !== undefined &&
+          mayRemember(transaction.pending.capability)
+            ? {
+                alwaysAllow: () => {
+                  const capability = transaction.pending.capability;
+                  if (capability === undefined) return;
+                  approvalMemory.current.remember(
+                    capability,
+                    contractVersion()
+                  );
+                  transaction.pending.resolve(true);
+                },
+              }
+            : {}),
           approve: () =>
             transaction.pending.resolve(
               transaction.pending.perItem
-                ? settle(transaction.decisions, "approved")
+                ? settleDecisions(transaction.decisions, "approved")
                 : true
             ),
-          reject: () =>
+          // A stated reason travels with the refusal, so the receipt and the
+          // model-visible result can say why rather than only that.
+          reject: (reason?: string) =>
             transaction.pending.resolve(
               transaction.pending.perItem
-                ? settle(transaction.decisions, "rejected")
-                : false
+                ? {
+                    ...settleDecisions(transaction.decisions, "rejected"),
+                    ...(reason?.trim() ? { reason: reason.trim() } : {}),
+                  }
+                : reason?.trim()
+                  ? { approved: [], reason: reason.trim() }
+                  : false
             ),
           ...(transaction.pending.perItem
             ? { decideAt: decideAt(transaction.id) }

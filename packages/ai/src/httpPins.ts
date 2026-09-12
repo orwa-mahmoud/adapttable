@@ -23,7 +23,10 @@
  * session: secrets never enter a fingerprint, and a table that goes away takes
  * its records with it.
  */
-import type { AgentManifest, AgentSession, CatalogEntry } from "./types";
+import { contractFingerprint } from "./binding";
+import type { AgentSession } from "./types";
+
+export { contractFingerprint };
 
 /** How a backend answered the contract it was sent. @public */
 export type PinStatus = "acknowledged" | "expired" | "unknown" | "unsupported";
@@ -49,43 +52,6 @@ export const DEFAULT_PIN_TTL_MS = 30 * 60 * 1000;
 
 /** Connections one table session may hold pins for at once. */
 export const DEFAULT_PIN_CONNECTIONS = 8;
-
-/**
- * A stable, unambiguous name for everything a backend was told.
- *
- * Structured rather than joined with separators: a column id containing the
- * separator would otherwise be able to spell a different contract. Turn-specific
- * state is deliberately absent — a view revision moving is not the contract
- * changing — while labels, types, limits and row addressing are present,
- * because a backend that was told the wrong label writes the wrong prompt even
- * though every key is still the same.
- */
-export function contractFingerprint(
-  manifest: AgentManifest,
-  catalog: readonly CatalogEntry[]
-): string {
-  return JSON.stringify({
-    tableId: manifest.tableId,
-    capabilities: [...manifest.capabilities].sort((a, b) => a.localeCompare(b)),
-    columns: [...manifest.columns]
-      .sort((a, b) => a.id.localeCompare(b.id))
-      .map((column) => ({
-        id: column.id,
-        label: column.label,
-        type: column.type,
-        readable: column.readable,
-        writable: column.writable,
-        sortable: column.sortable,
-      })),
-    rowAddressing: manifest.rowAddressing,
-    limits: manifest.limits,
-    policy: manifest.policy,
-    source: manifest.source,
-    catalog: [...catalog]
-      .sort((a, b) => a.key.localeCompare(b.key))
-      .map((entry) => ({ key: entry.key, summary: entry.summary })),
-  });
-}
 
 interface ConnectionState {
   record?: PinRecord;

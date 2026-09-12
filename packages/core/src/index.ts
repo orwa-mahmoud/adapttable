@@ -33,6 +33,14 @@ export {
   revisionToken,
 } from "./engine/neutralTable";
 export { engineSearchText } from "./engine/searchText";
+// Presentation contracts for an agent write awaiting a human. Type-only: an
+// adapter names them without any AI runtime reaching its graph.
+export type {
+  AgentApprovalDecision,
+  AgentApprovalOperation,
+  AgentApprovalPending,
+  AgentApprovalProposal,
+} from "./approval/types";
 export type {
   ActionAiOptions,
   ActionApprovalPolicy,

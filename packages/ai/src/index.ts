@@ -9,10 +9,34 @@
  * @packageDocumentation
  */
 export {
+  type AggregationInputs,
+  type AggregationState,
+  aggregationsFor,
+  applyAggregations,
+} from "./aggregationCommands";
+export {
   type ResolvedApproval,
   type SharedApproval,
   sharedApproval,
 } from "./approvalConfig";
+export {
+  type ApprovalTransaction,
+  closeTransaction,
+  createApprovalMemory,
+  openTransaction,
+  type PendingApproval,
+  recordDecision,
+  settleDecisions,
+} from "./approvalTransaction";
+export {
+  type BindingOperations,
+  type BindingQuery,
+  type BindingSnapshot,
+  contractFingerprint,
+  displayProposals,
+  type ProposalResolver,
+  type TableAgentBridge,
+} from "./binding";
 export {
   assertUniqueSuggestions,
   type AssistantAction,

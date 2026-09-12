@@ -638,7 +638,19 @@ export type ApprovalSubject =
  *
  * @public
  */
-export type ApprovalResult = boolean | { readonly approved: readonly number[] };
+export type ApprovalResult =
+  | boolean
+  | {
+      readonly approved: readonly number[];
+      /**
+       * Why the reader refused, when they said.
+       *
+       * Reaches the receipt and the model-visible result, so an assistant can
+       * answer "because it was the wrong quarter" instead of "rejected" and
+       * the reader is not asked to explain themselves twice.
+       */
+      readonly reason?: string;
+    };
 
 /**
  * Per-row outcome of a bulk write. Failures are never dropped.
@@ -668,6 +680,8 @@ export interface WriteExecuteResult {
   readonly applied: boolean;
   /** Approval recorded for this execute. */
   readonly approval: ApprovalOutcome;
+  /** Why the reader refused, when they said. */
+  readonly approvalReason?: string;
   /** Per-row receipts, when the host returned them. */
   readonly results?: readonly WriteRowResult[];
 }

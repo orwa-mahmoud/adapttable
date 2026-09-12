@@ -409,7 +409,13 @@ export function createAgentSession(
     );
     const approval = decision.outcome;
     if (approval === "pending" || approval === "rejected") {
-      return writePayload(plan.proposals, false, approval);
+      return writePayload(
+        plan.proposals,
+        false,
+        approval,
+        undefined,
+        decision.reason
+      );
     }
     throwIfCancelled();
     revalidate(key, entry, true);
@@ -1306,6 +1312,8 @@ interface ApprovalDecision {
   readonly outcome: ApprovalOutcome;
   /** Approved positions in the plan, when the reader decided row by row. */
   readonly approved?: readonly number[];
+  /** Why the reader refused, when they said. */
+  readonly reason?: string;
 }
 
 /**
@@ -1382,10 +1390,13 @@ async function decideApproval(
   if (typeof decision === "boolean") {
     return { outcome: decision ? "approved" : "rejected" };
   }
+  // A stated reason survives whatever the positions turn out to mean, so a
+  // partial run can still say why the rest was left out.
+  const reason = decision.reason ? { reason: decision.reason } : {};
   const approved = readPositions(decision, total, decomposable);
-  if (approved.length === 0) return { outcome: "rejected" };
-  if (approved.length === total) return { outcome: "approved" };
-  return { outcome: "partial", approved };
+  if (approved.length === 0) return { outcome: "rejected", ...reason };
+  if (approved.length === total) return { outcome: "approved", ...reason };
+  return { outcome: "partial", approved, ...reason };
 }
 
 /**
@@ -1442,9 +1453,16 @@ function writePayload(
   proposals: readonly WriteProposal[],
   applied: boolean,
   approval: ApprovalOutcome,
-  results?: readonly WriteRowResult[]
+  results?: readonly WriteRowResult[],
+  approvalReason?: string
 ): WriteExecuteResult {
-  return { proposals, applied, approval, results };
+  return {
+    proposals,
+    applied,
+    approval,
+    results,
+    ...(approvalReason ? { approvalReason } : {}),
+  };
 }
 
 interface CellEdit {
