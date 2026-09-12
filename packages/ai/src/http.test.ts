@@ -1377,6 +1377,247 @@ describe("createAgentHttpClient", () => {
   });
 });
 
+describe("pinning the contract on a backend", () => {
+  const ack = (contractVersion?: string) => ({
+    status: "acknowledged" as const,
+    ...(contractVersion ? { contractVersion } : {}),
+  });
+
+  it("does not pin on a reply that says nothing about the contract", async () => {
+    const live = session();
+    const bodies: (unknown | undefined)[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      request: (body: { catalog?: unknown }) => {
+        bodies.push(body.catalog);
+        // An ordinary successful turn. It proves nothing about pinning.
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+        });
+      },
+    };
+    await runAgentHttpTurn(live, "One", options);
+    await runAgentHttpTurn(live, "Two", options);
+
+    expect(bodies[0]).toBeDefined();
+    expect(bodies[1]).toBeDefined();
+  });
+
+  it("stops sending the contract once a reply acknowledges it", async () => {
+    const live = session();
+    const bodies: (unknown | undefined)[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      request: (body: { catalog?: unknown; contractVersion?: string }) => {
+        bodies.push(body.catalog);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          pin: ack(body.contractVersion),
+        });
+      },
+    };
+    await runAgentHttpTurn(live, "One", options);
+    await runAgentHttpTurn(live, "Two", options);
+
+    expect(bodies[0]).toBeDefined();
+    expect(bodies[1]).toBeUndefined();
+  });
+
+  it("keeps two endpoints from using each other's pin", async () => {
+    const live = session();
+    const seen: Record<string, boolean[]> = { a: [], b: [] };
+    const backend = (name: string) => ({
+      endpoint: `https://${name}.example/turn`,
+      request: (body: { catalog?: unknown; contractVersion?: string }) => {
+        seen[name]?.push(body.catalog !== undefined);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          pin: ack(body.contractVersion),
+        });
+      },
+    });
+    await runAgentHttpTurn(live, "One", backend("a"));
+    await runAgentHttpTurn(live, "Two", backend("a"));
+    // A different backend has never been told anything about this table.
+    await runAgentHttpTurn(live, "Three", backend("b"));
+
+    expect(seen.a).toEqual([true, false]);
+    expect(seen.b).toEqual([true]);
+  });
+
+  it("sends the contract again after the connection is reset", async () => {
+    const live = session();
+    const sent: boolean[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      connectionId: "conn-1",
+      request: (body: { catalog?: unknown; contractVersion?: string }) => {
+        sent.push(body.catalog !== undefined);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          pin: ack(body.contractVersion),
+        });
+      },
+    };
+    const client = createAgentHttpClient(options);
+    await client.send(live, "One");
+    await client.send(live, "Two");
+    // The host's credentials changed under the same endpoint.
+    client.reset(live);
+    await client.send(live, "Three");
+
+    expect(sent).toEqual([true, false, true]);
+  });
+
+  it("refuses an acknowledgement for a contract it did not send", async () => {
+    const live = session();
+    const sent: boolean[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      request: (body: { catalog?: unknown }) => {
+        sent.push(body.catalog !== undefined);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          pin: ack("some-other-contract"),
+        });
+      },
+    };
+    await runAgentHttpTurn(live, "One", options);
+    await runAgentHttpTurn(live, "Two", options);
+
+    expect(sent).toEqual([true, true]);
+  });
+
+  it("goes back to sending the contract when the labels change", async () => {
+    let label = "Name";
+    const live = createAgentSession({
+      observe: () =>
+        observation({
+          columns: [
+            {
+              id: "name",
+              label,
+              type: "string",
+              readable: true,
+              writable: true,
+              sortable: true,
+            },
+          ],
+        }),
+      apply: { setPage: vi.fn() },
+    });
+    const sent: boolean[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      request: (body: { catalog?: unknown; contractVersion?: string }) => {
+        sent.push(body.catalog !== undefined);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          pin: ack(body.contractVersion),
+        });
+      },
+    };
+    await runAgentHttpTurn(live, "One", options);
+    await runAgentHttpTurn(live, "Two", options);
+    // Same keys, different label: the backend would write the wrong prompt.
+    label = "Full name";
+    await runAgentHttpTurn(live, "Three", options);
+
+    expect(sent).toEqual([true, false, true]);
+  });
+
+  it("resends the contract once when the backend lost its pin", async () => {
+    const live = session();
+    const sent: boolean[] = [];
+    let pinned = true;
+    const options = {
+      endpoint: "https://agent.example/turn",
+      request: (body: { catalog?: unknown; contractVersion?: string }) => {
+        sent.push(body.catalog !== undefined);
+        if (!body.catalog && pinned) {
+          // The backend restarted between turns.
+          pinned = false;
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            pin: { status: "expired" as const },
+            text: "send it again",
+          });
+        }
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          pin: ack(body.contractVersion),
+        });
+      },
+    };
+    await runAgentHttpTurn(live, "One", options);
+    const result = await runAgentHttpTurn(live, "Two", options);
+
+    // Pinned, then a request that relied on the pin, then the recovery with
+    // the contract attached — and a real answer at the end.
+    expect(sent).toEqual([true, false, true]);
+    expect(result.text).toBe("ok");
+  });
+
+  it("does not resend a call whose outcome is unknown", async () => {
+    const setPage = vi.fn();
+    const live = session({ setPage });
+    let turns = 0;
+    const options = {
+      endpoint: "https://agent.example/turn",
+      request: (body: { contractVersion?: string }) => {
+        turns += 1;
+        if (turns === 1) {
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Paged.",
+            toolCalls: [{ id: "p", name: "view.setPage", args: { page: 2 } }],
+            pin: ack(body.contractVersion),
+          });
+        }
+        // A pin answer arriving after work has run is not a reason to run it
+        // again; recovery only ever resends context.
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          pin: { status: "expired" as const },
+          text: "lost it",
+        });
+      },
+    };
+    await runAgentHttpTurn(live, "Page 2", options);
+    await runAgentHttpTurn(live, "Again", options);
+
+    expect(setPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("attaches the contract every request when pinning is turned off", async () => {
+    const live = session();
+    const sent: boolean[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      pinCatalog: false,
+      request: (body: { catalog?: unknown; contractVersion?: string }) => {
+        sent.push(body.catalog !== undefined);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          pin: ack(body.contractVersion),
+        });
+      },
+    };
+    await runAgentHttpTurn(live, "One", options);
+    await runAgentHttpTurn(live, "Two", options);
+
+    expect(sent).toEqual([true, true]);
+  });
+});
+
 describe("transport limits and cancellation", () => {
   it("never invokes a custom transport when the signal is already aborted", async () => {
     const live = session();

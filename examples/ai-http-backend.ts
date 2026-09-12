@@ -24,6 +24,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   AGENT_HTTP_SCHEMA,
+  type AgentHttpPinAck,
   type AgentHttpRequest,
   type AgentHttpResponse,
   agentSystemPrompt,
@@ -32,17 +33,12 @@ import {
   parseAgentHttpResponse,
 } from "@adapttable/ai/http";
 
-interface ExamplePin {
-  readonly tableId: string;
-  readonly catalog: NonNullable<AgentHttpRequest["catalog"]>;
-  readonly manifest: NonNullable<AgentHttpRequest["manifest"]>;
-}
+import { createExamplePinStore, EXAMPLE_PIN_TTL_MS } from "./ai-http-pins.ts";
 
-const examplePins = new Map<string, ExamplePin>();
-
-function examplePinKey(request: AgentHttpRequest): string {
-  return request.sessionId ?? `table:${request.tableId}`;
-}
+const examplePins = createExamplePinStore<
+  NonNullable<AgentHttpRequest["catalog"]>,
+  NonNullable<AgentHttpRequest["manifest"]>
+>();
 
 function pinExampleSchema(request: AgentHttpRequest): string {
   if (!request.catalog || !request.manifest) {
@@ -50,38 +46,65 @@ function pinExampleSchema(request: AgentHttpRequest): string {
   }
   const sessionId =
     request.sessionId ?? `sess_${randomBytes(8).toString("hex")}`;
-  const pin: ExamplePin = {
+  examplePins.set(sessionId, {
     tableId: request.tableId,
     catalog: request.catalog,
     manifest: request.manifest,
-  };
-  examplePins.set(sessionId, pin);
-  examplePins.set(`table:${request.tableId}`, pin);
+    contractVersion: request.contractVersion,
+  });
   return sessionId;
 }
 
-function resolveExampleSchema(
-  request: AgentHttpRequest
-): AgentSystemPromptInput | undefined {
+/**
+ * The contract to answer this turn with, and what to tell the client about it.
+ *
+ * A request that carries the contract is answered from it and pins it. One
+ * that relies on a pin is answered from that pin only when the pin is this
+ * session's AND names this table — a session id for another table is as much a
+ * miss as no session at all, and saying so is what lets the client resend
+ * rather than guess.
+ */
+function resolveExampleSchema(request: AgentHttpRequest): {
+  readonly schema?: AgentSystemPromptInput;
+  readonly pin: AgentHttpPinAck;
+} {
   if (request.catalog && request.manifest) {
     pinExampleSchema(request);
     return {
-      tableId: request.tableId,
-      catalog: request.catalog,
-      manifest: {
-        viewRevision: request.viewRevision ?? request.manifest.viewRevision,
-        columns: request.manifest.columns,
+      schema: {
+        tableId: request.tableId,
+        catalog: request.catalog,
+        manifest: {
+          viewRevision: request.viewRevision ?? request.manifest.viewRevision,
+          columns: request.manifest.columns,
+        },
+      },
+      pin: {
+        status: "acknowledged",
+        ...(request.contractVersion
+          ? { contractVersion: request.contractVersion }
+          : {}),
+        ttlMs: EXAMPLE_PIN_TTL_MS,
       },
     };
   }
-  const pin = examplePins.get(examplePinKey(request));
-  if (!pin) return undefined;
+  const pin = examplePins.get(request.sessionId);
+  if (!pin || pin.tableId !== request.tableId) {
+    return { pin: { status: request.sessionId ? "expired" : "unknown" } };
+  }
   return {
-    tableId: request.tableId,
-    catalog: pin.catalog,
-    manifest: {
-      viewRevision: request.viewRevision ?? pin.manifest.viewRevision,
-      columns: pin.manifest.columns,
+    schema: {
+      tableId: request.tableId,
+      catalog: pin.catalog,
+      manifest: {
+        viewRevision: request.viewRevision ?? pin.manifest.viewRevision,
+        columns: pin.manifest.columns,
+      },
+    },
+    pin: {
+      status: "acknowledged",
+      ...(pin.contractVersion ? { contractVersion: pin.contractVersion } : {}),
+      ttlMs: EXAMPLE_PIN_TTL_MS,
     },
   };
 }
@@ -311,26 +334,36 @@ export async function handleExampleAgentTurn(
       schemaVersion: AGENT_HTTP_SCHEMA,
       ok: true,
       sessionId,
+      pin: {
+        status: "acknowledged",
+        ...(request.contractVersion
+          ? { contractVersion: request.contractVersion }
+          : {}),
+        ttlMs: EXAMPLE_PIN_TTL_MS,
+      },
       text:
         request.kind === "hello"
           ? "Connected. Messages and permitted table context go to this backend."
           : "Schema updated.",
     };
   }
-  const schema = resolveExampleSchema(request);
-  if (!schema) {
+  const resolved = resolveExampleSchema(request);
+  if (!resolved.schema) {
+    // Nothing ran, so saying the pin is gone is safe and the client resends
+    // the contract. This is never the answer to a call whose outcome is
+    // unknown, which is why it is decided before the provider is asked.
     return {
       schemaVersion: AGENT_HTTP_SCHEMA,
-      ok: false,
-      text: "schema required — send hello or schema before a question-only turn",
+      pin: resolved.pin,
+      text: "send the table contract — this backend no longer holds a pin for it",
     };
   }
   const raw = await complete({
-    system: agentSystemPrompt(schema),
+    system: agentSystemPrompt(resolved.schema),
     user: userPrompt(request),
     signal,
   });
-  return asReply(raw, request);
+  return { ...asReply(raw, request), pin: resolved.pin };
 }
 
 async function completeOpenAI(

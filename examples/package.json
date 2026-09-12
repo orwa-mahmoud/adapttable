@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "ai-http": "node --experimental-strip-types ./ai-http-backend.ts",
-    "test": "node --experimental-strip-types --test ./ai-http-backend.test.ts",
+    "test": "node --experimental-strip-types --test ./ai-http-backend.test.ts ./ai-http-pins.test.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },

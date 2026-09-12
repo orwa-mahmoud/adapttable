@@ -14,6 +14,13 @@ import {
   policyKey,
 } from "./httpExecution";
 import {
+  contractFingerprint,
+  createPinStore,
+  DEFAULT_PIN_TTL_MS,
+  pinExpiry,
+  type PinStatus,
+} from "./httpPins";
+import {
   createPhasePlan,
   DESCRIBE_TOOL,
   type FinalizedCall,
@@ -47,6 +54,13 @@ export type {
   AssistantUnresolved,
 } from "./assistantContracts";
 export type { AssistantReceiptSubject } from "./assistantReceipts";
+export {
+  contractFingerprint,
+  DEFAULT_PIN_CONNECTIONS,
+  DEFAULT_PIN_TTL_MS,
+  type PinRecord,
+  type PinStatus,
+} from "./httpPins";
 export { AgentTurnError, type PhaseState } from "./httpTurn";
 export * from "./httpTypes";
 export {
@@ -101,6 +115,13 @@ export interface AgentHttpRequest {
   readonly catalog?: readonly CatalogEntry[];
   /** Live view revision when the catalog is not re-attached. */
   readonly viewRevision?: number;
+  /**
+   * Version of the contract this request carries or relies on.
+   *
+   * A reply acknowledges this exact string. A backend that echoes a different
+   * one, or none, is not pinned and keeps being sent the contract.
+   */
+  readonly contractVersion?: string;
   /** User text. Required for `kind: "turn"`. */
   readonly message?: string;
   /** Optional prior lines the host chooses to send. */
@@ -144,8 +165,30 @@ export interface AgentHttpResponse {
   readonly toolCalls?: readonly AgentHttpToolCall[];
   /** A structured question for the reader, instead of asking in prose. */
   readonly askUser?: AgentHttpQuestion;
+  /** What the backend did with the contract this request named. */
+  readonly pin?: AgentHttpPinAck;
   /** When true, the host may POST execute receipts back. */
   readonly continueWithResults?: boolean;
+}
+
+/**
+ * A backend's answer about the contract it was sent.
+ *
+ * `acknowledged` is the only status that pins anything. `expired` and
+ * `unknown` say the backend has lost a pin it once had — recoverable by
+ * resending the contract, and deliberately distinct from a write whose outcome
+ * is unknown, which is never retried. `unsupported` says this backend does not
+ * pin at all, so every request carries its own contract.
+ *
+ * @public
+ */
+export interface AgentHttpPinAck {
+  /** What happened to the pin. */
+  readonly status: PinStatus;
+  /** The contract version this answers for. */
+  readonly contractVersion?: string;
+  /** How long the backend will hold it, in milliseconds. */
+  readonly ttlMs?: number;
 }
 
 /**
@@ -182,6 +225,16 @@ export interface AgentHttpClientOptions {
     question: AgentHttpQuestion,
     signal?: AbortSignal
   ) => Promise<AgentHttpAnswer>;
+  /**
+   * Which backend connection this is.
+   *
+   * Pins belong to a connection, so two endpoints — or one endpoint whose
+   * credentials changed — never reuse each other's. It is derived from the
+   * endpoint and the transport when omitted, which cannot see an
+   * authentication change: a host whose identity changes supplies its own id,
+   * or calls the client's `reset`.
+   */
+  readonly connectionId?: string;
 }
 
 /**
@@ -385,6 +438,7 @@ export function parseAgentHttpRequest(input: unknown): AgentHttpRequest {
     sessionId: requireSessionId(input.sessionId),
     ...schema,
     viewRevision: requireViewRevision(input.viewRevision),
+    contractVersion: asString(input.contractVersion),
     message: typeof input.message === "string" ? input.message : undefined,
     conversation: Array.isArray(input.conversation)
       ? (input.conversation as AgentHttpMessage[])
@@ -436,6 +490,7 @@ export function parseAgentHttpResponse(input: unknown): AgentHttpResponse {
     toolCalls,
     askUser:
       input.askUser === undefined ? undefined : asQuestion(input.askUser),
+    pin: input.pin === undefined ? undefined : asPinAck(input.pin),
     continueWithResults:
       typeof input.continueWithResults === "boolean"
         ? input.continueWithResults
@@ -546,6 +601,34 @@ function asQuestion(value: unknown): AgentHttpQuestion {
   return { id, question, ...(options ? { options } : {}), allowFreeText };
 }
 
+function asPinAck(value: unknown): AgentHttpPinAck {
+  if (!isRecord(value)) {
+    throw new TypeError("agent HTTP pin must be an object");
+  }
+  const status = asString(value.status);
+  if (
+    status !== "acknowledged" &&
+    status !== "expired" &&
+    status !== "unknown" &&
+    status !== "unsupported"
+  ) {
+    throw new TypeError(
+      'agent HTTP pin.status must be "acknowledged", "expired", "unknown", or "unsupported"'
+    );
+  }
+  const ttlMs = asFiniteNumber(value.ttlMs);
+  if (value.ttlMs !== undefined && ttlMs === undefined) {
+    throw new TypeError("agent HTTP pin.ttlMs must be a finite number");
+  }
+  return {
+    status,
+    ...(asString(value.contractVersion)
+      ? { contractVersion: asString(value.contractVersion) }
+      : {}),
+    ...(ttlMs === undefined ? {} : { ttlMs }),
+  };
+}
+
 /**
  * The two asking tools keep their own ceilings.
  *
@@ -624,47 +707,88 @@ function asDescribeKeys(args: unknown): readonly string[] {
   return entry.keys as readonly string[];
 }
 
-interface HttpPin {
-  readonly fingerprint: string;
-  readonly sessionId?: string;
+const pins = createPinStore();
+
+/** Stable opaque ids for transport functions, so none is ever stringified. */
+const transportIds = new WeakMap<object, string>();
+let transportSeq = 0;
+
+/**
+ * Which connection these options describe.
+ *
+ * The endpoint plus the identity of the transport function — never a header,
+ * which is where the credentials are. A host that changes credentials without
+ * changing either says so with `connectionId`.
+ */
+function connectionIdOf(options: AgentHttpClientOptions): string {
+  if (options.connectionId) return options.connectionId;
+  const transport: object | undefined = options.request ?? options.fetch;
+  if (!transport) return `endpoint:${options.endpoint}`;
+  let id = transportIds.get(transport);
+  if (id === undefined) {
+    transportSeq += 1;
+    id = `transport-${String(transportSeq)}`;
+    transportIds.set(transport, id);
+  }
+  return `endpoint:${options.endpoint}|${id}`;
 }
 
-const httpPins = new WeakMap<AgentSession, HttpPin>();
-
+/** Everything the backend would be told, named unambiguously. */
 function schemaFingerprint(session: AgentSession): string {
-  const manifest = session.manifest();
-  const columns = manifest.columns
-    .map(
-      (column) =>
-        `${column.id}:${column.readable ? "1" : "0"}:${column.writable ? "1" : "0"}`
-    )
-    .join(",");
-  return [
-    manifest.tableId,
-    manifest.capabilities.join(","),
-    columns,
-    manifest.policy.write,
-    manifest.policy.approval,
-    manifest.policy.commit,
-  ].join("|");
+  return contractFingerprint(session.manifest(), session.catalog());
 }
 
-function rememberPin(session: AgentSession, response: AgentHttpResponse): void {
-  const current = httpPins.get(session);
-  httpPins.set(session, {
-    fingerprint: schemaFingerprint(session),
-    sessionId: response.sessionId ?? current?.sessionId,
+/**
+ * Keep a pin only when the reply acknowledged the exact version it was sent.
+ *
+ * An ordinary successful turn proves nothing about pinning; a backend that
+ * says nothing about the contract keeps being sent it.
+ */
+function rememberPin(
+  session: AgentSession,
+  connectionId: string,
+  sent: { readonly version: string; readonly seq: number },
+  response: AgentHttpResponse
+): void {
+  const ack = response.pin;
+  if (ack?.status !== "acknowledged") return;
+  if (
+    ack.contractVersion !== undefined &&
+    ack.contractVersion !== sent.version
+  ) {
+    // The backend answered for a different contract than this request carried.
+    return;
+  }
+  pins.remember(session, {
+    connectionId,
+    tableId: session.manifest().tableId,
+    sessionId: response.sessionId,
+    // The version SENT, never the one live now: a contract that moved during
+    // the exchange is a contract this backend has not seen.
+    contractVersion: sent.version,
+    seq: sent.seq,
+    expiresAt: pinExpiry(Date.now(), ack.ttlMs, DEFAULT_PIN_TTL_MS),
   });
+}
+
+/** A backend that lost its pin, before anything of this turn has run. */
+function pinLost(response: AgentHttpResponse): boolean {
+  return (
+    response.pin?.status === "expired" || response.pin?.status === "unknown"
+  );
 }
 
 function compactRequest(
   session: AgentSession,
   kind: AgentHttpKind,
   extra: Partial<AgentHttpRequest> = {},
-  mode: "full" | "question" = "full"
+  mode: "full" | "question" = "full",
+  pin?: { readonly connectionId: string; readonly version: string }
 ): AgentHttpRequest {
   const manifest = session.manifest();
-  const sessionId = extra.sessionId ?? httpPins.get(session)?.sessionId;
+  const record = pin ? pins.read(session, pin.connectionId) : undefined;
+  const sessionId = extra.sessionId ?? record?.sessionId;
+  const contractVersion = pin?.version;
   if (mode === "question") {
     return {
       schemaVersion: AGENT_SCHEMA_VERSION,
@@ -672,6 +796,7 @@ function compactRequest(
       tableId: manifest.tableId,
       viewRevision: manifest.viewRevision,
       ...(sessionId ? { sessionId } : {}),
+      ...(contractVersion ? { contractVersion } : {}),
       ...extra,
     };
   }
@@ -682,37 +807,59 @@ function compactRequest(
     manifest,
     catalog: session.catalog(),
     ...(sessionId ? { sessionId } : {}),
+    ...(contractVersion ? { contractVersion } : {}),
     ...extra,
   };
 }
 
+/**
+ * Whether this connection may leave the contract out of the next request.
+ *
+ * The stored version is compared against the live one, so a contract that
+ * changed — during an exchange or since — is simply not current, and the next
+ * request carries it again.
+ */
 function usesPinnedCatalog(
   session: AgentSession,
   options: AgentHttpClientOptions
 ): boolean {
   if (options.pinCatalog === false) return false;
-  return httpPins.get(session)?.fingerprint === schemaFingerprint(session);
+  const record = pins.read(session, connectionIdOf(options));
+  return record?.contractVersion === schemaFingerprint(session);
 }
 
+/**
+ * Bring this connection's pin up to date, if it can be.
+ *
+ * A backend that refuses or cannot pin is not an error: the contract travels
+ * in each request instead. Only a transport failure propagates, and nothing is
+ * ever marked current by a refresh that did not succeed.
+ */
 async function refreshSchemaPin(
   session: AgentSession,
   options: AgentHttpClientOptions,
   signal?: AbortSignal
 ): Promise<void> {
   if (options.pinCatalog === false) return;
-  const fingerprint = schemaFingerprint(session);
-  const current = httpPins.get(session);
-  if (!current || current.fingerprint === fingerprint) return;
-  const kind: AgentHttpKind = "schema";
-  const response = await exchange(
-    options,
-    compactRequest(session, kind),
-    signal
-  );
-  if (response.ok === false) {
-    throw new Error(response.text ?? "agent HTTP schema pin was rejected");
-  }
-  rememberPin(session, response);
+  const connectionId = connectionIdOf(options);
+  const version = schemaFingerprint(session);
+  const current = pins.read(session, connectionId);
+  if (!current || current.contractVersion === version) return;
+  await pins.join(session, connectionId, version, async () => {
+    const seq = pins.claim(session, connectionId);
+    const response = await exchange(
+      options,
+      compactRequest(session, "schema", {}, "full", { connectionId, version }),
+      signal
+    );
+    if (response.ok === false) {
+      // The backend declined this contract. Sending it per request is the
+      // documented fallback, and marking anything current here would be a lie.
+      pins.forget(session, connectionId);
+      return;
+    }
+    rememberPin(session, connectionId, { version, seq }, response);
+  });
 }
 
 function mergeSignals(
@@ -1010,15 +1157,18 @@ export async function connectAgentHttp(
   options: AgentHttpClientOptions,
   signal?: AbortSignal
 ): Promise<AgentHttpResponse> {
+  const connectionId = connectionIdOf(options);
+  const version = schemaFingerprint(session);
+  const seq = pins.claim(session, connectionId);
   const response = await exchange(
     options,
-    compactRequest(session, "hello"),
+    compactRequest(session, "hello", {}, "full", { connectionId, version }),
     signal
   );
   if (response.ok === false) {
     throw new Error(response.text ?? "agent HTTP hello was rejected");
   }
-  rememberPin(session, response);
+  rememberPin(session, connectionId, { version, seq }, response);
   return response;
 }
 
@@ -1073,7 +1223,12 @@ async function runPhase(
   /** Set when the phase stopped without a plan it could run. */
   readonly unresolved?: AgentHttpUnresolved;
 }> {
-  const questionOnly = await preparePinnedTurn(session, options, input.signal);
+  const connectionId = connectionIdOf(options);
+  let questionOnly = await preparePinnedTurn(session, options, input.signal);
+  // One recovery, before anything of this phase has run. A backend that lost
+  // its pin can be sent the contract again safely; a call whose outcome is
+  // unknown never can, which is why this only happens while the plan is empty.
+  let mayRecoverPin = true;
   const phase = createPhasePlan({
     tableId: turn.tableId,
     turnId: turn.turnId,
@@ -1095,6 +1250,8 @@ async function runPhase(
     // its own capture as much as the rest: pinning the catalog is a network
     // round trip, and the table is free to move while it happens.
     context = phaseContext(session, turn.turnId, input.phaseId);
+    const version = schemaFingerprint(session);
+    const seq = pins.claim(session, connectionId);
     last = await exchange(
       options,
       compactRequest(
@@ -1108,11 +1265,24 @@ async function runPhase(
           ...(toolResults?.length ? { toolResults } : {}),
           ...(phase.pending().length ? { pendingCalls: phase.pending() } : {}),
         },
-        questionOnly ? "question" : "full"
+        questionOnly ? "question" : "full",
+        { connectionId, version }
       ),
       input.signal
     );
-    if (!questionOnly) rememberPin(session, last);
+    rememberPin(session, connectionId, { version, seq }, last);
+
+    if (pinLost(last) && mayRecoverPin) {
+      // The backend answered nothing but "I no longer have that contract".
+      // Forget it, send the whole thing once, and let the same round run
+      // again — no call of this phase has been dispatched.
+      mayRecoverPin = false;
+      pins.forget(session, connectionId);
+      questionOnly = false;
+      round -= 1;
+      continue;
+    }
+
     // A backend that explained itself on one round and only acted on the next
     // still said something; reading only the final round loses it.
     if (last.text) text = last.text;
@@ -1356,12 +1526,23 @@ export function createAgentHttpClient(options: AgentHttpClientOptions): {
       signal?: AbortSignal;
     }
   ) => Promise<AgentHttpTurnResult>;
+  /**
+   * Drop what this connection remembers about the backend.
+   *
+   * A host whose credentials change calls this — or gives a new
+   * `connectionId` — so the next turn negotiates again instead of relying on
+   * an acknowledgement made under the identity it has just left.
+   */
+  reset: (session: AgentSession) => void;
 } {
   return {
     endpoint: options.endpoint,
     connect: (session, signal) => connectAgentHttp(session, options, signal),
     send: (session, message, extras) =>
       runAgentHttpTurn(session, message, options, extras),
+    reset: (session) => {
+      pins.forget(session, connectionIdOf(options));
+    },
   };
 }
 
@@ -1382,9 +1563,17 @@ export function assistantHttpTransport(
   options: AgentHttpClientOptions
 ): AssistantTransport {
   const client = createAgentHttpClient(options);
+  let connected: AgentSession | undefined;
   return {
     connect: async ({ session, signal }) => {
+      connected = session;
       await client.connect(session, signal);
+    },
+    disconnect: () => {
+      // What the backend acknowledged was acknowledged to a connection that is
+      // now closed; a later one negotiates for itself.
+      if (connected) client.reset(connected);
+      connected = undefined;
     },
     send: async ({ session, text, conversation, signal }) => {
       const turn = await client.send(session, text, {
