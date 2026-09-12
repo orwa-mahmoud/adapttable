@@ -43,7 +43,7 @@ function observation(patch: Partial<AgentObservation> = {}): AgentObservation {
         sortable: true,
       },
     ],
-    source: { ...PAGE_ONLY, grouping: true },
+    source: { ...PAGE_ONLY, grouping: "client" as const },
     writePolicy: "deny",
     hasPagination: true,
     hasSearch: true,

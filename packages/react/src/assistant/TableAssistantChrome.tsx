@@ -31,7 +31,7 @@ import {
   type ApprovalReviewSlots,
 } from "../editing/ApprovalReviewChrome";
 import { AssistantComposer } from "./AssistantComposer";
-import type { SpeechInputHandle } from "./useSpeechInput";
+import type { SpeechInputHandle } from "./speechView";
 import { AssistantIcon, CloseIcon, SettingsIcon } from "./assistantIcons";
 import {
   AssistantAlwaysAllowed,

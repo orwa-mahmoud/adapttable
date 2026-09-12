@@ -157,22 +157,24 @@ describe("parseAgentHttpRequest checks the manifest it is handed", () => {
   }
 
   it("carries an optional turn payload through unchanged", () => {
-    const live = session();
-    const rows = [
-      { offset: 0, limit: 1, redacted: [], rows: [] as never[] },
-    ] as const;
+    // `descriptions` and `rows` are gone: a turn answers a backend's questions
+    // through `toolResults`, in the same list the calls arrived on.
+    const toolResults = [
+      { id: "n1", result: { source: "table-rows", untrusted: true } },
+    ];
     const parsed = parseAgentHttpRequest({
       ...base,
       kind: "turn",
       message: "page 2",
       conversation: [{ role: "user", content: "page 2" }],
-      descriptions: [live.describe("view.setPage")],
-      rows,
+      turnId: "t-1",
+      phaseId: 0,
+      toolResults,
     });
     expect(parsed.message).toBe("page 2");
     expect(parsed.conversation).toHaveLength(1);
-    expect(parsed.descriptions?.[0]?.key).toBe("view.setPage");
-    expect(parsed.rows).toEqual(rows);
+    expect(parsed.turnId).toBe("t-1");
+    expect(parsed.toolResults?.[0]?.id).toBe("n1");
   });
 });
 

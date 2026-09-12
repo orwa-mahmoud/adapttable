@@ -29,13 +29,13 @@ import {
   type AssistantAnswer,
   type AssistantExchange,
   type AssistantQuestion,
-  type AssistantReceipt,
   type AssistantSuggestion,
   type AssistantTransport,
   type AssistantTransportReply,
   eligibleSuggestions,
 } from "./assistantContracts";
 import {
+  type AssistantReceipt,
   type AssistantTurnStatus,
   receiptsFromResults,
   turnStatus,

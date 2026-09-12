@@ -12,6 +12,7 @@ import type { DisplayValue } from "./display";
 import type { FacetMap } from "./filters/facets";
 
 export type {
+  ColumnAiOptions,
   ColumnGroupShow,
   ColumnMetadata,
   ColumnModel,

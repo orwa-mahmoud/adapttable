@@ -591,7 +591,9 @@ export function parseAgentHttpRequest(input: unknown): AgentHttpRequest {
     context: isRecord(input.context)
       ? (input.context as AgentHttpRequest["context"])
       : undefined,
-    view: isRecord(input.view) ? (input.view as AgentContextView) : undefined,
+    view: isRecord(input.view)
+      ? (input.view as unknown as AgentContextView)
+      : undefined,
     audio: input.audio === undefined ? undefined : asAudio(input.audio),
     turnId: asString(input.turnId),
     phaseId: asFiniteNumber(input.phaseId),
@@ -1616,7 +1618,12 @@ async function runPhase(
     // Built once per round. With the contract pinned only the view travels;
     // with `pinCatalog: false` the whole thing does, which is what that option
     // means.
-    const context = currentContext(session, options, connectionId, version);
+    //
+    // Named apart from `context` above on purpose: that one is the phase's
+    // execution identity and this one is what goes on the wire. Sharing a name
+    // made the assignment above a write to a `const` declared below it, which
+    // threw on every turn.
+    const wireContext = currentContext(session, options, connectionId, version);
     last = await exchange(
       options,
       compactRequest(
@@ -1631,7 +1638,7 @@ async function runPhase(
           ...(phase.pending().length ? { pendingCalls: phase.pending() } : {}),
         },
         questionOnly ? "question" : "full",
-        { connectionId, version, context }
+        { connectionId, version, context: wireContext }
       ),
       input.signal
     );

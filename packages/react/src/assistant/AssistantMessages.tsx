@@ -194,6 +194,8 @@ export function AssistantMessage({
   labels,
   slots,
   action,
+  undo,
+  onUndo,
 }: {
   readonly message: TableAssistantMessageView;
   readonly labels: TableLabels | undefined;

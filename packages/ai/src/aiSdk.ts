@@ -64,9 +64,10 @@ import {
   buildAgentContext,
 } from "./context";
 import type { AgentContextView } from "./contextSnapshot";
+import type { ApprovalPresentation } from "@adapttable/core";
+
 import type {
   AgentSession,
-  ApprovalPresentation,
   ApprovalResult,
   ApprovalSubject,
   ExecuteResult,

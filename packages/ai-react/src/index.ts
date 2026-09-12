@@ -22,6 +22,7 @@ export type {
   TableAgentOptions,
 } from "./react";
 export { TABLE_AGENT_STATE, tableAgent } from "./react";
+export { type UseSpeechInputOptions, useSpeechInput } from "./useSpeechInput";
 export type {
   AssistantAnswer,
   AssistantQuestion,

@@ -11,7 +11,6 @@ import {
   type AgentColumn,
   agentColumnsFromNeutral,
   agentFiltersFromDefs,
-  type AgentManifest,
   type AgentObservation,
   type AgentSession,
   type AggregationInputs,
@@ -569,14 +568,6 @@ function applyFromRuntime(
   };
 }
 
-const BUILTIN_AGGREGATE_LABELS: Readonly<Record<string, string>> = {
-  sum: "Sum",
-  avg: "Average",
-  min: "Minimum",
-  max: "Maximum",
-  count: "Count",
-};
-
 /**
  * The live view and filter catalog, in the shape the context builder takes.
  *
@@ -597,7 +588,7 @@ function viewInputsFromRuntime(
     options.columns
   );
   return {
-    ...(filters.length > 0 ? { filters } : {}),
+    ...(filters && filters.length > 0 ? { filters } : {}),
     view: {
       ...(query?.page === undefined ? {} : { page: query.page }),
       ...(query?.limit === undefined ? {} : { limit: query.limit }),
@@ -856,6 +847,35 @@ function TableAgentProvider({
   const options = (feature as TableAgentFeature).options;
   const runtime = useTableRuntime();
   const revisionCounterRef = useRef(createRevisionCounter());
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+  const runtimeRef = useRef(runtime);
+  runtimeRef.current = runtime;
+
+  // The session is built here, before anything reads it. Several callbacks
+  // below name it in a dependency array, which React evaluates during render
+  // — so a `const` declared after them is read before it exists.
+  //
+  // `waitForChrome` is a ref whose handler is assigned further down; the
+  // session only calls it once a write is actually proposed, so declaring the
+  // ref early costs nothing and is what lets the session move up here.
+  const waitForChrome = useRef<
+    (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>
+  >(() => Promise.resolve(false));
+  const tableIdRef = useRef(options.tableId);
+  const sessionRef = useRef<AgentSession | null>(null);
+  if (tableIdRef.current !== options.tableId) {
+    tableIdRef.current = options.tableId;
+    sessionRef.current = null;
+    revisionCounterRef.current = createRevisionCounter();
+  }
+  sessionRef.current ??= bindLiveSession(
+    optionsRef,
+    runtimeRef,
+    revisionCounterRef.current,
+    waitForChrome
+  );
+  const session = sessionRef.current;
   // Bumped when the reader takes an allowance back, so the published list is
   // rebuilt. The memory itself is a ref and cannot notify React on its own.
   const [revocations, setRevocations] = useState(0);
@@ -926,9 +946,6 @@ function TableAgentProvider({
       options.onRegister?.([]);
     };
   }, [session, webmcp, webmcpVersion]);
-  const waitForChrome = useRef<
-    (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>
-  >(() => Promise.resolve(false));
   waitForChrome.current = (subject, signal) => {
     if (pendingRef.current) {
       return Promise.reject(new Error("an approval is already pending"));
@@ -1018,24 +1035,6 @@ function TableAgentProvider({
     []
   );
 
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
-  const runtimeRef = useRef(runtime);
-  runtimeRef.current = runtime;
-  const tableIdRef = useRef(options.tableId);
-  const sessionRef = useRef<AgentSession | null>(null);
-  if (tableIdRef.current !== options.tableId) {
-    tableIdRef.current = options.tableId;
-    sessionRef.current = null;
-    revisionCounterRef.current = createRevisionCounter();
-  }
-  sessionRef.current ??= bindLiveSession(
-    optionsRef,
-    runtimeRef,
-    revisionCounterRef.current,
-    waitForChrome
-  );
-  const session = sessionRef.current;
   const published: AgentSession = {
     catalog: () => session.catalog(),
     describe: (key) => session.describe(key),
@@ -1058,7 +1057,9 @@ function TableAgentProvider({
     // The reader is stable for the life of this feature, so a host takes it
     // once and calls it whenever it needs the view — rather than being pushed
     // a copy on every change and having to keep it in step.
-    options.bridge?.viewInputs?.(viewStateValue.read);
+    options.bridge?.viewInputs?.(
+      viewStateValue.read as () => AgentContextInputs
+    );
   }, [options.bridge, session, viewStateValue]);
 
   const last = useRef<string>("");

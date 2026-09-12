@@ -128,6 +128,7 @@ export {
   aggregationModel,
   type AggregationModelInput,
   type AggregationOrigin,
+  BUILTIN_AGGREGATE_LABELS,
   columnAggregationSignature,
   computedAggregateKeys,
   declaredByDeveloper,

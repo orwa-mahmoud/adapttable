@@ -1,6 +1,10 @@
 import { isPinnedSummaryRowId } from "@adapttable/core";
 
-import { resolveApproval, type ResolvedApproval } from "./approvalConfig";
+import {
+  resolveApproval,
+  type ResolvedApproval,
+  sharedApproval,
+} from "./approvalConfig";
 import {
   type CapabilityRegistry,
   createCapabilityRegistry,
@@ -100,10 +104,13 @@ function approvalFor(
   observation: AgentObservation
 ): ResolvedApproval {
   return resolveApproval(
-    {
+    sharedApproval({
       policy: approvalOf(observation),
       presentation: observation.presentation ?? "widget",
-    },
+      ...(observation.alwaysAllow
+        ? { alwaysAllow: observation.alwaysAllow }
+        : {}),
+    }),
     definition.ai
   );
 }
@@ -1208,7 +1215,7 @@ async function readRows(
   observation: AgentObservation,
   apply: AgentApply,
   guard: SessionGuard
-): Promise<RowWindow> {
+): Promise<RowProvenanceEnvelope> {
   const requestedScope = body.scope as RowAddressScope | undefined;
   const scope = assertScope(requestedScope, observation);
   const readMax = readMaxOf(observation);

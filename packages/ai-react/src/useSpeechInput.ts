@@ -1,5 +1,5 @@
 /**
- * Dictation, as a React hook.
+ * Dictation, as a React hook — `@adapttable/ai-react`.
  *
  * Thin on purpose. The controller in `@adapttable/ai/voice` owns the browser
  * APIs, the permission states and the language choice; this subscribes to it,
@@ -7,6 +7,12 @@
  * through the caller's `setDraft` — which is the one channel voice is allowed
  * to use, so a spoken sentence becomes a draft the reader can see and fix
  * rather than a request the table has already acted on.
+ *
+ * It lives here rather than in `@adapttable/react` because it imports
+ * `@adapttable/ai`, and that package must stay out of the base graph. The
+ * chrome takes `SpeechInputHandle` — the structural shape this returns —
+ * from `@adapttable/react/adapter`, which declares it without importing
+ * anything.
  */
 "use client";
 
@@ -19,20 +25,8 @@ import {
   type SpeechState,
   type VoiceOptions,
 } from "@adapttable/ai/voice";
+import type { SpeechInputHandle } from "@adapttable/react/adapter";
 import { useEffect, useRef, useSyncExternalStore } from "react";
-
-/** What the composer needs to wire a mic. @public */
-export interface SpeechInputHandle {
-  /** Whether to draw the control at all. */
-  readonly available: boolean;
-  readonly state: SpeechState;
-  /** Languages offered. One means no chip. */
-  readonly languages: readonly string[];
-  readonly start: () => void;
-  readonly stop: () => void;
-  /** Choose a language, and remember it for next time. */
-  readonly setLanguage: (language: string) => void;
-}
 
 /** How the hook is configured. @public */
 export interface UseSpeechInputOptions {

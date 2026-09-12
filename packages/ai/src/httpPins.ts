@@ -99,12 +99,13 @@ export interface PinStore {
 export function createPinStore(
   options: {
     readonly now?: () => number;
-    readonly ttlMs?: number;
     readonly maxConnections?: number;
   } = {}
 ): PinStore {
   const now = options.now ?? (() => Date.now());
-  const ttlMs = options.ttlMs ?? DEFAULT_PIN_TTL_MS;
+  // No TTL option here on purpose: a record's expiry is decided where the
+  // backend's own acknowledgement is read, with `pinExpiry`, so the store
+  // holds an absolute time rather than a second opinion about how long.
   const maxConnections = options.maxConnections ?? DEFAULT_PIN_CONNECTIONS;
   const byTable = new WeakMap<AgentSession, Map<string, ConnectionState>>();
 

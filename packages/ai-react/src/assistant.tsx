@@ -71,9 +71,9 @@ export type {
   AssistantStatus,
   AssistantTransport,
   AssistantTransportReply,
-  AssistantUndoOffer,
   AssistantTurnStatus,
 };
+export type { AssistantUndoOffer } from "@adapttable/ai";
 
 /** How {@link useTableAssistant} is configured. @public */
 export interface TableAssistantOptions {

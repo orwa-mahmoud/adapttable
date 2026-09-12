@@ -5,13 +5,7 @@
  * required kit slot — core never draws a button. Invisible live-region
  * announcements are the one thing this chrome owns itself.
  */
-import type {
-  AgentApprovalDecision,
-  AgentApprovalOperation,
-  AgentApprovalPending,
-  AgentApprovalProposal,
-  TableLabels,
-} from "@adapttable/core";
+import type { AgentApprovalPending, TableLabels } from "@adapttable/core";
 import {
   type ReactElement,
   type ReactNode,

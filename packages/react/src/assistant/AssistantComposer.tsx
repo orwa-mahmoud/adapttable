@@ -14,7 +14,7 @@ import { LiveRegion } from "../a11y/LiveRegion";
 
 import { MicIcon, SendIcon, StopIcon } from "./assistantIcons";
 import type { TableAssistantSlots } from "./assistantSlots";
-import type { SpeechInputHandle } from "./useSpeechInput";
+import type { SpeechInputHandle } from "./speechView";
 import { assistantIsBusy, assistantIsUsable } from "./assistantView";
 
 /** Props for {@link AssistantComposer}. @internal */
@@ -89,11 +89,9 @@ export function AssistantComposer({
     >
       {/* Announced once when it starts, not on every interim result: a screen
           reader repeating every word heard is unusable. */}
-      <LiveRegion
-        message={
-          listening ? (labels?.assistantVoiceListening ?? "Listening") : ""
-        }
-      />
+      <LiveRegion part="assistant-voice-status">
+        {listening ? (labels?.assistantVoiceListening ?? "Listening") : ""}
+      </LiveRegion>
       {/* The input takes the room that is left. Without `minWidth: 0` a
           textarea's intrinsic width wins the flex negotiation and pushes Send
           off the end of a 400px window. */}

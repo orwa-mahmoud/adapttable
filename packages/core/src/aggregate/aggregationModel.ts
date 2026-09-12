@@ -31,6 +31,27 @@ import { CUSTOM_AGGREGATE, type DeclaredAggregates } from "./aggregate";
 export const AGGREGATE_SUPPRESSED = "none";
 
 /**
+ * Reader-facing English names for the built-in operations.
+ *
+ * The operation ids are the model's vocabulary and never change; these are
+ * what a person is shown when nothing has named one for them. Kept here, with
+ * the ids, because two copies of this map is how a surface ends up calling
+ * `avg` "Average" while another calls it "Mean".
+ *
+ * A locale that translates these does it through `TableLabels`; a host that
+ * registers its own operation supplies its own label with it.
+ *
+ * @public
+ */
+export const BUILTIN_AGGREGATE_LABELS: Readonly<Record<string, string>> = {
+  sum: "Sum",
+  avg: "Average",
+  min: "Minimum",
+  max: "Maximum",
+  count: "Count",
+};
+
+/**
  * Where an active aggregation came from.
  *
  * @public

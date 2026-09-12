@@ -848,6 +848,14 @@ export interface AgentObservation {
    * Defaults to `"widget"`.
    */
   readonly presentation?: ApprovalPresentation;
+  /**
+   * Capability keys a reader may wave through for the session.
+   *
+   * Off unless the table names them. It only ever narrows: a destructive
+   * capability, a write that enumerates rows, and an action whose own
+   * configuration demands a human all refuse regardless.
+   */
+  readonly alwaysAllow?: readonly string[];
   /** Whether an approved write stages or persists. */
   readonly commit?: CommitPolicy;
   /** Whether page navigation is wired. */
