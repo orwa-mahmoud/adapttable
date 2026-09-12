@@ -12,16 +12,21 @@ import {
   type AgUiEvent,
   aguiTransport,
 } from "@adapttable/ai/ag-ui";
+import {
+  type AiSdkConnection,
+  type AiSdkPart,
+  aiSdkTransport,
+} from "@adapttable/ai/ai-sdk";
 import { assistantHttpTransport, connectAgentHttp } from "@adapttable/ai/http";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { DOCS_URL } from "./matrix/content";
 
 /** Which transport the conversation is using. @internal */
-export type AiPlayMode = "simulated" | "backend" | "ag-ui";
+export type AiPlayMode = "simulated" | "backend" | "ag-ui" | "ai-sdk";
 
 /** Which protocol a connected endpoint speaks. @internal */
-export type AiProtocol = "http" | "ag-ui";
+export type AiProtocol = "http" | "ag-ui" | "ai-sdk";
 
 /** A connected endpoint, or nothing. @internal */
 export interface AiConnection {
@@ -48,43 +53,75 @@ interface AiConnectionSettingsProps {
  * package's own types, and a CopilotKit, Mastra or LangGraph endpoint is
  * reached through exactly this.
  */
+async function* postForEvents<T>(
+  endpoint: string,
+  token: string,
+  body: unknown,
+  signal: AbortSignal | undefined,
+  what: string
+): AsyncGenerator<T> {
+  const response = await fetch(endpoint, {
+    method: "POST",
+    signal,
+    headers: {
+      "content-type": "application/json",
+      accept: "text/event-stream",
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok || !response.body) {
+    throw new Error(`the ${what} endpoint answered ${String(response.status)}`);
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let split = buffer.indexOf("\n\n");
+      while (split >= 0) {
+        const frame = buffer.slice(0, split);
+        buffer = buffer.slice(split + 2);
+        const data = /^data: (.*)$/m.exec(frame)?.[1];
+        // The AI SDK ends its stream with this sentinel rather than only by
+        // closing the body.
+        if (data && data !== "[DONE]") yield JSON.parse(data) as T;
+        split = buffer.indexOf("\n\n");
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+/**
+ * An AG-UI endpoint, over Server-Sent Events.
+ *
+ * The whole of what a host supplies: post the run input, read the events back.
+ * No agent framework is imported — the run input and the events are this
+ * package's own types.
+ */
 function sseAgUiConnection(endpoint: string, token: string): AgUiConnection {
   return {
-    run: async function* (input, signal) {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        signal,
-        headers: {
-          "content-type": "application/json",
-          accept: "text/event-stream",
-          ...(token ? { authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(input),
-      });
-      if (!response.ok || !response.body) {
-        throw new Error(`the AG-UI endpoint answered ${response.status}`);
-      }
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      try {
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          let split = buffer.indexOf("\n\n");
-          while (split >= 0) {
-            const frame = buffer.slice(0, split);
-            buffer = buffer.slice(split + 2);
-            const data = /^data: (.*)$/m.exec(frame)?.[1];
-            if (data) yield JSON.parse(data) as AgUiEvent;
-            split = buffer.indexOf("\n\n");
-          }
-        }
-      } finally {
-        reader.releaseLock();
-      }
-    },
+    run: (input, signal) =>
+      postForEvents<AgUiEvent>(endpoint, token, input, signal, "AG-UI"),
+  };
+}
+
+/**
+ * An AI SDK route, over its UI message stream.
+ *
+ * The same two lines of host code. The route declares the table's
+ * capabilities as client tools and this reads the parts back; `ai` is not
+ * imported here either.
+ */
+function sseAiSdkConnection(endpoint: string, token: string): AiSdkConnection {
+  return {
+    run: (request, signal) =>
+      postForEvents<AiSdkPart>(endpoint, token, request, signal, "AI SDK"),
   };
 }
 
@@ -122,6 +159,19 @@ export function AiConnectionSettings({
         endpoint,
         ...(token ? { headers: { authorization: `Bearer ${token}` } } : {}),
       };
+      if (protocol === "ai-sdk") {
+        const transport = aiSdkTransport({
+          connection: sseAiSdkConnection(endpoint, token),
+        });
+        onChange({
+          mode: "ai-sdk",
+          endpoint,
+          transport,
+          key: `ai-sdk:${endpoint}`,
+        });
+        onClose();
+        return;
+      }
       if (protocol === "ag-ui") {
         // A different protocol, the same table: the contract goes out as the
         // run's frontend tools and every call comes back through the same
@@ -182,7 +232,12 @@ export function AiConnectionSettings({
         ) : (
           <>
             <strong>
-              Connected · {connection.mode === "ag-ui" ? "AG-UI" : "HTTP"}
+              Connected ·{" "}
+              {connection.mode === "ag-ui"
+                ? "AG-UI"
+                : connection.mode === "ai-sdk"
+                  ? "AI SDK"
+                  : "HTTP"}
             </strong>
             <span>{connection.endpoint}</span>
           </>
@@ -258,6 +313,22 @@ export function AiConnectionSettings({
                 AG-UI — the table&apos;s capabilities become the run&apos;s
                 frontend tools, and its events stream back. Same executor, same
                 approvals.
+              </span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="ai-protocol"
+                value="ai-sdk"
+                checked={protocol === "ai-sdk"}
+                onChange={() => {
+                  setProtocol("ai-sdk");
+                }}
+              />
+              <span>
+                AI SDK — your <code>streamText</code> route declares the
+                table&apos;s capabilities as client tools, and this page runs
+                them.
               </span>
             </label>
           </fieldset>
