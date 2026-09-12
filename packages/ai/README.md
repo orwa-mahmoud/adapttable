@@ -41,8 +41,18 @@ import { toMcpTools, toMcpResources, mcpListChanged } from "@adapttable/ai/mcp";
 
 - `@adapttable/ai/json` — plain JSON function tools + `AgentEnvelope`
 - `@adapttable/ai/openai` — strict function tools with OpenAI-safe names (`view_setPage`); `{ deferred: true }` is the portable trio
-- `@adapttable/ai/mcp` — tools in catalog order, per-key guide resources, list-changed
+- `@adapttable/ai/mcp` — tools in catalog order with derived annotations, per-key guide resources, list-changed
+- `@adapttable/ai/mcp-apps` — the table as a view an MCP host embeds
 - `@adapttable/ai/http` — optional endpoint client and `agentSystemPrompt`; [connect a backend](https://orwa-mahmoud.github.io/adapttable/ai-http/)
+- `@adapttable/ai/context` — the permitted context contract, and bounded column sampling
+- `@adapttable/ai/assistant` — the conversation lifecycle, with no framework
+- `@adapttable/ai/voice` — dictation, in the browser or through a backend
+- `@adapttable/ai/webmcp` — the table as browser tools for an agent in the page
+- `@adapttable/ai/ag-ui` — the table as an AG-UI run's frontend tools
+- `@adapttable/ai/ai-sdk` — the table as AI SDK client tools
+
+`tableAgent` and `useTableAssistant` are `@adapttable/ai-react`. Everything
+above is React-free.
 
 The catalog lists only enabled features, permissions, source support and
 host callbacks. A filtering + pagination table does not advertise

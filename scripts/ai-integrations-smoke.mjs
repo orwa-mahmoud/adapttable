@@ -53,6 +53,34 @@ const ENTRIES = [
       "parseAgentHttpResponse",
     ],
   },
+  {
+    file: "context.js",
+    exports: ["buildAgentContext", "sampleColumnValues", "rowProvenance"],
+  },
+  {
+    file: "assistant.js",
+    exports: ["createTableAssistant", "planUndo", "runUndo"],
+  },
+  {
+    file: "voice.js",
+    exports: ["createSpeechInput"],
+  },
+  {
+    file: "webmcp.js",
+    exports: ["registerWebMcpTools"],
+  },
+  {
+    file: "agui.js",
+    exports: ["aguiTransport", "aguiTools", "statePatch"],
+  },
+  {
+    file: "aiSdk.js",
+    exports: ["aiSdkTransport", "aiSdkTools", "assertAiSdkVersion"],
+  },
+  {
+    file: "mcpApps.js",
+    exports: ["mcpAppResource", "mcpAppCsp", "createMcpAppBridge"],
+  },
 ];
 
 const FORBIDDEN = [
@@ -62,6 +90,12 @@ const FORBIDDEN = [
   "from '@modelcontextprotocol/sdk'",
   'from "react"',
   "from 'react'",
+  // The protocol adapters name these protocols; they must not depend on the
+  // packages that implement them.
+  'from "ai"',
+  "from 'ai'",
+  'from "@ag-ui/client"',
+  "from '@ag-ui/client'",
 ];
 
 for (const entry of ENTRIES) {
@@ -85,5 +119,5 @@ for (const entry of ENTRIES) {
 }
 
 console.log(
-  "✓ @adapttable/ai json, openai, mcp and http export the adapter functions without openai, MCP SDK or React"
+  `✓ @adapttable/ai ${ENTRIES.map((entry) => entry.file.replace(/\.js$/, "")).join(", ")} export their adapter functions without openai, the MCP SDK, the AI SDK, an AG-UI client or React`
 );

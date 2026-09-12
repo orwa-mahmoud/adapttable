@@ -28,7 +28,8 @@ automatic table-to-card responsive layouts.
 - [@adapttable/unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-unstyled): Headless/unstyled adapter with `data-*` + `className` hooks for Tailwind or any custom CSS.
 - [@adapttable/i18n](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/i18n): Locale presets for 17 languages (English, Arabic, German, Spanish, Persian, French, Hebrew, Hindi, Italian, Japanese, Korean, Portuguese, Russian, Turkish, Urdu, Simplified Chinese, Traditional Chinese) + RTL direction helpers.
 - [@adapttable/cli](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/cli): `npx @adapttable/cli init` — detects your UI kit and scaffolds a table.
-- [@adapttable/ai](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/ai): Optional provider-neutral capability discovery — `catalog` / `describe` / `execute` and `tableAgent`. Not in the core or adapter roots.
+- [@adapttable/ai](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/ai): Optional provider-neutral capability discovery — `catalog` / `describe` / `execute`, the permitted context contract, and the framework-free conversation store. React-free. Not in the core or adapter roots.
+- [@adapttable/ai-react](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/ai-react): The React binding — `tableAgent` and `useTableAssistant`. This is where `tableAgent` lives.
 
 ## Quickstart (React adapter)
 
@@ -100,7 +101,7 @@ const {
 - [React table URL state — shareable filters, sort, and page](https://orwa-mahmoud.github.io/adapttable/url-state/): adapters, urlKey namespacing, urlSync opt-out
 - [Server queries — parse and validate the table's query](https://orwa-mahmoud.github.io/adapttable/server-queries/): `@adapttable/server` validates page, sort, filters, filter tree and pivot against an allowlist of columns before they reach a backend
 - [AI table assistant and capabilities](https://orwa-mahmoud.github.io/adapttable/agent-capabilities/): native optional kit widgets, headless useTableAssistant, custom UI and transport examples; only active capabilities are advertised
-- [@adapttable/ai](https://orwa-mahmoud.github.io/adapttable/ai/): `tableAgent`, the versioned manifest, catalog/describe/execute
+- [@adapttable/ai](https://orwa-mahmoud.github.io/adapttable/ai/): the versioned manifest, catalog/describe/execute, `buildAgentContext` and `createTableAssistant`; `tableAgent` is `@adapttable/ai-react`
 - [Agent integrations](https://orwa-mahmoud.github.io/adapttable/ai-integrations/): JSON, OpenAI and MCP adapters over the same catalog/describe/execute session — no hosted service
 - [Connect a backend](https://orwa-mahmoud.github.io/adapttable/ai-http/): optional HTTP bridge, protocol, and the runnable example — simulated playground stays the default
 - [React table with SSR, server components & streaming](https://orwa-mahmoud.github.io/adapttable/ssr-rsc/): Next.js App Router client boundary, DOM-free rendering, hydration, Suspense

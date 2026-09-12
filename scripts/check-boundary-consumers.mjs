@@ -45,6 +45,10 @@ writeFileSync(
       dependencies: {
         "@adapttable/core": `file:${join(ROOT, "packages", "core")}`,
         "@adapttable/react": `file:${join(ROOT, "packages", "react")}`,
+        // Packed alongside, and deliberately without a React dependency of
+        // its own: the neutral fixture imports its subpaths from a package
+        // where React is not installed.
+        "@adapttable/ai": `file:${join(ROOT, "packages", "ai")}`,
         react: "^19.0.0",
         "react-dom": "^19.0.0",
       },
@@ -58,7 +62,7 @@ writeFileSync(
   )
 );
 
-for (const name of ["neutral-engine.ts", "react-column.tsx"]) {
+for (const name of ["neutral-engine.ts", "neutral-ai.ts", "react-column.tsx"]) {
   writeFileSync(join(dir, name), readFileSync(join(FIXTURES, name), "utf8"));
 }
 
@@ -76,7 +80,7 @@ writeFileSync(
         skipLibCheck: true,
         noEmit: true,
       },
-      include: ["neutral-engine.ts", "react-column.tsx"],
+      include: ["neutral-engine.ts", "neutral-ai.ts", "react-column.tsx"],
     },
     null,
     2

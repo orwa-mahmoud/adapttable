@@ -17,6 +17,14 @@ const MARKERS = [
   "tableAgent",
   "adapttable.agent.v1",
   "@adapttable/ai",
+  // The optional subpaths added for the protocol adapters. A root graph that
+  // mentions one of these has pulled an integration nobody asked for.
+  "createTableAssistant",
+  "buildAgentContext",
+  "registerWebMcpTools",
+  "aguiTransport",
+  "aiSdkTransport",
+  "createMcpAppBridge",
 ];
 
 const GRAPHS = [

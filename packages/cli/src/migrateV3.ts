@@ -235,6 +235,21 @@ const MOVED_EXPORTS: Readonly<
     useChangedCellFlash: "@adapttable/react/stream",
     useRowPatchStream: "@adapttable/react/stream",
   },
+  /**
+   * `@adapttable/ai/assistant` did not move; it changed hands.
+   *
+   * The React hook left for `@adapttable/ai-react`, and the subpath is now the
+   * framework-free conversation store — so rewriting the whole specifier would
+   * send `createTableAssistant` to a package that does not export it. Only the
+   * React names are routed; every neutral name is absent from this table and
+   * is therefore left exactly where it already is, which also makes a second
+   * migration a no-op on an import the first one corrected.
+   */
+  "@adapttable/ai/assistant": {
+    useTableAssistant: "@adapttable/ai-react",
+    TableAssistantOptions: "@adapttable/ai-react",
+    TableAssistantState: "@adapttable/ai-react",
+  },
   "@adapttable/core/xlsx": {
     ColumnDef: "@adapttable/react/xlsx",
     ColumnFooterContext: "@adapttable/react/xlsx",
@@ -252,7 +267,6 @@ const REDIRECTED_SPECIFIERS: Readonly<Record<string, string>> = {
   "@adapttable/core/features": "@adapttable/react/features",
   "@adapttable/core/sparkline": "@adapttable/react/sparkline",
   "@adapttable/ai/react": "@adapttable/ai-react",
-  "@adapttable/ai/assistant": "@adapttable/ai-react",
 };
 
 const REMOVED_DATA_TABLE_PROPS = [
@@ -533,6 +547,13 @@ function reportAmbiguousUsages(
     [
       /<(?:[A-Za-z_$][\w$]*\.)*DataTable\b[^>]*\bsize\s*=/g,
       "MUI DataTable.size needs an explicit density mapping; left unchanged.",
+    ],
+    [
+      // A namespace import hides which names are used, and that subpath now
+      // holds the neutral store beside names that left for the React package.
+      // Guessing would move a whole namespace to one of the two.
+      /import\s+\*\s+as\s+[A-Za-z_$][\w$]*\s+from\s+["']@adapttable\/ai\/assistant["']/g,
+      "@adapttable/ai/assistant now holds the neutral conversation store; useTableAssistant moved to @adapttable/ai-react. A namespace import cannot be split automatically; left unchanged.",
     ],
   ];
 

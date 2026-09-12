@@ -4,7 +4,7 @@ This is the setup page for a real model behind a live table. The [interactive
 playground](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
 defaults to **Simulated**: local scripted buttons, no credentials, no network
 model call. Switch to **Connect backend**, paste an endpoint, and the same
-`tableAgent` session sends compact capabilities and executes returned actions.
+`tableAgent` session sends the permitted context and executes the calls that come back.
 
 A recorded walkthrough of this page will land here when it exists. Absence of
 that video is not a missing feature.
@@ -17,23 +17,32 @@ backend, or in the example server below.
 
 On each request the HTTP bridge sends:
 
-- the compact [manifest](./ai.md) (enabled keys, column permissions, revision,
-  write/approval/commit policy — never the dataset)
-- the live catalog (key + one-line summary)
-- the user message
+- the [permitted context](./ai.md#what-the-agent-is-told) — the contract
+  (capabilities, column permissions, filters, limits, write/approval/commit
+  policy) and the view (page, size, search, sort, grouping, filter state);
+  never the dataset
+- the user message, and the conversation so far
 
-It does **not** preload every capability guide. If the backend responds with
-`needs.describe` or `needs.read`, the bridge answers those through
-`session.describe` and `rows.read` (so unreadable columns stay redacted and
-`readMax` still applies), then continues the same turn.
+How much of each capability's guide travels is the **profile**. `compact`
+names every capability and explains the ones a turn is likely to need;
+anything else is asked for on demand, in one batched round rather than a
+request per key, and cached per connection and contract version. `full` sends
+every guide up front. Neither changes what the table permits — only how much
+explaining arrives before it is asked for.
 
-Returned `actions` run through `session.execute`. Revision checks, permissions,
-approval chrome, commit policy and idempotency stay on the session. The bridge
-never retries a mutation on its own.
+A backend that asks for a guide or a row window puts that in `toolCalls`
+alongside anything it wants run; the bridge answers through `session.describe`
+and `rows.read`, so an unreadable column stays redacted and `readMax` still
+applies, then continues the same turn.
 
-Text plus actions is a complete turn. A second model call is not required to
-say “done.” Sending execute receipts back is optional (`continueWithResults`
-on the response, `returnResults` on the client).
+Returned calls run through `session.execute`. Revision checks, permissions,
+approval chrome, commit policy and idempotency stay on the session, and the
+replay identity is the bridge's own — a backend cannot mint a second write by
+repeating one. The bridge never retries a mutation.
+
+Text plus calls is a complete turn. A second model call is not required to say
+“done.” Sending execute receipts back is optional (`continueWithResults` on the
+response, `returnResults` on the client).
 
 ## Path 1 — run our example
 
@@ -158,42 +167,123 @@ transform — this client is optional. See [agent integrations](./ai-integration
 
 ## Protocol
 
-`POST` JSON. Schema family: `adapttable.agent.v1`.
+`POST` JSON. Schema family: `adapttable.agent.v1`. Import
+`parseAgentHttpRequest` / `parseAgentHttpResponse` from `@adapttable/ai/http`
+rather than duplicating the shape; both refuse an unknown `schemaVersion`.
 
-**Hello** (Connect). The client sends `kind: "hello"` plus `tableId`,
-`manifest` and `catalog`. The server pins that snapshot on a session and
-should return `sessionId`. `ok: false` is a rejected hello.
+### Request
 
-**Schema.** `kind: "schema"` replaces the pin when features or options
-change, so the system prompt stays current through summarization. Same
-payload as hello.
+| Field              | When                                              | What                                                                                       |
+| ------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `schemaVersion`    | always                                            | `"adapttable.agent.v1"`                                                                    |
+| `kind`             | always                                            | `"hello"`, `"schema"` or `"turn"`                                                          |
+| `tableId`          | always                                            | The table's identity                                                                       |
+| `context`          | hello, schema, and every turn when pinning is off | `{ contract, selection }` — what this table permits, and what was selected from it         |
+| `contractVersion`  | with `context`                                    | Names everything the contract says                                                         |
+| `selectionVersion` | with `context`                                    | Names what was selected from it                                                            |
+| `sessionId`        | after a hello                                     | The pin the backend handed back                                                            |
+| `viewRevision`     | a pinned turn                                     | The revision the contract was read at                                                      |
+| `view`             | every turn                                        | Where the table is **now** — page, size, search, sort, grouping and permitted filter state |
+| `message`          | a turn                                            | What the reader said                                                                       |
+| `conversation`     | a turn                                            | Earlier exchanges, oldest first                                                            |
+| `toolResults`      | a continuation                                    | Results for calls the client just ran                                                      |
+| `audio`            | a voice turn                                      | One clip, travelling once                                                                  |
 
-**Turn.** `kind: "turn"` and a `message` string. While the pin is valid the
-client omits `catalog` and `manifest` and sends `viewRevision` (and
-`sessionId`) instead. Optional `conversation`, `descriptions`, `rows`, and
-`results` appear only when the host is answering a previous `needs` or
-continuing with receipts. A senior backend may ignore the pin and keep
-sending the compact snapshot on every turn (`pinCatalog: false`).
+The contract and the view move on different clocks, which is why they are
+separate fields: pinning the contract does not pin the view, and a backend
+answering a turn is always answering against the view in that request.
 
-**Response.**
+### Response
 
 ```ts
 {
   schemaVersion: "adapttable.agent.v1",
+  ok?: boolean,               // hello / health only
   sessionId?: string,
   text?: string,
-  actions?: { key, args, idempotencyKey, expectedRevision? }[],
-  needs?: { describe?: string[], read?: { offset, limit, columns?, scope? }[] },
+  toolCalls?: { id, name, args?, expectedRevision? }[],
+  askUser?: { id, question, options?, allowFreeText },
+  transcript?: string,        // what the backend heard, on a voice turn
+  pin?: { status, contractVersion?, ttlMs? },
   continueWithResults?: boolean
 }
 ```
 
-`idempotencyKey` is required on every action so a client retry cannot mint a
-new write. `needs` is how progressive discovery works — do not preload every
-guide to skip it.
+**`toolCalls`** is one list, whether a call runs a capability or asks for
+something: `name` is a capability key, or `describe` / `read`. A call's `id`
+is a correlation handle unique within the reply — it is **not** the replay
+identity. The client issues that itself, from the table, the turn, the phase
+and the call's position, so a backend cannot mint a second write by repeating
+a string.
 
-Import `parseAgentHttpRequest` / `parseAgentHttpResponse` from
-`@adapttable/ai/http` instead of duplicating the shape.
+**`expectedRevision`** is optional. Omitted means the view this request
+described, which is the ordinary case; a backend that names one is answering
+for a revision it observed itself, and a stale call is refused with
+`revision-mismatch` rather than rebased onto the live table.
+
+**`askUser`** puts a structured question to the reader instead of asking in
+prose. The turn stops at that call and resumes when they answer; the answer
+returns as that call's `toolResults` entry. A client with nowhere to draw one
+reports `unresolved: "no-reader-channel"` and still says what already ran, and
+a reader who declines reports `question-unanswered` — different facts.
+
+**`pin`** is the backend's answer about the contract it was sent:
+`acknowledged` (and only that) pins something; `expired` and `unknown` say a
+pin it once held is gone, which is recoverable by resending the contract;
+`unsupported` says this backend does not pin at all. A backend that echoes a
+different `contractVersion`, or none, is not pinned and keeps being sent the
+contract. None of these is ever the answer to a call whose outcome is unknown:
+a write is never retried.
+
+### Discovery
+
+A turn that needs a guide asks for it in the same `toolCalls` list, and the
+client answers in one batched round rather than one request per key. Guides
+are cached per connection and contract version, so a second turn that needs
+the same guide does not ask again. Send `profile: "compact"` and let discovery
+do this; send `profile: "full"` when you would rather pay the bytes up front.
+
+### Streaming
+
+Ask for `text/event-stream` and the same reply arrives as events:
+
+- `text-delta` — a piece of the answer, as it is produced
+- `transcript` — what the backend heard, on a voice turn
+- `ask-user` — the structured question
+- `tool-calls` — the calls, whole, exactly once
+- `done` — the calls are final
+- `error` — the turn failed; `{ code, message }`
+
+The calls travel whole and only before `done`: a client that loses the
+connection first has run nothing. A stream that ends without `done` is
+reported as `stream-incomplete` rather than treated as a short answer.
+
+### Voice
+
+`@adapttable/ai/voice` has two modes. In **browser** mode the recognizer runs
+locally and heard text becomes the composer's draft — never a send, so a
+misheard word is a typo the reader corrects. In **backend** mode one clip is
+recorded, released from the microphone on stop, and sent as `audio`; the
+backend answers with a `transcript`, which the panel shows in place of the
+reader's own bubble and sends as text on every later round of the turn.
+
+### Any language
+
+The wire is a wire. [`examples/ai-http-backend.py`](https://github.com/orwa-mahmoud/adapttable/blob/main/examples/ai-http-backend.py)
+is the same contract in Python with no model and no framework — standard
+library only, run through `uv`:
+
+```bash
+uv run --python 3.12 examples/ai-http-backend.py
+```
+
+It reads the contract out of the request, decides one call, and answers in the
+shape above. Swap its `decide` for a real model call and nothing else changes.
+
+The machine-readable schema and the general rules text are generated from
+`AGENT_HTTP_LIMITS` and `agentInstructions` into `schemas/agent-http.v1.json`
+and `docs/agent-rules.txt` — build the package and run
+`node scripts/build-agent-schema.mjs`.
 
 ## Live provider test (owner)
 

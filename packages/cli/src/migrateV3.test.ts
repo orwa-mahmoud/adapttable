@@ -261,3 +261,74 @@ const table = (
     expect(result.changed).toBe(false);
   });
 });
+
+describe("the assistant subpath, which changed hands rather than moving", () => {
+  it("moves the React hook and leaves the neutral store where it is", () => {
+    const input = `import {
+  createTableAssistant,
+  useTableAssistant,
+  type TableAssistantStore,
+} from "@adapttable/ai/assistant";
+`;
+
+    const { code } = migrateV3Source(input);
+
+    expect(code).toContain('from "@adapttable/ai-react"');
+    expect(code).toContain("useTableAssistant");
+    // `createTableAssistant` lives at the neutral subpath now; sending it to
+    // the React package would import a name that is not there.
+    expect(code).toMatch(
+      /import \{[^}]*createTableAssistant[^}]*\} from "@adapttable\/ai\/assistant"/s
+    );
+    expect(code).toMatch(
+      /import type \{[^}]*TableAssistantStore[^}]*\} from "@adapttable\/ai\/assistant"|TableAssistantStore[^}]*\} from "@adapttable\/ai\/assistant"/s
+    );
+  });
+
+  it("leaves an already-correct neutral import untouched", () => {
+    const input = `import { createTableAssistant } from "@adapttable/ai/assistant";
+`;
+
+    const { code, movedImports } = migrateV3Source(input);
+
+    expect(code).toBe(input);
+    expect(movedImports).toBe(0);
+  });
+
+  it("is idempotent: a second run rewrites nothing", () => {
+    const input = `import {
+  createTableAssistant,
+  useTableAssistant,
+} from "@adapttable/ai/assistant";
+`;
+
+    const once = migrateV3Source(input).code;
+    const twice = migrateV3Source(once);
+
+    expect(twice.code).toBe(once);
+    expect(twice.movedImports).toBe(0);
+  });
+
+  it("reports a namespace import rather than guessing which half it wanted", () => {
+    const input = `import * as assistant from "@adapttable/ai/assistant";
+
+export { assistant };
+`;
+
+    const { code, issues } = migrateV3Source(input);
+
+    expect(code).toBe(input);
+    expect(issues.map((issue) => issue.message).join(" ")).toMatch(
+      /namespace import cannot be split/
+    );
+  });
+
+  it("still redirects the React subpath wholesale, names untouched", () => {
+    const input = `import { tableAgent } from "@adapttable/ai/react";
+`;
+
+    expect(migrateV3Source(input).code).toContain(
+      'import { tableAgent } from "@adapttable/ai-react";'
+    );
+  });
+});

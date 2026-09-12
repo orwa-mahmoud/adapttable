@@ -175,10 +175,99 @@ also a resource at
 `adapttable://table/{tableId}/capability/{key}`. `mcpListChanged`
 decides when to emit `notifications/tools/list_changed`.
 
-`@adapttable/ai/http` is the optional ready-made transport: post the
-compact manifest to your endpoint and execute returned actions through
-the same session. Setup, protocol and the runnable example live on
+`@adapttable/ai/http` is the optional ready-made transport: post the permitted
+context to your endpoint and execute the calls that come back through the same
+session. Setup, protocol and the runnable example live on
 [connect a backend](./ai-http.md).
+
+## Protocol adapters
+
+Each of these speaks a protocol somebody else defined, and each ends in the
+same `session.execute` — the same exclusion predicate, the same revision check,
+the same approval policy and the same receipts. None adds an SDK dependency:
+the event and part types are this package's own, and the one seam a host fills
+is "send this, stream that back."
+
+An integration is described as supported here only once its recorded-event
+conformance fixture runs against the real adapter code.
+
+### MCP tools, and the table as an MCP App
+
+`toMcpTools` carries annotations derived from what each capability declares:
+`readOnlyHint` for view and read keys, `destructiveHint` true only for a
+destructive one and explicitly false elsewhere, `idempotentHint` where running
+it twice lands where running it once did, and `openWorldHint` always false —
+a capability acts on this table and nothing behind it. `toMcpToolList` and
+`toMcpResourceList` return the same lists as cacheable responses, stamped with
+the contract they describe. `mcpToolResult` maps one `execute` outcome into a
+`tools/call` result and keeps the provenance envelope on a row window.
+
+`@adapttable/ai/mcp-apps` publishes the table as a view an MCP host embeds:
+`mcpAppResource` for the `ui://adapttable/table/{tableId}` descriptor,
+`mcpAppCsp` for a policy built only from the domains you declared, and
+`createMcpAppBridge` for the view's side — `ui/initialize`, the tool-input and
+tool-result notifications, and `tools/call` for a reader's actions. The bridge
+requires the host's exact origin: a handshake posted to `"*"` would announce
+the table's contract to whatever else is listening. `approveThroughHost` and
+`askThroughHost` use the host's elicitation when it advertises one and return
+nothing when it does not, leaving the table's own approval in charge.
+
+### WebMCP — an agent in the page
+
+```ts
+import { registerWebMcpTools } from "@adapttable/ai/webmcp";
+
+const registration = registerWebMcpTools(session, {
+  exposedTo: ["view.setPage", "view.setSort", "rows.read"],
+  onWarning: (warning) => console.warn(warning.message),
+});
+// A contract change is a different set of tools: dispose and register again.
+onTeardown(() => registration.dispose());
+```
+
+Nothing happens at import: `document.modelContext` is read when you call it, so
+the module loads on a server and in a browser without the API and registers
+nothing in either. In React, `tableAgent({ webmcp: true })` does the same and
+re-registers on a contract change for you.
+
+### AG-UI — the table as a run's frontend tools
+
+```ts
+import { aguiTransport } from "@adapttable/ai/ag-ui";
+
+const transport = aguiTransport({
+  connection: { run: (input, signal) => yourEndpoint(input, signal) },
+  onApprove, // the same seam `session.execute` uses
+});
+```
+
+The enabled contract becomes the run's tool definitions, the sanitized view
+its `STATE_SNAPSHOT` and then RFC 6902 `STATE_DELTA`s, and the conversation its
+`MESSAGES_SNAPSHOT`. A `RUN_FINISHED` interrupt with `reason: "confirmation"`
+becomes an `ApprovalSubject` and resumes with `resume[{ interruptId, status,
+payload }]`; `input_required` becomes a question for the reader. A tool call
+this table does not own is left to whoever registered it.
+
+### AI SDK — client tools on your own route
+
+```ts
+// Your route, your provider, unchanged apart from the spread.
+import { aiSdkTools } from "@adapttable/ai/ai-sdk";
+
+streamText({
+  model,
+  system,
+  tools: { ...yourTools, ...aiSdkTools(session) },
+});
+```
+
+Every entry omits `execute`, which is how the AI SDK decides the client runs
+it. In the browser, `aiSdkTransport` answers those calls and returns each
+result as the tool output on the next request — the shape `addToolOutput`
+sends. `tool-approval-request` becomes an `ApprovalSubject` and answers as an
+approval response; `output-denied` carries the reject reason. A stream that
+declares a version this adapter does not speak is refused with
+`unknown-stream-version` rather than parsed as though it were one it does.
 
 ## Examples
 
@@ -190,6 +279,10 @@ the same session. Setup, protocol and the runnable example live on
 - [ai-browser-agent.tsx](../examples/ai-browser-agent.tsx) — `tableAgent` + JSON tools
 - [ai-http-backend.ts](../examples/ai-http-backend.ts) — runnable OpenAI/Anthropic/Gemini/DeepSeek server
 - [ai-assistant-custom-ui.tsx](../examples/ai-assistant-custom-ui.tsx) — a complete conversation panel with none of the shipped widget in it
+- [ai-assistant-store.ts](../examples/ai-assistant-store.ts) — the conversation with no React, no DOM and no HTTP
+- [ai-agui-host.ts](../examples/ai-agui-host.ts) — an AG-UI run driven from recorded events, including a confirmation interrupt
+- [ai-sdk-route.ts](../examples/ai-sdk-route.ts) — the route half: client tools declared beside a route tool
+- [ai-http-backend.py](../examples/ai-http-backend.py) — the same wire in Python, standard library only, run through `uv`
 
 Intention fixtures (no live model) live in
 `packages/ai/src/__fixtures__/intentions.json`.
