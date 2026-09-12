@@ -38,13 +38,39 @@ export interface CapabilityRegistry {
   catalogOrder(): readonly string[];
   enabledKeys(observation: AgentObservation): readonly string[];
   describe(key: string): CapabilityGuide;
+  /**
+   * Whether the agent may use this key at all.
+   *
+   * Wiring and exclusion in one answer, resolved once and asked everywhere a
+   * key could leak — the catalog, a guide, a tool adapter, and execution
+   * itself, including after an awaited boundary. A chip hidden in a panel is
+   * not enforcement; this is.
+   */
+  permits(key: string, observation: AgentObservation): boolean;
+  /** Keys the host excluded, for reporting why something is unavailable. */
+  excluded(): ReadonlySet<string>;
 }
 
 class SessionCapabilityRegistry implements CapabilityRegistry {
   private readonly definitions: Map<string, AgentCapabilityDefinition>;
+  private readonly excludedKeys: ReadonlySet<string>;
 
-  constructor(definitions: Map<string, AgentCapabilityDefinition>) {
+  constructor(
+    definitions: Map<string, AgentCapabilityDefinition>,
+    excluded: ReadonlySet<string>
+  ) {
     this.definitions = definitions;
+    this.excludedKeys = excluded;
+  }
+
+  permits(key: string, observation: AgentObservation): boolean {
+    if (this.excludedKeys.has(key)) return false;
+    const def = this.definitions.get(key);
+    return def?.isEnabled(observation) ?? false;
+  }
+
+  excluded(): ReadonlySet<string> {
+    return this.excludedKeys;
   }
 
   has(key: string): boolean {
@@ -62,8 +88,7 @@ class SessionCapabilityRegistry implements CapabilityRegistry {
   enabledKeys(observation: AgentObservation): readonly string[] {
     const keys: string[] = [];
     for (const key of this.catalogOrder()) {
-      const def = this.definitions.get(key);
-      if (def?.isEnabled(observation)) keys.push(key);
+      if (this.permits(key, observation)) keys.push(key);
     }
     return keys;
   }
@@ -75,16 +100,28 @@ class SessionCapabilityRegistry implements CapabilityRegistry {
       schemaVersion: AGENT_SCHEMA_VERSION,
       key: def.key,
       guide: def.guide.guide,
+      // Derived from the guide it already has, never written a second time:
+      // two hand-written descriptions of one capability drift, and the short
+      // one is the copy a browser tool cap would show.
+      short: shortForm(def.guide.guide),
       input: def.guide.input,
       output: def.guide.output,
     };
   }
 }
 
-/** Register built-ins and custom capabilities for one session. */
+/**
+ * Register built-ins and custom capabilities for one session.
+ *
+ * `exclude` is the host's own denial list. It never enables anything — a key
+ * the table does not wire stays unavailable whatever the list says — and it
+ * applies to custom definitions as well as built-ins, because "the agent may
+ * not do this" is not a question about who authored the capability.
+ */
 export function createCapabilityRegistry(
   custom: readonly AgentCapabilityDefinition[],
-  builtIn: BuiltInHandlers
+  builtIn: BuiltInHandlers,
+  exclude: readonly string[] = []
 ): CapabilityRegistry {
   const definitions = new Map<string, AgentCapabilityDefinition>();
   for (const key of CAPABILITY_KEYS) {
@@ -122,7 +159,24 @@ export function createCapabilityRegistry(
     }
     definitions.set(def.key, def);
   }
-  return new SessionCapabilityRegistry(definitions);
+  return new SessionCapabilityRegistry(definitions, new Set(exclude));
+}
+
+/** Longest description a tool surface with a hard cap will still show. */
+const SHORT_LIMIT = 150;
+
+/**
+ * The first sentence, or the first {@link SHORT_LIMIT} characters of it.
+ *
+ * Derived rather than authored. A capability whose guide changes cannot end up
+ * with a short form describing what it used to do.
+ */
+export function shortForm(guide: string): string {
+  const sentence = /^.*?[.!?](?=\s|$)/.exec(guide.trim())?.[0] ?? guide.trim();
+  if (sentence.length <= SHORT_LIMIT) return sentence;
+  const clipped = sentence.slice(0, SHORT_LIMIT - 1);
+  const lastSpace = clipped.lastIndexOf(" ");
+  return `${lastSpace > 40 ? clipped.slice(0, lastSpace) : clipped}…`;
 }
 
 function capabilityKind(key: CapabilityKey): AgentCapabilityDefinition["kind"] {

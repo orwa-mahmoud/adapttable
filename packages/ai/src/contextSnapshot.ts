@@ -1,0 +1,307 @@
+/**
+ * The permitted contract, projected and sanitized from the live session.
+ *
+ * Nothing is re-derived here. The schemas are `guides.ts`'s, the wiring answer
+ * is the registry's, the filter data is `filterCatalog.ts`'s and the
+ * aggregation choices are `aggregationCommands.ts`'s. What this file owns is
+ * the projection: read them through the session, which has already applied the
+ * permission predicate, and shape what survives into something serializable.
+ *
+ * Two things are kept apart on purpose. The **contract** is what the table can
+ * do and what its columns are — it changes when the table changes, which is
+ * rarely, and it is the part worth pinning on a backend. The **view** is where
+ * the table is right now, which changes constantly and is sent every turn.
+ * Folding them together is how a backend ends up holding a contract that is
+ * stale for one reason and current for another.
+ *
+ * Absence is never silence: a value the table could not resolve is reported as
+ * unavailable rather than omitted, because a model cannot tell an empty list
+ * from a question nobody asked.
+ */
+import type {
+  AgentAggregations,
+  AgentColumn,
+  AgentFilter,
+  AgentManifest,
+  AgentSession,
+  CapabilityGuide,
+  CatalogEntry,
+  JsonSchema,
+} from "./types";
+
+/** One capability as the contract describes it. @public */
+export interface ContextCapability {
+  readonly key: string;
+  /** One line, from the capability's own summary. */
+  readonly summary: string;
+  /** The same, within a hard description cap. */
+  readonly summaryShort?: string;
+  /** What this capability does, when its guide was selected. */
+  readonly guide?: string;
+  /** Arguments it takes, when its guide was selected. */
+  readonly input?: JsonSchema;
+  /**
+   * What it returns.
+   *
+   * Absent by default. Input guidance is what lets a model call something
+   * correctly; an output schema is bulk it can read from the result it gets.
+   */
+  readonly output?: JsonSchema;
+}
+
+/** One column, with visibility and permission told apart. @public */
+export interface ContextColumn {
+  readonly id: string;
+  readonly label: string;
+  readonly type: string;
+  /** Whether the agent may read values from it. */
+  readonly readable: boolean;
+  /** Whether the agent may write it. */
+  readonly writable: boolean;
+  readonly sortable: boolean;
+  readonly pinnable?: boolean;
+  /** Whether it is currently on screen. Not a permission. */
+  readonly visible?: boolean;
+  /** What the author said it means. */
+  readonly description?: string;
+  /** Representative values the author supplied, or sampled where allowed. */
+  readonly examples?: readonly unknown[];
+}
+
+/** The table's permitted shape. Changes rarely; worth pinning. @public */
+export interface AgentContextContract {
+  readonly tableId: string;
+  /** Everything in this contract, named unambiguously. */
+  readonly version: string;
+  readonly capabilities: readonly ContextCapability[];
+  readonly columns: readonly ContextColumn[];
+  readonly filters: readonly AgentFilter[];
+  readonly aggregations?: AgentAggregations;
+  readonly rowAddressing: AgentManifest["rowAddressing"];
+  readonly limits: AgentManifest["limits"];
+  readonly policy: AgentManifest["policy"];
+  readonly source: AgentManifest["source"];
+}
+
+/** Where the table is right now. Changes constantly; sent every turn. @public */
+export interface AgentContextView {
+  readonly revision: number;
+  readonly page: number;
+  readonly limit: number;
+  readonly search: string;
+  readonly sortBy?: string;
+  readonly sortDir?: "asc" | "desc";
+  readonly groupBy?: string;
+  /** Filter state, with excluded keys already removed. */
+  readonly filters?: Readonly<Record<string, unknown>>;
+  readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+  readonly pinnedRows?: Readonly<Record<string, unknown>>;
+  /**
+   * Fields the table could not answer for.
+   *
+   * A model told a page is `1` when nobody published one would act on a fact
+   * nobody asserted. Naming the gap is the honest alternative to a default.
+   */
+  readonly unknown?: readonly string[];
+}
+
+/** Live values sampled for one column, when the author opted in. */
+const SAMPLE_CAP = 5;
+
+/** How many static filter options the contract will carry per filter. */
+const OPTION_CAP = 24;
+
+/**
+ * Author-supplied examples that actually match the column's declared type.
+ *
+ * A wrong example is worse than none: a model shown `"2024-01-01"` for a
+ * numeric column will send a string and be refused by the schema it was never
+ * shown.
+ */
+function validExamples(column: AgentColumn): readonly unknown[] | undefined {
+  const examples = column.ai?.examples;
+  if (!examples?.length) return undefined;
+  const matches = examples.filter((value) => matchesType(value, column.type));
+  return matches.length > 0 ? matches.slice(0, SAMPLE_CAP) : undefined;
+}
+
+function matchesType(value: unknown, type: string): boolean {
+  if (type === "number") return typeof value === "number";
+  if (type === "boolean") return typeof value === "boolean";
+  if (type === "string") return typeof value === "string";
+  if (type === "date") {
+    return value instanceof Date || typeof value === "string";
+  }
+  // An unknown or custom type cannot be checked, so nothing is rejected on a
+  // guess — the author is the one who knows.
+  return true;
+}
+
+/** Project one column, with permission and visibility kept apart. */
+function contextColumn(column: AgentColumn): ContextColumn {
+  const examples = column.readable ? validExamples(column) : undefined;
+  return {
+    id: column.id,
+    label: column.label,
+    type: column.type,
+    readable: column.readable,
+    writable: column.writable,
+    sortable: column.sortable,
+    ...(column.pinnable === undefined ? {} : { pinnable: column.pinnable }),
+    ...(column.visible === undefined ? {} : { visible: column.visible }),
+    ...(column.ai?.description ? { description: column.ai.description } : {}),
+    ...(examples ? { examples } : {}),
+  };
+}
+
+/**
+ * Bound a filter's static options without losing the fact that it has more.
+ *
+ * A truncated list presented as complete is the worst of both: the model
+ * believes it has seen every value and confidently filters for none of the
+ * rest. `optionsOmitted` is how it learns to ask instead.
+ */
+function boundFilter(filter: AgentFilter): AgentFilter {
+  if (!filter.options || filter.options.length <= OPTION_CAP) return filter;
+  return {
+    ...filter,
+    options: filter.options.slice(0, OPTION_CAP),
+    optionsOmitted: true,
+  };
+}
+
+/** Filters whose key names a column the agent may not read are dropped. */
+function permittedFilters(
+  filters: readonly AgentFilter[],
+  columns: readonly AgentColumn[]
+): readonly AgentFilter[] {
+  const unreadable = new Set(
+    columns.filter((column) => !column.readable).map((column) => column.id)
+  );
+  return filters
+    .filter((filter) => !unreadable.has(filter.key))
+    .map(boundFilter);
+}
+
+/**
+ * Strip a filter bag down to keys the agent is allowed to know about.
+ *
+ * An excluded field must not come back through the current-filter state, which
+ * is the quiet path a sanitized column list would otherwise leave open.
+ */
+function permittedFilterState(
+  state: Readonly<Record<string, unknown>> | undefined,
+  filters: readonly AgentFilter[]
+): Readonly<Record<string, unknown>> | undefined {
+  if (!state) return undefined;
+  const allowed = new Set(filters.flatMap((filter) => filter.valueKeys));
+  const kept: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(state)) {
+    if (allowed.has(key)) kept[key] = value;
+  }
+  return Object.keys(kept).length > 0 ? kept : undefined;
+}
+
+/** Everything the contract says, named so two of them can be compared. */
+export function contractVersion(contract: AgentContextContract): string {
+  return JSON.stringify({
+    tableId: contract.tableId,
+    capabilities: contract.capabilities.map((entry) => [
+      entry.key,
+      entry.summary,
+    ]),
+    columns: contract.columns,
+    filters: contract.filters,
+    aggregations: contract.aggregations,
+    rowAddressing: contract.rowAddressing,
+    limits: contract.limits,
+    policy: contract.policy,
+    source: contract.source,
+  });
+}
+
+/**
+ * Build the permitted contract from the live session.
+ *
+ * Every key comes from `session.catalog()`, which has already applied the
+ * permission predicate, so nothing excluded can reach this. Guides are
+ * attached by the selection step, not here: what a capability *is* does not
+ * depend on how much room there was to explain it.
+ */
+export function buildContract(
+  session: AgentSession,
+  catalog: readonly CatalogEntry[],
+  filters: readonly AgentFilter[],
+  aggregations: AgentAggregations | undefined
+): AgentContextContract {
+  const manifest = session.manifest();
+  const contract: AgentContextContract = {
+    tableId: manifest.tableId,
+    version: "",
+    capabilities: catalog.map((entry) => ({
+      key: entry.key,
+      summary: entry.summary,
+      ...(entry.summaryShort ? { summaryShort: entry.summaryShort } : {}),
+    })),
+    columns: manifest.columns.map(contextColumn),
+    filters: permittedFilters(filters, manifest.columns),
+    ...(aggregations ? { aggregations } : {}),
+    rowAddressing: manifest.rowAddressing,
+    limits: manifest.limits,
+    policy: manifest.policy,
+    source: manifest.source,
+  };
+  return { ...contract, version: contractVersion(contract) };
+}
+
+/** What the table's view state looks like, with nothing forbidden in it. */
+export function buildView(
+  view: {
+    readonly revision: number;
+    readonly page?: number;
+    readonly limit?: number;
+    readonly search?: string;
+    readonly sortBy?: string;
+    readonly sortDir?: "asc" | "desc";
+    readonly groupBy?: string;
+    readonly filters?: Readonly<Record<string, unknown>>;
+    readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+    readonly pinnedRows?: Readonly<Record<string, unknown>>;
+  },
+  filters: readonly AgentFilter[]
+): AgentContextView {
+  // Absence is a fact, not a default. A host that publishes no page is not a
+  // host whose table is on page 1.
+  const missing: string[] = [];
+  if (view.page === undefined) missing.push("page");
+  if (view.limit === undefined) missing.push("limit");
+  if (view.search === undefined) missing.push("search");
+  const state = permittedFilterState(view.filters, filters);
+  return {
+    revision: view.revision,
+    page: view.page ?? 1,
+    limit: view.limit ?? 10,
+    search: view.search ?? "",
+    ...(view.sortBy ? { sortBy: view.sortBy } : {}),
+    ...(view.sortDir ? { sortDir: view.sortDir } : {}),
+    ...(view.groupBy ? { groupBy: view.groupBy } : {}),
+    ...(state ? { filters: state } : {}),
+    ...(view.pinnedColumns ? { pinnedColumns: view.pinnedColumns } : {}),
+    ...(view.pinnedRows ? { pinnedRows: view.pinnedRows } : {}),
+    ...(missing.length > 0 ? { unknown: missing } : {}),
+  };
+}
+
+/** Wrap a guide onto the capability it belongs to. */
+export function withGuide(
+  capability: ContextCapability,
+  guide: CapabilityGuide,
+  includeOutput: boolean
+): ContextCapability {
+  return {
+    ...capability,
+    guide: guide.guide,
+    input: guide.input,
+    ...(includeOutput && guide.output ? { output: guide.output } : {}),
+  };
+}

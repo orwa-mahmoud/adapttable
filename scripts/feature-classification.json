@@ -588,7 +588,8 @@
           "./openai",
           "./mcp",
           "./http",
-          "./assistant"
+          "./assistant",
+          "./context"
         ]
       }
     ],

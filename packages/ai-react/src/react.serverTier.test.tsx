@@ -7,7 +7,12 @@
  * the chrome publishes. That fallback is the whole binding for anyone on
  * `useQuerySource`, and it is a separate code path from the engine one.
  */
-import type { AgentSession, ExecuteResult, RowWindow } from "@adapttable/ai";
+import type {
+  AgentSession,
+  ExecuteResult,
+  RowProvenanceEnvelope,
+  RowWindow,
+} from "@adapttable/ai";
 import {
   applyTableFeatures,
   FeatureProviders,
@@ -20,6 +25,11 @@ import { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TABLE_AGENT_STATE, tableAgent } from "./react";
+
+/** The window inside the provenance envelope a read returns. */
+function windowOf(result: { readonly result?: unknown }): RowWindow {
+  return (result.result as RowProvenanceEnvelope).rows;
+}
 
 interface Row {
   id: string;
@@ -163,15 +173,8 @@ describe("agent binding without an engine — reading", () => {
       "r-all"
     );
 
-    expect((visible.result as RowWindow).rows.map((r) => r.rowKey)).toEqual([
-      "2",
-      "3",
-    ]);
-    expect((all.result as RowWindow).rows.map((r) => r.rowKey)).toEqual([
-      "1",
-      "2",
-      "3",
-    ]);
+    expect(windowOf(visible).rows.map((r) => r.rowKey)).toEqual(["2", "3"]);
+    expect(windowOf(all).rows.map((r) => r.rowKey)).toEqual(["1", "2", "3"]);
   });
 
   it("never returns more rows than readMax, whatever was asked for", async () => {
@@ -183,7 +186,7 @@ describe("agent binding without an engine — reading", () => {
       "r-max"
     );
 
-    expect((result.result as RowWindow).rows).toHaveLength(2);
+    expect(windowOf(result).rows).toHaveLength(2);
     expect(result.result).toMatchObject({ limit: 2 });
   });
 
@@ -201,7 +204,7 @@ describe("agent binding without an engine — reading", () => {
       "r-red"
     );
 
-    const window = result.result as RowWindow;
+    const window = windowOf(result);
     expect(window.rows[0]?.cells).toEqual({ name: "Ada" });
     expect(window.redacted).toContain("team");
   });

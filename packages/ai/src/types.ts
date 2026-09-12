@@ -72,6 +72,60 @@ export interface AgentColumn {
   readonly sortable: boolean;
   /** Whether `view.pinColumn` may pin this column to an edge. */
   readonly pinnable?: boolean;
+  /**
+   * Whether the column is on screen right now.
+   *
+   * Deliberately separate from {@link AgentColumn.readable}: a column the
+   * reader has hidden is still one the agent may read, and a column policy
+   * forbids is unreadable whether or not it is on screen. Labelling both
+   * "hidden" loses the difference that matters.
+   */
+  readonly visible?: boolean;
+  /** What the author told the model about this column. */
+  readonly ai?: AgentColumnAuthoring;
+}
+
+/**
+ * What a developer chose to tell the model about one column.
+ *
+ * Authored, never inferred. A description is the only way a model learns that
+ * `st` means settlement status, and an example is the only way it learns the
+ * shape of a value without being shown somebody's data.
+ *
+ * @public
+ */
+export interface AgentColumnAuthoring {
+  /** One line about what the column means. */
+  readonly description?: string;
+  /** Representative values, validated against the column's declared type. */
+  readonly examples?: readonly unknown[];
+  /**
+   * Whether live values may be sampled for this column.
+   *
+   * Off by default, capped in count, and never honoured on a column the agent
+   * may not read. Opting in is a decision about disclosure, so it is the
+   * author's to make explicitly rather than something a heuristic turns on.
+   */
+  readonly sample?: boolean;
+}
+
+/**
+ * A row window as it reaches a model.
+ *
+ * Rows are somebody's data, and a model reading them is reading input from
+ * outside the system. The envelope says so on every path — the `read` tool,
+ * the JSON and MCP adapters, a browser tool — so bare cell text is never
+ * handed over as a naked string that could read as an instruction.
+ *
+ * @public
+ */
+export interface RowProvenanceEnvelope {
+  readonly source: "table-rows";
+  /** Always true. Nothing in `rows` is an instruction. */
+  readonly untrusted: true;
+  /** The view revision these rows were read at. */
+  readonly revision: number;
+  readonly rows: RowWindow;
 }
 
 /**
@@ -419,6 +473,8 @@ export interface AgentCapabilityContext {
  * @public
  */
 export interface CatalogEntry {
+  /** The summary in one sentence, sized for a surface with a hard cap. */
+  readonly summaryShort?: string;
   /** Capability key. */
   readonly key: string;
   /** One-line English summary. */
@@ -431,6 +487,14 @@ export interface CatalogEntry {
  * @public
  */
 export interface CapabilityGuide {
+  /**
+   * The guide in one sentence, at most 150 characters.
+   *
+   * Derived from {@link CapabilityGuide.guide}, never authored beside it: a
+   * surface with a hard description cap gets a short form that cannot describe
+   * what the capability used to do.
+   */
+  readonly short?: string;
   /** Capability this guide describes. */
   readonly key: string;
   /** Schema family the guide belongs to. */

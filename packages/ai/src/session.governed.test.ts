@@ -8,8 +8,14 @@ import type {
   AgentObservation,
   CapabilityPlan,
   RowReadQuery,
+  RowProvenanceEnvelope,
   RowWindow,
 } from "./types";
+
+/** The window inside the provenance envelope a read returns. */
+function windowOf(result: { readonly result?: unknown }): RowWindow {
+  return (result.result as RowProvenanceEnvelope).rows;
+}
 
 const PAGE_ONLY = {
   fullDataset: false,
@@ -129,7 +135,7 @@ describe("rows.read", () => {
       "read"
     );
     expect(result.ok).toBe(true);
-    const window = result.result as RowWindow;
+    const window = windowOf(result);
     expect(window.redacted).toEqual(["ssn"]);
     expect(window.rows[0]?.cells).toEqual({ name: "Ada", salary: 100 });
     expect(window.rows[0]?.cells).not.toHaveProperty("ssn");
@@ -147,7 +153,7 @@ describe("rows.read", () => {
       "cols"
     );
     expect(result.ok).toBe(true);
-    const window = result.result as RowWindow;
+    const window = windowOf(result);
     expect(window.rows[0]?.cells).toEqual({ name: "Ada" });
     expect(window.rows[0]?.cells).not.toHaveProperty("salary");
   });
@@ -854,7 +860,7 @@ describe("execution lifecycle", () => {
       1,
       "read-once"
     );
-    expect((first.result as RowWindow).rows[0]?.cells.salary).toBe(100);
+    expect(windowOf(first).rows[0]?.cells.salary).toBe(100);
     readableSalary = false;
     const replayed = await session.execute(
       "rows.read",
@@ -862,10 +868,8 @@ describe("execution lifecycle", () => {
       1,
       "read-once"
     );
-    expect(
-      (replayed.result as RowWindow).rows[0]?.cells.salary
-    ).toBeUndefined();
-    expect((replayed.result as RowWindow).redacted).toContain("salary");
+    expect(windowOf(replayed).rows[0]?.cells.salary).toBeUndefined();
+    expect(windowOf(replayed).redacted).toContain("salary");
   });
 
   it("rejects add/delete/reorder under commit: stage before callbacks run", async () => {

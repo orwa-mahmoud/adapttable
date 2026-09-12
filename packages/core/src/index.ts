@@ -51,6 +51,7 @@ export type {
   CellProps,
   ColorScheme,
   ColumnFooterContext,
+  ColumnAiOptions,
   ColumnGroupShow,
   ColumnHeaderContext,
   ColumnHeaderController,

@@ -80,6 +80,22 @@ export {
   agentFiltersFromDefs,
   type FilterCatalogColumnPatch,
 } from "./filterCatalog";
+export {
+  type AgentContext,
+  type AgentContextContract,
+  type AgentContextInputs,
+  type AgentContextOptions,
+  type AgentContextProfile,
+  type AgentContextSelection,
+  type AgentContextView,
+  buildAgentContext,
+  type ContextCapability,
+  type ContextColumn,
+  ContextIncludeError,
+  contractVersion,
+  DEFAULT_COMPACT_TOKENS,
+  rowProvenance,
+} from "./context";
 export { guideOf, summaryOf } from "./guides";
 export {
   AGENT_SCHEMA_VERSION,
@@ -133,8 +149,10 @@ export type {
   ExecuteResult,
   JsonSchema,
   ResolvedRow,
+  AgentColumnAuthoring,
   RowKeyRef,
   RowPositionRef,
+  RowProvenanceEnvelope,
   RowReadQuery,
   RowRef,
   RowWindow,

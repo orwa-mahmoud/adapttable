@@ -65,6 +65,14 @@ export interface ColumnModel<TRow = unknown> {
    * and the default row data path for the cell value.
    */
   key: string;
+  /**
+   * What an agent is told about this column.
+   *
+   * Authored, never inferred: a header reading `st` tells a model nothing, and
+   * no heuristic can recover that it means settlement status. Ignored entirely
+   * on a table with no agent.
+   */
+  ai?: ColumnAiOptions;
   /** Plain-text header caption. Bindings may store richer nodes separately. */
   header?: string;
   /** Native tooltip on the header caption. */
@@ -227,6 +235,31 @@ export interface ColumnModel<TRow = unknown> {
   lockPin?: boolean;
   /** Arbitrary metadata adapters may read. */
   meta?: Record<string, unknown>;
+}
+
+/**
+ * What a developer chose to tell an agent about one column.
+ *
+ * @public
+ */
+export interface ColumnAiOptions {
+  /** One line about what the column means. */
+  description?: string;
+  /**
+   * Representative values.
+   *
+   * Validated against the column's declared type before they are exported: an
+   * example of the wrong shape teaches a call the schema will refuse.
+   */
+  examples?: readonly unknown[];
+  /**
+   * Whether live values may be sampled from this column.
+   *
+   * Off by default, capped in count, and never honoured on a column an agent
+   * may not read. Opting in is a decision about disclosure, so it is made
+   * explicitly rather than turned on by a heuristic.
+   */
+  sample?: boolean;
 }
 
 /**

@@ -2,7 +2,17 @@ import type { TableSourceCapabilities } from "@adapttable/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { createAgentSession } from "./session";
-import type { AgentColumn, AgentObservation, RowWindow } from "./types";
+import type {
+  AgentColumn,
+  AgentObservation,
+  RowProvenanceEnvelope,
+  RowWindow,
+} from "./types";
+
+/** The window inside the provenance envelope a read returns. */
+function windowOf(result: { readonly result?: unknown }): RowWindow {
+  return (result.result as RowProvenanceEnvelope).rows;
+}
 
 const COLUMNS: AgentColumn[] = [
   {
@@ -104,7 +114,7 @@ describe("rows.read boundaries on returned data", () => {
       1,
       "over"
     );
-    const window = result.result as RowWindow;
+    const window = windowOf(result);
     expect(window.rows).toHaveLength(3);
     expect(window.limit).toBe(3);
     expect(window.offset).toBe(0);
@@ -133,7 +143,7 @@ describe("rows.read boundaries on returned data", () => {
       "max"
     );
     expect(seen).toEqual([4]);
-    expect((result.result as RowWindow).rows).toHaveLength(4);
+    expect(windowOf(result).rows).toHaveLength(4);
   });
 
   it("omits a cell the callback returned for an undeclared column", async () => {
@@ -165,7 +175,7 @@ describe("rows.read boundaries on returned data", () => {
       1,
       "undeclared"
     );
-    const window = result.result as RowWindow;
+    const window = windowOf(result);
     expect(window.rows[0]?.cells).toEqual({ name: "Ada", salary: 100 });
     expect(window.redacted).toContain("ssn");
   });
@@ -192,7 +202,7 @@ describe("rows.read boundaries on returned data", () => {
       1,
       "removed"
     );
-    const window = result.result as RowWindow;
+    const window = windowOf(result);
     expect(window.rows[0]?.cells).toEqual({ name: "name-1" });
   });
 
@@ -218,7 +228,7 @@ describe("rows.read boundaries on returned data", () => {
       1,
       "tightened"
     );
-    const window = result.result as RowWindow;
+    const window = windowOf(result);
     expect(window.rows).toHaveLength(2);
     expect(window.limit).toBe(2);
   });
@@ -329,7 +339,7 @@ describe("rows.read boundaries on replay", () => {
       1,
       "replay-cols"
     );
-    expect((first.result as RowWindow).rows[0]?.cells).toHaveProperty("salary");
+    expect(windowOf(first).rows[0]?.cells).toHaveProperty("salary");
     columns = COLUMNS.filter((column) => column.id !== "salary");
     const again = await session.execute(
       "rows.read",
@@ -337,7 +347,7 @@ describe("rows.read boundaries on replay", () => {
       1,
       "replay-cols"
     );
-    expect((again.result as RowWindow).rows[0]?.cells).toEqual({
+    expect(windowOf(again).rows[0]?.cells).toEqual({
       name: "name-1",
     });
   });
@@ -358,7 +368,7 @@ describe("rows.read boundaries on replay", () => {
       1,
       "replay-max"
     );
-    const window = again.result as RowWindow;
+    const window = windowOf(again);
     expect(window.rows).toHaveLength(1);
     expect(window.limit).toBe(1);
   });

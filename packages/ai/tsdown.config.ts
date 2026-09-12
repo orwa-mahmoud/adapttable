@@ -23,5 +23,6 @@ export default defineConfig({
     "src/mcp.ts",
     "src/http.ts",
     "src/assistant.ts",
+    "src/context.ts",
   ],
 });

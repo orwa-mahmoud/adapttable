@@ -91,6 +91,16 @@
         "default": "./dist/assistant.cjs"
       }
     },
+    "./context": {
+      "import": {
+        "types": "./dist/context.d.ts",
+        "default": "./dist/context.js"
+      },
+      "require": {
+        "types": "./dist/context.d.cts",
+        "default": "./dist/context.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

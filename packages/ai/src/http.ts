@@ -40,6 +40,7 @@ import type {
   CapabilityGuide,
   CatalogEntry,
   ExecuteResult,
+  RowProvenanceEnvelope,
   RowReadQuery,
   RowWindow,
 } from "./types";
@@ -1139,8 +1140,12 @@ async function answerQuestions(
       });
       continue;
     }
-    windows.push(result.result as RowWindow);
-    results.push({ id: call.id, result: result.result });
+    // Already labelled by the session: `{ source, untrusted, revision, rows }`.
+    // It travels to the backend as it is, and the window inside it is what
+    // counts against the accumulated context budget.
+    const envelope = result.result as RowProvenanceEnvelope;
+    windows.push(envelope.rows);
+    results.push({ id: call.id, result: envelope });
   }
 
   return { results, guides, windows, describe, read };

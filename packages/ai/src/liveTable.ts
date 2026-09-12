@@ -122,6 +122,10 @@ export function agentColumnsFromNeutral<TRow>(
       readable: true,
       writable: Boolean(column.editor),
       sortable: column.sortable === true,
+      // Carried through untouched. What an author wrote about a column is
+      // theirs, and sanitizing it is the context export's job, where the
+      // permission answer lives.
+      ...(column.ai ? { ai: column.ai } : {}),
     };
     return mergeColumnPatch(base, patches);
   });

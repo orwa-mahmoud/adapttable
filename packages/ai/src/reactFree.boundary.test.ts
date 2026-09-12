@@ -11,7 +11,15 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = join(ROOT, "dist");
-const ENTRIES = ["index", "json", "openai", "mcp", "http", "assistant"];
+const ENTRIES = [
+  "index",
+  "json",
+  "openai",
+  "mcp",
+  "http",
+  "assistant",
+  "context",
+];
 
 const REACT_IMPORT =
   /(?:from|import)[\s(]*["'](?:react|react-dom|react\/[^"']+|@adapttable\/react(?:\/[^"']+)?)["']/;

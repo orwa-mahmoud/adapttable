@@ -4,6 +4,7 @@ import { resolveApproval, type ResolvedApproval } from "./approvalConfig";
 import {
   type CapabilityRegistry,
   createCapabilityRegistry,
+  shortForm,
 } from "./capabilities/registry";
 import { errorMessage } from "./errorMessage";
 import { extrasFromAgentFilters, formatFilterCatalog } from "./filterCatalog";
@@ -35,6 +36,7 @@ import type {
   ResolvedRow,
   RowReadQuery,
   RowRef,
+  RowProvenanceEnvelope,
   RowWindow,
   WriteExecuteResult,
   WriteProposal,
@@ -65,6 +67,16 @@ export interface CreateAgentSessionOptions {
   ) => Promise<ApprovalResult>;
   /** Custom governed capabilities registered on this table session. */
   capabilities?: readonly AgentCapabilityDefinition[];
+  /**
+   * Capability keys the agent may not use on this table.
+   *
+   * One list, for built-ins and custom definitions alike. It only ever denies:
+   * a key the table does not wire stays unavailable whatever this says, and no
+   * entry here can enable a forbidden operation. The table's own UI is
+   * untouched — denying `edit.cells` to the agent leaves a person editing
+   * cells exactly as before.
+   */
+  excludeCapabilities?: readonly string[];
   /**
    * How many replay results this session keeps. Defaults to 200. Accepted
    * mutations keep their deduplication guarantee for the whole session even
@@ -259,28 +271,35 @@ export function createAgentSession(
       plan: (key, context, args) => planBuiltIn(key, context, args, guard),
       execute: (key, context, args) =>
         dispatchBuiltIn(key, context, args, guard),
-    }
+    },
+    options.excludeCapabilities ?? []
   );
   const guard: SessionGuard = {
     observe: () => options.observe(),
-    isEnabled: (key, observation) =>
-      registry.enabledKeys(observation).includes(key),
+    // One predicate, asked here as everywhere else — including the
+    // revalidation after an awaited boundary, which is the check an excluded
+    // capability must not be able to walk past.
+    isEnabled: (key, observation) => registry.permits(key, observation),
   };
 
   const catalog = (): CatalogEntry[] => {
     const observation = options.observe();
-    return registry.enabledKeys(observation).map((key) => ({
-      key,
-      summary: registry.get(key)?.summary ?? summaryOf(key as CapabilityKey),
-    }));
+    return registry.enabledKeys(observation).map((key) => {
+      const summary =
+        registry.get(key)?.summary ?? summaryOf(key as CapabilityKey);
+      return { key, summary, summaryShort: shortForm(summary) };
+    });
   };
 
   const describe = (key: string): CapabilityGuide => {
     if (!registry.has(key)) {
       throw new Error(`unknown capability "${key}"`);
     }
-    const enabled = registry.enabledKeys(options.observe());
-    if (!enabled.includes(key)) {
+    const observation = options.observe();
+    if (!registry.permits(key, observation)) {
+      // Excluded and unwired are both "you cannot use this", and saying which
+      // would tell a model something about the host's configuration that it
+      // has no business learning from a refusal.
       throw new Error(`capability "${key}" is not wired on this table`);
     }
     const guide = registry.describe(key);
@@ -682,19 +701,18 @@ function refreshReplayResult(
     const code = error instanceof ApplyError ? error.code : "apply-failed";
     return denied(code, errorMessage(error));
   }
-  const window = record.result.result as RowWindow;
+  // A replayed read is re-derived against the CURRENT declaration, so a column
+  // the host has since made unreadable does not come back out of the cache.
+  const window = (record.result.result as RowProvenanceEnvelope).rows;
   const wanted = body.columns as readonly string[] | undefined;
   const allow = readableAllowlist(observation.columns, wanted);
   const limit = Math.min(window.limit, readMaxOf(observation));
   return {
     ...record.result,
     revision: observation.viewRevision,
-    result: projectWindow(
-      window,
-      allow,
-      observation.columns,
-      window.offset,
-      limit
+    result: rowProvenance(
+      projectWindow(window, allow, observation.columns, window.offset, limit),
+      observation.viewRevision
     ),
   };
 }
@@ -1216,13 +1234,29 @@ async function readRows(
   }
   assertScope(requestedScope, latest);
   const permitted = Math.min(limit, readMaxOf(latest));
-  return projectWindow(
-    window,
-    readableAllowlist(latest.columns, wanted),
-    latest.columns,
-    offset,
-    permitted
+  // Labelled here, once, so every path that can put rows in front of a model
+  // carries it: the HTTP `read` tool, the JSON and MCP adapters, and anything
+  // later that calls `rows.read`. Rows are somebody's data and are input from
+  // outside the system; handing them over as bare cell text invites a value to
+  // be read as an instruction.
+  return rowProvenance(
+    projectWindow(
+      window,
+      readableAllowlist(latest.columns, wanted),
+      latest.columns,
+      offset,
+      permitted
+    ),
+    latest.viewRevision
   );
+}
+
+/** Rows as what they are: somebody's data, read at one revision. */
+function rowProvenance(
+  rows: RowWindow,
+  revision: number
+): RowProvenanceEnvelope {
+  return { source: "table-rows", untrusted: true, revision, rows };
 }
 
 function isRowKeyRef(
