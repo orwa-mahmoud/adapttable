@@ -593,7 +593,8 @@
           "./voice",
           "./webmcp",
           "./ag-ui",
-          "./mcp-apps"
+          "./mcp-apps",
+          "./ai-sdk"
         ]
       }
     ],

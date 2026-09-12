@@ -23,6 +23,7 @@ const ENTRIES = [
   "webmcp",
   "agui",
   "mcpApps",
+  "aiSdk",
 ];
 
 const REACT_IMPORT =

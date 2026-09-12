@@ -28,5 +28,6 @@ export default defineConfig({
     "src/webmcp.ts",
     "src/agui.ts",
     "src/mcpApps.ts",
+    "src/aiSdk.ts",
   ],
 });

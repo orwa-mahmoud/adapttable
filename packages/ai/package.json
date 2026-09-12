@@ -131,6 +131,16 @@
         "default": "./dist/agui.cjs"
       }
     },
+    "./ai-sdk": {
+      "import": {
+        "types": "./dist/aiSdk.d.ts",
+        "default": "./dist/aiSdk.js"
+      },
+      "require": {
+        "types": "./dist/aiSdk.d.cts",
+        "default": "./dist/aiSdk.cjs"
+      }
+    },
     "./mcp-apps": {
       "import": {
         "types": "./dist/mcpApps.d.ts",
