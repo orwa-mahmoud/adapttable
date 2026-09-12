@@ -11,9 +11,13 @@ import { type AgentObservation, createAgentSession } from "@adapttable/ai";
 import {
   executeMcpTool,
   mcpListChanged,
+  mcpToolResult,
+  toMcpResourceList,
   toMcpResources,
+  toMcpToolList,
   toMcpTools,
 } from "@adapttable/ai/mcp";
+import { mcpAppResource, withMcpAppMeta } from "@adapttable/ai/mcp-apps";
 
 const TABLE_ID = "employees";
 
@@ -100,6 +104,35 @@ export async function runMcpHostExample(): Promise<void> {
     "mcp-page-2"
   );
   console.log("executeMcpTool view.setPage →", page);
+  console.log("as a tools/call result →", mcpToolResult(page));
+
+  // What a host is told about each call, so it knows which ones need a
+  // confirmation and which are safe to retry.
+  for (const tool of toMcpTools(after)) {
+    console.log(tool.name, tool.annotations);
+  }
+
+  // The same lists, with what a host caching them needs. `cacheScope` is the
+  // contract stamp: a table whose capabilities or policy moved gets a new one.
+  console.log("tools/list _meta:", toMcpToolList(after)._meta);
+  console.log("resources/list _meta:", toMcpResourceList(after)._meta);
+
+  // Serve the table as a view the host embeds. `connectDomains` is the whole
+  // channel the view gets: the CSP refuses everything else.
+  const view = mcpAppResource(after, {
+    src: "https://orwa-mahmoud.github.io/adapttable/demo/mcp-app/",
+    security: { connectDomains: ["https://orwa-mahmoud.github.io"] },
+    preferredSize: { width: 720, height: 480 },
+  });
+  console.log("MCP App resource:", view.uri, view.mimeType);
+  console.log("CSP:", view._meta["ui/csp"]);
+  console.log(
+    "tools pointed at the view:",
+    withMcpAppMeta(toMcpTools(after), after).map((tool) => [
+      tool.name,
+      tool._meta?.ui,
+    ])
+  );
 }
 
 void runMcpHostExample();

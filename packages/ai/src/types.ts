@@ -407,6 +407,18 @@ export interface AgentCapabilityDefinition {
    */
   readonly partial?: CapabilityPartial;
   /**
+   * Whether running this twice leaves the table where running it once did.
+   *
+   * The distinction is assignment against accumulation: setting the page,
+   * the sort or a cell value lands on the same state however many times it
+   * runs, while adding rows or starting an export produces something new
+   * every time. Session replay makes a *repeated key* a no-op regardless;
+   * this is about the operation itself, which is what a host deciding
+   * whether a retry is safe needs to know. Defaults to false for `write` and
+   * `destructive` kinds and true for the rest.
+   */
+  readonly idempotent?: boolean;
+  /**
    * Agent-invocation overrides for this capability, inheriting field by
    * field from the table's shared assistant configuration. The same shape an
    * ordinary row or bulk action carries. See `ActionAiOptions`.
@@ -512,6 +524,14 @@ export interface CatalogEntry {
    * disagree.
    */
   readonly kind?: AgentCapabilityDefinition["kind"];
+  /**
+   * Whether running it twice lands where running it once did.
+   *
+   * Published for the same reason as `kind`: a tool surface that advertises
+   * retry safety should read the capability's own answer rather than keep a
+   * list beside it.
+   */
+  readonly idempotent?: boolean;
   /** Capability key. */
   readonly key: string;
   /** One-line English summary. */

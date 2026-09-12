@@ -131,6 +131,16 @@
         "default": "./dist/agui.cjs"
       }
     },
+    "./mcp-apps": {
+      "import": {
+        "types": "./dist/mcpApps.d.ts",
+        "default": "./dist/mcpApps.js"
+      },
+      "require": {
+        "types": "./dist/mcpApps.d.cts",
+        "default": "./dist/mcpApps.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

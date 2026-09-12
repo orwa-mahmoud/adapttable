@@ -146,6 +146,7 @@ export function createCapabilityRegistry(
         key === "edit.cells" || key === "rows.add" || key === "rows.delete"
           ? "supported"
           : "unsupported",
+      idempotent: isIdempotent(key),
       isEnabled: (observation) => isBuiltInEnabled(key, observation),
       plan: governed
         ? (context, args) => builtIn.plan(key, context, args)
@@ -177,6 +178,19 @@ export function shortForm(guide: string): string {
   const clipped = sentence.slice(0, SHORT_LIMIT - 1);
   const lastSpace = clipped.lastIndexOf(" ");
   return `${lastSpace > 40 ? clipped.slice(0, lastSpace) : clipped}…`;
+}
+
+/**
+ * Whether running a built-in twice lands where running it once did.
+ *
+ * Assignment against accumulation, and nothing else: every setter names an
+ * absolute state, so repeating it changes nothing, and that holds for a cell
+ * value and a deleted row key as much as for a page number. The two that
+ * accumulate are the two that produce something new each time — `rows.add`
+ * appends another row, and `export.run` emits another file.
+ */
+function isIdempotent(key: CapabilityKey): boolean {
+  return key !== "rows.add" && key !== "export.run";
 }
 
 function capabilityKind(key: CapabilityKey): AgentCapabilityDefinition["kind"] {

@@ -292,6 +292,9 @@ export function createAgentSession(
         summary,
         summaryShort: shortForm(summary),
         ...(definition?.kind ? { kind: definition.kind } : {}),
+        ...(definition?.idempotent === undefined
+          ? {}
+          : { idempotent: definition.idempotent }),
       };
     });
   };

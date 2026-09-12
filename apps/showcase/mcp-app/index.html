@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <meta
+      name="description"
+      content="AdaptTable as an MCP App view — the table an MCP host embeds beside the conversation, driving every reader action through tools/call."
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>AdaptTable — MCP App view</title>
+    <script>
+      try {
+        if (new URLSearchParams(location.search).get("theme") === "dark")
+          document.documentElement.dataset.theme = "dark";
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/entry-mcp-app.tsx"></script>
+  </body>
+</html>

@@ -592,7 +592,8 @@
           "./context",
           "./voice",
           "./webmcp",
-          "./ag-ui"
+          "./ag-ui",
+          "./mcp-apps"
         ]
       }
     ],

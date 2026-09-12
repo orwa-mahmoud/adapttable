@@ -22,6 +22,7 @@ const ENTRIES = [
   "voice",
   "webmcp",
   "agui",
+  "mcpApps",
 ];
 
 const REACT_IMPORT =

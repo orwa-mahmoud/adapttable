@@ -4,7 +4,10 @@ import { AGENT_SCHEMA_VERSION } from "./keys";
 import {
   executeMcpTool,
   mcpListChanged,
+  mcpToolResult,
+  toMcpResourceList,
   toMcpResources,
+  toMcpToolList,
   toMcpTools,
 } from "./mcp";
 import { createAgentSession } from "./session";
@@ -142,5 +145,145 @@ describe("executeMcpTool", () => {
     );
     expect(result.ok).toBe(true);
     expect(apply.setPage).toHaveBeenCalledWith(2);
+  });
+});
+
+/** Everything wired, so every annotation has a tool to sit on. */
+function fullTable() {
+  return createAgentSession({
+    observe: () =>
+      observation({
+        featureIds: ["editing", "export-csv"],
+        hasEdit: true,
+        hasExport: true,
+        hasAdd: true,
+        hasDelete: true,
+        approval: "never",
+      }),
+    apply: {
+      setPage: vi.fn(),
+      editCells: vi.fn(),
+      addRows: vi.fn(),
+      deleteRows: vi.fn(),
+      runExport: vi.fn(),
+      readRows: () => ({
+        offset: 0,
+        limit: 1,
+        redacted: [],
+        rows: [{ rowKey: "r1", cells: { salary: 1 } }],
+      }),
+    },
+  });
+}
+
+function annotationsOf(name: string) {
+  return toMcpTools(fullTable()).find((tool) => tool.name === name)
+    ?.annotations;
+}
+
+describe("what a host is told about a call", () => {
+  it("marks a view and a read as changing nothing", () => {
+    expect(annotationsOf("view.setPage")).toEqual({
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    });
+    expect(annotationsOf("rows.read")?.readOnlyHint).toBe(true);
+  });
+
+  it("marks only a destructive capability destructive, and says so for the rest", () => {
+    expect(annotationsOf("rows.delete")?.destructiveHint).toBe(true);
+    for (const name of ["edit.cells", "rows.add", "view.setPage"]) {
+      // Explicitly false, not absent: a host reading an absent hint has to
+      // guess, and the cautious guess is the expensive one.
+      expect(annotationsOf(name)?.destructiveHint).toBe(false);
+    }
+  });
+
+  it("marks a repeat safe only where it lands in the same place", () => {
+    // Assignment: the same page, the same cell value, the same deleted keys.
+    expect(annotationsOf("view.setPage")?.idempotentHint).toBe(true);
+    expect(annotationsOf("edit.cells")?.idempotentHint).toBe(true);
+    expect(annotationsOf("rows.delete")?.idempotentHint).toBe(true);
+    // Accumulation: another row, another file.
+    expect(annotationsOf("rows.add")?.idempotentHint).toBe(false);
+    expect(annotationsOf("export.run")?.idempotentHint).toBe(false);
+  });
+
+  it("never claims a capability reaches outside this table", () => {
+    for (const tool of toMcpTools(fullTable())) {
+      expect(tool.annotations.openWorldHint).toBe(false);
+    }
+  });
+});
+
+describe("caching a list", () => {
+  it("stamps a list with the contract it describes", () => {
+    const session = fullTable();
+    const tools = toMcpToolList(session);
+
+    expect(tools.tools).toEqual(toMcpTools(session));
+    expect(tools._meta.cacheScope).toMatch(
+      /^adapttable\.contract\.[0-9a-f]{8}$/
+    );
+    expect(tools._meta.ttlMs).toBeGreaterThan(0);
+    expect(toMcpResourceList(session)._meta).toEqual(tools._meta);
+  });
+
+  it("stamps a table whose capabilities moved differently", () => {
+    const before = createAgentSession({
+      observe: () => observation(),
+      apply: {},
+    });
+
+    expect(toMcpToolList(before)._meta.cacheScope).not.toBe(
+      toMcpToolList(fullTable())._meta.cacheScope
+    );
+  });
+});
+
+describe("mcpToolResult", () => {
+  it("reports a receipt for anything that is not row data", async () => {
+    const session = fullTable();
+    const result = mcpToolResult(
+      await executeMcpTool(session, "view.setPage", { page: 2 }, 1, "k1")
+    );
+
+    expect(result.isError).toBeUndefined();
+    expect(JSON.parse(result.content[0]?.text ?? "{}")).toMatchObject({
+      ok: true,
+    });
+  });
+
+  it("keeps the provenance envelope the session put on rows", async () => {
+    const session = fullTable();
+    const result = mcpToolResult(
+      await executeMcpTool(
+        session,
+        "rows.read",
+        { offset: 0, limit: 1 },
+        1,
+        "k2"
+      )
+    );
+
+    // Rows are somebody's data on this path too, and the label is what says so.
+    expect(JSON.parse(result.content[0]?.text ?? "{}")).toMatchObject({
+      source: "table-rows",
+      untrusted: true,
+    });
+  });
+
+  it("marks a refusal as an error and names it", async () => {
+    const session = fullTable();
+    const result = mcpToolResult(
+      await executeMcpTool(session, "view.setPage", { page: "no" }, 1, "k3")
+    );
+
+    expect(result.isError).toBe(true);
+    expect(JSON.parse(result.content[0]?.text ?? "{}").error).toMatchObject({
+      code: "invalid-arguments",
+    });
   });
 });
