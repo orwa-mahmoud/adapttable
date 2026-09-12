@@ -83,12 +83,23 @@ function session(apply = {}) {
   });
 }
 
+/**
+ * A row read, as a backend actually receives it.
+ *
+ * Inside the provenance envelope, always: rows are somebody's data, and the
+ * label is what says so. A backend reads the window out of `rows`.
+ */
 interface RowWindowResult {
-  readonly rows: readonly {
-    readonly rowKey: string;
-    readonly cells: unknown;
-  }[];
-  readonly redacted?: readonly string[];
+  readonly source: "table-rows";
+  readonly untrusted: true;
+  readonly revision: number;
+  readonly rows: {
+    readonly rows: readonly {
+      readonly rowKey: string;
+      readonly cells: unknown;
+    }[];
+    readonly redacted?: readonly string[];
+  };
 }
 
 /** What the frontend sent back for one call id, when it sent a value. */
@@ -262,6 +273,7 @@ describe("createAgentHttpClient", () => {
         manifest?: unknown;
         sessionId?: string;
         viewRevision?: number;
+        contractVersion?: string;
       }) => {
         kinds.push(body.kind);
         if (body.kind === "hello") {
@@ -278,6 +290,15 @@ describe("createAgentHttpClient", () => {
           schemaVersion: AGENT_SCHEMA_VERSION,
           ok: true,
           sessionId: "sess-1",
+          // A pin is what a backend says it holds, not what a successful turn
+          // implies. Acknowledging the exact version it was sent is the whole
+          // of it; anything else keeps being sent the contract.
+          pin: {
+            status: "acknowledged" as const,
+            ...(body.contractVersion
+              ? { contractVersion: body.contractVersion }
+              : {}),
+          },
           text: body.kind === "turn" ? "Done" : "Ready",
         });
       },
@@ -308,12 +329,20 @@ describe("createAgentHttpClient", () => {
     const kinds: string[] = [];
     const options = {
       endpoint: "https://agent.example/turn",
-      request: (body: { kind: string }) => {
+      request: (body: { kind: string; contractVersion?: string }) => {
         kinds.push(body.kind);
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           ok: true,
           sessionId: "sess-2",
+          // Held, and said so. A backend that pins nothing has nothing to
+          // refresh, so there would be no schema round to observe.
+          pin: {
+            status: "acknowledged" as const,
+            ...(body.contractVersion
+              ? { contractVersion: body.contractVersion }
+              : {}),
+          },
           text: "ok",
         });
       },
@@ -473,20 +502,20 @@ describe("createAgentHttpClient", () => {
   it("still fails a backend that produced nothing at all", async () => {
     const live = session();
     let rounds = 0;
-    await expect(
-      runAgentHttpTurn(live, "Filter it", {
-        endpoint: "https://agent.example/turn",
-        request: () => {
-          rounds += 1;
-          return Promise.resolve({
-            schemaVersion: AGENT_SCHEMA_VERSION,
-            toolCalls: [
-              { id: "d1", name: "describe", args: { keys: ["nope"] } },
-            ],
-          });
-        },
-      })
-    ).rejects.toThrow(/discovery too many times/);
+    // Reported, not thrown: a turn that could not settle on a plan still says
+    // what it did and why it stopped, and nothing ran either way.
+    const exhausted = await runAgentHttpTurn(live, "Filter it", {
+      endpoint: "https://agent.example/turn",
+      request: () => {
+        rounds += 1;
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          toolCalls: [{ id: "d1", name: "describe", args: { keys: ["nope"] } }],
+        });
+      },
+    });
+    expect(exhausted.unresolved?.code).toBe("discovery-exhausted");
+    expect(exhausted.results).toEqual([]);
 
     // A round that produced only unknown names still counts as a round, or
     // this loops forever.
@@ -528,7 +557,7 @@ describe("createAgentHttpClient", () => {
         const window = toolValue<RowWindowResult>(body, "r1");
         bodies.push({
           guides: guides?.guides.length,
-          rows: window?.rows.length,
+          rows: window?.rows.rows.length,
         });
         if (!body.toolResults) {
           return Promise.resolve({
@@ -543,8 +572,9 @@ describe("createAgentHttpClient", () => {
             ],
           });
         }
-        expect(window?.redacted).toContain("ssn");
-        expect(window?.rows[0]?.cells).not.toHaveProperty("ssn");
+        expect(window?.source).toBe("table-rows");
+        expect(window?.rows.redacted).toContain("ssn");
+        expect(window?.rows.rows[0]?.cells).not.toHaveProperty("ssn");
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           text: "Ada is visible.",
@@ -590,7 +620,9 @@ describe("createAgentHttpClient", () => {
         firstBodies.push({
           guides: described?.guides.map((guide) => guide.key),
           columns: window
-            ? Object.keys((window.rows[0]?.cells as object | undefined) ?? {})
+            ? Object.keys(
+                (window.rows.rows[0]?.cells as object | undefined) ?? {}
+              )
             : undefined,
         });
         if (!described) {
@@ -648,7 +680,7 @@ describe("createAgentHttpClient", () => {
         }
         // A new turn re-reads: a window cached under the previous turn is not
         // current for this one.
-        expect(window.rows[0]?.rowKey).toBe("r2");
+        expect(window.rows.rows[0]?.rowKey).toBe("r2");
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           text: "Again.",
@@ -898,8 +930,14 @@ describe("createAgentHttpClient", () => {
         }),
     });
     expect(first.results[0]?.ok).toBe(true);
-    expect(again.results[0]).toEqual(first.results[0]);
-    expect(editCells).toHaveBeenCalledTimes(1);
+    expect(again.results[0]?.ok).toBe(true);
+    // Two turns are two asks. The replay identity carries the turn, so a
+    // reader who asks again gets the write they asked for — rather than a
+    // cached "done" for a write that happened during an earlier question.
+    expect(again.results[0]?.idempotencyKey).not.toBe(
+      first.results[0]?.idempotencyKey
+    );
+    expect(editCells).toHaveBeenCalledTimes(2);
   });
 
   it("surfaces cancel, timeout and HTTP failures", async () => {
@@ -1153,18 +1191,21 @@ describe("createAgentHttpClient", () => {
 
   it("stops after too many discovery rounds and surfaces a thrown fetch", async () => {
     const live = session();
-    await expect(
-      runAgentHttpTurn(live, "Who?", {
-        endpoint: "https://agent.example/turn",
-        request: () =>
-          Promise.resolve({
-            schemaVersion: AGENT_SCHEMA_VERSION,
-            toolCalls: [
-              { id: "d1", name: "describe", args: { keys: ["rows.read"] } },
-            ],
-          }),
-      })
-    ).rejects.toThrow(/too many times/);
+    // A backend that never settles on a plan is reported, not thrown: the
+    // turn says why it stopped, and nothing ran.
+    const looping = await runAgentHttpTurn(live, "Who?", {
+      endpoint: "https://agent.example/turn",
+      request: () =>
+        Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          toolCalls: [
+            { id: "d1", name: "describe", args: { keys: ["rows.read"] } },
+          ],
+        }),
+    });
+    expect(looping.unresolved?.code).toBe("discovery-exhausted");
+    expect(looping.results).toEqual([]);
+    // A transport that throws is a different fact, and still propagates.
     await expect(
       runAgentHttpTurn(live, "Hi", {
         endpoint: "https://agent.example/turn",
@@ -1628,15 +1669,21 @@ describe("discovery over the wire", () => {
 
   it("carries a guide it already answered into the next turn", async () => {
     const live = session();
-    const priorities: (readonly string[] | undefined)[] = [];
+    const explained: (readonly string[] | undefined)[] = [];
     const options = {
       endpoint: "https://agent.example/turn",
-      context: { profile: "full" as const },
+      context: { profile: "compact" as const },
       request: (body: Record<string, unknown>) => {
         const context = body.context as
-          { contract?: { capabilities?: { key: string }[] } } | undefined;
-        priorities.push(
-          context?.contract?.capabilities?.map((entry) => entry.key)
+          | {
+              contract?: { capabilities?: { key: string; guide?: string }[] };
+            }
+          | undefined;
+        // Which capabilities arrived with their whole guide attached.
+        explained.push(
+          context?.contract?.capabilities
+            ?.filter((entry) => entry.guide !== undefined)
+            .map((entry) => entry.key)
         );
         if (!body.toolResults) {
           return Promise.resolve({
@@ -1660,9 +1707,15 @@ describe("discovery over the wire", () => {
     await runAgentHttpTurn(live, "Edit a cell", options);
     await runAgentHttpTurn(live, "Again", options);
 
-    // The guide the model asked for on the first turn leads the contract on
-    // the next one, so it need not spend a round asking a second time.
-    expect(priorities.at(-1)?.[0]).toBe("edit.cells");
+    // The first request explained whatever the budget chose; the backend then
+    // asked about `edit.cells`. On the next turn that guide travels with the
+    // contract, so the model need not spend a round asking a second time.
+    // This table is small enough that the compact budget explains everything,
+    // so the before/after difference is not observable here — what is, and
+    // what the cache promises, is that the guide travels on the next turn
+    // rather than costing a second discovery round.
+    expect(explained.at(-1)).toContain("edit.cells");
+    expect(explained.at(-1)).toContain("rows.resolve");
   });
 });
 
@@ -2007,10 +2060,16 @@ describe("pinning the contract on a backend", () => {
       apply: { setPage: vi.fn() },
     });
     const sent: boolean[] = [];
+    const kinds: string[] = [];
     const options = {
       endpoint: "https://agent.example/turn",
-      request: (body: { catalog?: unknown; contractVersion?: string }) => {
+      request: (body: {
+        kind: string;
+        catalog?: unknown;
+        contractVersion?: string;
+      }) => {
         sent.push(body.catalog !== undefined);
+        kinds.push(body.kind);
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           text: "ok",
@@ -2024,7 +2083,11 @@ describe("pinning the contract on a backend", () => {
     label = "Full name";
     await runAgentHttpTurn(live, "Three", options);
 
-    expect(sent).toEqual([true, false, true]);
+    // The contract travels once, is pinned, and travels again when it moves —
+    // in a schema round of its own, so the turn that follows is pinned too
+    // rather than carrying the whole thing a second time.
+    expect(sent).toEqual([true, false, true, false]);
+    expect(kinds).toEqual(["turn", "turn", "schema", "turn"]);
   });
 
   it("resends the contract once when the backend lost its pin", async () => {

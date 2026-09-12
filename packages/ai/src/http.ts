@@ -935,35 +935,20 @@ const pins = createPinStore();
  */
 const guideCache = createDiscoveryCache();
 
-/** Stable opaque ids for transport functions, so none is ever stringified. */
-const transportIds = new WeakMap<object, string>();
-let transportSeq = 0;
-
 /**
  * Which connection these options describe.
  *
- * The endpoint plus the identity of the transport function — never a header,
- * which is where the credentials are. A host that changes credentials without
- * changing either says so with `connectionId`.
+ * The endpoint, and never a header — a header is where the credentials are.
+ *
+ * Deliberately not the identity of the transport function. A host that builds
+ * its options inside a render hands over a new closure every call, and keying
+ * on that would mean such a host never keeps a pin at all: every turn would
+ * look like a first one and carry the whole contract forever. A host that
+ * genuinely has two connections to one endpoint — two credentials, two
+ * tenants — says so with `connectionId`, which is what that option is for.
  */
 function connectionIdOf(options: AgentHttpClientOptions): string {
-  if (options.connectionId) return options.connectionId;
-  const supplied: unknown = options.request ?? options.fetch;
-  // Only an object can key a WeakMap. A host that passed something else has a
-  // real problem, and the transport guard says so in words — reaching it
-  // matters more than identifying a connection that will never open.
-  const transport =
-    typeof supplied === "function" || (typeof supplied === "object" && supplied)
-      ? (supplied as object)
-      : undefined;
-  if (!transport) return `endpoint:${options.endpoint}`;
-  let id = transportIds.get(transport);
-  if (id === undefined) {
-    transportSeq += 1;
-    id = `transport-${String(transportSeq)}`;
-    transportIds.set(transport, id);
-  }
-  return `endpoint:${options.endpoint}|${id}`;
+  return options.connectionId ?? `endpoint:${options.endpoint}`;
 }
 
 /** Everything the backend would be told, named unambiguously. */
