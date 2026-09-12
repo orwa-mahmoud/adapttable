@@ -49,7 +49,10 @@ function toolCall(): JsonSchemaDocument {
         description:
           'A capability key, or "describe" / "read" — the two tools that ask the frontend something rather than commanding it.',
       },
-      args: { description: "Arguments for that tool." },
+      args: {
+        description:
+          'Arguments for that tool. "describe" takes { keys?: string[], bundle?: string } — a bundle names a family and is expanded locally into the members this table actually offers. "read" takes { offset, limit, columns?, scope? }.',
+      },
       expectedRevision: {
         type: "number",
         description:

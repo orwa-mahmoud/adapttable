@@ -21,6 +21,13 @@ import {
   type PinStatus,
 } from "./httpPins";
 import {
+  discover,
+  type DiscoveryRequest,
+  type DiscoverySource,
+  familyOf,
+} from "./discovery";
+import { createDiscoveryCache, type DiscoveryCache } from "./discoveryCache";
+import {
   createPhasePlan,
   DESCRIBE_TOOL,
   type FinalizedCall,
@@ -664,7 +671,9 @@ function asToolCall(value: unknown): AgentHttpToolCall {
     return { id, name, args: asReadQuery(args), expectedRevision };
   }
   if (name === DESCRIBE_TOOL) {
-    return { id, name, args: { keys: asDescribeKeys(args) }, expectedRevision };
+    // Normalized at the parser so a malformed key list is a protocol error
+    // where the body is read, not a surprise three awaits later.
+    return { id, name, args: asDescribeRequest(args), expectedRevision };
   }
   return { id, name, args, expectedRevision };
 }
@@ -845,24 +854,54 @@ function asReadQuery(args: unknown): RowReadQuery {
   };
 }
 
-/** The capability keys one `describe` call is asking about. */
-function asDescribeKeys(args: unknown): readonly string[] {
+/** What one `describe` call is asking about: keys, a family, or both. */
+function asDescribeRequest(args: unknown): DiscoveryRequest {
   const entry = isRecord(args) ? args : {};
-  if (entry.keys === undefined) return [];
-  if (!Array.isArray(entry.keys)) {
-    throw new TypeError("agent HTTP describe.keys must be an array of strings");
-  }
-  for (const key of entry.keys) {
-    if (typeof key !== "string" || key.length === 0) {
+  if (entry.keys !== undefined) {
+    if (!Array.isArray(entry.keys)) {
       throw new TypeError(
         "agent HTTP describe.keys must be an array of strings"
       );
     }
+    for (const key of entry.keys) {
+      if (typeof key !== "string" || key.length === 0) {
+        throw new TypeError(
+          "agent HTTP describe.keys must be an array of strings"
+        );
+      }
+    }
   }
-  return entry.keys as readonly string[];
+  const bundle = asString(entry.bundle);
+  return {
+    ...(entry.keys ? { keys: entry.keys as readonly string[] } : {}),
+    ...(bundle ? { bundle } : {}),
+  };
+}
+
+/**
+ * The session's own permitted view of itself, for expansion.
+ *
+ * `available` is the catalog, which the permission predicate has already
+ * filtered, and `describe` refuses anything it would not list — so a family
+ * cannot reach past either.
+ */
+function discoverySource(session: AgentSession): DiscoverySource {
+  return {
+    available: () => session.catalog().map((entry) => entry.key),
+    describe: (key) => session.describe(key),
+    family: (key) => familyOf(key),
+  };
 }
 
 const pins = createPinStore();
+/**
+ * Guides already answered, per connection and contract version.
+ *
+ * Holding one is not the same as sending one: a cached guide still has to be
+ * selected into a request. What this saves is the round that would have been
+ * spent asking for it again.
+ */
+const guideCache = createDiscoveryCache();
 
 /** Stable opaque ids for transport functions, so none is ever stringified. */
 const transportIds = new WeakMap<object, string>();
@@ -942,11 +981,31 @@ function pinLost(response: AgentHttpResponse): boolean {
  */
 function currentContext(
   session: AgentSession,
-  options: AgentHttpClientOptions
+  options: AgentHttpClientOptions,
+  connectionId?: string,
+  contractVersion?: string
 ): AgentContext {
-  return buildAgentContext(session, options.context ?? {}, {
-    ...(options.contextInputs?.(session) ?? {}),
-  });
+  const chosen = options.context ?? {};
+  // A guide this backend already asked for, under this same contract, is
+  // evidence of what the conversation is about. It goes to the front of the
+  // selection so the next turn carries it instead of spending another round
+  // asking — through the ordinary budget, not around it, and never by
+  // appending every guide ever answered.
+  const remembered =
+    connectionId && contractVersion
+      ? guideCache.known(
+          connectionId,
+          contractVersion,
+          session.catalog().map((entry) => entry.key)
+        )
+      : [];
+  return buildAgentContext(
+    session,
+    remembered.length > 0
+      ? { ...chosen, priority: [...remembered, ...(chosen.priority ?? [])] }
+      : chosen,
+    { ...(options.contextInputs?.(session) ?? {}) }
+  );
 }
 
 function compactRequest(
@@ -1056,6 +1115,7 @@ async function refreshSchemaPin(
       // The backend declined this contract. Sending it per request is the
       // documented fallback, and marking anything current here would be a lie.
       pins.forget(session, connectionId);
+      guideCache.forget(connectionId);
       return;
     }
     rememberPin(session, connectionId, { version, seq }, response);
@@ -1277,7 +1337,10 @@ function mergeGuides(
 async function answerQuestions(
   session: AgentSession,
   questions: readonly AgentHttpToolCall[],
-  turn: HttpPhaseContext
+  turn: HttpPhaseContext,
+  connectionId: string,
+  contractVersion: string,
+  cache: DiscoveryCache | undefined
 ): Promise<{
   readonly results: readonly AgentHttpToolResult[];
   readonly guides: readonly CapabilityGuide[];
@@ -1301,18 +1364,22 @@ async function answerQuestions(
     if (call.name === DESCRIBE_TOOL) {
       // Counted by what was ASKED, not by what came back: a round that
       // produced only unknown names still used a round.
-      const keys = asDescribeKeys(call.args);
-      describe += keys.length;
-      const catalog = session.catalog();
-      const known = keys.filter((key) =>
-        catalog.some((entry) => entry.key === key)
-      );
-      const missing = keys.filter((key) => !known.includes(key));
-      const answered = known.map((key) => session.describe(key));
-      guides.push(...answered);
+      const request = asDescribeRequest(call.args);
+      describe += request.keys?.length ?? 0;
+      const answered = discover(request, discoverySource(session));
+      guides.push(...answered.guides);
+      // Remembered against the contract these answers describe, so a later
+      // turn under the same contract need not spend a round on them again.
+      cache?.remember(connectionId, contractVersion, answered.guides);
       results.push({
         id: call.id,
-        result: { guides: answered, unavailable: missing },
+        result: {
+          guides: answered.guides,
+          unavailable: answered.unavailable,
+          ...(answered.deferred.length > 0
+            ? { deferred: answered.deferred }
+            : {}),
+        },
       });
       continue;
     }
@@ -1463,7 +1530,7 @@ async function runPhase(
     // Built once per round. With the contract pinned only the view travels;
     // with `pinCatalog: false` the whole thing does, which is what that option
     // means.
-    const context = currentContext(session, options);
+    const context = currentContext(session, options, connectionId, version);
     last = await exchange(
       options,
       compactRequest(
@@ -1490,6 +1557,7 @@ async function runPhase(
       // again — no call of this phase has been dispatched.
       mayRecoverPin = false;
       pins.forget(session, connectionId);
+      guideCache.forget(connectionId);
       questionOnly = false;
       round -= 1;
       continue;
@@ -1527,7 +1595,14 @@ async function runPhase(
       continue;
     }
 
-    const answers = await answerQuestions(session, outcome.questions, turn);
+    const answers = await answerQuestions(
+      session,
+      outcome.questions,
+      turn,
+      connectionId,
+      version,
+      guideCache
+    );
     guides = mergeGuides(guides, answers.guides);
     windows = [...windows, ...answers.windows];
     assertContextSize(guides, windows);
@@ -1783,7 +1858,12 @@ export function createAgentHttpClient(options: AgentHttpClientOptions): {
     send: (session, message, extras) =>
       runAgentHttpTurn(session, message, options, extras),
     reset: (session) => {
-      pins.forget(session, connectionIdOf(options));
+      const connectionId = connectionIdOf(options);
+      pins.forget(session, connectionId);
+      // Guidance is acknowledged to a connection the same way a pin is. A
+      // reader whose credentials changed is a different connection, and what
+      // the last one was told is not what this one has been.
+      guideCache.forget(connectionId);
     },
   };
 }

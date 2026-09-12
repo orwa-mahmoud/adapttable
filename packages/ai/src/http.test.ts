@@ -1379,6 +1379,109 @@ describe("createAgentHttpClient", () => {
   });
 });
 
+describe("discovery over the wire", () => {
+  it("answers a family in one round rather than one per key", async () => {
+    const live = session();
+    let rounds = 0;
+    const result = await runAgentHttpTurn(live, "Edit a cell", {
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        rounds += 1;
+        if (!body.toolResults) {
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            toolCalls: [
+              { id: "d1", name: "describe", args: { bundle: "editing" } },
+            ],
+          });
+        }
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "Got the guidance.",
+        });
+      },
+    });
+
+    // One describe call, one extra round — not one round per family member.
+    expect(rounds).toBe(2);
+    expect(result.text).toBe("Got the guidance.");
+  });
+
+  it("returns the family's guidance and names what it cannot give", async () => {
+    const live = session();
+    let answer: { guides?: unknown[]; unavailable?: string[] } | undefined;
+    await runAgentHttpTurn(live, "Edit a cell", {
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const result = toolValue<{ guides: unknown[]; unavailable: string[] }>(
+          body,
+          "d1"
+        );
+        if (result) answer = result;
+        if (!body.toolResults) {
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            toolCalls: [
+              {
+                id: "d1",
+                name: "describe",
+                args: { keys: ["edit.cells", "rows.delete"] },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+        });
+      },
+    });
+
+    // edit.cells drags in rows.resolve; rows.delete is not wired here.
+    expect(answer?.guides?.length).toBeGreaterThan(1);
+    expect(answer?.unavailable).toEqual(["rows.delete"]);
+  });
+
+  it("carries a guide it already answered into the next turn", async () => {
+    const live = session();
+    const priorities: (readonly string[] | undefined)[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      context: { profile: "full" as const },
+      request: (body: Record<string, unknown>) => {
+        const context = body.context as
+          { contract?: { capabilities?: { key: string }[] } } | undefined;
+        priorities.push(
+          context?.contract?.capabilities?.map((entry) => entry.key)
+        );
+        if (!body.toolResults) {
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            toolCalls: [
+              {
+                id: "d1",
+                name: "describe",
+                args: { keys: ["edit.cells"] },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+        });
+      },
+    } as unknown as Parameters<typeof runAgentHttpTurn>[2];
+
+    await runAgentHttpTurn(live, "Edit a cell", options);
+    await runAgentHttpTurn(live, "Again", options);
+
+    // The guide the model asked for on the first turn leads the contract on
+    // the next one, so it need not spend a round asking a second time.
+    expect(priorities.at(-1)?.[0]).toBe("edit.cells");
+  });
+});
+
 describe("carrying the context", () => {
   it("sends the contract and the view on a full request", async () => {
     const live = session();

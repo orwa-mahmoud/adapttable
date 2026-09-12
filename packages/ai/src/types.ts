@@ -341,6 +341,27 @@ export type CapabilityStaging = "supported" | "unsupported";
 export type CapabilityPartial = "supported" | "unsupported";
 
 /**
+ * What a capability belongs with, for one-round discovery.
+ *
+ * Declared on the definition, so a custom capability names its own related
+ * guidance without a second registry knowing it exists.
+ *
+ * @public
+ */
+export interface CapabilityFamily {
+  /** Family name a request may ask for by itself. */
+  readonly family?: string;
+  /**
+   * Keys this one is not usable without.
+   *
+   * Not "related reading": a dependency is guidance the model needs to form a
+   * correct call. Addressing rules for a write, grouping rules for an
+   * aggregate.
+   */
+  readonly dependsOn?: readonly string[];
+}
+
+/**
  * Governed capability extension registered on one table session.
  *
  * @public
@@ -358,6 +379,14 @@ export interface AgentCapabilityDefinition {
   };
   /** Effect class used for approval defaults on custom writes. */
   readonly kind?: "read" | "view" | "write" | "destructive";
+  /**
+   * What this capability belongs with, for one-round discovery.
+   *
+   * A custom capability declares its own related guidance here rather than a
+   * second registry doing it elsewhere. `dependsOn` is not "related reading":
+   * it is guidance the model cannot form a correct call without.
+   */
+  readonly discovery?: CapabilityFamily;
   /**
    * Optional labels and suggestions for a reader-facing assistant.
    *

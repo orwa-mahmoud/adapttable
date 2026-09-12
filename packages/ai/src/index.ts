@@ -96,6 +96,20 @@ export {
   DEFAULT_COMPACT_TOKENS,
   rowProvenance,
 } from "./context";
+export {
+  discover,
+  type DiscoveryRequest,
+  type DiscoveryResult,
+  type DiscoverySource,
+  familyOf,
+  MAX_FAMILY_GUIDES,
+} from "./discovery";
+export {
+  createDiscoveryCache,
+  DEFAULT_CACHE_GUIDES,
+  DEFAULT_CACHE_VERSIONS,
+  type DiscoveryCache,
+} from "./discoveryCache";
 export { guideOf, summaryOf } from "./guides";
 export {
   AGENT_SCHEMA_VERSION,
@@ -150,6 +164,7 @@ export type {
   JsonSchema,
   ResolvedRow,
   AgentColumnAuthoring,
+  CapabilityFamily,
   RowKeyRef,
   RowPositionRef,
   RowProvenanceEnvelope,
