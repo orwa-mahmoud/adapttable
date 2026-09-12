@@ -16,13 +16,17 @@ export {
 } from "./aggregationCommands";
 export {
   type ResolvedApproval,
+  resolveApproval,
   type SharedApproval,
   sharedApproval,
 } from "./approvalConfig";
 export {
+  type AlwaysAllowInput,
+  type ApprovalMemory,
   type ApprovalTransaction,
   closeTransaction,
   createApprovalMemory,
+  mayAlwaysAllow,
   openTransaction,
   type PendingApproval,
   recordDecision,
@@ -61,11 +65,21 @@ export {
 export {
   type AssistantMessage,
   type AssistantStatus,
+  type AssistantUndoOffer,
   createTableAssistant,
   type TableAssistantInputs,
   type TableAssistantSnapshot,
   type TableAssistantStore,
 } from "./assistantStore";
+export {
+  type AssistantUndo,
+  isUndoBlock,
+  planUndo,
+  runUndo,
+  type UndoBlock,
+  type UndoCall,
+  undoBlocked,
+} from "./assistantUndo";
 export {
   type AssistantReceipt,
   type AssistantReceiptStatus,

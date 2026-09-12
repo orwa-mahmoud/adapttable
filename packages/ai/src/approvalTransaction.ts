@@ -26,7 +26,7 @@ import type {
   ApprovalPresentation,
 } from "@adapttable/core";
 
-import type { ApprovalResult } from "./types";
+import type { AgentCapabilityDefinition, ApprovalResult } from "./types";
 
 /** The write waiting on a reader, and the call it will settle. */
 export interface PendingApproval {
@@ -135,14 +135,7 @@ export function settleDecisions(
  * version moves, because "allow this" was said about a table that no longer
  * exists in that shape.
  */
-export function createApprovalMemory(): {
-  /** Whether this capability may skip the human, under this contract. */
-  readonly allows: (capability: string, contractVersion: string) => boolean;
-  /** Remember the reader's "don't ask again" for this capability. */
-  readonly remember: (capability: string, contractVersion: string) => void;
-  /** Forget everything. */
-  readonly clear: () => void;
-} {
+export function createApprovalMemory(): ApprovalMemory {
   let version: string | undefined;
   let allowed = new Set<string>();
 
@@ -161,9 +154,79 @@ export function createApprovalMemory(): {
       sync(contractVersion);
       allowed.add(capability);
     },
+    revoke: (capability) => {
+      // No `sync`: revoking is always safe, and syncing here would quietly
+      // clear the set when a stale version was passed.
+      allowed.delete(capability);
+    },
+    remembered: (contractVersion) => {
+      // Synced like every other read: a list built from a contract that has
+      // moved would offer a revoke control for something already forgotten.
+      sync(contractVersion);
+      return [...allowed].sort((a, b) => a.localeCompare(b));
+    },
     clear: () => {
       allowed = new Set<string>();
       version = undefined;
     },
   };
+}
+
+/** What a reader has waved through, for this contract. @public */
+export interface ApprovalMemory {
+  /** Whether this capability may skip the human, under this contract. */
+  readonly allows: (capability: string, contractVersion: string) => boolean;
+  /** Remember the reader's "don't ask again" for this capability. */
+  readonly remember: (capability: string, contractVersion: string) => void;
+  /** Forget one capability, so the next write asks again. */
+  readonly revoke: (capability: string) => void;
+  /** What is remembered under this contract, so a surface can list it. */
+  readonly remembered: (contractVersion: string) => readonly string[];
+  /** Forget everything. */
+  readonly clear: () => void;
+}
+
+/** What decides whether "don't ask again" may even be offered. @public */
+export interface AlwaysAllowInput {
+  /**
+   * The capability the write runs, when it names one.
+   *
+   * A write that enumerates rows names none: the reader is deciding rows,
+   * not agreeing to a class of operation, and a remembered answer about
+   * "some rows" would mean nothing next time.
+   */
+  readonly capability: string | undefined;
+  /** What the capability does to the table, from its own declaration. */
+  readonly kind: AgentCapabilityDefinition["kind"] | undefined;
+  /** The keys the developer opted in, from the resolved approval. */
+  readonly alwaysAllow: readonly string[];
+}
+
+/**
+ * Whether a surface may draw the "don't ask again" control at all.
+ *
+ * One place, because every one of these is a rule somebody could otherwise
+ * reimplement slightly differently:
+ *
+ * - **Opt-in.** A key the developer did not name is never offered. This is
+ *   what makes the control absent by default rather than present and refusing.
+ * - **Never for a write that enumerates rows.** There is no class of
+ *   operation to remember.
+ * - **Never for a destructive capability.** Deleting is asked about every
+ *   time, however many times it has been allowed.
+ *
+ * Two more win without appearing here, because they act earlier: an action
+ * whose own configuration demands a human has already emptied `alwaysAllow`
+ * in {@link resolveApproval}, and a host `onApprove` or a backend that
+ * authorizes for itself means no transaction is opened at all.
+ *
+ * @param input - The capability, its kind, and what was opted in.
+ * @returns Whether the control may be drawn.
+ *
+ * @public
+ */
+export function mayAlwaysAllow(input: AlwaysAllowInput): boolean {
+  if (input.capability === undefined) return false;
+  if (input.kind === "destructive") return false;
+  return input.alwaysAllow.includes(input.capability);
 }

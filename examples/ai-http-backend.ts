@@ -35,6 +35,7 @@ import {
 } from "@adapttable/ai/http";
 
 import { createExamplePinStore, EXAMPLE_PIN_TTL_MS } from "./ai-http-pins.ts";
+import { createTextFieldReader, readSseData } from "./ai-http-stream.ts";
 
 const examplePins = createExamplePinStore<
   NonNullable<AgentHttpRequest["context"]>,
@@ -176,7 +177,18 @@ export interface ExampleCompleteArgs {
   readonly signal: AbortSignal;
 }
 
-export type ExampleComplete = (args: ExampleCompleteArgs) => Promise<string>;
+/**
+ * Ask the provider for one reply.
+ *
+ * `onDelta` is what makes it a stream. When it is given the provider is asked
+ * to stream and every fragment of the JSON document is forwarded as it
+ * arrives; the return value is the whole document either way, so the parsed
+ * reply is identical and nothing downstream has two paths to maintain.
+ */
+export type ExampleComplete = (
+  args: ExampleCompleteArgs,
+  onDelta?: (chunk: string) => void
+) => Promise<string>;
 
 function defaultModel(provider: string): string {
   if (provider === "anthropic") return "claude-sonnet-4-5";
@@ -274,24 +286,45 @@ function wantsStream(req: IncomingMessage): boolean {
  * whole, once, and `done` is what makes them final. A client that loses the
  * connection before `done` has run nothing.
  */
-function writeStream(res: ServerResponse, reply: AgentHttpResponse): void {
+function openStream(
+  res: ServerResponse
+): (event: string, data: unknown) => void {
   res.writeHead(200, {
     "content-type": "text/event-stream",
     "cache-control": "no-cache",
     connection: "keep-alive",
   });
-  const send = (event: string, data: unknown): void => {
+  return (event, data) => {
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
-  for (const piece of (reply.text ?? "").match(/.{1,24}/gs) ?? []) {
-    send("text-delta", { text: piece });
+}
+
+/**
+ * Close a stream that has already sent its text.
+ *
+ * `sent` is what the reader has seen. Anything the parsed reply carries beyond
+ * it goes out now — a provider whose stream and final message disagree, or a
+ * reply whose text was never streamed at all — so the client always ends up
+ * with exactly `reply.text`, which is what the parity test pins.
+ */
+function finishStream(
+  send: (event: string, data: unknown) => void,
+  reply: AgentHttpResponse,
+  sent: string
+): void {
+  const text = reply.text ?? "";
+  if (text !== sent) {
+    send("text-delta", {
+      text: text.startsWith(sent) ? text.slice(sent.length) : text,
+    });
   }
   if (reply.transcript) send("transcript", { text: reply.transcript });
   if (reply.askUser) send("ask-user", reply.askUser);
+  // Whole, once, and only now: `done` is what makes the calls final, so a
+  // client that loses the connection before it has run nothing.
   if (reply.toolCalls?.length)
     send("tool-calls", { toolCalls: reply.toolCalls });
   send("done", {});
-  res.end();
 }
 
 function writeJson(res: ServerResponse, status: number, body: unknown): void {
@@ -372,7 +405,8 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
 export async function handleExampleAgentTurn(
   request: AgentHttpRequest,
   complete: ExampleComplete,
-  signal: AbortSignal
+  signal: AbortSignal,
+  onText?: (chunk: string) => void
 ): Promise<AgentHttpResponse> {
   if (request.kind === "hello" || request.kind === "schema") {
     const sessionId = pinExampleSchema(request);
@@ -404,18 +438,72 @@ export async function handleExampleAgentTurn(
       text: "send the table contract — this backend no longer holds a pin for it",
     };
   }
-  const raw = await complete({
-    system: agentSystemPrompt(resolved.schema),
-    user: userPrompt(request),
-    signal,
-  });
+  // The provider streams fragments of a JSON document; the reader turns those
+  // into the reply text as it becomes readable. Without a sink there is
+  // nothing to stream to, so the provider is asked for the document whole.
+  const reader = onText ? createTextFieldReader("text") : undefined;
+  const raw = await complete(
+    {
+      system: agentSystemPrompt(resolved.schema),
+      user: userPrompt(request),
+      signal,
+    },
+    reader && onText
+      ? (fragment) => {
+          const decoded = reader.push(fragment);
+          if (decoded) onText(decoded);
+        }
+      : undefined
+  );
   return { ...asReply(raw, request), pin: resolved.pin };
+}
+
+/** What a provider said went wrong, or the bare status. */
+async function providerError(response: Response): Promise<Error> {
+  const body = (await response.json().catch(() => ({}))) as {
+    error?: { message?: string };
+  };
+  return new Error(body.error?.message ?? `provider ${response.status}`);
+}
+
+/**
+ * Collect a provider's stream, forwarding each fragment as it lands.
+ *
+ * The fragments are pieces of the JSON document the provider was asked for,
+ * not pieces of the answer — pulling the answer out of them is the reader's
+ * job, one layer up.
+ */
+async function collectStream(
+  response: Response,
+  fragmentOf: (payload: string) => string | undefined,
+  onDelta: (chunk: string) => void
+): Promise<string> {
+  let raw = "";
+  for await (const payload of readSseData(response.body)) {
+    // Every provider here ends its stream with a sentinel rather than only by
+    // closing the body.
+    if (payload === "[DONE]") break;
+    let fragment: string | undefined;
+    try {
+      fragment = fragmentOf(payload);
+    } catch {
+      // A keep-alive or a status frame this parser does not know. Skipping it
+      // is right; failing the turn over it is not.
+      continue;
+    }
+    if (!fragment) continue;
+    raw += fragment;
+    onDelta(fragment);
+  }
+  if (!raw) throw new Error("provider returned no content");
+  return raw;
 }
 
 async function completeOpenAI(
   url: string,
   key: string,
-  args: ExampleCompleteArgs
+  args: ExampleCompleteArgs,
+  onDelta?: (chunk: string) => void
 ): Promise<string> {
   const response = await fetch(url, {
     method: "POST",
@@ -427,25 +515,38 @@ async function completeOpenAI(
     body: JSON.stringify({
       model: MODEL,
       response_format: { type: "json_object" },
+      ...(onDelta ? { stream: true } : {}),
       messages: [
         { role: "system", content: args.system },
         { role: "user", content: args.user },
       ],
     }),
   });
+  if (!response.ok) throw await providerError(response);
+  if (onDelta) {
+    return collectStream(
+      response,
+      (payload) =>
+        (
+          JSON.parse(payload) as {
+            choices?: { delta?: { content?: string } }[];
+          }
+        ).choices?.[0]?.delta?.content,
+      onDelta
+    );
+  }
   const body = (await response.json()) as {
     choices?: { message?: { content?: string } }[];
-    error?: { message?: string };
   };
-  if (!response.ok) {
-    throw new Error(body.error?.message ?? `provider ${response.status}`);
-  }
   const text = body.choices?.[0]?.message?.content;
   if (!text) throw new Error("provider returned no content");
   return text;
 }
 
-async function completeAnthropic(args: ExampleCompleteArgs): Promise<string> {
+async function completeAnthropic(
+  args: ExampleCompleteArgs,
+  onDelta?: (chunk: string) => void
+): Promise<string> {
   const key = process.env.ANTHROPIC_API_KEY ?? "";
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -459,24 +560,48 @@ async function completeAnthropic(args: ExampleCompleteArgs): Promise<string> {
       model: MODEL,
       max_tokens: 1024,
       system: `${args.system}\nRespond with a JSON object only.`,
+      ...(onDelta ? { stream: true } : {}),
       messages: [{ role: "user", content: args.user }],
     }),
   });
+  if (!response.ok) throw await providerError(response);
+  if (onDelta) {
+    return collectStream(
+      response,
+      (payload) => {
+        const event = JSON.parse(payload) as {
+          type?: string;
+          delta?: { type?: string; text?: string };
+        };
+        // Only text deltas. `message_start`, `ping` and the stop events carry
+        // no part of the document.
+        return event.type === "content_block_delta" &&
+          event.delta?.type === "text_delta"
+          ? event.delta.text
+          : undefined;
+      },
+      onDelta
+    );
+  }
   const body = (await response.json()) as {
     content?: { type: string; text?: string }[];
-    error?: { message?: string };
   };
-  if (!response.ok) {
-    throw new Error(body.error?.message ?? `provider ${response.status}`);
-  }
   const text = body.content?.find((block) => block.type === "text")?.text;
   if (!text) throw new Error("provider returned no content");
   return text;
 }
 
-async function completeGemini(args: ExampleCompleteArgs): Promise<string> {
+async function completeGemini(
+  args: ExampleCompleteArgs,
+  onDelta?: (chunk: string) => void
+): Promise<string> {
   const key = process.env.GEMINI_API_KEY ?? "";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(key)}`;
+  // A different method, and `alt=sse` so the stream is framed as events
+  // rather than as one growing JSON array.
+  const method = onDelta
+    ? "streamGenerateContent?alt=sse&"
+    : "generateContent?";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:${method}key=${encodeURIComponent(key)}`;
   const response = await fetch(url, {
     method: "POST",
     signal: args.signal,
@@ -487,13 +612,22 @@ async function completeGemini(args: ExampleCompleteArgs): Promise<string> {
       generationConfig: { responseMimeType: "application/json" },
     }),
   });
+  if (!response.ok) throw await providerError(response);
+  if (onDelta) {
+    return collectStream(
+      response,
+      (payload) =>
+        (
+          JSON.parse(payload) as {
+            candidates?: { content?: { parts?: { text?: string }[] } }[];
+          }
+        ).candidates?.[0]?.content?.parts?.[0]?.text,
+      onDelta
+    );
+  }
   const body = (await response.json()) as {
     candidates?: { content?: { parts?: { text?: string }[] } }[];
-    error?: { message?: string };
   };
-  if (!response.ok) {
-    throw new Error(body.error?.message ?? `provider ${response.status}`);
-  }
   const text = body.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) throw new Error("provider returned no content");
   return text;
@@ -503,18 +637,20 @@ export function completeForProvider(provider: string): ExampleComplete {
   if (provider === "anthropic") return completeAnthropic;
   if (provider === "gemini") return completeGemini;
   if (provider === "deepseek") {
-    return (args) =>
+    return (args, onDelta) =>
       completeOpenAI(
         "https://api.deepseek.com/chat/completions",
         process.env.DEEPSEEK_API_KEY ?? "",
-        args
+        args,
+        onDelta
       );
   }
-  return (args) =>
+  return (args, onDelta) =>
     completeOpenAI(
       "https://api.openai.com/v1/chat/completions",
       process.env.OPENAI_API_KEY ?? "",
-      args
+      args,
+      onDelta
     );
 }
 
@@ -553,6 +689,9 @@ export async function handleExampleHttp(
   }
   const controller = new AbortController();
   req.on("aborted", () => controller.abort());
+  // Held outside the try: once the stream's head is out, a failure has to be
+  // reported as an event rather than as a status nobody can still receive.
+  let streaming: ((event: string, data: unknown) => void) | undefined;
   try {
     const raw = await readBody(req, controller.signal);
     const request = parseAgentHttpRequest(JSON.parse(raw) as unknown);
@@ -563,19 +702,37 @@ export async function handleExampleHttp(
         return;
       }
     }
+    // The client asked for a stream, so the head goes out before the provider
+    // is called and each piece of the answer is forwarded as it is decoded.
+    // The calls still travel whole, after `done`-worthy parsing — a client
+    // that loses the connection first has run nothing.
+    streaming = wantsStream(req) ? openStream(res) : undefined;
+    const send = streaming;
+    let sent = "";
     const reply = await handleExampleAgentTurn(
       request,
       complete ?? completeForProvider(PROVIDER),
-      controller.signal
+      controller.signal,
+      send
+        ? (chunk) => {
+            sent += chunk;
+            send("text-delta", { text: chunk });
+          }
+        : undefined
     );
-    // The client asked for a stream, so send one. This example completes
-    // before it streams — a real provider hands back tokens and they go out as
-    // they arrive — but the contract the client sees is identical either way:
-    // the calls travel complete, and `done` is what makes them final.
-    if (wantsStream(req)) writeStream(res, reply);
-    else writeJson(res, 200, reply);
+    if (send) {
+      finishStream(send, reply, sent);
+      res.end();
+    } else writeJson(res, 200, reply);
   } catch (error) {
     const message = error instanceof Error ? error.message : "bad request";
+    if (streaming) {
+      // The client is already reading. It ends the turn on `error`, and the
+      // absence of `done` means nothing this turn proposed is run.
+      streaming("error", { code: "backend-failed", message });
+      res.end();
+      return;
+    }
     let status = 400;
     if (message.includes("too large")) status = 413;
     else if (message.includes("cancelled")) status = 499;

@@ -164,7 +164,9 @@ export {
   sortArrow,
 } from "./display";
 export {
+  AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
+  type AgentAlwaysAllowState,
   type AgentApprovalButtonProps,
   AgentApprovalChrome,
   type AgentApprovalChromeProps,

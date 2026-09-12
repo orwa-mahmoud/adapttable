@@ -317,7 +317,7 @@ export interface AgentHttpClientOptions {
   readonly askUser?: (
     question: AgentHttpQuestion,
     signal?: AbortSignal
-  ) => Promise<AgentHttpAnswer>;
+  ) => Promise<AgentHttpAnswer | undefined>;
   /**
    * Which backend connection this is.
    *
@@ -1660,7 +1660,7 @@ async function runPhase(
 
     if (outcome.kind === "ask-user") {
       const answered = await askReader(options, outcome.question, input.signal);
-      if (!answered) {
+      if (answered.kind !== "answered") {
         phase.settle("failed");
         return {
           last,
@@ -1669,15 +1669,22 @@ async function runPhase(
           plan: [],
           text,
           fulfilled,
-          unresolved: {
-            code: "no-reader-channel",
-            message:
-              "the backend asked the reader a question and this client has no way to put it to them",
-            pending: phase.pending().map((call) => call.name),
-          },
+          unresolved:
+            answered.kind === "no-channel"
+              ? {
+                  code: "no-reader-channel",
+                  message:
+                    "the backend asked the reader a question and this client has no way to put it to them",
+                  pending: phase.pending().map((call) => call.name),
+                }
+              : {
+                  code: "question-unanswered",
+                  message: "the backend asked a question and nobody answered",
+                  pending: phase.pending().map((call) => call.name),
+                },
         };
       }
-      toolResults = mergeToolResults(toolResults, [answered]);
+      toolResults = mergeToolResults(toolResults, [answered.result]);
       continue;
     }
 
@@ -1872,11 +1879,21 @@ async function askReader(
   options: AgentHttpClientOptions,
   question: AgentHttpQuestion,
   signal?: AbortSignal
-): Promise<AgentHttpToolResult | undefined> {
-  if (!options.askUser) return undefined;
+): Promise<ReaderAnswer> {
+  if (!options.askUser) return { kind: "no-channel" };
   const answer = await options.askUser(question, signal);
-  return { id: question.id, result: answer };
+  // Undefined is the reader declining, or a turn that was abandoned while the
+  // question was on screen. Both are "nobody answered", and neither is a
+  // value to proceed on.
+  if (!answer) return { kind: "declined" };
+  return { kind: "answered", result: { id: question.id, result: answer } };
 }
+
+/** What came back when the backend asked the reader something. */
+type ReaderAnswer =
+  | { readonly kind: "answered"; readonly result: AgentHttpToolResult }
+  | { readonly kind: "no-channel" }
+  | { readonly kind: "declined" };
 
 /**
  * The ceilings this client enforces, published so a backend can enforce them.
@@ -1975,11 +1992,24 @@ export function assistantHttpTransport(
   // the life of the transport, so the option forwards to whichever turn is in
   // flight rather than each turn building its own client.
   let partialSink: ((text: string) => void) | undefined;
+  // The same arrangement for questions: the surface that can draw one belongs
+  // to the turn, the client option belongs to the transport.
+  let askSink:
+    | ((question: AgentHttpQuestion) => Promise<AgentHttpAnswer | undefined>)
+    | undefined;
   const client = createAgentHttpClient({
     ...options,
     onStreamText: (text) => {
       options.onStreamText?.(text);
       partialSink?.(text);
+    },
+    askUser: async (question, signal) => {
+      // A host that supplied its own channel keeps it; otherwise the turn's
+      // surface is asked. Without either, the turn reports `no-reader-channel`
+      // exactly as it did before.
+      if (options.askUser) return options.askUser(question, signal);
+      if (!askSink) return undefined;
+      return askSink(question);
     },
   });
   return {
@@ -1993,8 +2023,16 @@ export function assistantHttpTransport(
       if (connected) client.reset(connected);
       connected = undefined;
     },
-    send: async ({ session, text, conversation, signal, onPartialText }) => {
+    send: async ({
+      session,
+      text,
+      conversation,
+      signal,
+      onPartialText,
+      askUser,
+    }) => {
       partialSink = onPartialText;
+      askSink = askUser;
       const turn = await client
         .send(session, text, {
           conversation: conversation.map((entry) => ({
@@ -2006,8 +2044,10 @@ export function assistantHttpTransport(
         })
         .finally(() => {
           // Cleared whatever happened, so a later stream cannot write into the
-          // turn that has just ended.
+          // turn that has just ended, and a later question cannot be drawn
+          // into a conversation that has moved on.
           partialSink = undefined;
+          askSink = undefined;
         });
       return {
         text: turn.text,

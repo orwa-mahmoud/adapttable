@@ -63,6 +63,9 @@ export {
   renderAgentContext,
 } from "./contextPrompt";
 
+export { sampleColumns, sampleColumnValues } from "./contextSampling";
+export { matchesType, SAMPLE_CAP } from "./contextSnapshot";
+
 /** What a model is given about this table. @public */
 export interface AgentContext {
   /** The table's permitted shape. Changes rarely. */
@@ -79,6 +82,14 @@ export interface AgentContextInputs {
   readonly filters?: readonly AgentFilter[];
   /** Aggregation choices, from the neutral aggregation rules. */
   readonly aggregations?: AgentAggregations;
+  /**
+   * Live values the host sampled for columns whose author opted in.
+   *
+   * Produced by `sampleColumnValues` on this same subpath and handed in,
+   * never read here: the builder performs no I/O, and a sample is a read.
+   * Column id to values; anything not listed keeps its authored examples.
+   */
+  readonly samples?: Readonly<Record<string, readonly unknown[]>>;
   /** Live view state the session's manifest does not carry. */
   readonly view?: {
     readonly page?: number;
@@ -116,7 +127,8 @@ export function buildAgentContext(
     session,
     catalog,
     inputs.filters ?? [],
-    inputs.aggregations
+    inputs.aggregations,
+    inputs.samples
   );
   const chosen = selectGuides(
     contract.capabilities,

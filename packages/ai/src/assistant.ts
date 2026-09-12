@@ -15,6 +15,7 @@
 export {
   type AssistantMessage,
   type AssistantStatus,
+  type AssistantUndoOffer,
   createTableAssistant,
   type TableAssistantInputs,
   type TableAssistantSnapshot,
@@ -36,3 +37,12 @@ export type {
   AssistantReceiptSubject,
   AssistantTurnStatus,
 } from "./assistantReceipts";
+export {
+  type AssistantUndo,
+  isUndoBlock,
+  planUndo,
+  runUndo,
+  type UndoBlock,
+  type UndoCall,
+  undoBlocked,
+} from "./assistantUndo";

@@ -35,6 +35,21 @@ export type SharedApproval =
       readonly policy?: ApprovalPolicy;
       /** Where they are asked. Defaults to `"widget"`. */
       readonly presentation?: ApprovalPresentation;
+      /**
+       * Capabilities a reader may wave through for the session.
+       *
+       * Off by default, and an opt-in rather than an opt-out: the control is
+       * absent for every key not named here, so a developer who says nothing
+       * ships a table where "don't ask again" does not exist. Built-in keys
+       * are {@link CapabilityKey} values; a custom capability's own key works
+       * the same way.
+       *
+       * It only ever narrows. A destructive capability, an action whose own
+       * configuration demands a human, a host `onApprove` and the backend's
+       * own authorization all still win — naming a key here cannot reach past
+       * any of them.
+       */
+      readonly alwaysAllow?: false | readonly string[];
     };
 
 /** Both questions answered, with nothing left to inherit. @public */
@@ -43,12 +58,19 @@ export interface ResolvedApproval {
   readonly policy: ApprovalPolicy;
   /** Where the reader is asked. */
   readonly presentation: ApprovalPresentation;
+  /**
+   * Capabilities the reader may wave through, as the developer opted them in.
+   *
+   * Empty is the default and means the control is never drawn.
+   */
+  readonly alwaysAllow: readonly string[];
 }
 
 /** Asking for writes, in the conversation. What a table gets by saying nothing. */
 const SHARED_DEFAULT: ResolvedApproval = {
   policy: "writes",
   presentation: "widget",
+  alwaysAllow: [],
 };
 
 /** Read the shared configuration, in either of its two spellings. */
@@ -62,6 +84,10 @@ export function sharedApproval(
   return {
     policy: approval.policy ?? SHARED_DEFAULT.policy,
     presentation: approval.presentation ?? SHARED_DEFAULT.presentation,
+    // `false` and absence are the same answer, spelled two ways: nobody opted
+    // anything in.
+    alwaysAllow:
+      approval.alwaysAllow === false ? [] : (approval.alwaysAllow ?? []),
   };
 }
 
@@ -87,6 +113,9 @@ export function resolveApproval(
   return {
     policy: policyOf(override.policy, shared.policy),
     presentation: override.presentation ?? shared.presentation,
+    // An action that demands a human keeps demanding one. "Don't ask again"
+    // is the reader's convenience, never a way around a rule the table set.
+    alwaysAllow: override.policy === "required" ? [] : shared.alwaysAllow,
   };
 }
 

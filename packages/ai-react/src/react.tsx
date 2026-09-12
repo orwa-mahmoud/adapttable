@@ -25,6 +25,7 @@ import {
   createAgentSession,
   createApprovalMemory,
   displayProposals,
+  mayAlwaysAllow,
   monotonicRevision,
   observationFromNeutral,
   openTransaction,
@@ -33,6 +34,7 @@ import {
   readRowsFromNeutral,
   recordDecision,
   registerWebMcpTools,
+  resolveApproval,
   type ResolvedRow,
   resolveRowFromNeutral,
   revisionToken,
@@ -48,7 +50,9 @@ import {
   type WritePolicy,
 } from "@adapttable/ai";
 import {
+  AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
+  type AgentAlwaysAllowState,
   type AgentApprovalPending,
   type FeatureProviderProps,
   featureStateKey,
@@ -63,6 +67,7 @@ import {
   useDebugValue,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -558,17 +563,37 @@ const BUILTIN_AGGREGATE_LABELS: Readonly<Record<string, string>> = {
 };
 
 /**
- * Capabilities a reader may never wave through for a session.
+ * What a capability does to the table, from the live catalog.
  *
- * Deleting rows is asked about every time however many times it has been
- * allowed, and an action whose own configuration demands a human keeps
- * demanding one — "don't ask again" is the reader's convenience, never a way
- * around a rule the table set.
+ * Read through the session rather than kept in a list here: the definition is
+ * the only thing that knows, and item 11 published it on the catalog entry so
+ * every surface reads the same answer.
  */
-const NEVER_REMEMBERED = new Set(["rows.delete"]);
+function capabilityKind(
+  session: AgentSession | undefined,
+  capability: string | undefined
+): AgentCapabilityDefinition["kind"] | undefined {
+  if (!session || capability === undefined) return undefined;
+  return session.catalog().find((entry) => entry.key === capability)?.kind;
+}
 
-function mayRemember(capability: string): boolean {
-  return !NEVER_REMEMBERED.has(capability);
+/**
+ * The opt-in list, with an action's own demand for a human applied.
+ *
+ * The shared configuration is what the binding can see directly; an action
+ * that sets `approval: "required"` is read from the custom definition it was
+ * declared on, so a capability that must always be confirmed never offers the
+ * control however the table was configured.
+ */
+function alwaysAllowFor(
+  approval: SharedApproval | undefined,
+  capabilities: readonly AgentCapabilityDefinition[] | undefined,
+  capability: string | undefined
+): readonly string[] {
+  const shared = sharedApproval(approval);
+  if (capability === undefined) return shared.alwaysAllow;
+  const definition = capabilities?.find((entry) => entry.key === capability);
+  return resolveApproval(shared, definition?.ai).alwaysAllow;
 }
 
 /**
@@ -767,6 +792,9 @@ function TableAgentProvider({
   const options = (feature as TableAgentFeature).options;
   const runtime = useTableRuntime();
   const revisionCounterRef = useRef(createRevisionCounter());
+  // Bumped when the reader takes an allowance back, so the published list is
+  // rebuilt. The memory itself is a ref and cannot notify React on its own.
+  const [revocations, setRevocations] = useState(0);
   const [transaction, setTransaction] = useState<ApprovalTransaction | null>(
     null
   );
@@ -842,8 +870,16 @@ function TableAgentProvider({
     const capability =
       subject.kind === "operation" ? subject.capability : undefined;
     if (
+      mayAlwaysAllow({
+        capability,
+        kind: capabilityKind(session, capability),
+        alwaysAllow: alwaysAllowFor(
+          optionsRef.current.approval,
+          optionsRef.current.capabilities,
+          capability
+        ),
+      }) &&
       capability !== undefined &&
-      mayRemember(capability) &&
       approvalMemory.current.allows(capability, contractVersion())
     ) {
       return Promise.resolve(true);
@@ -1047,8 +1083,15 @@ function TableAgentProvider({
           // custom operation, or one that enumerates no rows at all. Sending
           // positions for one of those reaches the session as a decision it
           // is right to refuse, and an empty list reads as "approved none".
-          ...(transaction.pending.capability !== undefined &&
-          mayRemember(transaction.pending.capability)
+          ...(mayAlwaysAllow({
+            capability: transaction.pending.capability,
+            kind: capabilityKind(session, transaction.pending.capability),
+            alwaysAllow: alwaysAllowFor(
+              optionsRef.current.approval,
+              optionsRef.current.capabilities,
+              transaction.pending.capability
+            ),
+          })
             ? {
                 alwaysAllow: () => {
                   const capability = transaction.pending.capability;
@@ -1087,10 +1130,33 @@ function TableAgentProvider({
 
   publishedRef.current = approvalValue;
 
+  // What the reader has waved through, published whether or not an approval is
+  // open — a reader goes looking for the list precisely when nothing is
+  // waiting. `remembered` is read during render, and `revocations` is what
+  // makes a revoke reach this render rather than the next approval.
+  const alwaysAllowValue = useMemo<AgentAlwaysAllowState>(
+    () => ({
+      capabilities: approvalMemory.current.remembered(contractVersion()),
+      revoke: (capability: string) => {
+        approvalMemory.current.revoke(capability);
+        setRevocations((count) => count + 1);
+      },
+    }),
+    // A revoke, or the table moving — the memory is a ref, so neither tells
+    // React on its own, and a contract change is what clears the memory.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [revocations, stamp, contractVersion]
+  );
+
   return (
     <FeatureStateScope stateKey={TABLE_AGENT_STATE} value={published}>
       <FeatureStateScope stateKey={AGENT_APPROVAL_STATE} value={approvalValue}>
-        {children}
+        <FeatureStateScope
+          stateKey={AGENT_ALWAYS_ALLOW_STATE}
+          value={alwaysAllowValue}
+        >
+          {children}
+        </FeatureStateScope>
       </FeatureStateScope>
     </FeatureStateScope>
   );

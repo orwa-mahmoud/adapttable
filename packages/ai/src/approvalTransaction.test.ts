@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { resolveApproval, sharedApproval } from "./approvalConfig";
 import {
   closeTransaction,
   createApprovalMemory,
+  mayAlwaysAllow,
   openTransaction,
   type PendingApproval,
   recordDecision,
@@ -112,5 +114,112 @@ describe("what the reader asked not to be asked again", () => {
     memory.clear();
 
     expect(memory.allows("view.setFilters", "v1")).toBe(false);
+  });
+});
+
+describe('whether "don\'t ask again" may be offered at all', () => {
+  const opted = ["edit.cells", "rows.delete", "view.setPage"];
+
+  it("is off until a developer opts the capability in", () => {
+    // The whole point of the default: a table that says nothing ships without
+    // the control, rather than with one that refuses when pressed.
+    expect(
+      mayAlwaysAllow({
+        capability: "edit.cells",
+        kind: "write",
+        alwaysAllow: [],
+      })
+    ).toBe(false);
+    expect(
+      mayAlwaysAllow({
+        capability: "edit.cells",
+        kind: "write",
+        alwaysAllow: opted,
+      })
+    ).toBe(true);
+  });
+
+  it("never offers it for a destructive capability, opted in or not", () => {
+    expect(
+      mayAlwaysAllow({
+        capability: "rows.delete",
+        kind: "destructive",
+        alwaysAllow: opted,
+      })
+    ).toBe(false);
+  });
+
+  it("never offers it for a write that enumerates rows", () => {
+    // There is no class of operation to remember: the reader decided rows.
+    expect(
+      mayAlwaysAllow({
+        capability: undefined,
+        kind: "write",
+        alwaysAllow: opted,
+      })
+    ).toBe(false);
+  });
+
+  it("offers it for a capability whose kind nobody declared", () => {
+    expect(
+      mayAlwaysAllow({
+        capability: "view.setPage",
+        kind: undefined,
+        alwaysAllow: opted,
+      })
+    ).toBe(true);
+  });
+
+  it("is emptied by an action that demands a human every time", () => {
+    const shared = sharedApproval({ alwaysAllow: opted });
+
+    expect(shared.alwaysAllow).toEqual(opted);
+    expect(
+      resolveApproval(shared, { approval: { policy: "required" } }).alwaysAllow
+    ).toEqual([]);
+    // An action that says nothing about approval keeps the table's opt-in.
+    expect(resolveApproval(shared, undefined).alwaysAllow).toEqual(opted);
+  });
+
+  it("reads `false` and silence as the same answer", () => {
+    expect(sharedApproval({ alwaysAllow: false }).alwaysAllow).toEqual([]);
+    expect(sharedApproval({}).alwaysAllow).toEqual([]);
+    expect(sharedApproval(undefined).alwaysAllow).toEqual([]);
+    expect(sharedApproval("never").alwaysAllow).toEqual([]);
+  });
+});
+
+describe("taking an allowance back", () => {
+  it("lists what is remembered, and asks again once it is revoked", () => {
+    const memory = createApprovalMemory();
+
+    memory.remember("edit.cells", "v1");
+    memory.remember("view.setPage", "v1");
+    expect(memory.remembered("v1")).toEqual(["edit.cells", "view.setPage"]);
+    expect(memory.allows("edit.cells", "v1")).toBe(true);
+
+    memory.revoke("edit.cells");
+
+    expect(memory.remembered("v1")).toEqual(["view.setPage"]);
+    expect(memory.allows("edit.cells", "v1")).toBe(false);
+  });
+
+  it("lists nothing once the contract has moved", () => {
+    const memory = createApprovalMemory();
+    memory.remember("edit.cells", "v1");
+
+    // "Allow this" was said about a table that no longer exists in that shape.
+    expect(memory.remembered("v2")).toEqual([]);
+    expect(memory.allows("edit.cells", "v1")).toBe(false);
+  });
+
+  it("revoking something nobody remembered changes nothing", () => {
+    const memory = createApprovalMemory();
+    memory.remember("edit.cells", "v1");
+
+    expect(() => {
+      memory.revoke("rows.add");
+    }).not.toThrow();
+    expect(memory.remembered("v1")).toEqual(["edit.cells"]);
   });
 });

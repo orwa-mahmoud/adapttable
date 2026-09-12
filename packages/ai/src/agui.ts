@@ -755,6 +755,7 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
   /** Settle one interrupt, or say why the turn stops here. */
   const settle = async (
     interrupt: AgUiInterrupt,
+    ask: AgUiOptions["askUser"],
     signal?: AbortSignal
   ): Promise<AgUiResume | AssistantUnresolved> => {
     if (interrupt.reason === "confirmation") {
@@ -771,14 +772,14 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
       return resumeFromApproval(interrupt.interruptId, decided, total);
     }
     if (interrupt.reason === "input_required") {
-      if (!options.askUser) {
+      if (!ask) {
         return unresolvedTurn(
           "question-unanswered",
           "the backend asked a question and nothing here can put it to the reader",
           interruptCapability(interrupt)
         );
       }
-      const answered = await options.askUser(questionOf(interrupt), signal);
+      const answered = await ask(questionOf(interrupt), signal);
       if (!answered) {
         return unresolvedTurn(
           "question-unanswered",
@@ -821,7 +822,15 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
       conversation,
       signal,
       onPartialText,
+      askUser,
     }): Promise<AssistantTransportReply> => {
+      // A host that supplied its own channel keeps it; otherwise the turn's
+      // own surface is where an `input_required` interrupt is drawn.
+      const ask =
+        options.askUser ??
+        (askUser
+          ? (question: AssistantQuestion) => askUser(question)
+          : undefined);
       const turn: TurnState = {
         messages: [
           ...conversation.map((entry, index) => ({
@@ -872,7 +881,7 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
             keys: turn.keys,
           };
         }
-        const settled = await settle(outcome.interrupt, signal);
+        const settled = await settle(outcome.interrupt, ask, signal);
         if ("code" in settled) {
           unresolved = settled;
           break;

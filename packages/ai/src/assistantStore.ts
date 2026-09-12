@@ -40,7 +40,29 @@ import {
   receiptsFromResults,
   turnStatus,
 } from "./assistantReceipts";
+import {
+  type AssistantUndo,
+  planUndo,
+  runUndo,
+  type UndoBlock,
+  undoBlocked,
+} from "./assistantUndo";
+import { type AgentContextView, buildView } from "./contextSnapshot";
+import type { AgentContextInputs } from "./context";
 import type { AgentSession } from "./types";
+
+/** What a reader is offered about the last turn that moved the table. @public */
+export interface AssistantUndoOffer {
+  /** The assistant message this belongs to. */
+  readonly messageId: string;
+  /** Whether the control is live right now. */
+  readonly available: boolean;
+  /** Why it is not, when it is not. */
+  readonly blocked?: UndoBlock;
+}
+
+/** One shared empty list, so an unchanged snapshot stays identical. */
+const EMPTY_ALLOWED: readonly string[] = [];
 
 /** Where the conversation is. @public */
 export type AssistantStatus =
@@ -114,6 +136,20 @@ export interface TableAssistantInputs {
    * and the store's job is to carry it beside the transcript, not to read it.
    */
   readonly approval?: unknown;
+  /**
+   * Live view and filter data the manifest does not carry.
+   *
+   * A function, not a value: undo compares the view before a turn against the
+   * view after it, and a fixed object would report that nothing moved. The
+   * filter catalog belongs here too — without it the sanitized view carries no
+   * filter state, and a turn that filtered would look like a turn that did
+   * nothing.
+   */
+  readonly contextInputs?: () => AgentContextInputs;
+  /** Capability keys the reader has waved through, for this contract. */
+  readonly alwaysAllowed?: readonly string[];
+  /** Ask about one of them again from now on. */
+  readonly onRevokeAlwaysAllow?: (capability: string) => void;
 }
 
 /** What a binding renders from. @public */
@@ -142,6 +178,21 @@ export interface TableAssistantSnapshot {
    * The turn is parked, not finished: answering it resumes the same turn.
    */
   readonly pendingQuestion: AssistantQuestion | null;
+  /**
+   * Whether the last turn that moved the table can still be put back.
+   *
+   * Null when no turn moved it. Re-read on every publish, because the offer
+   * expires the moment anything else changes the view — and a control still
+   * drawn after that would do the wrong thing.
+   */
+  readonly undo: AssistantUndoOffer | null;
+  /**
+   * Capability keys the reader said not to ask about again.
+   *
+   * Readable with nothing pending, because that is when somebody goes looking
+   * for what they agreed to.
+   */
+  readonly alwaysAllowed: readonly string[];
   /** Whether a send would do anything right now. */
   readonly canSend: boolean;
   /** Whether there is a turn to stop. */
@@ -167,6 +218,16 @@ export interface TableAssistantStore {
   readonly clear: () => void;
   /** Send a suggestion's prompt as if the reader had typed it. */
   readonly runSuggestion: (id: string) => Promise<void>;
+  /**
+   * Put the last turn back.
+   *
+   * Does nothing when there is no offer or the table has moved: the snapshot
+   * already says so, and a control that acted anyway would move the table
+   * somewhere nobody asked for.
+   */
+  readonly undoTurn: () => Promise<void>;
+  /** Ask about this capability again from now on. */
+  readonly revokeAlwaysAllow: (capability: string) => void;
   /** Answer the pending question and resume the turn. */
   readonly answer: (answer: AssistantAnswer) => void;
   /**
@@ -235,7 +296,10 @@ export function createTableAssistant(
   let status: AssistantStatus = "idle";
   let error: string | undefined;
   let question: AssistantQuestion | null = null;
-  let resumeQuestion: ((answer: AssistantAnswer) => void) | undefined;
+  // The last turn that actually moved the view, and which message it was.
+  let undoPlan: { message: string; undo: AssistantUndo } | null = null;
+  let resumeQuestion:
+    ((answer: AssistantAnswer | undefined) => void) | undefined;
 
   // Reserved synchronously, before the first await. A flag in published state
   // would not be: two sends in one tick would both read "not sending".
@@ -292,6 +356,53 @@ export function createTableAssistant(
     return value;
   };
 
+  /** Whether two remembered sets say the same thing. */
+  const sameKeys = (a: readonly string[], b: readonly string[]): boolean =>
+    a === b || (a.length === b.length && a.every((key, i) => key === b[i]));
+
+  /** Whether two undo offers say the same thing. */
+  const sameOffer = (
+    a: AssistantUndoOffer | null,
+    b: AssistantUndoOffer | null
+  ): boolean => {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    return (
+      a.messageId === b.messageId &&
+      a.available === b.available &&
+      a.blocked?.code === b.blocked?.code
+    );
+  };
+
+  /**
+   * The sanitized view right now, as undo compares it.
+   *
+   * The view alone, not the whole context: a turn's undo needs what the table
+   * is showing, and building the contract and its prompt rendering to get
+   * there would pull all of that into a conversation bundle.
+   */
+  const viewNow = (): AgentContextView | null => {
+    const session = live.session;
+    if (!session) return null;
+    const inputs = live.contextInputs?.() ?? {};
+    return buildView(
+      { revision: session.manifest().viewRevision, ...inputs.view },
+      inputs.filters ?? []
+    );
+  };
+
+  /** What the reader is offered about the last turn, read fresh. */
+  const undoOffer = (): AssistantUndoOffer | null => {
+    const session = live.session;
+    if (!undoPlan || !session) return null;
+    const blocked = undoBlocked(session, undoPlan.undo);
+    return {
+      messageId: undoPlan.message,
+      available: !blocked,
+      ...(blocked ? { blocked } : {}),
+    };
+  };
+
   /** Whether two snapshots say the same thing. */
   const same = (
     a: TableAssistantSnapshot,
@@ -304,6 +415,8 @@ export function createTableAssistant(
     a.error === b.error &&
     a.approval === b.approval &&
     a.pendingQuestion === b.pendingQuestion &&
+    sameOffer(a.undo, b.undo) &&
+    sameKeys(a.alwaysAllowed, b.alwaysAllowed) &&
     a.canSend === b.canSend &&
     a.canStop === b.canStop &&
     a.suggestions === b.suggestions &&
@@ -363,6 +476,8 @@ export function createTableAssistant(
       moreSuggestions: sliceCache.tail,
       approval: live.approval ?? null,
       pendingQuestion: question,
+      undo: undoOffer(),
+      alwaysAllowed: live.alwaysAllowed ?? EMPTY_ALLOWED,
       canSend: !sending && Boolean(live.session) && Boolean(live.transport),
       canStop: sending,
     };
@@ -397,7 +512,38 @@ export function createTableAssistant(
     controller: AbortController
   ): boolean => current(mine) && turn === id && !controller.signal.aborted;
 
-  const receive = (reply: AssistantTransportReply): void => {
+  /**
+   * Work out whether this turn can be put back, and remember how.
+   *
+   * Compared against the view captured before the turn's calls ran. The
+   * revision the plan is pinned to is the one the turn's own calls settled
+   * at — the last result's — so anything that moves the table afterwards
+   * retires the offer rather than being undone by it.
+   */
+  const recordUndo = (
+    before: AgentContextView | null,
+    reply: AssistantTransportReply,
+    message: string
+  ): boolean => {
+    const session = live.session;
+    const after = viewNow();
+    const settledAt = reply.results?.at(-1)?.revision;
+    if (!session || !before || !after || settledAt === undefined) return false;
+    const planned = planUndo(before, after, session, settledAt);
+    if ("code" in planned) {
+      // Nothing moved, or something moved that no permitted capability can put
+      // back. Either way this turn keeps whatever offer was already standing:
+      // a turn that changed nothing does not retire the one before it.
+      return false;
+    }
+    undoPlan = { message, undo: planned };
+    return true;
+  };
+
+  const receive = (
+    reply: AssistantTransportReply,
+    before: AgentContextView | null
+  ): void => {
     // The table's own policy decides whether an applied write is saved or
     // staged; the result cannot say on its own.
     const receipts = receiptsFromResults(
@@ -407,12 +553,17 @@ export function createTableAssistant(
       reply.subjects
     );
     seq += 1;
+    const id = messageId("assistant", seq);
+    const undoable = recordUndo(before, reply, id);
     push({
-      id: messageId("assistant", seq),
+      id,
       role: "assistant",
       text: reply.text,
       at: Date.now(),
-      receipts: receipts.length > 0 ? receipts : undefined,
+      receipts:
+        receipts.length > 0
+          ? receipts.map((receipt) => ({ ...receipt, undoable }))
+          : undefined,
       outcome: receipts.length > 0 ? turnStatus(receipts) : undefined,
     });
     if (reply.unresolved) error = reply.unresolved.message;
@@ -437,13 +588,26 @@ export function createTableAssistant(
     publish();
   };
 
+  /**
+   * Settle the open question, once.
+   *
+   * Every path that ends a turn goes through here — the reader answering, a
+   * stop, a new table, a failure — because a transport awaiting an answer
+   * that never comes holds the turn open forever.
+   */
+  const settleQuestion = (given: AssistantAnswer | undefined): void => {
+    const resume = resumeQuestion;
+    question = null;
+    resumeQuestion = undefined;
+    resume?.(given);
+  };
+
   const release = (mine: number, id: number): void => {
     // Only this turn's reservation, never a later turn's.
     if (generation !== mine || turn !== id) return;
     sending = false;
     abort = undefined;
-    question = null;
-    resumeQuestion = undefined;
+    settleQuestion(undefined);
     publish();
   };
 
@@ -492,8 +656,7 @@ export function createTableAssistant(
     // is no longer the current one.
     turn += 1;
     sending = false;
-    question = null;
-    resumeQuestion = undefined;
+    settleQuestion(undefined);
   };
 
   const send = async (text?: string): Promise<void> => {
@@ -522,6 +685,10 @@ export function createTableAssistant(
       at: Date.now(),
     };
     const previousDraft = draft;
+    // Captured before the transport runs, which is before any of this turn's
+    // calls can execute. Reading it afterwards would capture what the turn
+    // already did.
+    const before = viewNow();
     if (text === undefined) draft = "";
     error = undefined;
     status = "sending";
@@ -570,6 +737,21 @@ export function createTableAssistant(
           streamPending = true;
           scheduleFlush(flushStream);
         },
+        askUser: (asked) =>
+          new Promise<AssistantAnswer | undefined>((settle) => {
+            // A question from a turn that is no longer the current one is
+            // answered by nobody: resolving immediately lets that transport
+            // report it as unresolved instead of waiting on a reader who is
+            // looking at a different conversation.
+            if (!deliverable(mine, id, controller)) {
+              settle(undefined);
+              return;
+            }
+            question = asked;
+            resumeQuestion = settle;
+            status = "awaiting-user";
+            publish();
+          }),
       });
       // The provisional message goes when the real one lands. A reply is the
       // authority for what happened; the words that preceded it are not.
@@ -577,7 +759,7 @@ export function createTableAssistant(
       // A transport is asked to honour `signal`, but it is host code and may
       // not. Stop has to hold either way, so delivery is gated on the signal
       // as well as on the turn still being the current one.
-      if (deliverable(mine, id, controller)) receive(reply);
+      if (deliverable(mine, id, controller)) receive(reply, before);
     } catch (cause) {
       // An abandoned stream leaves nothing behind: the partial message is
       // dropped, and nothing ran, because calls execute only after the reply
@@ -617,6 +799,8 @@ export function createTableAssistant(
       cancelTurn();
       messages = [];
       error = undefined;
+      // The offer belonged to a message the reader has just removed.
+      undoPlan = null;
       status = live.session && live.transport ? "ready" : status;
       publish();
     },
@@ -634,13 +818,44 @@ export function createTableAssistant(
       if (!runnable) return;
       await send(runnable.prompt);
     },
+    revokeAlwaysAllow: (capability) => {
+      if (disposed) return;
+      live.onRevokeAlwaysAllow?.(capability);
+      // The list itself belongs to whoever owns the memory; this publishes so
+      // a surface re-reads rather than waiting for the next unrelated change.
+      publish();
+    },
+    undoTurn: async () => {
+      const session = live.session;
+      const plan = undoPlan;
+      if (disposed || !session || !plan) return;
+      if (undoBlocked(session, plan.undo)) {
+        // The snapshot already says the offer has expired. Acting anyway would
+        // put the table back to a state the reader has since moved away from.
+        publish();
+        return;
+      }
+      // Retired before the calls run: whatever happens next, this plan
+      // describes a table that no longer exists once it has.
+      undoPlan = null;
+      try {
+        const results = await runUndo(
+          session,
+          plan.undo,
+          `undo:${plan.message}`
+        );
+        const failed = results.find((result) => !result.ok);
+        if (failed) error = failed.error?.message ?? "the undo did not finish";
+      } catch (cause) {
+        error = cause instanceof Error ? cause.message : String(cause);
+      }
+      publish();
+    },
     answer: (given) => {
       if (disposed || !question) return;
-      const resume = resumeQuestion;
-      question = null;
-      resumeQuestion = undefined;
+      // Back to work: the turn was never abandoned, it was waiting.
       setStatus("sending");
-      resume?.(given);
+      settleQuestion(given);
       publish();
     },
     update: (next) => {
@@ -655,6 +870,9 @@ export function createTableAssistant(
         cancelTurn();
         messages = [];
         error = undefined;
+        // A different table is not one this plan describes, and a revision
+        // number from the old one could coincide with the new one's.
+        undoPlan = null;
         dropConnection();
         startConnection();
         publish();

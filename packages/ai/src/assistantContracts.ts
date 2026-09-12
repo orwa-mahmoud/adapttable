@@ -326,6 +326,18 @@ export interface AssistantTransport {
      * from the reply, not from the words.
      */
     readonly onPartialText?: (text: string) => void;
+    /**
+     * Put a structured question to the reader and wait for their answer.
+     *
+     * Optional on both sides, exactly like `onPartialText`: a transport that
+     * never asks does not call it, and a controller with nowhere to draw a
+     * question does not pass one. It resolves to `undefined` when the reader
+     * declined or the turn was abandoned — which a transport reports as
+     * unresolved rather than proceeding on a value nobody gave.
+     */
+    readonly askUser?: (
+      question: AssistantQuestion
+    ) => Promise<AssistantAnswer | undefined>;
   }): Promise<AssistantTransportReply>;
   /**
    * Release whatever `connect` acquired.

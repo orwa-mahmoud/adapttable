@@ -22,6 +22,7 @@
 "use client";
 
 import {
+  type AgentContextInputs,
   type AgentSession,
   type AssistantExchange,
   type AssistantMessage,
@@ -32,10 +33,13 @@ import {
   type AssistantTransport,
   type AssistantTransportReply,
   type AssistantTurnStatus,
+  type AssistantUndoOffer,
   createTableAssistant,
 } from "@adapttable/ai";
 import {
+  AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
+  type AgentAlwaysAllowState,
   type AgentApprovalPending,
   useFeatureState,
 } from "@adapttable/react/adapter";
@@ -66,6 +70,7 @@ export type {
   AssistantStatus,
   AssistantTransport,
   AssistantTransportReply,
+  AssistantUndoOffer,
   AssistantTurnStatus,
 };
 
@@ -108,6 +113,14 @@ export interface TableAssistantOptions {
   readonly awaitingApproval?: boolean;
   /** How many primary suggestions to surface. The rest are `more`. */
   readonly primarySuggestions?: number;
+  /**
+   * Live view and filter data the manifest does not carry.
+   *
+   * Read when a turn starts and again when it settles, so per-turn undo can
+   * tell what the turn moved. A function rather than a value: a fixed object
+   * would report that nothing changed.
+   */
+  readonly contextInputs?: () => AgentContextInputs;
 }
 
 /** What a host renders from. @public */
@@ -147,6 +160,19 @@ export interface TableAssistantState {
   readonly pendingQuestion: AssistantQuestion | null;
   /** Answer the pending question and let the turn continue. */
   readonly answer: (answer: { optionId?: string; text?: string }) => void;
+  /**
+   * Whether the last turn that moved the table can still be put back.
+   *
+   * Null when no turn moved it. Re-read every render, because the offer ends
+   * the moment anything else changes the view.
+   */
+  readonly undo: AssistantUndoOffer | null;
+  /** Put that turn back. A no-op once the offer has expired. */
+  readonly undoTurn: () => Promise<void>;
+  /** Capability keys the reader said not to ask about again. */
+  readonly alwaysAllowed: readonly string[];
+  /** Ask about one of them again from now on. */
+  readonly revokeAlwaysAllow: (capability: string) => void;
   /** The suggestions this table can run right now, re-checked every render. */
   readonly suggestions: readonly AssistantSuggestion[];
   /** Eligible suggestions past `primarySuggestions`. */
@@ -179,19 +205,24 @@ export function useTableAssistant(
   // The live approval, so a host wires the panel with one prop rather than
   // reaching for feature state itself.
   const approval = useFeatureState(AGENT_APPROVAL_STATE);
+  // What the reader has waved through, published by the binding whether or
+  // not an approval is open.
+  const alwaysAllow = useFeatureState(AGENT_ALWAYS_ALLOW_STATE);
 
   // Created once, inert until the mount effect connects it. Constructing a
   // store during render must not open a connection — a render can be thrown
   // away, and Strict Mode throws the first one away on purpose.
   const storeRef = useRef<ReturnType<typeof createTableAssistant> | null>(null);
-  storeRef.current ??= createTableAssistant(inputsOf(options, approval));
+  storeRef.current ??= createTableAssistant(
+    inputsOf(options, approval, alwaysAllow)
+  );
   const store = storeRef.current;
 
   // Live inputs, every render. The store decides what a change means: a new
   // session resets the conversation, a new transport key reconnects, and an
   // updated catalog or a newly arrived approval does neither.
   useEffect(() => {
-    store.update(inputsOf(options, approval));
+    store.update(inputsOf(options, approval, alwaysAllow));
   });
 
   useEffect(() => {
@@ -235,6 +266,10 @@ export function useTableAssistant(
     approval: approval ?? null,
     pendingQuestion: state.pendingQuestion,
     answer: store.answer,
+    undo: state.undo,
+    undoTurn: store.undoTurn,
+    alwaysAllowed: state.alwaysAllowed,
+    revokeAlwaysAllow: store.revokeAlwaysAllow,
     suggestions: state.suggestions,
     moreSuggestions: state.moreSuggestions,
     runSuggestion: store.runSuggestion,
@@ -247,7 +282,8 @@ export function useTableAssistant(
 /** The hook's options as the store's live inputs. A projection, not a decision. */
 function inputsOf(
   options: TableAssistantOptions,
-  approval: AgentApprovalPending | null | undefined
+  approval: AgentApprovalPending | null | undefined,
+  alwaysAllow: AgentAlwaysAllowState | null | undefined
 ) {
   return {
     session: options.session,
@@ -257,5 +293,12 @@ function inputsOf(
     primarySuggestions: options.primarySuggestions,
     awaitingApproval: options.awaitingApproval,
     approval: approval ?? null,
+    ...(options.contextInputs ? { contextInputs: options.contextInputs } : {}),
+    ...(alwaysAllow
+      ? {
+          alwaysAllowed: alwaysAllow.capabilities,
+          onRevokeAlwaysAllow: alwaysAllow.revoke,
+        }
+      : {}),
   };
 }

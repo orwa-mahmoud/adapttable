@@ -40,6 +40,26 @@ export const AGENT_APPROVAL_STATE =
   featureStateKey<AgentApprovalPending | null>("agent-approval-pending");
 
 /**
+ * What the reader has waved through, and how to take it back.
+ *
+ * Separate from the pending approval because it outlives one: the list has to
+ * be visible — and revocable — when nothing is waiting, which is exactly when
+ * a reader goes looking for what they agreed to.
+ *
+ * @public
+ */
+export interface AgentAlwaysAllowState {
+  /** Capability keys the reader said not to ask about again. */
+  readonly capabilities: readonly string[];
+  /** Ask about this capability again from now on. */
+  readonly revoke: (capability: string) => void;
+}
+
+/** Feature-state key for the remembered "don't ask again" set. @public */
+export const AGENT_ALWAYS_ALLOW_STATE =
+  featureStateKey<AgentAlwaysAllowState | null>("agent-always-allow");
+
+/**
  * Kit button the approval chrome calls.
  *
  * @public

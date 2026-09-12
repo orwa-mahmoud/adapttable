@@ -863,3 +863,157 @@ describe("exampleConfigError", () => {
     );
   });
 });
+
+/**
+ * A provider that streams a document in pieces, as a real one does.
+ *
+ * The pieces are fragments of JSON, not of the answer — which is the whole
+ * reason the backend decodes rather than forwarding them.
+ */
+function streamingComplete(document: string, size = 5) {
+  return async (
+    _args: { system: string; user: string; signal?: AbortSignal },
+    onDelta?: (chunk: string) => void
+  ): Promise<string> => {
+    if (onDelta) {
+      for (let at = 0; at < document.length; at += size) {
+        onDelta(document.slice(at, at + size));
+        await Promise.resolve();
+      }
+    }
+    return document;
+  };
+}
+
+/** Every event of one SSE response, in order. */
+async function readEvents(
+  response: Response
+): Promise<{ event: string; data: Record<string, unknown> }[]> {
+  const text = await response.text();
+  return text
+    .split("\n\n")
+    .filter((frame) => frame.trim() !== "")
+    .map((frame) => {
+      const event = /^event: (.*)$/m.exec(frame)?.[1] ?? "";
+      const data = /^data: (.*)$/m.exec(frame)?.[1] ?? "{}";
+      return { event, data: JSON.parse(data) as Record<string, unknown> };
+    });
+}
+
+async function serve(
+  complete: Parameters<typeof handleExampleHttp>[2]
+): Promise<{ url: string; close: () => Promise<void> }> {
+  const server = createServer((req, res) => {
+    void handleExampleHttp(req, res, complete);
+  });
+  await new Promise<void>((resolve) => {
+    server.listen(0, "127.0.0.1", resolve);
+  });
+  const address = server.address();
+  const port = address && typeof address === "object" ? address.port : 0;
+  return {
+    url: `http://127.0.0.1:${String(port)}/`,
+    close: () =>
+      new Promise<void>((resolve) => {
+        server.close(() => resolve());
+      }),
+  };
+}
+
+const STREAM_REPLY = JSON.stringify({
+  text: 'Sorted by total, highest first — and "quoted", é, 😀.',
+  toolCalls: [{ id: "c1", name: "view.setSort", args: { key: "total" } }],
+});
+
+describe("streaming a provider's reply", () => {
+  it("sends the answer as it arrives, and the calls only at the end", async () => {
+    const backend = await serve(streamingComplete(STREAM_REPLY));
+    try {
+      const response = await fetch(backend.url, {
+        method: "POST",
+        headers: {
+          accept: "text/event-stream",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(request("turn")),
+      });
+      const events = await readEvents(response);
+
+      const deltas = events.filter((entry) => entry.event === "text-delta");
+      assert.ok(deltas.length > 1, "the answer arrived in more than one piece");
+      // Never a fragment of the JSON wrapper.
+      for (const delta of deltas) {
+        assert.ok(!String(delta.data.text).includes('"text"'));
+      }
+      const calls = events.findIndex((entry) => entry.event === "tool-calls");
+      const done = events.findIndex((entry) => entry.event === "done");
+      assert.ok(calls >= 0 && done === events.length - 1);
+      assert.ok(
+        calls < done,
+        "the calls travel before `done` makes them final"
+      );
+    } finally {
+      await backend.close();
+    }
+  });
+
+  it("streams exactly the text the JSON reply carries, byte for byte", async () => {
+    const streamed = await serve(streamingComplete(STREAM_REPLY));
+    const plain = await serve(streamingComplete(STREAM_REPLY));
+    try {
+      const sse = await fetch(streamed.url, {
+        method: "POST",
+        headers: {
+          accept: "text/event-stream",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(request("turn")),
+      });
+      const events = await readEvents(sse);
+      const text = events
+        .filter((entry) => entry.event === "text-delta")
+        .map((entry) => String(entry.data.text))
+        .join("");
+
+      const json = (await (
+        await fetch(plain.url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(request("turn")),
+        })
+      ).json()) as { text: string; toolCalls: unknown };
+
+      assert.equal(text, json.text);
+      const calls = events.find((entry) => entry.event === "tool-calls");
+      assert.deepEqual(calls?.data.toolCalls, json.toolCalls);
+    } finally {
+      await streamed.close();
+      await plain.close();
+    }
+  });
+
+  it("reports a provider failure as an event rather than a status", async () => {
+    const backend = await serve(() => {
+      throw new Error("provider 500");
+    });
+    try {
+      const response = await fetch(backend.url, {
+        method: "POST",
+        headers: {
+          accept: "text/event-stream",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(request("turn")),
+      });
+      const events = await readEvents(response);
+
+      // The head is already out, so a status cannot say it. The client ends
+      // the turn on `error`, and without `done` nothing proposed is run.
+      assert.equal(response.status, 200);
+      assert.equal(events.at(-1)?.event, "error");
+      assert.ok(!events.some((entry) => entry.event === "done"));
+    } finally {
+      await backend.close();
+    }
+  });
+});

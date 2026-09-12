@@ -66,6 +66,14 @@ export interface ContextColumn {
   readonly description?: string;
   /** Representative values the author supplied, or sampled where allowed. */
   readonly examples?: readonly unknown[];
+  /**
+   * Whether those examples came out of the table rather than from the author.
+   *
+   * Absent means authored. The distinction matters to whoever reads the
+   * contract: an authored example is a statement about what the column means,
+   * a sampled one is a handful of somebody's data.
+   */
+  readonly sampled?: true;
 }
 
 /** The table's permitted shape. Changes rarely; worth pinning. @public */
@@ -105,8 +113,8 @@ export interface AgentContextView {
   readonly unknown?: readonly string[];
 }
 
-/** Live values sampled for one column, when the author opted in. */
-const SAMPLE_CAP = 5;
+/** Live values sampled for one column, when the author opted in. @public */
+export const SAMPLE_CAP = 5;
 
 /** How many static filter options the contract will carry per filter. */
 const OPTION_CAP = 24;
@@ -125,7 +133,15 @@ function validExamples(column: AgentColumn): readonly unknown[] | undefined {
   return matches.length > 0 ? matches.slice(0, SAMPLE_CAP) : undefined;
 }
 
-function matchesType(value: unknown, type: string): boolean {
+/**
+ * Whether a value is the type the column declared.
+ *
+ * Shared with the sampling route, which revalidates for the same reason the
+ * author's examples are validated: a wrong example is worse than none.
+ *
+ * @public
+ */
+export function matchesType(value: unknown, type: string): boolean {
   if (type === "number") return typeof value === "number";
   if (type === "boolean") return typeof value === "boolean";
   if (type === "string") return typeof value === "string";
@@ -137,9 +153,20 @@ function matchesType(value: unknown, type: string): boolean {
   return true;
 }
 
-/** Project one column, with permission and visibility kept apart. */
-function contextColumn(column: AgentColumn): ContextColumn {
-  const examples = column.readable ? validExamples(column) : undefined;
+/**
+ * Project one column, with permission and visibility kept apart.
+ *
+ * Sampled values win over authored ones when the host ran the sampling route
+ * for this column: the author asked for live values by setting `sample`, and
+ * showing both would be two answers to "what does a value look like".
+ */
+function contextColumn(
+  column: AgentColumn,
+  sampled?: readonly unknown[]
+): ContextColumn {
+  const live = column.readable && sampled?.length ? sampled : undefined;
+  const examples =
+    live ?? (column.readable ? validExamples(column) : undefined);
   return {
     id: column.id,
     label: column.label,
@@ -151,6 +178,7 @@ function contextColumn(column: AgentColumn): ContextColumn {
     ...(column.visible === undefined ? {} : { visible: column.visible }),
     ...(column.ai?.description ? { description: column.ai.description } : {}),
     ...(examples ? { examples } : {}),
+    ...(live ? { sampled: true as const } : {}),
   };
 }
 
@@ -232,7 +260,8 @@ export function buildContract(
   session: AgentSession,
   catalog: readonly CatalogEntry[],
   filters: readonly AgentFilter[],
-  aggregations: AgentAggregations | undefined
+  aggregations: AgentAggregations | undefined,
+  samples: Readonly<Record<string, readonly unknown[]>> = {}
 ): AgentContextContract {
   const manifest = session.manifest();
   const contract: AgentContextContract = {
@@ -243,7 +272,9 @@ export function buildContract(
       summary: entry.summary,
       ...(entry.summaryShort ? { summaryShort: entry.summaryShort } : {}),
     })),
-    columns: manifest.columns.map(contextColumn),
+    columns: manifest.columns.map((column) =>
+      contextColumn(column, samples[column.id])
+    ),
     filters: permittedFilters(filters, manifest.columns),
     ...(aggregations ? { aggregations } : {}),
     rowAddressing: manifest.rowAddressing,
