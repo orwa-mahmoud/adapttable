@@ -20,6 +20,7 @@ const ENTRIES = [
   "assistant",
   "context",
   "voice",
+  "webmcp",
 ];
 
 const REACT_IMPORT =

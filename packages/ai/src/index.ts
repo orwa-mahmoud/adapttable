@@ -187,6 +187,16 @@ export type {
 } from "./types";
 export { validateSchema } from "./validate";
 export {
+  type ModelContextLike,
+  registerWebMcpTools,
+  type WebMcpAnnotations,
+  type WebMcpContent,
+  type WebMcpOptions,
+  type WebMcpRegistration,
+  type WebMcpResult,
+  type WebMcpTool,
+} from "./webmcp";
+export {
   createSpeechInput,
   readRememberedLanguage,
   rememberLanguage,

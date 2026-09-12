@@ -32,6 +32,7 @@ import {
   type ProposalResolver,
   readRowsFromNeutral,
   recordDecision,
+  registerWebMcpTools,
   type ResolvedRow,
   resolveRowFromNeutral,
   revisionToken,
@@ -121,6 +122,16 @@ export interface TableAgentOptions {
   readonly apply?: AgentApply;
   /** Custom governed capabilities for this table. */
   readonly capabilities?: readonly AgentCapabilityDefinition[];
+  /**
+   * Offer this table's capabilities to a browser-resident agent.
+   *
+   * `true` offers everything the session permits; an object narrows the
+   * surface. It narrows only — a capability the table excludes stays
+   * unavailable, and a browser confirmation is in addition to the table's own
+   * approval rather than instead of it. Does nothing in a browser without the
+   * API, and nothing on a server.
+   */
+  readonly webmcp?: true | { readonly exposedTo?: readonly string[] };
 }
 
 interface TableAgentFeature extends StaticTableFeature {
@@ -797,6 +808,27 @@ function TableAgentProvider({
     () => contractFingerprint(session.manifest(), session.catalog()),
     [session]
   );
+
+  const webmcp = options.webmcp;
+  // Registration belongs to a contract version: a table whose capabilities or
+  // columns moved is a different set of tools, so the old ones go and the new
+  // ones are offered. Effects never run on the server, which is also where
+  // `document` would be missing.
+  const webmcpVersion = webmcp ? contractVersion() : "";
+  useEffect(() => {
+    if (!webmcp) return;
+    const registration = registerWebMcpTools(session, {
+      ...(webmcp === true ? {} : webmcp),
+      onWarning: (warning) => {
+        // A page whose policy forbids this is configured that way on purpose.
+        // Saying so once beats throwing into a render.
+        console.warn(`[adapttable] webmcp: ${warning.message}`);
+      },
+    });
+    return () => {
+      registration.dispose();
+    };
+  }, [session, webmcp, webmcpVersion]);
   const waitForChrome = useRef<
     (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>
   >(() => Promise.resolve(false));

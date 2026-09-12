@@ -504,6 +504,14 @@ export interface AgentCapabilityContext {
 export interface CatalogEntry {
   /** The summary in one sentence, sized for a surface with a hard cap. */
   readonly summaryShort?: string;
+  /**
+   * What this capability does to the table.
+   *
+   * The definition's own answer, published so a surface deciding how much
+   * ceremony a call needs reads it rather than keeping a second list that can
+   * disagree.
+   */
+  readonly kind?: AgentCapabilityDefinition["kind"];
   /** Capability key. */
   readonly key: string;
   /** One-line English summary. */

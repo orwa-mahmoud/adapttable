@@ -285,9 +285,14 @@ export function createAgentSession(
   const catalog = (): CatalogEntry[] => {
     const observation = options.observe();
     return registry.enabledKeys(observation).map((key) => {
-      const summary =
-        registry.get(key)?.summary ?? summaryOf(key as CapabilityKey);
-      return { key, summary, summaryShort: shortForm(summary) };
+      const definition = registry.get(key);
+      const summary = definition?.summary ?? summaryOf(key as CapabilityKey);
+      return {
+        key,
+        summary,
+        summaryShort: shortForm(summary),
+        ...(definition?.kind ? { kind: definition.kind } : {}),
+      };
     });
   };
 

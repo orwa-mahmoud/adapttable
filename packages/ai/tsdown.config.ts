@@ -25,5 +25,6 @@ export default defineConfig({
     "src/assistant.ts",
     "src/context.ts",
     "src/voice.ts",
+    "src/webmcp.ts",
   ],
 });

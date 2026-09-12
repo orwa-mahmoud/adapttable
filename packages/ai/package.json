@@ -111,6 +111,16 @@
         "default": "./dist/voice.cjs"
       }
     },
+    "./webmcp": {
+      "import": {
+        "types": "./dist/webmcp.d.ts",
+        "default": "./dist/webmcp.js"
+      },
+      "require": {
+        "types": "./dist/webmcp.d.cts",
+        "default": "./dist/webmcp.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

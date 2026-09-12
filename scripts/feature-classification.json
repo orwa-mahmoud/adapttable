@@ -590,7 +590,8 @@
           "./http",
           "./assistant",
           "./context",
-          "./voice"
+          "./voice",
+          "./webmcp"
         ]
       }
     ],
