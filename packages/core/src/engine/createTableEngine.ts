@@ -773,23 +773,31 @@ export function createTableEngine<TRow>(
           syncDerived();
           notify(["view"]);
           return;
-        case "setSearch":
+        // A setter given the value the view already holds changes nothing, and
+        // publishing a revision for it is not free: a subscriber repaints, a
+        // memo rebuilds, and an agent action that was addressed to the view a
+        // moment earlier is refused as stale for a change nobody made.
+        case "setSearch": {
+          if (view.search === operation.search && view.page === 1) return;
           view = { ...view, search: operation.search, page: 1 };
           syncDerived();
           notify(["view"]);
           return;
-        case "setPage":
-          view = { ...view, page: Math.max(1, Math.round(operation.page)) };
+        }
+        case "setPage": {
+          const page = Math.max(1, Math.round(operation.page));
+          if (view.page === page) return;
+          view = { ...view, page };
           notify(["view"]);
           return;
-        case "setLimit":
-          view = {
-            ...view,
-            limit: Math.max(1, Math.round(operation.limit)),
-            page: 1,
-          };
+        }
+        case "setLimit": {
+          const limit = Math.max(1, Math.round(operation.limit));
+          if (view.limit === limit && view.page === 1) return;
+          view = { ...view, limit, page: 1 };
           notify(["view"]);
           return;
+        }
         case "setFilters":
           view = { ...view, extra: { ...operation.filters }, page: 1 };
           syncDerived();

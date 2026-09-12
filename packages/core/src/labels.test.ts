@@ -70,6 +70,11 @@ describe("defaultLabels — every function label", () => {
     ],
     columnRenamed: [{ previous: "COLUMN_OLD", name: "COLUMN_NEW" }],
     assistantConnection: ["connecting"],
+    // Both answer `undefined` for a token this language has no sentence for,
+    // so they are given one it does.
+    assistantUndoBlocked: ["table-moved"],
+    assistantCapabilityName: ["edit.cells"],
+    assistantAlwaysAllowedRevoke: ["edit.cells"],
     assistantReceipt: [{ capability: "view.setGroupBy", status: "executed" }],
     sortedBy: [{ column: "COLUMN_X", ascending: true }],
   };

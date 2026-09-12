@@ -47,3 +47,23 @@ describe("normalizeCapabilityArgs", () => {
     });
   });
 });
+
+describe("the search a model actually sends", () => {
+  it("accepts `search` where the guide says `query`", () => {
+    expect(
+      normalizeCapabilityArgs("view.setSearch", { search: "ada" })
+    ).toEqual({ query: "ada" });
+  });
+
+  it("leaves an explicit `query` alone, whatever else is there", () => {
+    expect(
+      normalizeCapabilityArgs("view.setSearch", { query: "ada", search: "x" })
+    ).toEqual({ query: "ada", search: "x" });
+  });
+
+  it("does not invent a query from a non-string", () => {
+    expect(normalizeCapabilityArgs("view.setSearch", { search: 7 })).toEqual({
+      search: 7,
+    });
+  });
+});

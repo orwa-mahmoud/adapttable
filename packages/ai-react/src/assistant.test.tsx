@@ -667,7 +667,7 @@ describe("the transcript", () => {
     expect(result.current.messages).toEqual([]);
   });
 
-  it("refuses to clear mid-turn", async () => {
+  it("ends the turn when the reader clears mid-flight", async () => {
     const deferred = deferredTransport();
     const { result } = renderHook(() =>
       useTableAssistant({
@@ -683,8 +683,11 @@ describe("the transcript", () => {
       result.current.clear();
     });
 
-    // Clearing now would hide an action that is still running.
-    expect(result.current.messages).toHaveLength(1);
+    // A reader who asks for a clear transcript means it. The turn is ended
+    // rather than left running with nowhere to land — which is worse than
+    // ending one they have visibly abandoned.
+    expect(result.current.messages).toHaveLength(0);
+    expect(result.current.busy).toBe(false);
     await act(async () => {
       deferred.settle({ text: "done" });
       await Promise.resolve();

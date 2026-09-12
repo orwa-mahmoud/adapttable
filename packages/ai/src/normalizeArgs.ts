@@ -92,5 +92,17 @@ export function normalizeCapabilityArgs(key: string, args: unknown): unknown {
     delete record.column;
   }
   if (key === "view.setSort") return normalizeSortArgs(record);
+  // The guide says `query`; the capability is called `setSearch` and the table
+  // calls the thing a search, so `search` is what a model reaches for. The
+  // guide is still the authority — this only accepts the near-miss rather than
+  // making a reader read "$.query is required" about a search that worked.
+  if (
+    key === "view.setSearch" &&
+    !("query" in record) &&
+    typeof record.search === "string"
+  ) {
+    record.query = record.search;
+    delete record.search;
+  }
   return record;
 }

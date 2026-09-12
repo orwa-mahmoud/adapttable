@@ -145,13 +145,18 @@ describe("agent binding without an engine — reading", () => {
     );
 
     expect(result.ok).toBe(true);
+    // A read comes back inside its provenance envelope, on every path.
     expect(result.result).toMatchObject({
-      rows: [
-        { rowKey: "2", cells: { name: "Zoe", team: "Docs" } },
-        { rowKey: "3", cells: { name: "Ravi", team: "Docs" } },
-      ],
-      offset: 1,
-      limit: 2,
+      source: "table-rows",
+      untrusted: true,
+      rows: {
+        rows: [
+          { rowKey: "2", cells: { name: "Zoe", team: "Docs" } },
+          { rowKey: "3", cells: { name: "Ravi", team: "Docs" } },
+        ],
+        offset: 1,
+        limit: 2,
+      },
     });
   });
 
@@ -187,7 +192,7 @@ describe("agent binding without an engine — reading", () => {
     );
 
     expect(windowOf(result).rows).toHaveLength(2);
-    expect(result.result).toMatchObject({ limit: 2 });
+    expect(result.result).toMatchObject({ rows: { limit: 2 } });
   });
 
   it("names a column the agent may not read as redacted rather than sending it", async () => {
