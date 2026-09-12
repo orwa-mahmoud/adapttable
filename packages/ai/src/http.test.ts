@@ -1379,6 +1379,186 @@ describe("createAgentHttpClient", () => {
   });
 });
 
+describe("a streamed reply", () => {
+  const sse = (records: readonly string[]): Response =>
+    new Response(`${records.join("\n\n")}\n\n`, {
+      status: 200,
+      headers: { "content-type": "text/event-stream" },
+    });
+
+  const event = (name: string, data?: unknown): string =>
+    data === undefined
+      ? `event: ${name}`
+      : `event: ${name}\ndata: ${JSON.stringify(data)}`;
+
+  it("runs the calls it carried, once it is complete", async () => {
+    const setPage = vi.fn();
+    const live = session({ setPage });
+    const result = await runAgentHttpTurn(live, "Page 2", {
+      endpoint: "https://agent.example/turn",
+      stream: true,
+      fetch: () =>
+        Promise.resolve(
+          sse([
+            event("text-delta", { text: "Showing " }),
+            event("text-delta", { text: "page 2." }),
+            event("tool-calls", {
+              toolCalls: [
+                { id: "c0", name: "view.setPage", args: { page: 2 } },
+              ],
+            }),
+            event("done", { turnId: "t", phaseId: 0 }),
+          ])
+        ),
+    });
+
+    expect(result.text).toBe("Showing page 2.");
+    expect(setPage).toHaveBeenCalledWith(2);
+    expect(result.results[0]?.ok).toBe(true);
+  });
+
+  it("reports the text as it arrives", async () => {
+    const live = session();
+    const seen: string[] = [];
+    await runAgentHttpTurn(live, "Hello", {
+      endpoint: "https://agent.example/turn",
+      stream: true,
+      onStreamText: (text) => seen.push(text),
+      fetch: () =>
+        Promise.resolve(
+          sse([
+            event("text-delta", { text: "Hi" }),
+            event("text-delta", { text: " there" }),
+            event("done"),
+          ])
+        ),
+    });
+
+    expect(seen).toEqual(["Hi", "Hi there"]);
+  });
+
+  it("asks for a stream and accepts JSON without asking twice", async () => {
+    const live = session();
+    let accept = "";
+    let calls = 0;
+    const result = await runAgentHttpTurn(live, "Hello", {
+      endpoint: "https://agent.example/turn",
+      stream: true,
+      fetch: (_url, init) => {
+        calls += 1;
+        accept = new Headers(init?.headers).get("accept") ?? "";
+        return Promise.resolve(
+          okResponse({ schemaVersion: AGENT_SCHEMA_VERSION, text: "plain" })
+        );
+      },
+    });
+
+    expect(accept).toContain("text/event-stream");
+    // The response's own content type decides. A backend that answers JSON is
+    // used as it is, not retried.
+    expect(calls).toBe(1);
+    expect(result.text).toBe("plain");
+  });
+
+  it("does not ask for a stream when nobody wanted one", async () => {
+    const live = session();
+    let accept = "";
+    await runAgentHttpTurn(live, "Hello", {
+      endpoint: "https://agent.example/turn",
+      fetch: (_url, init) => {
+        accept = new Headers(init?.headers).get("accept") ?? "";
+        return Promise.resolve(
+          okResponse({ schemaVersion: AGENT_SCHEMA_VERSION, text: "plain" })
+        );
+      },
+    });
+
+    expect(accept).toBe("application/json");
+  });
+
+  it("runs nothing when the stream stops before it is complete", async () => {
+    const setPage = vi.fn();
+    const live = session({ setPage });
+
+    await expect(
+      runAgentHttpTurn(live, "Page 2", {
+        endpoint: "https://agent.example/turn",
+        stream: true,
+        fetch: () =>
+          Promise.resolve(
+            sse([
+              event("text-delta", { text: "Showing" }),
+              event("tool-calls", {
+                toolCalls: [
+                  { id: "c0", name: "view.setPage", args: { page: 2 } },
+                ],
+              }),
+              // No `done`: the reply was cut off.
+            ])
+          ),
+      })
+    ).rejects.toThrow(/ended without done/);
+
+    // The calls were carried but never final, so nothing ran.
+    expect(setPage).not.toHaveBeenCalled();
+  });
+
+  it("surfaces a mid-stream failure and runs nothing", async () => {
+    const setPage = vi.fn();
+    const live = session({ setPage });
+
+    await expect(
+      runAgentHttpTurn(live, "Page 2", {
+        endpoint: "https://agent.example/turn",
+        stream: true,
+        fetch: () =>
+          Promise.resolve(
+            sse([
+              event("tool-calls", {
+                toolCalls: [
+                  { id: "c0", name: "view.setPage", args: { page: 2 } },
+                ],
+              }),
+              event("error", { code: "provider-down", message: "upstream" }),
+            ])
+          ),
+      })
+    ).rejects.toThrow(/upstream/);
+
+    expect(setPage).not.toHaveBeenCalled();
+  });
+
+  it("gives the same receipts as the same reply sent as JSON", async () => {
+    const reply = {
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      text: "Showing page 2.",
+      toolCalls: [{ id: "c0", name: "view.setPage", args: { page: 2 } }],
+    };
+    const asJson = await runAgentHttpTurn(session(), "Page 2", {
+      endpoint: "https://agent.example/turn",
+      request: () => Promise.resolve(reply),
+    });
+    const asStream = await runAgentHttpTurn(session(), "Page 2", {
+      endpoint: "https://agent.example/turn",
+      stream: true,
+      fetch: () =>
+        Promise.resolve(
+          sse([
+            event("text-delta", { text: "Showing page 2." }),
+            event("tool-calls", { toolCalls: reply.toolCalls }),
+            event("done"),
+          ])
+        ),
+    });
+
+    expect(asStream.text).toBe(asJson.text);
+    expect(asStream.keys).toEqual(asJson.keys);
+    expect(asStream.results.map((entry) => entry.ok)).toEqual(
+      asJson.results.map((entry) => entry.ok)
+    );
+  });
+});
+
 describe("discovery over the wire", () => {
   it("answers a family in one round rather than one per key", async () => {
     const live = session();

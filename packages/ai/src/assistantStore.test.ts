@@ -326,6 +326,96 @@ describe("the assistant store", () => {
     expect(store.getState().moreSuggestions.map((s) => s.id)).toEqual(["b"]);
   });
 
+  it("shows text as it streams, then replaces it with the reply", async () => {
+    let emit: ((text: string) => void) | undefined;
+    let settle: (() => void) | undefined;
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: ({ onPartialText }) => {
+          emit = onPartialText;
+          return new Promise((resolve) => {
+            settle = () => {
+              resolve({ text: "Showing page 2." });
+            };
+          });
+        },
+      },
+    });
+    store.connect();
+    const turn = store.send("Page 2");
+
+    emit?.("Showing ");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const during = store.getState().messages.at(-1);
+    expect(during?.partialText).toBe("Showing ");
+    expect(during?.text).toBe("");
+
+    settle?.();
+    await turn;
+    const after = store.getState().messages;
+    // One assistant message, and it is the reply — not the draft beside it.
+    expect(after).toHaveLength(2);
+    expect(after[1]?.text).toBe("Showing page 2.");
+    expect(after[1]?.partialText).toBeUndefined();
+  });
+
+  it("drops the partial message when the turn is stopped", async () => {
+    let emit: ((text: string) => void) | undefined;
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: ({ onPartialText }) => {
+          emit = onPartialText;
+          return new Promise<AssistantTransportReply>(() => undefined);
+        },
+      },
+    });
+    store.connect();
+    void store.send("Page 2");
+
+    emit?.("Half a sen");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(store.getState().messages.at(-1)?.partialText).toBe("Half a sen");
+
+    store.stop();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    // What was abandoned leaves nothing behind: only the reader's own message.
+    expect(store.getState().messages.map((entry) => entry.role)).toEqual([
+      "user",
+    ]);
+  });
+
+  it("does not repaint once per delta", async () => {
+    let emit: ((text: string) => void) | undefined;
+    let settle: (() => void) | undefined;
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: ({ onPartialText }) => {
+          emit = onPartialText;
+          return new Promise((resolve) => {
+            settle = () => {
+              resolve({ text: "done" });
+            };
+          });
+        },
+      },
+    });
+    store.connect();
+    const turn = store.send("Page 2");
+    const listener = vi.fn();
+    store.subscribe(listener);
+
+    for (let token = 0; token < 40; token += 1) emit?.(`x${String(token)}`);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Forty tokens, one repaint — a reader cannot read faster than a frame.
+    expect(listener.mock.calls.length).toBeLessThan(5);
+    settle?.();
+    await turn;
+  });
+
   it("says nothing more after dispose", async () => {
     const deferred = deferredTransport();
     const store = createTableAssistant({

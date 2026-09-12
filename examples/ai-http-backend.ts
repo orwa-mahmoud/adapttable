@@ -262,6 +262,38 @@ async function readBody(
   return parts.join("");
 }
 
+/** Whether this client negotiated a stream. */
+function wantsStream(req: IncomingMessage): boolean {
+  return (req.headers.accept ?? "").includes("text/event-stream");
+}
+
+/**
+ * Send one reply as events.
+ *
+ * Text goes out in pieces so it can be read as it lands; the calls go out
+ * whole, once, and `done` is what makes them final. A client that loses the
+ * connection before `done` has run nothing.
+ */
+function writeStream(res: ServerResponse, reply: AgentHttpResponse): void {
+  res.writeHead(200, {
+    "content-type": "text/event-stream",
+    "cache-control": "no-cache",
+    connection: "keep-alive",
+  });
+  const send = (event: string, data: unknown): void => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+  for (const piece of (reply.text ?? "").match(/.{1,24}/gs) ?? []) {
+    send("text-delta", { text: piece });
+  }
+  if (reply.transcript) send("transcript", { text: reply.transcript });
+  if (reply.askUser) send("ask-user", reply.askUser);
+  if (reply.toolCalls?.length)
+    send("tool-calls", { toolCalls: reply.toolCalls });
+  send("done", {});
+  res.end();
+}
+
 function writeJson(res: ServerResponse, status: number, body: unknown): void {
   res.writeHead(status, { "content-type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(body));
@@ -531,15 +563,17 @@ export async function handleExampleHttp(
         return;
       }
     }
-    writeJson(
-      res,
-      200,
-      await handleExampleAgentTurn(
-        request,
-        complete ?? completeForProvider(PROVIDER),
-        controller.signal
-      )
+    const reply = await handleExampleAgentTurn(
+      request,
+      complete ?? completeForProvider(PROVIDER),
+      controller.signal
     );
+    // The client asked for a stream, so send one. This example completes
+    // before it streams — a real provider hands back tokens and they go out as
+    // they arrive — but the contract the client sees is identical either way:
+    // the calls travel complete, and `done` is what makes them final.
+    if (wantsStream(req)) writeStream(res, reply);
+    else writeJson(res, 200, reply);
   } catch (error) {
     const message = error instanceof Error ? error.message : "bad request";
     let status = 400;

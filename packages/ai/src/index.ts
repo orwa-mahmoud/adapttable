@@ -110,6 +110,15 @@ export {
   DEFAULT_CACHE_VERSIONS,
   type DiscoveryCache,
 } from "./discoveryCache";
+export {
+  AgentStreamError,
+  type AgentStreamEvent,
+  type AgentStreamEventKind,
+  createStreamReply,
+  MAX_STREAM_EVENTS,
+  parseStreamRecord,
+  splitRecords,
+} from "./httpStream";
 export { guideOf, summaryOf } from "./guides";
 export {
   AGENT_SCHEMA_VERSION,

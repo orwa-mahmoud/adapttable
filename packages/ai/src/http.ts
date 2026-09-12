@@ -21,6 +21,11 @@ import {
   type PinStatus,
 } from "./httpPins";
 import {
+  createStreamReply,
+  parseStreamRecord,
+  splitRecords,
+} from "./httpStream";
+import {
   discover,
   type DiscoveryRequest,
   type DiscoverySource,
@@ -83,6 +88,15 @@ export {
   type PinRecord,
   type PinStatus,
 } from "./httpPins";
+export {
+  AgentStreamError,
+  type AgentStreamEvent,
+  type AgentStreamEventKind,
+  createStreamReply,
+  MAX_STREAM_EVENTS,
+  parseStreamRecord,
+  splitRecords,
+} from "./httpStream";
 export { AgentTurnError, type PhaseState } from "./httpTurn";
 export type { AgentWireLimits, JsonSchemaDocument } from "./httpSchema";
 export * from "./httpTypes";
@@ -330,6 +344,22 @@ export interface AgentHttpClientOptions {
    * than an invented one.
    */
   readonly contextInputs?: (session: AgentSession) => AgentContextInputs;
+  /**
+   * Ask the backend to stream its reply.
+   *
+   * Negotiated with `Accept`, and a backend that answers JSON is used as-is —
+   * no second request. Streaming changes when text appears and nothing else:
+   * calls still execute only after the reply is complete.
+   */
+  readonly stream?: boolean;
+  /**
+   * Called with the text so far while a reply is streaming.
+   *
+   * The transport does not batch: a caller that renders this decides its own
+   * cadence, because how often to repaint is a question about the surface
+   * rather than about the wire.
+   */
+  readonly onStreamText?: (text: string) => void;
 }
 
 /**
@@ -1237,7 +1267,12 @@ async function postJson(
   if (!headers.has("content-type")) {
     headers.set("content-type", "application/json");
   }
-  headers.set("accept", "application/json");
+  // Streaming is negotiated, never assumed. A backend that answers JSON is
+  // answered from its own content type rather than by trying again.
+  headers.set(
+    "accept",
+    options.stream ? "text/event-stream, application/json" : "application/json"
+  );
   let response: Response;
   try {
     response = await Promise.race([
@@ -1254,6 +1289,14 @@ async function postJson(
       throw abortReason(signal);
     }
     throw new Error(`agent HTTP connection failed: ${errorMessage(error)}`);
+  }
+  if (
+    options.stream &&
+    response.ok &&
+    response.body &&
+    (response.headers.get("content-type") ?? "").includes("text/event-stream")
+  ) {
+    return readStream(response, options, signal);
   }
   const text = await Promise.race([response.text(), abortPromise(signal)]);
   if (!response.ok) throw httpError(response.status, text);
@@ -1285,6 +1328,49 @@ async function exchange(
   } finally {
     merged.cleanup();
   }
+}
+
+/**
+ * Read an event stream into the reply the rest of this client expects.
+ *
+ * The same ceilings as a JSON body: total bytes, and the caller's own signal,
+ * which already carries `timeoutMs`. A stream that stops without `done` is a
+ * failure rather than a shorter reply — see `createStreamReply`.
+ */
+async function readStream(
+  response: Response,
+  options: AgentHttpClientOptions,
+  signal: AbortSignal
+): Promise<unknown> {
+  const reader = response.body?.getReader();
+  if (!reader) throw new TypeError("agent HTTP stream had no body");
+  const decoder = new TextDecoder();
+  const reply = createStreamReply(options.onStreamText);
+  let buffer = "";
+  let bytes = 0;
+
+  try {
+    for (;;) {
+      const chunk = await Promise.race([reader.read(), abortPromise(signal)]);
+      if (chunk.done) break;
+      bytes += chunk.value.byteLength;
+      assertResponseSize(bytes);
+      buffer += decoder.decode(chunk.value, { stream: true });
+      const split = splitRecords(buffer);
+      buffer = split.rest;
+      let finished = false;
+      for (const record of split.records) {
+        const event = parseStreamRecord(record);
+        if (event && reply.absorb(event)) finished = true;
+      }
+      if (finished) break;
+    }
+  } finally {
+    // Releasing rather than cancelling: an abort has already torn the request
+    // down, and a cancel on a settled reader throws over the real reason.
+    reader.releaseLock();
+  }
+  return reply.finish(AGENT_SCHEMA_VERSION);
 }
 
 function newHttpTurnId(): string {
@@ -1884,8 +1970,18 @@ export function createAgentHttpClient(options: AgentHttpClientOptions): {
 export function assistantHttpTransport(
   options: AgentHttpClientOptions
 ): AssistantTransport {
-  const client = createAgentHttpClient(options);
   let connected: AgentSession | undefined;
+  // The controller supplies a per-turn sink; the client option is fixed for
+  // the life of the transport, so the option forwards to whichever turn is in
+  // flight rather than each turn building its own client.
+  let partialSink: ((text: string) => void) | undefined;
+  const client = createAgentHttpClient({
+    ...options,
+    onStreamText: (text) => {
+      options.onStreamText?.(text);
+      partialSink?.(text);
+    },
+  });
   return {
     connect: async ({ session, signal }) => {
       connected = session;
@@ -1897,15 +1993,22 @@ export function assistantHttpTransport(
       if (connected) client.reset(connected);
       connected = undefined;
     },
-    send: async ({ session, text, conversation, signal }) => {
-      const turn = await client.send(session, text, {
-        conversation: conversation.map((entry) => ({
-          role: entry.role,
-          text: entry.text,
-        })),
-        returnResults: true,
-        signal,
-      });
+    send: async ({ session, text, conversation, signal, onPartialText }) => {
+      partialSink = onPartialText;
+      const turn = await client
+        .send(session, text, {
+          conversation: conversation.map((entry) => ({
+            role: entry.role,
+            text: entry.text,
+          })),
+          returnResults: true,
+          signal,
+        })
+        .finally(() => {
+          // Cleared whatever happened, so a later stream cannot write into the
+          // turn that has just ended.
+          partialSink = undefined;
+        });
       return {
         text: turn.text,
         results: turn.results,

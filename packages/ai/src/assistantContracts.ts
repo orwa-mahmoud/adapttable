@@ -317,6 +317,15 @@ export interface AssistantTransport {
     readonly text: string;
     readonly conversation: readonly AssistantExchange[];
     readonly signal?: AbortSignal;
+    /**
+     * Report the assistant's text as it arrives, when the transport streams.
+     *
+     * Optional on both sides: a transport that does not stream never calls it,
+     * and a controller that does not render partial text never passes one.
+     * Calling it is never a claim that anything ran — a turn's receipts come
+     * from the reply, not from the words.
+     */
+    readonly onPartialText?: (text: string) => void;
   }): Promise<AssistantTransportReply>;
   /**
    * Release whatever `connect` acquired.

@@ -187,6 +187,23 @@ export interface TableAssistantStore {
 
 const DEFAULT_PRIMARY = 4;
 
+/**
+ * Coalesce a burst of stream updates into one repaint.
+ *
+ * A frame where the host has one, a microtask where it does not — so a Node
+ * consumer batches too rather than publishing per delta.
+ */
+function scheduleFlush(run: () => void): void {
+  const raf = (
+    globalThis as { requestAnimationFrame?: (cb: () => void) => void }
+  ).requestAnimationFrame;
+  if (typeof raf === "function") {
+    raf(run);
+    return;
+  }
+  queueMicrotask(run);
+}
+
 /** Ids only have to be unique within one transcript. */
 function messageId(role: string, seq: number): string {
   return `${role}-${String(seq)}`;
@@ -510,18 +527,62 @@ export function createTableAssistant(
     status = "sending";
     push(userMessage);
 
+    // One provisional message, updated in place as text arrives. A new entry
+    // per delta would make the transcript grow by a message a token.
+    seq += 1;
+    const streamingId = messageId("assistant", seq);
+    let streamed = "";
+    let streamPending = false;
+    const flushStream = (): void => {
+      streamPending = false;
+      if (!deliverable(mine, id, controller)) return;
+      const existing = messages.some((entry) => entry.id === streamingId);
+      messages = existing
+        ? messages.map((entry) =>
+            entry.id === streamingId
+              ? { ...entry, partialText: streamed }
+              : entry
+          )
+        : [
+            ...messages,
+            {
+              id: streamingId,
+              role: "assistant" as const,
+              text: "",
+              at: Date.now(),
+              partialText: streamed,
+            },
+          ];
+      publish();
+    };
+
     try {
       const reply = await transport.send({
         session,
         text: outgoing,
         conversation: exchanges([...messages]),
         signal: controller.signal,
+        onPartialText: (partial) => {
+          streamed = partial;
+          // Coalesced rather than published per token: a repaint per delta is
+          // a render storm, and the reader cannot read that fast anyway.
+          if (streamPending) return;
+          streamPending = true;
+          scheduleFlush(flushStream);
+        },
       });
+      // The provisional message goes when the real one lands. A reply is the
+      // authority for what happened; the words that preceded it are not.
+      messages = messages.filter((entry) => entry.id !== streamingId);
       // A transport is asked to honour `signal`, but it is host code and may
       // not. Stop has to hold either way, so delivery is gated on the signal
       // as well as on the turn still being the current one.
       if (deliverable(mine, id, controller)) receive(reply);
     } catch (cause) {
+      // An abandoned stream leaves nothing behind: the partial message is
+      // dropped, and nothing ran, because calls execute only after the reply
+      // is complete.
+      messages = messages.filter((entry) => entry.id !== streamingId);
       if (current(mine) && turn === id) {
         recover(cause, controller.signal.aborted, previousDraft);
       }
