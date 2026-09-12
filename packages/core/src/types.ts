@@ -758,6 +758,14 @@ export interface TableLabels {
   assistantSend?: string;
   /** The control that stops a turn already running. */
   assistantStop?: string;
+  /** Accessible name for the mic when it is idle. */
+  assistantVoiceStart?: string;
+  /** Accessible name for the mic while it is listening. */
+  assistantVoiceStop?: string;
+  /** Announced once when dictation starts. Never per word heard. */
+  assistantVoiceListening?: string;
+  /** Accessible name for the dictation language chooser. */
+  assistantVoiceLanguage?: string;
   /** How a reader's own message is named. */
   assistantYou?: string;
   /** How the assistant's message is named. */

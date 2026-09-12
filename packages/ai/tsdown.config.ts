@@ -24,5 +24,6 @@ export default defineConfig({
     "src/http.ts",
     "src/assistant.ts",
     "src/context.ts",
+    "src/voice.ts",
   ],
 });

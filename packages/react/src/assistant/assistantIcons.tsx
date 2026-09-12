@@ -77,6 +77,30 @@ const SUGGESTION_PATHS: Record<string, string> = {
 };
 
 /**
+ * The mic, with a ring while it is listening.
+ *
+ * The ring is the only motion in the composer, and it is drawn as a static
+ * second stroke rather than an animation — a pulsing control is exactly what
+ * `prefers-reduced-motion` exists to stop, and a kit that wants motion adds it
+ * where it owns the CSS.
+ *
+ * @internal
+ */
+export function MicIcon({
+  listening,
+}: {
+  readonly listening?: boolean;
+}): ReactElement {
+  return (
+    <svg {...BASE}>
+      <rect x="9" y="2" width="6" height="12" rx="3" />
+      <path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" />
+      {listening ? <circle cx="12" cy="8" r="1.5" fill="currentColor" /> : null}
+    </svg>
+  );
+}
+
+/**
  * A glyph for a suggested prompt, or nothing when the kind is unknown.
  *
  * @param kind - The prompt's kind, from its presentation metadata.

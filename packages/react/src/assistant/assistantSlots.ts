@@ -136,4 +136,37 @@ export interface TableAssistantSlots {
   readonly Window: (props: TableAssistantWindowProps) => ReactNode;
   /** One suggested prompt, as a compact card or chip. */
   readonly Suggestion: (props: TableAssistantSuggestionProps) => ReactNode;
+  /**
+   * The language chooser beside the mic.
+   *
+   * Optional: a kit that has not filled it simply offers no chip, and a table
+   * with one language never needed one. A kit that fills it draws its own
+   * menu — this is a chooser, not a button with a list bolted on.
+   */
+  readonly LanguageChip?: (props: TableAssistantLanguageChipProps) => ReactNode;
+}
+
+/**
+ * The language chooser shown when dictation offers more than one.
+ *
+ * Only ever drawn beside a mic that is already there. One language shows no
+ * chip at all: asking a reader which language they are about to speak, when
+ * there is only one answer, is slower than typing.
+ *
+ * @public
+ */
+export interface TableAssistantLanguageChipProps {
+  /** Accessible name for the chooser itself. */
+  readonly label: string;
+  /** The tag in force. */
+  readonly value: string;
+  /** Every tag on offer, with the name to show for each. */
+  readonly options: readonly {
+    readonly value: string;
+    readonly label: string;
+  }[];
+  readonly part: string;
+  readonly className?: string;
+  readonly onChange: (value: string) => void;
+  readonly disabled?: boolean;
 }

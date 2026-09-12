@@ -1079,6 +1079,7 @@ export type {
   TableAssistantBadgeProps,
   TableAssistantButtonProps,
   TableAssistantComposerProps,
+  TableAssistantLanguageChipProps,
   TableAssistantPanelProps,
   TableAssistantSheetProps,
   TableAssistantSlots,
@@ -1101,6 +1102,11 @@ export {
   type TableAssistantPresentation,
   type TableAssistantProps,
 } from "./assistant/TableAssistantChrome";
+export {
+  type SpeechInputHandle,
+  type UseSpeechInputOptions,
+  useSpeechInput,
+} from "./assistant/useSpeechInput";
 export { editableCellController } from "./editing/editableCellController";
 export type { ExportRowRole } from "@adapttable/core";
 export type { AggregateFn } from "@adapttable/core";

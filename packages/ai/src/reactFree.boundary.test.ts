@@ -19,6 +19,7 @@ const ENTRIES = [
   "http",
   "assistant",
   "context",
+  "voice",
 ];
 
 const REACT_IMPORT =

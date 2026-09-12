@@ -101,6 +101,16 @@
         "default": "./dist/context.cjs"
       }
     },
+    "./voice": {
+      "import": {
+        "types": "./dist/voice.d.ts",
+        "default": "./dist/voice.js"
+      },
+      "require": {
+        "types": "./dist/voice.d.cts",
+        "default": "./dist/voice.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

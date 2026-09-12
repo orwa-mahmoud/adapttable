@@ -589,7 +589,8 @@
           "./mcp",
           "./http",
           "./assistant",
-          "./context"
+          "./context",
+          "./voice"
         ]
       }
     ],

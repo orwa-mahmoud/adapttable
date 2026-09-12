@@ -186,3 +186,15 @@ export type {
   WriteRowResult,
 } from "./types";
 export { validateSchema } from "./validate";
+export {
+  createSpeechInput,
+  readRememberedLanguage,
+  rememberLanguage,
+  type SpeechClip,
+  type SpeechInput,
+  type SpeechInputOptions,
+  type SpeechMode,
+  type SpeechState,
+  type SpeechStatus,
+  type VoiceOptions,
+} from "./voice";

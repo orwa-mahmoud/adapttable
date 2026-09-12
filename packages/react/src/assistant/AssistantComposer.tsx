@@ -10,8 +10,11 @@
 import type { TableLabels } from "@adapttable/core";
 import type { KeyboardEvent, ReactElement } from "react";
 
-import { SendIcon, StopIcon } from "./assistantIcons";
+import { LiveRegion } from "../a11y/LiveRegion";
+
+import { MicIcon, SendIcon, StopIcon } from "./assistantIcons";
 import type { TableAssistantSlots } from "./assistantSlots";
+import type { SpeechInputHandle } from "./useSpeechInput";
 import { assistantIsBusy, assistantIsUsable } from "./assistantView";
 
 /** Props for {@link AssistantComposer}. @internal */
@@ -25,6 +28,8 @@ export interface AssistantComposerProps {
   readonly setDraft: (draft: string) => void;
   readonly onSend: () => void;
   readonly onStop: () => void;
+  /** Dictation, when the host turned it on and this browser can do it. */
+  readonly speech?: SpeechInputHandle;
 }
 
 /** The sticky bottom composer. @internal */
@@ -37,6 +42,7 @@ export function AssistantComposer({
   setDraft,
   onSend,
   onStop,
+  speech,
 }: AssistantComposerProps): ReactElement {
   // A parked approval is still a turn: the host says so with `busy`, and
   // without it the status is the only signal there is.
@@ -44,6 +50,16 @@ export function AssistantComposer({
   const usable = assistantIsUsable(status);
   const Composer = slots.Composer;
   const Button = slots.Button;
+  const LanguageChip = slots.LanguageChip;
+  const listening = speech?.state.status === "listening";
+  const micLabel = listening
+    ? (labels?.assistantVoiceStop ?? "Stop dictation")
+    : (labels?.assistantVoiceStart ?? "Dictate");
+  // A chip for one language is a question with one answer.
+  const showChip =
+    speech?.available === true &&
+    speech.languages.length > 1 &&
+    LanguageChip !== undefined;
 
   const onKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
     if (event.key !== "Enter") return;
@@ -71,6 +87,13 @@ export function AssistantComposer({
         flexShrink: 0,
       }}
     >
+      {/* Announced once when it starts, not on every interim result: a screen
+          reader repeating every word heard is unusable. */}
+      <LiveRegion
+        message={
+          listening ? (labels?.assistantVoiceListening ?? "Listening") : ""
+        }
+      />
       {/* The input takes the room that is left. Without `minWidth: 0` a
           textarea's intrinsic width wins the flex negotiation and pushes Send
           off the end of a 400px window. */}
@@ -85,6 +108,28 @@ export function AssistantComposer({
           onKeyDown={onKeyDown}
         />
       </span>
+      {showChip && LanguageChip ? (
+        <LanguageChip
+          label={labels?.assistantVoiceLanguage ?? "Dictation language"}
+          value={speech.state.language}
+          options={speech.languages.map((value) => ({ value, label: value }))}
+          part="assistant-voice-language"
+          disabled={listening}
+          onChange={speech.setLanguage}
+        />
+      ) : null}
+      {speech?.available ? (
+        <Button
+          label={micLabel}
+          tooltip={micLabel}
+          part="assistant-voice"
+          variant={listening ? "primary" : "subtle"}
+          icon={<MicIcon listening={listening} />}
+          iconOnly
+          disabled={!usable}
+          onClick={listening ? speech.stop : speech.start}
+        />
+      ) : null}
       {busy ? (
         <Button
           label={labels?.assistantStop ?? "Stop"}

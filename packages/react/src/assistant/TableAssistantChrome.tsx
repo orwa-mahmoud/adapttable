@@ -31,6 +31,7 @@ import {
   type ApprovalReviewSlots,
 } from "../editing/ApprovalReviewChrome";
 import { AssistantComposer } from "./AssistantComposer";
+import type { SpeechInputHandle } from "./useSpeechInput";
 import { AssistantIcon, CloseIcon, SettingsIcon } from "./assistantIcons";
 import {
   AssistantEmpty,
@@ -77,6 +78,14 @@ export type TableAssistantPresentation = "panel" | "sheet" | "floating";
 export interface TableAssistantProps {
   /** The live conversation. */
   readonly assistant: TableAssistantView;
+  /**
+   * Dictation, when the host turned it on.
+   *
+   * Built by `useSpeechInput` and passed through, so the chrome draws a mic
+   * without knowing anything about recognizers or recorders — and draws none
+   * at all when this browser cannot listen.
+   */
+  readonly speech?: SpeechInputHandle;
   /** Whether the panel is showing. */
   readonly open: boolean;
   /** Asked to open or close. */
@@ -610,6 +619,7 @@ export function TableAssistantChrome({
   messageAction,
   approval,
   slots,
+  speech,
 }: Readonly<TableAssistantChromeProps>): ReactElement {
   const wide = useFloatingFits();
   const launcherRef = useRef<HTMLElement | null>(null);
@@ -712,6 +722,7 @@ export function TableAssistantChrome({
         setDraft={assistant.setDraft}
         onSend={send}
         onStop={assistant.stop}
+        {...(speech ? { speech } : {})}
       />
       {resolved === "sheet" ? (
         <Button
