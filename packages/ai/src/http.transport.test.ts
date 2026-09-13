@@ -748,3 +748,108 @@ describe("a backend that will not hold the contract", () => {
     expect(last.context ?? last.catalog).toBeDefined();
   });
 });
+
+describe("a backend that streams its answer", () => {
+  /** A fetch that answers with a real SSE body. */
+  function sse(records: readonly string[]) {
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        const encoder = new TextEncoder();
+        for (const record of records) {
+          controller.enqueue(encoder.encode(record));
+        }
+        controller.close();
+      },
+    });
+    return () =>
+      Promise.resolve(
+        new Response(body, {
+          status: 200,
+          headers: { "content-type": "text/event-stream" },
+        })
+      );
+  }
+
+  it("reports the text as it arrives and runs the calls after done", async () => {
+    const seen: string[] = [];
+    const live = session();
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      stream: true,
+      onStreamText: (text) => seen.push(text),
+      fetch: sse([
+        'event: text-delta\ndata: {"text":"Going "}\n\n',
+        'event: text-delta\ndata: {"text":"to page 3."}\n\n',
+        "event: done\ndata: {}\n\n",
+      ]) as unknown as typeof fetch,
+    });
+
+    const turn = await client.send(live, "go to page 3");
+
+    expect(seen).toEqual(["Going ", "Going to page 3."]);
+    expect(turn.text).toBe("Going to page 3.");
+  });
+
+  it("refuses a stream that ends without a reply", async () => {
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      stream: true,
+      fetch: sse([
+        'event: text-delta\ndata: {"text":"half a"}\n\n',
+      ]) as unknown as typeof fetch,
+    });
+
+    await expect(client.send(session(), "go")).rejects.toThrow();
+  });
+
+  it("reads an ordinary JSON answer when the backend did not stream", async () => {
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      stream: true,
+      fetch: (() =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({
+              schemaVersion: AGENT_SCHEMA_VERSION,
+              text: "no stream here",
+            }),
+            { status: 200, headers: { "content-type": "application/json" } }
+          )
+        )) as unknown as typeof fetch,
+    });
+
+    const turn = await client.send(session(), "go");
+    expect(turn.text).toBe("no stream here");
+  });
+});
+
+describe("what a model may write in a read or describe call", () => {
+  const ask = (name: string, args: unknown): unknown =>
+    parseAgentHttpResponse({
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      toolCalls: [{ id: "c1", name, args }],
+    });
+
+  it("takes a read call with nothing in it", () => {
+    expect(ask("read", undefined)).toMatchObject({
+      toolCalls: [{ name: "read" }],
+    });
+  });
+
+  it("keeps only the column names a read call could mean", () => {
+    const parsed = ask("read", { columns: ["name", 7, null, "salary"] });
+    const args = (parsed as { toolCalls: { args: { columns: string[] } }[] })
+      .toolCalls[0]?.args;
+    expect(args?.columns).toEqual(["name", "salary"]);
+  });
+
+  it("refuses a describe call whose keys are not a list", () => {
+    expect(() => ask("describe", { keys: "view.setPage" })).toThrow();
+  });
+
+  it("takes a describe call asking for a family", () => {
+    expect(ask("describe", { family: "view" })).toMatchObject({
+      toolCalls: [{ name: "describe" }],
+    });
+  });
+});
