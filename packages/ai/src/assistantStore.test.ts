@@ -935,3 +935,115 @@ describe("an undo the table refused", () => {
     expect(store.getState().error).toBeDefined();
   });
 });
+
+describe("what the badge says while a write waits on a person", () => {
+  it("calls a parked turn awaiting approval, not working", () => {
+    const deferred = deferredTransport();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: deferred.transport,
+      awaitingApproval: true,
+    });
+    store.connect();
+
+    void store.send("edit them");
+
+    // A reader watching a spinner that will never resolve on its own is why
+    // this is separate from `busy`: the turn is parked, not thinking.
+    expect(store.getState().status).toBe("awaiting-approval");
+    expect(store.getState().busy).toBe(true);
+  });
+
+  it("stays awaiting approval when a receipt came back parked", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: () =>
+          Promise.resolve({
+            text: "one of those needs you",
+            results: [
+              {
+                ok: true,
+                revision: 1,
+                idempotencyKey: "ed",
+                result: {
+                  applied: false,
+                  approval: "pending" as const,
+                },
+              },
+            ],
+            keys: ["edit.cells"],
+          }),
+      },
+    });
+    store.connect();
+
+    await store.send("edit them");
+
+    expect(store.getState().status).toBe("awaiting-approval");
+  });
+
+  it("reports a turn the backend could not finish", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: () =>
+          Promise.resolve({
+            text: "I got part way",
+            unresolved: {
+              code: "question-unanswered",
+              message: "nobody answered the question",
+              pending: ["view.setPage"],
+            },
+          }),
+      },
+    });
+    store.connect();
+
+    await store.send("go");
+
+    expect(store.getState().error).toBe("nobody answered the question");
+  });
+});
+
+describe("a conversation with nothing behind it", () => {
+  it("has no view to compare, so offers no undo", async () => {
+    const store = createTableAssistant({ transport: replying("ok") });
+    store.connect();
+
+    await store.send("go");
+
+    // No session: nothing to read a view from, and nothing to put back.
+    expect(store.getState().undo).toBeNull();
+  });
+
+  it("redraws its chips when the table's capabilities change underneath", () => {
+    let offers = ["view.setPage"];
+    const session = createAgentSession({
+      observe: () =>
+        observation({ hasSearch: offers.includes("view.setSearch") }),
+      apply: { setPage: vi.fn(), setSearch: vi.fn() },
+    });
+    const store = createTableAssistant({
+      session,
+      transport: replying(),
+      suggestions: [
+        {
+          id: "s1",
+          title: "Search it",
+          prompt: "search",
+          requires: ["view.setSearch"],
+        },
+      ],
+    });
+    store.connect();
+
+    expect(store.getState().suggestions).toHaveLength(0);
+
+    // The host turned the feature on in place, without swapping the session.
+    offers = ["view.setPage", "view.setSearch"];
+    store.setDraft("nudge");
+
+    expect(store.getState().suggestions).toHaveLength(1);
+  });
+});
