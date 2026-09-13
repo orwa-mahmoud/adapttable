@@ -1705,3 +1705,169 @@ describe("what a per-row decision means", () => {
     expect(hooks.editCells).not.toHaveBeenCalled();
   });
 });
+
+describe("a table that stages writes instead of applying them", () => {
+  function staging(patch: Partial<AgentApply> = {}) {
+    const hooks = apply(patch);
+    return {
+      hooks,
+      session: createAgentSession({
+        observe: () => observation({ commit: "stage", approval: "never" }),
+        apply: hooks,
+      }),
+    };
+  }
+
+  it("refuses to add a row on a table that stages", async () => {
+    const { hooks, session } = staging();
+
+    const result = await session.execute(
+      "rows.add",
+      { rows: [{ name: "Grace" }] },
+      1,
+      "add"
+    );
+
+    // Staging is a cell-level idea. A new row has nowhere to be staged, so
+    // the table says which commit mode it would need rather than half-doing it.
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("commit-incompatible");
+    expect(hooks.addRows).not.toHaveBeenCalled();
+  });
+
+  it("stages an edit through the host's own stage hook", async () => {
+    const { hooks, session } = staging();
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "ed"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(hooks.stageCells).toHaveBeenCalled();
+    expect(hooks.editCells).not.toHaveBeenCalled();
+  });
+
+  it("reports a stage nobody wired as needing no commit", async () => {
+    const { hooks, session } = staging({ stageCells: undefined });
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "ed"
+    );
+
+    // Nothing was written and nothing pretends otherwise: a table that stages
+    // but wired no stage hook has nowhere to put the edit.
+    expect(result.ok).toBe(true);
+    expect(hooks.editCells).not.toHaveBeenCalled();
+  });
+});
+
+describe("the aggregations an agent may change", () => {
+  const AGGREGATIONS = {
+    columns: [
+      {
+        id: "salary",
+        operations: [
+          { id: "sum", label: "Sum" },
+          { id: "avg", label: "Average" },
+        ],
+      },
+    ],
+    active: [],
+  };
+
+  function aggregating(patch: Partial<AgentObservation> = {}) {
+    const hooks = apply({ setAggregations: vi.fn() });
+    return {
+      hooks,
+      session: createAgentSession({
+        observe: () =>
+          observation({
+            featureIds: ["editing", "grouping"],
+            source: { ...PAGE_ONLY, grouping: "client" },
+            aggregations: AGGREGATIONS,
+            ...patch,
+          }),
+        apply: hooks,
+      }),
+    };
+  }
+
+  it("is offered only when the table publishes something to aggregate", () => {
+    const withColumns = aggregating();
+    expect(withColumns.session.manifest().capabilities).toContain(
+      "view.setAggregations"
+    );
+
+    const withNone = aggregating({ aggregations: { columns: [], active: [] } });
+    expect(withNone.session.manifest().capabilities).not.toContain(
+      "view.setAggregations"
+    );
+  });
+
+  it("is not offered on a table that does not group at all", () => {
+    const flat = aggregating({ source: PAGE_ONLY });
+    expect(flat.session.manifest().capabilities).not.toContain(
+      "view.setAggregations"
+    );
+  });
+
+  it("sets the operation the agent asked for", async () => {
+    const { hooks, session } = aggregating();
+
+    const result = await session.execute(
+      "view.setAggregations",
+      { set: { salary: "avg" } },
+      1,
+      "agg"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(hooks.setAggregations).toHaveBeenCalled();
+  });
+
+  it("refuses an operation the column does not offer", async () => {
+    const { hooks, session } = aggregating();
+
+    const result = await session.execute(
+      "view.setAggregations",
+      { set: { salary: "median" } },
+      1,
+      "agg"
+    );
+
+    expect(result.ok).toBe(false);
+    expect(hooks.setAggregations).not.toHaveBeenCalled();
+  });
+
+  it("refuses a removal list that is not a list", async () => {
+    const { session } = aggregating();
+
+    const result = await session.execute(
+      "view.setAggregations",
+      { remove: "salary" },
+      1,
+      "agg"
+    );
+
+    expect(result.ok).toBe(false);
+  });
+
+  it("refuses a removal naming something that is not a column id", async () => {
+    const { session } = aggregating();
+
+    const result = await session.execute(
+      "view.setAggregations",
+      { remove: [""] },
+      1,
+      "agg"
+    );
+
+    expect(result.ok).toBe(false);
+  });
+});

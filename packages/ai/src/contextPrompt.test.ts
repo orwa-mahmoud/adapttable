@@ -307,13 +307,13 @@ describe("what else a rendered context names", () => {
             columns: [
               {
                 id: "salary",
-                label: "Salary",
                 operations: [
                   { id: "sum", label: "Sum" },
                   { id: "avg", label: "Average" },
                 ],
               },
             ],
+            active: [],
           },
         }
       )

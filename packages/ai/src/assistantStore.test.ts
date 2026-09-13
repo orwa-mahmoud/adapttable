@@ -766,7 +766,7 @@ describe("a suggestion the table can no longer serve", () => {
       suggestions: [
         {
           id: "s1",
-          label: "Export it",
+          title: "Export it",
           prompt: "export",
           requires: ["export"],
         },

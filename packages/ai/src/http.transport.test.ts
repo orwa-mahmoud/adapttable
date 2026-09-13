@@ -559,7 +559,7 @@ describe("a host that would rather send the contract every time", () => {
       endpoint: "https://agent.example/turn",
       pinCatalog: false,
       request: (body) => {
-        bodies.push(body as Record<string, unknown>);
+        bodies.push(body as unknown as Record<string, unknown>);
         return Promise.resolve({
           schemaVersion: AGENT_SCHEMA_VERSION,
           text: "ok",

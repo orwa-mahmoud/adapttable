@@ -513,7 +513,7 @@ describe("what the host says that this view cannot use", () => {
 
     expect(onWarning).toHaveBeenCalledWith({
       code: "unknown-method",
-      message: expect.stringContaining("unheard-of") as unknown as string,
+      message: expect.stringContaining("unheard-of"),
     });
 
     // Still listening: an unknown notification is not a broken channel.
@@ -534,7 +534,7 @@ describe("what the host says that this view cannot use", () => {
 
     expect(onWarning).toHaveBeenCalledWith({
       code: "unmatched-response",
-      message: expect.stringContaining("not in flight") as unknown as string,
+      message: expect.stringContaining("not in flight"),
     });
   });
 });
@@ -626,7 +626,7 @@ describe("what the host answers a request with", () => {
       channel: host.channel,
     });
 
-    await bridge.callTool("view.describe");
+    await bridge.callTool("view.describe", undefined);
 
     const sent = host.sent.at(-1);
     expect(sent?.params).toMatchObject({
