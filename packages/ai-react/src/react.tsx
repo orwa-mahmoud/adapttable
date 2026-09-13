@@ -12,6 +12,7 @@ import {
   type AgentContextInputs,
   agentFiltersFromDefs,
   type AgentObservation,
+  agentObservation,
   agentPagination,
   type AgentPagination,
   type AgentSession,
@@ -59,6 +60,7 @@ import {
   type AgentAlwaysAllowState,
   type AgentApprovalPending,
   type AgentViewState,
+  deriveRuntimeOperations,
   type FeatureProviderProps,
   featureStateKey,
   FeatureStateScope,
@@ -341,66 +343,52 @@ function observationFromRuntime(
   const columns = columnsForRuntime(options, runtime).map((column) =>
     mergeColumn(column, options.columns)
   );
-  return {
+  const approval = sharedApproval(options.approval);
+  // What this runtime offers, and what the host wired, projected into the
+  // neutral contract. Which of those two makes a capability available is not
+  // this binding's rule to hold — it is the same rule for a local engine and
+  // for a server, and `agentObservation` is where it lives.
+  return agentObservation({
     tableId: options.tableId,
     viewRevision: revision,
     featureIds: ids,
     columns,
     source: view?.sourceCapabilities ?? PAGE_ONLY_SOURCE,
-    writePolicy: options.writePolicy ?? "allow",
-    approval: sharedApproval(options.approval).policy,
-    presentation: sharedApproval(options.approval).presentation,
-    commit: options.commit ?? "stage",
-    hasPagination:
-      options.apply?.setPage !== undefined || Boolean(query?.setPage),
-    hasSearch:
-      options.apply?.setSearch !== undefined || Boolean(query?.setSearch),
-    hasSort: options.apply?.setSort !== undefined || Boolean(query?.setSort),
-    hasFilters:
-      options.apply?.setFilters !== undefined ||
-      Boolean(liveQueryFilters(query).setExtras),
-    hasExport: options.apply?.runExport !== undefined,
-    hasEdit:
-      options.apply?.editCells !== undefined ||
-      options.apply?.stageCells !== undefined ||
-      Boolean(view?.editing?.onCellEdit) ||
-      Boolean(view?.editing?.stageCell),
-    hasReorder: options.apply?.reorderRows !== undefined,
-    hasColumnPinning:
-      options.apply?.pinColumn !== undefined ||
-      Boolean(view?.pinning?.setColumnPin),
-    hasRowPinning:
-      options.apply?.pinRow !== undefined || Boolean(view?.pinning?.setRowPin),
-    pinnedColumns: view?.pinning?.columns,
-    pinnedRows: view?.pinning?.rows,
-    hasSelection:
-      options.apply?.setSelection !== undefined || Boolean(view?.selection),
-    hasSavedViews: ids.includes("saved-views") && apply.applyView !== undefined,
-    hasAdd: options.apply?.addRows !== undefined,
-    hasDelete: options.apply?.deleteRows !== undefined,
-    page: pages.page,
-    limit: pages.pageSize,
-    search: query?.search ?? "",
-    sortBy: query?.sortBy,
-    sortDir: query?.sortDir,
-    groupBy: view?.groupingState?.groupBy,
+    operations: {
+      ...deriveRuntimeOperations(view),
+      // `applyView` is the host's alone; no runtime offers it by itself.
+      applyView: apply.applyView !== undefined,
+    },
+    apply: options.apply ?? {},
+    policy: {
+      ...(options.writePolicy ? { writePolicy: options.writePolicy } : {}),
+      approval: approval.policy,
+      ...(approval.presentation ? { presentation: approval.presentation } : {}),
+      ...(options.commit ? { commit: options.commit } : {}),
+    },
+    view: {
+      search: query?.search ?? "",
+      ...(query?.sortBy === undefined ? {} : { sortBy: query.sortBy }),
+      ...(query?.sortDir === undefined ? {} : { sortDir: query.sortDir }),
+      ...(view?.groupingState?.groupBy === undefined
+        ? {}
+        : { groupBy: view.groupingState.groupBy }),
+      ...(view?.pinning?.columns
+        ? { pinnedColumns: view.pinning.columns }
+        : {}),
+      ...(view?.pinning?.rows ? { pinnedRows: view.pinning.rows } : {}),
+      ...(query?.extra === undefined ? {} : { filters: query.extra }),
+    },
+    pagination: pages,
+    rowAddressScope: "visible",
+    readMax: options.readMax ?? 50,
     aggregations: aggregationsFor(aggregationInputs(view, options)),
     availableFilters: agentFiltersFromDefs(
       view?.filterDefs,
       view?.filterRegistry,
       options.columns
     ),
-    filters: query?.extra,
-    pagination: pages,
-    // A page count, derived from the same pagination the context publishes.
-    // This used to be the number of rows loaded, which is not a page count at
-    // any page size and let an agent report a move to a page that is not there.
-    pageMax:
-      pages.totalPages ??
-      Math.max(1, pages.page + (pages.hasNext === false ? 0 : 1)),
-    readMax: options.readMax ?? 50,
-    rowAddressScope: "visible",
-  };
+  });
 }
 
 /**

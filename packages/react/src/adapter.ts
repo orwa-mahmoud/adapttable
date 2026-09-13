@@ -1118,3 +1118,8 @@ export { editableCellController } from "./editing/editableCellController";
 export type { ExportRowRole } from "@adapttable/core";
 export type { AggregateFn } from "@adapttable/core";
 export { normalizeEditorOptions } from "@adapttable/core";
+
+// What a live runtime offers, for a binding projecting it into the neutral
+// AI contracts. Nothing here decides what an operation means — that is
+// `@adapttable/ai`'s `agentObservation`.
+export { deriveRuntimeOperations } from "./agent/deriveRuntimeOperations";

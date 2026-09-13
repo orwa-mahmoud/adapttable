@@ -159,6 +159,13 @@ export {
 } from "./liveTable";
 export { buildManifest, enabledKeys } from "./manifest";
 export {
+  agentObservation,
+  type ObservationInputs,
+  type ObservedPolicy,
+  type ObservedView,
+  type RuntimeOperations,
+} from "./observation";
+export {
   type AgentPagination,
   agentPagination,
   pageRefusal,
