@@ -851,3 +851,109 @@ describe("what a model may write in a read or describe call", () => {
     });
   });
 });
+
+describe("a backend that holds the contract between turns", () => {
+  it("names the version it acknowledged instead of resending it", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const sent = body as unknown as Record<string, unknown>;
+        bodies.push(sent);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          sessionId: "backend-session-1",
+          // The backend echoes the exact version it was sent, which is what
+          // makes the pin usable rather than a guess.
+          pin: {
+            status: "acknowledged",
+            contractVersion: sent.contractVersion as string | undefined,
+            ttlMs: 60_000,
+          },
+        });
+      },
+    });
+    const live = session();
+
+    await client.connect(live);
+    await client.send(live, "one");
+    await client.send(live, "two");
+
+    const last = bodies.at(-1);
+    // The handle the backend issued travels back, so it can find what it kept.
+    expect(last?.sessionId).toBe("backend-session-1");
+    expect(last?.contractVersion).toBeDefined();
+  });
+
+  it("forgets the pin when the host resets the session", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        bodies.push(body as unknown as Record<string, unknown>);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          sessionId: "backend-session-1",
+          pin: { status: "acknowledged", contractVersion: "c1" },
+        });
+      },
+    });
+    const live = session();
+
+    await client.connect(live);
+    await client.send(live, "one");
+    client.reset(live);
+    await client.send(live, "two");
+
+    // A reset is the host saying this conversation is over; the next turn
+    // does not claim a handle the backend issued to a different one.
+    expect(bodies.at(-1)?.sessionId).toBeUndefined();
+  });
+});
+
+describe("a table that changed while the backend was thinking", () => {
+  it("ends the turn when the table it was answering is gone", async () => {
+    let tableId = "orders";
+    const live = createAgentSession({
+      observe: () => ({ ...observation(), tableId }),
+      apply: { setPage: vi.fn() },
+    });
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: () => {
+        // The host swapped the table underneath while the model was called.
+        tableId = "invoices";
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "here you go",
+        });
+      },
+    });
+
+    // A view revision ticking mid-turn is ordinary. Identity is not: this is
+    // no longer the table the backend answered.
+    await expect(client.send(live, "go")).rejects.toThrow(/table changed/);
+  });
+
+  it("ends the turn when the table's policy changed underneath", async () => {
+    let writePolicy: "allow" | "deny" = "allow";
+    const live = createAgentSession({
+      observe: () => ({ ...observation(), writePolicy }),
+      apply: { setPage: vi.fn() },
+    });
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: () => {
+        writePolicy = "deny";
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "here you go",
+        });
+      },
+    });
+
+    await expect(client.send(live, "go")).rejects.toThrow(/policy changed/);
+  });
+});

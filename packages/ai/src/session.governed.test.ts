@@ -1987,3 +1987,72 @@ describe("what a table that says the least still means", () => {
     expect(onApprove).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("what the aggregations guide tells a model", () => {
+  it("says there is nothing eligible when there is nothing eligible", () => {
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: ["editing", "grouping"],
+          source: { ...PAGE_ONLY, grouping: "client" },
+          aggregations: {
+            columns: [
+              { id: "salary", operations: [{ id: "sum", label: "Sum" }] },
+            ],
+            active: [],
+          },
+        }),
+      apply: apply({ setAggregations: vi.fn() }),
+    });
+
+    // The guide is read from the live table, so a model is never told about a
+    // column it cannot aggregate right now.
+    expect(session.describe("view.setAggregations").guide).toContain(
+      "Eligible now"
+    );
+  });
+
+  it("refuses a set that is not an object of column ids", async () => {
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          featureIds: ["editing", "grouping"],
+          source: { ...PAGE_ONLY, grouping: "client" },
+          aggregations: {
+            columns: [
+              { id: "salary", operations: [{ id: "sum", label: "Sum" }] },
+            ],
+            active: [],
+          },
+        }),
+      apply: apply({ setAggregations: vi.fn() }),
+    });
+
+    const result = await session.execute(
+      "view.setAggregations",
+      { set: ["salary"] },
+      1,
+      "agg"
+    );
+
+    expect(result.ok).toBe(false);
+  });
+});
+
+describe("a row address the table will not accept", () => {
+  it("refuses a scope this table does not address rows by", async () => {
+    const session = createAgentSession({
+      observe: () => observation({ rowAddressScope: "visible" }),
+      apply: apply(),
+    });
+
+    const result = await session.execute(
+      "rows.read",
+      { offset: 0, limit: 5, scope: "all" },
+      1,
+      "read"
+    );
+
+    expect(result.ok).toBe(false);
+  });
+});

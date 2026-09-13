@@ -2506,3 +2506,92 @@ describe("telling a tool's value from its failure", () => {
     ).toBe(false);
   });
 });
+
+describe("a recording the wire will not carry", () => {
+  const turn = (audio: unknown): unknown => ({
+    schemaVersion: AGENT_SCHEMA_VERSION,
+    kind: "turn",
+    tableId: "orders",
+    audio,
+  });
+  const ok = { mimeType: "audio/webm", base64: "AAAA", durationMs: 1200 };
+
+  it("refuses a media type this wire does not speak", () => {
+    expect(() =>
+      parseAgentHttpRequest(turn({ ...ok, mimeType: "audio/aiff" }))
+    ).toThrow(/mimeType must be one of/);
+  });
+
+  it("takes a media type that carries its codec with it", () => {
+    // What a browser's MediaRecorder actually reports.
+    expect(
+      parseAgentHttpRequest(turn({ ...ok, mimeType: "audio/webm;codecs=opus" }))
+    ).toMatchObject({ audio: { durationMs: 1200 } });
+  });
+
+  it("refuses a recording with no audio in it", () => {
+    expect(() => parseAgentHttpRequest(turn({ ...ok, base64: "" }))).toThrow(
+      /base64 is required/
+    );
+  });
+
+  it("refuses a recording that says it lasted no time", () => {
+    expect(() => parseAgentHttpRequest(turn({ ...ok, durationMs: 0 }))).toThrow(
+      /positive number/
+    );
+  });
+
+  it("refuses a recording longer than the wire will carry", () => {
+    expect(() =>
+      parseAgentHttpRequest(turn({ ...ok, durationMs: 60 * 60 * 1000 }))
+    ).toThrow(/exceeds limit/);
+  });
+
+  it("refuses a clip too large to send, without decoding it", () => {
+    expect(() =>
+      parseAgentHttpRequest(turn({ ...ok, base64: "A".repeat(40_000_000) }))
+    ).toThrow(/exceeds limit/);
+  });
+});
+
+describe("what a tool result may say went wrong", () => {
+  const reply = (toolResults: unknown): unknown => ({
+    schemaVersion: AGENT_SCHEMA_VERSION,
+    kind: "turn",
+    tableId: "orders",
+    message: "go",
+    toolResults,
+  });
+
+  it("carries the failure a backend named", () => {
+    const parsed = parseAgentHttpRequest(
+      reply([{ id: "r1", error: { code: "refused", message: "not today" } }])
+    );
+
+    expect(parsed.toolResults?.[0]).toMatchObject({
+      id: "r1",
+      error: { code: "refused", message: "not today" },
+    });
+  });
+
+  it("names a failure the backend did not describe", () => {
+    const parsed = parseAgentHttpRequest(reply([{ id: "r1", error: {} }]));
+
+    expect(parsed.toolResults?.[0]).toMatchObject({
+      error: { code: "error", message: "tool call failed" },
+    });
+  });
+
+  it("refuses a question option missing its id or its label", () => {
+    expect(() =>
+      parseAgentHttpResponse({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        askUser: {
+          id: "q1",
+          question: "Which?",
+          options: [{ id: "q4" }],
+        },
+      })
+    ).toThrow(/needs an id and a label/);
+  });
+});

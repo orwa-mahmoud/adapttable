@@ -1047,3 +1047,44 @@ describe("a conversation with nothing behind it", () => {
     expect(store.getState().suggestions).toHaveLength(1);
   });
 });
+
+describe("a turn the reader stopped", () => {
+  it("is not reported as a failure, and puts the draft back", async () => {
+    const deferred = deferredTransport();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: deferred.transport,
+    });
+    store.connect();
+    store.setDraft("summarise this");
+
+    const turn = store.send("summarise this");
+    await Promise.resolve();
+    store.stop();
+    // A transport that honours the signal rejects with the abort.
+    deferred.throw(new DOMException("aborted", "AbortError"));
+    await turn;
+
+    // Stopping is not a failure to report as one, and nothing was resent.
+    expect(store.getState().status).toBe("ready");
+    expect(store.getState().error).toBeUndefined();
+    expect(store.getState().draft).toBe("summarise this");
+  });
+
+  it("reports a transport that failed for its own reasons", async () => {
+    const deferred = deferredTransport();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: deferred.transport,
+    });
+    store.connect();
+
+    const turn = store.send("go");
+    await Promise.resolve();
+    deferred.throw(new Error("the backend is down"));
+    await turn;
+
+    expect(store.getState().status).toBe("error");
+    expect(store.getState().error).toBe("the backend is down");
+  });
+});

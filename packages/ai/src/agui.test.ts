@@ -6,6 +6,7 @@ import {
   AgUiProtocolError,
   type AgUiRunInput,
   aguiToolName,
+  aguiTools,
   aguiTransport,
   statePatch,
 } from "./agui";
@@ -1298,5 +1299,77 @@ describe("how a per-row decision is sent back", () => {
       status: "rejected",
       payload: { reason: "not during the close" },
     });
+  });
+});
+
+describe("a tool name that is not one of ours", () => {
+  async function runWith(toolCallName: string, args = "{}") {
+    const table = liveTable();
+    const route = recorded([
+      (input) => [
+        started(input),
+        { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName },
+        { type: "TOOL_CALL_ARGS", toolCallId: "c1", delta: args },
+        { type: "TOOL_CALL_END", toolCallId: "c1" },
+        ...says("done"),
+        finished(input),
+      ],
+    ]);
+    const transport = aguiTransport({ connection: route.connection });
+    return transport.send({
+      session: table.session,
+      text: "go",
+      conversation: [],
+    });
+  }
+
+  it("leaves the bare prefix alone rather than executing nothing", async () => {
+    // Executing "" would be a refusal reported as though this table had tried
+    // to do something.
+    const reply = await runWith(`adapttable.${TABLE_ID}.`);
+    expect(reply.results ?? []).toHaveLength(0);
+  });
+
+  it("leaves another table's tool alone", async () => {
+    const reply = await runWith("adapttable.invoices.view.setPage");
+    expect(reply.results ?? []).toHaveLength(0);
+  });
+
+  it("refuses arguments that are not JSON at all", async () => {
+    const table = liveTable();
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          ...calls("c1", "view.setPage", "{not json"),
+          finished(input),
+        ],
+      ]).connection,
+    });
+
+    const cause = await transport
+      .send({ session: table.session, text: "go", conversation: [] })
+      .then(
+        () => undefined,
+        (thrown: unknown) => thrown
+      );
+    expect(cause).toBeDefined();
+  });
+});
+
+describe("the tools a run is offered", () => {
+  it("names every permitted capability, and nothing else", () => {
+    const table = liveTable();
+    const tools = aguiTools(table.session);
+
+    expect(tools.length).toBeGreaterThan(0);
+    for (const tool of tools) {
+      expect(tool.name.startsWith(`adapttable.${TABLE_ID}.`)).toBe(true);
+      expect(tool.description).toBeTruthy();
+      expect(tool.parameters).toBeDefined();
+    }
+    expect(tools.map((tool) => tool.name)).toEqual(
+      table.session.catalog().map((entry) => aguiToolName(TABLE_ID, entry.key))
+    );
   });
 });
