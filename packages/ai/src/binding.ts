@@ -12,7 +12,7 @@
  * feature host or a hook. A projection from a framework's own shape into this
  * one is allowed to be small and explicit. A permission decision is not.
  */
-import type { AgentApprovalProposal, NeutralTable } from "@adapttable/core";
+import type { AgentApprovalProposal } from "@adapttable/core";
 
 import type { AgentContextInputs } from "./context";
 import type {
@@ -115,60 +115,6 @@ export function displayProposals(
       ...(proposal.after !== undefined ? { after: proposal.after } : {}),
     };
   });
-}
-
-/**
- * What a source can actually do, as the binding found it.
- *
- * Every field is a fact about wiring, not a guess: a callback exists or it does
- * not. A source that cannot answer is `undefined` rather than `false`, so a
- * capability nobody has established is never advertised as refused.
- */
-export interface BindingOperations {
-  readonly setPage?: boolean;
-  readonly setSearch?: boolean;
-  readonly setSort?: boolean;
-  readonly setFilters?: boolean;
-  readonly setGroupBy?: boolean;
-  readonly setSelection?: boolean;
-  readonly setColumnPin?: boolean;
-  readonly setRowPin?: boolean;
-  readonly edit?: boolean;
-  readonly stage?: boolean;
-}
-
-/**
- * The view state a controlled or server-backed source owns.
- *
- * A remote source has no local engine and must not be given one: the binding
- * reports what the host says the view is, and a field the host does not
- * publish stays absent rather than being recomputed from rows that were never
- * downloaded.
- */
-export interface BindingQuery {
-  readonly page?: number;
-  readonly limit?: number;
-  readonly search?: string;
-  readonly sortBy?: string;
-  readonly sortDir?: "asc" | "desc";
-  readonly extra?: Readonly<Record<string, unknown>>;
-}
-
-/**
- * One binding's account of its table.
- *
- * `neutralTable` is present when the source published an engine, and absent
- * for a controlled or server-backed one. Both go down the same path: the
- * difference is what is known, not which algorithm runs.
- */
-export interface BindingSnapshot {
-  readonly tableId: string;
-  readonly featureIds: readonly string[];
-  readonly neutralTable?: NeutralTable<unknown>;
-  readonly query?: BindingQuery;
-  readonly operations: BindingOperations;
-  /** How many rows the reader can currently address. */
-  readonly rowCount?: number;
 }
 
 /**

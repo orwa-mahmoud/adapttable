@@ -83,9 +83,6 @@ export {
   type UndoCall,
 } from "./assistantUndo";
 export {
-  type BindingOperations,
-  type BindingQuery,
-  type BindingSnapshot,
   contractFingerprint,
   displayProposals,
   type ProposalResolver,
