@@ -11,6 +11,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { AgentApprovalPending } from "../editing/AgentApprovalChrome";
 import { tableAssistantTestSlots } from "../internal/chromeTestSlots";
 import type { TableAssistantView } from "./assistantView";
+import type { SpeechInputHandle } from "./speechView";
 import { TableAssistantChrome } from "./TableAssistantChrome";
 
 function part(name: string): HTMLElement | null {
@@ -1067,5 +1068,127 @@ describe("what the reader stopped being asked about", () => {
     });
 
     expect(part("assistant-always-allowed")).toBeNull();
+  });
+});
+
+describe("dictating instead of typing", () => {
+  /** A speech input the test drives by hand. */
+  function speech(patch: Partial<SpeechInputHandle> = {}): SpeechInputHandle & {
+    start: ReturnType<typeof vi.fn>;
+    stop: ReturnType<typeof vi.fn>;
+    setLanguage: ReturnType<typeof vi.fn>;
+  } {
+    return {
+      available: true,
+      state: { status: "idle", language: "en-GB", interim: "" },
+      languages: ["en-GB", "fr-FR"],
+      start: vi.fn(),
+      stop: vi.fn(),
+      setLanguage: vi.fn(),
+      ...patch,
+    } as SpeechInputHandle & {
+      start: ReturnType<typeof vi.fn>;
+      stop: ReturnType<typeof vi.fn>;
+      setLanguage: ReturnType<typeof vi.fn>;
+    };
+  }
+
+  it("offers a mic when the browser can listen", () => {
+    const input = speech();
+    mount({ speech: input });
+
+    const mic = part("assistant-voice");
+    expect(mic).toBeTruthy();
+    fireEvent.click(mic!);
+    expect(input.start).toHaveBeenCalledTimes(1);
+  });
+
+  it("has no mic at all when this browser cannot listen", () => {
+    // Absent rather than disabled: a disabled control raises a question the
+    // reader has no way to answer.
+    mount({ speech: speech({ available: false }) });
+
+    expect(part("assistant-voice")).toBeNull();
+  });
+
+  it("says it is listening, and offers to stop", () => {
+    const input = speech({
+      state: { status: "listening", language: "en-GB", interim: "show me" },
+    });
+    mount({ speech: input });
+
+    // Announced once when it starts, not on every word heard.
+    expect(part("assistant-voice-status")?.textContent).toBe("Listening");
+
+    fireEvent.click(part("assistant-voice")!);
+    expect(input.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers a language when there is a choice to make", () => {
+    const input = speech();
+    mount({ speech: input });
+
+    const chip = part("assistant-voice-language") as HTMLSelectElement | null;
+    expect(chip).toBeTruthy();
+    fireEvent.change(chip!, {
+      target: { value: "fr-FR" },
+    });
+    expect(input.setLanguage).toHaveBeenCalledWith("fr-FR");
+  });
+
+  it("shows no chip when there is only one answer", () => {
+    // Asking a reader which language they are about to speak, when there is
+    // only one, is slower than typing.
+    mount({ speech: speech({ languages: ["en-GB"] }) });
+
+    expect(part("assistant-voice-language")).toBeNull();
+  });
+});
+
+describe("answering a question in the reader's own words", () => {
+  it("sends what they typed, and clears the box", () => {
+    const onAnswer = vi.fn();
+    mount({
+      assistant: view({
+        pendingQuestion: {
+          id: "q1",
+          question: "What should I call it?",
+          allowFreeText: true,
+        },
+        answer: onAnswer,
+      }),
+    });
+
+    const box = part("assistant-question-input") as HTMLInputElement | null;
+    expect(box).toBeTruthy();
+    fireEvent.change(box!, {
+      target: { value: "  Q4 report  " },
+    });
+    fireEvent.click(part("assistant-question-send")!);
+
+    // Trimmed, because the surrounding spaces are the reader's typing rather
+    // than their answer.
+    expect(onAnswer).toHaveBeenCalledWith({ text: "Q4 report" });
+  });
+
+  it("sends nothing when they typed nothing", () => {
+    const onAnswer = vi.fn();
+    mount({
+      assistant: view({
+        pendingQuestion: {
+          id: "q1",
+          question: "What should I call it?",
+          allowFreeText: true,
+        },
+        answer: onAnswer,
+      }),
+    });
+
+    fireEvent.change(part("assistant-question-input") as HTMLInputElement, {
+      target: { value: "   " },
+    });
+    fireEvent.click(part("assistant-question-send")!);
+
+    expect(onAnswer).not.toHaveBeenCalled();
   });
 });

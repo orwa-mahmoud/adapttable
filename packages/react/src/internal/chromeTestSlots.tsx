@@ -694,4 +694,30 @@ export const tableAssistantTestSlots: TableAssistantSlots = {
       {label}
     </span>
   ),
+  LanguageChip: ({
+    label,
+    value,
+    options,
+    part,
+    className,
+    disabled,
+    onChange,
+  }) => (
+    <select
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  ),
 };
