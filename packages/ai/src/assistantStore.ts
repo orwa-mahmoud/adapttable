@@ -279,6 +279,25 @@ function exchanges(
   }));
 }
 
+/**
+ * What the badge says, which is not always what the turn is doing.
+ *
+ * Two things park a conversation on the reader without the turn looking
+ * stopped: a write waiting on approval, and a question the backend asked. The
+ * second settles the turn that carried it, so the status underneath is
+ * "ready" — and a badge reading "ready" beside an unanswered question tells
+ * the reader nothing is waiting on them when something is.
+ */
+function badgeStatus(
+  status: AssistantStatus,
+  asking: boolean,
+  parked: boolean
+): AssistantStatus {
+  if (asking) return "awaiting-user";
+  if (parked && status === "sending") return "awaiting-approval";
+  return status;
+}
+
 /** What the reader is told when a turn came back with nothing in it. */
 const EMPTY_TURN =
   "the assistant answered with no text and nothing to apply — try again";
@@ -494,11 +513,7 @@ export function createTableAssistant(
       // the status underneath is "ready", and a badge saying so next to an
       // unanswered question tells the reader nothing is waiting on them when
       // something is.
-      status: question
-        ? "awaiting-user"
-        : parked && status === "sending"
-          ? "awaiting-approval"
-          : status,
+      status: badgeStatus(status, question !== null, parked),
       busy: sending,
       messages,
       draft,

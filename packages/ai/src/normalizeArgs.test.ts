@@ -67,3 +67,40 @@ describe("the search a model actually sends", () => {
     });
   });
 });
+
+describe("the name a capability's own title suggests", () => {
+  it("reads `groupBy` as the key `setGroupBy` takes", () => {
+    // The guide says `key`, and a compact context defers that guide first.
+    // Accepting the near-miss is cheaper than a round trip and a refusal about
+    // a grouping the model had right.
+    expect(
+      normalizeCapabilityArgs("view.setGroupBy", { groupBy: "team" })
+    ).toEqual({ key: "team" });
+    expect(
+      normalizeCapabilityArgs("view.setGroupBy", { groupBy: null })
+    ).toEqual({ key: null });
+  });
+
+  it("reads `aggregations` as the set `setAggregations` takes", () => {
+    expect(
+      normalizeCapabilityArgs("view.setAggregations", {
+        aggregations: { salary: "avg" },
+      })
+    ).toEqual({ set: { salary: "avg" } });
+  });
+
+  it("never overrides what the model actually named", () => {
+    expect(
+      normalizeCapabilityArgs("view.setGroupBy", {
+        key: "team",
+        groupBy: "status",
+      })
+    ).toMatchObject({ key: "team" });
+    expect(
+      normalizeCapabilityArgs("view.setAggregations", {
+        set: { salary: "sum" },
+        aggregations: { salary: "avg" },
+      })
+    ).toMatchObject({ set: { salary: "sum" } });
+  });
+});

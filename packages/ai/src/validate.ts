@@ -44,7 +44,16 @@ function extraProperty(
   if (schema.additionalProperties !== false) return undefined;
   const allowed = new Set(Object.keys(schema.properties ?? {}));
   for (const key of Object.keys(value)) {
-    if (!allowed.has(key)) return `${path}.${key} is not allowed`;
+    // Name what it does take. A backend given only "not allowed" has to guess
+    // again or spend a round on `describe`, and under a compact context — where
+    // this capability's guide was deferred by design — guessing is exactly what
+    // it did to get here.
+    if (!allowed.has(key)) {
+      const names = [...allowed];
+      return names.length > 0
+        ? `${path}.${key} is not allowed; this takes ${names.join(", ")}`
+        : `${path}.${key} is not allowed; this takes no arguments`;
+    }
   }
   return undefined;
 }

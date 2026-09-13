@@ -967,6 +967,53 @@ function observedPagination(observation: AgentObservation): AgentPagination {
   );
 }
 
+/**
+ * Why this table will not serve that page, or `undefined`.
+ *
+ * Checked mechanically on this side of the wire against the numbers the source
+ * supplied: a page number is arithmetic, and arithmetic is the last thing a
+ * model should be trusted with.
+ */
+function pageRefusalFor(
+  observation: AgentObservation,
+  body: Record<string, unknown>
+): string | undefined {
+  const pages = observedPagination(observation);
+  return (
+    pageRefusal(pages, body.page) ??
+    (typeof body.limit === "number"
+      ? pageSizeRefusal(pages, body.limit)
+      : undefined)
+  );
+}
+
+/**
+ * Why this table will not sort by that column, or `undefined`.
+ *
+ * `sortable` is published per column, and a reader's own sort control is
+ * disabled for a column without it. An agent reading that contract and sorting
+ * anyway would be doing something the person in front of the table cannot.
+ * Clearing a sort names no column, so it is always allowed.
+ */
+function sortRefusal(
+  observation: AgentObservation,
+  sortKey: string | null | undefined
+): string | undefined {
+  if (!sortKey) return undefined;
+  const column = observation.columns.find((entry) => entry.id === sortKey);
+  if (!column) {
+    const offered = observation.columns.map((entry) => entry.id);
+    return `unknown column "${sortKey}"; this table offers ${offered.join(", ")}`;
+  }
+  if (column.sortable) return undefined;
+  const sortable = observation.columns
+    .filter((entry) => entry.sortable)
+    .map((entry) => entry.id);
+  return sortable.length > 0
+    ? `column "${sortKey}" is not sortable; this table sorts by ${sortable.join(", ")}`
+    : `column "${sortKey}" is not sortable, and no column on this table is`;
+}
+
 function assertApply<K extends keyof AgentApply>(
   apply: AgentApply,
   name: K
@@ -1083,15 +1130,7 @@ async function dispatchBuiltIn(
         revision: observation.viewRevision,
       };
     case "view.setPage": {
-      // Checked against what this source says its pages are, mechanically and
-      // on this side of the wire: a page number is arithmetic, and arithmetic
-      // is the last thing a model should be trusted with.
-      const pages = observedPagination(observation);
-      const refusal =
-        pageRefusal(pages, body.page) ??
-        (typeof body.limit === "number"
-          ? pageSizeRefusal(pages, body.limit)
-          : undefined);
+      const refusal = pageRefusalFor(observation, body);
       if (refusal) throw new ApplyError("apply-failed", refusal);
       const page = body.page as number;
       if (typeof body.limit === "number") {
@@ -1106,33 +1145,8 @@ async function dispatchBuiltIn(
     }
     case "view.setSort": {
       const sortKey = body.key as string | null | undefined;
-      // The contract publishes `sortable` per column, and a reader's own sort
-      // control is disabled for a column that is not. An agent reading that
-      // contract and then sorting anyway would be doing something the table
-      // told it it could not — and something the person sitting in front of
-      // the table cannot do either. Clearing the sort is always allowed.
-      if (sortKey) {
-        const column = observation.columns.find(
-          (entry) => entry.id === sortKey
-        );
-        if (!column) {
-          throw new ApplyError(
-            "apply-failed",
-            `unknown column "${sortKey}"; this table offers ${observation.columns.map((entry) => entry.id).join(", ")}`
-          );
-        }
-        if (!column.sortable) {
-          const sortable = observation.columns
-            .filter((entry) => entry.sortable)
-            .map((entry) => entry.id);
-          throw new ApplyError(
-            "apply-failed",
-            sortable.length > 0
-              ? `column "${sortKey}" is not sortable; this table sorts by ${sortable.join(", ")}`
-              : `column "${sortKey}" is not sortable, and no column on this table is`
-          );
-        }
-      }
+      const refused = sortRefusal(observation, sortKey);
+      if (refused) throw new ApplyError("apply-failed", refused);
       assertApply(apply, "setSort");
       apply.setSort(
         sortKey ?? undefined,

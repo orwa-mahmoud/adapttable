@@ -104,5 +104,28 @@ export function normalizeCapabilityArgs(key: string, args: unknown): unknown {
     record.query = record.search;
     delete record.search;
   }
+  // Same near-miss, same reason: the capability is called `setGroupBy`, so
+  // `groupBy` is the name a model reaches for — and the guide that says
+  // otherwise is the first thing a compact context defers.
+  if (
+    key === "view.setGroupBy" &&
+    !("key" in record) &&
+    (typeof record.groupBy === "string" || record.groupBy === null)
+  ) {
+    record.key = record.groupBy;
+    delete record.groupBy;
+  }
+  // And again: `setAggregations` taking `set` reads as a detail of this API,
+  // while `aggregations` is the word the capability itself uses.
+  if (
+    key === "view.setAggregations" &&
+    !("set" in record) &&
+    !("remove" in record) &&
+    !("restoreDefaults" in record) &&
+    asRecord(record.aggregations)
+  ) {
+    record.set = record.aggregations;
+    delete record.aggregations;
+  }
   return record;
 }
