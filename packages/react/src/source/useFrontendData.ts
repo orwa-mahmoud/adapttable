@@ -322,13 +322,31 @@ export function useFrontendData<TRow>(
   const total = snapshot.total;
   const safePage = snapshot.page;
 
-  // The view object is NOT a dependency: hosts rebuild extra/columns
-  // (and useTableData's filterTreeFn) every render. A new view identity
+  // A read of engine state, cached under the engine's own account of when that
+  // state moved: `data` covers row identity and cell values, `view` covers
+  // sort, filter, search, group, page and limit — between them, every input to
+  // `rows("page")`. Deliberately not `useMemo`: the key is what changes and the
+  // read never mentions it, which is the one shape a dependency array cannot
+  // state without listing something it does not use.
+  //
+  // The reader is compared too, because a replaced engine starts its revisions
+  // again at one and would otherwise match a cache from the engine before it.
+  // Holding the slice by identity is the point: hosts rebuild extra/columns
+  // (and useTableData's filterTreeFn) every render, and a new view identity
   // must not mint a new page slice or radix/base-ui findInTable loops.
-  const rows = useMemo<readonly TRow[]>(
-    () => reader.rows("page"),
-    [reader, sorted, paged, safePage, limit]
-  );
+  const pageCache = useRef<{
+    reader: unknown;
+    key: string;
+    rows: readonly TRow[];
+  } | null>(null);
+  const pageKey = `${String(snapshot.revisions.data)}:${String(snapshot.revisions.view)}`;
+  if (
+    pageCache.current?.reader !== reader ||
+    pageCache.current.key !== pageKey
+  ) {
+    pageCache.current = { reader, key: pageKey, rows: reader.rows("page") };
+  }
+  const rows = pageCache.current.rows;
 
   const hasNextPage = !paged && safePage * limit < total;
 

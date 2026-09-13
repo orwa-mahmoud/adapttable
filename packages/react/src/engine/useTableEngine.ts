@@ -144,7 +144,16 @@ export function useTableEngine<TRow>(
   options: CreateTableEngineOptions<TRow>
 ): TableEngine<TRow> {
   const engineRef = useRef<TableEngine<TRow> | undefined>(undefined);
-  const generationRef = useRef(0);
+  /**
+   * The mount whose teardown is still allowed to dispose the engine.
+   *
+   * A teardown defers disposal by a microtask so a remount can reclaim the
+   * engine it was about to destroy. Whether that happened is the next mount's
+   * to say, so it says it here — on the token the previous teardown already
+   * holds — rather than leaving the teardown to read a value that changed
+   * underneath it.
+   */
+  const mountRef = useRef<{ superseded: boolean } | null>(null);
   engineRef.current ??= createTableEngine(options);
   const engine = engineRef.current;
 
@@ -181,13 +190,17 @@ export function useTableEngine<TRow>(
   });
 
   useEffect(() => {
-    const generation = ++generationRef.current;
+    const mount = { superseded: false };
+    // React runs the previous teardown before this body, so the microtask it
+    // queued has not run yet and this is in time to stop it.
+    if (mountRef.current) mountRef.current.superseded = true;
+    mountRef.current = mount;
     const owned = engine;
     return () => {
       // Anything a later render staged and never committed goes with it.
       owned.discardCandidate();
       queueMicrotask(() => {
-        if (generationRef.current !== generation) return;
+        if (mount.superseded) return;
         owned.dispose();
         if (engineRef.current === owned) engineRef.current = undefined;
         if (liveRef.current?.engine === owned) liveRef.current = undefined;

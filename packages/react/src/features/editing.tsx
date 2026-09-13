@@ -111,7 +111,6 @@ function LiveEditing({
       dirty,
       rowModeArmed,
       rowEditing,
-      props.rowEditIcons,
       batchArmed,
       batch,
       lifecycle,
