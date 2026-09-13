@@ -1871,3 +1871,119 @@ describe("the aggregations an agent may change", () => {
     expect(result.ok).toBe(false);
   });
 });
+
+describe("what a table that says the least still means", () => {
+  /** A capability that declares only what it must. */
+  const plain: AgentCapabilityDefinition = {
+    key: "staff.ping",
+    summary: "Say hello",
+    guide: {
+      guide: "Say hello.",
+      input: { type: "object" },
+      output: { type: "object" },
+    },
+    isEnabled: () => true,
+    execute: () => ({ ok: true }),
+  };
+
+  it("treats a capability that declares no kind as a view", async () => {
+    const onApprove = vi.fn(() => Promise.resolve(true));
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes", commit: "immediate" }),
+      apply: apply(),
+      capabilities: [plain],
+      onApprove,
+    });
+
+    const result = await session.execute("staff.ping", {}, 1, "ping");
+
+    // A table that asks before writes does not ask before this one: something
+    // that did not say it writes is not treated as though it does.
+    expect(result.ok).toBe(true);
+    expect(onApprove).not.toHaveBeenCalled();
+  });
+
+  it("runs a call that sent no arguments at all", async () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: apply(),
+      capabilities: [plain],
+    });
+
+    const result = await session.execute("staff.ping", undefined, 1, "ping");
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("stages by default when the table names no commit policy", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ commit: undefined, approval: "never" }),
+      apply: hooks,
+    });
+
+    await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "ed"
+    );
+
+    // The cautious default: a table that did not say goes through staging
+    // rather than writing.
+    expect(hooks.stageCells).toHaveBeenCalled();
+    expect(hooks.editCells).not.toHaveBeenCalled();
+  });
+
+  it("asks in a widget when the table names no presentation", async () => {
+    let seen: { presentation?: string } | undefined;
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          approval: "writes",
+          commit: "immediate",
+          presentation: undefined,
+        }),
+      apply: apply(),
+      onApprove: (subject) => {
+        seen = subject;
+        return Promise.resolve(true);
+      },
+    });
+
+    await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "ed"
+    );
+
+    expect(seen?.presentation).toBe("widget");
+  });
+
+  it("carries the always-allow list the table published", async () => {
+    const onApprove = vi.fn(() => Promise.resolve(true));
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          approval: "writes",
+          commit: "immediate",
+          alwaysAllow: ["edit.cells"],
+        }),
+      apply: apply(),
+      onApprove,
+    });
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "ed"
+    );
+
+    // Naming a capability eligible is not the same as waving it through: the
+    // reader still decides, and what they decide is remembered above this.
+    expect(result.ok).toBe(true);
+    expect(onApprove).toHaveBeenCalledTimes(1);
+  });
+});

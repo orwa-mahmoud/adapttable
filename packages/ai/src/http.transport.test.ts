@@ -781,7 +781,7 @@ describe("a backend that streams its answer", () => {
         'event: text-delta\ndata: {"text":"Going "}\n\n',
         'event: text-delta\ndata: {"text":"to page 3."}\n\n',
         "event: done\ndata: {}\n\n",
-      ]) as unknown as typeof fetch,
+      ]),
     });
 
     const turn = await client.send(live, "go to page 3");
@@ -794,9 +794,7 @@ describe("a backend that streams its answer", () => {
     const client = createAgentHttpClient({
       endpoint: "https://agent.example/turn",
       stream: true,
-      fetch: sse([
-        'event: text-delta\ndata: {"text":"half a"}\n\n',
-      ]) as unknown as typeof fetch,
+      fetch: sse(['event: text-delta\ndata: {"text":"half a"}\n\n']),
     });
 
     await expect(client.send(session(), "go")).rejects.toThrow();
@@ -806,7 +804,7 @@ describe("a backend that streams its answer", () => {
     const client = createAgentHttpClient({
       endpoint: "https://agent.example/turn",
       stream: true,
-      fetch: (() =>
+      fetch: () =>
         Promise.resolve(
           new Response(
             JSON.stringify({
@@ -815,7 +813,7 @@ describe("a backend that streams its answer", () => {
             }),
             { status: 200, headers: { "content-type": "application/json" } }
           )
-        )) as unknown as typeof fetch,
+        ),
     });
 
     const turn = await client.send(session(), "go");
