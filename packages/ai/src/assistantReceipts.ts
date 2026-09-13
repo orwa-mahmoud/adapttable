@@ -20,6 +20,7 @@ import type {
  * - `executed` — the host callback ran.
  * - `staged` — approved and queued on the table's own dirty path; Save is
  *   still the reader's.
+ * - `partial` — some of what was proposed ran and a human refused the rest.
  * - `rejected` — a human refused it.
  * - `awaiting-approval` — parked, waiting on a human.
  * - `cancelled` — stopped before it reached the host.
@@ -31,6 +32,7 @@ import type {
 export type AssistantReceiptStatus =
   | "executed"
   | "staged"
+  | "partial"
   | "rejected"
   | "awaiting-approval"
   | "cancelled"
@@ -162,6 +164,11 @@ export function receiptFromResult(
   // else is decided by what the approval did. Under `commit: "stage"` the
   // callback that ran was the staging one, so the change is not saved yet.
   if (payload.applied) {
+    // Some rows ran and a human refused the others. `applied` is true for
+    // both that and a whole write, so reading it alone reports two of three
+    // raises as "Saved" and the reader never learns the third was refused.
+    if (payload.approval === "partial")
+      return { ...base, ...reason, status: "partial" };
     return {
       ...base,
       ...reason,
@@ -208,6 +215,10 @@ export function turnStatus(
   receipts: readonly AssistantReceipt[]
 ): AssistantTurnStatus {
   if (receipts.length === 0) return "none";
+  // One action that half-ran makes the whole turn partial however the others
+  // went: there is work the reader asked for that nobody did.
+  if (receipts.some((receipt) => receipt.status === "partial"))
+    return "partial";
   const landed = receipts.filter(
     (receipt) =>
       receipt.status === "executed" ||

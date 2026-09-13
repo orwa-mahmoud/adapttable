@@ -9,6 +9,7 @@ import type { TableLabels } from "@adapttable/core";
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "已完成",
   staged: "待儲存",
+  partial: "部分完成",
   rejected: "已拒絕",
   "awaiting-approval": "等待您確認",
   cancelled: "已取消",
@@ -248,6 +249,7 @@ export const zhTW: Required<TableLabels> = {
             "edit/executed": "已儲存",
             "edit/staged": "編輯已準備 — 未儲存",
             "edit/awaiting-approval": "編輯等待核准",
+            "edit/partial": "部分編輯已儲存，部分遭拒絕",
             "edit/rejected": "編輯已拒絕",
           } as Record<string, string>
         )[`${kind}/${status}`]

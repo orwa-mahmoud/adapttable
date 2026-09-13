@@ -28,6 +28,7 @@ const ASSISTANT_RECEIPT_ACTION: Readonly<Record<string, string>> = {
   "edit/executed": "Saved",
   "edit/staged": "Edit staged — not saved",
   "edit/awaiting-approval": "Edit awaiting approval",
+  "edit/partial": "Some edits saved, some refused",
   "edit/rejected": "Edit refused",
 };
 
@@ -60,6 +61,7 @@ const ASSISTANT_CAPABILITY: Readonly<Record<string, string>> = {
 const ASSISTANT_RECEIPT: Readonly<Record<string, string>> = {
   executed: "done",
   staged: "staged",
+  partial: "partly done",
   rejected: "rejected",
   "awaiting-approval": "waiting for you",
   cancelled: "cancelled",

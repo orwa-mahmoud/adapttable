@@ -208,3 +208,70 @@ describe("turnStatus", () => {
     ]);
   });
 });
+
+describe("a write a reader approved only part of", () => {
+  it("is not reported as saved", () => {
+    // Two of three raises ran. `applied` is true for that and for a whole
+    // write alike, so reading it alone tells the reader everything landed.
+    const receipt = receiptFromResult(
+      result({
+        result: {
+          proposals: [],
+          applied: true,
+          approval: "partial",
+          results: [
+            { rowKey: "r1", column: "salary", ok: true },
+            { rowKey: "r3", column: "salary", ok: true },
+          ],
+        },
+      }),
+      "edit.cells"
+    );
+
+    expect(receipt.status).toBe("partial");
+  });
+
+  it("carries the reason the reader gave", () => {
+    const receipt = receiptFromResult(
+      result({
+        result: {
+          proposals: [],
+          applied: true,
+          approval: "partial",
+          approvalReason: "not while she is on leave",
+        },
+      })
+    );
+
+    expect(receipt).toMatchObject({
+      status: "partial",
+      approvalReason: "not while she is on leave",
+    });
+  });
+
+  it("stays partial on a staging table", () => {
+    // Staged or saved, the fact worth the reader's attention is the same:
+    // something they saw proposed was refused and never ran.
+    const receipt = receiptFromResult(
+      result({
+        result: { proposals: [], applied: true, approval: "partial" },
+      }),
+      "edit.cells",
+      "stage"
+    );
+
+    expect(receipt.status).toBe("partial");
+  });
+
+  it("makes the whole turn partial, whatever else ran", () => {
+    expect(
+      turnStatus([
+        { status: "executed", idempotencyKey: "a" },
+        { status: "partial", idempotencyKey: "b" },
+      ])
+    ).toBe("partial");
+    expect(turnStatus([{ status: "partial", idempotencyKey: "b" }])).toBe(
+      "partial"
+    );
+  });
+});

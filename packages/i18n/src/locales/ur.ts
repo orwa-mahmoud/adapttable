@@ -9,6 +9,7 @@ import type { TableLabels } from "@adapttable/core";
 const RECEIPT_STATUS: Readonly<Record<string, string>> = {
   executed: "ہو گیا",
   staged: "تیار",
+  partial: "جزوی طور پر مکمل",
   rejected: "مسترد",
   "awaiting-approval": "آپ کا منتظر",
   cancelled: "منسوخ",
@@ -253,6 +254,7 @@ export const ur: Required<TableLabels> = {
             "edit/executed": "محفوظ ہو گیا",
             "edit/staged": "ترمیم تیار — محفوظ نہیں",
             "edit/awaiting-approval": "ترمیم منظوری کی منتظر",
+            "edit/partial": "کچھ ترامیم محفوظ، کچھ مسترد",
             "edit/rejected": "ترمیم مسترد",
           } as Record<string, string>
         )[`${kind}/${status}`]

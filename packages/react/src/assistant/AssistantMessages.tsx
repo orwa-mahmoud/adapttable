@@ -32,6 +32,9 @@ function receiptTone(
   status: string
 ): "neutral" | "busy" | "warning" | "danger" {
   if (status === "awaiting-approval" || status === NEEDS_SAVE) return "warning";
+  // Not everything the reader saw proposed actually ran, which is the whole
+  // reason the card is worth looking at.
+  if (status === "partial") return "warning";
   if (status === "rejected" || status === "failed" || status === "stale") {
     return "danger";
   }
