@@ -512,8 +512,9 @@ describe("a question put to the reader", () => {
         send: async ({ askUser }) => {
           const given = await askUser?.({
             id: "q1",
-            prompt: "Which quarter?",
+            question: "Which quarter?",
             options: [{ id: "q4", label: "Q4" }],
+            allowFreeText: false,
           });
           return { text: `you said ${given?.optionId ?? "nothing"}` };
         },
@@ -524,7 +525,7 @@ describe("a question put to the reader", () => {
     const turn = store.send("summarise");
     await Promise.resolve();
     expect(store.getState().status).toBe("awaiting-user");
-    expect(store.getState().pendingQuestion?.prompt).toBe("Which quarter?");
+    expect(store.getState().pendingQuestion?.question).toBe("Which quarter?");
 
     store.answer({ optionId: "q4" });
     // Answering is not a new turn: the one that asked resumes.
@@ -541,7 +542,12 @@ describe("a question put to the reader", () => {
       session: tableSession(),
       transport: {
         send: ({ askUser }) => {
-          asked = askUser?.({ id: "q1", prompt: "Which?", options: [] });
+          asked = askUser?.({
+            id: "q1",
+            question: "Which?",
+            options: [],
+            allowFreeText: true,
+          });
           return asked!.then(() => ({ text: "done" }));
         },
       },

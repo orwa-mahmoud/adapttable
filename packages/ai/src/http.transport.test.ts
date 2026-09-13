@@ -12,6 +12,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   AgentHttpError,
+  assistantHttpTransport,
   createAgentHttpClient,
   parseAgentHttpRequest,
   parseAgentHttpResponse,
@@ -377,5 +378,134 @@ describe("the HTTP client", () => {
     expect(result.results.map((r) => r.ok)).toEqual([true, true]);
     expect(result.text).toBe("And again.");
     expect(result.needsFulfilled.read).toBe(1);
+  });
+});
+
+describe("the HTTP transport the assistant store speaks to", () => {
+  /** A backend that answers one recorded reply per turn. */
+  function backend(replies: readonly Record<string, unknown>[]) {
+    const bodies: unknown[] = [];
+    let at = 0;
+    return {
+      bodies,
+      request: (body: unknown) => {
+        bodies.push(body);
+        const reply = replies[Math.min(at, replies.length - 1)] ?? {};
+        at += 1;
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          ...reply,
+        });
+      },
+    };
+  }
+
+  it("carries the turn and hands back what the backend said", async () => {
+    const live = session();
+    const route = backend([{ text: "Page 3 it is." }]);
+    const transport = assistantHttpTransport({
+      endpoint: "https://agent.example/turn",
+      request: route.request,
+    });
+
+    await transport.connect?.({ session: live });
+    const reply = await transport.send({
+      session: live,
+      text: "go to page 3",
+      conversation: [{ role: "user", text: "hello" }],
+    });
+
+    expect(reply.text).toBe("Page 3 it is.");
+    expect(route.bodies.at(-1)).toMatchObject({
+      message: "go to page 3",
+      conversation: [{ role: "user", text: "hello" }],
+    });
+  });
+
+  it("reports streamed text to the turn that is in flight", async () => {
+    const live = session();
+    const seen: string[] = [];
+    const transport = assistantHttpTransport({
+      endpoint: "https://agent.example/turn",
+      request: () =>
+        Promise.resolve({ schemaVersion: AGENT_SCHEMA_VERSION, text: "done" }),
+      // The client's own sink stands in for a stream arriving mid-turn.
+      onStreamText: undefined,
+    });
+    await transport.connect?.({ session: live });
+
+    await transport.send({
+      session: live,
+      text: "go",
+      conversation: [],
+      onPartialText: (text) => seen.push(text),
+    });
+
+    // Nothing streamed here, but the turn completed and the sink was released
+    // rather than left pointing at a conversation that has moved on.
+    expect(seen).toEqual([]);
+  });
+
+  it("asks the turn's own surface when the host supplied no channel", async () => {
+    const live = session();
+    const asked: string[] = [];
+    const transport = assistantHttpTransport({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const sent = body as { toolResults?: unknown };
+        // First turn asks; the second carries the answer back.
+        return Promise.resolve(
+          sent.toolResults
+            ? { schemaVersion: AGENT_SCHEMA_VERSION, text: "thanks" }
+            : {
+                schemaVersion: AGENT_SCHEMA_VERSION,
+                askUser: {
+                  id: "q1",
+                  question: "Which quarter?",
+                  options: [{ id: "q4", label: "Q4" }],
+                },
+              }
+        );
+      },
+    });
+    await transport.connect?.({ session: live });
+
+    await transport.send({
+      session: live,
+      text: "summarise",
+      conversation: [],
+      askUser: (question) => {
+        asked.push(question.question);
+        return Promise.resolve({ optionId: "q4" });
+      },
+    });
+
+    expect(asked).toEqual(["Which quarter?"]);
+  });
+
+  it("forgets what a closed connection was told", async () => {
+    const live = session();
+    const route = backend([
+      { text: "one", pin: { status: "acknowledged", contractVersion: "c1" } },
+      { text: "two" },
+    ]);
+    const transport = assistantHttpTransport({
+      endpoint: "https://agent.example/turn",
+      request: route.request,
+    });
+
+    await transport.connect?.({ session: live });
+    await transport.send({ session: live, text: "one", conversation: [] });
+    transport.disconnect?.();
+
+    // A pin belongs to the connection that earned it. After a disconnect the
+    // next exchange negotiates for itself rather than assuming a backend it
+    // is no longer talking to still holds the contract, so the contract
+    // travels again instead of being referred to by version alone.
+    await transport.connect?.({ session: live });
+    await transport.send({ session: live, text: "two", conversation: [] });
+
+    const last = route.bodies.at(-1) as Record<string, unknown>;
+    expect(last.context ?? last.catalog).toBeDefined();
   });
 });

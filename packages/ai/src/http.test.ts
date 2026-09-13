@@ -2274,3 +2274,112 @@ describe("transport limits and cancellation", () => {
     ).rejects.toThrow(/context exceeds/);
   });
 });
+
+describe("a reply the wire will not accept", () => {
+  /** A well-formed reply, for a case to spoil one field of. */
+  const reply = (patch: Record<string, unknown>): unknown => ({
+    schemaVersion: AGENT_SCHEMA_VERSION,
+    text: "ok",
+    ...patch,
+  });
+
+  // Each case is one field a backend can get wrong. The refusal happens at the
+  // boundary, before anything downstream reads a value nobody meant to send.
+  const cases: readonly [string, unknown, RegExp][] = [
+    ["a reply that is not an object", 7, /response must be an object/],
+    [
+      "a schema version this client does not speak",
+      { schemaVersion: "nope" },
+      /schemaVersion/,
+    ],
+    ["an empty session id", reply({ sessionId: "" }), /sessionId/],
+    [
+      "a question that is not an object",
+      reply({ askUser: 7 }),
+      /askUser must be an object/,
+    ],
+    [
+      "a question with no id",
+      reply({ askUser: { question: "Which?", allowFreeText: true } }),
+      /askUser\.id is required/,
+    ],
+    [
+      "a question nobody can answer",
+      reply({
+        askUser: { id: "q1", question: "Which?", allowFreeText: false },
+      }),
+      /options or allow free text/,
+    ],
+    [
+      "a question option that is not an object",
+      reply({
+        askUser: { id: "q1", question: "Which?", options: [7] },
+      }),
+      /option must be an object/,
+    ],
+    ["a pin that is not an object", reply({ pin: 7 }), /pin must be an object/],
+    [
+      "a pin status this client does not know",
+      reply({ pin: { status: "maybe" } }),
+      /pin/,
+    ],
+    [
+      "a pin lifetime that is not a number",
+      reply({ pin: { status: "acknowledged", ttlMs: "soon" } }),
+      /ttlMs must be a finite number/,
+    ],
+  ];
+
+  for (const [name, input, message] of cases) {
+    it(`refuses ${name}`, () => {
+      expect(() => parseAgentHttpResponse(input)).toThrow(message);
+    });
+  }
+
+  it("accepts a reply that carries only what it needs to", () => {
+    // The other half of the contract: none of the above is over-strict.
+    expect(
+      parseAgentHttpResponse({ schemaVersion: AGENT_SCHEMA_VERSION })
+    ).toMatchObject({ schemaVersion: AGENT_SCHEMA_VERSION });
+  });
+});
+
+describe("a request the wire will not accept", () => {
+  const turn = (patch: Record<string, unknown>): unknown => ({
+    schemaVersion: AGENT_SCHEMA_VERSION,
+    kind: "turn",
+    tableId: "orders",
+    message: "go",
+    ...patch,
+  });
+
+  const cases: readonly [string, unknown, RegExp][] = [
+    ["a request that is not an object", 7, /request must be an object/],
+    [
+      "a turn with neither words nor a recording",
+      { schemaVersion: AGENT_SCHEMA_VERSION, kind: "turn", tableId: "orders" },
+      /message string or audio/,
+    ],
+    [
+      "a tool result that is not an object",
+      turn({ toolResults: [7] }),
+      /tool result must be an object/,
+    ],
+    [
+      "a tool result with nothing to match it to",
+      turn({ toolResults: [{ result: 1 }] }),
+      /result\.id is required/,
+    ],
+    [
+      "a recording that is not an object",
+      turn({ audio: 7 }),
+      /audio must be an object/,
+    ],
+  ];
+
+  for (const [name, input, message] of cases) {
+    it(`refuses ${name}`, () => {
+      expect(() => parseAgentHttpRequest(input)).toThrow(message);
+    });
+  }
+});
