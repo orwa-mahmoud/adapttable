@@ -1176,3 +1176,74 @@ describe("a turn that came back with nothing in it", () => {
     expect(state.error).toBe("nobody answered the question");
   });
 });
+
+describe("a question the backend asked", () => {
+  /** A transport that parks on its question, as the HTTP client does. */
+  function asking() {
+    let answered: ((given: unknown) => void) | undefined;
+    return {
+      transport: {
+        send: async ({
+          askUser,
+        }: {
+          askUser?: (q: unknown) => Promise<unknown>;
+        }) => {
+          const given = await askUser?.({
+            id: "q1",
+            question: "What should be reversed?",
+            options: [{ id: "a", label: "Salary" }],
+            allowFreeText: true,
+          });
+          return {
+            text: given ? "Reversed by salary." : "Nothing to reverse.",
+          };
+        },
+      } as never,
+      settled: () => answered,
+    };
+  }
+
+  it("says the conversation is waiting on the reader, not that it is ready", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: asking().transport,
+    });
+    store.connect();
+    const turn = store.send("Reverse that");
+    await vi.waitFor(() => {
+      expect(store.getState().pendingQuestion).not.toBeNull();
+    });
+
+    // The reader is being asked something. A badge reading "ready" beside an
+    // unanswered question says nothing is waiting on them when something is.
+    expect(store.getState().pendingQuestion?.question).toBe(
+      "What should be reversed?"
+    );
+    expect(store.getState().status).toBe("awaiting-user");
+
+    store.answer({ optionId: "a" });
+    await turn;
+    expect(store.getState().pendingQuestion).toBeNull();
+    expect(store.getState().status).toBe("ready");
+    expect(store.getState().messages.at(-1)?.text).toBe("Reversed by salary.");
+  });
+
+  it("reports the turn as busy while the question stands", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: asking().transport,
+    });
+    store.connect();
+    const turn = store.send("Reverse that");
+    await vi.waitFor(() => {
+      expect(store.getState().pendingQuestion).not.toBeNull();
+    });
+
+    // Still in flight: the turn resumes on the answer, and a reader may stop
+    // it rather than answer.
+    expect(store.getState().busy).toBe(true);
+    store.answer({ text: "" });
+    await turn;
+    expect(store.getState().busy).toBe(false);
+  });
+});

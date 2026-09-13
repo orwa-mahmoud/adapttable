@@ -174,3 +174,100 @@ describe("what reaches the host", () => {
     expect(setPage).not.toHaveBeenCalled();
   });
 });
+
+describe("sorting a column the contract did not offer", () => {
+  function sortSession(columns: { id: string; sortable: boolean }[]) {
+    const setSort = vi.fn();
+    const session = createAgentSession({
+      observe: (): AgentObservation => ({
+        tableId: "orders",
+        viewRevision: 1,
+        featureIds: [],
+        columns: columns.map((c) => ({
+          id: c.id,
+          label: c.id,
+          type: "string",
+          readable: true,
+          writable: false,
+          sortable: c.sortable,
+        })),
+        source: PAGE_ONLY,
+        writePolicy: "allow",
+        approval: "never",
+        commit: "immediate",
+        hasPagination: false,
+        hasSearch: false,
+        hasSort: true,
+        hasFilters: false,
+        hasExport: false,
+        hasEdit: false,
+        hasReorder: false,
+        page: 1,
+        limit: 10,
+        search: "",
+        pageMax: 1,
+        rowAddressScope: "visible",
+      }),
+      apply: { setSort },
+    });
+    return { session, setSort };
+  }
+
+  it("refuses a column the table declares unsortable, and names the ones it sorts", async () => {
+    // The reader's own sort control is disabled for such a column. An agent
+    // that sorted by it anyway would be doing something the person in front
+    // of the table cannot.
+    const { session, setSort } = sortSession([
+      { id: "name", sortable: true },
+      { id: "notes", sortable: false },
+    ]);
+
+    const refused = await session.execute(
+      "view.setSort",
+      { key: "notes", dir: "asc" },
+      1,
+      "s1"
+    );
+    expect(refused.ok).toBe(false);
+    expect(refused.error?.message).toMatch(
+      /not sortable; this table sorts by name/
+    );
+    expect(setSort).not.toHaveBeenCalled();
+  });
+
+  it("says so plainly when no column on the table sorts", async () => {
+    const { session } = sortSession([{ id: "notes", sortable: false }]);
+    const refused = await session.execute(
+      "view.setSort",
+      { key: "notes" },
+      1,
+      "s2"
+    );
+    expect(refused.error?.message).toMatch(/no column on this table is/);
+  });
+
+  it("refuses a column nobody published", async () => {
+    const { session } = sortSession([{ id: "name", sortable: true }]);
+    const refused = await session.execute(
+      "view.setSort",
+      { key: "salary" },
+      1,
+      "s3"
+    );
+    expect(refused.ok).toBe(false);
+    expect(refused.error?.message).toMatch(/unknown column "salary"/);
+  });
+
+  it("sorts a column the contract offers, and always allows clearing", async () => {
+    const { session, setSort } = sortSession([{ id: "name", sortable: true }]);
+
+    expect(
+      (await session.execute("view.setSort", { key: "name" }, 1, "s4")).ok
+    ).toBe(true);
+    // Clearing is not a claim about any column.
+    expect(
+      (await session.execute("view.setSort", { key: null }, 1, "s5")).ok
+    ).toBe(true);
+    expect(setSort).toHaveBeenCalledTimes(2);
+  });
+});

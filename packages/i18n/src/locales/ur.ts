@@ -266,6 +266,7 @@ export const ur: Required<TableLabels> = {
       ready: "تیار",
       sending: "کام جاری…",
       "awaiting-approval": "آپ کا منتظر",
+      "awaiting-user": "آپ کا منتظر",
       error: "خرابی",
       disconnected: "منسلک نہیں",
     })[status] ?? "تیار",

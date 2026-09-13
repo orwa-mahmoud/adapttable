@@ -269,6 +269,7 @@ export const ru: Required<TableLabels> = {
       ready: "Готов",
       sending: "Выполняется…",
       "awaiting-approval": "Ждёт вас",
+      "awaiting-user": "Ждёт вас",
       error: "Ошибка",
       disconnected: "Нет подключения",
     })[status] ?? "Готов",

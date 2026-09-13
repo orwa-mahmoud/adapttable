@@ -262,6 +262,7 @@ export const ja: Required<TableLabels> = {
       ready: "準備完了",
       sending: "処理中…",
       "awaiting-approval": "確認待ち",
+      "awaiting-user": "確認待ち",
       error: "エラー",
       disconnected: "未接続",
     })[status] ?? "準備完了",

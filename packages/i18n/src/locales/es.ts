@@ -263,6 +263,7 @@ export const es: Required<TableLabels> = {
       ready: "Listo",
       sending: "Trabajando…",
       "awaiting-approval": "Esperándote",
+      "awaiting-user": "Esperándote",
       error: "Error",
       disconnected: "Sin conexión",
     })[status] ?? "Listo",

@@ -263,6 +263,7 @@ export const fa: Required<TableLabels> = {
       ready: "آماده",
       sending: "در حال کار…",
       "awaiting-approval": "در انتظار شما",
+      "awaiting-user": "در انتظار شما",
       error: "خطا",
       disconnected: "متصل نیست",
     })[status] ?? "آماده",

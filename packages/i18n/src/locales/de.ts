@@ -268,6 +268,7 @@ export const de: Required<TableLabels> = {
       ready: "Bereit",
       sending: "Arbeitet…",
       "awaiting-approval": "Wartet auf Sie",
+      "awaiting-user": "Wartet auf Sie",
       error: "Fehler",
       disconnected: "Nicht verbunden",
     })[status] ?? "Bereit",

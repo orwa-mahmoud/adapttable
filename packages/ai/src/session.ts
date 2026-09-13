@@ -1106,6 +1106,33 @@ async function dispatchBuiltIn(
     }
     case "view.setSort": {
       const sortKey = body.key as string | null | undefined;
+      // The contract publishes `sortable` per column, and a reader's own sort
+      // control is disabled for a column that is not. An agent reading that
+      // contract and then sorting anyway would be doing something the table
+      // told it it could not — and something the person sitting in front of
+      // the table cannot do either. Clearing the sort is always allowed.
+      if (sortKey) {
+        const column = observation.columns.find(
+          (entry) => entry.id === sortKey
+        );
+        if (!column) {
+          throw new ApplyError(
+            "apply-failed",
+            `unknown column "${sortKey}"; this table offers ${observation.columns.map((entry) => entry.id).join(", ")}`
+          );
+        }
+        if (!column.sortable) {
+          const sortable = observation.columns
+            .filter((entry) => entry.sortable)
+            .map((entry) => entry.id);
+          throw new ApplyError(
+            "apply-failed",
+            sortable.length > 0
+              ? `column "${sortKey}" is not sortable; this table sorts by ${sortable.join(", ")}`
+              : `column "${sortKey}" is not sortable, and no column on this table is`
+          );
+        }
+      }
       assertApply(apply, "setSort");
       apply.setSort(
         sortKey ?? undefined,

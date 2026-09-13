@@ -238,24 +238,28 @@ function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
   return [
     {
       key: "person",
+      sortable: true,
       header: header.person,
       accessor: (row) => row.person,
       editable: true,
     },
     {
       key: "team",
+      sortable: true,
       header: header.team,
       accessor: (row) => row.team,
       editable: true,
     },
     {
       key: "status",
+      sortable: true,
       header: header.status,
       accessor: (row) => row.status,
       editable: true,
     },
     {
       key: "salary",
+      sortable: true,
       header: header.salary,
       accessor: (row) => row.salary,
       editable: true,
@@ -265,6 +269,7 @@ function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
     },
     {
       key: "started",
+      sortable: true,
       header: header.started,
       accessor: (row) => row.started,
       editable: true,

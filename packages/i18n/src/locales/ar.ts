@@ -264,6 +264,7 @@ export const ar: Required<TableLabels> = {
       ready: "جاهز",
       sending: "جارٍ العمل…",
       "awaiting-approval": "بانتظارك",
+      "awaiting-user": "بانتظارك",
       error: "خطأ",
       disconnected: "غير متصل",
     })[status] ?? "جاهز",

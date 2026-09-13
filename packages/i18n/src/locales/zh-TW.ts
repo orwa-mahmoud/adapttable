@@ -261,6 +261,7 @@ export const zhTW: Required<TableLabels> = {
       ready: "就緒",
       sending: "處理中…",
       "awaiting-approval": "等待您確認",
+      "awaiting-user": "等待您確認",
       error: "錯誤",
       disconnected: "未連線",
     })[status] ?? "就緒",

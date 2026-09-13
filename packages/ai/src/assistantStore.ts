@@ -489,8 +489,16 @@ export function createTableAssistant(
     snapshot = {
       // What the badge says. A parked write is not "working", and a reader
       // watching a spinner that will never resolve on its own is the reason
-      // this is separate from `busy`.
-      status: parked && status === "sending" ? "awaiting-approval" : status,
+      // this is separate from `busy`. A question the backend asked parks the
+      // conversation the same way: the turn that carried it has settled, so
+      // the status underneath is "ready", and a badge saying so next to an
+      // unanswered question tells the reader nothing is waiting on them when
+      // something is.
+      status: question
+        ? "awaiting-user"
+        : parked && status === "sending"
+          ? "awaiting-approval"
+          : status,
       busy: sending,
       messages,
       draft,

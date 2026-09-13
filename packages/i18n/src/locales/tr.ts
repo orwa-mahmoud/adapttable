@@ -267,6 +267,7 @@ export const tr: Required<TableLabels> = {
       ready: "Hazır",
       sending: "Çalışıyor…",
       "awaiting-approval": "Sizi bekliyor",
+      "awaiting-user": "Sizi bekliyor",
       error: "Hata",
       disconnected: "Bağlı değil",
     })[status] ?? "Hazır",

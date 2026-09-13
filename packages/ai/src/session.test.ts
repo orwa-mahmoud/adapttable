@@ -244,14 +244,17 @@ describe("createAgentSession", () => {
     );
     expect(apply.setSort).toHaveBeenCalledWith("name", "desc");
     expect(sort.ok).toBe(true);
+    // `column` is read as `key`. Named against a column this table actually
+    // has: the alias is the subject, and a sort by a column nobody published
+    // is refused on its own terms.
     const aliased = await session.execute(
       "view.setSort",
-      { column: "salary", dir: "desc" },
+      { column: "name", dir: "asc" },
       2,
       "o-column"
     );
     expect(aliased.ok).toBe(true);
-    expect(apply.setSort).toHaveBeenCalledWith("salary", "desc");
+    expect(apply.setSort).toHaveBeenCalledWith("name", "asc");
     const columns = await session.execute("columns.describe", {}, 2, "c1");
     expect(columns.result).toEqual({
       columns: observation().columns,

@@ -267,6 +267,7 @@ export const hi: Required<TableLabels> = {
       ready: "तैयार",
       sending: "काम जारी…",
       "awaiting-approval": "आपकी प्रतीक्षा",
+      "awaiting-user": "आपकी प्रतीक्षा",
       error: "त्रुटि",
       disconnected: "जुड़ा नहीं",
     })[status] ?? "तैयार",

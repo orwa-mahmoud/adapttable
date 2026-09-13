@@ -264,6 +264,7 @@ export const ko: Required<TableLabels> = {
       ready: "준비됨",
       sending: "처리 중…",
       "awaiting-approval": "확인 대기",
+      "awaiting-user": "확인 대기",
       error: "오류",
       disconnected: "연결 안 됨",
     })[status] ?? "준비됨",

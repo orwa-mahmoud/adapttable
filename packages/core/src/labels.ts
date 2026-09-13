@@ -7,6 +7,7 @@ const ASSISTANT_CONNECTION: Readonly<Record<string, string>> = {
   ready: "Ready",
   sending: "Working…",
   "awaiting-approval": "Waiting for you",
+  "awaiting-user": "Waiting for you",
   error: "Error",
   disconnected: "Not connected",
 };

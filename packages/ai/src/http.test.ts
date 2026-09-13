@@ -803,15 +803,15 @@ describe("createAgentHttpClient", () => {
             },
             {
               name: "view.setSort",
-              args: { key: "salary", dir: "desc" },
-              id: "sort-salary",
+              args: { key: "name", dir: "desc" },
+              id: "sort-name",
             },
           ],
         }),
     });
     expect(result.results.map((entry) => entry.ok)).toEqual([true, true]);
     expect(setFilters).toHaveBeenCalledTimes(1);
-    expect(setSort).toHaveBeenCalledWith("salary", "desc");
+    expect(setSort).toHaveBeenCalledWith("name", "desc");
   });
 
   it("skips remaining actions after cancel without undoing completed writes", async () => {

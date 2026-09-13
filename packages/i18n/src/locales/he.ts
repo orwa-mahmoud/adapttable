@@ -262,6 +262,7 @@ export const he: Required<TableLabels> = {
       ready: "מוכן",
       sending: "עובד…",
       "awaiting-approval": "ממתין לך",
+      "awaiting-user": "ממתין לך",
       error: "שגיאה",
       disconnected: "לא מחובר",
     })[status] ?? "מוכן",
