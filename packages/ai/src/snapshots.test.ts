@@ -51,7 +51,10 @@ describe("manifest snapshots", () => {
     const standard = buildManifest(
       observation({
         tableId: "standard",
-        featureIds: ["filters", "grouping", "export-csv"],
+        // The grouping PANEL: a standard table an agent can regroup is one
+        // whose grouping is live state. The static `grouping(key)` feature
+        // reimposes its key, so it offers no setter — covered in session.test.
+        featureIds: ["filters", "grouping-panel", "export-csv"],
         hasFilters: true,
         hasExport: true,
         source: { ...PAGE_ONLY, grouping: "client", fullDataset: true },

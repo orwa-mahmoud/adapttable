@@ -32,7 +32,11 @@ const ROWS: Row[] = [{ id: "1", name: "Ada" }];
 
 type Pending = {
   readonly presentation?: string;
-  readonly proposals: readonly unknown[];
+  readonly proposals: readonly {
+    readonly rowKey?: string;
+    readonly beforeText?: string;
+    readonly afterText?: string;
+  }[];
   readonly operation?: { readonly capability: string; readonly title?: string };
   readonly decisions: readonly string[];
   readonly approve: () => void;
@@ -87,7 +91,9 @@ function mount(
         }),
         { id: "editing" },
         { id: "filters" },
-        { id: "grouping" },
+        // The panel, not the static feature: grouping is offered to an agent
+        // only where the setter can actually move it.
+        { id: "grouping-panel" },
         { id: "export-csv" },
       ],
     });
@@ -1691,5 +1697,82 @@ describe("who decides, and how", () => {
       handles.current.pending?.reject();
     });
     await result;
+  });
+});
+
+describe("what the card says, and what the host is told", () => {
+  it("reads a value the way its own column writes it", async () => {
+    // A table showing `$170k` in every cell must not ask the reader to agree
+    // to `170 → 175`: the card is the one screen where an ambiguous number
+    // costs something.
+    interface Paid {
+      id: string;
+      name: string;
+      salary: number;
+    }
+    const paid: Paid[] = [{ id: "1", name: "Ada", salary: 170 }];
+    const view = {
+      rows: paid,
+      getRowId: (row: Paid) => row.id,
+      rowLabel: (row: Paid) => row.name,
+      editing: { onCellEdit: () => undefined },
+      groupingState: {
+        groupBy: undefined,
+        aggregateOverrides: {},
+        columnLabel: (key: string) => key,
+        setGroupBy: () => undefined,
+        columns: [
+          {
+            key: "salary",
+            formatValue: (row: Paid) => `$${String(row.salary)}k`,
+          },
+        ],
+      },
+    } as unknown as TableRuntimeView<Row>;
+
+    mount(
+      {
+        tableId: "paid",
+        approval: "writes",
+        columns: { salary: { type: "number", writable: true } },
+      },
+      view
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    void session().execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "salary", value: 175 }] },
+      session().manifest().viewRevision,
+      "fmt"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+
+    const proposal = handles.current.pending?.proposals?.[0];
+    expect(proposal?.beforeText).toBe("$170k");
+    expect(proposal?.afterText).toBe("$175k");
+  });
+
+  it("publishes what the reader waved through to a panel outside the table", async () => {
+    // The panel cannot read the table's own feature state, so the standing
+    // decision travels through the bridge or it cannot be taken back.
+    const seen: { capabilities: readonly string[] }[] = [];
+    mount(
+      {
+        tableId: "bridged",
+        approval: "never",
+        bridge: { alwaysAllowed: (state) => seen.push(state) },
+      },
+      VIEW
+    );
+    await waitFor(() => {
+      expect(seen.length).toBeGreaterThan(0);
+    });
+
+    expect(seen.at(-1)?.capabilities).toEqual([]);
   });
 });

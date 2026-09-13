@@ -308,6 +308,18 @@ function salaryText(value: number): string {
 }
 
 /**
+ * A group's salary aggregate, in the same money the cells use. A count is
+ * people rather than an amount, so it stays a plain number.
+ */
+function salaryAggregateText(
+  value: unknown,
+  context: { readonly aggregation?: string }
+): ReactNode {
+  if (typeof value !== "number") return undefined;
+  return context.aggregation === "count" ? value : salaryText(value);
+}
+
+/**
  * Display only. `accessor` stays the number, so sorting, grouping and the
  * average still work on the value rather than on the text around it.
  */
@@ -357,12 +369,7 @@ function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
       // A number under a money column reads as money — and an average of
       // three salaries is not 163.33333333333334. A count is people, not an
       // amount, so it stays a plain number.
-      formatAggregate: (value, context) =>
-        typeof value !== "number"
-          ? undefined
-          : context.aggregation === "count"
-            ? value
-            : salaryText(value),
+      formatAggregate: (value, context) => salaryAggregateText(value, context),
       // A bare 170 is not a salary until something says what it counts. Left
       // unsaid, a model reports whatever unit reads naturally to it and the
       // reader has no way to tell the guess from the data.
@@ -491,6 +498,19 @@ function applyRow(
   );
 }
 
+/** Every row on one team, raised by a percentage. Pure: React may call it twice. */
+function raisedRows(
+  rows: readonly StaffRow[],
+  team: string,
+  percent: number
+): StaffRow[] {
+  return rows.map((row) =>
+    row.team === team
+      ? { ...row, salary: Math.round(row.salary * (1 + percent / 100)) }
+      : row
+  );
+}
+
 /** Remove the named rows. The seed is restored by Reset and by a refresh. */
 function removeRows(
   rows: readonly StaffRow[],
@@ -543,6 +563,8 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     bottom: [],
   });
   const [session, setSession] = useState<AgentSession | null>(null);
+  // Bumped by Reset. Remounting is how the table returns to its defaults.
+  const [tableGeneration, setTableGeneration] = useState(0);
   const [alwaysAllowed, setAlwaysAllowed] = useState<AlwaysAllowedState | null>(
     null
   );
@@ -646,16 +668,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const raiseTeam = useMemo(
     () =>
       raiseTeamCapability(({ team, percent }) => {
-        setRows((current) =>
-          current.map((row) =>
-            row.team === team
-              ? {
-                  ...row,
-                  salary: Math.round(row.salary * (1 + percent / 100)),
-                }
-              : row
-          )
-        );
+        setRows((current) => raisedRows(current, team, percent));
         return rowsRef.current.filter((row) => row.team === team).length;
       }),
     []
@@ -868,6 +881,10 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     setToggles(INITIAL_TOGGLES);
     setRows([...SEED]);
     setPinnedRowIds({ top: [], bottom: [] });
+    // The view belongs to the table, so Reset puts the table back rather than
+    // reaching in to unset filter, sort, search and grouping one at a time —
+    // and a filter the assistant applied is the table's, like any other.
+    setTableGeneration((current) => current + 1);
   }, [assistant]);
 
   /** Take one capability away from the agent, or give it back. */
@@ -1092,6 +1109,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         <KitProvider kit={adapter} dark={dark} dir={rtl ? "rtl" : "ltr"}>
           <Suspense fallback={<DemoFallback />}>
             <Table
+              key={tableGeneration}
               data={rows}
               columns={columns}
               labels={labels}

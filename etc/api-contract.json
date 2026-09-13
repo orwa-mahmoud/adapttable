@@ -402,6 +402,7 @@
       "AggregationInputs",
       "aggregationsFor",
       "AggregationState",
+      "AlwaysAllowedState",
       "AlwaysAllowInput",
       "applyAggregations",
       "ApprovalAlwaysAllowError",

@@ -7,6 +7,41 @@ const FEATURE_FOR: Partial<Record<CapabilityKey, string>> = {
   "rows.reorder": "row-reorder",
 };
 
+/**
+ * Whether the agent may change how the table is grouped.
+ *
+ * The grouping PANEL, never the static feature. `grouping(key)` reimposes its
+ * key on every render, so a setter offered against it reports a change the
+ * table has already undone — a live model said "grouped by status" over a
+ * table still grouped by team. Grouping is offered only where it is live
+ * state the reader drives too.
+ */
+function canRegroup(
+  features: ReadonlySet<string>,
+  observation: AgentObservation
+): boolean {
+  if (!features.has("grouping-panel")) return false;
+  return observation.source.grouping !== false;
+}
+
+/**
+ * Whether the agent may change what a group summarises.
+ *
+ * Either grouping feature can show aggregates — reading a total does not move
+ * the grouping — but only a table that can group at all, and only when some
+ * column is actually eligible.
+ */
+function canAggregate(
+  features: ReadonlySet<string>,
+  observation: AgentObservation
+): boolean {
+  if (!features.has("grouping") && !features.has("grouping-panel")) {
+    return false;
+  }
+  if (observation.source.grouping === false) return false;
+  return (observation.aggregations?.columns.length ?? 0) > 0;
+}
+
 /** Whether a built-in capability is wired for this observation. */
 export function isBuiltInEnabled(
   key: CapabilityKey,
@@ -28,20 +63,9 @@ export function isBuiltInEnabled(
     case "view.setFilters":
       return observation.hasFilters;
     case "view.setGroupBy":
-      // The grouping PANEL, never the static feature. `grouping(key)` reimposes
-      // its key on every render, so a setter offered against it reports a
-      // change the table has already undone — the agent says "grouped by
-      // status" over a table still grouped by team. Grouping is offered only
-      // where it is live state the reader drives too.
-      if (!features.has("grouping-panel")) return false;
-      return observation.source.grouping !== false;
-    case "view.setAggregations": {
-      if (!features.has("grouping") && !features.has("grouping-panel")) {
-        return false;
-      }
-      if (observation.source.grouping === false) return false;
-      return (observation.aggregations?.columns.length ?? 0) > 0;
-    }
+      return canRegroup(features, observation);
+    case "view.setAggregations":
+      return canAggregate(features, observation);
     // Pinning is advertised from the wired operation, never from a feature
     // name: a table can compose the column menu and still hand the agent no
     // way to change the layout.

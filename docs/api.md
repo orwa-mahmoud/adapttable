@@ -2109,8 +2109,9 @@ the `AssistantTurnStatus`.
 what the panel shows.
 
 **The table binding.** `TableAgentBridge` is how a host receives live updates —
-a session to attach, a manifest to publish, a pending approval, and a reader for
-the live view. A binding states what its own runtime offers through
+a session to attach, a manifest to publish, a pending approval, a reader for the
+live view, and an `AlwaysAllowedState` naming what the reader has agreed to stop
+being asked about, with the `revoke` that takes one back. A binding states what its own runtime offers through
 `ObservationInputs` and `agentObservation` turns that into the observation a
 session reads the table through, so every binding answers "what can this table
 do" the same way. `contractFingerprint` and `contractVersion` identify the

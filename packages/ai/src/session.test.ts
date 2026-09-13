@@ -65,7 +65,9 @@ describe("enabledKeys", () => {
       observation({
         featureIds: [
           "filters",
-          "grouping",
+          // The panel, not the static feature: `grouping(key)` reimposes its
+          // key every render, so a setter against it changes nothing.
+          "grouping-panel",
           "export-csv",
           "editing",
           "row-reorder",
@@ -117,8 +119,22 @@ describe("enabledKeys", () => {
     expect(
       enabledKeys(
         observation({
-          featureIds: ["grouping"],
+          featureIds: ["grouping-panel"],
           source: PAGE_ONLY,
+        })
+      )
+    ).not.toContain("view.setGroupBy");
+  });
+
+  it("does not advertise grouping a static feature would reimpose", () => {
+    // `grouping(key)` applies its key on every render, so a setter offered
+    // against it reports a change the table has already undone — a live model
+    // said "grouped by status" over a table still grouped by team.
+    expect(
+      enabledKeys(
+        observation({
+          featureIds: ["grouping"],
+          source: { ...PAGE_ONLY, grouping: "client" },
         })
       )
     ).not.toContain("view.setGroupBy");
@@ -138,7 +154,8 @@ describe("enabledKeys", () => {
       })
     );
     expect(keys).toContain("view.setAggregations");
-    expect(keys).not.toContain("view.setGroupBy");
+    // Grouping is the panel's own live state, so the agent may change it.
+    expect(keys).toContain("view.setGroupBy");
   });
 
   it("does not advertise aggregations when grouping is off or no column is eligible", () => {
@@ -360,7 +377,7 @@ describe("createAgentSession", () => {
         observation({
           featureIds: [
             "filters",
-            "grouping",
+            "grouping-panel",
             "export-csv",
             "editing",
             "row-reorder",

@@ -546,6 +546,7 @@ export interface ApprovalReviewChromeProps {
     readonly className?: string;
     readonly expanded?: boolean;
     readonly labels?: TableLabels;
+    readonly onAlwaysAllow?: () => void;
     readonly onApprove: () => void;
     readonly onBack?: () => void;
     readonly onDecide?: (index: number, approved: boolean) => void;

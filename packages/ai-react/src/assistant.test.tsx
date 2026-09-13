@@ -870,7 +870,9 @@ describe("suggestions follow a session that changes in place", () => {
       session: createAgentSession({
         observe: () =>
           observation({
-            featureIds: grouping ? ["grouping"] : [],
+            // The panel: grouping reaches an agent only where it is live
+            // state, not where a static feature reimposes its key.
+            featureIds: grouping ? ["grouping-panel"] : [],
             source: {
               fullDataset: false,
               grouping: grouping ? "client" : false,
@@ -1063,5 +1065,35 @@ describe("two assistants", () => {
 
     expect(a.result.current.messages).toHaveLength(2);
     expect(b.result.current.messages).toEqual([]);
+  });
+});
+
+describe("what the reader waved through", () => {
+  it("takes the host's own list when the panel sits outside the table", () => {
+    // A panel mounted beside the table cannot read the table's feature state,
+    // so the host wires `bridge.alwaysAllowed` and hands back what it
+    // published. Without this the reader can allow a capability and have no
+    // way to take it back.
+    const revoke = vi.fn();
+    const { result } = renderHook(() =>
+      useTableAssistant({
+        session: useHeldSession(),
+        alwaysAllow: { capabilities: ["orders.archive"], revoke },
+      })
+    );
+
+    expect(result.current.alwaysAllowed).toEqual(["orders.archive"]);
+    result.current.revokeAlwaysAllow?.("orders.archive");
+    expect(revoke).toHaveBeenCalledWith("orders.archive");
+  });
+
+  it("lists nothing when neither the host nor the table says", () => {
+    const { result } = renderHook(() =>
+      useTableAssistant({ session: useHeldSession() })
+    );
+
+    // An empty list is what the chrome checks: it draws nothing at all rather
+    // than a heading over no capabilities.
+    expect(result.current.alwaysAllowed).toEqual([]);
   });
 });

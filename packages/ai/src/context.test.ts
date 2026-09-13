@@ -279,9 +279,13 @@ describe("what the selection reports", () => {
     // The payload is budgeted whole, so guides receive the remainder after the
     // columns. Reporting that remainder tells a reader their budget is zero
     // when they asked for a thousand.
+    //
+    // Above the floor every column costs bare — columns are never dropped to
+    // fit, only their descriptions — and below what the guides want, which is
+    // the gap this is about.
     const context = buildAgentContext(tableSession(), {
       profile: "compact",
-      tokenBudget: 650,
+      tokenBudget: 800,
     });
 
     // The guide-deferral note specifically: the over-budget note below names
@@ -289,21 +293,21 @@ describe("what the selection reports", () => {
     const guideNote = (context.selection.notes ?? []).find((note) =>
       note.includes("guide(s) were deferred")
     );
-    expect(guideNote).toMatch(/650-token budget/);
+    expect(guideNote).toMatch(/800-token budget/);
   });
 
   it("says when the contract lands over its budget, and why", () => {
     const context = buildAgentContext(tableSession(), {
       profile: "compact",
-      tokenBudget: 650,
+      tokenBudget: 800,
     });
 
     // The common operations keep their guidance whatever the budget says, so
     // a small budget is missed rather than met by cutting them. Missing it
     // silently would leave the reported size to be discovered by a provider.
-    expect(context.selection.estimatedTokens).toBeGreaterThan(650);
+    expect(context.selection.estimatedTokens).toBeGreaterThan(800);
     expect((context.selection.notes ?? []).join(" ")).toMatch(
-      /over the 650-token budget/
+      /over the 800-token budget/
     );
   });
 

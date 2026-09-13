@@ -307,6 +307,21 @@ The control appears only for a capability on that list. It never appears for a
 destructive one, never for a write that enumerates rows, and never for an
 action whose own configuration demands a human every time — and a host
 `onApprove` bypasses the chrome entirely, so nothing there can reach past it.
+
+A panel mounted beside the table rather than inside it cannot read the table's
+feature state, so the standing decision travels through the bridge:
+`bridge.alwaysAllowed` is called with an `AlwaysAllowedState` — the capability
+keys currently waved through and a `revoke(key)` — and `useTableAssistant`
+takes it as `alwaysAllow`. Without it a reader can allow a capability and have
+no way to take it back.
+
+```ts
+const [allowed, setAllowed] = useState<AlwaysAllowedState | null>(null);
+
+tableAgent({ bridge: { alwaysAllowed: setAllowed } });
+useTableAssistant({ session, transport, alwaysAllow: allowed ?? undefined });
+```
+
 What a reader waved through is readable from the store as `alwaysAllowed` and
 revocable with `revokeAlwaysAllow(key)`; it resets whenever the contract moves,
 because "allow this" was said about a table that no longer exists in that

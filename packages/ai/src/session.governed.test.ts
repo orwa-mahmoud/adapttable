@@ -1018,7 +1018,7 @@ describe("execution lifecycle", () => {
     expect(hooks.addRows).not.toHaveBeenCalled();
     const del = await session.execute(
       "rows.delete",
-      { keys: ["r1"] },
+      { rows: [{ rowKey: "r1" }] },
       1,
       "del-stage"
     );
@@ -1716,7 +1716,7 @@ describe("the row writes an agent can ask for", () => {
 
     const result = await session.execute(
       "rows.delete",
-      { keys: ["r1"] },
+      { rows: [{ rowKey: "r1" }] },
       1,
       "del"
     );

@@ -11,6 +11,7 @@ import { AgentCapabilityDefinition } from '@adapttable/ai';
 import { AgentContextInputs } from '@adapttable/ai';
 import { AgentObservation } from '@adapttable/ai';
 import { AgentSession } from '@adapttable/ai';
+import { AlwaysAllowedState } from '@adapttable/ai';
 import { ApprovalResult } from '@adapttable/ai';
 import { ApprovalSubject } from '@adapttable/ai';
 import { AssistantAnswer } from '@adapttable/ai';
@@ -78,6 +79,7 @@ export interface TableAgentOptions {
 
 // @public
 export interface TableAssistantOptions {
+    readonly alwaysAllow?: AlwaysAllowedState;
     readonly awaitingApproval?: boolean;
     readonly contextInputs?: () => AgentContextInputs;
     readonly onOpenChange?: (open: boolean) => void;

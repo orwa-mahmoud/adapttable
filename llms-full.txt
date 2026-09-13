@@ -7556,7 +7556,9 @@ Capabilities come from the live table:
   `rows.read` redacts `readable: false` cells and is bounded by
   `limits.readMax`. `scope: "full"` requires `source.fullDataset === true`.
 - `rows.add` / `rows.delete` appear when the host apply methods exist and
-  `writePolicy` is `"allow"`. `rows.delete` is destructive.
+  `writePolicy` is `"allow"`. `rows.delete` is destructive, and takes the same
+  row references `edit.cells` does — a stable `rowKey`, or a 1-based
+  `position` in a named `scope` — resolved before any row is removed.
 - Data-layer truth comes from the source's
   [`TableSourceCapabilities`](./data-tiers.md) — the manifest copies those
   fields and never re-infers them from shape.
@@ -8484,7 +8486,10 @@ the write-approval path. See
 
 `edit.cells` takes `{ edits: Array<{ column, value, rowKey?, position?, scope? }> }`
 — each edit needs `rowKey` or a 1-based `position`. Positions resolve
-before write. The execute result is
+before write. `rows.delete` addresses rows the same way:
+`{ rows: Array<{ rowKey?, position?, scope? }> }`, resolved before anything
+is removed, so a reference that names no row is refused while the deletion is
+still a proposal. The execute result is
 
 `{ ok, revision, idempotencyKey, result: { proposals, applied, approval, results? } }`.
 
@@ -8559,6 +8564,21 @@ The control appears only for a capability on that list. It never appears for a
 destructive one, never for a write that enumerates rows, and never for an
 action whose own configuration demands a human every time — and a host
 `onApprove` bypasses the chrome entirely, so nothing there can reach past it.
+
+A panel mounted beside the table rather than inside it cannot read the table's
+feature state, so the standing decision travels through the bridge:
+`bridge.alwaysAllowed` is called with an `AlwaysAllowedState` — the capability
+keys currently waved through and a `revoke(key)` — and `useTableAssistant`
+takes it as `alwaysAllow`. Without it a reader can allow a capability and have
+no way to take it back.
+
+```ts
+const [allowed, setAllowed] = useState<AlwaysAllowedState | null>(null);
+
+tableAgent({ bridge: { alwaysAllowed: setAllowed } });
+useTableAssistant({ session, transport, alwaysAllow: allowed ?? undefined });
+```
+
 What a reader waved through is readable from the store as `alwaysAllowed` and
 revocable with `revokeAlwaysAllow(key)`; it resets whenever the contract moves,
 because "allow this" was said about a table that no longer exists in that
@@ -12788,8 +12808,9 @@ the `AssistantTurnStatus`.
 what the panel shows.
 
 **The table binding.** `TableAgentBridge` is how a host receives live updates —
-a session to attach, a manifest to publish, a pending approval, and a reader for
-the live view. A binding states what its own runtime offers through
+a session to attach, a manifest to publish, a pending approval, a reader for the
+live view, and an `AlwaysAllowedState` naming what the reader has agreed to stop
+being asked about, with the `revoke` that takes one back. A binding states what its own runtime offers through
 `ObservationInputs` and `agentObservation` turns that into the observation a
 session reads the table through, so every binding answers "what can this table
 do" the same way. `contractFingerprint` and `contractVersion` identify the

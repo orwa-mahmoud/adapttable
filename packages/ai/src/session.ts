@@ -1142,6 +1142,100 @@ function assertPinnableRow(rowKey: string): void {
   }
 }
 
+/** Move to a page, and to a page size when one was asked for. */
+function applySetPage(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): { ok: true; revision: number } {
+  const refusal = pageRefusalFor(observation, body);
+  if (refusal) throw new ApplyError("apply-failed", refusal);
+  const wantsLimit = typeof body.limit === "number";
+  if (wantsLimit) assertApply(apply, "setLimit");
+  assertApply(apply, "setPage");
+  apply.setPage(body.page as number);
+  if (wantsLimit) apply.setLimit!(body.limit as number);
+  return { ok: true, revision: observation.viewRevision + 1 };
+}
+
+/**
+ * Change or clear the sort, and say which sort landed.
+ *
+ * Answered with what was applied for the same reason the filter is: a bare
+ * `ok` leaves a caller unable to tell its own request from a guess, so it
+ * asks again.
+ */
+function applySetSort(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): {
+  ok: true;
+  revision: number;
+  sort: { key: string; dir: "asc" | "desc" } | null;
+} {
+  const sortKey = body.key as string | null | undefined;
+  const refused = sortRefusal(observation, sortKey);
+  if (refused) throw new ApplyError("apply-failed", refused);
+  assertApply(apply, "setSort");
+  const dir = body.dir as "asc" | "desc" | undefined;
+  apply.setSort(sortKey ?? undefined, dir);
+  return {
+    ok: true,
+    revision: observation.viewRevision + 1,
+    sort: sortKey ? { key: sortKey, dir: dir ?? "asc" } : null,
+  };
+}
+
+/** Set the toolbar search, and say which string landed. */
+function applySetSearch(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): { ok: true; revision: number; query: string } {
+  assertApply(apply, "setSearch");
+  const query = typeof body.query === "string" ? body.query : "";
+  apply.setSearch(query);
+  return { ok: true, revision: observation.viewRevision + 1, query };
+}
+
+/**
+ * Replace the extra filter bag, and say which bag landed.
+ *
+ * Three argument shapes reduce to one bag, and a bare `ok` leaves the caller
+ * unable to tell which reading it got — so it sends the request again in
+ * another shape, and the reader watches one filter land four times.
+ */
+function applySetFilters(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): { ok: true; revision: number; filters: Record<string, unknown> } {
+  assertApply(apply, "setFilters");
+  const extras = extrasFromAgentFilters(
+    body.filters,
+    observation.availableFilters
+  );
+  apply.setFilters(extras);
+  return { ok: true, revision: observation.viewRevision + 1, filters: extras };
+}
+
+/** Group by a column, or clear it, and say which the table is holding. */
+function applySetGroupBy(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): { ok: true; revision: number; groupBy: string | null } {
+  const groupKey = body.key as string | null | undefined;
+  assertApply(apply, "setGroupBy");
+  apply.setGroupBy(groupKey ?? undefined);
+  return {
+    ok: true,
+    revision: observation.viewRevision + 1,
+    groupBy: groupKey ?? null,
+  };
+}
+
 async function dispatchBuiltIn(
   key: CapabilityKey,
   context: AgentCapabilityContext,
@@ -1167,70 +1261,16 @@ async function dispatchBuiltIn(
         availableFilters: observation.availableFilters,
         revision: observation.viewRevision,
       };
-    case "view.setPage": {
-      const refusal = pageRefusalFor(observation, body);
-      if (refusal) throw new ApplyError("apply-failed", refusal);
-      const page = body.page as number;
-      if (typeof body.limit === "number") {
-        assertApply(apply, "setLimit");
-      }
-      assertApply(apply, "setPage");
-      apply.setPage(page);
-      if (typeof body.limit === "number") {
-        apply.setLimit!(body.limit);
-      }
-      return { ok: true, revision: observation.viewRevision + 1 };
-    }
-    case "view.setSort": {
-      const sortKey = body.key as string | null | undefined;
-      const refused = sortRefusal(observation, sortKey);
-      if (refused) throw new ApplyError("apply-failed", refused);
-      assertApply(apply, "setSort");
-      const dir = body.dir as "asc" | "desc" | undefined;
-      apply.setSort(sortKey ?? undefined, dir);
-      // Answered with the sort that was applied, for the same reason the
-      // filter is: a bare `ok` leaves a caller unable to tell its own request
-      // from a guess, and it asks again.
-      return {
-        ok: true,
-        revision: observation.viewRevision + 1,
-        sort: sortKey ? { key: sortKey, dir: dir ?? "asc" } : null,
-      };
-    }
-    case "view.setSearch": {
-      assertApply(apply, "setSearch");
-      const query = typeof body.query === "string" ? body.query : "";
-      apply.setSearch(query);
-      return { ok: true, revision: observation.viewRevision + 1, query };
-    }
-    case "view.setFilters": {
-      assertApply(apply, "setFilters");
-      // Three argument shapes reduce to one bag, and a bare `ok` leaves the
-      // caller unable to tell which reading it got — so it sends the request
-      // again in another shape, and the reader watches one filter land four
-      // times. Reporting the bag that was applied ends the guessing with the
-      // value the table is actually holding.
-      const extras = extrasFromAgentFilters(
-        body.filters,
-        observation.availableFilters
-      );
-      apply.setFilters(extras);
-      return {
-        ok: true,
-        revision: observation.viewRevision + 1,
-        filters: extras,
-      };
-    }
-    case "view.setGroupBy": {
-      const groupKey = body.key as string | null | undefined;
-      assertApply(apply, "setGroupBy");
-      apply.setGroupBy(groupKey ?? undefined);
-      return {
-        ok: true,
-        revision: observation.viewRevision + 1,
-        groupBy: groupKey ?? null,
-      };
-    }
+    case "view.setPage":
+      return applySetPage(apply, body, observation);
+    case "view.setSort":
+      return applySetSort(apply, body, observation);
+    case "view.setSearch":
+      return applySetSearch(apply, body, observation);
+    case "view.setFilters":
+      return applySetFilters(apply, body, observation);
+    case "view.setGroupBy":
+      return applySetGroupBy(apply, body, observation);
     case "view.setAggregations":
       return applySetAggregations(apply, body, observation, guard);
     case "view.pinColumn": {

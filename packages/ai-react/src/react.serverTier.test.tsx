@@ -456,7 +456,9 @@ describe("agent binding without an engine — writing", () => {
         },
       },
       {},
-      ["grouping"]
+      // The grouping panel: grouping is offered to an agent only where it is
+      // live state the setter can actually move.
+      ["grouping-panel"]
     );
     const result = await run(
       session,

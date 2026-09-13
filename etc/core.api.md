@@ -60,7 +60,9 @@ export interface AgentApprovalPending {
 // @public
 export interface AgentApprovalProposal {
     readonly after?: unknown;
+    readonly afterText?: string;
     readonly before?: unknown;
+    readonly beforeText?: string;
     readonly beforeUnavailable?: boolean;
     readonly column?: string;
     readonly columnLabel?: string;
@@ -4081,6 +4083,7 @@ export interface TableLabels {
     addGroupingColumn?: string;
     addRow?: string;
     allMatchingSelected?: (total: number) => string;
+    alwaysAllowProposal?: string;
     applyView?: string;
     approvalWaitingElsewhere?: string;
     approveAllProposals?: string;

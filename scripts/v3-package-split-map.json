@@ -6419,6 +6419,14 @@
       "behavior": ""
     },
     {
+      "export": "AlwaysAllowedState",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "AlwaysAllowInput",
       "currentImport": "@adapttable/ai",
       "kind": "type",

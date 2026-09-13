@@ -444,6 +444,12 @@ export interface AggregationState {
 }
 
 // @public
+export interface AlwaysAllowedState {
+    readonly capabilities: readonly string[];
+    readonly revoke: (capability: string) => void;
+}
+
+// @public
 export interface AlwaysAllowInput {
     readonly alwaysAllow: readonly string[];
     readonly capability: string | undefined;
@@ -1123,6 +1129,7 @@ export function planUndo(before: AgentContextView, after: AgentContextView, sess
 
 // @public
 export interface ProposalResolver {
+    readonly cellText?: (rowKey: string, column: string, value: unknown) => string | undefined;
     readonly cellValue: (rowKey: string, column: string) => unknown;
     readonly columnLabel: (column: string) => string | undefined;
     readonly readable: (column: string) => boolean;
@@ -1304,6 +1311,7 @@ export function summaryOf(key: CapabilityKey): string;
 
 // @public
 export interface TableAgentBridge<TPending = unknown> {
+    readonly alwaysAllowed?: (state: AlwaysAllowedState) => void;
     readonly approvals?: (pending: TPending | null) => void;
     attach?: (session: AgentSession) => void;
     publish?: (manifest: AgentManifest) => void;

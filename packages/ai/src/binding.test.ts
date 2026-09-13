@@ -80,14 +80,13 @@ describe("what a reader is shown beside Approve", () => {
     expect(shown[0]).not.toHaveProperty("columnLabel");
   });
 
-  it("carries a row-level proposal that names no column", () => {
+  it("carries a row-level proposal as the row, with no value claim", () => {
+    // A deletion names no column, so there is no cell to be unavailable.
+    // Saying there is put "Grace: Unavailable → —" in front of a reader being
+    // asked to delete her.
     const shown = displayProposals([{ rowKey: "r2" }], resolver());
 
-    expect(shown[0]).toEqual({
-      rowKey: "r2",
-      rowLabel: "Grace",
-      beforeUnavailable: true,
-    });
+    expect(shown[0]).toEqual({ rowKey: "r2", rowLabel: "Grace" });
   });
 
   it("keeps plan order", () => {
