@@ -272,7 +272,7 @@ describe("edit.cells", () => {
     }
   });
 
-  it("takes a host's own approval answer for one capability", async () => {
+  it("skips the human for one capability on a table that asks for writes", async () => {
     const editCells = vi.fn();
     const asked: string[] = [];
     const session = createAgentSession({
@@ -294,17 +294,19 @@ describe("edit.cells", () => {
       "auto-1"
     );
 
-    // The table asks for writes; this one capability was answered in advance,
-    // so nobody was asked and the write still ran.
+    // The table asks for writes. This capability's own policy replaces that
+    // rather than narrowing it, so nobody was asked and the write still ran —
+    // the developer's answer, not a reader's "don't ask again".
     expect(result.ok).toBe(true);
     expect(asked).toEqual([]);
     expect(editCells).toHaveBeenCalledTimes(1);
   });
 
-  it("cannot wave through a capability the table demands a human for", async () => {
+  it("asks for one capability on a table that asks for nothing", async () => {
     const asked: string[] = [];
     const session = createAgentSession({
-      observe: () => observation({ approval: "writes" }),
+      // The table waves writes through; this one capability does not.
+      observe: () => observation({ approval: "never" }),
       apply: apply(),
       capabilityApproval: {
         "edit.cells": { approval: { policy: "required" } },
@@ -322,6 +324,34 @@ describe("edit.cells", () => {
       "req-1"
     );
 
+    expect(asked).toHaveLength(1);
+  });
+
+  it("keeps a required capability asking whatever the reader waved through", async () => {
+    const asked: string[] = [];
+    const session = createAgentSession({
+      // The reader has already said "don't ask again" for this capability.
+      observe: () =>
+        observation({ approval: "writes", alwaysAllow: ["edit.cells"] }),
+      apply: apply(),
+      capabilityApproval: {
+        "edit.cells": { approval: { policy: "required" } },
+      },
+      onApprove: (subject) => {
+        asked.push(subject.kind);
+        return Promise.resolve(true);
+      },
+    });
+
+    await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "salary", value: 2 }] },
+      1,
+      "req-2"
+    );
+
+    // The one line that does not move: a developer marking a capability
+    // `required` is not something a reader's convenience can answer for.
     expect(asked).toHaveLength(1);
   });
 

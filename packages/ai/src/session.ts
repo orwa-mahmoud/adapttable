@@ -88,12 +88,24 @@ export interface CreateAgentSessionOptions {
    */
   excludeCapabilities?: readonly string[];
   /**
-   * A host's own approval policy for individual capabilities, by key.
+   * This table's approval policy for individual capabilities, by key.
    *
-   * The same shape a row or bulk action carries, resolved field by field
-   * against the table's shared policy. It narrows only: an entry asking for
-   * approval on something the table already waves through is honoured, and one
-   * waving through what the table requires a human for is not.
+   * The same shape a row or bulk action carries. An entry **replaces** the
+   * shared policy for that one capability rather than narrowing it: `required`
+   * asks on a table that asks for nothing, and `automatic` skips the human on a
+   * table that asks for writes. Both directions are deliberate — this is the
+   * developer's own answer to "who confirms this", written where the table is
+   * configured.
+   *
+   * It is not the reader's answer. A reader choosing "don't ask again" is
+   * `alwaysAllow` plus the approval memory: opt-in per capability, revocable,
+   * and reset by a contract change. The two are different permissions and
+   * neither stands in for the other — a capability carrying `required` here
+   * keeps asking however often the reader waves it through.
+   *
+   * What it cannot do is make something permitted. Approval decides who
+   * confirms an operation, never whether the table offers it: a key the table
+   * does not wire, or excludes, stays unavailable whatever this says.
    */
   capabilityApproval?: Readonly<Record<string, ActionAiOptions>>;
   /**

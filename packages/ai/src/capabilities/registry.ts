@@ -150,10 +150,11 @@ export function createCapabilityRegistry(
           ? "supported"
           : "unsupported",
       idempotent: isIdempotent(key),
-      // A host's own word on this one capability, resolved field by field
-      // against the table's shared policy exactly as a row action's is. It can
-      // only narrow what the table already permits: `resolveApproval` keeps a
-      // "required" override from being waved through.
+      // The table's own word on this one capability, carried exactly as a row
+      // action's is. `resolveApproval` lets it replace the shared policy in
+      // either direction — that is the point of authoring one — and holds the
+      // one line that does not move: an action marked `required` drops
+      // `alwaysAllow`, so a reader's "don't ask again" cannot answer for it.
       ...(approvals[key] ? { ai: approvals[key] } : {}),
       isEnabled: (observation) => isBuiltInEnabled(key, observation),
       plan: governed

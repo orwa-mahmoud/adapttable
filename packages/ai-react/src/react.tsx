@@ -138,9 +138,20 @@ export interface TableAgentOptions {
   /**
    * This table's approval policy for individual capabilities, by key.
    *
-   * The same shape a row or bulk action carries, resolved field by field
-   * against {@link approval}. It narrows only — a capability the table
-   * requires a human for cannot be waved through here.
+   * The same shape a row or bulk action carries. An entry **replaces**
+   * {@link approval} for that one capability rather than narrowing it:
+   * `required` asks on a table that asks for nothing, and `automatic` skips the
+   * human on a table that asks for writes. Both directions are deliberate —
+   * this is the developer's own answer to "who confirms this".
+   *
+   * It is not the reader's answer. "Don't ask again" is `approval.alwaysAllow`
+   * plus the approval memory: opt-in per capability, revocable, and reset by a
+   * contract change. A capability carrying `required` here keeps asking however
+   * often the reader waves it through.
+   *
+   * Approval decides who confirms an operation, never whether the table offers
+   * it: a key the table does not wire, or one in
+   * {@link excludeCapabilities}, stays unavailable whatever this says.
    */
   readonly capabilityApproval?: Readonly<Record<string, ActionAiOptions>>;
   /**
