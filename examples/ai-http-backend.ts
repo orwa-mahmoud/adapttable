@@ -476,14 +476,13 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
     text,
     toolCalls,
     askUser: record.askUser,
-    // A write's receipt goes to the reader, not back to the model: a second
-    // call that only says "done" is the confirmation loop nobody wants. A
-    // *read* is the opposite — its whole purpose is to inform what comes
-    // next, and a turn that resolves a row and is then never told which row
-    // it found can only stop there, having said it was about to act.
-    continueWithResults:
-      (toolCalls ?? []).length > 0 &&
-      (toolCalls ?? []).every((call) => ASKS.has(call.name)),
+    // One ask in the batch is enough. Its result is the thing the next step
+    // depends on, and a model routinely pairs it with the view change that
+    // made it worth asking — "search for Jonah, then read what is there".
+    // Requiring every call to be an ask drops that read on the floor; a batch
+    // with no ask at all is asking for a receipt, and a receipt goes to the
+    // reader rather than buying a round that says "done".
+    continueWithResults: (toolCalls ?? []).some((call) => ASKS.has(call.name)),
   });
 }
 

@@ -576,6 +576,46 @@ describe("handleExampleAgentTurn", () => {
     );
   });
 
+  it("continues on a read the model paired with the view change it needed", async () => {
+    // "Search for Jonah, then read what is there" arrives as one batch. The
+    // read is the whole point of the pass, so dropping its result because a
+    // view change travelled beside it ends the turn mid-lookup.
+    const complete = () =>
+      Promise.resolve(
+        JSON.stringify({
+          text: "Looking him up.",
+          toolCalls: [
+            { name: "view.setSearch", args: { query: "Jonah" } },
+            { name: "rows.read", args: { offset: 0, limit: 10 } },
+          ],
+        })
+      );
+    const reply = await handleExampleAgentTurn(
+      request(),
+      complete,
+      new AbortController().signal
+    );
+    assert.equal(reply.continueWithResults, true);
+  });
+
+  it("ends the turn on a batch that only acts", async () => {
+    const complete = () =>
+      Promise.resolve(
+        JSON.stringify({
+          text: "Moved.",
+          toolCalls: [{ name: "view.setPage", args: { page: 2 } }],
+        })
+      );
+    const reply = await handleExampleAgentTurn(
+      request(),
+      complete,
+      new AbortController().signal
+    );
+    // Its receipt belongs to the reader. Handing it back buys a round that
+    // says "done" — or repeats the call it just made.
+    assert.equal(reply.continueWithResults, false);
+  });
+
   it("keeps a wordless reply that carries calls", async () => {
     const complete = () =>
       Promise.resolve(
