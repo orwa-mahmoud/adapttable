@@ -534,7 +534,11 @@ export function createAgentSession(
     idempotencyKey: string,
     signal?: AbortSignal
   ): Promise<ExecuteResult> => {
-    const args = normalizeCapabilityArgs(key, rawArgs);
+    const args = normalizeCapabilityArgs(
+      key,
+      rawArgs,
+      registry.get(key)?.guide.input
+    );
     const state = { invokedWrite: false };
     const record = (result: ExecuteResult): ExecuteResult => {
       replay.set(idempotencyKey, {

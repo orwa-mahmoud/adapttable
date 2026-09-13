@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { guideOf } from "./guides";
+import type { CapabilityKey } from "./keys";
 import { normalizeCapabilityArgs } from "./normalizeArgs";
+
+const inputOf = (key: CapabilityKey) => guideOf(key).input;
 
 describe("normalizeCapabilityArgs", () => {
   it("rewrites column to key for sort, group and pin", () => {
@@ -153,5 +157,76 @@ describe("naming a row with the word this table uses for a column", () => {
     expect(
       normalizeCapabilityArgs("view.setSort", { key: "salary" })
     ).toMatchObject({ key: "salary" });
+  });
+});
+
+describe("one item where a capability takes a batch", () => {
+  it("wraps a single cell edit into the edits array", () => {
+    expect(
+      normalizeCapabilityArgs(
+        "edit.cells",
+        { rowKey: "p1", column: "salary", value: 185 },
+        inputOf("edit.cells")
+      )
+    ).toEqual({ edits: [{ rowKey: "p1", column: "salary", value: 185 }] });
+  });
+
+  it("wraps a lone edit object handed under the right name", () => {
+    expect(
+      normalizeCapabilityArgs(
+        "edit.cells",
+        { edits: { rowKey: "p1", column: "salary", value: 185 } },
+        inputOf("edit.cells")
+      )
+    ).toEqual({ edits: [{ rowKey: "p1", column: "salary", value: 185 }] });
+  });
+
+  it("wraps a lone key where a list of keys is required", () => {
+    expect(
+      normalizeCapabilityArgs(
+        "rows.delete",
+        { keys: "p1" },
+        inputOf("rows.delete")
+      )
+    ).toEqual({ keys: ["p1"] });
+  });
+
+  it("leaves a well-formed batch alone", () => {
+    const args = { edits: [{ rowKey: "p1", column: "salary", value: 185 }] };
+    expect(
+      normalizeCapabilityArgs("edit.cells", args, inputOf("edit.cells"))
+    ).toEqual(args);
+  });
+
+  it("leaves a body that is not one item for validation to name", () => {
+    // `notes` is nothing the item declares, so this is a different mistake —
+    // wrapping it would bury the name a refusal needs to say.
+    expect(
+      normalizeCapabilityArgs(
+        "edit.cells",
+        { rowKey: "p1", notes: "raise" },
+        inputOf("edit.cells")
+      )
+    ).toEqual({ rowKey: "p1", notes: "raise" });
+  });
+
+  it("wraps nothing when the caller has no schema to read", () => {
+    expect(
+      normalizeCapabilityArgs("edit.cells", {
+        rowKey: "p1",
+        column: "salary",
+        value: 185,
+      })
+    ).toEqual({ rowKey: "p1", column: "salary", value: 185 });
+  });
+
+  it("leaves a capability that takes two required arguments alone", () => {
+    expect(
+      normalizeCapabilityArgs(
+        "rows.reorder",
+        { fromKey: "p1", toKey: "p2" },
+        inputOf("rows.reorder")
+      )
+    ).toEqual({ fromKey: "p1", toKey: "p2" });
   });
 });

@@ -405,18 +405,21 @@ const REPLY_SHAPE = [
 ].join("\n");
 
 /**
- * The calls that ask this table something rather than command it.
+ * The calls that change the data, and so end a turn.
  *
- * Their results are worth handing back, because a model that looked something
- * up is not finished — it looked it up in order to do something with it.
+ * A write's receipt goes to the reader, not back to the model: handing one
+ * back buys a second call that only says "done". Everything else — reading,
+ * describing, resolving, and every `view.*` call — changes only what can be
+ * seen, and a model that narrowed the table did it in order to look at what
+ * is left. Naming the writes rather than the asks is what keeps that true for
+ * capabilities this list has never heard of.
  */
-const ASKS = new Set([
-  "describe",
-  "read",
-  "columns.describe",
-  "view.describe",
-  "rows.read",
-  "rows.resolve",
+const WRITES = new Set([
+  "edit.cells",
+  "rows.add",
+  "rows.delete",
+  "rows.reorder",
+  "export.run",
 ]);
 
 /** A bounded, single-line look at what a provider sent. */
@@ -471,14 +474,12 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
     text,
     toolCalls,
     askUser: record.askUser,
-    // A write's receipt goes to the reader, not back to the model: a second
-    // call that only says "done" is the confirmation loop nobody wants. A
-    // *read* is the opposite — its whole purpose is to inform what comes
-    // next, and a turn that resolves a row and is then never told which row
-    // it found can only stop there, having said it was about to act.
+    // A turn that only looked at something is not finished: it looked in
+    // order to act. The session caps continuations, so the open side of this
+    // is bounded by the library rather than by the length of this list.
     continueWithResults:
       (toolCalls ?? []).length > 0 &&
-      (toolCalls ?? []).every((call) => ASKS.has(call.name)),
+      (toolCalls ?? []).every((call) => !WRITES.has(call.name)),
   });
 }
 
