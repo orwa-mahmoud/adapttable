@@ -611,3 +611,15 @@ it("every locale words a single-change review link", () => {
     );
   }
 });
+
+it("every locale names a custom capability by the key the host chose", () => {
+  // A custom capability's key is the host's own, so no bundle can translate
+  // it. Showing the raw key is the only honest answer; showing `undefined`,
+  // or the word for a different capability, would be worse than untranslated.
+  for (const [tag, labels] of Object.entries(locales)) {
+    const revoke = labels.assistantAlwaysAllowedRevoke("orders.reprice");
+    expect(revoke, `${tag}.assistantAlwaysAllowedRevoke`).toContain(
+      "orders.reprice"
+    );
+  }
+});
