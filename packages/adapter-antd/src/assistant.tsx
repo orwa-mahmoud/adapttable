@@ -163,6 +163,7 @@ function AssistantSheet({
   className,
   open,
   onClose,
+  dir,
   children,
 }: Readonly<TableAssistantSheetProps>) {
   return (
@@ -171,6 +172,11 @@ function AssistantSheet({
       open={open}
       onClose={onClose}
       title={label}
+      // antd's Drawer takes no `dir` of its own, and its own direction comes
+      // from ConfigProvider — which a host may not have set for this subtree.
+      // `rootStyle` reaches the portalled root, which is the element that has
+      // to carry it.
+      rootStyle={dir ? { direction: dir } : undefined}
       data-adapttable-part={part}
       // antd forwards `data-*` to the content wrapper but `className` to the
       // drawer root, which would put the host's class on a different element

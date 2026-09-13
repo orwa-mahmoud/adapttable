@@ -56,7 +56,12 @@ import {
   type HostFilterState,
 } from "./aiHostFilters";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
-import { DEMO_SCENARIOS, demoTransport, UNSUPPORTED_REPLY } from "./aiScenario";
+import {
+  DEMO_SCENARIOS,
+  type DemoContext,
+  demoTransport,
+  UNSUPPORTED_REPLIES,
+} from "./aiScenario";
 import { setAssistantActive } from "./assistantActivity";
 import type { Locale } from "./data";
 import { DemoFallback, Segmented } from "./kitDemos";
@@ -214,6 +219,18 @@ const COLUMN_HEADERS: Record<Locale, Record<string, string>> = {
     salary: "الراتب",
     started: "تاريخ البدء",
   },
+};
+
+/** The action offered beside a reply the demo could not carry out. */
+const CONNECT_ACTION: Record<Locale, string> = {
+  en: "Connect a backend",
+  ar: "اربط خادمًا",
+};
+
+/** What the demo says about itself, in the language it is being read in. */
+const DEMO_NOTE: Record<Locale, string> = {
+  en: "These examples are scripted. Connect a backend to ask anything.",
+  ar: "هذه الأمثلة نصية مُعدّة مسبقًا. اربط خادمًا لطرح أي سؤال.",
 };
 
 function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
@@ -441,12 +458,14 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   // Rebuilt from the live rows every render, so the bulk example proposes
   // the salaries actually on screen rather than the ones it was written
   // against.
-  const contextRef = useRef({
+  const contextRef = useRef<DemoContext>({
+    locale: "en",
     namedRowKey: "p1",
     pinnedColumnKey: "person",
-    coreTeam: [] as { rowKey: string; salary: number }[],
+    coreTeam: [],
   });
   contextRef.current = {
+    locale,
     namedRowKey: "p1",
     pinnedColumnKey: "person",
     coreTeam: rows
@@ -857,6 +876,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               data={visibleRows}
               columns={columns}
               labels={labels}
+              dir={rtl ? "rtl" : "ltr"}
               rowKey={(row: StaffRow) => row.id}
               urlSync={false}
               features={features}
@@ -867,22 +887,21 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
             <Assistant
               assistant={assistant}
               labels={labels}
+              dir={rtl ? "rtl" : "ltr"}
               open={assistant.open}
               onOpenChange={assistant.setOpen}
               presentation="floating"
               note={
-                connection.mode === "simulated"
-                  ? "These examples are scripted. Connect a backend to ask anything."
-                  : undefined
+                connection.mode === "simulated" ? DEMO_NOTE[locale] : undefined
               }
               approval={pendingApproval}
               onSettings={() => {
                 setSettingsOpen(true);
               }}
               messageAction={(message) =>
-                message.text === UNSUPPORTED_REPLY
+                Object.values(UNSUPPORTED_REPLIES).includes(message.text)
                   ? {
-                      label: "Connect a backend",
+                      label: CONNECT_ACTION[locale],
                       onRun: () => {
                         setSettingsOpen(true);
                       },

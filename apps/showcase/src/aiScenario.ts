@@ -64,6 +64,8 @@ export interface DemoScenario {
 
 /** What the page knows when a scenario runs. @internal */
 export interface DemoContext {
+  /** The language this demo is being read in. */
+  readonly locale?: string;
   /** Row key of the person the edit examples name. */
   readonly namedRowKey: string;
   /** Column the pin examples name. */
@@ -80,6 +82,12 @@ export interface DemoContext {
 /** What the demo says when it does not know a request. @internal */
 export const UNSUPPORTED_REPLY =
   "This demo understands the example requests. Connect a backend for free-form conversation.";
+
+/** The same, per locale, because a reader reads it. @internal */
+export const UNSUPPORTED_REPLIES: Record<string, string> = {
+  en: UNSUPPORTED_REPLY,
+  ar: "يفهم هذا العرض الأمثلة المذكورة. اربط خادمًا لمحادثة حرة.",
+};
 
 /**
  * Every request this demo can carry out.
@@ -375,7 +383,12 @@ export function demoTransport(context: () => DemoContext): AssistantTransport {
   return {
     send: async ({ session, text }): Promise<AssistantTransportReply> => {
       const found = scenarioFor(text);
-      if (!found) return { text: UNSUPPORTED_REPLY };
+      if (!found) {
+        return {
+          text:
+            UNSUPPORTED_REPLIES[context().locale ?? "en"] ?? UNSUPPORTED_REPLY,
+        };
+      }
       const { scenario, arabic } = found;
       if (scenario.capabilityKey === "") {
         return { text: describeCatalog(session) };

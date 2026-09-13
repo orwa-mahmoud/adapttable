@@ -113,6 +113,16 @@ export interface TableAssistantSheetProps {
   readonly className?: string;
   readonly open: boolean;
   readonly onClose: () => void;
+  /**
+   * Writing direction for the surface.
+   *
+   * Every kit draws this one through a portal, which lands at the document
+   * root and never sees the direction of the subtree the assistant lives in.
+   * Passed explicitly for that reason: without it a right-to-left table opens
+   * a left-to-right sheet, with the text in one direction and the layout in
+   * the other. A kit applies it to the element it portals.
+   */
+  readonly dir?: "ltr" | "rtl";
   readonly children: ReactNode;
 }
 

@@ -155,6 +155,7 @@ function AssistantSheet({
   className,
   open,
   onClose,
+  dir,
   children,
 }: Readonly<TableAssistantSheetProps>) {
   return (
@@ -170,6 +171,7 @@ function AssistantSheet({
         <Drawer.Viewport>
           <Drawer.Popup
             className={cx("adapttable-drawer", className)}
+            dir={dir}
             data-adapttable-part={part}
             style={{ height: "90dvh" }}
           >

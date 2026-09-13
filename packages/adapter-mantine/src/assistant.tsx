@@ -275,6 +275,7 @@ function AssistantSheet({
   className,
   open,
   onClose,
+  dir,
   children,
 }: Readonly<TableAssistantSheetProps>) {
   return (
@@ -285,6 +286,7 @@ function AssistantSheet({
       <Drawer.Overlay />
       <Drawer.Content
         aria-label={label}
+        dir={dir}
         data-adapttable-part={part}
         className={className}
         style={{ display: "flex", flexDirection: "column" }}

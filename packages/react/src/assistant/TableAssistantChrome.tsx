@@ -78,6 +78,15 @@ export type TableAssistantPresentation = "panel" | "sheet" | "floating";
  * @public
  */
 export interface TableAssistantProps {
+  /**
+   * Writing direction for surfaces this chrome draws through a portal.
+   *
+   * The panel and the launcher inherit direction from wherever the host put
+   * them; the narrow-viewport sheet does not, because every kit portals it to
+   * the document root. A right-to-left table passes `"rtl"` here so the sheet
+   * is laid out the way the table it belongs to is.
+   */
+  readonly dir?: "ltr" | "rtl";
   /** The live conversation. */
   readonly assistant: TableAssistantView;
   /**
@@ -650,6 +659,7 @@ export function TableAssistantChrome({
   approval,
   slots,
   speech,
+  dir,
 }: Readonly<TableAssistantChromeProps>): ReactElement {
   const wide = useFloatingFits();
   const launcherRef = useRef<HTMLElement | null>(null);
@@ -785,6 +795,7 @@ export function TableAssistantChrome({
         className={className}
         open
         onClose={close}
+        {...(dir ? { dir } : {})}
       >
         {contents}
       </Sheet>

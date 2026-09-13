@@ -116,6 +116,7 @@ function AssistantSheet({
   className,
   open,
   onClose,
+  dir,
   children,
 }: Readonly<TableAssistantSheetProps>) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -132,6 +133,7 @@ function AssistantSheet({
       ref={ref}
       open={open}
       aria-label={label}
+      dir={dir}
       data-adapttable-part={part}
       className={className}
       onCancel={(event) => {

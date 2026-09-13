@@ -9,7 +9,7 @@ import type {
   SavedViewsPanelChromeProps,
 } from "@adapttable/react/adapter";
 import type { DataTableClassNames } from "@adapttable/unstyled";
-import { MantineProvider } from "@mantine/core";
+import { DirectionProvider, MantineProvider } from "@mantine/core";
 import { type ComponentType, lazy, type ReactNode, Suspense } from "react";
 
 import { tailwindClassNames } from "./adapters/tailwindClassNames";
@@ -47,11 +47,21 @@ function PlainProvider({ children }: Readonly<KitProviderProps>) {
   return <>{children}</>;
 }
 
-function MantineKitProvider({ dark, children }: Readonly<KitProviderProps>) {
+function MantineKitProvider({
+  dark,
+  dir,
+  children,
+}: Readonly<KitProviderProps>) {
   return (
-    <MantineProvider forceColorScheme={dark ? "dark" : "light"}>
-      {children}
-    </MantineProvider>
+    // Mantine reads direction from its own provider, and its overlays portal
+    // to the document root — outside whatever `dir` an ancestor set. Without
+    // this the assistant's mobile sheet renders Arabic text in a left-to-right
+    // layout, because the portal never sees the RTL subtree it came from.
+    <DirectionProvider initialDirection={dir} detectDirection={false}>
+      <MantineProvider forceColorScheme={dark ? "dark" : "light"}>
+        {children}
+      </MantineProvider>
+    </DirectionProvider>
   );
 }
 
