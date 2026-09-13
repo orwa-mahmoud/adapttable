@@ -30,6 +30,7 @@ import {
   buildContract,
   buildView,
 } from "./contextSnapshot";
+import type { AgentPagination } from "./pagination";
 import type {
   AgentAggregations,
   AgentFilter,
@@ -98,6 +99,8 @@ export interface AgentContextInputs {
     readonly filters?: Readonly<Record<string, unknown>>;
     readonly pinnedColumns?: Readonly<Record<string, unknown>>;
     readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    /** Overrides the session's own pagination, for a host that knows better. */
+    readonly pagination?: AgentPagination;
   };
 }
 
@@ -138,8 +141,15 @@ export function buildAgentContext(
     ...contract,
     capabilities: chosen.capabilities,
   };
+  const manifest = session.manifest();
   const view = buildView(
-    { revision: session.manifest().viewRevision, ...inputs.view },
+    {
+      revision: manifest.viewRevision,
+      // The table's own answer about its pages, so a caller cannot publish a
+      // page count that disagrees with the one the session enforces.
+      ...(manifest.pagination ? { pagination: manifest.pagination } : {}),
+      ...inputs.view,
+    },
     contract.filters
   );
   const profile: AgentContextProfile = options.profile ?? "compact";

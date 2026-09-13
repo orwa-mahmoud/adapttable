@@ -10,6 +10,7 @@ import {
 } from "@adapttable/core";
 
 import { type SharedApproval, sharedApproval } from "./approvalConfig";
+import { type AgentPagination, agentPagination } from "./pagination";
 import type { CommitPolicy, RowAddressScope, WritePolicy } from "./keys";
 import type {
   AgentApply,
@@ -217,28 +218,51 @@ export function resolveRowFromNeutral<TRow>(
 }
 
 /**
+ * What this table's pages are, read from the source's own capabilities.
+ *
+ * A source holding the whole filtered set, or one that counted it, knows its
+ * total; anything else does not, and the unknown is carried rather than
+ * replaced by the rows that happen to be loaded. A local engine takes a page
+ * number, so jumps are offered.
+ */
+export function paginationFromNeutral<TRow>(
+  table: NeutralTable<TRow>,
+  page: number,
+  pageSize: number
+): AgentPagination {
+  const caps = table.capabilities;
+  const counted = caps.fullDataset || caps.totalCount === "exact";
+  const loaded = table.rows("page").length;
+  return agentPagination({
+    page,
+    pageSize,
+    ...(counted ? { totalRows: table.rows("full").length } : {}),
+    loadedRows: loaded,
+    canJump: true,
+  });
+}
+
+/**
  * The largest page number the session will accept.
  *
  * A page number, not a row count: with 8 rows and a limit of 10 there is one
  * page, and a bound of 8 lets an agent report that it moved to page 2 of a
- * table that has no page 2.
- *
- * When the total is unknown the last page is unknowable, so the bound is one
- * step ahead of where the reader is — walking an unbounded list one page at a
- * time is the only honest way to find its end, and refusing to move at all
- * would be the wrong answer to "we cannot prove there is more".
+ * table that has no page 2. Derived from the same pagination a context
+ * publishes, so the two can never disagree.
  */
 export function pageMaxFromNeutral<TRow>(
   table: NeutralTable<TRow>,
   limit: number,
   page: number
 ): number {
-  const caps = table.capabilities;
-  const size = Math.max(1, limit);
-  if (caps.fullDataset || caps.totalCount === "exact") {
-    return Math.max(1, Math.ceil(table.rows("full").length / size));
-  }
-  return Math.max(1, page + 1);
+  const pages = paginationFromNeutral(table, page, limit);
+  // When the total is unknown the last page is unknowable, so the bound is one
+  // step ahead of the reader: walking forward is the only honest way to find
+  // the end of a list nobody has counted, and refusing to move at all would be
+  // the wrong answer to "we cannot prove there is more".
+  return (
+    pages.totalPages ?? Math.max(1, page + (pages.hasNext === false ? 0 : 1))
+  );
 }
 
 export function rowAddressScopeForNeutral<TRow>(
@@ -332,6 +356,7 @@ export function observationFromNeutral<TRow>(
     sortBy: query?.sortBy,
     sortDir: query?.sortDir,
     pageMax: pageMaxFromNeutral(table, limit, page),
+    pagination: paginationFromNeutral(table, page, limit),
     readMax: options.readMax ?? 50,
     rowAddressScope: rowAddressScopeForNeutral(table),
   };

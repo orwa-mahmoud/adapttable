@@ -12,6 +12,8 @@ import {
   type AgentContextInputs,
   agentFiltersFromDefs,
   type AgentObservation,
+  agentPagination,
+  type AgentPagination,
   type AgentSession,
   type AggregationInputs,
   aggregationsFor,
@@ -305,6 +307,7 @@ function observationFromRuntime(
   const table = view?.neutralTable;
   const query = view?.query;
   const ids = runtime.featureIds();
+  const pages = serverPagination(view, query);
   if (table) {
     return {
       ...observationFromNeutral(
@@ -375,8 +378,8 @@ function observationFromRuntime(
     hasSavedViews: ids.includes("saved-views") && apply.applyView !== undefined,
     hasAdd: options.apply?.addRows !== undefined,
     hasDelete: options.apply?.deleteRows !== undefined,
-    page: query?.page ?? 1,
-    limit: query?.limit ?? 10,
+    page: pages.page,
+    limit: pages.pageSize,
     search: query?.search ?? "",
     sortBy: query?.sortBy,
     sortDir: query?.sortDir,
@@ -388,10 +391,43 @@ function observationFromRuntime(
       options.columns
     ),
     filters: query?.extra,
-    pageMax: view?.rows?.length ?? 10,
+    pagination: pages,
+    // A page count, derived from the same pagination the context publishes.
+    // This used to be the number of rows loaded, which is not a page count at
+    // any page size and let an agent report a move to a page that is not there.
+    pageMax:
+      pages.totalPages ??
+      Math.max(1, pages.page + (pages.hasNext === false ? 0 : 1)),
     readMax: options.readMax ?? 50,
     rowAddressScope: "visible",
   };
+}
+
+/**
+ * What a server-backed table's pages are, from what the source will say.
+ *
+ * The total is the server's count for the *current query* — the figure the
+ * table's own pagination is computed from — and it is published only when the
+ * source claims to have counted. A source that has not counted keeps an
+ * unknown total rather than being handed the rows that happen to be loaded,
+ * and a short page is the one thing it still proves about its own end.
+ */
+function serverPagination(
+  view: TableRuntimeView<unknown> | undefined,
+  query: TableRuntimeView<unknown>["query"]
+): AgentPagination {
+  const counted =
+    (view?.sourceCapabilities ?? PAGE_ONLY_SOURCE).totalCount === "exact";
+  const total = query?.total;
+  const loaded = view?.rows.length;
+  return agentPagination({
+    page: query?.page ?? 1,
+    pageSize: query?.limit ?? 10,
+    ...(counted && total !== undefined ? { totalRows: total } : {}),
+    ...(loaded === undefined ? {} : { loadedRows: loaded }),
+    // Only a source wired to take a page number can be sent one.
+    canJump: query?.setPage !== undefined,
+  });
 }
 
 function liveEditCells(

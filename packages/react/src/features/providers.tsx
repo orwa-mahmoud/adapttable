@@ -278,6 +278,14 @@ export interface TableRuntimeView<TRow = unknown> {
   readonly query?: {
     readonly page: number;
     readonly limit: number;
+    /**
+     * Rows matching the current query, when the source counted them.
+     *
+     * The filtered total, not the dataset and not the rows on screen. Absent
+     * where the source cannot say, which a consumer must carry as unknown
+     * rather than substituting what happens to be loaded.
+     */
+    readonly total?: number;
     readonly search: string;
     readonly sortBy?: string;
     readonly sortDir?: "asc" | "desc";

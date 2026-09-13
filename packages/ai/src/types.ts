@@ -5,6 +5,9 @@ import type {
 } from "@adapttable/core";
 
 import type { CapabilityPresentation } from "./assistantContracts";
+// The pages a table has are one answer for every binding, and they live in
+// `pagination.ts` where nothing about React or a transport can reach them.
+import type { AgentPagination } from "./pagination";
 
 // `AgentCapabilityDefinition` names these, and every subpath re-exports this
 // module, so they travel with it rather than being reachable only from the
@@ -13,6 +16,7 @@ export type {
   AssistantSuggestion,
   CapabilityPresentation,
 } from "./assistantContracts";
+export type { AgentPagination, PaginationInput } from "./pagination";
 import type {
   ApprovalPolicy,
   CommitPolicy,
@@ -280,6 +284,14 @@ export interface AgentManifest {
   readonly rowAddressing: AgentRowAddressing;
   /** Read and page ceilings. */
   readonly limits: AgentLimits;
+  /**
+   * What this table's pages are for the current query.
+   *
+   * Beside {@link AgentLimits.pageMax} rather than replacing it: the bound is
+   * one number a session enforces, and this is the whole answer a backend
+   * needs to navigate without inventing arithmetic.
+   */
+  readonly pagination?: AgentPagination;
   /** Write, approval, and commit rules. */
   readonly policy: AgentPolicy;
   /** Data-layer facts from the table source — never re-inferred here. */
@@ -934,7 +946,23 @@ export interface AgentObservation {
   readonly filters?: unknown;
   /** Named view used for position addressing. */
   readonly rowAddressScope: RowAddressScope;
-  /** Largest page the session will accept. */
+  /**
+   * What this table's pages actually are, for the current query.
+   *
+   * The authority when present: it carries the counted total where a source
+   * has one, says outright when a total or a further page is unknowable, and
+   * states whether a page number may be named at all. Bindings build it with
+   * `agentPagination` rather than deriving a bound of their own.
+   */
+  readonly pagination?: AgentPagination;
+  /**
+   * Largest page the session will accept.
+   *
+   * Superseded by {@link AgentObservation.pagination}, which distinguishes a
+   * counted total from an unknown one and says how a source may be navigated.
+   * Read only when no pagination is supplied, and then as a page count — a
+   * row count here is the defect this field is most often given.
+   */
   readonly pageMax: number;
   /** Largest `rows.read` window. */
   readonly readMax?: number;

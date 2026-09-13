@@ -18,6 +18,7 @@
  * unavailable rather than omitted, because a model cannot tell an empty list
  * from a question nobody asked.
  */
+import type { AgentPagination } from "./pagination";
 import type {
   AgentAggregations,
   AgentColumn,
@@ -104,6 +105,15 @@ export interface AgentContextView {
   readonly filters?: Readonly<Record<string, unknown>>;
   readonly pinnedColumns?: Readonly<Record<string, unknown>>;
   readonly pinnedRows?: Readonly<Record<string, unknown>>;
+  /**
+   * What this table's pages are for the current query.
+   *
+   * Published so a model never has to infer a page count from a row count or
+   * from what it can see. An absent `totalPages` or `hasNext` means the source
+   * cannot say, which is a fact worth carrying: it is the difference between
+   * "there is no next page" and "nobody knows whether there is".
+   */
+  readonly pagination?: AgentPagination;
   /**
    * Fields the table could not answer for.
    *
@@ -298,6 +308,7 @@ export function buildView(
     readonly filters?: Readonly<Record<string, unknown>>;
     readonly pinnedColumns?: Readonly<Record<string, unknown>>;
     readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    readonly pagination?: AgentPagination;
   },
   filters: readonly AgentFilter[]
 ): AgentContextView {
@@ -319,6 +330,7 @@ export function buildView(
     ...(state ? { filters: state } : {}),
     ...(view.pinnedColumns ? { pinnedColumns: view.pinnedColumns } : {}),
     ...(view.pinnedRows ? { pinnedRows: view.pinnedRows } : {}),
+    ...(view.pagination ? { pagination: view.pagination } : {}),
     ...(missing.length > 0 ? { unknown: missing } : {}),
   };
 }

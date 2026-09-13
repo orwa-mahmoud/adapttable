@@ -1,0 +1,176 @@
+/**
+ * Paging is refused or served on the table's own numbers, never a model's.
+ */
+import { describe, expect, it, vi } from "vitest";
+
+import { agentPagination } from "./pagination";
+import { createAgentSession } from "./session";
+import type { AgentObservation, AgentPagination } from "./types";
+
+const PAGE_ONLY = {
+  fullDataset: false,
+  grouping: false as const,
+  selectAcrossPages: false,
+  exportScope: "page" as const,
+  totalCount: "loaded" as const,
+};
+
+function tableSession(pagination: AgentPagination, setPage = vi.fn()) {
+  const session = createAgentSession({
+    observe: (): AgentObservation => ({
+      tableId: "orders",
+      viewRevision: 1,
+      featureIds: [],
+      columns: [],
+      source: PAGE_ONLY,
+      writePolicy: "allow",
+      approval: "never",
+      commit: "immediate",
+      hasPagination: true,
+      hasSearch: false,
+      hasSort: false,
+      hasFilters: false,
+      hasExport: false,
+      hasEdit: false,
+      hasReorder: false,
+      page: pagination.page,
+      limit: pagination.pageSize,
+      search: "",
+      pagination,
+      pageMax: pagination.totalPages ?? pagination.page + 1,
+      rowAddressScope: "visible",
+    }),
+    apply: { setPage, setLimit: vi.fn() },
+  });
+  return { session, setPage };
+}
+
+const move = (s: ReturnType<typeof tableSession>["session"], page: number) =>
+  s.execute("view.setPage", { page }, 1, `k-${String(page)}`);
+
+describe("a counted source", () => {
+  it("serves a page inside the total and refuses one past it", async () => {
+    const counted = agentPagination({
+      page: 1,
+      pageSize: 25,
+      totalRows: 130,
+      canJump: true,
+    });
+    const { session, setPage } = tableSession(counted);
+
+    expect((await move(session, 6)).ok).toBe(true);
+    expect(setPage).toHaveBeenCalledWith(6);
+
+    const past = await move(session, 7);
+    expect(past.ok).toBe(false);
+    expect(past.error?.message).toMatch(/past the last page/);
+    // Refused before the host was touched: nothing claims a move that the
+    // table was never asked to make.
+    expect(setPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuses page 2 of a table that fits on one page", async () => {
+    // Eight rows at ten a page. The bound this replaces was the row count,
+    // which made page 2 look reachable and the receipt say it had moved.
+    const { session, setPage } = tableSession(
+      agentPagination({ page: 1, pageSize: 10, totalRows: 8, canJump: true })
+    );
+
+    const result = await move(session, 2);
+    expect(result.ok).toBe(false);
+    expect(result.error?.message).toMatch(/past the last page/);
+    expect(setPage).not.toHaveBeenCalled();
+  });
+
+  it("counts the filtered total, so filtering moves the last page", async () => {
+    const filtered = tableSession(
+      agentPagination({ page: 1, pageSize: 25, totalRows: 30, canJump: true })
+    );
+    expect((await move(filtered.session, 2)).ok).toBe(true);
+    expect((await move(filtered.session, 3)).ok).toBe(false);
+  });
+
+  it("keeps one page for an empty result", async () => {
+    const { session } = tableSession(
+      agentPagination({ page: 1, pageSize: 25, totalRows: 0, canJump: true })
+    );
+    expect((await move(session, 1)).ok).toBe(true);
+    expect((await move(session, 2)).ok).toBe(false);
+  });
+
+  it("re-bounds when the page size changes in the same call", async () => {
+    const { session } = tableSession(
+      agentPagination({
+        page: 1,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50],
+        totalRows: 130,
+        canJump: true,
+      })
+    );
+    const ok = await session.execute(
+      "view.setPage",
+      { page: 2, limit: 50 },
+      1,
+      "resize"
+    );
+    expect(ok.ok).toBe(true);
+
+    const refused = await session.execute(
+      "view.setPage",
+      { page: 2, limit: 37 },
+      1,
+      "odd-size"
+    );
+    expect(refused.ok).toBe(false);
+    expect(refused.error?.message).toMatch(/offers 10, 25, 50/);
+  });
+});
+
+describe("a source of unknown length", () => {
+  it("lets a host that takes page numbers jump without a fabricated total", async () => {
+    const { session, setPage } = tableSession(
+      agentPagination({ page: 3, pageSize: 25, canJump: true })
+    );
+    expect((await move(session, 40)).ok).toBe(true);
+    expect(setPage).toHaveBeenCalledWith(40);
+  });
+
+  it("moves one page at a time where the source only does that", async () => {
+    const { session } = tableSession(
+      agentPagination({ page: 3, pageSize: 25, canJump: false })
+    );
+    expect((await move(session, 4)).ok).toBe(true);
+    const jump = await move(session, 9);
+    expect(jump.ok).toBe(false);
+    expect(jump.error?.message).toMatch(/one page at a time/);
+  });
+
+  it("does not offer a next page once the source says it is finished", async () => {
+    const { session, setPage } = tableSession(
+      agentPagination({ page: 4, pageSize: 25, atEnd: true, canJump: true })
+    );
+    const past = await move(session, 5);
+    expect(past.ok).toBe(false);
+    expect(past.error?.message).toMatch(/no page after 4/);
+    expect(setPage).not.toHaveBeenCalled();
+  });
+});
+
+describe("what reaches the host", () => {
+  it("rejects a page that is not a whole number, before any call", async () => {
+    const { session, setPage } = tableSession(
+      agentPagination({ page: 1, pageSize: 25, totalRows: 130, canJump: true })
+    );
+    for (const bad of [0, -3, 2.5]) {
+      const result = await session.execute(
+        "view.setPage",
+        { page: bad },
+        1,
+        `bad-${String(bad)}`
+      );
+      expect(result.ok).toBe(false);
+    }
+    expect(setPage).not.toHaveBeenCalled();
+  });
+});

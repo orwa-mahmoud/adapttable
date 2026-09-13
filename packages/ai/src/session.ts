@@ -20,6 +20,12 @@ import {
   type RowAddressScope,
 } from "./keys";
 import { buildManifest } from "./manifest";
+import {
+  type AgentPagination,
+  agentPagination,
+  pageRefusal,
+  pageSizeRefusal,
+} from "./pagination";
 import { normalizeCapabilityArgs } from "./normalizeArgs";
 import type {
   AgentAggregationColumn,
@@ -941,6 +947,26 @@ function applySetAggregations(
   };
 }
 
+/**
+ * The pages an observation describes.
+ *
+ * A host that states its own {@link AgentPagination} is the authority. One
+ * that still supplies only `pageMax` is read as naming a page count, which is
+ * what the field has always meant even where a binding filled it with a row
+ * count — those bindings are fixed; this keeps a host that has not been.
+ */
+function observedPagination(observation: AgentObservation): AgentPagination {
+  return (
+    observation.pagination ??
+    agentPagination({
+      page: observation.page,
+      pageSize: observation.limit,
+      totalRows: observation.pageMax * observation.limit,
+      canJump: true,
+    })
+  );
+}
+
 function assertApply<K extends keyof AgentApply>(
   apply: AgentApply,
   name: K
@@ -1057,13 +1083,17 @@ async function dispatchBuiltIn(
         revision: observation.viewRevision,
       };
     case "view.setPage": {
+      // Checked against what this source says its pages are, mechanically and
+      // on this side of the wire: a page number is arithmetic, and arithmetic
+      // is the last thing a model should be trusted with.
+      const pages = observedPagination(observation);
+      const refusal =
+        pageRefusal(pages, body.page) ??
+        (typeof body.limit === "number"
+          ? pageSizeRefusal(pages, body.limit)
+          : undefined);
+      if (refusal) throw new ApplyError("apply-failed", refusal);
       const page = body.page as number;
-      if (page > observation.pageMax) {
-        throw new ApplyError(
-          "apply-failed",
-          `page ${page} exceeds pageMax ${observation.pageMax}`
-        );
-      }
       if (typeof body.limit === "number") {
         assertApply(apply, "setLimit");
       }

@@ -30,6 +30,7 @@ export function buildManifest(
       scope: observation.rowAddressScope,
       key: "rowKey",
     },
+    ...(observation.pagination ? { pagination: observation.pagination } : {}),
     limits: {
       pageMax: observation.pageMax,
       readMax: observation.readMax ?? 50,
