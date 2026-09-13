@@ -444,6 +444,7 @@ function AssistantApproval({
       onApprove={pending.approve}
       onReject={pending.reject}
       {...(pending.decideAt ? { onDecide: pending.decideAt } : {})}
+      {...(pending.alwaysAllow ? { onAlwaysAllow: pending.alwaysAllow } : {})}
     />
   );
 }
@@ -728,6 +729,18 @@ export function TableAssistantChrome({
   const close = useCallback(() => {
     onOpenChange(false);
   }, [onOpenChange]);
+
+  // Opening puts the reader where they were going. The launcher leaves the
+  // document when the panel takes its place, so without this a keyboard
+  // reader who pressed it is left on `body` and has to tab the whole page to
+  // reach the thing they just opened. The composer is what they came for.
+  useEffect(() => {
+    if (!open) return;
+    const composer = surfaceRef.current?.querySelector<HTMLElement>(
+      '[data-adapttable-part="assistant-input"]'
+    );
+    composer?.focus();
+  }, [open]);
 
   // Closing returns the reader where they were. Without this, focus falls to
   // the document and the next Tab starts from the top of the page.

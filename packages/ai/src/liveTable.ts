@@ -199,8 +199,10 @@ export function readRowsFromNeutral<TRow>(
  * A key is checked wherever absence can be proved. A name a model lifted out
  * of a cell looks exactly like a key, and taken on trust it becomes a write
  * nothing can land and an approval strip asking the reader to accept a change
- * from a value it cannot show. Saying the key is not there is what sends the
- * model to `rows.resolve` instead.
+ * from a value it cannot show. A key is not something to be guessed from a
+ * value on screen, so the refusal names where one actually comes from —
+ * `rows.read`, which returns the key beside each row — rather than sending
+ * the caller back to `rows.resolve` with the same invented key.
  *
  * A source that holds only the loaded window is the one case where a missing
  * key proves nothing — the row may be real and elsewhere — so the reference
@@ -220,7 +222,7 @@ export function resolveRowFromNeutral<TRow>(
       rows.some((row) => table.rowKey(row) === ref.rowKey);
     if (!known) {
       throw new Error(
-        `no row with key "${ref.rowKey}" in the ${scope} rows — resolve it first`
+        `no row with key "${ref.rowKey}" in the ${scope} rows — read the rows to get their keys, or address this one by position`
       );
     }
     return { rowKey: ref.rowKey, scope };

@@ -248,7 +248,7 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
       "Proposed the deletion — approve it to apply it. Reset brings it back.",
     capabilityKey: "rows.delete",
     args: (context) => ({
-      keys: [context.removableRow?.rowKey ?? "t1"],
+      rows: [{ rowKey: context.removableRow?.rowKey ?? "t1" }],
     }),
     requires: ["rows.delete"],
   },

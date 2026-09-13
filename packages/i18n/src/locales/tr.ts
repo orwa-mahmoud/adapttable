@@ -188,6 +188,7 @@ export const tr: Required<TableLabels> = {
   approveRemainingProposals: "Kalanları onayla",
   rejectAllProposals: "Tümünü reddet",
   rejectRemainingProposals: "Kalanları reddet",
+  alwaysAllowProposal: "Her zaman izin ver",
   proposalTally: ({ pending, approved, rejected }) =>
     "{a} onaylandı · {j} reddedildi · {p} kaldı"
       .replace("{a}", String(approved))

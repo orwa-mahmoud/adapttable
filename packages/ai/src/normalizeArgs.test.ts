@@ -181,14 +181,24 @@ describe("one item where a capability takes a batch", () => {
     ).toEqual({ edits: [{ rowKey: "p1", column: "salary", value: 185 }] });
   });
 
-  it("wraps a lone key where a list of keys is required", () => {
+  it("wraps a lone row where a list of rows is required", () => {
     expect(
       normalizeCapabilityArgs(
         "rows.delete",
-        { keys: "p1" },
+        { rows: { rowKey: "p1" } },
         inputOf("rows.delete")
       )
-    ).toEqual({ keys: ["p1"] });
+    ).toEqual({ rows: [{ rowKey: "p1" }] });
+  });
+
+  it("reads a bare row reference as the one row to delete", () => {
+    expect(
+      normalizeCapabilityArgs(
+        "rows.delete",
+        { rowKey: "p1" },
+        inputOf("rows.delete")
+      )
+    ).toEqual({ rows: [{ rowKey: "p1" }] });
   });
 
   it("leaves a well-formed batch alone", () => {

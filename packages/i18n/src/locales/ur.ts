@@ -187,6 +187,7 @@ export const ur: Required<TableLabels> = {
   approveRemainingProposals: "باقی منظور کریں",
   rejectAllProposals: "سب مسترد کریں",
   rejectRemainingProposals: "باقی مسترد کریں",
+  alwaysAllowProposal: "ہمیشہ اجازت دیں",
   proposalTally: ({ pending, approved, rejected }) =>
     "{a} منظور · {j} مسترد · {p} باقی"
       .replace("{a}", String(approved))

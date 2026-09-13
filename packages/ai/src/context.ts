@@ -149,13 +149,14 @@ export function buildAgentContext(
     budget === undefined
       ? { kept: contract.columns, deferred: [] as readonly string[] }
       : fitColumns(contract.columns, (kept) => floor(kept) <= budget);
+  // `fitColumns` keeps every column and gives back the barest form that fits,
+  // so a budget is unmeetable exactly when even that is too big.
   if (
     budget !== undefined &&
     options.tokenBudget !== undefined &&
-    fitted.kept.length === 0 &&
-    floor([]) > budget
+    floor(fitted.kept) > budget
   ) {
-    throw new ContextBudgetError(budget, floor([]));
+    throw new ContextBudgetError(budget, floor(fitted.kept));
   }
   const described: AgentContextContract = {
     ...contract,
@@ -235,7 +236,7 @@ export function buildAgentContext(
           ...chosen.notes,
           ...(fitted.deferred.length > 0
             ? [
-                `${String(fitted.deferred.length)} column description(s) were deferred to stay within the ${String(budget ?? 0)}-token budget; every one is still permitted, and columns.describe returns the detail: ${fitted.deferred.join(", ")}`,
+                `${String(fitted.deferred.length)} column description(s) were deferred to stay within the ${String(budget ?? 0)}-token budget; every column is still listed above and still permitted, and calling columns.describe — which takes no arguments and answers about all of them — returns the detail for: ${fitted.deferred.join(", ")}`,
               ]
             : []),
           // Said rather than left to be noticed. The common operations keep

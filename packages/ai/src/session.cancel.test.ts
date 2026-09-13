@@ -249,7 +249,7 @@ describe("a bulk write that is cancelled part way", () => {
     });
     const result = await session.execute(
       "rows.delete",
-      { keys: ["r1", "r2", "r3"] },
+      { rows: [{ rowKey: "r1" }, { rowKey: "r2" }, { rowKey: "r3" }] },
       1,
       "delete-1",
       controller.signal
@@ -270,7 +270,7 @@ describe("a bulk write that is cancelled part way", () => {
     // deleting r1 a second time.
     const retried = await session.execute(
       "rows.delete",
-      { keys: ["r1", "r2", "r3"] },
+      { rows: [{ rowKey: "r1" }, { rowKey: "r2" }, { rowKey: "r3" }] },
       1,
       "delete-1"
     );

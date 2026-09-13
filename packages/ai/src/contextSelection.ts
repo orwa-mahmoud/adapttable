@@ -365,17 +365,42 @@ function columnRank(column: ContextColumn): number {
 }
 
 /**
+ * The same column with only what a model cannot work without.
+ *
+ * Identity, type and permissions are what let a model name the column at all,
+ * and they cost almost nothing. The author's description and examples are the
+ * expensive part and the part `columns.describe` can hand over later, so they
+ * are what a budget takes.
+ */
+function withoutDetail(column: ContextColumn): ContextColumn {
+  return {
+    id: column.id,
+    label: column.label,
+    type: column.type,
+    readable: column.readable,
+    writable: column.writable,
+    sortable: column.sortable,
+    ...(column.pinnable === undefined ? {} : { pinnable: column.pinnable }),
+    ...(column.visible === undefined ? {} : { visible: column.visible }),
+  };
+}
+
+/**
  * Fit the described columns into what is left of the budget.
  *
  * Descriptions are dropped from the least useful end until the contract fits,
- * and every dropped id is returned. Nothing is truncated in place: a column is
- * described in full or named as deferred, because a half-described column is
- * how a model learns a wrong type.
+ * and every dropped id is returned. The column itself never goes: a contract
+ * that lists four of a table's five columns is a model telling the reader the
+ * table has four, so every column keeps its id, label, type and permissions
+ * and only the author's detail is deferred. Nothing is truncated in place
+ * either — a column is described in full or named as deferred, because a
+ * half-described column is how a model learns a wrong type.
  *
  * @param columns - Every permitted column, in the table's own order.
  * @param fits - Whether a given set of columns brings the contract inside
- *   the budget. Called with progressively smaller sets.
- * @returns The columns to describe, and the ids of those left out.
+ *   the budget. Called with progressively less detail.
+ * @returns Every column, described or bare, and the ids whose detail was
+ *   left out.
  *
  * @public
  */
@@ -385,21 +410,27 @@ export function fitColumns(
 ): { kept: readonly ContextColumn[]; deferred: readonly string[] } {
   if (fits(columns)) return { kept: columns, deferred: [] };
   // Defer from the back of the ranking forward, one at a time, so the result
-  // is the largest prefix that fits rather than an arbitrary subset.
+  // describes the largest prefix that fits rather than an arbitrary subset.
   const order = [...columns].sort((a, b) => columnRank(a) - columnRank(b));
   for (let keep = order.length - 1; keep >= 0; keep -= 1) {
-    const kept = order.slice(0, keep);
+    const described = new Set(order.slice(0, keep).map((column) => column.id));
+    // Every column is still listed, in the table's own order: a model reading
+    // the contract should see the columns as the table declares them, not as
+    // they were ranked, and never a shorter table than it has.
+    const kept = columns.map((column) =>
+      described.has(column.id) ? column : withoutDetail(column)
+    );
     if (fits(kept)) {
-      const ids = new Set(kept.map((column) => column.id));
       return {
-        // Back into the table's own order: a model reading the contract should
-        // see the columns as the table declares them, not as they were ranked.
-        kept: columns.filter((column) => ids.has(column.id)),
+        kept,
         deferred: columns
-          .filter((column) => !ids.has(column.id))
+          .filter((column) => !described.has(column.id))
           .map((column) => column.id),
       };
     }
   }
-  return { kept: [], deferred: columns.map((column) => column.id) };
+  return {
+    kept: columns.map(withoutDetail),
+    deferred: columns.map((column) => column.id),
+  };
 }

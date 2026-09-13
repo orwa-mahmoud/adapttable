@@ -119,9 +119,15 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
       "keys — for a number filter that is `salaryMin` / `salaryMax` / " +
       "`salaryOp`, not `{ salary: { gt: 10000 } }`. You may also send an " +
       "array of `{ key, op, value }` conditions; they become the same bag. " +
-      "Never invent a filter, operator or option that is not listed.",
+      "Never invent a filter, operator or option that is not listed. The " +
+      "result carries the bag that was applied, so there is no need to send " +
+      "the same filter again in another shape.",
     input: objectSchema({ filters: {} }, ["filters"]),
-    output: OK,
+    output: objectSchema({
+      ok: { type: "boolean", const: true },
+      revision: { type: "integer", minimum: 1 },
+      filters: { type: "object" },
+    }),
   },
   "view.setGroupBy": {
     key: "view.setGroupBy",
@@ -214,7 +220,7 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
   "rows.read": {
     key: "rows.read",
     guide:
-      "Read a bounded, redacted row window from the current view. Unreadable columns never appear. scope full requires a full-dataset source.",
+      "Read a bounded, redacted row window from the current view. Each row comes back with the rowKey that addresses it, which is where a rowKey comes from — it is a host key, never a value on screen. offset counts from the start of the named scope, not of the dataset: with scope page it is 0 on every page, however far into the data that page sits. A window past the end of its scope comes back empty, which says nothing about whether the table has rows. Unreadable columns never appear. scope full requires a full-dataset source.",
     input: objectSchema(
       {
         offset: { type: "integer", minimum: 0 },
@@ -243,7 +249,7 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
   "rows.resolve": {
     key: "rows.resolve",
     guide:
-      "Resolve a stable rowKey or a 1-based position against the named current view.",
+      "Turn a 1-based position in the named current view into its stable rowKey, or confirm a rowKey still addresses a row there. This is not a search: it cannot find a row from a name or any other cell value. Read the rows to get their keys.",
     input: ROW_KEY_OR_POSITION,
     output: objectSchema({
       rowKey: { type: "string" },
@@ -303,15 +309,20 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
   },
   "rows.delete": {
     key: "rows.delete",
-    guide: "Delete rows through the host delete callback. This is destructive.",
+    guide:
+      "Delete rows through the host delete callback. Each row needs a rowKey or a 1-based position. Resolves every row before deleting, so a row that names nothing is refused before anything is removed. This is destructive.",
     input: objectSchema(
       {
-        keys: {
+        rows: {
           type: "array",
-          items: { type: "string", minLength: 1 },
+          items: objectSchema({
+            rowKey: { type: "string", minLength: 1 },
+            position: { type: "integer", minimum: 1 },
+            scope: { type: "string", enum: ["visible", "page", "full"] },
+          }),
         },
       },
-      ["keys"]
+      ["rows"]
     ),
     output: WRITE_RESULT,
   },
@@ -342,12 +353,13 @@ const SUMMARIES: Record<CapabilityKey, string> = {
   "view.pinRow": "Pin or unpin a row above or below the body.",
   "view.setSelection": "Replace or clear the current selection.",
   "views.apply": "Apply a saved view.",
-  "rows.read": "Read a bounded, redacted row window.",
-  "rows.resolve": "Resolve a row key or 1-based position.",
+  "rows.read": "Read a bounded, redacted row window, each row with its rowKey.",
+  "rows.resolve": "Turn a 1-based position into a row key, or confirm one.",
   "export.run": "Export through the host export path.",
   "edit.cells": "Edit cells through the host callback.",
   "rows.add": "Add rows through the host callback.",
-  "rows.delete": "Delete rows through the host callback.",
+  "rows.delete":
+    "Delete rows, by rowKey or position, through the host callback.",
   "rows.reorder": "Reorder rows through the host callback.",
 };
 

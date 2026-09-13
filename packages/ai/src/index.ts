@@ -83,6 +83,7 @@ export {
   type UndoCall,
 } from "./assistantUndo";
 export {
+  type AlwaysAllowedState,
   contractFingerprint,
   displayProposals,
   type ProposalResolver,

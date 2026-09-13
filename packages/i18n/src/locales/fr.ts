@@ -187,6 +187,7 @@ export const fr: Required<TableLabels> = {
   approveRemainingProposals: "Approuver le reste",
   rejectAllProposals: "Tout refuser",
   rejectRemainingProposals: "Refuser le reste",
+  alwaysAllowProposal: "Toujours autoriser",
   proposalTally: ({ pending, approved, rejected }) =>
     "{a} approuvées · {j} refusées · {p} restantes"
       .replace("{a}", String(approved))

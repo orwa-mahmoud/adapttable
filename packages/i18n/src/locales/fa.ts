@@ -186,6 +186,7 @@ export const fa: Required<TableLabels> = {
   approveRemainingProposals: "تأیید بقیه",
   rejectAllProposals: "رد همه",
   rejectRemainingProposals: "رد بقیه",
+  alwaysAllowProposal: "همیشه اجازه بده",
   proposalTally: ({ pending, approved, rejected }) =>
     "{a} تأیید · {j} رد · {p} باقی"
       .replace("{a}", String(approved))

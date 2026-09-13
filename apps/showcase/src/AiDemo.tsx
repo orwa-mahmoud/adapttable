@@ -12,9 +12,11 @@
  * revision, so what the reader sees happen to the rows is the real thing.
  */
 import type {
+  AgentCapabilityDefinition,
   AgentContextInputs,
   AgentManifest,
   AgentSession,
+  AlwaysAllowedState,
   AssistantSuggestion,
 } from "@adapttable/ai";
 import { tableAgent, useTableAssistant } from "@adapttable/ai-react";
@@ -50,11 +52,6 @@ import {
   type DemoEditingMode,
   type DemoExclusion,
 } from "./AiDemoOptions";
-import {
-  applyHostFilters,
-  hostFiltersFromBag,
-  type HostFilterState,
-} from "./aiHostFilters";
 import { AI_KIT_FEATURES, type AiKitKey } from "./aiKitFeatures";
 import {
   DEMO_SCENARIOS,
@@ -76,6 +73,76 @@ interface StaffRow {
   status: string;
   salary: number;
   started: string;
+}
+
+/** What the raise capability takes, once the session has validated it. */
+interface RaiseArgs {
+  readonly team: string;
+  readonly percent: number;
+}
+
+/**
+ * A write the host performs whole, rather than a list of rows.
+ *
+ * Every other write here enumerates the rows it touches, and the reader
+ * decides them one by one. This one names an operation — a team and a
+ * percentage — so the approval shows what was asked rather than a list, and
+ * it is the shape a reader may reasonably agree to once and stop being asked
+ * about. Reset puts the salaries back.
+ */
+function raiseTeamCapability(
+  apply: (args: RaiseArgs) => number
+): AgentCapabilityDefinition {
+  return {
+    key: "staff.raiseTeam",
+    summary: "Raise every salary on one team by a percentage.",
+    kind: "write",
+    presentation: {
+      title: "Raise a team",
+      description: "Raises every salary on one team by a percentage.",
+      suggestions: [
+        {
+          id: "raise-platform",
+          title: "Give the Platform team a raise",
+          prompt: "Give everyone on the Platform team a 5% raise.",
+          requires: ["staff.raiseTeam"],
+        },
+      ],
+    },
+    guide: {
+      guide:
+        "Raise every salary on one team by a percentage. The host applies it " +
+        "to the whole team at once, so this names no rows: send the team " +
+        "exactly as the Team column spells it, and a percentage between 1 " +
+        "and 20.",
+      input: {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          team: { type: "string", minLength: 1 },
+          percent: { type: "number", minimum: 1, maximum: 20 },
+        },
+        required: ["team", "percent"],
+      },
+      output: {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          ok: { type: "boolean" },
+          changed: { type: "integer", minimum: 0 },
+        },
+      },
+    },
+    isEnabled: (observation) => observation.writePolicy === "allow",
+    // No proposals: the reader is asked about the operation, not about rows.
+    plan: () => ({ proposals: [] }),
+    execute: (_context, args) => ({
+      ok: true,
+      changed: apply(args as RaiseArgs),
+    }),
+  };
 }
 
 /**
@@ -266,6 +333,13 @@ function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
       editor: "number",
       aggregatable: true,
       editValue: (row) => String(row.salary),
+      // A bare 170 is not a salary until something says what it counts. Left
+      // unsaid, a model reports whatever unit reads naturally to it and the
+      // reader has no way to tell the guess from the data.
+      ai: {
+        description:
+          "Annual salary in thousands of US dollars. 170 means $170,000.",
+      },
     },
     {
       key: "started",
@@ -273,6 +347,7 @@ function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
       header: header.started,
       accessor: (row) => row.started,
       editable: true,
+      ai: { description: "The date this person joined, as YYYY-MM-DD." },
     },
   ];
 }
@@ -406,6 +481,7 @@ interface DemoToggles {
   readonly grouping: boolean;
   readonly rowPinning: boolean;
   readonly columnPinning: boolean;
+  readonly paging: boolean;
 }
 
 const INITIAL_TOGGLES: DemoToggles = {
@@ -413,18 +489,28 @@ const INITIAL_TOGGLES: DemoToggles = {
   grouping: false,
   rowPinning: true,
   columnPinning: true,
+  paging: false,
 };
+
+/** Small enough that this staff list becomes two pages rather than one. */
+const PAGE_LIMIT = 5;
 
 export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [rtl, setRtl] = useState(readRtl);
   const [toggles, setToggles] = useState<DemoToggles>(INITIAL_TOGGLES);
   const [rows, setRows] = useState<StaffRow[]>(() => [...SEED]);
-  const [hostFilters, setHostFilters] = useState<HostFilterState>({});
+  // What the custom capability counts against. The updater below has to stay
+  // pure — React may call it twice — so the count is read from here instead.
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
   const [pinnedRowIds, setPinnedRowIds] = useState<RowPinState>({
     top: [],
     bottom: [],
   });
   const [session, setSession] = useState<AgentSession | null>(null);
+  const [alwaysAllowed, setAlwaysAllowed] = useState<AlwaysAllowedState | null>(
+    null
+  );
   // Handed over once by `tableAgent`, which publishes it inside the table —
   // below this component, so feature state cannot reach it from here. Held in
   // a ref because it is stable and calling it is what makes it current.
@@ -520,6 +606,26 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     AI_KIT_FEATURES[adapter as AiKitKey] ?? AI_KIT_FEATURES.mantine;
   const Assistant = factories.Assistant;
 
+  // Stable across renders so the session is not rebuilt on every keystroke,
+  // and closed over `setRows` rather than over the rows themselves.
+  const raiseTeam = useMemo(
+    () =>
+      raiseTeamCapability(({ team, percent }) => {
+        setRows((current) =>
+          current.map((row) =>
+            row.team === team
+              ? {
+                  ...row,
+                  salary: Math.round(row.salary * (1 + percent / 100)),
+                }
+              : row
+          )
+        );
+        return rowsRef.current.filter((row) => row.team === team).length;
+      }),
+    []
+  );
+
   const features = useMemo((): TableFeature<StaffRow>[] => {
     const canWrite = toggles.editingMode !== "off";
     const next: TableFeature<StaffRow>[] = [
@@ -536,7 +642,11 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           // Opt-in, and only for the one write where waving it through is a
           // reasonable thing for a reader to want. Deleting is never on this
           // list, and the neutral rule refuses it even if it were.
-          alwaysAllow: ["edit.cells"],
+          // A cell edit enumerates rows, so the control never appears for it;
+          // the team raise is one operation, which is the shape a reader can
+          // agree to once. Deleting is never on this list, and the neutral
+          // rule refuses it even if it were.
+          alwaysAllow: ["staff.raiseTeam"],
         },
         // What the reader took away in the drawer. The table's own controls
         // are untouched: a person can still filter a table whose agent may not.
@@ -544,6 +654,9 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         // Per-action answers from the same drawer. "Use the default" leaves the
         // key out entirely, so the table's shared policy decides.
         capabilityApproval: actionApproval,
+        // One custom write, wired to this page's own data the same way every
+        // other write here is: the table asks, the host does.
+        capabilities: [raiseTeam],
         ...(webmcp ? { webmcp: { onRegister: setWebmcpNames } } : {}),
         // Staging needs the batch save path. Cell and row modes apply on
         // approve, so the reader is not dropped into always-open fields.
@@ -578,7 +691,13 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           },
         },
         apply: {
-          setFilters: (filters) => setHostFilters(hostFiltersFromBag(filters)),
+          // `setFilters` is deliberately NOT overridden. Filtering is view
+          // state the table already owns — `TEAM_FILTER` and `STATUS_FILTER`
+          // are declared to its own filter feature, and the popover drives
+          // them. Applying the agent's filter beside that would leave the
+          // reader looking at a filtered table whose Filters panel is empty
+          // and whose Clear all does nothing.
+          //
           // Disposable data, and deliberately destructive: this is the one
           // capability on the page that removes something. The rows are seeded
           // in memory, so Reset and an ordinary page refresh both bring them
@@ -601,6 +720,10 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           // table, so without this the panel would show "Working…" at a
           // turn that is actually waiting on the reader.
           approvals: setPendingApproval,
+          // The panel sits beside the table, so what a reader waved through
+          // has to be handed out the same way — otherwise "Always allow" is
+          // a decision with no way back.
+          alwaysAllowed: setAlwaysAllowed,
         },
       }),
     ];
@@ -654,6 +777,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     excluded,
     actionApproval,
     webmcp,
+    raiseTeam,
   ]);
 
   // The same live view the assistant's turns are judged against, published by
@@ -671,6 +795,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     transportKey: connection.key,
     suggestions,
     awaitingApproval,
+    ...(alwaysAllowed ? { alwaysAllow: alwaysAllowed } : {}),
     open: panelOpen,
     onOpenChange: setPanelOpen,
   });
@@ -696,14 +821,6 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     document.getElementById("ai-demo")?.scrollIntoView();
   }, []);
 
-  // The table never owns the data, so a filter the agent asks for is applied
-  // here to the rows the table is given. Memoised because a fresh array on
-  // every render would bump the revision and republish the manifest — a loop.
-  const visibleRows = useMemo(
-    () => applyHostFilters(rows, hostFilters),
-    [rows, hostFilters]
-  );
-
   const reset = useCallback(() => {
     // Explicit, and it cancels work in flight rather than leaving a reply to
     // land on a table that no longer matches it.
@@ -711,7 +828,6 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     assistant.clear();
     setToggles(INITIAL_TOGGLES);
     setRows([...SEED]);
-    setHostFilters({});
     setPinnedRowIds({ top: [], bottom: [] });
   }, [assistant]);
 
@@ -791,9 +907,10 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     });
   }, [manifest, actionPolicy]);
 
-  const toggle = (key: "grouping" | "rowPinning" | "columnPinning") => () => {
-    setToggles((current) => ({ ...current, [key]: !current[key] }));
-  };
+  const toggle =
+    (key: "grouping" | "rowPinning" | "columnPinning" | "paging") => () => {
+      setToggles((current) => ({ ...current, [key]: !current[key] }));
+    };
 
   return (
     <div id="ai-demo" className="ai-demo" data-adapter={adapter}>
@@ -903,6 +1020,13 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               on: toggles.columnPinning,
               onChange: toggle("columnPinning"),
             },
+            {
+              key: "paging",
+              label: "Pages of five",
+              help: "Splits the staff list over two pages, so the assistant has somewhere to page to and a position means a place on a page.",
+              on: toggles.paging,
+              onChange: toggle("paging"),
+            },
           ]}
           actions={actionApprovals}
           presentation={presentation}
@@ -929,12 +1053,18 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         <KitProvider kit={adapter} dark={dark} dir={rtl ? "rtl" : "ltr"}>
           <Suspense fallback={<DemoFallback />}>
             <Table
-              data={visibleRows}
+              data={rows}
               columns={columns}
               labels={labels}
               dir={rtl ? "rtl" : "ltr"}
               rowKey={(row: StaffRow) => row.id}
               urlSync={false}
+              {...(toggles.paging
+                ? {
+                    defaults: { limit: PAGE_LIMIT },
+                    paginationMode: "paged" as const,
+                  }
+                : {})}
               features={features}
               classNames={kitClassNames(adapter)}
             />

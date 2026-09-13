@@ -735,6 +735,13 @@ export interface TableLabels {
   rejectAllProposals?: string;
   /** Rejects what is still undecided, once some rows have been decided. */
   rejectRemainingProposals?: string;
+  /**
+   * Approves this write and stops asking about this capability.
+   *
+   * Only ever drawn when the table opted the capability in, so a reader who
+   * never sees it is not missing a control — there is none to offer.
+   */
+  alwaysAllowProposal?: string;
   /** Live tally under a review in progress. */
   proposalTally?: (counts: {
     pending: number;

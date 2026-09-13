@@ -185,6 +185,7 @@ export const ja: Required<TableLabels> = {
   approveRemainingProposals: "残りを承認",
   rejectAllProposals: "すべて却下",
   rejectRemainingProposals: "残りを却下",
+  alwaysAllowProposal: "常に許可",
   proposalTally: ({ pending, approved, rejected }) =>
     "承認 {a} · 却下 {j} · 残り {p}"
       .replace("{a}", String(approved))

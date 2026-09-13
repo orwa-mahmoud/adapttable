@@ -229,7 +229,10 @@ the write-approval path. See
 
 `edit.cells` takes `{ edits: Array<{ column, value, rowKey?, position?, scope? }> }`
 — each edit needs `rowKey` or a 1-based `position`. Positions resolve
-before write. The execute result is
+before write. `rows.delete` addresses rows the same way:
+`{ rows: Array<{ rowKey?, position?, scope? }> }`, resolved before anything
+is removed, so a reference that names no row is refused while the deletion is
+still a proposal. The execute result is
 
 `{ ok, revision, idempotencyKey, result: { proposals, applied, approval, results? } }`.
 

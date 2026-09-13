@@ -241,6 +241,7 @@ export const defaultLabels: Required<TableLabels> = {
   approveRemainingProposals: "Approve remaining",
   rejectAllProposals: "Reject all",
   rejectRemainingProposals: "Reject remaining",
+  alwaysAllowProposal: "Always allow",
   proposalTally: ({ pending, approved, rejected }) =>
     `${String(approved)} approved · ${String(rejected)} rejected · ${String(pending)} left`,
   approvalWaitingElsewhere: "A change is waiting for your decision.",

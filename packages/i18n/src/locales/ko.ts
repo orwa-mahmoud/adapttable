@@ -187,6 +187,7 @@ export const ko: Required<TableLabels> = {
   approveRemainingProposals: "나머지 승인",
   rejectAllProposals: "모두 거부",
   rejectRemainingProposals: "나머지 거부",
+  alwaysAllowProposal: "항상 허용",
   proposalTally: ({ pending, approved, rejected }) =>
     "승인 {a} · 거부 {j} · 남음 {p}"
       .replace("{a}", String(approved))

@@ -32,7 +32,9 @@ Capabilities come from the live table:
   `rows.read` redacts `readable: false` cells and is bounded by
   `limits.readMax`. `scope: "full"` requires `source.fullDataset === true`.
 - `rows.add` / `rows.delete` appear when the host apply methods exist and
-  `writePolicy` is `"allow"`. `rows.delete` is destructive.
+  `writePolicy` is `"allow"`. `rows.delete` is destructive, and takes the same
+  row references `edit.cells` does — a stable `rowKey`, or a 1-based
+  `position` in a named `scope` — resolved before any row is removed.
 - Data-layer truth comes from the source's
   [`TableSourceCapabilities`](./data-tiers.md) — the manifest copies those
   fields and never re-infers them from shape.

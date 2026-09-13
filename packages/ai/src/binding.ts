@@ -52,6 +52,27 @@ export interface TableAgentBridge<TPending = unknown> {
    * change would be a second copy of the table's state to keep in step.
    */
   readonly viewInputs?: (read: () => AgentContextInputs) => void;
+  /**
+   * Called when the set of capabilities the reader waved through changes.
+   *
+   * "Always allow" is remembered inside the table, and a panel mounted beside
+   * it cannot read that state — the same reason `approvals` and `viewInputs`
+   * are here. Without this, a reader can wave a capability through and have
+   * nowhere to take it back.
+   */
+  readonly alwaysAllowed?: (state: AlwaysAllowedState) => void;
+}
+
+/**
+ * What a reader has agreed to stop being asked about, and how to undo it.
+ *
+ * @public
+ */
+export interface AlwaysAllowedState {
+  /** Capability keys currently waved through, for this contract. */
+  readonly capabilities: readonly string[];
+  /** Take one back. The next write of that capability asks again. */
+  readonly revoke: (capability: string) => void;
 }
 
 /**
@@ -88,7 +109,9 @@ export interface ProposalResolver {
  * Viewing a table is not entitlement to every cell in it, so a column the host
  * marked unreadable resolves to nothing here too — and "nothing" is reported
  * as unavailable rather than drawn as an empty cell, because a blank value and
- * a value nobody could look up are different facts.
+ * a value nobody could look up are different facts. Unavailable is a fact
+ * about a cell, so a proposal that names no column — a deleted row — carries
+ * neither a before-value nor the claim that one was withheld.
  */
 export function displayProposals(
   proposals: readonly WriteProposal[],
@@ -96,22 +119,26 @@ export function displayProposals(
 ): readonly AgentApprovalProposal[] {
   return proposals.map((proposal) => {
     const label = resolve.rowLabel(proposal.rowKey);
-    const readable =
-      proposal.column === undefined || resolve.readable(proposal.column);
+    // A proposal that names no column is not a cell edit — deleting a row
+    // has no before-value to hide or to show. Only a cell can be
+    // unavailable; reporting it for a row-level write would tell the reader
+    // a value was withheld from them when there was never one to look up.
+    const column = proposal.column;
     const before =
-      readable && proposal.column !== undefined
-        ? resolve.cellValue(proposal.rowKey, proposal.column)
+      column !== undefined && resolve.readable(column)
+        ? resolve.cellValue(proposal.rowKey, column)
         : undefined;
-    const known = before !== undefined;
-    const columnLabel = proposal.column
-      ? resolve.columnLabel(proposal.column)
-      : undefined;
+    const columnLabel =
+      column === undefined ? undefined : resolve.columnLabel(column);
     return {
       rowKey: proposal.rowKey,
       ...(label ? { rowLabel: label } : {}),
-      ...(proposal.column ? { column: proposal.column } : {}),
+      ...(column === undefined ? {} : { column }),
       ...(columnLabel ? { columnLabel } : {}),
-      ...(known ? { before } : { beforeUnavailable: true }),
+      ...(before !== undefined ? { before } : {}),
+      ...(column !== undefined && before === undefined
+        ? { beforeUnavailable: true }
+        : {}),
       ...(proposal.after !== undefined ? { after: proposal.after } : {}),
     };
   });

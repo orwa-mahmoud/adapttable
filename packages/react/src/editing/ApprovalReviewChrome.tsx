@@ -55,6 +55,13 @@ export interface ApprovalReviewChromeProps {
   readonly onReject: () => void;
   /** Decide one change. Omit when the write cannot be split. */
   readonly onDecide?: (index: number, approved: boolean) => void;
+  /**
+   * Approve this, and stop asking about this capability for the session.
+   *
+   * Omit when the write is not one the reader may settle that way. The
+   * control is drawn only when this is here, rather than drawn and refusing.
+   */
+  readonly onAlwaysAllow?: () => void;
   /** Class for the region. */
   readonly className?: string;
   /** Class for each button. */
@@ -118,6 +125,7 @@ export function ApprovalReviewChrome({
   onApprove,
   onReject,
   onDecide,
+  onAlwaysAllow,
   className,
   buttonClassName,
 }: Readonly<ApprovalReviewChromeProps>): ReactElement {
@@ -216,6 +224,17 @@ export function ApprovalReviewChrome({
         data-adapttable-part="approval-review-actions"
         style={{ display: "flex", gap: "0.5em", justifyContent: "flex-end" }}
       >
+        {/* A standing decision sits apart from the two that answer only this
+            write, and it reads as the quieter choice — it is the one a reader
+            should take deliberately, not the one the thumb lands on. */}
+        {onAlwaysAllow ? (
+          <Action
+            label={labels?.alwaysAllowProposal ?? "Always allow"}
+            part="agent-approval-always-allow"
+            {...buttonClass}
+            onClick={onAlwaysAllow}
+          />
+        ) : null}
         <Reject
           label={review.rejectLabel}
           part="agent-approval-reject"

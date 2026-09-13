@@ -626,7 +626,12 @@ describe("approval and commit", () => {
       "ed"
     );
     expect(onApprove).not.toHaveBeenCalled();
-    await session.execute("rows.delete", { keys: ["r1"] }, 1, "del");
+    await session.execute(
+      "rows.delete",
+      { rows: [{ rowKey: "r1" }] },
+      1,
+      "del"
+    );
     expect(onApprove).toHaveBeenCalled();
   });
 
@@ -814,7 +819,7 @@ describe("selection, views, add and delete", () => {
     expect(hooks.addRows).toHaveBeenCalledWith([
       { rowKey: "r-new", name: "Named" },
     ]);
-    await session.execute("rows.delete", { keys: ["r1"] }, 1, "rm");
+    await session.execute("rows.delete", { rows: [{ rowKey: "r1" }] }, 1, "rm");
     expect(hooks.deleteRows).toHaveBeenCalled();
   });
 

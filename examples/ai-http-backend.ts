@@ -432,9 +432,22 @@ function excerpt(raw: string, limit = 300): string {
 }
 
 function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
-  const body: unknown = JSON.parse(raw);
+  let body: unknown;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    // A reply that is not JSON is the provider's fault, not the caller's, and
+    // a parser's "Expected ',' at position 37" tells whoever is reading
+    // nothing about which of authentication, billing, connectivity or model
+    // behaviour they are looking at. Name the class and quote what came back.
+    throw new TypeError(
+      `provider returned a reply that is not JSON — it sent ${excerpt(raw)}`
+    );
+  }
   if (!body || typeof body !== "object" || Array.isArray(body)) {
-    throw new TypeError("provider returned a non-object");
+    throw new TypeError(
+      `provider returned a non-object — it sent ${excerpt(raw)}`
+    );
   }
   const record = body as Record<string, unknown>;
   const turnId = request.turnId ?? "turn";
@@ -536,6 +549,11 @@ export async function handleExampleAgentTurn(
         }
       : undefined
   );
+  // A reader pressing Stop aborts the provider call mid-document, so what
+  // comes back is a truncated reply or none at all. That is a cancelled turn,
+  // not a provider that answered badly, and reading it as one would report the
+  // reader's own decision to them as a fault.
+  if (signal.aborted) throw new Error("cancelled");
   return { ...asReply(raw, request), pin: resolved.pin };
 }
 
@@ -794,6 +812,10 @@ function reportFailure(
 function statusForFailure(message: string): number {
   if (message.includes("too large")) return 413;
   if (message.includes("cancelled")) return 499;
+  // The caller sent a perfectly good request and the provider answered with
+  // something unusable. Reporting that as 400 sends whoever is debugging it
+  // looking at their own payload.
+  if (message.startsWith("provider ")) return 502;
   return 400;
 }
 

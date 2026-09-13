@@ -24,6 +24,7 @@
 import {
   type AgentContextInputs,
   type AgentSession,
+  type AlwaysAllowedState,
   type AssistantMessage,
   type AssistantQuestion,
   type AssistantStatus,
@@ -110,6 +111,17 @@ export interface TableAssistantOptions {
    * actually happening. The turn is still in flight and still stoppable.
    */
   readonly awaitingApproval?: boolean;
+  /**
+   * What the reader has waved through, when the panel is mounted outside the
+   * table.
+   *
+   * A panel inside the table reads this from feature state and needs nothing
+   * here. One beside it cannot, so a host wires `bridge.alwaysAllowed` and
+   * passes what it publishes — the same arrangement `bridge.approvals` and
+   * `bridge.viewInputs` already have. Without it a reader can wave a
+   * capability through and have no way to take it back.
+   */
+  readonly alwaysAllow?: AlwaysAllowedState;
   /** How many primary suggestions to surface. The rest are `more`. */
   readonly primarySuggestions?: number;
   /**
@@ -315,10 +327,12 @@ function inputsOf(
     awaitingApproval: options.awaitingApproval,
     approval: approval ?? null,
     ...(contextInputs ? { contextInputs } : {}),
-    ...(alwaysAllow
+    // The host's own wins, for the same reason `contextInputs` does: a panel
+    // beside the table has no feature state to read.
+    ...((options.alwaysAllow ?? alwaysAllow)
       ? {
-          alwaysAllowed: alwaysAllow.capabilities,
-          onRevokeAlwaysAllow: alwaysAllow.revoke,
+          alwaysAllowed: (options.alwaysAllow ?? alwaysAllow)?.capabilities,
+          onRevokeAlwaysAllow: (options.alwaysAllow ?? alwaysAllow)?.revoke,
         }
       : {}),
   };

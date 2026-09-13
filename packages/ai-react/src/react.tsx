@@ -1335,6 +1335,14 @@ function TableAgentProvider({
     [revocations, stamp, contractVersion]
   );
 
+  // Published the same way the manifest and the approval are: a panel mounted
+  // beside the table cannot read feature state from inside it, so a reader
+  // who waved a capability through would have nowhere to take it back.
+  const alwaysAllowedBridge = optionsRef.current.bridge?.alwaysAllowed;
+  useEffect(() => {
+    alwaysAllowedBridge?.(alwaysAllowValue);
+  }, [alwaysAllowedBridge, alwaysAllowValue]);
+
   return (
     <FeatureStateScope stateKey={TABLE_AGENT_STATE} value={published}>
       <FeatureStateScope stateKey={AGENT_APPROVAL_STATE} value={approvalValue}>

@@ -184,6 +184,7 @@ export const zh: Required<TableLabels> = {
   approveRemainingProposals: "批准其余",
   rejectAllProposals: "全部拒绝",
   rejectRemainingProposals: "拒绝其余",
+  alwaysAllowProposal: "始终允许",
   proposalTally: ({ pending, approved, rejected }) =>
     "已批准 {a} · 已拒绝 {j} · 剩余 {p}"
       .replace("{a}", String(approved))

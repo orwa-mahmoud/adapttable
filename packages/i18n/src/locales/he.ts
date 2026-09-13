@@ -186,6 +186,7 @@ export const he: Required<TableLabels> = {
   approveRemainingProposals: "אישור השאר",
   rejectAllProposals: "דחיית הכול",
   rejectRemainingProposals: "דחיית השאר",
+  alwaysAllowProposal: "לאפשר תמיד",
   proposalTally: ({ pending, approved, rejected }) =>
     "{a} אושרו · {j} נדחו · {p} נותרו"
       .replace("{a}", String(approved))

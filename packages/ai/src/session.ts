@@ -1076,7 +1076,7 @@ async function planBuiltIn(
     case "rows.add":
       return planAdd(body);
     case "rows.delete":
-      return planDelete(body);
+      return planDelete(body, observation, apply, guard);
     case "rows.reorder":
       return planReorder(body);
     default:
@@ -1196,12 +1196,24 @@ async function dispatchBuiltIn(
       assertApply(apply, "setSearch");
       apply.setSearch(typeof body.query === "string" ? body.query : "");
       return { ok: true, revision: observation.viewRevision + 1 };
-    case "view.setFilters":
+    case "view.setFilters": {
       assertApply(apply, "setFilters");
-      apply.setFilters(
-        extrasFromAgentFilters(body.filters, observation.availableFilters)
+      // Three argument shapes reduce to one bag, and a bare `ok` leaves the
+      // caller unable to tell which reading it got — so it sends the request
+      // again in another shape, and the reader watches one filter land four
+      // times. Reporting the bag that was applied ends the guessing with the
+      // value the table is actually holding.
+      const extras = extrasFromAgentFilters(
+        body.filters,
+        observation.availableFilters
       );
-      return { ok: true, revision: observation.viewRevision + 1 };
+      apply.setFilters(extras);
+      return {
+        ok: true,
+        revision: observation.viewRevision + 1,
+        filters: extras,
+      };
+    }
     case "view.setGroupBy": {
       const groupKey = body.key as string | null | undefined;
       assertApply(apply, "setGroupBy");
@@ -1800,8 +1812,41 @@ async function applyAdd(
   return writePayload(plan?.proposals ?? [], true, "not-required");
 }
 
-function planDelete(body: Record<string, unknown>): CapabilityPlan {
-  const keys = body.keys as string[];
+/**
+ * Turn a delete request into the row keys it actually names.
+ *
+ * Deletion addresses rows the way every other row-targeting capability does:
+ * a stable `rowKey`, or a 1-based `position` in the named scope. An agent
+ * usually knows which row a reader means — the one it is looking at — and not
+ * the opaque key behind it, so resolving here is what makes the request
+ * expressible at all. It is also what keeps it honest: a reference that names
+ * no row is refused while the plan is still a proposal, rather than reaching
+ * the host's delete callback to remove nothing and report success.
+ */
+async function planDelete(
+  body: Record<string, unknown>,
+  observation: AgentObservation,
+  apply: AgentApply,
+  guard: SessionGuard
+): Promise<CapabilityPlan> {
+  const rows = body.rows as Record<string, unknown>[];
+  if (!Array.isArray(rows) || rows.length === 0) {
+    throw new ApplyError("invalid-arguments", "at least one row is required");
+  }
+  const keys: string[] = [];
+  for (const row of rows) {
+    const resolved = await resolveRowArg(row, observation, apply);
+    // Resolving awaited host code: the row that answered has to still be
+    // addressable in the view this deletion was authorized against.
+    const latest = guard.observe();
+    if (latest.viewRevision !== observation.viewRevision) {
+      throw new ApplyError(
+        "revision-mismatch",
+        `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+      );
+    }
+    keys.push(resolved.rowKey);
+  }
   const proposals: WriteProposal[] = keys.map((rowKey) => ({ rowKey }));
   return { proposals, payload: keys, perItem: true };
 }

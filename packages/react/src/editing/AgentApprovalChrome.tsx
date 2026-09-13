@@ -230,6 +230,7 @@ export function AgentApprovalChrome({
         onApprove={mine.approve}
         onReject={mine.reject}
         {...(mine.decideAt ? { onDecide: mine.decideAt } : {})}
+        {...(mine.alwaysAllow ? { onAlwaysAllow: mine.alwaysAllow } : {})}
         {...(className ? { className } : {})}
         {...(buttonClassName ? { buttonClassName } : {})}
       />

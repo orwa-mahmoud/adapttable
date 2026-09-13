@@ -119,7 +119,14 @@ export function approvalReview(
     truncated: items.length > preview.length,
     ...(pending.operation ? { operation: pending.operation } : {}),
     perItem: pending.decideAt !== undefined,
-    summary: text.proposalSummary({ changes: items.length, rows }),
+    // A write that names an operation enumerates no rows, and counting them
+    // would head the strip "0 proposed changes" over a change that is about
+    // to happen. It is one change: the operation, which the block below it
+    // names.
+    summary: text.proposalSummary({
+      changes: pending.operation ? 1 : items.length,
+      rows,
+    }),
     tally: started
       ? (
           labels?.proposalTally ??

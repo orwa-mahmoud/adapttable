@@ -189,13 +189,26 @@ describe("what the context costs across fixtures", () => {
     const wide = buildAgentContext(tableSession(WIDE), { profile: "compact" });
     const full = buildAgentContext(tableSession(WIDE), { profile: "full" });
 
-    // Nothing was truncated and nothing was taken away: the columns that did
-    // not fit are named, so a model knows they exist and can ask.
+    // Nothing was truncated and nothing was taken away. Every column is still
+    // listed, in the table's own order: a contract naming fewer columns than
+    // the table has is a model telling the reader the table is smaller than it
+    // is, and a live one did exactly that. What a budget takes is the author's
+    // detail, and each column it took it from is named.
     const deferred = wide.selection.deferredColumns ?? [];
     expect(deferred.length).toBeGreaterThan(0);
-    expect(wide.contract.columns.length + deferred.length).toBe(
-      full.contract.columns.length
+    expect(wide.contract.columns.map((column) => column.id)).toEqual(
+      full.contract.columns.map((column) => column.id)
     );
+    const bare = new Set(deferred);
+    for (const column of wide.contract.columns.filter((entry) =>
+      bare.has(entry.id)
+    )) {
+      expect(column.description).toBeUndefined();
+      expect(column.examples).toBeUndefined();
+      // Identity and permissions are what a model cannot work without.
+      expect(column.label).toBeTruthy();
+      expect(typeof column.writable).toBe("boolean");
+    }
     expect(wide.selection.notes?.join(" ")).toMatch(/columns\.describe/);
 
     // Every capability the table offers is still offered. A budget decides

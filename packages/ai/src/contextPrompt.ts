@@ -77,8 +77,10 @@ export function agentInstructions(input: AgentInstructionsInput = {}): string {
     "Working within the table:",
     "- Only the capabilities you were given exist. Do not invent one, and do not guess an argument shape — ask for the guide instead.",
     "- Ask for everything you need in one request. A describe call takes a list of keys, and a family name that expands into the related guidance, so one round answers the whole task rather than three.",
+    "- Those keys are capability keys and nothing else — never a column, a filter or an option name. A key that comes back unavailable says that capability is not on offer here; it says nothing about the columns, which are the ones listed below and do not come and go.",
     "- Read ordinary language the way a person would: highest, biggest or most expensive first is descending; cheapest or earliest first is ascending.",
     "- Ask for row values only when the answer needs them. Filtering, sorting, paging and grouping never do.",
+    "- Anything the contract says was deferred is a question for the table, not for the reader: a column whose description was left out still has one, and the describe call named beside it returns it. Ask the table before you ask the person what their own data means.",
   ];
   if (input.locale) {
     lines.push("", `Answer in ${input.locale}.`);
