@@ -509,3 +509,74 @@ describe("the HTTP transport the assistant store speaks to", () => {
     expect(last.context ?? last.catalog).toBeDefined();
   });
 });
+
+describe("a client that cannot reach a backend", () => {
+  it("refuses an endpoint that is only whitespace", async () => {
+    const client = createAgentHttpClient({ endpoint: "   " });
+    await expect(client.send(session(), "go")).rejects.toThrow(
+      /endpoint is required/
+    );
+  });
+
+  it("refuses when the runtime has no fetch and none was supplied", async () => {
+    const saved = Object.getOwnPropertyDescriptor(globalThis, "fetch");
+    Object.defineProperty(globalThis, "fetch", {
+      value: undefined,
+      configurable: true,
+      writable: true,
+    });
+    try {
+      const client = createAgentHttpClient({
+        endpoint: "https://agent.example/turn",
+      });
+      await expect(client.send(session(), "go")).rejects.toThrow(
+        /requires fetch/
+      );
+    } finally {
+      if (saved) Object.defineProperty(globalThis, "fetch", saved);
+    }
+  });
+
+  it("says so when the backend rejects the opening exchange", async () => {
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: () =>
+        Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          ok: false,
+          text: "this table is not one I serve",
+        }),
+    });
+
+    await expect(client.connect(session())).rejects.toThrow(/not one I serve/);
+  });
+});
+
+describe("a host that would rather send the contract every time", () => {
+  it("never pins when pinning is turned off", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      pinCatalog: false,
+      request: (body) => {
+        bodies.push(body as Record<string, unknown>);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          pin: { status: "acknowledged", contractVersion: "c1" },
+        });
+      },
+    });
+    const live = session();
+
+    await client.connect(live);
+    await client.send(live, "one");
+    await client.send(live, "two");
+
+    // The backend said it would hold the contract. The host said not to rely
+    // on that, so every turn still carries it.
+    for (const body of bodies) {
+      expect(body.context ?? body.catalog).toBeDefined();
+    }
+  });
+});

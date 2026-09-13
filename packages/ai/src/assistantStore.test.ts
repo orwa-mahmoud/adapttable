@@ -707,3 +707,128 @@ describe("streamed text", () => {
     ).toHaveLength(1);
   });
 });
+
+describe("a store nobody is using any more", () => {
+  it("ignores every instruction once disposed", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying(),
+    });
+    store.connect();
+    store.dispose();
+
+    // Each of these is a surface that has gone calling into a store that has
+    // gone. None of them may throw, and none may publish.
+    const seen = vi.fn();
+    store.subscribe(seen);
+    store.setDraft("x");
+    store.clear();
+    store.stop();
+    store.answer({ optionId: "q" });
+    store.revokeAlwaysAllow("edit.cells");
+    store.update({ session: tableSession(), transport: replying() });
+    await store.undoTurn();
+    await store.send("hello");
+    await store.runSuggestion("s1");
+
+    expect(seen).not.toHaveBeenCalled();
+  });
+});
+
+describe("clearing the transcript", () => {
+  it("ends a turn in flight rather than leaving a reply nowhere to land", async () => {
+    const deferred = deferredTransport();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: deferred.transport,
+    });
+    store.connect();
+
+    const turn = store.send("summarise");
+    await Promise.resolve();
+    store.clear();
+
+    expect(store.getState().messages).toEqual([]);
+    // A reader who asks for a clear transcript means it: the abandoned reply
+    // lands nowhere rather than reappearing in an empty conversation.
+    deferred.reply("too late");
+    await turn;
+    expect(store.getState().messages).toEqual([]);
+  });
+});
+
+describe("a suggestion the table can no longer serve", () => {
+  it("is not sent once its capability has gone", async () => {
+    const send = vi.fn(() => Promise.resolve({ text: "ok" }));
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: { send },
+      suggestions: [
+        {
+          id: "s1",
+          label: "Export it",
+          prompt: "export",
+          requires: ["export"],
+        },
+      ],
+    });
+    store.connect();
+
+    await store.runSuggestion("s1");
+
+    // The executor would refuse it anyway. This is so the refusal is not what
+    // the reader finds out from.
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it("does nothing for an id nobody authored", async () => {
+    const send = vi.fn(() => Promise.resolve({ text: "ok" }));
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: { send },
+      suggestions: [],
+    });
+    store.connect();
+
+    await store.runSuggestion("nonesuch");
+    expect(send).not.toHaveBeenCalled();
+  });
+});
+
+describe("what a re-render may safely hand the store", () => {
+  it("holds its snapshot when the inputs say the same thing", () => {
+    const session = tableSession();
+    const transport = replying();
+    const store = createTableAssistant({ session, transport });
+    store.connect();
+
+    const before = store.getState();
+    // A binding is allowed to call this on every render. Doing so must not
+    // move anything a subscriber can see.
+    store.update({ session, transport });
+    expect(store.getState()).toBe(before);
+  });
+
+  it("disconnects the transport it is replacing, not the new one", () => {
+    const first = {
+      send: () => Promise.resolve({ text: "" }),
+      disconnect: vi.fn(),
+    };
+    const second = {
+      send: () => Promise.resolve({ text: "" }),
+      disconnect: vi.fn(),
+    };
+    const session = tableSession();
+    const store = createTableAssistant({
+      session,
+      transport: first,
+      transportKey: "a",
+    });
+    store.connect();
+
+    store.update({ session, transport: second, transportKey: "b" });
+
+    expect(first.disconnect).toHaveBeenCalledTimes(1);
+    expect(second.disconnect).not.toHaveBeenCalled();
+  });
+});
