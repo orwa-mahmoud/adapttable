@@ -1617,6 +1617,9 @@ export { DEFAULT_CARD_SIZE_PX }
 // @public
 export type Density = "comfortable" | "compact";
 
+// @public
+export function deriveRuntimeOperations<TRow>(view: TableRuntimeView<TRow> | undefined): Readonly<Record<string, boolean>>;
+
 export { deriveSortByOptions }
 
 // @public
@@ -4812,6 +4815,7 @@ export interface TableAssistantProps {
     readonly assistant: TableAssistantView;
     readonly boundary?: TableAssistantBoundary;
     readonly className?: string;
+    readonly dir?: "ltr" | "rtl";
     readonly labels?: TableLabels;
     readonly launcher?: boolean;
     readonly messageAction?: (message: TableAssistantMessageView) => {
@@ -4872,6 +4876,7 @@ export interface TableAssistantSheetProps {
     readonly children: ReactNode;
     // (undocumented)
     readonly className?: string;
+    readonly dir?: "ltr" | "rtl";
     // (undocumented)
     readonly label: string;
     // (undocumented)
@@ -5181,6 +5186,7 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly query?: {
         readonly page: number;
         readonly limit: number;
+        readonly total?: number;
         readonly search: string;
         readonly sortBy?: string;
         readonly sortDir?: "asc" | "desc";

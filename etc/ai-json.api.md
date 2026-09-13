@@ -166,6 +166,7 @@ export interface AgentManifest {
     readonly capabilities: readonly string[];
     readonly columns: readonly AgentColumn[];
     readonly limits: AgentLimits;
+    readonly pagination?: AgentPagination;
     readonly policy: AgentPolicy;
     readonly rowAddressing: AgentRowAddressing;
     readonly schemaVersion: string;
@@ -201,6 +202,7 @@ export interface AgentObservation {
     readonly limit: number;
     readonly page: number;
     readonly pageMax: number;
+    readonly pagination?: AgentPagination;
     readonly pinnedColumns?: Readonly<Record<string, "start" | "end">>;
     readonly pinnedRows?: {
         readonly top: readonly string[];
@@ -216,6 +218,18 @@ export interface AgentObservation {
     readonly tableId: string;
     readonly viewRevision: number;
     readonly writePolicy: WritePolicy;
+}
+
+// @public
+export interface AgentPagination {
+    readonly canJump: boolean;
+    readonly hasNext?: boolean;
+    readonly hasPrevious: boolean;
+    readonly page: number;
+    readonly pageSize: number;
+    readonly pageSizeOptions?: readonly number[];
+    readonly totalPages?: number;
+    readonly totalRows?: number;
 }
 
 // @public
@@ -379,6 +393,17 @@ export interface JsonToolCall {
     readonly expectedRevision: number;
     readonly idempotencyKey: string;
     readonly name: string;
+}
+
+// @public
+export interface PaginationInput {
+    readonly atEnd?: boolean;
+    readonly canJump: boolean;
+    readonly loadedRows?: number;
+    readonly page: number;
+    readonly pageSize: number;
+    readonly pageSizeOptions?: readonly number[];
+    readonly totalRows?: number;
 }
 
 // @public

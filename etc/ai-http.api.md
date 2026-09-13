@@ -180,11 +180,13 @@ export interface AgentContextInputs {
         readonly filters?: Readonly<Record<string, unknown>>;
         readonly pinnedColumns?: Readonly<Record<string, unknown>>;
         readonly pinnedRows?: Readonly<Record<string, unknown>>;
+        readonly pagination?: AgentPagination;
     };
 }
 
 // @public
 export interface AgentContextOptions {
+    readonly asked?: readonly string[];
     readonly estimateTokens?: (text: string) => number;
     readonly include?: readonly string[];
     readonly priority?: readonly string[];
@@ -201,7 +203,9 @@ export interface AgentContextSelection {
     readonly deferred: readonly {
         readonly key: string;
         readonly reason: DeferralReason;
+        readonly kind?: DeferralKind;
     }[];
+    readonly deferredColumns?: readonly string[];
     readonly estimated: boolean;
     readonly estimatedTokens: number;
     readonly notes?: readonly string[];
@@ -221,6 +225,7 @@ export interface AgentContextView {
     readonly limit: number;
     // (undocumented)
     readonly page: number;
+    readonly pagination?: AgentPagination;
     // (undocumented)
     readonly pinnedColumns?: Readonly<Record<string, unknown>>;
     // (undocumented)
@@ -427,6 +432,7 @@ export interface AgentManifest {
     readonly capabilities: readonly string[];
     readonly columns: readonly AgentColumn[];
     readonly limits: AgentLimits;
+    readonly pagination?: AgentPagination;
     readonly policy: AgentPolicy;
     readonly rowAddressing: AgentRowAddressing;
     readonly schemaVersion: string;
@@ -462,6 +468,7 @@ export interface AgentObservation {
     readonly limit: number;
     readonly page: number;
     readonly pageMax: number;
+    readonly pagination?: AgentPagination;
     readonly pinnedColumns?: Readonly<Record<string, "start" | "end">>;
     readonly pinnedRows?: {
         readonly top: readonly string[];
@@ -477,6 +484,18 @@ export interface AgentObservation {
     readonly tableId: string;
     readonly viewRevision: number;
     readonly writePolicy: WritePolicy;
+}
+
+// @public
+export interface AgentPagination {
+    readonly canJump: boolean;
+    readonly hasNext?: boolean;
+    readonly hasPrevious: boolean;
+    readonly page: number;
+    readonly pageSize: number;
+    readonly pageSizeOptions?: readonly number[];
+    readonly totalPages?: number;
+    readonly totalRows?: number;
 }
 
 // @public
@@ -763,6 +782,9 @@ export const DEFAULT_PIN_CONNECTIONS = 8;
 export const DEFAULT_PIN_TTL_MS: number;
 
 // @public
+export type DeferralKind = "guide" | "column";
+
+// @public
 export type DeferralReason = "budget" | "hard-limit";
 
 // @public
@@ -804,6 +826,17 @@ export type JsonSchemaDocument = Record<string, unknown>;
 
 // @public
 export const MAX_STREAM_EVENTS = 4000;
+
+// @public
+export interface PaginationInput {
+    readonly atEnd?: boolean;
+    readonly canJump: boolean;
+    readonly loadedRows?: number;
+    readonly page: number;
+    readonly pageSize: number;
+    readonly pageSizeOptions?: readonly number[];
+    readonly totalRows?: number;
+}
 
 // @public
 export function parseAgentHttpRequest(input: unknown): AgentHttpRequest;

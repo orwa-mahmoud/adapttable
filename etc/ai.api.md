@@ -189,11 +189,13 @@ export interface AgentContextInputs {
         readonly filters?: Readonly<Record<string, unknown>>;
         readonly pinnedColumns?: Readonly<Record<string, unknown>>;
         readonly pinnedRows?: Readonly<Record<string, unknown>>;
+        readonly pagination?: AgentPagination;
     };
 }
 
 // @public
 export interface AgentContextOptions {
+    readonly asked?: readonly string[];
     readonly estimateTokens?: (text: string) => number;
     readonly include?: readonly string[];
     readonly priority?: readonly string[];
@@ -210,7 +212,9 @@ export interface AgentContextSelection {
     readonly deferred: readonly {
         readonly key: string;
         readonly reason: DeferralReason;
+        readonly kind?: DeferralKind;
     }[];
+    readonly deferredColumns?: readonly string[];
     readonly estimated: boolean;
     readonly estimatedTokens: number;
     readonly notes?: readonly string[];
@@ -230,6 +234,7 @@ export interface AgentContextView {
     readonly limit: number;
     // (undocumented)
     readonly page: number;
+    readonly pagination?: AgentPagination;
     // (undocumented)
     readonly pinnedColumns?: Readonly<Record<string, unknown>>;
     // (undocumented)
@@ -305,6 +310,7 @@ export interface AgentManifest {
     readonly capabilities: readonly string[];
     readonly columns: readonly AgentColumn[];
     readonly limits: AgentLimits;
+    readonly pagination?: AgentPagination;
     readonly policy: AgentPolicy;
     readonly rowAddressing: AgentRowAddressing;
     readonly schemaVersion: string;
@@ -340,6 +346,7 @@ export interface AgentObservation {
     readonly limit: number;
     readonly page: number;
     readonly pageMax: number;
+    readonly pagination?: AgentPagination;
     readonly pinnedColumns?: Readonly<Record<string, "start" | "end">>;
     readonly pinnedRows?: {
         readonly top: readonly string[];
@@ -356,6 +363,24 @@ export interface AgentObservation {
     readonly viewRevision: number;
     readonly writePolicy: WritePolicy;
 }
+
+// @public
+export function agentObservation(inputs: ObservationInputs): AgentObservation;
+
+// @public
+export interface AgentPagination {
+    readonly canJump: boolean;
+    readonly hasNext?: boolean;
+    readonly hasPrevious: boolean;
+    readonly page: number;
+    readonly pageSize: number;
+    readonly pageSizeOptions?: readonly number[];
+    readonly totalPages?: number;
+    readonly totalRows?: number;
+}
+
+// @public
+export function agentPagination(input: PaginationInput): AgentPagination;
 
 // @public
 export interface AgentPolicy {
@@ -792,6 +817,13 @@ export function closeTransaction(entry: PendingApproval): (current: ApprovalTran
 export type CommitPolicy = "stage" | "immediate";
 
 // @public
+export class ContextBudgetError extends Error {
+    constructor(budget: number, floor: number);
+    readonly budget: number;
+    readonly floor: number;
+}
+
+// @public
 export interface ContextCapability {
     readonly guide?: string;
     readonly input?: JsonSchema;
@@ -880,6 +912,9 @@ export const DEFAULT_CACHE_VERSIONS = 2;
 
 // @public
 export const DEFAULT_COMPACT_TOKENS = 1000;
+
+// @public
+export type DeferralKind = "guide" | "column";
 
 // @public
 export type DeferralReason = "budget" | "hard-limit";
@@ -1037,10 +1072,90 @@ export interface NeutralQueryOverlay {
 export function observationFromNeutral<TRow>(table: NeutralTable<TRow>, options: LiveObservationOptions, viewRevision: number, apply: AgentApply, featureIds: readonly string[], query?: NeutralQueryOverlay): AgentObservation;
 
 // @public
+export interface ObservationInputs {
+    // (undocumented)
+    readonly aggregations?: AgentAggregations;
+    readonly apply: AgentApply;
+    // (undocumented)
+    readonly availableFilters?: readonly AgentFilter[];
+    // (undocumented)
+    readonly columns: readonly AgentColumn[];
+    // (undocumented)
+    readonly featureIds: readonly string[];
+    readonly operations: RuntimeOperations;
+    // (undocumented)
+    readonly pagination: AgentPagination;
+    // (undocumented)
+    readonly policy: ObservedPolicy;
+    // (undocumented)
+    readonly readMax?: number;
+    // (undocumented)
+    readonly rowAddressScope: RowAddressScope;
+    // (undocumented)
+    readonly source: TableSourceCapabilities;
+    // (undocumented)
+    readonly tableId: string;
+    // (undocumented)
+    readonly view: ObservedView;
+    // (undocumented)
+    readonly viewRevision: number;
+}
+
+// @public
+export interface ObservedPolicy {
+    // (undocumented)
+    readonly approval: ApprovalPolicy;
+    // (undocumented)
+    readonly commit?: CommitPolicy;
+    // (undocumented)
+    readonly presentation?: ApprovalPresentation;
+    // (undocumented)
+    readonly writePolicy?: WritePolicy;
+}
+
+// @public
+export interface ObservedView {
+    // (undocumented)
+    readonly filters?: unknown;
+    // (undocumented)
+    readonly groupBy?: string;
+    // (undocumented)
+    readonly pinnedColumns?: Readonly<Record<string, "start" | "end">>;
+    // (undocumented)
+    readonly pinnedRows?: {
+        readonly top: readonly string[];
+        readonly bottom: readonly string[];
+    };
+    // (undocumented)
+    readonly search?: string;
+    // (undocumented)
+    readonly sortBy?: string;
+    // (undocumented)
+    readonly sortDir?: "asc" | "desc";
+}
+
+// @public
 export function openAiToolNameMap(keys: readonly string[]): ReadonlyMap<string, string>;
 
 // @public
 export function openTransaction(id: number, pending: PendingApproval, presentation: ApprovalPresentation): ApprovalTransaction;
+
+// @public
+export function pageRefusal(pagination: AgentPagination, page: unknown): string | undefined;
+
+// @public
+export function pageSizeRefusal(pagination: AgentPagination, pageSize: unknown): string | undefined;
+
+// @public
+export interface PaginationInput {
+    readonly atEnd?: boolean;
+    readonly canJump: boolean;
+    readonly loadedRows?: number;
+    readonly page: number;
+    readonly pageSize: number;
+    readonly pageSizeOptions?: readonly number[];
+    readonly totalRows?: number;
+}
 
 // @public
 export function parseStreamRecord(record: string): AgentStreamEvent | undefined;
@@ -1163,6 +1278,9 @@ export interface RowWindowRow {
     readonly cells: Readonly<Record<string, unknown>>;
     readonly rowKey: string;
 }
+
+// @public
+export type RuntimeOperations = Readonly<Record<string, boolean>>;
 
 // @public
 export function runUndo(session: AgentSession, undo: AssistantUndo, idempotencyKey: string, signal?: AbortSignal): Promise<readonly ExecuteResult[]>;

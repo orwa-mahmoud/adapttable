@@ -636,14 +636,6 @@ function Body({
   );
 }
 
-/**
- * The assistant panel.
- *
- * @param props - See {@link TableAssistantChromeProps}.
- * @returns The launcher, the panel, or both.
- *
- * @public
- */
 /** What the assistant is drawn in, once the presentation has been resolved. */
 function openSurface({
   open,
@@ -703,6 +695,14 @@ function openSurface({
   );
 }
 
+/**
+ * The assistant panel.
+ *
+ * @param props - See {@link TableAssistantChromeProps}.
+ * @returns The launcher, the panel, or both.
+ *
+ * @public
+ */
 export function TableAssistantChrome({
   assistant,
   open,

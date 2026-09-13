@@ -978,6 +978,7 @@ export type {
   AgentLimits,
   AgentManifest,
   AgentObservation,
+  AgentPagination,
   AgentPolicy,
   AgentRowAddressing,
   AgentSession,

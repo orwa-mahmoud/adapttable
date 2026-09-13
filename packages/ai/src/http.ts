@@ -2146,4 +2146,8 @@ export type {
   ContextColumn,
 } from "./context";
 export type { AgentInstructionsInput } from "./contextPrompt";
-export type { AgentContextProfile, DeferralReason } from "./contextSelection";
+export type {
+  AgentContextProfile,
+  DeferralKind,
+  DeferralReason,
+} from "./contextSelection";
