@@ -12,6 +12,15 @@ const KEY_FROM_COLUMN = new Set([
   "view.pinColumn",
 ]);
 
+/**
+ * Capabilities that address a row, where `key` means `rowKey`.
+ *
+ * The mirror of the set above, and caused by it: sort, group and pin all take
+ * a plain `key`, so a model that has learned this table's vocabulary reaches
+ * for `key` when it wants to name a row too.
+ */
+const ROW_KEY_FROM_KEY = new Set(["rows.resolve", "view.pinRow"]);
+
 function asRecord(value: unknown): Record<string, unknown> | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
@@ -90,6 +99,14 @@ export function normalizeCapabilityArgs(key: string, args: unknown): unknown {
   ) {
     record.key = record.column;
     delete record.column;
+  }
+  if (
+    ROW_KEY_FROM_KEY.has(key) &&
+    !("rowKey" in record) &&
+    typeof record.key === "string"
+  ) {
+    record.rowKey = record.key;
+    delete record.key;
   }
   if (key === "view.setSort") return normalizeSortArgs(record);
   // The guide says `query`; the capability is called `setSearch` and the table

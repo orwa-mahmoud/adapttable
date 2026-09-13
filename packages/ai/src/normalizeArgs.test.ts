@@ -130,3 +130,28 @@ describe("a word the capability's own description hands the model", () => {
     ).toMatchObject({ side: "start" });
   });
 });
+
+describe("naming a row with the word this table uses for a column", () => {
+  it("reads `key` as the rowKey a row capability takes", () => {
+    // Sort, group and pin all take a plain `key`, so a model that has learned
+    // the vocabulary reaches for `key` when it wants to name a row as well.
+    expect(normalizeCapabilityArgs("rows.resolve", { key: "p1" })).toEqual({
+      rowKey: "p1",
+    });
+    expect(
+      normalizeCapabilityArgs("view.pinRow", { key: "p1", side: "top" })
+    ).toEqual({ rowKey: "p1", side: "top" });
+  });
+
+  it("leaves a properly named rowKey alone", () => {
+    expect(
+      normalizeCapabilityArgs("rows.resolve", { rowKey: "p1", key: "p2" })
+    ).toMatchObject({ rowKey: "p1" });
+  });
+
+  it("does not touch a capability whose key really is a column", () => {
+    expect(
+      normalizeCapabilityArgs("view.setSort", { key: "salary" })
+    ).toMatchObject({ key: "salary" });
+  });
+});
