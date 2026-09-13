@@ -315,3 +315,94 @@ describe("remembering a language", () => {
     expect(readRememberedLanguage()).toBeUndefined();
   });
 });
+
+describe("what dictation falls back to", () => {
+  it("offers the browser's own language when the host named none", () => {
+    installRecognizer();
+    setGlobal("navigator", { language: "de-DE" });
+
+    const input = createSpeechInput();
+
+    // A host that names no languages gets the reader's, not a hardcoded one.
+    expect(input.getState().language).toBe("de-DE");
+  });
+
+  it("falls back to en-US when the browser will not say", () => {
+    installRecognizer();
+    setGlobal("navigator", {});
+
+    expect(createSpeechInput().getState().language).toBe("en-US");
+  });
+
+  it("ignores a language change to the one already set", () => {
+    installRecognizer();
+    const input = createSpeechInput({ languages: ["fr-FR", "en-GB"] });
+    const seen = vi.fn();
+    input.subscribe(seen);
+
+    input.setLanguage("fr-FR");
+
+    // Nothing moved, so no surface is asked to redraw.
+    expect(seen).not.toHaveBeenCalled();
+  });
+
+  it("joins every result a recognizer reports, not only the last", () => {
+    const recognizer = installRecognizer();
+    const onDraft = vi.fn();
+    const input = createSpeechInput({ onDraft });
+    input.start();
+
+    recognizer.live()?.onresult?.({
+      resultIndex: 0,
+      results: {
+        length: 2,
+        0: { 0: { transcript: "show " } },
+        1: { 0: { transcript: "active rows" } },
+      },
+    });
+
+    expect(onDraft).toHaveBeenCalledWith("show active rows");
+  });
+
+  it("survives a result with nothing in it", () => {
+    const recognizer = installRecognizer();
+    const onDraft = vi.fn();
+    const input = createSpeechInput({ onDraft });
+    input.start();
+
+    recognizer.live()?.onresult?.({
+      resultIndex: 0,
+      results: { length: 1, 0: {} },
+    });
+
+    expect(onDraft).toHaveBeenCalledWith("");
+    expect(input.getState().status).toBe("listening");
+  });
+});
+
+describe("a browser that refuses storage", () => {
+  it("remembers nothing rather than breaking dictation", () => {
+    setGlobal("localStorage", {
+      getItem: () => {
+        throw new Error("storage is blocked");
+      },
+      setItem: () => {
+        throw new Error("storage is blocked");
+      },
+    });
+
+    expect(readRememberedLanguage()).toBeUndefined();
+    expect(() => {
+      rememberLanguage("fr-FR");
+    }).not.toThrow();
+  });
+
+  it("remembers nothing when there is no storage at all", () => {
+    setGlobal("localStorage", undefined);
+
+    expect(readRememberedLanguage()).toBeUndefined();
+    expect(() => {
+      rememberLanguage("fr-FR");
+    }).not.toThrow();
+  });
+});

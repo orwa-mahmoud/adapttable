@@ -822,3 +822,209 @@ describe("statePatch", () => {
     ).toEqual([{ op: "replace", path: "/unknown", value: ["page", "limit"] }]);
   });
 });
+
+describe("a run this adapter cannot read", () => {
+  async function refuse(
+    script: (input: AgUiRunInput) => AgUiEvent[],
+    options: Partial<Parameters<typeof aguiTransport>[0]> = {}
+  ): Promise<unknown> {
+    const table = liveTable();
+    const transport = aguiTransport({
+      connection: recorded([script]).connection,
+      ...options,
+    });
+    return transport
+      .send({ session: table.session, text: "go", conversation: [] })
+      .then(
+        () => undefined,
+        (cause: unknown) => cause
+      );
+  }
+
+  it("refuses a text delta that is not text", async () => {
+    const cause = await refuse((input) => [
+      started(input),
+      { type: "TEXT_MESSAGE_CONTENT", messageId: "m", delta: 7 },
+      finished(input),
+    ]);
+    expect(cause).toMatchObject({ code: "malformed-event" });
+  });
+
+  it("refuses a tool call that starts without a name", async () => {
+    const cause = await refuse((input) => [
+      started(input),
+      { type: "TOOL_CALL_START", toolCallId: "c1" },
+      finished(input),
+    ]);
+    expect(cause).toMatchObject({ code: "malformed-event" });
+  });
+
+  it("refuses arguments for a call that never started", async () => {
+    const cause = await refuse((input) => [
+      started(input),
+      { type: "TOOL_CALL_ARGS", toolCallId: "ghost", delta: "{}" },
+      finished(input),
+    ]);
+    expect(cause).toMatchObject({ code: "unknown-tool-call" });
+  });
+
+  it("refuses the end of a call that never started", async () => {
+    const cause = await refuse((input) => [
+      started(input),
+      { type: "TOOL_CALL_END", toolCallId: "ghost" },
+      finished(input),
+    ]);
+    expect(cause).toMatchObject({ code: "unknown-tool-call" });
+  });
+
+  it("carries the backend's own failure code", async () => {
+    const cause = await refuse((input) => [
+      started(input),
+      { type: "RUN_ERROR", code: "rate-limited", message: "slow down" },
+    ]);
+    expect(cause).toMatchObject({ code: "rate-limited", message: "slow down" });
+  });
+
+  it("names a failure the backend did not explain", async () => {
+    const cause = await refuse((input) => [
+      started(input),
+      { type: "RUN_ERROR" },
+    ]);
+    expect(cause).toMatchObject({ code: "run-error" });
+  });
+
+  it("refuses a run that stops without finishing", async () => {
+    const cause = await refuse((input) => [started(input), ...says("half a")]);
+    expect(cause).toMatchObject({ code: "run-incomplete" });
+  });
+
+  it("leaves somebody else's frontend tool alone", async () => {
+    const table = liveTable();
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "theirs" },
+          { type: "TOOL_CALL_ARGS", toolCallId: "c1", delta: "{}" },
+          { type: "TOOL_CALL_END", toolCallId: "c1" },
+          ...says("done"),
+          finished(input),
+        ],
+      ]).connection,
+    });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "go",
+      conversation: [],
+    });
+
+    // Answering it would be claiming a result for work this table never did.
+    expect(reply.results ?? []).toHaveLength(0);
+    expect(reply.text).toBe("done");
+  });
+});
+
+describe("an interrupt this table cannot settle", () => {
+  it("stops the turn when the backend asks and nobody can answer", async () => {
+    const table = liveTable();
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          finished(input, {
+            interrupt: {
+              interruptId: "i1",
+              reason: "input_required",
+              payload: { question: "Which quarter?" },
+            },
+          }),
+        ],
+      ]).connection,
+    });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "summarise",
+      conversation: [],
+    });
+
+    expect(reply.unresolved).toMatchObject({ code: "question-unanswered" });
+  });
+
+  it("says so when the backend stops for a reason this table does not know", async () => {
+    const table = liveTable();
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          finished(input, {
+            interrupt: { interruptId: "i1", reason: "payment_required" },
+          }),
+        ],
+      ]).connection,
+    });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "go",
+      conversation: [],
+    });
+
+    expect(reply.unresolved).toMatchObject({ code: "interrupt-unsupported" });
+  });
+
+  it("refuses a confirmation naming nothing to confirm", async () => {
+    const table = liveTable();
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          finished(input, {
+            interrupt: {
+              interruptId: "i1",
+              reason: "confirmation",
+              payload: {},
+            },
+          }),
+        ],
+      ]).connection,
+      onApprove: () => Promise.resolve(true),
+    });
+
+    const cause = await transport
+      .send({ session: table.session, text: "go", conversation: [] })
+      .then(
+        () => undefined,
+        (thrown: unknown) => thrown
+      );
+    expect(cause).toMatchObject({ code: "malformed-interrupt" });
+  });
+
+  it("refuses a question with nothing being asked", async () => {
+    const table = liveTable();
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          finished(input, {
+            interrupt: {
+              interruptId: "i1",
+              reason: "input_required",
+              payload: {},
+            },
+          }),
+        ],
+      ]).connection,
+      askUser: () => Promise.resolve(undefined),
+    });
+
+    const cause = await transport
+      .send({ session: table.session, text: "go", conversation: [] })
+      .then(
+        () => undefined,
+        (thrown: unknown) => thrown
+      );
+    expect(cause).toMatchObject({ code: "malformed-interrupt" });
+  });
+});
