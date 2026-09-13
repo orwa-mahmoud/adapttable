@@ -12805,6 +12805,33 @@ are `AgentCellEdit`s.
 `AgentStreamEventKind`, capped at `MAX_STREAM_EVENTS`; `splitRecords` and
 `parseStreamRecord` read them back, and `AgentStreamError` is the failure.
 
+**What a table's pages are.** `agentPagination` turns what a binding can say
+about its own source — `PaginationInput`: the current page and size, the sizes
+the host offers, the counted total for the _current query_ where there is one,
+whether a page number may be named — into an `AgentPagination`. It divides the
+page count from the total and works out whether a further page exists; anything
+unknowable is left absent rather than guessed, so "there is no next page" stays
+distinct from "nobody counted". `pageRefusal` and `pageSizeRefusal` answer
+whether a requested page or size can be served, in a sentence naming both
+sides. The session checks both before the host is called, so a page past the
+end is refused rather than reported as a move that happened.
+
+**What a table can do.** `agentObservation` decides that once, for every
+binding: a capability is available when the host wired a callback for it or the
+runtime already offers it. A binding states its own half — `ObservationInputs`,
+carrying `RuntimeOperations` for what the runtime does by itself, the host's
+`AgentApply`, an `ObservedPolicy` and an `ObservedView` — and reads the answer
+back. The page and size it publishes come from the `AgentPagination` it
+carries, so the bound a session enforces and the pages a model is told about
+are the same number by construction.
+
+**When the context will not fit.** A `compact` build budgets the whole payload.
+Column descriptions that do not fit are named in `selection.deferredColumns`
+and fetched with `columns.describe`; a deferral says which kind of thing it was
+through `DeferralKind`. A `tokenBudget` the caller chose that nothing can
+satisfy raises `ContextBudgetError`, which names the floor the table costs with
+everything deferrable already deferred.
+
 ### `@adapttable/ai/json` and `/openai`
 
 Two shapes of the same catalog: JSON Schema tool definitions, and OpenAI
@@ -12912,6 +12939,11 @@ The rendered assistant carries two blocks an adapter draws itself:
 `TableAssistantQuestionView` with its `TableAssistantQuestionOption`s is a
 question waiting on the reader, and `TableAssistantUndoView` is the offer to
 put back what the last turn changed.
+
+`deriveRuntimeOperations` reads which view operations a live runtime offers by
+itself, for a binding projecting them into `@adapttable/ai`'s
+`agentObservation`. It reports what the runtime does; what that means for a
+capability is decided there, once, rather than per binding.
 
 ## Other packages
 

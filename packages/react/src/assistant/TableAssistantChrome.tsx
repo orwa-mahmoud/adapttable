@@ -644,6 +644,65 @@ function Body({
  *
  * @public
  */
+/** What the assistant is drawn in, once the presentation has been resolved. */
+function openSurface({
+  open,
+  resolved,
+  title,
+  className,
+  boundary,
+  close,
+  dir,
+  contents,
+  slots,
+}: {
+  readonly open: boolean;
+  readonly resolved: string;
+  readonly title: string;
+  readonly className?: string;
+  readonly boundary: NonNullable<TableAssistantProps["boundary"]>;
+  readonly close: () => void;
+  readonly dir?: "ltr" | "rtl";
+  readonly contents: ReactNode;
+  readonly slots: TableAssistantSlots;
+}): ReactNode {
+  if (!open) return null;
+  if (resolved === "floating") {
+    return (
+      <slots.Window
+        label={title}
+        part="assistant-window"
+        className={className}
+        style={floatingStyle(boundary)}
+      >
+        {contents}
+      </slots.Window>
+    );
+  }
+  if (resolved === "sheet") {
+    return (
+      // The one surface every kit draws through a portal, which lands at the
+      // document root and never sees the direction of the subtree it came
+      // from. That is why this is the slot that takes a `dir`.
+      <slots.Sheet
+        label={title}
+        part="assistant-sheet"
+        className={className}
+        open
+        onClose={close}
+        {...(dir ? { dir } : {})}
+      >
+        {contents}
+      </slots.Sheet>
+    );
+  }
+  return (
+    <slots.Panel label={title} part="assistant-panel" className={className}>
+      {contents}
+    </slots.Panel>
+  );
+}
+
 export function TableAssistantChrome({
   assistant,
   open,
@@ -665,9 +724,6 @@ export function TableAssistantChrome({
   const launcherRef = useRef<HTMLElement | null>(null);
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   const Button = slots.Button;
-  const Panel = slots.Panel;
-  const Sheet = slots.Sheet;
-  const Window = slots.Window;
 
   const close = useCallback(() => {
     onOpenChange(false);
@@ -775,38 +831,17 @@ export function TableAssistantChrome({
     </div>
   );
 
-  let surface: ReactNode = null;
-  if (open && resolved === "floating") {
-    surface = (
-      <Window
-        label={title}
-        part="assistant-window"
-        className={className}
-        style={floatingStyle(boundary)}
-      >
-        {contents}
-      </Window>
-    );
-  } else if (open && resolved === "sheet") {
-    surface = (
-      <Sheet
-        label={title}
-        part="assistant-sheet"
-        className={className}
-        open
-        onClose={close}
-        {...(dir ? { dir } : {})}
-      >
-        {contents}
-      </Sheet>
-    );
-  } else if (open) {
-    surface = (
-      <Panel label={title} part="assistant-panel" className={className}>
-        {contents}
-      </Panel>
-    );
-  }
+  const surface = openSurface({
+    open,
+    resolved,
+    title,
+    className,
+    boundary,
+    close,
+    dir,
+    contents,
+    slots,
+  });
 
   // Something is parked on this reader, wherever it is being reviewed.
   const waiting = approval !== null && approval !== undefined;

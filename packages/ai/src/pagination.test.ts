@@ -163,3 +163,26 @@ describe("what a page size has to be", () => {
     expect(pageSizeRefusal(p, 0)).toMatch(/whole number/);
   });
 });
+
+describe("numbers that are not page numbers", () => {
+  it("falls back to the first page when the page is not one", () => {
+    // A binding that cannot say where it is gets the first page, not a
+    // fabricated one — and `hasPrevious` follows from that rather than from
+    // whatever was passed.
+    const p = agentPagination({ page: 0, pageSize: 25, canJump: true });
+    expect(p.page).toBe(1);
+    expect(p.hasPrevious).toBe(false);
+  });
+
+  it("names a total of zero rather than leaving the sentence half-built", () => {
+    const p = agentPagination({
+      page: 1,
+      pageSize: 25,
+      totalRows: 0,
+      canJump: true,
+    });
+    expect(pageRefusal(p, 2)).toBe(
+      "page 2 is past the last page (1 of 0 matching rows at 25 a page)"
+    );
+  });
+});

@@ -129,3 +129,87 @@ describe("what it publishes about the view", () => {
     expect(observed.commit).toBe("stage");
   });
 });
+
+describe("everything a binding can state", () => {
+  it("carries each optional field through when it is stated", () => {
+    const observed = agentObservation(
+      inputs({
+        policy: {
+          writePolicy: "deny",
+          approval: "writes",
+          presentation: "table",
+          commit: "immediate",
+        },
+        view: {
+          search: "ada",
+          sortBy: "salary",
+          sortDir: "desc",
+          groupBy: "team",
+          filters: { status: ["Active"] },
+          pinnedColumns: { person: "start" },
+          pinnedRows: { top: ["r1"], bottom: [] },
+        },
+        readMax: 25,
+        aggregations: { columns: [], active: [{ id: "salary" }] },
+        availableFilters: [
+          {
+            key: "status",
+            label: "Status",
+            type: "select",
+            operators: ["in"],
+            defaultOperator: "in",
+            valueKeys: ["status"],
+          },
+        ],
+      })
+    );
+
+    expect(observed).toMatchObject({
+      writePolicy: "deny",
+      approval: "writes",
+      presentation: "table",
+      commit: "immediate",
+      search: "ada",
+      sortBy: "salary",
+      sortDir: "desc",
+      groupBy: "team",
+      filters: { status: ["Active"] },
+      pinnedColumns: { person: "start" },
+      pinnedRows: { top: ["r1"], bottom: [] },
+      readMax: 25,
+    });
+    expect(observed.aggregations?.active).toHaveLength(1);
+    expect(observed.availableFilters).toHaveLength(1);
+  });
+
+  it("reports every capability off on a table that wires nothing", () => {
+    const observed = agentObservation(inputs());
+
+    for (const flag of [
+      observed.hasPagination,
+      observed.hasSearch,
+      observed.hasSort,
+      observed.hasFilters,
+      observed.hasExport,
+      observed.hasEdit,
+      observed.hasReorder,
+      observed.hasColumnPinning,
+      observed.hasRowPinning,
+      observed.hasSelection,
+      observed.hasSavedViews,
+      observed.hasAdd,
+      observed.hasDelete,
+    ]) {
+      expect(flag).toBe(false);
+    }
+  });
+
+  it("reads a runtime that says an operation is off as off", () => {
+    // `false` is a statement, not an absence: the runtime was asked and said no.
+    const observed = agentObservation(
+      inputs({ operations: { setPage: false, editCells: false } })
+    );
+    expect(observed.hasPagination).toBe(false);
+    expect(observed.hasEdit).toBe(false);
+  });
+});
