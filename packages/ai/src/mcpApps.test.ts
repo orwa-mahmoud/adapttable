@@ -682,3 +682,74 @@ describe("what the reader answered in the host's own chrome", () => {
     ).resolves.toBeUndefined();
   });
 });
+
+describe("a view running in a real frame", () => {
+  /** Stand in for the window an MCP host renders the view inside. */
+  function fakeWindow(): {
+    posted: { message: unknown; origin: string }[];
+    fire: (data: unknown, origin?: string) => void;
+    restore: () => void;
+  } {
+    const posted: { message: unknown; origin: string }[] = [];
+    const listeners = new Set<(event: unknown) => void>();
+    const saved = new Map<string, PropertyDescriptor | undefined>();
+    const set = (key: string, value: unknown): void => {
+      saved.set(key, Object.getOwnPropertyDescriptor(globalThis, key));
+      Object.defineProperty(globalThis, key, {
+        value,
+        configurable: true,
+        writable: true,
+      });
+    };
+    set("parent", {
+      postMessage: (message: unknown, origin: string) => {
+        posted.push({ message, origin });
+      },
+    });
+    set("addEventListener", (_type: string, listener: (e: unknown) => void) => {
+      listeners.add(listener);
+    });
+    set(
+      "removeEventListener",
+      (_type: string, listener: (e: unknown) => void) => {
+        listeners.delete(listener);
+      }
+    );
+    return {
+      posted,
+      fire: (data, origin = HOST) => {
+        for (const listener of [...listeners]) listener({ data, origin });
+      },
+      restore: () => {
+        for (const [key, descriptor] of saved) {
+          if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+          else delete (globalThis as Record<string, unknown>)[key];
+        }
+      },
+    };
+  }
+
+  it("talks to its parent window when the host gave it no channel", async () => {
+    const frame = fakeWindow();
+    try {
+      // No `channel` option: the bridge finds the window it is running in.
+      const bridge = createMcpAppBridge({ hostOrigin: HOST });
+
+      const call = bridge.callTool("view.setPage", { page: 2 });
+      const sent = frame.posted.at(-1);
+      expect(sent?.origin).toBe(HOST);
+
+      const id = (sent?.message as { id: number }).id;
+      frame.fire({ jsonrpc: "2.0", id, result: { content: [] } });
+      await expect(call).resolves.toMatchObject({ content: [] });
+
+      // And it stops listening when it is done with the frame.
+      bridge.dispose();
+      expect(() => {
+        frame.fire({ jsonrpc: "2.0", method: "ui/notifications/tool-input" });
+      }).not.toThrow();
+    } finally {
+      frame.restore();
+    }
+  });
+});

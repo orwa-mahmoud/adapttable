@@ -6,6 +6,7 @@ import {
   connectAgentHttp,
   createAgentHttpClient,
   parseAgentHttpRequest,
+  isToolValue,
   parseAgentHttpResponse,
   runAgentHttpTurn,
 } from "./http";
@@ -2491,5 +2492,17 @@ describe("every optional field the wire allows", () => {
     });
 
     expect(parsed.toolCalls?.[0]?.args).toEqual({});
+  });
+});
+
+describe("telling a tool's value from its failure", () => {
+  it("reads a result that carries one", () => {
+    expect(isToolValue({ id: "r1", result: { rows: 2 } })).toBe(true);
+  });
+
+  it("reads a result that carries a failure instead", () => {
+    expect(
+      isToolValue({ id: "r1", error: { code: "refused", message: "no" } })
+    ).toBe(false);
   });
 });

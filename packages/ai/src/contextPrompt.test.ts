@@ -265,3 +265,60 @@ describe("the convenience composition", () => {
     expect(composed).toContain("Money is in euros.");
   });
 });
+
+describe("what else a rendered context names", () => {
+  it("shows a column's examples and says when it is not on screen", () => {
+    const rendered = renderAgentContext(
+      context({
+        columns: [
+          column({
+            id: "status",
+            visible: false,
+            ai: {
+              description: "Where the row stands.",
+              examples: ["Active", "Closed"],
+            },
+          }),
+        ],
+      })
+    );
+
+    // Examples are how a model matches a value the reader typed to one the
+    // column actually holds.
+    expect(rendered).toContain('e.g. "Active", "Closed"');
+    // Hidden is not the same as unreadable, and the model needs both facts.
+    expect(rendered).toContain("not currently shown");
+  });
+
+  it("names what each column may be aggregated by", () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: { setPage: vi.fn(), setAggregations: vi.fn() },
+    });
+    const rendered = renderAgentContext(
+      buildAgentContext(
+        session,
+        { profile: "full" },
+        {
+          // The host publishes what may be aggregated, the same way it
+          // publishes the filter catalog.
+          aggregations: {
+            columns: [
+              {
+                id: "salary",
+                label: "Salary",
+                operations: [
+                  { id: "sum", label: "Sum" },
+                  { id: "avg", label: "Average" },
+                ],
+              },
+            ],
+          },
+        }
+      )
+    );
+
+    expect(rendered).toContain("Aggregations:");
+    expect(rendered).toContain("- salary: sum, avg");
+  });
+});
