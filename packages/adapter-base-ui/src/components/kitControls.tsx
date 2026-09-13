@@ -247,6 +247,74 @@ export function FilterHeaderControl<TRow>(
   return <FilterHeaderControlChrome {...props} slots={headerSlots} />;
 }
 
+/** What this kit hands a close handler. @internal */
+export interface OverlayCloseDetails {
+  readonly reason: string;
+  readonly cancel: () => void;
+}
+
+/**
+ * Close handler for a header filter's popover.
+ *
+ * The kit reports a close whenever focus leaves the trigger, and the field it
+ * draws opens its own listbox in a portal — so choosing an option reads as
+ * focus leaving and the popover would shut under the reader's hand. Both of
+ * those reasons are the field being used; Escape and an explicit press still
+ * close it.
+ *
+ * A named handler rather than an inline one so the decision can be exercised
+ * without a real focus event, which jsdom delivers or drops depending on how
+ * loaded the machine is.
+ *
+ * @internal
+ */
+export function headerFilterOpenChange(setOpen: (open: boolean) => void) {
+  return (next: boolean, details: OverlayCloseDetails): void => {
+    if (
+      !next &&
+      (details.reason === "outside-press" || details.reason === "focus-out")
+    ) {
+      details.cancel();
+      return;
+    }
+    setOpen(next);
+  };
+}
+
+/**
+ * Close handler for a row-move menu.
+ *
+ * While a confirmation is standing in the menu, its confirm and cancel
+ * controls live inside it, so pressing one is an `item-press` that would
+ * close the menu before the answer is read. With nothing to confirm the menu
+ * closes as any menu does, and a close that gets through cancels whatever was
+ * being asked and puts focus back on the trigger.
+ *
+ * @internal
+ */
+export function rowMoveMenuOpenChange(wiring: {
+  readonly setOpen: (open: boolean) => void;
+  readonly confirming: () => { readonly onCancel: () => void } | undefined;
+  readonly restoreTriggerFocus: () => void;
+}) {
+  return (next: boolean, details: OverlayCloseDetails): void => {
+    const standing = wiring.confirming();
+    if (
+      !next &&
+      standing &&
+      (details.reason === "focus-out" || details.reason === "item-press")
+    ) {
+      details.cancel();
+      return;
+    }
+    if (!next) {
+      standing?.onCancel();
+      wiring.restoreTriggerFocus();
+    }
+    wiring.setOpen(next);
+  };
+}
+
 /** Funnel on the column header — the same field the Filters panel draws. */
 export function FilterHeaderTrigger<TRow>(
   props: Readonly<FilterHeaderControlProps<TRow>>
@@ -257,20 +325,7 @@ export function FilterHeaderTrigger<TRow>(
     { nestedSelector: "[role='listbox'],[data-base-ui-portal]" }
   );
   return (
-    <Popover.Root
-      open={open}
-      onOpenChange={(next, eventDetails) => {
-        if (
-          !next &&
-          (eventDetails.reason === "outside-press" ||
-            eventDetails.reason === "focus-out")
-        ) {
-          eventDetails.cancel();
-          return;
-        }
-        setOpen(next);
-      }}
-    >
+    <Popover.Root open={open} onOpenChange={headerFilterOpenChange(setOpen)}>
       <Popover.Trigger
         render={
           <IconButton
@@ -663,22 +718,11 @@ function RowMoveMenu({
     <span data-adapttable-part="row-move-menu">
       <Menu.Root
         open={open}
-        onOpenChange={(next, eventDetails) => {
-          if (
-            !next &&
-            confirmationRef.current &&
-            (eventDetails.reason === "focus-out" ||
-              eventDetails.reason === "item-press")
-          ) {
-            eventDetails.cancel();
-            return;
-          }
-          if (!next) {
-            confirmationRef.current?.onCancel();
-            restoreTriggerFocus();
-          }
-          setOpen(next);
-        }}
+        onOpenChange={rowMoveMenuOpenChange({
+          setOpen,
+          confirming: () => confirmationRef.current,
+          restoreTriggerFocus,
+        })}
       >
         <Menu.Trigger
           render={
