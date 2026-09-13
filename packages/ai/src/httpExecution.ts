@@ -120,34 +120,34 @@ export function createTurnExecution(
     signal?: AbortSignal
   ) => Promise<ExecuteResult[]>;
 } {
-  let proven = first.viewRevision;
+  // What THIS turn's own actions have produced, and nothing else. A phase
+  // context can be ahead of it because something outside the turn moved the
+  // table between phases; adopting that as progress is how an unrelated change
+  // gets absorbed into a turn that never made it.
+  let ours = first.viewRevision;
 
   return {
-    revision: () => proven,
+    revision: () => ours,
     execute: async (batch, signal) => {
-      // Two revisions are legitimately this batch's own: the view its phase
-      // was answered against, and any later view this turn's executed actions
-      // produced. Revisions only move forward, so the later of the two is the
-      // one both describe. Anything beyond it came from outside the turn and
-      // stays unproven, which is what makes the action stale.
-      if (batch.context.viewRevision > proven) {
-        proven = batch.context.viewRevision;
-      }
+      // The view this phase was actually planned against. An action that names
+      // no revision of its own belongs to it — not to whatever the table has
+      // reached since, and not to what a previous phase left behind.
+      const planned = batch.context.viewRevision;
       const results: ExecuteResult[] = [];
       for (const action of batch.actions) {
         if (signal?.aborted) {
           results.push(cancelledResult(session, action.idempotencyKey));
           continue;
         }
-        // A revision the backend named for itself is its own claim about what
-        // it saw, and goes to the session untouched. Naming the phase's own
-        // revision is the same as omitting one: both mean "the view you
-        // showed me".
+        // A revision the backend named is its own claim about what it saw and
+        // goes to the session untouched — including when it equals the phase's
+        // own revision, which is a backend saying so deliberately rather than
+        // a value worth second-guessing.
         const named = action.expectedRevision;
-        const expected =
-          named !== undefined && named !== batch.context.viewRevision
-            ? named
-            : proven;
+        // Omitted: the context supplied for this phase, moved forward only by
+        // what this turn's earlier actions proved. `ours` exceeds `planned`
+        // exactly when this turn caused the difference.
+        const expected = named ?? (ours > planned ? ours : planned);
         const result = await session.execute(
           action.key,
           action.args ?? {},
@@ -156,10 +156,10 @@ export function createTurnExecution(
           signal
         );
         results.push(result);
-        // The revision the session observed when THIS action settled. Reading
-        // the manifest here instead would pick up anything that landed during
-        // the await and count it as this turn's progress.
-        if (result.ok) proven = result.revision;
+        // The revision the session reported for THIS action. Reading the
+        // manifest here instead would pick up anything that landed during the
+        // await and count it as this turn's progress.
+        if (result.ok) ours = result.revision;
       }
       return results;
     },
