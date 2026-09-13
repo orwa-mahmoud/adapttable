@@ -235,6 +235,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentPagination",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
       "export": "AgentPolicy",
       "currentImport": "@adapttable/ai/ag-ui",
       "kind": "type",
@@ -843,6 +851,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentPagination",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
       "export": "AgentPolicy",
       "currentImport": "@adapttable/ai/ai-sdk",
       "kind": "type",
@@ -1412,6 +1428,14 @@
     },
     {
       "export": "AgentObservation",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentPagination",
       "currentImport": "@adapttable/ai/assistant",
       "kind": "type",
       "class": "neutral-model",
@@ -2075,6 +2099,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentPagination",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
       "export": "AgentPolicy",
       "currentImport": "@adapttable/ai/context",
       "kind": "type",
@@ -2211,6 +2243,14 @@
       "behavior": ""
     },
     {
+      "export": "ContextBudgetError",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
       "export": "ContextCapability",
       "currentImport": "@adapttable/ai/context",
       "kind": "type",
@@ -2246,6 +2286,14 @@
       "export": "DEFAULT_COMPACT_TOKENS",
       "currentImport": "@adapttable/ai/context",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "DeferralKind",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai/context",
       "behavior": ""
@@ -2795,6 +2843,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentPagination",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "AgentPolicy",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
@@ -3107,6 +3163,14 @@
       "behavior": ""
     },
     {
+      "export": "DeferralKind",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "DeferralReason",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
@@ -3158,6 +3222,14 @@
       "export": "MAX_STREAM_EVENTS",
       "currentImport": "@adapttable/ai/http",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "PaginationInput",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai/http",
       "behavior": ""
@@ -3467,6 +3539,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentPagination",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
       "export": "AgentPolicy",
       "currentImport": "@adapttable/ai/json",
       "kind": "type",
@@ -3660,6 +3740,14 @@
     },
     {
       "export": "JsonToolCall",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
+      "export": "PaginationInput",
       "currentImport": "@adapttable/ai/json",
       "kind": "type",
       "class": "neutral-model",
@@ -3908,6 +3996,14 @@
     },
     {
       "export": "AgentObservation",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentPagination",
       "currentImport": "@adapttable/ai/mcp-apps",
       "kind": "type",
       "class": "neutral-model",
@@ -4563,6 +4659,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentPagination",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
       "export": "AgentPolicy",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "type",
@@ -4812,6 +4916,14 @@
     },
     {
       "export": "McpToolResult",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "PaginationInput",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "type",
       "class": "neutral-model",
@@ -5083,6 +5195,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentPagination",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
       "export": "AgentPolicy",
       "currentImport": "@adapttable/ai/openai",
       "kind": "type",
@@ -5300,6 +5420,14 @@
     },
     {
       "export": "OpenAIToolsOptions",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
+      "export": "PaginationInput",
       "currentImport": "@adapttable/ai/openai",
       "kind": "type",
       "class": "neutral-model",
@@ -5628,6 +5756,14 @@
     },
     {
       "export": "AgentObservation",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentPagination",
       "currentImport": "@adapttable/ai/webmcp",
       "kind": "type",
       "class": "neutral-model",
@@ -6179,7 +6315,31 @@
       "behavior": ""
     },
     {
+      "export": "agentObservation",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "AgentObservation",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "agentPagination",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentPagination",
       "currentImport": "@adapttable/ai",
       "kind": "type",
       "class": "neutral-model",
@@ -6667,6 +6827,14 @@
       "behavior": ""
     },
     {
+      "export": "ContextBudgetError",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "ContextCapability",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -6782,6 +6950,14 @@
       "export": "DEFAULT_COMPACT_TOKENS",
       "currentImport": "@adapttable/ai",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "DeferralKind",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
@@ -6979,6 +7155,30 @@
       "behavior": ""
     },
     {
+      "export": "ObservationInputs",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "ObservedPolicy",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "ObservedView",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "openAiToolNameMap",
       "currentImport": "@adapttable/ai",
       "kind": "value",
@@ -6990,6 +7190,30 @@
       "export": "openTransaction",
       "currentImport": "@adapttable/ai",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "pageRefusal",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "pageSizeRefusal",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "PaginationInput",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
@@ -7188,6 +7412,14 @@
     },
     {
       "export": "RowWindowRow",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "RuntimeOperations",
       "currentImport": "@adapttable/ai",
       "kind": "type",
       "class": "neutral-model",
@@ -24750,6 +24982,14 @@
       "export": "Density",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "deriveRuntimeOperations",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
       "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
