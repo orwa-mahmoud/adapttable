@@ -613,8 +613,16 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     webmcp,
   ]);
 
+  // The same live view the assistant's turns are judged against, published by
+  // `tableAgent`. Both the inspector and the assistant read it rather than
+  // keeping a copy, so what the inspector shows is what a backend receives —
+  // and the assistant can tell a turn that moved the table from one that did
+  // not, which is what puts an undo beside the reply.
+  const liveViewInputs = useCallback(() => viewInputs.current?.() ?? {}, []);
+
   const assistant = useTableAssistant({
     session: session ?? undefined,
+    contextInputs: liveViewInputs,
     transport: connection.transport,
     // Only a genuine transport swap re-establishes the conversation.
     transportKey: connection.key,
@@ -711,11 +719,6 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       "modelContext" in (document as { modelContext?: unknown }),
     []
   );
-
-  // The same live view the assistant's turns are judged against, published by
-  // `tableAgent`. The inspector reads it rather than keeping a copy, so what
-  // it shows is what a backend would actually receive.
-  const inspectorInputs = useCallback(() => viewInputs.current?.() ?? {}, []);
 
   // Generated from what the table actually wires right now, so turning a
   // feature off removes its row rather than leaving a dead switch behind.
@@ -935,7 +938,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         <AiContextInspector
           session={session}
           manifest={manifest}
-          contextInputs={inspectorInputs}
+          contextInputs={liveViewInputs}
           profile={contextProfile}
           webmcpNames={webmcpNames}
           docsUrl={DOCS_URL}
