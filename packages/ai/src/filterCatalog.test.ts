@@ -247,3 +247,55 @@ describe("formatFilterCatalog", () => {
     expect(formatFilterCatalog(omitted)).toContain("options omitted");
   });
 });
+
+const TEAM_DEFAULT_OP =
+  (agentFiltersFromDefs([TEAM, SALARY], undefined) ?? []).find(
+    (entry) => entry.key === "team"
+  )?.defaultOperator ?? "in";
+
+describe("a condition list written the other ways a model writes one", () => {
+  const catalog = agentFiltersFromDefs([TEAM, SALARY], undefined) ?? [];
+
+  it("takes `column` where it takes `key`", () => {
+    // Models reach for both words; the catalog decides which filter it is
+    // either way rather than dropping the condition on a spelling.
+    expect(
+      extrasFromAgentFilters([{ column: "team", value: ["Core"] }], catalog)
+    ).toEqual(
+      extrasFromAgentFilters([{ key: "team", value: ["Core"] }], catalog)
+    );
+  });
+
+  it("takes `values` where it takes `value`", () => {
+    expect(
+      extrasFromAgentFilters([{ key: "team", values: ["Core"] }], catalog)
+    ).toEqual(
+      extrasFromAgentFilters([{ key: "team", value: ["Core"] }], catalog)
+    );
+  });
+
+  it("refuses a condition naming no filter at all", () => {
+    // Said plainly: a condition the table cannot place is not a filter it can
+    // quietly leave off.
+    expect(() =>
+      extrasFromAgentFilters([{ op: "in", value: ["Core"] }], catalog)
+    ).toThrow(/needs key and op/);
+  });
+
+  it("refuses a condition naming a filter this table does not publish", () => {
+    expect(() =>
+      extrasFromAgentFilters([{ key: "nonesuch", value: 1 }], catalog)
+    ).toThrow(/needs key and op/);
+  });
+
+  it("falls back to the filter's own default operator", () => {
+    expect(
+      extrasFromAgentFilters([{ key: "team", value: ["Core"] }], catalog)
+    ).toEqual(
+      extrasFromAgentFilters(
+        [{ key: "team", op: TEAM_DEFAULT_OP, value: ["Core"] }],
+        catalog
+      )
+    );
+  });
+});

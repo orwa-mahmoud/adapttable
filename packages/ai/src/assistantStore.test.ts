@@ -832,3 +832,106 @@ describe("what a re-render may safely hand the store", () => {
     expect(second.disconnect).not.toHaveBeenCalled();
   });
 });
+
+describe("connecting and disconnecting", () => {
+  it("reports a handshake the transport refused", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        connect: () => Promise.reject(new Error("that table is not mine")),
+        send: () => Promise.resolve({ text: "" }),
+      },
+    });
+
+    store.connect();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(store.getState().status).toBe("error");
+    expect(store.getState().error).toBe("that table is not mine");
+  });
+
+  it("goes quiet when the host disconnects it", () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying(),
+    });
+    store.connect();
+
+    store.disconnect();
+
+    expect(store.getState().status).toBe("disconnected");
+  });
+
+  it("streams partial text into the message the reply will replace", async () => {
+    let report: ((text: string) => void) | undefined;
+    let settle: ((reply: { text: string }) => void) | undefined;
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: ({ onPartialText }) => {
+          report = onPartialText;
+          return new Promise((resolve) => {
+            settle = resolve;
+          });
+        },
+      },
+    });
+    store.connect();
+
+    const turn = store.send("count");
+    await Promise.resolve();
+    report?.("one");
+    // The coalescing flush runs off a microtask when there is no frame.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const streaming = store.getState().messages.at(-1);
+    expect(streaming?.partialText).toBe("one");
+
+    report?.("one two");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(store.getState().messages.at(-1)?.partialText).toBe("one two");
+
+    settle?.({ text: "one two three" });
+    await turn;
+    // The reply is the authority: the provisional message is replaced, not
+    // left standing beside it.
+    expect(store.getState().messages.at(-1)?.text).toBe("one two three");
+    expect(
+      store.getState().messages.filter((entry) => entry.role === "assistant")
+    ).toHaveLength(1);
+  });
+});
+
+describe("an undo the table refused", () => {
+  it("reports why rather than claiming the view was put back", async () => {
+    const table = movingTable();
+    let turn = 0;
+    const store = createTableAssistant({
+      session: table.session,
+      contextInputs: () => ({ view: { page: table.page(), limit: 10 } }),
+      transport: {
+        send: async ({ session }) => {
+          turn += 1;
+          const result = await session.execute(
+            "view.setPage",
+            { page: 4 },
+            session.manifest().viewRevision,
+            `t${String(turn)}`
+          );
+          return { text: "moved", results: [result], keys: ["view.setPage"] };
+        },
+      },
+    });
+    store.connect();
+    await store.send("go to page 4");
+
+    // The host's own setter starts failing between the turn and the undo.
+    table.setPage.mockImplementationOnce(() => {
+      throw new Error("the page is locked");
+    });
+    await store.undoTurn();
+
+    expect(store.getState().error).toBeDefined();
+  });
+});

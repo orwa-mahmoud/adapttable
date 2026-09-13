@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { agentSystemPrompt } from "./agentPrompt";
 import { type AgentContext, buildAgentContext } from "./context";
 import { agentInstructions, renderAgentContext } from "./contextPrompt";
+import { matchesType } from "./contextSnapshot";
 import { createAgentSession } from "./session";
 import type { AgentColumn, AgentObservation } from "./types";
 
@@ -320,5 +321,29 @@ describe("what else a rendered context names", () => {
 
     expect(rendered).toContain("Aggregations:");
     expect(rendered).toContain("- salary: sum, avg");
+  });
+});
+
+describe("whether an example is the type its column declared", () => {
+  // The check exists so an author's example that does not match the column is
+  // left out rather than shown to a model as a value it could match on.
+  it("holds each declared type to its own values", () => {
+    expect(matchesType(3, "number")).toBe(true);
+    expect(matchesType("3", "number")).toBe(false);
+    expect(matchesType(true, "boolean")).toBe(true);
+    expect(matchesType("true", "boolean")).toBe(false);
+    expect(matchesType("Ada", "string")).toBe(true);
+    expect(matchesType(1, "string")).toBe(false);
+  });
+
+  it("takes a date as either a Date or the string one travels as", () => {
+    expect(matchesType(new Date(), "date")).toBe(true);
+    expect(matchesType("2026-09-13", "date")).toBe(true);
+    expect(matchesType(17, "date")).toBe(false);
+  });
+
+  it("rejects nothing on a type it cannot check", () => {
+    // An author's custom type is the author's to know.
+    expect(matchesType({ amount: 3 }, "money")).toBe(true);
   });
 });
