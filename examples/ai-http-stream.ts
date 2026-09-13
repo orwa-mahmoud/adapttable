@@ -139,6 +139,71 @@ function escapeAt(
   }
 }
 
+/** How far a scan of the document has got. */
+interface Scan {
+  depth: number;
+  inString: boolean;
+  escaped: boolean;
+  /** Where the key currently being read began, or `-1`. */
+  keyStart: number;
+  lastKey: string;
+  /** Where the wanted field's value begins, once it is known. */
+  found: number;
+}
+
+/**
+ * One character inside a string literal.
+ *
+ * Only the closing quote matters, and only because the text it closes may have
+ * been a key — an escaped quote is content, not the end.
+ */
+function stepInString(
+  scan: Scan,
+  raw: string,
+  index: number,
+  ch: string
+): void {
+  if (scan.escaped) {
+    scan.escaped = false;
+    return;
+  }
+  if (ch === "\\") {
+    scan.escaped = true;
+    return;
+  }
+  if (ch !== '"') return;
+  scan.inString = false;
+  if (scan.keyStart >= 0) {
+    scan.lastKey = raw.slice(scan.keyStart, index);
+    scan.keyStart = -1;
+  }
+}
+
+/**
+ * One character of structure.
+ *
+ * A quote at depth 1 is either a key or the value the caller asked for, and
+ * which one it is depends on the character before it.
+ */
+function stepStructure(
+  scan: Scan,
+  raw: string,
+  index: number,
+  ch: string,
+  field: string
+): void {
+  if (ch === '"') {
+    scan.inString = true;
+    if (scan.depth !== 1) return;
+    const previous = previousMeaningful(raw, index);
+    if (previous === "{" || previous === ",") scan.keyStart = index + 1;
+    else if (previous === ":" && scan.lastKey === field) scan.found = index + 1;
+    return;
+  }
+  if (ch === "{" || ch === "[") scan.depth += 1;
+  else if (ch === "}" || ch === "]") scan.depth -= 1;
+}
+
 /**
  * Where a top-level field's string value starts, or `-1`.
  *
@@ -147,42 +212,20 @@ function escapeAt(
  * argument, not the answer.
  */
 function locate(raw: string, field: string): number {
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  let keyStart = -1;
-  let lastKey = "";
-
+  const scan: Scan = {
+    depth: 0,
+    inString: false,
+    escaped: false,
+    keyStart: -1,
+    lastKey: "",
+    found: -1,
+  };
   for (let index = 0; index < raw.length; index += 1) {
     const ch = raw[index];
-    if (inString) {
-      if (escaped) {
-        escaped = false;
-        continue;
-      }
-      if (ch === "\\") {
-        escaped = true;
-        continue;
-      }
-      if (ch === '"') {
-        inString = false;
-        if (keyStart >= 0) {
-          lastKey = raw.slice(keyStart, index);
-          keyStart = -1;
-        }
-      }
-      continue;
-    }
-    if (ch === '"') {
-      inString = true;
-      if (depth !== 1) continue;
-      const previous = previousMeaningful(raw, index);
-      if (previous === "{" || previous === ",") keyStart = index + 1;
-      else if (previous === ":" && lastKey === field) return index + 1;
-      continue;
-    }
-    if (ch === "{" || ch === "[") depth += 1;
-    else if (ch === "}" || ch === "]") depth -= 1;
+    if (ch === undefined) continue;
+    if (scan.inString) stepInString(scan, raw, index, ch);
+    else stepStructure(scan, raw, index, ch, field);
+    if (scan.found >= 0) return scan.found;
   }
   return -1;
 }

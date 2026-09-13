@@ -105,7 +105,7 @@ function resolveExampleSchema(request: AgentHttpRequest): {
     };
   }
   const pin = examplePins.get(request.sessionId);
-  if (!pin || pin.tableId !== request.tableId) {
+  if (pin?.tableId !== request.tableId) {
     return { pin: { status: request.sessionId ? "expired" : "unknown" } };
   }
   return {
@@ -673,20 +673,55 @@ function providerReady(
   return undefined;
 }
 
+/**
+ * Whether the request was turned away before it was read.
+ *
+ * True means a response has already been written and there is nothing further
+ * to do; the caller returns.
+ */
+function refused(req: IncomingMessage, res: ServerResponse): boolean {
+  if (!cors(req, res)) return true;
+  if (req.method !== "POST") {
+    writeJson(res, 405, { error: "POST only" });
+    return true;
+  }
+  if (!authorize(req)) {
+    writeJson(res, 401, { error: "unauthorized" });
+    return true;
+  }
+  return false;
+}
+
+/** Say a turn failed, on whichever channel the client is still reading. */
+function reportFailure(
+  res: ServerResponse,
+  streaming: ((event: string, data: unknown) => void) | undefined,
+  error: unknown
+): void {
+  const message = error instanceof Error ? error.message : "bad request";
+  if (streaming) {
+    // The client is already reading. It ends the turn on `error`, and the
+    // absence of `done` means nothing this turn proposed is run.
+    streaming("error", { code: "backend-failed", message });
+    res.end();
+    return;
+  }
+  writeJson(res, statusForFailure(message), { error: message });
+}
+
+/** The status a failed turn is reported with, read from what went wrong. */
+function statusForFailure(message: string): number {
+  if (message.includes("too large")) return 413;
+  if (message.includes("cancelled")) return 499;
+  return 400;
+}
+
 export async function handleExampleHttp(
   req: IncomingMessage,
   res: ServerResponse,
   complete?: ExampleComplete
 ): Promise<void> {
-  if (!cors(req, res)) return;
-  if (req.method !== "POST") {
-    writeJson(res, 405, { error: "POST only" });
-    return;
-  }
-  if (!authorize(req)) {
-    writeJson(res, 401, { error: "unauthorized" });
-    return;
-  }
+  if (refused(req, res)) return;
   const controller = new AbortController();
   req.on("aborted", () => controller.abort());
   // Held outside the try: once the stream's head is out, a failure has to be
@@ -725,18 +760,7 @@ export async function handleExampleHttp(
       res.end();
     } else writeJson(res, 200, reply);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "bad request";
-    if (streaming) {
-      // The client is already reading. It ends the turn on `error`, and the
-      // absence of `done` means nothing this turn proposed is run.
-      streaming("error", { code: "backend-failed", message });
-      res.end();
-      return;
-    }
-    let status = 400;
-    if (message.includes("too large")) status = 413;
-    else if (message.includes("cancelled")) status = 499;
-    writeJson(res, status, { error: message });
+    reportFailure(res, streaming, error);
   }
 }
 

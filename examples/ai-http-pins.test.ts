@@ -75,8 +75,9 @@ describe("the example backend's pin store", () => {
   it("replaces a session's pin rather than holding two", () => {
     const store = createExamplePinStore<unknown[], { viewRevision: number }>();
     store.set("sess-a", pin("orders"));
-    store.set("sess-a", pin("invoices"));
+    assert.equal(store.get("sess-a")?.tableId, "orders");
 
+    store.set("sess-a", pin("invoices"));
     assert.equal(store.get("sess-a")?.tableId, "invoices");
     assert.equal(store.size(), 1);
   });

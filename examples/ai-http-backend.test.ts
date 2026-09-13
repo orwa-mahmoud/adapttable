@@ -56,7 +56,7 @@ function request(
         estimatedTokens: 0,
         estimated: true,
       },
-    } as NonNullable<AgentHttpRequest["context"]>,
+    },
     view: {
       revision: 1,
       page: 1,
@@ -154,7 +154,7 @@ async function throughExample(
   const complete = () =>
     Promise.resolve(replies[turn++] ?? replies.at(-1) ?? "");
   const client = createAgentHttpClient({
-    endpoint: "http://example.invalid/turn",
+    endpoint: "https://example.invalid/turn",
     request: async (body) => {
       const reply = await handleExampleAgentTurn(
         body,
@@ -288,7 +288,7 @@ describe("the protocol through the real example handler", () => {
       return Promise.resolve(replies[rounds - 1] ?? replies[1] ?? "{}");
     };
     const client = createAgentHttpClient({
-      endpoint: "http://example.invalid/turn",
+      endpoint: "https://example.invalid/turn",
       request: async (body) => {
         const reply = await handleExampleAgentTurn(
           body,

@@ -168,15 +168,19 @@ function resumedRun(input: AgUiRunInput): AgUiEvent[] {
   ];
 }
 
+/** Which scripted run this demo answers a request with. */
+function runFor(input: AgUiRunInput): readonly AgUiEvent[] {
+  if (input.resume) return resumedRun(input);
+  if (input.messages.at(-1)?.content.includes("last page")) {
+    return confirmRun(input);
+  }
+  return sortRun(input);
+}
+
 /** The seam a real host fills with its own AG-UI client. */
 const connection: AgUiConnection = {
-  run: async function* (input) {
-    const events = input.resume
-      ? resumedRun(input)
-      : input.messages.at(-1)?.content.includes("last page")
-        ? confirmRun(input)
-        : sortRun(input);
-    for (const event of events) yield event;
+  run: function* (input) {
+    for (const event of runFor(input)) yield event;
   },
 };
 
@@ -196,11 +200,14 @@ const transport = aguiTransport({
   }),
   // The same seam `session.execute` uses, so a backend's confirmation is
   // decided exactly where the table's own writes are.
-  onApprove: async (subject: ApprovalSubject) => {
+  onApprove: (subject: ApprovalSubject) => {
     if (subject.kind === "operation") {
       console.log(`confirm: ${subject.title ?? subject.capability}`);
     }
-    return true;
+    // A host that asks a person answers this when they click; this demo has
+    // already decided, so it hands back a settled promise rather than an
+    // `async` wrapper around no awaiting.
+    return Promise.resolve(true);
   },
   onEvent: (event) => {
     if (event.type === "STATE_SNAPSHOT" || event.type === "STATE_DELTA") {
