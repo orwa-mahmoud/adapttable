@@ -452,6 +452,20 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [actionPolicy, setActionPolicy] = useState<
     Readonly<Record<string, "required" | "automatic">>
   >({});
+  // The drawer's per-action answers in the shape the table takes them: one
+  // entry per key the reader actually decided, so "use the default" is an
+  // absence rather than a third policy the table has to interpret.
+  const actionApproval = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(actionPolicy).map(([key, policy]) => [
+          key,
+          { approval: { policy } },
+        ])
+      ),
+    [actionPolicy]
+  );
+
   // Which capabilities the agent is offered, and how much it is told. Both
   // are the reader's to change in the drawer, and both visibly change what the
   // assistant suggests — which is the point of putting them there.
@@ -511,6 +525,9 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         // What the reader took away in the drawer. The table's own controls
         // are untouched: a person can still filter a table whose agent may not.
         excludeCapabilities: excluded,
+        // Per-action answers from the same drawer. "Use the default" leaves the
+        // key out entirely, so the table's shared policy decides.
+        capabilityApproval: actionApproval,
         ...(webmcp ? { webmcp: { onRegister: setWebmcpNames } } : {}),
         // Staging needs the batch save path. Cell and row modes apply on
         // approve, so the reader is not dropped into always-open fields.
@@ -610,6 +627,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     commit,
     locale,
     excluded,
+    actionApproval,
     webmcp,
   ]);
 

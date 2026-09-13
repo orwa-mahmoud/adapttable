@@ -1,4 +1,4 @@
-import { isPinnedSummaryRowId } from "@adapttable/core";
+import { type ActionAiOptions, isPinnedSummaryRowId } from "@adapttable/core";
 
 import {
   resolveApproval,
@@ -87,6 +87,15 @@ export interface CreateAgentSessionOptions {
    * cells exactly as before.
    */
   excludeCapabilities?: readonly string[];
+  /**
+   * A host's own approval policy for individual capabilities, by key.
+   *
+   * The same shape a row or bulk action carries, resolved field by field
+   * against the table's shared policy. It narrows only: an entry asking for
+   * approval on something the table already waves through is honoured, and one
+   * waving through what the table requires a human for is not.
+   */
+  capabilityApproval?: Readonly<Record<string, ActionAiOptions>>;
   /**
    * How many replay results this session keeps. Defaults to 200. Accepted
    * mutations keep their deduplication guarantee for the whole session even
@@ -285,7 +294,8 @@ export function createAgentSession(
       execute: (key, context, args) =>
         dispatchBuiltIn(key, context, args, guard),
     },
-    options.excludeCapabilities ?? []
+    options.excludeCapabilities ?? [],
+    options.capabilityApproval ?? {}
   );
   const guard: SessionGuard = {
     observe: () => options.observe(),

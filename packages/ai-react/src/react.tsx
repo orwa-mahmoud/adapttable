@@ -53,6 +53,7 @@ import {
   type TableAgentColumnPatch,
   type WritePolicy,
 } from "@adapttable/ai";
+import type { ActionAiOptions } from "@adapttable/core";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
@@ -134,6 +135,14 @@ export interface TableAgentOptions {
   readonly apply?: AgentApply;
   /** Custom governed capabilities for this table. */
   readonly capabilities?: readonly AgentCapabilityDefinition[];
+  /**
+   * This table's approval policy for individual capabilities, by key.
+   *
+   * The same shape a row or bulk action carries, resolved field by field
+   * against {@link approval}. It narrows only — a capability the table
+   * requires a human for cannot be waved through here.
+   */
+  readonly capabilityApproval?: Readonly<Record<string, ActionAiOptions>>;
   /**
    * Capability keys the agent may not use on this table.
    *
@@ -866,6 +875,9 @@ function bindLiveSession(
     apply,
     onApprove,
     capabilities: optionsRef.current.capabilities,
+    ...(optionsRef.current.capabilityApproval
+      ? { capabilityApproval: optionsRef.current.capabilityApproval }
+      : {}),
     ...(optionsRef.current.excludeCapabilities
       ? { excludeCapabilities: optionsRef.current.excludeCapabilities }
       : {}),
@@ -918,17 +930,19 @@ function TableAgentProvider({
   >(() => Promise.resolve(false));
   const tableIdRef = useRef(options.tableId);
   // The registry is resolved when the session is built, so a change to what
-  // the agent may use is a different session — not a different answer from
-  // the same one.
-  const excludedRef = useRef(exclusionKey(options.excludeCapabilities));
-  const excluded = exclusionKey(options.excludeCapabilities);
+  // the agent may use — or to who has to approve it — is a different session,
+  // not a different answer from the same one.
+  const registryKeyOf = (next: TableAgentOptions): string =>
+    `${exclusionKey(next.excludeCapabilities)}!${JSON.stringify(next.capabilityApproval ?? {})}`;
+  const registryRef = useRef(registryKeyOf(options));
+  const registryKey = registryKeyOf(options);
   const sessionRef = useRef<AgentSession | null>(null);
   if (
     tableIdRef.current !== options.tableId ||
-    excludedRef.current !== excluded
+    registryRef.current !== registryKey
   ) {
     tableIdRef.current = options.tableId;
-    excludedRef.current = excluded;
+    registryRef.current = registryKey;
     sessionRef.current = null;
     revisionCounterRef.current = createRevisionCounter();
   }

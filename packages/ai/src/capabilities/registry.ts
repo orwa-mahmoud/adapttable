@@ -1,3 +1,5 @@
+import type { ActionAiOptions } from "@adapttable/core";
+
 import { guideOf, summaryOf } from "../guides";
 import {
   AGENT_SCHEMA_VERSION,
@@ -121,7 +123,8 @@ class SessionCapabilityRegistry implements CapabilityRegistry {
 export function createCapabilityRegistry(
   custom: readonly AgentCapabilityDefinition[],
   builtIn: BuiltInHandlers,
-  exclude: readonly string[] = []
+  exclude: readonly string[] = [],
+  approvals: Readonly<Record<string, ActionAiOptions>> = {}
 ): CapabilityRegistry {
   const definitions = new Map<string, AgentCapabilityDefinition>();
   for (const key of CAPABILITY_KEYS) {
@@ -147,6 +150,11 @@ export function createCapabilityRegistry(
           ? "supported"
           : "unsupported",
       idempotent: isIdempotent(key),
+      // A host's own word on this one capability, resolved field by field
+      // against the table's shared policy exactly as a row action's is. It can
+      // only narrow what the table already permits: `resolveApproval` keeps a
+      // "required" override from being waved through.
+      ...(approvals[key] ? { ai: approvals[key] } : {}),
       isEnabled: (observation) => isBuiltInEnabled(key, observation),
       plan: governed
         ? (context, args) => builtIn.plan(key, context, args)

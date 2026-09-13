@@ -874,6 +874,7 @@ export function createAgentSession(options: CreateAgentSessionOptions): AgentSes
 export interface CreateAgentSessionOptions {
     apply: AgentApply;
     capabilities?: readonly AgentCapabilityDefinition[];
+    capabilityApproval?: Readonly<Record<string, ActionAiOptions>>;
     excludeCapabilities?: readonly string[];
     observe: () => AgentObservation;
     onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;

@@ -175,8 +175,8 @@ export function buildAgentContext(
           // what the note names — a remainder of zero is an accounting step,
           // not the number they chose.
           tokenBudget: Math.max(0, budget - floor(fitted.kept)),
-          budgetLabel: budget,
-        }
+        },
+    budget
   );
   const selected: AgentContextContract = {
     ...described,

@@ -272,6 +272,59 @@ describe("edit.cells", () => {
     }
   });
 
+  it("takes a host's own approval answer for one capability", async () => {
+    const editCells = vi.fn();
+    const asked: string[] = [];
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: apply({ editCells }),
+      capabilityApproval: {
+        "edit.cells": { approval: { policy: "automatic" } },
+      },
+      onApprove: (subject) => {
+        asked.push(subject.kind);
+        return Promise.resolve(true);
+      },
+    });
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "salary", value: 1 }] },
+      1,
+      "auto-1"
+    );
+
+    // The table asks for writes; this one capability was answered in advance,
+    // so nobody was asked and the write still ran.
+    expect(result.ok).toBe(true);
+    expect(asked).toEqual([]);
+    expect(editCells).toHaveBeenCalledTimes(1);
+  });
+
+  it("cannot wave through a capability the table demands a human for", async () => {
+    const asked: string[] = [];
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes" }),
+      apply: apply(),
+      capabilityApproval: {
+        "edit.cells": { approval: { policy: "required" } },
+      },
+      onApprove: (subject) => {
+        asked.push(subject.kind);
+        return Promise.resolve(true);
+      },
+    });
+
+    await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "salary", value: 1 }] },
+      1,
+      "req-1"
+    );
+
+    expect(asked).toHaveLength(1);
+  });
+
   it("is not offered when nothing wired an editing channel", () => {
     const session = createAgentSession({
       observe: () => observation({ featureIds: ["editing"], hasEdit: false }),

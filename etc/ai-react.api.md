@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ActionAiOptions } from '@adapttable/core';
 import { AgentApply } from '@adapttable/ai';
 import { AgentApprovalPending } from '@adapttable/react/adapter';
 import { AgentCapabilityDefinition } from '@adapttable/ai';
@@ -60,6 +61,7 @@ export interface TableAgentOptions {
     readonly approval?: SharedApproval;
     readonly bridge?: TableAgentBridge;
     readonly capabilities?: readonly AgentCapabilityDefinition[];
+    readonly capabilityApproval?: Readonly<Record<string, ActionAiOptions>>;
     readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
     readonly commit?: CommitPolicy;
     readonly excludeCapabilities?: readonly string[];
