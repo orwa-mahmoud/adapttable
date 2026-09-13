@@ -138,3 +138,98 @@ describe("setting an aggregate", () => {
     });
   });
 });
+
+describe("what an agent may not aggregate", () => {
+  it("leaves out a column the host excluded from the agent", () => {
+    const offered = aggregationsFor(
+      inputs({}, { allows: (key) => key !== "bonus" })
+    );
+
+    expect(offered?.columns.map((entry) => entry.id)).toEqual(["salary"]);
+  });
+
+  it("has no state to read when the host wired none", () => {
+    expect(aggregationsFor(inputs({}, { state: undefined }))).toBeUndefined();
+  });
+
+  it("names a built-in operation in the reader's own words", () => {
+    const offered = aggregationsFor(inputs());
+    const sum = offered?.columns[0]?.operations.find(
+      (operation) => operation.id === "sum"
+    );
+
+    // The label comes from core's own table, so a surface naming an aggregate
+    // shows the same word the table shows.
+    expect(sum?.label).toBeDefined();
+    expect(sum?.label).not.toBe("sum");
+  });
+});
+
+describe("applying an aggregation an agent asked for", () => {
+  it("refuses to set one on a column the host excluded", () => {
+    const setAggregateOverrides = vi.fn();
+    expect(() =>
+      applyAggregations(
+        inputs({ setAggregateOverrides }, { allows: (key) => key !== "bonus" }),
+        { set: { bonus: "sum" } }
+      )
+    ).toThrow(/bonus/);
+    expect(setAggregateOverrides).not.toHaveBeenCalled();
+  });
+
+  it("refuses to set one on a column the table does not have", () => {
+    const setAggregateOverrides = vi.fn();
+    expect(() =>
+      applyAggregations(inputs({ setAggregateOverrides }), {
+        set: { nonesuch: "sum" },
+      })
+    ).toThrow(/nonesuch/);
+    expect(setAggregateOverrides).not.toHaveBeenCalled();
+  });
+
+  it("refuses an operation the column does not offer", () => {
+    const setAggregateOverrides = vi.fn();
+    expect(() =>
+      applyAggregations(inputs({ setAggregateOverrides }), {
+        set: { salary: "median" },
+      })
+    ).toThrow(/median/);
+    expect(setAggregateOverrides).not.toHaveBeenCalled();
+  });
+
+  it("refuses when the host wired no way to set one", () => {
+    expect(() =>
+      applyAggregations(inputs({ setAggregateOverrides: undefined }), {
+        set: { salary: "sum" },
+      })
+    ).toThrow(/not wired/);
+  });
+
+  it("puts every column back to what the developer declared", () => {
+    const setAggregateOverrides = vi.fn();
+    applyAggregations(
+      inputs({ setAggregateOverrides, aggregateOverrides: { salary: "avg" } }),
+      { restoreDefaults: true }
+    );
+
+    expect(setAggregateOverrides).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuses a removal naming a column the table does not have", () => {
+    const setAggregateOverrides = vi.fn();
+
+    // Said plainly rather than quietly ignored: an agent removing an
+    // aggregate from a column that is not there has misread the table, and a
+    // silent success would leave it believing otherwise.
+    expect(() =>
+      applyAggregations(
+        inputs({
+          setAggregateOverrides,
+          aggregateOverrides: { salary: "sum" },
+        }),
+        { remove: ["nonesuch"] }
+      )
+    ).toThrow(/nonesuch/);
+    expect(setAggregateOverrides).not.toHaveBeenCalled();
+  });
+});
