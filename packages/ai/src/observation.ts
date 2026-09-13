@@ -13,7 +13,6 @@
  *
  * @packageDocumentation
  */
-import type { AgentPagination } from "./pagination";
 import type {
   ApprovalPresentation,
   TableSourceCapabilities,
@@ -25,6 +24,7 @@ import type {
   RowAddressScope,
   WritePolicy,
 } from "./keys";
+import type { AgentPagination } from "./pagination";
 import type {
   AgentAggregations,
   AgentApply,
