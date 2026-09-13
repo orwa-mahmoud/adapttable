@@ -391,9 +391,20 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
         };
       })
     : undefined;
+  const text = typeof record.text === "string" ? record.text : "";
+  // A document that parses but answers nothing is a failed turn, not a reply.
+  // Forwarding it as one puts an empty bubble in front of the reader beside a
+  // badge that says the turn is done.
+  if (
+    text.trim() === "" &&
+    !toolCalls?.length &&
+    record.askUser === undefined
+  ) {
+    throw new TypeError("provider returned no text, no calls and no question");
+  }
   return parseAgentHttpResponse({
     schemaVersion: AGENT_HTTP_SCHEMA,
-    text: typeof record.text === "string" ? record.text : "",
+    text,
     toolCalls,
     askUser: record.askUser,
     // The table already ran the calls. A second model call that only says

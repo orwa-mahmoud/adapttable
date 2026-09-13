@@ -568,6 +568,30 @@ describe("handleExampleAgentTurn", () => {
     );
   });
 
+  it("rejects a provider document that answers nothing", async () => {
+    const complete = () => Promise.resolve(JSON.stringify({ toolCalls: [] }));
+    await assert.rejects(
+      handleExampleAgentTurn(request(), complete, new AbortController().signal),
+      /no text, no calls and no question/
+    );
+  });
+
+  it("keeps a wordless reply that carries calls", async () => {
+    const complete = () =>
+      Promise.resolve(
+        JSON.stringify({
+          toolCalls: [{ name: "view.page", args: { page: 2 } }],
+        })
+      );
+    const reply = await handleExampleAgentTurn(
+      request(),
+      complete,
+      new AbortController().signal
+    );
+    assert.equal(reply.text, "");
+    assert.equal(reply.toolCalls?.length, 1);
+  });
+
   it("forwards a describe call and text-only replies from mocked providers", async () => {
     const complete = () =>
       Promise.resolve(

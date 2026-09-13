@@ -279,6 +279,24 @@ function exchanges(
   }));
 }
 
+/** What the reader is told when a turn came back with nothing in it. */
+const EMPTY_TURN =
+  "the assistant answered with no text and nothing to apply — try again";
+
+/**
+ * Whether a reply carries anything at all.
+ *
+ * Empty text is legitimate on its own: a turn that filtered the table and
+ * said nothing is fully reported by its receipts, and a turn that stopped
+ * short is reported by `unresolved`. All three absent is the case nothing
+ * downstream can render.
+ */
+function silentTurn(reply: AssistantTransportReply, receipts: number): boolean {
+  return (
+    reply.text.trim() === "" && receipts === 0 && reply.unresolved === undefined
+  );
+}
+
 /**
  * Create a conversation controller for one table.
  *
@@ -544,7 +562,8 @@ export function createTableAssistant(
 
   const receive = (
     reply: AssistantTransportReply,
-    before: AgentContextView | null
+    before: AgentContextView | null,
+    was: string
   ): void => {
     // The table's own policy decides whether an applied write is saved or
     // staged; the result cannot say on its own.
@@ -554,6 +573,18 @@ export function createTableAssistant(
       live.session?.manifest().policy.commit,
       reply.subjects
     );
+    // No words, nothing applied, and no reason given. Pushing that as a
+    // message renders an empty bubble under a "ready" badge: the reader is
+    // told the turn worked and handed nothing to read or act on. It is a
+    // turn that failed to answer, and it is reported as one — draft restored,
+    // so a retry is one keystroke.
+    if (silentTurn(reply, receipts.length)) {
+      if (draft === "") draft = was;
+      error = EMPTY_TURN;
+      status = "error";
+      publish();
+      return;
+    }
     seq += 1;
     const id = messageId("assistant", seq);
     const undoable = recordUndo(before, reply, id);
@@ -783,7 +814,9 @@ export function createTableAssistant(
       // A transport is asked to honour `signal`, but it is host code and may
       // not. Stop has to hold either way, so delivery is gated on the signal
       // as well as on the turn still being the current one.
-      if (deliverable(mine, id, controller)) receive(reply, before);
+      if (deliverable(mine, id, controller)) {
+        receive(reply, before, previousDraft);
+      }
     } catch (cause) {
       // An abandoned stream leaves nothing behind: the partial message is
       // dropped, and nothing ran, because calls execute only after the reply

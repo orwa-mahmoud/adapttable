@@ -1088,3 +1088,74 @@ describe("a turn the reader stopped", () => {
     expect(store.getState().error).toBe("the backend is down");
   });
 });
+
+describe("a turn that came back with nothing in it", () => {
+  it("reports the empty answer instead of an empty bubble", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying(""),
+    });
+    store.connect();
+    store.setDraft("Show only the Core team.");
+    await store.send();
+
+    const state = store.getState();
+    // The reader's own line stands; nothing is appended that says nothing.
+    expect(state.messages.map((entry) => entry.role)).toEqual(["user"]);
+    expect(state.status).toBe("error");
+    expect(state.error).toMatch(/no text and nothing to apply/);
+    // Retry is one keystroke rather than retyping, as after a failure.
+    expect(state.draft).toBe("Show only the Core team.");
+  });
+
+  it("keeps a wordless turn that applied something", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: () =>
+          Promise.resolve({
+            text: "",
+            keys: ["view.page"],
+            results: [{ ok: true, revision: 2, idempotencyKey: "page-2" }],
+          }),
+      },
+    });
+    store.connect();
+    await store.send("Page 2");
+
+    const state = store.getState();
+    expect(state.messages.map((entry) => entry.role)).toEqual([
+      "user",
+      "assistant",
+    ]);
+    expect(state.messages[1]?.receipts).toHaveLength(1);
+    expect(state.status).toBe("ready");
+    expect(state.error).toBeUndefined();
+  });
+
+  it("keeps a wordless turn that said why it stopped", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: () =>
+          Promise.resolve({
+            text: "",
+            unresolved: {
+              code: "question-unanswered",
+              message: "nobody answered the question",
+              pending: ["view.page"],
+            },
+          }),
+      },
+    });
+    store.connect();
+    await store.send("Page 2");
+
+    const state = store.getState();
+    expect(state.messages.map((entry) => entry.role)).toEqual([
+      "user",
+      "assistant",
+    ]);
+    expect(state.error).toBe("nobody answered the question");
+  });
+});
