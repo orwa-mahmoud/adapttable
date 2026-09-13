@@ -848,6 +848,17 @@ export interface TableLabels {
     before: string;
     after: string;
   }) => string;
+  /**
+   * The same pair when nothing was applied, spoken for assistive technology.
+   *
+   * A refused, staged or still-pending edit shows its before and after so the
+   * reader can see what was asked for — but saying it *changed* would claim
+   * something the table never did.
+   */
+  assistantReceiptProposed?: (change: {
+    before: string;
+    after: string;
+  }) => string;
   /** The toolbar control that adds a row (`onAddRow`). */
   addRow?: string;
   /** The row action that copies a row (`onDuplicateRow`). */

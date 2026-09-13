@@ -235,6 +235,8 @@ export const he: Required<TableLabels> = {
   assistantExamples: "דוגמאות",
   assistantMoreExamples: "עוד דוגמאות",
   assistantReceiptChange: ({ before, after }) => `שונה מ-${before} ל-${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `הוצע: מ-${before} ל-${after}`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

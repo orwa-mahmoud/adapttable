@@ -240,6 +240,8 @@ export const tr: Required<TableLabels> = {
   assistantMoreExamples: "Daha fazla örnek",
   assistantReceiptChange: ({ before, after }) =>
     `${before} değerinden ${after} değerine değiştirildi`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `Önerilen: ${before} değerinden ${after} değerine`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

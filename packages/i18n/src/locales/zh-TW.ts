@@ -234,6 +234,8 @@ export const zhTW: Required<TableLabels> = {
   assistantExamples: "範例",
   assistantMoreExamples: "更多範例",
   assistantReceiptChange: ({ before, after }) => `已從 ${before} 改為 ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `建議：從 ${before} 改為 ${after}`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

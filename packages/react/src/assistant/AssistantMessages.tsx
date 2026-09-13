@@ -70,6 +70,14 @@ function ChangedValue({
 }): ReactElement | null {
   const subject = receipt.subject;
   if (!subject?.before || !subject.after) return null;
+  // Shown either way, because the reader wants to see what was asked for —
+  // but only an applied edit is spoken as a change. Saying a refused or
+  // still-pending one "changed" claims something the table never did, and a
+  // reader who cannot see the strikethrough has only this sentence.
+  const spoken =
+    receipt.status === "executed"
+      ? labels?.assistantReceiptChange
+      : labels?.assistantReceiptProposed;
   return (
     <span
       data-adapttable-part="assistant-receipt-change"
@@ -89,10 +97,7 @@ function ChangedValue({
           clip: "rect(0,0,0,0)",
         }}
       >
-        {labels?.assistantReceiptChange?.({
-          before: subject.before,
-          after: subject.after,
-        }) ?? ""}
+        {spoken?.({ before: subject.before, after: subject.after }) ?? ""}
       </span>
     </span>
   );

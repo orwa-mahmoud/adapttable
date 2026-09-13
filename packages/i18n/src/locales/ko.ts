@@ -237,6 +237,8 @@ export const ko: Required<TableLabels> = {
   assistantMoreExamples: "예시 더 보기",
   assistantReceiptChange: ({ before, after }) =>
     `${before}에서 ${after}(으)로 변경했습니다`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `제안됨: ${before}에서 ${after}(으)로`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

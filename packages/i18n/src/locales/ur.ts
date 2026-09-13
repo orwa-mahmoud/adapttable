@@ -239,6 +239,8 @@ export const ur: Required<TableLabels> = {
   assistantMoreExamples: "مزید مثالیں",
   assistantReceiptChange: ({ before, after }) =>
     `${before} سے ${after} کر دیا گیا`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `تجویز: ${before} سے ${after}`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

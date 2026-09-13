@@ -4114,6 +4114,10 @@ export interface TableLabels {
         before: string;
         after: string;
     }) => string;
+    assistantReceiptProposed?: (change: {
+        before: string;
+        after: string;
+    }) => string;
     assistantReceiptStatus?: (status: string) => string;
     assistantSaveInTable?: string;
     assistantSend?: string;

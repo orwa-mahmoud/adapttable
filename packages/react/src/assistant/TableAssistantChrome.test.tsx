@@ -10,7 +10,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { AgentApprovalPending } from "../editing/AgentApprovalChrome";
 import { tableAssistantTestSlots } from "../internal/chromeTestSlots";
-import type { TableAssistantView } from "./assistantView";
+import type {
+  TableAssistantReceiptView,
+  TableAssistantView,
+} from "./assistantView";
 import type { SpeechInputHandle } from "./speechView";
 import { TableAssistantChrome } from "./TableAssistantChrome";
 
@@ -1190,5 +1193,67 @@ describe("answering a question in the reader's own words", () => {
     fireEvent.click(part("assistant-question-send")!);
 
     expect(onAnswer).not.toHaveBeenCalled();
+  });
+});
+
+describe("what a before-and-after pair is spoken as", () => {
+  function withReceipt(status: TableAssistantReceiptView["status"]) {
+    mount({
+      assistant: view({
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "Here you go.",
+            receipts: [
+              {
+                capabilityKey: "edit.cells",
+                status,
+                idempotencyKey: "k1",
+                subject: {
+                  kind: "edit",
+                  row: "Priya Nair",
+                  column: "Salary",
+                  before: "170",
+                  after: "185",
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+  }
+
+  it("calls an applied edit a change", () => {
+    withReceipt("executed");
+
+    expect(part("assistant-receipt-change")).toHaveTextContent(
+      "Changed from 170 to 185"
+    );
+  });
+
+  it("calls a refused edit a proposal, not a change", () => {
+    withReceipt("rejected");
+
+    // The strikethrough shows what was asked for; the sentence a screen
+    // reader hears must not say the table did it.
+    expect(part("assistant-receipt-change")).toHaveTextContent(
+      "Proposed: 170 to 185"
+    );
+    expect(part("assistant-receipt-change")).not.toHaveTextContent("Changed");
+  });
+
+  it("calls a staged edit a proposal too — nothing is saved yet", () => {
+    withReceipt("staged");
+
+    expect(part("assistant-receipt-change")).not.toHaveTextContent("Changed");
+  });
+
+  it("still shows both values whatever the outcome", () => {
+    withReceipt("rejected");
+
+    expect(part("assistant-receipt-before")).toHaveTextContent("170");
+    expect(part("assistant-receipt-after")).toHaveTextContent("185");
   });
 });

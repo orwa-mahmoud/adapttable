@@ -187,6 +187,14 @@ const INTERPOLATION_CASES: Record<
       }),
     expects: ["BEFORE_X", "AFTER_X"],
   },
+  assistantReceiptProposed: {
+    call: (fn) =>
+      (fn as (c: { before: string; after: string }) => string)({
+        before: "BEFORE_X",
+        after: "AFTER_X",
+      }),
+    expects: ["BEFORE_X", "AFTER_X"],
+  },
   showing: {
     call: (fn) =>
       (fn as (a: { from: number; to: number; total: number }) => string)({

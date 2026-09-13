@@ -242,6 +242,8 @@ export const ru: Required<TableLabels> = {
   assistantMoreExamples: "Ещё примеры",
   assistantReceiptChange: ({ before, after }) =>
     `Изменено с ${before} на ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `Предложено: с ${before} на ${after}`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

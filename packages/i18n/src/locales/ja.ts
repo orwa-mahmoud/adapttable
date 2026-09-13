@@ -235,6 +235,8 @@ export const ja: Required<TableLabels> = {
   assistantMoreExamples: "他の例",
   assistantReceiptChange: ({ before, after }) =>
     `${before} から ${after} に変更しました`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `提案: ${before} から ${after} へ`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

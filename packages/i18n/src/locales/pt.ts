@@ -239,6 +239,8 @@ export const pt: Required<TableLabels> = {
   assistantMoreExamples: "Mais exemplos",
   assistantReceiptChange: ({ before, after }) =>
     `Alterado de ${before} para ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `Proposto: de ${before} para ${after}`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

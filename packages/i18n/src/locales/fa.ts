@@ -236,6 +236,8 @@ export const fa: Required<TableLabels> = {
   assistantMoreExamples: "نمونه‌های بیشتر",
   assistantReceiptChange: ({ before, after }) =>
     `از ${before} به ${after} تغییر کرد`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `پیشنهادشده: از ${before} به ${after}`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

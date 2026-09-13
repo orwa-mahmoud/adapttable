@@ -237,6 +237,8 @@ export const ar: Required<TableLabels> = {
   assistantMoreExamples: "أمثلة أخرى",
   assistantReceiptChange: ({ before, after }) =>
     `تم التغيير من ${before} إلى ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `مقترح: من ${before} إلى ${after}`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

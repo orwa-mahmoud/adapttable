@@ -240,6 +240,8 @@ export const hi: Required<TableLabels> = {
   assistantMoreExamples: "और उदाहरण",
   assistantReceiptChange: ({ before, after }) =>
     `${before} से ${after} किया गया`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `प्रस्तावित: ${before} से ${after}`,
   assistantReceiptAction: ({ kind, status }) =>
     kind
       ? (

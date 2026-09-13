@@ -282,6 +282,8 @@ export const defaultLabels: Required<TableLabels> = {
     kind ? ASSISTANT_RECEIPT_ACTION[`${kind}/${status}`] : undefined,
   assistantReceiptChange: ({ before, after }) =>
     `Changed from ${before} to ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `Proposed: ${before} to ${after}`,
   addRow: "Add row",
   duplicateRow: "Duplicate row",
   deleteRow: "Delete row",
