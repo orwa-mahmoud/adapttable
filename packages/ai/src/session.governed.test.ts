@@ -174,18 +174,29 @@ describe("rows.read", () => {
 });
 
 describe("rows.resolve", () => {
-  it("rejects a position without expectedRevision or a missing row identity", async () => {
+  it("binds an omitted revision to the view the call was admitted against", async () => {
     const session = createAgentSession({
       observe: () => observation(),
       apply: apply(),
     });
-    const noRevision = await session.execute(
+
+    // The schema publishes `expectedRevision` as optional, and the call was
+    // already refused if the table had moved since revision 1 — so leaving it
+    // out names this view, it does not skip the check.
+    const bound = await session.execute(
       "rows.resolve",
       { position: 5 },
       1,
       "norev"
     );
-    expect(noRevision.error?.code).toBe("invalid-arguments");
+    expect(bound.ok).toBe(true);
+  });
+
+  it("rejects a stale revision or a missing row identity", async () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: apply(),
+    });
     const stale = await session.execute(
       "rows.resolve",
       { position: 5, expectedRevision: 9 },

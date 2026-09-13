@@ -1389,7 +1389,12 @@ async function resolveRowArg(
   observation: AgentObservation,
   apply: AgentApply
 ): Promise<ResolvedRow> {
-  const ref = asRowRef(body);
+  // An omitted revision binds to the observation this call was admitted
+  // against — the same one `edit.cells` binds to, and one the session has
+  // already refused the call over if the table had moved. The schema publishes
+  // `expectedRevision` as optional, so a caller that leaves it out is following
+  // the contract; a caller that states one is still held to it below.
+  const ref = asRowRef(body, observation.viewRevision);
   if ("position" in ref) {
     assertScope(ref.scope, observation);
     if (ref.expectedRevision !== observation.viewRevision) {
