@@ -791,3 +791,175 @@ describe("a refused call", () => {
     expect(reply.unresolved?.pending).toEqual(["unknown"]);
   });
 });
+
+describe("an approval the route enumerated rows for", () => {
+  function approvalRun(
+    input: unknown,
+    onApprove: () => unknown,
+    toolName = aiSdkToolName(TABLE_ID, "view.setPage")
+  ) {
+    const table = liveTable();
+    const subjects: ApprovalSubject[] = [];
+    const transport = aiSdkTransport({
+      connection: recorded([
+        () => [
+          START,
+          {
+            type: "tool-approval-request",
+            approvalId: "a1",
+            toolName,
+            input,
+          },
+          FINISH,
+        ],
+      ]).connection,
+      onApprove: (subject) => {
+        subjects.push(subject);
+        return Promise.resolve(onApprove() as never);
+      },
+    });
+    return { table, subjects, transport };
+  }
+
+  it("puts the rows to the reader, keeping only what it can address", async () => {
+    const { table, subjects, transport } = approvalRun(
+      {
+        proposals: [
+          { rowKey: "r1", column: "name", before: "Ada", after: "Grace" },
+          // No row key: nothing here can say which row this is.
+          { column: "name", after: "Nobody" },
+        ],
+        perItem: true,
+      },
+      () => true
+    );
+
+    await transport.send({
+      session: table.session,
+      text: "rename them",
+      conversation: [],
+    });
+
+    expect(subjects[0]).toMatchObject({ kind: "rows", perItem: true });
+    const rows = subjects[0] as { proposals: readonly unknown[] };
+    expect(rows.proposals).toHaveLength(1);
+    expect(rows.proposals[0]).toMatchObject({
+      rowKey: "r1",
+      column: "name",
+      before: "Ada",
+      after: "Grace",
+    });
+  });
+
+  it("falls back to the tool when no row could be addressed", async () => {
+    const { table, subjects, transport } = approvalRun(
+      { proposals: [{ column: "name" }] },
+      () => true
+    );
+
+    await transport.send({
+      session: table.session,
+      text: "go",
+      conversation: [],
+    });
+
+    // A list nothing addressable came out of is not a row approval: it falls
+    // back to confirming the capability the route named.
+    expect(subjects[0]).toMatchObject({ capability: "view.setPage" });
+  });
+
+  it("sends the reader's refusal back with its reason", async () => {
+    const table = liveTable();
+    const route = recorded([
+      () => [
+        START,
+        {
+          type: "tool-approval-request",
+          approvalId: "a1",
+          toolName: aiSdkToolName(TABLE_ID, "view.setPage"),
+        },
+        FINISH,
+      ],
+      () => [START, ...says("understood"), FINISH],
+    ]);
+    const transport = aiSdkTransport({
+      connection: route.connection,
+      onApprove: () =>
+        Promise.resolve({ approved: [], reason: "not right now" }),
+    });
+
+    await transport.send({
+      session: table.session,
+      text: "go to page 3",
+      conversation: [],
+    });
+
+    expect(route.requests[1]?.approvals).toMatchObject([
+      { approvalId: "a1", approved: false, reason: "not right now" },
+    ]);
+  });
+});
+
+describe("a call the table refused", () => {
+  it("returns the refusal as the tool's own output", async () => {
+    const table = liveTable();
+    const route = recorded([
+      // A revision the table has already left: the call must not apply.
+      () => [
+        START,
+        {
+          type: "tool-input-available",
+          toolCallId: "c1",
+          toolName: aiSdkToolName(TABLE_ID, "view.setPage"),
+          input: { page: "not a page" },
+        },
+        FINISH,
+      ],
+      () => [START, ...says("sorry"), FINISH],
+    ]);
+    const transport = aiSdkTransport({ connection: route.connection });
+
+    await transport.send({
+      session: table.session,
+      text: "go",
+      conversation: [],
+    });
+
+    // The route reads a refusal exactly as it reads any client tool's result,
+    // so the model can say what happened rather than assuming it worked.
+    const output = route.requests[1]?.toolOutputs?.[0];
+    expect(output).toMatchObject({ toolCallId: "c1" });
+    expect(JSON.stringify(output)).toContain('"ok":false');
+  });
+});
+
+describe("a turn the reader stopped", () => {
+  it("refuses to keep reading the stream", async () => {
+    const table = liveTable();
+    const controller = new AbortController();
+    const transport = aiSdkTransport({
+      connection: {
+        run: function* () {
+          controller.abort();
+          yield START;
+          yield { type: "text-delta", id: "t", delta: "too late" };
+          yield FINISH;
+        },
+      },
+    });
+
+    const cause = await transport
+      .send({
+        session: table.session,
+        text: "go",
+        conversation: [],
+        signal: controller.signal,
+      })
+      .then(
+        () => undefined,
+        (thrown: unknown) => thrown
+      );
+
+    expect(cause).toMatchObject({ code: "cancelled" });
+  });
+});
