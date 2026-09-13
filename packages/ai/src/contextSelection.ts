@@ -67,6 +67,14 @@ export interface AgentContextOptions {
   readonly include?: readonly string[];
   /** The host's own tokenizer. Without it, sizes are estimated. */
   readonly estimateTokens?: (text: string) => number;
+  /**
+   * The budget to name in notes, when {@link tokenBudget} is a share of it.
+   *
+   * The payload is budgeted whole, so guides receive what the columns did not
+   * spend. A note naming that remainder tells a reader their budget is zero
+   * when it is not; this names the one they set.
+   */
+  readonly budgetLabel?: number;
 }
 
 /** Why something is not in the upfront context. @public */
@@ -285,7 +293,7 @@ export function selectGuides(
     deferred.some((entry) => entry.reason === "budget")
   ) {
     notes.push(
-      `${String(deferred.length)} guide(s) were deferred to stay within the ${String(budget)}-token budget; ask for them with describe`
+      `${String(deferred.length)} guide(s) were deferred to stay within the ${String(options.budgetLabel ?? budget)}-token budget; ask for them with describe`
     );
   }
   if (selected.length === 0 && capabilities.length > 0) {

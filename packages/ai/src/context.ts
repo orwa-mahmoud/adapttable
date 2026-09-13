@@ -171,8 +171,11 @@ export function buildAgentContext(
       : {
           ...options,
           // What the columns did not spend. A guide is deferred by name, so a
-          // backend can still ask for any of them.
+          // backend can still ask for any of them. The budget a reader set is
+          // what the note names — a remainder of zero is an accounting step,
+          // not the number they chose.
           tokenBudget: Math.max(0, budget - floor(fitted.kept)),
+          budgetLabel: budget,
         }
   );
   const selected: AgentContextContract = {
@@ -225,11 +228,24 @@ export function buildAgentContext(
       // caller comparing it against a provider's real limit should know.
       estimated: measured === undefined,
       ...(() => {
+        const tokens = measured
+          ? measured(serialized)
+          : Math.ceil(serialized.length / 4);
         const notes = [
           ...chosen.notes,
           ...(fitted.deferred.length > 0
             ? [
                 `${String(fitted.deferred.length)} column description(s) were deferred to stay within the ${String(budget ?? 0)}-token budget; every one is still permitted, and columns.describe returns the detail: ${fitted.deferred.join(", ")}`,
+              ]
+            : []),
+          // Said rather than left to be noticed. The common operations keep
+          // their guidance whatever the budget says, so a table whose own
+          // description is larger than the budget ships over it — and a reader
+          // comparing this against a provider's limit needs the real number,
+          // not the one that was aimed at.
+          ...(budget !== undefined && tokens > budget
+            ? [
+                `the contract is about ${String(tokens)} tokens, over the ${String(budget)}-token budget: what remains is this table's own description and the common operations, which stay callable rather than being cut`,
               ]
             : []),
         ];
