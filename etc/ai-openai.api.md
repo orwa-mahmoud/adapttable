@@ -79,21 +79,26 @@ export interface AgentCapabilityContext {
 // @public
 export interface AgentCapabilityDefinition {
     readonly ai?: ActionAiOptions;
+    readonly discovery?: CapabilityFamily;
     execute(context: AgentCapabilityContext, args: unknown): unknown;
     readonly guide: Omit<CapabilityGuide, "schemaVersion" | "key"> & {
         readonly guide: string;
         readonly input: JsonSchema;
         readonly output: JsonSchema;
     };
+    readonly idempotent?: boolean;
     isEnabled(observation: AgentObservation): boolean;
     readonly key: string;
-    readonly kind?: "read" | "view" | "write" | "destructive";
+    readonly kind?: AgentCapabilityKind;
     readonly partial?: CapabilityPartial;
     plan?(context: AgentCapabilityContext, args: unknown): Promise<CapabilityPlan> | CapabilityPlan;
     readonly presentation?: CapabilityPresentation;
     readonly staging?: CapabilityStaging;
     readonly summary: string;
 }
+
+// @public
+export type AgentCapabilityKind = "read" | "view" | "write" | "destructive";
 
 // @public
 export interface AgentCellEdit {
@@ -104,13 +109,22 @@ export interface AgentCellEdit {
 
 // @public
 export interface AgentColumn {
+    readonly ai?: AgentColumnAuthoring;
     readonly id: string;
     readonly label: string;
     readonly pinnable?: boolean;
     readonly readable: boolean;
     readonly sortable: boolean;
     readonly type: string;
+    readonly visible?: boolean;
     readonly writable: boolean;
+}
+
+// @public
+export interface AgentColumnAuthoring {
+    readonly description?: string;
+    readonly examples?: readonly unknown[];
+    readonly sample?: boolean;
 }
 
 // @public
@@ -153,6 +167,7 @@ export interface AgentManifest {
 // @public
 export interface AgentObservation {
     readonly aggregations?: AgentAggregations;
+    readonly alwaysAllow?: readonly string[];
     readonly approval?: ApprovalPolicy;
     readonly availableFilters?: readonly AgentFilter[];
     readonly columns: readonly AgentColumn[];
@@ -223,6 +238,7 @@ export type ApprovalPolicy = "writes" | "destructive" | "never";
 // @public
 export type ApprovalResult = boolean | {
     readonly approved: readonly number[];
+    readonly reason?: string;
 };
 
 // @public
@@ -253,12 +269,19 @@ export interface AssistantSuggestion {
 export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setAggregations", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
 
 // @public
+export interface CapabilityFamily {
+    readonly dependsOn?: readonly string[];
+    readonly family?: string;
+}
+
+// @public
 export interface CapabilityGuide {
     readonly guide: string;
     readonly input: JsonSchema;
     readonly key: string;
     readonly output: JsonSchema;
     readonly schemaVersion: string;
+    readonly short?: string;
 }
 
 // @public
@@ -286,8 +309,11 @@ export type CapabilityStaging = "supported" | "unsupported";
 
 // @public
 export interface CatalogEntry {
+    readonly idempotent?: boolean;
     readonly key: string;
+    readonly kind?: AgentCapabilityKind;
     readonly summary: string;
+    readonly summaryShort?: string;
 }
 
 // @public
@@ -385,6 +411,16 @@ export interface RowPositionRef {
 }
 
 // @public
+export interface RowProvenanceEnvelope {
+    readonly revision: number;
+    // (undocumented)
+    readonly rows: RowWindow;
+    // (undocumented)
+    readonly source: "table-rows";
+    readonly untrusted: true;
+}
+
+// @public
 export interface RowReadQuery {
     readonly columns?: readonly string[];
     readonly limit: number;
@@ -419,6 +455,7 @@ export function toOpenAITools(session: AgentSession, options?: OpenAIToolsOption
 export interface WriteExecuteResult {
     readonly applied: boolean;
     readonly approval: ApprovalOutcome;
+    readonly approvalReason?: string;
     readonly proposals: readonly WriteProposal[];
     readonly results?: readonly WriteRowResult[];
 }

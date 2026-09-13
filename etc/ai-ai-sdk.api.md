@@ -128,6 +128,60 @@ export interface AgentColumnAuthoring {
 }
 
 // @public
+export interface AgentContextInputs {
+    readonly aggregations?: AgentAggregations;
+    readonly filters?: readonly AgentFilter[];
+    readonly samples?: Readonly<Record<string, readonly unknown[]>>;
+    readonly view?: {
+        readonly page?: number;
+        readonly limit?: number;
+        readonly search?: string;
+        readonly sortBy?: string;
+        readonly sortDir?: "asc" | "desc";
+        readonly groupBy?: string;
+        readonly filters?: Readonly<Record<string, unknown>>;
+        readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+        readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    };
+}
+
+// @public
+export interface AgentContextOptions {
+    readonly estimateTokens?: (text: string) => number;
+    readonly include?: readonly string[];
+    readonly priority?: readonly string[];
+    readonly profile?: AgentContextProfile;
+    readonly tokenBudget?: number;
+}
+
+// @public
+export type AgentContextProfile = "compact" | "full";
+
+// @public
+export interface AgentContextView {
+    readonly filters?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly groupBy?: string;
+    // (undocumented)
+    readonly limit: number;
+    // (undocumented)
+    readonly page: number;
+    // (undocumented)
+    readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly revision: number;
+    // (undocumented)
+    readonly search: string;
+    // (undocumented)
+    readonly sortBy?: string;
+    // (undocumented)
+    readonly sortDir?: "asc" | "desc";
+    readonly unknown?: readonly string[];
+}
+
+// @public
 export interface AgentFilter {
     readonly defaultOperator: string;
     readonly key: string;
@@ -230,6 +284,109 @@ export interface AgentSession {
 }
 
 // @public
+export const AI_SDK_STREAM_VERSION = 2;
+
+// @public
+export interface AiSdkApprovalResponse {
+    // (undocumented)
+    readonly approvalId: string;
+    // (undocumented)
+    readonly approved: boolean;
+    readonly reason?: string;
+}
+
+// @public
+export function aiSdkCapability(session: AgentSession, name: string): string | undefined;
+
+// @public
+export interface AiSdkConnection {
+    close?(): void;
+    run(request: AiSdkRequest, signal?: AbortSignal): AsyncIterable<AiSdkPart> | Iterable<AiSdkPart> | Promise<AsyncIterable<AiSdkPart> | Iterable<AiSdkPart>>;
+}
+
+// @public
+export interface AiSdkOptions {
+    readonly connection: AiSdkConnection;
+    readonly context?: AgentContextOptions;
+    readonly contextInputs?: () => AgentContextInputs;
+    readonly maxRequests?: number;
+    readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
+    readonly onPart?: (part: AiSdkPart) => void;
+    readonly presentation?: ApprovalPresentation;
+}
+
+// @public
+export interface AiSdkPart {
+    // (undocumented)
+    readonly [field: string]: unknown;
+    // (undocumented)
+    readonly approvalId?: string;
+    // (undocumented)
+    readonly delta?: unknown;
+    // (undocumented)
+    readonly errorText?: string;
+    // (undocumented)
+    readonly id?: string;
+    // (undocumented)
+    readonly input?: unknown;
+    // (undocumented)
+    readonly messageId?: string;
+    // (undocumented)
+    readonly output?: unknown;
+    // (undocumented)
+    readonly toolCallId?: string;
+    // (undocumented)
+    readonly toolName?: string;
+    // (undocumented)
+    readonly type: string;
+}
+
+// @public
+export class AiSdkProtocolError extends Error {
+    constructor(code: string, message: string);
+    readonly code: string;
+}
+
+// @public
+export interface AiSdkRequest {
+    readonly approvals?: readonly AiSdkApprovalResponse[];
+    readonly data?: {
+        readonly "data-adapttable-view": AgentContextView;
+    };
+    readonly message: string;
+    readonly messages: readonly {
+        readonly role: "user" | "assistant";
+        readonly content: string;
+    }[];
+    readonly toolOutputs?: readonly AiSdkToolOutput[];
+}
+
+// @public
+export interface AiSdkTool {
+    // (undocumented)
+    readonly description: string;
+    readonly execute?: undefined;
+    readonly inputSchema: unknown;
+}
+
+// @public
+export function aiSdkToolName(tableId: string, key: string): string;
+
+// @public
+export interface AiSdkToolOutput {
+    // (undocumented)
+    readonly output: unknown;
+    // (undocumented)
+    readonly toolCallId: string;
+}
+
+// @public
+export function aiSdkTools(session: AgentSession): Readonly<Record<string, AiSdkTool>>;
+
+// @public
+export function aiSdkTransport(options: AiSdkOptions): AssistantTransport;
+
+// @public
 export type ApprovalOutcome = "pending" | "approved" | "partial" | "rejected" | "cancelled" | "not-required";
 
 // @public
@@ -256,6 +413,49 @@ export type ApprovalSubject = {
 };
 
 // @public
+export function assertAiSdkVersion(version: unknown): void;
+
+// @public
+export interface AssistantAnswer {
+    readonly optionId?: string;
+    readonly text?: string;
+}
+
+// @public
+export interface AssistantExchange {
+    // (undocumented)
+    readonly role: "user" | "assistant";
+    // (undocumented)
+    readonly text: string;
+}
+
+// @public
+export interface AssistantQuestion {
+    readonly allowFreeText: boolean;
+    readonly id: string;
+    readonly options?: readonly AssistantQuestionOption[];
+    readonly question: string;
+}
+
+// @public
+export interface AssistantQuestionOption {
+    readonly id: string;
+    readonly label: string;
+}
+
+// @public
+export interface AssistantReceiptSubject {
+    // (undocumented)
+    readonly after?: string;
+    readonly before?: string;
+    // (undocumented)
+    readonly column?: string;
+    readonly detail?: string;
+    readonly kind?: string;
+    readonly row?: string;
+}
+
+// @public
 export interface AssistantSuggestion {
     readonly description?: string;
     readonly id: string;
@@ -266,7 +466,37 @@ export interface AssistantSuggestion {
 }
 
 // @public
-export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setAggregations", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
+export interface AssistantTransport {
+    connect?(input: {
+        readonly session: AgentSession;
+        readonly signal?: AbortSignal;
+    }): Promise<void> | void;
+    disconnect?(): void;
+    send(input: {
+        readonly session: AgentSession;
+        readonly text: string;
+        readonly conversation: readonly AssistantExchange[];
+        readonly signal?: AbortSignal;
+        readonly onPartialText?: (text: string) => void;
+        readonly askUser?: (question: AssistantQuestion) => Promise<AssistantAnswer | undefined>;
+    }): Promise<AssistantTransportReply>;
+}
+
+// @public
+export interface AssistantTransportReply {
+    readonly keys?: readonly string[];
+    readonly results?: readonly ExecuteResult[];
+    readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
+    readonly text: string;
+    readonly unresolved?: AssistantUnresolved;
+}
+
+// @public
+export interface AssistantUnresolved {
+    readonly code: string;
+    readonly message: string;
+    readonly pending: readonly string[];
+}
 
 // @public
 export interface CapabilityFamily {
@@ -283,9 +513,6 @@ export interface CapabilityGuide {
     readonly schemaVersion: string;
     readonly short?: string;
 }
-
-// @public
-export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
 // @public
 export type CapabilityPartial = "supported" | "unsupported";
@@ -326,9 +553,6 @@ export interface ExecuteError {
 }
 
 // @public
-export function executeMcpTool(session: AgentSession, name: string, args: unknown, expectedRevision: number, idempotencyKey: string): Promise<ExecuteResult>;
-
-// @public
 export interface ExecuteResult {
     readonly error?: ExecuteError;
     readonly idempotencyKey: string;
@@ -352,75 +576,6 @@ export interface JsonSchema {
     readonly required?: readonly string[];
     readonly type?: string | readonly string[];
 }
-
-// @public
-export interface McpContent {
-    // (undocumented)
-    readonly text: string;
-    // (undocumented)
-    readonly type: "text";
-}
-
-// @public
-export function mcpListChanged(prev: AgentManifest, next: AgentManifest): boolean;
-
-// @public
-export interface McpListMeta {
-    readonly cacheScope: string;
-    readonly ttlMs: number;
-}
-
-// @public
-export interface McpResource {
-    readonly description: string;
-    readonly mimeType: "application/json";
-    readonly name: string;
-    readonly text: string;
-    readonly uri: string;
-}
-
-// @public
-export interface McpResourceList {
-    // (undocumented)
-    readonly _meta: McpListMeta;
-    // (undocumented)
-    readonly resources: readonly McpResource[];
-}
-
-// @public
-export interface McpTool {
-    readonly annotations: McpToolAnnotations;
-    readonly description: string;
-    readonly inputSchema: JsonSchema;
-    readonly _meta?: Readonly<Record<string, unknown>>;
-    readonly name: string;
-}
-
-// @public
-export interface McpToolAnnotations {
-    readonly destructiveHint: boolean;
-    readonly idempotentHint: boolean;
-    readonly openWorldHint: false;
-    readonly readOnlyHint: boolean;
-}
-
-// @public
-export interface McpToolList {
-    // (undocumented)
-    readonly _meta: McpListMeta;
-    // (undocumented)
-    readonly tools: readonly McpTool[];
-}
-
-// @public
-export interface McpToolResult {
-    // (undocumented)
-    readonly content: readonly McpContent[];
-    readonly isError?: boolean;
-}
-
-// @public
-export function mcpToolResult(result: ExecuteResult): McpToolResult;
 
 // @public
 export interface ResolvedRow {
@@ -478,18 +633,6 @@ export interface RowWindowRow {
     readonly cells: Readonly<Record<string, unknown>>;
     readonly rowKey: string;
 }
-
-// @public
-export function toMcpResourceList(session: AgentSession): McpResourceList;
-
-// @public
-export function toMcpResources(session: AgentSession): readonly McpResource[];
-
-// @public
-export function toMcpToolList(session: AgentSession): McpToolList;
-
-// @public
-export function toMcpTools(session: AgentSession): readonly McpTool[];
 
 // @public
 export interface WriteExecuteResult {

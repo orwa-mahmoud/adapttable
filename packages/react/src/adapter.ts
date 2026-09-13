@@ -1093,9 +1093,12 @@ export type {
 export {
   assistantIsUsable,
   type TableAssistantMessageView,
+  type TableAssistantQuestionOption,
+  type TableAssistantQuestionView,
   type TableAssistantReceiptSubject,
   type TableAssistantReceiptView,
   type TableAssistantSuggestionView,
+  type TableAssistantUndoView,
   type TableAssistantView,
 } from "./assistant/assistantView";
 export {

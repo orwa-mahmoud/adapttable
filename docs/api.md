@@ -2060,7 +2060,8 @@ of being handed everything. `createDiscoveryCache` memoizes it as a
 **Context.** `buildAgentContext(session, options, inputs)` renders an
 `AgentContext` from `AgentContextOptions` and `AgentContextInputs`;
 `AgentContextProfile` picks how much to send (`DEFAULT_COMPACT_TOKENS` is the
-compact budget, `MAX_CONTEXT_BYTES` the hard ceiling) and `ContextIncludeError`
+compact budget, `MAX_CONTEXT_BYTES` the hard ceiling), a guide left out carries
+a `DeferralReason` saying which of the two cut it, and `ContextIncludeError`
 names an `include` entry the table does not publish. `ContextCapability` and
 `ContextColumn` are the rendered pieces, `AgentContextContract`,
 `AgentContextView` and `AgentContextSelection` the halves a request carries.
@@ -2227,6 +2228,11 @@ assistant: `AGENT_VIEW_STATE` / `AgentViewState` and
 `SpeechInputHandle` / `SpeechInputState` / `SpeechInputStatus` are the
 structural view of a speech input — structural so that `@adapttable/react`
 describes dictation without depending on `@adapttable/ai`.
+
+The rendered assistant carries two blocks an adapter draws itself:
+`TableAssistantQuestionView` with its `TableAssistantQuestionOption`s is a
+question waiting on the reader, and `TableAssistantUndoView` is the offer to
+put back what the last turn changed.
 
 ## Other packages
 

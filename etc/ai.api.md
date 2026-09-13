@@ -5,10 +5,16 @@
 ```ts
 
 import { ActionAiOptions } from '@adapttable/core';
+import { AgentApprovalDecision } from '@adapttable/core';
+import { AgentApprovalOperation } from '@adapttable/core';
+import { AgentApprovalProposal } from '@adapttable/core';
 import { ApprovalPresentation } from '@adapttable/core';
+import { ColumnMetadata } from '@adapttable/core';
 import { FilterDef } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
+import { GroupAggregateOverrides } from '@adapttable/core';
 import { NeutralTable } from '@adapttable/core';
+import { QueryAggregate } from '@adapttable/core';
 import { revisionToken } from '@adapttable/core';
 import { TableRevisions } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
@@ -87,21 +93,26 @@ export interface AgentCapabilityContext {
 // @public
 export interface AgentCapabilityDefinition {
     readonly ai?: ActionAiOptions;
+    readonly discovery?: CapabilityFamily;
     execute(context: AgentCapabilityContext, args: unknown): unknown;
     readonly guide: Omit<CapabilityGuide, "schemaVersion" | "key"> & {
         readonly guide: string;
         readonly input: JsonSchema;
         readonly output: JsonSchema;
     };
+    readonly idempotent?: boolean;
     isEnabled(observation: AgentObservation): boolean;
     readonly key: string;
-    readonly kind?: "read" | "view" | "write" | "destructive";
+    readonly kind?: AgentCapabilityKind;
     readonly partial?: CapabilityPartial;
     plan?(context: AgentCapabilityContext, args: unknown): Promise<CapabilityPlan> | CapabilityPlan;
     readonly presentation?: CapabilityPresentation;
     readonly staging?: CapabilityStaging;
     readonly summary: string;
 }
+
+// @public
+export type AgentCapabilityKind = "read" | "view" | "write" | "destructive";
 
 // @public
 export interface AgentCellEdit {
@@ -112,17 +123,127 @@ export interface AgentCellEdit {
 
 // @public
 export interface AgentColumn {
+    readonly ai?: AgentColumnAuthoring;
     readonly id: string;
     readonly label: string;
     readonly pinnable?: boolean;
     readonly readable: boolean;
     readonly sortable: boolean;
     readonly type: string;
+    readonly visible?: boolean;
     readonly writable: boolean;
 }
 
 // @public
+export interface AgentColumnAuthoring {
+    readonly description?: string;
+    readonly examples?: readonly unknown[];
+    readonly sample?: boolean;
+}
+
+// @public
 export function agentColumnsFromNeutral<TRow>(table: NeutralTable<TRow>, patches?: Readonly<Record<string, TableAgentColumnPatch>>): readonly AgentColumn[];
+
+// @public
+export interface AgentContext {
+    readonly contract: AgentContextContract;
+    readonly selection: AgentContextSelection;
+    readonly view: AgentContextView;
+}
+
+// @public
+export interface AgentContextContract {
+    // (undocumented)
+    readonly aggregations?: AgentAggregations;
+    // (undocumented)
+    readonly capabilities: readonly ContextCapability[];
+    // (undocumented)
+    readonly columns: readonly ContextColumn[];
+    // (undocumented)
+    readonly filters: readonly AgentFilter[];
+    // (undocumented)
+    readonly limits: AgentManifest["limits"];
+    // (undocumented)
+    readonly policy: AgentManifest["policy"];
+    // (undocumented)
+    readonly rowAddressing: AgentManifest["rowAddressing"];
+    // (undocumented)
+    readonly source: AgentManifest["source"];
+    // (undocumented)
+    readonly tableId: string;
+    readonly version: string;
+}
+
+// @public
+export interface AgentContextInputs {
+    readonly aggregations?: AgentAggregations;
+    readonly filters?: readonly AgentFilter[];
+    readonly samples?: Readonly<Record<string, readonly unknown[]>>;
+    readonly view?: {
+        readonly page?: number;
+        readonly limit?: number;
+        readonly search?: string;
+        readonly sortBy?: string;
+        readonly sortDir?: "asc" | "desc";
+        readonly groupBy?: string;
+        readonly filters?: Readonly<Record<string, unknown>>;
+        readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+        readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    };
+}
+
+// @public
+export interface AgentContextOptions {
+    readonly estimateTokens?: (text: string) => number;
+    readonly include?: readonly string[];
+    readonly priority?: readonly string[];
+    readonly profile?: AgentContextProfile;
+    readonly tokenBudget?: number;
+}
+
+// @public
+export type AgentContextProfile = "compact" | "full";
+
+// @public
+export interface AgentContextSelection {
+    readonly contractBytes: number;
+    readonly deferred: readonly {
+        readonly key: string;
+        readonly reason: DeferralReason;
+    }[];
+    readonly estimated: boolean;
+    readonly estimatedTokens: number;
+    readonly notes?: readonly string[];
+    // (undocumented)
+    readonly profile: AgentContextProfile;
+    readonly selected: readonly string[];
+    readonly version: string;
+    readonly viewBytes: number;
+}
+
+// @public
+export interface AgentContextView {
+    readonly filters?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly groupBy?: string;
+    // (undocumented)
+    readonly limit: number;
+    // (undocumented)
+    readonly page: number;
+    // (undocumented)
+    readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly revision: number;
+    // (undocumented)
+    readonly search: string;
+    // (undocumented)
+    readonly sortBy?: string;
+    // (undocumented)
+    readonly sortDir?: "asc" | "desc";
+    readonly unknown?: readonly string[];
+}
 
 // @public
 export interface AgentFilter {
@@ -146,6 +267,34 @@ export interface AgentFilterOption {
 export function agentFiltersFromDefs(defs: readonly FilterDef[] | undefined, registry: FilterTypeRegistry | undefined, patches?: Readonly<Record<string, FilterCatalogColumnPatch>>): readonly AgentFilter[] | undefined;
 
 // @public
+export interface AgentHttpPinAck {
+    readonly contractVersion?: string;
+    readonly status: PinStatus;
+    readonly ttlMs?: number;
+}
+
+// @public
+export interface AgentHttpResponse {
+    readonly askUser?: AssistantQuestion;
+    readonly continueWithResults?: boolean;
+    readonly ok?: boolean;
+    readonly pin?: AgentHttpPinAck;
+    readonly schemaVersion: typeof AGENT_SCHEMA_VERSION;
+    readonly sessionId?: string;
+    readonly text?: string;
+    readonly toolCalls?: readonly AgentHttpToolCall[];
+    readonly transcript?: string;
+}
+
+// @public
+export interface AgentHttpToolCall {
+    readonly args?: unknown;
+    readonly expectedRevision?: number;
+    readonly id: string;
+    readonly name: string;
+}
+
+// @public
 export interface AgentLimits {
     readonly pageMax: number;
     readonly readMax: number;
@@ -167,6 +316,7 @@ export interface AgentManifest {
 // @public
 export interface AgentObservation {
     readonly aggregations?: AgentAggregations;
+    readonly alwaysAllow?: readonly string[];
     readonly approval?: ApprovalPolicy;
     readonly availableFilters?: readonly AgentFilter[];
     readonly columns: readonly AgentColumn[];
@@ -229,6 +379,72 @@ export interface AgentSession {
 }
 
 // @public
+export class AgentStreamError extends Error {
+    constructor(code: string, message: string);
+    // (undocumented)
+    readonly code: string;
+}
+
+// @public
+export interface AgentStreamEvent {
+    // (undocumented)
+    readonly data: unknown;
+    // (undocumented)
+    readonly kind: AgentStreamEventKind;
+}
+
+// @public
+export type AgentStreamEventKind = "text-delta" | "ask-user" | "tool-calls" | "transcript" | "done" | "error";
+
+// @public
+export interface AggregationInputs {
+    readonly allows: (key: string) => boolean;
+    readonly grouping: "client" | "server" | false | undefined;
+    // (undocumented)
+    readonly state: AggregationState | undefined;
+}
+
+// @public
+export function aggregationsFor(inputs: AggregationInputs): AgentAggregations | undefined;
+
+// @public
+export interface AggregationState {
+    readonly aggregateOperations?: readonly string[];
+    readonly aggregateOverrides: GroupAggregateOverrides;
+    readonly columns?: readonly ColumnMetadata<unknown>[];
+    readonly computedAggregateKeys?: readonly string[];
+    readonly honorsAggregates?: boolean;
+    readonly queryAggregates?: readonly QueryAggregate[];
+    readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
+}
+
+// @public
+export interface AlwaysAllowInput {
+    readonly alwaysAllow: readonly string[];
+    readonly capability: string | undefined;
+    readonly kind: AgentCapabilityDefinition["kind"] | undefined;
+}
+
+// @public
+export function applyAggregations(inputs: AggregationInputs, patch: AgentAggregationsPatch): void;
+
+// @public
+export class ApprovalAlwaysAllowError extends Error {
+    constructor(keys: readonly string[]);
+    // (undocumented)
+    readonly code = "always-allow-unavailable";
+}
+
+// @public
+export interface ApprovalMemory {
+    readonly allows: (capability: string, contractVersion: string) => boolean;
+    readonly clear: () => void;
+    readonly remember: (capability: string, contractVersion: string) => void;
+    readonly remembered: (contractVersion: string) => readonly string[];
+    readonly revoke: (capability: string) => void;
+}
+
+// @public
 export type ApprovalOutcome = "pending" | "approved" | "partial" | "rejected" | "cancelled" | "not-required";
 
 // @public
@@ -237,6 +453,7 @@ export type ApprovalPolicy = "writes" | "destructive" | "never";
 // @public
 export type ApprovalResult = boolean | {
     readonly approved: readonly number[];
+    readonly reason?: string;
 };
 
 // @public
@@ -254,6 +471,19 @@ export type ApprovalSubject = {
 };
 
 // @public
+export interface ApprovalTransaction {
+    // (undocumented)
+    readonly decisions: readonly AgentApprovalDecision[];
+    readonly id: number;
+    // (undocumented)
+    readonly pending: PendingApproval;
+    readonly presentation: ApprovalPresentation;
+}
+
+// @public
+export function assertAlwaysAllow(alwaysAllow: readonly string[], available: Iterable<string>): void;
+
+// @public
 export function assertUniqueSuggestions(suggestions: readonly AssistantSuggestion[]): readonly AssistantSuggestion[];
 
 // @public
@@ -262,6 +492,12 @@ export interface AssistantAction {
     readonly capabilityKey: string;
     readonly expectedRevision: number;
     readonly idempotencyKey: string;
+}
+
+// @public
+export interface AssistantAnswer {
+    readonly optionId?: string;
+    readonly text?: string;
 }
 
 // @public
@@ -275,6 +511,18 @@ export interface AssistantExchange {
     // (undocumented)
     readonly role: "user" | "assistant";
     // (undocumented)
+    readonly text: string;
+}
+
+// @public
+export interface AssistantMessage {
+    readonly at: number;
+    readonly id: string;
+    readonly outcome?: AssistantTurnStatus;
+    readonly partialText?: string;
+    readonly receipts?: readonly AssistantReceipt[];
+    // (undocumented)
+    readonly role: "user" | "assistant";
     readonly text: string;
 }
 
@@ -306,12 +554,28 @@ export interface AssistantProposal {
 }
 
 // @public
+export interface AssistantQuestion {
+    readonly allowFreeText: boolean;
+    readonly id: string;
+    readonly options?: readonly AssistantQuestionOption[];
+    readonly question: string;
+}
+
+// @public
+export interface AssistantQuestionOption {
+    readonly id: string;
+    readonly label: string;
+}
+
+// @public
 export interface AssistantReceipt {
+    readonly approvalReason?: string;
     readonly capabilityKey?: string;
     readonly idempotencyKey: string;
     readonly message?: string;
     readonly status: AssistantReceiptStatus;
     readonly subject?: AssistantReceiptSubject;
+    readonly undoable?: boolean;
 }
 
 // @public
@@ -337,6 +601,9 @@ export interface AssistantRequest {
 }
 
 // @public
+export type AssistantStatus = "idle" | "connecting" | "ready" | "sending" | "awaiting-approval" | "awaiting-user" | "error" | "disconnected";
+
+// @public
 export interface AssistantSuggestion {
     readonly description?: string;
     readonly id: string;
@@ -358,6 +625,8 @@ export interface AssistantTransport {
         readonly text: string;
         readonly conversation: readonly AssistantExchange[];
         readonly signal?: AbortSignal;
+        readonly onPartialText?: (text: string) => void;
+        readonly askUser?: (question: AssistantQuestion) => Promise<AssistantAnswer | undefined>;
     }): Promise<AssistantTransportReply>;
 }
 
@@ -367,6 +636,7 @@ export interface AssistantTransportReply {
     readonly results?: readonly ExecuteResult[];
     readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
     readonly text: string;
+    readonly unresolved?: AssistantUnresolved;
 }
 
 // @public
@@ -383,10 +653,95 @@ export interface AssistantTurn {
 export type AssistantTurnStatus = "applied" | "partial" | "none" | "cancelled" | "failed";
 
 // @public
+export interface AssistantUndo {
+    readonly before: AgentContextView;
+    readonly calls: readonly UndoCall[];
+    readonly settledAt: number;
+}
+
+// @public
+export interface AssistantUndoOffer {
+    readonly available: boolean;
+    readonly blocked?: UndoBlock;
+    readonly messageId: string;
+}
+
+// @public
+export interface AssistantUnresolved {
+    readonly code: string;
+    readonly message: string;
+    readonly pending: readonly string[];
+}
+
+// @public
+export interface BindingOperations {
+    // (undocumented)
+    readonly edit?: boolean;
+    // (undocumented)
+    readonly setColumnPin?: boolean;
+    // (undocumented)
+    readonly setFilters?: boolean;
+    // (undocumented)
+    readonly setGroupBy?: boolean;
+    // (undocumented)
+    readonly setPage?: boolean;
+    // (undocumented)
+    readonly setRowPin?: boolean;
+    // (undocumented)
+    readonly setSearch?: boolean;
+    // (undocumented)
+    readonly setSelection?: boolean;
+    // (undocumented)
+    readonly setSort?: boolean;
+    // (undocumented)
+    readonly stage?: boolean;
+}
+
+// @public
+export interface BindingQuery {
+    // (undocumented)
+    readonly extra?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly limit?: number;
+    // (undocumented)
+    readonly page?: number;
+    // (undocumented)
+    readonly search?: string;
+    // (undocumented)
+    readonly sortBy?: string;
+    // (undocumented)
+    readonly sortDir?: "asc" | "desc";
+}
+
+// @public
+export interface BindingSnapshot {
+    // (undocumented)
+    readonly featureIds: readonly string[];
+    // (undocumented)
+    readonly neutralTable?: NeutralTable<unknown>;
+    // (undocumented)
+    readonly operations: BindingOperations;
+    // (undocumented)
+    readonly query?: BindingQuery;
+    readonly rowCount?: number;
+    // (undocumented)
+    readonly tableId: string;
+}
+
+// @public
+export function buildAgentContext(session: AgentSession, options?: AgentContextOptions, inputs?: AgentContextInputs): AgentContext;
+
+// @public
 export function buildManifest(observation: AgentObservation, capabilities?: readonly string[]): AgentManifest;
 
 // @public
 export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setAggregations", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
+
+// @public
+export interface CapabilityFamily {
+    readonly dependsOn?: readonly string[];
+    readonly family?: string;
+}
 
 // @public
 export interface CapabilityGuide {
@@ -395,6 +750,7 @@ export interface CapabilityGuide {
     readonly key: string;
     readonly output: JsonSchema;
     readonly schemaVersion: string;
+    readonly short?: string;
 }
 
 // @public
@@ -422,12 +778,62 @@ export type CapabilityStaging = "supported" | "unsupported";
 
 // @public
 export interface CatalogEntry {
+    readonly idempotent?: boolean;
     readonly key: string;
+    readonly kind?: AgentCapabilityKind;
     readonly summary: string;
+    readonly summaryShort?: string;
 }
 
 // @public
+export function closeTransaction(entry: PendingApproval): (current: ApprovalTransaction | null) => ApprovalTransaction | null;
+
+// @public
 export type CommitPolicy = "stage" | "immediate";
+
+// @public
+export interface ContextCapability {
+    readonly guide?: string;
+    readonly input?: JsonSchema;
+    // (undocumented)
+    readonly key: string;
+    readonly output?: JsonSchema;
+    readonly summary: string;
+    readonly summaryShort?: string;
+}
+
+// @public
+export interface ContextColumn {
+    readonly description?: string;
+    readonly examples?: readonly unknown[];
+    // (undocumented)
+    readonly id: string;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly pinnable?: boolean;
+    readonly readable: boolean;
+    readonly sampled?: true;
+    // (undocumented)
+    readonly sortable: boolean;
+    // (undocumented)
+    readonly type: string;
+    readonly visible?: boolean;
+    readonly writable: boolean;
+}
+
+// @public
+export class ContextIncludeError extends Error {
+    constructor(keys: readonly string[]);
+    // (undocumented)
+    readonly code = "include-unavailable";
+}
+
+// @public
+export function contractFingerprint(manifest: AgentManifest, catalog: readonly CatalogEntry[]): string;
+
+// @public
+export function contractVersion(contract: AgentContextContract): string;
 
 // @public
 export function createAgentSession(options: CreateAgentSessionOptions): AgentSession;
@@ -436,10 +842,83 @@ export function createAgentSession(options: CreateAgentSessionOptions): AgentSes
 export interface CreateAgentSessionOptions {
     apply: AgentApply;
     capabilities?: readonly AgentCapabilityDefinition[];
+    excludeCapabilities?: readonly string[];
     observe: () => AgentObservation;
     onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     replayCacheSize?: number;
 }
+
+// @public
+export function createApprovalMemory(): ApprovalMemory;
+
+// @public
+export function createDiscoveryCache(options?: {
+    readonly now?: () => number;
+    readonly maxVersions?: number;
+    readonly maxGuides?: number;
+}): DiscoveryCache;
+
+// @public
+export function createSpeechInput(options?: SpeechInputOptions): SpeechInput;
+
+// @public
+export function createStreamReply(onText?: (text: string) => void): {
+    readonly absorb: (event: AgentStreamEvent) => boolean;
+    readonly partial: () => string;
+    readonly finish: (schemaVersion: string) => AgentHttpResponse;
+    readonly complete: () => boolean;
+};
+
+// @public
+export function createTableAssistant(inputs?: TableAssistantInputs): TableAssistantStore;
+
+// @public
+export const DEFAULT_CACHE_GUIDES = 64;
+
+// @public
+export const DEFAULT_CACHE_VERSIONS = 2;
+
+// @public
+export const DEFAULT_COMPACT_TOKENS = 1000;
+
+// @public
+export type DeferralReason = "budget" | "hard-limit";
+
+// @public
+export function discover(request: DiscoveryRequest, source: DiscoverySource, limit?: number): DiscoveryResult;
+
+// @public
+export interface DiscoveryCache {
+    readonly forget: (connectionId?: string) => void;
+    readonly known: (connectionId: string, contractVersion: string, keys: readonly string[]) => readonly string[];
+    readonly read: (connectionId: string, contractVersion: string, key: string) => CapabilityGuide | undefined;
+    readonly remember: (connectionId: string, contractVersion: string, guides: readonly CapabilityGuide[]) => void;
+    readonly size: () => number;
+}
+
+// @public
+export interface DiscoveryRequest {
+    readonly bundle?: string;
+    readonly keys?: readonly string[];
+}
+
+// @public
+export interface DiscoveryResult {
+    readonly deferred: readonly string[];
+    readonly fulfilled: readonly string[];
+    readonly guides: readonly CapabilityGuide[];
+    readonly unavailable: readonly string[];
+}
+
+// @public
+export interface DiscoverySource {
+    readonly available: () => readonly string[];
+    readonly describe: (key: string) => CapabilityGuide;
+    readonly family: (key: string) => CapabilityFamily | undefined;
+}
+
+// @public
+export function displayProposals(proposals: readonly WriteProposal[], resolve: ProposalResolver): readonly AgentApprovalProposal[];
 
 // @public
 export function eligibleSuggestions(suggestions: readonly AssistantSuggestion[], available: readonly string[]): readonly AssistantSuggestion[];
@@ -463,6 +942,9 @@ export interface ExecuteResult {
 }
 
 // @public
+export function familyOf(key: string, declared?: CapabilityFamily): CapabilityFamily;
+
+// @public
 export interface FilterCatalogColumnPatch {
     // (undocumented)
     readonly readable?: boolean;
@@ -470,6 +952,9 @@ export interface FilterCatalogColumnPatch {
 
 // @public
 export function guideOf(key: CapabilityKey): CapabilityGuide;
+
+// @public
+export function isUndoBlock(value: AssistantUndo | UndoBlock): value is UndoBlock;
 
 // @public
 export interface JsonSchema {
@@ -505,6 +990,23 @@ export interface LiveObservationOptions {
     readonly writePolicy?: WritePolicy;
 }
 
+// @public
+export const MAX_FAMILY_GUIDES = 8;
+
+// @public
+export const MAX_STREAM_EVENTS = 4000;
+
+// @public
+export function mayAlwaysAllow(input: AlwaysAllowInput): boolean;
+
+// @public
+export interface ModelContextLike {
+    // (undocumented)
+    readonly registerTool: (tool: WebMcpTool) => void | (() => void);
+    // (undocumented)
+    readonly unregisterTool?: (name: string) => void;
+}
+
 // @public (undocumented)
 export function monotonicRevision(revisions: TableRevisions, lastToken: string | undefined): {
     token: string;
@@ -538,6 +1040,38 @@ export function observationFromNeutral<TRow>(table: NeutralTable<TRow>, options:
 export function openAiToolNameMap(keys: readonly string[]): ReadonlyMap<string, string>;
 
 // @public
+export function openTransaction(id: number, pending: PendingApproval, presentation: ApprovalPresentation): ApprovalTransaction;
+
+// @public
+export function parseStreamRecord(record: string): AgentStreamEvent | undefined;
+
+// @public
+export interface PendingApproval {
+    readonly capability?: string;
+    readonly operation?: AgentApprovalOperation;
+    readonly perItem: boolean;
+    readonly proposals: readonly AgentApprovalProposal[];
+    readonly resolve: (result: ApprovalResult) => void;
+}
+
+// @public
+export type PinStatus = "acknowledged" | "expired" | "unknown" | "unsupported";
+
+// @public
+export function planUndo(before: AgentContextView, after: AgentContextView, session: AgentSession, settledAt: number): AssistantUndo | UndoBlock;
+
+// @public
+export interface ProposalResolver {
+    readonly cellValue: (rowKey: string, column: string) => unknown;
+    readonly columnLabel: (column: string) => string | undefined;
+    readonly readable: (column: string) => boolean;
+    readonly rowLabel: (rowKey: string) => string | undefined;
+}
+
+// @public
+export function readRememberedLanguage(key?: string): string | undefined;
+
+// @public
 export function readRowsFromNeutral<TRow>(table: NeutralTable<TRow>, columns: readonly AgentColumn[], query: RowReadQuery, readMax: number): RowWindow;
 
 // @public
@@ -547,7 +1081,20 @@ export function receiptFromResult(result: ExecuteResult, capabilityKey?: string,
 export function receiptsFromResults(results: readonly ExecuteResult[], keys?: readonly string[], commit?: CommitPolicy, subjects?: readonly (AssistantReceiptSubject | undefined)[]): readonly AssistantReceipt[];
 
 // @public
+export function recordDecision(current: ApprovalTransaction | null, id: number, index: number, approved: boolean): ApprovalTransaction | null;
+
+// @public
+export function registerWebMcpTools(session: AgentSession, options?: WebMcpOptions): WebMcpRegistration;
+
+// @public
+export function rememberLanguage(language: string, key?: string): void;
+
+// @public
+export function resolveApproval(shared: ResolvedApproval, action: ActionAiOptions | undefined): ResolvedApproval;
+
+// @public
 export interface ResolvedApproval {
+    readonly alwaysAllow: readonly string[];
     readonly policy: ApprovalPolicy;
     readonly presentation: ApprovalPresentation;
 }
@@ -580,6 +1127,19 @@ export interface RowPositionRef {
 }
 
 // @public
+export function rowProvenance(rows: RowWindow, revision: number): RowProvenanceEnvelope;
+
+// @public
+export interface RowProvenanceEnvelope {
+    readonly revision: number;
+    // (undocumented)
+    readonly rows: RowWindow;
+    // (undocumented)
+    readonly source: "table-rows";
+    readonly untrusted: true;
+}
+
+// @public
 export interface RowReadQuery {
     readonly columns?: readonly string[];
     readonly limit: number;
@@ -605,16 +1165,86 @@ export interface RowWindowRow {
 }
 
 // @public
+export function runUndo(session: AgentSession, undo: AssistantUndo, idempotencyKey: string, signal?: AbortSignal): Promise<readonly ExecuteResult[]>;
+
+// @public
+export function settleDecisions(decisions: readonly AgentApprovalDecision[], fallback: AgentApprovalDecision): {
+    readonly approved: readonly number[];
+};
+
+// @public
 export type SharedApproval = ApprovalPolicy | {
     readonly policy?: ApprovalPolicy;
     readonly presentation?: ApprovalPresentation;
+    readonly alwaysAllow?: false | readonly string[];
 };
 
 // @public
 export function sharedApproval(approval: SharedApproval | undefined): ResolvedApproval;
 
 // @public
+export interface SpeechClip {
+    readonly base64: string;
+    // (undocumented)
+    readonly durationMs: number;
+    // (undocumented)
+    readonly mimeType: string;
+}
+
+// @public
+export interface SpeechInput {
+    readonly dispose: () => void;
+    // (undocumented)
+    readonly getState: () => SpeechState;
+    readonly setLanguage: (language: string) => void;
+    readonly start: () => void;
+    readonly stop: () => void;
+    // (undocumented)
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly supported: () => boolean;
+}
+
+// @public
+export interface SpeechInputOptions {
+    readonly initialLanguage?: string;
+    readonly languages?: readonly string[];
+    // (undocumented)
+    readonly mode?: SpeechMode;
+    readonly onClip?: (clip: SpeechClip) => void;
+    readonly onDraft?: (text: string) => void;
+}
+
+// @public
+export type SpeechMode = "browser" | "backend";
+
+// @public
+export interface SpeechState {
+    readonly error?: string;
+    readonly interim: string;
+    readonly language: string;
+    // (undocumented)
+    readonly status: SpeechStatus;
+}
+
+// @public
+export type SpeechStatus = "idle" | "listening" | "processing" | "denied" | "unsupported" | "error";
+
+// @public
+export function splitRecords(buffer: string): {
+    readonly records: readonly string[];
+    readonly rest: string;
+};
+
+// @public
 export function summaryOf(key: CapabilityKey): string;
+
+// @public
+export interface TableAgentBridge<TPending = unknown> {
+    readonly approvals?: (pending: TPending | null) => void;
+    attach?: (session: AgentSession) => void;
+    publish?: (manifest: AgentManifest) => void;
+    readonly viewInputs?: (read: () => AgentContextInputs) => void;
+}
 
 // @public
 export interface TableAgentColumnPatch {
@@ -631,15 +1261,153 @@ export interface TableAgentColumnPatch {
 }
 
 // @public
+export interface TableAssistantInputs {
+    readonly alwaysAllowed?: readonly string[];
+    readonly approval?: unknown;
+    readonly awaitingApproval?: boolean;
+    readonly contextInputs?: () => AgentContextInputs;
+    readonly onRevokeAlwaysAllow?: (capability: string) => void;
+    readonly primarySuggestions?: number;
+    readonly session?: AgentSession;
+    readonly suggestions?: readonly AssistantSuggestion[];
+    readonly transport?: AssistantTransport;
+    readonly transportKey?: string;
+}
+
+// @public
+export interface TableAssistantSnapshot {
+    readonly alwaysAllowed: readonly string[];
+    readonly approval: unknown;
+    readonly busy: boolean;
+    readonly canSend: boolean;
+    readonly canStop: boolean;
+    // (undocumented)
+    readonly draft: string;
+    readonly error: string | undefined;
+    // (undocumented)
+    readonly messages: readonly AssistantMessage[];
+    readonly moreSuggestions: readonly AssistantSuggestion[];
+    readonly pendingQuestion: AssistantQuestion | null;
+    // (undocumented)
+    readonly status: AssistantStatus;
+    readonly suggestions: readonly AssistantSuggestion[];
+    readonly undo: AssistantUndoOffer | null;
+}
+
+// @public
+export interface TableAssistantStore {
+    readonly answer: (answer: AssistantAnswer) => void;
+    readonly clear: () => void;
+    readonly connect: () => void;
+    readonly disconnect: () => void;
+    readonly dispose: () => void;
+    readonly getState: () => TableAssistantSnapshot;
+    readonly revokeAlwaysAllow: (capability: string) => void;
+    readonly runSuggestion: (id: string) => Promise<void>;
+    readonly send: (text?: string) => Promise<void>;
+    // (undocumented)
+    readonly setDraft: (draft: string) => void;
+    readonly stop: () => void;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly undoTurn: () => Promise<void>;
+    readonly update: (inputs: TableAssistantInputs) => void;
+}
+
+// @public
 export function turnStatus(receipts: readonly AssistantReceipt[]): AssistantTurnStatus;
+
+// @public
+export type UndoBlock = {
+    readonly code: "nothing-to-undo";
+} | {
+    readonly code: "cannot-restore";
+    readonly fields: readonly string[];
+} | {
+    readonly code: "table-moved";
+    readonly settledAt: number;
+    readonly now: number;
+};
+
+// @public
+export function undoBlocked(session: AgentSession, undo: AssistantUndo): UndoBlock | undefined;
+
+// @public
+export interface UndoCall {
+    // (undocumented)
+    readonly args: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly key: string;
+}
 
 // @public
 export function validateSchema(schema: JsonSchema, value: unknown, path?: string): string | undefined;
 
 // @public
+export interface VoiceOptions {
+    readonly languages?: readonly string[];
+    readonly mode?: SpeechMode;
+}
+
+// @public
+export interface WebMcpAnnotations {
+    readonly consequentialHint?: boolean;
+    readonly readOnlyHint?: boolean;
+    readonly untrustedContentHint?: boolean;
+}
+
+// @public
+export interface WebMcpContent {
+    // (undocumented)
+    readonly text: string;
+    // (undocumented)
+    readonly type: "text";
+}
+
+// @public
+export interface WebMcpOptions {
+    readonly exposedTo?: readonly string[];
+    readonly modelContext?: ModelContextLike;
+    readonly onWarning?: (warning: {
+        code: string;
+        message: string;
+    }) => void;
+}
+
+// @public
+export interface WebMcpRegistration {
+    readonly active: boolean;
+    readonly dispose: () => void;
+    readonly names: readonly string[];
+}
+
+// @public
+export interface WebMcpResult {
+    // (undocumented)
+    readonly content: readonly WebMcpContent[];
+    readonly isError?: boolean;
+}
+
+// @public
+export interface WebMcpTool {
+    // (undocumented)
+    readonly annotations: WebMcpAnnotations;
+    // (undocumented)
+    readonly description: string;
+    // (undocumented)
+    readonly execute: (params: unknown, context?: {
+        readonly signal?: AbortSignal;
+    }) => Promise<WebMcpResult>;
+    // (undocumented)
+    readonly inputSchema: unknown;
+    // (undocumented)
+    readonly name: string;
+}
+
+// @public
 export interface WriteExecuteResult {
     readonly applied: boolean;
     readonly approval: ApprovalOutcome;
+    readonly approvalReason?: string;
     readonly proposals: readonly WriteProposal[];
     readonly results?: readonly WriteRowResult[];
 }

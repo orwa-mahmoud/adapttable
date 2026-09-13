@@ -36,6 +36,39 @@ export function addFilterTreeCondition(tree: QueryFilterGroup | undefined, path:
 export function addFilterTreeGroup(tree: QueryFilterGroup | undefined, path: readonly number[]): QueryFilterGroup;
 
 // @public
+export type AgentApprovalDecision = "pending" | "approved" | "rejected";
+
+// @public
+export interface AgentApprovalOperation {
+    readonly arguments: unknown;
+    readonly capability: string;
+    readonly title?: string;
+}
+
+// @public
+export interface AgentApprovalPending {
+    readonly alwaysAllow?: () => void;
+    readonly approve: () => void;
+    readonly decideAt?: (index: number, approved: boolean) => void;
+    readonly decisions: readonly AgentApprovalDecision[];
+    readonly operation?: AgentApprovalOperation;
+    readonly presentation: ApprovalPresentation;
+    readonly proposals: readonly AgentApprovalProposal[];
+    readonly reject: (reason?: string) => void;
+}
+
+// @public
+export interface AgentApprovalProposal {
+    readonly after?: unknown;
+    readonly before?: unknown;
+    readonly beforeUnavailable?: boolean;
+    readonly column?: string;
+    readonly columnLabel?: string;
+    readonly rowKey: string;
+    readonly rowLabel?: string;
+}
+
+// @public
 export type Aggregatable<TValue = AggregateOrderedValue> = boolean | AggregatableConfig<TValue>;
 
 // @public
@@ -357,6 +390,9 @@ export interface BuildTreeEntriesOptions<TRow> extends TreeShape<TRow> {
 }
 
 // @public
+export const BUILTIN_AGGREGATE_LABELS: Readonly<Record<string, string>>;
+
+// @public
 export const builtInFilterSpecs: readonly FilterTypeSpec[];
 
 // @public
@@ -587,6 +623,13 @@ export const COLUMN_GROUP_STUB_WIDTH = 36;
 
 // @public
 export function columnAggregationSignature<TRow>(column: ColumnMetadata<TRow>): string;
+
+// @public
+export interface ColumnAiOptions {
+    description?: string;
+    examples?: readonly unknown[];
+    sample?: boolean;
+}
 
 // @public
 export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
@@ -825,6 +868,7 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 export interface ColumnModel<TRow = unknown> {
     accessor?: (row: TRow) => unknown;
     aggregatable?: Aggregatable;
+    ai?: ColumnAiOptions;
     align?: "start" | "center" | "end";
     colSpan?: number | ((row: TRow) => number);
     editable?: boolean | ((row: TRow) => boolean);
@@ -4042,7 +4086,13 @@ export interface TableLabels {
     approveAllProposals?: string;
     approveProposal?: string;
     approveRemainingProposals?: string;
+    assistantAlwaysAllowedRevoke?: (capability: string) => string;
+    assistantAlwaysAllowedTitle?: string;
+    assistantAnswerLabel?: string;
+    assistantAnswerPlaceholder?: string;
+    assistantAnswerSend?: string;
     assistantBackToTable?: string;
+    assistantCapabilityName?: (capability: string) => string | undefined;
     assistantClose?: string;
     assistantConnection?: (status: string) => string;
     assistantDetail?: string;
@@ -4072,6 +4122,12 @@ export interface TableLabels {
     assistantStop?: string;
     assistantTitle?: string;
     assistantUnavailable?: string;
+    assistantUndo?: string;
+    assistantUndoBlocked?: (code: string) => string | undefined;
+    assistantVoiceLanguage?: string;
+    assistantVoiceListening?: string;
+    assistantVoiceStart?: string;
+    assistantVoiceStop?: string;
     assistantYou?: string;
     autoSizeColumn?: string;
     autoSizeColumns?: string;

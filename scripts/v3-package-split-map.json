@@ -3,38 +3,6 @@
   "generatedFrom": "etc/api-contract.json",
   "symbols": [
     {
-      "export": "AssistantMessage",
-      "currentImport": "@adapttable/ai-react",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/ai-react",
-      "behavior": ""
-    },
-    {
-      "export": "AssistantStatus",
-      "currentImport": "@adapttable/ai-react",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/ai-react",
-      "behavior": ""
-    },
-    {
-      "export": "AssistantSuggestion",
-      "currentImport": "@adapttable/ai-react",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/ai-react",
-      "behavior": ""
-    },
-    {
-      "export": "SharedApproval",
-      "currentImport": "@adapttable/ai-react",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/ai-react",
-      "behavior": ""
-    },
-    {
       "export": "TABLE_AGENT_STATE",
       "currentImport": "@adapttable/ai-react",
       "kind": "value",
@@ -52,14 +20,6 @@
     },
     {
       "export": "TableAgentBridge",
-      "currentImport": "@adapttable/ai-react",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/ai-react",
-      "behavior": ""
-    },
-    {
-      "export": "TableAgentColumnPatch",
       "currentImport": "@adapttable/ai-react",
       "kind": "type",
       "class": "react-binding",
@@ -91,11 +51,2403 @@
       "behavior": ""
     },
     {
+      "export": "useSpeechInput",
+      "currentImport": "@adapttable/ai-react",
+      "kind": "value",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/ai-react",
+      "behavior": ""
+    },
+    {
+      "export": "UseSpeechInputOptions",
+      "currentImport": "@adapttable/ai-react",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/ai-react",
+      "behavior": ""
+    },
+    {
       "export": "useTableAssistant",
       "currentImport": "@adapttable/ai-react",
       "kind": "value",
       "class": "react-binding",
       "proposedImport": "@adapttable/ai-react",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentApply",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityContext",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityDefinition",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCellEdit",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumn",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumnAuthoring",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextInputs",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextOptions",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextProfile",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextView",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilter",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilterOption",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentLimits",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifest",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentObservation",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentPolicy",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentRowAddressing",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentSession",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiConnection",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiEvent",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiInterrupt",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiMessage",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiOptions",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiProtocolError",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiResume",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiResumeStatus",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiRunInput",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiRunOutcome",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgUiTool",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "aguiToolName",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "aguiTools",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "aguiTransport",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalOutcome",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalPolicy",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalResult",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalSubject",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantAnswer",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantExchange",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantQuestion",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantQuestionOption",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceiptSubject",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSuggestion",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTransport",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTransportReply",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantUnresolved",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityGuide",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPartial",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPlan",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPresentation",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityStaging",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "CatalogEntry",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "CommitPolicy",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteError",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteResult",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "JsonPatchOperation",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "JsonSchema",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "ResolvedRow",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "RowAddressScope",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "RowKeyRef",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "RowPositionRef",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "RowProvenanceEnvelope",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "RowReadQuery",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "RowRef",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindow",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindowRow",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "statePatch",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "WriteExecuteResult",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "WritePolicy",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "WriteProposal",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "WriteRowResult",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentApply",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityContext",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityDefinition",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCellEdit",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumn",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumnAuthoring",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextInputs",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextOptions",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextProfile",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextView",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilter",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilterOption",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentLimits",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifest",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentObservation",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentPolicy",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentRowAddressing",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentSession",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AI_SDK_STREAM_VERSION",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AiSdkApprovalResponse",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "aiSdkCapability",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AiSdkConnection",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AiSdkOptions",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AiSdkPart",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AiSdkProtocolError",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AiSdkRequest",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AiSdkTool",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "aiSdkToolName",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AiSdkToolOutput",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "aiSdkTools",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "aiSdkTransport",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalOutcome",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalPolicy",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalResult",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalSubject",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "assertAiSdkVersion",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantAnswer",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantExchange",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantQuestion",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantQuestionOption",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceiptSubject",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSuggestion",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTransport",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTransportReply",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantUnresolved",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityGuide",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPartial",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPlan",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPresentation",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityStaging",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "CatalogEntry",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "CommitPolicy",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteError",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteResult",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "JsonSchema",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "ResolvedRow",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "RowAddressScope",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "RowKeyRef",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "RowPositionRef",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "RowProvenanceEnvelope",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "RowReadQuery",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "RowRef",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindow",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindowRow",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "WriteExecuteResult",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "WritePolicy",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "WriteProposal",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "WriteRowResult",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentApply",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityContext",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityDefinition",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCellEdit",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumn",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumnAuthoring",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextInputs",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextView",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilter",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilterOption",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentLimits",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifest",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentObservation",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentPolicy",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentRowAddressing",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentSession",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalOutcome",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalPolicy",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalResult",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalSubject",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantAnswer",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantExchange",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantMessage",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantQuestion",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantQuestionOption",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceipt",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceiptStatus",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceiptSubject",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantStatus",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSuggestion",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTransport",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTransportReply",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTurnStatus",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantUndo",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantUndoOffer",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantUnresolved",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityGuide",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPartial",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPlan",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPresentation",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityStaging",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "CatalogEntry",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "CommitPolicy",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "createTableAssistant",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteError",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteResult",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "isUndoBlock",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "JsonSchema",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "planUndo",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "ResolvedRow",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "RowAddressScope",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "RowKeyRef",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "RowPositionRef",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "RowProvenanceEnvelope",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "RowReadQuery",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "RowRef",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindow",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindowRow",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "runUndo",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantInputs",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantSnapshot",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantStore",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "UndoBlock",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "undoBlocked",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "UndoCall",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "WriteExecuteResult",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "WritePolicy",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "WriteProposal",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "WriteRowResult",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentApply",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityContext",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityDefinition",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCellEdit",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumn",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumnAuthoring",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContext",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextContract",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextInputs",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextOptions",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextProfile",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextSelection",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextView",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilter",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilterOption",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "agentInstructions",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentInstructionsInput",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentLimits",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifest",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentObservation",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentPolicy",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentRowAddressing",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentSession",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalOutcome",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalPolicy",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalResult",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalSubject",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSuggestion",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "buildAgentContext",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityGuide",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPartial",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPlan",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPresentation",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityStaging",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "CatalogEntry",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "CommitPolicy",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "ContextCapability",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "ContextColumn",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "ContextIncludeError",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "contractVersion",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "DEFAULT_COMPACT_TOKENS",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "DeferralReason",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteError",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteResult",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "JsonSchema",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "matchesType",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "MAX_CONTEXT_BYTES",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "renderAgentContext",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "ResolvedRow",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "RowAddressScope",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "RowKeyRef",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "RowPositionRef",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "rowProvenance",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "RowProvenanceEnvelope",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "RowReadQuery",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "RowRef",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindow",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindowRow",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "SAMPLE_CAP",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "sampleColumns",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "sampleColumnValues",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "WriteExecuteResult",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "WritePolicy",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "WriteProposal",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "WriteRowResult",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AGENT_HTTP_LIMITS",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
       "behavior": ""
     },
     {
@@ -163,6 +2515,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "AgentCellEdit",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
@@ -172,6 +2532,70 @@
     },
     {
       "export": "AgentColumn",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumnAuthoring",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContext",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextContract",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextInputs",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextOptions",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextProfile",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextSelection",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextView",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
       "class": "neutral-model",
@@ -195,7 +2619,15 @@
       "behavior": ""
     },
     {
-      "export": "AgentHttpAction",
+      "export": "AgentHttpAnswer",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentHttpAudio",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
       "class": "neutral-model",
@@ -219,6 +2651,14 @@
       "behavior": ""
     },
     {
+      "export": "agentHttpJsonSchema",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "AgentHttpKind",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
@@ -235,7 +2675,23 @@
       "behavior": ""
     },
     {
-      "export": "AgentHttpNeeds",
+      "export": "AgentHttpPinAck",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentHttpQuestion",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentHttpQuestionOption",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
       "class": "neutral-model",
@@ -259,7 +2715,55 @@
       "behavior": ""
     },
     {
+      "export": "AgentHttpToolCall",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentHttpToolFailure",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentHttpToolResult",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentHttpToolValue",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "AgentHttpTurnResult",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentHttpUnresolved",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentInstructionsInput",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
       "class": "neutral-model",
@@ -315,6 +2819,30 @@
       "behavior": ""
     },
     {
+      "export": "AgentStreamError",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentStreamEvent",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentStreamEventKind",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "agentSystemPrompt",
       "currentImport": "@adapttable/ai/http",
       "kind": "value",
@@ -324,6 +2852,22 @@
     },
     {
       "export": "AgentSystemPromptInput",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentTurnError",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AgentWireLimits",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
       "class": "neutral-model",
@@ -411,9 +2955,25 @@
       "behavior": ""
     },
     {
+      "export": "AssistantUnresolved",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "CAPABILITY_KEYS",
       "currentImport": "@adapttable/ai/http",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai/http",
       "behavior": ""
@@ -491,10 +3051,66 @@
       "behavior": ""
     },
     {
+      "export": "ContextCapability",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "ContextColumn",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "contractFingerprint",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "createAgentHttpClient",
       "currentImport": "@adapttable/ai/http",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "createStreamReply",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "DEFAULT_PIN_CONNECTIONS",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "DEFAULT_PIN_TTL_MS",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "DeferralReason",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/ai/http",
       "behavior": ""
     },
@@ -515,9 +3131,33 @@
       "behavior": ""
     },
     {
+      "export": "isToolValue",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "JsonSchema",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "JsonSchemaDocument",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "MAX_STREAM_EVENTS",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai/http",
       "behavior": ""
@@ -535,6 +3175,38 @@
       "currentImport": "@adapttable/ai/http",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "parseStreamRecord",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "PhaseState",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "PinRecord",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "PinStatus",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/ai/http",
       "behavior": ""
     },
@@ -564,6 +3236,14 @@
     },
     {
       "export": "RowPositionRef",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "RowProvenanceEnvelope",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
       "class": "neutral-model",
@@ -607,6 +3287,14 @@
       "currentImport": "@adapttable/ai/http",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "splitRecords",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/ai/http",
       "behavior": ""
     },
@@ -699,6 +3387,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
       "export": "AgentCellEdit",
       "currentImport": "@adapttable/ai/json",
       "kind": "type",
@@ -708,6 +3404,14 @@
     },
     {
       "export": "AgentColumn",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumnAuthoring",
       "currentImport": "@adapttable/ai/json",
       "kind": "type",
       "class": "neutral-model",
@@ -830,6 +3534,14 @@
       "export": "CAPABILITY_KEYS",
       "currentImport": "@adapttable/ai/json",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai/json",
       "behavior": ""
@@ -995,6 +3707,14 @@
       "behavior": ""
     },
     {
+      "export": "RowProvenanceEnvelope",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
       "export": "RowReadQuery",
       "currentImport": "@adapttable/ai/json",
       "kind": "type",
@@ -1068,6 +3788,654 @@
     },
     {
       "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentApply",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityContext",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityDefinition",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCellEdit",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumn",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumnAuthoring",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilter",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilterOption",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentLimits",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifest",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentObservation",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentPolicy",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentRowAddressing",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentSession",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalOutcome",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalPolicy",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalResult",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalSubject",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "approveThroughHost",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "askThroughHost",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantAnswer",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantExchange",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantQuestion",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantQuestionOption",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceiptSubject",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSuggestion",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTransport",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTransportReply",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantUnresolved",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityGuide",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPartial",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPlan",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPresentation",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityStaging",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "CatalogEntry",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "CommitPolicy",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "createMcpAppBridge",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteError",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteResult",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "JsonSchema",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "MCP_APP_MIME",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppBridge",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppBridgeOptions",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppChannel",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "mcpAppCsp",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppElicitOption",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppElicitRequest",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppElicitResult",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppHostCapabilities",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "mcpAppResource",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppResource",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppResourceOptions",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppSecurity",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppToolInput",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "mcpAppToolMeta",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpAppToolOutcome",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "mcpAppUri",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpContent",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpTool",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpToolAnnotations",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "McpToolResult",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "ResolvedRow",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "RowAddressScope",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "RowKeyRef",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "RowPositionRef",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "RowProvenanceEnvelope",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "RowReadQuery",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "RowRef",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindow",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindowRow",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "withMcpAppMeta",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "WriteExecuteResult",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "WritePolicy",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "WriteProposal",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "WriteRowResult",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregateOperation",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "type",
       "class": "neutral-model",
@@ -1123,6 +4491,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
       "export": "AgentCellEdit",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "type",
@@ -1132,6 +4508,14 @@
     },
     {
       "export": "AgentColumn",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumnAuthoring",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "type",
       "class": "neutral-model",
@@ -1251,6 +4635,14 @@
       "behavior": ""
     },
     {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
       "export": "CapabilityGuide",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "type",
@@ -1347,9 +4739,25 @@
       "behavior": ""
     },
     {
+      "export": "McpContent",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
       "export": "mcpListChanged",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "McpListMeta",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai/mcp",
       "behavior": ""
@@ -1363,7 +4771,47 @@
       "behavior": ""
     },
     {
+      "export": "McpResourceList",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
       "export": "McpTool",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "McpToolAnnotations",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "McpToolList",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "mcpToolResult",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "McpToolResult",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "type",
       "class": "neutral-model",
@@ -1403,6 +4851,14 @@
       "behavior": ""
     },
     {
+      "export": "RowProvenanceEnvelope",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
       "export": "RowReadQuery",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "type",
@@ -1435,7 +4891,23 @@
       "behavior": ""
     },
     {
+      "export": "toMcpResourceList",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
       "export": "toMcpResources",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "toMcpToolList",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "value",
       "class": "neutral-operation",
@@ -1539,6 +5011,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
       "export": "AgentCellEdit",
       "currentImport": "@adapttable/ai/openai",
       "kind": "type",
@@ -1548,6 +5028,14 @@
     },
     {
       "export": "AgentColumn",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumnAuthoring",
       "currentImport": "@adapttable/ai/openai",
       "kind": "type",
       "class": "neutral-model",
@@ -1662,6 +5150,14 @@
       "export": "CAPABILITY_KEYS",
       "currentImport": "@adapttable/ai/openai",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai/openai",
       "behavior": ""
@@ -1843,6 +5339,14 @@
       "behavior": ""
     },
     {
+      "export": "RowProvenanceEnvelope",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
       "export": "RowReadQuery",
       "currentImport": "@adapttable/ai/openai",
       "kind": "type",
@@ -1923,6 +5427,534 @@
       "behavior": ""
     },
     {
+      "export": "createSpeechInput",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "readRememberedLanguage",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "rememberLanguage",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechClip",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechInput",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechInputOptions",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechMode",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechState",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechStatus",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "VoiceOptions",
+      "currentImport": "@adapttable/ai/voice",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/voice",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregateOperation",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationColumn",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregations",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAggregationsPatch",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentApply",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityContext",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityDefinition",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentCellEdit",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumn",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentColumnAuthoring",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilter",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentFilterOption",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentLimits",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifest",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentObservation",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentPolicy",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentRowAddressing",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentSession",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalOutcome",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalPolicy",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalResult",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalSubject",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSuggestion",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityGuide",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPartial",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPlan",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityPresentation",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityStaging",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "CatalogEntry",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "CommitPolicy",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteError",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "ExecuteResult",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "JsonSchema",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "ModelContextLike",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "registerWebMcpTools",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "ResolvedRow",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "RowAddressScope",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "RowKeyRef",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "RowPositionRef",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "RowProvenanceEnvelope",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "RowReadQuery",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "RowRef",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindow",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "RowWindowRow",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpAnnotations",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpContent",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpOptions",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpRegistration",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpResult",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpTool",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "WriteExecuteResult",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "WritePolicy",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "WriteProposal",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "WriteRowResult",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
       "export": "AGENT_SCHEMA_VERSION",
       "currentImport": "@adapttable/ai",
       "kind": "value",
@@ -1987,6 +6019,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentCapabilityKind",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "AgentCellEdit",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -2003,9 +6043,73 @@
       "behavior": ""
     },
     {
+      "export": "AgentColumnAuthoring",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "agentColumnsFromNeutral",
       "currentImport": "@adapttable/ai",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContext",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextContract",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextInputs",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextOptions",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextProfile",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextSelection",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentContextView",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
@@ -2030,6 +6134,30 @@
       "export": "agentFiltersFromDefs",
       "currentImport": "@adapttable/ai",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentHttpPinAck",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentHttpResponse",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentHttpToolCall",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
@@ -2083,6 +6211,86 @@
       "behavior": ""
     },
     {
+      "export": "AgentStreamError",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentStreamEvent",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentStreamEventKind",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AggregationInputs",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "aggregationsFor",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AggregationState",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AlwaysAllowInput",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "applyAggregations",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalAlwaysAllowError",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalMemory",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "ApprovalOutcome",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -2115,6 +6323,22 @@
       "behavior": ""
     },
     {
+      "export": "ApprovalTransaction",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "assertAlwaysAllow",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "assertUniqueSuggestions",
       "currentImport": "@adapttable/ai",
       "kind": "value",
@@ -2131,6 +6355,14 @@
       "behavior": ""
     },
     {
+      "export": "AssistantAnswer",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "AssistantConversation",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -2140,6 +6372,14 @@
     },
     {
       "export": "AssistantExchange",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantMessage",
       "currentImport": "@adapttable/ai",
       "kind": "type",
       "class": "neutral-model",
@@ -2179,6 +6419,22 @@
       "behavior": ""
     },
     {
+      "export": "AssistantQuestion",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantQuestionOption",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "AssistantReceipt",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -2204,6 +6460,14 @@
     },
     {
       "export": "AssistantRequest",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantStatus",
       "currentImport": "@adapttable/ai",
       "kind": "type",
       "class": "neutral-model",
@@ -2251,6 +6515,62 @@
       "behavior": ""
     },
     {
+      "export": "AssistantUndo",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantUndoOffer",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantUnresolved",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "BindingOperations",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "BindingQuery",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "BindingSnapshot",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "buildAgentContext",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "buildManifest",
       "currentImport": "@adapttable/ai",
       "kind": "value",
@@ -2262,6 +6582,14 @@
       "export": "CAPABILITY_KEYS",
       "currentImport": "@adapttable/ai",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityFamily",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
@@ -2323,9 +6651,57 @@
       "behavior": ""
     },
     {
+      "export": "closeTransaction",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "CommitPolicy",
       "currentImport": "@adapttable/ai",
       "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "ContextCapability",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "ContextColumn",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "ContextIncludeError",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "contractFingerprint",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "contractVersion",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
@@ -2342,6 +6718,126 @@
       "export": "CreateAgentSessionOptions",
       "currentImport": "@adapttable/ai",
       "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "createApprovalMemory",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "createDiscoveryCache",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "createSpeechInput",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "createStreamReply",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "createTableAssistant",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "DEFAULT_CACHE_GUIDES",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "DEFAULT_CACHE_VERSIONS",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "DEFAULT_COMPACT_TOKENS",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "DeferralReason",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "discover",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "DiscoveryCache",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "DiscoveryRequest",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "DiscoveryResult",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "DiscoverySource",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "displayProposals",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
@@ -2379,6 +6875,14 @@
       "behavior": ""
     },
     {
+      "export": "familyOf",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "FilterCatalogColumnPatch",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -2395,6 +6899,14 @@
       "behavior": ""
     },
     {
+      "export": "isUndoBlock",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "JsonSchema",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -2404,6 +6916,38 @@
     },
     {
       "export": "LiveObservationOptions",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "MAX_FAMILY_GUIDES",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "MAX_STREAM_EVENTS",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "mayAlwaysAllow",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "ModelContextLike",
       "currentImport": "@adapttable/ai",
       "kind": "type",
       "class": "neutral-model",
@@ -2443,6 +6987,62 @@
       "behavior": ""
     },
     {
+      "export": "openTransaction",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "parseStreamRecord",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "PendingApproval",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "PinStatus",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "planUndo",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "ProposalResolver",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "readRememberedLanguage",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "readRowsFromNeutral",
       "currentImport": "@adapttable/ai",
       "kind": "value",
@@ -2460,6 +7060,38 @@
     },
     {
       "export": "receiptsFromResults",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "recordDecision",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "registerWebMcpTools",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "rememberLanguage",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "resolveApproval",
       "currentImport": "@adapttable/ai",
       "kind": "value",
       "class": "neutral-model",
@@ -2491,14 +7123,6 @@
       "behavior": ""
     },
     {
-      "export": "revisionToken",
-      "currentImport": "@adapttable/ai",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/ai",
-      "behavior": ""
-    },
-    {
       "export": "RowAddressScope",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -2516,6 +7140,22 @@
     },
     {
       "export": "RowPositionRef",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "rowProvenance",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "RowProvenanceEnvelope",
       "currentImport": "@adapttable/ai",
       "kind": "type",
       "class": "neutral-model",
@@ -2555,6 +7195,22 @@
       "behavior": ""
     },
     {
+      "export": "runUndo",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "settleDecisions",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "sharedApproval",
       "currentImport": "@adapttable/ai",
       "kind": "value",
@@ -2571,10 +7227,74 @@
       "behavior": ""
     },
     {
+      "export": "SpeechClip",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechInput",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechInputOptions",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechMode",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechState",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechStatus",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "splitRecords",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "summaryOf",
       "currentImport": "@adapttable/ai",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "TableAgentBridge",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "react-binding",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
     },
@@ -2587,9 +7307,57 @@
       "behavior": ""
     },
     {
+      "export": "TableAssistantInputs",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantSnapshot",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantStore",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "turnStatus",
       "currentImport": "@adapttable/ai",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "UndoBlock",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "undoBlocked",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "UndoCall",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
@@ -2599,6 +7367,62 @@
       "currentImport": "@adapttable/ai",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "VoiceOptions",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpAnnotations",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpContent",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpOptions",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpRegistration",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpResult",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "WebMcpTool",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/ai",
       "behavior": ""
     },
@@ -6475,6 +11299,14 @@
       "behavior": ""
     },
     {
+      "export": "ColumnAiOptions",
+      "currentImport": "@adapttable/core/formula",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/formula",
+      "behavior": ""
+    },
+    {
       "export": "ColumnGroupShow",
       "currentImport": "@adapttable/core/formula",
       "kind": "type",
@@ -6828,6 +11660,14 @@
     },
     {
       "export": "CellProps",
+      "currentImport": "@adapttable/core/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "ColumnAiOptions",
       "currentImport": "@adapttable/core/pdf",
       "kind": "type",
       "class": "neutral-model",
@@ -7191,6 +12031,14 @@
       "currentImport": "@adapttable/core/pivot",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/pivot",
+      "behavior": ""
+    },
+    {
+      "export": "ColumnAiOptions",
+      "currentImport": "@adapttable/core/pivot",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/pivot",
       "behavior": ""
     },
@@ -7923,6 +12771,14 @@
       "behavior": ""
     },
     {
+      "export": "ColumnAiOptions",
+      "currentImport": "@adapttable/core/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/xlsx",
+      "behavior": ""
+    },
+    {
       "export": "ColumnFilter",
       "currentImport": "@adapttable/core/xlsx",
       "kind": "type",
@@ -8199,6 +13055,38 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AgentApprovalDecision",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AgentApprovalOperation",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AgentApprovalPending",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AgentApprovalProposal",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -8691,6 +13579,14 @@
       "behavior": ""
     },
     {
+      "export": "BUILTIN_AGGREGATE_LABELS",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "builtInFilterSpecs",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -9039,6 +13935,14 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ColumnAiOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -18771,6 +23675,14 @@
       "behavior": ""
     },
     {
+      "export": "AGENT_ALWAYS_ALLOW_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "AGENT_APPROVAL",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -18782,6 +23694,22 @@
       "export": "AGENT_APPROVAL_STATE",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "AGENT_VIEW_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "AgentAlwaysAllowState",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
       "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
@@ -18811,42 +23739,10 @@
       "behavior": ""
     },
     {
-      "export": "AgentApprovalDecision",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "AgentApprovalListProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalOperation",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalPending",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalProposal",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -18863,6 +23759,14 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "AgentViewState",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -19220,14 +24124,6 @@
     },
     {
       "export": "ChecklistSlots",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
-      "export": "ChecklistValue",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
@@ -22587,6 +27483,30 @@
       "behavior": ""
     },
     {
+      "export": "SpeechInputHandle",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechInputState",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "SpeechInputStatus",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "StandardFeatureOptions",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -22747,6 +27667,14 @@
       "behavior": ""
     },
     {
+      "export": "TableAssistantLanguageChipProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "TableAssistantMessageView",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -22772,6 +27700,22 @@
     },
     {
       "export": "TableAssistantProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantQuestionOption",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantQuestionView",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",
@@ -22820,6 +27764,14 @@
     },
     {
       "export": "TableAssistantSuggestionView",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantUndoView",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",

@@ -41,12 +41,20 @@ export function assignField(config: PivotConfig, key: string, zone: PivotZone, i
 export function availableFields(fields: readonly PivotField[], config: PivotConfig): PivotField[];
 
 // @public
+export interface ColumnAiOptions {
+    description?: string;
+    examples?: readonly unknown[];
+    sample?: boolean;
+}
+
+// @public
 export type ColumnGroupShow = "open" | "closed" | "always";
 
 // @public
 export interface ColumnModel<TRow = unknown> {
     accessor?: (row: TRow) => unknown;
     aggregatable?: Aggregatable;
+    ai?: ColumnAiOptions;
     align?: "start" | "center" | "end";
     colSpan?: number | ((row: TRow) => number);
     editable?: boolean | ((row: TRow) => boolean);

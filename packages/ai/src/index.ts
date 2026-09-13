@@ -225,3 +225,12 @@ export {
   type WebMcpResult,
   type WebMcpTool,
 } from "./webmcp";
+// Named by signatures this entry already exports: a selection says why a guide
+// was deferred, and the HTTP helpers return the reply shape.
+export type { DeferralReason } from "./contextSelection";
+export type {
+  AgentHttpPinAck,
+  AgentHttpResponse,
+  AgentHttpToolCall,
+  PinStatus,
+} from "./http";

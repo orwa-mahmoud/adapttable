@@ -194,3 +194,62 @@ export function rowProvenance(
 ): RowProvenanceEnvelope {
   return { source: "table-rows", untrusted: true, revision, rows };
 }
+
+// Named by the signatures above: the session a context is built from, the row
+// window and envelope `rowProvenance` returns, and the catalog shapes a
+// rendered context quotes. A reader writing a helper of their own needs them.
+export type { DeferralReason } from "./contextSelection";
+export type {
+  AgentAggregateOperation,
+  AgentAggregationColumn,
+  AgentAggregations,
+  AgentAggregationsPatch,
+  AgentApply,
+  AgentCapabilityContext,
+  AgentCapabilityDefinition,
+  AgentCapabilityKind,
+  AgentCellEdit,
+  AgentColumn,
+  AgentColumnAuthoring,
+  AgentFilter,
+  AgentFilterOption,
+  AgentLimits,
+  AgentManifest,
+  AgentObservation,
+  AgentPolicy,
+  AgentRowAddressing,
+  AgentSession,
+  ApprovalOutcome,
+  ApprovalResult,
+  ApprovalSubject,
+  CapabilityFamily,
+  CapabilityGuide,
+  CapabilityPartial,
+  CapabilityPlan,
+  CapabilityStaging,
+  CatalogEntry,
+  ExecuteError,
+  ExecuteResult,
+  JsonSchema,
+  ResolvedRow,
+  RowKeyRef,
+  RowPositionRef,
+  RowProvenanceEnvelope,
+  RowReadQuery,
+  RowRef,
+  RowWindow,
+  RowWindowRow,
+  WriteExecuteResult,
+  WriteProposal,
+  WriteRowResult,
+} from "./types";
+export type {
+  AssistantSuggestion,
+  CapabilityPresentation,
+} from "./assistantContracts";
+export type {
+  ApprovalPolicy,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";

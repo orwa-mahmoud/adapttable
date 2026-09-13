@@ -30,6 +30,29 @@ function isTypedSubpath(key) {
 }
 
 /**
+ * The declaration file a subpath resolves to, as the package itself declares.
+ *
+ * Read rather than derived from the subpath, because a subpath need not be
+ * spelled like the module behind it: `./ag-ui` is built from `agui.ts`,
+ * `./ai-sdk` from `aiSdk.ts` and `./mcp-apps` from `mcpApps.ts`. A name guessed
+ * from the key finds no file for any of them, and an entry point whose
+ * declaration cannot be found is an entry point with no report — which is the
+ * one thing this list exists to prevent.
+ */
+function typesTarget(value) {
+  if (typeof value === "string")
+    return value.endsWith(".d.ts") ? value : undefined;
+  if (value === null || typeof value !== "object") return undefined;
+  for (const condition of ["types", "import", "require", "default"]) {
+    if (condition in value) {
+      const found = typesTarget(value[condition]);
+      if (found !== undefined) return found;
+    }
+  }
+  return undefined;
+}
+
+/**
  * `{ dir, subpath, isMainEntry, report, entry, published }` for every typed entry
  * point, package by package, subpath sorted.
  *
@@ -61,7 +84,12 @@ export function entrypoints() {
           key === "."
             ? `${dir}.api.md`
             : `${dir}-${name.replaceAll("/", "-")}.api.md`,
-        entry: join(PACKAGES_DIR, dir, "dist", `${name}.d.ts`),
+        entry: join(
+          PACKAGES_DIR,
+          dir,
+          typesTarget(manifest.exports?.[key])?.replace(/^\.\//, "") ??
+            join("dist", `${name}.d.ts`)
+        ),
       });
     }
   }

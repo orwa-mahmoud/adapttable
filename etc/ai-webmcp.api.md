@@ -266,9 +266,6 @@ export interface AssistantSuggestion {
 }
 
 // @public
-export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setAggregations", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
-
-// @public
 export interface CapabilityFamily {
     readonly dependsOn?: readonly string[];
     readonly family?: string;
@@ -283,9 +280,6 @@ export interface CapabilityGuide {
     readonly schemaVersion: string;
     readonly short?: string;
 }
-
-// @public
-export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
 // @public
 export type CapabilityPartial = "supported" | "unsupported";
@@ -326,9 +320,6 @@ export interface ExecuteError {
 }
 
 // @public
-export function executeMcpTool(session: AgentSession, name: string, args: unknown, expectedRevision: number, idempotencyKey: string): Promise<ExecuteResult>;
-
-// @public
 export interface ExecuteResult {
     readonly error?: ExecuteError;
     readonly idempotencyKey: string;
@@ -354,73 +345,15 @@ export interface JsonSchema {
 }
 
 // @public
-export interface McpContent {
+export interface ModelContextLike {
     // (undocumented)
-    readonly text: string;
+    readonly registerTool: (tool: WebMcpTool) => void | (() => void);
     // (undocumented)
-    readonly type: "text";
+    readonly unregisterTool?: (name: string) => void;
 }
 
 // @public
-export function mcpListChanged(prev: AgentManifest, next: AgentManifest): boolean;
-
-// @public
-export interface McpListMeta {
-    readonly cacheScope: string;
-    readonly ttlMs: number;
-}
-
-// @public
-export interface McpResource {
-    readonly description: string;
-    readonly mimeType: "application/json";
-    readonly name: string;
-    readonly text: string;
-    readonly uri: string;
-}
-
-// @public
-export interface McpResourceList {
-    // (undocumented)
-    readonly _meta: McpListMeta;
-    // (undocumented)
-    readonly resources: readonly McpResource[];
-}
-
-// @public
-export interface McpTool {
-    readonly annotations: McpToolAnnotations;
-    readonly description: string;
-    readonly inputSchema: JsonSchema;
-    readonly _meta?: Readonly<Record<string, unknown>>;
-    readonly name: string;
-}
-
-// @public
-export interface McpToolAnnotations {
-    readonly destructiveHint: boolean;
-    readonly idempotentHint: boolean;
-    readonly openWorldHint: false;
-    readonly readOnlyHint: boolean;
-}
-
-// @public
-export interface McpToolList {
-    // (undocumented)
-    readonly _meta: McpListMeta;
-    // (undocumented)
-    readonly tools: readonly McpTool[];
-}
-
-// @public
-export interface McpToolResult {
-    // (undocumented)
-    readonly content: readonly McpContent[];
-    readonly isError?: boolean;
-}
-
-// @public
-export function mcpToolResult(result: ExecuteResult): McpToolResult;
+export function registerWebMcpTools(session: AgentSession, options?: WebMcpOptions): WebMcpRegistration;
 
 // @public
 export interface ResolvedRow {
@@ -480,16 +413,59 @@ export interface RowWindowRow {
 }
 
 // @public
-export function toMcpResourceList(session: AgentSession): McpResourceList;
+export interface WebMcpAnnotations {
+    readonly consequentialHint?: boolean;
+    readonly readOnlyHint?: boolean;
+    readonly untrustedContentHint?: boolean;
+}
 
 // @public
-export function toMcpResources(session: AgentSession): readonly McpResource[];
+export interface WebMcpContent {
+    // (undocumented)
+    readonly text: string;
+    // (undocumented)
+    readonly type: "text";
+}
 
 // @public
-export function toMcpToolList(session: AgentSession): McpToolList;
+export interface WebMcpOptions {
+    readonly exposedTo?: readonly string[];
+    readonly modelContext?: ModelContextLike;
+    readonly onWarning?: (warning: {
+        code: string;
+        message: string;
+    }) => void;
+}
 
 // @public
-export function toMcpTools(session: AgentSession): readonly McpTool[];
+export interface WebMcpRegistration {
+    readonly active: boolean;
+    readonly dispose: () => void;
+    readonly names: readonly string[];
+}
+
+// @public
+export interface WebMcpResult {
+    // (undocumented)
+    readonly content: readonly WebMcpContent[];
+    readonly isError?: boolean;
+}
+
+// @public
+export interface WebMcpTool {
+    // (undocumented)
+    readonly annotations: WebMcpAnnotations;
+    // (undocumented)
+    readonly description: string;
+    // (undocumented)
+    readonly execute: (params: unknown, context?: {
+        readonly signal?: AbortSignal;
+    }) => Promise<WebMcpResult>;
+    // (undocumented)
+    readonly inputSchema: unknown;
+    // (undocumented)
+    readonly name: string;
+}
 
 // @public
 export interface WriteExecuteResult {

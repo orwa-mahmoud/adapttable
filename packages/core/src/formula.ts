@@ -66,3 +66,4 @@ export type {
   ColumnModelFilter,
 } from "./columnModel";
 export type { DisplayValue } from "./display";
+export type { ColumnAiOptions } from "./columnModel";

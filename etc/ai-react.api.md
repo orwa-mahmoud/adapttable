@@ -7,35 +7,37 @@
 import { AgentApply } from '@adapttable/ai';
 import { AgentApprovalPending } from '@adapttable/react/adapter';
 import { AgentCapabilityDefinition } from '@adapttable/ai';
-import { AgentManifest } from '@adapttable/ai';
+import { AgentContextInputs } from '@adapttable/ai';
 import { AgentObservation } from '@adapttable/ai';
 import { AgentSession } from '@adapttable/ai';
 import { ApprovalResult } from '@adapttable/ai';
 import { ApprovalSubject } from '@adapttable/ai';
-import { AssistantReceipt } from '@adapttable/ai';
+import { AssistantAnswer } from '@adapttable/ai';
+import { AssistantMessage } from '@adapttable/ai';
+import { AssistantQuestion } from '@adapttable/ai';
+import { AssistantStatus } from '@adapttable/ai';
 import { AssistantSuggestion } from '@adapttable/ai';
 import { AssistantTransport } from '@adapttable/ai';
-import { AssistantTurnStatus } from '@adapttable/ai';
 import { CommitPolicy } from '@adapttable/ai';
 import { FeatureStateKey } from '@adapttable/react/adapter';
 import { SharedApproval } from '@adapttable/ai';
+import { SpeechClip } from '@adapttable/ai/voice';
+import { SpeechInputHandle } from '@adapttable/react/adapter';
 import { StaticTableFeature } from '@adapttable/react/adapter';
+import { TableAgentBridge as TableAgentBridge_2 } from '@adapttable/ai';
 import { TableAgentColumnPatch } from '@adapttable/ai';
+import { TableAssistantSnapshot } from '@adapttable/ai';
+import { TableAssistantStore } from '@adapttable/ai';
+import { VoiceOptions } from '@adapttable/ai/voice';
 import { WritePolicy } from '@adapttable/ai';
 
-// @public
-export interface AssistantMessage {
-    readonly at: number;
-    readonly id: string;
-    readonly outcome?: AssistantTurnStatus;
-    readonly receipts?: readonly AssistantReceipt[];
-    // (undocumented)
-    readonly role: "user" | "assistant";
-    readonly text: string;
-}
+export { AssistantAnswer }
 
-// @public
-export type AssistantStatus = "idle" | "connecting" | "ready" | "sending" | "awaiting-approval" | "error" | "disconnected";
+export { AssistantMessage }
+
+export { AssistantQuestion }
+
+export { AssistantStatus }
 
 export { AssistantSuggestion }
 
@@ -47,12 +49,8 @@ export const TABLE_AGENT_STATE: FeatureStateKey<AgentSession>;
 // @public
 export function tableAgent(options: TableAgentOptions): StaticTableFeature;
 
-// @public
-export interface TableAgentBridge {
-    readonly approvals?: (pending: AgentApprovalPending | null) => void;
-    attach?(session: AgentSession): void;
-    publish?(manifest: AgentManifest): void;
-}
+// @public (undocumented)
+export type TableAgentBridge = TableAgentBridge_2<AgentApprovalPending>;
 
 export { TableAgentColumnPatch }
 
@@ -64,16 +62,22 @@ export interface TableAgentOptions {
     readonly capabilities?: readonly AgentCapabilityDefinition[];
     readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
     readonly commit?: CommitPolicy;
+    readonly excludeCapabilities?: readonly string[];
     readonly observe?: () => AgentObservation;
     readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     readonly readMax?: number;
     readonly tableId: string;
+    readonly webmcp?: true | {
+        readonly exposedTo?: readonly string[];
+        readonly onRegister?: (names: readonly string[]) => void;
+    };
     readonly writePolicy?: WritePolicy;
 }
 
 // @public
 export interface TableAssistantOptions {
     readonly awaitingApproval?: boolean;
+    readonly contextInputs?: () => AgentContextInputs;
     readonly onOpenChange?: (open: boolean) => void;
     readonly open?: boolean;
     readonly primarySuggestions?: number;
@@ -83,8 +87,15 @@ export interface TableAssistantOptions {
     readonly transportKey?: string;
 }
 
+export { TableAssistantSnapshot }
+
 // @public
 export interface TableAssistantState {
+    readonly alwaysAllowed: readonly string[];
+    readonly answer: (answer: {
+        optionId?: string;
+        text?: string;
+    }) => void;
     readonly approval: AgentApprovalPending | null;
     readonly busy: boolean;
     readonly clear: () => void;
@@ -96,6 +107,8 @@ export interface TableAssistantState {
     readonly moreSuggestions: readonly AssistantSuggestion[];
     // (undocumented)
     readonly open: boolean;
+    readonly pendingQuestion: AssistantQuestion | null;
+    readonly revokeAlwaysAllow: (capability: string) => void;
     readonly runSuggestion: (id: string) => Promise<void>;
     readonly send: (text?: string) => Promise<void>;
     // (undocumented)
@@ -106,6 +119,26 @@ export interface TableAssistantState {
     readonly status: AssistantStatus;
     readonly stop: () => void;
     readonly suggestions: readonly AssistantSuggestion[];
+    readonly undo: {
+        readonly messageId: string;
+        readonly available: boolean;
+        readonly blockedCode?: string;
+    } | null;
+    readonly undoTurn: () => Promise<void>;
+}
+
+export { TableAssistantStore }
+
+// @public
+export function useSpeechInput(options: UseSpeechInputOptions): SpeechInputHandle;
+
+// @public
+export interface UseSpeechInputOptions {
+    readonly locale?: string;
+    readonly onClip?: (clip: SpeechClip) => void;
+    readonly setDraft: (text: string) => void;
+    // (undocumented)
+    readonly voice?: VoiceOptions;
 }
 
 // @public

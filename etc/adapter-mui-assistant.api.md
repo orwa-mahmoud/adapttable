@@ -8,7 +8,7 @@ import { JSX } from 'react';
 import { StaticTableFeature } from '@adapttable/react';
 import { TableAssistantProps } from '@adapttable/react/adapter';
 
-// @public
+// @public (undocumented)
 export function TableAssistant(props: Readonly<TableAssistantProps>): JSX.Element;
 
 // @public

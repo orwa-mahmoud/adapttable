@@ -2134,3 +2134,16 @@ export function assistantHttpTransport(
     },
   };
 }
+
+// The request builders take and return these, so the wire entry names them
+// rather than sending a reader to the root entry for the type of an argument
+// it already accepts.
+export type {
+  AgentContext,
+  AgentContextInputs,
+  AgentContextOptions,
+  ContextCapability,
+  ContextColumn,
+} from "./context";
+export type { AgentInstructionsInput } from "./contextPrompt";
+export type { AgentContextProfile, DeferralReason } from "./contextSelection";

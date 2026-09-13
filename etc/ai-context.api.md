@@ -128,6 +128,107 @@ export interface AgentColumnAuthoring {
 }
 
 // @public
+export interface AgentContext {
+    readonly contract: AgentContextContract;
+    readonly selection: AgentContextSelection;
+    readonly view: AgentContextView;
+}
+
+// @public
+export interface AgentContextContract {
+    // (undocumented)
+    readonly aggregations?: AgentAggregations;
+    // (undocumented)
+    readonly capabilities: readonly ContextCapability[];
+    // (undocumented)
+    readonly columns: readonly ContextColumn[];
+    // (undocumented)
+    readonly filters: readonly AgentFilter[];
+    // (undocumented)
+    readonly limits: AgentManifest["limits"];
+    // (undocumented)
+    readonly policy: AgentManifest["policy"];
+    // (undocumented)
+    readonly rowAddressing: AgentManifest["rowAddressing"];
+    // (undocumented)
+    readonly source: AgentManifest["source"];
+    // (undocumented)
+    readonly tableId: string;
+    readonly version: string;
+}
+
+// @public
+export interface AgentContextInputs {
+    readonly aggregations?: AgentAggregations;
+    readonly filters?: readonly AgentFilter[];
+    readonly samples?: Readonly<Record<string, readonly unknown[]>>;
+    readonly view?: {
+        readonly page?: number;
+        readonly limit?: number;
+        readonly search?: string;
+        readonly sortBy?: string;
+        readonly sortDir?: "asc" | "desc";
+        readonly groupBy?: string;
+        readonly filters?: Readonly<Record<string, unknown>>;
+        readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+        readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    };
+}
+
+// @public
+export interface AgentContextOptions {
+    readonly estimateTokens?: (text: string) => number;
+    readonly include?: readonly string[];
+    readonly priority?: readonly string[];
+    readonly profile?: AgentContextProfile;
+    readonly tokenBudget?: number;
+}
+
+// @public
+export type AgentContextProfile = "compact" | "full";
+
+// @public
+export interface AgentContextSelection {
+    readonly contractBytes: number;
+    readonly deferred: readonly {
+        readonly key: string;
+        readonly reason: DeferralReason;
+    }[];
+    readonly estimated: boolean;
+    readonly estimatedTokens: number;
+    readonly notes?: readonly string[];
+    // (undocumented)
+    readonly profile: AgentContextProfile;
+    readonly selected: readonly string[];
+    readonly version: string;
+    readonly viewBytes: number;
+}
+
+// @public
+export interface AgentContextView {
+    readonly filters?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly groupBy?: string;
+    // (undocumented)
+    readonly limit: number;
+    // (undocumented)
+    readonly page: number;
+    // (undocumented)
+    readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly revision: number;
+    // (undocumented)
+    readonly search: string;
+    // (undocumented)
+    readonly sortBy?: string;
+    // (undocumented)
+    readonly sortDir?: "asc" | "desc";
+    readonly unknown?: readonly string[];
+}
+
+// @public
 export interface AgentFilter {
     readonly defaultOperator: string;
     readonly key: string;
@@ -143,6 +244,15 @@ export interface AgentFilter {
 export interface AgentFilterOption {
     readonly label: string;
     readonly value: string;
+}
+
+// @public
+export function agentInstructions(input?: AgentInstructionsInput): string;
+
+// @public
+export interface AgentInstructionsInput {
+    readonly instructions?: string;
+    readonly locale?: string;
 }
 
 // @public
@@ -266,7 +376,7 @@ export interface AssistantSuggestion {
 }
 
 // @public
-export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setAggregations", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
+export function buildAgentContext(session: AgentSession, options?: AgentContextOptions, inputs?: AgentContextInputs): AgentContext;
 
 // @public
 export interface CapabilityFamily {
@@ -283,9 +393,6 @@ export interface CapabilityGuide {
     readonly schemaVersion: string;
     readonly short?: string;
 }
-
-// @public
-export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
 // @public
 export type CapabilityPartial = "supported" | "unsupported";
@@ -320,13 +427,57 @@ export interface CatalogEntry {
 export type CommitPolicy = "stage" | "immediate";
 
 // @public
+export interface ContextCapability {
+    readonly guide?: string;
+    readonly input?: JsonSchema;
+    // (undocumented)
+    readonly key: string;
+    readonly output?: JsonSchema;
+    readonly summary: string;
+    readonly summaryShort?: string;
+}
+
+// @public
+export interface ContextColumn {
+    readonly description?: string;
+    readonly examples?: readonly unknown[];
+    // (undocumented)
+    readonly id: string;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly pinnable?: boolean;
+    readonly readable: boolean;
+    readonly sampled?: true;
+    // (undocumented)
+    readonly sortable: boolean;
+    // (undocumented)
+    readonly type: string;
+    readonly visible?: boolean;
+    readonly writable: boolean;
+}
+
+// @public
+export class ContextIncludeError extends Error {
+    constructor(keys: readonly string[]);
+    // (undocumented)
+    readonly code = "include-unavailable";
+}
+
+// @public
+export function contractVersion(contract: AgentContextContract): string;
+
+// @public
+export const DEFAULT_COMPACT_TOKENS = 1000;
+
+// @public
+export type DeferralReason = "budget" | "hard-limit";
+
+// @public
 export interface ExecuteError {
     readonly code: string;
     readonly message: string;
 }
-
-// @public
-export function executeMcpTool(session: AgentSession, name: string, args: unknown, expectedRevision: number, idempotencyKey: string): Promise<ExecuteResult>;
 
 // @public
 export interface ExecuteResult {
@@ -354,73 +505,13 @@ export interface JsonSchema {
 }
 
 // @public
-export interface McpContent {
-    // (undocumented)
-    readonly text: string;
-    // (undocumented)
-    readonly type: "text";
-}
+export function matchesType(value: unknown, type: string): boolean;
 
 // @public
-export function mcpListChanged(prev: AgentManifest, next: AgentManifest): boolean;
+export const MAX_CONTEXT_BYTES = 128000;
 
 // @public
-export interface McpListMeta {
-    readonly cacheScope: string;
-    readonly ttlMs: number;
-}
-
-// @public
-export interface McpResource {
-    readonly description: string;
-    readonly mimeType: "application/json";
-    readonly name: string;
-    readonly text: string;
-    readonly uri: string;
-}
-
-// @public
-export interface McpResourceList {
-    // (undocumented)
-    readonly _meta: McpListMeta;
-    // (undocumented)
-    readonly resources: readonly McpResource[];
-}
-
-// @public
-export interface McpTool {
-    readonly annotations: McpToolAnnotations;
-    readonly description: string;
-    readonly inputSchema: JsonSchema;
-    readonly _meta?: Readonly<Record<string, unknown>>;
-    readonly name: string;
-}
-
-// @public
-export interface McpToolAnnotations {
-    readonly destructiveHint: boolean;
-    readonly idempotentHint: boolean;
-    readonly openWorldHint: false;
-    readonly readOnlyHint: boolean;
-}
-
-// @public
-export interface McpToolList {
-    // (undocumented)
-    readonly _meta: McpListMeta;
-    // (undocumented)
-    readonly tools: readonly McpTool[];
-}
-
-// @public
-export interface McpToolResult {
-    // (undocumented)
-    readonly content: readonly McpContent[];
-    readonly isError?: boolean;
-}
-
-// @public
-export function mcpToolResult(result: ExecuteResult): McpToolResult;
+export function renderAgentContext(context: AgentContext): string;
 
 // @public
 export interface ResolvedRow {
@@ -443,6 +534,9 @@ export interface RowPositionRef {
     readonly position: number;
     readonly scope: RowAddressScope;
 }
+
+// @public
+export function rowProvenance(rows: RowWindow, revision: number): RowProvenanceEnvelope;
 
 // @public
 export interface RowProvenanceEnvelope {
@@ -480,16 +574,13 @@ export interface RowWindowRow {
 }
 
 // @public
-export function toMcpResourceList(session: AgentSession): McpResourceList;
+export const SAMPLE_CAP = 5;
 
 // @public
-export function toMcpResources(session: AgentSession): readonly McpResource[];
+export function sampleColumns(session: AgentSession, wanted: readonly string[], signal?: AbortSignal): Promise<Readonly<Record<string, readonly unknown[]>>>;
 
 // @public
-export function toMcpToolList(session: AgentSession): McpToolList;
-
-// @public
-export function toMcpTools(session: AgentSession): readonly McpTool[];
+export function sampleColumnValues(session: AgentSession, key: string, signal?: AbortSignal): Promise<readonly unknown[]>;
 
 // @public
 export interface WriteExecuteResult {

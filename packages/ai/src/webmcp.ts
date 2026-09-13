@@ -256,3 +256,60 @@ function isRowWindowResult(value: unknown): boolean {
     (value as { source?: unknown }).source === "table-rows"
   );
 }
+
+// `registerWebMcpTools` takes a session and answers from its catalog, so the
+// entry names the session, what it publishes, and what a call returns.
+export type {
+  AgentAggregateOperation,
+  AgentAggregationColumn,
+  AgentAggregations,
+  AgentAggregationsPatch,
+  AgentApply,
+  AgentCapabilityContext,
+  AgentCapabilityDefinition,
+  AgentCapabilityKind,
+  AgentCellEdit,
+  AgentColumn,
+  AgentColumnAuthoring,
+  AgentFilter,
+  AgentFilterOption,
+  AgentLimits,
+  AgentManifest,
+  AgentObservation,
+  AgentPolicy,
+  AgentRowAddressing,
+  AgentSession,
+  ApprovalOutcome,
+  ApprovalResult,
+  ApprovalSubject,
+  CapabilityFamily,
+  CapabilityGuide,
+  CapabilityPartial,
+  CapabilityPlan,
+  CapabilityStaging,
+  CatalogEntry,
+  ExecuteError,
+  ExecuteResult,
+  JsonSchema,
+  ResolvedRow,
+  RowKeyRef,
+  RowPositionRef,
+  RowProvenanceEnvelope,
+  RowReadQuery,
+  RowRef,
+  RowWindow,
+  RowWindowRow,
+  WriteExecuteResult,
+  WriteProposal,
+  WriteRowResult,
+} from "./types";
+export type {
+  AssistantSuggestion,
+  CapabilityPresentation,
+} from "./assistantContracts";
+export type {
+  ApprovalPolicy,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";

@@ -128,6 +128,48 @@ export interface AgentColumnAuthoring {
 }
 
 // @public
+export interface AgentContextInputs {
+    readonly aggregations?: AgentAggregations;
+    readonly filters?: readonly AgentFilter[];
+    readonly samples?: Readonly<Record<string, readonly unknown[]>>;
+    readonly view?: {
+        readonly page?: number;
+        readonly limit?: number;
+        readonly search?: string;
+        readonly sortBy?: string;
+        readonly sortDir?: "asc" | "desc";
+        readonly groupBy?: string;
+        readonly filters?: Readonly<Record<string, unknown>>;
+        readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+        readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    };
+}
+
+// @public
+export interface AgentContextView {
+    readonly filters?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly groupBy?: string;
+    // (undocumented)
+    readonly limit: number;
+    // (undocumented)
+    readonly page: number;
+    // (undocumented)
+    readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly revision: number;
+    // (undocumented)
+    readonly search: string;
+    // (undocumented)
+    readonly sortBy?: string;
+    // (undocumented)
+    readonly sortDir?: "asc" | "desc";
+    readonly unknown?: readonly string[];
+}
+
+// @public
 export interface AgentFilter {
     readonly defaultOperator: string;
     readonly key: string;
@@ -256,6 +298,75 @@ export type ApprovalSubject = {
 };
 
 // @public
+export interface AssistantAnswer {
+    readonly optionId?: string;
+    readonly text?: string;
+}
+
+// @public
+export interface AssistantExchange {
+    // (undocumented)
+    readonly role: "user" | "assistant";
+    // (undocumented)
+    readonly text: string;
+}
+
+// @public
+export interface AssistantMessage {
+    readonly at: number;
+    readonly id: string;
+    readonly outcome?: AssistantTurnStatus;
+    readonly partialText?: string;
+    readonly receipts?: readonly AssistantReceipt[];
+    // (undocumented)
+    readonly role: "user" | "assistant";
+    readonly text: string;
+}
+
+// @public
+export interface AssistantQuestion {
+    readonly allowFreeText: boolean;
+    readonly id: string;
+    readonly options?: readonly AssistantQuestionOption[];
+    readonly question: string;
+}
+
+// @public
+export interface AssistantQuestionOption {
+    readonly id: string;
+    readonly label: string;
+}
+
+// @public
+export interface AssistantReceipt {
+    readonly approvalReason?: string;
+    readonly capabilityKey?: string;
+    readonly idempotencyKey: string;
+    readonly message?: string;
+    readonly status: AssistantReceiptStatus;
+    readonly subject?: AssistantReceiptSubject;
+    readonly undoable?: boolean;
+}
+
+// @public
+export type AssistantReceiptStatus = "executed" | "staged" | "rejected" | "awaiting-approval" | "cancelled" | "stale" | "failed";
+
+// @public
+export interface AssistantReceiptSubject {
+    // (undocumented)
+    readonly after?: string;
+    readonly before?: string;
+    // (undocumented)
+    readonly column?: string;
+    readonly detail?: string;
+    readonly kind?: string;
+    readonly row?: string;
+}
+
+// @public
+export type AssistantStatus = "idle" | "connecting" | "ready" | "sending" | "awaiting-approval" | "awaiting-user" | "error" | "disconnected";
+
+// @public
 export interface AssistantSuggestion {
     readonly description?: string;
     readonly id: string;
@@ -266,7 +377,54 @@ export interface AssistantSuggestion {
 }
 
 // @public
-export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setAggregations", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
+export interface AssistantTransport {
+    connect?(input: {
+        readonly session: AgentSession;
+        readonly signal?: AbortSignal;
+    }): Promise<void> | void;
+    disconnect?(): void;
+    send(input: {
+        readonly session: AgentSession;
+        readonly text: string;
+        readonly conversation: readonly AssistantExchange[];
+        readonly signal?: AbortSignal;
+        readonly onPartialText?: (text: string) => void;
+        readonly askUser?: (question: AssistantQuestion) => Promise<AssistantAnswer | undefined>;
+    }): Promise<AssistantTransportReply>;
+}
+
+// @public
+export interface AssistantTransportReply {
+    readonly keys?: readonly string[];
+    readonly results?: readonly ExecuteResult[];
+    readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
+    readonly text: string;
+    readonly unresolved?: AssistantUnresolved;
+}
+
+// @public
+export type AssistantTurnStatus = "applied" | "partial" | "none" | "cancelled" | "failed";
+
+// @public
+export interface AssistantUndo {
+    readonly before: AgentContextView;
+    readonly calls: readonly UndoCall[];
+    readonly settledAt: number;
+}
+
+// @public
+export interface AssistantUndoOffer {
+    readonly available: boolean;
+    readonly blocked?: UndoBlock;
+    readonly messageId: string;
+}
+
+// @public
+export interface AssistantUnresolved {
+    readonly code: string;
+    readonly message: string;
+    readonly pending: readonly string[];
+}
 
 // @public
 export interface CapabilityFamily {
@@ -283,9 +441,6 @@ export interface CapabilityGuide {
     readonly schemaVersion: string;
     readonly short?: string;
 }
-
-// @public
-export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
 // @public
 export type CapabilityPartial = "supported" | "unsupported";
@@ -320,13 +475,13 @@ export interface CatalogEntry {
 export type CommitPolicy = "stage" | "immediate";
 
 // @public
+export function createTableAssistant(inputs?: TableAssistantInputs): TableAssistantStore;
+
+// @public
 export interface ExecuteError {
     readonly code: string;
     readonly message: string;
 }
-
-// @public
-export function executeMcpTool(session: AgentSession, name: string, args: unknown, expectedRevision: number, idempotencyKey: string): Promise<ExecuteResult>;
 
 // @public
 export interface ExecuteResult {
@@ -336,6 +491,9 @@ export interface ExecuteResult {
     readonly result?: unknown;
     readonly revision: number;
 }
+
+// @public
+export function isUndoBlock(value: AssistantUndo | UndoBlock): value is UndoBlock;
 
 // @public
 export interface JsonSchema {
@@ -354,73 +512,7 @@ export interface JsonSchema {
 }
 
 // @public
-export interface McpContent {
-    // (undocumented)
-    readonly text: string;
-    // (undocumented)
-    readonly type: "text";
-}
-
-// @public
-export function mcpListChanged(prev: AgentManifest, next: AgentManifest): boolean;
-
-// @public
-export interface McpListMeta {
-    readonly cacheScope: string;
-    readonly ttlMs: number;
-}
-
-// @public
-export interface McpResource {
-    readonly description: string;
-    readonly mimeType: "application/json";
-    readonly name: string;
-    readonly text: string;
-    readonly uri: string;
-}
-
-// @public
-export interface McpResourceList {
-    // (undocumented)
-    readonly _meta: McpListMeta;
-    // (undocumented)
-    readonly resources: readonly McpResource[];
-}
-
-// @public
-export interface McpTool {
-    readonly annotations: McpToolAnnotations;
-    readonly description: string;
-    readonly inputSchema: JsonSchema;
-    readonly _meta?: Readonly<Record<string, unknown>>;
-    readonly name: string;
-}
-
-// @public
-export interface McpToolAnnotations {
-    readonly destructiveHint: boolean;
-    readonly idempotentHint: boolean;
-    readonly openWorldHint: false;
-    readonly readOnlyHint: boolean;
-}
-
-// @public
-export interface McpToolList {
-    // (undocumented)
-    readonly _meta: McpListMeta;
-    // (undocumented)
-    readonly tools: readonly McpTool[];
-}
-
-// @public
-export interface McpToolResult {
-    // (undocumented)
-    readonly content: readonly McpContent[];
-    readonly isError?: boolean;
-}
-
-// @public
-export function mcpToolResult(result: ExecuteResult): McpToolResult;
+export function planUndo(before: AgentContextView, after: AgentContextView, session: AgentSession, settledAt: number): AssistantUndo | UndoBlock;
 
 // @public
 export interface ResolvedRow {
@@ -480,16 +572,83 @@ export interface RowWindowRow {
 }
 
 // @public
-export function toMcpResourceList(session: AgentSession): McpResourceList;
+export function runUndo(session: AgentSession, undo: AssistantUndo, idempotencyKey: string, signal?: AbortSignal): Promise<readonly ExecuteResult[]>;
 
 // @public
-export function toMcpResources(session: AgentSession): readonly McpResource[];
+export interface TableAssistantInputs {
+    readonly alwaysAllowed?: readonly string[];
+    readonly approval?: unknown;
+    readonly awaitingApproval?: boolean;
+    readonly contextInputs?: () => AgentContextInputs;
+    readonly onRevokeAlwaysAllow?: (capability: string) => void;
+    readonly primarySuggestions?: number;
+    readonly session?: AgentSession;
+    readonly suggestions?: readonly AssistantSuggestion[];
+    readonly transport?: AssistantTransport;
+    readonly transportKey?: string;
+}
 
 // @public
-export function toMcpToolList(session: AgentSession): McpToolList;
+export interface TableAssistantSnapshot {
+    readonly alwaysAllowed: readonly string[];
+    readonly approval: unknown;
+    readonly busy: boolean;
+    readonly canSend: boolean;
+    readonly canStop: boolean;
+    // (undocumented)
+    readonly draft: string;
+    readonly error: string | undefined;
+    // (undocumented)
+    readonly messages: readonly AssistantMessage[];
+    readonly moreSuggestions: readonly AssistantSuggestion[];
+    readonly pendingQuestion: AssistantQuestion | null;
+    // (undocumented)
+    readonly status: AssistantStatus;
+    readonly suggestions: readonly AssistantSuggestion[];
+    readonly undo: AssistantUndoOffer | null;
+}
 
 // @public
-export function toMcpTools(session: AgentSession): readonly McpTool[];
+export interface TableAssistantStore {
+    readonly answer: (answer: AssistantAnswer) => void;
+    readonly clear: () => void;
+    readonly connect: () => void;
+    readonly disconnect: () => void;
+    readonly dispose: () => void;
+    readonly getState: () => TableAssistantSnapshot;
+    readonly revokeAlwaysAllow: (capability: string) => void;
+    readonly runSuggestion: (id: string) => Promise<void>;
+    readonly send: (text?: string) => Promise<void>;
+    // (undocumented)
+    readonly setDraft: (draft: string) => void;
+    readonly stop: () => void;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly undoTurn: () => Promise<void>;
+    readonly update: (inputs: TableAssistantInputs) => void;
+}
+
+// @public
+export type UndoBlock = {
+    readonly code: "nothing-to-undo";
+} | {
+    readonly code: "cannot-restore";
+    readonly fields: readonly string[];
+} | {
+    readonly code: "table-moved";
+    readonly settledAt: number;
+    readonly now: number;
+};
+
+// @public
+export function undoBlocked(session: AgentSession, undo: AssistantUndo): UndoBlock | undefined;
+
+// @public
+export interface UndoCall {
+    // (undocumented)
+    readonly args: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly key: string;
+}
 
 // @public
 export interface WriteExecuteResult {

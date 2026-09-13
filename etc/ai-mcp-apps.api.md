@@ -256,6 +256,52 @@ export type ApprovalSubject = {
 };
 
 // @public
+export function approveThroughHost(bridge: McpAppBridge, subject: ApprovalSubject): Promise<ApprovalResult | undefined>;
+
+// @public
+export function askThroughHost(bridge: McpAppBridge, question: AssistantQuestion): Promise<AssistantAnswer | undefined>;
+
+// @public
+export interface AssistantAnswer {
+    readonly optionId?: string;
+    readonly text?: string;
+}
+
+// @public
+export interface AssistantExchange {
+    // (undocumented)
+    readonly role: "user" | "assistant";
+    // (undocumented)
+    readonly text: string;
+}
+
+// @public
+export interface AssistantQuestion {
+    readonly allowFreeText: boolean;
+    readonly id: string;
+    readonly options?: readonly AssistantQuestionOption[];
+    readonly question: string;
+}
+
+// @public
+export interface AssistantQuestionOption {
+    readonly id: string;
+    readonly label: string;
+}
+
+// @public
+export interface AssistantReceiptSubject {
+    // (undocumented)
+    readonly after?: string;
+    readonly before?: string;
+    // (undocumented)
+    readonly column?: string;
+    readonly detail?: string;
+    readonly kind?: string;
+    readonly row?: string;
+}
+
+// @public
 export interface AssistantSuggestion {
     readonly description?: string;
     readonly id: string;
@@ -266,7 +312,37 @@ export interface AssistantSuggestion {
 }
 
 // @public
-export const CAPABILITY_KEYS: readonly ["columns.describe", "view.describe", "view.setPage", "view.setSort", "view.setSearch", "view.setFilters", "view.setGroupBy", "view.setAggregations", "view.pinColumn", "view.pinRow", "view.setSelection", "views.apply", "rows.read", "rows.resolve", "export.run", "edit.cells", "rows.add", "rows.delete", "rows.reorder"];
+export interface AssistantTransport {
+    connect?(input: {
+        readonly session: AgentSession;
+        readonly signal?: AbortSignal;
+    }): Promise<void> | void;
+    disconnect?(): void;
+    send(input: {
+        readonly session: AgentSession;
+        readonly text: string;
+        readonly conversation: readonly AssistantExchange[];
+        readonly signal?: AbortSignal;
+        readonly onPartialText?: (text: string) => void;
+        readonly askUser?: (question: AssistantQuestion) => Promise<AssistantAnswer | undefined>;
+    }): Promise<AssistantTransportReply>;
+}
+
+// @public
+export interface AssistantTransportReply {
+    readonly keys?: readonly string[];
+    readonly results?: readonly ExecuteResult[];
+    readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
+    readonly text: string;
+    readonly unresolved?: AssistantUnresolved;
+}
+
+// @public
+export interface AssistantUnresolved {
+    readonly code: string;
+    readonly message: string;
+    readonly pending: readonly string[];
+}
 
 // @public
 export interface CapabilityFamily {
@@ -283,9 +359,6 @@ export interface CapabilityGuide {
     readonly schemaVersion: string;
     readonly short?: string;
 }
-
-// @public
-export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
 
 // @public
 export type CapabilityPartial = "supported" | "unsupported";
@@ -320,13 +393,13 @@ export interface CatalogEntry {
 export type CommitPolicy = "stage" | "immediate";
 
 // @public
+export function createMcpAppBridge(options: McpAppBridgeOptions): McpAppBridge;
+
+// @public
 export interface ExecuteError {
     readonly code: string;
     readonly message: string;
 }
-
-// @public
-export function executeMcpTool(session: AgentSession, name: string, args: unknown, expectedRevision: number, idempotencyKey: string): Promise<ExecuteResult>;
 
 // @public
 export interface ExecuteResult {
@@ -354,37 +427,143 @@ export interface JsonSchema {
 }
 
 // @public
+export const MCP_APP_MIME = "text/html;profile=mcp-app";
+
+// @public
+export interface McpAppBridge {
+    readonly callTool: (name: string, args: unknown) => Promise<McpToolResult>;
+    readonly capabilities: () => McpAppHostCapabilities | undefined;
+    readonly dispose: () => void;
+    readonly elicit: (request: McpAppElicitRequest) => Promise<McpAppElicitResult | undefined>;
+    readonly initialize: () => Promise<McpAppHostCapabilities>;
+}
+
+// @public
+export interface McpAppBridgeOptions {
+    readonly channel?: McpAppChannel;
+    readonly hostOrigin: string;
+    readonly onToolInput?: (input: McpAppToolInput) => void;
+    readonly onToolResult?: (outcome: McpAppToolOutcome) => void;
+    readonly onWarning?: (warning: {
+        code: string;
+        message: string;
+    }) => void;
+    readonly timeoutMs?: number;
+}
+
+// @public
+export interface McpAppChannel {
+    // (undocumented)
+    readonly post: (message: unknown, targetOrigin: string) => void;
+    // (undocumented)
+    readonly subscribe: (listener: (message: unknown, origin: string) => void) => () => void;
+}
+
+// @public
+export function mcpAppCsp(security?: McpAppSecurity): string;
+
+// @public
+export interface McpAppElicitOption {
+    // (undocumented)
+    readonly id: string;
+    // (undocumented)
+    readonly label: string;
+}
+
+// @public
+export interface McpAppElicitRequest {
+    readonly allowFreeText?: boolean;
+    // (undocumented)
+    readonly message: string;
+    // (undocumented)
+    readonly options?: readonly McpAppElicitOption[];
+}
+
+// @public
+export interface McpAppElicitResult {
+    // (undocumented)
+    readonly action: "accept" | "decline" | "cancel";
+    readonly content?: {
+        readonly optionId?: string;
+        readonly text?: string;
+    };
+}
+
+// @public
+export interface McpAppHostCapabilities {
+    readonly elicitation?: boolean;
+    readonly tools?: boolean;
+}
+
+// @public
+export interface McpAppResource {
+    // (undocumented)
+    readonly description: string;
+    // (undocumented)
+    readonly _meta: Readonly<Record<string, unknown>>;
+    // (undocumented)
+    readonly mimeType: typeof MCP_APP_MIME;
+    // (undocumented)
+    readonly name: string;
+    readonly text?: string;
+    readonly uri: string;
+    readonly uriTemplate?: string;
+}
+
+// @public
+export function mcpAppResource(session: AgentSession, options: McpAppResourceOptions): McpAppResource;
+
+// @public
+export interface McpAppResourceOptions {
+    readonly description?: string;
+    readonly html?: string;
+    readonly preferredSize?: {
+        readonly width?: number;
+        readonly height?: number;
+    };
+    readonly security?: McpAppSecurity;
+    readonly src?: string;
+}
+
+// @public
+export interface McpAppSecurity {
+    readonly connectDomains?: readonly string[];
+    readonly frameAncestors?: readonly string[];
+    readonly resourceDomains?: readonly string[];
+}
+
+// @public
+export interface McpAppToolInput {
+    // (undocumented)
+    readonly input: unknown;
+    // (undocumented)
+    readonly toolCallId: string;
+    // (undocumented)
+    readonly toolName: string;
+}
+
+// @public
+export function mcpAppToolMeta(session: AgentSession, options?: Pick<McpAppResourceOptions, "preferredSize">): Readonly<Record<string, unknown>>;
+
+// @public
+export interface McpAppToolOutcome {
+    // (undocumented)
+    readonly result: unknown;
+    // (undocumented)
+    readonly toolCallId: string;
+    // (undocumented)
+    readonly toolName: string;
+}
+
+// @public
+export function mcpAppUri(tableId: string): string;
+
+// @public
 export interface McpContent {
     // (undocumented)
     readonly text: string;
     // (undocumented)
     readonly type: "text";
-}
-
-// @public
-export function mcpListChanged(prev: AgentManifest, next: AgentManifest): boolean;
-
-// @public
-export interface McpListMeta {
-    readonly cacheScope: string;
-    readonly ttlMs: number;
-}
-
-// @public
-export interface McpResource {
-    readonly description: string;
-    readonly mimeType: "application/json";
-    readonly name: string;
-    readonly text: string;
-    readonly uri: string;
-}
-
-// @public
-export interface McpResourceList {
-    // (undocumented)
-    readonly _meta: McpListMeta;
-    // (undocumented)
-    readonly resources: readonly McpResource[];
 }
 
 // @public
@@ -405,22 +584,11 @@ export interface McpToolAnnotations {
 }
 
 // @public
-export interface McpToolList {
-    // (undocumented)
-    readonly _meta: McpListMeta;
-    // (undocumented)
-    readonly tools: readonly McpTool[];
-}
-
-// @public
 export interface McpToolResult {
     // (undocumented)
     readonly content: readonly McpContent[];
     readonly isError?: boolean;
 }
-
-// @public
-export function mcpToolResult(result: ExecuteResult): McpToolResult;
 
 // @public
 export interface ResolvedRow {
@@ -480,16 +648,7 @@ export interface RowWindowRow {
 }
 
 // @public
-export function toMcpResourceList(session: AgentSession): McpResourceList;
-
-// @public
-export function toMcpResources(session: AgentSession): readonly McpResource[];
-
-// @public
-export function toMcpToolList(session: AgentSession): McpToolList;
-
-// @public
-export function toMcpTools(session: AgentSession): readonly McpTool[];
+export function withMcpAppMeta(tools: readonly McpTool[], session: AgentSession, options?: Pick<McpAppResourceOptions, "preferredSize">): readonly McpTool[];
 
 // @public
 export interface WriteExecuteResult {

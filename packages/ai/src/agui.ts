@@ -932,3 +932,76 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
     },
   };
 }
+
+// A transport is handed a session and answers from its catalog, so the entry
+// names the session, the context it sends, the approval it raises and the
+// conversation shapes it speaks. A host writing its own connection needs
+// every one of them to type its side.
+export type {
+  AgentContextInputs,
+  AgentContextOptions,
+  AgentContextView,
+} from "./context";
+export type {
+  AssistantAnswer,
+  AssistantExchange,
+  AssistantQuestion,
+  AssistantQuestionOption,
+  AssistantSuggestion,
+  AssistantTransport,
+  AssistantTransportReply,
+  AssistantUnresolved,
+  CapabilityPresentation,
+} from "./assistantContracts";
+export type {
+  AgentAggregateOperation,
+  AgentAggregationColumn,
+  AgentAggregations,
+  AgentAggregationsPatch,
+  AgentApply,
+  AgentCapabilityContext,
+  AgentCapabilityDefinition,
+  AgentCapabilityKind,
+  AgentCellEdit,
+  AgentColumn,
+  AgentColumnAuthoring,
+  AgentFilter,
+  AgentFilterOption,
+  AgentLimits,
+  AgentManifest,
+  AgentObservation,
+  AgentPolicy,
+  AgentRowAddressing,
+  AgentSession,
+  ApprovalOutcome,
+  ApprovalResult,
+  ApprovalSubject,
+  CapabilityFamily,
+  CapabilityGuide,
+  CapabilityPartial,
+  CapabilityPlan,
+  CapabilityStaging,
+  CatalogEntry,
+  ExecuteError,
+  ExecuteResult,
+  JsonSchema,
+  ResolvedRow,
+  RowKeyRef,
+  RowPositionRef,
+  RowProvenanceEnvelope,
+  RowReadQuery,
+  RowRef,
+  RowWindow,
+  RowWindowRow,
+  WriteExecuteResult,
+  WriteProposal,
+  WriteRowResult,
+} from "./types";
+export type {
+  ApprovalPolicy,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";
+export type { AssistantReceiptSubject } from "./assistantReceipts";
+export type { AgentContextProfile } from "./contextSelection";

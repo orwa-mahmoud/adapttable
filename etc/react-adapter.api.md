@@ -5,12 +5,15 @@
 ```ts
 
 import { ActionConfirm } from '@adapttable/core';
+import { AgentApprovalDecision } from '@adapttable/core';
+import { AgentApprovalOperation } from '@adapttable/core';
+import { AgentApprovalPending } from '@adapttable/core';
+import { AgentApprovalProposal } from '@adapttable/core';
 import { AggregateFn } from '@adapttable/core';
 import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
 import { applyCollapsedColumnGroups } from '@adapttable/core';
-import { ApprovalPresentation } from '@adapttable/core';
 import { AssemblyFns } from '@adapttable/core';
 import { bindFeatureHostFn } from '@adapttable/core';
 import { bindMobileCardList } from '@adapttable/core';
@@ -427,10 +430,22 @@ export interface AdapterStandardFeatureFactories {
 }
 
 // @public
+export const AGENT_ALWAYS_ALLOW_STATE: FeatureStateKey<AgentAlwaysAllowState | null>;
+
+// @public
 export const AGENT_APPROVAL: FeatureSlotKey<AgentApprovalProps>;
 
 // @public
 export const AGENT_APPROVAL_STATE: FeatureStateKey<AgentApprovalPending | null>;
+
+// @public
+export const AGENT_VIEW_STATE: FeatureStateKey<AgentViewState | null>;
+
+// @public
+export interface AgentAlwaysAllowState {
+    readonly capabilities: readonly string[];
+    readonly revoke: (capability: string) => void;
+}
 
 // @public
 export interface AgentApprovalButtonProps {
@@ -448,8 +463,7 @@ export interface AgentApprovalChromeProps extends AgentApprovalProps {
     readonly slots: AgentApprovalSlots;
 }
 
-// @public
-export type AgentApprovalDecision = "pending" | "approved" | "rejected";
+export { AgentApprovalDecision }
 
 // @public
 export interface AgentApprovalListProps {
@@ -459,34 +473,11 @@ export interface AgentApprovalListProps {
     readonly part: string;
 }
 
-// @public
-export interface AgentApprovalOperation {
-    readonly arguments: unknown;
-    readonly capability: string;
-    readonly title?: string;
-}
+export { AgentApprovalOperation }
 
-// @public
-export interface AgentApprovalPending {
-    readonly approve: () => void;
-    readonly decideAt?: (index: number, approved: boolean) => void;
-    readonly decisions: readonly AgentApprovalDecision[];
-    readonly operation?: AgentApprovalOperation;
-    readonly presentation: ApprovalPresentation;
-    readonly proposals: readonly AgentApprovalProposal[];
-    readonly reject: () => void;
-}
+export { AgentApprovalPending }
 
-// @public
-export interface AgentApprovalProposal {
-    readonly after?: unknown;
-    readonly before?: unknown;
-    readonly beforeUnavailable?: boolean;
-    readonly column?: string;
-    readonly columnLabel?: string;
-    readonly rowKey: string;
-    readonly rowLabel?: string;
-}
+export { AgentApprovalProposal }
 
 // @public
 export interface AgentApprovalProps {
@@ -502,6 +493,11 @@ export interface AgentApprovalSlots {
     readonly Approve: (props: AgentApprovalButtonProps) => ReactNode;
     readonly List: (props: AgentApprovalListProps) => ReactNode;
     readonly Reject: (props: AgentApprovalButtonProps) => ReactNode;
+}
+
+// @public
+export interface AgentViewState {
+    readonly read: () => unknown;
 }
 
 export { AggregateFn }
@@ -4590,6 +4586,31 @@ export { SortDirection }
 export { SortLevel }
 
 // @public
+export interface SpeechInputHandle {
+    readonly available: boolean;
+    readonly languages: readonly string[];
+    readonly setLanguage: (language: string) => void;
+    // (undocumented)
+    readonly start: () => void;
+    // (undocumented)
+    readonly state: SpeechInputState;
+    // (undocumented)
+    readonly stop: () => void;
+}
+
+// @public
+export interface SpeechInputState {
+    readonly error?: string;
+    readonly interim: string;
+    readonly language: string;
+    // (undocumented)
+    readonly status: SpeechInputStatus;
+}
+
+// @public
+export type SpeechInputStatus = "idle" | "listening" | "processing" | "denied" | "unsupported" | "error";
+
+// @public
 export interface StandardFeatureOptions<TRow> {
     readonly bulkActions?: readonly BulkAction[];
     readonly filters?: readonly FilterDef<TRow>[];
@@ -4741,9 +4762,28 @@ export interface TableAssistantComposerProps {
 }
 
 // @public
+export interface TableAssistantLanguageChipProps {
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly disabled?: boolean;
+    readonly label: string;
+    // (undocumented)
+    readonly onChange: (value: string) => void;
+    readonly options: readonly {
+        readonly value: string;
+        readonly label: string;
+    }[];
+    // (undocumented)
+    readonly part: string;
+    readonly value: string;
+}
+
+// @public
 export interface TableAssistantMessageView {
     // (undocumented)
     readonly id: string;
+    readonly partialText?: string;
     // (undocumented)
     readonly receipts?: readonly TableAssistantReceiptView[];
     // (undocumented)
@@ -4783,6 +4823,26 @@ export interface TableAssistantProps {
     readonly onSettings?: () => void;
     readonly open: boolean;
     readonly presentation?: TableAssistantPresentation;
+    readonly speech?: SpeechInputHandle;
+}
+
+// @public
+export interface TableAssistantQuestionOption {
+    // (undocumented)
+    readonly id: string;
+    // (undocumented)
+    readonly label: string;
+}
+
+// @public
+export interface TableAssistantQuestionView {
+    readonly allowFreeText: boolean;
+    // (undocumented)
+    readonly id: string;
+    // (undocumented)
+    readonly options?: readonly TableAssistantQuestionOption[];
+    // (undocumented)
+    readonly question: string;
 }
 
 // @public
@@ -4827,6 +4887,7 @@ export interface TableAssistantSlots {
     readonly Badge: (props: TableAssistantBadgeProps) => ReactNode;
     readonly Button: (props: TableAssistantButtonProps) => ReactNode;
     readonly Composer: (props: TableAssistantComposerProps) => ReactNode;
+    readonly LanguageChip?: (props: TableAssistantLanguageChipProps) => ReactNode;
     readonly Panel: (props: TableAssistantPanelProps) => ReactNode;
     readonly Sheet: (props: TableAssistantSheetProps) => ReactNode;
     readonly Suggestion: (props: TableAssistantSuggestionProps) => ReactNode;
@@ -4863,7 +4924,19 @@ export interface TableAssistantSuggestionView {
 }
 
 // @public
+export interface TableAssistantUndoView {
+    readonly available: boolean;
+    readonly blockedCode?: string;
+    readonly messageId: string;
+}
+
+// @public
 export interface TableAssistantView {
+    readonly alwaysAllowed?: readonly string[];
+    readonly answer?: (answer: {
+        optionId?: string;
+        text?: string;
+    }) => void;
     readonly busy?: boolean;
     // (undocumented)
     readonly draft: string;
@@ -4871,6 +4944,8 @@ export interface TableAssistantView {
     // (undocumented)
     readonly messages: readonly TableAssistantMessageView[];
     readonly moreSuggestions?: readonly TableAssistantSuggestionView[];
+    readonly pendingQuestion?: TableAssistantQuestionView | null;
+    readonly revokeAlwaysAllow?: (capability: string) => void;
     // (undocumented)
     readonly runSuggestion: (id: string) => void | Promise<void>;
     readonly send: (text?: string) => void | Promise<void>;
@@ -4879,6 +4954,8 @@ export interface TableAssistantView {
     readonly status: string;
     readonly stop: () => void;
     readonly suggestions: readonly TableAssistantSuggestionView[];
+    readonly undo?: TableAssistantUndoView | null;
+    readonly undoTurn?: () => void | Promise<void>;
 }
 
 // @public

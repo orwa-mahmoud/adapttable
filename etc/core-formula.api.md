@@ -41,6 +41,13 @@ export type BinaryOp = "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | "
 export function buildFormulaColumns<TRow extends object>(specs: readonly FormulaColumnSpec[]): FormulaColumnsResult<TRow>;
 
 // @public
+export interface ColumnAiOptions {
+    description?: string;
+    examples?: readonly unknown[];
+    sample?: boolean;
+}
+
+// @public
 export type ColumnGroupShow = "open" | "closed" | "always";
 
 // @public
@@ -53,6 +60,7 @@ export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | 
 export interface ColumnModel<TRow = unknown> {
     accessor?: (row: TRow) => unknown;
     aggregatable?: Aggregatable;
+    ai?: ColumnAiOptions;
     align?: "start" | "center" | "end";
     colSpan?: number | ((row: TRow) => number);
     editable?: boolean | ((row: TRow) => boolean);
