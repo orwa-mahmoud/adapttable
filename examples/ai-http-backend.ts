@@ -397,6 +397,9 @@ const REPLY_SHAPE = [
   "  a bounded window of rows.",
   "- `args` is that capability's own arguments — the schemas above describe",
   "  `args`, not this reply.",
+  "- A reply carrying only `text` ends the turn. Never announce a call you are",
+  "  not making in the same reply — if you are about to look something up, the",
+  "  reply that says so is the reply that has to carry it in `toolCalls`.",
   "- `askUser` is for a question you cannot answer from the context. It needs an",
   "  `id` of your own choosing so the answer can be matched back to it, and each",
   "  option is an object with its own `id` and `label` — never a bare string.",
@@ -405,21 +408,20 @@ const REPLY_SHAPE = [
 ].join("\n");
 
 /**
- * The calls that change the data, and so end a turn.
+ * The calls that ask this table something rather than command it.
  *
- * A write's receipt goes to the reader, not back to the model: handing one
- * back buys a second call that only says "done". Everything else — reading,
- * describing, resolving, and every `view.*` call — changes only what can be
- * seen, and a model that narrowed the table did it in order to look at what
- * is left. Naming the writes rather than the asks is what keeps that true for
- * capabilities this list has never heard of.
+ * Their results are worth handing back, because a model that looked something
+ * up is not finished — it looked it up in order to do something with it. The
+ * rest are actions: their result is a receipt for the reader, and handing one
+ * back buys a round that either says "done" or repeats the call it just made.
  */
-const WRITES = new Set([
-  "edit.cells",
-  "rows.add",
-  "rows.delete",
-  "rows.reorder",
-  "export.run",
+const ASKS = new Set([
+  "describe",
+  "read",
+  "columns.describe",
+  "view.describe",
+  "rows.read",
+  "rows.resolve",
 ]);
 
 /** A bounded, single-line look at what a provider sent. */
@@ -474,12 +476,14 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
     text,
     toolCalls,
     askUser: record.askUser,
-    // A turn that only looked at something is not finished: it looked in
-    // order to act. The session caps continuations, so the open side of this
-    // is bounded by the library rather than by the length of this list.
+    // A write's receipt goes to the reader, not back to the model: a second
+    // call that only says "done" is the confirmation loop nobody wants. A
+    // *read* is the opposite — its whole purpose is to inform what comes
+    // next, and a turn that resolves a row and is then never told which row
+    // it found can only stop there, having said it was about to act.
     continueWithResults:
       (toolCalls ?? []).length > 0 &&
-      (toolCalls ?? []).every((call) => !WRITES.has(call.name)),
+      (toolCalls ?? []).every((call) => ASKS.has(call.name)),
   });
 }
 
