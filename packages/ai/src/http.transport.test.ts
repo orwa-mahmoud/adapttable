@@ -636,3 +636,115 @@ describe("a question with nowhere to put it", () => {
     expect(turn.unresolved).toBeDefined();
   });
 });
+
+describe("what a turn does with a reader who will not answer", () => {
+  it("reports a declined question as unanswered, not as an answer", async () => {
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      // The reader closed the panel, or the turn was abandoned while the
+      // question was on screen. Neither is a value to proceed on.
+      askUser: () => Promise.resolve(undefined),
+      request: () =>
+        Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          askUser: {
+            id: "q1",
+            question: "Which quarter?",
+            options: [{ id: "q4", label: "Q4" }],
+          },
+        }),
+    });
+
+    const turn = await client.send(session(), "summarise");
+
+    expect(turn.unresolved).toMatchObject({ code: "question-unanswered" });
+  });
+
+  it("names a turn that had no channel to ask through at all", async () => {
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: () =>
+        Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          askUser: {
+            id: "q1",
+            question: "Which quarter?",
+            options: [{ id: "q4", label: "Q4" }],
+          },
+        }),
+    });
+
+    const turn = await client.send(session(), "summarise");
+
+    expect(turn.unresolved).toMatchObject({ code: "no-reader-channel" });
+  });
+
+  it("prefers the host's own channel over the turn's surface", async () => {
+    const hostAsked = vi.fn(() => Promise.resolve({ optionId: "q4" }));
+    const turnAsked = vi.fn(() => Promise.resolve({ optionId: "q1" }));
+    const transport = assistantHttpTransport({
+      endpoint: "https://agent.example/turn",
+      askUser: hostAsked,
+      request: (body) => {
+        const sent = body as { toolResults?: unknown };
+        return Promise.resolve(
+          sent.toolResults
+            ? { schemaVersion: AGENT_SCHEMA_VERSION, text: "thanks" }
+            : {
+                schemaVersion: AGENT_SCHEMA_VERSION,
+                askUser: {
+                  id: "q1",
+                  question: "Which quarter?",
+                  options: [{ id: "q4", label: "Q4" }],
+                },
+              }
+        );
+      },
+    });
+    const live = session();
+    await transport.connect?.({ session: live });
+
+    await transport.send({
+      session: live,
+      text: "summarise",
+      conversation: [],
+      askUser: turnAsked,
+    });
+
+    // A host that wired its own question channel keeps it.
+    expect(hostAsked).toHaveBeenCalledTimes(1);
+    expect(turnAsked).not.toHaveBeenCalled();
+  });
+});
+
+describe("a backend that will not hold the contract", () => {
+  it("keeps sending it when the pin exchange is declined", async () => {
+    const bodies: unknown[] = [];
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        bodies.push(body);
+        const sent = body as { kind?: string };
+        // The opening exchange is refused; turns still have to work.
+        return Promise.resolve(
+          sent.kind === "hello" || sent.kind === "schema"
+            ? {
+                schemaVersion: AGENT_SCHEMA_VERSION,
+                ok: false,
+                text: "no pins",
+              }
+            : { schemaVersion: AGENT_SCHEMA_VERSION, text: "ok" }
+        );
+      },
+    });
+    const live = session();
+
+    await client.connect(live).catch(() => undefined);
+    const turn = await client.send(live, "go");
+
+    expect(turn.text).toBe("ok");
+    // Nothing was marked current, so the contract travels with the turn.
+    const last = bodies.at(-1) as Record<string, unknown>;
+    expect(last.context ?? last.catalog).toBeDefined();
+  });
+});

@@ -1177,3 +1177,126 @@ describe("a question the backend asked through AG-UI", () => {
     expect(asked[0]).toMatchObject({ allowFreeText: false });
   });
 });
+
+describe("the state patch a shared view travels as", () => {
+  it("removes a key the next state dropped", () => {
+    expect(statePatch({ page: 2, sortBy: "team" }, { page: 2 })).toEqual([
+      { op: "remove", path: "/sortBy" },
+    ]);
+  });
+
+  it("treats a key set to nothing as a key that is gone", () => {
+    expect(
+      statePatch({ page: 2, sortBy: "team" }, { page: 2, sortBy: undefined })
+    ).toEqual([{ op: "remove", path: "/sortBy" }]);
+  });
+
+  it("adds a key the previous state did not have", () => {
+    expect(statePatch({ page: 2 }, { page: 2, sortBy: "team" })).toEqual([
+      { op: "add", path: "/sortBy", value: "team" },
+    ]);
+  });
+
+  it("says nothing about a key that arrived as nothing", () => {
+    expect(statePatch({ page: 2 }, { page: 2, sortBy: undefined })).toEqual([]);
+  });
+
+  it("escapes a key that would otherwise read as a path", () => {
+    // RFC 6901: `/` and `~` inside a key have to be escaped or the pointer
+    // names a different place than the key does.
+    expect(statePatch({}, { "a/b~c": 1 })).toEqual([
+      { op: "add", path: "/a~1b~0c", value: 1 },
+    ]);
+  });
+
+  it("descends into a nested object rather than replacing it whole", () => {
+    expect(
+      statePatch(
+        { view: { page: 1, limit: 10 } },
+        { view: { page: 2, limit: 10 } }
+      )
+    ).toEqual([{ op: "replace", path: "/view/page", value: 2 }]);
+  });
+
+  it("says nothing when the state did not move", () => {
+    const view = { page: 2, filters: { team: ["Core"] } };
+    expect(statePatch(view, { page: 2, filters: { team: ["Core"] } })).toEqual(
+      []
+    );
+  });
+});
+
+describe("how a per-row decision is sent back", () => {
+  function resumeFor(decided: unknown, rows: number) {
+    const table = liveTable();
+    const route = recorded([
+      (input) => [
+        started(input),
+        finished(input, {
+          interrupt: {
+            interruptId: "i1",
+            reason: "confirmation",
+            payload: {
+              proposals: Array.from({ length: rows }, (_, index) => ({
+                rowKey: `r${String(index + 1)}`,
+                column: "name",
+                after: "Ada",
+              })),
+              perItem: true,
+            },
+          },
+        }),
+      ],
+      (input) => [started(input), ...says("done"), finished(input)],
+    ]);
+    const transport = aguiTransport({
+      connection: route.connection,
+      onApprove: () => Promise.resolve(decided as never),
+    });
+    return { table, route, transport };
+  }
+
+  it("says approved when the reader kept everything they were shown", async () => {
+    const { table, route, transport } = resumeFor({ approved: [1, 2] }, 2);
+
+    await transport.send({
+      session: table.session,
+      text: "rename them",
+      conversation: [],
+    });
+
+    // The backend is told the whole write stands rather than being handed a
+    // position list it would have to re-derive.
+    expect(route.inputs[1]?.resume?.[0]).toMatchObject({ status: "approved" });
+  });
+
+  it("says partial when they kept some of it", async () => {
+    const { table, route, transport } = resumeFor({ approved: [1] }, 2);
+
+    await transport.send({
+      session: table.session,
+      text: "rename them",
+      conversation: [],
+    });
+
+    expect(route.inputs[1]?.resume?.[0]).toMatchObject({ status: "partial" });
+  });
+
+  it("says rejected when they kept none of it, with their reason", async () => {
+    const { table, route, transport } = resumeFor(
+      { approved: [], reason: "not during the close" },
+      2
+    );
+
+    await transport.send({
+      session: table.session,
+      text: "rename them",
+      conversation: [],
+    });
+
+    expect(route.inputs[1]?.resume?.[0]).toMatchObject({
+      status: "rejected",
+      payload: { reason: "not during the close" },
+    });
+  });
+});
