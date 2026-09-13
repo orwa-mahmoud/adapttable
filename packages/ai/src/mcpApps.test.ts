@@ -561,3 +561,124 @@ describe("a host that stops answering", () => {
     }
   });
 });
+
+describe("what the host answers a request with", () => {
+  it("carries the host's own refusal message", async () => {
+    const host = fakeHost((message) => {
+      if (message.method !== "tools/call") return {};
+      // Answering with an error rather than a result.
+      queueMicrotask(() => {
+        host.push({
+          jsonrpc: "2.0",
+          id: message.id,
+          error: { code: -32_000, message: "that table is read-only here" },
+        });
+      });
+      return undefined;
+    });
+    const bridge = createMcpAppBridge({
+      hostOrigin: HOST,
+      channel: host.channel,
+    });
+
+    await expect(bridge.callTool("view.setPage", { page: 2 })).rejects.toThrow(
+      /read-only here/
+    );
+  });
+
+  it("names a refusal the host did not explain", async () => {
+    const host = fakeHost((message) => {
+      if (message.method !== "tools/call") return {};
+      queueMicrotask(() => {
+        host.push({ jsonrpc: "2.0", id: message.id, error: {} });
+      });
+      return undefined;
+    });
+    const bridge = createMcpAppBridge({
+      hostOrigin: HOST,
+      channel: host.channel,
+    });
+
+    await expect(bridge.callTool("view.setPage", {})).rejects.toThrow(
+      /refused the request/
+    );
+  });
+
+  it("treats a host that advertises nothing as advertising nothing", async () => {
+    const host = fakeHost(() => ({}));
+    const bridge = createMcpAppBridge({
+      hostOrigin: HOST,
+      channel: host.channel,
+    });
+
+    const advertised = await bridge.initialize();
+
+    // Absent is not the same as unknown: the view proceeds with its own
+    // chrome rather than waiting for a capability that was never claimed.
+    expect(advertised).toEqual({});
+    expect(bridge.capabilities()).toEqual({});
+  });
+
+  it("calls a tool with no arguments as a call with none", async () => {
+    const host = fakeHost(() => ({ content: [] }));
+    const bridge = createMcpAppBridge({
+      hostOrigin: HOST,
+      channel: host.channel,
+    });
+
+    await bridge.callTool("view.describe");
+
+    const sent = host.sent.at(-1);
+    expect(sent?.params).toMatchObject({
+      name: "view.describe",
+      arguments: {},
+    });
+  });
+
+  it("stops listening once it is disposed, and says so only once", () => {
+    const host = fakeHost();
+    const onToolInput = vi.fn();
+    const bridge = createMcpAppBridge({
+      hostOrigin: HOST,
+      channel: host.channel,
+      onToolInput,
+    });
+
+    bridge.dispose();
+    bridge.dispose();
+
+    host.push({
+      jsonrpc: "2.0",
+      method: "ui/notifications/tool-input",
+      params: { toolCallId: "c1", toolName: "view.setPage", input: {} },
+    });
+    expect(onToolInput).not.toHaveBeenCalled();
+  });
+});
+
+describe("what the reader answered in the host's own chrome", () => {
+  it("is nothing when they declined", async () => {
+    const host = fakeHost(() => ({ action: "decline" }));
+    const bridge = createMcpAppBridge({
+      hostOrigin: HOST,
+      channel: host.channel,
+    });
+
+    await expect(
+      bridge.elicit({ message: "Change it?", options: [] })
+    ).resolves.toBeUndefined();
+  });
+
+  it("is nothing when they accepted without saying what", async () => {
+    const host = fakeHost(() => ({ action: "accept", content: {} }));
+    const bridge = createMcpAppBridge({
+      hostOrigin: HOST,
+      channel: host.channel,
+    });
+
+    // An empty acceptance is not an answer, and must not read as one.
+    await expect(
+      bridge.elicit({ message: "Which?", options: [] })
+    ).resolves.toBeUndefined();
+  });
+});

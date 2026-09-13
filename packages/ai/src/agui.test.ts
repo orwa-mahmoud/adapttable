@@ -1028,3 +1028,152 @@ describe("an interrupt this table cannot settle", () => {
     expect(cause).toMatchObject({ code: "malformed-interrupt" });
   });
 });
+
+describe("what a call's arguments may arrive as", () => {
+  it("takes a call that sent no arguments at all", async () => {
+    const table = liveTable();
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          {
+            type: "TOOL_CALL_START",
+            toolCallId: "c1",
+            toolCallName: aguiToolName(TABLE_ID, "view.describe"),
+          },
+          { type: "TOOL_CALL_END", toolCallId: "c1" },
+          finished(input),
+        ],
+      ]).connection,
+    });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "what can you do",
+      conversation: [],
+    });
+
+    // Empty arguments are an empty object, not a parse failure.
+    expect(reply.results?.[0]?.ok).toBe(true);
+  });
+
+  it("joins arguments that arrived in pieces", async () => {
+    const table = liveTable();
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          {
+            type: "TOOL_CALL_START",
+            toolCallId: "c1",
+            toolCallName: aguiToolName(TABLE_ID, "view.setPage"),
+          },
+          { type: "TOOL_CALL_ARGS", toolCallId: "c1", delta: '{"pa' },
+          { type: "TOOL_CALL_ARGS", toolCallId: "c1", delta: 'ge":3}' },
+          { type: "TOOL_CALL_END", toolCallId: "c1" },
+          finished(input),
+        ],
+      ]).connection,
+    });
+
+    await transport.send({
+      session: table.session,
+      text: "go to page 3",
+      conversation: [],
+    });
+
+    expect(table.state.page).toBe(3);
+  });
+
+  it("reports a refused call as the tool's own result", async () => {
+    const table = liveTable();
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          ...calls("c1", "view.setPage", '{"page":"not a page"}'),
+          finished(input),
+        ],
+      ]).connection,
+    });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "go",
+      conversation: [],
+    });
+
+    // The backend reads the refusal the same way it reads a success, so it
+    // can say what happened rather than assume the page moved.
+    expect(reply.results?.[0]?.ok).toBe(false);
+  });
+});
+
+describe("a question the backend asked through AG-UI", () => {
+  it("offers free text when the backend named no choices", async () => {
+    const table = liveTable();
+    const asked: unknown[] = [];
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          finished(input, {
+            interrupt: {
+              interruptId: "i1",
+              reason: "input_required",
+              payload: { question: "What should I call it?" },
+            },
+          }),
+        ],
+        (input) => [started(input), ...says("done"), finished(input)],
+      ]).connection,
+      askUser: (question) => {
+        asked.push(question);
+        return Promise.resolve({ text: "Q4 report" });
+      },
+    });
+
+    await transport.send({
+      session: table.session,
+      text: "name it",
+      conversation: [],
+    });
+
+    expect(asked[0]).toMatchObject({ allowFreeText: true });
+  });
+
+  it("closes the answer to the offered choices when the backend says so", async () => {
+    const table = liveTable();
+    const asked: unknown[] = [];
+    const transport = aguiTransport({
+      connection: recorded([
+        (input) => [
+          started(input),
+          finished(input, {
+            interrupt: {
+              interruptId: "i1",
+              reason: "input_required",
+              payload: {
+                question: "Which quarter?",
+                options: [{ id: "q4", label: "Q4" }],
+              },
+            },
+          }),
+        ],
+        (input) => [started(input), ...says("done"), finished(input)],
+      ]).connection,
+      askUser: (question) => {
+        asked.push(question);
+        return Promise.resolve({ optionId: "q4" });
+      },
+    });
+
+    await transport.send({
+      session: table.session,
+      text: "summarise",
+      conversation: [],
+    });
+
+    expect(asked[0]).toMatchObject({ allowFreeText: false });
+  });
+});
