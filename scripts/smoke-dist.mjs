@@ -120,13 +120,16 @@ const SERVER_SAFE = [
     reactFree: true,
   },
   {
-    // Catalog, describe, execute, the JSON / OpenAI / MCP mappers and the HTTP
-    // bridge all run in a host without React — the bridge posts a manifest and
-    // executes what comes back, and imports no model SDK.
+    // Every entry of it, the way core is listed: the catalog, the context and
+    // prompt builders, the conversation store, dictation, and each protocol
+    // adapter all run in a host without React, import no model SDK, and post
+    // or execute through the same neutral session. Listing the package rather
+    // than a subset is both the stronger claim and the one that stays true —
+    // a subpath added tomorrow is covered the day it ships, which a list of
+    // five names was not.
     // `@adapttable/ai-react` is the client package and is deliberately not
     // listed here.
     pkg: "ai",
-    only: /^\.\/dist\/(index|json|openai|mcp|http)\.(js|cjs)$/,
     reactFree: true,
   },
 ];
