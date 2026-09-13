@@ -147,7 +147,7 @@ export function createTurnExecution(
         // Omitted: the context supplied for this phase, moved forward only by
         // what this turn's earlier actions proved. `ours` exceeds `planned`
         // exactly when this turn caused the difference.
-        const expected = named ?? (ours > planned ? ours : planned);
+        const expected = named ?? Math.max(ours, planned);
         const result = await session.execute(
           action.key,
           action.args ?? {},
