@@ -415,6 +415,16 @@ const MAX_NEED_ROUNDS = 3;
  * bounds how many times work may depend on the work before it.
  */
 const MAX_CONTINUATIONS = 3;
+/**
+ * Repair rounds in one user send.
+ *
+ * A phase that ran nothing and was refused over its arguments changed nothing
+ * either, so handing that refusal back is the only way the turn can still
+ * succeed — and one round is enough for a backend that can read a refusal at
+ * all. It is counted apart from {@link MAX_CONTINUATIONS} so a backend asking
+ * to continue can never spend it.
+ */
+const MAX_REPAIRS = 1;
 const MAX_DESCRIBE_NEEDS = 16;
 const MAX_READ_NEEDS = 16;
 const MAX_ACTIONS = 32;
@@ -1832,6 +1842,7 @@ export async function runAgentHttpTurn(
   let unresolved: AgentHttpUnresolved | undefined;
   let toolResults: readonly AgentHttpToolResult[] | undefined;
   let phaseId = 0;
+  let repairs = 0;
 
   // Each pass is one dependent phase: ask until the backend settles, run what
   // it settled on, and only continue when it asked for the receipts.
@@ -1849,16 +1860,7 @@ export async function runAgentHttpTurn(
     fulfilled.describe += pass.fulfilled.describe;
     fulfilled.read += pass.fulfilled.read;
 
-    pass.phase.begin();
-    const ran = await execution.execute(
-      { context: pass.context, actions: pass.plan },
-      extras.signal
-    );
-    pass.phase.settle(
-      ran.some((entry) => entry.error?.code === "cancelled")
-        ? "cancelled"
-        : "settled"
-    );
+    const ran = await runPhasePlan(execution, pass, extras.signal);
     results.push(...ran);
     // The keys, not the calls: what a receipt needs is which capability ran.
     keys.push(...pass.plan.map((call) => call.key));
@@ -1867,13 +1869,15 @@ export async function runAgentHttpTurn(
       unresolved = pass.unresolved;
       break;
     }
-    if (
-      !extras.returnResults ||
-      !pass.last.continueWithResults ||
-      pass.plan.length === 0
-    ) {
-      break;
-    }
+    const next = nextPhaseReason({
+      allowed: extras.returnResults === true,
+      asked: pass.last.continueWithResults === true,
+      ran,
+      planned: pass.plan.length,
+      repairsLeft: MAX_REPAIRS - repairs,
+    });
+    if (!next) break;
+    if (next === "repair") repairs += 1;
     phaseId += 1;
     if (phaseId > MAX_CONTINUATIONS) {
       unresolved = {
@@ -1919,6 +1923,74 @@ function mergeToolResults(
 }
 
 /** One executed call, shaped as the tool result its caller is waiting for. */
+/**
+ * Whether this phase was refused over how it was written, and did nothing.
+ *
+ * Every call has to have failed: a phase that also ran something has already
+ * changed the table, and a second plan built over the top of it could apply
+ * that change twice. With nothing applied there is nothing to repeat, and the
+ * refusal names both what was wrong and what the capability takes — which is
+ * everything the next plan needs.
+ */
+function refusedOverArguments(ran: readonly ExecuteResult[]): boolean {
+  if (ran.length === 0) return false;
+  if (ran.some((entry) => entry.ok)) return false;
+  return ran.some((entry) => entry.error?.code === "invalid-arguments");
+}
+
+/**
+ * Run one phase's plan inside its own bound, and say how it settled.
+ *
+ * The phase opens before the first call and closes after the last, so a
+ * capability that reaches the table outside it is refused rather than
+ * silently attributed to this turn.
+ */
+async function runPhasePlan(
+  execution: ReturnType<typeof createTurnExecution>,
+  pass: {
+    readonly phase: {
+      begin: () => void;
+      settle: (how: "cancelled" | "settled") => void;
+    };
+    readonly context: HttpPhaseContext;
+    readonly plan: readonly FinalizedCall[];
+  },
+  signal: AbortSignal | undefined
+): Promise<readonly ExecuteResult[]> {
+  pass.phase.begin();
+  const ran = await execution.execute(
+    { context: pass.context, actions: pass.plan },
+    signal
+  );
+  pass.phase.settle(
+    ran.some((entry) => entry.error?.code === "cancelled")
+      ? "cancelled"
+      : "settled"
+  );
+  return ran;
+}
+
+/**
+ * Why this turn runs another phase, or nothing when it stops here.
+ *
+ * `continue` is the backend asking to be told what its calls produced.
+ * `repair` is this client's own: a phase refused over how it was written ran
+ * nothing, so handing that refusal back is the only way the turn can still
+ * succeed, and a backend that never asks to continue still gets it.
+ */
+function nextPhaseReason(input: {
+  readonly allowed: boolean;
+  readonly asked: boolean;
+  readonly ran: readonly ExecuteResult[];
+  readonly planned: number;
+  readonly repairsLeft: number;
+}): "continue" | "repair" | undefined {
+  if (!input.allowed) return undefined;
+  if (input.asked && input.planned > 0) return "continue";
+  if (input.repairsLeft > 0 && refusedOverArguments(input.ran)) return "repair";
+  return undefined;
+}
+
 function receiptResult(
   call: FinalizedCall,
   result: ExecuteResult | undefined

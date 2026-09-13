@@ -978,6 +978,113 @@ describe("createAgentHttpClient", () => {
     ).rejects.toThrow(/503/);
   });
 
+  it("hands an argument refusal back once, even unasked", async () => {
+    const editCells = vi.fn();
+    const live = session({ editCells });
+    const sent: unknown[] = [];
+    const result = await runAgentHttpTurn(
+      live,
+      "Raise Ada to 185",
+      {
+        endpoint: "https://agent.example/turn",
+        request: (body) => {
+          sent.push(body.toolResults);
+          // The backend never asks to continue. It does not have to: the
+          // phase ran nothing, so the refusal is the only thing that can
+          // still make this turn succeed.
+          if (!body.toolResults) {
+            return Promise.resolve({
+              schemaVersion: AGENT_SCHEMA_VERSION,
+              text: "Setting it.",
+              toolCalls: [
+                { name: "edit.cells", args: { rowKey: "r1" }, id: "e1" },
+              ],
+            });
+          }
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Fixed it.",
+            toolCalls: [
+              {
+                name: "edit.cells",
+                args: {
+                  edits: [{ rowKey: "r1", column: "name", value: "Ada" }],
+                },
+                id: "e2",
+              },
+            ],
+          });
+        },
+      },
+      { returnResults: true }
+    );
+
+    // The second phase was handed the refusal, under the refused call's id.
+    expect(sent).toHaveLength(2);
+    expect((sent[1] as { id: string }[])[0].id).toBe("e1");
+    expect(result.text).toBe("Fixed it.");
+    expect(editCells).toHaveBeenCalledTimes(1);
+  });
+
+  it("spends the repair round once and then stops", async () => {
+    const live = session();
+    let rounds = 0;
+    await runAgentHttpTurn(
+      live,
+      "Raise Ada",
+      {
+        endpoint: "https://agent.example/turn",
+        request: () => {
+          rounds += 1;
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Setting it.",
+            toolCalls: [
+              {
+                name: "edit.cells",
+                args: { rowKey: "r1" },
+                id: `e${String(rounds)}`,
+              },
+            ],
+          });
+        },
+      },
+      { returnResults: true }
+    );
+
+    // A backend that keeps sending the same malformed call does not get a
+    // repair round for each attempt.
+    expect(rounds).toBe(2);
+  });
+
+  it("does not repair a phase that already changed the table", async () => {
+    const live = session();
+    let rounds = 0;
+    await runAgentHttpTurn(
+      live,
+      "Page 2 and an edit",
+      {
+        endpoint: "https://agent.example/turn",
+        request: () => {
+          rounds += 1;
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Doing both.",
+            toolCalls: [
+              { name: "view.setPage", args: { page: 2 }, id: "p1" },
+              { name: "edit.cells", args: { rowKey: "r1" }, id: "e1" },
+            ],
+          });
+        },
+      },
+      { returnResults: true }
+    );
+
+    // One call landed. A second plan built over the top of it could apply
+    // that change twice, so the refusal is reported rather than repaired.
+    expect(rounds).toBe(1);
+  });
+
   it("returns execute receipts when the backend asks to continue", async () => {
     const live = session();
     const seen: (readonly { id: string }[] | undefined)[] = [];
