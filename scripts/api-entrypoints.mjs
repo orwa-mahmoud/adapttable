@@ -60,11 +60,11 @@ function typesTarget(value) {
  * is `private: true`): its parity is still worth reporting, but it carries no
  * SemVer promise, which is a distinction the contract checks depend on.
  */
-export function entrypoints() {
+export function entrypoints(packagesDir = PACKAGES_DIR) {
   const list = [];
-  for (const dir of readdirSync(PACKAGES_DIR)) {
+  for (const dir of readdirSync(packagesDir)) {
     const manifest = JSON.parse(
-      readFileSync(join(PACKAGES_DIR, dir, "package.json"), "utf8")
+      readFileSync(join(packagesDir, dir, "package.json"), "utf8")
     );
     const subpaths = Object.keys(manifest.exports ?? { ".": {} }).filter(
       isTypedSubpath
@@ -85,7 +85,7 @@ export function entrypoints() {
             ? `${dir}.api.md`
             : `${dir}-${name.replaceAll("/", "-")}.api.md`,
         entry: join(
-          PACKAGES_DIR,
+          packagesDir,
           dir,
           typesTarget(manifest.exports?.[key])?.replace(/^\.\//, "") ??
             join("dist", `${name}.d.ts`)

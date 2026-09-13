@@ -24,7 +24,7 @@
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import ts from "typescript";
 
@@ -73,9 +73,17 @@ function targetOf(value) {
  *
  * Non-JS conditions (`./styles.css`) and `./package.json` are not APIs.
  */
-function entriesOf(pkg) {
+/**
+ * Every documented entry a package advertises, resolved through its exports
+ * map rather than its subpath name.
+ *
+ * `root` exists so this can be pointed at a fixture: a guard nobody can aim
+ * at a broken tree is a guard nobody can prove still fails. Production passes
+ * nothing and gets the repository.
+ */
+export function entriesOf(pkg, root = REPO_ROOT) {
   const manifest = JSON.parse(
-    readFileSync(join(REPO_ROOT, "packages", pkg, "package.json"), "utf8")
+    readFileSync(join(root, "packages", pkg, "package.json"), "utf8")
   );
   const exported = manifest.exports ?? { ".": "./dist/index.js" };
   return Object.keys(exported)
@@ -91,7 +99,7 @@ function entriesOf(pkg) {
           .replace(/\.[cm]?[jt]sx?$/, "")
       );
       // A feature entry that renders is `.tsx`; the rest are `.ts`.
-      const entry = existsSync(join(REPO_ROOT, "packages", `${stem}.ts`))
+      const entry = existsSync(join(root, "packages", `${stem}.ts`))
         ? `${stem}.ts`
         : `${stem}.tsx`;
       return { label: key === "." ? pkg : `${pkg}/${key.slice(2)}`, entry };
@@ -104,7 +112,9 @@ const SURFACES = readdirSync(join(REPO_ROOT, "packages"), {
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
   .sort()
-  .flatMap(entriesOf);
+  // Wrapped, not passed by reference: `flatMap` hands the callback an index as
+  // its second argument, which is now this function's `root`.
+  .flatMap((pkg) => entriesOf(pkg));
 
 const docPages = readdirSync(DOCS_DIR)
   .filter((name) => name.endsWith(".md"))
@@ -461,4 +471,7 @@ function main() {
   );
 }
 
-main();
+// Only when run as the command. Importing this module — which a test that aims
+// `entriesOf` at a fixture must do — would otherwise run the whole audit and
+// exit on its result. Same guard `ai-isolation.mjs` uses.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) main();
