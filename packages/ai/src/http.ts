@@ -1843,6 +1843,7 @@ export async function runAgentHttpTurn(
   let toolResults: readonly AgentHttpToolResult[] | undefined;
   let phaseId = 0;
   let repairs = 0;
+  let lastPlan: string | undefined;
 
   // Each pass is one dependent phase: ask until the backend settles, run what
   // it settled on, and only continue when it asked for the receipts.
@@ -1856,42 +1857,44 @@ export async function runAgentHttpTurn(
     });
     if (!pass.last) throw new Error("agent HTTP returned no response");
     assertTurnContext(session, turn);
-    if (pass.text) text = pass.text;
+    text = pass.text || text;
     fulfilled.describe += pass.fulfilled.describe;
     fulfilled.read += pass.fulfilled.read;
+
+    // A phase that asks for exactly what the phase before it already ran has
+    // nothing to add, and running it would apply that work a second time. The
+    // turn keeps what it has and says why it stopped, rather than repeating
+    // the work or waiting for a backend to notice.
+    const signature = planSignature(pass.plan);
+    if (signature !== undefined && signature === lastPlan) {
+      unresolved = {
+        code: "repeated-plan",
+        message: "the backend asked for the same calls it had just run",
+        pending: pass.plan.map((call) => call.key),
+      };
+      break;
+    }
+    lastPlan = signature;
 
     const ran = await runPhasePlan(execution, pass, extras.signal);
     results.push(...ran);
     // The keys, not the calls: what a receipt needs is which capability ran.
     keys.push(...pass.plan.map((call) => call.key));
 
-    if (pass.unresolved) {
-      unresolved = pass.unresolved;
-      break;
-    }
-    const next = nextPhaseReason({
+    const step = advanceTurn({
       allowed: extras.returnResults === true,
       asked: pass.last.continueWithResults === true,
+      halted: pass.unresolved,
       ran,
-      planned: pass.plan.length,
+      plan: pass.plan,
+      phaseId,
       repairsLeft: MAX_REPAIRS - repairs,
     });
-    if (!next) break;
-    if (next === "repair") repairs += 1;
-    phaseId += 1;
-    if (phaseId > MAX_CONTINUATIONS) {
-      unresolved = {
-        code: "continuation-exhausted",
-        message: `the backend asked to continue more than ${String(MAX_CONTINUATIONS)} times`,
-        pending: [],
-      };
-      break;
-    }
-    // The next phase depends on what this one produced, so it carries the
-    // actual receipts rather than a claim that the work happened.
-    toolResults = pass.plan.map((call, index) =>
-      receiptResult(call, ran[index])
-    );
+    unresolved = step.unresolved ?? unresolved;
+    if (step.stop) break;
+    repairs += step.repaired ? 1 : 0;
+    phaseId = step.phaseId;
+    toolResults = step.toolResults;
   }
 
   return {
@@ -1936,6 +1939,66 @@ function refusedOverArguments(ran: readonly ExecuteResult[]): boolean {
   if (ran.length === 0) return false;
   if (ran.some((entry) => entry.ok)) return false;
   return ran.some((entry) => entry.error?.code === "invalid-arguments");
+}
+
+/**
+ * What the next phase of this turn carries, or nothing when it ends here.
+ *
+ * The receipts it hands forward are the ones the calls actually produced, so
+ * a dependent phase reasons over what happened rather than over a claim that
+ * it did.
+ */
+function advanceTurn(input: {
+  readonly allowed: boolean;
+  readonly asked: boolean;
+  readonly halted: AgentHttpUnresolved | undefined;
+  readonly ran: readonly ExecuteResult[];
+  readonly plan: readonly FinalizedCall[];
+  readonly phaseId: number;
+  readonly repairsLeft: number;
+}): {
+  readonly stop: boolean;
+  readonly phaseId: number;
+  readonly repaired: boolean;
+  readonly toolResults: readonly AgentHttpToolResult[];
+  readonly unresolved?: AgentHttpUnresolved;
+} {
+  const phaseId = input.phaseId + 1;
+  const toolResults = input.plan.map((call, index) =>
+    receiptResult(call, input.ran[index])
+  );
+  const stopped = { stop: true, phaseId, repaired: false, toolResults };
+  if (input.halted) return { ...stopped, unresolved: input.halted };
+  const reason = nextPhaseReason({
+    allowed: input.allowed,
+    asked: input.asked,
+    ran: input.ran,
+    planned: input.plan.length,
+    repairsLeft: input.repairsLeft,
+  });
+  if (!reason) return stopped;
+  if (phaseId > MAX_CONTINUATIONS) {
+    return {
+      ...stopped,
+      unresolved: {
+        code: "continuation-exhausted",
+        message: `the backend asked to continue more than ${String(MAX_CONTINUATIONS)} times`,
+        pending: [],
+      },
+    };
+  }
+  return { stop: false, phaseId, repaired: reason === "repair", toolResults };
+}
+
+/**
+ * What a phase asked the table to do, as one comparable value.
+ *
+ * `undefined` for an empty plan: a phase that ran nothing is not a repeat of
+ * the phase before it, whatever that one did.
+ */
+function planSignature(plan: readonly FinalizedCall[]): string | undefined {
+  if (plan.length === 0) return undefined;
+  return JSON.stringify(plan.map((call) => [call.key, call.args]));
 }
 
 /**

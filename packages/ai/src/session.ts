@@ -1004,6 +1004,10 @@ function sortRefusal(
   sortKey: string | null | undefined
 ): string | undefined {
   if (!sortKey) return undefined;
+  // A table that published no columns has said nothing about sorting, and an
+  // absence is not a restriction: the host wiring `setSort` is the permission.
+  // Where columns exist, they are the contract and the rules below apply.
+  if (observation.columns.length === 0) return undefined;
   const column = observation.columns.find((entry) => entry.id === sortKey);
   if (!column) {
     const offered = observation.columns.map((entry) => entry.id);

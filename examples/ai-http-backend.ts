@@ -408,20 +408,21 @@ const REPLY_SHAPE = [
 ].join("\n");
 
 /**
- * The calls that ask this table something rather than command it.
+ * The calls that change the data, and so end a turn.
  *
- * Their results are worth handing back, because a model that looked something
- * up is not finished — it looked it up in order to do something with it. The
- * rest are actions: their result is a receipt for the reader, and handing one
- * back buys a round that either says "done" or repeats the call it just made.
+ * A write's receipt goes to the reader, not back to the model: handing one
+ * back buys a second call that only says "done". Everything else is a step
+ * towards something — a lookup, or the view change that made the lookup worth
+ * doing, which is how a model narrows a table before reading what is left.
+ * The session ends a turn that asks for what it just ran, so continuing on
+ * every non-write costs nothing when the model has finished.
  */
-const ASKS = new Set([
-  "describe",
-  "read",
-  "columns.describe",
-  "view.describe",
-  "rows.read",
-  "rows.resolve",
+const WRITES = new Set([
+  "edit.cells",
+  "rows.add",
+  "rows.delete",
+  "rows.reorder",
+  "export.run",
 ]);
 
 /** A bounded, single-line look at what a provider sent. */
@@ -476,13 +477,9 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
     text,
     toolCalls,
     askUser: record.askUser,
-    // One ask in the batch is enough. Its result is the thing the next step
-    // depends on, and a model routinely pairs it with the view change that
-    // made it worth asking — "search for Jonah, then read what is there".
-    // Requiring every call to be an ask drops that read on the floor; a batch
-    // with no ask at all is asking for a receipt, and a receipt goes to the
-    // reader rather than buying a round that says "done".
-    continueWithResults: (toolCalls ?? []).some((call) => ASKS.has(call.name)),
+    continueWithResults:
+      (toolCalls ?? []).length > 0 &&
+      (toolCalls ?? []).every((call) => !WRITES.has(call.name)),
   });
 }
 

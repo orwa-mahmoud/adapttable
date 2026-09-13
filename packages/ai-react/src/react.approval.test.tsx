@@ -359,6 +359,9 @@ describe("host callbacks in place of the live table's", () => {
       {
         tableId: "override-once",
         approval: "never",
+        // The reader's own sort control is what the agent is held to, so a
+        // table meant to be sortable says so.
+        columns: { name: { sortable: true } },
         apply: {
           setPage: hostPage,
           setLimit: hostLimit,
@@ -421,7 +424,11 @@ describe("host callbacks in place of the live table's", () => {
     const liveSearch = vi.fn();
     const liveSort = vi.fn();
     mount(
-      { tableId: "runtime-default", approval: "never" },
+      {
+        tableId: "runtime-default",
+        approval: "never",
+        columns: { name: { sortable: true } },
+      },
       {
         ...VIEW,
         query: {

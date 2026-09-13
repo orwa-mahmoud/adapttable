@@ -582,6 +582,39 @@ describe("a host that would rather send the contract every time", () => {
 });
 
 describe("a backend that will not finish a turn", () => {
+  it("leaves a backend that keeps asking for new work", async () => {
+    let rounds = 0;
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const sent = body as { kind?: string };
+        if (sent.kind !== "turn" && sent.kind !== undefined) {
+          return Promise.resolve({ schemaVersion: AGENT_SCHEMA_VERSION });
+        }
+        rounds += 1;
+        // A different page each round, so nothing here is a repeat — this is
+        // the backend that genuinely never settles.
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: `round ${String(rounds)}`,
+          toolCalls: [
+            {
+              id: `c${String(rounds)}`,
+              name: "view.setPage",
+              args: { page: rounds + 1 },
+            },
+          ],
+          continueWithResults: true,
+        });
+      },
+    });
+
+    const turn = await client.send(session(), "go", { returnResults: true });
+
+    expect(turn.unresolved).toMatchObject({ code: "continuation-exhausted" });
+    expect(rounds).toBeLessThanOrEqual(5);
+  });
+
   it("stops asking to continue after the fourth round", async () => {
     let rounds = 0;
     const client = createAgentHttpClient({
@@ -610,8 +643,10 @@ describe("a backend that will not finish a turn", () => {
     // The continuation loop only runs for a caller that wants the receipts.
     const turn = await client.send(session(), "go", { returnResults: true });
 
-    // A backend asking forever is a backend the turn has to be able to leave.
-    expect(turn.unresolved).toMatchObject({ code: "continuation-exhausted" });
+    // A backend asking forever is a backend the turn has to be able to leave,
+    // and it leaves on the first round that adds nothing: this one asks for
+    // the page it is already on, again.
+    expect(turn.unresolved).toMatchObject({ code: "repeated-plan" });
     expect(rounds).toBeLessThanOrEqual(5);
   });
 });

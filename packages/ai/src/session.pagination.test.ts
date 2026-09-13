@@ -235,6 +235,22 @@ describe("sorting a column the contract did not offer", () => {
     expect(setSort).not.toHaveBeenCalled();
   });
 
+  it("sorts when the table published no columns to narrow it", async () => {
+    // Nothing was said about sorting, and an absence is not a restriction —
+    // the host wiring setSort is the permission. Refusing here would invent a
+    // rule out of silence and name an empty list of alternatives.
+    const { session, setSort } = sortSession([]);
+
+    const result = await session.execute(
+      "view.setSort",
+      { key: "name", dir: "asc" },
+      1,
+      "s-open"
+    );
+    expect(result.ok).toBe(true);
+    expect(setSort).toHaveBeenCalledWith("name", "asc");
+  });
+
   it("says so plainly when no column on the table sorts", async () => {
     const { session } = sortSession([{ id: "notes", sortable: false }]);
     const refused = await session.execute(

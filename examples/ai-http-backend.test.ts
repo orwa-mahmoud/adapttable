@@ -598,12 +598,17 @@ describe("handleExampleAgentTurn", () => {
     assert.equal(reply.continueWithResults, true);
   });
 
-  it("ends the turn on a batch that only acts", async () => {
+  it("ends the turn on a write", async () => {
     const complete = () =>
       Promise.resolve(
         JSON.stringify({
-          text: "Moved.",
-          toolCalls: [{ name: "view.setPage", args: { page: 2 } }],
+          text: "Saved.",
+          toolCalls: [
+            {
+              name: "edit.cells",
+              args: { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+            },
+          ],
         })
       );
     const reply = await handleExampleAgentTurn(
@@ -611,8 +616,8 @@ describe("handleExampleAgentTurn", () => {
       complete,
       new AbortController().signal
     );
-    // Its receipt belongs to the reader. Handing it back buys a round that
-    // says "done" — or repeats the call it just made.
+    // A write's receipt belongs to the reader. Handing it back buys a round
+    // that only says "done".
     assert.equal(reply.continueWithResults, false);
   });
 
