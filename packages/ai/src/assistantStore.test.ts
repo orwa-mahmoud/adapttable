@@ -1108,6 +1108,23 @@ describe("a turn that came back with nothing in it", () => {
     expect(state.draft).toBe("Show only the Core team.");
   });
 
+  it("reports a reply that arrives with no text at all", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      // A host's own transport, across a boundary the type system does not
+      // reach. Omitting `text` is the same silence as sending an empty one.
+      transport: { send: () => Promise.resolve({} as AssistantTransportReply) },
+    });
+    store.connect();
+    store.setDraft("Page 2");
+    await store.send();
+
+    const state = store.getState();
+    expect(state.messages.map((entry) => entry.role)).toEqual(["user"]);
+    expect(state.status).toBe("error");
+    expect(state.error).toMatch(/no text and nothing to apply/);
+  });
+
   it("keeps a wordless turn that applied something", async () => {
     const store = createTableAssistant({
       session: tableSession(),

@@ -292,9 +292,12 @@ const EMPTY_TURN =
  * downstream can render.
  */
 function silentTurn(reply: AssistantTransportReply, receipts: number): boolean {
-  return (
-    reply.text.trim() === "" && receipts === 0 && reply.unresolved === undefined
-  );
+  // `text` is declared as a string, but a transport is host code across a
+  // boundary and the declaration is a claim rather than a fact. A reply that
+  // arrives without one said nothing, which is the case this already answers
+  // — reading it as a string first would turn that into a thrown turn.
+  const said = typeof reply.text === "string" ? reply.text.trim() : "";
+  return said === "" && receipts === 0 && reply.unresolved === undefined;
 }
 
 /**

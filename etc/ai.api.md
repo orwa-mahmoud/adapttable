@@ -579,7 +579,7 @@ export interface AssistantReceipt {
 }
 
 // @public
-export type AssistantReceiptStatus = "executed" | "staged" | "rejected" | "awaiting-approval" | "cancelled" | "stale" | "failed";
+export type AssistantReceiptStatus = "executed" | "staged" | "partial" | "rejected" | "awaiting-approval" | "cancelled" | "stale" | "failed";
 
 // @public
 export interface AssistantReceiptSubject {
