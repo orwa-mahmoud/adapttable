@@ -121,11 +121,11 @@ async function installMockAgentBackend(page: Page): Promise<void> {
         body: JSON.stringify({
           schemaVersion: "adapttable.agent.v1",
           text: "Filtered to Core team.",
-          actions: [
+          toolCalls: [
             {
-              key: "view.setFilters",
+              id: `mock-filter-${String(Date.now())}`,
+              name: "view.setFilters",
               args: { filters: { team: ["Core"] } },
-              idempotencyKey: `mock-filter-${String(Date.now())}`,
             },
           ],
         }),

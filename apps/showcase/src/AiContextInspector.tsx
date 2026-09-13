@@ -68,16 +68,22 @@ function useContext(
   session: AgentSession | null,
   inputs: () => AgentContextInputs,
   profile: DemoContextProfile,
-  revision: number | undefined
+  manifest: AgentManifest | null
 ): AgentContext | null {
   return useMemo(() => {
     if (!session) return null;
     return buildAgentContext(session, { profile }, inputs());
-    // Rebuilt when the table moves or the profile changes. `inputs` is read
-    // inside, so it is deliberately not a dependency — a new closure every
-    // render would rebuild the contract every render.
+    // Rebuilt when the manifest moves or the profile changes. The manifest is
+    // the right key and the view revision was not: turning a feature off
+    // changes what the table offers without moving the view, and the
+    // inspector would go on listing a capability the table had just retired.
+    // A new manifest object is published only when one actually differs, so
+    // this rebuilds when the contract moves and not on every render.
+    //
+    // `inputs` is read inside and deliberately not a dependency — a new
+    // closure every render would rebuild the contract every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, profile, revision]);
+  }, [session, profile, manifest]);
 }
 
 /** The developer inspector. */
@@ -89,12 +95,7 @@ export function AiContextInspector({
   webmcpNames,
   docsUrl,
 }: Readonly<AiContextInspectorProps>) {
-  const context = useContext(
-    session,
-    contextInputs,
-    profile,
-    manifest?.viewRevision
-  );
+  const context = useContext(session, contextInputs, profile, manifest);
   const capabilities = context?.contract.capabilities ?? [];
   const [selectedKey, setSelectedKey] = useState("");
   const selected =
