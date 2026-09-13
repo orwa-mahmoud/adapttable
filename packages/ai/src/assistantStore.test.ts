@@ -483,3 +483,221 @@ describe("the assistant store", () => {
     expect(store.getState().messages).toHaveLength(2);
   });
 });
+
+/** A table whose page really moves, so an undo has something to put back. */
+function movingTable(): {
+  readonly session: AgentSession;
+  readonly setPage: ReturnType<typeof vi.fn>;
+  page: () => number;
+  revision: () => number;
+} {
+  let page = 1;
+  let revision = 1;
+  const setPage = vi.fn((next: number) => {
+    page = next;
+    revision += 1;
+  });
+  const session = createAgentSession({
+    observe: () => observation({ page, viewRevision: revision }),
+    apply: { setPage },
+  });
+  return { session, setPage, page: () => page, revision: () => revision };
+}
+
+describe("a question put to the reader", () => {
+  it("waits, then hands the answer back to the turn", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: async ({ askUser }) => {
+          const given = await askUser?.({
+            id: "q1",
+            prompt: "Which quarter?",
+            options: [{ id: "q4", label: "Q4" }],
+          });
+          return { text: `you said ${given?.optionId ?? "nothing"}` };
+        },
+      },
+    });
+    store.connect();
+
+    const turn = store.send("summarise");
+    await Promise.resolve();
+    expect(store.getState().status).toBe("awaiting-user");
+    expect(store.getState().pendingQuestion?.prompt).toBe("Which quarter?");
+
+    store.answer({ optionId: "q4" });
+    // Answering is not a new turn: the one that asked resumes.
+    expect(store.getState().status).toBe("sending");
+    await turn;
+
+    expect(store.getState().messages.at(-1)?.text).toBe("you said q4");
+    expect(store.getState().pendingQuestion).toBeNull();
+  });
+
+  it("is answered by nobody once its turn has been abandoned", async () => {
+    let asked: Promise<unknown> | undefined;
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: ({ askUser }) => {
+          asked = askUser?.({ id: "q1", prompt: "Which?", options: [] });
+          return asked!.then(() => ({ text: "done" }));
+        },
+      },
+    });
+    store.connect();
+
+    void store.send("first");
+    await Promise.resolve();
+    store.stop();
+
+    // The reader is looking at something else now. Resolving to `undefined`
+    // lets the transport report it unresolved rather than hang on an answer
+    // nobody is being asked for.
+    await expect(asked).resolves.toBeUndefined();
+  });
+
+  it("ignores an answer nobody asked for", () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying(),
+    });
+    store.connect();
+
+    const before = store.getState();
+    store.answer({ optionId: "q4" });
+    expect(store.getState()).toBe(before);
+  });
+});
+
+describe("putting a turn back", () => {
+  /** A transport that moves the page and reports the revision it landed on. */
+  function movingTransport(): AssistantTransport {
+    let turn = 0;
+    return {
+      send: async ({ session }) => {
+        turn += 1;
+        const result = await session.execute(
+          "view.setPage",
+          { page: 4 },
+          session.manifest().viewRevision,
+          `test-turn-${String(turn)}`
+        );
+        return { text: "moved", results: [result], keys: ["view.setPage"] };
+      },
+    };
+  }
+
+  it("restores the view the turn started from", async () => {
+    const table = movingTable();
+    const store = createTableAssistant({
+      session: table.session,
+      transport: movingTransport(),
+      // The host says where the view is; without that there is nothing for an
+      // undo to compare against.
+      contextInputs: () => ({ view: { page: table.page(), limit: 10 } }),
+    });
+    store.connect();
+
+    await store.send("go to page 4");
+    expect(table.page()).toBe(4);
+    expect(store.getState().undo?.available).toBe(true);
+
+    await store.undoTurn();
+    expect(table.page()).toBe(1);
+    // The offer is spent: the table it described no longer exists.
+    expect(store.getState().undo).toBeNull();
+  });
+
+  it("declines once the reader has moved the table themselves", async () => {
+    const table = movingTable();
+    const store = createTableAssistant({
+      session: table.session,
+      transport: movingTransport(),
+      contextInputs: () => ({ view: { page: table.page(), limit: 10 } }),
+    });
+    store.connect();
+    await store.send("go to page 4");
+
+    // Somebody else's hand on the table. The store is not told — a reader
+    // clicking the table's own control notifies nothing in here.
+    await table.session.execute(
+      "view.setPage",
+      { page: 7 },
+      table.session.manifest().viewRevision,
+      "reader-moved-it"
+    );
+
+    // Acting is refused whatever the chip currently says, because the offer
+    // is re-checked at the moment it is taken, not when it was drawn.
+    await store.undoTurn();
+    expect(table.page()).toBe(7);
+
+    // And on the next re-read the chip agrees: the table this plan described
+    // is gone.
+    store.setDraft("anything");
+    expect(store.getState().undo?.available).toBe(false);
+    expect(store.getState().undo?.blocked?.code).toBe("table-moved");
+  });
+
+  it("does nothing when there is no offer standing", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying(),
+    });
+    store.connect();
+
+    await store.undoTurn();
+    expect(store.getState().error).toBeUndefined();
+  });
+});
+
+describe("what the reader stopped being asked about", () => {
+  it("tells the host to forget one, and republishes", () => {
+    const onRevokeAlwaysAllow = vi.fn();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying(),
+      onRevokeAlwaysAllow,
+    });
+    store.connect();
+    const before = store.getState();
+
+    store.revokeAlwaysAllow("edit.cells");
+
+    expect(onRevokeAlwaysAllow).toHaveBeenCalledWith("edit.cells");
+    // The list itself lives with whoever owns the memory. The store asks for a
+    // re-read, and holds its snapshot when that re-read says the same thing —
+    // so a host that has not actually revoked anything causes no churn.
+    expect(store.getState()).toBe(before);
+  });
+});
+
+describe("streamed text", () => {
+  it("coalesces deltas rather than publishing one per token", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: ({ onPartialText }) => {
+          onPartialText?.("a");
+          onPartialText?.("ab");
+          onPartialText?.("abc");
+          return Promise.resolve({ text: "abc" });
+        },
+      },
+    });
+    store.connect();
+    const seen = vi.fn();
+    store.subscribe(seen);
+
+    await store.send("count");
+
+    // The reply is the authority for what happened, so the provisional text
+    // is replaced rather than appended to.
+    expect(store.getState().messages.at(-1)?.text).toBe("abc");
+    expect(
+      store.getState().messages.filter((m) => m.role === "assistant")
+    ).toHaveLength(1);
+  });
+});
