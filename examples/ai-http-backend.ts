@@ -367,6 +367,40 @@ function userPrompt(request: AgentHttpRequest): string {
  * intention into two writes. A model that repeats itself now repeats the same
  * ids, and the frontend recognises them.
  */
+/**
+ * The envelope this example parses, stated to the model.
+ *
+ * The capability guides above it are full of JSON Schemas, and a model told
+ * only "reply with JSON" will reasonably answer with an object shaped like one
+ * of them — arguments for the call it wants, with no envelope around them.
+ * That is a well-formed document this backend cannot use, so the shape is
+ * named here rather than assumed, and the mistake it invites is named with it.
+ *
+ * `agentSystemPrompt` deliberately does not say this: the envelope belongs to
+ * whoever wrote the backend, and a host with its own wire says something else.
+ */
+const REPLY_SHAPE = [
+  "Reply with one JSON object and nothing else, in exactly this shape:",
+  '{"text": "what the reader should see",',
+  ' "toolCalls": [{"name": "<capability key>", "args": {…}}],',
+  ' "askUser": {"id": "q1", "question": "…", "options": ["…"], "allowFreeText": true}}',
+  "",
+  "- `text` is always present, even when you are also calling something.",
+  "- `toolCalls` is what the table should do. Omit it when there is nothing to do.",
+  "- Each `name` is one of the capability keys listed above, and `args` is that",
+  "  capability's own arguments — the schemas above describe `args`, not this reply.",
+  "- `askUser` is for a question you cannot answer from the context, and needs",
+  "  an `id` of your own choosing so the answer can be matched back to it. Omit",
+  "  the whole field when you are not asking anything.",
+  "- Never reply with a bare arguments object: arguments belong inside `args`.",
+].join("\n");
+
+/** A bounded, single-line look at what a provider sent. */
+function excerpt(raw: string, limit = 300): string {
+  const flat = raw.replace(/\s+/g, " ").trim();
+  return flat.length > limit ? `${flat.slice(0, limit)}\u2026` : flat;
+}
+
 function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
   const body: unknown = JSON.parse(raw);
   if (!body || typeof body !== "object" || Array.isArray(body)) {
@@ -400,7 +434,13 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
     !toolCalls?.length &&
     record.askUser === undefined
   ) {
-    throw new TypeError("provider returned no text, no calls and no question");
+    // The document parsed and answered nothing. Quote a bounded excerpt of it:
+    // a developer running this example needs to see what the provider actually
+    // said, and the sentence alone sends them looking in the wrong place.
+    // Their own model's reply, never a credential.
+    throw new TypeError(
+      `provider returned no text, no calls and no question — it sent ${excerpt(raw)}`
+    );
   }
   return parseAgentHttpResponse({
     schemaVersion: AGENT_HTTP_SCHEMA,
@@ -455,7 +495,7 @@ export async function handleExampleAgentTurn(
   const reader = onText ? createTextFieldReader("text") : undefined;
   const raw = await complete(
     {
-      system: agentSystemPrompt(resolved.schema),
+      system: `${agentSystemPrompt(resolved.schema)}\n\n${REPLY_SHAPE}`,
       user: userPrompt(request),
       signal,
     },
