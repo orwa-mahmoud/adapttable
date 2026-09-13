@@ -5,7 +5,6 @@ const FEATURE_FOR: Partial<Record<CapabilityKey, string>> = {
   "view.setFilters": "filters",
   "view.setGroupBy": "grouping",
   "export.run": "export-csv",
-  "edit.cells": "editing",
   "rows.reorder": "row-reorder",
 };
 
@@ -58,6 +57,11 @@ export function isBuiltInEnabled(
       return observation.columns.length > 0;
     case "export.run":
       return observation.hasExport;
+    // Read from the wired channel, never from a feature name: cell, row and
+    // batch editing compose under three different ids, and a table editable
+    // through any of them hands the agent a real write path. `hasEdit` is
+    // already that answer — it is true only where a host callback or a
+    // composed editing channel exists.
     case "edit.cells":
       return observation.hasEdit && observation.writePolicy === "allow";
     case "rows.add":

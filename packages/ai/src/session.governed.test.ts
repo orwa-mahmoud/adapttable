@@ -256,6 +256,33 @@ describe("rows.resolve", () => {
 });
 
 describe("edit.cells", () => {
+  it("is offered under every editing feature a table can compose", () => {
+    // Cell, row and batch editing compose under three different ids. A table
+    // editable through any of them hands the agent a real write path, and
+    // gating on one feature's name took it away while the reader kept theirs.
+    for (const feature of ["editing", "row-editing", "batch-editing"]) {
+      const session = createAgentSession({
+        observe: () => observation({ featureIds: [feature] }),
+        apply: apply(),
+      });
+
+      expect(session.catalog().map((entry) => entry.key)).toContain(
+        "edit.cells"
+      );
+    }
+  });
+
+  it("is not offered when nothing wired an editing channel", () => {
+    const session = createAgentSession({
+      observe: () => observation({ featureIds: ["editing"], hasEdit: false }),
+      apply: apply(),
+    });
+
+    expect(session.catalog().map((entry) => entry.key)).not.toContain(
+      "edit.cells"
+    );
+  });
+
   it("rejects a stale revision before writing", async () => {
     const hooks = apply();
     const session = createAgentSession({
