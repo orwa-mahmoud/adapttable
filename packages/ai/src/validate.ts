@@ -31,7 +31,17 @@ function missingRequired(
   path: string
 ) {
   for (const key of schema.required ?? []) {
-    if (!(key in value)) return `${path}.${key} is required`;
+    if (key in value) continue;
+    // Name the values it takes when the schema names them. "side is required"
+    // sends a backend back to a guide it may not have; "one of top, bottom"
+    // lets it answer from the refusal itself.
+    const allowed = schema.properties?.[key]?.enum;
+    const choices = allowed
+      ?.filter((entry) => entry !== null)
+      .map((entry) => String(entry));
+    return choices && choices.length > 0
+      ? `${path}.${key} is required — one of ${choices.join(", ")}`
+      : `${path}.${key} is required`;
   }
   return undefined;
 }

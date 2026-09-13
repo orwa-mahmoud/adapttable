@@ -104,3 +104,29 @@ describe("the name a capability's own title suggests", () => {
     ).toMatchObject({ set: { salary: "sum" } });
   });
 });
+
+describe("a word the capability's own description hands the model", () => {
+  it("reads `edge` as the side `pinColumn` takes", () => {
+    // Its summary says "at a logical edge" and its guide says "to the logical
+    // start edge". A model that reaches for `edge` was told to.
+    expect(
+      normalizeCapabilityArgs("view.pinColumn", {
+        key: "person",
+        edge: "start",
+      })
+    ).toEqual({ key: "person", side: "start" });
+    expect(
+      normalizeCapabilityArgs("view.pinColumn", { key: "person", edge: null })
+    ).toEqual({ key: "person", side: null });
+  });
+
+  it("leaves a properly named side alone", () => {
+    expect(
+      normalizeCapabilityArgs("view.pinColumn", {
+        key: "person",
+        side: "start",
+        edge: "end",
+      })
+    ).toMatchObject({ side: "start" });
+  });
+});

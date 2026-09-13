@@ -115,6 +115,17 @@ export function normalizeCapabilityArgs(key: string, args: unknown): unknown {
     record.key = record.groupBy;
     delete record.groupBy;
   }
+  // `pinColumn` takes `side`, and both its summary and its guide describe
+  // pinning "to an edge" — so `edge` is the word the capability hands the
+  // model on its way to the wrong argument name.
+  if (
+    key === "view.pinColumn" &&
+    !("side" in record) &&
+    (typeof record.edge === "string" || record.edge === null)
+  ) {
+    record.side = record.edge;
+    delete record.edge;
+  }
   // And again: `setAggregations` taking `set` reads as a detail of this API,
   // while `aggregations` is the word the capability itself uses.
   if (

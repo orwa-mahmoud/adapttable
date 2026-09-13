@@ -33,3 +33,31 @@ describe("an argument the schema does not take", () => {
     ).toBe("$.anything is not allowed; this takes no arguments");
   });
 });
+
+describe("an argument the schema requires", () => {
+  it("names the values it takes when the schema names them", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        side: { type: ["string", "null"], enum: ["top", "bottom", null] },
+      },
+      required: ["side"],
+    };
+    expect(validateSchema(schema, {})).toBe(
+      "$.side is required — one of top, bottom"
+    );
+  });
+
+  it("says only that it is required when there is no set to name", () => {
+    expect(
+      validateSchema(
+        {
+          type: "object",
+          properties: { key: { type: "string" } },
+          required: ["key"],
+        },
+        {}
+      )
+    ).toBe("$.key is required");
+  });
+});
