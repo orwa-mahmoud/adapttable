@@ -7,9 +7,9 @@
 import {
   type AgentApply,
   type AgentCapabilityDefinition,
-  type AgentContextInputs,
   type AgentColumn,
   agentColumnsFromNeutral,
+  type AgentContextInputs,
   agentFiltersFromDefs,
   type AgentObservation,
   type AgentSession,
@@ -19,11 +19,11 @@ import {
   type ApprovalResult,
   type ApprovalSubject,
   type ApprovalTransaction,
-  closeTransaction,
-  contractFingerprint,
-  type CommitPolicy,
-  createAgentSession,
   assertAlwaysAllow,
+  closeTransaction,
+  type CommitPolicy,
+  contractFingerprint,
+  createAgentSession,
   createApprovalMemory,
   displayProposals,
   mayAlwaysAllow,
@@ -608,22 +608,34 @@ function viewInputsFromRuntime(
       ...(view?.groupingState?.groupBy
         ? { groupBy: view.groupingState.groupBy }
         : {}),
-      ...(query?.extra
-        ? { filters: query.extra as Readonly<Record<string, unknown>> }
-        : {}),
+      ...(query?.extra ? { filters: query.extra } : {}),
       ...(view?.pinning?.columns
         ? {
-            pinnedColumns: view.pinning.columns as Readonly<
-              Record<string, unknown>
-            >,
+            pinnedColumns: view.pinning.columns,
           }
         : {}),
       ...(view?.pinning?.rows
         ? {
-            pinnedRows: view.pinning.rows as Readonly<Record<string, unknown>>,
+            pinnedRows: view.pinning.rows,
           }
         : {}),
     },
+  };
+}
+
+/**
+ * A row-by-row refusal, with the reader's stated reason when they gave one.
+ *
+ * The reason travels with the refusal so the receipt and the model-visible
+ * result can say why rather than only that.
+ */
+function perItemRefusal(
+  transaction: ApprovalTransaction,
+  stated: string | undefined
+): ApprovalResult {
+  return {
+    ...settleDecisions(transaction.decisions, "rejected"),
+    ...(stated ? { reason: stated } : {}),
   };
 }
 
@@ -1220,19 +1232,19 @@ function TableAgentProvider({
                 ? settleDecisions(transaction.decisions, "approved")
                 : true
             ),
-          // A stated reason travels with the refusal, so the receipt and the
-          // model-visible result can say why rather than only that.
-          reject: (reason?: string) =>
+          reject: (reason?: string) => {
+            const stated = reason?.trim();
+            if (transaction.pending.perItem) {
+              transaction.pending.resolve(perItemRefusal(transaction, stated));
+              return;
+            }
+            // A write answered whole is a plain refusal unless the reader
+            // said something, in which case an empty approval list carries
+            // the words.
             transaction.pending.resolve(
-              transaction.pending.perItem
-                ? {
-                    ...settleDecisions(transaction.decisions, "rejected"),
-                    ...(reason?.trim() ? { reason: reason.trim() } : {}),
-                  }
-                : reason?.trim()
-                  ? { approved: [], reason: reason.trim() }
-                  : false
-            ),
+              stated ? { approved: [], reason: stated } : false
+            );
+          },
           ...(transaction.pending.perItem
             ? { decideAt: decideAt(transaction.id) }
             : {}),
