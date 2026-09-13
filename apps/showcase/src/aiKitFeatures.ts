@@ -13,7 +13,7 @@ import {
   undoRedoButtons as antdUndo,
 } from "@adapttable/antd/editing";
 import { filters as antdFilters } from "@adapttable/antd/filters";
-import { grouping as antdGrouping } from "@adapttable/antd/grouping";
+import { groupingPanel as antdGrouping } from "@adapttable/antd/grouping-panel";
 import { rowPinning as antdRowPinning } from "@adapttable/antd/row-pinning";
 import { agentApproval as baseUiApproval } from "@adapttable/base-ui";
 import { TableAssistant as baseUiAssistant } from "@adapttable/base-ui/assistant";
@@ -26,7 +26,7 @@ import {
   undoRedoButtons as baseUiUndo,
 } from "@adapttable/base-ui/editing";
 import { filters as baseUiFilters } from "@adapttable/base-ui/filters";
-import { grouping as baseUiGrouping } from "@adapttable/base-ui/grouping";
+import { groupingPanel as baseUiGrouping } from "@adapttable/base-ui/grouping-panel";
 import { rowPinning as baseUiRowPinning } from "@adapttable/base-ui/row-pinning";
 import { agentApproval as chakraApproval } from "@adapttable/chakra";
 import { TableAssistant as chakraAssistant } from "@adapttable/chakra/assistant";
@@ -39,7 +39,7 @@ import {
   undoRedoButtons as chakraUndo,
 } from "@adapttable/chakra/editing";
 import { filters as chakraFilters } from "@adapttable/chakra/filters";
-import { grouping as chakraGrouping } from "@adapttable/chakra/grouping";
+import { groupingPanel as chakraGrouping } from "@adapttable/chakra/grouping-panel";
 import { rowPinning as chakraRowPinning } from "@adapttable/chakra/row-pinning";
 import { agentApproval as mantineApproval } from "@adapttable/mantine";
 import { TableAssistant as mantineAssistant } from "@adapttable/mantine/assistant";
@@ -52,7 +52,7 @@ import {
   undoRedoButtons as mantineUndo,
 } from "@adapttable/mantine/editing";
 import { filters as mantineFilters } from "@adapttable/mantine/filters";
-import { grouping as mantineGrouping } from "@adapttable/mantine/grouping";
+import { groupingPanel as mantineGrouping } from "@adapttable/mantine/grouping-panel";
 import { rowPinning as mantineRowPinning } from "@adapttable/mantine/row-pinning";
 import { agentApproval as muiApproval } from "@adapttable/mui";
 import { TableAssistant as muiAssistant } from "@adapttable/mui/assistant";
@@ -65,7 +65,7 @@ import {
   undoRedoButtons as muiUndo,
 } from "@adapttable/mui/editing";
 import { filters as muiFilters } from "@adapttable/mui/filters";
-import { grouping as muiGrouping } from "@adapttable/mui/grouping";
+import { groupingPanel as muiGrouping } from "@adapttable/mui/grouping-panel";
 import { rowPinning as muiRowPinning } from "@adapttable/mui/row-pinning";
 import { agentApproval as radixApproval } from "@adapttable/radix";
 import { TableAssistant as radixAssistant } from "@adapttable/radix/assistant";
@@ -78,7 +78,7 @@ import {
   undoRedoButtons as radixUndo,
 } from "@adapttable/radix/editing";
 import { filters as radixFilters } from "@adapttable/radix/filters";
-import { grouping as radixGrouping } from "@adapttable/radix/grouping";
+import { groupingPanel as radixGrouping } from "@adapttable/radix/grouping-panel";
 import { rowPinning as radixRowPinning } from "@adapttable/radix/row-pinning";
 import { agentApproval as shadcnApproval } from "@adapttable/shadcn";
 import { TableAssistant as shadcnAssistant } from "@adapttable/shadcn/assistant";
@@ -91,7 +91,7 @@ import {
   undoRedoButtons as shadcnUndo,
 } from "@adapttable/shadcn/editing";
 import { filters as shadcnFilters } from "@adapttable/shadcn/filters";
-import { grouping as shadcnGrouping } from "@adapttable/shadcn/grouping";
+import { groupingPanel as shadcnGrouping } from "@adapttable/shadcn/grouping-panel";
 import { rowPinning as shadcnRowPinning } from "@adapttable/shadcn/row-pinning";
 import { agentApproval as unstyledApproval } from "@adapttable/unstyled";
 import { TableAssistant as unstyledAssistant } from "@adapttable/unstyled/assistant";
@@ -104,7 +104,7 @@ import {
   undoRedoButtons as unstyledUndo,
 } from "@adapttable/unstyled/editing";
 import { filters as unstyledFilters } from "@adapttable/unstyled/filters";
-import { grouping as unstyledGrouping } from "@adapttable/unstyled/grouping";
+import { groupingPanel as unstyledGrouping } from "@adapttable/unstyled/grouping-panel";
 import { rowPinning as unstyledRowPinning } from "@adapttable/unstyled/row-pinning";
 
 export const AI_KIT_FEATURES = {

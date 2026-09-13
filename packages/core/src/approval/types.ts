@@ -121,8 +121,18 @@ export interface AgentApprovalProposal {
    * they are looking at. Never guess a value to fill this in.
    */
   readonly beforeUnavailable?: boolean;
+  /**
+   * The before-value as the column itself writes it.
+   *
+   * Present only when the column says how its values read. A surface prefers
+   * it over {@link before}: a table showing `$170k` everywhere else must not
+   * ask the reader to agree to `170`.
+   */
+  readonly beforeText?: string;
   /** Value after the write. */
   readonly after?: unknown;
+  /** The after-value as the column itself writes it. See {@link beforeText}. */
+  readonly afterText?: string;
   /** Reader-facing name for the row, when the table can supply one. */
   readonly rowLabel?: string;
   /**

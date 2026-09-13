@@ -749,6 +749,19 @@ function readerResolver(
         : undefined;
     },
     cellValue: (rowKey, column) => recordFor(rowKey)?.[column],
+    // The column's own `formatValue` takes a row, so a proposed value is
+    // formatted by asking the column about the row it would produce. That is
+    // what makes `170 → 175` read as `$170k → $175k` on the card, in exactly
+    // the wording the cells use.
+    cellText: (rowKey, column, value) => {
+      const definition = runtime
+        .view()
+        ?.groupingState?.columns?.find((entry) => entry.key === column);
+      const format = definition?.formatValue;
+      const record = recordFor(rowKey);
+      if (!format || !record) return undefined;
+      return format({ ...record, [column]: value });
+    },
     readable: (column) => columns?.[column]?.readable !== false,
     columnLabel: (column) => columns?.[column]?.label,
   };

@@ -26,13 +26,14 @@ import {
   type RowPinState,
 } from "@adapttable/core";
 import { getLabels } from "@adapttable/i18n";
-import type { BatchRowEdit, ColumnDef } from "@adapttable/react";
+import type { BatchRowEdit, CellProps, ColumnDef } from "@adapttable/react";
 import {
   type AgentApprovalPending,
   assistantIsBusy,
 } from "@adapttable/react/adapter";
 import type { TableFeature } from "@adapttable/react/features";
 import {
+  type ReactElement,
   type ReactNode,
   Suspense,
   useCallback,
@@ -300,6 +301,20 @@ const DEMO_NOTE: Record<Locale, string> = {
   ar: "هذه الأمثلة نصية مُعدّة مسبقًا. اربط خادمًا لطرح أي سؤال.",
 };
 
+/** Salaries are stored in thousands; nothing on screen shows a bare number. */
+function salaryText(value: number): string {
+  const rounded = Math.round(value * 10) / 10;
+  return `$${String(rounded)}k`;
+}
+
+/**
+ * Display only. `accessor` stays the number, so sorting, grouping and the
+ * average still work on the value rather than on the text around it.
+ */
+function SalaryCell({ row }: CellProps<StaffRow>): ReactElement {
+  return <>{salaryText(row.salary)}</>;
+}
+
 function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
   const header = COLUMN_HEADERS[locale];
   return [
@@ -333,6 +348,21 @@ function columnsFor(locale: Locale): ColumnDef<StaffRow>[] {
       editor: "number",
       aggregatable: true,
       editValue: (row) => String(row.salary),
+      // The column stores thousands, so the cell says so. A bare 170 under a
+      // header called Salary is a number nobody can act on. `formatValue` is
+      // the same fact for every surface that cannot render a node — exports,
+      // mobile cards, the announcer.
+      Cell: SalaryCell,
+      formatValue: (row) => salaryText(row.salary),
+      // A number under a money column reads as money — and an average of
+      // three salaries is not 163.33333333333334. A count is people, not an
+      // amount, so it stays a plain number.
+      formatAggregate: (value, context) =>
+        typeof value !== "number"
+          ? undefined
+          : context.aggregation === "count"
+            ? value
+            : salaryText(value),
       // A bare 170 is not a salary until something says what it counts. Left
       // unsaid, a model reports whatever unit reads naturally to it and the
       // reader has no way to tell the guess from the data.
@@ -728,7 +758,11 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       }),
     ];
     // Off by default so this is a normal table. Group by team is an
-    // assistant example once this feature is on.
+    // assistant example once this feature is on — and it is the panel, not
+    // the static feature: a static `grouping("team")` reimposes its key on
+    // every render, so `view.setGroupBy` would report a change the table
+    // immediately undid. Grouping is live state the reader and the agent
+    // share, the same as filtering.
     if (toggles.grouping) next.push(factories.grouping("team"));
     if (toggles.rowPinning) {
       next.push(

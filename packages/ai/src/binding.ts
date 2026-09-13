@@ -97,6 +97,20 @@ export interface ProposalResolver {
    * difference is what a reader deciding on a write needs to know.
    */
   readonly cellValue: (rowKey: string, column: string) => unknown;
+  /**
+   * One value as this column writes it, when the column says how it reads.
+   *
+   * A salary column that shows `$170k` in every cell must not show `170` on
+   * the card where a reader agrees to change it — that is the one screen
+   * where an ambiguous number costs something. Takes the value rather than
+   * the row, so the value a write proposes is formatted the same way as the
+   * one it replaces. `undefined` when the column says nothing.
+   */
+  readonly cellText?: (
+    rowKey: string,
+    column: string,
+    value: unknown
+  ) => string | undefined;
   /** Whether the reader may see this column at all. */
   readonly readable: (column: string) => boolean;
   /** The column's reader-facing name, when the table can supply one. */
@@ -130,16 +144,24 @@ export function displayProposals(
         : undefined;
     const columnLabel =
       column === undefined ? undefined : resolve.columnLabel(column);
+    const text = (value: unknown): string | undefined =>
+      column === undefined || value === undefined
+        ? undefined
+        : resolve.cellText?.(proposal.rowKey, column, value);
+    const beforeText = text(before);
+    const afterText = text(proposal.after);
     return {
       rowKey: proposal.rowKey,
       ...(label ? { rowLabel: label } : {}),
       ...(column === undefined ? {} : { column }),
       ...(columnLabel ? { columnLabel } : {}),
       ...(before !== undefined ? { before } : {}),
+      ...(beforeText === undefined ? {} : { beforeText }),
       ...(column !== undefined && before === undefined
         ? { beforeUnavailable: true }
         : {}),
       ...(proposal.after !== undefined ? { after: proposal.after } : {}),
+      ...(afterText === undefined ? {} : { afterText }),
     };
   });
 }

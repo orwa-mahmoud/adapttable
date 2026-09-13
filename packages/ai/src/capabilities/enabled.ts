@@ -3,7 +3,6 @@ import type { AgentObservation } from "../types";
 
 const FEATURE_FOR: Partial<Record<CapabilityKey, string>> = {
   "view.setFilters": "filters",
-  "view.setGroupBy": "grouping",
   "export.run": "export-csv",
   "rows.reorder": "row-reorder",
 };
@@ -29,6 +28,12 @@ export function isBuiltInEnabled(
     case "view.setFilters":
       return observation.hasFilters;
     case "view.setGroupBy":
+      // The grouping PANEL, never the static feature. `grouping(key)` reimposes
+      // its key on every render, so a setter offered against it reports a
+      // change the table has already undone — the agent says "grouped by
+      // status" over a table still grouped by team. Grouping is offered only
+      // where it is live state the reader drives too.
+      if (!features.has("grouping-panel")) return false;
       return observation.source.grouping !== false;
     case "view.setAggregations": {
       if (!features.has("grouping") && !features.has("grouping-panel")) {

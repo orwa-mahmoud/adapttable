@@ -90,10 +90,12 @@ function describeItem(
     ...(proposal.column === undefined
       ? {}
       : { column: proposal.columnLabel ?? proposal.column }),
+    // The column's own wording wins where it has one: the card a reader
+    // agrees on should read in the same units as the table behind it.
     before: proposal.beforeUnavailable
       ? (labels?.proposalValueUnavailable ?? "Unavailable")
-      : display(proposal.before),
-    after: display(proposal.after),
+      : (proposal.beforeText ?? display(proposal.before)),
+    after: proposal.afterText ?? display(proposal.after),
   });
 }
 
