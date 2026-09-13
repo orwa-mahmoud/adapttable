@@ -165,6 +165,55 @@ describe("approval through the table's own chrome", () => {
     expect(onCellEdit).not.toHaveBeenCalled();
   });
 
+  it("settles when a kit's own button hands it the click event", async () => {
+    // Every kit wires its reject control `onClick={onReject}`, and the slot
+    // contract says that handler takes nothing — so what actually arrives is
+    // a MouseEvent. Reading it as a stated reason left the write pending and
+    // the approval strip on screen with nothing able to close it.
+    const onCellEdit = vi.fn();
+    mount(
+      { tableId: "clicked", approval: "writes" },
+      { ...VIEW, editing: { onCellEdit } }
+    );
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const result = edit("clicked-1");
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+    act(() => {
+      (handles.current.pending?.reject as (value: unknown) => void)(
+        new MouseEvent("click")
+      );
+    });
+
+    const settled = await result;
+    expect(settled.result).toMatchObject({ applied: false });
+    expect(onCellEdit).not.toHaveBeenCalled();
+  });
+
+  it("keeps a reason the reader actually stated", async () => {
+    mount({ tableId: "stated", approval: "writes" });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const result = edit("stated-1");
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+    act(() => {
+      (handles.current.pending?.reject as (value: unknown) => void)(
+        "  not during the close  "
+      );
+    });
+
+    const settled = await result;
+    expect(JSON.stringify(settled.result)).toContain("not during the close");
+  });
+
   it("refuses a second write while one is still waiting for a decision", async () => {
     mount({ tableId: "queue", approval: "writes" });
     await waitFor(() => {

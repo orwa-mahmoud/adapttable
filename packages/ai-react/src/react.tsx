@@ -1233,7 +1233,12 @@ function TableAgentProvider({
                 : true
             ),
           reject: (reason?: string) => {
-            const stated = reason?.trim();
+            // A kit's button is wired `onClick={onReject}`, and the slot
+            // contract says the handler takes nothing — so what actually
+            // arrives is a click event. The declared type is a claim, not a
+            // fact: anything that is not a stated reason is no reason at all.
+            const stated =
+              typeof reason === "string" ? reason.trim() : undefined;
             if (transaction.pending.perItem) {
               transaction.pending.resolve(perItemRefusal(transaction, stated));
               return;
