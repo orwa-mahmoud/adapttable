@@ -484,6 +484,18 @@ export function createAgentSession(
     // The last moment before the handler can touch the host. Nothing has been
     // written yet, so a cancellation here leaves the key free to be retried.
     throwIfCancelled();
+    // And nothing has been written yet, so this is also the last moment the
+    // table can be checked for free. Planning a write awaits the host — row
+    // resolution, the before-value, and the reader's own answer — and a change
+    // that lands across any of those leaves this plan describing a table that
+    // no longer exists. Refusing costs a retry; writing does not come back.
+    const atHandoff = guard.observe().viewRevision;
+    if (atHandoff !== entry.viewRevision) {
+      throw new ApplyError(
+        "revision-mismatch",
+        `expected revision ${String(entry.viewRevision)}, table is at ${String(atHandoff)}`
+      );
+    }
     state.invokedWrite = true;
     try {
       const payload = await definition.execute(context, args);
@@ -583,11 +595,20 @@ export function createAgentSession(
         signal,
         state
       );
+      // What this action is entitled to claim. An action that never reached a
+      // host write changed nothing, so it reports the revision it was admitted
+      // at: anything the table drifted to while it was awaiting belongs to
+      // whoever caused it, and absorbing that here would hand the next command
+      // in the turn a baseline containing a change it never saw. An action that
+      // did write reports where its write left the table.
+      const produced = state.invokedWrite
+        ? options.observe().viewRevision
+        : resolved.observation.viewRevision;
       const unfinished = unfinishedWrite(payload);
       if (unfinished) {
         return {
           ok: unfinished === "pending",
-          revision: options.observe().viewRevision,
+          revision: produced,
           idempotencyKey,
           result: unfinished === "pending" ? payload : undefined,
           error:
@@ -598,7 +619,7 @@ export function createAgentSession(
       }
       return record({
         ok: true,
-        revision: options.observe().viewRevision,
+        revision: produced,
         idempotencyKey,
         result: payload,
       });
