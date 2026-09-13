@@ -1561,3 +1561,147 @@ describe("an action that overrides the table's approval policy", () => {
     ).toBe(true);
   });
 });
+
+describe("the row writes an agent can ask for", () => {
+  it("adds the rows it was given", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: hooks,
+    });
+
+    const result = await session.execute(
+      "rows.add",
+      { rows: [{ name: "Grace" }] },
+      1,
+      "add"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(hooks.addRows).toHaveBeenCalledWith([{ name: "Grace" }]);
+  });
+
+  it("deletes the rows it named", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: hooks,
+    });
+
+    const result = await session.execute(
+      "rows.delete",
+      { keys: ["r1"] },
+      1,
+      "del"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(hooks.deleteRows).toHaveBeenCalledWith(["r1"]);
+  });
+
+  it("moves one row to another's place", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      // Reordering is its own feature; a table that only edits does not offer
+      // it, which is what `not-wired` says.
+      observe: () => observation({ featureIds: ["editing", "row-reorder"] }),
+      apply: hooks,
+    });
+
+    const result = await session.execute(
+      "rows.reorder",
+      { fromKey: "r1", toKey: "r2" },
+      1,
+      "mv"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(hooks.reorderRows).toHaveBeenCalledWith("r1", "r2");
+  });
+
+  it("refuses an edit that names no column", async () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: apply(),
+    });
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", value: "Ada" }] },
+      1,
+      "ed"
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("invalid-arguments");
+  });
+});
+
+describe("what a per-row decision means", () => {
+  /** A table that asks before every write. */
+  function asking(onApprove: (proposal: unknown) => unknown) {
+    const hooks = apply();
+    return {
+      hooks,
+      session: createAgentSession({
+        observe: () => observation({ approval: "writes" }),
+        apply: hooks,
+        onApprove: onApprove as never,
+      }),
+    };
+  }
+
+  it("runs only the rows the reader kept", async () => {
+    const { hooks, session } = asking(() => ({ approved: [1] }));
+
+    const result = await session.execute(
+      "edit.cells",
+      {
+        edits: [
+          { rowKey: "r1", column: "name", value: "Ada" },
+          { rowKey: "r2", column: "name", value: "Grace" },
+        ],
+      },
+      1,
+      "ed"
+    );
+
+    expect(result.ok).toBe(true);
+    // The reader kept the first of the two, so exactly one edit reaches the
+    // host — a partial approval is not an all-or-nothing refusal.
+    expect(hooks.editCells).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the reader's stated reason on a refusal", async () => {
+    const { hooks, session } = asking(() => ({
+      approved: [],
+      reason: "not during the close",
+    }));
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "ed"
+    );
+
+    expect(hooks.editCells).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).toContain("not during the close");
+  });
+
+  it("treats a decision that is not a decision as a refusal", async () => {
+    // The value crossed the host boundary, so its declared type is a claim
+    // rather than a fact.
+    const { hooks, session } = asking(() => "yes please");
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "ed"
+    );
+
+    expect(result.ok).toBe(false);
+    expect(hooks.editCells).not.toHaveBeenCalled();
+  });
+});
