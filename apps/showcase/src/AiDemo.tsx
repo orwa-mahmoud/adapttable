@@ -443,7 +443,12 @@ function readRtl(): boolean {
 }
 
 function applyField(row: StaffRow, key: string, value: unknown): StaffRow {
-  if (key === "salary") return { ...row, salary: Number(value) };
+  if (key === "salary") {
+    // The host decides what it will hold. `Number("185 thousand")` is NaN,
+    // and a row carrying NaN is worse than a write that did not land.
+    const next = Number(value);
+    return Number.isFinite(next) ? { ...row, salary: next } : row;
+  }
   if (
     key === "person" ||
     key === "team" ||

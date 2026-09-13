@@ -432,6 +432,12 @@ function excerpt(raw: string, limit = 300): string {
 }
 
 function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
+  if (raw.trim() === "") {
+    // Distinct from a malformed document: nothing came back at all, which is
+    // a provider or connectivity fault rather than a model that answered
+    // badly. Saying "not JSON — it sent " would quote an absence.
+    throw new TypeError("provider returned an empty reply");
+  }
   let body: unknown;
   try {
     body = JSON.parse(raw);

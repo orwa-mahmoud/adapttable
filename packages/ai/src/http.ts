@@ -473,9 +473,11 @@ function assertTurnContext(
   // filter, or an edit landed while the backend was thinking. That does not
   // end the turn: every phase is answered against the view it was shown, and
   // an action the table has moved past is rejected one action at a time, with
-  // a reason the caller can act on. Identity and policy are what must not
-  // move — a table that swapped underneath, or that dropped writes or
-  // capabilities mid-turn, is no longer the one the backend answered.
+  // a reason the caller can act on. The same is true of a capability that
+  // comes or goes, including because of what this turn itself did. Identity
+  // and the write / approval / commit rules are what must not move — a table
+  // that swapped underneath, or that stopped asking a human, is no longer the
+  // one the backend answered.
   if (manifest.tableId !== context.tableId) {
     throw new AgentHttpError(
       "context-stale",

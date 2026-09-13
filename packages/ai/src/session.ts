@@ -1186,16 +1186,23 @@ async function dispatchBuiltIn(
       const refused = sortRefusal(observation, sortKey);
       if (refused) throw new ApplyError("apply-failed", refused);
       assertApply(apply, "setSort");
-      apply.setSort(
-        sortKey ?? undefined,
-        body.dir as "asc" | "desc" | undefined
-      );
-      return { ok: true, revision: observation.viewRevision + 1 };
+      const dir = body.dir as "asc" | "desc" | undefined;
+      apply.setSort(sortKey ?? undefined, dir);
+      // Answered with the sort that was applied, for the same reason the
+      // filter is: a bare `ok` leaves a caller unable to tell its own request
+      // from a guess, and it asks again.
+      return {
+        ok: true,
+        revision: observation.viewRevision + 1,
+        sort: sortKey ? { key: sortKey, dir: dir ?? "asc" } : null,
+      };
     }
-    case "view.setSearch":
+    case "view.setSearch": {
       assertApply(apply, "setSearch");
-      apply.setSearch(typeof body.query === "string" ? body.query : "");
-      return { ok: true, revision: observation.viewRevision + 1 };
+      const query = typeof body.query === "string" ? body.query : "";
+      apply.setSearch(query);
+      return { ok: true, revision: observation.viewRevision + 1, query };
+    }
     case "view.setFilters": {
       assertApply(apply, "setFilters");
       // Three argument shapes reduce to one bag, and a bare `ok` leaves the
@@ -1218,7 +1225,11 @@ async function dispatchBuiltIn(
       const groupKey = body.key as string | null | undefined;
       assertApply(apply, "setGroupBy");
       apply.setGroupBy(groupKey ?? undefined);
-      return { ok: true, revision: observation.viewRevision + 1 };
+      return {
+        ok: true,
+        revision: observation.viewRevision + 1,
+        groupBy: groupKey ?? null,
+      };
     }
     case "view.setAggregations":
       return applySetAggregations(apply, body, observation, guard);
@@ -1289,6 +1300,24 @@ function redactedIds(columns: readonly AgentColumn[]): string[] {
   return columns
     .filter((column) => !column.readable)
     .map((column) => column.id);
+}
+
+/**
+ * Refuse a value the column cannot hold.
+ *
+ * A column that declared itself a number is a promise to whoever reads it,
+ * and a host applying `Number("185 thousand")` writes NaN into its own data
+ * and shows it to the reader. The model asked for something the table cannot
+ * do, so the table says so rather than passing it on: a refusal names the
+ * column and costs a retry, where a coercion costs the value.
+ */
+function assertWritableValue(column: AgentColumn, value: unknown): void {
+  if (column.type !== "number") return;
+  if (typeof value === "number" && Number.isFinite(value)) return;
+  throw new ApplyError(
+    "invalid-arguments",
+    `column "${column.id}" takes a number, not ${JSON.stringify(value)}`
+  );
 }
 
 function writableColumn(
@@ -1662,7 +1691,10 @@ async function planCells(
     if (typeof edit.column !== "string") {
       throw new ApplyError("invalid-arguments", "each edit requires a column");
     }
-    writableColumn(observation.columns, edit.column);
+    assertWritableValue(
+      writableColumn(observation.columns, edit.column),
+      edit.value
+    );
     const ref = asRowRef(edit, observation.viewRevision);
     const row = await resolveRowArg(
       "rowKey" in ref ? { rowKey: ref.rowKey } : { ...ref },

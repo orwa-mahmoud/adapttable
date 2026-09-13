@@ -60,16 +60,23 @@ export interface PhaseBatch {
 /**
  * The policy surface a turn is answered under.
  *
- * Capabilities and the write / approval / commit rules are the part of the
- * table a backend cannot be allowed to have answered under different terms;
- * a change here ends the turn rather than being rebound to a new revision.
+ * The write / approval / commit rules decide whether a human is asked at all,
+ * so a backend must never be allowed to have answered under different ones: a
+ * change here ends the turn rather than being rebound to a new revision.
+ *
+ * The capability set is deliberately NOT part of it. An agent's own admitted
+ * action changes what the table offers — grouping a table takes row pinning
+ * away and brings aggregations in — and counting that as a policy change ends
+ * a turn on the agent's own legal move, with an error the reader sees. What a
+ * capability leaving actually costs is one call, and the session already
+ * refuses that call against the live catalog with `not-wired`, which names the
+ * capability instead of killing the turn.
  */
 export function policyKey(manifest: AgentManifest): string {
   return JSON.stringify({
     write: manifest.policy.write,
     approval: manifest.policy.approval,
     commit: manifest.policy.commit,
-    capabilities: manifest.capabilities,
   });
 }
 

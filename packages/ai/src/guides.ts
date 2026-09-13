@@ -97,18 +97,36 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
     guide:
       "Sort by a column id. The parameter is named `key`, NOT `column` — " +
       'pass the column\'s id as `key`, with `dir` of "asc" or "desc". ' +
-      "Pass a null key to clear the sort.",
+      "Pass a null key to clear the sort. The result carries the sort that " +
+      "was applied, so there is no need to send it again to check.",
     input: objectSchema({
       key: { type: ["string", "null"] },
       dir: { type: "string", enum: ["asc", "desc"] },
     }),
-    output: OK,
+    output: objectSchema({
+      ok: { type: "boolean", const: true },
+      revision: { type: "integer", minimum: 1 },
+      sort: {
+        type: ["object", "null"],
+        additionalProperties: false,
+        properties: {
+          key: { type: "string" },
+          dir: { type: "string", enum: ["asc", "desc"] },
+        },
+      },
+    }),
   },
   "view.setSearch": {
     key: "view.setSearch",
-    guide: "Set the toolbar search string. Empty string clears it.",
+    guide:
+      "Set the toolbar search string. Empty string clears it. The result " +
+      "carries the string that was applied.",
     input: objectSchema({ query: { type: "string" } }, ["query"]),
-    output: OK,
+    output: objectSchema({
+      ok: { type: "boolean", const: true },
+      revision: { type: "integer", minimum: 1 },
+      query: { type: "string" },
+    }),
   },
   "view.setFilters": {
     key: "view.setFilters",
@@ -133,9 +151,14 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
     key: "view.setGroupBy",
     guide:
       "Group rows by a column id. The parameter is named `key`, NOT " +
-      "`column`. Pass null to clear grouping.",
+      "`column`. Pass null to clear grouping. The result carries the column " +
+      "the table is now grouped by, or null.",
     input: objectSchema({ key: { type: ["string", "null"] } }),
-    output: OK,
+    output: objectSchema({
+      ok: { type: "boolean", const: true },
+      revision: { type: "integer", minimum: 1 },
+      groupBy: { type: ["string", "null"] },
+    }),
   },
   "view.setAggregations": {
     key: "view.setAggregations",
@@ -356,7 +379,7 @@ const SUMMARIES: Record<CapabilityKey, string> = {
   "rows.read": "Read a bounded, redacted row window, each row with its rowKey.",
   "rows.resolve": "Turn a 1-based position into a row key, or confirm one.",
   "export.run": "Export through the host export path.",
-  "edit.cells": "Edit cells through the host callback.",
+  "edit.cells": "Change the value of one or more cells.",
   "rows.add": "Add rows through the host callback.",
   "rows.delete":
     "Delete rows, by rowKey or position, through the host callback.",
