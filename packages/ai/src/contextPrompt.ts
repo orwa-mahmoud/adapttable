@@ -93,7 +93,14 @@ export function agentInstructions(input: AgentInstructionsInput = {}): string {
 function capabilityLines(contract: AgentContextContract): readonly string[] {
   return contract.capabilities.map((capability) => {
     const summary = capability.summaryShort ?? capability.summary;
-    if (!capability.input) return `- ${capability.key}: ${summary}`;
+    // A capability with no arguments line is one whose guide was deferred, and
+    // an absence is easy to read as "this is not offered" — a live model read
+    // it exactly that way and told the reader it could not edit a table it
+    // could. The line says which it is, beside the capability it is about,
+    // rather than only in a list at the end.
+    if (!capability.input) {
+      return `- ${capability.key}: ${summary} (arguments not included — call describe for them)`;
+    }
     return `- ${capability.key}: ${summary}\n  arguments: ${JSON.stringify(capability.input)}`;
   });
 }

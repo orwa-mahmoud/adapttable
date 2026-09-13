@@ -414,3 +414,27 @@ describe("a table whose columns and view say less", () => {
     expect(rendered).toContain("filters");
   });
 });
+
+describe("a capability whose guide was deferred", () => {
+  it("says its arguments can be fetched, not that it is unavailable", () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: {
+        setPage: vi.fn(),
+        setSort: vi.fn(),
+        setSearch: vi.fn(),
+        setFilters: vi.fn(),
+      },
+    });
+    const rendered = renderAgentContext(
+      buildAgentContext(session, { tokenBudget: 700 })
+    );
+
+    // An absent arguments line is easy to read as "not offered". A live model
+    // read it that way and told the reader it could not edit a table it could.
+    expect(rendered).toMatch(
+      /\(arguments not included — call describe for them\)/
+    );
+    expect(rendered).toContain("Guides not included here:");
+  });
+});

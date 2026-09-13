@@ -404,6 +404,21 @@ const REPLY_SHAPE = [
   "- Never reply with a bare arguments object: arguments belong inside `args`.",
 ].join("\n");
 
+/**
+ * The calls that ask this table something rather than command it.
+ *
+ * Their results are worth handing back, because a model that looked something
+ * up is not finished — it looked it up in order to do something with it.
+ */
+const ASKS = new Set([
+  "describe",
+  "read",
+  "columns.describe",
+  "view.describe",
+  "rows.read",
+  "rows.resolve",
+]);
+
 /** A bounded, single-line look at what a provider sent. */
 function excerpt(raw: string, limit = 300): string {
   const flat = raw.replace(/\s+/g, " ").trim();
@@ -456,9 +471,14 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
     text,
     toolCalls,
     askUser: record.askUser,
-    // The table already ran the calls. A second model call that only says
-    // "done" is the confirmation loop the reader does not want.
-    continueWithResults: false,
+    // A write's receipt goes to the reader, not back to the model: a second
+    // call that only says "done" is the confirmation loop nobody wants. A
+    // *read* is the opposite — its whole purpose is to inform what comes
+    // next, and a turn that resolves a row and is then never told which row
+    // it found can only stop there, having said it was about to act.
+    continueWithResults:
+      (toolCalls ?? []).length > 0 &&
+      (toolCalls ?? []).every((call) => ASKS.has(call.name)),
   });
 }
 
