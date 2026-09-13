@@ -24,15 +24,11 @@
 import {
   type AgentContextInputs,
   type AgentSession,
-  type AssistantExchange,
   type AssistantMessage,
   type AssistantQuestion,
-  type AssistantReceipt,
   type AssistantStatus,
   type AssistantSuggestion,
   type AssistantTransport,
-  type AssistantTransportReply,
-  type AssistantTurnStatus,
   createTableAssistant,
 } from "@adapttable/ai";
 import {
@@ -64,15 +60,17 @@ export type {
   WritePolicy,
 } from "@adapttable/ai";
 export type {
-  AssistantExchange,
   AssistantMessage,
   AssistantQuestion,
-  AssistantReceipt,
   AssistantStatus,
   AssistantTransport,
+};
+export type {
+  AssistantExchange,
+  AssistantReceipt,
   AssistantTransportReply,
   AssistantTurnStatus,
-};
+} from "@adapttable/ai";
 export type { AssistantUndoOffer } from "@adapttable/ai";
 
 /** How {@link useTableAssistant} is configured. @public */

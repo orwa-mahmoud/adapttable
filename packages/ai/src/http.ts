@@ -1032,7 +1032,7 @@ function currentContext(
     remembered.length > 0
       ? { ...chosen, priority: [...remembered, ...(chosen.priority ?? [])] }
       : chosen,
-    { ...(options.contextInputs?.(session) ?? {}) }
+    options.contextInputs?.(session) ?? {}
   );
 }
 

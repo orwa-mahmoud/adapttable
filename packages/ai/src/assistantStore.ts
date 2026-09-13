@@ -444,7 +444,10 @@ export function createTableAssistant(
       snapshot = previous;
       return;
     }
-    for (const listener of [...listeners]) listener();
+    // Copied first: a listener that unsubscribes while it is being notified
+    // must not change the set this loop is walking.
+    const notifying = [...listeners];
+    for (const listener of notifying) listener();
   };
 
   const getState = (): TableAssistantSnapshot => {

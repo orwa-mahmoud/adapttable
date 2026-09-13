@@ -142,7 +142,7 @@ function canRecord(): boolean {
 async function toBase64(blob: Blob): Promise<string> {
   const bytes = new Uint8Array(await blob.arrayBuffer());
   let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
+  for (const byte of bytes) binary += String.fromCodePoint(byte);
   return btoa(binary);
 }
 
@@ -178,7 +178,10 @@ export function createSpeechInput(
   const publish = (): void => {
     snapshot = undefined;
     if (disposed) return;
-    for (const listener of [...listeners]) listener();
+    // Copied first: a listener that unsubscribes while it is being notified
+    // must not change the set this loop is walking.
+    const notifying = [...listeners];
+    for (const listener of notifying) listener();
   };
 
   const fail = (next: SpeechStatus, message?: string): void => {

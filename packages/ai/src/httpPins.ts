@@ -23,10 +23,9 @@
  * session: secrets never enter a fingerprint, and a table that goes away takes
  * its records with it.
  */
-import { contractFingerprint } from "./binding";
 import type { AgentSession } from "./types";
 
-export { contractFingerprint };
+export { contractFingerprint } from "./binding";
 
 /** How a backend answered the contract it was sent. @public */
 export type PinStatus = "acknowledged" | "expired" | "unknown" | "unsupported";

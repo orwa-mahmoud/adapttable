@@ -20,9 +20,6 @@ import {
   type AgentContextOptions,
   type AgentContextProfile,
   type AgentContextSelection,
-  ContextIncludeError,
-  DEFAULT_COMPACT_TOKENS,
-  MAX_CONTEXT_BYTES,
   selectGuides,
   selectionVersion,
   utf8Bytes,
@@ -32,9 +29,6 @@ import {
   type AgentContextView,
   buildContract,
   buildView,
-  type ContextCapability,
-  type ContextColumn,
-  contractVersion,
 } from "./contextSnapshot";
 import type {
   AgentAggregations,
@@ -50,19 +44,23 @@ export {
   type AgentContextProfile,
   type AgentContextSelection,
   type AgentContextView,
-  type ContextCapability,
-  type ContextColumn,
-  ContextIncludeError,
-  DEFAULT_COMPACT_TOKENS,
-  MAX_CONTEXT_BYTES,
 };
-
 export {
   agentInstructions,
   type AgentInstructionsInput,
   renderAgentContext,
 } from "./contextPrompt";
 export { sampleColumns, sampleColumnValues } from "./contextSampling";
+export {
+  ContextIncludeError,
+  DEFAULT_COMPACT_TOKENS,
+  MAX_CONTEXT_BYTES,
+} from "./contextSelection";
+export {
+  type ContextCapability,
+  type ContextColumn,
+  contractVersion,
+} from "./contextSnapshot";
 export { matchesType, SAMPLE_CAP } from "./contextSnapshot";
 
 /** What a model is given about this table. @public */
@@ -172,8 +170,6 @@ export function buildAgentContext(
     },
   };
 }
-
-export { contractVersion };
 
 /**
  * Wrap a row window as what it is: somebody's data, read at a revision.

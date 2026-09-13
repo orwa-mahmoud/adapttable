@@ -477,15 +477,28 @@ export function AssistantQuestion({
   const Suggestion = slots.Suggestion;
   const options = question.options ?? [];
   return (
-    <div
+    // A question and the controls that answer it is what a fieldset is for:
+    // the legend is announced with each control inside it, which a labelled
+    // `role="group"` only approximates. The browser's own border, padding and
+    // margin are cleared so the panel looks exactly as it did.
+    <fieldset
       data-adapttable-part="assistant-question"
-      role="group"
-      aria-label={question.question}
-      style={{ display: "flex", flexDirection: "column", gap: "0.45em" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.45em",
+        border: 0,
+        margin: 0,
+        padding: 0,
+        minInlineSize: 0,
+      }}
     >
-      <p data-adapttable-part="assistant-question-text" style={{ margin: 0 }}>
+      <legend
+        data-adapttable-part="assistant-question-text"
+        style={{ padding: 0 }}
+      >
         {question.question}
-      </p>
+      </legend>
       {options.length > 0 ? (
         <div
           data-adapttable-part="assistant-question-options"
@@ -538,7 +551,7 @@ export function AssistantQuestion({
           />
         </div>
       ) : null}
-    </div>
+    </fieldset>
   );
 }
 
