@@ -368,6 +368,56 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
       .poll(async () => visibleTableText(page))
       .not.toContain("Jonah");
   });
+
+  test("mirrors the assistant panel and speaks the locale with it", async ({
+    page,
+  }) => {
+    // Pinned, because the side assertion below is about a floating window on
+    // the leading edge. A narrow viewport makes it a full-width sheet, where
+    // "which side" has no answer.
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.reload();
+
+    await openDemoOptions(page);
+    await page.getByTestId("ai-toggle-rtl").check();
+    await closeDemoOptions(page);
+    await openAssistant(page);
+
+    const surface = page.locator(part("assistant-surface"));
+
+    // The panel itself mirrors, not merely the page around it.
+    await expect(surface).toHaveCSS("direction", "rtl");
+
+    // Direction without the locale proves the layout and nothing about the
+    // translations: an RTL frame around English is not what a reader in Arabic
+    // sees. Both strings come from `packages/i18n/src/locales/ar.ts`.
+    await expect(page.locator(part("assistant-launcher"))).toHaveAccessibleName(
+      "اسأل المساعد"
+    );
+    await expect(page.locator(part("assistant-input"))).toHaveAttribute(
+      "placeholder",
+      "اسأل عن هذا الجدول…"
+    );
+
+    // The logical end, which in RTL is the left of the viewport. Asserted as a
+    // side rather than a pixel so it holds at any width: the panel's own centre
+    // sits left of the page's.
+    const box = await surface.boundingBox();
+    const viewport = page.viewportSize();
+    expect(box).not.toBeNull();
+    expect(viewport).not.toBeNull();
+    if (box && viewport) {
+      expect(box.x + box.width / 2).toBeLessThan(viewport.width / 2);
+    }
+
+    // And what must NOT mirror. A mirrored code block is unreadable, and the
+    // inspector's JSON is a developer surface, not part of the table.
+    await expect(page.getByTestId("ai-inspector")).toHaveCSS(
+      "direction",
+      "ltr"
+    );
+    await expect(page.locator("pre").first()).toHaveCSS("direction", "ltr");
+  });
 });
 
 /**
