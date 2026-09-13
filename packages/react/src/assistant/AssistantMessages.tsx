@@ -180,7 +180,16 @@ function Receipt({
           {open ? (
             <span
               data-adapttable-part="assistant-receipt-message"
-              style={{ overflowWrap: "anywhere" }}
+              style={{
+                // The key names which capability failed and the message says
+                // what went wrong. Run inline they read as one broken
+                // sentence — "page 2 exceeds pageMax 1view.setPage".
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: "0.3em",
+                overflowWrap: "anywhere",
+              }}
             >
               {receipt.message}
               {receipt.capabilityKey ? (

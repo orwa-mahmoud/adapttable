@@ -216,12 +216,29 @@ export function resolveRowFromNeutral<TRow>(
   };
 }
 
-export function pageMaxFromNeutral<TRow>(table: NeutralTable<TRow>): number {
+/**
+ * The largest page number the session will accept.
+ *
+ * A page number, not a row count: with 8 rows and a limit of 10 there is one
+ * page, and a bound of 8 lets an agent report that it moved to page 2 of a
+ * table that has no page 2.
+ *
+ * When the total is unknown the last page is unknowable, so the bound is one
+ * step ahead of where the reader is — walking an unbounded list one page at a
+ * time is the only honest way to find its end, and refusing to move at all
+ * would be the wrong answer to "we cannot prove there is more".
+ */
+export function pageMaxFromNeutral<TRow>(
+  table: NeutralTable<TRow>,
+  limit: number,
+  page: number
+): number {
   const caps = table.capabilities;
-  const loaded = table.rows("full").length;
-  if (caps.fullDataset || caps.totalCount === "exact")
-    return Math.max(loaded, 1);
-  return Math.max(table.rows("page").length, 1);
+  const size = Math.max(1, limit);
+  if (caps.fullDataset || caps.totalCount === "exact") {
+    return Math.max(1, Math.ceil(table.rows("full").length / size));
+  }
+  return Math.max(1, page + 1);
 }
 
 export function rowAddressScopeForNeutral<TRow>(
@@ -273,6 +290,8 @@ export function observationFromNeutral<TRow>(
   const columns = agentColumnsFromNeutral(table, options.columns).map(
     (column) => mergeColumnPatch(column, options.columns)
   );
+  const page = query?.page ?? 1;
+  const limit = query?.limit ?? Math.max(1, table.rows("page").length || 10);
   const ops = table.operations;
   return {
     tableId: options.tableId,
@@ -307,12 +326,12 @@ export function observationFromNeutral<TRow>(
       featureIds.includes("saved-views") && apply.applyView !== undefined,
     hasAdd: options.apply?.addRows !== undefined,
     hasDelete: options.apply?.deleteRows !== undefined,
-    page: query?.page ?? 1,
-    limit: query?.limit ?? Math.max(1, table.rows("page").length || 10),
+    page,
+    limit,
     search: query?.search ?? "",
     sortBy: query?.sortBy,
     sortDir: query?.sortDir,
-    pageMax: pageMaxFromNeutral(table),
+    pageMax: pageMaxFromNeutral(table, limit, page),
     readMax: options.readMax ?? 50,
     rowAddressScope: rowAddressScopeForNeutral(table),
   };

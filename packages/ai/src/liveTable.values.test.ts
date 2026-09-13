@@ -203,7 +203,7 @@ describe("resolveRowFromNeutral", () => {
 });
 
 describe("scope reporting", () => {
-  it("caps a page-only source at the rows it actually holds", () => {
+  it("lets a source of unknown length step one page forward", () => {
     const engine = createTableEngine({
       data: ROWS,
       columns: COLUMNS,
@@ -222,7 +222,11 @@ describe("scope reporting", () => {
         totalCount: "loaded" as const,
       }),
     });
-    expect(pageMaxFromNeutral(table)).toBe(2);
+    // Nothing here knows where the data ends, so the bound is one step past
+    // where the reader is: walking forward is how the end gets found, and
+    // refusing to move is the wrong answer to "we cannot prove there is more".
+    expect(pageMaxFromNeutral(table, 2, 1)).toBe(2);
+    expect(pageMaxFromNeutral(table, 2, 7)).toBe(8);
   });
 
   it("addresses rows by page when the page is a window onto more data", () => {
@@ -236,8 +240,23 @@ describe("scope reporting", () => {
       visibleRows: () => engine.rows("page"),
     });
     expect(table.capabilities.fullDataset).toBe(true);
-    expect(pageMaxFromNeutral(table)).toBe(3);
+    // Three rows at two a page is two pages — a page count, never the row
+    // count, which would let an agent report a move to a page that is not
+    // there and the table would sit exactly where it was.
+    expect(pageMaxFromNeutral(table, 2, 1)).toBe(2);
     expect(rowAddressScopeForNeutral(table)).toBe("page");
+  });
+
+  it("gives a table that fits on one page exactly one page", () => {
+    const engine = createTableEngine({
+      data: ROWS,
+      columns: COLUMNS,
+      rowKey: (row: Row) => row.id,
+    });
+    const table = createNeutralTable(engine, "single", {
+      visibleRows: () => ROWS,
+    });
+    expect(pageMaxFromNeutral(table, 10, 1)).toBe(1);
   });
 
   it("falls back to visible when the two windows differ in length", () => {
