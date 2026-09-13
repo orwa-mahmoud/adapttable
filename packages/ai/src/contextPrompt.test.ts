@@ -347,3 +347,70 @@ describe("whether an example is the type its column declared", () => {
     expect(matchesType({ amount: 3 }, "money")).toBe(true);
   });
 });
+
+describe("a table whose columns and view say less", () => {
+  it("says a column cannot be sorted when it cannot", () => {
+    const rendered = renderAgentContext(
+      context({
+        columns: [column({ id: "notes", sortable: false, writable: true })],
+      })
+    );
+
+    // Both facts matter to a model deciding what it may ask for.
+    expect(rendered).toContain("not sortable");
+    expect(rendered).toContain("writable");
+  });
+
+  it("renders a filter that offers no closed list of values", () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: { setPage: vi.fn(), setFilters: vi.fn() },
+    });
+    const rendered = renderAgentContext(
+      buildAgentContext(
+        session,
+        { profile: "full" },
+        {
+          filters: [
+            {
+              key: "notes",
+              label: "Notes",
+              type: "text",
+              operators: ["contains"],
+              defaultOperator: "contains",
+              valueKeys: ["notes"],
+            },
+          ],
+        }
+      )
+    );
+
+    expect(rendered).toContain("operators: contains");
+    // Nothing invented: a free-text filter is not given an option list.
+    expect(rendered).not.toContain("more values exist");
+  });
+
+  it("states a grouping and the filters that are on", () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: { setPage: vi.fn(), setGroupBy: vi.fn(), setFilters: vi.fn() },
+    });
+    const rendered = renderAgentContext(
+      buildAgentContext(
+        session,
+        { profile: "full" },
+        {
+          view: {
+            page: 1,
+            limit: 10,
+            groupBy: "team",
+            filters: { team: ["Core"] },
+          },
+        }
+      )
+    );
+
+    expect(rendered).toContain("grouped by team");
+    expect(rendered).toContain("filters");
+  });
+});

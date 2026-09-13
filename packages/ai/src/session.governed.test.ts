@@ -2056,3 +2056,134 @@ describe("a row address the table will not accept", () => {
     expect(result.ok).toBe(false);
   });
 });
+
+describe("what a capability publishes about itself", () => {
+  it("carries a declared idempotency into the catalog", () => {
+    const retryable: AgentCapabilityDefinition = {
+      key: "staff.recount",
+      summary: "Count them again",
+      kind: "read",
+      idempotent: true,
+      guide: {
+        guide: "Count them again.",
+        input: { type: "object" },
+        output: { type: "object" },
+      },
+      isEnabled: () => true,
+      execute: () => ({ ok: true }),
+    };
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: apply(),
+      capabilities: [retryable],
+    });
+
+    const entry = session
+      .catalog()
+      .find((candidate) => candidate.key === "staff.recount");
+
+    // A tool surface reads this to decide whether a retry is safe, so it has
+    // to be the capability's own answer rather than a guess from its kind.
+    expect(entry?.idempotent).toBe(true);
+    expect(entry?.kind).toBe("read");
+  });
+
+  it("says nothing about idempotency when the capability did not", () => {
+    const quiet: AgentCapabilityDefinition = {
+      key: "staff.ping",
+      summary: "Say hello",
+      guide: {
+        guide: "Say hello.",
+        input: { type: "object" },
+        output: { type: "object" },
+      },
+      isEnabled: () => true,
+      execute: () => ({ ok: true }),
+    };
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: apply(),
+      capabilities: [quiet],
+    });
+
+    const entry = session
+      .catalog()
+      .find((candidate) => candidate.key === "staff.ping");
+
+    expect(entry && "idempotent" in entry).toBe(false);
+  });
+});
+
+describe("an approval that could not be put to anybody", () => {
+  it("refuses the write rather than proceeding without an answer", async () => {
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => observation({ approval: "writes", commit: "immediate" }),
+      apply: hooks,
+      onApprove: () => Promise.reject(new Error("the panel is gone")),
+    });
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "ed"
+    );
+
+    expect(result.ok).toBe(false);
+    expect(hooks.editCells).not.toHaveBeenCalled();
+  });
+});
+
+describe("a table that moved while the reader was deciding", () => {
+  it("refuses the write rather than applying it to a view nobody saw", async () => {
+    let revision = 1;
+    const hooks = apply();
+    const session = createAgentSession({
+      observe: () => ({
+        ...observation({ approval: "writes", commit: "immediate" }),
+        viewRevision: revision,
+      }),
+      apply: hooks,
+      onApprove: () => {
+        // The reader took a moment, and something else moved the table.
+        revision = 2;
+        return Promise.resolve(true);
+      },
+    });
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada" }] },
+      1,
+      "ed"
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("revision-mismatch");
+    expect(hooks.editCells).not.toHaveBeenCalled();
+  });
+});
+
+describe("the window a read call actually gets", () => {
+  it("never reads past the ceiling, whatever the model asked for", async () => {
+    const readRows = vi.fn(() => ({
+      offset: 0,
+      limit: 20,
+      redacted: [],
+      rows: [],
+    }));
+    const session = createAgentSession({
+      observe: () => observation({ readMax: 20 }),
+      apply: apply({ readRows }),
+    });
+
+    await session.execute("rows.read", { offset: 0, limit: 5000 }, 1, "read");
+
+    // The table's ceiling is the table's, not a suggestion the model may
+    // talk its way past.
+    expect(readRows).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 20 })
+    );
+  });
+});

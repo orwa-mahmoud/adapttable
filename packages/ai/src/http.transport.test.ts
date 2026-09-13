@@ -957,3 +957,86 @@ describe("a table that changed while the backend was thinking", () => {
     await expect(client.send(live, "go")).rejects.toThrow(/policy changed/);
   });
 });
+
+describe("a read the table refused", () => {
+  it("hands the refusal back as the call's own result", async () => {
+    const live = createAgentSession({
+      observe: () => observation(),
+      apply: {
+        setPage: vi.fn(),
+        readRows: () => {
+          throw new Error("that window is not readable");
+        },
+        resolveRow: () => ({ rowKey: "r1", scope: "visible" as const }),
+      },
+    });
+    const bodies: Record<string, unknown>[] = [];
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const sent = body as unknown as Record<string, unknown>;
+        bodies.push(sent);
+        return Promise.resolve(
+          sent.toolResults
+            ? {
+                schemaVersion: AGENT_SCHEMA_VERSION,
+                text: "I could not read it",
+              }
+            : {
+                schemaVersion: AGENT_SCHEMA_VERSION,
+                toolCalls: [
+                  { id: "c1", name: "read", args: { offset: 0, limit: 5 } },
+                ],
+              }
+        );
+      },
+    });
+
+    const turn = await client.send(live, "what is in it");
+
+    // The backend is told what happened rather than being left to assume the
+    // window came back.
+    const answered = bodies.at(-1)?.toolResults as
+      readonly { error?: { message?: string } }[] | undefined;
+    expect(answered?.[0]?.error?.message).toContain("not readable");
+    expect(turn.text).toBe("I could not read it");
+  });
+
+  it("names a read that failed without saying why", async () => {
+    const live = createAgentSession({
+      observe: () => observation(),
+      apply: {
+        setPage: vi.fn(),
+        readRows: () => {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error
+          throw { nothing: "useful" };
+        },
+        resolveRow: () => ({ rowKey: "r1", scope: "visible" as const }),
+      },
+    });
+    const bodies: Record<string, unknown>[] = [];
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const sent = body as unknown as Record<string, unknown>;
+        bodies.push(sent);
+        return Promise.resolve(
+          sent.toolResults
+            ? { schemaVersion: AGENT_SCHEMA_VERSION, text: "no luck" }
+            : {
+                schemaVersion: AGENT_SCHEMA_VERSION,
+                toolCalls: [
+                  { id: "c1", name: "read", args: { offset: 0, limit: 5 } },
+                ],
+              }
+        );
+      },
+    });
+
+    await client.send(live, "what is in it");
+
+    const answered = bodies.at(-1)?.toolResults as
+      readonly { error?: { code?: string } }[] | undefined;
+    expect(answered?.[0]?.error?.code).toBeDefined();
+  });
+});
