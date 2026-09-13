@@ -1,16 +1,24 @@
 /**
- * Whose change is it — the window a stale-approval test does not cover.
+ * Whose change is it — and what the session already guarantees.
  *
  * An action awaits the host: resolving a row, reading a before-value, waiting
  * for a reader to answer, and finally the write callback itself. Anything can
- * land on the table across any of those. The session must never report someone
- * else's change as its own, because the HTTP turn takes a result's revision as
- * the baseline for the next command in the same turn — and a baseline carrying
- * a foreign change is a stale-write protection that silently passes.
+ * land on the table across any of those, and the HTTP turn takes a result's
+ * revision as the baseline for the next command in the same turn — so a
+ * baseline carrying a foreign change would be a stale-write protection that
+ * silently passes.
  *
- * These are the two halves the earlier provenance work left open: a result that
- * absorbed drift it did not cause, and a plan that wrote against a table that
- * had moved since it was admitted.
+ * It does not happen, and these say why: every awaited boundary re-authorizes
+ * against the revision the action was admitted at, so a foreign change is
+ * REFUSED there rather than reaching the result to be absorbed. The result then
+ * reports where the table is, which for a view setter or a write is that
+ * action's own effect — and the next command in the turn depends on it being
+ * reported.
+ *
+ * Written after a change that reported the admitted revision instead broke
+ * exactly that: a view setter is not a governed write, so it would have
+ * reported the revision from before its own change and stalled every
+ * filter-then-sort turn.
  */
 import { describe, expect, it, vi } from "vitest";
 
@@ -95,14 +103,16 @@ function apply(patch: Partial<AgentApply> = {}): AgentApply {
   };
 }
 
-describe("a result reports only what its own action produced", () => {
-  it("does not absorb a change that landed while it was reading", async () => {
+describe("a foreign change is refused at the boundary, not absorbed", () => {
+  it("refuses a read whose callback returned onto a table that moved", async () => {
     const table = movableTable();
     const session = createAgentSession({
       observe: table.observe,
       apply: apply({
         readRows: async () => {
-          // Another writer lands mid-await. This read caused none of it.
+          // Another writer lands mid-await. The rows in hand describe a table
+          // that no longer exists, and disclosing them would be answering
+          // about a view nobody authorized.
           table.elsewhereWrites();
           return Promise.resolve({
             offset: 0,
@@ -121,86 +131,20 @@ describe("a result reports only what its own action produced", () => {
       "read-1"
     );
 
-    expect(read.ok).toBe(true);
-    // The table is at 2. This action is entitled to 1 — the revision it was
-    // admitted at — because it changed nothing.
+    expect(read.ok).toBe(false);
+    expect(read.error?.code).toBe("revision-mismatch");
+    // Nothing reached the result to be mistaken for this action's own progress.
     expect(table.current()).toBe(2);
-    expect(read.revision).toBe(1);
   });
 
-  it("leaves the next command in the turn to refuse, instead of passing it a foreign baseline", async () => {
-    const table = movableTable();
-    const setSearch = vi.fn();
-    const session = createAgentSession({
-      observe: table.observe,
-      apply: apply({
-        setSearch,
-        readRows: async () => {
-          table.elsewhereWrites();
-          return Promise.resolve({
-            offset: 0,
-            limit: 1,
-            redacted: [],
-            rows: [{ rowKey: "r1", cells: { name: "Ada" } }],
-          });
-        },
-      }),
-    });
-
-    const read = await session.execute(
-      "rows.read",
-      { offset: 0, limit: 1 },
-      1,
-      "read-2"
-    );
-    // A turn carries the previous result's revision into the next command.
-    const next = await session.execute(
-      "view.setSearch",
-      { query: "ada" },
-      read.revision,
-      "search-2"
-    );
-
-    expect(next.ok).toBe(false);
-    expect(next.error?.code).toBe("revision-mismatch");
-    expect(setSearch).not.toHaveBeenCalled();
-  });
-
-  it("still reports where its own write left the table", async () => {
-    const table = movableTable();
-    const session = createAgentSession({
-      observe: table.observe,
-      apply: apply({
-        editCells: () => {
-          // The write itself moves the table, exactly as a host's would.
-          table.elsewhereWrites();
-        },
-      }),
-    });
-
-    const write = await session.execute(
-      "edit.cells",
-      { edits: [{ rowKey: "r1", column: "name", value: "Grace" }] },
-      1,
-      "write-1"
-    );
-
-    expect(write.ok).toBe(true);
-    // This one did cause the change, so it carries it.
-    expect(write.revision).toBe(2);
-  });
-});
-
-describe("a write refuses a table that moved while it was being planned", () => {
-  it("never reaches the host when the change landed before the handoff", async () => {
+  it("refuses a write whose plan was built against a table that moved", async () => {
     const table = movableTable();
     const editCells = vi.fn();
     const session = createAgentSession({
       observe: table.observe,
       apply: apply({
         editCells,
-        // Planning a cell write awaits the host for the before-value. Another
-        // writer lands there — the plan now describes a table that is gone.
+        // Planning a cell write awaits the host for the before-value.
         readRows: async () => {
           table.elsewhereWrites();
           return Promise.resolve({
@@ -222,8 +166,68 @@ describe("a write refuses a table that moved while it was being planned", () => 
 
     expect(write.ok).toBe(false);
     expect(write.error?.code).toBe("revision-mismatch");
-    // The point of the check: refusing costs a retry, writing does not come back.
+    // Refusing costs a retry; writing does not come back.
     expect(editCells).not.toHaveBeenCalled();
+  });
+});
+
+describe("a result reports the effect its own action had", () => {
+  it("carries where a write left the table", async () => {
+    const table = movableTable();
+    const session = createAgentSession({
+      observe: table.observe,
+      apply: apply({
+        editCells: () => {
+          table.elsewhereWrites();
+        },
+      }),
+    });
+
+    const write = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Grace" }] },
+      1,
+      "write-1"
+    );
+
+    expect(write.ok).toBe(true);
+    expect(write.revision).toBe(2);
+  });
+
+  it("carries where a view setter left the table, which is not a governed write", async () => {
+    // The case that matters for an ordinary turn. `view.setSearch` changes the
+    // table without going through the governed-write path, so a rule keyed on
+    // "did this invoke a write" reports the revision from BEFORE its own
+    // change — and the next action in the turn inherits a baseline the table
+    // has already left, and is refused.
+    const table = movableTable();
+    const session = createAgentSession({
+      observe: table.observe,
+      apply: apply({
+        setSearch: () => {
+          table.elsewhereWrites();
+        },
+      }),
+    });
+
+    const search = await session.execute(
+      "view.setSearch",
+      { query: "ada" },
+      1,
+      "s-1"
+    );
+
+    expect(search.ok).toBe(true);
+    expect(search.revision).toBe(2);
+
+    // And the turn continues on it, rather than stalling on a stale baseline.
+    const sort = await session.execute(
+      "view.setSort",
+      { key: "name", dir: "asc" },
+      search.revision,
+      "s-2"
+    );
+    expect(sort.ok).toBe(true);
   });
 });
 

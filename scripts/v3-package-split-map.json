@@ -6699,30 +6699,6 @@
       "behavior": ""
     },
     {
-      "export": "BindingOperations",
-      "currentImport": "@adapttable/ai",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/ai",
-      "behavior": ""
-    },
-    {
-      "export": "BindingQuery",
-      "currentImport": "@adapttable/ai",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/ai",
-      "behavior": ""
-    },
-    {
-      "export": "BindingSnapshot",
-      "currentImport": "@adapttable/ai",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/ai",
-      "behavior": ""
-    },
-    {
       "export": "buildAgentContext",
       "currentImport": "@adapttable/ai",
       "kind": "value",

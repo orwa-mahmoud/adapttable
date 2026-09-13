@@ -699,61 +699,6 @@ export interface AssistantUnresolved {
 }
 
 // @public
-export interface BindingOperations {
-    // (undocumented)
-    readonly edit?: boolean;
-    // (undocumented)
-    readonly setColumnPin?: boolean;
-    // (undocumented)
-    readonly setFilters?: boolean;
-    // (undocumented)
-    readonly setGroupBy?: boolean;
-    // (undocumented)
-    readonly setPage?: boolean;
-    // (undocumented)
-    readonly setRowPin?: boolean;
-    // (undocumented)
-    readonly setSearch?: boolean;
-    // (undocumented)
-    readonly setSelection?: boolean;
-    // (undocumented)
-    readonly setSort?: boolean;
-    // (undocumented)
-    readonly stage?: boolean;
-}
-
-// @public
-export interface BindingQuery {
-    // (undocumented)
-    readonly extra?: Readonly<Record<string, unknown>>;
-    // (undocumented)
-    readonly limit?: number;
-    // (undocumented)
-    readonly page?: number;
-    // (undocumented)
-    readonly search?: string;
-    // (undocumented)
-    readonly sortBy?: string;
-    // (undocumented)
-    readonly sortDir?: "asc" | "desc";
-}
-
-// @public
-export interface BindingSnapshot {
-    // (undocumented)
-    readonly featureIds: readonly string[];
-    // (undocumented)
-    readonly neutralTable?: NeutralTable<unknown>;
-    // (undocumented)
-    readonly operations: BindingOperations;
-    // (undocumented)
-    readonly query?: BindingQuery;
-    readonly rowCount?: number;
-    // (undocumented)
-    readonly tableId: string;
-}
-
-// @public
 export function buildAgentContext(session: AgentSession, options?: AgentContextOptions, inputs?: AgentContextInputs): AgentContext;
 
 // @public

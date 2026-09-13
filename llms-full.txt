@@ -12787,10 +12787,14 @@ the `AssistantTurnStatus`.
 `undoBlocked` explains it); `runUndo` applies one, and `AssistantUndoOffer` is
 what the panel shows.
 
-**The table binding.** `TableAgentBridge` connects a session to a live table
-through `BindingSnapshot`, `BindingQuery` and `BindingOperations`;
-`contractFingerprint` and `contractVersion` identify the contract a backend was
-sent, `displayProposals` and `ProposalResolver` render proposed writes.
+**The table binding.** `TableAgentBridge` is how a host receives live updates —
+a session to attach, a manifest to publish, a pending approval, and a reader for
+the live view. A binding states what its own runtime offers through
+`ObservationInputs` and `agentObservation` turns that into the observation a
+session reads the table through, so every binding answers "what can this table
+do" the same way. `contractFingerprint` and `contractVersion` identify the
+contract a backend was sent, `displayProposals` and `ProposalResolver` render
+proposed writes.
 `observationFromNeutral`, `agentColumnsFromNeutral`, `readRowsFromNeutral`,
 `resolveRowFromNeutral`, `monotonicRevision`, `revisionToken`,
 `LiveObservationOptions`, `NeutralQueryOverlay` and `TableAgentColumnPatch`

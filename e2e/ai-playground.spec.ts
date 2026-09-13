@@ -381,19 +381,21 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
     await openDemoOptions(page);
     await page.getByTestId("ai-toggle-rtl").check();
     await closeDemoOptions(page);
+
+    // Before the panel opens, because opening it takes the launcher out of the
+    // DOM. Direction without the locale proves the layout and nothing about the
+    // translations: an RTL frame around English is not what a reader in Arabic
+    // sees. Both strings come from `packages/i18n/src/locales/ar.ts`.
+    await expect(page.locator(part("assistant-launcher"))).toHaveAccessibleName(
+      "اسأل المساعد"
+    );
+
     await openAssistant(page);
 
     const surface = page.locator(part("assistant-surface"));
 
     // The panel itself mirrors, not merely the page around it.
     await expect(surface).toHaveCSS("direction", "rtl");
-
-    // Direction without the locale proves the layout and nothing about the
-    // translations: an RTL frame around English is not what a reader in Arabic
-    // sees. Both strings come from `packages/i18n/src/locales/ar.ts`.
-    await expect(page.locator(part("assistant-launcher"))).toHaveAccessibleName(
-      "اسأل المساعد"
-    );
     await expect(page.locator(part("assistant-input"))).toHaveAttribute(
       "placeholder",
       "اسأل عن هذا الجدول…"
