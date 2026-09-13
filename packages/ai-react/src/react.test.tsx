@@ -6,6 +6,7 @@ import type {
 } from "@adapttable/ai";
 import { createNeutralTable, createTableEngine } from "@adapttable/core";
 import {
+  AGENT_VIEW_STATE,
   applyTableFeatures,
   FeatureProviders,
   type TableRuntimeView,
@@ -1191,5 +1192,339 @@ describe("tableAgent", () => {
     expect(revoked.ok).toBe(false);
     expect(revoked.error?.message).toMatch(/cannot use operation "avg"/);
     expect(setAggregateOverrides).not.toHaveBeenCalled();
+  });
+});
+
+describe("what a host may do instead of the table", () => {
+  /** Drive one session with whatever `apply` the test wants to supply. */
+  async function withApply(
+    apply: Record<string, unknown>,
+    commit: "immediate" | "stage" = "immediate"
+  ): Promise<AgentSession> {
+    let session: AgentSession | undefined;
+    render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "one",
+            columns: { name: { type: "string", writable: true } },
+            apply,
+            // Nobody is here to answer, so the table applies its own writes.
+            approval: "never",
+            commit,
+            bridge: { attach: (s) => (session = s) },
+          }),
+          { id: "editing" },
+        ]}
+        view={{
+          rows: [{ id: "1", name: "Ada" }],
+          getRowId: (row: unknown) => String((row as { id: string }).id),
+          rowLabel: () => "Ada",
+          query: {
+            page: 1,
+            limit: 10,
+            search: "",
+            setPage: vi.fn(),
+            setLimit: vi.fn(),
+            setSearch: vi.fn(),
+            setSort: vi.fn(),
+          },
+        }}
+      />
+    );
+    await waitFor(() => expect(session).toBeDefined());
+    return session!;
+  }
+
+  it("writes through the host's own editCells when it supplied one", async () => {
+    const editCells = vi.fn(() => ({ saved: 1 }));
+    const session = await withApply({ editCells });
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "name", value: "Grace" }] },
+      session.manifest().viewRevision,
+      "ed"
+    );
+
+    // A host that wired its own write path keeps it: the binding does not
+    // reach past it into the table.
+    expect(result.ok).toBe(true);
+    expect(editCells).toHaveBeenCalled();
+  });
+
+  it("stages through the host's own stageCells when the table stages", async () => {
+    const stageCells = vi.fn(() => ({ staged: 1 }));
+    const session = await withApply({ stageCells }, "stage");
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "name", value: "Grace" }] },
+      session.manifest().viewRevision,
+      "ed"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(stageCells).toHaveBeenCalled();
+  });
+
+  it("reads through the host's own readRows when it supplied one", async () => {
+    const readRows = vi.fn(() => ({
+      offset: 0,
+      limit: 1,
+      redacted: [],
+      rows: [{ rowKey: "1", cells: { name: "Ada" } }],
+    }));
+    const session = await withApply({ readRows });
+
+    const result = await session.execute(
+      "rows.read",
+      { offset: 0, limit: 1 },
+      session.manifest().viewRevision,
+      "read"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(readRows).toHaveBeenCalled();
+  });
+
+  it("resolves a row through the host's own resolveRow when it supplied one", async () => {
+    const resolveRow = vi.fn(() => ({
+      rowKey: "1",
+      scope: "visible" as const,
+    }));
+    const session = await withApply({ resolveRow });
+
+    const revision = session.manifest().viewRevision;
+    const result = await session.execute(
+      "rows.resolve",
+      { position: 1, expectedRevision: revision },
+      revision,
+      "res"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(resolveRow).toHaveBeenCalled();
+  });
+
+  it("refuses a grouping the table never wired", async () => {
+    const session = await withApply({});
+
+    const result = await session.execute(
+      "view.setGroupBy",
+      { key: "team" },
+      session.manifest().viewRevision,
+      "g"
+    );
+
+    expect(result.ok).toBe(false);
+  });
+});
+
+describe("the view a turn is told about", () => {
+  /** Reads the live view the context builder would send. */
+  function ViewReader({ onRead }: { onRead: (value: unknown) => void }) {
+    const state = useFeatureState(AGENT_VIEW_STATE);
+    useLayoutEffect(() => {
+      if (state) onRead(state.read());
+    }, [state, onRead]);
+    return null;
+  }
+
+  it("names everything the reader has actually done to it", async () => {
+    let seen: { view?: Record<string, unknown> } | undefined;
+    render(
+      <FeatureProviders
+        props={applyTableFeatures({
+          features: [
+            tableAgent({
+              tableId: "one",
+              columns: { name: { type: "string" } },
+              apply: { setFilters: vi.fn(), setGroupBy: vi.fn() },
+            }),
+            { id: "filters" },
+            { id: "grouping" },
+          ],
+        })}
+      >
+        <Publisher
+          view={{
+            rows: [{ id: "1", name: "Ada" }],
+            getRowId: (row: unknown) => String((row as { id: string }).id),
+            rowLabel: () => "Ada",
+            query: {
+              page: 3,
+              limit: 25,
+              search: "ada",
+              sortBy: "name",
+              sortDir: "desc",
+              extra: { team: ["Core"] },
+              setPage: vi.fn(),
+              setLimit: vi.fn(),
+              setSearch: vi.fn(),
+              setSort: vi.fn(),
+            },
+            pinning: {
+              columns: { name: "start" },
+              rows: { top: ["1"], bottom: [] },
+            },
+          }}
+        />
+        <ViewReader onRead={(value) => (seen = value as typeof seen)} />
+      </FeatureProviders>
+    );
+
+    await waitFor(() => expect(seen?.view).toBeDefined());
+
+    // Everything the reader can see is everything the model is told: a turn
+    // planned against a different view is a turn planned against the wrong
+    // table.
+    expect(seen?.view).toMatchObject({
+      page: 3,
+      limit: 25,
+      search: "ada",
+      sortBy: "name",
+      sortDir: "desc",
+      filters: { team: ["Core"] },
+      pinnedColumns: { name: "start" },
+      pinnedRows: { top: ["1"] },
+    });
+  });
+
+  it("leaves out what the reader has not touched", async () => {
+    let seen: { view?: Record<string, unknown> } | undefined;
+    render(
+      <FeatureProviders
+        props={applyTableFeatures({
+          features: [tableAgent({ tableId: "one" })],
+        })}
+      >
+        <Publisher
+          view={{
+            rows: [],
+            getRowId: () => "1",
+            rowLabel: () => "1",
+            query: {
+              page: 1,
+              limit: 10,
+              search: "",
+              setPage: vi.fn(),
+              setLimit: vi.fn(),
+              setSearch: vi.fn(),
+              setSort: vi.fn(),
+            },
+          }}
+        />
+        <ViewReader onRead={(value) => (seen = value as typeof seen)} />
+      </FeatureProviders>
+    );
+
+    await waitFor(() => expect(seen?.view).toBeDefined());
+
+    // Nothing invented: a sort nobody set is not reported as a sort.
+    expect(seen?.view).not.toHaveProperty("sortBy");
+    expect(seen?.view).not.toHaveProperty("groupBy");
+    expect(seen?.view).not.toHaveProperty("pinnedColumns");
+  });
+});
+
+describe("publishing the table as in-page tools", () => {
+  /** Stand in for a browser that implements WebMCP. */
+  function fakeModelContext(): {
+    registered: unknown[];
+    restore: () => void;
+  } {
+    const registered: unknown[] = [];
+    const saved = Object.getOwnPropertyDescriptor(document, "modelContext");
+    Object.defineProperty(document, "modelContext", {
+      value: {
+        registerTool: (tool: unknown) => {
+          registered.push(tool);
+          return { unregister: () => registered.splice(0, registered.length) };
+        },
+      },
+      configurable: true,
+      writable: true,
+    });
+    return {
+      registered,
+      restore: () => {
+        if (saved) Object.defineProperty(document, "modelContext", saved);
+        else
+          delete (document as unknown as Record<string, unknown>).modelContext;
+      },
+    };
+  }
+
+  it("offers the table's tools while it is mounted, and takes them back", async () => {
+    const browser = fakeModelContext();
+    const onRegister = vi.fn();
+    try {
+      const { unmount } = render(
+        <Harness
+          features={[
+            tableAgent({
+              tableId: "one",
+              columns: { name: { type: "string" } },
+              webmcp: { onRegister },
+            }),
+          ]}
+          view={{
+            rows: [],
+            getRowId: () => "1",
+            rowLabel: () => "1",
+            query: {
+              page: 1,
+              limit: 10,
+              search: "",
+              setPage: vi.fn(),
+              setLimit: vi.fn(),
+              setSearch: vi.fn(),
+              setSort: vi.fn(),
+            },
+          }}
+        />
+      );
+
+      await waitFor(() => expect(onRegister).toHaveBeenCalled());
+      expect(onRegister.mock.calls[0]?.[0]).not.toHaveLength(0);
+
+      unmount();
+      // Said plainly rather than left standing: a surface listing the tools
+      // would otherwise show a set nothing can call.
+      await waitFor(() => expect(onRegister).toHaveBeenLastCalledWith([]));
+    } finally {
+      browser.restore();
+    }
+  });
+
+  it("publishes nothing when the host did not ask for it", async () => {
+    const browser = fakeModelContext();
+    try {
+      render(
+        <Harness
+          features={[tableAgent({ tableId: "one" })]}
+          view={{
+            rows: [],
+            getRowId: () => "1",
+            rowLabel: () => "1",
+            query: {
+              page: 1,
+              limit: 10,
+              search: "",
+              setPage: vi.fn(),
+              setLimit: vi.fn(),
+              setSearch: vi.fn(),
+              setSort: vi.fn(),
+            },
+          }}
+        />
+      );
+
+      // Everything is opt-in: omitting the prop registers nothing.
+      await waitFor(() => expect(browser.registered).toHaveLength(0));
+    } finally {
+      browser.restore();
+    }
   });
 });
