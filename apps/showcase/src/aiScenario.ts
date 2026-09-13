@@ -77,6 +77,14 @@ export interface DemoContext {
    * describes the salaries actually on screen.
    */
   readonly coreTeam: readonly { rowKey: string; salary: number }[];
+  /**
+   * The row the delete example removes, and the name it goes by.
+   *
+   * Read from the live rows: once it is gone the example has nothing to
+   * remove, and an example that names a row the table no longer has would
+   * propose a deletion nobody could approve.
+   */
+  readonly removableRow?: { readonly rowKey: string; readonly person: string };
 }
 
 /** What the demo says when it does not know a request. @internal */
@@ -222,6 +230,27 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
       })),
     }),
     requires: ["edit.cells"],
+  },
+  {
+    prompt: "Remove Tobias Lind from the table.",
+    ar: {
+      prompt: "احذف Tobias Lind من الجدول.",
+      title: "حذف صف",
+      reply: "تم اقتراح الحذف — وافق عليه لتطبيقه.",
+    },
+    subject: (context) => ({
+      kind: "delete",
+      row: context.removableRow?.person ?? "Tobias Lind",
+    }),
+    title: "Delete a row",
+    kind: "delete",
+    reply:
+      "Proposed the deletion — approve it to apply it. Reset brings it back.",
+    capabilityKey: "rows.delete",
+    args: (context) => ({
+      keys: [context.removableRow?.rowKey ?? "t1"],
+    }),
+    requires: ["rows.delete"],
   },
   {
     prompt: "Pin the person column to the start.",

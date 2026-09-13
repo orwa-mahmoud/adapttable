@@ -381,6 +381,15 @@ function applyRow(
   );
 }
 
+/** Remove the named rows. The seed is restored by Reset and by a refresh. */
+function removeRows(
+  rows: readonly StaffRow[],
+  keys: readonly string[]
+): StaffRow[] {
+  const gone = new Set(keys);
+  return rows.filter((row) => !gone.has(row.id));
+}
+
 function applyBatch(
   rows: readonly StaffRow[],
   edits: readonly BatchRowEdit<StaffRow>[]
@@ -483,6 +492,10 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     pinnedColumnKey: "person",
     coreTeam: [],
   });
+  // Deliberately not one of the rows the edit examples name, and read from the
+  // live rows: once it has been deleted the example stops being offered rather
+  // than proposing a row the table no longer has.
+  const removable = rows.find((row) => row.id === "t1");
   contextRef.current = {
     locale,
     namedRowKey: "p1",
@@ -490,6 +503,9 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     coreTeam: rows
       .filter((row) => row.team === "Core")
       .map((row) => ({ rowKey: row.id, salary: row.salary })),
+    ...(removable
+      ? { removableRow: { rowKey: removable.id, person: removable.person } }
+      : {}),
   };
 
   const scripted = useMemo(() => demoTransport(() => contextRef.current), []);
@@ -563,6 +579,15 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         },
         apply: {
           setFilters: (filters) => setHostFilters(hostFiltersFromBag(filters)),
+          // Disposable data, and deliberately destructive: this is the one
+          // capability on the page that removes something. The rows are seeded
+          // in memory, so Reset and an ordinary page refresh both bring them
+          // back — and `rows.delete` is `destructive`, which the neutral rule
+          // refuses to let `alwaysAllow` wave through, so the reader is asked
+          // every time however the drawer is set.
+          deleteRows: (keys) => {
+            setRows((current) => removeRows(current, keys));
+          },
         },
         bridge: {
           attach: setSession,
@@ -718,6 +743,11 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           key: "edit.cells",
           label: "Edit cells",
           help: "Off: no write ever reaches the approval, because none is ever proposed.",
+        },
+        {
+          key: "rows.delete",
+          label: "Delete rows",
+          help: "Off: the assistant cannot remove a row. On, it always asks first — deleting is never waved through, and Reset brings the data back.",
         },
       ].map((entry) => ({
         ...entry,
