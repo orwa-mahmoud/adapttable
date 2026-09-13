@@ -9,7 +9,7 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const MARKERS = [
@@ -41,18 +41,64 @@ const GRAPHS = [
   "packages/adapter-unstyled/dist/index.js",
 ];
 
-const leaked = [];
-for (const file of GRAPHS) {
-  const text = readFileSync(join(ROOT, file), "utf8");
-  for (const marker of MARKERS) {
-    if (text.includes(marker)) leaked.push(`${file} contains ${marker}`);
+/**
+ * Every marker one graph's text carries.
+ *
+ * Separated from the reading so the rule can be exercised without a build:
+ * the test owns this, and the build output is what the gate runs it over.
+ */
+export function leaksIn(file, text) {
+  return MARKERS.filter((marker) => text.includes(marker)).map(
+    (marker) => `${file} contains ${marker}`
+  );
+}
+
+/** A graph's text, or nothing when that entry was never built. */
+function readGraph(file) {
+  try {
+    return readFileSync(join(ROOT, file), "utf8");
+  } catch (error) {
+    if (error.code === "ENOENT") return undefined;
+    throw error;
   }
 }
 
-if (leaked.length) {
-  console.error(`✗ AI leaked into a base graph:\n${leaked.join("\n")}`);
-  process.exit(1);
+/**
+ * Check every base graph.
+ *
+ * An entry that is not there proves nothing about isolation, so it is a
+ * failure named in full rather than a graph quietly skipped — a pass over
+ * eleven graphs must mean eleven graphs were read.
+ */
+export function checkGraphs(graphs = GRAPHS) {
+  const leaked = [];
+  const missing = [];
+  for (const file of graphs) {
+    const text = readGraph(file);
+    if (text === undefined) missing.push(file);
+    else leaked.push(...leaksIn(file, text));
+  }
+  return { leaked, missing };
 }
-console.log(
-  `✓ ${GRAPHS.length} base graphs contain none of ${MARKERS.join(", ")}`
-);
+
+export { GRAPHS, MARKERS };
+
+function main() {
+  const { leaked, missing } = checkGraphs();
+  if (missing.length) {
+    console.error(
+      `\u2717 not built, so isolation is unproven:\n${missing.join("\n")}\n` +
+        "Run `pnpm build` first — this check reads the built graphs."
+    );
+    process.exit(1);
+  }
+  if (leaked.length) {
+    console.error(`\u2717 AI leaked into a base graph:\n${leaked.join("\n")}`);
+    process.exit(1);
+  }
+  console.log(
+    `\u2713 ${GRAPHS.length} base graphs contain none of ${MARKERS.join(", ")}`
+  );
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) main();

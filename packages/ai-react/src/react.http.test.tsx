@@ -72,7 +72,9 @@ function Publisher({ engine, neutral }: LiveTable) {
     rowLabel: (row: unknown) => (row as Row).name,
     query: {
       page: 1,
-      limit: 10,
+      // One row a page, so the two rows above really are two pages and the
+      // move to page 2 below is a move the table can make.
+      limit: 1,
       search: "",
       setPage: (page: number) => engine.dispatch({ type: "setPage", page }),
       setLimit: (limit: number) => engine.dispatch({ type: "setLimit", limit }),
