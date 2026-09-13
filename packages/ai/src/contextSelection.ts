@@ -22,7 +22,7 @@
  * labelled as estimates. Bytes are UTF-8 and exact, because a transport limit
  * is about bytes and there is nothing to estimate.
  */
-import type { ContextCapability } from "./contextSnapshot";
+import type { ContextCapability, ContextColumn } from "./contextSnapshot";
 import type { CapabilityGuide } from "./types";
 
 /**
@@ -49,6 +49,16 @@ export interface AgentContextOptions {
   /** Keys to consider before the rest, after the common operations. */
   readonly priority?: readonly string[];
   /**
+   * Keys this backend has already asked about under this same contract.
+   *
+   * Considered before anything else, including the common operations: a
+   * backend that spent a discovery round on a guide has said what the
+   * conversation is about more precisely than any general list can. Still
+   * inside the budget — this changes what is considered first, never what is
+   * allowed to exceed the budget.
+   */
+  readonly asked?: readonly string[];
+  /**
    * Keys whose guides must travel upfront.
    *
    * A request, not a permission: a key that is excluded or unwired stays that
@@ -59,8 +69,20 @@ export interface AgentContextOptions {
   readonly estimateTokens?: (text: string) => number;
 }
 
-/** Why a capability's guide is not in the upfront context. @public */
+/** Why something is not in the upfront context. @public */
 export type DeferralReason = "budget" | "hard-limit";
+
+/**
+ * What was held back.
+ *
+ * A guide is instructions for calling a capability that is still offered; a
+ * column is a description of a column the table still permits. Neither
+ * deferral removes anything — both say "ask for this", and the key is what to
+ * ask with.
+ *
+ * @public
+ */
+export type DeferralKind = "guide" | "column";
 
 /** What the selector did, and why. @public */
 export interface AgentContextSelection {
@@ -73,7 +95,18 @@ export interface AgentContextSelection {
   readonly deferred: readonly {
     readonly key: string;
     readonly reason: DeferralReason;
+    /** Defaults to `guide` for a capability whose instructions were held back. */
+    readonly kind?: DeferralKind;
   }[];
+  /**
+   * Column ids described nowhere in this contract.
+   *
+   * The table still permits every one of them — what was deferred is the
+   * description, not the permission — and `columns.describe` returns the
+   * detail on request. Published as ids so a model knows they exist rather
+   * than concluding the table has fewer columns than it has.
+   */
+  readonly deferredColumns?: readonly string[];
   /** Exact UTF-8 size of the serialized contract. */
   readonly contractBytes: number;
   /** Exact UTF-8 size of the serialized view state, counted separately. */
@@ -127,7 +160,8 @@ export function utf8Bytes(value: unknown): number {
  */
 export function selectionOrder(
   keys: readonly string[],
-  priority: readonly string[] = []
+  priority: readonly string[] = [],
+  asked: readonly string[] = []
 ): readonly string[] {
   const available = new Set(keys);
   const ordered: string[] = [];
@@ -135,6 +169,7 @@ export function selectionOrder(
     if (!available.has(key) || ordered.includes(key)) return;
     ordered.push(key);
   };
+  for (const key of asked) take(key);
   for (const key of COMMON_FIRST) take(key);
   for (const key of priority) take(key);
   for (const key of keys) take(key);
@@ -184,8 +219,22 @@ export function selectGuides(
   );
   if (impossible.length > 0) throw new ContextIncludeError(impossible);
 
-  const required = new Set(options.include ?? []);
-  const order = selectionOrder(keys, options.priority);
+  // The common operations keep their guidance whatever the budget says. A
+  // context that fits a number but leaves a model unable to filter, sort or
+  // page is not a smaller context — it is an assistant that cannot answer, and
+  // the budget was meant to shape the reply rather than remove it. Everything
+  // else defers by name and is one `describe` away.
+  const required = new Set([
+    ...(options.include ?? []),
+    ...COMMON_FIRST.filter((key) => keys.includes(key)),
+    // A guide this backend already spent a discovery round on. Carrying it is
+    // strictly cheaper than the round it would otherwise spend asking again,
+    // and the backend naming it is a better statement of what this
+    // conversation needs than any general list. Bounded by what the cache
+    // holds per contract, and by the hard byte limit below.
+    ...(options.asked ?? []).filter((key) => keys.includes(key)),
+  ]);
+  const order = selectionOrder(keys, options.priority, options.asked);
   // Requested includes are considered first, without being listed twice.
   const considered = [
     ...order.filter((key) => required.has(key)),
@@ -270,4 +319,86 @@ export function selectionVersion(
     priority: options.priority,
     include: options.include,
   });
+}
+
+/**
+ * Raised when a budget cannot be met however much is deferred.
+ *
+ * Only for a budget the caller chose. The default compact budget degrades with
+ * a note instead: a table is not broken because it is wide, and refusing to
+ * build a context for one would take the assistant away entirely.
+ *
+ * @public
+ */
+export class ContextBudgetError extends Error {
+  /** The budget that could not be met, in estimated tokens. */
+  readonly budget: number;
+  /** What the contract costs with everything deferrable already deferred. */
+  readonly floor: number;
+
+  constructor(budget: number, floor: number) {
+    super(
+      `a ${String(budget)}-token budget cannot be met: this table's contract ` +
+        `costs ${String(floor)} tokens with every guide and column description ` +
+        `already deferred. Raise tokenBudget above ${String(floor)}, or narrow ` +
+        `the table with include/exclude before building the context.`
+    );
+    this.name = "ContextBudgetError";
+    this.budget = budget;
+    this.floor = floor;
+  }
+}
+
+/**
+ * How much a column is worth keeping described upfront.
+ *
+ * Lower sorts earlier and is deferred last. A column on screen is the one a
+ * reader is most likely to mean; one the agent may write is the one a mistake
+ * costs most; the rest are ordered as the table declared them, so the same
+ * table always defers the same columns.
+ */
+function columnRank(column: ContextColumn): number {
+  if (column.visible !== false) return 0;
+  if (column.writable) return 1;
+  return 2;
+}
+
+/**
+ * Fit the described columns into what is left of the budget.
+ *
+ * Descriptions are dropped from the least useful end until the contract fits,
+ * and every dropped id is returned. Nothing is truncated in place: a column is
+ * described in full or named as deferred, because a half-described column is
+ * how a model learns a wrong type.
+ *
+ * @param columns - Every permitted column, in the table's own order.
+ * @param fits - Whether a given set of columns brings the contract inside
+ *   the budget. Called with progressively smaller sets.
+ * @returns The columns to describe, and the ids of those left out.
+ *
+ * @public
+ */
+export function fitColumns(
+  columns: readonly ContextColumn[],
+  fits: (kept: readonly ContextColumn[]) => boolean
+): { kept: readonly ContextColumn[]; deferred: readonly string[] } {
+  if (fits(columns)) return { kept: columns, deferred: [] };
+  // Defer from the back of the ranking forward, one at a time, so the result
+  // is the largest prefix that fits rather than an arbitrary subset.
+  const order = [...columns].sort((a, b) => columnRank(a) - columnRank(b));
+  for (let keep = order.length - 1; keep >= 0; keep -= 1) {
+    const kept = order.slice(0, keep);
+    if (fits(kept)) {
+      const ids = new Set(kept.map((column) => column.id));
+      return {
+        // Back into the table's own order: a model reading the contract should
+        // see the columns as the table declares them, not as they were ranked.
+        kept: columns.filter((column) => ids.has(column.id)),
+        deferred: columns
+          .filter((column) => !ids.has(column.id))
+          .map((column) => column.id),
+      };
+    }
+  }
+  return { kept: [], deferred: columns.map((column) => column.id) };
 }

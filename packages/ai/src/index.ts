@@ -15,13 +15,6 @@ export {
   applyAggregations,
 } from "./aggregationCommands";
 export {
-  type AgentPagination,
-  agentPagination,
-  pageRefusal,
-  pageSizeRefusal,
-  type PaginationInput,
-} from "./pagination";
-export {
   resolveApproval,
   type ResolvedApproval,
   type SharedApproval,
@@ -108,6 +101,7 @@ export {
   type AgentContextSelection,
   type AgentContextView,
   buildAgentContext,
+  ContextBudgetError,
   type ContextCapability,
   type ContextColumn,
   ContextIncludeError,
@@ -164,6 +158,13 @@ export {
   type TableAgentColumnPatch,
 } from "./liveTable";
 export { buildManifest, enabledKeys } from "./manifest";
+export {
+  type AgentPagination,
+  agentPagination,
+  pageRefusal,
+  pageSizeRefusal,
+  type PaginationInput,
+} from "./pagination";
 export { createAgentSession, type CreateAgentSessionOptions } from "./session";
 export type {
   AgentAggregateOperation,

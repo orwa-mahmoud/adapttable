@@ -1673,6 +1673,7 @@ describe("discovery over the wire", () => {
     const explained: (readonly string[] | undefined)[] = [];
     const options = {
       endpoint: "https://agent.example/turn",
+      connectionId: "discovery-carry",
       context: { profile: "compact" as const },
       request: (body: Record<string, unknown>) => {
         const context = body.context as

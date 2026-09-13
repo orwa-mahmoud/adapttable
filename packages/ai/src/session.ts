@@ -20,13 +20,13 @@ import {
   type RowAddressScope,
 } from "./keys";
 import { buildManifest } from "./manifest";
+import { normalizeCapabilityArgs } from "./normalizeArgs";
 import {
   type AgentPagination,
   agentPagination,
   pageRefusal,
   pageSizeRefusal,
 } from "./pagination";
-import { normalizeCapabilityArgs } from "./normalizeArgs";
 import type {
   AgentAggregationColumn,
   AgentAggregationsPatch,

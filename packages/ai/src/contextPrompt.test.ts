@@ -181,7 +181,7 @@ describe("rendering this table", () => {
       },
     });
     const rendered = renderAgentContext(
-      buildAgentContext(session, { tokenBudget: 1 })
+      buildAgentContext(session, { tokenBudget: 700 })
     );
 
     expect(rendered).toContain("Guides not included here:");

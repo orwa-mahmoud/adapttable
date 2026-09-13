@@ -93,12 +93,12 @@ describe("a change from outside the turn", () => {
     const table = movableTable();
     const turn = createTurnExecution(
       table.session,
-      phaseContext(table.session)
+      phaseContext(table.session, "t-1", 0)
     );
 
     // Phase one moves the table itself: 1 → 2, and that is the turn's own.
     const first = await turn.execute({
-      context: phaseContext(table.session),
+      context: phaseContext(table.session, "t-1", 0),
       actions: [action("view.setSearch", { query: "ada" }, "a")],
     });
     expect(first[0]?.ok).toBe(true);
@@ -109,7 +109,9 @@ describe("a change from outside the turn", () => {
     // cause. Adopting it would make the turn's next action look current.
     table.elsewhere();
     const stale = await turn.execute({
-      context: { viewRevision: 2, tableId: "orders" },
+      // The client re-read the view before this phase, as it does, and the
+      // revision it carries now includes a change the turn did not make.
+      context: { ...phaseContext(table.session, "t-1", 1), viewRevision: 2 },
       actions: [action("view.setPage", { page: 2 }, "b")],
     });
 
@@ -122,9 +124,9 @@ describe("a change from outside the turn", () => {
     const table = movableTable();
     const turn = createTurnExecution(
       table.session,
-      phaseContext(table.session)
+      phaseContext(table.session, "t-1", 0)
     );
-    const context = phaseContext(table.session);
+    const context = phaseContext(table.session, "t-1", 0);
 
     const results = await turn.execute({
       context,
@@ -156,9 +158,9 @@ describe("a revision the backend named for itself", () => {
     const table = movableTable();
     const turn = createTurnExecution(
       table.session,
-      phaseContext(table.session)
+      phaseContext(table.session, "t-1", 0)
     );
-    const context = phaseContext(table.session);
+    const context = phaseContext(table.session, "t-1", 0);
 
     // The turn's own first action moves the table to 2.
     await turn.execute({
@@ -184,9 +186,9 @@ describe("a revision the backend named for itself", () => {
     const table = movableTable();
     const turn = createTurnExecution(
       table.session,
-      phaseContext(table.session)
+      phaseContext(table.session, "t-1", 0)
     );
-    const context = phaseContext(table.session);
+    const context = phaseContext(table.session, "t-1", 0);
 
     await turn.execute({
       context,
@@ -207,11 +209,11 @@ describe("ordinary ordered work still runs", () => {
     const table = movableTable();
     const turn = createTurnExecution(
       table.session,
-      phaseContext(table.session)
+      phaseContext(table.session, "t-1", 0)
     );
 
     const results = await turn.execute({
-      context: phaseContext(table.session),
+      context: phaseContext(table.session, "t-1", 0),
       actions: [
         action("view.setSearch", { query: "core" }, "a"),
         action("view.setPage", { page: 2 }, "b"),
@@ -228,14 +230,14 @@ describe("ordinary ordered work still runs", () => {
     const table = movableTable();
     const turn = createTurnExecution(
       table.session,
-      phaseContext(table.session)
+      phaseContext(table.session, "t-1", 0)
     );
     const controller = new AbortController();
     controller.abort();
 
     const results = await turn.execute(
       {
-        context: phaseContext(table.session),
+        context: phaseContext(table.session, "t-1", 0),
         actions: [action("view.setPage", { page: 2 }, "a")],
       },
       controller.signal
@@ -269,7 +271,7 @@ describe("a write waiting on a human", () => {
         ],
         source: PAGE_ONLY,
         writePolicy: "allow",
-        approval: "always",
+        approval: "writes",
         commit: "immediate",
         hasPagination: false,
         hasSearch: false,

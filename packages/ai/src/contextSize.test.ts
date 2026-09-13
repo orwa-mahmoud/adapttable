@@ -174,19 +174,43 @@ describe("what the context costs across fixtures", () => {
     expect(wide.viewBytes).toBeLessThan(full.contractBytes);
   });
 
-  it("budgets guides, and on a wide table the columns are the cost", () => {
+  it("brings a wide table inside the compact budget", () => {
     const compact = measure(WIDE, "compact");
     const full = measure(WIDE, "full");
 
-    // Measured, not assumed: on 220 columns the compact profile changes
-    // nothing. Its budget governs capability guides, and the bulk here is the
-    // column list, which no profile trims — the only ceiling over that is
-    // MAX_CONTEXT_BYTES. A host that needs a smaller context on a table this
-    // wide narrows the columns itself.
-    expect(compact.contractBytes).toBe(full.contractBytes);
-    expect(compact.deferred).toBe(0);
-    // That the budget defers at all, and names what it held back, is
-    // `contextSelection.test.ts`'s; this fixture is about where the cost is.
+    // 220 columns used to cost the same either way: the budget governed
+    // capability guides, and the column list — the whole cost on a table this
+    // wide — was not counted at all. The payload is budgeted whole now.
+    expect(compact.contractBytes).toBeLessThan(full.contractBytes);
+    expect(compact.estimatedTokens).toBeLessThan(full.estimatedTokens);
+  });
+
+  it("defers column descriptions by name, and keeps every capability", () => {
+    const wide = buildAgentContext(tableSession(WIDE), { profile: "compact" });
+    const full = buildAgentContext(tableSession(WIDE), { profile: "full" });
+
+    // Nothing was truncated and nothing was taken away: the columns that did
+    // not fit are named, so a model knows they exist and can ask.
+    const deferred = wide.selection.deferredColumns ?? [];
+    expect(deferred.length).toBeGreaterThan(0);
+    expect(wide.contract.columns.length + deferred.length).toBe(
+      full.contract.columns.length
+    );
+    expect(wide.selection.notes?.join(" ")).toMatch(/columns\.describe/);
+
+    // Every capability the table offers is still offered. A budget decides
+    // what is described, never what may be done.
+    expect(wide.contract.capabilities.map((c) => c.key)).toEqual(
+      full.contract.capabilities.map((c) => c.key)
+    );
+  });
+
+  it("refuses a budget nothing can satisfy, and says what the floor is", () => {
+    // Only for a budget the caller chose. The default compact budget degrades
+    // with a note instead — a wide table is not a broken one.
+    expect(() =>
+      buildAgentContext(tableSession(WIDE), { tokenBudget: 50 })
+    ).toThrow(/cannot be met/);
   });
 });
 

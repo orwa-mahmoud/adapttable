@@ -20,6 +20,9 @@ import {
   type AgentContextOptions,
   type AgentContextProfile,
   type AgentContextSelection,
+  ContextBudgetError,
+  DEFAULT_COMPACT_TOKENS as COMPACT_TOKENS,
+  fitColumns,
   selectGuides,
   selectionVersion,
   utf8Bytes,
@@ -29,6 +32,7 @@ import {
   type AgentContextView,
   buildContract,
   buildView,
+  type ContextColumn,
 } from "./contextSnapshot";
 import type { AgentPagination } from "./pagination";
 import type {
@@ -53,6 +57,7 @@ export {
 } from "./contextPrompt";
 export { sampleColumns, sampleColumnValues } from "./contextSampling";
 export {
+  ContextBudgetError,
   ContextIncludeError,
   DEFAULT_COMPACT_TOKENS,
   MAX_CONTEXT_BYTES,
@@ -130,15 +135,48 @@ export function buildAgentContext(
     inputs.aggregations,
     inputs.samples
   );
+  const measure =
+    options.estimateTokens ?? ((text: string) => Math.ceil(text.length / 4));
+  const budget = payloadBudget(options);
+  // The payload is budgeted whole, and in the order that keeps a table usable.
+  // Columns come first: a model cannot name a column it was never told about,
+  // and no guide makes up for that. Guides then fill whatever is left, common
+  // operations first, so the things nearly every request needs stay callable.
+  const floor = (columns: readonly ContextColumn[]): number =>
+    measure(JSON.stringify({ ...contract, columns, capabilities: bare }));
+  const bare = contract.capabilities;
+  const fitted =
+    budget === undefined
+      ? { kept: contract.columns, deferred: [] as readonly string[] }
+      : fitColumns(contract.columns, (kept) => floor(kept) <= budget);
+  if (
+    budget !== undefined &&
+    options.tokenBudget !== undefined &&
+    fitted.kept.length === 0 &&
+    floor([]) > budget
+  ) {
+    throw new ContextBudgetError(budget, floor([]));
+  }
+  const described: AgentContextContract = {
+    ...contract,
+    columns: fitted.kept,
+  };
   const chosen = selectGuides(
-    contract.capabilities,
+    described.capabilities,
     // Read only for a capability actually under consideration, and through the
     // session, which refuses a key the agent may not use.
     (key) => session.describe(key),
-    options
+    budget === undefined
+      ? options
+      : {
+          ...options,
+          // What the columns did not spend. A guide is deferred by name, so a
+          // backend can still ask for any of them.
+          tokenBudget: Math.max(0, budget - floor(fitted.kept)),
+        }
   );
   const selected: AgentContextContract = {
-    ...contract,
+    ...described,
     capabilities: chosen.capabilities,
   };
   const manifest = session.manifest();
@@ -167,7 +205,17 @@ export function buildAgentContext(
         options
       ),
       selected: chosen.selected,
-      deferred: chosen.deferred,
+      deferred: [
+        ...chosen.deferred,
+        ...fitted.deferred.map((key) => ({
+          key,
+          reason: "budget" as const,
+          kind: "column" as const,
+        })),
+      ],
+      ...(fitted.deferred.length > 0
+        ? { deferredColumns: fitted.deferred }
+        : {}),
       contractBytes: utf8Bytes(selected),
       viewBytes: utf8Bytes(view),
       estimatedTokens: measured
@@ -176,7 +224,17 @@ export function buildAgentContext(
       // False means nobody counted: the number is a rule of thumb, and a
       // caller comparing it against a provider's real limit should know.
       estimated: measured === undefined,
-      ...(chosen.notes.length > 0 ? { notes: chosen.notes } : {}),
+      ...(() => {
+        const notes = [
+          ...chosen.notes,
+          ...(fitted.deferred.length > 0
+            ? [
+                `${String(fitted.deferred.length)} column description(s) were deferred to stay within the ${String(budget ?? 0)}-token budget; every one is still permitted, and columns.describe returns the detail: ${fitted.deferred.join(", ")}`,
+              ]
+            : []),
+        ];
+        return notes.length > 0 ? { notes } : {};
+      })(),
     },
   };
 }
@@ -208,7 +266,7 @@ export type {
   AssistantSuggestion,
   CapabilityPresentation,
 } from "./assistantContracts";
-export type { DeferralReason } from "./contextSelection";
+export type { DeferralKind, DeferralReason } from "./contextSelection";
 export type {
   ApprovalPolicy,
   CommitPolicy,
@@ -259,3 +317,15 @@ export type {
   WriteProposal,
   WriteRowResult,
 } from "./types";
+
+/**
+ * The token budget this build is held to, or nothing.
+ *
+ * `compact` has one by default; `full` has one only when the caller names it.
+ */
+function payloadBudget(options: AgentContextOptions): number | undefined {
+  if (options.tokenBudget !== undefined) return options.tokenBudget;
+  return (options.profile ?? "compact") === "compact"
+    ? COMPACT_TOKENS
+    : undefined;
+}

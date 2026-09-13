@@ -157,13 +157,37 @@ describe("choosing what travels upfront", () => {
     expect(guideFor.mock.calls.length).toBeLessThanOrEqual(ALL.length);
   });
 
-  it("says so when nothing at all would fit", () => {
+  it("keeps the common operations callable even when nothing would fit", () => {
     const chosen = selectGuides(ALL, (key) => guide(key, 20_000), {
       tokenBudget: 1,
     });
 
-    expect(chosen.selected).toEqual([]);
-    expect(chosen.notes.join(" ")).toMatch(/narrow the allowed capabilities/);
+    // A context that meets a number while leaving a model unable to filter,
+    // sort or page is not a smaller context — it is an assistant that cannot
+    // answer. The common operations keep their guidance; everything else
+    // defers by name and is one `describe` away.
+    expect(chosen.selected).toEqual([
+      "view.setFilters",
+      "view.setSort",
+      "view.setSearch",
+      "view.setPage",
+      "rows.read",
+    ]);
+    expect(chosen.deferred.map((entry) => entry.key)).toContain("edit.cells");
+    expect(chosen.notes.join(" ")).toMatch(/deferred to stay within/);
+  });
+
+  it("carries a guide the backend already asked about, ahead of the rest", () => {
+    const chosen = selectGuides(ALL, (key) => guide(key, 20_000), {
+      tokenBudget: 1,
+      asked: ["edit.cells"],
+    });
+
+    // Cheaper than the discovery round it would otherwise spend asking again.
+    expect(chosen.selected).toContain("edit.cells");
+    expect(chosen.deferred.map((entry) => entry.key)).not.toContain(
+      "edit.cells"
+    );
   });
 
   it("gives compact a budget and full none", () => {

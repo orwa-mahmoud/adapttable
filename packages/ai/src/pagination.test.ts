@@ -67,7 +67,9 @@ describe("a source that counted its matching rows", () => {
       totalRows: 130,
       canJump: true,
     });
-    expect(pageRefusal(p, 40)).toMatch(/6.*130 matching rows at 25 a page/);
+    expect(pageRefusal(p, 40)).toBe(
+      "page 40 is past the last page (6 of 130 matching rows at 25 a page)"
+    );
     expect(pageRefusal(p, 6)).toBeUndefined();
   });
 });

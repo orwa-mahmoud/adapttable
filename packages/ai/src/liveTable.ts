@@ -10,8 +10,8 @@ import {
 } from "@adapttable/core";
 
 import { type SharedApproval, sharedApproval } from "./approvalConfig";
-import { type AgentPagination, agentPagination } from "./pagination";
 import type { CommitPolicy, RowAddressScope, WritePolicy } from "./keys";
+import { type AgentPagination, agentPagination } from "./pagination";
 import type {
   AgentApply,
   AgentColumn,

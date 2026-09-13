@@ -1030,7 +1030,7 @@ function currentContext(
   return buildAgentContext(
     session,
     remembered.length > 0
-      ? { ...chosen, priority: [...remembered, ...(chosen.priority ?? [])] }
+      ? { ...chosen, asked: [...remembered, ...(chosen.asked ?? [])] }
       : chosen,
     options.contextInputs?.(session) ?? {}
   );
