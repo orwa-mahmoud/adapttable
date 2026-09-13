@@ -260,6 +260,16 @@ function isRowWindowResult(value: unknown): boolean {
 // `registerWebMcpTools` takes a session and answers from its catalog, so the
 // entry names the session, what it publishes, and what a call returns.
 export type {
+  AssistantSuggestion,
+  CapabilityPresentation,
+} from "./assistantContracts";
+export type {
+  ApprovalPolicy,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";
+export type {
   AgentAggregateOperation,
   AgentAggregationColumn,
   AgentAggregations,
@@ -303,13 +313,3 @@ export type {
   WriteProposal,
   WriteRowResult,
 } from "./types";
-export type {
-  AssistantSuggestion,
-  CapabilityPresentation,
-} from "./assistantContracts";
-export type {
-  ApprovalPolicy,
-  CommitPolicy,
-  RowAddressScope,
-  WritePolicy,
-} from "./keys";

@@ -640,8 +640,6 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     setPinnedRowIds({ top: [], bottom: [] });
   }, [assistant]);
 
-  const catalog = manifest ? (session?.catalog() ?? []) : [];
-
   /** Take one capability away from the agent, or give it back. */
   const toggleOffer = useCallback((key: string) => {
     setExcluded((current) =>

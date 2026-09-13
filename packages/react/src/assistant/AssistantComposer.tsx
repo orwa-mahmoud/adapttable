@@ -11,11 +11,10 @@ import type { TableLabels } from "@adapttable/core";
 import type { KeyboardEvent, ReactElement } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
-
 import { MicIcon, SendIcon, StopIcon } from "./assistantIcons";
 import type { TableAssistantSlots } from "./assistantSlots";
-import type { SpeechInputHandle } from "./speechView";
 import { assistantIsBusy, assistantIsUsable } from "./assistantView";
+import type { SpeechInputHandle } from "./speechView";
 
 /** Props for {@link AssistantComposer}. @internal */
 export interface AssistantComposerProps {

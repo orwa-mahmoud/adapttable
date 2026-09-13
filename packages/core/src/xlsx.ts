@@ -102,5 +102,5 @@ export type {
   ColumnModelEditor,
   ColumnModelFilter,
 } from "./columnModel";
-export type { DisplayValue } from "./display";
 export type { ColumnAiOptions } from "./columnModel";
+export type { DisplayValue } from "./display";

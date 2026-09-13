@@ -31,7 +31,6 @@ import {
   type ApprovalReviewSlots,
 } from "../editing/ApprovalReviewChrome";
 import { AssistantComposer } from "./AssistantComposer";
-import type { SpeechInputHandle } from "./speechView";
 import { AssistantIcon, CloseIcon, SettingsIcon } from "./assistantIcons";
 import {
   AssistantAlwaysAllowed,
@@ -52,6 +51,7 @@ import type {
   TableAssistantMessageView,
   TableAssistantView,
 } from "./assistantView";
+import type { SpeechInputHandle } from "./speechView";
 
 export type { TableAssistantBoundary } from "./assistantPlacement";
 

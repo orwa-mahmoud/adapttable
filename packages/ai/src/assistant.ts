@@ -51,7 +51,14 @@ export {
 // `ExecuteResult`, the store is built from a session and the context inputs it
 // sends, and a receipt quotes the catalog. A caller that cannot name these
 // cannot type a transport of its own.
+export type { CapabilityPresentation } from "./assistantContracts";
 export type { AgentContextInputs, AgentContextView } from "./context";
+export type {
+  ApprovalPolicy,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";
 export type {
   AgentAggregateOperation,
   AgentAggregationColumn,
@@ -96,10 +103,3 @@ export type {
   WriteProposal,
   WriteRowResult,
 } from "./types";
-export type { CapabilityPresentation } from "./assistantContracts";
-export type {
-  ApprovalPolicy,
-  CommitPolicy,
-  RowAddressScope,
-  WritePolicy,
-} from "./keys";

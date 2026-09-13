@@ -13,11 +13,11 @@
  */
 import type { McpToolResult } from "@adapttable/ai/mcp";
 import {
+  createMcpAppBridge,
   type McpAppBridge,
   type McpAppHostCapabilities,
   type McpAppToolInput,
   type McpAppToolOutcome,
-  createMcpAppBridge,
 } from "@adapttable/ai/mcp-apps";
 import type { ColumnDef } from "@adapttable/react";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
@@ -97,6 +97,12 @@ function receiptApproval(text: string): string | undefined {
     // error to report; it is a body with no approval in it, shown as it came.
     return undefined;
   }
+}
+
+/** What the host admitted it can do, as a sentence. */
+function hostStatus(capabilities: McpAppHostCapabilities): string {
+  const asking = capabilities.elicitation ? "can" : "cannot";
+  return `Connected. The host ${asking} ask on our behalf.`;
 }
 
 export function McpAppView() {
@@ -181,7 +187,7 @@ export function McpAppView() {
         <p className="hint-row">
           <span className="hint" data-testid="mcp-app-status">
             {capabilities
-              ? `Connected. The host ${capabilities.elicitation ? "can" : "cannot"} ask on our behalf.`
+              ? hostStatus(capabilities)
               : "Connecting to the host…"}
           </span>
         </p>

@@ -369,8 +369,8 @@ export function AiDemoOptions({
         <Section title="What the agent may do">
           <p className="ai-opts__help">
             Taking one away removes it from the contract and from the
-            suggestions — and leaves the table's own control exactly where it
-            was, for the person using it.
+            suggestions — and leaves the table&apos;s own control exactly where
+            it was, for the person using it.
           </p>
           {exclusions.map((exclusion) => (
             <label key={exclusion.key} className="ai-opts__row">

@@ -581,6 +581,19 @@ export type {
   AssistantUnresolved,
   CapabilityPresentation,
 } from "./assistantContracts";
+export type { AssistantReceiptSubject } from "./assistantReceipts";
+export type {
+  ApprovalPolicy,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";
+export type {
+  McpContent,
+  McpTool,
+  McpToolAnnotations,
+  McpToolResult,
+} from "./mcp";
 export type {
   AgentAggregateOperation,
   AgentAggregationColumn,
@@ -625,16 +638,3 @@ export type {
   WriteProposal,
   WriteRowResult,
 } from "./types";
-export type {
-  ApprovalPolicy,
-  CommitPolicy,
-  RowAddressScope,
-  WritePolicy,
-} from "./keys";
-export type {
-  McpContent,
-  McpTool,
-  McpToolAnnotations,
-  McpToolResult,
-} from "./mcp";
-export type { AssistantReceiptSubject } from "./assistantReceipts";

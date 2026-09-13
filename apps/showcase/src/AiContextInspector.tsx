@@ -48,6 +48,21 @@ function readableBytes(bytes: number): string {
     : `${(bytes / 1024).toFixed(1)} kB`;
 }
 
+/**
+ * What one turn actually carries, in bytes and in tokens.
+ *
+ * The token count is the estimate the selection reports, and says so when it
+ * is one — a reader comparing profiles needs to know which number is measured.
+ */
+function sentEachTurn(
+  selection: NonNullable<AgentContext["selection"]>
+): string {
+  const bytes = readableBytes(selection.contractBytes + selection.viewBytes);
+  const tokens = String(selection.estimatedTokens);
+  const qualifier = selection.estimated ? " (estimated)" : "";
+  return `${bytes} · about ${tokens} tokens${qualifier}`;
+}
+
 /** The contract, or why there is not one yet. */
 function useContext(
   session: AgentSession | null,
@@ -127,9 +142,7 @@ export function AiContextInspector({
         <div>
           <dt>Sent each turn</dt>
           <dd data-testid="ai-context-size">
-            {selection
-              ? `${readableBytes(selection.contractBytes + selection.viewBytes)} · about ${String(selection.estimatedTokens)} tokens${selection.estimated ? " (estimated)" : ""}`
-              : "—"}
+            {selection ? sentEachTurn(selection) : "—"}
           </dd>
         </div>
         <div>

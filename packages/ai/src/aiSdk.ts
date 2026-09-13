@@ -735,11 +735,6 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
 // conversation shapes it speaks. A host writing its own connection needs
 // every one of them to type its side.
 export type {
-  AgentContextInputs,
-  AgentContextOptions,
-  AgentContextView,
-} from "./context";
-export type {
   AssistantAnswer,
   AssistantExchange,
   AssistantQuestion,
@@ -750,6 +745,19 @@ export type {
   AssistantUnresolved,
   CapabilityPresentation,
 } from "./assistantContracts";
+export type { AssistantReceiptSubject } from "./assistantReceipts";
+export type {
+  AgentContextInputs,
+  AgentContextOptions,
+  AgentContextView,
+} from "./context";
+export type { AgentContextProfile } from "./contextSelection";
+export type {
+  ApprovalPolicy,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";
 export type {
   AgentAggregateOperation,
   AgentAggregationColumn,
@@ -794,11 +802,3 @@ export type {
   WriteProposal,
   WriteRowResult,
 } from "./types";
-export type {
-  ApprovalPolicy,
-  CommitPolicy,
-  RowAddressScope,
-  WritePolicy,
-} from "./keys";
-export type { AssistantReceiptSubject } from "./assistantReceipts";
-export type { AgentContextProfile } from "./contextSelection";

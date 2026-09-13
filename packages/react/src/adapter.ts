@@ -176,9 +176,9 @@ export {
   type AgentApprovalOperation,
   type AgentApprovalPending,
   type AgentApprovalProposal,
-  type AgentViewState,
   type AgentApprovalProps,
   type AgentApprovalSlots,
+  type AgentViewState,
 } from "./editing/AgentApprovalChrome";
 export {
   APPROVAL_PREVIEW_LIMIT,
@@ -1101,6 +1101,11 @@ export {
   type TableAssistantUndoView,
   type TableAssistantView,
 } from "./assistant/assistantView";
+export type {
+  SpeechInputHandle,
+  SpeechInputState,
+  SpeechInputStatus,
+} from "./assistant/speechView";
 export {
   assistantIsBusy,
   type TableAssistantBoundary,
@@ -1109,11 +1114,6 @@ export {
   type TableAssistantPresentation,
   type TableAssistantProps,
 } from "./assistant/TableAssistantChrome";
-export type {
-  SpeechInputHandle,
-  SpeechInputState,
-  SpeechInputStatus,
-} from "./assistant/speechView";
 export { editableCellController } from "./editing/editableCellController";
 export type { ExportRowRole } from "@adapttable/core";
 export type { AggregateFn } from "@adapttable/core";

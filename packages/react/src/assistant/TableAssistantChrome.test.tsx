@@ -900,7 +900,7 @@ describe("a question the backend asked", () => {
 
     const chips = parts("assistant-question-option");
     expect(chips).toHaveLength(2);
-    fireEvent.click(chips[1] as HTMLElement);
+    fireEvent.click(chips[1]!);
 
     expect(answer).toHaveBeenCalledWith({ optionId: "q4" });
   });
@@ -978,7 +978,7 @@ describe("putting a turn back", () => {
     });
 
     expect(parts("assistant-undo")).toHaveLength(1);
-    fireEvent.click(part("assistant-undo-button") as HTMLElement);
+    fireEvent.click(part("assistant-undo-button")!);
     expect(undoTurn).toHaveBeenCalledTimes(1);
   });
 
@@ -1054,7 +1054,7 @@ describe("what the reader stopped being asked about", () => {
     });
 
     expect(parts("assistant-always-allowed-item")).toHaveLength(1);
-    const control = part("assistant-always-allowed-revoke") as HTMLElement;
+    const control = part("assistant-always-allowed-revoke")!;
     // The key is a developer detail; the reader sees what it means.
     expect(control.textContent).toBe("editing cells");
     fireEvent.click(control);

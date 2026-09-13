@@ -130,6 +130,13 @@ function sseAiSdkConnection(endpoint: string, token: string): AiSdkConnection {
  *
  * @internal
  */
+/** What each backend mode is called in the connected chip. */
+const MODE_LABEL: Readonly<Record<string, string>> = {
+  "ag-ui": "AG-UI",
+  "ai-sdk": "AI SDK",
+  http: "HTTP",
+};
+
 export function AiConnectionSettings({
   session,
   connection,
@@ -231,14 +238,7 @@ export function AiConnectionSettings({
           </>
         ) : (
           <>
-            <strong>
-              Connected ·{" "}
-              {connection.mode === "ag-ui"
-                ? "AG-UI"
-                : connection.mode === "ai-sdk"
-                  ? "AI SDK"
-                  : "HTTP"}
-            </strong>
+            <strong>Connected · {MODE_LABEL[connection.mode] ?? "HTTP"}</strong>
             <span>{connection.endpoint}</span>
           </>
         )}

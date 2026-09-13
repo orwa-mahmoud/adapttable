@@ -198,7 +198,17 @@ export function rowProvenance(
 // Named by the signatures above: the session a context is built from, the row
 // window and envelope `rowProvenance` returns, and the catalog shapes a
 // rendered context quotes. A reader writing a helper of their own needs them.
+export type {
+  AssistantSuggestion,
+  CapabilityPresentation,
+} from "./assistantContracts";
 export type { DeferralReason } from "./contextSelection";
+export type {
+  ApprovalPolicy,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";
 export type {
   AgentAggregateOperation,
   AgentAggregationColumn,
@@ -243,13 +253,3 @@ export type {
   WriteProposal,
   WriteRowResult,
 } from "./types";
-export type {
-  AssistantSuggestion,
-  CapabilityPresentation,
-} from "./assistantContracts";
-export type {
-  ApprovalPolicy,
-  CommitPolicy,
-  RowAddressScope,
-  WritePolicy,
-} from "./keys";
