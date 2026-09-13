@@ -581,3 +581,213 @@ describe("a cancelled turn", () => {
     expect(table.state.page).toBe(1);
   });
 });
+
+describe("a stream this adapter cannot read", () => {
+  async function refuse(parts: readonly AiSdkPart[]): Promise<unknown> {
+    const table = liveTable();
+    const transport = aiSdkTransport({
+      connection: recorded([() => parts]).connection,
+    });
+    return transport
+      .send({ session: table.session, text: "go", conversation: [] })
+      .then(
+        () => undefined,
+        (cause: unknown) => cause
+      );
+  }
+
+  it("refuses a part with no type at all", async () => {
+    // Not an unknown part from a newer SDK — those are forwarded and ignored.
+    // A part that is not shaped like one means the stream is not this stream.
+    const cause = await refuse([START, { type: "" }, FINISH]);
+    expect(cause).toMatchObject({ code: "unknown-stream-version" });
+  });
+
+  it("refuses a text delta that is not text", async () => {
+    const cause = await refuse([
+      START,
+      { type: "text-delta", id: "t-1", delta: 7 },
+      FINISH,
+    ]);
+    expect(cause).toMatchObject({ code: "malformed-part" });
+  });
+
+  it("refuses a tool call with no name", async () => {
+    const cause = await refuse([
+      START,
+      { type: "tool-input-available", toolCallId: "c1", input: {} },
+      FINISH,
+    ]);
+    expect(cause).toMatchObject({ code: "malformed-part" });
+  });
+
+  it("refuses one of our tools with no call id to answer", async () => {
+    const cause = await refuse([
+      START,
+      {
+        type: "tool-input-available",
+        toolName: aiSdkToolName(TABLE_ID, "view.setPage"),
+        input: { page: 2 },
+      },
+      FINISH,
+    ]);
+    expect(cause).toMatchObject({ code: "malformed-part" });
+  });
+
+  it("refuses an approval request with no id to answer", async () => {
+    const cause = await refuse([
+      START,
+      {
+        type: "tool-approval-request",
+        toolName: aiSdkToolName(TABLE_ID, "view.setPage"),
+      },
+      FINISH,
+    ]);
+    expect(cause).toMatchObject({ code: "malformed-part" });
+  });
+
+  it("refuses an approval that names neither rows nor one of our tools", async () => {
+    const table = liveTable();
+    const transport = aiSdkTransport({
+      connection: recorded([
+        () => [
+          START,
+          {
+            type: "tool-approval-request",
+            approvalId: "a1",
+            toolName: "somebody-elses-tool",
+          },
+          FINISH,
+        ],
+      ]).connection,
+      // Reached only when there is somebody to ask: without a reader, the turn
+      // stops as unavailable before the request is read this far.
+      onApprove: () => Promise.resolve(true),
+    });
+
+    const cause = await transport
+      .send({ session: table.session, text: "go", conversation: [] })
+      .then(
+        () => undefined,
+        (thrown: unknown) => thrown
+      );
+    expect(cause).toMatchObject({ code: "malformed-approval" });
+  });
+
+  it("stops the turn when the route asks and there is nobody to ask", async () => {
+    const table = liveTable();
+    const transport = aiSdkTransport({
+      connection: recorded([
+        () => [
+          START,
+          {
+            type: "tool-approval-request",
+            approvalId: "a1",
+            toolName: aiSdkToolName(TABLE_ID, "view.setPage"),
+          },
+          FINISH,
+        ],
+      ]).connection,
+    });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "go to page 3",
+      conversation: [],
+    });
+
+    expect(reply.unresolved).toMatchObject({
+      code: "approval-unavailable",
+      pending: ["view.setPage"],
+    });
+    expect(table.state.page).toBe(1);
+  });
+
+  it("refuses a stream that ends without finishing", async () => {
+    const cause = await refuse([START, ...says("half a")]);
+    expect(cause).toMatchObject({ code: "stream-incomplete" });
+  });
+
+  it("carries the route's own error text", async () => {
+    const cause = await refuse([
+      START,
+      { type: "error", errorText: "the model is unavailable" },
+    ]);
+    expect(cause).toMatchObject({
+      code: "stream-error",
+      message: "the model is unavailable",
+    });
+  });
+
+  it("names a route failure that said nothing about itself", async () => {
+    const cause = await refuse([START, { type: "error" }]);
+    expect(cause).toMatchObject({ code: "stream-error" });
+    expect(String((cause as Error).message)).toContain("without saying why");
+  });
+});
+
+describe("a refused call", () => {
+  it("reports what the reader turned down, and why", async () => {
+    const table = liveTable();
+    const route = recorded([
+      () => [
+        START,
+        {
+          type: "output-denied",
+          toolName: aiSdkToolName(TABLE_ID, "view.setPage"),
+          errorText: "not while I am reading",
+        },
+        FINISH,
+      ],
+    ]);
+    const transport = aiSdkTransport({ connection: route.connection });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "go to page 3",
+      conversation: [],
+    });
+
+    expect(reply.unresolved).toMatchObject({
+      code: "output-denied",
+      message: "not while I am reading",
+      pending: ["view.setPage"],
+    });
+    // Nothing ran: a refusal is not a turn that half happened.
+    expect(table.state.page).toBe(1);
+  });
+
+  it("falls back to the route's own name when the tool is not ours", async () => {
+    const table = liveTable();
+    const route = recorded([
+      () => [
+        START,
+        { type: "output-denied", toolName: "somebody-elses-tool" },
+        FINISH,
+      ],
+    ]);
+    const transport = aiSdkTransport({ connection: route.connection });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "go",
+      conversation: [],
+    });
+
+    expect(reply.unresolved?.pending).toEqual(["somebody-elses-tool"]);
+  });
+
+  it("says unknown when the route named nothing at all", async () => {
+    const table = liveTable();
+    const route = recorded([() => [START, { type: "output-denied" }, FINISH]]);
+    const transport = aiSdkTransport({ connection: route.connection });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "go",
+      conversation: [],
+    });
+
+    expect(reply.unresolved?.pending).toEqual(["unknown"]);
+  });
+});

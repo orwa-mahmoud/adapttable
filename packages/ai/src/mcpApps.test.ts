@@ -473,3 +473,91 @@ describe("asking the person", () => {
     });
   });
 });
+
+describe("a view with no host to talk to", () => {
+  it("refuses rather than waiting on an answer that cannot come", async () => {
+    // The module imports on a server, where there is no parent window. Every
+    // route that needs the host says so; nothing returns a bridge that looks
+    // connected and never answers.
+    const bridge = createMcpAppBridge({ hostOrigin: HOST });
+
+    expect(bridge.capabilities()).toBeUndefined();
+    await expect(bridge.initialize()).rejects.toThrow(/no MCP App host/);
+    await expect(bridge.callTool("view.setPage", {})).rejects.toThrow(
+      /no MCP App host/
+    );
+    // Elicitation is the one that degrades instead: a view that cannot ask
+    // through the host falls back to its own chrome.
+    await expect(
+      bridge.elicit({ message: "ok?", options: [] })
+    ).resolves.toBeUndefined();
+    expect(() => {
+      bridge.dispose();
+    }).not.toThrow();
+  });
+});
+
+describe("what the host says that this view cannot use", () => {
+  it("warns about a method it does not handle, and carries on", () => {
+    const onWarning = vi.fn();
+    const onToolInput = vi.fn();
+    const host = fakeHost();
+    createMcpAppBridge({
+      hostOrigin: HOST,
+      channel: host.channel,
+      onToolInput,
+      onWarning,
+    });
+
+    host.push({ jsonrpc: "2.0", method: "ui/notifications/unheard-of" });
+
+    expect(onWarning).toHaveBeenCalledWith({
+      code: "unknown-method",
+      message: expect.stringContaining("unheard-of") as unknown as string,
+    });
+
+    // Still listening: an unknown notification is not a broken channel.
+    host.push({
+      jsonrpc: "2.0",
+      method: "ui/notifications/tool-input",
+      params: { toolCallId: "c1", toolName: "view.setPage", input: {} },
+    });
+    expect(onToolInput).toHaveBeenCalledTimes(1);
+  });
+
+  it("warns about an answer to a request it is not waiting for", () => {
+    const onWarning = vi.fn();
+    const host = fakeHost();
+    createMcpAppBridge({ hostOrigin: HOST, channel: host.channel, onWarning });
+
+    host.push({ jsonrpc: "2.0", id: 99, result: {} });
+
+    expect(onWarning).toHaveBeenCalledWith({
+      code: "unmatched-response",
+      message: expect.stringContaining("not in flight") as unknown as string,
+    });
+  });
+});
+
+describe("a host that stops answering", () => {
+  it("gives up on a request rather than holding it forever", async () => {
+    vi.useFakeTimers();
+    try {
+      // `answer` returning undefined is a host that takes the message and
+      // says nothing back.
+      const host = fakeHost(() => undefined);
+      const bridge = createMcpAppBridge({
+        hostOrigin: HOST,
+        channel: host.channel,
+        timeoutMs: 1000,
+      });
+
+      const call = bridge.callTool("view.setPage", { page: 2 });
+      const settled = expect(call).rejects.toThrow(/did not answer/);
+      await vi.advanceTimersByTimeAsync(1000);
+      await settled;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
