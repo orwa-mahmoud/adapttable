@@ -193,7 +193,19 @@ export function readRowsFromNeutral<TRow>(
   };
 }
 
-/** Resolve a row reference within a scope window. */
+/**
+ * Resolve a row reference within a scope window.
+ *
+ * A key is checked wherever absence can be proved. A name a model lifted out
+ * of a cell looks exactly like a key, and taken on trust it becomes a write
+ * nothing can land and an approval strip asking the reader to accept a change
+ * from a value it cannot show. Saying the key is not there is what sends the
+ * model to `rows.resolve` instead.
+ *
+ * A source that holds only the loaded window is the one case where a missing
+ * key proves nothing — the row may be real and elsewhere — so the reference
+ * stands and the write path reports per row.
+ */
 export function resolveRowFromNeutral<TRow>(
   table: NeutralTable<TRow>,
   ref: RowRef
@@ -203,6 +215,14 @@ export function resolveRowFromNeutral<TRow>(
   assertScopeAvailable(table, resolvedScope);
   const rows = table.rows(resolvedScope);
   if ("rowKey" in ref) {
+    const known =
+      !table.capabilities.fullDataset ||
+      rows.some((row) => table.rowKey(row) === ref.rowKey);
+    if (!known) {
+      throw new Error(
+        `no row with key "${ref.rowKey}" in the ${scope} rows — resolve it first`
+      );
+    }
     return { rowKey: ref.rowKey, scope };
   }
   const index = ref.position - 1;

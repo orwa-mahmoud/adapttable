@@ -1021,7 +1021,7 @@ describe("createAgentHttpClient", () => {
 
     // The second phase was handed the refusal, under the refused call's id.
     expect(sent).toHaveLength(2);
-    expect((sent[1] as { id: string }[])[0].id).toBe("e1");
+    expect((sent[1] as { id: string }[])[0]?.id).toBe("e1");
     expect(result.text).toBe("Fixed it.");
     expect(editCells).toHaveBeenCalledTimes(1);
   });

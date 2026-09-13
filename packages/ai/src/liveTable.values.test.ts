@@ -182,10 +182,45 @@ describe("readRowsFromNeutral", () => {
 });
 
 describe("resolveRowFromNeutral", () => {
-  it("takes a key reference at its word, without walking the window", () => {
+  it("resolves a key that names a row in the scope", () => {
     const table = neutral();
-    expect(resolveRowFromNeutral(table, { rowKey: "gone" })).toEqual({
-      rowKey: "gone",
+    const [row] = table.rows("page");
+    if (!row) throw new Error("the fixture has no rows");
+    const first = table.rowKey(row);
+    expect(resolveRowFromNeutral(table, { rowKey: first })).toEqual({
+      rowKey: first,
+      scope: "visible",
+    });
+  });
+
+  it("refuses a key no row carries, when the table holds them all", () => {
+    const table = neutral();
+    // A model reaching for a row it never resolved sends the name it read out
+    // of a cell, which looks exactly like a key. Taken at its word it becomes
+    // a write against a record nobody can name, under an approval strip that
+    // cannot show what the value was.
+    expect(() =>
+      resolveRowFromNeutral(table, { rowKey: "Ada Lovelace" })
+    ).toThrow(/no row with key "Ada Lovelace"/);
+  });
+
+  it("lets an unknown key stand when the table holds only a window", () => {
+    const table = neutral();
+    Object.defineProperty(table, "capabilities", {
+      get: () => ({
+        fullDataset: false,
+        grouping: false as const,
+        selectAcrossPages: false,
+        exportScope: "page" as const,
+        totalCount: "loaded" as const,
+      }),
+    });
+
+    // Absent from the loaded rows is not absent from the data. The reference
+    // stands and the write path is where a row that truly is not there gets
+    // reported.
+    expect(resolveRowFromNeutral(table, { rowKey: "elsewhere" })).toEqual({
+      rowKey: "elsewhere",
       scope: "visible",
     });
   });
