@@ -580,3 +580,59 @@ describe("a host that would rather send the contract every time", () => {
     }
   });
 });
+
+describe("a backend that will not finish a turn", () => {
+  it("stops asking to continue after the fourth round", async () => {
+    let rounds = 0;
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const sent = body as { kind?: string };
+        if (sent.kind !== "turn" && sent.kind !== undefined) {
+          return Promise.resolve({ schemaVersion: AGENT_SCHEMA_VERSION });
+        }
+        rounds += 1;
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: `round ${String(rounds)}`,
+          toolCalls: [
+            {
+              id: `c${String(rounds)}`,
+              name: "view.setPage",
+              args: { page: 2 },
+            },
+          ],
+          continueWithResults: true,
+        });
+      },
+    });
+
+    // The continuation loop only runs for a caller that wants the receipts.
+    const turn = await client.send(session(), "go", { returnResults: true });
+
+    // A backend asking forever is a backend the turn has to be able to leave.
+    expect(turn.unresolved).toMatchObject({ code: "continuation-exhausted" });
+    expect(rounds).toBeLessThanOrEqual(5);
+  });
+});
+
+describe("a question with nowhere to put it", () => {
+  it("stops the turn rather than answering on the reader's behalf", async () => {
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: () =>
+        Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          askUser: {
+            id: "q1",
+            question: "Which quarter?",
+            options: [{ id: "q4", label: "Q4" }],
+          },
+        }),
+    });
+
+    const turn = await client.send(session(), "summarise");
+
+    expect(turn.unresolved).toBeDefined();
+  });
+});

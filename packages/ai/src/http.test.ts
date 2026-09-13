@@ -2383,3 +2383,113 @@ describe("a request the wire will not accept", () => {
     });
   }
 });
+
+describe("every optional field the wire allows", () => {
+  it("carries a request that fills in all of them", () => {
+    // The other half of the refusals above: each optional field has to survive
+    // the round trip untouched, or a backend that sends one loses it silently.
+    const parsed = parseAgentHttpRequest({
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      kind: "turn",
+      tableId: "orders",
+      message: "go",
+      sessionId: "s1",
+      turnId: "t1",
+      phaseId: 2,
+      contractVersion: "c1",
+      selectionVersion: "v1",
+      conversation: [{ role: "user", text: "hello" }],
+      context: { contract: { tableId: "orders", version: "c1" } },
+      view: { revision: 4, page: 2 },
+      audio: { mimeType: "audio/webm", base64: "AA==", durationMs: 1200 },
+      toolResults: [{ id: "r1", result: { ok: true } }],
+      pendingCalls: [
+        {
+          id: "c1",
+          name: "view.setPage",
+          args: { page: 3 },
+          expectedRevision: 4,
+        },
+      ],
+    });
+
+    expect(parsed).toMatchObject({
+      sessionId: "s1",
+      turnId: "t1",
+      phaseId: 2,
+      contractVersion: "c1",
+      selectionVersion: "v1",
+      audio: { mimeType: "audio/webm", durationMs: 1200 },
+      toolResults: [{ id: "r1" }],
+      pendingCalls: [{ id: "c1", name: "view.setPage", expectedRevision: 4 }],
+    });
+  });
+
+  it("carries a reply that fills in all of them", () => {
+    const parsed = parseAgentHttpResponse({
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      ok: true,
+      sessionId: "s1",
+      text: "here you go",
+      transcript: "here you go",
+      continueWithResults: true,
+      toolCalls: [{ id: "c1", name: "view.setPage", args: { page: 3 } }],
+      askUser: {
+        id: "q1",
+        question: "Which quarter?",
+        options: [{ id: "q4", label: "Q4" }],
+        allowFreeText: false,
+      },
+      pin: {
+        status: "acknowledged",
+        contractVersion: "c1",
+        ttlMs: 60_000,
+      },
+    });
+
+    expect(parsed).toMatchObject({
+      ok: true,
+      sessionId: "s1",
+      text: "here you go",
+      transcript: "here you go",
+      continueWithResults: true,
+      askUser: { id: "q1", allowFreeText: false },
+      pin: { status: "acknowledged", contractVersion: "c1", ttlMs: 60_000 },
+    });
+  });
+
+  it("refuses a tool call with an expected revision that is not a number", () => {
+    expect(() =>
+      parseAgentHttpResponse({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        toolCalls: [
+          { id: "c1", name: "view.setPage", expectedRevision: "soon" },
+        ],
+      })
+    ).toThrow(/expectedRevision must be a finite number/);
+  });
+
+  it("refuses a tool call with no id or no name", () => {
+    expect(() =>
+      parseAgentHttpResponse({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        toolCalls: [{ name: "view.setPage" }],
+      })
+    ).toThrow(/call\.id is required/);
+    expect(() =>
+      parseAgentHttpResponse({
+        schemaVersion: AGENT_SCHEMA_VERSION,
+        toolCalls: [{ id: "c1" }],
+      })
+    ).toThrow(/call\.name is required/);
+  });
+
+  it("defaults a tool call's arguments to nothing rather than undefined", () => {
+    const parsed = parseAgentHttpResponse({
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      toolCalls: [{ id: "c1", name: "view.setPage" }],
+    });
+
+    expect(parsed.toolCalls?.[0]?.args).toEqual({});
+  });
+});
