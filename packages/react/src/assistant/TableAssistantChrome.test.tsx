@@ -63,6 +63,83 @@ function mount(
   return { onOpenChange };
 }
 
+describe("what a receipt card offers", () => {
+  const twoActions = {
+    messages: [
+      {
+        id: "m1",
+        role: "assistant" as const,
+        text: "Done.",
+        receipts: [
+          {
+            capabilityKey: "view.setFilters",
+            status: "executed",
+            idempotencyKey: "k1",
+            undoable: true,
+            subject: {
+              kind: "filter",
+              terms: [{ column: "Team", value: "Platform" }],
+            },
+          },
+          {
+            capabilityKey: "view.setSort",
+            status: "executed",
+            idempotencyKey: "k2",
+            undoable: true,
+            subject: { kind: "sort", terms: [{ column: "Salary" }] },
+          },
+        ],
+      },
+    ],
+  };
+
+  it("puts back the one action the reader pressed", () => {
+    const undoAction = vi.fn();
+    mount({ assistant: view({ ...twoActions, undoAction }) });
+
+    const controls = parts("assistant-receipt-undo-button");
+    expect(controls).toHaveLength(2);
+    fireEvent.click(controls[1]!);
+    expect(undoAction).toHaveBeenCalledWith("k2");
+  });
+
+  it("offers none on a turn that did one thing", () => {
+    // The turn's own control already is that action's undo, and two controls
+    // for one change is a question rather than an affordance.
+    mount({
+      assistant: view({
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "Done.",
+            receipts: [
+              {
+                capabilityKey: "view.setSort",
+                status: "executed",
+                idempotencyKey: "k1",
+                subject: { kind: "sort", terms: [{ column: "Salary" }] },
+              },
+            ],
+          },
+        ],
+        undoAction: vi.fn(),
+      }),
+    });
+
+    expect(parts("assistant-receipt-undo-button")).toHaveLength(0);
+  });
+
+  it("draws no cards for a host that keeps its own account", () => {
+    mount({ assistant: view(twoActions), receipts: false });
+
+    // Hidden, not lost: the receipts are still in the conversation state for
+    // a host reading them.
+    expect(parts("assistant-receipt")).toHaveLength(0);
+    expect(part("assistant-message")).toBeTruthy();
+  });
+});
+
 describe("the examples, once a conversation has started", () => {
   const started = {
     messages: [{ id: "m1", role: "assistant" as const, text: "Done." }],

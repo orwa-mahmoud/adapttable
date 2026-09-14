@@ -59,6 +59,8 @@ export interface TableAssistantReceiptView {
   readonly idempotencyKey: string;
   /** What changed, for the card's headline and body. */
   readonly subject?: TableAssistantReceiptSubject;
+  /** Whether this one action can be put back on its own. */
+  readonly undoable?: boolean;
 }
 
 /** One record in the transcript. @public */
@@ -165,6 +167,14 @@ export interface TableAssistantView {
   readonly undo?: TableAssistantUndoView | null;
   /** Put that turn back. */
   readonly undoTurn?: () => void | Promise<void>;
+  /**
+   * Put one action back, by the replay identity on its receipt.
+   *
+   * A card draws its own control only when its receipt says `undoable` — and
+   * a turn that did one thing marks none of them, because the turn's own
+   * control is already that action's undo.
+   */
+  readonly undoAction?: (idempotencyKey: string) => void | Promise<void>;
   /** Capability keys the reader said not to ask about again. */
   readonly alwaysAllowed?: readonly string[];
   /** Ask about one of them again from now on. */

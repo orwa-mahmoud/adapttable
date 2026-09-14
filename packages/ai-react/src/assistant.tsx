@@ -185,6 +185,8 @@ export interface TableAssistantState {
   } | null;
   /** Put that turn back. A no-op once the offer has expired. */
   readonly undoTurn: () => Promise<void>;
+  /** Put one action of the last turn back, by its receipt's replay identity. */
+  readonly undoAction: (idempotencyKey: string) => Promise<void>;
   /** Capability keys the reader said not to ask about again. */
   readonly alwaysAllowed: readonly string[];
   /** Ask about one of them again from now on. */
@@ -295,6 +297,7 @@ export function useTableAssistant(
         }
       : null,
     undoTurn: store.undoTurn,
+    undoAction: store.undoAction,
     alwaysAllowed: state.alwaysAllowed,
     revokeAlwaysAllow: store.revokeAlwaysAllow,
     suggestions: state.suggestions,

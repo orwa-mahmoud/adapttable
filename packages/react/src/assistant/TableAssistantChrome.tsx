@@ -115,6 +115,19 @@ export interface TableAssistantProps {
   readonly presentation?: TableAssistantPresentation;
   /** Labels; falls back to the built-in English. */
   readonly labels?: TableLabels;
+  /**
+   * Whether each action draws a card under the reply.
+   *
+   * On by default, and the reason is that a receipt is the only thing in the
+   * conversation the reader can trust: the words above it are the model's,
+   * and the card is read from what the table actually did. A host that has
+   * its own account of a turn — an audit trail, a toast, a status line —
+   * turns them off here rather than being given two.
+   *
+   * Turning them off hides the cards, not the record: the receipts stay in
+   * the conversation state for a host that reads them.
+   */
+  readonly receipts?: boolean;
   /** Class for the surface. */
   readonly className?: string;
   /** Hide the floating launcher when the host supplies its own trigger. */
@@ -461,6 +474,7 @@ function Body({
   note,
   messageAction,
   approval,
+  receipts,
 }: {
   readonly assistant: TableAssistantView;
   readonly labels: TableLabels | undefined;
@@ -468,6 +482,7 @@ function Body({
   readonly note?: string;
   readonly messageAction: TableAssistantProps["messageAction"];
   readonly approval?: AgentApprovalPending | null;
+  readonly receipts?: boolean;
 }): ReactElement {
   const scroll = useConversationScroll(assistant.messages.length);
   const [expanded, setExpanded] = useState(false);
@@ -551,6 +566,10 @@ function Body({
                 onUndo={() => {
                   void assistant.undoTurn?.();
                 }}
+                onUndoAction={(idempotencyKey) => {
+                  void assistant.undoAction?.(idempotencyKey);
+                }}
+                receipts={receipts}
               />
             ))}
           </ul>
@@ -730,6 +749,7 @@ export function TableAssistantChrome({
   slots,
   speech,
   dir,
+  receipts = true,
 }: Readonly<TableAssistantChromeProps>): ReactElement {
   const wide = useFloatingFits();
   const launcherRef = useRef<HTMLElement | null>(null);
@@ -841,6 +861,7 @@ export function TableAssistantChrome({
         note={note}
         messageAction={messageAction}
         approval={approval}
+        receipts={receipts}
       />
       {assistant.error ? (
         <p data-adapttable-part="assistant-error" role="alert">

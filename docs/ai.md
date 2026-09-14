@@ -328,12 +328,20 @@ because "allow this" was said about a table that no longer exists in that
 shape. A key that this table does not offer is an error at build time
 (`ApprovalAlwaysAllowError`), not a control that silently never appears.
 
-**Undo is per turn, and only for the view.** The sanitized view is captured
-before a turn's calls run and restored through the same capabilities the agent
-used. The offer stands only while the live revision is still the one that
-turn's own calls settled at — a reader changing the page, a second agent, a
-source refresh or a later turn all end it, and the panel says which. Writes are
-not part of it: staging, Save and the edit history own those.
+**Undo covers the view, per turn and per action.** The sanitized view is
+captured before a turn's calls run and restored through the same capabilities
+the agent used. A turn that did more than one thing also offers each action its
+own control on its receipt card, because restoring the field that action wrote
+is exactly that action and nothing else; a turn that did one thing offers only
+the turn's, which is already the same control. The offer stands while the
+fields it would put back still hold what the turn left in them — a reader
+changing the page, a second agent, a source refresh or a later turn all end it,
+and the panel says which. Writes are not part of it: staging, Save and the edit
+history own those.
+
+Receipt cards are on by default and `receipts={false}` on the assistant turns
+them off for a host that keeps its own account of a turn. The record is
+unchanged either way: the receipts stay in the conversation state.
 
 ## Protocol adapters
 

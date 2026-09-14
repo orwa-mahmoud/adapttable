@@ -504,6 +504,189 @@ function movingTable(): {
   return { session, setPage, page: () => page, revision: () => revision };
 }
 
+describe("putting one action of a turn back", () => {
+  /** A table whose page and search both move, and report where they landed. */
+  function twoWayTable(): {
+    readonly session: AgentSession;
+    page: () => number;
+    search: () => string;
+    revision: () => number;
+  } {
+    let page = 1;
+    let search = "";
+    let revision = 1;
+    const session = createAgentSession({
+      observe: () =>
+        observation({ page, search, viewRevision: revision, hasSearch: true }),
+      apply: {
+        setPage: (next: number) => {
+          page = next;
+          revision += 1;
+        },
+        setSearch: (next: string) => {
+          search = next;
+          revision += 1;
+        },
+      },
+    });
+    return {
+      session,
+      page: () => page,
+      search: () => search,
+      revision: () => revision,
+    };
+  }
+
+  /** One turn that pages AND searches, so the two can be separated. */
+  function twoActionTransport(): AssistantTransport {
+    return {
+      send: async ({ session }) => {
+        const first = await session.execute(
+          "view.setPage",
+          { page: 4 },
+          session.manifest().viewRevision,
+          "two-1"
+        );
+        const second = await session.execute(
+          "view.setSearch",
+          { query: "ada" },
+          session.manifest().viewRevision,
+          "two-2"
+        );
+        return {
+          text: "moved",
+          results: [first, second],
+          keys: ["view.setPage", "view.setSearch"],
+        };
+      },
+    };
+  }
+
+  function storeFor(table: ReturnType<typeof twoWayTable>) {
+    const store = createTableAssistant({
+      session: table.session,
+      transport: twoActionTransport(),
+      contextInputs: () => ({
+        view: { page: table.page(), limit: 10, search: table.search() },
+      }),
+    });
+    store.connect();
+    return store;
+  }
+
+  it("puts back the action it was given and leaves the other standing", async () => {
+    const table = twoWayTable();
+    const store = storeFor(table);
+
+    await store.send("page and search");
+    expect(table.page()).toBe(4);
+    expect(table.search()).toBe("ada");
+
+    await store.undoAction("two-2");
+
+    // The search is back; the page the other action moved is untouched.
+    expect(table.search()).toBe("");
+    expect(table.page()).toBe(4);
+  });
+
+  it("marks every action of a two-action turn, and none of a one-action turn", async () => {
+    const table = twoWayTable();
+    const store = storeFor(table);
+    await store.send("page and search");
+    const receipts = store.getState().messages.at(-1)?.receipts ?? [];
+    expect(receipts.map((receipt) => receipt.undoable)).toEqual([true, true]);
+
+    const single = movingTable();
+    const one = createTableAssistant({
+      session: single.session,
+      transport: {
+        send: async ({ session }) => {
+          const result = await session.execute(
+            "view.setPage",
+            { page: 4 },
+            session.manifest().viewRevision,
+            "one-1"
+          );
+          return { text: "moved", results: [result], keys: ["view.setPage"] };
+        },
+      },
+      contextInputs: () => ({ view: { page: single.page(), limit: 10 } }),
+    });
+    one.connect();
+    await one.send("page");
+    // Absent rather than false: nobody established that this one can be put
+    // back on its own, which is not the same as establishing that it cannot.
+    expect(
+      (one.getState().messages.at(-1)?.receipts ?? []).map(
+        (receipt) => receipt.undoable
+      )
+    ).toEqual([undefined]);
+  });
+
+  it("retires the whole-turn offer once part of the turn is back", async () => {
+    const table = twoWayTable();
+    const store = storeFor(table);
+    await store.send("page and search");
+    expect(store.getState().undo?.available).toBe(true);
+
+    await store.undoAction("two-1");
+
+    // "Put the turn back" no longer describes anything that happened.
+    expect(store.getState().undo).toBeNull();
+    expect(table.page()).toBe(1);
+  });
+
+  it("stops offering the action it has just put back", async () => {
+    // A control that is drawn and does nothing is the defect this whole
+    // offer exists to avoid.
+    const table = twoWayTable();
+    const store = storeFor(table);
+    await store.send("page and search");
+
+    await store.undoAction("two-2");
+
+    const receipts = store.getState().messages.at(-1)?.receipts ?? [];
+    expect(
+      receipts.map((receipt) => [receipt.idempotencyKey, receipt.undoable])
+    ).toEqual([
+      ["two-1", true],
+      ["two-2", false],
+    ]);
+
+    // And pressing it again changes nothing.
+    await store.undoAction("two-2");
+    expect(table.page()).toBe(4);
+  });
+
+  it("hands back the same transcript while the offers stand", async () => {
+    // A subscriber compares the transcript by identity. Deriving a fresh one
+    // on every read is not a re-render, it is a render loop — and this store
+    // is handed its inputs on every render, which is what makes that fatal.
+    const table = twoWayTable();
+    const store = storeFor(table);
+    await store.send("page and search");
+
+    const first = store.getState().messages;
+    expect(store.getState().messages).toBe(first);
+    expect(store.getState()).toBe(store.getState());
+
+    await store.undoAction("two-2");
+    expect(store.getState().messages).not.toBe(first);
+    expect(store.getState().messages).toBe(store.getState().messages);
+  });
+
+  it("does nothing for an action it has no plan for", async () => {
+    const table = twoWayTable();
+    const store = storeFor(table);
+    await store.send("page and search");
+
+    await store.undoAction("not-a-key");
+
+    expect(table.page()).toBe(4);
+    expect(table.search()).toBe("ada");
+  });
+});
+
 describe("a question put to the reader", () => {
   it("waits, then hands the answer back to the turn", async () => {
     const store = createTableAssistant({

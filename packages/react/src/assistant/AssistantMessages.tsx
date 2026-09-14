@@ -132,10 +132,13 @@ function Receipt({
   receipt,
   labels,
   slots,
+  onUndo,
 }: {
   readonly receipt: TableAssistantReceiptView;
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
+  /** Put this one action back. Absent when only the whole turn can be. */
+  readonly onUndo?: () => void;
 }): ReactElement {
   const [open, setOpen] = useState(false);
   const Button = slots.Button;
@@ -177,6 +180,16 @@ function Receipt({
         <span data-adapttable-part="assistant-receipt-where">{where}</span>
       ) : null}
       <ChangedValue receipt={receipt} labels={labels} />
+      {onUndo ? (
+        <span data-adapttable-part="assistant-receipt-undo">
+          <Button
+            label={labels?.assistantUndo ?? "Undo"}
+            part="assistant-receipt-undo-button"
+            variant="subtle"
+            onClick={onUndo}
+          />
+        </span>
+      ) : null}
       {receipt.status === NEEDS_SAVE ? (
         <span data-adapttable-part="assistant-receipt-save">
           <Badge
@@ -236,6 +249,8 @@ export function AssistantMessage({
   action,
   undo,
   onUndo,
+  onUndoAction,
+  receipts = true,
 }: {
   readonly message: TableAssistantMessageView;
   readonly labels: TableLabels | undefined;
@@ -245,6 +260,10 @@ export function AssistantMessage({
   /** Whether this turn can be put back, when the offer belongs to it. */
   readonly undo?: TableAssistantUndoView;
   readonly onUndo?: () => void;
+  /** Put one action back, by its replay identity. */
+  readonly onUndoAction?: (idempotencyKey: string) => void;
+  /** Whether each action draws a card. The record is kept either way. */
+  readonly receipts?: boolean;
 }): ReactElement {
   const mine = message.role === "user";
   const speaker = mine
@@ -356,7 +375,7 @@ export function AssistantMessage({
           )}
         </span>
       ) : null}
-      {message.receipts && message.receipts.length > 0 ? (
+      {receipts && message.receipts && message.receipts.length > 0 ? (
         <ul
           data-adapttable-part="assistant-receipts"
           style={{
@@ -375,6 +394,13 @@ export function AssistantMessage({
               receipt={receipt}
               labels={labels}
               slots={slots}
+              {...(receipt.undoable && onUndoAction
+                ? {
+                    onUndo: () => {
+                      onUndoAction(receipt.idempotencyKey);
+                    },
+                  }
+                : {})}
             />
           ))}
         </ul>

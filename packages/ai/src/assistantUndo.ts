@@ -159,12 +159,34 @@ function restoreCall(
 }
 
 /**
+ * The view fields one capability writes.
+ *
+ * What makes a per-action undo exact: within one turn, the action that moved
+ * a field is the one whose capability owns it, so putting that field back to
+ * what it was before the turn puts that action back and nothing else.
+ *
+ * @internal
+ */
+export const UNDO_FIELDS_FOR: Readonly<Record<string, readonly string[]>> = {
+  "view.setPage": ["page", "limit"],
+  "view.setSearch": ["search"],
+  "view.setSort": ["sortBy", "sortDir"],
+  "view.setGroupBy": ["groupBy"],
+  "view.setFilters": ["filters"],
+  "view.pinColumn": ["pinnedColumns"],
+  "view.pinRow": ["pinnedRows"],
+};
+
+/**
  * Work out how to put a turn back.
  *
  * @param before - The view captured before the turn's calls ran.
  * @param after - The view now that they have.
  * @param session - The live session, for what is still permitted.
  * @param settledAt - The revision the turn's own calls settled at.
+ * @param only - Restrict the plan to these view fields. Without it the plan
+ * covers everything that moved, which is the whole turn; with it, one action
+ * within that turn, named by the fields its own capability writes.
  * @returns The undo, or why there is not one.
  *
  * @public
@@ -173,11 +195,14 @@ export function planUndo(
   before: AgentContextView,
   after: AgentContextView,
   session: AgentSession,
-  settledAt: number
+  settledAt: number,
+  only?: readonly string[]
 ): AssistantUndo | UndoBlock {
   const enabled = new Set(session.catalog().map((entry) => entry.key));
   const moved = FIELDS.filter(
-    (field) => !same(read(before, field), read(after, field))
+    (field) =>
+      (only === undefined || only.includes(field)) &&
+      !same(read(before, field), read(after, field))
   );
   if (moved.length === 0) return { code: "nothing-to-undo" };
 

@@ -44,6 +44,7 @@ import {
   type AssistantUndo,
   planUndo,
   runUndo,
+  UNDO_FIELDS_FOR,
   type UndoBlock,
   undoBlocked,
 } from "./assistantUndo";
@@ -226,6 +227,16 @@ export interface TableAssistantStore {
    * somewhere nobody asked for.
    */
   readonly undoTurn: () => Promise<void>;
+  /**
+   * Put one action back, named by the replay identity its receipt carries.
+   *
+   * Offered only where a turn did more than one thing a reader might want to
+   * separate: with one action the turn's own control already is that action's
+   * undo, and two controls for one change is a question rather than an
+   * affordance. Putting part of a turn back retires the whole-turn offer,
+   * which no longer describes anything that happened.
+   */
+  readonly undoAction: (idempotencyKey: string) => Promise<void>;
   /** Ask about this capability again from now on. */
   readonly revokeAlwaysAllow: (capability: string) => void;
   /** Answer the pending question and resume the turn. */
@@ -338,6 +349,20 @@ export function createTableAssistant(
   let question: AssistantQuestion | null = null;
   // The last turn that actually moved the view, and which message it was.
   let undoPlan: { message: string; undo: AssistantUndo } | null = null;
+  /**
+   * One plan per action that can be put back on its own.
+   *
+   * Keyed by the action's replay identity, which is what a receipt carries —
+   * so a card knows whether its own control does anything before it draws
+   * one.
+   */
+  let actionPlans = new Map<string, AssistantUndo>();
+  /** The transcript as the offers make it, kept while its inputs stand. */
+  let transcriptCache: {
+    source: readonly AssistantMessage[];
+    keys: string;
+    value: readonly AssistantMessage[];
+  } | null = null;
   // The provisional message of the turn in flight, so an abandoned turn can
   // take it away itself rather than waiting for a transport to settle.
   let streamingMessage: string | undefined;
@@ -434,6 +459,37 @@ export function createTableAssistant(
     );
   };
 
+  /**
+   * The transcript, with each receipt's offer read fresh.
+   *
+   * `undoable` is a live question, not something a turn settles once: undoing
+   * one action retires that action's plan, and a card still drawing a control
+   * for it would be a control that does nothing. Kept identical when nothing
+   * is on offer, so an unchanged snapshot stays unchanged.
+   */
+  const offeredMessages = (): readonly AssistantMessage[] => {
+    if (actionPlans.size === 0) return messages;
+    // Cached on what it is derived from, because a subscriber compares the
+    // transcript by identity: a fresh array on every read is a render loop,
+    // not a re-render.
+    const keys = [...actionPlans.keys()].join("\u0000");
+    if (transcriptCache?.source === messages && transcriptCache.keys === keys) {
+      return transcriptCache.value;
+    }
+    const value = messages.map((message) => {
+      if (!message.receipts) return message;
+      return {
+        ...message,
+        receipts: message.receipts.map((receipt) => ({
+          ...receipt,
+          undoable: actionPlans.has(receipt.idempotencyKey),
+        })),
+      };
+    });
+    transcriptCache = { source: messages, keys, value };
+    return value;
+  };
+
   /** What the reader is offered about the last turn, read fresh. */
   const undoOffer = (): AssistantUndoOffer | null => {
     const session = live.session;
@@ -517,7 +573,7 @@ export function createTableAssistant(
       // something is.
       status: badgeStatus(status, question !== null, parked),
       busy: sending,
-      messages,
+      messages: offeredMessages(),
       draft,
       error,
       suggestions: sliceCache.head,
@@ -585,7 +641,40 @@ export function createTableAssistant(
       return false;
     }
     undoPlan = { message, undo: planned };
+    // And one per action, for a turn that did more than one thing. Restoring
+    // a field to what it was before the turn is exactly the action that
+    // changed it: within one turn no other action wrote that field, and where
+    // two did, the later one is the one a reader is looking at.
+    actionPlans = new Map();
+    const results = reply.results ?? [];
+    for (const [index, result] of results.entries()) {
+      const key = reply.keys?.[index];
+      const fields = key ? UNDO_FIELDS_FOR[key] : undefined;
+      if (!fields || !result.ok) continue;
+      const one = planUndo(before, after, session, settledAt, fields);
+      if ("code" in one) continue;
+      actionPlans.set(result.idempotencyKey, one);
+    }
+    // One action that moved the table IS the turn, and two controls for one
+    // change is a question the reader has to answer before they can act.
+    if (actionPlans.size < 2) actionPlans = new Map();
     return true;
+  };
+
+  /** Run one plan and report what went wrong, wherever it came from. */
+  const runOneUndo = async (
+    session: AgentSession,
+    undo: AssistantUndo,
+    idempotencyKey: string
+  ): Promise<void> => {
+    try {
+      const results = await runUndo(session, undo, idempotencyKey);
+      const failed = results.find((result) => !result.ok);
+      if (failed) error = failed.error?.message ?? "the undo did not finish";
+    } catch (cause) {
+      error = cause instanceof Error ? cause.message : String(cause);
+    }
+    publish();
   };
 
   const receive = (
@@ -615,16 +704,13 @@ export function createTableAssistant(
     }
     seq += 1;
     const id = messageId("assistant", seq);
-    const undoable = recordUndo(before, reply, id);
+    recordUndo(before, reply, id);
     push({
       id,
       role: "assistant",
       text: reply.text,
       at: Date.now(),
-      receipts:
-        receipts.length > 0
-          ? receipts.map((receipt) => ({ ...receipt, undoable }))
-          : undefined,
+      receipts: receipts.length > 0 ? receipts : undefined,
       outcome: receipts.length > 0 ? turnStatus(receipts) : undefined,
     });
     if (reply.unresolved) error = reply.unresolved.message;
@@ -917,11 +1003,29 @@ export function createTableAssistant(
       // a surface re-reads rather than waiting for the next unrelated change.
       publish();
     },
+    undoAction: async (idempotencyKey) => {
+      const session = live.session;
+      const plan = actionPlans.get(idempotencyKey);
+      if (disposed || !session || !plan) return;
+      if (undoBlocked(session, plan, viewNow() ?? undefined)) {
+        publish();
+        return;
+      }
+      // Only this one is retired. The others describe fields this undo does
+      // not write, so they still stand — and the guard tells the truth about
+      // any that do not.
+      actionPlans.delete(idempotencyKey);
+      // The whole-turn offer no longer describes the table: part of the turn
+      // has been put back, so putting "the turn" back would be a second
+      // answer to a question the reader has already answered.
+      undoPlan = null;
+      await runOneUndo(session, plan, `undo:${idempotencyKey}`);
+    },
     undoTurn: async () => {
       const session = live.session;
       const plan = undoPlan;
       if (disposed || !session || !plan) return;
-      if (undoBlocked(session, plan.undo)) {
+      if (undoBlocked(session, plan.undo, viewNow() ?? undefined)) {
         // The snapshot already says the offer has expired. Acting anyway would
         // put the table back to a state the reader has since moved away from.
         publish();
@@ -930,18 +1034,8 @@ export function createTableAssistant(
       // Retired before the calls run: whatever happens next, this plan
       // describes a table that no longer exists once it has.
       undoPlan = null;
-      try {
-        const results = await runUndo(
-          session,
-          plan.undo,
-          `undo:${plan.message}`
-        );
-        const failed = results.find((result) => !result.ok);
-        if (failed) error = failed.error?.message ?? "the undo did not finish";
-      } catch (cause) {
-        error = cause instanceof Error ? cause.message : String(cause);
-      }
-      publish();
+      actionPlans = new Map();
+      await runOneUndo(session, plan.undo, `undo:${plan.message}`);
     },
     answer: (given) => {
       if (disposed || !question) return;
@@ -967,6 +1061,7 @@ export function createTableAssistant(
         // A different table is not one this plan describes, and a revision
         // number from the old one could coincide with the new one's.
         undoPlan = null;
+        actionPlans = new Map();
         dropConnection(previousTransport);
         startConnection();
         publish();

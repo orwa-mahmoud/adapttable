@@ -8585,12 +8585,20 @@ because "allow this" was said about a table that no longer exists in that
 shape. A key that this table does not offer is an error at build time
 (`ApprovalAlwaysAllowError`), not a control that silently never appears.
 
-**Undo is per turn, and only for the view.** The sanitized view is captured
-before a turn's calls run and restored through the same capabilities the agent
-used. The offer stands only while the live revision is still the one that
-turn's own calls settled at — a reader changing the page, a second agent, a
-source refresh or a later turn all end it, and the panel says which. Writes are
-not part of it: staging, Save and the edit history own those.
+**Undo covers the view, per turn and per action.** The sanitized view is
+captured before a turn's calls run and restored through the same capabilities
+the agent used. A turn that did more than one thing also offers each action its
+own control on its receipt card, because restoring the field that action wrote
+is exactly that action and nothing else; a turn that did one thing offers only
+the turn's, which is already the same control. The offer stands while the
+fields it would put back still hold what the turn left in them — a reader
+changing the page, a second agent, a source refresh or a later turn all end it,
+and the panel says which. Writes are not part of it: staging, Save and the edit
+history own those.
+
+Receipt cards are on by default and `receipts={false}` on the assistant turns
+them off for a host that keeps its own account of a turn. The record is
+unchanged either way: the receipts stay in the conversation state.
 
 ## Protocol adapters
 
@@ -12057,7 +12065,13 @@ readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
 `SharedApproval`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
 `receiptFromResult` and `receiptsFromResults` as `AssistantReceipt`, whose
 optional `AssistantReceiptSubject` names what changed so the panel can say
-"Filter applied — Team is Core" rather than a capability key.
+"Filter applied — Team is Core" rather than a capability key. `subjectFor`
+builds that subject for a built-in capability from what the session returned,
+carrying the columns and values as `AssistantReceiptTerm` pairs — label and
+formatted value, never a key — so the panel joins them in the reader's
+language through `assistantReceiptTerms`. The turn's transports fill
+`AssistantTransportReply.subjects` with it; a host capability has no entry,
+because only its own runner knows what it did.
 Each kit ships the panel on its own `@adapttable/<kit>/assistant` entry,
 exporting `TableAssistant` and `tableAssistant`. Core chrome exports
 `TableAssistantChrome` (`TableAssistantChromeProps`, `TableAssistantProps`),
@@ -12069,7 +12083,9 @@ a container of your own. `TableAssistantSlots` collects
 `TableAssistantPanelProps`, `TableAssistantSheetProps`,
 `TableAssistantWindowProps`, `TableAssistantSuggestionProps`,
 `TableAssistantButtonProps`, `TableAssistantComposerProps` and
-`TableAssistantBadgeProps`. The view types are `TableAssistantView`,
+`TableAssistantBadgeProps`, plus `TableAssistantMenuProps` and
+`TableAssistantMenuItem` — the examples menu in the composer, which each kit
+draws with its own menu primitive. The view types are `TableAssistantView`,
 `TableAssistantMessageView`, `TableAssistantReceiptView` with
 `TableAssistantReceiptSubject` — what an action changed, supplied by whoever
 ran it — and `TableAssistantSuggestionView`, plus `assistantIsBusy` and
@@ -12799,8 +12815,9 @@ the question channel. `AssistantSuggestion`s are filtered by
 `eligibleSuggestions` and checked by `assertUniqueSuggestions`;
 `CapabilityPresentation` says how a capability is shown. Receipts come from
 `receiptFromResult` / `receiptsFromResults` as `AssistantReceipt`s with an
-`AssistantReceiptStatus` and `AssistantReceiptSubject`, and `turnStatus` reads
-the `AssistantTurnStatus`.
+`AssistantReceiptStatus` and `AssistantReceiptSubject` — `subjectFor` builds
+one for a built-in capability, as `AssistantReceiptTerm` pairs of column label
+and formatted value — and `turnStatus` reads the `AssistantTurnStatus`.
 
 **Undo.** `planUndo` turns a finished turn into an `AssistantUndo` of
 `UndoCall`s, or an `UndoBlock` saying why not (`isUndoBlock` narrows it,
