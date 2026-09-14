@@ -838,9 +838,10 @@ describe("a question put to the reader", () => {
     await turn;
 
     const said = store.getState().messages.map((entry) => entry.text);
-    // "Q4", never "d": the id is a correlation handle and says nothing to
-    // the person who chose it.
-    expect(said).toEqual(["summarise", "Q4", "done"]);
+    // The question is in the conversation because the assistant said it, and
+    // the answer follows it — "Q4", never "d", because the id is a
+    // correlation handle and says nothing to whoever chose it.
+    expect(said).toEqual(["summarise", "Which quarter?", "Q4", "done"]);
   });
 
   it("records a typed answer as what was typed", async () => {
@@ -866,6 +867,7 @@ describe("a question put to the reader", () => {
 
     expect(store.getState().messages.map((entry) => entry.text)).toEqual([
       "summarise",
+      "Which quarter?",
       "the last one",
       "done",
     ]);
@@ -896,8 +898,11 @@ describe("a question put to the reader", () => {
     store.answer({ optionId: "z" });
     await turn;
 
+    // The question stays — the assistant said it — and nothing stands in for
+    // an answer that could not be put into words.
     expect(store.getState().messages.map((entry) => entry.text)).toEqual([
       "summarise",
+      "Which?",
       "done",
     ]);
   });
@@ -925,6 +930,7 @@ describe("a question put to the reader", () => {
 
     expect(store.getState().messages.map((entry) => entry.text)).toEqual([
       "summarise",
+      "Which?",
       "done",
     ]);
   });

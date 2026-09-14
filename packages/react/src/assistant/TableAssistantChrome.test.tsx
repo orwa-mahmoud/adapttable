@@ -56,6 +56,11 @@ function mount(
       assistant={view()}
       open
       onOpenChange={onOpenChange}
+      // The opening line is the assistant's first message, so it is in every
+      // transcript. Silenced by default here, and turned on by the tests that
+      // are about it — otherwise every assertion on "the reply" would have to
+      // count past it.
+      greeting=""
       {...props}
     />
   );
@@ -604,10 +609,13 @@ describe("Escape", () => {
 describe("the empty state", () => {
   it("asks what to do, and keeps the examples in one place", () => {
     mount({
+      greeting: undefined,
       assistant: view({ suggestions: [{ id: "a", title: "Group by city" }] }),
     });
 
-    expect(part("assistant-empty-prompt")).toHaveTextContent(
+    // The opening line is the assistant's first message, drawn by the same
+    // component as every other — not a screen shown instead of one.
+    expect(part("assistant-message-text")).toHaveTextContent(
       "What would you like to do?"
     );
     // A kit with a menu has them in the composer from the first frame —
@@ -624,7 +632,7 @@ describe("the empty state", () => {
       assistant: view({ suggestions: [{ id: "a", title: "Group by city" }] }),
     });
 
-    expect(part("assistant-empty-prompt")).toHaveTextContent(
+    expect(part("assistant-message-text")).toHaveTextContent(
       "Ask me about this quarter's pipeline."
     );
   });
@@ -634,9 +642,8 @@ describe("the empty state", () => {
     // forgot to set one. Nothing stands in for the message nobody wrote.
     mount({ greeting: "", assistant: view() });
 
-    expect(part("assistant-empty-prompt")).toBeNull();
-    expect(part("assistant-empty-mark")).toBeNull();
-    expect(part("assistant-empty")).toBeNull();
+    expect(parts("assistant-message-text")).toHaveLength(0);
+    expect(parts("assistant-message-mark")).toHaveLength(0);
   });
 
   it("still says what the host told it to, with no greeting", () => {
@@ -1132,7 +1139,7 @@ describe("without labels", () => {
   it("asks its question and offers its placeholder", () => {
     bare();
 
-    expect(part("assistant-empty-prompt")).toHaveTextContent(
+    expect(part("assistant-message-text")).toHaveTextContent(
       "What would you like to do?"
     );
     expect(part("assistant-input")).toHaveAttribute(
@@ -1143,6 +1150,7 @@ describe("without labels", () => {
 
   it("names the speakers and the outcome", () => {
     bare({
+      greeting: "",
       assistant: view({
         messages: [
           { id: "m1", role: "user", text: "hi" },
@@ -1443,8 +1451,18 @@ describe("a question the backend asked", () => {
   };
 
   it("offers each choice as a chip and answers with the one pressed", () => {
+    // The chips hang from the message that asked, not from a slot beside the
+    // transcript: one thing to keep in step, not two.
     const answer = vi.fn();
-    mount({ assistant: view({ pendingQuestion: question, answer }) });
+    mount({
+      assistant: view({
+        messages: [
+          { id: "m1", role: "assistant", text: question.question, question },
+        ],
+        pendingQuestion: question,
+        answer,
+      }),
+    });
 
     const chips = parts("assistant-question-option");
     expect(chips).toHaveLength(2);

@@ -35,9 +35,7 @@ import { AssistantComposer } from "./AssistantComposer";
 import { CloseIcon, SettingsIcon, SuggestionIcon } from "./assistantIcons";
 import {
   AssistantAlwaysAllowed,
-  AssistantEmpty,
   AssistantMessage,
-  AssistantQuestion,
   AssistantWorking,
   BUBBLE_CSS,
   SpeakerMark,
@@ -528,6 +526,7 @@ function AssistantApproval({
  */
 function Transcript({
   assistant,
+  messages,
   labels,
   slots,
   messageAction,
@@ -536,6 +535,8 @@ function Transcript({
   avatars,
 }: {
   readonly assistant: TableAssistantView;
+  /** Every message to draw, the opening line included. */
+  readonly messages: readonly TableAssistantMessageView[];
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly messageAction: TableAssistantProps["messageAction"];
@@ -561,13 +562,13 @@ function Transcript({
         gap: "1.15em",
       }}
     >
-      {assistant.messages.map((message, index) => (
+      {messages.map((message, index) => (
         <AssistantMessage
           key={message.id}
           message={message}
           // The mark stops repeating down a run from the same speaker. One
           // conversation, not a column of name tags.
-          leads={assistant.messages[index - 1]?.role !== message.role}
+          leads={messages[index - 1]?.role !== message.role}
           labels={labels}
           slots={slots}
           {...marks}
@@ -584,6 +585,9 @@ function Transcript({
             void assistant.undoAction?.(idempotencyKey);
           }}
           receipts={receipts}
+          {...(message.question && assistant.answer
+            ? { onAnswer: assistant.answer }
+            : {})}
         />
       ))}
       {/* At the end of the transcript, where the reply will land — but not
@@ -695,24 +699,24 @@ function present<T extends object>(given: T): Partial<T> {
 }
 
 /**
- * The question the backend is waiting on, where the reader is already looking.
+ * The conversation, opening line included.
  *
- * Drawn only when there is one and something can answer it: a question with
- * no channel back is a prompt into the void.
+ * The greeting is a message like any other, so it goes through the same
+ * renderer and stays where it was said. An empty string is a host asking for
+ * silence; omitted leaves the built-in question.
  */
-function PendingQuestion({
-  assistant,
-  slots,
-}: {
-  readonly assistant: TableAssistantView;
-  readonly slots: TableAssistantSlots;
-}): ReactElement | null {
-  const question = assistant.pendingQuestion;
-  const answer = assistant.answer;
-  if (!question || !answer) return null;
-  return (
-    <AssistantQuestion question={question} slots={slots} onAnswer={answer} />
-  );
+function withGreeting(
+  messages: readonly TableAssistantMessageView[],
+  greeting: string | undefined,
+  labels: TableLabels | undefined
+): readonly TableAssistantMessageView[] {
+  const said =
+    greeting ?? labels?.assistantEmpty ?? "What would you like to do?";
+  if (!said.trim()) return messages;
+  return [
+    { id: "assistant-greeting", role: "assistant", text: said },
+    ...messages,
+  ];
 }
 
 function Body({
@@ -740,7 +744,6 @@ function Body({
   const [expanded, setExpanded] = useState(false);
   // Omitted leaves the built-in greeting; an empty string is a host asking
   // for silence, which is a value and has to travel as one.
-  const opening = greeting === undefined ? {} : { greeting };
   // Optional, so it travels as a spread rather than an undefined prop.
   const marks = avatars ? { avatars } : {};
   // Only writes this surface owns. A write reviewed above the table or in a
@@ -758,6 +761,9 @@ function Body({
   // approval is what is happening, and two things claiming to be are one too
   // many.
   const parked = Boolean(approval);
+  // The opening line, ahead of whatever has been said since. An empty string
+  // is a host asking for silence; omitted leaves the built-in question.
+  const shown = withGreeting(assistant.messages, greeting, labels);
   const showingFullList = Boolean(review && expanded);
   return (
     <div
@@ -789,22 +795,32 @@ function Body({
         // has to drag straight before they can read the conversation.
         style={{ height: "100%", overflowY: "auto", overflowX: "hidden" }}
       >
-        {assistant.messages.length === 0 ? (
-          <AssistantEmpty labels={labels} note={note} {...opening} {...marks} />
-        ) : (
-          <Transcript
-            assistant={assistant}
-            labels={labels}
-            slots={slots}
-            messageAction={messageAction}
-            receipts={receipts}
-            {...marks}
-            parked={parked}
-          />
-        )}
-        {/* A question belongs where the reader is already looking, not in a
-            second surface that competes with the approval. */}
-        <PendingQuestion assistant={assistant} slots={slots} />
+        {/* One list, one renderer. The opening line is the assistant's first
+            message, not a screen shown instead of the conversation — held
+            apart it was replaced the moment the reader said anything. */}
+        <Transcript
+          assistant={assistant}
+          messages={shown}
+          labels={labels}
+          slots={slots}
+          messageAction={messageAction}
+          receipts={receipts}
+          {...marks}
+          parked={parked}
+        />
+        {note && assistant.messages.length === 0 ? (
+          <p
+            data-adapttable-part="assistant-empty-note"
+            style={{
+              margin: "0.5em 0 0 2.6em",
+              opacity: 0.7,
+              fontSize: "0.9em",
+              maxInlineSize: "26em",
+            }}
+          >
+            {note}
+          </p>
+        ) : null}
         {/* A standing decision, not something this turn did — so it sits with
             the examples rather than in the transcript. */}
         {assistant.revokeAlwaysAllow ? (

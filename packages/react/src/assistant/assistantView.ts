@@ -77,6 +77,14 @@ export interface TableAssistantMessageView {
    * message showing this carries no receipts.
    */
   readonly partialText?: string;
+  /**
+   * The question this message is asking, while it is still unanswered.
+   *
+   * A question is a thing the assistant said, so it belongs to the message
+   * that said it rather than to a slot beside the transcript. Gone once it is
+   * answered; the message stays.
+   */
+  readonly question?: TableAssistantQuestionView;
   readonly receipts?: readonly TableAssistantReceiptView[];
 }
 

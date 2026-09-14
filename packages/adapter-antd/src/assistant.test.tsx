@@ -67,6 +67,16 @@ function mount(node: ReactElement) {
   return render(<ConfigProvider>{node}</ConfigProvider>);
 }
 
+const QUESTION = {
+  id: "q1",
+  question: "Which team did you mean?",
+  options: [
+    { id: "core", label: "Core" },
+    { id: "platform", label: "Platform" },
+  ],
+  allowFreeText: false,
+};
+
 describe("TableAssistant", () => {
   it("renders the panel with the header, empty state and composer", () => {
     mount(
@@ -81,7 +91,9 @@ describe("TableAssistant", () => {
     expect(part("assistant-panel")).toBeTruthy();
     expect(part("assistant-title")).toHaveTextContent("Table assistant");
     expect(part("assistant-connection")).toHaveTextContent("Ready");
-    expect(part("assistant-empty-prompt")).toBeTruthy();
+    // The opening line is the assistant's first message, drawn by the
+    // same component as every other reply.
+    expect(part("assistant-message-text")).toBeTruthy();
     expect(part("assistant-input")).toBeTruthy();
     // The shortcuts live in the composer's own menu from the first frame,
     // not as cards in the empty state.
@@ -372,24 +384,28 @@ describe("the kit's own controls", () => {
       <TableAssistant
         assistant={view({
           status: "awaiting-user",
-          pendingQuestion: {
-            id: "q1",
-            question: "Which team did you mean?",
-            options: [
-              { id: "core", label: "Core" },
-              { id: "platform", label: "Platform" },
-            ],
-            allowFreeText: false,
-          },
+          // The question is an attribute of the message that asked it, so
+          // this kit's option controls hang from that message.
+          messages: [
+            {
+              id: "m1",
+              role: "assistant",
+              text: "Which team did you mean?",
+              question: QUESTION,
+            },
+          ],
+          pendingQuestion: QUESTION,
           answer,
         })}
+        // This is about the option controls, not the opening line.
+        greeting=""
         labels={defaultLabels}
         open
         onOpenChange={() => undefined}
       />
     );
 
-    expect(part("assistant-question-text")).toHaveTextContent(
+    expect(part("assistant-message-text")).toHaveTextContent(
       "Which team did you mean?"
     );
     const options = [

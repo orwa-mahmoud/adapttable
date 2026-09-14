@@ -180,9 +180,11 @@ for (const kit of kits) {
     await expect(page.locator(part("assistant-connection"))).toHaveText(
       "Ready"
     );
-    await expect(page.locator(part("assistant-empty-prompt"))).toContainText(
-      "What would you like to do"
-    );
+    // The opening line is the assistant's first message, drawn by the same
+    // component as every other reply.
+    await expect(
+      page.locator(part("assistant-message-text")).first()
+    ).toContainText("What would you like to do");
     // The shortcuts live in the composer, one press away, rather than as a
     // wall of cards a reader clears before they can type.
     await expect(page.locator(part("assistant-examples-menu"))).toBeVisible();

@@ -100,6 +100,16 @@ export interface AssistantMessage {
    * call is ever made from a partial reply.
    */
   readonly partialText?: string;
+  /**
+   * The question this message is asking, while it is still unanswered.
+   *
+   * A question is a thing the assistant said, so it lives on the message that
+   * said it. Held in a second slot beside the transcript it had to be kept in
+   * step with it, and answering cleared the slot while the message stayed —
+   * or, before that, cleared both and left the reader's reply answering
+   * nothing. Gone once it is answered; the reply follows it in the list.
+   */
+  readonly question?: AssistantQuestion;
   /** What the actions in this turn actually did. */
   readonly receipts?: readonly AssistantReceipt[];
   /** The turn's overall outcome, when it ran actions. */
@@ -336,6 +346,24 @@ function answerText(
   return (chosen?.label ?? answer.text ?? "").trim();
 }
 
+/** The question still waiting on the reader, if one is. */
+function openQuestion(
+  messages: readonly AssistantMessage[]
+): AssistantQuestion | null {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    const asked = messages[i]?.question;
+    if (asked) return asked;
+  }
+  return null;
+}
+
+/** The same message, no longer asking. */
+function stripQuestion(message: AssistantMessage): AssistantMessage {
+  const rest: Record<string, unknown> = { ...message };
+  delete rest.question;
+  return rest as unknown as AssistantMessage;
+}
+
 function badgeStatus(
   status: AssistantStatus,
   asking: boolean,
@@ -383,7 +411,9 @@ export function createTableAssistant(
   let draft = "";
   let status: AssistantStatus = "idle";
   let error: string | undefined;
-  let question: AssistantQuestion | null = null;
+  // Which message is asking, while it waits. The question itself lives on
+  // that message; this is only how to find it again.
+  let asking: string | undefined;
   // The last turn that actually moved the view, and which message it was.
   let errorCode: string | undefined;
   let undoPlan: { message: string; undo: AssistantUndo } | null = null;
@@ -647,7 +677,7 @@ export function createTableAssistant(
       // the status underneath is "ready", and a badge saying so next to an
       // unanswered question tells the reader nothing is waiting on them when
       // something is.
-      status: badgeStatus(status, question !== null, parked),
+      status: badgeStatus(status, asking !== undefined, parked),
       busy: sending,
       messages: offeredMessages(),
       draft,
@@ -656,7 +686,7 @@ export function createTableAssistant(
       suggestions: sliceCache.head,
       moreSuggestions: sliceCache.tail,
       approval: live.approval ?? null,
-      pendingQuestion: question,
+      pendingQuestion: openQuestion(messages),
       undo: undoOffer(),
       alwaysAllowed: live.alwaysAllowed ?? EMPTY_ALLOWED,
       // The same names the receipts use, so a standing permission reads as
@@ -862,7 +892,15 @@ export function createTableAssistant(
    */
   const settleQuestion = (given: AssistantAnswer | undefined): void => {
     const resume = resumeQuestion;
-    question = null;
+    // The message stays; it just stops asking. Dropping it would delete
+    // something the assistant said.
+    if (asking !== undefined) {
+      const id = asking;
+      messages = messages.map((entry) =>
+        entry.id === id ? stripQuestion(entry) : entry
+      );
+    }
+    asking = undefined;
     resumeQuestion = undefined;
     resume?.(given);
   };
@@ -1036,7 +1074,15 @@ export function createTableAssistant(
               settle(undefined);
               return;
             }
-            question = asked;
+            seq += 1;
+            asking = messageId("assistant", seq);
+            push({
+              id: asking,
+              role: "assistant",
+              text: asked.question,
+              at: Date.now(),
+              question: asked,
+            });
             resumeQuestion = settle;
             status = "awaiting-user";
             publish();
@@ -1159,12 +1205,13 @@ export function createTableAssistant(
       await runOneUndo(session, plan.undo, `undo:${plan.message}`);
     },
     answer: (given) => {
-      if (disposed || !question) return;
-      // What they answered goes into the transcript, in their own words: a
-      // chip that empties the question and leaves nothing behind reads as a
-      // click that did nothing, and the conversation a later turn is sent
-      // would show the assistant asking into silence.
-      const said = answerText(question, given);
+      const open = openQuestion(messages);
+      if (disposed || !open) return;
+      // What they answered, in their own words: a chip that empties the
+      // question and leaves nothing behind reads as a click that did nothing,
+      // and the conversation a later turn is sent would show the assistant
+      // asking into silence.
+      const said = answerText(open, given);
       if (said) {
         seq += 1;
         push({

@@ -73,7 +73,9 @@ describe("TableAssistant", () => {
     expect(part("assistant-panel")).toBeTruthy();
     expect(part("assistant-title")).toHaveTextContent("Table assistant");
     expect(part("assistant-connection")).toHaveTextContent("Ready");
-    expect(part("assistant-empty-prompt")).toBeTruthy();
+    // The opening line is the assistant's first message, drawn by the
+    // same component as every other reply.
+    expect(part("assistant-message-text")).toBeTruthy();
     expect(part("assistant-input")).toBeTruthy();
     // The shortcuts live in the composer's own menu from the first frame,
     // not as cards in the empty state.

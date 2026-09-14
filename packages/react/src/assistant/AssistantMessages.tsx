@@ -327,6 +327,7 @@ export function AssistantMessage({
   receipts = true,
   leads = true,
   avatars,
+  onAnswer,
 }: {
   readonly message: TableAssistantMessageView;
   readonly labels: TableLabels | undefined;
@@ -344,6 +345,8 @@ export function AssistantMessage({
   readonly leads?: boolean;
   /** The host's own marks, when it has them. */
   readonly avatars?: TableAssistantAvatars;
+  /** Answer this message's question. Absent when it is not asking one. */
+  readonly onAnswer?: (answer: { optionId?: string; text?: string }) => void;
 }): ReactElement {
   // A receipt says what CHANGED. Reading rows, resolving one, asking what a
   // column means — none of that changed anything the reader can see, and the
@@ -437,6 +440,16 @@ export function AssistantMessage({
         {...openable}
       />
       {hasActions ? disclosure.below : null}
+      {/* The choices this message is offering, while it is still asking. They
+          hang from the message rather than from a slot beside the transcript,
+          so there is one thing to keep in step and not two. */}
+      {message.question && onAnswer ? (
+        <QuestionOptions
+          question={message.question}
+          slots={slots}
+          onAnswer={onAnswer}
+        />
+      ) : null}
 
       {/* An offer, not a reply: it sits clear of the bubble above it and
           centred across the panel, so it reads as a way forward rather than
@@ -469,61 +482,6 @@ export function AssistantMessage({
         />
       ) : null}
     </li>
-  );
-}
-
-export function AssistantEmpty({
-  labels,
-  note,
-  greeting,
-  avatars,
-}: {
-  readonly labels: TableLabels | undefined;
-  /** What this conversation is talking to, when the host wants it said. */
-  readonly note?: string;
-  /**
-   * The assistant's opening line. Empty means the panel opens silent.
-   */
-  readonly greeting?: string;
-  /** The host's own marks, when it has them. */
-  readonly avatars?: TableAssistantAvatars;
-}): ReactElement | null {
-  const said =
-    greeting ?? labels?.assistantEmpty ?? "What would you like to do?";
-  const greeter =
-    avatars?.assistant === undefined ? {} : { avatar: avatars.assistant };
-  // A host that wants a silent panel gets one: no mark, no heading, no
-  // placeholder furniture standing in for a message nobody wrote.
-  if (!said.trim() && !note) return null;
-  return (
-    <div
-      data-adapttable-part="assistant-empty"
-      style={{ display: "flex", flexDirection: "column", gap: "0.5em" }}
-    >
-      {/* The assistant speaking first, in the same bubble its replies get.
-          A heading and a paragraph on the panel's own ground read as a screen
-          that has not loaded yet; one line from the assistant reads as a
-          conversation that has started. */}
-      {said.trim() ? (
-        <Said part="assistant-empty-prompt" as="h2" {...greeter}>
-          {said}
-        </Said>
-      ) : null}
-      {note ? (
-        <p
-          data-adapttable-part="assistant-empty-note"
-          style={{
-            margin: 0,
-            marginInlineStart: "2.05em",
-            opacity: 0.7,
-            fontSize: "0.9em",
-            maxInlineSize: "26em",
-          }}
-        >
-          {note}
-        </p>
-      ) : null}
-    </div>
   );
 }
 
@@ -745,6 +703,56 @@ export function SpeakerMark({
         (avatar ?? <DefaultFace mine={mine} />)
       )}
     </span>
+  );
+}
+
+/**
+ * The choices a message is offering, while it is still asking.
+ *
+ * Chips, not a form: a shortcut for the few answers worth one press, never
+ * the only way through. The question itself is the message above them, and
+ * the panel's one composer takes anything else the reader would rather say —
+ * which is what keeps this a conversation instead of a menu.
+ */
+function QuestionOptions({
+  question,
+  slots,
+  onAnswer,
+}: {
+  readonly question: TableAssistantQuestionView;
+  readonly slots: TableAssistantSlots;
+  readonly onAnswer: (answer: { optionId?: string; text?: string }) => void;
+}): ReactElement | null {
+  const Button = slots.Button;
+  const options = question.options ?? [];
+  if (options.length === 0) return null;
+  return (
+    <div
+      data-adapttable-part="assistant-question-options"
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "flex-start",
+        gap: "0.35em",
+        // To the line the bubble starts on, past the mark.
+        marginInlineStart: "2.6em",
+      }}
+    >
+      {/* The kit's own button, small and inline — a chip. The suggestion card
+          is a card: a title, a description and room for both, which beside a
+          question turns four words into four slabs down the panel. */}
+      {options.map((option) => (
+        <Button
+          key={option.id}
+          label={option.label}
+          part="assistant-question-option"
+          variant="secondary"
+          onClick={() => {
+            onAnswer({ optionId: option.id });
+          }}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -1223,86 +1231,6 @@ const WORKING_KEYFRAMES = `
   [data-adapttable-part="assistant-working-dot"] { animation: none; opacity: 0.55; }
 }
 `;
-
-/**
- * A question the backend asked, drawn where the reader is already looking.
- *
- * It is a message, not a form: the assistant's own mark, its own bubble, and
- * the panel's one composer to answer in. Choices are chips beside it — a
- * shortcut for the few answers worth one press, never the only way through.
- * A reader who would rather say something else just says it, which is what
- * keeps this a conversation instead of a menu.
- */
-export function AssistantQuestion({
-  question,
-  slots,
-  onAnswer,
-}: {
-  readonly question: TableAssistantQuestionView;
-  readonly slots: TableAssistantSlots;
-  readonly onAnswer: (answer: { optionId?: string; text?: string }) => void;
-}): ReactElement {
-  const askedId = useId();
-  const Button = slots.Button;
-  const options = question.options ?? [];
-  return (
-    // A question and the controls that answer it is what a fieldset is for:
-    // the legend is announced with each control inside it, which a labelled
-    // `role="group"` only approximates. The browser's own border, padding and
-    // margin are cleared so the panel looks exactly as it did.
-    <fieldset
-      data-adapttable-part="assistant-question"
-      aria-labelledby={askedId}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-        gap: "0.45em",
-        border: 0,
-        margin: 0,
-        padding: 0,
-        minInlineSize: 0,
-      }}
-    >
-      {/* The assistant asked this, so it is drawn exactly as the assistant
-          speaking — the same component every other bubble goes through. The
-          fieldset is named by it rather than wrapping it in a legend, which
-          is what forced a second, hand-placed copy of this markup. */}
-      <Said part="assistant-question-text" id={askedId}>
-        {question.question}
-      </Said>
-      {options.length > 0 ? (
-        <div
-          data-adapttable-part="assistant-question-options"
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "flex-start",
-            gap: "0.35em",
-            // To the line the bubble starts on, past the mark.
-            marginInlineStart: "2.45em",
-          }}
-        >
-          {/* The kit's own button, small and inline — a chip. The suggestion
-              card is a card: a title, a description and room for both, which
-              beside a question turns four words into four slabs down the
-              panel. These are shortcuts for one answer, not offers. */}
-          {options.map((option) => (
-            <Button
-              key={option.id}
-              label={option.label}
-              part="assistant-question-option"
-              variant="secondary"
-              onClick={() => {
-                onAnswer({ optionId: option.id });
-              }}
-            />
-          ))}
-        </div>
-      ) : null}
-    </fieldset>
-  );
-}
 
 /**
  * What the reader has waved through, and the way back.
