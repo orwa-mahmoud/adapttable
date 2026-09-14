@@ -6,7 +6,7 @@
  */
 import { defaultLabels } from "@adapttable/core";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
@@ -77,6 +77,45 @@ describe("TableAssistant", () => {
     expect(part("assistant-empty-prompt")).toBeTruthy();
     expect(part("assistant-input")).toBeTruthy();
     expect(part("assistant-suggestion")).toHaveTextContent("Group by city");
+  });
+
+  it("opens the examples from the composer, in this kit's own menu", async () => {
+    const runSuggestion = vi.fn();
+    mount(
+      <TableAssistant
+        assistant={view({
+          messages: [{ id: "m1", role: "assistant", text: "Done." }],
+          suggestions: [
+            { id: "s1", title: "Group by city" },
+            { id: "s2", title: "Sort by salary" },
+          ],
+          runSuggestion,
+        })}
+        labels={defaultLabels}
+        open
+        onOpenChange={() => undefined}
+      />
+    );
+
+    // In the composer, where a reader looks when they do not know what to
+    // type — and drawn by this kit, not by the chrome.
+    const trigger = part("assistant-examples-menu")!;
+    expect(trigger).toBeTruthy();
+    expect(part("assistant-composer")!.contains(trigger)).toBe(true);
+
+    fireEvent.click(trigger);
+    const items = await waitFor(() => {
+      const found = [
+        ...document.querySelectorAll<HTMLElement>(
+          '[data-adapttable-part="assistant-examples-item"]'
+        ),
+      ];
+      expect(found).toHaveLength(2);
+      return found;
+    });
+
+    fireEvent.click(items[1]!);
+    expect(runSuggestion).toHaveBeenCalledWith("s2");
   });
 
   it("shows only the launcher while closed", () => {

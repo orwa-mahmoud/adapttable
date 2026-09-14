@@ -78,6 +78,45 @@ describe("TableAssistant", () => {
     expect(part("assistant-suggestion")).toHaveTextContent("Group by city");
   });
 
+  it("opens the examples from the composer, in this kit's own menu", () => {
+    // Native IS the kit here, so `<details>` and a `menu` list are the real
+    // thing rather than a stand-in for a kit's popup.
+    const runSuggestion = vi.fn();
+    mount(
+      <TableAssistant
+        assistant={view({
+          messages: [{ id: "m1", role: "assistant", text: "Done." }],
+          suggestions: [
+            { id: "s1", title: "Group by city" },
+            { id: "s2", title: "Sort by salary" },
+          ],
+          runSuggestion,
+        })}
+        labels={defaultLabels}
+        open
+        onOpenChange={() => undefined}
+      />
+    );
+
+    const trigger = part("assistant-examples-menu")!;
+    expect(trigger.tagName).toBe("SUMMARY");
+    expect(part("assistant-composer")!.contains(trigger)).toBe(true);
+
+    const items = [
+      ...document.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="assistant-examples-item"]'
+      ),
+    ];
+    expect(items).toHaveLength(2);
+
+    const disclosure = trigger.closest("details")!;
+    disclosure.setAttribute("open", "");
+    fireEvent.click(items[1]!);
+    expect(runSuggestion).toHaveBeenCalledWith("s2");
+    // Picking one closes the menu, the way a menu closes anywhere else.
+    expect(disclosure.hasAttribute("open")).toBe(false);
+  });
+
   it("shows only the launcher while closed", () => {
     mount(
       <TableAssistant
