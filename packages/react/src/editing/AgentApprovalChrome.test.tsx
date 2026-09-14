@@ -186,9 +186,11 @@ describe("what the reader can act on", () => {
     expect(part("approval-review-operation-name")).toHaveTextContent(
       "Activate everyone"
     );
-    expect(part("approval-review-operation-arguments")).toHaveTextContent(
-      '{"status":"Active"}'
-    );
+    // Pairs a reader can read, not the JSON the capability will receive.
+    const args = part("approval-review-operation-arguments")!;
+    expect(args).toHaveTextContent("Status");
+    expect(args).toHaveTextContent("Active");
+    expect(args.textContent).not.toContain("{");
     expect(parts("agent-approval-row")).toHaveLength(0);
     expect(parts("approval-review-row-approve")).toHaveLength(0);
   });

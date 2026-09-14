@@ -286,9 +286,14 @@ export async function runUndo(
   session: AgentSession,
   undo: AssistantUndo,
   idempotencyKey: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  view?: AgentContextView
 ): Promise<readonly ExecuteResult[]> {
-  const blocked = undoBlocked(session, undo);
+  // The same reading the offer was drawn from. Without the live view this
+  // falls back to the revision alone, which refuses an undo the panel was
+  // still offering — putting one action of a turn back moves the revision,
+  // and that must not retire the action beside it.
+  const blocked = undoBlocked(session, undo, view);
   if (blocked) {
     throw new Error(
       blocked.code === "table-moved"

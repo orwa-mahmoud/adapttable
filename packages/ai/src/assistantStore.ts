@@ -679,7 +679,13 @@ export function createTableAssistant(
     idempotencyKey: string
   ): Promise<void> => {
     try {
-      const results = await runUndo(session, undo, idempotencyKey);
+      const results = await runUndo(
+        session,
+        undo,
+        idempotencyKey,
+        undefined,
+        viewNow() ?? undefined
+      );
       const failed = results.find((result) => !result.ok);
       if (failed) error = failed.error?.message ?? "the undo did not finish";
     } catch (cause) {

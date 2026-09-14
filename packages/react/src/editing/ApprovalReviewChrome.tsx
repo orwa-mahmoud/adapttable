@@ -10,7 +10,7 @@
  * Structure and part names live here; every visible control is a kit slot.
  */
 import type { TableLabels } from "@adapttable/core";
-import { type ReactElement, type ReactNode, useId } from "react";
+import { Fragment, type ReactElement, type ReactNode, useId } from "react";
 
 import type {
   AgentApprovalButtonProps,
@@ -110,6 +110,33 @@ function display(value: unknown): string | undefined {
 }
 
 /**
+ * One operation's arguments, as pairs a reader can read.
+ *
+ * Names are the host's own keys, spaced out of camelCase rather than
+ * translated: the host chose the word, and inventing another would describe
+ * something different from what it will receive. A value too deep to show
+ * plainly is left to {@link display}, which is honest about being JSON.
+ */
+function argumentPairs(
+  args: unknown
+): readonly { name: string; value: string }[] {
+  // Whatever a host's capability takes: only an object has pairs to show, and
+  // anything else falls back to the one line `display` can honestly give it.
+  if (!args || typeof args !== "object" || Array.isArray(args)) {
+    const single = display(args);
+    return single === undefined ? [] : [{ name: "", value: single }];
+  }
+  return Object.entries(args as Record<string, unknown>).map(
+    ([name, value]) => ({
+      name: name
+        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+        .replace(/^./, (first) => first.toUpperCase()),
+      value: display(value) ?? "—",
+    })
+  );
+}
+
+/**
  * The shared body of an approval review.
  *
  * @param props - See {@link ApprovalReviewChromeProps}.
@@ -171,11 +198,26 @@ export function ApprovalReviewChrome({
           <span data-adapttable-part="approval-review-operation-name">
             {review.operation.title ?? review.operation.capability}
           </span>
-          {/* The arguments it was called with, and nothing invented beside
-              them — an opaque server operation has no row count to show. */}
-          <code data-adapttable-part="approval-review-operation-arguments">
-            {JSON.stringify(review.operation.arguments)}
-          </code>
+          {/* What it was called with, read as pairs. A reader being asked to
+              agree to something should not have to parse JSON to find out
+              what they are agreeing to — and nothing is invented beside them,
+              because an opaque operation has no row count to show. */}
+          <dl
+            data-adapttable-part="approval-review-operation-arguments"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto 1fr",
+              gap: "0.15em 0.6em",
+              margin: 0,
+            }}
+          >
+            {argumentPairs(review.operation.arguments).map((pair) => (
+              <Fragment key={pair.name}>
+                <dt style={{ opacity: 0.7 }}>{pair.name}</dt>
+                <dd style={{ margin: 0, fontWeight: 550 }}>{pair.value}</dd>
+              </Fragment>
+            ))}
+          </dl>
         </div>
       ) : null}
 

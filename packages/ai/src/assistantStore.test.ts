@@ -675,6 +675,22 @@ describe("putting one action of a turn back", () => {
     expect(store.getState().messages).toBe(store.getState().messages);
   });
 
+  it("leaves the other action's offer usable after the first is put back", async () => {
+    // Putting one action back moves the revision. The action beside it writes
+    // a different field, so its offer still stands — and must still RUN, not
+    // just still be drawn.
+    const table = twoWayTable();
+    const store = storeFor(table);
+    await store.send("page and search");
+
+    await store.undoAction("two-2");
+    expect(table.search()).toBe("");
+
+    await store.undoAction("two-1");
+    expect(table.page()).toBe(1);
+    expect(store.getState().error).toBeUndefined();
+  });
+
   it("does nothing for an action it has no plan for", async () => {
     const table = twoWayTable();
     const store = storeFor(table);
