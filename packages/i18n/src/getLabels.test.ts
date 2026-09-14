@@ -608,10 +608,69 @@ it("every locale names the column and value, and separates the directions", () =
     expect(up, `${tag} dropped the sorted column`).toContain("Salary");
     expect(up, `${tag} reads the same either way`).not.toBe(down);
 
+    // A search names a value and no column; an edit names what it put where.
+    expect(
+      labels.assistantReceiptTerms({
+        kind: "search",
+        terms: [{ value: "nair" }],
+      }),
+      `${tag} dropped a value that had no column`
+    ).toContain("nair");
+    const edited = labels.assistantReceiptTerms({
+      kind: "edit",
+      terms: [{ column: "Salary", value: "185" }],
+    });
+    expect(edited, `${tag} dropped the edited column`).toContain("Salary");
+    expect(edited, `${tag} dropped the value written`).toContain("185");
+
     // Nothing to name is not a sentence: the headline stands on its own.
     expect(
       labels.assistantReceiptTerms({ kind: "filter", terms: [] }),
       `${tag} invented a detail for a cleared filter`
+    ).toBeUndefined();
+    expect(
+      labels.assistantReceiptTerms({ kind: "filter" }),
+      `${tag} invented a detail from no terms at all`
+    ).toBeUndefined();
+  }
+});
+
+/**
+ * Taking something off is not putting something on.
+ *
+ * "Filter applied" over a card where the filter was cleared reads as a
+ * failure, so every language gets its own sentence for the other direction.
+ */
+it("every locale words a cleared filter, sort, search and grouping", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    for (const kind of ["filter", "sort", "search", "group"]) {
+      const cleared = labels.assistantReceiptAction({
+        kind,
+        status: "executed",
+        cleared: true,
+      });
+      const applied = labels.assistantReceiptAction({
+        kind,
+        status: "executed",
+      });
+      expect(cleared, `${tag}.${kind} cleared`).toBeTypeOf("string");
+      expect(
+        (cleared ?? "").length,
+        `${tag}.${kind} cleared is empty`
+      ).toBeGreaterThan(0);
+      expect(cleared, `${tag}.${kind} reads the same either way`).not.toBe(
+        applied
+      );
+    }
+    // A kind this language has no cleared sentence for declines, the same way
+    // it declines an unknown pair.
+    expect(
+      labels.assistantReceiptAction({
+        kind: "teleport",
+        status: "executed",
+        cleared: true,
+      }),
+      `${tag} invented a cleared headline for an unknown kind`
     ).toBeUndefined();
   }
 });

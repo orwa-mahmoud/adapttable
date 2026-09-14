@@ -228,6 +228,34 @@ describe("what it still refuses, and what it tells the caller", () => {
     expect(result.error?.message).toMatch(/unknown column "ToTaL"/);
   });
 
+  it("says nothing about sorting on a table that published no columns", async () => {
+    // An absence is not a restriction: the host wiring setSort is the
+    // permission, and there is no list to resolve a name against.
+    const applied = apply();
+    const result = await session(applied, { columns: [] }).execute(
+      "view.setSort",
+      { key: "whatever" },
+      1,
+      "s6"
+    );
+    expect(result.ok).toBe(true);
+    expect(applied.setSort).toHaveBeenCalledWith("whatever", undefined);
+  });
+
+  it("groups by a key the contract never named, and says so", async () => {
+    // Grouping publishes no per-column permission, so a key this contract
+    // does not carry is the host's business rather than a mistake.
+    const applied = apply();
+    const result = await session(applied).execute(
+      "view.setGroupBy",
+      { key: "region" },
+      1,
+      "g2"
+    );
+    expect(applied.setGroupBy).toHaveBeenCalledWith("region");
+    expect(result.result).toMatchObject({ groupBy: "region" });
+  });
+
   it("leaves a search string exactly as the reader wrote it", async () => {
     const applied = apply();
     await session(applied).execute(

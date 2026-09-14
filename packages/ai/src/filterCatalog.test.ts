@@ -264,6 +264,24 @@ describe("extrasFromAgentFilters", () => {
     });
   });
 
+  it("leaves a filter that published no options alone", () => {
+    // A text filter offers no list, so there is nothing to resolve against
+    // and whatever the caller wrote is what the host asked to receive.
+    const open = agentFiltersFromDefs(
+      [{ key: "note", type: "text", label: "Note" }],
+      undefined
+    )!;
+    expect(extrasFromAgentFilters({ note: "  Mixed Case  " }, open)).toEqual({
+      note: "  Mixed Case  ",
+    });
+  });
+
+  it("resolves an operator written in another case", () => {
+    expect(
+      extrasFromAgentFilters({ salaryMin: 1, salaryOp: "GT" }, catalog)
+    ).toEqual({ salaryMin: 1, salaryOp: "gt" });
+  });
+
   it("takes the label a caller was shown as well as the value", () => {
     const labelled = agentFiltersFromDefs(
       [

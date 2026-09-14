@@ -179,6 +179,69 @@ describe("what an edit says it did", () => {
   });
 });
 
+describe("values it can read, and values it cannot", () => {
+  it("reads numbers, booleans and lists, and skips what it cannot", () => {
+    const of = (value: unknown) =>
+      subjectFor(
+        "view.setFilters",
+        {},
+        ran({ ok: true, filters: { team: value } }),
+        COLUMNS
+      );
+    expect(of(3)).toEqual({
+      kind: "filter",
+      terms: [{ column: "Team", value: "3" }],
+    });
+    expect(of(true)).toEqual({
+      kind: "filter",
+      terms: [{ column: "Team", value: "true" }],
+    });
+    expect(of(["Core", "Data"])).toEqual({
+      kind: "filter",
+      terms: [{ column: "Team", value: "Core, Data" }],
+    });
+    // A shape only the host understands shows the column alone rather than
+    // "[object Object]", and an empty string names nothing at all.
+    expect(of({ raw: 1 })).toEqual({
+      kind: "filter",
+      terms: [{ column: "Team" }],
+    });
+    expect(of("")).toEqual({ kind: "filter", terms: [{ column: "Team" }] });
+    expect(of(Number.NaN)).toEqual({
+      kind: "filter",
+      terms: [{ column: "Team" }],
+    });
+    expect(of([])).toEqual({ kind: "filter", terms: [{ column: "Team" }] });
+  });
+
+  it("says only the kind when an answer carries nothing to name", () => {
+    // A capability that ran but reported no payload, and arguments that were
+    // not an object: honest about the kind, silent about the rest.
+    expect(subjectFor("view.setFilters", {}, ran(undefined), COLUMNS)).toEqual({
+      kind: "filter",
+      cleared: true,
+    });
+    expect(
+      subjectFor("view.setGroupBy", {}, ran({ groupBy: "" }), COLUMNS)
+    ).toEqual({ kind: "group", cleared: true });
+    expect(subjectFor("view.setSearch", {}, ran({}))).toEqual({
+      kind: "search",
+      cleared: true,
+    });
+    expect(
+      subjectFor("view.pinColumn", "not-an-object", ran({ ok: true }))
+    ).toEqual({ kind: "pin" });
+    expect(
+      subjectFor(
+        "edit.cells",
+        { edits: "not-a-list" },
+        ran({ ok: true }),
+        COLUMNS
+      )
+    ).toEqual({ kind: "edit" });
+  });
+});
+
 describe("what it refuses to claim", () => {
   it("says only the kind when the action did not run", () => {
     // The absence of a sort in a refusal is not the table clearing its sort.
