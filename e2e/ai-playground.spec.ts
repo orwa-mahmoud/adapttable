@@ -310,8 +310,11 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
 
     await expect.poll(async () => visibleTableText(page)).toContain("Jonah");
     // The transcript goes with it — a conversation about rows that no longer
-    // exist is worse than none.
-    await expect(page.locator(part("assistant-message-text"))).toHaveCount(0);
+    // exist is worse than none. What is left is the opening line, which is
+    // where a cleared conversation starts.
+    const said = page.locator(part("assistant-message-text"));
+    await expect(said).toHaveCount(1);
+    await expect(said).toContainText("What would you like to do");
   });
 
   test("a connected backend answers the same composer", async ({ page }) => {
