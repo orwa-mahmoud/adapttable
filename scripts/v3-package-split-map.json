@@ -451,6 +451,14 @@
       "behavior": ""
     },
     {
+      "export": "AssistantReceiptTerm",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
       "export": "AssistantSuggestion",
       "currentImport": "@adapttable/ai/ag-ui",
       "kind": "type",
@@ -1067,6 +1075,14 @@
       "behavior": ""
     },
     {
+      "export": "AssistantReceiptTerm",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
       "export": "AssistantSuggestion",
       "currentImport": "@adapttable/ai/ai-sdk",
       "kind": "type",
@@ -1556,6 +1572,14 @@
     },
     {
       "export": "AssistantReceiptSubject",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceiptTerm",
       "currentImport": "@adapttable/ai/assistant",
       "kind": "type",
       "class": "neutral-model",
@@ -2987,6 +3011,14 @@
       "behavior": ""
     },
     {
+      "export": "AssistantReceiptTerm",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "AssistantSuggestion",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
@@ -4116,6 +4148,14 @@
     },
     {
       "export": "AssistantReceiptSubject",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantReceiptTerm",
       "currentImport": "@adapttable/ai/mcp-apps",
       "kind": "type",
       "class": "neutral-model",
@@ -6627,6 +6667,14 @@
       "behavior": ""
     },
     {
+      "export": "AssistantReceiptTerm",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
       "export": "AssistantRequest",
       "currentImport": "@adapttable/ai",
       "kind": "type",
@@ -7492,6 +7540,14 @@
     },
     {
       "export": "splitRecords",
+      "currentImport": "@adapttable/ai",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "subjectFor",
       "currentImport": "@adapttable/ai",
       "kind": "value",
       "class": "neutral-model",
@@ -27895,6 +27951,22 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantMenuItem",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantMenuProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
