@@ -119,11 +119,15 @@ describe("what the reader can act on", () => {
 
   it("offers per-row controls only when the write can be split", () => {
     const decideAt = vi.fn();
+    const two = [
+      { rowKey: "r1", column: "salary", before: 100, after: 200 },
+      { rowKey: "r2", column: "salary", before: 110, after: 210 },
+    ];
     const { rerender } = render(
       <AgentApprovalChrome
         slots={agentApprovalTestSlots}
         labels={defaultLabels}
-        pending={pending()}
+        pending={pending({ proposals: two, decisions: ["pending", "pending"] })}
       />
     );
     expect(parts("approval-review-row-approve")).toHaveLength(0);
@@ -132,11 +136,30 @@ describe("what the reader can act on", () => {
       <AgentApprovalChrome
         slots={agentApprovalTestSlots}
         labels={defaultLabels}
-        pending={pending({ decideAt })}
+        pending={pending({
+          proposals: two,
+          decisions: ["pending", "pending"],
+          decideAt,
+        })}
       />
     );
     fireEvent.click(part("approval-review-row-approve")!);
     expect(decideAt).toHaveBeenCalledWith(0, true);
+  });
+
+  it("gives one change one decision, not two pairs of buttons", () => {
+    // Per-row controls exist to take three raises and leave the fourth.
+    // Beside a single proposal they repeat the pair below them.
+    render(
+      <AgentApprovalChrome
+        slots={agentApprovalTestSlots}
+        labels={defaultLabels}
+        pending={pending({ decideAt: vi.fn() })}
+      />
+    );
+
+    expect(parts("approval-review-row-approve")).toHaveLength(0);
+    expect(part("agent-approval-approve")).toBeTruthy();
   });
 
   it("shows three changes, then opens the rest in place", () => {

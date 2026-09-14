@@ -236,7 +236,11 @@ export function ApprovalReviewChrome({
                 key={item.id}
                 item={item}
                 labels={labels}
-                perItem={review.perItem}
+                // One change needs one decision. Per-row controls exist to
+                // let a reader take three raises and leave the fourth; beside
+                // a single proposal they are a second pair of buttons that
+                // do exactly what the pair below them does.
+                perItem={review.perItem && shown.length > 1}
                 Approve={Approve}
                 Reject={Reject}
                 buttonClassName={buttonClassName}
@@ -266,7 +270,14 @@ export function ApprovalReviewChrome({
 
       <div
         data-adapttable-part="approval-review-actions"
-        style={{ display: "flex", gap: "0.5em", justifyContent: "flex-end" }}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "0.5em",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          paddingBlockStart: "0.2em",
+        }}
       >
         {/* A standing decision sits apart from the two that answer only this
             write, and it reads as the quieter choice — it is the one a reader
@@ -329,9 +340,15 @@ function ReviewRow({
       aria-label={text}
       style={{
         display: "flex",
+        // Wrapping rather than squeezing: at a phone's width the change and
+        // two controls cannot share a line, and a change clipped to make room
+        // for the buttons is the one thing the reader must be able to read
+        // before they press either.
+        flexWrap: "wrap",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: "0.5em",
+        gap: "0.4em 0.5em",
+        paddingBlock: "0.35em",
         listStyle: "none",
         // A decision has to be visible on the row it was taken on, or the
         // reader has only a tally to go by.
@@ -339,11 +356,21 @@ function ReviewRow({
         textDecoration: item.decision === "rejected" ? "line-through" : "none",
       }}
     >
-      <span data-adapttable-part="approval-review-change">{text}</span>
+      <span
+        data-adapttable-part="approval-review-change"
+        style={{ flex: "1 1 12em", minWidth: 0, overflowWrap: "anywhere" }}
+      >
+        {text}
+      </span>
       {perItem && onDecide ? (
         <span
           data-adapttable-part="approval-review-row-actions"
-          style={{ display: "flex", gap: "0.25em", flex: "0 0 auto" }}
+          style={{
+            display: "flex",
+            gap: "0.35em",
+            flex: "0 0 auto",
+            marginInlineStart: "auto",
+          }}
         >
           <Reject
             label={labels?.rejectProposal ?? "Reject"}

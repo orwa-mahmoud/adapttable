@@ -479,12 +479,15 @@ function Transcript({
   slots,
   messageAction,
   receipts,
+  parked,
 }: {
   readonly assistant: TableAssistantView;
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly messageAction: TableAssistantProps["messageAction"];
   readonly receipts?: boolean;
+  /** Whether a write is waiting on the reader's approval. */
+  readonly parked?: boolean;
 }): ReactElement {
   return (
     <ul
@@ -523,7 +526,7 @@ function Transcript({
           while a question is parked on the reader. Nothing is working then:
           the turn is waiting on them, and saying otherwise is why a question
           gets read as progress. */}
-      {assistant.busy && !assistant.pendingQuestion ? (
+      {assistant.busy && !assistant.pendingQuestion && !parked ? (
         <AssistantWorking labels={labels} />
       ) : null}
     </ul>
@@ -609,6 +612,7 @@ function Body({
             slots={slots}
             messageAction={messageAction}
             receipts={receipts}
+            parked={Boolean(approval)}
           />
         )}
         {/* A question belongs where the reader is already looking, not in a
