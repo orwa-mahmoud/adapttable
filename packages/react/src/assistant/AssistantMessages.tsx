@@ -14,7 +14,7 @@
 import type { TableLabels } from "@adapttable/core";
 import { type ReactElement, useState } from "react";
 
-import { AssistantIcon, SuggestionIcon } from "./assistantIcons";
+import { AssistantIcon, SuggestionIcon, UndoIcon } from "./assistantIcons";
 import type { TableAssistantSlots } from "./assistantSlots";
 import type {
   TableAssistantMessageView,
@@ -153,16 +153,11 @@ function Receipt({
       data-kind={subject?.kind}
       style={{
         display: "flex",
-        flexDirection: "column",
-        gap: "0.15em",
-        // Quiet by design: this is what the reply is evidence for, and a
-        // bordered panel per action turns three of them into the loudest
-        // thing on screen. A tinted rail marks them as one group without
-        // competing with the words above.
-        padding: "0.1em 0 0.1em 0.6em",
-        borderInlineStart: "2px solid currentColor",
-        borderColor: "color-mix(in srgb, currentColor 15%, transparent)",
-        fontSize: "0.92em",
+        alignItems: "baseline",
+        justifyContent: "space-between",
+        gap: "0.5em",
+        flexWrap: "wrap",
+        fontSize: "0.9em",
       }}
     >
       <span
@@ -187,11 +182,20 @@ function Receipt({
       ) : null}
       <ChangedValue receipt={receipt} labels={labels} />
       {onUndo ? (
-        <span data-adapttable-part="assistant-receipt-undo">
+        // At the end of the row it belongs to, small and quiet: putting one
+        // action back is worth offering, not worth competing with the action
+        // it would put back.
+        <span
+          data-adapttable-part="assistant-receipt-undo"
+          style={{ marginInlineStart: "auto", fontSize: "0.9em" }}
+        >
           <Button
             label={labels?.assistantUndo ?? "Undo"}
+            tooltip={labels?.assistantUndo ?? "Undo"}
             part="assistant-receipt-undo-button"
             variant="subtle"
+            icon={<UndoIcon />}
+            iconOnly
             onClick={onUndo}
           />
         </span>
@@ -281,6 +285,11 @@ export function AssistantMessage({
     (receipt) => receipt.subject?.kind !== "read"
   );
   const perAction = onUndoAction ? { onUndoAction } : {};
+  // One control per change. A card that carries its own Undo makes the
+  // whole-turn one a second answer to the same question — and a reader
+  // counting three controls under two actions cannot tell which does what.
+  const perCard =
+    onUndoAction !== undefined && shown.some((receipt) => receipt.undoable);
   const mine = message.role === "user";
   const speaker = mine
     ? (labels?.assistantYou ?? "You")
@@ -323,7 +332,7 @@ export function AssistantMessage({
           />
         </span>
       ) : null}
-      {undo ? (
+      {undo && !perCard ? (
         <span data-adapttable-part="assistant-undo">
           <slots.Button
             label={labels?.assistantUndo ?? "Undo"}
@@ -562,12 +571,17 @@ function Receipts({
       style={{
         listStyle: "none",
         margin: 0,
-        padding: 0,
+        // Its own ground and its own indent, so the eye can see where the
+        // reply ends and what it did begins without reading either.
+        padding: "0.4em 0.6em",
+        marginInlineStart: "1.6em",
+        marginBlockStart: "0.35em",
+        borderRadius: "0.6em",
+        background: "color-mix(in srgb, currentColor 5%, transparent)",
         display: "flex",
         flexDirection: "column",
-        gap: "0.2em",
+        gap: "0.35em",
         alignSelf: "stretch",
-        marginBlockStart: "0.15em",
       }}
     >
       {receipts.map((receipt) => (

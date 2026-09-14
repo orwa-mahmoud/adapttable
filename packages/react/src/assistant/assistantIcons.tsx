@@ -132,3 +132,16 @@ export function ExamplesIcon(): ReactElement {
     </svg>
   );
 }
+
+/**
+ * Put this back: an arrow curving anticlockwise, the shape every editor uses.
+ *
+ * @internal
+ */
+export function UndoIcon(): ReactElement {
+  return (
+    <svg {...BASE}>
+      <path d="M3 7v6h6M3.5 13a9 9 0 1 0 2.2-9.4L3 7" />
+    </svg>
+  );
+}
