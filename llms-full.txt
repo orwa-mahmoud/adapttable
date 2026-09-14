@@ -7642,7 +7642,7 @@ Nothing in these contracts imports React or calls a model.
 `@adapttable/ai-react` turns those contracts into a conversation, and
 still renders nothing. `useTableAssistant({ session, transport, suggestions })`
 returns `status`, `messages`, `draft`/`setDraft`, `send`, `stop`, `clear`,
-the live `suggestions` and `moreSuggestions`, `runSuggestion`, `open`/`setOpen`
+the live `suggestions`, `runSuggestion`, `open`/`setOpen`
 and `error`. A host renders its own panel from those; the widget each kit
 ships is written against the same values, so it is a convenience and never a
 requirement. `examples/ai-assistant-custom-ui.tsx` is a complete panel with no

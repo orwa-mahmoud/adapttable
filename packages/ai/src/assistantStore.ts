@@ -133,8 +133,6 @@ export interface TableAssistantInputs {
   readonly transportKey?: string;
   /** Everything authored, filtered live against what the table offers. */
   readonly suggestions?: readonly AssistantSuggestion[];
-  /** How many primary suggestions to surface. The rest are `more`. */
-  readonly primarySuggestions?: number;
   /**
    * Whether a write from this conversation is waiting on a human.
    *
@@ -190,8 +188,6 @@ export interface TableAssistantSnapshot {
   readonly errorCode: string | undefined;
   /** The suggestions this table can run right now. */
   readonly suggestions: readonly AssistantSuggestion[];
-  /** Eligible suggestions past `primarySuggestions`. */
-  readonly moreSuggestions: readonly AssistantSuggestion[];
   /** The pending approval a host supplied, or nothing. */
   readonly approval: unknown;
   /**
@@ -285,8 +281,6 @@ export interface TableAssistantStore {
   /** Idempotent. After this, nothing is delivered and nothing is notified. */
   readonly dispose: () => void;
 }
-
-const DEFAULT_PRIMARY = 4;
 
 /**
  * Coalesce a burst of stream updates into one repaint.
@@ -453,14 +447,6 @@ export function createTableAssistant(
 
   const listeners = new Set<() => void>();
   let snapshot: TableAssistantSnapshot | undefined;
-  let sliceCache:
-    | {
-        readonly offered: readonly AssistantSuggestion[];
-        readonly primary: number;
-        readonly head: readonly AssistantSuggestion[];
-        readonly tail: readonly AssistantSuggestion[];
-      }
-    | undefined;
 
   // The last eligibility answer, and what it was computed from. Recomputing
   // unconditionally would hand back new arrays on every read, and a snapshot
@@ -627,7 +613,7 @@ export function createTableAssistant(
     a.canSend === b.canSend &&
     a.canStop === b.canStop &&
     a.suggestions === b.suggestions &&
-    a.moreSuggestions === b.moreSuggestions;
+    a.suggestions === b.suggestions;
 
   /**
    * Rebuild, and notify only when something an observer can see has moved.
@@ -657,17 +643,6 @@ export function createTableAssistant(
   const getState = (): TableAssistantSnapshot => {
     if (snapshot) return snapshot;
     const offered = eligible();
-    const primary = live.primarySuggestions ?? DEFAULT_PRIMARY;
-    // Sliced once per eligibility answer, so an unchanged table hands back the
-    // same arrays rather than equal ones.
-    if (sliceCache?.offered !== offered || sliceCache.primary !== primary) {
-      sliceCache = {
-        offered,
-        primary,
-        head: offered.slice(0, primary),
-        tail: offered.slice(primary),
-      };
-    }
     const parked = sending && live.awaitingApproval === true;
     snapshot = {
       // What the badge says. A parked write is not "working", and a reader
@@ -683,8 +658,7 @@ export function createTableAssistant(
       draft,
       error,
       errorCode,
-      suggestions: sliceCache.head,
-      moreSuggestions: sliceCache.tail,
+      suggestions: offered,
       approval: live.approval ?? null,
       pendingQuestion: openQuestion(messages),
       undo: undoOffer(),

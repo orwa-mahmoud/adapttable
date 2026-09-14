@@ -753,26 +753,9 @@ describe("suggestions", () => {
       })
     );
 
-    const offered = [
-      ...result.current.suggestions,
-      ...result.current.moreSuggestions,
-    ].map((s) => s.id);
+    const offered = result.current.suggestions.map((s) => s.id);
     // Grouping is not wired on this table, so its chip is not shown.
     expect(offered).toEqual(["s1", "s3", "s4", "s5"]);
-  });
-
-  it("keeps the primary list short and puts the rest under more", () => {
-    const { result } = renderHook(() =>
-      useTableAssistant({
-        session: useHeldSession(),
-        transport: { send: () => Promise.resolve({ text: "" }) },
-        suggestions: SUGGESTIONS,
-        primarySuggestions: 3,
-      })
-    );
-
-    expect(result.current.suggestions).toHaveLength(3);
-    expect(result.current.moreSuggestions.map((s) => s.id)).toEqual(["s5"]);
   });
 
   it("sends the exact prompt the reader saw", async () => {

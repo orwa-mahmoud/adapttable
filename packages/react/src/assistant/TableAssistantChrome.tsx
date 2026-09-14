@@ -53,6 +53,7 @@ import type {
 } from "./assistantSlots";
 import type {
   TableAssistantMessageView,
+  TableAssistantQuestionView,
   TableAssistantView,
 } from "./assistantView";
 import type { SpeechInputHandle } from "./speechView";
@@ -594,7 +595,7 @@ function Transcript({
           while a question is parked on the reader. Nothing is working then:
           the turn is waiting on them, and saying otherwise is why a question
           gets read as progress. */}
-      {assistant.busy && !assistant.pendingQuestion && !parked ? (
+      {assistant.busy && !asking(messages) && !parked ? (
         <AssistantWorking labels={labels} />
       ) : null}
     </ul>
@@ -639,6 +640,23 @@ function FullApproval({
 }
 
 /**
+ * The question still waiting on the reader, if one is.
+ *
+ * Read off the conversation rather than from a field beside it: the question
+ * belongs to the message that asked it, and a second copy is a second thing
+ * to keep in step.
+ */
+function asking(
+  messages: readonly TableAssistantMessageView[]
+): TableAssistantQuestionView | undefined {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    const question = messages[i]?.question;
+    if (question) return question;
+  }
+  return undefined;
+}
+
+/**
  * What the one box at the bottom does right now.
  *
  * A turn parked on a question is waiting on the reader, not working — so the
@@ -671,7 +689,7 @@ function composerState(assistant: TableAssistantView): {
 function composerAnswers(
   assistant: TableAssistantView
 ): { readonly send: () => void } | undefined {
-  const question = assistant.pendingQuestion;
+  const question = asking(assistant.messages);
   const answer = assistant.answer;
   if (!question || !answer) return undefined;
   return {
@@ -1040,17 +1058,15 @@ export function TableAssistantChrome({
   // lot, which is the whole reason it replaced a list that had to be split.
   const examples = {
     label: labels?.assistantExamples ?? "Examples",
-    items: [...assistant.suggestions, ...(assistant.moreSuggestions ?? [])].map(
-      (suggestion) => ({
-        id: suggestion.id,
-        title: suggestion.title,
-        ...(suggestion.description
-          ? { description: suggestion.description }
-          : {}),
-        icon: <SuggestionIcon kind={suggestion.kind} />,
-        part: "assistant-examples-item",
-      })
-    ),
+    items: assistant.suggestions.map((suggestion) => ({
+      id: suggestion.id,
+      title: suggestion.title,
+      ...(suggestion.description
+        ? { description: suggestion.description }
+        : {}),
+      icon: <SuggestionIcon kind={suggestion.kind} />,
+      part: "assistant-examples-item",
+    })),
     onSelect: (id: string): void => {
       void assistant.runSuggestion(id);
     },

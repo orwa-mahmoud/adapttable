@@ -446,8 +446,10 @@ describe("what a receipt card offers", () => {
 describe("the examples, once a conversation has started", () => {
   const started = {
     messages: [{ id: "m1", role: "assistant" as const, text: "Done." }],
-    suggestions: [{ id: "group", title: "Group by city" }],
-    moreSuggestions: [{ id: "sort", title: "Sort by salary" }],
+    suggestions: [
+      { id: "group", title: "Group by city" },
+      { id: "sort", title: "Sort by salary" },
+    ],
   };
 
   it("moves into the composer, where a reader looks for what to type", () => {
@@ -1459,7 +1461,6 @@ describe("a question the backend asked", () => {
         messages: [
           { id: "m1", role: "assistant", text: question.question, question },
         ],
-        pendingQuestion: question,
         answer,
       }),
     });
@@ -1472,7 +1473,14 @@ describe("a question the backend asked", () => {
   });
 
   it("offers no typed answer when the backend accepts only a choice", () => {
-    mount({ assistant: view({ pendingQuestion: question, answer: vi.fn() }) });
+    mount({
+      assistant: view({
+        messages: [
+          { id: "m1", role: "assistant", text: question.question, question },
+        ],
+        answer: vi.fn(),
+      }),
+    });
 
     // An input beside a closed set invites an answer that will be refused.
     expect(part("assistant-question-input")).toBeNull();
@@ -1487,7 +1495,14 @@ describe("a question the backend asked", () => {
     const setDraft = vi.fn();
     mount({
       assistant: view({
-        pendingQuestion: { ...question, allowFreeText: false },
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "asked",
+            question: { ...question, allowFreeText: false },
+          },
+        ],
         draft: "  neither — show me Platform  ",
         setDraft,
         answer,
@@ -1505,7 +1520,12 @@ describe("a question the backend asked", () => {
 
   it("invites an answer rather than a new question while one is open", () => {
     mount({
-      assistant: view({ pendingQuestion: question, answer: vi.fn() }),
+      assistant: view({
+        messages: [
+          { id: "m1", role: "assistant", text: question.question, question },
+        ],
+        answer: vi.fn(),
+      }),
     });
 
     expect(part("assistant-input")).toHaveAttribute(
@@ -1520,7 +1540,14 @@ describe("a question the backend asked", () => {
     // could read and could not answer.
     mount({
       assistant: view({
-        pendingQuestion: question,
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "asked",
+            question: question,
+          },
+        ],
         busy: true,
         status: "awaiting-user",
         draft: "the last one",
@@ -1536,7 +1563,14 @@ describe("a question the backend asked", () => {
     const answer = vi.fn();
     mount({
       assistant: view({
-        pendingQuestion: question,
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "asked",
+            question: question,
+          },
+        ],
         busy: true,
         status: "awaiting-user",
         draft: "the last one",
@@ -1552,7 +1586,14 @@ describe("a question the backend asked", () => {
     const answer = vi.fn();
     mount({
       assistant: view({
-        pendingQuestion: question,
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "asked",
+            question: question,
+          },
+        ],
         draft: "Q4",
         answer,
       }),
@@ -1565,10 +1606,19 @@ describe("a question the backend asked", () => {
     expect(answer).not.toHaveBeenCalled();
   });
 
-  it("draws nothing when the host cannot answer one", () => {
-    mount({ assistant: view({ pendingQuestion: question }) });
+  it("offers no choices when the host cannot answer one", () => {
+    // A chip that settles nothing is a control the reader presses into the
+    // void; the question still reads as what the assistant said.
+    mount({
+      assistant: view({
+        messages: [
+          { id: "m1", role: "assistant", text: question.question, question },
+        ],
+      }),
+    });
 
-    expect(part("assistant-question")).toBeNull();
+    expect(parts("assistant-question-option")).toHaveLength(0);
+    expect(part("assistant-message-text")).toHaveTextContent("Which quarter?");
   });
 });
 
@@ -1831,11 +1881,18 @@ describe("answering a question in the reader's own words", () => {
     const setDraft = vi.fn();
     mount({
       assistant: view({
-        pendingQuestion: {
-          id: "q1",
-          question: "What should I call it?",
-          allowFreeText: true,
-        },
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "asked",
+            question: {
+              id: "q1",
+              question: "What should I call it?",
+              allowFreeText: true,
+            },
+          },
+        ],
         draft: "  Q4 report  ",
         setDraft,
         answer: onAnswer,
@@ -1854,11 +1911,18 @@ describe("answering a question in the reader's own words", () => {
     const onAnswer = vi.fn();
     mount({
       assistant: view({
-        pendingQuestion: {
-          id: "q1",
-          question: "What should I call it?",
-          allowFreeText: true,
-        },
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "asked",
+            question: {
+              id: "q1",
+              question: "What should I call it?",
+              allowFreeText: true,
+            },
+          },
+        ],
         draft: "   ",
         answer: onAnswer,
       }),

@@ -21,6 +21,12 @@ interface View {
     id: string;
     role: "user" | "assistant";
     text: string;
+    question?: {
+      id: string;
+      question: string;
+      options?: { id: string; label: string }[];
+      allowFreeText: boolean;
+    };
     receipts?: {
       capabilityKey?: string;
       status: string;
@@ -34,12 +40,6 @@ interface View {
   stop: () => void;
   suggestions: { id: string; title: string }[];
   runSuggestion: (id: string) => void;
-  pendingQuestion?: {
-    id: string;
-    question: string;
-    options?: { id: string; label: string }[];
-    allowFreeText: boolean;
-  } | null;
   answer?: (answer: { optionId?: string; text?: string }) => void;
 }
 
@@ -394,7 +394,6 @@ describe("the kit's own controls", () => {
               question: QUESTION,
             },
           ],
-          pendingQuestion: QUESTION,
           answer,
         })}
         // This is about the option controls, not the opening line.

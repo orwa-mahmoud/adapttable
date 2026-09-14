@@ -122,8 +122,6 @@ export interface TableAssistantOptions {
    * capability through and have no way to take it back.
    */
   readonly alwaysAllow?: AlwaysAllowedState;
-  /** How many primary suggestions to surface. The rest are `more`. */
-  readonly primarySuggestions?: number;
   /**
    * Live view and filter data the manifest does not carry.
    *
@@ -163,12 +161,6 @@ export interface TableAssistantState {
    * passing it costs nothing on a table reviewing elsewhere.
    */
   readonly approval: AgentApprovalPending | null;
-  /**
-   * A question the backend put to the reader, or nothing.
-   *
-   * The turn is parked rather than finished; answering resumes it.
-   */
-  readonly pendingQuestion: AssistantQuestion | null;
   /** Answer the pending question and let the turn continue. */
   readonly answer: (answer: { optionId?: string; text?: string }) => void;
   /**
@@ -195,8 +187,6 @@ export interface TableAssistantState {
   readonly revokeAlwaysAllow: (capability: string) => void;
   /** The suggestions this table can run right now, re-checked every render. */
   readonly suggestions: readonly AssistantSuggestion[];
-  /** Eligible suggestions past `primarySuggestions`. */
-  readonly moreSuggestions: readonly AssistantSuggestion[];
   /** Send a suggestion's prompt as if the reader had typed it. */
   readonly runSuggestion: (id: string) => Promise<void>;
   readonly open: boolean;
@@ -293,7 +283,6 @@ export function useTableAssistant(
     status: state.status,
     busy: state.busy,
     approval: approval ?? null,
-    pendingQuestion: state.pendingQuestion,
     answer: store.answer,
     undo: state.undo
       ? {
@@ -310,7 +299,6 @@ export function useTableAssistant(
     alwaysAllowedNames: state.alwaysAllowedNames,
     revokeAlwaysAllow: store.revokeAlwaysAllow,
     suggestions: state.suggestions,
-    moreSuggestions: state.moreSuggestions,
     runSuggestion: store.runSuggestion,
     open,
     setOpen,
@@ -336,7 +324,6 @@ function inputsOf(
     transport: options.transport,
     transportKey: options.transportKey,
     suggestions: options.suggestions,
-    primarySuggestions: options.primarySuggestions,
     awaitingApproval: options.awaitingApproval,
     approval: approval ?? null,
     ...(contextInputs ? { contextInputs } : {}),

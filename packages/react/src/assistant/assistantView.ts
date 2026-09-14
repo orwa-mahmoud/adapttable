@@ -155,10 +155,8 @@ export interface TableAssistantView {
   readonly send: (text?: string) => void | Promise<void>;
   /** Abort the turn in flight. */
   readonly stop: () => void;
-  /** Primary suggestions, already filtered to what this table can run. */
+  /** The prompts this table can actually run, ready to offer. */
   readonly suggestions: readonly TableAssistantSuggestionView[];
-  /** The eligible remainder, shown behind a "more" affordance. */
-  readonly moreSuggestions?: readonly TableAssistantSuggestionView[];
   readonly runSuggestion: (id: string) => void | Promise<void>;
   /** The last failure, when there is one. */
   readonly error?: string;
@@ -169,13 +167,12 @@ export interface TableAssistantView {
    */
   readonly errorCode?: string;
   /**
-   * A question waiting on the reader, when the backend asked one.
+   * Answer the question the conversation is waiting on.
    *
-   * The turn is still in flight while this is set: answering resumes it, and
-   * Stop still ends it.
+   * Which question that is comes from the messages: the one carrying
+   * {@link TableAssistantMessageView.question}. Ignored once the turn has
+   * moved on.
    */
-  readonly pendingQuestion?: TableAssistantQuestionView | null;
-  /** Answer it. Ignored once the turn has moved on. */
   readonly answer?: (answer: { optionId?: string; text?: string }) => void;
   /** Whether the last turn that moved the table can still be put back. */
   readonly undo?: TableAssistantUndoView | null;

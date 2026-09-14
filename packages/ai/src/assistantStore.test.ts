@@ -311,19 +311,19 @@ describe("the assistant store", () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it("splits the suggestions a table can run into primary and more", () => {
+  it("offers every suggestion the table can run", () => {
+    // One list. The head/tail split served a wall of cards with a "more"
+    // control; the shortcuts menu shows what a table can actually run.
     const store = createTableAssistant({
       session: tableSession(),
       transport: replying(),
-      primarySuggestions: 1,
       suggestions: [
         { id: "a", title: "A", prompt: "a" },
         { id: "b", title: "B", prompt: "b" },
       ],
     });
 
-    expect(store.getState().suggestions.map((s) => s.id)).toEqual(["a"]);
-    expect(store.getState().moreSuggestions.map((s) => s.id)).toEqual(["b"]);
+    expect(store.getState().suggestions.map((s) => s.id)).toEqual(["a", "b"]);
   });
 
   it("shows text as it streams, then replaces it with the reply", async () => {
