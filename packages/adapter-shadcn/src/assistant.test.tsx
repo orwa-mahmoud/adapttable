@@ -75,7 +75,9 @@ describe("TableAssistant", () => {
     expect(part("assistant-connection")).toHaveTextContent("Ready");
     expect(part("assistant-empty-prompt")).toBeTruthy();
     expect(part("assistant-input")).toBeTruthy();
-    expect(part("assistant-suggestion")).toHaveTextContent("Group by city");
+    // The shortcuts live in the composer's own menu from the first frame,
+    // not as cards in the empty state.
+    expect(part("assistant-examples-menu")).toBeTruthy();
   });
 
   it("shows only the launcher while closed", () => {
@@ -283,7 +285,7 @@ describe("the kit's own controls", () => {
     expect(send).toHaveBeenCalledTimes(1);
   });
 
-  it("runs a suggestion from the empty state", () => {
+  it("runs a shortcut from the composer's menu", () => {
     const runSuggestion = vi.fn();
     mount(
       <TableAssistant
@@ -293,7 +295,11 @@ describe("the kit's own controls", () => {
         onOpenChange={() => undefined}
       />
     );
-    fireEvent.click(part("assistant-suggestion")!);
+    fireEvent.click(
+      document.querySelector<HTMLElement>(
+        '[data-adapttable-part="assistant-examples-item"]'
+      )!
+    );
 
     expect(runSuggestion).toHaveBeenCalledWith("s1");
   });
