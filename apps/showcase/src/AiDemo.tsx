@@ -295,12 +295,6 @@ const CONNECT_ACTION: Record<Locale, string> = {
   ar: "اربط خادمًا",
 };
 
-/** What the demo says about itself, in the language it is being read in. */
-const DEMO_NOTE: Record<Locale, string> = {
-  en: "These examples are scripted. Connect a backend to ask anything.",
-  ar: "هذه الأمثلة نصية مُعدّة مسبقًا. اربط خادمًا لطرح أي سؤال.",
-};
-
 /** Salaries are stored in thousands; nothing on screen shows a bare number. */
 function salaryText(value: number): string {
   const rounded = Math.round(value * 10) / 10;
@@ -1137,9 +1131,6 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               open={assistant.open}
               onOpenChange={assistant.setOpen}
               presentation="floating"
-              note={
-                connection.mode === "simulated" ? DEMO_NOTE[locale] : undefined
-              }
               approval={pendingApproval}
               onSettings={() => {
                 setSettingsOpen(true);

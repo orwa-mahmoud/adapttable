@@ -21,11 +21,16 @@ const MARGIN = 16;
  * set 900px wide is harder to read than one set 400px wide, so a bigger
  * monitor buys nothing here. Height is the opposite — more of it is more
  * transcript — so it grows with the viewport up to a limit, rather than
- * leaving 880px of empty desk under a 560px window on a tall screen.
+ * leaving 880px of empty desk under a short window on a tall screen.
+ *
+ * The numbers are the ones this kind of surface has settled on: 360–420px
+ * across, 60–70% of the viewport tall, and not past ~700px however tall the
+ * screen is. Wider reads worse and taller stops being a panel beside the
+ * table and starts being a second page.
  */
 const WIDTH = 400;
-const HEIGHT = 560;
-const TALL_HEIGHT = 760;
+const HEIGHT = 520;
+const TALL_HEIGHT = 700;
 /**
  * Below this, a floating window would leave the table unusable behind it, so
  * the modal sheet is the honest presentation. Above it there is room for
@@ -69,7 +74,7 @@ export function floatingStyle(boundary: TableAssistantBoundary): CSSProperties {
     insetBlockEnd: `calc(${String(EDGE)}px + env(safe-area-inset-bottom, 0px))`,
     insetInlineEnd: `calc(${String(EDGE)}px + env(safe-area-inset-right, 0px))`,
     inlineSize: `min(${String(WIDTH)}px, calc(100% - ${String(MARGIN * 2)}px))`,
-    blockSize: `min(max(${String(HEIGHT)}px, 62vh), ${String(TALL_HEIGHT)}px, calc(100% - ${String(EDGE + MARGIN)}px))`,
+    blockSize: `min(max(${String(HEIGHT)}px, 66vh), ${String(TALL_HEIGHT)}px, calc(100% - ${String(EDGE + MARGIN)}px))`,
     // Above sticky headers and pinned cells, below a kit's own modal layer,
     // so a menu opened from the table still lands on top of the window.
     zIndex: 30,

@@ -12,16 +12,28 @@
  * left out rather than guessed.
  */
 import type { TableLabels } from "@adapttable/core";
-import { type ReactElement, type ReactNode, useId, useState } from "react";
+import {
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   ActionsIcon,
   AssistantIcon,
+  PersonIcon,
   ReceiptIcon,
   SuggestionIcon,
   UndoIcon,
 } from "./assistantIcons";
-import type { TableAssistantSlots } from "./assistantSlots";
+import type {
+  TableAssistantAvatars,
+  TableAssistantSlots,
+} from "./assistantSlots";
 import type {
   TableAssistantMessageView,
   TableAssistantQuestionView,
@@ -43,21 +55,6 @@ import type {
 const ACCENT = "var(--adapttable-assistant-accent, currentColor)";
 
 const NEEDS_SAVE = "staged";
-
-/** Which of the kit's tones a receipt's status deserves. */
-function receiptTone(
-  status: string
-): "neutral" | "busy" | "warning" | "danger" {
-  if (status === "awaiting-approval" || status === NEEDS_SAVE) return "warning";
-  // Not everything the reader saw proposed actually ran, which is the whole
-  // reason the card is worth looking at.
-  if (status === "partial") return "warning";
-  if (status === "rejected" || status === "failed" || status === "stale") {
-    return "danger";
-  }
-  if (status === "cancelled") return "neutral";
-  return "neutral";
-}
 
 /**
  * The card's headline.
@@ -172,16 +169,22 @@ function Receipt({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: "0.5em",
+        gap: "0.6em",
         flexWrap: "wrap",
-        fontSize: "0.9em",
+        // Each action on its own card: a column of rows separated by nothing
+        // reads as one block of text, and the eye cannot find where one
+        // action ends and the next starts.
+        padding: "0.55em 0.6em",
+        borderRadius: "0.7em",
+        border: "1px solid",
+        borderColor: "color-mix(in srgb, currentColor 12%, transparent)",
       }}
     >
       <span
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "0.55em",
+          gap: "0.65em",
           // Takes the row and gives it back: the undo control keeps its own
           // width, and a long detail wraps under the name rather than pushing
           // the control off the end.
@@ -199,20 +202,36 @@ function Receipt({
             lineHeight: 1.35,
           }}
         >
-          <strong style={{ fontWeight: 600 }}>
+          <strong style={{ fontWeight: 700, fontSize: "1.05em" }}>
             {headline(receipt, labels)}
           </strong>
-          {/* What it did, under what it was: the name is what a reader scans
-              and the detail is what they stop on, so stacking them lets the
-              names line up down the column. */}
-          {detail ? (
-            <span
-              data-adapttable-part="assistant-receipt-detail-text"
-              style={{ opacity: 0.7, overflowWrap: "anywhere" }}
-            >
-              {detail}
-            </span>
-          ) : null}
+          {/* One line under the name, not three. What it did, where it
+              landed and what it became are one sentence about one action —
+              stacked, they made every row three deep and the names stopped
+              lining up down the column. */}
+          <span
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "baseline",
+              gap: "0 0.45em",
+              opacity: 0.6,
+              fontSize: "0.9em",
+              overflowWrap: "anywhere",
+            }}
+          >
+            {detail ? (
+              <span data-adapttable-part="assistant-receipt-detail-text">
+                {detail}
+              </span>
+            ) : null}
+            {where ? (
+              <span data-adapttable-part="assistant-receipt-where">
+                {where}
+              </span>
+            ) : null}
+            <ChangedValue receipt={receipt} labels={labels} />
+          </span>
         </span>
       </span>
       {/* Where it landed, what it became, and the way back — one group at the
@@ -223,21 +242,12 @@ function Receipt({
         style={{
           display: "flex",
           alignItems: "center",
+          alignSelf: "center",
           gap: "0.5em",
           marginInlineStart: "auto",
           flexShrink: 0,
-          fontSize: "0.95em",
         }}
       >
-        {where ? (
-          <span
-            data-adapttable-part="assistant-receipt-where"
-            style={{ opacity: 0.7 }}
-          >
-            {where}
-          </span>
-        ) : null}
-        <ChangedValue receipt={receipt} labels={labels} />
         {onUndo ? (
           // At the end of the row it belongs to, small and quiet: putting one
           // action back is worth offering, not worth competing with the action
@@ -261,7 +271,10 @@ function Receipt({
               "Save in the table to keep this change."
             }
             part="assistant-receipt-save-badge"
-            tone={receiptTone(receipt.status)}
+            // The only status that draws this badge is the one that needs
+            // saving, and a change the reader still has to keep is a warning
+            // whatever else is true of it.
+            tone="warning"
           />
         </span>
       ) : null}
@@ -315,6 +328,7 @@ export function AssistantMessage({
   onUndoAction,
   receipts = true,
   leads = true,
+  avatars,
 }: {
   readonly message: TableAssistantMessageView;
   readonly labels: TableLabels | undefined;
@@ -330,6 +344,8 @@ export function AssistantMessage({
   readonly receipts?: boolean;
   /** Whether this message opens a run from its speaker, and so gets the mark. */
   readonly leads?: boolean;
+  /** The host's own marks, when it has them. */
+  readonly avatars?: TableAssistantAvatars;
 }): ReactElement {
   // A receipt says what CHANGED. Reading rows, resolving one, asking what a
   // column means — none of that changed anything the reader can see, and the
@@ -344,7 +360,9 @@ export function AssistantMessage({
   // there is evidence a reader opens when they want it.
   const [openActions, setOpenActions] = useState(false);
   const perAction = onUndoAction ? { onUndoAction } : {};
+  const hasActions = receipts && shown.length > 0;
   // Said once, and used wherever a blocked undo has to explain itself.
+  const marks = avatars ? { avatars } : {};
   const undoReason =
     labels?.assistantUndoBlocked?.(undo?.blockedCode ?? "") ??
     "The table has changed since this ran.";
@@ -355,6 +373,33 @@ export function AssistantMessage({
     undo && onUndo
       ? { undoTurn: { available: undo.available, ...blockedReason, onUndo } }
       : {};
+  // The mark that opens it and the list it opens, both inside the bubble the
+  // reply is in.
+  const markRef = useRef<HTMLSpanElement | null>(null);
+  const cardRef = useRef<HTMLElement | null>(null);
+  const tailInset = useTailInset(markRef, cardRef, openActions);
+  const disclosure = actionsDisclosure({
+    receipts: shown,
+    labels,
+    slots,
+    open: openActions,
+    onToggle: () => {
+      setOpenActions(!openActions);
+    },
+    ...turnUndo,
+    ...perAction,
+    cardRef,
+    tailInset,
+  });
+  const openable = hasActions
+    ? {
+        trailing: (
+          <span ref={markRef} style={{ display: "flex" }}>
+            {disclosure.trigger}
+          </span>
+        ),
+      }
+    : {};
   const mine = message.role === "user";
   const speaker = mine
     ? (labels?.assistantYou ?? "You")
@@ -390,25 +435,24 @@ export function AssistantMessage({
         message={message}
         mine={mine}
         leads={leads}
-        {...(receipts && shown.length > 0
-          ? {
-              trailing: (
-                <ActionsToggle
-                  count={shown.length}
-                  labels={labels}
-                  slots={slots}
-                  open={openActions}
-                  onToggle={() => {
-                    setOpenActions(!openActions);
-                  }}
-                />
-              ),
-            }
-          : {})}
+        {...marks}
+        {...openable}
       />
+      {hasActions ? disclosure.below : null}
 
+      {/* An offer, not a reply: it sits clear of the bubble above it and
+          centred across the panel, so it reads as a way forward rather than
+          as something the assistant said. */}
       {action ? (
-        <span data-adapttable-part="assistant-message-action">
+        <span
+          data-adapttable-part="assistant-message-action"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignSelf: "stretch",
+            marginBlockStart: "0.75em",
+          }}
+        >
           <slots.Button
             label={action.label}
             part="assistant-message-action-button"
@@ -424,16 +468,6 @@ export function AssistantMessage({
           available={undo.available}
           reason={undoReason}
           onUndo={() => onUndo?.()}
-        />
-      ) : null}
-      {receipts && shown.length > 0 ? (
-        <Actions
-          receipts={shown}
-          labels={labels}
-          slots={slots}
-          open={openActions}
-          {...turnUndo}
-          {...perAction}
         />
       ) : null}
     </li>
@@ -500,6 +534,8 @@ export function AssistantEmpty({
   more,
   onRun,
   note,
+  greeting,
+  avatars,
 }: {
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
@@ -508,34 +544,45 @@ export function AssistantEmpty({
   readonly onRun: (id: string) => void;
   /** What this conversation is talking to, when the host wants it said. */
   readonly note?: string;
-}): ReactElement {
+  /**
+   * The assistant's opening line. Empty means the panel opens silent.
+   */
+  readonly greeting?: string;
+  /** The host's own marks, when it has them. */
+  readonly avatars?: TableAssistantAvatars;
+}): ReactElement | null {
+  const said =
+    greeting ?? labels?.assistantEmpty ?? "What would you like to do?";
+  const cards = !slots.Menu && suggestions.length > 0;
+  const greeter =
+    avatars?.assistant === undefined ? {} : { avatar: avatars.assistant };
+  // A host that wants a silent panel gets one: no mark, no heading, no
+  // placeholder furniture standing in for a message nobody wrote.
+  if (!said.trim() && !note && !cards) return null;
   return (
     <div
       data-adapttable-part="assistant-empty"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.6em",
-        paddingBlock: "0.75em",
-      }}
+      style={{ display: "flex", flexDirection: "column", gap: "0.5em" }}
     >
-      <span
-        aria-hidden="true"
-        data-adapttable-part="assistant-empty-mark"
-        style={{ fontSize: "1.75em", opacity: 0.55, display: "flex" }}
-      >
-        <AssistantIcon />
-      </span>
-      <h2
-        data-adapttable-part="assistant-empty-prompt"
-        style={{ margin: 0, fontSize: "1.05em", textWrap: "balance" }}
-      >
-        {labels?.assistantEmpty ?? "What would you like to do?"}
-      </h2>
+      {/* The assistant speaking first, in the same bubble its replies get.
+          A heading and a paragraph on the panel's own ground read as a screen
+          that has not loaded yet; one line from the assistant reads as a
+          conversation that has started. */}
+      {said.trim() ? (
+        <Said part="assistant-empty-prompt" as="h2" {...greeter}>
+          {said}
+        </Said>
+      ) : null}
       {note ? (
         <p
           data-adapttable-part="assistant-empty-note"
-          style={{ margin: 0, opacity: 0.8 }}
+          style={{
+            margin: 0,
+            marginInlineStart: "2.05em",
+            opacity: 0.7,
+            fontSize: "0.9em",
+            maxInlineSize: "26em",
+          }}
         >
           {note}
         </p>
@@ -544,7 +591,7 @@ export function AssistantEmpty({
           frame — one place to look for them rather than cards here and a menu
           a message later. Without that slot they are cards, because a reader
           who does not know what to type needs to be shown something. */}
-      {slots.Menu ? null : (
+      {cards ? (
         <AssistantSuggestions
           slots={slots}
           labels={labels}
@@ -553,110 +600,291 @@ export function AssistantEmpty({
           onRun={onRun}
           part="assistant-suggestions"
         />
-      )}
+      ) : null}
     </div>
   );
 }
 
 /**
- * What was said, and who said it.
+ * One thing said, by whoever said it.
  *
- * The reader's own words sit in a bubble on their side; the assistant's are
- * the reply, and carry the weight of one — they are the answer to what was
- * asked, not a caption over the cards beneath them.
+ * Every bubble in the panel comes through here — a reply, the opening line,
+ * a question the backend asked. They were three copies of the same markup,
+ * and the copies drifted: one grew an absolutely-placed mark that sat under
+ * its own bubble and overlapped the message above it. The tag varies because
+ * a heading and a question name their region; the shape never does.
  */
+function Said({
+  mine = false,
+  leads = true,
+  avatar,
+  part,
+  id,
+  as: Tag = "span",
+  trailing,
+  streaming,
+  children,
+}: {
+  readonly mine?: boolean;
+  readonly leads?: boolean;
+  readonly avatar?: ReactNode;
+  readonly part: string;
+  readonly id?: string;
+  readonly as?: "span" | "h2";
+  readonly trailing?: ReactNode;
+  readonly streaming?: boolean;
+  readonly children: ReactNode;
+}): ReactElement {
+  return (
+    <span
+      style={{
+        display: "flex",
+        // Wider than the tail that sits in it: the tail hangs outside its
+        // bubble, and a gap narrower than the tail draws it over the mark.
+        gap: "0.7em",
+        // The mark sits at the foot of the bubble, where the tail points at
+        // it. Level with the first line it reads as a bullet beside a
+        // paragraph; level with the tail it reads as who said it.
+        alignItems: "flex-end",
+        maxWidth: "88%",
+        alignSelf: mine ? "flex-end" : "flex-start",
+        flexDirection: mine ? "row-reverse" : "row",
+      }}
+    >
+      <SpeakerMark
+        mine={mine}
+        hidden={!leads}
+        {...(avatar === undefined ? {} : { avatar })}
+      />
+      {/* Backend text is untrusted: rendered as text, never as markup. */}
+      <Tag
+        data-adapttable-part={part}
+        data-mine={mine ? "true" : "false"}
+        {...(id ? { id } : {})}
+        {...(streaming ? { "data-streaming": "true" } : {})}
+        style={{
+          margin: 0,
+          padding: "0.6em 0.8em",
+          overflowWrap: "anywhere",
+          whiteSpace: "pre-wrap",
+          display: "flex",
+          alignItems: "flex-end",
+          gap: "0.4em",
+          minWidth: 0,
+          position: "relative",
+          fontWeight: 400,
+          // Both sides get a surface. The reply used to be bare text on the
+          // panel's own ground, which made the one thing the reader asked for
+          // the only thing that did not look like a message.
+          ...(mine
+            ? {
+                background: "color-mix(in srgb, currentColor 10%, transparent)",
+                borderRadius: "1.1em 1.1em 0.35em 1.1em",
+              }
+            : {
+                background: `color-mix(in srgb, ${ACCENT} 14%, transparent)`,
+                borderRadius: "1.1em 1.1em 1.1em 0.35em",
+                fontSize: "1.05em",
+                lineHeight: 1.5,
+              }),
+        }}
+      >
+        <span style={{ minWidth: 0 }}>{children}</span>
+        {/* The control that opens what this reply did, on the reply's own
+            corner. On the panel's margin a reader could not tell which reply
+            it would open. */}
+        {trailing ? (
+          <span
+            data-adapttable-part="assistant-message-trailing"
+            style={{
+              display: "flex",
+              alignSelf: "flex-end",
+              flexShrink: 0,
+              marginInlineEnd: "-0.35em",
+              marginBlockEnd: "-0.25em",
+            }}
+          >
+            {trailing}
+          </span>
+        ) : null}
+      </Tag>
+    </span>
+  );
+}
+
+/**
+ * Who is speaking, drawn beside what they said.
+ *
+ * The host's own avatar when it has one — a photograph, initials, anything it
+ * renders — and a glyph otherwise. The ground and the size belong to the
+ * panel either way, so a kit's accent carries an image the host knows nothing
+ * about and every mark down the transcript is the same size.
+ */
+function SpeakerMark({
+  mine,
+  avatar,
+  hidden,
+  part,
+}: {
+  readonly mine: boolean;
+  readonly avatar?: ReactNode;
+  /** Kept in place but unseen, inside a run from one speaker. */
+  readonly hidden: boolean;
+  /** Overrides the part name, where the surface publishes its own. */
+  readonly part?: string;
+}): ReactElement {
+  return (
+    <span
+      aria-hidden="true"
+      data-adapttable-part={
+        part ?? (mine ? "assistant-user-mark" : "assistant-message-mark")
+      }
+      data-hidden={hidden ? "true" : undefined}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        inlineSize: "1.75em",
+        blockSize: "1.75em",
+        flexShrink: 0,
+        borderRadius: "50%",
+        // A host's image fills the circle rather than sitting in it, and
+        // nothing it brings can spill past the edge.
+        overflow: "hidden",
+        background: mine
+          ? "color-mix(in srgb, currentColor 10%, transparent)"
+          : `color-mix(in srgb, ${ACCENT} 16%, transparent)`,
+        color: mine
+          ? "currentColor"
+          : `color-mix(in srgb, ${ACCENT} 85%, currentColor)`,
+        // Kept in place, not removed: the bubbles in a run stay on one line
+        // as the mark stops repeating down it.
+        opacity: hidden ? 0 : 1,
+      }}
+    >
+      {avatar ?? (mine ? <PersonIcon /> : <AssistantIcon />)}
+    </span>
+  );
+}
+
+/** One exchange's words, in the bubble its speaker gets. */
 function Spoken({
   message,
   mine,
   leads,
   trailing,
+  avatars,
 }: {
   readonly message: TableAssistantMessageView;
   readonly mine: boolean;
   readonly leads: boolean;
   /** Hung on the bubble's own bottom corner. */
   readonly trailing?: ReactNode;
+  /** The host's own marks, when it has them. */
+  readonly avatars?: TableAssistantAvatars;
 }): ReactElement {
+  const chosen = mine ? avatars?.user : avatars?.assistant;
   return (
-    <span
-      style={{
-        display: "flex",
-        gap: "0.5em",
-        alignItems: "flex-start",
-        maxWidth: "88%",
-        flexDirection: mine ? "row-reverse" : "row",
-      }}
+    <Said
+      mine={mine}
+      leads={leads}
+      part="assistant-message-text"
+      {...(chosen === undefined ? {} : { avatar: chosen })}
+      {...(trailing ? { trailing } : {})}
+      {...(message.partialText === undefined ? {} : { streaming: true })}
     >
-      {mine ? null : (
-        <span
-          aria-hidden="true"
-          data-adapttable-part="assistant-message-mark"
-          data-hidden={leads ? undefined : "true"}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            inlineSize: "1.55em",
-            blockSize: "1.55em",
-            flexShrink: 0,
-            borderRadius: "50%",
-            background: `color-mix(in srgb, ${ACCENT} 16%, transparent)`,
-            color: `color-mix(in srgb, ${ACCENT} 85%, currentColor)`,
-            // Kept in place, not removed: the bubbles in a run stay on one
-            // line as the mark stops repeating down it.
-            opacity: leads ? 1 : 0,
-          }}
-        >
-          <AssistantIcon />
-        </span>
-      )}
-      {/* Backend text is untrusted: rendered as text, never as markup.
-        While a reply is still arriving, what has landed is shown in its
-        place — marked as provisional, because words are not a receipt. */}
-      <span
-        data-adapttable-part="assistant-message-text"
-        data-streaming={message.partialText === undefined ? undefined : "true"}
-        style={{
-          padding: "0.6em 0.8em",
-          borderRadius: "0.85em",
-          overflowWrap: "anywhere",
-          whiteSpace: "pre-wrap",
-          // Both sides get a surface. The reply used to be bare text on the
-          // panel's own ground, which made the one thing the reader asked for
-          // the only thing that did not look like a message.
-          ...(mine
-            ? { background: "color-mix(in srgb, currentColor 8%, transparent)" }
-            : {
-                background:
-                  "color-mix(in srgb, currentColor 3.5%, transparent)",
-                border: "1px solid currentColor",
-                borderColor:
-                  "color-mix(in srgb, currentColor 14%, transparent)",
-                fontSize: "1.05em",
-                lineHeight: 1.5,
-              }),
-        }}
-      >
-        {message.partialText ?? message.text}
-      </span>
-      {/* On the bubble's own corner, not under it: what a reply did belongs
-          to that reply, and a control on the panel's own margin belongs to
-          whatever the reader last looked at. */}
-      {trailing ? (
-        <span
-          style={{
-            alignSelf: "flex-end",
-            display: "flex",
-            marginInlineStart: "-0.9em",
-            marginBlockEnd: "-0.45em",
-            flexShrink: 0,
-          }}
-        >
-          {trailing}
-        </span>
-      ) : null}
-    </span>
+      {/* While a reply is still arriving, what has landed is shown in its
+          place — marked as provisional, because words are not a receipt. */}
+      {message.partialText ?? message.text}
+    </Said>
   );
+}
+
+/**
+ * Where to draw the card's tail, so it points at the mark that opened it.
+ *
+ * The mark rides the bubble's trailing corner, and that corner moves with
+ * every reply's length — a fixed inset points at the right place for one
+ * message and past the edge for the next. Measured after layout, and only
+ * while the card is open, because a closed card has nothing to point with.
+ */
+function useTailInset(
+  mark: RefObject<HTMLElement | null>,
+  card: RefObject<HTMLElement | null>,
+  open: boolean
+): number | undefined {
+  const [inset, setInset] = useState<number | undefined>(undefined);
+  useLayoutEffect(() => {
+    if (!open) return;
+    const from = mark.current;
+    const to = card.current;
+    if (!from || !to) return;
+    const a = from.getBoundingClientRect();
+    const b = to.getBoundingClientRect();
+    // From the card's trailing edge, which is the edge the tail is offset
+    // from — and the writing direction decides which edge that is.
+    const rtl = getComputedStyle(to).direction === "rtl";
+    const centre = a.left + a.width / 2;
+    setInset(rtl ? centre - b.left : b.right - centre);
+  }, [mark, card, open]);
+  return inset;
+}
+
+/**
+ * How a turn's evidence is offered: a mark, and where the list lands.
+ *
+ * A kit with a popover gets its own surface — its placement, its dismiss, its
+ * focus. A kit without one keeps the list under the reply, because core draws
+ * no surface of its own.
+ */
+function actionsDisclosure({
+  receipts,
+  labels,
+  slots,
+  open,
+  onToggle,
+  onUndoAction,
+  undoTurn,
+  cardRef,
+  tailInset,
+}: {
+  readonly receipts: readonly TableAssistantReceiptView[];
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  readonly open: boolean;
+  readonly onToggle: () => void;
+  readonly onUndoAction?: (idempotencyKey: string) => void;
+  readonly undoTurn?: {
+    readonly available: boolean;
+    readonly reason?: string;
+    readonly onUndo: () => void;
+  };
+  readonly cardRef: RefObject<HTMLElement | null>;
+  readonly tailInset: number | undefined;
+}): { readonly trigger: ReactNode; readonly below: ReactNode } {
+  const list = (
+    <Receipts
+      receipts={receipts}
+      labels={labels}
+      slots={slots}
+      cardRef={cardRef}
+      tailInset={tailInset}
+      {...(undoTurn ? { undoTurn } : {})}
+      {...(onUndoAction ? { onUndoAction } : {})}
+    />
+  );
+  return {
+    trigger: (
+      <ActionsToggle
+        count={receipts.length}
+        labels={labels}
+        slots={slots}
+        open={open}
+        onToggle={onToggle}
+      />
+    ),
+    below: open ? list : null,
+  };
 }
 
 /**
@@ -708,43 +936,6 @@ function LoneUndo({
  * Evidence is worth having to hand rather than in the way: the reply leads,
  * and one control under it opens the actions and closes them again.
  */
-function Actions({
-  receipts,
-  labels,
-  slots,
-  open,
-  onUndoAction,
-  undoTurn,
-}: {
-  readonly receipts: readonly TableAssistantReceiptView[];
-  readonly labels: TableLabels | undefined;
-  readonly slots: TableAssistantSlots;
-  readonly open: boolean;
-  readonly onUndoAction?: (idempotencyKey: string) => void;
-  /** Put the whole turn back. Absent when the turn cannot be. */
-  readonly undoTurn?: {
-    readonly available: boolean;
-    readonly reason?: string;
-    readonly onUndo: () => void;
-  };
-}): ReactElement {
-  const undo = onUndoAction ? { onUndoAction } : {};
-  const whole = undoTurn ? { undoTurn } : {};
-  return (
-    <>
-      {open ? (
-        <Receipts
-          receipts={receipts}
-          labels={labels}
-          slots={slots}
-          {...whole}
-          {...undo}
-        />
-      ) : null}
-    </>
-  );
-}
-
 /**
  * The mark that opens what a reply did.
  *
@@ -794,11 +985,16 @@ function Receipts({
   slots,
   onUndoAction,
   undoTurn,
+  cardRef,
+  tailInset,
 }: {
   readonly receipts: readonly TableAssistantReceiptView[];
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly onUndoAction?: (idempotencyKey: string) => void;
+  readonly cardRef?: RefObject<HTMLElement | null>;
+  /** Distance from the card's trailing edge to the mark's centre, in px. */
+  readonly tailInset?: number;
   readonly undoTurn?: {
     readonly available: boolean;
     readonly reason?: string;
@@ -823,24 +1019,53 @@ function Receipts({
       : {};
   return (
     <section
+      ref={cardRef}
       data-adapttable-part="assistant-receipts-group"
       aria-labelledby={headingId}
       style={{
-        // Its own ground and its own indent, so the eye can see where the
-        // reply ends and what it did begins without reading either.
-        marginInlineStart: "1.85em",
-        marginBlockStart: "0.1em",
-        padding: "0.5em 0.6em",
-        borderRadius: "0.75em",
-        border: "1px solid",
-        borderColor: `color-mix(in srgb, ${ACCENT} 22%, transparent)`,
-        background: `color-mix(in srgb, ${ACCENT} 5%, transparent)`,
+        // The panel's own width. A card at half of it wastes the room the
+        // panel was sized to give it.
         alignSelf: "stretch",
+        position: "relative",
         display: "flex",
         flexDirection: "column",
         gap: "0.3em",
+        fontSize: "0.92em",
+        minInlineSize: 0,
+        marginBlockStart: "0.55em",
+        padding: "0.6em 0.7em",
+        borderRadius: "0.85em",
+        border: "1px solid",
+        borderColor: `color-mix(in srgb, ${ACCENT} 22%, transparent)`,
+        background: `color-mix(in srgb, ${ACCENT} 5%, transparent)`,
       }}
     >
+      {/* Pointing up at the mark that opened it. Without it the card is a
+          second thing on the panel and nothing says which reply it is
+          evidence for. */}
+      <span
+        aria-hidden="true"
+        data-adapttable-part="assistant-receipts-tail"
+        style={{
+          position: "absolute",
+          insetBlockStart: "-0.42em",
+          // Under the mark, whose place moves with the length of the reply
+          // it rides. Until it has been measured the tail waits rather than
+          // pointing somewhere it was guessed to be.
+          insetInlineEnd:
+            tailInset === undefined
+              ? "1.15em"
+              : `calc(${String(tailInset)}px - 0.4em)`,
+          visibility: tailInset === undefined ? "hidden" : "visible",
+          inlineSize: "0.8em",
+          blockSize: "0.42em",
+          background: "inherit",
+          borderInlineStart: "1px solid",
+          borderBlockStart: "1px solid",
+          borderColor: "inherit",
+          clipPath: "polygon(50% 0, 100% 100%, 0 100%)",
+        }}
+      />
       {/* Two scopes, said once each: the heading undoes the turn, a row
           undoes itself. Without the heading they were the same word twice
           with nothing to say which was which. */}
@@ -975,6 +1200,42 @@ export function AssistantWorking({
  * Held still where motion is unwelcome, rather than turned off entirely: the
  * dots keep their place in the row so the layout does not move either way.
  */
+/**
+ * What makes a bubble a bubble: a tail.
+ *
+ * Rounded corners alone read as a rounded box, which is what a reader sees
+ * when nothing points from the words back to whoever said them. The tail has
+ * to be a pseudo-element — there is no element to hang it on — so it lives
+ * here rather than inline with the rest of the bubble.
+ *
+ * It inherits the bubble's own ground, so a kit's accent carries it without
+ * naming a second colour, and it flips with the writing direction because it
+ * is anchored to the inline start and end rather than to left and right.
+ *
+ * One rule, keyed on which side spoke, because there is one bubble component
+ * — a reply, the opening line and a question all come through it.
+ *
+ * @internal
+ */
+export const BUBBLE_CSS = `
+[data-mine]::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inline-size: 0.36em;
+  block-size: 0.5em;
+  background: inherit;
+}
+[data-mine="false"]::after {
+  inset-inline-start: -0.34em;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+[data-mine="true"]::after {
+  inset-inline-end: -0.34em;
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+`;
+
 const WORKING_KEYFRAMES = `
 @keyframes adapttable-assistant-dot {
   0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
@@ -988,22 +1249,22 @@ const WORKING_KEYFRAMES = `
 /**
  * A question the backend asked, drawn where the reader is already looking.
  *
- * Choices are chips rather than a column of submit buttons, and a free-text
- * answer is offered only when the backend said it would accept one — an input
- * beside a closed set is an invitation to type something that will be refused.
+ * It is a message, not a form: the assistant's own mark, its own bubble, and
+ * the panel's one composer to answer in. Choices are chips beside it — a
+ * shortcut for the few answers worth one press, never the only way through.
+ * A reader who would rather say something else just says it, which is what
+ * keeps this a conversation instead of a menu.
  */
 export function AssistantQuestion({
   question,
-  labels,
   slots,
   onAnswer,
 }: {
   readonly question: TableAssistantQuestionView;
-  readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly onAnswer: (answer: { optionId?: string; text?: string }) => void;
 }): ReactElement {
-  const [typed, setTyped] = useState("");
+  const askedId = useId();
   const Suggestion = slots.Suggestion;
   const options = question.options ?? [];
   return (
@@ -1013,6 +1274,7 @@ export function AssistantQuestion({
     // margin are cleared so the panel looks exactly as it did.
     <fieldset
       data-adapttable-part="assistant-question"
+      aria-labelledby={askedId}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -1020,37 +1282,17 @@ export function AssistantQuestion({
         gap: "0.45em",
         border: 0,
         margin: 0,
-        // Indented to the same line a reply starts on, so the assistant's
-        // question sits where its answers do rather than spanning the panel.
-        padding: "0 0 0 1.85em",
+        padding: 0,
         minInlineSize: 0,
       }}
     >
-      {/* The assistant asked this, so it looks like the assistant said it —
-          the same surface its replies get. A question rendered as bare text
-          beside bubbled replies reads as a caption on the controls under it
-          rather than as the thing being asked. */}
-      <legend
-        data-adapttable-part="assistant-question-text"
-        style={{
-          padding: "0.6em 0.8em",
-          borderRadius: "0.85em",
-          background: "color-mix(in srgb, currentColor 3.5%, transparent)",
-          border: "1px solid currentColor",
-          borderColor: "color-mix(in srgb, currentColor 14%, transparent)",
-          fontSize: "1.05em",
-          lineHeight: 1.5,
-          // The same measure a reply gets. A legend is out of flow by
-          // default, which is what let this span the whole panel.
-          float: "none",
-          display: "block",
-          inlineSize: "auto",
-          maxInlineSize: "min(100%, 30em)",
-          marginBlockEnd: "0.1em",
-        }}
-      >
+      {/* The assistant asked this, so it is drawn exactly as the assistant
+          speaking — the same component every other bubble goes through. The
+          fieldset is named by it rather than wrapping it in a legend, which
+          is what forced a second, hand-placed copy of this markup. */}
+      <Said part="assistant-question-text" id={askedId}>
         {question.question}
-      </legend>
+      </Said>
       {options.length > 0 ? (
         <div
           data-adapttable-part="assistant-question-options"
@@ -1059,6 +1301,8 @@ export function AssistantQuestion({
             flexWrap: "wrap",
             alignItems: "flex-start",
             gap: "0.35em",
+            // To the line the bubble starts on, past the mark.
+            marginInlineStart: "2.45em",
           }}
         >
           {options.map((option) => (
@@ -1071,53 +1315,6 @@ export function AssistantQuestion({
               }}
             />
           ))}
-        </div>
-      ) : null}
-      {question.allowFreeText ? (
-        <div
-          style={{
-            display: "flex",
-            gap: "0.35em",
-            alignItems: "flex-end",
-            alignSelf: "stretch",
-            minWidth: 0,
-          }}
-        >
-          <span style={{ flex: "1 1 auto", minWidth: 0, display: "flex" }}>
-            <slots.Composer
-              label={labels?.assistantAnswerLabel ?? "Your answer"}
-              placeholder={
-                labels?.assistantAnswerPlaceholder ?? "Type an answer"
-              }
-              part="assistant-question-input"
-              value={typed}
-              onChange={setTyped}
-              onKeyDown={(event) => {
-                // The same rule as the composer: Enter answers, Shift+Enter is a
-                // newline, and an IME composition is left alone.
-                if (event.key !== "Enter" || event.shiftKey) return;
-                if (
-                  (event.nativeEvent as { isComposing?: boolean }).isComposing
-                ) {
-                  return;
-                }
-                event.preventDefault();
-                if (!typed.trim()) return;
-                onAnswer({ text: typed.trim() });
-                setTyped("");
-              }}
-            />
-          </span>
-          <slots.Button
-            label={labels?.assistantAnswerSend ?? "Answer"}
-            part="assistant-question-send"
-            variant="primary"
-            disabled={!typed.trim()}
-            onClick={() => {
-              onAnswer({ text: typed.trim() });
-              setTyped("");
-            }}
-          />
         </div>
       ) : null}
     </fieldset>

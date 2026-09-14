@@ -55,12 +55,12 @@ describe("floatingStyle", () => {
   });
 
   it("takes some of a tall screen instead of leaving it empty", () => {
-    // 560px is the floor, not the size: a conversation on a 1440px-tall
+    // 520px is the floor, not the size: a conversation on a 1440px-tall
     // screen has room for more transcript, and the cap stops it becoming a
     // full-height wall.
     const block = String(floatingStyle("viewport").blockSize);
-    expect(block).toContain("max(560px, 62vh)");
-    expect(block).toContain("760px");
+    expect(block).toContain("max(520px, 66vh)");
+    expect(block).toContain("700px");
   });
 
   it("keeps the width fixed, because a wider conversation reads worse", () => {

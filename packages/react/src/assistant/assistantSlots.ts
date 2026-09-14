@@ -9,6 +9,22 @@
  */
 import type { ReactNode } from "react";
 
+/**
+ * The marks beside what each speaker said.
+ *
+ * Anything a kit can render — an `<img>`, initials, a kit's own Avatar. The
+ * panel draws the circle, the size and the ground, so a host supplies the
+ * face and nothing else. Omit either and that speaker keeps its glyph.
+ *
+ * @public
+ */
+export interface TableAssistantAvatars {
+  /** Beside the assistant's replies. */
+  readonly assistant?: ReactNode;
+  /** Beside what the reader said. */
+  readonly user?: ReactNode;
+}
+
 /** A kit button. @public */
 export interface TableAssistantButtonProps {
   /** Accessible name. Also the visible text unless `children` is given. */

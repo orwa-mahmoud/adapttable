@@ -12098,7 +12098,9 @@ a container of your own. `TableAssistantSlots` collects
 `TableAssistantButtonProps`, `TableAssistantComposerProps` and
 `TableAssistantBadgeProps`, plus `TableAssistantMenuProps` and
 `TableAssistantMenuItem` — the examples menu in the composer, which each kit
-draws with its own menu primitive. The view types are `TableAssistantView`,
+draws with its own menu primitive. `TableAssistantAvatars` sets the mark
+beside each speaker — pass an image, initials or a kit's own Avatar for
+`assistant`, `user` or both; either side left out keeps the built-in glyph. The view types are `TableAssistantView`,
 `TableAssistantMessageView`, `TableAssistantReceiptView` with
 `TableAssistantReceiptSubject` — what an action changed, supplied by whoever
 ran it — and `TableAssistantSuggestionView`, plus `assistantIsBusy` and

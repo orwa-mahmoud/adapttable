@@ -31,6 +31,24 @@ export function AssistantIcon(): ReactElement {
   );
 }
 
+/**
+ * The reader's own mark, for a host that has not supplied one.
+ *
+ * A shape rather than a photograph or initials: the panel does not know who
+ * is reading, and inventing a face or a letter for them would be a guess
+ * printed beside everything they say.
+ *
+ * @internal
+ */
+export function PersonIcon(): ReactElement {
+  return (
+    <svg {...BASE}>
+      <circle cx="12" cy="8" r="3.6" />
+      <path d="M4.8 20a7.2 7.2 0 0 1 14.4 0" />
+    </svg>
+  );
+}
+
 /** Settings. @internal */
 export function SettingsIcon(): ReactElement {
   return (
@@ -200,6 +218,33 @@ export function ActionsIcon(): ReactElement {
 }
 
 /**
+ * A hue per kind, so a list of actions is told apart before it is read.
+ *
+ * One accent for every tile makes a column of identically coloured squares,
+ * which carries no more than no colour at all. These are angles rather than
+ * colours: lightness and chroma are fixed below, so every tile is the same
+ * weight on the page and the same contrast in light and in dark.
+ */
+const KIND_HUE: Record<string, number> = {
+  filter: 295,
+  sort: 150,
+  search: 230,
+  group: 45,
+  page: 250,
+  aggregate: 330,
+  select: 195,
+  pin: 20,
+  pinRow: 20,
+  read: 215,
+  export: 175,
+  edit: 270,
+  add: 140,
+  delete: 25,
+  reorder: 95,
+  operation: 260,
+};
+
+/**
  * The glyph for one action, on a tile of its own.
  *
  * The tile is what makes a column of actions scannable: same size, same
@@ -217,7 +262,10 @@ export function ReceiptIcon({
 }: {
   readonly kind?: string;
 }): ReactElement {
-  const accent = "var(--adapttable-assistant-accent, currentColor)";
+  const hue = (kind ? KIND_HUE[kind] : undefined) ?? KIND_HUE.operation;
+  // Mid lightness and moderate chroma: legible on a white card and on a dark
+  // one, without a second colour per theme.
+  const ink = `oklch(0.58 0.17 ${String(hue)})`;
   return (
     <span
       aria-hidden="true"
@@ -227,20 +275,20 @@ export function ReceiptIcon({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        inlineSize: "1.8em",
-        blockSize: "1.8em",
+        inlineSize: "2.3em",
+        blockSize: "2.3em",
         flexShrink: 0,
         // Squircle rather than circle: a circle beside the round speaker mark
         // reads as a second speaker, and these are things the turn did.
-        borderRadius: "0.55em",
-        background: `color-mix(in srgb, ${accent} 12%, transparent)`,
-        color: `color-mix(in srgb, ${accent} 85%, currentColor)`,
+        borderRadius: "0.7em",
+        background: `color-mix(in oklab, ${ink} 16%, transparent)`,
+        color: ink,
         fontSize: "0.95em",
       }}
     >
       {/* An unknown kind still gets its tile, so the column does not break
           where a host capability sits. */}
-      <svg {...BASE} width="1.05em" height="1.05em">
+      <svg {...BASE} width="1.3em" height="1.3em">
         <path
           d={(kind ? KIND_PATHS[kind] : undefined) ?? KIND_PATHS.operation}
         />

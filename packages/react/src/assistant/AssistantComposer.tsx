@@ -43,6 +43,13 @@ export interface AssistantComposerProps {
     readonly items: readonly TableAssistantMenuItem[];
     readonly onSelect: (id: string) => void;
   };
+  /**
+   * What the empty box invites, when it is not the usual question.
+   *
+   * A question the assistant asked is answered here, in the one box the
+   * panel has — not in a second box drawn beside it.
+   */
+  readonly placeholder?: string;
 }
 
 /** The sticky bottom composer. @internal */
@@ -57,6 +64,7 @@ export function AssistantComposer({
   onStop,
   speech,
   examples,
+  placeholder,
 }: AssistantComposerProps): ReactElement {
   // A parked approval is still a turn: the host says so with `busy`, and
   // without it the status is the only signal there is.
@@ -127,7 +135,11 @@ export function AssistantComposer({
       <span style={{ flex: "1 1 auto", minWidth: 0, display: "flex" }}>
         <Composer
           label={labels?.assistantPlaceholder ?? "Ask about this table…"}
-          placeholder={labels?.assistantPlaceholder ?? "Ask about this table…"}
+          placeholder={
+            placeholder ??
+            labels?.assistantPlaceholder ??
+            "Ask about this table…"
+          }
           part="assistant-input"
           value={draft}
           disabled={!usable}

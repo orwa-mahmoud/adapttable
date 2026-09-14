@@ -1080,6 +1080,7 @@ export type { QueryAggregate } from "@adapttable/core";
  * from the entry that returns it.
  */
 export type {
+  TableAssistantAvatars,
   TableAssistantBadgeProps,
   TableAssistantButtonProps,
   TableAssistantComposerProps,

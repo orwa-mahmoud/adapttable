@@ -360,6 +360,21 @@ describe("what a receipt card offers", () => {
     expect(undoTurn).toHaveBeenCalledTimes(1);
   });
 
+  it("points its tail at the mark that opened it", () => {
+    // The mark rides the bubble's trailing corner, and that corner moves with
+    // every reply's length. The tail is measured against it rather than set
+    // to a guess, and it stays hidden until it has something to point at.
+    mount({ assistant: view(twoActions) });
+    showActions();
+
+    const tail = part("assistant-receipts-tail")!;
+    expect(tail).toBeTruthy();
+    // jsdom measures every box as zero, so the inset resolves rather than
+    // staying unset — what this pins is that the measurement ran at all.
+    expect(tail.style.visibility).toBe("visible");
+    expect(tail.style.insetInlineEnd).toContain("px");
+  });
+
   it("gives every action its own glyph, tiled so the list can be scanned", () => {
     // A row reading "Filter applied · Team is Platform" is a sentence to
     // parse; a funnel beside it is recognised before it is read.
@@ -639,12 +654,68 @@ describe("the empty state", () => {
     expect(part("assistant-examples-menu")).toBeTruthy();
   });
 
+  it("opens with the host's own greeting when it has one", () => {
+    // The first thing anyone reads. A table that knows what it is for says
+    // so better than a built-in question can.
+    mount({
+      greeting: "Ask me about this quarter's pipeline.",
+      assistant: view({ suggestions: [{ id: "a", title: "Group by city" }] }),
+    });
+
+    expect(part("assistant-empty-prompt")).toHaveTextContent(
+      "Ask me about this quarter's pipeline."
+    );
+  });
+
+  it("opens silent when the host asks for silence", () => {
+    // An empty greeting is a host saying "say nothing" — not a host that
+    // forgot to set one. Nothing stands in for the message nobody wrote.
+    mount({ greeting: "", assistant: view() });
+
+    expect(part("assistant-empty-prompt")).toBeNull();
+    expect(part("assistant-empty-mark")).toBeNull();
+    expect(part("assistant-empty")).toBeNull();
+  });
+
+  it("still says what the host told it to, with no greeting", () => {
+    // Silence is about the assistant's own opening line. A note the host
+    // wrote is the host talking, and it still gets said.
+    mount({
+      greeting: "",
+      note: "Scripted until you connect.",
+      assistant: view(),
+    });
+
+    expect(part("assistant-empty-prompt")).toBeNull();
+    expect(part("assistant-empty-note")).toHaveTextContent(
+      "Scripted until you connect."
+    );
+  });
+
   it("offers what this table can run as cards, for a kit with no menu", () => {
     mountWithoutMenu({
       assistant: view({ suggestions: [{ id: "a", title: "Group by city" }] }),
     });
 
     expect(part("assistant-suggestion")).toHaveTextContent("Group by city");
+  });
+
+  it("draws a glyph for a kind it knows and nothing for one it does not", () => {
+    // A host may label a shortcut with a kind of its own. An invented glyph
+    // would say something about it that nobody meant, so it gets none — and
+    // the card reads fine without one.
+    mountWithoutMenu({
+      assistant: view({
+        suggestions: [
+          { id: "a", title: "Group by city", kind: "group" },
+          { id: "b", title: "Run the weekly export", kind: "house-special" },
+        ],
+      }),
+    });
+
+    const cards = parts("assistant-suggestion");
+    expect(cards[0]?.querySelector("svg")).toBeTruthy();
+    expect(cards[1]?.querySelector("svg")).toBeNull();
   });
 
   it("runs the suggestion by its id", () => {
@@ -1477,41 +1548,53 @@ describe("a question the backend asked", () => {
     expect(part("assistant-question-input")).toBeNull();
   });
 
-  it("takes a typed answer when the backend said it would", () => {
+  it("answers from the composer, whatever the backend said it would take", () => {
+    // The panel has one box and it is at the bottom, where a reader types.
+    // A second box drawn beside the question is a form; this is a
+    // conversation, and the closed set the backend declared does not stop
+    // someone saying what they actually want.
     const answer = vi.fn();
+    const setDraft = vi.fn();
     mount({
       assistant: view({
-        pendingQuestion: {
-          ...question,
-          options: undefined,
-          allowFreeText: true,
-        },
+        pendingQuestion: { ...question, allowFreeText: false },
+        draft: "  neither — show me Platform  ",
+        setDraft,
         answer,
       }),
     });
 
-    const input = part("assistant-question-input") as HTMLTextAreaElement;
-    fireEvent.change(input, { target: { value: "  Q4  " } });
-    fireEvent.keyDown(input, { key: "Enter" });
+    expect(part("assistant-question-input")).toBeNull();
+    fireEvent.keyDown(part("assistant-input")!, { key: "Enter" });
 
-    expect(answer).toHaveBeenCalledWith({ text: "Q4" });
+    expect(answer).toHaveBeenCalledWith({
+      text: "neither — show me Platform",
+    });
+    expect(setDraft).toHaveBeenCalledWith("");
+  });
+
+  it("invites an answer rather than a new question while one is open", () => {
+    mount({
+      assistant: view({ pendingQuestion: question, answer: vi.fn() }),
+    });
+
+    expect(part("assistant-input")).toHaveAttribute(
+      "placeholder",
+      "Type an answer"
+    );
   });
 
   it("leaves Shift+Enter and an IME composition alone", () => {
     const answer = vi.fn();
     mount({
       assistant: view({
-        pendingQuestion: {
-          ...question,
-          options: undefined,
-          allowFreeText: true,
-        },
+        pendingQuestion: question,
+        draft: "Q4",
         answer,
       }),
     });
 
-    const input = part("assistant-question-input") as HTMLTextAreaElement;
-    fireEvent.change(input, { target: { value: "Q4" } });
+    const input = part("assistant-input")!;
     fireEvent.keyDown(input, { key: "Enter", shiftKey: true });
     fireEvent.keyDown(input, { key: "Enter", isComposing: true });
 
@@ -1710,8 +1793,9 @@ describe("dictating instead of typing", () => {
 });
 
 describe("answering a question in the reader's own words", () => {
-  it("sends what they typed, and clears the box", () => {
+  it("sends what they typed, trimmed, and clears the box", () => {
     const onAnswer = vi.fn();
+    const setDraft = vi.fn();
     mount({
       assistant: view({
         pendingQuestion: {
@@ -1719,20 +1803,18 @@ describe("answering a question in the reader's own words", () => {
           question: "What should I call it?",
           allowFreeText: true,
         },
+        draft: "  Q4 report  ",
+        setDraft,
         answer: onAnswer,
       }),
     });
 
-    const box = part("assistant-question-input") as HTMLInputElement | null;
-    expect(box).toBeTruthy();
-    fireEvent.change(box!, {
-      target: { value: "  Q4 report  " },
-    });
-    fireEvent.click(part("assistant-question-send")!);
+    fireEvent.click(part("assistant-send")!);
 
     // Trimmed, because the surrounding spaces are the reader's typing rather
     // than their answer.
     expect(onAnswer).toHaveBeenCalledWith({ text: "Q4 report" });
+    expect(setDraft).toHaveBeenCalledWith("");
   });
 
   it("sends nothing when they typed nothing", () => {
@@ -1744,14 +1826,12 @@ describe("answering a question in the reader's own words", () => {
           question: "What should I call it?",
           allowFreeText: true,
         },
+        draft: "   ",
         answer: onAnswer,
       }),
     });
 
-    fireEvent.change(part("assistant-question-input") as HTMLInputElement, {
-      target: { value: "   " },
-    });
-    fireEvent.click(part("assistant-question-send")!);
+    fireEvent.click(part("assistant-send")!);
 
     expect(onAnswer).not.toHaveBeenCalled();
   });

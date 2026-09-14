@@ -45,6 +45,7 @@ import {
   AssistantQuestion,
   AssistantSuggestions,
   AssistantWorking,
+  BUBBLE_CSS,
 } from "./AssistantMessages";
 import {
   FLOATING_MIN_WIDTH,
@@ -53,7 +54,10 @@ import {
   launcherStyle,
   type TableAssistantBoundary,
 } from "./assistantPlacement";
-import type { TableAssistantSlots } from "./assistantSlots";
+import type {
+  TableAssistantAvatars,
+  TableAssistantSlots,
+} from "./assistantSlots";
 import type {
   TableAssistantMessageView,
   TableAssistantView,
@@ -157,6 +161,24 @@ export interface TableAssistantProps {
    * connected, say.
    */
   readonly note?: string;
+  /**
+   * The assistant's opening line, before anyone has typed.
+   *
+   * Omit it and the panel opens with the built-in question. Pass your own to
+   * say what this assistant is for — it is the first thing a reader reads,
+   * and a table's own words beat a generic one. Pass an empty string and the
+   * panel opens silent: an empty conversation with nothing standing in for a
+   * message nobody wrote.
+   */
+  readonly greeting?: string;
+  /**
+   * The marks beside what each speaker said.
+   *
+   * A photograph, initials, the kit's own Avatar — anything React can render.
+   * The panel draws the circle and the size, so a host supplies the face and
+   * nothing else, and either side left out keeps its glyph.
+   */
+  readonly avatars?: TableAssistantAvatars;
   /**
    * An offer to put at the end of one reply.
    *
@@ -491,22 +513,27 @@ function Transcript({
   messageAction,
   receipts,
   parked,
+  avatars,
 }: {
   readonly assistant: TableAssistantView;
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly messageAction: TableAssistantProps["messageAction"];
   readonly receipts?: boolean;
+  readonly avatars?: TableAssistantAvatars;
   /** Whether a write is waiting on the reader's approval. */
   readonly parked?: boolean;
 }): ReactElement {
+  const marks = avatars ? { avatars } : {};
   return (
     <ul
       data-adapttable-part="assistant-messages"
       style={{
         listStyle: "none",
         margin: 0,
-        padding: 0,
+        // Half an em each side, which is what a tail needs to sit beside its
+        // bubble rather than under the panel's edge.
+        padding: "0 0.5em",
         display: "flex",
         flexDirection: "column",
         // Turns are further apart than the lines within one, so the eye finds
@@ -523,6 +550,7 @@ function Transcript({
           leads={assistant.messages[index - 1]?.role !== message.role}
           labels={labels}
           slots={slots}
+          {...marks}
           action={messageAction?.(message)}
           undo={
             assistant.undo?.messageId === message.id
@@ -588,11 +616,107 @@ function ExamplesFallback({
   );
 }
 
+/**
+ * Every change in a write, on a screen of its own.
+ *
+ * The conversation is hidden rather than scrolled past while this is up: a
+ * reader deciding on forty rows is doing one thing, and the transcript under
+ * it is forty rows of distance from the controls.
+ */
+function FullApproval({
+  review,
+  pending,
+  labels,
+  slots,
+  onBack,
+}: {
+  readonly review: ApprovalReview;
+  readonly pending: AgentApprovalPending;
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  readonly onBack: () => void;
+}): ReactElement {
+  return (
+    <div
+      data-adapttable-part="assistant-approval-full"
+      style={{ height: "100%", overflowY: "auto" }}
+    >
+      <AssistantApproval
+        review={review}
+        pending={pending}
+        labels={labels}
+        slots={slots}
+        expanded
+        onBack={onBack}
+      />
+    </div>
+  );
+}
+
+/**
+ * Whether the composer is answering a question rather than starting a turn.
+ *
+ * Returns nothing when there is no question on screen, or nothing to answer
+ * it with — and the composer goes back to being the composer.
+ */
+function composerAnswers(
+  assistant: TableAssistantView
+): { readonly send: () => void } | undefined {
+  const question = assistant.pendingQuestion;
+  const answer = assistant.answer;
+  if (!question || !answer) return undefined;
+  return {
+    send: () => {
+      const said = assistant.draft.trim();
+      if (!said) return;
+      assistant.setDraft("");
+      answer({ text: said });
+    },
+  };
+}
+
+/**
+ * Only what the host actually gave.
+ *
+ * An optional prop has to be absent rather than `undefined` to fall back to
+ * a default, and a component that decides that per prop grows a conditional
+ * per prop. `greeting` is kept when it is an empty string: silence is a value
+ * a host chose, not a prop it left out.
+ */
+function present<T extends object>(given: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(given).filter(([, value]) => value !== undefined)
+  ) as Partial<T>;
+}
+
+/**
+ * The question the backend is waiting on, where the reader is already looking.
+ *
+ * Drawn only when there is one and something can answer it: a question with
+ * no channel back is a prompt into the void.
+ */
+function PendingQuestion({
+  assistant,
+  slots,
+}: {
+  readonly assistant: TableAssistantView;
+  readonly slots: TableAssistantSlots;
+}): ReactElement | null {
+  const question = assistant.pendingQuestion;
+  const answer = assistant.answer;
+  if (!question || !answer) return null;
+  return (
+    <AssistantQuestion question={question} slots={slots} onAnswer={answer} />
+  );
+}
+
 function Body({
   assistant,
   labels,
   slots,
   note,
+  greeting,
+  avatars,
   messageAction,
   approval,
   receipts,
@@ -601,12 +725,19 @@ function Body({
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly note?: string;
+  readonly greeting?: string;
+  readonly avatars?: TableAssistantAvatars;
   readonly messageAction: TableAssistantProps["messageAction"];
   readonly approval?: AgentApprovalPending | null;
   readonly receipts?: boolean;
 }): ReactElement {
   const scroll = useConversationScroll(assistant.messages.length);
   const [expanded, setExpanded] = useState(false);
+  // Omitted leaves the built-in greeting; an empty string is a host asking
+  // for silence, which is a value and has to travel as one.
+  const opening = greeting === undefined ? {} : { greeting };
+  // Optional, so it travels as a spread rather than an undefined prop.
+  const marks = avatars ? { avatars } : {};
   // Only writes this surface owns. A write reviewed above the table or in a
   // modal is named here, never given a second set of controls.
   const mine = approval?.presentation === "widget" ? approval : null;
@@ -621,6 +752,11 @@ function Body({
   const allowedNames = assistant.alwaysAllowedNames
     ? { names: assistant.alwaysAllowedNames }
     : {};
+  // A write waiting on the reader parks the transcript's own indicators; the
+  // approval is what is happening, and two things claiming to be are one too
+  // many.
+  const parked = Boolean(approval);
+  const showingFullList = Boolean(review && expanded);
   return (
     <div
       data-adapttable-part="assistant-conversation-region"
@@ -633,26 +769,23 @@ function Body({
       }}
     >
       {review && expanded && mine ? (
-        <div
-          data-adapttable-part="assistant-approval-full"
-          style={{ height: "100%", overflowY: "auto" }}
-        >
-          <AssistantApproval
-            review={review}
-            pending={mine}
-            labels={labels}
-            slots={slots}
-            expanded
-            onBack={() => setExpanded(false)}
-          />
-        </div>
+        <FullApproval
+          review={review}
+          pending={mine}
+          labels={labels}
+          slots={slots}
+          onBack={() => setExpanded(false)}
+        />
       ) : null}
       <div
         ref={scroll.ref}
         onScroll={scroll.onScroll}
         data-adapttable-part="assistant-conversation"
-        hidden={Boolean(review && expanded)}
-        style={{ height: "100%", overflowY: "auto" }}
+        hidden={showingFullList}
+        // Never sideways. A bubble's tail sits outside the bubble, and a
+        // panel that scrolls to reveal half an em of it is a panel the reader
+        // has to drag straight before they can read the conversation.
+        style={{ height: "100%", overflowY: "auto", overflowX: "hidden" }}
       >
         {assistant.messages.length === 0 ? (
           <AssistantEmpty
@@ -662,6 +795,8 @@ function Body({
             more={assistant.moreSuggestions ?? []}
             onRun={run}
             note={note}
+            {...opening}
+            {...marks}
           />
         ) : (
           <Transcript
@@ -670,19 +805,13 @@ function Body({
             slots={slots}
             messageAction={messageAction}
             receipts={receipts}
-            parked={Boolean(approval)}
+            {...marks}
+            parked={parked}
           />
         )}
         {/* A question belongs where the reader is already looking, not in a
             second surface that competes with the approval. */}
-        {assistant.pendingQuestion && assistant.answer ? (
-          <AssistantQuestion
-            question={assistant.pendingQuestion}
-            labels={labels}
-            slots={slots}
-            onAnswer={assistant.answer}
-          />
-        ) : null}
+        <PendingQuestion assistant={assistant} slots={slots} />
         <ExamplesFallback
           slots={slots}
           labels={labels}
@@ -828,6 +957,8 @@ export function TableAssistantChrome({
   onSettings,
   boundary = "viewport",
   note,
+  greeting,
+  avatars,
   messageAction,
   approval,
   slots,
@@ -839,6 +970,8 @@ export function TableAssistantChrome({
   const wide = useFloatingFits();
   const launcherRef = useRef<HTMLElement | null>(null);
   const surfaceRef = useRef<HTMLDivElement | null>(null);
+  // Both optional, so both travel as spreads rather than undefined props.
+  const given = present({ greeting, avatars });
   const Button = slots.Button;
 
   const close = useCallback(() => {
@@ -911,9 +1044,11 @@ export function TableAssistantChrome({
     },
   };
 
-  const send = (): void => {
-    void assistant.send();
-  };
+  // The one box the panel has. A question the assistant asked is answered
+  // here rather than in a second box drawn beside it: two text inputs on one
+  // screen is a form, and a reader has to work out which one is theirs.
+  const answering = composerAnswers(assistant);
+  const send = answering?.send ?? ((): void => void assistant.send());
 
   const contents = (
     <div
@@ -935,6 +1070,12 @@ export function TableAssistantChrome({
           : {}),
       }}
     >
+      {/* The bubble tails, which need a pseudo-element and so cannot be
+          inline with the rest of the bubble. */}
+      <style>{BUBBLE_CSS}</style>
+      {/* The bubble tails, which need a pseudo-element and so cannot be
+          inline with the rest of the bubble. */}
+      <style>{BUBBLE_CSS}</style>
       <Header
         slots={slots}
         labels={labels}
@@ -952,6 +1093,7 @@ export function TableAssistantChrome({
         labels={labels}
         slots={slots}
         note={note}
+        {...given}
         messageAction={messageAction}
         approval={approval}
         receipts={receipts}
@@ -980,6 +1122,12 @@ export function TableAssistantChrome({
         setDraft={assistant.setDraft}
         onSend={send}
         onStop={assistant.stop}
+        {...(answering
+          ? {
+              placeholder:
+                labels?.assistantAnswerPlaceholder ?? "Type an answer",
+            }
+          : {})}
         {...(speech ? { speech } : {})}
         {...(examples.items.length > 0 ? { examples } : {})}
       />
