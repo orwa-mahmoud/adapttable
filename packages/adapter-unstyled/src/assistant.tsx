@@ -42,6 +42,22 @@ function AssistantButton({
       data-adapttable-part={part}
       className={className}
       disabled={disabled}
+      // A corner launcher is round and hand-sized; the header's controls are
+      // neither. Native elements are this kit, so the shape is set here
+      // rather than borrowed from a component.
+      {...(part === "assistant-launcher"
+        ? {
+            style: {
+              inlineSize: 56,
+              blockSize: 56,
+              borderRadius: "50%",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 0,
+            },
+          }
+        : {})}
       onClick={onClick}
     >
       {icon}

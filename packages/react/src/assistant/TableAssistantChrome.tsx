@@ -32,12 +32,7 @@ import {
   type ApprovalReviewSlots,
 } from "../editing/ApprovalReviewChrome";
 import { AssistantComposer } from "./AssistantComposer";
-import {
-  AssistantIcon,
-  CloseIcon,
-  SettingsIcon,
-  SuggestionIcon,
-} from "./assistantIcons";
+import { CloseIcon, SettingsIcon, SuggestionIcon } from "./assistantIcons";
 import {
   AssistantAlwaysAllowed,
   AssistantEmpty,
@@ -46,6 +41,7 @@ import {
   AssistantSuggestions,
   AssistantWorking,
   BUBBLE_CSS,
+  SpeakerMark,
 } from "./AssistantMessages";
 import {
   FLOATING_MIN_WIDTH,
@@ -258,13 +254,17 @@ function Header({
   status,
   onClose,
   onSettings,
+  avatars,
 }: {
   readonly slots: TableAssistantSlots;
   readonly labels: TableLabels | undefined;
   readonly status: string;
   readonly onClose: () => void;
   readonly onSettings?: () => void;
+  readonly avatars?: TableAssistantAvatars;
 }): ReactElement {
+  const face =
+    avatars?.assistant === undefined ? {} : { avatar: avatars.assistant };
   const Badge = slots.Badge;
   const Button = slots.Button;
   const connection =
@@ -281,13 +281,15 @@ function Header({
         flexShrink: 0,
       }}
     >
-      <span
-        aria-hidden="true"
-        data-adapttable-part="assistant-mark"
-        style={{ display: "flex", fontSize: "1.15em", opacity: 0.8 }}
-      >
-        <AssistantIcon />
-      </span>
+      {/* The same face it speaks with. A host that gave the assistant a
+          picture gave it one assistant, and a header wearing something else
+          is a second one. */}
+      <SpeakerMark
+        mine={false}
+        hidden={false}
+        part="assistant-mark"
+        {...face}
+      />
       <span
         data-adapttable-part="assistant-title"
         style={{
@@ -374,33 +376,52 @@ function Launcher({
   waiting,
   slots,
   onOpen,
+  avatars,
 }: {
   readonly labels: TableLabels | undefined;
   readonly waiting: boolean;
   readonly slots: TableAssistantSlots;
   readonly onOpen: () => void;
+  readonly avatars?: TableAssistantAvatars;
 }): ReactElement {
+  const face =
+    avatars?.assistant === undefined ? {} : { avatar: avatars.assistant };
   const Button = slots.Button;
   return (
+    // The face, and nothing else. A corner button carrying a glyph plus the
+    // words "Ask AI" spends a whole line saying what the face already says,
+    // and the face is the one thing a reader recognises from across a page.
+    // Its name stays on the control for anyone who cannot see it.
     <Button
       label={launcherName(labels, waiting)}
       part="assistant-launcher"
-      variant="primary"
-      icon={<AssistantIcon />}
-      onClick={onOpen}
-    >
-      <span data-adapttable-part="assistant-launcher-label">
-        {labels?.assistantOpen ?? "Ask AI"}
-      </span>
-      {waiting ? (
+      // Subtle, because the mark inside already carries its own ground. A
+      // solid button would paint the kit's primary behind it and give the
+      // reader a white robot here and a coloured one everywhere else.
+      variant="subtle"
+      iconOnly
+      tooltip={labels?.assistantOpen ?? "Ask AI"}
+      icon={
         <span
-          data-adapttable-part="assistant-launcher-waiting"
-          aria-hidden="true"
+          data-adapttable-part="assistant-launcher-mark"
+          // 56px, which is the size a corner launcher has settled on: big
+          // enough to hit without aiming, small enough not to sit on the
+          // page like a second window.
+          style={{ display: "flex", fontSize: "1.85em" }}
         >
-          {" •"}
+          <SpeakerMark mine={false} hidden={false} {...face} />
+          {waiting ? (
+            <span
+              data-adapttable-part="assistant-launcher-waiting"
+              aria-hidden="true"
+            >
+              {" •"}
+            </span>
+          ) : null}
         </span>
-      ) : null}
-    </Button>
+      }
+      onClick={onOpen}
+    />
   );
 }
 
@@ -972,6 +993,15 @@ export function TableAssistantChrome({
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   // Both optional, so both travel as spreads rather than undefined props.
   const given = present({ greeting, avatars });
+  // The header and the transcript wear the same face, so the question of
+  // whether the host gave one is asked once.
+  const marks = present({ avatars });
+  // The launcher lives outside the panel, so the accent cannot be set on the
+  // panel alone: a closed assistant would wear the page's text colour and an
+  // open one the kit's, which is the same mark in two colours.
+  const accentStyle: CSSProperties = accent
+    ? ({ "--adapttable-assistant-accent": accent } as CSSProperties)
+    : {};
   const Button = slots.Button;
 
   const close = useCallback(() => {
@@ -1060,14 +1090,9 @@ export function TableAssistantChrome({
         gap: "0.5em",
         height: "100%",
         minHeight: 0,
-        // Set once, on the surface everything inside inherits from, so the
-        // conversation is drawn in the kit's colour without any of its parts
-        // naming one.
-        ...(accent
-          ? ({
-              "--adapttable-assistant-accent": accent,
-            } as CSSProperties)
-          : {}),
+        // Set on every surface the assistant owns, so each is drawn in the
+        // kit's colour without any of its parts naming one.
+        ...accentStyle,
       }}
     >
       {/* The bubble tails, which need a pseudo-element and so cannot be
@@ -1082,6 +1107,7 @@ export function TableAssistantChrome({
         status={assistant.status}
         onClose={close}
         onSettings={onSettings}
+        {...marks}
       />
       {/* Status only — re-reading the transcript on every token is what makes
           a chat unusable with a screen reader. */}
@@ -1169,8 +1195,8 @@ export function TableAssistantChrome({
         data-adapttable-part="assistant-launcher-anchor"
         style={
           resolved === "floating" || resolved === "sheet"
-            ? launcherStyle(boundary)
-            : { display: "contents" }
+            ? { ...launcherStyle(boundary), ...accentStyle }
+            : { display: "contents", ...accentStyle }
         }
       >
         {launcher && !open ? (
@@ -1184,6 +1210,7 @@ export function TableAssistantChrome({
             onOpen={() => {
               onOpenChange(true);
             }}
+            {...marks}
           />
         ) : null}
       </span>

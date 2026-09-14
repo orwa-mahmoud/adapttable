@@ -48,10 +48,14 @@ function AssistantButton({
   tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  const launcher = part === "assistant-launcher";
   if (iconOnly) {
     return (
       <IconButton
         type="button"
+        {...(launcher
+          ? { style: { width: 56, height: 56, borderRadius: "50%" } }
+          : {})}
         title={tooltip}
         aria-label={label}
         aria-expanded={expanded}
@@ -392,9 +396,9 @@ function AssistantMenu({
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
-      // The colour the conversation is drawn in. The accent this adapter's own stylesheet already draws with.
+      // The colour the conversation is drawn in. The accent this adapter's own stylesheet draws with, whose value is repeated here because that stylesheet scopes it to the table's own surfaces.
       // Before the spread, so a host that names its own still wins.
-      accent="var(--adapttable-accent, currentColor)"
+      accent="var(--adapttable-accent, #2563eb)"
       {...props}
       slots={{
         Panel: AssistantPanel,

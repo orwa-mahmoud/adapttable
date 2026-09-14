@@ -24,8 +24,8 @@ import {
 
 import {
   ActionsIcon,
-  AssistantIcon,
-  PersonIcon,
+  AssistantAvatar,
+  PersonAvatar,
   ReceiptIcon,
   SuggestionIcon,
   UndoIcon,
@@ -606,6 +606,55 @@ export function AssistantEmpty({
 }
 
 /**
+ * A name, as the two letters every product falls back to.
+ *
+ * The first letter of each of the first two words. One word gives one letter;
+ * a name of nothing gives none, and the built-in face stands instead.
+ */
+function initialsOf(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => [...word][0] ?? "")
+    .join("")
+    .toUpperCase();
+}
+
+/** The face this speaker falls back to when the host named none. */
+function DefaultFace({ mine }: { readonly mine: boolean }): ReactElement {
+  return mine ? <PersonAvatar /> : <AssistantAvatar />;
+}
+
+/** A name drawn in a speaker's circle, or their face when it yields none. */
+function Initials({
+  name,
+  mine,
+}: {
+  readonly name: string;
+  readonly mine: boolean;
+}): ReactElement {
+  const letters = initialsOf(name);
+  if (!letters) return <DefaultFace mine={mine} />;
+  return (
+    <span
+      data-adapttable-part="assistant-initials"
+      style={{
+        fontSize: "0.72em",
+        fontWeight: 650,
+        letterSpacing: "0.02em",
+        // Never wrapped or clipped: two letters in a circle is the whole of
+        // what this draws.
+        whiteSpace: "nowrap",
+        lineHeight: 1,
+      }}
+    >
+      {letters}
+    </span>
+  );
+}
+
+/**
  * One thing said, by whoever said it.
  *
  * Every bubble in the panel comes through here — a reply, the opening line,
@@ -715,12 +764,14 @@ function Said({
 /**
  * Who is speaking, drawn beside what they said.
  *
+ * @internal
+ *
  * The host's own avatar when it has one — a photograph, initials, anything it
  * renders — and a glyph otherwise. The ground and the size belong to the
  * panel either way, so a kit's accent carries an image the host knows nothing
  * about and every mark down the transcript is the same size.
  */
-function SpeakerMark({
+export function SpeakerMark({
   mine,
   avatar,
   hidden,
@@ -744,12 +795,14 @@ function SpeakerMark({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        inlineSize: "1.75em",
-        blockSize: "1.75em",
+        inlineSize: "1.9em",
+        blockSize: "1.9em",
         flexShrink: 0,
         borderRadius: "50%",
         // A host's image fills the circle rather than sitting in it, and
-        // nothing it brings can spill past the edge.
+        // nothing it brings can spill past the edge. The built-in faces are
+        // drawn to fill it too — a glyph floating in the middle of a circle
+        // reads as a button that lost its label.
         overflow: "hidden",
         background: mine
           ? "color-mix(in srgb, currentColor 10%, transparent)"
@@ -762,7 +815,13 @@ function SpeakerMark({
         opacity: hidden ? 0 : 1,
       }}
     >
-      {avatar ?? (mine ? <PersonIcon /> : <AssistantIcon />)}
+      {/* A string is a name and becomes initials; anything else is the
+          host's own element; nothing is the built-in face. */}
+      {typeof avatar === "string" ? (
+        <Initials name={avatar} mine={mine} />
+      ) : (
+        (avatar ?? <DefaultFace mine={mine} />)
+      )}
     </span>
   );
 }
@@ -1170,12 +1229,9 @@ export function AssistantWorking({
       }}
     >
       <style>{WORKING_KEYFRAMES}</style>
-      <span
-        aria-hidden="true"
-        style={{ display: "flex", marginBlockStart: "0.15em", opacity: 0.7 }}
-      >
-        <AssistantIcon />
-      </span>
+      {/* The same face that is about to reply, so the wait and the answer
+          are visibly the same speaker. */}
+      <SpeakerMark mine={false} hidden={false} />
       <span style={{ display: "inline-flex", gap: "0.25em" }}>
         {[0, 1, 2].map((index) => (
           <span
@@ -1265,7 +1321,7 @@ export function AssistantQuestion({
   readonly onAnswer: (answer: { optionId?: string; text?: string }) => void;
 }): ReactElement {
   const askedId = useId();
-  const Suggestion = slots.Suggestion;
+  const Button = slots.Button;
   const options = question.options ?? [];
   return (
     // A question and the controls that answer it is what a fieldset is for:
@@ -1305,11 +1361,16 @@ export function AssistantQuestion({
             marginInlineStart: "2.45em",
           }}
         >
+          {/* The kit's own button, small and inline — a chip. The suggestion
+              card is a card: a title, a description and room for both, which
+              beside a question turns four words into four slabs down the
+              panel. These are shortcuts for one answer, not offers. */}
           {options.map((option) => (
-            <Suggestion
+            <Button
               key={option.id}
-              title={option.label}
+              label={option.label}
               part="assistant-question-option"
+              variant="secondary"
               onClick={() => {
                 onAnswer({ optionId: option.id });
               }}

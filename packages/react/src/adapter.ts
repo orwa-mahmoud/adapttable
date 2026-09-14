@@ -1084,6 +1084,7 @@ export type {
   TableAssistantBadgeProps,
   TableAssistantButtonProps,
   TableAssistantComposerProps,
+  TableAssistantFace,
   TableAssistantLanguageChipProps,
   TableAssistantMenuItem,
   TableAssistantMenuProps,

@@ -56,13 +56,17 @@ function AssistantButton({
   tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  const launcher = part === "assistant-launcher";
   if (iconOnly) {
     // Mantine's own icon control, so the header's controls are the size and
     // shape a Mantine reader already knows.
     const control = (
       <ActionIcon
         type="button"
-        size="md"
+        // A corner launcher is round and hand-sized; the header's controls
+        // are neither.
+        size={launcher ? 56 : "md"}
+        radius={launcher ? "xl" : undefined}
         variant={variant === "primary" ? "filled" : "subtle"}
         color={variant === "primary" ? undefined : "gray"}
         aria-label={label}

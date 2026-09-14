@@ -58,11 +58,14 @@ function AssistantButton({
   tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  const launcher = part === "assistant-launcher";
   if (iconOnly) {
     const control = (
       <IconButton
         type="button"
-        size="1"
+        size={launcher ? "4" : "1"}
+        radius={launcher ? "full" : undefined}
+        {...(launcher ? { style: { width: 56, height: 56 } } : {})}
         variant={variant === "primary" ? "solid" : "ghost"}
         color={variant === "primary" ? undefined : "gray"}
         aria-label={label}

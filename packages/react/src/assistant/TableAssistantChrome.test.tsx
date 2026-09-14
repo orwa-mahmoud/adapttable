@@ -1269,7 +1269,9 @@ describe("without labels", () => {
 
   it("labels the launcher, the stop control and the way back", () => {
     bare({ open: false });
-    expect(part("assistant-launcher")).toHaveTextContent("Ask AI");
+    // The launcher wears the assistant's face and nothing else: its name is
+    // on the control for anyone who cannot see it.
+    expect(part("assistant-launcher")).toHaveAccessibleName("Ask AI");
 
     bare({ assistant: view({ status: "sending" }) });
     expect(part("assistant-stop")).toHaveAccessibleName("Stop");
@@ -1605,6 +1607,75 @@ describe("a question the backend asked", () => {
     mount({ assistant: view({ pendingQuestion: question }) });
 
     expect(part("assistant-question")).toBeNull();
+  });
+});
+
+describe("the mark beside each speaker", () => {
+  const talking = {
+    messages: [
+      { id: "m-0", role: "user" as const, text: "sort it" },
+      { id: "m-1", role: "assistant" as const, text: "Sorted." },
+    ],
+  };
+
+  it("draws a built-in face for each side when the host names none", () => {
+    mount({ assistant: view(talking) });
+
+    expect(part("assistant-user-mark")).toBeTruthy();
+    expect(part("assistant-message-mark")).toBeTruthy();
+    expect(parts("assistant-initials")).toHaveLength(0);
+  });
+
+  it("reads a string as a name and draws its initials", () => {
+    // The two-letter circle every product falls back to for someone it has
+    // no picture of — the first letter of each of the first two words.
+    mount({
+      assistant: view(talking),
+      avatars: { user: "ada lovelace", assistant: "Table Bot Nine" },
+    });
+
+    // The header's mark, then the exchange: the assistant wears its name in
+    // both places, which is the point of naming it once.
+    expect(parts("assistant-initials").map((mark) => mark.textContent)).toEqual(
+      ["TB", "AL", "TB"]
+    );
+  });
+
+  it("takes one letter from a name of one word", () => {
+    mount({ assistant: view(talking), avatars: { user: "Ada" } });
+
+    expect(part("assistant-initials")).toHaveTextContent("A");
+  });
+
+  it("keeps the built-in face for a name that is only spaces", () => {
+    // An empty circle says less than a face does.
+    mount({ assistant: view(talking), avatars: { user: "   " } });
+
+    expect(parts("assistant-initials")).toHaveLength(0);
+    expect(part("assistant-user-mark")).toBeTruthy();
+  });
+
+  it("renders whatever the host gave, when it gave an element", () => {
+    mount({
+      assistant: view(talking),
+      avatars: { user: <img src="/me.png" alt="" data-testid="mine" /> },
+    });
+
+    expect(part("assistant-user-mark")?.querySelector("img")).toBeTruthy();
+  });
+
+  it("wears the same face in the header and on the launcher", () => {
+    // One assistant. A header or a corner button wearing something else is a
+    // second one.
+    mount({ assistant: view(talking), avatars: { assistant: "Table Bot" } });
+    expect(part("assistant-mark")).toHaveTextContent("TB");
+
+    mount({
+      open: false,
+      assistant: view(talking),
+      avatars: { assistant: "Table Bot" },
+    });
+    expect(part("assistant-launcher-mark")).toHaveTextContent("TB");
   });
 });
 

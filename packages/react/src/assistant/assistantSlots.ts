@@ -10,19 +10,30 @@
 import type { ReactNode } from "react";
 
 /**
+ * One speaker's mark: a picture, or a name to take initials from.
+ *
+ * A string is a name — "Ada Lovelace" is drawn as `AL`, the circle every
+ * product uses for a person it has no photograph of. Anything else is
+ * rendered as given: an `<img>`, a kit's own Avatar, whatever the host has.
+ * The panel owns the circle, the size and the ground either way, so a host
+ * supplies the face and nothing else.
+ *
+ * @public
+ */
+export type TableAssistantFace = Exclude<ReactNode, undefined>;
+
+/**
  * The marks beside what each speaker said.
  *
- * Anything a kit can render — an `<img>`, initials, a kit's own Avatar. The
- * panel draws the circle, the size and the ground, so a host supplies the
- * face and nothing else. Omit either and that speaker keeps its glyph.
+ * Omit either and that speaker keeps the built-in face.
  *
  * @public
  */
 export interface TableAssistantAvatars {
   /** Beside the assistant's replies. */
-  readonly assistant?: ReactNode;
+  readonly assistant?: TableAssistantFace;
   /** Beside what the reader said. */
-  readonly user?: ReactNode;
+  readonly user?: TableAssistantFace;
 }
 
 /** A kit button. @public */

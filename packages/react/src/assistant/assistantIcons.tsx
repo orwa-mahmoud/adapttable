@@ -21,30 +21,83 @@ const BASE = {
   focusable: false,
 } as const;
 
-/** The assistant's own mark: a conversation with a spark in it. @internal */
-export function AssistantIcon(): ReactElement {
+/**
+ * The assistant's face, for a host that has not supplied one.
+ *
+ * An avatar, not an icon: filled shapes that fill their circle, because a
+ * hairline glyph floating in the middle of one reads as a button that lost
+ * its label. It is drawn in the current colour, so the circle around it — and
+ * so the kit's own accent — carries it without naming a second colour.
+ *
+ * @internal
+ */
+export function AssistantAvatar(): ReactElement {
   return (
-    <svg {...BASE}>
-      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z" />
-      <path d="m12 8.6.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8Z" />
+    <svg
+      viewBox="0 0 40 40"
+      width="100%"
+      height="100%"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {/* The aerial, which is what makes a rounded square read as a head
+          rather than a card. */}
+      <circle cx="20" cy="8.5" r="2.6" />
+      <rect x="19" y="10.5" width="2" height="3.5" rx="1" />
+      <rect x="9" y="13.5" width="22" height="17" rx="6" />
+      {/* Eyes punched out of the head rather than drawn over it, so they are
+          the ground showing through and cannot fight the fill for contrast. */}
+      <circle
+        cx="15.6"
+        cy="21"
+        r="2.2"
+        fill="var(--adapttable-assistant-eye, #fff)"
+      />
+      <circle
+        cx="24.4"
+        cy="21"
+        r="2.2"
+        fill="var(--adapttable-assistant-eye, #fff)"
+      />
+      <rect
+        x="16.5"
+        y="25.4"
+        width="7"
+        height="1.8"
+        rx="0.9"
+        fill="var(--adapttable-assistant-eye, #fff)"
+      />
+      {/* Ears, which stop the head floating free of the circle's edge. */}
+      <rect x="5.5" y="18.5" width="2.6" height="7" rx="1.3" />
+      <rect x="31.9" y="18.5" width="2.6" height="7" rx="1.3" />
     </svg>
   );
 }
 
 /**
- * The reader's own mark, for a host that has not supplied one.
+ * The reader's face, for a host that has not supplied one.
  *
- * A shape rather than a photograph or initials: the panel does not know who
- * is reading, and inventing a face or a letter for them would be a guess
+ * A silhouette rather than a photograph or initials: the panel does not know
+ * who is reading, and inventing a face or a letter for them would be a guess
  * printed beside everything they say.
  *
  * @internal
  */
-export function PersonIcon(): ReactElement {
+export function PersonAvatar(): ReactElement {
   return (
-    <svg {...BASE}>
-      <circle cx="12" cy="8" r="3.6" />
-      <path d="M4.8 20a7.2 7.2 0 0 1 14.4 0" />
+    <svg
+      viewBox="0 0 40 40"
+      width="100%"
+      height="100%"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="20" cy="15" r="6.8" />
+      {/* Shoulders that run off the bottom of the circle, which is what makes
+          a silhouette read as a person rather than a lollipop. */}
+      <path d="M20 24.2c-6.6 0-12 4.6-12 10.3V40h24v-5.5c0-5.7-5.4-10.3-12-10.3Z" />
     </svg>
   );
 }

@@ -58,11 +58,13 @@ function AssistantButton({
   tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  const launcher = part === "assistant-launcher";
   if (iconOnly) {
     const control = (
       <IconButton
         type="button"
-        size="small"
+        size={launcher ? "large" : "small"}
+        {...(launcher ? { sx: { width: 56, height: 56 } } : {})}
         aria-label={label}
         aria-expanded={expanded}
         data-adapttable-part={part}
@@ -417,9 +419,9 @@ function AssistantMenu({
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
-      // The colour the conversation is drawn in. The theme's primary, as MUI publishes it to CSS.
+      // The colour the conversation is drawn in. The theme's primary as MUI publishes it, or MUI's own default when the host is not using its CSS-variable theme.
       // Before the spread, so a host that names its own still wins.
-      accent="var(--mui-palette-primary-main, currentColor)"
+      accent="var(--mui-palette-primary-main, #1976d2)"
       {...props}
       slots={{
         Panel: AssistantPanel,

@@ -57,11 +57,13 @@ function AssistantButton({
   tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  const launcher = part === "assistant-launcher";
   if (iconOnly) {
     return (
       <IconButton
         type="button"
-        size="sm"
+        size={launcher ? "xl" : "sm"}
+        rounded={launcher ? "full" : undefined}
         variant={variant === "primary" ? "solid" : "ghost"}
         aria-label={label}
         title={tooltip}
@@ -401,9 +403,11 @@ function AssistantMenu({
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
-      // The colour the conversation is drawn in. Whatever palette the surrounding Chakra provider is set to.
+      // The colour the conversation is drawn in. Chakra's blue, because its default colour
+      // palette is grey — a palette, but not an accent. A host with its own
+      // passes `accent`, which wins over this.
       // Before the spread, so a host that names its own still wins.
-      accent="var(--chakra-colors-color-palette-solid, currentColor)"
+      accent="var(--chakra-colors-blue-solid, #3182ce)"
       {...props}
       slots={{
         Panel: AssistantPanel,

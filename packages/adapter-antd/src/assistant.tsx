@@ -54,11 +54,16 @@ function AssistantButton({
   tooltip,
   variant = "secondary",
 }: Readonly<TableAssistantButtonProps>) {
+  const launcher = part === "assistant-launcher";
   if (iconOnly) {
     const control = (
       <Button
         type="text"
-        size="small"
+        // A corner launcher is round and hand-sized; the header's controls
+        // are neither.
+        size={launcher ? "large" : "small"}
+        shape={launcher ? "circle" : undefined}
+        {...(launcher ? { style: { width: 56, height: 56 } } : {})}
         icon={icon}
         aria-label={label}
         aria-expanded={expanded}
@@ -383,9 +388,9 @@ function AssistantMenu({
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
-      // The colour the conversation is drawn in. antd's primary seed token.
+      // The colour the conversation is drawn in. antd's primary seed token, or the seed's own default when the host has not turned antd's CSS variables on.
       // Before the spread, so a host that names its own still wins.
-      accent="var(--ant-color-primary, currentColor)"
+      accent="var(--ant-color-primary, #1677ff)"
       {...props}
       slots={{
         Panel: AssistantPanel,
