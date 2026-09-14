@@ -193,7 +193,7 @@ export type ExampleComplete = (
 function defaultModel(provider: string): string {
   if (provider === "anthropic") return "claude-sonnet-4-5";
   if (provider === "gemini") return "gemini-2.5-flash";
-  if (provider === "deepseek") return "deepseek-chat";
+  if (provider === "deepseek") return "deepseek-v4-pro";
   return "gpt-5.6-luna";
 }
 
