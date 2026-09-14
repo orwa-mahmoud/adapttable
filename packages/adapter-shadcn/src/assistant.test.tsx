@@ -5,7 +5,7 @@
  * from shadcn/ui, and that the structure the chrome owns arrives intact.
  */
 import { defaultLabels } from "@adapttable/core";
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
@@ -125,7 +125,7 @@ describe("TableAssistant", () => {
     expect(stop).toHaveBeenCalled();
   });
 
-  it("names each action and its outcome in the transcript", () => {
+  it("names each action and its outcome in the transcript", async () => {
     mount(
       <TableAssistant
         assistant={view({
@@ -151,7 +151,13 @@ describe("TableAssistant", () => {
       />
     );
 
-    expect(part("assistant-receipt-summary")).toHaveTextContent("Grouped");
+    // What a turn did is evidence, opened from the mark on the reply — and
+    // the control that opens it is this kit's own button, not one drawn here.
+    fireEvent.click(part("assistant-receipts-toggle-button")!);
+
+    await waitFor(() => {
+      expect(part("assistant-receipt-summary")).toHaveTextContent("Grouped");
+    });
   });
 
   it("becomes a modal sheet on a narrow viewport", () => {
