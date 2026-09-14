@@ -845,6 +845,13 @@ export interface TableLabels {
   assistantExamples?: string;
   /** Opens the eligible examples a first screen did not have room for. */
   assistantMoreExamples?: string;
+  /**
+   * The control that shows what a turn did.
+   *
+   * The count is the actions worth showing a reader — reads and other
+   * plumbing are not among them.
+   */
+  assistantActions?: (count: number) => string;
   /** One receipt status on its own, when the action's kind is unknown. */
   assistantReceiptStatus?: (status: string) => string;
   /**

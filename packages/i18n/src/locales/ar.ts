@@ -253,6 +253,8 @@ export const ar: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `اسأل عن ${CAPABILITY[capability] ?? capability} مرة أخرى`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "إجراء واحد" : `${String(count)} إجراءات`,
   assistantExamples: "اختصارات",
   assistantMoreExamples: "اختصارات أخرى",
   assistantReceiptChange: ({ before, after }) =>
@@ -286,6 +288,9 @@ export const ar: Required<TableLabels> = {
         "aggregate/executed": "تم تغيير الإجماليات",
         "select/executed": "تم تغيير التحديد",
         "read/executed": "تمت قراءة الجدول",
+        "operation/executed": "تم التنفيذ",
+        "operation/awaiting-approval": "بانتظارك",
+        "operation/rejected": "مرفوض",
         "export/executed": "تم التصدير",
         "add/executed": "تمت إضافة صف",
         "add/awaiting-approval": "صف جديد بانتظار الموافقة",

@@ -183,6 +183,13 @@ export interface TableAssistantView {
   readonly undoAction?: (idempotencyKey: string) => void | Promise<void>;
   /** Capability keys the reader said not to ask about again. */
   readonly alwaysAllowed?: readonly string[];
+  /**
+   * What each of those is called, keyed by capability.
+   *
+   * A built-in has a translation; a host's own capability has only what its
+   * definition said about it, which still beats showing a reader the key.
+   */
+  readonly alwaysAllowedNames?: Readonly<Record<string, string>>;
   /** Ask about one of them again from now on. */
   readonly revokeAlwaysAllow?: (capability: string) => void;
 }

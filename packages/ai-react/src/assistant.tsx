@@ -189,6 +189,8 @@ export interface TableAssistantState {
   readonly undoAction: (idempotencyKey: string) => Promise<void>;
   /** Capability keys the reader said not to ask about again. */
   readonly alwaysAllowed: readonly string[];
+  /** What each standing permission is called, where the table knows. */
+  readonly alwaysAllowedNames: Readonly<Record<string, string>>;
   /** Ask about one of them again from now on. */
   readonly revokeAlwaysAllow: (capability: string) => void;
   /** The suggestions this table can run right now, re-checked every render. */
@@ -201,6 +203,12 @@ export interface TableAssistantState {
   readonly setOpen: (open: boolean) => void;
   /** The last failure, cleared by the next successful turn. */
   readonly error: string | undefined;
+  /**
+   * The machine code behind {@link error}, when a turn ended with work
+   * pending. A surface with labels turns it into a sentence for the reader;
+   * the message beside it is written for whoever is debugging the turn.
+   */
+  readonly errorCode: string | undefined;
 }
 
 /**
@@ -299,6 +307,7 @@ export function useTableAssistant(
     undoTurn: store.undoTurn,
     undoAction: store.undoAction,
     alwaysAllowed: state.alwaysAllowed,
+    alwaysAllowedNames: state.alwaysAllowedNames,
     revokeAlwaysAllow: store.revokeAlwaysAllow,
     suggestions: state.suggestions,
     moreSuggestions: state.moreSuggestions,
@@ -306,6 +315,7 @@ export function useTableAssistant(
     open,
     setOpen,
     error: state.error,
+    errorCode: state.errorCode,
   };
 }
 

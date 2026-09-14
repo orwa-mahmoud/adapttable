@@ -438,3 +438,22 @@ describe("a capability whose guide was deferred", () => {
     expect(rendered).toContain("Guides not included here:");
   });
 });
+
+describe("how the assistant is asked to talk", () => {
+  it("states a principle rather than a list of situations", () => {
+    // A prompt that names scenarios one by one only covers the ones somebody
+    // thought of. This says how to talk, and the situations follow.
+    const said = agentInstructions();
+    expect(said).toContain("talking to a person, not presenting a menu");
+    expect(said).toContain("in your own words");
+  });
+
+  it("makes a question to the reader the last resort, not a confirmation", () => {
+    // A reader who wanted to pick from a list would have used the table's
+    // own controls.
+    const said = agentInstructions();
+    expect(said).toContain("last resort");
+    expect(said).toContain("not a way to confirm");
+    expect(said).not.toContain("Asked what you can do");
+  });
+});

@@ -501,10 +501,13 @@ function Transcript({
         gap: "0.75em",
       }}
     >
-      {assistant.messages.map((message) => (
+      {assistant.messages.map((message, index) => (
         <AssistantMessage
           key={message.id}
           message={message}
+          // The mark stops repeating down a run from the same speaker. One
+          // conversation, not a column of name tags.
+          leads={assistant.messages[index - 1]?.role !== message.role}
           labels={labels}
           slots={slots}
           action={messageAction?.(message)}
@@ -530,6 +533,45 @@ function Transcript({
         <AssistantWorking labels={labels} />
       ) : null}
     </ul>
+  );
+}
+
+/**
+ * The examples, for a kit that fills no menu slot.
+ *
+ * Losing them altogether would be worse than keeping them where they were,
+ * so a kit without the slot keeps the disclosure under the transcript.
+ *
+ * @internal
+ */
+function ExamplesFallback({
+  slots,
+  labels,
+  assistant,
+  onRun,
+}: {
+  readonly slots: TableAssistantSlots;
+  readonly labels: TableLabels | undefined;
+  readonly assistant: TableAssistantView;
+  readonly onRun: (id: string) => void;
+}): ReactElement | null {
+  if (slots.Menu) return null;
+  if (assistant.messages.length === 0) return null;
+  if (assistant.suggestions.length === 0) return null;
+  return (
+    <details data-adapttable-part="assistant-examples">
+      <summary data-adapttable-part="assistant-examples-summary">
+        {labels?.assistantExamples ?? "Shortcuts"}
+      </summary>
+      <AssistantSuggestions
+        slots={slots}
+        labels={labels}
+        suggestions={assistant.suggestions}
+        more={assistant.moreSuggestions ?? []}
+        onRun={onRun}
+        part="assistant-examples-list"
+      />
+    </details>
   );
 }
 
@@ -563,6 +605,9 @@ function Body({
   const run = (id: string): void => {
     void assistant.runSuggestion(id);
   };
+  const allowedNames = assistant.alwaysAllowedNames
+    ? { names: assistant.alwaysAllowedNames }
+    : {};
   return (
     <div
       data-adapttable-part="assistant-conversation-region"
@@ -625,33 +670,18 @@ function Body({
             onAnswer={assistant.answer}
           />
         ) : null}
-        {/* A scripted demo is unusable if the one click that starts it also
-            hides every other example, so they stay within reach. A kit with a
-            menu keeps them in the composer instead, where a reader looks when
-            they do not know what to type — this is what is left for one that
-            has not filled that slot. */}
-        {!slots.Menu &&
-        assistant.messages.length > 0 &&
-        assistant.suggestions.length > 0 ? (
-          <details data-adapttable-part="assistant-examples">
-            <summary data-adapttable-part="assistant-examples-summary">
-              {labels?.assistantExamples ?? "Examples"}
-            </summary>
-            <AssistantSuggestions
-              slots={slots}
-              labels={labels}
-              suggestions={assistant.suggestions}
-              more={assistant.moreSuggestions ?? []}
-              onRun={run}
-              part="assistant-examples-list"
-            />
-          </details>
-        ) : null}
+        <ExamplesFallback
+          slots={slots}
+          labels={labels}
+          assistant={assistant}
+          onRun={run}
+        />
         {/* A standing decision, not something this turn did — so it sits with
             the examples rather than in the transcript. */}
         {assistant.revokeAlwaysAllow ? (
           <AssistantAlwaysAllowed
             capabilities={assistant.alwaysAllowed ?? []}
+            {...allowedNames}
             labels={labels}
             slots={slots}
             onRevoke={assistant.revokeAlwaysAllow}

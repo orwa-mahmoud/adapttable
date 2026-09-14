@@ -95,6 +95,87 @@ describe("while a turn is running", () => {
   });
 });
 
+describe("what a turn did, when the reader asks for it", () => {
+  const oneAction = {
+    messages: [
+      {
+        id: "m1",
+        role: "assistant" as const,
+        text: "Sorted.",
+        receipts: [
+          {
+            capabilityKey: "view.setSort",
+            status: "executed",
+            idempotencyKey: "k1",
+            subject: { kind: "sort", terms: [{ column: "Salary" }] },
+          },
+        ],
+      },
+    ],
+  };
+
+  it("stays closed until it is opened, and says how many there are", () => {
+    // The reply is the answer; what it took to get there is evidence, and
+    // evidence is worth having to hand rather than in the way.
+    mount({ assistant: view(oneAction) });
+
+    expect(parts("assistant-receipt")).toHaveLength(0);
+    const toggle = part("assistant-receipts-toggle-button")!;
+    expect(toggle).toHaveTextContent("1 action");
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(toggle);
+    expect(parts("assistant-receipt")).toHaveLength(1);
+    expect(part("assistant-receipts-toggle-button")).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+
+    fireEvent.click(part("assistant-receipts-toggle-button")!);
+    expect(parts("assistant-receipt")).toHaveLength(0);
+  });
+
+  it("counts only what a reader would want shown", () => {
+    // A read changed nothing, so it is not one of the actions on offer.
+    mount({
+      assistant: view({
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "Done.",
+            receipts: [
+              {
+                capabilityKey: "rows.read",
+                status: "executed",
+                idempotencyKey: "k1",
+                subject: { kind: "read" },
+              },
+              {
+                capabilityKey: "view.setSort",
+                status: "executed",
+                idempotencyKey: "k2",
+                subject: { kind: "sort", terms: [{ column: "Salary" }] },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    expect(part("assistant-receipts-toggle-button")).toHaveTextContent(
+      "1 action"
+    );
+  });
+
+  it("offers no control at all for a host that keeps its own account", () => {
+    mount({ assistant: view(oneAction), receipts: false });
+
+    expect(part("assistant-receipts-toggle-button")).toBeNull();
+    expect(parts("assistant-receipt")).toHaveLength(0);
+  });
+});
+
 describe("what a receipt card offers", () => {
   const twoActions = {
     messages: [
@@ -128,6 +209,7 @@ describe("what a receipt card offers", () => {
   it("puts back the one action the reader pressed", () => {
     const undoAction = vi.fn();
     mount({ assistant: view({ ...twoActions, undoAction }) });
+    showActions();
 
     const controls = parts("assistant-receipt-undo-button");
     expect(controls).toHaveLength(2);
@@ -135,9 +217,11 @@ describe("what a receipt card offers", () => {
     expect(undoAction).toHaveBeenCalledWith("k2");
   });
 
-  it("offers none on a turn that did one thing", () => {
-    // The turn's own control already is that action's undo, and two controls
-    // for one change is a question rather than an affordance.
+  it("puts the control on the one card that moved something", () => {
+    // A turn can draw two cards and change only one thing — re-applying a
+    // sort already in place moves nothing. A loose button above them says
+    // nothing about which card it answers for.
+    const undoAction = vi.fn();
     mount({
       assistant: view({
         messages: [
@@ -152,14 +236,31 @@ describe("what a receipt card offers", () => {
                 idempotencyKey: "k1",
                 subject: { kind: "sort", terms: [{ column: "Salary" }] },
               },
+              {
+                capabilityKey: "view.setFilters",
+                status: "executed",
+                idempotencyKey: "k2",
+                undoable: true,
+                subject: {
+                  kind: "filter",
+                  terms: [{ column: "Status", value: "Active" }],
+                },
+              },
             ],
           },
         ],
-        undoAction: vi.fn(),
+        undo: { messageId: "m1", available: true },
+        undoAction,
       }),
     });
+    showActions();
 
-    expect(parts("assistant-receipt-undo-button")).toHaveLength(0);
+    // One control, on the card it belongs to — and no second one above.
+    const controls = parts("assistant-receipt-undo-button");
+    expect(controls).toHaveLength(1);
+    expect(part("assistant-undo-button")).toBeNull();
+    fireEvent.click(controls[0]!);
+    expect(undoAction).toHaveBeenCalledWith("k2");
   });
 
   it("keeps a read's own refusal out of the reader's conversation", () => {
@@ -195,6 +296,7 @@ describe("what a receipt card offers", () => {
         ],
       }),
     });
+    showActions();
 
     const cards = parts("assistant-receipt");
     expect(cards).toHaveLength(1);
@@ -263,6 +365,18 @@ describe("the examples, once a conversation has started", () => {
     expect(part("assistant-examples-menu")).toBeNull();
   });
 });
+
+/**
+ * Open every turn's actions.
+ *
+ * They are closed until asked for, so a test that reads a receipt card opens
+ * it the way a reader would.
+ */
+function showActions(): void {
+  for (const toggle of parts("assistant-receipts-toggle-button")) {
+    fireEvent.click(toggle);
+  }
+}
 
 describe("the launcher", () => {
   it("is the only thing shown while the panel is closed", () => {
@@ -549,6 +663,7 @@ describe("the transcript", () => {
         ],
       }),
     });
+    showActions();
 
     // The card names what changed, in the reader's terms.
     expect(part("assistant-receipt-summary")).toHaveTextContent("Grouped");
@@ -596,6 +711,7 @@ describe("the transcript", () => {
         ],
       }),
     });
+    showActions();
 
     // Two actions, two cards, and neither of them says "done".
     const [filter, sort] = parts("assistant-receipt-summary");
@@ -626,6 +742,7 @@ describe("the transcript", () => {
         ],
       }),
     });
+    showActions();
 
     expect(part("assistant-receipt-summary")).toHaveTextContent(
       "Filters cleared"
@@ -657,6 +774,7 @@ describe("the transcript", () => {
         ],
       }),
     });
+    showActions();
 
     expect(part("assistant-receipt-detail-text")).toHaveTextContent(
       "everyone still with us"
@@ -682,6 +800,7 @@ describe("the transcript", () => {
         ],
       }),
     });
+    showActions();
 
     // "staged" alone reads as done to anyone who has not read the docs.
     expect(part("assistant-receipt-save")).toHaveTextContent(
@@ -709,6 +828,7 @@ describe("the transcript", () => {
         ],
       }),
     });
+    showActions();
 
     expect(part("assistant-receipt-message")).toBeNull();
     const detail = part("assistant-receipt-detail")!;
@@ -950,6 +1070,7 @@ describe("without labels", () => {
         ],
       }),
     });
+    showActions();
 
     expect(
       parts("assistant-message-speaker").map((el) => el.textContent)
@@ -999,6 +1120,7 @@ describe("without labels", () => {
         ],
       }),
     });
+    showActions();
 
     expect(part("assistant-receipt-detail")).toHaveTextContent("Details");
   });
@@ -1552,6 +1674,7 @@ describe("what a before-and-after pair is spoken as", () => {
         ],
       }),
     });
+    showActions();
   }
 
   it("calls an applied edit a change", () => {
@@ -1561,6 +1684,7 @@ describe("what a before-and-after pair is spoken as", () => {
       "Changed from 170 to 185"
     );
   });
+  showActions();
 
   it("calls a refused edit a proposal, not a change", () => {
     withReceipt("rejected");
@@ -1572,12 +1696,14 @@ describe("what a before-and-after pair is spoken as", () => {
     );
     expect(part("assistant-receipt-change")).not.toHaveTextContent("Changed");
   });
+  showActions();
 
   it("calls a staged edit a proposal too — nothing is saved yet", () => {
     withReceipt("staged");
 
     expect(part("assistant-receipt-change")).not.toHaveTextContent("Changed");
   });
+  showActions();
 
   it("still shows both values whatever the outcome", () => {
     withReceipt("rejected");
@@ -1585,4 +1711,5 @@ describe("what a before-and-after pair is spoken as", () => {
     expect(part("assistant-receipt-before")).toHaveTextContent("170");
     expect(part("assistant-receipt-after")).toHaveTextContent("185");
   });
+  showActions();
 });

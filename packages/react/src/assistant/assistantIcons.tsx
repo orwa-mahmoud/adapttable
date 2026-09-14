@@ -151,3 +151,17 @@ export function UndoIcon(): ReactElement {
     </svg>
   );
 }
+
+/**
+ * What a turn did: a short list, for the control that reveals one.
+ *
+ * @internal
+ */
+export function ActionsIcon(): ReactElement {
+  return (
+    <svg {...BASE}>
+      <path d="M4 7h10M4 12h10M4 17h6" />
+      <path d="M18 5.5v3M16.5 7h3" />
+    </svg>
+  );
+}

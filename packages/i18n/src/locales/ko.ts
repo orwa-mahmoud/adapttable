@@ -254,6 +254,8 @@ export const ko: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `${CAPABILITY[capability] ?? capability} 다시 확인하기`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "작업 1개" : `작업 ${String(count)}개`,
   assistantExamples: "단축 명령",
   assistantMoreExamples: "단축 명령 더 보기",
   assistantReceiptChange: ({ before, after }) =>
@@ -287,6 +289,9 @@ export const ko: Required<TableLabels> = {
         "aggregate/executed": "합계를 변경했습니다",
         "select/executed": "선택을 변경했습니다",
         "read/executed": "테이블을 읽었습니다",
+        "operation/executed": "실행했습니다",
+        "operation/awaiting-approval": "대기 중입니다",
+        "operation/rejected": "거부되었습니다",
         "export/executed": "내보냈습니다",
         "add/executed": "행을 추가했습니다",
         "add/awaiting-approval": "새 행이 승인 대기 중입니다",

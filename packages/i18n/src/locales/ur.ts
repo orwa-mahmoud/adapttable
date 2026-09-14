@@ -255,6 +255,8 @@ export const ur: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `${CAPABILITY[capability] ?? capability} کے بارے میں دوبارہ پوچھیں`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 عمل" : `${String(count)} اعمال`,
   assistantExamples: "شارٹ کٹس",
   assistantMoreExamples: "مزید شارٹ کٹس",
   assistantReceiptChange: ({ before, after }) =>
@@ -288,6 +290,9 @@ export const ur: Required<TableLabels> = {
         "aggregate/executed": "میزان تبدیل ہوئے",
         "select/executed": "انتخاب تبدیل ہوا",
         "read/executed": "ٹیبل پڑھا گیا",
+        "operation/executed": "چل گیا",
+        "operation/awaiting-approval": "آپ کا منتظر",
+        "operation/rejected": "مسترد",
         "export/executed": "برآمد ہو گیا",
         "add/executed": "قطار شامل کی گئی",
         "add/awaiting-approval": "نئی قطار منظوری کی منتظر",

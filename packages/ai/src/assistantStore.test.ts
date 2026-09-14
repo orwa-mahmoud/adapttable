@@ -589,7 +589,7 @@ describe("putting one action of a turn back", () => {
     expect(table.page()).toBe(4);
   });
 
-  it("marks every action of a two-action turn, and none of a one-action turn", async () => {
+  it("marks every action that moved something, however many there were", async () => {
     const table = twoWayTable();
     const store = storeFor(table);
     await store.send("page and search");
@@ -614,13 +614,13 @@ describe("putting one action of a turn back", () => {
     });
     one.connect();
     await one.send("page");
-    // Absent rather than false: nobody established that this one can be put
-    // back on its own, which is not the same as establishing that it cannot.
+    // One action gets its own control too: the alternative is a loose button
+    // above the cards saying nothing about which card it answers for.
     expect(
       (one.getState().messages.at(-1)?.receipts ?? []).map(
         (receipt) => receipt.undoable
       )
-    ).toEqual([undefined]);
+    ).toEqual([true]);
   });
 
   it("retires the whole-turn offer once part of the turn is back", async () => {

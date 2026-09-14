@@ -253,6 +253,7 @@ export const fa: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `دوباره دربارهٔ ${CAPABILITY[capability] ?? capability} بپرس`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) => (count === 1 ? "۱ کنش" : `${String(count)} کنش`),
   assistantExamples: "میان‌برها",
   assistantMoreExamples: "میان‌برهای بیشتر",
   assistantReceiptChange: ({ before, after }) =>
@@ -286,6 +287,9 @@ export const fa: Required<TableLabels> = {
         "aggregate/executed": "جمع‌ها تغییر کرد",
         "select/executed": "انتخاب تغییر کرد",
         "read/executed": "جدول خوانده شد",
+        "operation/executed": "اجرا شد",
+        "operation/awaiting-approval": "در انتظار شما",
+        "operation/rejected": "رد شد",
         "export/executed": "خروجی گرفته شد",
         "add/executed": "سطر افزوده شد",
         "add/awaiting-approval": "سطر جدید در انتظار تأیید",

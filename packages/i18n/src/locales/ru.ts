@@ -260,6 +260,8 @@ export const ru: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `Снова спрашивать о: ${CAPABILITY[capability] ?? capability}`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 действие" : `Действий: ${String(count)}`,
   assistantExamples: "Быстрые команды",
   assistantMoreExamples: "Ещё команды",
   assistantReceiptChange: ({ before, after }) =>
@@ -293,6 +295,9 @@ export const ru: Required<TableLabels> = {
         "aggregate/executed": "Итоги изменены",
         "select/executed": "Выделение изменено",
         "read/executed": "Таблица прочитана",
+        "operation/executed": "Выполнено",
+        "operation/awaiting-approval": "Ожидает вас",
+        "operation/rejected": "Отклонено",
         "export/executed": "Экспортировано",
         "add/executed": "Строка добавлена",
         "add/awaiting-approval": "Новая строка ожидает подтверждения",

@@ -65,6 +65,9 @@ export interface AssistantUndoOffer {
 /** One shared empty list, so an unchanged snapshot stays identical. */
 const EMPTY_ALLOWED: readonly string[] = [];
 
+/** The same, for the names beside them. */
+const EMPTY_NAMES: Readonly<Record<string, string>> = {};
+
 /** Where the conversation is. @public */
 export type AssistantStatus =
   | "idle"
@@ -202,6 +205,14 @@ export interface TableAssistantSnapshot {
    * for what they agreed to.
    */
   readonly alwaysAllowed: readonly string[];
+  /**
+   * What each of those capabilities is called, where the table knows.
+   *
+   * Keyed by capability. A built-in has a translation the surface can use
+   * instead; a host's own has only whatever its definition said about it,
+   * and that is better than showing the reader an identifier.
+   */
+  readonly alwaysAllowedNames: Readonly<Record<string, string>>;
   /** Whether a send would do anything right now. */
   readonly canSend: boolean;
   /** Whether there is a turn to stop. */
@@ -499,6 +510,42 @@ export function createTableAssistant(
     return value;
   };
 
+  /**
+   * What a capability is called, in the words whoever wrote it chose.
+   *
+   * The built-in keys have translations; a host's own does not, and printing
+   * `staff.raiseTeam` at a reader tells them the developer's identifier
+   * rather than what the table did. The catalog carries the definition's own
+   * one-line summary, which is the closest thing to a name it has.
+   */
+  const capabilityName = (key: string): string | undefined => {
+    const entry = live.session
+      ?.catalog()
+      .find((candidate) => candidate.key === key);
+    return entry?.summaryShort ?? entry?.summary;
+  };
+
+  /** One shared empty map, so an unchanged snapshot stays identical. */
+  let namesCache: {
+    keys: readonly string[];
+    value: Readonly<Record<string, string>>;
+  } | null = null;
+
+  const allowedNames = (
+    keys: readonly string[] | undefined
+  ): Readonly<Record<string, string>> => {
+    const list = keys ?? EMPTY_ALLOWED;
+    if (list.length === 0) return EMPTY_NAMES;
+    if (namesCache && sameKeys(namesCache.keys, list)) return namesCache.value;
+    const value: Record<string, string> = {};
+    for (const key of list) {
+      const name = capabilityName(key);
+      if (name) value[key] = name;
+    }
+    namesCache = { keys: list, value };
+    return value;
+  };
+
   /** What the reader is offered about the last turn, read fresh. */
   const undoOffer = (): AssistantUndoOffer | null => {
     const session = live.session;
@@ -528,6 +575,7 @@ export function createTableAssistant(
     a.pendingQuestion === b.pendingQuestion &&
     sameOffer(a.undo, b.undo) &&
     sameKeys(a.alwaysAllowed, b.alwaysAllowed) &&
+    a.alwaysAllowedNames === b.alwaysAllowedNames &&
     a.canSend === b.canSend &&
     a.canStop === b.canStop &&
     a.suggestions === b.suggestions &&
@@ -593,6 +641,9 @@ export function createTableAssistant(
       pendingQuestion: question,
       undo: undoOffer(),
       alwaysAllowed: live.alwaysAllowed ?? EMPTY_ALLOWED,
+      // The same names the receipts use, so a standing permission reads as
+      // the thing the reader agreed to rather than as a developer's key.
+      alwaysAllowedNames: allowedNames(live.alwaysAllowed),
       canSend: !sending && Boolean(live.session) && Boolean(live.transport),
       canStop: sending,
     };
@@ -652,10 +703,16 @@ export function createTableAssistant(
       return false;
     }
     undoPlan = { message, undo: planned };
-    // And one per action, for a turn that did more than one thing. Restoring
-    // a field to what it was before the turn is exactly the action that
-    // changed it: within one turn no other action wrote that field, and where
-    // two did, the later one is the one a reader is looking at.
+    // And one per action. Restoring a field to what it was before the turn is
+    // exactly the action that changed it: within one turn no other action
+    // wrote that field, and where two did, the later one is the one a reader
+    // is looking at.
+    //
+    // Kept even when only one action moved anything, because the control
+    // belongs ON that action. A turn drawing two cards and one loose button
+    // above them says nothing about which card the button answers for — and
+    // in a turn that re-applied a sort already in place, that is exactly the
+    // shape it takes.
     actionPlans = new Map();
     const results = reply.results ?? [];
     for (const [index, result] of results.entries()) {
@@ -666,9 +723,6 @@ export function createTableAssistant(
       if ("code" in one) continue;
       actionPlans.set(result.idempotencyKey, one);
     }
-    // One action that moved the table IS the turn, and two controls for one
-    // change is a question the reader has to answer before they can act.
-    if (actionPlans.size < 2) actionPlans = new Map();
     return true;
   };
 
@@ -694,6 +748,29 @@ export function createTableAssistant(
     }
     publish();
   };
+
+  /**
+   * Give a host capability's receipt something to say.
+   *
+   * `subjectFor` describes the built-ins and declines everything else, which
+   * is right — only a host's own runner knows what its capability did. But
+   * the catalog knows what it is CALLED, and a card reading "done" is the
+   * defect this whole surface exists to fix.
+   */
+  const named = (
+    receipts: readonly AssistantReceipt[],
+    keys: readonly string[] | undefined
+  ): readonly AssistantReceipt[] =>
+    receipts.map((receipt, index) => {
+      if (receipt.subject) return receipt;
+      const key = keys?.[index];
+      const name = key ? capabilityName(key) : undefined;
+      if (!name) return receipt;
+      return {
+        ...receipt,
+        subject: { kind: "operation", terms: [{ value: name }] },
+      };
+    });
 
   const receive = (
     reply: AssistantTransportReply,
@@ -729,7 +806,7 @@ export function createTableAssistant(
       role: "assistant",
       text: reply.text,
       at: Date.now(),
-      receipts: receipts.length > 0 ? receipts : undefined,
+      receipts: receipts.length > 0 ? named(receipts, reply.keys) : undefined,
       outcome: receipts.length > 0 ? turnStatus(receipts) : undefined,
     });
     if (reply.unresolved) {

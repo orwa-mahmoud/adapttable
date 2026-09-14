@@ -257,6 +257,8 @@ export const tr: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `${CAPABILITY[capability] ?? capability} için yeniden sor`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 işlem" : `${String(count)} işlem`,
   assistantExamples: "Kısayollar",
   assistantMoreExamples: "Daha fazla kısayol",
   assistantReceiptChange: ({ before, after }) =>
@@ -290,6 +292,9 @@ export const tr: Required<TableLabels> = {
         "aggregate/executed": "Toplamlar değişti",
         "select/executed": "Seçim değişti",
         "read/executed": "Tablo okundu",
+        "operation/executed": "Çalıştırıldı",
+        "operation/awaiting-approval": "Sizi bekliyor",
+        "operation/rejected": "Reddedildi",
         "export/executed": "Dışa aktarıldı",
         "add/executed": "Satır eklendi",
         "add/awaiting-approval": "Yeni satır onay bekliyor",

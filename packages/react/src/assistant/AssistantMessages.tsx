@@ -14,7 +14,12 @@
 import type { TableLabels } from "@adapttable/core";
 import { type ReactElement, useState } from "react";
 
-import { AssistantIcon, SuggestionIcon, UndoIcon } from "./assistantIcons";
+import {
+  ActionsIcon,
+  AssistantIcon,
+  SuggestionIcon,
+  UndoIcon,
+} from "./assistantIcons";
 import type { TableAssistantSlots } from "./assistantSlots";
 import type {
   TableAssistantMessageView,
@@ -259,6 +264,7 @@ export function AssistantMessage({
   onUndo,
   onUndoAction,
   receipts = true,
+  leads = true,
 }: {
   readonly message: TableAssistantMessageView;
   readonly labels: TableLabels | undefined;
@@ -272,6 +278,8 @@ export function AssistantMessage({
   readonly onUndoAction?: (idempotencyKey: string) => void;
   /** Whether each action draws a card. The record is kept either way. */
   readonly receipts?: boolean;
+  /** Whether this message opens a run from its speaker, and so gets the mark. */
+  readonly leads?: boolean;
 }): ReactElement {
   // A receipt says what CHANGED. Reading rows, resolving one, asking what a
   // column means — none of that changed anything the reader can see, and the
@@ -282,6 +290,9 @@ export function AssistantMessage({
   const shown = (message.receipts ?? []).filter(
     (receipt) => receipt.subject?.kind !== "read"
   );
+  // Closed until asked for: the reply is the answer, and what it took to get
+  // there is evidence a reader opens when they want it.
+  const [openActions, setOpenActions] = useState(false);
   const perAction = onUndoAction ? { onUndoAction } : {};
   // One control per change. A card that carries its own Undo makes the
   // whole-turn one a second answer to the same question — and a reader
@@ -319,7 +330,8 @@ export function AssistantMessage({
       >
         {speaker}
       </span>
-      <Spoken message={message} mine={mine} />
+      <Spoken message={message} mine={mine} leads={leads} />
+
       {action ? (
         <span data-adapttable-part="assistant-message-action">
           <slots.Button
@@ -357,10 +369,14 @@ export function AssistantMessage({
         </span>
       ) : null}
       {receipts && shown.length > 0 ? (
-        <Receipts
+        <Actions
           receipts={shown}
           labels={labels}
           slots={slots}
+          open={openActions}
+          onToggle={() => {
+            setOpenActions(!openActions);
+          }}
           {...perAction}
         />
       ) : null}
@@ -496,9 +512,11 @@ export function AssistantEmpty({
 function Spoken({
   message,
   mine,
+  leads,
 }: {
   readonly message: TableAssistantMessageView;
   readonly mine: boolean;
+  readonly leads: boolean;
 }): ReactElement {
   return (
     <span
@@ -514,10 +532,13 @@ function Spoken({
         <span
           aria-hidden="true"
           data-adapttable-part="assistant-message-mark"
+          data-hidden={leads ? undefined : "true"}
           style={{
             display: "flex",
             marginBlockStart: "0.15em",
-            opacity: 0.7,
+            // Kept in place, not removed: the bubbles in a run stay on one
+            // line as the mark stops repeating down it.
+            opacity: leads ? 0.7 : 0,
           }}
         >
           <AssistantIcon />
@@ -553,6 +574,53 @@ function Spoken({
         {message.partialText ?? message.text}
       </span>
     </span>
+  );
+}
+
+/**
+ * What the turn did, on request.
+ *
+ * Evidence is worth having to hand rather than in the way: the reply leads,
+ * and one control under it opens the actions and closes them again.
+ */
+function Actions({
+  receipts,
+  labels,
+  slots,
+  open,
+  onToggle,
+  onUndoAction,
+}: {
+  readonly receipts: readonly TableAssistantReceiptView[];
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  readonly open: boolean;
+  readonly onToggle: () => void;
+  readonly onUndoAction?: (idempotencyKey: string) => void;
+}): ReactElement {
+  const undo = onUndoAction ? { onUndoAction } : {};
+  return (
+    <>
+      <span
+        data-adapttable-part="assistant-receipts-toggle"
+        style={{ marginInlineStart: "1.85em" }}
+      >
+        <slots.Button
+          label={
+            labels?.assistantActions?.(receipts.length) ??
+            `${String(receipts.length)} action${receipts.length === 1 ? "" : "s"}`
+          }
+          part="assistant-receipts-toggle-button"
+          variant="subtle"
+          icon={<ActionsIcon />}
+          expanded={open}
+          onClick={onToggle}
+        />
+      </span>
+      {open ? (
+        <Receipts receipts={receipts} labels={labels} slots={slots} {...undo} />
+      ) : null}
+    </>
   );
 }
 
@@ -714,10 +782,13 @@ export function AssistantQuestion({
       style={{
         display: "flex",
         flexDirection: "column",
+        alignItems: "flex-start",
         gap: "0.45em",
         border: 0,
         margin: 0,
-        padding: 0,
+        // Indented to the same line a reply starts on, so the assistant's
+        // question sits where its answers do rather than spanning the panel.
+        padding: "0 0 0 1.85em",
         minInlineSize: 0,
       }}
     >
@@ -735,11 +806,13 @@ export function AssistantQuestion({
           borderColor: "color-mix(in srgb, currentColor 14%, transparent)",
           fontSize: "1.05em",
           lineHeight: 1.5,
-          // A legend is out of flow by default, which would leave the options
-          // tucked under it.
-          float: "inline-start",
-          inlineSize: "100%",
-          marginBlockEnd: "0.45em",
+          // The same measure a reply gets. A legend is out of flow by
+          // default, which is what let this span the whole panel.
+          float: "none",
+          display: "block",
+          inlineSize: "auto",
+          maxInlineSize: "min(100%, 30em)",
+          marginBlockEnd: "0.1em",
         }}
       >
         {question.question}
@@ -747,7 +820,12 @@ export function AssistantQuestion({
       {options.length > 0 ? (
         <div
           data-adapttable-part="assistant-question-options"
-          style={{ display: "flex", flexWrap: "wrap", gap: "0.35em" }}
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "flex-start",
+            gap: "0.35em",
+          }}
         >
           {options.map((option) => (
             <Suggestion
@@ -762,28 +840,40 @@ export function AssistantQuestion({
         </div>
       ) : null}
       {question.allowFreeText ? (
-        <div style={{ display: "flex", gap: "0.35em", alignItems: "flex-end" }}>
-          <slots.Composer
-            label={labels?.assistantAnswerLabel ?? "Your answer"}
-            placeholder={labels?.assistantAnswerPlaceholder ?? "Type an answer"}
-            part="assistant-question-input"
-            value={typed}
-            onChange={setTyped}
-            onKeyDown={(event) => {
-              // The same rule as the composer: Enter answers, Shift+Enter is a
-              // newline, and an IME composition is left alone.
-              if (event.key !== "Enter" || event.shiftKey) return;
-              if (
-                (event.nativeEvent as { isComposing?: boolean }).isComposing
-              ) {
-                return;
+        <div
+          style={{
+            display: "flex",
+            gap: "0.35em",
+            alignItems: "flex-end",
+            alignSelf: "stretch",
+            minWidth: 0,
+          }}
+        >
+          <span style={{ flex: "1 1 auto", minWidth: 0, display: "flex" }}>
+            <slots.Composer
+              label={labels?.assistantAnswerLabel ?? "Your answer"}
+              placeholder={
+                labels?.assistantAnswerPlaceholder ?? "Type an answer"
               }
-              event.preventDefault();
-              if (!typed.trim()) return;
-              onAnswer({ text: typed.trim() });
-              setTyped("");
-            }}
-          />
+              part="assistant-question-input"
+              value={typed}
+              onChange={setTyped}
+              onKeyDown={(event) => {
+                // The same rule as the composer: Enter answers, Shift+Enter is a
+                // newline, and an IME composition is left alone.
+                if (event.key !== "Enter" || event.shiftKey) return;
+                if (
+                  (event.nativeEvent as { isComposing?: boolean }).isComposing
+                ) {
+                  return;
+                }
+                event.preventDefault();
+                if (!typed.trim()) return;
+                onAnswer({ text: typed.trim() });
+                setTyped("");
+              }}
+            />
+          </span>
           <slots.Button
             label={labels?.assistantAnswerSend ?? "Answer"}
             part="assistant-question-send"
@@ -808,11 +898,14 @@ export function AssistantQuestion({
  */
 export function AssistantAlwaysAllowed({
   capabilities,
+  names,
   labels,
   slots,
   onRevoke,
 }: {
   readonly capabilities: readonly string[];
+  /** What each is called, where the table could say. */
+  readonly names?: Readonly<Record<string, string>>;
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly onRevoke: (capability: string) => void;
@@ -852,7 +945,13 @@ export function AssistantAlwaysAllowed({
                 onRevoke(capability);
               }}
             >
-              {labels?.assistantCapabilityName?.(capability) ?? capability}
+              {/* A translation for the built-ins, the definition's own words
+                  for a host's own capability, and the key only when neither
+                  exists — which is a developer's identifier and reads like
+                  one. */}
+              {labels?.assistantCapabilityName?.(capability) ??
+                names?.[capability] ??
+                capability}
             </slots.Button>
           </li>
         ))}

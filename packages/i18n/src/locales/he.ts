@@ -251,6 +251,8 @@ export const he: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `לשאול שוב על ${CAPABILITY[capability] ?? capability}`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "פעולה אחת" : `${String(count)} פעולות`,
   assistantExamples: "קיצורי דרך",
   assistantMoreExamples: "עוד קיצורי דרך",
   assistantReceiptChange: ({ before, after }) => `שונה מ-${before} ל-${after}`,
@@ -283,6 +285,9 @@ export const he: Required<TableLabels> = {
         "aggregate/executed": "הסיכומים שונו",
         "select/executed": "הבחירה שונתה",
         "read/executed": "הטבלה נקראה",
+        "operation/executed": "בוצע",
+        "operation/awaiting-approval": "ממתין לך",
+        "operation/rejected": "נדחה",
         "export/executed": "יוצא",
         "add/executed": "שורה נוספה",
         "add/awaiting-approval": "שורה חדשה ממתינה לאישור",

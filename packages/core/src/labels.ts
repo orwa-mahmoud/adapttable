@@ -38,6 +38,9 @@ const ASSISTANT_RECEIPT_ACTION: Readonly<Record<string, string>> = {
   "aggregate/executed": "Totals changed",
   "select/executed": "Selection changed",
   "read/executed": "Read the table",
+  "operation/executed": "Ran",
+  "operation/awaiting-approval": "Waiting for you",
+  "operation/rejected": "Refused",
   "export/executed": "Exported",
   "edit/executed": "Saved",
   "edit/staged": "Edit staged — not saved",
@@ -343,6 +346,8 @@ export const defaultLabels: Required<TableLabels> = {
     const what = ASSISTANT_RECEIPT[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
+  assistantActions: (count) =>
+    count === 1 ? "1 action" : `${String(count)} actions`,
   assistantExamples: "Shortcuts",
   assistantMoreExamples: "More shortcuts",
   assistantReceiptStatus: (status) =>

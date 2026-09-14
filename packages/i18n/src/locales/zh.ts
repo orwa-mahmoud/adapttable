@@ -248,6 +248,8 @@ export const zh: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `重新询问${CAPABILITY[capability] ?? capability}`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 项操作" : `${String(count)} 项操作`,
   assistantExamples: "快捷指令",
   assistantMoreExamples: "更多快捷指令",
   assistantReceiptChange: ({ before, after }) => `已从 ${before} 改为 ${after}`,
@@ -280,6 +282,9 @@ export const zh: Required<TableLabels> = {
         "aggregate/executed": "已更改汇总",
         "select/executed": "已更改选择",
         "read/executed": "已读取表格",
+        "operation/executed": "已执行",
+        "operation/awaiting-approval": "等待你",
+        "operation/rejected": "已拒绝",
         "export/executed": "已导出",
         "add/executed": "已添加行",
         "add/awaiting-approval": "新行等待审批",

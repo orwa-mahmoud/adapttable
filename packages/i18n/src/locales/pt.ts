@@ -259,6 +259,8 @@ export const pt: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `Perguntar sobre ${CAPABILITY[capability] ?? capability} novamente`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 ação" : `${String(count)} ações`,
   assistantExamples: "Atalhos",
   assistantMoreExamples: "Mais atalhos",
   assistantReceiptChange: ({ before, after }) =>
@@ -292,6 +294,9 @@ export const pt: Required<TableLabels> = {
         "aggregate/executed": "Totais alterados",
         "select/executed": "Seleção alterada",
         "read/executed": "Tabela consultada",
+        "operation/executed": "Executado",
+        "operation/awaiting-approval": "Aguardando você",
+        "operation/rejected": "Recusado",
         "export/executed": "Exportado",
         "add/executed": "Linha adicionada",
         "add/awaiting-approval": "Nova linha aguardando aprovação",

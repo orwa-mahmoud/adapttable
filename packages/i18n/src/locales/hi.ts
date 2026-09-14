@@ -257,6 +257,8 @@ export const hi: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `${CAPABILITY[capability] ?? capability} के बारे में फिर पूछें`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 क्रिया" : `${String(count)} क्रियाएँ`,
   assistantExamples: "शॉर्टकट",
   assistantMoreExamples: "और शॉर्टकट",
   assistantReceiptChange: ({ before, after }) =>
@@ -290,6 +292,9 @@ export const hi: Required<TableLabels> = {
         "aggregate/executed": "योग बदले",
         "select/executed": "चयन बदला",
         "read/executed": "तालिका पढ़ी गई",
+        "operation/executed": "चलाया गया",
+        "operation/awaiting-approval": "आपकी प्रतीक्षा में",
+        "operation/rejected": "अस्वीकृत",
         "export/executed": "निर्यात किया गया",
         "add/executed": "पंक्ति जोड़ी गई",
         "add/awaiting-approval": "नई पंक्ति अनुमोदन की प्रतीक्षा में",

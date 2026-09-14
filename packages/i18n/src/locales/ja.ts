@@ -252,6 +252,8 @@ export const ja: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `${CAPABILITY[capability] ?? capability}について再び確認する`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 件の操作" : `${String(count)} 件の操作`,
   assistantExamples: "ショートカット",
   assistantMoreExamples: "他のショートカット",
   assistantReceiptChange: ({ before, after }) =>
@@ -285,6 +287,9 @@ export const ja: Required<TableLabels> = {
         "aggregate/executed": "集計を変更しました",
         "select/executed": "選択を変更しました",
         "read/executed": "テーブルを読み取りました",
+        "operation/executed": "実行しました",
+        "operation/awaiting-approval": "あなたを待っています",
+        "operation/rejected": "拒否されました",
         "export/executed": "エクスポートしました",
         "add/executed": "行を追加しました",
         "add/awaiting-approval": "新しい行が承認待ちです",
