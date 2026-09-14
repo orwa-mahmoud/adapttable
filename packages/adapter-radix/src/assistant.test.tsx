@@ -34,6 +34,13 @@ interface View {
   stop: () => void;
   suggestions: { id: string; title: string }[];
   runSuggestion: (id: string) => void;
+  pendingQuestion?: {
+    id: string;
+    question: string;
+    options?: { id: string; label: string }[];
+    allowFreeText: boolean;
+  } | null;
+  answer?: (answer: { optionId?: string; text?: string }) => void;
 }
 
 function view(patch: Partial<View> = {}): View {
@@ -76,7 +83,9 @@ describe("TableAssistant", () => {
     expect(part("assistant-connection")).toHaveTextContent("Ready");
     expect(part("assistant-empty-prompt")).toBeTruthy();
     expect(part("assistant-input")).toBeTruthy();
-    expect(part("assistant-suggestion")).toHaveTextContent("Group by city");
+    // The shortcuts live in the composer's own menu from the first frame,
+    // not as cards in the empty state.
+    expect(part("assistant-examples-menu")).toBeTruthy();
   });
 
   it("opens the examples from the composer, in this kit's own menu", async () => {
@@ -330,7 +339,7 @@ describe("the kit's own controls", () => {
     expect(send).toHaveBeenCalledTimes(1);
   });
 
-  it("runs a suggestion from the empty state", () => {
+  it("runs a shortcut from the composer's menu", async () => {
     const runSuggestion = vi.fn();
     mount(
       <TableAssistant
@@ -340,9 +349,65 @@ describe("the kit's own controls", () => {
         onOpenChange={() => undefined}
       />
     );
-    fireEvent.click(part("assistant-suggestion")!);
+
+    // This kit's menu renders its entries when it opens, not before.
+    const trigger = part("assistant-examples-menu")!;
+    fireEvent.pointerDown(
+      trigger,
+      new PointerEvent("pointerdown", {
+        bubbles: true,
+        button: 0,
+        ctrlKey: false,
+      })
+    );
+    const item = await waitFor(() => {
+      const found = document.querySelector<HTMLElement>(
+        '[data-adapttable-part="assistant-examples-item"]'
+      );
+      expect(found).toBeTruthy();
+      return found!;
+    });
+    fireEvent.click(item);
 
     expect(runSuggestion).toHaveBeenCalledWith("s1");
+  });
+
+  it("asks the backend's question with this kit's own option controls", () => {
+    // The suggestion control has two homes: the shortcuts menu, and the
+    // options on a question the backend put to the reader.
+    const answer = vi.fn();
+    mount(
+      <TableAssistant
+        assistant={view({
+          status: "awaiting-user",
+          pendingQuestion: {
+            id: "q1",
+            question: "Which team did you mean?",
+            options: [
+              { id: "core", label: "Core" },
+              { id: "platform", label: "Platform" },
+            ],
+            allowFreeText: false,
+          },
+          answer,
+        })}
+        labels={defaultLabels}
+        open
+        onOpenChange={() => undefined}
+      />
+    );
+
+    expect(part("assistant-question-text")).toHaveTextContent(
+      "Which team did you mean?"
+    );
+    const options = [
+      ...document.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="assistant-question-option"]'
+      ),
+    ];
+    expect(options).toHaveLength(2);
+    fireEvent.click(options[1]!);
+    expect(answer).toHaveBeenCalledWith({ optionId: "platform" });
   });
 
   it("closes from the header", () => {

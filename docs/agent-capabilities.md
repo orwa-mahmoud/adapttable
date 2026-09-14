@@ -553,7 +553,8 @@ const review = approvalReview(pending, labels);
 review.changes; // 12
 review.rows; //  8 — three edits to one row are three changes and one row
 review.preview; // the first three
-review.approveLabel; // "Approve all", or "Approve remaining" after a decision
+review.approveLabel; // "Approve all" — "Approve" for one, "Approve remaining"
+//                      once any change has been decided
 ```
 
 A long write opens with a summary — _12 proposed changes across 8 rows_ — and
@@ -564,10 +565,14 @@ conversation** returns, rather than a second overlay opening over the first.
 `Approve all` becomes `Approve remaining` the moment any single change is
 decided, because a row already refused stays refused and the first label
 would be a promise the control cannot keep. A running tally sits beside it.
+A write with one change says `Approve` and offers no per-row pair: "all" of
+one names a set that does not exist, and two controls answering the same
+question is a decision the reader has to make before they can act.
 
 A write that enumerates no rows — an opaque server operation — is shown by
-name and arguments. It gets no invented row count and no per-row checkboxes,
-and it is answered whole.
+name and its arguments as pairs, not as the JSON the capability will receive.
+It gets no invented row count and no per-row checkboxes, and it is answered
+whole.
 
 Closing the assistant does not answer anything. The write stays parked and
 the launcher still says so; reopening brings the review back.

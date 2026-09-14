@@ -721,9 +721,26 @@ export function AssistantQuestion({
         minInlineSize: 0,
       }}
     >
+      {/* The assistant asked this, so it looks like the assistant said it —
+          the same surface its replies get. A question rendered as bare text
+          beside bubbled replies reads as a caption on the controls under it
+          rather than as the thing being asked. */}
       <legend
         data-adapttable-part="assistant-question-text"
-        style={{ padding: 0 }}
+        style={{
+          padding: "0.6em 0.8em",
+          borderRadius: "0.85em",
+          background: "color-mix(in srgb, currentColor 3.5%, transparent)",
+          border: "1px solid currentColor",
+          borderColor: "color-mix(in srgb, currentColor 14%, transparent)",
+          fontSize: "1.05em",
+          lineHeight: 1.5,
+          // A legend is out of flow by default, which would leave the options
+          // tucked under it.
+          float: "inline-start",
+          inlineSize: "100%",
+          marginBlockEnd: "0.45em",
+        }}
       >
         {question.question}
       </legend>

@@ -33,6 +33,13 @@ interface View {
   stop: () => void;
   suggestions: { id: string; title: string }[];
   runSuggestion: (id: string) => void;
+  pendingQuestion?: {
+    id: string;
+    question: string;
+    options?: { id: string; label: string }[];
+    allowFreeText: boolean;
+  } | null;
+  answer?: (answer: { optionId?: string; text?: string }) => void;
 }
 
 function view(patch: Partial<View> = {}): View {
@@ -75,7 +82,9 @@ describe("TableAssistant", () => {
     expect(part("assistant-connection")).toHaveTextContent("Ready");
     expect(part("assistant-empty-prompt")).toBeTruthy();
     expect(part("assistant-input")).toBeTruthy();
-    expect(part("assistant-suggestion")).toHaveTextContent("Group by city");
+    // The shortcuts live in the composer's own menu from the first frame,
+    // not as cards in the empty state.
+    expect(part("assistant-examples-menu")).toBeTruthy();
   });
 
   it("opens the examples from the composer, in this kit's own menu", () => {
@@ -115,6 +124,44 @@ describe("TableAssistant", () => {
     expect(runSuggestion).toHaveBeenCalledWith("s2");
     // Picking one closes the menu, the way a menu closes anywhere else.
     expect(disclosure.hasAttribute("open")).toBe(false);
+  });
+
+  it("asks the backend's question with this kit's own option controls", () => {
+    // The suggestion control has two homes: the shortcuts menu, and the
+    // options on a question the backend put to the reader.
+    const answer = vi.fn();
+    mount(
+      <TableAssistant
+        assistant={view({
+          status: "awaiting-user",
+          pendingQuestion: {
+            id: "q1",
+            question: "Which team did you mean?",
+            options: [
+              { id: "core", label: "Core" },
+              { id: "platform", label: "Platform" },
+            ],
+            allowFreeText: false,
+          },
+          answer,
+        })}
+        labels={defaultLabels}
+        open
+        onOpenChange={() => undefined}
+      />
+    );
+
+    expect(part("assistant-question-text")).toHaveTextContent(
+      "Which team did you mean?"
+    );
+    const options = [
+      ...document.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="assistant-question-option"]'
+      ),
+    ];
+    expect(options).toHaveLength(2);
+    fireEvent.click(options[1]!);
+    expect(answer).toHaveBeenCalledWith({ optionId: "platform" });
   });
 
   it("shows only the launcher while closed", () => {

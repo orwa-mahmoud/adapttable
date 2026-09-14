@@ -47,10 +47,24 @@ describe("floatingStyle", () => {
 
   it("gives back size rather than overflowing a short viewport", () => {
     const style = floatingStyle("viewport");
-    // Both axes are a `min()` against the space available, so the intended
-    // 400x560 is a ceiling and never a demand.
+    // Both axes end in a `min()` against the space available, so nothing the
+    // window asks for is ever a demand.
     expect(String(style.inlineSize)).toMatch(/^min\(400px,/);
-    expect(String(style.blockSize)).toMatch(/^min\(560px,/);
+    expect(String(style.blockSize)).toContain("calc(100% - 40px)");
+    expect(String(style.blockSize)).toMatch(/^min\(/);
+  });
+
+  it("takes some of a tall screen instead of leaving it empty", () => {
+    // 560px is the floor, not the size: a conversation on a 1440px-tall
+    // screen has room for more transcript, and the cap stops it becoming a
+    // full-height wall.
+    const block = String(floatingStyle("viewport").blockSize);
+    expect(block).toContain("max(560px, 62vh)");
+    expect(block).toContain("760px");
+  });
+
+  it("keeps the width fixed, because a wider conversation reads worse", () => {
+    expect(String(floatingStyle("viewport").inlineSize)).not.toContain("vw");
   });
 
   it("sits above sticky headers without an arbitrary z-index", () => {
