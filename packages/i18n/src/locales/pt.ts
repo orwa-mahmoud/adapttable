@@ -223,6 +223,28 @@ export const pt: Required<TableLabels> = {
   assistantDetail: "Detalhes",
   assistantSaveInTable: "Salve na tabela para manter esta alteração.",
   assistantUndo: "Desfazer",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Isso exige mais etapas do que um turno permite. Peça uma parte.",
+        "continuation-limit":
+          "Isso exige mais etapas do que um turno permite. Peça uma parte.",
+        "resume-limit":
+          "Isso exige mais etapas do que um turno permite. Peça uma parte.",
+        "discovery-exhausted":
+          "O assistente não descobriu como fazer isso aqui.",
+        "repeated-plan": "O assistente pediu a mesma coisa duas vezes e parou.",
+        "question-unanswered":
+          "Isso precisa de uma resposta sua para concluir.",
+        "approval-unavailable":
+          "Isso precisa de aprovação e não há onde pedi-la.",
+        "interrupt-unsupported":
+          "O assistente pediu algo que esta tabela não faz.",
+        "output-denied": "Parte disso não teve permissão para executar.",
+        "not-run": "Isso não foi executado.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -237,8 +259,8 @@ export const pt: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `Perguntar sobre ${CAPABILITY[capability] ?? capability} novamente`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "Exemplos",
-  assistantMoreExamples: "Mais exemplos",
+  assistantExamples: "Atalhos",
+  assistantMoreExamples: "Mais atalhos",
   assistantReceiptChange: ({ before, after }) =>
     `Alterado de ${before} para ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -264,6 +286,8 @@ export const pt: Required<TableLabels> = {
         "search-cleared/executed": "Pesquisa limpa",
         "group-cleared/executed": "Agrupamento removido",
         "pin-cleared/executed": "Coluna desafixada",
+        "pinRow/executed": "Linha fixada",
+        "pinRow-cleared/executed": "Linha desafixada",
         "page/executed": "Página alterada",
         "aggregate/executed": "Totais alterados",
         "select/executed": "Seleção alterada",

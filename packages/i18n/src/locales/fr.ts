@@ -224,6 +224,29 @@ export const fr: Required<TableLabels> = {
   assistantSaveInTable:
     "Enregistrez dans le tableau pour conserver ce changement.",
   assistantUndo: "Annuler",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Cela demande plus d’étapes qu’un tour n’en permet. Demandez-en une partie.",
+        "continuation-limit":
+          "Cela demande plus d’étapes qu’un tour n’en permet. Demandez-en une partie.",
+        "resume-limit":
+          "Cela demande plus d’étapes qu’un tour n’en permet. Demandez-en une partie.",
+        "discovery-exhausted":
+          "L’assistant n’a pas trouvé comment faire cela ici.",
+        "repeated-plan":
+          "L’assistant a redemandé la même chose et s’est arrêté.",
+        "question-unanswered":
+          "Cela attend une réponse de votre part pour aboutir.",
+        "approval-unavailable":
+          "Cela demande une approbation, et il n’y a nulle part où la demander.",
+        "interrupt-unsupported":
+          "L’assistant a demandé quelque chose que ce tableau ne sait pas faire.",
+        "output-denied": "Une partie n’a pas été autorisée à s’exécuter.",
+        "not-run": "Cela ne s’est pas exécuté.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -238,8 +261,8 @@ export const fr: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `Redemander pour ${CAPABILITY[capability] ?? capability}`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "Exemples",
-  assistantMoreExamples: "Plus d’exemples",
+  assistantExamples: "Raccourcis",
+  assistantMoreExamples: "Plus de raccourcis",
   assistantReceiptChange: ({ before, after }) =>
     `Modifié de ${before} à ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -266,6 +289,8 @@ export const fr: Required<TableLabels> = {
         "search-cleared/executed": "Recherche effacée",
         "group-cleared/executed": "Groupement supprimé",
         "pin-cleared/executed": "Colonne désépinglée",
+        "pinRow/executed": "Ligne épinglée",
+        "pinRow-cleared/executed": "Ligne désépinglée",
         "page/executed": "Page modifiée",
         "aggregate/executed": "Totaux modifiés",
         "select/executed": "Sélection modifiée",

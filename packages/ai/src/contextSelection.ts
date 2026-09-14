@@ -28,8 +28,13 @@ import type { CapabilityGuide } from "./types";
 /**
  * How much context to build.
  *
- * `compact` carries the common operations in full and defers the rest;
- * `full` carries everything that fits inside the hard limit.
+ * `full` is the default: everything that fits inside the hard limit. Which
+ * model this table is talking to, and what its window costs, is the backend's
+ * business — trimming on its behalf means guessing, and a guess that drops a
+ * column's unit is paid for by the reader who gets the wrong number back.
+ *
+ * `compact` carries the common operations in full and defers the rest, for a
+ * host that has measured its own backend and wants the smaller payload.
  *
  * @public
  */
@@ -37,7 +42,7 @@ export type AgentContextProfile = "compact" | "full";
 
 /** How the caller wants the context selected. @public */
 export interface AgentContextOptions {
-  /** Defaults to `compact`. */
+  /** Defaults to `full`, which is budgeted only by the hard byte limit. */
   readonly profile?: AgentContextProfile;
   /**
    * Soft budget in estimated tokens.
@@ -205,7 +210,7 @@ export function selectGuides(
   readonly deferred: readonly { key: string; reason: DeferralReason }[];
   readonly notes: readonly string[];
 } {
-  const profile = options.profile ?? "compact";
+  const profile = options.profile ?? "full";
   const budget =
     options.tokenBudget ??
     (profile === "compact" ? DEFAULT_COMPACT_TOKENS : undefined);

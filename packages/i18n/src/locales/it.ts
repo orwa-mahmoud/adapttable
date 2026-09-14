@@ -220,6 +220,27 @@ export const it: Required<TableLabels> = {
   assistantDetail: "Dettagli",
   assistantSaveInTable: "Salva nella tabella per mantenere questa modifica.",
   assistantUndo: "Annulla",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Richiede più passaggi di quanti ne consenta un turno. Chiedine una parte.",
+        "continuation-limit":
+          "Richiede più passaggi di quanti ne consenta un turno. Chiedine una parte.",
+        "resume-limit":
+          "Richiede più passaggi di quanti ne consenta un turno. Chiedine una parte.",
+        "discovery-exhausted": "L’assistente non ha capito come farlo qui.",
+        "repeated-plan":
+          "L’assistente ha chiesto due volte la stessa cosa e si è fermato.",
+        "question-unanswered": "Serve una tua risposta per completare.",
+        "approval-unavailable":
+          "Serve un’approvazione e non c’è a chi chiederla.",
+        "interrupt-unsupported":
+          "L’assistente ha chiesto qualcosa che questa tabella non sa fare.",
+        "output-denied": "Una parte non è stata autorizzata a eseguire.",
+        "not-run": "Non è stato eseguito.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -234,8 +255,8 @@ export const it: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `Chiedi di nuovo per ${CAPABILITY[capability] ?? capability}`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "Esempi",
-  assistantMoreExamples: "Altri esempi",
+  assistantExamples: "Scorciatoie",
+  assistantMoreExamples: "Altre scorciatoie",
   assistantReceiptChange: ({ before, after }) =>
     `Modificato da ${before} a ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -261,6 +282,8 @@ export const it: Required<TableLabels> = {
         "search-cleared/executed": "Ricerca cancellata",
         "group-cleared/executed": "Raggruppamento rimosso",
         "pin-cleared/executed": "Colonna non più fissata",
+        "pinRow/executed": "Riga fissata",
+        "pinRow-cleared/executed": "Riga non più fissata",
         "page/executed": "Pagina cambiata",
         "aggregate/executed": "Totali modificati",
         "select/executed": "Selezione modificata",

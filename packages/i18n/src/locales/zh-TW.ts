@@ -219,6 +219,22 @@ export const zhTW: Required<TableLabels> = {
   assistantDetail: "詳細資料",
   assistantSaveInTable: "在表格中儲存以保留此變更。",
   assistantUndo: "復原",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "這需要的步驟超過單輪允許的數量。請分次提出。",
+        "continuation-limit": "這需要的步驟超過單輪允許的數量。請分次提出。",
+        "resume-limit": "這需要的步驟超過單輪允許的數量。請分次提出。",
+        "discovery-exhausted": "助理無法判斷在這裡該怎麼做。",
+        "repeated-plan": "助理重複請求同一件事後停止。",
+        "question-unanswered": "需要你的回覆才能完成。",
+        "approval-unavailable": "需要核准，但無處詢問。",
+        "interrupt-unsupported": "助理請求了此表格無法完成的操作。",
+        "output-denied": "其中一部分不被允許執行。",
+        "not-run": "未執行。",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -233,8 +249,8 @@ export const zhTW: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `重新詢問${CAPABILITY[capability] ?? capability}`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "範例",
-  assistantMoreExamples: "更多範例",
+  assistantExamples: "快捷指令",
+  assistantMoreExamples: "更多快捷指令",
   assistantReceiptChange: ({ before, after }) => `已從 ${before} 改為 ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
     `建議：從 ${before} 改為 ${after}`,
@@ -259,6 +275,8 @@ export const zhTW: Required<TableLabels> = {
         "search-cleared/executed": "已清除搜尋",
         "group-cleared/executed": "已清除分組",
         "pin-cleared/executed": "已取消固定欄位",
+        "pinRow/executed": "已固定列",
+        "pinRow-cleared/executed": "已取消固定列",
         "page/executed": "已切換頁次",
         "aggregate/executed": "已變更彙總",
         "select/executed": "已變更選取",

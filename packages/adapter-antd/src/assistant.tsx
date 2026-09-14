@@ -338,6 +338,7 @@ function AssistantMenu({
   disabled,
   items,
   onSelect,
+  maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
   return (
     <Dropdown
@@ -361,6 +362,7 @@ function AssistantMenu({
         onClick: (event) => {
           onSelect(event.key);
         },
+        style: { maxHeight, overflowY: "auto" },
       }}
     >
       <Tooltip title={label}>

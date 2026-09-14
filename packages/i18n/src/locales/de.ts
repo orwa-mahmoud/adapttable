@@ -225,6 +225,28 @@ export const de: Required<TableLabels> = {
   assistantSaveInTable:
     "In der Tabelle speichern, um diese Änderung zu behalten.",
   assistantUndo: "Rückgängig",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Das braucht mehr Schritte, als ein Durchgang erlaubt. Fragen Sie nach einem Teil.",
+        "continuation-limit":
+          "Das braucht mehr Schritte, als ein Durchgang erlaubt. Fragen Sie nach einem Teil.",
+        "resume-limit":
+          "Das braucht mehr Schritte, als ein Durchgang erlaubt. Fragen Sie nach einem Teil.",
+        "discovery-exhausted":
+          "Der Assistent konnte nicht herausfinden, wie das hier geht.",
+        "repeated-plan":
+          "Der Assistent hat dasselbe zweimal angefragt und gestoppt.",
+        "question-unanswered": "Das braucht erst eine Antwort von Ihnen.",
+        "approval-unavailable":
+          "Das braucht eine Freigabe, und es gibt niemanden zu fragen.",
+        "interrupt-unsupported":
+          "Der Assistent hat etwas angefragt, das diese Tabelle nicht kann.",
+        "output-denied": "Ein Teil davon durfte nicht ausgeführt werden.",
+        "not-run": "Das wurde nicht ausgeführt.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -239,8 +261,8 @@ export const de: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `Wieder nach ${CAPABILITY[capability] ?? capability} fragen`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "Beispiele",
-  assistantMoreExamples: "Weitere Beispiele",
+  assistantExamples: "Kurzbefehle",
+  assistantMoreExamples: "Weitere Kurzbefehle",
   assistantReceiptChange: ({ before, after }) =>
     `Von ${before} zu ${after} geändert`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -266,6 +288,8 @@ export const de: Required<TableLabels> = {
         "search-cleared/executed": "Suche gelöscht",
         "group-cleared/executed": "Gruppierung aufgehoben",
         "pin-cleared/executed": "Anheftung aufgehoben",
+        "pinRow/executed": "Zeile angeheftet",
+        "pinRow-cleared/executed": "Zeile gelöst",
         "page/executed": "Seite gewechselt",
         "aggregate/executed": "Summen geändert",
         "select/executed": "Auswahl geändert",

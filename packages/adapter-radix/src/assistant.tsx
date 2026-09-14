@@ -335,6 +335,7 @@ function AssistantMenu({
   disabled,
   items,
   onSelect,
+  maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
   return (
     <DropdownMenu.Root>
@@ -353,7 +354,11 @@ function AssistantMenu({
           {icon}
         </IconButton>
       </DropdownMenu.Trigger>
-      <DropdownMenu.Content side="top" align="start">
+      <DropdownMenu.Content
+        side="top"
+        align="start"
+        style={{ maxHeight, overflowY: "auto" }}
+      >
         {items.map((item) => (
           <DropdownMenu.Item
             key={item.id}

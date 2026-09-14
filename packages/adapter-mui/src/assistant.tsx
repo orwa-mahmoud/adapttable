@@ -353,6 +353,7 @@ function AssistantMenu({
   disabled,
   items,
   onSelect,
+  maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   return (
@@ -384,6 +385,7 @@ function AssistantMenu({
         }}
         anchorOrigin={{ vertical: "top", horizontal: "left" }}
         transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+        slotProps={{ paper: { sx: { maxHeight, overflowY: "auto" } } }}
       >
         {items.map((item) => (
           <MenuItem

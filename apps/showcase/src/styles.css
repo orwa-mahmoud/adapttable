@@ -1282,7 +1282,10 @@ a {
   flex-direction: column;
   gap: 6px;
 }
-.ai-conn__form input {
+/* The text fields only. This rule used to catch the protocol radios too,
+   which stretched them to 32px and floated them into the middle of their own
+   labels. */
+.ai-conn__form input:not([type="radio"]):not([type="checkbox"]) {
   min-height: 32px;
   padding: 0 8px;
   color: inherit;
@@ -1290,6 +1293,53 @@ a {
   border: 1px solid var(--page-border);
   border-radius: 8px;
   font: inherit;
+}
+/* One choice per row: the control in its own column, the description beside
+   it, both aligned to the first line so a three-line option still reads as
+   one choice. */
+.ai-conn__protocol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 8px 10px 10px;
+  border: 1px solid var(--page-border);
+  border-radius: 8px;
+}
+.ai-conn__protocol legend {
+  padding-inline: 4px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.ai-conn__protocol label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: start;
+  min-height: 44px;
+  padding: 6px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.ai-conn__protocol label:hover {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+.ai-conn__protocol input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--ink);
+}
+.ai-conn__protocol label:focus-within {
+  outline: 2px solid var(--focus, #2563eb);
+  outline-offset: 1px;
+}
+.ai-conn__protocol span {
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.ai-conn__protocol code {
+  overflow-wrap: anywhere;
 }
 .ai-conn__note {
   margin: 4px 0;

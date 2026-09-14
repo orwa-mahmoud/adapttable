@@ -118,6 +118,7 @@ export function AssistantComposer({
           disabled={!usable}
           items={examples.items}
           onSelect={examples.onSelect}
+          maxHeight="min(22em, 50vh)"
         />
       ) : null}
       {/* The input takes the room that is left. Without `minWidth: 0` a

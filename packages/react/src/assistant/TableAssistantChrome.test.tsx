@@ -63,6 +63,38 @@ function mount(
   return { onOpenChange };
 }
 
+describe("while a turn is running", () => {
+  it("says so where the reply will land, not only in the header", () => {
+    // A reader who has just pressed send is looking at the transcript, not
+    // at a word in the title bar.
+    mount({
+      assistant: view({
+        status: "sending",
+        busy: true,
+        messages: [{ id: "m1", role: "user", text: "sort by salary" }],
+      }),
+    });
+
+    const working = part("assistant-working");
+    expect(working).toBeTruthy();
+    expect(part("assistant-working-text")).toHaveTextContent("Working");
+    // The live region above the composer already announces it; hearing the
+    // same thing twice tells a screen reader reader nothing.
+    expect(working).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("shows none once the turn has settled", () => {
+    mount({
+      assistant: view({
+        status: "ready",
+        messages: [{ id: "m1", role: "assistant", text: "Sorted." }],
+      }),
+    });
+
+    expect(part("assistant-working")).toBeNull();
+  });
+});
+
 describe("what a receipt card offers", () => {
   const twoActions = {
     messages: [
@@ -130,6 +162,46 @@ describe("what a receipt card offers", () => {
     expect(parts("assistant-receipt-undo-button")).toHaveLength(0);
   });
 
+  it("keeps a read's own refusal out of the reader's conversation", () => {
+    // The model resolved a row by name, was refused, read the rows and wrote
+    // the value. The turn worked; the refusal was advice to the caller, and
+    // showing it says the opposite of what happened.
+    mount({
+      assistant: view({
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "Priya Nair's salary is now 185.",
+            receipts: [
+              {
+                capabilityKey: "rows.resolve",
+                status: "failed",
+                idempotencyKey: "k1",
+                message: 'no row with key "Priya Nair" in the visible rows',
+                subject: { kind: "read" },
+              },
+              {
+                capabilityKey: "edit.cells",
+                status: "executed",
+                idempotencyKey: "k2",
+                subject: {
+                  kind: "edit",
+                  terms: [{ column: "Salary", value: "185" }],
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    const cards = parts("assistant-receipt");
+    expect(cards).toHaveLength(1);
+    expect(cards[0]).toHaveTextContent("Salary set to 185");
+    expect(part("assistant-receipt-message")).toBeNull();
+  });
+
   it("draws no cards for a host that keeps its own account", () => {
     mount({ assistant: view(twoActions), receipts: false });
 
@@ -165,11 +237,11 @@ describe("the examples, once a conversation has started", () => {
     expect(runSuggestion).toHaveBeenCalledWith("sort");
   });
 
-  it("draws none before the first message, where the cards already are", () => {
+  it("is there from the first frame, before anything has been asked", () => {
     mount({ assistant: view({ ...started, messages: [] }) });
 
-    expect(part("assistant-examples-menu")).toBeNull();
-    expect(parts("assistant-suggestion")).not.toHaveLength(0);
+    expect(part("assistant-examples-menu")).toBeTruthy();
+    expect(parts("assistant-suggestion")).toHaveLength(0);
   });
 
   it("falls back to a disclosure for a kit that fills no menu", () => {
@@ -310,23 +382,50 @@ describe("Escape", () => {
   });
 });
 
+/** A kit that fills no `Menu` slot, which is where the cards still live. */
+function mountWithoutMenu(
+  props: Partial<Parameters<typeof TableAssistantChrome>[0]> = {}
+): void {
+  const noMenu: TableAssistantSlots = { ...tableAssistantTestSlots };
+  delete (noMenu as { Menu?: unknown }).Menu;
+  render(
+    <TableAssistantChrome
+      slots={noMenu}
+      labels={defaultLabels}
+      assistant={view()}
+      open
+      onOpenChange={vi.fn()}
+      {...props}
+    />
+  );
+}
+
 describe("the empty state", () => {
-  it("asks what to do and offers what this table can run", () => {
+  it("asks what to do, and keeps the examples in one place", () => {
     mount({
-      assistant: view({
-        suggestions: [{ id: "a", title: "Group by city" }],
-      }),
+      assistant: view({ suggestions: [{ id: "a", title: "Group by city" }] }),
     });
 
     expect(part("assistant-empty-prompt")).toHaveTextContent(
       "What would you like to do?"
     );
+    // A kit with a menu has them in the composer from the first frame —
+    // cards here and a menu a message later is two places to look.
+    expect(parts("assistant-suggestion")).toHaveLength(0);
+    expect(part("assistant-examples-menu")).toBeTruthy();
+  });
+
+  it("offers what this table can run as cards, for a kit with no menu", () => {
+    mountWithoutMenu({
+      assistant: view({ suggestions: [{ id: "a", title: "Group by city" }] }),
+    });
+
     expect(part("assistant-suggestion")).toHaveTextContent("Group by city");
   });
 
   it("runs the suggestion by its id", () => {
     const runSuggestion = vi.fn();
-    mount({
+    mountWithoutMenu({
       assistant: view({
         suggestions: [{ id: "group", title: "Group by city" }],
         runSuggestion,
@@ -338,7 +437,7 @@ describe("the empty state", () => {
   });
 
   it("keeps the extras behind a more control", () => {
-    mount({
+    mountWithoutMenu({
       assistant: view({
         suggestions: [{ id: "a", title: "First" }],
         moreSuggestions: [{ id: "b", title: "Second" }],

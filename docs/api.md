@@ -2067,8 +2067,9 @@ of being handed everything. `createDiscoveryCache` memoizes it as a
 
 **Context.** `buildAgentContext(session, options, inputs)` renders an
 `AgentContext` from `AgentContextOptions` and `AgentContextInputs`;
-`AgentContextProfile` picks how much to send (`DEFAULT_COMPACT_TOKENS` is the
-compact budget, `MAX_CONTEXT_BYTES` the hard ceiling), a guide left out carries
+`AgentContextProfile` picks how much to send — `full` by default, bounded only
+by `MAX_CONTEXT_BYTES`, with `DEFAULT_COMPACT_TOKENS` the budget `compact` opts
+into, a guide left out carries
 a `DeferralReason` saying which of the two cut it, and `ContextIncludeError`
 names an `include` entry the table does not publish. `ContextCapability` and
 `ContextColumn` are the rendered pieces, `AgentContextContract`,
@@ -2160,7 +2161,8 @@ back. The page and size it publishes come from the `AgentPagination` it
 carries, so the bound a session enforces and the pages a model is told about
 are the same number by construction.
 
-**When the context will not fit.** A `compact` build budgets the whole payload.
+**When the context will not fit.** A `compact` build, or any build given a
+`tokenBudget`, budgets the whole payload.
 Column descriptions that do not fit are named in `selection.deferredColumns`
 and fetched with `columns.describe`; a deferral says which kind of thing it was
 through `DeferralKind`. A `tokenBudget` the caller chose that nothing can

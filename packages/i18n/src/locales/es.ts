@@ -220,6 +220,26 @@ export const es: Required<TableLabels> = {
   assistantDetail: "Detalles",
   assistantSaveInTable: "Guarda en la tabla para conservar este cambio.",
   assistantUndo: "Deshacer",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Eso requiere más pasos de los que permite un turno. Pida una parte.",
+        "continuation-limit":
+          "Eso requiere más pasos de los que permite un turno. Pida una parte.",
+        "resume-limit":
+          "Eso requiere más pasos de los que permite un turno. Pida una parte.",
+        "discovery-exhausted": "El asistente no supo cómo hacer eso aquí.",
+        "repeated-plan": "El asistente pidió lo mismo dos veces y se detuvo.",
+        "question-unanswered": "Eso necesita una respuesta suya para terminar.",
+        "approval-unavailable":
+          "Eso necesita aprobación y no hay dónde pedirla.",
+        "interrupt-unsupported":
+          "El asistente pidió algo que esta tabla no puede hacer.",
+        "output-denied": "Parte de eso no se permitió ejecutar.",
+        "not-run": "Eso no se ejecutó.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -234,8 +254,8 @@ export const es: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `Volver a preguntar por ${CAPABILITY[capability] ?? capability}`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "Ejemplos",
-  assistantMoreExamples: "Más ejemplos",
+  assistantExamples: "Atajos",
+  assistantMoreExamples: "Más atajos",
   assistantReceiptChange: ({ before, after }) =>
     `Cambiado de ${before} a ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -261,6 +281,8 @@ export const es: Required<TableLabels> = {
         "search-cleared/executed": "Búsqueda borrada",
         "group-cleared/executed": "Agrupación eliminada",
         "pin-cleared/executed": "Columna desanclada",
+        "pinRow/executed": "Fila anclada",
+        "pinRow-cleared/executed": "Fila desanclada",
         "page/executed": "Página cambiada",
         "aggregate/executed": "Totales cambiados",
         "select/executed": "Selección cambiada",

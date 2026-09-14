@@ -622,8 +622,11 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   // are the reader's to change in the drawer, and both visibly change what the
   // assistant suggests — which is the point of putting them there.
   const [excluded, setExcluded] = useState<readonly string[]>([]);
+  // The library's own default, so the demo shows what a host gets without
+  // tuning anything — column descriptions included, which is how the salary
+  // column gets to say it counts thousands.
   const [contextProfile, setContextProfile] =
-    useState<DemoContextProfile>("compact");
+    useState<DemoContextProfile>("full");
   const [webmcp, setWebmcp] = useState(false);
   const [webmcpNames, setWebmcpNames] = useState<readonly string[]>([]);
   // Rebuilt from the live rows every render, so the bulk example proposes

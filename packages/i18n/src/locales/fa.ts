@@ -220,6 +220,25 @@ export const fa: Required<TableLabels> = {
   assistantDetail: "جزئیات",
   assistantSaveInTable: "برای حفظ این تغییر در جدول ذخیره کنید.",
   assistantUndo: "واگرد",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "این بیش از گام‌هایی است که یک نوبت اجازه می‌دهد. بخشی از آن را بخواهید.",
+        "continuation-limit":
+          "این بیش از گام‌هایی است که یک نوبت اجازه می‌دهد. بخشی از آن را بخواهید.",
+        "resume-limit":
+          "این بیش از گام‌هایی است که یک نوبت اجازه می‌دهد. بخشی از آن را بخواهید.",
+        "discovery-exhausted": "دستیار نفهمید این کار را اینجا چطور انجام دهد.",
+        "repeated-plan": "دستیار دو بار همان چیز را خواست و متوقف شد.",
+        "question-unanswered": "برای پایان، پاسخ شما لازم است.",
+        "approval-unavailable": "تأیید لازم است و جایی برای پرسیدن نیست.",
+        "interrupt-unsupported":
+          "دستیار چیزی خواست که این جدول نمی‌تواند انجام دهد.",
+        "output-denied": "بخشی از آن اجازه اجرا نداشت.",
+        "not-run": "این اجرا نشد.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -234,8 +253,8 @@ export const fa: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `دوباره دربارهٔ ${CAPABILITY[capability] ?? capability} بپرس`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "نمونه‌ها",
-  assistantMoreExamples: "نمونه‌های بیشتر",
+  assistantExamples: "میان‌برها",
+  assistantMoreExamples: "میان‌برهای بیشتر",
   assistantReceiptChange: ({ before, after }) =>
     `از ${before} به ${after} تغییر کرد`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -261,6 +280,8 @@ export const fa: Required<TableLabels> = {
         "search-cleared/executed": "جست‌وجو پاک شد",
         "group-cleared/executed": "گروه‌بندی حذف شد",
         "pin-cleared/executed": "سنجاق ستون برداشته شد",
+        "pinRow/executed": "سطر سنجاق شد",
+        "pinRow-cleared/executed": "سنجاق سطر برداشته شد",
         "page/executed": "صفحه تغییر کرد",
         "aggregate/executed": "جمع‌ها تغییر کرد",
         "select/executed": "انتخاب تغییر کرد",

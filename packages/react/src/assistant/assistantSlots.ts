@@ -166,6 +166,15 @@ export interface TableAssistantMenuProps {
   readonly disabled?: boolean;
   readonly items: readonly TableAssistantMenuItem[];
   readonly onSelect: (id: string) => void;
+  /**
+   * How tall the list may grow before it scrolls inside itself.
+   *
+   * A table can offer a dozen shortcuts, and a menu that grows to fit them
+   * all runs off the panel — past the composer it was opened from, and on a
+   * short viewport off the screen. The kit applies this to its own surface,
+   * because only the kit knows which element there scrolls.
+   */
+  readonly maxHeight?: string;
 }
 
 /**

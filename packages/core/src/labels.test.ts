@@ -57,6 +57,7 @@ describe("defaultLabels — every function label", () => {
     ],
     findMatchCount: [2, 7],
     assistantReceiptStatus: ["staged"],
+    assistantUnresolved: ["continuation-exhausted"],
     assistantReceiptAction: [{ kind: "filter", status: "executed" }],
     assistantReceiptTerms: [
       { kind: "filter", terms: [{ column: "COLUMN_X", value: "VALUE_X" }] },

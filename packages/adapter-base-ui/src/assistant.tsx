@@ -323,6 +323,7 @@ function AssistantMenu({
   disabled,
   items,
   onSelect,
+  maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
   return (
     <Menu.Root>
@@ -347,6 +348,8 @@ function AssistantMenu({
           <Menu.Popup
             style={{
               minWidth: 200,
+              maxHeight,
+              overflowY: "auto",
               padding: 4,
               background: "var(--at-surface, #fff)",
               border: "1px solid var(--at-border, #d0d7de)",

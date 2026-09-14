@@ -368,6 +368,7 @@ function AssistantMenu({
   disabled,
   items,
   onSelect,
+  maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
   return (
     <Menu position="top-start" withinPortal>
@@ -387,7 +388,7 @@ function AssistantMenu({
           </ActionIcon>
         </Tooltip>
       </Menu.Target>
-      <Menu.Dropdown>
+      <Menu.Dropdown style={{ maxHeight, overflowY: "auto" }}>
         {items.map((item) => (
           <Menu.Item
             key={item.id}

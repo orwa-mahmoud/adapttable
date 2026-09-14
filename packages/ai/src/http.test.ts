@@ -1923,7 +1923,9 @@ describe("carrying the context", () => {
       | { contract?: { version?: string }; selection?: { profile?: string } }
       | undefined;
     expect(context?.contract?.version).toBeTruthy();
-    expect(context?.selection?.profile).toBe("compact");
+    // Unbudgeted unless the host asks: what a backend's window costs is the
+    // backend's business, and trimming on its behalf is a guess.
+    expect(context?.selection?.profile).toBe("full");
     expect(body?.view).toBeDefined();
     expect(body?.contractVersion).toBeTruthy();
     expect(body?.selectionVersion).toBeTruthy();

@@ -32,6 +32,8 @@ const ASSISTANT_RECEIPT_ACTION: Readonly<Record<string, string>> = {
   "group-cleared/executed": "Grouping cleared",
   "pin/executed": "Column pinned",
   "pin-cleared/executed": "Column unpinned",
+  "pinRow/executed": "Row pinned",
+  "pinRow-cleared/executed": "Row unpinned",
   "page/executed": "Page changed",
   "aggregate/executed": "Totals changed",
   "select/executed": "Selection changed",
@@ -68,6 +70,32 @@ function receiptTerm(
     ? `${term.column} set to ${term.value}`
     : `${term.column} is ${term.value}`;
 }
+
+/**
+ * Why a turn stopped with work still pending, in English.
+ *
+ * The message the runtime carries beside these codes is written for whoever
+ * is debugging the turn — "the backend asked to continue more than 3 times"
+ * tells a reader nothing they can act on, and names machinery they never
+ * asked about.
+ */
+const ASSISTANT_UNRESOLVED: Readonly<Record<string, string>> = {
+  "continuation-exhausted":
+    "That took more steps than one turn allows. Ask for part of it.",
+  "continuation-limit":
+    "That took more steps than one turn allows. Ask for part of it.",
+  "resume-limit":
+    "That took more steps than one turn allows. Ask for part of it.",
+  "discovery-exhausted":
+    "The assistant could not work out how to do that here.",
+  "repeated-plan": "The assistant asked for the same thing twice and stopped.",
+  "question-unanswered": "That needs an answer from you before it can finish.",
+  "approval-unavailable": "That needs approval, and there is nowhere to ask.",
+  "interrupt-unsupported":
+    "The assistant asked for something this table cannot do.",
+  "output-denied": "Part of that was not allowed to run.",
+  "not-run": "That did not run.",
+};
 
 /**
  * Why an undo is not on offer, in English.
@@ -302,6 +330,7 @@ export const defaultLabels: Required<TableLabels> = {
   assistantSaveInTable: "Save in the table to keep this change.",
   assistantUndo: "Undo",
   assistantUndoBlocked: (code) => ASSISTANT_UNDO_BLOCKED[code],
+  assistantUnresolved: (code) => ASSISTANT_UNRESOLVED[code],
   assistantAnswerLabel: "Your answer",
   assistantAnswerPlaceholder: "Type an answer",
   assistantAnswerSend: "Answer",
@@ -314,8 +343,8 @@ export const defaultLabels: Required<TableLabels> = {
     const what = ASSISTANT_RECEIPT[status] ?? status;
     return capability ? `${capability}: ${what}` : what;
   },
-  assistantExamples: "Examples",
-  assistantMoreExamples: "More examples",
+  assistantExamples: "Shortcuts",
+  assistantMoreExamples: "More shortcuts",
   assistantReceiptStatus: (status) =>
     ASSISTANT_RECEIPT[status] ?? String(status),
   assistantReceiptAction: ({ kind, status, cleared }) => {

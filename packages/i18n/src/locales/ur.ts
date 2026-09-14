@@ -223,6 +223,24 @@ export const ur: Required<TableLabels> = {
   assistantDetail: "تفصیلات",
   assistantSaveInTable: "یہ تبدیلی رکھنے کے لیے ٹیبل میں محفوظ کریں۔",
   assistantUndo: "واپس کریں",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "یہ ایک باری کی اجازت سے زیادہ مراحل مانگتا ہے۔ اس کا ایک حصہ طلب کریں۔",
+        "continuation-limit":
+          "یہ ایک باری کی اجازت سے زیادہ مراحل مانگتا ہے۔ اس کا ایک حصہ طلب کریں۔",
+        "resume-limit":
+          "یہ ایک باری کی اجازت سے زیادہ مراحل مانگتا ہے۔ اس کا ایک حصہ طلب کریں۔",
+        "discovery-exhausted": "معاون سمجھ نہ سکا کہ یہ یہاں کیسے کیا جائے۔",
+        "repeated-plan": "معاون نے ایک ہی چیز دو بار مانگی اور رک گیا۔",
+        "question-unanswered": "مکمل ہونے کے لیے آپ کا جواب درکار ہے۔",
+        "approval-unavailable": "منظوری درکار ہے، اور پوچھنے کی کوئی جگہ نہیں۔",
+        "interrupt-unsupported": "معاون نے وہ مانگا جو یہ ٹیبل نہیں کر سکتا۔",
+        "output-denied": "اس کے کچھ حصے کو چلنے کی اجازت نہ تھی۔",
+        "not-run": "یہ نہیں چلا۔",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -237,8 +255,8 @@ export const ur: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `${CAPABILITY[capability] ?? capability} کے بارے میں دوبارہ پوچھیں`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "مثالیں",
-  assistantMoreExamples: "مزید مثالیں",
+  assistantExamples: "شارٹ کٹس",
+  assistantMoreExamples: "مزید شارٹ کٹس",
   assistantReceiptChange: ({ before, after }) =>
     `${before} سے ${after} کر دیا گیا`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -264,6 +282,8 @@ export const ur: Required<TableLabels> = {
         "search-cleared/executed": "تلاش صاف کر دی گئی",
         "group-cleared/executed": "گروپ بندی ہٹا دی گئی",
         "pin-cleared/executed": "کالم کی پن ہٹا دی گئی",
+        "pinRow/executed": "قطار پن ہو گئی",
+        "pinRow-cleared/executed": "قطار کی پن ہٹا دی گئی",
         "page/executed": "صفحہ تبدیل ہوا",
         "aggregate/executed": "میزان تبدیل ہوئے",
         "select/executed": "انتخاب تبدیل ہوا",

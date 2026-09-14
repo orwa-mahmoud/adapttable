@@ -194,7 +194,7 @@ export function buildAgentContext(
     },
     contract.filters
   );
-  const profile: AgentContextProfile = options.profile ?? "compact";
+  const profile: AgentContextProfile = options.profile ?? "full";
   const measured = options.estimateTokens;
   const serialized = JSON.stringify(selected);
   return {
@@ -339,11 +339,10 @@ export type {
 /**
  * The token budget this build is held to, or nothing.
  *
- * `compact` has one by default; `full` has one only when the caller names it.
+ * `compact` has one; `full` — the default — has one only when the caller names
+ * a `tokenBudget` itself.
  */
 function payloadBudget(options: AgentContextOptions): number | undefined {
   if (options.tokenBudget !== undefined) return options.tokenBudget;
-  return (options.profile ?? "compact") === "compact"
-    ? COMPACT_TOKENS
-    : undefined;
+  return (options.profile ?? "full") === "compact" ? COMPACT_TOKENS : undefined;
 }

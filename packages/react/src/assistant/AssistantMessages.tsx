@@ -154,12 +154,15 @@ function Receipt({
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: "0.3em",
-        padding: "0.55em 0.7em",
-        borderRadius: "0.6em",
-        border: "1px solid currentColor",
-        borderColor: "color-mix(in srgb, currentColor 18%, transparent)",
-        background: "color-mix(in srgb, currentColor 4%, transparent)",
+        gap: "0.15em",
+        // Quiet by design: this is what the reply is evidence for, and a
+        // bordered panel per action turns three of them into the loudest
+        // thing on screen. A tinted rail marks them as one group without
+        // competing with the words above.
+        padding: "0.1em 0 0.1em 0.6em",
+        borderInlineStart: "2px solid currentColor",
+        borderColor: "color-mix(in srgb, currentColor 15%, transparent)",
+        fontSize: "0.92em",
       }}
     >
       <span
@@ -169,9 +172,12 @@ function Receipt({
         <span aria-hidden="true" style={{ display: "flex", opacity: 0.75 }}>
           <SuggestionIcon kind={subject?.kind} />
         </span>
-        <strong>{headline(receipt, labels)}</strong>
+        <strong style={{ fontWeight: 550 }}>{headline(receipt, labels)}</strong>
         {detail ? (
-          <span data-adapttable-part="assistant-receipt-detail-text">
+          <span
+            data-adapttable-part="assistant-receipt-detail-text"
+            style={{ opacity: 0.75 }}
+          >
             {detail}
           </span>
         ) : null}
@@ -265,6 +271,16 @@ export function AssistantMessage({
   /** Whether each action draws a card. The record is kept either way. */
   readonly receipts?: boolean;
 }): ReactElement {
+  // A receipt says what CHANGED. Reading rows, resolving one, asking what a
+  // column means — none of that changed anything the reader can see, and the
+  // refusals they carry are written for the caller that has to recover from
+  // them: "read the rows to get their keys" is advice to a model, and a reader
+  // shown it beside a turn that then worked is being told it failed when it
+  // did not. They stay in the conversation state for a host that reads them.
+  const shown = (message.receipts ?? []).filter(
+    (receipt) => receipt.subject?.kind !== "read"
+  );
+  const perAction = onUndoAction ? { onUndoAction } : {};
   const mine = message.role === "user";
   const speaker = mine
     ? (labels?.assistantYou ?? "You")
@@ -296,49 +312,7 @@ export function AssistantMessage({
       >
         {speaker}
       </span>
-      <span
-        style={{
-          display: "flex",
-          gap: "0.5em",
-          alignItems: "flex-start",
-          maxWidth: "88%",
-          flexDirection: mine ? "row-reverse" : "row",
-        }}
-      >
-        {mine ? null : (
-          <span
-            aria-hidden="true"
-            data-adapttable-part="assistant-message-mark"
-            style={{
-              display: "flex",
-              marginBlockStart: "0.15em",
-              opacity: 0.7,
-            }}
-          >
-            <AssistantIcon />
-          </span>
-        )}
-        {/* Backend text is untrusted: rendered as text, never as markup.
-            While a reply is still arriving, what has landed is shown in its
-            place — marked as provisional, because words are not a receipt. */}
-        <span
-          data-adapttable-part="assistant-message-text"
-          data-streaming={
-            message.partialText === undefined ? undefined : "true"
-          }
-          style={{
-            padding: mine ? "0.5em 0.75em" : 0,
-            borderRadius: "0.85em",
-            background: mine
-              ? "color-mix(in srgb, currentColor 8%, transparent)"
-              : "transparent",
-            overflowWrap: "anywhere",
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {message.partialText ?? message.text}
-        </span>
-      </span>
+      <Spoken message={message} mine={mine} />
       {action ? (
         <span data-adapttable-part="assistant-message-action">
           <slots.Button
@@ -375,35 +349,13 @@ export function AssistantMessage({
           )}
         </span>
       ) : null}
-      {receipts && message.receipts && message.receipts.length > 0 ? (
-        <ul
-          data-adapttable-part="assistant-receipts"
-          style={{
-            listStyle: "none",
-            margin: 0,
-            padding: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.35em",
-            alignSelf: "stretch",
-          }}
-        >
-          {message.receipts.map((receipt) => (
-            <Receipt
-              key={receipt.idempotencyKey}
-              receipt={receipt}
-              labels={labels}
-              slots={slots}
-              {...(receipt.undoable && onUndoAction
-                ? {
-                    onUndo: () => {
-                      onUndoAction(receipt.idempotencyKey);
-                    },
-                  }
-                : {})}
-            />
-          ))}
-        </ul>
+      {receipts && shown.length > 0 ? (
+        <Receipts
+          receipts={shown}
+          labels={labels}
+          slots={slots}
+          {...perAction}
+        />
       ) : null}
     </li>
   );
@@ -509,17 +461,210 @@ export function AssistantEmpty({
           {note}
         </p>
       ) : null}
-      <AssistantSuggestions
-        slots={slots}
-        labels={labels}
-        suggestions={suggestions}
-        more={more}
-        onRun={onRun}
-        part="assistant-suggestions"
-      />
+      {/* A kit with a menu keeps the examples in the composer, from the first
+          frame — one place to look for them rather than cards here and a menu
+          a message later. Without that slot they are cards, because a reader
+          who does not know what to type needs to be shown something. */}
+      {slots.Menu ? null : (
+        <AssistantSuggestions
+          slots={slots}
+          labels={labels}
+          suggestions={suggestions}
+          more={more}
+          onRun={onRun}
+          part="assistant-suggestions"
+        />
+      )}
     </div>
   );
 }
+
+/**
+ * What was said, and who said it.
+ *
+ * The reader's own words sit in a bubble on their side; the assistant's are
+ * the reply, and carry the weight of one — they are the answer to what was
+ * asked, not a caption over the cards beneath them.
+ */
+function Spoken({
+  message,
+  mine,
+}: {
+  readonly message: TableAssistantMessageView;
+  readonly mine: boolean;
+}): ReactElement {
+  return (
+    <span
+      style={{
+        display: "flex",
+        gap: "0.5em",
+        alignItems: "flex-start",
+        maxWidth: "88%",
+        flexDirection: mine ? "row-reverse" : "row",
+      }}
+    >
+      {mine ? null : (
+        <span
+          aria-hidden="true"
+          data-adapttable-part="assistant-message-mark"
+          style={{
+            display: "flex",
+            marginBlockStart: "0.15em",
+            opacity: 0.7,
+          }}
+        >
+          <AssistantIcon />
+        </span>
+      )}
+      {/* Backend text is untrusted: rendered as text, never as markup.
+        While a reply is still arriving, what has landed is shown in its
+        place — marked as provisional, because words are not a receipt. */}
+      <span
+        data-adapttable-part="assistant-message-text"
+        data-streaming={message.partialText === undefined ? undefined : "true"}
+        style={{
+          padding: mine ? "0.5em 0.75em" : 0,
+          borderRadius: "0.85em",
+          background: mine
+            ? "color-mix(in srgb, currentColor 8%, transparent)"
+            : "transparent",
+          overflowWrap: "anywhere",
+          whiteSpace: "pre-wrap",
+          // The reply is the answer to what the reader asked. It led with
+          // the same weight as the cards under it, which made a turn read
+          // as a stack of machinery with a sentence lost in it.
+          ...(mine
+            ? {}
+            : { fontSize: "1.05em", lineHeight: 1.5, fontWeight: 450 }),
+        }}
+      >
+        {message.partialText ?? message.text}
+      </span>
+    </span>
+  );
+}
+
+/** What one turn did, as a group under the reply it is evidence for. */
+function Receipts({
+  receipts,
+  labels,
+  slots,
+  onUndoAction,
+}: {
+  readonly receipts: readonly TableAssistantReceiptView[];
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  readonly onUndoAction?: (idempotencyKey: string) => void;
+}): ReactElement {
+  return (
+    <ul
+      data-adapttable-part="assistant-receipts"
+      style={{
+        listStyle: "none",
+        margin: 0,
+        padding: 0,
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.2em",
+        alignSelf: "stretch",
+        marginBlockStart: "0.15em",
+      }}
+    >
+      {receipts.map((receipt) => (
+        <Receipt
+          key={receipt.idempotencyKey}
+          receipt={receipt}
+          labels={labels}
+          slots={slots}
+          {...(receipt.undoable && onUndoAction
+            ? {
+                onUndo: () => {
+                  onUndoAction(receipt.idempotencyKey);
+                },
+              }
+            : {})}
+        />
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * The turn, while it is still running.
+ *
+ * A reader who has just pressed send has no way to tell "thinking" from
+ * "nothing happened" — the badge changes a word in the header, which is not
+ * where they are looking. This sits at the end of the transcript, where the
+ * reply itself will appear, so the answer lands in the space the waiting
+ * occupied rather than shifting it.
+ *
+ * The dots animate only where motion is welcome; under `prefers-reduced-motion`
+ * they hold still and the word alone carries it. The live region above the
+ * composer already announces the status, so this is `aria-hidden` — a screen
+ * reader hearing "working" twice learns nothing the second time.
+ *
+ * @internal
+ */
+export function AssistantWorking({
+  labels,
+}: {
+  readonly labels: TableLabels | undefined;
+}): ReactElement {
+  const word = labels?.assistantConnection?.("sending") ?? "Working…";
+  return (
+    <li
+      data-adapttable-part="assistant-working"
+      aria-hidden="true"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5em",
+        opacity: 0.75,
+        // The reply replaces this in place, so the transcript does not jump
+        // when the words arrive.
+        minHeight: "1.5em",
+      }}
+    >
+      <style>{WORKING_KEYFRAMES}</style>
+      <span
+        aria-hidden="true"
+        style={{ display: "flex", marginBlockStart: "0.15em", opacity: 0.7 }}
+      >
+        <AssistantIcon />
+      </span>
+      <span style={{ display: "inline-flex", gap: "0.25em" }}>
+        {[0, 1, 2].map((index) => (
+          <span
+            key={index}
+            data-adapttable-part="assistant-working-dot"
+            style={{
+              width: "0.35em",
+              height: "0.35em",
+              borderRadius: "50%",
+              background: "currentColor",
+              animation: `adapttable-assistant-dot 1.2s ${String(index * 0.16)}s infinite ease-in-out`,
+            }}
+          />
+        ))}
+      </span>
+      <span data-adapttable-part="assistant-working-text">{word}</span>
+    </li>
+  );
+}
+
+/**
+ * Held still where motion is unwelcome, rather than turned off entirely: the
+ * dots keep their place in the row so the layout does not move either way.
+ */
+const WORKING_KEYFRAMES = `
+@keyframes adapttable-assistant-dot {
+  0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-0.15em); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-adapttable-part="assistant-working-dot"] { animation: none; opacity: 0.55; }
+}
+`;
 
 /**
  * A question the backend asked, drawn where the reader is already looking.

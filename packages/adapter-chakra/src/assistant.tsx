@@ -348,6 +348,7 @@ function AssistantMenu({
   disabled,
   items,
   onSelect,
+  maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
   return (
     <Menu.Root positioning={{ placement: "top-start" }}>
@@ -367,7 +368,7 @@ function AssistantMenu({
       </Menu.Trigger>
       <Portal>
         <Menu.Positioner>
-          <Menu.Content>
+          <Menu.Content maxH={maxHeight} overflowY="auto">
             {items.map((item) => (
               <Menu.Item
                 key={item.id}

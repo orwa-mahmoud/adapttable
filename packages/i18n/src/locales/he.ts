@@ -220,6 +220,23 @@ export const he: Required<TableLabels> = {
   assistantDetail: "פרטים",
   assistantSaveInTable: "שמור בטבלה כדי לשמר את השינוי.",
   assistantUndo: "ביטול",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "זה דורש יותר שלבים ממה שתור אחד מאפשר. בקשו חלק ממנו.",
+        "continuation-limit":
+          "זה דורש יותר שלבים ממה שתור אחד מאפשר. בקשו חלק ממנו.",
+        "resume-limit": "זה דורש יותר שלבים ממה שתור אחד מאפשר. בקשו חלק ממנו.",
+        "discovery-exhausted": "העוזר לא הצליח להבין איך לעשות זאת כאן.",
+        "repeated-plan": "העוזר ביקש את אותו דבר פעמיים ועצר.",
+        "question-unanswered": "נדרשת תשובה שלכם כדי לסיים.",
+        "approval-unavailable": "נדרש אישור, ואין את מי לשאול.",
+        "interrupt-unsupported": "העוזר ביקש משהו שהטבלה הזו לא יכולה לעשות.",
+        "output-denied": "חלק מזה לא הורשה לרוץ.",
+        "not-run": "זה לא רץ.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -234,8 +251,8 @@ export const he: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `לשאול שוב על ${CAPABILITY[capability] ?? capability}`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "דוגמאות",
-  assistantMoreExamples: "עוד דוגמאות",
+  assistantExamples: "קיצורי דרך",
+  assistantMoreExamples: "עוד קיצורי דרך",
   assistantReceiptChange: ({ before, after }) => `שונה מ-${before} ל-${after}`,
   assistantReceiptProposed: ({ before, after }) =>
     `הוצע: מ-${before} ל-${after}`,
@@ -260,6 +277,8 @@ export const he: Required<TableLabels> = {
         "search-cleared/executed": "החיפוש נוקה",
         "group-cleared/executed": "הקיבוץ בוטל",
         "pin-cleared/executed": "הצמדת העמודה בוטלה",
+        "pinRow/executed": "השורה הוצמדה",
+        "pinRow-cleared/executed": "הצמדת השורה בוטלה",
         "page/executed": "העמוד הוחלף",
         "aggregate/executed": "הסיכומים שונו",
         "select/executed": "הבחירה שונתה",

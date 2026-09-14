@@ -253,16 +253,24 @@ import { buildAgentContext } from "@adapttable/ai/context";
 
 const { contract, view, selection } = buildAgentContext(
   session,
-  { profile: "compact" },
+  { profile: "compact" }, // omit for the unbudgeted default
   { filters: liveFilters, view: { page, limit, search } }
 );
 ```
 
-**Profiles.** `compact` (the default) names every capability and attaches the
-full guide only for the ones a turn is likely to need; the rest are fetched on
-demand, in one batched discovery round rather than one request per key. `full`
-attaches every guide up front. `selection.selected` and `selection.deferred`
-say which went which way, and `selection.notes` says why.
+**Profiles.** `full` is the default: every guide and every column description
+travels, bounded only by the hard byte limit. What a model's context window
+costs is the backend's business, and trimming on its behalf means guessing —
+a guess that drops the sentence saying a column counts thousands is paid for
+by the reader who gets the wrong number back.
+
+`compact` is there for a host that has measured its own backend and wants the
+smaller payload: it names every capability but attaches the full guide only for
+the ones a turn is likely to need, and strips column detail to make room. The
+rest are fetched on demand, in one batched discovery round rather than one
+request per key. `selection.selected` and `selection.deferred` say which went
+which way, and `selection.notes` says why. Pass `tokenBudget` with either
+profile to name your own ceiling.
 
 **Budgets and sizes.** `selection.contractBytes` and `selection.viewBytes` are
 UTF-8 bytes on the wire. `selection.estimatedTokens` is an estimate of prompt

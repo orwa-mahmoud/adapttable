@@ -219,6 +219,25 @@ export const ja: Required<TableLabels> = {
   assistantDetail: "詳細",
   assistantSaveInTable: "この変更を残すにはテーブルで保存してください。",
   assistantUndo: "元に戻す",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "1 回のやり取りで許される手順を超えます。一部だけ依頼してください。",
+        "continuation-limit":
+          "1 回のやり取りで許される手順を超えます。一部だけ依頼してください。",
+        "resume-limit":
+          "1 回のやり取りで許される手順を超えます。一部だけ依頼してください。",
+        "discovery-exhausted":
+          "ここでその方法をアシスタントが判断できませんでした。",
+        "repeated-plan": "アシスタントが同じ要求を繰り返したため停止しました。",
+        "question-unanswered": "完了するにはあなたの回答が必要です。",
+        "approval-unavailable": "承認が必要ですが、尋ねる先がありません。",
+        "interrupt-unsupported": "このテーブルにできないことを要求しました。",
+        "output-denied": "その一部は実行を許可されませんでした。",
+        "not-run": "実行されませんでした。",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -233,8 +252,8 @@ export const ja: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `${CAPABILITY[capability] ?? capability}について再び確認する`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "例",
-  assistantMoreExamples: "他の例",
+  assistantExamples: "ショートカット",
+  assistantMoreExamples: "他のショートカット",
   assistantReceiptChange: ({ before, after }) =>
     `${before} から ${after} に変更しました`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -260,6 +279,8 @@ export const ja: Required<TableLabels> = {
         "search-cleared/executed": "検索を解除しました",
         "group-cleared/executed": "グループ化を解除しました",
         "pin-cleared/executed": "列の固定を解除しました",
+        "pinRow/executed": "行を固定しました",
+        "pinRow-cleared/executed": "行の固定を解除しました",
         "page/executed": "ページを変更しました",
         "aggregate/executed": "集計を変更しました",
         "select/executed": "選択を変更しました",

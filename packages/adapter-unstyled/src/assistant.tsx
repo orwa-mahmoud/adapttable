@@ -257,6 +257,7 @@ function AssistantMenu({
   disabled,
   items,
   onSelect,
+  maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
   const close = (event: { currentTarget: HTMLElement }): void => {
     event.currentTarget.closest("details")?.removeAttribute("open");
@@ -272,7 +273,10 @@ function AssistantMenu({
       >
         {icon}
       </summary>
-      <menu data-adapttable-part="assistant-examples-list">
+      <menu
+        data-adapttable-part="assistant-examples-list"
+        style={{ maxHeight, overflowY: "auto" }}
+      >
         {items.map((item) => (
           <li key={item.id}>
             <button

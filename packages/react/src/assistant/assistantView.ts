@@ -155,6 +155,12 @@ export interface TableAssistantView {
   /** The last failure, when there is one. */
   readonly error?: string;
   /**
+   * The machine code behind {@link error}, when a turn ended with work
+   * pending. The labels turn it into a sentence; without one the message
+   * itself is shown.
+   */
+  readonly errorCode?: string;
+  /**
    * A question waiting on the reader, when the backend asked one.
    *
    * The turn is still in flight while this is set: answering resumes it, and

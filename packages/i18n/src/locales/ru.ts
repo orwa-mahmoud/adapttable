@@ -226,6 +226,26 @@ export const ru: Required<TableLabels> = {
   assistantDetail: "Подробности",
   assistantSaveInTable: "Сохраните в таблице, чтобы оставить это изменение.",
   assistantUndo: "Отменить",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Это требует больше шагов, чем допускает один ход. Попросите часть.",
+        "continuation-limit":
+          "Это требует больше шагов, чем допускает один ход. Попросите часть.",
+        "resume-limit":
+          "Это требует больше шагов, чем допускает один ход. Попросите часть.",
+        "discovery-exhausted": "Ассистент не понял, как это сделать здесь.",
+        "repeated-plan":
+          "Ассистент дважды запросил одно и то же и остановился.",
+        "question-unanswered": "Для завершения нужен ваш ответ.",
+        "approval-unavailable": "Нужно подтверждение, а спросить негде.",
+        "interrupt-unsupported":
+          "Ассистент запросил то, чего эта таблица не умеет.",
+        "output-denied": "Часть этого не была разрешена.",
+        "not-run": "Это не выполнялось.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -240,8 +260,8 @@ export const ru: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `Снова спрашивать о: ${CAPABILITY[capability] ?? capability}`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "Примеры",
-  assistantMoreExamples: "Ещё примеры",
+  assistantExamples: "Быстрые команды",
+  assistantMoreExamples: "Ещё команды",
   assistantReceiptChange: ({ before, after }) =>
     `Изменено с ${before} на ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -267,6 +287,8 @@ export const ru: Required<TableLabels> = {
         "search-cleared/executed": "Поиск очищен",
         "group-cleared/executed": "Группировка сброшена",
         "pin-cleared/executed": "Столбец откреплён",
+        "pinRow/executed": "Строка закреплена",
+        "pinRow-cleared/executed": "Строка откреплена",
         "page/executed": "Страница изменена",
         "aggregate/executed": "Итоги изменены",
         "select/executed": "Выделение изменено",

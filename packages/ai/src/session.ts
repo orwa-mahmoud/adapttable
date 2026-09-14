@@ -19,6 +19,7 @@ import {
   type CommitPolicy,
   type RowAddressScope,
 } from "./keys";
+import { columnIds, withEnum, withFilterBag } from "./liveSchemas";
 import { buildManifest } from "./manifest";
 import { normalizeCapabilityArgs } from "./normalizeArgs";
 import {
@@ -347,12 +348,12 @@ export function createAgentSession(
     }
     const guide = registry.describe(key);
     if (key === "view.setAggregations") {
-      return describeAggregations(guide, options.observe());
+      return describeAggregations(guide, observation);
     }
     if (key === "view.setFilters") {
-      return describeFilters(guide, options.observe());
+      return describeFilters(guide, observation);
     }
-    return guide;
+    return describeColumnChoice(key, guide, observation);
   };
 
   /**
@@ -831,10 +832,55 @@ function describeFilters(
   guide: CapabilityGuide,
   observation: AgentObservation
 ): CapabilityGuide {
+  const catalog = observation.availableFilters;
+  const input = withFilterBag(guide.input, catalog);
   return {
     ...guide,
-    guide: guide.guide + formatFilterCatalog(observation.availableFilters),
+    guide: guide.guide + formatFilterCatalog(catalog),
+    // The keys and values this table actually takes, as schema rather than as
+    // a sentence about schema. A caller reading the input can no longer spell
+    // an option it was never offered.
+    ...(input ? { input } : {}),
   };
+}
+
+/**
+ * Which columns a capability that names one will accept.
+ *
+ * The authored schema says `key` is a string; only the table knows which
+ * strings. Publishing them as an `enum` is the difference between a caller
+ * that can misname a column and one that cannot — and it follows the live
+ * table, so a column that stops being sortable stops being offered.
+ */
+function describeColumnChoice(
+  key: string,
+  guide: CapabilityGuide,
+  observation: AgentObservation
+): CapabilityGuide {
+  const columns = observation.columns;
+  const specialise = (
+    property: string,
+    usable: (column: AgentColumn) => boolean,
+    nullable = false
+  ): CapabilityGuide => {
+    const input = withEnum(
+      guide.input,
+      property,
+      columnIds(columns, usable),
+      nullable
+    );
+    return input ? { ...guide, input } : guide;
+  };
+  switch (key) {
+    case "view.setSort":
+      return specialise("key", (column) => column.sortable !== false, true);
+    case "view.setGroupBy":
+      return specialise("key", () => true, true);
+    case "view.pinColumn":
+      return specialise("key", (column) => column.pinnable !== false);
+    default:
+      return guide;
+  }
 }
 
 function describeAggregations(

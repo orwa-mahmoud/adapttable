@@ -798,6 +798,14 @@ export interface TableLabels {
    * no sentence for, and the panel says nothing rather than showing a code.
    */
   assistantUndoBlocked?: (code: string) => string | undefined;
+  /**
+   * Why a turn stopped with work still pending.
+   *
+   * Returns `undefined` for a code this language has no sentence for, and the
+   * panel falls back to the runtime's own message — which is honest, if
+   * written for a developer.
+   */
+  assistantUnresolved?: (code: string) => string | undefined;
   /** Accessible name for the free-text answer to a question. */
   assistantAnswerLabel?: string;
   /** Placeholder in that field. */

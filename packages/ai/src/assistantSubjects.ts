@@ -149,6 +149,22 @@ function editSubject(
   return terms.length > 0 ? { kind: "edit", terms } : { kind: "edit" };
 }
 
+/**
+ * A pinned row, and which edge it went to.
+ *
+ * The row itself is addressed by a key, and a key is plumbing — so what the
+ * card can honestly name is the edge. A null side unpins, which is the
+ * opposite change and reads as one.
+ */
+function pinRowSubject(args: Record<string, unknown>): AssistantReceiptSubject {
+  const side = args.side;
+  if (side === null) return { kind: "pinRow", cleared: true };
+  if (side === "top" || side === "bottom") {
+    return { kind: "pinRow", terms: [{ value: side }] };
+  }
+  return { kind: "pinRow" };
+}
+
 /** Every built-in key, as the kind a card is drawn from. */
 const KIND_FOR: Readonly<Record<string, string>> = {
   "view.setFilters": "filter",
@@ -159,7 +175,7 @@ const KIND_FOR: Readonly<Record<string, string>> = {
   "view.setAggregations": "aggregate",
   "view.setSelection": "select",
   "view.pinColumn": "pin",
-  "view.pinRow": "pin",
+  "view.pinRow": "pinRow",
   "view.describe": "read",
   "columns.describe": "read",
   "rows.read": "read",
@@ -214,6 +230,8 @@ export function subjectFor(
       return groupSubject(payload, columns);
     case "view.pinColumn":
       return pinSubject(body, columns);
+    case "view.pinRow":
+      return pinRowSubject(body);
     case "edit.cells":
       return editSubject(body, columns);
     default:

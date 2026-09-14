@@ -221,6 +221,24 @@ export const ar: Required<TableLabels> = {
   assistantDetail: "التفاصيل",
   assistantSaveInTable: "احفظ في الجدول للاحتفاظ بهذا التغيير.",
   assistantUndo: "تراجع",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "يتطلب هذا خطوات أكثر مما يسمح به دور واحد. اطلب جزءًا منه.",
+        "continuation-limit":
+          "يتطلب هذا خطوات أكثر مما يسمح به دور واحد. اطلب جزءًا منه.",
+        "resume-limit":
+          "يتطلب هذا خطوات أكثر مما يسمح به دور واحد. اطلب جزءًا منه.",
+        "discovery-exhausted": "لم يعرف المساعد كيف ينفّذ ذلك هنا.",
+        "repeated-plan": "طلب المساعد الشيء نفسه مرتين وتوقف.",
+        "question-unanswered": "يحتاج هذا إلى ردّ منك لإتمامه.",
+        "approval-unavailable": "يحتاج هذا إلى موافقة، ولا مكان لطلبها.",
+        "interrupt-unsupported": "طلب المساعد شيئًا لا يستطيع هذا الجدول فعله.",
+        "output-denied": "لم يُسمح بتنفيذ جزء من ذلك.",
+        "not-run": "لم يُنفَّذ هذا.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -235,8 +253,8 @@ export const ar: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `اسأل عن ${CAPABILITY[capability] ?? capability} مرة أخرى`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "أمثلة",
-  assistantMoreExamples: "أمثلة أخرى",
+  assistantExamples: "اختصارات",
+  assistantMoreExamples: "اختصارات أخرى",
   assistantReceiptChange: ({ before, after }) =>
     `تم التغيير من ${before} إلى ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -262,6 +280,8 @@ export const ar: Required<TableLabels> = {
         "search-cleared/executed": "تم مسح البحث",
         "group-cleared/executed": "تم إلغاء التجميع",
         "pin-cleared/executed": "تم إلغاء تثبيت العمود",
+        "pinRow/executed": "تم تثبيت الصف",
+        "pinRow-cleared/executed": "تم إلغاء تثبيت الصف",
         "page/executed": "تم تغيير الصفحة",
         "aggregate/executed": "تم تغيير الإجماليات",
         "select/executed": "تم تغيير التحديد",

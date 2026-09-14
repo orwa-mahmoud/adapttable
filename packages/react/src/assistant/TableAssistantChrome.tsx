@@ -43,6 +43,7 @@ import {
   AssistantMessage,
   AssistantQuestion,
   AssistantSuggestions,
+  AssistantWorking,
 } from "./AssistantMessages";
 import {
   FLOATING_MIN_WIDTH,
@@ -467,6 +468,63 @@ function AssistantApproval({
   );
 }
 
+/**
+ * The conversation so far, and the turn still running at the end of it.
+ *
+ * @internal
+ */
+function Transcript({
+  assistant,
+  labels,
+  slots,
+  messageAction,
+  receipts,
+}: {
+  readonly assistant: TableAssistantView;
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  readonly messageAction: TableAssistantProps["messageAction"];
+  readonly receipts?: boolean;
+}): ReactElement {
+  return (
+    <ul
+      data-adapttable-part="assistant-messages"
+      style={{
+        listStyle: "none",
+        margin: 0,
+        padding: 0,
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.75em",
+      }}
+    >
+      {assistant.messages.map((message) => (
+        <AssistantMessage
+          key={message.id}
+          message={message}
+          labels={labels}
+          slots={slots}
+          action={messageAction?.(message)}
+          undo={
+            assistant.undo?.messageId === message.id
+              ? assistant.undo
+              : undefined
+          }
+          onUndo={() => {
+            void assistant.undoTurn?.();
+          }}
+          onUndoAction={(idempotencyKey) => {
+            void assistant.undoAction?.(idempotencyKey);
+          }}
+          receipts={receipts}
+        />
+      ))}
+      {/* At the end of the transcript, where the reply will land. */}
+      {assistant.busy ? <AssistantWorking labels={labels} /> : null}
+    </ul>
+  );
+}
+
 function Body({
   assistant,
   labels,
@@ -540,39 +598,13 @@ function Body({
             note={note}
           />
         ) : (
-          <ul
-            data-adapttable-part="assistant-messages"
-            style={{
-              listStyle: "none",
-              margin: 0,
-              padding: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.75em",
-            }}
-          >
-            {assistant.messages.map((message) => (
-              <AssistantMessage
-                key={message.id}
-                message={message}
-                labels={labels}
-                slots={slots}
-                action={messageAction?.(message)}
-                undo={
-                  assistant.undo?.messageId === message.id
-                    ? assistant.undo
-                    : undefined
-                }
-                onUndo={() => {
-                  void assistant.undoTurn?.();
-                }}
-                onUndoAction={(idempotencyKey) => {
-                  void assistant.undoAction?.(idempotencyKey);
-                }}
-                receipts={receipts}
-              />
-            ))}
-          </ul>
+          <Transcript
+            assistant={assistant}
+            labels={labels}
+            slots={slots}
+            messageAction={messageAction}
+            receipts={receipts}
+          />
         )}
         {/* A question belongs where the reader is already looking, not in a
             second surface that competes with the approval. */}
@@ -865,7 +897,12 @@ export function TableAssistantChrome({
       />
       {assistant.error ? (
         <p data-adapttable-part="assistant-error" role="alert">
-          {assistant.error}
+          {/* The runtime's own message names continuations and backends; a
+              reader gets the sentence for what it means to them, and only
+              falls back to that message when nobody wrote one. */}
+          {(assistant.errorCode
+            ? labels?.assistantUnresolved?.(assistant.errorCode)
+            : undefined) ?? assistant.error}
         </p>
       ) : null}
       {assistant.status === "disconnected" ? (
@@ -883,7 +920,7 @@ export function TableAssistantChrome({
         onSend={send}
         onStop={assistant.stop}
         {...(speech ? { speech } : {})}
-        {...(assistant.messages.length > 0 ? { examples } : {})}
+        {...(examples.items.length > 0 ? { examples } : {})}
       />
       {resolved === "sheet" ? (
         <Button

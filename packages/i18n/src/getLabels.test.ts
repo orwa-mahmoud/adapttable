@@ -183,6 +183,11 @@ const INTERPOLATION_CASES: Record<
       (fn as (code: string) => string | undefined)("table-moved") ?? "",
     expects: [],
   },
+  assistantUnresolved: {
+    call: (fn) =>
+      (fn as (code: string) => string | undefined)("repeated-plan") ?? "",
+    expects: [],
+  },
   assistantCapabilityName: {
     call: (fn) =>
       (fn as (capability: string) => string | undefined)("edit.cells") ?? "",
@@ -671,6 +676,38 @@ it("every locale words a cleared filter, sort, search and grouping", () => {
         cleared: true,
       }),
       `${tag} invented a cleared headline for an unknown kind`
+    ).toBeUndefined();
+  }
+});
+
+/**
+ * A turn that stopped short says so in the reader's language.
+ *
+ * The runtime's own message names continuations and backends, which is the
+ * right sentence for whoever is debugging the turn and the wrong one for the
+ * person who asked a question.
+ */
+it("every locale says why a turn stopped, without naming the machinery", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    for (const code of [
+      "continuation-exhausted",
+      "discovery-exhausted",
+      "repeated-plan",
+      "question-unanswered",
+      "approval-unavailable",
+      "interrupt-unsupported",
+      "output-denied",
+      "not-run",
+    ]) {
+      const said = labels.assistantUnresolved(code);
+      expect(said, `${tag}.${code}`).toBeTypeOf("string");
+      expect((said ?? "").length, `${tag}.${code} is empty`).toBeGreaterThan(0);
+      // The token is a code, not a word anyone reads.
+      expect(said, `${tag} leaked ${code}`).not.toContain(code);
+    }
+    expect(
+      labels.assistantUnresolved("teleported"),
+      `${tag} invented a reason for an unknown code`
     ).toBeUndefined();
   }
 });

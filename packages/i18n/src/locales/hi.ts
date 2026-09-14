@@ -224,6 +224,25 @@ export const hi: Required<TableLabels> = {
   assistantDetail: "विवरण",
   assistantSaveInTable: "यह बदलाव रखने के लिए टेबल में सहेजें।",
   assistantUndo: "पूर्ववत करें",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "इसमें एक बार में अनुमत से अधिक चरण लगते हैं। इसका एक हिस्सा माँगें।",
+        "continuation-limit":
+          "इसमें एक बार में अनुमत से अधिक चरण लगते हैं। इसका एक हिस्सा माँगें।",
+        "resume-limit":
+          "इसमें एक बार में अनुमत से अधिक चरण लगते हैं। इसका एक हिस्सा माँगें।",
+        "discovery-exhausted": "सहायक यह नहीं समझ पाया कि यहाँ यह कैसे करें।",
+        "repeated-plan": "सहायक ने वही चीज़ दो बार माँगी और रुक गया।",
+        "question-unanswered": "पूरा होने के लिए आपका उत्तर चाहिए।",
+        "approval-unavailable":
+          "इसके लिए अनुमोदन चाहिए, और पूछने की कोई जगह नहीं।",
+        "interrupt-unsupported": "सहायक ने वह माँगा जो यह तालिका नहीं कर सकती।",
+        "output-denied": "इसका कुछ हिस्सा चलने नहीं दिया गया।",
+        "not-run": "यह नहीं चला।",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -238,8 +257,8 @@ export const hi: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `${CAPABILITY[capability] ?? capability} के बारे में फिर पूछें`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "उदाहरण",
-  assistantMoreExamples: "और उदाहरण",
+  assistantExamples: "शॉर्टकट",
+  assistantMoreExamples: "और शॉर्टकट",
   assistantReceiptChange: ({ before, after }) =>
     `${before} से ${after} किया गया`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -265,6 +284,8 @@ export const hi: Required<TableLabels> = {
         "search-cleared/executed": "खोज साफ़ की गई",
         "group-cleared/executed": "समूहन हटाया गया",
         "pin-cleared/executed": "स्तंभ अनपिन किया गया",
+        "pinRow/executed": "पंक्ति पिन की गई",
+        "pinRow-cleared/executed": "पंक्ति अनपिन की गई",
         "page/executed": "पृष्ठ बदला",
         "aggregate/executed": "योग बदले",
         "select/executed": "चयन बदला",

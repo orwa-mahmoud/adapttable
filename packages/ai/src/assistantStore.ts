@@ -167,6 +167,14 @@ export interface TableAssistantSnapshot {
   readonly draft: string;
   /** The last failure, cleared by the next successful turn. */
   readonly error: string | undefined;
+  /**
+   * The machine code behind {@link error}, when a turn ended with work
+   * pending.
+   *
+   * The message beside it is written for whoever is debugging the turn; a
+   * surface with labels turns this into a sentence for the reader instead.
+   */
+  readonly errorCode: string | undefined;
   /** The suggestions this table can run right now. */
   readonly suggestions: readonly AssistantSuggestion[];
   /** Eligible suggestions past `primarySuggestions`. */
@@ -348,6 +356,7 @@ export function createTableAssistant(
   let error: string | undefined;
   let question: AssistantQuestion | null = null;
   // The last turn that actually moved the view, and which message it was.
+  let errorCode: string | undefined;
   let undoPlan: { message: string; undo: AssistantUndo } | null = null;
   /**
    * One plan per action that can be put back on its own.
@@ -514,6 +523,7 @@ export function createTableAssistant(
     a.messages === b.messages &&
     a.draft === b.draft &&
     a.error === b.error &&
+    a.errorCode === b.errorCode &&
     a.approval === b.approval &&
     a.pendingQuestion === b.pendingQuestion &&
     sameOffer(a.undo, b.undo) &&
@@ -576,6 +586,7 @@ export function createTableAssistant(
       messages: offeredMessages(),
       draft,
       error,
+      errorCode,
       suggestions: sliceCache.head,
       moreSuggestions: sliceCache.tail,
       approval: live.approval ?? null,
@@ -673,6 +684,7 @@ export function createTableAssistant(
       if (failed) error = failed.error?.message ?? "the undo did not finish";
     } catch (cause) {
       error = cause instanceof Error ? cause.message : String(cause);
+      errorCode = undefined;
     }
     publish();
   };
@@ -698,6 +710,7 @@ export function createTableAssistant(
     if (silentTurn(reply, receipts.length)) {
       if (draft === "") draft = was;
       error = EMPTY_TURN;
+      errorCode = undefined;
       status = "error";
       publish();
       return;
@@ -713,7 +726,10 @@ export function createTableAssistant(
       receipts: receipts.length > 0 ? receipts : undefined,
       outcome: receipts.length > 0 ? turnStatus(receipts) : undefined,
     });
-    if (reply.unresolved) error = reply.unresolved.message;
+    if (reply.unresolved) {
+      error = reply.unresolved.message;
+      errorCode = reply.unresolved.code;
+    }
     setStatus(
       receipts.some((receipt) => receipt.status === "awaiting-approval")
         ? "awaiting-approval"
@@ -730,6 +746,7 @@ export function createTableAssistant(
     // is resent either way: an action whose outcome is unknown stays unknown.
     if (!aborted) {
       error = cause instanceof Error ? cause.message : String(cause);
+      errorCode = undefined;
     }
     status = aborted ? "ready" : "error";
     publish();
@@ -782,6 +799,7 @@ export function createTableAssistant(
       } catch (cause) {
         if (!current(mine) || connection !== controller) return;
         error = cause instanceof Error ? cause.message : String(cause);
+        errorCode = undefined;
         status = "error";
         publish();
       }
@@ -859,6 +877,7 @@ export function createTableAssistant(
     const before = viewNow();
     if (text === undefined) draft = "";
     error = undefined;
+    errorCode = undefined;
     status = "sending";
     push(userMessage);
 
@@ -977,6 +996,7 @@ export function createTableAssistant(
       cancelTurn();
       messages = [];
       error = undefined;
+      errorCode = undefined;
       // The offer belonged to a message the reader has just removed.
       undoPlan = null;
       status = live.session && live.transport ? "ready" : status;
@@ -1058,6 +1078,7 @@ export function createTableAssistant(
         cancelTurn();
         messages = [];
         error = undefined;
+        errorCode = undefined;
         // A different table is not one this plan describes, and a revision
         // number from the old one could coincide with the new one's.
         undoPlan = null;

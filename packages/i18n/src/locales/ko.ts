@@ -221,6 +221,25 @@ export const ko: Required<TableLabels> = {
   assistantDetail: "세부 정보",
   assistantSaveInTable: "이 변경을 유지하려면 테이블에서 저장하세요.",
   assistantUndo: "실행 취소",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "한 번의 대화가 허용하는 단계를 넘습니다. 일부만 요청해 주세요.",
+        "continuation-limit":
+          "한 번의 대화가 허용하는 단계를 넘습니다. 일부만 요청해 주세요.",
+        "resume-limit":
+          "한 번의 대화가 허용하는 단계를 넘습니다. 일부만 요청해 주세요.",
+        "discovery-exhausted":
+          "여기서 그 방법을 어시스턴트가 알아내지 못했습니다.",
+        "repeated-plan": "어시스턴트가 같은 요청을 두 번 하고 멈췄습니다.",
+        "question-unanswered": "완료하려면 답변이 필요합니다.",
+        "approval-unavailable": "승인이 필요하지만 물어볼 곳이 없습니다.",
+        "interrupt-unsupported": "이 테이블이 할 수 없는 것을 요청했습니다.",
+        "output-denied": "그중 일부는 실행이 허용되지 않았습니다.",
+        "not-run": "실행되지 않았습니다.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -235,8 +254,8 @@ export const ko: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `${CAPABILITY[capability] ?? capability} 다시 확인하기`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "예시",
-  assistantMoreExamples: "예시 더 보기",
+  assistantExamples: "단축 명령",
+  assistantMoreExamples: "단축 명령 더 보기",
   assistantReceiptChange: ({ before, after }) =>
     `${before}에서 ${after}(으)로 변경했습니다`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -262,6 +281,8 @@ export const ko: Required<TableLabels> = {
         "search-cleared/executed": "검색을 지웠습니다",
         "group-cleared/executed": "그룹화를 해제했습니다",
         "pin-cleared/executed": "열 고정을 해제했습니다",
+        "pinRow/executed": "행을 고정했습니다",
+        "pinRow-cleared/executed": "행 고정을 해제했습니다",
         "page/executed": "페이지를 변경했습니다",
         "aggregate/executed": "합계를 변경했습니다",
         "select/executed": "선택을 변경했습니다",

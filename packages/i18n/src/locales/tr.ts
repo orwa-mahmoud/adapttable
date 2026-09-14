@@ -224,6 +224,25 @@ export const tr: Required<TableLabels> = {
   assistantDetail: "Ayrıntılar",
   assistantSaveInTable: "Bu değişikliği korumak için tabloda kaydedin.",
   assistantUndo: "Geri al",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Bu, bir turun izin verdiğinden fazla adım gerektiriyor. Bir kısmını isteyin.",
+        "continuation-limit":
+          "Bu, bir turun izin verdiğinden fazla adım gerektiriyor. Bir kısmını isteyin.",
+        "resume-limit":
+          "Bu, bir turun izin verdiğinden fazla adım gerektiriyor. Bir kısmını isteyin.",
+        "discovery-exhausted": "Asistan bunu burada nasıl yapacağını çözemedi.",
+        "repeated-plan": "Asistan aynı şeyi iki kez istedi ve durdu.",
+        "question-unanswered": "Bitmesi için sizden bir yanıt gerekiyor.",
+        "approval-unavailable": "Onay gerekiyor ve soracak bir yer yok.",
+        "interrupt-unsupported":
+          "Asistan bu tablonun yapamayacağı bir şey istedi.",
+        "output-denied": "Bunun bir kısmının çalışmasına izin verilmedi.",
+        "not-run": "Bu çalışmadı.",
+      }) as Record<string, string>
+    )[code],
   assistantUndoBlocked: (code) =>
     (
       ({
@@ -238,8 +257,8 @@ export const tr: Required<TableLabels> = {
   assistantAlwaysAllowedRevoke: (capability) =>
     `${CAPABILITY[capability] ?? capability} için yeniden sor`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
-  assistantExamples: "Örnekler",
-  assistantMoreExamples: "Daha fazla örnek",
+  assistantExamples: "Kısayollar",
+  assistantMoreExamples: "Daha fazla kısayol",
   assistantReceiptChange: ({ before, after }) =>
     `${before} değerinden ${after} değerine değiştirildi`,
   assistantReceiptProposed: ({ before, after }) =>
@@ -265,6 +284,8 @@ export const tr: Required<TableLabels> = {
         "search-cleared/executed": "Arama temizlendi",
         "group-cleared/executed": "Gruplama kaldırıldı",
         "pin-cleared/executed": "Sütun sabitlemesi kaldırıldı",
+        "pinRow/executed": "Satır sabitlendi",
+        "pinRow-cleared/executed": "Satır sabitlemesi kaldırıldı",
         "page/executed": "Sayfa değişti",
         "aggregate/executed": "Toplamlar değişti",
         "select/executed": "Seçim değişti",
