@@ -26,6 +26,7 @@ export type {
   AssistantReceipt,
   AssistantReceiptStatus,
   AssistantReceiptSubject,
+  AssistantReceiptTerm,
   AssistantTurnStatus,
 } from "./assistantReceipts";
 export {

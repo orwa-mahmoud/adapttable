@@ -581,7 +581,10 @@ export type {
   AssistantUnresolved,
   CapabilityPresentation,
 } from "./assistantContracts";
-export type { AssistantReceiptSubject } from "./assistantReceipts";
+export type {
+  AssistantReceiptSubject,
+  AssistantReceiptTerm,
+} from "./assistantReceipts";
 export type {
   ApprovalPolicy,
   CommitPolicy,

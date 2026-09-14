@@ -617,11 +617,20 @@ export interface AssistantReceiptSubject {
     // (undocumented)
     readonly after?: string;
     readonly before?: string;
+    readonly cleared?: boolean;
     // (undocumented)
     readonly column?: string;
     readonly detail?: string;
+    readonly direction?: "asc" | "desc";
     readonly kind?: string;
     readonly row?: string;
+    readonly terms?: readonly AssistantReceiptTerm[];
+}
+
+// @public
+export interface AssistantReceiptTerm {
+    readonly column?: string;
+    readonly value?: string;
 }
 
 // @public
@@ -685,8 +694,10 @@ export type AssistantTurnStatus = "applied" | "partial" | "none" | "cancelled" |
 
 // @public
 export interface AssistantUndo {
+    readonly after: AgentContextView;
     readonly before: AgentContextView;
     readonly calls: readonly UndoCall[];
+    readonly moved: readonly string[];
     readonly settledAt: number;
 }
 
@@ -1125,7 +1136,7 @@ export interface PendingApproval {
 export type PinStatus = "acknowledged" | "expired" | "unknown" | "unsupported";
 
 // @public
-export function planUndo(before: AgentContextView, after: AgentContextView, session: AgentSession, settledAt: number): AssistantUndo | UndoBlock;
+export function planUndo(before: AgentContextView, after: AgentContextView, session: AgentSession, settledAt: number, only?: readonly string[]): AssistantUndo | UndoBlock;
 
 // @public
 export interface ProposalResolver {
@@ -1307,6 +1318,9 @@ export function splitRecords(buffer: string): {
 };
 
 // @public
+export function subjectFor(key: string, args: unknown, result: ExecuteResult, columns?: readonly AgentColumn[]): AssistantReceiptSubject | undefined;
+
+// @public
 export function summaryOf(key: CapabilityKey): string;
 
 // @public
@@ -1381,6 +1395,7 @@ export interface TableAssistantStore {
     readonly setDraft: (draft: string) => void;
     readonly stop: () => void;
     readonly subscribe: (listener: () => void) => () => void;
+    readonly undoAction: (idempotencyKey: string) => Promise<void>;
     readonly undoTurn: () => Promise<void>;
     readonly update: (inputs: TableAssistantInputs) => void;
 }
@@ -1401,7 +1416,7 @@ export type UndoBlock = {
 };
 
 // @public
-export function undoBlocked(session: AgentSession, undo: AssistantUndo): UndoBlock | undefined;
+export function undoBlocked(session: AgentSession, undo: AssistantUndo, view?: AgentContextView): UndoBlock | undefined;
 
 // @public
 export interface UndoCall {

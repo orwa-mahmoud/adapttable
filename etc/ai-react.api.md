@@ -128,6 +128,7 @@ export interface TableAssistantState {
         readonly available: boolean;
         readonly blockedCode?: string;
     } | null;
+    readonly undoAction: (idempotencyKey: string) => Promise<void>;
     readonly undoTurn: () => Promise<void>;
 }
 

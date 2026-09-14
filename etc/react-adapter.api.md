@@ -4784,6 +4784,34 @@ export interface TableAssistantLanguageChipProps {
 }
 
 // @public
+export interface TableAssistantMenuItem {
+    // (undocumented)
+    readonly description?: string;
+    // (undocumented)
+    readonly icon?: ReactNode;
+    readonly id: string;
+    // (undocumented)
+    readonly part: string;
+    // (undocumented)
+    readonly title: string;
+}
+
+// @public
+export interface TableAssistantMenuProps {
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly disabled?: boolean;
+    readonly icon?: ReactNode;
+    // (undocumented)
+    readonly items: readonly TableAssistantMenuItem[];
+    readonly label: string;
+    // (undocumented)
+    readonly onSelect: (id: string) => void;
+    readonly part: string;
+}
+
+// @public
 export interface TableAssistantMessageView {
     // (undocumented)
     readonly id: string;
@@ -4828,6 +4856,7 @@ export interface TableAssistantProps {
     readonly onSettings?: () => void;
     readonly open: boolean;
     readonly presentation?: TableAssistantPresentation;
+    readonly receipts?: boolean;
     readonly speech?: SpeechInputHandle;
 }
 
@@ -4855,11 +4884,17 @@ export interface TableAssistantReceiptSubject {
     // (undocumented)
     readonly after?: string;
     readonly before?: string;
+    readonly cleared?: boolean;
     // (undocumented)
     readonly column?: string;
     readonly detail?: string;
+    readonly direction?: "asc" | "desc";
     readonly kind?: string;
     readonly row?: string;
+    readonly terms?: readonly {
+        readonly column?: string;
+        readonly value?: string;
+    }[];
 }
 
 // @public
@@ -4869,6 +4904,7 @@ export interface TableAssistantReceiptView {
     readonly message?: string;
     readonly status: string;
     readonly subject?: TableAssistantReceiptSubject;
+    readonly undoable?: boolean;
 }
 
 // @public
@@ -4894,6 +4930,7 @@ export interface TableAssistantSlots {
     readonly Button: (props: TableAssistantButtonProps) => ReactNode;
     readonly Composer: (props: TableAssistantComposerProps) => ReactNode;
     readonly LanguageChip?: (props: TableAssistantLanguageChipProps) => ReactNode;
+    readonly Menu?: (props: TableAssistantMenuProps) => ReactNode;
     readonly Panel: (props: TableAssistantPanelProps) => ReactNode;
     readonly Sheet: (props: TableAssistantSheetProps) => ReactNode;
     readonly Suggestion: (props: TableAssistantSuggestionProps) => ReactNode;
@@ -4961,6 +4998,7 @@ export interface TableAssistantView {
     readonly stop: () => void;
     readonly suggestions: readonly TableAssistantSuggestionView[];
     readonly undo?: TableAssistantUndoView | null;
+    readonly undoAction?: (idempotencyKey: string) => void | Promise<void>;
     readonly undoTurn?: () => void | Promise<void>;
 }
 

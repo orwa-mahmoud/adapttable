@@ -4112,6 +4112,7 @@ export interface TableLabels {
     assistantReceiptAction?: (action: {
         kind?: string;
         status: string;
+        cleared?: boolean;
     }) => string | undefined;
     assistantReceiptChange?: (change: {
         before: string;
@@ -4122,6 +4123,14 @@ export interface TableLabels {
         after: string;
     }) => string;
     assistantReceiptStatus?: (status: string) => string;
+    assistantReceiptTerms?: (subject: {
+        kind?: string;
+        terms?: readonly {
+            column?: string;
+            value?: string;
+        }[];
+        direction?: "asc" | "desc";
+    }) => string | undefined;
     assistantSaveInTable?: string;
     assistantSend?: string;
     assistantSettings?: string;

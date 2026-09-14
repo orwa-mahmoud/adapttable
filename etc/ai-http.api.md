@@ -404,6 +404,7 @@ export interface AgentHttpTurnResult {
         readonly read: number;
     };
     readonly results: readonly ExecuteResult[];
+    readonly subjects: readonly (AssistantReceiptSubject | undefined)[];
     readonly text: string;
     readonly unresolved?: AgentHttpUnresolved;
 }
@@ -614,11 +615,20 @@ export interface AssistantReceiptSubject {
     // (undocumented)
     readonly after?: string;
     readonly before?: string;
+    readonly cleared?: boolean;
     // (undocumented)
     readonly column?: string;
     readonly detail?: string;
+    readonly direction?: "asc" | "desc";
     readonly kind?: string;
     readonly row?: string;
+    readonly terms?: readonly AssistantReceiptTerm[];
+}
+
+// @public
+export interface AssistantReceiptTerm {
+    readonly column?: string;
+    readonly value?: string;
 }
 
 // @public
