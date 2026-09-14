@@ -135,10 +135,42 @@ describe("a write that named no rows", () => {
     expect(review.rows).toBe(0);
   });
 
-  it("still offers a whole answer", () => {
+  it("still offers a whole answer, in the singular", () => {
+    // An operation is one change however many rows it touches, so "all" is a
+    // word that describes nothing here.
     const review = approvalReview(operation, undefined)!;
-    expect(review.approveLabel).toBe("Approve all");
+    expect(review.approveLabel).toBe("Approve");
+    expect(review.rejectLabel).toBe("Reject");
     expect(review.truncated).toBe(false);
+  });
+});
+
+describe("how many changes the controls answer for", () => {
+  it("says Approve for one, and Approve all for more than one", () => {
+    const one = approvalReview(
+      pending({
+        proposals: [{ rowKey: "r1", column: "salary", before: 1, after: 2 }],
+        decisions: ["pending"],
+      }),
+      undefined
+    )!;
+    expect(one.approveLabel).toBe("Approve");
+    expect(one.rejectLabel).toBe("Reject");
+
+    const many = approvalReview(pending(), undefined)!;
+    expect(many.approveLabel).toBe("Approve all");
+    expect(many.rejectLabel).toBe("Reject all");
+  });
+
+  it("says remaining once a decision has been taken, however many there are", () => {
+    const started = approvalReview(
+      pending({
+        proposals: [{ rowKey: "r1", column: "salary", before: 1, after: 2 }],
+        decisions: ["approved"],
+      }),
+      undefined
+    )!;
+    expect(started.approveLabel).toBe("Approve remaining");
   });
 });
 

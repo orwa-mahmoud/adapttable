@@ -84,6 +84,29 @@ export interface ApprovalReview {
  *
  * @public
  */
+
+/** What the control that answers the whole write is called. */
+function approveWord(
+  labels: TableLabels | undefined,
+  count: number,
+  started: boolean
+): string {
+  if (started) return labels?.approveRemainingProposals ?? "Approve remaining";
+  if (count <= 1) return labels?.approveProposal ?? "Approve";
+  return labels?.approveAllProposals ?? "Approve all";
+}
+
+/** The same, for refusing it. */
+function rejectWord(
+  labels: TableLabels | undefined,
+  count: number,
+  started: boolean
+): string {
+  if (started) return labels?.rejectRemainingProposals ?? "Reject remaining";
+  if (count <= 1) return labels?.rejectProposal ?? "Reject";
+  return labels?.rejectAllProposals ?? "Reject all";
+}
+
 export function approvalReview(
   pending: AgentApprovalPending | null | undefined,
   labels: TableLabels | undefined
@@ -139,13 +162,11 @@ export function approvalReview(
         })
       : undefined,
     // "Approve all" is a promise the control cannot keep once a row has been
-    // refused: that row stays refused. The label changes with the behaviour.
-    approveLabel: started
-      ? (labels?.approveRemainingProposals ?? "Approve remaining")
-      : (labels?.approveAllProposals ?? "Approve all"),
-    rejectLabel: started
-      ? (labels?.rejectRemainingProposals ?? "Reject remaining")
-      : (labels?.rejectAllProposals ?? "Reject all"),
+    // refused: that row stays refused. The label changes with the behaviour —
+    // and "all" of one change is a word that describes nothing, so a single
+    // proposal is approved or rejected, full stop.
+    approveLabel: approveWord(labels, items.length, started),
+    rejectLabel: rejectWord(labels, items.length, started),
     reviewAllLabel:
       items.length > preview.length
         ? (

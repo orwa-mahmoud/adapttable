@@ -68,8 +68,9 @@ describe("when the strip draws at all", () => {
     expect(part("approval-review-summary")).toHaveTextContent(
       "1 proposed change"
     );
-    expect(part("agent-approval-approve")).toHaveTextContent("Approve all");
-    expect(part("agent-approval-reject")).toHaveTextContent("Reject all");
+    // One proposal, one decision — "all" of one is noise.
+    expect(part("agent-approval-approve")).toHaveTextContent("Approve");
+    expect(part("agent-approval-reject")).toHaveTextContent("Reject");
   });
 });
 
