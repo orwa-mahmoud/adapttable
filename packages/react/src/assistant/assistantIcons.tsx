@@ -134,14 +134,20 @@ export function ExamplesIcon(): ReactElement {
 }
 
 /**
- * Put this back: an arrow curving anticlockwise, the shape every editor uses.
+ * Put this back: an arrow turning left into a hook.
+ *
+ * Drawn as two strokes — a head and the path it came from — because a single
+ * near-closed arc renders as a plain circle at the size a row gives it, which
+ * tells a reader nothing about what the control does. The word travels beside
+ * it for the same reason.
  *
  * @internal
  */
 export function UndoIcon(): ReactElement {
   return (
     <svg {...BASE}>
-      <path d="M3 7v6h6M3.5 13a9 9 0 1 0 2.2-9.4L3 7" />
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h7a6 6 0 0 1 6 6v3" />
     </svg>
   );
 }

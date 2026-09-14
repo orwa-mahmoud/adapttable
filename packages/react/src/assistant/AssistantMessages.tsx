@@ -191,11 +191,9 @@ function Receipt({
         >
           <Button
             label={labels?.assistantUndo ?? "Undo"}
-            tooltip={labels?.assistantUndo ?? "Undo"}
             part="assistant-receipt-undo-button"
             variant="subtle"
             icon={<UndoIcon />}
-            iconOnly
             onClick={onUndo}
           />
         </span>
