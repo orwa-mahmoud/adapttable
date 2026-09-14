@@ -519,8 +519,13 @@ function Transcript({
           receipts={receipts}
         />
       ))}
-      {/* At the end of the transcript, where the reply will land. */}
-      {assistant.busy ? <AssistantWorking labels={labels} /> : null}
+      {/* At the end of the transcript, where the reply will land — but not
+          while a question is parked on the reader. Nothing is working then:
+          the turn is waiting on them, and saying otherwise is why a question
+          gets read as progress. */}
+      {assistant.busy && !assistant.pendingQuestion ? (
+        <AssistantWorking labels={labels} />
+      ) : null}
     </ul>
   );
 }

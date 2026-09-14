@@ -532,19 +532,24 @@ function Spoken({
         data-adapttable-part="assistant-message-text"
         data-streaming={message.partialText === undefined ? undefined : "true"}
         style={{
-          padding: mine ? "0.5em 0.75em" : 0,
+          padding: "0.6em 0.8em",
           borderRadius: "0.85em",
-          background: mine
-            ? "color-mix(in srgb, currentColor 8%, transparent)"
-            : "transparent",
           overflowWrap: "anywhere",
           whiteSpace: "pre-wrap",
-          // The reply is the answer to what the reader asked. It led with
-          // the same weight as the cards under it, which made a turn read
-          // as a stack of machinery with a sentence lost in it.
+          // Both sides get a surface. The reply used to be bare text on the
+          // panel's own ground, which made the one thing the reader asked for
+          // the only thing that did not look like a message.
           ...(mine
-            ? {}
-            : { fontSize: "1.05em", lineHeight: 1.5, fontWeight: 450 }),
+            ? { background: "color-mix(in srgb, currentColor 8%, transparent)" }
+            : {
+                background:
+                  "color-mix(in srgb, currentColor 3.5%, transparent)",
+                border: "1px solid currentColor",
+                borderColor:
+                  "color-mix(in srgb, currentColor 14%, transparent)",
+                fontSize: "1.05em",
+                lineHeight: 1.5,
+              }),
         }}
       >
         {message.partialText ?? message.text}
