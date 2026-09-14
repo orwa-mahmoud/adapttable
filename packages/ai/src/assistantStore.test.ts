@@ -142,7 +142,8 @@ describe("the assistant store", () => {
     const first = store.send("one");
     const second = store.send("two");
     expect(send).toHaveBeenCalledTimes(1);
-    expect(store.getState().canSend).toBe(false);
+    // A turn is running, which is the whole of "not now".
+    expect(store.getState().busy).toBe(true);
     deferred.reply("done");
     await Promise.all([first, second]);
   });

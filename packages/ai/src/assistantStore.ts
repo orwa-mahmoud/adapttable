@@ -227,10 +227,6 @@ export interface TableAssistantSnapshot {
    * goes looking for what they agreed to.
    */
   readonly alwaysAllowed: readonly AssistantAllowance[];
-  /** Whether a send would do anything right now. */
-  readonly canSend: boolean;
-  /** Whether there is a turn to stop. */
-  readonly canStop: boolean;
 }
 
 /**
@@ -619,8 +615,6 @@ export function createTableAssistant(
     a.pendingQuestion === b.pendingQuestion &&
     sameOffer(a.undo, b.undo) &&
     a.alwaysAllowed === b.alwaysAllowed &&
-    a.canSend === b.canSend &&
-    a.canStop === b.canStop &&
     a.suggestions === b.suggestions &&
     a.suggestions === b.suggestions;
 
@@ -672,8 +666,6 @@ export function createTableAssistant(
       pendingQuestion: openQuestion(messages),
       undo: undoOffer(),
       alwaysAllowed: allowances(live.alwaysAllowed),
-      canSend: !sending && Boolean(live.session) && Boolean(live.transport),
-      canStop: sending,
     };
     return snapshot;
   };
