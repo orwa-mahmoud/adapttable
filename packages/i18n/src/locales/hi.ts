@@ -259,6 +259,8 @@ export const hi: Required<TableLabels> = {
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) =>
     count === 1 ? "1 क्रिया" : `${String(count)} क्रियाएँ`,
+  assistantActionsTitle: "इस बारी ने क्या बदला",
+  assistantUndoAll: "सब पहले जैसा करें",
   assistantExamples: "शॉर्टकट",
   assistantMoreExamples: "और शॉर्टकट",
   assistantReceiptChange: ({ before, after }) =>

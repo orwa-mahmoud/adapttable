@@ -348,6 +348,8 @@ export const defaultLabels: Required<TableLabels> = {
   },
   assistantActions: (count) =>
     count === 1 ? "1 action" : `${String(count)} actions`,
+  assistantActionsTitle: "What this turn changed",
+  assistantUndoAll: "Undo all",
   assistantExamples: "Shortcuts",
   assistantMoreExamples: "More shortcuts",
   assistantReceiptStatus: (status) =>

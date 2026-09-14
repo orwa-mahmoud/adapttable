@@ -256,6 +256,8 @@ export const ko: Required<TableLabels> = {
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) =>
     count === 1 ? "작업 1개" : `작업 ${String(count)}개`,
+  assistantActionsTitle: "이번 차례에서 바뀐 것",
+  assistantUndoAll: "모두 실행 취소",
   assistantExamples: "단축 명령",
   assistantMoreExamples: "단축 명령 더 보기",
   assistantReceiptChange: ({ before, after }) =>

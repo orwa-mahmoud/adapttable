@@ -254,6 +254,8 @@ export const ja: Required<TableLabels> = {
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) =>
     count === 1 ? "1 件の操作" : `${String(count)} 件の操作`,
+  assistantActionsTitle: "このやり取りで変わったこと",
+  assistantUndoAll: "すべて元に戻す",
   assistantExamples: "ショートカット",
   assistantMoreExamples: "他のショートカット",
   assistantReceiptChange: ({ before, after }) =>

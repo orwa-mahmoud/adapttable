@@ -12,11 +12,12 @@
  * left out rather than guessed.
  */
 import type { TableLabels } from "@adapttable/core";
-import { type ReactElement, useState } from "react";
+import { type ReactElement, type ReactNode, useId, useState } from "react";
 
 import {
   ActionsIcon,
   AssistantIcon,
+  ReceiptIcon,
   SuggestionIcon,
   UndoIcon,
 } from "./assistantIcons";
@@ -30,6 +31,17 @@ import type {
 } from "./assistantView";
 
 /** A staged write is not finished, and the panel has to say so. */
+/**
+ * The assistant's own colour.
+ *
+ * A kit sets `--adapttable-assistant-accent` on its surface to give the
+ * conversation its palette; without one the panel borrows the text colour,
+ * which is legible everywhere and belongs to no brand. Everything here mixes
+ * against it rather than naming a colour, so a dark theme and a light one
+ * both land somewhere sensible.
+ */
+const ACCENT = "var(--adapttable-assistant-accent, currentColor)";
+
 const NEEDS_SAVE = "staged";
 
 /** Which of the kit's tones a receipt's status deserves. */
@@ -158,7 +170,7 @@ function Receipt({
       data-kind={subject?.kind}
       style={{
         display: "flex",
-        alignItems: "baseline",
+        alignItems: "center",
         justifyContent: "space-between",
         gap: "0.5em",
         flexWrap: "wrap",
@@ -166,43 +178,81 @@ function Receipt({
       }}
     >
       <span
-        style={{ display: "flex", alignItems: "center", gap: "0.45em" }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.55em",
+          // Takes the row and gives it back: the undo control keeps its own
+          // width, and a long detail wraps under the name rather than pushing
+          // the control off the end.
+          flex: "1 1 10em",
+          minWidth: 0,
+        }}
         data-adapttable-part="assistant-receipt-summary"
       >
-        <span aria-hidden="true" style={{ display: "flex", opacity: 0.75 }}>
-          <SuggestionIcon kind={subject?.kind} />
+        <ReceiptIcon {...(subject?.kind ? { kind: subject.kind } : {})} />
+        <span
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            minWidth: 0,
+            lineHeight: 1.35,
+          }}
+        >
+          <strong style={{ fontWeight: 600 }}>
+            {headline(receipt, labels)}
+          </strong>
+          {/* What it did, under what it was: the name is what a reader scans
+              and the detail is what they stop on, so stacking them lets the
+              names line up down the column. */}
+          {detail ? (
+            <span
+              data-adapttable-part="assistant-receipt-detail-text"
+              style={{ opacity: 0.7, overflowWrap: "anywhere" }}
+            >
+              {detail}
+            </span>
+          ) : null}
         </span>
-        <strong style={{ fontWeight: 550 }}>{headline(receipt, labels)}</strong>
-        {detail ? (
+      </span>
+      {/* Where it landed, what it became, and the way back — one group at the
+          row's end. Loose siblings each claimed their own line as soon as the
+          panel narrowed, which broke a row into three. */}
+      <span
+        data-adapttable-part="assistant-receipt-outcome"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5em",
+          marginInlineStart: "auto",
+          flexShrink: 0,
+          fontSize: "0.95em",
+        }}
+      >
+        {where ? (
           <span
-            data-adapttable-part="assistant-receipt-detail-text"
-            style={{ opacity: 0.75 }}
+            data-adapttable-part="assistant-receipt-where"
+            style={{ opacity: 0.7 }}
           >
-            {detail}
+            {where}
+          </span>
+        ) : null}
+        <ChangedValue receipt={receipt} labels={labels} />
+        {onUndo ? (
+          // At the end of the row it belongs to, small and quiet: putting one
+          // action back is worth offering, not worth competing with the action
+          // it would put back.
+          <span data-adapttable-part="assistant-receipt-undo">
+            <Button
+              label={labels?.assistantUndo ?? "Undo"}
+              part="assistant-receipt-undo-button"
+              variant="subtle"
+              icon={<UndoIcon />}
+              onClick={onUndo}
+            />
           </span>
         ) : null}
       </span>
-      {where ? (
-        <span data-adapttable-part="assistant-receipt-where">{where}</span>
-      ) : null}
-      <ChangedValue receipt={receipt} labels={labels} />
-      {onUndo ? (
-        // At the end of the row it belongs to, small and quiet: putting one
-        // action back is worth offering, not worth competing with the action
-        // it would put back.
-        <span
-          data-adapttable-part="assistant-receipt-undo"
-          style={{ marginInlineStart: "auto", fontSize: "0.9em" }}
-        >
-          <Button
-            label={labels?.assistantUndo ?? "Undo"}
-            part="assistant-receipt-undo-button"
-            variant="subtle"
-            icon={<UndoIcon />}
-            onClick={onUndo}
-          />
-        </span>
-      ) : null}
       {receipt.status === NEEDS_SAVE ? (
         <span data-adapttable-part="assistant-receipt-save">
           <Badge
@@ -294,11 +344,17 @@ export function AssistantMessage({
   // there is evidence a reader opens when they want it.
   const [openActions, setOpenActions] = useState(false);
   const perAction = onUndoAction ? { onUndoAction } : {};
-  // One control per change. A card that carries its own Undo makes the
-  // whole-turn one a second answer to the same question — and a reader
-  // counting three controls under two actions cannot tell which does what.
-  const perCard =
-    onUndoAction !== undefined && shown.some((receipt) => receipt.undoable);
+  // Said once, and used wherever a blocked undo has to explain itself.
+  const undoReason =
+    labels?.assistantUndoBlocked?.(undo?.blockedCode ?? "") ??
+    "The table has changed since this ran.";
+  // The whole-turn offer, assembled once: the group heads its list with it,
+  // and a turn that changed nothing visible carries it on its own below.
+  const blockedReason = undo?.available ? {} : { reason: undoReason };
+  const turnUndo =
+    undo && onUndo
+      ? { undoTurn: { available: undo.available, ...blockedReason, onUndo } }
+      : {};
   const mine = message.role === "user";
   const speaker = mine
     ? (labels?.assistantYou ?? "You")
@@ -310,7 +366,7 @@ export function AssistantMessage({
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: "0.35em",
+        gap: "0.25em",
         alignItems: mine ? "flex-end" : "flex-start",
       }}
     >
@@ -330,7 +386,26 @@ export function AssistantMessage({
       >
         {speaker}
       </span>
-      <Spoken message={message} mine={mine} leads={leads} />
+      <Spoken
+        message={message}
+        mine={mine}
+        leads={leads}
+        {...(receipts && shown.length > 0
+          ? {
+              trailing: (
+                <ActionsToggle
+                  count={shown.length}
+                  labels={labels}
+                  slots={slots}
+                  open={openActions}
+                  onToggle={() => {
+                    setOpenActions(!openActions);
+                  }}
+                />
+              ),
+            }
+          : {})}
+      />
 
       {action ? (
         <span data-adapttable-part="assistant-message-action">
@@ -342,31 +417,14 @@ export function AssistantMessage({
           />
         </span>
       ) : null}
-      {undo && !perCard ? (
-        <span data-adapttable-part="assistant-undo">
-          <slots.Button
-            label={labels?.assistantUndo ?? "Undo"}
-            part="assistant-undo-button"
-            variant="secondary"
-            disabled={!undo.available}
-            tooltip={
-              undo.available
-                ? undefined
-                : (labels?.assistantUndoBlocked?.(undo.blockedCode ?? "") ??
-                  "The table has changed since this ran.")
-            }
-            onClick={() => onUndo?.()}
-          />
-          {undo.available ? null : (
-            <span
-              data-adapttable-part="assistant-undo-reason"
-              style={{ opacity: 0.8 }}
-            >
-              {labels?.assistantUndoBlocked?.(undo.blockedCode ?? "") ??
-                "The table has changed since this ran."}
-            </span>
-          )}
-        </span>
+      {undo && shown.length === 0 ? (
+        <LoneUndo
+          labels={labels}
+          slots={slots}
+          available={undo.available}
+          reason={undoReason}
+          onUndo={() => onUndo?.()}
+        />
       ) : null}
       {receipts && shown.length > 0 ? (
         <Actions
@@ -374,9 +432,7 @@ export function AssistantMessage({
           labels={labels}
           slots={slots}
           open={openActions}
-          onToggle={() => {
-            setOpenActions(!openActions);
-          }}
+          {...turnUndo}
           {...perAction}
         />
       ) : null}
@@ -513,10 +569,13 @@ function Spoken({
   message,
   mine,
   leads,
+  trailing,
 }: {
   readonly message: TableAssistantMessageView;
   readonly mine: boolean;
   readonly leads: boolean;
+  /** Hung on the bubble's own bottom corner. */
+  readonly trailing?: ReactNode;
 }): ReactElement {
   return (
     <span
@@ -535,10 +594,17 @@ function Spoken({
           data-hidden={leads ? undefined : "true"}
           style={{
             display: "flex",
-            marginBlockStart: "0.15em",
+            alignItems: "center",
+            justifyContent: "center",
+            inlineSize: "1.55em",
+            blockSize: "1.55em",
+            flexShrink: 0,
+            borderRadius: "50%",
+            background: `color-mix(in srgb, ${ACCENT} 16%, transparent)`,
+            color: `color-mix(in srgb, ${ACCENT} 85%, currentColor)`,
             // Kept in place, not removed: the bubbles in a run stay on one
             // line as the mark stops repeating down it.
-            opacity: leads ? 0.7 : 0,
+            opacity: leads ? 1 : 0,
           }}
         >
           <AssistantIcon />
@@ -573,6 +639,65 @@ function Spoken({
       >
         {message.partialText ?? message.text}
       </span>
+      {/* On the bubble's own corner, not under it: what a reply did belongs
+          to that reply, and a control on the panel's own margin belongs to
+          whatever the reader last looked at. */}
+      {trailing ? (
+        <span
+          style={{
+            alignSelf: "flex-end",
+            display: "flex",
+            marginInlineStart: "-0.9em",
+            marginBlockEnd: "-0.45em",
+            flexShrink: 0,
+          }}
+        >
+          {trailing}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
+/**
+ * Putting a turn back when there is no list to head.
+ *
+ * A turn can change the table and draw no card a reader would want shown — a
+ * host capability the panel has no receipt for, a change the reader turned
+ * card display off for. The offer still stands, so it stands on its own.
+ */
+function LoneUndo({
+  labels,
+  slots,
+  available,
+  reason,
+  onUndo,
+}: {
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  readonly available: boolean;
+  readonly reason: string;
+  readonly onUndo: () => void;
+}): ReactElement {
+  return (
+    <span data-adapttable-part="assistant-undo">
+      <slots.Button
+        label={labels?.assistantUndo ?? "Undo"}
+        part="assistant-undo-button"
+        variant="secondary"
+        icon={<UndoIcon />}
+        disabled={!available}
+        {...(available ? {} : { tooltip: reason })}
+        onClick={onUndo}
+      />
+      {available ? null : (
+        <span
+          data-adapttable-part="assistant-undo-reason"
+          style={{ opacity: 0.8 }}
+        >
+          {reason}
+        </span>
+      )}
     </span>
   );
 }
@@ -588,39 +713,77 @@ function Actions({
   labels,
   slots,
   open,
-  onToggle,
   onUndoAction,
+  undoTurn,
 }: {
   readonly receipts: readonly TableAssistantReceiptView[];
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly open: boolean;
-  readonly onToggle: () => void;
   readonly onUndoAction?: (idempotencyKey: string) => void;
+  /** Put the whole turn back. Absent when the turn cannot be. */
+  readonly undoTurn?: {
+    readonly available: boolean;
+    readonly reason?: string;
+    readonly onUndo: () => void;
+  };
 }): ReactElement {
   const undo = onUndoAction ? { onUndoAction } : {};
+  const whole = undoTurn ? { undoTurn } : {};
   return (
     <>
-      <span
-        data-adapttable-part="assistant-receipts-toggle"
-        style={{ marginInlineStart: "1.85em" }}
-      >
-        <slots.Button
-          label={
-            labels?.assistantActions?.(receipts.length) ??
-            `${String(receipts.length)} action${receipts.length === 1 ? "" : "s"}`
-          }
-          part="assistant-receipts-toggle-button"
-          variant="subtle"
-          icon={<ActionsIcon />}
-          expanded={open}
-          onClick={onToggle}
-        />
-      </span>
       {open ? (
-        <Receipts receipts={receipts} labels={labels} slots={slots} {...undo} />
+        <Receipts
+          receipts={receipts}
+          labels={labels}
+          slots={slots}
+          {...whole}
+          {...undo}
+        />
       ) : null}
     </>
+  );
+}
+
+/**
+ * The mark that opens what a reply did.
+ *
+ * It rides the reply's own corner rather than sitting on the panel's margin:
+ * a count on its own line reads as a second message, and a reader who does
+ * not want the evidence should see one small mark, not another paragraph.
+ */
+function ActionsToggle({
+  count,
+  labels,
+  slots,
+  open,
+  onToggle,
+}: {
+  readonly count: number;
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  readonly open: boolean;
+  readonly onToggle: () => void;
+}): ReactElement {
+  const said =
+    labels?.assistantActions?.(count) ??
+    `${String(count)} action${count === 1 ? "" : "s"}`;
+  return (
+    <span
+      data-adapttable-part="assistant-receipts-toggle"
+      style={{ display: "flex" }}
+    >
+      <slots.Button
+        label={said}
+        part="assistant-receipts-toggle-button"
+        variant="subtle"
+        icon={<ActionsIcon />}
+        iconOnly
+        tooltip={said}
+        expanded={open}
+        onClick={onToggle}
+      />
+    </span>
   );
 }
 
@@ -630,47 +793,118 @@ function Receipts({
   labels,
   slots,
   onUndoAction,
+  undoTurn,
 }: {
   readonly receipts: readonly TableAssistantReceiptView[];
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly onUndoAction?: (idempotencyKey: string) => void;
+  readonly undoTurn?: {
+    readonly available: boolean;
+    readonly reason?: string;
+    readonly onUndo: () => void;
+  };
 }): ReactElement {
+  const headingId = useId();
+  // How many rows can be put back on their own. Nothing above the list is
+  // needed when exactly one can: that row's own control is the whole answer.
+  const perRow = onUndoAction
+    ? receipts.filter((receipt) => receipt.undoable).length
+    : 0;
+  // "Undo all" only when there is more than one to be all of; otherwise the
+  // heading's control is simply the undo.
+  const wholeLabel =
+    perRow > 1
+      ? (labels?.assistantUndoAll ?? "Undo all")
+      : (labels?.assistantUndo ?? "Undo");
+  const wholeTooltip =
+    undoTurn && !undoTurn.available && undoTurn.reason
+      ? { tooltip: undoTurn.reason }
+      : {};
   return (
-    <ul
-      data-adapttable-part="assistant-receipts"
+    <section
+      data-adapttable-part="assistant-receipts-group"
+      aria-labelledby={headingId}
       style={{
-        listStyle: "none",
-        margin: 0,
         // Its own ground and its own indent, so the eye can see where the
         // reply ends and what it did begins without reading either.
-        padding: "0.4em 0.6em",
-        marginInlineStart: "1.6em",
-        marginBlockStart: "0.35em",
-        borderRadius: "0.6em",
-        background: "color-mix(in srgb, currentColor 5%, transparent)",
+        marginInlineStart: "1.85em",
+        marginBlockStart: "0.1em",
+        padding: "0.5em 0.6em",
+        borderRadius: "0.75em",
+        border: "1px solid",
+        borderColor: `color-mix(in srgb, ${ACCENT} 22%, transparent)`,
+        background: `color-mix(in srgb, ${ACCENT} 5%, transparent)`,
+        alignSelf: "stretch",
         display: "flex",
         flexDirection: "column",
-        gap: "0.35em",
-        alignSelf: "stretch",
+        gap: "0.3em",
       }}
     >
-      {receipts.map((receipt) => (
-        <Receipt
-          key={receipt.idempotencyKey}
-          receipt={receipt}
-          labels={labels}
-          slots={slots}
-          {...(receipt.undoable && onUndoAction
-            ? {
-                onUndo: () => {
-                  onUndoAction(receipt.idempotencyKey);
-                },
-              }
-            : {})}
-        />
-      ))}
-    </ul>
+      {/* Two scopes, said once each: the heading undoes the turn, a row
+          undoes itself. Without the heading they were the same word twice
+          with nothing to say which was which. */}
+      <div
+        data-adapttable-part="assistant-receipts-heading"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "0.5em",
+          flexWrap: "wrap",
+        }}
+      >
+        <strong
+          id={headingId}
+          style={{ fontSize: "0.85em", opacity: 0.75, fontWeight: 600 }}
+        >
+          {labels?.assistantActionsTitle ?? "What this turn changed"}
+        </strong>
+        {undoTurn && perRow !== 1 ? (
+          <span data-adapttable-part="assistant-receipts-undo-all">
+            <slots.Button
+              // One change needs one control. "Undo all" beside a single row
+              // that already carries its own Undo is two buttons doing the
+              // same thing — the rule the approval review follows too.
+              label={wholeLabel}
+              part="assistant-receipts-undo-all-button"
+              variant="subtle"
+              icon={<UndoIcon />}
+              disabled={!undoTurn.available}
+              {...wholeTooltip}
+              onClick={undoTurn.onUndo}
+            />
+          </span>
+        ) : null}
+      </div>
+      <ul
+        data-adapttable-part="assistant-receipts"
+        style={{
+          listStyle: "none",
+          margin: 0,
+          padding: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.15em",
+        }}
+      >
+        {receipts.map((receipt) => (
+          <Receipt
+            key={receipt.idempotencyKey}
+            receipt={receipt}
+            labels={labels}
+            slots={slots}
+            {...(receipt.undoable && onUndoAction
+              ? {
+                  onUndo: () => {
+                    onUndoAction(receipt.idempotencyKey);
+                  },
+                }
+              : {})}
+          />
+        ))}
+      </ul>
+    </section>
   );
 }
 

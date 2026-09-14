@@ -396,6 +396,9 @@ function AssistantMenu({
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
+      // The colour the conversation is drawn in. Radix Themes' accent scale, step 9 — its solid accent.
+      // Before the spread, so a host that names its own still wins.
+      accent="var(--accent-9, currentColor)"
       {...props}
       slots={{
         Panel: AssistantPanel,

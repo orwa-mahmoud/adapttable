@@ -256,6 +256,8 @@ export const es: Required<TableLabels> = {
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) =>
     count === 1 ? "1 acción" : `${String(count)} acciones`,
+  assistantActionsTitle: "Lo que cambió este turno",
+  assistantUndoAll: "Deshacer todo",
   assistantExamples: "Atajos",
   assistantMoreExamples: "Más atajos",
   assistantReceiptChange: ({ before, after }) =>

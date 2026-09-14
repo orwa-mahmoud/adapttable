@@ -263,6 +263,8 @@ export const fr: Required<TableLabels> = {
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) =>
     count === 1 ? "1 action" : `${String(count)} actions`,
+  assistantActionsTitle: "Ce que ce tour a changé",
+  assistantUndoAll: "Tout annuler",
   assistantExamples: "Raccourcis",
   assistantMoreExamples: "Plus de raccourcis",
   assistantReceiptChange: ({ before, after }) =>

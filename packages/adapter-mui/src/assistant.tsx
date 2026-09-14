@@ -417,6 +417,9 @@ function AssistantMenu({
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
+      // The colour the conversation is drawn in. The theme's primary, as MUI publishes it to CSS.
+      // Before the spread, so a host that names its own still wins.
+      accent="var(--mui-palette-primary-main, currentColor)"
       {...props}
       slots={{
         Panel: AssistantPanel,

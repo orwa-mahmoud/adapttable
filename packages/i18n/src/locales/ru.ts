@@ -262,6 +262,8 @@ export const ru: Required<TableLabels> = {
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) =>
     count === 1 ? "1 действие" : `Действий: ${String(count)}`,
+  assistantActionsTitle: "Что изменил этот ход",
+  assistantUndoAll: "Отменить всё",
   assistantExamples: "Быстрые команды",
   assistantMoreExamples: "Ещё команды",
   assistantReceiptChange: ({ before, after }) =>

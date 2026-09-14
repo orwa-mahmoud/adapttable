@@ -121,7 +121,9 @@ describe("what a turn did, when the reader asks for it", () => {
 
     expect(parts("assistant-receipt")).toHaveLength(0);
     const toggle = part("assistant-receipts-toggle-button")!;
-    expect(toggle).toHaveTextContent("1 action");
+    // Closed, the control is a mark under the reply rather than a line of
+    // text competing with it — so the count is its accessible name.
+    expect(toggle).toHaveAccessibleName("1 action");
     expect(toggle).toHaveAttribute("aria-expanded", "false");
 
     fireEvent.click(toggle);
@@ -163,7 +165,7 @@ describe("what a turn did, when the reader asks for it", () => {
       }),
     });
 
-    expect(part("assistant-receipts-toggle-button")).toHaveTextContent(
+    expect(part("assistant-receipts-toggle-button")).toHaveAccessibleName(
       "1 action"
     );
   });
@@ -261,6 +263,114 @@ describe("what a receipt card offers", () => {
     expect(part("assistant-undo-button")).toBeNull();
     fireEvent.click(controls[0]!);
     expect(undoAction).toHaveBeenCalledWith("k2");
+  });
+
+  it("offers both scopes once, headed by the one that undoes everything", () => {
+    // Two scopes, two controls, said once each: the heading puts the turn
+    // back, a row puts itself back. Without the heading naming the turn, the
+    // same word appeared three times with nothing to say which was which.
+    const undoTurn = vi.fn();
+    const undoAction = vi.fn();
+    mount({
+      assistant: view({
+        ...twoActions,
+        undo: { messageId: "m1", available: true },
+        undoTurn,
+        undoAction,
+      }),
+    });
+    showActions();
+
+    expect(part("assistant-receipts-heading")).toHaveTextContent(
+      "What this turn changed"
+    );
+    const all = part("assistant-receipts-undo-all-button")!;
+    expect(all).toHaveAccessibleName("Undo all");
+    expect(parts("assistant-receipt-undo-button")).toHaveLength(2);
+
+    fireEvent.click(all);
+    expect(undoTurn).toHaveBeenCalledTimes(1);
+    expect(undoAction).not.toHaveBeenCalled();
+  });
+
+  it("drops Undo all beside a single change", () => {
+    // One change needs one decision — the same rule the approval review
+    // follows. A second control that does exactly what the first does is a
+    // question, not an offer.
+    mount({
+      assistant: view({
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "Sorted.",
+            receipts: [
+              {
+                capabilityKey: "view.setSort",
+                status: "executed",
+                idempotencyKey: "k1",
+                undoable: true,
+                subject: { kind: "sort", terms: [{ column: "Salary" }] },
+              },
+            ],
+          },
+        ],
+        undo: { messageId: "m1", available: true },
+        undoTurn: vi.fn(),
+        undoAction: vi.fn(),
+      }),
+    });
+    showActions();
+
+    expect(part("assistant-receipts-undo-all-button")).toBeNull();
+    expect(parts("assistant-receipt-undo-button")).toHaveLength(1);
+  });
+
+  it("keeps the turn reversible when no single action is", () => {
+    // The turn can be put back and no row can be put back on its own. The
+    // heading carries it, reading "Undo" — there is nothing to be "all" of.
+    const undoTurn = vi.fn();
+    mount({
+      assistant: view({
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "Done.",
+            receipts: [
+              {
+                capabilityKey: "view.setSort",
+                status: "executed",
+                idempotencyKey: "k1",
+                subject: { kind: "sort", terms: [{ column: "Salary" }] },
+              },
+            ],
+          },
+        ],
+        undo: { messageId: "m1", available: true },
+        undoTurn,
+      }),
+    });
+    showActions();
+
+    const only = part("assistant-receipts-undo-all-button")!;
+    expect(only).toHaveAccessibleName("Undo");
+    expect(parts("assistant-receipt-undo-button")).toHaveLength(0);
+    fireEvent.click(only);
+    expect(undoTurn).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives every action its own glyph, tiled so the list can be scanned", () => {
+    // A row reading "Filter applied · Team is Platform" is a sentence to
+    // parse; a funnel beside it is recognised before it is read.
+    mount({ assistant: view(twoActions) });
+    showActions();
+
+    expect(
+      parts("assistant-receipt-icon").map((icon) =>
+        icon.getAttribute("data-kind")
+      )
+    ).toEqual(["filter", "sort"]);
   });
 
   it("keeps a read's own refusal out of the reader's conversation", () => {

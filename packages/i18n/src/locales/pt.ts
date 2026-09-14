@@ -261,6 +261,8 @@ export const pt: Required<TableLabels> = {
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) =>
     count === 1 ? "1 ação" : `${String(count)} ações`,
+  assistantActionsTitle: "O que esta vez mudou",
+  assistantUndoAll: "Desfazer tudo",
   assistantExamples: "Atalhos",
   assistantMoreExamples: "Mais atalhos",
   assistantReceiptChange: ({ before, after }) =>

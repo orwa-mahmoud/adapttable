@@ -251,6 +251,8 @@ export const zhTW: Required<TableLabels> = {
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) =>
     count === 1 ? "1 項操作" : `${String(count)} 項操作`,
+  assistantActionsTitle: "這一輪改了什麼",
+  assistantUndoAll: "全部復原",
   assistantExamples: "快捷指令",
   assistantMoreExamples: "更多快捷指令",
   assistantReceiptChange: ({ before, after }) => `已從 ${before} 改為 ${after}`,

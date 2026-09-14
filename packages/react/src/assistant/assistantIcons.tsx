@@ -68,12 +68,46 @@ export function StopIcon(): ReactElement {
   );
 }
 
-/** Suggested prompt kinds, so a card carries a hint of what it will do. */
-const SUGGESTION_PATHS: Record<string, string> = {
+/**
+ * One glyph per kind of thing the assistant does.
+ *
+ * A row reading "Filter applied · Status is Active" is a sentence to parse;
+ * a funnel beside it is recognised before it is read, which is what lets a
+ * reader scan four actions instead of reading them. Every kind a receipt can
+ * carry is here — a kind with no glyph would put an unexplained gap in the
+ * column the others line up in.
+ *
+ * These are strokes on a 24-grid, drawn in the current colour at the size the
+ * text around them sets, so a kit's own palette and control size carry them.
+ */
+const KIND_PATHS: Record<string, string> = {
+  // A funnel: what a filter does to a table, in one shape.
   filter: "M22 3H2l8 9.46V19l4 2v-8.54L22 3Z",
-  sort: "M3 6h13M3 12h9M3 18h5M17 10l3-3 3 3M20 7v13",
+  // Two arrows facing opposite ways, which is the direction question a sort
+  // answers — not a list, which is what every other kind here already is.
+  sort: "M7 4v16M4 17l3 3 3-3M17 20V4M14 7l3-3 3 3",
+  search: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14ZM20 20l-4-4",
   group: "M3 5h8v6H3zM13 5h8v6h-8zM3 13h8v6H3zM13 13h8v6h-8z",
+  // Going one way or the other through something longer than the screen.
+  page: "M10 6l-4 6 4 6M16 6l4 6-4 6",
+  // A sigma: the symbol the reader already associates with a total.
+  aggregate: "M18 4H6l7 8-7 8h12",
+  select:
+    "M21 11v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9M9 12l3 3 9-9",
+  pin: "M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z",
+  // The same pin, held against the rows it holds in place.
+  pinRow:
+    "M13 14v4M10.5 4h5l-.8 5 2.3 2.3V14h-8v-2.7L11.3 9l-.8-5ZM3 8h4M3 12h4M3 16h4",
+  read: "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z",
+  export: "M12 3v12M8 11l4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2",
   edit: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z",
+  add: "M12 5v14M5 12h14",
+  delete:
+    "M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M10 11v6M14 11v6",
+  reorder: "M9 6h12M9 12h12M9 18h12M3 8l2-2 2 2M3 16l2 2 2-2",
+  // The host's own capability: a spark, because nothing here knows what it
+  // does and a shape that guessed would be wrong for most of them.
+  operation: "M13 2 4 14h7l-1 8 9-12h-7l1-8Z",
 };
 
 /**
@@ -111,7 +145,7 @@ export function SuggestionIcon({
 }: {
   readonly kind?: string;
 }): ReactElement | null {
-  const path = kind ? SUGGESTION_PATHS[kind] : undefined;
+  const path = kind ? KIND_PATHS[kind] : undefined;
   if (!path) return null;
   return (
     <svg {...BASE}>
@@ -160,8 +194,57 @@ export function UndoIcon(): ReactElement {
 export function ActionsIcon(): ReactElement {
   return (
     <svg {...BASE}>
-      <path d="M4 7h10M4 12h10M4 17h6" />
-      <path d="M18 5.5v3M16.5 7h3" />
+      <path d={KIND_PATHS.operation} />
     </svg>
+  );
+}
+
+/**
+ * The glyph for one action, on a tile of its own.
+ *
+ * The tile is what makes a column of actions scannable: same size, same
+ * place, one recognisable shape each, so four of them read as a list of
+ * things rather than four lines of prose. It is tinted from the kit's accent
+ * rather than given a colour here, so a Mantine table's actions are Mantine
+ * blue and an antd table's are antd's — the same rule the rest of the panel
+ * follows.
+ *
+ * @param kind - What the action was, from the receipt's subject.
+ * @internal
+ */
+export function ReceiptIcon({
+  kind,
+}: {
+  readonly kind?: string;
+}): ReactElement {
+  const accent = "var(--adapttable-assistant-accent, currentColor)";
+  return (
+    <span
+      aria-hidden="true"
+      data-adapttable-part="assistant-receipt-icon"
+      data-kind={kind}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        inlineSize: "1.8em",
+        blockSize: "1.8em",
+        flexShrink: 0,
+        // Squircle rather than circle: a circle beside the round speaker mark
+        // reads as a second speaker, and these are things the turn did.
+        borderRadius: "0.55em",
+        background: `color-mix(in srgb, ${accent} 12%, transparent)`,
+        color: `color-mix(in srgb, ${accent} 85%, currentColor)`,
+        fontSize: "0.95em",
+      }}
+    >
+      {/* An unknown kind still gets its tile, so the column does not break
+          where a host capability sits. */}
+      <svg {...BASE} width="1.05em" height="1.05em">
+        <path
+          d={(kind ? KIND_PATHS[kind] : undefined) ?? KIND_PATHS.operation}
+        />
+      </svg>
+    </span>
   );
 }

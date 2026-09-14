@@ -401,6 +401,9 @@ function AssistantMenu({
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
+      // The colour the conversation is drawn in. Whatever palette the surrounding Chakra provider is set to.
+      // Before the spread, so a host that names its own still wins.
+      accent="var(--chakra-colors-color-palette-solid, currentColor)"
       {...props}
       slots={{
         Panel: AssistantPanel,

@@ -392,6 +392,9 @@ function AssistantMenu({
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
+      // The colour the conversation is drawn in. The accent this adapter's own stylesheet already draws with.
+      // Before the spread, so a host that names its own still wins.
+      accent="var(--adapttable-accent, currentColor)"
       {...props}
       slots={{
         Panel: AssistantPanel,

@@ -206,6 +206,10 @@ describe("TableAssistant", () => {
       />
     );
 
+    // What a turn did is evidence, opened from the mark on the reply — and
+    // the control that opens it is this kit's own button, not one drawn here.
+    fireEvent.click(part("assistant-receipts-toggle-button")!);
+
     expect(part("assistant-receipt-summary")).toHaveTextContent("Grouped");
   });
 

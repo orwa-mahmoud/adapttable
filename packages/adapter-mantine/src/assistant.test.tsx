@@ -76,7 +76,9 @@ describe("TableAssistant", () => {
     expect(part("assistant-connection")).toHaveTextContent("Ready");
     expect(part("assistant-empty-prompt")).toBeTruthy();
     expect(part("assistant-input")).toBeTruthy();
-    expect(part("assistant-suggestion")).toHaveTextContent("Group by city");
+    // The shortcuts live in the composer, one press away, rather than as a
+    // wall of cards a reader has to clear before they can type.
+    expect(part("assistant-examples-menu")).toBeTruthy();
   });
 
   it("opens the examples from the composer, in this kit's own menu", async () => {
@@ -188,6 +190,10 @@ describe("TableAssistant", () => {
         onOpenChange={() => undefined}
       />
     );
+
+    // What a turn did is evidence, opened from the mark on the reply — and
+    // the control that opens it is this kit's own button, not one drawn here.
+    fireEvent.click(part("assistant-receipts-toggle-button")!);
 
     expect(part("assistant-receipt-summary")).toHaveTextContent("Grouped");
   });
@@ -325,7 +331,9 @@ describe("the kit's own controls", () => {
     expect(send).toHaveBeenCalledTimes(1);
   });
 
-  it("runs a suggestion from the empty state", () => {
+  it("runs a shortcut from the composer's menu on an empty conversation", async () => {
+    // A reader who has not typed anything yet reaches the shortcuts the same
+    // way as one mid-conversation: there is one place they live.
     const runSuggestion = vi.fn();
     mount(
       <TableAssistant
@@ -335,7 +343,18 @@ describe("the kit's own controls", () => {
         onOpenChange={() => undefined}
       />
     );
-    fireEvent.click(part("assistant-suggestion")!);
+    fireEvent.click(part("assistant-examples-menu")!);
+
+    const items = await waitFor(() => {
+      const found = [
+        ...document.querySelectorAll<HTMLElement>(
+          '[data-adapttable-part="assistant-examples-item"]'
+        ),
+      ];
+      expect(found.length).toBeGreaterThan(0);
+      return found;
+    });
+    fireEvent.click(items[0]!);
 
     expect(runSuggestion).toHaveBeenCalledWith("s1");
   });

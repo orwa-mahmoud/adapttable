@@ -14,6 +14,7 @@
  */
 import type { TableLabels } from "@adapttable/core";
 import {
+  type CSSProperties,
   type ReactElement,
   type ReactNode,
   useCallback,
@@ -116,6 +117,16 @@ export interface TableAssistantProps {
   readonly presentation?: TableAssistantPresentation;
   /** Labels; falls back to the built-in English. */
   readonly labels?: TableLabels;
+  /**
+   * The colour the conversation is drawn in.
+   *
+   * Any CSS colour, usually one of the kit's own tokens — each adapter passes
+   * its primary. Everything mixes against it rather than using it flat, so a
+   * strong brand colour tints the surfaces without shouting. Without one the
+   * panel borrows the text colour, which is legible everywhere and belongs to
+   * no brand.
+   */
+  readonly accent?: string;
   /**
    * Whether each action draws a card under the reply.
    *
@@ -498,7 +509,9 @@ function Transcript({
         padding: 0,
         display: "flex",
         flexDirection: "column",
-        gap: "0.75em",
+        // Turns are further apart than the lines within one, so the eye finds
+        // the boundary between them without a rule drawn across the panel.
+        gap: "1.15em",
       }}
     >
       {assistant.messages.map((message, index) => (
@@ -821,6 +834,7 @@ export function TableAssistantChrome({
   speech,
   dir,
   receipts = true,
+  accent,
 }: Readonly<TableAssistantChromeProps>): ReactElement {
   const wide = useFloatingFits();
   const launcherRef = useRef<HTMLElement | null>(null);
@@ -911,6 +925,14 @@ export function TableAssistantChrome({
         gap: "0.5em",
         height: "100%",
         minHeight: 0,
+        // Set once, on the surface everything inside inherits from, so the
+        // conversation is drawn in the kit's colour without any of its parts
+        // naming one.
+        ...(accent
+          ? ({
+              "--adapttable-assistant-accent": accent,
+            } as CSSProperties)
+          : {}),
       }}
     >
       <Header

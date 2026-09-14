@@ -414,6 +414,9 @@ function AssistantMenu({
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
+      // The colour the conversation is drawn in. Mantine's own primary, the colour its filled buttons already use.
+      // Before the spread, so a host that names its own still wins.
+      accent="var(--mantine-primary-color-filled, currentColor)"
       {...props}
       slots={{
         Panel: AssistantPanel,

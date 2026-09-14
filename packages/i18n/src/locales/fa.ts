@@ -254,6 +254,8 @@ export const fa: Required<TableLabels> = {
     `دوباره دربارهٔ ${CAPABILITY[capability] ?? capability} بپرس`,
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) => (count === 1 ? "۱ کنش" : `${String(count)} کنش`),
+  assistantActionsTitle: "آنچه این نوبت تغییر داد",
+  assistantUndoAll: "واگرد همه",
   assistantExamples: "میان‌برها",
   assistantMoreExamples: "میان‌برهای بیشتر",
   assistantReceiptChange: ({ before, after }) =>

@@ -259,6 +259,8 @@ export const tr: Required<TableLabels> = {
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) =>
     count === 1 ? "1 işlem" : `${String(count)} işlem`,
+  assistantActionsTitle: "Bu turda değişenler",
+  assistantUndoAll: "Tümünü geri al",
   assistantExamples: "Kısayollar",
   assistantMoreExamples: "Daha fazla kısayol",
   assistantReceiptChange: ({ before, after }) =>

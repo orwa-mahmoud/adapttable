@@ -257,6 +257,8 @@ export const ur: Required<TableLabels> = {
   assistantCapabilityName: (capability) => CAPABILITY[capability],
   assistantActions: (count) =>
     count === 1 ? "1 عمل" : `${String(count)} اعمال`,
+  assistantActionsTitle: "اس باری میں کیا بدلا",
+  assistantUndoAll: "سب واپس کریں",
   assistantExamples: "شارٹ کٹس",
   assistantMoreExamples: "مزید شارٹ کٹس",
   assistantReceiptChange: ({ before, after }) =>

@@ -852,6 +852,16 @@ export interface TableLabels {
    * plumbing are not among them.
    */
   assistantActions?: (count: number) => string;
+  /**
+   * The heading over what a turn did.
+   *
+   * Names the turn, not the table: a reader who has asked three things in a
+   * row needs to know which reply this list belongs to, and "this result"
+   * says nothing about which one.
+   */
+  assistantActionsTitle?: string;
+  /** Puts everything in that list back at once. */
+  assistantUndoAll?: string;
   /** One receipt status on its own, when the action's kind is unknown. */
   assistantReceiptStatus?: (status: string) => string;
   /**
