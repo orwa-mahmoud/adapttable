@@ -243,23 +243,58 @@ export const pt: Required<TableLabels> = {
     `Alterado de ${before} para ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
     `Proposto: de ${before} para ${after}`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "Filtro aplicado",
-            "filter/staged": "Filtro preparado",
-            "sort/executed": "Ordenado",
-            "group/executed": "Agrupado",
-            "pin/executed": "Coluna fixada",
-            "edit/executed": "Guardado",
-            "edit/staged": "Edição preparada — não guardada",
-            "edit/awaiting-approval": "Edição a aguardar aprovação",
-            "edit/partial": "Algumas edições guardadas, outras recusadas",
-            "edit/rejected": "Edição recusada",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "Filtro aplicado",
+        "filter/staged": "Filtro preparado",
+        "sort/executed": "Ordenado",
+        "group/executed": "Agrupado",
+        "pin/executed": "Coluna fixada",
+        "edit/executed": "Guardado",
+        "edit/staged": "Edição preparada — não guardada",
+        "edit/awaiting-approval": "Edição a aguardar aprovação",
+        "edit/partial": "Algumas edições guardadas, outras recusadas",
+        "edit/rejected": "Edição recusada",
+        "filter-cleared/executed": "Filtros removidos",
+        "sort-cleared/executed": "Ordenação removida",
+        "search/executed": "Pesquisa aplicada",
+        "search-cleared/executed": "Pesquisa limpa",
+        "group-cleared/executed": "Agrupamento removido",
+        "pin-cleared/executed": "Coluna desafixada",
+        "page/executed": "Página alterada",
+        "aggregate/executed": "Totais alterados",
+        "select/executed": "Seleção alterada",
+        "read/executed": "Tabela consultada",
+        "export/executed": "Exportado",
+        "add/executed": "Linha adicionada",
+        "add/awaiting-approval": "Nova linha aguardando aprovação",
+        "add/rejected": "Nova linha recusada",
+        "delete/executed": "Linhas excluídas",
+        "delete/awaiting-approval": "Exclusão aguardando aprovação",
+        "delete/partial": "Algumas linhas excluídas, outras mantidas",
+        "delete/rejected": "Exclusão recusada",
+        "reorder/executed": "Linhas movidas",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ kind, terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return kind === "edit"
+          ? `${term.column} definido como ${term.value}`
+          : `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "decrescente" : "crescente"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "Ocioso",

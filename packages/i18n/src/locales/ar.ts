@@ -241,23 +241,56 @@ export const ar: Required<TableLabels> = {
     `تم التغيير من ${before} إلى ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
     `مقترح: من ${before} إلى ${after}`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "تم تطبيق التصفية",
-            "filter/staged": "تم تجهيز التصفية",
-            "sort/executed": "تم الفرز",
-            "group/executed": "تم التجميع",
-            "pin/executed": "تم تثبيت العمود",
-            "edit/executed": "تم الحفظ",
-            "edit/staged": "تم تجهيز التعديل — لم يُحفظ",
-            "edit/awaiting-approval": "التعديل بانتظار الموافقة",
-            "edit/partial": "حُفظت بعض التعديلات ورُفض بعضها",
-            "edit/rejected": "تم رفض التعديل",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "تم تطبيق التصفية",
+        "filter/staged": "تم تجهيز التصفية",
+        "sort/executed": "تم الفرز",
+        "group/executed": "تم التجميع",
+        "pin/executed": "تم تثبيت العمود",
+        "edit/executed": "تم الحفظ",
+        "edit/staged": "تم تجهيز التعديل — لم يُحفظ",
+        "edit/awaiting-approval": "التعديل بانتظار الموافقة",
+        "edit/partial": "حُفظت بعض التعديلات ورُفض بعضها",
+        "edit/rejected": "تم رفض التعديل",
+        "filter-cleared/executed": "تم مسح عوامل التصفية",
+        "sort-cleared/executed": "تم إلغاء الفرز",
+        "search/executed": "تم البحث",
+        "search-cleared/executed": "تم مسح البحث",
+        "group-cleared/executed": "تم إلغاء التجميع",
+        "pin-cleared/executed": "تم إلغاء تثبيت العمود",
+        "page/executed": "تم تغيير الصفحة",
+        "aggregate/executed": "تم تغيير الإجماليات",
+        "select/executed": "تم تغيير التحديد",
+        "read/executed": "تمت قراءة الجدول",
+        "export/executed": "تم التصدير",
+        "add/executed": "تمت إضافة صف",
+        "add/awaiting-approval": "صف جديد بانتظار الموافقة",
+        "add/rejected": "تم رفض الصف الجديد",
+        "delete/executed": "تم حذف الصفوف",
+        "delete/awaiting-approval": "الحذف بانتظار الموافقة",
+        "delete/partial": "حُذفت بعض الصفوف واحتُفظ بالبعض",
+        "delete/rejected": "تم رفض الحذف",
+        "reorder/executed": "تم نقل الصفوف",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "تنازلي" : "تصاعدي"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "خامل",

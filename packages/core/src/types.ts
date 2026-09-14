@@ -849,6 +849,21 @@ export interface TableLabels {
   assistantReceiptAction?: (action: {
     kind?: string;
     status: string;
+    /** Whether the action took something off rather than put it on. */
+    cleared?: boolean;
+  }) => string | undefined;
+  /**
+   * What the action acted on, from the columns and values it ran with.
+   *
+   * The panel is handed the pair structurally — `{ column: "Team", value:
+   * "Platform" }` — because the word that joins them belongs to the reader's
+   * language. Returns `undefined` when there is nothing to name, and the card
+   * shows its headline alone.
+   */
+  assistantReceiptTerms?: (subject: {
+    kind?: string;
+    terms?: readonly { column?: string; value?: string }[];
+    direction?: "asc" | "desc";
   }) => string | undefined;
   /** An edit's before/after pair, spoken for assistive technology. */
   assistantReceiptChange?: (change: {

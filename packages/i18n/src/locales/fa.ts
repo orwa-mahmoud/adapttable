@@ -240,23 +240,56 @@ export const fa: Required<TableLabels> = {
     `از ${before} به ${after} تغییر کرد`,
   assistantReceiptProposed: ({ before, after }) =>
     `پیشنهادشده: از ${before} به ${after}`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "فیلتر اعمال شد",
-            "filter/staged": "فیلتر آماده شد",
-            "sort/executed": "مرتب شد",
-            "group/executed": "گروه‌بندی شد",
-            "pin/executed": "ستون سنجاق شد",
-            "edit/executed": "ذخیره شد",
-            "edit/staged": "ویرایش آماده شد — ذخیره نشده",
-            "edit/awaiting-approval": "ویرایش در انتظار تأیید",
-            "edit/partial": "برخی ویرایش‌ها ذخیره و برخی رد شد",
-            "edit/rejected": "ویرایش رد شد",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "فیلتر اعمال شد",
+        "filter/staged": "فیلتر آماده شد",
+        "sort/executed": "مرتب شد",
+        "group/executed": "گروه‌بندی شد",
+        "pin/executed": "ستون سنجاق شد",
+        "edit/executed": "ذخیره شد",
+        "edit/staged": "ویرایش آماده شد — ذخیره نشده",
+        "edit/awaiting-approval": "ویرایش در انتظار تأیید",
+        "edit/partial": "برخی ویرایش‌ها ذخیره و برخی رد شد",
+        "edit/rejected": "ویرایش رد شد",
+        "filter-cleared/executed": "فیلترها پاک شد",
+        "sort-cleared/executed": "مرتب‌سازی حذف شد",
+        "search/executed": "جست‌وجو انجام شد",
+        "search-cleared/executed": "جست‌وجو پاک شد",
+        "group-cleared/executed": "گروه‌بندی حذف شد",
+        "pin-cleared/executed": "سنجاق ستون برداشته شد",
+        "page/executed": "صفحه تغییر کرد",
+        "aggregate/executed": "جمع‌ها تغییر کرد",
+        "select/executed": "انتخاب تغییر کرد",
+        "read/executed": "جدول خوانده شد",
+        "export/executed": "خروجی گرفته شد",
+        "add/executed": "سطر افزوده شد",
+        "add/awaiting-approval": "سطر جدید در انتظار تأیید",
+        "add/rejected": "سطر جدید رد شد",
+        "delete/executed": "سطرها حذف شد",
+        "delete/awaiting-approval": "حذف در انتظار تأیید",
+        "delete/partial": "برخی سطرها حذف و برخی نگه داشته شد",
+        "delete/rejected": "حذف رد شد",
+        "reorder/executed": "سطرها جابه‌جا شد",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "نزولی" : "صعودی"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "بی‌کار",

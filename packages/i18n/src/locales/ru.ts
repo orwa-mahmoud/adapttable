@@ -246,23 +246,56 @@ export const ru: Required<TableLabels> = {
     `Изменено с ${before} на ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
     `Предложено: с ${before} на ${after}`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "Фильтр применён",
-            "filter/staged": "Фильтр подготовлен",
-            "sort/executed": "Отсортировано",
-            "group/executed": "Сгруппировано",
-            "pin/executed": "Столбец закреплён",
-            "edit/executed": "Сохранено",
-            "edit/staged": "Изменение подготовлено — не сохранено",
-            "edit/awaiting-approval": "Изменение ждёт подтверждения",
-            "edit/partial": "Часть изменений сохранена, часть отклонена",
-            "edit/rejected": "Изменение отклонено",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "Фильтр применён",
+        "filter/staged": "Фильтр подготовлен",
+        "sort/executed": "Отсортировано",
+        "group/executed": "Сгруппировано",
+        "pin/executed": "Столбец закреплён",
+        "edit/executed": "Сохранено",
+        "edit/staged": "Изменение подготовлено — не сохранено",
+        "edit/awaiting-approval": "Изменение ждёт подтверждения",
+        "edit/partial": "Часть изменений сохранена, часть отклонена",
+        "edit/rejected": "Изменение отклонено",
+        "filter-cleared/executed": "Фильтры сброшены",
+        "sort-cleared/executed": "Сортировка сброшена",
+        "search/executed": "Поиск применён",
+        "search-cleared/executed": "Поиск очищен",
+        "group-cleared/executed": "Группировка сброшена",
+        "pin-cleared/executed": "Столбец откреплён",
+        "page/executed": "Страница изменена",
+        "aggregate/executed": "Итоги изменены",
+        "select/executed": "Выделение изменено",
+        "read/executed": "Таблица прочитана",
+        "export/executed": "Экспортировано",
+        "add/executed": "Строка добавлена",
+        "add/awaiting-approval": "Новая строка ожидает подтверждения",
+        "add/rejected": "Новая строка отклонена",
+        "delete/executed": "Строки удалены",
+        "delete/awaiting-approval": "Удаление ожидает подтверждения",
+        "delete/partial": "Часть строк удалена, часть оставлена",
+        "delete/rejected": "Удаление отклонено",
+        "reorder/executed": "Строки перемещены",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "по убыванию" : "по возрастанию"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "Ожидание",

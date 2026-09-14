@@ -58,6 +58,9 @@ describe("defaultLabels — every function label", () => {
     findMatchCount: [2, 7],
     assistantReceiptStatus: ["staged"],
     assistantReceiptAction: [{ kind: "filter", status: "executed" }],
+    assistantReceiptTerms: [
+      { kind: "filter", terms: [{ column: "COLUMN_X", value: "VALUE_X" }] },
+    ],
     assistantReceiptChange: [{ before: "BEFORE_X", after: "AFTER_X" }],
     groupTotal: ["Core"],
     proposalChange: [
@@ -126,5 +129,61 @@ describe("defaultLabels — every function label", () => {
         before: "BEFORE_X",
       })
     ).toContain("BEFORE_X");
+  });
+});
+
+describe("what a receipt card says happened", () => {
+  it("separates taking a filter off from putting one on", () => {
+    expect(
+      defaultLabels.assistantReceiptAction({
+        kind: "filter",
+        status: "executed",
+      })
+    ).toBe("Filter applied");
+    expect(
+      defaultLabels.assistantReceiptAction({
+        kind: "filter",
+        status: "executed",
+        cleared: true,
+      })
+    ).toBe("Filters cleared");
+  });
+
+  it("words a filter and an edit differently from the same pair", () => {
+    const terms = [{ column: "Salary", value: "185" }];
+    expect(defaultLabels.assistantReceiptTerms({ kind: "filter", terms })).toBe(
+      "Salary is 185"
+    );
+    expect(defaultLabels.assistantReceiptTerms({ kind: "edit", terms })).toBe(
+      "Salary set to 185"
+    );
+  });
+
+  it("joins several terms, and names the sort direction", () => {
+    expect(
+      defaultLabels.assistantReceiptTerms({
+        kind: "filter",
+        terms: [
+          { column: "Team", value: "Platform" },
+          { column: "Status", value: "Active" },
+        ],
+      })
+    ).toBe("Team is Platform, Status is Active");
+    expect(
+      defaultLabels.assistantReceiptTerms({
+        kind: "sort",
+        terms: [{ column: "Salary" }],
+        direction: "desc",
+      })
+    ).toBe("Salary, descending");
+  });
+
+  it("says nothing when there is nothing to name", () => {
+    expect(
+      defaultLabels.assistantReceiptTerms({ kind: "filter", terms: [] })
+    ).toBeUndefined();
+    expect(
+      defaultLabels.assistantReceiptTerms({ kind: "group" })
+    ).toBeUndefined();
   });
 });

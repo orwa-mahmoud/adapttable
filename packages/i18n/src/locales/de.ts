@@ -245,23 +245,58 @@ export const de: Required<TableLabels> = {
     `Von ${before} zu ${after} geändert`,
   assistantReceiptProposed: ({ before, after }) =>
     `Vorgeschlagen: von ${before} zu ${after}`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "Filter angewendet",
-            "filter/staged": "Filter vorgemerkt",
-            "sort/executed": "Sortiert",
-            "group/executed": "Gruppiert",
-            "pin/executed": "Spalte angeheftet",
-            "edit/executed": "Gespeichert",
-            "edit/staged": "Änderung vorgemerkt — nicht gespeichert",
-            "edit/awaiting-approval": "Änderung wartet auf Freigabe",
-            "edit/partial": "Einige Änderungen gespeichert, einige abgelehnt",
-            "edit/rejected": "Änderung abgelehnt",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "Filter angewendet",
+        "filter/staged": "Filter vorgemerkt",
+        "sort/executed": "Sortiert",
+        "group/executed": "Gruppiert",
+        "pin/executed": "Spalte angeheftet",
+        "edit/executed": "Gespeichert",
+        "edit/staged": "Änderung vorgemerkt — nicht gespeichert",
+        "edit/awaiting-approval": "Änderung wartet auf Freigabe",
+        "edit/partial": "Einige Änderungen gespeichert, einige abgelehnt",
+        "edit/rejected": "Änderung abgelehnt",
+        "filter-cleared/executed": "Filter entfernt",
+        "sort-cleared/executed": "Sortierung aufgehoben",
+        "search/executed": "Gesucht",
+        "search-cleared/executed": "Suche gelöscht",
+        "group-cleared/executed": "Gruppierung aufgehoben",
+        "pin-cleared/executed": "Anheftung aufgehoben",
+        "page/executed": "Seite gewechselt",
+        "aggregate/executed": "Summen geändert",
+        "select/executed": "Auswahl geändert",
+        "read/executed": "Tabelle gelesen",
+        "export/executed": "Exportiert",
+        "add/executed": "Zeile hinzugefügt",
+        "add/awaiting-approval": "Neue Zeile wartet auf Freigabe",
+        "add/rejected": "Neue Zeile abgelehnt",
+        "delete/executed": "Zeilen gelöscht",
+        "delete/awaiting-approval": "Löschen wartet auf Freigabe",
+        "delete/partial": "Einige Zeilen gelöscht, andere behalten",
+        "delete/rejected": "Löschen abgelehnt",
+        "reorder/executed": "Zeilen verschoben",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ kind, terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return kind === "edit"
+          ? `${term.column} auf ${term.value} gesetzt`
+          : `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "absteigend" : "aufsteigend"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "Bereit",

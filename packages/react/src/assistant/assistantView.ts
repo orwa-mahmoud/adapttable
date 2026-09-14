@@ -22,8 +22,23 @@ export interface TableAssistantReceiptSubject {
    * `pin`, `edit`, or a kind a host defines. Labels turn it into a sentence.
    */
   readonly kind?: string;
-  /** What it acted on, already readable — "Team is Core", "Salary". */
+  /**
+   * What it acted on, already readable — "Team is Core", "Salary".
+   *
+   * A host that knows its own wording sets this and the panel shows it as
+   * given. The built-in capabilities fill {@link terms} instead, so the
+   * sentence is written in the reader's language rather than the runner's.
+   */
   readonly detail?: string;
+  /** What it acted on, structurally, for the labels to phrase. */
+  readonly terms?: readonly {
+    readonly column?: string;
+    readonly value?: string;
+  }[];
+  /** Which way a sort went, when the action was one. */
+  readonly direction?: "asc" | "desc";
+  /** Whether the action took something off rather than put it on. */
+  readonly cleared?: boolean;
   /** For an edit: which row and column, when the host may show them. */
   readonly row?: string;
   readonly column?: string;

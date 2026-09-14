@@ -239,23 +239,56 @@ export const ja: Required<TableLabels> = {
     `${before} から ${after} に変更しました`,
   assistantReceiptProposed: ({ before, after }) =>
     `提案: ${before} から ${after} へ`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "フィルターを適用しました",
-            "filter/staged": "フィルターを準備しました",
-            "sort/executed": "並べ替えました",
-            "group/executed": "グループ化しました",
-            "pin/executed": "列を固定しました",
-            "edit/executed": "保存しました",
-            "edit/staged": "編集を準備しました — 未保存",
-            "edit/awaiting-approval": "編集は承認待ちです",
-            "edit/partial": "一部の編集は保存、一部は却下",
-            "edit/rejected": "編集は拒否されました",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "フィルターを適用しました",
+        "filter/staged": "フィルターを準備しました",
+        "sort/executed": "並べ替えました",
+        "group/executed": "グループ化しました",
+        "pin/executed": "列を固定しました",
+        "edit/executed": "保存しました",
+        "edit/staged": "編集を準備しました — 未保存",
+        "edit/awaiting-approval": "編集は承認待ちです",
+        "edit/partial": "一部の編集は保存、一部は却下",
+        "edit/rejected": "編集は拒否されました",
+        "filter-cleared/executed": "フィルターを解除しました",
+        "sort-cleared/executed": "並べ替えを解除しました",
+        "search/executed": "検索しました",
+        "search-cleared/executed": "検索を解除しました",
+        "group-cleared/executed": "グループ化を解除しました",
+        "pin-cleared/executed": "列の固定を解除しました",
+        "page/executed": "ページを変更しました",
+        "aggregate/executed": "集計を変更しました",
+        "select/executed": "選択を変更しました",
+        "read/executed": "テーブルを読み取りました",
+        "export/executed": "エクスポートしました",
+        "add/executed": "行を追加しました",
+        "add/awaiting-approval": "新しい行が承認待ちです",
+        "add/rejected": "新しい行が拒否されました",
+        "delete/executed": "行を削除しました",
+        "delete/awaiting-approval": "削除が承認待ちです",
+        "delete/partial": "一部の行を削除し、一部を残しました",
+        "delete/rejected": "削除が拒否されました",
+        "reorder/executed": "行を移動しました",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "降順" : "昇順"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "待機中",

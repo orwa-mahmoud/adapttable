@@ -240,23 +240,58 @@ export const it: Required<TableLabels> = {
     `Modificato da ${before} a ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
     `Proposto: da ${before} a ${after}`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "Filtro applicato",
-            "filter/staged": "Filtro preparato",
-            "sort/executed": "Ordinato",
-            "group/executed": "Raggruppato",
-            "pin/executed": "Colonna bloccata",
-            "edit/executed": "Salvato",
-            "edit/staged": "Modifica preparata — non salvata",
-            "edit/awaiting-approval": "Modifica in attesa di approvazione",
-            "edit/partial": "Alcune modifiche salvate, altre rifiutate",
-            "edit/rejected": "Modifica rifiutata",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "Filtro applicato",
+        "filter/staged": "Filtro preparato",
+        "sort/executed": "Ordinato",
+        "group/executed": "Raggruppato",
+        "pin/executed": "Colonna bloccata",
+        "edit/executed": "Salvato",
+        "edit/staged": "Modifica preparata — non salvata",
+        "edit/awaiting-approval": "Modifica in attesa di approvazione",
+        "edit/partial": "Alcune modifiche salvate, altre rifiutate",
+        "edit/rejected": "Modifica rifiutata",
+        "filter-cleared/executed": "Filtri rimossi",
+        "sort-cleared/executed": "Ordinamento rimosso",
+        "search/executed": "Ricerca applicata",
+        "search-cleared/executed": "Ricerca cancellata",
+        "group-cleared/executed": "Raggruppamento rimosso",
+        "pin-cleared/executed": "Colonna non più fissata",
+        "page/executed": "Pagina cambiata",
+        "aggregate/executed": "Totali modificati",
+        "select/executed": "Selezione modificata",
+        "read/executed": "Tabella letta",
+        "export/executed": "Esportato",
+        "add/executed": "Riga aggiunta",
+        "add/awaiting-approval": "Nuova riga in attesa di approvazione",
+        "add/rejected": "Nuova riga rifiutata",
+        "delete/executed": "Righe eliminate",
+        "delete/awaiting-approval": "Eliminazione in attesa di approvazione",
+        "delete/partial": "Alcune righe eliminate, altre mantenute",
+        "delete/rejected": "Eliminazione rifiutata",
+        "reorder/executed": "Righe spostate",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ kind, terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return kind === "edit"
+          ? `${term.column} impostato su ${term.value}`
+          : `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "decrescente" : "crescente"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "Inattivo",

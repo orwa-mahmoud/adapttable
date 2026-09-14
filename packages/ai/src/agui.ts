@@ -66,6 +66,8 @@ import type {
   AssistantTransportReply,
   AssistantUnresolved,
 } from "./assistantContracts";
+import type { AssistantReceiptSubject } from "./assistantReceipts";
+import { subjectFor } from "./assistantSubjects";
 import {
   type AgentContextInputs,
   type AgentContextOptions,
@@ -566,6 +568,7 @@ interface TurnState {
   readonly messages: AgUiMessage[];
   readonly results: ExecuteResult[];
   readonly keys: string[];
+  readonly subjects: (AssistantReceiptSubject | undefined)[];
   text: string;
   sequence: number;
 }
@@ -635,16 +638,17 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
   ): Promise<void> => {
     // Read now: a call that arrives after the reader moved the table is
     // judged against the table as it is, not as the run input described it.
-    const revision = session.manifest().viewRevision;
+    const manifest = session.manifest();
     const result = await session.execute(
       key,
       args,
-      revision,
+      manifest.viewRevision,
       callKey(threadId, runId, toolCallId),
       signal
     );
     turn.results.push(result);
     turn.keys.push(key);
+    turn.subjects.push(subjectFor(key, args, result, manifest.columns));
     const content = JSON.stringify(
       result.ok
         ? { ok: true, revision: result.revision, result: result.result }
@@ -869,6 +873,7 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
         ],
         results: [],
         keys: [],
+        subjects: [],
         text: "",
         sequence: 0,
       };
@@ -907,6 +912,7 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
             text: outcome.text,
             results: turn.results,
             keys: turn.keys,
+            subjects: turn.subjects,
           };
         }
         const settled = await settle(outcome.interrupt, ask, signal);
@@ -921,6 +927,7 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
         text: turn.text,
         results: turn.results,
         keys: turn.keys,
+        subjects: turn.subjects,
         unresolved:
           unresolved ??
           unresolvedTurn(
@@ -948,7 +955,10 @@ export type {
   AssistantUnresolved,
   CapabilityPresentation,
 } from "./assistantContracts";
-export type { AssistantReceiptSubject } from "./assistantReceipts";
+export type {
+  AssistantReceiptSubject,
+  AssistantReceiptTerm,
+} from "./assistantReceipts";
 export type {
   AgentContextInputs,
   AgentContextOptions,

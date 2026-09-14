@@ -1358,7 +1358,13 @@ readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
 `SharedApproval`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
 `receiptFromResult` and `receiptsFromResults` as `AssistantReceipt`, whose
 optional `AssistantReceiptSubject` names what changed so the panel can say
-"Filter applied — Team is Core" rather than a capability key.
+"Filter applied — Team is Core" rather than a capability key. `subjectFor`
+builds that subject for a built-in capability from what the session returned,
+carrying the columns and values as `AssistantReceiptTerm` pairs — label and
+formatted value, never a key — so the panel joins them in the reader's
+language through `assistantReceiptTerms`. The turn's transports fill
+`AssistantTransportReply.subjects` with it; a host capability has no entry,
+because only its own runner knows what it did.
 Each kit ships the panel on its own `@adapttable/<kit>/assistant` entry,
 exporting `TableAssistant` and `tableAssistant`. Core chrome exports
 `TableAssistantChrome` (`TableAssistantChromeProps`, `TableAssistantProps`),
@@ -2100,8 +2106,9 @@ the question channel. `AssistantSuggestion`s are filtered by
 `eligibleSuggestions` and checked by `assertUniqueSuggestions`;
 `CapabilityPresentation` says how a capability is shown. Receipts come from
 `receiptFromResult` / `receiptsFromResults` as `AssistantReceipt`s with an
-`AssistantReceiptStatus` and `AssistantReceiptSubject`, and `turnStatus` reads
-the `AssistantTurnStatus`.
+`AssistantReceiptStatus` and `AssistantReceiptSubject` — `subjectFor` builds
+one for a built-in capability, as `AssistantReceiptTerm` pairs of column label
+and formatted value — and `turnStatus` reads the `AssistantTurnStatus`.
 
 **Undo.** `planUndo` turns a finished turn into an `AssistantUndo` of
 `UndoCall`s, or an `UndoBlock` saying why not (`isUndoBlock` narrows it,

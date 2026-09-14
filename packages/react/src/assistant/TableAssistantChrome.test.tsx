@@ -334,6 +334,106 @@ describe("the transcript", () => {
     );
   });
 
+  it("phrases a column and a value the reader's language joins", () => {
+    mount({
+      assistant: view({
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "Done.",
+            receipts: [
+              {
+                capabilityKey: "view.setFilters",
+                status: "executed",
+                idempotencyKey: "k1",
+                subject: {
+                  kind: "filter",
+                  terms: [{ column: "Team", value: "Platform" }],
+                },
+              },
+              {
+                capabilityKey: "view.setSort",
+                status: "executed",
+                idempotencyKey: "k2",
+                subject: {
+                  kind: "sort",
+                  terms: [{ column: "Salary" }],
+                  direction: "desc",
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    // Two actions, two cards, and neither of them says "done".
+    const [filter, sort] = parts("assistant-receipt-summary");
+    expect(filter).toHaveTextContent("Filter applied");
+    expect(filter).toHaveTextContent("Team is Platform");
+    expect(sort).toHaveTextContent("Sorted");
+    expect(sort).toHaveTextContent("Salary, descending");
+    expect(parts("assistant-receipt")).toHaveLength(2);
+  });
+
+  it("says what a cleared filter did, not what an applied one would have", () => {
+    mount({
+      assistant: view({
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "Done.",
+            receipts: [
+              {
+                capabilityKey: "view.setFilters",
+                status: "executed",
+                idempotencyKey: "k1",
+                subject: { kind: "filter", cleared: true },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    expect(part("assistant-receipt-summary")).toHaveTextContent(
+      "Filters cleared"
+    );
+    expect(part("assistant-receipt-detail-text")).toBeNull();
+  });
+
+  it("shows a host's own wording ahead of its own", () => {
+    mount({
+      assistant: view({
+        messages: [
+          {
+            id: "m1",
+            role: "assistant",
+            text: "Done.",
+            receipts: [
+              {
+                capabilityKey: "view.setFilters",
+                status: "executed",
+                idempotencyKey: "k1",
+                subject: {
+                  kind: "filter",
+                  detail: "everyone still with us",
+                  terms: [{ column: "Status", value: "Active" }],
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    expect(part("assistant-receipt-detail-text")).toHaveTextContent(
+      "everyone still with us"
+    );
+  });
+
   it("says a staged write still needs saving in the table", () => {
     mount({
       assistant: view({

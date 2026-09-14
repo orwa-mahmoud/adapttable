@@ -244,23 +244,56 @@ export const hi: Required<TableLabels> = {
     `${before} से ${after} किया गया`,
   assistantReceiptProposed: ({ before, after }) =>
     `प्रस्तावित: ${before} से ${after}`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "फ़िल्टर लागू किया गया",
-            "filter/staged": "फ़िल्टर तैयार किया गया",
-            "sort/executed": "क्रमबद्ध किया गया",
-            "group/executed": "समूहीकृत किया गया",
-            "pin/executed": "कॉलम पिन किया गया",
-            "edit/executed": "सहेजा गया",
-            "edit/staged": "संपादन तैयार — सहेजा नहीं गया",
-            "edit/awaiting-approval": "संपादन अनुमोदन की प्रतीक्षा में",
-            "edit/partial": "कुछ संपादन सहेजे गए, कुछ अस्वीकृत",
-            "edit/rejected": "संपादन अस्वीकृत",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "फ़िल्टर लागू किया गया",
+        "filter/staged": "फ़िल्टर तैयार किया गया",
+        "sort/executed": "क्रमबद्ध किया गया",
+        "group/executed": "समूहीकृत किया गया",
+        "pin/executed": "कॉलम पिन किया गया",
+        "edit/executed": "सहेजा गया",
+        "edit/staged": "संपादन तैयार — सहेजा नहीं गया",
+        "edit/awaiting-approval": "संपादन अनुमोदन की प्रतीक्षा में",
+        "edit/partial": "कुछ संपादन सहेजे गए, कुछ अस्वीकृत",
+        "edit/rejected": "संपादन अस्वीकृत",
+        "filter-cleared/executed": "फ़िल्टर हटाए गए",
+        "sort-cleared/executed": "क्रम हटाया गया",
+        "search/executed": "खोज लागू",
+        "search-cleared/executed": "खोज साफ़ की गई",
+        "group-cleared/executed": "समूहन हटाया गया",
+        "pin-cleared/executed": "स्तंभ अनपिन किया गया",
+        "page/executed": "पृष्ठ बदला",
+        "aggregate/executed": "योग बदले",
+        "select/executed": "चयन बदला",
+        "read/executed": "तालिका पढ़ी गई",
+        "export/executed": "निर्यात किया गया",
+        "add/executed": "पंक्ति जोड़ी गई",
+        "add/awaiting-approval": "नई पंक्ति अनुमोदन की प्रतीक्षा में",
+        "add/rejected": "नई पंक्ति अस्वीकृत",
+        "delete/executed": "पंक्तियाँ हटाई गईं",
+        "delete/awaiting-approval": "हटाना अनुमोदन की प्रतीक्षा में",
+        "delete/partial": "कुछ पंक्तियाँ हटाई गईं, कुछ रखी गईं",
+        "delete/rejected": "हटाना अस्वीकृत",
+        "reorder/executed": "पंक्तियाँ स्थानांतरित",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "अवरोही" : "आरोही"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "निष्क्रिय",

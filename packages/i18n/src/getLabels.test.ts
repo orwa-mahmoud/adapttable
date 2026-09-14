@@ -162,6 +162,20 @@ const INTERPOLATION_CASES: Record<
       }) ?? "",
     expects: [],
   },
+  assistantReceiptTerms: {
+    call: (fn) =>
+      (
+        fn as (subject: {
+          kind?: string;
+          terms?: readonly { column?: string; value?: string }[];
+          direction?: "asc" | "desc";
+        }) => string | undefined
+      )({
+        kind: "filter",
+        terms: [{ column: "COLUMN_X", value: "VALUE_X" }],
+      }) ?? "",
+    expects: ["COLUMN_X", "VALUE_X"],
+  },
   // A token these turn into a sentence, not a value they interpolate: a
   // translation that quoted the token back would be showing a reader a code.
   assistantUndoBlocked: {
@@ -560,6 +574,44 @@ it("every locale writes a receipt headline it knows and declines one it does not
     expect(
       labels.assistantReceiptAction({ status: "executed" }),
       `${tag} invents a headline without a kind`
+    ).toBeUndefined();
+  }
+});
+
+/**
+ * The card's second line, which is where the reader learns WHAT moved.
+ *
+ * Every locale joins a column to a value in its own way, so the test asserts
+ * that both survive and that the two sort directions do not collapse into one
+ * word — a card that reads the same whichever way the table sorted is telling
+ * the reader nothing.
+ */
+it("every locale names the column and value, and separates the directions", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    const applied = labels.assistantReceiptTerms({
+      kind: "filter",
+      terms: [{ column: "Team", value: "Platform" }],
+    });
+    expect(applied, `${tag} dropped the column`).toContain("Team");
+    expect(applied, `${tag} dropped the value`).toContain("Platform");
+
+    const up = labels.assistantReceiptTerms({
+      kind: "sort",
+      terms: [{ column: "Salary" }],
+      direction: "asc",
+    });
+    const down = labels.assistantReceiptTerms({
+      kind: "sort",
+      terms: [{ column: "Salary" }],
+      direction: "desc",
+    });
+    expect(up, `${tag} dropped the sorted column`).toContain("Salary");
+    expect(up, `${tag} reads the same either way`).not.toBe(down);
+
+    // Nothing to name is not a sentence: the headline stands on its own.
+    expect(
+      labels.assistantReceiptTerms({ kind: "filter", terms: [] }),
+      `${tag} invented a detail for a cleared filter`
     ).toBeUndefined();
   }
 });

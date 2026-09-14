@@ -241,23 +241,56 @@ export const ko: Required<TableLabels> = {
     `${before}에서 ${after}(으)로 변경했습니다`,
   assistantReceiptProposed: ({ before, after }) =>
     `제안됨: ${before}에서 ${after}(으)로`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "필터 적용됨",
-            "filter/staged": "필터 준비됨",
-            "sort/executed": "정렬됨",
-            "group/executed": "그룹화됨",
-            "pin/executed": "열 고정됨",
-            "edit/executed": "저장됨",
-            "edit/staged": "편집 준비됨 — 저장되지 않음",
-            "edit/awaiting-approval": "편집 승인 대기 중",
-            "edit/partial": "일부 편집은 저장, 일부는 거부",
-            "edit/rejected": "편집 거부됨",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "필터 적용됨",
+        "filter/staged": "필터 준비됨",
+        "sort/executed": "정렬됨",
+        "group/executed": "그룹화됨",
+        "pin/executed": "열 고정됨",
+        "edit/executed": "저장됨",
+        "edit/staged": "편집 준비됨 — 저장되지 않음",
+        "edit/awaiting-approval": "편집 승인 대기 중",
+        "edit/partial": "일부 편집은 저장, 일부는 거부",
+        "edit/rejected": "편집 거부됨",
+        "filter-cleared/executed": "필터를 해제했습니다",
+        "sort-cleared/executed": "정렬을 해제했습니다",
+        "search/executed": "검색했습니다",
+        "search-cleared/executed": "검색을 지웠습니다",
+        "group-cleared/executed": "그룹화를 해제했습니다",
+        "pin-cleared/executed": "열 고정을 해제했습니다",
+        "page/executed": "페이지를 변경했습니다",
+        "aggregate/executed": "합계를 변경했습니다",
+        "select/executed": "선택을 변경했습니다",
+        "read/executed": "테이블을 읽었습니다",
+        "export/executed": "내보냈습니다",
+        "add/executed": "행을 추가했습니다",
+        "add/awaiting-approval": "새 행이 승인 대기 중입니다",
+        "add/rejected": "새 행이 거부되었습니다",
+        "delete/executed": "행을 삭제했습니다",
+        "delete/awaiting-approval": "삭제가 승인 대기 중입니다",
+        "delete/partial": "일부 행은 삭제하고 일부는 유지했습니다",
+        "delete/rejected": "삭제가 거부되었습니다",
+        "reorder/executed": "행을 이동했습니다",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "내림차순" : "오름차순"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "대기",

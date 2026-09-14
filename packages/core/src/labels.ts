@@ -23,15 +23,51 @@ const ASSISTANT_CONNECTION: Readonly<Record<string, string>> = {
 const ASSISTANT_RECEIPT_ACTION: Readonly<Record<string, string>> = {
   "filter/executed": "Filter applied",
   "filter/staged": "Filter staged",
+  "filter-cleared/executed": "Filters cleared",
   "sort/executed": "Sorted",
+  "sort-cleared/executed": "Sort cleared",
+  "search/executed": "Searched",
+  "search-cleared/executed": "Search cleared",
   "group/executed": "Grouped",
+  "group-cleared/executed": "Grouping cleared",
   "pin/executed": "Column pinned",
+  "pin-cleared/executed": "Column unpinned",
+  "page/executed": "Page changed",
+  "aggregate/executed": "Totals changed",
+  "select/executed": "Selection changed",
+  "read/executed": "Read the table",
+  "export/executed": "Exported",
   "edit/executed": "Saved",
   "edit/staged": "Edit staged — not saved",
   "edit/awaiting-approval": "Edit awaiting approval",
   "edit/partial": "Some edits saved, some refused",
   "edit/rejected": "Edit refused",
+  "add/executed": "Row added",
+  "add/awaiting-approval": "New row awaiting approval",
+  "add/rejected": "New row refused",
+  "delete/executed": "Rows deleted",
+  "delete/awaiting-approval": "Deletion awaiting approval",
+  "delete/partial": "Some rows deleted, some kept",
+  "delete/rejected": "Deletion refused",
+  "reorder/executed": "Rows moved",
 };
+
+/**
+ * One column-and-value pair, in English.
+ *
+ * An edit put a value IN a column and a filter narrows BY one, so the two
+ * read differently even though the pair is the same shape.
+ */
+function receiptTerm(
+  kind: string | undefined,
+  term: { column?: string; value?: string }
+): string | undefined {
+  if (!term.column) return term.value;
+  if (!term.value) return term.column;
+  return kind === "edit"
+    ? `${term.column} set to ${term.value}`
+    : `${term.column} is ${term.value}`;
+}
 
 /**
  * Why an undo is not on offer, in English.
@@ -282,8 +318,20 @@ export const defaultLabels: Required<TableLabels> = {
   assistantMoreExamples: "More examples",
   assistantReceiptStatus: (status) =>
     ASSISTANT_RECEIPT[status] ?? String(status),
-  assistantReceiptAction: ({ kind, status }) =>
-    kind ? ASSISTANT_RECEIPT_ACTION[`${kind}/${status}`] : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return ASSISTANT_RECEIPT_ACTION[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ kind, terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => receiptTerm(kind, term))
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "descending" : "ascending"}`;
+  },
   assistantReceiptChange: ({ before, after }) =>
     `Changed from ${before} to ${after}`,
   assistantReceiptProposed: ({ before, after }) =>

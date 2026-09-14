@@ -59,6 +59,7 @@ export {
   type AssistantReceipt,
   type AssistantReceiptStatus,
   type AssistantReceiptSubject,
+  type AssistantReceiptTerm,
   type AssistantTurnStatus,
   receiptFromResult,
   receiptsFromResults,
@@ -73,6 +74,7 @@ export {
   type TableAssistantSnapshot,
   type TableAssistantStore,
 } from "./assistantStore";
+export { subjectFor } from "./assistantSubjects";
 export {
   type AssistantUndo,
   isUndoBlock,

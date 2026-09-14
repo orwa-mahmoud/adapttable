@@ -237,23 +237,56 @@ export const zh: Required<TableLabels> = {
   assistantReceiptChange: ({ before, after }) => `已从 ${before} 改为 ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
     `建议：从 ${before} 改为 ${after}`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "已应用筛选",
-            "filter/staged": "已准备筛选",
-            "sort/executed": "已排序",
-            "group/executed": "已分组",
-            "pin/executed": "已固定列",
-            "edit/executed": "已保存",
-            "edit/staged": "编辑已准备 — 未保存",
-            "edit/awaiting-approval": "编辑等待审批",
-            "edit/partial": "部分编辑已保存，部分被拒绝",
-            "edit/rejected": "编辑已拒绝",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "已应用筛选",
+        "filter/staged": "已准备筛选",
+        "sort/executed": "已排序",
+        "group/executed": "已分组",
+        "pin/executed": "已固定列",
+        "edit/executed": "已保存",
+        "edit/staged": "编辑已准备 — 未保存",
+        "edit/awaiting-approval": "编辑等待审批",
+        "edit/partial": "部分编辑已保存，部分被拒绝",
+        "edit/rejected": "编辑已拒绝",
+        "filter-cleared/executed": "已清除筛选",
+        "sort-cleared/executed": "已清除排序",
+        "search/executed": "已搜索",
+        "search-cleared/executed": "已清除搜索",
+        "group-cleared/executed": "已清除分组",
+        "pin-cleared/executed": "已取消固定列",
+        "page/executed": "已切换页码",
+        "aggregate/executed": "已更改汇总",
+        "select/executed": "已更改选择",
+        "read/executed": "已读取表格",
+        "export/executed": "已导出",
+        "add/executed": "已添加行",
+        "add/awaiting-approval": "新行等待审批",
+        "add/rejected": "新行已拒绝",
+        "delete/executed": "已删除行",
+        "delete/awaiting-approval": "删除等待审批",
+        "delete/partial": "部分行已删除，部分保留",
+        "delete/rejected": "删除已拒绝",
+        "reorder/executed": "已移动行",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "降序" : "升序"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "空闲",

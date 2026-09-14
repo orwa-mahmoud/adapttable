@@ -40,6 +40,22 @@ export type AssistantReceiptStatus =
   | "failed";
 
 /**
+ * One column, and the value the action put against it.
+ *
+ * Both sides are already in the reader's terms — the column's label, and the
+ * value as the table formats it — so a surface joins them with a word in its
+ * own language and shows the result.
+ *
+ * @public
+ */
+export interface AssistantReceiptTerm {
+  /** The column's label. */
+  readonly column?: string;
+  /** The value, formatted as the table would show it. */
+  readonly value?: string;
+}
+
+/**
  * What an action changed, in the reader's own terms.
  *
  * Supplied by whoever ran the action, from the arguments that actually ran.
@@ -53,8 +69,32 @@ export type AssistantReceiptStatus =
 export interface AssistantReceiptSubject {
   /** The kind of change: `filter`, `sort`, `group`, `pin`, `edit`. */
   readonly kind?: string;
-  /** What it acted on, already readable — "Team is Core". */
+  /**
+   * What it acted on, already readable — "Team is Core".
+   *
+   * A host that knows its own wording sets this and a surface shows it as
+   * given. The built-in capabilities leave it alone and fill {@link terms}
+   * instead, because the sentence that joins a column to a value belongs to
+   * the reader's language rather than to the package that ran the call.
+   */
   readonly detail?: string;
+  /**
+   * What it acted on, structurally, for a surface to phrase.
+   *
+   * Column labels and formatted values, never keys: "Team" and "Platform",
+   * not `team`. An empty list is not the same as none — see {@link cleared}.
+   */
+  readonly terms?: readonly AssistantReceiptTerm[];
+  /** Which way a sort went, when the action was one. */
+  readonly direction?: "asc" | "desc";
+  /**
+   * Whether the action took something off rather than put something on.
+   *
+   * A cleared filter has no terms to show, and a card that says "Filter
+   * applied" with nothing after it reads as a failure. The surface says
+   * "Filters cleared" instead.
+   */
+  readonly cleared?: boolean;
   /** For an edit: which row and column, when the host may show them. */
   readonly row?: string;
   readonly column?: string;

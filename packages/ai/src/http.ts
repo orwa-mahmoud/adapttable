@@ -6,6 +6,8 @@
  * returned actions through the existing session. No model SDK.
  */
 import type { AssistantTransport } from "./assistantContracts";
+import type { AssistantReceiptSubject } from "./assistantReceipts";
+import { subjectFor } from "./assistantSubjects";
 import {
   type AgentContext,
   type AgentContextContract,
@@ -80,7 +82,10 @@ export type {
   AssistantTransportReply,
   AssistantUnresolved,
 } from "./assistantContracts";
-export type { AssistantReceiptSubject } from "./assistantReceipts";
+export type {
+  AssistantReceiptSubject,
+  AssistantReceiptTerm,
+} from "./assistantReceipts";
 // `AgentHttpRequest.view` is typed with these, so a consumer of this subpath
 // can name them without reaching for another entry point.
 export type { AgentContextSelection } from "./contextSelection";
@@ -398,11 +403,19 @@ export interface AgentHttpTurnResult {
   /**
    * The capability key each result came from, in the same order.
    *
-   * Without it a receipt can only say "done" — the reader is told something
-   * happened but not what, which is the difference between a report and a
-   * shrug.
+   * A developer handle, for a host matching a result back to the call it
+   * asked for. What the reader is shown comes from {@link subjects}.
    */
   readonly keys: readonly string[];
+  /**
+   * What each action changed, in the same order.
+   *
+   * Without it a receipt can only say "done" — the reader is told something
+   * happened but not what, which is the difference between a report and a
+   * shrug. A built-in capability describes itself here; a host capability
+   * has no entry, because only its own runner knows what it did.
+   */
+  readonly subjects: readonly (AssistantReceiptSubject | undefined)[];
   /** How many describe / read needs this turn fulfilled. */
   readonly needsFulfilled: { readonly describe: number; readonly read: number };
   /** Present only when the turn stopped short of running everything. */
@@ -1839,6 +1852,7 @@ export async function runAgentHttpTurn(
   const execution = createTurnExecution(session, turn);
   const results: ExecuteResult[] = [];
   const keys: string[] = [];
+  const subjects: (AssistantReceiptSubject | undefined)[] = [];
   const fulfilled = { describe: 0, read: 0 };
   let text = "";
   let unresolved: AgentHttpUnresolved | undefined;
@@ -1882,6 +1896,18 @@ export async function runAgentHttpTurn(
     results.push(...ran);
     // The keys, not the calls: what a receipt needs is which capability ran.
     keys.push(...pass.plan.map((call) => call.key));
+    // Read after the phase ran, so a column a call renamed is named as it is
+    // now. Indexed off what ran rather than what was planned, because a
+    // cancelled phase returns fewer results than it had calls.
+    const columns = session.manifest().columns;
+    subjects.push(
+      ...ran.map((result, index) => {
+        const call = pass.plan[index];
+        return call
+          ? subjectFor(call.key, call.args, result, columns)
+          : undefined;
+      })
+    );
 
     const step = advanceTurn({
       allowed: extras.returnResults === true,
@@ -1903,6 +1929,7 @@ export async function runAgentHttpTurn(
     text,
     results,
     keys,
+    subjects,
     needsFulfilled: fulfilled,
     ...(unresolved ? { unresolved } : {}),
   };
@@ -2266,6 +2293,7 @@ export function assistantHttpTransport(
         text: turn.text,
         results: turn.results,
         keys: turn.keys,
+        subjects: turn.subjects,
         ...(turn.unresolved ? { unresolved: turn.unresolved } : {}),
       };
     },

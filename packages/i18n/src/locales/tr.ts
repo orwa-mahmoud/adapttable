@@ -244,23 +244,56 @@ export const tr: Required<TableLabels> = {
     `${before} değerinden ${after} değerine değiştirildi`,
   assistantReceiptProposed: ({ before, after }) =>
     `Önerilen: ${before} değerinden ${after} değerine`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "Filtre uygulandı",
-            "filter/staged": "Filtre hazırlandı",
-            "sort/executed": "Sıralandı",
-            "group/executed": "Gruplandı",
-            "pin/executed": "Sütun sabitlendi",
-            "edit/executed": "Kaydedildi",
-            "edit/staged": "Düzenleme hazırlandı — kaydedilmedi",
-            "edit/awaiting-approval": "Düzenleme onay bekliyor",
-            "edit/partial": "Bazı düzenlemeler kaydedildi, bazıları reddedildi",
-            "edit/rejected": "Düzenleme reddedildi",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "Filtre uygulandı",
+        "filter/staged": "Filtre hazırlandı",
+        "sort/executed": "Sıralandı",
+        "group/executed": "Gruplandı",
+        "pin/executed": "Sütun sabitlendi",
+        "edit/executed": "Kaydedildi",
+        "edit/staged": "Düzenleme hazırlandı — kaydedilmedi",
+        "edit/awaiting-approval": "Düzenleme onay bekliyor",
+        "edit/partial": "Bazı düzenlemeler kaydedildi, bazıları reddedildi",
+        "edit/rejected": "Düzenleme reddedildi",
+        "filter-cleared/executed": "Filtreler temizlendi",
+        "sort-cleared/executed": "Sıralama kaldırıldı",
+        "search/executed": "Arandı",
+        "search-cleared/executed": "Arama temizlendi",
+        "group-cleared/executed": "Gruplama kaldırıldı",
+        "pin-cleared/executed": "Sütun sabitlemesi kaldırıldı",
+        "page/executed": "Sayfa değişti",
+        "aggregate/executed": "Toplamlar değişti",
+        "select/executed": "Seçim değişti",
+        "read/executed": "Tablo okundu",
+        "export/executed": "Dışa aktarıldı",
+        "add/executed": "Satır eklendi",
+        "add/awaiting-approval": "Yeni satır onay bekliyor",
+        "add/rejected": "Yeni satır reddedildi",
+        "delete/executed": "Satırlar silindi",
+        "delete/awaiting-approval": "Silme onay bekliyor",
+        "delete/partial": "Bazı satırlar silindi, bazıları korundu",
+        "delete/rejected": "Silme reddedildi",
+        "reorder/executed": "Satırlar taşındı",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "azalan" : "artan"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "Boşta",

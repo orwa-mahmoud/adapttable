@@ -243,23 +243,56 @@ export const ur: Required<TableLabels> = {
     `${before} سے ${after} کر دیا گیا`,
   assistantReceiptProposed: ({ before, after }) =>
     `تجویز: ${before} سے ${after}`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "فلٹر لاگو ہو گیا",
-            "filter/staged": "فلٹر تیار ہے",
-            "sort/executed": "ترتیب دے دیا گیا",
-            "group/executed": "گروپ بندی ہو گئی",
-            "pin/executed": "کالم پن ہو گیا",
-            "edit/executed": "محفوظ ہو گیا",
-            "edit/staged": "ترمیم تیار — محفوظ نہیں",
-            "edit/awaiting-approval": "ترمیم منظوری کی منتظر",
-            "edit/partial": "کچھ ترامیم محفوظ، کچھ مسترد",
-            "edit/rejected": "ترمیم مسترد",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "فلٹر لاگو ہو گیا",
+        "filter/staged": "فلٹر تیار ہے",
+        "sort/executed": "ترتیب دے دیا گیا",
+        "group/executed": "گروپ بندی ہو گئی",
+        "pin/executed": "کالم پن ہو گیا",
+        "edit/executed": "محفوظ ہو گیا",
+        "edit/staged": "ترمیم تیار — محفوظ نہیں",
+        "edit/awaiting-approval": "ترمیم منظوری کی منتظر",
+        "edit/partial": "کچھ ترامیم محفوظ، کچھ مسترد",
+        "edit/rejected": "ترمیم مسترد",
+        "filter-cleared/executed": "فلٹر ہٹا دیے گئے",
+        "sort-cleared/executed": "ترتیب ہٹا دی گئی",
+        "search/executed": "تلاش کی گئی",
+        "search-cleared/executed": "تلاش صاف کر دی گئی",
+        "group-cleared/executed": "گروپ بندی ہٹا دی گئی",
+        "pin-cleared/executed": "کالم کی پن ہٹا دی گئی",
+        "page/executed": "صفحہ تبدیل ہوا",
+        "aggregate/executed": "میزان تبدیل ہوئے",
+        "select/executed": "انتخاب تبدیل ہوا",
+        "read/executed": "ٹیبل پڑھا گیا",
+        "export/executed": "برآمد ہو گیا",
+        "add/executed": "قطار شامل کی گئی",
+        "add/awaiting-approval": "نئی قطار منظوری کی منتظر",
+        "add/rejected": "نئی قطار مسترد",
+        "delete/executed": "قطاریں حذف ہو گئیں",
+        "delete/awaiting-approval": "حذف منظوری کا منتظر",
+        "delete/partial": "کچھ قطاریں حذف، کچھ رکھی گئیں",
+        "delete/rejected": "حذف مسترد",
+        "reorder/executed": "قطاریں منتقل ہوئیں",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "نزولی" : "صعودی"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "فارغ",

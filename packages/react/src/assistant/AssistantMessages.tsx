@@ -54,13 +54,35 @@ function headline(
   receipt: TableAssistantReceiptView,
   labels: TableLabels | undefined
 ): string {
-  const kind = receipt.subject?.kind;
+  const subject = receipt.subject;
   const fromLabels = labels?.assistantReceiptAction?.({
-    kind,
+    kind: subject?.kind,
     status: receipt.status,
+    ...(subject?.cleared === undefined ? {} : { cleared: subject.cleared }),
   });
   if (fromLabels) return fromLabels;
   return labels?.assistantReceiptStatus?.(receipt.status) ?? receipt.status;
+}
+
+/**
+ * What the action acted on, as one line.
+ *
+ * A host's own `detail` wins: it was written by whoever knows the wording of
+ * the surface it is shown on. Otherwise the labels join the terms, which is
+ * where the reader's language lives.
+ */
+function detailOf(
+  receipt: TableAssistantReceiptView,
+  labels: TableLabels | undefined
+): string | undefined {
+  const subject = receipt.subject;
+  if (!subject) return undefined;
+  if (subject.detail) return subject.detail;
+  return labels?.assistantReceiptTerms?.({
+    kind: subject.kind,
+    terms: subject.terms,
+    ...(subject.direction ? { direction: subject.direction } : {}),
+  });
 }
 
 /** The before/after pair, only when the host supplied both. */
@@ -119,6 +141,7 @@ function Receipt({
   const Button = slots.Button;
   const Badge = slots.Badge;
   const subject = receipt.subject;
+  const detail = detailOf(receipt, labels);
   const where = [subject?.row, subject?.column].filter(Boolean).join(" · ");
   return (
     <li
@@ -144,9 +167,9 @@ function Receipt({
           <SuggestionIcon kind={subject?.kind} />
         </span>
         <strong>{headline(receipt, labels)}</strong>
-        {subject?.detail ? (
+        {detail ? (
           <span data-adapttable-part="assistant-receipt-detail-text">
-            {subject.detail}
+            {detail}
           </span>
         ) : null}
       </span>

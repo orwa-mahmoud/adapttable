@@ -60,6 +60,8 @@ import type {
   AssistantTransportReply,
   AssistantUnresolved,
 } from "./assistantContracts";
+import type { AssistantReceiptSubject } from "./assistantReceipts";
+import { subjectFor } from "./assistantSubjects";
 import {
   type AgentContextInputs,
   type AgentContextOptions,
@@ -394,6 +396,7 @@ function deniedTurn(denied: readonly DeniedCall[]): AssistantUnresolved {
 interface TurnState {
   readonly results: ExecuteResult[];
   readonly keys: string[];
+  readonly subjects: (AssistantReceiptSubject | undefined)[];
   readonly outputs: AiSdkToolOutput[];
   readonly approvals: AiSdkApprovalResponse[];
   /** Calls the route reported as refused, and why. */
@@ -507,6 +510,9 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
     );
     turn.results.push(result);
     turn.keys.push(key);
+    turn.subjects.push(
+      subjectFor(key, part.input ?? {}, result, manifest.columns)
+    );
     // Exactly what `addToolOutput` sends, so a route reads it the way it
     // reads any other client tool's result.
     turn.outputs.push({
@@ -664,6 +670,7 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
       const turn: TurnState = {
         results: [],
         keys: [],
+        subjects: [],
         outputs: [],
         approvals: [],
         denied: [],
@@ -707,6 +714,7 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
             text: turn.text,
             results: turn.results,
             keys: turn.keys,
+            subjects: turn.subjects,
             ...(turn.denied.length > 0
               ? { unresolved: deniedTurn(turn.denied) }
               : {}),
@@ -718,6 +726,7 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
         text: turn.text,
         results: turn.results,
         keys: turn.keys,
+        subjects: turn.subjects,
         unresolved:
           unresolved ??
           unresolvedTurn(
@@ -745,7 +754,10 @@ export type {
   AssistantUnresolved,
   CapabilityPresentation,
 } from "./assistantContracts";
-export type { AssistantReceiptSubject } from "./assistantReceipts";
+export type {
+  AssistantReceiptSubject,
+  AssistantReceiptTerm,
+} from "./assistantReceipts";
 export type {
   AgentContextInputs,
   AgentContextOptions,

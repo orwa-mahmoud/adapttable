@@ -239,23 +239,56 @@ export const he: Required<TableLabels> = {
   assistantReceiptChange: ({ before, after }) => `שונה מ-${before} ל-${after}`,
   assistantReceiptProposed: ({ before, after }) =>
     `הוצע: מ-${before} ל-${after}`,
-  assistantReceiptAction: ({ kind, status }) =>
-    kind
-      ? (
-          {
-            "filter/executed": "הסינון הוחל",
-            "filter/staged": "הסינון הוכן",
-            "sort/executed": "מוין",
-            "group/executed": "קובץ",
-            "pin/executed": "העמודה ננעצה",
-            "edit/executed": "נשמר",
-            "edit/staged": "העריכה הוכנה — לא נשמרה",
-            "edit/awaiting-approval": "העריכה ממתינה לאישור",
-            "edit/partial": "חלק מהעריכות נשמרו וחלק נדחו",
-            "edit/rejected": "העריכה נדחתה",
-          } as Record<string, string>
-        )[`${kind}/${status}`]
-      : undefined,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "הסינון הוחל",
+        "filter/staged": "הסינון הוכן",
+        "sort/executed": "מוין",
+        "group/executed": "קובץ",
+        "pin/executed": "העמודה ננעצה",
+        "edit/executed": "נשמר",
+        "edit/staged": "העריכה הוכנה — לא נשמרה",
+        "edit/awaiting-approval": "העריכה ממתינה לאישור",
+        "edit/partial": "חלק מהעריכות נשמרו וחלק נדחו",
+        "edit/rejected": "העריכה נדחתה",
+        "filter-cleared/executed": "הסינון נוקה",
+        "sort-cleared/executed": "המיון בוטל",
+        "search/executed": "בוצע חיפוש",
+        "search-cleared/executed": "החיפוש נוקה",
+        "group-cleared/executed": "הקיבוץ בוטל",
+        "pin-cleared/executed": "הצמדת העמודה בוטלה",
+        "page/executed": "העמוד הוחלף",
+        "aggregate/executed": "הסיכומים שונו",
+        "select/executed": "הבחירה שונתה",
+        "read/executed": "הטבלה נקראה",
+        "export/executed": "יוצא",
+        "add/executed": "שורה נוספה",
+        "add/awaiting-approval": "שורה חדשה ממתינה לאישור",
+        "add/rejected": "השורה החדשה נדחתה",
+        "delete/executed": "שורות נמחקו",
+        "delete/awaiting-approval": "המחיקה ממתינה לאישור",
+        "delete/partial": "חלק מהשורות נמחקו, חלק נשמרו",
+        "delete/rejected": "המחיקה נדחתה",
+        "reorder/executed": "שורות הוזזו",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "בסדר יורד" : "בסדר עולה"}`;
+  },
   assistantConnection: (status) =>
     ({
       idle: "ממתין",
