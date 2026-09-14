@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   AGENT_HTTP_LIMITS,
   agentHttpJsonSchema,
+  type AgentHttpRequest,
   connectAgentHttp,
   createAgentHttpClient,
   isToolValue,
@@ -307,6 +308,81 @@ describe("createAgentHttpClient", () => {
     await connectAgentHttp(live, options);
     await runAgentHttpTurn(live, "Show page 2", options);
     expect(kinds).toEqual(["hello", "turn"]);
+  });
+
+  it("carries the view the reader left behind, not the one the turn opened on", async () => {
+    // A reader who sorts and filters the table themselves says nothing to the
+    // assistant. The contract is pinned and stays pinned; the view is read
+    // again for every round, so the next request describes the table they are
+    // actually looking at rather than the one the conversation started on.
+    let revision = 1;
+    let readerView: Record<string, unknown> = {};
+    const live = createAgentSession({
+      observe: () => observation({ viewRevision: revision }),
+      apply: { setPage: vi.fn() },
+    });
+    const seen: { revision?: number; view?: Record<string, unknown> }[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      // Filter state travels only for filters the table published, so the
+      // catalog rides beside the view the same way.
+      contextInputs: () => ({
+        view: readerView,
+        filters: [
+          {
+            key: "team",
+            label: "Team",
+            type: "multiSelect",
+            operators: ["is"],
+            defaultOperator: "is",
+            valueKeys: ["team", "teamOp"],
+          },
+        ],
+      }),
+      request: (body: AgentHttpRequest) => {
+        if (body.kind === "turn") {
+          seen.push({
+            revision: body.viewRevision,
+            view: body.view as Record<string, unknown> | undefined,
+          });
+        }
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          ok: true,
+          sessionId: "sess-view",
+          pin: {
+            status: "acknowledged" as const,
+            ...(body.contractVersion
+              ? { contractVersion: body.contractVersion }
+              : {}),
+          },
+          text: "Done",
+        });
+      },
+    };
+    await connectAgentHttp(live, options);
+    await runAgentHttpTurn(live, "What am I looking at?", options);
+
+    // The reader sorts and filters by hand, through the table's own controls.
+    revision = 4;
+    readerView = {
+      search: "nair",
+      sortBy: "name",
+      sortDir: "desc",
+      filters: { team: "Platform" },
+    };
+    await runAgentHttpTurn(live, "And now?", options);
+
+    expect(seen[0]?.view).toMatchObject({ revision: 1, search: "" });
+    expect(seen[0]?.view?.sortBy).toBeUndefined();
+    expect(seen[1]?.revision).toBe(4);
+    expect(seen[1]?.view).toMatchObject({
+      revision: 4,
+      search: "nair",
+      sortBy: "name",
+      sortDir: "desc",
+      filters: { team: "Platform" },
+    });
   });
 
   it("re-sends schema when column options change", async () => {

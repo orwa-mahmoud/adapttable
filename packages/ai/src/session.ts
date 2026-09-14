@@ -1021,6 +1021,38 @@ function pageRefusalFor(
   );
 }
 
+/** A name stripped of what never distinguishes two columns. */
+function fold(value: string): string {
+  return value.trim().toLocaleLowerCase();
+}
+
+/**
+ * The column a name refers to, in the table's own spelling.
+ *
+ * Columns are published with an id and a label and a caller picks from that
+ * list, so a name that differs only in case or in surrounding space — or that
+ * is the label rather than the id — has referred to exactly one column. An
+ * exact id wins; two columns a name could equally mean resolve to neither,
+ * and the caller is told what the table has.
+ */
+function findColumn(
+  columns: readonly AgentColumn[],
+  name: string
+): AgentColumn | undefined {
+  const exact = columns.find((entry) => entry.id === name);
+  if (exact) return exact;
+  const wanted = fold(name);
+  const [only, ...rest] = columns.filter(
+    (entry) => fold(entry.id) === wanted || fold(entry.label) === wanted
+  );
+  return only && rest.length === 0 ? only : undefined;
+}
+
+/** What the table has, for a refusal that leaves the caller somewhere to go. */
+function columnNames(columns: readonly AgentColumn[]): string {
+  return columns.map((entry) => entry.id).join(", ");
+}
+
 /**
  * Why this table will not sort by that column, or `undefined`.
  *
@@ -1038,10 +1070,10 @@ function sortRefusal(
   // absence is not a restriction: the host wiring `setSort` is the permission.
   // Where columns exist, they are the contract and the rules below apply.
   if (observation.columns.length === 0) return undefined;
-  const column = observation.columns.find((entry) => entry.id === sortKey);
+  const column = findColumn(observation.columns, sortKey);
   if (!column) {
-    const offered = observation.columns.map((entry) => entry.id);
-    return `unknown column "${sortKey}"; this table offers ${offered.join(", ")}`;
+    const offered = columnNames(observation.columns);
+    return `unknown column "${sortKey}"; this table offers ${offered}`;
   }
   if (column.sortable) return undefined;
   const sortable = observation.columns
@@ -1097,11 +1129,15 @@ function pinColumnArgs(
   body: Record<string, unknown>,
   observation: AgentObservation
 ): [string, "start" | "end" | undefined] {
-  const key = String(body.key);
-  const column = observation.columns.find((candidate) => candidate.id === key);
+  const asked = String(body.key);
+  const column = findColumn(observation.columns, asked);
   if (!column) {
-    throw new ApplyError("apply-failed", `unknown column "${key}"`);
+    throw new ApplyError(
+      "apply-failed",
+      `unknown column "${asked}"; this table offers ${columnNames(observation.columns)}`
+    );
   }
+  const key = column.id;
   const side = body.side as "start" | "end" | null | undefined;
   if (side === undefined || side === null) return [key, undefined];
   if (column.pinnable === false) {
@@ -1174,12 +1210,17 @@ function applySetSort(
   revision: number;
   sort: { key: string; dir: "asc" | "desc" } | null;
 } {
-  const sortKey = body.key as string | null | undefined;
-  const refused = sortRefusal(observation, sortKey);
+  const asked = body.key as string | null | undefined;
+  const refused = sortRefusal(observation, asked);
   if (refused) throw new ApplyError("apply-failed", refused);
   assertApply(apply, "setSort");
+  // The table's own spelling, so the host sorts by a column it recognises and
+  // the answer names the sort that landed rather than the one requested.
+  const sortKey = asked
+    ? (findColumn(observation.columns, asked)?.id ?? asked)
+    : undefined;
   const dir = body.dir as "asc" | "desc" | undefined;
-  apply.setSort(sortKey ?? undefined, dir);
+  apply.setSort(sortKey, dir);
   return {
     ok: true,
     revision: observation.viewRevision + 1,
@@ -1226,9 +1267,15 @@ function applySetGroupBy(
   body: Record<string, unknown>,
   observation: AgentObservation
 ): { ok: true; revision: number; groupBy: string | null } {
-  const groupKey = body.key as string | null | undefined;
+  const asked = body.key as string | null | undefined;
   assertApply(apply, "setGroupBy");
-  apply.setGroupBy(groupKey ?? undefined);
+  // Resolved where the table published the column, passed through where it
+  // did not: grouping publishes no per-column permission, so a key this
+  // contract does not name is the host's business rather than a mistake.
+  const groupKey = asked
+    ? (findColumn(observation.columns, asked)?.id ?? asked)
+    : undefined;
+  apply.setGroupBy(groupKey);
   return {
     ok: true,
     revision: observation.viewRevision + 1,
@@ -1364,17 +1411,22 @@ function writableColumn(
   columns: readonly AgentColumn[],
   id: string
 ): AgentColumn {
-  const column = columns.find((entry) => entry.id === id);
+  const column = findColumn(columns, id);
   if (!column) {
     throw new ApplyError(
       "unknown-column",
-      `column "${id}" is not on this table`
+      `column "${id}" is not on this table; it has ${columnNames(columns)}`
     );
   }
   if (!column.writable) {
+    const writable = columns
+      .filter((entry) => entry.writable)
+      .map((entry) => entry.id);
     throw new ApplyError(
       "column-not-writable",
-      `column "${id}" is not writable`
+      writable.length > 0
+        ? `column "${id}" is not writable; this table writes ${writable.join(", ")}`
+        : `column "${id}" is not writable, and no column on this table is`
     );
   }
   return column;
@@ -1731,17 +1783,18 @@ async function planCells(
     if (typeof edit.column !== "string") {
       throw new ApplyError("invalid-arguments", "each edit requires a column");
     }
-    assertWritableValue(
-      writableColumn(observation.columns, edit.column),
-      edit.value
-    );
+    const target = writableColumn(observation.columns, edit.column);
+    assertWritableValue(target, edit.value);
+    // The table's own column id from here on: a host reads the cell it owns,
+    // and a proposal the reader approves names the column the table draws.
+    const column = target.id;
     const ref = asRowRef(edit, observation.viewRevision);
     const row = await resolveRowArg(
       "rowKey" in ref ? { rowKey: ref.rowKey } : { ...ref },
       observation,
       apply
     );
-    const before = await peekCell(apply, observation, row.rowKey, edit.column);
+    const before = await peekCell(apply, observation, row.rowKey, column);
     // resolveRow and the peek both awaited host code.
     const latest = guard.observe();
     if (latest.viewRevision !== observation.viewRevision) {
@@ -1750,15 +1803,15 @@ async function planCells(
         `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
       );
     }
-    writableColumn(latest.columns, edit.column);
+    writableColumn(latest.columns, column);
     resolved.push({
       rowKey: row.rowKey,
-      column: edit.column,
+      column,
       value: edit.value,
     });
     proposals.push({
       rowKey: row.rowKey,
-      column: edit.column,
+      column,
       before,
       after: edit.value,
     });

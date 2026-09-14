@@ -183,28 +183,31 @@ describe("extrasFromAgentFilters", () => {
     ).toEqual({ team: ["Core"] });
   });
 
-  it("rejects unknown keys, operators and options", () => {
+  it("refuses what it cannot resolve, and names what it would take", () => {
+    // A refusal that withholds the set leaves a caller guessing at something
+    // the table could simply have shown it, which is how a turn ends up
+    // asking the reader a question the table already knows the answer to.
     expect(() => extrasFromAgentFilters({ ghost: 1 }, catalog)).toThrow(
-      /not a visible filter/
+      /"ghost" is not a filter key on this table — it has: team, salary/
     );
     expect(() =>
       extrasFromAgentFilters({ salary: { gt: 10000 } }, catalog)
     ).toThrow(/not an object/);
     expect(() =>
       extrasFromAgentFilters({ salaryOp: "contains" }, catalog)
-    ).toThrow(/cannot use operator/);
+    ).toThrow(/"salary" takes one of: .*— not "contains"/);
     expect(() => extrasFromAgentFilters({ team: ["Ghost"] }, catalog)).toThrow(
-      /does not accept option/
+      /"team" takes one of: Core, Platform, Data — not "Ghost"/
     );
     expect(() =>
       extrasFromAgentFilters([{ key: "ghost", op: "eq", value: "x" }], catalog)
-    ).toThrow(/not a visible filter/);
+    ).toThrow(/"ghost" is not a filter on this table — it has: team, salary/);
     expect(() =>
       extrasFromAgentFilters(
         [{ key: "salary", op: "contains", value: 1 }],
         catalog
       )
-    ).toThrow(/cannot use operator/);
+    ).toThrow(/"salary" takes one of: .*— not "contains"/);
     expect(() => extrasFromAgentFilters(["team"], catalog)).toThrow(
       /needs key and op/
     );
@@ -212,19 +215,72 @@ describe("extrasFromAgentFilters", () => {
       /filter object/
     );
     expect(() => extrasFromAgentFilters({ team: true }, catalog)).not.toThrow();
-    expect(() =>
-      extrasFromAgentFilters({ salaryMin: () => 1 }, catalog)
-    ).toThrow(/not function/);
-    expect(() =>
+  });
+
+  it("resolves a published choice to the spelling the table uses", () => {
+    // The value the rows hold is "Platform". Accepting "platform" and then
+    // filtering on it would match nothing, so what lands is the catalog's own
+    // spelling — resolution, not a relaxed comparison.
+    expect(extrasFromAgentFilters({ team: "platform" }, catalog)).toEqual({
+      team: "Platform",
+    });
+    expect(extrasFromAgentFilters({ team: ["  DATA "] }, catalog)).toEqual({
+      team: ["Data"],
+    });
+    expect(
       extrasFromAgentFilters(
-        [{ key: "team", op: "in", value: "Ghost" }],
+        [{ key: "Team", op: "in", value: "core" }],
         catalog
       )
-    ).toThrow(/does not accept option/);
+    ).toEqual({ team: ["Core"] });
+    expect(extrasFromAgentFilters({ TEAM: "Core" }, catalog)).toEqual({
+      team: "Core",
+    });
   });
-});
 
-describe("formatFilterCatalog", () => {
+  it("refuses a value two options could equally be", () => {
+    // Two choices differing only in case is a real ambiguity: the table knows
+    // they are distinct, so picking one for the caller would be a guess.
+    const ambiguous = agentFiltersFromDefs(
+      [
+        {
+          key: "state",
+          type: "multiSelect" as const,
+          label: "State",
+          options: [
+            { value: "Active", label: "Active" },
+            { value: "active", label: "Lowercase active" },
+          ],
+        },
+      ],
+      undefined
+    )!;
+    expect(() =>
+      extrasFromAgentFilters({ state: "ACTIVE" }, ambiguous)
+    ).toThrow(/"state" takes one of: Active, active — not "ACTIVE"/);
+    // Either one named exactly still lands, untouched.
+    expect(extrasFromAgentFilters({ state: "active" }, ambiguous)).toEqual({
+      state: "active",
+    });
+  });
+
+  it("takes the label a caller was shown as well as the value", () => {
+    const labelled = agentFiltersFromDefs(
+      [
+        {
+          key: "tier",
+          type: "multiSelect" as const,
+          label: "Tier",
+          options: [{ value: "t1", label: "Gold" }],
+        },
+      ],
+      undefined
+    )!;
+    expect(extrasFromAgentFilters({ tier: "gold" }, labelled)).toEqual({
+      tier: "t1",
+    });
+  });
+
   it("names the untyped, empty and listed cases", () => {
     expect(formatFilterCatalog(undefined)).toContain("has not published");
     expect(formatFilterCatalog([])).toContain("No filters are visible");

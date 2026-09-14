@@ -172,15 +172,67 @@ function namedCondition(
   const record = value as Record<string, unknown>;
   const key = conditionKey(record);
   if (!key) return undefined;
-  const filter = catalog.find((item) => item.key === key);
+  const filter = findFilter(catalog, key);
   if (!filter) return undefined;
   const op = typeof record.op === "string" ? record.op : filter.defaultOperator;
-  return { key, op, value: conditionValue(record) };
+  // The catalog's own key, so everything downstream addresses one spelling.
+  return { key: filter.key, op, value: conditionValue(record) };
 }
 
-function optionValues(filter: AgentFilter): ReadonlySet<string> | undefined {
-  if (!filter.options) return undefined;
-  return new Set(filter.options.map((option) => option.value));
+/** A value stripped of what never distinguishes two choices. */
+function fold(value: string): string {
+  return value.trim().toLocaleLowerCase();
+}
+
+/** What a filter will take, named in the spellings it published. */
+function optionNames(filter: AgentFilter): string {
+  return (filter.options ?? []).map((option) => option.value).join(", ");
+}
+
+/**
+ * The option a value names, in the catalog's own spelling.
+ *
+ * A caller picks from a list this table published, so a value that differs
+ * only in case or in surrounding space has named exactly one option, and
+ * naming it is not the same as guessing at it. What gets applied is the
+ * published spelling, because that is what the rows hold — resolving
+ * `platform` and then filtering on it would match nothing.
+ *
+ * Labels count as names too: both sides travel in the contract, so a caller
+ * that answered with the one it was shown is answering correctly. An exact
+ * value wins over any near match, and two options that differ only in case
+ * are a real ambiguity — refused like any other unknown value.
+ */
+function resolveOption(filter: AgentFilter, value: string): string | undefined {
+  const options = filter.options;
+  if (!options) return value;
+  const exact = options.find((option) => option.value === value);
+  if (exact) return exact.value;
+  const wanted = fold(value);
+  const [only, ...rest] = options.filter(
+    (option) => fold(option.value) === wanted || fold(option.label) === wanted
+  );
+  return only && rest.length === 0 ? only.value : undefined;
+}
+
+/**
+ * Every value in a filter argument, in the catalog's spellings.
+ *
+ * @throws when a value names no option, naming what the filter does take —
+ * a refusal that withholds the list leaves a caller guessing at a set the
+ * table could simply have shown it.
+ */
+function resolveOptionValue(filter: AgentFilter, raw: unknown): unknown {
+  if (!filter.options) return raw;
+  const one = (value: unknown): unknown => {
+    if (typeof value !== "string") return value;
+    const resolved = resolveOption(filter, value);
+    if (resolved !== undefined) return resolved;
+    throw new Error(
+      `"${filter.key}" takes one of: ${optionNames(filter)} — not "${value}"`
+    );
+  };
+  return Array.isArray(raw) ? raw.map(one) : one(raw);
 }
 
 function assertPlainExtraValue(key: string, raw: unknown): void {
@@ -200,33 +252,34 @@ function assertPlainExtraValue(key: string, raw: unknown): void {
   throw new Error(`"${key}" must be a value or list, not ${kind}`);
 }
 
-function asValueList(raw: unknown): readonly unknown[] {
-  if (Array.isArray(raw)) return raw;
-  if (raw == null) return [];
-  return [raw];
+/** The filter a key names, by its own key or its label, case aside. */
+function findFilter(
+  catalog: readonly AgentFilter[],
+  key: string
+): AgentFilter | undefined {
+  const exact = catalog.find((item) => item.key === key);
+  if (exact) return exact;
+  const wanted = fold(key);
+  const near = catalog.filter(
+    (item) => fold(item.key) === wanted || fold(item.label) === wanted
+  );
+  return near.length === 1 ? near[0] : undefined;
 }
 
-function assertOptionValue(filter: AgentFilter, raw: unknown): void {
-  const allowed = optionValues(filter);
-  if (!allowed) return;
-  const values = asValueList(raw);
-  for (const value of values) {
-    if (typeof value !== "string" || allowed.has(value)) continue;
-    throw new Error(
-      `"${filter.key}" does not accept option "${String(value)}"`
-    );
-  }
-}
-
+/**
+ * The same, required.
+ *
+ * @throws naming the filters this table has, for the same reason an unknown
+ * option does.
+ */
 function requireFilter(
   catalog: readonly AgentFilter[],
   key: string
 ): AgentFilter {
-  const filter = catalog.find((item) => item.key === key);
-  if (!filter) {
-    throw new Error(`"${key}" is not a visible filter`);
-  }
-  return filter;
+  const filter = findFilter(catalog, key);
+  if (filter) return filter;
+  const names = catalog.map((item) => item.key).join(", ");
+  throw new Error(`"${key}" is not a filter on this table — it has: ${names}`);
 }
 
 function asNamedCondition(
@@ -298,7 +351,12 @@ function resolveOperator(filter: AgentFilter, op: string): string {
   for (const candidate of OPERATOR_ALIASES[op] ?? []) {
     if (filter.operators.includes(candidate)) return candidate;
   }
-  return op;
+  const wanted = fold(op);
+  const [only, ...rest] = filter.operators.filter(
+    (name) => fold(name) === wanted
+  );
+  // Unresolved on purpose: the caller reports it, and it names the whole set.
+  return only && rest.length === 0 ? only : op;
 }
 
 function extrasFromCondition(
@@ -306,12 +364,12 @@ function extrasFromCondition(
   condition: { key: string; op: string; value?: unknown },
   registry: FilterTypeRegistry
 ): Record<string, unknown> {
-  const op = resolveOperator(filter, condition.op);
-  if (!filter.operators.includes(op)) {
-    throw new Error(`"${filter.key}" cannot use operator "${condition.op}"`);
-  }
-  condition = { ...condition, op };
-  assertOptionValue(filter, condition.value);
+  const op = requireOperator(filter, condition.op);
+  condition = {
+    ...condition,
+    op,
+    value: resolveOptionValue(filter, condition.value),
+  };
   return conditionToExtra(
     { key: filter.key, type: filter.type },
     condition,
@@ -319,28 +377,79 @@ function extrasFromCondition(
   );
 }
 
-function validateExtras(
+/** Which filter owns each extra-bag key, by its own spelling and folded. */
+interface ExtraKeyIndex {
+  readonly owner: ReadonlyMap<string, AgentFilter>;
+  readonly folded: ReadonlyMap<string, { filter: AgentFilter; key: string }[]>;
+}
+
+function indexExtraKeys(catalog: readonly AgentFilter[]): ExtraKeyIndex {
+  const owner = new Map<string, AgentFilter>();
+  const folded = new Map<string, { filter: AgentFilter; key: string }[]>();
+  for (const filter of catalog) {
+    for (const key of filter.valueKeys) {
+      owner.set(key, filter);
+      const bucket = folded.get(fold(key)) ?? [];
+      bucket.push({ filter, key });
+      folded.set(fold(key), bucket);
+    }
+  }
+  return { owner, folded };
+}
+
+/**
+ * The key a bag entry names, in the catalog's own spelling.
+ *
+ * @throws naming the keys this table has.
+ */
+function requireExtraKey(
+  index: ExtraKeyIndex,
+  given: string
+): { filter: AgentFilter; key: string } {
+  const exact = index.owner.get(given);
+  if (exact) return { filter: exact, key: given };
+  const [only, ...rest] = index.folded.get(fold(given)) ?? [];
+  if (only && rest.length === 0) return only;
+  const names = [...index.owner.keys()].join(", ");
+  throw new Error(
+    `"${given}" is not a filter key on this table — it has: ${names}`
+  );
+}
+
+/** One operator, resolved, or a refusal naming the ones on offer. */
+function requireOperator(filter: AgentFilter, given: string): string {
+  const op = resolveOperator(filter, given);
+  if (filter.operators.includes(op)) return op;
+  throw new Error(
+    `"${filter.key}" takes one of: ${filter.operators.join(", ")} — not "${given}"`
+  );
+}
+
+/**
+ * One extra bag in the catalog's own spellings, or a refusal that says why.
+ *
+ * Resolution rather than validation: a key, an operator and a value that name
+ * exactly one published choice are rewritten to the spelling the table uses,
+ * so what reaches the host is what its own controls would have sent.
+ */
+function resolvedExtras(
   extras: Record<string, unknown>,
   catalog: readonly AgentFilter[]
-): void {
-  const owner = new Map<string, AgentFilter>();
-  for (const filter of catalog) {
-    for (const key of filter.valueKeys) owner.set(key, filter);
-  }
-  for (const key of Object.keys(extras)) {
-    const filter = owner.get(key);
-    if (!filter) {
-      throw new Error(`"${key}" is not a visible filter key`);
-    }
-    assertPlainExtraValue(key, extras[key]);
-    if (key === filter.key) assertOptionValue(filter, extras[key]);
-    if (key === `${filter.key}Op`) {
-      const op = extras[key];
-      if (typeof op === "string" && !filter.operators.includes(op)) {
-        throw new Error(`"${filter.key}" cannot use operator "${op}"`);
-      }
+): Record<string, unknown> {
+  const index = indexExtraKeys(catalog);
+  const resolved: Record<string, unknown> = {};
+  for (const [given, value] of Object.entries(extras)) {
+    const { filter, key } = requireExtraKey(index, given);
+    assertPlainExtraValue(key, value);
+    if (key === filter.key) {
+      resolved[key] = resolveOptionValue(filter, value);
+    } else if (key === `${filter.key}Op` && typeof value === "string") {
+      resolved[key] = requireOperator(filter, value);
+    } else {
+      resolved[key] = value;
     }
   }
+  return resolved;
 }
 
 /**
@@ -373,7 +482,5 @@ export function extrasFromAgentFilters(
     registry
   );
   if (asCondition) return asCondition;
-  const extras = filters as Record<string, unknown>;
-  validateExtras(extras, catalog);
-  return extras;
+  return resolvedExtras(filters as Record<string, unknown>, catalog);
 }

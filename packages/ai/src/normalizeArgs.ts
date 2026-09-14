@@ -40,9 +40,19 @@ function pickString(
   return undefined;
 }
 
+/**
+ * The direction a caller asked for, in the two words the schema takes.
+ *
+ * Case and surrounding space never distinguish one direction from the other,
+ * and `DESC` is not a different sort from `desc` — so folding them here means
+ * the reader sees their sort rather than "$.dir must be one of". A word that
+ * is neither still travels on and is refused by the schema, which names both.
+ */
 function normalizeDir(value: string): string {
-  if (value === "descending" || value === "highest") return "desc";
-  if (value === "ascending" || value === "lowest") return "asc";
+  const wanted = value.trim().toLocaleLowerCase();
+  if (wanted === "descending" || wanted === "highest") return "desc";
+  if (wanted === "ascending" || wanted === "lowest") return "asc";
+  if (wanted === "desc" || wanted === "asc") return wanted;
   return value;
 }
 
@@ -80,6 +90,9 @@ function normalizeSortArgs(
       delete record.sortDir;
     }
   }
+  // The field the guide asks for gets the same reading as its near-misses: a
+  // direction spelled `DESC` was the only one it could have been.
+  if (typeof record.dir === "string") record.dir = normalizeDir(record.dir);
   return record;
 }
 
