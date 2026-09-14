@@ -438,7 +438,9 @@ export function createTableAssistant(
   const undoOffer = (): AssistantUndoOffer | null => {
     const session = live.session;
     if (!undoPlan || !session) return null;
-    const blocked = undoBlocked(session, undoPlan.undo);
+    // The live view, so a revision the turn's own approved write moved does
+    // not retire an offer that still stands.
+    const blocked = undoBlocked(session, undoPlan.undo, viewNow() ?? undefined);
     return {
       messageId: undoPlan.message,
       available: !blocked,

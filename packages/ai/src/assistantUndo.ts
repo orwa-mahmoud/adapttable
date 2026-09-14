@@ -10,11 +10,14 @@
  *   calls run and restored through the same capabilities the agent used. A
  *   write is not part of it: staging, save and the edit history own that, and
  *   a second undo path over the same edits would be a second answer.
- * - **Only while nothing else has moved.** The offer stands while the live
- *   revision is still the one the turn's own calls settled at. The reader
- *   scrolling to another page, a second agent, a source refresh or a later
- *   turn all end it — and the reason is reported rather than the control
- *   quietly doing the wrong thing.
+ * - **Only while nothing it restores has moved.** The offer stands while the
+ *   fields this plan puts back still hold what the turn left in them. The
+ *   reader scrolling to another page, a second agent, a source refresh or a
+ *   later turn all end it — and the reason is reported rather than the control
+ *   quietly doing the wrong thing. A revision that moved for some OTHER
+ *   reason does not: a write the reader approved after the turn settled bumps
+ *   it without touching the sort an undo would restore, and killing the offer
+ *   over that leaves a control that is drawn and can never be used.
  * - **Only what a permitted capability can restore.** A field that changed and
  *   has no enabled capability to put it back blocks the whole undo. A partial
  *   restore that silently leaves the table half-way is worse than none.
@@ -37,8 +40,12 @@ export interface UndoCall {
 export interface AssistantUndo {
   /** The view as it was before the turn's calls ran. */
   readonly before: AgentContextView;
+  /** The view the turn left behind, for reading whether it still stands. */
+  readonly after: AgentContextView;
   /** The revision the turn's own calls settled at. */
   readonly settledAt: number;
+  /** The view fields this plan puts back. */
+  readonly moved: readonly string[];
   /** The calls that restore it, in the order they run. */
   readonly calls: readonly UndoCall[];
 }
@@ -190,7 +197,7 @@ export function planUndo(
     if (calls.some((existing) => existing.key === call.key)) continue;
     calls.push(call);
   }
-  return { before, settledAt, calls };
+  return { before, after, settledAt, moved, calls };
 }
 
 /** Whether a plan is a plan, or the reason there is none. @public */
@@ -205,21 +212,36 @@ export function isUndoBlock(
  *
  * @param session - The live session.
  * @param undo - The plan made when the turn settled.
+ * @param view - The live view. Without it the revision alone decides, which
+ * is the stricter reading: any movement at all retires the offer.
  * @returns Nothing when the undo is still safe, or why it is not.
  *
  * @public
  */
 export function undoBlocked(
   session: AgentSession,
-  undo: AssistantUndo
+  undo: AssistantUndo,
+  view?: AgentContextView
 ): UndoBlock | undefined {
   const now = session.manifest().viewRevision;
-  if (now !== undo.settledAt) {
-    // Whoever moved it — the reader, another agent, a refresh, a later turn —
-    // the table is no longer the one this plan describes.
-    return { code: "table-moved", settledAt: undo.settledAt, now };
+  if (now === undo.settledAt) return undefined;
+  // The revision moved. What matters is whether it moved anything this plan
+  // would put back: a write the reader approved after the turn settled bumps
+  // the revision without touching the sort or the filter the undo restores,
+  // and retiring the offer over it kills a control that would have worked.
+  if (view) {
+    const clobbered = undo.moved.filter(
+      (field) =>
+        !same(
+          read(undo.after, field as ViewField),
+          read(view, field as ViewField)
+        )
+    );
+    if (clobbered.length === 0) return undefined;
   }
-  return undefined;
+  // Whoever moved it — the reader, another agent, a refresh, a later turn —
+  // the table is no longer the one this plan describes.
+  return { code: "table-moved", settledAt: undo.settledAt, now };
 }
 
 /**

@@ -194,17 +194,54 @@ describe("whether the offer still stands", () => {
   it("stands while the table is where the turn left it", () => {
     const undo: AssistantUndo = {
       before: view(),
+      after: view({ page: 2 }),
       settledAt: 1,
+      moved: ["page"],
       calls: [{ key: "view.setPage", args: { page: 1, limit: 25 } }],
     };
 
     expect(undoBlocked(session(), undo)).toBeUndefined();
   });
 
+  it("stands when the revision moved but nothing it restores did", () => {
+    // The reader approving this turn's own write bumps the revision without
+    // touching the page the undo puts back. Retiring the offer over that
+    // leaves a control that is drawn and can never be used.
+    const undo: AssistantUndo = {
+      before: view(),
+      after: view({ page: 2 }),
+      settledAt: 1,
+      moved: ["page"],
+      calls: [{ key: "view.setPage", args: { page: 1 } }],
+    };
+
+    expect(
+      undoBlocked(session({}, { viewRevision: 5 }), undo, view({ page: 2 }))
+    ).toBeUndefined();
+  });
+
+  it("ends when a field it would restore has moved under it", () => {
+    const undo: AssistantUndo = {
+      before: view(),
+      after: view({ page: 2 }),
+      settledAt: 1,
+      moved: ["page"],
+      calls: [{ key: "view.setPage", args: { page: 1 } }],
+    };
+
+    // The reader paged on themselves. Putting "their" page back would undo
+    // their own gesture, not the turn's.
+    expect(
+      undoBlocked(session({}, { viewRevision: 5 }), undo, view({ page: 7 }))
+    ).toEqual({ code: "table-moved", settledAt: 1, now: 5 });
+  });
+
   it("ends the moment anything else moves the table", () => {
     const undo: AssistantUndo = {
       before: view(),
+      after: view({ page: 2 }),
       settledAt: 1,
+      moved: ["page"],
       calls: [{ key: "view.setPage", args: { page: 1, limit: 25 } }],
     };
 
@@ -225,7 +262,9 @@ describe("putting it back", () => {
     const live = session({ setPage, setSearch });
     const undo: AssistantUndo = {
       before: view(),
+      after: view({ page: 2, search: "ada" }),
       settledAt: 1,
+      moved: ["page", "search"],
       calls: [
         // The size is not part of this one: the table wires no `setLimit`,
         // and a plan that named the size would be refused rather than run.
@@ -257,7 +296,9 @@ describe("putting it back", () => {
       spied,
       {
         before: view(),
+        after: view({ page: 2 }),
         settledAt: 1,
+        moved: ["page"],
         calls: [
           { key: "view.setPage", args: { page: 1 } },
           { key: "view.setSearch", args: { query: "" } },
@@ -277,6 +318,8 @@ describe("putting it back", () => {
       live,
       {
         before: view(),
+        after: view({ page: 2 }),
+        moved: ["page"],
         settledAt: 1,
         calls: [
           { key: "view.setPage", args: { page: 0 } },
@@ -300,6 +343,8 @@ describe("putting it back", () => {
         live,
         {
           before: view(),
+          after: view({ page: 2 }),
+          moved: ["page"],
           settledAt: 1,
           calls: [{ key: "view.setPage", args: { page: 1 } }],
         },
