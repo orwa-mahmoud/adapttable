@@ -1496,6 +1496,40 @@ describe("a question the backend asked", () => {
     );
   });
 
+  it("offers Send, not Stop, while it is the reader's turn", () => {
+    // The turn is parked on the reader. Reported busy, the composer drew the
+    // stop control where send belongs and Enter did nothing — a question you
+    // could read and could not answer.
+    mount({
+      assistant: view({
+        pendingQuestion: question,
+        busy: true,
+        status: "awaiting-user",
+        draft: "the last one",
+        answer: vi.fn(),
+      }),
+    });
+
+    expect(part("assistant-send")).toBeTruthy();
+    expect(part("assistant-stop")).toBeNull();
+  });
+
+  it("answers on Enter while the turn is parked", () => {
+    const answer = vi.fn();
+    mount({
+      assistant: view({
+        pendingQuestion: question,
+        busy: true,
+        status: "awaiting-user",
+        draft: "the last one",
+        answer,
+      }),
+    });
+
+    fireEvent.keyDown(part("assistant-input")!, { key: "Enter" });
+    expect(answer).toHaveBeenCalledWith({ text: "the last one" });
+  });
+
   it("leaves Shift+Enter and an IME composition alone", () => {
     const answer = vi.fn();
     mount({

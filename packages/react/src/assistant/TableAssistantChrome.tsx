@@ -635,6 +635,30 @@ function FullApproval({
 }
 
 /**
+ * What the one box at the bottom does right now.
+ *
+ * A turn parked on a question is waiting on the reader, not working — so the
+ * box answers it, and reports itself idle. Reported busy it drew Stop where
+ * Send belongs and swallowed the Enter that would have answered.
+ */
+function composerState(assistant: TableAssistantView): {
+  readonly send: () => void;
+  /** Undefined leaves the composer to read the status itself. */
+  readonly busy: boolean | undefined;
+  readonly answering: boolean;
+} {
+  const answering = composerAnswers(assistant);
+  if (answering) {
+    return { send: answering.send, busy: false, answering: true };
+  }
+  return {
+    send: () => void assistant.send(),
+    busy: assistant.busy,
+    answering: false,
+  };
+}
+
+/**
  * Whether the composer is answering a question rather than starting a turn.
  *
  * Returns nothing when there is no question on screen, or nothing to answer
@@ -1019,8 +1043,7 @@ export function TableAssistantChrome({
   // The one box the panel has. A question the assistant asked is answered
   // here rather than in a second box drawn beside it: two text inputs on one
   // screen is a form, and a reader has to work out which one is theirs.
-  const answering = composerAnswers(assistant);
-  const send = answering?.send ?? ((): void => void assistant.send());
+  const composer = composerState(assistant);
 
   const contents = (
     <div
@@ -1085,12 +1108,12 @@ export function TableAssistantChrome({
         slots={slots}
         labels={labels}
         status={assistant.status}
-        busy={assistant.busy}
+        busy={composer.busy}
         draft={assistant.draft}
         setDraft={assistant.setDraft}
-        onSend={send}
+        onSend={composer.send}
         onStop={assistant.stop}
-        {...(answering
+        {...(composer.answering
           ? {
               placeholder:
                 labels?.assistantAnswerPlaceholder ?? "Type an answer",

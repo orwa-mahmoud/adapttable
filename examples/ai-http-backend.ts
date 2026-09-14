@@ -28,8 +28,10 @@ import {
   type AgentHttpPinAck,
   type AgentHttpRequest,
   type AgentHttpResponse,
+  type AgentHttpToolResult,
   agentSystemPrompt,
   type AgentSystemPromptInput,
+  isToolValue,
   parseAgentHttpRequest,
   parseAgentHttpResponse,
 } from "@adapttable/ai/http";
@@ -352,10 +354,61 @@ function userPrompt(request: AgentHttpRequest): string {
       )
     );
   }
-  if (request.toolResults?.length) {
-    parts.push("Tool results:", JSON.stringify(request.toolResults));
+  // An answered question is a person talking, and it reads as one. Left in
+  // the tool results it arrives as a JSON row beside a read and a describe,
+  // and a model that has just been told "sort by salary" asks again instead
+  // of sorting.
+  const [answered, ran] = splitAnswers(request.toolResults ?? []);
+  for (const reply of answered) {
+    parts.push(
+      `You asked: ${reply.question}`,
+      `The reader answered: ${spokenAnswer(reply)}`,
+      "Act on it. Do not ask the same thing again."
+    );
+  }
+  if (ran.length) {
+    parts.push("Tool results:", JSON.stringify(ran));
   }
   return parts.join("\n\n");
+}
+
+/** What an answered question carries back, as this client sends it. */
+interface ReaderReply {
+  readonly question: string;
+  readonly text?: string;
+  readonly chose?: string;
+  readonly optionId?: string;
+}
+
+/**
+ * The answered questions, apart from everything else a round ran.
+ *
+ * They are told apart by shape rather than by id: the client sends a
+ * question's answer with the question in it, and nothing else does.
+ */
+function splitAnswers(
+  results: readonly AgentHttpToolResult[]
+): readonly [readonly ReaderReply[], readonly AgentHttpToolResult[]] {
+  const answered: ReaderReply[] = [];
+  const ran: AgentHttpToolResult[] = [];
+  for (const result of results) {
+    const value = isToolValue(result) ? result.result : undefined;
+    if (
+      value &&
+      typeof value === "object" &&
+      typeof (value as { question?: unknown }).question === "string"
+    ) {
+      answered.push(value as unknown as ReaderReply);
+    } else {
+      ran.push(result);
+    }
+  }
+  return [answered, ran];
+}
+
+/** What the reader said, in their words — the label when they picked one. */
+function spokenAnswer(reply: ReaderReply): string {
+  return reply.text ?? reply.chose ?? reply.optionId ?? "(nothing)";
 }
 
 /**
