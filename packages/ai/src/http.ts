@@ -2151,6 +2151,18 @@ function answeredQuestion(
   );
   return {
     question: question.question,
+    // What was on offer, sent back with the answer. The reader may ignore a
+    // list and say something else — they always can — and a backend that
+    // kept nothing needs the choices in front of it to tell whether "the
+    // last one" is one of them or a new request.
+    ...(question.options?.length
+      ? {
+          offered: question.options.map((option) => ({
+            id: option.id,
+            label: option.label,
+          })),
+        }
+      : {}),
     // The label is what was on screen; the id is what a backend correlating
     // against its own options matches on. Neither stands in for the other.
     ...(answer.optionId === undefined

@@ -448,6 +448,16 @@ describe("how the assistant is asked to talk", () => {
     expect(said).toContain("in your own words");
   });
 
+  it("says how to read a message before how to act on one", () => {
+    // A greeting answered with a menu of table operations is the assistant
+    // reading every message as a work order. The rule is about reading, so
+    // it covers the messages nobody thought to list.
+    const said = agentInstructions();
+    expect(said).toContain("Not every message is a request");
+    expect(said).toContain("answer it in kind");
+    expect(said).not.toContain("Asked what you can do");
+  });
+
   it("ties asking to the answer mattering, not to permission", () => {
     // Freedom to ask, with a reason to: a reader who wanted to pick from a
     // list would have used the table's own controls, so the test is whether

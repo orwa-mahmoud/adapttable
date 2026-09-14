@@ -523,6 +523,10 @@ describe("the HTTP transport the assistant store speaks to", () => {
 
     expect(carried).toEqual({
       question: "Which quarter?",
+      offered: [
+        { id: "d", label: "Q4" },
+        { id: "c", label: "Q3" },
+      ],
       optionId: "d",
       chose: "Q4",
     });
@@ -564,8 +568,56 @@ describe("the HTTP transport the assistant store speaks to", () => {
 
     expect(carried).toEqual({
       question: "Which quarter?",
+      offered: [{ id: "d", label: "Q4" }],
       optionId: "z",
       text: "the last one",
+    });
+  });
+
+  it("sends the choices back beside an answer that ignored them", async () => {
+    // A reader may say something else instead of picking — they always can.
+    // The backend kept nothing, so the list it offered travels with the
+    // answer, and it can tell a new request from one of its own choices.
+    const live = session();
+    let carried: unknown;
+    const transport = assistantHttpTransport({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const sent = body as { toolResults?: readonly { result?: unknown }[] };
+        if (sent.toolResults) carried = sent.toolResults[0]?.result;
+        return Promise.resolve(
+          sent.toolResults
+            ? { schemaVersion: AGENT_SCHEMA_VERSION, text: "thanks" }
+            : {
+                schemaVersion: AGENT_SCHEMA_VERSION,
+                askUser: {
+                  id: "q1",
+                  question: "Which quarter?",
+                  options: [
+                    { id: "d", label: "Q4" },
+                    { id: "c", label: "Q3" },
+                  ],
+                  allowFreeText: false,
+                },
+              }
+        );
+      },
+    });
+    await transport.connect?.({ session: live });
+    await transport.send({
+      session: live,
+      text: "summarise",
+      conversation: [],
+      askUser: () => Promise.resolve({ text: "neither — show me Platform" }),
+    });
+
+    expect(carried).toEqual({
+      question: "Which quarter?",
+      offered: [
+        { id: "d", label: "Q4" },
+        { id: "c", label: "Q3" },
+      ],
+      text: "neither — show me Platform",
     });
   });
 
