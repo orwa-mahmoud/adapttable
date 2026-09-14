@@ -448,12 +448,13 @@ describe("how the assistant is asked to talk", () => {
     expect(said).toContain("in your own words");
   });
 
-  it("makes a question to the reader the last resort, not a confirmation", () => {
-    // A reader who wanted to pick from a list would have used the table's
-    // own controls.
+  it("ties asking to the answer mattering, not to permission", () => {
+    // Freedom to ask, with a reason to: a reader who wanted to pick from a
+    // list would have used the table's own controls, so the test is whether
+    // the answer changes anything — never whether asking is allowed.
     const said = agentInstructions();
-    expect(said).toContain("last resort");
-    expect(said).toContain("not a way to confirm");
+    expect(said).toContain("would actually change what you do");
+    expect(said).toContain("Confirming a request you already understand");
     expect(said).not.toContain("Asked what you can do");
   });
 });

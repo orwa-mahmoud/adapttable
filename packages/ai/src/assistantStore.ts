@@ -318,6 +318,24 @@ function exchanges(
  * "ready" — and a badge reading "ready" beside an unanswered question tells
  * the reader nothing is waiting on them when something is.
  */
+/**
+ * What the reader answered, as they would say it.
+ *
+ * The option's own label, never its id: `d` is a correlation handle, and a
+ * transcript line reading "d" says nothing to the person who chose it or to
+ * the model reading the conversation back. A chosen option with no matching
+ * label, and free text, both speak for themselves.
+ */
+function answerText(
+  question: AssistantQuestion,
+  answer: AssistantAnswer
+): string {
+  const chosen = question.options?.find(
+    (option) => option.id === answer.optionId
+  );
+  return (chosen?.label ?? answer.text ?? "").trim();
+}
+
 function badgeStatus(
   status: AssistantStatus,
   asking: boolean,
@@ -1142,6 +1160,20 @@ export function createTableAssistant(
     },
     answer: (given) => {
       if (disposed || !question) return;
+      // What they answered goes into the transcript, in their own words: a
+      // chip that empties the question and leaves nothing behind reads as a
+      // click that did nothing, and the conversation a later turn is sent
+      // would show the assistant asking into silence.
+      const said = answerText(question, given);
+      if (said) {
+        seq += 1;
+        push({
+          id: messageId("user", seq),
+          role: "user",
+          text: said,
+          at: Date.now(),
+        });
+      }
       // Back to work: the turn was never abandoned, it was waiting.
       setStatus("sending");
       settleQuestion(given);

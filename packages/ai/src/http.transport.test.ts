@@ -483,6 +483,128 @@ describe("the HTTP transport the assistant store speaks to", () => {
     expect(asked).toEqual(["Which quarter?"]);
   });
 
+  it("sends the answer back in words, not as an id against a lost question", async () => {
+    // The wire is stateless: every request describes the whole situation, and
+    // the question is not in the next one. `{"optionId":"d"}` against `q1` is
+    // a letter answering something the backend cannot see, which is how a
+    // model ends up telling the reader it never asked anything.
+    const live = session();
+    let carried: unknown;
+    const transport = assistantHttpTransport({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const sent = body as { toolResults?: readonly { result?: unknown }[] };
+        if (sent.toolResults) carried = sent.toolResults[0]?.result;
+        return Promise.resolve(
+          sent.toolResults
+            ? { schemaVersion: AGENT_SCHEMA_VERSION, text: "thanks" }
+            : {
+                schemaVersion: AGENT_SCHEMA_VERSION,
+                askUser: {
+                  id: "q1",
+                  question: "Which quarter?",
+                  options: [
+                    { id: "d", label: "Q4" },
+                    { id: "c", label: "Q3" },
+                  ],
+                },
+              }
+        );
+      },
+    });
+
+    await transport.connect?.({ session: live });
+    await transport.send({
+      session: live,
+      text: "summarise",
+      conversation: [],
+      askUser: () => Promise.resolve({ optionId: "d" }),
+    });
+
+    expect(carried).toEqual({
+      question: "Which quarter?",
+      optionId: "d",
+      chose: "Q4",
+    });
+  });
+
+  it("still names the question when the chosen id matches no option", async () => {
+    // A backend that renumbered its own options, or a host channel answering
+    // with an id of its own: the label is gone, the id and the question are
+    // not, and sending those beats sending nothing.
+    const live = session();
+    let carried: unknown;
+    const transport = assistantHttpTransport({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const sent = body as { toolResults?: readonly { result?: unknown }[] };
+        if (sent.toolResults) carried = sent.toolResults[0]?.result;
+        return Promise.resolve(
+          sent.toolResults
+            ? { schemaVersion: AGENT_SCHEMA_VERSION, text: "thanks" }
+            : {
+                schemaVersion: AGENT_SCHEMA_VERSION,
+                askUser: {
+                  id: "q1",
+                  question: "Which quarter?",
+                  options: [{ id: "d", label: "Q4" }],
+                  allowFreeText: true,
+                },
+              }
+        );
+      },
+    });
+    await transport.connect?.({ session: live });
+    await transport.send({
+      session: live,
+      text: "summarise",
+      conversation: [],
+      askUser: () => Promise.resolve({ optionId: "z", text: "the last one" }),
+    });
+
+    expect(carried).toEqual({
+      question: "Which quarter?",
+      optionId: "z",
+      text: "the last one",
+    });
+  });
+
+  it("carries typed answers as the words that were typed", async () => {
+    const live = session();
+    let carried: unknown;
+    const transport = assistantHttpTransport({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        const sent = body as { toolResults?: readonly { result?: unknown }[] };
+        if (sent.toolResults) carried = sent.toolResults[0]?.result;
+        return Promise.resolve(
+          sent.toolResults
+            ? { schemaVersion: AGENT_SCHEMA_VERSION, text: "thanks" }
+            : {
+                schemaVersion: AGENT_SCHEMA_VERSION,
+                askUser: {
+                  id: "q1",
+                  question: "Which quarter?",
+                  allowFreeText: true,
+                },
+              }
+        );
+      },
+    });
+    await transport.connect?.({ session: live });
+    await transport.send({
+      session: live,
+      text: "summarise",
+      conversation: [],
+      askUser: () => Promise.resolve({ text: "the last one" }),
+    });
+
+    expect(carried).toEqual({
+      question: "Which quarter?",
+      text: "the last one",
+    });
+  });
+
   it("forgets what a closed connection was told", async () => {
     const live = session();
     const route = backend([

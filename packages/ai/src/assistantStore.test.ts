@@ -703,6 +703,55 @@ describe("putting one action of a turn back", () => {
   });
 });
 
+describe("the capabilities the reader stopped being asked about", () => {
+  it("names them from the catalog, in the table's own words", () => {
+    // The list the host keeps is capability keys. A reader revoking one is
+    // shown what it does, because "view.setPage" is the wire's word for it,
+    // not theirs.
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying(),
+      alwaysAllowed: ["view.setPage"],
+    });
+    store.connect();
+
+    const named = store.getState().alwaysAllowedNames;
+    expect(Object.keys(named)).toEqual(["view.setPage"]);
+    expect(named["view.setPage"]).toBeTruthy();
+  });
+
+  it("hands back the same map while the list is the same", () => {
+    // A fresh object every read makes every snapshot look new, and a
+    // subscriber comparing identities re-renders forever.
+    const session = tableSession();
+    const transport = replying();
+    const store = createTableAssistant({
+      session,
+      transport,
+      alwaysAllowed: ["view.setPage"],
+    });
+    store.connect();
+
+    const first = store.getState().alwaysAllowedNames;
+    // The host re-renders and hands over a fresh array of the same keys.
+    store.update({ session, transport, alwaysAllowed: ["view.setPage"] });
+    expect(store.getState().alwaysAllowedNames).toBe(first);
+  });
+
+  it("says nothing for a key the catalog does not carry", () => {
+    // A capability the host allowed and then unmounted. The key is not a
+    // name, so the entry is left out rather than printed raw.
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying(),
+      alwaysAllowed: ["host.gone"],
+    });
+    store.connect();
+
+    expect(store.getState().alwaysAllowedNames).toEqual({});
+  });
+});
+
 describe("a question put to the reader", () => {
   it("waits, then hands the answer back to the turn", async () => {
     const store = createTableAssistant({
@@ -761,6 +810,123 @@ describe("a question put to the reader", () => {
     // lets the transport report it unresolved rather than hang on an answer
     // nobody is being asked for.
     await expect(asked).resolves.toBeUndefined();
+  });
+
+  it("records what the reader chose, in the words they saw", async () => {
+    // A chip that empties the question and leaves nothing behind reads as a
+    // click that did nothing — and the conversation the next turn is sent
+    // would show the assistant asking into silence.
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: async ({ askUser }) => {
+          await askUser?.({
+            id: "q1",
+            question: "Which quarter?",
+            options: [{ id: "d", label: "Q4" }],
+            allowFreeText: false,
+          });
+          return { text: "done" };
+        },
+      },
+    });
+    store.connect();
+
+    const turn = store.send("summarise");
+    await Promise.resolve();
+    store.answer({ optionId: "d" });
+    await turn;
+
+    const said = store.getState().messages.map((entry) => entry.text);
+    // "Q4", never "d": the id is a correlation handle and says nothing to
+    // the person who chose it.
+    expect(said).toEqual(["summarise", "Q4", "done"]);
+  });
+
+  it("records a typed answer as what was typed", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: async ({ askUser }) => {
+          await askUser?.({
+            id: "q1",
+            question: "Which quarter?",
+            allowFreeText: true,
+          });
+          return { text: "done" };
+        },
+      },
+    });
+    store.connect();
+
+    const turn = store.send("summarise");
+    await Promise.resolve();
+    store.answer({ text: "  the last one  " });
+    await turn;
+
+    expect(store.getState().messages.map((entry) => entry.text)).toEqual([
+      "summarise",
+      "the last one",
+      "done",
+    ]);
+  });
+
+  it("says nothing rather than an id it cannot put into words", async () => {
+    // An option id that matches nothing is a correlation handle with no
+    // label behind it. The turn still resumes — the backend gets the id —
+    // but a transcript line reading "z" would say less than no line at all.
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: async ({ askUser }) => {
+          await askUser?.({
+            id: "q1",
+            question: "Which?",
+            options: [{ id: "d", label: "Q4" }],
+            allowFreeText: false,
+          });
+          return { text: "done" };
+        },
+      },
+    });
+    store.connect();
+
+    const turn = store.send("summarise");
+    await Promise.resolve();
+    store.answer({ optionId: "z" });
+    await turn;
+
+    expect(store.getState().messages.map((entry) => entry.text)).toEqual([
+      "summarise",
+      "done",
+    ]);
+  });
+
+  it("adds nothing for an answer that says nothing", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: async ({ askUser }) => {
+          await askUser?.({
+            id: "q1",
+            question: "Which?",
+            allowFreeText: true,
+          });
+          return { text: "done" };
+        },
+      },
+    });
+    store.connect();
+
+    const turn = store.send("summarise");
+    await Promise.resolve();
+    store.answer({ text: "   " });
+    await turn;
+
+    expect(store.getState().messages.map((entry) => entry.text)).toEqual([
+      "summarise",
+      "done",
+    ]);
   });
 
   it("ignores an answer nobody asked for", () => {

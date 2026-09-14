@@ -2126,7 +2126,41 @@ async function askReader(
   // question was on screen. Both are "nobody answered", and neither is a
   // value to proceed on.
   if (!answer) return { kind: "declined" };
-  return { kind: "answered", result: { id: question.id, result: answer } };
+  return {
+    kind: "answered",
+    result: { id: question.id, result: answeredQuestion(question, answer) },
+  };
+}
+
+/**
+ * What the reader answered, said in full.
+ *
+ * A correlation id and an option id are enough for a backend that kept the
+ * question it asked, and nothing at all for one that did not: `{"optionId":
+ * "d"}` against `q1` is a letter answering a question the next request never
+ * carries. The wire is stateless by design — every request describes the whole
+ * situation — so the answer describes itself too: the question as it was put,
+ * and the choice in the words the reader actually saw.
+ */
+function answeredQuestion(
+  question: AgentHttpQuestion,
+  answer: AgentHttpAnswer
+): Record<string, unknown> {
+  const chosen = question.options?.find(
+    (option) => option.id === answer.optionId
+  );
+  return {
+    question: question.question,
+    // The label is what was on screen; the id is what a backend correlating
+    // against its own options matches on. Neither stands in for the other.
+    ...(answer.optionId === undefined
+      ? {}
+      : {
+          optionId: answer.optionId,
+          ...(chosen ? { chose: chosen.label } : {}),
+        }),
+    ...(answer.text === undefined ? {} : { text: answer.text }),
+  };
 }
 
 /** What came back when the backend asked the reader something. */
