@@ -194,7 +194,7 @@ function defaultModel(provider: string): string {
   if (provider === "anthropic") return "claude-sonnet-4-5";
   if (provider === "gemini") return "gemini-2.5-flash";
   if (provider === "deepseek") return "deepseek-chat";
-  return "gpt-4.1-mini";
+  return "gpt-5.6-luna";
 }
 
 function allowedOrigins(): readonly string[] {
