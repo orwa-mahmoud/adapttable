@@ -257,7 +257,6 @@ export const ja: Required<TableLabels> = {
   assistantActionsTitle: "このやり取りで変わったこと",
   assistantUndoAll: "すべて元に戻す",
   assistantExamples: "ショートカット",
-  assistantMoreExamples: "他のショートカット",
   assistantReceiptChange: ({ before, after }) =>
     `${before} から ${after} に変更しました`,
   assistantReceiptProposed: ({ before, after }) =>

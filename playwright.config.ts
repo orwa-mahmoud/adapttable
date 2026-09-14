@@ -24,6 +24,10 @@ const DEV_PORT = 4322;
 /** Smoke the extra browsers run. Not the full Chromium suite. */
 const CROSS_BROWSER_SPECS = [
   "**/nightly-smoke.spec.ts",
+  // The assistant leans on color-mix, oklch, clip-path tails and logical
+  // insets, and it is the newest surface here — the one most likely to reach
+  // for something only one engine ships.
+  "**/ai-playground.spec.ts",
   "**/axe-audit.spec.ts",
   "**/aria-parity.spec.ts",
   "**/accessibility-page.spec.ts",

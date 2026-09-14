@@ -260,7 +260,6 @@ export const ur: Required<TableLabels> = {
   assistantActionsTitle: "اس باری میں کیا بدلا",
   assistantUndoAll: "سب واپس کریں",
   assistantExamples: "شارٹ کٹس",
-  assistantMoreExamples: "مزید شارٹ کٹس",
   assistantReceiptChange: ({ before, after }) =>
     `${before} سے ${after} کر دیا گیا`,
   assistantReceiptProposed: ({ before, after }) =>

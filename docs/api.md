@@ -1374,7 +1374,7 @@ page, `"panel"` for a surface the host places, `"sheet"` for the kit's modal —
 with `TableAssistantBoundary` scoping a floating window to the viewport or to
 a container of your own. `TableAssistantSlots` collects
 `TableAssistantPanelProps`, `TableAssistantSheetProps`,
-`TableAssistantWindowProps`, `TableAssistantSuggestionProps`,
+`TableAssistantWindowProps`,
 `TableAssistantButtonProps`, `TableAssistantComposerProps` and
 `TableAssistantBadgeProps`, plus `TableAssistantMenuProps` and
 `TableAssistantMenuItem` — the examples menu in the composer, which each kit

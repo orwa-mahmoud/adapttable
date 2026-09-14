@@ -633,18 +633,6 @@ export const tableAssistantTestSlots: TableAssistantSlots = {
       </menu>
     </details>
   ),
-  Suggestion: ({ title, description, icon, part, className, onClick }) => (
-    <button
-      type="button"
-      data-adapttable-part={part}
-      className={className}
-      onClick={onClick}
-    >
-      {icon}
-      <span>{title}</span>
-      {description ? <span>{description}</span> : null}
-    </button>
-  ),
   Panel: ({ label, part, className, children }) => (
     <section
       aria-label={label}

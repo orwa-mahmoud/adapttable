@@ -266,7 +266,6 @@ export const de: Required<TableLabels> = {
   assistantActionsTitle: "Was dieser Zug geändert hat",
   assistantUndoAll: "Alles rückgängig",
   assistantExamples: "Kurzbefehle",
-  assistantMoreExamples: "Weitere Kurzbefehle",
   assistantReceiptChange: ({ before, after }) =>
     `Von ${before} zu ${after} geändert`,
   assistantReceiptProposed: ({ before, after }) =>

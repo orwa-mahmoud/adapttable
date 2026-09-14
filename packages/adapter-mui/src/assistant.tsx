@@ -12,13 +12,11 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
-  type TableAssistantSuggestionProps,
   type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
 import {
   Box,
   Button,
-  ButtonBase,
   Chip,
   Drawer,
   IconButton,
@@ -236,66 +234,6 @@ function AssistantWindow({
   );
 }
 
-function AssistantSuggestion({
-  title,
-  description,
-  icon,
-  part,
-  className,
-  onClick,
-  disabled,
-}: Readonly<TableAssistantSuggestionProps>) {
-  return (
-    <ButtonBase
-      data-adapttable-part={part}
-      className={className}
-      disabled={disabled}
-      onClick={onClick}
-      sx={{
-        display: "flex",
-        gap: 1,
-        alignItems: "flex-start",
-        p: 1,
-        borderRadius: 1.5,
-        border: 1,
-        borderColor: "divider",
-        textAlign: "start",
-        width: "100%",
-        justifyContent: "flex-start",
-      }}
-    >
-      <Box
-        component="span"
-        sx={{ display: "flex", mt: "2px", color: "text.secondary" }}
-      >
-        {icon}
-      </Box>
-      <Box component="span">
-        <Box
-          component="span"
-          sx={{ display: "block", fontWeight: 500, fontSize: "0.875rem" }}
-          data-adapttable-part="assistant-suggestion-title"
-        >
-          {title}
-        </Box>
-        {description ? (
-          <Box
-            component="span"
-            sx={{
-              display: "block",
-              fontSize: "0.75rem",
-              color: "text.secondary",
-            }}
-            data-adapttable-part="assistant-suggestion-description"
-          >
-            {description}
-          </Box>
-        ) : null}
-      </Box>
-    </ButtonBase>
-  );
-}
-
 /**
  * Ask this table a question, in MUI.
  *
@@ -430,7 +368,6 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Composer: AssistantInput,
         Badge: AssistantBadge,
         Window: AssistantWindow,
-        Suggestion: AssistantSuggestion,
         Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}

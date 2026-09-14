@@ -258,7 +258,6 @@ export const ar: Required<TableLabels> = {
   assistantActionsTitle: "ما غيّره هذا الدور",
   assistantUndoAll: "تراجع عن الكل",
   assistantExamples: "اختصارات",
-  assistantMoreExamples: "اختصارات أخرى",
   assistantReceiptChange: ({ before, after }) =>
     `تم التغيير من ${before} إلى ${after}`,
   assistantReceiptProposed: ({ before, after }) =>

@@ -1091,7 +1091,6 @@ export type {
   TableAssistantPanelProps,
   TableAssistantSheetProps,
   TableAssistantSlots,
-  TableAssistantSuggestionProps,
   TableAssistantWindowProps,
 } from "./assistant/assistantSlots";
 export {

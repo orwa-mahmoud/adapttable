@@ -12,7 +12,6 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
-  type TableAssistantSuggestionProps,
   type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
 import {
@@ -26,7 +25,6 @@ import {
   Text,
   Textarea,
   Tooltip,
-  UnstyledButton,
 } from "@mantine/core";
 
 const BADGE_COLOR: Record<string, string> = {
@@ -102,67 +100,6 @@ function AssistantButton({
     >
       {children ?? label}
     </Button>
-  );
-}
-
-function AssistantSuggestion({
-  title,
-  description,
-  icon,
-  part,
-  className,
-  onClick,
-  disabled,
-}: Readonly<TableAssistantSuggestionProps>) {
-  return (
-    <UnstyledButton
-      type="button"
-      data-adapttable-part={part}
-      className={className}
-      disabled={disabled}
-      onClick={onClick}
-      style={{
-        display: "flex",
-        gap: "var(--mantine-spacing-xs)",
-        alignItems: "flex-start",
-        padding: "var(--mantine-spacing-xs)",
-        borderRadius: "var(--mantine-radius-md)",
-        border: "1px solid var(--mantine-color-default-border)",
-        background: "var(--mantine-color-body)",
-        textAlign: "start",
-        width: "100%",
-      }}
-    >
-      <Text
-        component="span"
-        c="dimmed"
-        style={{ display: "flex", marginTop: 2 }}
-      >
-        {icon}
-      </Text>
-      <span>
-        <Text
-          component="span"
-          fw={500}
-          size="sm"
-          display="block"
-          data-adapttable-part="assistant-suggestion-title"
-        >
-          {title}
-        </Text>
-        {description ? (
-          <Text
-            component="span"
-            c="dimmed"
-            size="xs"
-            display="block"
-            data-adapttable-part="assistant-suggestion-description"
-          >
-            {description}
-          </Text>
-        ) : null}
-      </span>
-    </UnstyledButton>
   );
 }
 
@@ -429,7 +366,6 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Composer: AssistantInput,
         Badge: AssistantBadge,
         Window: AssistantWindow,
-        Suggestion: AssistantSuggestion,
         Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}

@@ -260,7 +260,6 @@ export const it: Required<TableLabels> = {
   assistantActionsTitle: "Cosa ha cambiato questo turno",
   assistantUndoAll: "Annulla tutto",
   assistantExamples: "Scorciatoie",
-  assistantMoreExamples: "Altre scorciatoie",
   assistantReceiptChange: ({ before, after }) =>
     `Modificato da ${before} a ${after}`,
   assistantReceiptProposed: ({ before, after }) =>

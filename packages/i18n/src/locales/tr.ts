@@ -262,7 +262,6 @@ export const tr: Required<TableLabels> = {
   assistantActionsTitle: "Bu turda değişenler",
   assistantUndoAll: "Tümünü geri al",
   assistantExamples: "Kısayollar",
-  assistantMoreExamples: "Daha fazla kısayol",
   assistantReceiptChange: ({ before, after }) =>
     `${before} değerinden ${after} değerine değiştirildi`,
   assistantReceiptProposed: ({ before, after }) =>

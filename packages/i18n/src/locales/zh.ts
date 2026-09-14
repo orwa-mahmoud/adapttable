@@ -253,7 +253,6 @@ export const zh: Required<TableLabels> = {
   assistantActionsTitle: "这一轮改了什么",
   assistantUndoAll: "全部撤销",
   assistantExamples: "快捷指令",
-  assistantMoreExamples: "更多快捷指令",
   assistantReceiptChange: ({ before, after }) => `已从 ${before} 改为 ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
     `建议：从 ${before} 改为 ${after}`,

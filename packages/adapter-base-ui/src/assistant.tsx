@@ -12,7 +12,6 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
-  type TableAssistantSuggestionProps,
   type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
 import { Drawer } from "@base-ui/react/drawer";
@@ -225,60 +224,6 @@ function AssistantWindow({
   );
 }
 
-function AssistantSuggestion({
-  title,
-  description,
-  icon,
-  part,
-  className,
-  onClick,
-  disabled,
-}: Readonly<TableAssistantSuggestionProps>) {
-  return (
-    <button
-      type="button"
-      data-adapttable-part={part}
-      className={className}
-      disabled={disabled}
-      onClick={onClick}
-      style={{
-        display: "flex",
-        gap: "0.5rem",
-        alignItems: "flex-start",
-        padding: "0.5rem",
-        borderRadius: "0.5rem",
-        border: "1px solid",
-        textAlign: "start",
-        width: "100%",
-        cursor: "pointer",
-        background: "transparent",
-        color: "inherit",
-        font: "inherit",
-      }}
-    >
-      <span style={{ display: "flex", marginTop: 2, opacity: 0.7 }}>
-        {icon}
-      </span>
-      <span>
-        <span
-          style={{ display: "block", fontWeight: 500 }}
-          data-adapttable-part="assistant-suggestion-title"
-        >
-          {title}
-        </span>
-        {description ? (
-          <span
-            style={{ display: "block", opacity: 0.7, fontSize: "0.85em" }}
-            data-adapttable-part="assistant-suggestion-description"
-          >
-            {description}
-          </span>
-        ) : null}
-      </span>
-    </button>
-  );
-}
-
 /**
  * Ask this table a question, in Base UI.
  *
@@ -348,16 +293,25 @@ function AssistantMenu({
         }
       />
       <Menu.Portal>
-        <Menu.Positioner side="top" align="start">
+        {/* The positioner carries the overlay layer, as every other portaled
+            surface in this kit does: Base UI puts a transform on it, and a
+            transform is a stacking context — a z-index on the popup inside
+            cannot lift it past the assistant's own window. Without this the
+            menu opens behind the panel it was opened from. */}
+        <Menu.Positioner
+          side="top"
+          align="start"
+          className="adapttable-popup-positioner"
+        >
           <Menu.Popup
+            // The token class too, because a portal mounts under <body> and
+            // the adapter's variables are scoped to its own surfaces.
+            className="adapttable-select-popup"
             style={{
               minWidth: 200,
               maxHeight,
               overflowY: "auto",
               padding: 4,
-              background: "var(--at-surface, #fff)",
-              border: "1px solid var(--at-border, #d0d7de)",
-              borderRadius: 8,
             }}
           >
             {items.map((item) => (
@@ -407,7 +361,6 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Composer: AssistantInput,
         Badge: AssistantBadge,
         Window: AssistantWindow,
-        Suggestion: AssistantSuggestion,
         Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}

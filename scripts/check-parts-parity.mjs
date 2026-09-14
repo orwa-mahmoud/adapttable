@@ -143,6 +143,9 @@ const CORE_GETTER_PARTS = { row: ["getRowProps", "createDesktopRow"] };
  * per group.
  */
 const FALLBACK_ONLY = {
+  // Its own shortcuts menu: a native disclosure wrapping a <menu> of buttons,
+  // where a themed kit reaches the same affordance through its own Menu.
+  "assistant shortcuts": ["assistant-examples-list"],
   // Its own anchored card and drawer, built from divs and a backdrop.
   filters: [
     "filters-anchor",

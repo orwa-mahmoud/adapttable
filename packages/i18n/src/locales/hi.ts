@@ -262,7 +262,6 @@ export const hi: Required<TableLabels> = {
   assistantActionsTitle: "इस बारी ने क्या बदला",
   assistantUndoAll: "सब पहले जैसा करें",
   assistantExamples: "शॉर्टकट",
-  assistantMoreExamples: "और शॉर्टकट",
   assistantReceiptChange: ({ before, after }) =>
     `${before} से ${after} किया गया`,
   assistantReceiptProposed: ({ before, after }) =>

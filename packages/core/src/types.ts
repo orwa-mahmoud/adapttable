@@ -843,8 +843,6 @@ export interface TableLabels {
   }) => string;
   /** Reopens the examples once a conversation has started. */
   assistantExamples?: string;
-  /** Opens the eligible examples a first screen did not have room for. */
-  assistantMoreExamples?: string;
   /**
    * The control that shows what a turn did.
    *

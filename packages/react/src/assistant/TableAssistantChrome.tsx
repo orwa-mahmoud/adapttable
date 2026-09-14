@@ -38,7 +38,6 @@ import {
   AssistantEmpty,
   AssistantMessage,
   AssistantQuestion,
-  AssistantSuggestions,
   AssistantWorking,
   BUBBLE_CSS,
   SpeakerMark,
@@ -599,45 +598,6 @@ function Transcript({
 }
 
 /**
- * The examples, for a kit that fills no menu slot.
- *
- * Losing them altogether would be worse than keeping them where they were,
- * so a kit without the slot keeps the disclosure under the transcript.
- *
- * @internal
- */
-function ExamplesFallback({
-  slots,
-  labels,
-  assistant,
-  onRun,
-}: {
-  readonly slots: TableAssistantSlots;
-  readonly labels: TableLabels | undefined;
-  readonly assistant: TableAssistantView;
-  readonly onRun: (id: string) => void;
-}): ReactElement | null {
-  if (slots.Menu) return null;
-  if (assistant.messages.length === 0) return null;
-  if (assistant.suggestions.length === 0) return null;
-  return (
-    <details data-adapttable-part="assistant-examples">
-      <summary data-adapttable-part="assistant-examples-summary">
-        {labels?.assistantExamples ?? "Shortcuts"}
-      </summary>
-      <AssistantSuggestions
-        slots={slots}
-        labels={labels}
-        suggestions={assistant.suggestions}
-        more={assistant.moreSuggestions ?? []}
-        onRun={onRun}
-        part="assistant-examples-list"
-      />
-    </details>
-  );
-}
-
-/**
  * Every change in a write, on a screen of its own.
  *
  * The conversation is hidden rather than scrolled past while this is up: a
@@ -767,9 +727,6 @@ function Body({
     if (!review) setExpanded(false);
   }, [review]);
   const Button = slots.Button;
-  const run = (id: string): void => {
-    void assistant.runSuggestion(id);
-  };
   const allowedNames = assistant.alwaysAllowedNames
     ? { names: assistant.alwaysAllowedNames }
     : {};
@@ -809,16 +766,7 @@ function Body({
         style={{ height: "100%", overflowY: "auto", overflowX: "hidden" }}
       >
         {assistant.messages.length === 0 ? (
-          <AssistantEmpty
-            labels={labels}
-            slots={slots}
-            suggestions={assistant.suggestions}
-            more={assistant.moreSuggestions ?? []}
-            onRun={run}
-            note={note}
-            {...opening}
-            {...marks}
-          />
+          <AssistantEmpty labels={labels} note={note} {...opening} {...marks} />
         ) : (
           <Transcript
             assistant={assistant}
@@ -833,12 +781,6 @@ function Body({
         {/* A question belongs where the reader is already looking, not in a
             second surface that competes with the approval. */}
         <PendingQuestion assistant={assistant} slots={slots} />
-        <ExamplesFallback
-          slots={slots}
-          labels={labels}
-          assistant={assistant}
-          onRun={run}
-        />
         {/* A standing decision, not something this turn did — so it sits with
             the examples rather than in the transcript. */}
         {assistant.revokeAlwaysAllow ? (

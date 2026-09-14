@@ -63,25 +63,6 @@ export interface TableAssistantButtonProps {
 }
 
 /**
- * One suggested prompt, drawn as the kit's own compact card or chip.
- *
- * Deliberately not a {@link TableAssistantSlots.Button}: a column of
- * full-width submit buttons reads as a form, and the empty conversation is
- * the first thing anyone sees.
- *
- * @public
- */
-export interface TableAssistantSuggestionProps {
-  readonly title: string;
-  readonly description?: string;
-  readonly icon?: ReactNode;
-  readonly part: string;
-  readonly className?: string;
-  readonly onClick: () => void;
-  readonly disabled?: boolean;
-}
-
-/**
  * The floating conversation window.
  *
  * Nonmodal and out of the document flow: opening it must not resize, squeeze
@@ -222,8 +203,6 @@ export interface TableAssistantSlots {
   readonly Badge: (props: TableAssistantBadgeProps) => ReactNode;
   /** The nonmodal floating surface. */
   readonly Window: (props: TableAssistantWindowProps) => ReactNode;
-  /** One suggested prompt, as a compact card or chip. */
-  readonly Suggestion: (props: TableAssistantSuggestionProps) => ReactNode;
   /**
    * The examples menu in the composer.
    *

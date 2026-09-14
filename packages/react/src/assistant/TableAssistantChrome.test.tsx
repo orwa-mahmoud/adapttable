@@ -10,7 +10,6 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { AgentApprovalPending } from "../editing/AgentApprovalChrome";
 import { tableAssistantTestSlots } from "../internal/chromeTestSlots";
-import type { TableAssistantSlots } from "./assistantSlots";
 import type {
   TableAssistantReceiptView,
   TableAssistantView,
@@ -470,25 +469,6 @@ describe("the examples, once a conversation has started", () => {
     expect(part("assistant-examples-menu")).toBeTruthy();
     expect(parts("assistant-suggestion")).toHaveLength(0);
   });
-
-  it("falls back to a disclosure for a kit that fills no menu", () => {
-    const noMenu: TableAssistantSlots = { ...tableAssistantTestSlots };
-    delete (noMenu as { Menu?: unknown }).Menu;
-    render(
-      <TableAssistantChrome
-        slots={noMenu}
-        labels={defaultLabels}
-        assistant={view(started)}
-        open
-        onOpenChange={vi.fn()}
-      />
-    );
-
-    // Losing the examples altogether would be worse than keeping them where
-    // they were.
-    expect(part("assistant-examples-summary")).toBeTruthy();
-    expect(part("assistant-examples-menu")).toBeNull();
-  });
 });
 
 /**
@@ -621,24 +601,6 @@ describe("Escape", () => {
   });
 });
 
-/** A kit that fills no `Menu` slot, which is where the cards still live. */
-function mountWithoutMenu(
-  props: Partial<Parameters<typeof TableAssistantChrome>[0]> = {}
-): void {
-  const noMenu: TableAssistantSlots = { ...tableAssistantTestSlots };
-  delete (noMenu as { Menu?: unknown }).Menu;
-  render(
-    <TableAssistantChrome
-      slots={noMenu}
-      labels={defaultLabels}
-      assistant={view()}
-      open
-      onOpenChange={vi.fn()}
-      {...props}
-    />
-  );
-}
-
 describe("the empty state", () => {
   it("asks what to do, and keeps the examples in one place", () => {
     mount({
@@ -690,58 +652,6 @@ describe("the empty state", () => {
     expect(part("assistant-empty-note")).toHaveTextContent(
       "Scripted until you connect."
     );
-  });
-
-  it("offers what this table can run as cards, for a kit with no menu", () => {
-    mountWithoutMenu({
-      assistant: view({ suggestions: [{ id: "a", title: "Group by city" }] }),
-    });
-
-    expect(part("assistant-suggestion")).toHaveTextContent("Group by city");
-  });
-
-  it("draws a glyph for a kind it knows and nothing for one it does not", () => {
-    // A host may label a shortcut with a kind of its own. An invented glyph
-    // would say something about it that nobody meant, so it gets none — and
-    // the card reads fine without one.
-    mountWithoutMenu({
-      assistant: view({
-        suggestions: [
-          { id: "a", title: "Group by city", kind: "group" },
-          { id: "b", title: "Run the weekly export", kind: "house-special" },
-        ],
-      }),
-    });
-
-    const cards = parts("assistant-suggestion");
-    expect(cards[0]?.querySelector("svg")).toBeTruthy();
-    expect(cards[1]?.querySelector("svg")).toBeNull();
-  });
-
-  it("runs the suggestion by its id", () => {
-    const runSuggestion = vi.fn();
-    mountWithoutMenu({
-      assistant: view({
-        suggestions: [{ id: "group", title: "Group by city" }],
-        runSuggestion,
-      }),
-    });
-    fireEvent.click(part("assistant-suggestion")!);
-
-    expect(runSuggestion).toHaveBeenCalledWith("group");
-  });
-
-  it("keeps the extras behind a more control", () => {
-    mountWithoutMenu({
-      assistant: view({
-        suggestions: [{ id: "a", title: "First" }],
-        moreSuggestions: [{ id: "b", title: "Second" }],
-      }),
-    });
-
-    expect(parts("assistant-suggestion")).toHaveLength(1);
-    fireEvent.click(part("assistant-suggestions-more")!);
-    expect(parts("assistant-suggestion")).toHaveLength(2);
   });
 
   it("gives way to the transcript once there is one", () => {

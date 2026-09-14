@@ -12,7 +12,6 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
-  type TableAssistantSuggestionProps,
   type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
 import {
@@ -233,65 +232,6 @@ function AssistantWindow({
   );
 }
 
-function AssistantSuggestion({
-  title,
-  description,
-  icon,
-  part,
-  className,
-  onClick,
-  disabled,
-}: Readonly<TableAssistantSuggestionProps>) {
-  return (
-    <button
-      type="button"
-      data-adapttable-part={part}
-      className={className}
-      disabled={disabled}
-      onClick={onClick}
-      style={{
-        display: "flex",
-        gap: 8,
-        alignItems: "flex-start",
-        padding: 8,
-        borderRadius: "var(--ant-border-radius)",
-        border: "1px solid var(--ant-color-border)",
-        background: "var(--ant-color-bg-container)",
-        color: "inherit",
-        font: "inherit",
-        textAlign: "start",
-        width: "100%",
-        cursor: "pointer",
-      }}
-    >
-      <Typography.Text
-        type="secondary"
-        style={{ display: "flex", marginTop: 2 }}
-      >
-        {icon}
-      </Typography.Text>
-      <span>
-        <Typography.Text
-          strong
-          style={{ display: "block" }}
-          data-adapttable-part="assistant-suggestion-title"
-        >
-          {title}
-        </Typography.Text>
-        {description ? (
-          <Typography.Text
-            type="secondary"
-            style={{ display: "block", fontSize: 12 }}
-            data-adapttable-part="assistant-suggestion-description"
-          >
-            {description}
-          </Typography.Text>
-        ) : null}
-      </span>
-    </button>
-  );
-}
-
 /**
  * Ask this table a question, in Ant Design.
  *
@@ -399,7 +339,6 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Composer: AssistantInput,
         Badge: AssistantBadge,
         Window: AssistantWindow,
-        Suggestion: AssistantSuggestion,
         Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}

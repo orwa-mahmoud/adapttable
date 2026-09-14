@@ -76,6 +76,15 @@ async function lastReply(page: Page): Promise<string> {
 }
 
 async function receipts(page: Page): Promise<string[]> {
+  // What a turn did is evidence, opened from the mark on the reply it belongs
+  // to. Every open one is read, because a turn can draw more than one card.
+  const marks = page.locator(part("assistant-receipts-toggle-button"));
+  for (let i = 0; i < (await marks.count()); i += 1) {
+    const mark = marks.nth(i);
+    if ((await mark.getAttribute("aria-expanded")) !== "true") {
+      await mark.click();
+    }
+  }
   return page.locator(part("assistant-receipt-summary")).allInnerTexts();
 }
 
@@ -88,7 +97,10 @@ async function receipts(page: Page): Promise<string[]> {
 async function catalogText(page: Page): Promise<string> {
   const select = page.getByTestId("ai-catalog");
   await expect(select).toBeVisible();
-  return (await select.innerText()).trim();
+  // `textContent`, not `innerText`: Firefox reports no rendered text for the
+  // options inside a select, and the assertion would read an empty string
+  // rather than the catalog.
+  return ((await select.textContent()) ?? "").trim();
 }
 
 const MOCK_BACKEND = "http://127.0.0.1:8787";
@@ -171,9 +183,9 @@ for (const kit of kits) {
     await expect(page.locator(part("assistant-empty-prompt"))).toContainText(
       "What would you like to do"
     );
-    await expect(
-      page.locator(part("assistant-suggestion")).first()
-    ).toBeVisible();
+    // The shortcuts live in the composer, one press away, rather than as a
+    // wall of cards a reader clears before they can type.
+    await expect(page.locator(part("assistant-examples-menu"))).toBeVisible();
 
     const catalog = await catalogText(page);
     expect(catalog).toContain("view.setFilters");
@@ -188,9 +200,12 @@ for (const kit of kits) {
     const before = await visibleTableText(page);
     expect(before).toContain("Jonah");
 
+    await page.locator(part("assistant-examples-menu")).click();
+    // By its title: two shortcuts mention the Core team, and only one of them
+    // is the filter this asserts on.
     await page
-      .locator(part("assistant-suggestion"))
-      .filter({ hasText: "Core team" })
+      .locator(part("assistant-examples-item"))
+      .filter({ hasText: "Filter rows" })
       .click();
 
     await expect

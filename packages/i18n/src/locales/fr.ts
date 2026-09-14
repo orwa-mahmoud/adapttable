@@ -266,7 +266,6 @@ export const fr: Required<TableLabels> = {
   assistantActionsTitle: "Ce que ce tour a changé",
   assistantUndoAll: "Tout annuler",
   assistantExamples: "Raccourcis",
-  assistantMoreExamples: "Plus de raccourcis",
   assistantReceiptChange: ({ before, after }) =>
     `Modifié de ${before} à ${after}`,
   assistantReceiptProposed: ({ before, after }) =>

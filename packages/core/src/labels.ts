@@ -351,7 +351,6 @@ export const defaultLabels: Required<TableLabels> = {
   assistantActionsTitle: "What this turn changed",
   assistantUndoAll: "Undo all",
   assistantExamples: "Shortcuts",
-  assistantMoreExamples: "More shortcuts",
   assistantReceiptStatus: (status) =>
     ASSISTANT_RECEIPT[status] ?? String(status),
   assistantReceiptAction: ({ kind, status, cleared }) => {

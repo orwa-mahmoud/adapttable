@@ -256,7 +256,6 @@ export const he: Required<TableLabels> = {
   assistantActionsTitle: "מה התור הזה שינה",
   assistantUndoAll: "בטל הכול",
   assistantExamples: "קיצורי דרך",
-  assistantMoreExamples: "עוד קיצורי דרך",
   assistantReceiptChange: ({ before, after }) => `שונה מ-${before} ל-${after}`,
   assistantReceiptProposed: ({ before, after }) =>
     `הוצע: מ-${before} ל-${after}`,

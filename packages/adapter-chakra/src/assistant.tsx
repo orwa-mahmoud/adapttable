@@ -12,7 +12,6 @@ import {
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
-  type TableAssistantSuggestionProps,
   type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
 import {
@@ -238,63 +237,6 @@ function AssistantWindow({
   );
 }
 
-function AssistantSuggestion({
-  title,
-  description,
-  icon,
-  part,
-  className,
-  onClick,
-  disabled,
-}: Readonly<TableAssistantSuggestionProps>) {
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      height="auto"
-      justifyContent="flex-start"
-      textAlign="start"
-      w="100%"
-      display="flex"
-      gap="2"
-      alignItems="flex-start"
-      py="2"
-      px="2"
-      whiteSpace="normal"
-      data-adapttable-part={part}
-      className={className}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      <Text as="span" color="fg.muted" display="flex" mt="0.5">
-        {icon}
-      </Text>
-      <span>
-        <Text
-          as="span"
-          fontWeight="medium"
-          fontSize="sm"
-          display="block"
-          data-adapttable-part="assistant-suggestion-title"
-        >
-          {title}
-        </Text>
-        {description ? (
-          <Text
-            as="span"
-            color="fg.muted"
-            fontSize="xs"
-            display="block"
-            data-adapttable-part="assistant-suggestion-description"
-          >
-            {description}
-          </Text>
-        ) : null}
-      </span>
-    </Button>
-  );
-}
-
 /**
  * Ask this table a question, in Chakra UI.
  *
@@ -416,7 +358,6 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Composer: AssistantInput,
         Badge: AssistantBadge,
         Window: AssistantWindow,
-        Suggestion: AssistantSuggestion,
         Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}

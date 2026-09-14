@@ -27,7 +27,6 @@ import {
   AssistantAvatar,
   PersonAvatar,
   ReceiptIcon,
-  SuggestionIcon,
   UndoIcon,
 } from "./assistantIcons";
 import type {
@@ -38,7 +37,6 @@ import type {
   TableAssistantMessageView,
   TableAssistantQuestionView,
   TableAssistantReceiptView,
-  TableAssistantSuggestionView,
   TableAssistantUndoView,
 } from "./assistantView";
 
@@ -474,74 +472,13 @@ export function AssistantMessage({
   );
 }
 
-/** The suggested prompts, as compact cards. @internal */
-export function AssistantSuggestions({
-  slots,
-  labels,
-  suggestions,
-  more,
-  onRun,
-  part,
-}: {
-  readonly slots: TableAssistantSlots;
-  readonly labels: TableLabels | undefined;
-  readonly suggestions: readonly TableAssistantSuggestionView[];
-  readonly more: readonly TableAssistantSuggestionView[];
-  readonly onRun: (id: string) => void;
-  readonly part: string;
-}): ReactElement {
-  const [showMore, setShowMore] = useState(false);
-  const Button = slots.Button;
-  const Suggestion = slots.Suggestion;
-  const shown = [...suggestions, ...(showMore ? more : [])];
-  return (
-    <div
-      data-adapttable-part={part}
-      style={{ display: "flex", flexDirection: "column", gap: "0.4em" }}
-    >
-      {shown.map((suggestion) => (
-        <Suggestion
-          key={suggestion.id}
-          title={suggestion.title}
-          description={suggestion.description}
-          icon={<SuggestionIcon kind={suggestion.kind} />}
-          part="assistant-suggestion"
-          onClick={() => {
-            onRun(suggestion.id);
-          }}
-        />
-      ))}
-      {more.length > 0 && !showMore ? (
-        <Button
-          label={labels?.assistantMoreExamples ?? "More examples"}
-          part="assistant-suggestions-more"
-          variant="subtle"
-          expanded={false}
-          onClick={() => {
-            setShowMore(true);
-          }}
-        />
-      ) : null}
-    </div>
-  );
-}
-
-/** The empty state: a question, then what this table can actually do. @internal */
 export function AssistantEmpty({
   labels,
-  slots,
-  suggestions,
-  more,
-  onRun,
   note,
   greeting,
   avatars,
 }: {
   readonly labels: TableLabels | undefined;
-  readonly slots: TableAssistantSlots;
-  readonly suggestions: readonly TableAssistantSuggestionView[];
-  readonly more: readonly TableAssistantSuggestionView[];
-  readonly onRun: (id: string) => void;
   /** What this conversation is talking to, when the host wants it said. */
   readonly note?: string;
   /**
@@ -553,12 +490,11 @@ export function AssistantEmpty({
 }): ReactElement | null {
   const said =
     greeting ?? labels?.assistantEmpty ?? "What would you like to do?";
-  const cards = !slots.Menu && suggestions.length > 0;
   const greeter =
     avatars?.assistant === undefined ? {} : { avatar: avatars.assistant };
   // A host that wants a silent panel gets one: no mark, no heading, no
   // placeholder furniture standing in for a message nobody wrote.
-  if (!said.trim() && !note && !cards) return null;
+  if (!said.trim() && !note) return null;
   return (
     <div
       data-adapttable-part="assistant-empty"
@@ -586,20 +522,6 @@ export function AssistantEmpty({
         >
           {note}
         </p>
-      ) : null}
-      {/* A kit with a menu keeps the examples in the composer, from the first
-          frame — one place to look for them rather than cards here and a menu
-          a message later. Without that slot they are cards, because a reader
-          who does not know what to type needs to be shown something. */}
-      {cards ? (
-        <AssistantSuggestions
-          slots={slots}
-          labels={labels}
-          suggestions={suggestions}
-          more={more}
-          onRun={onRun}
-          part="assistant-suggestions"
-        />
       ) : null}
     </div>
   );

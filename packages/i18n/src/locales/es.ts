@@ -259,7 +259,6 @@ export const es: Required<TableLabels> = {
   assistantActionsTitle: "Lo que cambió este turno",
   assistantUndoAll: "Deshacer todo",
   assistantExamples: "Atajos",
-  assistantMoreExamples: "Más atajos",
   assistantReceiptChange: ({ before, after }) =>
     `Cambiado de ${before} a ${after}`,
   assistantReceiptProposed: ({ before, after }) =>

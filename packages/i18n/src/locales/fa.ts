@@ -257,7 +257,6 @@ export const fa: Required<TableLabels> = {
   assistantActionsTitle: "آنچه این نوبت تغییر داد",
   assistantUndoAll: "واگرد همه",
   assistantExamples: "میان‌برها",
-  assistantMoreExamples: "میان‌برهای بیشتر",
   assistantReceiptChange: ({ before, after }) =>
     `از ${before} به ${after} تغییر کرد`,
   assistantReceiptProposed: ({ before, after }) =>

@@ -265,7 +265,6 @@ export const ru: Required<TableLabels> = {
   assistantActionsTitle: "Что изменил этот ход",
   assistantUndoAll: "Отменить всё",
   assistantExamples: "Быстрые команды",
-  assistantMoreExamples: "Ещё команды",
   assistantReceiptChange: ({ before, after }) =>
     `Изменено с ${before} на ${after}`,
   assistantReceiptProposed: ({ before, after }) =>
