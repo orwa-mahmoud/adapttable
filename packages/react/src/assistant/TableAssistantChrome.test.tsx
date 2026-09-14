@@ -10,6 +10,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { AgentApprovalPending } from "../editing/AgentApprovalChrome";
 import { tableAssistantTestSlots } from "../internal/chromeTestSlots";
+import type { TableAssistantSlots } from "./assistantSlots";
 import type {
   TableAssistantReceiptView,
   TableAssistantView,
@@ -61,6 +62,58 @@ function mount(
   );
   return { onOpenChange };
 }
+
+describe("the examples, once a conversation has started", () => {
+  const started = {
+    messages: [{ id: "m1", role: "assistant" as const, text: "Done." }],
+    suggestions: [{ id: "group", title: "Group by city" }],
+    moreSuggestions: [{ id: "sort", title: "Sort by salary" }],
+  };
+
+  it("moves into the composer, where a reader looks for what to type", () => {
+    const runSuggestion = vi.fn();
+    mount({ assistant: view({ ...started, runSuggestion }) });
+
+    // In the composer, and no longer a disclosure under a scrolling
+    // transcript — which is where it was least reachable.
+    const trigger = part("assistant-examples-menu");
+    expect(trigger).toBeTruthy();
+    expect(part("assistant-composer")!.contains(trigger)).toBe(true);
+
+    // Everything eligible, primary and overflow alike: a menu has the room a
+    // split list did not.
+    const items = parts("assistant-examples-item");
+    expect(items).toHaveLength(2);
+    fireEvent.click(items[1]!);
+    expect(runSuggestion).toHaveBeenCalledWith("sort");
+  });
+
+  it("draws none before the first message, where the cards already are", () => {
+    mount({ assistant: view({ ...started, messages: [] }) });
+
+    expect(part("assistant-examples-menu")).toBeNull();
+    expect(parts("assistant-suggestion")).not.toHaveLength(0);
+  });
+
+  it("falls back to a disclosure for a kit that fills no menu", () => {
+    const noMenu: TableAssistantSlots = { ...tableAssistantTestSlots };
+    delete (noMenu as { Menu?: unknown }).Menu;
+    render(
+      <TableAssistantChrome
+        slots={noMenu}
+        labels={defaultLabels}
+        assistant={view(started)}
+        open
+        onOpenChange={vi.fn()}
+      />
+    );
+
+    // Losing the examples altogether would be worse than keeping them where
+    // they were.
+    expect(part("assistant-examples-summary")).toBeTruthy();
+    expect(part("assistant-examples-menu")).toBeNull();
+  });
+});
 
 describe("the launcher", () => {
   it("is the only thing shown while the panel is closed", () => {

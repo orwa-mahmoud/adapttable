@@ -8,6 +8,7 @@ import {
   TableAssistantChrome,
   type TableAssistantComposerProps,
   type TableAssistantLanguageChipProps,
+  type TableAssistantMenuProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -20,6 +21,8 @@ import {
   Button,
   Drawer,
   IconButton,
+  Menu,
+  Portal,
   Text,
   Textarea,
 } from "@chakra-ui/react";
@@ -333,6 +336,67 @@ function AssistantLanguageChip({
   );
 }
 
+/**
+ * The examples menu, as Chakra's own — its positioner, its portal, and the
+ * keyboard a Chakra reader already has everywhere else.
+ */
+function AssistantMenu({
+  label,
+  part,
+  className,
+  icon,
+  disabled,
+  items,
+  onSelect,
+}: Readonly<TableAssistantMenuProps>) {
+  return (
+    <Menu.Root positioning={{ placement: "top-start" }}>
+      <Menu.Trigger asChild>
+        <IconButton
+          type="button"
+          size="sm"
+          variant="ghost"
+          aria-label={label}
+          title={label}
+          data-adapttable-part={part}
+          className={className}
+          disabled={disabled}
+        >
+          {icon}
+        </IconButton>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content>
+            {items.map((item) => (
+              <Menu.Item
+                key={item.id}
+                value={item.id}
+                data-adapttable-part={item.part}
+                onClick={() => {
+                  onSelect(item.id);
+                }}
+              >
+                <Box display="flex" gap="2" alignItems="flex-start">
+                  {item.icon}
+                  <Box>
+                    <Text fontSize="sm">{item.title}</Text>
+                    {item.description ? (
+                      <Text fontSize="xs" color="fg.muted">
+                        {item.description}
+                      </Text>
+                    ) : null}
+                  </Box>
+                </Box>
+              </Menu.Item>
+            ))}
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -345,6 +409,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}
     />

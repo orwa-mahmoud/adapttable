@@ -31,7 +31,12 @@ import {
   type ApprovalReviewSlots,
 } from "../editing/ApprovalReviewChrome";
 import { AssistantComposer } from "./AssistantComposer";
-import { AssistantIcon, CloseIcon, SettingsIcon } from "./assistantIcons";
+import {
+  AssistantIcon,
+  CloseIcon,
+  SettingsIcon,
+  SuggestionIcon,
+} from "./assistantIcons";
 import {
   AssistantAlwaysAllowed,
   AssistantEmpty,
@@ -561,8 +566,13 @@ function Body({
           />
         ) : null}
         {/* A scripted demo is unusable if the one click that starts it also
-            hides every other example, so they stay within reach. */}
-        {assistant.messages.length > 0 && assistant.suggestions.length > 0 ? (
+            hides every other example, so they stay within reach. A kit with a
+            menu keeps them in the composer instead, where a reader looks when
+            they do not know what to type — this is what is left for one that
+            has not filled that slot. */}
+        {!slots.Menu &&
+        assistant.messages.length > 0 &&
+        assistant.suggestions.length > 0 ? (
           <details data-adapttable-part="assistant-examples">
             <summary data-adapttable-part="assistant-examples-summary">
               {labels?.assistantExamples ?? "Examples"}
@@ -776,6 +786,26 @@ export function TableAssistantChrome({
   const resolved =
     presentation === "floating" && !wide ? "sheet" : presentation;
   const title = labels?.assistantTitle ?? "Table assistant";
+  // Everything eligible, primary and overflow alike: a menu has room for the
+  // lot, which is the whole reason it replaced a list that had to be split.
+  const examples = {
+    label: labels?.assistantExamples ?? "Examples",
+    items: [...assistant.suggestions, ...(assistant.moreSuggestions ?? [])].map(
+      (suggestion) => ({
+        id: suggestion.id,
+        title: suggestion.title,
+        ...(suggestion.description
+          ? { description: suggestion.description }
+          : {}),
+        icon: <SuggestionIcon kind={suggestion.kind} />,
+        part: "assistant-examples-item",
+      })
+    ),
+    onSelect: (id: string): void => {
+      void assistant.runSuggestion(id);
+    },
+  };
+
   const send = (): void => {
     void assistant.send();
   };
@@ -832,6 +862,7 @@ export function TableAssistantChrome({
         onSend={send}
         onStop={assistant.stop}
         {...(speech ? { speech } : {})}
+        {...(assistant.messages.length > 0 ? { examples } : {})}
       />
       {resolved === "sheet" ? (
         <Button

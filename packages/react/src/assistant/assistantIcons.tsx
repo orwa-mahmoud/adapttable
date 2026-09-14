@@ -119,3 +119,16 @@ export function SuggestionIcon({
     </svg>
   );
 }
+
+/**
+ * The examples trigger: a lightbulb, for the prompts a reader can start from.
+ *
+ * @internal
+ */
+export function ExamplesIcon(): ReactElement {
+  return (
+    <svg {...BASE}>
+      <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z" />
+    </svg>
+  );
+}

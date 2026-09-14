@@ -127,6 +127,48 @@ export interface TableAssistantSheetProps {
 }
 
 /**
+ * One entry in the examples menu.
+ *
+ * Already in the reader's language — the chrome hands the kit words, never a
+ * suggestion object, so nothing about the assistant's shape leaks into a
+ * kit's menu.
+ *
+ * @public
+ */
+export interface TableAssistantMenuItem {
+  /** Stable identity, handed back to {@link TableAssistantMenuProps.onSelect}. */
+  readonly id: string;
+  readonly title: string;
+  readonly description?: string;
+  readonly icon?: ReactNode;
+  readonly part: string;
+}
+
+/**
+ * A menu hung off one trigger.
+ *
+ * Items rather than children, because a kit's menu wants its own item
+ * component — `Menu.Item`, `MenuItem`, `DropdownMenu.Item` — and children
+ * would force one kit's markup through another kit's menu. The kit owns the
+ * trigger, the surface, the placement and the keyboard; the chrome owns only
+ * what the entries say.
+ *
+ * @public
+ */
+export interface TableAssistantMenuProps {
+  /** Accessible name of the trigger, and its tooltip. */
+  readonly label: string;
+  /** Part name for the trigger. */
+  readonly part: string;
+  readonly className?: string;
+  /** The trigger's glyph. */
+  readonly icon?: ReactNode;
+  readonly disabled?: boolean;
+  readonly items: readonly TableAssistantMenuItem[];
+  readonly onSelect: (id: string) => void;
+}
+
+/**
  * Every control {@link TableAssistantChrome} needs from a kit.
  *
  * @public
@@ -146,6 +188,14 @@ export interface TableAssistantSlots {
   readonly Window: (props: TableAssistantWindowProps) => ReactNode;
   /** One suggested prompt, as a compact card or chip. */
   readonly Suggestion: (props: TableAssistantSuggestionProps) => ReactNode;
+  /**
+   * The examples menu in the composer.
+   *
+   * Optional, and the reason is the same as the chooser below: a kit that has
+   * not filled it keeps the disclosure the chrome falls back to, rather than
+   * losing the examples altogether. Every published kit fills it.
+   */
+  readonly Menu?: (props: TableAssistantMenuProps) => ReactNode;
   /**
    * The language chooser beside the mic.
    *

@@ -1376,7 +1376,9 @@ a container of your own. `TableAssistantSlots` collects
 `TableAssistantPanelProps`, `TableAssistantSheetProps`,
 `TableAssistantWindowProps`, `TableAssistantSuggestionProps`,
 `TableAssistantButtonProps`, `TableAssistantComposerProps` and
-`TableAssistantBadgeProps`. The view types are `TableAssistantView`,
+`TableAssistantBadgeProps`, plus `TableAssistantMenuProps` and
+`TableAssistantMenuItem` — the examples menu in the composer, which each kit
+draws with its own menu primitive. The view types are `TableAssistantView`,
 `TableAssistantMessageView`, `TableAssistantReceiptView` with
 `TableAssistantReceiptSubject` — what an action changed, supplied by whoever
 ran it — and `TableAssistantSuggestionView`, plus `assistantIsBusy` and

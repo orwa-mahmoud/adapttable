@@ -8,6 +8,7 @@ import {
   TableAssistantChrome,
   type TableAssistantComposerProps,
   type TableAssistantLanguageChipProps,
+  type TableAssistantMenuProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -15,6 +16,7 @@ import {
   type TableAssistantWindowProps,
 } from "@adapttable/react/adapter";
 import { Drawer } from "@base-ui/react/drawer";
+import { Menu } from "@base-ui/react/menu";
 
 import { NativeSelect } from "./components/primitives";
 import { Badge, Button, Card, cx, IconButton } from "./ui";
@@ -309,6 +311,81 @@ function AssistantLanguageChip({
   );
 }
 
+/**
+ * The examples menu, on Base UI's own menu — its portal, its positioner and
+ * the keyboard every other menu in this kit already uses.
+ */
+function AssistantMenu({
+  label,
+  part,
+  className,
+  icon,
+  disabled,
+  items,
+  onSelect,
+}: Readonly<TableAssistantMenuProps>) {
+  return (
+    <Menu.Root>
+      <Menu.Trigger
+        render={
+          <IconButton
+            size="1"
+            variant="ghost"
+            color="gray"
+            aria-label={label}
+            title={label}
+            data-adapttable-part={part}
+            className={className}
+            disabled={disabled}
+          >
+            {icon}
+          </IconButton>
+        }
+      />
+      <Menu.Portal>
+        <Menu.Positioner side="top" align="start">
+          <Menu.Popup
+            style={{
+              minWidth: 200,
+              padding: 4,
+              background: "var(--at-surface, #fff)",
+              border: "1px solid var(--at-border, #d0d7de)",
+              borderRadius: 8,
+            }}
+          >
+            {items.map((item) => (
+              <Menu.Item
+                key={item.id}
+                data-adapttable-part={item.part}
+                onClick={() => {
+                  onSelect(item.id);
+                }}
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  alignItems: "flex-start",
+                  width: "100%",
+                  padding: "6px 8px",
+                }}
+              >
+                {item.icon}
+                <span>
+                  <span style={{ display: "block" }}>{item.title}</span>
+                  {item.description ? (
+                    <span style={{ display: "block", opacity: 0.7 }}>
+                      {item.description}
+                    </span>
+                  ) : null}
+                </span>
+              </Menu.Item>
+            ))}
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -321,6 +398,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}
     />

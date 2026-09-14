@@ -11,6 +11,7 @@ import {
   TableAssistantChrome,
   type TableAssistantComposerProps,
   type TableAssistantLanguageChipProps,
+  type TableAssistantMenuProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -22,6 +23,7 @@ import {
   Button,
   Card,
   Dialog,
+  DropdownMenu,
   IconButton,
   Text,
   TextArea,
@@ -321,6 +323,71 @@ function AssistantLanguageChip({
   );
 }
 
+/**
+ * The examples menu, as a Radix Themes dropdown — the same surface, the same
+ * dismissal and the same typeahead as every other menu in the kit.
+ */
+function AssistantMenu({
+  label,
+  part,
+  className,
+  icon,
+  disabled,
+  items,
+  onSelect,
+}: Readonly<TableAssistantMenuProps>) {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger disabled={disabled}>
+        <IconButton
+          type="button"
+          size="2"
+          variant="ghost"
+          color="gray"
+          aria-label={label}
+          title={label}
+          data-adapttable-part={part}
+          className={className}
+          disabled={disabled}
+        >
+          {icon}
+        </IconButton>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content side="top" align="start">
+        {items.map((item) => (
+          <DropdownMenu.Item
+            key={item.id}
+            data-adapttable-part={item.part}
+            onSelect={() => {
+              onSelect(item.id);
+            }}
+          >
+            <span
+              style={{
+                display: "flex",
+                gap: "var(--space-2)",
+                alignItems: "flex-start",
+              }}
+            >
+              {item.icon}
+              <span>
+                <Text size="2" as="div">
+                  {item.title}
+                </Text>
+                {item.description ? (
+                  <Text size="1" color="gray" as="div">
+                    {item.description}
+                  </Text>
+                ) : null}
+              </span>
+            </span>
+          </DropdownMenu.Item>
+        ))}
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -333,6 +400,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}
     />

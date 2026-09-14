@@ -8,6 +8,7 @@ import {
   TableAssistantChrome,
   type TableAssistantComposerProps,
   type TableAssistantLanguageChipProps,
+  type TableAssistantMenuProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -21,10 +22,14 @@ import {
   Chip,
   Drawer,
   IconButton,
+  Menu,
+  MenuItem,
   Paper,
   TextField,
   Tooltip,
+  Typography,
 } from "@mui/material";
+import { useState } from "react";
 
 const CHIP_COLOR = {
   neutral: "default",
@@ -336,6 +341,77 @@ function AssistantLanguageChip({
   );
 }
 
+/**
+ * The examples menu, as MUI's own — the same anchored surface, transitions
+ * and keyboard a MUI reader gets from every other menu in the application.
+ */
+function AssistantMenu({
+  label,
+  part,
+  className,
+  icon,
+  disabled,
+  items,
+  onSelect,
+}: Readonly<TableAssistantMenuProps>) {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  return (
+    <>
+      <Tooltip title={label}>
+        <span>
+          <IconButton
+            type="button"
+            size="small"
+            aria-label={label}
+            aria-haspopup="menu"
+            aria-expanded={anchor !== null}
+            data-adapttable-part={part}
+            className={className}
+            disabled={disabled}
+            onClick={(event) => {
+              setAnchor(event.currentTarget);
+            }}
+          >
+            {icon}
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Menu
+        open={anchor !== null}
+        anchorEl={anchor}
+        onClose={() => {
+          setAnchor(null);
+        }}
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+      >
+        {items.map((item) => (
+          <MenuItem
+            key={item.id}
+            data-adapttable-part={item.part}
+            onClick={() => {
+              setAnchor(null);
+              onSelect(item.id);
+            }}
+          >
+            <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
+              {item.icon}
+              <Box>
+                <Typography variant="body2">{item.title}</Typography>
+                {item.description ? (
+                  <Typography variant="caption" color="text.secondary">
+                    {item.description}
+                  </Typography>
+                ) : null}
+              </Box>
+            </Box>
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -348,6 +424,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}
     />

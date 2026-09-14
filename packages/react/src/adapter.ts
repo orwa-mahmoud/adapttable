@@ -1084,6 +1084,8 @@ export type {
   TableAssistantButtonProps,
   TableAssistantComposerProps,
   TableAssistantLanguageChipProps,
+  TableAssistantMenuItem,
+  TableAssistantMenuProps,
   TableAssistantPanelProps,
   TableAssistantSheetProps,
   TableAssistantSlots,

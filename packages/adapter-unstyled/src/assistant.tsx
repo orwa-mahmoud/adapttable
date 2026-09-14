@@ -12,6 +12,7 @@ import {
   TableAssistantChrome,
   type TableAssistantComposerProps,
   type TableAssistantLanguageChipProps,
+  type TableAssistantMenuProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -239,6 +240,60 @@ function AssistantLanguageChip({
   );
 }
 
+/**
+ * The examples menu, in this kit's own vocabulary: native HTML.
+ *
+ * `<details>` is the platform's disclosure, and a `menu` list inside it is
+ * the platform's list of commands — no portal, no positioning code, and the
+ * keyboard and dismissal the browser already implements. A styled kit hangs
+ * its own popup here; native IS the kit here, so this is the real thing
+ * rather than a stand-in for one.
+ */
+function AssistantMenu({
+  label,
+  part,
+  className,
+  icon,
+  disabled,
+  items,
+  onSelect,
+}: Readonly<TableAssistantMenuProps>) {
+  const close = (event: { currentTarget: HTMLElement }): void => {
+    event.currentTarget.closest("details")?.removeAttribute("open");
+  };
+  return (
+    <details data-adapttable-part="assistant-examples">
+      <summary
+        aria-label={label}
+        title={label}
+        data-adapttable-part={part}
+        className={className}
+        {...(disabled ? { "aria-disabled": true } : {})}
+      >
+        {icon}
+      </summary>
+      <menu data-adapttable-part="assistant-examples-list">
+        {items.map((item) => (
+          <li key={item.id}>
+            <button
+              type="button"
+              data-adapttable-part={item.part}
+              onClick={(event) => {
+                close(event);
+                onSelect(item.id);
+              }}
+            >
+              {item.icon}
+              <span>{item.title}</span>
+              {item.description ? <small>{item.description}</small> : null}
+            </button>
+          </li>
+        ))}
+      </menu>
+    </details>
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -251,6 +306,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}
     />

@@ -8,6 +8,7 @@ import {
   TableAssistantChrome,
   type TableAssistantComposerProps,
   type TableAssistantLanguageChipProps,
+  type TableAssistantMenuProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -19,6 +20,7 @@ import {
   Badge,
   Button,
   Drawer,
+  Menu,
   Paper,
   Select,
   Text,
@@ -354,6 +356,60 @@ function AssistantLanguageChip({
   );
 }
 
+/**
+ * The examples menu, as Mantine's own — so it portals, positions and takes
+ * the keyboard exactly like every other menu in a Mantine application.
+ */
+function AssistantMenu({
+  label,
+  part,
+  className,
+  icon,
+  disabled,
+  items,
+  onSelect,
+}: Readonly<TableAssistantMenuProps>) {
+  return (
+    <Menu position="top-start" withinPortal>
+      <Menu.Target>
+        <Tooltip label={label} withinPortal>
+          <ActionIcon
+            type="button"
+            size="md"
+            variant="subtle"
+            color="gray"
+            aria-label={label}
+            data-adapttable-part={part}
+            className={className}
+            disabled={disabled}
+          >
+            {icon}
+          </ActionIcon>
+        </Tooltip>
+      </Menu.Target>
+      <Menu.Dropdown>
+        {items.map((item) => (
+          <Menu.Item
+            key={item.id}
+            data-adapttable-part={item.part}
+            leftSection={item.icon}
+            onClick={() => {
+              onSelect(item.id);
+            }}
+          >
+            <Text size="sm">{item.title}</Text>
+            {item.description ? (
+              <Text size="xs" c="dimmed">
+                {item.description}
+              </Text>
+            ) : null}
+          </Menu.Item>
+        ))}
+      </Menu.Dropdown>
+    </Menu>
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -366,6 +422,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}
     />

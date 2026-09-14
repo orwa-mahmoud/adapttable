@@ -8,6 +8,7 @@ import {
   TableAssistantChrome,
   type TableAssistantComposerProps,
   type TableAssistantLanguageChipProps,
+  type TableAssistantMenuProps,
   type TableAssistantPanelProps,
   type TableAssistantProps,
   type TableAssistantSheetProps,
@@ -18,6 +19,7 @@ import {
   Button,
   Card,
   Drawer,
+  Dropdown,
   Input,
   Select,
   Tag,
@@ -324,6 +326,58 @@ function AssistantLanguageChip({
   );
 }
 
+/**
+ * The examples menu, as Ant Design's own dropdown — its overlay, its
+ * placement and the keyboard an antd reader already knows.
+ */
+function AssistantMenu({
+  label,
+  part,
+  className,
+  icon,
+  disabled,
+  items,
+  onSelect,
+}: Readonly<TableAssistantMenuProps>) {
+  return (
+    <Dropdown
+      placement="topLeft"
+      trigger={["click"]}
+      menu={{
+        items: items.map((item) => ({
+          key: item.id,
+          icon: item.icon,
+          label: (
+            <span data-adapttable-part={item.part}>
+              <Typography.Text>{item.title}</Typography.Text>
+              {item.description ? (
+                <Typography.Text type="secondary" style={{ display: "block" }}>
+                  {item.description}
+                </Typography.Text>
+              ) : null}
+            </span>
+          ),
+        })),
+        onClick: (event) => {
+          onSelect(event.key);
+        },
+      }}
+    >
+      <Tooltip title={label}>
+        <Button
+          type="text"
+          size="small"
+          aria-label={label}
+          data-adapttable-part={part}
+          className={className}
+          disabled={disabled}
+          icon={icon}
+        />
+      </Tooltip>
+    </Dropdown>
+  );
+}
+
 export function TableAssistant(props: Readonly<TableAssistantProps>) {
   return (
     <TableAssistantChrome
@@ -336,6 +390,7 @@ export function TableAssistant(props: Readonly<TableAssistantProps>) {
         Badge: AssistantBadge,
         Window: AssistantWindow,
         Suggestion: AssistantSuggestion,
+        Menu: AssistantMenu,
         LanguageChip: AssistantLanguageChip,
       }}
     />

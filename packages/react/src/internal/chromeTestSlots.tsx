@@ -606,6 +606,33 @@ export const tableAssistantTestSlots: TableAssistantSlots = {
       {children}
     </dialog>
   ),
+  Menu: ({ label, part, className, icon, disabled, items, onSelect }) => (
+    <details data-adapttable-part="assistant-examples">
+      <summary
+        aria-label={label}
+        data-adapttable-part={part}
+        className={className}
+        {...(disabled ? { "aria-disabled": true } : {})}
+      >
+        {icon}
+      </summary>
+      <menu>
+        {items.map((item) => (
+          <li key={item.id}>
+            <button
+              type="button"
+              data-adapttable-part={item.part}
+              onClick={() => {
+                onSelect(item.id);
+              }}
+            >
+              {item.title}
+            </button>
+          </li>
+        ))}
+      </menu>
+    </details>
+  ),
   Suggestion: ({ title, description, icon, part, className, onClick }) => (
     <button
       type="button"

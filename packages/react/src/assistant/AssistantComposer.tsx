@@ -11,8 +11,11 @@ import type { TableLabels } from "@adapttable/core";
 import type { KeyboardEvent, ReactElement } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
-import { MicIcon, SendIcon, StopIcon } from "./assistantIcons";
-import type { TableAssistantSlots } from "./assistantSlots";
+import { ExamplesIcon, MicIcon, SendIcon, StopIcon } from "./assistantIcons";
+import type {
+  TableAssistantMenuItem,
+  TableAssistantSlots,
+} from "./assistantSlots";
 import { assistantIsBusy, assistantIsUsable } from "./assistantView";
 import type { SpeechInputHandle } from "./speechView";
 
@@ -29,6 +32,17 @@ export interface AssistantComposerProps {
   readonly onStop: () => void;
   /** Dictation, when the host turned it on and this browser can do it. */
   readonly speech?: SpeechInputHandle;
+  /**
+   * The examples this table can run right now, for the composer's own menu.
+   *
+   * Absent once a kit supplies no menu, or once there is nothing eligible —
+   * the chrome falls back to its disclosure rather than drawing an empty one.
+   */
+  readonly examples?: {
+    readonly label: string;
+    readonly items: readonly TableAssistantMenuItem[];
+    readonly onSelect: (id: string) => void;
+  };
 }
 
 /** The sticky bottom composer. @internal */
@@ -42,6 +56,7 @@ export function AssistantComposer({
   onSend,
   onStop,
   speech,
+  examples,
 }: AssistantComposerProps): ReactElement {
   // A parked approval is still a turn: the host says so with `busy`, and
   // without it the status is the only signal there is.
@@ -50,6 +65,7 @@ export function AssistantComposer({
   const Composer = slots.Composer;
   const Button = slots.Button;
   const LanguageChip = slots.LanguageChip;
+  const Menu = slots.Menu;
   const listening = speech?.state.status === "listening";
   const micLabel = listening
     ? (labels?.assistantVoiceStop ?? "Stop dictation")
@@ -91,6 +107,19 @@ export function AssistantComposer({
       <LiveRegion part="assistant-voice-status">
         {listening ? (labels?.assistantVoiceListening ?? "Listening") : ""}
       </LiveRegion>
+      {/* Where a reader looks when they do not know what to type. It leads the
+          row rather than trailing it: the actions on the other end are what
+          they press once they have written something. */}
+      {Menu && examples && examples.items.length > 0 ? (
+        <Menu
+          label={examples.label}
+          part="assistant-examples-menu"
+          icon={<ExamplesIcon />}
+          disabled={!usable}
+          items={examples.items}
+          onSelect={examples.onSelect}
+        />
+      ) : null}
       {/* The input takes the room that is left. Without `minWidth: 0` a
           textarea's intrinsic width wins the flex negotiation and pushes Send
           off the end of a 400px window. */}
