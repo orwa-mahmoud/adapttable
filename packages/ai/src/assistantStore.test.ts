@@ -348,8 +348,9 @@ describe("the assistant store", () => {
     emit?.("Showing ");
     await new Promise((resolve) => setTimeout(resolve, 0));
     const during = store.getState().messages.at(-1);
-    expect(during?.partialText).toBe("Showing ");
-    expect(during?.text).toBe("");
+    // One field carries the words, marked as still arriving.
+    expect(during?.text).toBe("Showing ");
+    expect(during?.streaming).toBe(true);
 
     settle?.();
     await turn;
@@ -357,7 +358,7 @@ describe("the assistant store", () => {
     // One assistant message, and it is the reply — not the draft beside it.
     expect(after).toHaveLength(2);
     expect(after[1]?.text).toBe("Showing page 2.");
-    expect(after[1]?.partialText).toBeUndefined();
+    expect(after[1]?.streaming).toBeUndefined();
   });
 
   it("drops the partial message when the turn is stopped", async () => {
@@ -376,7 +377,7 @@ describe("the assistant store", () => {
 
     emit?.("Half a sen");
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(store.getState().messages.at(-1)?.partialText).toBe("Half a sen");
+    expect(store.getState().messages.at(-1)?.text).toBe("Half a sen");
 
     store.stop();
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -715,12 +716,12 @@ describe("the capabilities the reader stopped being asked about", () => {
     });
     store.connect();
 
-    const named = store.getState().alwaysAllowedNames;
-    expect(Object.keys(named)).toEqual(["view.setPage"]);
-    expect(named["view.setPage"]).toBeTruthy();
+    const [allowance] = store.getState().alwaysAllowed;
+    expect(allowance?.capability).toBe("view.setPage");
+    expect(allowance?.name).toBeTruthy();
   });
 
-  it("hands back the same map while the list is the same", () => {
+  it("hands back the same list while the keys are the same", () => {
     // A fresh object every read makes every snapshot look new, and a
     // subscriber comparing identities re-renders forever.
     const session = tableSession();
@@ -732,10 +733,10 @@ describe("the capabilities the reader stopped being asked about", () => {
     });
     store.connect();
 
-    const first = store.getState().alwaysAllowedNames;
+    const first = store.getState().alwaysAllowed;
     // The host re-renders and hands over a fresh array of the same keys.
     store.update({ session, transport, alwaysAllowed: ["view.setPage"] });
-    expect(store.getState().alwaysAllowedNames).toBe(first);
+    expect(store.getState().alwaysAllowed).toBe(first);
   });
 
   it("says nothing for a key the catalog does not carry", () => {
@@ -748,7 +749,10 @@ describe("the capabilities the reader stopped being asked about", () => {
     });
     store.connect();
 
-    expect(store.getState().alwaysAllowedNames).toEqual({});
+    // The entry stands — the reader agreed to it — with no name to show.
+    expect(store.getState().alwaysAllowed).toEqual([
+      { capability: "host.gone" },
+    ]);
   });
 });
 
@@ -1257,11 +1261,12 @@ describe("connecting and disconnecting", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     const streaming = store.getState().messages.at(-1);
-    expect(streaming?.partialText).toBe("one");
+    expect(streaming?.text).toBe("one");
+    expect(streaming?.streaming).toBe(true);
 
     report?.("one two");
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(store.getState().messages.at(-1)?.partialText).toBe("one two");
+    expect(store.getState().messages.at(-1)?.text).toBe("one two");
 
     settle?.({ text: "one two three" });
     await turn;

@@ -34,6 +34,7 @@ import type {
   TableAssistantSlots,
 } from "./assistantSlots";
 import type {
+  TableAssistantAllowanceView,
   TableAssistantMessageView,
   TableAssistantQuestionView,
   TableAssistantReceiptView,
@@ -780,11 +781,11 @@ function Spoken({
       part="assistant-message-text"
       {...(chosen === undefined ? {} : { avatar: chosen })}
       {...(trailing ? { trailing } : {})}
-      {...(message.partialText === undefined ? {} : { streaming: true })}
+      {...(message.streaming ? { streaming: true } : {})}
     >
       {/* While a reply is still arriving, what has landed is shown in its
           place — marked as provisional, because words are not a receipt. */}
-      {message.partialText ?? message.text}
+      {message.text}
     </Said>
   );
 }
@@ -1239,20 +1240,18 @@ const WORKING_KEYFRAMES = `
  * it is a standing decision, not something that happened in this turn.
  */
 export function AssistantAlwaysAllowed({
-  capabilities,
-  names,
+  allowed,
   labels,
   slots,
   onRevoke,
 }: {
-  readonly capabilities: readonly string[];
+  readonly allowed: readonly TableAssistantAllowanceView[];
   /** What each is called, where the table could say. */
-  readonly names?: Readonly<Record<string, string>>;
   readonly labels: TableLabels | undefined;
   readonly slots: TableAssistantSlots;
   readonly onRevoke: (capability: string) => void;
 }): ReactElement | null {
-  if (capabilities.length === 0) return null;
+  if (allowed.length === 0) return null;
   return (
     <div
       data-adapttable-part="assistant-always-allowed"
@@ -1271,7 +1270,7 @@ export function AssistantAlwaysAllowed({
           gap: "0.3em",
         }}
       >
-        {capabilities.map((capability) => (
+        {allowed.map(({ capability, name }) => (
           <li
             key={capability}
             data-adapttable-part="assistant-always-allowed-item"
@@ -1292,7 +1291,7 @@ export function AssistantAlwaysAllowed({
                   exists — which is a developer's identifier and reads like
                   one. */}
               {labels?.assistantCapabilityName?.(capability) ??
-                names?.[capability] ??
+                name ??
                 capability}
             </slots.Button>
           </li>

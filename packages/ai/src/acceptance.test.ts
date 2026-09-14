@@ -637,8 +637,8 @@ describe("(h) a streamed reply", () => {
     });
     store.connect();
     store.subscribe(() => {
-      const text = store.getState().messages.at(-1)?.partialText;
-      if (text) seen.push(text);
+      const last = store.getState().messages.at(-1);
+      if (last?.streaming && last.text) seen.push(last.text);
     });
 
     const turn = store.send("go to page 3");

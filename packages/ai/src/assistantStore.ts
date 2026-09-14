@@ -62,11 +62,23 @@ export interface AssistantUndoOffer {
   readonly blocked?: UndoBlock;
 }
 
+/**
+ * One capability the reader waved through, and what it is called.
+ *
+ * @public
+ */
+export interface AssistantAllowance {
+  /** The capability key — a developer's identifier. */
+  readonly capability: string;
+  /** What the table knows it as, when it knows anything. */
+  readonly name?: string;
+}
+
 /** One shared empty list, so an unchanged snapshot stays identical. */
 const EMPTY_ALLOWED: readonly string[] = [];
 
-/** The same, for the names beside them. */
-const EMPTY_NAMES: Readonly<Record<string, string>> = {};
+/** The same, for the allowances built from them. */
+const EMPTY_ALLOWANCES: readonly AssistantAllowance[] = [];
 
 /** Where the conversation is. @public */
 export type AssistantStatus =
@@ -93,13 +105,13 @@ export interface AssistantMessage {
   /** Milliseconds since the epoch. */
   readonly at: number;
   /**
-   * Text so far, while a transport is still streaming this reply.
+   * Whether this is what has arrived so far rather than the settled reply.
    *
-   * Present only on the message in flight, and cleared when the turn settles
-   * into `text`. A panel renders it as provisional; nothing acts on it, and no
-   * call is ever made from a partial reply.
+   * `text` holds what to show either way — a reader never has to know which
+   * of two fields carries the words. A panel marks this one as provisional;
+   * nothing acts on it, and no call is ever made from a partial reply.
    */
-  readonly partialText?: string;
+  readonly streaming?: boolean;
   /**
    * The question this message is asking, while it is still unanswered.
    *
@@ -205,20 +217,16 @@ export interface TableAssistantSnapshot {
    */
   readonly undo: AssistantUndoOffer | null;
   /**
-   * Capability keys the reader said not to ask about again.
+   * What the reader said not to ask about again, each with its own name.
    *
-   * Readable with nothing pending, because that is when somebody goes looking
-   * for what they agreed to.
+   * One entry per capability rather than a list of keys beside a map of
+   * names: two collections keyed by the same thing are two collections to
+   * keep in step. `name` is whatever the table knows it as — a host's own
+   * capability has only what its definition said, and that beats showing an
+   * identifier. Readable with nothing pending, because that is when somebody
+   * goes looking for what they agreed to.
    */
-  readonly alwaysAllowed: readonly string[];
-  /**
-   * What each of those capabilities is called, where the table knows.
-   *
-   * Keyed by capability. A built-in has a translation the surface can use
-   * instead; a host's own has only whatever its definition said about it,
-   * and that is better than showing the reader an identifier.
-   */
-  readonly alwaysAllowedNames: Readonly<Record<string, string>>;
+  readonly alwaysAllowed: readonly AssistantAllowance[];
   /** Whether a send would do anything right now. */
   readonly canSend: boolean;
   /** Whether there is a turn to stop. */
@@ -559,23 +567,25 @@ export function createTableAssistant(
     return entry?.summaryShort ?? entry?.summary;
   };
 
-  /** One shared empty map, so an unchanged snapshot stays identical. */
+  /** Built once per list, so an unchanged snapshot stays identical. */
   let namesCache: {
     keys: readonly string[];
-    value: Readonly<Record<string, string>>;
+    value: readonly AssistantAllowance[];
   } | null = null;
 
-  const allowedNames = (
+  const allowances = (
     keys: readonly string[] | undefined
-  ): Readonly<Record<string, string>> => {
+  ): readonly AssistantAllowance[] => {
     const list = keys ?? EMPTY_ALLOWED;
-    if (list.length === 0) return EMPTY_NAMES;
+    if (list.length === 0) return EMPTY_ALLOWANCES;
+    // Built once per list, so an unchanged table hands back the same array
+    // rather than an equal one — a snapshot never equal to the last is a
+    // render loop in a binding that subscribes.
     if (namesCache && sameKeys(namesCache.keys, list)) return namesCache.value;
-    const value: Record<string, string> = {};
-    for (const key of list) {
-      const name = capabilityName(key);
-      if (name) value[key] = name;
-    }
+    const value = list.map((capability) => {
+      const name = capabilityName(capability);
+      return name === undefined ? { capability } : { capability, name };
+    });
     namesCache = { keys: list, value };
     return value;
   };
@@ -608,8 +618,7 @@ export function createTableAssistant(
     a.approval === b.approval &&
     a.pendingQuestion === b.pendingQuestion &&
     sameOffer(a.undo, b.undo) &&
-    sameKeys(a.alwaysAllowed, b.alwaysAllowed) &&
-    a.alwaysAllowedNames === b.alwaysAllowedNames &&
+    a.alwaysAllowed === b.alwaysAllowed &&
     a.canSend === b.canSend &&
     a.canStop === b.canStop &&
     a.suggestions === b.suggestions &&
@@ -662,10 +671,7 @@ export function createTableAssistant(
       approval: live.approval ?? null,
       pendingQuestion: openQuestion(messages),
       undo: undoOffer(),
-      alwaysAllowed: live.alwaysAllowed ?? EMPTY_ALLOWED,
-      // The same names the receipts use, so a standing permission reads as
-      // the thing the reader agreed to rather than as a developer's key.
-      alwaysAllowedNames: allowedNames(live.alwaysAllowed),
+      alwaysAllowed: allowances(live.alwaysAllowed),
       canSend: !sending && Boolean(live.session) && Boolean(live.transport),
       canStop: sending,
     };
@@ -1008,7 +1014,7 @@ export function createTableAssistant(
       messages = existing
         ? messages.map((entry) =>
             entry.id === streamingId
-              ? { ...entry, partialText: streamed }
+              ? { ...entry, text: streamed, streaming: true }
               : entry
           )
         : [
@@ -1016,9 +1022,9 @@ export function createTableAssistant(
             {
               id: streamingId,
               role: "assistant" as const,
-              text: "",
+              text: streamed,
               at: Date.now(),
-              partialText: streamed,
+              streaming: true,
             },
           ];
       publish();

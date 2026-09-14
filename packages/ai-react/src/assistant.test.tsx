@@ -1065,7 +1065,10 @@ describe("what the reader waved through", () => {
       })
     );
 
-    expect(result.current.alwaysAllowed).toEqual(["orders.archive"]);
+    // One entry per capability, each carrying whatever the table knows it as.
+    expect(result.current.alwaysAllowed).toEqual([
+      { capability: "orders.archive" },
+    ]);
     result.current.revokeAlwaysAllow?.("orders.archive");
     expect(revoke).toHaveBeenCalledWith("orders.archive");
   });

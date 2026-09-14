@@ -772,9 +772,6 @@ function Body({
     if (!review) setExpanded(false);
   }, [review]);
   const Button = slots.Button;
-  const allowedNames = assistant.alwaysAllowedNames
-    ? { names: assistant.alwaysAllowedNames }
-    : {};
   // A write waiting on the reader parks the transcript's own indicators; the
   // approval is what is happening, and two things claiming to be are one too
   // many.
@@ -843,8 +840,7 @@ function Body({
             the examples rather than in the transcript. */}
         {assistant.revokeAlwaysAllow ? (
           <AssistantAlwaysAllowed
-            capabilities={assistant.alwaysAllowed ?? []}
-            {...allowedNames}
+            allowed={assistant.alwaysAllowed ?? []}
             labels={labels}
             slots={slots}
             onRevoke={assistant.revokeAlwaysAllow}

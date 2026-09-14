@@ -70,13 +70,14 @@ export interface TableAssistantMessageView {
   /** Untrusted text. The chrome renders it as text, never as markup. */
   readonly text: string;
   /**
-   * What has arrived so far, while a reply is still streaming.
+   * Whether {@link TableAssistantMessageView.text} is what has arrived so far
+   * rather than the settled reply.
    *
-   * Present only on a provisional message; the real one replaces it when the
-   * turn settles. Words arriving are never a claim that anything ran, so a
-   * message showing this carries no receipts.
+   * One field carries the words either way, so nothing has to know which of
+   * two to read. Words arriving are never a claim that anything ran, so a
+   * message marked this way carries no receipts.
    */
-  readonly partialText?: string;
+  readonly streaming?: boolean;
   /**
    * The question this message is asking, while it is still unanswered.
    *
@@ -109,6 +110,14 @@ export interface TableAssistantQuestionView {
   readonly options?: readonly TableAssistantQuestionOption[];
   /** Whether a typed answer is accepted as well as, or instead of, a choice. */
   readonly allowFreeText: boolean;
+}
+
+/** One capability the reader waved through, and what it is called. @public */
+export interface TableAssistantAllowanceView {
+  /** The capability key — a developer's identifier. */
+  readonly capability: string;
+  /** What the table knows it as, when it knows anything. */
+  readonly name?: string;
 }
 
 /** Whether the last turn that moved the table can be put back. @public */
@@ -186,15 +195,13 @@ export interface TableAssistantView {
    * control is already that action's undo.
    */
   readonly undoAction?: (idempotencyKey: string) => void | Promise<void>;
-  /** Capability keys the reader said not to ask about again. */
-  readonly alwaysAllowed?: readonly string[];
   /**
-   * What each of those is called, keyed by capability.
+   * What the reader said not to ask about again, each with its own name.
    *
-   * A built-in has a translation; a host's own capability has only what its
-   * definition said about it, which still beats showing a reader the key.
+   * One entry per capability rather than a list of keys beside a map of
+   * names: two collections keyed by the same thing are two to keep in step.
    */
-  readonly alwaysAllowedNames?: Readonly<Record<string, string>>;
+  readonly alwaysAllowed?: readonly TableAssistantAllowanceView[];
   /** Ask about one of them again from now on. */
   readonly revokeAlwaysAllow?: (capability: string) => void;
 }

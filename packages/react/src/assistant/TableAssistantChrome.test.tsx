@@ -1749,8 +1749,8 @@ describe("a reply still arriving", () => {
           {
             id: "m-1",
             role: "assistant",
-            text: "",
-            partialText: "Sorting by",
+            text: "Sorting by",
+            streaming: true,
           },
         ],
       }),
@@ -1779,7 +1779,7 @@ describe("what the reader stopped being asked about", () => {
     const revokeAlwaysAllow = vi.fn();
     mount({
       assistant: view({
-        alwaysAllowed: ["edit.cells"],
+        alwaysAllowed: [{ capability: "edit.cells" }],
         revokeAlwaysAllow,
       }),
     });

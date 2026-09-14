@@ -66,6 +66,7 @@ export {
   turnStatus,
 } from "./assistantReceipts";
 export {
+  type AssistantAllowance,
   type AssistantMessage,
   type AssistantStatus,
   type AssistantUndoOffer,

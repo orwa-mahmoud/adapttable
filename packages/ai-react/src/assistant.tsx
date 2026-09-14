@@ -25,6 +25,7 @@ import {
   type AgentContextInputs,
   type AgentSession,
   type AlwaysAllowedState,
+  type AssistantAllowance,
   type AssistantMessage,
   type AssistantQuestion,
   type AssistantStatus,
@@ -179,10 +180,8 @@ export interface TableAssistantState {
   readonly undoTurn: () => Promise<void>;
   /** Put one action of the last turn back, by its receipt's replay identity. */
   readonly undoAction: (idempotencyKey: string) => Promise<void>;
-  /** Capability keys the reader said not to ask about again. */
-  readonly alwaysAllowed: readonly string[];
-  /** What each standing permission is called, where the table knows. */
-  readonly alwaysAllowedNames: Readonly<Record<string, string>>;
+  /** What the reader said not to ask about again, each with its own name. */
+  readonly alwaysAllowed: readonly AssistantAllowance[];
   /** Ask about one of them again from now on. */
   readonly revokeAlwaysAllow: (capability: string) => void;
   /** The suggestions this table can run right now, re-checked every render. */
@@ -296,7 +295,6 @@ export function useTableAssistant(
     undoTurn: store.undoTurn,
     undoAction: store.undoAction,
     alwaysAllowed: state.alwaysAllowed,
-    alwaysAllowedNames: state.alwaysAllowedNames,
     revokeAlwaysAllow: store.revokeAlwaysAllow,
     suggestions: state.suggestions,
     runSuggestion: store.runSuggestion,
