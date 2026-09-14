@@ -133,6 +133,38 @@ describe("a filter's own values reach its schema", () => {
   });
 });
 
+describe("what it leaves alone", () => {
+  it("keeps a property the authored schema already described", () => {
+    // `withEnum` narrows what a property accepts; it does not replace what
+    // the author said about its type.
+    const input = session().describe("view.pinColumn").input;
+    expect(input?.properties?.key?.type).toBeDefined();
+    expect(input?.properties?.key?.enum).toEqual(["person"]);
+  });
+
+  it("offers no null where the capability takes none", () => {
+    // Pinning names a column; only sort and grouping accept null to clear.
+    expect(
+      session().describe("view.pinColumn").input?.properties?.key?.enum
+    ).not.toContain(null);
+  });
+
+  it("says nothing about a capability that names no column", () => {
+    // Reading rows takes a query, not a column choice, and a capability this
+    // does not specialise comes back exactly as its author wrote it.
+    const live = session();
+    expect(live.describe("rows.read").input).toEqual(
+      live.describe("rows.read").input
+    );
+    expect(prop(live.describe("rows.read").input, "key")).toBeUndefined();
+  });
+
+  it("keeps the draft the authored schema declared", () => {
+    const input = session().describe("view.setFilters").input;
+    expect(input?.$schema).toBeTruthy();
+  });
+});
+
 describe("a column choice reaches the schema that names one", () => {
   it("offers the sortable columns to sort, and null to clear", () => {
     const input = session().describe("view.setSort").input;

@@ -242,6 +242,23 @@ describe("values it can read, and values it cannot", () => {
   });
 });
 
+describe("a pinned row says so, and which edge", () => {
+  it("names the edge it went to, and the opposite change when it comes off", () => {
+    const pin = (side: unknown) =>
+      subjectFor("view.pinRow", { rowKey: "r1", side }, ran({ ok: true }));
+    expect(pin("top")).toEqual({ kind: "pinRow", terms: [{ value: "top" }] });
+    expect(pin("bottom")).toEqual({
+      kind: "pinRow",
+      terms: [{ value: "bottom" }],
+    });
+    expect(pin(null)).toEqual({ kind: "pinRow", cleared: true });
+    // A side this capability does not take says only that a row was pinned,
+    // rather than naming an edge the table never used.
+    expect(pin("sideways")).toEqual({ kind: "pinRow" });
+    expect(pin(undefined)).toEqual({ kind: "pinRow" });
+  });
+});
+
 describe("what it refuses to claim", () => {
   it("says only the kind when the action did not run", () => {
     // The absence of a sort in a refusal is not the table clearing its sort.
