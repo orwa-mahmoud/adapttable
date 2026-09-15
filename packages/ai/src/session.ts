@@ -589,24 +589,13 @@ export function createAgentSession(
       own = options.observe().viewRevision;
     });
 
-    // Named here, where the call's own identity is, so a surface watching two
-    // capabilities at once can tell which one moved. Absent when the table
-    // wired nowhere to send it.
-    const report = options.onProgress;
-    let reported = false;
-    const progress = report
-      ? (given: CapabilityProgress) => {
-          reported = true;
-          report({ ...given, capability: key, idempotencyKey });
-        }
-      : undefined;
-    // Closed once, and only by a call that opened it: a surface holding the
-    // last count would otherwise show it beside a turn that has finished.
-    const closeProgress = (): void => {
-      if (!reported) return;
-      reported = false;
-      report?.(null);
-    };
+    // Named where the call’s own identity is, so a surface watching two
+    // capabilities at once can tell which one moved.
+    const { progress, close: closeProgress } = callProgress(
+      options.onProgress,
+      key,
+      idempotencyKey
+    );
 
     const call: CallState = { invokedWrite: false, apply: tracked, progress };
 
@@ -919,6 +908,37 @@ function traceApply(apply: AgentApply, settled: () => void): AgentApply {
       };
     },
   });
+}
+
+/**
+ * Where one call says how far it has got, and how that is closed.
+ *
+ * A call that reported something closes with `null` when it settles, so a
+ * surface is never left holding the last count beside a finished call. A call
+ * that reported nothing says nothing, and a table with nowhere to send it is
+ * handed no reporter at all.
+ */
+function callProgress(
+  report: ((given: AgentProgress | null) => void) | undefined,
+  capability: string,
+  idempotencyKey: string
+): {
+  readonly progress: ((given: CapabilityProgress) => void) | undefined;
+  readonly close: () => void;
+} {
+  if (!report) return { progress: undefined, close: () => undefined };
+  let reported = false;
+  return {
+    progress: (given) => {
+      reported = true;
+      report({ ...given, capability, idempotencyKey });
+    },
+    close: () => {
+      if (!reported) return;
+      reported = false;
+      report(null);
+    },
+  };
 }
 
 /**
