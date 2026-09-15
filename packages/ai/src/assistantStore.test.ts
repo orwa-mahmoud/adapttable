@@ -5,7 +5,7 @@ import type {
   AssistantTransport,
   AssistantTransportReply,
 } from "./assistantContracts";
-import { createTableAssistant } from "./assistantStore";
+import { type AssistantMessage, createTableAssistant } from "./assistantStore";
 import { createAgentSession } from "./session";
 import type { AgentObservation, AgentSession } from "./types";
 
@@ -1996,5 +1996,155 @@ describe("stop, disconnect and resume are three different things", () => {
     await store.resume();
 
     expect(store.getState().errorCode).toBe("resume-unsupported");
+  });
+});
+
+describe("a conversation the host owns", () => {
+  it("tells the host about every change, with the whole transcript", async () => {
+    const seen: (readonly AssistantMessage[])[] = [];
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying("done"),
+      onMessagesChange: (messages) => seen.push(messages),
+    });
+    store.connect();
+    await store.send("page 2");
+
+    // The reader's message and the reply, each as they happened.
+    expect(seen.at(-1)?.map((entry) => entry.text)).toEqual(["page 2", "done"]);
+  });
+
+  it("shows a transcript the host hands over", () => {
+    const loaded: readonly AssistantMessage[] = [
+      { id: "a", role: "user", text: "from yesterday", at: 1 },
+      { id: "b", role: "assistant", text: "and its answer", at: 2 },
+    ];
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying(),
+      messages: loaded,
+    });
+
+    // What a host loaded from its own API is what the panel opens with.
+    expect(store.getState().messages.map((entry) => entry.text)).toEqual([
+      "from yesterday",
+      "and its answer",
+    ]);
+  });
+
+  it("takes a message that arrived from somewhere else", () => {
+    const first: readonly AssistantMessage[] = [
+      { id: "a", role: "user", text: "hello", at: 1 },
+    ];
+    const session = tableSession();
+    const transport = replying();
+    const store = createTableAssistant({ session, transport, messages: first });
+    store.connect();
+
+    // A socket, another device, a support agent: a new array is how a host
+    // says something arrived.
+    store.update({
+      session,
+      transport,
+      messages: [...first, { id: "b", role: "assistant", text: "hi", at: 2 }],
+    });
+
+    expect(store.getState().messages.map((entry) => entry.text)).toEqual([
+      "hello",
+      "hi",
+    ]);
+  });
+
+  it("keeps a turn's own messages when the host hands back what it had", async () => {
+    // The list the host still believes in is not it undoing the turn that just
+    // ran. Only a different list replaces the transcript.
+    const session = tableSession();
+    const transport = replying("answered");
+    const held: readonly AssistantMessage[] = [];
+    const store = createTableAssistant({ session, transport, messages: held });
+    store.connect();
+    await store.send("ask");
+
+    store.update({ session, transport, messages: held });
+
+    expect(store.getState().messages.map((entry) => entry.text)).toEqual([
+      "ask",
+      "answered",
+    ]);
+  });
+});
+
+describe("how much of the conversation travels", () => {
+  function recorder(): {
+    readonly transport: AssistantTransport;
+    readonly sent: readonly {
+      readonly conversation: readonly { readonly text: string }[];
+    }[];
+  } {
+    const sent: { conversation: readonly { readonly text: string }[] }[] = [];
+    return {
+      sent,
+      transport: {
+        send: ({ text, conversation }) => {
+          sent.push({ conversation });
+          return Promise.resolve({ text: `re: ${text}` });
+        },
+      },
+    };
+  }
+
+  it("sends every earlier message by default", async () => {
+    const backend = recorder();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: backend.transport,
+    });
+    store.connect();
+    await store.send("one");
+    await store.send("two");
+
+    // The second turn carries the first exchange as well as its own text: a
+    // backend that remembers nothing has to be told all of it.
+    expect(backend.sent[1]?.conversation.map((entry) => entry.text)).toEqual([
+      "one",
+      "re: one",
+      "two",
+    ]);
+  });
+
+  it("sends only the most recent when the host names a number", async () => {
+    const backend = recorder();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: backend.transport,
+      conversation: 2,
+    });
+    store.connect();
+    await store.send("one");
+    await store.send("two");
+    await store.send("three");
+
+    expect(backend.sent[2]?.conversation.map((entry) => entry.text)).toEqual([
+      "re: two",
+      "three",
+    ]);
+  });
+
+  it("sends none when the backend keeps its own session", async () => {
+    const backend = recorder();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: backend.transport,
+      conversation: 0,
+    });
+    store.connect();
+    await store.send("one");
+    await store.send("two");
+
+    // The reader's own message still travels as the turn's text; the history
+    // is the backend's to remember.
+    expect(backend.sent[1]?.conversation).toEqual([]);
+    // And the reader still sees all of it.
+    expect(store.getState().messages).toHaveLength(4);
   });
 });

@@ -90,7 +90,10 @@ export interface TableAssistantOptions {
     readonly alwaysAllow?: AlwaysAllowedState;
     readonly awaitingApproval?: boolean;
     readonly contextInputs?: () => AgentContextInputs;
+    readonly conversation?: "full" | number;
+    readonly messages?: readonly AssistantMessage[];
     readonly onDetach?: (handle: AssistantResumeHandle) => void;
+    readonly onMessagesChange?: (messages: readonly AssistantMessage[]) => void;
     readonly onOpenChange?: (open: boolean) => void;
     readonly open?: boolean;
     readonly resumeHandle?: AssistantResumeHandle;

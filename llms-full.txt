@@ -35,7 +35,7 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 69–78 kB min+gzip (measured 2026-09-14 from
+A plain adapter `DataTable` is 69–79 kB min+gzip (measured 2026-09-15 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -615,7 +615,7 @@ bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
 Measured on MUI, the table alone is 69 kB gzipped and the same table with
-`standardFeatures()` composed is 121 kB.
+`standardFeatures()` composed is 122 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -8554,9 +8554,173 @@ pinned one and sees another knows to ask for the whole thing again.
 deliberate call — `sampleColumnValues(session, key)` reads through `rows.read`
 under the session's own permission predicate, caps at five distinct values,
 revalidates each against the column's declared type, and never touches an
-unreadable column. Hand the result in as `inputs.samples`; the contract marks
-those columns `sampled: true`, so nobody confuses an author's example with
-somebody's data.
+unreadable column. The contract marks those columns `sampled: true`, so nobody
+confuses an author's example with somebody's data.
+
+`tableAgent` does the reading for you: it collects the columns whose author
+asked, samples them once when the contract changes rather than once per turn,
+and hands the values in. A host building its own context calls
+`sampleColumns(session, wanted)` and passes the result as `inputs.samples` —
+the context builder performs no I/O of its own, which is why the read happens
+outside it.
+
+Sampling is for a column with no declared list of its own. A filter-backed
+column already publishes its options in the filter catalog — the declared set,
+complete, so no row can introduce a value the model has not been told about.
+What sampling answers is the other case: free text, references, dates and
+amounts, where the only way to learn how a value looks is to see one.
+
+The values are read when the contract changes, so they illustrate the column
+rather than tracking it. Five values were never the set anyway, which is why
+the contract marks them `sampled: true` — a model needing the real list reads
+rows or the filter catalog.
+
+## Saying how far a long call has got
+
+A capability that works through a thousand rows one call at a time has nothing
+to say between "started" and its receipt, and a reader watching a spinner
+cannot tell a slow write from a stuck one. Its execution context carries a
+channel for that:
+
+```ts
+capabilities: [
+  {
+    key: "orders.settle",
+    // …
+    execute: async (context, args) => {
+      const rows = rowsFor(args);
+      for (const [index, row] of rows.entries()) {
+        context.throwIfCancelled();
+        await settle(row);
+        context.reportProgress?.({
+          done: index + 1,
+          total: rows.length,
+          label: "orders",
+        });
+      }
+      return { settled: rows.length };
+    },
+  },
+];
+```
+
+The conversation shows it where it is waiting, and it goes when the turn
+settles. `label` is shown as given — this package has no translation for your
+nouns, and inventing one would be worse than leaving it out.
+
+**Progress is not a result.** The receipt still comes from what the handler
+returned, a call that reported progress and then failed has failed, and none of
+this involves the model: nothing is sent, and no second call is made to say the
+work is done.
+
+Wire `bridge.progress` to read it outside the table; a panel inside the table
+reads it from the table's own state and needs nothing.
+
+## Who owns the conversation
+
+The panel keeps the transcript itself and sends every earlier message with each
+turn, which is what a backend that remembers nothing needs. Both halves are
+yours to change, and they are independent of each other.
+
+**Where the messages live.** Pass `messages` and the panel renders the list you
+hand it instead of the one it kept; `onMessagesChange` reports every change,
+with the whole list. A different array replaces the transcript, which is how a
+message that arrived somewhere else gets in:
+
+```tsx
+const [messages, setMessages] = useState(() => loadThread(threadId));
+
+// Another device, a colleague, an agent working the same table.
+useEffect(
+  () => socket.on("message", (m) => setMessages((all) => [...all, m])),
+  []
+);
+
+useTableAssistant({
+  session,
+  transport,
+  messages,
+  onMessagesChange: setMessages,
+});
+```
+
+Handing the same array back is you holding what you were given; only a
+different one replaces the transcript.
+
+**How much of it travels.** `conversation` decides how much history goes out
+with each turn. It never changes what the reader sees.
+
+|                    | On the wire            | For                                                   |
+| ------------------ | ---------------------- | ----------------------------------------------------- |
+| `"full"` (default) | every earlier message  | a backend that keeps no session                       |
+| `20`               | the last 20            | a long thread where resending all of it earns nothing |
+| `0`                | this turn's text alone | a backend that holds the thread itself                |
+
+```tsx
+// The server owns the thread; it needs the question, not the history.
+useTableAssistant({ session, transport, conversation: 0 });
+```
+
+## Stopping, losing the connection, and coming back
+
+Three different things happen to a turn that does not end in a reply, and the
+conversation reports which one:
+
+- **Stop** — the reader ended it. The signal is raised, the remaining actions
+  never run, and nothing is left running anywhere. `interrupted` is
+  `"stopped"`.
+- **Disconnect** — the connection was released, by an unmount, a table change
+  or `disconnect()`. The backend was never asked to stop, so it may still be
+  working. `interrupted` is `"detached"`, and the conversation stops waiting
+  for a reply that can no longer reach it.
+- **Resume** — rejoin work that is still running. The turn comes back on a
+  fresh baseline: the table is read again before anything is applied, because
+  it is not the table the turn started against.
+
+A turn can only be detached if the transport named something to come back to.
+It does that while the turn runs, through `onResumable`, and implements
+`resume` to rejoin:
+
+```ts
+const transport: AssistantTransport = {
+  send: async ({ text, onResumable, signal }) => {
+    const job = await backend.start(text, { signal });
+    // Named now, because a connection released later is too late to ask.
+    onResumable?.(job.id);
+    return toReply(await backend.wait(job.id, { signal }));
+  },
+  resume: async ({ handle, signal }) => {
+    // Same replay identities as the first attempt, so a completed action is
+    // answered from the session's record rather than run again.
+    return toReply(await backend.wait(handle.token as string, { signal }));
+  },
+};
+```
+
+Without `resume`, releasing the connection ends the turn — which is the honest
+outcome for a transport that cannot get back to it.
+
+**What this package guarantees:** within the life of one session, an action
+that already ran is not run again when a turn is resumed. The session keeps a
+replay record per identity, and a resumed attempt that reuses its identities
+gets the recorded result rather than a second execution.
+
+**What the host owns:** everything that has to survive the page. A reload
+builds a new session with an empty replay record, a new transcript and no
+memory of what ran, so durable recovery is a host decision. Keep the handle
+and hand it back:
+
+```ts
+useTableAssistant({
+  session,
+  transport,
+  onDetach: (handle) => sessionStorage.setItem("turn", JSON.stringify(handle)),
+  resumeHandle: restoredHandle,
+});
+```
+
+A backend whose work outlives a page must also be idempotent across it — the
+replay record that answers a repeated action is in the session that went away.
 
 ## Approval, undo and what a reader agreed to
 
@@ -8868,6 +9032,23 @@ Nothing happens at import: `document.modelContext` is read when you call it, so
 the module loads on a server and in a browser without the API and registers
 nothing in either. In React, `tableAgent({ webmcp: true })` does the same and
 re-registers on a contract change for you.
+
+An agent in the page reads the table through one call and changes it through
+another, and the reader can move the table in between. Every tool therefore
+takes an optional `expectedRevision` — the revision the call was planned
+against, from the `revision` an earlier result carried:
+
+```ts
+// The agent read the table at revision 5 and acts on what it read.
+await tool.execute({ page: 3, expectedRevision: 5 });
+// Refused if the reader has since moved it, and the refusal says where it is:
+// { error: { code: "revision-mismatch", ... }, revision: 7 }
+```
+
+Omit it and the call acts on the table as it is, which is what an agent that
+never names a revision has always done. This is the one transport where the
+revision travels on the call: HTTP and the AI SDK send the view with each
+request, and AG-UI publishes it as state, so those bind it for you.
 
 ### AG-UI — the table as a run's frontend tools
 
@@ -12068,12 +12249,16 @@ and the assistant contracts `AssistantAction`, `AssistantConversation`,
 `AssistantOutcome`, `AssistantOutcomeStatus`, `AssistantPlanner`,
 `AssistantProposal`, `AssistantRequest`, `AssistantSuggestion`,
 `AssistantTurn`, `AssistantExchange`, `AssistantTransport`,
-`AssistantTransportReply` and `CapabilityPresentation`, plus the receipt
+`AssistantTransportReply`, `AssistantTurnInput`, `AssistantSendInput`,
+`AssistantResumeInput`, `AssistantResumeHandle`, `CapabilityProgress` and
+`CapabilityPresentation`, plus the receipt
 readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
 `AssistantReceipt`, `AssistantReceiptStatus`, `AssistantTurnStatus`.
 `@adapttable/ai-react` exports `useTableAssistant`,
 `TableAssistantOptions`, `TableAssistantState`, `AssistantMessage`,
-`AssistantStatus`, `AssistantSuggestion`, `tableAgent`, `TableAgentOptions`,
+`AssistantStatus`, `AssistantInterruption`, `AssistantResumeHandle`,
+`AgentProgress`,
+`AssistantSuggestion`, `tableAgent`, `TableAgentOptions`,
 `TableAgentColumnPatch`, `TABLE_AGENT_STATE`, `TableAgentBridge` and
 `SharedApproval`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
 `receiptFromResult` and `receiptsFromResults` as `AssistantReceipt`, whose
@@ -12831,7 +13016,14 @@ handle and `TableAssistantSnapshot` the value a view renders, holding
 not. `AssistantQuestion`, `AssistantQuestionOption` and `AssistantAnswer` are
 the question channel. `AssistantSuggestion`s are filtered by
 `eligibleSuggestions` and checked by `assertUniqueSuggestions`;
-`CapabilityPresentation` says how a capability is shown. Receipts come from
+`CapabilityPresentation` says how a capability is shown. Every turn is given an
+`AssistantTurnInput` — an `AssistantSendInput` when the reader asked and an
+`AssistantResumeInput` when it is rejoining — and a transport that names work
+outliving its connection through `onResumable` hands back an
+`AssistantResumeHandle` that `resume` takes. `AssistantInterruption` says which
+of the three ended a turn no reply ended. A capability says how far it has got
+through `CapabilityProgress` on its execution context; the session names the
+call and passes it on as `AgentProgress`. Receipts come from
 `receiptFromResult` / `receiptsFromResults` as `AssistantReceipt`s with an
 `AssistantReceiptStatus` and `AssistantReceiptSubject` — `subjectFor` builds
 one for a built-in capability, as `AssistantReceiptTerm` pairs of column label
@@ -12991,8 +13183,10 @@ functions, so a surface naming an aggregate reads the same word the table
 shows.
 
 `@adapttable/react/adapter` exports what an adapter needs to render the
-assistant: `AGENT_VIEW_STATE` / `AgentViewState` and
-`AGENT_ALWAYS_ALLOW_STATE` / `AgentAlwaysAllowState` are the shared state keys,
+assistant: `AGENT_VIEW_STATE` / `AgentViewState`,
+`AGENT_ALWAYS_ALLOW_STATE` / `AgentAlwaysAllowState` and
+`AGENT_PROGRESS_STATE` / `AgentProgress` — how far a running capability has
+got — are the shared state keys,
 `TableAssistantLanguageChipProps` is the dictation-language slot, and
 `SpeechInputHandle` / `SpeechInputState` / `SpeechInputStatus` are the
 structural view of a speech input — structural so that `@adapttable/react`
@@ -13001,7 +13195,11 @@ describes dictation without depending on `@adapttable/ai`.
 The rendered assistant carries two blocks an adapter draws itself:
 `TableAssistantQuestionView` with its `TableAssistantQuestionOption`s is a
 question waiting on the reader, and `TableAssistantUndoView` is the offer to
-put back what the last turn changed.
+put back what the last turn changed. `TableAssistantResumableView` says there
+is work a released connection left running, which the panel offers to rejoin,
+`TableAssistantProgressView` is how far a running capability has got, and
+`TableAssistantAllowanceView` is one capability the reader stopped being asked
+about.
 
 `deriveRuntimeOperations` reads which view operations a live runtime offers by
 itself, for a binding projecting them into `@adapttable/ai`'s
@@ -13221,14 +13419,14 @@ Every package sets `sideEffects: false` and ships ESM, so unused code is
 tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-09-14 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-09-15 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~24 kB    |
-| every core export                          | ~55 kB    |
-| `DataTable` from an adapter                | ~69–78 kB |
+| every core export                          | ~56 kB    |
+| `DataTable` from an adapter                | ~69–79 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
@@ -13489,8 +13687,8 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation`, and anything that writes — paste, cut, fill — goes through editable columns and `onCellEdit`, the channel inline editing already uses. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 69–78 kB min+gzip (measured
-2026-09-14 from packed fixtures; React and the kit stay external). Competitor
+A plain AdaptTable adapter `DataTable` is 69–79 kB min+gzip (measured
+2026-09-15 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of
 the grid: [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).

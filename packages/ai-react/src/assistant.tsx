@@ -147,6 +147,26 @@ export interface TableAssistantOptions {
   readonly onDetach?: (handle: AssistantResumeHandle) => void;
   /** A handle kept from a previous page, to resume into this one. */
   readonly resumeHandle?: AssistantResumeHandle;
+  /**
+   * The transcript, when your app owns it.
+   *
+   * Omit it and the conversation lives in the controller. Supply it to load
+   * the last conversation from your own API, append a message that arrived on
+   * a socket, or keep it where it survives a reload — pass a new array and the
+   * panel shows it. Pair it with `onMessagesChange`.
+   */
+  readonly messages?: readonly AssistantMessage[];
+  /** Told whenever the transcript changes, with the whole of it. */
+  readonly onMessagesChange?: (messages: readonly AssistantMessage[]) => void;
+  /**
+   * How much of the conversation travels with each turn.
+   *
+   * `"full"` (default) sends every earlier message, for a backend that
+   * remembers nothing. A number sends that many of the most recent. `0` sends
+   * none — the reader's message still travels, and a backend holding its own
+   * session supplies the rest. What the reader sees is never trimmed.
+   */
+  readonly conversation?: "full" | number;
 }
 
 /** What a host renders from. @public */
@@ -374,6 +394,13 @@ function inputsOf(
     progress: progress ?? null,
     ...(contextInputs ? { contextInputs } : {}),
     ...(options.onDetach ? { onDetach: options.onDetach } : {}),
+    ...(options.messages ? { messages: options.messages } : {}),
+    ...(options.onMessagesChange
+      ? { onMessagesChange: options.onMessagesChange }
+      : {}),
+    ...(options.conversation === undefined
+      ? {}
+      : { conversation: options.conversation }),
     ...(options.resumeHandle ? { resumeHandle: options.resumeHandle } : {}),
     // The host's own wins, for the same reason `contextInputs` does: a panel
     // beside the table has no feature state to read.

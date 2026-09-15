@@ -69,6 +69,15 @@ Receipts distinguish refused, partially applied, staged and saved work.
 View Undo is available through `undoTurn` and `undoAction`; it does not undo
 data writes, which remain owned by edit history and host persistence.
 
+The conversation is the controller's by default and the host's on request.
+Pass `messages` and the controller renders that list instead of keeping its
+own; `onMessagesChange` reports every change with the whole list, so a
+transcript held in a store, loaded from an API or arriving over a socket is
+the one the reader sees. `conversation` decides how much of the history
+travels with a turn — every earlier message, the most recent n, or none at
+all for a backend that keeps its own session. It does not change what the
+reader sees.
+
 Stop, disconnect and resume are separate operations. Stop ends the turn and
 the work behind it; releasing the connection leaves the backend running, and a
 transport that named work through `onResumable` can rejoin it with `resume`.

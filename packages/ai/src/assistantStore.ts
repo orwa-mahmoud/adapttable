@@ -183,6 +183,43 @@ export interface TableAssistantInputs {
    * nothing.
    */
   readonly contextInputs?: () => AgentContextInputs;
+  /**
+   * The transcript, when the host owns it.
+   *
+   * Omit it and the conversation lives here, which is what a demo or a single
+   * page wants. Supply it and this store renders what you hand over: load the
+   * last conversation from your own API when the panel opens, append a message
+   * that arrived on a socket, keep it where it survives a reload. A list that
+   * is not the one last supplied replaces the transcript, so a new array is
+   * how a host says something arrived.
+   *
+   * Pair it with {@link TableAssistantInputs.onMessagesChange}: without that,
+   * a turn's own messages are drawn and then lost the next time the host hands
+   * back the list it still believes in.
+   */
+  readonly messages?: readonly AssistantMessage[];
+  /**
+   * Told whenever the transcript changes, with the whole of it.
+   *
+   * Every change: the reader's message, the reply, a streamed update, an
+   * answered question, a clear. A host that keeps the conversation writes it
+   * down from here and hands it back through
+   * {@link TableAssistantInputs.messages}.
+   */
+  readonly onMessagesChange?: (messages: readonly AssistantMessage[]) => void;
+  /**
+   * How much of the conversation travels with each turn.
+   *
+   * `"full"` — the default — sends every earlier message, which is what a
+   * backend that remembers nothing needs. A number sends that many of the most
+   * recent, for a conversation long enough that resending all of it costs more
+   * than it is worth. `0` sends none: the reader's own message still travels as
+   * the turn's text, and a backend holding its own session supplies the rest.
+   *
+   * It never changes what a reader sees. The transcript on screen is whole
+   * whatever this says.
+   */
+  readonly conversation?: "full" | number;
   /** Capability keys the reader has waved through, for this contract. */
   readonly alwaysAllowed?: readonly string[];
   /** Ask about one of them again from now on. */
@@ -508,7 +545,15 @@ export function createTableAssistant(
   inputs: TableAssistantInputs = {}
 ): TableAssistantStore {
   let live: TableAssistantInputs = inputs;
-  let messages: readonly AssistantMessage[] = [];
+  // The transcript as it stands here. A host that owns the conversation hands
+  // one in and is told about every change; this still holds the current list,
+  // because a turn reads it between the moment it changes and the moment that
+  // host hands the next one back — and a streamed reply changes it per frame.
+  let messages: readonly AssistantMessage[] = inputs.messages ?? [];
+  // The last list a host supplied. A turn moves `messages` on from it, so the
+  // host handing that same list back is it holding what it was given rather
+  // than replacing the transcript with what preceded the turn.
+  let adopted: readonly AssistantMessage[] | undefined = inputs.messages;
   let draft = "";
   let status: AssistantStatus = "idle";
   let error: string | undefined;
@@ -804,8 +849,34 @@ export function createTableAssistant(
     publish();
   };
 
+  /**
+   * Change the transcript, and tell whoever owns it.
+   *
+   * One write path, so a host that keeps the conversation of its own — in a
+   * database, on another device, on a socket — hears about every change
+   * without this store deciding which changes are worth reporting.
+   */
+  const setMessages = (next: readonly AssistantMessage[]): void => {
+    messages = next;
+    live.onMessagesChange?.(next);
+  };
+
+  /**
+   * The conversation as it travels.
+   *
+   * What a reader sees is never trimmed; this is only what a backend is told.
+   * A backend that keeps its own session is sent none of it and answers from
+   * what it remembers.
+   */
+  const carried = (): readonly AssistantMessage[] => {
+    const limit = live.conversation;
+    if (limit === undefined || limit === "full") return messages;
+    const kept = Math.max(0, Math.trunc(limit));
+    return kept === 0 ? [] : messages.slice(-kept);
+  };
+
   const push = (message: AssistantMessage): void => {
-    messages = [...messages, message];
+    setMessages([...messages, message]);
     publish();
   };
 
@@ -1015,8 +1086,10 @@ export function createTableAssistant(
     // something the assistant said.
     if (asking !== undefined) {
       const id = asking;
-      messages = messages.map((entry) =>
-        entry.id === id ? stripQuestion(entry) : entry
+      setMessages(
+        messages.map((entry) =>
+          entry.id === id ? stripQuestion(entry) : entry
+        )
       );
     }
     asking = undefined;
@@ -1092,7 +1165,7 @@ export function createTableAssistant(
     if (owned === undefined) return;
     if (owned.generation !== mine || owned.turn !== id) return;
     streamingMessage = undefined;
-    messages = messages.filter((entry) => entry.id !== owned.id);
+    setMessages(messages.filter((entry) => entry.id !== owned.id));
   };
 
   /**
@@ -1203,28 +1276,30 @@ export function createTableAssistant(
       // it away, and an update with nothing left to write into is spent.
       if (streamingMessage?.id !== streamingId) return;
       const existing = messages.some((entry) => entry.id === streamingId);
-      messages = existing
-        ? messages.map((entry) =>
-            entry.id === streamingId
-              ? { ...entry, text: streamed, streaming: true }
-              : entry
-          )
-        : [
-            ...messages,
-            {
-              id: streamingId,
-              role: "assistant" as const,
-              text: streamed,
-              at: Date.now(),
-              streaming: true,
-            },
-          ];
+      setMessages(
+        existing
+          ? messages.map((entry) =>
+              entry.id === streamingId
+                ? { ...entry, text: streamed, streaming: true }
+                : entry
+            )
+          : [
+              ...messages,
+              {
+                id: streamingId,
+                role: "assistant" as const,
+                text: streamed,
+                at: Date.now(),
+                streaming: true,
+              },
+            ]
+      );
       publish();
     };
 
     const shared = {
       session,
-      conversation: exchanges([...messages]),
+      conversation: exchanges(carried()),
       signal: controller.signal,
       onResumable: (token: unknown) => {
         // Named while the turn runs, because a connection released afterwards
@@ -1355,7 +1430,7 @@ export function createTableAssistant(
       // transcript means it, and leaving a reply with nowhere to land is worse
       // than ending a turn they have visibly abandoned.
       cancelTurn();
-      messages = [];
+      setMessages([]);
       error = undefined;
       errorCode = undefined;
       // The offer belonged to a message the reader has just removed.
@@ -1446,13 +1521,22 @@ export function createTableAssistant(
       const transportChanged = next.transportKey !== live.transportKey;
       // The one that is about to be replaced, so it can be told.
       const previousTransport = live.transport;
+      const supplied = next.messages;
       live = next;
+      // A host that owns the transcript has handed over a different list: a
+      // conversation loaded when the panel opened, a message that arrived on a
+      // socket, a clear of its own. The same list back is that host holding
+      // what it was already given, not undoing what just happened here.
+      if (supplied !== undefined && supplied !== adopted) {
+        adopted = supplied;
+        messages = supplied;
+      }
       if (sessionChanged) {
         // A new session is a new table, or a new identity for this one. The
         // turn in flight belonged to the old one.
         generation += 1;
         cancelTurn();
-        messages = [];
+        setMessages([]);
         error = undefined;
         errorCode = undefined;
         // A different table is not one this plan describes, and a revision

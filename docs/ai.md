@@ -354,6 +354,51 @@ work is done.
 Wire `bridge.progress` to read it outside the table; a panel inside the table
 reads it from the table's own state and needs nothing.
 
+## Who owns the conversation
+
+The panel keeps the transcript itself and sends every earlier message with each
+turn, which is what a backend that remembers nothing needs. Both halves are
+yours to change, and they are independent of each other.
+
+**Where the messages live.** Pass `messages` and the panel renders the list you
+hand it instead of the one it kept; `onMessagesChange` reports every change,
+with the whole list. A different array replaces the transcript, which is how a
+message that arrived somewhere else gets in:
+
+```tsx
+const [messages, setMessages] = useState(() => loadThread(threadId));
+
+// Another device, a colleague, an agent working the same table.
+useEffect(
+  () => socket.on("message", (m) => setMessages((all) => [...all, m])),
+  []
+);
+
+useTableAssistant({
+  session,
+  transport,
+  messages,
+  onMessagesChange: setMessages,
+});
+```
+
+Handing the same array back is you holding what you were given; only a
+different one replaces the transcript.
+
+**How much of it travels.** `conversation` decides how much history goes out
+with each turn. It never changes what the reader sees.
+
+|                    | On the wire            | For                                                   |
+| ------------------ | ---------------------- | ----------------------------------------------------- |
+| `"full"` (default) | every earlier message  | a backend that keeps no session                       |
+| `20`               | the last 20            | a long thread where resending all of it earns nothing |
+| `0`                | this turn's text alone | a backend that holds the thread itself                |
+
+```tsx
+// The server owns the thread; it needs the question, not the history.
+useTableAssistant({ session, transport, conversation: 0 });
+```
+
 ## Stopping, losing the connection, and coming back
 
 Three different things happen to a turn that does not end in a reply, and the

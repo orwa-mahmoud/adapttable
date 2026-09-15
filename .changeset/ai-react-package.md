@@ -19,6 +19,10 @@ panel cannot read the table's feature state directly.
 contract, and hands the values into the context — a model then filters on the
 spelling the table stores rather than guessing one.
 
+`useTableAssistant` takes `messages` and `onMessagesChange` for a host that
+owns the transcript, and `conversation` for how much of it is sent with each
+turn.
+
 `useTableAssistant` returns `resume`, `interrupted` and `resumable` for a
 connection that went while the work carried on, and `progress` for a
 capability that says how far it has got. `onDetach` and `resumeHandle` are
