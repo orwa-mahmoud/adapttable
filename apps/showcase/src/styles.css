@@ -14,6 +14,15 @@
 
 html {
   scroll-behavior: smooth;
+  /* Reserved always, so holding the page still behind a modal does not shift
+     the layout sideways as the scrollbar goes. */
+  scrollbar-gutter: stable;
+}
+/* A modal dialog sits in the top layer, but the page underneath still scrolls:
+   two scrollable surfaces answering one wheel. The page holds still while the
+   panel is open, so a gesture over it moves the panel and nothing else. */
+html:has(.ai-opts[open]) {
+  overflow: hidden;
 }
 /* `html body` so the brand font outranks Chakra's runtime body reset —
    without it the whole chrome silently falls back to the system font. */

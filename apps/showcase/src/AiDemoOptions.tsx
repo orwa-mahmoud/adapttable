@@ -187,6 +187,31 @@ export function AiDemoOptions({
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
+  // Dismissal from the dark around the panel. The backdrop is painted by the
+  // dialog itself, so a click out there reaches the dialog rather than
+  // anything behind it and the browser does nothing with it; reading the click
+  // against the panel's own box tells the two apart. A listener rather than a
+  // handler on the element: the backdrop is a surface, not a control, and
+  // Escape and the close button are what a keyboard uses.
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    const dismiss = (event: MouseEvent): void => {
+      if (event.target !== dialog) return;
+      const box = dialog.getBoundingClientRect();
+      const onPanel =
+        event.clientX >= box.left &&
+        event.clientX <= box.right &&
+        event.clientY >= box.top &&
+        event.clientY <= box.bottom;
+      if (!onPanel) onClose();
+    };
+    dialog.addEventListener("click", dismiss);
+    return () => {
+      dialog.removeEventListener("click", dismiss);
+    };
+  }, [onClose]);
+
   return (
     <dialog
       ref={ref}

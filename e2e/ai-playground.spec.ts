@@ -285,6 +285,28 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
       .not.toContain("view.pinRow");
   });
 
+  test("closes the demo options on a click outside them", async ({ page }) => {
+    const drawer = page.getByTestId("ai-demo-options-drawer");
+    await openDemoOptions(page);
+
+    // On the panel's own padding, just inside its edge: this is the dialog
+    // element too, and it keeps the panel open.
+    const box = await drawer.boundingBox();
+    if (!box) throw new Error("the demo options have no box");
+    await page.mouse.click(box.x + box.width - 2, box.y + box.height / 2);
+    await expect(drawer).toBeVisible();
+
+    // A wheel out in the dark moves the panel, never the page behind it.
+    const resting = await page.evaluate(() => window.scrollY);
+    await page.mouse.move(box.x / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, 600);
+    expect(await page.evaluate(() => window.scrollY)).toBe(resting);
+
+    // Out in the dark beside it, where a reader dismisses a drawer.
+    await page.mouse.click(box.x / 2, box.y + box.height / 2);
+    await expect(drawer).toBeHidden();
+  });
+
   test("pins a column and a row through the assistant", async ({ page }) => {
     await expect.poll(async () => catalogText(page)).toContain("view.pinRow");
 
