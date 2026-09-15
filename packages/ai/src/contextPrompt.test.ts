@@ -103,8 +103,14 @@ describe("the general rules", () => {
     expect(rules).toMatch(/untrusted/);
   });
 
-  it("say the table reports success, not the model", () => {
-    expect(agentInstructions()).toMatch(/never claim a change succeeded/i);
+  it("let the model say what it did, and only what it did", () => {
+    const rules = agentInstructions();
+
+    // Saying "Grouped by team" is the reply a reader wants. What the rule
+    // forbids is describing work that never happened.
+    expect(rules).toMatch(/Say what you did/i);
+    expect(rules).toMatch(/do not describe a change you did not make/i);
+    expect(rules).toMatch(/one the table refused/i);
   });
 
   it("take a locale and host rules without being asked to concatenate", () => {

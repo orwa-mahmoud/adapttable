@@ -141,6 +141,39 @@ describe("what a turn did, when the reader asks for it", () => {
     expect(parts("assistant-receipt")).toHaveLength(0);
   });
 
+  it("brings what a reply did into view as it opens", () => {
+    // The list unfolds under a reply that is usually at the foot of the
+    // conversation, so it opens below the fold. Without this the reader
+    // presses the mark, sees nothing move, and goes looking for the scroll.
+    const seen: ScrollIntoViewOptions[] = [];
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function reveal(
+      arg?: boolean | ScrollIntoViewOptions
+    ) {
+      if (typeof arg === "object") seen.push(arg);
+    };
+    const frames: FrameRequestCallback[] = [];
+    const scheduled = vi
+      .spyOn(globalThis, "requestAnimationFrame")
+      .mockImplementation((callback: FrameRequestCallback) => {
+        frames.push(callback);
+        return frames.length;
+      });
+    try {
+      mount({ assistant: view(oneAction) });
+      fireEvent.click(part("assistant-receipts-toggle-button")!);
+      for (const frame of frames) frame(0);
+
+      expect(seen).toHaveLength(1);
+      // The reply is the context the list is evidence for, so it stays on
+      // screen rather than being scrolled away to put the list at the top.
+      expect(seen[0]?.block).toBe("nearest");
+    } finally {
+      scheduled.mockRestore();
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
   it("counts only what a reader would want shown", () => {
     // A read changed nothing, so it is not one of the actions on offer.
     mount({

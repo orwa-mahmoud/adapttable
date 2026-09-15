@@ -22,6 +22,7 @@ import {
   useState,
 } from "react";
 
+import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 import {
   ActionsIcon,
   AssistantAvatar,
@@ -381,6 +382,7 @@ export function AssistantMessage({
   const markRef = useRef<HTMLSpanElement | null>(null);
   const cardRef = useRef<HTMLElement | null>(null);
   const tailInset = useTailInset(markRef, cardRef, openActions);
+  useRevealOnOpen(cardRef, openActions);
   const disclosure = actionsDisclosure({
     receipts: shown,
     labels,
@@ -927,6 +929,39 @@ function LoneUndo({
  * Evidence is worth having to hand rather than in the way: the reply leads,
  * and one control under it opens the actions and closes them again.
  */
+/**
+ * Bring what a reply did into view as it opens.
+ *
+ * The list unfolds under a reply that is often already at the foot of the
+ * conversation, so it opens below the fold: the reader presses the mark,
+ * nothing appears to happen, and they are left scrolling to find out whether
+ * it worked. `nearest` because the reply itself is the context — pulling the
+ * list to the top would take the sentence it is evidence for off the screen.
+ */
+function useRevealOnOpen(
+  card: RefObject<HTMLElement | null>,
+  open: boolean
+): void {
+  const stillness = usePrefersReducedMotion();
+  useLayoutEffect(() => {
+    if (!open) return;
+    // After the layout this open produced, so the list is its full height
+    // rather than whatever it measured mid-unfold — and the card is read then
+    // rather than now, because that is when it is there to scroll.
+    const frame = requestAnimationFrame(() => {
+      // Called only where it exists: jsdom implements no scrolling at all, and
+      // a panel that cannot be brought into view still opens.
+      card.current?.scrollIntoView?.({
+        block: "nearest",
+        behavior: stillness ? "auto" : "smooth",
+      });
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [card, open, stillness]);
+}
+
 /**
  * The mark that opens what a reply did.
  *
