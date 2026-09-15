@@ -1010,10 +1010,23 @@ function rememberPin(
     // The backend answered for a different contract than this request carried.
     return;
   }
+  const tableId = session.manifest().tableId;
+  // A backend names its session handle when the connection opens and
+  // acknowledges later contracts without repeating it. Silence is not
+  // revocation: dropping the handle here sends the next request without one,
+  // and a backend that keys its pin by session answers that request as a
+  // stranger — a round trip spent resending the contract, and a turn the
+  // backend then plans again from the beginning. Carried forward only for the
+  // same table, because a handle is a handle on that table's contract.
+  const held = pins.read(session, connectionId);
+  const carried =
+    held?.tableId === tableId && held.sessionId !== undefined
+      ? held.sessionId
+      : undefined;
   pins.remember(session, {
     connectionId,
-    tableId: session.manifest().tableId,
-    sessionId: response.sessionId,
+    tableId,
+    sessionId: response.sessionId ?? carried,
     // The version SENT, never the one live now: a contract that moved during
     // the exchange is a contract this backend has not seen.
     contractVersion: sent.version,

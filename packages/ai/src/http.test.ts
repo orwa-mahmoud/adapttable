@@ -310,6 +310,43 @@ describe("createAgentHttpClient", () => {
     expect(kinds).toEqual(["hello", "turn"]);
   });
 
+  it("keeps a session handle the backend named once", async () => {
+    // A backend issues its handle when the connection opens and acknowledges
+    // every later contract without repeating it. Each request still has to
+    // carry it: a backend that keys its pin by session and is sent none
+    // answers as a stranger, and the turn pays a round trip to resend the
+    // contract and is then planned again from the beginning.
+    const live = session();
+    const carried: (string | undefined)[] = [];
+    const options = {
+      endpoint: "https://agent.example/turn",
+      request: (body: {
+        kind: string;
+        sessionId?: string;
+        contractVersion?: string;
+      }) => {
+        if (body.kind === "turn") carried.push(body.sessionId);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          ok: true,
+          ...(body.kind === "hello" ? { sessionId: "sess-once" } : {}),
+          pin: {
+            status: "acknowledged" as const,
+            ...(body.contractVersion
+              ? { contractVersion: body.contractVersion }
+              : {}),
+          },
+          text: "Done",
+        });
+      },
+    };
+    await connectAgentHttp(live, options);
+    await runAgentHttpTurn(live, "Show page 2", options);
+    await runAgentHttpTurn(live, "Sort by total", options);
+
+    expect(carried).toEqual(["sess-once", "sess-once"]);
+  });
+
   it("carries the view the reader left behind, not the one the turn opened on", async () => {
     // A reader who sorts and filters the table themselves says nothing to the
     // assistant. The contract is pinned and stays pinned; the view is read
