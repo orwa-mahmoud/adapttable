@@ -677,7 +677,13 @@ describe("putting one action of a turn back", () => {
     expect(sortDir).toBe("desc");
 
     const receipts = store.getState().messages.at(-1)?.receipts ?? [];
-    expect(receipts.map((receipt) => receipt.undoable)).toEqual([false, false]);
+    // Neither card offers one. With nothing on offer the transcript is handed
+    // over untouched, so the field is absent rather than false — the same
+    // "no control here" either way.
+    expect(receipts.map((receipt) => receipt.undoable ?? false)).toEqual([
+      false,
+      false,
+    ]);
 
     // The turn's own Undo still describes what happened, and still works.
     expect(store.getState().undo?.available).toBe(true);

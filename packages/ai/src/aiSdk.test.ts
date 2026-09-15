@@ -1004,9 +1004,9 @@ describe("what a call is bound to", () => {
         START,
         ...callsTool("c1", "view.setPage", { page: 2 }),
         ...callsTool("c2", "view.setSort", { key: "total", dir: "asc" }),
-        ...says("Paged and sorted."),
         FINISH,
       ],
+      () => [START, ...says("Paged and sorted."), FINISH],
     ]);
     const transport = aiSdkTransport({ connection: route.connection });
 

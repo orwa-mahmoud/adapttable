@@ -731,10 +731,12 @@ export function createTableAssistant(
     a.error === b.error &&
     a.errorCode === b.errorCode &&
     a.approval === b.approval &&
+    a.progress === b.progress &&
+    a.interrupted === b.interrupted &&
+    a.resumable === b.resumable &&
     a.pendingQuestion === b.pendingQuestion &&
     sameOffer(a.undo, b.undo) &&
     a.alwaysAllowed === b.alwaysAllowed &&
-    a.suggestions === b.suggestions &&
     a.suggestions === b.suggestions;
 
   /**
