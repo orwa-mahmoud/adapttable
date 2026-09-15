@@ -40,6 +40,7 @@ export type {
   AgentApprovalOperation,
   AgentApprovalPending,
   AgentApprovalProposal,
+  AgentProgress,
 } from "./approval/types";
 export type {
   ActionAiOptions,

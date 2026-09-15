@@ -1349,12 +1349,14 @@ and the assistant contracts `AssistantAction`, `AssistantConversation`,
 `AssistantProposal`, `AssistantRequest`, `AssistantSuggestion`,
 `AssistantTurn`, `AssistantExchange`, `AssistantTransport`,
 `AssistantTransportReply`, `AssistantTurnInput`, `AssistantSendInput`,
-`AssistantResumeInput`, `AssistantResumeHandle` and `CapabilityPresentation`, plus the receipt
+`AssistantResumeInput`, `AssistantResumeHandle`, `CapabilityProgress` and
+`CapabilityPresentation`, plus the receipt
 readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
 `AssistantReceipt`, `AssistantReceiptStatus`, `AssistantTurnStatus`.
 `@adapttable/ai-react` exports `useTableAssistant`,
 `TableAssistantOptions`, `TableAssistantState`, `AssistantMessage`,
 `AssistantStatus`, `AssistantInterruption`, `AssistantResumeHandle`,
+`AgentProgress`,
 `AssistantSuggestion`, `tableAgent`, `TableAgentOptions`,
 `TableAgentColumnPatch`, `TABLE_AGENT_STATE`, `TableAgentBridge` and
 `SharedApproval`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
@@ -2118,7 +2120,9 @@ the question channel. `AssistantSuggestion`s are filtered by
 `AssistantResumeInput` when it is rejoining — and a transport that names work
 outliving its connection through `onResumable` hands back an
 `AssistantResumeHandle` that `resume` takes. `AssistantInterruption` says which
-of the three ended a turn no reply ended. Receipts come from
+of the three ended a turn no reply ended. A capability says how far it has got
+through `CapabilityProgress` on its execution context; the session names the
+call and passes it on as `AgentProgress`. Receipts come from
 `receiptFromResult` / `receiptsFromResults` as `AssistantReceipt`s with an
 `AssistantReceiptStatus` and `AssistantReceiptSubject` — `subjectFor` builds
 one for a built-in capability, as `AssistantReceiptTerm` pairs of column label
@@ -2289,7 +2293,8 @@ The rendered assistant carries two blocks an adapter draws itself:
 `TableAssistantQuestionView` with its `TableAssistantQuestionOption`s is a
 question waiting on the reader, and `TableAssistantUndoView` is the offer to
 put back what the last turn changed. `TableAssistantResumableView` says there
-is work a released connection left running, which the panel offers to rejoin.
+is work a released connection left running, which the panel offers to rejoin,
+and `TableAssistantProgressView` is how far a running capability has got.
 
 `deriveRuntimeOperations` reads which view operations a live runtime offers by
 itself, for a binding projecting them into `@adapttable/ai`'s

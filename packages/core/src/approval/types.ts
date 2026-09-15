@@ -143,3 +143,34 @@ export interface AgentApprovalProposal {
    */
   readonly columnLabel?: string;
 }
+
+/**
+ * How far one agent capability has got, while it is still going.
+ *
+ * Here for the same reason the approval contracts are: a panel drawing it must
+ * not import an AI runtime to name what it draws, and the AI package must not
+ * import React to name what it publishes. What a capability reports is its
+ * own; this is the shape it travels in.
+ *
+ * Never a result. The capability's receipt still says what happened, and a
+ * call that reported progress and then failed has failed.
+ *
+ * @public
+ */
+export interface AgentProgress {
+  /** The capability doing the work. */
+  readonly capability: string;
+  /** The replay identity of the call, so two can be told apart. */
+  readonly idempotencyKey: string;
+  /** How many units are finished. */
+  readonly done: number;
+  /** How many there are, when the capability knows. */
+  readonly total?: number;
+  /**
+   * What is being worked through, in the host's own words.
+   *
+   * Shown as given: neither package has a translation for a host's nouns, and
+   * inventing one would be worse than leaving it out.
+   */
+  readonly label?: string;
+}

@@ -217,6 +217,10 @@ export const ja: Required<TableLabels> = {
   assistantUnavailable: "アシスタントは接続されていません。",
   assistantDetached: "接続が切れました。処理はまだ続いている可能性があります。",
   assistantRejoin: "再接続",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} 件完了`
+      : `${String(total)} 件中 ${String(done)} 件`,
   assistantBackToTable: "テーブルに戻る",
   assistantDetail: "詳細",
   assistantSaveInTable: "この変更を残すにはテーブルで保存してください。",

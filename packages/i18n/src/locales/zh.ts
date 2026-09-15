@@ -216,6 +216,10 @@ export const zh: Required<TableLabels> = {
   assistantUnavailable: "助手未连接。",
   assistantDetached: "连接已断开，工作可能仍在进行。",
   assistantRejoin: "重新连接",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `已完成 ${String(done)}`
+      : `${String(total)} 之 ${String(done)}`,
   assistantBackToTable: "返回表格",
   assistantDetail: "详情",
   assistantSaveInTable: "在表格中保存以保留此更改。",

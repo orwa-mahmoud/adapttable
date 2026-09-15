@@ -12,7 +12,7 @@
  * feature host or a hook. A projection from a framework's own shape into this
  * one is allowed to be small and explicit. A permission decision is not.
  */
-import type { AgentApprovalProposal } from "@adapttable/core";
+import type { AgentApprovalProposal, AgentProgress } from "@adapttable/core";
 
 import type { AgentContextInputs } from "./context";
 import type {
@@ -61,6 +61,16 @@ export interface TableAgentBridge<TPending = unknown> {
    * nowhere to take it back.
    */
   readonly alwaysAllowed?: (state: AlwaysAllowedState) => void;
+  /**
+   * Called as a capability reports how far it has got, and once with `null`
+   * when it stops.
+   *
+   * The same reason the three above are here: this happens inside a call the
+   * panel is waiting on, and nothing outside the table can see it. Wiring it
+   * is what gives a capability somewhere to report to — a table that does not
+   * hands its capabilities no `reportProgress` at all.
+   */
+  readonly progress?: (report: AgentProgress | null) => void;
 }
 
 /**

@@ -219,6 +219,10 @@ export const ko: Required<TableLabels> = {
   assistantUnavailable: "어시스턴트가 연결되지 않았습니다.",
   assistantDetached: "연결이 끊겼습니다. 작업이 아직 진행 중일 수 있습니다.",
   assistantRejoin: "다시 연결",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)}개 완료`
+      : `${String(total)}개 중 ${String(done)}개`,
   assistantBackToTable: "테이블로 돌아가기",
   assistantDetail: "세부 정보",
   assistantSaveInTable: "이 변경을 유지하려면 테이블에서 저장하세요.",

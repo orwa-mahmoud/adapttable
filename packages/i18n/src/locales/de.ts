@@ -223,6 +223,10 @@ export const de: Required<TableLabels> = {
   assistantDetached:
     "Die Verbindung wurde getrennt. Die Arbeit läuft möglicherweise weiter.",
   assistantRejoin: "Wieder verbinden",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} erledigt`
+      : `${String(done)} von ${String(total)}`,
   assistantBackToTable: "Zurück zur Tabelle",
   assistantDetail: "Details",
   assistantSaveInTable:

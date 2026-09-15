@@ -478,6 +478,37 @@ export interface AgentCapabilityDefinition {
 }
 
 /**
+ * How far a capability has got, while it is still going.
+ *
+ * For work a reader would otherwise watch an unexplained spinner through: a
+ * thousand rows written one call at a time says nothing until it is over. It
+ * is never a result — the capability's receipt still reports what happened —
+ * and reporting it costs nothing beyond the call itself.
+ *
+ * @public
+ */
+export interface CapabilityProgress {
+  /** How many units are finished. */
+  readonly done: number;
+  /** How many there are, when the capability knows. */
+  readonly total?: number;
+  /**
+   * What is being worked through, in the host's own words.
+   *
+   * Shown as given: this package has no translation for a host's nouns, and
+   * inventing one would be worse than leaving it out. Omit it and the
+   * conversation says how far along the work is without naming it.
+   */
+  readonly label?: string;
+}
+
+// What a capability reports plus the identity of the call that reported it,
+// which is what a surface needs and what a capability should not have to
+// repeat. The shape is `@adapttable/core`'s, because a panel drawing it must
+// not import an AI runtime to name what it draws.
+export type { AgentProgress } from "@adapttable/core";
+
+/**
  * Execution context passed to built-in and custom capability handlers.
  *
  * @public
@@ -529,6 +560,19 @@ export interface AgentCapabilityContext {
    * taken back, and this makes no claim to undo one.
    */
   readonly throwIfCancelled: () => void;
+  /**
+   * Say how far this call has got.
+   *
+   * For a handler whose work is long enough that a reader would otherwise be
+   * watching nothing. Call it as often as the work advances; the surface
+   * coalesces. It reports and nothing else: it never stands in for the
+   * capability's result, a call that reports progress and then fails has
+   * failed, and the receipt is still read from what the handler returns.
+   *
+   * Absent when the session was built with nowhere to send it, so a handler
+   * calls it optionally and works the same either way.
+   */
+  readonly reportProgress?: (progress: CapabilityProgress) => void;
 }
 
 /**

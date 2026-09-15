@@ -2043,3 +2043,37 @@ describe("a connection that went while the work carried on", () => {
     expect(part("assistant-detached")).toBeNull();
   });
 });
+
+describe("what a long call says while it is still going", () => {
+  it("counts instead of spinning, and names what it is working through", () => {
+    mount({
+      assistant: view({
+        status: "sending",
+        busy: true,
+        progress: { done: 185, total: 400, label: "rows" },
+      }),
+    });
+
+    expect(part("assistant-working-text")).toHaveTextContent(
+      "rows — 185 of 400"
+    );
+  });
+
+  it("counts what it has done when nobody knows how many there are", () => {
+    mount({
+      assistant: view({
+        status: "sending",
+        busy: true,
+        progress: { done: 12 },
+      }),
+    });
+
+    expect(part("assistant-working-text")).toHaveTextContent("12 done");
+  });
+
+  it("goes back to saying it is working when nothing reports", () => {
+    mount({ assistant: view({ status: "sending", busy: true }) });
+
+    expect(part("assistant-working-text")).not.toHaveTextContent("done");
+  });
+});

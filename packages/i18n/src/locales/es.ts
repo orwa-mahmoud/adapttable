@@ -219,6 +219,10 @@ export const es: Required<TableLabels> = {
   assistantDetached:
     "Se perdió la conexión. Es posible que el trabajo siga en curso.",
   assistantRejoin: "Reanudar",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} hechos`
+      : `${String(done)} de ${String(total)}`,
   assistantBackToTable: "Volver a la tabla",
   assistantDetail: "Detalles",
   assistantSaveInTable: "Guarda en la tabla para conservar este cambio.",

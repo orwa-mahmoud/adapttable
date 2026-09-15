@@ -121,6 +121,23 @@ export interface TableAssistantAllowanceView {
 }
 
 /**
+ * How far a running capability has got.
+ *
+ * Structural, like the rest of this view: the panel says what it is told
+ * without `@adapttable/react` depending on `@adapttable/ai`.
+ *
+ * @public
+ */
+export interface TableAssistantProgressView {
+  /** How many units are finished. */
+  readonly done: number;
+  /** How many there are, when the capability knows. */
+  readonly total?: number;
+  /** What is being worked through, in the host's own words. */
+  readonly label?: string;
+}
+
+/**
  * Work a released connection left running.
  *
  * The panel reads that there is some, and what the reader asked for; the
@@ -194,6 +211,13 @@ export interface TableAssistantView {
   readonly resumable?: TableAssistantResumableView;
   /** Rejoin it. */
   readonly resume?: () => void | Promise<void>;
+  /**
+   * How far the capability now running has got, when it says.
+   *
+   * Drawn beside the working indicator and gone when the turn settles. Never a
+   * result: what the turn did is what its receipts say.
+   */
+  readonly progress?: TableAssistantProgressView | null;
   /** The prompts this table can actually run, ready to offer. */
   readonly suggestions: readonly TableAssistantSuggestionView[];
   readonly runSuggestion: (id: string) => void | Promise<void>;

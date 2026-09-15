@@ -224,6 +224,10 @@ export const ru: Required<TableLabels> = {
   assistantUnavailable: "Помощник не подключён.",
   assistantDetached: "Соединение прервано. Работа может продолжаться.",
   assistantRejoin: "Подключиться снова",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `готово ${String(done)}`
+      : `${String(done)} из ${String(total)}`,
   assistantBackToTable: "Вернуться к таблице",
   assistantDetail: "Подробности",
   assistantSaveInTable: "Сохраните в таблице, чтобы оставить это изменение.",

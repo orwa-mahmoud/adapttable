@@ -166,6 +166,7 @@ export {
 export {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
+  AGENT_PROGRESS_STATE,
   AGENT_VIEW_STATE,
   type AgentAlwaysAllowState,
   type AgentApprovalButtonProps,
@@ -178,6 +179,7 @@ export {
   type AgentApprovalProposal,
   type AgentApprovalProps,
   type AgentApprovalSlots,
+  type AgentProgress,
   type AgentViewState,
 } from "./editing/AgentApprovalChrome";
 export {

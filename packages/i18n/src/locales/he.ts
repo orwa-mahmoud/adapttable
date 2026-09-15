@@ -218,6 +218,10 @@ export const he: Required<TableLabels> = {
   assistantUnavailable: "העוזר אינו מחובר.",
   assistantDetached: "החיבור נותק. ייתכן שהעבודה עדיין רצה.",
   assistantRejoin: "התחברות מחדש",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} הושלמו`
+      : `${String(done)} מתוך ${String(total)}`,
   assistantBackToTable: "חזרה לטבלה",
   assistantDetail: "פרטים",
   assistantSaveInTable: "שמור בטבלה כדי לשמר את השינוי.",

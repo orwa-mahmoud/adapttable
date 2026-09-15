@@ -330,6 +330,10 @@ export const defaultLabels: Required<TableLabels> = {
   assistantUnavailable: "The assistant is not connected.",
   assistantDetached: "The connection went. The work may still be running.",
   assistantRejoin: "Rejoin",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} done`
+      : `${String(done)} of ${String(total)}`,
   assistantBackToTable: "Back to table",
   assistantDetail: "Details",
   assistantSaveInTable: "Save in the table to keep this change.",

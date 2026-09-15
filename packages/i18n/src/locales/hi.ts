@@ -222,6 +222,10 @@ export const hi: Required<TableLabels> = {
   assistantUnavailable: "सहायक जुड़ा नहीं है।",
   assistantDetached: "कनेक्शन टूट गया। काम अब भी चल रहा हो सकता है।",
   assistantRejoin: "फिर जुड़ें",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} पूर्ण`
+      : `${String(total)} में से ${String(done)}`,
   assistantBackToTable: "टेबल पर वापस",
   assistantDetail: "विवरण",
   assistantSaveInTable: "यह बदलाव रखने के लिए टेबल में सहेजें।",

@@ -27,11 +27,25 @@ export type {
   AgentApprovalOperation,
   AgentApprovalPending,
   AgentApprovalProposal,
+  AgentProgress,
 } from "@adapttable/core";
 
 /** Feature-state key for a pending agent approval. @public */
 export const AGENT_APPROVAL_STATE =
   featureStateKey<AgentApprovalPending | null>("agent-approval-pending");
+
+/**
+ * Feature-state key for how far a running capability has got.
+ *
+ * Published by the agent feature and read by a panel inside the table, the
+ * same way a pending approval is: both happen inside a call the panel is
+ * waiting on, and neither is visible from outside the table.
+ *
+ * @public
+ */
+export const AGENT_PROGRESS_STATE = featureStateKey<AgentProgress | null>(
+  "agent-progress"
+);
 
 /**
  * What the reader has waved through, and how to take it back.

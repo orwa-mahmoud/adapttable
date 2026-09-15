@@ -36,6 +36,7 @@ import type {
 import type {
   TableAssistantAllowanceView,
   TableAssistantMessageView,
+  TableAssistantProgressView,
   TableAssistantQuestionView,
   TableAssistantReceiptView,
   TableAssistantUndoView,
@@ -1141,10 +1142,27 @@ function Receipts({
  */
 export function AssistantWorking({
   labels,
+  progress,
 }: {
   readonly labels: TableLabels | undefined;
+  /** What the running capability says about itself, when it says anything. */
+  readonly progress?: TableAssistantProgressView | null;
 }): ReactElement {
-  const word = labels?.assistantConnection?.("sending") ?? "Working…";
+  // What is happening beats that something is: "185 of 400 rows" is the whole
+  // difference between a wait a reader can judge and a spinner they cannot.
+  // The label is the host's own noun and is shown as given.
+  const counted = progress
+    ? (labels?.assistantProgress?.(progress.done, progress.total) ??
+      (progress.total === undefined
+        ? `${String(progress.done)} done`
+        : `${String(progress.done)} of ${String(progress.total)}`))
+    : undefined;
+  const word =
+    counted === undefined
+      ? (labels?.assistantConnection?.("sending") ?? "Working…")
+      : progress?.label
+        ? `${progress.label} — ${counted}`
+        : counted;
   return (
     <li
       data-adapttable-part="assistant-working"

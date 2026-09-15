@@ -218,6 +218,10 @@ export const fa: Required<TableLabels> = {
   assistantUnavailable: "دستیار متصل نیست.",
   assistantDetached: "اتصال قطع شد. ممکن است کار همچنان در جریان باشد.",
   assistantRejoin: "پیوستن دوباره",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} انجام شد`
+      : `${String(done)} از ${String(total)}`,
   assistantBackToTable: "بازگشت به جدول",
   assistantDetail: "جزئیات",
   assistantSaveInTable: "برای حفظ این تغییر در جدول ذخیره کنید.",

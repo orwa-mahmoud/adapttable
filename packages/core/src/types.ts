@@ -784,6 +784,8 @@ export interface TableLabels {
   assistantUnavailable?: string;
   /** That a released connection left the work running, not cancelled. */
   assistantDetached?: string;
+  /** How far a running capability has got. */
+  assistantProgress?: (done: number, total?: number) => string;
   /** Rejoins work a released connection left running. */
   assistantRejoin?: string;
   /** Leaves a full-screen assistant on a narrow viewport. */

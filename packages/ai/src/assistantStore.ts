@@ -25,6 +25,8 @@
  * `connect`. Nothing here renders, and nothing here holds an element — what a
  * panel looks like, whether it is open, and where focus sits are the binding's.
  */
+import type { AgentProgress } from "@adapttable/core";
+
 import {
   type AssistantAnswer,
   type AssistantExchange,
@@ -163,6 +165,15 @@ export interface TableAssistantInputs {
    */
   readonly approval?: unknown;
   /**
+   * How far a running capability has got, or nothing.
+   *
+   * Carried, never derived: it happens inside a call this store is waiting on,
+   * and only the session that made it can see it. It is not a result — the
+   * turn's receipts still come from what its actions returned, and a call that
+   * reported progress and then failed has failed.
+   */
+  readonly progress?: AgentProgress | null;
+  /**
    * Live view and filter data the manifest does not carry.
    *
    * A function, not a value: undo compares the view before a turn against the
@@ -220,6 +231,14 @@ export interface TableAssistantSnapshot {
   readonly suggestions: readonly AssistantSuggestion[];
   /** The pending approval a host supplied, or nothing. */
   readonly approval: unknown;
+  /**
+   * How far the capability now running has got, or nothing.
+   *
+   * What a surface says while a long write works through its rows. It never
+   * becomes the receipt: when the turn settles this goes and the receipts say
+   * what happened.
+   */
+  readonly progress: AgentProgress | null;
   /**
    * A question the backend put to the reader, or nothing.
    *
@@ -763,6 +782,9 @@ export function createTableAssistant(
       errorCode,
       suggestions: offered,
       approval: live.approval ?? null,
+      // Only while a turn is running: a report that outlived its turn would be
+      // a count standing beside a finished conversation.
+      progress: sending ? (live.progress ?? null) : null,
       pendingQuestion: openQuestion(messages),
       undo: undoOffer(),
       alwaysAllowed: allowances(live.alwaysAllowed),

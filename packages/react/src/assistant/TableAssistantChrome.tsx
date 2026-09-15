@@ -597,7 +597,7 @@ function Transcript({
           the turn is waiting on them, and saying otherwise is why a question
           gets read as progress. */}
       {assistant.busy && !asking(messages) && !parked ? (
-        <AssistantWorking labels={labels} />
+        <AssistantWorking labels={labels} progress={assistant.progress} />
       ) : null}
     </ul>
   );

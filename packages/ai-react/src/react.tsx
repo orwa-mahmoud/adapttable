@@ -57,9 +57,11 @@ import type { ActionAiOptions } from "@adapttable/core";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
+  AGENT_PROGRESS_STATE,
   AGENT_VIEW_STATE,
   type AgentAlwaysAllowState,
   type AgentApprovalPending,
+  type AgentProgress,
   type AgentViewState,
   deriveRuntimeOperations,
   type FeatureProviderProps,
@@ -846,7 +848,8 @@ function bindLiveSession(
       subject: ApprovalSubject,
       signal?: AbortSignal
     ) => Promise<ApprovalResult>;
-  }
+  },
+  reportProgress: { current: (report: AgentProgress | null) => void }
 ): AgentSession {
   const apply = new Proxy<AgentApply>(
     {},
@@ -898,6 +901,13 @@ function bindLiveSession(
     observe,
     apply,
     onApprove,
+    // Read at call time, like everything else here. The session is built once
+    // and a host may wire its bridge on a later render, so what a capability
+    // reports is delivered through the ref rather than through whatever was
+    // configured when the session was made.
+    onProgress: (report) => {
+      reportProgress.current(report);
+    },
     capabilities: optionsRef.current.capabilities,
     ...(optionsRef.current.capabilityApproval
       ? { capabilityApproval: optionsRef.current.capabilityApproval }
@@ -952,6 +962,12 @@ function TableAgentProvider({
   const waitForChrome = useRef<
     (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>
   >(() => Promise.resolve(false));
+  // The same arrangement for progress: the session is built once and reports
+  // through this, and what it reports goes both to the table's own feature
+  // state and to a bridge a host wired.
+  const reportProgress = useRef<(report: AgentProgress | null) => void>(
+    () => undefined
+  );
   const tableIdRef = useRef(options.tableId);
   // The registry is resolved when the session is built, so a change to what
   // the agent may use — or to who has to approve it — is a different session,
@@ -974,12 +990,16 @@ function TableAgentProvider({
     optionsRef,
     runtimeRef,
     revisionCounterRef.current,
-    waitForChrome
+    waitForChrome,
+    reportProgress
   );
   const session = sessionRef.current;
   // Bumped when the reader takes an allowance back, so the published list is
   // rebuilt. The memory itself is a ref and cannot notify React on its own.
   const [revocations, setRevocations] = useState(0);
+  // What a running capability last said about itself, and nothing once it
+  // stops. The session reports it through `reportProgress` above.
+  const [progress, setProgress] = useState<AgentProgress | null>(null);
   const [transaction, setTransaction] = useState<ApprovalTransaction | null>(
     null
   );
@@ -1356,6 +1376,15 @@ function TableAgentProvider({
     alwaysAllowedBridge?.(alwaysAllowValue);
   }, [alwaysAllowedBridge, alwaysAllowValue]);
 
+  // Both destinations, from the one report: the table's own panel reads the
+  // feature state, and a panel mounted outside it reads the bridge. Assigned
+  // on every render for the same reason the approval handler is — the session
+  // is built once and must not be holding the first render's closure.
+  reportProgress.current = (report) => {
+    setProgress(report);
+    optionsRef.current.bridge?.progress?.(report);
+  };
+
   return (
     <FeatureStateScope stateKey={TABLE_AGENT_STATE} value={published}>
       <FeatureStateScope stateKey={AGENT_APPROVAL_STATE} value={approvalValue}>
@@ -1364,7 +1393,9 @@ function TableAgentProvider({
           value={alwaysAllowValue}
         >
           <FeatureStateScope stateKey={AGENT_VIEW_STATE} value={viewStateValue}>
-            {children}
+            <FeatureStateScope stateKey={AGENT_PROGRESS_STATE} value={progress}>
+              {children}
+            </FeatureStateScope>
           </FeatureStateScope>
         </FeatureStateScope>
       </FeatureStateScope>

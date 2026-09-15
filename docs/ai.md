@@ -296,6 +296,47 @@ unreadable column. Hand the result in as `inputs.samples`; the contract marks
 those columns `sampled: true`, so nobody confuses an author's example with
 somebody's data.
 
+## Saying how far a long call has got
+
+A capability that works through a thousand rows one call at a time has nothing
+to say between "started" and its receipt, and a reader watching a spinner
+cannot tell a slow write from a stuck one. Its execution context carries a
+channel for that:
+
+```ts
+capabilities: [
+  {
+    key: "orders.settle",
+    // …
+    execute: async (context, args) => {
+      const rows = rowsFor(args);
+      for (const [index, row] of rows.entries()) {
+        context.throwIfCancelled();
+        await settle(row);
+        context.reportProgress?.({
+          done: index + 1,
+          total: rows.length,
+          label: "orders",
+        });
+      }
+      return { settled: rows.length };
+    },
+  },
+];
+```
+
+The conversation shows it where it is waiting, and it goes when the turn
+settles. `label` is shown as given — this package has no translation for your
+nouns, and inventing one would be worse than leaving it out.
+
+**Progress is not a result.** The receipt still comes from what the handler
+returned, a call that reported progress and then failed has failed, and none of
+this involves the model: nothing is sent, and no second call is made to say the
+work is done.
+
+Wire `bridge.progress` to read it outside the table; a panel inside the table
+reads it from the table's own state and needs nothing.
+
 ## Stopping, losing the connection, and coming back
 
 Three different things happen to a turn that does not end in a reply, and the

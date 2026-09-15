@@ -221,6 +221,10 @@ export const ur: Required<TableLabels> = {
   assistantUnavailable: "معاون منسلک نہیں ہے۔",
   assistantDetached: "کنکشن منقطع ہو گیا۔ کام اب بھی جاری ہو سکتا ہے۔",
   assistantRejoin: "دوبارہ جُڑیں",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} مکمل`
+      : `${String(total)} میں سے ${String(done)}`,
   assistantBackToTable: "ٹیبل پر واپس",
   assistantDetail: "تفصیلات",
   assistantSaveInTable: "یہ تبدیلی رکھنے کے لیے ٹیبل میں محفوظ کریں۔",

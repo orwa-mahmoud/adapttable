@@ -1,4 +1,8 @@
-import { type ActionAiOptions, isPinnedSummaryRowId } from "@adapttable/core";
+import {
+  type ActionAiOptions,
+  type AgentProgress,
+  isPinnedSummaryRowId,
+} from "@adapttable/core";
 
 import {
   resolveApproval,
@@ -42,6 +46,7 @@ import type {
   ApprovalSubject,
   CapabilityGuide,
   CapabilityPlan,
+  CapabilityProgress,
   CatalogEntry,
   ExecuteResult,
   ResolvedRow,
@@ -109,6 +114,17 @@ export interface CreateAgentSessionOptions {
    * does not wire, or excludes, stays unavailable whatever this says.
    */
   capabilityApproval?: Readonly<Record<string, ActionAiOptions>>;
+  /**
+   * Where a capability's progress goes, and `null` when it stops.
+   *
+   * The `null` closes it: a call that reported progress and then settled has
+   * nothing more to say, and a surface left holding the last count would go on
+   * showing it beside a finished turn. Without this option the context's
+   * `reportProgress` is absent, and a handler that would have called it simply
+   * does not — no buffer, no queue, nothing kept for a listener that may never
+   * arrive.
+   */
+  onProgress?: (report: AgentProgress | null) => void;
   /**
    * How many replay results this session keeps. Defaults to 200. Accepted
    * mutations keep their deduplication guarantee for the whole session even
@@ -400,7 +416,8 @@ export function createAgentSession(
     entry: AgentObservation,
     signal: AbortSignal | undefined,
     state: { invokedWrite: boolean },
-    apply: AgentApply
+    apply: AgentApply,
+    progress: ((report: CapabilityProgress) => void) | undefined
   ): Promise<unknown> => {
     const approve = bindApprove(options.onApprove, signal);
     const throwIfCancelled = cancellationGuard(signal);
@@ -411,6 +428,7 @@ export function createAgentSession(
       onApprove: approve,
       signal,
       throwIfCancelled,
+      ...(progress ? { reportProgress: progress } : {}),
     };
     // The reserved execution is starting for real.
     throwIfCancelled();
@@ -597,6 +615,25 @@ export function createAgentSession(
       own = options.observe().viewRevision;
     });
 
+    // Named here, where the call's own identity is, so a surface watching two
+    // capabilities at once can tell which one moved. Absent when the table
+    // wired nowhere to send it.
+    const report = options.onProgress;
+    let reported = false;
+    const progress = report
+      ? (given: CapabilityProgress) => {
+          reported = true;
+          report({ ...given, capability: key, idempotencyKey });
+        }
+      : undefined;
+    // Closed once, and only by a call that opened it: a surface holding the
+    // last count would otherwise show it beside a turn that has finished.
+    const closeProgress = (): void => {
+      if (!reported) return;
+      reported = false;
+      report?.(null);
+    };
+
     try {
       const payload = await runCapability(
         resolved.definition,
@@ -605,7 +642,8 @@ export function createAgentSession(
         resolved.observation,
         signal,
         state,
-        tracked
+        tracked,
+        progress
       );
       // What this action reached, never where the table happens to be. An
       // action that applied nothing reports the revision it was admitted at,
@@ -642,6 +680,8 @@ export function createAgentSession(
     } catch (error) {
       if (error instanceof ApplyError) return fail(error.code, error.message);
       return fail("apply-failed", errorMessage(error));
+    } finally {
+      closeProgress();
     }
   };
 

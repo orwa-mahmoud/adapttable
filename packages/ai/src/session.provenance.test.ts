@@ -19,6 +19,7 @@
  * "did this invoke a write" reports the revision from before its own change and
  * stalls every filter-then-sort turn — which the last cases here hold open.
  */
+import type { AgentProgress } from "@adapttable/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { createAgentSession } from "./session";
@@ -388,5 +389,141 @@ describe("a change that lands after this action's own call", () => {
 
     expect(result.ok).toBe(true);
     expect(result.revision).toBe(1);
+  });
+});
+
+describe("what a long call says while it is still going", () => {
+  /** A capability that reports its way through a fixed number of rows. */
+  function slowWrite(rows: number): AgentCapabilityDefinition {
+    return {
+      key: "demo.sweep",
+      summary: "Work through the rows, saying how far it has got.",
+      guide: {
+        guide: "Work through the rows.",
+        input: { type: "object", additionalProperties: false },
+        output: {
+          type: "object",
+          additionalProperties: false,
+          properties: { swept: { type: "integer" } },
+          required: ["swept"],
+        },
+      },
+      kind: "read",
+      isEnabled: () => true,
+      execute: async (context) => {
+        for (let done = 1; done <= rows; done += 1) {
+          await Promise.resolve();
+          context.reportProgress?.({ done, total: rows, label: "rows" });
+        }
+        return { swept: rows };
+      },
+    };
+  }
+
+  it("reports each step, named by the call that made it", async () => {
+    const table = movableTable();
+    const seen: (AgentProgress | null)[] = [];
+    const session = createAgentSession({
+      observe: table.observe,
+      apply: apply(),
+      capabilities: [slowWrite(3)],
+      onProgress: (report) => seen.push(report),
+    });
+
+    await session.execute("demo.sweep", {}, 1, "sweep-1");
+
+    expect(seen.slice(0, 3)).toEqual([
+      {
+        capability: "demo.sweep",
+        idempotencyKey: "sweep-1",
+        done: 1,
+        total: 3,
+        label: "rows",
+      },
+      {
+        capability: "demo.sweep",
+        idempotencyKey: "sweep-1",
+        done: 2,
+        total: 3,
+        label: "rows",
+      },
+      {
+        capability: "demo.sweep",
+        idempotencyKey: "sweep-1",
+        done: 3,
+        total: 3,
+        label: "rows",
+      },
+    ]);
+  });
+
+  it("closes what it opened, so nothing is left standing beside a finished call", async () => {
+    const table = movableTable();
+    const seen: (AgentProgress | null)[] = [];
+    const session = createAgentSession({
+      observe: table.observe,
+      apply: apply(),
+      capabilities: [slowWrite(2)],
+      onProgress: (report) => seen.push(report),
+    });
+
+    await session.execute("demo.sweep", {}, 1, "sweep-2");
+
+    expect(seen.at(-1)).toBeNull();
+    // Once, and only by a call that reported something.
+    expect(seen.filter((entry) => entry === null)).toHaveLength(1);
+  });
+
+  it("says nothing for a call that reported nothing", async () => {
+    const table = movableTable();
+    const seen: (AgentProgress | null)[] = [];
+    const session = createAgentSession({
+      observe: table.observe,
+      apply: apply({
+        setSearch: () => {
+          table.elsewhereWrites();
+        },
+      }),
+      onProgress: (report) => seen.push(report),
+    });
+
+    await session.execute("view.setSearch", { query: "ada" }, 1, "quiet-1");
+
+    expect(seen).toEqual([]);
+  });
+
+  it("is not a result: a call that reported and then failed still fails", async () => {
+    const table = movableTable();
+    const seen: (AgentProgress | null)[] = [];
+    const session = createAgentSession({
+      observe: table.observe,
+      apply: apply(),
+      capabilities: [
+        {
+          key: "demo.halfway",
+          summary: "Report, then give up.",
+          guide: {
+            guide: "Report, then give up.",
+            input: { type: "object", additionalProperties: false },
+            output: { type: "object", additionalProperties: false },
+          },
+          kind: "read",
+          isEnabled: () => true,
+          execute: (context) => {
+            context.reportProgress?.({ done: 4, total: 10 });
+            throw new Error("the host gave up");
+          },
+        },
+      ],
+      onProgress: (report) => seen.push(report),
+    });
+
+    const result = await session.execute("demo.halfway", {}, 1, "half-1");
+
+    expect(result.ok).toBe(false);
+    expect(seen.at(0)).toMatchObject({ done: 4, total: 10 });
+    // And it is still closed, so a surface is not left showing 4 of 10 beside
+    // a call that failed.
+    expect(seen.at(-1)).toBeNull();
   });
 });

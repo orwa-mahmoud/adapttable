@@ -222,6 +222,10 @@ export const tr: Required<TableLabels> = {
   assistantUnavailable: "Asistan bağlı değil.",
   assistantDetached: "Bağlantı koptu. İş hâlâ sürüyor olabilir.",
   assistantRejoin: "Yeniden bağlan",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} tamamlandı`
+      : `${String(total)} içinden ${String(done)}`,
   assistantBackToTable: "Tabloya dön",
   assistantDetail: "Ayrıntılar",
   assistantSaveInTable: "Bu değişikliği korumak için tabloda kaydedin.",

@@ -219,6 +219,10 @@ export const ar: Required<TableLabels> = {
   assistantUnavailable: "المساعد غير متصل.",
   assistantDetached: "انقطع الاتصال. قد يكون العمل ما زال جاريًا.",
   assistantRejoin: "إعادة الاتصال",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `اكتمل ${String(done)}`
+      : `${String(done)} من ${String(total)}`,
   assistantBackToTable: "العودة إلى الجدول",
   assistantDetail: "التفاصيل",
   assistantSaveInTable: "احفظ في الجدول للاحتفاظ بهذا التغيير.",
