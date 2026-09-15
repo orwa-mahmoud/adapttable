@@ -53,6 +53,7 @@ import {
   type TableAgentColumnPatch,
   type WritePolicy,
 } from "@adapttable/ai";
+import { sampleColumns } from "@adapttable/ai/context";
 import type { ActionAiOptions } from "@adapttable/core";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
@@ -632,9 +633,25 @@ function applyFromRuntime(
  * table cannot answer for is simply absent, and the sanitized view names the
  * gap rather than defaulting it.
  */
+/**
+ * Column ids whose author asked for live values.
+ *
+ * The flag is the author's, so it is read from the contract rather than from
+ * anything a reader can move. A column the agent may not read is not sampled
+ * whatever it says — the sampler refuses it too, and asking twice is cheaper
+ * than a read that comes back empty.
+ */
+function sampledColumns(session: AgentSession): readonly string[] {
+  return session
+    .manifest()
+    .columns.filter((column) => column.readable && column.ai?.sample === true)
+    .map((column) => column.id);
+}
+
 function viewInputsFromRuntime(
   runtime: ReturnType<typeof useTableRuntime>,
-  options: TableAgentOptions
+  options: TableAgentOptions,
+  samples: Readonly<Record<string, readonly unknown[]>>
 ): AgentContextInputs {
   const view = runtime.view();
   const query = view?.query;
@@ -645,6 +662,7 @@ function viewInputsFromRuntime(
   );
   return {
     ...(filters && filters.length > 0 ? { filters } : {}),
+    ...(Object.keys(samples).length > 0 ? { samples } : {}),
     view: {
       ...(query?.page === undefined ? {} : { page: query.page }),
       ...(query?.limit === undefined ? {} : { limit: query.limit }),
@@ -1169,8 +1187,19 @@ function TableAgentProvider({
   // again when it settles, and a value taken at render time would report that
   // nothing moved between the two — which is exactly what per-turn undo has
   // to be able to tell.
+  // Live values for the columns whose author opted in. Read once per contract
+  // rather than once per turn: sampling is a read against the table, and a
+  // table publishing ten sampled columns must not open ten reads every time
+  // somebody types. Held in a ref because the reader below is synchronous —
+  // the context builder performs no I/O, which is the rule this keeps.
+  const samplesRef = useRef<Readonly<Record<string, readonly unknown[]>>>({});
   const viewStateValue = useRef<AgentViewState>({
-    read: () => viewInputsFromRuntime(runtimeRef.current, optionsRef.current),
+    read: () =>
+      viewInputsFromRuntime(
+        runtimeRef.current,
+        optionsRef.current,
+        samplesRef.current
+      ),
   }).current;
 
   useEffect(() => {
@@ -1191,6 +1220,32 @@ function TableAgentProvider({
     last.current = encoded;
     options.bridge?.publish?.(published);
   });
+
+  // Sampled once for the set of columns that asked, and again only when that
+  // set changes. Abandoned on unmount: a read that comes back to a table the
+  // reader has left must not write into it.
+  const sampledKey = sampledColumns(session).join(" ");
+  useEffect(() => {
+    const wanted = sampledKey === "" ? [] : sampledKey.split(" ");
+    if (wanted.length === 0) {
+      samplesRef.current = {};
+      return;
+    }
+    const controller = new AbortController();
+    void sampleColumns(session, wanted, controller.signal).then(
+      (values) => {
+        if (controller.signal.aborted) return;
+        samplesRef.current = values;
+      },
+      () => {
+        // A sample is an illustration, not a result. A table that cannot
+        // supply one publishes the author's own examples and nothing else,
+        // rather than failing a turn nobody has started.
+        if (!controller.signal.aborted) samplesRef.current = {};
+      }
+    );
+    return () => controller.abort();
+  }, [session, sampledKey, samplesRef]);
 
   // The chrome path is the only one that parks: with `onApprove` the host
   // answers directly and nothing is ever left open here.

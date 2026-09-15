@@ -292,9 +292,19 @@ pinned one and sees another knows to ask for the whole thing again.
 deliberate call — `sampleColumnValues(session, key)` reads through `rows.read`
 under the session's own permission predicate, caps at five distinct values,
 revalidates each against the column's declared type, and never touches an
-unreadable column. Hand the result in as `inputs.samples`; the contract marks
-those columns `sampled: true`, so nobody confuses an author's example with
-somebody's data.
+unreadable column. The contract marks those columns `sampled: true`, so nobody
+confuses an author's example with somebody's data.
+
+`tableAgent` does the reading for you: it collects the columns whose author
+asked, samples them once when the contract changes rather than once per turn,
+and hands the values in. A host building its own context calls
+`sampleColumns(session, wanted)` and passes the result as `inputs.samples` —
+the context builder performs no I/O of its own, which is why the read happens
+outside it.
+
+The values are read when the contract changes, so they illustrate the column
+rather than tracking it: data that moves without changing the contract leaves
+the last sample standing. That is what an example is for.
 
 ## Saying how far a long call has got
 

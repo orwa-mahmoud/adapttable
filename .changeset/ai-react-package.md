@@ -15,6 +15,10 @@ allowances to a panel mounted outside the table. Pass the published
 `contextInputs` and `alwaysAllow` state to `useTableAssistant` when the
 panel cannot read the table's feature state directly.
 
+`tableAgent` samples the columns whose author set `ai.sample`, once per
+contract, and hands the values into the context — a model then filters on the
+spelling the table stores rather than guessing one.
+
 `useTableAssistant` returns `resume`, `interrupted` and `resumable` for a
 connection that went while the work carried on, and `progress` for a
 capability that says how far it has got. `onDetach` and `resumeHandle` are

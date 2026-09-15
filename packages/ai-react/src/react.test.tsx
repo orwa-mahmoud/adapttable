@@ -1528,3 +1528,121 @@ describe("publishing the table as in-page tools", () => {
     }
   });
 });
+
+describe("the values a column's author asked to show", () => {
+  /** Reads the live inputs the context builder would send, as they settle. */
+  function InputsReader({ onRead }: { onRead: (value: unknown) => void }) {
+    const state = useFeatureState(AGENT_VIEW_STATE);
+    useLayoutEffect(() => {
+      if (!state) return;
+      const id = setInterval(() => onRead(state.read()), 5);
+      return () => clearInterval(id);
+    }, [state, onRead]);
+    return null;
+  }
+
+  /** A table whose `team` column asks for live values, and whose `name` does not. */
+  function sampledTable(patch: { readonly sample?: boolean } = {}) {
+    const engine = createTableEngine({
+      data: [
+        { id: "1", name: "Ada", team: "Core" },
+        { id: "2", name: "Grace", team: "Platform" },
+        { id: "3", name: "Katherine", team: "Core" },
+      ],
+      columns: [
+        { key: "name", header: "Name" },
+        {
+          key: "team",
+          header: "Team",
+          // The author's opt-in, written where the column is defined. It is
+          // theirs, which is why the agent's own column patch cannot set it.
+          ...(patch.sample === false ? {} : { ai: { sample: true } }),
+        },
+      ],
+      rowKey: (row) => (row as { id: string }).id,
+    });
+    return createNeutralTable(
+      engine as ReturnType<typeof createTableEngine>,
+      "test",
+      {}
+    );
+  }
+
+  function view(neutralTable: ReturnType<typeof createNeutralTable>) {
+    return {
+      rows: [
+        { id: "1", name: "Ada", team: "Core" },
+        { id: "2", name: "Grace", team: "Platform" },
+        { id: "3", name: "Katherine", team: "Core" },
+      ],
+      getRowId: (row: unknown) => String((row as { id: string }).id),
+      rowLabel: (row: unknown) => String((row as { name: string }).name),
+      neutralTable,
+    } as unknown as TableRuntimeView;
+  }
+
+  it("carries live values for a column that opted in", async () => {
+    let seen: { samples?: Record<string, readonly unknown[]> } | undefined;
+    render(
+      <FeatureProviders
+        props={applyTableFeatures({
+          features: [tableAgent({ tableId: "one" })],
+        })}
+      >
+        <Publisher view={view(sampledTable())} />
+        <InputsReader onRead={(value) => (seen = value as typeof seen)} />
+      </FeatureProviders>
+    );
+
+    await waitFor(() => expect(seen?.samples?.team).toBeDefined());
+    // The values as the table stores them, so a model filtering on "Core"
+    // sends the spelling the table will match rather than guessing one.
+    expect(seen?.samples?.team).toContain("Core");
+    expect(seen?.samples?.team).toContain("Platform");
+    // Only the column that asked.
+    expect(seen?.samples?.name).toBeUndefined();
+  });
+
+  it("samples nothing for a column the agent may not read", async () => {
+    let seen: { samples?: Record<string, readonly unknown[]> } | undefined;
+    render(
+      <FeatureProviders
+        props={applyTableFeatures({
+          features: [
+            // Opted in by its author and forbidden by the table. Forbidden
+            // wins: asking to show values cannot widen what the agent reads.
+            tableAgent({
+              tableId: "one",
+              columns: { team: { readable: false } },
+            }),
+          ],
+        })}
+      >
+        <Publisher view={view(sampledTable())} />
+        <InputsReader onRead={(value) => (seen = value as typeof seen)} />
+      </FeatureProviders>
+    );
+
+    await waitFor(() => expect(seen).toBeDefined());
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    expect(seen?.samples).toBeUndefined();
+  });
+
+  it("carries nothing when no column asked", async () => {
+    let seen: { samples?: Record<string, readonly unknown[]> } | undefined;
+    render(
+      <FeatureProviders
+        props={applyTableFeatures({
+          features: [tableAgent({ tableId: "one" })],
+        })}
+      >
+        <Publisher view={view(sampledTable({ sample: false }))} />
+        <InputsReader onRead={(value) => (seen = value as typeof seen)} />
+      </FeatureProviders>
+    );
+
+    await waitFor(() => expect(seen).toBeDefined());
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    expect(seen?.samples).toBeUndefined();
+  });
+});
