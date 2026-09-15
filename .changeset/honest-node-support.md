@@ -13,7 +13,10 @@
 "@adapttable/server": major
 ---
 
-Raise the supported Node.js floor to 22.12.0 for published packages.
-Consumers on earlier Node releases must upgrade. Packed consumer verification
-covers Node 22.12 and Node 24. Browser React integrations continue to support
-React 18 and 19.
+Raise the supported Node.js minimum from 18.18.0 to 22.12.0.
+Consumers using an earlier Node release must upgrade their development,
+build and server environments.
+
+Browser React integrations continue to support React 18 and 19. Package
+versions are independent; consumers do not need to match version numbers
+across AdaptTable packages.

@@ -1,4 +1,5 @@
 ---
+"@adapttable/core": minor
 "@adapttable/react": minor
 "@adapttable/antd": minor
 "@adapttable/base-ui": minor
@@ -11,24 +12,40 @@
 "@adapttable/i18n": minor
 ---
 
-Add an optional native table assistant on `@adapttable/<kit>/assistant`:
-`TableAssistant` and the `tableAssistant()` feature. Tables that do not
-import it do not include the widget. Developers can instead build their own
-UI on the headless assistant controller and approval contracts.
+Add optional native table assistants through `TableAssistant` and
+`tableAssistant()` on `@adapttable/<kit>/assistant`. Importing a table
+without this feature does not include the widget; custom interfaces can use
+the headless controller and approval contracts instead.
 
-The assistant supports floating, panel and sheet presentations, a container
-boundary, and native mobile overlays. It includes prompt cards, an integrated
-composer, transcript navigation, readable action receipts, pending-approval
-status and Stop. Enter sends, Shift+Enter inserts a line, and IME composition
-is respected. Labels are available in all 17 locales.
+### Conversation experience
 
-Approval can be presented inside the conversation, above the table or in a
-native modal, with one active surface. Reviews show a summary and the first
-three changes, with expansion inside the selected surface. Independently
-executable changes support individual decisions and remaining-item actions.
-`approvalReview` exposes the shared review model for custom renderers.
+The panel supports floating, panel and sheet presentations, container
+boundaries and native mobile overlays. Messages lead the conversation;
+action details open on request beneath a reply. Receipts name the columns,
+values and operations involved, distinguish proposals from completed
+changes, and offer eligible view Undo controls. `receipts={false}` hides
+the action UI without removing the underlying receipts from conversation
+state.
 
-Each adapter supplies its own controls, with shared structure, keyboard
-behavior and part hooks. Overlays are viewport-contained, nested controls
-can handle Escape before the surrounding overlay, and focus returns to the
-appropriate trigger.
+Suggested prompts open from the composer menu and reflect the table's
+available capabilities. Structured questions appear in the conversation with
+choices and optional free-text answers. Streaming text, Stop, dictation and
+a language chooser use the same conversation interface.
+
+Hosts can customize the greeting and `avatars`; a name can supply initials
+instead of a custom React element. Remembered approval allowances have
+readable names and a revoke control.
+
+### Approval and accessibility
+
+Approvals use one active presentation: in the widget, above the table or in
+a native modal. Reviews pair before/after values, summarize bulk changes and
+show an initial preview with expansion. Independently executable changes
+support individual and remaining-item decisions; a single change receives a
+single decision. `approvalReview` exposes the shared review model.
+
+Every kit supplies its own controls over shared structure, keyboard behavior
+and part hooks. The composer supports Enter, Shift+Enter and IME input.
+Opening and closing manage focus, nested controls can handle Escape, overlays
+respect viewport boundaries and RTL direction, and motion respects reduced
+motion preferences. Labels are available in all 17 locales.

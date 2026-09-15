@@ -14,5 +14,6 @@
 "@adapttable/unstyled": patch
 ---
 
-Pin AdaptTable workspace dependencies to the exact versions they were
-released with. `workspace:^` no longer publishes as a major caret.
+Publish exact AdaptTable runtime dependency versions rather than major-caret
+ranges. Each package resolves the sibling versions it was released with;
+consumers do not need to align package version numbers manually.

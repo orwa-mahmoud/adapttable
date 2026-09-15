@@ -12,36 +12,35 @@
 "@adapttable/i18n": minor
 ---
 
-Add data, editing and table-organization features:
+Expand data processing, table organization and accessible interaction.
 
-- Spreadsheet-compatible `POWER` and `SQRT`, including numeric coercion
+- Add spreadsheet-compatible `POWER` and `SQRT`, including numeric coercion
   and formula error handling.
-- Row reordering within groups and tree parents, cross-group/reparent moves,
-  cycle prevention, and host-owned move policies and confirmation.
-- Independent pinned summary rows above or below grouped, tree and
+- Support row reordering within groups and tree parents, cross-group and
+  reparent moves, cycle prevention, and host-owned move policies and
+  confirmation.
+- Add independent pinned summary rows above or below grouped, tree and
   virtualized data.
-- A native grouping panel with drag-and-drop, removable/reorderable chips,
-  mobile controls, session aggregation overrides and saved state.
-- Column renaming with stable keys and propagation to filters, export,
+- Add column renaming with stable keys and propagation to filters, exports,
   accessibility, mobile cards, URL state and Saved Views.
-- Find-query URL state and versioned URL-state recovery for malformed,
-  unsupported or oversized input. Existing supported shared links remain
+- Preserve find queries in URL state and recover from malformed, unsupported
+  or oversized versioned state. Existing supported shared links remain
   readable.
-- `selectorKey` on `useQuerySource` from `@adapttable/react` to re-project unchanged
-  fetched pages with a changed selector.
+- Window expanded group and tree entries when virtualization is enabled,
+  including on paginated tables.
+- Expose stable row/column lookup through the React grid-focus contract.
+  Context-menu Copy targets the clicked cell outside a selection, preserves
+  a selection when opened inside it, and is unavailable without a cell target.
 
 Server-built all-row exports report progress, support cancellation and retry,
-and offer host-provided download URLs. Completed progress can be dismissed.
-An all-row capability declaration alone does not fetch data: configure a
-retrieval route; otherwise the control is disabled rather than silently
-exporting the current page.
-
-Context-menu Copy targets the clicked cell when outside a selection, preserves
-a selection when opened inside it, and is unavailable without a cell target.
-The React grid-focus contract exposes stable row/column lookup for custom hosts.
+and accept host-provided download URLs. Completed progress can be dismissed.
+Configure a retrieval route to enable all-row export; declaring the capability
+alone does not fetch data or silently substitute the current page.
 
 Improve high-contrast/forced-colors rendering, Ant Design header/cell grid
 association, header-filter focus and persistence, row-move cancellation,
 row-action event isolation, and Escape handling in nested controls.
-Optional feature isolation and bundle budgets cover published adapter roots;
-native controls and headless customization remain available.
+
+The neutral engine does not publish a view revision when `setSearch`,
+`setPage` or `setLimit` receives its current value. Subscribers are notified
+when state changes, rather than for redundant setter calls.
