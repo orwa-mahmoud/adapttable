@@ -72,6 +72,7 @@ export interface AgentCapabilityContext {
     // (undocumented)
     readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     readonly plan?: CapabilityPlan;
+    readonly reportProgress?: (progress: CapabilityProgress) => void;
     readonly signal?: AbortSignal;
     readonly throwIfCancelled: () => void;
 }
@@ -428,6 +429,13 @@ export interface CapabilityPresentation {
     readonly description?: string;
     readonly suggestions?: readonly AssistantSuggestion[];
     readonly title: string;
+}
+
+// @public
+export interface CapabilityProgress {
+    readonly done: number;
+    readonly label?: string;
+    readonly total?: number;
 }
 
 // @public

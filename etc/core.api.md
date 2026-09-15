@@ -71,6 +71,15 @@ export interface AgentApprovalProposal {
 }
 
 // @public
+export interface AgentProgress {
+    readonly capability: string;
+    readonly done: number;
+    readonly idempotencyKey: string;
+    readonly label?: string;
+    readonly total?: number;
+}
+
+// @public
 export type Aggregatable<TValue = AggregateOrderedValue> = boolean | AggregatableConfig<TValue>;
 
 // @public
@@ -4089,6 +4098,8 @@ export interface TableLabels {
     approveAllProposals?: string;
     approveProposal?: string;
     approveRemainingProposals?: string;
+    assistantActions?: (count: number) => string;
+    assistantActionsTitle?: string;
     assistantAlwaysAllowedRevoke?: (capability: string) => string;
     assistantAlwaysAllowedTitle?: string;
     assistantAnswerLabel?: string;
@@ -4098,13 +4109,14 @@ export interface TableLabels {
     assistantCapabilityName?: (capability: string) => string | undefined;
     assistantClose?: string;
     assistantConnection?: (status: string) => string;
+    assistantDetached?: string;
     assistantDetail?: string;
     assistantEmpty?: string;
     assistantExamples?: string;
-    assistantMoreExamples?: string;
     assistantNewMessages?: string;
     assistantOpen?: string;
     assistantPlaceholder?: string;
+    assistantProgress?: (done: number, total?: number) => string;
     assistantReceipt?: (receipt: {
         capability?: string;
         status: string;
@@ -4131,6 +4143,7 @@ export interface TableLabels {
         }[];
         direction?: "asc" | "desc";
     }) => string | undefined;
+    assistantRejoin?: string;
     assistantSaveInTable?: string;
     assistantSend?: string;
     assistantSettings?: string;
@@ -4139,7 +4152,9 @@ export interface TableLabels {
     assistantTitle?: string;
     assistantUnavailable?: string;
     assistantUndo?: string;
+    assistantUndoAll?: string;
     assistantUndoBlocked?: (code: string) => string | undefined;
+    assistantUnresolved?: (code: string) => string | undefined;
     assistantVoiceLanguage?: string;
     assistantVoiceListening?: string;
     assistantVoiceStart?: string;

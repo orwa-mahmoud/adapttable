@@ -318,6 +318,7 @@ export type {
   CapabilityGuide,
   CapabilityPartial,
   CapabilityPlan,
+  CapabilityProgress,
   CapabilityStaging,
   CatalogEntry,
   ExecuteError,

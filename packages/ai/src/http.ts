@@ -78,8 +78,12 @@ import type {
 export { agentSystemPrompt, type AgentSystemPromptInput } from "./agentPrompt";
 export type {
   AssistantExchange,
+  AssistantResumeHandle,
+  AssistantResumeInput,
+  AssistantSendInput,
   AssistantTransport,
   AssistantTransportReply,
+  AssistantTurnInput,
   AssistantUnresolved,
 } from "./assistantContracts";
 export type {

@@ -1101,6 +1101,8 @@ export {
   type TableAssistantQuestionOption,
   type TableAssistantQuestionView,
   type TableAssistantReceiptSubject,
+  type TableAssistantAllowanceView,
+  type TableAssistantProgressView,
   type TableAssistantReceiptView,
   type TableAssistantResumableView,
   type TableAssistantSuggestionView,

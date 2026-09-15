@@ -5,6 +5,7 @@
 ```ts
 
 import { ActionAiOptions } from '@adapttable/core';
+import { AgentProgress } from '@adapttable/core';
 import { ApprovalPresentation } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 
@@ -72,6 +73,7 @@ export interface AgentCapabilityContext {
     // (undocumented)
     readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     readonly plan?: CapabilityPlan;
+    readonly reportProgress?: (progress: CapabilityProgress) => void;
     readonly signal?: AbortSignal;
     readonly throwIfCancelled: () => void;
 }
@@ -314,6 +316,12 @@ export type ApprovalSubject = {
 };
 
 // @public
+export interface AssistantAllowance {
+    readonly capability: string;
+    readonly name?: string;
+}
+
+// @public
 export interface AssistantAnswer {
     readonly optionId?: string;
     readonly text?: string;
@@ -328,14 +336,18 @@ export interface AssistantExchange {
 }
 
 // @public
+export type AssistantInterruption = "stopped" | "detached";
+
+// @public
 export interface AssistantMessage {
     readonly at: number;
     readonly id: string;
     readonly outcome?: AssistantTurnStatus;
-    readonly partialText?: string;
+    readonly question?: AssistantQuestion;
     readonly receipts?: readonly AssistantReceipt[];
     // (undocumented)
     readonly role: "user" | "assistant";
+    readonly streaming?: boolean;
     readonly text: string;
 }
 
@@ -389,6 +401,22 @@ export interface AssistantReceiptTerm {
 }
 
 // @public
+export interface AssistantResumeHandle {
+    readonly text: string;
+    readonly token: unknown;
+}
+
+// @public
+export interface AssistantResumeInput extends AssistantTurnInput {
+    readonly handle: AssistantResumeHandle;
+}
+
+// @public
+export interface AssistantSendInput extends AssistantTurnInput {
+    readonly text: string;
+}
+
+// @public
 export type AssistantStatus = "idle" | "connecting" | "ready" | "sending" | "awaiting-approval" | "awaiting-user" | "error" | "disconnected";
 
 // @public
@@ -401,21 +429,15 @@ export interface AssistantSuggestion {
     readonly title: string;
 }
 
-// @public
+// @public (undocumented)
 export interface AssistantTransport {
     connect?(input: {
         readonly session: AgentSession;
         readonly signal?: AbortSignal;
     }): Promise<void> | void;
     disconnect?(): void;
-    send(input: {
-        readonly session: AgentSession;
-        readonly text: string;
-        readonly conversation: readonly AssistantExchange[];
-        readonly signal?: AbortSignal;
-        readonly onPartialText?: (text: string) => void;
-        readonly askUser?: (question: AssistantQuestion) => Promise<AssistantAnswer | undefined>;
-    }): Promise<AssistantTransportReply>;
+    resume?(input: AssistantResumeInput): Promise<AssistantTransportReply>;
+    send(input: AssistantSendInput): Promise<AssistantTransportReply>;
 }
 
 // @public
@@ -425,6 +447,19 @@ export interface AssistantTransportReply {
     readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
     readonly text: string;
     readonly unresolved?: AssistantUnresolved;
+}
+
+// @public
+export interface AssistantTurnInput {
+    readonly askUser?: (question: AssistantQuestion) => Promise<AssistantAnswer | undefined>;
+    // (undocumented)
+    readonly conversation: readonly AssistantExchange[];
+    readonly onPartialText?: (text: string) => void;
+    readonly onResumable?: (token: unknown) => void;
+    // (undocumented)
+    readonly session: AgentSession;
+    // (undocumented)
+    readonly signal?: AbortSignal;
 }
 
 // @public
@@ -484,6 +519,13 @@ export interface CapabilityPresentation {
     readonly description?: string;
     readonly suggestions?: readonly AssistantSuggestion[];
     readonly title: string;
+}
+
+// @public
+export interface CapabilityProgress {
+    readonly done: number;
+    readonly label?: string;
+    readonly total?: number;
 }
 
 // @public
@@ -599,7 +641,7 @@ export interface RowWindowRow {
 }
 
 // @public
-export function runUndo(session: AgentSession, undo: AssistantUndo, idempotencyKey: string, signal?: AbortSignal): Promise<readonly ExecuteResult[]>;
+export function runUndo(session: AgentSession, undo: AssistantUndo, idempotencyKey: string, signal?: AbortSignal, view?: AgentContextView): Promise<readonly ExecuteResult[]>;
 
 // @public
 export interface TableAssistantInputs {
@@ -607,8 +649,10 @@ export interface TableAssistantInputs {
     readonly approval?: unknown;
     readonly awaitingApproval?: boolean;
     readonly contextInputs?: () => AgentContextInputs;
+    readonly onDetach?: (handle: AssistantResumeHandle) => void;
     readonly onRevokeAlwaysAllow?: (capability: string) => void;
-    readonly primarySuggestions?: number;
+    readonly progress?: AgentProgress | null;
+    readonly resumeHandle?: AssistantResumeHandle;
     readonly session?: AgentSession;
     readonly suggestions?: readonly AssistantSuggestion[];
     readonly transport?: AssistantTransport;
@@ -617,18 +661,19 @@ export interface TableAssistantInputs {
 
 // @public
 export interface TableAssistantSnapshot {
-    readonly alwaysAllowed: readonly string[];
+    readonly alwaysAllowed: readonly AssistantAllowance[];
     readonly approval: unknown;
     readonly busy: boolean;
-    readonly canSend: boolean;
-    readonly canStop: boolean;
     // (undocumented)
     readonly draft: string;
     readonly error: string | undefined;
+    readonly errorCode: string | undefined;
+    readonly interrupted: AssistantInterruption | undefined;
     // (undocumented)
     readonly messages: readonly AssistantMessage[];
-    readonly moreSuggestions: readonly AssistantSuggestion[];
     readonly pendingQuestion: AssistantQuestion | null;
+    readonly progress: AgentProgress | null;
+    readonly resumable: AssistantResumeHandle | undefined;
     // (undocumented)
     readonly status: AssistantStatus;
     readonly suggestions: readonly AssistantSuggestion[];
@@ -643,6 +688,7 @@ export interface TableAssistantStore {
     readonly disconnect: () => void;
     readonly dispose: () => void;
     readonly getState: () => TableAssistantSnapshot;
+    readonly resume: () => Promise<void>;
     readonly revokeAlwaysAllow: (capability: string) => void;
     readonly runSuggestion: (id: string) => Promise<void>;
     readonly send: (text?: string) => Promise<void>;

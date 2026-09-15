@@ -5,6 +5,7 @@
 ```ts
 
 import { ActionAiOptions } from '@adapttable/core';
+import { AgentProgress } from '@adapttable/core';
 import { ApprovalPresentation } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 
@@ -72,6 +73,7 @@ export interface AgentCapabilityContext {
     // (undocumented)
     readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     readonly plan?: CapabilityPlan;
+    readonly reportProgress?: (progress: CapabilityProgress) => void;
     readonly signal?: AbortSignal;
     readonly throwIfCancelled: () => void;
 }
@@ -229,6 +231,8 @@ export interface AgentPolicy {
     readonly write: WritePolicy;
 }
 
+export { AgentProgress }
+
 // @public
 export interface AgentRowAddressing {
     readonly key: string;
@@ -316,6 +320,13 @@ export interface CapabilityPresentation {
     readonly description?: string;
     readonly suggestions?: readonly AssistantSuggestion[];
     readonly title: string;
+}
+
+// @public
+export interface CapabilityProgress {
+    readonly done: number;
+    readonly label?: string;
+    readonly total?: number;
 }
 
 // @public

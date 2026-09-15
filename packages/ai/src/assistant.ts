@@ -34,6 +34,7 @@ export type {
   AssistantTurnStatus,
 } from "./assistantReceipts";
 export {
+  type AssistantAllowance,
   type AssistantInterruption,
   type AssistantMessage,
   type AssistantStatus,
@@ -93,6 +94,7 @@ export type {
   CapabilityGuide,
   CapabilityPartial,
   CapabilityPlan,
+  CapabilityProgress,
   CapabilityStaging,
   CatalogEntry,
   ExecuteError,

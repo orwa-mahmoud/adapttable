@@ -5,6 +5,7 @@
 ```ts
 
 import { ActionAiOptions } from '@adapttable/core';
+import { AgentProgress } from '@adapttable/core';
 import { ApprovalPresentation } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 
@@ -80,6 +81,7 @@ export interface AgentCapabilityContext {
     // (undocumented)
     readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     readonly plan?: CapabilityPlan;
+    readonly reportProgress?: (progress: CapabilityProgress) => void;
     readonly signal?: AbortSignal;
     readonly throwIfCancelled: () => void;
 }
@@ -506,6 +508,8 @@ export interface AgentPolicy {
     readonly write: WritePolicy;
 }
 
+export { AgentProgress }
+
 // @public
 export interface AgentRowAddressing {
     readonly key: string;
@@ -632,6 +636,22 @@ export interface AssistantReceiptTerm {
 }
 
 // @public
+export interface AssistantResumeHandle {
+    readonly text: string;
+    readonly token: unknown;
+}
+
+// @public
+export interface AssistantResumeInput extends AssistantTurnInput {
+    readonly handle: AssistantResumeHandle;
+}
+
+// @public
+export interface AssistantSendInput extends AssistantTurnInput {
+    readonly text: string;
+}
+
+// @public
 export interface AssistantSuggestion {
     readonly description?: string;
     readonly id: string;
@@ -641,21 +661,15 @@ export interface AssistantSuggestion {
     readonly title: string;
 }
 
-// @public
+// @public (undocumented)
 export interface AssistantTransport {
     connect?(input: {
         readonly session: AgentSession;
         readonly signal?: AbortSignal;
     }): Promise<void> | void;
     disconnect?(): void;
-    send(input: {
-        readonly session: AgentSession;
-        readonly text: string;
-        readonly conversation: readonly AssistantExchange[];
-        readonly signal?: AbortSignal;
-        readonly onPartialText?: (text: string) => void;
-        readonly askUser?: (question: AgentHttpQuestion) => Promise<AgentHttpAnswer | undefined>;
-    }): Promise<AssistantTransportReply>;
+    resume?(input: AssistantResumeInput): Promise<AssistantTransportReply>;
+    send(input: AssistantSendInput): Promise<AssistantTransportReply>;
 }
 
 // @public
@@ -665,6 +679,19 @@ export interface AssistantTransportReply {
     readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
     readonly text: string;
     readonly unresolved?: AssistantUnresolved;
+}
+
+// @public
+export interface AssistantTurnInput {
+    readonly askUser?: (question: AgentHttpQuestion) => Promise<AgentHttpAnswer | undefined>;
+    // (undocumented)
+    readonly conversation: readonly AssistantExchange[];
+    readonly onPartialText?: (text: string) => void;
+    readonly onResumable?: (token: unknown) => void;
+    // (undocumented)
+    readonly session: AgentSession;
+    // (undocumented)
+    readonly signal?: AbortSignal;
 }
 
 // @public
@@ -711,6 +738,13 @@ export interface CapabilityPresentation {
     readonly description?: string;
     readonly suggestions?: readonly AssistantSuggestion[];
     readonly title: string;
+}
+
+// @public
+export interface CapabilityProgress {
+    readonly done: number;
+    readonly label?: string;
+    readonly total?: number;
 }
 
 // @public

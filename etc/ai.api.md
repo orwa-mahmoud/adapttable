@@ -8,6 +8,7 @@ import { ActionAiOptions } from '@adapttable/core';
 import { AgentApprovalDecision } from '@adapttable/core';
 import { AgentApprovalOperation } from '@adapttable/core';
 import { AgentApprovalProposal } from '@adapttable/core';
+import { AgentProgress } from '@adapttable/core';
 import { ApprovalPresentation } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
 import { FilterDef } from '@adapttable/core';
@@ -86,6 +87,7 @@ export interface AgentCapabilityContext {
     // (undocumented)
     readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     readonly plan?: CapabilityPlan;
+    readonly reportProgress?: (progress: CapabilityProgress) => void;
     readonly signal?: AbortSignal;
     readonly throwIfCancelled: () => void;
 }
@@ -389,6 +391,8 @@ export interface AgentPolicy {
     readonly write: WritePolicy;
 }
 
+export { AgentProgress }
+
 // @public
 export interface AgentRowAddressing {
     readonly key: string;
@@ -526,6 +530,12 @@ export interface AssistantAction {
 }
 
 // @public
+export interface AssistantAllowance {
+    readonly capability: string;
+    readonly name?: string;
+}
+
+// @public
 export interface AssistantAnswer {
     readonly optionId?: string;
     readonly text?: string;
@@ -546,14 +556,18 @@ export interface AssistantExchange {
 }
 
 // @public
+export type AssistantInterruption = "stopped" | "detached";
+
+// @public
 export interface AssistantMessage {
     readonly at: number;
     readonly id: string;
     readonly outcome?: AssistantTurnStatus;
-    readonly partialText?: string;
+    readonly question?: AssistantQuestion;
     readonly receipts?: readonly AssistantReceipt[];
     // (undocumented)
     readonly role: "user" | "assistant";
+    readonly streaming?: boolean;
     readonly text: string;
 }
 
@@ -641,6 +655,22 @@ export interface AssistantRequest {
 }
 
 // @public
+export interface AssistantResumeHandle {
+    readonly text: string;
+    readonly token: unknown;
+}
+
+// @public
+export interface AssistantResumeInput extends AssistantTurnInput {
+    readonly handle: AssistantResumeHandle;
+}
+
+// @public
+export interface AssistantSendInput extends AssistantTurnInput {
+    readonly text: string;
+}
+
+// @public
 export type AssistantStatus = "idle" | "connecting" | "ready" | "sending" | "awaiting-approval" | "awaiting-user" | "error" | "disconnected";
 
 // @public
@@ -653,21 +683,15 @@ export interface AssistantSuggestion {
     readonly title: string;
 }
 
-// @public
+// @public (undocumented)
 export interface AssistantTransport {
     connect?(input: {
         readonly session: AgentSession;
         readonly signal?: AbortSignal;
     }): Promise<void> | void;
     disconnect?(): void;
-    send(input: {
-        readonly session: AgentSession;
-        readonly text: string;
-        readonly conversation: readonly AssistantExchange[];
-        readonly signal?: AbortSignal;
-        readonly onPartialText?: (text: string) => void;
-        readonly askUser?: (question: AssistantQuestion) => Promise<AssistantAnswer | undefined>;
-    }): Promise<AssistantTransportReply>;
+    resume?(input: AssistantResumeInput): Promise<AssistantTransportReply>;
+    send(input: AssistantSendInput): Promise<AssistantTransportReply>;
 }
 
 // @public
@@ -687,6 +711,19 @@ export interface AssistantTurn {
     readonly proposal?: AssistantProposal;
     // (undocumented)
     readonly request: AssistantRequest;
+}
+
+// @public
+export interface AssistantTurnInput {
+    readonly askUser?: (question: AssistantQuestion) => Promise<AssistantAnswer | undefined>;
+    // (undocumented)
+    readonly conversation: readonly AssistantExchange[];
+    readonly onPartialText?: (text: string) => void;
+    readonly onResumable?: (token: unknown) => void;
+    // (undocumented)
+    readonly session: AgentSession;
+    // (undocumented)
+    readonly signal?: AbortSignal;
 }
 
 // @public
@@ -758,6 +795,13 @@ export interface CapabilityPresentation {
     readonly description?: string;
     readonly suggestions?: readonly AssistantSuggestion[];
     readonly title: string;
+}
+
+// @public
+export interface CapabilityProgress {
+    readonly done: number;
+    readonly label?: string;
+    readonly total?: number;
 }
 
 // @public
@@ -840,6 +884,7 @@ export interface CreateAgentSessionOptions {
     excludeCapabilities?: readonly string[];
     observe: () => AgentObservation;
     onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
+    onProgress?: (report: AgentProgress | null) => void;
     replayCacheSize?: number;
 }
 
@@ -1247,7 +1292,7 @@ export interface RowWindowRow {
 export type RuntimeOperations = Readonly<Record<string, boolean>>;
 
 // @public
-export function runUndo(session: AgentSession, undo: AssistantUndo, idempotencyKey: string, signal?: AbortSignal): Promise<readonly ExecuteResult[]>;
+export function runUndo(session: AgentSession, undo: AssistantUndo, idempotencyKey: string, signal?: AbortSignal, view?: AgentContextView): Promise<readonly ExecuteResult[]>;
 
 // @public
 export function settleDecisions(decisions: readonly AgentApprovalDecision[], fallback: AgentApprovalDecision): {
@@ -1328,6 +1373,7 @@ export interface TableAgentBridge<TPending = unknown> {
     readonly alwaysAllowed?: (state: AlwaysAllowedState) => void;
     readonly approvals?: (pending: TPending | null) => void;
     attach?: (session: AgentSession) => void;
+    readonly progress?: (report: AgentProgress | null) => void;
     publish?: (manifest: AgentManifest) => void;
     readonly viewInputs?: (read: () => AgentContextInputs) => void;
 }
@@ -1352,8 +1398,10 @@ export interface TableAssistantInputs {
     readonly approval?: unknown;
     readonly awaitingApproval?: boolean;
     readonly contextInputs?: () => AgentContextInputs;
+    readonly onDetach?: (handle: AssistantResumeHandle) => void;
     readonly onRevokeAlwaysAllow?: (capability: string) => void;
-    readonly primarySuggestions?: number;
+    readonly progress?: AgentProgress | null;
+    readonly resumeHandle?: AssistantResumeHandle;
     readonly session?: AgentSession;
     readonly suggestions?: readonly AssistantSuggestion[];
     readonly transport?: AssistantTransport;
@@ -1362,18 +1410,19 @@ export interface TableAssistantInputs {
 
 // @public
 export interface TableAssistantSnapshot {
-    readonly alwaysAllowed: readonly string[];
+    readonly alwaysAllowed: readonly AssistantAllowance[];
     readonly approval: unknown;
     readonly busy: boolean;
-    readonly canSend: boolean;
-    readonly canStop: boolean;
     // (undocumented)
     readonly draft: string;
     readonly error: string | undefined;
+    readonly errorCode: string | undefined;
+    readonly interrupted: AssistantInterruption | undefined;
     // (undocumented)
     readonly messages: readonly AssistantMessage[];
-    readonly moreSuggestions: readonly AssistantSuggestion[];
     readonly pendingQuestion: AssistantQuestion | null;
+    readonly progress: AgentProgress | null;
+    readonly resumable: AssistantResumeHandle | undefined;
     // (undocumented)
     readonly status: AssistantStatus;
     readonly suggestions: readonly AssistantSuggestion[];
@@ -1388,6 +1437,7 @@ export interface TableAssistantStore {
     readonly disconnect: () => void;
     readonly dispose: () => void;
     readonly getState: () => TableAssistantSnapshot;
+    readonly resume: () => Promise<void>;
     readonly revokeAlwaysAllow: (capability: string) => void;
     readonly runSuggestion: (id: string) => Promise<void>;
     readonly send: (text?: string) => Promise<void>;
