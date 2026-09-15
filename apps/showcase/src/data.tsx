@@ -367,6 +367,10 @@ export const BASE_COLUMNS: ColumnDef<Person>[] = [
     key: "timeline",
     accessor: (r) => formatDate(startDate(r)),
     sortValue: (r) => startDate(r).getTime(),
+    // Grouping by the instant a project starts gives every row a group of its
+    // own, captioned with the epoch the sort runs on. The month is the bucket
+    // a reader means when they group a timeline.
+    groupValue: (r) => formatMonth(startDate(r)),
     sortable: true,
     header: STRINGS.en.timeline,
   },
