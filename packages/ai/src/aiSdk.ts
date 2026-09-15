@@ -413,7 +413,6 @@ interface TurnState {
   /** What this turn's own calls have proven the table reached. */
   readonly bound: TurnRevision;
   /** The revision of the view the current request carried. */
-  planned: number;
   /** The request this turn is on, which is what a tool-call id belongs to. */
   step: string;
   text: string;
@@ -518,13 +517,13 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
       );
     }
     const manifest = session.manifest();
-    // The view this request carried, moved forward only by what this turn's
-    // own calls have proven. A call the model planned against that view is not
-    // quietly re-aimed at whatever the table has reached since.
+    // The view this request carried is checked as the request opens. A call
+    // arriving after one of this request's own calls has landed meets the
+    // table that call moved, rather than being refused for it.
     const result = await session.execute(
       key,
       part.input ?? {},
-      turn.bound.expected(turn.planned),
+      turn.bound.expected(manifest.viewRevision),
       callKey(manifest.tableId, turn.step, toolCallId),
       signal
     );
@@ -699,7 +698,6 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
         approvals: [],
         denied: [],
         bound: createTurnRevision(opening),
-        planned: opening,
         step: `${runId}:0`,
         text: "",
       };
@@ -710,7 +708,7 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
         // to. Both move on with the request, so a call is bound to the state
         // the model was actually shown.
         const view = viewOf(session);
-        turn.planned = view.revision;
+        turn.bound.opens(view.revision);
         turn.step = `${runId}:${String(attempt)}`;
         const request: AiSdkRequest = {
           message: text,

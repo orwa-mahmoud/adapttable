@@ -573,7 +573,6 @@ interface TurnState {
   /** What this turn's own calls have proven the table reached. */
   readonly bound: TurnRevision;
   /** The revision of the state the current run was started with. */
-  planned: number;
   text: string;
   sequence: number;
 }
@@ -642,13 +641,13 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
     signal?: AbortSignal
   ): Promise<void> => {
     const manifest = session.manifest();
-    // The state this run was started with, moved forward only by what this
-    // turn's own calls have proven. A call the backend planned against that
-    // state is not quietly re-aimed at whatever the table has reached since.
+    // The state this run was started with is checked as the run opens. A call
+    // arriving after one of this run's own calls has landed meets the table
+    // that call moved, rather than being refused for it.
     const result = await session.execute(
       key,
       args,
-      turn.bound.expected(turn.planned),
+      turn.bound.expected(manifest.viewRevision),
       callKey(threadId, runId, toolCallId),
       signal
     );
@@ -883,7 +882,6 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
         keys: [],
         subjects: [],
         bound: createTurnRevision(opening),
-        planned: opening,
         text: "",
         sequence: 0,
       };
@@ -902,7 +900,7 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
         // The state this run is actually started with. Its revision is what a
         // call arriving during the run was planned against.
         const view = viewOf(session);
-        turn.planned = view.revision;
+        turn.bound.opens(view.revision);
         const input: AgUiRunInput = {
           threadId,
           runId,

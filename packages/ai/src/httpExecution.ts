@@ -133,10 +133,10 @@ export function createTurnExecution(
   return {
     revision: bound.revision,
     execute: async (batch, signal) => {
-      // The view this phase was actually planned against. An action that names
-      // no revision of its own belongs to it — not to whatever the table has
-      // reached since, and not to what a previous phase left behind.
-      const planned = batch.context.viewRevision;
+      // The view this phase was planned against. It is checked once, as the
+      // phase opens: the calls inside one phase were planned together and in
+      // order, so a later one meets the table its own predecessor moved.
+      bound.opens(batch.context.viewRevision);
       const results: ExecuteResult[] = [];
       for (const action of batch.actions) {
         if (signal?.aborted) {
@@ -146,7 +146,10 @@ export function createTurnExecution(
         const result = await session.execute(
           action.key,
           action.args ?? {},
-          bound.expected(planned, action.expectedRevision),
+          bound.expected(
+            session.manifest().viewRevision,
+            action.expectedRevision
+          ),
           action.idempotencyKey,
           signal
         );

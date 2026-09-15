@@ -184,6 +184,60 @@ describe("phase-bound action execution", () => {
     expect(execution.revision()).toBe(3);
   });
 
+  it("runs a plan's later action against the table its own earlier one moved", async () => {
+    // A React host does not publish the revision while the apply call is on
+    // the stack: the filter's own effect is unreadable when the filter
+    // returns, and is there by the time the sort runs. The sort belongs to the
+    // same plan as the filter, so it meets that table rather than being
+    // refused for it.
+    const state = { revision: 1 };
+    const setFilters = vi.fn(() => {
+      void Promise.resolve().then(() => {
+        state.revision += 1;
+      });
+    });
+    const setSort = vi.fn();
+    const session = createAgentSession({
+      observe: () => observation({ viewRevision: state.revision }),
+      apply: { setFilters, setSort },
+    });
+    const context = phaseContext(session, "turn-1", 0);
+
+    const execution = createTurnExecution(session, context);
+    const results = await execution.execute({
+      context,
+      actions: [FILTER_ACTIVE, SORT_SALARY],
+    });
+
+    expect(results.map((entry) => entry.ok)).toEqual([true, true]);
+    expect(setSort).toHaveBeenCalledWith("salary", "desc");
+  });
+
+  it("refuses a whole plan whose opening view the table has left", async () => {
+    // The check that matters runs once, as the plan opens. A plan written for
+    // a view the reader has since moved past applies none of itself.
+    const setFilters = vi.fn();
+    const setSort = vi.fn();
+    const { session, state } = liveTable({ setFilters, setSort });
+    const context = phaseContext(session, "turn-1", 0);
+
+    // The edit a person made while the backend was writing this plan.
+    state.revision = 2;
+
+    const execution = createTurnExecution(session, context);
+    const results = await execution.execute({
+      context,
+      actions: [FILTER_ACTIVE, SORT_SALARY],
+    });
+
+    expect(results.map((entry) => entry.error?.code)).toEqual([
+      "revision-mismatch",
+      "revision-mismatch",
+    ]);
+    expect(setFilters).not.toHaveBeenCalled();
+    expect(setSort).not.toHaveBeenCalled();
+  });
+
   it("refuses the next action when an outside change lands between two of them", async () => {
     const state = { revision: 1 };
     const setFilters = vi.fn(() => {
