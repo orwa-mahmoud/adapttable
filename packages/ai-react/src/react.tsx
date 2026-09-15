@@ -660,8 +660,13 @@ function viewInputsFromRuntime(
     view?.filterRegistry,
     options.columns
   );
+  // The operations each column takes travel with the contract, not behind a
+  // describe call: a caller that has to guess between "avg" and "average"
+  // guesses wrong, and only finds out by being refused.
+  const aggregations = aggregationsFor(aggregationInputs(view, options));
   return {
     ...(filters && filters.length > 0 ? { filters } : {}),
+    ...(aggregations ? { aggregations } : {}),
     ...(Object.keys(samples).length > 0 ? { samples } : {}),
     view: {
       ...(query?.page === undefined ? {} : { page: query.page }),

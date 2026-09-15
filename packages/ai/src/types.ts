@@ -144,6 +144,14 @@ export interface AgentAggregateOperation {
   readonly id: string;
   /** Human label. */
   readonly label: string;
+  /**
+   * What a host's own operation does, in their words.
+   *
+   * Absent for a built-in, whose id already says it everywhere. Present only
+   * where the column's author wrote one, and handed over when the capability
+   * is described rather than in the contract every turn carries.
+   */
+  readonly description?: string;
 }
 
 /**
@@ -269,6 +277,18 @@ export interface AgentPolicy {
  *
  * @public
  */
+/**
+ * One column's aggregation offer, as the contract carries it.
+ *
+ * @public
+ */
+export interface AgentManifestAggregation {
+  /** Column id. */
+  readonly id: string;
+  /** Operation ids this column takes, in the order it offers them. */
+  readonly operations: readonly string[];
+}
+
 export interface AgentManifest {
   /** Schema family (`adapttable.agent.v1`). */
   readonly schemaVersion: string;
@@ -282,6 +302,16 @@ export interface AgentManifest {
   readonly columns: readonly AgentColumn[];
   /** How row keys and positions resolve. */
   readonly rowAddressing: AgentRowAddressing;
+  /**
+   * Which operations each aggregatable column takes, by id.
+   *
+   * Keys only, and part of the contract rather than something to ask for: a
+   * caller that has to guess between "avg" and "average" guesses wrong, and
+   * finds out by being refused. What an operation *means* is a question for
+   * `describe` — a built-in's id answers it, and a host's own carries the
+   * description its author wrote.
+   */
+  readonly aggregateOperations?: readonly AgentManifestAggregation[];
   /** Read and page ceilings. */
   readonly limits: AgentLimits;
   /**

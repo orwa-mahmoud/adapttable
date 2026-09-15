@@ -1039,7 +1039,11 @@ function describeAggregations(
           .map(
             (column) =>
               `${column.id} [${column.operations
-                .map((operation) => `${operation.id} (${operation.label})`)
+                .map((operation) =>
+                  operation.description
+                    ? `${operation.id} (${operation.label}) — ${operation.description}`
+                    : `${operation.id} (${operation.label})`
+                )
                 .join(", ")}]`
           )
           .join("; ") +
@@ -1086,7 +1090,7 @@ function aggregationSetEntries(
         "invalid-arguments",
         offered.length > 0
           ? `"${key}" cannot use operation "${operationId}" — it takes ${offered.join(", ")}`
-          : `"${key}" takes no aggregation`
+          : `"${key}" cannot use operation "${operationId}"`
       );
     }
     nextSet[key] = operationId;

@@ -821,6 +821,7 @@ export type {
   AgentFilterOption,
   AgentLimits,
   AgentManifest,
+  AgentManifestAggregation,
   AgentObservation,
   AgentPagination,
   AgentPolicy,

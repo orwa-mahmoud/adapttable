@@ -30,6 +30,16 @@ export function buildManifest(
       scope: observation.rowAddressScope,
       key: "rowKey",
     },
+    ...(observation.aggregations?.columns.length
+      ? {
+          aggregateOperations: observation.aggregations.columns.map(
+            (column) => ({
+              id: column.id,
+              operations: column.operations.map((operation) => operation.id),
+            })
+          ),
+        }
+      : {}),
     ...(observation.pagination ? { pagination: observation.pagination } : {}),
     limits: {
       pageMax: observation.pageMax,

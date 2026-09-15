@@ -10,6 +10,7 @@ import { TableSourceCapabilities } from '@adapttable/core';
 
 // @public
 export interface AgentAggregateOperation {
+    readonly description?: string;
     readonly id: string;
     readonly label: string;
 }
@@ -267,8 +268,9 @@ export interface AgentLimits {
     readonly readMax: number;
 }
 
-// @public
+// @public (undocumented)
 export interface AgentManifest {
+    readonly aggregateOperations?: readonly AgentManifestAggregation[];
     readonly capabilities: readonly string[];
     readonly columns: readonly AgentColumn[];
     readonly limits: AgentLimits;
@@ -279,6 +281,12 @@ export interface AgentManifest {
     readonly source: TableSourceCapabilities;
     readonly tableId: string;
     readonly viewRevision: number;
+}
+
+// @public
+export interface AgentManifestAggregation {
+    readonly id: string;
+    readonly operations: readonly string[];
 }
 
 // @public

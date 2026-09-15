@@ -28,6 +28,9 @@ mobile controls, multiple active aggregations, and URL/Saved Views support.
   validated at execution, and custom operation IDs survive state round-trips.
 - Date minimum and maximum compare ISO values. Grouped columns remain
   eligible for aggregation.
+- A custom operation takes a `description`. Anything reading the table rather
+  than looking at it is told what the operation does in the author's words;
+  a built-in needs none.
 
 Changes to aggregation choices invalidate cached group calculations through
 `IncrementalViewConfig.derivedKey`. Stored multi-column grouping is read as

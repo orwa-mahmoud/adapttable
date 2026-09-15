@@ -116,6 +116,9 @@ export function aggregationsFor(
           operation.label ??
           BUILTIN_AGGREGATE_LABELS[operation.id] ??
           operation.id,
+        ...(operation.description
+          ? { description: operation.description }
+          : {}),
       })),
     });
   }
@@ -157,10 +160,13 @@ function assertOperationsOffered(
     if (inputs.allows(key) && resolved && offered.includes(operationId)) {
       continue;
     }
+    // Listed only where the caller may see them: naming the operations of a
+    // column it cannot read would disclose the column.
+    const listable = inputs.allows(key) && offered.length > 0;
     throw new Error(
-      offered.length > 0
+      listable
         ? `"${key}" cannot use operation "${operationId}" — it takes ${offered.join(", ")}`
-        : `"${key}" takes no aggregation`
+        : `"${key}" cannot use operation "${operationId}"`
     );
   }
 }

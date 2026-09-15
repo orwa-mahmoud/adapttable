@@ -105,6 +105,40 @@ describe("naming a contract", () => {
     expect(after).not.toBe(before);
   });
 
+  it("moves when a column's aggregate operations change", () => {
+    // Which operations a column takes is something a caller plans against. A
+    // pin that outlives the change leaves it choosing from a list this table
+    // no longer offers — or never hearing about the one it needs.
+    const none = tableSession();
+    const offered = tableSession({
+      aggregations: {
+        columns: [
+          {
+            id: "salary",
+            operations: [
+              { id: "sum", label: "Sum" },
+              { id: "avg", label: "Average" },
+            ],
+          },
+        ],
+        active: [],
+      },
+    });
+    const narrowed = tableSession({
+      aggregations: {
+        columns: [{ id: "salary", operations: [{ id: "sum", label: "Sum" }] }],
+        active: [],
+      },
+    });
+
+    expect(contractFingerprint(offered.manifest(), offered.catalog())).not.toBe(
+      contractFingerprint(none.manifest(), none.catalog())
+    );
+    expect(
+      contractFingerprint(narrowed.manifest(), narrowed.catalog())
+    ).not.toBe(contractFingerprint(offered.manifest(), offered.catalog()));
+  });
+
   it("ignores a view revision, which is not the contract moving", () => {
     const first = tableSession();
     const second = tableSession({ viewRevision: 99 });

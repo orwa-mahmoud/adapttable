@@ -204,6 +204,12 @@ export function contractFingerprint(
         sortable: column.sortable,
       })),
     rowAddressing: manifest.rowAddressing,
+    // Which operations a column takes is part of what this table is, so a
+    // column gaining or losing one is a contract a backend has not been told.
+    // Without it here the pin outlives the change and a caller keeps planning
+    // against operations that are no longer on offer — or never learns the
+    // ones that are.
+    aggregateOperations: manifest.aggregateOperations,
     limits: manifest.limits,
     policy: manifest.policy,
     source: manifest.source,

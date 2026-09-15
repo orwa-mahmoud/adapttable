@@ -175,6 +175,7 @@ export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 // @public
 export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
     readonly calculate?: Aggregator<TValue>;
+    readonly description?: string;
     readonly id: string;
     readonly label: string;
 }

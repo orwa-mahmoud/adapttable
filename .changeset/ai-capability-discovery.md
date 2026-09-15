@@ -20,6 +20,12 @@ available through `columns.describe`. Explicit budgets that cannot fit the
 required context raise `ContextBudgetError`. Bounded column sampling is
 opt-in.
 
+The contract names the operations each aggregatable column takes, so a
+caller plans against ids the table stores rather than guessing a spelling;
+a custom operation's description is answered by `describe`. A refusal lists
+the operations the column does take, unless naming them would disclose a
+column the caller may not read.
+
 The filter catalog publishes supported types, operators and available
 options. Unambiguous option labels, column labels, casing differences and
 operator aliases resolve to the table's stored spelling. Cell values and

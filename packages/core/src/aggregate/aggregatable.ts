@@ -37,6 +37,17 @@ export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
   /** What the reader sees in the operation list. */
   readonly label: string;
   /**
+   * What this operation does, for anything reading the table rather than
+   * looking at it.
+   *
+   * A built-in needs none: "avg" means the same thing on every table. Your own
+   * does not — an agent meets the id and the label and has no way to know
+   * whether "band" is a range, a percentile or something only this business
+   * says. Write the sentence you would say to a colleague; it is handed over
+   * when the capability is described.
+   */
+  readonly description?: string;
+  /**
    * The local calculation. Omit it when only the server can answer this
    * operation; the table then offers it solely where the source declares it.
    */
@@ -97,6 +108,8 @@ export interface ResolvedAggregateOperation {
   readonly builtIn: boolean;
   /** The host's label. Built-ins are localized by the chrome instead. */
   readonly label?: string;
+  /** The host's own words for what it does, when they wrote any. */
+  readonly description?: string;
   /** The local calculation, when this operation has one. */
   readonly calculate?: Aggregator;
 }
@@ -238,6 +251,7 @@ function resolveOperation(
     id: operation.id,
     builtIn: false,
     label: operation.label,
+    ...(operation.description ? { description: operation.description } : {}),
     calculate: operation.calculate,
   };
 }

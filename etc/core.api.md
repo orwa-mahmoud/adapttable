@@ -1155,6 +1155,7 @@ export const CUSTOM_AGGREGATE = "custom";
 // @public
 export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
     readonly calculate?: Aggregator<TValue>;
+    readonly description?: string;
     readonly id: string;
     readonly label: string;
 }
@@ -3466,6 +3467,7 @@ export interface ResolvedAggregatable {
 export interface ResolvedAggregateOperation {
     readonly builtIn: boolean;
     readonly calculate?: Aggregator;
+    readonly description?: string;
     readonly id: string;
     readonly label?: string;
 }
