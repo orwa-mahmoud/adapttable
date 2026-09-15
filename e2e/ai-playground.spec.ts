@@ -180,11 +180,10 @@ for (const kit of kits) {
     await expect(page.locator(part("assistant-connection"))).toHaveText(
       "Ready"
     );
-    // The opening line is the assistant's first message, drawn by the same
-    // component as every other reply.
-    await expect(
-      page.locator(part("assistant-message-text")).first()
-    ).toContainText("What would you like to do");
+    // This demo opens with nothing said: the panel's own words are the
+    // page's, and a backend never sees them. The conversation starts with
+    // whatever the reader types.
+    await expect(page.locator(part("assistant-message-text"))).toHaveCount(0);
     // The shortcuts live in the composer, one press away, rather than as a
     // wall of cards a reader clears before they can type.
     await expect(page.locator(part("assistant-examples-menu"))).toBeVisible();
@@ -332,11 +331,10 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
 
     await expect.poll(async () => visibleTableText(page)).toContain("Jonah");
     // The transcript goes with it — a conversation about rows that no longer
-    // exist is worse than none. What is left is the opening line, which is
-    // where a cleared conversation starts.
-    const said = page.locator(part("assistant-message-text"));
-    await expect(said).toHaveCount(1);
-    await expect(said).toContainText("What would you like to do");
+    // exist is worse than none — and this demo says nothing of its own, so
+    // what is left is an empty panel waiting on the reader.
+    await expect(page.locator(part("assistant-message-text"))).toHaveCount(0);
+    await expect(page.locator(part("assistant-input"))).toBeVisible();
   });
 
   test("a connected backend answers the same composer", async ({ page }) => {

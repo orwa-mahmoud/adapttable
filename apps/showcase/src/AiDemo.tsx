@@ -1132,6 +1132,12 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               assistant={assistant}
               labels={labels}
               dir={rtl ? "rtl" : "ltr"}
+              // The panel's own words are the page's, not the conversation's:
+              // a backend never sees them, so a model answering the reader's
+              // first line writes its own opener under an identical one. Empty
+              // is a host saying nothing, and the reader's message is the
+              // first thing in the panel.
+              greeting=""
               open={assistant.open}
               onOpenChange={assistant.setOpen}
               presentation="floating"
