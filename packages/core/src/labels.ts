@@ -328,6 +328,8 @@ export const defaultLabels: Required<TableLabels> = {
   assistantSpeaker: "Assistant",
   assistantNewMessages: "New messages",
   assistantUnavailable: "The assistant is not connected.",
+  assistantDetached: "The connection went. The work may still be running.",
+  assistantRejoin: "Rejoin",
   assistantBackToTable: "Back to table",
   assistantDetail: "Details",
   assistantSaveInTable: "Save in the table to keep this change.",

@@ -782,6 +782,10 @@ export interface TableLabels {
   assistantNewMessages?: string;
   /** Why the composer cannot be used. */
   assistantUnavailable?: string;
+  /** That a released connection left the work running, not cancelled. */
+  assistantDetached?: string;
+  /** Rejoins work a released connection left running. */
+  assistantRejoin?: string;
   /** Leaves a full-screen assistant on a narrow viewport. */
   assistantBackToTable?: string;
   /** Expands an action's detail. */

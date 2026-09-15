@@ -2000,3 +2000,46 @@ describe("what a before-and-after pair is spoken as", () => {
   });
   showActions();
 });
+
+describe("a connection that went while the work carried on", () => {
+  it("offers to rejoin, rather than reporting a turn that ended", () => {
+    const resume = vi.fn();
+    mount({
+      assistant: view({
+        status: "disconnected",
+        resumable: { text: "count everything" },
+        resume,
+      }),
+    });
+
+    expect(part("assistant-detached")).toHaveTextContent("still be running");
+    // The one sentence for a connection that went, in place of the one for a
+    // conversation that was never connected.
+    expect(part("assistant-unavailable")).toBeNull();
+
+    fireEvent.click(part("assistant-rejoin")!);
+    expect(resume).toHaveBeenCalledTimes(1);
+  });
+
+  it("says nothing of the kind about a turn the reader stopped", () => {
+    // Stopping leaves no handle, so the offer is absent — which is how the
+    // panel tells the two apart.
+    mount({ assistant: view({ status: "disconnected" }) });
+
+    expect(part("assistant-detached")).toBeNull();
+    expect(part("assistant-unavailable")).toHaveTextContent("not connected");
+  });
+
+  it("waits for the turn in flight before offering anything", () => {
+    mount({
+      assistant: view({
+        status: "sending",
+        busy: true,
+        resumable: { text: "count everything" },
+        resume: vi.fn(),
+      }),
+    });
+
+    expect(part("assistant-detached")).toBeNull();
+  });
+});

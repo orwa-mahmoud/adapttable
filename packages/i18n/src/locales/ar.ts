@@ -217,6 +217,8 @@ export const ar: Required<TableLabels> = {
   assistantSpeaker: "المساعد",
   assistantNewMessages: "رسائل جديدة",
   assistantUnavailable: "المساعد غير متصل.",
+  assistantDetached: "انقطع الاتصال. قد يكون العمل ما زال جاريًا.",
+  assistantRejoin: "إعادة الاتصال",
   assistantBackToTable: "العودة إلى الجدول",
   assistantDetail: "التفاصيل",
   assistantSaveInTable: "احفظ في الجدول للاحتفاظ بهذا التغيير.",

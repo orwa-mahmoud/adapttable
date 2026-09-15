@@ -215,6 +215,8 @@ export const zhTW: Required<TableLabels> = {
   assistantSpeaker: "助理",
   assistantNewMessages: "新訊息",
   assistantUnavailable: "助理未連線。",
+  assistantDetached: "連線已中斷，工作可能仍在進行。",
+  assistantRejoin: "重新連線",
   assistantBackToTable: "返回表格",
   assistantDetail: "詳細資料",
   assistantSaveInTable: "在表格中儲存以保留此變更。",

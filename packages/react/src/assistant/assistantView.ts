@@ -120,6 +120,19 @@ export interface TableAssistantAllowanceView {
   readonly name?: string;
 }
 
+/**
+ * Work a released connection left running.
+ *
+ * The panel reads that there is some, and what the reader asked for; the
+ * handle a transport rejoins with is the host's and stays there.
+ *
+ * @public
+ */
+export interface TableAssistantResumableView {
+  /** What the reader asked. */
+  readonly text: string;
+}
+
 /** Whether the last turn that moved the table can be put back. @public */
 export interface TableAssistantUndoView {
   /** The message the offer belongs to. */
@@ -164,6 +177,23 @@ export interface TableAssistantView {
   readonly send: (text?: string) => void | Promise<void>;
   /** Abort the turn in flight. */
   readonly stop: () => void;
+  /**
+   * What became of the last turn, when no reply ended it.
+   *
+   * `"stopped"` is the reader's own decision and nothing is still running.
+   * `"detached"` is a released connection, where the backend may still be
+   * working — which is a different sentence to show.
+   */
+  readonly interrupted?: "stopped" | "detached";
+  /**
+   * Work a released connection left running, when there is any.
+   *
+   * Presence is the whole of what the panel reads: what the handle holds is
+   * between the host and its transport.
+   */
+  readonly resumable?: TableAssistantResumableView;
+  /** Rejoin it. */
+  readonly resume?: () => void | Promise<void>;
   /** The prompts this table can actually run, ready to offer. */
   readonly suggestions: readonly TableAssistantSuggestionView[];
   readonly runSuggestion: (id: string) => void | Promise<void>;

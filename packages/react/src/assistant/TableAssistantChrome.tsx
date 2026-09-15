@@ -51,17 +51,18 @@ import type {
   TableAssistantAvatars,
   TableAssistantSlots,
 } from "./assistantSlots";
-import type {
-  TableAssistantMessageView,
-  TableAssistantQuestionView,
-  TableAssistantView,
+import {
+  assistantIsBusy,
+  type TableAssistantMessageView,
+  type TableAssistantQuestionView,
+  type TableAssistantView,
 } from "./assistantView";
 import type { SpeechInputHandle } from "./speechView";
 
 export type { TableAssistantBoundary } from "./assistantPlacement";
 
 /** Whether the panel is mid-turn — re-exported for a host's own chrome. */
-export { assistantIsBusy } from "./assistantView";
+export { assistantIsBusy };
 import { useConversationScroll } from "./useConversationScroll";
 
 /**
@@ -1072,6 +1073,15 @@ export function TableAssistantChrome({
   // here rather than in a second box drawn beside it: two text inputs on one
   // screen is a form, and a reader has to work out which one is theirs.
   const composer = composerState(assistant);
+  // Offered whenever there is work to rejoin and no turn in flight — which
+  // covers a connection released a moment ago and a handle a host kept across
+  // a reload. A stopped turn leaves nothing here, so the control's absence is
+  // itself the difference between the two.
+  const running = assistant.busy ?? assistantIsBusy(assistant.status);
+  const rejoin =
+    assistant.resumable !== undefined &&
+    assistant.resume !== undefined &&
+    !running;
 
   const contents = (
     <div
@@ -1088,9 +1098,6 @@ export function TableAssistantChrome({
         ...accentStyle,
       }}
     >
-      {/* The bubble tails, which need a pseudo-element and so cannot be
-          inline with the rest of the bubble. */}
-      <style>{BUBBLE_CSS}</style>
       {/* The bubble tails, which need a pseudo-element and so cannot be
           inline with the rest of the bubble. */}
       <style>{BUBBLE_CSS}</style>
@@ -1127,7 +1134,19 @@ export function TableAssistantChrome({
             : undefined) ?? assistant.error}
         </p>
       ) : null}
-      {assistant.status === "disconnected" ? (
+      {rejoin ? (
+        <p data-adapttable-part="assistant-detached">
+          {labels?.assistantDetached ??
+            "The connection went. The work may still be running."}{" "}
+          <Button
+            label={labels?.assistantRejoin ?? "Rejoin"}
+            part="assistant-rejoin"
+            variant="secondary"
+            onClick={() => void assistant.resume?.()}
+          />
+        </p>
+      ) : null}
+      {!rejoin && assistant.status === "disconnected" ? (
         <p data-adapttable-part="assistant-unavailable">
           {labels?.assistantUnavailable ?? "The assistant is not connected."}
         </p>

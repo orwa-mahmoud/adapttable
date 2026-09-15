@@ -216,6 +216,8 @@ export const he: Required<TableLabels> = {
   assistantSpeaker: "עוזר",
   assistantNewMessages: "הודעות חדשות",
   assistantUnavailable: "העוזר אינו מחובר.",
+  assistantDetached: "החיבור נותק. ייתכן שהעבודה עדיין רצה.",
+  assistantRejoin: "התחברות מחדש",
   assistantBackToTable: "חזרה לטבלה",
   assistantDetail: "פרטים",
   assistantSaveInTable: "שמור בטבלה כדי לשמר את השינוי.",

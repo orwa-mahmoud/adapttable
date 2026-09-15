@@ -2288,7 +2288,8 @@ describes dictation without depending on `@adapttable/ai`.
 The rendered assistant carries two blocks an adapter draws itself:
 `TableAssistantQuestionView` with its `TableAssistantQuestionOption`s is a
 question waiting on the reader, and `TableAssistantUndoView` is the offer to
-put back what the last turn changed.
+put back what the last turn changed. `TableAssistantResumableView` says there
+is work a released connection left running, which the panel offers to rejoin.
 
 `deriveRuntimeOperations` reads which view operations a live runtime offers by
 itself, for a binding projecting them into `@adapttable/ai`'s

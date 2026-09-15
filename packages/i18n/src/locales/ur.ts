@@ -219,6 +219,8 @@ export const ur: Required<TableLabels> = {
   assistantSpeaker: "معاون",
   assistantNewMessages: "نئے پیغامات",
   assistantUnavailable: "معاون منسلک نہیں ہے۔",
+  assistantDetached: "کنکشن منقطع ہو گیا۔ کام اب بھی جاری ہو سکتا ہے۔",
+  assistantRejoin: "دوبارہ جُڑیں",
   assistantBackToTable: "ٹیبل پر واپس",
   assistantDetail: "تفصیلات",
   assistantSaveInTable: "یہ تبدیلی رکھنے کے لیے ٹیبل میں محفوظ کریں۔",

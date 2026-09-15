@@ -216,6 +216,8 @@ export const fa: Required<TableLabels> = {
   assistantSpeaker: "دستیار",
   assistantNewMessages: "پیام‌های جدید",
   assistantUnavailable: "دستیار متصل نیست.",
+  assistantDetached: "اتصال قطع شد. ممکن است کار همچنان در جریان باشد.",
+  assistantRejoin: "پیوستن دوباره",
   assistantBackToTable: "بازگشت به جدول",
   assistantDetail: "جزئیات",
   assistantSaveInTable: "برای حفظ این تغییر در جدول ذخیره کنید.",

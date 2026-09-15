@@ -216,6 +216,9 @@ export const es: Required<TableLabels> = {
   assistantSpeaker: "Asistente",
   assistantNewMessages: "Mensajes nuevos",
   assistantUnavailable: "El asistente no está conectado.",
+  assistantDetached:
+    "Se perdió la conexión. Es posible que el trabajo siga en curso.",
+  assistantRejoin: "Reanudar",
   assistantBackToTable: "Volver a la tabla",
   assistantDetail: "Detalles",
   assistantSaveInTable: "Guarda en la tabla para conservar este cambio.",

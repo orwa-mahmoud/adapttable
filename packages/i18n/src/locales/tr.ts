@@ -220,6 +220,8 @@ export const tr: Required<TableLabels> = {
   assistantSpeaker: "Asistan",
   assistantNewMessages: "Yeni iletiler",
   assistantUnavailable: "Asistan bağlı değil.",
+  assistantDetached: "Bağlantı koptu. İş hâlâ sürüyor olabilir.",
+  assistantRejoin: "Yeniden bağlan",
   assistantBackToTable: "Tabloya dön",
   assistantDetail: "Ayrıntılar",
   assistantSaveInTable: "Bu değişikliği korumak için tabloda kaydedin.",

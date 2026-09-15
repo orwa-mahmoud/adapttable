@@ -220,6 +220,8 @@ export const hi: Required<TableLabels> = {
   assistantSpeaker: "सहायक",
   assistantNewMessages: "नए संदेश",
   assistantUnavailable: "सहायक जुड़ा नहीं है।",
+  assistantDetached: "कनेक्शन टूट गया। काम अब भी चल रहा हो सकता है।",
+  assistantRejoin: "फिर जुड़ें",
   assistantBackToTable: "टेबल पर वापस",
   assistantDetail: "विवरण",
   assistantSaveInTable: "यह बदलाव रखने के लिए टेबल में सहेजें।",

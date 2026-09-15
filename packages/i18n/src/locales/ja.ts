@@ -215,6 +215,8 @@ export const ja: Required<TableLabels> = {
   assistantSpeaker: "アシスタント",
   assistantNewMessages: "新しいメッセージ",
   assistantUnavailable: "アシスタントは接続されていません。",
+  assistantDetached: "接続が切れました。処理はまだ続いている可能性があります。",
+  assistantRejoin: "再接続",
   assistantBackToTable: "テーブルに戻る",
   assistantDetail: "詳細",
   assistantSaveInTable: "この変更を残すにはテーブルで保存してください。",

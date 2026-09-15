@@ -222,6 +222,8 @@ export const ru: Required<TableLabels> = {
   assistantSpeaker: "Помощник",
   assistantNewMessages: "Новые сообщения",
   assistantUnavailable: "Помощник не подключён.",
+  assistantDetached: "Соединение прервано. Работа может продолжаться.",
+  assistantRejoin: "Подключиться снова",
   assistantBackToTable: "Вернуться к таблице",
   assistantDetail: "Подробности",
   assistantSaveInTable: "Сохраните в таблице, чтобы оставить это изменение.",
