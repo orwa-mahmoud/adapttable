@@ -1125,6 +1125,43 @@ function Receipts({
 }
 
 /**
+ * How far the work has got, as one phrase.
+ *
+ * The labels word it, because "185 of 400" is not the same sentence in every
+ * language. Without a label pack there is still an honest English fallback:
+ * counted against a known total, or counted alone when nobody knows how many
+ * there are.
+ */
+function counted(
+  progress: TableAssistantProgressView,
+  labels: TableLabels | undefined
+): string {
+  const said = labels?.assistantProgress?.(progress.done, progress.total);
+  if (said !== undefined) return said;
+  if (progress.total === undefined) return `${String(progress.done)} done`;
+  return `${String(progress.done)} of ${String(progress.total)}`;
+}
+
+/**
+ * What the indicator says.
+ *
+ * What is happening beats that something is: a count a reader can judge
+ * against, rather than a spinner they cannot. The capability's own noun leads
+ * it and is shown as given — this package has no translation for a host's
+ * words. Nothing reporting leaves the plain "working" it always said.
+ */
+function working(
+  progress: TableAssistantProgressView | null | undefined,
+  labels: TableLabels | undefined
+): string {
+  if (!progress) {
+    return labels?.assistantConnection?.("sending") ?? "Working…";
+  }
+  const count = counted(progress, labels);
+  return progress.label ? `${progress.label} — ${count}` : count;
+}
+
+/**
  * The turn, while it is still running.
  *
  * A reader who has just pressed send has no way to tell "thinking" from
@@ -1148,21 +1185,7 @@ export function AssistantWorking({
   /** What the running capability says about itself, when it says anything. */
   readonly progress?: TableAssistantProgressView | null;
 }): ReactElement {
-  // What is happening beats that something is: "185 of 400 rows" is the whole
-  // difference between a wait a reader can judge and a spinner they cannot.
-  // The label is the host's own noun and is shown as given.
-  const counted = progress
-    ? (labels?.assistantProgress?.(progress.done, progress.total) ??
-      (progress.total === undefined
-        ? `${String(progress.done)} done`
-        : `${String(progress.done)} of ${String(progress.total)}`))
-    : undefined;
-  const word =
-    counted === undefined
-      ? (labels?.assistantConnection?.("sending") ?? "Working…")
-      : progress?.label
-        ? `${progress.label} — ${counted}`
-        : counted;
+  const word = working(progress, labels);
   return (
     <li
       data-adapttable-part="assistant-working"

@@ -779,3 +779,20 @@ it("every locale names a custom capability by the key the host chose", () => {
     );
   }
 });
+
+/**
+ * Progress has two shapes and a locale has to word both: a capability that
+ * knows how many there are, and one that only knows how far it has got.
+ */
+it("every locale words progress with a total and without one", () => {
+  for (const [tag, labels] of Object.entries(locales)) {
+    const counted = labels.assistantProgress(185, 400);
+    const open = labels.assistantProgress(12, undefined);
+
+    expect(counted, `${tag}.assistantProgress(185, 400)`).toContain("185");
+    expect(counted, `${tag}.assistantProgress(185, 400)`).toContain("400");
+    // Without a total there is nothing to be "of", and no locale invents one.
+    expect(open, `${tag}.assistantProgress(12)`).toContain("12");
+    expect(open, `${tag}.assistantProgress(12)`).not.toBe(counted);
+  }
+});

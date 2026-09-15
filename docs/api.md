@@ -2282,8 +2282,10 @@ functions, so a surface naming an aggregate reads the same word the table
 shows.
 
 `@adapttable/react/adapter` exports what an adapter needs to render the
-assistant: `AGENT_VIEW_STATE` / `AgentViewState` and
-`AGENT_ALWAYS_ALLOW_STATE` / `AgentAlwaysAllowState` are the shared state keys,
+assistant: `AGENT_VIEW_STATE` / `AgentViewState`,
+`AGENT_ALWAYS_ALLOW_STATE` / `AgentAlwaysAllowState` and
+`AGENT_PROGRESS_STATE` / `AgentProgress` — how far a running capability has
+got — are the shared state keys,
 `TableAssistantLanguageChipProps` is the dictation-language slot, and
 `SpeechInputHandle` / `SpeechInputState` / `SpeechInputStatus` are the
 structural view of a speech input — structural so that `@adapttable/react`

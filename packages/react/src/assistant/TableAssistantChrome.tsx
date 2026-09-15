@@ -658,6 +658,79 @@ function asking(
 }
 
 /**
+ * What the panel says under the transcript, when it has something to say.
+ *
+ * Three different sentences that never appear together: a turn that failed, a
+ * connection that went while the work carried on, and a conversation with no
+ * connection at all. One component so a reader is never told two of them, and
+ * so each keeps its own part name.
+ */
+function PanelNotice({
+  assistant,
+  labels,
+  slots,
+  rejoin,
+}: {
+  readonly assistant: TableAssistantView;
+  readonly labels: TableLabels | undefined;
+  readonly slots: TableAssistantSlots;
+  /** Whether there is work to rejoin and nothing running. */
+  readonly rejoin: boolean;
+}): ReactElement | null {
+  const Button = slots.Button;
+  if (assistant.error !== undefined) {
+    // The runtime's own message names continuations and backends; a reader
+    // gets the sentence for what it means to them, and only falls back to
+    // that message when nobody wrote one.
+    const said =
+      assistant.errorCode === undefined
+        ? undefined
+        : labels?.assistantUnresolved?.(assistant.errorCode);
+    return (
+      <p data-adapttable-part="assistant-error" role="alert">
+        {said ?? assistant.error}
+      </p>
+    );
+  }
+  if (rejoin) {
+    return (
+      <p data-adapttable-part="assistant-detached">
+        {labels?.assistantDetached ??
+          "The connection went. The work may still be running."}{" "}
+        <Button
+          label={labels?.assistantRejoin ?? "Rejoin"}
+          part="assistant-rejoin"
+          variant="secondary"
+          onClick={() => void assistant.resume?.()}
+        />
+      </p>
+    );
+  }
+  if (assistant.status === "disconnected") {
+    return (
+      <p data-adapttable-part="assistant-unavailable">
+        {labels?.assistantUnavailable ?? "The assistant is not connected."}
+      </p>
+    );
+  }
+  return null;
+}
+
+/**
+ * Whether to offer a way back to work a released connection left running.
+ *
+ * Offered whenever there is some and no turn is in flight, which covers a
+ * connection released a moment ago and a handle a host kept across a reload.
+ * A turn the reader stopped leaves nothing to rejoin, so the control's absence
+ * is itself the difference between the two.
+ */
+function rejoinable(assistant: TableAssistantView): boolean {
+  if (assistant.resumable === undefined) return false;
+  if (assistant.resume === undefined) return false;
+  return !(assistant.busy ?? assistantIsBusy(assistant.status));
+}
+
+/**
  * What the one box at the bottom does right now.
  *
  * A turn parked on a question is waiting on the reader, not working — so the
@@ -1077,11 +1150,7 @@ export function TableAssistantChrome({
   // covers a connection released a moment ago and a handle a host kept across
   // a reload. A stopped turn leaves nothing here, so the control's absence is
   // itself the difference between the two.
-  const running = assistant.busy ?? assistantIsBusy(assistant.status);
-  const rejoin =
-    assistant.resumable !== undefined &&
-    assistant.resume !== undefined &&
-    !running;
+  const rejoin = rejoinable(assistant);
 
   const contents = (
     <div
@@ -1124,33 +1193,12 @@ export function TableAssistantChrome({
         approval={approval}
         receipts={receipts}
       />
-      {assistant.error ? (
-        <p data-adapttable-part="assistant-error" role="alert">
-          {/* The runtime's own message names continuations and backends; a
-              reader gets the sentence for what it means to them, and only
-              falls back to that message when nobody wrote one. */}
-          {(assistant.errorCode
-            ? labels?.assistantUnresolved?.(assistant.errorCode)
-            : undefined) ?? assistant.error}
-        </p>
-      ) : null}
-      {rejoin ? (
-        <p data-adapttable-part="assistant-detached">
-          {labels?.assistantDetached ??
-            "The connection went. The work may still be running."}{" "}
-          <Button
-            label={labels?.assistantRejoin ?? "Rejoin"}
-            part="assistant-rejoin"
-            variant="secondary"
-            onClick={() => void assistant.resume?.()}
-          />
-        </p>
-      ) : null}
-      {!rejoin && assistant.status === "disconnected" ? (
-        <p data-adapttable-part="assistant-unavailable">
-          {labels?.assistantUnavailable ?? "The assistant is not connected."}
-        </p>
-      ) : null}
+      <PanelNotice
+        assistant={assistant}
+        labels={labels}
+        slots={slots}
+        rejoin={rejoin}
+      />
       <AssistantComposer
         slots={slots}
         labels={labels}
