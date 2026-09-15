@@ -673,9 +673,8 @@ export function parseAgentHttpResponse(input: unknown): AgentHttpResponse {
       typeof input.sessionId === "string" ? input.sessionId : undefined,
     text: typeof input.text === "string" ? input.text : undefined,
     toolCalls,
-    askUser:
-      input.askUser === undefined ? undefined : asQuestion(input.askUser),
-    pin: input.pin === undefined ? undefined : asPinAck(input.pin),
+    askUser: unanswered(input.askUser) ? undefined : asQuestion(input.askUser),
+    pin: unanswered(input.pin) ? undefined : asPinAck(input.pin),
     transcript: asString(input.transcript),
     continueWithResults:
       typeof input.continueWithResults === "boolean"
@@ -767,6 +766,18 @@ function asQuestionOption(value: unknown): AgentHttpQuestionOption {
     throw new TypeError("agent HTTP askUser option needs an id and a label");
   }
   return { id, label };
+}
+
+/**
+ * Whether an optional field said nothing.
+ *
+ * JSON has no `undefined`, so a backend serializing an absent optional writes
+ * `null` — and a model asked for a document routinely fills in every key it
+ * was shown, question included. Both mean the field was not answered, and
+ * reading `null` as a malformed question refuses a reply that is fine.
+ */
+function unanswered(value: unknown): boolean {
+  return value === undefined || value === null;
 }
 
 function asQuestion(value: unknown): AgentHttpQuestion {

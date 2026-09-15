@@ -528,14 +528,13 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
       })
     : undefined;
   const text = typeof record.text === "string" ? record.text : "";
+  // A model asked for a document fills in the keys it was shown, so a turn
+  // with nothing to ask writes `null` here as often as it leaves the key out.
+  const askUser = record.askUser ?? undefined;
   // A document that parses but answers nothing is a failed turn, not a reply.
   // Forwarding it as one puts an empty bubble in front of the reader beside a
   // badge that says the turn is done.
-  if (
-    text.trim() === "" &&
-    !toolCalls?.length &&
-    record.askUser === undefined
-  ) {
+  if (text.trim() === "" && !toolCalls?.length && askUser === undefined) {
     // The document parsed and answered nothing. Quote a bounded excerpt of it:
     // a developer running this example needs to see what the provider actually
     // said, and the sentence alone sends them looking in the wrong place.
@@ -548,7 +547,7 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
     schemaVersion: AGENT_HTTP_SCHEMA,
     text,
     toolCalls,
-    askUser: record.askUser,
+    askUser,
     continueWithResults:
       (toolCalls ?? []).length > 0 &&
       (toolCalls ?? []).every((call) => !WRITES.has(call.name)),

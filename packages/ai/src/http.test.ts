@@ -178,6 +178,22 @@ describe("parseAgentHttpRequest / parseAgentHttpResponse", () => {
     expect(parsed.toolCalls?.[0]?.name).toBe("view.setPage");
   });
 
+  it("reads a null optional as one the backend did not answer", () => {
+    // JSON has no `undefined`, and a model asked for a document fills in the
+    // keys it was shown. A turn with nothing to ask and nothing to say about
+    // the pin writes them as null, and that is a reply, not a malformed one.
+    const parsed = parseAgentHttpResponse({
+      schemaVersion: AGENT_SCHEMA_VERSION,
+      text: "Cleared the grouping.",
+      askUser: null,
+      pin: null,
+    });
+
+    expect(parsed.askUser).toBeUndefined();
+    expect(parsed.pin).toBeUndefined();
+    expect(parsed.text).toBe("Cleared the grouping.");
+  });
+
   it("rejects a non-numeric call expectedRevision", () => {
     expect(() =>
       parseAgentHttpResponse({
