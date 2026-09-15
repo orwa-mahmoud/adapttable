@@ -1373,3 +1373,59 @@ describe("the tools a run is offered", () => {
     );
   });
 });
+
+describe("what a call is bound to", () => {
+  it("judges a call against the state the run was started with", async () => {
+    // The reader moves the table while the run is in flight. The call was
+    // planned against the state this run went out with, so it refuses rather
+    // than landing on a view nobody planned it for.
+    const table = liveTable();
+    const script = recorded([
+      (input) => {
+        table.state.page = 4;
+        table.state.revision += 1;
+        return [
+          started(input),
+          ...calls("c1", "view.setPage", '{"page":2}'),
+          ...says("Moved."),
+          finished(input),
+        ];
+      },
+    ]);
+    const transport = aguiTransport({ connection: script.connection });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "page 2",
+      conversation: [],
+    });
+
+    expect(reply.results?.[0]?.ok).toBe(false);
+    expect(reply.results?.[0]?.error?.code).toBe("revision-mismatch");
+    expect(table.state.page).toBe(4);
+  });
+
+  it("carries its own progress from one call to the next", async () => {
+    const table = liveTable();
+    const script = recorded([
+      (input) => [
+        started(input),
+        ...calls("c1", "view.setPage", '{"page":2}'),
+        ...calls("c2", "view.setSort", '{"key":"total","dir":"asc"}'),
+        ...says("Paged and sorted."),
+        finished(input),
+      ],
+    ]);
+    const transport = aguiTransport({ connection: script.connection });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "page and sort",
+      conversation: [],
+    });
+
+    expect(reply.results?.map((result) => result.ok)).toEqual([true, true]);
+    expect(table.state.page).toBe(2);
+    expect(table.state.sortBy).toBe("total");
+  });
+});

@@ -963,3 +963,85 @@ describe("a turn the reader stopped", () => {
     expect(cause).toMatchObject({ code: "cancelled" });
   });
 });
+
+describe("what a call is bound to", () => {
+  it("judges a call against the view its request carried", async () => {
+    // The reader moves the table while the route is thinking. The call was
+    // planned against the view the request went out with, and that is what it
+    // is judged against — so it refuses rather than landing on a view nobody
+    // planned it for.
+    const table = liveTable();
+    const route = recorded([
+      () => {
+        table.state.page = 3;
+        table.state.revision += 1;
+        return [
+          START,
+          ...callsTool("c1", "view.setPage", { page: 2 }),
+          ...says("Moved."),
+          FINISH,
+        ];
+      },
+    ]);
+    const transport = aiSdkTransport({ connection: route.connection });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "page 2",
+      conversation: [],
+    });
+
+    expect(reply.results?.[0]?.ok).toBe(false);
+    expect(reply.results?.[0]?.error?.code).toBe("revision-mismatch");
+    // The reader's own page stands.
+    expect(table.state.page).toBe(3);
+  });
+
+  it("carries its own progress from one call to the next", async () => {
+    const table = liveTable();
+    const route = recorded([
+      () => [
+        START,
+        ...callsTool("c1", "view.setPage", { page: 2 }),
+        ...callsTool("c2", "view.setSort", { key: "total", dir: "asc" }),
+        ...says("Paged and sorted."),
+        FINISH,
+      ],
+    ]);
+    const transport = aiSdkTransport({ connection: route.connection });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "page and sort",
+      conversation: [],
+    });
+
+    // The second call is bound to what the first proved, not to the view the
+    // request was planned against.
+    expect(reply.results?.map((result) => result.ok)).toEqual([true, true]);
+    expect(table.state.page).toBe(2);
+    expect(table.state.sortBy).toBe("total");
+  });
+
+  it("gives a reused tool-call id an identity of its own on a later request", async () => {
+    // A provider is free to hand back the same correlation id on the next
+    // step. It is a new call, and running it is what the model asked for.
+    const table = liveTable();
+    const route = recorded([
+      () => [START, ...callsTool("c1", "view.setPage", { page: 2 }), FINISH],
+      () => [START, ...callsTool("c1", "view.setPage", { page: 5 }), FINISH],
+      () => [START, ...says("Both done."), FINISH],
+    ]);
+    const transport = aiSdkTransport({ connection: route.connection });
+
+    const reply = await transport.send({
+      session: table.session,
+      text: "page twice",
+      conversation: [],
+    });
+
+    expect(reply.results?.map((result) => result.ok)).toEqual([true, true]);
+    // The second call ran rather than replaying the first one's result.
+    expect(table.state.page).toBe(5);
+  });
+});

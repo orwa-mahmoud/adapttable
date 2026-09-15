@@ -8,22 +8,25 @@
  * baseline carrying a foreign change would be a stale-write protection that
  * silently passes.
  *
- * It does not happen, and these say why: every awaited boundary re-authorizes
- * against the revision the action was admitted at, so a foreign change is
- * REFUSED there rather than reaching the result to be absorbed. The result then
- * reports where the table is, which for a view setter or a write is that
- * action's own effect — and the next command in the turn depends on it being
- * reported.
+ * Two rules hold it. Every awaited boundary re-authorizes against the revision
+ * the action was admitted at, so a foreign change arriving before the handler
+ * is REFUSED there rather than reaching the result. And the result reports the
+ * revision this action's own call to `apply` settled at, so a change landing
+ * after that call is left for whoever made it: the next command meets it as a
+ * mismatch to re-read instead of inheriting it.
  *
- * Written after a change that reported the admitted revision instead broke
- * exactly that: a view setter is not a governed write, so it would have
- * reported the revision from before its own change and stalled every
- * filter-then-sort turn.
+ * Both halves matter. A view setter is not a governed write, so a rule keyed on
+ * "did this invoke a write" reports the revision from before its own change and
+ * stalls every filter-then-sort turn — which the last cases here hold open.
  */
 import { describe, expect, it, vi } from "vitest";
 
 import { createAgentSession } from "./session";
-import type { AgentApply, AgentObservation } from "./types";
+import type {
+  AgentApply,
+  AgentCapabilityDefinition,
+  AgentObservation,
+} from "./types";
 
 const PAGE_ONLY = {
   fullDataset: false,
@@ -256,5 +259,134 @@ describe("the ordering the executor depends on", () => {
     );
 
     expect(calls).toEqual(["search", "sort"]);
+  });
+});
+
+describe("a change that lands after this action's own call", () => {
+  /**
+   * The window the boundary checks cannot see into: the host's handler has
+   * already been let through, its own call to `apply` has settled, and it is
+   * still awaiting something of its own when somebody else writes.
+   */
+  function slowCapability(afterOwnCall: () => void): AgentCapabilityDefinition {
+    return {
+      key: "demo.search",
+      summary: "Search through the host, then wait for its receipt.",
+      guide: {
+        guide: "Set the search, then await the host's own receipt.",
+        input: {
+          type: "object",
+          additionalProperties: false,
+          properties: { query: { type: "string" } },
+          required: ["query"],
+        },
+        output: {
+          type: "object",
+          additionalProperties: false,
+          properties: { ok: { type: "boolean" } },
+          required: ["ok"],
+        },
+      },
+      kind: "view",
+      isEnabled: () => true,
+      execute: async (context, args) => {
+        context.apply.setSearch?.((args as { query: string }).query);
+        // The handler's own work, still in flight.
+        await Promise.resolve();
+        afterOwnCall();
+        return { ok: true };
+      },
+    };
+  }
+
+  it("reports the revision its own call settled at, not the one that followed", async () => {
+    const table = movableTable();
+    const session = createAgentSession({
+      observe: table.observe,
+      apply: apply({
+        setSearch: () => {
+          table.elsewhereWrites();
+        },
+      }),
+      capabilities: [slowCapability(() => table.elsewhereWrites())],
+    });
+
+    const result = await session.execute(
+      "demo.search",
+      { query: "ada" },
+      1,
+      "slow-1"
+    );
+
+    expect(result.ok).toBe(true);
+    // Its own call left the table at 2. The table is at 3, and the third
+    // revision belongs to whoever wrote it.
+    expect(result.revision).toBe(2);
+    expect(table.current()).toBe(3);
+  });
+
+  it("leaves the next command to meet that change rather than inherit it", async () => {
+    const table = movableTable();
+    const session = createAgentSession({
+      observe: table.observe,
+      apply: apply({
+        setSearch: () => {
+          table.elsewhereWrites();
+        },
+      }),
+      capabilities: [slowCapability(() => table.elsewhereWrites())],
+    });
+
+    const first = await session.execute(
+      "demo.search",
+      { query: "ada" },
+      1,
+      "slow-2"
+    );
+    const next = await session.execute(
+      "view.setSort",
+      { key: "name", dir: "asc" },
+      first.revision,
+      "slow-3"
+    );
+
+    expect(next.ok).toBe(false);
+    expect(next.error?.code).toBe("revision-mismatch");
+  });
+
+  it("claims nothing when the action applied nothing", async () => {
+    const table = movableTable();
+    const session = createAgentSession({
+      observe: table.observe,
+      apply: apply(),
+      capabilities: [
+        {
+          key: "demo.idle",
+          summary: "Await the host and change nothing.",
+          guide: {
+            guide: "Await the host and change nothing.",
+            input: { type: "object", additionalProperties: false },
+            output: {
+              type: "object",
+              additionalProperties: false,
+              properties: { ok: { type: "boolean" } },
+              required: ["ok"],
+            },
+          },
+          kind: "read",
+          isEnabled: () => true,
+          execute: async () => {
+            await Promise.resolve();
+            table.elsewhereWrites();
+            return { ok: true };
+          },
+        },
+      ],
+    });
+
+    const result = await session.execute("demo.idle", {}, 1, "idle-1");
+
+    expect(result.ok).toBe(true);
+    expect(result.revision).toBe(1);
   });
 });

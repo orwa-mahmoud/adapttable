@@ -75,6 +75,7 @@ import {
 } from "./context";
 import type { AgentContextView } from "./contextSnapshot";
 import { errorMessage } from "./errorMessage";
+import { createTurnRevision, type TurnRevision } from "./turnRevision";
 import type {
   AgentSession,
   ApprovalResult,
@@ -569,6 +570,10 @@ interface TurnState {
   readonly results: ExecuteResult[];
   readonly keys: string[];
   readonly subjects: (AssistantReceiptSubject | undefined)[];
+  /** What this turn's own calls have proven the table reached. */
+  readonly bound: TurnRevision;
+  /** The revision of the state the current run was started with. */
+  planned: number;
   text: string;
   sequence: number;
 }
@@ -636,16 +641,18 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
     args: unknown,
     signal?: AbortSignal
   ): Promise<void> => {
-    // Read now: a call that arrives after the reader moved the table is
-    // judged against the table as it is, not as the run input described it.
     const manifest = session.manifest();
+    // The state this run was started with, moved forward only by what this
+    // turn's own calls have proven. A call the backend planned against that
+    // state is not quietly re-aimed at whatever the table has reached since.
     const result = await session.execute(
       key,
       args,
-      manifest.viewRevision,
+      turn.bound.expected(turn.planned),
       callKey(threadId, runId, toolCallId),
       signal
     );
+    turn.bound.settled(result);
     turn.results.push(result);
     turn.keys.push(key);
     turn.subjects.push(subjectFor(key, args, result, manifest.columns));
@@ -863,6 +870,7 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
         (askUser
           ? (question: AssistantQuestion) => askUser(question)
           : undefined);
+      const opening = session.manifest().viewRevision;
       const turn: TurnState = {
         messages: [
           ...conversation.map((entry, index) => ({
@@ -874,6 +882,8 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
         results: [],
         keys: [],
         subjects: [],
+        bound: createTurnRevision(opening),
+        planned: opening,
         text: "",
         sequence: 0,
       };
@@ -889,12 +899,16 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
       for (let attempt = 0; attempt < maxRuns; attempt += 1) {
         runCounter += 1;
         const runId = `${threadId}-run-${runCounter}`;
+        // The state this run is actually started with. Its revision is what a
+        // call arriving during the run was planned against.
+        const view = viewOf(session);
+        turn.planned = view.revision;
         const input: AgUiRunInput = {
           threadId,
           runId,
           messages: [...turn.messages],
           tools: aguiTools(session),
-          ...stateFor(viewOf(session)),
+          ...stateFor(view),
           ...(resume ? { resume } : {}),
         };
         emit({ type: "MESSAGES_SNAPSHOT", messages: input.messages });

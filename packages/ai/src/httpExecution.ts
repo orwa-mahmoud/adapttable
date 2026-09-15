@@ -18,6 +18,7 @@
  * No policy lives here. `session.execute` judges every action; this module
  * decides only which revision each action is judged against.
  */
+import { createTurnRevision } from "./turnRevision";
 import type { AgentManifest, AgentSession, ExecuteResult } from "./types";
 
 /**
@@ -127,14 +128,10 @@ export function createTurnExecution(
     signal?: AbortSignal
   ) => Promise<ExecuteResult[]>;
 } {
-  // What THIS turn's own actions have produced, and nothing else. A phase
-  // context can be ahead of it because something outside the turn moved the
-  // table between phases; adopting that as progress is how an unrelated change
-  // gets absorbed into a turn that never made it.
-  let ours = first.viewRevision;
+  const bound = createTurnRevision(first.viewRevision);
 
   return {
-    revision: () => ours,
+    revision: bound.revision,
     execute: async (batch, signal) => {
       // The view this phase was actually planned against. An action that names
       // no revision of its own belongs to it — not to whatever the table has
@@ -146,27 +143,15 @@ export function createTurnExecution(
           results.push(cancelledResult(session, action.idempotencyKey));
           continue;
         }
-        // A revision the backend named is its own claim about what it saw and
-        // goes to the session untouched — including when it equals the phase's
-        // own revision, which is a backend saying so deliberately rather than
-        // a value worth second-guessing.
-        const named = action.expectedRevision;
-        // Omitted: the context supplied for this phase, moved forward only by
-        // what this turn's earlier actions proved. `ours` exceeds `planned`
-        // exactly when this turn caused the difference.
-        const expected = named ?? Math.max(ours, planned);
         const result = await session.execute(
           action.key,
           action.args ?? {},
-          expected,
+          bound.expected(planned, action.expectedRevision),
           action.idempotencyKey,
           signal
         );
         results.push(result);
-        // The revision the session reported for THIS action. Reading the
-        // manifest here instead would pick up anything that landed during the
-        // await and count it as this turn's progress.
-        if (result.ok) ours = result.revision;
+        bound.settled(result);
       }
       return results;
     },

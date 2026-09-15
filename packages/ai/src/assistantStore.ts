@@ -50,7 +50,7 @@ import {
 } from "./assistantUndo";
 import type { AgentContextInputs } from "./context";
 import { type AgentContextView, buildView } from "./contextSnapshot";
-import type { AgentSession } from "./types";
+import type { AgentSession, ExecuteResult } from "./types";
 
 /** What a reader is offered about the last turn that moved the table. @public */
 export interface AssistantUndoOffer {
@@ -429,9 +429,17 @@ export function createTableAssistant(
     keys: string;
     value: readonly AssistantMessage[];
   } | null = null;
-  // The provisional message of the turn in flight, so an abandoned turn can
-  // take it away itself rather than waiting for a transport to settle.
-  let streamingMessage: string | undefined;
+  // The provisional message of the turn in flight, named together with the
+  // turn that put it there. An abandoned turn takes its own away rather than
+  // waiting for a transport to settle, and a turn that returns late finds a
+  // message it no longer owns and leaves it alone.
+  let streamingMessage:
+    | {
+        readonly id: string;
+        readonly generation: number;
+        readonly turn: number;
+      }
+    | undefined;
   let resumeQuestion:
     ((answer: AssistantAnswer | undefined) => void) | undefined;
 
@@ -723,10 +731,10 @@ export function createTableAssistant(
       return false;
     }
     undoPlan = { message, undo: planned };
-    // And one per action. Restoring a field to what it was before the turn is
-    // exactly the action that changed it: within one turn no other action
-    // wrote that field, and where two did, the later one is the one a reader
-    // is looking at.
+    // And one per action, where restoring a field to what it was before the
+    // turn is exactly that action and nothing more. It is when one action in
+    // the turn owns that field: the turn's opening view is then the view that
+    // action ran against.
     //
     // Kept even when only one action moved anything, because the control
     // belongs ON that action. A turn drawing two cards and one loose button
@@ -735,10 +743,27 @@ export function createTableAssistant(
     // shape it takes.
     actionPlans = new Map();
     const results = reply.results ?? [];
-    for (const [index, result] of results.entries()) {
+    const changed = (index: number, result: ExecuteResult) => {
       const key = reply.keys?.[index];
-      const fields = key ? UNDO_FIELDS_FOR[key] : undefined;
-      if (!fields || !result.ok) continue;
+      if (!key || !result.ok) return undefined;
+      return UNDO_FIELDS_FOR[key];
+    };
+    // Two actions moving the same field is the case a single before-state
+    // cannot answer for. Sort ascending, then descending: the second ran
+    // against a view the store never saw, so restoring the turn's opening
+    // sort from that card would take the first action back with it. Those
+    // cards carry no Undo of their own — the turn's own Undo is the offer
+    // that tells the truth about them.
+    const owners = new Map<string, number>();
+    for (const [index, result] of results.entries()) {
+      for (const field of changed(index, result) ?? []) {
+        owners.set(field, (owners.get(field) ?? 0) + 1);
+      }
+    }
+    for (const [index, result] of results.entries()) {
+      const fields = changed(index, result);
+      if (!fields) continue;
+      if (fields.some((field) => (owners.get(field) ?? 0) > 1)) continue;
       const one = planUndo(before, after, session, settledAt, fields);
       if ("code" in one) continue;
       actionPlans.set(result.idempotencyKey, one);
@@ -882,7 +907,9 @@ export function createTableAssistant(
     if (generation !== mine || turn !== id) return;
     sending = false;
     abort = undefined;
-    streamingMessage = undefined;
+    if (streamingMessage?.generation === mine && streamingMessage.turn === id) {
+      streamingMessage = undefined;
+    }
     settleQuestion(undefined);
     publish();
   };
@@ -931,12 +958,19 @@ export function createTableAssistant(
     transport?.disconnect?.();
   };
 
-  /** Take away the provisional message of a turn nobody is waiting for. */
-  const dropStreamingMessage = (): void => {
-    if (streamingMessage === undefined) return;
-    const id = streamingMessage;
+  /**
+   * Take away the provisional message of a turn nobody is waiting for.
+   *
+   * Only the turn that put it there may take it: a turn whose transport
+   * returns after the reader has moved on would otherwise clear a message the
+   * turn they are watching is still writing into.
+   */
+  const dropStreamingMessage = (mine: number, id: number): void => {
+    const owned = streamingMessage;
+    if (owned === undefined) return;
+    if (owned.generation !== mine || owned.turn !== id) return;
     streamingMessage = undefined;
-    messages = messages.filter((entry) => entry.id !== id);
+    messages = messages.filter((entry) => entry.id !== owned.id);
   };
 
   const cancelTurn = (): void => {
@@ -946,7 +980,7 @@ export function createTableAssistant(
     // A transport is asked to honour `signal`, but it is host code and may
     // not: one that never settles would otherwise leave half a sentence in
     // the transcript for good.
-    dropStreamingMessage();
+    dropStreamingMessage(generation, turn);
     // Release the lane here rather than waiting for the transport. One that
     // never settles would otherwise hold the composer busy forever; its
     // eventual reply is already undeliverable, because the turn it belonged to
@@ -996,12 +1030,17 @@ export function createTableAssistant(
     // per delta would make the transcript grow by a message a token.
     seq += 1;
     const streamingId = messageId("assistant", seq);
-    streamingMessage = streamingId;
+    streamingMessage = { id: streamingId, generation: mine, turn: id };
     let streamed = "";
     let streamPending = false;
     const flushStream = (): void => {
       streamPending = false;
       if (!deliverable(mine, id, controller)) return;
+      // A frame queued before the reply landed still belongs to a turn that is
+      // current and uncancelled, so the turn alone does not say whether this
+      // update is still wanted. The provisional message does: the reply takes
+      // it away, and an update with nothing left to write into is spent.
+      if (streamingMessage?.id !== streamingId) return;
       const existing = messages.some((entry) => entry.id === streamingId);
       messages = existing
         ? messages.map((entry) =>
@@ -1062,7 +1101,7 @@ export function createTableAssistant(
       });
       // The provisional message goes when the real one lands. A reply is the
       // authority for what happened; the words that preceded it are not.
-      dropStreamingMessage();
+      dropStreamingMessage(mine, id);
       // A transport is asked to honour `signal`, but it is host code and may
       // not. Stop has to hold either way, so delivery is gated on the signal
       // as well as on the turn still being the current one.
@@ -1073,7 +1112,7 @@ export function createTableAssistant(
       // An abandoned stream leaves nothing behind: the partial message is
       // dropped, and nothing ran, because calls execute only after the reply
       // is complete.
-      dropStreamingMessage();
+      dropStreamingMessage(mine, id);
       if (current(mine) && turn === id) {
         recover(cause, controller.signal.aborted, previousDraft);
       }

@@ -68,6 +68,7 @@ import {
   buildAgentContext,
 } from "./context";
 import type { AgentContextView } from "./contextSnapshot";
+import { createTurnRevision, type TurnRevision } from "./turnRevision";
 import type {
   AgentSession,
   ApprovalResult,
@@ -301,9 +302,17 @@ export function aiSdkTools(
   return tools;
 }
 
-/** The replay identity for one AI SDK tool call. */
-function callKey(tableId: string, toolCallId: string): string {
-  return `ai-sdk:${JSON.stringify({ tableId, toolCallId })}`;
+/**
+ * The replay identity for one AI SDK tool call.
+ *
+ * `toolCallId` is the provider's correlation id, and a provider is free to
+ * reuse one across the steps of a run. The identity that decides whether a
+ * mutation may run again is this adapter's own: the step the call arrived on,
+ * so reaching the same call twice within a step is a replay and the same id on
+ * a later step is the new call it is.
+ */
+function callKey(tableId: string, step: string, toolCallId: string): string {
+  return `ai-sdk:${JSON.stringify({ tableId, step, toolCallId })}`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -401,6 +410,12 @@ interface TurnState {
   readonly approvals: AiSdkApprovalResponse[];
   /** Calls the route reported as refused, and why. */
   readonly denied: DeniedCall[];
+  /** What this turn's own calls have proven the table reached. */
+  readonly bound: TurnRevision;
+  /** The revision of the view the current request carried. */
+  planned: number;
+  /** The request this turn is on, which is what a tool-call id belongs to. */
+  step: string;
   text: string;
 }
 
@@ -480,6 +495,10 @@ function assertPartShape(part: AiSdkPart): void {
 export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
   const maxRequests = Math.max(1, options.maxRequests ?? DEFAULT_MAX_REQUESTS);
   const presentation: ApprovalPresentation = options.presentation ?? "widget";
+  // Names one logical run, so two turns of the same conversation never share a
+  // call identity even when a provider hands back a tool-call id it has used
+  // before.
+  let runs = 0;
 
   const viewOf = (session: AgentSession): AgentContextView =>
     buildAgentContext(session, options.context, options.contextInputs?.()).view;
@@ -499,15 +518,17 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
       );
     }
     const manifest = session.manifest();
-    // Read now: a call is judged against the table as it is, not as the
-    // request described it.
+    // The view this request carried, moved forward only by what this turn's
+    // own calls have proven. A call the model planned against that view is not
+    // quietly re-aimed at whatever the table has reached since.
     const result = await session.execute(
       key,
       part.input ?? {},
-      manifest.viewRevision,
-      callKey(manifest.tableId, toolCallId),
+      turn.bound.expected(turn.planned),
+      callKey(manifest.tableId, turn.step, toolCallId),
       signal
     );
+    turn.bound.settled(result);
     turn.results.push(result);
     turn.keys.push(key);
     turn.subjects.push(
@@ -667,6 +688,9 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
       signal,
       onPartialText,
     }): Promise<AssistantTransportReply> => {
+      runs += 1;
+      const runId = `run-${String(runs)}`;
+      const opening = session.manifest().viewRevision;
       const turn: TurnState = {
         results: [],
         keys: [],
@@ -674,11 +698,20 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
         outputs: [],
         approvals: [],
         denied: [],
+        bound: createTurnRevision(opening),
+        planned: opening,
+        step: `${runId}:0`,
         text: "",
       };
       let unresolved: AssistantUnresolved | undefined;
 
       for (let attempt = 0; attempt < maxRequests; attempt += 1) {
+        // The view this request carries, and the step its tool calls belong
+        // to. Both move on with the request, so a call is bound to the state
+        // the model was actually shown.
+        const view = viewOf(session);
+        turn.planned = view.revision;
+        turn.step = `${runId}:${String(attempt)}`;
         const request: AiSdkRequest = {
           message: text,
           messages: conversation.map((entry) => ({
@@ -691,7 +724,7 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
           ...(turn.approvals.length > 0
             ? { approvals: [...turn.approvals] }
             : {}),
-          data: { "data-adapttable-view": viewOf(session) },
+          data: { "data-adapttable-view": view },
         };
         // Carried once: a second request repeats only what is new.
         turn.outputs.length = 0;

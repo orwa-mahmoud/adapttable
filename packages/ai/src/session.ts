@@ -399,13 +399,14 @@ export function createAgentSession(
     args: unknown,
     entry: AgentObservation,
     signal: AbortSignal | undefined,
-    state: { invokedWrite: boolean }
+    state: { invokedWrite: boolean },
+    apply: AgentApply
   ): Promise<unknown> => {
     const approve = bindApprove(options.onApprove, signal);
     const throwIfCancelled = cancellationGuard(signal);
     const baseContext: AgentCapabilityContext = {
       observation: entry,
-      apply: options.apply,
+      apply,
       observe: options.observe,
       onApprove: approve,
       signal,
@@ -587,6 +588,15 @@ export function createAgentSession(
     const resolved = preflight(key, args, expectedRevision);
     if ("code" in resolved) return fail(resolved.code, resolved.message);
 
+    // Where this action itself left the table. `apply` is the one channel a
+    // capability changes the table through — a built-in dispatches to it, a
+    // host handler is handed it — so the revision read as one of those calls
+    // settles is this action's own progress.
+    let own: number | undefined;
+    const tracked = traceApply(options.apply, () => {
+      own = options.observe().viewRevision;
+    });
+
     try {
       const payload = await runCapability(
         resolved.definition,
@@ -594,16 +604,22 @@ export function createAgentSession(
         args,
         resolved.observation,
         signal,
-        state
+        state,
+        tracked
       );
-      // Where the table is now. Every awaited boundary on the way here has
-      // already re-authorized against the revision this action was admitted
-      // at — `revalidate` after planning and after the approval, and the read
-      // and resolve paths after their own callbacks — so a foreign change
-      // during this action refuses rather than arriving here to be absorbed.
-      // What remains is this action's own effect, which a view setter has as
-      // much as a write does.
-      const produced = options.observe().viewRevision;
+      // What this action reached, never where the table happens to be. An
+      // action that applied nothing reports the revision it was admitted at,
+      // and one that applied reports what its own last call settled at, so a
+      // change that landed alongside it is left for whoever made it to
+      // account for. The next command then meets that change as a mismatch it
+      // has to re-read, which is the answer the session gives at every other
+      // awaited boundary.
+      //
+      // A host write and a foreign write inside the same `apply` call are the
+      // one pair this cannot separate: both move the same counter while that
+      // call is in flight, and only the host knows which revision its own
+      // write produced.
+      const produced = own ?? resolved.observation.viewRevision;
       const unfinished = unfinishedWrite(payload);
       if (unfinished) {
         return {
@@ -813,6 +829,58 @@ function decorateWrite(
       payload.proposals.length > 0 ? payload.proposals : plan.proposals,
     approval,
   };
+}
+
+/**
+ * Apply members that read the table rather than change it.
+ *
+ * A call to one of these says nothing about where the table has got to, so
+ * tracing it would let a change made by somebody else stand in for progress
+ * this action never made.
+ */
+const READING_APPLY: ReadonlySet<PropertyKey> = new Set([
+  "readRows",
+  "resolveRow",
+]);
+
+/** Whether a handler's return value has to be waited on. */
+function isThenable(value: unknown): value is PromiseLike<unknown> {
+  if (typeof value !== "object" || value === null) return false;
+  return typeof (value as { then?: unknown }).then === "function";
+}
+
+/**
+ * `apply`, reporting where each changing call leaves the table.
+ *
+ * Every route a capability has to the table runs through this object, so the
+ * revision read as one of its calls settles is the revision that call
+ * produced. Wrapping it here rather than at each call site covers a host's
+ * own capability handler, which the session never sees inside.
+ *
+ * A proxy rather than a copy: a host may hand over a class instance, whose
+ * methods a spread would drop.
+ */
+function traceApply(apply: AgentApply, settled: () => void): AgentApply {
+  return new Proxy(apply, {
+    get(target, property) {
+      const member: unknown = Reflect.get(target, property);
+      if (typeof member !== "function" || READING_APPLY.has(property)) {
+        return member;
+      }
+      const call = member as (...args: readonly unknown[]) => unknown;
+      return (...args: readonly unknown[]): unknown => {
+        const outcome = Reflect.apply(call, target, args);
+        if (!isThenable(outcome)) {
+          settled();
+          return outcome;
+        }
+        return Promise.resolve(outcome).then((value) => {
+          settled();
+          return value;
+        });
+      };
+    },
+  });
 }
 
 /**

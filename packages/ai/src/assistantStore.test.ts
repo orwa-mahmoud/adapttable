@@ -625,6 +625,65 @@ describe("putting one action of a turn back", () => {
     ).toEqual([true]);
   });
 
+  it("offers no per-action control where two actions moved the same field", async () => {
+    // Sort ascending, then descending. Putting the second card back means
+    // restoring ascending, and the store never saw that view: its only
+    // before-state is the one the turn opened on, which would take the first
+    // action back too. So the cards carry the turn's Undo and none of their
+    // own.
+    let sortBy: string | undefined;
+    let sortDir: "asc" | "desc" | undefined;
+    let revision = 1;
+    const session = createAgentSession({
+      observe: () =>
+        observation({ sortBy, sortDir, viewRevision: revision, hasSort: true }),
+      apply: {
+        setSort: (key: string | undefined, dir?: "asc" | "desc") => {
+          sortBy = key;
+          sortDir = dir;
+          revision += 1;
+        },
+      },
+    });
+    const store = createTableAssistant({
+      session,
+      transport: {
+        send: async ({ session: live }) => {
+          const first = await live.execute(
+            "view.setSort",
+            { key: "name", dir: "asc" },
+            live.manifest().viewRevision,
+            "sort-1"
+          );
+          const second = await live.execute(
+            "view.setSort",
+            { key: "name", dir: "desc" },
+            live.manifest().viewRevision,
+            "sort-2"
+          );
+          return {
+            text: "sorted, then sorted again",
+            results: [first, second],
+            keys: ["view.setSort", "view.setSort"],
+          };
+        },
+      },
+      contextInputs: () => ({ view: { page: 1, limit: 10, sortBy, sortDir } }),
+    });
+    store.connect();
+
+    await store.send("sort it both ways");
+    expect(sortDir).toBe("desc");
+
+    const receipts = store.getState().messages.at(-1)?.receipts ?? [];
+    expect(receipts.map((receipt) => receipt.undoable)).toEqual([false, false]);
+
+    // The turn's own Undo still describes what happened, and still works.
+    expect(store.getState().undo?.available).toBe(true);
+    await store.undoTurn();
+    expect(sortBy).toBeUndefined();
+  });
+
   it("retires the whole-turn offer once part of the turn is back", async () => {
     const table = twoWayTable();
     const store = storeFor(table);
@@ -1081,6 +1140,93 @@ describe("streamed text", () => {
     expect(
       store.getState().messages.filter((m) => m.role === "assistant")
     ).toHaveLength(1);
+  });
+
+  it("spends an update the reply has already overtaken", async () => {
+    // A browser coalesces onto a frame, and a frame runs long after the
+    // microtask the reply lands on. The update is queued while the turn is
+    // still current and uncancelled, so only the message it was written for
+    // can say it is spent.
+    const frames: (() => void)[] = [];
+    vi.stubGlobal("requestAnimationFrame", (run: () => void) => {
+      frames.push(run);
+      return frames.length;
+    });
+    try {
+      let emit: ((text: string) => void) | undefined;
+      let settle: (() => void) | undefined;
+      const store = createTableAssistant({
+        session: tableSession(),
+        transport: {
+          send: ({ onPartialText }) => {
+            emit = onPartialText;
+            return new Promise<AssistantTransportReply>((resolve) => {
+              settle = () => {
+                resolve({ text: "Showing page 2." });
+              };
+            });
+          },
+        },
+      });
+      store.connect();
+      const turn = store.send("Page 2");
+
+      emit?.("Showing ");
+      expect(frames).toHaveLength(1);
+
+      settle?.();
+      await turn;
+      // The frame arrives now, with the reply already in the transcript.
+      for (const run of frames) run();
+
+      const messages = store.getState().messages;
+      expect(messages.map((entry) => entry.role)).toEqual([
+        "user",
+        "assistant",
+      ]);
+      expect(messages.at(-1)?.text).toBe("Showing page 2.");
+      expect(messages.at(-1)?.streaming).toBeUndefined();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("leaves the streaming message of the turn the reader is watching", async () => {
+    const emits: ((text: string) => void)[] = [];
+    const settles: ((reply: AssistantTransportReply) => void)[] = [];
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: ({ onPartialText }) => {
+          if (onPartialText) emits.push(onPartialText);
+          return new Promise<AssistantTransportReply>((resolve) => {
+            settles.push(resolve);
+          });
+        },
+      },
+    });
+    store.connect();
+
+    void store.send("first");
+    store.stop();
+
+    const second = store.send("second");
+    emits[1]?.("Half of the second");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(store.getState().messages.at(-1)?.text).toBe("Half of the second");
+
+    // The abandoned turn's transport finally answers. It may take away what it
+    // put there itself, which is already gone, and nothing else.
+    settles[0]?.({ text: "first, far too late" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const during = store.getState().messages.at(-1);
+    expect(during?.text).toBe("Half of the second");
+    expect(during?.streaming).toBe(true);
+
+    settles[1]?.({ text: "second, answered" });
+    await second;
+    expect(store.getState().messages.at(-1)?.text).toBe("second, answered");
   });
 });
 
