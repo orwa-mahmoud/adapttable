@@ -98,14 +98,16 @@ test("RTL lab still exposes labeled approve and reject", async ({ page }) => {
   await expect(
     page.locator('[data-adapttable-part="agent-approval"]')
   ).toBeVisible();
-  // The summary controls say what they will do: "all" before any single
-  // change has been decided, "remaining" after one has.
+  // The summary controls say what they will do, and this lab proposes one
+  // change: "all" would claim a set where there is a single salary. The plural
+  // wording belongs to a write that enumerates more than one, and "remaining"
+  // to one where a row has already been decided.
   await expect(
     page.locator('[data-adapttable-part="agent-approval-approve"]')
-  ).toHaveAccessibleName("Approve all");
+  ).toHaveAccessibleName("Approve");
   await expect(
     page.locator('[data-adapttable-part="agent-approval-reject"]')
-  ).toHaveAccessibleName("Reject all");
+  ).toHaveAccessibleName("Reject");
 });
 
 test.describe("mobile lab", () => {
