@@ -47,10 +47,14 @@ export {
   type AssistantQuestion,
   type AssistantQuestionOption,
   type AssistantRequest,
+  type AssistantResumeHandle,
+  type AssistantResumeInput,
+  type AssistantSendInput,
   type AssistantSuggestion,
   type AssistantTransport,
   type AssistantTransportReply,
   type AssistantTurn,
+  type AssistantTurnInput,
   type AssistantUnresolved,
   type CapabilityPresentation,
   eligibleSuggestions,
@@ -67,6 +71,7 @@ export {
 } from "./assistantReceipts";
 export {
   type AssistantAllowance,
+  type AssistantInterruption,
   type AssistantMessage,
   type AssistantStatus,
   type AssistantUndoOffer,

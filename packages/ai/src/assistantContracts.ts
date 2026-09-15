@@ -305,6 +305,79 @@ export interface AssistantUnresolved {
  *
  * @public
  */
+/**
+ * A handle on work that outlived the connection it started on.
+ *
+ * Losing a connection is not the same as stopping a turn: a backend asked to
+ * do something may still be doing it. A transport that can be reattached to
+ * says so while the turn runs, and this is what it takes to come back.
+ *
+ * @public
+ */
+export interface AssistantResumeHandle {
+  /** What the reader asked, so the work is legible wherever it is stored. */
+  readonly text: string;
+  /**
+   * The backend's own name for the work, carried back untouched.
+   *
+   * Opaque here on purpose — a stream id, a job id, a signed token. Only the
+   * transport that minted it reads it.
+   */
+  readonly token: unknown;
+}
+
+/**
+ * What every turn is given, however it started.
+ *
+ * @public
+ */
+export interface AssistantTurnInput {
+  readonly session: AgentSession;
+  readonly conversation: readonly AssistantExchange[];
+  readonly signal?: AbortSignal;
+  /**
+   * Report the assistant's text as it arrives, when the transport streams.
+   *
+   * Optional on both sides: a transport that does not stream never calls it,
+   * and a controller that does not render partial text never passes one.
+   * Calling it is never a claim that anything ran — a turn's receipts come
+   * from the reply, not from the words.
+   */
+  readonly onPartialText?: (text: string) => void;
+  /**
+   * Put a structured question to the reader and wait for their answer.
+   *
+   * Optional on both sides, exactly like `onPartialText`: a transport that
+   * never asks does not call it, and a controller with nowhere to draw a
+   * question does not pass one. It resolves to `undefined` when the reader
+   * declined or the turn was abandoned — which a transport reports as
+   * unresolved rather than proceeding on a value nobody gave.
+   */
+  readonly askUser?: (
+    question: AssistantQuestion
+  ) => Promise<AssistantAnswer | undefined>;
+  /**
+   * Name work a lost connection would not end.
+   *
+   * Called as soon as the backend has something to reattach to. A transport
+   * that never calls it is one whose turns end with their connection, and a
+   * controller then has nothing to offer a reader but sending again.
+   */
+  readonly onResumable?: (token: unknown) => void;
+}
+
+/** One turn, started by the reader. @public */
+export interface AssistantSendInput extends AssistantTurnInput {
+  /** What the reader asked. */
+  readonly text: string;
+}
+
+/** One turn, rejoined where a connection left it. @public */
+export interface AssistantResumeInput extends AssistantTurnInput {
+  /** The work to rejoin, exactly as it was handed out. */
+  readonly handle: AssistantResumeHandle;
+}
+
 export interface AssistantTransport {
   /** Optional handshake. Rejecting it leaves the controller disconnected. */
   connect?(input: {
@@ -312,33 +385,17 @@ export interface AssistantTransport {
     readonly signal?: AbortSignal;
   }): Promise<void> | void;
   /** Run one turn. Must honour `signal` and must not retry a mutation. */
-  send(input: {
-    readonly session: AgentSession;
-    readonly text: string;
-    readonly conversation: readonly AssistantExchange[];
-    readonly signal?: AbortSignal;
-    /**
-     * Report the assistant's text as it arrives, when the transport streams.
-     *
-     * Optional on both sides: a transport that does not stream never calls it,
-     * and a controller that does not render partial text never passes one.
-     * Calling it is never a claim that anything ran — a turn's receipts come
-     * from the reply, not from the words.
-     */
-    readonly onPartialText?: (text: string) => void;
-    /**
-     * Put a structured question to the reader and wait for their answer.
-     *
-     * Optional on both sides, exactly like `onPartialText`: a transport that
-     * never asks does not call it, and a controller with nowhere to draw a
-     * question does not pass one. It resolves to `undefined` when the reader
-     * declined or the turn was abandoned — which a transport reports as
-     * unresolved rather than proceeding on a value nobody gave.
-     */
-    readonly askUser?: (
-      question: AssistantQuestion
-    ) => Promise<AssistantAnswer | undefined>;
-  }): Promise<AssistantTransportReply>;
+  send(input: AssistantSendInput): Promise<AssistantTransportReply>;
+  /**
+   * Rejoin work a released connection left running.
+   *
+   * Optional: without it a released connection ends the turn, which is the
+   * honest outcome for a transport that cannot get back to it. An
+   * implementation must reuse the replay identities its first attempt used, so
+   * the session answers a completed action from its record rather than running
+   * it a second time.
+   */
+  resume?(input: AssistantResumeInput): Promise<AssistantTransportReply>;
   /**
    * Release whatever `connect` acquired.
    *

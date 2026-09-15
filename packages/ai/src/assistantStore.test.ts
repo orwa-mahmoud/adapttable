@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type {
+  AssistantResumeHandle,
   AssistantTransport,
   AssistantTransportReply,
 } from "./assistantContracts";
@@ -1768,5 +1769,226 @@ describe("a question the backend asked", () => {
     store.answer({ text: "" });
     await turn;
     expect(store.getState().busy).toBe(false);
+  });
+});
+
+describe("stop, disconnect and resume are three different things", () => {
+  /** A transport that hands out a handle and never answers on its own. */
+  function detachable(): {
+    readonly transport: AssistantTransport;
+    readonly resumes: AssistantResumeHandle[];
+    readonly answerResume: (reply: AssistantTransportReply) => void;
+  } {
+    const resumes: AssistantResumeHandle[] = [];
+    let settleResume: ((reply: AssistantTransportReply) => void) | undefined;
+    return {
+      resumes,
+      answerResume: (reply) => settleResume?.(reply),
+      transport: {
+        send: ({ onResumable }) => {
+          onResumable?.("job-1");
+          return new Promise<AssistantTransportReply>(() => undefined);
+        },
+        resume: ({ handle }) => {
+          resumes.push(handle);
+          return new Promise<AssistantTransportReply>((resolve) => {
+            settleResume = resolve;
+          });
+        },
+      },
+    };
+  }
+
+  it("ends the work when the reader stops it", async () => {
+    const backend = detachable();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: backend.transport,
+    });
+    store.connect();
+    void store.send("count everything");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(store.getState().resumable).toEqual({
+      text: "count everything",
+      token: "job-1",
+    });
+
+    store.stop();
+
+    // Their decision, so there is nothing left to come back to.
+    expect(store.getState().interrupted).toBe("stopped");
+    expect(store.getState().resumable).toBeUndefined();
+    expect(store.getState().busy).toBe(false);
+  });
+
+  it("leaves the work running when the connection goes", async () => {
+    const backend = detachable();
+    const kept: AssistantResumeHandle[] = [];
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: backend.transport,
+      onDetach: (handle) => kept.push(handle),
+    });
+    store.connect();
+    void store.send("count everything");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    store.disconnect();
+
+    expect(store.getState().interrupted).toBe("detached");
+    expect(store.getState().status).toBe("disconnected");
+    // Not an error: nothing failed, and the backend was never asked to stop.
+    expect(store.getState().error).toBeUndefined();
+    // Handed to whoever can keep it, which is where durable recovery starts.
+    expect(kept).toEqual([{ text: "count everything", token: "job-1" }]);
+  });
+
+  it("ends a turn with nothing to come back to", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: () => new Promise<AssistantTransportReply>(() => undefined),
+      },
+    });
+    store.connect();
+    void store.send("count everything");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    store.disconnect();
+
+    // Nothing named work that outlives the connection, so saying the turn is
+    // still running would leave the reader waiting on a reply that cannot come.
+    expect(store.getState().interrupted).toBe("stopped");
+    expect(store.getState().busy).toBe(false);
+  });
+
+  it("rejoins the work it was handed, and answers into the transcript", async () => {
+    const backend = detachable();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: backend.transport,
+    });
+    store.connect();
+    void store.send("count everything");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    store.disconnect();
+
+    const rejoined = store.resume();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(backend.resumes).toEqual([
+      { text: "count everything", token: "job-1" },
+    ]);
+    expect(store.getState().busy).toBe(true);
+    expect(store.getState().interrupted).toBeUndefined();
+
+    backend.answerResume({ text: "Counted them." });
+    await rejoined;
+
+    expect(store.getState().messages.at(-1)?.text).toBe("Counted them.");
+    // Nothing is left to rejoin once the reply has landed.
+    expect(store.getState().resumable).toBeUndefined();
+  });
+
+  it("rejoins a handle a host kept across a reload", async () => {
+    const backend = detachable();
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: backend.transport,
+      resumeHandle: { text: "count everything", token: "job-1" },
+    });
+    store.connect();
+
+    // A fresh store: no transcript, no turn of its own, and still a way back.
+    expect(store.getState().messages).toEqual([]);
+    expect(store.getState().resumable).toEqual({
+      text: "count everything",
+      token: "job-1",
+    });
+
+    const rejoined = store.resume();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    backend.answerResume({ text: "Counted them." });
+    await rejoined;
+
+    expect(store.getState().messages.at(-1)?.text).toBe("Counted them.");
+  });
+
+  it("does not run an action a second time when it rejoins", async () => {
+    // The replay identity is what holds this: the resumed attempt reuses the
+    // key its first attempt used, and the session answers from its record
+    // rather than calling the table again.
+    let pages = 0;
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: {
+        setPage: () => {
+          pages += 1;
+        },
+      },
+    });
+    let settleResume: ((reply: AssistantTransportReply) => void) | undefined;
+    const runPage = async (live: AgentSession) =>
+      live.execute(
+        "view.setPage",
+        { page: 2 },
+        live.manifest().viewRevision,
+        "one-and-only"
+      );
+    const store = createTableAssistant({
+      session,
+      transport: {
+        send: async ({ session: live, onResumable }) => {
+          onResumable?.("job-1");
+          await runPage(live);
+          return new Promise<AssistantTransportReply>(() => undefined);
+        },
+        resume: async ({ session: live }) => {
+          const result = await runPage(live);
+          return new Promise<AssistantTransportReply>((resolve) => {
+            settleResume = () => {
+              resolve({
+                text: "Paged.",
+                results: [result],
+                keys: ["view.setPage"],
+              });
+            };
+          });
+        },
+      },
+    });
+    store.connect();
+    void store.send("page 2");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(pages).toBe(1);
+
+    store.disconnect();
+    const rejoined = store.resume();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    settleResume?.({ text: "Paged." });
+    await rejoined;
+
+    // Once, across both attempts.
+    expect(pages).toBe(1);
+    expect(store.getState().messages.at(-1)?.text).toBe("Paged.");
+  });
+
+  it("says so when a transport cannot rejoin anything", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: ({ onResumable }) => {
+          onResumable?.("job-1");
+          return new Promise<AssistantTransportReply>(() => undefined);
+        },
+      },
+    });
+    store.connect();
+    void store.send("count everything");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    store.disconnect();
+
+    await store.resume();
+
+    expect(store.getState().errorCode).toBe("resume-unsupported");
   });
 });

@@ -29,9 +29,11 @@ import {
   type AssistantAnswer,
   type AssistantExchange,
   type AssistantQuestion,
+  type AssistantResumeHandle,
   type AssistantSuggestion,
   type AssistantTransport,
   type AssistantTransportReply,
+  type AssistantTurnInput,
   eligibleSuggestions,
 } from "./assistantContracts";
 import {
@@ -174,6 +176,22 @@ export interface TableAssistantInputs {
   readonly alwaysAllowed?: readonly string[];
   /** Ask about one of them again from now on. */
   readonly onRevokeAlwaysAllow?: (capability: string) => void;
+  /**
+   * Work that outlived its connection, handed over the moment it does.
+   *
+   * This is where durable recovery starts and where this package stops: a
+   * host that writes the handle somewhere it survives a reload can offer a
+   * resume when the reader comes back. A host that does nothing loses the
+   * work when the page goes, which is the honest default.
+   */
+  readonly onDetach?: (handle: AssistantResumeHandle) => void;
+  /**
+   * A handle from a previous page, to resume into this one.
+   *
+   * The store has no memory across a reload; a host that kept one hands it
+   * back here and `resume` has something to rejoin.
+   */
+  readonly resumeHandle?: AssistantResumeHandle;
 }
 
 /** What a binding renders from. @public */
@@ -227,7 +245,33 @@ export interface TableAssistantSnapshot {
    * goes looking for what they agreed to.
    */
   readonly alwaysAllowed: readonly AssistantAllowance[];
+  /**
+   * What became of the last turn, when something other than a reply ended it.
+   *
+   * `"stopped"` is the reader's own decision and nothing is still running.
+   * `"detached"` is a released connection: the backend may still be working,
+   * and {@link TableAssistantSnapshot.resumable} says whether there is a way
+   * back to it. A surface that tells a reader "cancelled" for both is telling
+   * one of them something untrue.
+   */
+  readonly interrupted: AssistantInterruption | undefined;
+  /**
+   * The work a resume would rejoin, or nothing.
+   *
+   * Present only while a transport has named work that outlives its
+   * connection. It is also what a host persists to offer a resume after a
+   * reload — that part is the host's, because a page that has been away has
+   * no session, no transcript and no memory of what ran.
+   */
+  readonly resumable: AssistantResumeHandle | undefined;
 }
+
+/**
+ * What ended a turn that no reply ended.
+ *
+ * @public
+ */
+export type AssistantInterruption = "stopped" | "detached";
 
 /**
  * The conversation, as a store.
@@ -242,8 +286,22 @@ export interface TableAssistantStore {
   readonly setDraft: (draft: string) => void;
   /** Send the draft, or the given text. Resolves when the turn settles. */
   readonly send: (text?: string) => Promise<void>;
-  /** Abort the turn in flight. Safe to call when nothing is in flight. */
+  /**
+   * End the turn in flight and the work behind it.
+   *
+   * The reader's own decision, so nothing is left running and nothing is left
+   * to rejoin. Safe to call when nothing is in flight.
+   */
   readonly stop: () => void;
+  /**
+   * Rejoin work a released connection left running.
+   *
+   * Does nothing without a handle to rejoin, and reports a transport that
+   * cannot. The turn comes back on a fresh baseline: the table is read again
+   * before anything else is applied, because it is not the table the turn
+   * started against.
+   */
+  readonly resume: () => Promise<void>;
   /** Drop the transcript. Cancels an active turn first. */
   readonly clear: () => void;
   /** Send a suggestion's prompt as if the reader had typed it. */
@@ -280,7 +338,15 @@ export interface TableAssistantStore {
   readonly update: (inputs: TableAssistantInputs) => void;
   /** Establish the connection. Normally called from a binding's mount. */
   readonly connect: () => void;
-  /** Release the connection without discarding the transcript. */
+  /**
+   * Release the connection without discarding the transcript.
+   *
+   * Not a stop: a turn in flight whose transport named work that outlives the
+   * connection is left running, its handle is offered to `onDetach`, and
+   * {@link TableAssistantStore.resume} can rejoin it. A turn with nothing to
+   * rejoin ends here, because pretending otherwise leaves a reader waiting on
+   * a reply that can no longer arrive.
+   */
   readonly disconnect: () => void;
   /** Idempotent. After this, nothing is delivered and nothing is notified. */
   readonly dispose: () => void;
@@ -306,6 +372,24 @@ function scheduleFlush(run: () => void): void {
 /** Ids only have to be unique within one transcript. */
 function messageId(role: string, seq: number): string {
   return `${role}-${String(seq)}`;
+}
+
+/**
+ * Ask a transport to rejoin work it started.
+ *
+ * Separated so the turn path reads as one shape: a transport without `resume`
+ * never reaches here, and this says so rather than failing as a missing
+ * function.
+ */
+function resumeWith(
+  transport: AssistantTransport,
+  shared: AssistantTurnInput,
+  handle: AssistantResumeHandle
+): Promise<AssistantTransportReply> {
+  if (!transport.resume) {
+    throw new Error("this transport cannot rejoin work it started");
+  }
+  return transport.resume({ ...shared, handle });
 }
 
 function exchanges(
@@ -442,6 +526,14 @@ export function createTableAssistant(
     | undefined;
   let resumeQuestion:
     ((answer: AssistantAnswer | undefined) => void) | undefined;
+
+  // Which of the three ended the turn in flight, when one of them did. Stop
+  // cancels it and nothing is left running; a released connection leaves the
+  // backend working and something to come back to.
+  let interrupted: AssistantInterruption | undefined;
+  // What a resume would rejoin. Named by the transport while the turn runs,
+  // because a connection released afterwards is too late to ask.
+  let resumable: AssistantResumeHandle | undefined;
 
   // Reserved synchronously, before the first await. A flag in published state
   // would not be: two sends in one tick would both read "not sending".
@@ -674,6 +766,10 @@ export function createTableAssistant(
       pendingQuestion: openQuestion(messages),
       undo: undoOffer(),
       alwaysAllowed: allowances(live.alwaysAllowed),
+      interrupted,
+      // A handle the host kept across a reload counts: the store has no turn
+      // of its own to come back to, and the reader still does.
+      resumable: resumable ?? live.resumeHandle,
     };
     return snapshot;
   };
@@ -872,6 +968,8 @@ export function createTableAssistant(
     if (draft === "") draft = was;
     // Stopping before a reply is not a failure to report as one, and nothing
     // is resent either way: an action whose outcome is unknown stays unknown.
+    // A detached turn never reaches here at all: releasing the lane moves the
+    // turn on, so the transport's eventual failure belongs to nobody.
     if (!aborted) {
       error = cause instanceof Error ? cause.message : String(cause);
       errorCode = undefined;
@@ -973,58 +1071,97 @@ export function createTableAssistant(
     messages = messages.filter((entry) => entry.id !== owned.id);
   };
 
-  const cancelTurn = (): void => {
-    if (!sending) return;
-    abort?.abort();
-    abort = undefined;
-    // A transport is asked to honour `signal`, but it is host code and may
-    // not: one that never settles would otherwise leave half a sentence in
-    // the transcript for good.
+  /**
+   * Stop waiting for the turn in flight.
+   *
+   * Released here rather than when the transport settles. One that never
+   * settles would otherwise hold the composer busy forever; its eventual reply
+   * is already undeliverable, because the turn it belonged to is no longer the
+   * current one. The provisional message goes with it — a transport is asked
+   * to honour `signal`, but it is host code and may not, and half a sentence
+   * would otherwise stay in the transcript for good.
+   */
+  const releaseTurn = (): void => {
     dropStreamingMessage(generation, turn);
-    // Release the lane here rather than waiting for the transport. One that
-    // never settles would otherwise hold the composer busy forever; its
-    // eventual reply is already undeliverable, because the turn it belonged to
-    // is no longer the current one.
     turn += 1;
     sending = false;
     settleQuestion(undefined);
   };
 
-  const send = async (text?: string): Promise<void> => {
-    if (disposed) return;
-    const outgoing = (text ?? draft).trim();
-    if (!outgoing || sending) return;
-    const transport = live.transport;
-    const session = live.session;
-    if (!session || !transport) {
-      status = "disconnected";
-      error = "no transport is connected";
-      publish();
-      return;
-    }
+  /** Stop waiting, and end the work behind it. */
+  const cancelTurn = (): void => {
+    if (!sending) return;
+    abort?.abort();
+    abort = undefined;
+    releaseTurn();
+  };
+
+  /**
+   * Stop waiting, and leave the work running.
+   *
+   * The signal is deliberately not raised: the backend was not asked to stop,
+   * and a resume rejoins what it is still doing. The controller stays with the
+   * turn that holds it, so its reply is dropped rather than delivered into a
+   * conversation that has moved on.
+   */
+  const detachTurn = (): void => {
+    if (!sending) return;
+    abort = undefined;
+    releaseTurn();
+  };
+
+  /**
+   * How a turn began.
+   *
+   * Sending and resuming are the same turn from here on — the same lane, the
+   * same streaming message, the same delivery rules — so they run one path and
+   * differ only where they must: what the transport is asked, and whether the
+   * reader's message is new to the transcript.
+   */
+  type TurnStart =
+    | {
+        readonly kind: "send";
+        readonly text: string;
+        readonly keepDraft: boolean;
+      }
+    | { readonly kind: "resume"; readonly handle: AssistantResumeHandle };
+
+  const runTurn = async (
+    start: TurnStart,
+    transport: AssistantTransport,
+    session: AgentSession
+  ): Promise<void> => {
     sending = true;
+    interrupted = undefined;
     const mine = generation;
     turn += 1;
     const id = turn;
     const controller = new AbortController();
     abort = controller;
-    seq += 1;
-    const userMessage: AssistantMessage = {
-      id: messageId("user", seq),
-      role: "user",
-      text: outgoing,
-      at: Date.now(),
-    };
     const previousDraft = draft;
     // Captured before the transport runs, which is before any of this turn's
     // calls can execute. Reading it afterwards would capture what the turn
-    // already did.
+    // already did. A resumed turn takes it fresh for the same reason: the
+    // baseline is where the table is now, not where it was when the connection
+    // was lost.
     const before = viewNow();
-    if (text === undefined) draft = "";
     error = undefined;
     errorCode = undefined;
     status = "sending";
-    push(userMessage);
+    if (start.kind === "send") {
+      seq += 1;
+      if (!start.keepDraft) draft = "";
+      // `push` publishes; a resumed turn has nothing new to say, so it says
+      // only that it is running again.
+      push({
+        id: messageId("user", seq),
+        role: "user",
+        text: start.text,
+        at: Date.now(),
+      });
+    } else {
+      publish();
+    }
 
     // One provisional message, updated in place as text arrives. A new entry
     // per delta would make the transcript grow by a message a token.
@@ -1061,44 +1198,58 @@ export function createTableAssistant(
       publish();
     };
 
+    const shared = {
+      session,
+      conversation: exchanges([...messages]),
+      signal: controller.signal,
+      onResumable: (token: unknown) => {
+        // Named while the turn runs, because a connection released afterwards
+        // is exactly when it is needed.
+        if (!deliverable(mine, id, controller)) return;
+        resumable = {
+          text: start.kind === "send" ? start.text : start.handle.text,
+          token,
+        };
+        publish();
+      },
+      onPartialText: (partial: string) => {
+        streamed = partial;
+        // Coalesced rather than published per token: a repaint per delta is a
+        // render storm, and the reader cannot read that fast anyway.
+        if (streamPending) return;
+        streamPending = true;
+        scheduleFlush(flushStream);
+      },
+      askUser: (asked: AssistantQuestion) =>
+        new Promise<AssistantAnswer | undefined>((settle) => {
+          // A question from a turn that is no longer the current one is
+          // answered by nobody: resolving immediately lets that transport
+          // report it as unresolved instead of waiting on a reader who is
+          // looking at a different conversation.
+          if (!deliverable(mine, id, controller)) {
+            settle(undefined);
+            return;
+          }
+          seq += 1;
+          asking = messageId("assistant", seq);
+          push({
+            id: asking,
+            role: "assistant",
+            text: asked.question,
+            at: Date.now(),
+            question: asked,
+          });
+          resumeQuestion = settle;
+          status = "awaiting-user";
+          publish();
+        }),
+    };
+
     try {
-      const reply = await transport.send({
-        session,
-        text: outgoing,
-        conversation: exchanges([...messages]),
-        signal: controller.signal,
-        onPartialText: (partial) => {
-          streamed = partial;
-          // Coalesced rather than published per token: a repaint per delta is
-          // a render storm, and the reader cannot read that fast anyway.
-          if (streamPending) return;
-          streamPending = true;
-          scheduleFlush(flushStream);
-        },
-        askUser: (asked) =>
-          new Promise<AssistantAnswer | undefined>((settle) => {
-            // A question from a turn that is no longer the current one is
-            // answered by nobody: resolving immediately lets that transport
-            // report it as unresolved instead of waiting on a reader who is
-            // looking at a different conversation.
-            if (!deliverable(mine, id, controller)) {
-              settle(undefined);
-              return;
-            }
-            seq += 1;
-            asking = messageId("assistant", seq);
-            push({
-              id: asking,
-              role: "assistant",
-              text: asked.question,
-              at: Date.now(),
-              question: asked,
-            });
-            resumeQuestion = settle;
-            status = "awaiting-user";
-            publish();
-          }),
-      });
+      const reply =
+        start.kind === "send"
+          ? await transport.send({ ...shared, text: start.text })
+          : await resumeWith(transport, shared, start.handle);
       // The provisional message goes when the real one lands. A reply is the
       // authority for what happened; the words that preceded it are not.
       dropStreamingMessage(mine, id);
@@ -1106,6 +1257,8 @@ export function createTableAssistant(
       // not. Stop has to hold either way, so delivery is gated on the signal
       // as well as on the turn still being the current one.
       if (deliverable(mine, id, controller)) {
+        // Whatever was left to come back to has arrived.
+        resumable = undefined;
         receive(reply, before, previousDraft);
       }
     } catch (cause) {
@@ -1119,6 +1272,28 @@ export function createTableAssistant(
     } finally {
       release(mine, id);
     }
+  };
+
+  const send = async (text?: string): Promise<void> => {
+    if (disposed) return;
+    const outgoing = (text ?? draft).trim();
+    if (!outgoing || sending) return;
+    const transport = live.transport;
+    const session = live.session;
+    if (!session || !transport) {
+      status = "disconnected";
+      error = "no transport is connected";
+      publish();
+      return;
+    }
+    // A new question is not the old one: whatever was left running belongs to
+    // a turn the reader has moved on from.
+    resumable = undefined;
+    await runTurn(
+      { kind: "send", text: outgoing, keepDraft: text !== undefined },
+      transport,
+      session
+    );
   };
 
   // Taken once, so `publish` always has something to compare against. Without
@@ -1143,6 +1318,10 @@ export function createTableAssistant(
     stop: () => {
       if (disposed || !sending) return;
       cancelTurn();
+      interrupted = "stopped";
+      // The reader ended the work, so there is nothing to come back to. A
+      // handle left standing would offer to rejoin something they cancelled.
+      resumable = undefined;
       setStatus("ready");
       publish();
     },
@@ -1256,6 +1435,9 @@ export function createTableAssistant(
         // number from the old one could coincide with the new one's.
         undoPlan = null;
         actionPlans = new Map();
+        // Whatever was still running belonged to the table the reader left.
+        resumable = undefined;
+        interrupted = undefined;
         dropConnection(previousTransport);
         startConnection();
         publish();
@@ -1263,6 +1445,9 @@ export function createTableAssistant(
       }
       if (transportChanged) {
         cancelTurn();
+        // Only the transport that started the work can rejoin it.
+        resumable = undefined;
+        interrupted = undefined;
         dropConnection(previousTransport);
         startConnection();
         publish();
@@ -1278,8 +1463,42 @@ export function createTableAssistant(
     },
     disconnect: () => {
       if (disposed) return;
+      if (sending) {
+        const handle = resumable;
+        if (handle) {
+          // The connection goes; the work does not. This conversation stops
+          // waiting for the reply, the backend keeps going, and the handle
+          // goes to whoever can keep it.
+          detachTurn();
+          interrupted = "detached";
+          live.onDetach?.(handle);
+        } else {
+          // Nothing named anything to come back to, so releasing the
+          // connection is the end of this turn. Saying so is better than
+          // leaving a reader watching a turn that cannot finish.
+          cancelTurn();
+          interrupted = "stopped";
+        }
+      }
       dropConnection();
       setStatus("disconnected");
+      publish();
+    },
+    resume: async () => {
+      if (disposed || sending) return;
+      const handle = resumable ?? live.resumeHandle;
+      const transport = live.transport;
+      const session = live.session;
+      if (!handle || !session || !transport) return;
+      if (!transport.resume) {
+        error = "this transport cannot rejoin work it started";
+        errorCode = "resume-unsupported";
+        status = "error";
+        publish();
+        return;
+      }
+      resumable = handle;
+      await runTurn({ kind: "resume", handle }, transport, session);
     },
     dispose: () => {
       if (disposed) return;

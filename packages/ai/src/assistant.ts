@@ -17,9 +17,13 @@ export type {
   AssistantExchange,
   AssistantQuestion,
   AssistantQuestionOption,
+  AssistantResumeHandle,
+  AssistantResumeInput,
+  AssistantSendInput,
   AssistantSuggestion,
   AssistantTransport,
   AssistantTransportReply,
+  AssistantTurnInput,
   AssistantUnresolved,
 } from "./assistantContracts";
 export type {
@@ -30,6 +34,7 @@ export type {
   AssistantTurnStatus,
 } from "./assistantReceipts";
 export {
+  type AssistantInterruption,
   type AssistantMessage,
   type AssistantStatus,
   type AssistantUndoOffer,

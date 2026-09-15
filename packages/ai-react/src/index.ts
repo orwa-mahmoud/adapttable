@@ -25,7 +25,9 @@ export { TABLE_AGENT_STATE, tableAgent } from "./react";
 export { useSpeechInput, type UseSpeechInputOptions } from "./useSpeechInput";
 export type {
   AssistantAnswer,
+  AssistantInterruption,
   AssistantQuestion,
+  AssistantResumeHandle,
   AssistantSuggestion,
   TableAssistantSnapshot,
   TableAssistantStore,

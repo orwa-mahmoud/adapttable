@@ -1348,12 +1348,14 @@ and the assistant contracts `AssistantAction`, `AssistantConversation`,
 `AssistantOutcome`, `AssistantOutcomeStatus`, `AssistantPlanner`,
 `AssistantProposal`, `AssistantRequest`, `AssistantSuggestion`,
 `AssistantTurn`, `AssistantExchange`, `AssistantTransport`,
-`AssistantTransportReply` and `CapabilityPresentation`, plus the receipt
+`AssistantTransportReply`, `AssistantTurnInput`, `AssistantSendInput`,
+`AssistantResumeInput`, `AssistantResumeHandle` and `CapabilityPresentation`, plus the receipt
 readers `receiptFromResult`, `receiptsFromResults`, `turnStatus` and the types
 `AssistantReceipt`, `AssistantReceiptStatus`, `AssistantTurnStatus`.
 `@adapttable/ai-react` exports `useTableAssistant`,
 `TableAssistantOptions`, `TableAssistantState`, `AssistantMessage`,
-`AssistantStatus`, `AssistantSuggestion`, `tableAgent`, `TableAgentOptions`,
+`AssistantStatus`, `AssistantInterruption`, `AssistantResumeHandle`,
+`AssistantSuggestion`, `tableAgent`, `TableAgentOptions`,
 `TableAgentColumnPatch`, `TABLE_AGENT_STATE`, `TableAgentBridge` and
 `SharedApproval`. `@adapttable/ai/http` adds `assistantHttpTransport`. Receipts come from
 `receiptFromResult` and `receiptsFromResults` as `AssistantReceipt`, whose
@@ -2111,7 +2113,12 @@ handle and `TableAssistantSnapshot` the value a view renders, holding
 not. `AssistantQuestion`, `AssistantQuestionOption` and `AssistantAnswer` are
 the question channel. `AssistantSuggestion`s are filtered by
 `eligibleSuggestions` and checked by `assertUniqueSuggestions`;
-`CapabilityPresentation` says how a capability is shown. Receipts come from
+`CapabilityPresentation` says how a capability is shown. Every turn is given an
+`AssistantTurnInput` — an `AssistantSendInput` when the reader asked and an
+`AssistantResumeInput` when it is rejoining — and a transport that names work
+outliving its connection through `onResumable` hands back an
+`AssistantResumeHandle` that `resume` takes. `AssistantInterruption` says which
+of the three ended a turn no reply ended. Receipts come from
 `receiptFromResult` / `receiptsFromResults` as `AssistantReceipt`s with an
 `AssistantReceiptStatus` and `AssistantReceiptSubject` — `subjectFor` builds
 one for a built-in capability, as `AssistantReceiptTerm` pairs of column label

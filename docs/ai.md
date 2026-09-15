@@ -296,6 +296,67 @@ unreadable column. Hand the result in as `inputs.samples`; the contract marks
 those columns `sampled: true`, so nobody confuses an author's example with
 somebody's data.
 
+## Stopping, losing the connection, and coming back
+
+Three different things happen to a turn that does not end in a reply, and the
+conversation reports which one:
+
+- **Stop** — the reader ended it. The signal is raised, the remaining actions
+  never run, and nothing is left running anywhere. `interrupted` is
+  `"stopped"`.
+- **Disconnect** — the connection was released, by an unmount, a table change
+  or `disconnect()`. The backend was never asked to stop, so it may still be
+  working. `interrupted` is `"detached"`, and the conversation stops waiting
+  for a reply that can no longer reach it.
+- **Resume** — rejoin work that is still running. The turn comes back on a
+  fresh baseline: the table is read again before anything is applied, because
+  it is not the table the turn started against.
+
+A turn can only be detached if the transport named something to come back to.
+It does that while the turn runs, through `onResumable`, and implements
+`resume` to rejoin:
+
+```ts
+const transport: AssistantTransport = {
+  send: async ({ text, onResumable, signal }) => {
+    const job = await backend.start(text, { signal });
+    // Named now, because a connection released later is too late to ask.
+    onResumable?.(job.id);
+    return toReply(await backend.wait(job.id, { signal }));
+  },
+  resume: async ({ handle, signal }) => {
+    // Same replay identities as the first attempt, so a completed action is
+    // answered from the session's record rather than run again.
+    return toReply(await backend.wait(handle.token as string, { signal }));
+  },
+};
+```
+
+Without `resume`, releasing the connection ends the turn — which is the honest
+outcome for a transport that cannot get back to it.
+
+**What this package guarantees:** within the life of one session, an action
+that already ran is not run again when a turn is resumed. The session keeps a
+replay record per identity, and a resumed attempt that reuses its identities
+gets the recorded result rather than a second execution.
+
+**What the host owns:** everything that has to survive the page. A reload
+builds a new session with an empty replay record, a new transcript and no
+memory of what ran, so durable recovery is a host decision. Keep the handle
+and hand it back:
+
+```ts
+useTableAssistant({
+  session,
+  transport,
+  onDetach: (handle) => sessionStorage.setItem("turn", JSON.stringify(handle)),
+  resumeHandle: restoredHandle,
+});
+```
+
+A backend whose work outlives a page must also be idempotent across it — the
+replay record that answers a repeated action is in the session that went away.
+
 ## Approval, undo and what a reader agreed to
 
 `approval` answers two questions separately: **which** capabilities need a

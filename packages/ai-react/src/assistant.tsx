@@ -26,8 +26,10 @@ import {
   type AgentSession,
   type AlwaysAllowedState,
   type AssistantAllowance,
+  type AssistantInterruption,
   type AssistantMessage,
   type AssistantQuestion,
+  type AssistantResumeHandle,
   type AssistantStatus,
   type AssistantSuggestion,
   type AssistantTransport,
@@ -62,8 +64,10 @@ export type {
   WritePolicy,
 } from "@adapttable/ai";
 export type {
+  AssistantInterruption,
   AssistantMessage,
   AssistantQuestion,
+  AssistantResumeHandle,
   AssistantStatus,
   AssistantTransport,
 };
@@ -131,6 +135,17 @@ export interface TableAssistantOptions {
    * would report that nothing changed.
    */
   readonly contextInputs?: () => AgentContextInputs;
+  /**
+   * Work that outlived its connection, handed over the moment it does.
+   *
+   * Durable recovery starts here and ends outside this package: a host that
+   * stores the handle where it survives a reload can offer a resume when the
+   * reader comes back, and a host that does nothing loses the work with the
+   * page.
+   */
+  readonly onDetach?: (handle: AssistantResumeHandle) => void;
+  /** A handle kept from a previous page, to resume into this one. */
+  readonly resumeHandle?: AssistantResumeHandle;
 }
 
 /** What a host renders from. @public */
@@ -151,6 +166,21 @@ export interface TableAssistantState {
   readonly send: (text?: string) => Promise<void>;
   /** Abort the turn in flight. Safe to call when nothing is in flight. */
   readonly stop: () => void;
+  /**
+   * Rejoin work a released connection left running.
+   *
+   * A no-op with nothing to rejoin, which is what `resumable` says.
+   */
+  readonly resume: () => Promise<void>;
+  /**
+   * What became of the last turn, when no reply ended it.
+   *
+   * `"stopped"` is the reader's own decision; `"detached"` is a released
+   * connection, where the work may still be running.
+   */
+  readonly interrupted: AssistantInterruption | undefined;
+  /** The work `resume` would rejoin, or nothing. */
+  readonly resumable: AssistantResumeHandle | undefined;
   /** Drop the transcript. Refuses while a turn is in flight. */
   readonly clear: () => void;
   /**
@@ -278,6 +308,9 @@ export function useTableAssistant(
     setDraft: store.setDraft,
     send: store.send,
     stop: store.stop,
+    resume: store.resume,
+    interrupted: state.interrupted,
+    resumable: state.resumable,
     clear: store.clear,
     status: state.status,
     busy: state.busy,
@@ -325,6 +358,8 @@ function inputsOf(
     awaitingApproval: options.awaitingApproval,
     approval: approval ?? null,
     ...(contextInputs ? { contextInputs } : {}),
+    ...(options.onDetach ? { onDetach: options.onDetach } : {}),
+    ...(options.resumeHandle ? { resumeHandle: options.resumeHandle } : {}),
     // The host's own wins, for the same reason `contextInputs` does: a panel
     // beside the table has no feature state to read.
     ...((options.alwaysAllow ?? alwaysAllow)
