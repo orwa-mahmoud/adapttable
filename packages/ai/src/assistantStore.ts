@@ -1150,10 +1150,23 @@ export function createTableAssistant(
    * the time this runs, and disconnecting the new transport would leave the
    * old one holding whatever it acquired — an endpoint credential included.
    */
-  const dropConnection = (transport = live.transport): void => {
+  /**
+   * Let go of the open connection.
+   *
+   * `released` is the transport being told the conversation is over, which is
+   * what makes it forget whatever the backend established — its pin, and the
+   * handle naming the thread that backend is holding. A session the host
+   * rebuilt for the same table is not that: the reader is still talking to
+   * the same backend about the same table, so the connection is re-made
+   * rather than disowned.
+   */
+  const dropConnection = (
+    transport = live.transport,
+    released = true
+  ): void => {
     connection?.abort();
     connection = undefined;
-    transport?.disconnect?.();
+    if (released) transport?.disconnect?.();
   };
 
   /**
@@ -1563,7 +1576,7 @@ export function createTableAssistant(
         // Whatever was still running belonged to the table the reader left.
         resumable = undefined;
         interrupted = undefined;
-        dropConnection(previousTransport);
+        dropConnection(previousTransport, tableChanged);
         startConnection();
         publish();
         return;

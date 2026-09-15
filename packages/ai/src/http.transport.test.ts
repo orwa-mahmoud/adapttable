@@ -1095,6 +1095,31 @@ describe("a backend that holds the contract between turns", () => {
     expect(last?.contractVersion).toBeDefined();
   });
 
+  it("carries the backend's handle into a session the host rebuilt", async () => {
+    // A remounted provider hands over a new session object for the same table.
+    // The backend is holding a thread against the handle it issued, and a turn
+    // that arrives without it reads as somebody who has just walked in.
+    const bodies: Record<string, unknown>[] = [];
+    const client = createAgentHttpClient({
+      endpoint: "https://agent.example/turn",
+      request: (body) => {
+        bodies.push(body as unknown as Record<string, unknown>);
+        return Promise.resolve({
+          schemaVersion: AGENT_SCHEMA_VERSION,
+          text: "ok",
+          sessionId: "backend-session-1",
+          pin: { status: "acknowledged", contractVersion: "c1" },
+        });
+      },
+    });
+
+    await client.connect(session());
+    // The same table, a different object carrying it.
+    await client.send(session(), "one");
+
+    expect(bodies.at(-1)?.sessionId).toBe("backend-session-1");
+  });
+
   it("forgets the pin when the host resets the session", async () => {
     const bodies: Record<string, unknown>[] = [];
     const client = createAgentHttpClient({

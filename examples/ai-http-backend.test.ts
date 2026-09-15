@@ -699,6 +699,60 @@ describe("handleExampleAgentTurn", () => {
     assert.equal(reply.continueWithResults, true);
   });
 
+  it("puts a model's question to the reader whatever it left out", async () => {
+    // Every field the wire insists on is one a model can omit, and it omits a
+    // different one each time. None of them is the reader's problem.
+    const shapes: [string, unknown][] = [
+      ["no id at all", { question: "Which team?" }],
+      ["an empty id", { id: "   ", question: "Which team?" }],
+      [
+        "options carrying only a label",
+        { question: "Which team?", options: [{ label: "Core" }] },
+      ],
+      [
+        "options carrying only an id",
+        { question: "Which team?", options: [{ id: "core" }] },
+      ],
+      [
+        "no way at all to answer",
+        { question: "Which team?", options: [], allowFreeText: false },
+      ],
+    ];
+    for (const [shape, askUser] of shapes) {
+      const reply = await handleExampleAgentTurn(
+        request(),
+        () => Promise.resolve(JSON.stringify({ text: "", askUser })),
+        new AbortController().signal
+      );
+      assert.equal(reply.askUser?.question, "Which team?", shape);
+      assert.ok(reply.askUser?.id, `${shape}: a question needs an id`);
+      assert.ok(
+        (reply.askUser?.options?.length ?? 0) > 0 ||
+          reply.askUser?.allowFreeText === true,
+        `${shape}: the reader has to be able to answer it`
+      );
+      for (const option of reply.askUser?.options ?? []) {
+        assert.ok(option.id, `${shape}: an option needs an id`);
+        assert.ok(option.label, `${shape}: an option needs a label`);
+      }
+    }
+  });
+
+  it("treats a question with nothing to ask as no question", async () => {
+    for (const askUser of [null, 7, {}, { question: "   " }]) {
+      const reply = await handleExampleAgentTurn(
+        request(),
+        () =>
+          Promise.resolve(
+            JSON.stringify({ text: "Grouping cleared.", askUser })
+          ),
+        new AbortController().signal
+      );
+      assert.equal(reply.askUser, undefined);
+      assert.equal(reply.text, "Grouping cleared.");
+    }
+  });
+
   it("ends the turn on a write", async () => {
     const complete = () =>
       Promise.resolve(

@@ -1001,6 +1001,35 @@ function schemaFingerprint(session: AgentSession): string {
 }
 
 /**
+ * The handle a backend issued for a table, kept past the session that got it.
+ *
+ * The pin is a note about what one session was told, and a host that rebuilds
+ * the session — a remounted provider, a re-keyed parent — has told a new one
+ * nothing. The backend's handle is not that: it names a thread that backend
+ * is holding for this table, and arriving without it makes a reader who has
+ * been talking for ten minutes look like someone who has just walked in.
+ *
+ * Carried on its own, so nothing about the contract is assumed: a rebuilt
+ * session still holds no pin, still sends the contract, and the backend
+ * re-pins it against the thread it already had.
+ */
+const sessionHandles = new Map<string, string>();
+
+/** Tables whose handle is kept. Enough for any page; this is not a store. */
+const MAX_SESSION_HANDLES = 16;
+
+function rememberHandle(tableId: string, sessionId: string | undefined): void {
+  if (!sessionId) return;
+  // Re-inserted so the least recently confirmed is the one that goes.
+  sessionHandles.delete(tableId);
+  sessionHandles.set(tableId, sessionId);
+  if (sessionHandles.size > MAX_SESSION_HANDLES) {
+    const oldest = sessionHandles.keys().next().value;
+    if (oldest !== undefined) sessionHandles.delete(oldest);
+  }
+}
+
+/**
  * Keep a pin only when the reply acknowledged the exact version it was sent.
  *
  * An ordinary successful turn proves nothing about pinning; a backend that
@@ -1034,10 +1063,12 @@ function rememberPin(
     held?.tableId === tableId && held.sessionId !== undefined
       ? held.sessionId
       : undefined;
+  const handle = response.sessionId ?? carried;
+  rememberHandle(tableId, handle);
   pins.remember(session, {
     connectionId,
     tableId,
-    sessionId: response.sessionId ?? carried,
+    sessionId: handle,
     // The version SENT, never the one live now: a contract that moved during
     // the exchange is a contract this backend has not seen.
     contractVersion: sent.version,
@@ -1102,7 +1133,10 @@ function compactRequest(
 ): AgentHttpRequest {
   const manifest = session.manifest();
   const record = pin ? pins.read(session, pin.connectionId) : undefined;
-  const sessionId = extra.sessionId ?? record?.sessionId;
+  const sessionId =
+    extra.sessionId ??
+    record?.sessionId ??
+    sessionHandles.get(manifest.tableId);
   const contractVersion = pin?.version;
   const context = pin?.context;
   const versions = {
@@ -1671,6 +1705,11 @@ async function sendRound(
 function forgetConnection(session: AgentSession, connectionId: string): void {
   pins.forget(session, connectionId);
   guideCache.forget(connectionId);
+  // The handle goes with them. A host resetting the conversation, and a
+  // backend answering that it holds no such pin, are both saying this thread
+  // is not one to carry on — and claiming a handle after either is claiming
+  // someone else's.
+  sessionHandles.delete(session.manifest().tableId);
 }
 
 /**
@@ -2274,13 +2313,12 @@ export function createAgentHttpClient(options: AgentHttpClientOptions): {
     connect: (session, signal) => connectAgentHttp(session, options, signal),
     send: (session, message, extras) =>
       runAgentHttpTurn(session, message, options, extras),
+    // Everything this connection remembers about the backend goes: the pin,
+    // the guidance acknowledged under it — a reader whose credentials changed
+    // is a different connection, and what the last one was told is not what
+    // this one has been — and the handle naming the thread it was holding.
     reset: (session) => {
-      const connectionId = connectionIdOf(options);
-      pins.forget(session, connectionId);
-      // Guidance is acknowledged to a connection the same way a pin is. A
-      // reader whose credentials changed is a different connection, and what
-      // the last one was told is not what this one has been.
-      guideCache.forget(connectionId);
+      forgetConnection(session, connectionIdOf(options));
     },
   };
 }

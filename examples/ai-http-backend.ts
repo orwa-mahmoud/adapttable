@@ -26,6 +26,7 @@ import {
   AGENT_HTTP_SCHEMA,
   type AgentContextView,
   type AgentHttpPinAck,
+  type AgentHttpQuestion,
   type AgentHttpRequest,
   type AgentHttpResponse,
   type AgentHttpToolResult,
@@ -443,6 +444,53 @@ function closeTurn(request: AgentHttpRequest, text: string): void {
   }
 }
 
+/**
+ * The question a model wrote, in the shape the wire requires.
+ *
+ * Every field the protocol insists on is one a language model can leave out,
+ * and it leaves out a different one each time: the key filled in as `null` for
+ * a turn with nothing to ask, an option with a label and no id, a question
+ * with no correlation id — and that one is the backend's to mint anyway, since
+ * it is how the reader's answer finds its way back here and means nothing to
+ * the model.
+ *
+ * So a backend written against a provider normalizes what it gets rather than
+ * passing it through and reporting a schema violation to the reader as if
+ * their own turn were malformed. Anything with no text to put to the reader is
+ * no question at all.
+ */
+function askUserFrom(value: unknown): AgentHttpQuestion | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const record = value as Record<string, unknown>;
+  const question =
+    typeof record.question === "string" ? record.question.trim() : "";
+  if (!question) return undefined;
+  const options = Array.isArray(record.options)
+    ? record.options.flatMap((entry) => {
+        if (typeof entry !== "object" || entry === null) return [];
+        const option = entry as Record<string, unknown>;
+        const id = typeof option.id === "string" ? option.id.trim() : "";
+        const label =
+          typeof option.label === "string" ? option.label.trim() : "";
+        // Either one carries the other: an option the reader can see is one
+        // they can choose, and a choice with nothing written on it is not one.
+        const text = label || id;
+        return text ? [{ id: id || text, label: text }] : [];
+      })
+    : [];
+  const named = typeof record.id === "string" ? record.id.trim() : "";
+  // A question with neither options nor free text cannot be answered, and the
+  // reader is the one who would be left holding it.
+  const allowFreeText =
+    options.length === 0 ? true : record.allowFreeText !== false;
+  return {
+    id: named || "q_" + randomBytes(6).toString("hex"),
+    question,
+    ...(options.length > 0 ? { options } : {}),
+    allowFreeText,
+  };
+}
+
 function userPrompt(request: AgentHttpRequest): string {
   // A clip arrives once. A real backend transcribes it and answers the text;
   // this one says so rather than pretending to have heard it, because a demo
@@ -645,9 +693,7 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
       })
     : undefined;
   const text = typeof record.text === "string" ? record.text : "";
-  // A model asked for a document fills in the keys it was shown, so a turn
-  // with nothing to ask writes `null` here as often as it leaves the key out.
-  const askUser = record.askUser ?? undefined;
+  const askUser = askUserFrom(record.askUser);
   // A document that parses but answers nothing is a failed turn, not a reply.
   // Forwarding it as one puts an empty bubble in front of the reader beside a
   // badge that says the turn is done.

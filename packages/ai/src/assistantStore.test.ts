@@ -257,6 +257,29 @@ describe("the assistant store", () => {
     ]);
   });
 
+  it("holds the backend connection when the same table rebuilds its session", () => {
+    // Releasing the connection tells the transport the conversation is over,
+    // and it forgets what the backend established — the pin, and the handle
+    // naming the thread that backend is keeping. A host rebuilding the session
+    // for the same table has ended nothing.
+    let released = 0;
+    const transport: AssistantTransport = {
+      ...replying("done"),
+      disconnect: () => {
+        released += 1;
+      },
+    };
+    const session = tableSession();
+    const store = createTableAssistant({ session, transport });
+    store.connect();
+
+    store.update({ session: tableSession(), transport });
+    expect(released).toBe(0);
+
+    store.update({ session: tableSession({ tableId: "invoices" }), transport });
+    expect(released).toBe(1);
+  });
+
   it("clears the conversation when the table itself changes", async () => {
     const store = createTableAssistant({
       session: tableSession(),
