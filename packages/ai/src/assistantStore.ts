@@ -554,6 +554,9 @@ export function createTableAssistant(
   // host handing that same list back is it holding what it was given rather
   // than replacing the transcript with what preceded the turn.
   let adopted: readonly AssistantMessage[] | undefined = inputs.messages;
+  // The table this transcript belongs to. Kept as the id rather than read back
+  // off the previous session, which a host may already have torn down.
+  let tableId: string | undefined = inputs.session?.manifest().tableId;
   let draft = "";
   let status: AssistantStatus = "idle";
   let error: string | undefined;
@@ -1518,6 +1521,14 @@ export function createTableAssistant(
     update: (next) => {
       if (disposed) return;
       const sessionChanged = next.session !== live.session;
+      // A different table, which is a different conversation. Arriving at a
+      // session, or losing one, is neither: a host that supplied a transcript
+      // before its table was ready still means it.
+      const nextTableId = next.session?.manifest().tableId;
+      const tableChanged =
+        tableId !== undefined &&
+        nextTableId !== undefined &&
+        nextTableId !== tableId;
       const transportChanged = next.transportKey !== live.transportKey;
       // The one that is about to be replaced, so it can be told.
       const previousTransport = live.transport;
@@ -1532,11 +1543,17 @@ export function createTableAssistant(
         messages = supplied;
       }
       if (sessionChanged) {
-        // A new session is a new table, or a new identity for this one. The
-        // turn in flight belonged to the old one.
+        // The turn in flight belonged to the session being replaced, and the
+        // revisions its plans name belong to that session's counter.
         generation += 1;
         cancelTurn();
-        setMessages([]);
+        tableId = nextTableId ?? tableId;
+        // The transcript belongs to the table and the reader, not to the object
+        // that happens to carry it. A host rebuilding the session for its own
+        // reasons — a remounted provider, a re-keyed parent — is the same
+        // conversation about the same table, and throwing it away loses work
+        // the reader did. Only a different table is a different conversation.
+        if (tableChanged) setMessages([]);
         error = undefined;
         errorCode = undefined;
         // A different table is not one this plan describes, and a revision

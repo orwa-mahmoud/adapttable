@@ -219,7 +219,7 @@ describe("the assistant store", () => {
     expect(store.getState().error).toBeUndefined();
   });
 
-  it("drops a reply that belongs to a table the reader has left", async () => {
+  it("drops a reply that belongs to a session the reader has left", async () => {
     const deferred = deferredTransport();
     const store = createTableAssistant({
       session: tableSession(),
@@ -229,10 +229,48 @@ describe("the assistant store", () => {
     const turn = store.send("one");
 
     store.update({ session: tableSession(), transport: deferred.transport });
-    deferred.reply("for the old table");
+    deferred.reply("for the old session");
     await turn;
 
-    // A new session is a new conversation.
+    // The reply belonged to the session that went, so it never lands. What the
+    // reader said is still what they said.
+    expect(store.getState().messages.map((entry) => entry.text)).toEqual([
+      "one",
+    ]);
+  });
+
+  it("keeps the conversation when the same table hands over a new session", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying("done"),
+    });
+    store.connect();
+    await store.send("page 2");
+
+    // A host rebuilt the session — a remounted provider, a re-keyed parent.
+    // Same table, same reader, same conversation.
+    store.update({ session: tableSession(), transport: replying("done") });
+
+    expect(store.getState().messages.map((entry) => entry.text)).toEqual([
+      "page 2",
+      "done",
+    ]);
+  });
+
+  it("clears the conversation when the table itself changes", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: replying("done"),
+    });
+    store.connect();
+    await store.send("page 2");
+
+    store.update({
+      session: tableSession({ tableId: "invoices" }),
+      transport: replying("done"),
+    });
+
+    // A different table is a different conversation.
     expect(store.getState().messages).toEqual([]);
   });
 
