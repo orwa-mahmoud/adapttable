@@ -443,3 +443,109 @@ describe("disposal", () => {
     );
   });
 });
+
+describe("a call planned against a view the reader has left", () => {
+  /** A table whose revision the test moves, as the reader would. */
+  function movable(): {
+    readonly session: AgentSession;
+    readonly state: { revision: number; page: number };
+  } {
+    const state = { revision: 1, page: 1 };
+    const session = tableSession(
+      () => observation({ viewRevision: state.revision, page: state.page }),
+      {
+        setPage: (page: number) => {
+          state.page = page;
+          state.revision += 1;
+        },
+      }
+    );
+    return { session, state };
+  }
+
+  it("offers the revision a caller may plan against", () => {
+    const fake = fakeContext();
+    registerWebMcpTools(tableSession(), { modelContext: fake.context });
+
+    const tool = fake.tools.get("adapttable.orders.view.setPage");
+    const schema = tool?.inputSchema as {
+      properties?: Record<string, { type?: string }>;
+    };
+    expect(schema.properties?.expectedRevision?.type).toBe("integer");
+  });
+
+  it("refuses a call the table has moved past, and says where it is", async () => {
+    const fake = fakeContext();
+    const table = movable();
+    registerWebMcpTools(table.session, { modelContext: fake.context });
+    const tool = fake.tools.get("adapttable.orders.view.setPage");
+
+    // The agent read the table, the reader paged, and the agent acts on what
+    // it read.
+    table.state.revision = 7;
+    const result = await tool!.execute({ page: 3, expectedRevision: 5 });
+
+    expect(result.isError).toBe(true);
+    const said = payload(result);
+    expect((said.error as { code?: string }).code).toBe("revision-mismatch");
+    // Where the table actually is, as a number rather than a sentence to
+    // parse: the caller re-plans from this and calls again.
+    expect(said.revision).toBe(7);
+    expect(table.state.page).toBe(1);
+  });
+
+  it("applies a call that named the revision it was planned against", async () => {
+    const fake = fakeContext();
+    const table = movable();
+    registerWebMcpTools(table.session, { modelContext: fake.context });
+    const tool = fake.tools.get("adapttable.orders.view.setPage");
+
+    const result = await tool!.execute({ page: 3, expectedRevision: 1 });
+
+    expect(result.isError).toBeUndefined();
+    expect(table.state.page).toBe(3);
+  });
+
+  it("acts on the table as it is when the caller names nothing", async () => {
+    // The field is optional, and an agent that ignores it behaves exactly as
+    // it did before there was one.
+    const fake = fakeContext();
+    const table = movable();
+    registerWebMcpTools(table.session, { modelContext: fake.context });
+    const tool = fake.tools.get("adapttable.orders.view.setPage");
+
+    table.state.revision = 4;
+    const result = await tool!.execute({ page: 2 });
+
+    expect(result.isError).toBeUndefined();
+    expect(table.state.page).toBe(2);
+  });
+});
+
+describe("what a caller may leave out", () => {
+  it("runs a tool called with no arguments at all", async () => {
+    // `view.describe` takes nothing, and an agent calling it passes nothing.
+    const fake = fakeContext();
+    registerWebMcpTools(tableSession(), { modelContext: fake.context });
+    const tool = fake.tools.get("adapttable.orders.view.describe");
+
+    const result = await tool!.execute(undefined);
+
+    expect(result.isError).toBeUndefined();
+    expect(payload(result).ok).toBe(true);
+  });
+
+  it("ignores a revision that is not one", async () => {
+    // A number is the whole of the claim. Anything else says nothing, and a
+    // call that said nothing acts on the table as it is rather than being
+    // refused for a malformed field.
+    const fake = fakeContext();
+    const table = tableSession();
+    registerWebMcpTools(table, { modelContext: fake.context });
+    const tool = fake.tools.get("adapttable.orders.view.setPage");
+
+    const result = await tool!.execute({ page: 2, expectedRevision: "5" });
+
+    expect(result.isError).toBeUndefined();
+  });
+});

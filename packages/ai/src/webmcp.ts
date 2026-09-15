@@ -22,7 +22,12 @@
  *
  * @packageDocumentation
  */
-import type { AgentCapabilityKind, AgentSession, ExecuteResult } from "./types";
+import type {
+  AgentCapabilityKind,
+  AgentSession,
+  ExecuteResult,
+  JsonSchema,
+} from "./types";
 
 /** What a WebMCP tool result looks like. @public */
 export interface WebMcpContent {
@@ -106,6 +111,51 @@ function isReadOnly(kind: AgentCapabilityKind | undefined): boolean {
 }
 
 /**
+ * The tool's own schema, plus the revision a caller may plan against.
+ *
+ * Optional, and only here: the capability's schema is what every other
+ * transport shows, and those carry the revision in their request instead. An
+ * agent in the page has no request to carry it in, so the call is where it
+ * says so — and an agent that says nothing behaves exactly as it did.
+ */
+function revisionAware(input: JsonSchema): JsonSchema {
+  if (input.type !== "object") return input;
+  return {
+    ...input,
+    properties: {
+      ...input.properties,
+      expectedRevision: {
+        type: "integer",
+        minimum: 1,
+        description:
+          "The view revision this call was planned against, from an earlier read. Omit it to act on the table as it is now; name it and a table the reader has since moved refuses the call rather than applying it to a view nobody planned it for.",
+      },
+    },
+  };
+}
+
+/**
+ * Split what the caller planned against from what the capability takes.
+ *
+ * `expectedRevision` is this adapter's field rather than the capability's, so
+ * it never reaches a schema that would refuse it as an unknown property.
+ */
+function plannedAgainst(params: unknown): {
+  readonly args: unknown;
+  readonly revision: number | undefined;
+} {
+  if (typeof params !== "object" || params === null) {
+    return { args: params ?? {}, revision: undefined };
+  }
+  const { expectedRevision, ...args } = params as Record<string, unknown>;
+  const revision =
+    typeof expectedRevision === "number" && Number.isInteger(expectedRevision)
+      ? expectedRevision
+      : undefined;
+  return { args, revision };
+}
+
+/**
  * Hints from what the capability already declares.
  *
  * `untrustedContentHint` goes on every read because a row is somebody's data
@@ -174,7 +224,7 @@ export function registerWebMcpTools(
     const tool: WebMcpTool = {
       name,
       description: entry.summaryShort ?? entry.summary,
-      inputSchema: definition.input,
+      inputSchema: revisionAware(definition.input),
       annotations: annotationsFor(entry.kind),
       execute: async (params, callContext) => {
         if (disposed || controller.signal.aborted) {
@@ -184,16 +234,21 @@ export function registerWebMcpTools(
           );
         }
         sequence += 1;
-        // Read now, not at registration: a tool called ten minutes later must
-        // be judged against the table as it is, not as it was.
+        const planned = plannedAgainst(params);
+        // The revision the caller says it planned against, and the table as it
+        // is when nothing was said. An in-page agent reads the table through
+        // one call and changes it through another, and the reader can move it
+        // in between; naming the revision is how a call that was planned for a
+        // view the table has left is refused rather than applied to a
+        // different one.
         const live = session.manifest().viewRevision;
         const signal = callContext?.signal ?? controller.signal;
         let result: ExecuteResult;
         try {
           result = await session.execute(
             entry.key,
-            params ?? {},
-            live,
+            planned.args,
+            planned.revision ?? live,
             callKey(manifest.tableId, entry.key, sequence),
             signal
           );
@@ -203,7 +258,15 @@ export function registerWebMcpTools(
             true
           );
         }
-        if (!result.ok) return textResult({ error: result.error }, true);
+        // The refusal says where the table actually is, so a caller that named
+        // a revision the reader has since left can re-plan from this answer
+        // rather than reading the number out of a sentence.
+        if (!result.ok) {
+          return textResult(
+            { error: result.error, revision: result.revision },
+            true
+          );
+        }
         // A read is already wrapped by the session. Anything else is a
         // receipt, which is what the agent should report rather than a claim
         // of its own.

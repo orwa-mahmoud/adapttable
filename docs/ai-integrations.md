@@ -230,6 +230,23 @@ the module loads on a server and in a browser without the API and registers
 nothing in either. In React, `tableAgent({ webmcp: true })` does the same and
 re-registers on a contract change for you.
 
+An agent in the page reads the table through one call and changes it through
+another, and the reader can move the table in between. Every tool therefore
+takes an optional `expectedRevision` — the revision the call was planned
+against, from the `revision` an earlier result carried:
+
+```ts
+// The agent read the table at revision 5 and acts on what it read.
+await tool.execute({ page: 3, expectedRevision: 5 });
+// Refused if the reader has since moved it, and the refusal says where it is:
+// { error: { code: "revision-mismatch", ... }, revision: 7 }
+```
+
+Omit it and the call acts on the table as it is, which is what an agent that
+never names a revision has always done. This is the one transport where the
+revision travels on the call: HTTP and the AI SDK send the view with each
+request, and AG-UI publishes it as state, so those bind it for you.
+
 ### AG-UI — the table as a run's frontend tools
 
 ```ts

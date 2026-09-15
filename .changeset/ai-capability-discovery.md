@@ -42,8 +42,10 @@ per-item approvals, while opaque operations are reviewed as a whole.
   `agentSystemPrompt` builds the default HTTP instructions from the request's
   context. The backend owns authentication and model credentials.
 - `/ag-ui` and `/ai-sdk` adapt agent streams to table execution.
-- `/webmcp` exposes tools to an agent in the page, and `/mcp-apps` supports
-  an embedded table view in an MCP host.
+- `/webmcp` exposes tools to an agent in the page — each taking an optional
+  `expectedRevision`, so a call planned against a view the reader has left is
+  refused rather than applied to a different one — and `/mcp-apps` supports an
+  embedded table view in an MCP host.
 - `/voice` provides browser or backend dictation support.
 
 These subpaths do not add model or protocol SDK dependencies.
