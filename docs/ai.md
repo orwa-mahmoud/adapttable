@@ -302,9 +302,16 @@ and hands the values in. A host building its own context calls
 the context builder performs no I/O of its own, which is why the read happens
 outside it.
 
+Sampling is for a column with no declared list of its own. A filter-backed
+column already publishes its options in the filter catalog — the declared set,
+complete, so no row can introduce a value the model has not been told about.
+What sampling answers is the other case: free text, references, dates and
+amounts, where the only way to learn how a value looks is to see one.
+
 The values are read when the contract changes, so they illustrate the column
-rather than tracking it: data that moves without changing the contract leaves
-the last sample standing. That is what an example is for.
+rather than tracking it. Five values were never the set anyway, which is why
+the contract marks them `sampled: true` — a model needing the real list reads
+rows or the filter catalog.
 
 ## Saying how far a long call has got
 
