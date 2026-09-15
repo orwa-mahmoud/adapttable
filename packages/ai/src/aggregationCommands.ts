@@ -138,6 +138,33 @@ export function aggregationsFor(
  * legal column and one forbidden one changes nothing at all — a half-applied
  * aggregate request is harder to explain than a refused one.
  */
+/**
+ * Refuse any requested operation this column does not offer, naming the ones
+ * it does — a refusal that says only "no" leaves the caller where it started.
+ */
+function assertOperationsOffered(
+  patch: AgentAggregationsPatch,
+  byKey: Map<string, NonNullable<AggregationState["columns"]>[number]>,
+  inputs: AggregationInputs,
+  source: Parameters<typeof offerableOperations>[1]
+): void {
+  for (const [key, operationId] of Object.entries(patch.set ?? {})) {
+    const column = byKey.get(key);
+    const resolved = column ? resolveAggregatable(column) : undefined;
+    const offered = resolved
+      ? offerableOperations(resolved, source).map((operation) => operation.id)
+      : [];
+    if (inputs.allows(key) && resolved && offered.includes(operationId)) {
+      continue;
+    }
+    throw new Error(
+      offered.length > 0
+        ? `"${key}" cannot use operation "${operationId}" — it takes ${offered.join(", ")}`
+        : `"${key}" takes no aggregation`
+    );
+  }
+}
+
 export function applyAggregations(
   inputs: AggregationInputs,
   patch: AgentAggregationsPatch
@@ -161,19 +188,7 @@ export function applyAggregations(
     (state.columns ?? []).map((column) => [column.key, column])
   );
 
-  for (const [key, operationId] of Object.entries(patch.set ?? {})) {
-    const column = byKey.get(key);
-    const resolved = column ? resolveAggregatable(column) : undefined;
-    if (
-      !inputs.allows(key) ||
-      !resolved ||
-      !offerableOperations(resolved, source).some(
-        (operation) => operation.id === operationId
-      )
-    ) {
-      throw new Error(`"${key}" cannot use operation "${operationId}"`);
-    }
-  }
+  assertOperationsOffered(patch, byKey, inputs, source);
   for (const key of patch.remove ?? []) {
     const column = byKey.get(key);
     if (

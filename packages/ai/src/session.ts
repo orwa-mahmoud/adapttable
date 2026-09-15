@@ -1077,9 +1077,16 @@ function aggregationSetEntries(
     }
     const column = eligible.get(key);
     if (!column?.operations.some((operation) => operation.id === operationId)) {
+      // Named, so the next attempt is the caller's to make rather than a
+      // second guess: a refusal that says only "no" leaves whoever sent it
+      // with the same information it had, and "invalid-arguments" is what
+      // tells a turn this is worth one repair round.
+      const offered = column?.operations.map((operation) => operation.id) ?? [];
       throw new ApplyError(
-        "apply-failed",
-        `"${key}" cannot use operation "${operationId}"`
+        "invalid-arguments",
+        offered.length > 0
+          ? `"${key}" cannot use operation "${operationId}" — it takes ${offered.join(", ")}`
+          : `"${key}" takes no aggregation`
       );
     }
     nextSet[key] = operationId;
