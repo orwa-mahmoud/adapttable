@@ -28,7 +28,6 @@ import {
   type AssistantAllowance,
   type AssistantInterruption,
   type AssistantMessage,
-  type AssistantQuestion,
   type AssistantResumeHandle,
   type AssistantStatus,
   type AssistantSuggestion,
@@ -68,13 +67,13 @@ export type {
 export type {
   AssistantInterruption,
   AssistantMessage,
-  AssistantQuestion,
   AssistantResumeHandle,
   AssistantStatus,
   AssistantTransport,
 };
 export type {
   AssistantExchange,
+  AssistantQuestion,
   AssistantReceipt,
   AssistantTransportReply,
   AssistantTurnStatus,

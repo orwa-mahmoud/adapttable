@@ -415,10 +415,9 @@ export function createAgentSession(
     args: unknown,
     entry: AgentObservation,
     signal: AbortSignal | undefined,
-    state: { invokedWrite: boolean },
-    apply: AgentApply,
-    progress: ((report: CapabilityProgress) => void) | undefined
+    call: CallState
   ): Promise<unknown> => {
+    const { apply, progress } = call;
     const approve = bindApprove(options.onApprove, signal);
     const throwIfCancelled = cancellationGuard(signal);
     const baseContext: AgentCapabilityContext = {
@@ -516,7 +515,7 @@ export function createAgentSession(
     // The last moment before the handler can touch the host. Nothing has been
     // written yet, so a cancellation here leaves the key free to be retried.
     throwIfCancelled();
-    state.invokedWrite = true;
+    call.invokedWrite = true;
     try {
       const payload = await definition.execute(context, args);
       return decorateWrite(payload, approvedPlan, approval);
@@ -581,31 +580,6 @@ export function createAgentSession(
       rawArgs,
       registry.get(key)?.guide.input
     );
-    const state = { invokedWrite: false };
-    const record = (result: ExecuteResult): ExecuteResult => {
-      replay.set(idempotencyKey, {
-        capabilityKey: key,
-        fingerprint: executeFingerprint(key, args),
-        args,
-        mutation: state.invokedWrite,
-        result,
-      });
-      return result;
-    };
-    const fail = (code: string, message: string): ExecuteResult => {
-      const result: ExecuteResult = {
-        ok: false,
-        revision: options.observe().viewRevision,
-        idempotencyKey,
-        error: { code, message },
-      };
-      if (code === "cancelled" || code === "revision-mismatch") return result;
-      return record(result);
-    };
-
-    const resolved = preflight(key, args, expectedRevision);
-    if ("code" in resolved) return fail(resolved.code, resolved.message);
-
     // Where this action itself left the table. `apply` is the one channel a
     // capability changes the table through — a built-in dispatches to it, a
     // host handler is handed it — so the revision read as one of those calls
@@ -634,6 +608,32 @@ export function createAgentSession(
       report?.(null);
     };
 
+    const call: CallState = { invokedWrite: false, apply: tracked, progress };
+
+    const record = (result: ExecuteResult): ExecuteResult => {
+      replay.set(idempotencyKey, {
+        capabilityKey: key,
+        fingerprint: executeFingerprint(key, args),
+        args,
+        mutation: call.invokedWrite,
+        result,
+      });
+      return result;
+    };
+    const fail = (code: string, message: string): ExecuteResult => {
+      const result: ExecuteResult = {
+        ok: false,
+        revision: options.observe().viewRevision,
+        idempotencyKey,
+        error: { code, message },
+      };
+      if (code === "cancelled" || code === "revision-mismatch") return result;
+      return record(result);
+    };
+
+    const resolved = preflight(key, args, expectedRevision);
+    if ("code" in resolved) return fail(resolved.code, resolved.message);
+
     try {
       const payload = await runCapability(
         resolved.definition,
@@ -641,9 +641,7 @@ export function createAgentSession(
         args,
         resolved.observation,
         signal,
-        state,
-        tracked,
-        progress
+        call
       );
       // What this action reached, never where the table happens to be. An
       // action that applied nothing reports the revision it was admitted at,
@@ -921,6 +919,23 @@ function traceApply(apply: AgentApply, settled: () => void): AgentApply {
       };
     },
   });
+}
+
+/**
+ * What one `execute` call carries with it.
+ *
+ * The three things a call has that the session itself does not: the channel it
+ * reaches the table through, where it may say how far it has got, and whether
+ * it has invoked a host write yet — which decides whether a replayed identity
+ * is a repeated mutation or a harmless re-read.
+ */
+interface CallState {
+  /** Whether a host write callback has been invoked for this call. */
+  invokedWrite: boolean;
+  /** `apply`, reporting where each changing call leaves the table. */
+  readonly apply: AgentApply;
+  /** Where this call says how far it has got, when anything is listening. */
+  readonly progress: ((progress: CapabilityProgress) => void) | undefined;
 }
 
 /**
