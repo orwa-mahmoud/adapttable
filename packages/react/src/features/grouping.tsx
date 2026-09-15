@@ -142,7 +142,12 @@ function LiveGrouping({
       groupByKeys,
       sourceGroups: serverGroups,
       allFilteredRows: source.allFilteredRows,
-      columns: chrome.columnLayout.visibleColumns,
+      // The schema, never the visible subset: a column carries the
+      // `groupValue` that says which bucket a row belongs in, and hiding it or
+      // collapsing the group it sits under must not change how rows are
+      // bucketed or what those buckets are called. Resolved without it, a
+      // timeline groups by the instant it holds and every caption is an epoch.
+      columns: chrome.allColumns,
       getRowId,
       collapsedGroupIds: groupCollapse.collapsedGroupIds,
       aggregates: effectiveGroupAggregates,
