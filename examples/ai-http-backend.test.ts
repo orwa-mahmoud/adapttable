@@ -11,6 +11,7 @@ import {
 
 import {
   clearExampleAgentPins,
+  clearExampleConversations,
   completeForProvider,
   exampleConfigError,
   exampleRequiresToken,
@@ -365,6 +366,106 @@ describe("handleExampleAgentTurn", () => {
     );
     assert.equal(turn.ok, undefined);
     assert.match(system, /view\.setPage/);
+  });
+
+  it("remembers the thread against the session and sends it on", async () => {
+    // The backend keeps the conversation, so the table sends the reader's own
+    // message and nothing else. What the model is shown on the second turn is
+    // what this backend wrote down on the first.
+    clearExampleAgentPins();
+    clearExampleConversations();
+    const hello = await handleExampleAgentTurn(
+      request("hello", {
+        catalog: [{ key: "view.setPage", summary: "Set the page." }],
+        context: contextWith("view.setPage", "Set the page."),
+      }),
+      () => {
+        throw new Error("provider must not run on hello");
+      },
+      new AbortController().signal
+    );
+
+    const turn = (message: string, turnId: string, reply: string) =>
+      handleExampleAgentTurn(
+        {
+          schemaVersion: AGENT_HTTP_SCHEMA,
+          kind: "turn",
+          tableId: "orders",
+          sessionId: hello.sessionId,
+          turnId,
+          message,
+        },
+        (args) => {
+          seen.push(args.history.map((line) => `${line.role}: ${line.text}`));
+          return Promise.resolve(JSON.stringify({ text: reply }));
+        },
+        new AbortController().signal
+      );
+    const seen: string[][] = [];
+
+    await turn("Go to page 2", "t1", "Moved.");
+    await turn("And sort by salary", "t2", "Sorted.");
+
+    // Nothing preceded the first turn. The second is answered knowing both.
+    assert.deepEqual(seen[0], []);
+    assert.deepEqual(seen[1], ["user: Go to page 2", "assistant: Moved."]);
+  });
+
+  it("speaks once for a turn that took several phases", async () => {
+    clearExampleAgentPins();
+    clearExampleConversations();
+    const hello = await handleExampleAgentTurn(
+      request("hello", {
+        catalog: [{ key: "view.setPage", summary: "Set the page." }],
+        context: contextWith("view.setPage", "Set the page."),
+      }),
+      () => {
+        throw new Error("provider must not run on hello");
+      },
+      new AbortController().signal
+    );
+    const seen: string[][] = [];
+    const phase = (phaseId: number, reply: string) =>
+      handleExampleAgentTurn(
+        {
+          schemaVersion: AGENT_HTTP_SCHEMA,
+          kind: "turn",
+          tableId: "orders",
+          sessionId: hello.sessionId,
+          turnId: "t1",
+          phaseId,
+          message: "Go to page 2",
+        },
+        (args) => {
+          seen.push(args.history.map((line) => `${line.role}: ${line.text}`));
+          return Promise.resolve(JSON.stringify({ text: reply }));
+        },
+        new AbortController().signal
+      );
+
+    await phase(0, "Paging…");
+    await phase(1, "Moved.");
+    await handleExampleAgentTurn(
+      {
+        schemaVersion: AGENT_HTTP_SCHEMA,
+        kind: "turn",
+        tableId: "orders",
+        sessionId: hello.sessionId,
+        turnId: "t2",
+        message: "Thanks",
+      },
+      (args) => {
+        seen.push(args.history.map((line) => `${line.role}: ${line.text}`));
+        return Promise.resolve(JSON.stringify({ text: "Any time." }));
+      },
+      new AbortController().signal
+    );
+
+    // Both phases answer the same message, so neither is shown it as history.
+    assert.deepEqual(seen[0], []);
+    assert.deepEqual(seen[1], []);
+    // The turn said one thing, and it is the last thing it said.
+    assert.deepEqual(seen[2], ["user: Go to page 2", "assistant: Moved."]);
   });
 
   it("replaces the pin when schema is sent again", async () => {
@@ -795,6 +896,10 @@ function bodyText(init: RequestInit): string {
 const args = {
   system: "You drive a table.",
   user: "Go to page 2",
+  history: [
+    { role: "user" as const, text: "Sort by salary." },
+    { role: "assistant" as const, text: "Sorted by salary." },
+  ],
   signal: new AbortController().signal,
 };
 
@@ -838,8 +943,10 @@ describe("provider adapters over mocked HTTP", () => {
           `${provider} posted to ${call.url}`
         );
         assert.equal(call.init.method, "POST");
-        // The user turn always reaches the provider.
+        // The user turn always reaches the provider, and so does what was
+        // already said — a backend that keeps no session has to send it.
         assert.ok(bodyText(call.init).includes("Go to page 2"));
+        assert.ok(bodyText(call.init).includes("Sorted by salary."));
       } finally {
         mock.restore();
       }

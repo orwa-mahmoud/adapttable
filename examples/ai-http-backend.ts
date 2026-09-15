@@ -176,6 +176,18 @@ export type ExampleProvider = "openai" | "anthropic" | "gemini" | "deepseek";
 export interface ExampleCompleteArgs {
   readonly system: string;
   readonly user: string;
+  /**
+   * What was already said, oldest first, without this turn's own message.
+   *
+   * The table sends the conversation with every request because this backend
+   * keeps no session of its own. A backend that does keep one answers from
+   * what it stored and asks the table for less — that is what
+   * `conversation` on the client is for.
+   */
+  readonly history: readonly {
+    readonly role: "user" | "assistant";
+    readonly text: string;
+  }[];
   readonly signal: AbortSignal;
 }
 
@@ -334,6 +346,103 @@ function writeJson(res: ServerResponse, status: number, body: unknown): void {
   res.end(JSON.stringify(body));
 }
 
+/** One line of a remembered conversation. */
+interface ExampleLine {
+  readonly role: "user" | "assistant";
+  readonly text: string;
+}
+
+/** What one session has said, and where its turn in progress begins. */
+interface ExampleThread {
+  lines: ExampleLine[];
+  turnId?: string;
+  /** Index in `lines` where the turn in progress starts. */
+  opened: number;
+  /** Index of that turn's reply, once there is one to revise. */
+  replyAt?: number;
+}
+
+/**
+ * The conversations this backend is holding, one per session.
+ *
+ * Where a transcript belongs. The table is a client: it renders what the
+ * reader sees and sends what the reader just said, and a backend that
+ * remembers the thread asks it for nothing more. In memory here because this
+ * is an example — a real one writes to its own store, and the shape of the
+ * code around it does not change.
+ */
+const exampleThreads = new Map<string, ExampleThread>();
+
+/** How many lines one session keeps. Old enough is gone; this is not a store. */
+const EXAMPLE_THREAD_LINES = 40;
+
+/** Drop remembered conversations. Tests call this between cases. */
+export function clearExampleConversations(): void {
+  exampleThreads.clear();
+}
+
+/**
+ * Open this turn against the session's thread, and answer with what preceded
+ * it.
+ *
+ * A turn reaches this more than once — a phase that ran tools comes back for
+ * the next one — so the reader's message is written when its turn id is first
+ * seen, and every phase after that is the same turn still being answered. What
+ * the model is shown is everything before that line, so the message it is
+ * answering is not also in its history.
+ *
+ * A request carrying no session id is one this backend never pinned. There is
+ * nothing to remember it by, so the conversation the table sent is used as it
+ * stands — which is the documented fallback, not a second way of working.
+ */
+function openTurn(request: AgentHttpRequest): readonly ExampleLine[] {
+  const sessionId = request.sessionId;
+  if (!sessionId) {
+    return (request.conversation ?? [])
+      .filter((line) => line.text.trim() !== "")
+      .map((line) => ({ role: line.role, text: line.text }));
+  }
+  const thread = exampleThreads.get(sessionId) ?? { lines: [], opened: 0 };
+  exampleThreads.set(sessionId, thread);
+  if (request.turnId !== thread.turnId) {
+    thread.turnId = request.turnId;
+    thread.opened = thread.lines.length;
+    thread.replyAt = undefined;
+    const said = request.message?.trim();
+    if (said) thread.lines.push({ role: "user", text: said });
+  }
+  return thread.lines.slice(0, thread.opened);
+}
+
+/**
+ * Keep what this turn answered, replacing what an earlier phase of it said.
+ *
+ * A turn speaks once however many phases it took, so the latest reply stands
+ * in for the ones before it rather than stacking up beside them.
+ */
+function closeTurn(request: AgentHttpRequest, text: string): void {
+  const sessionId = request.sessionId;
+  const thread = sessionId ? exampleThreads.get(sessionId) : undefined;
+  if (!thread || thread.turnId !== request.turnId) return;
+  const said = text.trim();
+  if (!said) return;
+  // Where this turn's reply goes: the line an earlier phase of it already
+  // wrote, or the end of the thread when this is the first thing it has said.
+  const at = thread.replyAt ?? thread.lines.length;
+  if (at === thread.lines.length) {
+    thread.lines.push({ role: "assistant", text: said });
+  } else {
+    thread.lines[at] = { role: "assistant", text: said };
+  }
+  thread.replyAt = at;
+  if (thread.lines.length > EXAMPLE_THREAD_LINES) {
+    const dropped = thread.lines.length - EXAMPLE_THREAD_LINES;
+    thread.lines = thread.lines.slice(dropped);
+    thread.opened = Math.max(0, thread.opened - dropped);
+    thread.replyAt = Math.max(0, at - dropped);
+  }
+}
+
 function userPrompt(request: AgentHttpRequest): string {
   // A clip arrives once. A real backend transcribes it and answers the text;
   // this one says so rather than pretending to have heard it, because a demo
@@ -470,12 +579,20 @@ const REPLY_SHAPE = [
  * The session ends a turn that asks for what it just ran, so continuing on
  * every non-write costs nothing when the model has finished.
  */
-const WRITES = new Set([
-  "edit.cells",
-  "rows.add",
-  "rows.delete",
-  "rows.reorder",
-  "export.run",
+/**
+ * Calls whose result the model has to read before it can answer.
+ *
+ * These are the only reason to come back for another phase. A view change
+ * answers itself — the sort landed or it did not, and its receipt says which —
+ * so asking for another phase after one invites the model to look at the
+ * result and do the same thing again, which is how a finished turn spends its
+ * continuations and ends up reported as too long.
+ */
+const LOOKUPS = new Set([
+  "rows.read",
+  "rows.resolve",
+  "columns.describe",
+  "view.describe",
 ]);
 
 /** A bounded, single-line look at what a provider sent. */
@@ -548,9 +665,11 @@ function asReply(raw: string, request: AgentHttpRequest): AgentHttpResponse {
     text,
     toolCalls,
     askUser,
-    continueWithResults:
-      (toolCalls ?? []).length > 0 &&
-      (toolCalls ?? []).every((call) => !WRITES.has(call.name)),
+    // Another phase only when something was looked up. A plan that only
+    // changed the view has nothing to come back for.
+    continueWithResults: (toolCalls ?? []).some((call) =>
+      LOOKUPS.has(call.name)
+    ),
   });
 }
 
@@ -590,6 +709,9 @@ export async function handleExampleAgentTurn(
       text: "send the table contract — this backend no longer holds a pin for it",
     };
   }
+  // Opened before the provider is asked, so what the model is shown is the
+  // thread as it stood when the reader spoke.
+  const history = openTurn(request);
   // The provider streams fragments of a JSON document; the reader turns those
   // into the reply text as it becomes readable. Without a sink there is
   // nothing to stream to, so the provider is asked for the document whole.
@@ -598,6 +720,7 @@ export async function handleExampleAgentTurn(
     {
       system: `${agentSystemPrompt(resolved.schema)}\n\n${REPLY_SHAPE}`,
       user: userPrompt(request),
+      history,
       signal,
     },
     reader && onText
@@ -612,7 +735,9 @@ export async function handleExampleAgentTurn(
   // not a provider that answered badly, and reading it as one would report the
   // reader's own decision to them as a fault.
   if (signal.aborted) throw new Error("cancelled");
-  return { ...asReply(raw, request), pin: resolved.pin };
+  const reply = asReply(raw, request);
+  closeTurn(request, reply.text ?? "");
+  return { ...reply, pin: resolved.pin };
 }
 
 /** What a provider said went wrong, or the bare status. */
@@ -675,6 +800,10 @@ async function completeOpenAI(
       ...(onDelta ? { stream: true } : {}),
       messages: [
         { role: "system", content: args.system },
+        ...args.history.map((line) => ({
+          role: line.role,
+          content: line.text,
+        })),
         { role: "user", content: args.user },
       ],
     }),
@@ -718,7 +847,13 @@ async function completeAnthropic(
       max_tokens: 1024,
       system: `${args.system}\nRespond with a JSON object only.`,
       ...(onDelta ? { stream: true } : {}),
-      messages: [{ role: "user", content: args.user }],
+      messages: [
+        ...args.history.map((line) => ({
+          role: line.role,
+          content: line.text,
+        })),
+        { role: "user", content: args.user },
+      ],
     }),
   });
   if (!response.ok) throw await providerError(response);
@@ -765,7 +900,15 @@ async function completeGemini(
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: args.system }] },
-      contents: [{ role: "user", parts: [{ text: args.user }] }],
+      contents: [
+        ...args.history.map((line) => ({
+          // Gemini names the assistant "model"; the roles are otherwise the
+          // same two this wire has.
+          role: line.role === "assistant" ? "model" : "user",
+          parts: [{ text: line.text }],
+        })),
+        { role: "user", parts: [{ text: args.user }] },
+      ],
       generationConfig: { responseMimeType: "application/json" },
     }),
   });

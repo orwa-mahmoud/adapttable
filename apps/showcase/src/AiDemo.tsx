@@ -842,6 +842,10 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     transport: connection.transport,
     // Only a genuine transport swap re-establishes the conversation.
     transportKey: connection.key,
+    // The backend keeps the thread against its session, so a turn carries the
+    // reader's own message and nothing else. The panel still shows all of it:
+    // this is what travels, not what is read.
+    conversation: 0,
     suggestions,
     awaitingApproval,
     ...(alwaysAllowed ? { alwaysAllow: alwaysAllowed } : {}),
