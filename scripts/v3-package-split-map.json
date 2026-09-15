@@ -28051,14 +28051,6 @@
       "behavior": ""
     },
     {
-      "export": "TableAssistantSuggestionProps",
-      "currentImport": "@adapttable/react/adapter",
-      "kind": "type",
-      "class": "react-chrome",
-      "proposedImport": "@adapttable/react/adapter",
-      "behavior": ""
-    },
-    {
       "export": "TableAssistantSuggestionView",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -34264,6 +34256,374 @@
       "kind": "value",
       "class": "kit-rendering",
       "proposedImport": "@adapttable/unstyled",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantAllowance",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantInterruption",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeHandle",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeInput",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSendInput",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTurnInput",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeHandle",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeInput",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSendInput",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTurnInput",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeHandle",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeInput",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSendInput",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTurnInput",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantAllowance",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantInterruption",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeHandle",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeInput",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSendInput",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTurnInput",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeHandle",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeInput",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSendInput",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTurnInput",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeHandle",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantResumeInput",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantSendInput",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantTurnInput",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
+      "export": "CapabilityProgress",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
+      "export": "AgentProgress",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "AGENT_PROGRESS_STATE",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantAllowanceView",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantAvatars",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantFace",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantProgressView",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "TableAssistantResumableView",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     }
   ]
