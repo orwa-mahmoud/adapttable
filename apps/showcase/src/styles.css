@@ -2142,8 +2142,29 @@ a {
 }
 /* Set apart, because it throws work away. */
 .ai-opts__foot {
+  display: flex;
+  align-items: center;
+  /* Reset sits away from Done: the destructive one is not where a reader
+     aiming to leave puts their cursor. */
+  justify-content: space-between;
+  gap: 12px;
   padding: 12px 16px;
   border-block-start: 1px solid var(--page-border);
+}
+.ai-opts__done {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  padding: 6px 16px;
+  color: var(--page-surface);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ai-opts__done:hover {
+  background: var(--ink-2);
+  border-color: var(--ink-2);
 }
 .ai-opts__reset {
   font: inherit;

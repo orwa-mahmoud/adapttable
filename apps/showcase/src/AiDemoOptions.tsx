@@ -470,6 +470,17 @@ export function AiDemoOptions({
         >
           Reset demo
         </button>
+        {/* Clicking outside closes the panel and Escape closes it, and
+            neither is something a reader can see. Done is where a reader
+            looks for the way out of a settings panel. */}
+        <button
+          type="button"
+          className="ai-opts__done"
+          data-testid="ai-demo-options-done"
+          onClick={onClose}
+        >
+          Done
+        </button>
       </footer>
     </dialog>
   );
