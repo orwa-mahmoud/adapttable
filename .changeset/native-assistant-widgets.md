@@ -27,6 +27,10 @@ changes, and offer eligible view Undo controls. `receipts={false}` hides
 the action UI without removing the underlying receipts from conversation
 state.
 
+While a long capability works, the conversation counts what it has done rather
+than spinning. A released connection reads as work that may still be running,
+with a control that rejoins it, and a turn the reader stopped reads as stopped.
+
 Suggested prompts open from the composer menu and reflect the table's
 available capabilities. Structured questions appear in the conversation with
 choices and optional free-text answers. Streaming text, Stop, dictation and

@@ -2296,7 +2296,9 @@ The rendered assistant carries two blocks an adapter draws itself:
 question waiting on the reader, and `TableAssistantUndoView` is the offer to
 put back what the last turn changed. `TableAssistantResumableView` says there
 is work a released connection left running, which the panel offers to rejoin,
-and `TableAssistantProgressView` is how far a running capability has got.
+`TableAssistantProgressView` is how far a running capability has got, and
+`TableAssistantAllowanceView` is one capability the reader stopped being asked
+about.
 
 `deriveRuntimeOperations` reads which view operations a live runtime offers by
 itself, for a binding projecting them into `@adapttable/ai`'s

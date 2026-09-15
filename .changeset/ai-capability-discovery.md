@@ -67,4 +67,19 @@ Receipts distinguish refused, partially applied, staged and saved work.
 View Undo is available through `undoTurn` and `undoAction`; it does not undo
 data writes, which remain owned by edit history and host persistence.
 
+Stop, disconnect and resume are separate operations. Stop ends the turn and
+the work behind it; releasing the connection leaves the backend running, and a
+transport that named work through `onResumable` can rejoin it with `resume`.
+`onDetach` hands the `AssistantResumeHandle` to a host that keeps it and
+`resumeHandle` takes one back, which is where durable recovery across a page
+reload belongs. Within one session a completed action is not run twice on a
+resume; across a reload the session is new and the host owns it.
+
+A capability reports how far it has got through `reportProgress` on its
+execution context, and the session passes it on with the call that made it.
+Progress is never a result: the receipt still says what happened.
+
+Every action is judged against the view its turn was planned against, and
+reports the revision its own work reached — on every transport, not only HTTP.
+
 React integration is supplied separately by `@adapttable/ai-react`.

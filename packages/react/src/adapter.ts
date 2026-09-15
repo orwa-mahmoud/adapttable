@@ -1097,12 +1097,12 @@ export type {
 } from "./assistant/assistantSlots";
 export {
   assistantIsUsable,
+  type TableAssistantAllowanceView,
   type TableAssistantMessageView,
+  type TableAssistantProgressView,
   type TableAssistantQuestionOption,
   type TableAssistantQuestionView,
   type TableAssistantReceiptSubject,
-  type TableAssistantAllowanceView,
-  type TableAssistantProgressView,
   type TableAssistantReceiptView,
   type TableAssistantResumableView,
   type TableAssistantSuggestionView,
