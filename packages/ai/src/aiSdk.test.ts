@@ -212,7 +212,11 @@ describe("what a request carries", () => {
         // The session's own receipt travels inside ours: `ok` and the
         // revision are this adapter's, `result` is what the capability
         // returned.
-        output: { ok: true, revision: 2, result: { ok: true, revision: 2 } },
+        output: {
+          ok: true,
+          revision: 2,
+          result: { ok: true, revision: 2, page: 3, limit: 25 },
+        },
       },
     ]);
     expect(reply.keys).toEqual(["view.setPage"]);

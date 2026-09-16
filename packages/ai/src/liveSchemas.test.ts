@@ -10,8 +10,15 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { agentFiltersFromDefs } from "./filterCatalog";
+import {
+  aggregationSetSchema,
+  filterBagSchema,
+  withAggregationBag,
+  withEnum,
+  withFilterBag,
+} from "./liveSchemas";
 import { createAgentSession } from "./session";
-import type { AgentObservation, JsonSchema } from "./types";
+import type { AgentFilter, AgentObservation, JsonSchema } from "./types";
 
 const PAGE_ONLY = {
   fullDataset: false,
@@ -229,5 +236,66 @@ describe("a column choice reaches the schema that names one", () => {
     // what an absent column list means.
     const input = session({ columns: [] }).describe("view.setSort").input;
     expect(prop(input, "key")?.enum).toBeUndefined();
+  });
+});
+
+describe("the live schema helpers, called on their own", () => {
+  const authored: JsonSchema = {
+    type: "object",
+    properties: { set: { type: "object" }, remove: { type: "array" } },
+  };
+
+  it("leaves an authored schema alone when there is nothing to close", () => {
+    expect(withEnum(undefined, "limit", [5, 10])).toBeUndefined();
+    expect(withEnum(authored, "limit", [])).toBe(authored);
+    expect(aggregationSetSchema(undefined)).toBeUndefined();
+    expect(aggregationSetSchema([])).toBeUndefined();
+    expect(
+      aggregationSetSchema([{ id: "salary", operations: [] }])
+    ).toBeUndefined();
+    expect(
+      withAggregationBag(undefined, [{ id: "salary", operations: [] }])
+    ).toBeUndefined();
+    expect(withAggregationBag(authored, undefined)).toBe(authored);
+    expect(withFilterBag(undefined, [])).toBeUndefined();
+    expect(withFilterBag(authored, undefined)).toBe(authored);
+    expect(filterBagSchema(undefined)).toBeUndefined();
+  });
+
+  it("closes set and remove on the columns that actually aggregate", () => {
+    const next = withAggregationBag(authored, [
+      {
+        id: "salary",
+        operations: [
+          { id: "sum", label: "Sum" },
+          { id: "avg", label: "Average" },
+        ],
+      },
+    ]);
+    expect(next?.properties?.set?.properties?.salary?.enum).toEqual([
+      "sum",
+      "avg",
+    ]);
+    expect(next?.properties?.remove?.items?.enum).toEqual(["salary"]);
+    expect(next?.$schema).toBe("https://json-schema.org/draft/2020-12/schema");
+  });
+
+  it("keeps a filter property open when the catalog lists no options", () => {
+    const catalog: readonly AgentFilter[] = [
+      {
+        key: "q",
+        label: "Search",
+        type: "text",
+        operators: ["contains"],
+        defaultOperator: "contains",
+        valueKeys: ["q", "qMin"],
+      },
+    ];
+    const bag = filterBagSchema(catalog);
+    expect(bag?.properties?.q).toEqual({});
+    expect(bag?.properties?.qMin).toEqual({});
+    const next = withFilterBag({ type: "object", properties: {} }, catalog);
+    expect(next?.properties?.filters).toEqual(bag);
+    expect(next?.$schema).toBe("https://json-schema.org/draft/2020-12/schema");
   });
 });

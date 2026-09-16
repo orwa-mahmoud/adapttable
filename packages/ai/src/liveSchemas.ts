@@ -147,7 +147,7 @@ export function withAggregationBag(
   const remove =
     ids.length > 0
       ? {
-          ...(schema.properties?.remove ?? {}),
+          ...schema.properties?.remove,
           type: "array" as const,
           items: { type: "string", enum: ids },
         }
