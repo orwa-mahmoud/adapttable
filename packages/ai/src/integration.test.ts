@@ -162,15 +162,16 @@ describe("optional JSON helpers stay framework-free", () => {
 
 describe("dependency boundaries", () => {
   it("keeps the provider-neutral root free of model and agent-framework SDKs", () => {
+    const packageDirectory = dirname(fileURLToPath(import.meta.url));
     const pkg = JSON.parse(
-      readFileSync(
-        join(dirname(fileURLToPath(import.meta.url)), "../package.json"),
-        "utf8"
-      )
+      readFileSync(join(packageDirectory, "../package.json"), "utf8")
     ) as {
       dependencies?: Record<string, string>;
       peerDependencies?: Record<string, string>;
     };
+    const corePkg = JSON.parse(
+      readFileSync(join(packageDirectory, "../../core/package.json"), "utf8")
+    ) as { version: string };
     for (const name of [
       "openai",
       "langchain",
@@ -181,8 +182,6 @@ describe("dependency boundaries", () => {
       expect(pkg.dependencies ?? {}).not.toHaveProperty(name);
       expect(pkg.peerDependencies ?? {}).not.toHaveProperty(name);
     }
-    expect(pkg.dependencies).toMatchObject({
-      "@adapttable/core": "2.9.0",
-    });
+    expect(pkg.dependencies?.["@adapttable/core"]).toBe(corePkg.version);
   });
 });
