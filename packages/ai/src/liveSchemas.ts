@@ -15,6 +15,7 @@
  * Nothing here narrows what the session will accept. The session resolves and
  * refuses exactly as before; this only stops a caller having to guess.
  */
+import { formatFilterOperators } from "./filterCatalog";
 import type {
   AgentAggregationColumn,
   AgentColumn,
@@ -60,7 +61,11 @@ export function filterBagSchema(
         continue;
       }
       if (key === `${filter.key}Op`) {
-        properties[key] = { type: "string", enum: filter.operators };
+        properties[key] = {
+          type: "string",
+          enum: filter.operators,
+          description: formatFilterOperators(filter.operators),
+        };
         continue;
       }
       properties[key] = {};
@@ -91,6 +96,29 @@ export function columnIds(
  * said nothing about which are usable, and an empty `enum` would say the
  * opposite — that none are.
  */
+/**
+ * Close an array property's items to the live values, the way
+ * {@link withEnum} closes a scalar.
+ */
+export function withItemEnum(
+  schema: JsonSchema | undefined,
+  property: string,
+  values: readonly (string | number)[]
+): JsonSchema | undefined {
+  if (!schema || values.length === 0) return schema;
+  const existing = schema.properties?.[property] ?? {};
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      [property]: {
+        ...existing,
+        items: { type: "string", enum: values },
+      },
+    },
+  };
+}
+
 export function withEnum(
   schema: JsonSchema | undefined,
   property: string,

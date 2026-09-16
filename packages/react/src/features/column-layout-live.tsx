@@ -54,6 +54,7 @@ function LiveColumnLayout({
       columnLayout.state.names
     ),
     columnLayout,
+    columnLayoutLive: true,
     columnGroups: flattened.groups,
     autoSizeColumns,
     autoSizeColumn,

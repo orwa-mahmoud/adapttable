@@ -209,6 +209,37 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
     ),
     output: OK,
   },
+  "view.hideColumn": {
+    key: "view.hideColumn",
+    guide:
+      "Hide or show a column the Columns menu can hide. Send the column " +
+      "id and `hidden: true` to hide, or `hidden: false` to show it again. " +
+      "The last visible column cannot be hidden.",
+    input: objectSchema(
+      {
+        key: { type: "string", minLength: 1 },
+        hidden: { type: "boolean" },
+      },
+      ["key"]
+    ),
+    output: OK,
+  },
+  "view.setColumnOrder": {
+    key: "view.setColumnOrder",
+    guide:
+      "Reorder columns the way the Columns menu does. Send `{ key, index }` " +
+      "to move one column — index 0 is first, and the list includes hidden " +
+      "columns — or `{ order }` with every column id exactly once.",
+    input: objectSchema({
+      key: { type: "string", minLength: 1 },
+      index: { type: "integer", minimum: 0 },
+      order: {
+        type: "array",
+        items: { type: "string", minLength: 1 },
+      },
+    }),
+    output: OK,
+  },
   "view.pinRow": {
     key: "view.pinRow",
     guide:
@@ -378,6 +409,8 @@ const SUMMARIES: Record<CapabilityKey, string> = {
   "view.setGroupBy": "Change or clear grouping.",
   "view.setAggregations": "Add, change, remove or restore group aggregations.",
   "view.pinColumn": "Pin or unpin a column at a logical edge.",
+  "view.hideColumn": "Hide or show a column.",
+  "view.setColumnOrder": "Reorder columns, including hidden ones.",
   "view.pinRow": "Pin or unpin a row above or below the body.",
   "view.setSelection": "Replace or clear the current selection.",
   "views.apply": "Apply a saved view.",

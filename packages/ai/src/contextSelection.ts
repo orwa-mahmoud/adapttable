@@ -388,6 +388,7 @@ function withoutDetail(column: ContextColumn): ContextColumn {
     writable: column.writable,
     sortable: column.sortable,
     ...(column.pinnable === undefined ? {} : { pinnable: column.pinnable }),
+    ...(column.hideable === undefined ? {} : { hideable: column.hideable }),
     ...(column.visible === undefined ? {} : { visible: column.visible }),
   };
 }

@@ -190,6 +190,8 @@ for (const kit of kits) {
 
     const catalog = await catalogText(page);
     expect(catalog).toContain("view.setFilters");
+    expect(catalog).toContain("view.hideColumn");
+    expect(catalog).toContain("view.setColumnOrder");
     expect(catalog).toContain("edit.cells");
     expect(catalog).not.toMatch(/pivot/i);
   });

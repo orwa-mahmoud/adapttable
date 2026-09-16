@@ -27,6 +27,8 @@ export const CAPABILITY_KEYS = [
   "view.setGroupBy",
   "view.setAggregations",
   "view.pinColumn",
+  "view.hideColumn",
+  "view.setColumnOrder",
   "view.pinRow",
   "view.setSelection",
   "views.apply",

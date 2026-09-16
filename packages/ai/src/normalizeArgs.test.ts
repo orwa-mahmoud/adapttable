@@ -20,6 +20,30 @@ describe("normalizeCapabilityArgs", () => {
     expect(
       normalizeCapabilityArgs("view.pinColumn", { column: "person" })
     ).toEqual({ key: "person" });
+    expect(
+      normalizeCapabilityArgs("view.hideColumn", { column: "person" })
+    ).toEqual({ key: "person" });
+    expect(
+      normalizeCapabilityArgs("view.setColumnOrder", {
+        column: "salary",
+        index: 0,
+      })
+    ).toEqual({ key: "salary", index: 0 });
+  });
+
+  it("reads visible as the inverse of hidden", () => {
+    expect(
+      normalizeCapabilityArgs("view.hideColumn", {
+        key: "person",
+        visible: false,
+      })
+    ).toEqual({ key: "person", hidden: true });
+    expect(
+      normalizeCapabilityArgs("view.hideColumn", {
+        key: "person",
+        visible: true,
+      })
+    ).toEqual({ key: "person", hidden: false });
   });
 
   it("rewrites sort / sortBy bags into key and dir", () => {

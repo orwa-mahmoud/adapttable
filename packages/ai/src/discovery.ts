@@ -46,6 +46,8 @@ const BUILT_IN_FAMILIES: Readonly<Record<string, CapabilityFamily>> = {
   "view.setSearch": { family: "view" },
   "view.setPage": { family: "view" },
   "view.pinColumn": { family: "view" },
+  "view.hideColumn": { family: "view" },
+  "view.setColumnOrder": { family: "view" },
   "view.pinRow": { family: "view", dependsOn: ["rows.resolve"] },
 };
 

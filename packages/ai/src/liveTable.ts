@@ -330,6 +330,8 @@ export interface NeutralQueryOverlay {
     readonly top: readonly string[];
     readonly bottom: readonly string[];
   };
+  readonly hiddenColumns?: readonly string[];
+  readonly columnOrder?: readonly string[];
   /** Page sizes the table's own control offers. */
   readonly pageSizeOptions?: readonly number[];
 }
@@ -373,8 +375,17 @@ export function observationFromNeutral<TRow>(
     hasColumnPinning:
       ops.pinColumn === true || options.apply?.pinColumn !== undefined,
     hasRowPinning: ops.pinRow === true || options.apply?.pinRow !== undefined,
+    hasColumnHide:
+      ops.hideColumn === true || options.apply?.hideColumn !== undefined,
+    hasColumnOrder:
+      ops.setColumnOrder === true ||
+      ops.moveColumn === true ||
+      options.apply?.setColumnOrder !== undefined ||
+      options.apply?.moveColumn !== undefined,
     pinnedColumns: query?.pinnedColumns,
     pinnedRows: query?.pinnedRows,
+    hiddenColumns: query?.hiddenColumns,
+    columnOrder: query?.columnOrder,
     hasSelection:
       options.apply?.setSelection !== undefined || ops.setSelection === true,
     hasSavedViews:

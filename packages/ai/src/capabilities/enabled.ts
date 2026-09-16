@@ -74,6 +74,15 @@ export function isBuiltInEnabled(
         observation.hasColumnPinning === true &&
         observation.columns.some((column) => column.pinnable !== false)
       );
+    case "view.hideColumn":
+      return (
+        observation.hasColumnHide === true &&
+        observation.columns.some((column) => column.hideable !== false)
+      );
+    case "view.setColumnOrder":
+      return (
+        observation.hasColumnOrder === true && observation.columns.length > 1
+      );
     case "view.pinRow":
       return observation.hasRowPinning === true;
     case "view.setSelection":

@@ -461,6 +461,13 @@ const STATUS_FILTER: FilterDef<StaffRow> = {
   getValue: (row) => row.status,
 };
 
+const STARTED_FILTER: FilterDef<StaffRow> = {
+  key: "started",
+  type: "dateRange",
+  label: "Started",
+  getValue: (row) => row.started,
+};
+
 /** The row and column the scripted examples name. */
 
 /**
@@ -730,7 +737,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const features = useMemo((): TableFeature<StaffRow>[] => {
     const canWrite = toggles.editingMode !== "off";
     const next: TableFeature<StaffRow>[] = [
-      factories.filters([TEAM_FILTER, STATUS_FILTER]),
+      factories.filters([TEAM_FILTER, STATUS_FILTER, STARTED_FILTER]),
       tableAgent({
         tableId: "ai-assistant-demo",
         writePolicy: "allow",
@@ -793,8 +800,8 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         },
         apply: {
           // `setFilters` is deliberately NOT overridden. Filtering is view
-          // state the table already owns — `TEAM_FILTER` and `STATUS_FILTER`
-          // are declared to its own filter feature, and the popover drives
+          // state the table already owns — team, status and started are
+          // declared to its own filter feature, and the popover drives
           // them. Applying the agent's filter beside that would leave the
           // reader looking at a filtered table whose Filters panel is empty
           // and whose Clear all does nothing.

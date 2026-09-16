@@ -4,7 +4,9 @@
  */
 import {
   conditionToExtra,
+  DATE_OP_LABEL_KEYS,
   defaultFilterRegistry,
+  defaultLabels,
   FILTER_AI_OPTIONS_LIMIT,
   type FilterAiOptions,
   type FilterDef,
@@ -14,6 +16,9 @@ import {
   filterTypeDefaultOp,
   filterTypeOps,
   type FilterTypeRegistry,
+  NUMBER_OP_LABEL_KEYS,
+  type TableLabels,
+  TEXT_OP_LABEL_KEYS,
 } from "@adapttable/core";
 
 import type { AgentFilter, AgentFilterOption } from "./types";
@@ -115,7 +120,7 @@ export function formatFilterCatalog(
       .map((filter) => {
         const parts = [
           filter.type,
-          `ops: ${filter.operators.join(", ")}`,
+          `ops: ${formatFilterOperators(filter.operators)}`,
           `keys: ${filter.valueKeys.join(", ")}`,
         ];
         if (filter.options) {
@@ -335,23 +340,75 @@ function extrasFromConditionObject(
   );
 }
 
+const OP_LABEL_KEYS: Readonly<Record<string, keyof TableLabels>> = {
+  ...TEXT_OP_LABEL_KEYS,
+  ...NUMBER_OP_LABEL_KEYS,
+  ...DATE_OP_LABEL_KEYS,
+};
+
+/**
+ * The built-in English caption for an operator id, when it is not the id
+ * itself. `gte` is "On or after"; `between` is already the word.
+ */
+export function operatorCaption(op: string): string | undefined {
+  const key = OP_LABEL_KEYS[op];
+  if (!key) return undefined;
+  const label = defaultLabels[key];
+  return typeof label === "string" ? label : undefined;
+}
+
+/**
+ * Operator ids as describe lists them: the token, plus the library caption
+ * when the token would not be obvious on its own.
+ */
+export function formatFilterOperators(ops: readonly string[]): string {
+  return ops
+    .map((op) => {
+      const caption = operatorCaption(op);
+      if (!caption || fold(caption) === fold(op)) return op;
+      return `${op} (${caption})`;
+    })
+    .join(", ");
+}
+
 const OPERATOR_ALIASES: Readonly<Record<string, readonly string[]>> = {
-  "=": ["eq", "in"],
-  "==": ["eq", "in"],
-  eq: ["in"],
-  equals: ["eq", "in"],
-  equal: ["eq", "in"],
+  "=": ["eq", "in", "on"],
+  "==": ["eq", "in", "on"],
+  eq: ["in", "on"],
+  equals: ["eq", "in", "on"],
+  equal: ["eq", "in", "on"],
   "!=": ["neq", "notIn"],
   "<>": ["neq", "notIn"],
   neq: ["notIn"],
+  greater: ["gte", "gt", "after"],
+  "greater than": ["gt", "gte", "after"],
+  more: ["gt", "gte", "after"],
+  gt: ["gt", "after", "gte"],
+  gte: ["gte", "after"],
+  after: ["after", "gte", "gt"],
+  since: ["gte", "after", "gt"],
+  from: ["gte", "after", "gt"],
+  less: ["lte", "lt", "before"],
+  "less than": ["lt", "lte", "before"],
+  lt: ["lt", "before", "lte"],
+  lte: ["lte", "before"],
+  before: ["before", "lte", "lt"],
+  until: ["lte", "before", "lt"],
+  till: ["lte", "before", "lt"],
+  between: ["between"],
+  range: ["between"],
+  on: ["on", "eq"],
 };
 
 function resolveOperator(filter: AgentFilter, op: string): string {
   if (filter.operators.includes(op)) return op;
-  for (const candidate of OPERATOR_ALIASES[op] ?? []) {
-    if (filter.operators.includes(candidate)) return candidate;
-  }
   const wanted = fold(op);
+  for (const [alias, candidates] of Object.entries(OPERATOR_ALIASES)) {
+    if (fold(alias) !== wanted) continue;
+    for (const candidate of candidates) {
+      if (filter.operators.includes(candidate)) return candidate;
+    }
+  }
   const [only, ...rest] = filter.operators.filter(
     (name) => fold(name) === wanted
   );

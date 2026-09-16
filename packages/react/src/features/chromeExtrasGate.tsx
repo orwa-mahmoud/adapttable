@@ -6,8 +6,11 @@
  * imports those modules.
  */
 import {
+  ACTIONS_COLUMN_KEY,
+  applyColumnOrder,
   computedAggregateKeys,
   createNeutralTable,
+  REORDER_COLUMN_KEY,
   type RowPinSide,
 } from "@adapttable/core";
 import { type ReactNode, useRef } from "react";
@@ -165,6 +168,7 @@ function RuntimePublisher<TRow>({
         }
       : undefined,
     pinning: livePinning(chrome),
+    columnLayout: liveColumnLayout(chrome),
     editing: chrome.editing
       ? {
           onCellEdit: chrome.editing.onCellEdit,
@@ -221,6 +225,28 @@ function RuntimePublisher<TRow>({
  * is composed, which is why the row half is optional and the column half is
  * not.
  */
+function liveColumnLayout<TRow>(
+  chrome: TableChrome<TRow>
+): TableRuntimeView<TRow>["columnLayout"] | undefined {
+  if (!chrome.columnLayoutLive) return undefined;
+  const reserved = new Set([ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY]);
+  const declared = chrome.allColumns.filter(
+    (column) => !reserved.has(column.key)
+  );
+  const keys = applyColumnOrder(declared, chrome.columnLayout.state.order)
+    .map((column) => column.key)
+    .filter((key) => !reserved.has(key));
+  return {
+    keys,
+    hidden: chrome.columnLayout.state.hidden.filter(
+      (key) => !reserved.has(key)
+    ),
+    setHidden: chrome.columnLayout.setHidden,
+    move: chrome.columnLayout.move,
+    setOrder: chrome.columnLayout.setOrder,
+  };
+}
+
 function livePinning<TRow>(
   chrome: TableChrome<TRow>
 ): NonNullable<TableRuntimeView<TRow>["pinning"]> {

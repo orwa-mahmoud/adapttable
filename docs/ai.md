@@ -199,6 +199,7 @@ Stable catalog order:
 `columns.describe`, `view.describe`, `view.setPage`, `view.setSort`,
 `view.setSearch`, `view.setFilters`, `view.setGroupBy`,
 `view.setAggregations`, `view.pinColumn`,
+`view.hideColumn`, `view.setColumnOrder`,
 `view.pinRow`, `view.setSelection`, `views.apply`, `rows.read`,
 `rows.resolve`, `export.run`, `edit.cells`, `rows.add`, `rows.delete`,
 `rows.reorder`.
@@ -221,9 +222,12 @@ aggregates. `describe` lists eligible columns and operation ids (never a
 response that answers the new query arrives.
 
 `view.pinColumn` takes `{ key, side }` where `side` is the logical `"start"`
-or `null` to unpin. `view.pinRow` takes `{ side }` — `"top"`, `"bottom"` or
-`null` — with a `rowKey`, or a `position` plus the `scope` and
-`expectedRevision` it was read at. Both are view operations, so neither takes
+or `null` to unpin. `view.hideColumn` takes `{ key, hidden? }` — omit
+`hidden` or send `true` to hide, `false` to show. `view.setColumnOrder`
+takes `{ key, index }` (0-based, hidden columns included) or `{ order }`
+with every column id exactly once. `view.pinRow` takes `{ side }` — `"top"`,
+`"bottom"` or `null` — with a `rowKey`, or a `position` plus the `scope` and
+`expectedRevision` it was read at. These are view operations, so none takes
 the write-approval path. See
 [adaptive capabilities](./agent-capabilities.md#pinning).
 

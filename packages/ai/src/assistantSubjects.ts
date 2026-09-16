@@ -124,6 +124,29 @@ function pinSubject(
   return { kind: "pin", terms: [{ column: labelOf(columns, key) }] };
 }
 
+function hideSubject(
+  args: Record<string, unknown>,
+  columns: readonly AgentColumn[]
+): AssistantReceiptSubject {
+  const key = typeof args.key === "string" ? args.key : undefined;
+  if (key === undefined) return { kind: "hide" };
+  const hidden = args.hidden !== false;
+  return {
+    kind: "hide",
+    ...(hidden ? {} : { cleared: true }),
+    terms: [{ column: labelOf(columns, key) }],
+  };
+}
+
+function orderSubject(
+  args: Record<string, unknown>,
+  columns: readonly AgentColumn[]
+): AssistantReceiptSubject {
+  const key = typeof args.key === "string" ? args.key : undefined;
+  if (key === undefined) return { kind: "order" };
+  return { kind: "order", terms: [{ column: labelOf(columns, key) }] };
+}
+
 /**
  * The cells an edit put a value in.
  *
@@ -175,6 +198,8 @@ const KIND_FOR: Readonly<Record<string, string>> = {
   "view.setAggregations": "aggregate",
   "view.setSelection": "select",
   "view.pinColumn": "pin",
+  "view.hideColumn": "hide",
+  "view.setColumnOrder": "order",
   "view.pinRow": "pinRow",
   "view.describe": "read",
   "columns.describe": "read",
@@ -230,6 +255,10 @@ export function subjectFor(
       return groupSubject(payload, columns);
     case "view.pinColumn":
       return pinSubject(body, columns);
+    case "view.hideColumn":
+      return hideSubject(body, columns);
+    case "view.setColumnOrder":
+      return orderSubject(body, columns);
     case "view.pinRow":
       return pinRowSubject(body);
     case "edit.cells":

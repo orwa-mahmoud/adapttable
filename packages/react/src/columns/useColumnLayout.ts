@@ -403,6 +403,27 @@ export function useColumnLayout<TRow>({
     [commit, columns, columnGroups]
   );
 
+  const setOrder = useCallback(
+    (order: readonly string[]) => {
+      const latest = stateRef.current;
+      const current = applyColumnOrder(columns, latest.order).map(
+        (column) => column.key
+      );
+      if (order.length !== current.length) return;
+      const unique = new Set(order);
+      if (
+        unique.size !== current.length ||
+        !current.every((key) => unique.has(key))
+      ) {
+        return;
+      }
+      const next = [...order];
+      if (columnGroups && !marriedOrderHolds(next, columnGroups)) return;
+      commit({ ...latest, order: next });
+    },
+    [commit, columns, columnGroups]
+  );
+
   const reset = useCallback(() => {
     const names = stateRef.current.names ?? {};
     const renamedKeys = Object.keys(names);
@@ -468,6 +489,7 @@ export function useColumnLayout<TRow>({
     toggleVisible,
     setPinned,
     move,
+    setOrder,
     setWidth,
     setName,
     resetName,

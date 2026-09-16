@@ -33,5 +33,8 @@ export function deriveRuntimeOperations<TRow>(
     editCells: Boolean(view?.editing?.onCellEdit ?? view?.editing?.stageCell),
     pinColumn: Boolean(view?.pinning?.setColumnPin),
     pinRow: Boolean(view?.pinning?.setRowPin),
+    hideColumn: Boolean(view?.columnLayout?.setHidden),
+    moveColumn: Boolean(view?.columnLayout?.move),
+    setColumnOrder: Boolean(view?.columnLayout?.setOrder),
   };
 }

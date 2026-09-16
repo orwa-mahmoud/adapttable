@@ -300,6 +300,30 @@ function findRow(
   return rows.find((row) => getRowId(row) === rowKey);
 }
 
+function stampColumnLayout(
+  columns: readonly AgentColumn[],
+  layout: TableRuntimeView<unknown>["columnLayout"]
+): readonly AgentColumn[] {
+  if (!layout) return columns;
+  const byId = new Map(columns.map((column) => [column.id, column]));
+  const hidden = new Set(layout.hidden);
+  const keys = layout.keys.length > 0 ? layout.keys : columns.map((c) => c.id);
+  return keys.map((id) => {
+    const existing = byId.get(id);
+    const visible = !hidden.has(id);
+    if (existing) return { ...existing, visible };
+    return {
+      id,
+      label: id,
+      type: "unknown",
+      readable: true,
+      writable: false,
+      sortable: false,
+      visible,
+    };
+  });
+}
+
 function columnsForRuntime(
   options: TableAgentOptions,
   runtime: ReturnType<typeof useTableRuntime>
@@ -349,12 +373,15 @@ function observationFromRuntime(
             sortDir: query.sortDir,
             pinnedColumns: view?.pinning?.columns,
             pinnedRows: view?.pinning?.rows,
+            hiddenColumns: view?.columnLayout?.hidden,
+            columnOrder: view?.columnLayout?.keys,
           }
         : undefined
     );
     const sizes = offeredPageSizes(query);
     return {
       ...live,
+      columns: stampColumnLayout(live.columns, view?.columnLayout),
       pagination: live.pagination
         ? { ...live.pagination, pageSizeOptions: sizes }
         : { ...pages, pageSizeOptions: sizes },
@@ -368,8 +395,11 @@ function observationFromRuntime(
       filters: query?.extra,
     };
   }
-  const columns = columnsForRuntime(options, runtime).map((column) =>
-    mergeColumn(column, options.columns)
+  const columns = stampColumnLayout(
+    columnsForRuntime(options, runtime).map((column) =>
+      mergeColumn(column, options.columns)
+    ),
+    view?.columnLayout
   );
   const approval = sharedApproval(options.approval);
   // What this runtime offers, and what the host wired, projected into the
@@ -405,6 +435,12 @@ function observationFromRuntime(
         ? { pinnedColumns: view.pinning.columns }
         : {}),
       ...(view?.pinning?.rows ? { pinnedRows: view.pinning.rows } : {}),
+      ...(view?.columnLayout?.hidden
+        ? { hiddenColumns: view.columnLayout.hidden }
+        : {}),
+      ...(view?.columnLayout?.keys
+        ? { columnOrder: view.columnLayout.keys }
+        : {}),
       ...(query?.extra === undefined ? {} : { filters: query.extra }),
     },
     pagination: pages,
@@ -630,6 +666,21 @@ function applyFromRuntime(
       if (!pinning?.setColumnPin) throw new Error("pinColumn is not wired");
       pinning.setColumnPin(key, side);
     },
+    hideColumn: (key, hidden) => {
+      const layout = view()?.columnLayout;
+      if (!layout?.setHidden) throw new Error("hideColumn is not wired");
+      layout.setHidden(key, hidden);
+    },
+    moveColumn: (key, toIndex) => {
+      const layout = view()?.columnLayout;
+      if (!layout?.move) throw new Error("moveColumn is not wired");
+      layout.move(key, toIndex);
+    },
+    setColumnOrder: (order) => {
+      const layout = view()?.columnLayout;
+      if (!layout?.setOrder) throw new Error("setColumnOrder is not wired");
+      layout.setOrder(order);
+    },
     pinRow: (rowKey, side) => {
       const pinning = view()?.pinning;
       if (!pinning?.setRowPin) throw new Error("pinRow is not wired");
@@ -703,6 +754,12 @@ function viewInputsFromRuntime(
         ? {
             pinnedRows: view.pinning.rows,
           }
+        : {}),
+      ...(view?.columnLayout?.hidden
+        ? { hiddenColumns: view.columnLayout.hidden }
+        : {}),
+      ...(view?.columnLayout?.keys
+        ? { columnOrder: view.columnLayout.keys }
         : {}),
     },
   };

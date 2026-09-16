@@ -95,6 +95,26 @@
       }
     },
     {
+      "text": "hide the person column",
+      "expected": {
+        "key": "view.hideColumn",
+        "args": {
+          "key": "person",
+          "hidden": true
+        }
+      }
+    },
+    {
+      "text": "move salary to the first column",
+      "expected": {
+        "key": "view.setColumnOrder",
+        "args": {
+          "key": "salary",
+          "index": 0
+        }
+      }
+    },
+    {
       "text": "pin the row with key 5 to the top",
       "expected": {
         "key": "view.pinRow",

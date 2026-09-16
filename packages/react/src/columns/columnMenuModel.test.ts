@@ -51,6 +51,7 @@ function layout(
     toggleVisible: () => undefined,
     setPinned: () => undefined,
     move: () => undefined,
+    setOrder: () => undefined,
     setWidth: () => undefined,
     setName: () => undefined,
     resetName: () => undefined,

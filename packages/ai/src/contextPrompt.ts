@@ -168,6 +168,12 @@ function viewLines(view: AgentContextView): readonly string[] {
   }
   if (view.groupBy) lines.push(`grouped by ${view.groupBy}`);
   if (view.filters) lines.push(`filters ${JSON.stringify(view.filters)}`);
+  if (view.hiddenColumns?.length) {
+    lines.push(`hidden columns ${view.hiddenColumns.join(", ")}`);
+  }
+  if (view.columnOrder?.length) {
+    lines.push(`column order ${view.columnOrder.join(", ")}`);
+  }
   if (view.unknown?.length) {
     // Absence reported, so the model does not read a default as a fact.
     lines.push(`not published by this table: ${view.unknown.join(", ")}`);

@@ -343,6 +343,22 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
   };
   /**
+   * Live hide and order, when a layout-owning feature is composed.
+   *
+   * Column layout is always present as state; the setters are only real
+   * when the reader can hide and reorder too. Advertising a no-op would
+   * tell the agent it moved a column the table left alone.
+   */
+  readonly columnLayout?: {
+    /** Full order, hidden columns included. */
+    readonly keys: readonly string[];
+    /** Column ids the reader has hidden. */
+    readonly hidden: readonly string[];
+    readonly setHidden?: (key: string, hidden: boolean) => void;
+    readonly move?: (key: string, toIndex: number) => void;
+    readonly setOrder?: (order: readonly string[]) => void;
+  };
+  /**
    * Live editing channels. `onCellEdit` is the host callback; `stageCell`
    * is the batch/dirty path when batch editing is composed.
    */

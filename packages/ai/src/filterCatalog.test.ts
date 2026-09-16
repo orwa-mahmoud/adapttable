@@ -1,10 +1,11 @@
-import { FILTER_AI_OPTIONS_LIMIT } from "@adapttable/core";
+import { DATE_OPS, FILTER_AI_OPTIONS_LIMIT } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
 import {
   agentFiltersFromDefs,
   extrasFromAgentFilters,
   formatFilterCatalog,
+  formatFilterOperators,
 } from "./filterCatalog";
 
 const TEAM = {
@@ -21,6 +22,12 @@ const SALARY = {
   key: "salary",
   type: "numberRange" as const,
   label: "Salary",
+};
+
+const STARTED = {
+  key: "started",
+  type: "dateRange" as const,
+  label: "Started",
 };
 
 describe("agentFiltersFromDefs", () => {
@@ -299,6 +306,26 @@ describe("extrasFromAgentFilters", () => {
     });
   });
 
+  it("publishes every built-in date operator, with library captions", () => {
+    const catalog = agentFiltersFromDefs([STARTED], undefined);
+    expect(catalog?.[0]?.operators).toEqual([...DATE_OPS]);
+    expect(catalog?.[0]?.valueKeys).toEqual([
+      "startedFrom",
+      "startedTo",
+      "startedOp",
+    ]);
+    const listed = formatFilterCatalog(catalog);
+    expect(listed).toContain("started [");
+    expect(listed).toContain("gte (On or after)");
+    expect(listed).toContain("lte (On or before)");
+    expect(listed).toContain("between");
+    expect(listed).toContain("before");
+    expect(listed).toContain("after");
+    expect(formatFilterOperators(["between", "gte"])).toBe(
+      "between, gte (On or after)"
+    );
+  });
+
   it("names the untyped, empty and listed cases", () => {
     expect(formatFilterCatalog(undefined)).toContain("has not published");
     expect(formatFilterCatalog([])).toContain("No filters are visible");
@@ -360,6 +387,38 @@ describe("a condition list written the other ways a model writes one", () => {
     expect(() =>
       extrasFromAgentFilters([{ key: "nonesuch", value: 1 }], catalog)
     ).toThrow(/needs key and op/);
+  });
+
+  it("reads spoken greater / less / between as the date operators", () => {
+    const catalog = agentFiltersFromDefs([STARTED], undefined) ?? [];
+    expect(
+      extrasFromAgentFilters(
+        [
+          {
+            key: "started",
+            op: "between",
+            value: ["2021-01-01", "2022-12-31"],
+          },
+        ],
+        catalog
+      )
+    ).toEqual({
+      startedFrom: "2021-01-01",
+      startedTo: "2022-12-31",
+      startedOp: "between",
+    });
+    expect(
+      extrasFromAgentFilters(
+        [{ key: "started", op: "greater", value: "2021-01-01" }],
+        catalog
+      )
+    ).toEqual({ startedFrom: "2021-01-01", startedOp: "gte" });
+    expect(
+      extrasFromAgentFilters(
+        [{ key: "started", op: "less", value: "2022-12-31" }],
+        catalog
+      )
+    ).toEqual({ startedTo: "2022-12-31", startedOp: "lte" });
   });
 
   it("falls back to the filter's own default operator", () => {

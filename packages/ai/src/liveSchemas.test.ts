@@ -7,6 +7,7 @@
  * cannot get wrong. The session still resolves and refuses exactly as before
  * — this only stops the guess.
  */
+import { DATE_OPS } from "@adapttable/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { agentFiltersFromDefs } from "./filterCatalog";
@@ -16,6 +17,7 @@ import {
   withAggregationBag,
   withEnum,
   withFilterBag,
+  withItemEnum,
 } from "./liveSchemas";
 import { createAgentSession } from "./session";
 import type { AgentFilter, AgentObservation, JsonSchema } from "./types";
@@ -42,6 +44,12 @@ const TEAM = {
     value: team,
     label: team,
   })),
+};
+
+const STARTED = {
+  key: "started",
+  type: "dateRange" as const,
+  label: "Started",
 };
 
 function observation(patch: Partial<AgentObservation> = {}): AgentObservation {
@@ -80,7 +88,7 @@ function observation(patch: Partial<AgentObservation> = {}): AgentObservation {
     hasEdit: true,
     hasReorder: false,
     hasColumnPinning: true,
-    availableFilters: agentFiltersFromDefs([TEAM, SALARY], undefined),
+    availableFilters: agentFiltersFromDefs([TEAM, SALARY, STARTED], undefined),
     page: 1,
     limit: 10,
     search: "",
@@ -127,6 +135,8 @@ describe("a filter's own values reach its schema", () => {
     const bag = prop(session().describe("view.setFilters").input, "filters");
     expect(bag?.properties?.teamOp).toBeUndefined();
     expect(bag?.properties?.salaryOp?.enum).toContain("between");
+    expect(bag?.properties?.startedOp?.enum).toEqual([...DATE_OPS]);
+    expect(bag?.properties?.startedOp?.description).toContain("On or after");
   });
 
   it("leaves the bag open, because a host's own keys are not ours to refuse", () => {
@@ -260,6 +270,16 @@ describe("the live schema helpers, called on their own", () => {
     expect(withFilterBag(undefined, [])).toBeUndefined();
     expect(withFilterBag(authored, undefined)).toBe(authored);
     expect(filterBagSchema(undefined)).toBeUndefined();
+    expect(withItemEnum(undefined, "order", ["person"])).toBeUndefined();
+    expect(withItemEnum(authored, "order", [])).toBe(authored);
+  });
+
+  it("closes an array property's items to the live values", () => {
+    const next = withItemEnum(authored, "order", ["person", "salary"]);
+    expect(next?.properties?.order?.items).toEqual({
+      type: "string",
+      enum: ["person", "salary"],
+    });
   });
 
   it("closes set and remove on the columns that actually aggregate", () => {

@@ -11,6 +11,8 @@ const KEY_FROM_COLUMN = new Set([
   "view.setSort",
   "view.setGroupBy",
   "view.pinColumn",
+  "view.hideColumn",
+  "view.setColumnOrder",
 ]);
 
 /**
@@ -216,7 +218,19 @@ export function normalizeCapabilityArgs(
     delete record.edge;
   }
   if (key === "view.setAggregations") normalizeAggregationArgs(record);
+  if (key === "view.hideColumn") normalizeHideArgs(record);
   return normalizeBatchArgs(record, input);
+}
+
+/**
+ * `visible` is the word the Columns menu uses; the capability takes `hidden`.
+ */
+function normalizeHideArgs(record: Record<string, unknown>): void {
+  if (!("hidden" in record)) {
+    if (record.visible === true) record.hidden = false;
+    if (record.visible === false) record.hidden = true;
+  }
+  delete record.visible;
 }
 
 /**

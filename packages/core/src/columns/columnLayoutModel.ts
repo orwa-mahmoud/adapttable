@@ -75,6 +75,8 @@ export interface UseColumnLayoutResult<TRow> {
   setPinned: (key: string, side: PinSide | undefined) => void;
   /** Move a column to a new index among the visible columns. */
   move: (key: string, toIndex: number) => void;
+  /** Replace the full column order, hidden columns included. */
+  setOrder: (order: readonly string[]) => void;
   /** Set (or clear, with `undefined`) a column's pixel width. */
   setWidth: (key: string, width: number | undefined) => void;
   /** Rename a column after trimming surrounding whitespace. Empty names are ignored. */

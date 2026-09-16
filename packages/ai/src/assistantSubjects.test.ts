@@ -153,6 +153,40 @@ describe("what a view change says it did", () => {
       terms: [{ column: "Team" }],
     });
   });
+
+  it("separates hiding a column from showing one", () => {
+    expect(
+      subjectFor(
+        "view.hideColumn",
+        { key: "team", hidden: true },
+        ran({ ok: true }),
+        COLUMNS
+      )
+    ).toEqual({ kind: "hide", terms: [{ column: "Team" }] });
+    expect(
+      subjectFor(
+        "view.hideColumn",
+        { key: "team", hidden: false },
+        ran({ ok: true }),
+        COLUMNS
+      )
+    ).toEqual({
+      kind: "hide",
+      cleared: true,
+      terms: [{ column: "Team" }],
+    });
+  });
+
+  it("names the column that moved", () => {
+    expect(
+      subjectFor(
+        "view.setColumnOrder",
+        { key: "team", index: 0 },
+        ran({ ok: true }),
+        COLUMNS
+      )
+    ).toEqual({ kind: "order", terms: [{ column: "Team" }] });
+  });
 });
 
 describe("what an edit says it did", () => {

@@ -49,6 +49,7 @@ export function declaredColumnLayout<TCol extends ColumnMetadata<never>>(
       noop();
     },
     move: noop,
+    setOrder: noop,
     setWidth: noop,
     setName: noop,
     resetName: noop,

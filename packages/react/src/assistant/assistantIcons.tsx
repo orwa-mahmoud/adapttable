@@ -166,6 +166,8 @@ const KIND_PATHS: Record<string, string> = {
   select:
     "M21 11v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9M9 12l3 3 9-9",
   pin: "M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z",
+  hide: "M3 3l18 18M10.6 10.6A3 3 0 0 0 13.4 13.4M9.9 5.2A10 10 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-3.2 4.3M6.1 6.1A16 16 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.2-.9",
+  order: "M7 6h14M7 12h10M7 18h14M3 8l2-2 2 2M3 16l2 2 2-2",
   // The same pin, held against the rows it holds in place.
   pinRow:
     "M13 14v4M10.5 4h5l-.8 5 2.3 2.3V14h-8v-2.7L11.3 9l-.8-5ZM3 8h4M3 12h4M3 16h4",
@@ -287,6 +289,8 @@ const KIND_HUE: Record<string, number> = {
   aggregate: 330,
   select: 195,
   pin: 20,
+  hide: 280,
+  order: 95,
   pinRow: 20,
   read: 215,
   export: 175,

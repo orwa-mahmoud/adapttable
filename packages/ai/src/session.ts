@@ -28,6 +28,7 @@ import {
   withAggregationBag,
   withEnum,
   withFilterBag,
+  withItemEnum,
 } from "./liveSchemas";
 import { buildManifest } from "./manifest";
 import { normalizeCapabilityArgs } from "./normalizeArgs";
@@ -1026,6 +1027,14 @@ function describeColumnChoice(
       return specialise("key", () => true, true);
     case "view.pinColumn":
       return specialise("key", (column) => column.pinnable !== false);
+    case "view.hideColumn":
+      return specialise("key", (column) => column.hideable !== false);
+    case "view.setColumnOrder": {
+      const moved = specialise("key", () => true);
+      const listed = columnIds(columns, () => true);
+      const input = withItemEnum(moved.input, "order", listed);
+      return input ? { ...moved, input } : moved;
+    }
     case "view.setPage":
       return describePage(guide, observation);
     default:
@@ -1400,6 +1409,138 @@ function pinColumnArgs(
   return [key, side];
 }
 
+/**
+ * Validate a hide request against the live columns.
+ *
+ * The last visible column stays on screen — the Columns menu will not hide
+ * it either — and a column the host marked unhideable is only addressable
+ * to show it again.
+ */
+function hideColumnArgs(
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): [string, boolean] {
+  const asked = String(body.key);
+  const column = findColumn(observation.columns, asked);
+  if (!column) {
+    throw new ApplyError(
+      "apply-failed",
+      `unknown column "${asked}"; this table offers ${columnNames(observation.columns)}`
+    );
+  }
+  const hidden = body.hidden !== false;
+  if (hidden && column.hideable === false) {
+    throw new ApplyError(
+      "apply-failed",
+      `column "${column.id}" is not hideable`
+    );
+  }
+  if (hidden && column.visible !== false) {
+    const visible = observation.columns.filter(
+      (entry) => entry.visible !== false
+    );
+    if (visible.length <= 1) {
+      throw new ApplyError(
+        "apply-failed",
+        `cannot hide "${column.id}"; it is the last visible column`
+      );
+    }
+  }
+  return [column.id, hidden];
+}
+
+/**
+ * Move one column or replace the full order, using the table's own ids.
+ */
+function applySetColumnOrder(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): {
+  ok: true;
+  revision: number;
+  order?: readonly string[];
+  key?: string;
+  index?: number;
+} {
+  if (Array.isArray(body.order)) {
+    assertApply(apply, "setColumnOrder");
+    const order = resolveColumnOrder(body.order, observation);
+    apply.setColumnOrder(order);
+    return { ok: true, revision: observation.viewRevision + 1, order };
+  }
+  const asked = typeof body.key === "string" ? body.key : "";
+  const index = typeof body.index === "number" ? Math.floor(body.index) : NaN;
+  if (!asked || !Number.isFinite(index)) {
+    throw new ApplyError(
+      "invalid-arguments",
+      "setColumnOrder takes { key, index } or { order }"
+    );
+  }
+  const column = findColumn(observation.columns, asked);
+  if (!column) {
+    throw new ApplyError(
+      "apply-failed",
+      `unknown column "${asked}"; this table offers ${columnNames(observation.columns)}`
+    );
+  }
+  const last = observation.columns.length - 1;
+  if (index < 0 || index > last) {
+    throw new ApplyError(
+      "invalid-arguments",
+      `index ${String(index)} is out of range; use 0–${String(last)}`
+    );
+  }
+  if (apply.moveColumn) {
+    apply.moveColumn(column.id, index);
+  } else {
+    assertApply(apply, "setColumnOrder");
+    const current = observation.columns.map((entry) => entry.id);
+    const from = current.indexOf(column.id);
+    if (from !== -1) {
+      current.splice(from, 1);
+      current.splice(index, 0, column.id);
+    }
+    apply.setColumnOrder(current);
+  }
+  return {
+    ok: true,
+    revision: observation.viewRevision + 1,
+    key: column.id,
+    index,
+  };
+}
+
+function resolveColumnOrder(
+  asked: readonly unknown[],
+  observation: AgentObservation
+): string[] {
+  const order: string[] = [];
+  for (const value of asked) {
+    const column = findColumn(observation.columns, String(value));
+    if (!column) {
+      throw new ApplyError(
+        "apply-failed",
+        `unknown column "${String(value)}"; this table offers ${columnNames(observation.columns)}`
+      );
+    }
+    order.push(column.id);
+  }
+  const known = observation.columns.map((column) => column.id);
+  const unique = new Set(order);
+  if (
+    unique.size !== known.length ||
+    order.length !== known.length ||
+    !known.every((id) => unique.has(id))
+  ) {
+    throw new ApplyError(
+      "invalid-arguments",
+      `order must list every column exactly once: ${known.join(", ")}`
+    );
+  }
+  return order;
+}
+
 /** The row-ref half of a pin request, without its `side`. */
 function rowRefBody(body: Record<string, unknown>): Record<string, unknown> {
   const ref: Record<string, unknown> = {};
@@ -1565,6 +1706,8 @@ async function dispatchBuiltIn(
         groupBy: observation.groupBy ?? null,
         pinnedColumns: observation.pinnedColumns ?? {},
         pinnedRows: observation.pinnedRows ?? { top: [], bottom: [] },
+        hiddenColumns: observation.hiddenColumns ?? [],
+        columnOrder: observation.columnOrder ?? [],
         filters: observation.filters ?? null,
         availableFilters: observation.availableFilters,
         pagination: observedPagination(observation),
@@ -1587,6 +1730,19 @@ async function dispatchBuiltIn(
       apply.pinColumn(...pinColumnArgs(body, observation));
       return { ok: true, revision: observation.viewRevision + 1 };
     }
+    case "view.hideColumn": {
+      assertApply(apply, "hideColumn");
+      const [column, hidden] = hideColumnArgs(body, observation);
+      apply.hideColumn(column, hidden);
+      return {
+        ok: true,
+        revision: observation.viewRevision + 1,
+        key: column,
+        hidden,
+      };
+    }
+    case "view.setColumnOrder":
+      return applySetColumnOrder(apply, body, observation);
     case "view.pinRow": {
       assertApply(apply, "pinRow");
       const side = body.side as "top" | "bottom" | null;

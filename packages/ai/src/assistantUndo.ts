@@ -76,6 +76,8 @@ const RESTORES: Readonly<Record<string, string>> = {
   filters: "view.setFilters",
   pinnedColumns: "view.pinColumn",
   pinnedRows: "view.pinRow",
+  hiddenColumns: "view.hideColumn",
+  columnOrder: "view.setColumnOrder",
 };
 
 /** Fields compared between the two views, in restore order. */
@@ -89,6 +91,8 @@ const FIELDS = [
   "filters",
   "pinnedColumns",
   "pinnedRows",
+  "hiddenColumns",
+  "columnOrder",
 ] as const;
 
 type ViewField = (typeof FIELDS)[number];
@@ -151,9 +155,12 @@ function restoreCall(
       };
     case "pinnedColumns":
     case "pinnedRows":
+    case "hiddenColumns":
+    case "columnOrder":
       // Unreachable: `planUndo` names these unrestorable before it gets here.
-      // Pinning is addressed one column or row at a time, and the sanitized
-      // view carries the host's own shape rather than a list this can walk.
+      // Pinning, hide and order are addressed one column at a time, and the
+      // sanitized view carries the host's own shape rather than a list this
+      // can walk.
       throw new Error(`${field} is not restorable from the view`);
   }
 }
@@ -175,6 +182,8 @@ export const UNDO_FIELDS_FOR: Readonly<Record<string, readonly string[]>> = {
   "view.setFilters": ["filters"],
   "view.pinColumn": ["pinnedColumns"],
   "view.pinRow": ["pinnedRows"],
+  "view.hideColumn": ["hiddenColumns"],
+  "view.setColumnOrder": ["columnOrder"],
 };
 
 /**
@@ -207,7 +216,14 @@ export function planUndo(
   if (moved.length === 0) return { code: "nothing-to-undo" };
 
   const unrestorable = moved.filter((field) => {
-    if (field === "pinnedColumns" || field === "pinnedRows") return true;
+    if (
+      field === "pinnedColumns" ||
+      field === "pinnedRows" ||
+      field === "hiddenColumns" ||
+      field === "columnOrder"
+    ) {
+      return true;
+    }
     const key = RESTORES[field];
     return key === undefined || !enabled.has(key);
   });

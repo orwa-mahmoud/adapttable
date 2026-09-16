@@ -61,6 +61,7 @@ export interface ContextColumn {
   readonly writable: boolean;
   readonly sortable: boolean;
   readonly pinnable?: boolean;
+  readonly hideable?: boolean;
   /** Whether it is currently on screen. Not a permission. */
   readonly visible?: boolean;
   /** What the author said it means. */
@@ -105,6 +106,8 @@ export interface AgentContextView {
   readonly filters?: Readonly<Record<string, unknown>>;
   readonly pinnedColumns?: Readonly<Record<string, unknown>>;
   readonly pinnedRows?: Readonly<Record<string, unknown>>;
+  readonly hiddenColumns?: readonly string[];
+  readonly columnOrder?: readonly string[];
   /**
    * What this table's pages are for the current query.
    *
@@ -185,6 +188,7 @@ function contextColumn(
     writable: column.writable,
     sortable: column.sortable,
     ...(column.pinnable === undefined ? {} : { pinnable: column.pinnable }),
+    ...(column.hideable === undefined ? {} : { hideable: column.hideable }),
     ...(column.visible === undefined ? {} : { visible: column.visible }),
     ...(column.ai?.description ? { description: column.ai.description } : {}),
     ...(examples ? { examples } : {}),
@@ -308,6 +312,8 @@ export function buildView(
     readonly filters?: Readonly<Record<string, unknown>>;
     readonly pinnedColumns?: Readonly<Record<string, unknown>>;
     readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    readonly hiddenColumns?: readonly string[];
+    readonly columnOrder?: readonly string[];
     readonly pagination?: AgentPagination;
   },
   filters: readonly AgentFilter[]
@@ -336,6 +342,8 @@ export function buildView(
     ...(state ? { filters: state } : {}),
     ...(view.pinnedColumns ? { pinnedColumns: view.pinnedColumns } : {}),
     ...(view.pinnedRows ? { pinnedRows: view.pinnedRows } : {}),
+    ...(view.hiddenColumns ? { hiddenColumns: view.hiddenColumns } : {}),
+    ...(view.columnOrder ? { columnOrder: view.columnOrder } : {}),
     ...(view.pagination ? { pagination: view.pagination } : {}),
     ...(missing.length > 0 ? { unknown: missing } : {}),
   };

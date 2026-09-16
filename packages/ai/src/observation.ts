@@ -57,6 +57,8 @@ export interface ObservedView {
     readonly top: readonly string[];
     readonly bottom: readonly string[];
   };
+  readonly hiddenColumns?: readonly string[];
+  readonly columnOrder?: readonly string[];
 }
 
 /** What a host decided about writing. @public */
@@ -136,6 +138,8 @@ export function agentObservation(inputs: ObservationInputs): AgentObservation {
     hasReorder: wired(inputs, "reorderRows"),
     hasColumnPinning: wired(inputs, "pinColumn"),
     hasRowPinning: wired(inputs, "pinRow"),
+    hasColumnHide: wired(inputs, "hideColumn"),
+    hasColumnOrder: wired(inputs, "setColumnOrder", "moveColumn"),
     hasSelection: wired(inputs, "setSelection"),
     // A saved view needs the feature composed as well as the handler: the
     // handler alone has nowhere to put what it applies.
@@ -157,6 +161,12 @@ export function agentObservation(inputs: ObservationInputs): AgentObservation {
       ? { pinnedColumns: inputs.view.pinnedColumns }
       : {}),
     ...(inputs.view.pinnedRows ? { pinnedRows: inputs.view.pinnedRows } : {}),
+    ...(inputs.view.hiddenColumns
+      ? { hiddenColumns: inputs.view.hiddenColumns }
+      : {}),
+    ...(inputs.view.columnOrder
+      ? { columnOrder: inputs.view.columnOrder }
+      : {}),
     ...(inputs.view.filters === undefined
       ? {}
       : { filters: inputs.view.filters }),

@@ -24,8 +24,10 @@ Capabilities come from the live table:
   is present.
 - `view.setSelection` appears when selection is wired (`apply.setSelection`).
 - `view.pinColumn` appears when column pinning is wired and at least one
-  column is pinnable. `view.pinRow` appears when row pinning is wired. Both
-  are view operations, so neither takes the write-approval path.
+  column is pinnable. `view.hideColumn` and `view.setColumnOrder` appear
+  when a layout-owning feature (the Columns menu) is composed. `view.pinRow`
+  appears when row pinning is wired. These are view operations, so none
+  takes the write-approval path.
 - `views.apply` appears when `featureIds` includes `saved-views` and
   `apply.applyView` exists.
 - `rows.read` / `rows.resolve` appear when the table has columns.

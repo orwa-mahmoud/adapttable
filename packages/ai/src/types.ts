@@ -76,6 +76,8 @@ export interface AgentColumn {
   readonly sortable: boolean;
   /** Whether `view.pinColumn` may pin this column to an edge. */
   readonly pinnable?: boolean;
+  /** Whether `view.hideColumn` may hide this column. */
+  readonly hideable?: boolean;
   /**
    * Whether the column is on screen right now.
    *
@@ -977,6 +979,14 @@ export interface AgentObservation {
   readonly hasColumnPinning?: boolean;
   /** Whether row pinning is wired. */
   readonly hasRowPinning?: boolean;
+  /** Whether hiding a column is wired. */
+  readonly hasColumnHide?: boolean;
+  /** Whether reordering columns is wired. */
+  readonly hasColumnOrder?: boolean;
+  /** Column ids the reader has hidden, in layout order. */
+  readonly hiddenColumns?: readonly string[];
+  /** Full column order, including hidden columns. */
+  readonly columnOrder?: readonly string[];
   /**
    * Columns currently pinned, by logical edge.
    *
@@ -1067,6 +1077,12 @@ export interface AgentApply {
   setAggregations?(patch: AgentAggregationsPatch): void;
   /** Pin a column to a logical edge, or unpin it with `undefined`. */
   pinColumn?(key: string, side: "start" | "end" | undefined): void;
+  /** Hide or show a column. */
+  hideColumn?(key: string, hidden: boolean): void;
+  /** Replace the full column order, hidden columns included. */
+  setColumnOrder?(order: readonly string[]): void;
+  /** Move one column to a 0-based index in the full order. */
+  moveColumn?(key: string, toIndex: number): void;
   /** Pin a row above or below the scrolled body, or unpin it. */
   pinRow?(rowKey: string, side: "top" | "bottom" | undefined): void;
   /** Replace or clear the current selection. */

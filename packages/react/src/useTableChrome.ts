@@ -443,6 +443,12 @@ export interface TableChrome<TRow> {
   /** All declared columns (pre layout/device filtering) for the column menu. */
   allColumns: ColumnDef<TRow>[];
   /**
+   * Whether hide / order / pin setters on {@link columnLayout} actually
+   * write. The three-prop table publishes no-ops; a layout-owning feature
+   * replaces them.
+   */
+  columnLayoutLive?: boolean;
+  /**
    * Opted-in features that cannot run. Empty when everything the host
    * asked for can. Adapters show these on the status bar (when it is
    * on) and as `data-adapttable-notices` on the root; the matching

@@ -77,6 +77,7 @@ function layoutOf<TRow>(
     toggleVisible: record("toggleVisible"),
     setPinned: record("setPinned"),
     move: record("move"),
+    setOrder: record("setOrder"),
     setWidth: record("setWidth"),
     setName: record("setName"),
     resetName: record("resetName"),

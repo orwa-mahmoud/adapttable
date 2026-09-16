@@ -63,4 +63,27 @@ describe("deriveRuntimeOperations", () => {
     expect(ops.pinColumn).toBe(true);
     expect(ops.pinRow).toBe(false);
   });
+
+  it("follows the column-layout setters, not the layout bundle", () => {
+    const readOnly = deriveRuntimeOperations(
+      view({ columnLayout: { keys: ["name"], hidden: [] } })
+    );
+    expect(readOnly.hideColumn).toBe(false);
+    expect(readOnly.setColumnOrder).toBe(false);
+
+    const wired = deriveRuntimeOperations(
+      view({
+        columnLayout: {
+          keys: ["name", "team"],
+          hidden: ["team"],
+          setHidden: () => undefined,
+          move: () => undefined,
+          setOrder: () => undefined,
+        },
+      })
+    );
+    expect(wired.hideColumn).toBe(true);
+    expect(wired.moveColumn).toBe(true);
+    expect(wired.setColumnOrder).toBe(true);
+  });
 });

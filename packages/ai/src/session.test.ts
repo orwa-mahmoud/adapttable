@@ -84,6 +84,26 @@ describe("enabledKeys", () => {
         hasDelete: true,
         hasColumnPinning: true,
         hasRowPinning: true,
+        hasColumnHide: true,
+        hasColumnOrder: true,
+        columns: [
+          {
+            id: "name",
+            label: "Name",
+            type: "string",
+            readable: true,
+            writable: false,
+            sortable: true,
+          },
+          {
+            id: "salary",
+            label: "Salary",
+            type: "number",
+            readable: true,
+            writable: true,
+            sortable: true,
+          },
+        ],
         aggregations: {
           columns: [
             {
