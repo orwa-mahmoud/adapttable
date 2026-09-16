@@ -176,10 +176,6 @@ jobs:
         if: needs.detect.outputs.skipAll != 'true'
         run: pnpm check:features
 
-      - name: Check the engine imports no framework
-        if: needs.detect.outputs.skipAll != 'true'
-        run: pnpm check:boundary
-
       - name: Lint root tooling
         if: needs.detect.outputs.runLintRoot == 'true'
         run: pnpm lint:root
@@ -327,6 +323,8 @@ jobs:
       - uses: ./.github/actions/setup-pnpm
       - name: Restore built packages
         run: pnpm build
+      - name: Check the engine imports no framework
+        run: pnpm check:boundary
       - name: Validate published package configs
         run: pnpm publint
       - name: Check the extracted API reports are current

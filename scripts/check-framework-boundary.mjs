@@ -181,6 +181,15 @@ export function runFrameworkBoundaryCheck() {
 }
 
 function main() {
+  const coreRuntime = join(ROOT, "packages", "core", "dist", "index.js");
+  if (!existsSync(coreRuntime)) {
+    console.error(
+      "✗ not built, so the framework boundary is unproven.\n" +
+        "Run `pnpm build` first — this check walks the shipped graphs."
+    );
+    process.exit(1);
+  }
+
   const { missing, sourceViolations, transitiveViolations } =
     runFrameworkBoundaryCheck();
   const total =
