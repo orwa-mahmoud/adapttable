@@ -109,22 +109,23 @@ describe(\`AdaptTable on React \${version}\`, () => {
     expect(screen.queryByText("Item 26")).toBeNull();
 
     // Sort: toggle Qty to descending; highest qty lands on page 1.
+    // Page while that sort holds — page 2 of qty-desc is Item 05..01,
+    // not Item 26 (that is page 2 of the unsorted list).
     const qtySort = screen.getByRole("button", { name: /qty/i });
     fireEvent.click(qtySort); // asc
     fireEvent.click(qtySort); // desc
     await waitFor(() => {
-      expect(screen.getByText("Item 30")).toBeTruthy();
-    });
-    fireEvent.click(qtySort); // back to the cleared state for paging
-    await waitFor(() => {
-      expect(screen.getByText("Item 01")).toBeTruthy();
-      expect(screen.queryByText("Item 30")).toBeNull();
+      expect(
+        document
+          .querySelector('[data-adapttable-part="row"][aria-rowindex="1"]')
+          ?.getAttribute("data-row-id")
+      ).toBe("30");
     });
 
-    // Page: next page shows the tail rows.
     fireEvent.click(screen.getByRole("button", { name: /next page/i }));
     await waitFor(() => {
-      expect(screen.getByText("Item 26")).toBeTruthy();
+      expect(screen.getByText("Item 05")).toBeTruthy();
+      expect(screen.queryByText("Item 30")).toBeNull();
     });
 
     // Search (filter): debounced commit narrows to one row.
