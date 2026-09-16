@@ -116,6 +116,10 @@ describe(\`AdaptTable on React \${version}\`, () => {
       expect(screen.getByText("Item 30")).toBeTruthy();
     });
     fireEvent.click(qtySort); // back to the cleared state for paging
+    await waitFor(() => {
+      expect(screen.getByText("Item 01")).toBeTruthy();
+      expect(screen.queryByText("Item 30")).toBeNull();
+    });
 
     // Page: next page shows the tail rows.
     fireEvent.click(screen.getByRole("button", { name: /next page/i }));

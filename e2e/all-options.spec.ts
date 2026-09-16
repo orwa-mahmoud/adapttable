@@ -65,16 +65,18 @@ test("Feature Lab options open as an edge drawer and close from its backdrop", a
 
   const viewport = page.viewportSize();
   const drawer = page.getByRole("dialog", { name: "Configure Feature Lab" });
-  // Align to the layout box, not the window: `scrollbar-gutter: stable`
-  // reserves the scrollbar lane, so `viewport.width` is ~15px wider.
-  const layoutWidth = async () =>
-    page.evaluate(() => document.documentElement.clientWidth);
+  // Classic scrollbars plus `scrollbar-gutter: stable` split the visual
+  // viewport from `clientWidth` by ~15px. Overlay scrollbars do not. The
+  // drawer is an edge panel if it meets either edge.
   await expect
     .poll(async () => {
       const box = await drawer.boundingBox();
-      return Math.abs(
-        (box?.x ?? 0) + (box?.width ?? 0) - (await layoutWidth())
+      const right = (box?.x ?? 0) + (box?.width ?? 0);
+      const visual = viewport?.width ?? 0;
+      const layout = await page.evaluate(
+        () => document.documentElement.clientWidth
       );
+      return Math.min(Math.abs(right - visual), Math.abs(right - layout));
     })
     .toBeLessThanOrEqual(1);
   const panel = await drawer.boundingBox();

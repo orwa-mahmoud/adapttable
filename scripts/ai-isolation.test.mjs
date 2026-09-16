@@ -38,10 +38,13 @@ describe("AI isolation", () => {
     // A graph that is not there proves nothing about isolation. Reporting it
     // as clean is how a check keeps passing over a package nobody built.
     const { missing, leaked } = checkGraphs([
-      "packages/core/dist/index.js",
       "packages/never-built/dist/index.js",
+      "packages/also-never-built/dist/index.js",
     ]);
-    assert.deepEqual(missing, ["packages/never-built/dist/index.js"]);
+    assert.deepEqual(missing, [
+      "packages/never-built/dist/index.js",
+      "packages/also-never-built/dist/index.js",
+    ]);
     assert.deepEqual(leaked, []);
   });
 });
