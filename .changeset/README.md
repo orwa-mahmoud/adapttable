@@ -6,7 +6,6 @@ The release workflow consumes these to version and publish the `@adapttable/*`
 packages.
 
 Published `@adapttable/*` runtime dependencies are exact versions (not
-`workspace:^`). Changesets will not rewrite those pins to a major caret:
-`bumpVersionsWithWorkspaceProtocolOnly` is on, and the pins are not
-workspace protocol. A later release that needs a new sibling version
-lists that version in the same release.
+`workspace:^`). `bumpVersionsWithWorkspaceProtocolOnly` stays off so Changesets
+advances those exact pins whenever a sibling package is released; the exact
+range shape is preserved in the published manifest.

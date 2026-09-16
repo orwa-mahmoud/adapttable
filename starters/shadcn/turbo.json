@@ -1,0 +1,8 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "typecheck": {
+      "dependsOn": ["@adapttable/shadcn#build", "@adapttable/core#build"]
+    }
+  }
+}
