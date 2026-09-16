@@ -1,5 +1,31 @@
 # @adapttable/server
 
+## 0.2.0
+
+### Minor Changes
+
+- 65fcbed: Raise the supported Node.js minimum from 18.18.0 to 22.12.0.
+  Consumers using an earlier Node release must upgrade their development,
+  build and server environments.
+  
+  Browser React integrations continue to support React 18 and 19. Package
+  versions are independent; consumers do not need to match version numbers
+  across AdaptTable packages.
+
+### Patch Changes
+
+- e2e22c3: Publish exact AdaptTable runtime dependency versions rather than major-caret
+  ranges. Each package resolves the sibling versions it was released with;
+  consumers do not need to align package version numbers manually.
+- Updated dependencies [28b3c3d]
+- Updated dependencies [65fcbed]
+- Updated dependencies [278a6d5]
+- Updated dependencies [cd45219]
+- Updated dependencies [4d05d7b]
+- Updated dependencies [cd45219]
+- Updated dependencies [4d05d7b]
+  - @adapttable/core@3.0.0
+
 ## 0.1.1
 
 ### Patch Changes

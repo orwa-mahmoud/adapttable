@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/cli",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Scaffolding and migration CLI for AdaptTable — initialize a table or safely migrate v2 source.",
   "keywords": [
     "adapttable",

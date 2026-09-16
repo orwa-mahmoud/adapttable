@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/react",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Headless React binding and structural Chrome for AdaptTable. Hooks subscribe to the framework-neutral engine in @adapttable/core.",
   "keywords": [
     "react",
@@ -118,7 +118,7 @@
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@adapttable/core": "2.9.0",
+    "@adapttable/core": "3.0.0",
     "@tanstack/react-virtual": "^3.14.10",
     "react-compiler-runtime": "^1.0.0"
   },

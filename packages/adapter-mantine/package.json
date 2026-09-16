@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/mantine",
-  "version": "2.6.0",
+  "version": "3.0.0",
   "description": "Mantine adapter for AdaptTable \u2014 a batteries-included, themeable React data table with sorting, filtering, URL state, virtualization, RTL, dark mode, and responsive card rendering.",
   "keywords": [
     "react",
@@ -460,9 +460,9 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "dependencies": {
-    "@adapttable/core": "2.9.0",
+    "@adapttable/core": "3.0.0",
     "react-compiler-runtime": "^1.0.0",
-    "@adapttable/react": "0.0.0"
+    "@adapttable/react": "1.0.0"
   },
   "peerDependencies": {
     "@mantine/core": "^7.2.0 || ^8.0.0 || ^9.0.0",

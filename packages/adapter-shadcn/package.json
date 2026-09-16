@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/shadcn",
-  "version": "2.6.0",
+  "version": "3.0.0",
   "description": "shadcn/ui adapter for AdaptTable \u2014 a fully-styled React data table in one import, built on the headless @adapttable/core engine and shadcn's design tokens.",
   "keywords": [
     "react",
@@ -457,9 +457,9 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "dependencies": {
-    "@adapttable/unstyled": "2.6.0",
+    "@adapttable/unstyled": "3.0.0",
     "react-compiler-runtime": "^1.0.0",
-    "@adapttable/react": "0.0.0"
+    "@adapttable/react": "1.0.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
