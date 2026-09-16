@@ -44,16 +44,20 @@ describe("AI root stays React-free", () => {
     }
   });
 
-  it("published root dist does not mention react or @adapttable/react", () => {
-    const files = runtimeFiles();
-    expect(files.length, "build @adapttable/ai before this assertion").toBe(
-      ENTRIES.length
-    );
-    for (const file of files) {
-      const text = readFileSync(file, "utf8");
-      expect(text, file).not.toMatch(REACT_IMPORT);
-      expect(text, file).not.toMatch(/["']@adapttable\/react["']/);
-      expect(text, file).not.toMatch(/["']react["']/);
+  // Unit shards do not build dist. The source test above is the gate
+  // there. This one runs when a build is present (local `pnpm build`,
+  // smoke, or a job that packs the tarball).
+  it.skipIf(!existsSync(DIST))(
+    "published root dist does not mention react or @adapttable/react",
+    () => {
+      const files = runtimeFiles();
+      expect(files).toHaveLength(ENTRIES.length);
+      for (const file of files) {
+        const text = readFileSync(file, "utf8");
+        expect(text, file).not.toMatch(REACT_IMPORT);
+        expect(text, file).not.toMatch(/["']@adapttable\/react["']/);
+        expect(text, file).not.toMatch(/["']react["']/);
+      }
     }
-  });
+  );
 });

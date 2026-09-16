@@ -44,6 +44,13 @@ describe("normalizeCapabilityArgs", () => {
         visible: true,
       })
     ).toEqual({ key: "person", hidden: false });
+    expect(
+      normalizeCapabilityArgs("view.hideColumn", {
+        key: "person",
+        hidden: true,
+        visible: true,
+      })
+    ).toEqual({ key: "person", hidden: true });
   });
 
   it("rewrites sort / sortBy bags into key and dir", () => {
@@ -59,6 +66,24 @@ describe("normalizeCapabilityArgs", () => {
       normalizeCapabilityArgs("view.setSort", {
         sortBy: "salary",
         sortDir: "desc",
+      })
+    ).toEqual({ key: "salary", dir: "desc" });
+    expect(
+      normalizeCapabilityArgs("view.setSort", {
+        key: "salary",
+        dir: "highest",
+      })
+    ).toEqual({ key: "salary", dir: "desc" });
+    expect(
+      normalizeCapabilityArgs("view.setSort", { key: "salary", dir: "lowest" })
+    ).toEqual({ key: "salary", dir: "asc" });
+    expect(
+      normalizeCapabilityArgs("view.setSort", { key: "salary", dir: "ASC" })
+    ).toEqual({ key: "salary", dir: "asc" });
+    expect(
+      normalizeCapabilityArgs("view.setSort", {
+        key: "salary",
+        sort: { direction: "desc" },
       })
     ).toEqual({ key: "salary", dir: "desc" });
   });
@@ -123,6 +148,11 @@ describe("the name a capability's own title suggests", () => {
         set: { salary: "average" },
       })
     ).toEqual({ set: { salary: "avg" } });
+    expect(
+      normalizeCapabilityArgs("view.setAggregations", {
+        set: { salary: "mean", budget: "total" },
+      })
+    ).toEqual({ set: { salary: "avg", budget: "sum" } });
   });
 
   it("never overrides what the model actually named", () => {
@@ -250,6 +280,20 @@ describe("one item where a capability takes a batch", () => {
         inputOf("edit.cells")
       )
     ).toEqual({ rowKey: "p1", notes: "raise" });
+  });
+
+  it("wraps a lone value even when the item schema names no properties", () => {
+    expect(
+      normalizeCapabilityArgs(
+        "edit.cells",
+        { edits: { value: 1 } },
+        {
+          type: "object",
+          required: ["edits"],
+          properties: { edits: { type: "array" } },
+        }
+      )
+    ).toEqual({ edits: [{ value: 1 }] });
   });
 
   it("wraps nothing when the caller has no schema to read", () => {

@@ -226,6 +226,10 @@ for (const adapter of ADAPTERS) {
 
       const trigger = part(page, "row-move-menu-trigger").first();
       await expect(trigger).toBeVisible();
+      const triggerRowId = await trigger.evaluate((node) =>
+        node.closest("[data-row-id]")?.getAttribute("data-row-id")
+      );
+      expect(triggerRowId).toBeTruthy();
       // Click, not Space: after the confirm dialog closes, Space is eaten by
       // a kit overlay that is no longer :visible but still intercepts keys.
       await trigger.click();
@@ -243,7 +247,13 @@ for (const adapter of ADAPTERS) {
       const cancel = confirmation.getByRole("button", { name: "Cancel" });
       await cancel.focus();
       await cancel.press("Enter");
-      await expect(trigger).toBeFocused();
+      // `.first()` is a different trigger after the grouped remount — cancel
+      // returns focus to the row that opened the menu.
+      await expect(
+        demo(page).locator(
+          `[data-row-id="${triggerRowId}"] [data-adapttable-part="row-move-menu-trigger"]`
+        )
+      ).toBeFocused();
     });
 
     test("keeps nested move controls on mobile RTL cards", async ({ page }) => {

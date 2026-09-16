@@ -1473,7 +1473,8 @@ function applySetColumnOrder(
     return { ok: true, revision: observation.viewRevision + 1, order };
   }
   const asked = typeof body.key === "string" ? body.key : "";
-  const index = typeof body.index === "number" ? Math.floor(body.index) : NaN;
+  const index =
+    typeof body.index === "number" ? Math.floor(body.index) : Number.NaN;
   if (!asked || !Number.isFinite(index)) {
     throw new ApplyError(
       "invalid-arguments",

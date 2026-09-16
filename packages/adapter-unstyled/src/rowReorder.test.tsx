@@ -1,5 +1,11 @@
 import type { TableRowReorderState } from "@adapttable/react";
-import { createEvent, fireEvent, render, screen } from "@testing-library/react";
+import {
+  createEvent,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { RowReorderHandle } from "./components/kitControls";
@@ -119,7 +125,7 @@ describe("row reorder (unstyled)", () => {
     expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(0, 1, ROWS[0]);
   });
 
-  it("offers a keyboard menu and confirms a cross-group move", () => {
+  it("offers a keyboard menu and confirms a cross-group move", async () => {
     const onGroupMove = vi.fn();
     render(
       <DataTable
@@ -153,7 +159,8 @@ describe("row reorder (unstyled)", () => {
     expect(onGroupMove.mock.calls[0]?.[0]).toBe(ROWS[0]);
     expect(onGroupMove.mock.calls[0]?.[1]).toMatchObject({ label: "Core" });
     expect(onGroupMove.mock.calls[0]?.[2]).toMatchObject({ label: "Docs" });
-    expect(trigger).toHaveFocus();
+    // Restored on the next frame so the closing dialog cannot steal it.
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 
   it("keeps the nested move menu available on mobile cards", () => {

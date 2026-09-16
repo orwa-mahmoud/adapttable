@@ -111,6 +111,36 @@ describe("edit.cells refuses an edit it cannot address", () => {
     expect(result.error?.message).toMatch(/at least one edit/);
   });
 
+  it("refuses a body that is not a list of edits", async () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: apply(),
+    });
+    const result = await session.execute(
+      "edit.cells",
+      { edits: "raise everyone" },
+      1,
+      "e-shape"
+    );
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("invalid-arguments");
+  });
+
+  it("refuses an edit whose column is not a name", async () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: apply(),
+    });
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: 2, value: "Ada" }] },
+      1,
+      "e-col"
+    );
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("invalid-arguments");
+  });
+
   it("refuses an edit that names no column", async () => {
     const session = createAgentSession({
       observe: () => observation(),
@@ -343,6 +373,41 @@ describe("a custom capability keeps its own payload", () => {
     expect(result.ok).toBe(false);
     expect(result.error?.code).toBe("cancelled");
     expect(result.result).toBeUndefined();
+  });
+});
+
+describe("rows.delete refuses a deletion it cannot address", () => {
+  it("refuses an empty row list", async () => {
+    const session = createAgentSession({
+      observe: () => observation(),
+      apply: apply(),
+    });
+    const result = await session.execute("rows.delete", { rows: [] }, 1, "d0");
+    expect(result.ok).toBe(false);
+    expect(result.error?.message).toMatch(/at least one row/);
+  });
+
+  it("refuses the delete when the table moves while rows are resolved", async () => {
+    let revision = 1;
+    const session = createAgentSession({
+      observe: () => observation({ viewRevision: revision }),
+      apply: apply({
+        resolveRow: vi.fn((ref) => {
+          revision = 2;
+          return "rowKey" in ref
+            ? { rowKey: ref.rowKey, scope: "visible" as const }
+            : { rowKey: "r1", scope: ref.scope, position: ref.position };
+        }),
+      }),
+    });
+    const result = await session.execute(
+      "rows.delete",
+      { rows: [{ rowKey: "r1" }] },
+      1,
+      "d1"
+    );
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("revision-mismatch");
   });
 });
 

@@ -15,8 +15,13 @@ import {
   createAgentSession,
   type ExecuteResult,
 } from "@adapttable/ai";
+import {
+  AGENT_VIEW_STATE,
+  type AgentViewState,
+  FeatureStateScope,
+} from "@adapttable/react/adapter";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { useRef } from "react";
+import { type ReactNode, useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { useTableAssistant } from "./assistant";
@@ -1081,5 +1086,52 @@ describe("what the reader waved through", () => {
     // An empty list is what the chrome checks: it draws nothing at all rather
     // than a heading over no capabilities.
     expect(result.current.alwaysAllowed).toEqual([]);
+  });
+
+  it("reads the table's own view when the host did not lift context", async () => {
+    // Per-turn undo needs the page and sort the table is showing. A panel
+    // inside the table has that from feature state; a host that already
+    // lifted it passes `contextInputs` and this path stays unused.
+    const read = vi.fn(() => ({ page: 2, search: "ada" }));
+    const viewState: AgentViewState = { read };
+    const { result } = renderHook(
+      () =>
+        useTableAssistant({
+          session: useHeldSession(),
+          transport: { send: () => Promise.resolve({ text: "done" }) },
+        }),
+      {
+        wrapper: ({ children }: { children: ReactNode }) => (
+          <FeatureStateScope stateKey={AGENT_VIEW_STATE} value={viewState}>
+            {children}
+          </FeatureStateScope>
+        ),
+      }
+    );
+
+    await act(async () => {
+      await result.current.send("who is on page two");
+    });
+    expect(read).toHaveBeenCalled();
+  });
+
+  it("hands a host-owned transcript and a detach through to the store", () => {
+    const onDetach = vi.fn();
+    const onMessagesChange = vi.fn();
+    const hosted: [] = [];
+    const resumeHandle = { text: "who is on page two", token: "resume-1" };
+    const transport = { send: () => Promise.resolve({ text: "" }) };
+    const { result } = renderHook(() =>
+      useTableAssistant({
+        session: useHeldSession(),
+        transport,
+        onDetach,
+        messages: hosted,
+        onMessagesChange,
+        conversation: 0,
+        resumeHandle,
+      })
+    );
+    expect(result.current.messages).toEqual([]);
   });
 });

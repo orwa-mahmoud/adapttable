@@ -172,7 +172,10 @@ export function createAdapterEditingFeatures(
   }
 
   function undoRedoButtons(): StaticTableFeature {
-    return extendFeature(coreUndoRedoButtons(), undoChrome);
+    return extendFeature(
+      coreUndoRedoButtons(),
+      components.historyIncludesControls === true ? [] : undoChrome
+    );
   }
 
   function batchEditing<TRow>(

@@ -1332,7 +1332,7 @@ the types `AgentApply`, `AgentAggregateOperation`, `AgentAggregationColumn`,
 `AgentAggregations`, `AgentAggregationsPatch`, `AgentCapabilityContext`,
 `AgentCapabilityDefinition`,
 `AgentCellEdit`, `AgentColumn`, `AgentFilter`, `AgentFilterOption`, `AgentLimits`,
-`AgentManifest`, `AgentObservation`, `AgentPolicy`, `AgentRowAddressing`,
+`AgentManifest`, `AgentManifestAggregation`, `AgentObservation`, `AgentPolicy`, `AgentRowAddressing`,
 `AgentSession`, `ApprovalOutcome`, `ApprovalResult`, `ApprovalSubject`,
 `CapabilityGuide`, `CatalogEntry`,
 `ExecuteError`, `ExecuteResult`, `JsonSchema`, `ResolvedRow`, `RowKeyRef`,
@@ -2050,7 +2050,7 @@ description of the table: `AgentApply` is the write seam the host fills,
 / `AgentFilter` / `AgentFilterOption` describe its shape, `AgentLimits` and
 `AgentPolicy` its bounds, and `AgentRowAddressing` / `RowAddressScope` say how a
 row may be named. The result is an `AgentSession`: `buildManifest` renders its
-`AgentManifest`, `enabledKeys` lists what the table actually offers, and
+`AgentManifest` (and per-column `AgentManifestAggregation` ids), `enabledKeys` lists what the table actually offers, and
 `CAPABILITY_KEYS` / `CapabilityKey` are the built-in names.
 
 A capability is a `CatalogEntry` backed by an `AgentCapabilityDefinition`.

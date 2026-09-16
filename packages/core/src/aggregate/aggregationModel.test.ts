@@ -229,6 +229,31 @@ describe("what a column offers", () => {
     resetDevWarnings();
   });
 
+  it("keeps the sentence a custom operation writes for an agent", () => {
+    const resolved = resolveAggregatable({
+      key: "x",
+      aggregatable: {
+        operations: [
+          {
+            id: "median",
+            label: "Median",
+            description: "The middle salary after sorting.",
+            calculate: median,
+          },
+        ],
+      },
+    });
+    expect(resolved?.operations).toEqual([
+      {
+        id: "median",
+        builtIn: false,
+        label: "Median",
+        description: "The middle salary after sorting.",
+        calculate: median,
+      },
+    ]);
+  });
+
   it("refuses an unknown name, a reserved id, and a duplicate", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     expect(

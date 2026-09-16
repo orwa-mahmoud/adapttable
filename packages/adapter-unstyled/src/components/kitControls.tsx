@@ -36,6 +36,7 @@ import {
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
   hasActiveHeaderFilter,
+  restoreFocusSoon,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
@@ -676,7 +677,7 @@ function RowMoveMenu({
   const finish = (action: () => void) => {
     action();
     if (detailsRef.current) detailsRef.current.open = false;
-    triggerRef.current?.focus();
+    queueMicrotask(() => restoreFocusSoon(triggerRef.current));
   };
   const finishRef = useRef(finish);
   finishRef.current = finish;

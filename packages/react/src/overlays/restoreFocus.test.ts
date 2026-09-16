@@ -110,7 +110,55 @@ describe("restoreFocusSoon", () => {
     cleanup();
   });
 
+  it("can be cancelled after the first frame, so a later reclaim does not steal a move", async () => {
+    const { trigger, elsewhere, cleanup } = scene();
+    elsewhere.focus();
+    const cancel = restoreFocusSoon(trigger);
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    expect(document.activeElement).toBe(trigger);
+    elsewhere.focus();
+    cancel();
+    await frames();
+    expect(document.activeElement).toBe(elsewhere);
+    cleanup();
+  });
+
   it("does nothing without a trigger", () => {
     expect(() => restoreFocusSoon(null)()).not.toThrow();
+  });
+
+  it("uses timers when requestAnimationFrame is missing", async () => {
+    const raf = globalThis.requestAnimationFrame;
+    const caf = globalThis.cancelAnimationFrame;
+    // jsdom always has rAF; the fallback is for non-browser hosts.
+    Object.defineProperty(globalThis, "requestAnimationFrame", {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(globalThis, "cancelAnimationFrame", {
+      configurable: true,
+      value: undefined,
+    });
+    try {
+      const { trigger, elsewhere, cleanup } = scene();
+      elsewhere.focus();
+      const cancel = restoreFocusSoon(trigger);
+      cancel();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(document.activeElement).toBe(elsewhere);
+      restoreFocusSoon(trigger);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(document.activeElement).toBe(trigger);
+      cleanup();
+    } finally {
+      Object.defineProperty(globalThis, "requestAnimationFrame", {
+        configurable: true,
+        value: raf,
+      });
+      Object.defineProperty(globalThis, "cancelAnimationFrame", {
+        configurable: true,
+        value: caf,
+      });
+    }
   });
 });

@@ -7,7 +7,7 @@
  * pinned columns are never windowed out, and the spacers are logical.
  */
 import { act, render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { type ColumnWindow, useColumnWindow } from "./useColumnWindow";
@@ -70,6 +70,8 @@ const windowAt = (
 };
 
 describe("useColumnWindow", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
   it("renders every column when it is off", () => {
     const window = windowAt(0, { enabled: false });
     expect(window.enabled).toBe(false);
@@ -112,5 +114,30 @@ describe("useColumnWindow", () => {
     const window = windowAt(99_999);
     expect(window.columns[0]?.key).toBe("c0");
     expect(window.columns.length).toBeGreaterThan(0);
+  });
+
+  it("re-reads the viewport when the scroll box is resized", () => {
+    let callback: ResizeObserverCallback | undefined;
+    class FakeResizeObserver {
+      constructor(cb: ResizeObserverCallback) {
+        callback = cb;
+      }
+      observe() {
+        // the hook only needs the constructor + the callback
+      }
+      disconnect() {
+        callback = undefined;
+      }
+      unobserve() {
+        // unused
+      }
+    }
+    vi.stubGlobal("ResizeObserver", FakeResizeObserver);
+    const window = windowAt(0, { clientWidth: 200 });
+    expect(window.columns.length).toBeLessThan(20);
+    act(() => {
+      callback?.([], {} as ResizeObserver);
+    });
+    expect(callback).toBeDefined();
   });
 });

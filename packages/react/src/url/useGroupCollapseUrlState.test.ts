@@ -12,6 +12,11 @@ import { createMemoryAdapter } from "./adapter";
 import { useGroupCollapseUrlState } from "./useGroupCollapseUrlState";
 
 describe("useGroupCollapseUrlState", () => {
+  it("starts empty when there is no URL adapter", () => {
+    const { result } = renderHook(() => useGroupCollapseUrlState());
+    expect(result.current.collapsedGroupIds).toEqual([]);
+  });
+
   it("starts empty, and writes what was collapsed", () => {
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>

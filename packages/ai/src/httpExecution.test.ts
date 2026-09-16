@@ -142,6 +142,34 @@ describe("phase-bound action execution", () => {
     expect(setPage).toHaveBeenCalledWith(2);
   });
 
+  it("cancels every remaining action when the request is aborted", async () => {
+    const setPage = vi.fn();
+    const { session } = liveTable({ setPage });
+    const context = phaseContext(session, "turn-1", 0);
+    const execution = createTurnExecution(session, context);
+    const results = await execution.execute(
+      { context, actions: [PAGE_TWO, FILTER_ACTIVE] },
+      AbortSignal.abort()
+    );
+    expect(results.map((result) => result.error?.code)).toEqual([
+      "cancelled",
+      "cancelled",
+    ]);
+    expect(setPage).not.toHaveBeenCalled();
+  });
+
+  it("treats a missing args bag as an empty one", async () => {
+    const { session } = liveTable();
+    const context = phaseContext(session, "turn-1", 0);
+    const execution = createTurnExecution(session, context);
+    const results = await execution.execute({
+      context,
+      actions: [{ key: "view.setPage", idempotencyKey: "no-args" }],
+    });
+    expect(results[0]?.ok).toBe(false);
+    expect(results[0]?.error?.code).toBe("invalid-arguments");
+  });
+
   it("runs an omitted revision when the render in between changed nothing", async () => {
     const setPage = vi.fn();
     const { session, state } = liveTable({ setPage });

@@ -3,12 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 import {
   ContextIncludeError,
   DEFAULT_COMPACT_TOKENS,
+  fitColumns,
   selectGuides,
   selectionOrder,
   selectionVersion,
   utf8Bytes,
 } from "./contextSelection";
-import type { ContextCapability } from "./contextSnapshot";
+import type { ContextCapability, ContextColumn } from "./contextSnapshot";
 import type { CapabilityGuide } from "./types";
 
 function capability(key: string): ContextCapability {
@@ -234,5 +235,69 @@ describe("naming a selection", () => {
 describe("measuring", () => {
   it("counts UTF-8 bytes, not characters", () => {
     expect(utf8Bytes("é")).toBeGreaterThan(utf8Bytes("e"));
+  });
+});
+
+describe("fitting column descriptions to a budget", () => {
+  const person: ContextColumn = {
+    id: "person",
+    label: "Person",
+    type: "string",
+    readable: true,
+    writable: false,
+    sortable: true,
+    description: "Name on the row",
+  };
+  const salary: ContextColumn = {
+    id: "salary",
+    label: "Salary",
+    type: "number",
+    readable: true,
+    writable: true,
+    sortable: true,
+    visible: false,
+    hideable: true,
+    description: "Hidden but still writable",
+  };
+  const notes: ContextColumn = {
+    id: "notes",
+    label: "Notes",
+    type: "string",
+    readable: true,
+    writable: false,
+    sortable: false,
+    visible: false,
+    description: "Hidden and read-only",
+  };
+
+  it("defers a hidden read-only column before a hidden writable one", () => {
+    // Visible first, then a hidden column the agent can still write, then
+    // a hidden column it can only read. A hide does not take a writable
+    // column out of the prompt before a notes field.
+    const fitted = fitColumns([person, salary, notes], (kept) =>
+      kept.every(
+        (column) => column.description === undefined || column.id !== "notes"
+      )
+    );
+    expect(fitted.deferred).toEqual(["notes"]);
+    expect(fitted.kept.map((column) => column.id)).toEqual([
+      "person",
+      "salary",
+      "notes",
+    ]);
+    expect(
+      fitted.kept.find((column) => column.id === "notes")?.description
+    ).toBeUndefined();
+    expect(fitted.kept.find((column) => column.id === "salary")?.hideable).toBe(
+      true
+    );
+  });
+
+  it("keeps every column listed when even the names overflow", () => {
+    const fitted = fitColumns([person, salary], () => false);
+    expect(fitted.deferred).toEqual(["person", "salary"]);
+    expect(
+      fitted.kept.every((column) => column.description === undefined)
+    ).toBe(true);
   });
 });

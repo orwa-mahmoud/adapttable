@@ -43,6 +43,8 @@ export interface AgentApply {
     applyView?(viewId: string): void;
     deleteRows?(keys: readonly string[]): unknown;
     editCells?(edits: readonly AgentCellEdit[]): unknown;
+    hideColumn?(key: string, hidden: boolean): void;
+    moveColumn?(key: string, toIndex: number): void;
     pinColumn?(key: string, side: "start" | "end" | undefined): void;
     pinRow?(rowKey: string, side: "top" | "bottom" | undefined): void;
     readRows?(query: RowReadQuery): Promise<RowWindow> | RowWindow;
@@ -50,6 +52,7 @@ export interface AgentApply {
     resolveRow?(ref: RowRef): Promise<ResolvedRow> | ResolvedRow;
     runExport?(format: string): unknown;
     setAggregations?(patch: AgentAggregationsPatch): void;
+    setColumnOrder?(order: readonly string[]): void;
     setFilters?(filters: unknown): void;
     setGroupBy?(key: string | undefined): void;
     setLimit?(limit: number): void;
@@ -112,6 +115,7 @@ export interface AgentCellEdit {
 // @public
 export interface AgentColumn {
     readonly ai?: AgentColumnAuthoring;
+    readonly hideable?: boolean;
     readonly id: string;
     readonly label: string;
     readonly pinnable?: boolean;
@@ -174,6 +178,8 @@ export interface AgentContextInputs {
         readonly filters?: Readonly<Record<string, unknown>>;
         readonly pinnedColumns?: Readonly<Record<string, unknown>>;
         readonly pinnedRows?: Readonly<Record<string, unknown>>;
+        readonly hiddenColumns?: readonly string[];
+        readonly columnOrder?: readonly string[];
         readonly pagination?: AgentPagination;
     };
 }
@@ -212,9 +218,13 @@ export interface AgentContextSelection {
 
 // @public
 export interface AgentContextView {
+    // (undocumented)
+    readonly columnOrder?: readonly string[];
     readonly filters?: Readonly<Record<string, unknown>>;
     // (undocumented)
     readonly groupBy?: string;
+    // (undocumented)
+    readonly hiddenColumns?: readonly string[];
     // (undocumented)
     readonly limit: number;
     // (undocumented)
@@ -295,12 +305,15 @@ export interface AgentObservation {
     readonly alwaysAllow?: readonly string[];
     readonly approval?: ApprovalPolicy;
     readonly availableFilters?: readonly AgentFilter[];
+    readonly columnOrder?: readonly string[];
     readonly columns: readonly AgentColumn[];
     readonly commit?: CommitPolicy;
     readonly featureIds: readonly string[];
     readonly filters?: unknown;
     readonly groupBy?: string;
     readonly hasAdd?: boolean;
+    readonly hasColumnHide?: boolean;
+    readonly hasColumnOrder?: boolean;
     readonly hasColumnPinning?: boolean;
     readonly hasDelete?: boolean;
     readonly hasEdit: boolean;
@@ -313,6 +326,7 @@ export interface AgentObservation {
     readonly hasSearch: boolean;
     readonly hasSelection?: boolean;
     readonly hasSort: boolean;
+    readonly hiddenColumns?: readonly string[];
     readonly limit: number;
     readonly page: number;
     readonly pageMax: number;
@@ -483,6 +497,8 @@ export interface ContextCapability {
 export interface ContextColumn {
     readonly description?: string;
     readonly examples?: readonly unknown[];
+    // (undocumented)
+    readonly hideable?: boolean;
     // (undocumented)
     readonly id: string;
     // (undocumented)

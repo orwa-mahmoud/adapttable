@@ -1622,6 +1622,7 @@ export interface TableChrome<TRow> {
     clearFilters: () => void;
     columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     columnLayout: ReactUseColumnLayoutResult<TRow>;
+    columnLayoutLive?: boolean;
     confirm: ConfirmHandler;
     detail?: {
         render: (row: TRow) => ReactNode;

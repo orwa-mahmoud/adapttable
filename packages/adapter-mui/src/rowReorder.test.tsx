@@ -6,6 +6,7 @@ import type {
   RowReorderState,
 } from "@adapttable/react/adapter";
 import {
+  act,
   createEvent,
   fireEvent,
   render,
@@ -303,6 +304,11 @@ describe("row reorder (mui)", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Move under…" })).toHaveFocus()
     );
+    // Closing ignores a click on the trigger for 500ms so MUI's backdrop
+    // dismiss does not bounce the menu open again.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    });
 
     trigger = screen.getByRole("button", { name: "Move under…" });
     fireEvent.click(trigger);

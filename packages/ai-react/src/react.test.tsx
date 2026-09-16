@@ -13,7 +13,7 @@ import {
   useFeatureState,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
-import { render, waitFor } from "@testing-library/react";
+import { act, render, waitFor } from "@testing-library/react";
 import { useLayoutEffect, useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -1498,6 +1498,56 @@ describe("publishing the table as in-page tools", () => {
     }
   });
 
+  it("warns once when the page forbids model-context tools", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const saved = Object.getOwnPropertyDescriptor(document, "modelContext");
+    Object.defineProperty(document, "modelContext", {
+      value: {
+        registerTool: () => {
+          const error = new Error("model context is disallowed by policy");
+          error.name = "NotAllowedError";
+          throw error;
+        },
+      },
+      configurable: true,
+    });
+    try {
+      render(
+        <Harness
+          features={[
+            tableAgent({
+              tableId: "forbidden",
+              columns: { name: { type: "string" } },
+              webmcp: true,
+            }),
+          ]}
+          view={{
+            rows: [],
+            getRowId: () => "1",
+            rowLabel: () => "1",
+            query: {
+              page: 1,
+              limit: 10,
+              search: "",
+              setPage: vi.fn(),
+              setLimit: vi.fn(),
+              setSearch: vi.fn(),
+              setSort: vi.fn(),
+            },
+          }}
+        />
+      );
+      await waitFor(() => {
+        expect(warn).toHaveBeenCalled();
+      });
+      expect(String(warn.mock.calls[0]?.[0])).toMatch(/webmcp/);
+    } finally {
+      warn.mockRestore();
+      if (saved) Object.defineProperty(document, "modelContext", saved);
+      else delete (document as unknown as Record<string, unknown>).modelContext;
+    }
+  });
+
   it("publishes nothing when the host did not ask for it", async () => {
     const browser = fakeModelContext();
     try {
@@ -1644,5 +1694,22 @@ describe("the values a column's author asked to show", () => {
     await waitFor(() => expect(seen).toBeDefined());
     await new Promise((resolve) => setTimeout(resolve, 60));
     expect(seen?.samples).toBeUndefined();
+  });
+
+  it("abandons a sample that comes back after the table is gone", async () => {
+    const { unmount } = render(
+      <FeatureProviders
+        props={applyTableFeatures({
+          features: [tableAgent({ tableId: "gone" })],
+        })}
+      >
+        <Publisher view={view(sampledTable())} />
+      </FeatureProviders>
+    );
+    // Leaving the page mid-read must not throw into the next table.
+    expect(() => {
+      unmount();
+    }).not.toThrow();
+    await act(() => Promise.resolve());
   });
 });

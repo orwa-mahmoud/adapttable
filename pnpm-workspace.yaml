@@ -45,9 +45,9 @@ overrides:
   svgo: "^4.0.2"
   # inherited libvips CVEs (2026-33327/33328/35590/35591)
   sharp: "^0.35.0"
-  # merge-key chains force quadratic CPU; both majors are in the tree
+  # merge-key chains force quadratic CPU; 4.3.1 still burns on empty sources
   "js-yaml@3": "^3.15.0"
-  "js-yaml@4": "^4.3.0"
+  "js-yaml@4": "^4.3.2"
   # DoS via exponential-time expansion of consecutive non-expanding {} groups;
   # both majors are in the tree (glob/minimatch transitives)
   "brace-expansion@1": "^1.1.16"

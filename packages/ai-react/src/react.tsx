@@ -1115,11 +1115,11 @@ function TableAgentProvider({
   // A concrete provider update, rather than an empty `flushSync`, makes React
   // finish controlled-state work already queued by the reader before the
   // session takes its admission snapshot.
-  const [, setAdmissionTick] = useState(0);
+  const [admissionTick, setAdmissionTick] = useState(0);
   const flushAdmission = useRef<() => void>(() => undefined);
   flushAdmission.current = () => {
     flushSync(() => {
-      setAdmissionTick((tick) => tick + 1);
+      setAdmissionTick(admissionTick + 1);
     });
   };
 

@@ -6,7 +6,13 @@ import type {
   RowReorderState,
 } from "@adapttable/react/adapter";
 import { MantineProvider } from "@mantine/core";
-import { createEvent, fireEvent, render, screen } from "@testing-library/react";
+import {
+  createEvent,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { RowReorderHandle } from "./components/kitControls";
@@ -295,7 +301,9 @@ describe("row reorder (mantine)", () => {
     await Promise.resolve();
     expect(onCancel).toHaveBeenCalledOnce();
     expect(onConfirm).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Move under…" })).toHaveFocus();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Move under…" })).toHaveFocus()
+    );
 
     rerender(<MoveHandle pendingMove={null} handlers={handlers} />);
     trigger = screen.getByRole("button", { name: "Move under…" });
@@ -304,7 +312,9 @@ describe("row reorder (mantine)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Move", hidden: true }));
     await Promise.resolve();
     expect(onConfirm).toHaveBeenCalledOnce();
-    expect(screen.getByRole("button", { name: "Move under…" })).toHaveFocus();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Move under…" })).toHaveFocus()
+    );
   });
 
   it("lists the reorder column in the Columns menu", async () => {

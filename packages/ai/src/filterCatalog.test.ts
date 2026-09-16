@@ -367,6 +367,12 @@ describe("a condition list written the other ways a model writes one", () => {
     );
   });
 
+  it("keeps a named condition that carries no value", () => {
+    expect(
+      extrasFromAgentFilters([{ key: "team", op: "in" }], catalog)
+    ).toEqual({ team: undefined });
+  });
+
   it("takes `values` where it takes `value`", () => {
     expect(
       extrasFromAgentFilters([{ key: "team", values: ["Core"] }], catalog)

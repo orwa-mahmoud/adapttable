@@ -4762,6 +4762,7 @@ export interface UseColumnLayoutResult<TRow> {
     resetName: (key: string) => void;
     setHidden: (key: string, hidden: boolean) => void;
     setName: (key: string, name: string) => void;
+    setOrder: (order: readonly string[]) => void;
     setPinned: (key: string, side: PinSide | undefined) => void;
     setWidth: (key: string, width: number | undefined) => void;
     state: ColumnLayoutState;

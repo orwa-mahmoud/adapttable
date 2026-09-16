@@ -5,6 +5,11 @@ import { createMemoryAdapter } from "./adapter";
 import { useRowPinningUrlState } from "./useRowPinningUrlState";
 
 describe("useRowPinningUrlState", () => {
+  it("starts empty when there is no URL adapter", () => {
+    const { result } = renderHook(() => useRowPinningUrlState());
+    expect(result.current.pinnedRowIds).toEqual({ top: [], bottom: [] });
+  });
+
   it("reads an empty list from a bare URL", () => {
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>

@@ -130,6 +130,7 @@ describe("adapter feature assembly", () => {
       "toolbar-extras",
     ]);
     expectKitRenders(features.editHistory(), ["toolbar-extras"]);
+    expect(renderSlots(features.undoRedoButtons())).toEqual([]);
   });
 
   it("keeps filter state providers while adding all four kit surfaces", () => {

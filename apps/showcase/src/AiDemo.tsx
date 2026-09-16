@@ -628,7 +628,14 @@ function AiDemoWatch(): ReactElement {
         preload="none"
         width={960}
         height={474}
-      />
+      >
+        <track
+          kind="captions"
+          src={`${AI_DEMO_MEDIA}/captions.vtt`}
+          srcLang="en"
+          label="English"
+        />
+      </video>
       <p className="ai-demo__watch-note">
         Recorded on the Mantine page. The same assistant runs on every kit.
       </p>
@@ -882,10 +889,8 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     const editing: TableFeature<StaffRow>[] = [
       factories.approval(),
       factories.history(),
+      factories.undo(),
     ];
-    // MUI's history() already draws Undo/Redo. Adding undo() again
-    // mounts a second pair on the same toolbar extras slot.
-    if (adapter !== "mui") editing.push(factories.undo());
     if (toggles.editingMode === "cell") {
       editing.push(
         factories.editing((row: StaffRow, key: string, value: unknown) => {
@@ -909,7 +914,6 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     }
     return [...editing, ...next];
   }, [
-    adapter,
     factories,
     pinnedRowIds,
     toggles,

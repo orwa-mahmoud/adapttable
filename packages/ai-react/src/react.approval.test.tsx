@@ -9,7 +9,9 @@
 import type { AgentApply, AgentSession, ExecuteResult } from "@adapttable/ai";
 import type { ActionAiOptions } from "@adapttable/core";
 import {
+  AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
+  type AgentAlwaysAllowState,
   type AgentApprovalPending,
   applyTableFeatures,
   FeatureProviders,
@@ -41,6 +43,7 @@ type Pending = {
   readonly decisions: readonly string[];
   readonly approve: () => void;
   readonly reject: () => void;
+  readonly alwaysAllow?: () => void;
   readonly decideAt?: (index: number, approved: boolean) => void;
 } | null;
 
@@ -51,6 +54,30 @@ const VIEW: TableRuntimeView<Row> = {
   editing: { onCellEdit: () => undefined },
 };
 
+/** A custom write the table can park, remember, or run unmarked. */
+function sensitive(ai?: ActionAiOptions) {
+  const ran: unknown[] = [];
+  return {
+    ran,
+    capability: {
+      key: "staff.archive",
+      summary: "Archive a person",
+      kind: "write" as const,
+      ...(ai ? { ai } : {}),
+      guide: {
+        guide: "Archive.",
+        input: { type: "object" },
+        output: { type: "object" },
+      },
+      isEnabled: () => true,
+      execute: (_context: unknown, args: unknown) => {
+        ran.push(args);
+        return { proposals: [], applied: true, approval: "not-required" };
+      },
+    },
+  };
+}
+
 function Publisher({ view }: { view: TableRuntimeView<Row> }) {
   usePublishTableRuntime(view.rows, undefined, view);
   return null;
@@ -59,6 +86,7 @@ function Publisher({ view }: { view: TableRuntimeView<Row> }) {
 interface Handles {
   readonly session: AgentSession | undefined;
   readonly pending: Pending;
+  readonly alwaysAllow?: AgentAlwaysAllowState | null;
 }
 
 const handles: { current: Handles } = {
@@ -68,7 +96,12 @@ const handles: { current: Handles } = {
 function Reader({ onReady }: { onReady: () => void }) {
   const session = useFeatureState(TABLE_AGENT_STATE);
   const pending = useFeatureState(AGENT_APPROVAL_STATE);
-  handles.current = { session, pending: pending ?? null };
+  const alwaysAllow = useFeatureState(AGENT_ALWAYS_ALLOW_STATE);
+  handles.current = {
+    session,
+    pending: pending ?? null,
+    alwaysAllow: alwaysAllow ?? null,
+  };
   useEffect(() => {
     if (session) onReady();
   }, [session, onReady]);
@@ -1491,30 +1524,6 @@ describe("what the reader sees is not what the model is told", () => {
  * wrong shape. Each of these failed before the fix beside it.
  */
 describe("who decides, and how", () => {
-  /** A custom write that asks for approval on a table that asks for none. */
-  function sensitive(ai?: ActionAiOptions) {
-    const ran: unknown[] = [];
-    return {
-      ran,
-      capability: {
-        key: "staff.archive",
-        summary: "Archive a person",
-        kind: "write" as const,
-        ...(ai ? { ai } : {}),
-        guide: {
-          guide: "Archive.",
-          input: { type: "object" },
-          output: { type: "object" },
-        },
-        isEnabled: () => true,
-        execute: (_context: unknown, args: unknown) => {
-          ran.push(args);
-          return { proposals: [], applied: true, approval: "not-required" };
-        },
-      },
-    };
-  }
-
   it("asks for an action marked required, on a table that asks for nothing", async () => {
     // The binding used to answer "approved" from the SHARED policy alone,
     // which quietly overrode the action's own override.
@@ -1774,5 +1783,113 @@ describe("what the card says, and what the host is told", () => {
     });
 
     expect(seen.at(-1)?.capabilities).toEqual([]);
+  });
+
+  it("remembers a waved-through write, and asks again once it is revoked", async () => {
+    handles.current = { session: undefined, pending: null };
+    const { ran, capability } = sensitive();
+    mount({
+      tableId: "wave-through",
+      approval: { policy: "writes", alwaysAllow: ["staff.archive"] },
+      capabilities: [capability],
+    });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const first = session().execute(
+      "staff.archive",
+      {},
+      session().manifest().viewRevision,
+      "wave-1"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending?.alwaysAllow).toBeTypeOf("function");
+    });
+    act(() => {
+      handles.current.pending?.alwaysAllow?.();
+    });
+    expect((await first).ok).toBe(true);
+    expect(ran).toHaveLength(1);
+
+    const second = await session().execute(
+      "staff.archive",
+      {},
+      session().manifest().viewRevision,
+      "wave-2"
+    );
+    expect(second.ok).toBe(true);
+    expect(ran).toHaveLength(2);
+    expect(handles.current.pending).toBeNull();
+
+    act(() => {
+      handles.current.alwaysAllow?.revoke("staff.archive");
+    });
+
+    const third = session().execute(
+      "staff.archive",
+      {},
+      session().manifest().viewRevision,
+      "wave-3"
+    );
+    await waitFor(() => {
+      expect(handles.current.pending).not.toBeNull();
+    });
+    act(() => {
+      handles.current.pending?.reject();
+    });
+    await third;
+    expect(ran).toHaveLength(2);
+  });
+
+  it("tells a panel outside the table how far a long write has got", async () => {
+    handles.current = { session: undefined, pending: null };
+    const seen: ({ capability: string } | null)[] = [];
+    const ran: unknown[] = [];
+    mount({
+      tableId: "progress",
+      approval: "never",
+      bridge: { progress: (report) => seen.push(report) },
+      capabilities: [
+        {
+          key: "staff.sweep",
+          summary: "Sweep the roster",
+          kind: "write" as const,
+          guide: {
+            guide: "Sweep.",
+            input: { type: "object" },
+            output: { type: "object" },
+          },
+          isEnabled: () => true,
+          execute: (context: {
+            reportProgress?: (report: {
+              done: number;
+              total: number;
+              label: string;
+            }) => void;
+          }) => {
+            context.reportProgress?.({ done: 1, total: 1, label: "rows" });
+            ran.push(true);
+            return { proposals: [], applied: true, approval: "not-required" };
+          },
+        },
+      ],
+    });
+    await waitFor(() => {
+      expect(handles.current.session).toBeDefined();
+    });
+
+    const settled = await session().execute(
+      "staff.sweep",
+      {},
+      session().manifest().viewRevision,
+      "sweep-1"
+    );
+    expect(settled.ok).toBe(true);
+    expect(ran).toHaveLength(1);
+    expect(seen.some((report) => report?.capability === "staff.sweep")).toBe(
+      true
+    );
+    expect(seen.at(-1)).toBeNull();
   });
 });

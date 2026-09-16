@@ -227,6 +227,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentManifestAggregation",
+      "currentImport": "@adapttable/ai/ag-ui",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ag-ui",
+      "behavior": ""
+    },
+    {
       "export": "AgentObservation",
       "currentImport": "@adapttable/ai/ag-ui",
       "kind": "type",
@@ -891,6 +899,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentManifestAggregation",
+      "currentImport": "@adapttable/ai/ai-sdk",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/ai-sdk",
+      "behavior": ""
+    },
+    {
       "export": "AgentObservation",
       "currentImport": "@adapttable/ai/ai-sdk",
       "kind": "type",
@@ -1516,6 +1532,14 @@
     },
     {
       "export": "AgentManifest",
+      "currentImport": "@adapttable/ai/assistant",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/assistant",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifestAggregation",
       "currentImport": "@adapttable/ai/assistant",
       "kind": "type",
       "class": "neutral-model",
@@ -2244,6 +2268,14 @@
     },
     {
       "export": "AgentManifest",
+      "currentImport": "@adapttable/ai/context",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/context",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifestAggregation",
       "currentImport": "@adapttable/ai/context",
       "kind": "type",
       "class": "neutral-model",
@@ -3003,6 +3035,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentManifestAggregation",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "AgentObservation",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
@@ -3747,6 +3787,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentManifestAggregation",
+      "currentImport": "@adapttable/ai/json",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/json",
+      "behavior": ""
+    },
+    {
       "export": "AgentObservation",
       "currentImport": "@adapttable/ai/json",
       "kind": "type",
@@ -4212,6 +4260,14 @@
     },
     {
       "export": "AgentManifest",
+      "currentImport": "@adapttable/ai/mcp-apps",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp-apps",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifestAggregation",
       "currentImport": "@adapttable/ai/mcp-apps",
       "kind": "type",
       "class": "neutral-model",
@@ -4923,6 +4979,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentManifestAggregation",
+      "currentImport": "@adapttable/ai/mcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/mcp",
+      "behavior": ""
+    },
+    {
       "export": "AgentObservation",
       "currentImport": "@adapttable/ai/mcp",
       "kind": "type",
@@ -5460,6 +5524,14 @@
     },
     {
       "export": "AgentManifest",
+      "currentImport": "@adapttable/ai/openai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/openai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifestAggregation",
       "currentImport": "@adapttable/ai/openai",
       "kind": "type",
       "class": "neutral-model",
@@ -6043,6 +6115,14 @@
       "behavior": ""
     },
     {
+      "export": "AgentManifestAggregation",
+      "currentImport": "@adapttable/ai/webmcp",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/webmcp",
+      "behavior": ""
+    },
+    {
       "export": "AgentObservation",
       "currentImport": "@adapttable/ai/webmcp",
       "kind": "type",
@@ -6604,6 +6684,14 @@
     },
     {
       "export": "AgentManifest",
+      "currentImport": "@adapttable/ai",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai",
+      "behavior": ""
+    },
+    {
+      "export": "AgentManifestAggregation",
       "currentImport": "@adapttable/ai",
       "kind": "type",
       "class": "neutral-model",

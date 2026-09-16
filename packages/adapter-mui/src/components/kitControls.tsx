@@ -33,6 +33,7 @@ import {
   GroupMoreButtonChrome,
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
+  restoreFocusSoon,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
@@ -621,7 +622,7 @@ function RowMoveMenu({
     suppressOpenRef.current = true;
     setAnchor(null);
     window.setTimeout(() => {
-      triggerRef.current?.focus();
+      restoreFocusSoon(triggerRef.current);
       window.setTimeout(() => {
         suppressOpenRef.current = false;
       }, 500);

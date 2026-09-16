@@ -238,6 +238,31 @@ describe("useFindInTable", () => {
     expect(result.current.current).toEqual({ row: 2, col: 0 });
   });
 
+  it("opens a closed bar when a matching find param arrives", () => {
+    const { result, urlAdapter } = setup();
+    act(() => {
+      result.current.setQuery("Ada");
+    });
+    expect(result.current.open).toBe(false);
+    act(() => {
+      urlAdapter.setSearch("find=Ada&atv=1");
+    });
+    expect(result.current.open).toBe(true);
+    expect(result.current.query).toBe("Ada");
+  });
+
+  it("starts closed when there is no URL adapter", () => {
+    const { result } = renderHook(() =>
+      useFindInTable<Row>({
+        enabled: true,
+        rows: ROWS,
+        columns: COLUMNS,
+      })
+    );
+    expect(result.current.open).toBe(false);
+    expect(result.current.query).toBe("");
+  });
+
   it("namespaces the param when the table has a urlKey", () => {
     const urlAdapter = createMemoryAdapter("");
     const { result } = renderHook(() =>

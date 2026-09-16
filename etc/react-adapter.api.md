@@ -5050,6 +5050,7 @@ export interface TableChrome<TRow> {
     clearFilters: () => void;
     columnGroups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     columnLayout: ReactUseColumnLayoutResult<TRow>;
+    columnLayoutLive?: boolean;
     confirm: ConfirmHandler;
     detail?: {
         render: (row: TRow) => ReactNode;
@@ -5213,6 +5214,13 @@ export interface TableRuntime<TRow = unknown> {
 
 // @public
 export interface TableRuntimeView<TRow = unknown> {
+    readonly columnLayout?: {
+        readonly keys: readonly string[];
+        readonly hidden: readonly string[];
+        readonly setHidden?: (key: string, hidden: boolean) => void;
+        readonly move?: (key: string, toIndex: number) => void;
+        readonly setOrder?: (order: readonly string[]) => void;
+    };
     readonly editing?: {
         readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
         readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
@@ -5248,6 +5256,7 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly page: number;
         readonly limit: number;
         readonly total?: number;
+        readonly defaultLimit?: number;
         readonly search: string;
         readonly sortBy?: string;
         readonly sortDir?: "asc" | "desc";

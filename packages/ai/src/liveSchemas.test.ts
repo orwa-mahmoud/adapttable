@@ -258,6 +258,9 @@ describe("the live schema helpers, called on their own", () => {
   it("leaves an authored schema alone when there is nothing to close", () => {
     expect(withEnum(undefined, "limit", [5, 10])).toBeUndefined();
     expect(withEnum(authored, "limit", [])).toBe(authored);
+    expect(
+      withEnum(authored, "key", ["salary"], true)?.properties?.key?.enum
+    ).toEqual(["salary", null]);
     expect(aggregationSetSchema(undefined)).toBeUndefined();
     expect(aggregationSetSchema([])).toBeUndefined();
     expect(

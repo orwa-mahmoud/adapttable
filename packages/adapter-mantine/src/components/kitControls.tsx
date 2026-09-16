@@ -36,6 +36,7 @@ import {
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
   hasActiveHeaderFilter,
+  restoreFocusSoon,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
@@ -642,12 +643,12 @@ function RowMoveMenu({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const setMenuOpen = (next: boolean) => {
     setOpened(next);
-    if (!next) queueMicrotask(() => triggerRef.current?.focus());
+    if (!next) queueMicrotask(() => restoreFocusSoon(triggerRef.current));
   };
   const finish = (callback: () => void) => {
     callback();
     setOpened(false);
-    queueMicrotask(() => triggerRef.current?.focus());
+    queueMicrotask(() => restoreFocusSoon(triggerRef.current));
   };
   if (confirmation) {
     return (

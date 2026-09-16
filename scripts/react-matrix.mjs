@@ -6,8 +6,9 @@
  * develops against one React version — an import of a newer-React-only API
  * (the `useEffectEvent` regression) passes every local test and crashes any
  * consumer on an older release line. This probe packs the CURRENT workspace
- * build of `@adapttable/core` + `@adapttable/unstyled` into a throwaway npm
- * project pinned to one React version and runs a real jsdom smoke: render,
+ * build of `@adapttable/core`, `@adapttable/react` and `@adapttable/unstyled`
+ * into a throwaway npm project pinned to one React version and runs a real
+ * jsdom smoke: render,
  * sort, page, search, and a server-tier `onQueryChange` fetch.
  *
  * Blocking by contract: a failing version is a broken peer-range promise, so
@@ -195,6 +196,7 @@ function runVersion(reactVersion, tarballs) {
       type: "module",
       dependencies: {
         "@adapttable/core": `file:${tarballs.core}`,
+        "@adapttable/react": `file:${tarballs.react}`,
         "@adapttable/unstyled": `file:${tarballs.unstyled}`,
         react: reactVersion,
         "react-dom": reactVersion,
@@ -244,6 +246,7 @@ function main() {
   try {
     const tarballs = {
       core: packInto("core", packDir),
+      react: packInto("react", packDir),
       unstyled: packInto("adapter-unstyled", packDir),
     };
     for (const version of versions) {

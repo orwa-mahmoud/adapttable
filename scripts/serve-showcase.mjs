@@ -28,7 +28,7 @@ import { spawnSync } from "node:child_process";
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
-import { dirname, extname, join, normalize, resolve, sep } from "node:path";
+import { dirname, extname, isAbsolute, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -95,11 +95,21 @@ function build() {
 
 /** Resolve one URL path to a file inside `dist`, or null. */
 function fileFor(urlPath) {
-  const decoded = decodeURIComponent(urlPath.split("?")[0]);
-  // `normalize` collapses `..` before the prefix check, so a traversal attempt
-  // cannot leave the directory.
-  const target = resolve(DIST, `.${normalize(decoded)}`);
-  if (target !== DIST && !target.startsWith(DIST + sep)) return null;
+  let decoded;
+  try {
+    decoded = decodeURIComponent(urlPath.split("?")[0] ?? "");
+  } catch {
+    return null;
+  }
+  const parts = [];
+  for (const part of decoded.split("/")) {
+    if (part === "" || part === ".") continue;
+    if (part === ".." || part.includes("\0")) return null;
+    parts.push(part);
+  }
+  const target = parts.length === 0 ? DIST : join(DIST, ...parts);
+  const rel = relative(DIST, target);
+  if (rel.startsWith("..") || isAbsolute(rel)) return null;
 
   if (existsSync(target) && statSync(target).isFile()) return target;
   // Directory routes (`/mui/realtime/`) are served by their index.
