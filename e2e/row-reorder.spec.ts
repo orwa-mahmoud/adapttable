@@ -36,6 +36,8 @@ const NAMES = [
 const demo = (page: Page) => page.locator("#demo");
 const part = (page: Page, name: string) =>
   demo(page).locator(`[data-adapttable-part="${name}"]`);
+const pagePart = (page: Page, name: string) =>
+  page.locator(`[data-adapttable-part="${name}"]`);
 
 function nameIn(text: string): string {
   return NAMES.find((name) => text.includes(name)) ?? "";
@@ -94,11 +96,14 @@ async function pointerDragRow(grip: Locator, target: Locator): Promise<void> {
       (rowId === null
         ? null
         : document.querySelector(`[data-row-id="${CSS.escape(rowId)}"]`)) ?? to;
+    const bounds = live.getBoundingClientRect();
+    const clientY = bounds.top + bounds.height / 2;
     live.dispatchEvent(
       new DragEvent("dragover", {
         bubbles: true,
         cancelable: true,
         dataTransfer: dt,
+        clientY,
       })
     );
     live.dispatchEvent(
@@ -106,6 +111,7 @@ async function pointerDragRow(grip: Locator, target: Locator): Promise<void> {
         bubbles: true,
         cancelable: true,
         dataTransfer: dt,
+        clientY,
       })
     );
     from.dispatchEvent(
@@ -168,6 +174,99 @@ for (const adapter of ADAPTERS) {
       await expect(demo(page).locator('[dir="rtl"]').first()).toBeVisible();
       // RTL: ArrowLeft is down, the same as ArrowDown in LTR.
       await grabOneDown(page, "ArrowLeft");
+    });
+
+    test("moves between groups and guards tree cycles", async ({ page }) => {
+      await openDemo(page, adapter);
+      await configureFeatureLab(page, "row structure", "Tree");
+      await enable(page, "reorder");
+
+      const treeRows = demo(page).locator("[data-stagger][data-row-id]");
+      await part(page, "tree-toggle").first().click();
+      await expect(treeRows.nth(5)).toBeVisible();
+      await pointerDragRow(
+        part(page, "row-reorder-handle").first(),
+        treeRows.nth(1)
+      );
+      await expect(part(page, "row-reorder-announcer")).toContainText(
+        "cannot move inside"
+      );
+      const treeTrigger = part(page, "row-move-menu-trigger").first();
+      await expect(treeTrigger).toBeVisible();
+      await treeTrigger.focus();
+      await treeTrigger.press("Enter");
+      const cycleTarget = page.locator(
+        '[data-adapttable-part="row-move-menu-item"][title*="cannot move inside"]:visible'
+      );
+      await expect(cycleTarget.first()).toBeVisible();
+      await page.keyboard.press("Escape");
+
+      await configureFeatureLab(page, "row structure", "Grouped");
+      const groupedRows = demo(page).locator("[data-stagger][data-row-id]");
+      await expect(groupedRows).toHaveCount(30);
+      const groupedGrip = part(page, "row-reorder-handle").first();
+      await groupedGrip.evaluate((element) =>
+        element.scrollIntoView({ block: "center" })
+      );
+      await expect(groupedGrip).toBeInViewport();
+      await pointerDragRow(groupedGrip, groupedRows.last());
+      let confirmation = page.locator(
+        '[data-adapttable-part="row-move-confirmation"]:visible'
+      );
+      await expect(confirmation).toBeVisible();
+      const confirm = confirmation.getByRole("button", { name: "Move" });
+      await confirm.focus();
+      await confirm.press("Enter");
+      await expect(part(page, "row-reorder-announcer")).toContainText(
+        "Row moved to"
+      );
+      await expect(
+        page.locator('[data-adapttable-part="row-move-confirmation"]:visible')
+      ).toHaveCount(0);
+
+      const trigger = part(page, "row-move-menu-trigger").first();
+      await expect(trigger).toBeVisible();
+      const triggerRowId = await trigger.evaluate((node) =>
+        node.closest("[data-row-id]")?.getAttribute("data-row-id")
+      );
+      expect(triggerRowId).toBeTruthy();
+      // Click, not Space: after the confirm dialog closes, Space is eaten by
+      // a kit overlay that is no longer :visible but still intercepts keys.
+      await trigger.click();
+      const destination = pagePart(page, "row-move-menu-item")
+        .filter({
+          visible: true,
+        })
+        .first();
+      await expect(destination).toBeVisible();
+      await destination.click();
+      confirmation = page.locator(
+        '[data-adapttable-part="row-move-confirmation"]:visible'
+      );
+      await expect(confirmation).toBeVisible();
+      const cancel = confirmation.getByRole("button", { name: "Cancel" });
+      await cancel.focus();
+      await cancel.press("Enter");
+      // `.first()` is a different trigger after the grouped remount — cancel
+      // returns focus to the row that opened the menu.
+      await expect(
+        demo(page).locator(
+          `[data-row-id="${triggerRowId}"] [data-adapttable-part="row-move-menu-trigger"]`
+        )
+      ).toBeFocused();
+    });
+
+    test("keeps nested move controls on mobile RTL cards", async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await openDemo(page, adapter);
+      await configureFeatureLab(page, "row structure", "Tree");
+      await enable(page, "reorder");
+      await configureFeatureLab(page, "locale", "العربية");
+
+      await expect(demo(page).locator('[dir="rtl"]').first()).toBeVisible();
+      await expect(part(page, "row-reorder-buttons").first()).toBeVisible();
+      await expect(part(page, "row-move-menu-trigger").first()).toBeVisible();
+      await expect(part(page, "row-reorder-handle")).toHaveCount(0);
     });
   });
 }

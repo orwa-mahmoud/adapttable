@@ -3,7 +3,7 @@ import {
   type StreamSocket,
   useChangedCellFlash,
   useRowPatchStream,
-} from "@adapttable/core/stream";
+} from "@adapttable/react/stream";
 import {
   type Dispatch,
   type ReactNode,

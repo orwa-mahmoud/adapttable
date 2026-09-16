@@ -1,14 +1,14 @@
-import { SAVED_VIEW_VERSION } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core";
 import {
   createMemoryAdapter,
-  defaultLabels,
+  SAVED_VIEW_VERSION,
   type SavedView,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 const KEY = "test-views";
@@ -79,7 +79,11 @@ describe("unstyled SavedViewsMenu", () => {
     // captured (the foreign param stays out); the input reset for the next.
     expect(screen.getByRole("button", { name: "Mine" })).toBeInTheDocument();
     expect(storage.read()).toEqual([
-      { name: "Mine", search: "q=alice&page=2", version: SAVED_VIEW_VERSION },
+      {
+        name: "Mine",
+        search: "q=alice&page=2&atv=1",
+        version: SAVED_VIEW_VERSION,
+      },
     ]);
     expect(input).toHaveValue("");
     expect(saveButton).toBeDisabled();

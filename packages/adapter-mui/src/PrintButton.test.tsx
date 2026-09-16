@@ -1,8 +1,9 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { print } from "./print";
 
 interface Row {
   id: string;
@@ -34,6 +35,11 @@ describe("print button (mui)", () => {
           columns={COLS}
           rowKey={(r) => r.id}
           urlSync={false}
+          features={
+            extra?.printButton && extra?.onPrint
+              ? [print(extra.onPrint as () => void, true)]
+              : undefined
+          }
           {...extra}
         />
       </>

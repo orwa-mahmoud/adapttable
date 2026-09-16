@@ -1,10 +1,10 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import { flattenColumnTree } from "@adapttable/core/adapter";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import { flattenReactColumnTree } from "@adapttable/react/adapter";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { ConfigProvider } from "antd";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef, ColumnInput } from "./index";
 
 interface Row {
@@ -33,7 +33,7 @@ function Harness(props: {
   const source = useFrontendData<Row>({
     data: ROWS,
     urlAdapter: adapter,
-    columns: flattenColumnTree(columns).leaves,
+    columns: flattenReactColumnTree(columns).leaves,
     paginationMode: "paged",
   });
   return (

@@ -7,11 +7,11 @@
  * sticky header inside a bounded scroll box, the fixed-width table min-width,
  * the right-pinned actions edge, and the clickable mobile card.
  */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -26,16 +26,16 @@ const columns: ColumnDef<Row>[] = [
   { key: "name", header: "Name", accessor: (r) => r.name },
 ];
 
-import type * as AdapterModule from "@adapttable/core/adapter";
-import { useDataTableShell } from "@adapttable/core/adapter";
+import type * as AdapterModule from "@adapttable/react/adapter";
+import { useDataTableShell } from "@adapttable/react/adapter";
 
-vi.mock("@adapttable/core/adapter", async (importOriginal) => {
+vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return { ...actual, useDataTableShell: vi.fn(actual.useDataTableShell) };
 });
 
 const actualAdapter = await vi.importActual<typeof AdapterModule>(
-  "@adapttable/core/adapter"
+  "@adapttable/react/adapter"
 );
 
 /**
@@ -47,6 +47,7 @@ function mockVirtualWindow(top: number, bottom: number, indices = [0, 1]) {
     const real = actualAdapter.useDataTableShell(props, render);
     return {
       ...real,
+      skipChromeBody: true,
       tableProps: {
         ...real.tableProps,
         rowEntries: indices

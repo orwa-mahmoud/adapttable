@@ -14,6 +14,15 @@
 
 html {
   scroll-behavior: smooth;
+  /* Reserved always, so holding the page still behind a modal does not shift
+     the layout sideways as the scrollbar goes. */
+  scrollbar-gutter: stable;
+}
+/* A modal dialog sits in the top layer, but the page underneath still scrolls:
+   two scrollable surfaces answering one wheel. The page holds still while the
+   panel is open, so a gesture over it moves the panel and nothing else. */
+html:has(.ai-opts[open]) {
+  overflow: hidden;
 }
 /* `html body` so the brand font outranks Chakra's runtime body reset —
    without it the whole chrome silently falls back to the system font. */
@@ -932,6 +941,537 @@ a {
   font-size: 12px;
   color: var(--ink-2);
 }
+.ai-play {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--page-border);
+  background: var(--page-surface-2);
+}
+.ai-play__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink);
+}
+.ai-play__status strong {
+  font-weight: 650;
+}
+.ai-play__note {
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.ai-play__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.ai-play__keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1 1 220px;
+}
+.ai-play__key,
+.ai-play__btn {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--page-border);
+  border-radius: 999px;
+  background: var(--page-surface);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ai-play__key.is-on,
+.ai-play__btn:hover {
+  border-color: var(--brand, var(--c));
+}
+.ai-play__key.is-on {
+  background: color-mix(
+    in srgb,
+    var(--page-surface) 78%,
+    var(--brand, var(--c)) 22%
+  );
+}
+.ai-play__key:focus-visible,
+.ai-play__btn:focus-visible {
+  outline: 2px solid var(--brand, var(--c));
+  outline-offset: 2px;
+}
+.ai-play__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ai-play__schema {
+  margin: 0;
+  padding: 10px 12px;
+  max-height: 160px;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.45;
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: 8px;
+}
+.ai-play__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.ai-play__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ai-play__backend,
+.ai-play__chat {
+  display: grid;
+  gap: 10px;
+}
+.ai-play__field {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  min-width: min(100%, 280px);
+  flex: 1 1 220px;
+}
+.ai-play__field input {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--page-border);
+  border-radius: 8px;
+  background: var(--page-surface);
+  color: inherit;
+  font: inherit;
+}
+.ai-play__log {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.ai-play__last {
+  min-height: 1.2em;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.ai-play__refs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.ai-play__refs a {
+  color: inherit;
+}
+.ai-play__kits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 13px;
+}
+.ai-play__kits a {
+  color: inherit;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.ai-play__kits a[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+/* The conversational demo: table and assistant side by side, and the panel
+   drops below the table once there is no longer room for both. */
+#ai-demo {
+  /* Kit switches are a new page; the hash must clear the sticky nav. */
+  scroll-margin-top: 72px;
+}
+
+.ai-demo__lede {
+  margin: 0 0 10px;
+  color: var(--ink-2);
+  font-size: 13px;
+  max-width: 62ch;
+}
+.ai-demo__watch {
+  margin: 0 0 14px;
+  width: 100%;
+  max-width: none;
+}
+.ai-demo__watch figcaption {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 650;
+}
+.ai-demo__watch-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 960 / 474;
+  border-radius: 8px;
+  border: 1px solid var(--page-border);
+  background: var(--page-surface);
+}
+.ai-demo__watch-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.ai-demo__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+}
+.ai-demo__controls .ai-demo__kits {
+  margin-bottom: 0;
+}
+.ai-demo__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-inline-start: auto;
+}
+.ai-demo__options-trigger {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 9px;
+  border: 1px solid var(--page-border);
+  background: var(--page-surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+.ai-demo__options-trigger:hover {
+  border-color: var(--ink);
+}
+.ai-demo__options-trigger:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.ai-demo__options-trigger[aria-expanded="true"] {
+  background: var(--ink);
+  color: var(--page-bg);
+  border-color: var(--ink);
+}
+.ai-demo__options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.ai-demo__kits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+.ai-demo__kits a {
+  color: var(--ink-2);
+}
+.ai-demo__kits a[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 650;
+  text-decoration: none;
+}
+.ai-demo__stage {
+  /* One column: the table keeps the full width, and the assistant floats
+     over the page rather than taking a column away from it. */
+  display: block;
+}
+.ai-demo__assistant {
+  /* The launcher and the window are both fixed to the viewport, so this
+     wrapper only has to stay out of the table's way. */
+  display: contents;
+}
+.ai-demo__panel {
+  position: sticky;
+  top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Tall enough to hold a conversation, short enough that the table beside
+     it keeps a usable viewport on a laptop. */
+  max-height: min(70dvh, 620px);
+  min-height: 380px;
+}
+@media (width < 1100px) {
+  .ai-demo__stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ai-demo__panel {
+    position: static;
+    max-height: none;
+  }
+}
+.ai-demo__settings,
+.ai-demo__dev {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--page-border);
+  border-radius: 10px;
+  font-size: 12px;
+}
+.ai-demo__settings summary,
+.ai-demo__dev summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+.ai-demo__toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ai-demo__note,
+.ai-demo__revision {
+  margin: 10px 0 0;
+  color: var(--ink-2);
+}
+.ai-demo__keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.ai-demo__key {
+  padding: 4px 8px;
+  color: var(--ink-2);
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+}
+.ai-demo__key.is-on {
+  color: var(--ink);
+  border-color: var(--brand);
+  font-weight: 650;
+}
+.ai-demo__key:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.ai-demo__schema {
+  max-height: 220px;
+  margin-top: 10px;
+  overflow: auto;
+  padding: 10px;
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: 8px;
+  font-size: 11px;
+}
+.ai-demo__refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 10px 0 0;
+}
+.ai-conn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: 10px;
+  font-size: 12px;
+}
+.ai-conn__now {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+.ai-conn__now span {
+  color: var(--ink-2);
+}
+.ai-conn__form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* The text fields only. This rule used to catch the protocol radios too,
+   which stretched them to 32px and floated them into the middle of their own
+   labels. */
+.ai-conn__form input:not([type="radio"]):not([type="checkbox"]) {
+  min-height: 32px;
+  padding: 0 8px;
+  color: inherit;
+  background: var(--page-bg);
+  border: 1px solid var(--page-border);
+  border-radius: 8px;
+  font: inherit;
+}
+/* One choice per row: the control in its own column, the description beside
+   it, both aligned to the first line so a three-line option still reads as
+   one choice. */
+.ai-conn__protocol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 8px 10px 10px;
+  border: 1px solid var(--page-border);
+  border-radius: 8px;
+}
+.ai-conn__protocol legend {
+  padding-inline: 4px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.ai-conn__protocol label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: start;
+  min-height: 44px;
+  padding: 6px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.ai-conn__protocol label:hover {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+.ai-conn__protocol input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--ink);
+}
+.ai-conn__protocol label:focus-within {
+  outline: 2px solid var(--focus, #2563eb);
+  outline-offset: 1px;
+}
+.ai-conn__protocol span {
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.ai-conn__protocol code {
+  overflow-wrap: anywhere;
+}
+.ai-conn__note {
+  margin: 4px 0;
+  color: var(--ink-2);
+}
+.ai-conn__error {
+  margin: 0;
+  color: var(--danger, #b42318);
+}
+.ai-conn__row {
+  display: flex;
+  gap: 8px;
+}
+.ai-conn__btn {
+  min-height: 32px;
+  padding: 0 12px;
+  color: var(--page-bg);
+  background: var(--ink);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 650;
+}
+.ai-conn__btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+/* What to run, where the key stays, what Connect does — the three things
+   someone needs before pointing this at their own machine. */
+.ai-conn__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-inline-start: 20px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.ai-conn__steps code {
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--page-bg);
+  border: 1px solid var(--page-border);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.ai-conn-dialog {
+  width: min(520px, calc(100vw - 32px));
+  padding: 0;
+  color: inherit;
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 28%);
+}
+.ai-conn-dialog::backdrop {
+  background: rgb(0 0 0 / 42%);
+}
+.ai-conn-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--page-border);
+}
+.ai-conn-dialog__head h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.ai-conn-dialog__close {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  color: var(--ink-2);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+.ai-conn-dialog__close:hover {
+  color: var(--ink);
+  background: var(--page-bg);
+}
+.ai-conn-dialog__close:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+/* Inside the dialog the card chrome is the dialog's own. */
+.ai-conn-dialog .ai-conn {
+  gap: 12px;
+  padding: 16px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
 .demo-live-update {
   display: flex;
   align-items: center;
@@ -1498,5 +2038,253 @@ a {
   }
   .star-the-repo__star:hover {
     transform: none;
+  }
+}
+
+/* The demo's own settings. A drawer, so the table stays visible behind the
+   choices being made about it. */
+/* A closed dialog is display:none by UA rule — which a display of our own
+   would silently override, leaving the drawer on screen permanently. */
+.ai-opts:not([open]) {
+  display: none;
+}
+.ai-opts[open] {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  /* The UA sets both inset edges on a modal dialog; clearing the start edge
+     is what actually anchors it to one side. */
+  inset-inline-start: auto;
+  width: min(420px, 100vw);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  background: var(--page-surface);
+  border: 0;
+  border-inline-start: 1px solid var(--page-border);
+  box-shadow: -18px 0 48px rgb(0 0 0 / 22%);
+}
+.ai-opts::backdrop {
+  background: rgb(0 0 0 / 34%);
+}
+.ai-opts__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-block-end: 1px solid var(--page-border);
+}
+.ai-opts__head h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.ai-opts__close {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  color: var(--ink-2);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+.ai-opts__close:hover {
+  color: var(--ink);
+  background: var(--page-bg);
+}
+.ai-opts__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 16px 16px;
+}
+.ai-opts__section {
+  padding-block: 14px;
+  border-block-end: 1px solid var(--page-border);
+}
+.ai-opts__section:last-child {
+  border-block-end: 0;
+}
+.ai-opts__heading {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.ai-opts__help {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.ai-opts__row--mode {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.ai-opts__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding-block: 7px;
+  font-size: 13px;
+}
+.ai-opts__row > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ai-opts__row input[type="checkbox"],
+.ai-opts__row input[type="radio"] {
+  margin-block-start: 2px;
+  flex: 0 0 auto;
+}
+.ai-opts__label {
+  font-weight: 600;
+}
+.ai-opts__hint {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.ai-opts__choices select {
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 6px;
+  color: inherit;
+  background: var(--page-bg);
+  border: 1px solid var(--page-border);
+  border-radius: 7px;
+}
+/* Set apart, because it throws work away. */
+.ai-opts__foot {
+  display: flex;
+  align-items: center;
+  /* Reset sits away from Done: the destructive one is not where a reader
+     aiming to leave puts their cursor. */
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-block-start: 1px solid var(--page-border);
+}
+.ai-opts__done {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  padding: 6px 16px;
+  color: var(--page-surface);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ai-opts__done:hover {
+  background: var(--ink-2);
+  border-color: var(--ink-2);
+}
+.ai-opts__reset {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  padding: 6px 12px;
+  color: var(--danger, #b42318);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ai-opts__reset:hover {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+/* The developer inspector, in the documentation column beside the
+   integration example it explains. */
+.ai-demo__dev {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* A grid child sizes to its content unless told otherwise, and this one
+     holds a JSON schema. Without it the whole column widens to the longest
+     line and the page scrolls sideways. */
+  min-width: 0;
+  padding: 12px 14px;
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: 10px;
+  font-size: 12px;
+}
+.ai-demo__dev-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.ai-demo__revision {
+  margin: 0;
+  color: var(--ink-2);
+}
+.ai-demo__pick {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ai-demo__pick > span {
+  font-weight: 600;
+}
+.ai-demo__pick select {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 6px;
+  color: inherit;
+  background: var(--page-bg);
+  border: 1px solid var(--page-border);
+  border-radius: 7px;
+  max-width: 100%;
+}
+.ai-demo__schema-wrap {
+  position: relative;
+  min-width: 0;
+}
+.ai-demo__copy {
+  position: absolute;
+  inset-block-start: 6px;
+  inset-inline-end: 6px;
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 7px;
+  color: inherit;
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+/* Bounded, and scrolling inside itself: a long schema must not stretch the
+   sidebar or push the page sideways. */
+.ai-demo__schema {
+  margin: 0;
+  min-width: 0;
+  max-height: 260px;
+  overflow: auto;
+  padding: 10px;
+  background: var(--page-bg);
+  border: 1px solid var(--page-border);
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: start;
+}
+@media (max-width: 900px) {
+  .ai-demo__schema {
+    max-height: 200px;
   }
 }

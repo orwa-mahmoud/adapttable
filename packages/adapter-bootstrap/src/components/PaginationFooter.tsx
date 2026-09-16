@@ -3,7 +3,7 @@ import {
   type PaginationInfo,
   type TableLabels,
 } from "@adapttable/core";
-import { paginationSlots } from "@adapttable/core/adapter";
+import { paginationSlots } from "@adapttable/react/adapter";
 import { Form, Pagination } from "react-bootstrap";
 
 export function Footer({

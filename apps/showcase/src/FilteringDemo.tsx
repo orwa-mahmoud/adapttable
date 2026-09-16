@@ -39,6 +39,10 @@ export function FilteringDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           <Check size={12} /> Header icons filter one column; Filters keeps the
           tree
         </span>
+        <span className="hint">
+          <Check size={12} /> Find highlights cells and writes find= in the URL
+          — it is not the filter tree
+        </span>
         <div className="seg" role="group" aria-label="Filter layout">
           {(
             [

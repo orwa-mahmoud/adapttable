@@ -1,71 +1,48 @@
 import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
-  columnReorderKeyProps,
-  type Direction,
   REORDER_COLUMN_KEY,
-  useColumnDragState,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
+import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
 import {
   columnMenuActions,
-  type ColumnMenuChromeProps,
+  type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
+  type ColumnMenuSlotProps,
+  type ColumnRenameEditorState,
   EyeIcon,
   filterColumnMenuRows,
   GripIcon,
   hideAllColumns,
+  LiveRegion,
   nextPinSide,
   pinActionLabel,
   PinIcon,
   showAllColumns,
   unpinAllColumns,
+  useColumnRenameEditor,
+  useEscapeClose,
   useFeatureHost,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   Box,
   Button,
   Divider,
   IconButton,
+  MenuItem,
   Popover,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-/** Props for the column menu — the shared core contract + actions wiring. */
-export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
-  /** Resolved labels, including the trailing actions-column entry's name. */
-  labels: ColumnMenuChromeProps<TRow>["labels"] & {
-    actions: string;
-    reorderRow: string;
-  };
-  /** Whether the table has row actions — lists the injected actions column. */
-  hasRowActions?: boolean;
-  /**
-   * Whether the table renders a row-reorder column. When true the menu
-   * lists it as a leading reserved row: hideable and start-pinnable.
-   */
-  hasRowReorder?: boolean;
-  /** Size every rendered column to its content. */
-  onAutoSize: () => void;
-  /** Size one column to its content. */
-  onAutoSizeColumn?: (key: string) => void;
-  /** Sort one column from the submenu. */
-  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-  /** Open the filter UI from the submenu. */
-  onFilterColumn?: (key: string) => void;
-  /** Column key currently sorted by, if any. */
-  sortBy?: string;
-  /** Direction for `sortBy`. */
-  sortDir?: "asc" | "desc";
-  /** Text direction — the Popover portals to `<body>`, so it loses the
-   *  table's direction unless we hand it over explicitly (RTL flips
-   *  grip ↔ pin). */
-  dir?: Direction;
-}
+/** The shared Columns-menu contract, declared once in core. */
+export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
+
+const NOOP_RENAME = () => undefined;
 
 /** Labels the visibility toggle and the row name share. */
 interface RowLabels {
@@ -142,6 +119,148 @@ function PinToggle({
     >
       <PinIcon />
     </IconButton>
+  );
+}
+
+function ColumnRenameForm({
+  rename,
+  labels,
+}: Readonly<{
+  rename: ColumnRenameEditorState;
+  labels: ColumnMenuLabels;
+}>) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+  return (
+    <Box
+      component="form"
+      data-adapttable-part="column-rename-form"
+      sx={{ display: "grid", gap: 0.5, p: 0.5 }}
+      onSubmit={(event) => {
+        event.preventDefault();
+        rename.submit();
+      }}
+    >
+      <Typography
+        component="label"
+        htmlFor={rename.inputId}
+        variant="caption"
+        data-adapttable-part="column-rename-label"
+      >
+        {labels.columnName}
+      </Typography>
+      <TextField
+        id={rename.inputId}
+        inputRef={inputRef}
+        size="small"
+        fullWidth
+        value={rename.draft}
+        error={rename.error !== undefined}
+        slotProps={{
+          htmlInput: {
+            "data-adapttable-part": "column-rename-input",
+            "aria-invalid": rename.error ? "true" : undefined,
+            "aria-describedby": rename.error ? rename.errorId : undefined,
+          },
+        }}
+        onChange={(event) => rename.setDraft(event.target.value)}
+        onBlur={rename.blur}
+        onKeyDown={rename.onKeyDown}
+      />
+      {rename.error ? (
+        <Typography
+          id={rename.errorId}
+          variant="caption"
+          color="error"
+          role="alert"
+          data-adapttable-part="column-rename-error"
+        >
+          {rename.error}
+        </Typography>
+      ) : null}
+      <Stack direction="row" spacing={0.5}>
+        <Button
+          type="submit"
+          size="small"
+          variant="contained"
+          data-adapttable-part="column-rename-save"
+        >
+          {labels.saveColumnName}
+        </Button>
+        <Button
+          type="button"
+          size="small"
+          data-adapttable-part="column-rename-cancel"
+          onClick={rename.cancel}
+        >
+          {labels.cancelColumnRename}
+        </Button>
+      </Stack>
+    </Box>
+  );
+}
+
+function ColumnSubmenu({
+  actions,
+  rename,
+  labels,
+  onClose,
+}: Readonly<{
+  actions: readonly ColumnMenuItem[];
+  rename: ColumnRenameEditorState;
+  labels: ColumnMenuLabels;
+  onClose: () => void;
+}>) {
+  return (
+    <Box data-adapttable-part="column-menu-submenu" sx={{ px: 0.5, pb: 0.5 }}>
+      {actions.map((action) =>
+        "kind" in action ? (
+          <TextField
+            key={action.id}
+            select
+            size="small"
+            fullWidth
+            label={action.label}
+            value={action.value}
+            disabled={action.disabled}
+            data-adapttable-part="column-menu-choice"
+            slotProps={{
+              select: { inputProps: { "aria-label": action.label } },
+            }}
+            sx={{ my: 0.5 }}
+            onChange={(event) => action.onChange(event.target.value)}
+          >
+            {action.options.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+        ) : (
+          <Button
+            key={action.id}
+            size="small"
+            fullWidth
+            data-adapttable-part="column-menu-action"
+            disabled={
+              action.disabled || (action.id === "rename" && rename.editing)
+            }
+            sx={{ justifyContent: "flex-start" }}
+            onClick={() => {
+              action.run();
+              if (action.id !== "rename") onClose();
+            }}
+          >
+            {action.label}
+          </Button>
+        )
+      )}
+      {rename.editing ? (
+        <ColumnRenameForm rename={rename} labels={labels} />
+      ) : null}
+    </Box>
   );
 }
 
@@ -227,6 +346,8 @@ function ColumnMenuRowItem<TRow>({
   onSortColumn,
   onAutoSizeColumn,
   onFilterColumn,
+  onRenameColumn,
+  groupingPanel,
 }: Readonly<{
   row: ColumnMenuRow<TRow>;
   layout: UseColumnLayoutResult<TRow>;
@@ -237,10 +358,19 @@ function ColumnMenuRowItem<TRow>({
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
+  onRenameColumn?: (key: string, name: string) => void;
+  groupingPanel: ColumnMenuProps<TRow>["groupingPanel"];
 }>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
   const featureHost = useFeatureHost<TRow>();
+  const rename = useColumnRenameEditor({
+    key,
+    name,
+    onRename: onRenameColumn ?? NOOP_RENAME,
+    requiredMessage: labels.columnNameRequired,
+    renamedMessage: labels.columnRenamed,
+  });
   const actions = columnMenuActions(row, {
     featureHost,
     labels,
@@ -250,6 +380,8 @@ function ColumnMenuRowItem<TRow>({
     onSortColumn,
     onAutoSizeColumn,
     onFilterColumn,
+    onBeginRename: onRenameColumn ? rename.begin : undefined,
+    groupingPanel,
   });
   const indicator = canMove ? drag.rowAttrs(key, index) : {};
   const edge = indicator["data-drop"];
@@ -322,28 +454,16 @@ function ColumnMenuRowItem<TRow>({
         </IconButton>
       </Stack>
       {open ? (
-        <Box
-          data-adapttable-part="column-menu-submenu"
-          sx={{ px: 0.5, pb: 0.5 }}
-        >
-          {actions.map((action) => (
-            <Button
-              key={action.id}
-              size="small"
-              fullWidth
-              data-adapttable-part="column-menu-action"
-              disabled={action.disabled}
-              sx={{ justifyContent: "flex-start" }}
-              onClick={() => {
-                action.run();
-                setOpen(false);
-              }}
-            >
-              {action.label}
-            </Button>
-          ))}
-        </Box>
+        <ColumnSubmenu
+          actions={actions}
+          rename={rename}
+          labels={labels}
+          onClose={() => setOpen(false)}
+        />
       ) : null}
+      <LiveRegion part="column-rename-announcer" statusRole={false}>
+        {rename.announcement}
+      </LiveRegion>
     </div>
   );
 }
@@ -364,14 +484,25 @@ export function ColumnMenu<TRow>({
   onAutoSizeColumn,
   onSortColumn,
   onFilterColumn,
+  onRenameColumn,
   sortBy,
   sortDir,
+  groupingPanel,
   dir,
 }: Readonly<ColumnMenuProps<TRow>>) {
   const drag = useColumnDragState();
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
   const [query, setQuery] = useState("");
   const rows = filterColumnMenuRows(columnMenuRows(allColumns, layout), query);
+  const open = anchor !== null;
+  // One owner for Escape. MUI's Modal closes the popover only when the
+  // dialog itself holds focus; after a cancelled rename, focus is back on
+  // the action that opened the editor, and the next Escape was swallowed.
+  // `useEscapeClose` closes from anywhere and leaves the key alone inside
+  // the rename field.
+  useEscapeClose(open, () => setAnchor(null), {
+    ignoreWithin: '[data-adapttable-part="column-rename-input"]',
+  });
   return (
     <>
       <Button
@@ -386,7 +517,7 @@ export function ColumnMenu<TRow>({
       </Button>
       <Popover
         anchorEl={anchor}
-        open={anchor !== null}
+        open={open}
         onClose={() => setAnchor(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}
@@ -482,6 +613,8 @@ export function ColumnMenu<TRow>({
               onSortColumn={onSortColumn}
               onAutoSizeColumn={onAutoSizeColumn}
               onFilterColumn={onFilterColumn}
+              onRenameColumn={onRenameColumn}
+              groupingPanel={groupingPanel}
             />
           ))}
           {(hasRowReorder || hasRowActions) && <Divider sx={{ my: 0.5 }} />}

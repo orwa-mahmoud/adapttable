@@ -78,17 +78,14 @@ describe("collectFeatureNotices", () => {
     ).toEqual([]);
   });
 
-  it("marks pin and reorder as off while nested", () => {
+  it("marks pin as off while nested but keeps row reorder available", () => {
     const notices = collectFeatureNotices({
       ...BASE,
       rowPinningRequested: true,
       rowReorderRequested: true,
       nestedArmed: true,
     });
-    expect(notices.map((n) => n.kind)).toEqual([
-      "pin-nested",
-      "reorder-nested",
-    ]);
+    expect(notices.map((n) => n.kind)).toEqual(["pin-nested"]);
     expect(notices.every((n) => n.appearance === "off")).toBe(true);
   });
 
@@ -102,7 +99,7 @@ describe("collectFeatureNotices", () => {
     ).toEqual([]);
   });
 
-  it("marks export-all without a full set as one-page", () => {
+  it("marks export-all without a retrieval route as disabled", () => {
     const notices = collectFeatureNotices({
       ...BASE,
       exportCsv: { scope: "all" },
@@ -110,13 +107,13 @@ describe("collectFeatureNotices", () => {
     expect(notices).toEqual([
       {
         kind: "export-all-page",
-        appearance: "one-page",
+        appearance: "disabled",
         message: defaultLabels.noticeExportAllPage,
       },
     ]);
   });
 
-  it("does not notice export-all when fetchAll or request can answer", () => {
+  it("does not notice export-all when an executable route can answer", () => {
     expect(
       collectFeatureNotices({
         ...BASE,
@@ -130,6 +127,12 @@ describe("collectFeatureNotices", () => {
       collectFeatureNotices({
         ...BASE,
         exportCsv: { scope: "all", request: () => undefined },
+      })
+    ).toEqual([]);
+    expect(
+      collectFeatureNotices({
+        ...BASE,
+        exportCsv: { scope: "all", onExportAll: () => undefined },
       })
     ).toEqual([]);
     expect(

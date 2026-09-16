@@ -1,7 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { commandPalette } from "./command-palette";
+import { DataTable } from "./data-table.test-utils";
+import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -31,10 +33,27 @@ describe("command palette (mui)", () => {
           rowKey={(r) => r.id}
           urlSync={false}
           commandPalette
+          features={[commandPalette()]}
           onPrint={onPrint}
           {...extra}
         />
       </>
+    );
+
+  /**
+   * No features composed. This one renders the shipped component rather than
+   * the harness above, which exists to compose features from props — the very
+   * thing an absence test must not do.
+   */
+  const bare = (extra?: Record<string, unknown>) =>
+    render(
+      <BareDataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        {...extra}
+      />
     );
 
   const palette = () =>
@@ -94,8 +113,8 @@ describe("command palette (mui)", () => {
     expect(palette()).toBeNull();
   });
 
-  it("binds nothing when the prop is absent", () => {
-    table({ commandPalette: undefined });
+  it("binds nothing when the feature is not composed", () => {
+    bare({ commandPalette: true });
     fireEvent.keyDown(document, { key: "k", ctrlKey: true });
 
     expect(palette()).toBeNull();

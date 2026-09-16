@@ -1,9 +1,9 @@
-import type { RowPinState } from "@adapttable/core";
+import type { RowPinState } from "@adapttable/react/adapter";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Task {

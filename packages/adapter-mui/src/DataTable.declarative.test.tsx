@@ -3,18 +3,22 @@
  * (`data`, `data` + `onQueryChange`), auto headers, dot-path cells, and the
  * auto-built filter form writing every filter type's state keys.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { AutoFilterForm } from "./components/AutoFilterForm";
-import { DataTable } from "./DataTable";
-import type { ColumnDef, FilterDef, FilterOption, TableQuery } from "./index";
+import { DataTable } from "./data-table.test-utils";
+import { filters as filtersFeature } from "./filters";
 import {
+  type ColumnDef,
   defaultFilterRegistry,
   defaultLabels,
+  type FilterDef,
+  type FilterOption,
   resolveFilterRegistry,
+  type TableQuery,
 } from "./index";
 import { renderMui } from "./test-utils";
 
@@ -97,15 +101,24 @@ function mountTable(
   url = ""
 ) {
   const adapter = createMemoryAdapter(url);
+  const { features: extraFeatures, ...rest } = override;
+  const filtersProp = "filters" in override ? override.filters : FILTERS;
+  // The kit renderer rides on the feature; defs still come from the prop /
+  // column shorthands. An empty list only fills the slot.
+  const filterDefs = Array.isArray(filtersProp) ? filtersProp : [];
   render(
     <ThemeProvider theme={theme}>
       <DataTable<Person>
         data={PEOPLE}
         columns={columns}
         rowKey={(r) => r.id}
-        filters={FILTERS}
+        filters={filtersProp}
+        features={[
+          filtersFeature<Person>(filterDefs),
+          ...(extraFeatures ?? []),
+        ]}
         urlAdapter={adapter}
-        {...override}
+        {...rest}
       />
     </ThemeProvider>
   );
@@ -149,7 +162,7 @@ function pickSelect(
 }
 
 describe("declarative DataTable (MUI)", () => {
-  it("column filter shorthands alone (no filters prop) render the auto form", () => {
+  it("column shorthands with empty feature config render the auto form", () => {
     mountTable({
       filters: undefined,
       columns: [

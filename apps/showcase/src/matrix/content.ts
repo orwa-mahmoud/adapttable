@@ -10,6 +10,7 @@
 import {
   adapterByKey,
   builtAdapters,
+  CANONICAL_AI_ADAPTER,
   featureBySlug,
   fillTemplate,
   introFor,
@@ -21,6 +22,7 @@ import {
 export {
   adapterByKey,
   builtAdapters,
+  CANONICAL_AI_ADAPTER,
   featureBySlug,
   fillTemplate,
   introFor,

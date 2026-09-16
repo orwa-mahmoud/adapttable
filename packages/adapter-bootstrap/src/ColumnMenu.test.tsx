@@ -1,5 +1,8 @@
-import type { UseColumnLayoutResult } from "@adapttable/core";
-import { ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY } from "@adapttable/core";
+import {
+  ACTIONS_COLUMN_KEY,
+  REORDER_COLUMN_KEY,
+  type UseColumnLayoutResult,
+} from "@adapttable/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -34,6 +37,22 @@ const mockLabels: ColumnMenuProps<Row>["labels"] = {
   filterColumn: "Filter column",
   autoSizeColumn: "Size column to content",
   resetColumn: "Reset column",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save name",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Column name is required",
+  columnRenamed: ({ previous, name }) => `${previous} renamed to ${name}`,
+  groupByColumn: (label) => `Group by ${label}`,
+  ungroupColumn: (label) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
+  groupingAverage: "Average",
+  groupingAggregationCustom: "Custom",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
 };
 
 function makeLayoutMock(
@@ -280,4 +299,68 @@ describe("ColumnMenu", () => {
       })
     ).toBeDisabled();
   });
+});
+
+describe("a hidden column", () => {
+  // `isHidden` only ever matched "hiddenCol", which is not in `allColumns`, so
+  // no test rendered a row in its hidden state and every `hidden ? … : …`
+  // branch in the row markup went unexercised.
+  it("renders the hidden marker, the struck-through name and the show label", () => {
+    const props = makeProps({
+      layout: makeLayoutMock({
+        isHidden: vi.fn((key: string) => key === "age"),
+      }),
+    });
+    render(<ColumnMenu {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: mockLabels.columns }));
+
+    const rows = document.querySelectorAll(
+      '[data-adapttable-part="column-menu-item"]'
+    );
+    expect(rows.length).toBeGreaterThan(0);
+    expect(document.body.textContent).toContain("○");
+    expect(
+      document.querySelector(".text-decoration-line-through")
+    ).not.toBeNull();
+  });
+
+  it("offers to show a hidden column and to hide a visible one", () => {
+    const toggleVisible = vi.fn();
+    const props = makeProps({
+      layout: makeLayoutMock({
+        isHidden: vi.fn((key: string) => key === "age"),
+        toggleVisible,
+      }),
+    });
+    render(<ColumnMenu {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: mockLabels.columns }));
+
+    fireEvent.click(
+      screen.getByRole("button", { name: `${mockLabels.showColumn}: Age` })
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: `${mockLabels.hideColumn}: Name` })
+    );
+    expect(toggleVisible).toHaveBeenCalledTimes(2);
+  });
+});
+
+it("falls back to no actions column and no reorder column when unstated", () => {
+  // Every other test passes both flags as true, so their defaults never ran.
+  const { allColumns, layout, labels, onAutoSize, sortBy, sortDir, dir } =
+    makeProps();
+  render(
+    <ColumnMenu
+      allColumns={allColumns}
+      layout={layout}
+      labels={labels}
+      onAutoSize={onAutoSize}
+      sortBy={sortBy}
+      sortDir={sortDir}
+      dir={dir}
+    />
+  );
+  fireEvent.click(screen.getByRole("button", { name: mockLabels.columns }));
+
+  expect(document.body.textContent).not.toContain(mockLabels.actions);
 });

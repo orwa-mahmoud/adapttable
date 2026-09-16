@@ -20,12 +20,12 @@
  * app importing it ever downloads — a table that exports CSV must not ship a
  * ZIP encoder.
  */
+import type { ColumnMetadata } from "../columnModel";
 import {
   coveredAddressSet,
   type GetCellSpan,
   spanningArmed,
 } from "../rows/cellSpan";
-import type { ColumnDef } from "../types";
 import { isBrowser } from "../utils/env";
 import { getPath } from "../utils/path";
 import { defaultCsvValue, matrixToCsv } from "./csv";
@@ -145,7 +145,10 @@ export interface ExportWriter {
  * file should carry something other than the screen. Without one, the default
  * display-value resolution stands.
  */
-function exportCellValue<TRow>(row: TRow, column: ColumnDef<TRow>): unknown {
+function exportCellValue<TRow>(
+  row: TRow,
+  column: ColumnMetadata<TRow>
+): unknown {
   if (column.exportValue) return column.exportValue(row);
   const value = defaultCsvValue(row, column);
   if (value !== "") return value;
@@ -154,7 +157,9 @@ function exportCellValue<TRow>(row: TRow, column: ColumnDef<TRow>): unknown {
 }
 
 /** Character width a spreadsheet can use, from a column's own `width`. */
-function columnWidthChars<TRow>(column: ColumnDef<TRow>): number | undefined {
+function columnWidthChars<TRow>(
+  column: ColumnMetadata<TRow>
+): number | undefined {
   const raw = column.width;
   let pixels = Number.NaN;
   if (typeof raw === "number") pixels = raw;
@@ -166,7 +171,7 @@ function columnWidthChars<TRow>(column: ColumnDef<TRow>): number | undefined {
   return Math.min(40, Math.max(8, pixels / 8));
 }
 
-function tableChrome<TRow>(columns: readonly ColumnDef<TRow>[]): {
+function tableChrome<TRow>(columns: readonly ColumnMetadata<TRow>[]): {
   headers: string[];
   keys: string[];
   widths: (number | undefined)[];
@@ -182,7 +187,7 @@ function tableChrome<TRow>(columns: readonly ColumnDef<TRow>[]): {
 
 function viewRowValues<TRow>(
   entry: ExportViewEntry<TRow>,
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): unknown[] {
   if (entry.role === "data") {
     return columns.map((column) => exportCellValue(entry.row, column));
@@ -210,7 +215,7 @@ function viewRowValues<TRow>(
  */
 export function buildExportTable<TRow>(
   rows: readonly TRow[],
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   span?: {
     getCellSpan?: GetCellSpan<TRow>;
     firstRowIndex?: number;

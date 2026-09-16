@@ -2,7 +2,8 @@
 
 Short, direct answers to the things people ask when choosing a React table.
 (Looking for a quick comparison table instead? See
-[comparison.md](./comparison.md).)
+[comparison.md](./comparison.md). Looking for what the product does not
+do? See [limitations.md](./limitations.md).)
 
 **Jump to a feature:** [URL state](./url-state.md) ·
 [Filtering](./filtering.md) · [Virtualization](./virtualization.md) ·
@@ -117,8 +118,9 @@ all — your call.
 ## Does it support virtualization?
 
 Yes. Long infinite lists can opt into row/card virtualization with
-`virtualize`, `estimateRowSize`, `estimateCardSize`, and `virtualOverscan`.
-Ant Design uses its native virtual table mode via the same `virtualize` prop.
+Compose `virtualize()` and tune `estimateRowSize`, `estimateCardSize`, and
+`virtualOverscan`. Ant Design uses its native virtual table mode through the
+same feature.
 
 ## How do I add URL-synced (shareable, deep-linkable) table state?
 
@@ -172,27 +174,25 @@ Every package sets `sideEffects: false` and ships ESM, so unused code is
 tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured on the published builds, with React and your UI kit external because
-your app already ships those:
+Measured 2026-09-15 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+React and the UI kit external because your app already ships those):
 
-| What you import                           | min+gzip    |
-| ----------------------------------------- | ----------- |
-| `useFrontendData` + `useDataTable` (core) | ~18 kB      |
-| every core export                         | ~87 kB      |
-| `DataTable` from an adapter               | ~127–141 kB |
+| What you import                            | min+gzip  |
+| ------------------------------------------ | --------- |
+| `useFrontendData` + `useDataTable` (react) | ~24 kB    |
+| every core export                          | ~56 kB    |
+| `DataTable` from an adapter                | ~69–79 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
-land within ~13 kB of each other, so switching kits does not change what you
+land within ~12 kB of each other, so switching kits does not change what you
 pay.
 
-The third row is the one to understand. `DataTable` is a single component whose
-props can turn on every feature it has, and a bundler follows imports rather
-than prop values — so it carries them all whether or not you switch one on. To
-pay for what you use, name it: compose with `features` from the kit's subpath,
-or build on the headless hooks in row one. [Feature
-composition](./features.md#no-bundle-savings-yet) has the detail; v3 is where
-the props stop holding the imports open.
+The third row is what composition buys. Every optional feature lives on its own
+entry point, so a plain `DataTable` carries none of them: no drag machine, no
+virtualizer, no export writer, no filter engine. Each one arrives with the
+import that names it — `features={[grouping("team")]}` — and costs what it
+weighs. [Feature composition](./features.md) has the detail.
 
 These are not estimates. `pnpm budget` bundles each of those imports for real
 and fails the build if one crosses its ceiling, and it checks this table against
@@ -213,6 +213,13 @@ Yes — AdaptTable is **stable at 2.0** and follows semantic versioning, so
 breaking changes ship only in a major release. It is strict-TypeScript, dual
 ESM/CJS with `.d.ts` types, axe-audited for accessibility in CI, and holds
 near-100% test coverage across every adapter.
+
+## What does AdaptTable not do?
+
+Present-tense ceilings — data ownership, formula grammar, reorder policy,
+virtualization, export caps, adapter size, SSR, kit coverage — live on
+[limitations and boundaries](./limitations.md). Each claim there traces to
+a test, a measurement, or a documented decision.
 
 ## When might another library fit better?
 

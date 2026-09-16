@@ -1,6 +1,6 @@
 /** The row-expansion chevron, shared by rows and cards. */
-import { type Direction, type TableLabels } from "@adapttable/core";
-import { ExpandChevron } from "@adapttable/core/adapter";
+import type { Direction, TableLabels } from "@adapttable/core";
+import { ExpandChevron } from "@adapttable/react/adapter";
 import { IconButton } from "@chakra-ui/react";
 
 /** Chevron toggle for a row's detail panel. */

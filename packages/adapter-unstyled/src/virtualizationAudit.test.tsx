@@ -1,8 +1,9 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { virtualize } from "./virtualize";
 
 interface Row {
   id: string;
@@ -45,7 +46,7 @@ describe("virtualization compatibility (unstyled)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         paginationMode="infinite"
-        virtualize
+        features={[virtualize()]}
         {...extra}
       />
     );

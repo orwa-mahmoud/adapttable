@@ -8,6 +8,8 @@ shareable and a page reloadable. The moment that URL reaches a backend it
 stops being state and becomes **user input**: `limit=999999`,
 `sortBy=password`, a filter on a column that is not in the table at all.
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 ## Features
 
 - **Validation, not just parsing** — you give it the columns a client is

@@ -1,8 +1,4 @@
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type EditableCellEditorCtrl,
-  EditableCellGate,
   editorInputType,
   isBooleanEditor,
   isDraftChecked,
@@ -11,11 +7,17 @@ import {
   readMultiDraft,
 } from "@adapttable/core";
 import {
+  type ColumnDef,
+  type EditableCellEditing,
+  type EditableCellEditorCtrl,
+  EditableCellGate,
+} from "@adapttable/react";
+import {
   commitBooleanDraft,
   editorValidationProps,
   multiDraftFromSelect,
   stopEditKeys,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { editableCellSlots } from "./kitControls";

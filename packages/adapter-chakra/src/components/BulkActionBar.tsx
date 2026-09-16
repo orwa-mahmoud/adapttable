@@ -3,7 +3,7 @@ import {
   type BulkBarChromeProps,
   resolveDisabledReason,
   useBulkBarState,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, HStack, Text } from "@chakra-ui/react";
 import { isValidElement } from "react";
 

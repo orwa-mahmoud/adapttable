@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../columnModel";
 import {
   bodyCellsHaveRowSpan,
   buildBodyCells,
@@ -19,10 +19,10 @@ interface Person {
   city: string;
 }
 
-const COLUMNS: ColumnDef<Person>[] = [
-  { key: "name", header: "Name", accessor: (row) => row.name },
-  { key: "team", header: "Team", accessor: (row) => row.team },
-  { key: "city", header: "City", accessor: (row) => row.city },
+const COLUMNS: ColumnModel<Person>[] = [
+  { key: "name", header: "Name", exportValue: (row) => row.name },
+  { key: "team", header: "Team", exportValue: (row) => row.team },
+  { key: "city", header: "City", exportValue: (row) => row.city },
 ];
 
 const ROWS: Person[] = [
@@ -91,7 +91,7 @@ describe("resolveCellSpan", () => {
   });
 
   it("reads column.colSpan / rowSpan when the callback is silent", () => {
-    const column: ColumnDef<Person> = {
+    const column: ColumnModel<Person> = {
       ...COLUMNS[0]!,
       colSpan: 2,
       rowSpan: (row) => (row.id === "a" ? 2 : 1),

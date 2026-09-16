@@ -4,7 +4,7 @@ import {
   type ContextMenuItemProps,
   type ContextMenuSlots,
   type ContextMenuSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { DropdownMenu } from "@radix-ui/themes";
 
 /**
@@ -31,7 +31,7 @@ function Surface({
   onClose,
   children,
   className,
-}: ContextMenuSurfaceProps) {
+}: Readonly<ContextMenuSurfaceProps>) {
   return (
     <DropdownMenu.Root
       open

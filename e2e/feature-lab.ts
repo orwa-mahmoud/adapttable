@@ -14,10 +14,15 @@ export async function configureFeatureLab(
   await page.getByRole("button", { name: "Configure options" }).click();
   const dialog = page.getByRole("dialog", { name: "Configure Feature Lab" });
   await expect(dialog).toBeVisible();
-  await dialog
+  const choice = dialog
     .getByRole("group", { name: group })
-    .getByRole("button", { name: option, exact: true })
-    .click();
+    .getByRole("button", { name: option, exact: true });
+  await choice.click();
+  // Wait for the option to report itself chosen before leaving the drawer.
+  // Several of these rebuild the table — a locale switch swaps every label
+  // and the writing direction with it — so a caller that closes and asserts
+  // immediately can be reading the table that is about to be replaced.
+  await expect(choice).toHaveAttribute("aria-pressed", "true");
   await dialog.getByRole("button", { name: "Close options" }).click();
   await expect(dialog).toBeHidden();
 }

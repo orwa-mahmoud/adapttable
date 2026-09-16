@@ -1,8 +1,11 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { cellNavigation } from "./cell-navigation";
+import { DataTable } from "./data-table.test-utils";
+import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
+import { selectionStats } from "./status-bar";
 
 interface Row {
   id: string;
@@ -33,6 +36,7 @@ describe("selection statistics (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         cellNavigation
+        features={[cellNavigation(), selectionStats()]}
         {...extra}
       />
     );
@@ -47,14 +51,30 @@ describe("selection statistics (mui)", () => {
   };
 
   it("adds up the selected cells", () => {
-    table({ selectionStats: true, locale: "en-US" });
+    table({
+      selectionStats: true,
+      locale: "en-US",
+      features: [cellNavigation(), selectionStats()],
+    });
     selectBudgetColumn();
     expect(strip()?.textContent).toContain("Sum 40");
     expect(strip()?.textContent).toContain("Avg 20");
   });
 
-  it("renders nothing without the prop", () => {
-    table();
+  it("renders nothing without the feature", () => {
+    // The shipped component, not the harness: the harness turns v2 props into
+    // features, which is exactly what this test must not have happen. v3
+    // removed those props, so there is no second way in to pass either.
+    render(
+      <BareDataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        locale="en-US"
+        features={[cellNavigation()]}
+      />
+    );
     selectBudgetColumn();
     expect(strip()).toBeNull();
   });

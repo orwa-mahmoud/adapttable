@@ -1,7 +1,13 @@
+import type { ResolvedAggregateOperation } from "../aggregate/aggregatable";
+import type { ColumnMetadata } from "../columnModel";
 import type { FeatureHostState } from "../features/currentHost";
-import type { ColumnDef } from "../types";
-import type { PinSide, UseColumnLayoutResult } from "./useColumnLayout";
-import { applyColumnOrder } from "./useColumnLayout";
+import type { GroupingPanelState } from "../grouping/groupingPanelModel";
+import type { Direction } from "../types";
+import {
+  applyColumnOrder,
+  type PinSide,
+  type UseColumnLayoutResult,
+} from "./columnLayoutModel";
 
 export type { UseColumnLayoutResult };
 
@@ -10,7 +16,7 @@ export type { UseColumnLayoutResult };
  *
  * @public
  */
-export function columnMenuLabel<TRow>(column: ColumnDef<TRow>): string {
+export function columnMenuLabel<TRow>(column: ColumnMetadata<TRow>): string {
   if (typeof column.header === "string") return column.header;
   return column.mobileLabel ?? column.key;
 }
@@ -29,7 +35,7 @@ export type PinnedSide = PinSide | undefined;
  */
 export interface ColumnMenuRow<TRow> {
   /** The column this row controls. */
-  column: ColumnDef<TRow>;
+  column: ColumnMetadata<TRow>;
   /** The column's key. */
   key: string;
   /** The column's name in prose, for the row's label. */
@@ -52,6 +58,8 @@ export interface ColumnMenuRow<TRow> {
   canSort: boolean;
   /** True when the column declared a `filter`. */
   canFilter: boolean;
+  /** True when the column allows its display name to be edited. */
+  canRename?: boolean;
 }
 
 /**
@@ -85,12 +93,12 @@ export function pinActionLabel(
 /**
  * Build the column-menu rows in the table's real order — visible and hidden
  * columns interleaved exactly as they appear (hiding never reorders the list).
- * Shared so all five adapters render an identical model and only differ in kit
+ * Shared so all eight adapters render an identical model and only differ in kit
  * markup.
  */
 /**
  * Reserved layout key for the injected row-actions column. It is not a
- * `ColumnDef`, but the layout state treats keys opaquely, so the actions
+ * `ColumnModel`, but the layout state treats keys opaquely, so the actions
  * column hides (`hidden: ["actions"]`) and end-pins
  * (`pinned: { actions: "end" }`) like any data column — adapters list it
  * in the Columns menu with a visibility toggle and an end-pin toggle (no
@@ -102,7 +110,7 @@ export const ACTIONS_COLUMN_KEY = "actions";
 
 /**
  * Reserved layout key for the injected row-reorder column. Same deal as
- * {@link ACTIONS_COLUMN_KEY}: not a `ColumnDef`, but hideable and
+ * {@link ACTIONS_COLUMN_KEY}: not a `ColumnModel`, but hideable and
  * start-pinnable through the layout because the key is just a string.
  *
  * @public
@@ -115,7 +123,7 @@ export const REORDER_COLUMN_KEY = "reorder";
  * @public
  */
 export function columnMenuRows<TRow>(
-  allColumns: readonly ColumnDef<TRow>[],
+  allColumns: readonly ColumnMetadata<TRow>[],
   layout: UseColumnLayoutResult<TRow>
 ): ColumnMenuRow<TRow>[] {
   return applyColumnOrder(allColumns, layout.state.order).map(
@@ -132,6 +140,7 @@ export function columnMenuRows<TRow>(
       canResize: column.lockWidth !== true,
       canSort: column.sortable === true,
       canFilter: column.filter !== undefined,
+      canRename: column.renameable === true,
     })
   );
 }
@@ -203,7 +212,7 @@ export function unpinAllColumns<TRow>(
 }
 
 /**
- * Restore one column's visibility, pin and width. Locks still apply.
+ * Restore one column's visibility, pin, width and display name. Locks still apply.
  *
  * @public
  */
@@ -214,6 +223,7 @@ export function resetColumnLayout<TRow>(
   if (row.canHide) layout.setHidden(row.key, false);
   if (row.canPin) layout.setPinned(row.key, undefined);
   if (row.canResize) layout.setWidth(row.key, undefined);
+  if (row.canRename === true) layout.resetName(row.key);
 }
 
 /**
@@ -231,6 +241,35 @@ export interface ColumnMenuAction {
   /** Performs the action. */
   run: () => void;
 }
+
+/** One option in a kit-native column-menu choice control. @public */
+export interface ColumnMenuChoiceOption {
+  /** State value written when selected. */
+  value: string;
+  /** Localized visible option text. */
+  label: string;
+}
+
+/** A compact kit-native choice appended by a column-menu plugin. @public */
+export interface ColumnMenuChoice {
+  /** Discriminant used by adapters to select a native choice control. */
+  kind: "choice";
+  /** Stable action identifier. */
+  id: string;
+  /** Localized visible and accessible control label. */
+  label: string;
+  /** Whether the choice is visible but unavailable. */
+  disabled: boolean;
+  /** Controlled selected value. */
+  value: string;
+  /** Localized choices. */
+  options: readonly ColumnMenuChoiceOption[];
+  /** Commit one selected value. */
+  onChange: (value: string) => void;
+}
+
+/** An ordinary action or a compact choice control in a column submenu. @public */
+export type ColumnMenuItem = ColumnMenuAction | ColumnMenuChoice;
 
 /**
  * What a submenu needs besides the row itself.
@@ -252,8 +291,35 @@ export interface ColumnMenuActionContext<TRow = unknown> {
   onAutoSizeColumn?: (key: string) => void;
   /** Opens a column's filter, absent when unavailable. */
   onFilterColumn?: (key: string) => void;
+  /** Opens the kit-owned inline name editor, absent when renaming is unavailable. */
+  onBeginRename?: () => void;
   /** The host of THIS table — plugin menu actions resolve from here. */
   featureHost?: FeatureHostState<TRow>;
+  /** Interactive grouping state, when `groupingPanel()` is composed. */
+  groupingPanel?: GroupingPanelState;
+}
+
+function resetColumnDisabled<TRow>(
+  row: ColumnMenuRow<TRow>,
+  layout: UseColumnLayoutResult<TRow>
+): boolean {
+  const hasCustomName =
+    row.canRename === true && layout.state.names?.[row.key] !== undefined;
+  return !row.canHide && !row.canPin && !row.canResize && !hasCustomName;
+}
+
+function appendRenameAction<TRow>(
+  actions: ColumnMenuItem[],
+  row: ColumnMenuRow<TRow>,
+  ctx: ColumnMenuActionContext<TRow>
+): void {
+  if (row.canRename !== true || !ctx.onBeginRename) return;
+  actions.push({
+    id: "rename",
+    label: ctx.labels.renameColumn,
+    disabled: false,
+    run: ctx.onBeginRename,
+  });
 }
 
 /**
@@ -264,8 +330,8 @@ export interface ColumnMenuActionContext<TRow = unknown> {
 export function columnMenuActions<TRow>(
   row: ColumnMenuRow<TRow>,
   ctx: ColumnMenuActionContext<TRow>
-): ColumnMenuAction[] {
-  const actions: ColumnMenuAction[] = [];
+): ColumnMenuItem[] {
+  const actions: ColumnMenuItem[] = [];
   if (row.canSort && ctx.onSortColumn) {
     actions.push(
       {
@@ -328,18 +394,110 @@ export function columnMenuActions<TRow>(
       run: () => ctx.onFilterColumn?.(row.key),
     });
   }
+  appendRenameAction(actions, row, ctx);
   actions.push({
     id: "reset",
     label: ctx.labels.resetColumn,
-    disabled: !row.canHide && !row.canPin && !row.canResize,
+    disabled: resetColumnDisabled(row, ctx.layout),
     run: () => resetColumnLayout(row, ctx.layout),
   });
+  appendGroupingPanelActions(actions, row, ctx);
   appendPluginColumnMenuActions(actions, row, ctx);
   return actions;
 }
 
+function appendGroupingPanelActions<TRow>(
+  actions: ColumnMenuItem[],
+  row: ColumnMenuRow<TRow>,
+  ctx: ColumnMenuActionContext<TRow>
+): void {
+  const panel = ctx.groupingPanel;
+  if (!panel) return;
+  const grouped = panel.groupBy.includes(row.key);
+  actions.push({
+    id: grouped ? "ungroup-column" : "group-by-column",
+    label: grouped
+      ? ctx.labels.ungroupColumn(row.name)
+      : ctx.labels.groupByColumn(row.name),
+    disabled: false,
+    run: () => (grouped ? panel.remove(row.key) : panel.add(row.key)),
+  });
+  // Aggregation is independent of whether this column is also a grouping
+  // key. With nothing grouped yet there are no group cells to aggregate.
+  if (panel.groupBy.length === 0) return;
+
+  // The same list the panel reads: same eligibility, same operations, same
+  // current value, same mutation. A column offers one answer wherever a
+  // reader meets it.
+  const candidate = panel.aggregations.candidates.find(
+    (entry) => entry.columnKey === row.key
+  );
+  if (!candidate) return;
+  const active = panel.aggregations.items.find(
+    (item) => item.columnKey === row.key
+  );
+  if (active && !active.editable) return;
+  const options = candidate.operations.map((operation) => ({
+    value: operation.id,
+    label: operationLabel(operation, ctx.labels),
+  }));
+  if (active && active.operationId === undefined) {
+    options.unshift({
+      value: "",
+      label: ctx.labels.groupingAggregationCustom,
+    });
+  } else if (
+    active?.operationId &&
+    !options.some((option) => option.value === active.operationId)
+  ) {
+    options.unshift({
+      value: active.operationId,
+      label: operationLabel(
+        { id: active.operationId, builtIn: true },
+        ctx.labels
+      ),
+    });
+  }
+  actions.push({
+    kind: "choice",
+    id: "group-aggregation",
+    label: ctx.labels.groupingAggregation,
+    disabled: !panel.canSetAggregates,
+    value: active?.operationId ?? "",
+    options,
+    onChange: (value) => {
+      if (value === "") return;
+      panel.setAggregateOperation(row.key, value);
+    },
+  });
+  if (active?.editable) {
+    actions.push({
+      id: "remove-aggregation",
+      label: ctx.labels.groupingRemoveAggregation(row.name),
+      disabled: !panel.canSetAggregates,
+      run: () => panel.removeAggregate(row.key),
+    });
+  }
+}
+
+/** What one operation is called: the table's own name, or the host's. */
+function operationLabel(
+  operation: ResolvedAggregateOperation,
+  labels: ColumnMenuLabels
+): string {
+  if (!operation.builtIn) return operation.label ?? operation.id;
+  const named: Partial<Record<string, string>> = {
+    sum: labels.selectionSum,
+    avg: labels.groupingAverage,
+    min: labels.selectionMin,
+    max: labels.selectionMax,
+    count: labels.selectionCount,
+  };
+  return named[operation.id] ?? operation.id;
+}
+
 function appendPluginColumnMenuActions<TRow>(
-  actions: ColumnMenuAction[],
+  actions: ColumnMenuItem[],
   row: ColumnMenuRow<TRow>,
   ctx: ColumnMenuActionContext<TRow>
 ): void {
@@ -353,8 +511,8 @@ function appendPluginColumnMenuActions<TRow>(
 }
 
 function pushColumnMenuExtra(
-  actions: ColumnMenuAction[],
-  extra: ColumnMenuAction | readonly ColumnMenuAction[]
+  actions: ColumnMenuItem[],
+  extra: ColumnMenuItem | readonly ColumnMenuItem[]
 ): void {
   if ("id" in extra) {
     actions.push(extra);
@@ -365,7 +523,7 @@ function pushColumnMenuExtra(
 
 /**
  * Labels every adapter's column menu needs (pre-translated by the caller).
- * Hoisted here so the five adapters share one contract instead of
+ * Hoisted here so the eight adapters share one contract instead of
  * re-declaring it.
  *
  * @public
@@ -401,6 +559,18 @@ export interface ColumnMenuLabels {
   unpinAllColumns: string;
   /** Restore one column's own state. */
   resetColumn: string;
+  /** Open the column-name editor. */
+  renameColumn: string;
+  /** Visible label for the name input. */
+  columnName: string;
+  /** Commit a valid column name. */
+  saveColumnName: string;
+  /** Dismiss the name editor. */
+  cancelColumnRename: string;
+  /** Validation message for an empty name. */
+  columnNameRequired: string;
+  /** Polite announcement after a successful rename. */
+  columnRenamed: (info: { previous: string; name: string }) => string;
   /** Sort the column ascending. */
   sortAscending: string;
   /** Sort the column descending. */
@@ -411,6 +581,26 @@ export interface ColumnMenuLabels {
   columnActions: string;
   /** Size this column to its content. */
   autoSizeColumn: string;
+  /** Add a named column to row grouping. */
+  groupByColumn: (label: string) => string;
+  /** Remove a named column from row grouping. */
+  ungroupColumn: (label: string) => string;
+  /** Label for the group aggregation choice. */
+  groupingAggregation: string;
+  /** Take this column's aggregation away. */
+  groupingRemoveAggregation: (label: string) => string;
+  /** Full average label used by aggregation choices. */
+  groupingAverage: string;
+  /** Honest label for a host aggregate whose operation is unknown. */
+  groupingAggregationCustom: string;
+  /** Count aggregation label. */
+  selectionCount: string;
+  /** Sum aggregation label. */
+  selectionSum: string;
+  /** Minimum aggregation label. */
+  selectionMin: string;
+  /** Maximum aggregation label. */
+  selectionMax: string;
 }
 
 /**
@@ -420,9 +610,55 @@ export interface ColumnMenuLabels {
  */
 export interface ColumnMenuChromeProps<TRow> {
   /** All declared columns (pre layout filtering). */
-  allColumns: ColumnDef<TRow>[];
+  allColumns: ColumnMetadata<TRow>[];
   /** The user column-layout state + mutators. */
   layout: UseColumnLayoutResult<TRow>;
   /** Resolved labels. */
   labels: ColumnMenuLabels;
+}
+
+/**
+ * Everything a kit's Columns menu is given.
+ *
+ * Every adapter declared this same shape beside its own menu — eight copies of
+ * one contract, so a field the table started passing reached whichever kits
+ * someone remembered to edit. It belongs here, next to the model that produces
+ * the values.
+ *
+ * @public
+ */
+export interface ColumnMenuSlotProps<TRow> extends ColumnMenuChromeProps<TRow> {
+  /** Resolved labels, including the trailing actions-column entry's name. */
+  labels: ColumnMenuLabels & {
+    actions: string;
+    reorderRow: string;
+  };
+  /** Whether the table has row actions — lists the injected actions column. */
+  hasRowActions?: boolean;
+  /**
+   * Whether the table renders a row-reorder column. When true the menu
+   * lists it as a leading reserved row: hideable and start-pinnable.
+   */
+  hasRowReorder?: boolean;
+  /** Size every rendered column to its content. */
+  onAutoSize: () => void;
+  /** Size one column to its content. */
+  onAutoSizeColumn?: (key: string) => void;
+  /** Sort one column from the submenu. */
+  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
+  /** Open the filter UI from the submenu. */
+  onFilterColumn?: (key: string) => void;
+  /** Commit a trimmed display name for a renameable column. */
+  onRenameColumn?: (key: string, name: string) => void;
+  /** Column key currently sorted by, if any. */
+  sortBy?: string;
+  /** Direction for `sortBy`. */
+  sortDir?: "asc" | "desc";
+  /**
+   * Text direction. A kit that portals its menu to `<body>` loses the table's
+   * direction unless it is handed over, and RTL flips grip against pin.
+   */
+  dir?: Direction;
+  /** Interactive grouping state used by plugin menu items. */
+  groupingPanel?: GroupingPanelState;
 }

@@ -1,9 +1,8 @@
 {
   "name": "@adapttable/core",
   "version": "2.9.0",
-  "description": "Headless, UI-agnostic React data table engine — state, URL sync, virtualization, prop-getters, and a unified client/server TableSource. Zero UI-kit imports.",
+  "description": "Framework-neutral AdaptTable engine — models, state, URL sync, and a unified client/server TableSource. Zero UI-kit or React imports.",
   "keywords": [
-    "react",
     "data-table",
     "table",
     "headless",
@@ -19,7 +18,7 @@
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
-  "homepage": "https://orwa-mahmoud.github.io/adapttable/",
+  "homepage": "https://orwa-mahmoud.github.io/adapttable/demo/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
@@ -46,16 +45,6 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
-      }
-    },
-    "./adapter": {
-      "import": {
-        "types": "./dist/adapter.d.ts",
-        "default": "./dist/adapter.js"
-      },
-      "require": {
-        "types": "./dist/adapter.d.cts",
-        "default": "./dist/adapter.cjs"
       }
     },
     "./xlsx": {
@@ -88,16 +77,6 @@
         "default": "./dist/formula.cjs"
       }
     },
-    "./features": {
-      "import": {
-        "types": "./dist/features.d.ts",
-        "default": "./dist/features.js"
-      },
-      "require": {
-        "types": "./dist/features.d.cts",
-        "default": "./dist/features.cjs"
-      }
-    },
     "./pivot": {
       "import": {
         "types": "./dist/pivot.d.ts",
@@ -128,16 +107,6 @@
         "default": "./dist/stream.cjs"
       }
     },
-    "./sparkline": {
-      "import": {
-        "types": "./dist/sparkline.d.ts",
-        "default": "./dist/sparkline.js"
-      },
-      "require": {
-        "types": "./dist/sparkline.d.cts",
-        "default": "./dist/sparkline.cjs"
-      }
-    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -145,23 +114,19 @@
     "dev": "tsdown --watch",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:mutation": "stryker run",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist coverage .turbo"
   },
-  "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": false
-    }
-  },
   "devDependencies": {
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/vitest-runner": "^9.6.1",
     "@tanstack/react-query": "^5.102.6",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
+    "fast-check": "^4.9.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
@@ -169,10 +134,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=22.12.0"
   },
-  "dependencies": {
-    "@tanstack/react-virtual": "^3.14.10",
-    "react-compiler-runtime": "^1.0.0"
-  }
+  "dependencies": {}
 }

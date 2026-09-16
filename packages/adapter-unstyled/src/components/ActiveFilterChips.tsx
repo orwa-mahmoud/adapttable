@@ -1,5 +1,6 @@
 /** Removable chips for the active filters. */
-import { type ActiveFilterChip, type TableLabels } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import type { ActiveFilterChip } from "@adapttable/react";
 
 import type { DataTableClassNames } from "../types";
 

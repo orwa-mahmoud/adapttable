@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — pass `onPinnedRowIdsChange` and pin actions appear. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [pin, reorder and merge rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — sticky pins, a drag grip, Team written once down consecutive teammates (pin keeps that one merge), and a 3-dot menu. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [pin and merge rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — sticky pins, Team written once down consecutive teammates (pin keeps that one merge), and a 3-dot menu. Movement lives on the [row-reordering page](https://orwa-mahmoud.github.io/adapttable/demo/mantine/row-reordering/). The same pages exist for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 Pass `pinnedRowIds` and/or `onPinnedRowIdsChange` and every row gains icon-only
 Pin to top / Pin to bottom / Unpin (labels on hover and as the accessible name).
@@ -60,6 +60,10 @@ grid. The list order still puts top pins first and bottom pins last.
 
 **Grouping or a tree.** A nested list is not a flat pin stack. Passing the
 props while either is armed logs a `devWarn` and the actions do not render.
+Host-owned totals that are not data rows are a different feature —
+[`pinnedSummaryRows`](./pinned-summary-rows.md) sticks those objects above
+or below the scroll body on every table shape, including grouped and tree
+tables.
 
 ## Headless
 

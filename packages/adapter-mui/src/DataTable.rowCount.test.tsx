@@ -3,11 +3,11 @@
  * only a page of rows is in the DOM, so assistive tech cannot count the rest.
  * Core decides; this proves the mui table element carries it.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { renderMui } from "./test-utils";
 

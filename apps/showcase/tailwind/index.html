@@ -4,30 +4,49 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
-    <meta name="description" content="A batteries-included React data table for Tailwind CSS: filtering, grouping, pivot, editing, saved views and export, rendered as semantic HTML whose every part takes your classes. Install @adapttable/unstyled." />
+    <meta name="description" content="Style an unstyled React data table with Tailwind CSS. Try filtering, editing, grouping and export with semantic HTML, class hooks and MIT licensing." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/tailwind/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="AdaptTable for Tailwind — a data table you style with your own classes" />
-    <meta property="og:description" content="A batteries-included React data table for Tailwind CSS: filtering, grouping, pivot, editing, saved views and export, rendered as semantic HTML whose every part takes your classes. Install @adapttable/unstyled." />
+    <meta property="og:title" content="Tailwind CSS React data table examples — AdaptTable" />
+    <meta property="og:description" content="Style an unstyled React data table with Tailwind CSS. Try filtering, editing, grouping and export with semantic HTML, class hooks and MIT licensing." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/tailwind/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AdaptTable for Tailwind — a data table you style with your own classes" />
-    <meta name="twitter:description" content="A batteries-included React data table for Tailwind CSS: filtering, grouping, pivot, editing, saved views and export, rendered as semantic HTML whose every part takes your classes. Install @adapttable/unstyled." />
+    <meta name="twitter:title" content="Tailwind CSS React data table examples — AdaptTable" />
+    <meta name="twitter:description" content="Style an unstyled React data table with Tailwind CSS. Try filtering, editing, grouping and export with semantic HTML, class hooks and MIT licensing." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"A batteries-included React data table for Tailwind CSS: filtering, grouping, pivot, editing, saved views and export, rendered as semantic HTML whose every part takes your classes. Install @adapttable/unstyled.","url":"https://orwa-mahmoud.github.io/adapttable/demo/tailwind/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Style an unstyled React data table with Tailwind CSS. Try filtering, editing, grouping and export with semantic HTML, class hooks and MIT licensing.","url":"https://orwa-mahmoud.github.io/adapttable/demo/tailwind/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
-    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed. -->
-    <script
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "dd71ff9f3b7b4064969d3f81e8c6ee9b"}'
-    ></script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      (function () {
+  var isLocal = function(){
+  var h = location.hostname || "";
+  if (location.protocol === "file:") return true;
+  if (h === "" || h === "localhost" || h === "0.0.0.0" || h === "[::1]" || h === "::1") return true;
+  if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+  return false;
+};
+  if (isLocal()) return;
+  (function () {
+    var s = document.createElement('script');
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.defer = true;
+    s.setAttribute("data-cf-beacon", "{\"token\": \"dd71ff9f3b7b4064969d3f81e8c6ee9b\"}");
+    document.head.appendChild(s);
+  })();
+})();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -40,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>AdaptTable for Tailwind — a data table you style with your own classes</title>
+    <title>Tailwind CSS React data table examples — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -144,30 +163,33 @@
         <p class="at-fallback__kicker">@adapttable/unstyled</p>
         <h1>AdaptTable for Tailwind</h1>
         <p>Native controls and no opinions — every class is yours.</p>
-        <p>The engine is headless and shared — sorting, filtering, grouping, the pivot, URL state, saved views and export live in @adapttable/core. Every control you can see and click is a native HTML control you address by class name.</p>
+        <p>A framework-neutral @adapttable/core provides the data engine; @adapttable/react connects it to React. Add features through explicit imports. The visible controls are a native HTML control you address by class name.</p>
         <p>That is the whole trade: one model to learn, and a table that belongs in a Tailwind app rather than sitting inside one.</p>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/unstyled @adapttable/core</code></pre>
         <h2>Every feature, on its own page</h2>
         <ul>
-          <li><a href="./filtering/">Filtering in Tailwind</a> — Kit-native operators, date ranges, checklists, an AND/OR tree, chips.</li>
+          <li><a href="./filtering/">Filtering in Tailwind</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
           <li><a href="./columns/">Column management in Tailwind</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
           <li><a href="./column-groups/">Column groups in Tailwind</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="./selection/">Row selection in Tailwind</a> — A set of ids that survives paging, with bulk actions over it.</li>
-          <li><a href="./rows/">Rows in Tailwind</a> — Pin, drag-reorder, merge cells, and a 3-dot menu per row.</li>
+          <li><a href="./rows/">Rows in Tailwind</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="./row-reordering/">Row reordering in Tailwind</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
           <li><a href="./editing/">Inline cell editing in Tailwind</a> — Kit-native editors in the cell; every write goes through your handler.</li>
-          <li><a href="./grouping/">Row grouping in Tailwind</a> — Nested group headers with counts, subtotals, footers and collapse state.</li>
+          <li><a href="./grouping/">Row grouping in Tailwind</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
+          <li><a href="./aggregation/">Aggregation in Tailwind</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
           <li><a href="./nested-tables/">Nested tables in Tailwind</a> — A real table under a row — same engine, own columns, own keys.</li>
-          <li><a href="./export/">Export and print in Tailwind</a> — CSV, XLSX and PDF from one seam — plus a real print layout.</li>
-          <li><a href="./scale/">Large datasets in Tailwind</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
-          <li><a href="./tree/">Tree data in Tailwind</a> — Rows that contain rows — nesting, chevrons, keyboard traversal.</li>
+          <li><a href="./export/">Export and print in Tailwind</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
+          <li><a href="./scale/">Row and column virtualization in Tailwind</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="./tree/">Tree data in Tailwind</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
           <li><a href="./mobile-cards/">Mobile cards in Tailwind</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="./pivot/">Pivot tables in Tailwind</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
           <li><a href="./saved-views/">Saved views in Tailwind</a> — Name an arrangement, share it as a link, manage the list in place.</li>
-          <li><a href="./formulas/">Spreadsheet formulas in Tailwind</a> — Computed columns typed as formulas, errors reported in the cell.</li>
+          <li><a href="./formulas/">Spreadsheet formulas in Tailwind</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
           <li><a href="./rtl/">Right-to-left Tailwind data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
           <li><a href="./realtime/">Live updates in Tailwind</a> — Rows change while you read them. Sort and selection hold.</li>
-          <li><a href="./accessibility/">Accessible Tailwind data table</a> — Arrow-key focus, a visible ring, and every announcement shown as text.</li>
+          <li><a href="./accessibility/">Accessible Tailwind data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="./ai/">AI table assistant in Tailwind</a> — Native assistant, feature-aware prompts and governed action receipts.</li>
         </ul>
         <h2>The same table, in seven other kits</h2>
         <p>Switching kit changes the components, never the model — the props on this page are the props there.</p>

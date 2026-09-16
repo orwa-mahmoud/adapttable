@@ -1,15 +1,25 @@
-import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import type { UseColumnLayoutResult } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { columnMenu } from "./column-menu";
 import { ColumnMenu } from "./components/ColumnMenu";
+import { DataTable } from "./data-table.test-utils";
+import { DataTable as BareDataTable } from "./DataTable";
+import { groupingPanel } from "./grouping-panel";
 
 interface Row {
   id: string;
 }
 const cols: ColumnDef<Row>[] = [
   { key: "a", header: "Alpha", accessor: (r) => r.id },
-  { key: "b", header: "Bravo", accessor: (r) => r.id },
+  {
+    key: "b",
+    header: "Bravo",
+    accessor: (r) => r.id,
+    aggregatable: { operations: ["sum", "avg", "count"] },
+  },
   { key: "c", header: "Charlie", accessor: (r) => r.id },
 ];
 
@@ -22,7 +32,10 @@ function fakeLayout(): UseColumnLayoutResult<Row> {
     toggleVisible: vi.fn(),
     setPinned: vi.fn(),
     move: vi.fn(),
+    setOrder: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -50,6 +63,23 @@ const labels = {
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}.`,
+  groupByColumn: (name: string) => `Group by ${name}`,
+  ungroupColumn: (name: string) => `Ungroup ${name}`,
+  groupingAggregation: "Group aggregation",
+  groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
+  groupingAverage: "Average",
+  groupingAggregationCustom: "Custom",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
   actions: "Actions",
   reorderRow: "Reorder",
 };
@@ -291,5 +321,135 @@ describe("mui ColumnMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     const reset = await screen.findByText("Reset columns");
     expect(reset.closest('[dir="rtl"]')).not.toBeNull();
+  });
+
+  it("renames inline with validation, announcements, and focus restoration", async () => {
+    const layout = fakeLayout();
+    const onRenameColumn = vi.fn();
+    const renameableColumns = [
+      { ...cols[0]!, renameable: true },
+      cols[1]!,
+      cols[2]!,
+    ];
+    render(
+      <ColumnMenu
+        allColumns={renameableColumns}
+        layout={layout}
+        labels={labels}
+        onAutoSize={() => undefined}
+        onRenameColumn={onRenameColumn}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+
+    const renameAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    renameAction.focus();
+    fireEvent.click(renameAction);
+    expect(renameAction).toBeDisabled();
+
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveAttribute(
+      "data-adapttable-part",
+      "column-rename-input"
+    );
+    await waitFor(() => expect(input).toHaveFocus());
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.blur(input);
+    const error = screen.getByRole("alert");
+    expect(error).toHaveTextContent("Enter a column name.");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+
+    fireEvent.change(input, { target: { value: "  Account owner  " } });
+    expect(screen.queryByRole("alert")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onRenameColumn).toHaveBeenCalledWith("a", "Account owner");
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-form"]')
+    ).toBeNull();
+    expect(renameAction).toBeInTheDocument();
+    await waitFor(() => expect(renameAction).toHaveFocus());
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-announcer"]')
+    ).toHaveTextContent("Alpha renamed to Account owner.");
+
+    fireEvent.click(renameAction);
+    fireEvent.keyDown(screen.getByRole("textbox", { name: "Column name" }), {
+      key: "Escape",
+    });
+    await waitFor(() => expect(renameAction).toHaveFocus());
+
+    fireEvent.click(renameAction);
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(renameAction).toHaveFocus());
+  });
+});
+
+describe("column menu feature (mui)", () => {
+  it("draws no Columns button when the feature was never imported", () => {
+    // The shipped component, not the harness: the harness turns v2 props into
+    // features, which is exactly what this test must not have happen. v3
+    // removed those props, so there is no second way in to pass either.
+    render(
+      <BareDataTable
+        data={[{ id: "1" }]}
+        columns={cols}
+        rowKey={(r) => r.id}
+        urlSync={false}
+      />
+    );
+    expect(
+      screen.queryByRole("button", { name: "Columns" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("draws the Columns button when the feature is composed", () => {
+    render(
+      <DataTable
+        data={[{ id: "1" }]}
+        columns={cols}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        enableColumnMenu
+        features={[columnMenu()]}
+      />
+    );
+    expect(screen.getByRole("button", { name: "Columns" })).toBeInTheDocument();
+  });
+
+  it("renders a grouping choice without closing the column submenu", async () => {
+    render(
+      <DataTable
+        data={[{ id: "1" }]}
+        columns={cols}
+        rowKey={(row) => row.id}
+        urlSync={false}
+        enableColumnMenu
+        features={[columnMenu(), groupingPanel(["a"])]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Bravo"));
+
+    const choice = screen.getByRole("combobox", {
+      name: "Group aggregation",
+    });
+    fireEvent.mouseDown(choice);
+    fireEvent.click(screen.getByRole("option", { name: "Sum" }));
+
+    expect(choice).toHaveTextContent("Sum");
+    expect(
+      screen.getByRole("button", { name: "Group by Bravo" })
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-adapttable-part="column-menu-choice"]')
+    ).toBeInTheDocument();
+    expect(screen.getByText("Reset columns")).toBeInTheDocument();
   });
 });

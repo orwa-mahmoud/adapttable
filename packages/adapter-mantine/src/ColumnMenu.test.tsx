@@ -1,6 +1,14 @@
-import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
+import type { UseColumnLayoutResult } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+import {
+  featureHostOf,
+  FeatureHostProvider,
+  type GroupingPanelState,
+  useTableFeatures,
+} from "@adapttable/react/adapter";
+import type { TableFeature } from "@adapttable/react/features";
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -24,7 +32,10 @@ function fakeLayout(): UseColumnLayoutResult<Row> {
     toggleVisible: vi.fn(),
     setPinned: vi.fn(),
     move: vi.fn(),
+    setOrder: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -54,12 +65,100 @@ const labels = {
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}.`,
+  groupByColumn: (label: string) => `Group by ${label}`,
+  ungroupColumn: (label: string) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
+  groupingAverage: "Average",
+  groupingAggregationCustom: "Custom",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
 };
 
 // Mantine renders the dropdown in a portal whose buttons testing-library's
 // role query treats as hidden mid-transition; query by aria-label directly.
 const byLabel = (name: string) =>
   document.querySelector<HTMLElement>(`[aria-label="${name}"]`)!;
+
+function groupingState(): GroupingPanelState {
+  return {
+    groupBy: ["b"],
+    aggregateOverrides: {},
+    canSetAggregates: true,
+    announcement: "",
+    headerDragProps: () => ({}),
+    chipDragProps: () => ({}),
+    chipKeyboardProps: () => ({
+      tabIndex: 0,
+      role: "button",
+      "aria-label": "Move grouping",
+      onKeyDown: () => undefined,
+    }),
+    dropProps: () => ({}),
+    removeDropProps: () => ({}),
+    add: vi.fn(),
+    remove: vi.fn(),
+    moveBy: vi.fn(),
+    setAggregate: vi.fn(),
+    aggregations: {
+      items: [],
+      candidates: [],
+      atDefaults: true,
+      hasDefaults: false,
+    },
+    setAggregateOperation: vi.fn(),
+    addAggregate: vi.fn(),
+    removeAggregate: vi.fn(),
+    restoreAggregateDefaults: vi.fn(),
+  };
+}
+
+function ChoiceMenu({
+  onChange,
+}: Readonly<{ onChange: (value: string) => void }>) {
+  const choiceFeature: TableFeature<Row> = {
+    id: "column-choice-test",
+    setup(host) {
+      host.registerColumnMenuAction((_row, context) =>
+        context.groupingPanel
+          ? {
+              kind: "choice",
+              id: "aggregation-test",
+              label: "Group aggregation",
+              disabled: false,
+              value: "",
+              options: [
+                { value: "", label: "Default" },
+                { value: "sum", label: "Sum" },
+              ],
+              onChange,
+            }
+          : undefined
+      );
+    },
+  };
+  const props = useTableFeatures({ features: [choiceFeature] });
+  return (
+    <FeatureHostProvider host={featureHostOf(props)}>
+      <ColumnMenu
+        allColumns={cols}
+        layout={fakeLayout()}
+        labels={labels}
+        onAutoSize={() => undefined}
+        groupingPanel={groupingState()}
+      />
+    </FeatureHostProvider>
+  );
+}
 
 describe("mantine ColumnMenu", () => {
   it("shows drop-position feedback while dragging a row", async () => {
@@ -287,5 +386,106 @@ describe("mantine ColumnMenu", () => {
     await user.click(screen.getByRole("button", { name: "Columns" }));
     const reset = await screen.findByText("Reset columns");
     expect(reset.closest('[dir="rtl"]')).not.toBeNull();
+  });
+
+  it("renames inline with validation, announcements, and focus restoration", async () => {
+    const user = userEvent.setup();
+    const layout = fakeLayout();
+    const onRenameColumn = vi.fn();
+    const renameableColumns = [
+      { ...cols[0]!, renameable: true },
+      cols[1]!,
+      cols[2]!,
+    ];
+    render(
+      <MantineProvider>
+        <ColumnMenu
+          allColumns={renameableColumns}
+          layout={layout}
+          labels={labels}
+          onAutoSize={() => undefined}
+          onRenameColumn={onRenameColumn}
+        />
+      </MantineProvider>
+    );
+    await user.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+
+    const renameAction = screen.getByText("Rename column").closest("button")!;
+    await user.click(renameAction);
+    expect(renameAction).toBeDisabled();
+
+    const input = document.querySelector<HTMLInputElement>(
+      '[data-adapttable-part="column-rename-input"]'
+    )!;
+    expect(input).toHaveAttribute(
+      "data-adapttable-part",
+      "column-rename-input"
+    );
+    await waitFor(() => expect(input).toHaveFocus());
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.blur(input);
+    const error = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="column-rename-error"]'
+    )!;
+    expect(error).toHaveTextContent("Enter a column name.");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+
+    fireEvent.change(input, { target: { value: "  Account owner  " } });
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-error"]')
+    ).toBeNull();
+    await user.click(
+      document.querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="column-rename-save"]'
+      )!
+    );
+    expect(onRenameColumn).toHaveBeenCalledWith("a", "Account owner");
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-form"]')
+    ).toBeNull();
+    expect(renameAction).toBeInTheDocument();
+    await waitFor(() => expect(renameAction).toHaveFocus());
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-announcer"]')
+    ).toHaveTextContent("Alpha renamed to Account owner.");
+
+    await user.click(renameAction);
+    fireEvent.keyDown(
+      document.querySelector('[data-adapttable-part="column-rename-input"]')!,
+      { key: "Escape" }
+    );
+    await waitFor(() => expect(renameAction).toHaveFocus());
+
+    await user.click(renameAction);
+    await user.click(
+      document.querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="column-rename-cancel"]'
+      )!
+    );
+    await waitFor(() => expect(renameAction).toHaveFocus());
+  });
+
+  it("renders plugin choices as labelled selects without closing", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <MantineProvider env="test">
+        <ChoiceMenu onChange={onChange} />
+      </MantineProvider>
+    );
+    await user.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+    const choice = screen.getByRole("combobox", {
+      name: "Group aggregation",
+    });
+    await user.click(choice);
+    await user.click(await screen.findByRole("option", { name: "Sum" }));
+
+    expect(onChange).toHaveBeenCalledWith("sum");
+    expect(choice).toBeInTheDocument();
   });
 });

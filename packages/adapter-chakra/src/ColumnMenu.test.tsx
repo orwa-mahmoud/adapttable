@@ -1,6 +1,14 @@
-import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
+import type { UseColumnLayoutResult } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+import {
+  featureHostOf,
+  FeatureHostProvider,
+  type GroupingPanelState,
+  useTableFeatures,
+} from "@adapttable/react/adapter";
+import type { TableFeature } from "@adapttable/react/features";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ColumnMenu } from "./components/ColumnMenu";
@@ -10,7 +18,7 @@ interface Row {
   id: string;
 }
 const cols: ColumnDef<Row>[] = [
-  { key: "a", header: "Alpha", accessor: (r) => r.id },
+  { key: "a", header: "Alpha", accessor: (r) => r.id, renameable: true },
   { key: "b", header: "Bravo", accessor: (r) => r.id },
   { key: "c", header: "Charlie", accessor: (r) => r.id },
 ];
@@ -24,7 +32,10 @@ function fakeLayout(): UseColumnLayoutResult<Row> {
     toggleVisible: vi.fn(),
     setPinned: vi.fn(),
     move: vi.fn(),
+    setOrder: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -48,16 +59,104 @@ const labels = {
   hideAllColumns: "Hide all",
   unpinAllColumns: "Unpin all",
   resetColumn: "Reset column",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save name",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Column name is required",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}`,
   sortAscending: "Sort ascending",
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
   actions: "Actions",
   reorderRow: "Reorder",
+  groupByColumn: (label: string) => `Group by ${label}`,
+  ungroupColumn: (label: string) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
+  groupingAverage: "Average",
+  groupingAggregationCustom: "Custom",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
 };
 
 const byLabel = (name: string) =>
   document.querySelector<HTMLElement>(`[aria-label="${name}"]`)!;
+
+function groupingState(): GroupingPanelState {
+  return {
+    groupBy: ["b"],
+    aggregateOverrides: {},
+    canSetAggregates: true,
+    announcement: "",
+    headerDragProps: () => ({}),
+    chipDragProps: () => ({}),
+    chipKeyboardProps: () => ({
+      tabIndex: 0,
+      role: "button",
+      "aria-label": "Move grouping",
+      onKeyDown: () => undefined,
+    }),
+    dropProps: () => ({}),
+    removeDropProps: () => ({}),
+    add: vi.fn(),
+    remove: vi.fn(),
+    moveBy: vi.fn(),
+    setAggregate: vi.fn(),
+    aggregations: {
+      items: [],
+      candidates: [],
+      atDefaults: true,
+      hasDefaults: false,
+    },
+    setAggregateOperation: vi.fn(),
+    addAggregate: vi.fn(),
+    removeAggregate: vi.fn(),
+    restoreAggregateDefaults: vi.fn(),
+  };
+}
+
+function ChoiceMenu({
+  onChange,
+}: Readonly<{ onChange: (value: string) => void }>) {
+  const choiceFeature: TableFeature<Row> = {
+    id: "column-choice-test",
+    setup(host) {
+      host.registerColumnMenuAction((_row, context) =>
+        context.groupingPanel
+          ? {
+              kind: "choice",
+              id: "aggregation-test",
+              label: "Group aggregation",
+              disabled: false,
+              value: "",
+              options: [
+                { value: "", label: "Default" },
+                { value: "sum", label: "Sum" },
+              ],
+              onChange,
+            }
+          : undefined
+      );
+    },
+  };
+  const props = useTableFeatures({ features: [choiceFeature] });
+  return (
+    <FeatureHostProvider host={featureHostOf(props)}>
+      <ColumnMenu
+        allColumns={cols}
+        layout={fakeLayout()}
+        labels={labels}
+        onAutoSize={() => undefined}
+        groupingPanel={groupingState()}
+      />
+    </FeatureHostProvider>
+  );
+}
 
 describe("chakra ColumnMenu", () => {
   it("shows drop-position feedback while dragging a row", async () => {
@@ -236,6 +335,73 @@ describe("chakra ColumnMenu", () => {
     expect(screen.queryByText("Alpha")).toBeNull();
   });
 
+  it("renames a data column with Chakra controls and announces it", async () => {
+    const onRenameColumn = vi.fn();
+    renderChakra(
+      <ColumnMenu
+        allColumns={cols}
+        onAutoSize={() => undefined}
+        layout={fakeLayout()}
+        labels={labels}
+        onRenameColumn={onRenameColumn}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+
+    const renameAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    fireEvent.click(renameAction);
+    expect(renameAction).toBeDisabled();
+
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveFocus();
+    fireEvent.change(input, { target: { value: " " } });
+    fireEvent.blur(input);
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Column name is required"
+    );
+
+    fireEvent.change(input, { target: { value: "  Account owner  " } });
+    fireEvent.click(screen.getByRole("button", { name: "Save name" }));
+    expect(onRenameColumn).toHaveBeenCalledWith("a", "Account owner");
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-announcer"]')
+    ).toHaveTextContent("Alpha renamed to Account owner");
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-form"]')
+    ).toBeNull();
+    const restoredAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    expect(restoredAction).toBeEnabled();
+
+    restoredAction.focus();
+    fireEvent.click(restoredAction);
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(restoredAction).toHaveFocus());
+
+    fireEvent.click(screen.getByRole("button", { name: "Reset column" }));
+    expect(screen.queryByRole("button", { name: "Rename column" })).toBeNull();
+  });
+
+  it("does not offer rename without the host callback", async () => {
+    renderChakra(
+      <ColumnMenu
+        allColumns={cols}
+        onAutoSize={() => undefined}
+        layout={fakeLayout()}
+        labels={labels}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+    expect(screen.queryByRole("button", { name: "Rename column" })).toBeNull();
+  });
+
   it("copies the host dark class onto the portalled columns card", async () => {
     render(
       <ChakraProvider value={defaultSystem}>
@@ -254,5 +420,20 @@ describe("chakra ColumnMenu", () => {
     expect(
       document.querySelector('[data-adapttable-color-mode="dark"]')
     ).not.toBeNull();
+  });
+
+  it("renders plugin choices as labelled selects without closing", async () => {
+    const onChange = vi.fn();
+    renderChakra(<ChoiceMenu onChange={onChange} />);
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    await screen.findByText("Reset columns");
+    fireEvent.click(byLabel("Column actions: Alpha"));
+    const choice = screen.getByRole("combobox", {
+      name: "Group aggregation",
+    });
+    fireEvent.change(choice, { target: { value: "sum" } });
+
+    expect(onChange).toHaveBeenCalledWith("sum");
+    expect(choice).toBeInTheDocument();
   });
 });

@@ -1,7 +1,9 @@
 import { fireEvent } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { cellNavigation } from "./cell-navigation";
+import { columnSelectionCheckbox } from "./column-selection";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { renderMui } from "./test-utils";
 
@@ -37,6 +39,7 @@ describe("column selection from the header (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
+        features={[cellNavigation()]}
         cellNavigation
       />
     );
@@ -52,6 +55,7 @@ describe("column selection from the header (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
+        features={[cellNavigation()]}
         cellNavigation
       />
     );
@@ -66,6 +70,7 @@ describe("column selection from the header (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
+        features={[cellNavigation()]}
         cellNavigation
       />
     );
@@ -90,6 +95,12 @@ describe("the column-selection header checkbox (mui)", () => {
         columns={COLS}
         rowKey={(r) => r.id}
         urlSync={false}
+        features={[
+          ...(extra?.cellNavigation ? [cellNavigation()] : []),
+          ...(extra?.columnSelectionCheckbox
+            ? [columnSelectionCheckbox()]
+            : []),
+        ]}
         {...extra}
       />
     );

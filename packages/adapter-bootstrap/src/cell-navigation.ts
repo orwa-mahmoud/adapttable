@@ -1,1 +1,1 @@
-export { cellNavigation } from "@adapttable/core/features";
+export { cellNavigation } from "@adapttable/react/features";

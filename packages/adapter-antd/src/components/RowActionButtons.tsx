@@ -8,7 +8,7 @@ import {
   type TableLabels,
   visibleRowActions,
 } from "@adapttable/core";
-import { resolveDisabledReason } from "@adapttable/core/adapter";
+import { resolveDisabledReason } from "@adapttable/react/adapter";
 import { Button, Dropdown, Tooltip } from "antd";
 import type { ReactNode } from "react";
 
@@ -106,6 +106,9 @@ function ActionMenu<TRow>({
           };
         }),
         onClick: (info) => {
+          // The menu sits inside the row, so the choice must not read as a
+          // click on the row underneath it.
+          info.domEvent.stopPropagation();
           const action = actions.find((item) => item.key === info.key);
           if (!action) return;
           runRowAction(action, row, confirm, labels.cancel);
@@ -135,7 +138,7 @@ export function RowActionButtons<TRow>({
   const visible = visibleRowActions(actions, row);
   let content: ReactNode = null;
   if (render) {
-    content = render({ row, actions, confirm, labels });
+    content = render({ row, actions, confirm, labels }) as ReactNode;
   } else if (visible.length > 0) {
     content =
       layout === "menu" ? (

@@ -4,7 +4,7 @@
 
 ```ts
 
-import { columnMenu } from '@adapttable/core/features';
+import { columnMenu } from '@adapttable/react/features';
 
 export { columnMenu }
 

@@ -8,7 +8,7 @@ import {
   type TableLabels,
   visibleRowActions,
 } from "@adapttable/core";
-import { resolveDisabledReason } from "@adapttable/core/adapter";
+import { resolveDisabledReason } from "@adapttable/react/adapter";
 import {
   Button,
   IconButton,
@@ -19,8 +19,7 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
-import type { MouseEvent, ReactNode } from "react";
-import { useState } from "react";
+import { type MouseEvent, type ReactNode, useState } from "react";
 
 import { iconForRowAction, MoreVerticalIcon } from "../icons";
 import { muiColor } from "./DesktopTable";
@@ -92,7 +91,7 @@ function ActionStrip<TRow>({
   );
 }
 
-function ActionsMenuPaper(props: PaperProps) {
+function ActionsMenuPaper(props: Readonly<PaperProps>) {
   return <Paper {...props} data-adapttable-part="row-actions-menu" />;
 }
 
@@ -168,7 +167,7 @@ export function RowActionButtons<TRow>({
   const visible = visibleRowActions(actions, row);
   let content: ReactNode = null;
   if (render) {
-    content = render({ row, actions, confirm, labels });
+    content = render({ row, actions, confirm, labels }) as ReactNode;
   } else if (visible.length > 0) {
     content =
       layout === "menu" ? (

@@ -1,7 +1,9 @@
 import { fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
+import { densityChooser } from "./density";
+import { fullscreen } from "./fullscreen";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -44,6 +46,10 @@ describe("density and fullscreen (mui)", () => {
           columns={COLS}
           rowKey={(r) => r.id}
           urlSync={false}
+          features={[
+            ...(extra?.densityChooser ? [densityChooser()] : []),
+            ...(extra?.fullscreen ? [fullscreen()] : []),
+          ]}
           {...extra}
         />
       </>
@@ -64,6 +70,15 @@ describe("density and fullscreen (mui)", () => {
     fireEvent.click(part("density-toggle")!);
 
     expect(onDensityChange).toHaveBeenCalledWith("compact");
+  });
+
+  it("applies an uncontrolled choice to the rendered cells", () => {
+    table({ densityChooser: true });
+    const header = document.querySelector("th")!;
+
+    expect(header).toHaveClass("MuiTableCell-sizeMedium");
+    fireEvent.click(part("density-toggle")!);
+    expect(header).toHaveClass("MuiTableCell-sizeSmall");
   });
 
   it("goes back the other way from compact", () => {

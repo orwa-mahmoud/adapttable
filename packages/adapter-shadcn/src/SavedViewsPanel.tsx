@@ -54,7 +54,7 @@ export interface SavedViewsPanelProps {
  *
  * @public
  */
-export function SavedViewsPanel(props: SavedViewsPanelProps) {
+export function SavedViewsPanel(props: Readonly<SavedViewsPanelProps>) {
   const { classNames, ...rest } = props;
   return (
     <UnstyledSavedViewsPanel

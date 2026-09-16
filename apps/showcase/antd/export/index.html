@@ -4,30 +4,49 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Export a Ant Design data table to CSV, XLSX or PDF from one toolbar button — grouped sheets with outline levels, selected ranges only, and a real print layout." />
+    <meta name="description" content="Export a Ant Design data table to CSV, XLSX or PDF from one toolbar button — browser files or cancellable server jobs with live progress." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/antd/export/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content="Ant Design table export to CSV, Excel and PDF — AdaptTable" />
-    <meta property="og:description" content="Export a Ant Design data table to CSV, XLSX or PDF from one toolbar button — grouped sheets with outline levels, selected ranges only, and a real print layout." />
+    <meta property="og:description" content="Export a Ant Design data table to CSV, XLSX or PDF from one toolbar button — browser files or cancellable server jobs with live progress." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/antd/export/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Ant Design table export to CSV, Excel and PDF — AdaptTable" />
-    <meta name="twitter:description" content="Export a Ant Design data table to CSV, XLSX or PDF from one toolbar button — grouped sheets with outline levels, selected ranges only, and a real print layout." />
+    <meta name="twitter:description" content="Export a Ant Design data table to CSV, XLSX or PDF from one toolbar button — browser files or cancellable server jobs with live progress." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Export a Ant Design data table to CSV, XLSX or PDF from one toolbar button — grouped sheets with outline levels, selected ranges only, and a real print layout.","url":"https://orwa-mahmoud.github.io/adapttable/demo/antd/export/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Export a Ant Design data table to CSV, XLSX or PDF from one toolbar button — browser files or cancellable server jobs with live progress.","url":"https://orwa-mahmoud.github.io/adapttable/demo/antd/export/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
-    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed. -->
-    <script
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "dd71ff9f3b7b4064969d3f81e8c6ee9b"}'
-    ></script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      (function () {
+  var isLocal = function(){
+  var h = location.hostname || "";
+  if (location.protocol === "file:") return true;
+  if (h === "" || h === "localhost" || h === "0.0.0.0" || h === "[::1]" || h === "::1") return true;
+  if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+  return false;
+};
+  if (isLocal()) return;
+  (function () {
+    var s = document.createElement('script');
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.defer = true;
+    s.setAttribute("data-cf-beacon", "{\"token\": \"dd71ff9f3b7b4064969d3f81e8c6ee9b\"}");
+    document.head.appendChild(s);
+  })();
+})();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -143,26 +162,32 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Ant Design</p>
         <h1>Export and print in Ant Design</h1>
-        <p>One <code>exportCsv</code> prop puts an export button in the toolbar, and one <code>scope</code> decides what leaves: the current page, every filtered row, or exactly the cells selected.</p>
+        <p>One <code>exportCsv()</code> feature puts an export button in the toolbar, and one <code>scope</code> decides what leaves: the current page, every filtered row, or exactly the cells selected.</p>
         <p>Swap the writer and the same button produces a different file. <code>xlsxWriter</code> writes Excel outline levels for grouped rows and bolds the totals; <code>pdfWriter</code> lays out a paginated document, right-to-left scripts included when you hand it a font.</p>
+        <p>Past the 50,000-row browser cap, <code>onExportAll</code> sends the page-free current view to your backend while the kit shows determinate or indeterminate progress, Cancel, Retry, and the finished download.</p>
         <p><code>printTable</code> opens the browser's own print dialog against a layout built for paper rather than a screenshot of the page.</p>
         <p>The export control is an antd Button in its loading state, which takes the icon slot and disables the button for the duration — antd's own answer to a control that is working.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/antd&quot;;
-import { xlsxWriter } from &quot;@adapttable/core/xlsx&quot;;
+import { exportCsv } from &quot;@adapttable/antd/export&quot;;
 
-export function People({ rows, columns }) {
+export function People({ source, columns, api }) {
   return (
     &lt;DataTable
-      data={rows}
+      source={source}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      groupBy=&quot;team&quot;
-      exportCsv={{
-        scope: &quot;all&quot;,
-        filename: &quot;people.xlsx&quot;,
-        writer: xlsxWriter({ sheetName: &quot;People&quot; }),
-      }}
+      features={[
+        exportCsv({
+          scope: &quot;all&quot;,
+          onExportAll: async (query, controls) =&gt;
+            api.buildExport(query, {
+              signal: controls.signal,
+              onProgress: controls.setProgress,
+              onMessage: controls.setMessage,
+            }),
+        }),
+      ]}
     /&gt;
   );
 }</code></pre>
@@ -180,26 +205,29 @@ export function People({ rows, columns }) {
         </ul>
         <h2>More Ant Design features</h2>
         <ul>
-          <li><a href="../filtering/">Filtering in Ant Design</a> — Kit-native operators, date ranges, checklists, an AND/OR tree, chips.</li>
+          <li><a href="../filtering/">Filtering in Ant Design</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
           <li><a href="../columns/">Column management in Ant Design</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
           <li><a href="../column-groups/">Column groups in Ant Design</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="../selection/">Row selection in Ant Design</a> — A set of ids that survives paging, with bulk actions over it.</li>
-          <li><a href="../rows/">Rows in Ant Design</a> — Pin, drag-reorder, merge cells, and a 3-dot menu per row.</li>
+          <li><a href="../rows/">Rows in Ant Design</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="../row-reordering/">Row reordering in Ant Design</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
           <li><a href="../editing/">Inline cell editing in Ant Design</a> — Kit-native editors in the cell; every write goes through your handler.</li>
-          <li><a href="../grouping/">Row grouping in Ant Design</a> — Nested group headers with counts, subtotals, footers and collapse state.</li>
+          <li><a href="../grouping/">Row grouping in Ant Design</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
+          <li><a href="../aggregation/">Aggregation in Ant Design</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
           <li><a href="../nested-tables/">Nested tables in Ant Design</a> — A real table under a row — same engine, own columns, own keys.</li>
-          <li><a href="../scale/">Large datasets in Ant Design</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
-          <li><a href="../tree/">Tree data in Ant Design</a> — Rows that contain rows — nesting, chevrons, keyboard traversal.</li>
+          <li><a href="../scale/">Row and column virtualization in Ant Design</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="../tree/">Tree data in Ant Design</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
           <li><a href="../mobile-cards/">Mobile cards in Ant Design</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="../pivot/">Pivot tables in Ant Design</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
           <li><a href="../saved-views/">Saved views in Ant Design</a> — Name an arrangement, share it as a link, manage the list in place.</li>
-          <li><a href="../formulas/">Spreadsheet formulas in Ant Design</a> — Computed columns typed as formulas, errors reported in the cell.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in Ant Design</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
           <li><a href="../rtl/">Right-to-left Ant Design data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
           <li><a href="../realtime/">Live updates in Ant Design</a> — Rows change while you read them. Sort and selection hold.</li>
-          <li><a href="../accessibility/">Accessible Ant Design data table</a> — Arrow-key focus, a visible ring, and every announcement shown as text.</li>
+          <li><a href="../accessibility/">Accessible Ant Design data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="../ai/">AI table assistant in Ant Design</a> — Native assistant, feature-aware prompts and governed action receipts.</li>
         </ul>
         <p>
-          Reference: <a href="https://orwa-mahmoud.github.io/adapttable/export-pdf/">export-pdf</a>. More of this kit:
+          Reference: <a href="https://orwa-mahmoud.github.io/adapttable/exporting/">exporting</a>, <a href="https://orwa-mahmoud.github.io/adapttable/export-pdf/">export-pdf</a>. More of this kit:
           <a href="../">AdaptTable for Ant Design</a>, or
           <a href="/adapttable/demo/">the live demo</a>.
         </p>

@@ -1,8 +1,5 @@
-import {
-  type ColumnDef,
-  type GroupedFlatEntry,
-  type SelectionState,
-} from "@adapttable/core";
+import type { GroupedFlatEntry } from "@adapttable/core";
+import { type ColumnDef, type SelectionState } from "@adapttable/react";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -61,9 +58,11 @@ function makeSelection(
     toggleAll: vi.fn(),
     toggleGroupLeaves: vi.fn(),
     clear: vi.fn(),
+    replace: vi.fn(),
     visibleIds: [...LEAF_IDS, "3"],
     allMatching: false,
     selectAllMatching: vi.fn(),
+    acrossPages: true,
     ...overrides,
   };
 }

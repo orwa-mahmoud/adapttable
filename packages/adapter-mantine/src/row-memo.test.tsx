@@ -1,9 +1,9 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -88,25 +88,30 @@ describe("desktop row memoization (Mantine)", () => {
   it("toggling one row's checkbox re-renders only that row", () => {
     renderHarness();
     const boxes = screen.getAllByLabelText("Select row");
-    const before = accessor.mock.calls.length;
+    accessor.mockClear();
 
     fireEvent.click(boxes[0]!);
 
     expect(boxes[0]).toBeChecked();
     expect(boxes[1]).not.toBeChecked();
-    // Exactly one row re-rendered: one accessor call per column.
-    expect(accessor.mock.calls.length - before).toBe(columns.length);
+    // Cell-level memoization is finer than the row: the checkbox cell above
+    // re-renders, while no row's data accessor re-runs — not even the toggled
+    // row's. The assertions above are what prove the render happened, so this
+    // cannot pass by rendering nothing.
+    expect(accessor).not.toHaveBeenCalled();
   });
 
   it("expanding one row re-renders only that row", () => {
     renderHarness({ withDetail: true });
     const toggles = screen.getAllByRole("button", { name: "Expand row" });
-    const before = accessor.mock.calls.length;
+    accessor.mockClear();
 
     fireEvent.click(toggles[0]!);
 
     expect(screen.getByText("Detail for Alice")).toBeInTheDocument();
-    expect(accessor.mock.calls.length - before).toBe(columns.length);
+    // Same claim on the expansion path: the chevron cell re-renders and the
+    // detail row arrives, and no data cell is rebuilt for it.
+    expect(accessor).not.toHaveBeenCalled();
   });
 });
 

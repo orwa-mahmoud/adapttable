@@ -6,8 +6,10 @@
  * on — item 36 raised each floor to the truth (Chakra 3.13, MUI 6,
  * Mantine 7.2, antd 6, Radix 3). This probe packs the CURRENT workspace
  * build of core + one adapter, installs it beside the kit pinned to its
- * EXACT floor version, and runs a jsdom render smoke (rows visible, sort
- * button present) under each kit's minimal provider.
+ * EXACT floor version, and runs a jsdom render smoke (rows visible, sort,
+ * filters, selection, column menu) under each kit's minimal provider. Filter
+ * and bulk chrome come from `standardFeatures()` — they are not on the
+ * adapter root in v3.
  *
  * Unlike the scheduled `peer-matrix` (published versions, tsc-only,
  * non-blocking), this validates the LOCAL build and fails loudly — run
@@ -112,6 +114,7 @@ const smokeTest = (kit, providerImport, wrapped) => `import {
   DataTable,
   type ColumnDef,
 } from "@adapttable/${kit}";
+import { standardFeatures } from "@adapttable/${kit}/preset";
 ${providerImport}
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -125,7 +128,7 @@ const ROWS: Row[] = [
   { id: "2", name: "Floor Beta" },
 ];
 const columns: ColumnDef<Row>[] = [
-  { key: "name", label: "Name", filter: "text", sortable: true },
+  { key: "name", header: "Name", accessor: (r) => r.name, sortable: true },
 ];
 
 // Interactions run against document.body via screen — every kit portals
@@ -151,7 +154,10 @@ describe("@adapttable/${kit} at its kit floor", () => {
     // Filters: the toolbar button opens the kit's native popover with the
     // declared text filter inside.
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
-    expect(await screen.findAllByRole("textbox")).not.toHaveLength(0);
+    // The field is labelled by the def, not always role="textbox" — Chakra
+    // 3.13 and Radix Themes 3 expose a combobox/operator first. Antd labels
+    // both the operator and the value with the column name.
+    expect((await screen.findAllByLabelText(/Name/)).length).toBeGreaterThan(0);
     fireEvent.keyDown(document.body, { key: "Escape" });
 
     // Selection: bulkActions turns checkboxes on; ticking one row must
@@ -177,6 +183,7 @@ export default defineConfig({
     environment: "jsdom",
     include: ["floor.test.tsx"],
     setupFiles: ["./setup.ts"],
+    testTimeout: 15_000,
   },
 });
 `;
@@ -200,6 +207,22 @@ const SETUP = `if (typeof window !== "undefined") {
     disconnect() {}
   } as unknown as typeof ResizeObserver;
   window.scrollTo ??= (() => undefined) as typeof window.scrollTo;
+  // jsdom throws on getComputedStyle(el, pseudoElt); antd 6 measures
+  // with a pseudo-element. Drop the second argument. A re-entrancy guard
+  // stops jsdom 29 from calling back into this wrapper and hanging render.
+  const realGetComputedStyle = globalThis.getComputedStyle.bind(globalThis);
+  let computing = false;
+  globalThis.getComputedStyle = ((element: Element) => {
+    if (computing) {
+      return { getPropertyValue: () => "" } as CSSStyleDeclaration;
+    }
+    computing = true;
+    try {
+      return realGetComputedStyle(element);
+    } finally {
+      computing = false;
+    }
+  }) as typeof globalThis.getComputedStyle;
 }
 export {};
 `;
@@ -215,7 +238,7 @@ function packInto(pkgDir, dest) {
   return lines[lines.length - 1].trim();
 }
 
-function runCell(cell, coreTarball, packDir) {
+function runCell(cell, workspaceTarballs, packDir) {
   const adapterTarball = packInto(cell.pkg, packDir);
   const dir = mkdtempSync(join(tmpdir(), `floor-${cell.kit}-`));
   try {
@@ -226,6 +249,10 @@ function runCell(cell, coreTarball, packDir) {
       type: "module",
       dependencies: {
         [`@adapttable/${cell.kit}`]: `file:${adapterTarball}`,
+        // Named directly, not only overridden: the binding is not published
+        // yet, and npm's peer resolution needs a concrete node for it.
+        "@adapttable/core": `file:${workspaceTarballs.core}`,
+        "@adapttable/react": `file:${workspaceTarballs.react}`,
         ...cell.deps,
         ...REACT,
       },
@@ -237,9 +264,13 @@ function runCell(cell, coreTarball, packDir) {
         jsdom: "^29.0.0",
         vitest: "^4.0.0",
       },
-      // The adapter's ^-ranged core dependency must resolve to the LOCAL
-      // build, not the registry's published 1.x.
-      overrides: { "@adapttable/core": `file:${coreTarball}` },
+      // The adapter's ^-ranged workspace dependencies must resolve to the
+      // LOCAL build, not the registry — and `@adapttable/react` is not
+      // published at all yet, so an unpinned range fails to install.
+      overrides: {
+        "@adapttable/core": `file:${workspaceTarballs.core}`,
+        "@adapttable/react": `file:${workspaceTarballs.react}`,
+      },
     };
     writeFileSync(join(dir, "package.json"), JSON.stringify(pkg, null, 2));
     writeFileSync(join(dir, "vitest.config.ts"), VITEST_CONFIG);
@@ -248,8 +279,10 @@ function runCell(cell, coreTarball, packDir) {
         data={ROWS}
         columns={columns}
         rowKey={(r) => r.id}
-        enableColumnMenu
-        bulkActions={[{ key: "zap", label: "Zap", onClick: () => undefined }]}
+        features={standardFeatures({
+          filters: [{ key: "name", type: "text", label: "Name" }],
+          bulkActions: [{ key: "zap", label: "Zap", onClick: () => undefined }],
+        })}
       />`;
     writeFileSync(
       join(dir, "floor.test.tsx"),
@@ -287,7 +320,10 @@ function main() {
   const packDir = mkdtempSync(join(tmpdir(), "peer-floors-packs-"));
   let failed = false;
   try {
-    const coreTarball = packInto("core", packDir);
+    const workspaceTarballs = {
+      core: packInto("core", packDir),
+      react: packInto("react", packDir),
+    };
     for (const cell of cells) {
       process.stdout.write(
         `• @adapttable/${cell.kit} × ${Object.entries(cell.deps)
@@ -295,7 +331,7 @@ function main() {
           .map(([name, version]) => `${name}@${version}`)
           .join(" + ")} … `
       );
-      const { ok, output } = runCell(cell, coreTarball, packDir);
+      const { ok, output } = runCell(cell, workspaceTarballs, packDir);
       process.stdout.write(ok ? "ok\n" : "FAIL\n");
       if (!ok) {
         failed = true;

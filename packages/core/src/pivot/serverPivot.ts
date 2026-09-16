@@ -22,8 +22,7 @@
  * to say so — so `count`, `subtotal` and `totals` are optional, and a missing
  * cell is an empty cell rather than a zero.
  */
-import type { ReactNode } from "react";
-
+import type { DisplayValue } from "../display";
 import {
   PIVOT_GRAND_TOTAL_KEY,
   pivotLeafKey,
@@ -101,9 +100,9 @@ export interface ServerPivotOptions {
   config: PivotConfig;
   /** Format a computed cell, as the local engine's `format` does. */
   format?: (
-    value: ReactNode,
+    value: DisplayValue,
     measure: PivotConfig["measures"][number]
-  ) => ReactNode;
+  ) => DisplayValue;
 }
 
 /** Rebuild the column header tree from the paths the server named. */
@@ -180,14 +179,14 @@ export function serverPivotResult(
     }
   }
 
-  const cellsOf = (row: QueryPivotRow): ReactNode[] =>
+  const cellsOf = (row: QueryPivotRow): DisplayValue[] =>
     leaves.map((leaf, index) => {
       const value = leaf.total
         ? row.totals?.[index - columnCells]
         : row.cells[index];
       // A cell the server did not send is empty, not zero — the same rule the
       // local engine follows for a value that will not add up.
-      const node = (value ?? undefined) as ReactNode;
+      const node = (value ?? undefined) as DisplayValue;
       return format ? format(node, leaf.measure) : node;
     });
 

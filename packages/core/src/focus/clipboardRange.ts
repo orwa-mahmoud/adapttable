@@ -10,8 +10,8 @@
  * Values come from the same resolution the exports use, so what lands in a
  * spreadsheet from a copy and from a downloaded file cannot disagree.
  */
+import type { ColumnMetadata } from "../columnModel";
 import { buildExportTable } from "../export/exportWriter";
-import type { ColumnDef } from "../types";
 import { type CellRange, cellRangeIndices } from "./cellRange";
 
 /**
@@ -25,7 +25,7 @@ export interface ClipboardRangeOptions<TRow> {
   /** The rows the browser holds, in table order. */
   rows: readonly TRow[];
   /** The columns as rendered — a range's column indices address these. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Where the rendered window starts in the dataset. Zero unless paged. */
   firstRowIndex?: number;
   /** Include a header row naming each column. Defaults to `false`. */

@@ -3,12 +3,12 @@
  * the per-card chevron + inline detail on mobile, the detail row's colSpan,
  * RTL chevron flipping, and the interplay with row activation and pinning.
  */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { Theme } from "@radix-ui/themes";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {

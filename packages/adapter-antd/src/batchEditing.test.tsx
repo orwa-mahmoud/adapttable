@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Task {
@@ -84,6 +84,14 @@ describe("batch editing (antd)", () => {
       '[data-adapttable-part="batch-edit-cell"][data-changed]'
     );
     expect(changed).toHaveLength(3);
+  });
+
+  it("records the save as one undo gesture when history is armed", () => {
+    table({ editHistory: true, undoRedoButtons: true });
+    fireEvent.change(editors()[0]!, { target: { value: "Ship it" } });
+    expect(part("undo-button")).toBeDisabled();
+    fireEvent.click(part("batch-edit-save")!);
+    expect(part("undo-button")).not.toBeDisabled();
   });
 
   it("tells the host once, with every pending row", () => {

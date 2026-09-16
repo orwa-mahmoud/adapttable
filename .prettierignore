@@ -2,6 +2,7 @@
 **/build
 **/coverage
 **/.turbo
+worktrees/**
 pnpm-lock.yaml
 CHANGELOG.md
 **/CHANGELOG.md

@@ -4,9 +4,13 @@
 
 ```ts
 
-import { grouping } from '@adapttable/core/features';
+import { AdapterGroupingFeature } from '@adapttable/react/adapter';
+import { GroupSort } from '@adapttable/react/features';
 
-export { grouping }
+// @public
+export const grouping: AdapterGroupingFeature;
+
+export { GroupSort }
 
 // (No @packageDocumentation comment for this package)
 

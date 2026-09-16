@@ -1,4 +1,4 @@
-import type { SelectionState } from "@adapttable/core";
+import type { SelectionState } from "@adapttable/react";
 import { act, fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -270,9 +270,11 @@ function makeSelection(
     toggleAll: vi.fn(),
     toggleGroupLeaves: vi.fn(),
     clear: vi.fn(),
+    replace: vi.fn(),
     visibleIds: ["a", "b"],
     allMatching: false,
     selectAllMatching: vi.fn(),
+    acrossPages: true,
     ...overrides,
   };
 }

@@ -1,12 +1,21 @@
-import type { CellProps, ColumnDef } from "@adapttable/core";
 import {
   applyRowPatches,
   applyRowPatchesWithLog,
   updateRow,
-  useFrontendData,
-  useServerData,
 } from "@adapttable/core";
 import { getLabels } from "@adapttable/i18n";
+import {
+  type CellProps,
+  type ColumnDef,
+  useFrontendData,
+  useServerData,
+} from "@adapttable/react";
+import {
+  editing as editing_,
+  rowAppearance,
+  tree as tree_,
+  virtualize as virtualize_,
+} from "@adapttable/react/features";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
@@ -312,10 +321,21 @@ function ServerScaleTable({
         labels={getLabels("en")}
         urlSync={false}
         searchPlaceholder={`Filter ${total.toLocaleString("en-US")} rows…`}
-        virtualize={virtual}
-        virtualizeColumns={virtualCols}
-        estimateRowSize={48}
-        rowHeight={variableHeight ? variableRowHeight : undefined}
+        // The window is what this page exists to show, so it is imported —
+        // and the import carries its own configuration.
+        features={[
+          ...(virtual
+            ? [
+                virtualize_({
+                  virtualizeColumns: virtualCols,
+                  estimateRowSize: 48,
+                }),
+              ]
+            : []),
+          ...(variableHeight
+            ? [rowAppearance<BigPerson>({ rowHeight: variableRowHeight })]
+            : []),
+        ]}
         classNames={kitClassNames(kit)}
         stickyHeader
         stickyTop={navHeight}
@@ -491,6 +511,19 @@ function FrontendScaleTable({
   });
   const Table = kitTable<BigPerson>(kit);
   const navHeight = useNavHeight();
+  const onScaleCellEdit = (
+    row: BigPerson,
+    _key: string,
+    nextValue: unknown
+  ) => {
+    setRows((current) =>
+      applyRowPatches(
+        current,
+        [updateRow<BigPerson>(String(row.id), { budget: Number(nextValue) })],
+        (r) => String(r.id)
+      )
+    );
+  };
   return (
     <KitProvider kit={kit} dark={dark}>
       {/* The benchmark reads these to know the burst finished and how long
@@ -509,34 +542,35 @@ function FrontendScaleTable({
           labels={getLabels("en")}
           urlSync={false}
           searchPlaceholder={`Filter ${total.toLocaleString("en-US")} rows…`}
-          virtualize={virtual}
-          virtualizeColumns={virtualCols}
-          getParentId={treeShape?.getParentId}
-          expandedIds={treeShape?.expandedIds}
-          estimateRowSize={48}
-          rowHeight={variableHeight ? variableRowHeight : undefined}
+          // Imported, not switched on: the window, the tree and the editor
+          // each arrive with the feature that draws them.
+          features={[
+            ...(virtual
+              ? [
+                  virtualize_({
+                    virtualizeColumns: virtualCols,
+                    estimateRowSize: 48,
+                  }),
+                ]
+              : []),
+            ...(variableHeight
+              ? [rowAppearance<BigPerson>({ rowHeight: variableRowHeight })]
+              : []),
+            ...(treeShape
+              ? [
+                  tree_<BigPerson>({
+                    getParentId: treeShape.getParentId,
+                    expandedIds: treeShape.expandedIds,
+                  }),
+                ]
+              : []),
+            ...(edit ? [editing_<BigPerson>(onScaleCellEdit)] : []),
+          ]}
           classNames={kitClassNames(kit)}
           // Page-scroll window mode with a pinned header: the page itself
           // scrolls the 50k rows while the header sticks under the app nav.
           stickyHeader
           stickyTop={navHeight}
-          onCellEdit={
-            edit
-              ? (row, _key, nextValue) => {
-                  setRows((current) =>
-                    applyRowPatches(
-                      current,
-                      [
-                        updateRow<BigPerson>(String(row.id), {
-                          budget: Number(nextValue),
-                        }),
-                      ],
-                      (r) => String(r.id)
-                    )
-                  );
-                }
-              : undefined
-          }
         />
       </div>
     </KitProvider>

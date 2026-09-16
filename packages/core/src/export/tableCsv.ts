@@ -1,16 +1,23 @@
-import type { ReactNode } from "react";
-
+import type { ColumnMetadata } from "../columnModel";
 import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "../columns/columnMenuModel";
+import type { DisplayValue } from "../display";
 import type { FeatureHostState } from "../features/currentHost";
 import { type CellRange, cellRangeIndices } from "../focus/cellRange";
+import { parseGroupBy } from "../grouping/groupKeys";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { GetCellSpan } from "../rows/cellSpan";
+import type { SortLevel } from "../sort/compare";
+import {
+  type CapabilitySource,
+  sourceCapabilities,
+} from "../source/capabilities";
+import type { QueryFilterGroup } from "../source/queryContract";
 import type { TableSource } from "../source/TableSource";
 import type { TreeEntry } from "../tree/treeRows";
-import type { ColumnDef, ExtraFilters, SortDirection } from "../types";
+import type { ExtraFilters, SortDirection } from "../types";
 import { devWarn } from "../utils/devWarn";
 import {
   exportViewFromChrome,
@@ -54,8 +61,10 @@ export interface ExportCsvOptions<TRow = unknown> {
    *
    * `"page"` (default) — current page / loaded slice.
    * `"all"` — full filtered+sorted set when the source exposes
-   * {@link TableSource.allFilteredRows}; otherwise falls back to the
-   * page with a dev-only warning.
+   * {@link TableSource.allFilteredRows}. A server source instead needs
+   * {@link ExportCsvOptions.onExportAll}, {@link ExportCsvOptions.request}, or
+   * {@link ExportCsvOptions.fetchAll}; without an executable route the export
+   * stays disabled.
    * `"selected"` — the checked rows, in table order. Selection is a set of
    * ids, so this searches the widest set the source can offer: a row selected
    * on page 1 is still exported while page 3 is on screen.
@@ -108,6 +117,23 @@ export interface ExportCsvOptions<TRow = unknown> {
     info: ExportInfo<TRow> & { csv: string; file: ExportPayload }
   ) => void;
   /**
+   * Build an all-rows export where the data already lives.
+   *
+   * This route is used only with `scope: "all"`. It receives a page-free,
+   * transport-safe snapshot of the current view and never asks the table to
+   * fetch or materialise the matching rows. Report progress or a status
+   * message through `controls`; honouring its signal makes the progress
+   * surface's Cancel action stop the host job.
+   *
+   * Resolve `{ url }` and the completed surface offers that URL as a download.
+   * Resolve nothing when the host delivered the file another way. Reject to
+   * show the localized failure state and a Retry action.
+   */
+  onExportAll?: (
+    query: ExportAllQuery,
+    controls: ExportAllControls
+  ) => ExportAllResult | Promise<ExportAllResult>;
+  /**
    * The file format. Defaults to CSV; `@adapttable/core/xlsx` exports
    * {@link ExportWriter | a spreadsheet writer}, and any function of the
    * resolved rows and columns is a valid one.
@@ -136,9 +162,9 @@ export interface ExportCsvOptions<TRow = unknown> {
    * Let `scope: "all"` page a server source itself.
    *
    * A server-backed table holds one page, so "all" has nothing to read. The
-   * first answer is {@link ExportCsvOptions.request} — the backend already has
-   * the data. This is the second: opt in and the table walks the query page by
-   * page and builds the file in the browser.
+   * first answer is {@link ExportCsvOptions.onExportAll} — the backend already
+   * has the data. This is the second: opt in and the table walks the query page
+   * by page and builds the file in the browser.
    *
    * It is opt-in because it is a loop of network requests the reader did not
    * ask for, and capped because an unbounded one over a large table is a way
@@ -243,6 +269,64 @@ export interface ExportRequest<TRow> extends ExportInfo<TRow> {
 }
 
 /**
+ * A server-built all-rows export's page-free view.
+ *
+ * Every field is plain transport data. In particular, columns are keys rather
+ * than `ColumnMetadata` objects, because definitions may contain React nodes and
+ * functions that cannot cross a network boundary.
+ *
+ * @public
+ */
+export interface ExportAllQuery {
+  /** The committed free-text search term. */
+  readonly search: string;
+  /** Active primary sort key, if any. */
+  readonly sortBy: string | undefined;
+  /** Direction for `sortBy`. */
+  readonly sortDir: SortDirection | undefined;
+  /** The complete multi-sort chain, in priority order. */
+  readonly sortLevels: readonly SortLevel[];
+  /** Active flat filter values. */
+  readonly filters: ExtraFilters;
+  /** Active nested AND/OR filters, when present. */
+  readonly filterTree: QueryFilterGroup | undefined;
+  /** Active grouping keys, outermost first. */
+  readonly groupBy: readonly string[];
+  /** Column keys requested for the file, in file order. */
+  readonly columns: readonly string[];
+  /** Column keys visible on screen, in display order. */
+  readonly visibleColumns: readonly string[];
+  /** The requested file format. */
+  readonly format: string;
+  /** The requested filename. */
+  readonly filename: string;
+}
+
+/**
+ * Controls the table gives a server-built export.
+ *
+ * @public
+ */
+export interface ExportAllControls {
+  /** Aborted when the reader chooses Cancel. */
+  readonly signal: AbortSignal;
+  /** Report determinate completion from 0 through 100. */
+  readonly setProgress?: (progress: number) => void;
+  /** Report a short host-owned status message. */
+  readonly setMessage?: (message: string) => void;
+}
+
+/**
+ * How a server-built export settles.
+ *
+ * Resolve a URL for the table to offer as a download, or resolve nothing when
+ * the host delivered the file itself.
+ *
+ * @public
+ */
+export type ExportAllResult = { readonly url: string } | void;
+
+/**
  * The view-defining half of a table query, for an export request.
  *
  * @public
@@ -276,7 +360,7 @@ export interface ExportInfo<TRow> {
   /** The rows the chosen scope resolved to, in table order. */
   rows: readonly TRow[];
   /** The columns the chosen scope resolved to, in file order. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** The filename as it stands, before any override this hook returns. */
   filename: string;
 }
@@ -307,24 +391,35 @@ export function resolveExportCsv<TRow = unknown>(
   return { ...value, writer };
 }
 
+/** Whether the source itself can execute an all-rows export. */
+function sourceProvidesAllExportRows(source: CapabilitySource): boolean {
+  return (
+    source.allFilteredRows !== undefined &&
+    sourceCapabilities(source).exportScope === "all"
+  );
+}
+
 /**
- * Whether `scope: "all"` will write the current page instead of the
- * full filtered set.
+ * Whether `scope: "all"` lacks a route to the full filtered set.
  *
- * A frontend source that exposes `allFilteredRows`, or a host that
- * passed `request` / `fetchAll`, can answer honestly. Everything else
- * is this page — the button should say so.
+ * A frontend source that both exposes `allFilteredRows` and declares that
+ * export-all is supported can answer through the source. A host-provided
+ * `onExportAll` / `request` / `fetchAll` route can answer independently. A
+ * capability declaration describes support; it never creates access to rows.
  */
 export function exportAllFallsBackToPage<TRow = unknown>(
   exportCsv: ExportCsvProp<TRow>,
-  source: Pick<TableSource<TRow>, "allFilteredRows">
+  source: CapabilitySource
 ): boolean {
   const options = resolveExportCsv(exportCsv);
+  // A source declaration may constrain its own row route. Host-owned routes
+  // are executable independently and remain valid whatever the source says.
   return Boolean(
     options?.scope === "all" &&
-    source.allFilteredRows === undefined &&
+    options.onExportAll === undefined &&
     options.request === undefined &&
-    options.fetchAll === undefined
+    options.fetchAll === undefined &&
+    !sourceProvidesAllExportRows(source)
   );
 }
 
@@ -334,8 +429,8 @@ export function exportAllFallsBackToPage<TRow = unknown>(
  * @public
  */
 export function exportableColumns<TRow>(
-  columns: readonly ColumnDef<TRow>[]
-): ColumnDef<TRow>[] {
+  columns: readonly ColumnMetadata<TRow>[]
+): ColumnMetadata<TRow>[] {
   return columns.filter(
     (column) =>
       column.key !== ACTIONS_COLUMN_KEY && column.key !== REORDER_COLUMN_KEY
@@ -357,7 +452,7 @@ export interface ExportContext<TRow> {
   /** How a row's id is derived — the table's own `getRowId`. */
   getRowId?: (row: TRow) => string;
   /** Every defined column, including any hidden through the column menu. */
-  allColumns?: readonly ColumnDef<TRow>[];
+  allColumns?: readonly ColumnMetadata<TRow>[];
   /** The highlighted cell rectangle, for `scope: "range"`. */
   range?: CellRange | null;
   /**
@@ -373,7 +468,11 @@ export interface ExportContext<TRow> {
    * writes headers, outline levels and footers from them. A range export
    * ignores this — a rectangle is already its own shape.
    */
-  grouping?: { entries: readonly GroupedFlatEntry<TRow>[] };
+  grouping?: {
+    /** Active grouping keys, outermost first. */
+    groupBy?: readonly string[];
+    entries: readonly GroupedFlatEntry<TRow>[];
+  };
   /**
    * The flattened tree, when a tree is armed. Outranks grouping, the same
    * way the table does.
@@ -393,7 +492,7 @@ export interface ExportContext<TRow> {
    * The table's `summaryRow` mapper. Called on the scoped rows so a grand
    * total in the file matches the rows that actually left.
    */
-  summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+  summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
 }
 
 /**
@@ -403,9 +502,9 @@ export interface ExportContext<TRow> {
  */
 export function resolveExportColumns<TRow>(
   scope: ExportColumnScope | undefined,
-  visible: readonly ColumnDef<TRow>[],
-  all: readonly ColumnDef<TRow>[] | undefined
-): ColumnDef<TRow>[] {
+  visible: readonly ColumnMetadata<TRow>[],
+  all: readonly ColumnMetadata<TRow>[] | undefined
+): ColumnMetadata<TRow>[] {
   const keys: readonly string[] | undefined =
     typeof scope === "string" || scope === undefined ? undefined : scope;
   const pool = exportableColumns(
@@ -463,7 +562,7 @@ function resolveExportRows<TRow>(
       // Reached only by a hand-built call: the toolbar handler refuses to
       // render an "all" button a server source cannot answer.
       devWarn(
-        'exportCsv scope "all" needs the full filtered set. This source exposes only the current page, so that is what is exported. Pass `request` or `fetchAll` to export everything from a server tier.'
+        'exportCsv scope "all" needs the full filtered set. This source exposes only the current page, so that is what is exported. Pass `onExportAll`, `request`, or `fetchAll` to export everything from a server tier.'
       );
     }
     return source.allFilteredRows ?? source.rows;
@@ -492,11 +591,11 @@ function resolveExportRows<TRow>(
  */
 function resolveExport<TRow>(options: {
   source: TableSource<TRow>;
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   scope?: ExportRowScope;
   columnScope?: ExportColumnScope;
   context?: ExportContext<TRow>;
-}): { rows: readonly TRow[]; columns: ColumnDef<TRow>[] } {
+}): { rows: readonly TRow[]; columns: ColumnMetadata<TRow>[] } {
   const scope = options.scope ?? "page";
   const range = options.context?.range;
   return {
@@ -521,8 +620,8 @@ function resolveExport<TRow>(options: {
  */
 function columnsInRange<TRow>(
   range: CellRange,
-  columns: readonly ColumnDef<TRow>[]
-): ColumnDef<TRow>[] {
+  columns: readonly ColumnMetadata<TRow>[]
+): ColumnMetadata<TRow>[] {
   return exportableColumns(
     cellRangeIndices(range).cols.flatMap((index) => {
       const column = columns[index];
@@ -574,7 +673,7 @@ function exportTableOptions<TRow>(
  */
 export function buildTableCsv<TRow>(options: {
   source: TableSource<TRow>;
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   scope?: ExportRowScope;
   columnScope?: ExportColumnScope;
   escapeFormulas?: boolean;
@@ -602,7 +701,7 @@ export function buildTableCsv<TRow>(options: {
  */
 export function downloadTableCsv<TRow>(options: {
   source: TableSource<TRow>;
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   filename?: string;
   scope?: ExportRowScope;
   columnScope?: ExportColumnScope;
@@ -638,7 +737,8 @@ export function downloadTableCsv<TRow>(options: {
 }
 
 /**
- * Resolve the `exportCsv` prop into a click handler, or `undefined` when off.
+ * Resolve composed export configuration into a click handler, or `undefined`
+ * when off.
  * Adapters bind this to the toolbar Export button.
  *
  * @typeParam TRow - The row type.
@@ -648,16 +748,27 @@ export function downloadTableCsv<TRow>(options: {
 export function makeExportCsvHandler<TRow>(
   exportCsv: boolean | ExportCsvOptions<TRow> | undefined,
   source: TableSource<TRow>,
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   context?: ExportContext<TRow>,
   host?: FeatureHostState
-): (() => void | Promise<void>) | undefined {
+):
+  | ((
+      controls?: ExportAllControls
+    ) => ExportAllResult | Promise<ExportAllResult>)
+  | undefined {
   const options = resolveExportCsv(exportCsv, host);
   if (!options) return undefined;
 
+  const writer = options.writer ?? csvWriter;
+  if (options.scope === "all" && options.onExportAll) {
+    const query = exportAllQueryOf(source, columns, options, context, writer);
+    const onExportAll = options.onExportAll;
+    return (controls) =>
+      onExportAll(query, controls ?? { signal: new AbortController().signal });
+  }
+
   // Handing the export to a backend replaces building it here entirely —
   // the browser neither assembles a file nor downloads one.
-  const writer = options.writer ?? csvWriter;
   const { request } = options;
   if (request) {
     return () =>
@@ -677,9 +788,13 @@ export function makeExportCsvHandler<TRow>(
   }
 
   // "All" over a server source: the browser holds one page, so it has to be
-  // answered by fetching, not by pretending. `fetchAll` is the opt-in.
+  // answered by fetching, not by pretending. A page-only declaration also
+  // constrains rows that happen to be present; `fetchAll` remains an
+  // independent host-owned route in either case.
   const serverAll =
-    options.scope === "all" && !source.allFilteredRows && options.fetchAll;
+    options.scope === "all" &&
+    !sourceProvidesAllExportRows(source) &&
+    options.fetchAll;
   if (serverAll) {
     return async () => {
       const rows = await fetchAllExportRows(source, serverAll);
@@ -698,28 +813,16 @@ export function makeExportCsvHandler<TRow>(
     };
   }
 
-  // Neither a backend handler nor an opt-in fetch, and no rows to read:
-  // write this page and name the button that way.
-  if (options.scope === "all" && !source.allFilteredRows) {
-    devWarn(
-      'exportCsv scope "all" needs the full filtered set. This source ' +
-        "exposes only the current page, so the Export button writes this " +
-        "page and names itself that way. Pass `request` or `fetchAll` to " +
-        "export everything from a server tier."
-    );
-    return () =>
-      downloadTableCsv({
-        source,
-        columns,
-        filename: options.filename,
-        scope: "page",
-        columnScope: options.columns,
-        escapeFormulas: options.escapeFormulas,
-        context,
-        writer,
-        onBeforeExport: options.onBeforeExport,
-        onAfterExport: options.onAfterExport,
-      });
+  // Keep a handler so adapters can render the disabled control, but never
+  // turn an unavailable all-rows request into a current-page download.
+  if (exportAllFallsBackToPage(options, source)) {
+    return () => {
+      devWarn(
+        'exportCsv scope "all" needs an executable full-export route. ' +
+          "Provide source.allFilteredRows, exportCsv.onExportAll, " +
+          "exportCsv.request, or exportCsv.fetchAll. No export was started."
+      );
+    };
   }
 
   return () =>
@@ -735,6 +838,36 @@ export function makeExportCsvHandler<TRow>(
       onBeforeExport: options.onBeforeExport,
       onAfterExport: options.onAfterExport,
     });
+}
+
+/** Build the serializable, page-free view for `onExportAll`. */
+function exportAllQueryOf<TRow>(
+  source: TableSource<TRow>,
+  visibleColumns: readonly ColumnMetadata<TRow>[],
+  options: ExportCsvOptions<TRow>,
+  context: ExportContext<TRow> | undefined,
+  writer: ExportWriter
+): ExportAllQuery {
+  const columns = resolveExportColumns(
+    options.columns,
+    visibleColumns,
+    context?.allColumns
+  );
+  return {
+    search: source.search,
+    sortBy: source.sortBy,
+    sortDir: source.sortDir,
+    sortLevels: source.sortLevels,
+    filters: source.extra,
+    filterTree: source.filterTree,
+    groupBy: context?.grouping?.groupBy ?? parseGroupBy(source.groupBy),
+    columns: columns.map((column) => column.key),
+    visibleColumns: exportableColumns(visibleColumns).map(
+      (column) => column.key
+    ),
+    format: writer.extension,
+    filename: options.filename ?? defaultExportFilename(writer),
+  };
 }
 
 /** The view-defining half of the source's state, for a server export. */

@@ -1,8 +1,37 @@
-import type { ReactNode } from "react";
-
+import type { ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 import type { ExtraEntry } from "../rows/extraRows";
-import type { ColumnDef } from "../types";
 import { getPath } from "../utils/path";
+import { parseGroupBy } from "./groupKeys";
+import type { GroupAggregateOps } from "./groupRowLayout";
+
+/**
+ * One field/value pair in a nested group's address.
+ *
+ * @public
+ */
+export interface RowGroupLevel {
+  /** Column key that defines this level. */
+  readonly key: string;
+  /** Raw value the host writes when a row moves here. */
+  readonly value: unknown;
+  /** Human-readable value shown by the group header. */
+  readonly label: string;
+}
+
+/**
+ * Stable, host-usable address of one leaf group.
+ *
+ * @public
+ */
+export interface RowGroupRef {
+  /** The group row's stable key. */
+  readonly id: string;
+  /** Breadcrumb label for menus and announcements. */
+  readonly label: string;
+  /** Grouping fields and raw values, outermost first. */
+  readonly levels: readonly RowGroupLevel[];
+}
 
 /**
  * One visual row in a grouped body: a group header at some depth, or a leaf
@@ -29,6 +58,8 @@ export type GroupedFlatEntry<TRow> =
       groupBy: string;
       /** The value keys from the root down to here — the node's address. */
       path: readonly string[];
+      /** Rich address used by row-move controls. */
+      group?: RowGroupRef;
       /**
        * EVERY leaf beneath this header, not just its direct children: a
        * parent's count, its aggregates and its selection state all describe
@@ -45,7 +76,14 @@ export type GroupedFlatEntry<TRow> =
        */
       serverCount?: number;
       /** Present when the host passed `groupAggregates`. */
-      aggregateCells?: Partial<Record<string, ReactNode>>;
+      aggregateCells?: Partial<Record<string, DisplayValue>>;
+      /**
+       * Which operation produced each of those cells, where the table knows
+       * it: the reader's own choice, or the one a server was asked for. What
+       * a column's `formatAggregate` is told, so a count can read as a count
+       * under a money column.
+       */
+      aggregateOps?: GroupAggregateOps;
       collapsed: boolean;
     }
   | {
@@ -68,7 +106,9 @@ export type GroupedFlatEntry<TRow> =
       label: string;
       leafRows: readonly TRow[];
       leafIds: readonly string[];
-      aggregateCells?: Partial<Record<string, ReactNode>>;
+      aggregateCells?: Partial<Record<string, DisplayValue>>;
+      /** Which operation produced each of those cells, where it is known. */
+      aggregateOps?: GroupAggregateOps;
     }
   | {
       /**
@@ -103,6 +143,10 @@ export type GroupedFlatEntry<TRow> =
       /** Index among leaves in the flat model (stable for selection chrome). */
       index: number;
       groupKey: string;
+      /** Position among this group's direct leaves. */
+      groupPosition?: number;
+      /** Rich address used by row-move controls. */
+      group?: RowGroupRef;
     }
   | ExtraEntry;
 
@@ -148,7 +192,7 @@ export type GroupSort<TRow> =
  */
 export type GroupAggregatesFn<TRow> = (
   rows: readonly TRow[]
-) => Partial<Record<string, ReactNode>>;
+) => Partial<Record<string, DisplayValue>>;
 
 /**
  * What `buildGroupedFlatModel` needs to flatten grouped rows into the single
@@ -165,13 +209,19 @@ export interface BuildGroupedFlatModelOptions<TRow> {
    */
   groupBy: string | readonly string[];
   /** Visible columns, in order. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Row identity function. */
   getRowId: (row: TRow) => string;
   /** Collapsed group keys (from `useGroupCollapse`). */
   collapsedGroupIds: ReadonlySet<string>;
   /** Optional per-group cells — same shape as `summaryRow`. */
   aggregates?: GroupAggregatesFn<TRow>;
+  /**
+   * Which operation each of those cells came from, where it is known. Carried
+   * on every group so a column's `formatAggregate` can tell a total from a
+   * count without the kits threading it through themselves.
+   */
+  aggregateOps?: GroupAggregateOps;
   /** Override blank-group label (default `"(blank)"`). */
   blankLabel?: string;
   /**
@@ -213,14 +263,15 @@ export interface GroupPaging {
 
 /**
  * Resolve the value used to bucket a row for `groupBy`. Prefers the column's
- * `sortValue` (same primitive as client sort), then a path lookup on the
- * column key — never the JSX accessor.
+ * own `groupValue`, then `sortValue` (same primitive as client sort), then a
+ * path lookup on the column key — never the JSX accessor.
  */
 export function resolveGroupValue<TRow>(
   row: TRow,
   groupBy: string,
-  column: ColumnDef<TRow> | undefined
+  column: ColumnMetadata<TRow> | undefined
 ): unknown {
+  if (column?.groupValue) return column.groupValue(row);
   if (column?.sortValue) return column.sortValue(row);
   const path = column?.key ?? groupBy;
   return getPath(row, path);
@@ -315,13 +366,16 @@ export interface GroupPartition<TRow> {
  * The grouping keys {@link buildGroupedFlatModel} will actually use — blank
  * entries dropped, so `["", "team"]` is just `"team"`.
  *
- * @param groupBy - A single key or an ordered list.
+ * A string is read the way grouping is stored and travels: comma-separated.
+ * `formatGroupBy` writes `"team,status"` into state and the URL, so a caller
+ * handing that back must get two keys — reading it as one column name groups
+ * every row into a single blank bucket.
+ *
+ * @param groupBy - A single key, a comma-separated list, or an ordered list.
  * @returns The non-empty keys, outermost first.
  */
 export function groupingKeys(groupBy: string | readonly string[]): string[] {
-  return (typeof groupBy === "string" ? [groupBy] : groupBy).filter(
-    (key) => key.length > 0
-  );
+  return parseGroupBy(groupBy);
 }
 
 /**
@@ -339,7 +393,7 @@ export function groupingKeys(groupBy: string | readonly string[]): string[] {
 export function partitionGroupedRows<TRow>(
   rows: readonly TRow[],
   groupBy: string | readonly string[],
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): GroupPartition<TRow>[] {
   const keys = groupingKeys(groupBy);
   if (keys.length === 0) return [];
@@ -350,7 +404,7 @@ function partitionLevel<TRow>(
   rows: readonly TRow[],
   keys: readonly string[],
   level: number,
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): GroupPartition<TRow>[] {
   const { order, buckets } = bucketBy(rows, keys[level]!, columns);
   return order.map((valueKey) => {
@@ -391,6 +445,7 @@ export function flattenGroupPartitions<TRow>(
     getRowId,
     collapsedGroupIds,
     aggregates,
+    aggregateOps,
     blankLabel,
     footers = false,
     sort,
@@ -405,7 +460,8 @@ export function flattenGroupPartitions<TRow>(
   const walk = (
     levelPartitions: readonly GroupPartition<TRow>[],
     level: number,
-    path: readonly string[]
+    path: readonly string[],
+    parentLevels: readonly RowGroupLevel[]
   ): void => {
     const key = keys[level]!;
 
@@ -443,6 +499,15 @@ export function flattenGroupPartitions<TRow>(
       const collapsed = collapsedGroupIds.has(groupKey);
       const aggregateCells = aggregates?.(part.rows);
       const label = node.label;
+      const levels = [
+        ...parentLevels,
+        { key, value: part.value, label },
+      ] satisfies RowGroupLevel[];
+      const group: RowGroupRef = {
+        id: groupKey,
+        label: levels.map((entry) => entry.label).join(" / "),
+        levels,
+      };
 
       flat.push({
         kind: "group",
@@ -452,18 +517,21 @@ export function flattenGroupPartitions<TRow>(
         level,
         groupBy: key,
         path: here,
+        group,
         leafRows: part.rows,
         leafIds: part.rows.map((row) => getRowId(row)),
         aggregateCells,
+        aggregateOps,
         collapsed,
       });
       if (collapsed) continue;
 
       if (level + 1 < keys.length) {
-        walk(part.children ?? [], level + 1, here);
+        walk(part.children ?? [], level + 1, here, levels);
       } else {
         leafIndex = emitLeaves(flat, part.rows, {
           groupKey,
+          group,
           level,
           getRowId,
           from: leafIndex,
@@ -489,6 +557,7 @@ export function flattenGroupPartitions<TRow>(
           leafRows: part.rows,
           leafIds: part.rows.map((row) => getRowId(row)),
           aggregateCells,
+          aggregateOps,
         });
       }
     }
@@ -500,7 +569,7 @@ export function flattenGroupPartitions<TRow>(
     }
   };
 
-  walk(partitions, 0, []);
+  walk(partitions, 0, [], []);
   return flat;
 }
 
@@ -571,21 +640,24 @@ function emitLeaves<TRow>(
   rows: readonly TRow[],
   options: {
     groupKey: string;
+    group: RowGroupRef;
     level: number;
     getRowId: (row: TRow) => string;
     from: number;
     limit: number;
   }
 ): number {
-  const { groupKey, level, getRowId, from, limit } = options;
+  const { groupKey, group, level, getRowId, from, limit } = options;
   let index = from;
-  for (const row of rows.slice(0, limit)) {
+  for (const [groupPosition, row] of rows.slice(0, limit).entries()) {
     flat.push({
       kind: "row",
       key: getRowId(row),
       row,
       index: index++,
       groupKey,
+      groupPosition,
+      group,
     });
   }
   const hidden = Math.max(0, rows.length - limit);
@@ -627,7 +699,7 @@ function pageLimit(
 function bucketBy<TRow>(
   rows: readonly TRow[],
   key: string,
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): {
   order: string[];
   buckets: Map<string, { value: unknown; rows: TRow[] }>;

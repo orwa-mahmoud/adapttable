@@ -1,9 +1,15 @@
-# React table keyboard navigation — arrow keys, ARIA grid, screen readers
+# React data grid navigation — range selection, copy, paste and fill
 
-A table with a hundred cells should not be a hundred tab stops. Set
-`cellNavigation` and the table becomes **one** tab stop whose interior is
-reachable by arrow keys, with correct ARIA grid semantics and a screen reader
-that says where you are.
+Use arrow keys to navigate cells, select a range, copy and paste spreadsheet
+values, or extend values with a fill handle. This guide also covers find-in-table,
+selection statistics and accessible focus. For host-owned validation and saving,
+see [cell editing](./cell-editing.md).
+
+A table with a hundred cells should not be a hundred tab stops. Compose
+`cellNavigation` from `@adapttable/<kit>/cell-navigation` and the table becomes
+**one** tab stop whose interior is reachable by arrow keys, with correct ARIA
+grid semantics and a screen reader that says where you are. See
+[feature composition](./features.md).
 
 **Related:** [Accessible React data table](./accessibility.md) ·
 [Cell editing](./cell-editing.md) · [Virtualization](./virtualization.md) ·
@@ -34,15 +40,21 @@ it, reporting whether it landed rather than throwing.
 ## Pasting a spreadsheet back in
 
 **Ctrl/Cmd+V** parses what a spreadsheet put on the clipboard and commits it as
-ordinary cell edits — through `onCellEdit`, the same channel inline editing
-uses:
+ordinary cell edits — through your `editing()` handler, the same channel inline
+editing uses:
 
 ```tsx
+import { DataTable } from "@adapttable/mantine";
+import { cellNavigation } from "@adapttable/mantine/cell-navigation";
+import { editing } from "@adapttable/mantine/editing";
+
 <DataTable
-  cellNavigation
+  features={[
+    cellNavigation(),
+    editing((row, key, value) => save(row, key, value)),
+  ]}
   columns={[{ key: "budget", header: "Budget", editable: true }]}
-  onCellEdit={(row, key, value) => save(row, key, value)}
-/>
+/>;
 ```
 
 That is the whole wiring: a table that can be edited can be pasted into. Each
@@ -55,9 +67,9 @@ To take the batch whole instead — one server round trip, one undo entry — se
 
 ```tsx
 <DataTable
-  cellNavigation
+  features={[cellNavigation(), editing(commit)]}
   onCellPaste={(edits) => saveAll(edits)}
-  onCellEdit={commit}
+  columns={[{ key: "budget", header: "Budget", editable: true }]}
 />
 ```
 
@@ -92,15 +104,14 @@ rest of it. The handle itself is not a tab stop, because the grid is one tab
 stop and a focusable square inside it would break that; the key press announces
 what it wrote through `labels.gridRangeFilled`.
 
-The edits arrive exactly as a paste's do — `onCellEdit` per cell, or
-`onCellFill` for the batch — so the handle appears as soon as a table can be
-edited, and never when it cannot:
+The edits arrive exactly as a paste's do — one call per cell through
+`editing()`, or `onCellFill` for the batch — so the handle appears as soon as a
+table can be edited, and never when it cannot:
 
 ```tsx
 <DataTable
-  cellNavigation
+  features={[cellNavigation(), editing(commit)]}
   columns={[{ key: "budget", header: "Budget", editable: true }]}
-  onCellEdit={commit}
 />
 ```
 
@@ -113,10 +124,14 @@ Headless: `fillDirection`, `fillTargetRange` and `fillRangeEdits`;
 
 ## Find in table
 
-Set `findInTable` and **Ctrl/Cmd+F** opens a find bar over the table:
+Compose `findInTable` from `@adapttable/<kit>/find-in-table` and **Ctrl/Cmd+F**
+opens a find bar over the table:
 
 ```tsx
-<DataTable cellNavigation findInTable />
+import { cellNavigation } from "@adapttable/mantine/cell-navigation";
+import { findInTable } from "@adapttable/mantine/find-in-table";
+
+<DataTable features={[cellNavigation(), findInTable()]} />;
 ```
 
 Find is not search. The search box asks "show me only the rows that match", and
@@ -143,9 +158,12 @@ Matching reads what a cell **shows**, so a column that renders a formatted date
 is found by that date rather than by the ISO string underneath. Only the loaded
 rows are searched: a hit the table cannot take you to would be a lie, so on a
 paged table find covers the page you are on, and under virtualization it covers
-what has been fetched. The query is deliberately not put in the URL — where you
-are looking is not part of the table's state, and a shared link should not reopen
-someone else's search box.
+what has been fetched. The **query** is part of the table's shareable URL state
+(a `find` param beside `q`): opening a link that carries it reopens the bar,
+runs the walk, and focuses the first hit. The current-match position stays
+ephemeral — the receiving page's data may differ, so the query reproduces and
+the cursor does not. Typing writes with replace-state after a short debounce so
+browser history stays clean.
 
 On mobile the cards are a list rather than a grid, so the bar opens and searches
 but the hits are not marked; the desktop layout is where a cell can be pointed
@@ -157,10 +175,14 @@ Headless: `findMatches`, `matchKeySet`, `stepMatch`, `useFindInTable` in
 
 ## What the selection adds up to
 
-Set `selectionStats` and a strip under the table says what is selected:
+Compose `selectionStats` from `@adapttable/<kit>/selection-stats` and a strip
+under the table says what is selected:
 
 ```tsx
-<DataTable cellNavigation selectionStats />
+import { cellNavigation } from "@adapttable/mantine/cell-navigation";
+import { selectionStats } from "@adapttable/mantine/selection-stats";
+
+<DataTable features={[cellNavigation(), selectionStats()]} />;
 ```
 
 > Count 12 · Sum 1,240.5 · Avg 103.4 · Min 12 · Max 900
@@ -202,7 +224,7 @@ never seen, because a copy or an export would then invent them.
 
 ### The header checkbox
 
-`columnSelectionCheckbox` adds a checkbox to every column header that selects
+`columnSelectionCheckbox()` adds a checkbox to every column header that selects
 that column. The gesture above is unchanged; this is the same state reached two
 ways it cannot be. A touchscreen has no Ctrl key to hold, and a gesture nothing
 announces is a gesture nobody finds — so the control is what a finger taps and
@@ -210,11 +232,14 @@ what a screen reader reads, named `labels.selectColumn` plus the column's own
 name ("Select column: Team", translated in all seventeen locales).
 
 ```tsx
-<DataTable cellNavigation columnSelectionCheckbox … />
+import { cellNavigation } from "@adapttable/mantine/cell-navigation";
+import { columnSelectionCheckbox } from "@adapttable/mantine/column-selection";
+
+<DataTable features={[cellNavigation(), columnSelectionCheckbox()]} … />;
 ```
 
-It needs `cellNavigation`, because that is what makes a selection exist at all;
-either prop alone renders nothing. Ticking selects the column, unticking clears
+It needs `cellNavigation()`, because that is what makes a selection exist at all;
+either factory alone renders nothing. Ticking selects the column, unticking clears
 — nothing selected is the only state one checkbox can return to, since a
 rectangle cannot lose a column out of its middle. A box reads as checked only
 when the selection is exactly its column: inside a wider rectangle it stays
@@ -251,12 +276,15 @@ the fill is yours through the `cellSelected` class hook (the shadcn preset sets
 ## Example
 
 ```tsx
+import { DataTable } from "@adapttable/mantine";
+import { cellNavigation } from "@adapttable/mantine/cell-navigation";
+
 <DataTable
   data={people}
   columns={columns}
   rowKey={(row) => row.id}
-  cellNavigation
-/>
+  features={[cellNavigation()]}
+/>;
 ```
 
 That is the whole opt-in. Omit it and nothing changes — see
@@ -350,10 +378,10 @@ label/value pairs, and a two-dimensional focus model does not describe it.
 
 ## Off means absent
 
-With `cellNavigation` omitted there is no `role="grid"`, no `tabIndex`, no key
+Without `cellNavigation()` composed there is no `role="grid"`, no `tabIndex`, no key
 handler, no live region, and no extra attributes. Not "disabled" — absent. A
 test asserts the rendered markup is byte-identical to a table built without the
-prop at all, in every one of the eight adapters.
+feature at all, in every one of the eight adapters.
 
 Focus position is also deliberately **not** saved to the URL or a Saved View.
 Where the keyboard is sitting is ephemeral UI state, not part of a view someone
@@ -369,6 +397,31 @@ would share.
 | `gridFocusMoveForKey` / `GridKeyPress`                    | Maps a key press to a move, applying the RTL swap.                                                                                |
 | `GridCell` / `sameGridCell`                               | A cell address, and address equality.                                                                                             |
 | `GRID_CELL_ATTR` / `gridCellAttr`                         | The `data-grid-cell` attribute focus uses to find a cell in the DOM.                                                              |
+| `contextMenuCopyTarget` / `ContextMenuCopyTarget`         | Decides what a context-menu Copy takes: the clicked cell, or the selection it landed inside.                                      |
+
+### Copying from the context menu
+
+The context menu names what was clicked by row key and column key. Copying
+needs a grid address, and a row key is not one: where a row sits on screen
+follows the sort, the filter, the page, the pinned rows and the virtual
+window. `gridFocus.cellAt(rowId, columnKey)` resolves it against the very rows
+and columns that grid was handed, so no adapter counts positions itself.
+
+`contextMenuCopyTarget(gridFocus, target)` then decides what Copy takes:
+
+```tsx
+onCopy: (target) => {
+  const copy = contextMenuCopyTarget(gridFocus, target);
+  if (!copy.available) return;
+  gridFocus.copyCells(copy.cell);
+};
+```
+
+A cell with nothing selected copies that cell. A click inside a selection
+keeps the selection — the rectangle is what the reader built. A click outside
+one copies the cell under the cursor. A target that names no cell reports
+`available: false`, and the menu greys Copy out rather than copying data
+nobody pointed at. `useGridFocus` needs `getRowId` for `cellAt` to answer.
 
 `getCellPropsAt(windowIndex, col)` and `getRowPropsAt(windowIndex)` take the
 index an adapter already has — its position in the rendered rows — and convert
@@ -378,6 +431,7 @@ because getting it wrong is invisible on screen.
 ## Notes
 
 - Works in all eight adapters, verified by the same parity test in each.
-- Enter and F2 are handled by the editing gate on the focused cell, so the two
-  keyboard models never race for one key press.
+- Enter and F2 open the focused cell when its column is `editable`, and do
+  nothing when it is not — so arrowing to a cell and pressing Enter edits it,
+  which is the whole keyboard path.
 - A click moves focus too: state follows the DOM rather than fighting it.

@@ -1,8 +1,12 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { columnMenu } from "./column-menu";
+import { DataTable } from "./data-table.test-utils";
+import { exportCsv } from "./export";
+import { filters as filtersFeature } from "./filters";
 import type { ColumnDef } from "./index";
+import { savedViews } from "./saved-views";
 import { renderMui } from "./test-utils";
 
 /**
@@ -29,6 +33,12 @@ describe("toolbar order (MUI)", () => {
         urlSync={false}
         filters={[{ key: "name", type: "text" }]}
         enableColumnMenu
+        features={[
+          columnMenu(),
+          filtersFeature<Row>([{ key: "name", type: "text" }]),
+          savedViews({ storageKey: "order-test" }),
+          exportCsv<Row>(),
+        ]}
         exportCsv
         savedViews={{ storageKey: "order-test" }}
       />

@@ -1,4 +1,5 @@
-import type { ColumnDef, SortByOption } from "../types";
+import type { ColumnMetadata } from "../columnModel";
+import type { SortByOption } from "../types";
 
 /**
  * Build sort-by select options from sortable columns. On mobile the card
@@ -17,7 +18,7 @@ import type { ColumnDef, SortByOption } from "../types";
  * @public
  */
 export function deriveSortByOptions<TRow>(
-  columns: readonly ColumnDef<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[]
 ): SortByOption[] {
   const options: SortByOption[] = [];
   for (const column of columns) {

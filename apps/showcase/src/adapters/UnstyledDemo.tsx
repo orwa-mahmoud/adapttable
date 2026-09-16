@@ -1,5 +1,7 @@
-import type { ColumnDef, ColumnLayoutState } from "@adapttable/core";
-import type { DataTableProps } from "@adapttable/unstyled";
+import type { ColumnLayoutState } from "@adapttable/core";
+import type { ColumnDef, FeatureProps } from "@adapttable/react";
+import type {} from "@adapttable/unstyled";
+import { groupingPanel as groupingPanel_ } from "@adapttable/unstyled/grouping-panel";
 
 import { type Locale, type Person } from "../data";
 import {
@@ -28,6 +30,8 @@ export function UnstyledDemo({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
+  summaryRow,
   cellSpan,
   extraRows,
   rowStyle,
@@ -80,6 +84,8 @@ export function UnstyledDemo({
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -101,7 +107,7 @@ export function UnstyledDemo({
   derivedFields?: boolean;
   editorShowcase?: boolean;
   /** The toolbar Export button's configuration. */
-  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
+  exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
   columnMenu?: boolean;
   filterControls?: boolean;
   bulkActions?: boolean;
@@ -114,7 +120,7 @@ export function UnstyledDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
   wide?: boolean;
   defaultColumnLayout?: Partial<ColumnLayoutState>;
   forceMobile?: boolean;
@@ -124,6 +130,7 @@ export function UnstyledDemo({
     <UnstyledLike
       mode={mode}
       locale={locale}
+      groupingPanelFactory={groupingPanel_}
       pageMode={pageMode}
       urlKey={urlKey}
       density={density}
@@ -137,6 +144,8 @@ export function UnstyledDemo({
       rowMutations={rowMutations}
       rowReorder={rowReorder}
       rowPinning={rowPinning}
+      pinnedSummaryRows={pinnedSummaryRows}
+      summaryRow={summaryRow}
       cellSpan={cellSpan}
       extraRows={extraRows}
       rowStyle={rowStyle}

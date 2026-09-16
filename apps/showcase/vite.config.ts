@@ -1,9 +1,11 @@
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 
+import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
 import { SHOWCASE_PAGES } from "./pages.mjs";
 
 const GA_MEASUREMENT_ID = "G-FT8LY7Z15Y";
@@ -29,54 +31,52 @@ const googleAnalytics = (): Plugin => ({
   transformIndexHtml: () => [
     {
       tag: "script",
-      attrs: {
-        async: true,
-        // googletagmanager.com serves the tag with `access-control-allow-origin: *`,
-        // so an anonymous fetch gives the browser full error detail instead of
-        // the opaque "Script error." every cross-origin failure collapses into.
-        crossorigin: "anonymous",
-        src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
-      },
-      injectTo: "head",
-    },
-    {
-      tag: "script",
-      children: [
-        "window.dataLayer = window.dataLayer || [];",
-        "function gtag(){dataLayer.push(arguments);}",
-        "gtag('js', new Date());",
-        `gtag('config', '${GA_MEASUREMENT_ID}');`,
-        "(function () {",
-        "  function report(type, fatal) {",
-        "    if (typeof gtag !== 'function') return;",
-        "    gtag('event', 'web_exception', {",
-        "      exception_type: type,",
-        "      fatal: fatal,",
-        "      non_interaction: true",
-        "    });",
-        "  }",
-        "  window.addEventListener('error', function (event) {",
-        "    var message = typeof event.message === 'string' ? event.message : '';",
-        // ResizeObserver's benign loop notification arrives as an error event
-        // with no error object. It gets its own bucket so the count stays
-        // readable in GA4 instead of hiding inside a generic 'Error' total.
-        "    if (message.startsWith('ResizeObserver loop')) {",
-        "      report('ResizeObserverLoop', false);",
-        "      return;",
-        "    }",
-        "    var error = event.error;",
-        // Without an error object the message is the only identifying detail
-        // GA4 will ever see, so send it instead of the blanket 'Error' —
-        // truncated to the 100-character parameter limit. Only a real error
-        // object marks the event fatal.
-        "    var name = error && error.name ? error.name : '';",
-        "    report(name || message.slice(0, 100) || 'Error', Boolean(error));",
-        "  });",
-        "  window.addEventListener('unhandledrejection', function (event) {",
-        "    report(event.reason && event.reason.name ? event.reason.name : 'UnhandledRejection', false);",
-        "  });",
-        "})();",
-      ].join("\n"),
+      children: guarded(
+        [
+          // googletagmanager.com serves the tag with
+          // `access-control-allow-origin: *`, so an anonymous fetch gives the
+          // browser full error detail instead of the opaque "Script error."
+          // every cross-origin failure collapses into.
+          appendScript(
+            `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
+            { async: true, crossorigin: "anonymous" }
+          ),
+          "window.dataLayer = window.dataLayer || [];",
+          "function gtag(){dataLayer.push(arguments);}",
+          "gtag('js', new Date());",
+          `gtag('config', '${GA_MEASUREMENT_ID}');`,
+          "(function () {",
+          "  function report(type, fatal) {",
+          "    if (typeof gtag !== 'function') return;",
+          "    gtag('event', 'web_exception', {",
+          "      exception_type: type,",
+          "      fatal: fatal,",
+          "      non_interaction: true",
+          "    });",
+          "  }",
+          "  window.addEventListener('error', function (event) {",
+          "    var message = typeof event.message === 'string' ? event.message : '';",
+          // ResizeObserver's benign loop notification arrives as an error event
+          // with no error object. It gets its own bucket so the count stays
+          // readable in GA4 instead of hiding inside a generic 'Error' total.
+          "    if (message.startsWith('ResizeObserver loop')) {",
+          "      report('ResizeObserverLoop', false);",
+          "      return;",
+          "    }",
+          "    var error = event.error;",
+          // Without an error object the message is the only identifying detail
+          // GA4 will ever see, so send it instead of the blanket 'Error' —
+          // truncated to the 100-character parameter limit. Only a real error
+          // object marks the event fatal.
+          "    var name = error && error.name ? error.name : '';",
+          "    report(name || message.slice(0, 100) || 'Error', Boolean(error));",
+          "  });",
+          "  window.addEventListener('unhandledrejection', function (event) {",
+          "    report(event.reason && event.reason.name ? event.reason.name : 'UnhandledRejection', false);",
+          "  });",
+          "})();",
+        ].join("\n")
+      ),
       injectTo: "head",
     },
   ],
@@ -96,19 +96,16 @@ const microsoftClarity = (): Plugin => ({
   transformIndexHtml: () => [
     {
       tag: "script",
-      children: [
-        "window.clarity = window.clarity || function () {",
-        "  (window.clarity.q = window.clarity.q || []).push(arguments);",
-        "};",
-      ].join("\n"),
-      injectTo: "head",
-    },
-    {
-      tag: "script",
-      attrs: {
-        async: true,
-        src: `https://www.clarity.ms/tag/${CLARITY_PROJECT_ID}`,
-      },
+      children: guarded(
+        [
+          "  window.clarity = window.clarity || function () {",
+          "    (window.clarity.q = window.clarity.q || []).push(arguments);",
+          "  };",
+          appendScript(`https://www.clarity.ms/tag/${CLARITY_PROJECT_ID}`, {
+            async: true,
+          }),
+        ].join("\n")
+      ),
       injectTo: "head",
     },
   ],
@@ -133,13 +130,23 @@ const patchStream = (): Plugin => ({
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
       });
-      res.write("data: tick\n\n");
-      const id = setInterval(() => {
-        res.write("data: tick\n\n");
-      }, PATCH_STREAM_INTERVAL_MS);
-      req.on("close", () => {
-        clearInterval(id);
-      });
+      const tick = () => {
+        try {
+          if (res.writableEnded || res.destroyed) {
+            clearInterval(id);
+            return;
+          }
+          res.write("data: tick\n\n");
+        } catch {
+          clearInterval(id);
+        }
+      };
+      const id = setInterval(tick, PATCH_STREAM_INTERVAL_MS);
+      const stop = () => clearInterval(id);
+      req.on("close", stop);
+      res.on("close", stop);
+      res.on("error", stop);
+      tick();
     });
   },
 });
@@ -147,16 +154,51 @@ const patchStream = (): Plugin => ({
 // Resolve each @adapttable/* package to its TypeScript source so the showcase
 // always reflects the current library (and hot-reloads). The adapters are still
 // the REAL ones — each section mounts a genuine kit component, never a mock.
-const pkg = (rel: string, entry = "index") =>
+const pkg = (rel: string, entry = "index", ext = "ts") =>
   fileURLToPath(
-    new URL(`../../packages/${rel}/src/${entry}.ts`, import.meta.url)
+    new URL(`../../packages/${rel}/src/${entry}.${ext}`, import.meta.url)
   );
 
 const page = (rel: string) => fileURLToPath(new URL(rel, import.meta.url));
 
+/**
+ * Resolve every `@adapttable/<pkg>/<feature>` subpath to its TypeScript source.
+ *
+ * The showcase runs against source so it always reflects the library, and each
+ * kit now publishes one entry point per feature — which is exactly what the
+ * demo imports to arm them. Listing those by hand meant a new import silently
+ * resolved to `.../src/index.ts/<feature>` and broke the page, so the mapping
+ * is derived: `enforce: "pre"` puts it ahead of the bare-package aliases that
+ * would otherwise swallow the subpath.
+ */
+function adapttableSubpaths(): Plugin {
+  return {
+    name: "adapttable-source-subpaths",
+    enforce: "pre",
+    resolveId(id) {
+      const match = /^@adapttable\/([a-z0-9-]+)\/([a-z0-9-]+)$/.exec(id);
+      if (!match) return null;
+      const dir =
+        match[1] === "core" ||
+        match[1] === "ai" ||
+        match[1] === "ai-react" ||
+        match[1] === "i18n" ||
+        match[1] === "react"
+          ? match[1]
+          : `adapter-${match[1]}`;
+      for (const ext of ["tsx", "ts"]) {
+        const file = pkg(dir, match[2], ext);
+        if (existsSync(file)) return file;
+      }
+      return null;
+    },
+  };
+}
+
 export default defineConfig({
   base: "./",
   plugins: [
+    adapttableSubpaths(),
     react(),
     tailwindcss(),
     googleAnalytics(),
@@ -191,27 +233,26 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      // Longest key first: the bare "@adapttable/core" alias would otherwise
-      // swallow the subpath and resolve ".../index.ts/adapter".
-      "@adapttable/core/adapter": pkg("core", "adapter"),
-      "@adapttable/core/xlsx": pkg("core", "xlsx"),
-      "@adapttable/core/pdf": pkg("core", "pdf"),
-      "@adapttable/core/sparkline": pkg("core", "sparkline"),
-      "@adapttable/core/pivot": pkg("core", "pivot"),
-      "@adapttable/core/formula": pkg("core", "formula"),
-      "@adapttable/core/stream": pkg("core", "stream"),
-      "@adapttable/core": pkg("core"),
-      "@adapttable/mantine": pkg("adapter-mantine"),
-      "@adapttable/mui": pkg("adapter-mui"),
-      "@adapttable/chakra": pkg("adapter-chakra"),
-      "@adapttable/unstyled": pkg("adapter-unstyled"),
-      "@adapttable/shadcn": pkg("adapter-shadcn"),
-      "@adapttable/antd": pkg("adapter-antd"),
-      "@adapttable/radix": pkg("adapter-radix"),
-      "@adapttable/base-ui": pkg("adapter-base-ui"),
-      "@adapttable/i18n": pkg("i18n"),
-    },
+    // Bare package names only, matched EXACTLY: a prefix alias would swallow
+    // `@adapttable/mui/cell-navigation` and resolve `.../src/index.ts/…`.
+    // Every subpath is resolved by `adapttableSubpaths` above, which derives
+    // the file rather than listing 100-odd entries that go stale one import
+    // at a time.
+    alias: [
+      { find: /^@adapttable\/core$/, replacement: pkg("core") },
+      { find: /^@adapttable\/react$/, replacement: pkg("react") },
+      { find: /^@adapttable\/ai$/, replacement: pkg("ai") },
+      { find: /^@adapttable\/ai-react$/, replacement: pkg("ai-react") },
+      { find: /^@adapttable\/i18n$/, replacement: pkg("i18n") },
+      { find: /^@adapttable\/mantine$/, replacement: pkg("adapter-mantine") },
+      { find: /^@adapttable\/mui$/, replacement: pkg("adapter-mui") },
+      { find: /^@adapttable\/chakra$/, replacement: pkg("adapter-chakra") },
+      { find: /^@adapttable\/unstyled$/, replacement: pkg("adapter-unstyled") },
+      { find: /^@adapttable\/shadcn$/, replacement: pkg("adapter-shadcn") },
+      { find: /^@adapttable\/antd$/, replacement: pkg("adapter-antd") },
+      { find: /^@adapttable\/radix$/, replacement: pkg("adapter-radix") },
+      { find: /^@adapttable\/base-ui$/, replacement: pkg("adapter-base-ui") },
+    ],
     dedupe: [
       "react",
       "react-dom",

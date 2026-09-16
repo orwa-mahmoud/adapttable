@@ -1,12 +1,10 @@
-import type {
-  BaseDataTableProps,
-  Slot,
-  TableErrorState,
-  TableSource,
-  UrlStateAdapter,
-  UseSavedViewsOptions,
-} from "@adapttable/core";
-import type { DataModeProps } from "@adapttable/core/adapter";
+import type { TableErrorState, TableSource } from "@adapttable/core";
+import {
+  type BaseDataTableProps,
+  type Slot,
+  type UrlStateAdapter,
+} from "@adapttable/react";
+import type { DataModeProps } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 /**
@@ -104,14 +102,6 @@ export interface DataTablePropsBase<TRow> extends Omit<
    * @default true
    */
   urlSync?: boolean;
-  /**
-   * Saved views: capture the table's current URL state (search, sort, page,
-   * filters, column layout) under a name and re-apply it on demand. Setting
-   * this renders a Saved-views menu in the toolbar next to the Columns
-   * button. `adapter` / `urlKey` default to the table's own `urlAdapter` /
-   * `urlKey`, so usually only `storageKey` is needed.
-   */
-  savedViews?: UseSavedViewsOptions;
   /** Replace sub-components (skeleton, empty-state). */
   slots?: DataTableSlots;
   /** Per-part class name overrides. */

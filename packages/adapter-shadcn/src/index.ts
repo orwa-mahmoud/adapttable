@@ -6,6 +6,7 @@
  * local `DataTable` below shadows the unstyled one with the shadcn preset baked
  * in.
  */
+export { agentApproval } from "./agent-approval";
 export { shadcnClassNames } from "./classNames";
 export { DataTable } from "./DataTable";
 // The panels are native markup, so the preset's classes are the only
@@ -20,14 +21,21 @@ export * from "@adapttable/unstyled";
    needs — CSV options, column layout, cell editors, tier props —
    without ever depending on @adapttable/core directly. */
 export {
-  type BaseDataTableProps,
   type BulkActionContext,
   type CellEditor,
   type ChipLabelResolver,
   type ColumnFilter,
-  type ColumnLayoutState,
   type CustomCellEditorCtrl,
   type CustomCellEditorRender,
+  type ExportCsvOptions,
+  FILTER_TYPES,
+  type MobileCardRenderer,
+  type RowActionsRenderer,
+  type TableQuery,
+} from "@adapttable/core";
+export {
+  type BaseDataTableProps,
+  type ColumnLayoutState,
   type EditConflict,
   type EditConflictChoice,
   type EditConflictHandler,
@@ -37,13 +45,11 @@ export {
   type EditEventHandler,
   type EditLifecycle,
   type EditUnit,
-  type ExportCsvOptions,
-  FILTER_TYPES,
-  type MobileCardRenderer,
-  type RowActionsRenderer,
-  type TableQuery,
   type ToolbarSlots,
   type UseServerDataOptions,
   type UseTableDataOptions,
-} from "@adapttable/core";
-export { type DataModeProps } from "@adapttable/core/adapter";
+} from "@adapttable/react";
+export {
+  type DataModeProps,
+  type TableQueryHandler,
+} from "@adapttable/react/adapter";

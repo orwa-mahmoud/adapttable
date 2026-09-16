@@ -5,7 +5,7 @@
 ```ts
 
 import { JSX } from 'react';
-import { PivotPanelChromeProps } from '@adapttable/core/adapter';
+import { PivotPanelChromeProps } from '@adapttable/react/adapter';
 
 // @public
 export function PivotPanel(props: Readonly<Omit<PivotPanelChromeProps, "slots">>): JSX.Element;

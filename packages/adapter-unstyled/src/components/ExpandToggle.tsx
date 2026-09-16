@@ -1,5 +1,5 @@
 /** The row-expansion chevron, shared by rows and cards. */
-import { type TableLabels } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
 
 import type { DataTableClassNames } from "../types";
 import { ChevronIcon } from "./icons";

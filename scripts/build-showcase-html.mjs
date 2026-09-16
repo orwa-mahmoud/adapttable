@@ -7,7 +7,7 @@
  * heading and copy — the demo is client-rendered, so an empty root is an empty
  * page to everything that does not run JavaScript.
  *
- * A hundred and fifty-two of those files (eight adapters × eighteen
+ * A hundred and sixty-eight of those files (eight adapters × twenty
  * features, plus a landing each) cannot be hand-written and stay true. So they
  * are written from
  * `apps/showcase/matrix.mjs`, the same module the live page renders from: one
@@ -36,6 +36,7 @@ import {
   matrixPages,
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES } from "../apps/showcase/pages.mjs";
+import { appendScript, guarded } from "./analytics-guard.mjs";
 import { SITE } from "./sitemap-routes.mjs";
 
 const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
@@ -115,12 +116,16 @@ const head = ({
         },
       })}
     </script>
-    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed. -->
-    <script
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "${CF_TOKEN}"}'
-    ></script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      ${guarded(
+        appendScript("https://static.cloudflareinsights.com/beacon.min.js", {
+          defer: true,
+          "data-cf-beacon": `{"token": "${CF_TOKEN}"}`,
+        })
+      )}
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

@@ -5,107 +5,111 @@
 ```ts
 
 import { ActionConfirm } from '@adapttable/core';
-import { ActiveFilterChip } from '@adapttable/core';
-import { BaseDataTableProps } from '@adapttable/core';
-import { BatchEditBarProps } from '@adapttable/core/adapter';
+import { ActiveFilterChip } from '@adapttable/react';
+import { AgentApprovalProps } from '@adapttable/react/adapter';
+import { BaseDataTableProps } from '@adapttable/react';
+import { BatchEditBarProps } from '@adapttable/react/adapter';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
-import { CellProps } from '@adapttable/core';
-import { ChecklistFilterProps } from '@adapttable/core/adapter';
+import { CellProps } from '@adapttable/react';
+import { ChecklistFilterProps } from '@adapttable/react/adapter';
 import { ChipLabelResolver } from '@adapttable/core';
 import { ColorScheme } from '@adapttable/core';
-import { ColumnDef } from '@adapttable/core';
+import { ColumnDef } from '@adapttable/react';
 import { ColumnFilter } from '@adapttable/core';
 import { ColumnGroupDef } from '@adapttable/core';
 import { ColumnGroupShow } from '@adapttable/core';
-import { ColumnGroupToggleProps } from '@adapttable/core/adapter';
-import { ColumnInput } from '@adapttable/core';
-import { ColumnLayoutState } from '@adapttable/core';
+import { ColumnGroupToggleProps } from '@adapttable/react/adapter';
+import { ColumnInput } from '@adapttable/react';
+import { ColumnLayoutState } from '@adapttable/react';
 import { ConfirmHandler } from '@adapttable/core';
 import { ConfirmRequest } from '@adapttable/core';
 import { createFilterRegistry } from '@adapttable/core';
-import { createHistoryAdapter } from '@adapttable/core';
-import { createMemoryAdapter } from '@adapttable/core';
+import { createHistoryAdapter } from '@adapttable/react';
+import { createMemoryAdapter } from '@adapttable/react';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
-import { DataModeProps } from '@adapttable/core/adapter';
+import { DataModeProps } from '@adapttable/react/adapter';
 import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
 import { defaultLabels } from '@adapttable/core';
-import { deriveSortByOptions } from '@adapttable/core/adapter';
+import { deriveSortByOptions } from '@adapttable/react/adapter';
 import { Direction } from '@adapttable/core';
-import { EditConflict } from '@adapttable/core';
-import { EditConflictChoice } from '@adapttable/core';
-import { EditConflictHandler } from '@adapttable/core';
-import { EditConflictPolicy } from '@adapttable/core';
-import { EditConflictState } from '@adapttable/core';
-import { EditEvent } from '@adapttable/core';
-import { EditEventHandler } from '@adapttable/core';
-import { EditLifecycle } from '@adapttable/core';
-import { EditUnit } from '@adapttable/core';
+import { EditConflict } from '@adapttable/react';
+import { EditConflictChoice } from '@adapttable/react';
+import { EditConflictHandler } from '@adapttable/react';
+import { EditConflictPolicy } from '@adapttable/react';
+import { EditConflictState } from '@adapttable/react';
+import { EditEvent } from '@adapttable/react';
+import { EditEventHandler } from '@adapttable/react';
+import { EditLifecycle } from '@adapttable/react';
+import { EditUnit } from '@adapttable/react';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
-import { FillHandleChromeProps } from '@adapttable/core/adapter';
+import { FillHandleChromeProps } from '@adapttable/react/adapter';
 import { FILTER_TYPES } from '@adapttable/core';
 import { FilterDef } from '@adapttable/core';
-import { FilterHeaderControlProps } from '@adapttable/core/adapter';
-import { FilterHeaderRowProps } from '@adapttable/core/adapter';
+import { FilterHeaderControlProps } from '@adapttable/react/adapter';
+import { FilterHeaderRowProps } from '@adapttable/react/adapter';
 import { FilterOption } from '@adapttable/core';
-import { FilterTreeBuilderProps } from '@adapttable/core/adapter';
+import { FilterTreeBuilderProps } from '@adapttable/react/adapter';
 import { FilterType } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
-import { FindBarProps } from '@adapttable/core/adapter';
-import { getHistoryAdapter } from '@adapttable/core';
-import { GroupMoreButtonProps } from '@adapttable/core/adapter';
-import { InfiniteQueryLike } from '@adapttable/core';
+import { FindBarProps } from '@adapttable/react/adapter';
+import { getHistoryAdapter } from '@adapttable/react';
+import { GroupingPanelChromeProps } from '@adapttable/react/adapter';
+import { GroupMoreButtonProps } from '@adapttable/react/adapter';
+import { InfiniteQueryLike } from '@adapttable/react';
 import { JSX } from 'react';
 import { MobileCardRenderer } from '@adapttable/core';
-import { MountStaggerOptions } from '@adapttable/core/adapter';
-import { PageSelector } from '@adapttable/core';
+import { MountStaggerOptions } from '@adapttable/react/adapter';
+import { PageSelector } from '@adapttable/react';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
-import { PivotPanelChromeProps } from '@adapttable/core/adapter';
+import { PivotPanelChromeProps } from '@adapttable/react/adapter';
 import { ReactNode } from 'react';
 import { resolveFilterRegistry } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { RowActionsRenderer } from '@adapttable/core';
-import { RowEditActionsProps } from '@adapttable/core/adapter';
-import { RowReorderButtonsProps } from '@adapttable/core/adapter';
-import { RowReorderHandleProps } from '@adapttable/core/adapter';
-import { SavedView } from '@adapttable/core';
-import { SavedViewsPanelChromeProps } from '@adapttable/core/adapter';
-import { SelectionStatsChromeProps } from '@adapttable/core/adapter';
-import { Slot } from '@adapttable/core';
+import { RowEditActionsProps } from '@adapttable/react/adapter';
+import { RowReorderButtonsProps } from '@adapttable/react/adapter';
+import { RowReorderHandleProps } from '@adapttable/react/adapter';
+import { SavedView } from '@adapttable/react';
+import { SavedViewsPanelChromeProps } from '@adapttable/react/adapter';
+import { SelectionStatsChromeProps } from '@adapttable/react/adapter';
+import { Slot } from '@adapttable/react';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
+import { StaticTableFeature } from '@adapttable/react';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
+import { TableQueryHandler } from '@adapttable/react/adapter';
 import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
-import { ToolbarSlots } from '@adapttable/core';
-import { TreeCellProps } from '@adapttable/core/adapter';
-import { TreeToggleProps } from '@adapttable/core/adapter';
-import { UrlStateAdapter } from '@adapttable/core';
-import { useDataTable } from '@adapttable/core';
-import { UseDataTableResult } from '@adapttable/core';
-import { useFrontendData } from '@adapttable/core';
-import { UseFrontendDataOptions } from '@adapttable/core';
-import { useMountStagger } from '@adapttable/core/adapter';
-import { useQuerySource } from '@adapttable/core';
-import { UseQuerySourceOptions } from '@adapttable/core';
-import { useSavedViews } from '@adapttable/core';
-import { UseSavedViewsOptions } from '@adapttable/core';
-import { UseSavedViewsResult } from '@adapttable/core';
-import { UseServerDataOptions } from '@adapttable/core';
-import { UseTableDataOptions } from '@adapttable/core';
-import { useTableUrlState } from '@adapttable/core';
-import { UseTableUrlStateOptions } from '@adapttable/core';
-import { UseTableUrlStateResult } from '@adapttable/core';
+import { ToolbarSlots } from '@adapttable/react';
+import { TreeCellProps } from '@adapttable/react/adapter';
+import { TreeToggleProps } from '@adapttable/react/adapter';
+import { UrlStateAdapter } from '@adapttable/react';
+import { useDataTable } from '@adapttable/react';
+import { UseDataTableResult } from '@adapttable/react';
+import { useFrontendData } from '@adapttable/react';
+import { UseFrontendDataOptions } from '@adapttable/react';
+import { useMountStagger } from '@adapttable/react/adapter';
+import { useQuerySource } from '@adapttable/react';
+import { UseQuerySourceOptions } from '@adapttable/react';
+import { useSavedViews } from '@adapttable/react';
+import { UseSavedViewsOptions } from '@adapttable/react';
+import { UseSavedViewsResult } from '@adapttable/react';
+import { UseServerDataOptions } from '@adapttable/react';
+import { UseTableDataOptions } from '@adapttable/react';
+import { useTableUrlState } from '@adapttable/react';
+import { UseTableUrlStateOptions } from '@adapttable/react';
+import { UseTableUrlStateResult } from '@adapttable/react';
 
 export { ActionConfirm }
 
@@ -121,6 +125,14 @@ export interface ActiveFilterChipsProps {
     label: string;
     onClearAll?: () => void;
 }
+
+// @public (undocumented)
+export function AgentApproval(props: Readonly<AgentApprovalProps>): JSX.Element;
+
+// @public
+export function agentApproval(): StaticTableFeature;
+
+export { AgentApprovalProps }
 
 // @public
 export function AutoFilterForm<TRow>(input: Readonly<AutoFilterFormProps<TRow>>): JSX.Element;
@@ -212,7 +224,6 @@ export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>,
     data?: readonly TRow[];
     error?: Error | null;
     loading?: boolean;
-    savedViews?: UseSavedViewsOptions;
     slots?: DataTableSlots;
     source?: TableSource<TRow>;
     total?: number;
@@ -339,6 +350,9 @@ export { FindBarProps }
 export { getHistoryAdapter }
 
 // @public
+export function GroupingPanel<TRow>(props: Readonly<Omit<GroupingPanelChromeProps<TRow>, "slots">>): JSX.Element;
+
+// @public
 export function GroupMoreButton(props: Readonly<GroupMoreButtonProps>): JSX.Element;
 
 export { GroupMoreButtonProps }
@@ -426,6 +440,8 @@ export { SortDirection }
 export { TableLabels }
 
 export { TableQuery }
+
+export { TableQueryHandler }
 
 export { TableQueryParams }
 

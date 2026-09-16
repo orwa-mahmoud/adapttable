@@ -7,10 +7,10 @@ export default mergeConfig(sharedConfig, {
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       thresholds: {
-        statements: 70,
-        lines: 95,
-        functions: 85,
-        branches: 55,
+        statements: 100,
+        branches: 100,
+        functions: 100,
+        lines: 100,
       },
     },
   },

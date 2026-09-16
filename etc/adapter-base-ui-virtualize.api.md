@@ -4,7 +4,7 @@
 
 ```ts
 
-import { virtualize } from '@adapttable/core/features';
+import { virtualize } from '@adapttable/react/features';
 
 export { virtualize }
 

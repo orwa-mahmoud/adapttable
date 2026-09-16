@@ -1,4 +1,5 @@
 import type { Direction, TableLabels } from "@adapttable/core";
+import { restoreFocusSoon } from "@adapttable/react/adapter";
 import { Button, HStack, Popover, Stack, Text } from "@chakra-ui/react";
 import { type ReactNode, useEffect, useRef } from "react";
 
@@ -44,6 +45,7 @@ export function FilterPopover({
   children,
 }: Readonly<FilterPopoverProps>) {
   const anchorRef = useRef<HTMLSpanElement>(null);
+  const reclaimRef = useRef<(() => void) | undefined>(undefined);
 
   // Ark's `closeOnEscape` restores focus only through `Popover.Trigger`, which
   // this layout doesn't use (the Filters button is an external anchor). Handle
@@ -55,11 +57,29 @@ export function FilterPopover({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       onClose();
-      anchorRef.current?.querySelector("button")?.focus();
+      const trigger =
+        anchorRef.current?.querySelector<HTMLButtonElement>("button");
+      trigger?.focus();
+      // Ark runs its own focus handling a step later and has nowhere to put
+      // focus in this anchored layout, so the line above can be undone.
+      reclaimRef.current?.();
+      reclaimRef.current = restoreFocusSoon(trigger ?? null);
     };
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [open, onClose]);
+
+  // Cancelled on unmount only. Closing re-runs the effect above, and letting
+  // its cleanup cancel the frame would cancel the reclaim that same Escape
+  // just scheduled.
+  useEffect(
+    () => () => {
+      reclaimRef.current?.();
+    },
+    []
+  );
 
   return (
     <Popover.Root

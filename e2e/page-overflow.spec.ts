@@ -7,7 +7,7 @@ import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
  *
  * A page-level horizontal scrollbar is the one layout fault that touches every
  * page at once, because it comes from the shared chrome rather than from a
- * demo: the nav is on top of all eighteen of them, and anything in it that
+ * demo: the nav is on top of all twenty-one of them, and anything in it that
  * cannot fit pushes the whole document wider than the viewport. jsdom has no
  * layout, so only a real browser can measure it. The nav's own metrics — one
  * row at every desktop width, panels that float rather than widen the bar —
@@ -31,9 +31,9 @@ const VIEWPORTS = [
 ] as const;
 
 /**
- * The one non-indexable entry is a meta-refresh stub with no layout of its own
- * — `scripts/showcase-pages.test.mjs` holds it to that — and it forwards to a
- * page already measured here.
+ * Non-indexable entries are either meta-refresh stubs (no layout of their
+ * own) or kit/e2e labs that stay off the sitemap. Overflow is measured on
+ * the indexable pages the nav actually offers.
  */
 const PAGES = SHOWCASE_PAGES.filter((page) => page.indexable);
 
@@ -67,6 +67,41 @@ for (const { key, route } of PAGES) {
       }
     });
   }
+}
+
+/**
+ * The same contract on a phone, at the narrowest width the site claims to
+ * serve. A control row that only wraps at a desktop width, or a code sample
+ * that widens the document instead of scrolling inside its own box, shows up
+ * here and nowhere else — the desktop widths above have room to hide it.
+ * 320px is the whole loop on purpose: a page that fits there fits the wider
+ * phones, and the suite stays a suite rather than a matrix.
+ */
+for (const { key, route } of PAGES) {
+  test(`${key}: the document does not scroll sideways at 320px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await page.goto(devPath(route));
+
+    const measured = await page.evaluate(() => {
+      const root = document.documentElement;
+      return {
+        overflow: root.scrollWidth - root.clientWidth,
+        clipped: [root, document.body].map(
+          (element) => getComputedStyle(element).overflowX
+        ),
+      };
+    });
+
+    expect(
+      measured.overflow,
+      `${devPath(route)} overflows its viewport by ${measured.overflow}px at 320px`
+    ).toBeLessThanOrEqual(1);
+    for (const overflowX of measured.clipped) {
+      expect(overflowX).not.toBe("hidden");
+    }
+  });
 }
 
 /**

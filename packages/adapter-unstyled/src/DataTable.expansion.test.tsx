@@ -4,11 +4,11 @@
  * accessors are the observable proxy — on search keystrokes or another
  * row's selection change.
  */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -222,17 +222,19 @@ describe("<DataTable> memoized desktop rows (unstyled)", () => {
     fireEvent.click(first);
     expect(first).toBeChecked();
     expect(screen.getByText("1 selected")).toBeInTheDocument();
-    // Only Alice's row re-rendered; Bob's accessor never re-ran.
-    expect(accessor).toHaveBeenCalledTimes(1);
-    expect(accessor).toHaveBeenCalledWith(ROWS[0]);
+    // Cell-level memoization is finer than the row: the checkbox cell above
+    // re-renders and the count updates, while no row's data accessor re-runs —
+    // not even the toggled row's. The assertions above are what prove the
+    // render happened, so this cannot pass by rendering nothing.
+    expect(accessor).not.toHaveBeenCalled();
 
     // The bailed-out row still toggles through the latest-ref callback —
     // its selection joins (not replaces) the first row's.
-    accessor.mockClear();
-    fireEvent.click(screen.getAllByLabelText("Select row")[1]!);
+    const second = screen.getAllByLabelText("Select row")[1]!;
+    fireEvent.click(second);
+    expect(second).toBeChecked();
     expect(screen.getByText("2 selected")).toBeInTheDocument();
-    expect(accessor).toHaveBeenCalledTimes(1);
-    expect(accessor).toHaveBeenCalledWith(ROWS[1]);
+    expect(accessor).not.toHaveBeenCalled();
   });
 
   it("expanding a row re-renders only that row", () => {
@@ -247,7 +249,8 @@ describe("<DataTable> memoized desktop rows (unstyled)", () => {
 
     fireEvent.click(expandButtons()[0]!);
     expect(screen.getByText("detail-Alice")).toBeInTheDocument();
-    expect(accessor).toHaveBeenCalledTimes(1);
-    expect(accessor).toHaveBeenCalledWith(ROWS[0]);
+    // Same claim on the expansion path: the chevron cell re-renders and the
+    // detail row arrives, and no data cell is rebuilt for it.
+    expect(accessor).not.toHaveBeenCalled();
   });
 });

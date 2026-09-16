@@ -15,20 +15,32 @@
  * before the first aggregate, which keeps the label's roomy look without
  * displacing a single number.
  */
-import type { ReactNode } from "react";
+import type { AggregateOperationId } from "../aggregate/aggregate";
+import type { ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 
-import type { ColumnDef } from "../types";
+/**
+ * Which operation produced each column's aggregate, where the table knows.
+ *
+ * @public
+ */
+export type GroupAggregateOps = Readonly<
+  Partial<Record<string, AggregateOperationId | "none">>
+>;
 
 /**
  * One cell of a group header row, after the leading label cell.
  *
  * @public
  */
-export interface GroupRowCell<TRow> {
+export interface GroupRowCell<
+  TRow,
+  TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>,
+> {
   /** The column this cell sits under. */
-  column: ColumnDef<TRow>;
+  column: TCol;
   /** That column's aggregate, or `undefined` for an empty cell. */
-  node: ReactNode;
+  node: DisplayValue | undefined;
 }
 
 /**
@@ -36,20 +48,50 @@ export interface GroupRowCell<TRow> {
  *
  * @public
  */
-export interface GroupRowLayout<TRow> {
+export interface GroupRowLayout<
+  TRow,
+  TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>,
+> {
   /**
    * Columns the leading label cell covers. Its `colSpan` is this length plus
    * however many edge cells (expand chevron, selection checkbox) precede it.
    */
-  labelColumns: readonly ColumnDef<TRow>[];
+  labelColumns: readonly TCol[];
   /**
    * Aggregates belonging to a column inside the label cell — only possible when
    * the very first column carries one, since the label has to live somewhere.
    * Rendered after the count.
    */
-  labelAggregates: readonly GroupRowCell<TRow>[];
+  labelAggregates: readonly GroupRowCell<TRow, TCol>[];
   /** One cell per remaining column, in render order. */
-  cells: readonly GroupRowCell<TRow>[];
+  cells: readonly GroupRowCell<TRow, TCol>[];
+}
+
+/**
+ * What one aggregate reads as, once the column has had its say.
+ *
+ * The value the model holds is what the aggregate returned: exports, and
+ * anything comparing numbers, keep seeing that. A column's `formatAggregate`
+ * decides what the reader sees, and is applied here — where the cell is drawn
+ * — exactly once, whichever surface draws it. A kit that lays out its own
+ * group rows rather than using {@link groupRowLayout} calls this for each
+ * cell, so every kit shows the same thing.
+ *
+ * @public
+ */
+export function groupAggregateNode<
+  TCol extends { key: string } & Pick<ColumnMetadata<never>, "formatAggregate">,
+>(
+  column: TCol,
+  node: DisplayValue | undefined,
+  aggregation: GroupAggregateOps | undefined
+): DisplayValue | undefined {
+  const format = column.formatAggregate;
+  if (!format || node === undefined) return node;
+  return format(node, {
+    columnKey: column.key,
+    aggregation: aggregation?.[column.key],
+  });
 }
 
 /**
@@ -65,12 +107,18 @@ export interface GroupRowLayout<TRow> {
  *
  * @public
  */
-export function groupRowLayout<TRow>(
-  columns: readonly ColumnDef<TRow>[],
-  aggregateCells: Readonly<Partial<Record<string, ReactNode>>> | undefined
-): GroupRowLayout<TRow> {
-  const has = (column: ColumnDef<TRow>) =>
-    aggregateCells?.[column.key] !== undefined;
+export function groupRowLayout<
+  TRow,
+  TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>,
+>(
+  columns: readonly TCol[],
+  aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined,
+  aggregation?: GroupAggregateOps
+): GroupRowLayout<TRow, TCol> {
+  // Whether a column carries an aggregate is a question about the data, so it
+  // is asked of the value the model holds — a formatter decides how a cell
+  // reads, never whether the row has one.
+  const has = (column: TCol) => aggregateCells?.[column.key] !== undefined;
   const firstAggregate = columns.findIndex(has);
   if (firstAggregate === -1) {
     return { labelColumns: columns, labelAggregates: [], cells: [] };
@@ -83,12 +131,21 @@ export function groupRowLayout<TRow>(
   const labelColumns = columns.slice(0, split);
   return {
     labelColumns,
-    labelAggregates: labelColumns
-      .filter(has)
-      .map((column) => ({ column, node: aggregateCells?.[column.key] })),
+    labelAggregates: labelColumns.filter(has).map((column) => ({
+      column,
+      node: groupAggregateNode(
+        column,
+        aggregateCells?.[column.key],
+        aggregation
+      ),
+    })),
     cells: columns.slice(split).map((column) => ({
       column,
-      node: aggregateCells?.[column.key],
+      node: groupAggregateNode(
+        column,
+        aggregateCells?.[column.key],
+        aggregation
+      ),
     })),
   };
 }
@@ -107,14 +164,19 @@ export function groupRowLayout<TRow>(
  *
  * @public
  */
-export function groupAggregateEntries<TRow>(
-  columns: readonly ColumnDef<TRow>[],
-  aggregateCells: Readonly<Partial<Record<string, ReactNode>>> | undefined
-): GroupRowCell<TRow>[] {
+export function groupAggregateEntries<
+  TRow,
+  TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>,
+>(
+  columns: readonly TCol[],
+  aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined,
+  aggregation?: GroupAggregateOps
+): GroupRowCell<TRow, TCol>[] {
   if (!aggregateCells) return [];
   return columns.flatMap((column) => {
     const node = aggregateCells[column.key];
-    return node === undefined ? [] : [{ column, node }];
+    if (node === undefined) return [];
+    return [{ column, node: groupAggregateNode(column, node, aggregation) }];
   });
 }
 

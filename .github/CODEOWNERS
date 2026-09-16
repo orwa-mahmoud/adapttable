@@ -1,0 +1,8 @@
+# Default review owner for every path. Paths below refine that.
+* @orwa-mahmoud
+
+# Release and publish surface — require the release owner.
+/.github/workflows/release.yml @orwa-mahmoud
+/.changeset/ @orwa-mahmoud
+/SECURITY.md @orwa-mahmoud
+/GOVERNANCE.md @orwa-mahmoud

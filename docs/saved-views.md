@@ -3,12 +3,17 @@
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 Let users capture the table's current state under a name and re-apply it
-later. One prop mounts a ready-made menu; a headless hook backs custom UIs.
+later. Compose `savedViews()` from `@adapttable/<kit>/saved-views` and a
+ready-made menu mounts in the toolbar; a headless hook backs custom UIs. The
+import and `features` entry are the switch; there is no `savedViews` table prop. See
+[feature composition](./features.md).
 
 A view captures **everything the table can put in a URL**: search, the
 multi-sort chain, page and page size, the simple filters and the advanced
-filter tree, grouping and which groups are collapsed, the whole column layout
-(order, hidden, pinned, widths, collapsed column groups), pinned rows, density,
+filter tree, ordered grouping keys (`groupBy`), session aggregation overrides
+(`groupAgg`), and which groups are collapsed, the whole column layout (order,
+hidden, pinned, widths, user-renamed column names, collapsed column groups),
+pinned rows, density,
 and the [pivot configuration](./pivot.md). The parts that take longest to
 rebuild by hand are exactly the parts worth capturing.
 
@@ -200,6 +205,8 @@ The card names four parts for styling and testing: `saved-views-panel` and
 ```tsx
 // Needs your kit's provider once at the root (e.g. <MantineProvider>).
 import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, shadcn, unstyled
+import { columnMenu } from "@adapttable/mantine/column-menu";
+import { savedViews } from "@adapttable/mantine/saved-views";
 
 interface Person {
   id: string;
@@ -255,8 +262,7 @@ export function PeopleTable() {
         { key: "status", filter: { type: "multiSelect", options: "auto" } },
         { key: "salary", filter: "numberRange", sortable: true },
       ]}
-      enableColumnMenu
-      savedViews={{ storageKey: "people-views" }}
+      features={[columnMenu(), savedViews({ storageKey: "people-views" })]}
     />
   );
 }
@@ -264,9 +270,9 @@ export function PeopleTable() {
 
 ## How it works
 
-- Setting `savedViews` renders the kit's built-in Saved-views menu in the
-  toolbar next to the Columns button: click a name to apply it, the trailing
-  ✕ to delete it, or type a name and Save to capture the current state.
+- Composing `savedViews({ storageKey })` renders the kit's built-in Saved-views
+  menu in the toolbar next to the Columns button: click a name to apply it, the
+  trailing ✕ to delete it, or type a name and Save to capture the current state.
 - A view stores the table-scoped query string — search, sort, page and
   page-size, every `f_*` filter param, and the URL-persisted column layout.
   Only this table's params are captured; saving under an existing name
@@ -280,8 +286,8 @@ export function PeopleTable() {
 
 ## Options
 
-`savedViews` takes `UseSavedViewsOptions` (the same options as the headless
-hook):
+`savedViews(options)` takes `UseSavedViewsOptions` (the same options as the
+headless hook):
 
 | Prop         | Type              | Default                                | Description                                                  |
 | ------------ | ----------------- | -------------------------------------- | ------------------------------------------------------------ |

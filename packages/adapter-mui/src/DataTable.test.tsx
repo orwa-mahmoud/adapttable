@@ -1,11 +1,19 @@
-import type { ColumnLayoutState } from "@adapttable/core";
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import { sparklineColumn } from "@adapttable/core/sparkline";
+import {
+  type ColumnLayoutState,
+  createMemoryAdapter,
+  type TableErrorState,
+  useFrontendData,
+} from "@adapttable/react";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
+import { columnMenu } from "./column-menu";
+import { DataTable } from "./data-table.test-utils";
+import { filters as filtersFeature } from "./filters";
+import { headerFilters } from "./header-filters";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -22,6 +30,16 @@ const columns: ColumnDef<Row>[] = [
   { key: "city", header: "City", accessor: (r) => r.city },
 ];
 const theme = createTheme();
+
+function composeBulk(
+  actions: NonNullable<Parameters<typeof DataTable<Row>>[0]["bulkActions"]>,
+  extra: Parameters<typeof DataTable<Row>>[0]["features"] = []
+) {
+  return {
+    bulkActions: actions,
+    features: [bulkActionsFeature(actions), ...(extra ?? [])],
+  };
+}
 
 let adapter: ReturnType<typeof createMemoryAdapter>;
 
@@ -71,7 +89,11 @@ afterEach(() => vi.useRealTimers());
 describe("<DataTable> (MUI)", () => {
   it("drawer mode opens the slide-in filter drawer", async () => {
     renderHarness({
-      override: { filters: <div>drawer body</div>, filtersMode: "drawer" },
+      override: {
+        filters: <div>drawer body</div>,
+        filtersMode: "drawer",
+        features: [filtersFeature<Row>([])],
+      },
     });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(await screen.findByText("drawer body")).toBeInTheDocument();
@@ -79,7 +101,11 @@ describe("<DataTable> (MUI)", () => {
 
   it("flips the filter popover to the start side under RTL", async () => {
     renderHarness({
-      override: { dir: "rtl", filters: <div>rtl body</div> },
+      override: {
+        dir: "rtl",
+        filters: <div>rtl body</div>,
+        features: [filtersFeature<Row>([])],
+      },
     });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(await screen.findByText("rtl body")).toBeInTheDocument();
@@ -92,7 +118,7 @@ describe("<DataTable> (MUI)", () => {
         maxHeight: 300,
         density: "compact",
         resizableColumns: true,
-        bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+        ...composeBulk([{ key: "x", label: "X", onClick: vi.fn() }]),
         rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
         columns: [
           {
@@ -324,7 +350,7 @@ describe("<DataTable> (MUI)", () => {
       refetch,
       override: {
         slots: {
-          error: (state) => (
+          error: (state: TableErrorState) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>
@@ -371,20 +397,21 @@ describe("<DataTable> (MUI)", () => {
   it("runs a bulk action after confirm", async () => {
     const onClick = vi.fn();
     const confirm = vi.fn((r: { onConfirm: () => void }) => r.onConfirm());
+    const actions = [
+      {
+        key: "del",
+        label: "Delete",
+        onClick,
+        confirm: {
+          title: "t",
+          message: (n: number) => `Delete ${n}`,
+          confirmLabel: "Yes",
+        },
+      },
+    ];
     renderHarness({
       override: {
-        bulkActions: [
-          {
-            key: "del",
-            label: "Delete",
-            onClick,
-            confirm: {
-              title: "t",
-              message: (n) => `Delete ${n}`,
-              confirmLabel: "Yes",
-            },
-          },
-        ],
+        ...composeBulk(actions),
         confirm,
       },
     });
@@ -407,9 +434,10 @@ describe("<DataTable> (MUI)", () => {
       { id: "d", name: "Dina", city: "Muscat" },
     ];
     const bulkActions = [{ key: "x", label: "X", onClick: vi.fn() }];
+    const bulk = () => composeBulk(bulkActions);
 
     it("stays hidden when the page already holds every match", () => {
-      renderHarness({ override: { bulkActions } });
+      renderHarness({ override: { ...bulk() } });
       fireEvent.click(screen.getByLabelText("Select all"));
       expect(screen.getByText("2 selected")).toBeInTheDocument();
       expect(screen.queryByText(/on this page selected/)).toBeNull();
@@ -417,7 +445,7 @@ describe("<DataTable> (MUI)", () => {
     });
 
     it("flips from the offer to the active state and back to none via clear", () => {
-      renderHarness({ rows: MANY, override: { bulkActions } }, "limit=2");
+      renderHarness({ rows: MANY, override: { ...bulk() } }, "limit=2");
       fireEvent.click(screen.getByLabelText("Select all"));
       // Offer: full page selected, more rows match elsewhere.
       expect(
@@ -439,22 +467,23 @@ describe("<DataTable> (MUI)", () => {
       const confirm = vi.fn((r: { message: string; onConfirm: () => void }) =>
         r.onConfirm()
       );
+      const actions = [
+        {
+          key: "del",
+          label: "Delete",
+          onClick,
+          confirm: {
+            title: "t",
+            message: (n: number) => `Delete ${n}`,
+            confirmLabel: "Yes",
+          },
+        },
+      ];
       renderHarness(
         {
           rows: MANY,
           override: {
-            bulkActions: [
-              {
-                key: "del",
-                label: "Delete",
-                onClick,
-                confirm: {
-                  title: "t",
-                  message: (n) => `Delete ${n}`,
-                  confirmLabel: "Yes",
-                },
-              },
-            ],
+            ...composeBulk(actions),
             confirm,
           },
         },
@@ -478,7 +507,7 @@ describe("<DataTable> (MUI)", () => {
     });
 
     it("narrows back to the page scope on a single row toggle", () => {
-      renderHarness({ rows: MANY, override: { bulkActions } }, "limit=2");
+      renderHarness({ rows: MANY, override: { ...bulk() } }, "limit=2");
       fireEvent.click(screen.getByLabelText("Select all"));
       fireEvent.click(
         screen.getByRole("button", { name: "Select all 4 matching" })
@@ -497,6 +526,7 @@ describe("<DataTable> (MUI)", () => {
         override: {
           filters: <div>filter body</div>,
           filterLabels: { status: (v) => `Status: ${v}` },
+          features: [filtersFeature<Row>([])],
         },
       },
       "f_status=Active"
@@ -626,6 +656,7 @@ describe("<DataTable> (MUI)", () => {
         override: {
           filterLabels: { status: (v) => `Status: ${v}` },
           extraChips: [{ key: "x", label: "Custom", onRemove: vi.fn() }],
+          features: [filtersFeature<Row>([])],
         },
       },
       "f_status=Active"
@@ -639,7 +670,7 @@ describe("<DataTable> (MUI)", () => {
     renderHarness({
       isMobile: true,
       override: {
-        bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+        ...composeBulk([{ key: "x", label: "X", onClick: vi.fn() }]),
         rowActions: [{ key: "e", label: "Edit", onClick }],
       },
     });
@@ -654,14 +685,14 @@ describe("<DataTable> (MUI)", () => {
   it("bulk action with a disabledReason is disabled", () => {
     renderHarness({
       override: {
-        bulkActions: [
+        ...composeBulk([
           {
             key: "d",
             label: "Delete",
             onClick: vi.fn(),
             disabledReason: () => "no",
           },
-        ],
+        ]),
       },
     });
     fireEvent.click(screen.getByLabelText("Select all"));
@@ -770,7 +801,11 @@ describe("actions column management (MUI)", () => {
 
   it("pins the actions column with ONE click — sticky with NO data pins", async () => {
     renderHarness({
-      override: { enableColumnMenu: true, rowActions: [edit] },
+      override: {
+        enableColumnMenu: true,
+        features: [columnMenu()],
+        rowActions: [edit],
+      },
     });
     // In normal flow before the pin: nothing anywhere is pinned.
     expect(getComputedStyle(actionsHeader()!).position).not.toBe("sticky");
@@ -793,7 +828,11 @@ describe("actions column management (MUI)", () => {
 
   it("hides and re-shows the actions column from the Columns menu", async () => {
     renderHarness({
-      override: { enableColumnMenu: true, rowActions: [edit] },
+      override: {
+        enableColumnMenu: true,
+        features: [columnMenu()],
+        rowActions: [edit],
+      },
     });
     expect(screen.getAllByRole("button", { name: "Edit" })).toHaveLength(2);
     await openMenu();
@@ -816,6 +855,7 @@ describe("actions column management (MUI)", () => {
     const first = renderHarness({
       override: {
         enableColumnMenu: true,
+        features: [columnMenu()],
         rowActions: [edit],
         onColumnLayoutChange: (next) => (persisted = next),
       },
@@ -921,6 +961,7 @@ describe("header filter trigger", () => {
     renderHarness({
       override: {
         headerFilters: true,
+        features: [headerFilters()],
         filters: [{ key: "name", type: "text", label: "Name" }],
       },
     });
@@ -935,6 +976,7 @@ describe("header filter trigger", () => {
       isMobile: true,
       override: {
         headerFilters: true,
+        features: [headerFilters()],
         filters: [{ key: "name", type: "text", label: "Name" }],
       },
     });

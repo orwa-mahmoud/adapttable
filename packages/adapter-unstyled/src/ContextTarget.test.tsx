@@ -1,8 +1,8 @@
-import { resolveContextTarget } from "@adapttable/core/adapter";
+import { resolveContextTarget } from "@adapttable/react/adapter";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {

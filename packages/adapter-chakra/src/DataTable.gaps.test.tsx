@@ -1,15 +1,15 @@
 /** Gap-fill: footer prev, clear-all link, bulk clear. */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import type * as AdapterModule from "@adapttable/core/adapter";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import type * as AdapterModule from "@adapttable/react/adapter";
 import {
   useDataTableShell,
   type VirtualTableRow,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -24,7 +24,7 @@ const columns: ColumnDef<Row>[] = [
   { key: "name", header: "Name", accessor: (r) => r.name, sortable: true },
 ];
 
-vi.mock("@adapttable/core/adapter", async (importOriginal) => {
+vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return {
     ...actual,
@@ -33,7 +33,7 @@ vi.mock("@adapttable/core/adapter", async (importOriginal) => {
 });
 
 const actualCore = await vi.importActual<typeof AdapterModule>(
-  "@adapttable/core/adapter"
+  "@adapttable/react/adapter"
 );
 
 let adapter: ReturnType<typeof createMemoryAdapter>;
@@ -53,6 +53,7 @@ function mockBodyData(rows: VirtualTableRow<Row>[], padding: number) {
     const real = actualCore.useDataTableShell(props, render);
     return {
       ...real,
+      skipChromeBody: true,
       tableProps: {
         ...real.tableProps,
         rowEntries: rows,

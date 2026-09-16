@@ -1,9 +1,12 @@
 import {
   buildGroupedFlatModel,
-  type ColumnDef,
+  type ExportAllControls,
+  type ExportAllResult,
+  type ExportCsvOptions,
   viewFromGroupedEntries,
 } from "@adapttable/core";
 import { pdfWriter, printTable } from "@adapttable/core/pdf";
+import type { ColumnDef } from "@adapttable/react";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
 import { rosterFor } from "./casts";
@@ -122,8 +125,66 @@ function printPeople(locale: Locale, font: ArrayBuffer | undefined): void {
   });
 }
 
+/** Simulate the host-owned job used by the server-export walkthrough. */
+function buildServerExport(
+  locale: Locale,
+  controls: ExportAllControls
+): Promise<ExportAllResult> {
+  return new Promise((resolve, reject) => {
+    let progress = 10;
+    controls.setProgress?.(progress);
+    controls.setMessage?.(
+      locale === "ar"
+        ? "جارٍ إنشاء الملف على الخادم"
+        : "Building the file on the server"
+    );
+    const timer = window.setInterval(() => {
+      progress = Math.min(100, progress + 5);
+      controls.setProgress?.(progress);
+      if (progress < 100) return;
+      window.clearInterval(timer);
+      controls.signal.removeEventListener("abort", abort);
+      resolve({
+        url: "data:text/csv;charset=utf-8,Name%0AAda%20Lovelace",
+      });
+    }, 500);
+    const abort = () => {
+      window.clearInterval(timer);
+      reject(new DOMException("Cancelled", "AbortError"));
+    };
+    controls.signal.addEventListener("abort", abort, { once: true });
+  });
+}
+
+/** Build the selected walkthrough's feature options outside the render tree. */
+function exportOptions(
+  mode: "pdf" | "server",
+  locale: Locale,
+  font: ArrayBuffer | undefined
+): ExportCsvOptions<Person> {
+  if (mode === "server") {
+    return {
+      scope: "all",
+      filename: "people.csv",
+      onExportAll: (_query, controls) => buildServerExport(locale, controls),
+    };
+  }
+  return {
+    scope: "all",
+    writer: pdfWriter({
+      title: locale === "ar" ? "الموظفون" : "People",
+      direction: locale === "ar" ? "rtl" : "ltr",
+      font: locale === "ar" ? font : undefined,
+      pageSize: "a4-landscape",
+      pageBreak: "group",
+    }),
+    filename: locale === "ar" ? "الموظفون.pdf" : "people.pdf",
+  };
+}
+
 export function ExportPdfDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [locale, setLocale] = useState<Locale>("en");
+  const [exportMode, setExportMode] = useState<"pdf" | "server">("pdf");
   const font = useArabicFont(locale === "ar");
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;
 
@@ -135,19 +196,8 @@ export function ExportPdfDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
    * that file to the glyphs this sheet used and embeds the result.
    */
   const exportCsv = useMemo(
-    () =>
-      ({
-        scope: "all",
-        writer: pdfWriter({
-          title: locale === "ar" ? "الموظفون" : "People",
-          direction: locale === "ar" ? "rtl" : "ltr",
-          font: locale === "ar" ? font : undefined,
-          pageSize: "a4-landscape",
-          pageBreak: "group",
-        }),
-        filename: locale === "ar" ? "الموظفون.pdf" : "people.pdf",
-      }) as const,
-    [locale, font]
+    () => exportOptions(exportMode, locale, font),
+    [exportMode, locale, font]
   );
 
   return (
@@ -170,7 +220,25 @@ export function ExportPdfDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               : "Print is opt-in toolbar chrome — same view, browser dialog"}
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
+          <Control label="Export mode">
+            <Segmented
+              label="Export mode"
+              value={exportMode}
+              onChange={setExportMode}
+              options={[
+                { value: "pdf", label: "PDF" },
+                { value: "server", label: "Server job" },
+              ]}
+            />
+          </Control>
           <Control label="Language">
             <Segmented
               label="Language"

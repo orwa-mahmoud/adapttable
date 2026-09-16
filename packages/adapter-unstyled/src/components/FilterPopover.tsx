@@ -33,7 +33,9 @@ export interface FilterPopoverProps {
   /** Per-part classes. */
   classNames: DataTableClassNames;
   /** The Filters trigger button — the popover anchors beneath it. */
-  children: ReactNode;
+  children?: ReactNode;
+  /** Anchor element when the trigger lives outside this wrapper. */
+  anchorEl?: HTMLElement | null;
 }
 
 /**

@@ -19,6 +19,8 @@ Import the adapter styles once in your app entry (or rely on the side-effect imp
 import "@adapttable/base-ui/styles.css";
 ```
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 ## Quickstart
 
 ```tsx
@@ -55,37 +57,38 @@ Behavior lives in `@adapttable/core`; this package only renders Base UI primitiv
 - **URL-synced** search / sort / filters / page — shareable, deep-linkable links.
 - **Sorting** via sortable headers.
 - **Filtering** — a `Popover` or `Dialog` of filters plus removable chips, with a filter count on the trigger. Nested AND/OR filter tree in the same panel.
-- **Selection + bulk actions** using Base UI `Checkbox`es, with confirm dialogs (`bulkActions`).
+- **Selection + bulk actions** using Base UI `Checkbox`es, composed with `bulkActions(...)`.
 - **Row actions** with optional confirm, `isHidden` / `isDisabled` per row.
-- **Row expansion** — inline detail panels via `renderRowDetail`.
-- **Inline cell editing** (`onCellEdit` + `editable` columns) — text, number and select
+- **Row expansion** — inline detail panels via `rowDetail(...)`.
+- **Inline cell editing** (`editing(handler)` + `editable` columns) — text, number and select
   editors; Enter commits, Escape cancels, Tab moves on. Omit the handler and no cell opens.
-- **Row reordering** (`onRowReorder`) — drag handle, Space-lift keyboard, dataset-relative indices. Grouping and trees refuse it.
-- **Row pinning** (`pinnedRowIds` / `onPinnedRowIdsChange`) — sticky top and bottom rows outside the virtual window. Grouping and trees refuse it.
-- **Row and column spanning** (`getCellSpan`) — one cell list per row; covered cells are omitted.
-- **Full-width and separator rows** (`extraRows`) — host-injected slots spliced in by `beforeRowId`.
-- **Row styling and heights** (`rowStyle`, `rowHeight`) — conditional inline style and per-row height.
-- **Keyboard cell navigation** (`cellNavigation`) — one tab stop, arrow keys,
+- **Row reordering** (`rowReorder(handler)`) — drag handle, Space-lift keyboard, dataset-relative indices.
+- **Row pinning** (`rowPinning(...)`) — sticky top and bottom rows outside the virtual window.
+- **Pinned summary rows** (`pinnedSummaryRows(...)`) — host-owned totals stuck outside sort, filter, grouping, pagination and selection, including on grouped and tree tables.
+- **Row and column spanning** (`cellSpan(...)`) — one cell list per row; covered cells are omitted.
+- **Full-width and separator rows** (`extraRows(...)`) — host-injected slots spliced in by `beforeRowId`.
+- **Row styling and heights** (`rowAppearance(...)`) — conditional inline style and per-row height.
+- **Keyboard cell navigation** (`cellNavigation()`) — one tab stop, arrow keys,
   ARIA grid semantics and screen-reader announcements. It is also the gate for
   cell-range selection, clipboard copy/paste of a range, and the fill handle.
-- **Row grouping** (`groupBy`) — one column key or an ordered list to nest, with per-group aggregates sharing the `summaryRow` mapper.
+- **Row grouping** (`grouping(...)` or `groupingPanel(...)`) — one column key or an ordered list to nest, with per-group aggregates.
 - **Pivot tables** — rows, columns and measures with subtotals, from the optional
   `@adapttable/core/pivot` entry.
-- **Tree data** (`getChildren` / `getParentId`) — hierarchical rows with expand/collapse, on desktop and on cards.
+- **Tree data** (`tree(...)`) — hierarchical rows with expand/collapse, on desktop and on cards.
 - **Column management** — show/hide, reorder, pin (sticky) and resize, plus collapsible column groups.
-- **Sparkline columns** (`@adapttable/core/sparkline`) — bar, line and area as inline SVG. The base bundle never pays for it.
+- **Sparkline columns** (`@adapttable/react/sparkline`) — bar, line and area as inline SVG. The base bundle never pays for it.
 - **PDF export and print layout** (`@adapttable/core/pdf`) — optional entry; `pdfWriter()` on `exportCsv`, `printTable` for the browser dialog.
 - **Formula engine** (`@adapttable/core/formula`) — spreadsheet formulas over rows and aggregates; circular refs report `#CYCLE!`.
-- **Feature composition** (`features={[rowReorder(fn)]}`) from `@adapttable/base-ui/row-reorder`-style subpaths. Enabling props still work until v3; no bundle saving yet. Host plugins share the same `setup(host)` surface.
+- **Feature composition** (`features={[rowReorder(fn)]}`) from `@adapttable/base-ui/row-reorder`-style subpaths — the import is the switch, and `standardFeatures()` on the `/preset` entry is the one-import path. Host plugins share the same `setup(host)` surface.
 - **Saved views** — name a filter/sort/column arrangement and switch between them.
-- **CSV export** (`exportCsv`) — current page, the full filtered set, or the
+- **CSV export** (`exportCsv(...)`) — current page, the full filtered set, or the
   selected rows; choose the columns, or hand the whole thing to your backend.
-- **Virtualization** (`virtualize`) — opt-in row/card windowing for very large lists.
+- **Virtualization** (`virtualize(...)`) — opt-in row/card windowing for very large lists.
 - **Pagination** — numbered pagination, or infinite scroll (auto by device).
 - **SSR & server components** — renders with no DOM; the client boundary is already in the build, so it drops straight into the Next.js App Router. [Docs](https://orwa-mahmoud.github.io/adapttable/ssr-rsc/).
 - **States** — skeleton loading, error with retry, and an empty state.
 - **RTL** via `dir`; **dark mode** follows your theme tokens.
-- **Customisation** — `slots`, `className`, injectable `confirm` — Base UI ships unstyled, so every part is yours, and the full headless escape hatch via `@adapttable/core`.
+- **Customisation** — `slots`, `className`, injectable `confirm` — Base UI ships unstyled, so every part is yours, and the full headless escape hatch via `@adapttable/react`.
 
 ## See it work
 

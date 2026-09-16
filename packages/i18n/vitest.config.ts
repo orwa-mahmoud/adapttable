@@ -7,10 +7,10 @@ export default mergeConfig(sharedConfig, {
     environment: "node",
     coverage: {
       thresholds: {
-        statements: 99,
-        lines: 99,
-        functions: 99,
-        branches: 95,
+        statements: 100,
+        lines: 100,
+        functions: 100,
+        branches: 100,
       },
     },
   },

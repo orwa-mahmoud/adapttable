@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../columnModel";
 import {
   FALLBACK_PIN_WIDTH,
   parsePxWidth,
@@ -25,13 +25,17 @@ describe("parsePxWidth", () => {
   });
 });
 
-const fixed: ColumnDef<{ id: string }> = { key: "a", header: "A", width: 100 };
-const relative: ColumnDef<{ id: string }> = {
+const fixed: ColumnModel<{ id: string }> = {
+  key: "a",
+  header: "A",
+  width: 100,
+};
+const relative: ColumnModel<{ id: string }> = {
   key: "b",
   header: "B",
   width: "50%",
 };
-const auto: ColumnDef<{ id: string }> = { key: "c", header: "C" };
+const auto: ColumnModel<{ id: string }> = { key: "c", header: "C" };
 const cols = [fixed, relative, auto];
 
 describe("resolveColumnWidth", () => {

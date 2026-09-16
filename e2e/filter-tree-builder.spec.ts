@@ -51,10 +51,14 @@ async function openFilters(page: Page, name = "Filters"): Promise<void> {
 }
 
 async function enableFilterRecipe(page: Page): Promise<void> {
-  await page
+  const recipe = page
     .locator(".lab-recipes")
-    .getByRole("button", { name: /^Filters/ })
-    .click();
+    .getByRole("button", { name: /^Filters/ });
+  await recipe.click();
+  // Switching recipe rebuilds the table with a different feature set. Without
+  // waiting for the button to report itself pressed, the next interaction can
+  // reach the toolbar that is about to be replaced.
+  await expect(recipe).toHaveAttribute("aria-pressed", "true");
 }
 
 /** The AND/OR builder sits behind Advanced so the compact form stays the page. */

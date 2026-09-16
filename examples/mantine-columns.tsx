@@ -1,6 +1,8 @@
 import "@mantine/core/styles.css";
 
 import { DataTable } from "@adapttable/mantine";
+import { columnMenu } from "@adapttable/mantine/column-menu";
+import { resizableColumns } from "@adapttable/mantine/resizable-columns";
 import { MantineProvider } from "@mantine/core";
 
 interface Person {
@@ -71,8 +73,7 @@ export function MantineColumnsExample() {
           },
         ]}
         rowKey={(r) => r.id}
-        enableColumnMenu
-        resizableColumns
+        features={[columnMenu(), resizableColumns()]}
         maxHeight={420}
         defaultColumnLayout={{
           pinned: { name: "start" },

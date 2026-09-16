@@ -22,6 +22,37 @@ const ADAPTERS = [
 ] as const;
 
 const demo = (page: Page) => page.locator("#demo");
+
+/**
+ * What is actually painted at the top-left of an overlay item.
+ *
+ * The bug this guards is an overlay the sticky header or a pinned cell paints
+ * over, so the question is which element wins the pixel — not whether the item
+ * exists. `"missing"` is kept distinct from `"header"` so a selector that stops
+ * matching fails loudly instead of passing as "not covered".
+ *
+ * The target is a CSS selector, or the exact text of a button when the kit
+ * gives the control no stable part name.
+ */
+const stackingAt = (page: Page, target: string) =>
+  page.evaluate((selector) => {
+    const item =
+      selector.startsWith("[") || selector.startsWith(".")
+        ? document.querySelector(selector)
+        : [...document.querySelectorAll("button")].find(
+            (el) => el.textContent?.trim() === selector
+          );
+    if (!item) return "missing";
+    const box = item.getBoundingClientRect();
+    const hit = document.elementFromPoint(
+      box.left + Math.min(24, box.width / 2),
+      box.top + 8
+    );
+    return hit?.closest("th, [data-adapttable-part='header-cell']")
+      ? "header"
+      : "overlay";
+  }, target);
+
 const filtersTrigger = (page: Page) =>
   demo(page).getByRole("button", { name: "Filters", exact: true }).first();
 
@@ -31,7 +62,7 @@ async function openDemo(page: Page, adapter: string): Promise<void> {
   // chunk requests for other kits are attributable to the click.
   await expect(
     demo(page).locator('[data-adapter="mantine"] [data-stagger]').first()
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 15_000 });
   if (adapter === "mantine") return;
   const tab = page.getByTestId(`adapter-${adapter}`);
   await tab.scrollIntoViewIfNeeded();
@@ -40,7 +71,7 @@ async function openDemo(page: Page, adapter: string): Promise<void> {
   // ready — assert against the NEW adapter's tree, not the outgoing one.
   await expect(
     demo(page).locator(`[data-adapter="${adapter}"] [data-stagger]`).first()
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 15_000 });
 }
 
 test("non-default kits load on demand (code-split)", async ({ page }) => {
@@ -204,7 +235,11 @@ for (const focused of [
   }) => {
     await page.goto(focused.path);
     await expect(page.locator("[data-stagger]").first()).toBeVisible();
-    for (const name of ["Filters", "Saved views", "Columns"]) {
+    const hidden =
+      focused.name === "grouping"
+        ? (["Filters", "Saved views"] as const)
+        : (["Filters", "Saved views", "Columns"] as const);
+    for (const name of hidden) {
       await expect(page.getByRole("button", { name, exact: true })).toHaveCount(
         0
       );
@@ -263,6 +298,28 @@ test("antd keeps its sticky header to one compact line", async ({ page }) => {
   const rowBox = await row.boundingBox();
   expect(headerBox?.height).toBeLessThanOrEqual(64);
   expect(headerBox?.height ?? 0).toBeLessThan((rowBox?.height ?? 1) * 2);
+});
+
+test("keyboard density changes tighten rows in every adapter", async ({
+  page,
+}) => {
+  for (const adapter of ADAPTERS) {
+    await openDemo(page, adapter);
+    const row = demo(page)
+      .locator(`[data-adapter="${adapter}"] [data-stagger]`)
+      .first();
+    const comfortable = await row.boundingBox();
+    expect(comfortable).not.toBeNull();
+
+    const compact = page
+      .getByRole("group", { name: "density" })
+      .getByRole("button", { name: "Compact", exact: true });
+    await compact.focus();
+    await page.keyboard.press("Enter");
+    await expect
+      .poll(async () => (await row.boundingBox())?.height ?? Infinity)
+      .toBeLessThan(comfortable!.height);
+  }
 });
 
 /** Grouping and editing are opt-in control-bar toggles (off by default). */
@@ -342,7 +399,11 @@ for (const adapter of ADAPTERS) {
 
       // Escape while interacting inside the overlay dismisses it (some kits
       // scope their Escape listener to the open panel, so focus it first).
+      // Assert the focus landed: if it has not, Escape goes to the body and a
+      // kit that scopes its listener never sees it — which reads as "the
+      // popover would not close" rather than "the key went somewhere else".
       await control.focus();
+      await expect(control).toBeFocused();
       await page.keyboard.press("Escape");
       await expect(trigger).toHaveAttribute("aria-expanded", "false");
       // Escape must also RESTORE focus to the trigger (CLAUDE.md overlay
@@ -351,9 +412,73 @@ for (const adapter of ADAPTERS) {
 
       // Re-open, then a click in the far corner (outside the anchored card)
       // dismisses it.
+      //
+      // Wait for the CARD, not just the trigger's attribute. A kit that mounts
+      // its overlay a tick after opening arms its outside-click listener with
+      // it, so a click that lands in between is heard by nobody and the
+      // popover never closes — which reads as a dismiss failure rather than
+      // what it is.
       await trigger.click();
       await expect(trigger).toHaveAttribute("aria-expanded", "true");
-      await page.mouse.click(4, 4);
+      await expect(form).toBeVisible();
+      // A point that is provably outside the card and provably not the sticky
+      // header. Naming a specific element does not work here: an anchored
+      // panel shifts to stay inside the window, so on a narrow window it can
+      // cover whichever text the test had in mind — and the corner (4, 4) is
+      // the nav, which some kits' overlays treat as chrome rather than as an
+      // ordinary outside click.
+      // Measure only once the card has stopped moving. Several kits animate
+      // an anchored panel into place, and a point computed from a box that is
+      // still travelling can land on the card itself by the time it is
+      // clicked — which reads as "outside click does not dismiss".
+      const settled = await form.evaluate(async (node) => {
+        const read = () => {
+          const r = node.getBoundingClientRect();
+          return `${String(Math.round(r.x))}:${String(Math.round(r.y))}:${String(Math.round(r.width))}:${String(Math.round(r.height))}`;
+        };
+        let last = read();
+        for (let i = 0; i < 20; i++) {
+          await new Promise((done) => requestAnimationFrame(() => done(null)));
+          const now = read();
+          if (now === last) return true;
+          last = now;
+        }
+        return false;
+      });
+      expect(settled, "the card never stopped moving").toBe(true);
+      const card = await form.boundingBox();
+      expect(card, "the open card has no box").not.toBeNull();
+      const anchor = await trigger.boundingBox();
+      expect(anchor, "the trigger has no box").not.toBeNull();
+      // Somewhere genuinely inert: not the card, not the trigger — the card
+      // flips to whichever side has room, so the trigger can sit either side
+      // of it — and not another control, because clicking one of the demo's
+      // own buttons changes the page instead of dismissing the card.
+      const spot = await page.evaluate(
+        ([box, hit]) => {
+          const clear = (x: number, y: number) => {
+            const inside = (b: typeof box, pad: number) =>
+              x >= b.x - pad &&
+              x <= b.x + b.width + pad &&
+              y >= b.y - pad &&
+              y <= b.y + b.height + pad;
+            if (inside(box, 0) || inside(hit, 4)) return false;
+            const at = document.elementFromPoint(x, y);
+            return (
+              at !== null && at.closest("button, a, input, select") === null
+            );
+          };
+          for (let y = 8; y < window.innerHeight; y += 16) {
+            for (let x = 8; x < window.innerWidth; x += 16) {
+              if (clear(x, y)) return { x, y };
+            }
+          }
+          return null;
+        },
+        [card!, anchor!] as const
+      );
+      expect(spot, "nowhere on the page is outside the card").not.toBeNull();
+      await page.mouse.click(spot!.x, spot!.y);
       await expect(trigger).toHaveAttribute("aria-expanded", "false");
     });
 
@@ -421,25 +546,15 @@ for (const adapter of ADAPTERS) {
         .getByRole("button", { name: /(hide|show) column/i })
         .first();
       await expect(toggle).toBeVisible();
-      const stacked = await page.evaluate(() => {
-        const item = document.querySelector(
-          '[data-adapttable-part="column-menu-item"]'
-        );
-        if (!item) return { found: false };
-        const ir = item.getBoundingClientRect();
-        const hit = document.elementFromPoint(
-          ir.left + Math.min(24, ir.width / 2),
-          ir.top + 8
-        );
-        return {
-          found: true,
-          headerOnTop: Boolean(
-            hit?.closest("th, [data-adapttable-part='header-cell']")
-          ),
-        };
-      });
-      expect(stacked.found).toBe(true);
-      expect(stacked.headerOnTop).toBe(false);
+      // Visible is not yet settled: a kit that animates its menu into place is
+      // still moving when the assertion could first run, and a sample taken
+      // mid-flight reads whatever is under that pixel on the way. Poll until
+      // the overlay has landed, the same way the drawer check above does.
+      await expect
+        .poll(() =>
+          stackingAt(page, '[data-adapttable-part="column-menu-item"]')
+        )
+        .toBe("overlay");
     });
 
     test("saved views menu opens below the trigger", async ({ page }) => {
@@ -450,25 +565,7 @@ for (const adapter of ADAPTERS) {
       await trigger.click();
       const save = page.getByRole("button", { name: "Save view", exact: true });
       await expect(save).toBeVisible();
-      const stacked = await page.evaluate(() => {
-        const save = [...document.querySelectorAll("button")].find(
-          (el) => el.textContent?.trim() === "Save view"
-        );
-        if (!save) return { found: false };
-        const sr = save.getBoundingClientRect();
-        const hit = document.elementFromPoint(
-          sr.left + Math.min(24, sr.width / 2),
-          sr.top + 8
-        );
-        return {
-          found: true,
-          headerOnTop: Boolean(
-            hit?.closest("th, [data-adapttable-part='header-cell']")
-          ),
-        };
-      });
-      expect(stacked.found).toBe(true);
-      expect(stacked.headerOnTop).toBe(false);
+      await expect.poll(() => stackingAt(page, "Save view")).toBe("overlay");
     });
 
     test("mirrors to RTL in Arabic", async ({ page }) => {

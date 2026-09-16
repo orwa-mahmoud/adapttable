@@ -56,7 +56,31 @@ describe("defaultLabels — every function label", () => {
       { fromRow: 1, toRow: 2, fromColumn: 3, toColumn: 4, cells: 8 },
     ],
     findMatchCount: [2, 7],
+    assistantReceiptStatus: ["staged"],
+    assistantUnresolved: ["continuation-exhausted"],
+    assistantReceiptAction: [{ kind: "filter", status: "executed" }],
+    assistantReceiptTerms: [
+      { kind: "filter", terms: [{ column: "COLUMN_X", value: "VALUE_X" }] },
+    ],
+    assistantReceiptChange: [{ before: "BEFORE_X", after: "AFTER_X" }],
     groupTotal: ["Core"],
+    proposalChange: [
+      {
+        row: "ROW_X",
+        column: "COLUMN_X",
+        before: "BEFORE_X",
+        after: "AFTER_X",
+      },
+    ],
+    columnRenamed: [{ previous: "COLUMN_OLD", name: "COLUMN_NEW" }],
+    assistantConnection: ["connecting"],
+    // Both answer `undefined` for a token this language has no sentence for,
+    // so they are given one it does.
+    assistantUndoBlocked: ["table-moved"],
+    assistantCapabilityName: ["edit.cells"],
+    assistantAlwaysAllowedRevoke: ["edit.cells"],
+    assistantReceipt: [{ capability: "view.setGroupBy", status: "executed" }],
+    sortedBy: [{ column: "COLUMN_X", ascending: true }],
   };
 
   it("returns a real string for the arguments it is given", () => {
@@ -86,5 +110,81 @@ describe("defaultLabels — every function label", () => {
 
   it("says No matches when a find turns up nothing", () => {
     expect(defaultLabels.findMatchCount(1, 0)).toBe("No matches");
+  });
+
+  it("formats one pending proposal and a change without a column or value", () => {
+    expect(defaultLabels.pendingProposals(1)).toBe("1 proposed change");
+    expect(defaultLabels.pendingProposals(3)).toBe("3 proposed changes");
+    expect(defaultLabels.proposalChange({ row: "ROW_X" })).toBe("ROW_X");
+    expect(
+      defaultLabels.proposalChange({
+        row: "ROW_X",
+        column: "COLUMN_X",
+        after: "AFTER_X",
+      })
+    ).toContain("AFTER_X");
+    expect(
+      defaultLabels.proposalChange({
+        row: "ROW_X",
+        column: "COLUMN_X",
+        before: "BEFORE_X",
+      })
+    ).toContain("BEFORE_X");
+  });
+});
+
+describe("what a receipt card says happened", () => {
+  it("separates taking a filter off from putting one on", () => {
+    expect(
+      defaultLabels.assistantReceiptAction({
+        kind: "filter",
+        status: "executed",
+      })
+    ).toBe("Filter applied");
+    expect(
+      defaultLabels.assistantReceiptAction({
+        kind: "filter",
+        status: "executed",
+        cleared: true,
+      })
+    ).toBe("Filters cleared");
+  });
+
+  it("words a filter and an edit differently from the same pair", () => {
+    const terms = [{ column: "Salary", value: "185" }];
+    expect(defaultLabels.assistantReceiptTerms({ kind: "filter", terms })).toBe(
+      "Salary is 185"
+    );
+    expect(defaultLabels.assistantReceiptTerms({ kind: "edit", terms })).toBe(
+      "Salary set to 185"
+    );
+  });
+
+  it("joins several terms, and names the sort direction", () => {
+    expect(
+      defaultLabels.assistantReceiptTerms({
+        kind: "filter",
+        terms: [
+          { column: "Team", value: "Platform" },
+          { column: "Status", value: "Active" },
+        ],
+      })
+    ).toBe("Team is Platform, Status is Active");
+    expect(
+      defaultLabels.assistantReceiptTerms({
+        kind: "sort",
+        terms: [{ column: "Salary" }],
+        direction: "desc",
+      })
+    ).toBe("Salary, descending");
+  });
+
+  it("says nothing when there is nothing to name", () => {
+    expect(
+      defaultLabels.assistantReceiptTerms({ kind: "filter", terms: [] })
+    ).toBeUndefined();
+    expect(
+      defaultLabels.assistantReceiptTerms({ kind: "group" })
+    ).toBeUndefined();
   });
 });

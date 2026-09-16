@@ -3,17 +3,35 @@
  * expansion/reorder/selection leads, and the exported muiColor / ExpandChevron
  * helpers. `useStableToggle` is already covered in DataTable.expansion.test.
  */
+import { defaultLabels } from "@adapttable/core";
 import {
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { ExpandChevron, muiColor } from "./components/DesktopTable";
-import { DataTable } from "./DataTable";
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
+import { cellNavigation } from "./cell-navigation";
+import { columnSelectionCheckbox } from "./column-selection";
+import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
+import { muiColor } from "./components/DesktopTable";
+import { ExpandChevron } from "./components/ExpandToggle";
+import { DataTable } from "./data-table.test-utils";
+import { rowEditing } from "./editing";
+import { grouping } from "./grouping";
+import { headerFilters } from "./header-filters";
 import type { ColumnDef } from "./index";
+import { rowDetail } from "./row-detail";
+import { rowPinning } from "./row-pinning";
+import { rowReorder } from "./row-reorder";
 
 interface Person {
   id: string;
@@ -52,7 +70,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 const EXPANSION_WIDTH = 48;
-const REORDER_WIDTH = 40;
+const REORDER_WIDTH = 64;
 const PIN_BG = "var(--mui-palette-background-paper)";
 const theme = createTheme();
 
@@ -73,10 +91,15 @@ function mount(
   );
 }
 
+const BULK = [{ key: "x", label: "Export", onClick: vi.fn() }];
 const fullChrome = {
   renderRowDetail: (row: Person) => <div>detail-{row.id}</div>,
-  onRowReorder: vi.fn(),
-  bulkActions: [{ key: "x", label: "Export", onClick: vi.fn() }],
+  features: [
+    rowReorder(vi.fn()),
+    bulkActionsFeature(BULK),
+    rowDetail((row) => <div>detail-{row.id}</div>),
+  ],
+  bulkActions: BULK,
   rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
   columnLayout: {
     hidden: [] as string[],
@@ -177,6 +200,14 @@ describe("DesktopTable layered chrome", () => {
       headerFilters: true,
       filters: [{ key: "name", type: "text", label: "Name" }],
       cellNavigation: true,
+      features: [
+        ...fullChrome.features,
+        headerFilters(),
+        cellNavigation(),
+        columnSelectionCheckbox(),
+        rowEditing(onRowEdit),
+        rowPinning({ pinnedRowIds: { top: ["a"], bottom: [] } }),
+      ],
       columnSelectionCheckbox: true,
       resizableColumns: true,
       rowEditing: true,
@@ -241,6 +272,7 @@ describe("DesktopTable layered chrome", () => {
     const { container } = mount({
       ...fullChrome,
       groupBy: "city",
+      features: [...fullChrome.features, grouping("city")],
     });
     expect(
       container.querySelector('[data-adapttable-part="group-label"]')
@@ -250,5 +282,99 @@ describe("DesktopTable layered chrome", () => {
     ).not.toBeNull();
     fireEvent.click(screen.getAllByRole("button", { name: "Expand row" })[0]!);
     expect(screen.getByText("detail-a")).toBeInTheDocument();
+  });
+});
+
+describe("DesktopTable header rename (MUI)", () => {
+  it("mounts the optional slot only for a renameable column", () => {
+    const { container } = mount({
+      enableColumnMenu: true,
+      onColumnRename: vi.fn(),
+      columns: COLUMNS.map((column) =>
+        column.key === "name" ? { ...column, renameable: true } : column
+      ),
+    });
+    expect(
+      screen.getByRole("button", { name: "Rename column: Name" })
+    ).toHaveAttribute("data-adapttable-part", "header-rename-button");
+    expect(
+      container.querySelectorAll(
+        '[data-adapttable-part="header-rename-button"]'
+      )
+    ).toHaveLength(1);
+  });
+
+  it("validates, commits, announces, and restores trigger focus", async () => {
+    const onColumnRename = vi.fn();
+    const { container } = render(
+      <ThemeProvider theme={theme}>
+        <div>
+          <ColumnHeaderRename
+            columnKey="name"
+            name="Name"
+            labels={defaultLabels}
+            onRenameColumn={onColumnRename}
+          >
+            <span data-adapttable-part="header-caption-control">Name</span>
+          </ColumnHeaderRename>
+        </div>
+      </ThemeProvider>
+    );
+
+    const trigger = screen.getByRole("button", {
+      name: "Rename column: Name",
+    });
+    expect(trigger).toHaveAttribute(
+      "data-adapttable-part",
+      "header-rename-button"
+    );
+    trigger.focus();
+    fireEvent.click(trigger);
+    expect(trigger).toBeDisabled();
+    expect(
+      container.querySelector('[data-adapttable-part="header-caption-control"]')
+    ).toBeNull();
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveAttribute(
+      "data-adapttable-part",
+      "header-rename-input"
+    );
+    await waitFor(() => expect(input).toHaveFocus());
+
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.blur(input);
+    const error = screen.getByRole("alert");
+    expect(error).toHaveTextContent("Enter a column name.");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+
+    fireEvent.change(input, { target: { value: "  Display name  " } });
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getByRole("button", { name: "Save name" })).toHaveAttribute(
+      "type",
+      "submit"
+    );
+    fireEvent.submit(
+      container.querySelector('[data-adapttable-part="header-rename-form"]')!
+    );
+    expect(
+      container.querySelector('[data-adapttable-part="header-rename-form"]')
+    ).toBeNull();
+    expect(
+      container.querySelector('[data-adapttable-part="header-caption-control"]')
+    ).toHaveTextContent("Name");
+    await waitFor(() =>
+      expect(onColumnRename).toHaveBeenCalledWith("name", "Display name")
+    );
+    expect(
+      screen.getByText("Column Name renamed to Display name")
+    ).toHaveAttribute("data-adapttable-part", "header-rename-announcer");
+    await waitFor(() => expect(trigger).toHaveFocus());
+
+    fireEvent.click(trigger);
+    fireEvent.keyDown(screen.getByRole("textbox", { name: "Column name" }), {
+      key: "Escape",
+    });
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 });

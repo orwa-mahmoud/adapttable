@@ -92,6 +92,10 @@ selection checkbox, the expand and tree toggles, the reorder controls, the row
 actions and the detail panel. A custom card cannot drop the parts that make
 the list usable, because it never owns them.
 
+Flat cards expose 44px up/down controls. Grouped and tree cards also expose
+the kit-native **Move to group…** / **Move under…** menu, including explicit
+confirmation when `movePolicy: "confirm"`; touch never has to emulate a drag.
+
 `card.fields` is what the built-in would have laid out — each field's
 `column`, its resolved `label` (`undefined` when the column asked for none)
 and its `value`, rendered exactly as the built-in renders it, cell renderers
@@ -157,7 +161,7 @@ still lists it.
 - **Grouping** renders group header blocks between cards, with the same
   collapse behavior as desktop — see [row grouping](./row-grouping.md).
 - **Virtualization** windows the card list the same way it windows rows:
-  one `virtualize` prop, measured in a real browser across every adapter —
+  one `virtualize()` feature, measured in a real browser across every adapter —
   see [virtualization](./virtualization.md).
 - **RTL** flips the cards along with everything else — see
   [i18n & RTL](./i18n-rtl.md).

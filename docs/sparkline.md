@@ -1,15 +1,15 @@
 # React table sparkline columns
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — import `@adapttable/core/sparkline`. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — import `@adapttable/react/sparkline`. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [turn on the sparkline column in the Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — switch kits with it on and the chart is drawn by each one.
 
 A sparkline is a mini chart in a cell: bar, line or area, drawn as inline
-SVG. It ships as `@adapttable/core/sparkline` so a table that never
+SVG. It ships as `@adapttable/react/sparkline` so a table that never
 imports it never pays for it. No chart library.
 
 ```tsx
-import { sparklineColumn } from "@adapttable/core/sparkline";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import { DataTable } from "@adapttable/mantine";
 
 const columns = [

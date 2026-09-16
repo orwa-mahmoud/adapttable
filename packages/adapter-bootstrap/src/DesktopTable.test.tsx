@@ -1,4 +1,4 @@
-import type { SharedTableRenderProps } from "@adapttable/core/adapter";
+import type { SharedTableRenderProps } from "@adapttable/react/adapter";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

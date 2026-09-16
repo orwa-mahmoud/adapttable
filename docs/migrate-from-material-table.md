@@ -23,19 +23,19 @@ is the closer fit):
 
 - **Full row-edit CRUD suites** (`editable` as a material-table-style
   object with `onRowAdd` / `onRowUpdate`) — AdaptTable ships **opt-in
-  inline cell editing** via `onCellEdit` + `ColumnDef.editable` (see
+  inline cell editing** via `editing(save)` + `ColumnDef.editable` (see
   [Inline cell editing](./cell-editing.md)), not material-table's row
-  dialog engine. Multi-field forms still go through `rowActions` + your
+  dialog engine. Multi-field forms still go through `rowActions([…])` + your
   own UI, with the built-in `confirm` seam for destructive actions.
 - **Drag-to-group aggregation** (`options.grouping`) — AdaptTable ships
-  [row grouping](./row-grouping.md) at any depth (`groupBy` takes one key or an
+  [row grouping](./row-grouping.md) at any depth (`grouping("team")` or an
   ordered list, plus optional `groupAggregates`); there is no
   drag-a-column-to-group UI, so wire your own control to `groupBy` if you need
   that gesture.
-- **Tree data** (`parentChildData`) — [`getParentId`](./tree-data.md) is the
+- **Tree data** (`parentChildData`) — [`tree({ getParentId })`](./tree-data.md) is the
   same idea: a flat list with a parent column, rendered as a hierarchy.
-- **PDF export button** — the export button takes a writer, so
-  `pdfWriter` from `@adapttable/core/pdf` makes it a PDF button. See
+- **PDF export button** — compose `exportCsv({ writer: pdfWriter })` with
+  `pdfWriter` from `@adapttable/core/pdf`. See
   [PDF export](./export-pdf.md).
 
 What's left — sorted, filtered, searched, paginated, selectable CRUD list
@@ -52,7 +52,7 @@ tables with remote data — is the majority use case, and it maps cleanly.
   AdaptTable never writes to your rows.
 - **No virtualization**: nothing in its public API windows large datasets,
   and slow-large-table issues are long-standing. AdaptTable has opt-in
-  row/card virtualization.
+  row/card virtualization via `virtualize()`.
 - **Fragile foundations**: header-drag grouping depends on the archived
   `react-beautiful-dnd`.
 - Plus the AdaptTable batteries the old stack never had: URL-synced shareable
@@ -70,27 +70,27 @@ Same Material look, on a current MUI — and your rows stay untouched.
 
 `<MaterialTable>` → `<DataTable>`:
 
-| material-table                                       | `@adapttable/mui`                                     | Notes                                                                |
-| ---------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------- |
-| `data` (array)                                       | `data`                                                | No `tableData` injection — your objects are never mutated.           |
-| `data` (query function)                              | `onQueryChange` (or `source`)                         | Mapping below.                                                       |
-| `columns`                                            | `columns`                                             | Field-by-field below.                                                |
-| `title`                                              | `tableLabel` / your own heading                       | The toolbar is yours to compose (`toolbar` slot).                    |
-| `actions` (row actions)                              | `rowActions`                                          | Icon buttons on desktop, card buttons on mobile; `confirm` built in. |
-| `actions` (`isFreeAction: true`)                     | `toolbar` slot                                        | Free actions are just toolbar content.                               |
-| `options.selection` + `onSelectionChange`            | `bulkActions`, or `selectedIds` / `onSelectionChange` | Selection turns on with `bulkActions`.                               |
-| `detailPanel`                                        | `renderRowDetail`                                     | `(row) => ReactNode`.                                                |
-| `options.paging` / `pageSize` / `pageSizeOptions`    | automatic                                             | Paged on desktop, infinite on mobile (`"auto"`).                     |
-| `options.search` / `searchText` / `debounceInterval` | built-in search                                       | Debounced + URL-synced by default.                                   |
-| `options.filtering`                                  | column `filter` shorthands + `filters`                | Real widgets + removable chips, not per-column text rows.            |
-| `options.columnsButton`                              | `enableColumnMenu`                                    | Show/hide, reorder, pin.                                             |
-| `options.columnResizable`                            | `resizableColumns`                                    | —                                                                    |
-| `options.fixedColumns: { left, right }`              | column pinning via `columnLayout` / Columns menu      | Logical sides — RTL-correct.                                         |
-| `options.padding: "dense"`                           | `density="compact"`                                   | —                                                                    |
-| `options.exportButton`                               | `exportCsv` / `rowsToCsv` + `downloadCsv`             | Built-in button; the writer picks CSV, Excel or PDF.                 |
-| `options.maxBodyHeight`                              | `maxHeight`                                           | Enables the scroll box + sticky pinning.                             |
-| `localization`                                       | `labels` (+ [`@adapttable/i18n`](./i18n-rtl.md))      | Flat label object; presets for 17 locales incl. RTL.                 |
-| `isLoading`                                          | `loading`                                             | —                                                                    |
+| material-table                                       | `@adapttable/mui`                                          | Notes                                                                            |
+| ---------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `data` (array)                                       | `data`                                                     | No `tableData` injection — your objects are never mutated.                       |
+| `data` (query function)                              | `onQueryChange` (or `source`)                              | Mapping below.                                                                   |
+| `columns`                                            | `columns`                                                  | Field-by-field below.                                                            |
+| `title`                                              | `tableLabel` / your own heading                            | The toolbar is yours to compose (`toolbar` slot).                                |
+| `actions` (row actions)                              | `rowActions([…])`                                          | Icon buttons on desktop, card buttons on mobile; `confirm` built in.             |
+| `actions` (`isFreeAction: true`)                     | `toolbar` slot                                             | Free actions are just toolbar content.                                           |
+| `options.selection` + `onSelectionChange`            | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Compose `bulkActions()` to turn on selection.                                    |
+| `detailPanel`                                        | `rowDetail(fn)`                                            | `(row) => ReactNode`.                                                            |
+| `options.paging` / `pageSize` / `pageSizeOptions`    | automatic                                                  | Paged on desktop, infinite on mobile (`"auto"`).                                 |
+| `options.search` / `searchText` / `debounceInterval` | built-in search                                            | Debounced + URL-synced by default.                                               |
+| `options.filtering`                                  | column `filter` shorthands + `filters`                     | Real widgets + removable chips, not per-column text rows.                        |
+| `options.columnsButton`                              | `columnMenu()`                                             | Show/hide, reorder, pin.                                                         |
+| `options.columnResizable`                            | `resizableColumns()`                                       | —                                                                                |
+| `options.fixedColumns: { left, right }`              | column pinning via `columnMenu()` + `columnLayout`         | Logical sides — RTL-correct.                                                     |
+| `options.padding: "dense"`                           | `density="compact"`                                        | —                                                                                |
+| `options.exportButton`                               | `exportCsv()` / `rowsToCsv` + `downloadCsv`                | Compose `exportCsv()` for a built-in button; the writer picks CSV, Excel or PDF. |
+| `options.maxBodyHeight`                              | `maxHeight`                                                | Enables the scroll box + sticky pinning.                                         |
+| `localization`                                       | `labels` (+ [`@adapttable/i18n`](./i18n-rtl.md))           | Flat label object; presets for 17 locales incl. RTL.                             |
+| `isLoading`                                          | `loading`                                                  | —                                                                                |
 
 Column def → `ColumnDef`:
 
@@ -105,7 +105,7 @@ Column def → `ColumnDef`:
 | `sorting` / `defaultSort`          | `sortable` + `defaults`                       | Default sort is `defaults={{ sortBy, sortDir }}` (URL state wins when present). |
 | `customSort(a, b)`                 | `sortValue: (row) => primitive`               | Extract a comparable value instead of writing a comparator.                     |
 | `customFilterAndSearch`            | `filter` + `getValue`                         | Predicate derives from the declaration.                                         |
-| `hidden` / `hiddenByColumnsButton` | `enableColumnMenu` + `columnLayout`           | User-facing visibility lives in the menu.                                       |
+| `hidden` / `hiddenByColumnsButton` | `columnMenu()` + `columnLayout`               | User-facing visibility lives in the menu.                                       |
 | `cellStyle` / `headerStyle`        | `align`, `width`, `className`, `Cell`         | Style through your own components/classes.                                      |
 
 ## Remote data: the query function maps almost 1:1
@@ -170,16 +170,21 @@ function PeopleTable({ people }) {
 
 ```tsx
 import { DataTable } from "@adapttable/mui";
+import { bulkActions } from "@adapttable/mui/bulk-actions";
+import { columnMenu } from "@adapttable/mui/column-menu";
+import { rowActions } from "@adapttable/mui/row-actions";
 
 function PeopleTable({ people }: { people: Person[] }) {
   return (
     <DataTable
       data={people}
       rowKey={(r) => r.id}
-      enableColumnMenu
-      bulkActions={bulkActions}
-      rowActions={[
-        { key: "edit", label: "Edit", onClick: (row) => openEdit(row) },
+      features={[
+        columnMenu(),
+        bulkActions([]),
+        rowActions([
+          { key: "edit", label: "Edit", onClick: (row) => openEdit(row) },
+        ]),
       ]}
       columns={[
         { key: "name", sortable: true },
@@ -206,7 +211,7 @@ function PeopleTable({ people }: { people: Person[] }) {
 - **`rowKey` is required.** material-table keyed rows via its injected ids;
   AdaptTable wants your stable id.
 - **Editing is a workflow now, not a table mode.** Recreate `onRowUpdate` /
-  `onRowDelete` as `rowActions` with your own form/dialog; destructive
+  `onRowDelete` as `rowActions([…])` with your own form/dialog; destructive
   actions get the built-in `confirm` dialog seam.
 - **`lookup` becomes explicit options.** `{ 1: "Active" }` →
   `[{ value: "1", label: "Active" }]` (values round-trip through the URL as
@@ -215,6 +220,8 @@ function PeopleTable({ people }: { people: Person[] }) {
   `numberRange` filter); dates → an `accessor` that formats + `dateRange`
   filter; `"currency"` → your formatter, with `sortValue` keeping sort
   numeric.
+- **Features compose in `features`.** Import each factory from its kit subpath;
+  enabling props no longer arm chrome. See [feature composition](./features.md).
 
 ## Where next
 

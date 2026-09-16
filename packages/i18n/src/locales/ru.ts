@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "выполнено",
+  staged: "подготовлено",
+  partial: "выполнено частично",
+  rejected: "отклонено",
+  "awaiting-approval": "ждёт вас",
+  cancelled: "отменено",
+  stale: "устарело",
+  failed: "не удалось",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "изменение ячеек",
+  "rows.add": "добавление строк",
+  "rows.delete": "удаление строк",
+  "rows.reorder": "изменение порядка строк",
+  "export.run": "экспорт",
+};
+
 export const ru: Required<TableLabels> = {
   table: "Таблица данных",
   search: "Поиск",
@@ -117,6 +138,13 @@ export const ru: Required<TableLabels> = {
   hideAllColumns: "Скрыть все",
   unpinAllColumns: "Открепить все",
   resetColumn: "Сбросить столбец",
+  renameColumn: "Переименовать столбец",
+  columnName: "Название столбца",
+  saveColumnName: "Сохранить название",
+  cancelColumnRename: "Отмена",
+  columnNameRequired: "Введите название столбца.",
+  columnRenamed: ({ previous, name }) =>
+    `Столбец «${previous}» переименован в «${name}»`,
   sortAscending: "Сортировать по возрастанию",
   sortDescending: "Сортировать по убыванию",
   sortedBy: ({ column, ascending }) =>
@@ -126,8 +154,13 @@ export const ru: Required<TableLabels> = {
   columnActions: "Действия со столбцом",
   exportCsv: "Экспорт CSV",
   exportFile: (format) => `Экспорт ${format.toUpperCase()}`,
+  exportStarted: "Подготовка экспорта",
+  exportProgress: (progress) => `Экспорт выполнен на ${progress}%`,
   exportDone: "Экспорт завершён",
   exportFailed: "Не удалось выполнить экспорт",
+  exportCancelled: "Экспорт отменён",
+  exportDownload: "Скачать экспорт",
+  exportDismiss: "Закрыть экспорт",
   editCell: "Изменить ячейку",
   undoEdit: "Отменить",
   redoEdit: "Повторить",
@@ -139,6 +172,180 @@ export const ru: Required<TableLabels> = {
       : `${String(count)} несохранённых строк`,
   saveAll: "Сохранить всё",
   cancelAll: "Отменить всё",
+  approveProposal: "Одобрить",
+  rejectProposal: "Отклонить",
+  proposalValueUnavailable: "Недоступно",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 предложенное изменение"
+        : "Предложено изменений: {c}".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"в {r} строках".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "Просмотреть все изменения ({c})".replace("{c}", String(count)),
+  backToConversation: "Вернуться к разговору",
+  approveAllProposals: "Одобрить все",
+  approveRemainingProposals: "Одобрить остальные",
+  rejectAllProposals: "Отклонить все",
+  rejectRemainingProposals: "Отклонить остальные",
+  alwaysAllowProposal: "Всегда разрешать",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "одобрено {a} · отклонено {j} · осталось {p}"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "Изменение ждёт вашего решения.",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 предложенное изменение"
+      : `${String(count)} предложенных изменений`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "Помощник таблицы",
+  assistantOpen: "Спросить ИИ",
+  assistantClose: "Закрыть",
+  assistantSettings: "Настройки помощника",
+  assistantEmpty: "Что вы хотите сделать с этой таблицей?",
+  assistantPlaceholder: "Спросите об этой таблице…",
+  assistantSend: "Отправить",
+  assistantStop: "Остановить",
+  assistantVoiceStart: "Диктовать",
+  assistantVoiceStop: "Остановить диктовку",
+  assistantVoiceListening: "Слушаю",
+  assistantVoiceLanguage: "Язык диктовки",
+  assistantYou: "Вы",
+  assistantSpeaker: "Помощник",
+  assistantNewMessages: "Новые сообщения",
+  assistantUnavailable: "Помощник не подключён.",
+  assistantDetached: "Соединение прервано. Работа может продолжаться.",
+  assistantRejoin: "Подключиться снова",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `готово ${String(done)}`
+      : `${String(done)} из ${String(total)}`,
+  assistantBackToTable: "Вернуться к таблице",
+  assistantDetail: "Подробности",
+  assistantSaveInTable: "Сохраните в таблице, чтобы оставить это изменение.",
+  assistantUndo: "Отменить",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Это требует больше шагов, чем допускает один ход. Попросите часть.",
+        "continuation-limit":
+          "Это требует больше шагов, чем допускает один ход. Попросите часть.",
+        "resume-limit":
+          "Это требует больше шагов, чем допускает один ход. Попросите часть.",
+        "discovery-exhausted": "Ассистент не понял, как это сделать здесь.",
+        "repeated-plan":
+          "Ассистент дважды запросил одно и то же и остановился.",
+        "question-unanswered": "Для завершения нужен ваш ответ.",
+        "approval-unavailable": "Нужно подтверждение, а спросить негде.",
+        "interrupt-unsupported":
+          "Ассистент запросил то, чего эта таблица не умеет.",
+        "output-denied": "Часть этого не была разрешена.",
+        "not-run": "Это не выполнялось.",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "Таблица изменилась с тех пор.",
+        "cannot-restore": "Часть этого вернуть нельзя.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "Ваш ответ",
+  assistantAnswerPlaceholder: "Введите ответ",
+  assistantAnswerSend: "Ответить",
+  assistantAlwaysAllowedTitle: "Больше не спрашивать о",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `Снова спрашивать о: ${CAPABILITY[capability] ?? capability}`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 действие" : `Действий: ${String(count)}`,
+  assistantActionsTitle: "Что изменил этот ход",
+  assistantUndoAll: "Отменить всё",
+  assistantExamples: "Быстрые команды",
+  assistantReceiptChange: ({ before, after }) =>
+    `Изменено с ${before} на ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `Предложено: с ${before} на ${after}`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "Фильтр применён",
+        "filter/staged": "Фильтр подготовлен",
+        "sort/executed": "Отсортировано",
+        "group/executed": "Сгруппировано",
+        "pin/executed": "Столбец закреплён",
+        "edit/executed": "Сохранено",
+        "edit/staged": "Изменение подготовлено — не сохранено",
+        "edit/awaiting-approval": "Изменение ждёт подтверждения",
+        "edit/partial": "Часть изменений сохранена, часть отклонена",
+        "edit/rejected": "Изменение отклонено",
+        "filter-cleared/executed": "Фильтры сброшены",
+        "sort-cleared/executed": "Сортировка сброшена",
+        "search/executed": "Поиск применён",
+        "search-cleared/executed": "Поиск очищен",
+        "group-cleared/executed": "Группировка сброшена",
+        "pin-cleared/executed": "Столбец откреплён",
+        "pinRow/executed": "Строка закреплена",
+        "pinRow-cleared/executed": "Строка откреплена",
+        "page/executed": "Страница изменена",
+        "aggregate/executed": "Итоги изменены",
+        "select/executed": "Выделение изменено",
+        "read/executed": "Таблица прочитана",
+        "operation/executed": "Выполнено",
+        "operation/awaiting-approval": "Ожидает вас",
+        "operation/rejected": "Отклонено",
+        "export/executed": "Экспортировано",
+        "add/executed": "Строка добавлена",
+        "add/awaiting-approval": "Новая строка ожидает подтверждения",
+        "add/rejected": "Новая строка отклонена",
+        "delete/executed": "Строки удалены",
+        "delete/awaiting-approval": "Удаление ожидает подтверждения",
+        "delete/partial": "Часть строк удалена, часть оставлена",
+        "delete/rejected": "Удаление отклонено",
+        "reorder/executed": "Строки перемещены",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "по убыванию" : "по возрастанию"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "Ожидание",
+      connecting: "Подключение…",
+      ready: "Готов",
+      sending: "Выполняется…",
+      "awaiting-approval": "Ждёт вас",
+      "awaiting-user": "Ждёт вас",
+      error: "Ошибка",
+      disconnected: "Нет подключения",
+    })[status] ?? "Готов",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Добавить строку",
   duplicateRow: "Дублировать строку",
   deleteRow: "Удалить строку",
@@ -155,9 +362,28 @@ export const ru: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Строка перемещена с ${String(from)} на ${String(to)}`,
   rowReorderCancelled: "Перестановка отменена",
+  rowMoveOptions: "Параметры перемещения строки",
+  moveToGroup: "Переместить в группу…",
+  moveUnder: "Переместить под…",
+  moveToTopLevel: "Переместить на верхний уровень",
+  confirmRowMoveTitle: "Подтвердить перемещение строки",
+  confirmRowMoveDescription: (row, from, to) =>
+    `Переместить ${row} из ${from} в ${to}?`,
+  confirmRowMove: "Переместить",
+  rowMovedToGroup: (group) => `Строка перемещена в ${group}`,
+  rowMovedUnder: (parent) => `Строка перемещена под ${parent}`,
+  moveRejectedPolicyNever: "Перемещение строк через границы отключено",
+  moveRejectedSorted: "Сбросьте сортировку перед изменением порядка строк",
+  moveRejectedCycle:
+    "Строку нельзя переместить внутрь неё самой или её потомка",
+  moveUnavailable: "Это перемещение строки недоступно",
+  rootLevel: "Верхний уровень",
   pinToTop: "Закрепить сверху",
   pinToBottom: "Закрепить снизу",
   unpinRow: "Открепить строку",
+  pinnedSummaryRow: "Строка итогов",
+  pinnedSummaryTop: "Закреплённые итоговые строки сверху",
+  pinnedSummaryBottom: "Закреплённые итоговые строки снизу",
   rowSeparator: "Разделитель",
   expandColumnGroup: "Развернуть группу столбцов",
   collapseColumnGroup: "Свернуть группу столбцов",
@@ -167,6 +393,35 @@ export const ru: Required<TableLabels> = {
   expandGroup: "Развернуть группу",
   collapseGroup: "Свернуть группу",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "Группировка строк",
+  groupingDropColumns: "Перетащите столбцы сюда для группировки",
+  addGroupingColumn: "Добавить столбец группировки",
+  groupByColumn: (label) => `Группировать по ${label}`,
+  ungroupColumn: (label) => `Разгруппировать ${label}`,
+  removeGroupingColumn: (label) => `Удалить ${label} из группировки`,
+  moveGroupingColumn: (label) => `Переместить ${label} в группировке`,
+  groupingDropToRemove: "Перетащите сюда, чтобы удалить из группировки",
+  groupingAggregateColumn: "Столбец агрегации",
+  groupingAggregation: "Агрегация группы",
+  groupingAggregationDefault: "По умолчанию",
+  groupingAggregationNone: "Нет",
+  groupingAggregations: "Агрегации",
+  groupingAddAggregation: "Добавить столбец агрегации",
+  groupingRestoreAggregations: "Восстановить значения по умолчанию",
+  groupingRemoveAggregation: (column) => `Удалить агрегацию ${column}`,
+  groupingAggregationFor: (column) => `Агрегация ${column}`,
+  groupingAggregationReadOnly: "Задано приложением",
+  groupingAggregationCustom: "Пользовательская",
+  groupingAggregateRemoved: (column) => `Агрегация ${column} удалена`,
+  groupingAggregatesRestored:
+    "Агрегации восстановлены до значений по умолчанию",
+  groupingAverage: "Среднее",
+  groupingAdded: (label) => `${label} добавлен в группировку`,
+  groupingRemoved: (label) => `${label} удалён из группировки`,
+  groupingMoved: (label, position) =>
+    `${label} перемещён на позицию группировки ${position}`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `Агрегация группы ${label} изменена на ${aggregation}`,
   gridRangeCopied: (cells) => `Скопировано ячеек: ${cells}`,
   gridRangeCopyFailed: "Не удалось скопировать",
   gridRangePasted: (cells) => `Вставлено ячеек: ${cells}`,
@@ -222,10 +477,9 @@ export const ru: Required<TableLabels> = {
   noticeReorderNested:
     "Перестановка строк выключена, пока включена группировка или дерево.",
   noticeGroupingUnavailable:
-    "Группировка выключена — источник не отдаёт полный отфильтрованный набор.",
+    "Группировка отключена: этот источник не умеет группировать.",
   noticeExportAllPage:
-    "Экспорт всех — это эта страница: полный отфильтрованный набор недоступен.",
+    "Экспорт всех отключён: этот источник выдаёт по одной странице.",
   noticeEditWithoutWriter:
     "Редактирование выключено — обработчик записи не подключён.",
-  exportThisPage: "Экспортировать эту страницу",
 };

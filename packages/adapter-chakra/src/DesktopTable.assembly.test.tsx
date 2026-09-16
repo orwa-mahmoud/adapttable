@@ -5,13 +5,14 @@
 import {
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { rowReorder } from "./row-reorder";
 
 interface Person {
   id: string;
@@ -50,7 +51,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 const EXPANSION_WIDTH = 32;
-const REORDER_WIDTH = 40;
+const REORDER_WIDTH = 64;
 const PIN_BG = "var(--chakra-colors-bg)";
 
 function mount(
@@ -71,7 +72,7 @@ function mount(
 
 const fullChrome = {
   renderRowDetail: (row: Person) => <div>detail-{row.id}</div>,
-  onRowReorder: vi.fn(),
+  features: [rowReorder(vi.fn())],
   bulkActions: [{ key: "x", label: "Export", onClick: vi.fn() }],
   rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
   columnLayout: {

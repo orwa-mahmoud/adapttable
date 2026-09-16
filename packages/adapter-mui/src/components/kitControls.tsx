@@ -2,8 +2,11 @@
  * MUI kit controls — TextField / Button / IconButton / Checkbox.
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
-import { filterLabel, useHeaderFilterOverlay } from "@adapttable/core";
 import {
+  type AgentApprovalButtonProps,
+  AgentApprovalChrome,
+  type AgentApprovalListProps,
+  type AgentApprovalProps,
   BatchEditBarChrome,
   type BatchEditBarProps,
   type BatchEditButtonProps,
@@ -30,10 +33,11 @@ import {
   GroupMoreButtonChrome,
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
-  hasActiveHeaderFilter,
+  restoreFocusSoon,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -46,7 +50,7 @@ import {
   TreeToggleChrome,
   type TreeToggleProps,
   type TreeToggleSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   Button,
   Checkbox,
@@ -55,15 +59,17 @@ import {
   Menu,
   MenuItem,
   Paper,
-  Popper,
+  type PaperProps,
+  Popover,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useId, useRef, useState } from "react";
 
-import { FiltersIcon } from "../icons";
-import { AutoFilterForm } from "./AutoFilterForm";
+import { iconForRowEditPart } from "../icons";
 
 export type {
+  AgentApprovalProps,
   BatchEditBarProps,
   ColumnGroupToggleProps,
   FilterHeaderControlProps,
@@ -100,7 +106,7 @@ function HeaderSearch({
   value,
   className,
   onChange,
-}: FilterHeaderSearchProps) {
+}: Readonly<FilterHeaderSearchProps>) {
   return (
     <TextField
       size="small"
@@ -123,7 +129,7 @@ function HeaderSelect({
   options,
   className,
   onChange,
-}: FilterHeaderSelectProps) {
+}: Readonly<FilterHeaderSelectProps>) {
   return (
     <TextField
       select
@@ -172,7 +178,7 @@ function HeaderMulti({
   className,
   menuClassName,
   onToggle,
-}: FilterHeaderMultiProps) {
+}: Readonly<FilterHeaderMultiProps>) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const menuId = useId();
   const open = Boolean(anchor);
@@ -268,55 +274,6 @@ export function FilterHeaderControl<TRow>(
   return <FilterHeaderControlChrome {...props} slots={headerSlots} />;
 }
 
-/** Funnel on the column header — the same field the Filters panel draws. */
-export function FilterHeaderTrigger<TRow>(
-  props: Readonly<FilterHeaderControlProps<TRow>>
-) {
-  const active = hasActiveHeaderFilter(props);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const { open, setOpen, source, sessionProps } = useHeaderFilterOverlay(
-    props,
-    {
-      nestedSelector: "[role='listbox'],.MuiMenu-root,.MuiPopover-root",
-    }
-  );
-  return (
-    <>
-      <IconButton
-        {...sessionProps}
-        ref={triggerRef}
-        size="small"
-        aria-label={filterLabel(props.def)}
-        data-adapttable-part="filter-header-trigger"
-        data-active={active ? "" : undefined}
-        onClick={() => setOpen(!open)}
-      >
-        <FiltersIcon size={14} />
-      </IconButton>
-      <Popper
-        open={open}
-        anchorEl={triggerRef.current}
-        placement="bottom-start"
-        style={{ zIndex: 1300 }}
-      >
-        <Paper
-          {...sessionProps}
-          elevation={8}
-          data-adapttable-part="filter-header-cell"
-          sx={{ minWidth: "20rem", p: 1 }}
-        >
-          <AutoFilterForm
-            defs={[props.def]}
-            source={source}
-            labels={props.labels}
-            registry={props.registry}
-          />
-        </Paper>
-      </Popper>
-    </>
-  );
-}
-
 function FindSearch({
   label,
   placeholder,
@@ -324,7 +281,7 @@ function FindSearch({
   focusRef,
   onChange,
   onKeyDown,
-}: FindSearchProps) {
+}: Readonly<FindSearchProps>) {
   return (
     <TextField
       inputRef={focusRef}
@@ -378,20 +335,37 @@ export function FindBar(props: Readonly<FindBarProps>) {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
-}: RowEditButtonProps) {
+}: Readonly<RowEditButtonProps>) {
+  const glyph = iconForRowEditPart(part, icon);
+  if (!glyph) {
+    return (
+      <Button
+        type="button"
+        size="small"
+        data-adapttable-part={part}
+        className={className}
+        aria-label={label}
+        onClick={onClick}
+      >
+        {label}
+      </Button>
+    );
+  }
   return (
-    <Button
+    <IconButton
       type="button"
       size="small"
       data-adapttable-part={part}
       className={className}
       aria-label={label}
+      title={label}
       onClick={onClick}
     >
-      {label}
-    </Button>
+      {glyph}
+    </IconButton>
   );
 }
 
@@ -411,7 +385,7 @@ function BatchButton({
   part,
   className,
   onClick,
-}: BatchEditButtonProps) {
+}: Readonly<BatchEditButtonProps>) {
   return (
     <Button
       type="button"
@@ -434,13 +408,72 @@ export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>) {
   return <BatchEditBarChrome {...props} slots={{ Button: BatchButton }} />;
 }
 
+function ApprovalList({
+  part,
+  label,
+  className,
+  children,
+}: Readonly<AgentApprovalListProps>) {
+  return (
+    // A real list: its children are the proposed changes, one <li> each, and
+    // the element carries that everywhere rather than only where ARIA does.
+    <ul
+      data-adapttable-part={part}
+      aria-label={label}
+      className={className}
+      style={{ listStyle: "none", margin: 0, padding: 0 }}
+    >
+      {children}
+    </ul>
+  );
+}
+
+/**
+ * Approve or reject a pending agent write.
+ *
+ * @public
+ */
+function ApprovalAction({
+  label,
+  part,
+  className,
+  onClick,
+}: Readonly<AgentApprovalButtonProps>) {
+  return (
+    <Button
+      type="button"
+      size="small"
+      variant="text"
+      data-adapttable-part={part}
+      className={className}
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  );
+}
+
+export function AgentApproval(props: Readonly<AgentApprovalProps>) {
+  return (
+    <AgentApprovalChrome
+      {...props}
+      slots={{
+        Approve: BatchButton,
+        Reject: BatchButton,
+        List: ApprovalList,
+        Action: ApprovalAction,
+      }}
+    />
+  );
+}
+
 function TreeButton({
   label,
   expanded,
   loading,
   className,
   onClick,
-}: TreeToggleButtonProps) {
+}: Readonly<TreeToggleButtonProps>) {
   return (
     <IconButton
       type="button"
@@ -492,7 +525,7 @@ function GroupToggleButton({
   expanded,
   className,
   onClick,
-}: ColumnGroupToggleButtonProps) {
+}: Readonly<ColumnGroupToggleButtonProps>) {
   return (
     <IconButton
       type="button"
@@ -546,10 +579,11 @@ function ReorderHandle({
   label,
   pressed,
   dragging,
+  disabled,
   className,
   dragProps,
   onKeyDown,
-}: RowReorderHandleSlotProps) {
+}: Readonly<RowReorderHandleSlotProps>) {
   return (
     <IconButton
       type="button"
@@ -560,12 +594,136 @@ function ReorderHandle({
       className={className}
       aria-label={label}
       aria-pressed={pressed}
+      disabled={disabled}
       sx={{ cursor: pressed ? "grabbing" : "grab" }}
       {...dragProps}
       onKeyDown={onKeyDown}
     >
       <GripIcon />
     </IconButton>
+  );
+}
+
+function RowMoveMenuPaper(props: Readonly<PaperProps>) {
+  return <Paper {...props} data-adapttable-part="row-move-menu-content" />;
+}
+
+function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const suppressOpenRef = useRef(false);
+  const menuId = useId();
+  const open = anchor !== null;
+  const close = () => {
+    suppressOpenRef.current = true;
+    setAnchor(null);
+    window.setTimeout(() => {
+      restoreFocusSoon(triggerRef.current);
+      window.setTimeout(() => {
+        suppressOpenRef.current = false;
+      }, 500);
+    }, 0);
+  };
+  const finish = (callback: () => void) => {
+    callback();
+    close();
+  };
+  if (confirmation) {
+    return (
+      <span data-adapttable-part="row-move-menu">
+        <IconButton
+          ref={triggerRef}
+          type="button"
+          size="small"
+          aria-label={label}
+          aria-haspopup="dialog"
+          aria-expanded="true"
+          aria-controls={menuId}
+          data-adapttable-part="row-move-menu-trigger"
+        >
+          ⋮
+        </IconButton>
+        <Popover
+          id={menuId}
+          anchorEl={() => triggerRef.current}
+          open
+          onClose={() => finish(confirmation.onCancel)}
+          slots={{ paper: RowMoveMenuPaper }}
+          slotProps={{ paper: { sx: { minWidth: "12rem", p: 1 } } }}
+        >
+          <div
+            role="alertdialog"
+            aria-label={confirmation.title}
+            data-adapttable-part="row-move-confirmation"
+          >
+            <Typography variant="subtitle2">{confirmation.title}</Typography>
+            <Typography variant="body2" sx={{ my: 1 }}>
+              {confirmation.description}
+            </Typography>
+            <Button
+              type="button"
+              size="small"
+              onClick={() => finish(confirmation.onConfirm)}
+            >
+              {confirmation.confirmLabel}
+            </Button>
+            <Button
+              type="button"
+              size="small"
+              onClick={() => finish(confirmation.onCancel)}
+            >
+              {confirmation.cancelLabel}
+            </Button>
+          </div>
+        </Popover>
+      </span>
+    );
+  }
+  return (
+    <span data-adapttable-part="row-move-menu">
+      <IconButton
+        ref={triggerRef}
+        type="button"
+        size="small"
+        aria-label={label}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
+        data-adapttable-part="row-move-menu-trigger"
+        onClick={(event) => {
+          if (!suppressOpenRef.current) setAnchor(event.currentTarget);
+        }}
+      >
+        ⋮
+      </IconButton>
+      <Menu
+        id={menuId}
+        anchorEl={anchor}
+        open={open}
+        onClose={close}
+        slots={{ paper: RowMoveMenuPaper }}
+        slotProps={{
+          list: { "aria-label": label },
+          paper: { sx: { minWidth: "12rem", p: 1 } },
+        }}
+      >
+        {items.map((item) => (
+          <MenuItem
+            key={item.id}
+            disabled={item.disabled}
+            title={item.disabledReason}
+            data-adapttable-part="row-move-menu-item"
+            onClick={item.onSelect}
+          >
+            {item.label}
+          </MenuItem>
+        ))}
+      </Menu>
+    </span>
   );
 }
 
@@ -578,7 +736,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -588,7 +749,7 @@ function ReorderMove({
   disabled,
   className,
   onClick,
-}: RowReorderMoveButtonProps) {
+}: Readonly<RowReorderMoveButtonProps>) {
   return (
     <IconButton
       type="button"
@@ -612,7 +773,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({
@@ -625,7 +791,7 @@ function ActivateCell({
   onDoubleClick,
   onClick,
   onKeyDown,
-}: EditableCellActivateProps) {
+}: Readonly<EditableCellActivateProps>) {
   return (
     <button
       ref={activateRef}
@@ -652,7 +818,7 @@ function EditGateButton({
   className,
   onMouseDown,
   onClick,
-}: EditableCellButtonProps) {
+}: Readonly<EditableCellButtonProps>) {
   return (
     <Button
       type="button"

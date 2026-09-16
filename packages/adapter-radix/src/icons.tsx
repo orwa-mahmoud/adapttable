@@ -4,7 +4,7 @@ import {
   PIN_BOTTOM_ACTION_KEY,
   PIN_TOP_ACTION_KEY,
   UNPIN_ROW_ACTION_KEY,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import type { ReactNode } from "react";
 
 interface IconProps {
@@ -105,15 +105,43 @@ export function MoreVerticalIcon({ size = 15 }: Readonly<IconProps>) {
   );
 }
 
+/** Pencil — the control that opens a row for editing. */
+export function EditRowIcon({ size = 15 }: Readonly<IconProps>) {
+  return (
+    <Svg size={size}>
+      <path d="M2.5 12.5h2.5L12 6a1.4 1.4 0 0 0-2-2L3 10.5v2z" />
+      <path d="M9.5 4.5l2 2" />
+    </Svg>
+  );
+}
+
+/** Check mark — the row-mode save control. */
+export function SaveRowIcon({ size = 15 }: Readonly<IconProps>) {
+  return (
+    <Svg size={size}>
+      <path d="M3 8l3 3 6-6.5" />
+    </Svg>
+  );
+}
+
+/** Cross — the row-mode cancel control. */
+export function CancelRowIcon({ size = 15 }: Readonly<IconProps>) {
+  return (
+    <Svg size={size}>
+      <path d="M3.5 3.5l8 8M11.5 3.5l-8 8" />
+    </Svg>
+  );
+}
+
 /**
  * Host `icon` wins. Built-in duplicate / delete / pin keys get this kit's
  * glyph so core can stay a key + label.
  */
 export function iconForRowAction(
-  action: Readonly<{ key: string; icon?: ReactNode }>
+  action: Readonly<{ key: string; icon?: unknown }>
 ): ReactNode | undefined {
   return (
-    action.icon ??
+    (action.icon as ReactNode | undefined) ??
     {
       [DUPLICATE_ROW_ACTION_KEY]: <DuplicateRowIcon />,
       [DELETE_ROW_ACTION_KEY]: <DeleteRowIcon />,
@@ -122,4 +150,22 @@ export function iconForRowAction(
       [UNPIN_ROW_ACTION_KEY]: <UnpinRowIcon />,
     }[action.key]
   );
+}
+
+/**
+ * The glyph this kit draws for a row-mode control.
+ *
+ * `icon` is the host's answer and wins: a node replaces the glyph, `false`
+ * asks for the label as text. Only when the host said nothing does the kit
+ * choose, by part.
+ */
+export function iconForRowEditPart(part: string, icon?: unknown): ReactNode {
+  return icon === false
+    ? undefined
+    : ((icon as ReactNode | undefined) ??
+        {
+          "row-edit-begin": <EditRowIcon />,
+          "row-edit-save": <SaveRowIcon />,
+          "row-edit-cancel": <CancelRowIcon />,
+        }[part]);
 }

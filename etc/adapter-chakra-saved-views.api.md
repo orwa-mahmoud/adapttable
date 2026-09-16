@@ -4,9 +4,11 @@
 
 ```ts
 
-import { savedViews } from '@adapttable/core/features';
+import { StaticTableFeature } from '@adapttable/react/adapter';
+import { UseSavedViewsOptions } from '@adapttable/react/features';
 
-export { savedViews }
+// @public
+export function savedViews(options: UseSavedViewsOptions): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

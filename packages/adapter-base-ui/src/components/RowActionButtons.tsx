@@ -8,7 +8,7 @@ import {
   type TableLabels,
   visibleRowActions,
 } from "@adapttable/core";
-import { resolveDisabledReason } from "@adapttable/core/adapter";
+import { resolveDisabledReason } from "@adapttable/react/adapter";
 import { Menu } from "@base-ui/react/menu";
 import type { ReactNode } from "react";
 
@@ -174,7 +174,7 @@ export function RowActionButtons<TRow>({
   const visible = visibleRowActions(actions, row);
   let content: ReactNode = null;
   if (render) {
-    content = render({ row, actions, confirm, labels });
+    content = render({ row, actions, confirm, labels }) as ReactNode;
   } else if (visible.length > 0) {
     content =
       layout === "menu" ? (

@@ -1,5 +1,9 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import { sparklineColumn } from "@adapttable/core/sparkline";
+import {
+  createMemoryAdapter,
+  type TableErrorState,
+  useFrontendData,
+} from "@adapttable/react";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import { Theme } from "@radix-ui/themes";
 import {
   act,
@@ -11,7 +15,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -374,7 +378,7 @@ describe("<DataTable> (Radix)", () => {
       refetch,
       override: {
         slots: {
-          error: (state) => (
+          error: (state: TableErrorState) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>
@@ -1014,6 +1018,34 @@ describe("header filter trigger", () => {
     expect(
       document.querySelector('[data-adapttable-part="filter-header-trigger"]')
     ).toBeNull();
+  });
+  it("keeps the header filter open when the pointer lands outside it", async () => {
+    renderHarness({
+      override: {
+        headerFilters: true,
+        filters: [{ key: "name", type: "text", label: "Name" }],
+      },
+    });
+    const trigger = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="filter-header-trigger"]'
+    )!;
+    fireEvent.click(trigger);
+    const panel = await waitFor(() => {
+      const found = document.querySelector<HTMLElement>(
+        '[data-adapttable-part="filter-header-cell"]'
+      );
+      expect(found).not.toBeNull();
+      return found!;
+    });
+
+    // Typing in a filter often moves focus or the pointer outside the small
+    // anchored card; dismissing on that would close the panel mid-edit.
+    fireEvent.pointerDown(document.body);
+    fireEvent.focusOut(panel);
+
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).not.toBeNull();
   });
 });
 

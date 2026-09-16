@@ -1,10 +1,11 @@
+import type { TableSource } from "@adapttable/core";
 import {
   type ColumnLayoutState,
   createMemoryAdapter,
-  type TableSource,
+  type TableErrorState,
   useFrontendData,
-} from "@adapttable/core";
-import { sparklineColumn } from "@adapttable/core/sparkline";
+} from "@adapttable/react";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import {
   act,
   fireEvent,
@@ -16,7 +17,7 @@ import {
 import { ConfigProvider } from "antd";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef, FilterDef } from "./index";
 
 interface Row {
@@ -237,7 +238,7 @@ describe("<DataTable> (Ant Design)", () => {
       refetch,
       override: {
         slots: {
-          error: (state) => (
+          error: (state: TableErrorState) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>
@@ -1717,7 +1718,7 @@ function pickFilterSelect(
 const urlState = () => decodeURIComponent(adapter.getSearch());
 
 describe("<DataTable> declarative engine (Ant Design)", () => {
-  it("column filter shorthands alone (no filters prop) render the auto form", () => {
+  it("column shorthands with empty feature config render the auto form", () => {
     renderZero();
     const popover = openFilters();
     // personColumns declares `filter: "text"` on firstName — the form must
@@ -2007,6 +2008,39 @@ describe("header filter trigger", () => {
     });
     expect(
       document.querySelector('[data-adapttable-part="filter-header-trigger"]')
+    ).not.toBeNull();
+  });
+
+  it("keeps the overlay open after the operator changes", () => {
+    renderHarness({
+      override: {
+        headerFilters: true,
+        filters: [{ key: "name", type: "text", label: "Name" }],
+      },
+    });
+    fireEvent.click(
+      document.querySelector('[data-adapttable-part="filter-header-trigger"]')!
+    );
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).not.toBeNull();
+    fireEvent.mouseDown(
+      document.querySelector('[data-adapttable-part="filter-operator"]')!
+    );
+    fireEvent.click(
+      document.querySelector('[data-adapttable-part="filter-operator"]')!
+    );
+    const option = document.querySelectorAll(".ant-select-item-option")[1];
+    expect(option).toBeTruthy();
+    fireEvent.mouseDown(option!);
+    fireEvent.click(option!);
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).not.toBeNull();
+    expect(
+      document.querySelector(
+        '[data-adapttable-part="filter-header-cell"] .ant-select-item-option'
+      )
     ).not.toBeNull();
   });
 });

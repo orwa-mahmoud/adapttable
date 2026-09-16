@@ -1,0 +1,382 @@
+/**
+ * The live permitted context — `@adapttable/ai/context`.
+ *
+ * One export, built from the live session, that any integration can send to
+ * any model: what this table can do, what its columns are, and where its view
+ * is right now. It performs no I/O, applies nothing, and reads no row values.
+ *
+ * It is deliberately not a second definition of anything. The capability
+ * schemas are `guides.ts`'s, the wiring and exclusion answer is the registry's,
+ * the filters are `filterCatalog.ts`'s. If a rule changes there it changes
+ * here, because there is nothing here to change.
+ *
+ * `contract.version` names everything the table can do; `selection.version`
+ * names that plus how much of it was selected. A backend acknowledges both, so
+ * switching a profile cannot reuse a payload built for the other one.
+ *
+ * @packageDocumentation
+ */
+import {
+  type AgentContextOptions,
+  type AgentContextProfile,
+  type AgentContextSelection,
+  ContextBudgetError,
+  DEFAULT_COMPACT_TOKENS as COMPACT_TOKENS,
+  fitColumns,
+  selectGuides,
+  selectionVersion,
+  utf8Bytes,
+} from "./contextSelection";
+import {
+  type AgentContextContract,
+  type AgentContextView,
+  buildContract,
+  buildView,
+  type ContextColumn,
+} from "./contextSnapshot";
+import type { AgentPagination } from "./pagination";
+import type {
+  AgentAggregations,
+  AgentFilter,
+  AgentManifest,
+  AgentSession,
+  RowProvenanceEnvelope,
+  RowWindow,
+} from "./types";
+
+/**
+ * The operations the session already published, when the host did not hand
+ * a separate catalog in. HTTP builds context from the session alone, and a
+ * caller that has to guess between `avg` and `average` guesses wrong.
+ */
+function aggregationsFromManifest(
+  manifest: AgentManifest
+): AgentAggregations | undefined {
+  const listed = manifest.aggregateOperations;
+  if (!listed?.length) return undefined;
+  return {
+    columns: listed.map((column) => ({
+      id: column.id,
+      operations: column.operations.map((id) => ({ id, label: id })),
+    })),
+    active: [],
+  };
+}
+
+export {
+  type AgentContextContract,
+  type AgentContextOptions,
+  type AgentContextProfile,
+  type AgentContextSelection,
+  type AgentContextView,
+};
+export {
+  agentInstructions,
+  type AgentInstructionsInput,
+  renderAgentContext,
+} from "./contextPrompt";
+export { sampleColumns, sampleColumnValues } from "./contextSampling";
+export {
+  ContextBudgetError,
+  ContextIncludeError,
+  DEFAULT_COMPACT_TOKENS,
+  MAX_CONTEXT_BYTES,
+} from "./contextSelection";
+export {
+  type ContextCapability,
+  type ContextColumn,
+  contractVersion,
+} from "./contextSnapshot";
+export { matchesType, SAMPLE_CAP } from "./contextSnapshot";
+
+/** What a model is given about this table. @public */
+export interface AgentContext {
+  /** The table's permitted shape. Changes rarely. */
+  readonly contract: AgentContextContract;
+  /** Where the table is right now. Changes constantly. */
+  readonly view: AgentContextView;
+  /** What was selected, what was deferred, and how big it came out. */
+  readonly selection: AgentContextSelection;
+}
+
+/** Everything the builder needs that the session does not already expose. */
+export interface AgentContextInputs {
+  /** Live filter definitions, already reduced to what the agent may use. */
+  readonly filters?: readonly AgentFilter[];
+  /** Aggregation choices, from the neutral aggregation rules. */
+  readonly aggregations?: AgentAggregations;
+  /**
+   * Live values the host sampled for columns whose author opted in.
+   *
+   * Produced by `sampleColumnValues` on this same subpath and handed in,
+   * never read here: the builder performs no I/O, and a sample is a read.
+   * Column id to values; anything not listed keeps its authored examples.
+   */
+  readonly samples?: Readonly<Record<string, readonly unknown[]>>;
+  /** Live view state the session's manifest does not carry. */
+  readonly view?: {
+    readonly page?: number;
+    readonly limit?: number;
+    readonly search?: string;
+    readonly sortBy?: string;
+    readonly sortDir?: "asc" | "desc";
+    readonly groupBy?: string;
+    readonly filters?: Readonly<Record<string, unknown>>;
+    readonly pinnedColumns?: Readonly<Record<string, unknown>>;
+    readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    readonly hiddenColumns?: readonly string[];
+    readonly columnOrder?: readonly string[];
+    /** Overrides the session's own pagination, for a host that knows better. */
+    readonly pagination?: AgentPagination;
+  };
+}
+
+/**
+ * Build the permitted context for one table.
+ *
+ * @param session - The live session. Everything is read through it, so the
+ *   permission predicate has already been applied to every key that arrives.
+ * @param options - Profile, budget and expert overrides.
+ * @param inputs - Live view and filter data the manifest does not carry.
+ * @returns The contract, the view, and what the selector did.
+ * @throws {@link ContextIncludeError} when `include` names a key this table
+ *   does not offer — a request that cannot be met is an error, not a silence.
+ *
+ * @public
+ */
+export function buildAgentContext(
+  session: AgentSession,
+  options: AgentContextOptions = {},
+  inputs: AgentContextInputs = {}
+): AgentContext {
+  const catalog = session.catalog();
+  const contract = buildContract(
+    session,
+    catalog,
+    inputs.filters ?? [],
+    inputs.aggregations ?? aggregationsFromManifest(session.manifest()),
+    inputs.samples
+  );
+  const measure =
+    options.estimateTokens ?? ((text: string) => Math.ceil(text.length / 4));
+  const budget = payloadBudget(options);
+  // The payload is budgeted whole, and in the order that keeps a table usable.
+  // Columns come first: a model cannot name a column it was never told about,
+  // and no guide makes up for that. Guides then fill whatever is left, common
+  // operations first, so the things nearly every request needs stay callable.
+  const floor = (columns: readonly ContextColumn[]): number =>
+    measure(JSON.stringify({ ...contract, columns, capabilities: bare }));
+  const bare = contract.capabilities;
+  const fitted =
+    budget === undefined
+      ? { kept: contract.columns, deferred: [] as readonly string[] }
+      : fitColumns(contract.columns, (kept) => floor(kept) <= budget);
+  // `fitColumns` keeps every column and gives back the barest form that fits,
+  // so a budget is unmeetable exactly when even that is too big.
+  if (
+    budget !== undefined &&
+    options.tokenBudget !== undefined &&
+    floor(fitted.kept) > budget
+  ) {
+    throw new ContextBudgetError(budget, floor(fitted.kept));
+  }
+  const described: AgentContextContract = {
+    ...contract,
+    columns: fitted.kept,
+  };
+  const chosen = selectGuides(
+    described.capabilities,
+    // Read only for a capability actually under consideration, and through the
+    // session, which refuses a key the agent may not use.
+    (key) => session.describe(key),
+    budget === undefined
+      ? options
+      : {
+          ...options,
+          // What the columns did not spend. A guide is deferred by name, so a
+          // backend can still ask for any of them. The budget a reader set is
+          // what the note names — a remainder of zero is an accounting step,
+          // not the number they chose.
+          tokenBudget: Math.max(0, budget - floor(fitted.kept)),
+        },
+    budget
+  );
+  const selected: AgentContextContract = {
+    ...described,
+    capabilities: chosen.capabilities,
+  };
+  const manifest = session.manifest();
+  const pages = manifest.pagination;
+  const view = buildView(
+    {
+      revision: manifest.viewRevision,
+      // The table's own answer about its pages, so a caller cannot publish a
+      // page count that disagrees with the one the session enforces. Page
+      // and size ride with it: HTTP often has no host `inputs.view`, and
+      // defaulting those to 1 / 10 is how the model decided a 25-row table
+      // was already at 10.
+      ...(pages
+        ? {
+            pagination: pages,
+            page: pages.page,
+            limit: pages.pageSize,
+          }
+        : {}),
+      ...inputs.view,
+    },
+    contract.filters
+  );
+  const profile: AgentContextProfile = options.profile ?? "full";
+  const measured = options.estimateTokens;
+  const serialized = JSON.stringify(selected);
+  return {
+    contract: selected,
+    view,
+    selection: {
+      profile,
+      version: selectionVersion(
+        contract.version,
+        profile,
+        chosen.selected,
+        options
+      ),
+      selected: chosen.selected,
+      deferred: [
+        ...chosen.deferred,
+        ...fitted.deferred.map((key) => ({
+          key,
+          reason: "budget" as const,
+          kind: "column" as const,
+        })),
+      ],
+      ...(fitted.deferred.length > 0
+        ? { deferredColumns: fitted.deferred }
+        : {}),
+      contractBytes: utf8Bytes(selected),
+      viewBytes: utf8Bytes(view),
+      estimatedTokens: measured
+        ? measured(serialized)
+        : Math.ceil(serialized.length / 4),
+      // False means nobody counted: the number is a rule of thumb, and a
+      // caller comparing it against a provider's real limit should know.
+      estimated: measured === undefined,
+      ...(() => {
+        const tokens = measured
+          ? measured(serialized)
+          : Math.ceil(serialized.length / 4);
+        const notes = [
+          ...chosen.notes,
+          ...(fitted.deferred.length > 0
+            ? [
+                `${String(fitted.deferred.length)} column description(s) were deferred to stay within the ${String(budget ?? 0)}-token budget; every column is still listed above and still permitted, and calling columns.describe — which takes no arguments and answers about all of them — returns the detail for: ${fitted.deferred.join(", ")}`,
+              ]
+            : []),
+          // Said rather than left to be noticed. The common operations keep
+          // their guidance whatever the budget says, so a table whose own
+          // description is larger than the budget ships over it — and a reader
+          // comparing this against a provider's limit needs the real number,
+          // not the one that was aimed at.
+          ...(budget !== undefined && tokens > budget
+            ? [
+                `the contract is about ${String(tokens)} tokens, over the ${String(budget)}-token budget: what remains is this table's own description and the common operations, which stay callable rather than being cut`,
+              ]
+            : []),
+        ];
+        return notes.length > 0 ? { notes } : {};
+      })(),
+    },
+  };
+}
+
+/**
+ * Wrap a row window as what it is: somebody's data, read at a revision.
+ *
+ * Every path that puts rows in front of a model goes through this — the
+ * `read` tool, the JSON and MCP adapters, a browser tool — so cell text is
+ * never handed over as a bare string that could read as an instruction.
+ *
+ * @param rows - The window the session returned.
+ * @param revision - The view revision it was read at.
+ * @returns The window, labelled.
+ *
+ * @public
+ */
+export function rowProvenance(
+  rows: RowWindow,
+  revision: number
+): RowProvenanceEnvelope {
+  return { source: "table-rows", untrusted: true, revision, rows };
+}
+
+// Named by the signatures above: the session a context is built from, the row
+// window and envelope `rowProvenance` returns, and the catalog shapes a
+// rendered context quotes. A reader writing a helper of their own needs them.
+export type {
+  AssistantSuggestion,
+  CapabilityPresentation,
+} from "./assistantContracts";
+export type { DeferralKind, DeferralReason } from "./contextSelection";
+export type {
+  ApprovalPolicy,
+  CommitPolicy,
+  RowAddressScope,
+  WritePolicy,
+} from "./keys";
+export type {
+  AgentAggregateOperation,
+  AgentAggregationColumn,
+  AgentAggregations,
+  AgentAggregationsPatch,
+  AgentApply,
+  AgentCapabilityContext,
+  AgentCapabilityDefinition,
+  AgentCapabilityKind,
+  AgentCellEdit,
+  AgentColumn,
+  AgentColumnAuthoring,
+  AgentFilter,
+  AgentFilterOption,
+  AgentLimits,
+  AgentManifest,
+  AgentManifestAggregation,
+  AgentObservation,
+  AgentPagination,
+  AgentPolicy,
+  AgentRowAddressing,
+  AgentSession,
+  ApprovalOutcome,
+  ApprovalResult,
+  ApprovalSubject,
+  CapabilityFamily,
+  CapabilityGuide,
+  CapabilityPartial,
+  CapabilityPlan,
+  CapabilityProgress,
+  CapabilityStaging,
+  CatalogEntry,
+  ExecuteError,
+  ExecuteResult,
+  JsonSchema,
+  ResolvedRow,
+  RowKeyRef,
+  RowPositionRef,
+  RowProvenanceEnvelope,
+  RowReadQuery,
+  RowRef,
+  RowWindow,
+  RowWindowRow,
+  WriteExecuteResult,
+  WriteProposal,
+  WriteRowResult,
+} from "./types";
+
+/**
+ * The token budget this build is held to, or nothing.
+ *
+ * `compact` has one; `full` — the default — has one only when the caller names
+ * a `tokenBudget` itself.
+ */
+function payloadBudget(options: AgentContextOptions): number | undefined {
+  if (options.tokenBudget !== undefined) return options.tokenBudget;
+  return (options.profile ?? "full") === "compact" ? COMPACT_TOKENS : undefined;
+}

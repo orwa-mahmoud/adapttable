@@ -1,12 +1,10 @@
-import type {
-  BaseDataTableProps,
-  Slot,
-  TableErrorState,
-  TableSource,
-  UrlStateAdapter,
-  UseSavedViewsOptions,
-} from "@adapttable/core";
-import type { DataModeProps } from "@adapttable/core/adapter";
+import type { TableErrorState, TableSource } from "@adapttable/core";
+import {
+  type BaseDataTableProps,
+  type Slot,
+  type UrlStateAdapter,
+} from "@adapttable/react";
+import type { DataModeProps } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 /**
@@ -76,13 +74,13 @@ export interface DataTableClassNames {
   treeToggle?: string;
   /** A leaf's placeholder, holding the chevron's width so names line up. */
   treeSpacer?: string;
-  /** The Add-row toolbar button (when `onAddRow` is set). */
+  /** The Add-row toolbar button contributed by `rowActions()`. */
   addRow?: string;
-  /** The density toggle (when `densityChooser` is set). */
+  /** The density toggle contributed by `density()`. */
   densityToggle?: string;
-  /** The fullscreen toggle (when `fullscreen` is set). */
+  /** The fullscreen toggle contributed by `fullscreen()`. */
   fullscreenToggle?: string;
-  /** The command palette's surface (when `commandPalette` is set). */
+  /** The surface contributed by `commandPalette()`. */
   commandPalette?: string;
   /** Its search box. */
   commandInput?: string;
@@ -90,29 +88,29 @@ export interface DataTableClassNames {
   commandItem?: string;
   /** The "nothing matched" line. */
   commandEmpty?: string;
-  /** The right-click menu (when `contextMenu` is set). */
+  /** The right-click menu contributed by `contextMenu()`. */
   contextMenu?: string;
   /** One entry in it. */
   contextMenuItem?: string;
   /** The divider between groups of entries. */
   contextMenuSeparator?: string;
-  /** The docked settings panel (when `sidePanel` is set). */
+  /** The docked settings panel contributed by `sidePanel()`. */
   sidePanel?: string;
   /** One tab in the side panel's strip. */
   sidePanelTab?: string;
   /** The side panel's close control. */
   sidePanelClose?: string;
-  /** The status bar under the table (when `statusBar` is set). */
+  /** The strip contributed by `statusBar()`. */
   statusBar?: string;
   /** One figure inside the status bar. */
   statusItem?: string;
-  /** The Undo toolbar button (when `undoRedoButtons` is set). */
+  /** The Undo toolbar button contributed by `undoRedoButtons()`. */
   undoButton?: string;
-  /** The Redo toolbar button (when `undoRedoButtons` is set). */
+  /** The Redo toolbar button contributed by `undoRedoButtons()`. */
   redoButton?: string;
-  /** The Print toolbar button (when `printButton` and `onPrint` are set). */
+  /** The Print toolbar button contributed by `print()`. */
   printButton?: string;
-  /** The Export CSV toolbar button (when `exportCsv` is set). */
+  /** The Export CSV toolbar button contributed by `exportCsv()`. */
   exportCsvButton?: string;
   /**
    * The spinner inside the Export button while a host-handled export runs.
@@ -120,6 +118,22 @@ export interface DataTableClassNames {
    * style — the shadcn preset spins it.
    */
   exportSpinner?: string;
+  /** The fixed server-export progress card. */
+  exportProgressSurface?: string;
+  /** The determinate or indeterminate progress element. */
+  exportProgressBar?: string;
+  /** Host status or failure detail inside the progress card. */
+  exportProgressMessage?: string;
+  /** Action row inside the progress card. */
+  exportProgressActions?: string;
+  /** Cancel control inside the progress card. */
+  exportProgressCancel?: string;
+  /** Retry control inside the progress card. */
+  exportProgressRetry?: string;
+  /** Download link inside the completed progress card. */
+  exportProgressDownload?: string;
+  /** Dismiss control on a finished, failed, or cancelled progress card. */
+  exportProgressDismiss?: string;
   /** The element the filters overlay is positioned against. */
   filtersAnchor?: string;
   /** The scrim behind the filters overlay. */
@@ -226,6 +240,38 @@ export interface DataTableClassNames {
   columnMenuSubmenu?: string;
   /** One action inside the per-column submenu. */
   columnMenuAction?: string;
+  /** One plugin-provided labelled choice inside a column submenu. */
+  columnMenuChoice?: string;
+  /** The visible caption for a plugin-provided column-menu choice. */
+  columnMenuChoiceLabel?: string;
+  /** The native select for a plugin-provided column-menu choice. */
+  columnMenuChoiceSelect?: string;
+  /** Inline column-name editor in the Columns menu. */
+  columnRenameForm?: string;
+  /** Visible label for the menu rename input. */
+  columnRenameLabel?: string;
+  /** Menu column-name input. */
+  columnRenameInput?: string;
+  /** Menu column-name validation message. */
+  columnRenameError?: string;
+  /** Menu column-name save action. */
+  columnRenameSave?: string;
+  /** Menu column-name cancel action. */
+  columnRenameCancel?: string;
+  /** Direct rename control beside a semantic header caption. */
+  headerRenameButton?: string;
+  /** Direct header column-name editor. */
+  headerRenameForm?: string;
+  /** Visible label for the direct header rename input. */
+  headerRenameLabel?: string;
+  /** Direct header column-name input. */
+  headerRenameInput?: string;
+  /** Direct header column-name validation message. */
+  headerRenameError?: string;
+  /** Direct header column-name save action. */
+  headerRenameSave?: string;
+  /** Direct header column-name cancel action. */
+  headerRenameCancel?: string;
   /** Host-provided controls after a header caption. */
   headerActions?: string;
   /** Free slot under the table, above the pager. */
@@ -367,6 +413,35 @@ export interface DataTableClassNames {
   groupCount?: string;
   /** One aggregate value chip in the group header. */
   groupAggregate?: string;
+  /* ── Interactive row-grouping panel ────────────────────────────── */
+  /** The grouping strip above the table body. */
+  groupingPanel?: string;
+  /** One insertion target in the grouping strip. */
+  groupingDropZone?: string;
+  /** The wrapper around one active grouping column. */
+  groupingItem?: string;
+  /** One active grouping column chip. */
+  groupingChip?: string;
+  /** The draggable, keyboard-reorderable handle in a grouping chip. */
+  groupingChipHandle?: string;
+  /** The remove control in a grouping chip. */
+  groupingChipRemove?: string;
+  /** The select that adds another grouping column. */
+  groupingAdd?: string;
+  /** The row listing every active aggregation. */
+  groupingAggregations?: string;
+  /** One active aggregation: its column, operation and remove control. */
+  groupingAggregationItem?: string;
+  /** The operation select of one active aggregation. */
+  groupingAggregationOperation?: string;
+  /** The control that removes one aggregation. */
+  groupingAggregationRemove?: string;
+  /** The checklist that adds and removes aggregated columns. */
+  groupingAggregationAdd?: string;
+  /** The button that restores the app's declared aggregations. */
+  groupingAggregationsRestore?: string;
+  /** The drop target that removes a dragged grouping chip. */
+  groupingRemoveZone?: string;
   /* ── Cell editing ────────────────────────────────────────────────── */
   /** The invisible activate button wrapping an editable display cell. */
   editCellActivate?: string;
@@ -518,11 +593,6 @@ export interface DataTablePropsBase<TRow> extends Omit<
   urlSync?: boolean;
   /** Per-table URL namespace (e.g. `"left"` → `left.q`, `left.page`). */
   urlKey?: string;
-  /**
-   * Mounts a saved-views menu in the toolbar (beside the Columns button).
-   * The table's own `urlAdapter` / `urlKey` fill in unless overridden here.
-   */
-  savedViews?: UseSavedViewsOptions;
   /** Per-part class name overrides. */
   classNames?: DataTableClassNames;
   /** Replace sub-components (loading skeleton, empty state). */

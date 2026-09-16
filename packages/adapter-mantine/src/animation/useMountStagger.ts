@@ -4,4 +4,4 @@
 export {
   type MountStaggerOptions,
   useMountStagger,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";

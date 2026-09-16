@@ -1,7 +1,9 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { cellNavigation } from "./cell-navigation";
+import { DataTable } from "./data-table.test-utils";
+import { findInTable } from "./find-in-table";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -33,6 +35,7 @@ describe("find in table (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         cellNavigation
+        features={[findInTable(), cellNavigation()]}
         {...extra}
       />
     );
@@ -80,9 +83,25 @@ describe("find in table (mui)", () => {
   });
 
   it("leaves Ctrl/Cmd+F to the browser without the prop", () => {
-    table();
+    // The feature is composed here — the import brings the bar's code — so
+    // this is the prop, on its own, still deciding that nothing opens.
+    table({ findInTable: false });
     act(() => cell(0, 0).focus());
     fireEvent.keyDown(cell(0, 0), { key: "f", ctrlKey: true });
+    expect(bar()).toBeNull();
+  });
+
+  it("draws no find bar when the feature was never imported", () => {
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        cellNavigation
+        findInTable
+      />
+    );
     expect(bar()).toBeNull();
   });
 });

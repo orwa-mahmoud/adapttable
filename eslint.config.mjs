@@ -6,6 +6,7 @@ import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import sonarjs from "eslint-plugin-sonarjs";
+import importX from "eslint-plugin-import-x";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
@@ -25,7 +26,9 @@ const sonarRecommended = /** @type {import("eslint").Linter.Config} */ (
  */
 const REACT_SOURCES = [
   "packages/core/**/*.{ts,tsx}",
+  "packages/react/**/*.{ts,tsx}",
   "packages/adapter-*/**/*.{ts,tsx}",
+  "packages/ai-react/**/*.{ts,tsx}",
   "apps/showcase/**/*.{ts,tsx}",
   "examples/**/*.{ts,tsx}",
 ];
@@ -64,11 +67,19 @@ export default defineConfig(
       react,
       "react-hooks": reactHooks,
       "jsx-a11y": jsxA11y,
+      "import-x": /** @type {import("eslint").ESLint.Plugin} */ (
+        /** @type {unknown} */ (importX)
+      ),
       "simple-import-sort": simpleImportSort,
     },
     rules: {
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
+      // One statement per module. A file that imports a module's values in
+      // one statement and its types in another reads as two dependencies and
+      // is reported as duplicated by static analysis; `prefer-inline` merges
+      // them the way `consistent-type-imports` already writes new ones.
+      "import-x/no-duplicates": ["error", { "prefer-inline": true }],
       "@typescript-eslint/consistent-type-imports": [
         "error",
         { prefer: "type-imports", fixStyle: "inline-type-imports" },
@@ -83,7 +94,8 @@ export default defineConfig(
   {
     // The React rules run only where React does. `version: "detect"` reads the
     // installed `react`, and three lint contexts have none — `@adapttable/cli`
-    // and `@adapttable/server` are React-free on purpose, and root `scripts/`
+    // `@adapttable/ai` (root) and `@adapttable/server` are React-free on
+    // purpose, and root `scripts/`
     // is build tooling — so running them everywhere printed a startup warning
     // per context and fell back to guessing a version.
     //
@@ -110,7 +122,7 @@ export default defineConfig(
     // Root build tooling (lcov path fixer, shared vitest config) lives
     // outside any package's TS project, so the type-aware rules can't
     // resolve it. Lint it with the syntactic rules only.
-    files: ["scripts/**/*.{js,mjs,cjs,ts}", "vitest.shared.ts"],
+    files: ["scripts/**/*.{js,mjs,cjs,ts,tsx}", "vitest.shared.ts"],
     languageOptions: {
       parserOptions: { projectService: false, project: false },
     },

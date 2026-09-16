@@ -46,8 +46,10 @@ test.describe("a revealed column is still editable", () => {
     await page.goto("/all-options/");
     await configureFeatureLab(page, "editing mode", "Cell");
 
-    // Cell editing brings the editable columns on, Email among them. Take it
-    // away and put it back: that round trip is what has to survive.
+    // Email starts hidden on the lab. Bring it on, take it away, put it back:
+    // that round trip is what has to survive.
+    await expect(header(page, "Email")).toHaveCount(0);
+    await toggleVisibility(page, "Email", "Show column");
     await expect(header(page, "Email").first()).toBeVisible();
     await toggleVisibility(page, "Email", "Hide column");
     await expect(header(page, "Email")).toHaveCount(0);

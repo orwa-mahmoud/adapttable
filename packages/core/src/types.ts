@@ -7,19 +7,20 @@
  *
  * @packageDocumentation
  */
-
-import type { ComponentType, ReactNode } from "react";
-
-import type { CellEditor } from "./editing/cellEditing";
+import type { ColumnModel, ExtraFilters, SortDirection } from "./columnModel";
+import type { DisplayValue } from "./display";
 import type { FacetMap } from "./filters/facets";
-import type { ColumnFilter } from "./filters/filterDefs";
 
-/**
- * Sort direction for a column.
- *
- * @public
- */
-export type SortDirection = "asc" | "desc";
+export type {
+  ColumnAiOptions,
+  ColumnGroupShow,
+  ColumnMetadata,
+  ColumnModel,
+  ExtraFilters,
+  FilterValue,
+  SortableValue,
+  SortDirection,
+} from "./columnModel";
 
 /**
  * Text direction. Adapters apply it; logical CSS does the rest.
@@ -51,36 +52,7 @@ export type PaginationMode = "infinite" | "paged" | "auto";
 export type ResolvedPaginationMode = "infinite" | "paged";
 
 /**
- * Comparable primitive returned by a sort-value extractor.
- *
- * @public
- */
-export type SortableValue = string | number | boolean | null | undefined;
-
-/**
- * When a leaf under a collapsible column group is visible.
- * `"open"` — expanded group only; `"closed"` — collapsed only; `"always"` — both.
- *
- * @public
- */
-export type ColumnGroupShow = "open" | "closed" | "always";
-
-/**
- * A single extra-filter value as it round-trips through URL state.
- *
- * @public
- */
-export type FilterValue = string | string[] | number | undefined;
-
-/**
- * The bag of extra (caller-defined) filter values keyed by filter name.
- *
- * @public
- */
-export type ExtraFilters = Record<string, FilterValue>;
-
-/**
- * Props every `ColumnDef.Cell` component receives.
+ * Props every cell renderer receives. Bindings may wrap this in a component.
  *
  * @public
  */
@@ -92,231 +64,13 @@ export interface CellProps<TRow> {
 }
 
 /**
- * Definition of a single column. `TRow` is the row item type.
- *
- * Provide either a `ColumnDef.Cell` component (stable identity →
- * memoisable sub-trees, preferred for statically-known columns) or the
- * lighter `ColumnDef.accessor` function.
- *
- * @public
- */
-export interface ColumnDef<TRow> {
-  /**
-   * Unique within the table. Also the value sent to a backend as `sortBy`,
-   * and — when no `accessor`/`Cell` is given — the row's data path for the
-   * cell value (dot paths reach nested values: `"department.name"`).
-   */
-  key: string;
-  /**
-   * Header content. Pre-translated by the caller. Omit it and the header is
-   * auto-derived from `key` (`"hiredAt"` → `"Hired At"`).
-   */
-  header?: ReactNode;
-  /**
-   * Replace the header caption. The surrounding cell still owns sort,
-   * resize and the menu — this callback receives that controller so a
-   * custom caption can stay wired.
-   */
-  renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
-  /**
-   * Replace one summary-row cell. `value` is whatever `summaryRow`
-   * produced for this key (or `undefined` when only this renderer is set).
-   */
-  renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
-  /** Native tooltip on the header caption. */
-  headerTooltip?: string;
-  /**
-   * How readily this column is given up when the table is too narrow for all
-   * of them. Priority 1 is kept longest, in the ordinary sense of the word.
-   *
-   * A column that omits it is never dropped, so the columns carrying the
-   * row's identity stay by saying nothing — and a table where nobody sets it
-   * behaves exactly as it did before.
-   */
-  responsivePriority?: number;
-  /** Host-provided controls after the caption, before the resize handle. */
-  headerActions?: ReactNode;
-  /**
-   * Presentational header group: contiguous columns sharing a `group`
-   * render under one spanning header cell. A string is one level; a
-   * path (`["Finance", "Q1"]`) stacks rows. Reordering columns apart
-   * splits the group (adjacency-based, never lies about layout).
-   *
-   * Prefer a `ColumnGroupDef` with `children` when the group has
-   * collapse options (`collapsedKey`, `collapsedRender`) — `group` is
-   * the shortcut for a spanning label only.
-   */
-  group?: string | readonly string[];
-  /**
-   * When this leaf sits under a collapsible group: shown only while the
-   * group is expanded (`open`), only while collapsed (`closed`), or in
-   * both states (`always`). Omit and the group decides — `collapsedKey`,
-   * `collapsedRender`, or an arrow stub when neither is set.
-   */
-  groupShow?: ColumnGroupShow;
-  /**
-   * Per-locale data paths for this column's VALUE. The active table
-   * `locale` picks the path (exact tag first, then its primary subtag, then
-   * `key`): `{ key: "nameEn", i18n: { ar: "nameAr" } }` for flat fields, or
-   * `{ key: "name.en", i18n: { ar: "name.ar" } }` for nested objects. The
-   * cell, client-side sort and the column's declarative filter all follow
-   * the resolved path. Header TEXT stays whatever you pass in `header`.
-   */
-  i18n?: Readonly<Record<string, string>>;
-  /**
-   * Declarative filter for this column: a bare type (`"dateRange"`) or a
-   * definition without `key`/`label` (inherited from the column). Merged
-   * with the table-level `filters` array; a `filters` entry with the same
-   * key wins.
-   */
-  filter?: ColumnFilter<TRow>;
-  /**
-   * Opt this column into inline cell editing. `true` for every row, or a
-   * predicate for per-row control. Editing stays fully dormant unless the
-   * table also receives `onCellEdit` — omit both and nothing changes.
-   */
-  editable?: boolean | ((row: TRow) => boolean);
-  /**
-   * Editor widget when `ColumnDef.editable` is set. Defaults to
-   * `"text"`. A registered plugin name (`host.registerEditor`) is a string
-   * that is not a built-in. Select options may be `{ value, label }` or
-   * plain strings.
-   */
-  editor?: CellEditor;
-  /**
-   * Override the draft seed for the editor (raw value). Defaults to
-   * `sortValue` then the column key path — use this when the displayed
-   * cell is formatted but editing needs the underlying value.
-   */
-  editValue?: (row: TRow) => string;
-  /**
-   * Turn the edited text back into the value to commit.
-   *
-   * A column can show one thing, seed the editor with another, and commit a
-   * third: `accessor` renders `"$1,240.00"`, `ColumnDef.editValue` seeds
-   * the editor with `"1240"`, and this parses what the user typed back into a
-   * number. Without it, a `number` editor commits `number | null` and every
-   * other editor commits the raw string.
-   *
-   * Receives the draft exactly as typed, plus the row being edited. Return
-   * whatever `onCellEdit` should receive — a number, a `Date`, a parsed unit.
-   */
-  parseValue?: (draft: string, row: TRow) => unknown;
-  /**
-   * Gate a commit on this column's own rule. Receives the value
-   * `ColumnDef.parseValue` produced, plus the row being edited; return a
-   * message to reject it, nothing to allow it.
-   *
-   * May be async — "is this SKU real" is a request — and the editor stays open
-   * and marked busy while it runs. A rejected value keeps the editor open with
-   * the message on it, so the reader fixes what they typed rather than losing it.
-   * Validation gates `onCellEdit` and nothing else: the host still owns saving.
-   */
-  validate?: (
-    value: unknown,
-    row: TRow
-  ) => string | undefined | Promise<string | undefined>;
-  /**
-   * Component rendered per row. Define at module level (or memoise) so
-   * its identity is stable across renders.
-   */
-  Cell?: ComponentType<CellProps<TRow>>;
-  /** Lightweight alternative to `ColumnDef.Cell`; returns cell content. */
-  accessor?: (row: TRow) => ReactNode;
-  /**
-   * Primitive extractor used by the client-side sort comparator
-   * (`useFrontendData`). Unused for server-sorted data.
-   */
-  sortValue?: (row: TRow) => SortableValue;
-  /**
-   * The value this column contributes to an export, when the file should not
-   * carry what the screen shows.
-   *
-   * A cell formatted for reading — `"$1,240.00"`, `"3 days ago"`, a status
-   * badge — is worse than useless in a spreadsheet, because it cannot be
-   * summed or sorted. Return the underlying value here and the export writes
-   * it while the table keeps rendering the friendly version.
-   *
-   * Without it an export falls back to the display value, so this is only
-   * needed where the two genuinely differ.
-   */
-  exportValue?: (row: TRow) => unknown;
-  /**
-   * The cell as plain text, for every context that cannot render JSX.
-   *
-   * `ColumnDef.accessor` returns a `ReactNode`, so a screen-reader
-   * announcement, an `aria-label`, a tooltip or the clipboard have nothing to
-   * read: a badge or an avatar is a React element, not a word. Return the text
-   * those places should use.
-   *
-   * Resolution order when this is absent — text is always available, this only
-   * makes it accurate: `ColumnDef.formatValue`, then
-   * `ColumnDef.exportValue`, then `accessor` when it happens to yield a
-   * primitive, then the key's data path. So only columns whose rendered cell is
-   * not already its own text need one.
-   */
-  formatValue?: (row: TRow) => string;
-  /** Enable sorting for this column. Off by default. */
-  sortable?: boolean;
-  /** Column width passed through to the rendered header/cell. */
-  width?: number | string;
-  /**
-   * Floor for this column's width, in pixels. A resize will not go below it,
-   * and neither will the container-fitting mode — a column of dates has a
-   * width below which it is simply unreadable.
-   */
-  minWidth?: number;
-  /** Ceiling for this column's width, in pixels. */
-  maxWidth?: number;
-  /**
-   * This column's share of the leftover width when the table fits its
-   * container: `flex: 2` takes twice the space of `flex: 1`. Columns without
-   * it keep their own width and are not stretched.
-   */
-  flex?: number;
-  /** Text alignment within the cell. Defaults to `"start"`. */
-  align?: "start" | "center" | "end";
-  /**
-   * How many columns this cell covers, or a per-row callback. Covered
-   * neighbours are omitted from the row's cell list. Clipped at a pin
-   * boundary and at the column window. Default 1.
-   */
-  colSpan?: number | ((row: TRow) => number);
-  /**
-   * How many rows this cell covers, or a per-row callback. Covered cells
-   * in later rows are omitted. Stays inside one tbody (pin sections do
-   * not share a span). Default 1.
-   */
-  rowSpan?: number | ((row: TRow) => number);
-  /** Label used on mobile card layouts; falls back to `header` when a string. */
-  mobileLabel?: string;
-  /**
-   * Hide this column entirely on mobile layouts. Explicit and absolute:
-   * it always wins, including over the `mobileIdentityColumns` default.
-   */
-  hideOnMobile?: boolean;
-  /** Hide this column entirely on desktop layouts. */
-  hideOnDesktop?: boolean;
-  /** Gray out the menu's reorder grip — the column stays where it is. */
-  lockPosition?: boolean;
-  /** Gray out the menu's show/hide control. */
-  lockVisibility?: boolean;
-  /** Gray out resize and per-column auto-size. */
-  lockWidth?: boolean;
-  /** Gray out the menu's pin control. */
-  lockPin?: boolean;
-  /** Arbitrary metadata adapters may read (e.g. a custom renderer flag). */
-  meta?: Record<string, unknown>;
-}
-
-/**
  * Sort/resize state a custom header caption can read.
  *
  * @public
  */
 export interface ColumnHeaderController {
   /** Default caption (`header`, else the humanized key). */
-  label: ReactNode;
+  label: DisplayValue;
   /** This column's sort direction, absent when it is not sorted. */
   sortDir?: "asc" | "desc";
   /** 1-based position in a multi-column sort, absent when unsorted. */
@@ -326,27 +80,76 @@ export interface ColumnHeaderController {
 }
 
 /**
- * Arguments for `ColumnDef.renderHeader`.
+ * Arguments for a custom header caption.
  *
  * @public
  */
 export interface ColumnHeaderContext<TRow> {
   /** The column being rendered. */
-  column: ColumnDef<TRow>;
+  column: ColumnModel<TRow>;
   /** Caption and sort state for this header. */
   controller: ColumnHeaderController;
 }
 
 /**
- * Arguments for `ColumnDef.renderFooter`.
+ * Arguments for a custom summary-row cell.
  *
  * @public
  */
 export interface ColumnFooterContext<TRow> {
   /** The column being rendered. */
-  column: ColumnDef<TRow>;
+  column: ColumnModel<TRow>;
   /** The aggregate this column resolved to, already formatted. */
-  value: ReactNode;
+  value: DisplayValue;
+}
+
+/**
+ * Where a write an agent proposed is reviewed.
+ *
+ * One surface is active at a time. `widget` reviews inside the assistant
+ * conversation, `table` above the table it changes, `modal` in a dialog of
+ * the kit's own. This is presentation only — it never decides WHETHER a
+ * human is asked, which is {@link ActionApprovalPolicy}.
+ *
+ * @public
+ */
+export type ApprovalPresentation = "widget" | "table" | "modal";
+
+/**
+ * Whether an agent invoking this action has to wait for a human.
+ *
+ * `automatic` skips the human confirmation and nothing else: permissions,
+ * validation, staging and save rules all still run. There is no value here
+ * that means "authorized" — an action with no policy inherits the shared
+ * default, which asks for writes.
+ *
+ * @public
+ */
+export type ActionApprovalPolicy = "required" | "automatic";
+
+/**
+ * What an ordinary action says about being invoked by an agent.
+ *
+ * Plain data, so an action definition stays framework-neutral and a table
+ * with no assistant carries no agent code because one of its actions
+ * mentions this. Every field is optional and inherits INDIVIDUALLY from the
+ * shared configuration: overriding the policy alone leaves the presentation
+ * as the shared one.
+ *
+ * This is not {@link ActionConfirm}. That describes a person clicking the
+ * action themselves and being asked to confirm; this describes an agent
+ * asking to run it on their behalf. One agent execution raises one prompt.
+ *
+ * @public
+ */
+export interface ActionAiOptions {
+  /** Approval overrides for agent invocation. */
+  readonly approval?: {
+    /** Whether a human is asked. Inherits when omitted. */
+    readonly policy?: ActionApprovalPolicy;
+    /** Where they are asked. Inherits when omitted. */
+    readonly presentation?: ApprovalPresentation;
+  };
 }
 
 /**
@@ -380,9 +183,24 @@ export interface RowAction<TRow> {
    * Built-in duplicate / delete / pin keys get each kit's own glyph when this
    * is omitted.
    */
-  icon?: ReactNode;
-  /** Click handler; fires after confirmation when `confirm` is set. */
-  onClick: (row: TRow) => void;
+  icon?: DisplayValue;
+  /**
+   * Click handler; fires after confirmation when `confirm` is set. Omit it
+   * only on an `editsRow` action, where the row's own form does the writing.
+   */
+  onClick?: (row: TRow) => void;
+  /**
+   * This action opens the row's fields as one form instead of writing
+   * anything itself. Row-mode editing hands it the trigger and the table's
+   * own "Edit row" control stands down, so a row has one way in rather than
+   * two controls that do the same thing. Save and cancel come from the open
+   * row, as they do for every row edit.
+   *
+   * It renders only where there is a form to open: a table without row-mode
+   * editing drops the action, because a control that cannot do what it says
+   * is worse than no control.
+   */
+  editsRow?: boolean;
   /** Adapter-defined colour token (e.g. `"red"` for destructive). */
   color?: string;
   /** Disable conditionally — e.g. delete when the row is referenced. */
@@ -396,6 +214,11 @@ export interface RowAction<TRow> {
   isHidden?: (row: TRow) => boolean;
   /** Optional confirmation dialog wiring. */
   confirm?: ActionConfirm<TRow>;
+  /**
+   * Agent-invocation overrides. Omit and the shared assistant configuration
+   * applies. See {@link ActionAiOptions}.
+   */
+  ai?: ActionAiOptions;
 }
 
 /**
@@ -409,7 +232,7 @@ export interface BulkAction {
   /** Pre-translated button label. */
   label: string;
   /** Optional leading icon. */
-  icon?: ReactNode;
+  icon?: DisplayValue;
   /** Adapter-defined colour token. */
   color?: string;
   /**
@@ -430,6 +253,11 @@ export interface BulkAction {
   ) => void | Promise<unknown>;
   /** Optional confirmation dialog wiring (receives the selection count). */
   confirm?: ActionConfirm<number>;
+  /**
+   * Agent-invocation overrides. Omit and the shared assistant configuration
+   * applies. See {@link ActionAiOptions}.
+   */
+  ai?: ActionAiOptions;
 }
 
 /**
@@ -741,6 +569,18 @@ export interface TableLabels {
   unpinAllColumns?: string;
   /** Restore one column's visibility, pin and width. */
   resetColumn?: string;
+  /** Open the inline column-name editor. */
+  renameColumn?: string;
+  /** Visible label for the column-name input. */
+  columnName?: string;
+  /** Submit the column-name editor. */
+  saveColumnName?: string;
+  /** Dismiss the column-name editor without changing the name. */
+  cancelColumnRename?: string;
+  /** Validation message for an empty column name. */
+  columnNameRequired?: string;
+  /** Polite live-region message after a column name changes. */
+  columnRenamed?: (info: { previous: string; name: string }) => string;
   /** Sort this column ascending from the column-menu submenu. */
   sortAscending?: string;
   /** Sort this column descending from the column-menu submenu. */
@@ -769,6 +609,10 @@ export interface TableLabels {
    * and a host that overrode that string keeps their own wording.
    */
   exportFile?: (format: string) => string;
+  /** Shown and announced when a server-built export starts. */
+  exportStarted?: string;
+  /** Visible and announced determinate export progress. */
+  exportProgress?: (progress: number) => string;
   /**
    * Announced when an export finishes. A download gives a screen-reader user
    * no feedback of its own, so without this the button simply goes quiet.
@@ -776,6 +620,12 @@ export interface TableLabels {
   exportDone?: string;
   /** Announced when an export fails, so a silent failure is never silent. */
   exportFailed?: string;
+  /** Shown and announced after the reader cancels a server-built export. */
+  exportCancelled?: string;
+  /** Link label for a server-built export that resolves a download URL. */
+  exportDownload?: string;
+  /** Dismisses a finished, failed, or cancelled server-export surface. */
+  exportDismiss?: string;
   /** Accessible name for starting inline cell edit (double-click / activate). */
   editCell?: string;
   /**
@@ -847,6 +697,219 @@ export interface TableLabels {
   saveAll?: string;
   /** The control that discards one. */
   cancelAll?: string;
+  /** Approve a pending agent proposal. */
+  approveProposal?: string;
+  /** Reject a pending agent proposal. */
+  rejectProposal?: string;
+  /** How many agent proposals are waiting — "2 proposed changes". */
+  pendingProposals?: (count: number) => string;
+  /**
+   * One proposed cell change in the approval list. Names the row, the
+   * column, and the before/after values so the reader can see the write
+   * before it lands.
+   */
+  proposalChange?: (change: {
+    row: string;
+    column?: string;
+    before?: string;
+    after?: string;
+  }) => string;
+  /**
+   * Shown in place of a before-value the reader's own view cannot supply.
+   *
+   * Distinct from a blank cell: this says nobody could look the value up,
+   * not that it is empty.
+   */
+  proposalValueUnavailable?: string;
+  /** Headline over a review: how many changes, across how many rows. */
+  proposalSummary?: (counts: { changes: number; rows: number }) => string;
+  /** Opens the full list when a review shows only the first few. */
+  reviewAllProposals?: (count: number) => string;
+  /** Leaves the full list and returns to the conversation. */
+  backToConversation?: string;
+  /** Approves everything, before any row has been decided on its own. */
+  approveAllProposals?: string;
+  /** Approves what is still undecided, once some rows have been decided. */
+  approveRemainingProposals?: string;
+  /** Rejects everything, before any row has been decided on its own. */
+  rejectAllProposals?: string;
+  /** Rejects what is still undecided, once some rows have been decided. */
+  rejectRemainingProposals?: string;
+  /**
+   * Approves this write and stops asking about this capability.
+   *
+   * Only ever drawn when the table opted the capability in, so a reader who
+   * never sees it is not missing a control — there is none to offer.
+   */
+  alwaysAllowProposal?: string;
+  /** Live tally under a review in progress. */
+  proposalTally?: (counts: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  }) => string;
+  /** Says a write is waiting, where the decision is made somewhere else. */
+  approvalWaitingElsewhere?: string;
+  /** Title of the assistant panel. */
+  assistantTitle?: string;
+  /** Accessible name of the control that opens the assistant. */
+  assistantOpen?: string;
+  /** Accessible name of the control that closes it. */
+  assistantClose?: string;
+  /** Accessible name of the assistant's settings control. */
+  assistantSettings?: string;
+  /** The question an empty conversation asks. */
+  assistantEmpty?: string;
+  /** Placeholder in the composer. */
+  assistantPlaceholder?: string;
+  /** The control that sends the draft. */
+  assistantSend?: string;
+  /** The control that stops a turn already running. */
+  assistantStop?: string;
+  /** Accessible name for the mic when it is idle. */
+  assistantVoiceStart?: string;
+  /** Accessible name for the mic while it is listening. */
+  assistantVoiceStop?: string;
+  /** Announced once when dictation starts. Never per word heard. */
+  assistantVoiceListening?: string;
+  /** Accessible name for the dictation language chooser. */
+  assistantVoiceLanguage?: string;
+  /** How a reader's own message is named. */
+  assistantYou?: string;
+  /** How the assistant's message is named. */
+  assistantSpeaker?: string;
+  /** The affordance that jumps to a reply which arrived off-screen. */
+  assistantNewMessages?: string;
+  /** Why the composer cannot be used. */
+  assistantUnavailable?: string;
+  /** That a released connection left the work running, not cancelled. */
+  assistantDetached?: string;
+  /** How far a running capability has got. */
+  assistantProgress?: (done: number, total?: number) => string;
+  /** Rejoins work a released connection left running. */
+  assistantRejoin?: string;
+  /** Leaves a full-screen assistant on a narrow viewport. */
+  assistantBackToTable?: string;
+  /** Expands an action's detail. */
+  assistantDetail?: string;
+  /** What a staged write still needs from the reader. */
+  assistantSaveInTable?: string;
+  /** Puts back what one assistant turn changed. */
+  assistantUndo?: string;
+  /**
+   * Why the undo is not on offer, from a token.
+   *
+   * `table-moved` is the one a reader sees: something else changed the view
+   * after the turn settled. Returns `undefined` for a token this language has
+   * no sentence for, and the panel says nothing rather than showing a code.
+   */
+  assistantUndoBlocked?: (code: string) => string | undefined;
+  /**
+   * Why a turn stopped with work still pending.
+   *
+   * Returns `undefined` for a code this language has no sentence for, and the
+   * panel falls back to the runtime's own message — which is honest, if
+   * written for a developer.
+   */
+  assistantUnresolved?: (code: string) => string | undefined;
+  /** Accessible name for the free-text answer to a question. */
+  assistantAnswerLabel?: string;
+  /** Placeholder in that field. */
+  assistantAnswerPlaceholder?: string;
+  /** Sends a typed answer. */
+  assistantAnswerSend?: string;
+  /** Heading above the capabilities the reader stopped being asked about. */
+  assistantAlwaysAllowedTitle?: string;
+  /** Accessible name for the control that starts asking again. */
+  assistantAlwaysAllowedRevoke?: (capability: string) => string;
+  /**
+   * A capability key as a reader-facing name.
+   *
+   * Returns `undefined` for a key this language has no name for, and the
+   * surface shows the key — which is a developer detail, and the honest
+   * fallback when nobody has named it.
+   */
+  assistantCapabilityName?: (capability: string) => string | undefined;
+  /**
+   * The connection badge, from a status token.
+   *
+   * Every token maps to a translated word, so the token itself never reaches
+   * the reader — which is why this label interpolates none of its argument.
+   */
+  assistantConnection?: (status: string) => string;
+  /**
+   * One action receipt — the operation that ran and what became of it.
+   *
+   * `capability` is a stable technical key and appears as given; `status` is
+   * a token this label turns into the reader's language.
+   */
+  assistantReceipt?: (receipt: {
+    capability?: string;
+    status: string;
+  }) => string;
+  /** Reopens the examples once a conversation has started. */
+  assistantExamples?: string;
+  /**
+   * The control that shows what a turn did.
+   *
+   * The count is the actions worth showing a reader — reads and other
+   * plumbing are not among them.
+   */
+  assistantActions?: (count: number) => string;
+  /**
+   * The heading over what a turn did.
+   *
+   * Names the turn, not the table: a reader who has asked three things in a
+   * row needs to know which reply this list belongs to, and "this result"
+   * says nothing about which one.
+   */
+  assistantActionsTitle?: string;
+  /** Puts everything in that list back at once. */
+  assistantUndoAll?: string;
+  /** One receipt status on its own, when the action's kind is unknown. */
+  assistantReceiptStatus?: (status: string) => string;
+  /**
+   * A receipt's headline, from what changed and what became of it.
+   *
+   * Returns `undefined` for a pair this language has no sentence for, and
+   * the panel falls back to {@link TableLabels.assistantReceiptStatus} —
+   * a technical capability key never reaches the reader either way.
+   */
+  assistantReceiptAction?: (action: {
+    kind?: string;
+    status: string;
+    /** Whether the action took something off rather than put it on. */
+    cleared?: boolean;
+  }) => string | undefined;
+  /**
+   * What the action acted on, from the columns and values it ran with.
+   *
+   * The panel is handed the pair structurally — `{ column: "Team", value:
+   * "Platform" }` — because the word that joins them belongs to the reader's
+   * language. Returns `undefined` when there is nothing to name, and the card
+   * shows its headline alone.
+   */
+  assistantReceiptTerms?: (subject: {
+    kind?: string;
+    terms?: readonly { column?: string; value?: string }[];
+    direction?: "asc" | "desc";
+  }) => string | undefined;
+  /** An edit's before/after pair, spoken for assistive technology. */
+  assistantReceiptChange?: (change: {
+    before: string;
+    after: string;
+  }) => string;
+  /**
+   * The same pair when nothing was applied, spoken for assistive technology.
+   *
+   * A refused, staged or still-pending edit shows its before and after so the
+   * reader can see what was asked for — but saying it *changed* would claim
+   * something the table never did.
+   */
+  assistantReceiptProposed?: (change: {
+    before: string;
+    after: string;
+  }) => string;
   /** The toolbar control that adds a row (`onAddRow`). */
   addRow?: string;
   /** The row action that copies a row (`onDuplicateRow`). */
@@ -884,12 +947,46 @@ export interface TableLabels {
   rowMoved?: (from: number, to: number) => string;
   /** Live region: Escape cancelled a lift. */
   rowReorderCancelled?: string;
+  /** Accessible name for the row-move menu trigger. */
+  rowMoveOptions?: string;
+  /** Opens the target-group picker. */
+  moveToGroup?: string;
+  /** Opens the target-parent picker. */
+  moveUnder?: string;
+  /** Tree destination with no parent. */
+  moveToTopLevel?: string;
+  /** Heading on the built-in confirmation surface. */
+  confirmRowMoveTitle?: string;
+  /** Concrete source and destination shown before a move. */
+  confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
+  /** Button that approves a pending row move. */
+  confirmRowMove?: string;
+  /** Live region: the row entered another group. */
+  rowMovedToGroup?: (group: string) => string;
+  /** Live region: the row entered another tree parent. */
+  rowMovedUnder?: (parent: string) => string;
+  /** Cross-boundary moves were disabled by policy. */
+  moveRejectedPolicyNever?: string;
+  /** Visual order cannot be written while a sort owns it. */
+  moveRejectedSorted?: string;
+  /** A tree node cannot become its own ancestor. */
+  moveRejectedCycle?: string;
+  /** The host did not provide the matching move callback. */
+  moveUnavailable?: string;
+  /** Label for the tree's root level. */
+  rootLevel?: string;
   /** Pin this row above the scroll window. */
   pinToTop?: string;
   /** Pin this row below the scroll window. */
   pinToBottom?: string;
   /** Release a pinned row back into the scroll window. */
   unpinRow?: string;
+  /** Accessible name for an independent pinned summary row. */
+  pinnedSummaryRow?: string;
+  /** Visible and accessible name for the top summary band. */
+  pinnedSummaryTop?: string;
+  /** Visible and accessible name for the bottom summary band. */
+  pinnedSummaryBottom?: string;
   /** Accessible name of a decorative separator row. */
   rowSeparator?: string;
   /** Expand a collapsed column group back to its leaves. */
@@ -970,22 +1067,78 @@ export interface TableLabels {
   collapseGroup?: string;
   /** Leaf-count suffix on a group header, e.g. `(12)`. */
   groupCount?: (count: number) => string;
+  /** Visible and accessible name of the interactive grouping strip. */
+  groupingPanel?: string;
+  /** Instruction shown by the desktop grouping drop target. */
+  groupingDropColumns?: string;
+  /** Accessible label of the select that adds a grouping field. */
+  addGroupingColumn?: string;
+  /** Add one named column to row grouping. */
+  groupByColumn?: (label: string) => string;
+  /** Remove one named column from row grouping. */
+  ungroupColumn?: (label: string) => string;
+  /** Remove one grouping field. */
+  removeGroupingColumn?: (label: string) => string;
+  /** Keyboard drag handle for one grouping field. */
+  moveGroupingColumn?: (label: string) => string;
+  /** Chip-only drop target that removes a grouping field. */
+  groupingDropToRemove?: string;
+  /** Select the column whose group aggregate is being changed. */
+  groupingAggregateColumn?: string;
+  /** Label for a grouped-table aggregation picker. */
+  groupingAggregation?: string;
+  /** Preserve the developer-provided aggregation. */
+  groupingAggregationDefault?: string;
+  /** Explicitly hide a column's group aggregate. */
+  groupingAggregationNone?: string;
+  /** Accessible name of the aggregations group — there is no visible heading. */
+  groupingAggregations?: string;
+  /** Placeholder and accessible name of the control that adds an aggregation. */
+  groupingAddAggregation?: string;
+  /** Puts the developer's whole aggregation setup back. */
+  groupingRestoreAggregations?: string;
+  /** Takes one column's aggregation away. */
+  groupingRemoveAggregation?: (column: string) => string;
+  /** Names the operation control of one active aggregation. */
+  groupingAggregationFor?: (column: string) => string;
+  /** Marks an aggregate the host owns and the reader cannot change. */
+  groupingAggregationReadOnly?: string;
+  /** Honest label for a host aggregate whose operation is unknown. */
+  groupingAggregationCustom?: string;
+  /** Polite announcement after a column's aggregate is taken away. */
+  groupingAggregateRemoved?: (column: string) => string;
+  /** Polite announcement after the declared aggregations are restored. */
+  groupingAggregatesRestored?: string;
+  /** Full label for the average aggregation choice. */
+  groupingAverage?: string;
+  /** Polite announcement after adding a grouping field. */
+  groupingAdded?: (label: string) => string;
+  /** Polite announcement after removing a grouping field. */
+  groupingRemoved?: (label: string) => string;
+  /** Polite announcement after changing nesting order. */
+  groupingMoved?: (label: string, position: number) => string;
+  /** Polite announcement after changing one aggregation choice. */
+  groupingAggregateChanged?: (label: string, aggregation: string) => string;
   /**
    * Status copy when `virtualize` is on a paged table, which stays one page.
    */
   noticeVirtualizePaged?: string;
   /** Status copy when row pin is on while grouping or a tree is on. */
   noticePinNested?: string;
-  /** Status copy when row reorder is on while grouping or a tree is on. */
+  /**
+   * Compatibility override for the former nested-reorder notice.
+   *
+   * @deprecated Nested reorder is supported and no longer emits this notice.
+   */
   noticeReorderNested?: string;
   /**
-   * Status copy when `groupBy` is set but the source cannot regroup
-   * (no `allFilteredRows`, no server groups).
+   * Status copy when `groupBy` is set and the source's capabilities say it
+   * cannot group.
    */
   noticeGroupingUnavailable?: string;
   /**
-   * Status copy when `exportCsv.scope` is `"all"` and only the current
-   * page can be written.
+   * Status copy when `exportCsv.scope` is `"all"` and the source's export
+   * scope is one page, which disables the button.
    */
   noticeExportAllPage?: string;
   /**
@@ -993,9 +1146,4 @@ export interface TableLabels {
    * callback (`onCellEdit` / `onRowEdit` / `onBatchEdit`).
    */
   noticeEditWithoutWriter?: string;
-  /**
-   * Export button caption when `"all"` can only write the current page.
-   * Defaults to `"Export this page"`.
-   */
-  exportThisPage?: string;
 }

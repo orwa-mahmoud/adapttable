@@ -98,33 +98,40 @@ export function People() {
 - Cell content resolves `Cell` → `accessor` → the key's data path. `Cell` is a React component receiving `{ row, rowIndex }`; `accessor` is the lighter function form. Mini charts are a separate import — see [sparkline columns](./sparkline.md).
 - `sortable` opts a column into sorting; on frontend data the comparator reads `sortValue`, falling back to the column's accessor. See [sorting](./sorting.md).
 - `i18n` maps locale tags to alternative data paths; the table's `locale` prop picks one (exact tag → primary subtag → `key`). The cell, client-side sort, and the column's filter all follow the resolved path — header text does not.
+- `renameable` opts a leaf into user naming when the table also provides
+  `onColumnRename`. This changes display text, mobile and export labels while
+  the key and localized data paths stay fixed. See
+  [column management](./column-management.md).
 - `hideOnMobile` / `hideOnDesktop` drop a column per layout; `mobileLabel` overrides the label on mobile cards.
 - `key` is also the value sent to a backend as `sortBy`, so keep it API-stable.
 
 ## Options
 
-| Prop            | Type                             | Default                      | Description                                                                                       |
-| --------------- | -------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------- |
-| `key`           | `string`                         | required                     | Unique id; data path for the cell value; the backend `sortBy` value.                              |
-| `header`        | `ReactNode`                      | humanised from `key`         | Header content, pre-translated by the caller.                                                     |
-| `renderHeader`  | `(ctx) => ReactNode`             | —                            | Custom caption; receives a controller so sort/resize stay available.                              |
-| `renderFooter`  | `(ctx) => ReactNode`             | —                            | Custom summary-row cell.                                                                          |
-| `headerTooltip` | `string`                         | —                            | Native tooltip on the caption.                                                                    |
-| `headerActions` | `ReactNode`                      | —                            | Host controls after the caption.                                                                  |
-| `accessor`      | `(row) => ReactNode`             | read the key's data path     | Lightweight cell renderer.                                                                        |
-| `Cell`          | `ComponentType<CellProps<TRow>>` | —                            | Component per row, receives `{ row, rowIndex }`; wins over `accessor`.                            |
-| `sortable`      | `boolean`                        | `false`                      | Enable sorting for this column.                                                                   |
-| `sortValue`     | `(row) => SortableValue`         | the generated accessor value | Primitive extractor for the client-side sort. See [sorting](./sorting.md).                        |
-| `exportValue`   | `(row) => unknown`               | the display value            | Value written to a CSV export when the file should carry something other than the formatted cell. |
-| `align`         | `"start" \| "center" \| "end"`   | `"start"`                    | Text alignment within the cell.                                                                   |
-| `width`         | `number \| string`               | —                            | Width passed through to the rendered header/cell.                                                 |
-| `mobileLabel`   | `string`                         | `header` (when a string)     | Label on mobile card layouts.                                                                     |
-| `hideOnMobile`  | `boolean`                        | `false`                      | Hide the column entirely on mobile.                                                               |
-| `hideOnDesktop` | `boolean`                        | `false`                      | Hide the column entirely on desktop.                                                              |
-| `group`         | `string`                         | —                            | Spanning header above adjacent columns sharing the name. See below.                               |
-| `i18n`          | `Record<string, string>`         | —                            | Per-locale data paths for the column's value.                                                     |
-| `meta`          | `Record<string, unknown>`        | —                            | Free-form bag your own code can read back.                                                        |
-| `locale`        | `string` (table prop)            | —                            | Active locale tag (`"ar"`, `"ar-EG"`); drives `i18n` path resolution.                             |
+| Prop              | Type                                        | Default                      | Description                                                                                                   |
+| ----------------- | ------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `key`             | `string`                                    | required                     | Unique id; data path for the cell value; the backend `sortBy` value.                                          |
+| `header`          | `ReactNode`                                 | humanised from `key`         | Header content, pre-translated by the caller.                                                                 |
+| `renderHeader`    | `(ctx) => ReactNode`                        | —                            | Custom caption; receives a controller so sort/resize stay available.                                          |
+| `renderFooter`    | `(ctx) => ReactNode`                        | —                            | Custom summary-row cell.                                                                                      |
+| `headerTooltip`   | `string`                                    | —                            | Native tooltip on the caption.                                                                                |
+| `headerActions`   | `ReactNode`                                 | —                            | Host controls after the caption.                                                                              |
+| `renameable`      | `boolean`                                   | `false`                      | Allow a host-persisted user display name from the Columns menu.                                               |
+| `accessor`        | `(row) => ReactNode`                        | read the key's data path     | Lightweight cell renderer.                                                                                    |
+| `Cell`            | `ComponentType<CellProps<TRow>>`            | —                            | Component per row, receives `{ row, rowIndex }`; wins over `accessor`.                                        |
+| `sortable`        | `boolean`                                   | `false`                      | Enable sorting for this column.                                                                               |
+| `sortValue`       | `(row) => SortableValue`                    | the generated accessor value | Primitive extractor for the client-side sort. See [sorting](./sorting.md).                                    |
+| `exportValue`     | `(row) => unknown`                          | the display value            | Value written to a CSV export when the file should carry something other than the formatted cell.             |
+| `align`           | `"start" \| "center" \| "end"`              | `"start"`                    | Text alignment within the cell.                                                                               |
+| `width`           | `number \| string`                          | —                            | Width passed through to the rendered header/cell.                                                             |
+| `mobileLabel`     | `string`                                    | `header` (when a string)     | Label on mobile card layouts.                                                                                 |
+| `hideOnMobile`    | `boolean`                                   | `false`                      | Hide the column entirely on mobile.                                                                           |
+| `hideOnDesktop`   | `boolean`                                   | `false`                      | Hide the column entirely on desktop.                                                                          |
+| `aggregatable`    | `false \| true \| { default?, operations }` | omitted                      | Whether a reader may aggregate this column, and with which operations. See [row grouping](./row-grouping.md). |
+| `formatAggregate` | `(value, context) => DisplayValue`          | —                            | How a group aggregate of this column reads. Presentation only.                                                |
+| `group`           | `string`                                    | —                            | Spanning header above adjacent columns sharing the name. See below.                                           |
+| `i18n`            | `Record<string, string>`                    | —                            | Per-locale data paths for the column's value.                                                                 |
+| `meta`            | `Record<string, unknown>`                   | —                            | Free-form bag your own code can read back.                                                                    |
+| `locale`          | `string` (table prop)                       | —                            | Active locale tag (`"ar"`, `"ar-EG"`); drives `i18n` path resolution.                                         |
 
 ## The cell as text
 

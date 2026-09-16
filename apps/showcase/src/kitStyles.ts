@@ -20,7 +20,7 @@
  *   (`ensureBaseUiStyles`), so importing the package is enough.
  * - Radix Themes' sheet is 800 KB — it loads with the Radix chunk that needs
  *   it (`adapters/RadixDemo.tsx` and the `radix` provider in
- *   `kitProviders.tsx`), never on the eighteen pages that may never show it.
+ *   `kitProviders.tsx`), never on the twenty pages that may never show it.
  *
  * Page entries import this module and never a kit stylesheet directly:
  * `scripts/showcase-pages.test.mjs` walks the page manifest and fails a page

@@ -7,9 +7,10 @@
  * through the tarball's `exports` map and its emitted declarations — the two
  * things a monorepo test can never see, because it resolves source.
  *
- * The compatibility aliases are the exception: they are generated from
- * `mainEntryAliases.ts` rather than listed, so the day one is added or retired
- * the fixture follows without anyone remembering to edit it.
+ * The names v3 moved off the main entry are the exception: they come from the
+ * removal inventory rather than being listed here, so the fixture proves the
+ * migration's own claim — each one still reachable from
+ * `@adapttable/core/adapter`.
  */
 
 /** `<DataTable data columns rowKey />` and nothing else. */
@@ -25,8 +26,16 @@ export const Beginner = () => (
 );
 `;
 
-/** The v2 props a table already in production is passing. */
-export const V2_PROPS = String.raw`import type { ColumnDef, FilterDef } from "@adapttable/unstyled";
+/** Every removed v2 enabling prop must fail against the packed declaration. */
+export function removedV2Props(manifest) {
+  const group = manifest.v3Removals.groups.find(
+    (entry) => entry.id === "enabling-props"
+  );
+  const probes = Object.keys(group.props).map(
+    (prop) => `// @ts-expect-error v3 removed the ${prop} enabling prop
+export const removed_${prop} = <DataTable {...base} ${prop}={undefined} />;`
+  );
+  return String.raw`import type { ColumnDef } from "@adapttable/unstyled";
 import { DataTable } from "@adapttable/unstyled";
 
 type Row = { id: string; name: string; city: string; spend: number };
@@ -36,22 +45,11 @@ const columns: ColumnDef<Row>[] = [
   { key: "city" },
   { key: "spend", align: "end" },
 ];
-const filters: FilterDef[] = [{ key: "city", label: "City", type: "text" }];
+const base = { data: rows, columns, rowKey: (row: Row) => row.id };
 
-export const StillAccepted = () => (
-  <DataTable
-    data={rows}
-    columns={columns}
-    rowKey={(row) => row.id}
-    groupBy="city"
-    virtualize
-    searchable
-    filters={filters}
-    onRowReorder={(next) => next}
-    onCellEdit={(edit) => edit}
-  />
-);
+${probes.join("\n\n")}
 `;
+}
 
 /** Kit factories, a custom feature, and every registration the host offers. */
 export const SENIOR = String.raw`import type {
@@ -145,12 +143,12 @@ export const Senior = () => (
     rowKey={(row) => row.id}
     features={[
       rowReorder<Row>((next) => next),
-      savedViews<Row>({ storageKey: "harness" }),
-      grouping<Row>("city"),
+      savedViews({ storageKey: "harness" }),
+      grouping("city"),
       editing<Row>((row, key, next) => ({ ...row, [key]: next })),
-      virtualize<Row>(),
-      columnMenu<Row>(),
-      cellNavigation<Row>(),
+      virtualize(),
+      columnMenu(),
+      cellNavigation(),
       everything,
     ]}
   />
@@ -160,19 +158,22 @@ export const pivoted = pivot;
 `;
 
 /** Slots, class maps, render callbacks, and shadcn's preset merging. */
-export const CUSTOMIZATION = String.raw`// The renderer types come from @adapttable/core: a kit republishes 128 core
-// names but not these three, so core is the documented route that has them.
+export const CUSTOMIZATION = String.raw`// A kit republishes 128 core names but not these renderer types, so the
+// owning package is the documented route. The card renderer is React's: its
+// field values are rendered, so they are ReactNode and not the neutral
+// model's unknown.
+import type { RowActionsRenderer } from "@adapttable/core";
 import type {
-  MobileCardRenderer,
-  RowActionsRenderer,
+  ReactMobileCardRenderer,
   ToolbarSlots,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import type {
   ColumnDef,
   DataTableClassNames,
   DataTableSlots,
 } from "@adapttable/unstyled";
 import { DataTable } from "@adapttable/unstyled";
+import { rowDetail } from "@adapttable/unstyled/row-detail";
 import type { SavedViewsPanelProps } from "@adapttable/shadcn";
 import {
   DataTable as ShadcnDataTable,
@@ -187,7 +188,7 @@ const slots: DataTableSlots = {
   empty: <p>Nothing here yet</p>,
   noResults: <p>No match</p>,
   skeleton: <p>Loading…</p>,
-  error: (state) => <p role="alert">{String(state.error)}</p>,
+  error: (state: { error: unknown }) => <p role="alert">{String(state.error)}</p>,
 };
 
 /** Per-node classes: unstyled and shadcn publish a key for every part. */
@@ -201,7 +202,7 @@ const classNames: DataTableClassNames = {
 
 const toolbarSlots: ToolbarSlots = { end: <button type="button">Mine</button> };
 
-const renderCard: MobileCardRenderer<Row> = (_row, card) => (
+const renderCard: ReactMobileCardRenderer<Row> = (_row, card) => (
   <article>
     {card.fields.map((field) => (
       <p key={field.column.key}>{field.value}</p>
@@ -226,7 +227,7 @@ export const Customized = () => (
     toolbarSlots={toolbarSlots}
     renderCard={renderCard}
     renderRowActions={renderRowActions}
-    renderRowDetail={(row) => <pre>{row.name}</pre>}
+    features={[rowDetail((row: Row) => <pre>{row.name}</pre>)]}
   />
 );
 
@@ -246,11 +247,10 @@ export type PanelProps = SavedViewsPanelProps;
 /** A source, the prop-getters, caller overrides, fully custom markup. */
 export const HEADLESS = String.raw`import type {
   ColumnDef,
-  Props,
-  TableSource,
   UseDataTableResult,
-} from "@adapttable/core";
-import { useDataTable, useFrontendData } from "@adapttable/core";
+} from "@adapttable/react";
+import type { Props, TableSource } from "@adapttable/core";
+import { useDataTable, useFrontendData } from "@adapttable/react";
 
 type Row = { id: string; name: string; city: string };
 const rows: Row[] = [{ id: "1", name: "Alpha", city: "Dubai" }];
@@ -309,22 +309,19 @@ export function Headless() {
 `;
 
 /**
- * Split `mainEntryAliases.ts` into its type and value aliases.
+ * The names v3 moved off the main entry, as the inventory records them.
  *
- * Read from the module that declares them so the fixture cannot drift: the
- * whole point is that every alias still reachable is still reached.
+ * They used to be read out of `mainEntryAliases.ts`; v3 deleted that module,
+ * and the list is now closed — nothing joins a set of removals that already
+ * happened. What the probes check is the other half of the promise: every one
+ * of them still ships from `@adapttable/react/adapter`, which is the import a
+ * host moves to.
  */
-export function aliasesIn(source) {
-  const types = [];
-  const values = [];
-  for (const m of source.matchAll(
-    /^export (type|const) ([A-Za-z_$][\w$]*)/gm
-  )) {
-    (m[1] === "type" ? types : values).push(m[2]);
-  }
-  types.sort((a, b) => a.localeCompare(b));
-  values.sort((a, b) => a.localeCompare(b));
-  return { types, values };
+export function movedAliases(manifest) {
+  const group = manifest.v3Removals.groups.find(
+    (entry) => entry.id === "main-entry-aliases"
+  );
+  return { types: group.types, values: group.values };
 }
 
 /** Three aliases are generic, so naming them needs a row type. */
@@ -342,12 +339,13 @@ export function aliasTypeProbe({ types, values }) {
       `  ${name[0].toLowerCase()}${name.slice(1)}: ${name}${GENERIC.has(name) ? "<Row>" : ""};`
   );
   return [
-    "// Every deprecated main-entry alias, reached from the v2 import path it",
-    "// has always had. They stay until v3 so existing code keeps compiling.",
+    "// Every name v3 moved off the main entry, reached from the entry it",
+    '// moved to. A migration that says "import it from /adapter instead"',
+    "// is only true if all of them are there.",
     "import {",
     ...types.map((name) => `  type ${name},`),
     ...values.map((name) => `  ${name},`),
-    '} from "@adapttable/core";',
+    '} from "@adapttable/react/adapter";',
     "",
     "type Row = { id: string };",
     "",
@@ -364,15 +362,45 @@ export function aliasTypeProbe({ types, values }) {
   ].join("\n");
 }
 
+/** React hooks and types must fail from the packed core main entry. */
+export function removedFromCoreMainProbe() {
+  return [
+    `// @ts-expect-error v3 moved useDataTable to @adapttable/react`,
+    `import { useDataTable } from "@adapttable/core";`,
+    "",
+    `// @ts-expect-error v3 moved useFrontendData to @adapttable/react`,
+    `import { useFrontendData } from "@adapttable/core";`,
+    "",
+    `// @ts-expect-error v3 moved ColumnDef to @adapttable/react`,
+    `import type { ColumnDef } from "@adapttable/core";`,
+    "",
+    `// @ts-expect-error v3 moved useDataTableShell to @adapttable/react/adapter`,
+    `import { useDataTableShell } from "@adapttable/core";`,
+    "",
+  ].join("\n");
+}
+
+/** Every moved name must fail from the packed main entry. */
+export function removedAliasProbe({ types, values }) {
+  const sample = [...types.slice(0, 2), ...values.slice(0, 2)];
+  return sample
+    .map(
+      (name) =>
+        `// @ts-expect-error v3 moved ${name} to @adapttable/react/adapter\n` +
+        `import { ${name} as Removed_${name} } from "@adapttable/core";`
+    )
+    .join("\n\n");
+}
+
 /** A value alias must still be a value — proved by running it, not by tsc. */
 export function aliasRuntimeProbe(values) {
   return [
-    'import * as core from "@adapttable/core";',
+    'import * as core from "@adapttable/react/adapter";',
     `const values = ${JSON.stringify(values)};`,
     "const missing = values.filter((name) => core[name] === undefined);",
     "if (missing.length > 0)",
     "  throw new Error(",
-    '    "compatibility aliases missing from the packed @adapttable/core: " +',
+    '    "names missing from the packed @adapttable/react/adapter: " +',
     '      missing.join(", ")',
     "  );",
     'console.log("aliases ok (" + values.length + " values)");',

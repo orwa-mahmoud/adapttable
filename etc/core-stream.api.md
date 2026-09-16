@@ -5,17 +5,6 @@
 ```ts
 
 // @public
-export interface ChangedCellFlashState {
-    clear: () => void;
-    flashProps: (rowId: string, columnKey: string) => {
-        "data-flash"?: "";
-    } | Record<string, never>;
-    isFlashing: (rowId: string, columnKey: string) => boolean;
-    isRowFlashing: (rowId: string) => boolean;
-    mark: (events: readonly RowPatchEvent<unknown>[]) => void;
-}
-
-// @public
 export interface InsertPatch<TRow> {
     at?: number;
     row: TRow;
@@ -88,13 +77,6 @@ export interface RowPatchStreamReconnect {
 }
 
 // @public
-export interface RowPatchStreamState {
-    close: () => void;
-    error: Error | null;
-    status: RowPatchStreamStatus;
-}
-
-// @public
 export type RowPatchStreamStatus =
 /** No url wired, or `enabled: false`. Nothing is open and nothing will be. */
 "idle" |
@@ -133,34 +115,6 @@ export interface UpdatePatch<TRow> {
 export interface UpsertPatch<TRow> {
     row: TRow;
     type: "upsert";
-}
-
-// @public
-export function useChangedCellFlash(options?: UseChangedCellFlashOptions): ChangedCellFlashState;
-
-// @public
-export interface UseChangedCellFlashOptions {
-    durationMs?: number;
-    enabled?: boolean;
-}
-
-// @public
-export function useRowPatchStream<TRow>(options: UseRowPatchStreamOptions<TRow>): RowPatchStreamState;
-
-// @public
-export interface UseRowPatchStreamOptions<TRow> {
-    createEventSource?: (url: string) => StreamSocket | undefined;
-    createWebSocket?: (url: string, protocols?: string | string[]) => StreamSocket | undefined;
-    enabled?: boolean;
-    event?: string;
-    eventSource?: string;
-    getRowId: (row: TRow) => string;
-    onPatch: (update: (rows: readonly TRow[]) => readonly TRow[]) => void;
-    onPatches?: (patches: readonly RowPatch<TRow>[]) => void;
-    parse?: (frame: string) => readonly RowPatch<TRow>[];
-    protocols?: string | string[];
-    reconnect?: RowPatchStreamReconnect;
-    websocket?: string;
 }
 
 // (No @packageDocumentation comment for this package)

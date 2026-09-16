@@ -1,5 +1,5 @@
-import type { TableLabels, UseSavedViewsOptions } from "@adapttable/core";
-import { useSavedViews } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
 import {
   Button,
   Flex,
@@ -86,7 +86,9 @@ export function SavedViewsMenu({
       <Popover.Content
         align="end"
         side="bottom"
-        avoidCollisions={false}
+        // Collision handling stays on: a panel wider than the space
+        // beside its trigger otherwise runs off the edge on a narrow
+        // viewport and clips its own labels.
         minWidth="240px"
         maxHeight="min(70vh, 360px)"
         style={{ overflowY: "auto", zIndex: 10050 }}

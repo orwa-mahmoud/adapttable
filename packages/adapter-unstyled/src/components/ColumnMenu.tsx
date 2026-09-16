@@ -1,35 +1,115 @@
 import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
-  columnReorderKeyProps,
-  type Direction,
   REORDER_COLUMN_KEY,
-  useColumnDragState,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
+import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
 import {
   type ColumnDragState,
   columnMenuActions,
-  type ColumnMenuChromeProps,
+  type ColumnMenuChoice,
+  type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
+  type ColumnMenuSlotProps,
+  type ColumnRenameEditorState,
   EyeIcon,
   filterColumnMenuRows,
   GripIcon,
   hideAllColumns,
+  LiveRegion,
   nextPinSide,
   pinActionLabel,
   PinIcon,
   showAllColumns,
   unpinAllColumns,
+  useColumnRenameEditor,
   useFeatureHost,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
 import { MENU_PANEL_STYLE, useMenuPopover } from "./menuPopover";
+
+const NOOP_RENAME = () => undefined;
+
+function isColumnMenuChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
+  return "kind" in item && item.kind === "choice";
+}
+
+function focusRenameInput(input: HTMLInputElement | null): void {
+  input?.focus();
+}
+
+function ColumnRenameEditor({
+  editor,
+  labels,
+  classNames,
+}: Readonly<{
+  editor: ColumnRenameEditorState;
+  labels: ColumnMenuLabels;
+  classNames: DataTableClassNames;
+}>) {
+  if (!editor.editing) return null;
+  return (
+    <form
+      data-adapttable-part="column-rename-form"
+      className={classNames.columnRenameForm}
+      onSubmit={(event) => {
+        event.preventDefault();
+        editor.submit();
+      }}
+    >
+      <label
+        htmlFor={editor.inputId}
+        data-adapttable-part="column-rename-label"
+        className={classNames.columnRenameLabel}
+      >
+        {labels.columnName}
+      </label>
+      <input
+        ref={focusRenameInput}
+        id={editor.inputId}
+        value={editor.draft}
+        aria-invalid={editor.error ? true : undefined}
+        aria-describedby={editor.error ? editor.errorId : undefined}
+        data-adapttable-part="column-rename-input"
+        className={classNames.columnRenameInput}
+        onChange={(event) => editor.setDraft(event.currentTarget.value)}
+        onBlur={editor.blur}
+        onKeyDown={editor.onKeyDown}
+      />
+      {editor.error ? (
+        <span
+          id={editor.errorId}
+          role="alert"
+          data-adapttable-part="column-rename-error"
+          className={classNames.columnRenameError}
+        >
+          {editor.error}
+        </span>
+      ) : null}
+      <button
+        type="submit"
+        data-adapttable-part="column-rename-save"
+        className={classNames.columnRenameSave}
+      >
+        {labels.saveColumnName}
+      </button>
+      <button
+        type="button"
+        data-adapttable-part="column-rename-cancel"
+        className={classNames.columnRenameCancel}
+        onClick={editor.cancel}
+      >
+        {labels.cancelColumnRename}
+      </button>
+    </form>
+  );
+}
 
 /** Menu labels: the shared chrome contract plus the actions row's name. */
 type ColumnMenuRowLabels = ColumnMenuLabels & {
@@ -132,6 +212,8 @@ interface ColumnMenuRowProps<TRow> {
   onSortColumn?: (key: string, dir: "asc" | "desc") => void;
   onAutoSizeColumn?: (key: string) => void;
   onFilterColumn?: (key: string) => void;
+  onRenameColumn?: (key: string, name: string) => void;
+  groupingPanel?: NonNullable<ColumnMenuSlotProps<TRow>["groupingPanel"]>;
 }
 
 function ColumnMenuRowItem<TRow>({
@@ -145,10 +227,19 @@ function ColumnMenuRowItem<TRow>({
   onSortColumn,
   onAutoSizeColumn,
   onFilterColumn,
+  onRenameColumn,
+  groupingPanel,
 }: Readonly<ColumnMenuRowProps<TRow>>) {
   const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
   const [open, setOpen] = useState(false);
   const featureHost = useFeatureHost<TRow>();
+  const rename = useColumnRenameEditor({
+    key,
+    name,
+    onRename: onRenameColumn ?? NOOP_RENAME,
+    requiredMessage: labels.columnNameRequired,
+    renamedMessage: labels.columnRenamed,
+  });
   const actions = columnMenuActions(row, {
     featureHost,
     labels,
@@ -158,6 +249,8 @@ function ColumnMenuRowItem<TRow>({
     onSortColumn,
     onAutoSizeColumn,
     onFilterColumn,
+    onBeginRename: onRenameColumn ? rename.begin : undefined,
+    groupingPanel,
   });
   return (
     <div
@@ -220,23 +313,67 @@ function ColumnMenuRowItem<TRow>({
           data-adapttable-part="column-menu-submenu"
           className={classNames.columnMenuSubmenu}
         >
-          {actions.map((action) => (
-            <button
-              key={action.id}
-              type="button"
-              data-adapttable-part="column-menu-action"
-              className={classNames.columnMenuAction}
-              disabled={action.disabled}
-              onClick={() => {
-                action.run();
-                setOpen(false);
-              }}
-            >
-              {action.label}
-            </button>
-          ))}
+          {actions.map((action) => {
+            if (isColumnMenuChoice(action)) {
+              return (
+                <label
+                  key={action.id}
+                  data-adapttable-part="column-menu-choice"
+                  className={classNames.columnMenuChoice}
+                >
+                  <span
+                    data-adapttable-part="column-menu-choice-label"
+                    className={classNames.columnMenuChoiceLabel}
+                  >
+                    {action.label}
+                  </span>
+                  <select
+                    aria-label={action.label}
+                    value={action.value}
+                    disabled={action.disabled}
+                    data-adapttable-part="column-menu-choice-select"
+                    className={classNames.columnMenuChoiceSelect}
+                    onChange={(event) =>
+                      action.onChange(event.currentTarget.value)
+                    }
+                  >
+                    {action.options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              );
+            }
+            return (
+              <button
+                key={action.id}
+                type="button"
+                data-adapttable-part="column-menu-action"
+                className={classNames.columnMenuAction}
+                disabled={
+                  action.disabled || (action.id === "rename" && rename.editing)
+                }
+                onClick={() => {
+                  action.run();
+                  if (action.id !== "rename") setOpen(false);
+                }}
+              >
+                {action.label}
+              </button>
+            );
+          })}
+          <ColumnRenameEditor
+            editor={rename}
+            labels={labels}
+            classNames={classNames}
+          />
         </div>
       ) : null}
+      <LiveRegion part="column-rename-announcer" statusRole={false}>
+        {rename.announcement}
+      </LiveRegion>
     </div>
   );
 }
@@ -329,39 +466,10 @@ function ReorderMenuRowItem<TRow>({
   );
 }
 
-export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
+/** The shared Columns-menu contract, plus this kit's class map. */
+export interface ColumnMenuProps<TRow> extends ColumnMenuSlotProps<TRow> {
+  /** Class map for the menu's parts. */
   classNames: DataTableClassNames;
-  /** Resolved labels — the shared contract plus the actions row's name. */
-  labels: ColumnMenuRowLabels;
-  /**
-   * Whether the table renders row actions. When true the menu lists the
-   * injected actions column as a separated trailing row, so it hides and
-   * end-pins like any data column.
-   */
-  hasRowActions?: boolean;
-  /**
-   * Whether the table renders a row-reorder column. When true the menu
-   * lists it as a leading reserved row: hideable and start-pinnable.
-   */
-  hasRowReorder?: boolean;
-  /** Size every rendered column to its content. */
-  onAutoSize: () => void;
-  /** Size one column to its content. */
-  onAutoSizeColumn?: (key: string) => void;
-  /** Sort one column from the submenu. */
-  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-  /** Open the filter UI from the submenu. */
-  onFilterColumn?: (key: string) => void;
-  /** Column key currently sorted by, if any. */
-  sortBy?: string;
-  /** Direction for `sortBy`. */
-  sortDir?: "asc" | "desc";
-  /**
-   * Text direction. The panel portals to `document.body`, so it cannot
-   * inherit `dir` from the table — without this, Arabic keeps LTR row
-   * chrome (grip, eye, pin).
-   */
-  dir?: Direction;
 }
 
 /**
@@ -381,6 +489,8 @@ export function ColumnMenu<TRow>({
   onAutoSizeColumn,
   onSortColumn,
   onFilterColumn,
+  onRenameColumn,
+  groupingPanel,
   sortBy,
   sortDir,
   dir,
@@ -482,6 +592,8 @@ export function ColumnMenu<TRow>({
                 onSortColumn={onSortColumn}
                 onAutoSizeColumn={onAutoSizeColumn}
                 onFilterColumn={onFilterColumn}
+                onRenameColumn={onRenameColumn}
+                groupingPanel={groupingPanel}
               />
             ))}
             {(hasRowReorder === true || hasRowActions === true) && (

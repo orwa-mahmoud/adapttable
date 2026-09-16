@@ -1,16 +1,18 @@
 /** Gap-fill: MUI select onChange handlers and chip delete. */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import type * as AdapterModule from "@adapttable/core/adapter";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import type * as AdapterModule from "@adapttable/react/adapter";
 import {
   useDataTableShell,
   type VirtualTableRow,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
+import { filters as filtersFeature } from "./filters";
 import type { ColumnDef } from "./index";
+import { virtualize } from "./virtualize";
 
 interface Row {
   id: string;
@@ -25,13 +27,13 @@ const columns: ColumnDef<Row>[] = [
 ];
 const theme = createTheme();
 
-vi.mock("@adapttable/core/adapter", async (importOriginal) => {
+vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return { ...actual, useDataTableShell: vi.fn(actual.useDataTableShell) };
 });
 
 const actualAdapter = await vi.importActual<typeof AdapterModule>(
-  "@adapttable/core/adapter"
+  "@adapttable/react/adapter"
 );
 
 /**
@@ -47,6 +49,7 @@ function mockBodyData(
     const real = actualAdapter.useDataTableShell(props, render);
     return {
       ...real,
+      skipChromeBody: true,
       tableProps: {
         ...real.tableProps,
         rowEntries: rows,
@@ -115,7 +118,10 @@ describe("MUI gaps", () => {
 
   it("deleting a chip clears its filter", () => {
     mount(
-      { filterLabels: { status: (v) => `Status: ${v}` } },
+      {
+        filterLabels: { status: (v) => `Status: ${v}` },
+        features: [filtersFeature<Row>([])],
+      },
       "paged",
       "f_status=Active"
     );
@@ -127,7 +133,11 @@ describe("MUI gaps", () => {
   it("clear-all link clears filters", () => {
     const onClearFilters = vi.fn();
     mount(
-      { filterLabels: { status: (v) => `Status: ${v}` }, onClearFilters },
+      {
+        filterLabels: { status: (v) => `Status: ${v}` },
+        onClearFilters,
+        features: [filtersFeature<Row>([])],
+      },
       "paged",
       "f_status=Active"
     );
@@ -180,7 +190,14 @@ describe("MUI gaps", () => {
       40,
       40
     );
-    mount({ virtualize: true, estimateRowSize: 40 }, "infinite");
+    mount(
+      {
+        virtualize: true,
+        estimateRowSize: 40,
+        features: [virtualize({ estimateRowSize: 40 })],
+      },
+      "infinite"
+    );
     expect(screen.queryByText("Alice")).toBeNull();
     expect(screen.getByText("Bob")).toBeInTheDocument();
   });
@@ -191,7 +208,12 @@ describe("MUI gaps", () => {
       132,
       0
     );
-    mount({ forceMobile: true, virtualize: true, estimateCardSize: 132 });
+    mount({
+      forceMobile: true,
+      virtualize: true,
+      estimateCardSize: 132,
+      features: [virtualize({ estimateCardSize: 132 })],
+    });
     expect(screen.queryByText("Alice")).toBeNull();
     expect(screen.getByText("Bob")).toBeInTheDocument();
   });

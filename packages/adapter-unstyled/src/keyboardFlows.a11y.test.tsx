@@ -3,15 +3,12 @@
  * filter drawer's trap/restore cycle, edit commit keeping focus in the
  * table, the bulk bar's live announcement, and the pager's current page.
  */
-import {
-  createMemoryAdapter,
-  type FilterDef,
-  useFrontendData,
-} from "@adapttable/core";
+import type { FilterDef } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {

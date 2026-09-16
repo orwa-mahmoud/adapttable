@@ -5,7 +5,7 @@ import {
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
-import { paginationSlots } from "@adapttable/core/adapter";
+import { paginationSlots } from "@adapttable/react/adapter";
 
 import type { DataTableClassNames } from "../types";
 

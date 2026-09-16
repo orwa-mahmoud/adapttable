@@ -1,13 +1,15 @@
-import type { ColumnDef, SidePanelEntry } from "@adapttable/core";
-import { usePrefersReducedMotion, useSavedViews } from "@adapttable/core";
-import { buildFormulaColumns } from "@adapttable/core/formula";
-import {
-  isPivotReady,
-  type PivotConfig,
-  usePivotUrlState,
-} from "@adapttable/core/pivot";
+import { isPivotReady, type PivotConfig } from "@adapttable/core/pivot";
 import { getLabels } from "@adapttable/i18n";
-import { type DataTableProps, FilterDrawer } from "@adapttable/mantine";
+import { FilterDrawer } from "@adapttable/mantine";
+import {
+  type ColumnDef,
+  type FeatureProps,
+  type SidePanelEntry,
+  usePrefersReducedMotion,
+  useSavedViews,
+} from "@adapttable/react";
+import { buildFormulaColumns } from "@adapttable/react/formula";
+import { usePivotUrlState } from "@adapttable/react/pivot";
 import { MantineProvider } from "@mantine/core";
 import {
   type ReactNode,
@@ -330,8 +332,9 @@ function compatibilityNoteFor(
   if (structured) {
     return (
       <small>
-        Reorder and pin are disabled because grouped/tree rows do not have one
-        stable flat row index.
+        Row pinning stays off for structured rows. Reorder works within each
+        group or parent; crossing a group boundary or changing parent asks for
+        confirmation.
       </small>
     );
   }
@@ -374,7 +377,7 @@ function LabRows({
   pivoted: boolean;
   kit: string;
   dark: boolean;
-  sidePanel: DataTableProps<Person>["sidePanel"];
+  sidePanel: FeatureProps<Person>["sidePanel"];
   children: ReactNode;
 }>) {
   if (!pivoted) return <>{children}</>;
@@ -426,6 +429,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
   const [rowMutations, setRowMutations] = useState<OnOff>("off");
   const [rowReorder, setRowReorder] = useState<OnOff>("off");
   const [rowPinning, setRowPinning] = useState<OnOff>("off");
+  const [pinnedSummaryRows, setPinnedSummaryRows] = useState<OnOff>("off");
   const [cellSpan, setCellSpan] = useState<OnOff>("off");
   const [extraRows, setExtraRows] = useState<OnOff>("off");
   const [rowStyle, setRowStyle] = useState<OnOff>("off");
@@ -496,12 +500,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
     setFailure("off");
   }, []);
   const structured = structure === "grouped" || structure === "tree";
-  const reorderReason =
-    clientOnlyReason ??
-    wholeSetWriteReason ??
-    (structured
-      ? "Row reorder is unavailable while grouped or tree rows are active."
-      : undefined);
+  const reorderReason = clientOnlyReason ?? wholeSetWriteReason;
   const pinReason =
     clientOnlyReason ??
     (structured
@@ -511,6 +510,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
     rowMutations,
     rowReorder,
     rowPinning,
+    pinnedSummaryRows,
     cellSpan,
     extraRows,
     rowStyle,
@@ -534,6 +534,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
     setRowMutations("off");
     setRowReorder("off");
     setRowPinning("off");
+    setPinnedSummaryRows("off");
     setCellSpan("off");
     setExtraRows("off");
     setRowStyle("off");
@@ -609,7 +610,6 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
       setRecipe(null);
       setStructure(next);
       if (next === "grouped" || next === "tree") {
-        setRowReorder("off");
         setRowPinning("off");
       }
     });
@@ -907,6 +907,11 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
                       onChange={(next) => customize(setRowPinning, next)}
                     />
                     <Toggle
+                      label="Summary rows"
+                      value={pinnedSummaryRows}
+                      onChange={(next) => customize(setPinnedSummaryRows, next)}
+                    />
+                    <Toggle
                       label="Span cells"
                       value={cellSpan}
                       disabledOn={clientOnlyReason}
@@ -1009,6 +1014,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
                           onRecover={recoverFromFailure}
                           rowReorder={rowReorder === "on"}
                           rowPinning={rowPinning === "on"}
+                          pinnedSummaryRows={pinnedSummaryRows === "on"}
                           cellSpan={cellSpan === "on"}
                           extraRows={extraRows === "on"}
                           rowStyle={rowStyle === "on"}

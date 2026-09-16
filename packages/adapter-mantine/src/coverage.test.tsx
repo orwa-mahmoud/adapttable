@@ -6,15 +6,15 @@
  * drawer clear-all button, the toolbar/pagination onChange handlers, the
  * search placeholder branch, and the mount-stagger null-ref guard.
  */
-import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
+import type { UseColumnLayoutResult } from "@adapttable/core";
 import {
+  type ColumnDef,
   createMemoryAdapter,
   useFrontendData,
   usePrefersReducedMotion,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { renderHook } from "@testing-library/react";
+import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -23,7 +23,7 @@ import { useMountStagger } from "./animation/useMountStagger";
 import { ColumnMenu } from "./components/ColumnMenu";
 import { FilterDrawer } from "./components/FilterDrawer";
 import { PaginationFooter } from "./components/PaginationFooter";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import { defaultLabels } from "./index";
 
 interface Row {
@@ -131,7 +131,10 @@ function hiddenLayout(): UseColumnLayoutResult<MenuRow> {
     toggleVisible: vi.fn(),
     setPinned: vi.fn(),
     move: vi.fn(),
+    setOrder: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -160,7 +163,24 @@ const menuLabels = {
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}.`,
   reorderRow: "Reorder",
+  groupByColumn: (label: string) => `Group by ${label}`,
+  ungroupColumn: (label: string) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
+  groupingAverage: "Average",
+  groupingAggregationCustom: "Custom",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
 };
 
 describe("ColumnMenu hidden column", () => {

@@ -1,29 +1,31 @@
 import {
-  CHECKLIST_LIST_HEIGHT,
   defaultFilterRegistry,
   type Direction,
   type FilterDef,
-  type FilterFormSource,
   filterLabel,
-  filterOpLabel,
   type FilterTypeRegistry,
   filterWidgetKind,
   joinRelativeToken,
-  listFilterValues,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   renderRegisteredFilter,
   resolveLabels,
-  scalarFilterText,
   splitRelativeToken,
   type TableLabels,
+} from "@adapttable/core";
+import {
+  CHECKLIST_LIST_HEIGHT,
+  filterOpLabel,
+  listFilterValues,
+  scalarFilterText,
   useBooleanFilterWidget,
   useFilterOptions,
   useRangeFilterWidget,
   useTextFilterWidget,
-} from "@adapttable/core";
+} from "@adapttable/react";
+import type { FilterFormSource } from "@adapttable/react/adapter";
 import { Flex, Spinner, Text, TextField } from "@radix-ui/themes";
-import { type ReactNode, useId } from "react";
+import { type ReactElement, type ReactNode, useId } from "react";
 
 import type { RadixAccentColor } from "../types";
 import { ChecklistFilter } from "./ChecklistFilter";
@@ -302,7 +304,7 @@ function AutoFilterField<TRow>({
   labels: Required<TableLabels>;
   accentColor?: RadixAccentColor;
   registry: FilterTypeRegistry;
-}>) {
+}>): ReactElement | null {
   const id = useId();
   const { extra, setExtra } = source;
   const label = filterLabel(def);
@@ -310,7 +312,7 @@ function AutoFilterField<TRow>({
   // `loading` so the select/checkbox controls can show a native affordance.
   const { options, loading } = useFilterOptions(def);
   const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom;
+  if (custom) return custom as ReactElement;
   switch (filterWidgetKind(def, registry)) {
     case "text":
       return <TextFilterField def={def} source={source} labels={labels} />;

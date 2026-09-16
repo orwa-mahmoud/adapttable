@@ -1,8 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
+import { DataTable as BareDataTable } from "./DataTable";
 import type { ColumnDef } from "./index";
+import { sidePanel } from "./side-panel";
+import { statusBar } from "./status-bar";
 
 interface Row {
   id: string;
@@ -33,9 +36,33 @@ describe("side panel and status bar (mui)", () => {
           columns={COLS}
           rowKey={(r) => r.id}
           urlSync={false}
+          features={[
+            statusBar(),
+            sidePanel({
+              panels: [],
+              open: null,
+              onOpenChange: () => undefined,
+            }),
+          ]}
           {...extra}
         />
       </>
+    );
+
+  /**
+   * No features composed. This one renders the shipped component rather than
+   * the harness above, which exists to compose features from props — the very
+   * thing an absence test must not do.
+   */
+  const bare = (extra?: Record<string, unknown>) =>
+    render(
+      <BareDataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        {...extra}
+      />
     );
 
   const panel = {
@@ -47,8 +74,8 @@ describe("side panel and status bar (mui)", () => {
     onOpenChange,
   };
 
-  it("renders neither without the props", () => {
-    table();
+  it("renders neither without the features", () => {
+    bare({ statusBar: true });
 
     expect(
       document.querySelector('[data-adapttable-part="status-bar"]')
@@ -59,7 +86,9 @@ describe("side panel and status bar (mui)", () => {
   });
 
   it("shows the row count once the status bar is asked for", () => {
-    table({ statusBar: true });
+    // The strip is the feature's own component; the import and composition
+    // bring both its configuration and renderer.
+    table({ statusBar: true, features: [statusBar()] });
     const bar = document.querySelector('[data-adapttable-part="status-bar"]');
 
     expect(bar?.textContent).toContain("2");

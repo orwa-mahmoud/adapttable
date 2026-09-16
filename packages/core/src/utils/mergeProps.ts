@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CssProperties } from "../style/cssProperties";
 
 /**
  * Any props object a prop-getter can produce or accept for merging.
@@ -49,8 +49,8 @@ export function mergeProps<T extends Props>(base: T, overrides?: Props): T {
       out[key] = `${existing as string} ${value as string}`;
     } else if (key === "style" && existing && value) {
       out[key] = {
-        ...(existing as CSSProperties),
-        ...(value as CSSProperties),
+        ...(existing as CssProperties),
+        ...(value as CssProperties),
       };
     } else {
       out[key] = value;

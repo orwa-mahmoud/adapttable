@@ -8,7 +8,7 @@ import {
   type PivotPanelSlots,
   type PivotPanelSurfaceProps,
   type PivotZoneProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Card, Flex, Text } from "@radix-ui/themes";
 
 import { NativeSelect } from "./primitives";

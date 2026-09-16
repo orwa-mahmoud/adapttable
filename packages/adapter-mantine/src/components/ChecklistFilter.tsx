@@ -5,7 +5,7 @@ import {
   type ChecklistFilterProps,
   type ChecklistSearchProps,
   type ChecklistSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Checkbox, TextInput } from "@mantine/core";
 
 export type { ChecklistFilterProps };
@@ -15,7 +15,7 @@ function ChecklistSearch({
   value,
   className,
   onChange,
-}: ChecklistSearchProps) {
+}: Readonly<ChecklistSearchProps>) {
   return (
     <TextInput
       size="sm"
@@ -45,7 +45,7 @@ function ChecklistBox({
   className,
   countClassName,
   onChange,
-}: ChecklistCheckboxProps) {
+}: Readonly<ChecklistCheckboxProps>) {
   return (
     <Checkbox
       size="sm"

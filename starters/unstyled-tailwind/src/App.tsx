@@ -3,6 +3,7 @@ import {
   type DataTableClassNames,
   DataTable,
 } from "@adapttable/unstyled";
+import { columnMenu } from "@adapttable/unstyled/column-menu";
 
 import { type Person, people } from "./data";
 
@@ -141,7 +142,7 @@ export function App() {
       columns={columns}
       rowKey={(r) => r.id}
       searchPlaceholder="Search people…"
-      enableColumnMenu
+      features={[columnMenu()]}
       classNames={classNames}
     />
   );

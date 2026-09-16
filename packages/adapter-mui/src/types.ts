@@ -1,12 +1,10 @@
-import type {
-  BaseDataTableProps,
-  Slot,
-  TableErrorState,
-  TableSource,
-  UrlStateAdapter,
-  UseSavedViewsOptions,
-} from "@adapttable/core";
-import type { DataModeProps } from "@adapttable/core/adapter";
+import type { TableErrorState, TableSource } from "@adapttable/core";
+import {
+  type BaseDataTableProps,
+  type Slot,
+  type UrlStateAdapter,
+} from "@adapttable/react";
+import type { DataModeProps } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 /**
@@ -107,26 +105,12 @@ export interface DataTablePropsBase<TRow> extends Omit<
    * multiple tables can share one URL without colliding.
    */
   urlKey?: string;
-  /**
-   * Mount a saved-views menu in the toolbar: name and capture the table's
-   * current URL state (search, sort, page, filters, column layout), then
-   * re-apply it on demand. `adapter`/`urlKey` default to the table's own
-   * `urlAdapter`/`urlKey`, so usually only `storageKey` is needed.
-   */
-  savedViews?: UseSavedViewsOptions;
   /** Replace sub-components (skeleton, empty-state). */
   slots?: DataTableSlots;
   /** Class name applied to the root `<Paper>`. */
   className?: string;
   /** Per-part class hooks for the structural elements. */
   classNames?: DataTableClassNames;
-  /**
-   * Explicit MUI table size override. When omitted, the size is derived from
-   * `density`: `"comfortable"` → `"medium"`, `"compact"` → `"small"`.
-   *
-   * @deprecated Use `density` instead. Removed at v3.
-   */
-  size?: "small" | "medium";
   /**
    * Animate rows/cards on mount (dependency-free; honors reduced motion).
    * Off by default.

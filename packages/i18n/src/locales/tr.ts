@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "tamamlandı",
+  staged: "hazırlandı",
+  partial: "kısmen tamam",
+  rejected: "reddedildi",
+  "awaiting-approval": "sizi bekliyor",
+  cancelled: "iptal edildi",
+  stale: "güncel değil",
+  failed: "başarısız",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "hücre düzenleme",
+  "rows.add": "satır ekleme",
+  "rows.delete": "satır silme",
+  "rows.reorder": "satır sıralama",
+  "export.run": "dışa aktarma",
+};
+
 export const tr: Required<TableLabels> = {
   table: "Veri tablosu",
   search: "Ara",
@@ -115,6 +136,13 @@ export const tr: Required<TableLabels> = {
   hideAllColumns: "Tümünü gizle",
   unpinAllColumns: "Tümünü çöz",
   resetColumn: "Sütunu sıfırla",
+  renameColumn: "Sütunu yeniden adlandır",
+  columnName: "Sütun adı",
+  saveColumnName: "Adı kaydet",
+  cancelColumnRename: "İptal",
+  columnNameRequired: "Bir sütun adı girin.",
+  columnRenamed: ({ previous, name }) =>
+    `${previous} sütununun adı ${name} olarak değiştirildi`,
   sortAscending: "Artan sırala",
   sortDescending: "Azalan sırala",
   sortedBy: ({ column, ascending }) =>
@@ -124,8 +152,13 @@ export const tr: Required<TableLabels> = {
   columnActions: "Sütun işlemleri",
   exportCsv: "CSV olarak dışa aktar",
   exportFile: (format) => `${format.toUpperCase()} olarak dışa aktar`,
+  exportStarted: "Dışa aktarma hazırlanıyor",
+  exportProgress: (progress) => `Dışa aktarma %${progress} tamamlandı`,
   exportDone: "Dışa aktarma tamamlandı",
   exportFailed: "Dışa aktarma başarısız",
+  exportCancelled: "Dışa aktarma iptal edildi",
+  exportDownload: "Dışa aktarmayı indir",
+  exportDismiss: "Dışa aktarmayı kapat",
   editCell: "Hücreyi düzenle",
   undoEdit: "Geri al",
   redoEdit: "Yinele",
@@ -137,6 +170,179 @@ export const tr: Required<TableLabels> = {
       : `${String(count)} kaydedilmemiş satır`,
   saveAll: "Tümünü kaydet",
   cancelAll: "Tümünü iptal et",
+  approveProposal: "Onayla",
+  rejectProposal: "Reddet",
+  proposalValueUnavailable: "Kullanılamıyor",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 önerilen değişiklik"
+        : "{c} önerilen değişiklik".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"{r} satırda".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "{c} değişikliğin tümünü incele".replace("{c}", String(count)),
+  backToConversation: "Sohbete dön",
+  approveAllProposals: "Tümünü onayla",
+  approveRemainingProposals: "Kalanları onayla",
+  rejectAllProposals: "Tümünü reddet",
+  rejectRemainingProposals: "Kalanları reddet",
+  alwaysAllowProposal: "Her zaman izin ver",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} onaylandı · {j} reddedildi · {p} kaldı"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "Bir değişiklik kararınızı bekliyor.",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 önerilen değişiklik"
+      : `${String(count)} önerilen değişiklik`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "Tablo asistanı",
+  assistantOpen: "Yapay zekâya sor",
+  assistantClose: "Kapat",
+  assistantSettings: "Asistan ayarları",
+  assistantEmpty: "Bu tabloyla ne yapmak istersiniz?",
+  assistantPlaceholder: "Bu tablo hakkında sorun…",
+  assistantSend: "Gönder",
+  assistantStop: "Durdur",
+  assistantVoiceStart: "Dikte et",
+  assistantVoiceStop: "Diktesi durdur",
+  assistantVoiceListening: "Dinleniyor",
+  assistantVoiceLanguage: "Dikte dili",
+  assistantYou: "Siz",
+  assistantSpeaker: "Asistan",
+  assistantNewMessages: "Yeni iletiler",
+  assistantUnavailable: "Asistan bağlı değil.",
+  assistantDetached: "Bağlantı koptu. İş hâlâ sürüyor olabilir.",
+  assistantRejoin: "Yeniden bağlan",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} tamamlandı`
+      : `${String(total)} içinden ${String(done)}`,
+  assistantBackToTable: "Tabloya dön",
+  assistantDetail: "Ayrıntılar",
+  assistantSaveInTable: "Bu değişikliği korumak için tabloda kaydedin.",
+  assistantUndo: "Geri al",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Bu, bir turun izin verdiğinden fazla adım gerektiriyor. Bir kısmını isteyin.",
+        "continuation-limit":
+          "Bu, bir turun izin verdiğinden fazla adım gerektiriyor. Bir kısmını isteyin.",
+        "resume-limit":
+          "Bu, bir turun izin verdiğinden fazla adım gerektiriyor. Bir kısmını isteyin.",
+        "discovery-exhausted": "Asistan bunu burada nasıl yapacağını çözemedi.",
+        "repeated-plan": "Asistan aynı şeyi iki kez istedi ve durdu.",
+        "question-unanswered": "Bitmesi için sizden bir yanıt gerekiyor.",
+        "approval-unavailable": "Onay gerekiyor ve soracak bir yer yok.",
+        "interrupt-unsupported":
+          "Asistan bu tablonun yapamayacağı bir şey istedi.",
+        "output-denied": "Bunun bir kısmının çalışmasına izin verilmedi.",
+        "not-run": "Bu çalışmadı.",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "Bu çalıştıktan sonra tablo değişti.",
+        "cannot-restore": "Bunun bir kısmı geri alınamaz.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "Yanıtınız",
+  assistantAnswerPlaceholder: "Bir yanıt yazın",
+  assistantAnswerSend: "Yanıtla",
+  assistantAlwaysAllowedTitle: "Artık sorulmayanlar",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `${CAPABILITY[capability] ?? capability} için yeniden sor`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 işlem" : `${String(count)} işlem`,
+  assistantActionsTitle: "Bu turda değişenler",
+  assistantUndoAll: "Tümünü geri al",
+  assistantExamples: "Kısayollar",
+  assistantReceiptChange: ({ before, after }) =>
+    `${before} değerinden ${after} değerine değiştirildi`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `Önerilen: ${before} değerinden ${after} değerine`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "Filtre uygulandı",
+        "filter/staged": "Filtre hazırlandı",
+        "sort/executed": "Sıralandı",
+        "group/executed": "Gruplandı",
+        "pin/executed": "Sütun sabitlendi",
+        "edit/executed": "Kaydedildi",
+        "edit/staged": "Düzenleme hazırlandı — kaydedilmedi",
+        "edit/awaiting-approval": "Düzenleme onay bekliyor",
+        "edit/partial": "Bazı düzenlemeler kaydedildi, bazıları reddedildi",
+        "edit/rejected": "Düzenleme reddedildi",
+        "filter-cleared/executed": "Filtreler temizlendi",
+        "sort-cleared/executed": "Sıralama kaldırıldı",
+        "search/executed": "Arandı",
+        "search-cleared/executed": "Arama temizlendi",
+        "group-cleared/executed": "Gruplama kaldırıldı",
+        "pin-cleared/executed": "Sütun sabitlemesi kaldırıldı",
+        "pinRow/executed": "Satır sabitlendi",
+        "pinRow-cleared/executed": "Satır sabitlemesi kaldırıldı",
+        "page/executed": "Sayfa değişti",
+        "aggregate/executed": "Toplamlar değişti",
+        "select/executed": "Seçim değişti",
+        "read/executed": "Tablo okundu",
+        "operation/executed": "Çalıştırıldı",
+        "operation/awaiting-approval": "Sizi bekliyor",
+        "operation/rejected": "Reddedildi",
+        "export/executed": "Dışa aktarıldı",
+        "add/executed": "Satır eklendi",
+        "add/awaiting-approval": "Yeni satır onay bekliyor",
+        "add/rejected": "Yeni satır reddedildi",
+        "delete/executed": "Satırlar silindi",
+        "delete/awaiting-approval": "Silme onay bekliyor",
+        "delete/partial": "Bazı satırlar silindi, bazıları korundu",
+        "delete/rejected": "Silme reddedildi",
+        "reorder/executed": "Satırlar taşındı",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "azalan" : "artan"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "Boşta",
+      connecting: "Bağlanıyor…",
+      ready: "Hazır",
+      sending: "Çalışıyor…",
+      "awaiting-approval": "Sizi bekliyor",
+      "awaiting-user": "Sizi bekliyor",
+      error: "Hata",
+      disconnected: "Bağlı değil",
+    })[status] ?? "Hazır",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Satır ekle",
   duplicateRow: "Satırı çoğalt",
   deleteRow: "Satırı sil",
@@ -153,9 +359,28 @@ export const tr: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Satır ${String(from)} konumundan ${String(to)} konumuna taşındı`,
   rowReorderCancelled: "Yeniden sıralama iptal edildi",
+  rowMoveOptions: "Satır taşıma seçenekleri",
+  moveToGroup: "Gruba taşı…",
+  moveUnder: "Altına taşı…",
+  moveToTopLevel: "En üst düzeye taşı",
+  confirmRowMoveTitle: "Satır taşımayı onayla",
+  confirmRowMoveDescription: (row, from, to) =>
+    `${row}, ${from} konumundan ${to} konumuna taşınsın mı?`,
+  confirmRowMove: "Taşı",
+  rowMovedToGroup: (group) => `Satır ${group} grubuna taşındı`,
+  rowMovedUnder: (parent) => `Satır ${parent} altına taşındı`,
+  moveRejectedPolicyNever: "Sınırlar arası satır taşıma devre dışı",
+  moveRejectedSorted: "Satır sırasını değiştirmeden önce sıralamayı temizleyin",
+  moveRejectedCycle:
+    "Bir satır kendi içine veya alt öğelerinden birinin içine taşınamaz",
+  moveUnavailable: "Bu satır taşıma işlemi kullanılamıyor",
+  rootLevel: "En üst düzey",
   pinToTop: "Üste sabitle",
   pinToBottom: "Alta sabitle",
   unpinRow: "Satırı bırak",
+  pinnedSummaryRow: "Özet satırı",
+  pinnedSummaryTop: "Üste sabitlenmiş özet satırları",
+  pinnedSummaryBottom: "Alta sabitlenmiş özet satırları",
   rowSeparator: "Ayırıcı",
   expandColumnGroup: "Sütun grubunu genişlet",
   collapseColumnGroup: "Sütun grubunu daralt",
@@ -165,6 +390,34 @@ export const tr: Required<TableLabels> = {
   expandGroup: "Grubu genişlet",
   collapseGroup: "Grubu daralt",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "Satır gruplama",
+  groupingDropColumns: "Gruplamak için sütunları buraya sürükleyin",
+  addGroupingColumn: "Gruplama sütunu ekle",
+  groupByColumn: (label) => `${label} ölçütüne göre grupla`,
+  ungroupColumn: (label) => `${label} gruplamasını kaldır`,
+  removeGroupingColumn: (label) => `${label} sütununu gruplamadan kaldır`,
+  moveGroupingColumn: (label) => `${label} gruplamasını taşı`,
+  groupingDropToRemove: "Gruplamadan kaldırmak için buraya bırakın",
+  groupingAggregateColumn: "Toplama sütunu",
+  groupingAggregation: "Grup toplaması",
+  groupingAggregationDefault: "Varsayılan",
+  groupingAggregationNone: "Yok",
+  groupingAggregations: "Toplamalar",
+  groupingAddAggregation: "Toplama sütunu ekle",
+  groupingRestoreAggregations: "Varsayılanları geri yükle",
+  groupingRemoveAggregation: (column) => `${column} toplamasını kaldır`,
+  groupingAggregationFor: (column) => `${column} toplaması`,
+  groupingAggregationReadOnly: "Uygulama tarafından ayarlandı",
+  groupingAggregationCustom: "Özel",
+  groupingAggregateRemoved: (column) => `${column} toplaması kaldırıldı`,
+  groupingAggregatesRestored: "Toplamalar varsayılanlara geri yüklendi",
+  groupingAverage: "Ortalama",
+  groupingAdded: (label) => `${label} gruplamaya eklendi`,
+  groupingRemoved: (label) => `${label} gruplamadan kaldırıldı`,
+  groupingMoved: (label, position) =>
+    `${label}, ${position}. gruplama konumuna taşındı`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `${label} grup toplaması ${aggregation} olarak değiştirildi`,
   gridRangeCopied: (cells) => `${cells} hücre kopyalandı`,
   gridRangeCopyFailed: "Kopyalama başarısız",
   gridRangePasted: (cells) => `${cells} hücre yapıştırıldı`,
@@ -217,10 +470,8 @@ export const tr: Required<TableLabels> = {
     "Sanallaştırma kapalı — bu sayfalanmış tablo her seferinde bir sayfa gösterir.",
   noticePinNested: "Gruplama veya ağaç açıkken satır sabitleme kapalıdır.",
   noticeReorderNested: "Gruplama veya ağaç açıkken satır sıralama kapalıdır.",
-  noticeGroupingUnavailable:
-    "Gruplama kapalı — bu kaynak tam filtrelenmiş kümeyi sağlamıyor.",
+  noticeGroupingUnavailable: "Gruplama kapalı — bu kaynak gruplayamaz.",
   noticeExportAllPage:
-    "Tümünü dışa aktarma bu sayfadır — tam filtrelenmiş küme yok.",
+    "Tümünü dışa aktarma kapalı — bu kaynak her seferinde tek sayfa verir.",
   noticeEditWithoutWriter: "Düzenleme kapalı — yazma işleyicisi bağlı değil.",
-  exportThisPage: "Bu sayfayı dışa aktar",
 };

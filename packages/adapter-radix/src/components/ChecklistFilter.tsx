@@ -5,7 +5,7 @@ import {
   type ChecklistFilterProps,
   type ChecklistSearchProps,
   type ChecklistSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, TextField } from "@radix-ui/themes";
 
 import { Checkbox } from "./primitives";
@@ -17,7 +17,7 @@ function ChecklistSearch({
   value,
   className,
   onChange,
-}: ChecklistSearchProps) {
+}: Readonly<ChecklistSearchProps>) {
   return (
     <TextField.Root
       size="2"
@@ -47,7 +47,7 @@ function ChecklistBox({
   className,
   countClassName,
   onChange,
-}: ChecklistCheckboxProps) {
+}: Readonly<ChecklistCheckboxProps>) {
   return (
     <Checkbox
       data-adapttable-part="filter-checkbox"

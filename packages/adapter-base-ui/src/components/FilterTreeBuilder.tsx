@@ -6,7 +6,7 @@ import {
   type FilterTreeInputProps,
   type FilterTreeSelectProps,
   type FilterTreeSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { Button, Flex, TextField } from "../ui";
 import { NativeSelect } from "./primitives";
@@ -20,7 +20,7 @@ function TreeSelect({
   options,
   className,
   onChange,
-}: FilterTreeSelectProps) {
+}: Readonly<FilterTreeSelectProps>) {
   return (
     <div style={{ flex: "0 1 8.5rem", minWidth: "8.5rem", maxWidth: "11rem" }}>
       <NativeSelect
@@ -43,7 +43,7 @@ function TreeInput({
   type,
   className,
   onChange,
-}: FilterTreeInputProps) {
+}: Readonly<FilterTreeInputProps>) {
   return (
     <TextField.Root
       size="1"
@@ -63,7 +63,7 @@ function TreeButton({
   part,
   className,
   onClick,
-}: FilterTreeButtonProps) {
+}: Readonly<FilterTreeButtonProps>) {
   return (
     <Button
       type="button"
@@ -85,7 +85,7 @@ function TreeDisclosure({
   summaryClassName,
   children,
   onExpandedChange,
-}: FilterTreeDisclosureProps) {
+}: Readonly<FilterTreeDisclosureProps>) {
   return (
     <Flex
       direction="column"

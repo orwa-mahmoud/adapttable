@@ -12,7 +12,7 @@
  * both fire under `fireEvent`, and the popover's Escape handler hands focus
  * back to the trigger itself — so this file asserts that restoration too.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import {
   cleanup,
@@ -25,8 +25,9 @@ import {
 import { afterEach, describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
-import { DataTable } from "./DataTable";
-import type { ColumnDef, DataTableProps } from "./index";
+import { DataTable } from "./data-table.test-utils";
+import { filters as filtersFeature } from "./filters";
+import type { ColumnDef } from "./index";
 
 interface Person {
   id: string;
@@ -52,9 +53,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 
 // A select + a numberRange exercises the full auto-built filter form, so axe
 // scans real, labelled form controls — not an empty card.
-const FILTERS: DataTableProps<Person>["filters"] = [
-  { key: "age", type: "numberRange" },
-];
+const FILTERS = [{ key: "age", type: "numberRange" as const }];
 
 // `color-contrast` is jsdom-blind (the existing a11y.test.tsx disables it for
 // the same reason). `region` flags page-level landmarks — the host app's job,
@@ -70,7 +69,7 @@ const AXE_TIMEOUT_MS = 20_000;
 const theme = createTheme();
 
 function renderTable(
-  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}
 ) {
   return render(
     <ThemeProvider theme={theme}>
@@ -80,6 +79,7 @@ function renderTable(
         rowKey={(r) => r.id}
         urlAdapter={createMemoryAdapter("")}
         filters={FILTERS}
+        features={[filtersFeature<Person>(FILTERS)]}
         {...override}
       />
     </ThemeProvider>

@@ -76,6 +76,19 @@ export const shadcnClassNames = {
   cellMatchCurrent: "bg-amber-400/80 dark:bg-amber-400/60",
   exportSpinner:
     "size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent",
+  exportProgressSurface:
+    "rounded-lg border border-border bg-card text-card-foreground shadow-xl",
+  exportProgressBar: "h-2 overflow-hidden rounded-full accent-primary",
+  exportProgressMessage: "my-2 text-sm text-muted-foreground",
+  exportProgressActions: "mt-3 flex flex-wrap justify-end gap-2",
+  exportProgressCancel:
+    "inline-flex h-8 items-center rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+  exportProgressRetry:
+    "inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90",
+  exportProgressDownload:
+    "inline-flex h-8 items-center rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+  exportProgressDismiss:
+    "inline-flex h-8 items-center rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
   filtersBackdrop: "fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]",
   filtersPanel:
     "fixed inset-y-0 end-0 z-50 flex w-[420px] max-w-[88vw] flex-col border-s border-border bg-card text-card-foreground shadow-2xl",
@@ -192,10 +205,37 @@ export const shadcnClassNames = {
   columnMenuSubmenu: "ms-6 flex flex-col gap-0.5 py-1",
   columnMenuAction:
     "w-full rounded-md px-2 py-1.5 text-start text-[13px] font-medium hover:bg-muted/60 disabled:opacity-50",
+  columnMenuChoice: "grid gap-1 rounded-md px-2 py-1.5",
+  columnMenuChoiceLabel: "text-xs font-medium text-muted-foreground",
+  columnMenuChoiceSelect:
+    "h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+  columnRenameForm:
+    "ms-6 grid gap-1 rounded-md border border-border bg-background p-2",
+  columnRenameLabel: "text-xs font-medium text-muted-foreground",
+  columnRenameInput:
+    "h-8 min-w-0 rounded-md border border-input bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring",
+  columnRenameError: "text-xs text-destructive",
+  columnRenameSave:
+    "rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90",
+  columnRenameCancel: "rounded-md px-2 py-1 text-xs font-medium hover:bg-muted",
+  headerRenameButton:
+    "ms-1 inline-flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50",
+  headerRenameForm:
+    "inline-flex flex-wrap items-end gap-1 rounded-md border border-border bg-background p-1.5",
+  headerRenameLabel: "text-xs font-medium text-muted-foreground",
+  headerRenameInput:
+    "h-7 w-36 rounded-md border border-input bg-background px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring",
+  headerRenameError: "basis-full text-xs text-destructive",
+  headerRenameSave:
+    "h-7 rounded-md bg-primary px-2 text-xs font-medium text-primary-foreground hover:bg-primary/90",
+  headerRenameCancel: "h-7 rounded-md px-2 text-xs font-medium hover:bg-muted",
   headerActions: "ms-1 inline-flex items-center gap-0.5",
   tableFooter: "px-3 py-2 text-sm text-muted-foreground",
   resizeHandle: "hover:bg-border",
-  card: "list-none rounded-xl border border-border bg-card p-3 shadow-sm [[data-density=compact]_&]:p-2",
+  // min-w-0: a grid item sizes to its content unless told otherwise, and a
+  // card with a long value would otherwise be wider than the list holding
+  // it, pushing the page sideways on a phone.
+  card: "min-w-0 list-none rounded-xl border border-border bg-card p-3 shadow-sm [[data-density=compact]_&]:p-2",
   cardRow:
     "flex items-start justify-between gap-3 py-1 text-sm first-of-type:mb-1 first-of-type:border-b first-of-type:border-border first-of-type:pb-2",
   cardLabel:
@@ -309,6 +349,33 @@ export const shadcnClassNames = {
   groupLabel: "text-sm font-semibold",
   groupCount: "text-xs text-muted-foreground",
   groupAggregate: "ms-auto text-xs text-muted-foreground",
+  // ── Interactive row-grouping panel ──────────────────────────────
+  groupingPanel:
+    "flex flex-wrap items-center gap-2 border-b border-border bg-muted/20 px-3 py-2",
+  groupingDropZone:
+    "m-0 inline-flex min-h-8 min-w-3 items-center justify-center rounded-md border border-dashed border-border p-0 text-xs text-muted-foreground data-[active]:border-primary data-[active]:bg-primary/10 data-[empty]:min-w-40 data-[empty]:px-2",
+  groupingItem: "inline-flex items-center gap-2",
+  groupingChip:
+    "inline-flex items-center gap-1 rounded-md border border-border bg-background p-1 shadow-sm",
+  groupingChipHandle:
+    "inline-flex cursor-grab items-center gap-1 rounded px-1.5 py-0.5 text-sm font-medium outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring data-[grouping-dragging]:cursor-grabbing data-[grouping-dragging]:opacity-60",
+  groupingChipRemove:
+    "inline-grid size-6 place-items-center rounded text-muted-foreground hover:bg-accent hover:text-foreground",
+  groupingAdd:
+    "h-8 w-auto max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+  groupingAggregations: "flex w-full min-w-0 flex-wrap items-center gap-2",
+  groupingAggregationItem:
+    "inline-flex max-w-full items-center gap-0.5 rounded-full bg-muted px-3 py-1 text-sm font-semibold",
+  groupingAggregationOperation:
+    "h-8 border-0 bg-transparent px-1 text-sm font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+  groupingAggregationRemove:
+    "inline-grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground",
+  groupingAggregationAdd:
+    "h-10 w-auto max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+  groupingAggregationsRestore:
+    "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+  groupingRemoveZone:
+    "inline-flex min-h-8 items-center rounded-md border border-dashed border-destructive px-2 text-xs text-destructive data-[active]:bg-destructive/10",
   // A rejected commit reads as a form error, in the destructive tone shadcn
   // already uses for one.
   editCellError: "mt-1 block text-xs text-destructive",

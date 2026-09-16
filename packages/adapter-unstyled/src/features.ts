@@ -1,16 +1,11 @@
 /**
  * `@adapttable/<kit>/features` — the feature factories and every type they
- * hand back, forwarded from `@adapttable/core/features`.
+ * hand back, forwarded from `@adapttable/react/features`.
  *
- * The whole surface, not the factories alone: a host writing its own
- * `TableFeature` names `Aggregator`, `ExportWriter`, `FilterTypeSpec`,
- * `SidePanelEntry`, `Command` and `CustomCellEditorRender` to register
- * anything on the host, and reaching into `@adapttable/core` for them is the
- * one thing importing from your kit is meant to avoid.
+ * The explicit manifest keeps shadcn's second-level forwarding surface exact;
+ * a nested wildcard can expose core's private bundle symbols.
  *
- * Every kit forwards the same list, so `etc/api-contract.json` gives all of
- * them one shared `kit/features` surface: a kit that stops forwarding a name
- * fails the contract check against the other seven.
+ * @packageDocumentation
  */
 export {
   type Aggregator,
@@ -64,6 +59,7 @@ export {
   type NestedTableFor,
   print,
   resizableColumns,
+  rowActions,
   rowAppearance,
   rowDetail,
   rowEditing,
@@ -86,4 +82,4 @@ export {
   type UseSavedViewsOptions,
   useTableFeatures,
   virtualize,
-} from "@adapttable/core/features";
+} from "@adapttable/react/features";

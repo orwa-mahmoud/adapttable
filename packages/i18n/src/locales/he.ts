@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "בוצע",
+  staged: "מוכן לשמירה",
+  partial: "בוצע חלקית",
+  rejected: "נדחה",
+  "awaiting-approval": "ממתין לך",
+  cancelled: "בוטל",
+  stale: "לא עדכני",
+  failed: "נכשל",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "עריכת תאים",
+  "rows.add": "הוספת שורות",
+  "rows.delete": "מחיקת שורות",
+  "rows.reorder": "סידור שורות מחדש",
+  "export.run": "ייצוא",
+};
+
 export const he: Required<TableLabels> = {
   table: "טבלת נתונים",
   search: "חיפוש",
@@ -116,6 +137,12 @@ export const he: Required<TableLabels> = {
   hideAllColumns: "הסתר הכול",
   unpinAllColumns: "בטל נעיצה לכולן",
   resetColumn: "אפס עמודה",
+  renameColumn: "שינוי שם העמודה",
+  columnName: "שם העמודה",
+  saveColumnName: "שמירת השם",
+  cancelColumnRename: "ביטול",
+  columnNameRequired: "יש להזין שם עמודה.",
+  columnRenamed: ({ previous, name }) => `שם העמודה ${previous} שונה ל-${name}`,
   sortAscending: "מיין בסדר עולה",
   sortDescending: "מיין בסדר יורד",
   sortedBy: ({ column, ascending }) =>
@@ -125,8 +152,13 @@ export const he: Required<TableLabels> = {
   columnActions: "פעולות עמודה",
   exportCsv: "ייצוא CSV",
   exportFile: (format) => `ייצוא ${format.toUpperCase()}`,
+  exportStarted: "מכין את הייצוא",
+  exportProgress: (progress) => `הייצוא הושלם ב-${progress}%`,
   exportDone: "הייצוא הושלם",
   exportFailed: "הייצוא נכשל",
+  exportCancelled: "הייצוא בוטל",
+  exportDownload: "הורדת הייצוא",
+  exportDismiss: "סגור ייצוא",
   editCell: "עריכת תא",
   undoEdit: "בטל",
   redoEdit: "בצע שוב",
@@ -136,6 +168,174 @@ export const he: Required<TableLabels> = {
     count === 1 ? "שורה אחת שלא נשמרה" : `${String(count)} שורות שלא נשמרו`,
   saveAll: "שמור הכול",
   cancelAll: "בטל הכול",
+  approveProposal: "אשר",
+  rejectProposal: "דחה",
+  proposalValueUnavailable: "לא זמין",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "שינוי מוצע אחד"
+        : "{c} שינויים מוצעים".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"ב-{r} שורות".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "סקירת כל {c} השינויים".replace("{c}", String(count)),
+  backToConversation: "חזרה לשיחה",
+  approveAllProposals: "אישור הכול",
+  approveRemainingProposals: "אישור השאר",
+  rejectAllProposals: "דחיית הכול",
+  rejectRemainingProposals: "דחיית השאר",
+  alwaysAllowProposal: "לאפשר תמיד",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} אושרו · {j} נדחו · {p} נותרו"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "שינוי ממתין להחלטתך.",
+  pendingProposals: (count) =>
+    count === 1 ? "שינוי מוצע אחד" : `${String(count)} שינויים מוצעים`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "עוזר הטבלה",
+  assistantOpen: "שאל את ה-AI",
+  assistantClose: "סגירה",
+  assistantSettings: "הגדרות העוזר",
+  assistantEmpty: "מה תרצה לעשות עם הטבלה הזאת?",
+  assistantPlaceholder: "שאל על הטבלה הזאת…",
+  assistantSend: "שליחה",
+  assistantStop: "עצירה",
+  assistantVoiceStart: "הכתבה",
+  assistantVoiceStop: "עצירת ההכתבה",
+  assistantVoiceListening: "מקשיב",
+  assistantVoiceLanguage: "שפת ההכתבה",
+  assistantYou: "אתה",
+  assistantSpeaker: "עוזר",
+  assistantNewMessages: "הודעות חדשות",
+  assistantUnavailable: "העוזר אינו מחובר.",
+  assistantDetached: "החיבור נותק. ייתכן שהעבודה עדיין רצה.",
+  assistantRejoin: "התחברות מחדש",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} הושלמו`
+      : `${String(done)} מתוך ${String(total)}`,
+  assistantBackToTable: "חזרה לטבלה",
+  assistantDetail: "פרטים",
+  assistantSaveInTable: "שמור בטבלה כדי לשמר את השינוי.",
+  assistantUndo: "ביטול",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "זה דורש יותר שלבים ממה שתור אחד מאפשר. בקשו חלק ממנו.",
+        "continuation-limit":
+          "זה דורש יותר שלבים ממה שתור אחד מאפשר. בקשו חלק ממנו.",
+        "resume-limit": "זה דורש יותר שלבים ממה שתור אחד מאפשר. בקשו חלק ממנו.",
+        "discovery-exhausted": "העוזר לא הצליח להבין איך לעשות זאת כאן.",
+        "repeated-plan": "העוזר ביקש את אותו דבר פעמיים ועצר.",
+        "question-unanswered": "נדרשת תשובה שלכם כדי לסיים.",
+        "approval-unavailable": "נדרש אישור, ואין את מי לשאול.",
+        "interrupt-unsupported": "העוזר ביקש משהו שהטבלה הזו לא יכולה לעשות.",
+        "output-denied": "חלק מזה לא הורשה לרוץ.",
+        "not-run": "זה לא רץ.",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "הטבלה השתנתה מאז שזה רץ.",
+        "cannot-restore": "חלק מזה לא ניתן להשבה.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "התשובה שלך",
+  assistantAnswerPlaceholder: "הקלידו תשובה",
+  assistantAnswerSend: "שליחה",
+  assistantAlwaysAllowedTitle: "לא נשאל על",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `לשאול שוב על ${CAPABILITY[capability] ?? capability}`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "פעולה אחת" : `${String(count)} פעולות`,
+  assistantActionsTitle: "מה התור הזה שינה",
+  assistantUndoAll: "בטל הכול",
+  assistantExamples: "קיצורי דרך",
+  assistantReceiptChange: ({ before, after }) => `שונה מ-${before} ל-${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `הוצע: מ-${before} ל-${after}`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "הסינון הוחל",
+        "filter/staged": "הסינון הוכן",
+        "sort/executed": "מוין",
+        "group/executed": "קובץ",
+        "pin/executed": "העמודה ננעצה",
+        "edit/executed": "נשמר",
+        "edit/staged": "העריכה הוכנה — לא נשמרה",
+        "edit/awaiting-approval": "העריכה ממתינה לאישור",
+        "edit/partial": "חלק מהעריכות נשמרו וחלק נדחו",
+        "edit/rejected": "העריכה נדחתה",
+        "filter-cleared/executed": "הסינון נוקה",
+        "sort-cleared/executed": "המיון בוטל",
+        "search/executed": "בוצע חיפוש",
+        "search-cleared/executed": "החיפוש נוקה",
+        "group-cleared/executed": "הקיבוץ בוטל",
+        "pin-cleared/executed": "הצמדת העמודה בוטלה",
+        "pinRow/executed": "השורה הוצמדה",
+        "pinRow-cleared/executed": "הצמדת השורה בוטלה",
+        "page/executed": "העמוד הוחלף",
+        "aggregate/executed": "הסיכומים שונו",
+        "select/executed": "הבחירה שונתה",
+        "read/executed": "הטבלה נקראה",
+        "operation/executed": "בוצע",
+        "operation/awaiting-approval": "ממתין לך",
+        "operation/rejected": "נדחה",
+        "export/executed": "יוצא",
+        "add/executed": "שורה נוספה",
+        "add/awaiting-approval": "שורה חדשה ממתינה לאישור",
+        "add/rejected": "השורה החדשה נדחתה",
+        "delete/executed": "שורות נמחקו",
+        "delete/awaiting-approval": "המחיקה ממתינה לאישור",
+        "delete/partial": "חלק מהשורות נמחקו, חלק נשמרו",
+        "delete/rejected": "המחיקה נדחתה",
+        "reorder/executed": "שורות הוזזו",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "בסדר יורד" : "בסדר עולה"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "ממתין",
+      connecting: "מתחבר…",
+      ready: "מוכן",
+      sending: "עובד…",
+      "awaiting-approval": "ממתין לך",
+      "awaiting-user": "ממתין לך",
+      error: "שגיאה",
+      disconnected: "לא מחובר",
+    })[status] ?? "מוכן",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "הוסף שורה",
   duplicateRow: "שכפל שורה",
   deleteRow: "מחק שורה",
@@ -151,9 +351,27 @@ export const he: Required<TableLabels> = {
   rowLifted: (position) => `שורה ${String(position)} הורמה`,
   rowMoved: (from, to) => `שורה הועברה מ-${String(from)} אל ${String(to)}`,
   rowReorderCancelled: "סידור מחדש בוטל",
+  rowMoveOptions: "אפשרויות העברת שורה",
+  moveToGroup: "העברה לקבוצה…",
+  moveUnder: "העברה תחת…",
+  moveToTopLevel: "העברה לרמה העליונה",
+  confirmRowMoveTitle: "אישור העברת שורה",
+  confirmRowMoveDescription: (row, from, to) =>
+    `להעביר את ${row} מ-${from} אל ${to}?`,
+  confirmRowMove: "העברה",
+  rowMovedToGroup: (group) => `השורה הועברה אל ${group}`,
+  rowMovedUnder: (parent) => `השורה הועברה תחת ${parent}`,
+  moveRejectedPolicyNever: "העברת שורות בין גבולות מושבתת",
+  moveRejectedSorted: "יש לנקות את המיון לפני שינוי סדר השורות",
+  moveRejectedCycle: "לא ניתן להעביר שורה לתוך עצמה או לתוך אחת מצאצאיה",
+  moveUnavailable: "העברת שורה זו אינה זמינה",
+  rootLevel: "הרמה העליונה",
   pinToTop: "הצמד למעלה",
   pinToBottom: "הצמד למטה",
   unpinRow: "בטל הצמדת שורה",
+  pinnedSummaryRow: "שורת סיכום",
+  pinnedSummaryTop: "שורות סיכום מוצמדות למעלה",
+  pinnedSummaryBottom: "שורות סיכום מוצמדות למטה",
   rowSeparator: "מפריד",
   expandColumnGroup: "הרחב קבוצת עמודות",
   collapseColumnGroup: "כווץ קבוצת עמודות",
@@ -163,6 +381,34 @@ export const he: Required<TableLabels> = {
   expandGroup: "הרחב קבוצה",
   collapseGroup: "כווץ קבוצה",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "קיבוץ שורות",
+  groupingDropColumns: "גררו עמודות לכאן כדי לקבץ",
+  addGroupingColumn: "הוספת עמודת קיבוץ",
+  groupByColumn: (label) => `קיבוץ לפי ${label}`,
+  ungroupColumn: (label) => `ביטול הקיבוץ של ${label}`,
+  removeGroupingColumn: (label) => `הסרת ${label} מהקיבוץ`,
+  moveGroupingColumn: (label) => `העברת הקיבוץ של ${label}`,
+  groupingDropToRemove: "שחררו כאן כדי להסיר מהקיבוץ",
+  groupingAggregateColumn: "עמודת צבירה",
+  groupingAggregation: "צבירת קבוצה",
+  groupingAggregationDefault: "ברירת מחדל",
+  groupingAggregationNone: "ללא",
+  groupingAggregations: "צבירות",
+  groupingAddAggregation: "הוספת עמודת צבירה",
+  groupingRestoreAggregations: "שחזור ברירות מחדל",
+  groupingRemoveAggregation: (column) => `הסרת צבירת ${column}`,
+  groupingAggregationFor: (column) => `צבירת ${column}`,
+  groupingAggregationReadOnly: "נקבע על ידי האפליקציה",
+  groupingAggregationCustom: "מותאם",
+  groupingAggregateRemoved: (column) => `צבירת ${column} הוסרה`,
+  groupingAggregatesRestored: "הצבירות שוחזרו לברירות המחדל",
+  groupingAverage: "ממוצע",
+  groupingAdded: (label) => `${label} נוסף לקיבוץ`,
+  groupingRemoved: (label) => `${label} הוסר מהקיבוץ`,
+  groupingMoved: (label, position) =>
+    `${label} הועבר למיקום הקיבוץ ${position}`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `צבירת הקבוצה של ${label} שונתה ל-${aggregation}`,
   gridRangeCopied: (cells) => `${cells} תאים הועתקו`,
   gridRangeCopyFailed: "ההעתקה נכשלה",
   gridRangePasted: (cells) => `הודבקו ${cells} תאים`,
@@ -215,9 +461,7 @@ export const he: Required<TableLabels> = {
     "הווירטואליזציה כבויה — הטבלה המחולקת לעמודים מציגה עמוד אחד בכל פעם.",
   noticePinNested: "נעיצת שורות כבויה כשיש קיבוץ או עץ.",
   noticeReorderNested: "סידור מחדש של שורות כבוי כשיש קיבוץ או עץ.",
-  noticeGroupingUnavailable:
-    "הקיבוץ כבוי — המקור אינו מספק את הסט המסונן המלא.",
-  noticeExportAllPage: "ייצוא הכל הוא העמוד הזה — הסט המסונן המלא אינו זמין.",
+  noticeGroupingUnavailable: "הקיבוץ כבוי — מקור זה אינו יכול לקבץ.",
+  noticeExportAllPage: "ייצוא הכל כבוי — מקור זה מספק עמוד אחד בכל פעם.",
   noticeEditWithoutWriter: "העריכה כבויה — לא חובר מטפל כתיבה.",
-  exportThisPage: "ייצוא העמוד הזה",
 };

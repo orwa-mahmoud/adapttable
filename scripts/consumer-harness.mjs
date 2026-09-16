@@ -41,14 +41,15 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
-  aliasesIn,
   aliasRuntimeProbe,
   aliasTypeProbe,
   BEGINNER,
   CUSTOMIZATION,
   HEADLESS,
+  movedAliases,
+  removedFromCoreMainProbe,
+  removedV2Props,
   SENIOR,
-  V2_PROPS,
 } from "./layer-fixtures.mjs";
 import { missingNames, NAMEABLE, NAMEABLE_PROBE } from "./packed-names.mjs";
 
@@ -167,6 +168,9 @@ function main() {
 
   const REACT = { react: "^19.0.0", "react-dom": "^19.0.0" };
   const CORE = { "@adapttable/core": `file:${tarballs["@adapttable/core"]}` };
+  const REACT_PKG = {
+    "@adapttable/react": `file:${tarballs["@adapttable/react"]}`,
+  };
   const UNSTYLED = {
     "@adapttable/unstyled": `file:${tarballs["@adapttable/unstyled"]}`,
   };
@@ -209,6 +213,7 @@ function main() {
         type: "module",
         dependencies: {
           ...CORE,
+          ...REACT_PKG,
           ...UNSTYLED,
           ...BASE_UI,
           ...SERVER,
@@ -228,16 +233,19 @@ function main() {
   writeFileSync(
     join(resDir, "esm.mjs"),
     `import { DataTable } from "@adapttable/unstyled";
-import { tableQueryKey, useQuerySource } from "@adapttable/core";
-import { useDataTableShell } from "@adapttable/core/adapter";
+import { createTableEngine, tableQueryKey } from "@adapttable/core";
+import { useQuerySource } from "@adapttable/react";
+import { useDataTableShell } from "@adapttable/react/adapter";
 import { pivot } from "@adapttable/core/pivot";
 import { parseTableQuery } from "@adapttable/server";
 if (typeof DataTable !== "function" && typeof DataTable !== "object")
   throw new Error("unstyled DataTable missing from ESM entry");
+if (typeof createTableEngine !== "function")
+  throw new Error("core createTableEngine missing from ESM entry");
 if (typeof useQuerySource !== "function")
-  throw new Error("core useQuerySource missing from ESM entry");
+  throw new Error("react useQuerySource missing from ESM entry");
 if (typeof useDataTableShell !== "function")
-  throw new Error("core/adapter useDataTableShell missing from ESM entry");
+  throw new Error("react/adapter useDataTableShell missing from ESM entry");
 if (typeof pivot !== "function")
   throw new Error("core/pivot missing from ESM entry");
 if (typeof parseTableQuery !== "function")
@@ -253,15 +261,18 @@ console.log("esm ok");
   writeFileSync(
     join(resDir, "cjs.cjs"),
     `const { DataTable } = require("@adapttable/unstyled");
-const { tableQueryKey, useQuerySource } = require("@adapttable/core");
-const { useDataTableShell } = require("@adapttable/core/adapter");
+const { createTableEngine, tableQueryKey } = require("@adapttable/core");
+const { useQuerySource } = require("@adapttable/react");
+const { useDataTableShell } = require("@adapttable/react/adapter");
 const { pivot } = require("@adapttable/core/pivot");
 const { parseTableQuery } = require("@adapttable/server");
 if (!DataTable) throw new Error("unstyled DataTable missing from CJS entry");
+if (typeof createTableEngine !== "function")
+  throw new Error("core createTableEngine missing from CJS entry");
 if (typeof useQuerySource !== "function")
-  throw new Error("core useQuerySource missing from CJS entry");
+  throw new Error("react useQuerySource missing from CJS entry");
 if (typeof useDataTableShell !== "function")
-  throw new Error("core/adapter useDataTableShell missing from CJS entry");
+  throw new Error("react/adapter useDataTableShell missing from CJS entry");
 if (typeof pivot !== "function")
   throw new Error("core/pivot missing from CJS entry");
 if (typeof parseTableQuery !== "function")
@@ -273,30 +284,34 @@ console.log("cjs ok");
   );
   writeFileSync(
     join(resDir, "probe.ts"),
-    `import type { ColumnDef, TableSource } from "@adapttable/core";
-import { useQuerySource } from "@adapttable/core";
-import { useDataTableShell } from "@adapttable/core/adapter";
+    `import type { TableSource } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+import { createTableEngine } from "@adapttable/core";
+import { useQuerySource } from "@adapttable/react";
+import { useDataTableShell } from "@adapttable/react/adapter";
 import { DataTable } from "@adapttable/unstyled";
 
-export const surface = { useQuerySource, useDataTableShell, DataTable };
+export const surface = { createTableEngine, useQuerySource, useDataTableShell, DataTable };
 export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
 `
   );
   writeFileSync(join(resDir, "nameable.ts"), NAMEABLE_PROBE);
   // The three product layers, compiled against the tarballs beside the probes.
-  const aliases = aliasesIn(
+  const manifest = JSON.parse(
     readFileSync(
-      join(REPO_ROOT, "packages", "core", "src", "mainEntryAliases.ts"),
+      join(REPO_ROOT, "scripts", "feature-classification.json"),
       "utf8"
     )
   );
+  const aliases = movedAliases(manifest);
   for (const [name, source] of [
     ["beginner.tsx", BEGINNER],
-    ["v2props.tsx", V2_PROPS],
+    ["removed-v2-props.tsx", removedV2Props(manifest)],
     ["senior.tsx", SENIOR],
     ["customization.tsx", CUSTOMIZATION],
     ["headless.tsx", HEADLESS],
     ["aliases.ts", aliasTypeProbe(aliases)],
+    ["removed-core-main.ts", removedFromCoreMainProbe()],
   ]) {
     writeFileSync(join(resDir, name), source);
   }
@@ -320,8 +335,9 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
             "probe.ts",
             "nameable.ts",
             "aliases.ts",
+            "removed-core-main.ts",
             "beginner.tsx",
-            "v2props.tsx",
+            "removed-v2-props.tsx",
             "senior.tsx",
             "customization.tsx",
             "headless.tsx",
@@ -337,7 +353,7 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
   run(NPM_BIN, ["install", "--no-audit", "--no-fund"], resDir, "npm install");
   console.log("ok");
 
-  process.stdout.write("ESM import + core/adapter subpath … ");
+  process.stdout.write("ESM import + react/adapter subpath … ");
   run(process.execPath, ["esm.mjs"], resDir, "ESM import");
   console.log("ok");
 
@@ -358,7 +374,7 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
 
   checkPackedNames(resDir);
 
-  process.stdout.write("compatibility aliases are still values … ");
+  process.stdout.write("moved aliases are values on react/adapter … ");
   run(process.execPath, ["aliases.mjs"], resDir, "compatibility aliases");
   console.log("ok");
 
@@ -423,7 +439,7 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
         version: "0.0.0",
         private: true,
         type: "module",
-        dependencies: { ...SERVER },
+        dependencies: { ...CORE, ...SERVER },
       },
       null,
       2
@@ -530,6 +546,33 @@ if (wrong.length > 0)
   }
   console.log("ok");
 
+  writeFileSync(
+    join(nodeDir, "core-neutral.mjs"),
+    `import { createTableEngine } from "@adapttable/core";
+import { parseFilterTree } from "@adapttable/core/query";
+const engine = createTableEngine({
+  data: [{ id: "1", name: "Ada" }],
+  columns: [{ key: "name", header: "Name" }],
+  rowKey: (row) => row.id,
+});
+engine.dispatch({ type: "setSearch", search: "Ada" });
+if (engine.snapshot().search !== "Ada")
+  throw new Error("neutral engine search failed");
+if (typeof parseFilterTree !== "function")
+  throw new Error("core/query missing in React-free app");
+console.log("core-neutral ok");
+`
+  );
+
+  process.stdout.write("core engine works without React (ESM) … ");
+  run(
+    process.execPath,
+    ["core-neutral.mjs"],
+    nodeDir,
+    "react-free core engine"
+  );
+  console.log("ok");
+
   process.stdout.write("server parses a query without React (ESM) … ");
   run(process.execPath, ["parse.mjs"], nodeDir, "react-free ESM parse");
   console.log("ok");
@@ -549,7 +592,7 @@ if (wrong.length > 0)
         version: "0.0.0",
         private: true,
         type: "module",
-        dependencies: { ...CORE, ...UNSTYLED, ...REACT },
+        dependencies: { ...CORE, ...REACT_PKG, ...UNSTYLED, ...REACT },
         overrides: OVERRIDES,
         devDependencies: {
           typescript: "^6.0.0",

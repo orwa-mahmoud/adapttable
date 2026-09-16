@@ -1,0 +1,356 @@
+/**
+ * The assistant panel in Ant Design — `@adapttable/antd/assistant`.
+ */
+import {
+  createAdapterTableAssistantFeature,
+  type TableAssistantBadgeProps,
+  type TableAssistantButtonProps,
+  TableAssistantChrome,
+  type TableAssistantComposerProps,
+  type TableAssistantLanguageChipProps,
+  type TableAssistantMenuProps,
+  type TableAssistantPanelProps,
+  type TableAssistantProps,
+  type TableAssistantSheetProps,
+  type TableAssistantWindowProps,
+} from "@adapttable/react/adapter";
+import {
+  Button,
+  Card,
+  Drawer,
+  Dropdown,
+  Input,
+  Select,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
+
+const TAG_COLOR: Record<string, string | undefined> = {
+  neutral: undefined,
+  busy: "processing",
+  warning: "warning",
+  danger: "error",
+};
+
+/** How this kit spells the three prominences the chrome asks for. */
+const KIT_VARIANT = {
+  primary: "primary",
+  secondary: "default",
+  subtle: "text",
+} as const;
+
+function AssistantButton({
+  label,
+  part,
+  className,
+  onClick,
+  disabled,
+  children,
+  expanded,
+  icon,
+  iconOnly,
+  tooltip,
+  variant = "secondary",
+}: Readonly<TableAssistantButtonProps>) {
+  const launcher = part === "assistant-launcher";
+  if (iconOnly) {
+    const control = (
+      <Button
+        type="text"
+        // A corner launcher is round and hand-sized; the header's controls
+        // are neither.
+        size={launcher ? "large" : "small"}
+        shape={launcher ? "circle" : undefined}
+        {...(launcher ? { style: { width: 56, height: 56 } } : {})}
+        icon={icon}
+        aria-label={label}
+        aria-expanded={expanded}
+        data-adapttable-part={part}
+        className={className}
+        disabled={disabled}
+        onClick={onClick}
+      />
+    );
+    return tooltip ? <Tooltip title={tooltip}>{control}</Tooltip> : control;
+  }
+  return (
+    <Button
+      htmlType="button"
+      size="small"
+      type={KIT_VARIANT[variant]}
+      aria-label={label}
+      aria-expanded={expanded}
+      data-adapttable-part={part}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {children ?? label}
+    </Button>
+  );
+}
+
+function AssistantInput({
+  label,
+  placeholder,
+  part,
+  className,
+  value,
+  disabled,
+  onChange,
+  onKeyDown,
+}: Readonly<TableAssistantComposerProps>) {
+  return (
+    <Input.TextArea
+      autoSize={{ minRows: 1, maxRows: 6 }}
+      aria-label={label}
+      placeholder={placeholder}
+      data-adapttable-part={part}
+      className={className}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+      onKeyDown={onKeyDown}
+    />
+  );
+}
+
+function AssistantBadge({
+  label,
+  part,
+  className,
+  tone,
+}: Readonly<TableAssistantBadgeProps>) {
+  return (
+    <Tag
+      color={TAG_COLOR[tone]}
+      data-adapttable-part={part}
+      data-tone={tone}
+      className={className}
+    >
+      {label}
+    </Tag>
+  );
+}
+
+function AssistantPanel({
+  label,
+  part,
+  className,
+  children,
+}: Readonly<TableAssistantPanelProps>) {
+  return (
+    <Card
+      size="small"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      styles={{
+        body: {
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+        },
+      }}
+      style={{ height: "100%" }}
+    >
+      {children}
+    </Card>
+  );
+}
+
+function AssistantSheet({
+  label,
+  part,
+  className,
+  open,
+  onClose,
+  dir,
+  children,
+}: Readonly<TableAssistantSheetProps>) {
+  return (
+    <Drawer
+      placement="bottom"
+      open={open}
+      onClose={onClose}
+      title={label}
+      // antd's Drawer takes no `dir` of its own, and its own direction comes
+      // from ConfigProvider — which a host may not have set for this subtree.
+      // `rootStyle` reaches the portalled root, which is the element that has
+      // to carry it.
+      rootStyle={dir ? { direction: dir } : undefined}
+      data-adapttable-part={part}
+      // antd forwards `data-*` to the content wrapper but `className` to the
+      // drawer root, which would put the host's class on a different element
+      // from the part it names. `classNames.wrapper` lands them together.
+      classNames={{ wrapper: className }}
+      styles={{
+        wrapper: { height: "90%" },
+        body: {
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+          overflow: "hidden",
+        },
+      }}
+    >
+      {children}
+    </Drawer>
+  );
+}
+
+function AssistantWindow({
+  label,
+  part,
+  className,
+  style,
+  children,
+}: Readonly<TableAssistantWindowProps>) {
+  return (
+    <Card
+      size="small"
+      role="dialog"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={{ ...style, boxShadow: "var(--ant-box-shadow-secondary)" }}
+      styles={{
+        body: {
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+        },
+      }}
+    >
+      {children}
+    </Card>
+  );
+}
+
+/**
+ * Ask this table a question, in Ant Design.
+ *
+ * @public
+ */
+/**
+ * The dictation language chooser, in antd.
+ *
+ * Drawn only beside a mic that is already there, and only when more than one
+ * language is offered — the chrome decides both. This is the kit's own
+ * chooser, not a button with a list bolted on.
+ */
+function AssistantLanguageChip({
+  label,
+  value,
+  options,
+  part,
+  className,
+  onChange,
+  disabled,
+}: Readonly<TableAssistantLanguageChipProps>) {
+  return (
+    <Select
+      size="small"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={{ minWidth: "7.5rem" }}
+      value={value}
+      disabled={disabled}
+      options={options.map((option) => ({
+        value: option.value,
+        label: option.label,
+      }))}
+      onChange={onChange}
+    />
+  );
+}
+
+/**
+ * The examples menu, as Ant Design's own dropdown — its overlay, its
+ * placement and the keyboard an antd reader already knows.
+ */
+function AssistantMenu({
+  label,
+  part,
+  className,
+  icon,
+  disabled,
+  items,
+  onSelect,
+  maxHeight,
+}: Readonly<TableAssistantMenuProps>) {
+  return (
+    <Dropdown
+      placement="topLeft"
+      trigger={["click"]}
+      menu={{
+        items: items.map((item) => ({
+          key: item.id,
+          icon: item.icon,
+          label: (
+            <span data-adapttable-part={item.part}>
+              <Typography.Text>{item.title}</Typography.Text>
+              {item.description ? (
+                <Typography.Text type="secondary" style={{ display: "block" }}>
+                  {item.description}
+                </Typography.Text>
+              ) : null}
+            </span>
+          ),
+        })),
+        onClick: (event) => {
+          onSelect(event.key);
+        },
+        style: { maxHeight, overflowY: "auto" },
+      }}
+    >
+      <Tooltip title={label}>
+        <Button
+          type="text"
+          size="small"
+          aria-label={label}
+          data-adapttable-part={part}
+          className={className}
+          disabled={disabled}
+          icon={icon}
+        />
+      </Tooltip>
+    </Dropdown>
+  );
+}
+
+export function TableAssistant(props: Readonly<TableAssistantProps>) {
+  return (
+    <TableAssistantChrome
+      // The colour the conversation is drawn in. antd's primary seed token, or the seed's own default when the host has not turned antd's CSS variables on.
+      // Before the spread, so a host that names its own still wins.
+      accent="var(--ant-color-primary, #1677ff)"
+      {...props}
+      slots={{
+        Panel: AssistantPanel,
+        Sheet: AssistantSheet,
+        Button: AssistantButton,
+        Composer: AssistantInput,
+        Badge: AssistantBadge,
+        Window: AssistantWindow,
+        Menu: AssistantMenu,
+        LanguageChip: AssistantLanguageChip,
+      }}
+    />
+  );
+}
+
+/**
+ * Bind this kit's assistant panel to the assistant slot.
+ *
+ * @public
+ */
+export function tableAssistant() {
+  return createAdapterTableAssistantFeature(TableAssistant);
+}

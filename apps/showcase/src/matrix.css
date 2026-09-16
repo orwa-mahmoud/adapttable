@@ -1,5 +1,5 @@
 /* ============================================================================
-   The adapter-first pages — "AdaptTable for Mantine" and its eighteen features.
+   The adapter-first pages — "AdaptTable for Mantine" and its matrix features.
 
    Every rule here is page chrome. Nothing below styles a table: the demo
    surface is a bordered box with padding, and what happens inside it belongs
@@ -308,8 +308,8 @@
 }
 
 /* ---------- the feature grid ---------- */
-/* Twelve cards, unnumbered: the features are a set, and numbering them would
-   claim an order they do not have. */
+/* Feature cards, unnumbered: the features are a set, and numbering them would
+   claim an order they do not have. The column count is three / two / one. */
 .mx-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -525,6 +525,16 @@
 .mx-brief__side {
   display: grid;
   gap: var(--sp-3);
+  min-width: 0;
+}
+/* Where the AI page portals its developer inspector. A grid child sizes to
+   its content unless told otherwise, and this one holds a JSON schema — so
+   without this the whole column grows to the longest line and the page
+   scrolls sideways on a narrow viewport. */
+#mx-inspector-slot {
+  min-width: 0;
+}
+#mx-inspector-slot > * {
   min-width: 0;
 }
 .mx-refs {

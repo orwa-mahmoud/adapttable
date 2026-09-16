@@ -1,15 +1,16 @@
 /** Mobile-card windowing: the card list renders only the virtual slice. */
-import type * as AdaptTableCore from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import {
-  createMemoryAdapter,
-  useFrontendData,
-  useTableVirtualization,
-} from "@adapttable/core";
+  KEYED_WINDOW,
+  type KeyedWindowSlotProps,
+  slotRender,
+  type TableFeature,
+} from "@adapttable/react/adapter";
 import { render, within } from "@testing-library/react";
 import { ConfigProvider } from "antd";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -31,26 +32,40 @@ const columns: ColumnDef<Row>[] = [
   { key: "city", header: "City", accessor: (r) => r.city },
 ];
 
-// jsdom has no layout, so the real window virtualizer can't materialize a
-// window; mock the core hook (defaulting to the real one) and drive an
-// explicit slice for the windowed case — mirroring the MUI coverage suite.
-vi.mock("@adapttable/core", async (importOriginal) => {
-  const actual = await importOriginal();
+/**
+ * jsdom has no layout, so a real virtualizer materializes no window. antd asks
+ * for its card window through `KEYED_WINDOW`, which only `virtualize` fills —
+ * so a feature that fills the same slot with a fixed slice drives the windowed
+ * path exactly as the real one does, and the seam itself is what is under test.
+ */
+function fixedWindow<TRow>(options: {
+  from: number;
+  count: number;
+  paddingTop: number;
+  paddingBottom: number;
+  measureElement: (node: Element | null) => void;
+}): TableFeature<TRow> {
   return {
-    ...(actual as object),
-    useTableVirtualization: vi.fn(),
+    id: "virtualize",
+    apply: () => ({ virtualize: true }),
+    renders: [
+      slotRender(KEYED_WINDOW, ({ children }: KeyedWindowSlotProps) =>
+        children({
+          enabled: true,
+          indices: Array.from(
+            { length: options.count },
+            (_, i) => options.from + i
+          ),
+          paddingTop: options.paddingTop,
+          paddingBottom: options.paddingBottom,
+          measureElement: options.measureElement,
+        })
+      ),
+    ],
   };
-});
+}
 
 let adapter: ReturnType<typeof createMemoryAdapter>;
-
-beforeEach(async () => {
-  const actual =
-    await vi.importActual<typeof AdaptTableCore>("@adapttable/core");
-  vi.mocked(useTableVirtualization).mockImplementation(
-    actual.useTableVirtualization
-  );
-});
 
 function mount(
   override: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">> = {},
@@ -94,18 +109,18 @@ describe("<DataTable> (Ant Design) mobile card windowing", () => {
     const measureElement = vi.fn();
     // A 10-card window out of 50 source rows, with rows above and below it.
     const WINDOW = 10;
-    vi.mocked(useTableVirtualization).mockReturnValue({
-      enabled: true,
-      rows: Array.from({ length: WINDOW }, (_, i) => ({
-        row: ROWS[i + 5]!,
-        index: i + 5,
-        key: ROWS[i + 5]!.id,
-      })),
-      paddingTop: 320,
-      paddingBottom: 2400,
-      measureElement,
+    const { container } = mount({
+      forceMobile: true,
+      features: [
+        fixedWindow<Row>({
+          from: 5,
+          count: WINDOW,
+          paddingTop: 320,
+          paddingBottom: 2400,
+          measureElement,
+        }),
+      ],
     });
-    const { container } = mount({ forceMobile: true, virtualize: true });
     const list = cardList(container);
     const items = within(list).getAllByRole("listitem");
     // Only the windowed cards render — far fewer than the 50 source rows.

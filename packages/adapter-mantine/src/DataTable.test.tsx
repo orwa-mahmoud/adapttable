@@ -1,10 +1,11 @@
+import type { TableSource } from "@adapttable/core";
 import {
   createMemoryAdapter,
-  type TableSource,
+  type TableErrorState,
   useColumnLayoutUrlState,
   useFrontendData,
-} from "@adapttable/core";
-import { sparklineColumn } from "@adapttable/core/sparkline";
+} from "@adapttable/react";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import { MantineProvider } from "@mantine/core";
 import {
   act,
@@ -17,7 +18,7 @@ import {
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -47,7 +48,7 @@ interface HarnessProps {
   override?: Partial<Omit<Parameters<typeof DataTable<Row>>[0], "mode">>;
 }
 
-function Harness(props: HarnessProps) {
+function Harness(props: Readonly<HarnessProps>) {
   const source = useFrontendData<Row>({
     data: props.rows ?? ROWS,
     urlAdapter: harnessAdapter,
@@ -367,7 +368,7 @@ describe("<DataTable> (Mantine)", () => {
       refetch,
       override: {
         slots: {
-          error: (state) => (
+          error: (state: TableErrorState) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>

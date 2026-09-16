@@ -6,10 +6,8 @@
  * covers what Radix puts inside it and the wiring the headless layer needs:
  * the part name, the validation ARIA, the draft round-trip and the commit.
  */
-import {
-  type EditableCellEditorCtrl,
-  formatMultiDraft,
-} from "@adapttable/core";
+import { formatMultiDraft } from "@adapttable/core";
+import type { EditableCellEditorCtrl } from "@adapttable/react";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

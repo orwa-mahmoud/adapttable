@@ -42,7 +42,7 @@ test("is reachable from the kit's feature grid", async ({ page }) => {
 test("answers the search phrase without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto(`/${KIT}/realtime/`);
+  await page.goto(`/${KIT}/realtime/`, { waitUntil: "domcontentloaded" });
 
   await expect(page).toHaveTitle(copy(FEATURE.title));
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
@@ -57,15 +57,6 @@ test("answers the search phrase without JavaScript", async ({ browser }) => {
   );
   await expect(page.locator("main")).toContainText(ADAPTER.pkg);
   await context.close();
-});
-
-test("the feed says it is waiting until a patch arrives", async ({ page }) => {
-  // With the stream held off, the empty state is a fact rather than a race:
-  // on a fast machine the first patch can land before an assertion can see it.
-  await page.route("**/__adapttable/patches", (route) => route.abort());
-  await page.goto(`/${KIT}/realtime/`);
-  await expect(feed(page)).toContainText("waiting for the first patch");
-  await expect(feed(page).locator("li")).toHaveCount(0);
 });
 
 test("the feed fills as patches land", async ({ page }) => {

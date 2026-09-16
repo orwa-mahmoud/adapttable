@@ -1,16 +1,17 @@
 /** Search field, sort select, filters trigger, menus and rows-per-page. */
 import { pageSizeOptions } from "@adapttable/core";
 import {
-  ExportAnnouncer,
+  FeatureSlot,
+  FILTER_POPOVER,
   SearchIcon,
+  TOOLBAR_EXTRAS,
   type ToolbarChromeProps,
-} from "@adapttable/core/adapter";
-import { Badge, Box, Button, Flex, Spinner, TextField } from "@radix-ui/themes";
+} from "@adapttable/react/adapter";
+import { Badge, Box, Button, Flex, TextField } from "@radix-ui/themes";
 import { type ReactNode } from "react";
 
 import { FiltersIcon } from "../icons";
 import type { RadixAccentColor } from "../types";
-import { FilterPopover } from "./FilterPopover";
 import { NativeSelect, type SelectOption } from "./primitives";
 
 export function pageSizeSelectOptions(
@@ -75,6 +76,9 @@ export function Toolbar<TRow>({
   onExportCsv,
   exportBusy,
   exportAnnouncement = "",
+  exportProgressState,
+  exportDisabled = false,
+  exportDisabledReason = "",
   exportLabel,
   showRowsPerPage,
   accentColor,
@@ -152,65 +156,51 @@ export function Toolbar<TRow>({
           />
         )}
         {toolbar}
-        {hasFilters &&
-          (filtersMode === "popover" ? (
-            <FilterPopover
-              open={filtersOpen}
-              onClose={onCloseFilters}
-              filters={filters}
-              activeFilterCount={activeFilterCount}
-              onClearFilters={onClearFilters}
-              labels={labels}
-              accentColor={accentColor}
-              dir={dir}
-            >
-              {filtersButton}
-            </FilterPopover>
-          ) : (
-            filtersButton
-          ))}
+        {hasFilters && filtersMode === "popover" ? (
+          <FeatureSlot
+            slot={FILTER_POPOVER}
+            props={{
+              open: filtersOpen,
+              onClose: onCloseFilters,
+              filters,
+              activeFilterCount,
+              onClearFilters,
+              labels,
+              dir,
+              children: filtersButton,
+            }}
+          />
+        ) : (
+          hasFilters && filtersButton
+        )}
         {savedViewsMenu}
         {columnMenu}
-        {onUndo && onRedo && (
-          <>
-            <Button
-              size="2"
-              variant="soft"
-              color="gray"
-              data-adapttable-part="undo-button"
-              disabled={canUndo !== true}
-              onClick={onUndo}
-            >
-              {undoLabel}
-            </Button>
-            <Button
-              size="2"
-              variant="soft"
-              color="gray"
-              data-adapttable-part="redo-button"
-              disabled={canRedo !== true}
-              onClick={onRedo}
-            >
-              {redoLabel}
-            </Button>
-          </>
-        )}
-        {onExportCsv && (
-          <Button
-            size="2"
-            variant="outline"
-            color={accentColor}
-            onClick={onExportCsv}
-            disabled={exportBusy}
-            aria-busy={exportBusy}
-          >
-            {/* Radix Themes' own pattern for a working button: its Spinner
-                wrapping the label, which reserves the label's width so the
-                toolbar does not reflow when the export starts. */}
-            <Spinner loading={exportBusy}>{exportLabel}</Spinner>
-          </Button>
-        )}
-        {onExportCsv && <ExportAnnouncer announcement={exportAnnouncement} />}
+        <FeatureSlot
+          slot={TOOLBAR_EXTRAS}
+          props={{
+            onUndo,
+            onRedo,
+            canUndo,
+            canRedo,
+            undoLabel,
+            redoLabel,
+            onPrint,
+            printLabel,
+            density,
+            onDensityChange,
+            onToggleFullscreen,
+            isFullscreen,
+            onExportCsv,
+            exportBusy,
+            exportAnnouncement,
+            exportProgressState,
+            exportLabel,
+            exportDisabled,
+            exportDisabledReason,
+            accentColor,
+            labels,
+          }}
+        />
         {onAddRow && (
           <Button
             size="2"
@@ -219,51 +209,6 @@ export function Toolbar<TRow>({
             onClick={onAddRow}
           >
             {addRowLabel}
-          </Button>
-        )}
-        {onPrint && (
-          <Button
-            size="2"
-            variant="soft"
-            color="gray"
-            data-adapttable-part="print-button"
-            onClick={onPrint}
-          >
-            {printLabel}
-          </Button>
-        )}
-        {onDensityChange && (
-          <Button
-            size="2"
-            variant="soft"
-            color="gray"
-            aria-label={labels.density}
-            data-adapttable-part="density-toggle"
-            onClick={() => {
-              onDensityChange(
-                density === "compact" ? "comfortable" : "compact"
-              );
-            }}
-          >
-            {density === "compact"
-              ? labels.densityCompact
-              : labels.densityComfortable}
-          </Button>
-        )}
-        {onToggleFullscreen && (
-          <Button
-            size="2"
-            variant="soft"
-            color="gray"
-            aria-label={
-              isFullscreen === true
-                ? labels.exitFullscreen
-                : labels.enterFullscreen
-            }
-            data-adapttable-part="fullscreen-toggle"
-            onClick={onToggleFullscreen}
-          >
-            {isFullscreen === true ? "\u2715" : "\u26f6"}
           </Button>
         )}
         {toolbarSlots?.end}

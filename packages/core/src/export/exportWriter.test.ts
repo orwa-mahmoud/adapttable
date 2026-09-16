@@ -9,8 +9,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import type { TableSource } from "../source/TableSource";
-import type { ColumnDef } from "../types";
 import * as env from "../utils/env";
 import {
   buildExportTable,
@@ -34,8 +34,8 @@ const ROWS: Row[] = [
   { id: "2", name: "Linus" },
 ];
 
-const COLUMNS: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (row) => row.name },
+const COLUMNS: ColumnModel<Row>[] = [
+  { key: "name", header: "Name", exportValue: (row) => row.name },
 ];
 
 function makeSource(): TableSource<Row> {
@@ -105,8 +105,8 @@ describe("csvWriter", () => {
   });
 
   it("still neutralises formulas, and still lets a caller turn that off", () => {
-    const columns: ColumnDef<Row>[] = [
-      { key: "name", header: "Name", accessor: () => "=CMD()" },
+    const columns: ColumnModel<Row>[] = [
+      { key: "name", header: "Name", exportValue: () => "=CMD()" },
     ];
     const table = buildExportTable([ROWS[0]!], columns);
     const guarded = csvWriter.build({ table, filename: "export.csv" });
@@ -120,9 +120,9 @@ describe("csvWriter", () => {
   });
 
   it("exports a spanned value once and leaves covered cells empty", () => {
-    const columns: ColumnDef<Row>[] = [
-      { key: "name", header: "Name", accessor: (row) => row.name },
-      { key: "name2", header: "Also", accessor: (row) => row.name },
+    const columns: ColumnModel<Row>[] = [
+      { key: "name", header: "Name", exportValue: (row) => row.name },
+      { key: "name2", header: "Also", exportValue: (row) => row.name },
     ];
     const table = buildExportTable(ROWS, columns, {
       getCellSpan: ({ column, rowIndex }) =>

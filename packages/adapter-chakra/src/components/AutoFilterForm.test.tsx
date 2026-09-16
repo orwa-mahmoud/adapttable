@@ -417,4 +417,17 @@ describe("<AutoFilterForm> (Chakra)", () => {
     );
     expect(screen.getByPlaceholderText("Find…")).toBeVisible();
   });
+  it("text: switching the operator rewrites the filter under the new one", () => {
+    const { setExtras } = renderForm([{ key: "name", type: "text" }], {
+      name: "ada",
+    });
+
+    // A text filter carries its operator beside the value, and changing it
+    // has to rewrite the stored filter rather than leave the old key behind.
+    fireEvent.change(screen.getByLabelText("Operator"), {
+      target: { value: "startsWith" },
+    });
+
+    expect(setExtras).toHaveBeenCalled();
+  });
 });

@@ -2,8 +2,13 @@
  * Radix Themes kit controls — TextField / Button / IconButton / Checkbox.
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
-import { filterLabel, useHeaderFilterOverlay } from "@adapttable/core";
+import { filterLabel } from "@adapttable/core";
+import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
+  type AgentApprovalButtonProps,
+  AgentApprovalChrome,
+  type AgentApprovalListProps,
+  type AgentApprovalProps,
   BatchEditBarChrome,
   type BatchEditBarProps,
   type BatchEditButtonProps,
@@ -31,9 +36,11 @@ import {
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
   hasActiveHeaderFilter,
+  restoreFocusSoon,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -46,14 +53,24 @@ import {
   TreeToggleChrome,
   type TreeToggleProps,
   type TreeToggleSlots,
-} from "@adapttable/core/adapter";
-import { Button, Flex, IconButton, Popover, TextField } from "@radix-ui/themes";
+} from "@adapttable/react/adapter";
+import {
+  Button,
+  DropdownMenu,
+  Flex,
+  IconButton,
+  Popover,
+  Text,
+  TextField,
+} from "@radix-ui/themes";
+import { useEffect, useRef, useState } from "react";
 
-import { FiltersIcon } from "../icons";
+import { FiltersIcon, iconForRowEditPart } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
 import { Checkbox, NativeSelect } from "./primitives";
 
 export type {
+  AgentApprovalProps,
   BatchEditBarProps,
   ColumnGroupToggleProps,
   FilterHeaderControlProps,
@@ -90,7 +107,7 @@ function HeaderSearch({
   value,
   className,
   onChange,
-}: FilterHeaderSearchProps) {
+}: Readonly<FilterHeaderSearchProps>) {
   return (
     <TextField.Root
       size="1"
@@ -111,7 +128,7 @@ function HeaderSelect({
   options,
   className,
   onChange,
-}: FilterHeaderSelectProps) {
+}: Readonly<FilterHeaderSelectProps>) {
   return (
     <span className={className} style={{ display: "block", width: "100%" }}>
       <NativeSelect
@@ -147,7 +164,7 @@ function HeaderMulti({
   className,
   menuClassName,
   onToggle,
-}: FilterHeaderMultiProps) {
+}: Readonly<FilterHeaderMultiProps>) {
   return (
     <Popover.Root>
       <Popover.Trigger>
@@ -280,7 +297,7 @@ function FindSearch({
   focusRef,
   onChange,
   onKeyDown,
-}: FindSearchProps) {
+}: Readonly<FindSearchProps>) {
   return (
     <TextField.Root
       ref={focusRef}
@@ -331,9 +348,27 @@ export function FindBar(props: Readonly<FindBarProps>) {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
-}: RowEditButtonProps) {
+}: Readonly<RowEditButtonProps>) {
+  const glyph = iconForRowEditPart(part, icon);
+  if (glyph) {
+    return (
+      <IconButton
+        type="button"
+        size="1"
+        variant="ghost"
+        data-adapttable-part={part}
+        className={className}
+        aria-label={label}
+        title={label}
+        onClick={onClick}
+      >
+        {glyph}
+      </IconButton>
+    );
+  }
   return (
     <Button
       type="button"
@@ -365,7 +400,7 @@ function BatchButton({
   part,
   className,
   onClick,
-}: BatchEditButtonProps) {
+}: Readonly<BatchEditButtonProps>) {
   return (
     <Button
       type="button"
@@ -389,13 +424,72 @@ export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>) {
   return <BatchEditBarChrome {...props} slots={{ Button: BatchButton }} />;
 }
 
+function ApprovalList({
+  part,
+  label,
+  className,
+  children,
+}: Readonly<AgentApprovalListProps>) {
+  return (
+    // A real list: its children are the proposed changes, one <li> each, and
+    // the element carries that everywhere rather than only where ARIA does.
+    <ul
+      data-adapttable-part={part}
+      aria-label={label}
+      className={className}
+      style={{ listStyle: "none", margin: 0, padding: 0 }}
+    >
+      {children}
+    </ul>
+  );
+}
+
+/**
+ * Approve or reject a pending agent write.
+ *
+ * @public
+ */
+function ApprovalAction({
+  label,
+  part,
+  className,
+  onClick,
+}: Readonly<AgentApprovalButtonProps>) {
+  return (
+    <Button
+      type="button"
+      size="1"
+      variant="ghost"
+      data-adapttable-part={part}
+      className={className}
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  );
+}
+
+export function AgentApproval(props: Readonly<AgentApprovalProps>) {
+  return (
+    <AgentApprovalChrome
+      {...props}
+      slots={{
+        Approve: BatchButton,
+        Reject: BatchButton,
+        List: ApprovalList,
+        Action: ApprovalAction,
+      }}
+    />
+  );
+}
+
 function TreeButton({
   label,
   expanded,
   loading,
   className,
   onClick,
-}: TreeToggleButtonProps) {
+}: Readonly<TreeToggleButtonProps>) {
   return (
     <IconButton
       type="button"
@@ -449,7 +543,7 @@ function GroupToggleButton({
   expanded,
   className,
   onClick,
-}: ColumnGroupToggleButtonProps) {
+}: Readonly<ColumnGroupToggleButtonProps>) {
   return (
     <IconButton
       type="button"
@@ -505,10 +599,11 @@ function ReorderHandle({
   label,
   pressed,
   dragging,
+  disabled,
   className,
   dragProps,
   onKeyDown,
-}: RowReorderHandleSlotProps) {
+}: Readonly<RowReorderHandleSlotProps>) {
   return (
     <IconButton
       type="button"
@@ -521,12 +616,154 @@ function ReorderHandle({
       className={className}
       aria-label={label}
       aria-pressed={pressed}
+      disabled={disabled}
       style={{ cursor: pressed ? "grabbing" : "grab" }}
       {...dragProps}
       onKeyDown={onKeyDown}
     >
       <GripIcon />
     </IconButton>
+  );
+}
+
+function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const [open, setOpen] = useState(false);
+  const [direction, setDirection] = useState<"ltr" | "rtl">("ltr");
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const confirmationRef = useRef(confirmation);
+  confirmationRef.current = confirmation;
+  useEffect(() => {
+    if (confirmation) setOpen(true);
+  }, [confirmation]);
+
+  const restoreTriggerFocus = () => {
+    queueMicrotask(() => restoreFocusSoon(triggerRef.current));
+  };
+  const close = () => {
+    setOpen(false);
+    restoreTriggerFocus();
+  };
+
+  return (
+    <span data-adapttable-part="row-move-menu">
+      <DropdownMenu.Root
+        open={open}
+        dir={direction}
+        onOpenChange={(next) => {
+          if (next) {
+            setDirection(
+              triggerRef.current?.closest('[dir="rtl"]') ? "rtl" : "ltr"
+            );
+          } else {
+            setTimeout(() => confirmationRef.current?.onCancel(), 0);
+            restoreTriggerFocus();
+          }
+          setOpen(next);
+        }}
+      >
+        <DropdownMenu.Trigger>
+          <IconButton
+            ref={triggerRef}
+            type="button"
+            size="1"
+            variant="ghost"
+            color="gray"
+            aria-label={label}
+            data-adapttable-part="row-move-menu-trigger"
+            onClick={(event) => event.stopPropagation()}
+          >
+            ⋮
+          </IconButton>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content
+          aria-label={label}
+          align="start"
+          sideOffset={4}
+          data-adapttable-part="row-move-menu-content"
+          style={{ minWidth: "12rem", padding: 8 }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          {confirmation ? (
+            <Flex
+              role="alertdialog"
+              aria-label={confirmation.title}
+              direction="column"
+              gap="2"
+              data-adapttable-part="row-move-confirmation"
+            >
+              <Text weight="bold">{confirmation.title}</Text>
+              <Text>{confirmation.description}</Text>
+              <Flex justify="end" gap="2">
+                <Button
+                  type="button"
+                  size="1"
+                  variant="soft"
+                  color="gray"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    confirmation.onCancel();
+                    close();
+                  }}
+                >
+                  {confirmation.cancelLabel}
+                </Button>
+                <Button
+                  type="button"
+                  size="1"
+                  variant="solid"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    confirmation.onConfirm();
+                    close();
+                  }}
+                >
+                  {confirmation.confirmLabel}
+                </Button>
+              </Flex>
+            </Flex>
+          ) : (
+            <Flex direction="column" gap="1">
+              {items.map((item) => (
+                <DropdownMenu.Item
+                  key={item.id}
+                  disabled={item.disabled}
+                  title={item.disabledReason}
+                  data-adapttable-part="row-move-menu-item"
+                  style={{
+                    height: "auto",
+                    justifyContent: "flex-start",
+                    textAlign: "start",
+                    whiteSpace: "normal",
+                  }}
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    item.onSelect();
+                    setTimeout(() => {
+                      if (!confirmationRef.current) close();
+                    }, 0);
+                  }}
+                >
+                  <Flex direction="column" align="start">
+                    <Text>{item.label}</Text>
+                    {item.disabledReason ? (
+                      <Text size="1" color="gray">
+                        {item.disabledReason}
+                      </Text>
+                    ) : null}
+                  </Flex>
+                </DropdownMenu.Item>
+              ))}
+            </Flex>
+          )}
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    </span>
   );
 }
 
@@ -539,7 +776,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -549,7 +789,7 @@ function ReorderMove({
   disabled,
   className,
   onClick,
-}: RowReorderMoveButtonProps) {
+}: Readonly<RowReorderMoveButtonProps>) {
   return (
     <IconButton
       type="button"
@@ -575,7 +815,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({
@@ -588,7 +833,7 @@ function ActivateCell({
   onDoubleClick,
   onClick,
   onKeyDown,
-}: EditableCellActivateProps) {
+}: Readonly<EditableCellActivateProps>) {
   return (
     <button
       ref={activateRef}
@@ -615,7 +860,7 @@ function EditGateButton({
   className,
   onMouseDown,
   onClick,
-}: EditableCellButtonProps) {
+}: Readonly<EditableCellButtonProps>) {
   return (
     <Button
       type="button"

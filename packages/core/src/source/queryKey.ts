@@ -37,7 +37,7 @@
  * what both expect.
  */
 import { stableKey } from "../utils/stableKey";
-import type { TableQuery } from "./useServerData";
+import type { TableQuery } from "./tableQuery";
 
 /**
  * Options for {@link tableQueryKey} and {@link tableQueryBaseKey}.

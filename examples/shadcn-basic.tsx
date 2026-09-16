@@ -1,4 +1,5 @@
 import { type ColumnDef, DataTable, useFrontendData } from "@adapttable/shadcn";
+import { rowActions } from "@adapttable/shadcn/row-actions";
 
 interface Person {
   id: string;
@@ -38,14 +39,16 @@ export function ShadcnBasicExample() {
       source={source}
       columns={columns}
       rowKey={(r) => r.id}
-      searchPlaceholder="Search people…"
-      rowActions={[
-        {
-          key: "edit",
-          label: "Edit",
-          onClick: (row) => alert(`Edit ${row.name}`),
-        },
+      features={[
+        rowActions<Person>([
+          {
+            key: "edit",
+            label: "Edit",
+            onClick: (row) => alert(`Edit ${row.name}`),
+          },
+        ]),
       ]}
+      searchPlaceholder="Search people…"
     />
   );
 }

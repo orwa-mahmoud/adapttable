@@ -1,17 +1,17 @@
-import { babel } from "@rollup/plugin-babel";
-import { defineConfig, type UserConfig } from "tsdown";
+import { defineConfig } from "tsdown";
 
-/** Everything both passes below share: one toolchain, one output shape. */
-const common: UserConfig = {
-  // The published declarations come from `src` alone. The package's own
-  // tsconfig also covers its vitest and tsdown configs so typecheck sees
-  // them, and pulling those into the dts program makes it emit a stray
-  // declaration beside the root's vitest.shared.ts.
+export default defineConfig({
   tsconfig: "./tsconfig.build.json",
+  entry: [
+    "src/index.ts",
+    "src/xlsx.ts",
+    "src/pdf.ts",
+    "src/pivot.ts",
+    "src/formula.ts",
+    "src/stream.ts",
+    "src/query.ts",
+  ],
   format: ["esm", "cjs"],
-  // The multi-entry surface shares types across several declaration graphs.
-  // Preparing the complete program before chunking keeps their placement and
-  // generated names deterministic across otherwise identical builds.
   dts: { eager: true },
   sourcemap: true,
   clean: true,
@@ -20,50 +20,4 @@ const common: UserConfig = {
     js: format === "es" ? ".js" : ".cjs",
     dts: format === "es" ? ".d.ts" : ".d.cts",
   }),
-  deps: { neverBundle: ["react", "react-dom", "@tanstack/react-query"] },
-  plugins: [
-    babel({
-      babelHelpers: "bundled",
-      extensions: [".ts", ".tsx"],
-      presets: ["@babel/preset-typescript"],
-      plugins: [["babel-plugin-react-compiler", { target: "18" }]],
-    }),
-  ],
-};
-
-/**
- * Two passes, because `"use client"` is a boundary and a boundary belongs in
- * exactly one place.
- *
- * The client pass carries the directive on every chunk: hook-bearing entries
- * must mark themselves or a Next.js App Router consumer has to hand-write a
- * client wrapper for each one.
- *
- * `./query` is built on its own, unmarked. It is the React-free half of the
- * model — the URL codecs a route handler decodes a shared link with — and a
- * directive there would keep the code OUT of the one place it belongs. Its own
- * pass is what makes that structural rather than hopeful: a separate bundle
- * cannot share a chunk with a hook, so nothing downstream of `useState` can
- * reach `@adapttable/server` however the chunking changes. The graph is
- * asserted React-free and directive-free by `scripts/smoke-dist.mjs`.
- *
- * tsdown cleans the shared `dist` once for both passes, before either runs.
- */
-export default defineConfig([
-  {
-    ...common,
-    banner: { js: '"use client";' },
-    entry: [
-      "src/index.ts",
-      "src/adapter.ts",
-      "src/xlsx.ts",
-      "src/pdf.ts",
-      "src/sparkline.ts",
-      "src/pivot.ts",
-      "src/formula.ts",
-      "src/features.ts",
-      "src/stream.ts",
-    ],
-  },
-  { ...common, entry: ["src/query.ts"] },
-]);
+});

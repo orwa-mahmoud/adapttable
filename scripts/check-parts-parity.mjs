@@ -143,6 +143,9 @@ const CORE_GETTER_PARTS = { row: ["getRowProps", "createDesktopRow"] };
  * per group.
  */
 const FALLBACK_ONLY = {
+  // Its own shortcuts menu: a native disclosure wrapping a <menu> of buttons,
+  // where a themed kit reaches the same affordance through its own Menu.
+  "assistant shortcuts": ["assistant-examples-list"],
   // Its own anchored card and drawer, built from divs and a backdrop.
   filters: [
     "filters-anchor",
@@ -166,6 +169,8 @@ const FALLBACK_ONLY = {
   "column menu": [
     "column-menu",
     "column-menu-auto-size",
+    "column-menu-choice-label",
+    "column-menu-choice-select",
     "column-menu-grip",
     "column-menu-header",
     "column-menu-label",
@@ -219,7 +224,6 @@ const FALLBACK_ONLY = {
     "checkbox",
     "empty-clear",
     "expand-button",
-    "export-csv-button",
     "export-spinner",
     "retry-button",
     "sort-button",
@@ -318,7 +322,9 @@ function partsOf(pkg) {
 }
 
 /**
- * The part names core's chrome owns.
+ * The part names the shared chrome owns — `@adapttable/core` and the React
+ * binding together, since the split put the engine in one and the structural
+ * Chrome in the other.
  *
  * Core names a part in four ways, and only the first looks like the others:
  * the attribute it renders itself, the `part` prop it hands a kit's slot to put
@@ -330,7 +336,14 @@ function partsOf(pkg) {
  */
 function corePartNames() {
   const found = new Set();
-  for (const file of sourceFiles(join(PACKAGES, "core", "src"))) {
+  // The shared chrome spans two packages since the v3 split: the neutral
+  // engine in `core`, and the structural Chrome and prop-getters in `react`.
+  // Both are upstream of every kit, so both count as "core owns this name".
+  const shared = [
+    ...sourceFiles(join(PACKAGES, "core", "src")),
+    ...sourceFiles(join(PACKAGES, "react", "src")),
+  ];
+  for (const file of shared) {
     const text = readFileSync(file, "utf8");
     for (const match of text.matchAll(
       /["']?data-adapttable-part["']?\s*[=:]\s*["']([a-z0-9-]+)["']/g
@@ -448,10 +461,10 @@ function fail(count, headline, lines, advice) {
  * design, so comparing spellings would report the kits that take it the shared
  * way; the contract check owns those.
  */
-function themedFailures(byKit, shellParts, everyPart) {
+function themedFailures(byKit, shellParts, everyPart, coreParts) {
   const failures = [];
   for (const part of [...everyPart].sort()) {
-    if (CORE_GETTER_PARTS[part] !== undefined) continue;
+    if (coreParts.has(part) || CORE_GETTER_PARTS[part] !== undefined) continue;
     const missing = SHELL_KITS.filter(
       (pkg) =>
         !byKit.get(pkg).has(part) && EXPECTED_GAPS[pkg]?.[part] === undefined
@@ -490,7 +503,7 @@ function main() {
       "renders, or route it through the core prop-getter every kit spreads."
   );
 
-  const failures = themedFailures(byKit, shellParts, everyPart);
+  const failures = themedFailures(byKit, shellParts, everyPart, coreParts);
   fail(
     failures.length,
     `${failures.length} part(s) are rendered by some adapters and not others:`,

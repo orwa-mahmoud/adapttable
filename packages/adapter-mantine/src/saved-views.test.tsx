@@ -1,17 +1,17 @@
+import { defaultLabels } from "@adapttable/core";
 import {
   type ColumnDef,
   createMemoryAdapter,
-  defaultLabels,
   type LayoutStorage,
   type UrlStateAdapter,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import { savedViews } from "./saved-views";
 
 /** Map-backed `LayoutStorage`, so views never leak between tests. */

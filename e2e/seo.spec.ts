@@ -29,7 +29,9 @@ for (const { path, name } of PAGES) {
   test(`${name}: is readable with JavaScript disabled`, async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
-    await page.goto(path);
+    // HTML and meta are what a crawler sees. `load` waits for Google Fonts
+    // and times out a green page when that third-party request hangs.
+    await page.goto(path, { waitUntil: "domcontentloaded" });
 
     const title = await page.title();
     expect(title.length, `${path} has no title`).toBeGreaterThan(10);
@@ -59,7 +61,7 @@ test("no two pages share a title or a description", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   for (const { path } of PAGES) {
-    await page.goto(path);
+    await page.goto(path, { waitUntil: "domcontentloaded" });
     titles.add(await page.title());
     descriptions.add(
       (await page

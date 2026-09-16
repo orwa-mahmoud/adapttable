@@ -1,10 +1,10 @@
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Person {
@@ -100,7 +100,7 @@ describe("<DataTable> declarative columns + filters (Mantine)", () => {
     expect(screen.queryByText("Beta")).not.toBeInTheDocument();
   });
 
-  it("column filter shorthands alone (no filters prop) render the auto form", async () => {
+  it("column shorthands with empty feature config render the auto form", async () => {
     const adapter = createMemoryAdapter("");
     renderMantine(
       <DataTable<Person>
@@ -241,7 +241,7 @@ describe("<DataTable> declarative columns + filters (Mantine)", () => {
         sortLevels: [],
         filters: { status: "active" },
       },
-      { signal: expect.any(AbortSignal) }
+      { signal: expect.any(AbortSignal), key: expect.any(String) }
     );
     // No client filtering on the server tier: the archived row stays even
     // though the URL carries f_status=active.

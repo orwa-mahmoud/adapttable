@@ -3,11 +3,14 @@
  * native thead/tbody, the tbody summary row, and expansion/reorder/selection
  * leads against a start pin.
  */
+import { resolveLabels } from "@adapttable/core";
 import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { rowReorder } from "./row-reorder";
 import { renderBaseUi } from "./test-utils";
 
 interface Person {
@@ -28,6 +31,7 @@ const COLUMNS: ColumnDef<Person>[] = [
     header: "Name",
     accessor: (row) => row.name,
     sortable: true,
+    renameable: true,
     headerTooltip: "Full name",
     headerActions: <span data-testid="name-actions">★</span>,
     group: "Person",
@@ -47,7 +51,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 const EXPANSION_WIDTH = 32;
-const REORDER_WIDTH = 40;
+const REORDER_WIDTH = 64;
 const PIN_BG = "var(--adapttable-surface, #ffffff)";
 
 function mount(
@@ -66,7 +70,7 @@ function mount(
 
 const fullChrome = {
   renderRowDetail: (row: Person) => <div>detail-{row.id}</div>,
-  onRowReorder: vi.fn(),
+  features: [rowReorder(vi.fn())],
   bulkActions: [{ key: "x", label: "Export", onClick: vi.fn() }],
   rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
   columnLayout: {
@@ -148,5 +152,49 @@ describe("DesktopTable assembly paint (Base UI)", () => {
     expect(screen.getByText("Alice").closest("tr")!.style.background).toBe(
       "var(--gray-a3)"
     );
+  });
+});
+
+describe("DesktopTable direct header rename (Base UI)", () => {
+  it("renders Base UI controls only with a callback and commits a trimmed name", () => {
+    const withoutCallback = mount({ enableColumnMenu: true });
+    expect(
+      screen.queryByRole("button", { name: "Rename column: Name" })
+    ).toBeNull();
+    withoutCallback.unmount();
+
+    const onColumnRename = vi.fn();
+    const integrated = mount({ enableColumnMenu: true, onColumnRename });
+    expect(
+      screen.getByRole("button", { name: "Rename column: Name" })
+    ).toBeInTheDocument();
+    integrated.unmount();
+    renderBaseUi(
+      <ColumnHeaderRename
+        columnKey="name"
+        name="Name"
+        labels={resolveLabels(undefined)}
+        onRenameColumn={onColumnRename}
+      >
+        <button type="button" aria-label="Sort by: Name">
+          Name
+        </button>
+      </ColumnHeaderRename>
+    );
+    const renameButton = screen.getByRole("button", {
+      name: "Rename column: Name",
+    });
+    fireEvent.click(renameButton);
+    expect(renameButton).toBeDisabled();
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveFocus();
+    fireEvent.change(input, { target: { value: "  Account  " } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(onColumnRename).toHaveBeenCalledWith("name", "Account");
+    expect(renameButton).not.toBeDisabled();
+    expect(
+      document.querySelector('[data-adapttable-part="header-rename-announcer"]')
+    ).toHaveTextContent("Column Name renamed to Account");
   });
 });

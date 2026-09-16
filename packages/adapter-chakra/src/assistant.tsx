@@ -1,0 +1,375 @@
+/**
+ * The assistant panel in Chakra UI — `@adapttable/chakra/assistant`.
+ */
+import {
+  createAdapterTableAssistantFeature,
+  type TableAssistantBadgeProps,
+  type TableAssistantButtonProps,
+  TableAssistantChrome,
+  type TableAssistantComposerProps,
+  type TableAssistantLanguageChipProps,
+  type TableAssistantMenuProps,
+  type TableAssistantPanelProps,
+  type TableAssistantProps,
+  type TableAssistantSheetProps,
+  type TableAssistantWindowProps,
+} from "@adapttable/react/adapter";
+import {
+  Badge,
+  Box,
+  Button,
+  Drawer,
+  IconButton,
+  Menu,
+  Portal,
+  Text,
+  Textarea,
+} from "@chakra-ui/react";
+
+import { KitPortal } from "./components/kitPortal";
+import { NativeSelect } from "./components/primitives";
+
+const BADGE_PALETTE: Record<string, string> = {
+  neutral: "gray",
+  busy: "blue",
+  warning: "orange",
+  danger: "red",
+};
+
+/** How this kit spells the three prominences the chrome asks for. */
+const KIT_VARIANT = {
+  primary: "solid",
+  secondary: "outline",
+  subtle: "ghost",
+} as const;
+
+function AssistantButton({
+  label,
+  part,
+  className,
+  onClick,
+  disabled,
+  children,
+  expanded,
+  icon,
+  iconOnly,
+  tooltip,
+  variant = "secondary",
+}: Readonly<TableAssistantButtonProps>) {
+  const launcher = part === "assistant-launcher";
+  if (iconOnly) {
+    return (
+      <IconButton
+        type="button"
+        size={launcher ? "xl" : "sm"}
+        rounded={launcher ? "full" : undefined}
+        variant={variant === "primary" ? "solid" : "ghost"}
+        aria-label={label}
+        title={tooltip}
+        aria-expanded={expanded}
+        data-adapttable-part={part}
+        className={className}
+        disabled={disabled}
+        onClick={onClick}
+      >
+        {icon}
+      </IconButton>
+    );
+  }
+  return (
+    <Button
+      type="button"
+      size="xs"
+      variant={KIT_VARIANT[variant]}
+      aria-label={label}
+      aria-expanded={expanded}
+      data-adapttable-part={part}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {children ?? label}
+    </Button>
+  );
+}
+
+function AssistantInput({
+  label,
+  placeholder,
+  part,
+  className,
+  value,
+  disabled,
+  onChange,
+  onKeyDown,
+}: Readonly<TableAssistantComposerProps>) {
+  return (
+    <Textarea
+      rows={2}
+      resize="vertical"
+      aria-label={label}
+      placeholder={placeholder}
+      data-adapttable-part={part}
+      className={className}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+      onKeyDown={onKeyDown}
+    />
+  );
+}
+
+function AssistantBadge({
+  label,
+  part,
+  className,
+  tone,
+}: Readonly<TableAssistantBadgeProps>) {
+  return (
+    <Badge
+      size="sm"
+      variant="subtle"
+      colorPalette={BADGE_PALETTE[tone]}
+      data-adapttable-part={part}
+      data-tone={tone}
+      className={className}
+    >
+      {label}
+    </Badge>
+  );
+}
+
+function AssistantPanel({
+  label,
+  part,
+  className,
+  children,
+}: Readonly<TableAssistantPanelProps>) {
+  return (
+    <Box
+      as="section"
+      borderWidth="1px"
+      borderRadius="md"
+      p="3"
+      h="100%"
+      minH="0"
+      display="flex"
+      flexDirection="column"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function AssistantSheet({
+  label,
+  part,
+  className,
+  open,
+  onClose,
+  dir,
+  children,
+}: Readonly<TableAssistantSheetProps>) {
+  return (
+    <Drawer.Root
+      open={open}
+      onOpenChange={(event) => {
+        if (!event.open) onClose();
+      }}
+      placement="bottom"
+      size="full"
+    >
+      <KitPortal>
+        <Drawer.Backdrop />
+        <Drawer.Positioner>
+          <Drawer.Content
+            aria-label={label}
+            dir={dir}
+            data-adapttable-part={part}
+            className={className}
+            display="flex"
+            flexDirection="column"
+            h="90dvh"
+          >
+            <Drawer.Body
+              flex="1"
+              minH="0"
+              display="flex"
+              flexDirection="column"
+            >
+              {children}
+            </Drawer.Body>
+          </Drawer.Content>
+        </Drawer.Positioner>
+      </KitPortal>
+    </Drawer.Root>
+  );
+}
+
+function AssistantWindow({
+  label,
+  part,
+  className,
+  style,
+  children,
+}: Readonly<TableAssistantWindowProps>) {
+  return (
+    <Box
+      as="section"
+      role="dialog"
+      borderWidth="1px"
+      borderRadius="lg"
+      boxShadow="lg"
+      bg="bg.panel"
+      p="3"
+      aria-label={label}
+      data-adapttable-part={part}
+      className={className}
+      style={style}
+    >
+      {children}
+    </Box>
+  );
+}
+
+/**
+ * Ask this table a question, in Chakra UI.
+ *
+ * @public
+ */
+/**
+ * The dictation language chooser, in Chakra.
+ *
+ * Drawn only beside a mic that is already there, and only when more than one
+ * language is offered — the chrome decides both. This is the kit's own
+ * chooser, not a button with a list bolted on.
+ */
+function AssistantLanguageChip({
+  label,
+  value,
+  options,
+  part,
+  className,
+  onChange,
+  disabled,
+}: Readonly<TableAssistantLanguageChipProps>) {
+  return (
+    <NativeSelect
+      size="xs"
+      minW="7.5rem"
+      className={className}
+      aria-label={label}
+      data-adapttable-part={part}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </NativeSelect>
+  );
+}
+
+/**
+ * The examples menu, as Chakra's own — its positioner, its portal, and the
+ * keyboard a Chakra reader already has everywhere else.
+ */
+function AssistantMenu({
+  label,
+  part,
+  className,
+  icon,
+  disabled,
+  items,
+  onSelect,
+  maxHeight,
+}: Readonly<TableAssistantMenuProps>) {
+  return (
+    <Menu.Root positioning={{ placement: "top-start" }}>
+      <Menu.Trigger asChild>
+        <IconButton
+          type="button"
+          size="sm"
+          variant="ghost"
+          aria-label={label}
+          title={label}
+          data-adapttable-part={part}
+          className={className}
+          disabled={disabled}
+        >
+          {icon}
+        </IconButton>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content maxH={maxHeight} overflowY="auto">
+            {items.map((item) => (
+              <Menu.Item
+                key={item.id}
+                value={item.id}
+                data-adapttable-part={item.part}
+                onClick={() => {
+                  onSelect(item.id);
+                }}
+              >
+                <Box display="flex" gap="2" alignItems="flex-start">
+                  {item.icon}
+                  <Box>
+                    <Text fontSize="sm">{item.title}</Text>
+                    {item.description ? (
+                      <Text fontSize="xs" color="fg.muted">
+                        {item.description}
+                      </Text>
+                    ) : null}
+                  </Box>
+                </Box>
+              </Menu.Item>
+            ))}
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
+  );
+}
+
+export function TableAssistant(props: Readonly<TableAssistantProps>) {
+  return (
+    <TableAssistantChrome
+      // The colour the conversation is drawn in. Chakra's blue, because its default colour
+      // palette is grey — a palette, but not an accent. A host with its own
+      // passes `accent`, which wins over this.
+      // Before the spread, so a host that names its own still wins.
+      accent="var(--chakra-colors-blue-solid, #3182ce)"
+      {...props}
+      slots={{
+        Panel: AssistantPanel,
+        Sheet: AssistantSheet,
+        Button: AssistantButton,
+        Composer: AssistantInput,
+        Badge: AssistantBadge,
+        Window: AssistantWindow,
+        Menu: AssistantMenu,
+        LanguageChip: AssistantLanguageChip,
+      }}
+    />
+  );
+}
+
+/**
+ * Bind this kit's assistant panel to the assistant slot.
+ *
+ * @public
+ */
+export function tableAssistant() {
+  return createAdapterTableAssistantFeature(TableAssistant);
+}

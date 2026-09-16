@@ -5,8 +5,8 @@
  */
 import { describe, expect, it } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import { partitionGroupedRows } from "../grouping/groupRows";
-import type { ColumnDef } from "../types";
 import {
   applyRowPatchesToView,
   applyRowPatchLogToView,
@@ -48,10 +48,10 @@ const ROWS: Person[] = [
   { id: "3", name: "Grace", team: "Core", budget: 80, status: "active" },
 ];
 const byId = (row: Person) => row.id;
-const COLS: ColumnDef<Person>[] = [
+const COLS: ColumnModel<Person>[] = [
   { key: "team" },
-  { key: "budget", accessor: (row) => row.budget },
-  { key: "name", accessor: (row) => row.name },
+  { key: "budget", exportValue: (row) => row.budget },
+  { key: "name", exportValue: (row) => row.name },
 ];
 
 describe("incrementalSearchText", () => {
@@ -264,6 +264,22 @@ describe("incremental aggregates — built-ins and rescans", () => {
         { id: "d", budget: 2 },
       ])
     ).toEqual({ budget: 2 });
+  });
+
+  it("keeps ISO date min/max consistent with a full aggregate pass", () => {
+    const rows = [
+      { id: "a", started: "2024-03-01" },
+      { id: "b", started: "2024-01-15" },
+      { id: "c", started: "2024-02-01" },
+    ];
+    const state = createIncrementalAggregate({ started: "min" }, rows);
+    expect(readIncrementalAggregate(state, rows)).toEqual({
+      started: "2024-01-15",
+    });
+    removeAggregateRow(state, rows[1]!);
+    expect(readIncrementalAggregate(state, [rows[0]!, rows[2]!])).toEqual({
+      started: "2024-02-01",
+    });
   });
 
   it("falls back to a full pass for a custom aggregator", () => {

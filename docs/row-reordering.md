@@ -1,19 +1,18 @@
-# React table row reordering — drag handle, keyboard grab, dataset indices
+# React table row reordering — flat, grouped and tree rows
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — pass `onRowReorder` and a grip appears. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — compose `rowReorder` and a grip appears. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [drag-reorder rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — Space lifts a row, arrows move it, Space drops it. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [reorder flat, grouped and tree rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/row-reordering/) — Space lifts a row, arrows move it, Space drops it. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
-Pass `onRowReorder` and a drag handle appears in a reserved leading column.
-Or import `rowReorder` from `@adapttable/<kit>/row-reorder` and pass
-`features={[rowReorder(handler)]}` — same runtime, see
-[feature composition](./features.md). The enabling prop is deprecated and
-stays until v3.
-Omit it and nothing renders, nothing ships in the hot path — the same opt-in
-rule as `onCellEdit`. The table never mutates your array; you apply the move.
+Import `rowReorder` from `@adapttable/<kit>/row-reorder` and a drag handle
+appears in a reserved leading column. The import is the switch: a table that
+does not compose it never downloads the drag state machine, its keyboard
+handling or its announcements — see [feature composition](./features.md).
+The table never mutates your array; you apply the move.
 
 ```tsx
 import { applyRowReorder, DataTable } from "@adapttable/mantine";
+import { rowReorder } from "@adapttable/mantine/row-reorder";
 import { useState } from "react";
 
 function Tasks({ seed }: { seed: Task[] }) {
@@ -23,9 +22,11 @@ function Tasks({ seed }: { seed: Task[] }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      onRowReorder={(from, to) => {
-        setRows((current) => applyRowReorder(current, from, to));
-      }}
+      features={[
+        rowReorder((from, to) => {
+          setRows((current) => applyRowReorder(current, from, to));
+        }),
+      ]}
     />
   );
 }
@@ -50,22 +51,76 @@ review. The grip is a real button:
 - **Escape** cancels
 
 `RowReorderAnnouncer` is the live region. It mounts only when reorder is
-armed, so a table without `onRowReorder` does not add a second status
+armed, so a table that does not compose `rowReorder` adds no second status
 region (export already owns one).
 
 ## Mobile
 
 Cards get **up / down** buttons (`RowReorderButtons`), not a drag handle. The
-ends disable rather than wrapping.
+ends disable rather than wrapping. Grouped and tree cards also get the same
+**Move to group…** / **Move under…** menu as desktop, with 44px targets.
 
-## What it will not do
+## Grouped rows: reorder versus move
 
-**Grouping or a tree.** Nested order is not a flat splice. Passing
-`onRowReorder` while either is armed logs a `devWarn` and the handle does not
-render — never a silent ignore.
+The first handler still means **reorder among siblings**. Its `from` and `to`
+are positions inside that group, not positions in the flattened list.
+Crossing a group boundary is a different write:
+
+```tsx
+rowReorder((from, to, row) => reorderInsideGroup(row, from, to), {
+  movePolicy: "confirm",
+  onGroupMove: (row, fromGroup, toGroup, position) => {
+    // toGroup.levels contains each grouping column and its raw value.
+    moveRowIntoGroup(row, toGroup.levels, position);
+  },
+});
+```
+
+Dragging over another group's row or choosing **Move to group…** calls
+`onGroupMove`. The menu lists loaded leaf groups. A nested `RowGroupRef`
+contains a stable `id`, a breadcrumb `label`, and raw `{ key, value, label }`
+levels, so the host can write the actual grouping fields.
+
+## Tree rows: reorder versus re-parent
+
+Before/after another sibling calls the ordinary reorder handler with sibling
+positions. Dropping into the middle of another node, or choosing **Move
+under…**, calls:
+
+```tsx
+rowReorder(reorderAmongSiblings, {
+  movePolicy: "confirm",
+  onTreeMove: (row, fromParent, toParent, position) => {
+    updateParentAndOrder(row, toParent.id, position);
+  },
+});
+```
+
+`toParent.id` is `null` for the top level. A row cannot move under itself or
+one of its descendants: the cycle guard rejects pointer, keyboard, and menu
+paths before any host callback runs and announces the reason.
+
+## Move policy
+
+- `"never"` (default) keeps same-group/same-parent reorder available and
+  rejects boundary changes with an announcement.
+- `"confirm"` opens the kit-native confirmation in the move menu. Confirm and
+  cancel return focus to the trigger. Supply `confirmMove(request)` to use a
+  host-owned async confirmation surface instead.
+- `"auto"` calls the matching move callback immediately.
+
+Every pointer action has a keyboard/touch equivalent. Space + arrows can cross
+the visible boundary; the destination menu reaches loaded groups and parents
+directly.
+
+When sorting is active, visual order belongs to the sort. Same-scope
+order-only writes are rejected with “Clear sorting before changing row order.”
+Cross-group moves and re-parenting remain available because they change row
+membership; the active sort remains in force.
 
 **URL / Saved Views.** Row order is the host's array. There is nothing to
-serialize.
+serialize. Drag, keyboard, mobile and menu paths call the same host callbacks,
+so host persistence receives one identical write contract.
 
 ## Column menu
 
@@ -76,14 +131,19 @@ Columns menu. CSV export drops it the way it drops actions
 
 ## Headless
 
-`useRowReorder(options)` (`RowReorderState` is what it returns; `RowReorderHandler`
-is the host callback; `RowReorderLabels` names the grip and the live region)
-is the grab state. `datasetIndex(localIndex, windowStart)` turns a rendered
-slot into a dataset index. `rowReorderSignature(reorder, rowId, localIndex)` is
-the memo digest so a virtualized row repaints when it is lifted or is the drop
-target. It also carries a global in-flight bit so every visible row repaints
-once at lift and once at drop (live `dropProps` for the drag); hover still
-does not repaint untouched rows.
+`RowReorderOptions`, `RowMovePolicy`, `RowMoveRequest`, `RowDropPosition`,
+`RowGroupMoveHandler`, `RowTreeMoveHandler`, `RowTreeParentRef`,
+`RowGroupRef`, `treeMoveCreatesCycle` and `rowDropPosition` are the nested
+contracts. `RowReorderDecision` is the internal-seam result used to distinguish
+an order write, a membership move, or a rejection. `useRowReorder(options)`
+(`RowReorderState`, also exported as `TableRowReorderState`, is what it
+returns; `RowReorderHandler` is the ordinal write) is the grab state.
+`datasetIndex(localIndex, windowStart)` turns a flat rendered slot into a
+dataset index. `rowReorderSignature(reorder, rowId, localIndex)` is the memo
+digest so a virtualized row repaints when lifted, targeted, or confirming.
+`hostConfirmPending` is true while a host-owned `confirmMove` promise is
+unresolved — adapters disable grips, buttons and menu items then, and a
+second move is ignored until that promise settles.
 
 Each adapter mounts `RowReorderHandle` (`RowReorderHandleProps`) and
 `RowReorderButtons` (`RowReorderButtonsProps`) over
@@ -91,3 +151,8 @@ Each adapter mounts `RowReorderHandle` (`RowReorderHandleProps`) and
 `RowReorderAnnouncer` stays on `@adapttable/core/adapter`.
 `REORDER_COLUMN_WIDTH` is the pin-lead width every kit shares.
 `ROW_DND_MIME` is the HTML5 drag type.
+
+Styling and test hooks: `row-reorder-handle`, `row-reorder-buttons`,
+`row-reorder-up`, `row-reorder-down`, `row-move-menu`,
+`row-move-menu-trigger`, `row-move-menu-content`, `row-move-menu-item`, and
+`row-move-confirmation`.

@@ -1,9 +1,10 @@
-import { createMemoryAdapter, type TableQuery } from "@adapttable/core";
+import type { TableQuery } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
-import type { ColumnDef, DataTableProps } from "./index";
+import { DataTable } from "./data-table.test-utils";
+import type { ColumnDef } from "./index";
 
 interface Person {
   id: string;
@@ -49,7 +50,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 function renderTable(
-  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}
 ) {
   return render(
     <DataTable<Person>
@@ -74,7 +75,7 @@ function pickOption(comboboxName: string, optionLabel: string) {
 }
 
 describe("<DataTable> declarative tiers (Base UI)", () => {
-  it("column filter shorthands alone (no filters prop) render the auto form", async () => {
+  it("column shorthands with empty feature config render the auto form", async () => {
     renderTable({ filters: undefined });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     // The form mounts inside the popover a tick after opening — await it. The

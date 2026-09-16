@@ -25,7 +25,7 @@ test("is reachable from the kit's feature grid", async ({ page }) => {
 test("answers the search phrase without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto(`/${KIT}/rows/`);
+  await page.goto(`/${KIT}/rows/`, { waitUntil: "domcontentloaded" });
 
   await expect(page).toHaveTitle(copy(FEATURE.title));
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
@@ -43,15 +43,15 @@ test("answers the search phrase without JavaScript", async ({ browser }) => {
 });
 
 for (const kit of KITS) {
-  test(`${kit}: pin, reorder, merge and a row-action menu on one table`, async ({
+  test(`${kit}: pin, merge and a row-action menu on one table`, async ({
     page,
   }) => {
     await page.goto(`/${kit}/rows/`);
     const root = demo(page).locator(`[data-adapter="${kit}"]`);
     await expect(root.first()).toBeVisible();
     await expect(
-      root.locator('[data-adapttable-part="reorder-cell"]').first()
-    ).toBeVisible();
+      root.locator('[data-adapttable-part="reorder-cell"]')
+    ).toHaveCount(0);
     await expect(
       root.locator('[data-adapttable-part="row-actions-trigger"]').first()
     ).toBeVisible();

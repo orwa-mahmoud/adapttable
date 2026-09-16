@@ -17,8 +17,8 @@ import type {
 } from "../actions/contextMenuModel";
 import type { Aggregator } from "../aggregate/aggregate";
 import type {
-  ColumnMenuAction,
   ColumnMenuActionContext,
+  ColumnMenuItem,
   ColumnMenuRow,
 } from "../columns/columnMenuModel";
 import type { CustomCellEditorRender } from "../editing/cellEditing";
@@ -29,7 +29,12 @@ import {
   withExtendedFilterType,
   withFilterType,
 } from "../filters/filterRegistry";
-import type { SidePanelEntry } from "../layout/SidePanelChrome";
+
+/** Neutral panel tab identity. React chrome adds the rest. */
+export interface SidePanelEntry {
+  /** Stable identity, used for the open-panel state and the URL. */
+  key: string;
+}
 
 /**
  * Extra column-menu actions a plugin appends after the built-ins.
@@ -39,7 +44,7 @@ import type { SidePanelEntry } from "../layout/SidePanelChrome";
 export type ColumnMenuActionFactory<TRow = unknown> = (
   row: ColumnMenuRow<TRow>,
   ctx: ColumnMenuActionContext<TRow>
-) => ColumnMenuAction | readonly ColumnMenuAction[] | undefined;
+) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined;
 
 /**
  * Extra context-menu entries a plugin appends after the built-ins.

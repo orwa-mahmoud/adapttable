@@ -1,5 +1,9 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import { sparklineColumn } from "@adapttable/core/sparkline";
+import {
+  createMemoryAdapter,
+  type TableErrorState,
+  useFrontendData,
+} from "@adapttable/react";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import {
   act,
@@ -11,7 +15,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -278,7 +282,7 @@ describe("<DataTable> (Chakra)", () => {
       refetch,
       override: {
         slots: {
-          error: (state) => (
+          error: (state: TableErrorState) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>
@@ -862,6 +866,70 @@ describe("custom header and footer", () => {
   });
 });
 
+describe("direct header column rename", () => {
+  const renameableColumns: ColumnDef<Row>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+      renameable: true,
+    },
+    { key: "city", header: "City", accessor: (row) => row.city },
+  ];
+
+  function renderRenameTable(
+    onColumnRename?: (key: string, name: string) => void
+  ) {
+    adapter = createMemoryAdapter();
+    return render(
+      <ChakraProvider value={defaultSystem}>
+        <DataTable
+          data={ROWS}
+          columns={renameableColumns}
+          rowKey={(row) => row.id}
+          enableColumnMenu
+          onColumnRename={onColumnRename}
+          urlAdapter={adapter}
+        />
+      </ChakraProvider>
+    );
+  }
+
+  it("replaces the sort caption while the header slot edits", async () => {
+    const onColumnRename = vi.fn();
+    renderRenameTable(onColumnRename);
+
+    const renameButton = screen.getByRole("button", {
+      name: "Rename column: Name",
+    });
+    renameButton.focus();
+    fireEvent.click(renameButton);
+    expect(renameButton).toBeDisabled();
+    expect(screen.queryByRole("button", { name: /sort by: name/i })).toBeNull();
+
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveFocus();
+    expect(input).toHaveValue("Name");
+    fireEvent.change(input, { target: { value: " " } });
+    fireEvent.blur(input);
+    expect(screen.getByRole("alert")).toHaveTextContent("Enter a column name.");
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(renameButton).toHaveFocus());
+    expect(
+      screen.getByRole("button", { name: /sort by: name/i })
+    ).toBeInTheDocument();
+  });
+
+  it("omits the direct control without the host callback", () => {
+    renderRenameTable();
+    expect(
+      document.querySelector('[data-adapttable-part="header-rename-button"]')
+    ).toBeNull();
+  });
+});
+
 describe("header filter trigger", () => {
   it("puts a filter icon on the column header instead of a second row", () => {
     renderHarness({
@@ -887,6 +955,26 @@ describe("header filter trigger", () => {
     expect(
       document.querySelector('[data-adapttable-part="filter-header-trigger"]')
     ).toBeNull();
+  });
+  it("opens the header filter panel from its trigger", async () => {
+    renderHarness({
+      override: {
+        headerFilters: true,
+        filters: [{ key: "name", type: "text", label: "Name" }],
+      },
+    });
+    const trigger = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="filter-header-trigger"]'
+    )!;
+    const panel = () =>
+      document.querySelector('[data-adapttable-part="filter-header-cell"]');
+
+    fireEvent.click(trigger);
+
+    await waitFor(() => {
+      expect(panel()).not.toBeNull();
+    });
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
   });
 });
 

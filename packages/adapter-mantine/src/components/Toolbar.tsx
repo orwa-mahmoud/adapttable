@@ -1,13 +1,14 @@
 import { pageSizeOptions } from "@adapttable/core";
 import {
-  ExportAnnouncer,
+  FeatureSlot,
+  FILTER_POPOVER,
+  TOOLBAR_EXTRAS,
   type ToolbarChromeProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Badge, Button, Group, Select, Text, TextInput } from "@mantine/core";
 import type { ReactNode } from "react";
 
 import { FiltersIcon, SearchIcon } from "../icons";
-import { FilterPopover } from "./FilterPopover";
 
 /**
  * Props for {@link Toolbar}: the shared chrome surface from core plus the
@@ -63,6 +64,9 @@ export function Toolbar<TRow>({
   onExportCsv,
   exportBusy,
   exportAnnouncement = "",
+  exportProgressState,
+  exportDisabled = false,
+  exportDisabledReason = "",
   exportLabel,
   showRowsPerPage,
   className,
@@ -130,63 +134,50 @@ export function Toolbar<TRow>({
           />
         )}
         {toolbar}
-        {hasFilters &&
-          (filtersMode === "popover" ? (
-            <FilterPopover
-              open={filtersOpen}
-              onClose={onCloseFilters}
-              filters={filters}
-              activeFilterCount={activeFilterCount}
-              onClearFilters={onClearFilters}
-              labels={labels}
-              dir={dir}
-            >
-              {filtersButton}
-            </FilterPopover>
-          ) : (
-            filtersButton
-          ))}
+        {hasFilters && filtersMode === "popover" ? (
+          <FeatureSlot
+            slot={FILTER_POPOVER}
+            props={{
+              open: filtersOpen,
+              onClose: onCloseFilters,
+              filters,
+              activeFilterCount,
+              onClearFilters,
+              labels,
+              dir,
+              children: filtersButton,
+            }}
+          />
+        ) : (
+          hasFilters && filtersButton
+        )}
         {savedViewsMenu}
         {columnMenu}
-        {onUndo && onRedo && (
-          <Button.Group>
-            <Button
-              variant="default"
-              size="sm"
-              data-adapttable-part="undo-button"
-              disabled={canUndo !== true}
-              onClick={onUndo}
-            >
-              {undoLabel}
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              data-adapttable-part="redo-button"
-              disabled={canRedo !== true}
-              onClick={onRedo}
-            >
-              {redoLabel}
-            </Button>
-          </Button.Group>
-        )}
-        {onExportCsv && (
-          <>
-            {/* Mantine's own loading Button: it swaps in the kit's Loader and
-                blocks interaction itself, which reads as "working" rather than
-                as a control that has been switched off. */}
-            <Button
-              variant="default"
-              size="sm"
-              onClick={onExportCsv}
-              loading={exportBusy}
-              aria-busy={exportBusy}
-            >
-              {exportLabel}
-            </Button>
-            <ExportAnnouncer announcement={exportAnnouncement} />
-          </>
-        )}
+        <FeatureSlot
+          slot={TOOLBAR_EXTRAS}
+          props={{
+            onUndo,
+            onRedo,
+            canUndo,
+            canRedo,
+            undoLabel,
+            redoLabel,
+            onPrint,
+            printLabel,
+            density,
+            onDensityChange,
+            onToggleFullscreen,
+            isFullscreen,
+            onExportCsv,
+            exportBusy,
+            exportAnnouncement,
+            exportProgressState,
+            exportLabel,
+            exportDisabled,
+            exportDisabledReason,
+            labels,
+          }}
+        />
         {onAddRow && (
           <Button
             variant="light"
@@ -195,48 +186,6 @@ export function Toolbar<TRow>({
             onClick={onAddRow}
           >
             {addRowLabel}
-          </Button>
-        )}
-        {onPrint && (
-          <Button
-            variant="default"
-            size="sm"
-            data-adapttable-part="print-button"
-            onClick={onPrint}
-          >
-            {printLabel}
-          </Button>
-        )}
-        {onDensityChange && (
-          <Button
-            variant="default"
-            size="sm"
-            aria-label={labels.density}
-            data-adapttable-part="density-toggle"
-            onClick={() => {
-              onDensityChange(
-                density === "compact" ? "comfortable" : "compact"
-              );
-            }}
-          >
-            {density === "compact"
-              ? labels.densityCompact
-              : labels.densityComfortable}
-          </Button>
-        )}
-        {onToggleFullscreen && (
-          <Button
-            variant="default"
-            size="sm"
-            aria-label={
-              isFullscreen === true
-                ? labels.exitFullscreen
-                : labels.enterFullscreen
-            }
-            data-adapttable-part="fullscreen-toggle"
-            onClick={onToggleFullscreen}
-          >
-            {isFullscreen === true ? "\u2715" : "\u26f6"}
           </Button>
         )}
         {toolbarSlots?.end}

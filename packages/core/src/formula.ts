@@ -2,16 +2,10 @@
  * Spreadsheet formulas — `@adapttable/core/formula`.
  *
  * A separate entry point, so a table with no computed columns never
- * downloads a parser. Import it and columns can be typed as formulas; do not,
- * and none of this code reaches the bundle.
+ * downloads a parser. Hooks that sync formula columns to the URL live on
+ * `@adapttable/react/formula`.
  *
- * ```tsx
- * import { buildFormulaColumns } from "@adapttable/core/formula";
- *
- * const { columns: computed } = buildFormulaColumns<Row>([
- *   { key: "total", header: "Total", formula: "=[Unit Price] * Quantity" },
- * ]);
- * ```
+ * @packageDocumentation
  */
 export {
   evaluateFormula,
@@ -46,64 +40,30 @@ export {
   parseFormula,
   type ParseResult,
 } from "./formula/parse";
-export {
-  FORMULA_URL_WRITE_DEBOUNCE_MS,
-  useFormulaUrlState,
-  type UseFormulaUrlStateOptions,
-  type UseFormulaUrlStateResult,
-} from "./formula/useFormulaUrlState";
-export type { ColumnDef, SortableValue } from "./types";
-export type { UrlStateAdapter } from "./url/adapter";
 
 /**
- * The member types the signatures above hand back.
- *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
- * a consumer a type whose parts they cannot name. These are already
- * public on `@adapttable/core`; this is the same declaration, reachable
- * from the entry that returns it.
+ * Member types the signatures above hand back, reachable from the entry that
+ * returns them.
  */
-export type { CellEditor } from "./editing/cellEditing";
-export type { ColumnFilter } from "./filters/filterDefs";
 export type {
-  CellProps,
-  ColumnFooterContext,
+  Aggregatable,
+  AggregatableConfig,
+  AggregateOperation,
+  CustomAggregateOperation,
+} from "./aggregate/aggregatable";
+export type {
+  AggregateFormatContext,
+  AggregateName,
+  AggregateOperationId,
+  AggregateOrderedValue,
+  Aggregator,
+} from "./aggregate/aggregate";
+export type { ColumnMetadata, SortableValue } from "./columnModel";
+export type { ColumnModel } from "./columnModel";
+export type {
   ColumnGroupShow,
-  ColumnHeaderContext,
-} from "./types";
-
-/**
- * The member types the signatures above hand back.
- *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
- * a consumer a type whose parts they cannot name. These are already
- * public on `@adapttable/core`; this is the same declaration, reachable
- * from the entry that returns it.
- */
-export type {
-  CellEditorOption,
-  CustomCellEditorRender,
-} from "./editing/cellEditing";
-export type { FilterDef, FilterType } from "./filters/filterDefs";
-export type { ColumnHeaderController } from "./types";
-
-/**
- * The member types the signatures above hand back.
- *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
- * a consumer a type whose parts they cannot name. These are already
- * public on `@adapttable/core`; this is the same declaration, reachable
- * from the entry that returns it.
- */
-export type { CustomCellEditorCtrl } from "./editing/cellEditing";
-export type { FilterOptionsSource } from "./filters/filterDefs";
-
-/**
- * The member types the signatures above hand back.
- *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
- * a consumer a type whose parts they cannot name. These are already
- * public on `@adapttable/core`; this is the same declaration, reachable
- * from the entry that returns it.
- */
-export type { FilterOption } from "./filters/filterDefs";
+  ColumnModelEditor,
+  ColumnModelFilter,
+} from "./columnModel";
+export type { ColumnAiOptions } from "./columnModel";
+export type { DisplayValue } from "./display";

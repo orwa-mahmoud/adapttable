@@ -6,7 +6,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../columnModel";
 import { fillDirection, fillRangeEdits, fillTargetRange } from "./fillRange";
 
 interface Row {
@@ -21,7 +21,7 @@ const ROWS: Row[] = [
   { id: "4", name: "Alan", score: 9 },
   { id: "5", name: "Edsger", score: 9 },
 ];
-const COLUMNS: ColumnDef<Row>[] = [
+const COLUMNS: ColumnModel<Row>[] = [
   { key: "name", header: "Name", editable: true },
   {
     key: "score",

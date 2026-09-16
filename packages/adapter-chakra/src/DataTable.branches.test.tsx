@@ -3,13 +3,10 @@
  * branches in DataTable.tsx, components/chrome.tsx and components/tables.tsx
  * that the existing suites only hit on one side.
  */
-import {
-  createMemoryAdapter,
-  defaultLabels,
-  useFrontendData,
-} from "@adapttable/core";
-import type * as AdapterModule from "@adapttable/core/adapter";
-import { useDataTableShell } from "@adapttable/core/adapter";
+import { defaultLabels } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import type * as AdapterModule from "@adapttable/react/adapter";
+import { useDataTableShell } from "@adapttable/react/adapter";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -17,7 +14,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FilterDrawer } from "./components/FilterDrawer";
 import { FilterPopover } from "./components/FilterPopover";
 import { LoadingState } from "./components/TableSkeleton";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -34,7 +31,7 @@ const columns: ColumnDef<Row>[] = [
   { key: "city", header: "City", accessor: (r) => r.city },
 ];
 
-vi.mock("@adapttable/core/adapter", async (importOriginal) => {
+vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return {
     ...actual,
@@ -43,7 +40,7 @@ vi.mock("@adapttable/core/adapter", async (importOriginal) => {
 });
 
 const actualCore = await vi.importActual<typeof AdapterModule>(
-  "@adapttable/core/adapter"
+  "@adapttable/react/adapter"
 );
 
 /**
@@ -54,9 +51,10 @@ const actualCore = await vi.importActual<typeof AdapterModule>(
 type Shell = ReturnType<typeof actualCore.useDataTableShell>;
 
 function mockShell(patch: (real: Shell) => Shell) {
-  vi.mocked(useDataTableShell).mockImplementation((props, render) =>
-    patch(actualCore.useDataTableShell(props, render))
-  );
+  vi.mocked(useDataTableShell).mockImplementation((props, render) => ({
+    ...patch(actualCore.useDataTableShell(props, render)),
+    skipChromeBody: true,
+  }));
 }
 
 let adapter: ReturnType<typeof createMemoryAdapter>;

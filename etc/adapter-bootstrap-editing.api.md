@@ -4,7 +4,7 @@
 
 ```ts
 
-import { editing } from '@adapttable/core/features';
+import { editing } from '@adapttable/react/features';
 
 export { editing }
 

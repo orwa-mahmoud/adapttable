@@ -5,7 +5,7 @@ import {
   type SidePanelFrameProps,
   type SidePanelSlots,
   type SidePanelTabProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Card } from "antd";
 
 function Frame({ children, side, className }: SidePanelFrameProps) {

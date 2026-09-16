@@ -7,8 +7,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ColumnModel } from "../columnModel";
 import type { TableSource } from "../source/TableSource";
-import type { ColumnDef } from "../types";
 import { buildTableCsv, downloadTableCsv, type ExportInfo } from "./tableCsv";
 
 interface Row {
@@ -28,12 +28,12 @@ const money = new Intl.NumberFormat("en-US", {
 });
 
 /** A money column: pretty on screen, useless in a spreadsheet. */
-const COLUMNS: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (row) => row.name },
+const COLUMNS: ColumnModel<Row>[] = [
+  { key: "name", header: "Name", exportValue: (row) => row.name },
   {
     key: "budget",
     header: "Budget",
-    accessor: (row) => money.format(row.budget),
+    formatValue: (row) => money.format(row.budget),
     exportValue: (row) => row.budget,
   },
 ];

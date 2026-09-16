@@ -1,5 +1,6 @@
-import type { ColumnDef, ColumnLayoutState } from "@adapttable/core";
-import type { DataTableProps } from "@adapttable/mantine";
+import type { ColumnLayoutState } from "@adapttable/core";
+import type {} from "@adapttable/mantine";
+import type { ColumnDef, FeatureProps } from "@adapttable/react";
 import {
   type ComponentType,
   lazy,
@@ -34,6 +35,8 @@ export type KitDemoProps = Readonly<{
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -90,7 +93,7 @@ export type KitDemoProps = Readonly<{
   /** Undo and Redo in the toolbar. Needs editing armed to do anything. */
   undoRedoButtons?: boolean;
   /** A settings panel docked beside the table. */
-  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
   /** Use the wide, horizontally-scrolling column set with Person pinned. */
   wide?: boolean;
   /** The column layout a page starts from. */
@@ -100,7 +103,7 @@ export type KitDemoProps = Readonly<{
   /** A checkbox in every column header that selects the column. */
   columnSelectionCheckbox?: boolean;
   /** The toolbar Export button's configuration. */
-  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
+  exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
   forceMobile?: boolean;
   pageMode?: PageMode;
   focused?: boolean;
@@ -150,7 +153,13 @@ export function Segmented<T extends string>({
 }: Readonly<{
   value: T;
   onChange: (v: T) => void;
-  options: { value: T; label: string; disabled?: boolean; title?: string }[];
+  options: {
+    value: T;
+    label: string;
+    disabled?: boolean;
+    title?: string;
+    testId?: string;
+  }[];
   label: string;
 }>) {
   return (
@@ -163,6 +172,7 @@ export function Segmented<T extends string>({
           aria-pressed={value === o.value}
           disabled={o.disabled}
           title={o.title}
+          data-testid={o.testId}
           onClick={() => onChange(o.value)}
         >
           {o.label}

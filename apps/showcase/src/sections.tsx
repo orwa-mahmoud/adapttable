@@ -12,6 +12,7 @@ import { cssVars } from "./cssVars";
 import {
   adapterByKey,
   builtAdapters,
+  CANONICAL_AI_ADAPTER,
   MATRIX_FEATURES,
   SHOWCASE_ADAPTERS,
   type ShowcaseAdapter,
@@ -494,8 +495,13 @@ export function AppNav({
   const topPages: readonly NavPage[] = [
     { key: "demo", label: "Live demo", href: href("") },
     { key: "all-options", label: "Feature Lab", href: href("all-options") },
+    {
+      key: "ai-demo",
+      label: "AI demo",
+      href: href(`${CANONICAL_AI_ADAPTER}/ai`),
+    },
   ];
-  /** The current kit's eighteen feature pages — the phone picker's only home for
+  /** The current kit's matrix feature pages — the phone picker's only home for
    * them, since a phone has neither the landing grid nor the feature rail in
    * reach of the bar. */
   const kitFeaturePages: readonly NavPage[] = MATRIX_FEATURES.map(
@@ -574,16 +580,20 @@ export function AppNav({
       <div className="nav__inner shell">
         <Wordmark href={href("")} />
         <nav className="nav__links" aria-label="Demo pages">
-          {topPages.map((p) => (
-            <a
-              key={p.key}
-              href={p.href}
-              className={active === p.key ? "is-on" : undefined}
-              aria-current={active === p.key ? "page" : undefined}
-            >
-              {p.label}
-            </a>
-          ))}
+          {topPages.map((p) => {
+            const on =
+              p.key === "ai-demo" ? active.endsWith("/ai") : active === p.key;
+            return (
+              <a
+                key={p.key}
+                href={p.href}
+                className={on ? "is-on" : undefined}
+                aria-current={on ? "page" : undefined}
+              >
+                {p.label}
+              </a>
+            );
+          })}
           {groups.map((group) => (
             <NavGroup
               key={group.key}

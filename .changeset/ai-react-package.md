@@ -1,0 +1,38 @@
+---
+"@adapttable/ai-react": minor
+---
+
+Introduce `@adapttable/ai-react`, the React integration for the
+framework-neutral `@adapttable/ai` package.
+
+`tableAgent` connects a table's live capabilities, columns, source and host
+callbacks to an agent session. `useTableAssistant` connects the headless
+conversation controller to React. Cell, row and batch editing are exposed
+through their wired editing channels.
+
+React DOM 18 or 19 is a peer dependency. Binding-owned view changes are
+committed before returning their execution revision, so sequential commands
+can follow their own updates without accepting unrelated reader changes.
+
+The bridge can publish the session, view inputs, approvals and remembered
+allowances to a panel mounted outside the table. Pass the published
+`contextInputs` and `alwaysAllow` state to `useTableAssistant` when the
+panel cannot read the table's feature state directly.
+
+`tableAgent` samples the columns whose author set `ai.sample`, once per
+contract, and hands the values into the context — a model then filters on the
+spelling the table stores rather than guessing one.
+
+`useTableAssistant` takes `messages` and `onMessagesChange` for a host that
+owns the transcript, and `conversation` for how much of it is sent with each
+turn.
+
+`useTableAssistant` returns `resume`, `interrupted` and `resumable` for a
+connection that went while the work carried on, and `progress` for a
+capability that says how far it has got. `onDetach` and `resumeHandle` are
+where a host keeps that work across a page reload. `tableAgent` publishes
+progress through `bridge.progress` and the table's own state.
+
+Use an optional native widget from `@adapttable/<kit>/assistant`, or build
+your own UI and transport. This is the package's initial release; no migration
+from an earlier AdaptTable AI React package is required.

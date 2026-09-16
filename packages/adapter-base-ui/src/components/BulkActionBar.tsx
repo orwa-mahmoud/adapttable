@@ -3,7 +3,7 @@ import {
   type BulkBarChromeProps,
   resolveDisabledReason,
   useBulkBarState,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { isValidElement } from "react";
 
 import type { BaseUiAccentColor } from "../types";

@@ -3,7 +3,7 @@ import {
   type ContextMenuChromeProps,
   type ContextMenuItemProps,
   type ContextMenuSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { type ReactNode, useEffect, useRef } from "react";
 
 import type { DataTableClassNames } from "../types";

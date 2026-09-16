@@ -124,6 +124,16 @@ jobs:
       - uses: ./.github/actions/setup-pnpm
       - name: Build packages
         run: pnpm build
+      - name: Pack Node support fixtures
+        if: needs.detect.outputs.runPackage == 'true'
+        run: pnpm node:support:pack
+      - name: Upload Node support fixtures
+        if: needs.detect.outputs.runPackage == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: node-support-packs
+          path: node-support-packs/
+          retention-days: 1
 
   format:
     name: Format
@@ -162,6 +172,10 @@ jobs:
         if: needs.detect.outputs.runUnit == 'true'
         run: pnpm check:parts
 
+      - name: Check the feature inventory matches the code
+        if: needs.detect.outputs.skipAll != 'true'
+        run: pnpm check:features
+
       - name: Lint root tooling
         if: needs.detect.outputs.runLintRoot == 'true'
         run: pnpm lint:root
@@ -175,7 +189,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [core, antd, mui, kits, tools]
+        name: [core, react, antd, mui, kits, tools]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
@@ -185,13 +199,15 @@ jobs:
         run: |
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
+            react) f="--filter=@adapttable/react" ;;
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
-            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
+            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/ai --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
-          pnpm lint $f --concurrency=1
+          # 2-core runner: two packages at once, each lint is one process.
+          pnpm lint $f --concurrency=2
 
   typescript:
     name: TypeScript
@@ -202,7 +218,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [core, antd, mui, kits, tools]
+        name: [core, react, antd, mui, kits, tools]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
@@ -212,10 +228,11 @@ jobs:
         run: |
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
+            react) f="--filter=@adapttable/react" ;;
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
-            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
+            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/ai --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
           pnpm typecheck $f
@@ -249,13 +266,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: core
           - name: antd
-          - name: mui
-          - name: chakra · mantine
-          - name: radix · base-ui
-          - name: shadcn · unstyled · bootstrap
-          - name: server · cli · i18n
+          - name: chakra
+          - name: core · unstyled
+          - name: mui · shadcn
+          - name: react
+          - name: mantine · bootstrap
+          - name: base-ui · ai
+          - name: radix · server · cli · i18n
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
@@ -264,16 +282,21 @@ jobs:
           LANE: ${{ matrix.name }}
         run: |
           case "$LANE" in
-            core) f="--filter=@adapttable/core" ;;
             antd) f="--filter=@adapttable/antd" ;;
-            mui) f="--filter=@adapttable/mui" ;;
-            "chakra · mantine") f="--filter=@adapttable/chakra --filter=@adapttable/mantine" ;;
-            "radix · base-ui") f="--filter=@adapttable/radix --filter=@adapttable/base-ui" ;;
-            "shadcn · unstyled · bootstrap") f="--filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
-            "server · cli · i18n") f="--filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n" ;;
+            chakra) f="--filter=@adapttable/chakra" ;;
+            "core · unstyled") f="--filter=@adapttable/core --filter=@adapttable/unstyled" ;;
+            "mui · shadcn") f="--filter=@adapttable/mui --filter=@adapttable/shadcn" ;;
+            react) f="--filter=@adapttable/react" ;;
+            "mantine · bootstrap") f="--filter=@adapttable/mantine --filter=@adapttable/bootstrap" ;;
+            "base-ui · ai") f="--filter=@adapttable/base-ui --filter=@adapttable/ai" ;;
+            "radix · server · cli · i18n") f="--filter=@adapttable/radix --filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
-          pnpm test:coverage $f --concurrency=1
+          # Lanes are balanced by measured suite time, not package count:
+          # antd 85s, chakra 69s, mui 53s, react 52s, mantine 51s, base-ui
+          # 46s, radix 45s, unstyled 40s, core 33s, shadcn 18s, ai 8s,
+          # bootstrap 5s, server/cli/i18n ~1s each. antd alone sets the floor.
+          pnpm test:coverage $f --concurrency=2
 
   unit:
     name: Unit
@@ -300,6 +323,8 @@ jobs:
       - uses: ./.github/actions/setup-pnpm
       - name: Restore built packages
         run: pnpm build
+      - name: Check the engine imports no framework
+        run: pnpm check:boundary
       - name: Validate published package configs
         run: pnpm publint
       - name: Check the extracted API reports are current
@@ -324,6 +349,27 @@ jobs:
         run: pnpm build
       - name: Run the packed-consumer harness
         run: pnpm consumer:harness
+
+  node-support:
+    name: Packed Node support · ${{ matrix.node }}
+    needs: [detect, build]
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPackage == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22.12.0", "24"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: node-support-packs
+          path: node-support-packs/
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install and load packed packages
+        run: node scripts/node-support-harness.mjs verify
 
   floors:
     name: Peer floors (changed adapters)
@@ -405,7 +451,7 @@ jobs:
 
   package:
     name: Package
-    needs: [detect, package-gate, consumer, floors, react-matrix]
+    needs: [detect, package-gate, consumer, node-support, floors, react-matrix]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
     steps:
@@ -424,13 +470,33 @@ jobs:
             exit 0
           fi
           [ "${{ needs.consumer.result }}" = "success" ] || { echo "Consumer: ${{ needs.consumer.result }}"; exit 1; }
+          [ "${{ needs.node-support.result }}" = "success" ] || { echo "Node support: ${{ needs.node-support.result }}"; exit 1; }
           [ "${{ needs.react-matrix.result }}" = "success" ] || { echo "React matrix: ${{ needs.react-matrix.result }}"; exit 1; }
           floors="${{ needs.floors.result }}"
           case "$floors" in success|skipped) ;; *) echo "Floors: $floors"; exit 1 ;; esac
 
+  showcase-build:
+    name: Build the showcase for E2E
+    needs: detect
+    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPlaywright == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      # Every shard runs against this one build, so nine runners do not each
+      # compile the same site.
+      - name: Build
+        run: pnpm turbo run build --filter=@adapttable/showcase
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: showcase-dist
+          path: apps/showcase/dist/
+          retention-days: 1
+
   playwright-shard:
     name: Playwright shards
-    needs: detect
+    needs: [detect, showcase-build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPlaywright == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -442,8 +508,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - uses: ./.github/actions/playwright-chromium
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: showcase-dist
+          path: apps/showcase/dist/
       - name: Run E2E smoke suite
-        run: pnpm exec playwright test --shard=${{ matrix.shard }}/9
+        run: pnpm exec playwright test --project=chromium --project=chromium-dev --shard=${{ matrix.shard }}/9
+        env:
+          SHOWCASE_SKIP_BUILD: "1"
       - name: Upload report on failure
         if: ${{ failure() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

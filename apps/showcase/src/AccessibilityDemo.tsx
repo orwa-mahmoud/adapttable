@@ -69,6 +69,10 @@ export function AccessibilityDemo({
         <span className="hint">
           <Check size={12} /> hover a header to select its whole column
         </span>
+        <span className="hint">
+          <Check size={12} /> focus, selection and disabled stay visible in
+          forced-colors — nothing is color-only
+        </span>
       </div>
       <div className="mx-demo__body">
         <div key={adapter} data-adapter={adapter} ref={setRoot}>

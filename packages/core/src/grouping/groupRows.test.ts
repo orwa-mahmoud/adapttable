@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../columnModel";
 import {
   buildGroupedFlatModel,
   formatGroupLabel,
@@ -23,7 +23,7 @@ const ROWS: Person[] = [
   { id: "4", name: "Katherine", team: "Platform", budget: 40 },
 ];
 
-const COLS: ColumnDef<Person>[] = [
+const COLS: ColumnModel<Person>[] = [
   { key: "name" },
   { key: "team" },
   { key: "budget", sortValue: (r) => r.budget },
@@ -33,6 +33,57 @@ describe("resolveGroupValue / groupValueKey / formatGroupLabel", () => {
   it("prefers sortValue over path", () => {
     expect(resolveGroupValue(ROWS[0]!, "budget", COLS[2])).toBe(10);
     expect(resolveGroupValue(ROWS[0]!, "team", COLS[1])).toBe("Core");
+  });
+
+  it("buckets by the column's own groupValue ahead of sortValue", () => {
+    // A continuous value sorts fine and groups terribly: every row is its own
+    // bucket. The band is what the reader means.
+    const banded: ColumnModel<Person> = {
+      key: "budget",
+      sortValue: (r) => r.budget,
+      groupValue: (r) => (r.budget < 25 ? "Under 25" : "25 and over"),
+    };
+    expect(resolveGroupValue(ROWS[0]!, "budget", banded)).toBe("Under 25");
+    expect(resolveGroupValue(ROWS[3]!, "budget", banded)).toBe("25 and over");
+  });
+
+  it("groups rows that share a bucket under one header", () => {
+    const model = buildGroupedFlatModel({
+      rows: ROWS,
+      groupBy: "budget",
+      columns: [
+        {
+          key: "budget",
+          sortValue: (r) => r.budget,
+          groupValue: (r) => (r.budget < 25 ? "Under 25" : "25 and over"),
+        },
+      ],
+      getRowId: (r) => r.id,
+      collapsedGroupIds: new Set<string>(),
+    });
+    const headers = model.flatMap((entry) =>
+      entry.kind === "group" ? [entry.label] : []
+    );
+    expect(headers).toEqual(["Under 25", "25 and over"]);
+  });
+
+  it("reads the stored comma-separated form as the list it is", () => {
+    // `formatGroupBy` writes "team,budget" into state and the URL, so a
+    // caller handing that back must get two keys: read as one column name it
+    // matches nothing and every row lands in a single blank bucket.
+    const model = buildGroupedFlatModel({
+      rows: ROWS,
+      groupBy: "team,budget",
+      columns: COLS,
+      getRowId: (r) => r.id,
+      collapsedGroupIds: new Set<string>(),
+    });
+    const headers = model.flatMap((entry) =>
+      entry.kind === "group" ? [entry.label] : []
+    );
+    expect(headers).not.toContain("(blank)");
+    expect(headers).toContain("Core");
+    expect(headers.filter((label) => label === "Core")).toHaveLength(1);
   });
 
   it("uses path lookup when column has no sortValue", () => {
@@ -145,7 +196,14 @@ describe("buildGroupedFlatModel", () => {
       key: "1",
       groupKey: "group:team:s:Core",
       index: 0,
+      groupPosition: 0,
+      group: {
+        id: "group:team:s:Core",
+        label: "Core",
+        levels: [{ key: "team", value: "Core", label: "Core" }],
+      },
     });
+    expect(flat[2]).toMatchObject({ kind: "row", groupPosition: 1 });
   });
 
   it("omits leaves when a group is collapsed", () => {
@@ -379,7 +437,7 @@ describe("buildGroupedFlatModel — ordering and filtering groups", () => {
 
   it("orders by an aggregate through the rows it is computed from", () => {
     // "Sort by total" is a comparator over the same leaves the aggregate
-    // reads — never over the rendered aggregate cell, which is a ReactNode.
+    // reads — never over the rendered aggregate cell, which is a DisplayValue.
     const byTotal = build({
       sort: (a, b) => total(b.leafRows) - total(a.leafRows),
     });

@@ -4,7 +4,8 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
+import { builtAdapters, MATRIX_FEATURES } from "../apps/showcase/matrix.mjs";
+import { REPLACED_PAGES, SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
 import { isRedirectPage } from "./sitemap-routes.mjs";
 
 const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
@@ -93,6 +94,29 @@ describe("the showcase page manifest", () => {
     );
   });
 
+  it("registers row-reordering and aggregation for every published adapter", () => {
+    const slugs = ["row-reordering", "aggregation"];
+    for (const slug of slugs) {
+      assert.ok(
+        MATRIX_FEATURES.some((feature) => feature.slug === slug),
+        slug
+      );
+    }
+    const routes = new Set(
+      SHOWCASE_PAGES.filter((page) => page.indexable).map((page) => page.route)
+    );
+    const adapters = builtAdapters();
+    assert.equal(adapters.length, 8);
+    for (const adapter of adapters) {
+      for (const slug of slugs) {
+        const route = `/demo/${adapter.key}/${slug}/`;
+        assert.ok(routes.has(route), route);
+      }
+    }
+    assert.equal(routes.has("/demo/bootstrap/row-reordering/"), false);
+    assert.equal(routes.has("/demo/bootstrap/aggregation/"), false);
+  });
+
   it("gives every page its own key and its own route", () => {
     const keys = SHOWCASE_PAGES.map((page) => page.key);
     const routes = SHOWCASE_PAGES.map((page) => page.route);
@@ -107,11 +131,19 @@ describe("the showcase page manifest", () => {
     }
   });
 
-  it("keeps a page out of the sitemap only when it forwards the reader on", () => {
+  it("forwards replaced addresses and keeps labs out of the sitemap without a refresh", () => {
+    const replaced = new Set(
+      REPLACED_PAGES.map(([from]) => `./${from}/index.html`)
+    );
     for (const { html, indexable } of SHOWCASE_PAGES) {
       if (indexable) continue;
       const source = readFileSync(join(SHOWCASE, html), "utf8");
-      assert.equal(isRedirectPage(source), true, html);
+      if (replaced.has(html)) {
+        assert.equal(isRedirectPage(source), true, html);
+        continue;
+      }
+      assert.equal(isRedirectPage(source), false, html);
+      assert.ok(entryModuleOf(source), html);
     }
   });
 });

@@ -3,9 +3,9 @@ import {
   type Direction,
   PIN_Z,
   type PinSide,
-  resolveColumnFooter,
   type TableLabels,
 } from "@adapttable/core";
+import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
   cellHighlightStyle,
@@ -28,11 +28,13 @@ import {
   mergedCellStyle,
   pinnedEdgeCellStyle,
   REORDER_COLUMN_WIDTH,
+  resolveRowEditTrigger,
+  rowEditConflict,
   type SharedTableRenderProps,
   sortArrow,
   useDesktopTableAssembly,
-} from "@adapttable/core/adapter";
-import { Box, chakra, Table, Text } from "@chakra-ui/react";
+} from "@adapttable/react/adapter";
+import { Box, chakra, Flex, Table, Text } from "@chakra-ui/react";
 import {
   type CSSProperties,
   type ReactElement,
@@ -40,18 +42,19 @@ import {
   useMemo,
 } from "react";
 
-import { ColumnSelectCheckbox } from "./ColumnSelectCheckbox";
-import { EditableDataCell } from "./EditableCell";
-import { ExpandToggle } from "./ExpandToggle";
-import { FillHandle } from "./FillHandle";
-import { GroupHeaderRow } from "./GroupHeader";
 import {
-  ColumnGroupToggle,
-  FilterHeaderTrigger,
-  RowEditActions,
-  RowReorderHandle,
-  TreeCell,
-} from "./kitControls";
+  OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
+} from "./featureSlots";
 import { Checkbox } from "./primitives";
 import { RowActionButtons } from "./RowActionButtons";
 
@@ -206,6 +209,13 @@ function DesktopRowBase<TRow>(
     if (!pin) return undefined;
     return { ...pin, background: pin.background ?? PIN_BG };
   };
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
+  const rowConflict = rowEditConflict(editing, id);
   return (
     <>
       <Table.Row
@@ -224,11 +234,13 @@ function DesktopRowBase<TRow>(
               ...edgeRowPin,
             }}
           >
-            <ExpandToggle
-              open={Boolean(expanded)}
+            <OptionalExpandToggle
+              id={id}
+              expanded={Boolean(expanded)}
+              onToggle={onToggleExpand}
               dir={dir}
-              labels={labels}
-              onToggle={() => onToggleExpand(id)}
+              expandLabel={labels.expandRow}
+              collapseLabel={labels.collapseRow}
             />
           </Table.Cell>
         )}
@@ -246,7 +258,7 @@ function DesktopRowBase<TRow>(
               ...edgeRowPin,
             }}
           >
-            <RowReorderHandle
+            <OptionalRowReorderHandle
               reorder={rowReorder}
               labels={labels}
               rowId={id}
@@ -310,33 +322,27 @@ function DesktopRowBase<TRow>(
                 }
               )}
             >
-              <TreeCell
+              <OptionalTreeCell
                 entry={treeEntry}
                 columnKey={column.key}
                 treeColumnKey={treeKey}
                 labels={labels}
                 onToggle={onToggleTree}
               >
-                <EditableDataCell
+                <OptionalEditableCell
                   editing={editing}
                   row={row}
-                  column={column}
+                  column={column as ColumnDef<TRow>}
                   rowId={id}
+                  rowIndex={focusIndex}
                   rows={rows}
                   columns={columns}
                   rowKey={getRowId}
                   editLabel={labels.editCell}
                   undoLabel={labels.undoEdit}
-                  display={
-                    column.Cell ? (
-                      <column.Cell row={row} rowIndex={focusIndex} />
-                    ) : (
-                      column.accessor?.(row)
-                    )
-                  }
                 />
-              </TreeCell>
-              <FillHandle
+              </OptionalTreeCell>
+              <OptionalFillHandle
                 focus={gridFocus}
                 windowIndex={focusIndex}
                 col={columnIndex}
@@ -354,17 +360,20 @@ function DesktopRowBase<TRow>(
             }}
           >
             {editing?.rowEditing && (
-              <RowEditActions
+              <OptionalRowEditActions
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
+                showBegin={rowEdit.showBegin}
+                icons={editing.rowEditIcons}
+                conflict={rowConflict}
                 labels={labels}
               />
             )}
-            {rowActions && rowActions.length > 0 && (
+            {rowEdit.actions.length > 0 && (
               <RowActionButtons
                 row={row}
-                actions={rowActions}
+                actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
                 layout={rowActionsLayout}
@@ -384,6 +393,51 @@ function DesktopRowBase<TRow>(
   );
 }
 
+function NormalHeaderCaption<TRow>({
+  leaf,
+  labels,
+}: Readonly<{
+  leaf: DesktopHeaderLeaf<TRow>;
+  labels: Required<TableLabels>;
+}>) {
+  const { column } = leaf;
+  const ariaSort = leaf.headerProps["aria-sort"] as
+    "ascending" | "descending" | "none" | undefined;
+  if (!column.sortable) {
+    return <span title={column.headerTooltip}>{leaf.caption}</span>;
+  }
+  return (
+    <chakra.button
+      type="button"
+      cursor="pointer"
+      aria-label={`${labels.sortBy}: ${leaf.columnName}`}
+      onClick={leaf.sortButtonProps.onClick}
+      title={column.headerTooltip}
+    >
+      {leaf.caption}
+      <Text as="span" aria-hidden>
+        {sortGlyph(ariaSort)}
+      </Text>
+      {leaf.sortIndex !== undefined && (
+        <Text
+          as="span"
+          aria-hidden
+          data-sort-index={leaf.sortIndex}
+          fontSize="0.7em"
+          fontWeight="bold"
+          borderRadius="full"
+          px={1.5}
+          ms={1}
+          bg="blackAlpha.200"
+          _dark={{ bg: "whiteAlpha.300" }}
+        >
+          {leaf.sortIndex}
+        </Text>
+      )}
+    </chakra.button>
+  );
+}
+
 function LeafHeader<TRow>({
   leaf,
   stickyTh,
@@ -394,6 +448,7 @@ function LeafHeader<TRow>({
   source,
   labels,
   resizeHandleStyle,
+  onRenameColumn,
 }: Readonly<{
   leaf: DesktopHeaderLeaf<TRow>;
   stickyTh: Record<string, unknown>;
@@ -404,10 +459,9 @@ function LeafHeader<TRow>({
   source: SharedTableRenderProps<TRow>["table"]["source"];
   labels: Required<TableLabels>;
   resizeHandleStyle: CSSProperties;
+  onRenameColumn?: (key: string, name: string) => void;
 }>): ReactElement {
   const { column } = leaf;
-  const ariaSort = leaf.headerProps["aria-sort"] as
-    "ascending" | "descending" | "none" | undefined;
   const leafStyle = {
     ...leaf.style,
     ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
@@ -416,52 +470,41 @@ function LeafHeader<TRow>({
     <Table.ColumnHeader
       key={column.key}
       data-adapttable-part="header-cell"
+      // Every header prop core states, in full. Cherry-picking named fields
+      // meant a prop core added reached only the kits that happened to name
+      // it; the kit's own props below still win where they overlap.
+      {...leaf.headerProps}
       {...leaf.columnHeaderProps}
-      // Chakra's own header cell does not set it, and this component takes
-      // named props from `leaf` rather than spreading `headerProps`.
-      scope="col"
       textAlign={logicalAlign(column.align)}
       width={column.width}
-      aria-sort={ariaSort}
-      data-column-key={column.key}
       rowSpan={leaf.rowSpan > 1 ? leaf.rowSpan : undefined}
       {...stickyTh}
       style={leafStyle}
     >
-      {column.sortable ? (
-        <chakra.button
-          type="button"
-          cursor="pointer"
-          aria-label={`${labels.sortBy}: ${leaf.columnName}`}
-          onClick={leaf.sortButtonProps.onClick}
-          title={column.headerTooltip}
-        >
-          {leaf.caption}
-          <Text as="span" aria-hidden>
-            {sortGlyph(ariaSort)}
-          </Text>
-          {leaf.sortIndex !== undefined && (
-            <Text
-              as="span"
-              aria-hidden
-              data-sort-index={leaf.sortIndex}
-              fontSize="0.7em"
-              fontWeight="bold"
-              borderRadius="full"
-              px={1.5}
-              ms={1}
-              bg="blackAlpha.200"
-              _dark={{ bg: "whiteAlpha.300" }}
-            >
-              {leaf.sortIndex}
-            </Text>
-          )}
-        </chakra.button>
-      ) : (
-        <span title={column.headerTooltip}>{leaf.caption}</span>
-      )}
+      <Flex align="center" gap={1} flexWrap="wrap">
+        {column.renameable === true && onRenameColumn ? (
+          <OptionalColumnHeaderRename
+            columnKey={column.key}
+            name={leaf.columnName}
+            labels={labels}
+            onRenameColumn={onRenameColumn}
+          >
+            <Box as="span" data-adapttable-part="header-caption">
+              <Box as="span" data-adapttable-part="header-caption-control">
+                <NormalHeaderCaption leaf={leaf} labels={labels} />
+              </Box>
+            </Box>
+          </OptionalColumnHeaderRename>
+        ) : (
+          <Box as="span" data-adapttable-part="header-caption">
+            <Box as="span" data-adapttable-part="header-caption-control">
+              <NormalHeaderCaption leaf={leaf} labels={labels} />
+            </Box>
+          </Box>
+        )}
+      </Flex>
       {leaf.showColumnCheckbox && leaf.onToggleColumn ? (
-        <ColumnSelectCheckbox
+        <OptionalColumnSelect
           label={leaf.columnSelectAriaLabel}
           checked={leaf.columnCheckboxChecked}
           onToggle={leaf.onToggleColumn}
@@ -473,7 +516,7 @@ function LeafHeader<TRow>({
         </span>
       ) : null}
       {leaf.headerDef ? (
-        <FilterHeaderTrigger
+        <OptionalFilterHeader
           def={leaf.headerDef}
           source={source}
           labels={labels}
@@ -559,6 +602,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     source: props.table.source,
     labels,
     resizeHandleStyle,
+    onRenameColumn: props.onRenameColumn,
   };
 
   const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {
@@ -591,7 +635,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       >
         <span style={groupedHeaderLabelStyle()}>
           {props.onToggleColumnGroup ? (
-            <ColumnGroupToggle
+            <OptionalColumnGroupToggle
               cell={cell.cell}
               labels={labels}
               onToggle={props.onToggleColumnGroup}
@@ -768,7 +812,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
             }
             if (slot.kind === "group") {
               return (
-                <GroupHeaderRow
+                <OptionalGroupHeaderRow
                   key={slot.key}
                   entry={slot.entry}
                   columns={columns}
@@ -777,8 +821,6 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
                   getCellProps={props.table.getCellProps}
                   selection={selection}
                   labels={labels}
-                  dir={dir}
-                  accentColor={accentColor}
                   onToggleCollapse={callbacks.onToggleGroup}
                   onShowMore={props.grouping?.showMore ?? (() => undefined)}
                 />

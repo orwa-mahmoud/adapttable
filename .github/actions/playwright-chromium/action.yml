@@ -1,17 +1,24 @@
 name: Playwright browsers
-description: Cache and install Chromium for Playwright.
+description: Cache and install Playwright browsers. Chromium is the per-PR default.
+
+inputs:
+  browsers:
+    description: Space-separated Playwright browser names to install.
+    required: false
+    default: chromium
 
 runs:
   using: composite
   steps:
-    - name: Cache Playwright browser
+    - name: Cache Playwright browsers
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cache/ms-playwright
-        key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        key: playwright-${{ runner.os }}-${{ inputs.browsers }}-${{ hashFiles('pnpm-lock.yaml') }}
         restore-keys: |
+          playwright-${{ runner.os }}-${{ inputs.browsers }}-
           playwright-${{ runner.os }}-
 
-    - name: Install Playwright Chromium
+    - name: Install Playwright browsers
       shell: bash
-      run: pnpm exec playwright install --with-deps chromium
+      run: pnpm exec playwright install --with-deps ${{ inputs.browsers }}

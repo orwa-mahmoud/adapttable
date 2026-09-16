@@ -19,13 +19,13 @@ describe("the generated showcase pages", () => {
   const files = showcaseHtmlFiles();
 
   it("writes one page per matrix entry and per replaced address", () => {
-    // Nineteen pages per adapter — a landing plus eighteen features — across all
-    // eight kits, plus the eight replaced top-level addresses. Kit
+    // Twenty-two pages per adapter — a landing plus twenty-one features — across
+    // all eight kits, plus the eight replaced top-level addresses. Kit
     // `/accessibility/` URLs are matrix pages again, not redirects to editing.
     // Written out rather than recomputed from the matrix: the writer reads
     // that same list, so a derived count would agree with itself no matter
     // what it produced.
-    assert.equal(files.length, 8 * 19 + 8);
+    assert.equal(files.length, 8 * 22 + 8);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
   });
 
@@ -57,6 +57,47 @@ describe("the generated showcase pages", () => {
     assert.equal(new Set(descriptions).size, live.length);
     for (const description of descriptions) {
       assert.ok(description && description.length > 40, description);
+    }
+  });
+
+  it("names the v3 row-reordering and aggregation capabilities in static HTML", () => {
+    const reorder = files.filter((file) =>
+      file.dir.endsWith("/row-reordering")
+    );
+    const aggregation = files.filter((file) =>
+      file.dir.endsWith("/aggregation")
+    );
+    assert.equal(reorder.length, 8);
+    assert.equal(aggregation.length, 8);
+    for (const file of reorder) {
+      assert.match(file.html, /movePolicy/);
+      assert.match(file.html, /onGroupMove|grouped/);
+      assert.match(file.html, /onTreeMove|tree/);
+      assert.match(file.html, /rowReorder/);
+    }
+    for (const file of aggregation) {
+      assert.match(file.html, /pinnedSummaryRows/);
+      assert.match(file.html, /summaryRow/);
+      assert.match(file.html, /groupAggregates/);
+    }
+  });
+
+  it("names the v3 AI integration capabilities in static HTML", () => {
+    const ai = files.filter((file) => file.dir.endsWith("/ai"));
+    assert.equal(ai.length, 8);
+    for (const file of ai) {
+      assert.match(file.html, /tableAgent/);
+      assert.match(file.html, /session\.execute|catalog/);
+      assert.match(file.html, /agentApproval/);
+      // Crawlers see the current conversational interface, with an honest
+      // distinction between scripted scenarios and a connected model.
+      assert.match(file.html, /AI table assistant/);
+      assert.match(
+        file.html,
+        /deterministic local scenarios, not a language model/
+      );
+      assert.match(file.html, /Connect backend/);
+      assert.doesNotMatch(file.html, /never grouping or pivoting/);
     }
   });
 

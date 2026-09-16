@@ -1,5 +1,5 @@
-import type { TableLabels, UseSavedViewsOptions } from "@adapttable/core";
-import { useSavedViews } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
 import { Popover } from "@base-ui/react/popover";
 import { useState } from "react";
 
@@ -94,7 +94,7 @@ export function SavedViewsMenu({
           <Popover.Popup
             className="adapttable-popup"
             style={{
-              minWidth: 240,
+              minWidth: "min(240px, calc(100vw - 48px))",
               maxHeight: "min(70vh, 360px)",
               overflowY: "auto",
             }}

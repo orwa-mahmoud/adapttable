@@ -4,9 +4,30 @@
 
 ```ts
 
-import { editing } from '@adapttable/core/features';
+import { BatchRowEdit } from '@adapttable/react';
+import { FeaturePatch } from '@adapttable/react';
+import { StaticTableFeature } from '@adapttable/react';
+import { TableFeature } from '@adapttable/react';
 
-export { editing }
+// @public
+export const batchEditing: <TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown) => TableFeature<TRow>;
+
+// @public
+export const dirtyIndicators: () => StaticTableFeature;
+
+// @public
+export const editHistory: (options?: boolean | {
+    depth?: number;
+}) => StaticTableFeature;
+
+// @public
+export const editing: <TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;
+
+// @public
+export const rowEditing: <TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;
+
+// @public
+export const undoRedoButtons: () => StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

@@ -1,7 +1,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
+import { editing } from "./editing";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -43,6 +44,7 @@ describe("async save states (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         onCellEdit={onCellEdit}
+        features={[editing(onCellEdit)]}
         {...extra}
       />
     );

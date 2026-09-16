@@ -6,7 +6,7 @@ import {
   type FilterTreeInputProps,
   type FilterTreeSelectProps,
   type FilterTreeSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Input, Stack } from "@chakra-ui/react";
 
 import { NativeSelect } from "./primitives";
@@ -20,7 +20,7 @@ function TreeSelect({
   options,
   className,
   onChange,
-}: FilterTreeSelectProps) {
+}: Readonly<FilterTreeSelectProps>) {
   return (
     <NativeSelect
       size="sm"
@@ -48,7 +48,7 @@ function TreeInput({
   type,
   className,
   onChange,
-}: FilterTreeInputProps) {
+}: Readonly<FilterTreeInputProps>) {
   return (
     <Input
       size="sm"
@@ -68,7 +68,7 @@ function TreeButton({
   part,
   className,
   onClick,
-}: FilterTreeButtonProps) {
+}: Readonly<FilterTreeButtonProps>) {
   return (
     <Button
       type="button"
@@ -90,7 +90,7 @@ function TreeDisclosure({
   summaryClassName,
   children,
   onExpandedChange,
-}: FilterTreeDisclosureProps) {
+}: Readonly<FilterTreeDisclosureProps>) {
   return (
     <Stack
       gap={2}

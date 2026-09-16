@@ -1,10 +1,13 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
+import { collapsibleColumnGroups } from "./column-groups";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { rowDetail } from "./row-detail";
 
 interface Row {
   id: string;
@@ -95,7 +98,16 @@ describe("summary row (desktop)", () => {
     const { container } = renderHarness({
       override: {
         summaryRow: (rows) => ({ amount: sumAmount(rows) }),
-        bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+        ...(() => {
+          const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
+          return {
+            bulkActions: actions,
+            features: [
+              bulkActionsFeature(actions),
+              rowDetail((r: Row) => <div>detail {r.id}</div>),
+            ],
+          };
+        })(),
         rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
         renderRowDetail: (r) => <div>detail {r.id}</div>,
       },
@@ -153,7 +165,16 @@ describe("header groups (desktop)", () => {
     const { container } = renderHarness({
       columns: GROUPED,
       override: {
-        bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+        ...(() => {
+          const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
+          return {
+            bulkActions: actions,
+            features: [
+              bulkActionsFeature(actions),
+              rowDetail((r: Row) => <div>detail {r.id}</div>),
+            ],
+          };
+        })(),
         rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
         renderRowDetail: (r) => <div>detail {r.id}</div>,
       },
@@ -178,7 +199,10 @@ describe("header groups (desktop)", () => {
   it("collapses a group to an arrow stub when armed", () => {
     const { container } = renderHarness({
       columns: GROUPED,
-      override: { collapsibleColumnGroups: true },
+      override: {
+        collapsibleColumnGroups: true,
+        features: [collapsibleColumnGroups()],
+      },
     });
     const toggle = container.querySelector(
       '[data-adapttable-part="column-group-toggle"]'

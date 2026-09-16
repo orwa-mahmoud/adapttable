@@ -14,6 +14,21 @@ import {
 import { SectionHead, TrialCta } from "./sections";
 import { ADAPTER_TOKENS } from "./themeTokens";
 
+/**
+ * Whether the link being opened already groups the table.
+ *
+ * The table restores its own grouping from the URL, but only once the feature
+ * is mounted — and this demo mounts it from a toggle. Landing on a grouped
+ * link with the toggle off dropped the grouping the link was carrying.
+ */
+function groupedByUrl(): "on" | "off" {
+  if (typeof window === "undefined") return "off";
+  const groupBy = new URLSearchParams(window.location.search).get(
+    "live.groupBy"
+  );
+  return groupBy && groupBy.length > 0 ? "on" : "off";
+}
+
 export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
   const [adapter, setAdapter] = useState(readKitFromUrl);
   const [mode, setMode] = useState<DataMode>("frontend");
@@ -21,8 +36,8 @@ export function LiveDemo({ dark }: Readonly<{ dark: boolean }>) {
   const [density, setDensity] = useState<Density>("comfortable");
   const [filtersUi, setFiltersUi] = useState<FiltersUi>("popover");
   const [motion, setMotion] = useState<"on" | "off">("on");
-  const [grouping, setGrouping] = useState<"on" | "off">("off");
-  const [editing, setEditing] = useState<"on" | "off">("off");
+  const [grouping, setGrouping] = useState<"on" | "off">(groupedByUrl);
+  const [editing, setEditing] = useState<"on" | "off">("on");
   const token =
     ADAPTER_TOKENS.find((a) => a.key === adapter) ?? ADAPTER_TOKENS[0];
   const accent = dark ? token.accentDark : token.accentLight;

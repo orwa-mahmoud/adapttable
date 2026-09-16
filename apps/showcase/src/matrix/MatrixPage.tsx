@@ -32,6 +32,7 @@ import {
   Filter,
   Formula,
   Globe,
+  Grip,
   Keyboard,
   Nested,
   Pencil,
@@ -39,6 +40,8 @@ import {
   Pin,
   Pivot,
   Rows,
+  Sigma,
+  Spark,
   Star,
   Tree,
 } from "../sectionIcons";
@@ -71,16 +74,19 @@ const FEATURE_ICONS: Record<string, (props: { size?: number }) => ReactNode> = {
   filtering: Filter,
   formulas: Formula,
   grouping: Rows,
+  aggregation: Sigma,
   "mobile-cards": Phone,
   "nested-tables": Nested,
   pivot: Pivot,
   realtime: Bolt,
   rows: Pin,
+  "row-reordering": Grip,
   rtl: Globe,
   "saved-views": Star,
   scale: Database,
   selection: CheckSquare,
   tree: Tree,
+  ai: Spark,
 };
 
 /**
@@ -228,7 +234,7 @@ function SpecPlate({ adapter }: Readonly<{ adapter: ShowcaseAdapter }>) {
   );
 }
 
-/** The eighteen features of one kit, as a grid of links. */
+/** The matrix features of one kit, as a grid of links. */
 function FeatureGrid({
   adapter,
   root,
@@ -385,6 +391,43 @@ function FeaturePage({
     throw new Error(`No demo body for feature "${feature.slug}"`);
   }
   const note = feature.notes[adapter.key];
+  const brief = (
+    <div className="mx-brief">
+      <CodeBlock
+        title={`${feature.label} · ${adapter.label}`}
+        code={fill(feature.snippet)}
+      />
+      <div className="mx-brief__side">
+        {note ? (
+          <div className="mx-note">
+            <span className="mx-note__key">In {adapter.label}</span>
+            <p>{note}</p>
+          </div>
+        ) : null}
+        <div className="mx-refs">
+          <span className="mx-refs__key">Reference</span>
+          <div className="mx-refs__list">
+            {feature.docs.map((slug) => (
+              <a
+                key={slug}
+                href={`${DOCS_URL}${slug}/`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {slug.replaceAll("-", " ")}
+              </a>
+            ))}
+          </div>
+        </div>
+        {/* Where the AI page's developer inspector lands — directly below
+            Reference, beside the integration example. Rendered by the demo,
+            which owns the live session, and portaled here so there is one
+            inspector rather than a copy of one. */}
+        <div id="mx-inspector-slot" />
+      </div>
+    </div>
+  );
+
   return (
     <>
       <header className="mx-hero mx-hero--solo">
@@ -403,35 +446,7 @@ function FeaturePage({
         </div>
       </header>
 
-      <div className="mx-brief">
-        <CodeBlock
-          title={`${feature.label} · ${adapter.label}`}
-          code={fill(feature.snippet)}
-        />
-        <div className="mx-brief__side">
-          {note ? (
-            <div className="mx-note">
-              <span className="mx-note__key">In {adapter.label}</span>
-              <p>{note}</p>
-            </div>
-          ) : null}
-          <div className="mx-refs">
-            <span className="mx-refs__key">Reference</span>
-            <div className="mx-refs__list">
-              {feature.docs.map((slug) => (
-                <a
-                  key={slug}
-                  href={`${DOCS_URL}${slug}/`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {slug.replaceAll("-", " ")}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      {brief}
 
       <Seam pkg={adapter.pkg} />
       {Body ? (

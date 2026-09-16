@@ -1,21 +1,20 @@
 import {
-  type ColumnDef,
   type Direction,
   groupAggregateEntries,
   type GroupedFlatEntry,
   groupLeafCount,
   groupRowLayout,
   groupSelectionState,
-  type SelectionState,
   type TableLabels,
 } from "@adapttable/core";
+import { type ColumnDef, type SelectionState } from "@adapttable/react";
 import {
   ExpandChevron,
   groupIndentStyle,
   groupRowParts,
   GroupToggleSpacer,
   resolveMobileLabel,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { ReactElement, ReactNode } from "react";
 
 import type { BaseUiAccentColor } from "../types";
@@ -114,9 +113,10 @@ export function GroupHeaderRow<TRow>({
       : "none";
   // One cell per column from the first aggregate onward: a subtotal only reads
   // as one when it sits under the column it totals.
-  const layout = groupRowLayout(
+  const layout = groupRowLayout<TRow, ColumnDef<TRow>>(
     columns,
-    entry.kind === "groupMore" ? undefined : entry.aggregateCells
+    entry.kind === "groupMore" ? undefined : entry.aggregateCells,
+    entry.kind === "groupMore" ? undefined : entry.aggregateOps
   );
 
   return (
@@ -172,7 +172,7 @@ export function GroupHeaderRow<TRow>({
               data-column={column.key}
               style={{ marginInlineStart: "auto" }}
             >
-              {node}
+              {node as ReactNode}
             </Box>
           ))}
         </Flex>
@@ -186,7 +186,7 @@ export function GroupHeaderRow<TRow>({
           }
           data-column={node === undefined ? undefined : column.key}
         >
-          {node}
+          {node as ReactNode}
         </Table.Cell>
       ))}
       {showActions && <Table.Cell />}
@@ -290,9 +290,10 @@ export function GroupHeaderCard<TRow>({
           {footer || more ? null : labels.groupCount(groupLeafCount(entry))}
         </Text>
       </Flex>
-      {groupAggregateEntries(
+      {groupAggregateEntries<TRow, ColumnDef<TRow>>(
         columns,
-        entry.kind === "groupMore" ? undefined : entry.aggregateCells
+        entry.kind === "groupMore" ? undefined : entry.aggregateCells,
+        entry.kind === "groupMore" ? undefined : entry.aggregateOps
       ).map(({ column, node }) => (
         <Flex key={column.key} gap="2">
           <Text as="span" color="gray" size="2">
@@ -304,7 +305,7 @@ export function GroupHeaderCard<TRow>({
             data-column={column.key}
             style={{ marginInlineStart: "auto" }}
           >
-            {node}
+            {node as ReactNode}
           </Text>
         </Flex>
       ))}

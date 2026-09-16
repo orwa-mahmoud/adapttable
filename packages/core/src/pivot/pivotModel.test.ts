@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../columnModel";
 import {
   pivot,
   PIVOT_BLANK,
@@ -161,7 +161,7 @@ describe("pivot", () => {
   it("reads values through a column's sortValue", () => {
     // The same rule sorting, grouping and the summary row follow — a pivot
     // that read the raw field would disagree with its own footer.
-    const columns: ColumnDef<Sale>[] = [
+    const columns: ColumnModel<Sale>[] = [
       { key: "amount", header: "Amount", sortValue: (row) => row.amount * 2 },
     ];
     const result = pivot(SALES, { ...base, columns: [] }, { columns });

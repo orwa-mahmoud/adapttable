@@ -1,8 +1,4 @@
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type EditableCellEditorCtrl,
-  EditableCellGate,
   editorInputType,
   formatMultiDraft,
   isBooleanEditor,
@@ -12,11 +8,17 @@ import {
   readMultiDraft,
 } from "@adapttable/core";
 import {
+  type ColumnDef,
+  type EditableCellEditing,
+  type EditableCellEditorCtrl,
+  EditableCellGate,
+} from "@adapttable/react";
+import {
   commitBooleanDraft,
   editorBusyProps,
   editorValidationProps,
   stopEditKeys,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Checkbox, MultiSelect, Select, TextInput } from "@mantine/core";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 

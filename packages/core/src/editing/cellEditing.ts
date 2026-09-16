@@ -1,7 +1,9 @@
-import type { ReactElement } from "react";
-
-import type { FeatureHostState } from "../features/currentHost";
-import { currentFeatureHost } from "../features/currentHost";
+import type { ColumnModelEditor } from "../columnModel";
+import type { DisplayValue } from "../display";
+import {
+  currentFeatureHost,
+  type FeatureHostState,
+} from "../features/currentHost";
 import type { SortableValue } from "../types";
 import { getPath } from "../utils/path";
 
@@ -69,7 +71,7 @@ export type CellEditor =
  */
 export type CustomCellEditorRender = (
   ctrl: CustomCellEditorCtrl
-) => ReactElement;
+) => DisplayValue;
 
 /**
  * What a custom editor is handed.
@@ -110,15 +112,36 @@ export interface CustomCellEditorCtrl {
   validating: boolean;
   /** `id` of the message element, for `aria-describedby`. */
   errorId: string;
+  /**
+   * The question this cell is waiting on, when the value moved underneath the
+   * draft. The table draws its own notice either way; an editor that wants the
+   * choice inside its own surface — a picker showing what arrived beside what
+   * was chosen — builds it from this.
+   */
+  conflict?: CustomCellEditorConflict;
 }
 
 /**
- * Minimal column surface the editing helpers need. `ColumnDef`
- * satisfies this; using a narrow shape avoids `ColumnDef<T>` variance
+ * What arrived under a draft, and the two ways out of it.
+ *
+ * @public
+ */
+export interface CustomCellEditorConflict {
+  /** What the cell reads now. */
+  readonly incomingValue: string;
+  /** Keep the draft; the incoming value becomes what it is measured against. */
+  readonly keep: () => void;
+  /** Replace the draft with the incoming value. */
+  readonly take: () => void;
+}
+
+/**
+ * Minimal column surface the editing helpers need. `ColumnModel`
+ * satisfies this; using a narrow shape avoids `ColumnModel<T>` variance
  * issues when Tab-navigation crosses generic boundaries.
  *
  * `editable` uses a bivariant callback (same pattern as React's event
- * handlers) so `ColumnDef<Person>` is assignable to `EditableColumnLike`.
+ * handlers) so `ColumnModel<Person>` is assignable to `EditableColumnLike`.
  *
  * @public
  */
@@ -128,7 +151,7 @@ export interface EditableColumnLike<TRow = unknown> {
   /** Whether the column is editable, per row when it is a function. */
   editable?: boolean | { bivarianceHack(row: TRow): boolean }["bivarianceHack"];
   /** Which editor the cell opens. Defaults to a text field. */
-  editor?: CellEditor;
+  editor?: ColumnModelEditor;
   /** Turns the stored value into the draft text the editor starts with. */
   editValue?: { bivarianceHack(row: TRow): string }["bivarianceHack"];
   /** Turns the draft text back into the stored value's type. */
@@ -317,12 +340,15 @@ const BUILTIN_EDITORS = new Set<string>([
 ]);
 
 function resolveEditorValue(
-  editor: CellEditor,
+  editor: ColumnModelEditor,
   host?: FeatureHostState
 ): CellEditor {
-  if (typeof editor !== "string" || BUILTIN_EDITORS.has(editor)) return editor;
+  if (typeof editor === "string" && BUILTIN_EDITORS.has(editor)) {
+    return editor as CellEditor;
+  }
+  if (typeof editor !== "string") return editor as CellEditor;
   const render = (host ?? currentFeatureHost())?.editors.get(editor);
-  return render ? { type: "custom", render } : editor;
+  return render ? { type: "custom", render } : (editor as CellEditor);
 }
 
 /**
@@ -342,7 +368,8 @@ export function resolveCellEditor(
   host?: FeatureHostState
 ): CellEditor | null {
   if (column.editable === undefined || column.editable === false) return null;
-  return resolveEditorValue(column.editor ?? "text", host);
+  const editor = column.editor ?? "text";
+  return resolveEditorValue(editor, host);
 }
 
 /**

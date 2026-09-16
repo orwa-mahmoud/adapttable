@@ -59,7 +59,7 @@ plain CSS, Tailwind, and shadcn tokens all work. The full part map:
 | `filtersButton`                                                                                                         | The Filters trigger button.                                                                                        |
 | `filtersIcon`                                                                                                           | The funnel icon inside the trigger.                                                                                |
 | `filtersCount`                                                                                                          | The active-filter count badge.                                                                                     |
-| `exportCsvButton`                                                                                                       | The Export CSV toolbar button (`exportCsv` prop).                                                                  |
+| `exportCsvButton`                                                                                                       | The Export CSV toolbar button (`exportCsv()` feature).                                                             |
 | `exportSpinner`                                                                                                         | The spinner inside that button while a host-handled export runs.                                                   |
 | `cellSelected`                                                                                                          | A cell inside the selected range (`cellNavigation`). Styled kits use their own token.                              |
 | `cellSpan`                                                                                                              | A spanned cell (`getCellSpan`). `data-cell-span` is on the element (`"2x1"`). Default look is centered + one fill. |
@@ -136,7 +136,7 @@ plain CSS, Tailwind, and shadcn tokens all work. The full part map:
 
 ### Inline cell editing
 
-Opt-in via `onCellEdit` — see [Inline cell editing](./cell-editing.md). When
+Opt-in via `editing()` — see [Inline cell editing](./cell-editing.md). When
 editing is dormant these parts are never mounted.
 
 | Part                 | Element                                                             |
@@ -146,8 +146,26 @@ editing is dormant these parts are never mounted.
 
 ### Row grouping
 
-Opt-in via `groupBy` — see [Row grouping](./row-grouping.md). When grouping
-is dormant these parts are never mounted.
+Opt in with `groupingPanel()` from the kit's `/grouping-panel` subpath — see
+[Row grouping](./row-grouping.md). The panel owns the grouped headers as well
+as the configuration strip; when it is dormant these parts are never mounted.
+
+| Part                             | Element                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------- |
+| `grouping-panel`                 | The dedicated grouping strip above the table.                                   |
+| `grouping-drop-zone`             | A desktop insertion target for header/chip drag-and-drop.                       |
+| `grouping-item`                  | One active grouping level: chip plus its following insertion target.            |
+| `grouping-chip`                  | An active grouping field, with logical arrow-key movement and a remove control. |
+| `grouping-add`                   | The Add grouping column select, present on desktop and mobile.                  |
+| `grouping-aggregations`          | Active aggregation chips plus Add aggregation column and Restore defaults.      |
+| `grouping-aggregation-item`      | One active aggregation: column name, operation select, remove.                  |
+| `grouping-aggregation-operation` | That item's operation select.                                                   |
+| `grouping-aggregation-remove`    | That item's remove control.                                                     |
+| `grouping-aggregation-add`       | The Add aggregation column control.                                             |
+| `grouping-aggregation-option`    | One checklist row.                                                              |
+| `grouping-aggregations-restore`  | Restore defaults.                                                               |
+| `grouping-remove-zone`           | Desktop drop target shown while dragging a grouping chip to remove it.          |
+| `grouping-announcer`             | Polite live region for add, move, remove, and aggregation-change feedback.      |
 
 | Part                | Element                                                               |
 | ------------------- | --------------------------------------------------------------------- |
@@ -288,55 +306,64 @@ The order is the same in every kit: `start` · Search · `toolbar` · Filters ·
 Saved views · Columns · Undo/Redo · Export · Add · Print · Density ·
 Fullscreen · `end` · Rows per page.
 
-`undoRedoButtons` adds Undo and Redo to that row. They render only when
-`editHistory` is armed, and they disable rather than disappear when there is
+`undoRedoButtons()` adds Undo and Redo to that row. They render only when
+`editHistory()` is composed, and they disable rather than disappear when there is
 nothing to put back — a toolbar that reflows while someone is working is
 worse than a button that is briefly unavailable. The keyboard shortcuts and
 `table.editHistory` are unchanged and stay the always-on path; this is the
 visible one, for users who will not find Ctrl+Z.
 
 ```tsx
+import {
+  editing,
+  editHistory,
+  undoRedoButtons,
+} from "@adapttable/mantine/editing";
+import { statusBar } from "@adapttable/mantine/status-bar";
+
 <DataTable
-  onCellEdit={saveCell}
-  editHistory
-  undoRedoButtons
-  statusBar
+  features={[
+    editing(saveCell),
+    editHistory(),
+    undoRedoButtons(),
+    statusBar(),
+  ]}
   …
-/>
+/>;
 ```
 
-`statusBar` puts a strip under the table: the row range, how many rows are
-selected, and — with `selectionStats` armed — what the selected cells add up
+`statusBar()` puts a strip under the table: the row range, how many rows are
+selected, and — with `selectionStats()` composed — what the selected cells add up
 to. The range is the one the pagination footer shows, from the same
 arithmetic, so the two never disagree. The strip hosts the selection figures
 rather than repeating them, so turning it on does not print them twice.
 
-Opted-in features that cannot run (virtualize on a paged table, pin or
-reorder under grouping, `exportCsv` `scope: "all"` with only this page,
+Opted-in features that cannot run (virtualize on a paged table, pin under
+grouping/tree rows, `exportCsv()` with `scope: "all"` on a page-scoped source,
 edits with no writer) still show as `FeatureNotice` items
 (`FeatureNoticeKind` is the union). They live on
 `StatusBarChromeProps.notices` and `TableChrome.featureNotices`, and they
-render even when `statusBar` is off — row and selected counts still need
+render even when `statusBar()` is off — row and selected counts still need
 the bar.
 
-`printButton` adds a Print button beside the view controls. It needs two
-things, not one: the option, and an `onPrint` handler saying what to print.
-Either alone draws nothing — a button that opens no dialog would be worse than
+`print(onPrint, true)` adds a Print button beside the view controls. It needs two
+things, not one: the handler, and `true` as the second argument to draw the
+button. Either alone draws nothing — a button that opens no dialog would be worse than
 no button, and a handler on its own stays what it always was, the palette's
 Print command. The caption is `labels.print`, the same string the command
 uses.
 
 ```tsx
 import { printTable } from "@adapttable/core/pdf";
+import { print } from "@adapttable/mantine/print";
 
 <DataTable
-  onPrint={() => printTable({ rows, columns })}
-  printButton
+  features={[print(() => printTable({ rows, columns }), true)]}
   …
 />;
 ```
 
-All of them are off unless asked for: omit them and nothing renders and
+All of them are off unless asked for: omit them from `features` and nothing renders and
 nothing is bundled.
 
 ## Highlighting a row
@@ -389,23 +416,57 @@ cell, for a column's `Cell` renderer to read.
 ## Density and fullscreen
 
 ```tsx
-const { density, onDensityChange } = useDensityUrlState();
+import { DataTable } from "@adapttable/mantine";
+import { standardFeatures } from "@adapttable/mantine/preset";
 
 <DataTable
-  density={density}
-  densityChooser
-  onDensityChange={onDensityChange}
-  fullscreen
+  data={data}
+  columns={columns}
+  rowKey={(r) => r.id}
+  features={standardFeatures()}
   …
 />;
 ```
 
-`densityChooser` puts the control in the toolbar; `density` is still what
-the table renders, so the host stays in charge. Pairing it with
-`useDensityUrlState` keeps the choice in the URL beside sort and filters, so
-a reload and a shared link both reproduce it.
+`standardFeatures()` includes `densityChooser()` — the toggle works with no
+`density` or `onDensityChange` from the host. The feature owns uncontrolled
+state and starts at `"comfortable"`. To control density yourself, pass `density`
+as the source of truth and `onDensityChange` to observe requests:
 
-`fullscreen` adds a toggle. Fullscreen hides everything outside the table,
+```tsx
+import { densityChooser } from "@adapttable/mantine/density";
+import { fullscreen } from "@adapttable/mantine/fullscreen";
+import type { Density } from "@adapttable/core";
+
+const [density, setDensity] = useState<Density>("comfortable");
+
+<DataTable
+  density={density}
+  onDensityChange={setDensity}
+  features={[densityChooser(), fullscreen()]}
+  …
+/>;
+```
+
+Pairing controlled density with `useDensityUrlState` keeps the choice in the
+URL beside sort and filters, so a reload and a shared link both reproduce it:
+
+```tsx
+import { densityChooser } from "@adapttable/mantine/density";
+import { fullscreen } from "@adapttable/mantine/fullscreen";
+import { useDensityUrlState } from "@adapttable/core";
+
+const { density, onDensityChange } = useDensityUrlState();
+
+<DataTable
+  density={density}
+  onDensityChange={onDensityChange}
+  features={[densityChooser(), fullscreen()]}
+  …
+/>;
+```
+
+`fullscreen()` adds a toggle. Fullscreen hides everything outside the table,
 which is what makes it useful and also what breaks overlays: a menu
 portalled to `document.body` sits inside the part being hidden, still
 mounted and still focused. The table's own overlays are re-pointed at the
@@ -419,7 +480,17 @@ worse than no control.
 ## Command palette
 
 ```tsx
-<DataTable commandPalette onPrint={() => printTable({ rows, columns })} … />
+import { commandPalette } from "@adapttable/mantine/command-palette";
+import { print } from "@adapttable/mantine/print";
+import { printTable } from "@adapttable/core/pdf";
+
+<DataTable
+  features={[
+    commandPalette(),
+    print(() => printTable({ rows, columns })),
+  ]}
+  …
+/>;
 ```
 
 Cmd/Ctrl+K opens a palette listing every action the table can perform. Type
@@ -430,13 +501,17 @@ an action written once appears in both, and cannot gain a condition in one
 and not the other.
 
 ```tsx
+import { commandPalette } from "@adapttable/mantine/command-palette";
+
 <DataTable
-  commandPalette={{
-    commands: [{ key: "audit", label: "Open audit log", onSelect: open }],
-    shortcuts: [{ chord: "ctrl+shift+p", command: "command-palette" }],
-  }}
+  features={[
+    commandPalette({
+      commands: [{ key: "audit", label: "Open audit log", onSelect: open }],
+      shortcuts: [{ chord: "ctrl+shift+p", command: "command-palette" }],
+    }),
+  ]}
   …
-/>
+/>;
 ```
 
 Shortcuts are data, not a key handler, because remapping is not a
@@ -445,13 +520,15 @@ and Ctrl elsewhere, so one chord is right on both. Pass `shortcuts: []` to
 bind nothing and open the palette from your own control instead.
 
 Print lives here rather than in the toolbar: `printTable` opens a browser
-dialog, so it is the host's call to make. Wire `onPrint` and it becomes a
+dialog, so it is the host's call to make. Compose `print(onPrint)` and it becomes a
 command; leave it out and it is not offered.
 
 ## Context menus
 
 ```tsx
-<DataTable contextMenu … />
+import { contextMenu } from "@adapttable/mantine/context-menu";
+
+<DataTable features={[contextMenu()]} … />;
 ```
 
 Right-click a header and it offers that column's actions — sort, filter, pin,
@@ -476,15 +553,19 @@ Add your own entries with `{ items }`. They land behind a divider, so a
 custom action is never mistaken for a built-in one:
 
 ```tsx
+import { contextMenu } from "@adapttable/mantine/context-menu";
+
 <DataTable
-  contextMenu={{
-    items: (target) =>
-      target.kind === "row"
-        ? [{ key: "audit", label: "Open audit log", onSelect: () => open(target.rowId) }]
-        : [],
-  }}
+  features={[
+    contextMenu({
+      items: (target) =>
+        target.kind === "row"
+          ? [{ key: "audit", label: "Open audit log", onSelect: () => open(target.rowId) }]
+          : [],
+    }),
+  ]}
   …
-/>
+/>;
 ```
 
 ## Side panel
@@ -495,26 +576,30 @@ because that is iterative: change one thing, look at the rows, change
 another. A popover closes when you look away, and the rows are behind it
 while it is open.
 
-`sidePanel` docks that work beside the table instead. It is controlled,
+`sidePanel()` docks that work beside the table instead. It is controlled,
 because the control that opens it is yours — `toolbarSlots` is where it
 usually goes:
 
 ```tsx
+import { sidePanel } from "@adapttable/mantine/side-panel";
+
 const [panel, setPanel] = useState<string | null>(null);
 
 <DataTable
   toolbarSlots={{
     end: <button onClick={() => setPanel("filters")}>Settings</button>,
   }}
-  sidePanel={{
-    panels: [
-      { key: "filters", label: "Filters", content: <MyFilters /> },
-      { key: "columns", label: "Columns", content: <MyColumnList /> },
-    ],
-    open: panel,
-    onOpenChange: setPanel,
-    side: "end",
-  }}
+  features={[
+    sidePanel({
+      panels: [
+        { key: "filters", label: "Filters", content: <MyFilters /> },
+        { key: "columns", label: "Columns", content: <MyColumnList /> },
+      ],
+      open: panel,
+      onOpenChange: setPanel,
+      side: "end",
+    }),
+  ]}
   …
 />;
 ```
@@ -527,8 +612,8 @@ inside. Putting focus back afterwards is the opener's job, since only it
 knows where focus was.
 
 `side` picks the edge — `"end"` (the default) is the right in a
-left-to-right table and the left in a right-to-left one. Omit `sidePanel`
-and nothing renders, nothing is bundled, and the table's markup is
+left-to-right table and the left in a right-to-left one. Omit `sidePanel()`
+from `features` and nothing renders, nothing is bundled, and the table's markup is
 unchanged.
 
 Adapters build their panel over `SidePanelChrome` / `SidePanelSlots` /
@@ -548,18 +633,19 @@ it with `SidePanelLayout` / `SidePanelLayoutProps`, all from
 ```
 
 `"comfortable"` (default) is the roomy layout; `"compact"` tightens row
-height and padding. Each adapter maps it to its kit's table size — MUI
-`"comfortable"` → `medium` / `"compact"` → `small`, antd → `middle` /
-`small`, Radix `"2"` / `"1"` — and MUI, Chakra, antd, and Radix offer an
-explicit `size` prop that
+height and padding. With `densityChooser()` composed and no controlled
+`density` prop, the feature owns the choice and defaults to `"comfortable"`.
+Each adapter maps density to its kit's table size — MUI `"comfortable"` →
+`medium` / `"compact"` → `small`, antd → `middle` / `small`, Radix `"2"` /
+`"1"` — and MUI, Chakra, antd, and Radix offer an explicit `size` prop that
 overrides the mapping (e.g. antd `size="large"`).
 
 ## Export
 
-CSV by default, spreadsheets when you ask for them — one prop, one set of
+CSV by default, spreadsheets when you ask for them — one factory, one set of
 scopes, [one button](#spreadsheet-xlsx-export).
 
-Opt in with `exportCsv` to render a kit-native **Export CSV** button next to
+Opt in with `exportCsv()` from `@adapttable/<kit>/export` to render a kit-native **Export CSV** button next to
 Filters / Columns. The file mirrors the current view's data — the active search, filters,
 and sort — with **the full exportable column set in display order,
 regardless of viewport**: the same button produces the same file on phone
@@ -571,25 +657,31 @@ default; pass `escapeFormulas: false` in the options object if you need
 raw output for a non-spreadsheet pipeline.
 
 ```tsx
-<DataTable
-  data={people}
-  columns={columns}
-  rowKey={(r) => r.id}
-  exportCsv // defaults: export.csv, current page
-/>
+import { DataTable } from "@adapttable/mantine";
+import { exportCsv } from "@adapttable/mantine/export";
 
 <DataTable
   data={people}
   columns={columns}
   rowKey={(r) => r.id}
-  exportCsv={{ filename: "people.csv", scope: "all" }}
-/>
+  features={[exportCsv()]} // defaults: export.csv, current page
+/>;
+
+<DataTable
+  data={people}
+  columns={columns}
+  rowKey={(r) => r.id}
+  features={[exportCsv({ filename: "people.csv", scope: "all" })]}
+/>;
 ```
 
 - `scope: "page"` (default) — the current page / loaded slice.
-- `scope: "all"` — the full filtered+sorted set when the source exposes it
-  (frontend does); server-backed sources fall back to the current page unless
-  you wire your own download against an export endpoint via `toolbar`.
+- `scope: "all"` — the full filtered+sorted set when the source can reach it
+  (frontend can). A source-owned route requires both actual
+  `allFilteredRows` and a capability contract that permits `"all"`; the
+  declaration alone does not retrieve rows. Otherwise `request` or `fetchAll`
+  must fetch the rest — see
+  [source capabilities](./data-tiers.md#what-a-source-can-do--capabilities).
 
   **"All" means every row that matched the filters, not every row on screen.**
   Display state never shrinks an export: a collapsed tree folder still writes
@@ -609,9 +701,9 @@ raw output for a non-spreadsheet pipeline.
     stopped the export short. `fetchAllExportRows` is the same walk, exported
     for hand-built downloads.
 
-  With neither, the Export button is **not rendered** and a development warning
-  says why. Writing the current page as if it were everything is the one answer
-  that is always wrong.
+  With no executable route, the Export button stays rendered but disabled,
+  with the localized reason on the control and in the status bar. Writing the
+  current page as if it were everything is the one answer that is always wrong.
 
 - `scope: "selected"` — the ticked rows, in table order. Selection is a set of
   ids, so a row checked on page 1 is still in the file while page 3 is on
@@ -657,12 +749,15 @@ The same button writes a real `.xlsx` when you hand it the spreadsheet writer:
 
 ```tsx
 import { xlsxWriter } from "@adapttable/core/xlsx";
+import { exportCsv } from "@adapttable/mantine/export";
 
 <DataTable
   data={people}
   columns={columns}
   rowKey={(r) => r.id}
-  exportCsv={{ writer: xlsxWriter({ sheetName: "People" }), scope: "all" }}
+  features={[
+    exportCsv({ writer: xlsxWriter({ sheetName: "People" }), scope: "all" }),
+  ]}
 />;
 ```
 
@@ -710,13 +805,21 @@ argument.
 ### Before and after the file is written
 
 ```tsx
-exportCsv={{
-  onBeforeExport: ({ rows, columns, filename }) => {
-    if (rows.length > 50_000) return false;          // cancel
-    return { filename: `people-${rows.length}.csv` }; // or rename
-  },
-  onAfterExport: ({ csv, file, filename }) => track("export", { filename }),
-}}
+import { exportCsv } from "@adapttable/mantine/export";
+
+<DataTable
+  features={[
+    exportCsv({
+      onBeforeExport: ({ rows, columns, filename }) => {
+        if (rows.length > 50_000) return false; // cancel
+        return { filename: `people-${rows.length}.csv` }; // or rename
+      },
+      onAfterExport: ({ csv, file, filename }) =>
+        track("export", { filename }),
+    }),
+  ]}
+  …
+/>;
 ```
 
 `onBeforeExport` runs once the rows and columns are resolved and before
@@ -734,47 +837,49 @@ Headless helpers remain available: `rowsToCsv`, `downloadCsv`, and
 
 Past a certain size the browser is the wrong place to build the file: the rows
 are not all loaded, holding them would cost more memory than the tab has, and
-the work blocks the main thread. `request` hands the export to the server
-instead:
+the work blocks the main thread. `onExportAll` hands the page-free current view
+to the server and keeps the job visible:
 
 ```tsx
-exportCsv={{
-  scope: "all",
-  request: async ({ query, scope, format, columns, filename }) => {
-    const res = await fetch("/api/people/export", {
-      method: "POST",
-      body: JSON.stringify({ ...query, scope, columns: columns.map((c) => c.key) }),
-    });
-    window.location.href = (await res.json()).url; // or queue a job and email it
-  },
-}}
+import { exportCsv } from "@adapttable/mantine/export";
+
+<DataTable
+  features={[
+    exportCsv({
+      scope: "all",
+      onExportAll: async (query, controls) => {
+        const res = await fetch("/api/people/export", {
+          method: "POST",
+          body: JSON.stringify(query),
+          signal: controls.signal,
+        });
+        const job = await res.json();
+        controls.setProgress?.(job.progress);
+        controls.setMessage?.(job.message);
+        return job.url ? { url: job.url } : undefined;
+      },
+    }),
+  ]}
+  …
+/>;
 ```
 
-`query` carries the user's current view — search, filters, sort, paging — in
-the same shape a [server tier](./data-tiers.md) receives, so an endpoint that
-already answers table queries needs no new vocabulary. `format` is the
-extension the button would have produced (`"csv"`, `"xlsx"`, or whatever a
-custom writer names itself), so the server builds the file the user asked for
-rather than guessing from the filename. `rows` holds whatever the browser has
-of the scope, which is useful for a count or a confirmation even when the
-server does the real work.
+`query` carries search, flat and nested filters, single and multi-sort,
+grouping, visible and requested column keys, format, and filename — but no page
+window and no rows. `controls.signal` powers Cancel; `setProgress(0–100)` and
+`setMessage(text)` update every kit's progress surface. No progress means an
+indeterminate indicator. Resolve `{ url }` and the table offers the download;
+resolve nothing when the host delivered it another way; reject for a localized
+error with Retry.
 
-With `request` set the table builds no file and downloads nothing, so
-`onBeforeExport` and `onAfterExport` do not run — there is no file for them to
-bracket.
+The existing `fetchAll` route still pages in the browser and keeps its 50,000
+row default cap. `onExportAll` is the documented route past it. The generic
+`request` callback also remains for backend takeover of page, selected, or
+range exports without progress. Host-owned routes do not run
+`onBeforeExport`/`onAfterExport`, because the table never builds their file.
 
-Return a promise and the Export button shows **its own kit's loading
-affordance** until it settles — Mantine's, MUI's, Chakra's and Ant Design's
-loading buttons, Radix's and Base UI's spinners, and a styleable
-`exportSpinner` element in the unstyled and shadcn presets — with `aria-busy`
-throughout, so an impatient second click cannot start the same export twice. A
-rejected promise releases the button rather than leaving it stuck.
-
-Either way the outcome is **announced**: a download is silent and a failed one
-is silent in the same way, so a polite live region beside the button says
-`labels.exportDone` or `labels.exportFailed` (translated in all seventeen
-locales) when the export ends. `exportStatus` — `"idle"`, `"busy"`, `"done"` or
-`"failed"` — is on the same state for a toolbar that wants to show more.
+The full settle, cancellation, and accessibility contract is in
+[Browser and server-built exports](./exporting.md).
 
 ### The export pipeline (headless)
 
@@ -782,7 +887,7 @@ The export path is exported end to end: `exportableColumns` filters the
 visible layout to columns with exportable values, `resolveExportColumns`
 applies a column scope to them, `buildTableCsv` turns rows + columns into CSV
 text (`RowsToCsvOptions` controls delimiter, BOM and `escapeFormulas`),
-`resolveExportCsv` normalizes the `exportCsv` prop (`ExportCsvOptions`), and
+`resolveExportCsv` normalizes the export options (`ExportCsvOptions`), and
 `makeExportCsvHandler` wires all of it to a download handler the toolbar button
 calls. Custom toolbars can reuse any stage.
 

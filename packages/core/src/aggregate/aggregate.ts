@@ -18,12 +18,25 @@
  * `sortValue` if it has one, else the key's data path — so a formatted cell
  * (`accessor: r => money.format(r.budget)`) still aggregates on its number.
  */
-import type { ReactNode } from "react";
-
-import type { FeatureHostState } from "../features/currentHost";
-import { currentFeatureHost } from "../features/currentHost";
-import type { ColumnDef, SortableValue } from "../types";
+import type { ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
+import {
+  currentFeatureHost,
+  type FeatureHostState,
+} from "../features/currentHost";
+import type { SortableValue } from "../types";
 import { getPath } from "../utils/path";
+
+/**
+ * A value min/max can rank: the sortable primitives plus a `Date`.
+ *
+ * `SortableValue` stays the sort-key type. A date column's raw cell is a
+ * `Date` without a `sortValue`, and min/max keep that original rather than
+ * forcing it through a number first.
+ *
+ * @public
+ */
+export type AggregateOrderedValue = SortableValue | Date;
 
 /**
  * The aggregate functions available by name.
@@ -33,20 +46,49 @@ import { getPath } from "../utils/path";
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
 
 /**
+ * An operation id: a built-in name, or one a column declared itself.
+ *
+ * The open half is what carries a host's `{ id, label, calculate }` operation
+ * through state, a URL and a request; the named half is what keeps built-ins
+ * autocompleting.
+ *
+ * @public
+ */
+export type AggregateOperationId =
+  AggregateName | (string & Record<never, never>);
+
+/**
  * A custom aggregator: the values found for one column across the rows being
  * aggregated, already narrowed to those that are present.
  *
  * Return whatever the cell should show — a number, a formatted string, a
  * node. Return `undefined` for "no cell here".
  *
- * The return type is `ReactNode` so the built mapper is directly assignable
+ * The return type is `DisplayValue` so the built mapper is directly assignable
  * to `summaryRow` and `groupAggregates`, which is the whole point of it.
  *
  * @public
  */
-export type Aggregator<TValue = SortableValue> = (
+export type Aggregator<TValue = AggregateOrderedValue> = (
   values: readonly TValue[]
-) => ReactNode;
+) => DisplayValue | undefined;
+
+/**
+ * What the table knows about the aggregate a column is about to show.
+ *
+ * @public
+ */
+export interface AggregateFormatContext {
+  /** The column the value belongs to. */
+  readonly columnKey: string;
+  /**
+   * The operation that produced it, when the table knows: the reader's own
+   * choice, or the one a server was asked for — a built-in name, or the id of
+   * an operation the column declared itself. A hand-written `groupAggregates`
+   * mapper declares nothing, so this is absent there.
+   */
+  readonly aggregation?: AggregateOperationId;
+}
 
 /**
  * What to compute per column: a built-in name, or your own function.
@@ -65,12 +107,22 @@ export interface AggregateOptions<TRow> {
    * Columns, so values resolve through `sortValue` exactly as sorting and
    * grouping do. Without them, values come from the key's data path.
    */
-  columns?: readonly ColumnDef<TRow>[];
+  columns?: readonly ColumnMetadata<TRow>[];
   /**
    * Format a computed value for display. Receives the raw result and the
    * column key: `format: (v, key) => key === "budget" ? money.format(v) : v`.
+   *
+   * This runs when the value is computed. A column's `formatAggregate` runs
+   * when a group cell is drawn, and the two compose: with both set, the
+   * column is handed what this returned and formats it again unless it is
+   * written to pass non-numbers through. For groups, leaving the value raw
+   * here and letting the column own presentation is the simpler pair; for a
+   * mapper used as `summaryRow`, this is the only one of the two that runs.
    */
-  format?: (value: ReactNode, key: string) => ReactNode;
+  format?: (
+    value: DisplayValue | undefined,
+    key: string
+  ) => DisplayValue | undefined;
   /**
    * The host of the table this mapper will run in. Omit it when the
    * table binds the call with `runWithFeatureHost`.
@@ -86,7 +138,9 @@ export interface AggregateOptions<TRow> {
  * @param value - The resolved cell value.
  * @returns The number, or `undefined` when it is not summable.
  */
-export function toAggregateNumber(value: SortableValue): number | undefined {
+export function toAggregateNumber(
+  value: AggregateOrderedValue
+): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim() !== "") {
     const n = Number(value);
@@ -95,8 +149,124 @@ export function toAggregateNumber(value: SortableValue): number | undefined {
   return undefined;
 }
 
+/** Strict ISO date: `YYYY-MM-DD`. */
+const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+/** Strict ISO clock: `HH:mm` with optional seconds and a fraction. */
+const ISO_CLOCK = /^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/;
+/** Strict ISO timezone: `Z`, `+HH:MM`, or `+HHMM`. */
+const ISO_TZ = /^(Z|[+-]\d{2}:?\d{2})$/;
+
+function finiteMs(time: number): number | undefined {
+  return Number.isFinite(time) ? time : undefined;
+}
+
+/** Milliseconds from midnight for a time-only ISO clock. */
+function instantFromClock(text: string): number | undefined {
+  const match = ISO_CLOCK.exec(text);
+  if (!match) return undefined;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const seconds = match[3] === undefined ? 0 : Number(match[3]);
+  const fraction = match[4] === undefined ? 0 : Number(`0.${match[4]}`);
+  return finiteMs(
+    hours * 3_600_000 + minutes * 60_000 + seconds * 1000 + fraction * 1000
+  );
+}
+
+/** Split `HH:mm[:ss][.frac][Z|+offset]` into the clock and its zone. */
+function peelTimeZone(rest: string): { clock: string; zone: string } {
+  if (rest.endsWith("Z")) {
+    return { clock: rest.slice(0, -1), zone: "Z" };
+  }
+  const plus = rest.lastIndexOf("+");
+  if (plus > 0 && ISO_TZ.test(rest.slice(plus))) {
+    return { clock: rest.slice(0, plus), zone: rest.slice(plus) };
+  }
+  const minus = rest.lastIndexOf("-");
+  if (minus > 0 && ISO_TZ.test(rest.slice(minus))) {
+    return { clock: rest.slice(0, minus), zone: rest.slice(minus) };
+  }
+  return { clock: rest, zone: "" };
+}
+
+/**
+ * Parse `YYYY-MM-DD[T ]HH:mm…` the same way `Date.parse` would, after the
+ * date, clock and optional zone have each been checked on their own.
+ */
+function instantFromDateTime(text: string): number | undefined {
+  const sep = text.includes("T") ? text.indexOf("T") : text.indexOf(" ");
+  if (sep < 0) return undefined;
+  if (!ISO_DATE.test(text.slice(0, sep))) return undefined;
+  const { clock } = peelTimeZone(text.slice(sep + 1));
+  if (!ISO_CLOCK.test(clock)) return undefined;
+  return finiteMs(Date.parse(text));
+}
+
+function instantFromIsoString(text: string): number | undefined {
+  if (ISO_DATE.test(text)) {
+    return finiteMs(Date.parse(`${text}T00:00:00Z`));
+  }
+  return instantFromDateTime(text) ?? instantFromClock(text);
+}
+
+/**
+ * Parse a temporal value the built-in min/max can compare.
+ *
+ * Accepts a `Date`, a finite number (including an epoch), a numeric string,
+ * or a strict ISO date / datetime / time string. Locale-dependent forms
+ * (`"9 Sep 2026"`, `"09/09/2026"`) are invalid and skipped — the same way a
+ * non-numeric string is skipped by {@link toAggregateNumber}.
+ *
+ * @param value - The resolved cell value, already through `sortValue` when
+ *   the column has one.
+ * @returns Milliseconds from epoch (or from midnight for a time-only string),
+ *   or `undefined` when the value is missing or not a supported temporal.
+ *
+ * @public
+ */
+export function toAggregateInstant(
+  value: AggregateOrderedValue
+): number | undefined {
+  if (value instanceof Date) {
+    return finiteMs(value.getTime());
+  }
+  if (typeof value === "string") {
+    const fromIso = instantFromIsoString(value.trim());
+    if (fromIso !== undefined) return fromIso;
+  }
+  return toAggregateNumber(value);
+}
+
+/**
+ * One comparable value for min/max: a rank plus the original cell to return.
+ *
+ * Numeric values keep returning a number. A `Date` stays a `Date`. An ISO
+ * string stays that string, so `formatAggregate` can format it as a date
+ * without guessing. Invalid and missing values are absent.
+ *
+ * @param value - The resolved cell value.
+ * @returns The rank and the result representation, or `undefined` to skip.
+ *
+ * @public
+ */
+export function toAggregateOrdered(
+  value: AggregateOrderedValue
+): { rank: number; result: AggregateOrderedValue } | undefined {
+  if (value instanceof Date) {
+    const rank = toAggregateInstant(value);
+    return rank === undefined ? undefined : { rank, result: value };
+  }
+  const numeric = toAggregateNumber(value);
+  if (numeric !== undefined) return { rank: numeric, result: numeric };
+  if (typeof value === "string") {
+    const rank = toAggregateInstant(value);
+    if (rank !== undefined) return { rank, result: value };
+  }
+  return undefined;
+}
+
 /** Numbers only — everything else is not summable, and silently skipped. */
-function numbers(values: readonly SortableValue[]): number[] {
+function numbers(values: readonly AggregateOrderedValue[]): number[] {
   const out: number[] = [];
   for (const v of values) {
     const n = toAggregateNumber(v);
@@ -113,6 +283,11 @@ function numbers(values: readonly SortableValue[]): number[] {
  * what a "count" cell under that column is asking about. `sum` of nothing is
  * `0`; `avg`, `min` and `max` of nothing are `undefined`, because an average
  * of no numbers is not zero, it is unanswerable.
+ *
+ * `min` and `max` compare through {@link toAggregateOrdered}: numbers stay
+ * numbers; a `Date` or a strict ISO date/time string stays that value, so
+ * `formatAggregate` receives the winning original rather than a timestamp.
+ * Locale-dependent date strings are skipped, not guessed.
  */
 const BUILT_INS: Record<AggregateName, Aggregator> = {
   sum: (values) => numbers(values).reduce((a, b) => a + b, 0),
@@ -121,15 +296,27 @@ const BUILT_INS: Record<AggregateName, Aggregator> = {
     return ns.length ? ns.reduce((a, b) => a + b, 0) / ns.length : undefined;
   },
   count: (values) => values.length,
-  min: (values) => {
-    const ns = numbers(values);
-    return ns.length ? Math.min(...ns) : undefined;
-  },
-  max: (values) => {
-    const ns = numbers(values);
-    return ns.length ? Math.max(...ns) : undefined;
-  },
+  min: (values) => extreme(values, "min"),
+  max: (values) => extreme(values, "max"),
 };
+
+function extreme(
+  values: readonly AggregateOrderedValue[],
+  which: "min" | "max"
+): AggregateOrderedValue | undefined {
+  let best: { rank: number; result: AggregateOrderedValue } | undefined;
+  for (const value of values) {
+    const ordered = toAggregateOrdered(value);
+    if (!ordered) continue;
+    if (
+      !best ||
+      (which === "min" ? ordered.rank < best.rank : ordered.rank > best.rank)
+    ) {
+      best = ordered;
+    }
+  }
+  return best?.result;
+}
 
 /**
  * Every built-in aggregate name, for a UI that offers a choice.
@@ -151,10 +338,12 @@ export const AGGREGATE_NAMES = Object.keys(BUILT_INS) as AggregateName[];
 export function resolveAggregateValue<TRow>(
   row: TRow,
   key: string,
-  column: ColumnDef<TRow> | undefined
-): SortableValue {
-  if (column?.sortValue) return column.sortValue(row);
-  return getPath(row, key) as SortableValue;
+  column: ColumnMetadata<TRow> | undefined
+): AggregateOrderedValue {
+  const value: AggregateOrderedValue = column?.sortValue
+    ? column.sortValue(row)
+    : (getPath(row, key) as AggregateOrderedValue);
+  return value;
 }
 
 /**
@@ -173,13 +362,13 @@ export function resolveAggregateValue<TRow>(
 export function aggregate<TRow>(
   spec: AggregateSpec,
   options: AggregateOptions<TRow> = {}
-): (rows: readonly TRow[]) => Partial<Record<string, ReactNode>> {
+): GroupAggregatesMapper<TRow> {
   const { columns, format, host: boundHost } = options;
   const byKey = new Map(columns?.map((c) => [c.key, c]));
   const entries = Object.entries(spec);
 
-  return (rows) => {
-    const out: Partial<Record<string, ReactNode>> = {};
+  const mapper = (rows: readonly TRow[]) => {
+    const out: Partial<Record<string, DisplayValue>> = {};
     for (const [key, fn] of entries) {
       if (!fn) continue;
       const aggregator =
@@ -188,7 +377,7 @@ export function aggregate<TRow>(
             (boundHost ?? currentFeatureHost())?.aggregators.get(fn))
           : fn;
       if (typeof aggregator !== "function") continue;
-      const values: SortableValue[] = [];
+      const values: AggregateOrderedValue[] = [];
       for (const row of rows) {
         const value = resolveAggregateValue(row, key, byKey.get(key));
         // A missing value is not a zero — skip it and let the aggregator see
@@ -200,4 +389,83 @@ export function aggregate<TRow>(
     }
     return out;
   };
+  return withDeclaredAggregates(mapper, declaredFrom(spec));
+}
+
+/**
+ * What a mapper built by {@link aggregate} was declared to compute.
+ *
+ * Column key to operation id, and `CUSTOM_AGGREGATE` where the declaration
+ * was a function rather than a name. Ids only: a closure is not application
+ * state, so nothing here can reach a URL, a saved view or a request body.
+ *
+ * @public
+ */
+export type DeclaredAggregates = Readonly<Record<string, string>>;
+
+/**
+ * The operation id standing for "the host calculates this itself".
+ *
+ * A function says what to compute and nothing about which operation it is,
+ * so the table reports it as custom rather than inventing a name for it.
+ *
+ * @public
+ */
+export const CUSTOM_AGGREGATE = "custom";
+
+/** Where the declaration rides on the mapper, out of reach of JSON. */
+const DECLARED = Symbol.for("adapttable.declaredAggregates");
+
+/**
+ * A `groupAggregates` / `summaryRow` mapper, optionally carrying what it was
+ * declared to compute.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
+export interface GroupAggregatesMapper<TRow> {
+  (rows: readonly TRow[]): Partial<Record<string, DisplayValue>>;
+  /** What this mapper declares, when the table built it. */
+  readonly [DECLARED]?: DeclaredAggregates;
+}
+
+/** The spec, reduced to the ids a reader-facing surface may show. */
+function declaredFrom(spec: AggregateSpec): DeclaredAggregates {
+  const out: Record<string, string> = {};
+  for (const [key, fn] of Object.entries(spec)) {
+    if (!fn) continue;
+    out[key] = typeof fn === "string" ? fn : CUSTOM_AGGREGATE;
+  }
+  return out;
+}
+
+/** Attach a declaration to a mapper without making it enumerable state. */
+export function withDeclaredAggregates<TRow>(
+  mapper: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>,
+  declared: DeclaredAggregates
+): GroupAggregatesMapper<TRow> {
+  return Object.defineProperty(mapper, DECLARED, {
+    value: declared,
+    enumerable: false,
+  });
+}
+
+/**
+ * Read what a mapper declares, when it came from {@link aggregate}.
+ *
+ * The table asks this instead of running the mapper on invented rows: a
+ * hand-written mapper answers nothing, which is the honest answer, and a
+ * declared one names the columns and operations it owns.
+ *
+ * @param mapper - Any `groupAggregates` / `summaryRow` value.
+ * @returns The declaration, or `undefined` for a mapper the table did not build.
+ *
+ * @public
+ */
+export function declaredAggregates(
+  mapper: unknown
+): DeclaredAggregates | undefined {
+  if (typeof mapper !== "function") return undefined;
+  return (mapper as GroupAggregatesMapper<never>)[DECLARED];
 }

@@ -1,11 +1,15 @@
+import type { TableEngine } from "../engine/createTableEngine";
 import type { FacetMap } from "../filters/facets";
+import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
+import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 import type { TableStateMutators } from "../tableStateMutators";
 import type {
   ExtraFilters,
   ResolvedPaginationMode,
   SortDirection,
 } from "../types";
-import type { QueryFilterGroup } from "./queryContract";
+import type { TableSourceCapabilities } from "./capabilities";
+import type { QueryAggregate, QueryFilterGroup } from "./queryContract";
 import type { QueryGroupRow } from "./queryGroups";
 
 /**
@@ -72,6 +76,11 @@ export interface TableSource<TRow> extends TableStateMutators {
   readonly error: Error | null;
   /** Re-run the underlying fetch. No-op for purely in-memory sources. */
   refetch?: () => Promise<unknown> | void;
+  /**
+   * Framework-neutral engine for frontend tiers. Bindings read revisions and
+   * row scopes through {@link createNeutralTable}; server sources omit this.
+   */
+  readonly tableEngine?: TableEngine<TRow>;
   /** The resolved pagination mode (after `"auto"` → device resolution). */
   readonly paginationMode: ResolvedPaginationMode;
 
@@ -103,12 +112,53 @@ export interface TableSource<TRow> extends TableStateMutators {
    */
   readonly groupBy: string | undefined;
   /**
+   * Session choices layered over the developer's group aggregate mapper.
+   * An absent key preserves the developer default; `"none"` hides it.
+   */
+  readonly groupAggregateOverrides?: GroupAggregateOverrides;
+  /**
+   * What this source can genuinely do — full-dataset access, where grouping
+   * can happen, selection across pages, export scope, whether the total is
+   * exact. Omit it and the table infers the same answers from the shape
+   * below, exactly as it always has.
+   */
+  readonly capabilities?: TableSourceCapabilities;
+  /**
    * Groups the SERVER computed, when it answered `query.groupBy` itself.
    * Present only on a server tier that declared `supports.grouping`; the table
    * then renders these instead of grouping the page it holds, which it could
    * not do correctly anyway with one page of the data.
    */
   readonly groups?: readonly QueryGroupRow<TRow>[];
+  /**
+   * Which operation each aggregate in those groups was asked for, as of the
+   * response now on screen — not one still in flight. `useQuerySource` and
+   * `useServerData` publish it from the request they sent; a source that
+   * computes its own groups may publish it too, and a source that says
+   * nothing leaves the table with the reader's own choices, which is what it
+   * knew before.
+   */
+  readonly groupAggregations?: GroupAggregateOps;
+  /**
+   * The aggregates the developer asked for originally — `query.aggregates`
+   * as they wrote it, before reader overrides and before a response arrived.
+   * Restore-defaults and the initial panel read this, never the operations
+   * the rows on screen were computed with.
+   */
+  readonly queryAggregates?: readonly QueryAggregate[];
+  /**
+   * Operation ids this backend can compute, when it named them. Omit and the
+   * five standard functions are assumed on a server that declared
+   * `supports.aggregates`.
+   */
+  readonly aggregateOperations?: readonly string[];
+  /**
+   * Whether this source will honour `query.aggregates`. A server that
+   * groups but does not aggregate must not offer controls that only
+   * mutate local state while the request is dropped. Frontend sources
+   * omit it — local calculation always runs.
+   */
+  readonly honorsAggregates?: boolean;
 
   /* State (write) is the shared {@link TableStateMutators} contract. */
 }

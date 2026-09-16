@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../columnModel";
 import {
   columnFlexShares,
   columnSizeStyle,
@@ -18,7 +18,7 @@ import { COLUMN_GROUP_STUB_PREFIX, columnGroupStubStyle } from "./headerGroups";
 interface Row {
   id: string;
 }
-const cols = (...defs: Partial<ColumnDef<Row>>[]): ColumnDef<Row>[] =>
+const cols = (...defs: Partial<ColumnModel<Row>>[]): ColumnModel<Row>[] =>
   defs.map((def, i) => ({ key: `c${i}`, header: `C${i}`, ...def }));
 
 describe("columnFlexShares", () => {

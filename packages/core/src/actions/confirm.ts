@@ -83,8 +83,13 @@ export function runRowAction<TRow>(
   confirm: ConfirmHandler,
   cancelLabel: string
 ): void {
+  // An `editsRow` action has no handler of its own: the trigger is rewired to
+  // the row form before the cell renders it, so there is nothing to call here.
+  const run = (): void => {
+    action.onClick?.(row);
+  };
   if (!action.confirm) {
-    action.onClick(row);
+    run();
     return;
   }
   confirm({
@@ -93,6 +98,6 @@ export function runRowAction<TRow>(
     confirmLabel: action.confirm.confirmLabel,
     cancelLabel,
     danger: action.confirm.danger,
-    onConfirm: () => action.onClick(row),
+    onConfirm: run,
   });
 }

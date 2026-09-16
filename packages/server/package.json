@@ -15,7 +15,7 @@
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
-  "homepage": "https://orwa-mahmoud.github.io/adapttable/",
+  "homepage": "https://orwa-mahmoud.github.io/adapttable/demo/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
@@ -56,12 +56,12 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "dependencies": {
-    "@adapttable/core": "workspace:^"
+    "@adapttable/core": "2.9.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=22.12.0"
   }
 }

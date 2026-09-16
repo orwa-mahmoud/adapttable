@@ -1,0 +1,964 @@
+import { buildTableCsv, resetDevWarnings } from "@adapttable/core";
+import { act, render, renderHook } from "@testing-library/react";
+import { type ReactNode, useState } from "react";
+import { describe, expect, it, vi } from "vitest";
+
+import type { ColumnDef } from "./columnDef";
+import { ChromeExtrasGate } from "./features/chromeExtrasGate";
+import { dirtyIndicators } from "./features/editing";
+import { bulkActions, pinnedSummaryRows } from "./features/factories";
+import { filters } from "./features/filters";
+import { grouping } from "./features/grouping";
+import { groupingPanel } from "./features/grouping-panel";
+import { FeatureProviders } from "./features/providers";
+import { rowActions } from "./features/row-actions";
+import { rowPinning } from "./features/row-pinning";
+import { rowReorder } from "./features/row-reorder";
+import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
+import { tree } from "./features/tree";
+import { useFrontendData } from "./source/useFrontendData";
+import { createMemoryAdapter } from "./url/adapter";
+import {
+  printToolbar,
+  type TableChrome,
+  undoRedoToolbar,
+  useTableChrome,
+} from "./useTableChrome";
+
+interface Row {
+  id: string;
+  name: string;
+}
+const ROWS: Row[] = [
+  { id: "a", name: "Alice" },
+  { id: "b", name: "Bob" },
+];
+const columns: ColumnDef<Row>[] = [{ key: "name", header: "Name" }];
+
+function renderLiveChrome<TRow>(
+  features: readonly TableFeature<TRow>[],
+  build: () => Parameters<typeof useTableChrome<TRow>>[0]
+) {
+  const applied = applyTableFeatures({ features });
+  const box: { current: TableChrome<TRow> } = {
+    current: undefined as unknown as TableChrome<TRow>,
+  };
+  function Probe() {
+    const props = build();
+    const chromeProps = { ...applied, ...props };
+    const base = useTableChrome<TRow>(chromeProps);
+    return (
+      <ChromeExtrasGate chrome={base} props={chromeProps}>
+        {(overlaid) => {
+          box.current = overlaid;
+          return null;
+        }}
+      </ChromeExtrasGate>
+    );
+  }
+  const view = render(
+    <FeatureProviders props={applied}>
+      <Probe />
+    </FeatureProviders>
+  );
+  return { result: box, unmount: view.unmount };
+}
+
+function mount(
+  initial = "",
+  opts: {
+    rows?: readonly Row[];
+    isLoading?: boolean;
+    isMobile?: boolean;
+    extraChips?: { key: string; label: string; onRemove: () => void }[];
+    filterLabels?: Record<string, (v: string) => string>;
+    activeFilterCount?: number;
+    onRowsChange?: (rows: readonly Row[]) => void;
+  } = {}
+) {
+  const adapter = createMemoryAdapter(initial);
+  return renderHook(() => {
+    const source = useFrontendData<Row>({
+      data: opts.rows ?? ROWS,
+      urlAdapter: adapter,
+      columns,
+      paginationMode: "paged",
+      isLoading: opts.isLoading,
+    });
+    return useTableChrome<Row>({
+      source,
+      columns,
+      rowKey: (r) => r.id,
+      forceMobile: opts.isMobile,
+      extraChips: opts.extraChips,
+      filterLabels: opts.filterLabels,
+      activeFilterCount: opts.activeFilterCount,
+      onRowsChange: opts.onRowsChange,
+    });
+  });
+}
+
+describe("useTableChrome", () => {
+  it("resolves the desktop body and a paged footer with data", () => {
+    const { result } = mount();
+    expect(result.current.body).toBe("desktop");
+    expect(result.current.isPaged).toBe(true);
+    expect(result.current.showFooter).toBe(true);
+    expect(result.current.isMobile).toBe(false);
+  });
+
+  it("reports the skeleton body while loading with no rows", () => {
+    const { result } = mount("", { rows: [], isLoading: true });
+    expect(result.current.body).toBe("skeleton");
+    expect(result.current.showFooter).toBe(true);
+  });
+
+  it("reports the empty body when there are no rows", () => {
+    const { result } = mount("", { rows: [] });
+    expect(result.current.body).toBe("empty");
+    expect(result.current.showFooter).toBe(false);
+  });
+
+  it("reports the mobile body when isMobile", () => {
+    const { result } = mount("", { isMobile: true });
+    expect(result.current.body).toBe("mobile");
+  });
+
+  it("merges label chips with extraChips and counts them", () => {
+    const adapter = createMemoryAdapter("f_status=Active");
+    const extraChips = [{ key: "x", label: "X", onRemove: vi.fn() }];
+    const { result } = renderLiveChrome([filters<Row>([])], () => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return {
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        filterLabels: { status: (v) => `Status: ${v}` },
+        extraChips,
+      };
+    });
+    expect(result.current.mergedChips.map((c) => c.label)).toContain(
+      "Status: Active"
+    );
+    expect(result.current.mergedChips.map((c) => c.label)).toContain("X");
+    expect(result.current.activeFilterCount).toBe(
+      result.current.mergedChips.length
+    );
+  });
+
+  it("returns only extraChips when there are no label chips", () => {
+    const { result } = mount("", {
+      extraChips: [{ key: "x", label: "Only", onRemove: vi.fn() }],
+    });
+    expect(result.current.mergedChips.map((c) => c.label)).toEqual(["Only"]);
+  });
+
+  it("honours an explicit activeFilterCount override", () => {
+    const { result } = mount("", { activeFilterCount: 7 });
+    expect(result.current.activeFilterCount).toBe(7);
+  });
+
+  it("exposes the headless table and a getRowId", () => {
+    const { result } = mount();
+    expect(result.current.table.rows).toHaveLength(2);
+    expect(result.current.getRowId(ROWS[0]!)).toBe("a");
+    act(() => result.current.table.toggleSort("name"));
+  });
+
+  it("notifies callers when the materialized rows change", () => {
+    const onRowsChange = vi.fn();
+    const { rerender } = mount("", { onRowsChange });
+    expect(onRowsChange).toHaveBeenLastCalledWith(ROWS);
+
+    rerender();
+    expect(onRowsChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("grouping is a full-set view: footer numbers, select-all and CSV match the screen", () => {
+    const rows: Row[] = Array.from({ length: 30 }, (_, i) => ({
+      id: String(i + 1),
+      name: `P${String(i + 1).padStart(2, "0")}-${i % 3 === 0 ? "A" : "B"}`,
+    }));
+    const adapter = createMemoryAdapter("limit=10");
+    const { result } = renderLiveChrome(
+      [
+        grouping("name"),
+        bulkActions([{ key: "del", label: "Delete", onClick: vi.fn() }]),
+      ],
+      () => {
+        const source = useFrontendData<Row>({
+          data: rows,
+          urlAdapter: adapter,
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns,
+          rowKey: (r) => r.id,
+          groupBy: "name",
+        };
+      }
+    );
+
+    // The view facade presents the full filtered set as one page.
+    expect(result.current.grouping).toBeDefined();
+    expect(result.current.source.rows).toHaveLength(30);
+    expect(result.current.table.pagination.totalPages).toBe(1);
+    expect(result.current.table.pagination.fromIndex).toBe(1);
+    expect(result.current.table.pagination.toIndex).toBe(30);
+    expect(result.current.showFooter).toBe(true);
+
+    // Select-all covers every rendered row, not the page slice.
+    act(() => result.current.table.selection?.toggleAll());
+    expect(result.current.table.selection?.selectedCount).toBe(30);
+
+    // Page-scope CSV exports exactly the rendered set: header + 30 rows.
+    const csv = buildTableCsv({
+      source: result.current.source,
+      columns: result.current.table.columns,
+      scope: "page",
+    });
+    expect(csv.trim().split("\n")).toHaveLength(31);
+  });
+
+  it("typing in search does not rebuild the grouped model", () => {
+    const rows: Row[] = Array.from({ length: 50 }, (_, i) => ({
+      id: String(i),
+      name: `P${i % 5}`,
+    }));
+    const adapter = createMemoryAdapter("");
+    const stableRowKey = (r: Row) => r.id;
+    const { result } = renderLiveChrome([grouping("name")], () => {
+      const source = useFrontendData<Row>({
+        data: rows,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return {
+        source,
+        columns,
+        rowKey: stableRowKey,
+        groupBy: "name",
+      };
+    });
+    const before = result.current.grouping;
+    expect(before).toBeDefined();
+    // Uncommitted keystrokes re-render the table but must not rebuild the
+    // O(filtered rows) grouped flat model.
+    act(() => result.current.table.setSearchValue("p"));
+    act(() => result.current.table.setSearchValue("p1"));
+    expect(result.current.grouping).toBe(before);
+  });
+
+  it("CSV export columns are identical on desktop and mobile viewports", () => {
+    const deviceCols: ColumnDef<Row>[] = [
+      { key: "name", header: "Name" },
+      { key: "id", header: "Ref", hideOnMobile: true },
+    ];
+    const build = (isMobile: boolean) => {
+      const adapter = createMemoryAdapter("");
+      const { result } = renderHook(() => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: adapter,
+          columns: deviceCols,
+          paginationMode: "paged",
+        });
+        return useTableChrome<Row>({
+          source,
+          columns: deviceCols,
+          rowKey: (r) => r.id,
+          forceMobile: isMobile,
+        });
+      });
+      return buildTableCsv({
+        source: result.current.source,
+        columns: result.current.columnLayout.visibleColumns,
+        scope: "page",
+      });
+    };
+    const desktop = build(false);
+    const mobile = build(true);
+    expect(mobile).toBe(desktop);
+    // And the full exportable set is present — hideOnMobile is visual only.
+    expect(desktop.split("\r\n")[0]).toBe("Name,Ref");
+  });
+
+  it("merges grouping panel interactions with url-backed grouping state", () => {
+    const columnsWithTeam: ColumnDef<Row>[] = [
+      { key: "name", header: "Name" },
+      { key: "team", header: "Team" },
+    ];
+    const { result } = renderLiveChrome<Row>([groupingPanel()], () => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        columns: columnsWithTeam,
+        urlAdapter: createMemoryAdapter("groupBy=name&groupAgg=team%3Asum"),
+        defaults: { limit: 10 },
+      });
+      return {
+        source,
+        columns: columnsWithTeam,
+        rowKey: (row) => row.id,
+        groupBy: "name",
+      };
+    });
+    expect(result.current.groupingPanel?.groupBy).toEqual(["name"]);
+    expect(result.current.groupingPanel?.aggregateOverrides).toEqual({
+      team: "sum",
+    });
+    expect(result.current.groupingPanel?.canSetAggregates).toBe(true);
+    expect(result.current.groupingPanel?.add).toEqual(expect.any(Function));
+  });
+
+  it("without grouping the source passes through untouched", () => {
+    const rows: Row[] = Array.from({ length: 30 }, (_, i) => ({
+      id: String(i + 1),
+      name: `P${i + 1}`,
+    }));
+    const adapter = createMemoryAdapter("limit=10");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: rows,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({ source, columns, rowKey: (r) => r.id });
+    });
+    expect(result.current.source.rows).toHaveLength(10);
+    expect(result.current.table.pagination.totalPages).toBe(3);
+  });
+
+  it("onClearFilters observes — a logging handler never breaks the clear", () => {
+    const onClearFilters = vi.fn();
+    const adapter = createMemoryAdapter("f_status=Active");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        onClearFilters,
+      });
+    });
+    expect(result.current.table.source.extra.status).toBe("Active");
+    act(() => result.current.clearFilters());
+    // The clear HAPPENED, and the host was notified.
+    expect(result.current.table.source.extra.status).toBeUndefined();
+    expect(onClearFilters).toHaveBeenCalledTimes(1);
+  });
+
+  it("tree chips appear and clearFilters drops the tree", () => {
+    const adapter = createMemoryAdapter("");
+    const { result } = renderLiveChrome(
+      [filters<Row>([{ key: "name", type: "text", label: "Person" }])],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: adapter,
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns,
+          rowKey: (r) => r.id,
+          filterDefs: [{ key: "name", type: "text", label: "Person" }],
+        };
+      }
+    );
+    act(() =>
+      result.current.source.setFilterTree?.({
+        combinator: "and",
+        conditions: [{ key: "name", op: "eq", value: "Ada" }],
+      })
+    );
+    expect(
+      result.current.mergedChips.some((chip) => chip.label.includes("Ada"))
+    ).toBe(true);
+    act(() => result.current.clearFilters());
+    expect(result.current.source.filterTree).toBeUndefined();
+    expect(result.current.mergedChips).toEqual([]);
+  });
+
+  it("onGroupByChange observes — a logging handler never breaks grouping", () => {
+    const onGroupByChange = vi.fn();
+    const adapter = createMemoryAdapter("");
+    const { result } = renderLiveChrome([grouping("name")], () => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return {
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        groupBy: "name",
+        onGroupByChange,
+      };
+    });
+    expect(result.current.grouping).toBeDefined();
+    act(() => result.current.grouping!.setGroupBy(null));
+    // The change APPLIED (URL cleared → prop groupBy still forces it on,
+    // but the mutator ran and the host was notified with the value).
+    expect(onGroupByChange).toHaveBeenCalledWith([]);
+    expect(adapter.getSearch()).not.toContain("groupBy");
+  });
+
+  it("dev-warns when editable columns have no composed editing handler", () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const first = renderLiveChrome([dirtyIndicators()], () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns: [{ key: "name", header: "Name", editable: true }],
+          rowKey: (r) => r.id,
+        };
+      });
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("editing(handler)")
+      );
+      first.unmount();
+
+      // With the handler present the combination is complete: no warning.
+      warn.mockClear();
+      resetDevWarnings();
+      renderLiveChrome([dirtyIndicators()], () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns: [{ key: "name", header: "Name", editable: true }],
+          rowKey: (r) => r.id,
+          onCellEdit: vi.fn(),
+        };
+      });
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+      resetDevWarnings();
+    }
+  });
+
+  it("keeps row reorder armed when grouping is composed", () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      // The chrome no longer builds the reorder state; it reads what the
+      // feature's provider published, which is why this needs the provider.
+      const composed = applyTableFeatures({
+        features: [rowReorder(vi.fn())],
+      });
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <FeatureProviders props={composed}>{children}</FeatureProviders>
+      );
+      const chrome = (
+        extra: Partial<Parameters<typeof useTableChrome<Row>>[0]>
+      ) =>
+        renderHook(
+          () => {
+            const source = useFrontendData<Row>({
+              data: ROWS,
+              urlAdapter: createMemoryAdapter(""),
+              columns,
+              paginationMode: "paged",
+            });
+            return useTableChrome<Row>({
+              source,
+              columns,
+              rowKey: (r) => r.id,
+              ...extra,
+            });
+          },
+          { wrapper }
+        );
+
+      const { result } = chrome({});
+      expect(result.current.hasRowReorder).toBe(true);
+      expect(result.current.rowReorder).toBeDefined();
+
+      warn.mockClear();
+      resetDevWarnings();
+      const grouped = renderLiveChrome(
+        [rowReorder(vi.fn()), grouping("name")],
+        () => {
+          const source = useFrontendData<Row>({
+            data: ROWS,
+            urlAdapter: createMemoryAdapter(""),
+            columns,
+            paginationMode: "paged",
+          });
+          return {
+            source,
+            columns,
+            rowKey: (r: Row) => r.id,
+            groupBy: "name",
+          };
+        }
+      );
+      expect(grouped.result.current.hasRowReorder).toBe(true);
+      expect(grouped.result.current.rowReorder).toBeDefined();
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+      resetDevWarnings();
+    }
+  });
+
+  it("arms row pinning when the feature is composed, and warns under grouping", () => {
+    resetDevWarnings();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const onPinnedRowIdsChange = vi.fn();
+      const rowKey = (r: Row) => r.id;
+      const props = applyTableFeatures({
+        features: [rowPinning({ onPinnedRowIdsChange })],
+        columns,
+        rowKey,
+        onPinnedRowIdsChange,
+      });
+      let chrome: TableChrome<Row> | undefined;
+      function Probe(bits: { groupBy?: string }) {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        });
+        const chromeProps = { ...props, source, columns, rowKey, ...bits };
+        const base = useTableChrome<Row>(chromeProps);
+        return (
+          <ChromeExtrasGate chrome={base} props={chromeProps}>
+            {(overlaid) => {
+              chrome = overlaid;
+              return null;
+            }}
+          </ChromeExtrasGate>
+        );
+      }
+      render(
+        <FeatureProviders props={props}>
+          <Probe />
+        </FeatureProviders>
+      );
+      expect(chrome?.rowPinning).toBeDefined();
+      expect(chrome?.hasRowActions).toBe(true);
+      expect(chrome?.rowActions?.some((a) => a.key.includes("pin"))).toBe(true);
+
+      const groupedProps = applyTableFeatures({
+        features: [rowPinning({ onPinnedRowIdsChange }), grouping("name")],
+        columns,
+        rowKey,
+        onPinnedRowIdsChange,
+        groupBy: "name",
+      });
+      warn.mockClear();
+      resetDevWarnings();
+      render(
+        <FeatureProviders props={groupedProps}>
+          <Probe groupBy="name" />
+        </FeatureProviders>
+      );
+      expect(chrome?.rowPinning).toBeUndefined();
+      expect(
+        warn.mock.calls.some((call) => String(call[0]).includes("row pinning"))
+      ).toBe(true);
+    } finally {
+      warn.mockRestore();
+      resetDevWarnings();
+    }
+  });
+
+  it("publishes host-owned summary rows even when grouping is armed", () => {
+    const totals = { id: "totals", name: "Totals" };
+    const { result } = renderLiveChrome(
+      [pinnedSummaryRows({ top: [totals] }), grouping("name")],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          ...applyTableFeatures({
+            features: [pinnedSummaryRows({ top: [totals] }), grouping("name")],
+            columns,
+            rowKey: (r: Row) => r.id,
+            groupBy: "name",
+          }),
+          source,
+          columns,
+          rowKey: (r: Row) => r.id,
+          groupBy: "name",
+        };
+      }
+    );
+    expect(result.current.pinnedRows?.top).toEqual([totals]);
+    expect(result.current.grouping).toBeDefined();
+  });
+
+  it("publishes host-owned summary rows even when the table is a tree", () => {
+    const totals = { id: "totals", name: "Totals" };
+    const { result } = renderLiveChrome(
+      [pinnedSummaryRows({ bottom: [totals] }), tree<Row>()],
+      () => {
+        const source = useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: createMemoryAdapter(""),
+          columns,
+          paginationMode: "paged",
+        });
+        return {
+          ...applyTableFeatures({
+            features: [pinnedSummaryRows({ bottom: [totals] }), tree<Row>()],
+            columns,
+            rowKey: (r: Row) => r.id,
+            getChildren: (row: Row) => (row.id === "a" ? [] : undefined),
+          }),
+          source,
+          columns,
+          rowKey: (r: Row) => r.id,
+          getChildren: (row: Row) => (row.id === "a" ? [] : undefined),
+        };
+      }
+    );
+    expect(result.current.pinnedRows?.bottom).toEqual([totals]);
+    expect(result.current.tree).toBeDefined();
+  });
+
+  it("controlled selection: change requests go to the handler, state stays put", () => {
+    const onSelectionChange = vi.fn();
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        bulkActions: [{ key: "del", label: "Delete", onClick: vi.fn() }],
+        selectedIds: ["a"],
+        onSelectionChange,
+      });
+    });
+    // The controlled value is authoritative — and there is NO observer
+    // mount fire in controlled mode (the parent already owns the state).
+    expect(result.current.table.selection?.isSelected("a")).toBe(true);
+    expect(onSelectionChange).not.toHaveBeenCalled();
+
+    // A toggle is a change REQUEST: the handler receives the next ids and
+    // the table does not mutate its own state.
+    act(() => result.current.table.selection?.toggle("b"));
+    expect(onSelectionChange).toHaveBeenCalledWith(["a", "b"]);
+    expect(result.current.table.selection?.isSelected("b")).toBe(false);
+  });
+
+  it("uncontrolled selection: the automatic reset notifies the observer", () => {
+    const received: string[][] = [];
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        bulkActions: [{ key: "del", label: "Delete", onClick: vi.fn() }],
+        onSelectionChange: (ids) => received.push(ids),
+      });
+    });
+    act(() => result.current.table.selection?.toggle("a"));
+    expect(received.at(-1)).toEqual(["a"]);
+    // The designed resetKey behavior: a search change empties the
+    // selection AND tells the observer about it.
+    act(() => result.current.table.source.setSearch("zzz"));
+    expect(received.at(-1)).toEqual([]);
+  });
+
+  it("does not loop when an uncontrolled inline handler stores the selection", () => {
+    // The documented uncontrolled usage: an inline arrow (fresh identity
+    // every render) that writes the ids straight into state. Keying the
+    // observer effect on the handler identity made this recurse forever.
+    const adapter = createMemoryAdapter("");
+    const renders = { count: 0 };
+    const received: string[][] = [];
+    const { result } = renderHook(() => {
+      renders.count += 1;
+      // Fail fast (instead of starving the runner) if the loop returns.
+      if (renders.count > 50) {
+        throw new Error("selection observer feedback loop");
+      }
+      const [ids, setIds] = useState<readonly string[]>([]);
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      const chrome = useTableChrome<Row>({
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        bulkActions: [{ key: "del", label: "Delete", onClick: vi.fn() }],
+        onSelectionChange: (next) => {
+          received.push(next);
+          setIds(next);
+        },
+      });
+      return { chrome, ids };
+    });
+
+    // Mount: the documented single fire with the empty selection, and no
+    // feedback loop (initial render + the setIds([]) commit).
+    expect(received).toEqual([[]]);
+    expect(renders.count).toBeLessThanOrEqual(3);
+
+    // One real selection change notifies exactly once more.
+    const mounted = renders.count;
+    act(() => result.current.chrome.table.selection?.toggle("a"));
+    expect(received).toEqual([[], ["a"]]);
+    expect(result.current.ids).toEqual(["a"]);
+    // toggle commit + setIds re-render — never an unbounded cascade.
+    expect(renders.count - mounted).toBeLessThanOrEqual(2);
+  });
+});
+
+describe("useTableChrome — the whole-tree grouping actions", () => {
+  interface Person {
+    id: string;
+    name: string;
+    role: string;
+  }
+  const rows: Person[] = [
+    { id: "1", name: "Ada", role: "Core" },
+    { id: "2", name: "Alan", role: "Core" },
+    { id: "3", name: "Grace", role: "Web" },
+  ];
+  const groupColumns: ColumnDef<Person>[] = [
+    { key: "name", header: "Name" },
+    { key: "role", header: "Role" },
+  ];
+  const setup = (props: Record<string, unknown> = {}) =>
+    renderLiveChrome(
+      [grouping((props.groupBy as string | string[]) ?? ["role", "name"])],
+      () => {
+        const source = useFrontendData<Person>({
+          data: rows,
+          urlAdapter: createMemoryAdapter(""),
+          columns: groupColumns,
+          paginationMode: "paged",
+        });
+        return {
+          source,
+          columns: groupColumns,
+          rowKey: (r) => r.id,
+          groupBy: ["role", "name"],
+          ...props,
+        };
+      }
+    );
+  const headers = (result: {
+    current: { grouping?: { entries: readonly { kind: string }[] } };
+  }) =>
+    result.current.grouping!.entries.filter((entry) => entry.kind === "group");
+
+  it("collapses everything, then opens it again", () => {
+    const { result } = setup();
+    expect(headers(result)).toHaveLength(5);
+    act(() => result.current.grouping!.collapseAll());
+    // Only the outermost headers survive a full collapse.
+    expect(headers(result)).toHaveLength(2);
+    act(() => result.current.grouping!.expandAll());
+    expect(headers(result)).toHaveLength(5);
+  });
+
+  it("shows the tree down to a depth", () => {
+    const { result } = setup();
+    act(() => result.current.grouping!.collapseToDepth(1));
+    // Depth 1 keeps the top level open and closes what is inside it.
+    expect(headers(result)).toHaveLength(5);
+    act(() => result.current.grouping!.collapseToDepth(0));
+    expect(headers(result)).toHaveLength(2);
+  });
+
+  it("reveals another page of groups", () => {
+    const { result } = setup({ groupBy: "role", groupPageSize: 1 });
+    expect(headers(result)).toHaveLength(1);
+    act(() => result.current.grouping!.showMore({ scope: "groups" }));
+    expect(headers(result)).toHaveLength(2);
+  });
+
+  it("reveals more of one group's rows, and says which", () => {
+    const onGroupLoadMore = vi.fn();
+    const { result } = setup({
+      groupBy: "role",
+      groupRowPageSize: 1,
+      onGroupLoadMore,
+    });
+    const leaves = () =>
+      result.current.grouping!.entries.filter((entry) => entry.kind === "row");
+    expect(leaves()).toHaveLength(2);
+    act(() =>
+      result.current.grouping!.showMore({
+        scope: "rows",
+        groupKey: "group:role:s:Core",
+      })
+    );
+    expect(leaves()).toHaveLength(3);
+    expect(onGroupLoadMore).toHaveBeenCalledExactlyOnceWith(
+      "group:role:s:Core"
+    );
+  });
+});
+
+describe("useTableChrome — row mutations and lazy tree", () => {
+  it("appends duplicate and delete after the host's own row actions", () => {
+    const adapter = createMemoryAdapter("");
+    const hostActions = [
+      { key: "edit", label: "Edit", onClick: () => undefined },
+    ];
+    const { result } = renderLiveChrome([rowActions<Row>(hostActions)], () => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return {
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        rowActions: hostActions,
+        onDuplicateRow: vi.fn(),
+        onDeleteRow: vi.fn(),
+      };
+    });
+    expect(result.current.rowActions?.map((action) => action.key)).toEqual([
+      "edit",
+      "adapttable:duplicate-row",
+      "adapttable:delete-row",
+    ]);
+  });
+
+  it("loads children when a collapsed lazy node is opened", async () => {
+    const onLoadChildren = vi.fn().mockResolvedValue(undefined);
+    const adapter = createMemoryAdapter("");
+    const { result } = renderLiveChrome([tree<Row>()], () => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return {
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        getChildren: (row) => (row.id === "a" ? [] : undefined),
+        hasChildren: (row) => row.id === "a",
+        onLoadChildren,
+      };
+    });
+    expect(result.current.tree?.entries[0]?.expanded).toBe(false);
+    await act(async () => {
+      result.current.tree?.expansion.toggle("a");
+      // The lazy loader is a promise; settle it inside the same act.
+      await Promise.resolve();
+    });
+    expect(onLoadChildren).toHaveBeenCalledWith(ROWS[0]);
+  });
+
+  it("does not reload a flat node whose children are already in the rows", () => {
+    const onLoadChildren = vi.fn().mockResolvedValue(undefined);
+    const adapter = createMemoryAdapter("");
+    const { result } = renderLiveChrome([tree<Row>()], () => {
+      const source = useFrontendData<Row>({
+        data: ROWS,
+        urlAdapter: adapter,
+        columns,
+        paginationMode: "paged",
+      });
+      return {
+        source,
+        columns,
+        rowKey: (r) => r.id,
+        getParentId: (row) => (row.id === "b" ? "a" : undefined),
+        hasChildren: (row) => row.id === "a",
+        onLoadChildren,
+      };
+    });
+    act(() => {
+      result.current.tree?.expansion.toggle("a");
+    });
+    expect(onLoadChildren).not.toHaveBeenCalled();
+  });
+});
+
+describe("toolbar halves", () => {
+  it("exposes undo, redo and print only when the host asked and they can run", () => {
+    const undo = vi.fn();
+    const redo = vi.fn();
+    const onPrint = vi.fn();
+    expect(
+      undoRedoToolbar(
+        true,
+        {
+          enabled: true,
+          canUndo: true,
+          canRedo: false,
+          undo,
+          redo,
+          clear: vi.fn(),
+          record: vi.fn(),
+        },
+        { undoEdit: "Undo", redoEdit: "Redo" }
+      )
+    ).toEqual({
+      onUndo: undo,
+      onRedo: redo,
+      canUndo: true,
+      canRedo: false,
+      undoLabel: "Undo",
+      redoLabel: "Redo",
+    });
+    expect(printToolbar(true, onPrint, { print: "Print" })).toEqual({
+      onPrint,
+      printLabel: "Print",
+    });
+  });
+});

@@ -4,14 +4,40 @@
 
 ```ts
 
-import { ComponentType } from 'react';
-import { ReactElement } from 'react';
-import { ReactNode } from 'react';
+// @public
+export type Aggregatable<TValue = AggregateOrderedValue> = boolean | AggregatableConfig<TValue>;
+
+// @public
+export interface AggregatableConfig<TValue = AggregateOrderedValue> {
+    readonly default?: string;
+    readonly operations: readonly AggregateOperation<TValue>[];
+}
+
+// @public
+export interface AggregateFormatContext {
+    readonly aggregation?: AggregateOperationId;
+    readonly columnKey: string;
+}
+
+// @public
+export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
+
+// @public
+export type AggregateOperation<TValue = AggregateOrderedValue> = AggregateName | CustomAggregateOperation<TValue>;
+
+// @public
+export type AggregateOperationId = AggregateName | (string & Record<never, never>);
+
+// @public
+export type AggregateOrderedValue = SortableValue | Date;
+
+// @public
+export type Aggregator<TValue = AggregateOrderedValue> = (values: readonly TValue[]) => DisplayValue | undefined;
 
 // @public
 export function buildTableXlsx<TRow>(options: {
     rows: readonly TRow[];
-    columns: readonly ColumnDef<TRow>[];
+    columns: readonly ColumnMetadata<TRow>[];
     sheetName?: string;
     view?: readonly ExportViewEntry<TRow>[];
     summary?: Readonly<Partial<Record<string, unknown>>>;
@@ -50,22 +76,68 @@ export interface CellProps<TRow> {
 }
 
 // @public
-export interface ColumnDef<TRow> {
-    accessor?: (row: TRow) => ReactNode;
+export interface ColumnAiOptions {
+    description?: string;
+    examples?: readonly unknown[];
+    sample?: boolean;
+}
+
+// @public
+export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
+    label?: string;
+});
+
+// @public
+export interface ColumnFooterContext<TRow> {
+    column: ColumnModel<TRow>;
+    value: DisplayValue;
+}
+
+// @public
+export type ColumnGroupShow = "open" | "closed" | "always";
+
+// @public
+export interface ColumnHeaderContext<TRow> {
+    column: ColumnModel<TRow>;
+    controller: ColumnHeaderController;
+}
+
+// @public
+export interface ColumnHeaderController {
+    label: DisplayValue;
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}
+
+// @public
+export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter"> & {
+    header?: unknown;
+    filter?: unknown;
+};
+
+// @public
+export interface ColumnModel<TRow = unknown> {
+    accessor?: (row: TRow) => unknown;
+    aggregatable?: Aggregatable;
+    ai?: ColumnAiOptions;
     align?: "start" | "center" | "end";
-    Cell?: ComponentType<CellProps<TRow>>;
     colSpan?: number | ((row: TRow) => number);
     editable?: boolean | ((row: TRow) => boolean);
-    editor?: CellEditor;
+    editor?: ColumnModelEditor;
     editValue?: (row: TRow) => string;
     exportValue?: (row: TRow) => unknown;
-    filter?: ColumnFilter<TRow>;
+    filter?: ColumnModelFilter;
     flex?: number;
+    formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => DisplayValue | undefined;
     formatValue?: (row: TRow) => string;
     group?: string | readonly string[];
+    groupable?: boolean;
     groupShow?: ColumnGroupShow;
-    header?: ReactNode;
-    headerActions?: ReactNode;
+    groupValue?: (row: TRow) => unknown;
+    header?: string;
     headerTooltip?: string;
     hideOnDesktop?: boolean;
     hideOnMobile?: boolean;
@@ -80,8 +152,7 @@ export interface ColumnDef<TRow> {
     minWidth?: number;
     mobileLabel?: string;
     parseValue?: (draft: string, row: TRow) => unknown;
-    renderFooter?: (ctx: ColumnFooterContext<TRow>) => ReactNode;
-    renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
+    renameable?: boolean;
     responsivePriority?: number;
     rowSpan?: number | ((row: TRow) => number);
     sortable?: boolean;
@@ -91,39 +162,31 @@ export interface ColumnDef<TRow> {
 }
 
 // @public
-export type ColumnFilter<TRow = unknown> = FilterType | (Omit<FilterDef<TRow>, "key" | "label"> & {
-    label?: string;
-});
+export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 
 // @public
-export interface ColumnFooterContext<TRow> {
-    column: ColumnDef<TRow>;
-    value: ReactNode;
+export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
+
+// @public
+export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
+    readonly calculate?: Aggregator<TValue>;
+    readonly description?: string;
+    readonly id: string;
+    readonly label: string;
 }
 
 // @public
-export type ColumnGroupShow = "open" | "closed" | "always";
-
-// @public
-export interface ColumnHeaderContext<TRow> {
-    column: ColumnDef<TRow>;
-    controller: ColumnHeaderController;
-}
-
-// @public
-export interface ColumnHeaderController {
-    label: ReactNode;
-    sortDir?: "asc" | "desc";
-    sortIndex?: number;
-    toggleSort: (event?: {
-        shiftKey?: boolean;
-    }) => void;
+export interface CustomCellEditorConflict {
+    readonly incomingValue: string;
+    readonly keep: () => void;
+    readonly take: () => void;
 }
 
 // @public
 export interface CustomCellEditorCtrl {
     cancel: () => void;
     commit: () => void;
+    conflict?: CustomCellEditorConflict;
     draft: string;
     error?: string;
     errorId: string;
@@ -142,7 +205,10 @@ export interface CustomCellEditorCtrl {
 }
 
 // @public
-export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => ReactElement;
+export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValue;
+
+// @public
+export type DisplayValue = string | number | boolean | bigint | object | null;
 
 // @public
 export interface ExportPayload {
@@ -196,7 +262,13 @@ export interface ExportWriter {
 }
 
 // @public
+export interface FilterAiOptions {
+    readonly options?: false | number;
+}
+
+// @public
 export interface FilterDef<TRow = unknown> {
+    ai?: false | FilterAiOptions;
     column?: string;
     getValue?: (row: TRow) => unknown;
     key: string;

@@ -4,9 +4,10 @@
 
 ```ts
 
-import { rowReorder } from '@adapttable/core/features';
+import { AdapterRowReorderFeature } from '@adapttable/react/adapter';
 
-export { rowReorder }
+// @public
+export const rowReorder: AdapterRowReorderFeature;
 
 // (No @packageDocumentation comment for this package)
 

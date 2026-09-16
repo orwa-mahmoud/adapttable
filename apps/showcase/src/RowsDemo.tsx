@@ -6,11 +6,7 @@ import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Pin } from "./sectionIcons";
 
 /**
- * The rows page: pin, reorder, merge, act — the Pro row bundle, MIT.
- *
- * These are four props, not four pages. People search for each by name, and
- * MUI X / ag-Grid sell them separately; this page is the one place a kit
- * reader sees them working together without the Feature Lab's other knobs.
+ * The rows page: pin, merge, act. Movement lives on row-reordering.
  */
 export function RowsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;
@@ -19,9 +15,6 @@ export function RowsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
       <div className="hint-row">
         <span className="hint">
           <Pin size={12} /> pin a row to the top or the floor of the scroll box
-        </span>
-        <span className="hint">
-          <Check size={12} /> Space lifts, arrows move, Space drops
         </span>
         <span className="hint">
           <Check size={12} /> Team is written once down consecutive teammates
@@ -40,7 +33,6 @@ export function RowsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 dark={dark}
                 urlKey="rows"
                 rowMutations
-                rowReorder
                 rowPinning
                 cellSpan
                 focused

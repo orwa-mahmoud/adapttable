@@ -8,12 +8,12 @@ import {
   type LayoutStorage,
   useColumnLayoutStorageState,
   useFrontendData,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { Theme } from "@radix-ui/themes";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {

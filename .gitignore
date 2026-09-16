@@ -1,3 +1,6 @@
+# Isolated Nightshift / agent worktrees nested under this clone. Never committed.
+/worktrees/
+
 # Private working context (plans, notes, AI/skill/tool output). Never committed.
 ai_docs/
 
@@ -9,6 +12,12 @@ dist/
 build/
 coverage/
 .turbo/
+/node-support-packs/
+
+# Stryker mutation testing — generated reports and scratch.
+.stryker-tmp/
+reports/mutation/
+**/reports/mutation/
 
 # SonarQube / sonar-scanner local output. Never committed.
 .scannerwork/

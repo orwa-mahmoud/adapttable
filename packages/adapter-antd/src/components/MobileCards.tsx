@@ -1,19 +1,21 @@
 import {
   bodyRowEntries,
-  type ColumnDef,
   type ConfirmHandler,
-  type EditableCellEditing,
   type GroupedFlatEntry,
-  type MobileCardRenderer,
   type RowAction,
   type RowActionsLayout,
   type RowActionsRenderer,
-  type RowExpansionState,
   type TableLabels,
   treeCardStyle,
   type TreeEntry,
-  type UseDataTableResult,
 } from "@adapttable/core";
+import {
+  type ColumnDef,
+  type EditableCellEditing,
+  type ReactMobileCardRenderer,
+  type RowExpansionState,
+  type UseDataTableResult,
+} from "@adapttable/react";
 import {
   cellFlashAttr,
   EXTRA_ROW_PARTS,
@@ -21,29 +23,36 @@ import {
   insertExtraRows,
   isExtraEntry,
   orderedCardEntries,
+  pinnedSummaryPart,
+  pinnedSummaryRowId,
+  pinnedSummarySideFromId,
   resolveMobileLabel,
+  resolveRowEditTrigger,
   resolveRowStyle,
   rowClickProps,
+  rowEditConflict,
   rowEditingSignature,
   rowFlashSignature,
   rowIsDirty,
   rowReorderSignature,
   type RowReorderState,
+  type RowStyle,
   rowStyleSignature,
   useSummaryCells,
   type VirtualTableRow,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Card, Checkbox, Descriptions, Space } from "antd";
 import { type CSSProperties, memo, type ReactNode, useMemo } from "react";
 
-import { EditableDataCell } from "./EditableCell";
-import { ExpandToggle } from "./ExpandToggle";
 import {
-  ADAPTTABLE_GROUP,
-  type AdaptTableGroupRow,
-  GroupHeaderCard,
-} from "./grouping";
-import { RowEditActions, RowReorderButtons, TreeToggle } from "./kitControls";
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalGroupHeaderCard,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalTreeToggle,
+} from "./featureSlots";
+import { ADAPTTABLE_GROUP, type AdaptTableGroupRow } from "./grouping";
 import { RowActionButtons } from "./RowActionButtons";
 
 /**
@@ -83,7 +92,7 @@ function SummaryCard<TRow>({
 /** Per-card inputs for the memoized {@link CardItemBase}. */
 interface CardItemProps<TRow> {
   /** Replace the card's body — see `BaseDataTableProps.renderCard`. */
-  renderCard?: MobileCardRenderer<TRow>;
+  renderCard?: ReactMobileCardRenderer<TRow>;
   /** This card's place in the tree, when the table is one. */
   treeEntry?: TreeEntry<TRow>;
   /** Open or close this node. */
@@ -216,14 +225,24 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
     rowCount,
     renderCard,
   } = props;
-  const actions = rowActions && rowActions.length > 0 ? rowActions : null;
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
+  const rowConflict = rowEditConflict(editing, id);
+  const actions = rowEdit.actions.length > 0 ? rowEdit.actions : null;
   // Built once and used by both paths, so a custom card shows the very same
   // value node the built-in would have — cell renderers and editors included.
   const fields = columns.map((column) => ({
     column,
     label: resolveMobileLabel(column),
     value: (
-      <EditableDataCell
+      <OptionalEditableCell
+        // Built inside the map, so it needs its own key: React reads these
+        // as a list even though a card renders them one at a time.
+        key={column.key}
         editing={editing}
         row={row}
         column={column}
@@ -251,7 +270,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         (treeEntry ?? onToggleSelect) ? (
           <Space size="small">
             {treeEntry && (
-              <TreeToggle
+              <OptionalTreeToggle
                 entry={treeEntry}
                 labels={labels}
                 onToggle={onToggleTree ?? (() => undefined)}
@@ -271,17 +290,22 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         (onToggleExpand ?? actions ?? editing?.rowEditing) ? (
           <Space size="small">
             {onToggleExpand && (
-              <ExpandToggle
-                expanded={expanded}
-                labels={labels}
-                onClick={() => onToggleExpand(id)}
+              <OptionalExpandToggle
+                id={id}
+                expanded={Boolean(expanded)}
+                onToggle={onToggleExpand}
+                expandLabel={labels.expandRow}
+                collapseLabel={labels.collapseRow}
               />
             )}
             {editing?.rowEditing && (
-              <RowEditActions
+              <OptionalRowEditActions
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
+                showBegin={rowEdit.showBegin}
+                icons={editing.rowEditIcons}
+                conflict={rowConflict}
                 labels={labels}
               />
             )}
@@ -318,7 +342,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
         </Descriptions>
       )}
       {rowReorder && (
-        <RowReorderButtons
+        <OptionalRowReorderButtons
           reorder={rowReorder}
           labels={labels}
           localIndex={rowIndex}
@@ -343,7 +367,38 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
  * viewports so columns never get cramped. Each card is memoized on its own
  * inputs, so a toolbar re-render (e.g. a search keystroke) re-renders no
  * unchanged card.
- *
+ */
+function summaryCardInteractive(
+  side: ReturnType<typeof pinnedSummarySideFromId>,
+  selection:
+    | { isSelected: (id: string) => boolean; toggle: (id: string) => void }
+    | null
+    | undefined,
+  expansion: RowExpansionState | undefined,
+  id: string
+): {
+  selected: boolean;
+  expanded: boolean;
+  onToggleSelect: ((id: string) => void) | undefined;
+  onToggleExpand: ((id: string) => void) | undefined;
+} {
+  if (side) {
+    return {
+      selected: false,
+      expanded: false,
+      onToggleSelect: undefined,
+      onToggleExpand: undefined,
+    };
+  }
+  return {
+    selected: Boolean(selection?.isSelected(id)),
+    expanded: Boolean(expansion?.isExpanded(id)),
+    onToggleSelect: selection?.toggle,
+    onToggleExpand: expansion?.toggle,
+  };
+}
+
+/**
  * @typeParam TRow - The row type.
  */
 export function MobileCards<TRow>({
@@ -378,6 +433,8 @@ export function MobileCards<TRow>({
   cardSetSize = 0,
   pinnedTopRows = [],
   pinnedBottomRows = [],
+  pinnedSummaryTop = [],
+  pinnedSummaryBottom = [],
   extraRows,
   renderCard,
   listRef,
@@ -403,7 +460,7 @@ export function MobileCards<TRow>({
    */
   isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   /** Conditional per-row style — see `BaseDataTableProps.rowStyle`. */
-  rowStyle?: (row: TRow, index: number) => CSSProperties | undefined;
+  rowStyle?: RowStyle<TRow>;
   /** Per-row height — see `BaseDataTableProps.rowHeight`. */
   rowHeight?: number | ((row: TRow, index: number) => number);
   tableLabel?: string;
@@ -414,7 +471,7 @@ export function MobileCards<TRow>({
   /** Detail-panel renderer — see `BaseDataTableProps.renderRowDetail`. */
   renderRowDetail?: (row: TRow) => ReactNode;
   /** Replace each card's body — see `BaseDataTableProps.renderCard`. */
-  renderCard?: MobileCardRenderer<TRow>;
+  renderCard?: ReactMobileCardRenderer<TRow>;
   /** Footer summary builder — see `BaseDataTableProps.summaryRow`. */
   summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
   /** Opt-in editing bundle — omit and cells stay display-only. */
@@ -451,6 +508,8 @@ export function MobileCards<TRow>({
   cardSetSize?: number;
   pinnedTopRows?: readonly TRow[];
   pinnedBottomRows?: readonly TRow[];
+  pinnedSummaryTop?: readonly TRow[];
+  pinnedSummaryBottom?: readonly TRow[];
   extraRows?: readonly ExtraRow[];
   /** Attach the virtualizer to this list (window or maxHeight box). */
   listRef?: (node: HTMLElement | null) => void;
@@ -466,7 +525,9 @@ export function MobileCards<TRow>({
     getRowId,
     rowEntries,
     pinnedTopRows,
-    pinnedBottomRows
+    pinnedBottomRows,
+    pinnedSummaryTop,
+    pinnedSummaryBottom
   );
 
   // `memo` erases generics at module level, so the memoized card is
@@ -482,7 +543,9 @@ export function MobileCards<TRow>({
     key: string,
     treeEntry?: TreeEntry<TRow>
   ) => {
-    const id = getRowId(row);
+    const side = pinnedSummarySideFromId(key);
+    const id = side ? key : getRowId(row);
+    const interactive = summaryCardInteractive(side, selection, expansion, id);
     return (
       <li
         key={key}
@@ -495,7 +558,8 @@ export function MobileCards<TRow>({
           cardSetSize > rows.length ? windowStart + index + 1 : undefined
         }
         aria-setsize={cardSetSize > rows.length ? cardSetSize : undefined}
-        data-adapttable-part="card"
+        data-adapttable-part={side ? pinnedSummaryPart(side) : "card"}
+        aria-label={side ? labels.pinnedSummaryRow : undefined}
         style={{
           ...treeCardStyle(treeEntry?.level ?? 0),
           ...resolveRowStyle(rowStyle, rowHeight, row, index),
@@ -508,9 +572,9 @@ export function MobileCards<TRow>({
           columns={columns}
           labels={labels}
           confirm={confirm}
-          rowActions={rowActions}
+          rowActions={side ? undefined : rowActions}
           rowActionsLayout={rowActionsLayout}
-          renderRowActions={renderRowActions}
+          renderRowActions={side ? undefined : renderRowActions}
           className={
             [cardClassName, rowClassName?.(row, index)]
               .filter(Boolean)
@@ -522,24 +586,24 @@ export function MobileCards<TRow>({
           )}
           flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
           isCellFlashing={isCellFlashing}
-          selected={selection ? selection.isSelected(id) : false}
-          expanded={expansion ? expansion.isExpanded(id) : false}
-          onToggleSelect={selection ? selection.toggle : undefined}
-          onToggleExpand={expansion ? expansion.toggle : undefined}
-          renderDetail={renderRowDetail}
-          onRowClick={onRowClick}
+          selected={interactive.selected}
+          expanded={interactive.expanded}
+          onToggleSelect={interactive.onToggleSelect}
+          onToggleExpand={interactive.onToggleExpand}
+          renderDetail={side ? undefined : renderRowDetail}
+          onRowClick={side ? undefined : onRowClick}
           prefetch={prefetch}
           editing={editing}
           rows={rows}
           getRowId={getRowId}
           editingSignature={rowEditingSignature(editing, id)}
-          treeEntry={treeEntry}
-          onToggleTree={tree?.expansion.toggle}
-          rowReorder={rowReorder}
+          treeEntry={side ? undefined : treeEntry}
+          onToggleTree={side ? undefined : tree?.expansion.toggle}
+          rowReorder={side ? undefined : rowReorder}
           windowStart={windowStart}
           rowCount={rows.length}
           reorderSignature={rowReorderSignature(rowReorder, id, index)}
-          renderCard={renderCard}
+          renderCard={side ? undefined : renderCard}
         />
       </li>
     );
@@ -569,7 +633,10 @@ export function MobileCards<TRow>({
       entry.leafIds.length,
     leafIds: entry.leafIds,
     aggregateCells:
-      entry.kind === "groupMore" ? undefined : entry.aggregateCells,
+      entry.kind === "groupMore"
+        ? undefined
+        : (entry.aggregateCells as Partial<Record<string, ReactNode>>),
+    aggregateOps: entry.kind === "groupMore" ? undefined : entry.aggregateOps,
     collapsed: entry.kind === "group" && entry.collapsed,
   });
 
@@ -590,6 +657,11 @@ export function MobileCards<TRow>({
     >
       {paddingTop > 0 && <li aria-hidden style={{ height: paddingTop }} />}
       {grouping
+        ? pinnedSummaryTop.map((row, index) =>
+            renderLeafCard(row, index, pinnedSummaryRowId("top", index))
+          )
+        : null}
+      {grouping
         ? grouping.entries.map((entry) => {
             if (isExtraEntry(entry)) {
               return (
@@ -602,7 +674,9 @@ export function MobileCards<TRow>({
                   }
                 >
                   <div data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}>
-                    {entry.kind === "fullWidth" ? entry.render?.() : null}
+                    {entry.kind === "fullWidth"
+                      ? (entry.render?.() as ReactNode)
+                      : null}
                   </div>
                 </li>
               );
@@ -614,7 +688,7 @@ export function MobileCards<TRow>({
             ) {
               return (
                 <li key={entry.key} ref={measureElement}>
-                  <GroupHeaderCard
+                  <OptionalGroupHeaderCard
                     group={toGroupRow(entry)}
                     labels={labels}
                     onToggle={() => grouping.collapsed.toggle(entry.key)}
@@ -625,7 +699,7 @@ export function MobileCards<TRow>({
                         ? Object.entries(entry.aggregateCells).map(
                             ([colKey, node]) => (
                               <span key={colKey} data-column={colKey}>
-                                {node}
+                                {node as ReactNode}
                               </span>
                             )
                           )
@@ -652,13 +726,20 @@ export function MobileCards<TRow>({
                 }
               >
                 <div data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}>
-                  {slot.kind === "fullWidth" ? slot.render?.() : null}
+                  {slot.kind === "fullWidth"
+                    ? (slot.render?.() as ReactNode)
+                    : null}
                 </div>
               </li>
             ) : (
               renderLeafCard(slot.row, slot.index, slot.key, slot.treeEntry)
             )
           )}
+      {grouping
+        ? pinnedSummaryBottom.map((row, index) =>
+            renderLeafCard(row, index, pinnedSummaryRowId("bottom", index))
+          )
+        : null}
       {summaryRow && (
         <li>
           <SummaryCard rows={rows} columns={columns} summaryRow={summaryRow} />

@@ -3,7 +3,7 @@ import {
   type SelectionStatsChromeProps,
   type SelectionStatsSlotProps,
   type SelectionStatsSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Flex, Text } from "@radix-ui/themes";
 
 function Stats({ parts, className }: SelectionStatsSlotProps) {

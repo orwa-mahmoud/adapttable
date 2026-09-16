@@ -1,15 +1,16 @@
 import {
+  type GroupAggregateOps,
   type GroupedFlatEntry,
   groupSelectionState,
-  type SelectionState,
   type TableLabels,
 } from "@adapttable/core";
+import type { SelectionState } from "@adapttable/react";
 import {
   type ExtraEntry,
   groupIndentStyle,
   GroupToggleSpacer,
   isExtraEntry,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Checkbox, Space, Typography } from "antd";
 import type { CSSProperties, MouseEventHandler, ReactNode } from "react";
 
@@ -41,6 +42,8 @@ export interface AdaptTableGroupRow {
   leafIds: readonly string[];
   /** Footer aggregates for the group, by column key. */
   aggregateCells?: Partial<Record<string, ReactNode>>;
+  /** Which operation produced each of them, where the table knows. */
+  aggregateOps?: GroupAggregateOps;
   /** Whether the group is collapsed. */
   collapsed: boolean;
 }
@@ -91,7 +94,10 @@ function toExtraDataRecord(entry: ExtraEntry): AdaptTableExtraRow {
     [ADAPTTABLE_EXTRA]: true,
     key: entry.key,
     extraKind: entry.kind,
-    render: entry.kind === "fullWidth" ? entry.render : undefined,
+    render:
+      entry.kind === "fullWidth"
+        ? (entry.render as () => ReactNode)
+        : undefined,
   };
 }
 
@@ -118,7 +124,10 @@ function toGroupDataRecord<TRow>(
       entry.leafIds.length,
     leafIds: entry.leafIds,
     aggregateCells:
-      entry.kind === "groupMore" ? undefined : entry.aggregateCells,
+      entry.kind === "groupMore"
+        ? undefined
+        : (entry.aggregateCells as Partial<Record<string, ReactNode>>),
+    aggregateOps: entry.kind === "groupMore" ? undefined : entry.aggregateOps,
     collapsed: entry.kind === "group" && entry.collapsed,
   };
 }

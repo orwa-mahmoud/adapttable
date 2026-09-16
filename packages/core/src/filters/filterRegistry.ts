@@ -3,14 +3,16 @@
  * predicate, chips and tree serialization. Built-ins are the first consumers —
  * every former `switch (def.type)` looks up a spec instead.
  */
-import type { ReactElement } from "react";
-
+import type { DisplayValue } from "../display";
 import type { QueryCondition } from "../source/queryContract";
 import type { ExtraFilters, TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
-import type { FilterDef, FilterType } from "./filterDefs";
-import type { FilterFormSource } from "./filterForm";
-import type { ChipLabelResolver } from "./useActiveFilterChips";
+import {
+  type ChipLabelResolver,
+  type FilterDef,
+  type FilterType,
+} from "./filterDefs";
+import type { FilterFormSource } from "./filterFormModel";
 
 /**
  * Built-in widget a kit AutoFilterForm / header row already knows how to draw.
@@ -40,7 +42,7 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
  * tree projection. Register a new `type` string via
  * `TableFeatureHost.registerFilterType`, or extend a built-in with
  * `TableFeatureHost.extendFilterType` to add operators without forking
- * the table. `FilterTypeRegistry.register` / `extend` still work until v3.
+ * the table.
  *
  * @public
  */
@@ -69,7 +71,7 @@ export interface FilterTypeSpec {
     condition: QueryCondition
   ): ExtraFilters;
   /** Native renderer — header row and AutoFilterForm use this when set. */
-  render?<TRow>(props: FilterWidgetRenderProps<TRow>): ReactElement;
+  render?<TRow>(props: FilterWidgetRenderProps<TRow>): DisplayValue;
 }
 
 /**
@@ -84,20 +86,6 @@ export interface FilterTypeRegistry {
   has(type: string): boolean;
   /** Every registered type name. */
   types(): readonly string[];
-  /**
-   * Returns a registry with this spec added.
-   *
-   * @deprecated Register with `TableFeatureHost.registerFilterType` in
-   * `feature.setup(host)` instead. Removed at v3.
-   */
-  register(spec: FilterTypeSpec): FilterTypeRegistry;
-  /**
-   * Returns a registry with one type's spec patched.
-   *
-   * @deprecated Use `TableFeatureHost.extendFilterType` in
-   * `feature.setup(host)` instead. Removed at v3.
-   */
-  extend(type: string, patch: Partial<FilterTypeSpec>): FilterTypeRegistry;
 }
 
 class MapRegistry implements FilterTypeRegistry {
@@ -114,22 +102,14 @@ class MapRegistry implements FilterTypeRegistry {
   types(): readonly string[] {
     return [...this.specs.keys()];
   }
-
-  /** Returns a registry with this spec added. */
-  register(spec: FilterTypeSpec): FilterTypeRegistry {
-    return withFilterType(this, spec);
-  }
-
-  /** Returns a registry with one type's spec patched. */
-  extend(type: string, patch: Partial<FilterTypeSpec>): FilterTypeRegistry {
-    return withExtendedFilterType(this, type, patch);
-  }
 }
 
 /**
- * Copy `registry` with `spec` added (same `type` replaces). Used internally
- * so {@link FilterTypeRegistry.register} can stay deprecated without the
- * library calling it.
+ * Copy `registry` with `spec` added (same `type` replaces).
+ *
+ * A registry is immutable, so a feature's `setup(host)` registration lands
+ * here: `registerFilterType` builds the next registry rather than mutating
+ * the one a render already read.
  */
 export function withFilterType(
   registry: FilterTypeRegistry,
@@ -145,8 +125,8 @@ export function withFilterType(
 }
 
 /**
- * Patch a named type on `registry`. Unknown types warn and return the
- * same registry — same contract as {@link FilterTypeRegistry.extend}.
+ * Patch a named type on `registry`. Unknown types warn and return the same
+ * registry, because a typo must not silently drop a built-in.
  */
 export function withExtendedFilterType(
   registry: FilterTypeRegistry,
@@ -242,6 +222,6 @@ export function renderRegisteredFilter<TRow>(
   labels: Required<TableLabels>,
   registry: FilterTypeRegistry,
   className?: string
-): ReactElement | undefined {
+): DisplayValue | undefined {
   return registry.get(def.type)?.render?.({ def, source, labels, className });
 }

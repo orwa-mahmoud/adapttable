@@ -102,12 +102,12 @@ const SERVER_SAFE = [
     reactFree: true,
   },
   {
-    // `@adapttable/core/query` is the entry `@adapttable/server` reads the URL
-    // codecs from. Holding it to the same rule checks the promise at the source
-    // as well as at the consumer, so core cannot break a backend by growing a
-    // hook into a chunk the two of them share.
+    // Core is framework-neutral in v3, every entry of it: a directive would
+    // draw a client boundary around code that has no client in it. Listing the
+    // package rather than a subset is the stronger claim — nothing core
+    // publishes may reach React, checked through the whole import graph, which
+    // is also the promise `@adapttable/server` leans on.
     pkg: "core",
-    only: /^\.\/dist\/query\.(js|cjs)$/,
     reactFree: true,
   },
   {
@@ -117,6 +117,19 @@ const SERVER_SAFE = [
     // reaching a hook-bearing module would make the tool that sets up a table
     // require the table.
     pkg: "cli",
+    reactFree: true,
+  },
+  {
+    // Every entry of it, the way core is listed: the catalog, the context and
+    // prompt builders, the conversation store, dictation, and each protocol
+    // adapter all run in a host without React, import no model SDK, and post
+    // or execute through the same neutral session. Listing the package rather
+    // than a subset is both the stronger claim and the one that stays true —
+    // a subpath added tomorrow is covered the day it ships, which a list of
+    // five names was not.
+    // `@adapttable/ai-react` is the client package and is deliberately not
+    // listed here.
+    pkg: "ai",
     reactFree: true,
   },
 ];

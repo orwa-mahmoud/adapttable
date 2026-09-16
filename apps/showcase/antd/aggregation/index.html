@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <meta name="description" content="Try Ant Design table aggregation with group subtotals, footer totals and independent pinned summary rows. Keep summaries outside sorting and pagination." />
+    <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/antd/aggregation/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AdaptTable" />
+    <meta property="og:title" content="Ant Design table aggregation — AdaptTable" />
+    <meta property="og:description" content="Try Ant Design table aggregation with group subtotals, footer totals and independent pinned summary rows. Keep summaries outside sorting and pagination." />
+    <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/antd/aggregation/" />
+    <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ant Design table aggregation — AdaptTable" />
+    <meta name="twitter:description" content="Try Ant Design table aggregation with group subtotals, footer totals and independent pinned summary rows. Keep summaries outside sorting and pagination." />
+    <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Ant Design table aggregation with group subtotals, footer totals and independent pinned summary rows. Keep summaries outside sorting and pagination.","url":"https://orwa-mahmoud.github.io/adapttable/demo/antd/aggregation/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      (function () {
+  var isLocal = function(){
+  var h = location.hostname || "";
+  if (location.protocol === "file:") return true;
+  if (h === "" || h === "localhost" || h === "0.0.0.0" || h === "[::1]" || h === "::1") return true;
+  if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+  return false;
+};
+  if (isLocal()) return;
+  (function () {
+    var s = document.createElement('script');
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.defer = true;
+    s.setAttribute("data-cf-beacon", "{\"token\": \"dd71ff9f3b7b4064969d3f81e8c6ee9b\"}");
+    document.head.appendChild(s);
+  })();
+})();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <title>Ant Design table aggregation — AdaptTable</title>
+    <script>
+      try {
+        if (localStorage.getItem("adapttable-demo-theme") === "dark")
+          document.documentElement.dataset.theme = "dark";
+      } catch {}
+    </script>
+    <style>
+      /* The pre-mount fallback inside #root. React replaces it on mount, so
+         this paints only while the bundle is still downloading — or
+         permanently, when JavaScript is unavailable. Styled so that moment
+         reads as the page arriving rather than as broken markup. */
+      .at-fallback {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 4.5rem 1.5rem;
+        font-family: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+        color: #52525b;
+        line-height: 1.65;
+      }
+      .at-fallback p {
+        text-wrap: pretty;
+      }
+      .at-fallback__kicker {
+        margin: 0 0 0.75rem;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #71717a;
+      }
+      .at-fallback h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #18181b;
+        margin: 0 0 1rem;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+      .at-fallback h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #18181b;
+        margin: 2rem 0 0.6rem;
+      }
+      .at-fallback pre {
+        overflow-x: auto;
+        padding: 1rem 1.1rem;
+        border: 1px solid #e4e4e7;
+        border-radius: 12px;
+        background: #fafafa;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.8rem;
+        line-height: 1.7;
+        color: #3f3f46;
+      }
+      .at-fallback p code {
+        padding: 1px 5px;
+        border-radius: 5px;
+        background: #f4f4f5;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.86em;
+        color: #27272a;
+      }
+      .at-fallback ul {
+        padding-inline-start: 1.2rem;
+        margin: 0;
+      }
+      .at-fallback li {
+        margin: 0.4rem 0;
+      }
+      .at-fallback a {
+        color: #4f46e5;
+      }
+      [data-theme="dark"] .at-fallback {
+        color: #a1a1aa;
+      }
+      [data-theme="dark"] .at-fallback :is(h1, h2) {
+        color: #fafafa;
+      }
+      [data-theme="dark"] .at-fallback pre {
+        border-color: #3f3f46;
+        background: #18181b;
+        color: #d4d4d8;
+      }
+      [data-theme="dark"] .at-fallback p code {
+        background: #27272a;
+        color: #e4e4e7;
+      }
+      [data-theme="dark"] .at-fallback a {
+        color: #a5b4fc;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Replaced by React on mount — the served markup carries the page's
+         own words so a crawler, and anyone whose bundle has not arrived, reads
+         a real page. Written by scripts/build-showcase-html.mjs. -->
+    <div id="root" data-matrix-page="antd/aggregation">
+      <main class="at-fallback">
+        <p class="at-fallback__kicker">AdaptTable for Ant Design</p>
+        <h1>Aggregation in Ant Design</h1>
+        <p>A summary row is not a pinned data row and not a group footer. <code>summaryRow</code> writes a grand total in the table footer. <code>pinnedSummaryRows</code> sticks host-owned totals above or below the scroll box. <code>groupAggregates</code> plus <code>groupFooters</code> close each group.</p>
+        <p>Filter the table and every total recomputes from the rows that remain — client <code>aggregate()</code> and a source that already computed the same numbers share one mapper shape. Extra full-width rows stay attached to a person, not to a total.</p>
+        <p>The footer, the pinned summaries and the group totals render through Ant Design's own table rows. Building and reordering group levels stays on the grouping page.</p>
+        <p>Group totals splice into antd's dataSource the same way group headers do; the footer is antd's Table.Summary, and pinned summaries are extra records the adapter marks.</p>
+        <h2>The code</h2>
+        <pre><code>import { aggregate } from &quot;@adapttable/core&quot;;
+import { DataTable } from &quot;@adapttable/antd&quot;;
+import { groupingPanel } from &quot;@adapttable/antd/grouping-panel&quot;;
+import { pinnedSummaryRows } from &quot;@adapttable/antd/pinned-summary-rows&quot;;
+
+export function Sales({ rows, columns }) {
+  const budgetSum = aggregate({ budget: &quot;sum&quot; }, { columns });
+  return (
+    &lt;DataTable
+      data={rows}
+      columns={columns}
+      rowKey={(row) =&gt; row.id}
+      summaryRow={budgetSum}
+      features={[
+        groupingPanel([&quot;team&quot;], {
+          groupAggregates: budgetSum,
+          groupFooters: true,
+        }),
+        pinnedSummaryRows({
+          top: [{ id: &quot;team-total&quot;, name: &quot;Team total&quot; }],
+          bottom: [{ id: &quot;grand-total&quot;, name: &quot;Grand total&quot; }],
+        }),
+      ]}
+    /&gt;
+  );
+}</code></pre>
+        <h2>Install</h2>
+        <pre><code>pnpm add @adapttable/antd @adapttable/core antd</code></pre>
+        <h2>The same feature in the other kits</h2>
+        <ul>
+          <li><a href="../../mantine/aggregation/">Aggregation in Mantine</a> — Rounded, friendly, filled controls</li>
+          <li><a href="../../mui/aggregation/">Aggregation in MUI</a> — Material elevation, uppercase actions</li>
+          <li><a href="../../chakra/aggregation/">Aggregation in Chakra</a> — Soft teal, generous radius</li>
+          <li><a href="../../radix/aggregation/">Aggregation in Radix</a> — Radix Themes, iris accent</li>
+          <li><a href="../../base-ui/aggregation/">Aggregation in Base UI</a> — Unstyled primitives, blue accent</li>
+          <li><a href="../../shadcn/aggregation/">Aggregation in shadcn</a> — Monochrome, ring focus</li>
+          <li><a href="../../tailwind/aggregation/">Aggregation in Tailwind</a> — Unstyled — your own classes</li>
+        </ul>
+        <h2>More Ant Design features</h2>
+        <ul>
+          <li><a href="../filtering/">Filtering in Ant Design</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
+          <li><a href="../columns/">Column management in Ant Design</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="../column-groups/">Column groups in Ant Design</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="../selection/">Row selection in Ant Design</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="../rows/">Rows in Ant Design</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="../row-reordering/">Row reordering in Ant Design</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
+          <li><a href="../editing/">Inline cell editing in Ant Design</a> — Kit-native editors in the cell; every write goes through your handler.</li>
+          <li><a href="../grouping/">Row grouping in Ant Design</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
+          <li><a href="../nested-tables/">Nested tables in Ant Design</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="../export/">Export and print in Ant Design</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
+          <li><a href="../scale/">Row and column virtualization in Ant Design</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="../tree/">Tree data in Ant Design</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
+          <li><a href="../mobile-cards/">Mobile cards in Ant Design</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="../pivot/">Pivot tables in Ant Design</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="../saved-views/">Saved views in Ant Design</a> — Name an arrangement, share it as a link, manage the list in place.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in Ant Design</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="../rtl/">Right-to-left Ant Design data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="../realtime/">Live updates in Ant Design</a> — Rows change while you read them. Sort and selection hold.</li>
+          <li><a href="../accessibility/">Accessible Ant Design data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="../ai/">AI table assistant in Ant Design</a> — Native assistant, feature-aware prompts and governed action receipts.</li>
+        </ul>
+        <p>
+          Reference: <a href="https://orwa-mahmoud.github.io/adapttable/row-grouping/">row-grouping</a>, <a href="https://orwa-mahmoud.github.io/adapttable/pinned-summary-rows/">pinned-summary-rows</a>, <a href="https://orwa-mahmoud.github.io/adapttable/full-width-rows/">full-width-rows</a>. More of this kit:
+          <a href="../">AdaptTable for Ant Design</a>, or
+          <a href="/adapttable/demo/">the live demo</a>.
+        </p>
+      </main>
+    </div>
+    <script type="module" src="/src/entry-matrix.tsx"></script>
+  </body>
+</html>

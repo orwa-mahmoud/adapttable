@@ -16,7 +16,8 @@
  * the host does; that rule does not stop being true because the request
  * arrived from a menu.
  */
-import type { ColumnDef, TableLabels } from "../types";
+import type { ColumnMetadata } from "../columnModel";
+import type { TableLabels } from "../types";
 
 /**
  * Where the menu was opened.
@@ -73,7 +74,7 @@ export interface ContextMenuModelOptions<TRow> {
   /** What the menu was opened on. */
   target: ContextMenuTarget<TRow>;
   /** Visible columns, in order. */
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   /** Label overrides; gaps fall back to English. */
   labels: TableLabels;
   /** Actions to offer. */
@@ -93,9 +94,9 @@ export interface ContextMenuModelOptions<TRow> {
 }
 
 function columnFor<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   key: string
-): ColumnDef<TRow> | undefined {
+): ColumnMetadata<TRow> | undefined {
   return columns.find((column) => column.key === key);
 }
 
@@ -170,10 +171,15 @@ function dataItems<TRow>(
 ): ContextMenuItem[] {
   const { actions, labels } = options;
   const items: ContextMenuItem[] = [];
+  // A row menu — a right-click on a pinned spacer, or anywhere in the row that
+  // is not a cell — names no column, so there is no cell to copy or cut. The
+  // entries stay, greyed, rather than acting on data nobody pointed at.
+  const addressable = target.kind === "cell";
   if (actions.onCopy) {
     items.push({
       key: "copy",
       label: labels.copyCells ?? "Copy",
+      disabled: !addressable,
       onSelect: () => {
         actions.onCopy?.(target);
       },
@@ -183,6 +189,7 @@ function dataItems<TRow>(
     items.push({
       key: "cut",
       label: labels.cutCells ?? "Cut",
+      disabled: !addressable,
       onSelect: () => {
         actions.onCut?.(target);
       },

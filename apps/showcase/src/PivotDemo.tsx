@@ -1,5 +1,5 @@
-import { usePivotUrlState } from "@adapttable/core/pivot";
 import { getLabels } from "@adapttable/i18n";
+import { usePivotUrlState } from "@adapttable/react/pivot";
 import { Suspense } from "react";
 
 import { pivotRoster } from "./casts";

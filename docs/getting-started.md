@@ -26,6 +26,10 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
+A plain adapter `DataTable` is 69–79 kB min+gzip (measured 2026-09-15 from
+packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
+has the method and the rest of the grid.
+
 Or install manually: `@adapttable/core`, the adapter for your kit, and the
 kit's own packages (peer dependencies — skip what you already have).
 `react` / `react-dom` 18 or 19 are peers everywhere.
@@ -58,16 +62,16 @@ pnpm add @adapttable/core @adapttable/unstyled
 
 ## Supported versions
 
-| Dependency        | Supported range                                                               |
-| ----------------- | ----------------------------------------------------------------------------- |
-| React / React DOM | `^18.0.0 \|\| ^19.0.0` (CI-tested on 18.3 / 19.0 / 19.2)                      |
-| Mantine           | `^7.2.0 \|\| ^8 \|\| ^9`                                                      |
-| MUI               | `^6 \|\| ^7 \|\| ^8 \|\| ^9`                                                  |
-| Chakra UI         | `^3.13.0`                                                                     |
-| Ant Design        | `^6`                                                                          |
-| Radix Themes      | `^3`                                                                          |
-| Base UI           | `^1`                                                                          |
-| Node (toolchain)  | consumers: any Node your bundler supports; building this repo needs `>=20.19` |
+| Dependency        | Supported range                                                       |
+| ----------------- | --------------------------------------------------------------------- |
+| React / React DOM | `^18.0.0 \|\| ^19.0.0` (CI-tested on 18.3 / 19.0 / 19.2)              |
+| Mantine           | `^7.2.0 \|\| ^8 \|\| ^9`                                              |
+| MUI               | `^6 \|\| ^7 \|\| ^8 \|\| ^9`                                          |
+| Chakra UI         | `^3.13.0`                                                             |
+| Ant Design        | `^6`                                                                  |
+| Radix Themes      | `^3`                                                                  |
+| Base UI           | `^1`                                                                  |
+| Node.js           | `>=22.12.0` (packed releases are CI-tested on Node 22.12 and Node 24) |
 
 Each floor is the lowest version the adapter actually runs on — verified
 by automated install-and-render probes, not guesswork.
@@ -144,6 +148,7 @@ Pass `data` and declare columns — that's the whole thing:
 // "@adapttable/radix", "@adapttable/base-ui", "@adapttable/shadcn",
 // "@adapttable/unstyled" — same props everywhere.
 import { DataTable } from "@adapttable/mantine";
+import { filters } from "@adapttable/mantine/filters";
 
 interface Person {
   id: string;
@@ -188,10 +193,15 @@ export function PeopleTable() {
         { key: "hiredAt", filter: "dateRange" },
       ]}
       rowKey={(r) => r.id}
+      features={[filters([])]}
     />
   );
 }
 ```
+
+Column `filter` declarations need the filters feature — `filters([])` when
+every filter lives on a column, or pass standalone defs to the factory (below).
+See [feature composition](./features.md).
 
 What you just got without writing any of it: search, sorting, pagination
 (paged on desktop, infinite scroll on mobile), URL-synced state (reload-safe,
@@ -208,11 +218,18 @@ filter also drives its own removable chip, URL parsing, and row predicate.
 <DataTable
   data={PEOPLE}
   columns={columns}
-  filters={[
-    { key: "companyId", type: "select", label: "Company", options: companies },
-    { key: "budget", type: "numberRange" },
-  ]}
   rowKey={(r) => r.id}
+  features={[
+    filters([
+      {
+        key: "companyId",
+        type: "select",
+        label: "Company",
+        options: companies,
+      },
+      { key: "budget", type: "numberRange" },
+    ]),
+  ]}
 />
 ```
 
@@ -238,10 +255,11 @@ The source for each lives in
 
 - [Columns](./columns.md) — headers, custom cells, the Columns menu
   (show/hide, reorder, pin), resizing.
-- [Inline cell editing](./cell-editing.md) — opt-in `onCellEdit`, kit-native
+- [Inline cell editing](./cell-editing.md) — compose `editing()`, kit-native
   editors, keyboard flow.
-- [Row reordering](./row-reordering.md) — opt-in `onRowReorder`, Space-lift
+- [Row reordering](./row-reordering.md) — opt-in `rowReorder`, Space-lift
 - [Row pinning](./row-pinning.md) — sticky top and bottom rows, `{ top, bottom }` ids
+- [Pinned summary rows](./pinned-summary-rows.md) — host-owned totals outside the row model
 - [Row and column spanning](./row-spanning.md) — `getCellSpan`, one cell list per row
 - [Full-width and separator rows](./full-width-rows.md) — `extraRows`, host-injected slots
 - [Row styling and heights](./row-styling.md) — `rowStyle`, `rowHeight`, variable-height virtualizer

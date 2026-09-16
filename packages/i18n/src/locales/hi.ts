@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "हो गया",
+  staged: "तैयार",
+  partial: "आंशिक रूप से पूर्ण",
+  rejected: "अस्वीकृत",
+  "awaiting-approval": "आपकी प्रतीक्षा",
+  cancelled: "रद्द",
+  stale: "पुराना",
+  failed: "विफल",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "सेल संपादित करना",
+  "rows.add": "पंक्तियाँ जोड़ना",
+  "rows.delete": "पंक्तियाँ हटाना",
+  "rows.reorder": "पंक्तियाँ पुनः क्रमित करना",
+  "export.run": "निर्यात करना",
+};
+
 export const hi: Required<TableLabels> = {
   table: "डेटा तालिका",
   search: "खोजें",
@@ -115,6 +136,13 @@ export const hi: Required<TableLabels> = {
   hideAllColumns: "सभी छिपाएँ",
   unpinAllColumns: "सभी अनपिन करें",
   resetColumn: "स्तंभ रीसेट करें",
+  renameColumn: "कॉलम का नाम बदलें",
+  columnName: "कॉलम का नाम",
+  saveColumnName: "नाम सहेजें",
+  cancelColumnRename: "रद्द करें",
+  columnNameRequired: "कॉलम का नाम दर्ज करें।",
+  columnRenamed: ({ previous, name }) =>
+    `कॉलम ${previous} का नाम बदलकर ${name} किया गया`,
   sortAscending: "आरोही क्रम",
   sortDescending: "अवरोही क्रम",
   sortedBy: ({ column, ascending }) =>
@@ -124,8 +152,13 @@ export const hi: Required<TableLabels> = {
   columnActions: "स्तंभ क्रियाएँ",
   exportCsv: "CSV निर्यात करें",
   exportFile: (format) => `${format.toUpperCase()} निर्यात करें`,
+  exportStarted: "निर्यात तैयार हो रहा है",
+  exportProgress: (progress) => `निर्यात ${progress}% पूर्ण`,
   exportDone: "निर्यात पूर्ण",
   exportFailed: "निर्यात विफल",
+  exportCancelled: "निर्यात रद्द किया गया",
+  exportDownload: "निर्यात डाउनलोड करें",
+  exportDismiss: "निर्यात बंद करें",
   editCell: "सेल संपादित करें",
   undoEdit: "पूर्ववत करें",
   redoEdit: "फिर से करें",
@@ -137,6 +170,179 @@ export const hi: Required<TableLabels> = {
       : `${String(count)} सहेजी न गई पंक्तियाँ`,
   saveAll: "सभी सहेजें",
   cancelAll: "सभी रद्द करें",
+  approveProposal: "स्वीकृत करें",
+  rejectProposal: "अस्वीकार करें",
+  proposalValueUnavailable: "अनुपलब्ध",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 प्रस्तावित बदलाव"
+        : "{c} प्रस्तावित बदलाव".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"{r} पंक्तियों में".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "सभी {c} बदलाव देखें".replace("{c}", String(count)),
+  backToConversation: "बातचीत पर लौटें",
+  approveAllProposals: "सभी स्वीकारें",
+  approveRemainingProposals: "शेष स्वीकारें",
+  rejectAllProposals: "सभी अस्वीकारें",
+  rejectRemainingProposals: "शेष अस्वीकारें",
+  alwaysAllowProposal: "हमेशा अनुमति दें",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} स्वीकृत · {j} अस्वीकृत · {p} शेष"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "एक बदलाव आपके निर्णय की प्रतीक्षा में है।",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 प्रस्तावित परिवर्तन"
+      : `${String(count)} प्रस्तावित परिवर्तन`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "टेबल सहायक",
+  assistantOpen: "AI से पूछें",
+  assistantClose: "बंद करें",
+  assistantSettings: "सहायक सेटिंग्स",
+  assistantEmpty: "आप इस टेबल के साथ क्या करना चाहेंगे?",
+  assistantPlaceholder: "इस टेबल के बारे में पूछें…",
+  assistantSend: "भेजें",
+  assistantStop: "रोकें",
+  assistantVoiceStart: "बोलकर लिखें",
+  assistantVoiceStop: "बोलना रोकें",
+  assistantVoiceListening: "सुन रहे हैं",
+  assistantVoiceLanguage: "बोलने की भाषा",
+  assistantYou: "आप",
+  assistantSpeaker: "सहायक",
+  assistantNewMessages: "नए संदेश",
+  assistantUnavailable: "सहायक जुड़ा नहीं है।",
+  assistantDetached: "कनेक्शन टूट गया। काम अब भी चल रहा हो सकता है।",
+  assistantRejoin: "फिर जुड़ें",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} पूर्ण`
+      : `${String(total)} में से ${String(done)}`,
+  assistantBackToTable: "टेबल पर वापस",
+  assistantDetail: "विवरण",
+  assistantSaveInTable: "यह बदलाव रखने के लिए टेबल में सहेजें।",
+  assistantUndo: "पूर्ववत करें",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "इसमें एक बार में अनुमत से अधिक चरण लगते हैं। इसका एक हिस्सा माँगें।",
+        "continuation-limit":
+          "इसमें एक बार में अनुमत से अधिक चरण लगते हैं। इसका एक हिस्सा माँगें।",
+        "resume-limit":
+          "इसमें एक बार में अनुमत से अधिक चरण लगते हैं। इसका एक हिस्सा माँगें।",
+        "discovery-exhausted": "सहायक यह नहीं समझ पाया कि यहाँ यह कैसे करें।",
+        "repeated-plan": "सहायक ने वही चीज़ दो बार माँगी और रुक गया।",
+        "question-unanswered": "पूरा होने के लिए आपका उत्तर चाहिए।",
+        "approval-unavailable":
+          "इसके लिए अनुमोदन चाहिए, और पूछने की कोई जगह नहीं।",
+        "interrupt-unsupported": "सहायक ने वह माँगा जो यह तालिका नहीं कर सकती।",
+        "output-denied": "इसका कुछ हिस्सा चलने नहीं दिया गया।",
+        "not-run": "यह नहीं चला।",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "यह चलने के बाद तालिका बदल गई है.",
+        "cannot-restore": "इसका कुछ हिस्सा वापस नहीं किया जा सकता.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "आपका उत्तर",
+  assistantAnswerPlaceholder: "उत्तर लिखें",
+  assistantAnswerSend: "उत्तर दें",
+  assistantAlwaysAllowedTitle: "इनके बारे में नहीं पूछा जाता",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `${CAPABILITY[capability] ?? capability} के बारे में फिर पूछें`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 क्रिया" : `${String(count)} क्रियाएँ`,
+  assistantActionsTitle: "इस बारी ने क्या बदला",
+  assistantUndoAll: "सब पहले जैसा करें",
+  assistantExamples: "शॉर्टकट",
+  assistantReceiptChange: ({ before, after }) =>
+    `${before} से ${after} किया गया`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `प्रस्तावित: ${before} से ${after}`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "फ़िल्टर लागू किया गया",
+        "filter/staged": "फ़िल्टर तैयार किया गया",
+        "sort/executed": "क्रमबद्ध किया गया",
+        "group/executed": "समूहीकृत किया गया",
+        "pin/executed": "कॉलम पिन किया गया",
+        "edit/executed": "सहेजा गया",
+        "edit/staged": "संपादन तैयार — सहेजा नहीं गया",
+        "edit/awaiting-approval": "संपादन अनुमोदन की प्रतीक्षा में",
+        "edit/partial": "कुछ संपादन सहेजे गए, कुछ अस्वीकृत",
+        "edit/rejected": "संपादन अस्वीकृत",
+        "filter-cleared/executed": "फ़िल्टर हटाए गए",
+        "sort-cleared/executed": "क्रम हटाया गया",
+        "search/executed": "खोज लागू",
+        "search-cleared/executed": "खोज साफ़ की गई",
+        "group-cleared/executed": "समूहन हटाया गया",
+        "pin-cleared/executed": "स्तंभ अनपिन किया गया",
+        "pinRow/executed": "पंक्ति पिन की गई",
+        "pinRow-cleared/executed": "पंक्ति अनपिन की गई",
+        "page/executed": "पृष्ठ बदला",
+        "aggregate/executed": "योग बदले",
+        "select/executed": "चयन बदला",
+        "read/executed": "तालिका पढ़ी गई",
+        "operation/executed": "चलाया गया",
+        "operation/awaiting-approval": "आपकी प्रतीक्षा में",
+        "operation/rejected": "अस्वीकृत",
+        "export/executed": "निर्यात किया गया",
+        "add/executed": "पंक्ति जोड़ी गई",
+        "add/awaiting-approval": "नई पंक्ति अनुमोदन की प्रतीक्षा में",
+        "add/rejected": "नई पंक्ति अस्वीकृत",
+        "delete/executed": "पंक्तियाँ हटाई गईं",
+        "delete/awaiting-approval": "हटाना अनुमोदन की प्रतीक्षा में",
+        "delete/partial": "कुछ पंक्तियाँ हटाई गईं, कुछ रखी गईं",
+        "delete/rejected": "हटाना अस्वीकृत",
+        "reorder/executed": "पंक्तियाँ स्थानांतरित",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "अवरोही" : "आरोही"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "निष्क्रिय",
+      connecting: "जुड़ रहा है…",
+      ready: "तैयार",
+      sending: "काम जारी…",
+      "awaiting-approval": "आपकी प्रतीक्षा",
+      "awaiting-user": "आपकी प्रतीक्षा",
+      error: "त्रुटि",
+      disconnected: "जुड़ा नहीं",
+    })[status] ?? "तैयार",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "पंक्ति जोड़ें",
   duplicateRow: "पंक्ति की प्रतिलिपि बनाएँ",
   deleteRow: "पंक्ति हटाएँ",
@@ -152,9 +358,28 @@ export const hi: Required<TableLabels> = {
   rowLifted: (position) => `पंक्ति ${String(position)} उठाई गई`,
   rowMoved: (from, to) => `पंक्ति ${String(from)} से ${String(to)} पर गई`,
   rowReorderCancelled: "क्रम बदलना रद्द हुआ",
+  rowMoveOptions: "पंक्ति ले जाने के विकल्प",
+  moveToGroup: "समूह में ले जाएँ…",
+  moveUnder: "इसके नीचे ले जाएँ…",
+  moveToTopLevel: "शीर्ष स्तर पर ले जाएँ",
+  confirmRowMoveTitle: "पंक्ति ले जाने की पुष्टि करें",
+  confirmRowMoveDescription: (row, from, to) =>
+    `${row} को ${from} से ${to} पर ले जाएँ?`,
+  confirmRowMove: "ले जाएँ",
+  rowMovedToGroup: (group) => `पंक्ति ${group} में ले जाई गई`,
+  rowMovedUnder: (parent) => `पंक्ति ${parent} के नीचे ले जाई गई`,
+  moveRejectedPolicyNever: "सीमाओं के पार पंक्ति ले जाना अक्षम है",
+  moveRejectedSorted: "पंक्तियों का क्रम बदलने से पहले छँटाई साफ़ करें",
+  moveRejectedCycle:
+    "किसी पंक्ति को उसके अंदर या उसकी किसी वंशज पंक्ति में नहीं ले जाया जा सकता",
+  moveUnavailable: "यह पंक्ति स्थानांतरण उपलब्ध नहीं है",
+  rootLevel: "शीर्ष स्तर",
   pinToTop: "ऊपर पिन करें",
   pinToBottom: "नीचे पिन करें",
   unpinRow: "पंक्ति अनपिन करें",
+  pinnedSummaryRow: "सारांश पंक्ति",
+  pinnedSummaryTop: "ऊपर पिन की गई सारांश पंक्तियाँ",
+  pinnedSummaryBottom: "नीचे पिन की गई सारांश पंक्तियाँ",
   rowSeparator: "विभाजक",
   expandColumnGroup: "स्तंभ समूह फैलाएँ",
   collapseColumnGroup: "स्तंभ समूह समेटें",
@@ -164,6 +389,34 @@ export const hi: Required<TableLabels> = {
   expandGroup: "समूह विस्तारित करें",
   collapseGroup: "समूह संक्षिप्त करें",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "पंक्ति समूहीकरण",
+  groupingDropColumns: "समूहीकरण के लिए स्तंभ यहाँ खींचें",
+  addGroupingColumn: "समूहीकरण स्तंभ जोड़ें",
+  groupByColumn: (label) => `${label} के अनुसार समूह बनाएँ`,
+  ungroupColumn: (label) => `${label} का समूहीकरण हटाएँ`,
+  removeGroupingColumn: (label) => `${label} को समूहीकरण से हटाएँ`,
+  moveGroupingColumn: (label) => `${label} समूहीकरण को ले जाएँ`,
+  groupingDropToRemove: "समूहीकरण हटाने के लिए यहाँ छोड़ें",
+  groupingAggregateColumn: "एकत्रीकरण स्तंभ",
+  groupingAggregation: "समूह एकत्रीकरण",
+  groupingAggregationDefault: "डिफ़ॉल्ट",
+  groupingAggregationNone: "कोई नहीं",
+  groupingAggregations: "एकत्रीकरण",
+  groupingAddAggregation: "एकत्रीकरण स्तंभ जोड़ें",
+  groupingRestoreAggregations: "डिफ़ॉल्ट पुनर्स्थापित करें",
+  groupingRemoveAggregation: (column) => `${column} एकत्रीकरण हटाएँ`,
+  groupingAggregationFor: (column) => `${column} एकत्रीकरण`,
+  groupingAggregationReadOnly: "ऐप द्वारा सेट",
+  groupingAggregationCustom: "कस्टम",
+  groupingAggregateRemoved: (column) => `${column} एकत्रीकरण हटाया गया`,
+  groupingAggregatesRestored: "एकत्रीकरण डिफ़ॉल्ट पर पुनर्स्थापित किए गए",
+  groupingAverage: "औसत",
+  groupingAdded: (label) => `${label} समूहीकरण में जोड़ा गया`,
+  groupingRemoved: (label) => `${label} समूहीकरण से हटाया गया`,
+  groupingMoved: (label, position) =>
+    `${label} को समूहीकरण स्थान ${position} पर ले जाया गया`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `${label} का समूह एकत्रीकरण ${aggregation} में बदला गया`,
   gridRangeCopied: (cells) => `${cells} सेल कॉपी किए गए`,
   gridRangeCopyFailed: "कॉपी विफल",
   gridRangePasted: (cells) => `${cells} सेल चिपकाए गए`,
@@ -217,10 +470,8 @@ export const hi: Required<TableLabels> = {
   noticePinNested: "समूहीकरण या वृक्ष चालू होने पर पंक्ति पिन बंद है।",
   noticeReorderNested:
     "समूहीकरण या वृक्ष चालू होने पर पंक्ति क्रम बदलना बंद है।",
-  noticeGroupingUnavailable:
-    "समूहीकरण बंद है — यह स्रोत पूरी फ़िल्टर की गई सूची नहीं देता।",
+  noticeGroupingUnavailable: "समूहन बंद है — यह स्रोत समूहन नहीं कर सकता।",
   noticeExportAllPage:
-    "सभी निर्यात इस पृष्ठ का है — पूरी फ़िल्टर की गई सूची उपलब्ध नहीं है।",
+    "सभी निर्यात बंद है — यह स्रोत एक बार में एक ही पृष्ठ देता है।",
   noticeEditWithoutWriter: "संपादन बंद है — कोई लेखन हैंडलर नहीं जोड़ा गया।",
-  exportThisPage: "यह पृष्ठ निर्यात करें",
 };

@@ -1,26 +1,26 @@
-import type {
-  BulkAction,
-  ColumnDef,
-  ColumnInput,
-  ColumnLayoutState,
-  ConfirmHandler,
-  ConfirmRequest,
-  FilterDef,
-  FilterTypeSpec,
-  GroupAggregatesFn,
-  RowAction,
-  UseSavedViewsOptions,
-} from "@adapttable/core";
 import {
-  aggregate,
   buildFilterRuntime,
-  computed,
+  type BulkAction,
+  type ColumnLayoutState,
+  type ConfirmHandler,
+  type ConfirmRequest,
   defaultFilterRegistry,
+  type FilterDef,
+  type FilterTypeSpec,
   formatMultiDraft,
   resolveFilterDefs,
   resolveFilterRegistry,
+  type RowAction,
 } from "@adapttable/core";
-import { sparklineColumn } from "@adapttable/core/sparkline";
+import {
+  aggregate,
+  type ColumnDef,
+  type ColumnInput,
+  computed,
+  type SummaryRowFn,
+  type UseSavedViewsOptions,
+} from "@adapttable/react";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import type { CSSProperties, ReactNode } from "react";
 
 import { EditIcon, TrashIcon } from "./icons";
@@ -311,8 +311,9 @@ export const demoConfirm: ConfirmHandler = (request: ConfirmRequest) => {
  * the menu has no table `urlKey` to inherit its namespace from. The storage
  * key is scoped the same way, so each demo keeps its own views — and every
  * adapter on a page shares one key, so a view saved under Mantine is there
- * when you switch to MUI. Only the live demo writes views to the address
- * bar (`urlSync`); Feature Lab and kit pages do not.
+ * when you switch to MUI. The live demo, grouping, filtering, and
+ * aggregation pages write views to the address bar (`urlSync`); Feature
+ * Lab and every other kit page do not.
  */
 export function demoSavedViews(urlKey?: string): UseSavedViewsOptions {
   return {
@@ -323,12 +324,20 @@ export function demoSavedViews(urlKey?: string): UseSavedViewsOptions {
 }
 
 /**
- * Table query/layout hits the address bar only on the live demo
- * (`urlKey="live"`, the `/` page). Feature Lab and adapter feature
- * pages stay off so interacting does not rewrite the URL.
+ * Pages whose subject is shareable table state write the address bar.
+ *
+ * The live demo is the home-page table. Grouping, filtering, and aggregation
+ * each own a namespace (`grp`, `flt`, `agg`) so a chip reorder, a find
+ * query, or a Core-team filter is a link. Other feature pages keep state
+ * off the address so opening one never rewrites another.
  */
 export function demoUrlSync(urlKey?: string): boolean {
-  return urlKey === "live";
+  return (
+    urlKey === "live" ||
+    urlKey === "grp" ||
+    urlKey === "flt" ||
+    urlKey === "agg"
+  );
 }
 
 /**
@@ -345,6 +354,7 @@ export const BASE_COLUMNS: ColumnDef<Person>[] = [
     sortValue: (r) => r.name,
     sortable: true,
     header: STRINGS.en.person,
+    renameable: true,
   },
   {
     key: "status",
@@ -357,6 +367,10 @@ export const BASE_COLUMNS: ColumnDef<Person>[] = [
     key: "timeline",
     accessor: (r) => formatDate(startDate(r)),
     sortValue: (r) => startDate(r).getTime(),
+    // Grouping by the instant a project starts gives every row a group of its
+    // own, captioned with the epoch the sort runs on. The month is the bucket
+    // a reader means when they group a timeline.
+    groupValue: (r) => formatMonth(startDate(r)),
     sortable: true,
     header: STRINGS.en.timeline,
   },
@@ -364,6 +378,7 @@ export const BASE_COLUMNS: ColumnDef<Person>[] = [
     key: "budget",
     accessor: (r) => formatMoney(budget(r)),
     sortValue: (r) => budget(r),
+    formatAggregate: (value, context) => formatBudgetAggregate(value, context),
     sortable: true,
     header: STRINGS.en.budget,
   },
@@ -690,11 +705,14 @@ export function makeColumns(
       key: "person",
       header: s.person,
       headerTooltip: s.person,
+      renameable: true,
       sortable: true,
       sortValue: (r) => r.name,
       editable: canEdit,
       editor: "text",
       editValue: (r) => r.name,
+      // A name adds up to nothing; counting the people in a group does.
+      aggregatable: { operations: ["count"] },
       // A rule the reader can trip on purpose: clear the name and commit.
       validate: (value) =>
         String(value).trim() === "" ? s.nameRequired : undefined,
@@ -722,6 +740,7 @@ export function makeColumns(
       key: "email",
       header: s.email,
       headerTooltip: s.email,
+      aggregatable: false,
       // Opt-in cell editing — only when this page also passes `onCellEdit`.
       editable: canEdit,
       editor: "text",
@@ -749,6 +768,7 @@ export function makeColumns(
     {
       key: "status",
       header: s.status,
+      aggregatable: { operations: ["count"] },
       accessor: (r) => (
         <Status
           status={personStatus(r)}
@@ -772,7 +792,16 @@ export function makeColumns(
     {
       key: "timeline",
       header: s.timeline,
+      // Dates compare but do not add up, and a millisecond count is not a
+      // date: min and max read back as the day they name.
+      aggregatable: { operations: ["min", "max", "count"] },
+      formatAggregate: (value, context) =>
+        formatTimelineAggregate(value, context, locale),
       sortValue: (r) => startDate(r).getTime(),
+      // Grouping by the instant a project starts gives every row a group of
+      // its own, captioned with the epoch. The month is the bucket a reader
+      // means when they group a timeline.
+      groupValue: (r) => formatMonth(startDate(r), locale),
       // A localized "Mar 8, 2026 → Apr 22, 2026" is unusable in a spreadsheet;
       // the file gets the sortable ISO start date.
       exportValue: (r) => startDate(r).toISOString().slice(0, 10),
@@ -798,12 +827,22 @@ export function makeColumns(
     {
       key: "budget",
       header: s.budget,
+      // The developer's own choice, visible in the panel before anyone
+      // touches it: Budget opens summed, and offers the rest.
+      aggregatable: {
+        default: "sum",
+        operations: ["sum", "avg", "min", "max", "count"],
+      },
       accessor: (r) => (
         <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
           {formatMoney(budget(r), locale)}
         </span>
       ),
       sortValue: (r) => budget(r),
+      // A subtotal of this column is money too — whether the table computed it
+      // or the reader chose the operation from the grouping strip.
+      formatAggregate: (value, context) =>
+        formatBudgetAggregate(value, context, locale),
       // The screen shows "$25,300"; a spreadsheet cannot sum that, so the file
       // carries the number underneath.
       exportValue: (r) => budget(r),
@@ -817,6 +856,10 @@ export function makeColumns(
     {
       key: "load",
       header: s.load,
+      // Available, and off until a reader asks for it.
+      aggregatable: { operations: ["avg", "min", "max", "count"] },
+      formatAggregate: (value, context) =>
+        formatLoadAggregate(value, context, locale),
       sortValue: (r) => utilization(r),
       sortable: true,
       editable: canEdit,
@@ -989,14 +1032,34 @@ export function makeWideColumns(
   return leaves;
 }
 
-export function makeActions(locale: Locale): RowAction<Person>[] {
+/**
+ * What the demo's row actions actually do.
+ *
+ * Supplied by whoever owns the rows. Without them the actions can only say
+ * they were clicked, which is what they used to do — and a Delete that
+ * announces a deletion without performing one teaches the wrong thing about
+ * the table.
+ */
+export interface DemoRowHandlers {
+  /** Remove the row from the data. */
+  readonly onDelete: (row: Person) => void;
+}
+
+export function makeActions(
+  locale: Locale,
+  handlers?: DemoRowHandlers
+): RowAction<Person>[] {
   const s = STRINGS[locale];
   return [
     {
       key: "edit",
       label: s.edit,
       icon: <EditIcon />,
-      onClick: (row) => notifyDemo({ message: `${s.edit}: ${row.name}` }),
+      // The pencil opens the row's own fields rather than writing anything of
+      // its own, so the table's built-in "Edit row" control stands down and
+      // save and cancel come from the open row. Where a table has no row form
+      // the action does not render at all.
+      editsRow: true,
     },
     {
       key: "delete",
@@ -1009,8 +1072,15 @@ export function makeActions(locale: Locale): RowAction<Person>[] {
         confirmLabel: s.remove,
         danger: true,
       },
-      onClick: (row) =>
-        notifyDemo({ message: `${s.remove}: ${row.name}`, tone: "danger" }),
+      onClick: (row) => {
+        if (!handlers) {
+          notifyDemo({ message: `${s.remove}: ${row.name}`, tone: "danger" });
+          return;
+        }
+        handlers.onDelete(row);
+        notifyDemo({ message: `${s.remove}: ${row.name}`, tone: "danger" });
+      },
+      ai: { approval: { policy: "required" } },
     },
   ];
 }
@@ -1295,27 +1365,70 @@ function largePerson(index: number): Person {
   };
 }
 
+/**
+ * One formatter per locale, built on first use.
+ *
+ * These run per cell per render — a grouped table asks for a few hundred at
+ * a time — and building an `Intl` formatter is far more expensive than using
+ * one.
+ */
+function formatter<TFormat>(build: (tag: string) => TFormat) {
+  const made = new Map<string, TFormat>();
+  return (locale: Locale): TFormat => {
+    const tag = locale === "ar" ? "ar" : "en";
+    const existing = made.get(tag);
+    if (existing) return existing;
+    const next = build(tag);
+    made.set(tag, next);
+    return next;
+  };
+}
+
+const dateFormat = formatter(
+  (tag) =>
+    new Intl.DateTimeFormat(tag, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+);
+
+const moneyFormat = formatter(
+  (tag) =>
+    new Intl.NumberFormat(tag, {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    })
+);
+
+const percentFormat = formatter(
+  (tag) =>
+    new Intl.NumberFormat(tag, {
+      style: "percent",
+      maximumFractionDigits: 0,
+    })
+);
+
+const monthFormat = formatter(
+  (tag) => new Intl.DateTimeFormat(tag, { month: "long", year: "numeric" })
+);
+
 export function formatDate(date: Date, locale: Locale = "en"): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(date);
+  return dateFormat(locale).format(date);
+}
+
+/** The month a date falls in — what grouping a timeline buckets by. */
+export function formatMonth(date: Date, locale: Locale = "en"): string {
+  return monthFormat(locale).format(date);
 }
 
 export function formatMoney(value: number, locale: Locale = "en"): string {
-  return new Intl.NumberFormat(locale === "ar" ? "ar" : "en", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
+  return moneyFormat(locale).format(value);
 }
 
 export function formatPercent(value: number, locale: Locale = "en"): string {
-  return new Intl.NumberFormat(locale === "ar" ? "ar" : "en", {
-    style: "percent",
-    maximumFractionDigits: 0,
-  }).format(value / 100);
+  return percentFormat(locale).format(value / 100);
 }
 
 /**
@@ -1427,17 +1540,96 @@ export const matchesDemoFilters = DEMO_FILTER_RUNTIME.filterFn;
  * Shares the `summaryRow` mapper shape — one function type for footer totals
  * and group headers.
  */
-export const DEMO_GROUP_AGGREGATES: GroupAggregatesFn<Person> =
-  aggregate<Person>(
-    { budget: "sum" },
-    {
-      // The same columns the table sorts by, so the subtotal reads the number
-      // behind the formatted cell rather than parsing "$1,240".
-      columns: BASE_COLUMNS,
-      format: (value) => (
-        <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
-          {formatMoney(typeof value === "number" ? value : 0, "en")}
-        </span>
-      ),
-    }
+/**
+ * What a subtotal of Budget reads like, whoever computed it.
+ *
+ * `groupAggregates` returns money already formatted; a reader who switches the
+ * column to average or minimum gets the raw number the table computed. This is
+ * what the column says about that — and it is told which operation produced
+ * the value, so a count of rows reads as a count rather than as dollars. A
+ * value that is not a number is already someone else's formatting and is left
+ * exactly as it is.
+ */
+const countFormat = formatter((tag) => new Intl.NumberFormat(tag));
+
+export function formatBudgetAggregate(
+  value: unknown,
+  context: { readonly aggregation?: string },
+  locale: Locale = "en"
+): ReactNode {
+  // Already formatted by whoever computed it — shown as it is, in a fragment
+  // so this always hands back one kind of thing.
+  if (typeof value !== "number") return <>{value as ReactNode}</>;
+  const text =
+    context.aggregation === "count"
+      ? countFormat(locale).format(value)
+      : formatMoney(value, locale);
+  return (
+    <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
+      {text}
+    </span>
   );
+}
+
+/**
+ * A utilization aggregate, as a percentage — except a count, which counts.
+ *
+ * @param value - The computed aggregate.
+ * @param context - What the table says produced it.
+ * @param locale - The active locale.
+ * @returns The cell content.
+ */
+export function formatLoadAggregate(
+  value: unknown,
+  context: { readonly aggregation?: string },
+  locale: Locale = "en"
+): ReactNode {
+  if (typeof value !== "number") return <>{value as ReactNode}</>;
+  return (
+    <span style={{ fontVariantNumeric: "tabular-nums" }}>
+      {context.aggregation === "count"
+        ? countFormat(locale).format(value)
+        : formatPercent(value, locale)}
+    </span>
+  );
+}
+
+/**
+ * A timeline aggregate, as the day it names.
+ *
+ * The column sorts on epoch milliseconds, so min and max come back as
+ * numbers. A millisecond count is not a date to anybody reading it.
+ *
+ * @param value - The computed aggregate.
+ * @param context - What the table says produced it.
+ * @param locale - The active locale.
+ * @returns The cell content.
+ */
+export function formatTimelineAggregate(
+  value: unknown,
+  context: { readonly aggregation?: string },
+  locale: Locale = "en"
+): ReactNode {
+  if (typeof value !== "number") return <>{value as ReactNode}</>;
+  return (
+    <span>
+      {context.aggregation === "count"
+        ? countFormat(locale).format(value)
+        : formatDate(new Date(value), locale)}
+    </span>
+  );
+}
+
+export const DEMO_GROUP_AGGREGATES: SummaryRowFn<Person> = aggregate<Person>(
+  { budget: "sum" },
+  {
+    // The same columns the table sorts by, so the subtotal reads the number
+    // behind the formatted cell rather than parsing "$1,240".
+    columns: BASE_COLUMNS,
+    format: (value) => (
+      <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
+        {formatMoney(typeof value === "number" ? value : 0, "en")}
+      </span>
+    ),
+  }
+);

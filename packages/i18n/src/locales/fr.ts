@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "effectué",
+  staged: "préparé",
+  partial: "partiellement fait",
+  rejected: "refusé",
+  "awaiting-approval": "vous attend",
+  cancelled: "annulé",
+  stale: "obsolète",
+  failed: "échoué",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "modifier des cellules",
+  "rows.add": "ajouter des lignes",
+  "rows.delete": "supprimer des lignes",
+  "rows.reorder": "réordonner des lignes",
+  "export.run": "exporter",
+};
+
 export const fr: Required<TableLabels> = {
   table: "Tableau de données",
   search: "Rechercher",
@@ -114,6 +135,13 @@ export const fr: Required<TableLabels> = {
   hideAllColumns: "Tout masquer",
   unpinAllColumns: "Tout détacher",
   resetColumn: "Réinitialiser la colonne",
+  renameColumn: "Renommer la colonne",
+  columnName: "Nom de la colonne",
+  saveColumnName: "Enregistrer le nom",
+  cancelColumnRename: "Annuler",
+  columnNameRequired: "Saisissez un nom de colonne.",
+  columnRenamed: ({ previous, name }) =>
+    `Colonne ${previous} renommée en ${name}`,
   sortAscending: "Trier par ordre croissant",
   sortDescending: "Trier par ordre décroissant",
   sortedBy: ({ column, ascending }) =>
@@ -123,8 +151,13 @@ export const fr: Required<TableLabels> = {
   columnActions: "Actions de colonne",
   exportCsv: "Exporter en CSV",
   exportFile: (format) => `Exporter en ${format.toUpperCase()}`,
+  exportStarted: "Préparation de l’export",
+  exportProgress: (progress) => `Export terminé à ${progress}%`,
   exportDone: "Export terminé",
   exportFailed: "Échec de l’export",
+  exportCancelled: "Export annulé",
+  exportDownload: "Télécharger l’export",
+  exportDismiss: "Fermer l’export",
   editCell: "Modifier la cellule",
   undoEdit: "Annuler",
   redoEdit: "Rétablir",
@@ -136,6 +169,188 @@ export const fr: Required<TableLabels> = {
       : `${String(count)} lignes non enregistrées`,
   saveAll: "Tout enregistrer",
   cancelAll: "Tout annuler",
+  approveProposal: "Approuver",
+  rejectProposal: "Rejeter",
+  proposalValueUnavailable: "Indisponible",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 modification proposée"
+        : "{c} modifications proposées".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"sur {r} lignes".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "Examiner les {c} modifications".replace("{c}", String(count)),
+  backToConversation: "Retour à la conversation",
+  approveAllProposals: "Tout approuver",
+  approveRemainingProposals: "Approuver le reste",
+  rejectAllProposals: "Tout refuser",
+  rejectRemainingProposals: "Refuser le reste",
+  alwaysAllowProposal: "Toujours autoriser",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} approuvées · {j} refusées · {p} restantes"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "Une modification attend votre décision.",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 modification proposée"
+      : `${String(count)} modifications proposées`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "Assistant de tableau",
+  assistantOpen: "Demander à l’IA",
+  assistantClose: "Fermer",
+  assistantSettings: "Paramètres de l’assistant",
+  assistantEmpty: "Que voulez-vous faire avec ce tableau ?",
+  assistantPlaceholder: "Posez une question sur ce tableau…",
+  assistantSend: "Envoyer",
+  assistantStop: "Arrêter",
+  assistantVoiceStart: "Dicter",
+  assistantVoiceStop: "Arrêter la dictée",
+  assistantVoiceListening: "Écoute en cours",
+  assistantVoiceLanguage: "Langue de la dictée",
+  assistantYou: "Vous",
+  assistantSpeaker: "Assistant",
+  assistantNewMessages: "Nouveaux messages",
+  assistantUnavailable: "L’assistant n’est pas connecté.",
+  assistantDetached:
+    "La connexion a été perdue. Le travail est peut-être toujours en cours.",
+  assistantRejoin: "Rejoindre",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} traités`
+      : `${String(done)} sur ${String(total)}`,
+  assistantBackToTable: "Retour au tableau",
+  assistantDetail: "Détails",
+  assistantSaveInTable:
+    "Enregistrez dans le tableau pour conserver ce changement.",
+  assistantUndo: "Annuler",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Cela demande plus d’étapes qu’un tour n’en permet. Demandez-en une partie.",
+        "continuation-limit":
+          "Cela demande plus d’étapes qu’un tour n’en permet. Demandez-en une partie.",
+        "resume-limit":
+          "Cela demande plus d’étapes qu’un tour n’en permet. Demandez-en une partie.",
+        "discovery-exhausted":
+          "L’assistant n’a pas trouvé comment faire cela ici.",
+        "repeated-plan":
+          "L’assistant a redemandé la même chose et s’est arrêté.",
+        "question-unanswered":
+          "Cela attend une réponse de votre part pour aboutir.",
+        "approval-unavailable":
+          "Cela demande une approbation, et il n’y a nulle part où la demander.",
+        "interrupt-unsupported":
+          "L’assistant a demandé quelque chose que ce tableau ne sait pas faire.",
+        "output-denied": "Une partie n’a pas été autorisée à s’exécuter.",
+        "not-run": "Cela ne s’est pas exécuté.",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "Le tableau a changé depuis.",
+        "cannot-restore": "Une partie ne peut pas être rétablie.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "Votre réponse",
+  assistantAnswerPlaceholder: "Saisissez une réponse",
+  assistantAnswerSend: "Répondre",
+  assistantAlwaysAllowedTitle: "Ne demande plus pour",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `Redemander pour ${CAPABILITY[capability] ?? capability}`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 action" : `${String(count)} actions`,
+  assistantActionsTitle: "Ce que ce tour a changé",
+  assistantUndoAll: "Tout annuler",
+  assistantExamples: "Raccourcis",
+  assistantReceiptChange: ({ before, after }) =>
+    `Modifié de ${before} à ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `Proposé : de ${before} à ${after}`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "Filtre appliqué",
+        "filter/staged": "Filtre préparé",
+        "sort/executed": "Trié",
+        "group/executed": "Groupé",
+        "pin/executed": "Colonne épinglée",
+        "edit/executed": "Enregistré",
+        "edit/staged": "Modification préparée — non enregistrée",
+        "edit/awaiting-approval": "Modification en attente d’approbation",
+        "edit/partial":
+          "Certaines modifications enregistrées, d’autres refusées",
+        "edit/rejected": "Modification refusée",
+        "filter-cleared/executed": "Filtres supprimés",
+        "sort-cleared/executed": "Tri supprimé",
+        "search/executed": "Recherche appliquée",
+        "search-cleared/executed": "Recherche effacée",
+        "group-cleared/executed": "Groupement supprimé",
+        "pin-cleared/executed": "Colonne désépinglée",
+        "pinRow/executed": "Ligne épinglée",
+        "pinRow-cleared/executed": "Ligne désépinglée",
+        "page/executed": "Page modifiée",
+        "aggregate/executed": "Totaux modifiés",
+        "select/executed": "Sélection modifiée",
+        "read/executed": "Tableau consulté",
+        "operation/executed": "Exécuté",
+        "operation/awaiting-approval": "Vous attend",
+        "operation/rejected": "Refusé",
+        "export/executed": "Exporté",
+        "add/executed": "Ligne ajoutée",
+        "add/awaiting-approval": "Nouvelle ligne en attente d’approbation",
+        "add/rejected": "Nouvelle ligne refusée",
+        "delete/executed": "Lignes supprimées",
+        "delete/awaiting-approval": "Suppression en attente d’approbation",
+        "delete/partial": "Certaines lignes supprimées, d’autres conservées",
+        "delete/rejected": "Suppression refusée",
+        "reorder/executed": "Lignes déplacées",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ kind, terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return kind === "edit"
+          ? `${term.column} défini sur ${term.value}`
+          : `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "ordre décroissant" : "ordre croissant"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "Inactif",
+      connecting: "Connexion…",
+      ready: "Prêt",
+      sending: "En cours…",
+      "awaiting-approval": "Vous attend",
+      "awaiting-user": "Vous attend",
+      error: "Erreur",
+      disconnected: "Non connecté",
+    })[status] ?? "Prêt",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Ajouter une ligne",
   duplicateRow: "Dupliquer la ligne",
   deleteRow: "Supprimer la ligne",
@@ -152,9 +367,29 @@ export const fr: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Ligne déplacée de ${String(from)} vers ${String(to)}`,
   rowReorderCancelled: "Réorganisation annulée",
+  rowMoveOptions: "Options de déplacement de la ligne",
+  moveToGroup: "Déplacer vers le groupe…",
+  moveUnder: "Déplacer sous…",
+  moveToTopLevel: "Déplacer au niveau supérieur",
+  confirmRowMoveTitle: "Confirmer le déplacement de la ligne",
+  confirmRowMoveDescription: (row, from, to) =>
+    `Déplacer ${row} de ${from} vers ${to} ?`,
+  confirmRowMove: "Déplacer",
+  rowMovedToGroup: (group) => `Ligne déplacée vers ${group}`,
+  rowMovedUnder: (parent) => `Ligne déplacée sous ${parent}`,
+  moveRejectedPolicyNever:
+    "Les déplacements de lignes entre limites sont désactivés",
+  moveRejectedSorted: "Effacez le tri avant de modifier l’ordre des lignes",
+  moveRejectedCycle:
+    "Une ligne ne peut pas être déplacée dans elle-même ni dans l’un de ses descendants",
+  moveUnavailable: "Ce déplacement de ligne n’est pas disponible",
+  rootLevel: "Niveau supérieur",
   pinToTop: "Épingler en haut",
   pinToBottom: "Épingler en bas",
   unpinRow: "Désépingler la ligne",
+  pinnedSummaryRow: "Ligne de synthèse",
+  pinnedSummaryTop: "Lignes de synthèse épinglées en haut",
+  pinnedSummaryBottom: "Lignes de synthèse épinglées en bas",
   rowSeparator: "Séparateur",
   expandColumnGroup: "Développer le groupe de colonnes",
   collapseColumnGroup: "Réduire le groupe de colonnes",
@@ -165,6 +400,34 @@ export const fr: Required<TableLabels> = {
   expandGroup: "Développer le groupe",
   collapseGroup: "Réduire le groupe",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "Groupement des lignes",
+  groupingDropColumns: "Faites glisser des colonnes ici pour grouper",
+  addGroupingColumn: "Ajouter une colonne de groupement",
+  groupByColumn: (label) => `Grouper par ${label}`,
+  ungroupColumn: (label) => `Ne plus grouper par ${label}`,
+  removeGroupingColumn: (label) => `Retirer ${label} du groupement`,
+  moveGroupingColumn: (label) => `Déplacer le groupement ${label}`,
+  groupingDropToRemove: "Déposez ici pour retirer le groupement",
+  groupingAggregateColumn: "Colonne d’agrégation",
+  groupingAggregation: "Agrégation du groupe",
+  groupingAggregationDefault: "Par défaut",
+  groupingAggregationNone: "Aucune",
+  groupingAggregations: "Agrégations",
+  groupingAddAggregation: "Ajouter une colonne d'agrégation",
+  groupingRestoreAggregations: "Restaurer les valeurs par défaut",
+  groupingRemoveAggregation: (column) => `Retirer l’agrégation de ${column}`,
+  groupingAggregationFor: (column) => `Agrégation de ${column}`,
+  groupingAggregationReadOnly: "Définie par l’application",
+  groupingAggregationCustom: "Personnalisée",
+  groupingAggregateRemoved: (column) => `Agrégation de ${column} retirée`,
+  groupingAggregatesRestored: "Agrégations restaurées aux valeurs par défaut",
+  groupingAverage: "Moyenne",
+  groupingAdded: (label) => `${label} ajouté au groupement`,
+  groupingRemoved: (label) => `${label} retiré du groupement`,
+  groupingMoved: (label, position) =>
+    `${label} déplacé à la position de groupement ${position}`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `Agrégation de ${label} remplacée par ${aggregation}`,
   gridRangeCopied: (cells) => `${cells} cellules copiées`,
   gridRangeCopyFailed: "Échec de la copie",
   gridRangePasted: (cells) => `${cells} cellules collées`,
@@ -220,10 +483,9 @@ export const fr: Required<TableLabels> = {
   noticeReorderNested:
     "Le réordonnancement des lignes est inactif tant que le regroupement ou un arbre est actif.",
   noticeGroupingUnavailable:
-    "Le regroupement est inactif — cette source n’expose pas l’ensemble filtré complet.",
+    "Le groupement est désactivé — cette source ne peut pas grouper.",
   noticeExportAllPage:
-    "Exporter tout correspond à cette page — l’ensemble filtré complet n’est pas disponible.",
+    "Exporter tout est désactivé — cette source ne fournit qu’une page à la fois.",
   noticeEditWithoutWriter:
     "L’édition est inactive — aucun gestionnaire d’écriture n’est branché.",
-  exportThisPage: "Exporter cette page",
 };

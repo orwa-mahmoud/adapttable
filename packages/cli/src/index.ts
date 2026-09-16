@@ -1,9 +1,11 @@
 /**
- * `@adapttable/cli` — the scaffolding CLI for AdaptTable.
+ * `@adapttable/cli` — scaffolding and v3 migration tools for AdaptTable.
  *
  * `npx @adapttable/cli init` detects your UI kit, picks your package manager,
- * writes a starter table, and prints the install command. This module
- * exposes the pure building blocks (also usable programmatically).
+ * writes a starter table, and prints the install command.
+ * `npx @adapttable/cli migrate-v3` applies only provably safe source rewrites
+ * and reports behavior-dependent migrations. This module exposes the pure
+ * building blocks (also usable programmatically).
  *
  * @packageDocumentation
  */

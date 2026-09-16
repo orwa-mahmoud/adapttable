@@ -13,10 +13,11 @@
  * Extras are content, not table state — nothing goes in the URL. Mobile
  * cards keep the same slots: a rule between cards, or a full-width note.
  */
-import type { CSSProperties, ReactNode } from "react";
+import { PIN_Z } from "../columns/columnLayoutModel";
+import type { DisplayValue } from "../display";
+import type { CssProperties } from "../style/cssProperties";
 
-import { PIN_Z } from "../columns/useColumnLayout";
-import { resolveRowStyle, type RowStyle } from "./rowStyle";
+export { extraHostFillStyle } from "./rowPresentation";
 
 /**
  * What the host may inject.
@@ -41,7 +42,7 @@ export interface ExtraRow {
    */
   beforeRowId?: string;
   /** Full-width body. Ignored on a separator. */
-  render?: () => ReactNode;
+  render?: () => DisplayValue;
 }
 
 /**
@@ -51,7 +52,7 @@ export interface ExtraRow {
  */
 export type ExtraEntry =
   | { kind: "separator"; key: string }
-  | { kind: "fullWidth"; key: string; render?: () => ReactNode };
+  | { kind: "fullWidth"; key: string; render?: () => DisplayValue };
 
 /**
  * Narrow a body slot to a host-injected extra.
@@ -167,7 +168,7 @@ export function insertExtrasBeforeRows<TRow>(
  *
  * @public
  */
-export const EXTRA_OVER_SPAN_ROW_STYLE: CSSProperties = {
+export const EXTRA_OVER_SPAN_ROW_STYLE: CssProperties = {
   position: "relative",
   zIndex: PIN_Z.rowPinned,
 };
@@ -177,38 +178,11 @@ export const EXTRA_OVER_SPAN_ROW_STYLE: CSSProperties = {
  *
  * @public
  */
-export const EXTRA_OVER_SPAN_STYLE: CSSProperties = {
+export const EXTRA_OVER_SPAN_STYLE: CssProperties = {
   textAlign: "start",
   paddingBlock: "0.75rem",
   paddingInline: "0.75rem",
 };
-
-/**
- * The fill the host already passed for this extra's person. Height is not
- * copied — extras size from their own padding, not `rowHeight`.
- *
- * @public
- */
-export function extraHostFillStyle<TRow>(
-  extraKey: string,
-  extraRows: readonly ExtraRow[] | undefined,
-  rows: readonly TRow[],
-  getRowId: (row: TRow) => string,
-  rowStyle: RowStyle<TRow> | undefined
-): CSSProperties | undefined {
-  const extra = extraRows?.find((item) => item.key === extraKey);
-  if (!extra?.beforeRowId) return undefined;
-  const index = rows.findIndex((row) => getRowId(row) === extra.beforeRowId);
-  if (index < 0) return undefined;
-  const visual = resolveRowStyle(rowStyle, undefined, rows[index]!, index);
-  if (!visual) return undefined;
-  const fill: CSSProperties = {};
-  if (visual.backgroundColor !== undefined) {
-    fill.backgroundColor = visual.backgroundColor;
-  }
-  if (visual.background !== undefined) fill.background = visual.background;
-  return Object.keys(fill).length > 0 ? fill : undefined;
-}
 
 /**
  * Part names every kit stamps on an extra row.

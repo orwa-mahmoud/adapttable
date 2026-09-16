@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "완료",
+  staged: "저장 대기",
+  partial: "일부 완료",
+  rejected: "거부됨",
+  "awaiting-approval": "확인 대기",
+  cancelled: "취소됨",
+  stale: "오래됨",
+  failed: "실패",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "셀 편집",
+  "rows.add": "행 추가",
+  "rows.delete": "행 삭제",
+  "rows.reorder": "행 순서 변경",
+  "export.run": "내보내기",
+};
+
 export const ko: Required<TableLabels> = {
   table: "데이터 테이블",
   search: "검색",
@@ -114,6 +135,13 @@ export const ko: Required<TableLabels> = {
   hideAllColumns: "모두 숨기기",
   unpinAllColumns: "모두 고정 해제",
   resetColumn: "열 재설정",
+  renameColumn: "열 이름 바꾸기",
+  columnName: "열 이름",
+  saveColumnName: "이름 저장",
+  cancelColumnRename: "취소",
+  columnNameRequired: "열 이름을 입력하세요.",
+  columnRenamed: ({ previous, name }) =>
+    `${previous} 열의 이름을 ${name}(으)로 변경했습니다`,
   sortAscending: "오름차순 정렬",
   sortDescending: "내림차순 정렬",
   sortedBy: ({ column, ascending }) =>
@@ -123,8 +151,13 @@ export const ko: Required<TableLabels> = {
   columnActions: "열 작업",
   exportCsv: "CSV 내보내기",
   exportFile: (format) => `${format.toUpperCase()} 내보내기`,
+  exportStarted: "내보내기 준비 중",
+  exportProgress: (progress) => `내보내기 ${progress}% 완료`,
   exportDone: "내보내기 완료",
   exportFailed: "내보내기 실패",
+  exportCancelled: "내보내기 취소됨",
+  exportDownload: "내보내기 다운로드",
+  exportDismiss: "내보내기 닫기",
   editCell: "셀 편집",
   undoEdit: "되돌리기",
   redoEdit: "다시 실행",
@@ -136,6 +169,177 @@ export const ko: Required<TableLabels> = {
       : `${String(count)} 개의 저장되지 않은 행`,
   saveAll: "모두 저장",
   cancelAll: "모두 취소",
+  approveProposal: "승인",
+  rejectProposal: "거부",
+  proposalValueUnavailable: "확인할 수 없음",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "제안된 변경 1건"
+        : "제안된 변경 {c}건".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"{r}개 행에 걸쳐".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "{c}건 모두 검토".replace("{c}", String(count)),
+  backToConversation: "대화로 돌아가기",
+  approveAllProposals: "모두 승인",
+  approveRemainingProposals: "나머지 승인",
+  rejectAllProposals: "모두 거부",
+  rejectRemainingProposals: "나머지 거부",
+  alwaysAllowProposal: "항상 허용",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "승인 {a} · 거부 {j} · 남음 {p}"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "결정을 기다리는 변경이 있습니다.",
+  pendingProposals: (count) =>
+    count === 1 ? "제안된 변경 1개" : `제안된 변경 ${String(count)}개`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "테이블 어시스턴트",
+  assistantOpen: "AI에게 묻기",
+  assistantClose: "닫기",
+  assistantSettings: "어시스턴트 설정",
+  assistantEmpty: "이 테이블로 무엇을 하시겠어요?",
+  assistantPlaceholder: "이 테이블에 대해 질문…",
+  assistantSend: "보내기",
+  assistantStop: "중지",
+  assistantVoiceStart: "받아쓰기",
+  assistantVoiceStop: "받아쓰기 중지",
+  assistantVoiceListening: "듣는 중",
+  assistantVoiceLanguage: "받아쓰기 언어",
+  assistantYou: "나",
+  assistantSpeaker: "어시스턴트",
+  assistantNewMessages: "새 메시지",
+  assistantUnavailable: "어시스턴트가 연결되지 않았습니다.",
+  assistantDetached: "연결이 끊겼습니다. 작업이 아직 진행 중일 수 있습니다.",
+  assistantRejoin: "다시 연결",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)}개 완료`
+      : `${String(total)}개 중 ${String(done)}개`,
+  assistantBackToTable: "테이블로 돌아가기",
+  assistantDetail: "세부 정보",
+  assistantSaveInTable: "이 변경을 유지하려면 테이블에서 저장하세요.",
+  assistantUndo: "실행 취소",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "한 번의 대화가 허용하는 단계를 넘습니다. 일부만 요청해 주세요.",
+        "continuation-limit":
+          "한 번의 대화가 허용하는 단계를 넘습니다. 일부만 요청해 주세요.",
+        "resume-limit":
+          "한 번의 대화가 허용하는 단계를 넘습니다. 일부만 요청해 주세요.",
+        "discovery-exhausted":
+          "여기서 그 방법을 어시스턴트가 알아내지 못했습니다.",
+        "repeated-plan": "어시스턴트가 같은 요청을 두 번 하고 멈췄습니다.",
+        "question-unanswered": "완료하려면 답변이 필요합니다.",
+        "approval-unavailable": "승인이 필요하지만 물어볼 곳이 없습니다.",
+        "interrupt-unsupported": "이 테이블이 할 수 없는 것을 요청했습니다.",
+        "output-denied": "그중 일부는 실행이 허용되지 않았습니다.",
+        "not-run": "실행되지 않았습니다.",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "실행 이후 표가 변경되었습니다.",
+        "cannot-restore": "일부는 되돌릴 수 없습니다.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "답변",
+  assistantAnswerPlaceholder: "답변 입력",
+  assistantAnswerSend: "보내기",
+  assistantAlwaysAllowedTitle: "묻지 않는 작업",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `${CAPABILITY[capability] ?? capability} 다시 확인하기`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "작업 1개" : `작업 ${String(count)}개`,
+  assistantActionsTitle: "이번 차례에서 바뀐 것",
+  assistantUndoAll: "모두 실행 취소",
+  assistantExamples: "단축 명령",
+  assistantReceiptChange: ({ before, after }) =>
+    `${before}에서 ${after}(으)로 변경했습니다`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `제안됨: ${before}에서 ${after}(으)로`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "필터 적용됨",
+        "filter/staged": "필터 준비됨",
+        "sort/executed": "정렬됨",
+        "group/executed": "그룹화됨",
+        "pin/executed": "열 고정됨",
+        "edit/executed": "저장됨",
+        "edit/staged": "편집 준비됨 — 저장되지 않음",
+        "edit/awaiting-approval": "편집 승인 대기 중",
+        "edit/partial": "일부 편집은 저장, 일부는 거부",
+        "edit/rejected": "편집 거부됨",
+        "filter-cleared/executed": "필터를 해제했습니다",
+        "sort-cleared/executed": "정렬을 해제했습니다",
+        "search/executed": "검색했습니다",
+        "search-cleared/executed": "검색을 지웠습니다",
+        "group-cleared/executed": "그룹화를 해제했습니다",
+        "pin-cleared/executed": "열 고정을 해제했습니다",
+        "pinRow/executed": "행을 고정했습니다",
+        "pinRow-cleared/executed": "행 고정을 해제했습니다",
+        "page/executed": "페이지를 변경했습니다",
+        "aggregate/executed": "합계를 변경했습니다",
+        "select/executed": "선택을 변경했습니다",
+        "read/executed": "테이블을 읽었습니다",
+        "operation/executed": "실행했습니다",
+        "operation/awaiting-approval": "대기 중입니다",
+        "operation/rejected": "거부되었습니다",
+        "export/executed": "내보냈습니다",
+        "add/executed": "행을 추가했습니다",
+        "add/awaiting-approval": "새 행이 승인 대기 중입니다",
+        "add/rejected": "새 행이 거부되었습니다",
+        "delete/executed": "행을 삭제했습니다",
+        "delete/awaiting-approval": "삭제가 승인 대기 중입니다",
+        "delete/partial": "일부 행은 삭제하고 일부는 유지했습니다",
+        "delete/rejected": "삭제가 거부되었습니다",
+        "reorder/executed": "행을 이동했습니다",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "내림차순" : "오름차순"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "대기",
+      connecting: "연결 중…",
+      ready: "준비됨",
+      sending: "처리 중…",
+      "awaiting-approval": "확인 대기",
+      "awaiting-user": "확인 대기",
+      error: "오류",
+      disconnected: "연결 안 됨",
+    })[status] ?? "준비됨",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "행 추가",
   duplicateRow: "행 복제",
   deleteRow: "행 삭제",
@@ -152,9 +356,28 @@ export const ko: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `행을 ${String(from)}에서 ${String(to)}(으)로 옮겼습니다`,
   rowReorderCancelled: "순서 변경을 취소했습니다",
+  rowMoveOptions: "행 이동 옵션",
+  moveToGroup: "그룹으로 이동…",
+  moveUnder: "하위로 이동…",
+  moveToTopLevel: "최상위로 이동",
+  confirmRowMoveTitle: "행 이동 확인",
+  confirmRowMoveDescription: (row, from, to) =>
+    `${row}을(를) ${from}에서 ${to}(으)로 이동할까요?`,
+  confirmRowMove: "이동",
+  rowMovedToGroup: (group) => `행을 ${group}(으)로 이동했습니다`,
+  rowMovedUnder: (parent) => `행을 ${parent} 아래로 이동했습니다`,
+  moveRejectedPolicyNever: "경계를 넘는 행 이동이 비활성화되어 있습니다",
+  moveRejectedSorted: "행 순서를 변경하기 전에 정렬을 해제하세요",
+  moveRejectedCycle:
+    "행을 자기 자신이나 그 하위 항목 안으로 이동할 수 없습니다",
+  moveUnavailable: "이 행 이동은 사용할 수 없습니다",
+  rootLevel: "최상위",
   pinToTop: "위에 고정",
   pinToBottom: "아래에 고정",
   unpinRow: "행 고정 해제",
+  pinnedSummaryRow: "요약 행",
+  pinnedSummaryTop: "위에 고정된 요약 행",
+  pinnedSummaryBottom: "아래에 고정된 요약 행",
   rowSeparator: "구분선",
   expandColumnGroup: "열 그룹 펼치기",
   collapseColumnGroup: "열 그룹 접기",
@@ -164,6 +387,34 @@ export const ko: Required<TableLabels> = {
   expandGroup: "그룹 펼치기",
   collapseGroup: "그룹 접기",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "행 그룹화",
+  groupingDropColumns: "그룹화할 열을 여기로 드래그하세요",
+  addGroupingColumn: "그룹화 열 추가",
+  groupByColumn: (label) => `${label} 기준 그룹화`,
+  ungroupColumn: (label) => `${label} 그룹화 해제`,
+  removeGroupingColumn: (label) => `그룹화에서 ${label} 제거`,
+  moveGroupingColumn: (label) => `${label} 그룹화 이동`,
+  groupingDropToRemove: "그룹화를 제거하려면 여기에 놓으세요",
+  groupingAggregateColumn: "집계 열",
+  groupingAggregation: "그룹 집계",
+  groupingAggregationDefault: "기본값",
+  groupingAggregationNone: "없음",
+  groupingAggregations: "집계",
+  groupingAddAggregation: "집계 열 추가",
+  groupingRestoreAggregations: "기본값 복원",
+  groupingRemoveAggregation: (column) => `${column} 집계 제거`,
+  groupingAggregationFor: (column) => `${column} 집계`,
+  groupingAggregationReadOnly: "앱에서 설정됨",
+  groupingAggregationCustom: "사용자 지정",
+  groupingAggregateRemoved: (column) => `${column} 집계가 제거됨`,
+  groupingAggregatesRestored: "집계가 기본값으로 복원됨",
+  groupingAverage: "평균",
+  groupingAdded: (label) => `${label} 그룹화에 추가됨`,
+  groupingRemoved: (label) => `${label} 그룹화에서 제거됨`,
+  groupingMoved: (label, position) =>
+    `${label} 그룹화 위치 ${position}(으)로 이동됨`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `${label} 그룹 집계가 ${aggregation}(으)로 변경됨`,
   gridRangeCopied: (cells) => `${cells}개 셀 복사됨`,
   gridRangeCopyFailed: "복사 실패",
   gridRangePasted: (cells) => `${cells}개 셀 붙여넣기`,
@@ -217,10 +468,9 @@ export const ko: Required<TableLabels> = {
   noticePinNested: "그룹화 또는 트리가 켜져 있으면 행 고정은 꺼집니다.",
   noticeReorderNested: "그룹화 또는 트리가 켜져 있으면 행 재배치는 꺼집니다.",
   noticeGroupingUnavailable:
-    "그룹화는 꺼져 있습니다. 이 소스는 필터된 전체 집합을 제공하지 않습니다.",
+    "그룹화가 꺼져 있습니다. 이 소스는 그룹화할 수 없습니다.",
   noticeExportAllPage:
-    "모두 내보내기는 이 페이지입니다. 필터된 전체 집합을 쓸 수 없습니다.",
+    "모두 내보내기가 꺼져 있습니다. 이 소스는 한 번에 한 페이지만 제공합니다.",
   noticeEditWithoutWriter:
     "편집은 꺼져 있습니다. 쓰기 처리기가 연결되어 있지 않습니다.",
-  exportThisPage: "이 페이지 내보내기",
 };

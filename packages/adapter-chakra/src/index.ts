@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+export { agentApproval } from "./agent-approval";
 export {
   ChecklistFilter,
   type ChecklistFilterProps,
@@ -16,7 +17,10 @@ export {
   FilterTreeBuilder,
   type FilterTreeBuilderProps,
 } from "./components/FilterTreeBuilder";
+export { GroupingPanel } from "./components/GroupingPanel";
 export {
+  AgentApproval,
+  type AgentApprovalProps,
   BatchEditBar,
   type BatchEditBarProps,
   ColumnGroupToggle,
@@ -57,15 +61,11 @@ export type {
 
 /* Re-exported headless engine — source builders, hooks, and types. */
 export {
-  type ActiveFilterChip,
   type BulkAction,
-  type CellProps,
   type ColorScheme,
-  type ColumnDef,
   type ColumnFilter,
   type ColumnGroupDef,
   type ColumnGroupShow,
-  type ColumnInput,
   type ConfirmHandler,
   type ConfirmRequest,
   createFilterRegistry,
@@ -74,7 +74,6 @@ export {
   defaultLabels,
   type Direction,
   type ExtraFilters,
-  FILTER_TYPES,
   type FilterDef,
   type FilterOption,
   type FilterType,
@@ -87,12 +86,16 @@ export {
   resolveFilterRegistry,
   type RowAction,
   type RowActionsRenderer,
-  type SavedView,
   type SortByOption,
   type SortDirection,
   type TableLabels,
   type TableQuery,
   type TableSource,
+} from "@adapttable/core";
+export type { CellProps, ColumnDef, ColumnInput } from "@adapttable/react";
+export {
+  type ActiveFilterChip,
+  type SavedView,
   type ToolbarSlots,
   useDataTable,
   type UseDataTableResult,
@@ -106,22 +109,21 @@ export {
   useServerData,
   type UseServerDataOptions,
   useTableUrlState,
-} from "@adapttable/core";
+  type UseTableUrlStateOptions,
+  type UseTableUrlStateResult,
+} from "@adapttable/react";
 
-/* Router / custom-source integration types (re-exported from core). */
+/* Router / custom-source integration types. */
+export { type ActionConfirm, type SortableValue } from "@adapttable/core";
 export {
-  type ActionConfirm,
   createHistoryAdapter,
   createMemoryAdapter,
   getHistoryAdapter,
   type InfiniteQueryLike,
   type PageSelector,
-  type SortableValue,
   type UrlStateAdapter,
-  type UseTableUrlStateOptions,
-  type UseTableUrlStateResult,
-} from "@adapttable/core";
-export { deriveSortByOptions } from "@adapttable/core/adapter";
+} from "@adapttable/react";
+export { deriveSortByOptions } from "@adapttable/react/adapter";
 
 /* The adapter's own names: the props base every DataTableProps is built
    from, before the data mode is chosen. */
@@ -131,13 +133,17 @@ export type { DataTablePropsBase } from "./types";
    needs — CSV options, column layout, cell editors, tier props —
    without ever depending on @adapttable/core directly. */
 export {
-  type BaseDataTableProps,
   type BulkActionContext,
   type CellEditor,
   type ChipLabelResolver,
-  type ColumnLayoutState,
   type CustomCellEditorCtrl,
   type CustomCellEditorRender,
+  type ExportCsvOptions,
+  FILTER_TYPES,
+} from "@adapttable/core";
+export {
+  type BaseDataTableProps,
+  type ColumnLayoutState,
   type EditConflict,
   type EditConflictChoice,
   type EditConflictHandler,
@@ -147,7 +153,6 @@ export {
   type EditEventHandler,
   type EditLifecycle,
   type EditUnit,
-  type ExportCsvOptions,
   type UseTableDataOptions,
-} from "@adapttable/core";
-export { type DataModeProps } from "@adapttable/core/adapter";
+} from "@adapttable/react";
+export { type DataModeProps } from "@adapttable/react/adapter";

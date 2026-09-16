@@ -6,7 +6,7 @@ import {
   type FilterTreeInputProps,
   type FilterTreeSelectProps,
   type FilterTreeSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   Accordion,
   AccordionDetails,
@@ -25,7 +25,7 @@ function TreeSelect({
   options,
   className,
   onChange,
-}: FilterTreeSelectProps) {
+}: Readonly<FilterTreeSelectProps>) {
   return (
     <TextField
       select
@@ -55,7 +55,7 @@ function TreeInput({
   type,
   className,
   onChange,
-}: FilterTreeInputProps) {
+}: Readonly<FilterTreeInputProps>) {
   return (
     <TextField
       size="small"
@@ -75,7 +75,7 @@ function TreeButton({
   part,
   className,
   onClick,
-}: FilterTreeButtonProps) {
+}: Readonly<FilterTreeButtonProps>) {
   return (
     <Button
       type="button"
@@ -96,7 +96,7 @@ function TreeDisclosure({
   summaryClassName,
   children,
   onExpandedChange,
-}: FilterTreeDisclosureProps) {
+}: Readonly<FilterTreeDisclosureProps>) {
   return (
     <Accordion
       disableGutters

@@ -6,8 +6,8 @@
 export type FilterChromeMode = "popover" | "drawer" | "header";
 
 /**
- * Resolve the single filter chrome. `headerFilters` is an alias for
- * `"header"`. Header mode wins when both are passed so a host cannot
+ * Resolve the single filter chrome. `headerFilters()` selects `"header"`.
+ * Header mode wins when both internal inputs are present so a host cannot
  * mount the toolbar overlay and the header row at once.
  *
  * @public

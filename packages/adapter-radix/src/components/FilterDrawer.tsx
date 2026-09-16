@@ -1,5 +1,5 @@
 /** The filters drawer — the backdrop-ed alternative to the popover. */
-import { type Direction, type TableLabels } from "@adapttable/core";
+import type { Direction, TableLabels } from "@adapttable/core";
 import { Button, Dialog, Flex } from "@radix-ui/themes";
 import { type ReactNode } from "react";
 

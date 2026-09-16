@@ -2,12 +2,13 @@
  * Unstyled kit controls — native HTML is this adapter's kit.
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
+import { filterLabel, type TableSource } from "@adapttable/core";
+import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
-  filterLabel,
-  type TableSource,
-  useHeaderFilterOverlay,
-} from "@adapttable/core";
-import {
+  type AgentApprovalButtonProps,
+  AgentApprovalChrome,
+  type AgentApprovalListProps,
+  type AgentApprovalProps,
   BatchEditBarChrome,
   type BatchEditBarProps,
   type BatchEditButtonProps,
@@ -35,9 +36,11 @@ import {
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
   hasActiveHeaderFilter,
+  restoreFocusSoon,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -50,14 +53,15 @@ import {
   TreeToggleChrome,
   type TreeToggleProps,
   type TreeToggleSlots,
-} from "@adapttable/core/adapter";
-import type { ChangeEvent } from "react";
+} from "@adapttable/react/adapter";
+import { type ChangeEvent, useEffect, useRef } from "react";
 
 import type { DataTableClassNames } from "../types";
 import { AutoFilterForm } from "./AutoFilterForm";
-import { FiltersIcon } from "./icons";
+import { FiltersIcon, iconForRowEditPart } from "./icons";
 
 export type {
+  AgentApprovalProps,
   BatchEditBarProps,
   ColumnGroupToggleProps,
   FilterHeaderControlProps,
@@ -114,7 +118,7 @@ function HeaderSearch({
   value,
   className,
   onChange,
-}: FilterHeaderSearchProps) {
+}: Readonly<FilterHeaderSearchProps>) {
   return (
     <input
       type="search"
@@ -136,7 +140,7 @@ function HeaderSelect({
   options,
   className,
   onChange,
-}: FilterHeaderSelectProps) {
+}: Readonly<FilterHeaderSelectProps>) {
   return (
     <select
       aria-label={label}
@@ -177,7 +181,7 @@ function HeaderMulti({
   className,
   menuClassName,
   onToggle,
-}: FilterHeaderMultiProps) {
+}: Readonly<FilterHeaderMultiProps>) {
   return (
     <details style={{ position: "relative", width: "100%" }}>
       <summary
@@ -352,7 +356,7 @@ function FindSearch({
   focusRef,
   onChange,
   onKeyDown,
-}: FindSearchProps) {
+}: Readonly<FindSearchProps>) {
   return (
     <input
       ref={focusRef}
@@ -402,18 +406,21 @@ export function FindBar(props: Readonly<FindBarProps>) {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
-}: RowEditButtonProps) {
+}: Readonly<RowEditButtonProps>) {
+  const glyph = iconForRowEditPart(part, icon);
   return (
     <button
       type="button"
       data-adapttable-part={part}
       className={className}
       aria-label={label}
+      title={glyph ? label : undefined}
       onClick={onClick}
     >
-      {label}
+      {glyph ?? label}
     </button>
   );
 }
@@ -434,7 +441,7 @@ function BatchButton({
   part,
   className,
   onClick,
-}: BatchEditButtonProps) {
+}: Readonly<BatchEditButtonProps>) {
   return (
     <button
       type="button"
@@ -456,13 +463,71 @@ export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>) {
   return <BatchEditBarChrome {...props} slots={{ Button: BatchButton }} />;
 }
 
+function ApprovalList({
+  part,
+  label,
+  className,
+  children,
+}: Readonly<AgentApprovalListProps>) {
+  return (
+    // A real list: its children are the proposed changes, one <li> each, and
+    // the element carries that everywhere rather than only where ARIA does.
+    <ul
+      data-adapttable-part={part}
+      aria-label={label}
+      className={className}
+      style={{ listStyle: "none", margin: 0, padding: 0 }}
+    >
+      {children}
+    </ul>
+  );
+}
+
+/**
+ * Approve or reject a pending agent write.
+ *
+ * @public
+ */
+function ApprovalAction({
+  label,
+  part,
+  className,
+  onClick,
+}: Readonly<AgentApprovalButtonProps>) {
+  return (
+    <button
+      type="button"
+      data-adapttable-part={part}
+      data-variant="quiet"
+      className={className}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+
+export function AgentApproval(props: Readonly<AgentApprovalProps>) {
+  return (
+    <AgentApprovalChrome
+      {...props}
+      slots={{
+        Approve: BatchButton,
+        Reject: BatchButton,
+        List: ApprovalList,
+        Action: ApprovalAction,
+      }}
+    />
+  );
+}
+
 function TreeButton({
   label,
   expanded,
   loading,
   className,
   onClick,
-}: TreeToggleButtonProps) {
+}: Readonly<TreeToggleButtonProps>) {
   return (
     <button
       type="button"
@@ -514,7 +579,7 @@ function GroupToggleButton({
   expanded,
   className,
   onClick,
-}: ColumnGroupToggleButtonProps) {
+}: Readonly<ColumnGroupToggleButtonProps>) {
   return (
     <button
       type="button"
@@ -575,10 +640,11 @@ function ReorderHandle({
   label,
   pressed,
   dragging,
+  disabled,
   className,
   dragProps,
   onKeyDown,
-}: RowReorderHandleSlotProps) {
+}: Readonly<RowReorderHandleSlotProps>) {
   return (
     <button
       type="button"
@@ -588,12 +654,119 @@ function ReorderHandle({
       className={className}
       aria-label={label}
       aria-pressed={pressed}
+      disabled={disabled}
       style={{ ...REORDER_BUTTON, cursor: pressed ? "grabbing" : "grab" }}
       {...dragProps}
       onKeyDown={onKeyDown}
     >
       <GripIcon />
     </button>
+  );
+}
+
+function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const triggerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (confirmation && detailsRef.current) detailsRef.current.open = true;
+  }, [confirmation]);
+  const finish = (action: () => void) => {
+    action();
+    if (detailsRef.current) detailsRef.current.open = false;
+    queueMicrotask(() => restoreFocusSoon(triggerRef.current));
+  };
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
+  // Escape abandons the pending move. It is bound to the document rather than
+  // to the dialog so it works wherever focus sits — the same route this kit's
+  // filter panel takes for its own dismissal.
+  useEffect(() => {
+    if (!confirmation) return undefined;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      finishRef.current(confirmation.onCancel);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [confirmation]);
+  return (
+    <details
+      ref={detailsRef}
+      data-adapttable-part="row-move-menu"
+      style={{ display: "inline-block", position: "relative" }}
+    >
+      <summary
+        ref={triggerRef}
+        aria-label={label}
+        data-adapttable-part="row-move-menu-trigger"
+        style={{ ...REORDER_BUTTON, cursor: "pointer", listStyle: "none" }}
+      >
+        ⋮
+      </summary>
+      <div
+        role="menu"
+        aria-label={label}
+        data-adapttable-part="row-move-menu-content"
+        style={{
+          position: "absolute",
+          zIndex: 20,
+          insetInlineStart: 0,
+          minWidth: "12rem",
+          padding: "0.5rem",
+          border: "1px solid currentColor",
+          borderRadius: "0.375rem",
+          background: "Canvas",
+          color: "CanvasText",
+        }}
+      >
+        {confirmation ? (
+          <div
+            role="alertdialog"
+            aria-label={confirmation.title}
+            data-adapttable-part="row-move-confirmation"
+          >
+            <strong>{confirmation.title}</strong>
+            <p>{confirmation.description}</p>
+            <button
+              type="button"
+              onClick={() => finish(confirmation.onConfirm)}
+            >
+              {confirmation.confirmLabel}
+            </button>{" "}
+            <button type="button" onClick={() => finish(confirmation.onCancel)}>
+              {confirmation.cancelLabel}
+            </button>
+          </div>
+        ) : (
+          items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="menuitem"
+              disabled={item.disabled}
+              title={item.disabledReason}
+              data-adapttable-part="row-move-menu-item"
+              style={{
+                display: "block",
+                width: "100%",
+                minHeight: "2.75rem",
+                textAlign: "start",
+              }}
+              onClick={item.onSelect}
+            >
+              {item.label}
+            </button>
+          ))
+        )}
+      </div>
+    </details>
   );
 }
 
@@ -606,7 +779,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -616,7 +792,7 @@ function ReorderMove({
   disabled,
   className,
   onClick,
-}: RowReorderMoveButtonProps) {
+}: Readonly<RowReorderMoveButtonProps>) {
   return (
     <button
       type="button"
@@ -624,7 +800,7 @@ function ReorderMove({
       aria-label={label}
       disabled={disabled}
       className={className}
-      style={REORDER_BUTTON}
+      style={{ ...REORDER_BUTTON, minWidth: "2.75rem", minHeight: "2.75rem" }}
       onClick={onClick}
     >
       {part === "row-reorder-up" ? "↑" : "↓"}
@@ -640,7 +816,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({
@@ -653,7 +834,7 @@ function ActivateCell({
   onDoubleClick,
   onClick,
   onKeyDown,
-}: EditableCellActivateProps) {
+}: Readonly<EditableCellActivateProps>) {
   return (
     <button
       ref={activateRef}
@@ -689,7 +870,7 @@ function EditGateButton({
   className,
   onMouseDown,
   onClick,
-}: EditableCellButtonProps) {
+}: Readonly<EditableCellButtonProps>) {
   return (
     <button
       type="button"

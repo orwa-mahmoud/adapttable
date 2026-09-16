@@ -3,31 +3,30 @@
  * class of its camelCased key, and every key's class shows up in at least
  * one rendered state — the two surfaces can never drift apart again.
  */
-import {
-  createMemoryAdapter,
-  type FilterDef,
-  useFrontendData,
-} from "@adapttable/core";
-import type * as AdapterModule from "@adapttable/core/adapter";
-import { useDataTableShell } from "@adapttable/core/adapter";
+import type { FilterDef } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import type * as AdapterModule from "@adapttable/react/adapter";
+import { useDataTableShell } from "@adapttable/react/adapter";
 import { act, fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FilterHeaderRow } from "./components/kitControls";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
+import { groupingPanel } from "./grouping-panel";
 import {
   type ColumnDef,
   type DataTableClassNames,
   defaultLabels,
 } from "./index";
+import { rowReorder } from "./row-reorder";
 
-vi.mock("@adapttable/core/adapter", async (importOriginal) => {
+vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return { ...actual, useDataTableShell: vi.fn(actual.useDataTableShell) };
 });
 
 const actualAdapter = await vi.importActual<typeof AdapterModule>(
-  "@adapttable/core/adapter"
+  "@adapttable/react/adapter"
 );
 
 /**
@@ -39,6 +38,7 @@ function mockVirtualWindow(top: number, bottom: number, indices = [0, 1]) {
     const real = actualAdapter.useDataTableShell(props, render);
     return {
       ...real,
+      skipChromeBody: true,
       tableProps: {
         ...real.tableProps,
         rowEntries: indices
@@ -99,6 +99,7 @@ const columns: ColumnDef<Row>[] = [
     header: "Name",
     accessor: (r) => r.name,
     sortable: true,
+    renameable: true,
     group: "Identity",
     headerActions: <button type="button">info</button>,
     editable: true,
@@ -119,6 +120,10 @@ const columns: ColumnDef<Row>[] = [
     sortValue: (r) => r.qty,
     sortable: true,
     group: "Facts",
+    aggregatable: {
+      default: "sum",
+      operations: ["sum", "avg", "count"],
+    },
   },
 ];
 
@@ -163,7 +168,10 @@ const camel = (part: string): string =>
 const A11Y_PARTS = new Set([
   "export-announcer",
   "grid-announcer",
+  "column-rename-announcer",
+  "header-rename-announcer",
   "row-reorder-announcer",
+  "grouping-announcer",
   "table-status-announcer",
 ]);
 
@@ -196,6 +204,7 @@ const CORE_OWNED = new Set([
   "side-panel-body",
   "context-menu-anchor",
   "command-list",
+  "grouping-aggregation-option",
 ]);
 
 const STATE_CLASSES = new Set([
@@ -207,6 +216,10 @@ const STATE_CLASSES = new Set([
   "groupMoreCell",
   "cellMatch",
   "cellMatchCurrent",
+  // Plugin-only parts are driven with a registered host in ColumnMenu.test.
+  "columnMenuChoice",
+  "columnMenuChoiceLabel",
+  "columnMenuChoiceSelect",
 ]);
 
 function collectParts(): Map<string, Element[]> {
@@ -260,6 +273,7 @@ function Harness(props: {
       savedViews={{ storageKey: "parity" }}
       exportCsv
       onAddRow={vi.fn()}
+      onColumnRename={vi.fn()}
       enableColumnMenu
       collapsibleColumnGroups
       resizableColumns
@@ -331,6 +345,11 @@ async function renderAllStates(classNames?: DataTableClassNames) {
 
   // Desktop kitchen sink: open filters, select rows, menus, detail, edit.
   const desktop = mount({});
+  fireEvent.click(part("header-rename-button")!);
+  fireEvent.change(part("header-rename-input")!, { target: { value: " " } });
+  fireEvent.submit(part("header-rename-form")!);
+  absorb();
+  fireEvent.click(part("header-rename-cancel")!);
   fireEvent.click(part("filters-button")!);
   absorb();
   const addCondition = desktop.getByRole("button", { name: "Add condition" });
@@ -365,6 +384,10 @@ async function renderAllStates(classNames?: DataTableClassNames) {
   const more = part("column-menu-more");
   if (more) {
     fireEvent.click(more);
+    absorb();
+    fireEvent.click(desktop.getByRole("button", { name: "Rename column" }));
+    fireEvent.change(part("column-rename-input")!, { target: { value: " " } });
+    fireEvent.submit(part("column-rename-form")!);
     absorb();
   }
   // Saved views: open, name one, save — the list + delete render.
@@ -435,7 +458,14 @@ async function renderAllStates(classNames?: DataTableClassNames) {
   // is left unsettled on purpose: the affordance only exists while it is.
   const exporting = mount({
     override: {
-      exportCsv: { request: () => new Promise<void>(() => undefined) },
+      exportCsv: {
+        scope: "all",
+        onExportAll: (_query, controls) => {
+          controls.setProgress?.(40);
+          controls.setMessage?.("Building file");
+          return new Promise<void>(() => undefined);
+        },
+      },
     },
   });
   await act(async () => {
@@ -444,6 +474,36 @@ async function renderAllStates(classNames?: DataTableClassNames) {
   });
   absorb();
   exporting.unmount();
+
+  const failedExport = mount({
+    override: {
+      exportCsv: {
+        scope: "all",
+        onExportAll: () => Promise.reject(new Error("export failed")),
+      },
+    },
+  });
+  await act(async () => {
+    fireEvent.click(part("export-csv-button")!);
+    await Promise.resolve();
+  });
+  absorb();
+  failedExport.unmount();
+
+  const completedExport = mount({
+    override: {
+      exportCsv: {
+        scope: "all",
+        onExportAll: () => Promise.resolve({ url: "/export.csv" }),
+      },
+    },
+  });
+  await act(async () => {
+    fireEvent.click(part("export-csv-button")!);
+    await Promise.resolve();
+  });
+  absorb();
+  completedExport.unmount();
 
   // Drawer filters mode (panel, header, footer, close, done, backdrop) with
   // an active filter (count badge + chips + chip remove).
@@ -512,15 +572,50 @@ async function renderAllStates(classNames?: DataTableClassNames) {
   tree.unmount();
 
   // Row grouping (desktop + mobile cards).
-  mount({ url: "groupBy=team" }).unmount();
-  const groupedMobile = mount({ url: "groupBy=team", isMobile: true });
+  mount({ url: "groupBy=team", override: { groupBy: "team" } }).unmount();
+  const groupedMobile = mount({
+    url: "groupBy=team",
+    isMobile: true,
+    override: { groupBy: "team" },
+  });
   absorb();
   groupedMobile.unmount();
 
+  // Interactive grouping panel and its drag-only remove target.
+  const interactiveGrouping = mount({
+    url: "groupAgg=qty:avg",
+    override: {
+      features: [groupingPanel<Row>(["team"], {})],
+    },
+  });
+  absorb();
+  const groupingTransfer = {
+    effectAllowed: "",
+    dropEffect: "",
+    values: new Map<string, string>(),
+    get types() {
+      return [...this.values.keys()];
+    },
+    setData(type: string, value: string) {
+      this.values.set(type, value);
+    },
+    getData(type: string) {
+      return this.values.get(type) ?? "";
+    },
+  };
+  fireEvent.dragStart(part("grouping-chip-handle")!, {
+    dataTransfer: groupingTransfer,
+  });
+  absorb();
+  interactiveGrouping.unmount();
+
   // Row reorder: desktop grip + header, mobile up/down. Isolated so grouping
   // does not refuse the column and fire a devWarn in the kitchen-sink mounts.
-  mount({ override: { onRowReorder: vi.fn() } }).unmount();
-  mount({ isMobile: true, override: { onRowReorder: vi.fn() } }).unmount();
+  mount({ override: { features: [rowReorder(vi.fn())] } }).unmount();
+  mount({
+    isMobile: true,
+    override: { features: [rowReorder(vi.fn())] },
+  }).unmount();
 
   mount({
     override: {
@@ -620,6 +715,14 @@ const KEYS = [
   "printButton",
   "exportCsvButton",
   "exportSpinner",
+  "exportProgressSurface",
+  "exportProgressBar",
+  "exportProgressMessage",
+  "exportProgressActions",
+  "exportProgressCancel",
+  "exportProgressRetry",
+  "exportProgressDownload",
+  "exportProgressDismiss",
   "filtersAnchor",
   "filtersBackdrop",
   "filtersPopover",
@@ -673,6 +776,22 @@ const KEYS = [
   "columnMenuMore",
   "columnMenuSubmenu",
   "columnMenuAction",
+  "columnMenuChoice",
+  "columnMenuChoiceLabel",
+  "columnMenuChoiceSelect",
+  "columnRenameForm",
+  "columnRenameLabel",
+  "columnRenameInput",
+  "columnRenameError",
+  "columnRenameSave",
+  "columnRenameCancel",
+  "headerRenameButton",
+  "headerRenameForm",
+  "headerRenameLabel",
+  "headerRenameInput",
+  "headerRenameError",
+  "headerRenameSave",
+  "headerRenameCancel",
   "headerActions",
   "tableFooter",
   "viewsMenu",
@@ -748,6 +867,20 @@ const KEYS = [
   "groupLabel",
   "groupCount",
   "groupAggregate",
+  "groupingPanel",
+  "groupingDropZone",
+  "groupingItem",
+  "groupingChip",
+  "groupingChipHandle",
+  "groupingChipRemove",
+  "groupingAdd",
+  "groupingAggregations",
+  "groupingAggregationItem",
+  "groupingAggregationOperation",
+  "groupingAggregationRemove",
+  "groupingAggregationAdd",
+  "groupingAggregationsRestore",
+  "groupingRemoveZone",
   "editCellActivate",
   "editCellEditor",
   "cards",

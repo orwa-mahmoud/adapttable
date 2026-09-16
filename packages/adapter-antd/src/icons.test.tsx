@@ -4,25 +4,31 @@ import {
   PIN_BOTTOM_ACTION_KEY,
   PIN_TOP_ACTION_KEY,
   UNPIN_ROW_ACTION_KEY,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 
 import {
+  CancelRowIcon,
   ChevronRightIcon,
   DeleteRowIcon,
   DuplicateRowIcon,
+  EditRowIcon,
   FiltersIcon,
   iconForRowAction,
+  iconForRowEditPart,
   MoreVerticalIcon,
   PinBottomIcon,
   PinTopIcon,
+  SaveRowIcon,
   SearchIcon,
   UnpinRowIcon,
 } from "./icons";
 
 /** Every glyph this adapter exports, so none is added without a check. */
+const ROW_EDIT_PARTS = ["row-edit-begin", "row-edit-save", "row-edit-cancel"];
+
 const GLYPHS: readonly [string, (p: { size?: number }) => ReactNode][] = [
   ["FiltersIcon", FiltersIcon],
   ["SearchIcon", SearchIcon],
@@ -33,6 +39,9 @@ const GLYPHS: readonly [string, (p: { size?: number }) => ReactNode][] = [
   ["PinBottomIcon", PinBottomIcon],
   ["UnpinRowIcon", UnpinRowIcon],
   ["MoreVerticalIcon", MoreVerticalIcon],
+  ["EditRowIcon", EditRowIcon],
+  ["SaveRowIcon", SaveRowIcon],
+  ["CancelRowIcon", CancelRowIcon],
 ];
 
 const BUILT_IN = [
@@ -81,6 +90,19 @@ describe("icons", () => {
     for (const key of BUILT_IN) {
       const { container } = render(<>{iconForRowAction({ key })}</>);
       expect(container.querySelector("svg")).not.toBeNull();
+    }
+  });
+
+  it("keeps a host glyph, takes text on `false`, and otherwise draws its own", () => {
+    const host = <span data-testid="host" />;
+
+    expect(iconForRowEditPart("row-edit-save", host)).toBe(host);
+    expect(iconForRowEditPart("row-edit-save", false)).toBeUndefined();
+    expect(iconForRowEditPart("not-a-row-edit-part")).toBeUndefined();
+    for (const part of ROW_EDIT_PARTS) {
+      const { container } = render(<>{iconForRowEditPart(part)}</>);
+
+      expect(container.querySelector("svg"), part).not.toBeNull();
     }
   });
 });

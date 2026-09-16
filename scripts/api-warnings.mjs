@@ -7,16 +7,9 @@
  * anything ending in `$1` defers real findings too, because the bundler uses
  * the same suffix for a name it invented and for a name it merely renamed.
  *
- * The classes, in the order they are tested:
+ * The class that remains:
  *
- * 1. **alias** — a deprecated main-entry alias re-exported from
- *    `mainEntryAliases.ts`. The alias and its source module both land in
- *    core's rollup, so the bundler keeps two copies and suffixes the second.
- *    Deferring one requires all of: a suffix, a base name that is really an
- *    alias, and the report that alias lives in. A known alias reported from
- *    somewhere else is a finding, not an artifact.
- *
- * 2. **published** — a suffixed copy of a name the SAME entry point exports
+ * **published** — a suffixed copy of a name the SAME entry point exports
  *    under its own spelling. `print_2` is not a leaked API when consumers
  *    import `print`: the type is nameable from that route, and the copy is
  *    private to the bundle. The proof is read out of the emitted declaration
@@ -29,9 +22,6 @@
 import { readFileSync } from "node:fs";
 
 import { exportedNames } from "./packed-names.mjs";
-
-/** The report the main-entry aliases are rolled into. */
-export const ALIAS_REPORT = "core.api.md";
 
 /**
  * The exact places a public type is derived from a runtime value.
@@ -49,13 +39,10 @@ export const ALIAS_REPORT = "core.api.md";
  * finding, including a different symbol on one of these same reports.
  */
 export const VALUE_BACKED = [
-  ["core-adapter.api.md", "FILTER_TYPES"],
-  ["core-features.api.md", "FILTER_TYPES"],
   ["core-formula.api.md", "FILTER_TYPES"],
   ["core-pdf.api.md", "FILTER_TYPES"],
   ["core-pivot.api.md", "FILTER_TYPES"],
   ["core-query.api.md", "FORMULA_ERRORS"],
-  ["core-sparkline.api.md", "FILTER_TYPES"],
   ["core-xlsx.api.md", "FILTER_TYPES"],
 ];
 
@@ -65,21 +52,6 @@ const VALUE_BACKED_KEYS = new Set(
 
 /** The suffix shapes the declaration bundler assigns to a duplicate. */
 const GENERATED = /^(?<base>[A-Za-z_$][\w$]*?)(?<suffix>[$_]\d+)$/;
-
-/**
- * Every name `mainEntryAliases.ts` re-exports.
- *
- * Keyed on the BASE name, never the generated one: the suffix is assigned by
- * collision order and moves whenever chunking moves, so a literal list of
- * `foo$1` silently stops matching. The set empties itself when the aliases go.
- */
-export function aliasNames(source) {
-  return new Set(
-    [...source.matchAll(/^export (?:type|const) ([A-Za-z_$][\w$]*)/gm)].map(
-      (m) => m[1]
-    )
-  );
-}
 
 /**
  * Read an entry point's emitted declaration once, for the `published` test.
@@ -98,25 +70,21 @@ export function entryExports(entryDtsPath) {
 /**
  * Classify one `ae-forgotten-export`.
  *
- * Returns `{ kind, base, suffix }` where `kind` is `"alias"`, `"published"`,
- * `"front-door"` or `"subpath"`. The first two are artifacts and carry the
- * evidence that made them so; the last two are findings, split by whether the
- * entry point is one an application imports.
+ * Returns `{ kind, base, suffix }` where `kind` is `"published"`,
+ * `"value-backed"`, `"front-door"` or `"subpath"`. The first two are artifacts
+ * and carry the evidence that made them so; the last two are findings, split
+ * by whether the entry point is one an application imports.
  */
 export function classifyForgottenExport({
   symbol,
   report,
   isMainEntry,
-  aliases,
   exports: entryExported,
 }) {
   const match = GENERATED.exec(symbol);
   const base = match?.groups.base ?? symbol;
   const suffix = match?.groups.suffix ?? "";
 
-  if (suffix && report === ALIAS_REPORT && aliases.has(base)) {
-    return { kind: "alias", base, suffix };
-  }
   if (suffix && entryExported.has(base)) {
     return { kind: "published", base, suffix };
   }
@@ -135,7 +103,6 @@ export function classifyForgottenExport({
  */
 export function summarize(counts) {
   const said = [];
-  if (counts.alias) said.push(`${counts.alias} deprecated-alias artifact(s)`);
   if (counts.published) said.push(`${counts.published} published-name copy(s)`);
   if (counts.valueBacked)
     said.push(`${counts.valueBacked} value-backed type(s)`);

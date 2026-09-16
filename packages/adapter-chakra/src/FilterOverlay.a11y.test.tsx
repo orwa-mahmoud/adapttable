@@ -12,7 +12,7 @@
  * is off because its focus restore only works through `Popover.Trigger`), so
  * both the close and the focus hand-back ARE asserted here.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import {
   cleanup,
@@ -25,8 +25,8 @@ import {
 import { afterEach, describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
-import { DataTable } from "./DataTable";
-import type { ColumnDef, DataTableProps } from "./index";
+import { DataTable } from "./data-table.test-utils";
+import type { ColumnDef, FilterDef } from "./index";
 
 interface Person {
   id: string;
@@ -52,9 +52,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 
 // A select + a numberRange exercises the full auto-built filter form, so axe
 // scans real, labelled form controls — not an empty card.
-const FILTERS: DataTableProps<Person>["filters"] = [
-  { key: "age", type: "numberRange" },
-];
+const FILTERS: FilterDef<Person>[] = [{ key: "age", type: "numberRange" }];
 
 // `color-contrast` is jsdom-blind (the existing a11y.test.tsx disables it for
 // the same reason). `region` flags page-level landmarks — the host app's job,
@@ -68,7 +66,7 @@ const axeOpts = {
 const AXE_TIMEOUT_MS = 20_000;
 
 function renderTable(
-  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}
 ) {
   return render(
     <ChakraProvider value={defaultSystem}>
@@ -177,8 +175,26 @@ describe("filter overlay a11y (axe) — Chakra", () => {
     });
     // Escape also hands focus back to the trigger — the popover's own
     // document-level listener does it (Ark's restore only works through
-    // `Popover.Trigger`, which this anchored layout doesn't use).
-    expect(trigger()).toHaveFocus();
+    // `Popover.Trigger`, which this anchored layout doesn't use). That
+    // happens a frame later, so it is waited for rather than asserted on the
+    // spot: reading it synchronously passes only while the machine is idle.
+    await waitFor(() => {
+      expect(trigger()).toHaveFocus();
+    });
+  });
+
+  it("reclaims focus the closing panel dropped to the document", async () => {
+    renderTable();
+    await openFilterForm();
+
+    fireEvent.keyDown(document.body, { key: "Escape" });
+    // What Ark does a step later in this anchored layout: it has no trigger
+    // of its own to restore to, so focus lands nowhere.
+    (document.activeElement as HTMLElement | null)?.blur();
+
+    await waitFor(() => {
+      expect(trigger()).toHaveFocus();
+    });
   });
 
   it("opening the drawer moves focus into the dialog behind a backdrop", async () => {

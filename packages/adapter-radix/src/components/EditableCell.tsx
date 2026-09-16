@@ -1,22 +1,24 @@
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type EditableCellEditorCtrl,
-  EditableCellGate,
   editorInputType,
   isBooleanEditor,
   isDraftChecked,
   isMultiSelectEditor,
   isSelectEditor,
+} from "@adapttable/core";
+import {
+  type ColumnDef,
+  type EditableCellEditing,
+  type EditableCellEditorCtrl,
+  EditableCellGate,
   type MultiSelectEditorCheckboxProps,
   MultiSelectEditorChrome,
   type MultiSelectEditorSlots,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import {
   commitBooleanDraft,
   editorValidationProps,
   stopEditKeys,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { TextField } from "@radix-ui/themes";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 

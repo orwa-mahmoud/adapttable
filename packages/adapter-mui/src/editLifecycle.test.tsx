@@ -1,7 +1,8 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
+import { editing } from "./editing";
 import type { ColumnDef } from "./index";
 
 interface Task {
@@ -37,6 +38,7 @@ describe("edit lifecycle (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         onCellEdit={onCellEdit}
+        features={[editing(onCellEdit)]}
         onEditStart={onEditStart}
         onEditCommit={onEditCommit}
         onEditCancel={onEditCancel}

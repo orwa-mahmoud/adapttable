@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "完了",
+  staged: "保存待ち",
+  partial: "一部完了",
+  rejected: "却下",
+  "awaiting-approval": "確認待ち",
+  cancelled: "取り消し",
+  stale: "古い状態",
+  failed: "失敗",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "セルの編集",
+  "rows.add": "行の追加",
+  "rows.delete": "行の削除",
+  "rows.reorder": "行の並べ替え",
+  "export.run": "エクスポート",
+};
+
 export const ja: Required<TableLabels> = {
   table: "データテーブル",
   search: "検索",
@@ -114,6 +135,13 @@ export const ja: Required<TableLabels> = {
   hideAllColumns: "すべて非表示",
   unpinAllColumns: "すべて固定解除",
   resetColumn: "列をリセット",
+  renameColumn: "列名を変更",
+  columnName: "列名",
+  saveColumnName: "名前を保存",
+  cancelColumnRename: "キャンセル",
+  columnNameRequired: "列名を入力してください。",
+  columnRenamed: ({ previous, name }) =>
+    `列 ${previous} の名前を ${name} に変更しました`,
   sortAscending: "昇順で並べ替え",
   sortDescending: "降順で並べ替え",
   sortedBy: ({ column, ascending }) =>
@@ -123,8 +151,13 @@ export const ja: Required<TableLabels> = {
   columnActions: "列の操作",
   exportCsv: "CSVをエクスポート",
   exportFile: (format) => `${format.toUpperCase()}をエクスポート`,
+  exportStarted: "エクスポートを準備しています",
+  exportProgress: (progress) => `エクスポート ${progress}% 完了`,
   exportDone: "エクスポートが完了しました",
   exportFailed: "エクスポートに失敗しました",
+  exportCancelled: "エクスポートをキャンセルしました",
+  exportDownload: "エクスポートをダウンロード",
+  exportDismiss: "エクスポートを閉じる",
   editCell: "セルを編集",
   undoEdit: "元に戻す",
   redoEdit: "やり直す",
@@ -134,6 +167,177 @@ export const ja: Required<TableLabels> = {
     count === 1 ? "未保存の行 1 件" : `${String(count)} 件の未保存の行`,
   saveAll: "すべて保存",
   cancelAll: "すべて取り消し",
+  approveProposal: "承認",
+  rejectProposal: "却下",
+  proposalValueUnavailable: "取得できません",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "提案された変更 1 件"
+        : "提案された変更 {c} 件".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"{r} 行にわたって".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "{c} 件すべてを確認".replace("{c}", String(count)),
+  backToConversation: "会話に戻る",
+  approveAllProposals: "すべて承認",
+  approveRemainingProposals: "残りを承認",
+  rejectAllProposals: "すべて却下",
+  rejectRemainingProposals: "残りを却下",
+  alwaysAllowProposal: "常に許可",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "承認 {a} · 却下 {j} · 残り {p}"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "判断を待っている変更があります。",
+  pendingProposals: (count) =>
+    count === 1 ? "提案 1 件" : `${String(count)} 件の提案`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "テーブルアシスタント",
+  assistantOpen: "AI に質問",
+  assistantClose: "閉じる",
+  assistantSettings: "アシスタントの設定",
+  assistantEmpty: "このテーブルで何をしますか？",
+  assistantPlaceholder: "このテーブルについて質問…",
+  assistantSend: "送信",
+  assistantStop: "停止",
+  assistantVoiceStart: "音声入力",
+  assistantVoiceStop: "音声入力を停止",
+  assistantVoiceListening: "認識中",
+  assistantVoiceLanguage: "音声入力の言語",
+  assistantYou: "あなた",
+  assistantSpeaker: "アシスタント",
+  assistantNewMessages: "新しいメッセージ",
+  assistantUnavailable: "アシスタントは接続されていません。",
+  assistantDetached: "接続が切れました。処理はまだ続いている可能性があります。",
+  assistantRejoin: "再接続",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} 件完了`
+      : `${String(total)} 件中 ${String(done)} 件`,
+  assistantBackToTable: "テーブルに戻る",
+  assistantDetail: "詳細",
+  assistantSaveInTable: "この変更を残すにはテーブルで保存してください。",
+  assistantUndo: "元に戻す",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "1 回のやり取りで許される手順を超えます。一部だけ依頼してください。",
+        "continuation-limit":
+          "1 回のやり取りで許される手順を超えます。一部だけ依頼してください。",
+        "resume-limit":
+          "1 回のやり取りで許される手順を超えます。一部だけ依頼してください。",
+        "discovery-exhausted":
+          "ここでその方法をアシスタントが判断できませんでした。",
+        "repeated-plan": "アシスタントが同じ要求を繰り返したため停止しました。",
+        "question-unanswered": "完了するにはあなたの回答が必要です。",
+        "approval-unavailable": "承認が必要ですが、尋ねる先がありません。",
+        "interrupt-unsupported": "このテーブルにできないことを要求しました。",
+        "output-denied": "その一部は実行を許可されませんでした。",
+        "not-run": "実行されませんでした。",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "実行後にテーブルが変わりました。",
+        "cannot-restore": "一部は元に戻せません。",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "回答",
+  assistantAnswerPlaceholder: "回答を入力",
+  assistantAnswerSend: "送信",
+  assistantAlwaysAllowedTitle: "確認しない操作",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `${CAPABILITY[capability] ?? capability}について再び確認する`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 件の操作" : `${String(count)} 件の操作`,
+  assistantActionsTitle: "このやり取りで変わったこと",
+  assistantUndoAll: "すべて元に戻す",
+  assistantExamples: "ショートカット",
+  assistantReceiptChange: ({ before, after }) =>
+    `${before} から ${after} に変更しました`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `提案: ${before} から ${after} へ`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "フィルターを適用しました",
+        "filter/staged": "フィルターを準備しました",
+        "sort/executed": "並べ替えました",
+        "group/executed": "グループ化しました",
+        "pin/executed": "列を固定しました",
+        "edit/executed": "保存しました",
+        "edit/staged": "編集を準備しました — 未保存",
+        "edit/awaiting-approval": "編集は承認待ちです",
+        "edit/partial": "一部の編集は保存、一部は却下",
+        "edit/rejected": "編集は拒否されました",
+        "filter-cleared/executed": "フィルターを解除しました",
+        "sort-cleared/executed": "並べ替えを解除しました",
+        "search/executed": "検索しました",
+        "search-cleared/executed": "検索を解除しました",
+        "group-cleared/executed": "グループ化を解除しました",
+        "pin-cleared/executed": "列の固定を解除しました",
+        "pinRow/executed": "行を固定しました",
+        "pinRow-cleared/executed": "行の固定を解除しました",
+        "page/executed": "ページを変更しました",
+        "aggregate/executed": "集計を変更しました",
+        "select/executed": "選択を変更しました",
+        "read/executed": "テーブルを読み取りました",
+        "operation/executed": "実行しました",
+        "operation/awaiting-approval": "あなたを待っています",
+        "operation/rejected": "拒否されました",
+        "export/executed": "エクスポートしました",
+        "add/executed": "行を追加しました",
+        "add/awaiting-approval": "新しい行が承認待ちです",
+        "add/rejected": "新しい行が拒否されました",
+        "delete/executed": "行を削除しました",
+        "delete/awaiting-approval": "削除が承認待ちです",
+        "delete/partial": "一部の行を削除し、一部を残しました",
+        "delete/rejected": "削除が拒否されました",
+        "reorder/executed": "行を移動しました",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "降順" : "昇順"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "待機中",
+      connecting: "接続中…",
+      ready: "準備完了",
+      sending: "処理中…",
+      "awaiting-approval": "確認待ち",
+      "awaiting-user": "確認待ち",
+      error: "エラー",
+      disconnected: "未接続",
+    })[status] ?? "準備完了",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "行を追加",
   duplicateRow: "行を複製",
   deleteRow: "行を削除",
@@ -150,9 +354,28 @@ export const ja: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `行を ${String(from)} から ${String(to)} へ移動しました`,
   rowReorderCancelled: "並び替えを取り消しました",
+  rowMoveOptions: "行の移動オプション",
+  moveToGroup: "グループへ移動…",
+  moveUnder: "配下へ移動…",
+  moveToTopLevel: "最上位へ移動",
+  confirmRowMoveTitle: "行の移動を確認",
+  confirmRowMoveDescription: (row, from, to) =>
+    `${row} を ${from} から ${to} へ移動しますか？`,
+  confirmRowMove: "移動",
+  rowMovedToGroup: (group) => `行を ${group} へ移動しました`,
+  rowMovedUnder: (parent) => `行を ${parent} の配下へ移動しました`,
+  moveRejectedPolicyNever: "境界を越える行の移動は無効です",
+  moveRejectedSorted: "行の順序を変更する前に並べ替えを解除してください",
+  moveRejectedCycle:
+    "行をその行自体またはその子孫の中へ移動することはできません",
+  moveUnavailable: "この行の移動は利用できません",
+  rootLevel: "最上位",
   pinToTop: "上に固定",
   pinToBottom: "下に固定",
   unpinRow: "行の固定を解除",
+  pinnedSummaryRow: "集計行",
+  pinnedSummaryTop: "上部に固定された集計行",
+  pinnedSummaryBottom: "下部に固定された集計行",
   rowSeparator: "区切り",
   expandColumnGroup: "列グループを展開",
   collapseColumnGroup: "列グループを折りたたむ",
@@ -162,6 +385,34 @@ export const ja: Required<TableLabels> = {
   expandGroup: "グループを展開",
   collapseGroup: "グループを折りたたむ",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "行のグループ化",
+  groupingDropColumns: "列をここにドラッグしてグループ化",
+  addGroupingColumn: "グループ化する列を追加",
+  groupByColumn: (label) => `${label} でグループ化`,
+  ungroupColumn: (label) => `${label} のグループ化を解除`,
+  removeGroupingColumn: (label) => `${label} をグループ化から削除`,
+  moveGroupingColumn: (label) => `${label} のグループ化を移動`,
+  groupingDropToRemove: "ここにドロップしてグループ化を解除",
+  groupingAggregateColumn: "集計列",
+  groupingAggregation: "グループ集計",
+  groupingAggregationDefault: "既定",
+  groupingAggregationNone: "なし",
+  groupingAggregations: "集計",
+  groupingAddAggregation: "集計する列を追加",
+  groupingRestoreAggregations: "既定に戻す",
+  groupingRemoveAggregation: (column) => `${column} の集計を削除`,
+  groupingAggregationFor: (column) => `${column} の集計`,
+  groupingAggregationReadOnly: "アプリが設定",
+  groupingAggregationCustom: "カスタム",
+  groupingAggregateRemoved: (column) => `${column} の集計を削除しました`,
+  groupingAggregatesRestored: "集計を既定に戻しました",
+  groupingAverage: "平均",
+  groupingAdded: (label) => `${label} をグループ化に追加しました`,
+  groupingRemoved: (label) => `${label} をグループ化から削除しました`,
+  groupingMoved: (label, position) =>
+    `${label} をグループ化の ${position} 番目に移動しました`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `${label} のグループ集計を ${aggregation} に変更しました`,
   gridRangeCopied: (cells) => `${cells}セルをコピーしました`,
   gridRangeCopyFailed: "コピーに失敗しました",
   gridRangePasted: (cells) => `${cells} 件のセルを貼り付けました`,
@@ -216,10 +467,9 @@ export const ja: Required<TableLabels> = {
   noticeReorderNested:
     "グループ化またはツリーの使用中は行の並べ替えはオフです。",
   noticeGroupingUnavailable:
-    "グループ化はオフです。このソースは絞り込んだ全件を提供しません。",
+    "グループ化はオフです。このソースはグループ化できません。",
   noticeExportAllPage:
-    "すべて書き出しはこのページです。絞り込んだ全件は利用できません。",
+    "すべて書き出しはオフです。このソースは一度に 1 ページのみ提供します。",
   noticeEditWithoutWriter:
     "編集はオフです。書き込みハンドラーがつながっていません。",
-  exportThisPage: "このページを書き出す",
 };

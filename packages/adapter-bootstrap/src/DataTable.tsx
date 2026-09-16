@@ -1,5 +1,7 @@
 import {
+  DataTableShellView,
   FeatureHostProvider,
+  FeatureProviders,
   GridFocusAnnouncer,
   RowReorderAnnouncer,
   type TableBodyRegion,
@@ -7,7 +9,7 @@ import {
   useDataTableShell,
   useMountStagger,
   useTableFeatures,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
 import { ColumnMenu } from "./components/ColumnMenu";
@@ -28,7 +30,7 @@ function renderNoAutoForm() {
  *
  * @public
  */
-export function DataTable<TRow>(
+function DataTableContent<TRow>(
   incoming: Readonly<DataTableProps<TRow>>
 ): ReactNode {
   const props = useTableFeatures(incoming);
@@ -46,7 +48,6 @@ export function DataTable<TRow>(
     source,
     table,
     labels,
-    toolbarProps,
     filtersOpen,
     filtersTrigger,
     setFiltersOpen,
@@ -55,116 +56,151 @@ export function DataTable<TRow>(
     hasRowReorder,
   } = shell;
 
-  const tableProps = {
-    ...shell.tableProps,
-    size,
-    dir: props.dir,
-  };
-
   useMountStagger(rootRef, [source.rows.length, chrome.isMobile], {
     enabled: animate,
   });
 
-  const bodyByRegion: Record<TableBodyRegion, ReactNode> = {
-    skeleton: slots?.skeleton ?? (
-      <div className="text-center py-5 text-muted">{labels.loading}</div>
-    ),
-    empty:
-      (chrome.emptyVariant === "noResults" ? slots?.noResults : undefined) ??
-      slots?.empty ??
-      (chrome.emptyVariant === "noResults" ? (
-        <div className="d-flex flex-column align-items-center py-5 gap-2">
-          <p className="text-muted mb-0">{labels.noResults}</p>
-          <button
-            type="button"
-            className="btn btn-outline-secondary btn-sm"
-            onClick={chrome.clearFilters}
-          >
-            {labels.clearAll}
-          </button>
-        </div>
-      ) : (
-        <p className="text-muted text-center py-5 mb-0">{labels.noData}</p>
-      )),
-    mobile: (
-      <DesktopTable
-        {...tableProps}
-        prefetch={props.prefetch}
-        className={props.classNames?.table}
-      />
-    ),
-    desktop: (
-      <DesktopTable
-        {...tableProps}
-        prefetch={props.prefetch}
-        className={props.classNames?.table}
-      />
-    ),
-  };
-
   return (
-    <FeatureHostProvider host={shell.featureHost}>
-      <div
-        ref={rootRef}
-        dir={props.dir}
-        className={`d-flex flex-column gap-3 ${props.classNames?.root ?? ""}`.trim()}
-        aria-busy={chrome.isRefreshing || undefined}
-      >
-        <GridFocusAnnouncer focus={shell.gridFocus} />
-        <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
-        {shell.tableProps.rowReorder ? (
-          <RowReorderAnnouncer
-            announcement={shell.tableProps.rowReorder.announcement}
-          />
-        ) : null}
+    <DataTableShellView shell={shell}>
+      {(view) => {
+        const tableProps = {
+          ...view.tableProps,
+          size,
+          dir: props.dir,
+        };
+        const { toolbarProps } = view;
+        const bodyByRegion: Record<TableBodyRegion, ReactNode> = {
+          skeleton: slots?.skeleton ?? (
+            <div className="text-center py-5 text-muted">{labels.loading}</div>
+          ),
+          empty:
+            (chrome.emptyVariant === "noResults"
+              ? slots?.noResults
+              : undefined) ??
+            slots?.empty ??
+            (chrome.emptyVariant === "noResults" ? (
+              <div className="d-flex flex-column align-items-center py-5 gap-2">
+                <p className="text-muted mb-0">{labels.noResults}</p>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={chrome.clearFilters}
+                >
+                  {labels.clearAll}
+                </button>
+              </div>
+            ) : (
+              <p className="text-muted text-center py-5 mb-0">
+                {labels.noData}
+              </p>
+            )),
+          mobile: (
+            <DesktopTable
+              {...tableProps}
+              prefetch={props.prefetch}
+              className={props.classNames?.table}
+            />
+          ),
+          desktop: (
+            <DesktopTable
+              {...tableProps}
+              prefetch={props.prefetch}
+              className={props.classNames?.table}
+            />
+          ),
+        };
 
-        <Toolbar
-          {...toolbarProps}
-          className={props.classNames?.toolbar}
-          filtersMode={filtersMode}
-          filtersOpen={filtersOpen}
-          onToggleFilters={filtersTrigger.onClick}
-          onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
-          onCloseFilters={() => setFiltersOpen(false)}
-          columnMenu={
-            props.enableColumnMenu && !chrome.isMobile ? (
-              <ColumnMenu
-                allColumns={chrome.allColumns}
-                layout={chrome.columnLayout}
-                labels={labels}
-                onAutoSize={shell.autoSizeColumns}
-                onAutoSizeColumn={shell.autoSizeColumn}
-                onSortColumn={(key, dir) => source.setSort(key, dir)}
-                onFilterColumn={() => setFiltersOpen(true)}
-                sortBy={source.sortBy}
-                sortDir={source.sortDir}
-                hasRowActions={hasRowActions}
-                hasRowReorder={hasRowReorder}
-                dir={props.dir}
+        return (
+          <FeatureHostProvider host={shell.featureHost}>
+            <div
+              ref={rootRef}
+              dir={props.dir}
+              className={`d-flex flex-column gap-3 ${props.classNames?.root ?? ""}`.trim()}
+              aria-busy={chrome.isRefreshing || undefined}
+            >
+              <GridFocusAnnouncer focus={view.gridFocus} />
+              <TableStatusAnnouncer announcement={shell.statusAnnouncement} />
+              {shell.tableProps.rowReorder ? (
+                <RowReorderAnnouncer
+                  announcement={shell.tableProps.rowReorder.announcement}
+                />
+              ) : null}
+
+              <Toolbar
+                {...toolbarProps}
+                className={props.classNames?.toolbar}
+                filtersMode={filtersMode}
+                filtersOpen={filtersOpen}
+                onToggleFilters={filtersTrigger.onClick}
+                onFiltersTriggerPointerDown={filtersTrigger.onPointerDown}
+                onCloseFilters={() => setFiltersOpen(false)}
+                columnMenu={
+                  props.enableColumnMenu && !chrome.isMobile ? (
+                    <ColumnMenu
+                      allColumns={chrome.allColumns}
+                      layout={chrome.columnLayout}
+                      labels={labels}
+                      onAutoSize={shell.autoSizeColumns}
+                      onAutoSizeColumn={shell.autoSizeColumn}
+                      onSortColumn={(key, dir) => source.setSort(key, dir)}
+                      onFilterColumn={() => setFiltersOpen(true)}
+                      sortBy={source.sortBy}
+                      sortDir={source.sortDir}
+                      hasRowActions={hasRowActions}
+                      hasRowReorder={hasRowReorder}
+                      dir={props.dir}
+                    />
+                  ) : undefined
+                }
               />
-            ) : undefined
-          }
-        />
 
-        {bodyByRegion[chrome.body]}
+              {bodyByRegion[chrome.body]}
 
-        {props.tableFooter ? (
-          <div data-adapttable-part="table-footer">{props.tableFooter}</div>
-        ) : null}
+              {props.tableFooter ? (
+                <div data-adapttable-part="table-footer">
+                  {props.tableFooter}
+                </div>
+              ) : null}
 
-        {chrome.showFooter && (
-          <Footer
-            className={props.classNames?.footer}
-            pagination={table.pagination}
-            total={source.total}
-            limit={source.limit}
-            setPage={source.setPage}
-            setLimit={source.setLimit}
-            labels={labels}
-            showRowsPerPage={!chrome.grouping}
-          />
-        )}
-      </div>
-    </FeatureHostProvider>
+              {chrome.showFooter && (
+                <Footer
+                  className={props.classNames?.footer}
+                  pagination={table.pagination}
+                  total={source.total}
+                  limit={source.limit}
+                  setPage={source.setPage}
+                  setLimit={source.setLimit}
+                  labels={labels}
+                  showRowsPerPage={!chrome.grouping}
+                />
+              )}
+            </div>
+          </FeatureHostProvider>
+        );
+      }}
+    </DataTableShellView>
+  );
+}
+
+/**
+ * Resolve `features` and mount whatever providers they contribute, then render
+ * the table inside them.
+ *
+ * A feature that owns hooks owns a component, so its provider has to sit ABOVE
+ * the body that reads what it publishes — that is the whole reason this is two
+ * components rather than one.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
+export function DataTable<TRow>(
+  incoming: Readonly<DataTableProps<TRow>>
+): ReactNode {
+  const props = useTableFeatures(incoming);
+  return (
+    <FeatureProviders props={props}>
+      <DataTableContent<TRow> {...props} />
+    </FeatureProviders>
   );
 }

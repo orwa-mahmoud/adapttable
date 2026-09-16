@@ -7,17 +7,18 @@
  * fall back to a rescan of the rows the total describes. That is still
  * the group or the filtered set, not the unfiltered source.
  */
-import type { ReactNode } from "react";
-
 import {
   aggregate,
   type AggregateName,
   type AggregateOptions,
+  type AggregateOrderedValue,
   type AggregateSpec,
   resolveAggregateValue,
   toAggregateNumber,
+  toAggregateOrdered,
 } from "../aggregate/aggregate";
-import type { ColumnDef, SortableValue } from "../types";
+import type { ColumnMetadata } from "../columnModel";
+import type { DisplayValue } from "../display";
 
 interface ColumnAcc {
   kind: AggregateName | "custom";
@@ -26,6 +27,8 @@ interface ColumnAcc {
   presentCount: number;
   min: number | undefined;
   max: number | undefined;
+  minResult: AggregateOrderedValue;
+  maxResult: AggregateOrderedValue;
   /** The old min or max left; `read` must rescan. */
   dirty: boolean;
 }
@@ -46,7 +49,7 @@ export interface IncrementalAggregate<TRow> {
   /** Options the aggregate was built with. */
   options: AggregateOptions<TRow>;
   /** Columns by key. */
-  columns: ReadonlyMap<string, ColumnDef<TRow>>;
+  columns: ReadonlyMap<string, ColumnMetadata<TRow>>;
   /** Per-column bindings for the aggregate. */
   bindings: ColumnBinding[];
 }
@@ -80,6 +83,8 @@ export function createIncrementalAggregate<TRow>(
         presentCount: 0,
         min: undefined,
         max: undefined,
+        minResult: undefined,
+        maxResult: undefined,
         dirty: kind === undefined,
       },
     });
@@ -154,14 +159,14 @@ export function replaceAggregateRow<TRow>(
 export function readIncrementalAggregate<TRow>(
   state: IncrementalAggregate<TRow>,
   rows: readonly TRow[]
-): Partial<Record<string, ReactNode>> {
+): Partial<Record<string, DisplayValue>> {
   if (state.bindings.some((binding) => binding.acc.kind === "custom")) {
     return aggregate(state.spec, state.options)(rows);
   }
   if (state.bindings.some((binding) => binding.acc.dirty)) {
     rescan(state, rows);
   }
-  const out: Partial<Record<string, ReactNode>> = {};
+  const out: Partial<Record<string, DisplayValue>> = {};
   const format = state.options.format;
   for (const { key, acc } of state.bindings) {
     const result = cellOf(acc);
@@ -187,35 +192,64 @@ function valueOf<TRow>(
   state: IncrementalAggregate<TRow>,
   row: TRow,
   key: string
-): SortableValue {
+): AggregateOrderedValue {
   return resolveAggregateValue(row, key, state.columns.get(key));
 }
 
-function applyValue(acc: ColumnAcc, value: SortableValue, sign: 1 | -1): void {
+function applyValue(
+  acc: ColumnAcc,
+  value: AggregateOrderedValue,
+  sign: 1 | -1
+): void {
   if (acc.kind === "custom") {
     acc.dirty = true;
     return;
   }
   if (value === undefined || value === null) return;
   acc.presentCount += sign;
+  if (acc.kind === "count") return;
+  if (acc.kind === "min" || acc.kind === "max") {
+    applyOrdered(acc, value, sign);
+    return;
+  }
   const n = toAggregateNumber(value);
   if (n === undefined) return;
   acc.sum += sign * n;
   acc.numericCount += sign;
+  if (sign === -1 && acc.numericCount <= 0) {
+    acc.sum = 0;
+    acc.numericCount = 0;
+  }
+}
+
+function applyOrdered(
+  acc: ColumnAcc,
+  value: AggregateOrderedValue,
+  sign: 1 | -1
+): void {
+  const ordered = toAggregateOrdered(value);
+  if (!ordered) return;
+  acc.numericCount += sign;
   if (sign === 1) {
-    acc.min = acc.min === undefined ? n : Math.min(acc.min, n);
-    acc.max = acc.max === undefined ? n : Math.max(acc.max, n);
+    if (acc.min === undefined || ordered.rank < acc.min) {
+      acc.min = ordered.rank;
+      acc.minResult = ordered.result;
+    }
+    if (acc.max === undefined || ordered.rank > acc.max) {
+      acc.max = ordered.rank;
+      acc.maxResult = ordered.result;
+    }
     return;
   }
   if (acc.numericCount <= 0) {
-    acc.sum = 0;
-    acc.numericCount = 0;
     acc.min = undefined;
     acc.max = undefined;
+    acc.minResult = undefined;
+    acc.maxResult = undefined;
     acc.dirty = false;
     return;
   }
-  if (n === acc.min || n === acc.max) acc.dirty = true;
+  if (ordered.rank === acc.min || ordered.rank === acc.max) acc.dirty = true;
 }
 
 function rescan<TRow>(
@@ -228,17 +262,20 @@ function rescan<TRow>(
     acc.presentCount = 0;
     acc.min = undefined;
     acc.max = undefined;
+    acc.minResult = undefined;
+    acc.maxResult = undefined;
     acc.dirty = false;
   }
   for (const row of rows) addAggregateRow(state, row);
 }
 
-function cellOf(acc: ColumnAcc): number | undefined {
-  if (acc.kind === "sum") return acc.sum;
-  if (acc.kind === "count") return acc.presentCount;
-  if (acc.kind === "avg") {
-    return acc.numericCount ? acc.sum / acc.numericCount : undefined;
-  }
-  if (acc.kind === "min") return acc.min;
-  return acc.max;
+function cellOf(acc: ColumnAcc): DisplayValue | undefined {
+  let result: DisplayValue | undefined;
+  if (acc.kind === "sum") result = acc.sum;
+  else if (acc.kind === "count") result = acc.presentCount;
+  else if (acc.kind === "avg") {
+    result = acc.numericCount ? acc.sum / acc.numericCount : undefined;
+  } else if (acc.kind === "min") result = acc.minResult;
+  else result = acc.maxResult;
+  return result;
 }

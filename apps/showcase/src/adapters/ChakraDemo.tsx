@@ -1,10 +1,83 @@
-import { DataTable, type DataTableProps } from "@adapttable/chakra";
+import { DataTable } from "@adapttable/chakra";
+import { bulkActions as bulkActions_ } from "@adapttable/chakra/bulk-actions";
+import { cellNavigation as cellNavigation_ } from "@adapttable/chakra/cell-navigation";
+import { collapsibleColumnGroups as columnGroups_ } from "@adapttable/chakra/column-groups";
+import { columnMenu as columnMenu_ } from "@adapttable/chakra/column-menu";
+import { columnSelectionCheckbox as columnSelection_ } from "@adapttable/chakra/column-selection";
+import { commandPalette as commandPalette_ } from "@adapttable/chakra/command-palette";
+import { contextMenu as contextMenu_ } from "@adapttable/chakra/context-menu";
+import { densityChooser as densityChooser_ } from "@adapttable/chakra/density";
+import {
+  batchEditing as batchEditing_,
+  editHistory as editHistory_,
+  editing as editing_,
+  rowEditing as rowEditing_,
+  undoRedoButtons as undoRedoButtons_,
+} from "@adapttable/chakra/editing";
+import { exportCsv as exportCsv_ } from "@adapttable/chakra/export";
+import {
+  filters as filters_,
+  filterTypes as filterTypes_,
+} from "@adapttable/chakra/filters";
+import { findInTable as findInTable_ } from "@adapttable/chakra/find-in-table";
+import { fullscreen as fullscreen_ } from "@adapttable/chakra/fullscreen";
+import { groupingPanel as groupingPanel_ } from "@adapttable/chakra/grouping-panel";
+import { headerFilters as headerFilters_ } from "@adapttable/chakra/header-filters";
+import { nestedTable as nestedTable_ } from "@adapttable/chakra/nested-table";
+import { print as print_ } from "@adapttable/chakra/print";
+import { resizableColumns as resizableColumns_ } from "@adapttable/chakra/resizable-columns";
+import { rowActions as rowActions_ } from "@adapttable/chakra/row-actions";
+import { rowReorder as rowReorder_ } from "@adapttable/chakra/row-reorder";
+import { savedViews as savedViews_ } from "@adapttable/chakra/saved-views";
+import { sidePanel as sidePanel_ } from "@adapttable/chakra/side-panel";
+import {
+  selectionStats as selectionStats_,
+  statusBar as statusBar_,
+} from "@adapttable/chakra/status-bar";
+import { tree as tree_ } from "@adapttable/chakra/tree";
+import type { ColumnLayoutState } from "@adapttable/core";
+import { getDirection, getLabels } from "@adapttable/i18n";
 import type {
   ColumnDef,
-  ColumnLayoutState,
+  FeatureProps,
   NestedTableDefaults,
-} from "@adapttable/core";
-import { getDirection, getLabels } from "@adapttable/i18n";
+} from "@adapttable/react";
+
+import { kitChromeFeatures } from "./chromeFeatures";
+
+/** This kit's factories, handed to the shared builder. */
+const KIT_CHROME = {
+  cellNavigation: cellNavigation_,
+  columnSelectionCheckbox: columnSelection_,
+  densityChooser: densityChooser_,
+  batchEditing: batchEditing_,
+  editHistory: editHistory_,
+  editing: editing_,
+  groupingPanel: groupingPanel_,
+  rowEditing: rowEditing_,
+  rowReorder: rowReorder_,
+  tree: tree_,
+  exportCsv: exportCsv_,
+  fullscreen: fullscreen_,
+  headerFilters: headerFilters_,
+  nestedTable: nestedTable_,
+  print: print_,
+  resizableColumns: resizableColumns_,
+  rowActions: rowActions_,
+  savedViews: savedViews_,
+  undoRedoButtons: undoRedoButtons_,
+  bulkActions: bulkActions_,
+  collapsibleColumnGroups: columnGroups_,
+  columnMenu: columnMenu_,
+  commandPalette: commandPalette_,
+  contextMenu: contextMenu_,
+  filters: filters_,
+  filterTypes: filterTypes_,
+  findInTable: findInTable_,
+  selectionStats: selectionStats_,
+  sidePanel: sidePanel_,
+  statusBar: statusBar_,
+};
 import {
   Avatar,
   Badge,
@@ -23,7 +96,6 @@ import {
   demoFilterTypes,
   type DemoOrder,
   demoOrders,
-  demoSavedViews,
   LIVE_DEFAULT_LAYOUT,
   type LoadCellProps,
   type Locale,
@@ -44,6 +116,7 @@ import {
   type Failure,
   type FiltersUi,
   type PageMode,
+  showsRowActions,
 } from "../Demo";
 import { useDemoFilterDefs } from "../demoFilters";
 import {
@@ -117,6 +190,8 @@ export function ChakraDemo({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
+  summaryRow,
   cellSpan,
   extraRows,
   rowStyle,
@@ -170,6 +245,8 @@ export function ChakraDemo({
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -194,7 +271,7 @@ export function ChakraDemo({
   editorShowcase?: boolean;
   /** Show the Columns menu. Defaults to on unless the page is focused. */
   /** The toolbar Export button's configuration. */
-  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
+  exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
   columnMenu?: boolean;
   /** Show the Filters control. Defaults to on unless the page is focused. */
   filterControls?: boolean;
@@ -210,7 +287,7 @@ export function ChakraDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
   /** Use the wide, horizontally-scrolling column set with Person pinned. */
   wide?: boolean;
   defaultColumnLayout?: Partial<ColumnLayoutState>;
@@ -220,12 +297,18 @@ export function ChakraDemo({
 }>) {
   const s = strings(locale);
   const filters = useDemoFilterDefs(locale);
+  const rowActionsShown = showsRowActions({
+    rowMutations,
+    focused,
+    columnGroups,
+  });
   return (
     <ChakraProvider value={defaultSystem}>
       {/* Chakra v3 resolves `_dark` tokens under a `.dark` ancestor, so forcing
           the class here tracks the page theme without next-themes/persistence. */}
       <Box className={dark ? "dark" : "light"} bg="bg" color="fg">
         <DemoBody
+          rowActionsShown={rowActionsShown}
           mode={mode}
           pageMode={pageMode}
           urlKey={urlKey}
@@ -247,6 +330,8 @@ export function ChakraDemo({
           rowMutations={rowMutations}
           rowReorder={rowReorder}
           rowPinning={rowPinning}
+          pinnedSummaryRows={pinnedSummaryRows}
+          summaryRow={summaryRow}
           cellSpan={cellSpan}
           extraRows={extraRows}
           rowStyle={rowStyle}
@@ -258,7 +343,10 @@ export function ChakraDemo({
           editing={editing}
           derivedFields={derivedFields}
           formulaColumns={formulaColumns}
-          render={(source, columns) => (
+          render={(
+            source,
+            { features: demoFeatures, demoRowHandlers, ...columns }
+          ) => (
             <DataTable
               source={source}
               columns={
@@ -285,24 +373,42 @@ export function ChakraDemo({
                     })
               }
               rowKey={(r) => r.id}
-              features={nested ? nestedOuterFeatures<Person>() : undefined}
-              nestedTable={nested ? nestedOrders : undefined}
-              defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
-              cellNavigation={cellNavigation ?? editing}
-              columnSelectionCheckbox={columnSelectionCheckbox}
-              statusBar={statusBar}
-              contextMenu={contextMenu}
-              densityChooser={densityChooser}
+              features={[
+                ...(nested ? nestedOuterFeatures<Person>() : []),
+                ...kitChromeFeatures(KIT_CHROME, {
+                  cellNavigation,
+                  columnSelectionCheckbox,
+                  densityChooser,
+                  editing,
+                  exportCsv,
+                  focused,
+                  fullscreen,
+                  headerFilters,
+                  nested: nested ? nestedOrders : undefined,
+                  nestedOpenIds: nestedOpenIds(nested, source.rows),
+                  onPrint,
+                  printButton,
+                  undoRedoButtons,
+                  urlKey,
+                  bulkActions,
+                  bulkActionList: makeBulkActions(locale),
+                  collapsibleColumnGroups: columns.collapsibleColumnGroups,
+                  columnMenu,
+                  rowActions: rowActionsShown
+                    ? makeActions(locale, demoRowHandlers)
+                    : undefined,
+                  commandPalette,
+                  contextMenu,
+                  filterControls,
+                  filterDefs: filters,
+                  filterTypeSpecs: demoFilterTypes(),
+                  sidePanel,
+                  statusBar,
+                  kitFeatures: columns.kitFeatures,
+                }),
+                ...(demoFeatures ?? []),
+              ]}
               onDensityChange={onDensityChange}
-              fullscreen={fullscreen}
-              commandPalette={commandPalette}
-              onPrint={onPrint}
-              printButton={printButton}
-              undoRedoButtons={undoRedoButtons}
-              sidePanel={sidePanel}
-              selectionStats={editing}
-              editHistory={editing}
-              findInTable={editing}
               {...columns}
               forceMobile={forceMobile}
               density={density}
@@ -311,26 +417,11 @@ export function ChakraDemo({
               locale={locale}
               dir={getDirection(locale)}
               searchPlaceholder={s.search}
-              rowActions={
-                rowMutations || (focused && !columnGroups)
-                  ? undefined
-                  : makeActions(locale)
-              }
               rowActionsLayout={rowMutations ? "menu" : undefined}
-              bulkActions={
-                (bulkActions ?? !focused) ? makeBulkActions(locale) : undefined
-              }
               confirm={demoConfirm}
-              enableColumnMenu={columnMenu ?? !focused}
-              exportCsv={exportCsv ?? !focused}
-              savedViews={focused ? undefined : demoSavedViews(urlKey)}
               animate={animate}
-              resizableColumns
               stickyHeader
-              headerFilters={headerFilters}
               filterFields={filterFields}
-              filters={(filterControls ?? !focused) ? filters : undefined}
-              filterTypes={demoFilterTypes()}
             />
           )}
         />

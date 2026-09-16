@@ -3,7 +3,7 @@ import {
   type FillHandleChromeProps,
   type FillHandleSlotProps,
   type FillHandleSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 function Handle({ label, handleProps, className }: FillHandleSlotProps) {
   return (

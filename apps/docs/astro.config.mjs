@@ -1,4 +1,5 @@
 import starlight from "@astrojs/starlight";
+import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
 import { defineConfig } from "astro/config";
 
 import { sidebar } from "./sidebar.mjs";
@@ -16,7 +17,7 @@ export default defineConfig({
     starlight({
       title: "AdaptTable",
       description:
-        "One headless React data-table engine, native adapters for Mantine, MUI, Chakra, Ant Design, Radix, Base UI and Tailwind/shadcn.",
+        "React data tables with a framework-neutral engine, native UI-kit adapters and optional features for filtering, editing, pivoting and AI integration.",
       head: [
         // Social-share image is per-page (PNG, 1200x630): sync-docs injects a
         // distinct og:image/twitter:image into each page's frontmatter `head`.
@@ -54,90 +55,94 @@ export default defineConfig({
           }),
         },
         // Cloudflare Web Analytics — cookieless, no consent banner needed.
+        // Injected only off localhost, so a local run files no session.
         {
           tag: "script",
-          attrs: {
-            defer: true,
-            src: "https://static.cloudflareinsights.com/beacon.min.js",
-            "data-cf-beacon": '{"token": "dd71ff9f3b7b4064969d3f81e8c6ee9b"}',
-          },
+          content: guarded(
+            appendScript(
+              "https://static.cloudflareinsights.com/beacon.min.js",
+              {
+                defer: true,
+                "data-cf-beacon":
+                  '{"token": "dd71ff9f3b7b4064969d3f81e8c6ee9b"}',
+              }
+            )
+          ),
         },
-        // Google Analytics (GA4), production builds only. Runs alongside the
-        // Cloudflare beacon: the beacon stays the cookieless baseline, GA4
-        // adds funnel and event reporting. Unlike the beacon — which is bound
-        // to a hostname and drops anything that is not the real site — GA4
-        // accepts hits from any host, so a dev server would report itself.
+        // Google Analytics (GA4), production builds only, and only off
+        // localhost. Runs alongside the Cloudflare beacon: the beacon stays
+        // the cookieless baseline, GA4 adds funnel and event reporting. GA4
+        // accepts hits from any host, so without the host guard a local
+        // preview would report itself as a real visitor.
         ...(IS_BUILD
           ? [
               {
                 tag: "script",
-                attrs: {
-                  async: true,
-                  // googletagmanager.com serves the tag with
-                  // `access-control-allow-origin: *`, so an anonymous fetch
-                  // gives the browser full error detail instead of the opaque
-                  // "Script error." every cross-origin failure collapses into.
-                  crossorigin: "anonymous",
-                  src: "https://www.googletagmanager.com/gtag/js?id=G-FT8LY7Z15Y",
-                },
+                content: guarded(
+                  [
+                    // googletagmanager.com serves the tag with
+                    // `access-control-allow-origin: *`, so an anonymous fetch
+                    // gives the browser full error detail instead of the
+                    // opaque "Script error." cross-origin failures collapse
+                    // into.
+                    appendScript(
+                      "https://www.googletagmanager.com/gtag/js?id=G-FT8LY7Z15Y",
+                      { async: true, crossorigin: "anonymous" }
+                    ),
+                    "window.dataLayer = window.dataLayer || [];",
+                    "function gtag(){dataLayer.push(arguments);}",
+                    "gtag('js', new Date());",
+                    "gtag('config', 'G-FT8LY7Z15Y');",
+                    "(function () {",
+                    "  function report(type, fatal) {",
+                    "    if (typeof gtag !== 'function') return;",
+                    "    gtag('event', 'web_exception', {",
+                    "      exception_type: type,",
+                    "      fatal: fatal,",
+                    "      non_interaction: true",
+                    "    });",
+                    "  }",
+                    "  window.addEventListener('error', function (event) {",
+                    "    var message = typeof event.message === 'string' ? event.message : '';",
+                    // ResizeObserver's benign loop notification arrives as an
+                    // error event with no error object. It gets its own bucket so
+                    // the count stays readable in GA4 instead of hiding inside a
+                    // generic 'Error' total.
+                    "    if (message.startsWith('ResizeObserver loop')) {",
+                    "      report('ResizeObserverLoop', false);",
+                    "      return;",
+                    "    }",
+                    "    var error = event.error;",
+                    // Without an error object the message is the only identifying
+                    // detail GA4 will ever see, so send it instead of the blanket
+                    // 'Error' — truncated to the 100-character parameter limit.
+                    // Only a real error object marks the event fatal.
+                    "    var name = error && error.name ? error.name : '';",
+                    "    report(name || message.slice(0, 100) || 'Error', Boolean(error));",
+                    "  });",
+                    "  window.addEventListener('unhandledrejection', function (event) {",
+                    "    report(event.reason && event.reason.name ? event.reason.name : 'UnhandledRejection', false);",
+                    "  });",
+                    "})();",
+                  ].join("\n")
+                ),
               },
+              // Microsoft Clarity session recording, behind the same guard:
+              // a local run, a preview or an e2e pass must never record itself
+              // as a session. The stub queues clarity() calls until the tag
+              // loads.
               {
                 tag: "script",
-                content: [
-                  "window.dataLayer = window.dataLayer || [];",
-                  "function gtag(){dataLayer.push(arguments);}",
-                  "gtag('js', new Date());",
-                  "gtag('config', 'G-FT8LY7Z15Y');",
-                  "(function () {",
-                  "  function report(type, fatal) {",
-                  "    if (typeof gtag !== 'function') return;",
-                  "    gtag('event', 'web_exception', {",
-                  "      exception_type: type,",
-                  "      fatal: fatal,",
-                  "      non_interaction: true",
-                  "    });",
-                  "  }",
-                  "  window.addEventListener('error', function (event) {",
-                  "    var message = typeof event.message === 'string' ? event.message : '';",
-                  // ResizeObserver's benign loop notification arrives as an
-                  // error event with no error object. It gets its own bucket so
-                  // the count stays readable in GA4 instead of hiding inside a
-                  // generic 'Error' total.
-                  "    if (message.startsWith('ResizeObserver loop')) {",
-                  "      report('ResizeObserverLoop', false);",
-                  "      return;",
-                  "    }",
-                  "    var error = event.error;",
-                  // Without an error object the message is the only identifying
-                  // detail GA4 will ever see, so send it instead of the blanket
-                  // 'Error' — truncated to the 100-character parameter limit.
-                  // Only a real error object marks the event fatal.
-                  "    var name = error && error.name ? error.name : '';",
-                  "    report(name || message.slice(0, 100) || 'Error', Boolean(error));",
-                  "  });",
-                  "  window.addEventListener('unhandledrejection', function (event) {",
-                  "    report(event.reason && event.reason.name ? event.reason.name : 'UnhandledRejection', false);",
-                  "  });",
-                  "})();",
-                ].join("\n"),
-              },
-              // Microsoft Clarity session recording, behind the same gate:
-              // a dev server or an e2e run must never record itself as a
-              // session. The stub queues clarity() calls until the tag loads.
-              {
-                tag: "script",
-                content: [
-                  "window.clarity = window.clarity || function () {",
-                  "  (window.clarity.q = window.clarity.q || []).push(arguments);",
-                  "};",
-                ].join("\n"),
-              },
-              {
-                tag: "script",
-                attrs: {
-                  async: true,
-                  src: "https://www.clarity.ms/tag/xxq9dbsjnj",
-                },
+                content: guarded(
+                  [
+                    "  window.clarity = window.clarity || function () {",
+                    "    (window.clarity.q = window.clarity.q || []).push(arguments);",
+                    "  };",
+                    appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", {
+                      async: true,
+                    }),
+                  ].join("\n")
+                ),
               },
             ]
           : []),

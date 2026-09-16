@@ -13,24 +13,8 @@ concurrency: release-${{ github.ref }}
 permissions: {}
 
 jobs:
-  # Skip cleanly until an NPM_TOKEN secret is configured, so pushes don't fail
-  # before the project is set up to publish. Add the secret (Settings →
-  # Secrets → Actions → NPM_TOKEN) and this activates automatically.
-  guard:
-    runs-on: ubuntu-latest
-    # Reads one secret's presence and writes a boolean to an output. It needs
-    # no access to the repository at all.
-    permissions: {}
-    outputs:
-      enabled: ${{ steps.check.outputs.enabled }}
-    steps:
-      - id: check
-        run: echo "enabled=${{ secrets.NPM_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
-
   detect:
     name: Detect
-    needs: guard
-    if: ${{ needs.guard.outputs.enabled == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -43,17 +27,55 @@ jobs:
         name: Classify version vs publish vs skip
         run: node scripts/release-detect.mjs >> "$GITHUB_OUTPUT"
 
-  release:
-    needs: [guard, detect]
-    if: >
-      needs.guard.outputs.enabled == 'true' &&
-      (needs.detect.outputs.needVersion == 'true' ||
-       needs.detect.outputs.needPublish == 'true')
-    name: Version or Publish
+  version:
+    needs: detect
+    if: ${{ needs.detect.outputs.needVersion == 'true' }}
+    name: Version Packages PR
     runs-on: ubuntu-latest
-    # contents: tag and commit the version bump · id-token: npm provenance on
-    # publish. The "Version Packages" PR is opened with RELEASE_TOKEN, so the
-    # workflow token needs no pull-requests access.
+    permissions:
+      contents: write
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Open or update the Version Packages PR
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          # Version only — publish is a separate OIDC job so changesets/action
+          # never writes an npm _authToken that would shadow trusted publishing.
+          version-script: pnpm version-packages
+          # A fine-grained PAT scoped to this repository alone, with Contents
+          # and Pull requests write and nothing else. Repository settings deny
+          # the workflow token the ability to create pull requests, so this is
+          # the identity that opens the "Version Packages" PR — and because it
+          # is a real account, that PR runs the required checks.
+          github-token: ${{ secrets.RELEASE_TOKEN }}
+        env:
+          # The version-bump commit must not run the husky gate on this
+          # 2-core runner: CI enforces the same gate on every PR (including
+          # the Version Packages PR), and the full suite inside a commit
+          # hook starves past the 30s antd test budget.
+          HUSKY: "0"
+
+  publish:
+    needs: detect
+    if: ${{ needs.detect.outputs.needPublish == 'true' }}
+    name: Publish
+    runs-on: ubuntu-latest
+    # contents: create git tags · id-token: npm OIDC trusted publishing.
+    # Provenance is automatic when trusted publishing is configured on npm.
     permissions:
       contents: write
       id-token: write
@@ -69,32 +91,41 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+          # Registry URL without an auth token — npm CLI ≥ 11.5.1 exchanges
+          # the GitHub OIDC token when a trusted publisher is configured.
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Require npm CLI for OIDC trusted publishing
+        run: |
+          npm install -g npm@^11.5.1
+          node -e "
+            const v = require('child_process').execSync('npm -v',{encoding:'utf8'}).trim();
+            const [maj, min, pat] = v.split('.').map(Number);
+            if (maj < 11 || (maj === 11 && (min < 5 || (min === 5 && pat < 1)))) {
+              console.error('npm >= 11.5.1 required for trusted publishing, got', v);
+              process.exit(1);
+            }
+            console.log('npm', v, 'ok for OIDC');
+          "
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create release PR or publish
-        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
-        with:
-          # Detect already decided a version PR or an unpublished package
-          # exists. Publish is build → publint → changeset publish — not
-          # verify:release. ONE command: the action execs its publish input
-          # without a shell, so a `&&` here would be a literal argument.
-          publish-script: pnpm release:gated
-          version-script: pnpm version-packages
-          # A fine-grained PAT scoped to this repository alone, with Contents
-          # and Pull requests write and nothing else. Repository settings deny
-          # the workflow token the ability to create pull requests, so this is
-          # the identity that opens the "Version Packages" PR — and because it
-          # is a real account, that PR runs the required checks.
-          github-token: ${{ secrets.RELEASE_TOKEN }}
+      - name: Clear any registry auth that would shadow OIDC
+        run: |
+          # setup-node / prior steps must not leave a bearer token that makes
+          # npm skip the OIDC exchange.
+          npm config delete "//registry.npmjs.org/:_authToken" || true
+          if [ -f .npmrc ]; then
+            grep -v '_authToken' .npmrc > .npmrc.oidc || true
+            mv .npmrc.oidc .npmrc
+          fi
+          unset NODE_AUTH_TOKEN
+          unset NPM_TOKEN
+
+      - name: Build, publint and publish
+        # No NODE_AUTH_TOKEN / NPM_TOKEN — publish authenticates via OIDC.
+        run: pnpm release:gated
         env:
-          # npm auth for `changeset publish`: setup-node's registry-url writes
-          # the .npmrc that reads this variable.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # The version-bump commit must not run the husky gate on this
-          # 2-core runner: CI enforces the same gate on every PR (including
-          # the Version Packages PR), and the full suite inside a commit
-          # hook starves past the 30s antd test budget.
           HUSKY: "0"

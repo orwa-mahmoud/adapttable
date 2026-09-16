@@ -1,8 +1,4 @@
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type EditableCellEditorCtrl,
-  EditableCellGate,
   editorInputType,
   formatMultiDraft,
   isBooleanEditor,
@@ -12,10 +8,16 @@ import {
   readMultiDraft,
 } from "@adapttable/core";
 import {
+  type ColumnDef,
+  type EditableCellEditing,
+  type EditableCellEditorCtrl,
+  EditableCellGate,
+} from "@adapttable/react";
+import {
   commitBooleanDraft,
   editorValidationProps,
   stopEditKeys,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Checkbox, Input, Select } from "antd";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
@@ -115,20 +117,19 @@ export function EditableDataCell<TRow>(props: {
   readonly row: TRow;
   readonly column: ColumnDef<TRow>;
   readonly rowId: string;
-  readonly rowIndex: number;
   readonly rows: readonly TRow[];
   readonly columns: readonly ColumnDef<TRow>[];
   readonly rowKey: (row: TRow) => string;
   readonly editLabel: string;
   /** `labels.undoEdit` — the control a failed save offers. */
   readonly undoLabel?: string;
+  /**
+   * What the cell shows when nothing is being edited. The binding resolves it
+   * — the row's precomputed display, the column's `Cell`, or its accessor —
+   * so the accessor runs in this cell's own memo scope.
+   */
+  readonly display: ReactNode;
 }): ReactElement {
-  const display: ReactNode = props.column.Cell ? (
-    <props.column.Cell row={props.row} rowIndex={props.rowIndex} />
-  ) : (
-    props.column.accessor?.(props.row)
-  );
-
   return (
     <EditableCellGate
       editing={props.editing}
@@ -140,7 +141,7 @@ export function EditableDataCell<TRow>(props: {
       rowKey={props.rowKey}
       editLabel={props.editLabel}
       undoLabel={props.undoLabel}
-      display={display}
+      display={props.display}
       slots={editableCellSlots}
       renderEditor={(ctrl) => (
         <AntdCellEditor ctrl={ctrl} label={props.editLabel} />

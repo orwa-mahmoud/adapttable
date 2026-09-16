@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <meta name="description" content="Try a shadcn React table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend." />
+    <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/shadcn/ai/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AdaptTable" />
+    <meta property="og:title" content="shadcn AI table assistant demo — AdaptTable" />
+    <meta property="og:description" content="Try a shadcn React table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend." />
+    <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/shadcn/ai/" />
+    <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="shadcn AI table assistant demo — AdaptTable" />
+    <meta name="twitter:description" content="Try a shadcn React table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend." />
+    <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try a shadcn React table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend.","url":"https://orwa-mahmoud.github.io/adapttable/demo/shadcn/ai/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      (function () {
+  var isLocal = function(){
+  var h = location.hostname || "";
+  if (location.protocol === "file:") return true;
+  if (h === "" || h === "localhost" || h === "0.0.0.0" || h === "[::1]" || h === "::1") return true;
+  if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+  return false;
+};
+  if (isLocal()) return;
+  (function () {
+    var s = document.createElement('script');
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.defer = true;
+    s.setAttribute("data-cf-beacon", "{\"token\": \"dd71ff9f3b7b4064969d3f81e8c6ee9b\"}");
+    document.head.appendChild(s);
+  })();
+})();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <title>shadcn AI table assistant demo — AdaptTable</title>
+    <script>
+      try {
+        if (localStorage.getItem("adapttable-demo-theme") === "dark")
+          document.documentElement.dataset.theme = "dark";
+      } catch {}
+    </script>
+    <style>
+      /* The pre-mount fallback inside #root. React replaces it on mount, so
+         this paints only while the bundle is still downloading — or
+         permanently, when JavaScript is unavailable. Styled so that moment
+         reads as the page arriving rather than as broken markup. */
+      .at-fallback {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 4.5rem 1.5rem;
+        font-family: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+        color: #52525b;
+        line-height: 1.65;
+      }
+      .at-fallback p {
+        text-wrap: pretty;
+      }
+      .at-fallback__kicker {
+        margin: 0 0 0.75rem;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #71717a;
+      }
+      .at-fallback h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #18181b;
+        margin: 0 0 1rem;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+      .at-fallback h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #18181b;
+        margin: 2rem 0 0.6rem;
+      }
+      .at-fallback pre {
+        overflow-x: auto;
+        padding: 1rem 1.1rem;
+        border: 1px solid #e4e4e7;
+        border-radius: 12px;
+        background: #fafafa;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.8rem;
+        line-height: 1.7;
+        color: #3f3f46;
+      }
+      .at-fallback p code {
+        padding: 1px 5px;
+        border-radius: 5px;
+        background: #f4f4f5;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.86em;
+        color: #27272a;
+      }
+      .at-fallback ul {
+        padding-inline-start: 1.2rem;
+        margin: 0;
+      }
+      .at-fallback li {
+        margin: 0.4rem 0;
+      }
+      .at-fallback a {
+        color: #4f46e5;
+      }
+      [data-theme="dark"] .at-fallback {
+        color: #a1a1aa;
+      }
+      [data-theme="dark"] .at-fallback :is(h1, h2) {
+        color: #fafafa;
+      }
+      [data-theme="dark"] .at-fallback pre {
+        border-color: #3f3f46;
+        background: #18181b;
+        color: #d4d4d8;
+      }
+      [data-theme="dark"] .at-fallback p code {
+        background: #27272a;
+        color: #e4e4e7;
+      }
+      [data-theme="dark"] .at-fallback a {
+        color: #a5b4fc;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Replaced by React on mount — the served markup carries the page's
+         own words so a crawler, and anyone whose bundle has not arrived, reads
+         a real page. Written by scripts/build-showcase-html.mjs. -->
+    <div id="root" data-matrix-page="shadcn/ai">
+      <main class="at-fallback">
+        <p class="at-fallback__kicker">AdaptTable for shadcn</p>
+        <h1>AI table assistant in shadcn</h1>
+        <p><code>@adapttable/ai</code> is optional and provider-neutral. This shadcn demo combines a conversational assistant with a real table. Try filtering, grouping, column pinning and a proposed edit; available actions depend on the mounted features and the host's permissions. Row pinning requires an ungrouped view in this demo.</p>
+        <p>Start in Simulated mode: suggested prompts run deterministic local scenarios, not a language model. The conversation shows action receipts; a proposed write still follows approval and save policy. Connect backend sends your prompt and permitted table context to an endpoint you run. The assistant keeps the same table session and shadcn controls in both modes.</p>
+        <p>Three integration levels share that session: a custom bridge that maps any agent format onto <code>session.execute</code>, an <code>AgentEnvelope</code> on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.</p>
+        <p>The optional shadcn assistant matches the table's preset. Keep its ready controls or use the headless controller with your own components and transport.</p>
+        <h2>The code</h2>
+        <pre><code>import { useTableAssistant } from &quot;@adapttable/ai-react&quot;;
+import { assistantHttpTransport } from &quot;@adapttable/ai/http&quot;;
+import { tableAgent } from &quot;@adapttable/ai-react&quot;;
+import { DataTable, agentApproval } from &quot;@adapttable/shadcn&quot;;
+import { TableAssistant } from &quot;@adapttable/shadcn/assistant&quot;;
+import { editing } from &quot;@adapttable/shadcn/editing&quot;;
+import { filters } from &quot;@adapttable/shadcn/filters&quot;;
+import { useMemo, useState } from &quot;react&quot;;
+
+const suggestions = [
+  {
+    id: &quot;core-team&quot;,
+    title: &quot;Show only the Core team&quot;,
+    prompt: &quot;Show only the Core team.&quot;,
+    requires: [&quot;view.setFilters&quot;],
+  },
+];
+
+export function Orders({ rows, columns, onEdit }) {
+  const [session, setSession] = useState();
+  const transport = useMemo(
+    () =&gt; assistantHttpTransport({ endpoint: &quot;/api/table-agent&quot; }),
+    []
+  );
+  const assistant = useTableAssistant({ session, transport, suggestions });
+
+  return (
+    &lt;&gt;
+      &lt;DataTable
+        data={rows}
+        columns={columns}
+        rowKey={(row) =&gt; row.id}
+        features={[
+          filters([{ key: &quot;team&quot;, type: &quot;multiSelect&quot;, getValue: (row) =&gt; row.team }]),
+          agentApproval(),
+          editing(onEdit),
+          tableAgent({
+            tableId: &quot;orders&quot;,
+            writePolicy: &quot;allow&quot;,
+            approval: &quot;writes&quot;,
+            commit: &quot;stage&quot;,
+            columns: { salary: { type: &quot;number&quot;, writable: true } },
+            bridge: { attach: setSession },
+          }),
+        ]}
+      /&gt;
+      &lt;TableAssistant
+        assistant={assistant}
+        open={assistant.open}
+        onOpenChange={assistant.setOpen}
+      /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+        <h2>Install</h2>
+        <pre><code>pnpm add @adapttable/shadcn @adapttable/core</code></pre>
+        <h2>The same feature in the other kits</h2>
+        <ul>
+          <li><a href="../../mantine/ai/">AI table assistant in Mantine</a> — Rounded, friendly, filled controls</li>
+          <li><a href="../../mui/ai/">AI table assistant in MUI</a> — Material elevation, uppercase actions</li>
+          <li><a href="../../chakra/ai/">AI table assistant in Chakra</a> — Soft teal, generous radius</li>
+          <li><a href="../../antd/ai/">AI table assistant in Ant Design</a> — Compact, tinted header, crisp</li>
+          <li><a href="../../radix/ai/">AI table assistant in Radix</a> — Radix Themes, iris accent</li>
+          <li><a href="../../base-ui/ai/">AI table assistant in Base UI</a> — Unstyled primitives, blue accent</li>
+          <li><a href="../../tailwind/ai/">AI table assistant in Tailwind</a> — Unstyled — your own classes</li>
+        </ul>
+        <h2>More shadcn features</h2>
+        <ul>
+          <li><a href="../filtering/">Filtering in shadcn</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
+          <li><a href="../columns/">Column management in shadcn</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="../column-groups/">Column groups in shadcn</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="../selection/">Row selection in shadcn</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="../rows/">Rows in shadcn</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="../row-reordering/">Row reordering in shadcn</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
+          <li><a href="../editing/">Inline cell editing in shadcn</a> — Kit-native editors in the cell; every write goes through your handler.</li>
+          <li><a href="../grouping/">Row grouping in shadcn</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
+          <li><a href="../aggregation/">Aggregation in shadcn</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
+          <li><a href="../nested-tables/">Nested tables in shadcn</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="../export/">Export and print in shadcn</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
+          <li><a href="../scale/">Row and column virtualization in shadcn</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="../tree/">Tree data in shadcn</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
+          <li><a href="../mobile-cards/">Mobile cards in shadcn</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="../pivot/">Pivot tables in shadcn</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="../saved-views/">Saved views in shadcn</a> — Name an arrangement, share it as a link, manage the list in place.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in shadcn</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="../rtl/">Right-to-left shadcn data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="../realtime/">Live updates in shadcn</a> — Rows change while you read them. Sort and selection hold.</li>
+          <li><a href="../accessibility/">Accessible shadcn data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+        </ul>
+        <p>
+          Reference: <a href="https://orwa-mahmoud.github.io/adapttable/ai-http/">ai-http</a>, <a href="https://orwa-mahmoud.github.io/adapttable/ai-integrations/">ai-integrations</a>, <a href="https://orwa-mahmoud.github.io/adapttable/ai/">ai</a>, <a href="https://orwa-mahmoud.github.io/adapttable/agent-capabilities/">agent-capabilities</a>. More of this kit:
+          <a href="../">AdaptTable for shadcn</a>, or
+          <a href="/adapttable/demo/">the live demo</a>.
+        </p>
+      </main>
+    </div>
+    <script type="module" src="/src/entry-matrix.tsx"></script>
+  </body>
+</html>

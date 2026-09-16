@@ -12,11 +12,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@adapttable/ai": "workspace:*",
+    "@adapttable/ai-react": "workspace:*",
     "@adapttable/antd": "workspace:*",
     "@adapttable/base-ui": "workspace:*",
     "@adapttable/chakra": "workspace:*",
     "@adapttable/core": "workspace:*",
     "@adapttable/i18n": "workspace:*",
+    "@adapttable/react": "workspace:*",
     "@adapttable/mantine": "workspace:*",
     "@adapttable/mui": "workspace:*",
     "@adapttable/radix": "workspace:*",

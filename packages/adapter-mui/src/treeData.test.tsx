@@ -1,8 +1,9 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { tree } from "./tree";
 
 interface Node {
   id: string;
@@ -52,6 +53,7 @@ describe("tree data (mui)", () => {
           rowKey={(r) => r.id}
           urlSync={false}
           getChildren={(row: Node) => row.children}
+          features={[tree({ getChildren: (row: Node) => row.children })]}
           {...extra}
         />
       )

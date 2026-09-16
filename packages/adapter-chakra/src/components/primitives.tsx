@@ -138,6 +138,7 @@ export function NativeSelect({
   flex,
   w,
   minW,
+  minH,
   maxW,
   className,
   "aria-label": ariaLabel,
@@ -157,6 +158,7 @@ export function NativeSelect({
   flex?: string;
   w?: string;
   minW?: string;
+  minH?: string;
   maxW?: string;
   className?: string;
   "aria-label"?: string;
@@ -167,6 +169,7 @@ export function NativeSelect({
   "aria-describedby"?: string;
   "aria-busy"?: true;
   "data-conflict"?: "";
+  disabled?: boolean;
 }>) {
   return (
     <ChakraNativeSelect.Root
@@ -180,6 +183,7 @@ export function NativeSelect({
         className={className}
         ref={fieldRef}
         data-adapttable-part={dataPart}
+        minH={minH}
         aria-label={ariaLabel}
         // A multiple field is a list box: Chakra's placeholder renders an
         // empty first option, which reads as a selectable value there.

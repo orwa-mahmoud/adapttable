@@ -1,5 +1,145 @@
 import type { TableLabels } from "./types";
 
+/** Connection tokens the assistant badge shows, in English. */
+const ASSISTANT_CONNECTION: Readonly<Record<string, string>> = {
+  idle: "Idle",
+  connecting: "Connecting…",
+  ready: "Ready",
+  sending: "Working…",
+  "awaiting-approval": "Waiting for you",
+  "awaiting-user": "Waiting for you",
+  error: "Error",
+  disconnected: "Not connected",
+};
+
+/** What became of one action, in English. */
+/**
+ * What a receipt's headline says, per (kind, status).
+ *
+ * Written out rather than composed from two halves because English is the
+ * only language where "filter" + "applied" reliably reads as a sentence, and
+ * a translator needs the whole phrase to work with.
+ */
+const ASSISTANT_RECEIPT_ACTION: Readonly<Record<string, string>> = {
+  "filter/executed": "Filter applied",
+  "filter/staged": "Filter staged",
+  "filter-cleared/executed": "Filters cleared",
+  "sort/executed": "Sorted",
+  "sort-cleared/executed": "Sort cleared",
+  "search/executed": "Searched",
+  "search-cleared/executed": "Search cleared",
+  "group/executed": "Grouped",
+  "group-cleared/executed": "Grouping cleared",
+  "pin/executed": "Column pinned",
+  "pin-cleared/executed": "Column unpinned",
+  "hide/executed": "Column hidden",
+  "hide-cleared/executed": "Column shown",
+  "order/executed": "Columns reordered",
+  "pinRow/executed": "Row pinned",
+  "pinRow-cleared/executed": "Row unpinned",
+  "page/executed": "Page changed",
+  "aggregate/executed": "Totals changed",
+  "select/executed": "Selection changed",
+  "read/executed": "Read the table",
+  "operation/executed": "Ran",
+  "operation/awaiting-approval": "Waiting for you",
+  "operation/rejected": "Refused",
+  "export/executed": "Exported",
+  "edit/executed": "Saved",
+  "edit/staged": "Edit staged — not saved",
+  "edit/awaiting-approval": "Edit awaiting approval",
+  "edit/partial": "Some edits saved, some refused",
+  "edit/rejected": "Edit refused",
+  "add/executed": "Row added",
+  "add/awaiting-approval": "New row awaiting approval",
+  "add/rejected": "New row refused",
+  "delete/executed": "Rows deleted",
+  "delete/awaiting-approval": "Deletion awaiting approval",
+  "delete/partial": "Some rows deleted, some kept",
+  "delete/rejected": "Deletion refused",
+  "reorder/executed": "Rows moved",
+};
+
+/**
+ * One column-and-value pair, in English.
+ *
+ * An edit put a value IN a column and a filter narrows BY one, so the two
+ * read differently even though the pair is the same shape.
+ */
+function receiptTerm(
+  kind: string | undefined,
+  term: { column?: string; value?: string }
+): string | undefined {
+  if (!term.column) return term.value;
+  if (!term.value) return term.column;
+  return kind === "edit"
+    ? `${term.column} set to ${term.value}`
+    : `${term.column} is ${term.value}`;
+}
+
+/**
+ * Why a turn stopped with work still pending, in English.
+ *
+ * The message the runtime carries beside these codes is written for whoever
+ * is debugging the turn — "the backend asked to continue more than 3 times"
+ * tells a reader nothing they can act on, and names machinery they never
+ * asked about.
+ */
+const ASSISTANT_UNRESOLVED: Readonly<Record<string, string>> = {
+  "continuation-exhausted":
+    "That took more steps than one turn allows. Ask for part of it.",
+  "continuation-limit":
+    "That took more steps than one turn allows. Ask for part of it.",
+  "resume-limit":
+    "That took more steps than one turn allows. Ask for part of it.",
+  "discovery-exhausted":
+    "The assistant could not work out how to do that here.",
+  "repeated-plan": "The assistant asked for the same thing twice and stopped.",
+  "question-unanswered": "That needs an answer from you before it can finish.",
+  "approval-unavailable": "That needs approval, and there is nowhere to ask.",
+  "interrupt-unsupported":
+    "The assistant asked for something this table cannot do.",
+  "output-denied": "Part of that was not allowed to run.",
+  "not-run": "That did not run.",
+};
+
+/**
+ * Why an undo is not on offer, in English.
+ *
+ * Only the reasons a reader can act on. `nothing-to-undo` never reaches a
+ * surface — a turn that changed nothing is offered no control at all.
+ */
+const ASSISTANT_UNDO_BLOCKED: Readonly<Record<string, string>> = {
+  "table-moved": "The table has changed since this ran.",
+  "cannot-restore": "Part of this cannot be put back.",
+};
+
+/**
+ * A capability key as something a reader recognises, in English.
+ *
+ * Only the keys a reader is ever asked to confirm, which is the only place a
+ * key is shown to one. Anything else falls back to the key itself, which is
+ * a developer detail and honest about being one.
+ */
+const ASSISTANT_CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "editing cells",
+  "rows.add": "adding rows",
+  "rows.delete": "deleting rows",
+  "rows.reorder": "reordering rows",
+  "export.run": "exporting",
+};
+
+const ASSISTANT_RECEIPT: Readonly<Record<string, string>> = {
+  executed: "done",
+  staged: "staged",
+  partial: "partly done",
+  rejected: "rejected",
+  "awaiting-approval": "waiting for you",
+  cancelled: "cancelled",
+  stale: "out of date",
+  failed: "failed",
+};
+
 /**
  * English default strings. Consumers override any subset via the
  * `labels` option; {@link resolveLabels} merges their overrides on top.
@@ -115,6 +255,13 @@ export const defaultLabels: Required<TableLabels> = {
   hideAllColumns: "Hide all",
   unpinAllColumns: "Unpin all",
   resetColumn: "Reset column",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save name",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }) =>
+    `Column ${previous} renamed to ${name}`,
   sortAscending: "Sort ascending",
   sortDescending: "Sort descending",
   sortedBy: ({ column, ascending }) =>
@@ -124,8 +271,13 @@ export const defaultLabels: Required<TableLabels> = {
   columnActions: "Column actions",
   exportCsv: "Export CSV",
   exportFile: (format) => `Export ${format.toUpperCase()}`,
+  exportStarted: "Preparing export",
+  exportProgress: (progress) => `Export ${String(progress)}% complete`,
   exportDone: "Export complete",
   exportFailed: "Export failed",
+  exportCancelled: "Export cancelled",
+  exportDownload: "Download export",
+  exportDismiss: "Dismiss",
   editCell: "Edit cell",
   undoEdit: "Undo",
   redoEdit: "Redo",
@@ -135,6 +287,99 @@ export const defaultLabels: Required<TableLabels> = {
     count === 1 ? "1 unsaved row" : `${String(count)} unsaved rows`,
   saveAll: "Save all",
   cancelAll: "Cancel all",
+  approveProposal: "Approve",
+  rejectProposal: "Reject",
+  pendingProposals: (count) =>
+    count === 1 ? "1 proposed change" : `${String(count)} proposed changes`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  proposalValueUnavailable: "Unavailable",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 proposed change"
+        : `${String(changes)} proposed changes`;
+    if (rows <= 1) return left;
+    return `${left} across ${String(rows)} rows`;
+  },
+  reviewAllProposals: (count) => `Review all ${String(count)} changes`,
+  backToConversation: "Back to conversation",
+  approveAllProposals: "Approve all",
+  approveRemainingProposals: "Approve remaining",
+  rejectAllProposals: "Reject all",
+  rejectRemainingProposals: "Reject remaining",
+  alwaysAllowProposal: "Always allow",
+  proposalTally: ({ pending, approved, rejected }) =>
+    `${String(approved)} approved · ${String(rejected)} rejected · ${String(pending)} left`,
+  approvalWaitingElsewhere: "A change is waiting for your decision.",
+  assistantTitle: "Table assistant",
+  assistantOpen: "Ask AI",
+  assistantClose: "Close",
+  assistantSettings: "Assistant settings",
+  assistantEmpty: "What would you like to do?",
+  assistantPlaceholder: "Ask about this table…",
+  assistantSend: "Send",
+  assistantStop: "Stop",
+  assistantVoiceStart: "Dictate",
+  assistantVoiceStop: "Stop dictation",
+  assistantVoiceListening: "Listening",
+  assistantVoiceLanguage: "Dictation language",
+  assistantYou: "You",
+  assistantSpeaker: "Assistant",
+  assistantNewMessages: "New messages",
+  assistantUnavailable: "The assistant is not connected.",
+  assistantDetached: "The connection went. The work may still be running.",
+  assistantRejoin: "Rejoin",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} done`
+      : `${String(done)} of ${String(total)}`,
+  assistantBackToTable: "Back to table",
+  assistantDetail: "Details",
+  assistantSaveInTable: "Save in the table to keep this change.",
+  assistantUndo: "Undo",
+  assistantUndoBlocked: (code) => ASSISTANT_UNDO_BLOCKED[code],
+  assistantUnresolved: (code) => ASSISTANT_UNRESOLVED[code],
+  assistantAnswerLabel: "Your answer",
+  assistantAnswerPlaceholder: "Type an answer",
+  assistantAnswerSend: "Answer",
+  assistantAlwaysAllowedTitle: "Not asking about",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `Ask about ${ASSISTANT_CAPABILITY[capability] ?? capability} again`,
+  assistantCapabilityName: (capability) => ASSISTANT_CAPABILITY[capability],
+  assistantConnection: (status) => ASSISTANT_CONNECTION[status] ?? "Ready",
+  assistantReceipt: ({ capability, status }) => {
+    const what = ASSISTANT_RECEIPT[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantActions: (count) =>
+    count === 1 ? "1 action" : `${String(count)} actions`,
+  assistantActionsTitle: "What this turn changed",
+  assistantUndoAll: "Undo all",
+  assistantExamples: "Shortcuts",
+  assistantReceiptStatus: (status) =>
+    ASSISTANT_RECEIPT[status] ?? String(status),
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return ASSISTANT_RECEIPT_ACTION[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ kind, terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => receiptTerm(kind, term))
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "descending" : "ascending"}`;
+  },
+  assistantReceiptChange: ({ before, after }) =>
+    `Changed from ${before} to ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `Proposed: ${before} to ${after}`,
   addRow: "Add row",
   duplicateRow: "Duplicate row",
   deleteRow: "Delete row",
@@ -150,9 +395,27 @@ export const defaultLabels: Required<TableLabels> = {
   rowLifted: (position) => `Row ${String(position)} lifted`,
   rowMoved: (from, to) => `Row moved from ${String(from)} to ${String(to)}`,
   rowReorderCancelled: "Reorder cancelled",
+  rowMoveOptions: "Row move options",
+  moveToGroup: "Move to group…",
+  moveUnder: "Move under…",
+  moveToTopLevel: "Move to top level",
+  confirmRowMoveTitle: "Confirm row move",
+  confirmRowMoveDescription: (row, from, to) =>
+    `Move ${row} from ${from} to ${to}?`,
+  confirmRowMove: "Move",
+  rowMovedToGroup: (group) => `Row moved to ${group}`,
+  rowMovedUnder: (parent) => `Row moved under ${parent}`,
+  moveRejectedPolicyNever: "Cross-boundary row moves are disabled",
+  moveRejectedSorted: "Clear sorting before changing row order",
+  moveRejectedCycle: "A row cannot move inside itself or its descendant",
+  moveUnavailable: "This row move is not available",
+  rootLevel: "Top level",
   pinToTop: "Pin to top",
   pinToBottom: "Pin to bottom",
   unpinRow: "Unpin row",
+  pinnedSummaryRow: "Summary row",
+  pinnedSummaryTop: "Pinned summary rows at the top",
+  pinnedSummaryBottom: "Pinned summary rows at the bottom",
   rowSeparator: "Separator",
   expandColumnGroup: "Expand column group",
   collapseColumnGroup: "Collapse column group",
@@ -213,16 +476,43 @@ export const defaultLabels: Required<TableLabels> = {
   expandGroup: "Expand group",
   collapseGroup: "Collapse group",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "Row grouping",
+  groupingDropColumns: "Drag columns here to group",
+  addGroupingColumn: "Add grouping column",
+  groupByColumn: (label) => `Group by ${label}`,
+  ungroupColumn: (label) => `Ungroup ${label}`,
+  removeGroupingColumn: (label) => `Remove ${label} from grouping`,
+  moveGroupingColumn: (label) => `Move ${label} grouping`,
+  groupingDropToRemove: "Drop here to remove grouping",
+  groupingAggregateColumn: "Aggregate column",
+  groupingAggregation: "Group aggregation",
+  groupingAggregationDefault: "Default",
+  groupingAggregationNone: "None",
+  groupingAggregations: "Aggregations",
+  groupingAddAggregation: "Add aggregation column",
+  groupingRestoreAggregations: "Restore defaults",
+  groupingRemoveAggregation: (column: string) => `Remove ${column} aggregation`,
+  groupingAggregationFor: (column: string) => `${column} aggregation`,
+  groupingAggregationReadOnly: "Set by the app",
+  groupingAggregationCustom: "Custom",
+  groupingAggregateRemoved: (column: string) => `${column} aggregate removed`,
+  groupingAggregatesRestored: "Aggregations restored to defaults",
+  groupingAverage: "Average",
+  groupingAdded: (label) => `${label} added to grouping`,
+  groupingRemoved: (label) => `${label} removed from grouping`,
+  groupingMoved: (label, position) =>
+    `${label} moved to grouping position ${position}`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `${label} group aggregation changed to ${aggregation}`,
   noticeVirtualizePaged:
     "Virtualization is off — this paged table shows one page at a time.",
   noticePinNested: "Row pinning is off while grouping or a tree is on.",
-  noticeReorderNested: "Row reorder is off while grouping or a tree is on.",
-  noticeGroupingUnavailable:
-    "Grouping is off — this source does not provide the full filtered set.",
+  noticeReorderNested:
+    "Cross-boundary row moves follow the configured move policy.",
+  noticeGroupingUnavailable: "Grouping is off — this source cannot group.",
   noticeExportAllPage:
-    "Export all is this page — the full filtered set is not available.",
+    "Export all is off — this source provides one page at a time.",
   noticeEditWithoutWriter: "Editing is off — no write handler is wired.",
-  exportThisPage: "Export this page",
 };
 
 /**

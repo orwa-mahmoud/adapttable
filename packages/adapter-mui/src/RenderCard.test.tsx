@@ -6,12 +6,13 @@
  * checkbox, the row actions or the detail panel, because those belong to the
  * shell and a custom card has no way to put them back.
  */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { rowDetail } from "./row-detail";
 
 interface Row {
   id: string;
@@ -103,6 +104,7 @@ describe("renderCard", () => {
         ]}
         rowActions={[{ key: "edit", label: "Edit", onClick: () => undefined }]}
         renderRowDetail={(row) => <span>detail for {row.name}</span>}
+        features={[rowDetail((row: Row) => <span>detail for {row.name}</span>)]}
         renderCard={(row) => <p>{row.name}</p>}
       />
     );
@@ -121,6 +123,7 @@ describe("renderCard", () => {
           { key: "del", label: "Delete", onClick: () => undefined },
         ]}
         renderRowDetail={() => <span>detail</span>}
+        features={[rowDetail(() => <span>detail</span>)]}
         renderCard={(row, card) => (
           <p>
             {row.name}:{card.selected ? "on" : "off"}:

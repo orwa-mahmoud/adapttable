@@ -1,6 +1,12 @@
-import type { ColumnDef, UseColumnLayoutResult } from "@adapttable/core";
-import { COLUMN_DND_MIME } from "@adapttable/core/adapter";
-import { fireEvent, render, screen } from "@testing-library/react";
+import type { UseColumnLayoutResult } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/react";
+import {
+  COLUMN_DND_MIME,
+  FeatureHostProvider,
+  type FeatureHostState,
+  type GroupingPanelState,
+} from "@adapttable/react/adapter";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ColumnMenu } from "./components/ColumnMenu";
@@ -9,7 +15,7 @@ interface Row {
   id: string;
 }
 const cols: ColumnDef<Row>[] = [
-  { key: "a", header: "Alpha", accessor: (r) => r.id },
+  { key: "a", header: "Alpha", accessor: (r) => r.id, renameable: true },
   { key: "b", header: "Bravo", accessor: (r) => r.id },
   { key: "c", header: "Charlie", accessor: (r) => r.id },
 ];
@@ -25,7 +31,10 @@ function fakeLayout(
     toggleVisible: vi.fn(),
     setPinned: vi.fn(),
     move: vi.fn(),
+    setOrder: vi.fn(),
     setWidth: vi.fn(),
+    setName: vi.fn(),
+    resetName: vi.fn(),
     pinOffset: () => undefined,
     reset: vi.fn(),
     toggleColumnGroup: vi.fn(),
@@ -50,10 +59,27 @@ const labels = {
   hideAllColumns: "Hide all",
   unpinAllColumns: "Unpin all",
   resetColumn: "Reset column",
+  renameColumn: "Rename column",
+  columnName: "Column name",
+  saveColumnName: "Save",
+  cancelColumnRename: "Cancel",
+  columnNameRequired: "Enter a column name.",
+  columnRenamed: ({ previous, name }: { previous: string; name: string }) =>
+    `${previous} renamed to ${name}.`,
   sortAscending: "Sort ascending",
   sortDescending: "Sort descending",
   filterColumn: "Filter column",
   columnActions: "Column actions",
+  groupByColumn: (label: string) => `Group by ${label}`,
+  ungroupColumn: (label: string) => `Ungroup ${label}`,
+  groupingAggregation: "Group aggregation",
+  groupingRemoveAggregation: (name: string) => `Remove ${name} aggregation`,
+  groupingAverage: "Average",
+  groupingAggregationCustom: "Custom",
+  selectionCount: "Count",
+  selectionSum: "Sum",
+  selectionMin: "Minimum",
+  selectionMax: "Maximum",
   actions: "Actions",
   reorderRow: "Reorder",
 };
@@ -61,7 +87,8 @@ const labels = {
 function open(
   layout: UseColumnLayoutResult<Row>,
   hasRowActions = false,
-  hasRowReorder = false
+  hasRowReorder = false,
+  onRenameColumn?: (key: string, name: string) => void
 ) {
   const view = render(
     <ColumnMenu
@@ -72,6 +99,7 @@ function open(
       classNames={{}}
       hasRowActions={hasRowActions}
       hasRowReorder={hasRowReorder}
+      onRenameColumn={onRenameColumn}
     />
   );
   fireEvent.click(screen.getByRole("button", { name: "Columns" }));
@@ -95,6 +123,100 @@ function fakeDataTransfer(initial: Record<string, string> = {}) {
 }
 
 describe("unstyled ColumnMenu", () => {
+  it("renders a plugin choice as a labelled select and keeps it open", () => {
+    const onChange = vi.fn();
+    const groupingPanel: GroupingPanelState = {
+      groupBy: ["a"],
+      aggregateOverrides: {},
+      canSetAggregates: true,
+      announcement: "",
+      headerDragProps: () => ({}),
+      chipDragProps: () => ({}),
+      chipKeyboardProps: () => ({
+        tabIndex: 0,
+        role: "button",
+        "aria-label": "Move grouping",
+        onKeyDown: () => undefined,
+      }),
+      dropProps: () => ({}),
+      removeDropProps: () => ({}),
+      add: () => undefined,
+      remove: () => undefined,
+      moveBy: () => undefined,
+      setAggregate: () => undefined,
+      aggregations: {
+        items: [],
+        candidates: [],
+        atDefaults: true,
+        hasDefaults: false,
+      },
+      setAggregateOperation: () => undefined,
+      addAggregate: () => undefined,
+      removeAggregate: () => undefined,
+      restoreAggregateDefaults: () => undefined,
+    };
+    const host: FeatureHostState = {
+      filterTypes: [],
+      filterExtends: [],
+      editors: new Map(),
+      aggregators: new Map(),
+      writers: [],
+      columnMenuActions: [
+        (_row, context) => {
+          expect(context.groupingPanel).toBe(groupingPanel);
+          return {
+            kind: "choice",
+            id: "plugin-choice",
+            label: "Group aggregation",
+            disabled: false,
+            value: "",
+            options: [
+              { value: "", label: "Default" },
+              { value: "count", label: "Count" },
+            ],
+            onChange,
+          };
+        },
+      ],
+      panels: [],
+      commands: [],
+      contextMenuItems: [],
+    };
+    render(
+      <FeatureHostProvider host={host}>
+        <ColumnMenu
+          allColumns={cols}
+          onAutoSize={() => undefined}
+          layout={fakeLayout()}
+          labels={labels}
+          classNames={{
+            columnMenuChoice: "choice",
+            columnMenuChoiceLabel: "choice-label",
+            columnMenuChoiceSelect: "choice-select",
+          }}
+          groupingPanel={groupingPanel}
+        />
+      </FeatureHostProvider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    const choice = screen.getByRole("combobox", {
+      name: "Group aggregation",
+    });
+
+    fireEvent.change(choice, { target: { value: "count" } });
+
+    expect(onChange).toHaveBeenCalledWith("count");
+    expect(choice).toHaveClass("choice-select");
+    expect(choice.closest("label")).toHaveClass("choice");
+    expect(choice.closest("label")?.querySelector("span")).toHaveClass(
+      "choice-label"
+    );
+    expect(choice).toBeInTheDocument();
+  });
+
   it("toggles visibility via the eye control", () => {
     const layout = fakeLayout();
     open(layout);
@@ -311,6 +433,99 @@ describe("unstyled ColumnMenu", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Sort ascending" }));
     expect(onSortColumn).toHaveBeenCalledWith("a", "asc");
+  });
+
+  it("offers rename only when the host supplies a callback", () => {
+    const withoutRename = open(fakeLayout());
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    expect(screen.queryByRole("button", { name: "Rename column" })).toBeNull();
+    withoutRename.unmount();
+
+    open(fakeLayout(), false, false, vi.fn());
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    expect(
+      screen.getByRole("button", { name: "Rename column" })
+    ).toBeInTheDocument();
+  });
+
+  it("submits a trimmed rename and announces it", () => {
+    const onRenameColumn = vi.fn();
+    open(fakeLayout(), false, false, onRenameColumn);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    const renameAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    fireEvent.click(renameAction);
+
+    expect(renameAction).toBeDisabled();
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    fireEvent.change(input, { target: { value: "  Account name  " } });
+    fireEvent.submit(input.closest("form")!);
+
+    expect(onRenameColumn).toHaveBeenCalledWith("a", "Account name");
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-form"]')
+    ).toBeNull();
+    expect(renameAction).not.toBeDisabled();
+    expect(
+      document.querySelector('[data-adapttable-part="column-rename-announcer"]')
+    ).toHaveTextContent("Alpha renamed to Account name.");
+  });
+
+  it("cancels by Escape or button without committing", async () => {
+    const onRenameColumn = vi.fn();
+    open(fakeLayout(), false, false, onRenameColumn);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    const renameAction = screen.getByRole("button", {
+      name: "Rename column",
+    });
+    renameAction.focus();
+    fireEvent.click(renameAction);
+    fireEvent.change(screen.getByRole("textbox", { name: "Column name" }), {
+      target: { value: "Discarded" },
+    });
+    fireEvent.keyDown(screen.getByRole("textbox", { name: "Column name" }), {
+      key: "Escape",
+    });
+    expect(onRenameColumn).not.toHaveBeenCalled();
+    expect(renameAction).not.toBeDisabled();
+    await waitFor(() => expect(renameAction).toHaveFocus());
+
+    fireEvent.click(renameAction);
+    fireEvent.change(screen.getByRole("textbox", { name: "Column name" }), {
+      target: { value: "Also discarded" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onRenameColumn).not.toHaveBeenCalled();
+    expect(renameAction).not.toBeDisabled();
+  });
+
+  it("keeps a blank rename open with accessible validation", () => {
+    const onRenameColumn = vi.fn();
+    open(fakeLayout(), false, false, onRenameColumn);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Column actions: Alpha" })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Rename column" }));
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.blur(input);
+
+    const error = screen.getByRole("alert");
+    expect(error).toHaveTextContent("Enter a column name.");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+    fireEvent.submit(input.closest("form")!);
+    expect(onRenameColumn).not.toHaveBeenCalled();
+    expect(input).toBeInTheDocument();
   });
 
   it("resets the layout", () => {

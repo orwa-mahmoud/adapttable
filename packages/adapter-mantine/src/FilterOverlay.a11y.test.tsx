@@ -19,7 +19,7 @@
  *    carries no `aria-expanded`; drawer closure is asserted by the dialog
  *    unmounting.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { MantineProvider } from "@mantine/core";
 import {
   cleanup,
@@ -32,8 +32,8 @@ import {
 import { afterEach, describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
-import { DataTable } from "./DataTable";
-import type { ColumnDef, DataTableProps } from "./index";
+import { DataTable } from "./data-table.test-utils";
+import type { ColumnDef, FilterDef } from "./index";
 
 interface Person {
   id: string;
@@ -61,9 +61,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 // auto-built form, so axe scans real, labelled form controls — not an empty
 // card. The numberRange's operator select is labelled "Age Operator", giving
 // the open form a node that does NOT collide with the "Status" column header.
-const FILTERS: DataTableProps<Person>["filters"] = [
-  { key: "age", type: "numberRange" },
-];
+const FILTERS: FilterDef<Person>[] = [{ key: "age", type: "numberRange" }];
 
 // `color-contrast` is jsdom-blind (the existing a11y.test.tsx disables it for
 // the same reason). `region` flags page-level landmarks — the host app's job,
@@ -77,7 +75,7 @@ const axeOpts = {
 const AXE_TIMEOUT_MS = 20_000;
 
 function renderTable(
-  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}
 ) {
   return render(
     <MantineProvider>

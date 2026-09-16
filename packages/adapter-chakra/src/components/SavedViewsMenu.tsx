@@ -1,5 +1,5 @@
-import type { TableLabels, UseSavedViewsOptions } from "@adapttable/core";
-import { useSavedViews } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
 import {
   Button,
   HStack,

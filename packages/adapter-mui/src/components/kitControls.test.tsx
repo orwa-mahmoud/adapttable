@@ -10,12 +10,9 @@ import {
   type FilterValue,
 } from "../index";
 import { renderMui } from "../test-utils";
+import { FilterHeaderTrigger } from "./FilterHeaderTrigger";
 import { FilterTreeBuilder } from "./FilterTreeBuilder";
-import {
-  FilterHeaderControl,
-  FilterHeaderRow,
-  FilterHeaderTrigger,
-} from "./kitControls";
+import { FilterHeaderControl, FilterHeaderRow } from "./kitControls";
 
 interface Row {
   name: string;

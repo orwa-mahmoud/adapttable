@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "ہو گیا",
+  staged: "تیار",
+  partial: "جزوی طور پر مکمل",
+  rejected: "مسترد",
+  "awaiting-approval": "آپ کا منتظر",
+  cancelled: "منسوخ",
+  stale: "پرانا",
+  failed: "ناکام",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "خانوں کی ترمیم",
+  "rows.add": "قطاریں شامل کرنا",
+  "rows.delete": "قطاریں حذف کرنا",
+  "rows.reorder": "قطاروں کی ترتیب بدلنا",
+  "export.run": "برآمد کرنا",
+};
+
 export const ur: Required<TableLabels> = {
   table: "ڈیٹا ٹیبل",
   search: "تلاش",
@@ -116,6 +137,13 @@ export const ur: Required<TableLabels> = {
   hideAllColumns: "سب چھپائیں",
   unpinAllColumns: "سب ان پن کریں",
   resetColumn: "کالم ری سیٹ کریں",
+  renameColumn: "کالم کا نام تبدیل کریں",
+  columnName: "کالم کا نام",
+  saveColumnName: "نام محفوظ کریں",
+  cancelColumnRename: "منسوخ کریں",
+  columnNameRequired: "کالم کا نام درج کریں۔",
+  columnRenamed: ({ previous, name }) =>
+    `کالم ${previous} کا نام ${name} کر دیا گیا`,
   sortAscending: "صعودی ترتیب",
   sortDescending: "نزولی ترتیب",
   sortedBy: ({ column, ascending }) =>
@@ -125,8 +153,13 @@ export const ur: Required<TableLabels> = {
   columnActions: "کالم اعمال",
   exportCsv: "CSV برآمد کریں",
   exportFile: (format) => `${format.toUpperCase()} برآمد کریں`,
+  exportStarted: "برآمد تیار کی جا رہی ہے",
+  exportProgress: (progress) => `برآمد ${progress}% مکمل`,
   exportDone: "برآمد مکمل ہو گئی",
   exportFailed: "برآمد ناکام ہو گئی",
+  exportCancelled: "برآمد منسوخ کر دی گئی",
+  exportDownload: "برآمد ڈاؤن لوڈ کریں",
+  exportDismiss: "برآمد بند کریں",
   editCell: "سیل میں ترمیم",
   undoEdit: "واپس کریں",
   redoEdit: "دوبارہ کریں",
@@ -136,6 +169,178 @@ export const ur: Required<TableLabels> = {
     count === 1 ? "1 غیر محفوظ قطار" : `${String(count)} غیر محفوظ قطاریں`,
   saveAll: "سب محفوظ کریں",
   cancelAll: "سب منسوخ کریں",
+  approveProposal: "منظور کریں",
+  rejectProposal: "مسترد کریں",
+  proposalValueUnavailable: "دستیاب نہیں",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 تجویز کردہ تبدیلی"
+        : "{c} تجویز کردہ تبدیلیاں".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"{r} قطاروں میں".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "تمام {c} تبدیلیاں دیکھیں".replace("{c}", String(count)),
+  backToConversation: "گفتگو پر واپس",
+  approveAllProposals: "سب منظور کریں",
+  approveRemainingProposals: "باقی منظور کریں",
+  rejectAllProposals: "سب مسترد کریں",
+  rejectRemainingProposals: "باقی مسترد کریں",
+  alwaysAllowProposal: "ہمیشہ اجازت دیں",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} منظور · {j} مسترد · {p} باقی"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "ایک تبدیلی آپ کے فیصلے کی منتظر ہے۔",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 تجویز کردہ تبدیلی"
+      : `${String(count)} تجویز کردہ تبدیلیاں`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "ٹیبل معاون",
+  assistantOpen: "اے آئی سے پوچھیں",
+  assistantClose: "بند کریں",
+  assistantSettings: "معاون کی ترتیبات",
+  assistantEmpty: "آپ اس ٹیبل کے ساتھ کیا کرنا چاہتے ہیں؟",
+  assistantPlaceholder: "اس ٹیبل کے بارے میں پوچھیں…",
+  assistantSend: "بھیجیں",
+  assistantStop: "روکیں",
+  assistantVoiceStart: "بول کر لکھیں",
+  assistantVoiceStop: "بولنا روکیں",
+  assistantVoiceListening: "سن رہے ہیں",
+  assistantVoiceLanguage: "بولنے کی زبان",
+  assistantYou: "آپ",
+  assistantSpeaker: "معاون",
+  assistantNewMessages: "نئے پیغامات",
+  assistantUnavailable: "معاون منسلک نہیں ہے۔",
+  assistantDetached: "کنکشن منقطع ہو گیا۔ کام اب بھی جاری ہو سکتا ہے۔",
+  assistantRejoin: "دوبارہ جُڑیں",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} مکمل`
+      : `${String(total)} میں سے ${String(done)}`,
+  assistantBackToTable: "ٹیبل پر واپس",
+  assistantDetail: "تفصیلات",
+  assistantSaveInTable: "یہ تبدیلی رکھنے کے لیے ٹیبل میں محفوظ کریں۔",
+  assistantUndo: "واپس کریں",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "یہ ایک باری کی اجازت سے زیادہ مراحل مانگتا ہے۔ اس کا ایک حصہ طلب کریں۔",
+        "continuation-limit":
+          "یہ ایک باری کی اجازت سے زیادہ مراحل مانگتا ہے۔ اس کا ایک حصہ طلب کریں۔",
+        "resume-limit":
+          "یہ ایک باری کی اجازت سے زیادہ مراحل مانگتا ہے۔ اس کا ایک حصہ طلب کریں۔",
+        "discovery-exhausted": "معاون سمجھ نہ سکا کہ یہ یہاں کیسے کیا جائے۔",
+        "repeated-plan": "معاون نے ایک ہی چیز دو بار مانگی اور رک گیا۔",
+        "question-unanswered": "مکمل ہونے کے لیے آپ کا جواب درکار ہے۔",
+        "approval-unavailable": "منظوری درکار ہے، اور پوچھنے کی کوئی جگہ نہیں۔",
+        "interrupt-unsupported": "معاون نے وہ مانگا جو یہ ٹیبل نہیں کر سکتا۔",
+        "output-denied": "اس کے کچھ حصے کو چلنے کی اجازت نہ تھی۔",
+        "not-run": "یہ نہیں چلا۔",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "یہ چلنے کے بعد جدول بدل چکا ہے۔",
+        "cannot-restore": "اس کا کچھ حصہ واپس نہیں کیا جا سکتا۔",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "آپ کا جواب",
+  assistantAnswerPlaceholder: "جواب لکھیں",
+  assistantAnswerSend: "جواب",
+  assistantAlwaysAllowedTitle: "ان کے بارے میں نہیں پوچھا جاتا",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `${CAPABILITY[capability] ?? capability} کے بارے میں دوبارہ پوچھیں`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 عمل" : `${String(count)} اعمال`,
+  assistantActionsTitle: "اس باری میں کیا بدلا",
+  assistantUndoAll: "سب واپس کریں",
+  assistantExamples: "شارٹ کٹس",
+  assistantReceiptChange: ({ before, after }) =>
+    `${before} سے ${after} کر دیا گیا`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `تجویز: ${before} سے ${after}`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "فلٹر لاگو ہو گیا",
+        "filter/staged": "فلٹر تیار ہے",
+        "sort/executed": "ترتیب دے دیا گیا",
+        "group/executed": "گروپ بندی ہو گئی",
+        "pin/executed": "کالم پن ہو گیا",
+        "edit/executed": "محفوظ ہو گیا",
+        "edit/staged": "ترمیم تیار — محفوظ نہیں",
+        "edit/awaiting-approval": "ترمیم منظوری کی منتظر",
+        "edit/partial": "کچھ ترامیم محفوظ، کچھ مسترد",
+        "edit/rejected": "ترمیم مسترد",
+        "filter-cleared/executed": "فلٹر ہٹا دیے گئے",
+        "sort-cleared/executed": "ترتیب ہٹا دی گئی",
+        "search/executed": "تلاش کی گئی",
+        "search-cleared/executed": "تلاش صاف کر دی گئی",
+        "group-cleared/executed": "گروپ بندی ہٹا دی گئی",
+        "pin-cleared/executed": "کالم کی پن ہٹا دی گئی",
+        "pinRow/executed": "قطار پن ہو گئی",
+        "pinRow-cleared/executed": "قطار کی پن ہٹا دی گئی",
+        "page/executed": "صفحہ تبدیل ہوا",
+        "aggregate/executed": "میزان تبدیل ہوئے",
+        "select/executed": "انتخاب تبدیل ہوا",
+        "read/executed": "ٹیبل پڑھا گیا",
+        "operation/executed": "چل گیا",
+        "operation/awaiting-approval": "آپ کا منتظر",
+        "operation/rejected": "مسترد",
+        "export/executed": "برآمد ہو گیا",
+        "add/executed": "قطار شامل کی گئی",
+        "add/awaiting-approval": "نئی قطار منظوری کی منتظر",
+        "add/rejected": "نئی قطار مسترد",
+        "delete/executed": "قطاریں حذف ہو گئیں",
+        "delete/awaiting-approval": "حذف منظوری کا منتظر",
+        "delete/partial": "کچھ قطاریں حذف، کچھ رکھی گئیں",
+        "delete/rejected": "حذف مسترد",
+        "reorder/executed": "قطاریں منتقل ہوئیں",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "نزولی" : "صعودی"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "فارغ",
+      connecting: "منسلک ہو رہا ہے…",
+      ready: "تیار",
+      sending: "کام جاری…",
+      "awaiting-approval": "آپ کا منتظر",
+      "awaiting-user": "آپ کا منتظر",
+      error: "خرابی",
+      disconnected: "منسلک نہیں",
+    })[status] ?? "تیار",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "قطار شامل کریں",
   duplicateRow: "قطار کی نقل بنائیں",
   deleteRow: "قطار حذف کریں",
@@ -151,9 +356,28 @@ export const ur: Required<TableLabels> = {
   rowLifted: (position) => `قطار ${String(position)} اٹھائی گئی`,
   rowMoved: (from, to) => `قطار ${String(from)} سے ${String(to)} پر گئی`,
   rowReorderCancelled: "ترتیب منسوخ ہوئی",
+  rowMoveOptions: "قطار منتقل کرنے کے اختیارات",
+  moveToGroup: "گروپ میں منتقل کریں…",
+  moveUnder: "اس کے تحت منتقل کریں…",
+  moveToTopLevel: "اعلیٰ ترین سطح پر منتقل کریں",
+  confirmRowMoveTitle: "قطار کی منتقلی کی تصدیق کریں",
+  confirmRowMoveDescription: (row, from, to) =>
+    `${row} کو ${from} سے ${to} منتقل کریں؟`,
+  confirmRowMove: "منتقل کریں",
+  rowMovedToGroup: (group) => `قطار ${group} میں منتقل ہو گئی`,
+  rowMovedUnder: (parent) => `قطار ${parent} کے تحت منتقل ہو گئی`,
+  moveRejectedPolicyNever: "حدود کے پار قطار منتقل کرنا غیر فعال ہے",
+  moveRejectedSorted: "قطاروں کی ترتیب بدلنے سے پہلے چھانٹی صاف کریں",
+  moveRejectedCycle:
+    "قطار کو خود اپنے یا اپنی کسی ذیلی قطار کے اندر منتقل نہیں کیا جا سکتا",
+  moveUnavailable: "یہ قطار منتقل کرنا دستیاب نہیں ہے",
+  rootLevel: "اعلیٰ ترین سطح",
   pinToTop: "اوپر پن کریں",
   pinToBottom: "نیچے پن کریں",
   unpinRow: "قطار کا پن ہٹائیں",
+  pinnedSummaryRow: "خلاصہ قطار",
+  pinnedSummaryTop: "اوپر پن شدہ خلاصہ قطاریں",
+  pinnedSummaryBottom: "نیچے پن شدہ خلاصہ قطاریں",
   rowSeparator: "جداکار",
   expandColumnGroup: "کالم گروپ پھیلائیں",
   collapseColumnGroup: "کالم گروپ سکیڑیں",
@@ -163,6 +387,34 @@ export const ur: Required<TableLabels> = {
   expandGroup: "گروپ پھیلائیں",
   collapseGroup: "گروپ سکیڑیں",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "قطاروں کی گروپ بندی",
+  groupingDropColumns: "گروپ بنانے کے لیے کالم یہاں گھسیٹیں",
+  addGroupingColumn: "گروپ بندی کا کالم شامل کریں",
+  groupByColumn: (label) => `${label} کے لحاظ سے گروپ بنائیں`,
+  ungroupColumn: (label) => `${label} کی گروپ بندی ختم کریں`,
+  removeGroupingColumn: (label) => `${label} کو گروپ بندی سے ہٹائیں`,
+  moveGroupingColumn: (label) => `${label} کی گروپ بندی منتقل کریں`,
+  groupingDropToRemove: "گروپ بندی ہٹانے کے لیے یہاں چھوڑیں",
+  groupingAggregateColumn: "مجموعی کالم",
+  groupingAggregation: "گروپ کا مجموعہ",
+  groupingAggregationDefault: "طے شدہ",
+  groupingAggregationNone: "کوئی نہیں",
+  groupingAggregations: "مجموعے",
+  groupingAddAggregation: "مجموعی کالم شامل کریں",
+  groupingRestoreAggregations: "طے شدہ بحال کریں",
+  groupingRemoveAggregation: (column) => `${column} کا مجموعہ ہٹائیں`,
+  groupingAggregationFor: (column) => `${column} کا مجموعہ`,
+  groupingAggregationReadOnly: "ایپ نے مقرر کیا",
+  groupingAggregationCustom: "حسب ضرورت",
+  groupingAggregateRemoved: (column) => `${column} کا مجموعہ ہٹا دیا گیا`,
+  groupingAggregatesRestored: "مجموعے طے شدہ پر بحال ہو گئے",
+  groupingAverage: "اوسط",
+  groupingAdded: (label) => `${label} گروپ بندی میں شامل ہوا`,
+  groupingRemoved: (label) => `${label} گروپ بندی سے ہٹا دیا گیا`,
+  groupingMoved: (label, position) =>
+    `${label} گروپ بندی کی پوزیشن ${position} پر منتقل ہوا`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `${label} کا گروپ مجموعہ ${aggregation} میں تبدیل ہوا`,
   gridRangeCopied: (cells) => `${cells} خانے کاپی ہو گئے`,
   gridRangeCopyFailed: "کاپی ناکام",
   gridRangePasted: (cells) => `${cells} خانے چسپاں ہوئے`,
@@ -217,9 +469,8 @@ export const ur: Required<TableLabels> = {
   noticeReorderNested:
     "گروپنگ یا درخت آن ہونے پر قطاروں کی ترتیب بدلنا بند ہے۔",
   noticeGroupingUnavailable:
-    "گروپنگ بند ہے — یہ ماخذ پوری فلٹر شدہ فہرست نہیں دیتا۔",
+    "گروہ بندی بند ہے — یہ ماخذ گروہ بندی نہیں کر سکتا۔",
   noticeExportAllPage:
-    "سب برآمد یہی صفحہ ہے — پوری فلٹر شدہ فہرست دستیاب نہیں۔",
+    "سب برآمد بند ہے — یہ ماخذ ایک وقت میں ایک صفحہ دیتا ہے۔",
   noticeEditWithoutWriter: "ترمیم بند ہے — کوئی لکھائی ہینڈلر منسلک نہیں۔",
-  exportThisPage: "یہ صفحہ برآمد کریں",
 };

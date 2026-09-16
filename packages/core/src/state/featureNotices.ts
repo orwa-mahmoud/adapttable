@@ -11,6 +11,11 @@ import {
   exportAllFallsBackToPage,
   type ExportCsvOptions,
 } from "../export/tableCsv";
+import {
+  capabilityReason,
+  sourceCapabilities,
+  type TableSourceCapabilities,
+} from "../source/capabilities";
 import type { TableSource } from "../source/TableSource";
 import type { TableLabels } from "../types";
 
@@ -22,7 +27,6 @@ import type { TableLabels } from "../types";
 export type FeatureNoticeKind =
   | "virtualize-paged"
   | "pin-nested"
-  | "reorder-nested"
   | "grouping-unavailable"
   | "export-all-page"
   | "edit-without-writer";
@@ -58,13 +62,20 @@ export interface CollectFeatureNoticesInput<TRow = unknown> {
   groupByKeys: readonly string[];
   /** Every filtered row, when the source can hand them over. */
   allFilteredRows?: readonly TRow[];
+  /**
+   * What the source says it can do. Absent means the table infers it from the
+   * fields below, which is what it did before the contract existed.
+   */
+  capabilities?: TableSourceCapabilities;
+  /** Rows across every page, when the source counted them. */
+  total?: number;
   /** Server-built groups, when grouping happens upstream. */
   serverGroups?: unknown;
   /** Whether the host asked for row pinning. */
   rowPinningRequested: boolean;
   /** Whether the host asked for row reordering. */
   rowReorderRequested: boolean;
-  /** Grouping is armed or a tree is on — pin and reorder stay off. */
+  /** Grouping is armed or a tree is on — row pinning stays off. */
   nestedArmed: boolean;
   /** Whether any column declared an editor. */
   hasEditableColumn: boolean;
@@ -106,17 +117,18 @@ export function collectFeatureNotices<TRow>(
     });
   }
 
-  if (
-    input.groupByKeys.length > 0 &&
-    input.allFilteredRows === undefined &&
-    input.serverGroups === undefined
-  ) {
+  const capabilities = sourceCapabilities({
+    allFilteredRows: input.allFilteredRows,
+    groups: input.serverGroups,
+    total: input.total,
+    capabilities: input.capabilities,
+  });
+
+  if (input.groupByKeys.length > 0 && capabilities.grouping === false) {
     notices.push({
       kind: "grouping-unavailable",
       appearance: "off",
-      message:
-        labels.noticeGroupingUnavailable ??
-        "Grouping is off — this source does not provide the full filtered set.",
+      message: labels.noticeGroupingUnavailable ?? capabilityReason("grouping"),
     });
   }
 
@@ -130,27 +142,18 @@ export function collectFeatureNotices<TRow>(
     });
   }
 
-  if (input.rowReorderRequested && input.nestedArmed) {
-    notices.push({
-      kind: "reorder-nested",
-      appearance: "off",
-      message:
-        labels.noticeReorderNested ??
-        "Row reorder is off while grouping or a tree is on.",
-    });
-  }
-
   if (
     exportAllFallsBackToPage(input.exportCsv, {
       allFilteredRows: input.allFilteredRows,
+      groups: input.serverGroups,
+      total: input.total,
+      capabilities: input.capabilities,
     })
   ) {
     notices.push({
       kind: "export-all-page",
-      appearance: "one-page",
-      message:
-        labels.noticeExportAllPage ??
-        "Export all is this page — the full filtered set is not available.",
+      appearance: "disabled",
+      message: labels.noticeExportAllPage ?? capabilityReason("exportScope"),
     });
   }
 

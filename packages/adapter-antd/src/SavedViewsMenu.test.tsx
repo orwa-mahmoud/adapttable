@@ -1,9 +1,9 @@
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { SavedViewsMenu } from "./components/SavedViewsMenu";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 const labels = {
@@ -196,7 +196,7 @@ describe("<DataTable savedViews> (Ant Design)", () => {
     expect(stored[0]!.search).toContain("t.q=ali");
   });
 
-  it("renders no trigger without the savedViews prop", () => {
+  it("renders no trigger without the savedViews feature", () => {
     render(<DataTable data={rows} columns={columns} rowKey={(r) => r.id} />);
     expect(screen.queryByRole("button", { name: "Saved views" })).toBeNull();
   });

@@ -1,20 +1,12 @@
 import {
   ACTIONS_COLUMN_KEY,
   type CellSpanAppearance,
-  type ColumnDef,
-  columnHeaderController,
   columnResizeHandleProps,
   type ConfirmHandler,
-  type EditableCellEditing,
   type FilterDef,
-  filterDefForColumn,
-  type FilterFormSource,
   type FilterTypeRegistry,
-  type GridFocusState,
-  type GroupCollapseState,
-  type PinSide,
+  groupAggregateNode,
   REORDER_COLUMN_KEY,
-  resolveColumnHeader,
   type RowAction,
   type RowActionsLayout,
   type RowActionsRenderer,
@@ -23,6 +15,14 @@ import {
   type TableLabels,
   type TreeEntry,
 } from "@adapttable/core";
+import {
+  type CellElementProps,
+  type ColumnDef,
+  columnHeaderController,
+  type EditableCellEditing,
+  filterDefForColumn,
+  resolveColumnHeader,
+} from "@adapttable/react";
 import {
   type BodyCell,
   cellFlashAttr,
@@ -35,16 +35,25 @@ import {
   columnSizeStyle,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
+  type FilterFormSource,
+  type GridFocusState,
+  type GroupCollapseState,
   groupedHeaderAlign,
   groupedHeaderChildRule,
   groupedHeaderLabelStyle,
+  type GroupingDragProps,
+  type GroupingPanelState,
   type HeaderGroupCell,
   headerGroupRows,
   isColumnGroupSummaryKey,
   mergedCellStyle,
+  pinnedSummaryRowId,
+  type PinSide,
   REORDER_COLUMN_WIDTH,
+  resolveRowEditTrigger,
+  rowEditConflict,
   type RowReorderState,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { type TableColumnsType, Typography } from "antd";
 import type {
   CSSProperties,
@@ -55,23 +64,24 @@ import type {
   ReactNode,
 } from "react";
 
-import { ColumnSelectCheckbox } from "./components/ColumnSelectCheckbox";
-import { EditableDataCell } from "./components/EditableCell";
-import { FillHandle } from "./components/FillHandle";
+import {
+  OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
+} from "./components/featureSlots";
 import {
   type AdaptTableGroupRow,
   type GroupedDataRecord,
-  GroupHeaderCell,
   isAdaptTableExtraRow,
   isAdaptTableGroupRow,
 } from "./components/grouping";
-import {
-  ColumnGroupToggle,
-  FilterHeaderTrigger,
-  RowEditActions,
-  RowReorderHandle,
-  TreeCell,
-} from "./components/kitControls";
 import { RowActionButtons } from "./components/RowActionButtons";
 
 /**
@@ -256,7 +266,11 @@ function groupTitle(
   return (
     <span style={groupedHeaderLabelStyle()}>
       {onToggle ? (
-        <ColumnGroupToggle cell={cell} labels={labels} onToggle={onToggle} />
+        <OptionalColumnGroupToggle
+          cell={cell}
+          labels={labels}
+          onToggle={onToggle}
+        />
       ) : null}
       {columnGroupHeaderCaption(cell)}
     </span>
@@ -404,13 +418,23 @@ export interface BuildColumnsOptions<TRow> {
   editing?: EditableCellEditing<TRow>;
   /** Current page rows (Tab advance); required when editing is set. */
   rows?: readonly TRow[];
+  /** Interactive grouping drag state for the data-column headers. */
+  groupingPanel?: GroupingPanelState;
   /** Row identity function. */
   getRowId?: (row: TRow) => string;
   /** Per-column edge pinning (logical start/end), mapped to antd's native
    *  physical `fixed` via {@link antdFixed}. */
   pinned?: Readonly<Record<string, PinSide>>;
+  /**
+   * Core's header-cell props for a column. antd builds its `<th>` from what
+   * `onHeaderCell` returns and nothing else, so this is the only way an
+   * attribute core states about a header reaches this kit.
+   */
+  getHeaderCellProps?: (column: ColumnDef<TRow>) => CellElementProps;
   /** Layout width mutator; enables a resize handle when provided. */
   setWidth?: (key: string, width: number) => void;
+  /** Accepted-name mutator; enables direct rename when its feature slot exists. */
+  onRenameColumn?: (key: string, name: string) => void;
   /** Per-column pixel widths from the layout state. */
   columnWidths?: Readonly<Record<string, number>>;
   /** Accessible label prefix for the resize handle. */
@@ -432,6 +456,9 @@ export interface BuildColumnsOptions<TRow> {
   windowStart?: number;
   /** Per-row body cells so `onCell` can apply col/row spans. */
   cellsByRow?: ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+  /** Host-owned summary objects, keyed separately from data-row ids. */
+  pinnedSummaryTop?: readonly TRow[];
+  pinnedSummaryBottom?: readonly TRow[];
   /** Spreadsheet merge paint; omit / `"merged"` is the default look. */
   cellSpanAppearance?: CellSpanAppearance;
   /** When true, group parents render a collapse toggle. */
@@ -542,7 +569,7 @@ function renderGroupDataCell<TRow>(
   if (groupSpansAll(record)) {
     if (columnIndex === 0) {
       content = (
-        <GroupHeaderCell
+        <OptionalGroupHeaderRow
           group={record}
           labels={options.labels}
           onToggle={() => options.grouping?.collapsed.toggle(record.key)}
@@ -552,16 +579,28 @@ function renderGroupDataCell<TRow>(
     }
   } else if (columnIndex === 0) {
     content = (
-      <GroupHeaderCell
+      <OptionalGroupHeaderRow
         group={record}
         labels={options.labels}
         onToggle={() => options.grouping?.collapsed.toggle(record.key)}
         onShowMore={options.grouping?.showMore}
-        aggregate={record.aggregateCells?.[column.key]}
+        aggregate={
+          groupAggregateNode(
+            column,
+            record.aggregateCells?.[column.key],
+            record.aggregateOps
+          ) as ReactNode
+        }
       />
     );
   } else {
-    content = aggregateCellContent(record.aggregateCells?.[column.key]);
+    content = aggregateCellContent(
+      groupAggregateNode(
+        column,
+        record.aggregateCells?.[column.key],
+        record.aggregateOps
+      ) as ReactNode
+    );
   }
   return content;
 }
@@ -584,14 +623,14 @@ function renderLeafDataCell<TRow>(
 ): ReactNode {
   return (
     <>
-      <TreeCell
+      <OptionalTreeCell
         entry={options.tree?.entryFor(record)}
         columnKey={column.key}
         treeColumnKey={options.tree?.columnKey}
         labels={options.labels}
         onToggle={options.tree?.toggle}
       >
-        <EditableDataCell
+        <OptionalEditableCell
           editing={options.editing}
           row={record}
           column={column}
@@ -603,8 +642,8 @@ function renderLeafDataCell<TRow>(
           editLabel={options.labels.editCell}
           undoLabel={options.labels.undoEdit}
         />
-      </TreeCell>
-      <FillHandle
+      </OptionalTreeCell>
+      <OptionalFillHandle
         focus={options.gridFocus}
         windowIndex={index}
         col={columnIndex}
@@ -639,8 +678,22 @@ function renderDataCell<TRow>(
   return renderLeafDataCell(column, record, index, options, columnIndex);
 }
 
+function antdRecordId<TRow>(
+  record: TRow,
+  getRowId: (row: TRow) => string,
+  top: readonly TRow[],
+  bottom: readonly TRow[]
+): string {
+  const topIndex = top.indexOf(record);
+  if (topIndex >= 0) return pinnedSummaryRowId("top", topIndex);
+  const bottomIndex = bottom.indexOf(record);
+  if (bottomIndex >= 0) return pinnedSummaryRowId("bottom", bottomIndex);
+  return getRowId(record);
+}
+
 export function buildColumns<TRow>({
   gridFocus,
+  getHeaderCellProps,
   columns,
   rowActions,
   rowActionsLayout,
@@ -651,9 +704,11 @@ export function buildColumns<TRow>({
   labels,
   editing,
   rows = [],
+  groupingPanel,
   getRowId = () => "",
   pinned,
   setWidth,
+  onRenameColumn,
   columnWidths,
   resizeLabel = "Resize column",
   sortLevels = [],
@@ -664,6 +719,8 @@ export function buildColumns<TRow>({
   rowReorder,
   windowStart = 0,
   cellsByRow,
+  pinnedSummaryTop = [],
+  pinnedSummaryBottom = [],
   cellSpanAppearance,
   collapsibleColumnGroups,
   collapsedColumnGroups,
@@ -675,7 +732,9 @@ export function buildColumns<TRow>({
   filterRegistry,
   closeHeaderFilterOnSelect,
   isCellFlashing,
-}: BuildColumnsOptions<TRow>): TableColumnsType<GroupedDataRecord<TRow>> {
+}: Readonly<BuildColumnsOptions<TRow>>): TableColumnsType<
+  GroupedDataRecord<TRow>
+> {
   const cellOpts = {
     editing,
     rows,
@@ -705,6 +764,13 @@ export function buildColumns<TRow>({
         headerFilters && filterSource
           ? filterDefForColumn(filterDefs ?? [], column.key)
           : undefined;
+      const caption = resolveColumnHeader(
+        column,
+        columnHeaderController(column, {
+          sortDir: effectiveSortDir,
+          sortIndex: typeof sortIndex === "number" ? sortIndex : undefined,
+        })
+      );
       return {
         key: column.key,
         // A real element (not a Fragment): antd v6 attaches a `ref` to the
@@ -713,16 +779,24 @@ export function buildColumns<TRow>({
         // anchors to the (positioned) header cell, so the layout is unchanged.
         title: (
           <span title={column.headerTooltip}>
-            {resolveColumnHeader(
-              column,
-              columnHeaderController(column, {
-                sortDir: effectiveSortDir,
-                sortIndex:
-                  typeof sortIndex === "number" ? sortIndex : undefined,
-              })
+            {column.renameable === true && onRenameColumn ? (
+              <OptionalColumnHeaderRename
+                columnKey={column.key}
+                name={columnLabel(column)}
+                labels={labels}
+                onRenameColumn={onRenameColumn}
+              >
+                <span data-adapttable-part="header-caption-control">
+                  {caption}
+                </span>
+              </OptionalColumnHeaderRename>
+            ) : (
+              <span data-adapttable-part="header-caption-control">
+                {caption}
+              </span>
             )}
             {gridFocus?.columnCheckbox === true ? (
-              <ColumnSelectCheckbox
+              <OptionalColumnSelect
                 label={columnSelectLabel(labels.selectColumn, column)}
                 checked={gridFocus.isColumnSelected(columnIndex)}
                 onToggle={() => gridFocus.toggleColumn(columnIndex)}
@@ -736,16 +810,16 @@ export function buildColumns<TRow>({
             <SortIndexBadge index={sortIndex} />
             {setWidth && (
               <span
-                {...columnResizeHandleProps(
+                {...(columnResizeHandleProps(
                   column.key,
                   setWidth,
                   `${resizeLabel}: ${columnLabel(column)}`
-                )}
+                ) as unknown as HTMLAttributes<HTMLSpanElement>)}
                 style={RESIZE_HANDLE_STYLE}
               />
             )}
             {headerDef && filterSource ? (
-              <FilterHeaderTrigger
+              <OptionalFilterHeader
                 def={headerDef}
                 source={filterSource}
                 labels={labels}
@@ -791,7 +865,13 @@ export function buildColumns<TRow>({
             gridFocus
           );
           if (isAdaptTableGroupRow(record) || !cellsByRow) return grouped;
-          const cells = cellsForRow(cellsByRow, getRowId(record));
+          const rowId = antdRecordId(
+            record,
+            getRowId,
+            pinnedSummaryTop,
+            pinnedSummaryBottom
+          );
+          const cells = cellsForRow(cellsByRow, rowId);
           const cell = cells.find((c) => c.column.key === column.key);
           if (!cell) return { colSpan: 0 };
           const mark = cellSpanMark(cell.colSpan, cell.rowSpan);
@@ -810,11 +890,7 @@ export function buildColumns<TRow>({
             rowSpan: cell.rowSpan,
             "data-adapttable-part": "cell",
             "data-column-key": column.key,
-            "data-flash": cellFlashAttr(
-              isCellFlashing,
-              getRowId(record),
-              column.key
-            ),
+            "data-flash": cellFlashAttr(isCellFlashing, rowId, column.key),
             ...(mark ? { "data-cell-span": mark } : {}),
             style: cellHighlightStyle(
               focus,
@@ -839,7 +915,15 @@ export function buildColumns<TRow>({
             pinned?.[column.key] != null,
             onToggleSortLevel
           );
+          // Everything core states about a header cell, in full, before this
+          // adapter's own props: the kit's values still win where they
+          // overlap, but nothing core adds is silently dropped.
+          const core = getHeaderCellProps?.(column);
+          const groupingDrag = groupingPanel?.headerDragProps(column.key) as
+            GroupingDragProps | undefined;
           return {
+            ...core,
+            ...groupingDrag,
             "data-adapttable-part": "header-cell",
             "data-column-key": column.key,
             ...gridFocus?.getColumnHeaderProps(columnIndex, {
@@ -849,6 +933,7 @@ export function buildColumns<TRow>({
             // The sizing merges INTO whatever style the header already has,
             // rather than being overwritten by it.
             style: {
+              ...core?.style,
               ...head.style,
               ...columnSizeStyle(
                 column,
@@ -910,7 +995,7 @@ export function buildColumns<TRow>({
         const id = getRowId(row);
         return (
           <span data-adapttable-part="reorder-cell">
-            <RowReorderHandle
+            <OptionalRowReorderHandle
               reorder={rowReorder}
               labels={labels}
               rowId={id}
@@ -954,20 +1039,25 @@ export function buildColumns<TRow>({
           return null;
         }
         const row = record;
+        const rowId = getRowId(row);
+        const rowEdit = resolveRowEditTrigger(rowActions, rowMode, row, rowId);
         return (
           <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
             {rowMode && (
-              <RowEditActions
+              <OptionalRowEditActions
                 rowEditing={rowMode}
                 row={row}
-                rowId={getRowId(row)}
+                rowId={rowId}
+                showBegin={rowEdit.showBegin}
+                icons={editing?.rowEditIcons}
+                conflict={rowEditConflict(editing, rowId)}
                 labels={labels}
               />
             )}
-            {(rowActions ?? []).length > 0 && (
+            {rowEdit.actions.length > 0 && (
               <RowActionButtons
                 row={row}
-                actions={rowActions ?? []}
+                actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
                 layout={rowActionsLayout}

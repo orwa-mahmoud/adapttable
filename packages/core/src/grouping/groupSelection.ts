@@ -1,4 +1,4 @@
-import type { HeaderSelectionState } from "../selection/useSelection";
+import type { HeaderSelectionState } from "../selection/selectionState";
 
 /**
  * Tri-state for a group checkbox over its leaf row ids — same enum as the

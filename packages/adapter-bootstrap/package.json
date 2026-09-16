@@ -14,7 +14,7 @@
   "type": "module",
   "sideEffects": false,
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=22.12.0"
   },
   "private": true,
   "files": [
@@ -139,8 +139,9 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "dependencies": {
-    "@adapttable/core": "workspace:^",
-    "react-compiler-runtime": "^1.0.0"
+    "@adapttable/core": "2.9.0",
+    "react-compiler-runtime": "^1.0.0",
+    "@adapttable/react": "0.0.0"
   },
   "peerDependencies": {
     "bootstrap": "^5.0.0",

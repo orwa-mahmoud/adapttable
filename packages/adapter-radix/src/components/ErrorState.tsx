@@ -1,5 +1,5 @@
 /** Load failure, with a retry. */
-import { type TableLabels } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
 import { Box, Button, Callout, Text } from "@radix-ui/themes";
 
 /** Error callout with retry. */

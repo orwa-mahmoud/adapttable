@@ -65,14 +65,21 @@ test("Feature Lab options open as an edge drawer and close from its backdrop", a
 
   const viewport = page.viewportSize();
   const drawer = page.getByRole("dialog", { name: "Configure Feature Lab" });
+  // Wait for the slide-in to finish, then treat a ~15px classic-scrollbar
+  // gutter as still an edge panel. A centered modal fails the right-half
+  // check; a 1px flush is overlay-scrollbar only.
   await expect
     .poll(async () => {
       const box = await drawer.boundingBox();
-      return Math.abs(
-        (box?.x ?? 0) + (box?.width ?? 0) - (viewport?.width ?? 0)
+      const visual = viewport?.width ?? 0;
+      const layout = await page.evaluate(
+        () => document.documentElement.clientWidth
       );
+      if ((box?.x ?? 0) <= visual / 2) return Number.POSITIVE_INFINITY;
+      const right = (box?.x ?? 0) + (box?.width ?? 0);
+      return Math.min(Math.abs(right - visual), Math.abs(right - layout));
     })
-    .toBeLessThanOrEqual(1);
+    .toBeLessThanOrEqual(20);
   const panel = await drawer.boundingBox();
   expect(viewport).not.toBeNull();
   expect(panel).not.toBeNull();
@@ -205,16 +212,19 @@ test("Feature Lab disables combinations the data model cannot honor", async ({
     .click();
   await expect(
     page
-      .getByRole("group", { name: "reorder" })
+      .getByRole("group", { name: "pin rows" })
       .getByRole("button", { name: "On", exact: true })
   ).toBeDisabled();
-  for (const group of ["reorder", "pin rows"]) {
-    await expect(
-      page
-        .getByRole("group", { name: group })
-        .getByRole("button", { name: "Off", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
-  }
+  await expect(
+    page
+      .getByRole("group", { name: "pin rows" })
+      .getByRole("button", { name: "Off", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page
+      .getByRole("group", { name: "reorder" })
+      .getByRole("button", { name: "On", exact: true })
+  ).toBeEnabled();
 
   await page
     .getByRole("group", { name: "data source" })

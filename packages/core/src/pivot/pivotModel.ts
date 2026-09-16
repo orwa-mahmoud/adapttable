@@ -31,23 +31,24 @@
  * {@link PIVOT_BLANK}, rather than being dropped. Rows that fall in no column
  * silently disappearing is how a pivot table lies about a total.
  */
-import type { ReactNode } from "react";
-
 import {
   type AggregateName,
+  type AggregateOrderedValue,
   type Aggregator,
   resolveAggregateValue,
 } from "../aggregate/aggregate";
+import type { ColumnMetadata, ColumnModel } from "../columnModel";
+import type { DisplayValue } from "../display";
 import { compareValues } from "../sort/compare";
-import type { ColumnDef, SortableValue } from "../types";
-
-export type { AggregateName, Aggregator, ColumnDef, SortableValue };
 import {
   PIVOT_GRAND_TOTAL_KEY,
   pivotLeafKey,
   pivotPathKey,
   pivotTotalLeafKey,
 } from "./pivotKeys";
+
+export type { AggregateName, Aggregator } from "../aggregate/aggregate";
+export type { SortableValue } from "../types";
 
 // Keys are built in `./pivotKeys`, which the server translator and the URL
 // codec share, so the three agree by construction rather than by copying. The
@@ -153,7 +154,7 @@ export interface PivotRow {
   /** The dimension value this line is labelled with. */
   label: string;
   /** One value per entry of {@link PivotResult.columnLeaves}, in order. */
-  cells: readonly ReactNode[];
+  cells: readonly (DisplayValue | undefined)[];
   /** How many source rows it covers — for "12 rows" affordances. */
   count: number;
 }
@@ -184,9 +185,12 @@ export interface PivotOptions<TRow> {
    * Columns, so dimension and measure values resolve through `sortValue`
    * exactly as sorting and grouping do.
    */
-  columns?: readonly ColumnDef<TRow>[];
+  columns?: readonly ColumnModel<TRow>[];
   /** Format a computed cell. Receives the raw result and the measure. */
-  format?: (value: ReactNode, measure: PivotMeasure) => ReactNode;
+  format?: (
+    value: DisplayValue | undefined,
+    measure: PivotMeasure
+  ) => DisplayValue | undefined;
   /**
    * Subtotal keys the user has collapsed. A collapsed line keeps its own
    * totals and drops everything beneath it.
@@ -202,7 +206,7 @@ export interface PivotOptions<TRow> {
 }
 
 /** The label for a dimension value, with a bucket for "no value". */
-function dimensionLabel(value: SortableValue): string {
+function dimensionLabel(value: AggregateOrderedValue): string {
   if (value === undefined || value === null || value === "") return PIVOT_BLANK;
   return String(value);
 }
@@ -211,7 +215,7 @@ function dimensionLabel(value: SortableValue): string {
 function dimensionOf<TRow>(
   row: TRow,
   key: string,
-  byKey: ReadonlyMap<string, ColumnDef<TRow>>
+  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>
 ): string {
   return dimensionLabel(resolveAggregateValue(row, key, byKey.get(key)));
 }
@@ -223,7 +227,7 @@ function dimensionOf<TRow>(
 function distinctPaths<TRow>(
   rows: readonly TRow[],
   dimensions: readonly string[],
-  byKey: ReadonlyMap<string, ColumnDef<TRow>>
+  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>
 ): string[][] {
   if (dimensions.length === 0) return [[]];
   let paths: string[][] = [[]];
@@ -323,10 +327,10 @@ function cellsOf<TRow>(
   covered: readonly TRow[],
   leaves: readonly PivotColumnLeaf[],
   columnDimensions: readonly string[],
-  byKey: ReadonlyMap<string, ColumnDef<TRow>>,
+  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>,
   aggregate: (leaf: PivotColumnLeaf) => Aggregator,
   format: PivotOptions<TRow>["format"]
-): ReactNode[] {
+): (DisplayValue | undefined)[] {
   return leaves.map((leaf) => {
     const matching = leaf.total
       ? covered
@@ -336,7 +340,7 @@ function cellsOf<TRow>(
               dimensionOf(row, columnDimensions[i] ?? "", byKey) === value
           )
         );
-    const values: SortableValue[] = [];
+    const values: AggregateOrderedValue[] = [];
     for (const row of matching) {
       const value = resolveAggregateValue(
         row,
@@ -447,10 +451,10 @@ interface BodyInput<TRow> {
   rows: readonly TRow[];
   dimensions: readonly string[];
   paths: readonly (readonly string[])[];
-  byKey: ReadonlyMap<string, ColumnDef<TRow>>;
+  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>;
   subtotals: boolean;
   collapsed: ReadonlySet<string>;
-  cells: (covered: readonly TRow[]) => ReactNode[];
+  cells: (covered: readonly TRow[]) => (DisplayValue | undefined)[];
 }
 
 /**
@@ -512,7 +516,7 @@ function rowsUnder<TRow>(
   rows: readonly TRow[],
   prefix: readonly string[],
   dimensions: readonly string[],
-  byKey: ReadonlyMap<string, ColumnDef<TRow>>
+  byKey: ReadonlyMap<string, ColumnMetadata<TRow>>
 ): TRow[] {
   return rows.filter((row) =>
     prefix.every(
@@ -579,7 +583,7 @@ function builtInAggregator(name: AggregateName): Aggregator {
 }
 
 /** The values that are actually numbers, in the aggregate module's sense. */
-function summableNumbers(values: readonly SortableValue[]): number[] {
+function summableNumbers(values: readonly AggregateOrderedValue[]): number[] {
   const numbers: number[] = [];
   for (const value of values) {
     if (typeof value === "number") {

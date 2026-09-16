@@ -1,12 +1,85 @@
 import "@radix-ui/themes/styles.css";
 
+import type { ColumnLayoutState } from "@adapttable/core";
+import { getDirection, getLabels } from "@adapttable/i18n";
+import { DataTable } from "@adapttable/radix";
+import { bulkActions as bulkActions_ } from "@adapttable/radix/bulk-actions";
+import { cellNavigation as cellNavigation_ } from "@adapttable/radix/cell-navigation";
+import { collapsibleColumnGroups as columnGroups_ } from "@adapttable/radix/column-groups";
+import { columnMenu as columnMenu_ } from "@adapttable/radix/column-menu";
+import { columnSelectionCheckbox as columnSelection_ } from "@adapttable/radix/column-selection";
+import { commandPalette as commandPalette_ } from "@adapttable/radix/command-palette";
+import { contextMenu as contextMenu_ } from "@adapttable/radix/context-menu";
+import { densityChooser as densityChooser_ } from "@adapttable/radix/density";
+import {
+  batchEditing as batchEditing_,
+  editHistory as editHistory_,
+  editing as editing_,
+  rowEditing as rowEditing_,
+  undoRedoButtons as undoRedoButtons_,
+} from "@adapttable/radix/editing";
+import { exportCsv as exportCsv_ } from "@adapttable/radix/export";
+import {
+  filters as filters_,
+  filterTypes as filterTypes_,
+} from "@adapttable/radix/filters";
+import { findInTable as findInTable_ } from "@adapttable/radix/find-in-table";
+import { fullscreen as fullscreen_ } from "@adapttable/radix/fullscreen";
+import { groupingPanel as groupingPanel_ } from "@adapttable/radix/grouping-panel";
+import { headerFilters as headerFilters_ } from "@adapttable/radix/header-filters";
+import { nestedTable as nestedTable_ } from "@adapttable/radix/nested-table";
+import { print as print_ } from "@adapttable/radix/print";
+import { resizableColumns as resizableColumns_ } from "@adapttable/radix/resizable-columns";
+import { rowActions as rowActions_ } from "@adapttable/radix/row-actions";
+import { rowReorder as rowReorder_ } from "@adapttable/radix/row-reorder";
+import { savedViews as savedViews_ } from "@adapttable/radix/saved-views";
+import { sidePanel as sidePanel_ } from "@adapttable/radix/side-panel";
+import {
+  selectionStats as selectionStats_,
+  statusBar as statusBar_,
+} from "@adapttable/radix/status-bar";
+import { tree as tree_ } from "@adapttable/radix/tree";
 import type {
   ColumnDef,
-  ColumnLayoutState,
+  FeatureProps,
   NestedTableDefaults,
-} from "@adapttable/core";
-import { getDirection, getLabels } from "@adapttable/i18n";
-import { DataTable, type DataTableProps } from "@adapttable/radix";
+} from "@adapttable/react";
+
+import { kitChromeFeatures } from "./chromeFeatures";
+
+/** This kit's factories, handed to the shared builder. */
+const KIT_CHROME = {
+  cellNavigation: cellNavigation_,
+  columnSelectionCheckbox: columnSelection_,
+  densityChooser: densityChooser_,
+  batchEditing: batchEditing_,
+  editHistory: editHistory_,
+  editing: editing_,
+  groupingPanel: groupingPanel_,
+  rowEditing: rowEditing_,
+  rowReorder: rowReorder_,
+  tree: tree_,
+  exportCsv: exportCsv_,
+  fullscreen: fullscreen_,
+  headerFilters: headerFilters_,
+  nestedTable: nestedTable_,
+  print: print_,
+  resizableColumns: resizableColumns_,
+  rowActions: rowActions_,
+  savedViews: savedViews_,
+  undoRedoButtons: undoRedoButtons_,
+  bulkActions: bulkActions_,
+  collapsibleColumnGroups: columnGroups_,
+  columnMenu: columnMenu_,
+  commandPalette: commandPalette_,
+  contextMenu: contextMenu_,
+  filters: filters_,
+  filterTypes: filterTypes_,
+  findInTable: findInTable_,
+  selectionStats: selectionStats_,
+  sidePanel: sidePanel_,
+  statusBar: statusBar_,
+};
 import { Avatar, Badge, Box, Progress, Text, Theme } from "@radix-ui/themes";
 
 import {
@@ -17,7 +90,6 @@ import {
   demoFilterTypes,
   type DemoOrder,
   demoOrders,
-  demoSavedViews,
   LIVE_DEFAULT_LAYOUT,
   type LoadCellProps,
   type Locale,
@@ -38,6 +110,7 @@ import {
   type Failure,
   type FiltersUi,
   type PageMode,
+  showsRowActions,
 } from "../Demo";
 import { useDemoFilterDefs } from "../demoFilters";
 import {
@@ -109,6 +182,8 @@ export function RadixDemo({
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
+  summaryRow,
   cellSpan,
   extraRows,
   rowStyle,
@@ -162,6 +237,8 @@ export function RadixDemo({
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -186,7 +263,7 @@ export function RadixDemo({
   editorShowcase?: boolean;
   /** Show the Columns menu. Defaults to on unless the page is focused. */
   /** The toolbar Export button's configuration. */
-  exportCsv?: NonNullable<DataTableProps<Person>["exportCsv"]>;
+  exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
   columnMenu?: boolean;
   /** Show the Filters control. Defaults to on unless the page is focused. */
   filterControls?: boolean;
@@ -202,7 +279,7 @@ export function RadixDemo({
   onPrint?: () => void;
   printButton?: boolean;
   undoRedoButtons?: boolean;
-  sidePanel?: NonNullable<DataTableProps<Person>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
   /** Use the wide, horizontally-scrolling column set with Person pinned. */
   wide?: boolean;
   /** The column layout the page starts from. */
@@ -213,6 +290,11 @@ export function RadixDemo({
 }>) {
   const s = strings(locale);
   const filters = useDemoFilterDefs(locale);
+  const rowActionsShown = showsRowActions({
+    rowMutations,
+    focused,
+    columnGroups,
+  });
   return (
     <Theme
       appearance={dark ? "dark" : "light"}
@@ -225,6 +307,7 @@ export function RadixDemo({
       style={{ minHeight: 0 }}
     >
       <DemoBody
+        rowActionsShown={rowActionsShown}
         mode={mode}
         pageMode={pageMode}
         urlKey={urlKey}
@@ -246,6 +329,8 @@ export function RadixDemo({
         rowMutations={rowMutations}
         rowReorder={rowReorder}
         rowPinning={rowPinning}
+        pinnedSummaryRows={pinnedSummaryRows}
+        summaryRow={summaryRow}
         cellSpan={cellSpan}
         extraRows={extraRows}
         rowStyle={rowStyle}
@@ -257,7 +342,10 @@ export function RadixDemo({
         editing={editing}
         derivedFields={derivedFields}
         formulaColumns={formulaColumns}
-        render={(source, columns) => (
+        render={(
+          source,
+          { features: demoFeatures, demoRowHandlers, ...columns }
+        ) => (
           <DataTable
             source={source}
             columns={
@@ -284,24 +372,42 @@ export function RadixDemo({
                   })
             }
             rowKey={(r) => r.id}
-            features={nested ? nestedOuterFeatures<Person>() : undefined}
-            nestedTable={nested ? nestedOrders : undefined}
-            defaultExpandedRowIds={nestedOpenIds(nested, source.rows)}
-            cellNavigation={cellNavigation ?? editing}
-            columnSelectionCheckbox={columnSelectionCheckbox}
-            statusBar={statusBar}
-            contextMenu={contextMenu}
-            densityChooser={densityChooser}
+            features={[
+              ...(nested ? nestedOuterFeatures<Person>() : []),
+              ...kitChromeFeatures(KIT_CHROME, {
+                cellNavigation,
+                columnSelectionCheckbox,
+                densityChooser,
+                editing,
+                exportCsv,
+                focused,
+                fullscreen,
+                headerFilters,
+                nested: nested ? nestedOrders : undefined,
+                nestedOpenIds: nestedOpenIds(nested, source.rows),
+                onPrint,
+                printButton,
+                undoRedoButtons,
+                urlKey,
+                bulkActions,
+                bulkActionList: makeBulkActions(locale),
+                collapsibleColumnGroups: columns.collapsibleColumnGroups,
+                columnMenu,
+                rowActions: rowActionsShown
+                  ? makeActions(locale, demoRowHandlers)
+                  : undefined,
+                commandPalette,
+                contextMenu,
+                filterControls,
+                filterDefs: filters,
+                filterTypeSpecs: demoFilterTypes(),
+                sidePanel,
+                statusBar,
+                kitFeatures: columns.kitFeatures,
+              }),
+              ...(demoFeatures ?? []),
+            ]}
             onDensityChange={onDensityChange}
-            fullscreen={fullscreen}
-            commandPalette={commandPalette}
-            onPrint={onPrint}
-            printButton={printButton}
-            undoRedoButtons={undoRedoButtons}
-            sidePanel={sidePanel}
-            selectionStats={editing}
-            editHistory={editing}
-            findInTable={editing}
             {...columns}
             forceMobile={forceMobile}
             density={density}
@@ -310,26 +416,11 @@ export function RadixDemo({
             locale={locale}
             dir={getDirection(locale)}
             searchPlaceholder={s.search}
-            rowActions={
-              rowMutations || (focused && !columnGroups)
-                ? undefined
-                : makeActions(locale)
-            }
             rowActionsLayout={rowMutations ? "menu" : undefined}
-            bulkActions={
-              (bulkActions ?? !focused) ? makeBulkActions(locale) : undefined
-            }
             confirm={demoConfirm}
-            enableColumnMenu={columnMenu ?? !focused}
-            exportCsv={exportCsv ?? !focused}
-            savedViews={focused ? undefined : demoSavedViews(urlKey)}
             animate={animate}
-            resizableColumns
             stickyHeader
-            headerFilters={headerFilters}
             filterFields={filterFields}
-            filters={(filterControls ?? !focused) ? filters : undefined}
-            filterTypes={demoFilterTypes()}
           />
         )}
       />

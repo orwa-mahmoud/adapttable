@@ -1,7 +1,8 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { cellNavigation } from "./cell-navigation";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -33,6 +34,7 @@ describe("the fill handle (mui)", () => {
         rowKey={(r) => r.id}
         urlSync={false}
         cellNavigation
+        features={[cellNavigation()]}
         {...extra}
       />
     );

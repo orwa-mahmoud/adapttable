@@ -167,6 +167,7 @@ export function NativeSelect({
   size = "2",
   value,
   placeholder,
+  disabled,
   onValueChange,
   onKeyDown,
   options,
@@ -179,6 +180,7 @@ export function NativeSelect({
   size?: "1" | "2" | "3";
   value: string;
   placeholder?: string;
+  disabled?: boolean;
   onValueChange: (value: string) => void;
   onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
   options: readonly SelectOption[];
@@ -203,6 +205,7 @@ export function NativeSelect({
     <Select.Root
       value={selected}
       items={items}
+      disabled={disabled}
       onValueChange={(next, details) => {
         // This select is controlled by its caller, so the only value change
         // worth forwarding is one the user made. The kit also reconciles the

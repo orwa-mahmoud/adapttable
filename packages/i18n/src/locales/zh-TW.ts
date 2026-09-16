@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "已完成",
+  staged: "待儲存",
+  partial: "部分完成",
+  rejected: "已拒絕",
+  "awaiting-approval": "等待您確認",
+  cancelled: "已取消",
+  stale: "已過期",
+  failed: "失敗",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "編輯儲存格",
+  "rows.add": "新增列",
+  "rows.delete": "刪除列",
+  "rows.reorder": "重新排序列",
+  "export.run": "匯出",
+};
+
 export const zhTW: Required<TableLabels> = {
   table: "資料表",
   search: "搜尋",
@@ -114,6 +135,13 @@ export const zhTW: Required<TableLabels> = {
   hideAllColumns: "全部隱藏",
   unpinAllColumns: "全部取消釘選",
   resetColumn: "重設欄位",
+  renameColumn: "重新命名欄位",
+  columnName: "欄位名稱",
+  saveColumnName: "儲存名稱",
+  cancelColumnRename: "取消",
+  columnNameRequired: "請輸入欄位名稱。",
+  columnRenamed: ({ previous, name }) =>
+    `已將欄位 ${previous} 重新命名為 ${name}`,
   sortAscending: "升冪排序",
   sortDescending: "降冪排序",
   sortedBy: ({ column, ascending }) =>
@@ -123,8 +151,13 @@ export const zhTW: Required<TableLabels> = {
   columnActions: "欄位動作",
   exportCsv: "匯出 CSV",
   exportFile: (format) => `匯出 ${format.toUpperCase()}`,
+  exportStarted: "正在準備匯出",
+  exportProgress: (progress) => `匯出已完成 ${progress}%`,
   exportDone: "匯出完成",
   exportFailed: "匯出失敗",
+  exportCancelled: "匯出已取消",
+  exportDownload: "下載匯出檔案",
+  exportDismiss: "關閉匯出",
   editCell: "編輯儲存格",
   undoEdit: "復原",
   redoEdit: "重做",
@@ -134,6 +167,173 @@ export const zhTW: Required<TableLabels> = {
     count === 1 ? "1 列未儲存" : `${String(count)} 列未儲存`,
   saveAll: "全部儲存",
   cancelAll: "全部取消",
+  approveProposal: "核准",
+  rejectProposal: "拒絕",
+  proposalValueUnavailable: "無法取得",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 項提議的變更"
+        : "{c} 項提議的變更".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"涉及 {r} 列".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "檢視全部 {c} 項變更".replace("{c}", String(count)),
+  backToConversation: "返回對話",
+  approveAllProposals: "全部核准",
+  approveRemainingProposals: "核准其餘",
+  rejectAllProposals: "全部拒絕",
+  rejectRemainingProposals: "拒絕其餘",
+  alwaysAllowProposal: "一律允許",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "已核准 {a} · 已拒絕 {j} · 剩餘 {p}"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "有一項變更正在等待你的決定。",
+  pendingProposals: (count) =>
+    count === 1 ? "1 項提議變更" : `${String(count)} 項提議變更`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "表格助理",
+  assistantOpen: "詢問 AI",
+  assistantClose: "關閉",
+  assistantSettings: "助理設定",
+  assistantEmpty: "您想對這個表格做什麼？",
+  assistantPlaceholder: "詢問關於此表格的問題…",
+  assistantSend: "傳送",
+  assistantStop: "停止",
+  assistantVoiceStart: "語音輸入",
+  assistantVoiceStop: "停止語音輸入",
+  assistantVoiceListening: "正在聆聽",
+  assistantVoiceLanguage: "語音輸入語言",
+  assistantYou: "您",
+  assistantSpeaker: "助理",
+  assistantNewMessages: "新訊息",
+  assistantUnavailable: "助理未連線。",
+  assistantDetached: "連線已中斷，工作可能仍在進行。",
+  assistantRejoin: "重新連線",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `已完成 ${String(done)}`
+      : `${String(total)} 之 ${String(done)}`,
+  assistantBackToTable: "返回表格",
+  assistantDetail: "詳細資料",
+  assistantSaveInTable: "在表格中儲存以保留此變更。",
+  assistantUndo: "復原",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "這需要的步驟超過單輪允許的數量。請分次提出。",
+        "continuation-limit": "這需要的步驟超過單輪允許的數量。請分次提出。",
+        "resume-limit": "這需要的步驟超過單輪允許的數量。請分次提出。",
+        "discovery-exhausted": "助理無法判斷在這裡該怎麼做。",
+        "repeated-plan": "助理重複請求同一件事後停止。",
+        "question-unanswered": "需要你的回覆才能完成。",
+        "approval-unavailable": "需要核准，但無處詢問。",
+        "interrupt-unsupported": "助理請求了此表格無法完成的操作。",
+        "output-denied": "其中一部分不被允許執行。",
+        "not-run": "未執行。",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "執行之後表格已變更。",
+        "cannot-restore": "其中一部分無法還原。",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "你的回答",
+  assistantAnswerPlaceholder: "輸入回答",
+  assistantAnswerSend: "回答",
+  assistantAlwaysAllowedTitle: "不再詢問",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `重新詢問${CAPABILITY[capability] ?? capability}`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 項操作" : `${String(count)} 項操作`,
+  assistantActionsTitle: "這一輪改了什麼",
+  assistantUndoAll: "全部復原",
+  assistantExamples: "快捷指令",
+  assistantReceiptChange: ({ before, after }) => `已從 ${before} 改為 ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `建議：從 ${before} 改為 ${after}`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "已套用篩選",
+        "filter/staged": "已準備篩選",
+        "sort/executed": "已排序",
+        "group/executed": "已分組",
+        "pin/executed": "已固定欄",
+        "edit/executed": "已儲存",
+        "edit/staged": "編輯已準備 — 未儲存",
+        "edit/awaiting-approval": "編輯等待核准",
+        "edit/partial": "部分編輯已儲存，部分遭拒絕",
+        "edit/rejected": "編輯已拒絕",
+        "filter-cleared/executed": "已清除篩選",
+        "sort-cleared/executed": "已清除排序",
+        "search/executed": "已搜尋",
+        "search-cleared/executed": "已清除搜尋",
+        "group-cleared/executed": "已清除分組",
+        "pin-cleared/executed": "已取消固定欄位",
+        "pinRow/executed": "已固定列",
+        "pinRow-cleared/executed": "已取消固定列",
+        "page/executed": "已切換頁次",
+        "aggregate/executed": "已變更彙總",
+        "select/executed": "已變更選取",
+        "read/executed": "已讀取表格",
+        "operation/executed": "已執行",
+        "operation/awaiting-approval": "等待你",
+        "operation/rejected": "已拒絕",
+        "export/executed": "已匯出",
+        "add/executed": "已新增列",
+        "add/awaiting-approval": "新列等待核准",
+        "add/rejected": "新列已拒絕",
+        "delete/executed": "已刪除列",
+        "delete/awaiting-approval": "刪除等待核准",
+        "delete/partial": "部分列已刪除，部分保留",
+        "delete/rejected": "刪除已拒絕",
+        "reorder/executed": "已移動列",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "降冪" : "升冪"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "閒置",
+      connecting: "連線中…",
+      ready: "就緒",
+      sending: "處理中…",
+      "awaiting-approval": "等待您確認",
+      "awaiting-user": "等待您確認",
+      error: "錯誤",
+      disconnected: "未連線",
+    })[status] ?? "就緒",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "新增列",
   duplicateRow: "複製列",
   deleteRow: "刪除列",
@@ -149,9 +349,27 @@ export const zhTW: Required<TableLabels> = {
   rowLifted: (position) => `已提起第 ${String(position)} 列`,
   rowMoved: (from, to) => `已將列從 ${String(from)} 移到 ${String(to)}`,
   rowReorderCancelled: "已取消重新排序",
+  rowMoveOptions: "列移動選項",
+  moveToGroup: "移至群組…",
+  moveUnder: "移至下層…",
+  moveToTopLevel: "移至最上層",
+  confirmRowMoveTitle: "確認移動列",
+  confirmRowMoveDescription: (row, from, to) =>
+    `將 ${row} 從 ${from} 移至 ${to}？`,
+  confirmRowMove: "移動",
+  rowMovedToGroup: (group) => `已將列移至 ${group}`,
+  rowMovedUnder: (parent) => `已將列移至 ${parent} 下層`,
+  moveRejectedPolicyNever: "已停用跨界移動列",
+  moveRejectedSorted: "變更列順序前請清除排序",
+  moveRejectedCycle: "不能將列移入其自身或其後代中",
+  moveUnavailable: "無法執行此列移動操作",
+  rootLevel: "最上層",
   pinToTop: "固定到頂部",
   pinToBottom: "固定到底部",
   unpinRow: "取消固定列",
+  pinnedSummaryRow: "彙總列",
+  pinnedSummaryTop: "頂部固定彙總列",
+  pinnedSummaryBottom: "底部固定彙總列",
   rowSeparator: "分隔線",
   expandColumnGroup: "展開欄組",
   collapseColumnGroup: "摺疊欄組",
@@ -161,6 +379,33 @@ export const zhTW: Required<TableLabels> = {
   expandGroup: "展開群組",
   collapseGroup: "摺疊群組",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "列群組化",
+  groupingDropColumns: "將欄拖曳到此處以建立群組",
+  addGroupingColumn: "新增群組欄",
+  groupByColumn: (label) => `依 ${label} 分組`,
+  ungroupColumn: (label) => `取消 ${label} 群組`,
+  removeGroupingColumn: (label) => `從群組移除 ${label}`,
+  moveGroupingColumn: (label) => `移動 ${label} 群組`,
+  groupingDropToRemove: "拖放到此處以移除群組",
+  groupingAggregateColumn: "彙總欄",
+  groupingAggregation: "群組彙總",
+  groupingAggregationDefault: "預設",
+  groupingAggregationNone: "無",
+  groupingAggregations: "彙總",
+  groupingAddAggregation: "新增彙總欄",
+  groupingRestoreAggregations: "還原預設",
+  groupingRemoveAggregation: (column) => `移除 ${column} 彙總`,
+  groupingAggregationFor: (column) => `${column} 彙總`,
+  groupingAggregationReadOnly: "由應用程式設定",
+  groupingAggregationCustom: "自訂",
+  groupingAggregateRemoved: (column) => `已移除 ${column} 彙總`,
+  groupingAggregatesRestored: "已將彙總還原為預設值",
+  groupingAverage: "平均值",
+  groupingAdded: (label) => `已將 ${label} 加入群組`,
+  groupingRemoved: (label) => `已從群組移除 ${label}`,
+  groupingMoved: (label, position) => `已將 ${label} 移至群組位置 ${position}`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `${label} 的群組彙總已變更為 ${aggregation}`,
   gridRangeCopied: (cells) => `已複製 ${cells} 個儲存格`,
   gridRangeCopyFailed: "複製失敗",
   gridRangePasted: (cells) => `已貼上 ${cells} 個儲存格`,
@@ -212,8 +457,7 @@ export const zhTW: Required<TableLabels> = {
   noticeVirtualizePaged: "虛擬捲動已關閉 — 此分頁表格每次只顯示一頁。",
   noticePinNested: "分組或樹狀結構開啟時，列固定已關閉。",
   noticeReorderNested: "分組或樹狀結構開啟時，列重排已關閉。",
-  noticeGroupingUnavailable: "分組已關閉 — 此資料來源未提供完整篩選結果。",
-  noticeExportAllPage: "匯出全部即本頁 — 完整篩選結果不可用。",
+  noticeGroupingUnavailable: "分組已關閉 — 此資料來源無法分組。",
+  noticeExportAllPage: "匯出全部已關閉 — 此資料來源每次僅提供一頁。",
   noticeEditWithoutWriter: "編輯已關閉 — 未接上寫入處理函式。",
-  exportThisPage: "匯出本頁",
 };

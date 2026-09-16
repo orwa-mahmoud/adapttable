@@ -1,10 +1,6 @@
 /** The desktop table: header, pinned columns, rows and summary. */
-import {
-  edgePinStyle,
-  PIN_Z,
-  resolveColumnFooter,
-  type TableLabels,
-} from "@adapttable/core";
+import { edgePinStyle, PIN_Z, type TableLabels } from "@adapttable/core";
+import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
   cellSpanMark,
@@ -23,26 +19,33 @@ import {
   isMatchedCell,
   isSelectedCell,
   mergedCellStyle,
+  resolveRowEditTrigger,
+  rowEditConflict,
   type SharedTableRenderProps,
   useDesktopTableAssembly,
-} from "@adapttable/core/adapter";
-import type { CSSProperties, ReactElement, ReactNode } from "react";
-import { useMemo } from "react";
+} from "@adapttable/react/adapter";
+import {
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  useMemo,
+} from "react";
 
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
-import { ColumnSelectCheckbox } from "./ColumnSelectCheckbox";
-import { EditableDataCell } from "./EditableCell";
-import { ExpandButton } from "./ExpandToggle";
-import { FillHandle } from "./FillHandle";
-import { GroupHeaderRow } from "./GroupHeader";
 import {
-  ColumnGroupToggle,
-  FilterHeaderTrigger,
-  RowEditActions,
-  RowReorderHandle,
-  TreeCell,
-} from "./kitControls";
+  OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
+} from "./featureSlots";
 import { RowActionButtons } from "./RowActionButtons";
 
 function ExtraSlotRow({
@@ -171,6 +174,13 @@ function DesktopRowBase<TRow>(
     bodyPinStyle,
   } = props;
   const expandable = expanded !== undefined;
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
+  const rowConflict = rowEditConflict(editing, id);
   return (
     <>
       <tr
@@ -184,11 +194,12 @@ function DesktopRowBase<TRow>(
             data-adapttable-part="expand-cell"
             className={classNames.expandCell}
           >
-            <ExpandButton
-              expanded={expanded}
-              labels={labels}
-              classNames={classNames}
-              onToggle={() => onToggleExpand(id)}
+            <OptionalExpandToggle
+              id={id}
+              expanded={Boolean(expanded)}
+              onToggle={onToggleExpand}
+              expandLabel={labels.expandRow}
+              collapseLabel={labels.collapseRow}
             />
           </td>
         )}
@@ -206,7 +217,7 @@ function DesktopRowBase<TRow>(
             }}
             className={cx(classNames.cell, classNames.reorderCell)}
           >
-            <RowReorderHandle
+            <OptionalRowReorderHandle
               reorder={rowReorder}
               labels={labels}
               rowId={id}
@@ -256,7 +267,7 @@ function DesktopRowBase<TRow>(
               colSpan={colSpan > 1 ? colSpan : undefined}
               rowSpan={rowSpan > 1 ? rowSpan : undefined}
               data-column-key={column.key}
-              {...table.getCellProps(column, {
+              {...table.getCellProps(column as ColumnDef<TRow>, {
                 style: {
                   ...pinStyle,
                   ...mergedCellStyle(
@@ -284,7 +295,7 @@ function DesktopRowBase<TRow>(
                 .filter(Boolean)
                 .join(" ")}
             >
-              <TreeCell
+              <OptionalTreeCell
                 entry={treeEntry}
                 columnKey={column.key}
                 treeColumnKey={treeKey}
@@ -294,31 +305,20 @@ function DesktopRowBase<TRow>(
                 toggleClassName={classNames.treeToggle}
                 spacerClassName={classNames.treeSpacer}
               >
-                <EditableDataCell
-                  activateClassName={classNames.editCellActivate}
-                  errorClassName={classNames.editCellError}
-                  saveErrorClassName={classNames.editCellSaveError}
-                  rollbackClassName={classNames.editCellRollback}
-                  editorClassName={classNames.editCellEditor}
+                <OptionalEditableCell
                   editing={editing}
                   row={row}
-                  column={column}
+                  column={column as ColumnDef<TRow>}
                   rowId={id}
+                  rowIndex={focusIndex}
                   rows={rows}
                   columns={columns}
                   rowKey={getRowId}
                   editLabel={labels.editCell}
                   undoLabel={labels.undoEdit}
-                  display={
-                    column.Cell ? (
-                      <column.Cell row={row} rowIndex={focusIndex} />
-                    ) : (
-                      column.accessor?.(row)
-                    )
-                  }
                 />
-              </TreeCell>
-              <FillHandle
+              </OptionalTreeCell>
+              <OptionalFillHandle
                 focus={gridFocus}
                 windowIndex={focusIndex}
                 col={columnIndex}
@@ -338,17 +338,20 @@ function DesktopRowBase<TRow>(
             className={cx(classNames.cell, classNames.actionsCell)}
           >
             {editing?.rowEditing && (
-              <RowEditActions
+              <OptionalRowEditActions
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
+                showBegin={rowEdit.showBegin}
+                icons={editing.rowEditIcons}
+                conflict={rowConflict}
                 labels={labels}
               />
             )}
-            {rowActions && rowActions.length > 0 && (
+            {rowEdit.actions.length > 0 && (
               <RowActionButtons
                 row={row}
-                actions={rowActions}
+                actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
                 classNames={classNames}
@@ -383,6 +386,7 @@ function LeafHeader<TRow>({
   source,
   labels,
   resizeHandleStyle,
+  onRenameColumn,
 }: Readonly<{
   leaf: DesktopHeaderLeaf<TRow>;
   classNames: DataTableClassNames;
@@ -392,8 +396,31 @@ function LeafHeader<TRow>({
   source: SharedTableRenderProps<TRow>["table"]["source"];
   labels: Required<TableLabels>;
   resizeHandleStyle: CSSProperties;
+  onRenameColumn: SharedTableRenderProps<TRow>["onRenameColumn"];
 }>): ReactElement {
   const { column } = leaf;
+  const canRename = column.renameable === true && onRenameColumn !== undefined;
+  const caption = column.sortable ? (
+    <button
+      {...leaf.sortButtonProps}
+      data-adapttable-part="sort-button"
+      className={classNames.sortButton}
+      title={column.headerTooltip}
+    >
+      {leaf.caption}
+      {typeof leaf.sortIndex === "number" && (
+        <span
+          data-adapttable-part="sort-index"
+          className={classNames.sortIndex}
+        >
+          {leaf.sortIndex}
+        </span>
+      )}
+      <span aria-hidden> {sortGlyph(leaf.sortActive, leaf.sortDir)}</span>
+    </button>
+  ) : (
+    <span title={column.headerTooltip}>{leaf.caption}</span>
+  );
   return (
     <th
       key={column.key}
@@ -407,29 +434,20 @@ function LeafHeader<TRow>({
       data-pinned={leaf.pinSide}
       className={classNames.headerCell}
     >
-      {column.sortable ? (
-        <button
-          {...leaf.sortButtonProps}
-          data-adapttable-part="sort-button"
-          className={classNames.sortButton}
-          title={column.headerTooltip}
+      {canRename ? (
+        <OptionalColumnHeaderRename
+          columnKey={column.key}
+          name={leaf.columnName}
+          labels={labels}
+          onRenameColumn={onRenameColumn}
         >
-          {leaf.caption}
-          {typeof leaf.sortIndex === "number" && (
-            <span
-              data-adapttable-part="sort-index"
-              className={classNames.sortIndex}
-            >
-              {leaf.sortIndex}
-            </span>
-          )}
-          <span aria-hidden> {sortGlyph(leaf.sortActive, leaf.sortDir)}</span>
-        </button>
+          {caption}
+        </OptionalColumnHeaderRename>
       ) : (
-        <span title={column.headerTooltip}>{leaf.caption}</span>
+        caption
       )}
       {leaf.showColumnCheckbox && leaf.onToggleColumn && (
-        <ColumnSelectCheckbox
+        <OptionalColumnSelect
           label={leaf.columnSelectAriaLabel}
           checked={leaf.columnCheckboxChecked}
           onToggle={leaf.onToggleColumn}
@@ -445,13 +463,12 @@ function LeafHeader<TRow>({
         </span>
       ) : null}
       {leaf.headerDef ? (
-        <FilterHeaderTrigger
+        <OptionalFilterHeader
           def={leaf.headerDef}
           source={source}
           labels={labels}
           registry={filterRegistry}
           closeOnSelect={closeHeaderFilterOnSelect}
-          classNames={classNames}
         />
       ) : null}
       {leaf.resizeHandleProps && (
@@ -505,6 +522,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     source: props.table.source,
     labels,
     resizeHandleStyle,
+    onRenameColumn: props.onRenameColumn,
   };
 
   const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {
@@ -535,7 +553,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       >
         <span style={groupedHeaderLabelStyle()}>
           {props.onToggleColumnGroup ? (
-            <ColumnGroupToggle
+            <OptionalColumnGroupToggle
               cell={cell.cell}
               labels={labels}
               onToggle={props.onToggleColumnGroup}
@@ -713,7 +731,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           }
           if (slot.kind === "group") {
             return (
-              <GroupHeaderRow
+              <OptionalGroupHeaderRow
                 key={slot.key}
                 entry={slot.entry}
                 columns={columns}
@@ -722,7 +740,6 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
                 getCellProps={props.table.getCellProps}
                 selection={selection}
                 labels={labels}
-                classNames={classNames}
                 onToggleCollapse={callbacks.onToggleGroup}
                 onShowMore={props.grouping?.showMore ?? (() => undefined)}
               />

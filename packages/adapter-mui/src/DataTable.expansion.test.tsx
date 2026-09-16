@@ -3,13 +3,13 @@
  * memoized desktop row: a search keystroke must not re-run cell accessors,
  * and toggling one row's checkbox must re-render only that row.
  */
+import { defaultConfirm } from "@adapttable/core";
 import {
   createMemoryAdapter,
-  defaultConfirm,
   type RowExpansionState,
   useDataTable,
   useFrontendData,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import {
   act,
@@ -21,11 +21,12 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DesktopTable } from "./components/DesktopTable";
-import { useStableToggle } from "./components/DesktopTable";
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
+import { DesktopTable, useStableToggle } from "./components/DesktopTable";
 import { MobileCards } from "./components/MobileCards";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { rowDetail } from "./row-detail";
 
 interface Row {
   id: string;
@@ -60,6 +61,14 @@ function Harness(props: {
       source={source}
       columns={columns}
       rowKey={(r) => r.id}
+      features={
+        props.override?.renderRowDetail
+          ? [
+              rowDetail(props.override.renderRowDetail),
+              ...(props.override.features ?? []),
+            ]
+          : props.override?.features
+      }
       {...props.override}
     />
   );
@@ -247,9 +256,11 @@ describe("memoized desktop rows (MUI)", () => {
       { key: "name", header: "Name", accessor: nameAccessor },
       { key: "city", header: "City", accessor: cityAccessor },
     ];
+    const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
     renderTable({
       columns: tracked,
-      bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }],
+      bulkActions: actions,
+      features: [bulkActionsFeature(actions)],
     });
     expect(nameAccessor).toHaveBeenCalled();
     nameAccessor.mockClear();

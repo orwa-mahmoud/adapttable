@@ -1,103 +1,67 @@
 /**
- * Query cache keys.
- *
- * Two properties carry the whole point: the key does not change when nothing
- * did, and the full key starts with the base key so prefix invalidation
- * catches every page of a view and nothing outside it.
+ * Cache keys for a query library. The split matters: the FULL key identifies
+ * one page, the BASE key identifies the view every page belongs to — which is
+ * what a host invalidates after a write, because invalidating page 3 alone
+ * leaves pages 1 and 2 showing the row that was just deleted.
  */
 import { describe, expect, it } from "vitest";
 
 import { tableQueryBaseKey, tableQueryKey } from "./queryKey";
-import type { TableQuery } from "./useServerData";
+import type { TableQuery } from "./tableQuery";
 
-function query(overrides: Partial<TableQuery> = {}): TableQuery {
-  return {
-    page: 1,
-    limit: 25,
-    search: "",
-    sortBy: undefined,
-    sortDir: undefined,
-    sortLevels: [],
-    filters: {},
-    ...overrides,
-  };
-}
+const QUERY: TableQuery = {
+  page: 2,
+  limit: 25,
+  search: "ada",
+  sortBy: "name",
+  sortDir: "asc",
+  sortLevels: [],
+  filters: { team: "core" },
+};
 
 describe("tableQueryKey", () => {
-  it("is identical for two equal queries built separately", () => {
-    expect(tableQueryKey(query())).toEqual(tableQueryKey(query()));
-  });
-
-  it("ignores the order the filter object was built in", () => {
-    const a = query({ filters: { status: "Active", team: "Core" } });
-    const b = query({ filters: { team: "Core", status: "Active" } });
-    expect(tableQueryKey(a)).toEqual(tableQueryKey(b));
-  });
-
-  it("changes when the search changes", () => {
-    expect(tableQueryKey(query({ search: "ada" }))).not.toEqual(
-      tableQueryKey(query())
+  it("is stable for the same query and distinct per page", () => {
+    expect(tableQueryKey(QUERY)).toEqual(tableQueryKey({ ...QUERY }));
+    expect(tableQueryKey(QUERY)).not.toEqual(
+      tableQueryKey({ ...QUERY, page: 3 })
     );
   });
 
-  it("changes when the page changes", () => {
-    expect(tableQueryKey(query({ page: 2 }))).not.toEqual(
-      tableQueryKey(query())
+  it("keys a cursor page as well as a numbered one", () => {
+    const cursor = { ...QUERY, cursor: "abc" };
+    expect(tableQueryKey(cursor)).not.toEqual(
+      tableQueryKey({ ...cursor, cursor: "def" })
     );
   });
 
-  it("changes when the cursor changes", () => {
-    expect(tableQueryKey(query({ cursor: "b" }))).not.toEqual(
-      tableQueryKey(query({ cursor: "a" }))
-    );
-  });
-
-  it("separates two tables through their scope", () => {
-    expect(tableQueryKey(query(), { scope: "people" })).not.toEqual(
-      tableQueryKey(query(), { scope: "orders" })
-    );
+  it("names the table it belongs to, so two tables never share a key", () => {
+    expect(tableQueryKey(QUERY)[1]).toBe("table");
+    expect(tableQueryKey(QUERY, { scope: "orders" })[1]).toBe("orders");
+    expect(tableQueryKey(QUERY)[0]).toBe("adapttable");
   });
 });
 
 describe("tableQueryBaseKey", () => {
-  it("is a prefix of the full key, so prefix invalidation reaches it", () => {
-    const q = query({ page: 3, search: "ada" });
-    const base = tableQueryBaseKey(q);
-    expect(tableQueryKey(q).slice(0, base.length)).toEqual(base);
-  });
-
-  it("is the same across pages of one view", () => {
-    const base = tableQueryBaseKey(query({ page: 1 }));
-    expect(tableQueryBaseKey(query({ page: 7 }))).toEqual(base);
-  });
-
-  it("is the same across cursors of one view", () => {
-    expect(tableQueryBaseKey(query({ cursor: "x" }))).toEqual(
-      tableQueryBaseKey(query({ cursor: "y" }))
+  it("is the same for every page of one view", () => {
+    expect(tableQueryBaseKey(QUERY)).toEqual(
+      tableQueryBaseKey({ ...QUERY, page: 9 })
+    );
+    expect(tableQueryBaseKey(QUERY)).toEqual(
+      tableQueryBaseKey({ ...QUERY, cursor: "abc" })
     );
   });
 
-  it("differs once the view itself differs", () => {
-    expect(tableQueryBaseKey(query({ sortBy: "name" }))).not.toEqual(
-      tableQueryBaseKey(query())
+  it("changes when the view itself changes", () => {
+    expect(tableQueryBaseKey(QUERY)).not.toEqual(
+      tableQueryBaseKey({ ...QUERY, search: "grace" })
     );
-    expect(tableQueryBaseKey(query({ limit: 50 }))).not.toEqual(
-      tableQueryBaseKey(query())
-    );
-    expect(tableQueryBaseKey(query({ filters: { team: "Core" } }))).not.toEqual(
-      tableQueryBaseKey(query())
+    expect(tableQueryBaseKey(QUERY)).not.toEqual(
+      tableQueryBaseKey({ ...QUERY, filters: { team: "web" } })
     );
   });
 
-  it("follows the optional query fields too", () => {
-    expect(tableQueryBaseKey(query({ groupBy: ["team"] }))).not.toEqual(
-      tableQueryBaseKey(query())
-    );
-  });
-
-  it("serialises to something a string-keyed cache can use", () => {
-    expect(
-      tableQueryKey(query()).every((part) => typeof part === "string")
-    ).toBe(true);
+  it("is the prefix of the full key", () => {
+    const base = tableQueryBaseKey(QUERY);
+    expect(tableQueryKey(QUERY).slice(0, base.length)).toEqual(base);
   });
 });

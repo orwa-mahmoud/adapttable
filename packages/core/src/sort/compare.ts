@@ -1,6 +1,5 @@
-import type { SortableValue, SortDirection } from "../types";
-
 /** `null` / `undefined` / `NaN` are unorderable and always sort last. */
+import type { SortableValue, SortDirection } from "../columnModel";
 function sortsLast(value: SortableValue): boolean {
   return (
     value === null ||

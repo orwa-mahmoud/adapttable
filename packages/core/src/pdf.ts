@@ -34,12 +34,12 @@ export {
   printStyles,
   printTable,
 } from "./export/printLayout";
-export type { ColumnDef } from "./types";
+export type { ColumnModel } from "./types";
 
 /**
  * The member types the signatures above hand back.
  *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * A subpath that exports `ColumnModel` but not `ColumnHeaderContext` hands
  * a consumer a type whose parts they cannot name. These are already
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
@@ -62,7 +62,7 @@ export type {
 /**
  * The member types the signatures above hand back.
  *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * A subpath that exports `ColumnModel` but not `ColumnHeaderContext` hands
  * a consumer a type whose parts they cannot name. These are already
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
@@ -72,26 +72,58 @@ export type {
   CustomCellEditorRender,
 } from "./editing/cellEditing";
 export type { ExportRowRole } from "./export/exportWriter";
-export type { FilterDef, FilterType } from "./filters/filterDefs";
+export type {
+  FilterAiOptions,
+  FilterDef,
+  FilterType,
+} from "./filters/filterDefs";
 export type { ColumnHeaderController } from "./types";
 
 /**
  * The member types the signatures above hand back.
  *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * A subpath that exports `ColumnModel` but not `ColumnHeaderContext` hands
  * a consumer a type whose parts they cannot name. These are already
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
  */
-export type { CustomCellEditorCtrl } from "./editing/cellEditing";
+export type {
+  CustomCellEditorConflict,
+  CustomCellEditorCtrl,
+} from "./editing/cellEditing";
 export type { FilterOptionsSource } from "./filters/filterDefs";
 
 /**
  * The member types the signatures above hand back.
  *
- * A subpath that exports `ColumnDef` but not `ColumnHeaderContext` hands
+ * A subpath that exports `ColumnModel` but not `ColumnHeaderContext` hands
  * a consumer a type whose parts they cannot name. These are already
  * public on `@adapttable/core`; this is the same declaration, reachable
  * from the entry that returns it.
  */
 export type { FilterOption } from "./filters/filterDefs";
+
+/**
+ * Member types the signatures above hand back, reachable from the entry that
+ * returns them.
+ */
+export type {
+  Aggregatable,
+  AggregatableConfig,
+  AggregateOperation,
+  CustomAggregateOperation,
+} from "./aggregate/aggregatable";
+export type {
+  AggregateFormatContext,
+  AggregateName,
+  AggregateOperationId,
+  AggregateOrderedValue,
+  Aggregator,
+} from "./aggregate/aggregate";
+export type {
+  ColumnMetadata,
+  ColumnModelEditor,
+  ColumnModelFilter,
+} from "./columnModel";
+export type { ColumnAiOptions } from "./columnModel";
+export type { DisplayValue } from "./display";

@@ -118,7 +118,7 @@ core exports `useTableVirtualization`, and the ready adapters wire it into
 their desktop rows and mobile cards. With no `maxHeight` the window tracks
 the page scroll; add `maxHeight` and the same prop virtualizes inside the
 scroll box instead — fifty thousand rows in a 380px panel stay a handful of
-DOM nodes. Ant Design maps the same `virtualize` prop to antd's native
+DOM nodes. Ant Design maps the same `virtualize()` feature to antd's native
 virtual table mode.
 
 ```tsx
@@ -147,8 +147,64 @@ desktop-visible columns so every card keeps enough identity to be useful.
 <DataTable mobileIdentityColumns={2} />
 ```
 
+## The engine, and why it has no React in it
+
+Filtering, sorting, paging and grouping are decisions about data, not about
+the DOM. In v3 they live in `@adapttable/core` as a plain object with no
+framework in its import graph, and `@adapttable/react` is the binding that
+subscribes a component tree to one.
+
+```ts
+import { createTableEngine } from "@adapttable/core";
+
+const engine = createTableEngine({
+  data: people,
+  columns: [{ key: "name", sortable: true }],
+  rowKey: (row) => row.id,
+  defaults: { limit: 25 },
+});
+
+engine.dispatch({ type: "setSearch", search: "ada" });
+engine.rows("page"); // the rows that page shows
+```
+
+`CreateTableEngineOptions` is what you build one from. `data`, `columns`,
+`rowKey`, `locale`, `paginationMode`, `filterFn` and `getSearchText` stay
+live — change one and the engine follows. `tableId` and `defaults` are read
+once, because an identity and a seed cannot be retroactively different.
+
+`TableEngine` is the handle:
+
+| Member                                            | What it gives you                                                                                                                 |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `snapshot()`                                      | A `TableSnapshot`: the current query state, the page it is showing, and the four revision counters.                               |
+| `rows(scope)`                                     | A `TableRowScope` — `"page"`, `"visible"` or `"full"`.                                                                            |
+| `dispatch(operation)`                             | A `TableOperation` a person performed: `setSort`, `setSearch`, `setPage`, `setLimit`, `setFilters`, `setGroupBy`, `setSelection`. |
+| `configure(patch)`                                | A `TableEngineConfigPatch` — controlled state a binding replays. Pass `{ silent: true }` to move without waking subscribers.      |
+| `invalidate(axes, next)`                          | Tell it the data or columns changed. `invalidate(["data"])` with no new array re-derives from the rows it already holds.          |
+| `subscribe(axes, listener)`                       | Wake on a `TableRevisionAxis` — `data`, `view`, `schema` or `policy` — and nothing else.                                          |
+| `cellValue` / `rowByKey` / `rowKey` / `getColumn` | Read one cell, find a row, take a row's identity, look up a column.                                                               |
+
+`TableRevisions` carries those four counters. They are separate so a consumer
+can wake on the one it cares about: a virtualizer on `data`, a toolbar on
+`view`, an agent on `policy`.
+
+`snapshot().page` is the page actually on screen. Ask for page 9 of a table
+that shrank to three and it reports the last page, while `requestedPage`
+remembers what you asked for — so restoring the rows restores the page,
+instead of stranding a reader on page 1.
+
+### Handing the engine to something that is not a table
+
+`createNeutralTable(engine, tableId, binding)` wraps one as a `NeutralTable`:
+the same rows and revisions plus an `operations` map saying which of them are
+actually wired right now. That is the shape `@adapttable/ai` reads, and the
+`NeutralTableBinding` is how a host tells it what the surrounding UI can do.
+An operation that stops being wired disappears from the map, so nothing is
+offered a capability the table can no longer perform.
+
 ## The two ways to use it
 
 1. **Batteries-included** — `import { DataTable } from "@adapttable/<kit>"`.
-2. **Headless** — `import { useDataTable } from "@adapttable/core"` and render
+2. **Headless** — `import { useDataTable } from "@adapttable/react"` and render
    your own markup with the returned prop-getters.

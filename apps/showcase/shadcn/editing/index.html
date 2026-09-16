@@ -4,30 +4,49 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Edit cells in place in a shadcn table — text, number and select editors, Enter to commit, paste from a spreadsheet, undo in one press. Your handler owns every write." />
+    <meta name="description" content="Try inline editing in a shadcn React table with text, number and select inputs, paste and undo. Your application validates and saves each change." />
     <link rel="canonical" href="https://orwa-mahmoud.github.io/adapttable/demo/shadcn/editing/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content="shadcn editable data table — AdaptTable" />
-    <meta property="og:description" content="Edit cells in place in a shadcn table — text, number and select editors, Enter to commit, paste from a spreadsheet, undo in one press. Your handler owns every write." />
+    <meta property="og:description" content="Try inline editing in a shadcn React table with text, number and select inputs, paste and undo. Your application validates and saves each change." />
     <meta property="og:url" content="https://orwa-mahmoud.github.io/adapttable/demo/shadcn/editing/" />
     <meta property="og:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="shadcn editable data table — AdaptTable" />
-    <meta name="twitter:description" content="Edit cells in place in a shadcn table — text, number and select editors, Enter to commit, paste from a spreadsheet, undo in one press. Your handler owns every write." />
+    <meta name="twitter:description" content="Try inline editing in a shadcn React table with text, number and select inputs, paste and undo. Your application validates and saves each change." />
     <meta name="twitter:image" content="https://orwa-mahmoud.github.io/adapttable/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Edit cells in place in a shadcn table — text, number and select editors, Enter to commit, paste from a spreadsheet, undo in one press. Your handler owns every write.","url":"https://orwa-mahmoud.github.io/adapttable/demo/shadcn/editing/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try inline editing in a shadcn React table with text, number and select inputs, paste and undo. Your application validates and saves each change.","url":"https://orwa-mahmoud.github.io/adapttable/demo/shadcn/editing/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
-    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed. -->
-    <script
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "dd71ff9f3b7b4064969d3f81e8c6ee9b"}'
-    ></script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      (function () {
+  var isLocal = function(){
+  var h = location.hostname || "";
+  if (location.protocol === "file:") return true;
+  if (h === "" || h === "localhost" || h === "0.0.0.0" || h === "[::1]" || h === "::1") return true;
+  if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+  return false;
+};
+  if (isLocal()) return;
+  (function () {
+    var s = document.createElement('script');
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.defer = true;
+    s.setAttribute("data-cf-beacon", "{\"token\": \"dd71ff9f3b7b4064969d3f81e8c6ee9b\"}");
+    document.head.appendChild(s);
+  })();
+})();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -143,7 +162,7 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for shadcn</p>
         <h1>Inline cell editing in shadcn</h1>
-        <p>Mark a column <code>editable</code>, pass <code>onCellEdit</code>, and double-click opens a shadcn editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.</p>
+        <p>Mark a column <code>editable</code>, compose <code>editing(onCellEdit)</code>, and double-click opens a shadcn editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.</p>
         <p>The table never mutates your rows. It hands your handler the row, the column and the new value, and shows whatever you hand back — which is what makes optimistic updates, validation and rollback yours to decide.</p>
         <p>With <code>cellNavigation</code> on, the same handler receives whole blocks: paste a spreadsheet range with Ctrl+V, drag the fill handle, and undo the entire paste with one Ctrl+Z.</p>
         <p>Text, number and select editors all share one class key, so every editor in the table is the same h-8 field over border-input — and a rejected commit reads as a form error in text-destructive, the tone shadcn already uses for one.</p>
@@ -188,23 +207,26 @@ export function People({ rows, onSave }) {
         </ul>
         <h2>More shadcn features</h2>
         <ul>
-          <li><a href="../filtering/">Filtering in shadcn</a> — Kit-native operators, date ranges, checklists, an AND/OR tree, chips.</li>
+          <li><a href="../filtering/">Filtering in shadcn</a> — Operators, an AND/OR tree, chips, and find in the same URL.</li>
           <li><a href="../columns/">Column management in shadcn</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
           <li><a href="../column-groups/">Column groups in shadcn</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="../selection/">Row selection in shadcn</a> — A set of ids that survives paging, with bulk actions over it.</li>
-          <li><a href="../rows/">Rows in shadcn</a> — Pin, drag-reorder, merge cells, and a 3-dot menu per row.</li>
-          <li><a href="../grouping/">Row grouping in shadcn</a> — Nested group headers with counts, subtotals, footers and collapse state.</li>
+          <li><a href="../rows/">Rows in shadcn</a> — Pin rows, merge cells, and a 3-dot menu for add and delete.</li>
+          <li><a href="../row-reordering/">Row reordering in shadcn</a> — Flat, grouped and tree moves — keyboard, confirm, host writes.</li>
+          <li><a href="../grouping/">Row grouping in shadcn</a> — Drag, keyboard and mobile grouping controls with live aggregation overrides.</li>
+          <li><a href="../aggregation/">Aggregation in shadcn</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
           <li><a href="../nested-tables/">Nested tables in shadcn</a> — A real table under a row — same engine, own columns, own keys.</li>
-          <li><a href="../export/">Export and print in shadcn</a> — CSV, XLSX and PDF from one seam — plus a real print layout.</li>
-          <li><a href="../scale/">Large datasets in shadcn</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
-          <li><a href="../tree/">Tree data in shadcn</a> — Rows that contain rows — nesting, chevrons, keyboard traversal.</li>
+          <li><a href="../export/">Export and print in shadcn</a> — Browser files or cancellable server jobs — CSV, XLSX and PDF.</li>
+          <li><a href="../scale/">Row and column virtualization in shadcn</a> — 100k rows, 40 columns, virtualized rows and columns, sticky chrome.</li>
+          <li><a href="../tree/">Tree data in shadcn</a> — Nesting, chevrons, URL expansion, and host-owned tree moves.</li>
           <li><a href="../mobile-cards/">Mobile cards in shadcn</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="../pivot/">Pivot tables in shadcn</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
           <li><a href="../saved-views/">Saved views in shadcn</a> — Name an arrangement, share it as a link, manage the list in place.</li>
-          <li><a href="../formulas/">Spreadsheet formulas in shadcn</a> — Computed columns typed as formulas, errors reported in the cell.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in shadcn</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
           <li><a href="../rtl/">Right-to-left shadcn data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
           <li><a href="../realtime/">Live updates in shadcn</a> — Rows change while you read them. Sort and selection hold.</li>
-          <li><a href="../accessibility/">Accessible shadcn data table</a> — Arrow-key focus, a visible ring, and every announcement shown as text.</li>
+          <li><a href="../accessibility/">Accessible shadcn data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="../ai/">AI table assistant in shadcn</a> — Native assistant, feature-aware prompts and governed action receipts.</li>
         </ul>
         <p>
           Reference: <a href="https://orwa-mahmoud.github.io/adapttable/cell-editing/">cell-editing</a>, <a href="https://orwa-mahmoud.github.io/adapttable/cell-navigation/">cell-navigation</a>. More of this kit:

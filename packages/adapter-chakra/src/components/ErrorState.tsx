@@ -1,5 +1,5 @@
 /** Load failure, with a retry. */
-import { type TableLabels } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
 import { Alert, Button } from "@chakra-ui/react";
 
 /** Error alert with retry. */

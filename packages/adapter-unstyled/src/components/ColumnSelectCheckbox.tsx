@@ -3,13 +3,13 @@ import {
   type ColumnSelectCheckboxChromeProps,
   type ColumnSelectCheckboxProps,
   type ColumnSelectSlots,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 function ColumnSelectBox({
   label,
   checked,
   onToggle,
-}: ColumnSelectCheckboxProps) {
+}: Readonly<ColumnSelectCheckboxProps>) {
   // No part of its own: `column-select` on core's wrapper names the whole
   // control, which is the element every other kit tags too.
   return (

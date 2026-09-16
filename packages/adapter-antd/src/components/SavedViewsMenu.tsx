@@ -1,9 +1,5 @@
-import type {
-  Direction,
-  TableLabels,
-  UseSavedViewsOptions,
-} from "@adapttable/core";
-import { useSavedViews } from "@adapttable/core";
+import type { Direction, TableLabels } from "@adapttable/core";
+import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
 import { Button, Divider, Flex, Input, Popover } from "antd";
 import { useEffect, useRef, useState } from "react";
 
@@ -66,7 +62,7 @@ export function SavedViewsMenu({
     <div
       style={{
         padding: 8,
-        minWidth: 240,
+        minWidth: "min(240px, calc(100vw - 48px))",
         maxHeight: "min(70vh, 360px)",
         overflowY: "auto",
       }}

@@ -3,15 +3,24 @@
  * bodySlots, pin-edge attributes, extra rows beside chrome columns, and the
  * tfoot summary pads.
  */
+import { resolveLabels } from "@adapttable/core";
 import {
   DELETE_ROW_ACTION_KEY,
   DUPLICATE_ROW_ACTION_KEY,
-} from "@adapttable/core";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+} from "@adapttable/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { rowReorder } from "./row-reorder";
 
 interface Person {
   id: string;
@@ -31,6 +40,7 @@ const COLUMNS: ColumnDef<Person>[] = [
     header: "Name",
     accessor: (row) => row.name,
     sortable: true,
+    renameable: true,
     headerTooltip: "Full name",
     headerActions: <span data-testid="name-actions">★</span>,
     group: "Person",
@@ -65,7 +75,7 @@ function mount(
 
 const fullChrome = {
   renderRowDetail: (row: Person) => <div>detail-{row.id}</div>,
-  onRowReorder: vi.fn(),
+  features: [rowReorder(vi.fn())],
   bulkActions: [{ key: "x", label: "Export", onClick: vi.fn() }],
   rowActions: [{ key: "e", label: "Edit", onClick: vi.fn() }],
   columnLayout: {
@@ -164,6 +174,82 @@ describe("DesktopTable assembly paint (unstyled)", () => {
     );
     fireEvent.click(screen.getAllByLabelText("Select row")[0]!);
     expect(screen.getByText("1 selected")).toBeInTheDocument();
+  });
+});
+
+describe("DesktopTable direct header rename (unstyled)", () => {
+  it("shows the affordance only for a renameable column with a callback", () => {
+    const withoutCallback = mount({ enableColumnMenu: true });
+    expect(
+      screen.queryByRole("button", { name: "Rename column: Name" })
+    ).toBeNull();
+    withoutCallback.unmount();
+
+    mount({ enableColumnMenu: true, onColumnRename: vi.fn() });
+    expect(
+      screen.getByRole("button", { name: "Rename column: Name" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Rename column: City" })
+    ).toBeNull();
+  });
+
+  it("focuses, validates, trims, commits, and announces", () => {
+    const onColumnRename = vi.fn();
+    render(
+      <ColumnHeaderRename
+        columnKey="name"
+        name="Name"
+        labels={resolveLabels(undefined)}
+        onRenameColumn={onColumnRename}
+      >
+        <button type="button" aria-label="Sort by: Name">
+          Name
+        </button>
+      </ColumnHeaderRename>
+    );
+    const renameButton = screen.getByRole("button", {
+      name: "Rename column: Name",
+    });
+    fireEvent.click(renameButton);
+
+    expect(renameButton).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Sort by: Name" })).toBeNull();
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    expect(input).toHaveFocus();
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.blur(input);
+    const error = screen.getByRole("alert");
+    expect(error).toHaveTextContent("Enter a column name.");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+
+    fireEvent.change(input, { target: { value: "  Account  " } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onColumnRename).toHaveBeenCalledWith("name", "Account");
+    expect(renameButton).not.toBeDisabled();
+    expect(
+      document.querySelector('[data-adapttable-part="header-rename-announcer"]')
+    ).toHaveTextContent("Column Name renamed to Account");
+  });
+
+  it("cancels with Escape and restores focus without committing", async () => {
+    const onColumnRename = vi.fn();
+    mount({ enableColumnMenu: true, onColumnRename });
+    const renameButton = screen.getByRole("button", {
+      name: "Rename column: Name",
+    });
+    renameButton.focus();
+    fireEvent.click(renameButton);
+    const input = screen.getByRole("textbox", { name: "Column name" });
+    fireEvent.change(input, { target: { value: "Discarded" } });
+    fireEvent.keyDown(input, { key: "Escape" });
+
+    expect(onColumnRename).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: "Sort by: Name" })
+    ).toBeInTheDocument();
+    await waitFor(() => expect(renameButton).toHaveFocus());
   });
 });
 

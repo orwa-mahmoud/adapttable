@@ -22,9 +22,9 @@
  * `--report` prints the full per-package diff instead of failing fast —
  * useful when auditing rather than gating.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import ts from "typescript";
 
@@ -41,26 +41,69 @@ const DOCS_DIR = join(REPO_ROOT, "docs");
 const REFERENCE_PAGE = "api.md";
 
 /**
+ * The built file a subpath resolves to, as the package itself declares it.
+ *
+ * Conditional exports nest, so the target is whatever string this branch
+ * bottoms out at; a non-JS condition (`./styles.css`) bottoms out at a string
+ * directly.
+ */
+function targetOf(value) {
+  if (typeof value === "string") return value;
+  if (value === null || typeof value !== "object") return undefined;
+  for (const condition of ["import", "require", "default"]) {
+    if (condition in value) {
+      const resolved = targetOf(value[condition]);
+      if (resolved !== undefined) return resolved;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Every published package's export surface, one audit per importable entry.
  *
- * The list is READ from each package's `exports` map rather than written here,
- * because a hand-written list is a second place to remember: `/pivot` and
- * `/formula` both shipped while this array still named five core entries, so
- * every export behind them was invisible to the gate that exists to see them.
- * Deriving it means a new subpath is audited the moment it is published.
+ * Both halves are READ from each package's `exports` map rather than written
+ * here, because anything restated is a second place to remember. The subpath
+ * list is read because `/pivot` and `/formula` shipped while a hand-written
+ * array still named five core entries. The SOURCE FILE is read from the same
+ * map because a subpath need not be spelled like the module behind it:
+ * `./ag-ui` is built from `agui.ts`, `./ai-sdk` from `aiSdk.ts`, and a guess
+ * from the subpath finds neither. Deriving both means a new entry is audited
+ * the moment it is published, whatever it is called.
+ *
  * Non-JS conditions (`./styles.css`) and `./package.json` are not APIs.
  */
-function entriesOf(pkg) {
+/**
+ * Every documented entry a package advertises, resolved through its exports
+ * map rather than its subpath name.
+ *
+ * `root` exists so this can be pointed at a fixture: a guard nobody can aim
+ * at a broken tree is a guard nobody can prove still fails. Production passes
+ * nothing and gets the repository.
+ */
+export function entriesOf(pkg, root = REPO_ROOT) {
   const manifest = JSON.parse(
-    readFileSync(join(REPO_ROOT, "packages", pkg, "package.json"), "utf8")
+    readFileSync(join(root, "packages", pkg, "package.json"), "utf8")
   );
-  return Object.keys(manifest.exports ?? { ".": {} })
+  const exported = manifest.exports ?? { ".": "./dist/index.js" };
+  return Object.keys(exported)
     .filter((key) => key === "." || !key.slice(2).includes("."))
     .sort()
-    .map((key) => ({
-      label: key === "." ? pkg : `${pkg}/${key.slice(2)}`,
-      entry: join(pkg, "src", key === "." ? "index.ts" : `${key.slice(2)}.ts`),
-    }));
+    .map((key) => {
+      const target = targetOf(exported[key]);
+      const stem = join(
+        pkg,
+        "src",
+        (target ?? "index")
+          .replace(/^\.\/dist\//, "")
+          .replace(/\.[cm]?[jt]sx?$/, "")
+      );
+      // A feature entry that renders is `.tsx`; the rest are `.ts`.
+      const entry = existsSync(join(root, "packages", `${stem}.ts`))
+        ? `${stem}.ts`
+        : `${stem}.tsx`;
+      return { label: key === "." ? pkg : `${pkg}/${key.slice(2)}`, entry };
+    });
 }
 
 const SURFACES = readdirSync(join(REPO_ROOT, "packages"), {
@@ -69,7 +112,9 @@ const SURFACES = readdirSync(join(REPO_ROOT, "packages"), {
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
   .sort()
-  .flatMap(entriesOf);
+  // Wrapped, not passed by reference: `flatMap` hands the callback an index as
+  // its second argument, which is now this function's `root`.
+  .flatMap((pkg) => entriesOf(pkg));
 
 const docPages = readdirSync(DOCS_DIR)
   .filter((name) => name.endsWith(".md"))
@@ -426,4 +471,7 @@ function main() {
   );
 }
 
-main();
+// Only when run as the command. Importing this module — which a test that aims
+// `entriesOf` at a fixture must do — would otherwise run the whole audit and
+// exit on its result. Same guard `ai-isolation.mjs` uses.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) main();

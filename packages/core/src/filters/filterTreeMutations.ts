@@ -2,8 +2,11 @@
  * Immutable updates for an AND/OR filter tree. Paths are child indexes
  * from the root (`[]` is the root group).
  */
-import type { QueryCondition, QueryFilterGroup } from "../source/queryContract";
-import { isFilterGroup } from "../source/queryContract";
+import {
+  isFilterGroup,
+  type QueryCondition,
+  type QueryFilterGroup,
+} from "../source/queryContract";
 
 /**
  * One node in a filter tree: a single condition, or a group of them.

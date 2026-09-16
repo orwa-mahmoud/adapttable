@@ -1,0 +1,2489 @@
+import {
+  type ActionAiOptions,
+  type AgentProgress,
+  isPinnedSummaryRowId,
+} from "@adapttable/core";
+
+import {
+  resolveApproval,
+  type ResolvedApproval,
+  sharedApproval,
+} from "./approvalConfig";
+import {
+  type CapabilityRegistry,
+  createCapabilityRegistry,
+  shortForm,
+} from "./capabilities/registry";
+import { errorMessage } from "./errorMessage";
+import { extrasFromAgentFilters, formatFilterCatalog } from "./filterCatalog";
+import { summaryOf } from "./guides";
+import {
+  type ApprovalPolicy,
+  type CapabilityKey,
+  type CommitPolicy,
+  type RowAddressScope,
+} from "./keys";
+import {
+  columnIds,
+  withAggregationBag,
+  withEnum,
+  withFilterBag,
+  withItemEnum,
+} from "./liveSchemas";
+import { buildManifest } from "./manifest";
+import { normalizeCapabilityArgs } from "./normalizeArgs";
+import {
+  type AgentPagination,
+  agentPagination,
+  pageRefusal,
+  pageSizeRefusal,
+} from "./pagination";
+import type {
+  AgentAggregationColumn,
+  AgentAggregationsPatch,
+  AgentApply,
+  AgentCapabilityContext,
+  AgentCapabilityDefinition,
+  AgentColumn,
+  AgentObservation,
+  AgentSession,
+  ApprovalOutcome,
+  ApprovalResult,
+  ApprovalSubject,
+  CapabilityGuide,
+  CapabilityPlan,
+  CapabilityProgress,
+  CatalogEntry,
+  ExecuteResult,
+  ResolvedRow,
+  RowProvenanceEnvelope,
+  RowReadQuery,
+  RowRef,
+  RowWindow,
+  WriteExecuteResult,
+  WriteProposal,
+  WriteRowResult,
+} from "./types";
+import { validateSchema } from "./validate";
+
+/** Replay records kept per session before the oldest non-mutation is dropped. */
+const DEFAULT_REPLAY_CACHE_SIZE = 200;
+
+/**
+ * Inputs for {@link createAgentSession}.
+ *
+ * @public
+ */
+export interface CreateAgentSessionOptions {
+  /** Latest wired state. Called on every catalog/describe/execute. */
+  observe: () => AgentObservation;
+  /** Apply a validated mutation to the live table. */
+  apply: AgentApply;
+  /**
+   * Host confirmation. When set, chrome is skipped.
+   * When omitted and approval is required, execute returns `approval: "pending"`.
+   */
+  onApprove?: (
+    subject: ApprovalSubject,
+    signal?: AbortSignal
+  ) => Promise<ApprovalResult>;
+  /** Custom governed capabilities registered on this table session. */
+  capabilities?: readonly AgentCapabilityDefinition[];
+  /**
+   * Capability keys the agent may not use on this table.
+   *
+   * One list, for built-ins and custom definitions alike. It only ever denies:
+   * a key the table does not wire stays unavailable whatever this says, and no
+   * entry here can enable a forbidden operation. The table's own UI is
+   * untouched — denying `edit.cells` to the agent leaves a person editing
+   * cells exactly as before.
+   */
+  excludeCapabilities?: readonly string[];
+  /**
+   * This table's approval policy for individual capabilities, by key.
+   *
+   * The same shape a row or bulk action carries. An entry **replaces** the
+   * shared policy for that one capability rather than narrowing it: `required`
+   * asks on a table that asks for nothing, and `automatic` skips the human on a
+   * table that asks for writes. Both directions are deliberate — this is the
+   * developer's own answer to "who confirms this", written where the table is
+   * configured.
+   *
+   * It is not the reader's answer. A reader choosing "don't ask again" is
+   * `alwaysAllow` plus the approval memory: opt-in per capability, revocable,
+   * and reset by a contract change. The two are different permissions and
+   * neither stands in for the other — a capability carrying `required` here
+   * keeps asking however often the reader waves it through.
+   *
+   * What it cannot do is make something permitted. Approval decides who
+   * confirms an operation, never whether the table offers it: a key the table
+   * does not wire, or excludes, stays unavailable whatever this says.
+   */
+  capabilityApproval?: Readonly<Record<string, ActionAiOptions>>;
+  /**
+   * Where a capability's progress goes, and `null` when it stops.
+   *
+   * The `null` closes it: a call that reported progress and then settled has
+   * nothing more to say, and a surface left holding the last count would go on
+   * showing it beside a finished turn. Without this option the context's
+   * `reportProgress` is absent, and a handler that would have called it simply
+   * does not — no buffer, no queue, nothing kept for a listener that may never
+   * arrive.
+   */
+  onProgress?: (report: AgentProgress | null) => void;
+  /**
+   * How many replay results this session keeps. Defaults to 200. Accepted
+   * mutations keep their deduplication guarantee for the whole session even
+   * after their result is evicted — a replayed key then reports
+   * `replay-expired` rather than running the write twice.
+   */
+  replayCacheSize?: number;
+}
+
+function approvalOf(observation: AgentObservation): ApprovalPolicy {
+  return observation.approval ?? "writes";
+}
+
+/**
+ * The policy for one capability: the table's, unless the capability itself
+ * overrides it. Presentation is resolved the same way but is the surface's
+ * business, not the session's — the session only decides whether to ask.
+ */
+function approvalFor(
+  definition: AgentCapabilityDefinition,
+  observation: AgentObservation
+): ResolvedApproval {
+  return resolveApproval(
+    sharedApproval({
+      policy: approvalOf(observation),
+      presentation: observation.presentation ?? "widget",
+      ...(observation.alwaysAllow
+        ? { alwaysAllow: observation.alwaysAllow }
+        : {}),
+    }),
+    definition.ai
+  );
+}
+
+function commitOf(observation: AgentObservation): CommitPolicy {
+  return observation.commit ?? "stage";
+}
+
+function readMaxOf(observation: AgentObservation): number {
+  return observation.readMax ?? 50;
+}
+
+function kindOf(
+  definition: AgentCapabilityDefinition
+): NonNullable<AgentCapabilityDefinition["kind"]> {
+  return definition.kind ?? "view";
+}
+
+function isGoverned(definition: AgentCapabilityDefinition): boolean {
+  const kind = kindOf(definition);
+  return kind === "write" || kind === "destructive";
+}
+
+function needsApproval(
+  definition: AgentCapabilityDefinition,
+  policy: ApprovalPolicy
+): boolean {
+  if (policy === "never") return false;
+  if (policy === "destructive") return kindOf(definition) === "destructive";
+  return isGoverned(definition);
+}
+
+class ApplyError extends Error {
+  readonly code: string;
+  constructor(code: string, message: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
+/**
+ * Session-owned re-checks a handler runs after every awaited boundary.
+ * Never handed to custom capability code.
+ */
+interface SessionGuard {
+  readonly observe: () => AgentObservation;
+  readonly isEnabled: (key: string, observation: AgentObservation) => boolean;
+}
+
+interface ReplayRecord {
+  readonly capabilityKey: string;
+  readonly fingerprint: string;
+  readonly args: unknown;
+  /** A governed write reached its handler — never run this key again. */
+  readonly mutation: boolean;
+  readonly result: ExecuteResult;
+}
+
+function executeFingerprint(key: string, args: unknown): string {
+  return JSON.stringify({ key, args: args ?? {} });
+}
+
+/**
+ * Bounded replay store. Results are evicted oldest-first; the identity of an
+ * accepted mutation is retained for the session so its key can never execute
+ * a second time.
+ */
+class ReplayStore {
+  readonly #capacity: number;
+  readonly #records = new Map<string, ReplayRecord>();
+  readonly #mutations = new Map<string, string>();
+
+  constructor(capacity: number) {
+    this.#capacity = Math.max(1, Math.floor(capacity));
+  }
+
+  get(key: string): ReplayRecord | undefined {
+    const record = this.#records.get(key);
+    if (!record) return undefined;
+    this.#records.delete(key);
+    this.#records.set(key, record);
+    return record;
+  }
+
+  /** Fingerprint of an accepted mutation whose result is no longer cached. */
+  retiredMutation(key: string): string | undefined {
+    if (this.#records.has(key)) return undefined;
+    return this.#mutations.get(key);
+  }
+
+  set(key: string, record: ReplayRecord): void {
+    if (record.mutation) this.#mutations.set(key, record.fingerprint);
+    this.#records.delete(key);
+    this.#records.set(key, record);
+    for (const oldest of this.#records.keys()) {
+      if (this.#records.size <= this.#capacity) break;
+      this.#records.delete(oldest);
+    }
+  }
+}
+
+function readableAllowlist(
+  columns: readonly AgentColumn[],
+  wanted: readonly string[] | undefined
+): Set<string> {
+  const readable = columns
+    .filter((column) => column.readable)
+    .map((column) => column.id);
+  if (!wanted) return new Set(readable);
+  const declared = new Set(readable);
+  return new Set(wanted.filter((id) => declared.has(id)));
+}
+
+/**
+ * Project a host window onto what the CURRENT declaration permits: allowed
+ * columns only, no more rows than the permitted limit, and window metadata
+ * that describes the window actually returned.
+ */
+function projectWindow(
+  window: RowWindow,
+  allow: ReadonlySet<string>,
+  columns: readonly AgentColumn[],
+  offset: number,
+  limit: number
+): RowWindow {
+  const rows = window.rows.slice(0, limit).map((row) => {
+    const cells: Record<string, unknown> = {};
+    for (const [id, value] of Object.entries(row.cells)) {
+      if (!allow.has(id)) continue;
+      cells[id] = value;
+    }
+    return { rowKey: row.rowKey, cells };
+  });
+  return { rows, offset, limit, redacted: redactedIds(columns) };
+}
+
+/** A non-negative integer bound, ignoring a missing or unusable value. */
+function boundedInt(value: unknown, fallback: number): number {
+  const parsed = typeof value === "number" ? Math.floor(value) : Number.NaN;
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, parsed);
+}
+
+/**
+ * Provider-neutral three-stage session.
+ *
+ * Runtimes that support typed tools can wrap each `describe` result; the
+ * generic catalog/describe/execute calls stay the portable fallback.
+ *
+ * @public
+ */
+export function createAgentSession(
+  options: CreateAgentSessionOptions
+): AgentSession {
+  const replay = new ReplayStore(
+    options.replayCacheSize ?? DEFAULT_REPLAY_CACHE_SIZE
+  );
+  const inflight = new Map<
+    string,
+    { fingerprint: string; promise: Promise<ExecuteResult> }
+  >();
+  const registry: CapabilityRegistry = createCapabilityRegistry(
+    options.capabilities ?? [],
+    {
+      plan: (key, context, args) => planBuiltIn(key, context, args, guard),
+      execute: (key, context, args) =>
+        dispatchBuiltIn(key, context, args, guard),
+    },
+    options.excludeCapabilities ?? [],
+    options.capabilityApproval ?? {}
+  );
+  const guard: SessionGuard = {
+    observe: () => options.observe(),
+    // One predicate, asked here as everywhere else — including the
+    // revalidation after an awaited boundary, which is the check an excluded
+    // capability must not be able to walk past.
+    isEnabled: (key, observation) => registry.permits(key, observation),
+  };
+
+  const catalog = (): CatalogEntry[] => {
+    const observation = options.observe();
+    return registry.enabledKeys(observation).map((key) => {
+      const definition = registry.get(key);
+      const summary = definition?.summary ?? summaryOf(key as CapabilityKey);
+      return {
+        key,
+        summary,
+        summaryShort: shortForm(summary),
+        ...(definition?.kind ? { kind: definition.kind } : {}),
+        ...(definition?.idempotent === undefined
+          ? {}
+          : { idempotent: definition.idempotent }),
+      };
+    });
+  };
+
+  const describe = (key: string): CapabilityGuide => {
+    if (!registry.has(key)) {
+      throw new Error(`unknown capability "${key}"`);
+    }
+    const observation = options.observe();
+    if (!registry.permits(key, observation)) {
+      // Excluded and unwired are both "you cannot use this", and saying which
+      // would tell a model something about the host's configuration that it
+      // has no business learning from a refusal.
+      throw new Error(`capability "${key}" is not wired on this table`);
+    }
+    const guide = registry.describe(key);
+    if (key === "view.setAggregations") {
+      return describeAggregations(guide, observation);
+    }
+    if (key === "view.setFilters") {
+      return describeFilters(guide, observation);
+    }
+    return describeColumnChoice(key, guide, observation);
+  };
+
+  /**
+   * Re-check the table after an awaited boundary. A revision move, a
+   * capability that stopped being wired, or a withdrawn write permission all
+   * deny the call rather than letting it proceed on the entry snapshot.
+   */
+  const revalidate = (
+    key: string,
+    entry: AgentObservation,
+    governed: boolean
+  ): AgentObservation => {
+    const latest = options.observe();
+    if (latest.viewRevision !== entry.viewRevision) {
+      throw new ApplyError(
+        "revision-mismatch",
+        `expected revision ${entry.viewRevision}, table is at ${latest.viewRevision}`
+      );
+    }
+    if (!guard.isEnabled(key, latest)) {
+      throw new ApplyError(
+        "not-wired",
+        `capability "${key}" is not wired on this table`
+      );
+    }
+    if (governed && latest.writePolicy !== "allow") {
+      throw new ApplyError(
+        "write-denied",
+        `writes are not permitted on this table`
+      );
+    }
+    return latest;
+  };
+
+  /**
+   * The one governed path. Built-ins and custom definitions both run here,
+   * so a custom `kind: "write"` cannot execute without the same policy,
+   * commit-mode, approval and revalidation checks a built-in gets.
+   */
+  const runCapability = async (
+    definition: AgentCapabilityDefinition,
+    key: string,
+    args: unknown,
+    entry: AgentObservation,
+    signal: AbortSignal | undefined,
+    call: CallState
+  ): Promise<unknown> => {
+    const { apply, progress } = call;
+    const approve = bindApprove(options.onApprove, signal);
+    const throwIfCancelled = cancellationGuard(signal);
+    const baseContext: AgentCapabilityContext = {
+      observation: entry,
+      apply,
+      observe: options.observe,
+      onApprove: approve,
+      signal,
+      throwIfCancelled,
+      ...(progress ? { reportProgress: progress } : {}),
+    };
+    // The reserved execution is starting for real.
+    throwIfCancelled();
+    if (!isGoverned(definition)) {
+      return definition.execute(baseContext, args);
+    }
+
+    if (entry.writePolicy !== "allow") {
+      throw new ApplyError(
+        "write-denied",
+        `writes are not permitted on this table`
+      );
+    }
+    const commit = commitOf(entry);
+    if (
+      commit === "stage" &&
+      (definition.staging ?? "unsupported") !== "supported"
+    ) {
+      throw new ApplyError(
+        "commit-incompatible",
+        `${key} requires commit: immediate on this table`
+      );
+    }
+
+    const plan: CapabilityPlan = definition.plan
+      ? await definition.plan(baseContext, args)
+      : { proposals: [] };
+    // Planning awaited host code, which is long enough to be cancelled in.
+    throwIfCancelled();
+    revalidate(key, entry, true);
+
+    // One fact, read from the captured plan, used for both the offer the
+    // reader is given and the answer they are allowed to give back.
+    const decomposable = isDecomposable(plan, definition);
+    const presentation = approvalFor(definition, entry).presentation;
+    const subject: ApprovalSubject =
+      plan.proposals.length > 0
+        ? {
+            kind: "rows",
+            proposals: plan.proposals,
+            perItem: decomposable,
+            presentation,
+          }
+        : {
+            kind: "operation",
+            capability: key,
+            ...(definition.presentation?.title
+              ? { title: definition.presentation.title }
+              : {}),
+            arguments: args ?? {},
+            presentation,
+          };
+    const decision = await decideApproval(
+      definition,
+      entry,
+      subject,
+      approve,
+      plan.proposals.length,
+      decomposable
+    );
+    const approval = decision.outcome;
+    if (approval === "pending" || approval === "rejected") {
+      return writePayload(
+        plan.proposals,
+        false,
+        approval,
+        undefined,
+        decision.reason
+      );
+    }
+    throwIfCancelled();
+    revalidate(key, entry, true);
+
+    // What the handler sees is what the reader agreed to, never the whole
+    // plan with a note attached.
+    const approvedPlan = decision.approved
+      ? narrowPlan(plan, decision.approved)
+      : plan;
+    const context: AgentCapabilityContext = {
+      ...baseContext,
+      plan: approvedPlan,
+      commit,
+      ...(decision.approved ? { approvedIndexes: decision.approved } : {}),
+    };
+    // The last moment before the handler can touch the host. Nothing has been
+    // written yet, so a cancellation here leaves the key free to be retried.
+    throwIfCancelled();
+    call.invokedWrite = true;
+    try {
+      const payload = await definition.execute(context, args);
+      return decorateWrite(payload, approvedPlan, approval);
+    } catch (error) {
+      if (error instanceof BulkFailure) {
+        return writePayload(
+          approvedPlan.proposals,
+          false,
+          approval,
+          error.results
+        );
+      }
+      throw error;
+    }
+  };
+
+  /** Resolve the capability, or the reason the call cannot start. */
+  const preflight = (
+    key: string,
+    args: unknown,
+    expectedRevision: number
+  ):
+    | {
+        readonly definition: AgentCapabilityDefinition;
+        readonly observation: AgentObservation;
+      }
+    | { readonly code: string; readonly message: string } => {
+    const definition = registry.get(key);
+    if (!definition) {
+      return {
+        code: "unknown-capability",
+        message: `unknown capability "${key}"`,
+      };
+    }
+    const observation = options.observe();
+    if (!registry.enabledKeys(observation).includes(key)) {
+      return {
+        code: "not-wired",
+        message: `capability "${key}" is not wired on this table`,
+      };
+    }
+    if (expectedRevision !== observation.viewRevision) {
+      return {
+        code: "revision-mismatch",
+        message: `expected revision ${expectedRevision}, table is at ${observation.viewRevision}`,
+      };
+    }
+    const invalid = validateSchema(definition.guide.input, args ?? {});
+    if (invalid) return { code: "invalid-arguments", message: invalid };
+    return { definition, observation };
+  };
+
+  const runExecute = async (
+    key: string,
+    rawArgs: unknown,
+    expectedRevision: number,
+    idempotencyKey: string,
+    signal?: AbortSignal
+  ): Promise<ExecuteResult> => {
+    const args = normalizeCapabilityArgs(
+      key,
+      rawArgs,
+      registry.get(key)?.guide.input
+    );
+    // Where this action itself left the table. `apply` is the one channel a
+    // capability changes the table through — a built-in dispatches to it, a
+    // host handler is handed it — so the revision read as one of those calls
+    // settles is this action's own progress.
+    let own: number | undefined;
+    const tracked = traceApply(options.apply, () => {
+      own = options.observe().viewRevision;
+    });
+
+    // Named where the call’s own identity is, so a surface watching two
+    // capabilities at once can tell which one moved.
+    const { progress, close: closeProgress } = callProgress(
+      options.onProgress,
+      key,
+      idempotencyKey
+    );
+
+    const call: CallState = { invokedWrite: false, apply: tracked, progress };
+
+    const record = (result: ExecuteResult): ExecuteResult => {
+      replay.set(idempotencyKey, {
+        capabilityKey: key,
+        fingerprint: executeFingerprint(key, args),
+        args,
+        mutation: call.invokedWrite,
+        result,
+      });
+      return result;
+    };
+    const fail = (code: string, message: string): ExecuteResult => {
+      const result: ExecuteResult = {
+        ok: false,
+        revision: options.observe().viewRevision,
+        idempotencyKey,
+        error: { code, message },
+      };
+      if (code === "cancelled" || code === "revision-mismatch") return result;
+      return record(result);
+    };
+
+    const resolved = preflight(key, args, expectedRevision);
+    if ("code" in resolved) return fail(resolved.code, resolved.message);
+
+    try {
+      const payload = await runCapability(
+        resolved.definition,
+        key,
+        args,
+        resolved.observation,
+        signal,
+        call
+      );
+      // What this action reached, never where the table happens to be. An
+      // action that applied nothing reports the revision it was admitted at,
+      // and one that applied reports what its own last call settled at, so a
+      // change that landed alongside it is left for whoever made it to
+      // account for. The next command then meets that change as a mismatch it
+      // has to re-read, which is the answer the session gives at every other
+      // awaited boundary.
+      //
+      // A host write and a foreign write inside the same `apply` call are the
+      // one pair this cannot separate: both move the same counter while that
+      // call is in flight, and only the host knows which revision its own
+      // write produced.
+      const produced = own ?? resolved.observation.viewRevision;
+      const unfinished = unfinishedWrite(payload);
+      if (unfinished) {
+        return {
+          ok: unfinished === "pending",
+          revision: produced,
+          idempotencyKey,
+          result: unfinished === "pending" ? payload : undefined,
+          error:
+            unfinished === "cancelled"
+              ? { code: "cancelled", message: "approval cancelled" }
+              : undefined,
+        };
+      }
+      return record({
+        ok: true,
+        revision: produced,
+        idempotencyKey,
+        result: payload,
+      });
+    } catch (error) {
+      if (error instanceof ApplyError) return fail(error.code, error.message);
+      return fail("apply-failed", errorMessage(error));
+    } finally {
+      closeProgress();
+    }
+  };
+
+  const execute = (
+    key: string,
+    args: unknown,
+    expectedRevision: number,
+    idempotencyKey: string,
+    signal?: AbortSignal
+  ): Promise<ExecuteResult> => {
+    if (signal?.aborted) {
+      return Promise.resolve({
+        ok: false,
+        revision: options.observe().viewRevision,
+        idempotencyKey,
+        error: { code: "cancelled", message: "execute cancelled" },
+      });
+    }
+    const fingerprint = executeFingerprint(key, args);
+    const mismatch = (): ExecuteResult => ({
+      ok: false,
+      revision: options.observe().viewRevision,
+      idempotencyKey,
+      error: {
+        code: "idempotency-mismatch",
+        message:
+          "idempotency key was already used for a different capability or payload",
+      },
+    });
+
+    const cached = replay.get(idempotencyKey);
+    if (cached) {
+      if (cached.fingerprint !== fingerprint)
+        return Promise.resolve(mismatch());
+      return Promise.resolve(
+        refreshReplayResult(cached, idempotencyKey, guard)
+      );
+    }
+
+    // An accepted mutation keeps its identity after its result is evicted.
+    const retired = replay.retiredMutation(idempotencyKey);
+    if (retired !== undefined) {
+      if (retired !== fingerprint) return Promise.resolve(mismatch());
+      return Promise.resolve({
+        ok: false,
+        revision: options.observe().viewRevision,
+        idempotencyKey,
+        error: {
+          code: "replay-expired",
+          message:
+            "this write was already accepted; its result is no longer cached and it will not run again",
+        },
+      });
+    }
+
+    const running = inflight.get(idempotencyKey);
+    if (running) {
+      if (running.fingerprint !== fingerprint)
+        return Promise.resolve(mismatch());
+      return running.promise;
+    }
+
+    // Reserve the key before any handler can run, so a synchronous re-entry
+    // joins this execution instead of starting a second one.
+    const entry = {
+      fingerprint,
+      promise: Promise.resolve().then(() =>
+        runExecute(key, args, expectedRevision, idempotencyKey, signal)
+      ),
+    };
+    inflight.set(idempotencyKey, entry);
+    return entry.promise.finally(() => {
+      inflight.delete(idempotencyKey);
+    });
+  };
+
+  return {
+    catalog,
+    describe,
+    execute,
+    manifest: () => {
+      const observation = options.observe();
+      return buildManifest(observation, registry.enabledKeys(observation));
+    },
+  };
+}
+
+/**
+ * Re-derive a cached read against the current declaration. A replay never
+ * discloses a column, a row count or a scope the table no longer permits.
+ */
+function refreshReplayResult(
+  record: ReplayRecord,
+  idempotencyKey: string,
+  guard: SessionGuard
+): ExecuteResult {
+  const observation = guard.observe();
+  const key = record.capabilityKey;
+  if (key !== "rows.read" && key !== "columns.describe") return record.result;
+
+  const denied = (code: string, message: string): ExecuteResult => ({
+    ok: false,
+    revision: observation.viewRevision,
+    idempotencyKey,
+    error: { code, message },
+  });
+
+  if (!guard.isEnabled(key, observation)) {
+    return denied(
+      "not-wired",
+      `capability "${key}" is not wired on this table`
+    );
+  }
+  if (!record.result.ok) {
+    return { ...record.result, revision: observation.viewRevision };
+  }
+  if (key === "columns.describe") {
+    return {
+      ...record.result,
+      // The current declaration decides what may still be disclosed, but a
+      // replay did not read the current view and cannot claim its revision as
+      // progress made by this call.
+      revision: record.result.revision,
+      result: { columns: observation.columns },
+    };
+  }
+
+  const body = (record.args ?? {}) as Record<string, unknown>;
+  try {
+    assertScope(body.scope as RowAddressScope | undefined, observation);
+  } catch (error) {
+    const code = error instanceof ApplyError ? error.code : "apply-failed";
+    return denied(code, errorMessage(error));
+  }
+  // A replayed read is re-derived against the CURRENT declaration, so a column
+  // the host has since made unreadable does not come back out of the cache.
+  const window = (record.result.result as RowProvenanceEnvelope).rows;
+  const wanted = body.columns as readonly string[] | undefined;
+  const allow = readableAllowlist(observation.columns, wanted);
+  const limit = Math.min(window.limit, readMaxOf(observation));
+  return {
+    ...record.result,
+    revision: record.result.revision,
+    result: rowProvenance(
+      projectWindow(window, allow, observation.columns, window.offset, limit),
+      record.result.revision
+    ),
+  };
+}
+
+/**
+ * A write that stopped at approval, so nothing was applied. Anything else —
+ * including a rejected proposal — is a completed, replayable outcome.
+ */
+function unfinishedWrite(
+  payload: unknown
+): "pending" | "cancelled" | undefined {
+  if (!isWriteResult(payload) || payload.applied) return undefined;
+  if (payload.approval === "pending") return "pending";
+  if (payload.approval === "cancelled") return "cancelled";
+  return undefined;
+}
+
+function isWriteResult(value: unknown): value is WriteExecuteResult {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Record<string, unknown>;
+  return (
+    Array.isArray(record.proposals) &&
+    typeof record.applied === "boolean" &&
+    typeof record.approval === "string"
+  );
+}
+
+/**
+ * Keep a handler's own payload, but make the session's approval decision the
+ * authority on any write result it returned.
+ */
+function decorateWrite(
+  payload: unknown,
+  plan: CapabilityPlan,
+  approval: ApprovalOutcome
+): unknown {
+  if (!isWriteResult(payload)) return payload;
+  if (payload.approval === "cancelled") return payload;
+  return {
+    ...payload,
+    proposals:
+      payload.proposals.length > 0 ? payload.proposals : plan.proposals,
+    approval,
+  };
+}
+
+/**
+ * Apply members that read the table rather than change it.
+ *
+ * A call to one of these says nothing about where the table has got to, so
+ * tracing it would let a change made by somebody else stand in for progress
+ * this action never made.
+ */
+const READING_APPLY: ReadonlySet<PropertyKey> = new Set([
+  "readRows",
+  "resolveRow",
+]);
+
+/** Whether a handler's return value has to be waited on. */
+function isThenable(value: unknown): value is PromiseLike<unknown> {
+  if (typeof value !== "object" || value === null) return false;
+  return typeof (value as { then?: unknown }).then === "function";
+}
+
+/**
+ * `apply`, reporting where each changing call leaves the table.
+ *
+ * Every route a capability has to the table runs through this object, so the
+ * revision read as one of its calls settles is the revision that call
+ * produced. Wrapping it here rather than at each call site covers a host's
+ * own capability handler, which the session never sees inside.
+ *
+ * A proxy rather than a copy: a host may hand over a class instance, whose
+ * methods a spread would drop.
+ */
+function traceApply(apply: AgentApply, settled: () => void): AgentApply {
+  return new Proxy(apply, {
+    get(target, property) {
+      const member: unknown = Reflect.get(target, property);
+      if (typeof member !== "function" || READING_APPLY.has(property)) {
+        return member;
+      }
+      const call = member as (...args: readonly unknown[]) => unknown;
+      return (...args: readonly unknown[]): unknown => {
+        const outcome = Reflect.apply(call, target, args);
+        if (!isThenable(outcome)) {
+          settled();
+          return outcome;
+        }
+        return Promise.resolve(outcome).then((value) => {
+          settled();
+          return value;
+        });
+      };
+    },
+  });
+}
+
+/**
+ * Where one call says how far it has got, and how that is closed.
+ *
+ * A call that reported something closes with `null` when it settles, so a
+ * surface is never left holding the last count beside a finished call. A call
+ * that reported nothing says nothing, and a table with nowhere to send it is
+ * handed no reporter at all.
+ */
+function callProgress(
+  report: ((given: AgentProgress | null) => void) | undefined,
+  capability: string,
+  idempotencyKey: string
+): {
+  readonly progress: ((given: CapabilityProgress) => void) | undefined;
+  readonly close: () => void;
+} {
+  if (!report) return { progress: undefined, close: () => undefined };
+  let reported = false;
+  return {
+    progress: (given) => {
+      reported = true;
+      report({ ...given, capability, idempotencyKey });
+    },
+    close: () => {
+      if (!reported) return;
+      reported = false;
+      report(null);
+    },
+  };
+}
+
+/**
+ * What one `execute` call carries with it.
+ *
+ * The three things a call has that the session itself does not: the channel it
+ * reaches the table through, where it may say how far it has got, and whether
+ * it has invoked a host write yet — which decides whether a replayed identity
+ * is a repeated mutation or a harmless re-read.
+ */
+interface CallState {
+  /** Whether a host write callback has been invoked for this call. */
+  invokedWrite: boolean;
+  /** `apply`, reporting where each changing call leaves the table. */
+  readonly apply: AgentApply;
+  /** Where this call says how far it has got, when anything is listening. */
+  readonly progress: ((progress: CapabilityProgress) => void) | undefined;
+}
+
+/**
+ * The check every governed step makes before the next side effect.
+ *
+ * Cancellation is not an approval question: a table with no `onApprove` is
+ * still cancellable, and a write that has not started must not start.
+ */
+function cancellationGuard(signal: AbortSignal | undefined): () => void {
+  return () => {
+    if (signal?.aborted !== true) return;
+    throw new ApplyError("cancelled", "request cancelled");
+  };
+}
+
+function describeFilters(
+  guide: CapabilityGuide,
+  observation: AgentObservation
+): CapabilityGuide {
+  const catalog = observation.availableFilters;
+  const input = withFilterBag(guide.input, catalog);
+  return {
+    ...guide,
+    guide: guide.guide + formatFilterCatalog(catalog),
+    // The keys and values this table actually takes, as schema rather than as
+    // a sentence about schema. A caller reading the input can no longer spell
+    // an option it was never offered.
+    ...(input ? { input } : {}),
+  };
+}
+
+/**
+ * Which columns a capability that names one will accept.
+ *
+ * The authored schema says `key` is a string; only the table knows which
+ * strings. Publishing them as an `enum` is the difference between a caller
+ * that can misname a column and one that cannot — and it follows the live
+ * table, so a column that stops being sortable stops being offered.
+ */
+function describeColumnChoice(
+  key: string,
+  guide: CapabilityGuide,
+  observation: AgentObservation
+): CapabilityGuide {
+  const columns = observation.columns;
+  const specialise = (
+    property: string,
+    usable: (column: AgentColumn) => boolean,
+    nullable = false
+  ): CapabilityGuide => {
+    const input = withEnum(
+      guide.input,
+      property,
+      columnIds(columns, usable),
+      nullable
+    );
+    return input ? { ...guide, input } : guide;
+  };
+  switch (key) {
+    case "view.setSort":
+      return specialise("key", (column) => column.sortable !== false, true);
+    case "view.setGroupBy":
+      return specialise("key", () => true, true);
+    case "view.pinColumn":
+      return specialise("key", (column) => column.pinnable !== false);
+    case "view.hideColumn":
+      return specialise("key", (column) => column.hideable !== false);
+    case "view.setColumnOrder": {
+      const moved = specialise("key", () => true);
+      const listed = columnIds(columns, () => true);
+      const input = withItemEnum(moved.input, "order", listed);
+      return input ? { ...moved, input } : moved;
+    }
+    case "view.setPage":
+      return describePage(guide, observation);
+    default:
+      return guide;
+  }
+}
+
+/**
+ * The page sizes this table's own control offers, as schema rather than
+ * as a free integer. A caller that can write `5` when the table offers
+ * `10, 25, 50` finds out by being refused; an `enum` stops the guess.
+ */
+function describePage(
+  guide: CapabilityGuide,
+  observation: AgentObservation
+): CapabilityGuide {
+  const sizes = observedPagination(observation).pageSizeOptions;
+  if (!sizes?.length) return guide;
+  const input = withEnum(guide.input, "limit", sizes);
+  const listed = ` Page sizes this table offers: ${sizes.join(", ")}.`;
+  return {
+    ...guide,
+    guide: guide.guide + listed,
+    ...(input ? { input } : {}),
+  };
+}
+
+function describeAggregations(
+  guide: CapabilityGuide,
+  observation: AgentObservation
+): CapabilityGuide {
+  const columns = observation.aggregations?.columns ?? [];
+  const listed =
+    columns.length === 0
+      ? " No eligible columns right now."
+      : " Eligible now: " +
+        columns
+          .map(
+            (column) =>
+              `${column.id} [${column.operations
+                .map((operation) =>
+                  operation.description
+                    ? `${operation.id} (${operation.label}) — ${operation.description}`
+                    : `${operation.id} (${operation.label})`
+                )
+                .join(", ")}]`
+          )
+          .join("; ") +
+        ".";
+  const input = withAggregationBag(guide.input, columns);
+  return {
+    ...guide,
+    guide: guide.guide + listed,
+    ...(input ? { input } : {}),
+  };
+}
+
+function eligibleAggregationColumns(
+  observation: AgentObservation
+): Map<string, AgentAggregationColumn> {
+  return new Map(
+    (observation.aggregations?.columns ?? []).map((column) => [
+      column.id,
+      column,
+    ])
+  );
+}
+
+function aggregationSetEntries(
+  set: unknown,
+  eligible: ReturnType<typeof eligibleAggregationColumns>
+): Record<string, string> {
+  if (set === null || typeof set !== "object" || Array.isArray(set)) {
+    throw new ApplyError("apply-failed", "set must be an object of column ids");
+  }
+  const nextSet: Record<string, string> = {};
+  for (const [key, operationId] of Object.entries(
+    set as Record<string, unknown>
+  )) {
+    if (typeof operationId !== "string" || operationId === "") {
+      throw new ApplyError(
+        "apply-failed",
+        `aggregation for "${key}" is not a named operation`
+      );
+    }
+    const column = eligible.get(key);
+    if (!column?.operations.some((operation) => operation.id === operationId)) {
+      // Named, so the next attempt is the caller's to make rather than a
+      // second guess: a refusal that says only "no" leaves whoever sent it
+      // with the same information it had, and "invalid-arguments" is what
+      // tells a turn this is worth one repair round.
+      const offered = column?.operations.map((operation) => operation.id) ?? [];
+      throw new ApplyError(
+        "invalid-arguments",
+        offered.length > 0
+          ? `"${key}" cannot use operation "${operationId}" — it takes ${offered.join(", ")}`
+          : `"${key}" cannot use operation "${operationId}"`
+      );
+    }
+    nextSet[key] = operationId;
+  }
+  return nextSet;
+}
+
+function aggregationRemoveKeys(
+  remove: unknown,
+  eligible: ReturnType<typeof eligibleAggregationColumns>
+): string[] {
+  if (!Array.isArray(remove)) {
+    throw new ApplyError(
+      "apply-failed",
+      "remove must be an array of column ids"
+    );
+  }
+  const nextRemove: string[] = [];
+  for (const key of remove) {
+    if (typeof key !== "string" || key === "") {
+      throw new ApplyError("apply-failed", "remove entries must be column ids");
+    }
+    if (!eligible.has(key)) {
+      throw new ApplyError("apply-failed", `"${key}" cannot be removed`);
+    }
+    nextRemove.push(key);
+  }
+  return nextRemove;
+}
+
+function validatedAggregationsPatch(
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): AgentAggregationsPatch {
+  const restoreDefaults = body.restoreDefaults === true;
+  const set = body.set;
+  const remove = body.remove;
+  if (restoreDefaults && (set !== undefined || remove !== undefined)) {
+    throw new ApplyError(
+      "apply-failed",
+      "restoreDefaults cannot be combined with set or remove"
+    );
+  }
+  if (restoreDefaults) return { restoreDefaults: true };
+  const eligible = eligibleAggregationColumns(observation);
+  const nextSet = set === undefined ? {} : aggregationSetEntries(set, eligible);
+  const nextRemove =
+    remove === undefined ? [] : aggregationRemoveKeys(remove, eligible);
+  if (Object.keys(nextSet).length === 0 && nextRemove.length === 0) {
+    throw new ApplyError(
+      "apply-failed",
+      "set, remove or restoreDefaults is required"
+    );
+  }
+  return {
+    ...(Object.keys(nextSet).length > 0 ? { set: nextSet } : {}),
+    ...(nextRemove.length > 0 ? { remove: nextRemove } : {}),
+  };
+}
+
+function applySetAggregations(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation,
+  guard: SessionGuard
+): Record<string, unknown> {
+  assertApply(apply, "setAggregations");
+  const latest = guard.observe();
+  if (latest.viewRevision !== observation.viewRevision) {
+    throw new ApplyError(
+      "revision-mismatch",
+      `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+    );
+  }
+  if (!guard.isEnabled("view.setAggregations", latest)) {
+    throw new ApplyError(
+      "not-wired",
+      "view.setAggregations is not wired on this table"
+    );
+  }
+  apply.setAggregations(validatedAggregationsPatch(body, latest));
+  const pending = latest.source.grouping === "server";
+  return {
+    ok: true,
+    revision: latest.viewRevision + 1,
+    applied: !pending,
+    pending,
+  };
+}
+
+/**
+ * The pages an observation describes.
+ *
+ * A host that states its own {@link AgentPagination} is the authority. One
+ * that still supplies only `pageMax` is read as naming a page count, which is
+ * what the field has always meant even where a binding filled it with a row
+ * count — those bindings are fixed; this keeps a host that has not been.
+ */
+function observedPagination(observation: AgentObservation): AgentPagination {
+  return (
+    observation.pagination ??
+    agentPagination({
+      page: observation.page,
+      pageSize: observation.limit,
+      totalRows: observation.pageMax * observation.limit,
+      canJump: true,
+    })
+  );
+}
+
+/**
+ * Why this table will not serve that page, or `undefined`.
+ *
+ * Checked mechanically on this side of the wire against the numbers the source
+ * supplied: a page number is arithmetic, and arithmetic is the last thing a
+ * model should be trusted with.
+ */
+function pageRefusalFor(
+  observation: AgentObservation,
+  body: Record<string, unknown>
+): string | undefined {
+  const current = observedPagination(observation);
+  if (typeof body.limit === "number") {
+    const size = pageSizeRefusal(current, body.limit);
+    if (size) return size;
+  }
+  // A size change rewrites how many pages exist. Checking the page against
+  // the size still on screen would refuse a page the new size has, or allow
+  // one it no longer does.
+  const pages =
+    typeof body.limit === "number"
+      ? agentPagination({
+          page: current.page,
+          pageSize: body.limit,
+          canJump: current.canJump,
+          ...(current.pageSizeOptions
+            ? { pageSizeOptions: current.pageSizeOptions }
+            : {}),
+          ...(current.totalRows === undefined
+            ? {}
+            : { totalRows: current.totalRows }),
+        })
+      : current;
+  return pageRefusal(pages, body.page);
+}
+
+/** A name stripped of what never distinguishes two columns. */
+function fold(value: string): string {
+  return value.trim().toLocaleLowerCase();
+}
+
+/**
+ * The column a name refers to, in the table's own spelling.
+ *
+ * Columns are published with an id and a label and a caller picks from that
+ * list, so a name that differs only in case or in surrounding space — or that
+ * is the label rather than the id — has referred to exactly one column. An
+ * exact id wins; two columns a name could equally mean resolve to neither,
+ * and the caller is told what the table has.
+ */
+function findColumn(
+  columns: readonly AgentColumn[],
+  name: string
+): AgentColumn | undefined {
+  const exact = columns.find((entry) => entry.id === name);
+  if (exact) return exact;
+  const wanted = fold(name);
+  const [only, ...rest] = columns.filter(
+    (entry) => fold(entry.id) === wanted || fold(entry.label) === wanted
+  );
+  return only && rest.length === 0 ? only : undefined;
+}
+
+/** What the table has, for a refusal that leaves the caller somewhere to go. */
+function columnNames(columns: readonly AgentColumn[]): string {
+  return columns.map((entry) => entry.id).join(", ");
+}
+
+/**
+ * Why this table will not sort by that column, or `undefined`.
+ *
+ * `sortable` is published per column, and a reader's own sort control is
+ * disabled for a column without it. An agent reading that contract and sorting
+ * anyway would be doing something the person in front of the table cannot.
+ * Clearing a sort names no column, so it is always allowed.
+ */
+function sortRefusal(
+  observation: AgentObservation,
+  sortKey: string | null | undefined
+): string | undefined {
+  if (!sortKey) return undefined;
+  // A table that published no columns has said nothing about sorting, and an
+  // absence is not a restriction: the host wiring `setSort` is the permission.
+  // Where columns exist, they are the contract and the rules below apply.
+  if (observation.columns.length === 0) return undefined;
+  const column = findColumn(observation.columns, sortKey);
+  if (!column) {
+    const offered = columnNames(observation.columns);
+    return `unknown column "${sortKey}"; this table offers ${offered}`;
+  }
+  if (column.sortable) return undefined;
+  const sortable = observation.columns
+    .filter((entry) => entry.sortable)
+    .map((entry) => entry.id);
+  return sortable.length > 0
+    ? `column "${sortKey}" is not sortable; this table sorts by ${sortable.join(", ")}`
+    : `column "${sortKey}" is not sortable, and no column on this table is`;
+}
+
+function assertApply<K extends keyof AgentApply>(
+  apply: AgentApply,
+  name: K
+): asserts apply is AgentApply & Required<Pick<AgentApply, K>> {
+  if (apply[name] === undefined) {
+    throw new ApplyError("not-wired", `${String(name)} is not wired`);
+  }
+}
+
+/** Side-effect-free proposal for a built-in write. */
+async function planBuiltIn(
+  key: CapabilityKey,
+  context: AgentCapabilityContext,
+  args: unknown,
+  guard: SessionGuard
+): Promise<CapabilityPlan> {
+  const { observation, apply } = context;
+  const body = args as Record<string, unknown>;
+  switch (key) {
+    case "edit.cells":
+      return planCells(body, observation, apply, guard);
+    case "rows.add":
+      return planAdd(body);
+    case "rows.delete":
+      return planDelete(body, observation, apply, guard);
+    case "rows.reorder":
+      return planReorder(body);
+    default:
+      return { proposals: [] };
+  }
+}
+
+/**
+ * Validate a column pin request against what this table actually allows.
+ *
+ * The column has to be one the agent was told about, and it has to be
+ * pinnable — a column the host marked unpinnable is not addressable here just
+ * because its key is known. The end edge belongs to the table's trailing
+ * actions column, which is chrome the agent never sees, so a data column
+ * asking for it is told why rather than silently pinned to the wrong side.
+ */
+function pinColumnArgs(
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): [string, "start" | "end" | undefined] {
+  const asked = String(body.key);
+  const column = findColumn(observation.columns, asked);
+  if (!column) {
+    throw new ApplyError(
+      "apply-failed",
+      `unknown column "${asked}"; this table offers ${columnNames(observation.columns)}`
+    );
+  }
+  const key = column.id;
+  const side = body.side as "start" | "end" | null | undefined;
+  if (side === undefined || side === null) return [key, undefined];
+  if (column.pinnable === false) {
+    throw new ApplyError("apply-failed", `column "${key}" is not pinnable`);
+  }
+  if (side === "end") {
+    throw new ApplyError(
+      "apply-failed",
+      `column "${key}" pins to the start edge only`
+    );
+  }
+  return [key, side];
+}
+
+/**
+ * Validate a hide request against the live columns.
+ *
+ * The last visible column stays on screen — the Columns menu will not hide
+ * it either — and a column the host marked unhideable is only addressable
+ * to show it again.
+ */
+function hideColumnArgs(
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): [string, boolean] {
+  const asked = String(body.key);
+  const column = findColumn(observation.columns, asked);
+  if (!column) {
+    throw new ApplyError(
+      "apply-failed",
+      `unknown column "${asked}"; this table offers ${columnNames(observation.columns)}`
+    );
+  }
+  const hidden = body.hidden !== false;
+  if (hidden && column.hideable === false) {
+    throw new ApplyError(
+      "apply-failed",
+      `column "${column.id}" is not hideable`
+    );
+  }
+  if (hidden && column.visible !== false) {
+    const visible = observation.columns.filter(
+      (entry) => entry.visible !== false
+    );
+    if (visible.length <= 1) {
+      throw new ApplyError(
+        "apply-failed",
+        `cannot hide "${column.id}"; it is the last visible column`
+      );
+    }
+  }
+  return [column.id, hidden];
+}
+
+/**
+ * Move one column or replace the full order, using the table's own ids.
+ */
+function applySetColumnOrder(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): {
+  ok: true;
+  revision: number;
+  order?: readonly string[];
+  key?: string;
+  index?: number;
+} {
+  if (Array.isArray(body.order)) {
+    assertApply(apply, "setColumnOrder");
+    const order = resolveColumnOrder(body.order, observation);
+    apply.setColumnOrder(order);
+    return { ok: true, revision: observation.viewRevision + 1, order };
+  }
+  const asked = typeof body.key === "string" ? body.key : "";
+  const index =
+    typeof body.index === "number" ? Math.floor(body.index) : Number.NaN;
+  if (!asked || !Number.isFinite(index)) {
+    throw new ApplyError(
+      "invalid-arguments",
+      "setColumnOrder takes { key, index } or { order }"
+    );
+  }
+  const column = findColumn(observation.columns, asked);
+  if (!column) {
+    throw new ApplyError(
+      "apply-failed",
+      `unknown column "${asked}"; this table offers ${columnNames(observation.columns)}`
+    );
+  }
+  const last = observation.columns.length - 1;
+  if (index < 0 || index > last) {
+    throw new ApplyError(
+      "invalid-arguments",
+      `index ${String(index)} is out of range; use 0–${String(last)}`
+    );
+  }
+  if (apply.moveColumn) {
+    apply.moveColumn(column.id, index);
+  } else {
+    assertApply(apply, "setColumnOrder");
+    const current = observation.columns.map((entry) => entry.id);
+    const from = current.indexOf(column.id);
+    if (from !== -1) {
+      current.splice(from, 1);
+      current.splice(index, 0, column.id);
+    }
+    apply.setColumnOrder(current);
+  }
+  return {
+    ok: true,
+    revision: observation.viewRevision + 1,
+    key: column.id,
+    index,
+  };
+}
+
+function resolveColumnOrder(
+  asked: readonly unknown[],
+  observation: AgentObservation
+): string[] {
+  const order: string[] = [];
+  for (const value of asked) {
+    const column = findColumn(observation.columns, String(value));
+    if (!column) {
+      throw new ApplyError(
+        "apply-failed",
+        `unknown column "${String(value)}"; this table offers ${columnNames(observation.columns)}`
+      );
+    }
+    order.push(column.id);
+  }
+  const known = observation.columns.map((column) => column.id);
+  const unique = new Set(order);
+  if (
+    unique.size !== known.length ||
+    order.length !== known.length ||
+    !known.every((id) => unique.has(id))
+  ) {
+    throw new ApplyError(
+      "invalid-arguments",
+      `order must list every column exactly once: ${known.join(", ")}`
+    );
+  }
+  return order;
+}
+
+/** The row-ref half of a pin request, without its `side`. */
+function rowRefBody(body: Record<string, unknown>): Record<string, unknown> {
+  const ref: Record<string, unknown> = {};
+  for (const [name, value] of Object.entries(body)) {
+    if (name !== "side") ref[name] = value;
+  }
+  return ref;
+}
+
+/**
+ * Refuse a row that is chrome rather than data.
+ *
+ * Summary rows carry a reserved id, and pinning one would ask the table to
+ * pin a total to the top of itself. `resolveRow` rejects anything that is not
+ * a real row, so this only has to name the case the host could still hand
+ * back.
+ */
+function assertPinnableRow(rowKey: string): void {
+  if (isPinnedSummaryRowId(rowKey)) {
+    throw new ApplyError(
+      "apply-failed",
+      `"${rowKey}" is a summary row, not a data row`
+    );
+  }
+}
+
+/** Move to a page, and to a page size when one was asked for. */
+function applySetPage(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): { ok: true; revision: number; page: number; limit: number } {
+  const refusal = pageRefusalFor(observation, body);
+  if (refusal) throw new ApplyError("apply-failed", refusal);
+  const page = body.page as number;
+  const currentSize = observedPagination(observation).pageSize;
+  const nextLimit = typeof body.limit === "number" ? body.limit : currentSize;
+  // The table's own `setLimit` resets the page — that is what a human rows-
+  // per-page control does. A caller that names both (or restates the size
+  // already on screen) would lose the page move if the size ran last. Skip a
+  // size that has not changed, and apply a new size before the page.
+  if (nextLimit !== currentSize) {
+    assertApply(apply, "setLimit");
+    apply.setLimit(nextLimit);
+  }
+  assertApply(apply, "setPage");
+  apply.setPage(page);
+  return {
+    ok: true,
+    revision: observation.viewRevision + 1,
+    page,
+    limit: nextLimit,
+  };
+}
+
+/**
+ * Change or clear the sort, and say which sort landed.
+ *
+ * Answered with what was applied for the same reason the filter is: a bare
+ * `ok` leaves a caller unable to tell its own request from a guess, so it
+ * asks again.
+ */
+function applySetSort(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): {
+  ok: true;
+  revision: number;
+  sort: { key: string; dir: "asc" | "desc" } | null;
+} {
+  const asked = body.key as string | null | undefined;
+  const refused = sortRefusal(observation, asked);
+  if (refused) throw new ApplyError("apply-failed", refused);
+  assertApply(apply, "setSort");
+  // The table's own spelling, so the host sorts by a column it recognises and
+  // the answer names the sort that landed rather than the one requested.
+  const sortKey = asked
+    ? (findColumn(observation.columns, asked)?.id ?? asked)
+    : undefined;
+  const dir = body.dir as "asc" | "desc" | undefined;
+  apply.setSort(sortKey, dir);
+  return {
+    ok: true,
+    revision: observation.viewRevision + 1,
+    sort: sortKey ? { key: sortKey, dir: dir ?? "asc" } : null,
+  };
+}
+
+/** Set the toolbar search, and say which string landed. */
+function applySetSearch(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): { ok: true; revision: number; query: string } {
+  assertApply(apply, "setSearch");
+  const query = typeof body.query === "string" ? body.query : "";
+  apply.setSearch(query);
+  return { ok: true, revision: observation.viewRevision + 1, query };
+}
+
+/**
+ * Replace the extra filter bag, and say which bag landed.
+ *
+ * Three argument shapes reduce to one bag, and a bare `ok` leaves the caller
+ * unable to tell which reading it got — so it sends the request again in
+ * another shape, and the reader watches one filter land four times.
+ */
+function applySetFilters(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): { ok: true; revision: number; filters: Record<string, unknown> } {
+  assertApply(apply, "setFilters");
+  const extras = extrasFromAgentFilters(
+    body.filters,
+    observation.availableFilters
+  );
+  apply.setFilters(extras);
+  return { ok: true, revision: observation.viewRevision + 1, filters: extras };
+}
+
+/** Group by a column, or clear it, and say which the table is holding. */
+function applySetGroupBy(
+  apply: AgentApply,
+  body: Record<string, unknown>,
+  observation: AgentObservation
+): { ok: true; revision: number; groupBy: string | null } {
+  const asked = body.key as string | null | undefined;
+  assertApply(apply, "setGroupBy");
+  // Resolved where the table published the column, passed through where it
+  // did not: grouping publishes no per-column permission, so a key this
+  // contract does not name is the host's business rather than a mistake.
+  const groupKey = asked
+    ? (findColumn(observation.columns, asked)?.id ?? asked)
+    : undefined;
+  apply.setGroupBy(groupKey);
+  return {
+    ok: true,
+    revision: observation.viewRevision + 1,
+    groupBy: groupKey ?? null,
+  };
+}
+
+async function dispatchBuiltIn(
+  key: CapabilityKey,
+  context: AgentCapabilityContext,
+  args: unknown,
+  guard: SessionGuard
+): Promise<unknown> {
+  const { observation, apply } = context;
+  const body = args as Record<string, unknown>;
+  switch (key) {
+    case "columns.describe":
+      return { columns: observation.columns };
+    case "view.describe":
+      return {
+        page: observation.page,
+        limit: observation.limit,
+        search: observation.search,
+        sortBy: observation.sortBy ?? null,
+        sortDir: observation.sortDir ?? null,
+        groupBy: observation.groupBy ?? null,
+        pinnedColumns: observation.pinnedColumns ?? {},
+        pinnedRows: observation.pinnedRows ?? { top: [], bottom: [] },
+        hiddenColumns: observation.hiddenColumns ?? [],
+        columnOrder: observation.columnOrder ?? [],
+        filters: observation.filters ?? null,
+        availableFilters: observation.availableFilters,
+        pagination: observedPagination(observation),
+        revision: observation.viewRevision,
+      };
+    case "view.setPage":
+      return applySetPage(apply, body, observation);
+    case "view.setSort":
+      return applySetSort(apply, body, observation);
+    case "view.setSearch":
+      return applySetSearch(apply, body, observation);
+    case "view.setFilters":
+      return applySetFilters(apply, body, observation);
+    case "view.setGroupBy":
+      return applySetGroupBy(apply, body, observation);
+    case "view.setAggregations":
+      return applySetAggregations(apply, body, observation, guard);
+    case "view.pinColumn": {
+      assertApply(apply, "pinColumn");
+      apply.pinColumn(...pinColumnArgs(body, observation));
+      return { ok: true, revision: observation.viewRevision + 1 };
+    }
+    case "view.hideColumn": {
+      assertApply(apply, "hideColumn");
+      const [column, hidden] = hideColumnArgs(body, observation);
+      apply.hideColumn(column, hidden);
+      return {
+        ok: true,
+        revision: observation.viewRevision + 1,
+        key: column,
+        hidden,
+      };
+    }
+    case "view.setColumnOrder":
+      return applySetColumnOrder(apply, body, observation);
+    case "view.pinRow": {
+      assertApply(apply, "pinRow");
+      const side = body.side as "top" | "bottom" | null;
+      // Resolving through the same path edits use means a position is read
+      // against the revision it was seen at, and a key that names no data row
+      // fails here rather than pinning nothing.
+      const resolved = await resolveRowArg(
+        rowRefBody(body),
+        observation,
+        apply
+      );
+      // Resolving is an awaited boundary: the row that answered has to still
+      // be addressable in the view this request was authorized against.
+      const latest = guard.observe();
+      if (latest.viewRevision !== observation.viewRevision) {
+        throw new ApplyError(
+          "revision-mismatch",
+          `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+        );
+      }
+      if (!guard.isEnabled("view.pinRow", latest)) {
+        throw new ApplyError(
+          "not-wired",
+          `capability "view.pinRow" is not wired on this table`
+        );
+      }
+      assertPinnableRow(resolved.rowKey);
+      apply.pinRow(resolved.rowKey, side ?? undefined);
+      return { ok: true, revision: observation.viewRevision + 1 };
+    }
+    case "view.setSelection": {
+      const ids = body.ids as readonly string[] | undefined;
+      assertApply(apply, "setSelection");
+      apply.setSelection(ids);
+      return { ok: true, revision: observation.viewRevision + 1 };
+    }
+    case "views.apply":
+      assertApply(apply, "applyView");
+      apply.applyView(String(body.viewId));
+      return { ok: true, revision: observation.viewRevision + 1 };
+    case "rows.read":
+      return readRows(body, observation, apply, guard);
+    case "rows.resolve":
+      return resolveRowArg(body, observation, apply);
+    case "export.run":
+      assertApply(apply, "runExport");
+      return apply.runExport(String(body.format));
+    case "edit.cells":
+      return applyCells(context);
+    case "rows.add":
+      return applyAdd(context);
+    case "rows.delete":
+      return applyDelete(context);
+    case "rows.reorder":
+      return applyReorder(context);
+  }
+}
+
+function redactedIds(columns: readonly AgentColumn[]): string[] {
+  return columns
+    .filter((column) => !column.readable)
+    .map((column) => column.id);
+}
+
+/**
+ * Refuse a value the column cannot hold.
+ *
+ * A column that declared itself a number is a promise to whoever reads it,
+ * and a host applying `Number("185 thousand")` writes NaN into its own data
+ * and shows it to the reader. The model asked for something the table cannot
+ * do, so the table says so rather than passing it on: a refusal names the
+ * column and costs a retry, where a coercion costs the value.
+ */
+function assertWritableValue(column: AgentColumn, value: unknown): void {
+  if (column.type !== "number") return;
+  if (typeof value === "number" && Number.isFinite(value)) return;
+  throw new ApplyError(
+    "invalid-arguments",
+    `column "${column.id}" takes a number, not ${JSON.stringify(value)}`
+  );
+}
+
+function writableColumn(
+  columns: readonly AgentColumn[],
+  id: string
+): AgentColumn {
+  const column = findColumn(columns, id);
+  if (!column) {
+    throw new ApplyError(
+      "unknown-column",
+      `column "${id}" is not on this table; it has ${columnNames(columns)}`
+    );
+  }
+  if (!column.writable) {
+    const writable = columns
+      .filter((entry) => entry.writable)
+      .map((entry) => entry.id);
+    throw new ApplyError(
+      "column-not-writable",
+      writable.length > 0
+        ? `column "${id}" is not writable; this table writes ${writable.join(", ")}`
+        : `column "${id}" is not writable, and no column on this table is`
+    );
+  }
+  return column;
+}
+
+function assertScope(
+  scope: RowAddressScope | undefined,
+  observation: AgentObservation
+): RowAddressScope {
+  const resolved = scope ?? observation.rowAddressScope;
+  if (resolved === "full" && observation.source.fullDataset !== true) {
+    throw new ApplyError(
+      "scope-denied",
+      "scope full requires source.fullDataset"
+    );
+  }
+  return resolved;
+}
+
+/**
+ * Read a row window. The allowlist comes from the CURRENT declaration and is
+ * re-derived after the host callback returns, so an over-returning callback,
+ * an undeclared column or a tightened ceiling cannot disclose data the table
+ * does not permit right now.
+ */
+async function readRows(
+  body: Record<string, unknown>,
+  observation: AgentObservation,
+  apply: AgentApply,
+  guard: SessionGuard
+): Promise<RowProvenanceEnvelope> {
+  const requestedScope = body.scope as RowAddressScope | undefined;
+  const scope = assertScope(requestedScope, observation);
+  const readMax = readMaxOf(observation);
+  const offset = boundedInt(body.offset, 0);
+  const limit = Math.min(boundedInt(body.limit, readMax), readMax);
+  const wanted = body.columns as readonly string[] | undefined;
+  const allow = readableAllowlist(observation.columns, wanted);
+  const query: RowReadQuery = {
+    offset,
+    limit,
+    columns: [...allow],
+    scope,
+  };
+  const window = apply.readRows
+    ? await Promise.resolve(apply.readRows(query))
+    : { rows: [], offset, limit, redacted: redactedIds(observation.columns) };
+
+  // The awaited callback is a boundary: re-authorize before disclosing.
+  const latest = guard.observe();
+  if (latest.viewRevision !== observation.viewRevision) {
+    throw new ApplyError(
+      "revision-mismatch",
+      `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+    );
+  }
+  if (!guard.isEnabled("rows.read", latest)) {
+    throw new ApplyError(
+      "not-wired",
+      `capability "rows.read" is not wired on this table`
+    );
+  }
+  assertScope(requestedScope, latest);
+  const permitted = Math.min(limit, readMaxOf(latest));
+  // Labelled here, once, so every path that can put rows in front of a model
+  // carries it: the HTTP `read` tool, the JSON and MCP adapters, and anything
+  // later that calls `rows.read`. Rows are somebody's data and are input from
+  // outside the system; handing them over as bare cell text invites a value to
+  // be read as an instruction.
+  return rowProvenance(
+    projectWindow(
+      window,
+      readableAllowlist(latest.columns, wanted),
+      latest.columns,
+      offset,
+      permitted
+    ),
+    latest.viewRevision
+  );
+}
+
+/** Rows as what they are: somebody's data, read at one revision. */
+function rowProvenance(
+  rows: RowWindow,
+  revision: number
+): RowProvenanceEnvelope {
+  return { source: "table-rows", untrusted: true, revision, rows };
+}
+
+function isRowKeyRef(
+  value: Record<string, unknown>
+): value is { rowKey: string } {
+  return typeof value.rowKey === "string" && value.rowKey.length > 0;
+}
+
+function asRowRef(
+  value: Record<string, unknown>,
+  fallbackRevision?: number
+): RowRef {
+  if (isRowKeyRef(value)) return { rowKey: value.rowKey };
+  if (typeof value.position === "number") {
+    const scope = (value.scope as RowAddressScope | undefined) ?? "visible";
+    const expectedRevision =
+      typeof value.expectedRevision === "number"
+        ? value.expectedRevision
+        : fallbackRevision;
+    if (typeof expectedRevision !== "number") {
+      throw new ApplyError(
+        "invalid-arguments",
+        "position refs require expectedRevision"
+      );
+    }
+    return {
+      position: value.position,
+      scope,
+      expectedRevision,
+    };
+  }
+  throw new ApplyError(
+    "invalid-arguments",
+    "a rowKey or 1-based position is required"
+  );
+}
+
+async function resolveRowArg(
+  body: Record<string, unknown>,
+  observation: AgentObservation,
+  apply: AgentApply
+): Promise<ResolvedRow> {
+  // An omitted revision binds to the observation this call was admitted
+  // against — the same one `edit.cells` binds to, and one the session has
+  // already refused the call over if the table had moved. The schema publishes
+  // `expectedRevision` as optional, so a caller that leaves it out is following
+  // the contract; a caller that states one is still held to it below.
+  const ref = asRowRef(body, observation.viewRevision);
+  if ("position" in ref) {
+    assertScope(ref.scope, observation);
+    if (ref.expectedRevision !== observation.viewRevision) {
+      throw new ApplyError(
+        "revision-mismatch",
+        `expected revision ${ref.expectedRevision}, table is at ${observation.viewRevision}`
+      );
+    }
+  }
+  if (!apply.resolveRow) {
+    throw new ApplyError("apply-failed", "resolveRow is not wired");
+  }
+  return apply.resolveRow(ref);
+}
+
+/**
+ * Whether this exact plan may be decided row by row.
+ *
+ * Computed ONCE, from the captured plan, before the reader is asked — so the
+ * offer they are given and the answer they are allowed to give are the same
+ * fact. Every condition has to hold:
+ *
+ * - the plan says its proposals stand alone;
+ * - the capability declares that `execute` applies `plan.payload` rather than
+ *   its own arguments, because narrowing the plan cannot narrow the arguments;
+ * - the payload is an array lined up with the proposals index for index, which
+ *   is what lets a refused row be dropped from it.
+ *
+ * Anything short of all three means the write is offered whole. It is never
+ * offered per item and then silently widened back.
+ */
+function isDecomposable(
+  plan: CapabilityPlan,
+  definition: AgentCapabilityDefinition
+): boolean {
+  if (plan.perItem !== true) return false;
+  if ((definition.partial ?? "unsupported") !== "supported") return false;
+  if (!Array.isArray(plan.payload)) return false;
+  return (plan.payload as readonly unknown[]).length === plan.proposals.length;
+}
+
+/** A decision, and which rows it covered when it did not cover all of them. */
+interface ApprovalDecision {
+  readonly outcome: ApprovalOutcome;
+  /** Approved positions in the plan, when the reader decided row by row. */
+  readonly approved?: readonly number[];
+  /** Why the reader refused, when they said. */
+  readonly reason?: string;
+}
+
+/**
+ * Read a row-by-row answer, or refuse it.
+ *
+ * Fails closed on every count. A malformed list is an error, not a filtered
+ * list: dropping a bad index and running the rest would apply a set nobody
+ * chose. Duplicates are malformed too — a reader decides a row once, and a
+ * repeated position means the caller lost track of which rows it was
+ * answering about. The surviving positions keep plan order.
+ */
+function readPositions(
+  decision: unknown,
+  total: number,
+  decomposable: boolean
+): readonly number[] {
+  if (!decomposable) {
+    throw new ApplyError(
+      "approval-not-decomposable",
+      "this write cannot be approved row by row; answer it whole"
+    );
+  }
+  // The value crossed the host boundary, so its declared type is a claim
+  // rather than a fact. Everything below re-establishes it.
+  const approved =
+    typeof decision === "object" && decision !== null && "approved" in decision
+      ? (decision as { readonly approved: unknown }).approved
+      : undefined;
+  if (!Array.isArray(approved)) {
+    throw new ApplyError(
+      "approval-invalid",
+      "an approval must be a boolean or a list of approved positions"
+    );
+  }
+  const positions: readonly unknown[] = approved;
+  const seen = new Set<number>();
+  for (const position of positions) {
+    if (
+      typeof position !== "number" ||
+      !Number.isInteger(position) ||
+      position < 0 ||
+      position >= total
+    ) {
+      throw new ApplyError(
+        "approval-invalid",
+        `approved position ${String(position)} is not a row of this plan`
+      );
+    }
+    if (seen.has(position)) {
+      throw new ApplyError(
+        "approval-invalid",
+        `approved position ${String(position)} appears more than once`
+      );
+    }
+    seen.add(position);
+  }
+  return [...seen].sort((left, right) => left - right);
+}
+
+async function decideApproval(
+  definition: AgentCapabilityDefinition,
+  observation: AgentObservation,
+  subject: ApprovalSubject,
+  onApprove:
+    ((subject: ApprovalSubject) => Promise<ApprovalResult>) | undefined,
+  total: number,
+  decomposable: boolean
+): Promise<ApprovalDecision> {
+  if (!needsApproval(definition, approvalFor(definition, observation).policy)) {
+    return { outcome: "not-required" };
+  }
+  if (!onApprove) return { outcome: "pending" };
+  const decision = await onApprove(subject);
+  if (typeof decision === "boolean") {
+    return { outcome: decision ? "approved" : "rejected" };
+  }
+  // A stated reason survives whatever the positions turn out to mean, so a
+  // partial run can still say why the rest was left out.
+  const reason = decision.reason ? { reason: decision.reason } : {};
+  const approved = readPositions(decision, total, decomposable);
+  if (approved.length === 0) return { outcome: "rejected", ...reason };
+  if (approved.length === total) return { outcome: "approved", ...reason };
+  return { outcome: "partial", approved, ...reason };
+}
+
+/**
+ * Narrow a plan to the rows a reader approved.
+ *
+ * Only ever called for a plan {@link isDecomposable} already accepted, so the
+ * payload is known to be an aligned array and both halves can be reduced
+ * together. There is no branch here that keeps a payload wider than the
+ * proposals: that is the shape which let a receipt say `partial` while the
+ * handler received work nobody agreed to.
+ */
+function narrowPlan(
+  plan: CapabilityPlan,
+  approved: readonly number[]
+): CapabilityPlan {
+  const payload = plan.payload as readonly unknown[];
+  return {
+    ...plan,
+    proposals: approved.map((index) => plan.proposals[index]!),
+    payload: approved.map((index) => payload[index]),
+  };
+}
+
+function bindApprove(
+  onApprove: CreateAgentSessionOptions["onApprove"] | undefined,
+  signal?: AbortSignal
+): CreateAgentSessionOptions["onApprove"] | undefined {
+  if (!onApprove) return undefined;
+  return async (proposal) => {
+    if (signal?.aborted) {
+      throw new ApplyError("cancelled", "approval cancelled");
+    }
+    if (!signal) return onApprove(proposal, signal);
+    return new Promise<ApprovalResult>((resolve, reject) => {
+      const onAbort = () => {
+        reject(new ApplyError("cancelled", "approval cancelled"));
+      };
+      signal.addEventListener("abort", onAbort, { once: true });
+      onApprove(proposal, signal).then(
+        (allowed) => {
+          signal.removeEventListener("abort", onAbort);
+          resolve(allowed);
+        },
+        (error: unknown) => {
+          signal.removeEventListener("abort", onAbort);
+          reject(error instanceof Error ? error : new Error(String(error)));
+        }
+      );
+    });
+  };
+}
+
+function writePayload(
+  proposals: readonly WriteProposal[],
+  applied: boolean,
+  approval: ApprovalOutcome,
+  results?: readonly WriteRowResult[],
+  approvalReason?: string
+): WriteExecuteResult {
+  return {
+    proposals,
+    applied,
+    approval,
+    results,
+    ...(approvalReason ? { approvalReason } : {}),
+  };
+}
+
+interface CellEdit {
+  rowKey: string;
+  column: string;
+  value: unknown;
+}
+
+async function planCells(
+  body: Record<string, unknown>,
+  observation: AgentObservation,
+  apply: AgentApply,
+  guard: SessionGuard
+): Promise<CapabilityPlan> {
+  const edits = body.edits as Record<string, unknown>[];
+  if (!Array.isArray(edits) || edits.length === 0) {
+    throw new ApplyError("invalid-arguments", "at least one edit is required");
+  }
+  const resolved: CellEdit[] = [];
+  const proposals: WriteProposal[] = [];
+  for (const edit of edits) {
+    if (typeof edit.column !== "string") {
+      throw new ApplyError("invalid-arguments", "each edit requires a column");
+    }
+    const target = writableColumn(observation.columns, edit.column);
+    assertWritableValue(target, edit.value);
+    // The table's own column id from here on: a host reads the cell it owns,
+    // and a proposal the reader approves names the column the table draws.
+    const column = target.id;
+    const ref = asRowRef(edit, observation.viewRevision);
+    const row = await resolveRowArg(
+      "rowKey" in ref ? { rowKey: ref.rowKey } : { ...ref },
+      observation,
+      apply
+    );
+    const before = await peekCell(apply, observation, row.rowKey, column);
+    // resolveRow and the peek both awaited host code.
+    const latest = guard.observe();
+    if (latest.viewRevision !== observation.viewRevision) {
+      throw new ApplyError(
+        "revision-mismatch",
+        `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+      );
+    }
+    writableColumn(latest.columns, column);
+    resolved.push({
+      rowKey: row.rowKey,
+      column,
+      value: edit.value,
+    });
+    proposals.push({
+      rowKey: row.rowKey,
+      column,
+      before,
+      after: edit.value,
+    });
+  }
+  return { proposals, payload: resolved, perItem: true };
+}
+
+async function applyCells(
+  context: AgentCapabilityContext
+): Promise<WriteExecuteResult> {
+  const { observation, apply, plan } = context;
+  const resolved = (plan?.payload ?? []) as CellEdit[];
+  const proposals = plan?.proposals ?? [];
+  const commit = context.commit ?? commitOf(observation);
+  if (commit === "stage") {
+    if (!apply.stageCells) {
+      return writePayload(
+        proposals,
+        false,
+        "not-required",
+        resolved.map((edit) => ({
+          rowKey: edit.rowKey,
+          column: edit.column,
+          ok: true,
+        }))
+      );
+    }
+    context.throwIfCancelled();
+    await Promise.resolve(apply.stageCells(resolved));
+    return writePayload(proposals, true, "not-required");
+  }
+  if (!apply.editCells) {
+    throw new ApplyError("not-wired", "editCells is not wired");
+  }
+  const outcome = await applyEach(
+    resolved,
+    async (edit) => {
+      await Promise.resolve(apply.editCells?.([edit]));
+    },
+    context.throwIfCancelled
+  );
+  return writePayload(
+    proposals,
+    outcome.applied,
+    "not-required",
+    outcome.results
+  );
+}
+
+/**
+ * A bound `readRows`, as a plain function rather than a method reference.
+ *
+ * Reading it off the apply object as a method would leave `this` implicit at
+ * the call site, which the linter is right to refuse.
+ */
+type ReadRowWindow = (query: RowReadQuery) => Promise<RowWindow> | RowWindow;
+
+/**
+ * The value a write is about to replace, as the MODEL is allowed to see it.
+ *
+ * Read at the agent's own addressing scope and through the same readable
+ * column allowlist as `rows.read`, because this value travels: it lands in
+ * `WriteProposal.before`, which the session returns and an HTTP or MCP
+ * continuation sends back to the backend. A wider read here would be a
+ * disclosure with a comment on it.
+ *
+ * A row the current scope does not reach therefore has no before-value here,
+ * and that is correct. What the human approving the write sees is resolved
+ * separately, from the table they are already looking at — see
+ * `@adapttable/ai-react`.
+ */
+async function peekCell(
+  apply: AgentApply,
+  observation: AgentObservation,
+  rowKey: string,
+  column: string
+): Promise<unknown> {
+  if (!apply.readRows) return undefined;
+  const read: ReadRowWindow = (query) =>
+    apply.readRows?.(query) ?? {
+      offset: 0,
+      limit: 0,
+      redacted: [],
+      rows: [],
+    };
+  const readMax = readMaxOf(observation);
+  let offset = 0;
+  for (let page = 0; page < 256; page++) {
+    const window = await Promise.resolve(
+      read({
+        offset,
+        limit: readMax,
+        columns: [column],
+        scope: observation.rowAddressScope,
+      })
+    );
+    const row = window.rows.find((entry) => entry.rowKey === rowKey);
+    if (row) return row.cells[column];
+    if (window.rows.length < readMax) break;
+    offset += readMax;
+  }
+  return undefined;
+}
+
+function planAdd(body: Record<string, unknown>): CapabilityPlan {
+  const rows = body.rows as Record<string, unknown>[];
+  const proposals: WriteProposal[] = rows.map((row, index) => ({
+    rowKey:
+      typeof row.rowKey === "string" ? row.rowKey : `new:${String(index + 1)}`,
+    after: row,
+  }));
+  return { proposals, payload: rows, perItem: true };
+}
+
+async function applyAdd(
+  context: AgentCapabilityContext
+): Promise<WriteExecuteResult> {
+  const { apply, plan } = context;
+  const rows = (plan?.payload ?? []) as Record<string, unknown>[];
+  assertApply(apply, "addRows");
+  context.throwIfCancelled();
+  await Promise.resolve(apply.addRows(rows));
+  return writePayload(plan?.proposals ?? [], true, "not-required");
+}
+
+/**
+ * Turn a delete request into the row keys it actually names.
+ *
+ * Deletion addresses rows the way every other row-targeting capability does:
+ * a stable `rowKey`, or a 1-based `position` in the named scope. An agent
+ * usually knows which row a reader means — the one it is looking at — and not
+ * the opaque key behind it, so resolving here is what makes the request
+ * expressible at all. It is also what keeps it honest: a reference that names
+ * no row is refused while the plan is still a proposal, rather than reaching
+ * the host's delete callback to remove nothing and report success.
+ */
+async function planDelete(
+  body: Record<string, unknown>,
+  observation: AgentObservation,
+  apply: AgentApply,
+  guard: SessionGuard
+): Promise<CapabilityPlan> {
+  const rows = body.rows as Record<string, unknown>[];
+  if (!Array.isArray(rows) || rows.length === 0) {
+    throw new ApplyError("invalid-arguments", "at least one row is required");
+  }
+  const keys: string[] = [];
+  for (const row of rows) {
+    const resolved = await resolveRowArg(row, observation, apply);
+    // Resolving awaited host code: the row that answered has to still be
+    // addressable in the view this deletion was authorized against.
+    const latest = guard.observe();
+    if (latest.viewRevision !== observation.viewRevision) {
+      throw new ApplyError(
+        "revision-mismatch",
+        `expected revision ${observation.viewRevision}, table is at ${latest.viewRevision}`
+      );
+    }
+    keys.push(resolved.rowKey);
+  }
+  const proposals: WriteProposal[] = keys.map((rowKey) => ({ rowKey }));
+  return { proposals, payload: keys, perItem: true };
+}
+
+async function applyDelete(
+  context: AgentCapabilityContext
+): Promise<WriteExecuteResult> {
+  const { apply, plan } = context;
+  const keys = (plan?.payload ?? []) as string[];
+  assertApply(apply, "deleteRows");
+  const outcome = await applyEach(
+    keys.map((rowKey) => ({ rowKey })),
+    async (entry) => {
+      await Promise.resolve(apply.deleteRows?.([entry.rowKey]));
+    },
+    context.throwIfCancelled
+  );
+  return writePayload(
+    plan?.proposals ?? [],
+    outcome.applied,
+    "not-required",
+    outcome.results
+  );
+}
+
+function planReorder(body: Record<string, unknown>): CapabilityPlan {
+  const fromKey = String(body.fromKey);
+  const toKey = String(body.toKey);
+  const proposals: WriteProposal[] = [
+    { rowKey: fromKey, after: toKey },
+    { rowKey: toKey, before: fromKey },
+  ];
+  return { proposals, payload: { fromKey, toKey } };
+}
+
+async function applyReorder(
+  context: AgentCapabilityContext
+): Promise<WriteExecuteResult> {
+  const { apply, plan } = context;
+  const { fromKey, toKey } = (plan?.payload ?? {}) as {
+    fromKey: string;
+    toKey: string;
+  };
+  assertApply(apply, "reorderRows");
+  context.throwIfCancelled();
+  await Promise.resolve(apply.reorderRows(fromKey, toKey));
+  return writePayload(plan?.proposals ?? [], true, "not-required");
+}
+
+class BulkFailure extends Error {
+  readonly results: readonly WriteRowResult[];
+  constructor(results: readonly WriteRowResult[]) {
+    super("bulk write reported per-row failures");
+    this.results = results;
+  }
+}
+
+/**
+ * Write each item, in order, and stop where a cancellation lands.
+ *
+ * Rows already written stay written and stay in the results — the host was
+ * called and that cannot be taken back. The rows after them are never
+ * attempted, and the partial outcome is what the caller is told about, so a
+ * retry of the same idempotency key replays it rather than writing twice.
+ */
+async function applyEach<T extends { rowKey: string; column?: string }>(
+  items: readonly T[],
+  write: (item: T) => Promise<void>,
+  throwIfCancelled: () => void
+): Promise<{ applied: boolean; results: WriteRowResult[] }> {
+  const results: WriteRowResult[] = [];
+  for (const item of items) {
+    try {
+      throwIfCancelled();
+      await write(item);
+      results.push({ rowKey: item.rowKey, column: item.column, ok: true });
+    } catch (error) {
+      const message = errorMessage(error);
+      const code = error instanceof ApplyError ? error.code : "apply-failed";
+      results.push({
+        rowKey: item.rowKey,
+        column: item.column,
+        ok: false,
+        error: { code, message },
+      });
+    }
+  }
+  const applied = results.every((entry) => entry.ok);
+  if (!applied) throw new BulkFailure(results);
+  return { applied, results };
+}
+
+export { AGENT_SCHEMA_VERSION } from "./keys";

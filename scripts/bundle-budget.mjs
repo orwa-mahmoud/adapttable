@@ -9,6 +9,7 @@
  *
  *   pnpm build && node scripts/bundle-budget.mjs      # measure and check
  *   node scripts/bundle-budget.mjs --update           # print current sizes
+ *   node scripts/bundle-budget.mjs --json             # machine-readable sizes
  *
  * Sizes are minified + gzipped bytes of AdaptTable's own share of the graph.
  * React and the UI kits are external because an application already ships
@@ -16,19 +17,31 @@
  *
  * The bundler is rolldown, re-exported by tsdown, which builds this repo
  * already — the measurement adds no dependency of its own.
+ *
+ * Consumer paths live in `consumer-fixtures.mjs`: core-simple, every adapter
+ * base (≤ 80 KB and ≥ 35% below the item-1 baseline), every feature delta on
+ * MUI, `standardFeatures()` for every kit, representative combinations, and
+ * the all-feature ceiling. Negative markers travel with each fixture.
  */
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 
 import { Rolldown } from "tsdown";
 
+import {
+  adapterAcceptanceKB,
+  FIXTURES,
+  PLAIN_ADAPTER_CEILING_KB,
+  plantedLeakFixture,
+} from "./consumer-fixtures.mjs";
 import { publishedFigures, staleReason } from "./published-figures.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const UPDATE = process.argv.includes("--update");
+const JSON_OUT = process.argv.includes("--json");
 
 /** Anything an application already has. AdaptTable's share is what remains. */
 const EXTERNAL = [
@@ -49,330 +62,38 @@ const EXTERNAL = [
   /^lucide-react$/,
 ];
 
-/**
- * Each fixture is the smallest honest expression of one use case.
- *
- * `budgetKB` is a ceiling with headroom, not a target: it stays quiet through
- * ordinary work and fails the build when the base path puts on real weight.
- * Raising one is a decision that belongs in a pull request with a reason —
- * which is the entire point of writing them down.
- */
-const FIXTURES = [
-  {
-    name: "core · simple table",
-    pkg: "core",
-    budgetKB: 20,
-    code: `export { useFrontendData, useDataTable } from "PKG";`,
-    // The size ceiling says the base import is small. These say WHY: the heavy
-    // capabilities are genuinely shaken out, not merely compressing well. A
-    // feature that starts leaking into the base path trips this before the
-    // budget notices the bytes.
-    absent: [
-      "toCsv",
-      "Blob",
-      "download",
-      "virtual",
-      "PIVOT_BLANK",
-      "parseFormula",
-      "useRowPatchStream",
-      "useChangedCellFlash",
-    ],
-  },
-  {
-    // The whole surface at once, which no application imports. It is a canary
-    // for the library's total weight rather than a promise about a user's
-    // bundle — the promise is the fixture above, and it holds independently.
-    // This number therefore moves when the library genuinely gains a feature,
-    // and it moves in a commit that says which one.
-    name: "core · every export",
-    pkg: "core",
-    budgetKB: 93,
-    code: `export * from "PKG";`,
-    // The optional entries are the proof that "optional" is real: even the
-    // whole main surface at once does not carry them. The marker is an
-    // engine-only name, not the word "pivot" — the panel's LABELS are shared
-    // table labels and do belong in the base bundle.
-    absent: [
-      "PIVOT_BLANK",
-      "parseFormula",
-      "useRowPatchStream",
-      "useChangedCellFlash",
-    ],
-  },
-  {
-    // What the pivot engine costs the tables that ask for it, and nothing to
-    // the tables that do not — see the `absent` checks above.
-    name: "core · pivot",
-    pkg: "core",
-    entryFile: "pivot.js",
-    budgetKB: 5,
-    code: `export { pivot } from "PKG";`,
-  },
-  {
-    // The engine plus the mapping that renders it with an adapter's own
-    // table — the pair a host actually imports to put a pivot on screen.
-    // Measured 4.1 KB against the engine's 1.5, and 2.6 of that difference is
-    // the shared label set: the mapping reads its two grand-total captions
-    // from the same labels every table resolves, rather than shipping English
-    // of its own. This fixture bundles the entry with nothing else installed,
-    // so it counts that set in full; an app importing the table has already
-    // paid for it, and the mapping's own weight is under a kilobyte.
-    name: "core · pivot rendered",
-    pkg: "core",
-    entryFile: "pivot.js",
-    budgetKB: 5,
-    code: `export { pivot, pivotTableModel } from "PKG";`,
-  },
-  {
-    // Same promise for the formula engine: a parser nobody imports is a
-    // parser nobody pays for.
-    name: "core · formula",
-    pkg: "core",
-    entryFile: "formula.js",
-    budgetKB: 6,
-    code: `export { buildFormulaColumns } from "PKG";`,
-  },
-  {
-    // Live patches over WebSocket or SSE. A table that never opens a
-    // socket never downloads one — `useRowPatchStream` is absent from
-    // the simple-table and every-export fixtures above.
-    name: "core · stream",
-    pkg: "core",
-    entryFile: "stream.js",
-    budgetKB: 5,
-    code: `export { useRowPatchStream } from "PKG";`,
-  },
-  {
-    // The React-free half of the model, which a backend imports instead of the
-    // table: the filter-tree, pivot and formula-column URL codecs and nothing
-    // else. Measured 0.8 KB, the pivot codec included: it carries the switches
-    // and the folded groups a shared link names, which a route handler reads
-    // with the same function the table wrote them with. The ceiling holds.
-    // The absences carry the promise — `useState` is the
-    // load-bearing one, because an entry that names a hook has a React peer no
-    // route handler can satisfy; `PIVOT_BLANK` says the codec did not drag the
-    // engine in behind it, and `parseFormula` says the same for the formula
-    // parser, which reading a link must never reach.
-    name: "core · query",
-    pkg: "core",
-    entryFile: "query.js",
-    budgetKB: 1,
-    code: `export { parseFilterTree, deserializePivot, deserializeFormulaColumns } from "PKG";`,
-    absent: [
-      "useState",
-      "useSyncExternalStore",
-      "PIVOT_BLANK",
-      "toCsv",
-      "parseFormula",
-    ],
-  },
-  {
-    // What a route handler pays to parse and validate a shared link: measured
-    // 1.6 KB, the parser plus the codecs it reads through `@adapttable/core/query`.
-    // React is external in every fixture here, so an accidental React import
-    // would not show as bytes — the graph walk in `scripts/smoke-dist.mjs` is
-    // what enforces its absence, and these markers are the cheap second look.
-    name: "server · parse a query",
-    pkg: "server",
-    budgetKB: 2,
-    code: `export { parseTableQuery } from "PKG";`,
-    absent: ["useState", "PIVOT_BLANK", "toCsv"],
-  },
-  // Every adapter, because the adapters are meant to be interchangeable and
-  // that includes their weight. One drifting away from the pack is a finding.
-  //
-  // These moved together on 2026-08-12 (+~1 KB each) when cell selection became
-  // visible, columns became selectable and Ctrl/Cmd+C learned to copy the
-  // rectangle — all of it on the grid path, which every adapter bundles. The
-  // fixture that carries the actual promise is `core · simple table` above: a
-  // plain table pays 10.6 KB of a 12 KB ceiling and did not move.
-  //
-  // Five capabilities joined that path on 2026-08-12, each of them chrome the
-  // batteries-included table always carries: Ctrl/Cmd+V (~0.4 KB), the fill
-  // handle (~1.3 KB), the selection statistics strip (~0.5 KB), the edit
-  // history (~0.6 KB) and find in table (~0.8 KB, bar included). The fixture
-  // that carries the actual promise is `core · simple table` above — a plain
-  // table pays 10.7 KB of a 12 KB ceiling and did not move through any of it.
-  //
-  // Grouping grew on the same day: nesting, footers, ordering and the server's
-  // own group rows all render through the entries every adapter already walks.
-  // Row detail then learned to be measured together with its row, which is
-  // what let it be used with virtualization at all, and the columns learned to
-  // window too (~1 KB): the spacer cells and the horizontal window ride the
-  // same render model every adapter already maps over. Auto-sizing added the
-  // measurement and one menu action on top, and column sizing — bounds, flex
-  // shares and the container-fitting mode — closed phase 3. Tree data adds a
-  // second hierarchy model (~1 KB): the flattening walk, its own expansion
-  // state, and the chevron every body and every card renders — plus the
-  // per-node fetch state a lazily loaded branch needs, and the nested-table
-  // region that turns master/detail into a real table under a row. Editing
-  // validation adds the per-cell message state, the async check that supersedes
-  // a stale answer, and the ARIA every editor now carries (~1 KB). The editor
-  // set — boolean, date, datetime, time, multi-select — adds the platform
-  // controls two of them render and the draft shapes they hold. Async saves add
-  // the per-cell in-flight state, the rollback it offers, and a bring-your-own
-  // editor's contract; dirty marks add the per-cell change set every row reads.
-  // Row editing adds the second commit unit — the whole-row draft state, the
-  // cell that renders a field instead of a value, and the three controls that
-  // end the edit — and batch editing the third, holding many rows at once
-  // behind one write. Lifecycle events (~0.5 KB) observe those three units:
-  // start, cancel, commit, validation-fail and save-error, latched so a host
-  // inline arrow never repaints rows. Edit conflicts (~0.5 KB) compare the
-  // open editor to a live row and surface Keep mine / Take theirs on the
-  // validation channel. The simple-table fixture did not move.
-  //
-  // Row reordering (~2 KB) is chrome every adapter already walks: the reserved
-  // grip column, Space-lift keyboard, live-region announcer, HTML5 drop
-  // targets, and the mobile up/down pair. The host still opts in with
-  // `onRowReorder` — omit it and nothing renders — but the builders sit on
-  // the same path as row actions. `core · simple table` stayed at 11.4 KB
-  // of a 12 KB ceiling.
-  //
-  // Row pinning (~0.5 KB) adds the sticky top/bottom sections, the pin
-  // actions, and the URL pair. The host still opts in with `pinnedRowIds`
-  // or `onPinnedRowIdsChange`. `core · simple table` stayed at 11.4 KB of
-  // a 12 KB ceiling.
-  //
-  // Row and column spanning (~1.5 KB) replaces every kit's columns.map
-  // with a per-row cell list: origins carry colSpan/rowSpan, covered
-  // cells are omitted, pins and the column window clip the rectangle,
-  // and arrows / CSV skip a covered address. The host still opts in
-  // with `getCellSpan` or `column.colSpan` / `column.rowSpan`.
-  // `core · simple table` stayed at 11.4 KB of a 12 KB ceiling.
-  //
-  // Collapsible multi-level column groups (~0.4 KB) stack header rows
-  // from a path, hide non-summary leaves when a group is collapsed, and
-  // render one shared toggle. The host still opts in with
-  // `collapsibleColumnGroups` — omit it and no toggle renders — but the
-  // path walker sits on the same header-group path the kits already
-  // imported. `core · simple table` stayed at 11.5 KB of a 12 KB ceiling.
-  //
-  // Column menu 2.0 (~2 KB per kit) adds the search box, bulk
-  // show/hide/unpin, the per-column submenu, and the lock flags the
-  // shared model already computed. The host still opts in with
-  // `enableColumnMenu` — omit it and the menu does not render — but
-  // every kit's ColumnMenu is on the same always-imported path.
-  // `core · simple table` stayed at 11.5 KB of a 12 KB ceiling.
-  //
-  // Rich filter operators (~1.5 KB) put the per-datatype registry, the
-  // operator-first widgets, and `f_<key>Op` persistence on the filter
-  // form every kit already imports. The host still opts in with a
-  // `filters` array — omit it and no widget renders — but the
-  // comparison tokens ride the same AutoFilterForm path. `core ·
-  // simple table` stayed at 11.7 KB of a 12 KB ceiling.
-  //
-  // Boolean filter (~0.3 KB) adds the tri-state any/true/false widget
-  // on that same AutoFilterForm path. `core · simple table` unmoved.
-  //
-  // Relative date tokens (~0.5–1.1 KB) add the preset select + last/next
-  // N on the dateRange widget. `core · simple table` stayed at 11.9 KB
-  // of a 12 KB ceiling.
-  //
-  // AND/OR filter trees (~0.4 KB on the simple path, ~0.9 KB on the
-  // full export) parse `ft=1.{…}` in the URL layer and evaluate the
-  // tree in `useTableData`. A shared link has to filter without a
-  // builder, so the codec cannot sit behind an optional entry. The
-  // evaluator stays next to `filterDefs` (already on `useTableData`);
-  // the codec is a separate module so `useFrontendData` does not pull
-  // the predicate engine. `core · simple table` is 12.3 KB of a 13 KB
-  // ceiling.
-  //
-  // The visual AND/OR builder (~4 KB per kit) mounts under the same
-  // filter panel every adapter already imports. The host still opts
-  // in with `filters` — omit the defs and the builder returns null —
-  // but the recursive native UI cannot sit behind a second entry
-  // without breaking a shared `ft=` link that needs editing. The
-  // simple-table fixture stayed at 12.5 KB of a 13 KB ceiling.
-  //
-  // The Excel-style checklist (~1.5 KB per kit) is another leaf on
-  // that same AutoFilterForm path. Omit `type: "checklist"` and the
-  // widget returns null; a server page without `allFilteredRows`
-  // never offers it. `core · simple table` stayed at 12.5 KB of a
-  // 13 KB ceiling.
-  //
-  // The compact header filter row (~0.7 KB on the full export, ~1 KB
-  // per kit) sits under the leaf header every desktop table already
-  // renders. `headerFilters` opts the row in; omit it and
-  // FilterHeaderRow returns null. Ant Design keeps the control in
-  // the header cell so its fixture stayed under. `core · simple
-  // table` stayed at 12.5 KB of a 13 KB ceiling.
-  //
-  // The public filter-type registry (~0.5 KB on the kit path) lives in
-  // `filterBuiltins` so `useFrontendData` / `useDataTable` do not load
-  // every built-in spec. Ant Design's header-cell control plus the
-  // registry lookup on AutoFilterForm nudged that fixture over 101 KB.
-  //
-  // XLSX export grew into the shape a spreadsheet actually wants (#316): typed
-  // cells, styling, a frozen header, and the grouped or tree structure the
-  // reader can see rather than a denormalised leaf dump. That work sits in
-  // `exportView` / `exportWriter`, on the CSV path every kit already carries,
-  // and costs ~1.4 KB there. It is genuinely absent from the plain path:
-  // `core · simple table` measured 12.5 KB before this change and 12.5 KB
-  // after, against the same 13 KB ceiling. The PDF writer and the print
-  // layout (#319) are behind `@adapttable/core/pdf` and cost the kits nothing.
-  //
-  // Incremental re-eval (#322) sits on `useFrontendData`. A patch that
-  // carries a `rowPatchLog` re-runs search, filters, sort, grouping and
-  // aggregates for the touched rows only, instead of walking the set.
-  // That snapshot is the live path now, so the simple-table fixture
-  // moved from 12.5 KB to 17.1 KB; the ceiling is 20 KB (~15%
-  // headroom). The heavy capabilities are still shaken out: toCsv,
-  // Blob, download and virtual stay absent. Every adapter imports that
-  // hook, so the kit fixtures moved with it.
-  //
-  // Feature notices (~1 KB per kit) put the opted-in-but-inert features on
-  // `useTableChrome`, which every adapter imports: the reason each one cannot
-  // run, its localized label, and the status-bar strip that carries them when
-  // the bar itself is off. Ant Design pays only this, which is what sizes it.
-  //
-  // The shared desktop assembly (~1.5 KB per thinned kit) replaces six
-  // per-kit copies of the same header/pin/row/summary walk with one generic
-  // pass in core. It is one graph serving six kits, so a single kit's bundle
-  // carries paths its own copy specialised away; the trade is deliberate.
-  //
-  // The public plugin host (`TableFeature.setup`) lives on the default path
-  // because editors, aggregators, column menus, filters, export, the palette
-  // and the context menu read it during the same render. It cannot sit behind
-  // an optional entry without becoming a second API. ~1 KB gzip; the four
-  // kits that were already against the ceiling move by that amount.
-  //
-  // Changed-cell flash (#324) paints `data-flash` on every kit's cell and
-  // card-value. The host still opts in with `isCellFlashing` — omit it and
-  // the attribute is never set — but the helper sits on the cell walk every
-  // adapter already imports. Unstyled was on the 133 KB line and moved
-  // 0.1 KB over it.
-  //
-  // Each table provides its own feature host through FeatureHostProvider /
-  // useFeatureHost. That context is on the default path because export,
-  // menus, editors and aggregators resolve after render. ~0.2 KB gzip; the
-  // four kits already on the line move 1 KB.
-  //
-  // Every table now says what changed when its rows change — the status
-  // announcement's resolver, its region and two label strings. It is on the
-  // default path because a table that sorts, filters or pages silently is
-  // broken for a screen-reader user, and there is no version of that fix which
-  // the host has to remember to switch on. 0.1-0.4 KB gzip; the five kits
-  // already on their line move 1 KB, the other three had the slack.
-  { name: "mantine · table", pkg: "adapter-mantine", budgetKB: 134 },
-  { name: "mui · table", pkg: "adapter-mui", budgetKB: 135 },
-  { name: "chakra · table", pkg: "adapter-chakra", budgetKB: 134 },
-  { name: "antd · table", pkg: "adapter-antd", budgetKB: 128 },
-  { name: "radix · table", pkg: "adapter-radix", budgetKB: 135 },
-  // Overlay placement, empty-cell hit area, and dir on the columns panel
-  // grew the unstyled graph (~1 KB gzip). shadcn sits on that path, so both
-  // ceilings move; ~3 KB slack so the next small patch does not flake CI.
-  //
-  // The filter drawer's enter/leave transition is the most recent weight on
-  // that path: the shared overlay-transition hook and the drawer's own
-  // keyframes ship on the default path, because a drawer that appears
-  // instantly reads as a rendering glitch rather than a panel. Measured
-  // 2026-08-29 at the commit that landed it: base-ui 141.1 KB and shadcn
-  // 138.2 KB, against ceilings of 141 and 138. unstyled and radix carried it
-  // inside the slack they already had.
-  { name: "base-ui · table", pkg: "adapter-base-ui", budgetKB: 142 },
-  { name: "shadcn · table", pkg: "adapter-shadcn", budgetKB: 139 },
-  { name: "unstyled · table", pkg: "adapter-unstyled", budgetKB: 135 },
-].map((f) => ({ code: `export { DataTable } from "PKG";`, ...f }));
+function extraFiles(fixture) {
+  const extras = [...(fixture.alsoFiles ?? [])];
+  if (fixture.alsoEntryFile && !extras.includes(fixture.alsoEntryFile)) {
+    extras.unshift(fixture.alsoEntryFile);
+  }
+  return extras;
+}
+
+function entryCode(fixture) {
+  const target = join(
+    ROOT,
+    "packages",
+    fixture.pkg,
+    "dist",
+    fixture.entryFile ?? "index.js"
+  );
+  const extras = extraFiles(fixture);
+  let code = fixture.code.replaceAll("PKG", target);
+  for (let index = extras.length - 1; index >= 0; index--) {
+    code = code.replaceAll(
+      `ALSO${index}`,
+      join(ROOT, "packages", fixture.pkg, "dist", extras[index])
+    );
+  }
+  if (extras[0]) {
+    code = code.replaceAll(
+      "ALSO",
+      join(ROOT, "packages", fixture.pkg, "dist", extras[0])
+    );
+  }
+  return code;
+}
 
 /**
  * Bundle one fixture: its gzipped size, plus any names that were supposed to
@@ -382,19 +103,11 @@ const FIXTURES = [
  * check reads the unminified build of the same bundle, where identifiers still
  * carry their real names.
  */
-async function measure(fixture, dir) {
+export async function measure(fixture, dir) {
   const entry = join(dir, "entry.js");
-  // Optional entries (`@adapttable/core/pivot` and friends) build to their
-  // own file, and measuring them is the only way to say what they cost.
-  const target = join(
-    ROOT,
-    "packages",
-    fixture.pkg,
-    "dist",
-    fixture.entryFile ?? "index.js"
-  );
-  writeFileSync(entry, fixture.code.replaceAll("PKG", target));
+  writeFileSync(entry, entryCode(fixture));
 
+  const started = performance.now();
   const bundle = await Rolldown.rolldown({
     input: entry,
     external: (id) => EXTERNAL.some((re) => re.test(id)),
@@ -405,53 +118,47 @@ async function measure(fixture, dir) {
     bundle.generate({ format: "esm" }),
   ]);
   await bundle.close();
+  const parseMs = Math.round(performance.now() - started);
 
   const code = readable.output[0].code;
+  const sizeBytes = gzipSync(min.output[0].code).length;
   return {
-    sizeKB: gzipSync(min.output[0].code).length / 1024,
+    sizeBytes,
+    sizeKB: sizeBytes / 1024,
+    parseMs,
     leaked: (fixture.absent ?? []).filter((name) =>
       new RegExp(`\\b${name}`).test(code)
+    ),
+    missing: (fixture.present ?? []).filter(
+      (name) => !new RegExp(`\\b${name}`).test(code)
     ),
   };
 }
 
-const dir = mkdtempSync(join(tmpdir(), "adapttable-budget-"));
-const rows = [];
-let over = 0;
-
-try {
-  for (const fixture of FIXTURES) {
-    const { sizeKB, leaked } = await measure(fixture, dir);
-    const ok = sizeKB <= fixture.budgetKB && leaked.length === 0;
-    if (!ok) over++;
-    rows.push({ ...fixture, sizeKB, ok });
-    const headroom = fixture.budgetKB - sizeKB;
-    console.log(
-      `${ok ? "✓" : "✗"} ${fixture.name.padEnd(26)}` +
-        `${sizeKB.toFixed(1).padStart(6)} KB gzipped` +
-        `   budget ${String(fixture.budgetKB).padStart(3)} KB` +
-        (headroom >= 0
-          ? `   (${headroom.toFixed(1)} KB to spare)`
-          : `   OVER by ${(-headroom).toFixed(1)} KB`)
-    );
-    if (leaked.length) {
-      console.log(
-        `  └ reached the base import but should not have: ${leaked.join(", ")}`
-      );
-    }
+function fixtureCeiling(fixture) {
+  if (fixture.kind === "adapter-base") {
+    return adapterAcceptanceKB(fixture.kit);
   }
-} finally {
-  rmSync(dir, { recursive: true, force: true });
+  return fixture.budgetKB;
 }
 
-if (UPDATE) {
-  console.log("\nCurrent sizes with ~15% headroom — for the FIXTURES table:");
-  for (const r of rows) {
-    console.log(
-      `  ${r.name.padEnd(26)} budgetKB: ${Math.ceil(r.sizeKB * 1.15)}`
+/**
+ * A planted import of a live hook must trip the negative assertion. If this
+ * stays green, the detector is what failed — not the table.
+ */
+export async function provePlantedLeak(dir) {
+  const fixture = plantedLeakFixture(ROOT);
+  const { leaked } = await measure(fixture, dir);
+  if (!leaked.includes("useTableEditHistory")) {
+    throw new Error(
+      "planted leak did not fail the negative assertion — the detector is blind"
     );
   }
-  process.exit(0);
+  if (!JSON_OUT) {
+    console.log(
+      "✓ planted leak failed the negative assertion (useTableEditHistory)"
+    );
+  }
 }
 
 /**
@@ -468,8 +175,8 @@ if (UPDATE) {
 const PUBLISHED = [
   {
     doc: "docs/faq.md",
-    find: "| `useFrontendData` + `useDataTable` (core)",
-    from: ["core · simple table"],
+    find: "| `useFrontendData` + `useDataTable` (react)",
+    from: ["react · simple table"],
   },
   {
     doc: "docs/faq.md",
@@ -479,9 +186,22 @@ const PUBLISHED = [
   {
     doc: "docs/faq.md",
     find: "| `DataTable` from an adapter",
-    from: FIXTURES.filter((f) => f.pkg.startsWith("adapter-")).map(
-      (f) => f.name
-    ),
+    from: FIXTURES.filter((f) => f.kind === "adapter-base").map((f) => f.name),
+  },
+  {
+    doc: "docs/features.md",
+    find: "Measured on MUI, the table alone is",
+    from: ["mui · table", "mui · table + preset"],
+  },
+  {
+    doc: "docs/getting-started.md",
+    find: "A plain adapter `DataTable` is",
+    from: FIXTURES.filter((f) => f.kind === "adapter-base").map((f) => f.name),
+  },
+  {
+    doc: "docs/comparison.md",
+    find: "A plain AdaptTable adapter `DataTable` is",
+    from: FIXTURES.filter((f) => f.kind === "adapter-base").map((f) => f.name),
   },
   {
     doc: "docs/formulas.md",
@@ -500,31 +220,69 @@ const PUBLISHED = [
   },
 ];
 
-let stale = 0;
-for (const { doc, find, from } of PUBLISHED) {
-  const measured = rows
-    .filter((r) => from.includes(r.name))
-    .map((r) => r.sizeKB);
-  const figures = publishedFigures(join(ROOT, doc), find);
-
-  if (figures === null) {
-    stale++;
-    console.error(
-      `✗ ${doc}: no line starting "${find}" — the text moved or was reworded`
+function logRow(fixture, row) {
+  const headroom = row.ceiling - row.sizeKB;
+  console.log(
+    `${row.ok ? "✓" : "✗"} ${fixture.name.padEnd(34)}` +
+      `${row.sizeKB.toFixed(1).padStart(6)} KB gzipped` +
+      `   budget ${String(Math.ceil(row.ceiling)).padStart(3)} KB` +
+      (headroom >= 0
+        ? `   (${headroom.toFixed(1)} KB to spare)`
+        : `   OVER by ${(-headroom).toFixed(1)} KB`) +
+      `   parse ${String(row.parseMs).padStart(4)}ms`
+  );
+  if (fixture.kind === "adapter-base") {
+    const cut = ((1 - row.sizeKB / fixture.item1BaselineKB) * 100).toFixed(0);
+    const vs80 =
+      row.sizeKB <= PLAIN_ADAPTER_CEILING_KB
+        ? "≤ 80 KB"
+        : `OVER ${PLAIN_ADAPTER_CEILING_KB} KB`;
+    console.log(
+      `  └ item-1 ${fixture.item1BaselineKB} KB → ${cut}% smaller · ${vs80}`
     );
-    continue;
   }
-  const reason = staleReason(figures, measured);
-  if (reason) {
-    stale++;
-    console.error(`✗ ${doc} · ${find.trim()}: ${reason}`);
+  if (row.leaked.length) {
+    console.log(
+      `  └ reached the base import but should not have: ${row.leaked.join(", ")}`
+    );
   }
-}
-if (!stale) {
-  console.log(`\n✓ ${PUBLISHED.length} published size figures match this run`);
+  if (row.missing.length) {
+    console.log(
+      `  └ feature marker missing from the composed graph: ${row.missing.join(", ")}`
+    );
+  }
 }
 
-if (over || stale) {
+function countStale(rows) {
+  let stale = 0;
+  for (const { doc, find, from } of PUBLISHED) {
+    const measured = rows
+      .filter((r) => from.includes(r.name))
+      .map((r) => r.sizeKB);
+    const figures = publishedFigures(join(ROOT, doc), find);
+    if (figures === null) {
+      stale++;
+      console.error(
+        `✗ ${doc}: no line starting "${find}" — the text moved or was reworded`
+      );
+      continue;
+    }
+    const reason = staleReason(figures, measured);
+    if (reason) {
+      stale++;
+      console.error(`✗ ${doc} · ${find.trim()}: ${reason}`);
+    }
+  }
+  if (!stale) {
+    console.log(
+      `\n✓ ${PUBLISHED.length} published size figures match this run`
+    );
+  }
+  return stale;
+}
+
+function exitIfFailed(over, stale) {
+  if (!over && !stale) return;
   if (over) {
     console.error(
       `\n${over} fixture(s) over budget.\n` +
@@ -540,4 +298,71 @@ if (over || stale) {
   }
   process.exit(1);
 }
-console.log(`\nAll ${rows.length} fixtures within budget.`);
+
+async function main() {
+  const dir = mkdtempSync(join(tmpdir(), "adapttable-budget-"));
+  const rows = [];
+  let over = 0;
+
+  try {
+    for (const fixture of FIXTURES) {
+      const measured = await measure(fixture, dir);
+      const ceiling = fixtureCeiling(fixture);
+      const ok =
+        measured.sizeKB <= ceiling &&
+        measured.leaked.length === 0 &&
+        measured.missing.length === 0;
+      if (!ok) over++;
+      const row = {
+        name: fixture.name,
+        kind: fixture.kind,
+        kit: fixture.kit,
+        ...measured,
+        ceiling,
+        ok,
+      };
+      rows.push(row);
+      if (!JSON_OUT) logRow(fixture, row);
+    }
+    await provePlantedLeak(dir);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+
+  if (JSON_OUT) {
+    console.log(
+      JSON.stringify(
+        {
+          fixtures: rows.map((row) => ({
+            name: row.name,
+            sizeBytes: row.sizeBytes,
+            sizeKB: Number(row.sizeKB.toFixed(3)),
+          })),
+        },
+        null,
+        2
+      )
+    );
+  }
+
+  if (UPDATE) {
+    console.log("\nCurrent sizes with ~15% headroom — for the FIXTURES table:");
+    for (const r of rows) {
+      console.log(
+        `  ${r.name.padEnd(34)} budgetKB: ${Math.ceil(r.sizeKB * 1.15)}`
+      );
+    }
+    process.exit(over ? 1 : 0);
+  }
+
+  const stale = JSON_OUT ? 0 : countStale(rows);
+  exitIfFailed(over, stale);
+  if (!JSON_OUT) {
+    console.log(`\nAll ${rows.length} fixtures within budget.`);
+  }
+}
+
+const isMain =
+  Boolean(process.argv[1]) &&
+  import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) await main();

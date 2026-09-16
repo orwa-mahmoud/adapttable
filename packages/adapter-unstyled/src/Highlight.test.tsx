@@ -1,8 +1,8 @@
-import { useHighlight } from "@adapttable/core";
+import { useHighlight } from "@adapttable/react";
 import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {

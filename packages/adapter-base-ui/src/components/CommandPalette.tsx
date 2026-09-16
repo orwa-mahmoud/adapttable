@@ -5,7 +5,7 @@ import {
   type CommandPaletteItemProps,
   type CommandPaletteSlots,
   type CommandPaletteSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 import { Button } from "../ui";
 

@@ -1,13 +1,22 @@
-import type { TableFeature } from "@adapttable/core";
+import { sidePanel as antdSidePanel } from "@adapttable/antd/side-panel";
+import { sidePanel as baseUiSidePanel } from "@adapttable/base-ui/side-panel";
+import { sidePanel as chakraSidePanel } from "@adapttable/chakra/side-panel";
 import {
   pivot,
   type PivotConfig,
   type PivotField,
   type PivotRow,
-  pivotTableModel,
 } from "@adapttable/core/pivot";
 import { getLabels } from "@adapttable/i18n";
-import type { DataTableProps } from "@adapttable/mantine";
+import type {} from "@adapttable/mantine";
+import { sidePanel as mantineSidePanel } from "@adapttable/mantine/side-panel";
+import { sidePanel as muiSidePanel } from "@adapttable/mui/side-panel";
+import { sidePanel as radixSidePanel } from "@adapttable/radix/side-panel";
+import type { FeatureProps, SidePanelOptions } from "@adapttable/react";
+import { rowAppearance, type TableFeature } from "@adapttable/react/features";
+import { pivotTableModel } from "@adapttable/react/pivot";
+import { sidePanel as shadcnSidePanel } from "@adapttable/shadcn/side-panel";
+import { sidePanel as unstyledSidePanel } from "@adapttable/unstyled/side-panel";
 import { Suspense, useMemo } from "react";
 
 import { kitClassNames, kitTable } from "./kitProviders";
@@ -72,7 +81,38 @@ export interface PivotTableViewProps<TRow> {
   /** Fold or unfold one subtotal group. */
   onToggleFold: (key: string) => void;
   /** A panel docked beside the table — the Feature Lab docks the pivot builder. */
-  sidePanel?: NonNullable<DataTableProps<PivotRow>["sidePanel"]>;
+  sidePanel?: NonNullable<FeatureProps<PivotRow>["sidePanel"]>;
+}
+
+/**
+ * `kit`'s side-panel feature, by kit key.
+ *
+ * A side panel is drawn by the adapter, so a table that shows one has to
+ * import that kit's factory — a prop alone brings no panel. Synchronous
+ * because a feature is a plain object: there is nothing to suspend on, and a
+ * lazily-armed feature would render the table once without its panel.
+ */
+const SIDE_PANELS: Record<
+  string,
+  (options: SidePanelOptions) => TableFeature<never>
+> = {
+  mantine: mantineSidePanel,
+  mui: muiSidePanel,
+  chakra: chakraSidePanel,
+  antd: antdSidePanel,
+  radix: radixSidePanel,
+  "base-ui": baseUiSidePanel,
+  shadcn: shadcnSidePanel,
+  tailwind: unstyledSidePanel,
+};
+
+/** `kit`'s side-panel feature, falling back to Mantine's for an unknown key. */
+export function kitSidePanel<TRow>(
+  kit: string,
+  options: SidePanelOptions
+): TableFeature<TRow> {
+  const make = SIDE_PANELS[kit] ?? mantineSidePanel;
+  return make(options) as TableFeature<TRow>;
 }
 
 /** What a line is called, and — on a subtotal — the control that folds it. */
@@ -145,12 +185,20 @@ export function PivotTableView<TRow>({
     <div className="pivot-table-wrap" data-testid="pivot-table">
       <Suspense fallback={null}>
         <Table
-          features={[RANGE_FEATURE]}
+          // The docked builder is what pivoted this table, so it travels with
+          // it — and a panel is drawn by the kit, which means importing the
+          // kit's own feature rather than passing a prop.
+          features={[
+            rowAppearance<PivotRow>({
+              rowClassName: (row) => `pivot-line pivot-line--${row.kind}`,
+            }),
+            RANGE_FEATURE,
+            ...(sidePanel ? [kitSidePanel<PivotRow>(kit, sidePanel)] : []),
+          ]}
           data={model.rows}
           columns={model.columns}
           rowKey={model.rowKey}
           summaryRow={model.summaryRow}
-          rowClassName={(row) => `pivot-line pivot-line--${row.kind}`}
           labels={labels}
           classNames={kitClassNames(kit)}
           // Only the live demo writes the address bar. This table must not
@@ -164,7 +212,6 @@ export function PivotTableView<TRow>({
           defaults={{ limit: 500 }}
           paginationMode="paged"
           stickyHeader
-          sidePanel={sidePanel}
         />
       </Suspense>
     </div>

@@ -4,25 +4,27 @@
 
 ```ts
 
-import { BaseDataTableProps } from '@adapttable/core';
+import { agentApproval } from '@adapttable/unstyled';
+import { BaseDataTableProps } from '@adapttable/react';
 import { BulkActionContext } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
-import { ColumnLayoutState } from '@adapttable/core';
+import { ColumnLayoutState } from '@adapttable/react';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
+import { DataModeProps } from '@adapttable/react/adapter';
 import { DataTableClassNames } from '@adapttable/unstyled';
 import { DataTableProps } from '@adapttable/unstyled';
-import { EditConflict } from '@adapttable/core';
-import { EditConflictChoice } from '@adapttable/core';
-import { EditConflictHandler } from '@adapttable/core';
-import { EditConflictPolicy } from '@adapttable/core';
-import { EditConflictState } from '@adapttable/core';
-import { EditEvent } from '@adapttable/core';
-import { EditEventHandler } from '@adapttable/core';
-import { EditLifecycle } from '@adapttable/core';
-import { EditUnit } from '@adapttable/core';
+import { EditConflict } from '@adapttable/react';
+import { EditConflictChoice } from '@adapttable/react';
+import { EditConflictHandler } from '@adapttable/react';
+import { EditConflictPolicy } from '@adapttable/react';
+import { EditConflictState } from '@adapttable/react';
+import { EditEvent } from '@adapttable/react';
+import { EditEventHandler } from '@adapttable/react';
+import { EditLifecycle } from '@adapttable/react';
+import { EditUnit } from '@adapttable/react';
 import { ExportCsvOptions } from '@adapttable/core';
 import { FILTER_TYPES } from '@adapttable/core';
 import { JSX } from 'react';
@@ -33,9 +35,12 @@ import { RowActionsRenderer } from '@adapttable/core';
 import { SavedView } from '@adapttable/unstyled';
 import { TableLabels } from '@adapttable/unstyled';
 import { TableQuery } from '@adapttable/core';
-import { ToolbarSlots } from '@adapttable/core';
-import { UseServerDataOptions } from '@adapttable/core';
-import { UseTableDataOptions } from '@adapttable/core';
+import { TableQueryHandler } from '@adapttable/react/adapter';
+import { ToolbarSlots } from '@adapttable/react';
+import { UseServerDataOptions } from '@adapttable/react';
+import { UseTableDataOptions } from '@adapttable/react';
+
+export { agentApproval }
 
 export { BaseDataTableProps }
 
@@ -53,14 +58,7 @@ export { CustomCellEditorCtrl }
 
 export { CustomCellEditorRender }
 
-// @public
-export type DataModeProps<TRow> = {
-    mode: "server";
-    onQueryChange: NonNullable<UseServerDataOptions$1<TRow>["onQueryChange"]>;
-} | {
-    mode?: "frontend";
-    onQueryChange?: NonNullable<UseServerDataOptions$1<TRow>["onQueryChange"]>;
-};
+export { DataModeProps }
 
 // @public
 export function DataTable<TRow>(props: Readonly<DataTableProps<TRow>>): JSX.Element;
@@ -94,7 +92,7 @@ export { PivotPanel }
 export { RowActionsRenderer }
 
 // @public
-export function SavedViewsPanel(props: SavedViewsPanelProps): JSX.Element;
+export function SavedViewsPanel(props: Readonly<SavedViewsPanelProps>): JSX.Element;
 
 // @public
 export interface SavedViewsPanelProps {
@@ -143,6 +141,14 @@ export const shadcnClassNames: {
     cellMatch: string;
     cellMatchCurrent: string;
     exportSpinner: string;
+    exportProgressSurface: string;
+    exportProgressBar: string;
+    exportProgressMessage: string;
+    exportProgressActions: string;
+    exportProgressCancel: string;
+    exportProgressRetry: string;
+    exportProgressDownload: string;
+    exportProgressDismiss: string;
     filtersBackdrop: string;
     filtersPanel: string;
     filtersPopover: string;
@@ -212,6 +218,22 @@ export const shadcnClassNames: {
     columnMenuMore: string;
     columnMenuSubmenu: string;
     columnMenuAction: string;
+    columnMenuChoice: string;
+    columnMenuChoiceLabel: string;
+    columnMenuChoiceSelect: string;
+    columnRenameForm: string;
+    columnRenameLabel: string;
+    columnRenameInput: string;
+    columnRenameError: string;
+    columnRenameSave: string;
+    columnRenameCancel: string;
+    headerRenameButton: string;
+    headerRenameForm: string;
+    headerRenameLabel: string;
+    headerRenameInput: string;
+    headerRenameError: string;
+    headerRenameSave: string;
+    headerRenameCancel: string;
     headerActions: string;
     tableFooter: string;
     resizeHandle: string;
@@ -288,6 +310,20 @@ export const shadcnClassNames: {
     groupLabel: string;
     groupCount: string;
     groupAggregate: string;
+    groupingPanel: string;
+    groupingDropZone: string;
+    groupingItem: string;
+    groupingChip: string;
+    groupingChipHandle: string;
+    groupingChipRemove: string;
+    groupingAdd: string;
+    groupingAggregations: string;
+    groupingAggregationItem: string;
+    groupingAggregationOperation: string;
+    groupingAggregationRemove: string;
+    groupingAggregationAdd: string;
+    groupingAggregationsRestore: string;
+    groupingRemoveZone: string;
     editCellError: string;
     editCellSaveError: string;
     editCellRollback: string;
@@ -317,6 +353,8 @@ export const shadcnClassNames: {
 };
 
 export { TableQuery }
+
+export { TableQueryHandler }
 
 export { ToolbarSlots }
 

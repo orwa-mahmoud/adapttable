@@ -2,9 +2,9 @@ import {
   edgePinStyle,
   PIN_Z,
   pinnedCellStyle,
-  resolveColumnFooter,
   type TableLabels,
 } from "@adapttable/core";
+import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
   cellHighlightStyle,
@@ -23,28 +23,37 @@ import {
   type HtmlGroupedHeaderCell,
   mergedCellStyle,
   REORDER_COLUMN_WIDTH,
+  resolveRowEditTrigger,
+  rowEditConflict,
   type SharedTableRenderProps,
   useDesktopTableAssembly,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Badge, Checkbox, Group, Table, VisuallyHidden } from "@mantine/core";
-import type { CSSProperties, ReactElement, ReactNode, RefObject } from "react";
-import { Fragment, useMemo } from "react";
+import {
+  type CSSProperties,
+  Fragment,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
+  useMemo,
+} from "react";
 
 import { type Density, DENSITY_SPACING } from "../density";
 import { ChevronDownIcon, ChevronUpIcon, SelectorIcon } from "../icons";
 import { HAIRLINE, SURFACE } from "../surface";
-import { ColumnSelectCheckbox } from "./ColumnSelectCheckbox";
-import { EditableDataCell } from "./EditableCell";
-import { ExpandToggle } from "./ExpandToggle";
-import { FillHandle } from "./FillHandle";
-import { GroupHeaderRow } from "./GroupHeader";
 import {
-  ColumnGroupToggle,
-  FilterHeaderTrigger,
-  RowEditActions,
-  RowReorderHandle,
-  TreeCell,
-} from "./kitControls";
+  OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
+} from "./featureSlots";
 import { RowActionButtons } from "./RowActionButtons";
 
 function ExtraSlotRow({
@@ -145,6 +154,7 @@ function LeafHeader<TRow>({
   source,
   labels,
   resizeHandleStyle,
+  onRenameColumn,
 }: Readonly<{
   leaf: DesktopHeaderLeaf<TRow>;
   paintStyle: CSSProperties;
@@ -153,6 +163,7 @@ function LeafHeader<TRow>({
   source: SharedTableRenderProps<TRow>["table"]["source"];
   labels: Required<TableLabels>;
   resizeHandleStyle: CSSProperties;
+  onRenameColumn: SharedTableRenderProps<TRow>["onRenameColumn"];
 }>): ReactElement {
   const { column } = leaf;
   const headerStyle = { ...leaf.style, ...paintStyle };
@@ -162,14 +173,14 @@ function LeafHeader<TRow>({
   ) : null;
   const columnSelect =
     leaf.showColumnCheckbox && leaf.onToggleColumn ? (
-      <ColumnSelectCheckbox
+      <OptionalColumnSelect
         label={leaf.columnSelectAriaLabel}
         checked={leaf.columnCheckboxChecked}
         onToggle={leaf.onToggleColumn}
       />
     ) : null;
   const filterTrigger = leaf.headerDef ? (
-    <FilterHeaderTrigger
+    <OptionalFilterHeader
       def={leaf.headerDef}
       source={source}
       labels={labels}
@@ -185,43 +196,50 @@ function LeafHeader<TRow>({
     ...leaf.headerProps,
     ...leaf.columnHeaderProps,
   };
-  if (!column.sortable) {
-    return (
-      <Table.Th {...cellProps} {...spanProps} style={headerStyle}>
-        <span title={column.headerTooltip}>{leaf.caption}</span>
-        {columnSelect}
-        {actions}
-        {filterTrigger}
-        {resizeHandle}
-      </Table.Th>
-    );
-  }
+  const caption = column.sortable ? (
+    <Group
+      component="button"
+      gap={6}
+      wrap="nowrap"
+      display="inline-flex"
+      title={column.headerTooltip}
+      style={{
+        background: "none",
+        border: 0,
+        cursor: "pointer",
+        font: "inherit",
+        padding: 0,
+        color: leaf.sortActive
+          ? "var(--mantine-primary-color-filled)"
+          : "inherit",
+      }}
+      {...leaf.sortButtonProps}
+    >
+      <span>{leaf.caption}</span>
+      <SortIcon active={leaf.sortActive} dir={leaf.sortDir} />
+      {typeof leaf.sortIndex === "number" && (
+        <Badge component="span" size="xs" variant="light">
+          {leaf.sortIndex}
+        </Badge>
+      )}
+    </Group>
+  ) : (
+    <span title={column.headerTooltip}>{leaf.caption}</span>
+  );
   return (
     <Table.Th {...cellProps} {...spanProps} style={headerStyle}>
-      <Group
-        component="button"
-        gap={6}
-        wrap="nowrap"
-        display="inline-flex"
-        title={column.headerTooltip}
-        style={{
-          background: "none",
-          border: 0,
-          cursor: "pointer",
-          font: "inherit",
-          padding: 0,
-          color: leaf.sortActive
-            ? "var(--mantine-primary-color-filled)"
-            : "inherit",
-        }}
-        {...leaf.sortButtonProps}
-      >
-        <span>{leaf.caption}</span>
-        <SortIcon active={leaf.sortActive} dir={leaf.sortDir} />
-        {typeof leaf.sortIndex === "number" && (
-          <Badge component="span" size="xs" variant="light">
-            {leaf.sortIndex}
-          </Badge>
+      <Group gap={4} wrap="nowrap" display="inline-flex" align="center">
+        {column.renameable === true && onRenameColumn ? (
+          <OptionalColumnHeaderRename
+            columnKey={column.key}
+            name={leaf.columnName}
+            labels={labels}
+            onRenameColumn={onRenameColumn}
+          >
+            <span data-adapttable-part="header-caption-control">{caption}</span>
+          </OptionalColumnHeaderRename>
+        ) : (
+          <span data-adapttable-part="header-caption-control">{caption}</span>
         )}
       </Group>
       {columnSelect}
@@ -337,6 +355,13 @@ function DesktopRowBase<TRow>(
   const paintedActions = paintPin(
     edgePinStyle("end", hasEndPin || actionsPinned, PIN_Z.body)
   );
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
+  const rowConflict = rowEditConflict(editing, id);
   return (
     <>
       <Table.Tr
@@ -350,11 +375,12 @@ function DesktopRowBase<TRow>(
             ta="center"
             style={{ ...expansionCellStyle, ...edgeRowPin }}
           >
-            <ExpandToggle
-              expanded={expanded}
+            <OptionalExpandToggle
+              id={id}
+              expanded={Boolean(expanded)}
+              onToggle={onToggleExpand}
               expandLabel={labels.expandRow}
               collapseLabel={labels.collapseRow}
-              onToggle={() => onToggleExpand(id)}
             />
           </Table.Td>
         )}
@@ -364,7 +390,7 @@ function DesktopRowBase<TRow>(
             ta="center"
             style={{ ...paintedReorder, ...edgeRowPin }}
           >
-            <RowReorderHandle
+            <OptionalRowReorderHandle
               reorder={rowReorder}
               labels={labels}
               rowId={id}
@@ -404,7 +430,7 @@ function DesktopRowBase<TRow>(
               data-adapttable-part="cell"
               data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
               data-cell-span={cellSpanMark(colSpan, rowSpan)}
-              {...table.getCellProps(column)}
+              {...table.getCellProps(column as ColumnDef<TRow>)}
               {...focusProps}
               style={cellHighlightStyle(
                 focusProps,
@@ -417,7 +443,7 @@ function DesktopRowBase<TRow>(
                 }
               )}
             >
-              <TreeCell
+              <OptionalTreeCell
                 entry={treeEntry}
                 columnKey={column.key}
                 treeColumnKey={treeKey}
@@ -427,26 +453,20 @@ function DesktopRowBase<TRow>(
                 }}
                 onToggle={onToggleTree}
               >
-                <EditableDataCell
+                <OptionalEditableCell
                   editing={editing}
                   row={row}
-                  column={column}
+                  column={column as ColumnDef<TRow>}
                   rowId={id}
+                  rowIndex={focusIndex}
                   rows={rows}
                   columns={columns}
                   rowKey={getRowId}
                   editLabel={labels.editCell}
                   undoLabel={labels.undoEdit}
-                  display={
-                    column.Cell ? (
-                      <column.Cell row={row} rowIndex={focusIndex} />
-                    ) : (
-                      column.accessor?.(row)
-                    )
-                  }
                 />
-              </TreeCell>
-              <FillHandle
+              </OptionalTreeCell>
+              <OptionalFillHandle
                 focus={gridFocus}
                 windowIndex={focusIndex}
                 col={columnIndex}
@@ -458,10 +478,13 @@ function DesktopRowBase<TRow>(
         {showActions && (
           <Table.Td ta="end" style={{ ...paintedActions, ...edgeRowPin }}>
             {editing?.rowEditing && (
-              <RowEditActions
+              <OptionalRowEditActions
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
+                showBegin={rowEdit.showBegin}
+                icons={editing.rowEditIcons}
+                conflict={rowConflict}
                 labels={{
                   editRow: labels.editRow,
                   saveRow: labels.saveRow,
@@ -469,10 +492,10 @@ function DesktopRowBase<TRow>(
                 }}
               />
             )}
-            {rowActions && rowActions.length > 0 && (
+            {rowEdit.actions.length > 0 && (
               <RowActionButtons
                 row={row}
-                actions={rowActions}
+                actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
                 layout={rowActionsLayout}
@@ -574,6 +597,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
     source: props.table.source,
     labels,
     resizeHandleStyle,
+    onRenameColumn: props.onRenameColumn,
   };
 
   const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {
@@ -600,7 +624,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
       >
         <span style={groupedHeaderLabelStyle()}>
           {props.onToggleColumnGroup ? (
-            <ColumnGroupToggle
+            <OptionalColumnGroupToggle
               cell={cell.cell}
               labels={labels}
               onToggle={props.onToggleColumnGroup}
@@ -763,7 +787,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
             }
             if (slot.kind === "group") {
               return (
-                <GroupHeaderRow
+                <OptionalGroupHeaderRow
                   key={slot.key}
                   entry={slot.entry}
                   columns={columns}

@@ -3,11 +3,11 @@
  * (their accessors must not be re-invoked) when unrelated table state
  * changes — a search keystroke, a hover, or another row's selection.
  */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -89,10 +89,11 @@ describe("<DataTable> (Base UI) desktop row memoization", () => {
     accessor.mockClear();
     fireEvent.click(screen.getAllByLabelText("Select row")[0]!);
     expect(screen.getByText("1 selected")).toBeInTheDocument();
-    // Row "a" re-rendered (its selected state changed); row "b" did not.
-    const renderedIds = accessor.mock.calls.map(([row]) => row.id);
-    expect(renderedIds.length).toBeGreaterThan(0);
-    expect(new Set(renderedIds)).toEqual(new Set(["a"]));
+    // Cell-level memoization is finer than the row: the checkbox cell above
+    // re-renders and the count updates, while no row's data accessor re-runs —
+    // not even the toggled row's. The assertions above are what prove the
+    // render happened, so this cannot pass by rendering nothing.
+    expect(accessor).not.toHaveBeenCalled();
   });
 
   it("re-renders only the toggled row when expanding a detail panel", () => {
@@ -100,8 +101,9 @@ describe("<DataTable> (Base UI) desktop row memoization", () => {
     accessor.mockClear();
     fireEvent.click(screen.getAllByRole("button", { name: "Expand row" })[0]!);
     expect(screen.getByText("detail-Alice")).toBeInTheDocument();
-    const renderedIds = accessor.mock.calls.map(([row]) => row.id);
-    expect(new Set(renderedIds)).toEqual(new Set(["a"]));
+    // Same claim on the expansion path: the chevron cell re-renders and the
+    // detail row arrives, and no data cell is rebuilt for it.
+    expect(accessor).not.toHaveBeenCalled();
   });
 
   it("still updates rows when their data actually changes (memo is not stale)", () => {

@@ -5,10 +5,8 @@
  * MultiSelect — with the wiring the headless layer needs still attached: the
  * part name, the validation ARIA, the draft round-trip and the commit gesture.
  */
-import {
-  type EditableCellEditorCtrl,
-  formatMultiDraft,
-} from "@adapttable/core";
+import { formatMultiDraft } from "@adapttable/core";
+import type { EditableCellEditorCtrl } from "@adapttable/react";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

@@ -250,6 +250,73 @@ describe("parseTableQuery", () => {
     });
   });
 
+  describe("the shapes a hand-edited link still takes", () => {
+    it("still reads the single-column sort form an older link carries", () => {
+      expect(parseTableQuery("?sortBy=team&sortDir=desc", schema).sort).toEqual(
+        [{ key: "team", dir: "desc" }]
+      );
+      // Anything that is not `desc` is ascending: a link is user input, and a
+      // typo in the direction should not lose the ordering.
+      expect(parseTableQuery("?sortBy=team&sortDir=up", schema).sort).toEqual([
+        { key: "team", dir: "asc" },
+      ]);
+      expect(parseTableQuery("?sortBy=team", schema).sort).toEqual([
+        { key: "team", dir: "asc" },
+      ]);
+    });
+
+    it("drops the single-column sort form when it names a forbidden column", () => {
+      const query = parseTableQuery("?sortBy=password&sortDir=desc", schema);
+
+      expect(query.sort).toEqual([]);
+      expect(query.rejected).toEqual([
+        { param: "sortBy", value: "password", reason: "not a sortable column" },
+      ]);
+    });
+
+    it("passes a groupBy the schema allows straight through", () => {
+      const query = parseTableQuery("?groupBy=team", schema);
+
+      expect(query.groupBy).toBe("team");
+      expect(query.rejected).toEqual([]);
+    });
+
+    it("treats an empty q and an empty groupBy as absent, not as values", () => {
+      const query = parseTableQuery("?q=&groupBy=", schema);
+
+      expect(query.search).toBeUndefined();
+      expect(query.groupBy).toBeUndefined();
+      expect(query.rejected).toEqual([]);
+    });
+
+    it("drops a forbidden column from the pivot's column axis", () => {
+      const query = parseTableQuery(
+        "?pivot=rows:team;cols:secret,name;sum:budget",
+        schema
+      );
+
+      expect(query.pivot?.columns).toEqual(["name"]);
+      expect(query.rejected).toEqual([
+        { param: "pivot", value: "secret", reason: "not a pivotable column" },
+      ]);
+    });
+  });
+
+  describe("a schema that asks for more than it allows", () => {
+    it("caps its own default and says the limit was refused", () => {
+      const query = parseTableQuery("", {
+        columns: ["name"],
+        defaultLimit: 500,
+        maxLimit: 50,
+      });
+
+      expect(query.limit).toBe(50);
+      expect(query.rejected).toEqual([
+        { param: "limit", value: "", reason: "above the maximum of 50" },
+      ]);
+    });
+  });
+
   describe("two tables sharing one URL", () => {
     it("reads only its own namespace", () => {
       const query = parseTableQuery("?left.q=ali&right.q=bob&left.page=3", {

@@ -15,7 +15,7 @@
  * Numbers stay numbers so a spreadsheet can sum them, which is the entire point
  * of exporting to a spreadsheet rather than a CSV.
  */
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
 import {
   buildExportTable,
   type ExportTable,
@@ -24,7 +24,7 @@ import {
 } from "./exportWriter";
 import { buildZip, utf8, type ZipEntry } from "./zip";
 
-export type { ColumnDef, ExportWriter };
+export type { ExportWriter };
 
 /** Escape the five characters XML cannot carry literally. */
 function xml(text: string): string {
@@ -298,7 +298,7 @@ export function safeSheetName(name: string): string {
  */
 export function buildTableXlsx<TRow>(options: {
   rows: readonly TRow[];
-  columns: readonly ColumnDef<TRow>[];
+  columns: readonly ColumnMetadata<TRow>[];
   sheetName?: string;
   view?: readonly ExportViewEntry<TRow>[];
   summary?: Readonly<Partial<Record<string, unknown>>>;
@@ -325,7 +325,7 @@ const XLSX_MIME =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 /**
- * The spreadsheet writer, for the `exportCsv` prop's `writer` option:
+ * The spreadsheet writer, for `exportCsv({ writer })`:
  *
  * ```tsx
  * import { xlsxWriter } from "@adapttable/core/xlsx";

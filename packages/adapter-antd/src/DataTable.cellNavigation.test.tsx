@@ -12,10 +12,11 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -100,6 +101,36 @@ describe("antd cell navigation", () => {
     // No grid role, no focusable cells, no key handling.
     expect(screen.queryByRole("grid")).toBeNull();
     expect(cellAt(0, 0)).toBeNull();
+  });
+
+  it("keeps sticky-header columnheaders inside the same grid", () => {
+    const { container } = render(
+      <DataTable
+        data={ROWS}
+        columns={columns}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        cellNavigation
+        stickyHeader
+      />
+    );
+    // antd's sticky holder is the proof the header is still split — the
+    // association has to hold WITHOUT turning sticky off.
+    expect(container.querySelector(".ant-table-sticky-holder")).not.toBeNull();
+    const grid = screen.getByRole("grid");
+    expect(within(grid).getAllByRole("columnheader").length).toBeGreaterThan(0);
+    expect(within(grid).getAllByRole("gridcell").length).toBeGreaterThan(0);
+    for (const node of container.querySelectorAll("table")) {
+      expect(node).toHaveAttribute("role", "rowgroup");
+    }
+    // The relationship is containment in one grid, not a `headers`/`id`
+    // pair across the two tables (W3C ACT a25f45 forbids that).
+    expect(
+      [...container.querySelectorAll("[data-grid-cell]")].every(
+        (cell) => !cell.hasAttribute("headers")
+      )
+    ).toBe(true);
   });
 });
 

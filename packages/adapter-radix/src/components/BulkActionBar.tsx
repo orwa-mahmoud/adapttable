@@ -3,7 +3,7 @@ import {
   type BulkBarChromeProps,
   resolveDisabledReason,
   useBulkBarState,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Flex, Text } from "@radix-ui/themes";
 import { isValidElement } from "react";
 

@@ -14,8 +14,10 @@ import { fileURLToPath } from "node:url";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
+// `serve-showcase.mjs` builds and serves what the suite runs against, so a
+// change to it changes every result the suite can produce.
 const RELATED =
-  /^(packages\/|apps\/showcase\/|e2e\/|playwright\.config\.ts$|pnpm-lock\.yaml$)/;
+  /^(packages\/|apps\/showcase\/|e2e\/|playwright\.config\.ts$|scripts\/serve-showcase\.mjs$|pnpm-lock\.yaml$)/;
 
 /** @param {string} file */
 export function isE2eRelated(file) {
@@ -56,6 +58,29 @@ const PLAYWRIGHT = join(
   process.platform === "win32" ? "playwright.cmd" : "playwright"
 );
 
+/** Per-PR projects. Extra browsers and visual baselines are nightly-only. */
+export const DEFAULT_E2E_PROJECTS = [
+  "--project=chromium",
+  "--project=chromium-dev",
+];
+
+/** Visual specs live under e2e/visual/ and only match chromium-visual. */
+export const VISUAL_E2E_PROJECTS = ["--project=chromium-visual"];
+
+/** @param {readonly string[]} args */
+export function projectsFor(args) {
+  if (
+    args.length > 0 &&
+    args.every((file) => {
+      const path = file.replaceAll("\\", "/");
+      return path.startsWith("e2e/visual/") || path.includes("/visual/");
+    })
+  ) {
+    return VISUAL_E2E_PROJECTS;
+  }
+  return DEFAULT_E2E_PROJECTS;
+}
+
 function changedFiles() {
   try {
     const out = execFileSync(
@@ -76,7 +101,7 @@ function changedFiles() {
 }
 
 function runPlaywright(args) {
-  execFileSync(PLAYWRIGHT, ["test", ...args], {
+  execFileSync(PLAYWRIGHT, ["test", ...projectsFor(args), ...args], {
     cwd: REPO_ROOT,
     stdio: "inherit",
   });

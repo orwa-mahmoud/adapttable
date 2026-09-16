@@ -1,0 +1,487 @@
+/**
+ * The demo's own settings, in a drawer.
+ *
+ * Everything here is scaffolding around the table rather than part of it, so
+ * it stays in the page's language and out of the table's direction. The
+ * sections are the questions a reader actually has — what the table can do,
+ * which actions need a human, where they are asked, and what saving means —
+ * each with a line of help, because a switch whose consequence is invisible
+ * is a switch nobody touches.
+ */
+import type { ApprovalPresentation } from "@adapttable/core";
+import { type ReactNode, useEffect, useRef } from "react";
+
+import { Segmented } from "./kitDemos";
+
+export type DemoEditingMode = "off" | "cell" | "row" | "batch";
+
+/** One feature switch. */
+export interface DemoFeature {
+  readonly key: string;
+  readonly label: string;
+  readonly help: string;
+  readonly on: boolean;
+  readonly onChange: () => void;
+}
+
+/** One action whose approval the reader can override. */
+export interface DemoActionApproval {
+  /** Capability key — stable, and never shown as the label. */
+  readonly key: string;
+  /** Reader-facing name, from the capability's own presentation. */
+  readonly label: string;
+  /** What it resolves to right now. */
+  readonly policy: "required" | "automatic";
+  /** True when the table's shared default is what produced that. */
+  readonly inherited: boolean;
+  readonly onChange: (policy: "required" | "automatic" | "inherit") => void;
+}
+
+/** One capability the reader can take away from the agent. */
+export interface DemoExclusion {
+  /** Capability key — stable, and never shown as the label. */
+  readonly key: string;
+  /** Reader-facing name. */
+  readonly label: string;
+  /** What taking it away costs, in one line. */
+  readonly help: string;
+  /** True when the agent may still use it. */
+  readonly offered: boolean;
+  readonly onChange: () => void;
+}
+
+/** How much of the contract a turn carries. */
+export type DemoContextProfile = "compact" | "full";
+
+/** Props for {@link AiDemoOptions}. */
+export interface AiDemoOptionsProps {
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingMode: DemoEditingMode;
+  readonly onEditingMode: (next: DemoEditingMode) => void;
+  readonly features: readonly DemoFeature[];
+  readonly actions: readonly DemoActionApproval[];
+  readonly presentation: ApprovalPresentation;
+  readonly onPresentation: (next: ApprovalPresentation) => void;
+  readonly commit: "stage" | "immediate";
+  readonly onCommit: (next: "stage" | "immediate") => void;
+  readonly rtl: boolean;
+  readonly onRtl: (next: boolean) => void;
+  readonly onReset: () => void;
+  /** How much of the contract each turn carries. */
+  readonly contextProfile: DemoContextProfile;
+  readonly onContextProfile: (next: DemoContextProfile) => void;
+  /** Capabilities the reader can take away from the agent. */
+  readonly exclusions: readonly DemoExclusion[];
+  /** Whether the table registers itself as browser tools. */
+  readonly webmcp: boolean;
+  readonly onWebmcp: (next: boolean) => void;
+  /** Whether this browser has the API at all. */
+  readonly webmcpAvailable: boolean;
+}
+
+const PRESENTATIONS: readonly {
+  readonly value: ApprovalPresentation;
+  readonly label: string;
+  readonly help: string;
+}[] = [
+  {
+    value: "widget",
+    label: "In the assistant",
+    help: "Reviewed in the conversation where the change was asked for.",
+  },
+  {
+    value: "table",
+    label: "Above the table",
+    help: "Reviewed in a strip over the rows it changes.",
+  },
+  {
+    value: "modal",
+    label: "In a dialog",
+    help: "Reviewed in a dialog over the page. Nothing else is reachable until you answer.",
+  },
+];
+
+const PROFILES: readonly {
+  readonly value: DemoContextProfile;
+  readonly label: string;
+  readonly help: string;
+}[] = [
+  {
+    value: "compact",
+    label: "Compact",
+    help: "Every capability by name, with the full instructions only for the ones this turn is likely to need. The rest are asked for when they are.",
+  },
+  {
+    value: "full",
+    label: "Full",
+    help: "Every capability with its whole guide, up front. Larger, and nothing is deferred.",
+  },
+];
+
+const SAVING: readonly {
+  readonly value: "stage" | "immediate";
+  readonly label: string;
+  readonly help: string;
+}[] = [
+  {
+    value: "stage",
+    label: "Stage changes",
+    help: "An approved change becomes an unsaved edit. You still press Save.",
+  },
+  {
+    value: "immediate",
+    label: "Save immediately",
+    help: "An approved change goes straight to the save path and reports what came back.",
+  },
+];
+
+/** What an action's approval resolves to, and whether it was inherited. */
+function describe(action: DemoActionApproval): string {
+  if (!action.inherited) return "Overridden for this action";
+  return action.policy === "required"
+    ? "Inherited: asks first"
+    : "Inherited: runs without asking";
+}
+
+function Section({
+  title,
+  children,
+}: Readonly<{ title: string; children: ReactNode }>) {
+  return (
+    <section className="ai-opts__section">
+      <h4 className="ai-opts__heading">{title}</h4>
+      {children}
+    </section>
+  );
+}
+
+/** The demo's settings drawer. */
+export function AiDemoOptions({
+  open,
+  onClose,
+  editingMode,
+  onEditingMode,
+  features,
+  actions,
+  presentation,
+  onPresentation,
+  commit,
+  onCommit,
+  rtl,
+  onRtl,
+  onReset,
+  contextProfile,
+  onContextProfile,
+  exclusions,
+  webmcp,
+  onWebmcp,
+  webmcpAvailable,
+}: Readonly<AiDemoOptionsProps>) {
+  const ref = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
+
+  // Dismissal from the dark around the panel. The backdrop is painted by the
+  // dialog itself, so a click out there reaches the dialog rather than
+  // anything behind it and the browser does nothing with it; reading the click
+  // against the panel's own box tells the two apart. A listener rather than a
+  // handler on the element: the backdrop is a surface, not a control, and
+  // Escape and the close button are what a keyboard uses.
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    const dismiss = (event: MouseEvent): void => {
+      if (event.target !== dialog) return;
+      const box = dialog.getBoundingClientRect();
+      const onPanel =
+        event.clientX >= box.left &&
+        event.clientX <= box.right &&
+        event.clientY >= box.top &&
+        event.clientY <= box.bottom;
+      if (!onPanel) onClose();
+    };
+    dialog.addEventListener("click", dismiss);
+    return () => {
+      dialog.removeEventListener("click", dismiss);
+    };
+  }, [onClose]);
+
+  return (
+    <dialog
+      ref={ref}
+      className="ai-opts"
+      aria-label="Demo options"
+      data-testid="ai-demo-options-drawer"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+    >
+      <header className="ai-opts__head">
+        <h3>Demo options</h3>
+        <button
+          type="button"
+          className="ai-opts__close"
+          aria-label="Close"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+      </header>
+
+      <div className="ai-opts__body">
+        <Section title="Table features">
+          <p className="ai-opts__help">
+            Turn one off and the assistant offers less: it only ever suggests
+            what this table currently wires.
+          </p>
+          <div className="ai-opts__row ai-opts__row--mode">
+            <span>
+              <span className="ai-opts__label">Editing mode</span>
+              <span className="ai-opts__hint">
+                Cell and row stay ordinary fields until you open them. Batch
+                keeps every editable cell as an input.
+              </span>
+            </span>
+            <Segmented
+              label="Editing mode"
+              value={editingMode}
+              onChange={onEditingMode}
+              options={[
+                { value: "off", label: "Off", testId: "ai-editing-off" },
+                { value: "cell", label: "Cell", testId: "ai-editing-cell" },
+                { value: "row", label: "Row", testId: "ai-editing-row" },
+                { value: "batch", label: "Batch", testId: "ai-editing-batch" },
+              ]}
+            />
+          </div>
+          {features.map((feature) => (
+            <label key={feature.key} className="ai-opts__row">
+              <input
+                type="checkbox"
+                aria-label={feature.label}
+                checked={feature.on}
+                data-testid={`ai-toggle-${feature.key}`}
+                onChange={feature.onChange}
+              />
+              <span>
+                <span className="ai-opts__label">{feature.label}</span>
+                <span className="ai-opts__hint">{feature.help}</span>
+              </span>
+            </label>
+          ))}
+        </Section>
+
+        <Section title="Action approvals">
+          <p className="ai-opts__help">
+            Whether the assistant has to ask before it runs an action. This is
+            not where the question appears — that is below.
+          </p>
+          {actions.length === 0 ? (
+            <p className="ai-opts__hint">
+              This table wires no actions the assistant may run.
+            </p>
+          ) : (
+            actions.map((action) => (
+              <div key={action.key} className="ai-opts__row">
+                <span>
+                  <span className="ai-opts__label">{action.label}</span>
+                  <span className="ai-opts__hint">{describe(action)}</span>
+                </span>
+                <span className="ai-opts__choices">
+                  <select
+                    aria-label={`Approval for ${action.label}`}
+                    data-testid={`ai-approval-${action.key}`}
+                    value={action.inherited ? "inherit" : action.policy}
+                    onChange={(event) => {
+                      action.onChange(
+                        event.target.value as
+                          "required" | "automatic" | "inherit"
+                      );
+                    }}
+                  >
+                    <option value="inherit">Use the default</option>
+                    <option value="required">Always ask</option>
+                    <option value="automatic">Never ask</option>
+                  </select>
+                </span>
+              </div>
+            ))
+          )}
+        </Section>
+
+        <Section title="Approval location">
+          <p className="ai-opts__help">
+            Where a waiting change is reviewed. One place at a time — the others
+            say a change is waiting, and never repeat the buttons.
+          </p>
+          {PRESENTATIONS.map((option) => (
+            <label key={option.value} className="ai-opts__row">
+              <input
+                type="radio"
+                name="ai-approval-location"
+                aria-label={option.label}
+                value={option.value}
+                checked={presentation === option.value}
+                data-testid={`ai-presentation-${option.value}`}
+                onChange={() => {
+                  onPresentation(option.value);
+                }}
+              />
+              <span>
+                <span className="ai-opts__label">{option.label}</span>
+                <span className="ai-opts__hint">{option.help}</span>
+              </span>
+            </label>
+          ))}
+        </Section>
+
+        <Section title="Saving">
+          {SAVING.map((option) => (
+            <label key={option.value} className="ai-opts__row">
+              <input
+                type="radio"
+                name="ai-saving"
+                aria-label={option.label}
+                value={option.value}
+                checked={commit === option.value}
+                disabled={option.value === "stage" && editingMode !== "batch"}
+                data-testid={`ai-commit-${option.value}`}
+                onChange={() => {
+                  onCommit(option.value);
+                }}
+              />
+              <span>
+                <span className="ai-opts__label">{option.label}</span>
+                <span className="ai-opts__hint">{option.help}</span>
+              </span>
+            </label>
+          ))}
+        </Section>
+
+        <Section title="What the agent is told">
+          <p className="ai-opts__help">
+            The contract each turn carries. Compact names everything and
+            explains what this turn needs; the rest is asked for on demand.
+          </p>
+          {PROFILES.map((option) => (
+            <label key={option.value} className="ai-opts__row">
+              <input
+                type="radio"
+                name="ai-context-profile"
+                aria-label={option.label}
+                value={option.value}
+                checked={contextProfile === option.value}
+                data-testid={`ai-profile-${option.value}`}
+                onChange={() => {
+                  onContextProfile(option.value);
+                }}
+              />
+              <span>
+                <span className="ai-opts__label">{option.label}</span>
+                <span className="ai-opts__hint">{option.help}</span>
+              </span>
+            </label>
+          ))}
+        </Section>
+
+        <Section title="What the agent may do">
+          <p className="ai-opts__help">
+            Taking one away removes it from the contract and from the
+            suggestions — and leaves the table&apos;s own control exactly where
+            it was, for the person using it.
+          </p>
+          {exclusions.map((exclusion) => (
+            <label key={exclusion.key} className="ai-opts__row">
+              <input
+                type="checkbox"
+                aria-label={exclusion.label}
+                checked={exclusion.offered}
+                data-testid={`ai-offer-${exclusion.key}`}
+                onChange={exclusion.onChange}
+              />
+              <span>
+                <span className="ai-opts__label">{exclusion.label}</span>
+                <span className="ai-opts__hint">{exclusion.help}</span>
+              </span>
+            </label>
+          ))}
+        </Section>
+
+        <Section title="Browser tools">
+          <label className="ai-opts__row">
+            <input
+              type="checkbox"
+              aria-label="Offer this table to a browser agent"
+              checked={webmcp && webmcpAvailable}
+              disabled={!webmcpAvailable}
+              data-testid="ai-toggle-webmcp"
+              onChange={() => {
+                onWebmcp(!webmcp);
+              }}
+            />
+            <span>
+              <span className="ai-opts__label">
+                Offer this table to a browser agent
+              </span>
+              <span className="ai-opts__hint">
+                {webmcpAvailable
+                  ? "Registers the permitted contract as WebMCP tools. The same executor, the same approvals — a browser agent gets no more than this page's assistant does."
+                  : "This browser has no model-context API, so there is nothing to register. The page works exactly the same without it."}
+              </span>
+            </span>
+          </label>
+        </Section>
+
+        <Section title="Language and direction">
+          <label className="ai-opts__row">
+            <input
+              type="checkbox"
+              aria-label="Right-to-left table"
+              checked={rtl}
+              data-testid="ai-toggle-rtl"
+              onChange={() => {
+                onRtl(!rtl);
+              }}
+            />
+            <span>
+              <span className="ai-opts__label">Right-to-left table</span>
+              <span className="ai-opts__hint">
+                Mirrors the table and its overlays, and reads it in Arabic. The
+                page around it stays as it is.
+              </span>
+            </span>
+          </label>
+        </Section>
+      </div>
+
+      <footer className="ai-opts__foot">
+        <button
+          type="button"
+          className="ai-opts__reset"
+          data-testid="ai-reset"
+          onClick={onReset}
+        >
+          Reset demo
+        </button>
+        {/* Clicking outside closes the panel and Escape closes it, and
+            neither is something a reader can see. Done is where a reader
+            looks for the way out of a settings panel. */}
+        <button
+          type="button"
+          className="ai-opts__done"
+          data-testid="ai-demo-options-done"
+          onClick={onClose}
+        >
+          Done
+        </button>
+      </footer>
+    </dialog>
+  );
+}

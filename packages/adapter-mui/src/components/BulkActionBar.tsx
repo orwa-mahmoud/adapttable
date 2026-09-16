@@ -1,11 +1,13 @@
 /** Selection bar with the bulk actions and cross-page banner. */
-import { useBulkActionRunner } from "@adapttable/core";
+import { useBulkActionRunner } from "@adapttable/react";
 import {
   bulkActionErrorMessage,
   type BulkBarChromeProps,
+  offersAllMatching,
   resolveDisabledReason,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Stack, Tooltip, Typography } from "@mui/material";
+import type { ReactNode } from "react";
 
 /** Selection toolbar. */
 export function BulkBar({
@@ -18,7 +20,6 @@ export function BulkBar({
   const {
     selectedIds,
     selectedCount,
-    headerState,
     visibleIds,
     allMatching,
     selectAllMatching,
@@ -37,7 +38,7 @@ export function BulkBar({
   const ids = [...selectedIds];
   // Offer "select all N matching" only when the whole page is selected and
   // more rows match beyond it; once active, show the cross-page scope.
-  const showBanner = headerState === "all" && total > visibleIds.length;
+  const showBanner = offersAllMatching(selection, total);
   return (
     <Stack
       data-adapttable-part="bulk-bar"
@@ -120,7 +121,7 @@ export function BulkBar({
                   size="small"
                   variant="contained"
                   color={action.color as "primary" | undefined}
-                  startIcon={action.icon}
+                  startIcon={action.icon as ReactNode}
                   disabled={reason !== undefined || pending !== null}
                   onClick={() =>
                     run(

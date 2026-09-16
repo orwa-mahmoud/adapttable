@@ -1,5 +1,6 @@
 /** The desktop `<table>`: header, pinned columns, rows and summary. */
-import { PIN_Z, resolveColumnFooter, type TableLabels } from "@adapttable/core";
+import { PIN_Z, type TableLabels } from "@adapttable/core";
+import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
   cellHighlightStyle,
@@ -21,9 +22,11 @@ import {
   mergedCellStyle,
   pinnedEdgeCellStyle,
   REORDER_COLUMN_WIDTH,
+  resolveRowEditTrigger,
+  rowEditConflict,
   type SharedTableRenderProps,
   useDesktopTableAssembly,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import {
   Box,
   Checkbox,
@@ -37,21 +40,28 @@ import {
   TableSortLabel,
   type Theme,
 } from "@mui/material";
-import type { CSSProperties, ReactElement, ReactNode } from "react";
-import { useCallback, useMemo, useRef } from "react";
-
-import { ColumnSelectCheckbox } from "./ColumnSelectCheckbox";
-import { EditableDataCell } from "./EditableCell";
-import { ExpandToggle } from "./ExpandToggle";
-import { FillHandle } from "./FillHandle";
-import { GroupHeaderRow } from "./GroupHeader";
 import {
-  ColumnGroupToggle,
-  FilterHeaderTrigger,
-  RowEditActions,
-  RowReorderHandle,
-  TreeCell,
-} from "./kitControls";
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
+
+import {
+  OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
+} from "./featureSlots";
 import { RowActionButtons } from "./RowActionButtons";
 
 function ExtraSlotRow({
@@ -152,36 +162,6 @@ export function useStableToggle(
   return useCallback((id: string) => ref.current?.toggle(id), []);
 }
 
-/** Inline chevron pointing at the reading end; rotates down when open. */
-export function ExpandChevron({
-  expanded,
-  dir,
-}: Readonly<{ expanded: boolean; dir?: "ltr" | "rtl" }>) {
-  let transform: string | undefined;
-  if (expanded) transform = "rotate(90deg)";
-  else if (dir === "rtl") transform = "rotate(180deg)";
-  return (
-    <Box
-      component="span"
-      aria-hidden
-      sx={{ display: "inline-flex", transition: "transform 150ms", transform }}
-    >
-      <svg
-        width="1em"
-        height="1em"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M9 6l6 6-6 6" />
-      </svg>
-    </Box>
-  );
-}
-
 function muiAlign(
   align: "start" | "center" | "end" | undefined
 ): "start" | "center" | "end" {
@@ -255,6 +235,13 @@ function DesktopRowBase<TRow>(
     expansionLead + (showReorder ? REORDER_COLUMN_WIDTH : 0);
   const edge = (active: boolean, lead = 0) =>
     pinnedEdgeCellStyle("start", active, PIN_Z.body, PIN_BG, lead);
+  const rowEdit = resolveRowEditTrigger(
+    rowActions,
+    editing?.rowEditing,
+    row,
+    id
+  );
+  const rowConflict = rowEditConflict(editing, id);
   return (
     <>
       <TableRow
@@ -271,7 +258,7 @@ function DesktopRowBase<TRow>(
             sx={PAPER_SX}
             style={{ ...edge(hasStartPin), ...edgeRowPin }}
           >
-            <ExpandToggle
+            <OptionalExpandToggle
               id={id}
               expanded={Boolean(expanded)}
               onToggle={onToggleExpand}
@@ -291,7 +278,7 @@ function DesktopRowBase<TRow>(
               ...edgeRowPin,
             }}
           >
-            <RowReorderHandle
+            <OptionalRowReorderHandle
               reorder={rowReorder}
               labels={labels}
               rowId={id}
@@ -349,7 +336,7 @@ function DesktopRowBase<TRow>(
               )}
               {...focusProps}
             >
-              <TreeCell
+              <OptionalTreeCell
                 entry={treeEntry}
                 columnKey={column.key}
                 treeColumnKey={treeKey}
@@ -359,10 +346,10 @@ function DesktopRowBase<TRow>(
                 }}
                 onToggle={onToggleTree}
               >
-                <EditableDataCell
+                <OptionalEditableCell
                   editing={editing}
                   row={row}
-                  column={column}
+                  column={column as ColumnDef<TRow>}
                   rowId={id}
                   rowIndex={focusIndex}
                   rows={rows}
@@ -371,8 +358,8 @@ function DesktopRowBase<TRow>(
                   editLabel={labels.editCell}
                   undoLabel={labels.undoEdit}
                 />
-              </TreeCell>
-              <FillHandle
+              </OptionalTreeCell>
+              <OptionalFillHandle
                 focus={gridFocus}
                 windowIndex={focusIndex}
                 col={columnIndex}
@@ -395,10 +382,13 @@ function DesktopRowBase<TRow>(
             }}
           >
             {editing?.rowEditing && (
-              <RowEditActions
+              <OptionalRowEditActions
                 rowEditing={editing.rowEditing}
                 row={row}
                 rowId={id}
+                showBegin={rowEdit.showBegin}
+                icons={editing.rowEditIcons}
+                conflict={rowConflict}
                 labels={{
                   editRow: labels.editRow,
                   saveRow: labels.saveRow,
@@ -406,10 +396,10 @@ function DesktopRowBase<TRow>(
                 }}
               />
             )}
-            {rowActions && rowActions.length > 0 && (
+            {rowEdit.actions.length > 0 && (
               <RowActionButtons
                 row={row}
-                actions={rowActions}
+                actions={rowEdit.actions}
                 confirm={confirm}
                 labels={labels}
                 layout={rowActionsLayout}
@@ -437,6 +427,7 @@ function LeafHeader<TRow>({
   closeHeaderFilterOnSelect,
   source,
   labels,
+  onRenameColumn,
 }: Readonly<{
   leaf: DesktopHeaderLeaf<TRow>;
   headSx: SxProps<Theme>;
@@ -446,19 +437,36 @@ function LeafHeader<TRow>({
   closeHeaderFilterOnSelect: boolean | undefined;
   source: SharedTableRenderProps<TRow>["table"]["source"];
   labels: Required<TableLabels>;
+  onRenameColumn: SharedTableRenderProps<TRow>["onRenameColumn"];
 }>): ReactElement {
   const { column } = leaf;
-  const ariaSort = leaf.headerProps["aria-sort"] as
-    "ascending" | "descending" | "none" | undefined;
-  const active = ariaSort === "ascending" || ariaSort === "descending";
+  const caption = column.sortable ? (
+    <TableSortLabel
+      active={leaf.sortActive}
+      direction={leaf.sortDir === "desc" ? "desc" : "asc"}
+      aria-label={leaf.sortButtonProps["aria-label"]}
+      onClick={leaf.sortButtonProps.onClick}
+      title={column.headerTooltip}
+    >
+      {leaf.caption}
+      {leaf.sortIndex !== undefined && (
+        <Box component="span" sx={{ fontSize: 10, ml: 0.5 }}>
+          {leaf.sortIndex}
+        </Box>
+      )}
+    </TableSortLabel>
+  ) : (
+    <span title={column.headerTooltip}>{leaf.caption}</span>
+  );
   return (
     <TableCell
       key={column.key}
       data-adapttable-part="header-cell"
+      // Every header prop core states, in full. Cherry-picking named fields
+      // meant a prop core added reached only the kits that happened to name
+      // it; the kit's own props below still win where they overlap.
+      {...leaf.headerProps}
       {...leaf.columnHeaderProps}
-      aria-sort={ariaSort}
-      data-column-key={column.key}
-      data-sort-index={leaf.sortIndex}
       rowSpan={leaf.rowSpan > 1 ? leaf.rowSpan : undefined}
       sx={headSx}
       style={{
@@ -466,29 +474,29 @@ function LeafHeader<TRow>({
         ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
       }}
     >
-      {column.sortable ? (
-        <TableSortLabel
-          active={active}
-          direction={ariaSort === "descending" ? "desc" : "asc"}
-          // Six other kits name this control "Sort by: <column>". Named only by
-          // its own text, it reads as "Person, button" — which does not say what
-          // pressing it does.
-          aria-label={leaf.sortButtonProps["aria-label"]}
-          onClick={leaf.sortButtonProps.onClick}
-          title={column.headerTooltip}
-        >
-          {leaf.caption}
-          {leaf.sortIndex !== undefined && (
-            <Box component="span" sx={{ fontSize: 10, ml: 0.5 }}>
-              {leaf.sortIndex}
+      <Box
+        component="div"
+        sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
+      >
+        {column.renameable === true && onRenameColumn ? (
+          <OptionalColumnHeaderRename
+            columnKey={column.key}
+            name={leaf.columnName}
+            labels={labels}
+            onRenameColumn={onRenameColumn}
+          >
+            <Box component="span" data-adapttable-part="header-caption-control">
+              {caption}
             </Box>
-          )}
-        </TableSortLabel>
-      ) : (
-        <span title={column.headerTooltip}>{leaf.caption}</span>
-      )}
+          </OptionalColumnHeaderRename>
+        ) : (
+          <Box component="span" data-adapttable-part="header-caption-control">
+            {caption}
+          </Box>
+        )}
+      </Box>
       {leaf.showColumnCheckbox && leaf.onToggleColumn ? (
-        <ColumnSelectCheckbox
+        <OptionalColumnSelect
           label={leaf.columnSelectAriaLabel}
           checked={leaf.columnCheckboxChecked}
           onToggle={leaf.onToggleColumn}
@@ -500,7 +508,7 @@ function LeafHeader<TRow>({
         </span>
       ) : null}
       {leaf.headerDef ? (
-        <FilterHeaderTrigger
+        <OptionalFilterHeader
           def={leaf.headerDef}
           source={source}
           labels={labels}
@@ -591,6 +599,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     closeHeaderFilterOnSelect,
     source: props.table.source,
     labels,
+    onRenameColumn: props.onRenameColumn,
   };
 
   const renderPlanCell = (cell: HtmlGroupedHeaderCell): ReactElement => {
@@ -627,7 +636,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       >
         <span style={groupedHeaderLabelStyle()}>
           {props.onToggleColumnGroup ? (
-            <ColumnGroupToggle
+            <OptionalColumnGroupToggle
               cell={cell.cell}
               labels={labels}
               onToggle={props.onToggleColumnGroup}
@@ -798,7 +807,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
             }
             if (slot.kind === "group") {
               return (
-                <GroupHeaderRow
+                <OptionalGroupHeaderRow
                   key={slot.key}
                   entry={slot.entry}
                   columns={columns}

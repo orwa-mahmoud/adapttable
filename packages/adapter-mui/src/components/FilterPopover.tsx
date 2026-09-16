@@ -1,7 +1,6 @@
 import type { Direction, TableLabels } from "@adapttable/core";
 import { Box, Button, Paper, Popper, Stack, Typography } from "@mui/material";
-import type { ReactNode } from "react";
-import { useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 /** Props for {@link FilterPopover}. */
 export interface FilterPopoverProps {
@@ -89,7 +88,9 @@ export function FilterPopover({
       modifiers={[
         { name: "offset", options: { offset: [0, 4] } },
         { name: "flip", enabled: false },
-        { name: "preventOverflow", options: { padding: 8, mainAxis: false } },
+        // Both axes: a panel that cannot shift horizontally runs off the
+        // edge on a narrow viewport and clips its own labels.
+        { name: "preventOverflow", options: { padding: 8 } },
       ]}
       style={{ zIndex: 10050 }}
     >

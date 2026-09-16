@@ -9,9 +9,10 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { renderMui } from "./test-utils";
+import { virtualize } from "./virtualize";
 
 interface Row {
   id: string;
@@ -44,6 +45,11 @@ function mount(extra?: Record<string, unknown>) {
       rowKey={(r) => r.id}
       urlSync={false}
       maxHeight={300}
+      features={
+        extra?.virtualizeColumns === true
+          ? [virtualize({ virtualizeColumns: true })]
+          : undefined
+      }
       {...extra}
     />
   );

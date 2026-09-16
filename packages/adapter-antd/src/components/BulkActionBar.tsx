@@ -1,9 +1,10 @@
 /** Selection bar with the bulk actions and cross-page banner. */
-import { useBulkActionRunner } from "@adapttable/core";
+import { useBulkActionRunner } from "@adapttable/react";
 import {
   bulkActionErrorMessage,
   type BulkBarChromeProps,
-} from "@adapttable/core/adapter";
+  offersAllMatching,
+} from "@adapttable/react/adapter";
 import { Alert, Button, Space, Typography } from "antd";
 import type { ReactNode } from "react";
 
@@ -60,8 +61,7 @@ export function BulkBar(props: Readonly<BulkBarChromeProps>) {
   const errorMessage = bulkActionErrorMessage(runner.error);
   const ids = [...selection.selectedIds];
   const busy = runner.pending !== null;
-  const crossPage =
-    selection.headerState === "all" && total > selection.visibleIds.length;
+  const crossPage = offersAllMatching(selection, total);
   const context = selection.allMatching
     ? { allMatching: true, total }
     : undefined;
@@ -112,7 +112,7 @@ export function BulkBar(props: Readonly<BulkBarChromeProps>) {
               size="small"
               type="primary"
               danger={isDangerColor(action.color)}
-              icon={action.icon}
+              icon={action.icon as ReactNode}
               title={action.disabledReason?.(ids)}
               disabled={action.disabledReason?.(ids) !== undefined || busy}
               onClick={() => runner.run(action, ids, context)}

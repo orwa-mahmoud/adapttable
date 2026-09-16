@@ -5,10 +5,14 @@
   "description": "Typechecked example components for every AdaptTable adapter (not published).",
   "type": "module",
   "scripts": {
+    "ai-http": "node --experimental-strip-types ./ai-http-backend.ts",
+    "test": "node --experimental-strip-types --test ./ai-http-backend.test.ts ./ai-http-pins.test.ts ./ai-http-stream.test.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@adapttable/ai": "workspace:*",
+    "@adapttable/ai-react": "workspace:*",
     "@adapttable/antd": "workspace:*",
     "@adapttable/base-ui": "workspace:*",
     "@adapttable/chakra": "workspace:*",
@@ -17,6 +21,7 @@
     "@adapttable/mantine": "workspace:*",
     "@adapttable/mui": "workspace:*",
     "@adapttable/radix": "workspace:*",
+    "@adapttable/react": "workspace:*",
     "@adapttable/shadcn": "workspace:*",
     "@adapttable/unstyled": "workspace:*"
   },

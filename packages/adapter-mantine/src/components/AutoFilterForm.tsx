@@ -2,7 +2,6 @@ import {
   defaultFilterRegistry,
   type FilterDef,
   filterLabel,
-  filterOpLabel,
   type FilterTypeRegistry,
   type FilterValue,
   filterWidgetKind,
@@ -13,11 +12,14 @@ import {
   splitRelativeToken,
   type TableLabels,
   type TableSource,
+} from "@adapttable/core";
+import {
+  filterOpLabel,
   useBooleanFilterWidget,
   useFilterOptions,
   useRangeFilterWidget,
   useTextFilterWidget,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import {
   Group,
   Input,
@@ -28,7 +30,7 @@ import {
   Stack,
   TextInput,
 } from "@mantine/core";
-import { type ReactNode } from "react";
+import { type ReactElement, type ReactNode } from "react";
 
 import { ChecklistFilter } from "./ChecklistFilter";
 
@@ -359,9 +361,9 @@ function FilterControl<TRow>({
   source: TableSource<TRow>;
   labels: Required<TableLabels>;
   registry: FilterTypeRegistry;
-}>) {
+}>): ReactElement | null {
   const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom;
+  if (custom) return custom as ReactElement;
   switch (filterWidgetKind(def, registry)) {
     case "text":
       return <TextFilterField def={def} source={source} labels={labels} />;

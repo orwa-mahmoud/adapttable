@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
 import { ASSUMED_COLUMN_WIDTH, responsiveColumns } from "./responsiveColumns";
 
 interface Row {
@@ -15,9 +15,9 @@ const col = (
   key: string,
   width?: number,
   responsivePriority?: number
-): ColumnDef<Row> => ({ key, width, responsivePriority });
+): ColumnMetadata<Row> => ({ key, width, responsivePriority });
 
-const keys = <T>(result: { columns: readonly ColumnDef<T>[] }) =>
+const keys = <T>(result: { columns: readonly ColumnMetadata<T>[] }) =>
   result.columns.map((c) => c.key);
 
 describe("responsiveColumns", () => {

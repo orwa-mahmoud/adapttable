@@ -1,10 +1,13 @@
-import type { ColumnDef, Direction } from "@adapttable/core";
 import {
-  columnHeaderController,
   columnResizeHandleProps,
-  resolveColumnHeader,
+  type Direction,
   tableMinWidth,
 } from "@adapttable/core";
+import {
+  type ColumnDef,
+  columnHeaderController,
+  resolveColumnHeader,
+} from "@adapttable/react";
 import {
   cellFlashAttr,
   columnFlexShares,
@@ -15,7 +18,8 @@ import {
   type SharedTableRenderProps,
   sortArrow,
   tableRenderModel,
-} from "@adapttable/core/adapter";
+  toReactColumnResizeHandleProps,
+} from "@adapttable/react/adapter";
 import type { CSSProperties, ReactNode } from "react";
 
 import { Table } from "./primitives";
@@ -209,10 +213,12 @@ export function DesktopTable<TRow>(
                     <span
                       data-adapttable-part="column-resize-handle"
                       style={RESIZE_HANDLE_STYLE}
-                      {...columnResizeHandleProps(
-                        column.key,
-                        setWidth,
-                        `${resizeLabel}: ${getHeaderName(column)}`
+                      {...toReactColumnResizeHandleProps(
+                        columnResizeHandleProps(
+                          column.key,
+                          setWidth,
+                          `${resizeLabel}: ${getHeaderName(column)}`
+                        )
                       )}
                     />
                   )}

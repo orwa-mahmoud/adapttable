@@ -4,8 +4,11 @@
  * predicate and the server query both read the same `QueryFilterGroup`.
  * The builder UI is #279; this file is the evaluator.
  */
-import type { QueryCondition, QueryFilterGroup } from "../source/queryContract";
-import { isFilterGroup } from "../source/queryContract";
+import {
+  isFilterGroup,
+  type QueryCondition,
+  type QueryFilterGroup,
+} from "../source/queryContract";
 import type { ExtraFilters } from "../types";
 import { defaultFilterRegistry } from "./filterBuiltins";
 import { type FilterDef, filterPredicate } from "./filterDefs";

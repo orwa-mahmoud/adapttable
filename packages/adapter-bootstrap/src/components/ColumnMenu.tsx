@@ -1,17 +1,15 @@
 import {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
-  columnReorderKeyProps,
-  type Direction,
   REORDER_COLUMN_KEY,
-  useColumnDragState,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
+import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
 import {
   columnMenuActions,
-  type ColumnMenuChromeProps,
   type ColumnMenuLabels,
   type ColumnMenuRow,
+  type ColumnMenuSlotProps,
   filterColumnMenuRows,
   hideAllColumns,
   nextPinSide,
@@ -19,26 +17,12 @@ import {
   showAllColumns,
   unpinAllColumns,
   useFeatureHost,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { useState } from "react";
 import { Button, Dropdown, Form } from "react-bootstrap";
 
-export interface ColumnMenuProps<TRow> extends ColumnMenuChromeProps<TRow> {
-  /** Resolved labels, every key filled. */
-  labels: ColumnMenuLabels & { actions: string; reorderRow: string };
-  hasRowActions?: boolean;
-  hasRowReorder?: boolean;
-  onAutoSize: () => void;
-  onAutoSizeColumn?: (key: string) => void;
-  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-  onFilterColumn?: (key: string) => void;
-  /** Column key currently sorted by, if any. */
-  sortBy?: string;
-  /** Direction for `sortBy`. */
-  sortDir?: "asc" | "desc";
-  /** Writing direction, so the menu opens on the correct side. */
-  dir?: Direction;
-}
+/** The shared Columns-menu contract, declared once in core. */
+export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
 
 function ColumnMenuRowItem<TRow>({
   row,
@@ -146,22 +130,41 @@ function ColumnMenuRowItem<TRow>({
           className="d-flex flex-column ms-4 mb-1"
           data-adapttable-part="column-menu-submenu"
         >
-          {actions.map((action) => (
-            <Button
-              key={action.id}
-              size="sm"
-              variant="link"
-              className="text-start text-decoration-none"
-              data-adapttable-part="column-menu-action"
-              disabled={action.disabled}
-              onClick={() => {
-                action.run();
-                setOpen(false);
-              }}
-            >
-              {action.label}
-            </Button>
-          ))}
+          {actions.map((action) =>
+            "kind" in action ? (
+              <Form.Group key={action.id} className="px-2 py-1">
+                <Form.Label className="small mb-1">{action.label}</Form.Label>
+                <Form.Select
+                  size="sm"
+                  aria-label={action.label}
+                  value={action.value}
+                  disabled={action.disabled}
+                  onChange={(event) => action.onChange(event.target.value)}
+                >
+                  {action.options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            ) : (
+              <Button
+                key={action.id}
+                size="sm"
+                variant="link"
+                className="text-start text-decoration-none"
+                data-adapttable-part="column-menu-action"
+                disabled={action.disabled}
+                onClick={() => {
+                  action.run();
+                  setOpen(false);
+                }}
+              >
+                {action.label}
+              </Button>
+            )
+          )}
         </div>
       )}
     </div>
@@ -265,7 +268,10 @@ export function ColumnMenu<TRow>({
         {labels.columns}
       </Dropdown.Toggle>
 
-      <Dropdown.Menu className="p-2" style={{ minWidth: 260 }}>
+      <Dropdown.Menu
+        className="p-2"
+        style={{ minWidth: "min(260px, calc(100vw - 48px))" }}
+      >
         <div className="small fw-semibold text-uppercase text-muted px-1 pb-1">
           {labels.columns}
         </div>

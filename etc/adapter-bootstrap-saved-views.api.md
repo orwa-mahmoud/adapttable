@@ -4,7 +4,7 @@
 
 ```ts
 
-import { savedViews } from '@adapttable/core/features';
+import { savedViews } from '@adapttable/react/features';
 
 export { savedViews }
 

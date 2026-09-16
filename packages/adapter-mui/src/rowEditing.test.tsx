@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
+import { rowEditing } from "./editing";
 import type { ColumnDef } from "./index";
 
 interface Task {
@@ -51,6 +52,7 @@ describe("row editing (mui)", () => {
         urlSync={false}
         rowEditing
         onRowEdit={onRowEdit}
+        features={[rowEditing(onRowEdit)]}
         {...extra}
       />
     );

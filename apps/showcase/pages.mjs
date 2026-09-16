@@ -30,9 +30,10 @@
  *   showcase under `/demo/`. Trailing slash always: that is the form Pages
  *   serves a directory index at, and the form the sitemap has to carry.
  * @property {boolean} indexable Whether the route belongs in the sitemap. A
- *   page that must build but must never be indexed sets `false`; a redirect
- *   stub is that case, because listing one asks a crawler to index a URL whose
- *   whole content is "the page is elsewhere".
+ *   page that must build but must never be indexed sets `false`. Redirect
+ *   stubs use that because listing one asks a crawler to index a URL whose
+ *   whole content is "the page is elsewhere". A kit/e2e lab that is not a
+ *   marketing tile uses it too and still boots a bundle.
  */
 
 import { matrixPages } from "./matrix.mjs";
@@ -87,7 +88,12 @@ export const REPLACED_PAGES = [
 export const SHOWCASE_PAGES = [
   { key: "main", html: "./index.html", route: "/demo/", indexable: true },
   demo("all-options"),
-  // The adapter × feature matrix — a landing plus eighteen feature pages per
+  // Optional AI chrome — built for kit/e2e coverage, not a marketing tile.
+  demo("agent-approval", { indexable: false }),
+  // The view an MCP host embeds in an iframe. Built so the handshake and the
+  // tools/call path are exercisable; not a page anybody browses to.
+  demo("mcp-app", { indexable: false }),
+  // The adapter × feature matrix — a landing plus the matrix feature pages per
   // built adapter, expanded from `matrix.mjs`.
   ...matrixPages().map((page) => demo(page.dir)),
   // The addresses those pages replaced.

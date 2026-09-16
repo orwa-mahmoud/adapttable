@@ -1,5 +1,6 @@
-import type { TableLabels, UseSavedViewsOptions } from "@adapttable/core";
-import { useSavedViews } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
+import { useEscapeClose } from "@adapttable/react/adapter";
 import {
   ActionIcon,
   Box,
@@ -12,7 +13,6 @@ import {
 import { useState } from "react";
 
 import { CloseIcon } from "../icons";
-import { useEscapeClose } from "./useEscapeClose";
 
 /**
  * The label strings the saved-views menu renders.
@@ -72,7 +72,7 @@ export function SavedViewsMenu({
       withinPortal
       returnFocus
       zIndex={10050}
-      middlewares={{ flip: false, shift: { padding: 8, mainAxis: false } }}
+      middlewares={{ flip: false, shift: { padding: 8 } }}
     >
       <Popover.Target>
         <Button

@@ -2,8 +2,13 @@
  * Ant Design kit controls — Input / Select / Button / Checkbox.
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
-import { filterLabel, useHeaderFilterOverlay } from "@adapttable/core";
+import { filterLabel } from "@adapttable/core";
+import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
+  type AgentApprovalButtonProps,
+  AgentApprovalChrome,
+  type AgentApprovalListProps,
+  type AgentApprovalProps,
   BatchEditBarChrome,
   type BatchEditBarProps,
   type BatchEditButtonProps,
@@ -31,9 +36,11 @@ import {
   type GroupMoreButtonProps,
   type GroupMoreButtonSlotProps,
   hasActiveHeaderFilter,
+  restoreFocusSoon,
   RowEditActionsChrome,
   type RowEditActionsProps,
   type RowEditButtonProps,
+  type RowMoveMenuSlotProps,
   RowReorderButtonsChrome,
   type RowReorderButtonsProps,
   RowReorderHandleChrome,
@@ -46,14 +53,30 @@ import {
   TreeToggleChrome,
   type TreeToggleProps,
   type TreeToggleSlots,
-} from "@adapttable/core/adapter";
-import { Button, Checkbox, Dropdown, Input, Popover, Select } from "antd";
-import { type ReactNode } from "react";
+} from "@adapttable/react/adapter";
+import {
+  Button,
+  Checkbox,
+  Dropdown,
+  Input,
+  Popover,
+  Select,
+  Typography,
+} from "antd";
+import {
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 
-import { FiltersIcon } from "../icons";
+import { FiltersIcon, iconForRowEditPart } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
 
 export type {
+  AgentApprovalProps,
   BatchEditBarProps,
   ColumnGroupToggleProps,
   FilterHeaderControlProps,
@@ -90,7 +113,7 @@ function HeaderSearch({
   value,
   className,
   onChange,
-}: FilterHeaderSearchProps) {
+}: Readonly<FilterHeaderSearchProps>) {
   return (
     <Input
       size="small"
@@ -111,7 +134,7 @@ function HeaderSelect({
   options,
   className,
   onChange,
-}: FilterHeaderSelectProps) {
+}: Readonly<FilterHeaderSelectProps>) {
   return (
     <Select
       size="small"
@@ -198,7 +221,7 @@ function HeaderMulti({
   className,
   menuClassName,
   onToggle,
-}: FilterHeaderMultiProps) {
+}: Readonly<FilterHeaderMultiProps>) {
   return (
     <Dropdown
       trigger={["click"]}
@@ -274,45 +297,86 @@ export function FilterHeaderTrigger<TRow>(
   props: Readonly<FilterHeaderControlProps<TRow>>
 ) {
   const active = hasActiveHeaderFilter(props);
+  const triggerRef = useRef<HTMLSpanElement>(null);
+  const [anchor, setAnchor] = useState<{ top: number; left: number } | null>(
+    null
+  );
   const { open, setOpen, source, sessionProps } = useHeaderFilterOverlay(
     props,
     {
-      nestedSelector: ".ant-popover,.ant-select-dropdown,.ant-picker-dropdown",
+      nestedSelector:
+        ".ant-dropdown,.ant-select-dropdown,.ant-picker-dropdown,[role='listbox']",
     }
   );
+  useLayoutEffect(() => {
+    if (!open) {
+      setAnchor(null);
+      return;
+    }
+    const update = (): void => {
+      const box = triggerRef.current?.getBoundingClientRect();
+      if (box == null) return;
+      setAnchor({ top: box.bottom + 4, left: box.left });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [open]);
   return (
-    <Popover
-      trigger={[]}
-      open={open}
-      placement="bottomLeft"
-      destroyOnHidden
-      content={
-        <div
-          {...sessionProps}
-          data-adapttable-part="filter-header-cell"
-          style={{ minWidth: "20rem" }}
-        >
-          <AutoFilterForm
-            defs={[props.def]}
-            source={source}
-            labels={props.labels}
-            registry={props.registry}
-          />
-        </div>
-      }
-    >
-      <Button
+    <>
+      <span
         {...sessionProps}
-        type={active ? "primary" : "text"}
-        size="small"
-        aria-label={filterLabel(props.def)}
-        data-adapttable-part="filter-header-trigger"
-        data-active={active ? "" : undefined}
-        onClick={() => setOpen(!open)}
+        ref={triggerRef}
+        style={{ display: "inline-flex" }}
       >
-        <FiltersIcon size={14} />
-      </Button>
-    </Popover>
+        <Button
+          type={active ? "primary" : "text"}
+          size="small"
+          aria-label={filterLabel(props.def)}
+          data-adapttable-part="filter-header-trigger"
+          data-active={active ? "" : undefined}
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            setOpen(!open);
+          }}
+        >
+          <FiltersIcon size={14} />
+        </Button>
+      </span>
+      {open &&
+        anchor != null &&
+        createPortal(
+          <div
+            {...sessionProps}
+            data-adapttable-part="filter-header-cell"
+            style={{
+              position: "fixed",
+              top: anchor.top,
+              left: anchor.left,
+              zIndex: 1050,
+              minWidth: "20rem",
+              padding: 12,
+              background: "var(--ant-color-bg-elevated, #fff)",
+              boxShadow:
+                "var(--ant-box-shadow-secondary, 0 6px 16px rgba(0,0,0,0.08))",
+              borderRadius: 8,
+            }}
+          >
+            <AutoFilterForm
+              defs={[props.def]}
+              source={source}
+              labels={props.labels}
+              registry={props.registry}
+            />
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
 
@@ -323,7 +387,7 @@ function FindSearch({
   focusRef,
   onChange,
   onKeyDown,
-}: FindSearchProps) {
+}: Readonly<FindSearchProps>) {
   return (
     <Input
       ref={focusRef}
@@ -372,19 +436,22 @@ export function FindBar(props: Readonly<FindBarProps>) {
 function RowEditButton({
   label,
   part,
+  icon,
   className,
   onClick,
-}: RowEditButtonProps) {
+}: Readonly<RowEditButtonProps>) {
+  const glyph = iconForRowEditPart(part, icon);
   return (
     <Button
-      type="default"
+      type="text"
       size="small"
       data-adapttable-part={part}
       className={className}
       aria-label={label}
+      title={glyph ? label : undefined}
       onClick={onClick}
     >
-      {label}
+      {glyph ?? label}
     </Button>
   );
 }
@@ -405,7 +472,7 @@ function BatchButton({
   part,
   className,
   onClick,
-}: BatchEditButtonProps) {
+}: Readonly<BatchEditButtonProps>) {
   return (
     <Button
       type="default"
@@ -428,13 +495,72 @@ export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>) {
   return <BatchEditBarChrome {...props} slots={{ Button: BatchButton }} />;
 }
 
+function ApprovalList({
+  part,
+  label,
+  className,
+  children,
+}: Readonly<AgentApprovalListProps>) {
+  return (
+    // A real list: its children are the proposed changes, one <li> each, and
+    // the element carries that everywhere rather than only where ARIA does.
+    <ul
+      data-adapttable-part={part}
+      aria-label={label}
+      className={className}
+      style={{ listStyle: "none", margin: 0, padding: 0 }}
+    >
+      {children}
+    </ul>
+  );
+}
+
+/**
+ * Approve or reject a pending agent write.
+ *
+ * @public
+ */
+function ApprovalAction({
+  label,
+  part,
+  className,
+  onClick,
+}: Readonly<AgentApprovalButtonProps>) {
+  return (
+    <Button
+      htmlType="button"
+      size="small"
+      type="link"
+      data-adapttable-part={part}
+      className={className}
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  );
+}
+
+export function AgentApproval(props: Readonly<AgentApprovalProps>) {
+  return (
+    <AgentApprovalChrome
+      {...props}
+      slots={{
+        Approve: BatchButton,
+        Reject: BatchButton,
+        List: ApprovalList,
+        Action: ApprovalAction,
+      }}
+    />
+  );
+}
+
 function TreeButton({
   label,
   expanded,
   loading,
   className,
   onClick,
-}: TreeToggleButtonProps) {
+}: Readonly<TreeToggleButtonProps>) {
   return (
     <Button
       type="text"
@@ -486,7 +612,7 @@ function GroupToggleButton({
   expanded,
   className,
   onClick,
-}: ColumnGroupToggleButtonProps) {
+}: Readonly<ColumnGroupToggleButtonProps>) {
   return (
     <Button
       type="text"
@@ -544,10 +670,11 @@ function ReorderHandle({
   label,
   pressed,
   dragging,
+  disabled,
   className,
   dragProps,
   onKeyDown,
-}: RowReorderHandleSlotProps) {
+}: Readonly<RowReorderHandleSlotProps>) {
   return (
     <Button
       type="text"
@@ -558,12 +685,155 @@ function ReorderHandle({
       className={className}
       aria-label={label}
       aria-pressed={pressed}
+      disabled={disabled}
       style={{ cursor: pressed ? "grabbing" : "grab" }}
       {...dragProps}
       onKeyDown={onKeyDown}
     >
       <GripIcon />
     </Button>
+  );
+}
+
+function RowMoveMenu({
+  label,
+  items,
+  confirmation,
+}: Readonly<RowMoveMenuSlotProps>) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const confirmationRef = useRef(confirmation);
+  confirmationRef.current = confirmation;
+  useEffect(() => {
+    if (confirmation) setOpen(true);
+  }, [confirmation]);
+
+  const restoreTriggerFocus = () => {
+    queueMicrotask(() => restoreFocusSoon(triggerRef.current));
+  };
+  const close = () => {
+    setOpen(false);
+    restoreTriggerFocus();
+  };
+
+  const content = (
+    <div
+      role={confirmation ? undefined : "menu"}
+      aria-label={confirmation ? undefined : label}
+      data-adapttable-part="row-move-menu-content"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 4,
+        minWidth: "12rem",
+      }}
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          // Closing the popover is the single cancel path: its
+          // `onOpenChange` abandons the pending move.
+          close();
+        }
+      }}
+    >
+      {confirmation ? (
+        <div
+          role="alertdialog"
+          aria-label={confirmation.title}
+          data-adapttable-part="row-move-confirmation"
+          style={{ display: "flex", flexDirection: "column", gap: 8 }}
+        >
+          <Typography.Text strong>{confirmation.title}</Typography.Text>
+          <Typography.Text>{confirmation.description}</Typography.Text>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <Button
+              size="small"
+              onClick={() => {
+                confirmation.onCancel();
+                close();
+              }}
+            >
+              {confirmation.cancelLabel}
+            </Button>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => {
+                confirmation.onConfirm();
+                close();
+              }}
+            >
+              {confirmation.confirmLabel}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        items.map((item) => (
+          <Button
+            key={item.id}
+            type="text"
+            role="menuitem"
+            block
+            disabled={item.disabled}
+            title={item.disabledReason}
+            data-adapttable-part="row-move-menu-item"
+            style={{ height: "auto", textAlign: "start", whiteSpace: "normal" }}
+            onClick={() => {
+              item.onSelect();
+              setTimeout(() => {
+                if (!confirmationRef.current) close();
+              }, 0);
+            }}
+          >
+            <span
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+              }}
+            >
+              <Typography.Text>{item.label}</Typography.Text>
+              {item.disabledReason ? (
+                <Typography.Text type="secondary">
+                  {item.disabledReason}
+                </Typography.Text>
+              ) : null}
+            </span>
+          </Button>
+        ))
+      )}
+    </div>
+  );
+
+  return (
+    <span data-adapttable-part="row-move-menu">
+      <Popover
+        open={open}
+        trigger="click"
+        placement="bottomLeft"
+        content={content}
+        destroyOnHidden
+        onOpenChange={(next) => {
+          if (!next) {
+            confirmationRef.current?.onCancel();
+            restoreTriggerFocus();
+          }
+          setOpen(next);
+        }}
+      >
+        <Button
+          ref={triggerRef}
+          type="text"
+          size="small"
+          aria-label={label}
+          data-adapttable-part="row-move-menu-trigger"
+          onClick={(event) => event.stopPropagation()}
+        >
+          ⋮
+        </Button>
+      </Popover>
+    </span>
   );
 }
 
@@ -576,7 +846,10 @@ export function RowReorderHandle<TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
 ) {
   return (
-    <RowReorderHandleChrome {...props} slots={{ Handle: ReorderHandle }} />
+    <RowReorderHandleChrome
+      {...props}
+      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
+    />
   );
 }
 
@@ -586,7 +859,7 @@ function ReorderMove({
   disabled,
   className,
   onClick,
-}: RowReorderMoveButtonProps) {
+}: Readonly<RowReorderMoveButtonProps>) {
   return (
     <Button
       type="text"
@@ -610,7 +883,12 @@ function ReorderMove({
 export function RowReorderButtons<TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
 ) {
-  return <RowReorderButtonsChrome {...props} slots={{ Button: ReorderMove }} />;
+  return (
+    <RowReorderButtonsChrome
+      {...props}
+      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
+    />
+  );
 }
 
 function ActivateCell({
@@ -623,7 +901,7 @@ function ActivateCell({
   onDoubleClick,
   onClick,
   onKeyDown,
-}: EditableCellActivateProps) {
+}: Readonly<EditableCellActivateProps>) {
   return (
     <button
       ref={activateRef}
@@ -650,7 +928,7 @@ function EditGateButton({
   className,
   onMouseDown,
   onClick,
-}: EditableCellButtonProps) {
+}: Readonly<EditableCellButtonProps>) {
   return (
     <Button
       type="default"

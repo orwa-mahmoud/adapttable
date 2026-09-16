@@ -1,12 +1,16 @@
 /** Coverage gap-fill: drawer close, footer limit, page label, virtual rows, row select. */
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
+import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { bulkActions as bulkActionsFeature } from "./bulk-actions";
+import { columnMenu } from "./column-menu";
 import { LoadingState } from "./components/TableSkeleton";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
+import { filters as filtersFeature } from "./filters";
 import type { ColumnDef } from "./index";
+import { virtualize } from "./virtualize";
 
 interface Row {
   id: string;
@@ -22,19 +26,19 @@ const columns: ColumnDef<Row>[] = [
 ];
 const theme = createTheme();
 
-import type * as AdapterModule from "@adapttable/core/adapter";
+import type * as AdapterModule from "@adapttable/react/adapter";
 import {
   useDataTableShell,
   type VirtualTableRow,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
-vi.mock("@adapttable/core/adapter", async (importOriginal) => {
+vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
   return { ...actual, useDataTableShell: vi.fn(actual.useDataTableShell) };
 });
 
 const actualAdapter = await vi.importActual<typeof AdapterModule>(
-  "@adapttable/core/adapter"
+  "@adapttable/react/adapter"
 );
 
 /**
@@ -50,6 +54,7 @@ function mockBodyData(
     const real = actualAdapter.useDataTableShell(props, render);
     return {
       ...real,
+      skipChromeBody: true,
       tableProps: {
         ...real.tableProps,
         rowEntries: rows,
@@ -103,7 +108,10 @@ function mount(
 
 describe("MUI coverage gaps", () => {
   it("renders the filter popover with NO modal backdrop/scrim", () => {
-    mount({ filters: <div>filter body</div> });
+    mount({
+      filters: <div>filter body</div>,
+      features: [filtersFeature<Row>([])],
+    });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(screen.getByText("filter body")).toBeInTheDocument();
     // The popover is a non-modal Popper, so the background stays interactive:
@@ -114,7 +122,10 @@ describe("MUI coverage gaps", () => {
   });
 
   it("closes the filter popover on outside click (ClickAwayListener)", async () => {
-    mount({ filters: <div>filter body</div> });
+    mount({
+      filters: <div>filter body</div>,
+      features: [filtersFeature<Row>([])],
+    });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(screen.getByText("filter body")).toBeInTheDocument();
     // ClickAwayListener arms its outside-click guard on the next tick.
@@ -129,7 +140,10 @@ describe("MUI coverage gaps", () => {
   });
 
   it("closes the filter popover on Escape (and only Escape)", async () => {
-    mount({ filters: <div>filter body</div> });
+    mount({
+      filters: <div>filter body</div>,
+      features: [filtersFeature<Row>([])],
+    });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     const body = screen.getByText("filter body");
     // The document-level listener must ignore every other key — typing in a
@@ -147,6 +161,7 @@ describe("MUI coverage gaps", () => {
     mount(
       {
         filters: <div>filter body</div>,
+        features: [filtersFeature<Row>([])],
         filterLabels: { status: (v) => `Status: ${v}` },
         onClearFilters,
       },
@@ -165,6 +180,7 @@ describe("MUI coverage gaps", () => {
       {
         filters: <div>filter body</div>,
         filtersMode: "drawer",
+        features: [filtersFeature<Row>([])],
         filterLabels: { status: (v) => `Status: ${v}` },
         onClearFilters,
       },
@@ -181,7 +197,11 @@ describe("MUI coverage gaps", () => {
   });
 
   it("closes the filter drawer from its Done button", async () => {
-    mount({ filters: <div>filter body</div>, filtersMode: "drawer" });
+    mount({
+      filters: <div>filter body</div>,
+      filtersMode: "drawer",
+      features: [filtersFeature<Row>([])],
+    });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(screen.getByText("filter body")).toBeInTheDocument();
     // The drawer's Done button hands control back to DataTable, which flips
@@ -242,7 +262,11 @@ describe("MUI coverage gaps", () => {
   });
 
   it("toggles a desktop row's selection checkbox", () => {
-    mount({ bulkActions: [{ key: "x", label: "X", onClick: vi.fn() }] });
+    const actions = [{ key: "x", label: "X", onClick: vi.fn() }];
+    mount({
+      bulkActions: actions,
+      features: [bulkActionsFeature(actions)],
+    });
     const rowChecks = screen.getAllByLabelText("Select row");
     fireEvent.click(rowChecks[0]!);
     expect(screen.getByText("1 selected")).toBeInTheDocument();
@@ -266,7 +290,7 @@ describe("MUI coverage gaps", () => {
   });
 
   it("opens and closes the column menu popover", async () => {
-    mount({ enableColumnMenu: true });
+    mount({ enableColumnMenu: true, features: [columnMenu()] });
     fireEvent.click(screen.getByRole("button", { name: "Columns" }));
     await screen.findByText("Reset columns");
     fireEvent.click(document.querySelector(".MuiBackdrop-root")!);
@@ -381,6 +405,7 @@ describe("MUI coverage gaps", () => {
     mount({
       filters: <div>filter body</div>,
       filtersMode: "drawer",
+      features: [filtersFeature<Row>([])],
       dir: "rtl",
     });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
@@ -394,7 +419,11 @@ describe("MUI coverage gaps", () => {
   });
 
   it("anchors the RTL filter popover (bottom-start) with no backdrop", () => {
-    mount({ filters: <div>filter body</div>, dir: "rtl" });
+    mount({
+      filters: <div>filter body</div>,
+      features: [filtersFeature<Row>([])],
+      dir: "rtl",
+    });
     fireEvent.click(screen.getByRole("button", { name: /filters/i }));
     expect(screen.getByText("filter body")).toBeInTheDocument();
     // dir="rtl" flips the Popper placement to bottom-start; it stays non-modal.
@@ -411,7 +440,14 @@ describe("MUI coverage gaps", () => {
     // paddingBottom > 0 → the trailing `paddingBottom > 0 &&` spacer renders
     // (MobileCards true branch). paddingTop is 0 so only the bottom spacer.
     mockBodyData([{ row: ROWS[1]!, index: 1, key: "b" }], 0, 80);
-    mount({ forceMobile: true, virtualize: true }, "infinite");
+    mount(
+      {
+        forceMobile: true,
+        virtualize: true,
+        features: [virtualize()],
+      },
+      "infinite"
+    );
     const list = screen.getByRole("list");
     expect(within(list).getByText("Bob")).toBeInTheDocument();
     // The list's direct spacer children: a bottom spacer (height 80) but no top
@@ -444,6 +480,8 @@ describe("MUI coverage gaps", () => {
 describe("MUI density → table size", () => {
   // MUI threads the table `size` down to every cell as a `MuiTableCell-size*`
   // modifier class, which is the stable signal for the rendered density.
+  // `density` is the only input: v3 removed the `size` prop that used to
+  // override it, so these three cover the whole mapping.
   it("maps density='compact' to the small MUI table", () => {
     const { container } = mount({ density: "compact" });
     const cell = container.querySelector("tbody td");
@@ -460,15 +498,6 @@ describe("MUI density → table size", () => {
 
   it("defaults to the medium MUI table when density is omitted", () => {
     const { container } = mount();
-    const cell = container.querySelector("tbody td");
-    expect(cell).toHaveClass("MuiTableCell-sizeMedium");
-    expect(cell).not.toHaveClass("MuiTableCell-sizeSmall");
-  });
-
-  it("lets an explicit size prop win over density (back-compat)", () => {
-    // Pre-density callers passed MUI's `size` directly; it must still take
-    // precedence so upgrading does not change their rendered table.
-    const { container } = mount({ size: "medium", density: "compact" });
     const cell = container.querySelector("tbody td");
     expect(cell).toHaveClass("MuiTableCell-sizeMedium");
     expect(cell).not.toHaveClass("MuiTableCell-sizeSmall");

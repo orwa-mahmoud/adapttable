@@ -7,7 +7,7 @@ import {
   type SavedViewsPanelRowProps,
   type SavedViewsPanelSlots,
   type SavedViewsPanelSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import type { CSSProperties } from "react";
 
 import type { DataTableClassNames } from "../types";
@@ -39,7 +39,7 @@ function Row({
   controls,
   layout,
   ...rest
-}: SavedViewsPanelRowProps) {
+}: Readonly<SavedViewsPanelRowProps>) {
   const { viewsRow, viewsItem, viewsDelete } = useClassNames();
   return (
     <div className={viewsRow} style={layout.row} {...rest}>
@@ -100,7 +100,7 @@ function Input({
   onChange,
   onCommit,
   onCancel,
-}: SavedViewsPanelInputProps) {
+}: Readonly<SavedViewsPanelInputProps>) {
   const { viewsInput } = useClassNames();
   return (
     <input

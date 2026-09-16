@@ -1,7 +1,6 @@
-import { act, renderHook } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { PIN_Z } from "../columns/useColumnLayout";
+import { PIN_Z } from "../columns/columnLayoutModel";
 import {
   orderedCardEntries,
   PINNED_BOTTOM_PART,
@@ -10,7 +9,6 @@ import {
   pinnedRowPart,
   pinnedRowSticky,
   pinnedRowStickyStyle,
-  useOffsetHeight,
 } from "./pinnedRowChrome";
 
 describe("pinnedRowPart", () => {
@@ -89,52 +87,25 @@ describe("orderedCardEntries", () => {
     expect(next.map((e) => e.key)).toEqual(["c", "b", "a"]);
     expect(next[0]?.sourceIndex).toBe(2);
   });
-});
 
-describe("useOffsetHeight", () => {
-  afterEach(() => vi.unstubAllGlobals());
-
-  it("starts at zero before an element is attached", () => {
-    const { result } = renderHook(() => useOffsetHeight());
-    expect(result.current[1]).toBe(0);
-    expect(PINNED_TOP_PART).toBe("pinned-top");
-    expect(PINNED_BOTTOM_PART).toBe("pinned-bottom");
-  });
-
-  it("reads the attached node and follows ResizeObserver", () => {
-    let callback: ResizeObserverCallback | undefined;
-    class FakeResizeObserver {
-      constructor(cb: ResizeObserverCallback) {
-        callback = cb;
-      }
-      observe() {
-        // the hook only needs the constructor + disconnect
-      }
-      disconnect() {
-        callback = undefined;
-      }
-      unobserve() {
-        // unused
-      }
-    }
-    vi.stubGlobal("ResizeObserver", FakeResizeObserver);
-    const node = document.createElement("thead");
-    vi.spyOn(node, "getBoundingClientRect").mockReturnValue({
-      height: 40,
-    } as DOMRect);
-    const { result, unmount } = renderHook(() => useOffsetHeight());
-    act(() => {
-      result.current[0](node);
-    });
-    expect(result.current[1]).toBe(40);
-    vi.spyOn(node, "getBoundingClientRect").mockReturnValue({
-      height: 56,
-    } as DOMRect);
-    act(() => {
-      callback?.([], {} as ResizeObserver);
-    });
-    expect(result.current[1]).toBe(56);
-    unmount();
-    expect(callback).toBeUndefined();
+  it("wraps host summary objects outside lifted pins", () => {
+    const totals = { id: "totals", name: "Totals" };
+    const grand = { id: "grand", name: "Grand" };
+    const next = orderedCardEntries(
+      rows,
+      id,
+      undefined,
+      [rows[2]!],
+      [rows[0]!],
+      [totals],
+      [grand]
+    );
+    expect(next.map((e) => e.key)).toEqual([
+      "adapttable:pinned-summary:top:0",
+      "c",
+      "b",
+      "a",
+      "adapttable:pinned-summary:bottom:0",
+    ]);
   });
 });

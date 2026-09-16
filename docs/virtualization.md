@@ -1,4 +1,4 @@
-# React table virtualization — 50,000 rows, ~24 DOM nodes
+# React table virtualization — rows, columns and mobile cards
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
@@ -134,9 +134,11 @@ loaded laptop as an idle one, which is what makes them worth publishing: run
 ## Notes
 
 - Virtualization is optional — leave it off for small lists or paged tables.
-- Combining `virtualize` with `renderRowDetail` is not recommended: desktop
-  detail panels render as unmeasured sibling rows, so scroll heights can drift
-  (a dev-mode warning says so). Prefer paged data with row details.
+- `virtualize` and `renderRowDetail` work together. A `<tr>` cannot contain the
+  panel that belongs to it, so an open detail renders as a sibling row — and the
+  pair is measured as a pair, with the combined height handed to the virtualizer.
+  A panel that grows later (an image loading, a nested table expanding) corrects
+  its item's size when it does, so scroll positions hold.
 - The headless hook is exported as `useTableVirtualization` for custom markup;
   when disabled it returns every row with no spacers, so one render path
   serves both cases.

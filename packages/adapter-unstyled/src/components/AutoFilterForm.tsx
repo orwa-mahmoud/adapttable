@@ -1,9 +1,7 @@
 import {
-  CHECKLIST_LIST_HEIGHT,
   defaultFilterRegistry,
   type FilterDef,
   filterLabel,
-  filterOpLabel,
   type FilterTypeRegistry,
   type FilterValue,
   filterWidgetKind,
@@ -15,11 +13,15 @@ import {
   splitRelativeToken,
   type TableLabels,
   type TableSource,
+} from "@adapttable/core";
+import {
+  CHECKLIST_LIST_HEIGHT,
+  filterOpLabel,
   useBooleanFilterWidget,
   useFilterOptions,
   useRangeFilterWidget,
   useTextFilterWidget,
-} from "@adapttable/core";
+} from "@adapttable/react";
 import {
   type CSSProperties,
   type ReactElement,
@@ -468,7 +470,7 @@ function FilterField<TRow>({
 }: Readonly<FilterFieldProps<TRow>>): ReactElement | null {
   const spec = registry.get(def.type);
   const custom = renderRegisteredFilter(def, source, labels, registry);
-  if (custom) return custom;
+  if (custom) return custom as ReactElement;
   switch (spec?.widget ?? filterWidgetKind(def, registry)) {
     case "text":
       return (

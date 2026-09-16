@@ -1,5 +1,9 @@
-import { createMemoryAdapter, useFrontendData } from "@adapttable/core";
-import { sparklineColumn } from "@adapttable/core/sparkline";
+import {
+  createMemoryAdapter,
+  type TableErrorState,
+  useFrontendData,
+} from "@adapttable/react";
+import { sparklineColumn } from "@adapttable/react/sparkline";
 import {
   act,
   fireEvent,
@@ -10,7 +14,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -328,7 +332,7 @@ describe("<DataTable> (Base UI)", () => {
       refetch,
       override: {
         slots: {
-          error: (state) => (
+          error: (state: TableErrorState) => (
             <output>
               mine: {state.error.message}
               <button type="button" onClick={state.retry}>

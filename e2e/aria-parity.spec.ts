@@ -53,8 +53,25 @@ const ATTRIBUTES = {
   header: ["scope", "aria-sort"],
 } as const;
 
-/** Pages chosen for their table state: one plain, one a keyboard grid. */
-const PAGES = ["all-options", "accessibility"] as const;
+/**
+ * What `getHeaderCellProps` states about every header cell, in every kit.
+ *
+ * These are not kit choices: core computes them and each adapter has to put
+ * them on its own header element. Two kits spread the whole object and six
+ * read named fields off it, so `role` and `scope` reached half the kits until
+ * every kit was made to pass the object through whole.
+ */
+const HEADER_CONTRACT = {
+  role: "columnheader",
+  scope: "col",
+} as const;
+
+/**
+ * Pages chosen for their table state: one plain, one a keyboard grid. Both are
+ * per-kit routes — the Feature Lab is one page with a kit switcher, so it has
+ * no `/<kit>/all-options/` to compare eight of.
+ */
+const PAGES = ["columns", "accessibility"] as const;
 
 for (const page of PAGES) {
   test(`${page}: every kit describes the table the same way`, async ({
@@ -71,10 +88,13 @@ for (const page of PAGES) {
             Object.fromEntries(
               names.map((name) => [name, el?.getAttribute(name) ?? null])
             );
-          // The table holding the ROWS: antd splits header and body into two
-          // <table> elements, and the first in the document is its header.
+          // The accessible TABLE or GRID that owns the rows. antd splits
+          // header and body into two <table>s; with cell navigation the
+          // grid role sits on the wrapper around both, so attributes live
+          // there rather than on the body table.
           const row = document.querySelector('[data-adapttable-part="row"]');
-          const table = row?.closest("table") ?? null;
+          const grid = row?.closest('[role="grid"]');
+          const table = grid ?? row?.closest("table") ?? null;
           const cell = document.querySelector('[data-adapttable-part="cell"]');
           const header = document.querySelector(
             '[data-adapttable-part="header-cell"]'
@@ -103,6 +123,35 @@ for (const page of PAGES) {
         shapes.get(kit),
         `${kit} describes the table differently from ${reference}`
       ).toEqual(shapes.get(reference!));
+    }
+  });
+
+  test(`${page}: every kit renders the header props core states`, async ({
+    page: browser,
+  }) => {
+    // Comparing kits to each other cannot see this: eight kits all missing a
+    // prop core computes agree perfectly. So this one asserts CONFORMANCE —
+    // each kit against the contract, not against its siblings — which is the
+    // guarantee that lets core state something new about a header cell and
+    // have it arrive everywhere.
+    for (const kit of KITS) {
+      await browser.goto(`/${kit}/${page}/`);
+      await browser.locator("table").first().waitFor({ state: "visible" });
+      const header = browser
+        .locator('[data-adapttable-part="header-cell"]')
+        .first();
+      for (const [name, value] of Object.entries(HEADER_CONTRACT)) {
+        await expect(
+          header,
+          `${kit} drops ${name} from the header props core states`
+        ).toHaveAttribute(name, value);
+      }
+      // Not a fixed value — what matters is that the key core computes is on
+      // the element at all, whatever this page's first column happens to be.
+      await expect(
+        header,
+        `${kit} drops data-column-key from the header props core states`
+      ).toHaveAttribute("data-column-key", /.+/);
     }
   });
 
@@ -275,6 +324,10 @@ test("every kit names every control in the saved-views panel", async ({
       shape.unnamed,
       `${kit} has unnamed controls in the saved-views panel`
     ).toEqual([]);
+    expect(
+      shape.controls,
+      `${kit} saved-views panel exposes no named controls`
+    ).toBeGreaterThan(0);
     shapes.set(kit, shape);
   }
 
@@ -357,8 +410,15 @@ test("every kit exposes the same command palette", async ({ page }) => {
       `${kit} opens a command palette with no accessible name`
     ).toHaveCount(1);
 
+    const combobox = dialog.getByRole("combobox");
+    await expect(
+      combobox,
+      `${kit} command palette has no named combobox`
+    ).toHaveAccessibleName(/search commands/i);
+
     shapes.set(kit, {
-      combobox: await dialog.getByRole("combobox").count(),
+      combobox: await combobox.count(),
+      comboboxName: (await combobox.getAttribute("aria-label")) ?? "",
       listboxes: await dialog.getByRole("listbox").count(),
       options: await dialog.getByRole("option").count(),
       unnamedOptions: await dialog
@@ -424,4 +484,81 @@ test("every kit exposes the same find bar", async ({ page }) => {
   }
 
   assertOneShape(shapes, "find bar");
+});
+
+/**
+ * Header association is a RELATIONSHIP, not a role count.
+ *
+ * With a sticky header antd renders two `<table>` elements. The grid role
+ * sits on the wrapper around both so every `gridcell` and every
+ * `columnheader` belong to the same accessible grid. Turning sticky off, or
+ * announcing a header twice (`headers`/`id` or `aria-labelledby` onto a
+ * header that is already a columnheader), is a failing route.
+ *
+ * Playwright's roles are the accessibility tree, so any standards-valid
+ * relationship counts — containment is how this one holds.
+ */
+test("every body gridcell shares its columnheader with the same grid", async ({
+  page,
+}) => {
+  test.setTimeout(180_000);
+  for (const kit of KITS) {
+    await page.goto(`/${kit}/accessibility/`);
+    const grid = page.getByRole("grid").first();
+    await expect(grid, `${kit} accessibility page has no grid`).toBeVisible();
+
+    if (kit === "antd") {
+      await expect(
+        page.locator(".ant-table-sticky-holder"),
+        "antd association must be proven with sticky headers ON"
+      ).toBeVisible();
+    }
+
+    const headers = grid.getByRole("columnheader");
+    const cells = grid.getByRole("gridcell");
+    const headerCount = await headers.count();
+    const cellCount = await cells.count();
+    expect(headerCount, `${kit} grid has no columnheaders`).toBeGreaterThan(0);
+    expect(cellCount, `${kit} grid has no gridcells`).toBeGreaterThan(0);
+
+    const pageHeaderCount = await page.getByRole("columnheader").count();
+    expect(
+      pageHeaderCount,
+      `${kit} announces columnheaders outside the accessible grid`
+    ).toBe(headerCount);
+
+    const headerCountInGrid = headerCount;
+    const mapping = await cells.evaluateAll((nodes, count) => {
+      return nodes.map((node) => {
+        const index = Number(node.getAttribute("aria-colindex"));
+        return {
+          index,
+          inGrid: index >= 1 && index <= count,
+          headersAttr: node.getAttribute("headers"),
+        };
+      });
+    }, headerCountInGrid);
+
+    const addressed = mapping.filter((entry) => entry.index >= 1);
+    expect(
+      addressed.length,
+      `${kit} gridcells carry no aria-colindex`
+    ).toBeGreaterThan(0);
+    expect(
+      addressed.every((entry) => entry.inGrid),
+      `${kit} has a gridcell whose columnheader is not in the same grid`
+    ).toBe(true);
+    expect(
+      addressed.every((entry) => !entry.headersAttr),
+      `${kit} points gridcells at another table via headers= (W3C ACT a25f45)`
+    ).toBe(true);
+
+    const snapshot = await grid.ariaSnapshot();
+    expect(snapshot, `${kit} grid snapshot missing columnheader`).toMatch(
+      /columnheader/i
+    );
+    expect(snapshot, `${kit} grid snapshot missing gridcell`).toMatch(
+      /gridcell/i
+    );
+  }
 });

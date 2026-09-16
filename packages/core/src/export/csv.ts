@@ -1,4 +1,4 @@
-import type { ColumnDef } from "../types";
+import type { ColumnMetadata } from "../columnModel";
 import { isBrowser } from "../utils/env";
 
 /**
@@ -12,7 +12,7 @@ export interface RowsToCsvOptions<TRow> {
    * yields a primitive, falling back to `sortValue`, else an empty string —
    * so JSX cells export their underlying value instead of `[object Object]`.
    */
-  getValue?: (row: TRow, column: ColumnDef<TRow>) => unknown;
+  getValue?: (row: TRow, column: ColumnMetadata<TRow>) => unknown;
   /** Field delimiter. Defaults to `","`. */
   delimiter?: string;
   /**
@@ -83,8 +83,12 @@ function isTypedCell(value: unknown): boolean {
  */
 export function defaultCsvValue<TRow>(
   row: TRow,
-  column: ColumnDef<TRow>
+  column: ColumnMetadata<TRow>
 ): unknown {
+  const fromExport = column.exportValue?.(row);
+  if (isTypedCell(fromExport)) return fromExport;
+  // What the column reads is the value the table shows. A binding that drew
+  // something instead of returning data fails `isTypedCell` and falls through.
   const fromAccessor = column.accessor?.(row);
   if (isTypedCell(fromAccessor)) return fromAccessor;
   const fromSort = column.sortValue?.(row);
@@ -107,7 +111,7 @@ export function defaultCsvValue<TRow>(
  */
 export function rowsToCsv<TRow>(
   rows: readonly TRow[],
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   options: RowsToCsvOptions<TRow> = {}
 ): string {
   const { getValue = defaultCsvValue } = options;

@@ -43,10 +43,12 @@ const FEATURES = {
   pivot: /pivot/i,
   "row-reordering": /row reorder/i,
   "row-pinning": /row pinn/i,
+  "pinned-summary-rows": /pinned summary|summary row/i,
   "row-spanning": /row (and column )?spann|cell spann/i,
   "full-width-rows": /full-width|separator row|extraRows/i,
   "row-styling": /rowStyle|rowHeight|row styl/i,
   "export-pdf": /pdf export|print layout|pdfWriter/i,
+  exporting: /export/i,
   formulas: /formula engine|spreadsheet formula/i,
   sparkline: /sparkline/i,
   "saved-views": /saved view/i,
@@ -92,9 +94,14 @@ const IGNORED = new Set([
   "data-tiers",
   "faq",
   "getting-started",
+  "limitations",
   // Its own package (`@adapttable/server`), not something an adapter ships —
   // every adapter README claiming it would be a promise none of them keep.
   "server-queries",
+  "agent-capabilities",
+  "ai",
+  "ai-integrations",
+  "ai-http",
   "url-state",
   // Whole-table quality, not an opt-in feature — lives under Beyond the table.
   "accessibility",

@@ -110,9 +110,16 @@ describe("buildTreeEntries", () => {
   });
 
   it("carries each row's ancestry", () => {
-    const util = build(["src", "lib"]).find((e) => e.key === "util");
+    const entries = build(["src", "lib"]);
+    const util = entries.find((e) => e.key === "util");
     expect(util?.path).toEqual(["src", "lib"]);
     expect(util?.level).toBe(2);
+    expect(util?.parentId).toBe("lib");
+    expect(util?.siblingIndex).toBe(0);
+    expect(entries.find((entry) => entry.key === "lib")?.siblingIndex).toBe(1);
+    expect(
+      entries.find((entry) => entry.key === "src")?.parentId
+    ).toBeUndefined();
   });
 
   it("treats a node with unloaded children as openable", () => {

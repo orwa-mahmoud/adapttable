@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "erledigt",
+  staged: "vorgemerkt",
+  partial: "teilweise erledigt",
+  rejected: "abgelehnt",
+  "awaiting-approval": "wartet auf Sie",
+  cancelled: "abgebrochen",
+  stale: "veraltet",
+  failed: "fehlgeschlagen",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "Zellen bearbeiten",
+  "rows.add": "Zeilen hinzufügen",
+  "rows.delete": "Zeilen löschen",
+  "rows.reorder": "Zeilen umsortieren",
+  "export.run": "Exportieren",
+};
+
 export const de: Required<TableLabels> = {
   table: "Datentabelle",
   search: "Suchen",
@@ -115,6 +136,13 @@ export const de: Required<TableLabels> = {
   hideAllColumns: "Alle ausblenden",
   unpinAllColumns: "Alle lösen",
   resetColumn: "Spalte zurücksetzen",
+  renameColumn: "Spalte umbenennen",
+  columnName: "Spaltenname",
+  saveColumnName: "Namen speichern",
+  cancelColumnRename: "Abbrechen",
+  columnNameRequired: "Geben Sie einen Spaltennamen ein.",
+  columnRenamed: ({ previous, name }) =>
+    `Spalte ${previous} wurde in ${name} umbenannt`,
   sortAscending: "Aufsteigend sortieren",
   sortDescending: "Absteigend sortieren",
   sortedBy: ({ column, ascending }) =>
@@ -124,8 +152,13 @@ export const de: Required<TableLabels> = {
   columnActions: "Spaltenaktionen",
   exportCsv: "CSV exportieren",
   exportFile: (format) => `${format.toUpperCase()} exportieren`,
+  exportStarted: "Export wird vorbereitet",
+  exportProgress: (progress) => `Export zu ${progress}% abgeschlossen`,
   exportDone: "Export abgeschlossen",
   exportFailed: "Export fehlgeschlagen",
+  exportCancelled: "Export abgebrochen",
+  exportDownload: "Export herunterladen",
+  exportDismiss: "Export schließen",
   editCell: "Zelle bearbeiten",
   undoEdit: "Rückgängig",
   redoEdit: "Wiederholen",
@@ -137,6 +170,186 @@ export const de: Required<TableLabels> = {
       : `${String(count)} ungespeicherte Zeilen`,
   saveAll: "Alle speichern",
   cancelAll: "Alle verwerfen",
+  approveProposal: "Genehmigen",
+  rejectProposal: "Ablehnen",
+  proposalValueUnavailable: "Nicht verfügbar",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 vorgeschlagene Änderung"
+        : "{c} vorgeschlagene Änderungen".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"in {r} Zeilen".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "Alle {c} Änderungen prüfen".replace("{c}", String(count)),
+  backToConversation: "Zurück zur Unterhaltung",
+  approveAllProposals: "Alle genehmigen",
+  approveRemainingProposals: "Rest genehmigen",
+  rejectAllProposals: "Alle ablehnen",
+  rejectRemainingProposals: "Rest ablehnen",
+  alwaysAllowProposal: "Immer zulassen",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} genehmigt · {j} abgelehnt · {p} offen"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "Eine Änderung wartet auf Ihre Entscheidung.",
+  pendingProposals: (count) =>
+    count === 1
+      ? "1 vorgeschlagene Änderung"
+      : `${String(count)} vorgeschlagene Änderungen`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "Tabellenassistent",
+  assistantOpen: "KI fragen",
+  assistantClose: "Schließen",
+  assistantSettings: "Assistenteneinstellungen",
+  assistantEmpty: "Was möchten Sie mit dieser Tabelle tun?",
+  assistantPlaceholder: "Fragen Sie zu dieser Tabelle…",
+  assistantSend: "Senden",
+  assistantStop: "Stoppen",
+  assistantVoiceStart: "Diktieren",
+  assistantVoiceStop: "Diktat beenden",
+  assistantVoiceListening: "Hört zu",
+  assistantVoiceLanguage: "Diktatsprache",
+  assistantYou: "Sie",
+  assistantSpeaker: "Assistent",
+  assistantNewMessages: "Neue Nachrichten",
+  assistantUnavailable: "Der Assistent ist nicht verbunden.",
+  assistantDetached:
+    "Die Verbindung wurde getrennt. Die Arbeit läuft möglicherweise weiter.",
+  assistantRejoin: "Wieder verbinden",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} erledigt`
+      : `${String(done)} von ${String(total)}`,
+  assistantBackToTable: "Zurück zur Tabelle",
+  assistantDetail: "Details",
+  assistantSaveInTable:
+    "In der Tabelle speichern, um diese Änderung zu behalten.",
+  assistantUndo: "Rückgängig",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "Das braucht mehr Schritte, als ein Durchgang erlaubt. Fragen Sie nach einem Teil.",
+        "continuation-limit":
+          "Das braucht mehr Schritte, als ein Durchgang erlaubt. Fragen Sie nach einem Teil.",
+        "resume-limit":
+          "Das braucht mehr Schritte, als ein Durchgang erlaubt. Fragen Sie nach einem Teil.",
+        "discovery-exhausted":
+          "Der Assistent konnte nicht herausfinden, wie das hier geht.",
+        "repeated-plan":
+          "Der Assistent hat dasselbe zweimal angefragt und gestoppt.",
+        "question-unanswered": "Das braucht erst eine Antwort von Ihnen.",
+        "approval-unavailable":
+          "Das braucht eine Freigabe, und es gibt niemanden zu fragen.",
+        "interrupt-unsupported":
+          "Der Assistent hat etwas angefragt, das diese Tabelle nicht kann.",
+        "output-denied": "Ein Teil davon durfte nicht ausgeführt werden.",
+        "not-run": "Das wurde nicht ausgeführt.",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "Die Tabelle hat sich seitdem geändert.",
+        "cannot-restore": "Ein Teil davon lässt sich nicht zurücknehmen.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "Ihre Antwort",
+  assistantAnswerPlaceholder: "Antwort eingeben",
+  assistantAnswerSend: "Antworten",
+  assistantAlwaysAllowedTitle: "Wird nicht mehr gefragt",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `Wieder nach ${CAPABILITY[capability] ?? capability} fragen`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 Aktion" : `${String(count)} Aktionen`,
+  assistantActionsTitle: "Was dieser Zug geändert hat",
+  assistantUndoAll: "Alles rückgängig",
+  assistantExamples: "Kurzbefehle",
+  assistantReceiptChange: ({ before, after }) =>
+    `Von ${before} zu ${after} geändert`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `Vorgeschlagen: von ${before} zu ${after}`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "Filter angewendet",
+        "filter/staged": "Filter vorgemerkt",
+        "sort/executed": "Sortiert",
+        "group/executed": "Gruppiert",
+        "pin/executed": "Spalte angeheftet",
+        "edit/executed": "Gespeichert",
+        "edit/staged": "Änderung vorgemerkt — nicht gespeichert",
+        "edit/awaiting-approval": "Änderung wartet auf Freigabe",
+        "edit/partial": "Einige Änderungen gespeichert, einige abgelehnt",
+        "edit/rejected": "Änderung abgelehnt",
+        "filter-cleared/executed": "Filter entfernt",
+        "sort-cleared/executed": "Sortierung aufgehoben",
+        "search/executed": "Gesucht",
+        "search-cleared/executed": "Suche gelöscht",
+        "group-cleared/executed": "Gruppierung aufgehoben",
+        "pin-cleared/executed": "Anheftung aufgehoben",
+        "pinRow/executed": "Zeile angeheftet",
+        "pinRow-cleared/executed": "Zeile gelöst",
+        "page/executed": "Seite gewechselt",
+        "aggregate/executed": "Summen geändert",
+        "select/executed": "Auswahl geändert",
+        "read/executed": "Tabelle gelesen",
+        "operation/executed": "Ausgeführt",
+        "operation/awaiting-approval": "Wartet auf Sie",
+        "operation/rejected": "Abgelehnt",
+        "export/executed": "Exportiert",
+        "add/executed": "Zeile hinzugefügt",
+        "add/awaiting-approval": "Neue Zeile wartet auf Freigabe",
+        "add/rejected": "Neue Zeile abgelehnt",
+        "delete/executed": "Zeilen gelöscht",
+        "delete/awaiting-approval": "Löschen wartet auf Freigabe",
+        "delete/partial": "Einige Zeilen gelöscht, andere behalten",
+        "delete/rejected": "Löschen abgelehnt",
+        "reorder/executed": "Zeilen verschoben",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ kind, terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return kind === "edit"
+          ? `${term.column} auf ${term.value} gesetzt`
+          : `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "absteigend" : "aufsteigend"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "Bereit",
+      connecting: "Verbinden…",
+      ready: "Bereit",
+      sending: "Arbeitet…",
+      "awaiting-approval": "Wartet auf Sie",
+      "awaiting-user": "Wartet auf Sie",
+      error: "Fehler",
+      disconnected: "Nicht verbunden",
+    })[status] ?? "Bereit",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "Zeile hinzufügen",
   duplicateRow: "Zeile duplizieren",
   deleteRow: "Zeile löschen",
@@ -154,9 +367,30 @@ export const de: Required<TableLabels> = {
   rowMoved: (from, to) =>
     `Zeile von ${String(from)} nach ${String(to)} verschoben`,
   rowReorderCancelled: "Neuordnung abgebrochen",
+  rowMoveOptions: "Optionen zum Verschieben der Zeile",
+  moveToGroup: "In Gruppe verschieben…",
+  moveUnder: "Unterordnen unter…",
+  moveToTopLevel: "Auf die oberste Ebene verschieben",
+  confirmRowMoveTitle: "Zeilenverschiebung bestätigen",
+  confirmRowMoveDescription: (row, from, to) =>
+    `Zeile ${row} von ${from} nach ${to} verschieben?`,
+  confirmRowMove: "Verschieben",
+  rowMovedToGroup: (group) => `Zeile in ${group} verschoben`,
+  rowMovedUnder: (parent) => `Zeile unter ${parent} verschoben`,
+  moveRejectedPolicyNever:
+    "Zeilenverschiebungen über Grenzen hinweg sind deaktiviert",
+  moveRejectedSorted:
+    "Sortierung aufheben, bevor die Zeilenreihenfolge geändert wird",
+  moveRejectedCycle:
+    "Eine Zeile kann nicht in sich selbst oder einen ihrer Nachfolger verschoben werden",
+  moveUnavailable: "Diese Zeilenverschiebung ist nicht verfügbar",
+  rootLevel: "Oberste Ebene",
   pinToTop: "Oben anheften",
   pinToBottom: "Unten anheften",
   unpinRow: "Zeile lösen",
+  pinnedSummaryRow: "Zusammenfassungszeile",
+  pinnedSummaryTop: "Oben angeheftete Zusammenfassungszeilen",
+  pinnedSummaryBottom: "Unten angeheftete Zusammenfassungszeilen",
   rowSeparator: "Trennlinie",
   expandColumnGroup: "Spaltengruppe erweitern",
   collapseColumnGroup: "Spaltengruppe einklappen",
@@ -166,6 +400,35 @@ export const de: Required<TableLabels> = {
   expandGroup: "Gruppe erweitern",
   collapseGroup: "Gruppe einklappen",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "Zeilengruppierung",
+  groupingDropColumns: "Spalten zum Gruppieren hierher ziehen",
+  addGroupingColumn: "Gruppierungsspalte hinzufügen",
+  groupByColumn: (label) => `Nach ${label} gruppieren`,
+  ungroupColumn: (label) => `Gruppierung für ${label} aufheben`,
+  removeGroupingColumn: (label) => `${label} aus der Gruppierung entfernen`,
+  moveGroupingColumn: (label) => `Gruppierung nach ${label} verschieben`,
+  groupingDropToRemove: "Hier ablegen, um die Gruppierung zu entfernen",
+  groupingAggregateColumn: "Aggregatspalte",
+  groupingAggregation: "Gruppenaggregation",
+  groupingAggregationDefault: "Standard",
+  groupingAggregationNone: "Keine",
+  groupingAggregations: "Aggregationen",
+  groupingAddAggregation: "Aggregationsspalte hinzufügen",
+  groupingRestoreAggregations: "Standardwerte wiederherstellen",
+  groupingRemoveAggregation: (column) => `Aggregation von ${column} entfernen`,
+  groupingAggregationFor: (column) => `Aggregation von ${column}`,
+  groupingAggregationReadOnly: "Von der App festgelegt",
+  groupingAggregationCustom: "Benutzerdefiniert",
+  groupingAggregateRemoved: (column) => `Aggregation von ${column} entfernt`,
+  groupingAggregatesRestored:
+    "Aggregationen auf die Standardwerte zurückgesetzt",
+  groupingAverage: "Durchschnitt",
+  groupingAdded: (label) => `${label} zur Gruppierung hinzugefügt`,
+  groupingRemoved: (label) => `${label} aus der Gruppierung entfernt`,
+  groupingMoved: (label, position) =>
+    `${label} an Gruppierungsposition ${position} verschoben`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `Gruppenaggregation für ${label} in ${aggregation} geändert`,
   gridRangeCopied: (cells) => `${cells} Zellen kopiert`,
   gridRangeCopyFailed: "Kopieren fehlgeschlagen",
   gridRangePasted: (cells) => `${cells} Zellen eingefügt`,
@@ -221,10 +484,9 @@ export const de: Required<TableLabels> = {
   noticeReorderNested:
     "Zeilenverschieben ist aus, solange Gruppierung oder ein Baum aktiv ist.",
   noticeGroupingUnavailable:
-    "Gruppierung ist aus — diese Quelle liefert nicht die vollständige gefilterte Menge.",
+    "Gruppierung ist aus — diese Quelle kann nicht gruppieren.",
   noticeExportAllPage:
-    "Alle exportieren ist diese Seite — die vollständige gefilterte Menge ist nicht verfügbar.",
+    "Alle exportieren ist aus — diese Quelle liefert jeweils nur eine Seite.",
   noticeEditWithoutWriter:
     "Bearbeiten ist aus — es ist kein Schreib-Handler verbunden.",
-  exportThisPage: "Diese Seite exportieren",
 };

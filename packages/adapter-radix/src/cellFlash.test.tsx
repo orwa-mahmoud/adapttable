@@ -2,7 +2,7 @@ import { Theme } from "@radix-ui/themes";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
 
@@ -39,7 +39,7 @@ function table(
         urlSync={false}
         forceMobile={extra.forceMobile}
         isCellFlashing={extra.isCellFlashing}
-        features={extra.grouped ? [grouping<Row>(["name"])] : undefined}
+        features={extra.grouped ? [grouping(["name"])] : undefined}
       />
     </Theme>
   );

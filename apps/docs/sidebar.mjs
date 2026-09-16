@@ -22,6 +22,7 @@ export const sidebar = [
       { label: "Columns", slug: "columns" },
       { label: "Column groups", slug: "column-groups" },
       { label: "Sparkline columns", slug: "sparkline" },
+      { label: "Browser and server exports", slug: "exporting" },
       { label: "PDF export and print", slug: "export-pdf" },
       { label: "Sorting", slug: "sorting" },
       { label: "Filtering", slug: "filtering" },
@@ -33,6 +34,7 @@ export const sidebar = [
       { label: "Keyboard & cell navigation", slug: "cell-navigation" },
       { label: "Row reordering", slug: "row-reordering" },
       { label: "Row pinning", slug: "row-pinning" },
+      { label: "Pinned summary rows", slug: "pinned-summary-rows" },
       { label: "Row and column spanning", slug: "row-spanning" },
       { label: "Full-width and separator rows", slug: "full-width-rows" },
       { label: "Row styling and heights", slug: "row-styling" },
@@ -56,6 +58,10 @@ export const sidebar = [
       { label: "i18n & RTL", slug: "i18n-rtl" },
       { label: "Accessibility", slug: "accessibility" },
       { label: "Realtime", slug: "realtime" },
+      { label: "Adaptive capabilities", slug: "agent-capabilities" },
+      { label: "@adapttable/ai", slug: "ai" },
+      { label: "Agent integrations", slug: "ai-integrations" },
+      { label: "Connect a backend", slug: "ai-http" },
     ],
   },
   {
@@ -63,6 +69,7 @@ export const sidebar = [
     items: [
       { label: "API reference", slug: "api" },
       { label: "FAQ", slug: "faq" },
+      { label: "Limitations and boundaries", slug: "limitations" },
       { label: "Comparison", slug: "comparison" },
       { label: "Versioning & stability", slug: "versioning" },
     ],
@@ -70,6 +77,10 @@ export const sidebar = [
   {
     label: "Migrating",
     items: [
+      {
+        label: "From AdaptTable v2",
+        slug: "migrate-from-v2",
+      },
       {
         label: "From AdaptTable v1",
         slug: "migrate-from-v1",

@@ -1,25 +1,41 @@
-import type { EditEventHandler, GroupNode } from "@adapttable/core";
 import {
   applyRowPatchesWithLog,
-  applyRowReorder,
-  type ColumnDef,
   type ColumnLayoutState,
   evaluateFilterTree,
+  type GroupNode,
   insertRow,
-  type MobileCardModel,
-  type MobileCardRenderer,
   type QueryFilterGroup,
   removeRow,
+  type RowGroupRef,
   type RowPatch,
-  type Slot,
+  type RowReorderOptions,
   type TableErrorState,
   type TableSource,
   updateRow,
+} from "@adapttable/core";
+import {
+  applyRowReorder,
+  type ColumnDef,
+  type EditEventHandler,
+  type ReactMobileCardModel,
+  type ReactMobileCardRenderer,
+  type Slot,
   useColumnLayoutUrlState,
   useFrontendData,
   useHighlight,
   useQuerySource,
-} from "@adapttable/core";
+} from "@adapttable/react";
+import {
+  cellSpan,
+  extraRows,
+  type GroupingExtras,
+  pinnedSummaryRows,
+  rowActions,
+  rowAppearance,
+  rowPinning,
+  type TableFeature,
+  virtualize,
+} from "@adapttable/react/features";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   createContext,
@@ -43,8 +59,8 @@ import {
   consecutiveTeamSpan,
   DEMO_FILTER_RUNTIME,
   DEMO_GROUP_AGGREGATES,
+  type DemoRowHandlers,
   demoUrlSync,
-  EDITING_DEFAULT_LAYOUT,
   GROUPS_DEFAULT_LAYOUT,
   isRemote,
   LIVE_DEFAULT_LAYOUT,
@@ -65,6 +81,26 @@ import {
 import { fetchPeople, type PeoplePage, type PeopleParams } from "./mockApi";
 import { usePatchSink } from "./patchSink";
 import { useRealtimeSlot } from "./realtimeSlot";
+
+function summaryPerson(id: string, name: string): Person {
+  // Materialize every derived field the showcase columns read. Numeric id
+  // hashing would turn non-numeric summary ids into Invalid Date / NaN and
+  // throw while formatting Timeline and Budget.
+  return {
+    id,
+    name,
+    email: "",
+    role: "",
+    team: "All",
+    nameAr: name,
+    roleAr: "",
+    teamAr: "الكل",
+    status: "Active",
+    budget: 0,
+    utilization: 0,
+    start: "2026-01-01",
+  };
+}
 
 /**
  * Where the rows come from.
@@ -112,7 +148,7 @@ const REPLACED_ERROR_SLOT = {
  * compact grid. It reuses `card.fields`, so every value — cell renderers and
  * editors included — is the one the built-in card would have shown.
  */
-function demoCard(row: Person, card: MobileCardModel<Person>): ReactNode {
+function demoCard(row: Person, card: ReactMobileCardModel<Person>): ReactNode {
   const [identity, ...rest] = card.fields;
   return (
     <div className="demo-person-card">
@@ -132,7 +168,7 @@ function demoCard(row: Person, card: MobileCardModel<Person>): ReactNode {
 /** The demo's own card layout, when that toggle is on. */
 function cardRenderer(
   customCard: boolean | undefined
-): MobileCardRenderer<Person> | undefined {
+): ReactMobileCardRenderer<Person> | undefined {
   return customCard ? demoCard : undefined;
 }
 
@@ -207,14 +243,60 @@ const LARGE_ROW_ESTIMATE = 48;
  * `onCellEdit` is frontend-only: mutable local rows. Backend mode omits it
  * so editing stays fully dormant (package DNA — nothing forced).
  *
- * `groupBy` / `groupAggregates` follow the same rule — frontend tier only;
+ * Grouping follows the same rule — frontend tier only;
  * server-paginated sources cannot regroup a full result set.
  */
+/** The kit-drawn features a page asked for, and what each needs. */
+export interface KitFeatureRequests {
+  editing?: (row: Person, key: string, nextValue: unknown) => void;
+  rowEditing?: (row: Person, patch: Record<string, unknown>) => void;
+  batchEditing?: (
+    edits: readonly { row: Person; patch: Record<string, unknown> }[]
+  ) => void;
+  grouping?: {
+    groupBy: readonly string[];
+    extras: GroupingExtras<Person>;
+  };
+  tree?: {
+    getParentId: (row: Person) => string | undefined;
+    treeColumn: string;
+  };
+  rowReorder?: {
+    onRowReorder: (from: number, to: number, row: Person) => void;
+    options: RowReorderOptions<Person>;
+  };
+}
+
 export interface DemoColumnProps {
+  /**
+   * The behaviours the flags composed. Each adapter demo concatenates its own
+   * kit-chrome features onto this rather than spreading it, so neither list
+   * silently replaces the other.
+   */
+  features?: readonly TableFeature<Person>[];
+  /**
+   * What the demo's row actions do.
+   *
+   * This side owns the rows, so it supplies the behaviour; the adapter side
+   * owns the locale and the kit, so it builds the actions. An adapter
+   * destructures this out of the bag rather than spreading it onto the
+   * table.
+   */
+  demoRowHandlers?: DemoRowHandlers;
+  /**
+   * What the page asked for that only the KIT can build: grouping draws its
+   * panel and headers, editing draws an editor, reorder draws a grip. This
+   * side decides what and with which handler; the adapter's demo decides
+   * which factory, because only it knows its own kit.
+   */
+  kitFeatures?: KitFeatureRequests;
   columnLayout: ColumnLayoutState;
   onColumnLayoutChange: (next: ColumnLayoutState) => void;
-  /** Table chrome follows {@link demoUrlSync}: live demo only. */
+  onColumnRename: (key: string, name: string) => void;
+  /** Whether table chrome follows the URL policy from {@link demoUrlSync}. */
   urlSync?: boolean;
+  /** Namespace shared with the data hook (`live.find` beside `live.q`). */
+  urlKey?: string;
   collapsibleColumnGroups?: boolean;
   onCellEdit?: (row: Person, key: string, nextValue: unknown) => void;
   onEditStart?: EditEventHandler<Person>;
@@ -228,12 +310,9 @@ export interface DemoColumnProps {
   /** The host's own error state, when the lab is showing a replacement. */
   slots?: { error?: Slot<TableErrorState> };
   /** The demo's own mobile card layout, when that toggle is on. */
-  renderCard?: MobileCardRenderer<Person>;
-  /** `null` forces grouping off even if the URL carries a groupBy. */
-  groupBy?: string | readonly string[] | null;
-  groupAggregates?: (
-    rows: readonly Person[]
-  ) => Partial<Record<string, ReactNode>>;
+  renderCard?: ReactMobileCardRenderer<Person>;
+  /** Footer grand total, when the aggregation page asks for one. */
+  summaryRow?: typeof DEMO_GROUP_AGGREGATES;
 }
 
 /** Adapter demos provide this — given a source + column controls, render. */
@@ -284,10 +363,14 @@ interface DataProps {
   editing?: boolean;
   tree?: boolean;
   rowMode?: boolean;
+  /** Whether this page shows the demo's own row actions — the pencil. */
+  rowActionsShown?: boolean;
   batch?: boolean;
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -418,6 +501,22 @@ function columnChanges(
   return changes;
 }
 
+/** Editable columns this demo always shows, for the incoming change to aim at. */
+const INCOMING_CANDIDATES = ["status", "budget", "load", "person"] as const;
+
+/**
+ * Which columns an incoming change moves.
+ *
+ * Every field the reader has typed in, so each asks them to choose — and one
+ * they have not, which simply takes the new value. Seeing both at once is the
+ * point: a field nobody was working in is not a conflict.
+ */
+function incomingColumns(touched: readonly string[]): string[] {
+  const untouched = INCOMING_CANDIDATES.find((key) => !touched.includes(key));
+  const spare = untouched === undefined ? [] : [untouched];
+  return touched.length > 0 ? [...touched, ...spare] : spare;
+}
+
 /** Column key → row field for composite cells (person shows name; load
  * shows utilisation). Every other column key IS the field name. */
 const EDIT_FIELD: Record<string, keyof Person> = {
@@ -497,6 +596,159 @@ function incomingEditValue(row: Person, columnKey: string): unknown {
   }
 }
 
+/**
+ * Every behaviour the demo flags turned on, composed.
+ *
+ * The props beside them still CONFIGURE each feature — the handler, the group
+ * keys, the span function — but the import is what arms it, which is the whole
+ * point of the demo. Each kit's own demo adds the features that draw its own
+ * chrome and concatenates them onto this list.
+ */
+function composeDemoFeatures(
+  flags: Parameters<typeof frontendColumnProps>[1],
+  parts: {
+    teamSpan: NonNullable<Parameters<typeof cellSpan<Person>>[0]>;
+    demoExtraRows: Parameters<typeof extraRows>[0] | undefined;
+    accentRowStyle:
+      ((row: Person) => Record<string, string> | undefined) | undefined;
+  }
+): readonly TableFeature<Person>[] {
+  const { teamSpan, demoExtraRows, accentRowStyle } = parts;
+  return [
+    // The live demo groups the whole set several levels deep, which walks a
+    // page of thirty rows out into a hundred and forty entries: the page size
+    // stops bounding what the browser draws, so window it. The feature pages
+    // group a handful of rows one level deep and need no window.
+    ...(flags.large || (flags.grouping && flags.urlKey === "live")
+      ? [virtualize({ estimateRowSize: LARGE_ROW_ESTIMATE })]
+      : []),
+    ...(flags.rowPinning ? [rowPinning()] : []),
+    ...(flags.pinnedSummaryRows
+      ? [
+          pinnedSummaryRows<Person>({
+            // Numeric ids so showcase derivations (timeline, load count)
+            // stay defined; namespaced feature keys still own the DOM ids.
+            // Host-owned totals: the demo sums the array it already owns.
+            top: [
+              {
+                ...summaryPerson("901", "Team total"),
+                budget: flags.data.reduce((sum, row) => sum + budget(row), 0),
+              },
+            ],
+            bottom: [
+              {
+                ...summaryPerson("902", "Grand total"),
+                budget: flags.data.reduce((sum, row) => sum + budget(row), 0),
+              },
+            ],
+          }),
+        ]
+      : []),
+    ...(flags.rowMutations ? [rowActions<Person>()] : []),
+    ...(flags.cellSpan && teamSpan ? [cellSpan<Person>(teamSpan)] : []),
+    ...(demoExtraRows ? [extraRows(demoExtraRows)] : []),
+    ...(accentRowStyle
+      ? [rowAppearance<Person>({ rowStyle: accentRowStyle, rowHeight: 48 })]
+      : []),
+  ];
+}
+
+/** What each row-model flag configures, beside the feature that arms it. */
+/**
+ * Whether the table gives a row a form to open.
+ *
+ * The pencil in the actions column opens the row's fields, so it belongs to
+ * editing: where the demo offers both, the table arms row mode, and where
+ * editing is off there is no form and no pencil. Batch is the exception —
+ * every cell is already a field there, and a row form would fight it.
+ */
+function rowFormArmed(flags: {
+  readonly rowMode?: boolean;
+  readonly editing?: boolean;
+  readonly rowActionsShown?: boolean;
+  readonly batch?: boolean;
+}): boolean {
+  if (flags.rowMode === true) return true;
+  if (flags.batch === true) return false;
+  return flags.editing === true && flags.rowActionsShown === true;
+}
+
+function applyRowModelFlags(
+  next: DemoColumnProps,
+  flags: Parameters<typeof frontendColumnProps>[1],
+  onRowEdit: (row: Person, patch: Record<string, unknown>) => void
+): void {
+  if (flags.large) {
+    Object.assign(next, { estimateRowSize: LARGE_ROW_ESTIMATE });
+  }
+  if (flags.editing) {
+    Object.assign(next, { onCellEdit: flags.onCellEdit });
+  }
+  // The lifecycle belongs to every editing mode, not just the cell: the
+  // simulated incoming update aims at whatever the reader has open, and a row
+  // or a batch is as open as a cell.
+  if (flags.editing || rowFormArmed(flags) || flags.batch) {
+    Object.assign(next, {
+      onEditStart: flags.onEditStart,
+      onEditCancel: flags.onEditCancel,
+      onEditCommit: flags.onEditCommit,
+      rowVersion: (row: Person) => row.revision ?? 0,
+    });
+  }
+  if (rowFormArmed(flags)) {
+    Object.assign(next, { rowEditing: true, onRowEdit });
+  }
+  if (flags.tree) {
+    Object.assign(next, { getParentId: reportsTo, treeColumn: "person" });
+  }
+}
+
+/**
+ * What only the kit can draw, and what each needs to draw it.
+ *
+ * Core owns what grouping, editing and reordering DO; the grouping controls,
+ * group headers, editor and grip are the adapter's. This side names the
+ * behaviour and the handler; the adapter's demo picks the factory.
+ */
+function kitRequests(
+  flags: Parameters<typeof frontendColumnProps>[1],
+  onRowEdit: (row: Person, patch: Record<string, unknown>) => void
+): KitFeatureRequests {
+  return {
+    ...(flags.editing ? { editing: flags.onCellEdit } : {}),
+    ...(rowFormArmed(flags) ? { rowEditing: onRowEdit } : {}),
+    ...(flags.batch ? { batchEditing: flags.onBatchEdit } : {}),
+    ...(flags.grouping
+      ? {
+          grouping: {
+            groupBy: ["team", "status"],
+            extras: {
+              groupAggregates: DEMO_GROUP_AGGREGATES,
+              groupFooters: true,
+              groupSort: (a: GroupNode<Person>, b: GroupNode<Person>) =>
+                b.leafRows.length - a.leafRows.length,
+            },
+          },
+        }
+      : {}),
+    ...(flags.tree
+      ? { tree: { getParentId: reportsTo, treeColumn: "person" } }
+      : {}),
+    ...(flags.rowReorder
+      ? {
+          rowReorder: {
+            onRowReorder: flags.onRowReorder,
+            options: {
+              movePolicy: "confirm",
+              onGroupMove: flags.onGroupMove,
+              onTreeMove: flags.onTreeMove,
+            },
+          },
+        }
+      : {}),
+  };
+}
+
 /** Feature flags on the frontend demo, assembled away from the data hook. */
 function frontendColumnProps(
   columns: DemoColumnProps,
@@ -504,12 +756,19 @@ function frontendColumnProps(
     large?: boolean;
     editing?: boolean;
     rowMode?: boolean;
+    /** Whether this page shows the demo's own row actions — the pencil. */
+    rowActionsShown?: boolean;
+    /** Which demo this is, so a page can compose for its own shape. */
+    urlKey?: string;
     grouping?: boolean;
     tree?: boolean;
     batch?: boolean;
     rowMutations?: boolean;
     rowReorder?: boolean;
     rowPinning?: boolean;
+    pinnedSummaryRows?: boolean;
+    /** Footer grand total — same mapper shape as group aggregates. */
+    summaryRow?: boolean;
     cellSpan?: boolean;
     extraRows?: boolean;
     extraAnchorId?: string;
@@ -529,7 +788,9 @@ function frontendColumnProps(
     onAddRow: () => void;
     onDuplicateRow: (row: Person) => void;
     onDeleteRow: (row: Person) => void;
-    onRowReorder: (from: number, to: number) => void;
+    onRowReorder: (from: number, to: number, row: Person) => void;
+    onGroupMove: NonNullable<RowReorderOptions<Person>["onGroupMove"]>;
+    onTreeMove: NonNullable<RowReorderOptions<Person>["onTreeMove"]>;
     writePatches: (patches: readonly RowPatch<Person>[]) => void;
     flashRow: (id: Person["id"]) => void;
   }
@@ -540,44 +801,15 @@ function frontendColumnProps(
     isCellFlashing: flags.isCellFlashing,
     slots: errorSlots(flags.failure),
     renderCard: cardRenderer(flags.customCard),
-    groupBy: null,
+    // Delete removes the row. The pencil is a row-edit trigger and needs no
+    // handler: it opens the row's own fields, which save through `onRowEdit`.
+    demoRowHandlers: { onDelete: flags.onDeleteRow },
   };
-  if (flags.large) {
-    Object.assign(next, {
-      virtualize: true,
-      estimateRowSize: LARGE_ROW_ESTIMATE,
-    });
-  }
-  if (flags.editing) {
-    Object.assign(next, {
-      onCellEdit: flags.onCellEdit,
-      onEditStart: flags.onEditStart,
-      onEditCancel: flags.onEditCancel,
-      onEditCommit: flags.onEditCommit,
-      rowVersion: (row: Person) => row.revision ?? 0,
-    });
-  }
-  if (flags.rowMode) {
-    Object.assign(next, {
-      rowEditing: true,
-      onRowEdit: (row: Person, patch: Record<string, unknown>) => {
-        flags.writePatches([updateRow(row.id, columnChanges(patch))]);
-        flags.flashRow(row.id);
-      },
-    });
-  }
-  if (flags.grouping) {
-    Object.assign(next, {
-      groupBy: ["team", "status"],
-      groupAggregates: DEMO_GROUP_AGGREGATES,
-      groupFooters: true,
-      groupSort: (a: GroupNode<Person>, b: GroupNode<Person>) =>
-        b.leafRows.length - a.leafRows.length,
-    });
-  }
-  if (flags.tree) {
-    Object.assign(next, { getParentId: reportsTo, treeColumn: "person" });
-  }
+  const onRowEdit = (row: Person, patch: Record<string, unknown>) => {
+    flags.writePatches([updateRow(row.id, columnChanges(patch))]);
+    flags.flashRow(row.id);
+  };
+  applyRowModelFlags(next, flags, onRowEdit);
   if (flags.batch) {
     Object.assign(next, { batchEditing: true, onBatchEdit: flags.onBatchEdit });
   }
@@ -588,62 +820,138 @@ function frontendColumnProps(
       onDeleteRow: flags.onDeleteRow,
     });
   }
-  if (flags.rowReorder) {
-    Object.assign(next, { onRowReorder: flags.onRowReorder });
-  }
   if (flags.rowPinning) {
     Object.assign(next, { onPinnedRowIdsChange: () => undefined });
   }
+  if (flags.summaryRow) {
+    Object.assign(next, { summaryRow: DEMO_GROUP_AGGREGATES });
+  }
+  // Team is the same fact on consecutive rows in visual order — merge it,
+  // leave Person and Email alone. Reorder can break a run; that is the point.
+  // Pin keeps the run: the person moves, Core stays one cell.
+  const teamSpan = ({
+    column,
+    sectionRows,
+    sectionRowIndex,
+  }: {
+    column: { key: string };
+    sectionRows: readonly Person[];
+    sectionRowIndex: number;
+  }) => {
+    if (column.key !== "team") return undefined;
+    const span = consecutiveTeamSpan(sectionRows, sectionRowIndex);
+    return span > 1 ? { rowSpan: span } : undefined;
+  };
   if (flags.cellSpan) {
-    Object.assign(next, {
-      // Team is the same fact on consecutive rows in visual order — merge
-      // it, leave Person and Email alone. Reorder can break a run; that
-      // is the point. Pin keeps the run: the person moves, Core stays one
-      // cell.
-      getCellSpan: ({
-        column,
-        sectionRows,
-        sectionRowIndex,
-      }: {
-        column: { key: string };
-        sectionRows: readonly Person[];
-        sectionRowIndex: number;
-      }) => {
-        if (column.key !== "team") return undefined;
-        const span = consecutiveTeamSpan(sectionRows, sectionRowIndex);
-        return span > 1 ? { rowSpan: span } : undefined;
-      },
-    });
+    Object.assign(next, { getCellSpan: teamSpan });
   }
-  if (flags.extraRows && flags.extraAnchorId) {
-    const extraHost = flags.data.find((row) => row.id === flags.extraAnchorId);
-    const extraHostName = extraHost?.name ?? "this person";
-    Object.assign(next, {
-      extraRows: [
-        {
-          key: "note",
-          kind: "fullWidth" as const,
-          beforeRowId: flags.extraAnchorId,
-          render: () =>
-            `Full-width extra attached to ${extraHostName}. Drag or pin them — this note stays in front of them.`,
-        },
-      ],
-    });
+  const extraAnchorName =
+    flags.data.find((row) => row.id === flags.extraAnchorId)?.name ??
+    "this person";
+  const demoExtraRows =
+    flags.extraRows && flags.extraAnchorId
+      ? [
+          {
+            key: "note",
+            kind: "fullWidth" as const,
+            beforeRowId: flags.extraAnchorId,
+            render: () =>
+              `Full-width extra attached to ${extraAnchorName}. Drag or pin them — this note stays in front of them.`,
+          },
+        ]
+      : undefined;
+  if (demoExtraRows) {
+    Object.assign(next, { extraRows: demoExtraRows });
   }
-  if (flags.rowStyle) {
-    const accentId = flags.data[0]?.id;
-    Object.assign(next, {
-      rowStyle: (row: Person) =>
+  const accentId = flags.data[0]?.id;
+  const accentRowStyle = flags.rowStyle
+    ? (row: Person) =>
         row.id === accentId
           ? {
               backgroundColor:
                 "light-dark(oklch(0.93 0.08 95), oklch(0.38 0.07 85))",
             }
-          : undefined,
-      rowHeight: 48,
-    });
+          : undefined
+    : undefined;
+  if (accentRowStyle) {
+    Object.assign(next, { rowStyle: accentRowStyle, rowHeight: 48 });
   }
+  Object.assign(next, { kitFeatures: kitRequests(flags, onRowEdit) });
+  const composed = composeDemoFeatures(flags, {
+    teamSpan,
+    demoExtraRows,
+    accentRowStyle,
+  });
+  if (composed.length > 0) Object.assign(next, { features: composed });
   return next;
+}
+
+function sameReorderScope(
+  candidate: Person,
+  row: Person,
+  grouping: boolean | undefined,
+  tree: boolean | undefined
+): boolean {
+  if (grouping) {
+    return candidate.team === row.team && candidate.status === row.status;
+  }
+  if (tree) return reportsTo(candidate) === reportsTo(row);
+  return true;
+}
+
+function reorderDemoRows(
+  rows: readonly Person[],
+  from: number,
+  to: number,
+  row: Person,
+  grouping: boolean | undefined,
+  tree: boolean | undefined
+): readonly Person[] {
+  const sameScope = (candidate: Person) =>
+    sameReorderScope(candidate, row, grouping, tree);
+  const siblings = rows.filter(sameScope);
+  const source = siblings.findIndex((candidate) => candidate.id === row.id);
+  const reordered = applyRowReorder(siblings, source < 0 ? from : source, to);
+  let siblingIndex = 0;
+  return rows.map((candidate) => {
+    if (!sameScope(candidate)) return candidate;
+    const replacement = reordered[siblingIndex];
+    siblingIndex += 1;
+    return replacement ?? candidate;
+  });
+}
+
+function insertionIndex(
+  destinations: readonly number[],
+  position: number,
+  fallback: number
+): number {
+  if (position >= 0 && position < destinations.length) {
+    return destinations[position];
+  }
+  return (destinations.at(-1) ?? fallback - 1) + 1;
+}
+
+function groupDestinationIndices(
+  rows: readonly Person[],
+  group: RowGroupRef
+): number[] {
+  return rows.flatMap((candidate, index) =>
+    group.levels.every(
+      (level) => Reflect.get(candidate, level.key) === level.value
+    )
+      ? [index]
+      : []
+  );
+}
+
+function treeDestinationIndices(
+  rows: readonly Person[],
+  parentId: string | null
+): number[] {
+  return rows.flatMap((candidate, index) =>
+    (reportsTo(candidate) ?? null) === parentId ? [index] : []
+  );
 }
 
 function Frontend({
@@ -657,10 +965,13 @@ function Frontend({
   editing,
   tree,
   rowMode,
+  rowActionsShown,
   batch,
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
+  summaryRow,
   cellSpan,
   extraRows,
   rowStyle,
@@ -743,17 +1054,55 @@ function Frontend({
     },
     [writePatches]
   );
-  const onRowReorder = useCallback((from: number, to: number) => {
-    setData((prev) => applyRowReorder(prev, from, to));
+  const onRowReorder = useCallback(
+    (from: number, to: number, row: Person) => {
+      setData((prev) => reorderDemoRows(prev, from, to, row, grouping, tree));
+    },
+    [grouping, tree]
+  );
+  const onGroupMove = useCallback<
+    NonNullable<RowReorderOptions<Person>["onGroupMove"]>
+  >((row, _fromGroup, toGroup, position) => {
+    setData((prev) => {
+      const remaining = prev.filter((candidate) => candidate.id !== row.id);
+      const changes = Object.fromEntries(
+        toGroup.levels.map((level) => [level.key, level.value])
+      );
+      const moved: Person = Object.assign({}, row, changes);
+      const destinations = groupDestinationIndices(remaining, toGroup);
+      const at = insertionIndex(destinations, position, remaining.length);
+      const next = remaining.slice();
+      next.splice(at, 0, moved);
+      return next;
+    });
+  }, []);
+  const onTreeMove = useCallback<
+    NonNullable<RowReorderOptions<Person>["onTreeMove"]>
+  >((row, _fromParent, toParent, position) => {
+    setData((prev) => {
+      const remaining = prev.filter((candidate) => candidate.id !== row.id);
+      const moved: Person = { ...row, managerId: toParent.id };
+      const destinations = treeDestinationIndices(remaining, toParent.id);
+      const at = insertionIndex(destinations, position, remaining.length);
+      const next = remaining.slice();
+      next.splice(at, 0, moved);
+      return next;
+    });
   }, []);
   const [activeEdit, setActiveEdit] = useState<{
     rowId: string;
-    columnKey: string;
+    touched: readonly string[];
   } | null>(null);
   const onEditStart = useCallback<EditEventHandler<Person>>((event) => {
-    setActiveEdit({
-      rowId: event.rowId,
-      columnKey: event.columnKey || "email",
+    setActiveEdit((current) => {
+      // Opening a row names no column; typing in one of its fields names that
+      // field. Both arrive here, so the demo learns which fields are the
+      // reader's and which are still untouched.
+      if (!event.columnKey) return { rowId: event.rowId, touched: [] };
+      const touched =
+        current?.rowId === event.rowId ? current.touched : ([] as string[]);
+      if (touched.includes(event.columnKey)) return current;
+      return { rowId: event.rowId, touched: [...touched, event.columnKey] };
     });
   }, []);
   const onEditEnd = useCallback(() => setActiveEdit(null), []);
@@ -761,16 +1110,17 @@ function Frontend({
   // revision: Take theirs reads that cell's stored value.
   const simulateLiveUpdate = useCallback(() => {
     if (!activeEdit) return;
-    const { rowId, columnKey } = activeEdit;
-    const field = EDIT_FIELD[columnKey] ?? (columnKey as keyof Person);
+    const { rowId, touched } = activeEdit;
     const row = data.find((person) => person.id === rowId);
     if (!row) return;
-    writePatches([
-      updateRow(rowId, {
-        [field]: incomingEditValue(row, columnKey) as never,
-        revision: (row.revision ?? 0) + 1,
-      }),
-    ]);
+    const changes: Record<string, unknown> = {
+      revision: (row.revision ?? 0) + 1,
+    };
+    for (const columnKey of incomingColumns(touched)) {
+      const field = EDIT_FIELD[columnKey] ?? (columnKey as keyof Person);
+      changes[field] = incomingEditValue(row, columnKey);
+    }
+    writePatches([updateRow(rowId, changes as Partial<Person>)]);
   }, [activeEdit, data, writePatches]);
   // Two classes, not one: the mark holds steady under reduced motion, so the
   // user still learns which row changed without anything moving.
@@ -826,11 +1176,17 @@ function Frontend({
   });
   const tableSource = advancedFilters ? source : withoutFilterTree(source);
   const live = realtime === true && RealtimeSlot !== null;
+  // Every editing mode gets the incoming-change control: a row form and a
+  // batch have something open to disagree with, the same as a cell.
+  const editingArmed =
+    editing === true ||
+    batch === true ||
+    rowFormArmed({ rowMode, editing, rowActionsShown, batch });
   return (
     <>
-      {editing ? (
+      {editingArmed ? (
         <div className="demo-live-update">
-          <span>Edit a cell, then test an incoming server change.</span>
+          <span>Open an editor, then test an incoming server change.</span>
           <button
             type="button"
             data-adapttable-part="demo-live-update"
@@ -861,12 +1217,15 @@ function Frontend({
           large,
           editing,
           rowMode,
+          rowActionsShown,
           grouping,
           tree,
           batch,
           rowMutations,
           rowReorder,
           rowPinning,
+          pinnedSummaryRows,
+          summaryRow,
           cellSpan,
           extraRows,
           extraAnchorId,
@@ -900,8 +1259,11 @@ function Frontend({
           onDuplicateRow,
           onDeleteRow,
           onRowReorder,
+          onGroupMove,
+          onTreeMove,
           writePatches,
           flashRow: flash.flashRow,
+          urlKey,
         })
       )}
     </>
@@ -943,9 +1305,29 @@ function Backend({
  * mounted at a time (remounted on `mode` change), so the headless source is
  * the single thing that differs — the adapter markup is identical. The column
  * layout is URL-persisted here (shared by both paths) so pin/hide/reorder
- * survive the re-mount — but only on the live demo (`urlKey="live"`).
- * Feature Lab and kit feature pages do not write the address bar.
+ * survive the re-mount. {@link demoUrlSync} enables that on the live demo,
+ * grouping, filtering, and aggregation pages, where persistence is itself
+ * part of the demonstration.
  */
+/**
+ * Whether a page shows the demo's own row actions — the pencil and the trash.
+ *
+ * A page demonstrating row mutations gets the built-in add / duplicate /
+ * delete instead, and a focused feature page keeps its actions column clear
+ * unless column groups are the thing it is showing. The same answer decides
+ * whether the table arms a row form, because the pencil is what opens one.
+ */
+export function showsRowActions(flags: {
+  readonly rowMutations?: boolean;
+  readonly focused?: boolean;
+  readonly columnGroups?: boolean;
+}): boolean {
+  return !(
+    flags.rowMutations ??
+    (flags.focused === true && flags.columnGroups !== true)
+  );
+}
+
 export function DemoBody({
   mode,
   pageMode,
@@ -956,10 +1338,13 @@ export function DemoBody({
   editing,
   tree,
   rowMode,
+  rowActionsShown,
   batch,
   rowMutations,
   rowReorder,
   rowPinning,
+  pinnedSummaryRows,
+  summaryRow,
   cellSpan,
   extraRows,
   rowStyle,
@@ -981,10 +1366,14 @@ export function DemoBody({
   tree?: boolean;
   editing?: boolean;
   rowMode?: boolean;
+  /** Whether this page shows the demo's own row actions — the pencil. */
+  rowActionsShown?: boolean;
   batch?: boolean;
   rowMutations?: boolean;
   rowReorder?: boolean;
   rowPinning?: boolean;
+  pinnedSummaryRows?: boolean;
+  summaryRow?: boolean;
   cellSpan?: boolean;
   extraRows?: boolean;
   rowStyle?: boolean;
@@ -1001,15 +1390,15 @@ export function DemoBody({
 }>) {
   const advancedFilters = useAdvancedFilters();
   const scenario = useDemoScenario();
-  // Demos mounted WITH editing (the /editing page) keep email visible — it
-  // is the column the walkthrough edits. Column-groups drop Person, Email
-  // and Load so the three groups plus Actions fit; Team stays visible as
-  // Assignment's kept child. Only the shared live default is swapped;
-  // explicit layouts (the wide showcase's pins, RTL) pass through.
+  // Column-groups drop Person, Email and Load so the three groups plus
+  // Actions fit; Team stays visible as Assignment's kept child. Only the
+  // shared live default is swapped; explicit layouts (the editing page's,
+  // the wide showcase's pins, RTL) pass through. Turning editing on does not
+  // swap it: a toggle that reshuffles the columns under the reader hides the
+  // thing they turned on.
   let resolvedDefaultLayout = defaultColumnLayout;
   if (defaultColumnLayout === LIVE_DEFAULT_LAYOUT) {
-    if (editing) resolvedDefaultLayout = EDITING_DEFAULT_LAYOUT;
-    else if (columnGroups) resolvedDefaultLayout = GROUPS_DEFAULT_LAYOUT;
+    if (columnGroups) resolvedDefaultLayout = GROUPS_DEFAULT_LAYOUT;
     else if (cellSpan) resolvedDefaultLayout = SPAN_DEFAULT_LAYOUT;
     else {
       const scenarioLayout = layoutFor(scenario);
@@ -1027,11 +1416,17 @@ export function DemoBody({
       onLayoutChange(revealHiddenOnPin(layout, next)),
     [layout, onLayoutChange]
   );
+  // The controlled layout above owns the demo's persisted display names.
+  // Product hosts can use this channel to write the same accepted name to
+  // their schema/backend as well.
+  const onColumnRename = useCallback(() => undefined, []);
   const columns: DemoColumnProps = {
     columnLayout: layout,
     onColumnLayoutChange,
+    onColumnRename,
     collapsibleColumnGroups: columnGroups !== false,
     urlSync: syncToUrl,
+    urlKey,
   };
 
   return mode === "backend" ? (
@@ -1059,10 +1454,13 @@ export function DemoBody({
       editing={editing}
       tree={tree}
       rowMode={rowMode}
+      rowActionsShown={rowActionsShown}
       batch={batch}
       rowMutations={rowMutations}
       rowReorder={rowReorder}
       rowPinning={rowPinning}
+      pinnedSummaryRows={pinnedSummaryRows}
+      summaryRow={summaryRow}
       cellSpan={cellSpan}
       extraRows={extraRows}
       rowStyle={rowStyle}

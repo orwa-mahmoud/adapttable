@@ -38,6 +38,8 @@ export type DemoScenario =
   | "export"
   | "column-groups"
   | "rows"
+  | "row-reordering"
+  | "aggregation"
   | "nested-tables"
   | "accessibility";
 
@@ -347,6 +349,7 @@ export function rosterFor(scenario: DemoScenario): readonly Person[] {
     case "tree":
       return CAST_ORG;
     case "grouping":
+    case "aggregation":
     case "pivot":
     case "export":
       return CAST_SQUADS;
@@ -368,6 +371,8 @@ export function rosterFor(scenario: DemoScenario): readonly Person[] {
       return CAST_WIDE;
     case "rows":
       return CAST_SQUADS;
+    case "row-reordering":
+      return PEOPLE;
     case "nested-tables":
     case "accessibility":
       return CAST_LANDING;
@@ -408,6 +413,7 @@ export function layoutFor(
     case "tree":
       return TREE_LAYOUT;
     case "grouping":
+    case "aggregation":
     case "export":
       return GROUPING_LAYOUT;
     case "filtering":
@@ -435,6 +441,8 @@ export function pageLimitFor(scenario: DemoScenario): number | undefined {
   if (
     scenario === "tree" ||
     scenario === "grouping" ||
+    scenario === "aggregation" ||
+    scenario === "row-reordering" ||
     scenario === "export" ||
     scenario === "pivot"
   ) {

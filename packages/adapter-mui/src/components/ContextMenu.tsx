@@ -4,7 +4,7 @@ import {
   type ContextMenuItemProps,
   type ContextMenuSlots,
   type ContextMenuSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Divider, Menu, MenuItem } from "@mui/material";
 
 /**
@@ -22,7 +22,7 @@ function Surface({
   onClose,
   children,
   className,
-}: ContextMenuSurfaceProps) {
+}: Readonly<ContextMenuSurfaceProps>) {
   return (
     <Menu
       open

@@ -9,13 +9,13 @@
  *   may itself contain a comma); numbers are parsed back.
  * - Default values are omitted to keep the URL clean.
  */
+import type { ColumnLayoutState } from "../columns/columnLayoutModel";
 import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "../columns/columnResize";
-import type { ColumnLayoutState } from "../columns/useColumnLayout";
 import {
   parseFilterTree,
   serializeFilterTree,
 } from "../filters/filterTreeCodec";
-import { type RowPinSide, type RowPinState } from "../rows/rowPinning";
+import { type RowPinSide, type RowPinState } from "../rows/rowPinModel";
 import type { QueryFilterGroup } from "../source/queryContract";
 import type { ExtraFilters, FilterValue, SortDirection } from "../types";
 
@@ -40,12 +40,16 @@ function splitRaw(raw: string | null): string[] {
 export const PARAM_PAGE = "page";
 export const PARAM_LIMIT = "limit";
 export const PARAM_SEARCH = "q";
+/** Find-bar query — the in-table walk, not the filter search term. */
+export const PARAM_FIND = "find";
 export const PARAM_SORT_BY = "sortBy";
 export const PARAM_SORT_DIR = "sortDir";
 /** Multi-sort chain: `sort=name:asc,age:desc` (keys percent-encoded). */
 export const PARAM_SORT = "sort";
 /** Row grouping keys, comma-separated — outermost first. */
 export const PARAM_GROUP_BY = "groupBy";
+/** Per-column group aggregate overrides. */
+export const PARAM_GROUP_AGGREGATES = "groupAgg";
 /** Keys under this prefix flow through as-is into the `extra` bag. */
 export const FILTER_PREFIX = "f_";
 /** Versioned AND/OR filter tree (`ft=1.{…}`). */
@@ -57,6 +61,7 @@ export const PARAM_COL_HIDDEN = "colHide";
 export const PARAM_COL_PINNED = "colPin";
 export const PARAM_COL_ORDER = "colOrder";
 export const PARAM_COL_WIDTHS = "colW";
+export const PARAM_COL_NAMES = "colName";
 export const PARAM_COL_GROUPS = "colGroupCollapse";
 /** Pinned rows: `rowPin=id1:top,id2:bottom`. */
 export const PARAM_ROW_PIN = "rowPin";
@@ -194,6 +199,22 @@ export function writeFilterTreeParam(
   else params.delete(key);
 }
 
+function readColumnNames(raw: string | null): Record<string, string> {
+  const names: Record<string, string> = {};
+  const seen = new Set<string>();
+  for (const pair of splitRaw(raw)) {
+    const [encKey, encName] = pair.split(":");
+    if (!encKey || !encName) continue;
+    const key = safeDecode(encKey);
+    const name = safeDecode(encName).trim();
+    if (name !== "" && !seen.has(key)) {
+      seen.add(key);
+      names[key] = name;
+    }
+  }
+  return names;
+}
+
 /**
  * Read the column layout (hidden / pinned / order / widths) from the URL.
  * Each column key is percent-encoded so `:` and `,` (the field/pair
@@ -208,12 +229,14 @@ export function readColumnLayout(
   const pinRaw = params.get(prefix + PARAM_COL_PINNED);
   const orderRaw = params.get(prefix + PARAM_COL_ORDER);
   const widthRaw = params.get(prefix + PARAM_COL_WIDTHS);
+  const nameRaw = params.get(prefix + PARAM_COL_NAMES);
   const groupRaw = params.get(prefix + PARAM_COL_GROUPS);
   if (
     hideRaw === null &&
     pinRaw === null &&
     orderRaw === null &&
     widthRaw === null &&
+    nameRaw === null &&
     groupRaw === null
   ) {
     return undefined;
@@ -242,11 +265,13 @@ export function readColumnLayout(
   }
 
   const collapsedGroups = splitRaw(groupRaw).map(safeDecode);
+  const names = readColumnNames(nameRaw);
   return {
     hidden: splitRaw(hideRaw).map(safeDecode),
     order: splitRaw(orderRaw).map(safeDecode),
     pinned,
     widths,
+    ...(Object.keys(names).length > 0 ? { names } : {}),
     ...(collapsedGroups.length > 0 ? { collapsedGroups } : {}),
   };
 }
@@ -282,6 +307,16 @@ export function writeColumnLayout(
     PARAM_COL_WIDTHS,
     Object.entries(layout.widths)
       .map(([key, px]) => `${encodeURIComponent(key)}:${Math.round(px)}`)
+      .join(",")
+  );
+  setOrDelete(
+    PARAM_COL_NAMES,
+    Object.entries(layout.names ?? {})
+      .filter(([, name]) => name.trim() !== "")
+      .map(
+        ([key, name]) =>
+          `${encodeURIComponent(key)}:${encodeURIComponent(name.trim())}`
+      )
       .join(",")
   );
   setOrDelete(
@@ -338,7 +373,7 @@ export function readCollapsedGroups(
   return raw
     .split(",")
     .filter((key) => key.length > 0)
-    .map((key) => decodeURIComponent(key));
+    .map(safeDecode);
 }
 
 /**

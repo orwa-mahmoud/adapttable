@@ -1,12 +1,20 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { checkContract, publicNames, readReport } from "./api-contract.mjs";
+import { entrypoints } from "./api-entrypoints.mjs";
+import { gateSteps } from "./gate-graph.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dir = mkdtempSync(join(tmpdir(), "api-contract-"));
@@ -90,15 +98,47 @@ describe("readReport", () => {
 
   it("reads a star re-export as a forwarded target", () => {
     assert.deepEqual(
-      readReport('export * from "@adapttable/unstyled/features";\n').stars,
+      readReport("export * from '@adapttable/unstyled/features';\n").stars,
       ["@adapttable/unstyled/features"]
     );
+  });
+
+  it("records an external named re-export without inventing a local tag", () => {
+    const report = readReport(
+      "import { filterTypes } from '@adapttable/core/features';\n" +
+        "export { filterTypes }\n"
+    );
+    assert.deepEqual(publicNames(report), []);
+    assert.ok(report.exported.has("filterTypes"));
+    assert.ok(report.forwarded.has("filterTypes"));
   });
 });
 
 describe("both directions", () => {
   it("passes when the contract and the report agree", () => {
     assert.deepEqual(run(agreeing()), []);
+  });
+
+  it("accepts a named re-export as part of a declared surface", () => {
+    assert.deepEqual(
+      checkContract({
+        manifest: {
+          surfaces: { filters: ["filterTypes"] },
+          entrypoints: {
+            "filters.api.md": { surface: "filters" },
+          },
+        },
+        entrypoints: [
+          { ...ENTRY, report: "filters.api.md", isMainEntry: false },
+        ],
+        reports: {
+          "filters.api.md":
+            "import { filterTypes } from '@adapttable/core/features';\n" +
+            "export { filterTypes }\n",
+        },
+      }),
+      []
+    );
   });
 
   it("fails an @public symbol the contract does not list", () => {
@@ -249,6 +289,64 @@ describe("re-export policies", () => {
     );
   });
 
+  it("uses a canonical wildcard without copying every surface name", () => {
+    assert.deepEqual(
+      checkContract({
+        manifest: {
+          surfaces: { "kit/features": ["rowReorder", "savedViews"] },
+          entrypoints: {
+            "adapter-antd-features.api.md": {
+              reexport: "kit/features",
+              from: "@adapttable/core/features",
+            },
+          },
+        },
+        entrypoints: [
+          {
+            ...ENTRY,
+            report: "adapter-antd-features.api.md",
+            isMainEntry: false,
+          },
+        ],
+        reports: {
+          "adapter-antd-features.api.md":
+            "export * from '@adapttable/core/features';\n",
+        },
+      }),
+      []
+    );
+  });
+
+  it("fails when a canonical wildcard changes source", () => {
+    const errors = checkContract({
+      manifest: {
+        surfaces: { "kit/features": ["rowReorder"] },
+        entrypoints: {
+          "adapter-antd-features.api.md": {
+            reexport: "kit/features",
+            from: "@adapttable/core/features",
+          },
+        },
+      },
+      entrypoints: [
+        {
+          ...ENTRY,
+          report: "adapter-antd-features.api.md",
+          isMainEntry: false,
+        },
+      ],
+      reports: {
+        "adapter-antd-features.api.md":
+          "export * from '@adapttable/other/features';\n",
+      },
+    });
+    assert.ok(
+      errors.some((error) =>
+        /no longer forwards its canonical source/.test(error)
+      )
+    );
+  });
+
   it("fails when a forwarded name stops arriving", () => {
     const errors = checkContract({
       manifest: {
@@ -299,8 +397,10 @@ describe("the real gate runs this", () => {
   const pkg = JSON.parse(readFileSync(join(REPO_ROOT, "package.json"), "utf8"));
 
   it("is a step in both pnpm check and pnpm verify:release", () => {
-    assert.match(pkg.scripts.check, /pnpm run check:api-contract/);
-    assert.match(pkg.scripts["verify:release"], /pnpm run check:api-contract/);
+    assert.ok(gateSteps(pkg.scripts, "check").has("check:api-contract"));
+    assert.ok(
+      gateSteps(pkg.scripts, "verify:release").has("check:api-contract")
+    );
   });
 
   it("passes against the committed manifest", () => {
@@ -310,6 +410,37 @@ describe("the real gate runs this", () => {
       { encoding: "utf8" }
     );
     assert.equal(result.status, 0, result.stderr);
+  });
+
+  // `RowMoveMenu` is the slot component each kit hands to
+  // `RowReorderHandleChrome`. It is reached through `RowReorderHandle` and
+  // `RowReorderButtons`, never imported by a host, so it belongs to no
+  // entry point — and because it lives outside one, the surface check above
+  // would not notice it becoming public. This names it directly.
+  it("keeps the row move menu out of every kit's public surface", () => {
+    const manifest = JSON.parse(
+      readFileSync(join(REPO_ROOT, "etc", "api-contract.json"), "utf8")
+    );
+    const contracted = Object.entries(manifest.surfaces).filter(([, names]) =>
+      names.includes("RowMoveMenu")
+    );
+    assert.deepEqual(contracted, []);
+
+    // Reports carry both what a kit declares and what shadcn forwards from
+    // `@adapttable/unstyled`, so this covers the forwarding routes too.
+    const offenders = [];
+    for (const entry of entrypoints()) {
+      const file = join(REPO_ROOT, "etc", entry.report);
+      if (!existsSync(file)) continue;
+      const report = readReport(readFileSync(file, "utf8"));
+      if (
+        publicNames(report).includes("RowMoveMenu") ||
+        report.forwarded.has("RowMoveMenu")
+      ) {
+        offenders.push(entry.report);
+      }
+    }
+    assert.deepEqual(offenders, []);
   });
 
   // The point of the item: the binary the gate runs must exit non-zero, not a

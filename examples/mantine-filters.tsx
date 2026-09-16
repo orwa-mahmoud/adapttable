@@ -1,6 +1,7 @@
 import "@mantine/core/styles.css";
 
 import { DataTable } from "@adapttable/mantine";
+import { filters } from "@adapttable/mantine/filters";
 import { MantineProvider } from "@mantine/core";
 
 interface Invoice {
@@ -46,8 +47,12 @@ export function MantineFiltersExample() {
             filter: { type: "multiSelect", options: STATUS_OPTIONS },
           },
         ]}
-        filters={[{ key: "amount", type: "numberRange", label: "Amount" }]}
         rowKey={(r) => r.id}
+        features={[
+          filters<Invoice>([
+            { key: "amount", type: "numberRange", label: "Amount" },
+          ]),
+        ]}
       />
     </MantineProvider>
   );

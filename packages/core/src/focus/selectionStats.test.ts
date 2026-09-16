@@ -8,7 +8,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../columnModel";
 import { selectionStats } from "./selectionStats";
 
 interface Row {
@@ -23,9 +23,9 @@ const ROWS: Row[] = [
 ];
 // Accessors, because that is what makes a cell show anything at all — and
 // the stats read exactly what copy and export read.
-const COLUMNS: ColumnDef<Row>[] = [
-  { key: "name", header: "Name", accessor: (row) => row.name },
-  { key: "budget", header: "Budget", accessor: (row) => row.budget },
+const COLUMNS: ColumnModel<Row>[] = [
+  { key: "name", header: "Name", exportValue: (row) => row.name },
+  { key: "budget", header: "Budget", exportValue: (row) => row.budget },
 ];
 const rect = (
   fromRow: number,
@@ -86,7 +86,7 @@ describe("selectionStats", () => {
 
   it("does not add up booleans", () => {
     // Summing a column of ticks to 3 says something nobody asked.
-    const columns: ColumnDef<Row>[] = [
+    const columns: ColumnModel<Row>[] = [
       { key: "name", header: "Name", exportValue: () => true },
     ];
     expect(
@@ -95,7 +95,7 @@ describe("selectionStats", () => {
   });
 
   it("takes the value a column exports, not the one it renders", () => {
-    const columns: ColumnDef<Row>[] = [
+    const columns: ColumnModel<Row>[] = [
       { key: "budget", header: "Budget", exportValue: (row) => row.budget * 2 },
     ];
     expect(

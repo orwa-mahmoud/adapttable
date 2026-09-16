@@ -50,7 +50,7 @@ test("is reachable from the kit's feature grid", async ({ page }) => {
 test("answers the search phrase without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto(`/${KIT}/tree/`);
+  await page.goto(`/${KIT}/tree/`, { waitUntil: "domcontentloaded" });
 
   // The served bytes are the matrix's words. Asserting the strings rather
   // than a phrase inside them is what catches a page whose HTML was never

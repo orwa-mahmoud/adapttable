@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "انجام شد",
+  staged: "آماده‌سازی شد",
+  partial: "تا حدی انجام شد",
+  rejected: "رد شد",
+  "awaiting-approval": "در انتظار شما",
+  cancelled: "لغو شد",
+  stale: "منسوخ",
+  failed: "ناموفق",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "ویرایش سلول‌ها",
+  "rows.add": "افزودن سطر",
+  "rows.delete": "حذف سطر",
+  "rows.reorder": "تغییر ترتیب سطرها",
+  "export.run": "برون‌بری",
+};
+
 export const fa: Required<TableLabels> = {
   table: "جدول داده",
   search: "جستجو",
@@ -115,6 +136,13 @@ export const fa: Required<TableLabels> = {
   hideAllColumns: "پنهان‌کردن همه",
   unpinAllColumns: "لغو سنجاق همه",
   resetColumn: "بازنشانی ستون",
+  renameColumn: "تغییر نام ستون",
+  columnName: "نام ستون",
+  saveColumnName: "ذخیره نام",
+  cancelColumnRename: "لغو",
+  columnNameRequired: "نامی برای ستون وارد کنید.",
+  columnRenamed: ({ previous, name }) =>
+    `نام ستون ${previous} به ${name} تغییر کرد`,
   sortAscending: "مرتب‌سازی صعودی",
   sortDescending: "مرتب‌سازی نزولی",
   sortedBy: ({ column, ascending }) =>
@@ -124,8 +152,13 @@ export const fa: Required<TableLabels> = {
   columnActions: "اقدامات ستون",
   exportCsv: "خروجی CSV",
   exportFile: (format) => `خروجی ${format.toUpperCase()}`,
+  exportStarted: "در حال آماده‌سازی خروجی",
+  exportProgress: (progress) => `${progress}% از خروجی آماده شد`,
   exportDone: "خروجی گرفتن کامل شد",
   exportFailed: "خروجی گرفتن ناموفق بود",
+  exportCancelled: "خروجی گرفتن لغو شد",
+  exportDownload: "دانلود خروجی",
+  exportDismiss: "بستن خروجی",
   editCell: "ویرایش سلول",
   undoEdit: "بازگردانی",
   redoEdit: "بازانجام",
@@ -135,6 +168,176 @@ export const fa: Required<TableLabels> = {
     count === 1 ? "۱ ردیف ذخیره‌نشده" : `${String(count)} ردیف ذخیره‌نشده`,
   saveAll: "ذخیره همه",
   cancelAll: "لغو همه",
+  approveProposal: "تأیید",
+  rejectProposal: "رد",
+  proposalValueUnavailable: "در دسترس نیست",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "۱ تغییر پیشنهادی"
+        : "{c} تغییر پیشنهادی".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"در {r} ردیف".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "بررسی هر {c} تغییر".replace("{c}", String(count)),
+  backToConversation: "بازگشت به گفتگو",
+  approveAllProposals: "تأیید همه",
+  approveRemainingProposals: "تأیید بقیه",
+  rejectAllProposals: "رد همه",
+  rejectRemainingProposals: "رد بقیه",
+  alwaysAllowProposal: "همیشه اجازه بده",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} تأیید · {j} رد · {p} باقی"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "یک تغییر منتظر تصمیم شماست.",
+  pendingProposals: (count) =>
+    count === 1 ? "۱ تغییر پیشنهادی" : `${String(count)} تغییر پیشنهادی`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "دستیار جدول",
+  assistantOpen: "از هوش مصنوعی بپرسید",
+  assistantClose: "بستن",
+  assistantSettings: "تنظیمات دستیار",
+  assistantEmpty: "با این جدول چه می‌خواهید انجام دهید؟",
+  assistantPlaceholder: "درباره این جدول بپرسید…",
+  assistantSend: "ارسال",
+  assistantStop: "توقف",
+  assistantVoiceStart: "دیکته",
+  assistantVoiceStop: "توقف دیکته",
+  assistantVoiceListening: "در حال شنیدن",
+  assistantVoiceLanguage: "زبان دیکته",
+  assistantYou: "شما",
+  assistantSpeaker: "دستیار",
+  assistantNewMessages: "پیام‌های جدید",
+  assistantUnavailable: "دستیار متصل نیست.",
+  assistantDetached: "اتصال قطع شد. ممکن است کار همچنان در جریان باشد.",
+  assistantRejoin: "پیوستن دوباره",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `${String(done)} انجام شد`
+      : `${String(done)} از ${String(total)}`,
+  assistantBackToTable: "بازگشت به جدول",
+  assistantDetail: "جزئیات",
+  assistantSaveInTable: "برای حفظ این تغییر در جدول ذخیره کنید.",
+  assistantUndo: "واگرد",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "این بیش از گام‌هایی است که یک نوبت اجازه می‌دهد. بخشی از آن را بخواهید.",
+        "continuation-limit":
+          "این بیش از گام‌هایی است که یک نوبت اجازه می‌دهد. بخشی از آن را بخواهید.",
+        "resume-limit":
+          "این بیش از گام‌هایی است که یک نوبت اجازه می‌دهد. بخشی از آن را بخواهید.",
+        "discovery-exhausted": "دستیار نفهمید این کار را اینجا چطور انجام دهد.",
+        "repeated-plan": "دستیار دو بار همان چیز را خواست و متوقف شد.",
+        "question-unanswered": "برای پایان، پاسخ شما لازم است.",
+        "approval-unavailable": "تأیید لازم است و جایی برای پرسیدن نیست.",
+        "interrupt-unsupported":
+          "دستیار چیزی خواست که این جدول نمی‌تواند انجام دهد.",
+        "output-denied": "بخشی از آن اجازه اجرا نداشت.",
+        "not-run": "این اجرا نشد.",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "جدول از زمان اجرای این تغییر کرده است.",
+        "cannot-restore": "بخشی از این را نمی‌توان بازگرداند.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "پاسخ شما",
+  assistantAnswerPlaceholder: "پاسخی بنویسید",
+  assistantAnswerSend: "پاسخ",
+  assistantAlwaysAllowedTitle: "دربارهٔ این‌ها پرسیده نمی‌شود",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `دوباره دربارهٔ ${CAPABILITY[capability] ?? capability} بپرس`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) => (count === 1 ? "۱ کنش" : `${String(count)} کنش`),
+  assistantActionsTitle: "آنچه این نوبت تغییر داد",
+  assistantUndoAll: "واگرد همه",
+  assistantExamples: "میان‌برها",
+  assistantReceiptChange: ({ before, after }) =>
+    `از ${before} به ${after} تغییر کرد`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `پیشنهادشده: از ${before} به ${after}`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "فیلتر اعمال شد",
+        "filter/staged": "فیلتر آماده شد",
+        "sort/executed": "مرتب شد",
+        "group/executed": "گروه‌بندی شد",
+        "pin/executed": "ستون سنجاق شد",
+        "edit/executed": "ذخیره شد",
+        "edit/staged": "ویرایش آماده شد — ذخیره نشده",
+        "edit/awaiting-approval": "ویرایش در انتظار تأیید",
+        "edit/partial": "برخی ویرایش‌ها ذخیره و برخی رد شد",
+        "edit/rejected": "ویرایش رد شد",
+        "filter-cleared/executed": "فیلترها پاک شد",
+        "sort-cleared/executed": "مرتب‌سازی حذف شد",
+        "search/executed": "جست‌وجو انجام شد",
+        "search-cleared/executed": "جست‌وجو پاک شد",
+        "group-cleared/executed": "گروه‌بندی حذف شد",
+        "pin-cleared/executed": "سنجاق ستون برداشته شد",
+        "pinRow/executed": "سطر سنجاق شد",
+        "pinRow-cleared/executed": "سنجاق سطر برداشته شد",
+        "page/executed": "صفحه تغییر کرد",
+        "aggregate/executed": "جمع‌ها تغییر کرد",
+        "select/executed": "انتخاب تغییر کرد",
+        "read/executed": "جدول خوانده شد",
+        "operation/executed": "اجرا شد",
+        "operation/awaiting-approval": "در انتظار شما",
+        "operation/rejected": "رد شد",
+        "export/executed": "خروجی گرفته شد",
+        "add/executed": "سطر افزوده شد",
+        "add/awaiting-approval": "سطر جدید در انتظار تأیید",
+        "add/rejected": "سطر جدید رد شد",
+        "delete/executed": "سطرها حذف شد",
+        "delete/awaiting-approval": "حذف در انتظار تأیید",
+        "delete/partial": "برخی سطرها حذف و برخی نگه داشته شد",
+        "delete/rejected": "حذف رد شد",
+        "reorder/executed": "سطرها جابه‌جا شد",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "نزولی" : "صعودی"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "بی‌کار",
+      connecting: "در حال اتصال…",
+      ready: "آماده",
+      sending: "در حال کار…",
+      "awaiting-approval": "در انتظار شما",
+      "awaiting-user": "در انتظار شما",
+      error: "خطا",
+      disconnected: "متصل نیست",
+    })[status] ?? "آماده",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "افزودن ردیف",
   duplicateRow: "تکثیر ردیف",
   deleteRow: "حذف ردیف",
@@ -150,9 +353,28 @@ export const fa: Required<TableLabels> = {
   rowLifted: (position) => `ردیف ${String(position)} برداشته شد`,
   rowMoved: (from, to) => `ردیف از ${String(from)} به ${String(to)} منتقل شد`,
   rowReorderCancelled: "مرتب‌سازی لغو شد",
+  rowMoveOptions: "گزینه‌های انتقال ردیف",
+  moveToGroup: "انتقال به گروه…",
+  moveUnder: "انتقال به زیر…",
+  moveToTopLevel: "انتقال به سطح اصلی",
+  confirmRowMoveTitle: "تأیید انتقال ردیف",
+  confirmRowMoveDescription: (row, from, to) =>
+    `${row} از ${from} به ${to} منتقل شود؟`,
+  confirmRowMove: "انتقال",
+  rowMovedToGroup: (group) => `ردیف به ${group} منتقل شد`,
+  rowMovedUnder: (parent) => `ردیف به زیر ${parent} منتقل شد`,
+  moveRejectedPolicyNever: "انتقال ردیف بین محدوده‌ها غیرفعال است",
+  moveRejectedSorted: "پیش از تغییر ترتیب ردیف‌ها، مرتب‌سازی را پاک کنید",
+  moveRejectedCycle:
+    "ردیف را نمی‌توان درون خودش یا یکی از زیرمجموعه‌هایش منتقل کرد",
+  moveUnavailable: "این انتقال ردیف در دسترس نیست",
+  rootLevel: "سطح اصلی",
   pinToTop: "سنجاق به بالا",
   pinToBottom: "سنجاق به پایین",
   unpinRow: "رها کردن ردیف",
+  pinnedSummaryRow: "ردیف خلاصه",
+  pinnedSummaryTop: "ردیف‌های خلاصه سنجاق‌شده در بالا",
+  pinnedSummaryBottom: "ردیف‌های خلاصه سنجاق‌شده در پایین",
   rowSeparator: "جداکننده",
   expandColumnGroup: "گسترش گروه ستون",
   collapseColumnGroup: "جمع کردن گروه ستون",
@@ -162,6 +384,34 @@ export const fa: Required<TableLabels> = {
   expandGroup: "باز کردن گروه",
   collapseGroup: "بستن گروه",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "گروه‌بندی ردیف‌ها",
+  groupingDropColumns: "ستون‌ها را برای گروه‌بندی به اینجا بکشید",
+  addGroupingColumn: "افزودن ستون گروه‌بندی",
+  groupByColumn: (label) => `گروه‌بندی بر اساس ${label}`,
+  ungroupColumn: (label) => `لغو گروه‌بندی ${label}`,
+  removeGroupingColumn: (label) => `حذف ${label} از گروه‌بندی`,
+  moveGroupingColumn: (label) => `جابجایی گروه‌بندی ${label}`,
+  groupingDropToRemove: "برای حذف گروه‌بندی اینجا رها کنید",
+  groupingAggregateColumn: "ستون تجمیع",
+  groupingAggregation: "تجمیع گروه",
+  groupingAggregationDefault: "پیش‌فرض",
+  groupingAggregationNone: "هیچ‌کدام",
+  groupingAggregations: "تجمیع‌ها",
+  groupingAddAggregation: "افزودن ستون تجمیع",
+  groupingRestoreAggregations: "بازگردانی پیش‌فرض‌ها",
+  groupingRemoveAggregation: (column) => `حذف تجمیع ${column}`,
+  groupingAggregationFor: (column) => `تجمیع ${column}`,
+  groupingAggregationReadOnly: "تنظیم‌شده توسط برنامه",
+  groupingAggregationCustom: "سفارشی",
+  groupingAggregateRemoved: (column) => `تجمیع ${column} حذف شد`,
+  groupingAggregatesRestored: "تجمیع‌ها به پیش‌فرض بازگردانده شدند",
+  groupingAverage: "میانگین",
+  groupingAdded: (label) => `${label} به گروه‌بندی افزوده شد`,
+  groupingRemoved: (label) => `${label} از گروه‌بندی حذف شد`,
+  groupingMoved: (label, position) =>
+    `${label} به موقعیت گروه‌بندی ${position} منتقل شد`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `تجمیع گروه ${label} به ${aggregation} تغییر کرد`,
   gridRangeCopied: (cells) => `${cells} خانه کپی شد`,
   gridRangeCopyFailed: "کپی ناموفق بود",
   gridRangePasted: (cells) => `${cells} خانه جای‌گذاری شد`,
@@ -215,9 +465,8 @@ export const fa: Required<TableLabels> = {
   noticePinNested: "سنجاق‌کردن ردیف‌ها هنگام گروه‌بندی یا درخت خاموش است.",
   noticeReorderNested: "جابه‌جایی ردیف‌ها هنگام گروه‌بندی یا درخت خاموش است.",
   noticeGroupingUnavailable:
-    "گروه‌بندی خاموش است — این منبع مجموعهٔ فیلترشدهٔ کامل را فراهم نمی‌کند.",
+    "گروه‌بندی خاموش است — این منبع نمی‌تواند گروه‌بندی کند.",
   noticeExportAllPage:
-    "برون‌بری همه همین صفحه است — مجموعهٔ فیلترشدهٔ کامل در دسترس نیست.",
+    "برون‌بری همه خاموش است — این منبع هر بار یک صفحه می‌دهد.",
   noticeEditWithoutWriter: "ویرایش خاموش است — هیچ تابع نوشتنی وصل نشده.",
-  exportThisPage: "برون‌بری این صفحه",
 };

@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "已完成",
+  staged: "待保存",
+  partial: "部分完成",
+  rejected: "已拒绝",
+  "awaiting-approval": "等待您确认",
+  cancelled: "已取消",
+  stale: "已过期",
+  failed: "失败",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "编辑单元格",
+  "rows.add": "添加行",
+  "rows.delete": "删除行",
+  "rows.reorder": "重新排序行",
+  "export.run": "导出",
+};
+
 export const zh: Required<TableLabels> = {
   table: "数据表",
   search: "搜索",
@@ -114,6 +135,12 @@ export const zh: Required<TableLabels> = {
   hideAllColumns: "全部隐藏",
   unpinAllColumns: "全部取消固定",
   resetColumn: "重置列",
+  renameColumn: "重命名列",
+  columnName: "列名",
+  saveColumnName: "保存名称",
+  cancelColumnRename: "取消",
+  columnNameRequired: "请输入列名。",
+  columnRenamed: ({ previous, name }) => `已将列 ${previous} 重命名为 ${name}`,
   sortAscending: "升序排序",
   sortDescending: "降序排序",
   sortedBy: ({ column, ascending }) =>
@@ -123,8 +150,13 @@ export const zh: Required<TableLabels> = {
   columnActions: "列操作",
   exportCsv: "导出 CSV",
   exportFile: (format) => `导出 ${format.toUpperCase()}`,
+  exportStarted: "正在准备导出",
+  exportProgress: (progress) => `导出已完成 ${progress}%`,
   exportDone: "导出完成",
   exportFailed: "导出失败",
+  exportCancelled: "导出已取消",
+  exportDownload: "下载导出文件",
+  exportDismiss: "关闭导出",
   editCell: "编辑单元格",
   undoEdit: "撤销",
   redoEdit: "重做",
@@ -134,6 +166,173 @@ export const zh: Required<TableLabels> = {
     count === 1 ? "1 行未保存" : `${String(count)} 行未保存`,
   saveAll: "全部保存",
   cancelAll: "全部取消",
+  approveProposal: "批准",
+  rejectProposal: "拒绝",
+  proposalValueUnavailable: "无法获取",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "1 项提议的更改"
+        : "{c} 项提议的更改".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"涉及 {r} 行".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "查看全部 {c} 项更改".replace("{c}", String(count)),
+  backToConversation: "返回对话",
+  approveAllProposals: "全部批准",
+  approveRemainingProposals: "批准其余",
+  rejectAllProposals: "全部拒绝",
+  rejectRemainingProposals: "拒绝其余",
+  alwaysAllowProposal: "始终允许",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "已批准 {a} · 已拒绝 {j} · 剩余 {p}"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "有一项更改正在等待你的决定。",
+  pendingProposals: (count) =>
+    count === 1 ? "1 项提议更改" : `${String(count)} 项提议更改`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "表格助手",
+  assistantOpen: "询问 AI",
+  assistantClose: "关闭",
+  assistantSettings: "助手设置",
+  assistantEmpty: "您想对这个表格做什么？",
+  assistantPlaceholder: "询问关于此表格的问题…",
+  assistantSend: "发送",
+  assistantStop: "停止",
+  assistantVoiceStart: "语音输入",
+  assistantVoiceStop: "停止语音输入",
+  assistantVoiceListening: "正在聆听",
+  assistantVoiceLanguage: "语音输入语言",
+  assistantYou: "您",
+  assistantSpeaker: "助手",
+  assistantNewMessages: "新消息",
+  assistantUnavailable: "助手未连接。",
+  assistantDetached: "连接已断开，工作可能仍在进行。",
+  assistantRejoin: "重新连接",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `已完成 ${String(done)}`
+      : `${String(total)} 之 ${String(done)}`,
+  assistantBackToTable: "返回表格",
+  assistantDetail: "详情",
+  assistantSaveInTable: "在表格中保存以保留此更改。",
+  assistantUndo: "撤销",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "这需要的步骤超过单轮允许的数量。请分次提出。",
+        "continuation-limit": "这需要的步骤超过单轮允许的数量。请分次提出。",
+        "resume-limit": "这需要的步骤超过单轮允许的数量。请分次提出。",
+        "discovery-exhausted": "助手无法确定在这里该怎么做。",
+        "repeated-plan": "助手重复请求同一件事后停止。",
+        "question-unanswered": "需要你的回答才能完成。",
+        "approval-unavailable": "需要审批，但无处询问。",
+        "interrupt-unsupported": "助手请求了此表格无法完成的操作。",
+        "output-denied": "其中一部分不被允许执行。",
+        "not-run": "未执行。",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "运行之后表格已发生变化。",
+        "cannot-restore": "其中一部分无法还原。",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "你的回答",
+  assistantAnswerPlaceholder: "输入回答",
+  assistantAnswerSend: "回答",
+  assistantAlwaysAllowedTitle: "不再询问",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `重新询问${CAPABILITY[capability] ?? capability}`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "1 项操作" : `${String(count)} 项操作`,
+  assistantActionsTitle: "这一轮改了什么",
+  assistantUndoAll: "全部撤销",
+  assistantExamples: "快捷指令",
+  assistantReceiptChange: ({ before, after }) => `已从 ${before} 改为 ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `建议：从 ${before} 改为 ${after}`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "已应用筛选",
+        "filter/staged": "已准备筛选",
+        "sort/executed": "已排序",
+        "group/executed": "已分组",
+        "pin/executed": "已固定列",
+        "edit/executed": "已保存",
+        "edit/staged": "编辑已准备 — 未保存",
+        "edit/awaiting-approval": "编辑等待审批",
+        "edit/partial": "部分编辑已保存，部分被拒绝",
+        "edit/rejected": "编辑已拒绝",
+        "filter-cleared/executed": "已清除筛选",
+        "sort-cleared/executed": "已清除排序",
+        "search/executed": "已搜索",
+        "search-cleared/executed": "已清除搜索",
+        "group-cleared/executed": "已清除分组",
+        "pin-cleared/executed": "已取消固定列",
+        "pinRow/executed": "已固定行",
+        "pinRow-cleared/executed": "已取消固定行",
+        "page/executed": "已切换页码",
+        "aggregate/executed": "已更改汇总",
+        "select/executed": "已更改选择",
+        "read/executed": "已读取表格",
+        "operation/executed": "已执行",
+        "operation/awaiting-approval": "等待你",
+        "operation/rejected": "已拒绝",
+        "export/executed": "已导出",
+        "add/executed": "已添加行",
+        "add/awaiting-approval": "新行等待审批",
+        "add/rejected": "新行已拒绝",
+        "delete/executed": "已删除行",
+        "delete/awaiting-approval": "删除等待审批",
+        "delete/partial": "部分行已删除，部分保留",
+        "delete/rejected": "删除已拒绝",
+        "reorder/executed": "已移动行",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "降序" : "升序"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "空闲",
+      connecting: "连接中…",
+      ready: "就绪",
+      sending: "处理中…",
+      "awaiting-approval": "等待您确认",
+      "awaiting-user": "等待您确认",
+      error: "错误",
+      disconnected: "未连接",
+    })[status] ?? "就绪",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "添加行",
   duplicateRow: "复制行",
   deleteRow: "删除行",
@@ -149,9 +348,27 @@ export const zh: Required<TableLabels> = {
   rowLifted: (position) => `已提起第 ${String(position)} 行`,
   rowMoved: (from, to) => `已将行从 ${String(from)} 移到 ${String(to)}`,
   rowReorderCancelled: "已取消重新排序",
+  rowMoveOptions: "行移动选项",
+  moveToGroup: "移至分组…",
+  moveUnder: "移至下级…",
+  moveToTopLevel: "移至顶层",
+  confirmRowMoveTitle: "确认移动行",
+  confirmRowMoveDescription: (row, from, to) =>
+    `将 ${row} 从 ${from} 移至 ${to}？`,
+  confirmRowMove: "移动",
+  rowMovedToGroup: (group) => `已将行移至 ${group}`,
+  rowMovedUnder: (parent) => `已将行移至 ${parent} 下级`,
+  moveRejectedPolicyNever: "已禁用跨边界移动行",
+  moveRejectedSorted: "更改行顺序前请清除排序",
+  moveRejectedCycle: "不能将行移入其自身或其后代中",
+  moveUnavailable: "无法执行此行移动操作",
+  rootLevel: "顶层",
   pinToTop: "固定到顶部",
   pinToBottom: "固定到底部",
   unpinRow: "取消固定行",
+  pinnedSummaryRow: "汇总行",
+  pinnedSummaryTop: "顶部固定汇总行",
+  pinnedSummaryBottom: "底部固定汇总行",
   rowSeparator: "分隔线",
   expandColumnGroup: "展开列组",
   collapseColumnGroup: "折叠列组",
@@ -161,6 +378,33 @@ export const zh: Required<TableLabels> = {
   expandGroup: "展开分组",
   collapseGroup: "折叠分组",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "行分组",
+  groupingDropColumns: "将列拖到此处进行分组",
+  addGroupingColumn: "添加分组列",
+  groupByColumn: (label) => `按 ${label} 分组`,
+  ungroupColumn: (label) => `取消 ${label} 分组`,
+  removeGroupingColumn: (label) => `从分组中移除 ${label}`,
+  moveGroupingColumn: (label) => `移动 ${label} 分组`,
+  groupingDropToRemove: "拖到此处取消分组",
+  groupingAggregateColumn: "聚合列",
+  groupingAggregation: "分组聚合",
+  groupingAggregationDefault: "默认",
+  groupingAggregationNone: "无",
+  groupingAggregations: "聚合",
+  groupingAddAggregation: "添加聚合列",
+  groupingRestoreAggregations: "恢复默认",
+  groupingRemoveAggregation: (column) => `移除 ${column} 聚合`,
+  groupingAggregationFor: (column) => `${column} 聚合`,
+  groupingAggregationReadOnly: "由应用设置",
+  groupingAggregationCustom: "自定义",
+  groupingAggregateRemoved: (column) => `已移除 ${column} 聚合`,
+  groupingAggregatesRestored: "已将聚合恢复为默认值",
+  groupingAverage: "平均值",
+  groupingAdded: (label) => `已将 ${label} 添加到分组`,
+  groupingRemoved: (label) => `已将 ${label} 从分组中移除`,
+  groupingMoved: (label, position) => `已将 ${label} 移至分组位置 ${position}`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `${label} 的分组聚合已改为 ${aggregation}`,
   gridRangeCopied: (cells) => `已复制 ${cells} 个单元格`,
   gridRangeCopyFailed: "复制失败",
   gridRangePasted: (cells) => `已粘贴 ${cells} 个单元格`,
@@ -212,8 +456,7 @@ export const zh: Required<TableLabels> = {
   noticeVirtualizePaged: "虚拟滚动已关闭 — 此分页表格每次只显示一页。",
   noticePinNested: "分组或树开启时，行固定已关闭。",
   noticeReorderNested: "分组或树开启时，行重排已关闭。",
-  noticeGroupingUnavailable: "分组已关闭 — 此数据源未提供完整筛选结果。",
-  noticeExportAllPage: "导出全部即本页 — 完整筛选结果不可用。",
+  noticeGroupingUnavailable: "分组已关闭 — 此数据源无法分组。",
+  noticeExportAllPage: "导出全部已关闭 — 此数据源每次仅提供一页。",
   noticeEditWithoutWriter: "编辑已关闭 — 未接入写入处理函数。",
-  exportThisPage: "导出本页",
 };

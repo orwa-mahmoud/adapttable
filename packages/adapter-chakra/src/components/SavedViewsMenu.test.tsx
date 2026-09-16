@@ -1,20 +1,17 @@
 /**
  * SavedViewsMenu: saving (disabled while empty, clears after), applying a
  * view through a memory URL adapter (scoped to the table's `urlKey`),
- * deleting, and the `savedViews` DataTable prop mounting the trigger.
+ * deleting, and the composed saved-views feature mounting the trigger.
  *
  * Chakra portals its popover and keeps closed content visibility-hidden in
  * jsdom, so internals are queried by label/placeholder, not by role.
  */
-import {
-  createMemoryAdapter,
-  defaultLabels,
-  type LayoutStorage,
-} from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core";
+import { createMemoryAdapter, type LayoutStorage } from "@adapttable/react";
 import { act, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "../DataTable";
+import { DataTable } from "../data-table.test-utils";
 import type { ColumnDef } from "../index";
 import { renderChakra } from "../test-utils";
 import { SavedViewsMenu } from "./SavedViewsMenu";
@@ -93,7 +90,7 @@ describe("<SavedViewsMenu> (Chakra)", () => {
     fireEvent.click(screen.getByText("Mine"));
     // `t.*` is restored from the snapshot (stale `t.page` dropped); the
     // foreign `other` param keeps its CURRENT value.
-    expect(adapter.getSearch()).toBe("other=2&t.q=alice");
+    expect(adapter.getSearch()).toBe("other=2&t.q=alice&t.atv=1");
   });
 
   it("deletes a view from its trailing icon button", async () => {
@@ -108,7 +105,7 @@ describe("<SavedViewsMenu> (Chakra)", () => {
   });
 });
 
-describe("<DataTable> savedViews prop (Chakra)", () => {
+describe("<DataTable> savedViews feature (Chakra)", () => {
   interface Row {
     id: string;
     name: string;

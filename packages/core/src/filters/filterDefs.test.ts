@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../columnModel";
 import { resetDevWarnings } from "../utils/devWarn";
 import { defaultFilterRegistry } from "./filterBuiltins";
 import {
@@ -88,7 +88,7 @@ describe("filterStateKeys", () => {
 describe("resolveFilterDefs", () => {
   beforeEach(() => resetDevWarnings());
 
-  const columns: ColumnDef<Row>[] = [
+  const columns: ColumnModel<Row>[] = [
     { key: "name", header: "Name" },
     { key: "status", header: "Status", filter: "select" },
     {
@@ -124,9 +124,26 @@ describe("resolveFilterDefs", () => {
   });
 
   it("filters-only usage (no column declares a filter) is first-class", () => {
-    const bare: ColumnDef<Row>[] = [{ key: "name", header: "Name" }];
+    const bare: ColumnModel<Row>[] = [{ key: "name", header: "Name" }];
     const defs = resolveFilterDefs(bare, [{ key: "status", type: "select" }]);
     expect(defs).toHaveLength(1);
+  });
+
+  it("preserves assistant visibility on standalone and column filters", () => {
+    const defs = resolveFilterDefs(
+      [
+        {
+          key: "customer",
+          header: "Customer",
+          filter: { type: "select", ai: { options: false } },
+        },
+      ],
+      [{ key: "internal", type: "text", ai: false }]
+    );
+    expect(defs.find((def) => def.key === "customer")?.ai).toEqual({
+      options: false,
+    });
+    expect(defs.find((def) => def.key === "internal")?.ai).toBe(false);
   });
 
   it("a non-string column header falls back to the humanized key as label", () => {

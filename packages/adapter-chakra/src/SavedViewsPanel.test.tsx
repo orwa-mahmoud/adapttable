@@ -5,7 +5,7 @@
  * controls drive them — including the two things a management UI most often
  * gets wrong: reordering that needs a mouse, and a rename you cannot escape.
  */
-import type { SavedView } from "@adapttable/core";
+import type { SavedView } from "@adapttable/react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";

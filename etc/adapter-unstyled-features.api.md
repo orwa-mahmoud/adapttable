@@ -4,79 +4,80 @@
 
 ```ts
 
-import { Aggregator } from '@adapttable/core/features';
-import { applyTableFeatures } from '@adapttable/core/features';
-import { batchEditing } from '@adapttable/core/features';
-import { BatchRowEdit } from '@adapttable/core/features';
-import { BulkAction } from '@adapttable/core/features';
-import { bulkActions } from '@adapttable/core/features';
-import { cellNavigation } from '@adapttable/core/features';
-import { cellSpan } from '@adapttable/core/features';
-import { CellSpanAppearance } from '@adapttable/core/features';
-import { collapsibleColumnGroups } from '@adapttable/core/features';
-import { columnMenu } from '@adapttable/core/features';
-import { ColumnMenuAction } from '@adapttable/core/features';
-import { ColumnMenuActionContext } from '@adapttable/core/features';
-import { ColumnMenuRow } from '@adapttable/core/features';
-import { columnSelectionCheckbox } from '@adapttable/core/features';
-import { Command } from '@adapttable/core/features';
-import { commandPalette } from '@adapttable/core/features';
-import { CommandPaletteOptions } from '@adapttable/core/features';
-import { contextMenu } from '@adapttable/core/features';
-import { ContextMenuItem } from '@adapttable/core/features';
-import { ContextMenuOptions } from '@adapttable/core/features';
-import { ContextMenuTarget } from '@adapttable/core/features';
-import { CustomCellEditorRender } from '@adapttable/core/features';
-import { densityChooser } from '@adapttable/core/features';
-import { dirtyIndicators } from '@adapttable/core/features';
-import { editHistory } from '@adapttable/core/features';
-import { editing } from '@adapttable/core/features';
-import { exportCsv } from '@adapttable/core/features';
-import { ExportCsvOptions } from '@adapttable/core/features';
-import { ExportWriter } from '@adapttable/core/features';
-import { ExtraRow } from '@adapttable/core/features';
-import { extraRows } from '@adapttable/core/features';
-import { feature } from '@adapttable/core/features';
-import { FeatureApplyInput } from '@adapttable/core/features';
-import { FeaturePatch } from '@adapttable/core/features';
-import { FilterDef } from '@adapttable/core/features';
-import { filters } from '@adapttable/core/features';
-import { filterTypes } from '@adapttable/core/features';
-import { FilterTypeSpec } from '@adapttable/core/features';
-import { findInTable } from '@adapttable/core/features';
-import { fitColumns } from '@adapttable/core/features';
-import { fullscreen } from '@adapttable/core/features';
-import { GetCellSpan } from '@adapttable/core/features';
-import { grouping } from '@adapttable/core/features';
-import { GroupSort } from '@adapttable/core/features';
-import { headerFilters } from '@adapttable/core/features';
-import { multiSort } from '@adapttable/core/features';
-import { nestedTable } from '@adapttable/core/features';
-import { NestedTableFor } from '@adapttable/core/features';
-import { print as print_2 } from '@adapttable/core/features';
-import { resizableColumns } from '@adapttable/core/features';
-import { rowAppearance } from '@adapttable/core/features';
-import { rowDetail } from '@adapttable/core/features';
-import { rowEditing } from '@adapttable/core/features';
-import { RowHeight } from '@adapttable/core/features';
-import { rowPinning } from '@adapttable/core/features';
-import { RowPinState } from '@adapttable/core/features';
-import { rowReorder } from '@adapttable/core/features';
-import { RowReorderHandler } from '@adapttable/core/features';
-import { RowStyle } from '@adapttable/core/features';
-import { savedViews } from '@adapttable/core/features';
-import { selectionStats } from '@adapttable/core/features';
-import { sidePanel } from '@adapttable/core/features';
-import { SidePanelEntry } from '@adapttable/core/features';
-import { SidePanelOptions } from '@adapttable/core/features';
-import { statusBar } from '@adapttable/core/features';
-import { TableFeature } from '@adapttable/core/features';
-import { TableFeatureHost } from '@adapttable/core/features';
-import { tree } from '@adapttable/core/features';
-import { undoRedoButtons } from '@adapttable/core/features';
-import { UseSavedViewsOptions } from '@adapttable/core/features';
-import { useTableFeatures } from '@adapttable/core/features';
-import { virtualize } from '@adapttable/core/features';
+import { Aggregator } from '@adapttable/react/features';
+import { applyTableFeatures } from '@adapttable/react/features';
+import { batchEditing } from '@adapttable/react/features';
+import { BatchRowEdit } from '@adapttable/react/features';
+import { BulkAction } from '@adapttable/react/features';
+import { bulkActions } from '@adapttable/react/features';
+import { cellNavigation } from '@adapttable/react/features';
+import { cellSpan } from '@adapttable/react/features';
+import { CellSpanAppearance } from '@adapttable/react/features';
+import { collapsibleColumnGroups } from '@adapttable/react/features';
+import { columnMenu } from '@adapttable/react/features';
+import { ColumnMenuAction } from '@adapttable/react/features';
+import { ColumnMenuActionContext } from '@adapttable/react/features';
+import { ColumnMenuRow } from '@adapttable/react/features';
+import { columnSelectionCheckbox } from '@adapttable/react/features';
+import { Command } from '@adapttable/react/features';
+import { commandPalette } from '@adapttable/react/features';
+import { CommandPaletteOptions } from '@adapttable/react/features';
+import { contextMenu } from '@adapttable/react/features';
+import { ContextMenuItem } from '@adapttable/react/features';
+import { ContextMenuOptions } from '@adapttable/react/features';
+import { ContextMenuTarget } from '@adapttable/react/features';
+import { CustomCellEditorRender } from '@adapttable/react/features';
+import { densityChooser } from '@adapttable/react/features';
+import { dirtyIndicators } from '@adapttable/react/features';
+import { editHistory } from '@adapttable/react/features';
+import { editing } from '@adapttable/react/features';
+import { exportCsv } from '@adapttable/react/features';
+import { ExportCsvOptions } from '@adapttable/react/features';
+import { ExportWriter } from '@adapttable/react/features';
+import { ExtraRow } from '@adapttable/react/features';
+import { extraRows } from '@adapttable/react/features';
+import { feature } from '@adapttable/react/features';
+import { FeatureApplyInput } from '@adapttable/react/features';
+import { FeaturePatch } from '@adapttable/react/features';
+import { FilterDef } from '@adapttable/react/features';
+import { filters } from '@adapttable/react/features';
+import { filterTypes } from '@adapttable/react/features';
+import { FilterTypeSpec } from '@adapttable/react/features';
+import { findInTable } from '@adapttable/react/features';
+import { fitColumns } from '@adapttable/react/features';
+import { fullscreen } from '@adapttable/react/features';
+import { GetCellSpan } from '@adapttable/react/features';
+import { grouping } from '@adapttable/react/features';
+import { GroupSort } from '@adapttable/react/features';
+import { headerFilters } from '@adapttable/react/features';
+import { multiSort } from '@adapttable/react/features';
+import { nestedTable } from '@adapttable/react/features';
+import { NestedTableFor } from '@adapttable/react/features';
+import { print as print_2 } from '@adapttable/react/features';
+import { resizableColumns } from '@adapttable/react/features';
+import { rowActions } from '@adapttable/react/features';
+import { rowAppearance } from '@adapttable/react/features';
+import { rowDetail } from '@adapttable/react/features';
+import { rowEditing } from '@adapttable/react/features';
+import { RowHeight } from '@adapttable/react/features';
+import { rowPinning } from '@adapttable/react/features';
+import { RowPinState } from '@adapttable/react/features';
+import { rowReorder } from '@adapttable/react/features';
+import { RowReorderHandler } from '@adapttable/react/features';
+import { RowStyle } from '@adapttable/react/features';
+import { savedViews } from '@adapttable/react/features';
+import { selectionStats } from '@adapttable/react/features';
+import { sidePanel } from '@adapttable/react/features';
+import { SidePanelEntry } from '@adapttable/react/features';
+import { SidePanelOptions } from '@adapttable/react/features';
+import { statusBar } from '@adapttable/react/features';
+import { TableFeature } from '@adapttable/react/features';
+import { TableFeatureHost } from '@adapttable/react/features';
+import { tree } from '@adapttable/react/features';
+import { undoRedoButtons } from '@adapttable/react/features';
+import { UseSavedViewsOptions } from '@adapttable/react/features';
+import { useTableFeatures } from '@adapttable/react/features';
+import { virtualize } from '@adapttable/react/features';
 
 export { Aggregator }
 
@@ -179,6 +180,8 @@ export { NestedTableFor }
 export { print_2 as print }
 
 export { resizableColumns }
+
+export { rowActions }
 
 export { rowAppearance }
 

@@ -17,7 +17,7 @@
  *    scan the inner declarative form, which proves the controls themselves are
  *    fully accessible, and report the wrapper gap.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { Theme } from "@radix-ui/themes";
 import {
   cleanup,
@@ -29,8 +29,8 @@ import {
 import { afterEach, describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
-import { DataTable } from "./DataTable";
-import type { ColumnDef, DataTableProps } from "./index";
+import { DataTable } from "./data-table.test-utils";
+import type { ColumnDef, FilterDef } from "./index";
 
 interface Person {
   id: string;
@@ -59,9 +59,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 // operator-first "Operator" combobox is unique to the OPEN overlay (unlike the
 // "Status" select, whose name doubles the column header), so it doubles as the
 // open/closed sentinel for close-detection.
-const FILTERS: DataTableProps<Person>["filters"] = [
-  { key: "age", type: "numberRange" },
-];
+const FILTERS: FilterDef<Person>[] = [{ key: "age", type: "numberRange" }];
 
 // `color-contrast` is jsdom-blind (the package's a11y.test.tsx disables it for
 // the same reason). `region` flags page-level landmarks — the host app's job,
@@ -75,7 +73,7 @@ const axeOpts = {
 const AXE_TIMEOUT_MS = 20_000;
 
 function renderTable(
-  override: Partial<Omit<DataTableProps<Person>, "mode">> = {}
+  override: Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">> = {}
 ) {
   return render(
     <Theme>

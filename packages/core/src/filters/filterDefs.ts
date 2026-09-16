@@ -5,15 +5,11 @@
  * predicate. Definitions come from two places — a column's `filter` shorthand
  * and the table-level `filters` array — merged by {@link resolveFilterDefs}.
  */
+import type { ColumnMetadata } from "../columnModel";
 import { localizedColumnPath } from "../columns/resolveColumns";
 import { defaultLabels } from "../labels";
 import type { QueryCondition } from "../source/queryContract";
-import type {
-  ColumnDef,
-  ExtraFilters,
-  FilterValue,
-  TableLabels,
-} from "../types";
+import type { ExtraFilters, FilterValue, TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { humanizeKey } from "../utils/humanizeKey";
 import { getPath } from "../utils/path";
@@ -36,7 +32,13 @@ import {
   TEXT_OPS,
 } from "./operators";
 import { relativeTokenLabel, resolveRelativeRange } from "./relativeDates";
-import type { ChipLabelResolver } from "./useActiveFilterChips";
+
+/**
+ * Resolve a chip's visible label from its raw extra-filter value.
+ *
+ * @public
+ */
+export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
 
 /**
  * Every built-in filter shape, exported so consumers never hand-type them.
@@ -90,6 +92,32 @@ export type FilterOptionsSource =
 export const AUTO_OPTIONS_LIMIT = 50;
 
 /**
+ * Default maximum static choices published to an assistant. A longer list
+ * is omitted rather than truncated, so the model cannot treat a sample as
+ * the full set.
+ *
+ * @public
+ */
+export const FILTER_AI_OPTIONS_LIMIT = AUTO_OPTIONS_LIMIT;
+
+/**
+ * What an assistant may see of one filter. `false` on {@link FilterDef.ai}
+ * hides the filter entirely. This object keeps the filter visible and
+ * controls only the option list.
+ *
+ * @public
+ */
+export interface FilterAiOptions {
+  /**
+   * Option list for the assistant.
+   * `false` — never send values.
+   * a number — send values only when the static list is this long or shorter.
+   * Omit — {@link FILTER_AI_OPTIONS_LIMIT}.
+   */
+  readonly options?: false | number;
+}
+
+/**
  * A full, standalone filter definition (the `filters` array form).
  *
  * @public
@@ -120,6 +148,15 @@ export interface FilterDef<TRow = unknown> {
   getValue?: (row: TRow) => unknown;
   /** Placeholder for text-like inputs. */
   placeholder?: string;
+  /**
+   * What the assistant may see. `false` hides this filter.
+   * `{ options: false }` keeps the filter and omits the value list.
+   * `{ options: 10 }` sends values only when the static list is that
+   * long or shorter. Omit and the filter is visible, with values sent
+   * only when there are {@link FILTER_AI_OPTIONS_LIMIT} or fewer static
+   * choices.
+   */
+  ai?: false | FilterAiOptions;
 }
 
 /**
@@ -188,7 +225,7 @@ function booleanChoiceOn(value: FilterValue): boolean {
  * @public
  */
 export function resolveFilterDefs<TRow>(
-  columns: readonly ColumnDef<TRow>[],
+  columns: readonly ColumnMetadata<TRow>[],
   filters: readonly FilterDef<TRow>[] | undefined,
   locale?: string
 ): FilterDef<TRow>[] {
@@ -210,16 +247,22 @@ export function resolveFilterDefs<TRow>(
     // A localized column's filter matches against the same locale-resolved
     // path the cell shows (unless the shorthand brings its own getValue).
     const path = localizedColumnPath(column, locale);
+    const declaredLabel =
+      typeof base === "object" &&
+      "label" in base &&
+      typeof base.label === "string"
+        ? base.label
+        : undefined;
     fromColumns.push({
       key: column.key,
       label:
-        base.label ??
+        declaredLabel ??
         (typeof column.header === "string" ? column.header : undefined),
       ...(path === column.key
         ? {}
         : { getValue: (row: TRow) => getPath(row, path) }),
       ...base,
-    });
+    } as FilterDef<TRow>);
   }
   return [...fromColumns, ...standalone];
 }

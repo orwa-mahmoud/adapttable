@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnDef } from "../types";
+import type { ColumnModel } from "../columnModel";
 import {
   applyCellEditCommit,
   booleanDraft,
@@ -36,7 +36,7 @@ const ROWS: Person[] = [
   { id: "3", name: "Alan", age: 41, status: "active", salary: 95_000 },
 ];
 
-const COLS: ColumnDef<Person>[] = [
+const COLS: ColumnModel<Person>[] = [
   { key: "name", editable: true },
   { key: "age", editable: true, editor: "number", sortValue: (r) => r.age },
   {
@@ -55,7 +55,7 @@ const COLS: ColumnDef<Person>[] = [
     editable: true,
     editor: "number",
     editValue: (r) => String(r.salary),
-    accessor: (r) => `$${r.salary}`,
+    exportValue: (r) => `$${r.salary}`,
   },
   { key: "id" },
 ];

@@ -2,7 +2,7 @@ import { xlsxWriter } from "@adapttable/core/xlsx";
 import { act, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { renderChakra } from "./test-utils";
 
@@ -36,6 +36,54 @@ function renderExport(request: () => Promise<void>) {
 }
 
 describe("export states (Chakra)", () => {
+  it("renders server progress and cancels through the host signal", async () => {
+    let signal: AbortSignal | undefined;
+    const { container } = renderChakra(
+      <DataTable
+        data={rows}
+        columns={columns}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        exportCsv={{
+          scope: "all",
+          onExportAll: (_query, controls) =>
+            new Promise<void>(() => {
+              signal = controls.signal;
+              controls.setProgress?.(55);
+              controls.setMessage?.("Building file");
+            }),
+        }}
+      />
+    );
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Export CSV" }).click();
+      await Promise.resolve();
+    });
+    expect(
+      screen.getByRole("region", { name: "Preparing export" })
+    ).toHaveTextContent("Building file");
+    expect(
+      container.querySelector('[data-adapttable-part="export-progress-bar"]')
+    ).not.toBeNull();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Cancel" }).click();
+      await Promise.resolve();
+    });
+    expect(signal?.aborted).toBe(true);
+    expect(
+      screen.getByRole("region", { name: "Export cancelled" })
+    ).toBeInTheDocument();
+    await act(async () => {
+      screen.getByRole("button", { name: "Dismiss" }).click();
+      await Promise.resolve();
+    });
+    expect(
+      screen.queryByRole("region", { name: "Export cancelled" })
+    ).toBeNull();
+  });
+
   it("shows Chakra's own loading affordance while the export runs", async () => {
     let settle!: () => void;
     const { container } = renderExport(

@@ -49,7 +49,7 @@ test("is reachable from the kit's feature grid", async ({ page }) => {
 test("answers the search phrase without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto(`/${KIT}/filtering/`);
+  await page.goto(`/${KIT}/filtering/`, { waitUntil: "domcontentloaded" });
 
   // The served bytes are the matrix's words. Asserting the strings rather
   // than a phrase inside them is what catches a page whose HTML was never
@@ -141,6 +141,28 @@ test("Advanced alone still uses the same Filters chrome", async ({ page }) => {
   await expect(
     form.getByRole("button", { name: "Add condition" })
   ).toBeVisible();
+});
+
+test("find writes flt.find in the URL and is not the filter tree", async ({
+  page,
+}) => {
+  await page.goto(`/${KIT}/filtering/?flt.find=Priya`);
+  const input = demo(page).locator('[data-adapttable-part="find-input"]');
+  await expect(input).toBeVisible({ timeout: 15_000 });
+  await expect(input).toHaveValue("Priya");
+  await expect(
+    demo(page).getByRole("button", { name: "Filters", exact: true })
+  ).toBeVisible();
+  await expect(
+    demo(page).locator('[data-adapttable-part="filter-tree"]')
+  ).toHaveCount(0);
+
+  await input.fill("Jonah");
+  await expect
+    .poll(() => new URL(page.url()).searchParams.get("flt.find"), {
+      timeout: 5_000,
+    })
+    .toBe("Jonah");
 });
 
 for (const kit of KITS) {

@@ -5,7 +5,7 @@ import {
   type CommandPaletteItemProps,
   type CommandPaletteSlots,
   type CommandPaletteSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Dialog, Input, Text } from "@chakra-ui/react";
 
 import { KitPortal } from "./kitPortal";
@@ -24,7 +24,7 @@ function Surface({
   onClose,
   children,
   className,
-}: CommandPaletteSurfaceProps) {
+}: Readonly<CommandPaletteSurfaceProps>) {
   return (
     <Dialog.Root
       open

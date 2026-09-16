@@ -2,7 +2,7 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -65,6 +65,15 @@ describe("density and fullscreen (chakra)", () => {
     fireEvent.click(part("density-toggle")!);
 
     expect(onDensityChange).toHaveBeenCalledWith("compact");
+  });
+
+  it("applies an uncontrolled choice to the rendered table", () => {
+    const { container } = table({ densityChooser: true });
+    const rendered = container.querySelector("table")!;
+
+    expect(rendered).toHaveAttribute("data-size", "md");
+    fireEvent.click(part("density-toggle")!);
+    expect(rendered).toHaveAttribute("data-size", "sm");
   });
 
   it("goes back the other way from compact", () => {

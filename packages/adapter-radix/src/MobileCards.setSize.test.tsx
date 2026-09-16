@@ -3,10 +3,10 @@
  * does: `aria-setsize` on each item with its absolute `aria-posinset`. Core
  * decides when the list is a window; this proves the radix cards carry it.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import { createMemoryAdapter } from "@adapttable/react";
 import { describe, expect, it } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { renderRadix } from "./test-utils";
 

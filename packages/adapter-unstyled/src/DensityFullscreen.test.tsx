@@ -1,7 +1,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -64,6 +64,15 @@ describe("density and fullscreen (unstyled)", () => {
     fireEvent.click(part("density-toggle")!);
 
     expect(onDensityChange).toHaveBeenCalledWith("compact");
+  });
+
+  it("applies an uncontrolled choice to the rendered density hook", () => {
+    const { container } = table({ densityChooser: true });
+    const root = container.querySelector('[data-adapttable-part="root"]')!;
+
+    expect(root).toHaveAttribute("data-density", "comfortable");
+    fireEvent.click(part("density-toggle")!);
+    expect(root).toHaveAttribute("data-density", "compact");
   });
 
   it("goes back the other way from compact", () => {

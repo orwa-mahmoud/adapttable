@@ -5,6 +5,27 @@ import type { TableLabels } from "@adapttable/core";
  *
  * @public
  */
+/** How this language names what became of one action. */
+const RECEIPT_STATUS: Readonly<Record<string, string>> = {
+  executed: "تم",
+  staged: "مُجهَّز",
+  partial: "تم جزئيًا",
+  rejected: "مرفوض",
+  "awaiting-approval": "بانتظارك",
+  cancelled: "أُلغي",
+  stale: "غير محدَّث",
+  failed: "فشل",
+};
+
+/** How this language names the capabilities a reader is asked to confirm. */
+const CAPABILITY: Readonly<Record<string, string>> = {
+  "edit.cells": "تعديل الخلايا",
+  "rows.add": "إضافة صفوف",
+  "rows.delete": "حذف صفوف",
+  "rows.reorder": "إعادة ترتيب الصفوف",
+  "export.run": "التصدير",
+};
+
 export const ar: Required<TableLabels> = {
   table: "جدول البيانات",
   search: "بحث",
@@ -116,6 +137,13 @@ export const ar: Required<TableLabels> = {
   hideAllColumns: "إخفاء الكل",
   unpinAllColumns: "إلغاء تثبيت الكل",
   resetColumn: "إعادة تعيين العمود",
+  renameColumn: "إعادة تسمية العمود",
+  columnName: "اسم العمود",
+  saveColumnName: "حفظ الاسم",
+  cancelColumnRename: "إلغاء",
+  columnNameRequired: "أدخل اسمًا للعمود.",
+  columnRenamed: ({ previous, name }) =>
+    `تمت إعادة تسمية العمود ${previous} إلى ${name}`,
   sortAscending: "ترتيب تصاعدي",
   sortDescending: "ترتيب تنازلي",
   sortedBy: ({ column, ascending }) =>
@@ -125,8 +153,13 @@ export const ar: Required<TableLabels> = {
   columnActions: "إجراءات العمود",
   exportCsv: "تصدير CSV",
   exportFile: (format) => `تصدير ${format.toUpperCase()}`,
+  exportStarted: "جارٍ تجهيز التصدير",
+  exportProgress: (progress) => `اكتمل التصدير بنسبة ${progress}%`,
   exportDone: "تم التصدير",
   exportFailed: "فشل التصدير",
+  exportCancelled: "تم إلغاء التصدير",
+  exportDownload: "تنزيل التصدير",
+  exportDismiss: "إغلاق التصدير",
   editCell: "تعديل الخلية",
   undoEdit: "تراجع",
   redoEdit: "إعادة",
@@ -136,6 +169,176 @@ export const ar: Required<TableLabels> = {
     count === 1 ? "صف واحد غير محفوظ" : `${String(count)} صفوف غير محفوظة`,
   saveAll: "حفظ الكل",
   cancelAll: "إلغاء الكل",
+  approveProposal: "موافقة",
+  rejectProposal: "رفض",
+  proposalValueUnavailable: "غير متاح",
+  proposalSummary: ({ changes, rows }) => {
+    const left =
+      changes === 1
+        ? "تغيير مقترح واحد"
+        : "{c} تغييرات مقترحة".replace("{c}", String(changes));
+    if (rows <= 1) return left;
+    return `${left} ${"عبر {r} صفوف".replace("{r}", String(rows))}`;
+  },
+  reviewAllProposals: (count) =>
+    "مراجعة كل {c} تغييرات".replace("{c}", String(count)),
+  backToConversation: "العودة إلى المحادثة",
+  approveAllProposals: "الموافقة على الكل",
+  approveRemainingProposals: "الموافقة على الباقي",
+  rejectAllProposals: "رفض الكل",
+  rejectRemainingProposals: "رفض الباقي",
+  alwaysAllowProposal: "السماح دائمًا",
+  proposalTally: ({ pending, approved, rejected }) =>
+    "{a} موافق عليها · {j} مرفوضة · {p} متبقية"
+      .replace("{a}", String(approved))
+      .replace("{j}", String(rejected))
+      .replace("{p}", String(pending)),
+  approvalWaitingElsewhere: "هناك تغيير ينتظر قرارك.",
+  pendingProposals: (count) =>
+    count === 1 ? "تغيير مقترح واحد" : `${String(count)} تغييرات مقترحة`,
+  proposalChange: ({ row, column, before, after }) => {
+    const field = column ? `${row} · ${column}` : row;
+    if (before === undefined && after === undefined) return field;
+    return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
+  },
+  assistantTitle: "مساعد الجدول",
+  assistantOpen: "اسأل المساعد",
+  assistantClose: "إغلاق",
+  assistantSettings: "إعدادات المساعد",
+  assistantEmpty: "ماذا تريد أن تفعل بهذا الجدول؟",
+  assistantPlaceholder: "اسأل عن هذا الجدول…",
+  assistantSend: "إرسال",
+  assistantStop: "إيقاف",
+  assistantVoiceStart: "إملاء",
+  assistantVoiceStop: "إيقاف الإملاء",
+  assistantVoiceListening: "جارٍ الاستماع",
+  assistantVoiceLanguage: "لغة الإملاء",
+  assistantYou: "أنت",
+  assistantSpeaker: "المساعد",
+  assistantNewMessages: "رسائل جديدة",
+  assistantUnavailable: "المساعد غير متصل.",
+  assistantDetached: "انقطع الاتصال. قد يكون العمل ما زال جاريًا.",
+  assistantRejoin: "إعادة الاتصال",
+  assistantProgress: (done, total) =>
+    total === undefined
+      ? `اكتمل ${String(done)}`
+      : `${String(done)} من ${String(total)}`,
+  assistantBackToTable: "العودة إلى الجدول",
+  assistantDetail: "التفاصيل",
+  assistantSaveInTable: "احفظ في الجدول للاحتفاظ بهذا التغيير.",
+  assistantUndo: "تراجع",
+  assistantUnresolved: (code) =>
+    (
+      ({
+        "continuation-exhausted":
+          "يتطلب هذا خطوات أكثر مما يسمح به دور واحد. اطلب جزءًا منه.",
+        "continuation-limit":
+          "يتطلب هذا خطوات أكثر مما يسمح به دور واحد. اطلب جزءًا منه.",
+        "resume-limit":
+          "يتطلب هذا خطوات أكثر مما يسمح به دور واحد. اطلب جزءًا منه.",
+        "discovery-exhausted": "لم يعرف المساعد كيف ينفّذ ذلك هنا.",
+        "repeated-plan": "طلب المساعد الشيء نفسه مرتين وتوقف.",
+        "question-unanswered": "يحتاج هذا إلى ردّ منك لإتمامه.",
+        "approval-unavailable": "يحتاج هذا إلى موافقة، ولا مكان لطلبها.",
+        "interrupt-unsupported": "طلب المساعد شيئًا لا يستطيع هذا الجدول فعله.",
+        "output-denied": "لم يُسمح بتنفيذ جزء من ذلك.",
+        "not-run": "لم يُنفَّذ هذا.",
+      }) as Record<string, string>
+    )[code],
+  assistantUndoBlocked: (code) =>
+    (
+      ({
+        "table-moved": "تغيّر الجدول منذ تنفيذ هذا.",
+        "cannot-restore": "جزء من هذا لا يمكن إرجاعه.",
+      }) as Record<string, string>
+    )[code],
+  assistantAnswerLabel: "إجابتك",
+  assistantAnswerPlaceholder: "اكتب إجابة",
+  assistantAnswerSend: "إجابة",
+  assistantAlwaysAllowedTitle: "لا يُسأل عن",
+  assistantAlwaysAllowedRevoke: (capability) =>
+    `اسأل عن ${CAPABILITY[capability] ?? capability} مرة أخرى`,
+  assistantCapabilityName: (capability) => CAPABILITY[capability],
+  assistantActions: (count) =>
+    count === 1 ? "إجراء واحد" : `${String(count)} إجراءات`,
+  assistantActionsTitle: "ما غيّره هذا الدور",
+  assistantUndoAll: "تراجع عن الكل",
+  assistantExamples: "اختصارات",
+  assistantReceiptChange: ({ before, after }) =>
+    `تم التغيير من ${before} إلى ${after}`,
+  assistantReceiptProposed: ({ before, after }) =>
+    `مقترح: من ${before} إلى ${after}`,
+  assistantReceiptAction: ({ kind, status, cleared }) => {
+    if (!kind) return undefined;
+    const scope = cleared ? `${kind}-cleared` : kind;
+    return (
+      {
+        "filter/executed": "تم تطبيق التصفية",
+        "filter/staged": "تم تجهيز التصفية",
+        "sort/executed": "تم الفرز",
+        "group/executed": "تم التجميع",
+        "pin/executed": "تم تثبيت العمود",
+        "edit/executed": "تم الحفظ",
+        "edit/staged": "تم تجهيز التعديل — لم يُحفظ",
+        "edit/awaiting-approval": "التعديل بانتظار الموافقة",
+        "edit/partial": "حُفظت بعض التعديلات ورُفض بعضها",
+        "edit/rejected": "تم رفض التعديل",
+        "filter-cleared/executed": "تم مسح عوامل التصفية",
+        "sort-cleared/executed": "تم إلغاء الفرز",
+        "search/executed": "تم البحث",
+        "search-cleared/executed": "تم مسح البحث",
+        "group-cleared/executed": "تم إلغاء التجميع",
+        "pin-cleared/executed": "تم إلغاء تثبيت العمود",
+        "pinRow/executed": "تم تثبيت الصف",
+        "pinRow-cleared/executed": "تم إلغاء تثبيت الصف",
+        "page/executed": "تم تغيير الصفحة",
+        "aggregate/executed": "تم تغيير الإجماليات",
+        "select/executed": "تم تغيير التحديد",
+        "read/executed": "تمت قراءة الجدول",
+        "operation/executed": "تم التنفيذ",
+        "operation/awaiting-approval": "بانتظارك",
+        "operation/rejected": "مرفوض",
+        "export/executed": "تم التصدير",
+        "add/executed": "تمت إضافة صف",
+        "add/awaiting-approval": "صف جديد بانتظار الموافقة",
+        "add/rejected": "تم رفض الصف الجديد",
+        "delete/executed": "تم حذف الصفوف",
+        "delete/awaiting-approval": "الحذف بانتظار الموافقة",
+        "delete/partial": "حُذفت بعض الصفوف واحتُفظ بالبعض",
+        "delete/rejected": "تم رفض الحذف",
+        "reorder/executed": "تم نقل الصفوف",
+      } as Record<string, string>
+    )[`${scope}/${status}`];
+  },
+  assistantReceiptTerms: ({ terms, direction }) => {
+    const parts = (terms ?? [])
+      .map((term) => {
+        if (!term.column) return term.value;
+        if (!term.value) return term.column;
+        return `${term.column}: ${term.value}`;
+      })
+      .filter((part): part is string => Boolean(part));
+    if (parts.length === 0) return undefined;
+    const joined = parts.join(", ");
+    if (!direction) return joined;
+    return `${joined}, ${direction === "desc" ? "تنازلي" : "تصاعدي"}`;
+  },
+  assistantConnection: (status) =>
+    ({
+      idle: "خامل",
+      connecting: "جارٍ الاتصال…",
+      ready: "جاهز",
+      sending: "جارٍ العمل…",
+      "awaiting-approval": "بانتظارك",
+      "awaiting-user": "بانتظارك",
+      error: "خطأ",
+      disconnected: "غير متصل",
+    })[status] ?? "جاهز",
+  assistantReceipt: ({ capability, status }) => {
+    const what = RECEIPT_STATUS[status] ?? status;
+    return capability ? `${capability}: ${what}` : what;
+  },
+  assistantReceiptStatus: (status) => RECEIPT_STATUS[status] ?? status,
   addRow: "إضافة صف",
   duplicateRow: "تكرار الصف",
   deleteRow: "حذف الصف",
@@ -151,9 +354,27 @@ export const ar: Required<TableLabels> = {
   rowLifted: (position) => `تم رفع الصف ${String(position)}`,
   rowMoved: (from, to) => `نُقل الصف من ${String(from)} إلى ${String(to)}`,
   rowReorderCancelled: "أُلغيت إعادة الترتيب",
+  rowMoveOptions: "خيارات نقل الصف",
+  moveToGroup: "نقل إلى مجموعة…",
+  moveUnder: "نقل تحت…",
+  moveToTopLevel: "نقل إلى المستوى الأعلى",
+  confirmRowMoveTitle: "تأكيد نقل الصف",
+  confirmRowMoveDescription: (row, from, to) =>
+    `نقل ${row} من ${from} إلى ${to}؟`,
+  confirmRowMove: "نقل",
+  rowMovedToGroup: (group) => `تم نقل الصف إلى ${group}`,
+  rowMovedUnder: (parent) => `تم نقل الصف تحت ${parent}`,
+  moveRejectedPolicyNever: "نقل الصفوف عبر الحدود معطّل",
+  moveRejectedSorted: "امسح الترتيب قبل تغيير ترتيب الصفوف",
+  moveRejectedCycle: "لا يمكن نقل صف داخل نفسه أو أحد الصفوف التابعة له",
+  moveUnavailable: "نقل هذا الصف غير متاح",
+  rootLevel: "المستوى الأعلى",
   pinToTop: "تثبيت في الأعلى",
   pinToBottom: "تثبيت في الأسفل",
   unpinRow: "إلغاء تثبيت الصف",
+  pinnedSummaryRow: "صف الملخص",
+  pinnedSummaryTop: "صفوف الملخص المثبتة في الأعلى",
+  pinnedSummaryBottom: "صفوف الملخص المثبتة في الأسفل",
   rowSeparator: "فاصل",
   expandColumnGroup: "توسيع مجموعة الأعمدة",
   collapseColumnGroup: "طي مجموعة الأعمدة",
@@ -163,6 +384,34 @@ export const ar: Required<TableLabels> = {
   expandGroup: "توسيع المجموعة",
   collapseGroup: "طي المجموعة",
   groupCount: (count) => `(${count})`,
+  groupingPanel: "تجميع الصفوف",
+  groupingDropColumns: "اسحب الأعمدة هنا للتجميع",
+  addGroupingColumn: "إضافة عمود تجميع",
+  groupByColumn: (label) => `تجميع حسب ${label}`,
+  ungroupColumn: (label) => `إلغاء تجميع ${label}`,
+  removeGroupingColumn: (label) => `إزالة ${label} من التجميع`,
+  moveGroupingColumn: (label) => `نقل تجميع ${label}`,
+  groupingDropToRemove: "أفلت هنا لإزالة التجميع",
+  groupingAggregateColumn: "عمود التجميع",
+  groupingAggregation: "دالة تجميع المجموعة",
+  groupingAggregationDefault: "افتراضي",
+  groupingAggregationNone: "بلا",
+  groupingAggregations: "التجميعات",
+  groupingAddAggregation: "إضافة عمود تجميعة",
+  groupingRestoreAggregations: "استعادة الإعدادات الافتراضية",
+  groupingRemoveAggregation: (column) => `إزالة تجميع ${column}`,
+  groupingAggregationFor: (column) => `تجميع ${column}`,
+  groupingAggregationReadOnly: "تعيّنه التطبيق",
+  groupingAggregationCustom: "مخصص",
+  groupingAggregateRemoved: (column) => `تمت إزالة تجميع ${column}`,
+  groupingAggregatesRestored: "تمت استعادة التجميعات إلى الإعدادات الافتراضية",
+  groupingAverage: "المتوسط",
+  groupingAdded: (label) => `تمت إضافة ${label} إلى التجميع`,
+  groupingRemoved: (label) => `تمت إزالة ${label} من التجميع`,
+  groupingMoved: (label, position) =>
+    `تم نقل ${label} إلى موضع التجميع ${position}`,
+  groupingAggregateChanged: (label, aggregation) =>
+    `تغيّرت دالة تجميع ${label} إلى ${aggregation}`,
   gridRangeCopied: (cells) => `تم نسخ ${cells} خلية`,
   gridRangeCopyFailed: "تعذّر النسخ",
   gridRangePasted: (cells) => `تم لصق ${cells} خلية`,
@@ -215,10 +464,8 @@ export const ar: Required<TableLabels> = {
     "التصفح الافتراضي متوقف — يعرض هذا الجدول المقسّم صفحة واحدة في كل مرة.",
   noticePinNested: "تثبيت الصفوف متوقف أثناء التجميع أو الشجرة.",
   noticeReorderNested: "إعادة ترتيب الصفوف متوقفة أثناء التجميع أو الشجرة.",
-  noticeGroupingUnavailable:
-    "التجميع متوقف — لا يوفّر هذا المصدر المجموعة الكاملة المصفّاة.",
+  noticeGroupingUnavailable: "التجميع متوقف — هذا المصدر لا يدعم التجميع.",
   noticeExportAllPage:
-    "تصدير الكل هو هذه الصفحة — المجموعة الكاملة المصفّاة غير متاحة.",
+    "تصدير الكل متوقف — هذا المصدر يوفّر صفحة واحدة في كل مرة.",
   noticeEditWithoutWriter: "التحرير متوقف — لم يُربَط معالج كتابة.",
-  exportThisPage: "تصدير هذه الصفحة",
 };

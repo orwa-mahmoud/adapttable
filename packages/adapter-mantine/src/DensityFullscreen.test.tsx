@@ -2,7 +2,7 @@ import { MantineProvider } from "@mantine/core";
 import { fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./DataTable";
+import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -65,6 +65,19 @@ describe("density and fullscreen (mantine)", () => {
     fireEvent.click(part("density-toggle")!);
 
     expect(onDensityChange).toHaveBeenCalledWith("compact");
+  });
+
+  it("applies an uncontrolled choice to the rendered row spacing", () => {
+    const { container } = table({ densityChooser: true });
+    const rendered = container.querySelector("table")!;
+
+    expect(rendered.style.getPropertyValue("--table-vertical-spacing")).toBe(
+      "var(--mantine-spacing-sm)"
+    );
+    fireEvent.click(part("density-toggle")!);
+    expect(
+      rendered.style.getPropertyValue("--table-vertical-spacing")
+    ).toContain("0.25rem");
   });
 
   it("goes back the other way from compact", () => {

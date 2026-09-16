@@ -4,7 +4,7 @@ import {
   type ContextMenuItemProps,
   type ContextMenuSlots,
   type ContextMenuSurfaceProps,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 import { Menu } from "@mantine/core";
 
 /**
@@ -32,7 +32,7 @@ function Surface({
   children,
   className,
   container,
-}: ContextMenuSurfaceProps) {
+}: Readonly<ContextMenuSurfaceProps>) {
   return (
     <Menu
       opened

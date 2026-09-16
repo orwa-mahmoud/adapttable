@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "adapttable.agent.v1",
+  "tableId": "minimal",
+  "viewRevision": 1,
+  "capabilities": [
+    "columns.describe",
+    "view.describe",
+    "view.setPage",
+    "view.setSort",
+    "view.setSearch"
+  ],
+  "columns": [],
+  "rowAddressing": { "scope": "visible", "key": "rowKey" },
+  "limits": { "pageMax": 100, "readMax": 50 },
+  "policy": { "write": "allow", "approval": "writes", "commit": "stage" },
+  "source": {
+    "fullDataset": false,
+    "grouping": false,
+    "selectAcrossPages": false,
+    "exportScope": "page",
+    "totalCount": "loaded"
+  }
+}

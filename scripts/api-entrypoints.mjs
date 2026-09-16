@@ -30,18 +30,41 @@ function isTypedSubpath(key) {
 }
 
 /**
- * `{ dir, isMainEntry, report, entry, published }` for every typed entry
+ * The declaration file a subpath resolves to, as the package itself declares.
+ *
+ * Read rather than derived from the subpath, because a subpath need not be
+ * spelled like the module behind it: `./ag-ui` is built from `agui.ts`,
+ * `./ai-sdk` from `aiSdk.ts` and `./mcp-apps` from `mcpApps.ts`. A name guessed
+ * from the key finds no file for any of them, and an entry point whose
+ * declaration cannot be found is an entry point with no report — which is the
+ * one thing this list exists to prevent.
+ */
+function typesTarget(value) {
+  if (typeof value === "string")
+    return value.endsWith(".d.ts") ? value : undefined;
+  if (value === null || typeof value !== "object") return undefined;
+  for (const condition of ["types", "import", "require", "default"]) {
+    if (condition in value) {
+      const found = typesTarget(value[condition]);
+      if (found !== undefined) return found;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * `{ dir, subpath, isMainEntry, report, entry, published }` for every typed entry
  * point, package by package, subpath sorted.
  *
  * `published` is false for a workspace-private package (`@adapttable/bootstrap`
  * is `private: true`): its parity is still worth reporting, but it carries no
  * SemVer promise, which is a distinction the contract checks depend on.
  */
-export function entrypoints() {
+export function entrypoints(packagesDir = PACKAGES_DIR) {
   const list = [];
-  for (const dir of readdirSync(PACKAGES_DIR)) {
+  for (const dir of readdirSync(packagesDir)) {
     const manifest = JSON.parse(
-      readFileSync(join(PACKAGES_DIR, dir, "package.json"), "utf8")
+      readFileSync(join(packagesDir, dir, "package.json"), "utf8")
     );
     const subpaths = Object.keys(manifest.exports ?? { ".": {} }).filter(
       isTypedSubpath
@@ -50,10 +73,23 @@ export function entrypoints() {
       const name = key === "." ? "index" : key.slice(2);
       list.push({
         dir,
+        // The exports-map key this came from. Carried rather than recovered
+        // from the report name, which flattens a nested subpath's separator.
+        subpath: key,
         isMainEntry: key === ".",
         published: manifest.private !== true,
-        report: key === "." ? `${dir}.api.md` : `${dir}-${name}.api.md`,
-        entry: join(PACKAGES_DIR, dir, "dist", `${name}.d.ts`),
+        // A nested subpath (`./features/row-reorder`) still names ONE report,
+        // so the separator is flattened — `etc/` is a flat directory.
+        report:
+          key === "."
+            ? `${dir}.api.md`
+            : `${dir}-${name.replaceAll("/", "-")}.api.md`,
+        entry: join(
+          packagesDir,
+          dir,
+          typesTarget(manifest.exports?.[key])?.replace(/^\.\//, "") ??
+            join("dist", `${name}.d.ts`)
+        ),
       });
     }
   }

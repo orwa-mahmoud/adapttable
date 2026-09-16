@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta
       name="description"
-      content="Flip one dataset between Mantine, MUI, Chakra, Ant Design, Radix and shadcn — filtering, sorting, selection and 50,000-row virtualization."
+      content="Switch one React table between eight UI kits. Try native filters, sorting, selection and editing with Mantine, MUI, Ant Design, Chakra and more."
     />
     <link
       rel="canonical"
@@ -15,10 +15,13 @@
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="AdaptTable — live demo, every UI kit" />
+    <meta
+      property="og:title"
+      content="React data table live demo — AdaptTable"
+    />
     <meta
       property="og:description"
-      content="Flip one dataset between Mantine, MUI, Chakra, Ant Design, Radix and shadcn/ui — with filtering, sorting, selection, column management and 50,000-row virtualization."
+      content="Switch one React table between eight UI kits. Try native filters, sorting, selection and editing with Mantine, MUI, Ant Design, Chakra and more."
     />
     <meta
       property="og:url"
@@ -31,10 +34,13 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AdaptTable — live demo, every UI kit" />
+    <meta
+      name="twitter:title"
+      content="React data table live demo — AdaptTable"
+    />
     <meta
       name="twitter:description"
-      content="Flip one dataset between Mantine, MUI, Chakra, Ant Design, Radix and shadcn/ui — filtering, sorting, selection, column management, virtualization."
+      content="Switch one React table between eight UI kits. Try native filters, sorting, selection and editing with Mantine, MUI, Ant Design, Chakra and more."
     />
     <meta
       name="twitter:image"
@@ -55,12 +61,41 @@
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
       }
     </script>
-    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed. -->
-    <script
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "dd71ff9f3b7b4064969d3f81e8c6ee9b"}'
-    ></script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a local run files no session. -->
+    <script>
+      (function () {
+        var isLocal = function () {
+          var h = location.hostname || "";
+          if (location.protocol === "file:") return true;
+          if (
+            h === "" ||
+            h === "localhost" ||
+            h === "0.0.0.0" ||
+            h === "[::1]" ||
+            h === "::1"
+          )
+            return true;
+          if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+          if (/^127\./.test(h)) return true;
+          if (/^10\./.test(h)) return true;
+          if (/^192\.168\./.test(h)) return true;
+          if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+          return false;
+        };
+        if (isLocal()) return;
+        (function () {
+          var s = document.createElement("script");
+          s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+          s.defer = true;
+          s.setAttribute(
+            "data-cf-beacon",
+            '{"token": "dd71ff9f3b7b4064969d3f81e8c6ee9b"}'
+          );
+          document.head.appendChild(s);
+        })();
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Critical UI face first; mono + Arabic load after first paint. -->
@@ -80,7 +115,7 @@
         rel="stylesheet"
       />
     </noscript>
-    <title>AdaptTable — one headless engine, every UI kit</title>
+    <title>React data table live demo — AdaptTable</title>
     <script>
       // Apply the stored theme before paint so page-to-page navigation
       // doesn't flash light.

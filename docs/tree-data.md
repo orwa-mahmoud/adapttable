@@ -202,6 +202,24 @@ one table. The region carries `data-adapttable-part="nested-table"` and is
 announced with the label you gave it. `defaultExpandedRowIds` opens those rows
 on the first render so the inner table is visible without a click.
 
+## Reorder siblings or change parent
+
+Compose the kit's `rowReorder` feature with `tree`. Before/after drops reorder
+rows that already share a parent; the ordinary reorder handler receives
+sibling positions. A middle drop, **Move under…**, or **Move to top level**
+uses `onTreeMove(row, fromParent, toParent, position)`.
+
+Set `movePolicy` to `"auto"`, `"confirm"`, or `"never"` (the default).
+Confirmation is kit-native and restores focus to its menu trigger; a host can
+instead provide async `confirmMove`. The same controls appear on mobile cards
+and follow logical direction in RTL.
+
+The tree model carries each node's `parentId`, `siblingIndex`, and complete
+`descendantIds`. Re-parenting is rejected before the host callback when the
+target is the node itself or a descendant, so pointer and menu paths cannot
+create a cycle. See [row reordering](./row-reordering.md) for the full write
+contract and sorted-state rule.
+
 ## Headless pieces
 
 Everything above is composed from exports you can use directly when you render
