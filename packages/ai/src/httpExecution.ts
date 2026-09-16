@@ -9,11 +9,11 @@
  *
  * The phase context is the view that was answered, captured before the
  * request goes out. Actions that name no revision of their own belong to it.
- * The baseline then moves only for a revision the session itself reported
- * when one of this turn's own actions settled — never to whatever is newest.
- * That is what keeps an ordinary filter-then-sort reply working: the filter's
- * apply is the thing that advanced the table, and an unrelated edit cannot be
- * mistaken for it.
+ * Each one is checked against that view or a revision the session itself
+ * reported for one of this turn's own actions — never against whatever is
+ * merely newest. That is what keeps an ordinary filter-then-sort reply
+ * working: the filter's apply is the thing that advanced the table, and an
+ * unrelated edit cannot be mistaken for it.
  *
  * No policy lives here. `session.execute` judges every action; this module
  * decides only which revision each action is judged against.
@@ -133,9 +133,8 @@ export function createTurnExecution(
   return {
     revision: bound.revision,
     execute: async (batch, signal) => {
-      // The view this phase was planned against. It is checked once, as the
-      // phase opens: the calls inside one phase were planned together and in
-      // order, so a later one meets the table its own predecessor moved.
+      // The view this phase was planned against. Each call is checked against
+      // it or against progress an earlier call in this turn proved.
       bound.opens(batch.context.viewRevision);
       const results: ExecuteResult[] = [];
       for (const action of batch.actions) {
@@ -146,10 +145,7 @@ export function createTurnExecution(
         const result = await session.execute(
           action.key,
           action.args ?? {},
-          bound.expected(
-            session.manifest().viewRevision,
-            action.expectedRevision
-          ),
+          bound.expected(action.expectedRevision),
           action.idempotencyKey,
           signal
         );

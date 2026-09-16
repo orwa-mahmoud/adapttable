@@ -47,7 +47,9 @@ per-item approvals, while opaque operations are reviewed as a whole.
   discovery, continuation, streamed replies and structured questions.
   `agentSystemPrompt` builds the default HTTP instructions from the request's
   context. The backend owns authentication and model credentials.
-- `/ag-ui` and `/ai-sdk` adapt agent streams to table execution.
+- `/ag-ui` and `/ai-sdk` adapt agent streams to table execution. AI SDK call
+  identities distinguish turns, requests and steps within a stream, while
+  repeated calls within a step retain replay protection.
 - `/webmcp` exposes tools to an agent in the page — each taking an optional
   `expectedRevision`, so a call planned against a view the reader has left is
   refused rather than applied to a different one — and `/mcp-apps` supports an
@@ -98,5 +100,7 @@ Progress is never a result: the receipt still says what happened.
 
 Every action is judged against the view its turn was planned against, and
 reports the revision its own work reached — on every transport, not only HTTP.
+Later actions retain stale-command checks after a successful read or mutation;
+an unrelated table change is not adopted as the turn's own progress.
 
 React integration is supplied separately by `@adapttable/ai-react`.

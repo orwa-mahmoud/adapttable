@@ -1428,4 +1428,42 @@ describe("what a call is bound to", () => {
     expect(table.state.page).toBe(2);
     expect(table.state.sortBy).toBe("total");
   });
+
+  it("does not absorb a foreign edit after a successful call in the same run", async () => {
+    const table = liveTable();
+    const live = table.session;
+    const session: AgentSession = {
+      catalog: live.catalog,
+      describe: live.describe,
+      manifest: live.manifest,
+      execute: async (...args) => {
+        const result = await live.execute(...args);
+        if (args[0] === "view.setPage") {
+          table.state.page = 4;
+          table.state.revision += 1;
+        }
+        return result;
+      },
+    };
+    const script = recorded([
+      (input) => [
+        started(input),
+        ...calls("c1", "view.setPage", '{"page":2}'),
+        ...calls("c2", "view.setSort", '{"key":"total","dir":"asc"}'),
+        finished(input),
+      ],
+    ]);
+    const transport = aguiTransport({ connection: script.connection });
+
+    const reply = await transport.send({
+      session,
+      text: "page and sort",
+      conversation: [],
+    });
+
+    expect(reply.results?.[0]).toMatchObject({ ok: true, revision: 2 });
+    expect(reply.results?.[1]?.error?.code).toBe("revision-mismatch");
+    expect(table.state.page).toBe(4);
+    expect(table.state.sortBy).toBeUndefined();
+  });
 });

@@ -58,39 +58,41 @@ server-paginated `useInfiniteQuery` — nothing else changes.
 - **Client or server data** through one `TableSource` contract — same props either way.
 - **URL-synced** search / sort / filters / page — shareable, deep-linkable links.
 - **Sorting** via accessible header controls.
-- **Filtering** — a `Drawer` or anchored `Popover` of filters plus removable chips (`filters` + `filterLabels`), with a filter count on the trigger. Nested AND/OR filter tree in the same panel.
-- **Selection + bulk actions** using Mantine `Checkbox`es, with confirm dialogs (`bulkActions`).
+- **Filtering** — compose `filters(...)` for a `Drawer` or anchored `Popover`
+  plus removable chips and a trigger count. A nested AND/OR filter tree uses
+  the same panel.
+- **Selection + bulk actions** using Mantine `Checkbox`es, composed with `bulkActions(...)`.
 - **Row actions** with optional confirm, `isHidden` / `isDisabled` per row.
-- **Row expansion** — inline detail panels via `renderRowDetail`.
-- **Inline cell editing** (`onCellEdit` + `editable` columns) — text, number and select
+- **Row expansion** — inline detail panels via `rowDetail(...)`.
+- **Inline cell editing** (`editing(handler)` + `editable` columns) — text, number and select
   editors; Enter commits, Escape cancels, Tab moves on. Omit the handler and no cell opens.
-- **Row reordering** (`onRowReorder`) — drag handle, Space-lift keyboard, dataset-relative indices. Grouping and trees refuse it.
-- **Row pinning** (`pinnedRowIds` / `onPinnedRowIdsChange`) — sticky top and bottom rows outside the virtual window. Grouping and trees refuse it.
-- **Pinned summary rows** (`pinnedRows`) — host-owned totals stuck outside sort, filter, grouping, pagination and selection, including on grouped and tree tables.
-- **Row and column spanning** (`getCellSpan`) — one cell list per row; covered cells are omitted.
-- **Full-width and separator rows** (`extraRows`) — host-injected slots spliced in by `beforeRowId`.
-- **Row styling and heights** (`rowStyle`, `rowHeight`) — conditional inline style and per-row height.
-- **Keyboard cell navigation** (`cellNavigation`) — one tab stop, arrow keys,
+- **Row reordering** (`rowReorder(handler)`) — drag handle, Space-lift keyboard, dataset-relative indices.
+- **Row pinning** (`rowPinning(...)`) — sticky top and bottom rows outside the virtual window.
+- **Pinned summary rows** (`pinnedSummaryRows(...)`) — host-owned totals stuck outside sort, filter, grouping, pagination and selection, including on grouped and tree tables.
+- **Row and column spanning** (`cellSpan(...)`) — one cell list per row; covered cells are omitted.
+- **Full-width and separator rows** (`extraRows(...)`) — host-injected slots spliced in by `beforeRowId`.
+- **Row styling and heights** (`rowAppearance(...)`) — conditional inline style and per-row height.
+- **Keyboard cell navigation** (`cellNavigation()`) — one tab stop, arrow keys,
   ARIA grid semantics and screen-reader announcements. It is also the gate for
   cell-range selection, clipboard copy/paste of a range, and the fill handle.
-- **Row grouping** (`groupBy`) — one column key or an ordered list to nest, with per-group aggregates sharing the `summaryRow` mapper.
+- **Row grouping** (`grouping(...)` or `groupingPanel(...)`) — one column key or an ordered list to nest, with per-group aggregates.
 - **Pivot tables** — rows, columns and measures with subtotals, from the optional
   `@adapttable/core/pivot` entry.
-- **Tree data** (`getChildren` / `getParentId`) — hierarchical rows with expand/collapse, on desktop and on cards.
+- **Tree data** (`tree(...)`) — hierarchical rows with expand/collapse, on desktop and on cards.
 - **Column management** — show/hide, reorder, pin (sticky) and resize, plus collapsible column groups.
 - **Sparkline columns** (`@adapttable/react/sparkline`) — bar, line and area as inline SVG. The base bundle never pays for it.
 - **PDF export and print layout** (`@adapttable/core/pdf`) — optional entry; `pdfWriter()` on `exportCsv`, `printTable` for the browser dialog.
 - **Formula engine** (`@adapttable/core/formula`) — spreadsheet formulas over rows and aggregates; circular refs report `#CYCLE!`.
 - **Feature composition** (`features={[rowReorder(fn)]}`) from `@adapttable/mantine/row-reorder`-style subpaths — the import is the switch, and `standardFeatures()` on the `/preset` entry is the one-import path. Host plugins share the same `setup(host)` surface.
 - **Saved views** — name a filter/sort/column arrangement and switch between them.
-- **CSV export** (`exportCsv`) — current page, the full filtered set, or the
+- **CSV export** (`exportCsv(...)`) — current page, the full filtered set, or the
   selected rows; choose the columns, or hand the whole thing to your backend.
-- **Virtualization** (`virtualize`) — opt-in row/card windowing for very large lists.
+- **Virtualization** (`virtualize(...)`) — opt-in row/card windowing for very large lists.
 - **Pagination** — numbered `Pagination`, or infinite scroll (auto by device).
 - **SSR & server components** — renders with no DOM; the client boundary is already in the build, so it drops straight into the Next.js App Router. [Docs](https://orwa-mahmoud.github.io/adapttable/ssr-rsc/).
 - **States** — `Skeleton` loading, error with retry, and an empty state.
 - **RTL** via `dir`; **dark mode** via Mantine's color scheme.
-- **Customisation** — `slots`, `classNames`, custom `toolbar`, injectable `confirm`, optional entrance animation (`animate`, honours `prefers-reduced-motion`), and the full headless escape hatch via `@adapttable/core`.
+- **Customisation** — `slots`, `classNames`, custom `toolbar`, injectable `confirm`, optional entrance animation (`animate`, honours `prefers-reduced-motion`), and the full headless escape hatch via `@adapttable/react`.
 
 ## See it work
 

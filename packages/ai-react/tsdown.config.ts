@@ -19,6 +19,7 @@ export default defineConfig({
       "@adapttable/core",
       "@adapttable/react",
       "react",
+      "react-dom",
       "react-compiler-runtime",
     ],
   },

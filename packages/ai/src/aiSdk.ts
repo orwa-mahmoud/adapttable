@@ -44,9 +44,9 @@
  *   keys and travel through provider schemas that are strict about what a
  *   function name may contain, so ours are underscore-separated rather than
  *   dotted. {@link aiSdkCapability} is the way back.
- * - **The replay identity is the stream's `toolCallId`.** A resumed or
- *   re-sent turn that repeats a call gets the first result back rather than
- *   writing twice.
+ * - **Replay identity includes the transport, turn, request and stream step.**
+ *   Repeating a call within that step returns its first result. A provider's
+ *   correlation id can be reused in a later step without reusing that result.
  * - **An unknown stream version is refused.** A parser that guesses at a
  *   shape it does not know is how a silent misreading of somebody's data
  *   starts. Drift is expected; guessing is not.
@@ -311,8 +311,13 @@ export function aiSdkTools(
  * so reaching the same call twice within a step is a replay and the same id on
  * a later step is the new call it is.
  */
-function callKey(tableId: string, step: string, toolCallId: string): string {
-  return `ai-sdk:${JSON.stringify({ tableId, step, toolCallId })}`;
+function callKey(
+  tableId: string,
+  step: string,
+  streamStep: number,
+  toolCallId: string
+): string {
+  return `ai-sdk:${JSON.stringify({ tableId, step, streamStep, toolCallId })}`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -415,6 +420,8 @@ interface TurnState {
   /** The revision of the view the current request carried. */
   /** The request this turn is on, which is what a tool-call id belongs to. */
   step: string;
+  /** Step boundary within the current response stream. */
+  streamStep: number;
   text: string;
 }
 
@@ -498,6 +505,7 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
   // call identity even when a provider hands back a tool-call id it has used
   // before.
   let runs = 0;
+  const transportId = globalThis.crypto.randomUUID();
 
   const viewOf = (session: AgentSession): AgentContextView =>
     buildAgentContext(session, options.context, options.contextInputs?.()).view;
@@ -517,14 +525,14 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
       );
     }
     const manifest = session.manifest();
-    // The view this request carried is checked as the request opens. A call
-    // arriving after one of this request's own calls has landed meets the
-    // table that call moved, rather than being refused for it.
+    // Bind to the view sent with this request, advanced only by revisions
+    // earlier calls proved they produced. An unrelated change must still
+    // cause a mismatch even after this request has executed a call.
     const result = await session.execute(
       key,
       part.input ?? {},
-      turn.bound.expected(manifest.viewRevision),
-      callKey(manifest.tableId, turn.step, toolCallId),
+      turn.bound.expected(),
+      callKey(manifest.tableId, turn.step, turn.streamStep, toolCallId),
       signal
     );
     turn.bound.settled(result);
@@ -591,6 +599,7 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
   ): Promise<StreamOutcome | AssistantUnresolved> => {
     let finished = false;
     let continues = false;
+    turn.streamStep = 0;
 
     for await (const part of parts) {
       if (signal?.aborted) {
@@ -606,6 +615,8 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
           break;
         }
         case "start-step":
+          turn.streamStep += 1;
+          break;
         case "finish-step":
         case "text-start":
         case "text-end":
@@ -688,7 +699,7 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
       onPartialText,
     }): Promise<AssistantTransportReply> => {
       runs += 1;
-      const runId = `run-${String(runs)}`;
+      const runId = `${transportId}:run-${String(runs)}`;
       const opening = session.manifest().viewRevision;
       const turn: TurnState = {
         results: [],
@@ -699,6 +710,7 @@ export function aiSdkTransport(options: AiSdkOptions): AssistantTransport {
         denied: [],
         bound: createTurnRevision(opening),
         step: `${runId}:0`,
+        streamStep: 0,
         text: "",
       };
       let unresolved: AssistantUnresolved | undefined;

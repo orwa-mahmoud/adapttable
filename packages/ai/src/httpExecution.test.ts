@@ -184,12 +184,12 @@ describe("phase-bound action execution", () => {
     expect(execution.revision()).toBe(3);
   });
 
-  it("runs a plan's later action against the table its own earlier one moved", async () => {
-    // A React host does not publish the revision while the apply call is on
-    // the stack: the filter's own effect is unreadable when the filter
-    // returns, and is there by the time the sort runs. The sort belongs to the
-    // same plan as the filter, so it meets that table rather than being
-    // refused for it.
+  it("does not guess that an unattributed delayed callback moved the table", async () => {
+    // This plain host returns before it publishes any evidence of its own
+    // change. By the time the next action starts there is a newer revision,
+    // but no way to distinguish that revision from another writer's. The safe
+    // answer is to refuse; the React binding's attributable engine path is
+    // covered in react.http.test.tsx.
     const state = { revision: 1 };
     const setFilters = vi.fn(() => {
       void Promise.resolve().then(() => {
@@ -209,13 +209,14 @@ describe("phase-bound action execution", () => {
       actions: [FILTER_ACTIVE, SORT_SALARY],
     });
 
-    expect(results.map((entry) => entry.ok)).toEqual([true, true]);
-    expect(setSort).toHaveBeenCalledWith("salary", "desc");
+    expect(results[0]?.ok).toBe(true);
+    expect(results[1]?.error?.code).toBe("revision-mismatch");
+    expect(setSort).not.toHaveBeenCalled();
   });
 
   it("refuses a whole plan whose opening view the table has left", async () => {
-    // The check that matters runs once, as the plan opens. A plan written for
-    // a view the reader has since moved past applies none of itself.
+    // A plan written for a view the reader has since moved past applies none
+    // of itself.
     const setFilters = vi.fn();
     const setSort = vi.fn();
     const { session, state } = liveTable({ setFilters, setSort });

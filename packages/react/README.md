@@ -12,13 +12,18 @@ pnpm add @adapttable/react @adapttable/core
 ```
 
 Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
-Requires React 18 or 19.
+Requires React and React DOM 18 or 19.
 
 ## Usage
 
 ```tsx
 import { useDataTable, useFrontendData } from "@adapttable/react";
 import type { ColumnDef } from "@adapttable/react";
+
+interface Person {
+  id: string;
+  name: string;
+}
 
 const columns: ColumnDef<Person>[] = [
   { key: "name", header: "Name", sortable: true },
@@ -27,6 +32,7 @@ const columns: ColumnDef<Person>[] = [
 function HeadlessTable({ data }: { data: Person[] }) {
   const source = useFrontendData({ data, columns, getRowId: (row) => row.id });
   const table = useDataTable({ columns, source, rowKey: (row) => row.id });
+  // Add your header and row markup using the prop-getters.
   return <table {...table.getTableProps()} />;
 }
 ```

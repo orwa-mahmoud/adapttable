@@ -794,7 +794,10 @@ function refreshReplayResult(
   if (key === "columns.describe") {
     return {
       ...record.result,
-      revision: observation.viewRevision,
+      // The current declaration decides what may still be disclosed, but a
+      // replay did not read the current view and cannot claim its revision as
+      // progress made by this call.
+      revision: record.result.revision,
       result: { columns: observation.columns },
     };
   }
@@ -814,10 +817,10 @@ function refreshReplayResult(
   const limit = Math.min(window.limit, readMaxOf(observation));
   return {
     ...record.result,
-    revision: observation.viewRevision,
+    revision: record.result.revision,
     result: rowProvenance(
       projectWindow(window, allow, observation.columns, window.offset, limit),
-      observation.viewRevision
+      record.result.revision
     ),
   };
 }

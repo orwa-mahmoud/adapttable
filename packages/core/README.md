@@ -6,67 +6,79 @@
 
 _Migrating from TanStack Table? See the [migration guide](https://orwa-mahmoud.github.io/adapttable/migrate-from-tanstack-table/)._
 
-The **headless engine** behind [AdaptTable](https://github.com/orwa-mahmoud/adapttable) —
-a UI-agnostic React data table. Zero UI-kit imports: state, hooks,
-prop-getters, and a unified client/server `TableSource` contract.
+The **framework-neutral engine** behind [AdaptTable](https://github.com/orwa-mahmoud/adapttable) —
+state, models, query codecs and the unified client/server `TableSource`
+contract, with no React or UI-kit imports in its graph.
 
 ```bash
-pnpm add @adapttable/core react
+pnpm add @adapttable/core
 ```
 
 You usually want a styled adapter on top (`@adapttable/mantine`,
 `@adapttable/mui`, `@adapttable/chakra`, `@adapttable/unstyled`). Reach for
-`@adapttable/core` directly when you want to render your own markup with full
-control via prop-getters.
+`@adapttable/react` when you want hooks and prop-getters to render your own
+markup.
 
 Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
 
 ## Features
 
-- **Automatic mobile cards** — the engine resolves the layout by viewport and every adapter renders rows as cards below the mobile breakpoint, state intact; `forceMobile`, `mobileLabel` and `hideOnMobile` tune it. [Docs](https://orwa-mahmoud.github.io/adapttable/mobile/).
+Core supplies the state, data transforms and contracts behind the complete
+table surface below. React hooks, keyboard wiring and rendered controls live
+in `@adapttable/react` and the kit adapters.
+
+- **Automatic mobile cards** — core preserves one row/state model while the
+  React and adapter layers render cards below the mobile breakpoint. [Docs](https://orwa-mahmoud.github.io/adapttable/mobile/).
 - **Client or server data** through one `TableSource` contract — same props either way.
 - **URL-synced** search / sort / filters / page — shareable, deep-linkable links.
 - **Pagination** — paged or infinite scroll via `paginationMode`; server sources
   report their own totals, client sources derive them.
-- **SSR & server components** — renders with no DOM; the client boundary is
-  already in the build, so it drops straight into the Next.js App Router.
+- **SSR & server components** — the engine has no DOM dependency; the React
+  binding supplies the client boundary for the Next.js App Router.
   [Docs](https://orwa-mahmoud.github.io/adapttable/ssr-rsc/).
 - **A React-free half** (`@adapttable/core/query`) — the filter-tree and pivot
   URL codecs on their own, so a route handler can decode a shared link in a
   process with no React installed.
-- **Sorting** — comparator resolution, multi-key `sortValue`, accessible header state.
-- **Filtering** — filter model, operators, chips and counts; bring your own predicate. Nested AND/OR filter tree.
-- **Selection + bulk actions** — ids, tri-state select-all, and the bulk-action contract.
-- **Row actions** with optional confirm, `isHidden` / `isDisabled` per row.
-- **Row expansion** — detail-panel state via `renderRowDetail`.
-- **Inline cell editing** — `onCellEdit` plus `editable` columns; text, number and select
+- **Sorting** — comparator resolution and multi-key `sortValue`; React turns
+  the result into accessible header state.
+- **Filtering** — filter model, operators and counts, including a nested AND/OR
+  filter tree; adapters render the forms and chips.
+- **Selection + bulk actions** — selected ids and the bulk-action contract;
+  adapters render tri-state controls and dialogs.
+- **Row actions** — contracts for visibility, disabled state and confirmation;
+  adapters own the controls.
+- **Row expansion** — state behind the React binding's `rowDetail(...)` feature.
+- **Inline cell editing** — state behind `editing(handler)` and `editable` columns; text, number and select
   editors, keyboard commit/cancel, Tab advance. Omit the handler and no cell opens.
-- **Row reordering** — `onRowReorder`; Space-lift keyboard, dataset-relative indices.
-- **Row pinning** — `pinnedRowIds` / `onPinnedRowIdsChange`; sticky top and bottom rows.
+- **Row reordering** — `rowReorder(handler)`; Space-lift keyboard, dataset-relative indices.
+- **Row pinning** — `rowPinning(...)`; sticky top and bottom rows.
 - **Pinned summary rows** — `pinnedSummaryRows({ top, bottom })`; host-owned totals outside the row model.
-- **Row and column spanning** — `getCellSpan` / `column.colSpan` / `column.rowSpan`.
+- **Row and column spanning** — the model behind `cellSpan(...)`.
 - **Full-width and separator rows** — `extraRows`.
-- **Row styling and heights** — `rowStyle`, `rowHeight`.
-  Grouping and trees refuse it. Omit the handler and no handle renders.
-- **Keyboard cell navigation** (`cellNavigation`) — one tab stop, arrow keys,
-  ARIA grid semantics and screen-reader announcements. It is also the gate for
-  cell-range selection, clipboard copy/paste of a range, and the fill handle.
-- **Row grouping** — `groupBy` with per-group aggregates sharing the `summaryRow` mapper.
+- **Row styling and heights** — the model behind `rowAppearance(...)`.
+- **Keyboard cell navigation** — core state supports the React layer's
+  `cellNavigation()` feature, which adds ARIA grid semantics, arrow-key
+  movement and screen-reader announcements.
+- **Row grouping** — model support for `grouping(...)` and `groupingPanel(...)`.
 - **Pivot tables** — rows, columns and measures with subtotals and collapsible
   groups, from the optional `@adapttable/core/pivot` entry.
-- **Tree data** — `getChildren` / `getParentId`, hierarchical rows with their own expansion state.
+- **Tree data** — the hierarchy model behind `tree(...)`.
 - **Column management** — show/hide, reorder, pin (sticky) and resize state, plus collapsible column groups.
-- **Sparkline columns** — `@adapttable/react/sparkline`; bar, line and area as inline SVG.
+- **Sparkline columns** — the React layer's `@adapttable/react/sparkline`
+  renders bar, line and area charts as inline SVG.
 - **PDF export and print layout** (`@adapttable/core/pdf`) — optional entry; `pdfWriter()` on `exportCsv`, `printTable` for the browser dialog.
 - **Formula engine** (`@adapttable/core/formula`) — spreadsheet formulas over rows and aggregates; circular refs report `#CYCLE!`.
-- **Live row patches** (`@adapttable/core/stream`) — `useRowPatchStream` binds a WebSocket or SSE to the rows you already own.
+- **Live row patches** (`@adapttable/core/stream`) — wire parsing and socket
+  connection without React; `useRowPatchStream` lives at `@adapttable/react/stream`.
 - **Saved views** — name a filter/sort/column arrangement and switch between them.
-- **Feature composition** (`features={[rowReorder(fn)]}`) from `@adapttable/core/features` or a kit subpath. The import is the switch, and the only way to arm a feature. Host plugins use the same `TableFeature` / `setup(host)` surface.
-- **CSV export** (`exportCsv`) — current page, the full filtered set, or the
+- **Feature composition foundations** — framework-neutral state and contracts power the
+  factories exposed by `@adapttable/react/features` and each kit subpath.
+  Host plugins use the same `TableFeature` / `setup(host)` surface.
+- **CSV export** (`exportCsv(...)`) — current page, the full filtered set, or the
   selected rows; choose the columns, or hand the whole thing to your backend.
-- **Virtualization** (`virtualize`) — row/card windowing for very large lists.
+- **Virtualization** (`virtualize(...)`) — row/card windowing for very large lists.
 - **RTL** and i18n-agnostic labels — pass `labels` or a `t` function.
-- **Headless** — hooks and prop-getters only. No components, no styling, no UI-kit imports.
+- **Framework-neutral** — no components, styling, React or UI-kit imports.
 
 ## See it work
 

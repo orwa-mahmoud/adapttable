@@ -969,6 +969,127 @@ describe("a turn the reader stopped", () => {
 });
 
 describe("what a call is bound to", () => {
+  it.each(["view.describe", "view.setPage"])(
+    "rejects a foreign change after %s in the same response stream",
+    async (first) => {
+      const table = liveTable();
+      let requests = 0;
+      const transport = aiSdkTransport({
+        connection: {
+          run: () => {
+            requests += 1;
+            return (function* () {
+              yield START;
+              if (requests > 1) {
+                yield FINISH;
+                return;
+              }
+              yield* callsTool(
+                "first",
+                first,
+                first === "view.setPage" ? { page: 2 } : {}
+              );
+              // The reader acts while the next tool call is still streaming.
+              table.state.page = 3;
+              table.state.revision += 1;
+              yield* callsTool("second", "view.setSort", {
+                key: "total",
+                dir: "asc",
+              });
+              yield FINISH;
+            })();
+          },
+        },
+      });
+      const reply = await transport.send({
+        session: table.session,
+        text: "inspect then sort",
+        conversation: [],
+      });
+      expect(reply.results?.[0]?.ok).toBe(true);
+      expect(reply.results?.[1]?.error?.code).toBe("revision-mismatch");
+      expect(table.state.sortBy).toBeUndefined();
+      expect(table.state.page).toBe(3);
+    }
+  );
+
+  it("separates reused call ids across steps in one response", async () => {
+    const table = liveTable();
+    const route = recorded([
+      () => [
+        START,
+        { type: "start-step" },
+        ...callsTool("c1", "view.setPage", { page: 2 }),
+        ...callsTool("c1", "view.setPage", { page: 2 }),
+        { type: "finish-step" },
+        { type: "start-step" },
+        ...callsTool("c1", "view.setPage", { page: 5 }),
+        { type: "finish-step" },
+        FINISH,
+      ],
+      () => [START, ...says("Done."), FINISH],
+    ]);
+    const reply = await aiSdkTransport({ connection: route.connection }).send({
+      session: table.session,
+      text: "page twice",
+      conversation: [],
+    });
+
+    expect(reply.results?.map((result) => result.ok)).toEqual([
+      true,
+      true,
+      true,
+    ]);
+    expect(reply.results?.[0]?.idempotencyKey).toBe(
+      reply.results?.[1]?.idempotencyKey
+    );
+    expect(reply.results?.[2]?.idempotencyKey).not.toBe(
+      reply.results?.[0]?.idempotencyKey
+    );
+    expect(table.state.page).toBe(5);
+    expect(table.state.revision).toBe(3);
+  });
+
+  it("does not collide when a new transport joins the same table session", async () => {
+    const table = liveTable();
+    for (const page of [2, 5]) {
+      const route = recorded([
+        () => [START, ...callsTool("c1", "view.setPage", { page }), FINISH],
+        () => [START, ...says("Done."), FINISH],
+      ]);
+      const reply = await aiSdkTransport({ connection: route.connection }).send(
+        {
+          session: table.session,
+          text: "page",
+          conversation: [],
+        }
+      );
+      expect(reply.results?.[0]?.ok).toBe(true);
+    }
+    expect(table.state.page).toBe(5);
+  });
+
+  it("refuses a changed payload for the same call within a stream step", async () => {
+    const table = liveTable();
+    const route = recorded([
+      () => [
+        START,
+        { type: "start-step" },
+        ...callsTool("c1", "view.setPage", { page: 2 }),
+        ...callsTool("c1", "view.setPage", { page: 5 }),
+        FINISH,
+      ],
+      () => [START, ...says("Done."), FINISH],
+    ]);
+    const reply = await aiSdkTransport({ connection: route.connection }).send({
+      session: table.session,
+      text: "page",
+      conversation: [],
+    });
+    expect(reply.results?.map((result) => result.ok)).toEqual([true, false]);
+    expect(table.state.page).toBe(2);
+  });
+
   it("judges a call against the view its request carried", async () => {
     // The reader moves the table while the route is thinking. The call was
     // planned against the view the request went out with, and that is what it

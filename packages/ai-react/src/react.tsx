@@ -83,6 +83,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { flushSync } from "react-dom";
 
 export type { SharedApproval, TableAgentColumnPatch };
 
@@ -226,11 +227,22 @@ function viewRevisionStamp(
   if (table) return monotonicRevision(table.revisions, undefined).token;
   const rows = view?.rows ?? [];
   const getRowId = view?.getRowId;
+  const query = view?.query;
   return JSON.stringify({
     ids: rows.map((row) => (getRowId ? getRowId(row) : null)),
     payloads: rows,
-    page: view?.query?.page ?? 1,
-    search: view?.query?.search ?? "",
+    page: query?.page ?? 1,
+    limit: query?.limit ?? 10,
+    search: query?.search ?? "",
+    sortBy: query?.sortBy,
+    sortDir: query?.sortDir,
+    filters: query?.extra,
+    groupBy: view?.groupingState?.groupBy,
+    aggregateOverrides: view?.groupingState?.aggregateOverrides,
+    pinnedColumns: view?.pinning?.columns,
+    pinnedRows: view?.pinning?.rows,
+    hiddenColumns: view?.columnLayout?.hidden,
+    columnOrder: view?.columnLayout?.keys,
   });
 }
 
@@ -346,6 +358,16 @@ function columnsForRuntime(
   );
 }
 
+function observationPolicy(options: TableAgentOptions) {
+  const approval = sharedApproval(options.approval);
+  return {
+    ...(options.writePolicy ? { writePolicy: options.writePolicy } : {}),
+    approval: approval.policy,
+    ...(approval.presentation ? { presentation: approval.presentation } : {}),
+    ...(options.commit ? { commit: options.commit } : {}),
+  };
+}
+
 function observationFromRuntime(
   options: TableAgentOptions,
   runtime: ReturnType<typeof useTableRuntime>,
@@ -401,7 +423,6 @@ function observationFromRuntime(
     ),
     view?.columnLayout
   );
-  const approval = sharedApproval(options.approval);
   // What this runtime offers, and what the host wired, projected into the
   // neutral contract. Which of those two makes a capability available is not
   // this binding's rule to hold — it is the same rule for a local engine and
@@ -418,12 +439,7 @@ function observationFromRuntime(
       applyView: apply.applyView !== undefined,
     },
     apply: options.apply ?? {},
-    policy: {
-      ...(options.writePolicy ? { writePolicy: options.writePolicy } : {}),
-      approval: approval.policy,
-      ...(approval.presentation ? { presentation: approval.presentation } : {}),
-      ...(options.commit ? { commit: options.commit } : {}),
-    },
+    policy: observationPolicy(options),
     view: {
       search: query?.search ?? "",
       ...(query?.sortBy === undefined ? {} : { sortBy: query.sortBy }),
@@ -890,9 +906,43 @@ function asCallable(
   return value as (...input: unknown[]) => unknown;
 }
 
+/**
+ * View mutations whose default implementation belongs to this binding.
+ *
+ * They call React-backed runtime setters. Committing those setters before the
+ * call returns lets the session attribute the resulting table revision to the
+ * exact apply call that made it. Host overrides are deliberately excluded:
+ * only the host can say when its own async callback has settled.
+ */
+const BINDING_VIEW_MUTATIONS: ReadonlySet<string> = new Set([
+  "setPage",
+  "setLimit",
+  "setSearch",
+  "setSort",
+  "setFilters",
+  "setGroupBy",
+  "setAggregations",
+  "pinColumn",
+  "hideColumn",
+  "moveColumn",
+  "setColumnOrder",
+  "pinRow",
+  "setSelection",
+]);
+
 function createRevisionCounter() {
   let token: string | undefined;
   let revision = 1;
+  const bumpFromToken = (nextToken: string): number => {
+    if (token === undefined) {
+      token = nextToken;
+      return revision;
+    }
+    if (token === nextToken) return revision;
+    token = nextToken;
+    revision += 1;
+    return revision;
+  };
   return {
     bumpFrom(revisions: {
       data: number;
@@ -900,15 +950,10 @@ function createRevisionCounter() {
       schema: number;
       policy: number;
     }) {
-      const nextToken = revisionToken(revisions);
-      if (token === undefined) {
-        token = nextToken;
-        return revision;
-      }
-      if (token === nextToken) return revision;
-      token = nextToken;
-      revision += 1;
-      return revision;
+      return bumpFromToken(revisionToken(revisions));
+    },
+    bumpFromStamp(stamp: string) {
+      return bumpFromToken(stamp);
     },
     current() {
       return revision;
@@ -939,6 +984,7 @@ function bindLiveSession(
   optionsRef: { current: TableAgentOptions },
   runtimeRef: { current: ReturnType<typeof useTableRuntime> },
   revisionCounter: ReturnType<typeof createRevisionCounter>,
+  flushAdmission: { current: () => void },
   waitForChrome: {
     current: (
       subject: ApprovalSubject,
@@ -958,12 +1004,21 @@ function bindLiveSession(
         ) as Record<string, unknown>;
         if (!(prop in live)) return undefined;
         return (...args: unknown[]) => {
-          const latest = currentApply(
-            optionsRef.current,
-            runtimeRef.current
-          ) as Record<string, unknown>;
+          const options = optionsRef.current;
+          const latest = currentApply(options, runtimeRef.current) as Record<
+            string,
+            unknown
+          >;
           const fn = asCallable(latest[prop]);
           if (!fn) return undefined;
+          const host = options.apply as Record<string, unknown> | undefined;
+          if (BINDING_VIEW_MUTATIONS.has(prop) && !asCallable(host?.[prop])) {
+            let result: unknown;
+            flushSync(() => {
+              result = fn(...args);
+            });
+            return result;
+          }
           return fn(...args);
         };
       },
@@ -972,10 +1027,15 @@ function bindLiveSession(
   const observe = () => {
     const options = optionsRef.current;
     if (options.observe) return options.observe();
-    const table = runtimeRef.current.view()?.neutralTable;
-    const viewRevision = table
-      ? revisionCounter.bumpFrom(table.revisions)
-      : revisionCounter.current();
+    const runtimeView = runtimeRef.current.view();
+    const table = runtimeView?.neutralTable;
+    let viewRevision = revisionCounter.current();
+    if (table) viewRevision = revisionCounter.bumpFrom(table.revisions);
+    else if (runtimeView) {
+      viewRevision = revisionCounter.bumpFromStamp(
+        viewRevisionStamp(runtimeView)
+      );
+    }
     return observationFromRuntime(
       options,
       runtimeRef.current,
@@ -1022,6 +1082,11 @@ function bindLiveSession(
       idempotencyKey: string,
       signal?: AbortSignal
     ) => {
+      // React may still hold a reader's earlier controlled-state change. Flush
+      // it before the session takes its admission snapshot so that change is
+      // refused as foreign, never swept into the revision of the agent call
+      // below. The binding-owned mutation itself is flushed in `apply` above.
+      flushAdmission.current();
       const result = await inner.execute(
         key,
         args,
@@ -1047,6 +1112,16 @@ function TableAgentProvider({
   optionsRef.current = options;
   const runtimeRef = useRef(runtime);
   runtimeRef.current = runtime;
+  // A concrete provider update, rather than an empty `flushSync`, makes React
+  // finish controlled-state work already queued by the reader before the
+  // session takes its admission snapshot.
+  const [, setAdmissionTick] = useState(0);
+  const flushAdmission = useRef<() => void>(() => undefined);
+  flushAdmission.current = () => {
+    flushSync(() => {
+      setAdmissionTick((tick) => tick + 1);
+    });
+  };
 
   // The session is built here, before anything reads it. Several callbacks
   // below name it in a dependency array, which React evaluates during render
@@ -1086,6 +1161,7 @@ function TableAgentProvider({
     optionsRef,
     runtimeRef,
     revisionCounterRef.current,
+    flushAdmission,
     waitForChrome,
     reportProgress
   );

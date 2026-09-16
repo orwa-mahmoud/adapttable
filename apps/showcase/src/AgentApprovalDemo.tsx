@@ -207,7 +207,8 @@ export function AgentApprovalDemo({ dark }: Readonly<{ dark: boolean }>) {
         setRows((current) => applyBatch(current, edits));
       }),
       factories.history(),
-      factories.undo(),
+      // MUI's history() already draws Undo/Redo.
+      ...(kit === "mui" ? [] : [factories.undo()]),
       tableAgent({
         tableId: "agent-lab",
         writePolicy: "allow",
@@ -223,7 +224,7 @@ export function AgentApprovalDemo({ dark }: Readonly<{ dark: boolean }>) {
         bridge: { attach: setSession },
       }),
     ],
-    [factories]
+    [factories, kit]
   );
 
   const proposeFifth = async () => {

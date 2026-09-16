@@ -1106,6 +1106,30 @@ a {
   font-size: 13px;
   max-width: 62ch;
 }
+.ai-demo__watch {
+  margin: 0 0 14px;
+  width: 100%;
+  max-width: none;
+}
+.ai-demo__watch figcaption {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 650;
+}
+.ai-demo__watch-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 960 / 474;
+  border-radius: 8px;
+  border: 1px solid var(--page-border);
+  background: var(--page-surface);
+}
+.ai-demo__watch-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--ink-2);
+}
 .ai-demo__controls {
   display: flex;
   flex-wrap: wrap;

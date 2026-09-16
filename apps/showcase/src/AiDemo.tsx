@@ -607,6 +607,35 @@ const INITIAL_TOGGLES: DemoToggles = {
 /** Five of fifteen: three pages, and 10 stays a real size the assistant can set. */
 const PAGE_LIMIT = 5;
 
+const AI_DEMO_MEDIA = import.meta.env.DEV
+  ? "/media/ai"
+  : "https://orwa-mahmoud.github.io/adapttable/media/ai";
+
+/**
+ * Visible player, no autoload: the poster is what paints, and the file
+ * waits until the reader presses play (`preload="none"`).
+ */
+function AiDemoWatch(): ReactElement {
+  return (
+    <figure className="ai-demo__watch">
+      <figcaption>Watch demo</figcaption>
+      <video
+        className="ai-demo__watch-video"
+        src={`${AI_DEMO_MEDIA}/demo.mp4`}
+        poster={`${AI_DEMO_MEDIA}/poster.png`}
+        controls
+        playsInline
+        preload="none"
+        width={960}
+        height={474}
+      />
+      <p className="ai-demo__watch-note">
+        Recorded on the Mantine page. The same assistant runs on every kit.
+      </p>
+    </figure>
+  );
+}
+
 export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [rtl, setRtl] = useState(readRtl);
   const [toggles, setToggles] = useState<DemoToggles>(INITIAL_TOGGLES);
@@ -853,8 +882,10 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     const editing: TableFeature<StaffRow>[] = [
       factories.approval(),
       factories.history(),
-      factories.undo(),
     ];
+    // MUI's history() already draws Undo/Redo. Adding undo() again
+    // mounts a second pair on the same toolbar extras slot.
+    if (adapter !== "mui") editing.push(factories.undo());
     if (toggles.editingMode === "cell") {
       editing.push(
         factories.editing((row: StaffRow, key: string, value: unknown) => {
@@ -878,6 +909,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     }
     return [...editing, ...next];
   }, [
+    adapter,
     factories,
     pinnedRowIds,
     toggles,
@@ -1041,6 +1073,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           The application decides what the assistant may do and what it may save
           — the table asks, your code answers.
         </p>
+        <AiDemoWatch />
         <div className="ai-demo__controls">
           <nav
             className="ai-demo__kits"

@@ -14,6 +14,10 @@
 
 **Easy by default, infinitely customizable.** [Automatic mobile card layout](https://orwa-mahmoud.github.io/adapttable/mobile/) — the table becomes a card list on phones by itself, no second layout to build. One unified data source for both client-side and server-side data, URL-synced shareable state, optional virtualization, infinite-scroll & paging (auto by device), a real filter UX, **column management** (reorder · pin · resize · show/hide), **inline cell editing**, **interactive row grouping** with header drag-and-drop and per-group aggregate choices, **CSV export**, first-class **i18n + RTL**, and seamless **dark mode** — out of the box.
 
+<video src="https://orwa-mahmoud.github.io/adapttable/media/ai/demo.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/ai/poster.png" controls playsinline preload="none" width="860">
+  <a href="https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/">▶ Watch the AI demo — ask the table to filter, group, aggregate, hide and reorder columns.</a>
+</video>
+
 <video src="https://github.com/user-attachments/assets/3b9f8a41-a2d6-4a36-bc61-50fac3d8c3ed" poster="https://orwa-mahmoud.github.io/adapttable/media/core/poster.png?v=2" controls playsinline width="860">
   <a href="https://github.com/user-attachments/assets/3b9f8a41-a2d6-4a36-bc61-50fac3d8c3ed">▶ Watch the tour — the same data table re-rendered through Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn, and Tailwind, from one headless engine.</a>
 </video>
@@ -27,21 +31,22 @@ releases are tested on Node 22.12 and Node 24.
 
 ## Features
 
-Every one of these works in **all eight adapters** — the same props, whichever kit you use.
+Every one of these works in **all eight adapters** — the same feature factories,
+whichever kit you use.
 
 |             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Data**    | Client or server through one [`TableSource`](https://orwa-mahmoud.github.io/adapttable/data-tiers/) contract · [pagination or infinite scroll](https://orwa-mahmoud.github.io/adapttable/pagination/) (auto by device) · [URL-synced state](https://orwa-mahmoud.github.io/adapttable/url-state/) for shareable links                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | **Mobile**  | [Automatic mobile card layout on phones](https://orwa-mahmoud.github.io/adapttable/mobile/) — rows become cards below the breakpoint, same filters/search/selection/URL state · per-column `mobileLabel` / `hideOnMobile` · infinite scroll replaces the pager · [see it flip live](https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | **Reading** | [Sorting](https://orwa-mahmoud.github.io/adapttable/sorting/) · [filtering](https://orwa-mahmoud.github.io/adapttable/filtering/) with a real drawer/popover UX and removable chips · [AND/OR filter tree](https://orwa-mahmoud.github.io/adapttable/filter-tree/) · [row expansion](https://orwa-mahmoud.github.io/adapttable/row-expansion/) · [tree data](https://orwa-mahmoud.github.io/adapttable/tree-data/) — hierarchical rows with expand/collapse · [keyboard navigation](https://orwa-mahmoud.github.io/adapttable/cell-navigation/) — one tab stop, arrow-key cell walk, ARIA grid semantics, and the gate for cell-range selection, range clipboard and the fill handle · [virtualization](https://orwa-mahmoud.github.io/adapttable/virtualization/) for very large lists                                                                                                                                                                                                                                                                  |
-| **Writing** | [Inline cell editing](https://orwa-mahmoud.github.io/adapttable/cell-editing/) — text, number and select editors, keyboard commit/cancel · [row reordering](https://orwa-mahmoud.github.io/adapttable/row-reordering/) — drag handle, Space-lift keyboard · [row pinning](https://orwa-mahmoud.github.io/adapttable/row-pinning/) — sticky top and bottom rows · [pinned summary rows](https://orwa-mahmoud.github.io/adapttable/pinned-summary-rows/) — host-owned totals outside the row model · [row and column spanning](https://orwa-mahmoud.github.io/adapttable/row-spanning/) — `getCellSpan` · [full-width and separator rows](https://orwa-mahmoud.github.io/adapttable/full-width-rows/) — `extraRows` · [row styling and heights](https://orwa-mahmoud.github.io/adapttable/row-styling/) — `rowStyle`, `rowHeight` · [selection + bulk actions](https://orwa-mahmoud.github.io/adapttable/selection/) · row actions with confirm                                                                                                            |
+| **Writing** | [Inline cell editing](https://orwa-mahmoud.github.io/adapttable/cell-editing/) · [row reordering](https://orwa-mahmoud.github.io/adapttable/row-reordering/) · [row pinning](https://orwa-mahmoud.github.io/adapttable/row-pinning/) · [pinned summary rows](https://orwa-mahmoud.github.io/adapttable/pinned-summary-rows/) · [row and column spanning](https://orwa-mahmoud.github.io/adapttable/row-spanning/) · [full-width and separator rows](https://orwa-mahmoud.github.io/adapttable/full-width-rows/) · [row styling and heights](https://orwa-mahmoud.github.io/adapttable/row-styling/) · [selection + bulk actions](https://orwa-mahmoud.github.io/adapttable/selection/) · row actions with confirm                                                                                                                                                                                                                                                                                                                                        |
 | **Shaping** | [Interactive row grouping](https://orwa-mahmoud.github.io/adapttable/row-grouping/) — drag headers into a dedicated panel, reorder/remove grouping chips, choose per-column aggregates, and use mobile selects · [pivot tables](https://orwa-mahmoud.github.io/adapttable/pivot/) — dimensions on both axes, measures, collapsible subtotals · [formula columns](https://orwa-mahmoud.github.io/adapttable/formulas/) — a spreadsheet formula engine that parses instead of evaluating · [column management](https://orwa-mahmoud.github.io/adapttable/column-management/) — show/hide, reorder, pin, resize · [collapsible column groups](https://orwa-mahmoud.github.io/adapttable/column-groups/) · [sparkline columns](https://orwa-mahmoud.github.io/adapttable/sparkline/) — bar, line, area · [saved views](https://orwa-mahmoud.github.io/adapttable/saved-views/) · [CSV & XLSX export](https://orwa-mahmoud.github.io/adapttable/customization/#export) · [PDF export and print layout](https://orwa-mahmoud.github.io/adapttable/export-pdf/) |
 | **Reach**   | First-class [RTL and i18n](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/) · [accessible data table](https://orwa-mahmoud.github.io/adapttable/accessibility/) — keyboard, screen readers, labelled controls · [realtime / live row updates](https://orwa-mahmoud.github.io/adapttable/realtime/) · dark mode · [SSR, server components and streaming](https://orwa-mahmoud.github.io/adapttable/ssr-rsc/) — a Next.js App Router client boundary, DOM-free rendering · [feature composition](https://orwa-mahmoud.github.io/adapttable/features/) — `features={[rowReorder(fn)]}` from kit subpaths · full [customization](https://orwa-mahmoud.github.io/adapttable/customization/) down to a headless escape hatch                                                                                                                                                                                                                                                                                                                               |
 
-Every feature above is **opt-in**: omit the prop and it stays dormant — no UI
-rendered, no keyboard handlers attached. (A few table-stakes conveniences default
-ON instead: URL sync (`urlSync={false}` to keep state in memory), the search
-box (`searchable={false}`), pagination, and scroll-to-top on page change.)
+Every feature above is **opt-in** through a kit subpath and the `features` array:
+omit the feature and it stays dormant — no UI rendered, no keyboard handlers
+attached. Table-stakes behavior such as search, sorting, pagination, responsive
+cards and URL state remains in the base table.
 See each one running per kit on its
 [npm page](https://www.npmjs.com/org/adapttable), or click through the
 [live demo](https://orwa-mahmoud.github.io/adapttable/demo/).
@@ -57,25 +62,38 @@ not ship the broken horizontal-scroll tables users hate on phones.
 Filters are adapter-native too: each ready UI kit renders its own drawer and
 controls, while the core keeps URL state, chips, and backend params aligned.
 
-**Built to scale.** Flip on `virtualize` and a **10,000-row table mounts just 24 DOM rows** — **417× fewer than a plain table, on ~95% less memory** — holding constant whether the list is 1,000 or 100,000. [See the measured benchmark →](https://orwa-mahmoud.github.io/adapttable/virtualization/#benchmark)
+**Built to scale.** Compose `virtualize()` and a **10,000-row table mounts just 24 DOM rows** — **417× fewer than a plain table, on ~95% less memory** — holding constant whether the list is 1,000 or 100,000. [See the measured benchmark →](https://orwa-mahmoud.github.io/adapttable/virtualization/#benchmark)
 
 ```tsx
-// Batteries-included — 5 lines to a fully styled, sortable, filterable, paginated table.
-import {
-  DataTable,
-  useFrontendData,
-  type ColumnDef,
-} from "@adapttable/mantine";
+// Batteries included, with filtering explicitly composed.
+import { DataTable, type ColumnDef } from "@adapttable/mantine";
+import { filters } from "@adapttable/mantine/filters";
+
+interface Person {
+  id: string;
+  name: string;
+  email: string;
+}
 
 const columns: ColumnDef<Person>[] = [
   { key: "name", header: "Name", accessor: (r) => r.name, sortable: true },
-  { key: "email", header: "Email", accessor: (r) => r.email },
+  {
+    key: "email",
+    header: "Email",
+    accessor: (r) => r.email,
+    filter: "text",
+  },
 ];
 
 function People({ rows }: { rows: Person[] }) {
-  // Pass `columns` here too — it's what client-side sorting reads to order rows.
-  const source = useFrontendData({ data: rows, columns });
-  return <DataTable source={source} columns={columns} rowKey={(r) => r.id} />;
+  return (
+    <DataTable
+      data={rows}
+      columns={columns}
+      rowKey={(r) => r.id}
+      features={[filters([])]}
+    />
+  );
 }
 ```
 
@@ -100,6 +118,11 @@ place: **[the comparison page](https://orwa-mahmoud.github.io/adapttable/compari
 
 ## Packages
 
+The dependency graph is deliberately layered: framework-neutral
+`@adapttable/core` → headless `@adapttable/react` → the kit adapter you render.
+Optional behavior is imported from feature subpaths such as
+`@adapttable/mantine/filters`; unused features stay out of the table.
+
 | Package                | What it is                                                                 |
 | ---------------------- | -------------------------------------------------------------------------- |
 | `@adapttable/core`     | The engine. Filter, sort, page and group, with no framework in its graph.  |
@@ -117,6 +140,18 @@ place: **[the comparison page](https://orwa-mahmoud.github.io/adapttable/compari
 | `@adapttable/server`   | React-free query parsing for a host backend.                               |
 | `@adapttable/ai`       | Optional provider-neutral table agent contract.                            |
 | `@adapttable/ai-react` | React bindings for the agent — `tableAgent` and `useTableAssistant`.       |
+
+## AI, without a provider lock-in
+
+AI support is optional. `@adapttable/ai` exposes the enabled table as a
+provider-neutral capability contract; connect it to your own backend and model.
+Add `@adapttable/ai-react` plus a kit's `/assistant` widget when you want the
+ready conversation UI, or build a custom interface on the same contract.
+Only enabled, permitted capabilities are offered to the agent. Commands run
+through the table's validation and configured approvals; your application
+owns data and persistence. HTTP, AG-UI, AI SDK and MCP integrations are optional,
+not prerequisites for using the executor with your own agent.
+[See the AI integrations](https://orwa-mahmoud.github.io/adapttable/ai-integrations/).
 
 ## Install
 
@@ -136,16 +171,16 @@ Every data source — in-memory or server-paginated — fulfils one contract. Th
 
 ```ts
 const source = useQuerySource({ usePaginatedQuery }); // server-side, infinite or paged
-const source = useFrontendData({ data }); // client-side filter/sort/slice
+const source = useFrontendData({ data, columns }); // client-side filter/sort/slice
 // Both return the same TableSource<T>. Swap freely; the UI never changes.
 ```
 
 ## Customization spectrum — easy ↔ pro
 
-1. **Props** — `columns`, `source`, `searchPlaceholder`, `sortByOptions`, `rowActions`, `bulkActions`, `filters`, `dir`, …
-2. **`slots`** — replace the `skeleton` and `empty` sub-parts with your own components.
-3. **`classNames` per part** — restyle without replacing (the **unstyled** adapter exposes a class hook + `data-*` state attribute for every node).
-4. **A custom `toolbar` slot** and an **injectable `confirm`** handler for action dialogs.
+1. **Base props** — `data` or `source`, `columns`, `rowKey`, labels, direction and state options.
+2. **Feature factories** — opt into filtering, editing, row actions, grouping and more from kit subpaths.
+3. **`slots`** — replace adapter-owned parts with your own components.
+4. **`classNames` per part** — restyle without replacing (the **unstyled** adapter exposes a class hook + `data-*` state attribute for every node).
 5. **Prop-getters (fully headless)** — build the entire markup yourself with `@adapttable/react`.
 
 See the [customization guide](https://orwa-mahmoud.github.io/adapttable/customization/) for details.
@@ -168,6 +203,7 @@ Hosted at **[orwa-mahmoud.github.io/adapttable](https://orwa-mahmoud.github.io/a
 - Features: [Columns](https://orwa-mahmoud.github.io/adapttable/columns/) · [Sorting](https://orwa-mahmoud.github.io/adapttable/sorting/) · [Filtering](https://orwa-mahmoud.github.io/adapttable/filtering/) · [AND/OR filter tree](https://orwa-mahmoud.github.io/adapttable/filter-tree/) · [Pagination](https://orwa-mahmoud.github.io/adapttable/pagination/) · [Selection](https://orwa-mahmoud.github.io/adapttable/selection/) · [Row expansion](https://orwa-mahmoud.github.io/adapttable/row-expansion/) · [Inline cell editing](https://orwa-mahmoud.github.io/adapttable/cell-editing/) · [Row reordering](https://orwa-mahmoud.github.io/adapttable/row-reordering/) · [Row pinning](https://orwa-mahmoud.github.io/adapttable/row-pinning/) · [Pinned summary rows](https://orwa-mahmoud.github.io/adapttable/pinned-summary-rows/) · [Row and column spanning](https://orwa-mahmoud.github.io/adapttable/row-spanning/) · [Full-width and separator rows](https://orwa-mahmoud.github.io/adapttable/full-width-rows/) · [Row styling and heights](https://orwa-mahmoud.github.io/adapttable/row-styling/) · [Row grouping](https://orwa-mahmoud.github.io/adapttable/row-grouping/) · [Column management](https://orwa-mahmoud.github.io/adapttable/column-management/) · [Sparkline columns](https://orwa-mahmoud.github.io/adapttable/sparkline/) · [Saved views](https://orwa-mahmoud.github.io/adapttable/saved-views/) · [Virtualization](https://orwa-mahmoud.github.io/adapttable/virtualization/)
 - [URL state](https://orwa-mahmoud.github.io/adapttable/url-state/) · [Customization](https://orwa-mahmoud.github.io/adapttable/customization/) · [i18n & RTL](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/) · [Accessibility](https://orwa-mahmoud.github.io/adapttable/accessibility/) · [Realtime](https://orwa-mahmoud.github.io/adapttable/realtime/)
 - [API reference](https://orwa-mahmoud.github.io/adapttable/api/) · [Comparison](https://orwa-mahmoud.github.io/adapttable/comparison/) · [Limitations](https://orwa-mahmoud.github.io/adapttable/limitations/) · [Versioning & stability](https://orwa-mahmoud.github.io/adapttable/versioning/) · [FAQ](https://orwa-mahmoud.github.io/adapttable/faq/)
+- Upgrading? [Migrate from v2](https://orwa-mahmoud.github.io/adapttable/migrate-from-v2/) — feature factories, moved React imports and the CLI codemod.
 - Migrating from another table library? [mantine-datatable](https://orwa-mahmoud.github.io/adapttable/migrate-from-mantine-datatable/) · [MUI X DataGrid](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-x-datagrid/) · [TanStack Table](https://orwa-mahmoud.github.io/adapttable/migrate-from-tanstack-table/) · [mui-datatables](https://orwa-mahmoud.github.io/adapttable/migrate-from-mui-datatables/) · [material-table](https://orwa-mahmoud.github.io/adapttable/migrate-from-material-table/) · [ag-Grid](https://orwa-mahmoud.github.io/adapttable/migrate-from-ag-grid/)
 - [Live demo](https://orwa-mahmoud.github.io/adapttable/demo/) — every adapter on one dataset, plus [Columns](https://orwa-mahmoud.github.io/adapttable/demo/mantine/columns/), [Editing](https://orwa-mahmoud.github.io/adapttable/demo/mantine/editing/), [Grouping](https://orwa-mahmoud.github.io/adapttable/demo/mantine/grouping/), [RTL](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rtl/) and [50k-row Scale](https://orwa-mahmoud.github.io/adapttable/demo/mantine/scale/) pages
 - [Examples per adapter](https://github.com/orwa-mahmoud/adapttable/tree/main/examples)
@@ -187,11 +223,15 @@ Hosted at **[orwa-mahmoud.github.io/adapttable](https://orwa-mahmoud.github.io/a
 
 ## Status
 
-**Stable — `v2`.** The public API follows [semantic versioning](./docs/versioning.md): breaking changes ship only in a major release. Coming from v1? The [migration guide](https://orwa-mahmoud.github.io/adapttable/migrate-from-v1/) has the full rename table. See the [roadmap](#roadmap) for what's next.
+This README describes the v3 architecture. Packages are versioned independently;
+check each package's npm page for its published version. The public API follows
+[semantic versioning](./docs/versioning.md). Upgrading an existing v2 application?
+Start with the
+[v2 migration guide](https://orwa-mahmoud.github.io/adapttable/migrate-from-v2/).
 
 ## Roadmap
 
-- [x] Headless `@adapttable/core`
+- [x] Framework-neutral `@adapttable/core`
 - [x] `@adapttable/mantine`
 - [x] `@adapttable/i18n` (en/ar + RTL)
 - [x] `@adapttable/unstyled` (Tailwind/shadcn)
@@ -202,15 +242,16 @@ Hosted at **[orwa-mahmoud.github.io/adapttable](https://orwa-mahmoud.github.io/a
 - [x] Docs (markdown + `llms.txt`) + examples
 - [x] Hosted [docs site](https://orwa-mahmoud.github.io/adapttable/) + [live demo](https://orwa-mahmoud.github.io/adapttable/demo/) (GitHub Pages, deployed on every push to `main`)
 - [x] Optional row/card virtualization (windowing) for very large lists
-- [x] Inline cell editing — opt-in `onCellEdit`, kit-native editors
-- [x] Row reordering — opt-in `onRowReorder`, keyboard grab, dataset indices
+- [x] Inline cell editing — opt-in `editing(...)`, kit-native editors
+- [x] Row reordering — opt-in `rowReorder(...)`, keyboard grab, dataset indices
 - [x] Row pinning — sticky top and bottom rows, `{ top, bottom }` id lists
 - [x] Pinned summary rows — host-owned totals outside the row model, including on grouped and tree tables
-- [x] Row and column spanning — `getCellSpan`, covered cells omitted
-- [x] Row grouping — `groupBy` at any depth, with per-group aggregates
+- [x] Row and column spanning — opt-in `cellSpan(...)`, covered cells omitted
+- [x] Row grouping — opt-in `grouping(...)` at any depth, with per-group aggregates
 - [x] CSV export
 - [x] `v1.0` — stable, semver-committed public API
 - [x] `v2.0` — one name per concept across all eight adapters; React 18 & 19 proven in CI
+- [x] v3 architecture — framework-neutral core, React binding, kit feature subpaths
 
 ## Contributing
 

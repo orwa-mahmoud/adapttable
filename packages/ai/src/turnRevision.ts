@@ -6,12 +6,10 @@
  * source update, the reader themselves — and running it against "wherever the
  * table is now" applies it to a view nobody planned it for.
  *
- * So the view is checked where the check means something: once, as a plan
- * opens. The actions inside a plan were written together, in order, each
- * expecting the one before it to have landed — the filter that narrows the
- * rows and the sort that orders what is left are one intention, not two
- * independent claims about the same view. Re-checking the second against the
- * view the first has just moved refuses a plan for its own progress.
+ * Each action is therefore checked against either the view the plan named or
+ * a later revision one of this turn's own actions proved. A successful read
+ * or no-op proves no movement, and a live revision that merely appeared
+ * between calls belongs to somebody else; neither may rebase the plan.
  *
  * Every transport binds its plans the same way, because which transport a
  * developer chose is not a reason for a different rule.
@@ -31,13 +29,12 @@ export interface TurnRevision {
   /**
    * The revision to run the open plan's next action against.
    *
-   * @param live - The revision the table is at now.
    * @param named - A revision the backend named for this action, which is its
    *   own claim about what it saw and goes through untouched — including when
    *   it equals the planned one, which is a backend saying so deliberately
    *   rather than a value worth second-guessing.
    */
-  readonly expected: (live: number, named?: number) => number;
+  readonly expected: (named?: number) => number;
   /** Record what an action settled at. Only a successful action proves one. */
   readonly settled: (result: ExecuteResult) => void;
 }
@@ -56,22 +53,17 @@ export function createTurnRevision(opening: number): TurnRevision {
   // adopting that as progress is how an unrelated change gets absorbed into a
   // turn that never made it.
   let ours = opening;
-  // The view the open plan was written against, and whether one of its own
-  // actions has already moved the table.
+  // The view the open plan was written against. A plan can name an earlier
+  // revision than `ours` when it was prepared before this turn's prior action
+  // settled; `Math.max` below carries that proven progress forward.
   let planned = opening;
-  let moved = false;
   return {
     revision: () => ours,
     opens: (against) => {
       planned = against;
-      moved = false;
     },
-    expected: (live, named) => {
+    expected: (named) => {
       if (named !== undefined) return named;
-      // Everything after the plan's first successful action is that action's
-      // consequence. The table is where this plan put it, and the check that
-      // mattered has already run.
-      if (moved) return live;
       // `ours` exceeds `planned` exactly when this turn caused the difference.
       return Math.max(ours, planned);
     },
@@ -81,7 +73,6 @@ export function createTurnRevision(opening: number): TurnRevision {
       // manifest instead would pick up anything that landed during the await
       // and count it as this turn's progress.
       ours = result.revision;
-      moved = true;
     },
   };
 }

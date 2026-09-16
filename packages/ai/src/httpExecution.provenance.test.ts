@@ -89,6 +89,84 @@ const action = (
 });
 
 describe("a change from outside the turn", () => {
+  it("is not absorbed by a sanitized read replay", async () => {
+    const table = movableTable();
+    await table.session.execute("columns.describe", {}, 1, "describe");
+    const context = phaseContext(table.session, "t-replay", 0);
+    const turn = createTurnExecution(table.session, context);
+    table.elsewhere();
+
+    const results = await turn.execute({
+      context,
+      actions: [
+        action("columns.describe", {}, "describe"),
+        action("view.setPage", { page: 2 }, "page-after-replay"),
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ ok: true, revision: 1 });
+    expect(results[1]?.error?.code).toBe("revision-mismatch");
+    expect(table.state.page).toBe(1);
+  });
+
+  it("is not absorbed after a successful read in the same batch", async () => {
+    const table = movableTable();
+    const live = table.session;
+    const session: AgentSession = {
+      catalog: live.catalog,
+      describe: live.describe,
+      manifest: live.manifest,
+      execute: async (...args) => {
+        const result = await live.execute(...args);
+        if (args[0] === "view.describe") table.elsewhere();
+        return result;
+      },
+    };
+    const context = phaseContext(session, "t-read", 0);
+    const turn = createTurnExecution(session, context);
+
+    const results = await turn.execute({
+      context,
+      actions: [
+        action("view.describe", {}, "read"),
+        action("view.setPage", { page: 2 }, "page"),
+      ],
+    });
+
+    expect(results[0]?.ok).toBe(true);
+    expect(results[1]?.error?.code).toBe("revision-mismatch");
+    expect(table.state.page).toBe(1);
+  });
+
+  it("chains only the mutation's own revision when a foreign edit follows it in the same batch", async () => {
+    const table = movableTable();
+    const live = table.session;
+    const session: AgentSession = {
+      catalog: live.catalog,
+      describe: live.describe,
+      manifest: live.manifest,
+      execute: async (...args) => {
+        const result = await live.execute(...args);
+        if (args[0] === "view.setSearch") table.elsewhere();
+        return result;
+      },
+    };
+    const context = phaseContext(session, "t-write", 0);
+    const turn = createTurnExecution(session, context);
+
+    const results = await turn.execute({
+      context,
+      actions: [
+        action("view.setSearch", { query: "ada" }, "search"),
+        action("view.setPage", { page: 2 }, "page"),
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ ok: true, revision: 2 });
+    expect(results[1]?.error?.code).toBe("revision-mismatch");
+    expect(table.state.page).toBe(1);
+  });
+
   it("is not absorbed by the context of a later phase", async () => {
     const table = movableTable();
     const turn = createTurnExecution(

@@ -19,7 +19,7 @@ complete, copy-pasteable React component — wrap it in your kit's provider
 | [base-ui-basic.tsx](./base-ui-basic.tsx)                   | `@adapttable/base-ui`  | Base UI primitives, self-injected styles         |
 | [shadcn-basic.tsx](./shadcn-basic.tsx)                     | `@adapttable/shadcn`   | shadcn/ui tokens, no provider                    |
 | [unstyled-tailwind.tsx](./unstyled-tailwind.tsx)           | `@adapttable/unstyled` | Tailwind classes + RTL/i18n                      |
-| [headless.tsx](./headless.tsx)                             | `@adapttable/core`     | Fully custom markup via prop-getters             |
+| [headless.tsx](./headless.tsx)                             | `@adapttable/react`    | Fully custom markup via prop-getters             |
 | [ai-custom-bridge.ts](./ai-custom-bridge.ts)               | `@adapttable/ai`       | Any agent format → `session.execute`             |
 | [ai-one-call.ts](./ai-one-call.ts)                         | `@adapttable/ai/json`  | Text + actions, no model round trip              |
 | [ai-result-return.ts](./ai-result-return.ts)               | `@adapttable/ai/json`  | Optional ExecuteResult return loop               |

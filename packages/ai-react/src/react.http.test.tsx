@@ -14,12 +14,14 @@ import {
   createTableEngine,
   type NeutralTable,
 } from "@adapttable/core";
+import { useFrontendData } from "@adapttable/react";
 import {
   applyTableFeatures,
   FeatureProviders,
   usePublishTableRuntime,
 } from "@adapttable/react/adapter";
 import { act, render, waitFor } from "@testing-library/react";
+import { useMemo, useState } from "react";
 import { describe, expect, it } from "vitest";
 
 import { tableAgent } from "./react";
@@ -131,9 +133,171 @@ async function mounted() {
   return { engine, session };
 }
 
+function FrontendPublisher({
+  state,
+}: {
+  state: {
+    search: string;
+    sortBy?: string;
+    setSearch?: (search: string) => void;
+  };
+}) {
+  const source = useFrontendData({
+    data: ROWS,
+    columns: [
+      { key: "name", header: "Name", sortable: true },
+      { key: "salary", header: "Salary", sortable: true },
+    ],
+    getRowId: (row) => row.id,
+    urlSync: false,
+  });
+  const engine = source.tableEngine;
+  if (!engine) throw new Error("useFrontendData did not publish its engine");
+  const neutral = useMemo(
+    () =>
+      createNeutralTable(engine, "http-frontend-binding", {
+        operations: () => WIRED,
+      }) as NeutralTable<unknown>,
+    [engine]
+  );
+  state.search = source.search;
+  state.sortBy = source.sortBy;
+  state.setSearch = source.setSearch;
+  usePublishTableRuntime(source.rows, undefined, {
+    rows: source.rows,
+    visibleRows: source.rows,
+    neutralTable: neutral,
+    getRowId: (row: unknown) => (row as Row).id,
+    rowLabel: (row: unknown) => (row as Row).name,
+    query: {
+      page: source.page,
+      limit: source.limit,
+      search: source.search,
+      sortBy: source.sortBy,
+      sortDir: source.sortDir,
+      setPage: source.setPage,
+      setLimit: source.setLimit,
+      setSearch: source.setSearch,
+      setSort: source.setSort,
+      setExtras: source.setExtras,
+      clearExtras: source.clearExtras,
+    },
+  });
+  return null;
+}
+
+async function mountedFrontend() {
+  const state: {
+    search: string;
+    sortBy?: string;
+    setSearch?: (search: string) => void;
+  } = { search: "" };
+  let session: AgentSession | undefined;
+  const props = applyTableFeatures({
+    features: [
+      tableAgent({
+        tableId: "http-frontend-binding",
+        writePolicy: "allow",
+        approval: "never",
+        columns: {
+          name: { type: "string", sortable: true },
+          salary: { type: "number", sortable: true },
+        },
+        bridge: {
+          attach: (live) => {
+            session = live;
+          },
+        },
+      }),
+    ],
+  });
+  render(
+    <FeatureProviders props={props}>
+      <FrontendPublisher state={state} />
+    </FeatureProviders>
+  );
+  await waitFor(() => {
+    expect(session).toBeDefined();
+  });
+  if (!session)
+    throw new Error("the frontend binding never attached a session");
+  return { session, state };
+}
+
+function ServerPublisher({
+  state,
+}: {
+  state: {
+    search: string;
+    sortBy?: string;
+    setSearch?: (value: string) => void;
+  };
+}) {
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<string>();
+  state.search = search;
+  state.sortBy = sortBy;
+  state.setSearch = setSearch;
+  usePublishTableRuntime(ROWS, undefined, {
+    rows: ROWS,
+    visibleRows: ROWS,
+    getRowId: (row: unknown) => (row as Row).id,
+    rowLabel: (row: unknown) => (row as Row).name,
+    query: {
+      page: 1,
+      limit: 10,
+      search,
+      sortBy,
+      sortDir: sortBy ? "desc" : undefined,
+      setPage: () => undefined,
+      setLimit: () => undefined,
+      setSearch,
+      setSort: (key) => setSortBy(key),
+    },
+  });
+  return null;
+}
+
+async function mountedServer() {
+  const state: {
+    search: string;
+    sortBy?: string;
+    setSearch?: (value: string) => void;
+  } = { search: "" };
+  let session: AgentSession | undefined;
+  const props = applyTableFeatures({
+    features: [
+      tableAgent({
+        tableId: "http-server-binding",
+        approval: "never",
+        columns: {
+          name: { type: "string", sortable: true },
+          salary: { type: "number", sortable: true },
+        },
+        bridge: {
+          attach: (live) => {
+            session = live;
+          },
+        },
+      }),
+    ],
+  });
+  render(
+    <FeatureProviders props={props}>
+      <ServerPublisher state={state} />
+    </FeatureProviders>
+  );
+  await waitFor(() => {
+    expect(session).toBeDefined();
+  });
+  if (!session) throw new Error("the server binding never attached a session");
+  return { session, state };
+}
+
 describe("an HTTP turn over the live React binding", () => {
   it("runs filter then sort in one reply, following the table it moved", async () => {
     const { engine, session } = await mounted();
+    const opening = session.manifest().viewRevision;
 
     let result!: TurnResult;
     await act(async () => {
@@ -160,11 +324,109 @@ describe("an HTTP turn over the live React binding", () => {
     });
 
     // The search moved the engine's own view revision, and the sort was
-    // judged against where the search left it rather than being refused.
+    // judged against where the search left it rather than being refused. The
+    // provider render may publish later, but the binding can attribute the
+    // neutral engine's synchronous revision before another call starts.
     expect(result.results.map((entry) => entry.ok)).toEqual([true, true]);
+    expect(result.results.map((entry) => entry.revision)).toEqual([
+      opening + 1,
+      opening + 2,
+    ]);
     expect(engine.snapshot().search).toBe("ada");
     expect(engine.snapshot().sortBy).toBe("salary");
     expect(engine.snapshot().sortDir).toBe("desc");
+  });
+
+  it("keeps useFrontendData search then sort in one reply", async () => {
+    const { session, state } = await mountedFrontend();
+
+    let result!: TurnResult;
+    await act(async () => {
+      result = await runAgentHttpTurn(session, "Ada, salary first", {
+        endpoint: "https://agent.example/turn",
+        request: () =>
+          Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            text: "Done.",
+            toolCalls: [
+              {
+                id: "server-search-ada",
+                name: "view.setSearch",
+                args: { search: "ada" },
+              },
+              {
+                id: "server-sort-salary",
+                name: "view.setSort",
+                args: { key: "salary", dir: "desc" },
+              },
+            ],
+          }),
+      });
+    });
+
+    expect(result.results.map((entry) => entry.ok)).toEqual([true, true]);
+    expect(state).toMatchObject({ search: "ada", sortBy: "salary" });
+  });
+
+  it("flushes a pending reader change before admitting useFrontendData work", async () => {
+    const { session, state } = await mountedFrontend();
+
+    let result!: TurnResult;
+    await act(async () => {
+      result = await runAgentHttpTurn(session, "Sort by salary", {
+        endpoint: "https://agent.example/turn",
+        request: () => {
+          // React has accepted the reader's update but has not committed the
+          // frontend engine yet. Admission flushes it before checking the
+          // revision; the agent may not claim it as part of its own sort.
+          state.setSearch?.("grace");
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            toolCalls: [
+              {
+                id: "sort-after-reader",
+                name: "view.setSort",
+                args: { key: "salary", dir: "desc" },
+              },
+            ],
+          });
+        },
+      });
+    });
+
+    expect(result.results[0]?.error?.code).toBe("revision-mismatch");
+    expect(state.search).toBe("grace");
+    expect(state.sortBy).toBeUndefined();
+  });
+
+  it("bumps and checks a server query revision with no neutral engine", async () => {
+    const { session, state } = await mountedServer();
+    const opening = session.manifest().viewRevision;
+
+    let result!: TurnResult;
+    await act(async () => {
+      result = await runAgentHttpTurn(session, "Sort by salary", {
+        endpoint: "https://agent.example/turn",
+        request: () => {
+          state.setSearch?.("grace");
+          return Promise.resolve({
+            schemaVersion: AGENT_SCHEMA_VERSION,
+            toolCalls: [
+              {
+                id: "server-sort-after-reader",
+                name: "view.setSort",
+                args: { key: "salary", dir: "desc" },
+              },
+            ],
+          });
+        },
+      });
+    });
+
+    expect(result.results[0]?.error?.code).toBe("revision-mismatch");
+    expect(session.manifest().viewRevision).toBeGreaterThan(opening);
+    expect(state.search).toBe("grace");
+    expect(state.sortBy).toBeUndefined();
   });
 
   it("refuses the reply when the table was edited during the model call", async () => {

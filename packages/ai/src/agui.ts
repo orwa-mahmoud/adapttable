@@ -641,13 +641,13 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
     signal?: AbortSignal
   ): Promise<void> => {
     const manifest = session.manifest();
-    // The state this run was started with is checked as the run opens. A call
-    // arriving after one of this run's own calls has landed meets the table
-    // that call moved, rather than being refused for it.
+    // This call is checked against the state the run started with or progress
+    // one of this run's own earlier calls proved. A merely newer live revision
+    // is foreign and remains visible to the session as a mismatch.
     const result = await session.execute(
       key,
       args,
-      turn.bound.expected(manifest.viewRevision),
+      turn.bound.expected(),
       callKey(threadId, runId, toolCallId),
       signal
     );

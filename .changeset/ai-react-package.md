@@ -10,6 +10,10 @@ callbacks to an agent session. `useTableAssistant` connects the headless
 conversation controller to React. Cell, row and batch editing are exposed
 through their wired editing channels.
 
+React DOM 18 or 19 is a peer dependency. Binding-owned view changes are
+committed before returning their execution revision, so sequential commands
+can follow their own updates without accepting unrelated reader changes.
+
 The bridge can publish the session, view inputs, approvals and remembered
 allowances to a panel mounted outside the table. Pass the published
 `contextInputs` and `alwaysAllow` state to `useTableAssistant` when the
