@@ -10,7 +10,7 @@
 "@adapttable/unstyled": major
 "@adapttable/cli": major
 "@adapttable/i18n": major
-"@adapttable/server": major
+"@adapttable/server": minor
 ---
 
 Raise the supported Node.js minimum from 18.18.0 to 22.12.0.

@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/ai",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Provider-neutral adaptive table capability discovery — catalog, describe and execute against a live AdaptTable without shipping a model SDK.",
   "keywords": [
     "data-table",
