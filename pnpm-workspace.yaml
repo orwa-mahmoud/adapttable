@@ -20,7 +20,9 @@ peerDependencyRules:
 # @tanstack/react-virtual — so these are build/dev tooling only.
 overrides:
   # Starters declare ^2.0.0 so StackBlitz installs from npm. The monorepo
-  # must still typecheck them against workspace packages.
+  # must still typecheck them against workspace packages. Turbo `^build`
+  # only follows a matching semver range, so each starter also names the
+  # workspace `#build` it needs (see starters/*/turbo.json).
   "@adapttable/antd": "workspace:*"
   "@adapttable/base-ui": "workspace:*"
   "@adapttable/chakra": "workspace:*"

@@ -1,0 +1,11 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["@adapttable/unstyled#build", "@adapttable/core#build"]
+    },
+    "typecheck": {
+      "dependsOn": ["@adapttable/unstyled#build", "@adapttable/core#build"]
+    }
+  }
+}
