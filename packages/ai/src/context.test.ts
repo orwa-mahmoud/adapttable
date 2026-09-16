@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { buildAgentContext, rowProvenance } from "./context";
+import { agentPagination } from "./pagination";
 import { createAgentSession } from "./session";
 import type { AgentColumn, AgentObservation, AgentSession } from "./types";
 
@@ -76,6 +77,54 @@ describe("the permitted contract", () => {
 
     expect(keys).toContain("view.setPage");
     expect(keys).not.toContain("edit.cells");
+  });
+
+  it("takes page size from the session when the host sent no view", () => {
+    // HTTP builds context from the session alone. Defaulting that size to 10
+    // is how a model was told a 25-row table was already at 10, and never
+    // called setLimit.
+    const context = buildAgentContext(
+      tableSession({
+        page: 1,
+        limit: 25,
+        pagination: agentPagination({
+          page: 1,
+          pageSize: 25,
+          pageSizeOptions: [10, 25, 50, 100],
+          totalRows: 8,
+          canJump: true,
+        }),
+      })
+    );
+
+    expect(context.view.limit).toBe(25);
+    expect(context.view.page).toBe(1);
+    expect(context.view.unknown).not.toContain("limit");
+  });
+
+  it("names aggregation operations from the session when the host sent none", () => {
+    const context = buildAgentContext(
+      tableSession({
+        featureIds: ["grouping-panel"],
+        source: { ...PAGE_ONLY, grouping: "client" },
+        aggregations: {
+          columns: [
+            {
+              id: "salary",
+              operations: [
+                { id: "sum", label: "Sum" },
+                { id: "avg", label: "Average" },
+              ],
+            },
+          ],
+          active: [],
+        },
+      })
+    );
+
+    expect(
+      context.contract.aggregations?.columns[0]?.operations.map((op) => op.id)
+    ).toEqual(["sum", "avg"]);
   });
 
   it("leaves out a capability the host excluded", () => {

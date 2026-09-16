@@ -435,13 +435,13 @@ const MAX_CONTINUATIONS = 3;
 /**
  * Repair rounds in one user send.
  *
- * A phase that ran nothing and was refused over its arguments changed nothing
- * either, so handing that refusal back is the only way the turn can still
- * succeed — and one round is enough for a backend that can read a refusal at
- * all. It is counted apart from {@link MAX_CONTINUATIONS} so a backend asking
- * to continue can never spend it.
+ * A call refused over its arguments is handed back to the backend — even
+ * when a sibling already landed — so the model can send the id the table
+ * takes. Two rounds is enough to correct a guess; a third refusal is shown
+ * to the reader. Counted apart from {@link MAX_CONTINUATIONS} so a backend
+ * asking to continue can never spend it.
  */
-const MAX_REPAIRS = 1;
+const MAX_REPAIRS = 2;
 const MAX_DESCRIBE_NEEDS = 16;
 const MAX_READ_NEEDS = 16;
 const MAX_ACTIONS = 32;
@@ -1916,6 +1916,20 @@ export async function runAgentHttpTurn(
 
   const turnId = newHttpTurnId();
   const turn = phaseContext(session, turnId, 0);
+  return runTurnPhases(session, options, extras, trimmed, turn);
+}
+
+async function runTurnPhases(
+  session: AgentSession,
+  options: AgentHttpClientOptions,
+  extras: {
+    conversation?: readonly AgentHttpMessage[];
+    returnResults?: boolean;
+    signal?: AbortSignal;
+  },
+  trimmed: string,
+  turn: HttpPhaseContext
+): Promise<AgentHttpTurnResult> {
   const execution = createTurnExecution(session, turn);
   const results: ExecuteResult[] = [];
   const keys: string[] = [];
@@ -1927,6 +1941,7 @@ export async function runAgentHttpTurn(
   let phaseId = 0;
   let repairs = 0;
   let lastPlan: string | undefined;
+  let hidden: HiddenReceipts | undefined;
 
   // Each pass is one dependent phase: ask until the backend settles, run what
   // it settled on, and only continue when it asked for the receipts.
@@ -1949,7 +1964,19 @@ export async function runAgentHttpTurn(
     // turn keeps what it has and says why it stopped, rather than repeating
     // the work or waiting for a backend to notice.
     const signature = planSignature(pass.plan);
-    if (signature !== undefined && signature === lastPlan) {
+    const same = samePlanAfter(signature, lastPlan, hidden, repairs);
+    if (same === "retry") {
+      repairs += 1;
+      phaseId += 1;
+      continue;
+    }
+    if (same === "show" && hidden) {
+      results.push(...hidden.results);
+      keys.push(...hidden.keys);
+      subjects.push(...hidden.subjects);
+      break;
+    }
+    if (same === "repeat") {
       unresolved = {
         code: "repeated-plan",
         message: "the backend asked for the same calls it had just run",
@@ -1960,22 +1987,6 @@ export async function runAgentHttpTurn(
     lastPlan = signature;
 
     const ran = await runPhasePlan(execution, pass, extras.signal);
-    results.push(...ran);
-    // The keys, not the calls: what a receipt needs is which capability ran.
-    keys.push(...pass.plan.map((call) => call.key));
-    // Read after the phase ran, so a column a call renamed is named as it is
-    // now. Indexed off what ran rather than what was planned, because a
-    // cancelled phase returns fewer results than it had calls.
-    const columns = session.manifest().columns;
-    subjects.push(
-      ...ran.map((result, index) => {
-        const call = pass.plan[index];
-        return call
-          ? subjectFor(call.key, call.args, result, columns)
-          : undefined;
-      })
-    );
-
     const step = advanceTurn({
       allowed: extras.returnResults === true,
       asked: pass.last.continueWithResults === true,
@@ -1985,6 +1996,16 @@ export async function runAgentHttpTurn(
       phaseId,
       repairsLeft: MAX_REPAIRS - repairs,
     });
+    const recorded = receiptsForPhase(
+      ran,
+      pass.plan,
+      step.repaired,
+      session.manifest().columns
+    );
+    results.push(...recorded.shown.results);
+    keys.push(...recorded.shown.keys);
+    subjects.push(...recorded.shown.subjects);
+    hidden = recorded.hidden;
     unresolved = step.unresolved ?? unresolved;
     if (step.stop) break;
     repairs += step.repaired ? 1 : 0;
@@ -1999,6 +2020,55 @@ export async function runAgentHttpTurn(
     subjects,
     needsFulfilled: fulfilled,
     ...(unresolved ? { unresolved } : {}),
+  };
+}
+
+interface HiddenReceipts {
+  readonly results: readonly ExecuteResult[];
+  readonly keys: readonly string[];
+  readonly subjects: readonly (AssistantReceiptSubject | undefined)[];
+}
+
+/**
+ * What to do when this phase asked for the same calls as the one before.
+ *
+ * A repair that comes back unchanged is not a second apply. Hand the
+ * refusal back until the two retries are spent, then show it.
+ */
+function samePlanAfter(
+  signature: string | undefined,
+  lastPlan: string | undefined,
+  hidden: HiddenReceipts | undefined,
+  repairs: number
+): "retry" | "show" | "repeat" | undefined {
+  if (signature === undefined || signature !== lastPlan) return undefined;
+  if (hidden && repairs < MAX_REPAIRS) return "retry";
+  return hidden ? "show" : "repeat";
+}
+
+/** Landed receipts for the reader, and refusals still going back to the model. */
+function receiptsForPhase(
+  ran: readonly ExecuteResult[],
+  plan: readonly FinalizedCall[],
+  repaired: boolean,
+  columns: AgentManifest["columns"]
+): { readonly shown: HiddenReceipts; readonly hidden?: HiddenReceipts } {
+  const tagged = ran.map((entry, index) => ({ entry, index }));
+  const visible = repaired ? tagged.filter(({ entry }) => entry.ok) : tagged;
+  const held = repaired ? tagged.filter(({ entry }) => !entry.ok) : [];
+  const toReceipts = (
+    items: readonly { entry: ExecuteResult; index: number }[]
+  ): HiddenReceipts => ({
+    results: items.map(({ entry }) => entry),
+    keys: items.map(({ index }) => plan[index]?.key ?? ""),
+    subjects: items.map(({ entry, index }) => {
+      const call = plan[index];
+      return call ? subjectFor(call.key, call.args, entry, columns) : undefined;
+    }),
+  });
+  return {
+    shown: toReceipts(visible),
+    ...(held.length > 0 ? { hidden: toReceipts(held) } : {}),
   };
 }
 
@@ -2023,17 +2093,14 @@ function mergeToolResults(
 
 /** One executed call, shaped as the tool result its caller is waiting for. */
 /**
- * Whether this phase was refused over how it was written, and did nothing.
+ * Whether this phase was refused over how a call was written.
  *
- * Every call has to have failed: a phase that also ran something has already
- * changed the table, and a second plan built over the top of it could apply
- * that change twice. With nothing applied there is nothing to repeat, and the
- * refusal names both what was wrong and what the capability takes — which is
- * everything the next plan needs.
+ * A sibling that already landed stays applied. The refusal still names what
+ * the capability takes, so the next plan can send that instead of showing
+ * the guess to the reader.
  */
 function refusedOverArguments(ran: readonly ExecuteResult[]): boolean {
   if (ran.length === 0) return false;
-  if (ran.some((entry) => entry.ok)) return false;
   return ran.some((entry) => entry.error?.code === "invalid-arguments");
 }
 
@@ -2133,9 +2200,9 @@ async function runPhasePlan(
  * Why this turn runs another phase, or nothing when it stops here.
  *
  * `continue` is the backend asking to be told what its calls produced.
- * `repair` is this client's own: a phase refused over how it was written ran
- * nothing, so handing that refusal back is the only way the turn can still
- * succeed, and a backend that never asks to continue still gets it.
+ * `repair` is this client's own: a call refused over its arguments is
+ * handed back so the model can send what the table takes, even when a
+ * sibling already landed. A backend that never asks to continue still gets it.
  */
 function nextPhaseReason(input: {
   readonly allowed: boolean;

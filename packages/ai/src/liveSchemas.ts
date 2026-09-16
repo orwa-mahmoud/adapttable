@@ -15,7 +15,12 @@
  * Nothing here narrows what the session will accept. The session resolves and
  * refuses exactly as before; this only stops a caller having to guess.
  */
-import type { AgentColumn, AgentFilter, JsonSchema } from "./types";
+import type {
+  AgentAggregationColumn,
+  AgentColumn,
+  AgentFilter,
+  JsonSchema,
+} from "./types";
 
 const DRAFT = "https://json-schema.org/draft/2020-12/schema";
 
@@ -89,7 +94,7 @@ export function columnIds(
 export function withEnum(
   schema: JsonSchema | undefined,
   property: string,
-  values: readonly string[],
+  values: readonly (string | number)[],
   nullable = false
 ): JsonSchema | undefined {
   if (!schema || values.length === 0) return schema;
@@ -102,6 +107,58 @@ export function withEnum(
         ...existing,
         enum: nullable ? [...values, null] : values,
       },
+    },
+  };
+}
+
+/**
+ * The `set` argument for the columns this table will actually aggregate.
+ *
+ * Each property is one column; its `enum` is the operation ids that column
+ * takes. A free-form string is how a caller writes "average" when the table
+ * takes `avg`.
+ */
+export function aggregationSetSchema(
+  columns: readonly AgentAggregationColumn[] | undefined
+): JsonSchema | undefined {
+  if (columns === undefined || columns.length === 0) return undefined;
+  const properties: Record<string, JsonSchema> = {};
+  for (const column of columns) {
+    const ids = column.operations.map((operation) => operation.id);
+    if (ids.length === 0) continue;
+    properties[column.id] = { type: "string", enum: ids };
+  }
+  if (Object.keys(properties).length === 0) return undefined;
+  return {
+    type: "object",
+    additionalProperties: false,
+    properties,
+  };
+}
+
+/** The `set` and `remove` properties, specialised for this table. */
+export function withAggregationBag(
+  schema: JsonSchema | undefined,
+  columns: readonly AgentAggregationColumn[] | undefined
+): JsonSchema | undefined {
+  const bag = aggregationSetSchema(columns);
+  if (!schema || !bag) return schema;
+  const ids = columns?.map((column) => column.id) ?? [];
+  const remove =
+    ids.length > 0
+      ? {
+          ...(schema.properties?.remove ?? {}),
+          type: "array" as const,
+          items: { type: "string", enum: ids },
+        }
+      : schema.properties?.remove;
+  return {
+    $schema: schema.$schema ?? DRAFT,
+    ...schema,
+    properties: {
+      ...schema.properties,
+      set: bag,
+      ...(remove ? { remove } : {}),
     },
   };
 }

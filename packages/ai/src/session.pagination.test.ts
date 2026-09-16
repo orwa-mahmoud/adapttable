@@ -98,6 +98,149 @@ describe("a counted source", () => {
     expect((await move(session, 2)).ok).toBe(false);
   });
 
+  it("applies a page size the table is not already on", async () => {
+    const setPage = vi.fn();
+    const setLimit = vi.fn();
+    const session = createAgentSession({
+      observe: (): AgentObservation => ({
+        tableId: "orders",
+        viewRevision: 1,
+        featureIds: [],
+        columns: [],
+        source: PAGE_ONLY,
+        writePolicy: "allow",
+        approval: "never",
+        commit: "immediate",
+        hasPagination: true,
+        hasSearch: false,
+        hasSort: false,
+        hasFilters: false,
+        hasExport: false,
+        hasEdit: false,
+        hasReorder: false,
+        page: 1,
+        limit: 25,
+        search: "",
+        pagination: agentPagination({
+          page: 1,
+          pageSize: 25,
+          pageSizeOptions: [10, 25, 50, 100],
+          totalRows: 8,
+          canJump: true,
+        }),
+        pageMax: 1,
+        rowAddressScope: "visible",
+      }),
+      apply: { setPage, setLimit },
+    });
+    const result = await session.execute(
+      "view.setPage",
+      { page: 1, limit: 10 },
+      1,
+      "to-ten"
+    );
+    expect(result.ok).toBe(true);
+    expect(setLimit).toHaveBeenCalledWith(10);
+    expect(setPage).toHaveBeenCalledWith(1);
+  });
+
+  it("moves the page after a restated size, so setLimit cannot wipe it", async () => {
+    // The table's own setLimit resets the page. A caller that names the size
+    // already on screen — "page 2 at 5 a page" — used to run setPage and then
+    // setLimit, and the table ended on page 1 with a receipt that said page 2.
+    const setPage = vi.fn();
+    const setLimit = vi.fn();
+    const session = createAgentSession({
+      observe: (): AgentObservation => ({
+        tableId: "orders",
+        viewRevision: 1,
+        featureIds: [],
+        columns: [],
+        source: PAGE_ONLY,
+        writePolicy: "allow",
+        approval: "never",
+        commit: "immediate",
+        hasPagination: true,
+        hasSearch: false,
+        hasSort: false,
+        hasFilters: false,
+        hasExport: false,
+        hasEdit: false,
+        hasReorder: false,
+        page: 1,
+        limit: 5,
+        search: "",
+        pagination: agentPagination({
+          page: 1,
+          pageSize: 5,
+          pageSizeOptions: [5, 10, 25],
+          totalRows: 30,
+          canJump: true,
+        }),
+        pageMax: 6,
+        rowAddressScope: "visible",
+      }),
+      apply: { setPage, setLimit },
+    });
+    const result = await session.execute(
+      "view.setPage",
+      { page: 2, limit: 5 },
+      1,
+      "next"
+    );
+    expect(result.ok).toBe(true);
+    expect(result.result).toMatchObject({ page: 2, limit: 5 });
+    expect(setLimit).not.toHaveBeenCalled();
+    expect(setPage).toHaveBeenCalledWith(2);
+  });
+
+  it("resizes before it pages, because setLimit resets the page", async () => {
+    const setPage = vi.fn();
+    const setLimit = vi.fn();
+    const session = createAgentSession({
+      observe: (): AgentObservation => ({
+        tableId: "orders",
+        viewRevision: 1,
+        featureIds: [],
+        columns: [],
+        source: PAGE_ONLY,
+        writePolicy: "allow",
+        approval: "never",
+        commit: "immediate",
+        hasPagination: true,
+        hasSearch: false,
+        hasSort: false,
+        hasFilters: false,
+        hasExport: false,
+        hasEdit: false,
+        hasReorder: false,
+        page: 1,
+        limit: 10,
+        search: "",
+        pagination: agentPagination({
+          page: 1,
+          pageSize: 10,
+          pageSizeOptions: [10, 25, 50],
+          totalRows: 130,
+          canJump: true,
+        }),
+        pageMax: 13,
+        rowAddressScope: "visible",
+      }),
+      apply: { setPage, setLimit },
+    });
+    const ok = await session.execute(
+      "view.setPage",
+      { page: 2, limit: 50 },
+      1,
+      "both"
+    );
+    expect(ok.ok).toBe(true);
+    expect(setLimit.mock.invocationCallOrder[0]).toBeLessThan(
+      setPage.mock.invocationCallOrder[0]!
+    );
+  });
+
   it("re-bounds when the page size changes in the same call", async () => {
     const { session } = tableSession(
       agentPagination({

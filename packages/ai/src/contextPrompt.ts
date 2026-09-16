@@ -149,10 +149,19 @@ function filterLines(contract: AgentContextContract): readonly string[] {
 
 /** Where the table is, as fact rather than instruction. */
 function viewLines(view: AgentContextView): readonly string[] {
+  const pages = view.pagination;
+  const page = pages?.page ?? view.page;
+  const limit = pages?.pageSize ?? view.limit;
   const lines = [
     `revision ${String(view.revision)}`,
-    `page ${String(view.page)} of size ${String(view.limit)}`,
+    pages?.totalPages !== undefined
+      ? `page ${String(page)} of ${String(pages.totalPages)} (size ${String(limit)})`
+      : `page ${String(page)} of size ${String(limit)}`,
   ];
+  if (pages?.pageSizeOptions?.length) {
+    lines.push(`page sizes ${pages.pageSizeOptions.join(", ")}`);
+  }
+  if (pages?.hasNext === false) lines.push("no further page");
   if (view.search) lines.push(`search ${JSON.stringify(view.search)}`);
   if (view.sortBy) {
     lines.push(`sorted by ${view.sortBy} ${view.sortDir ?? "asc"}`);

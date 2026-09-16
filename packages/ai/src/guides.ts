@@ -82,7 +82,11 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
   },
   "view.setPage": {
     key: "view.setPage",
-    guide: "Move to a 1-based page. Rejects a stale view revision.",
+    guide:
+      "Move to a 1-based page. A `limit` is a page size the table's own " +
+      "control offers — send one of those ids, never an arbitrary count. " +
+      "Omit `limit` when only the page should move. Rejects a stale view " +
+      "revision.",
     input: objectSchema(
       {
         page: { type: "integer", minimum: 1 },
@@ -169,7 +173,8 @@ const GUIDES: Record<CapabilityKey, Omit<CapabilityGuide, "schemaVersion">> = {
       "`restoreDefaults` cannot be combined with `set` or `remove`. The " +
       "whole request is validated before anything is applied. Eligible " +
       "columns and operation ids are listed when this capability is " +
-      "described against the live table. Never send a calculate function.",
+      "described against the live table. Send those ids (`avg`), never the " +
+      "English word (`average`). Never send a calculate function.",
     input: objectSchema({
       set: {
         type: "object",

@@ -166,6 +166,52 @@ describe("rendering this table", () => {
     expect(rendered).toContain("sorted by status asc");
   });
 
+  it("does not invent a page size of 10 when the table is at 25", () => {
+    const session = createAgentSession({
+      observe: () =>
+        observation({
+          page: 1,
+          limit: 25,
+          pagination: {
+            page: 1,
+            pageSize: 25,
+            pageSizeOptions: [10, 25, 50, 100],
+            totalRows: 8,
+            totalPages: 1,
+            hasPrevious: false,
+            hasNext: false,
+            canJump: true,
+          },
+        }),
+      apply: { setPage: vi.fn(), setLimit: vi.fn() },
+    });
+    const rendered = renderAgentContext(buildAgentContext(session));
+
+    expect(rendered).toContain("size 25");
+    expect(rendered).not.toMatch(/page 1 of size 10\b/);
+    expect(rendered).toContain("page sizes 10, 25, 50, 100");
+  });
+
+  it("names the page sizes and page count the table actually has", () => {
+    const rendered = renderAgentContext(
+      context({
+        pagination: {
+          page: 2,
+          pageSize: 25,
+          pageSizeOptions: [10, 25, 50, 100],
+          totalPages: 4,
+          totalRows: 80,
+          hasPrevious: true,
+          hasNext: true,
+          canJump: true,
+        },
+      })
+    );
+
+    expect(rendered).toContain("page 2 of 4 (size 25)");
+    expect(rendered).toContain("page sizes 10, 25, 50, 100");
+  });
+
   it("names what the table did not publish", () => {
     const session = createAgentSession({
       observe: () => observation(),

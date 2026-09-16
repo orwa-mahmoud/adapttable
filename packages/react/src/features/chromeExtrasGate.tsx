@@ -119,6 +119,7 @@ function RuntimePublisher<TRow>({
     query: {
       page: chrome.source.page,
       limit: chrome.source.limit,
+      defaultLimit: chrome.source.defaultLimit,
       total: chrome.source.total,
       search: chrome.source.search,
       sortBy: chrome.source.sortBy,

@@ -313,16 +313,22 @@ export function buildView(
   filters: readonly AgentFilter[]
 ): AgentContextView {
   // Absence is a fact, not a default. A host that publishes no page is not a
-  // host whose table is on page 1.
+  // host whose table is on page 1. The session's own pagination is that
+  // fact when the host did not pass page and limit separately — inventing
+  // `10` here is how a model was told the size was already 10 on a table
+  // sitting at 25, and never called setLimit.
+  const pages = view.pagination;
+  const page = view.page ?? pages?.page;
+  const limit = view.limit ?? pages?.pageSize;
   const missing: string[] = [];
-  if (view.page === undefined) missing.push("page");
-  if (view.limit === undefined) missing.push("limit");
+  if (page === undefined) missing.push("page");
+  if (limit === undefined) missing.push("limit");
   if (view.search === undefined) missing.push("search");
   const state = permittedFilterState(view.filters, filters);
   return {
     revision: view.revision,
-    page: view.page ?? 1,
-    limit: view.limit ?? 10,
+    page: page ?? 1,
+    limit: limit ?? 10,
     search: view.search ?? "",
     ...(view.sortBy ? { sortBy: view.sortBy } : {}),
     ...(view.sortDir ? { sortDir: view.sortDir } : {}),

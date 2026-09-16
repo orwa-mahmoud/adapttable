@@ -273,15 +273,19 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
   });
 
   test("offers only what the table currently wires", async ({ page }) => {
-    // Ungrouped by default, so row pinning is live.
+    // Ungrouped by default: pinning is live, and grouping is not offered.
     expect(await catalogText(page)).toContain("view.pinRow");
+    expect(await catalogText(page)).not.toContain("view.setGroupBy");
 
     await openDemoOptions(page);
     await page.getByTestId("ai-toggle-grouping").click();
 
+    // The toggle arms the panel, it does not group by team. Pinning stays
+    // until a group is actually applied; setGroupBy is what appears.
     await expect
       .poll(async () => catalogText(page))
-      .not.toContain("view.pinRow");
+      .toContain("view.setGroupBy");
+    expect(await catalogText(page)).toContain("view.pinRow");
   });
 
   test("closes the demo options on a click outside them", async ({ page }) => {

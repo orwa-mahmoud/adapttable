@@ -531,6 +531,20 @@ describe("createAgentSession", () => {
     const described = session.describe("view.setAggregations");
     expect(described.guide).toContain("salary [sum (Sum), avg (Average)]");
     expect(described.guide).not.toMatch(/calculate\s*:/);
+    expect(described.input?.properties?.set?.properties?.salary?.enum).toEqual([
+      "sum",
+      "avg",
+    ]);
+    const spoken = await session.execute(
+      "view.setAggregations",
+      { set: { salary: "average" } },
+      1,
+      "spoken"
+    );
+    expect(spoken.ok).toBe(true);
+    expect(apply.setAggregations).toHaveBeenCalledWith({
+      set: { salary: "avg" },
+    });
   });
 
   it("restores, removes and holds a server aggregation until the host answers", async () => {

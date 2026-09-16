@@ -250,7 +250,8 @@ export function resolveRowFromNeutral<TRow>(
 export function paginationFromNeutral<TRow>(
   table: NeutralTable<TRow>,
   page: number,
-  pageSize: number
+  pageSize: number,
+  options?: { readonly pageSizeOptions?: readonly number[] }
 ): AgentPagination {
   const caps = table.capabilities;
   const counted = caps.fullDataset || caps.totalCount === "exact";
@@ -258,6 +259,9 @@ export function paginationFromNeutral<TRow>(
   return agentPagination({
     page,
     pageSize,
+    ...(options?.pageSizeOptions
+      ? { pageSizeOptions: options.pageSizeOptions }
+      : {}),
     ...(counted ? { totalRows: table.rows("full").length } : {}),
     loadedRows: loaded,
     canJump: true,
@@ -275,9 +279,12 @@ export function paginationFromNeutral<TRow>(
 export function pageMaxFromNeutral<TRow>(
   table: NeutralTable<TRow>,
   limit: number,
-  page: number
+  page: number,
+  pageSizeOptions?: readonly number[]
 ): number {
-  const pages = paginationFromNeutral(table, page, limit);
+  const pages = paginationFromNeutral(table, page, limit, {
+    ...(pageSizeOptions ? { pageSizeOptions } : {}),
+  });
   // When the total is unknown the last page is unknowable, so the bound is one
   // step ahead of the reader: walking forward is the only honest way to find
   // the end of a list nobody has counted, and refusing to move at all would be
@@ -323,6 +330,8 @@ export interface NeutralQueryOverlay {
     readonly top: readonly string[];
     readonly bottom: readonly string[];
   };
+  /** Page sizes the table's own control offers. */
+  readonly pageSizeOptions?: readonly number[];
 }
 
 export function observationFromNeutral<TRow>(
@@ -377,8 +386,12 @@ export function observationFromNeutral<TRow>(
     search: query?.search ?? "",
     sortBy: query?.sortBy,
     sortDir: query?.sortDir,
-    pageMax: pageMaxFromNeutral(table, limit, page),
-    pagination: paginationFromNeutral(table, page, limit),
+    pageMax: pageMaxFromNeutral(table, limit, page, query?.pageSizeOptions),
+    pagination: paginationFromNeutral(table, page, limit, {
+      ...(query?.pageSizeOptions
+        ? { pageSizeOptions: query.pageSizeOptions }
+        : {}),
+    }),
     readMax: options.readMax ?? 50,
     rowAddressScope: rowAddressScopeForNeutral(table),
   };

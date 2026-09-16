@@ -88,9 +88,11 @@ function session(patch: Partial<AgentObservation> = {}) {
   return createAgentSession({
     observe: () => observation(patch),
     apply: {
+      setPage: vi.fn(),
       setSort: vi.fn(),
       setGroupBy: vi.fn(),
       setFilters: vi.fn(),
+      setAggregations: vi.fn(),
       pinColumn: vi.fn(),
     },
   });
@@ -180,6 +182,46 @@ describe("a column choice reaches the schema that names one", () => {
   it("offers every column to group by", () => {
     const input = session().describe("view.setGroupBy").input;
     expect(prop(input, "key")?.enum).toEqual(["person", "notes", null]);
+  });
+
+  it("publishes the page sizes the table offers on limit", () => {
+    const live = session({
+      pagination: {
+        page: 1,
+        pageSize: 5,
+        pageSizeOptions: [5, 10, 25, 50, 100],
+        hasPrevious: false,
+        canJump: true,
+      },
+    });
+    expect(prop(live.describe("view.setPage").input, "limit")?.enum).toEqual([
+      5, 10, 25, 50, 100,
+    ]);
+  });
+
+  it("publishes each column's operation ids on set, not a free string", () => {
+    const live = session({
+      featureIds: ["filters", "grouping-panel"],
+      source: { ...PAGE_ONLY, grouping: "client" },
+      aggregations: {
+        columns: [
+          {
+            id: "salary",
+            operations: [
+              { id: "sum", label: "Sum" },
+              { id: "avg", label: "Average" },
+            ],
+          },
+        ],
+        active: [],
+      },
+    });
+    const set = prop(live.describe("view.setAggregations").input, "set");
+    expect(set?.properties?.salary?.enum).toEqual(["sum", "avg"]);
+    expect(set?.additionalProperties).toBe(false);
+    expect(
+      prop(live.describe("view.setAggregations").input, "remove")?.items?.enum
+    ).toEqual(["salary"]);
   });
 
   it("leaves the schema alone on a table that published no columns", () => {

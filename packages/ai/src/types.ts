@@ -305,11 +305,11 @@ export interface AgentManifest {
   /**
    * Which operations each aggregatable column takes, by id.
    *
-   * Keys only, and part of the contract rather than something to ask for: a
-   * caller that has to guess between "avg" and "average" guesses wrong, and
-   * finds out by being refused. What an operation *means* is a question for
-   * `describe` — a built-in's id answers it, and a host's own carries the
-   * description its author wrote.
+   * Keys only, and part of the contract rather than something to ask for.
+   * `describe` publishes those ids as the `set` enum so a caller does not
+   * have to guess between `avg` and `average`. What an operation *means* is
+   * a question for `describe` — a built-in's id answers it, and a host's own
+   * carries the description its author wrote.
    */
   readonly aggregateOperations?: readonly AgentManifestAggregation[];
   /** Read and page ceilings. */

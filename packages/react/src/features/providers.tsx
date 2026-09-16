@@ -286,6 +286,11 @@ export interface TableRuntimeView<TRow = unknown> {
      * rather than substituting what happens to be loaded.
      */
     readonly total?: number;
+    /**
+     * The table's default page size, so a rows-per-page list can keep it
+     * after the reader picks another size.
+     */
+    readonly defaultLimit?: number;
     readonly search: string;
     readonly sortBy?: string;
     readonly sortDir?: "asc" | "desc";

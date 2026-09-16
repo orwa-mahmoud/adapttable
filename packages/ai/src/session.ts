@@ -23,7 +23,12 @@ import {
   type CommitPolicy,
   type RowAddressScope,
 } from "./keys";
-import { columnIds, withEnum, withFilterBag } from "./liveSchemas";
+import {
+  columnIds,
+  withAggregationBag,
+  withEnum,
+  withFilterBag,
+} from "./liveSchemas";
 import { buildManifest } from "./manifest";
 import { normalizeCapabilityArgs } from "./normalizeArgs";
 import {
@@ -1021,9 +1026,31 @@ function describeColumnChoice(
       return specialise("key", () => true, true);
     case "view.pinColumn":
       return specialise("key", (column) => column.pinnable !== false);
+    case "view.setPage":
+      return describePage(guide, observation);
     default:
       return guide;
   }
+}
+
+/**
+ * The page sizes this table's own control offers, as schema rather than
+ * as a free integer. A caller that can write `5` when the table offers
+ * `10, 25, 50` finds out by being refused; an `enum` stops the guess.
+ */
+function describePage(
+  guide: CapabilityGuide,
+  observation: AgentObservation
+): CapabilityGuide {
+  const sizes = observedPagination(observation).pageSizeOptions;
+  if (!sizes?.length) return guide;
+  const input = withEnum(guide.input, "limit", sizes);
+  const listed = ` Page sizes this table offers: ${sizes.join(", ")}.`;
+  return {
+    ...guide,
+    guide: guide.guide + listed,
+    ...(input ? { input } : {}),
+  };
 }
 
 function describeAggregations(
@@ -1048,7 +1075,12 @@ function describeAggregations(
           )
           .join("; ") +
         ".";
-  return { ...guide, guide: guide.guide + listed };
+  const input = withAggregationBag(guide.input, columns);
+  return {
+    ...guide,
+    guide: guide.guide + listed,
+    ...(input ? { input } : {}),
+  };
 }
 
 function eligibleAggregationColumns(
@@ -1212,13 +1244,29 @@ function pageRefusalFor(
   observation: AgentObservation,
   body: Record<string, unknown>
 ): string | undefined {
-  const pages = observedPagination(observation);
-  return (
-    pageRefusal(pages, body.page) ??
-    (typeof body.limit === "number"
-      ? pageSizeRefusal(pages, body.limit)
-      : undefined)
-  );
+  const current = observedPagination(observation);
+  if (typeof body.limit === "number") {
+    const size = pageSizeRefusal(current, body.limit);
+    if (size) return size;
+  }
+  // A size change rewrites how many pages exist. Checking the page against
+  // the size still on screen would refuse a page the new size has, or allow
+  // one it no longer does.
+  const pages =
+    typeof body.limit === "number"
+      ? agentPagination({
+          page: current.page,
+          pageSize: body.limit,
+          canJump: current.canJump,
+          ...(current.pageSizeOptions
+            ? { pageSizeOptions: current.pageSizeOptions }
+            : {}),
+          ...(current.totalRows === undefined
+            ? {}
+            : { totalRows: current.totalRows }),
+        })
+      : current;
+  return pageRefusal(pages, body.page);
 }
 
 /** A name stripped of what never distinguishes two columns. */
@@ -1383,15 +1431,28 @@ function applySetPage(
   apply: AgentApply,
   body: Record<string, unknown>,
   observation: AgentObservation
-): { ok: true; revision: number } {
+): { ok: true; revision: number; page: number; limit: number } {
   const refusal = pageRefusalFor(observation, body);
   if (refusal) throw new ApplyError("apply-failed", refusal);
-  const wantsLimit = typeof body.limit === "number";
-  if (wantsLimit) assertApply(apply, "setLimit");
+  const page = body.page as number;
+  const currentSize = observedPagination(observation).pageSize;
+  const nextLimit = typeof body.limit === "number" ? body.limit : currentSize;
+  // The table's own `setLimit` resets the page — that is what a human rows-
+  // per-page control does. A caller that names both (or restates the size
+  // already on screen) would lose the page move if the size ran last. Skip a
+  // size that has not changed, and apply a new size before the page.
+  if (nextLimit !== currentSize) {
+    assertApply(apply, "setLimit");
+    apply.setLimit(nextLimit);
+  }
   assertApply(apply, "setPage");
-  apply.setPage(body.page as number);
-  if (wantsLimit) apply.setLimit!(body.limit as number);
-  return { ok: true, revision: observation.viewRevision + 1 };
+  apply.setPage(page);
+  return {
+    ok: true,
+    revision: observation.viewRevision + 1,
+    page,
+    limit: nextLimit,
+  };
 }
 
 /**
@@ -1506,6 +1567,7 @@ async function dispatchBuiltIn(
         pinnedRows: observation.pinnedRows ?? { top: [], bottom: [] },
         filters: observation.filters ?? null,
         availableFilters: observation.availableFilters,
+        pagination: observedPagination(observation),
         revision: observation.viewRevision,
       };
     case "view.setPage":

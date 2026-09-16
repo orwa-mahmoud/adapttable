@@ -54,7 +54,7 @@ import {
   type WritePolicy,
 } from "@adapttable/ai";
 import { sampleColumns } from "@adapttable/ai/context";
-import type { ActionAiOptions } from "@adapttable/core";
+import { type ActionAiOptions, pageSizeOptions } from "@adapttable/core";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
@@ -334,25 +334,30 @@ function observationFromRuntime(
   const ids = runtime.featureIds();
   const pages = serverPagination(view, query);
   if (table) {
+    const live = observationFromNeutral(
+      table,
+      options,
+      revision,
+      apply,
+      ids,
+      query
+        ? {
+            page: query.page,
+            limit: query.limit,
+            search: query.search,
+            sortBy: query.sortBy,
+            sortDir: query.sortDir,
+            pinnedColumns: view?.pinning?.columns,
+            pinnedRows: view?.pinning?.rows,
+          }
+        : undefined
+    );
+    const sizes = offeredPageSizes(query);
     return {
-      ...observationFromNeutral(
-        table,
-        options,
-        revision,
-        apply,
-        ids,
-        query
-          ? {
-              page: query.page,
-              limit: query.limit,
-              search: query.search,
-              sortBy: query.sortBy,
-              sortDir: query.sortDir,
-              pinnedColumns: view?.pinning?.columns,
-              pinnedRows: view?.pinning?.rows,
-            }
-          : undefined
-      ),
+      ...live,
+      pagination: live.pagination
+        ? { ...live.pagination, pageSizeOptions: sizes }
+        : { ...pages, pageSizeOptions: sizes },
       groupBy: view?.groupingState?.groupBy,
       aggregations: aggregationsFor(aggregationInputs(view, options)),
       availableFilters: agentFiltersFromDefs(
@@ -423,6 +428,16 @@ function observationFromRuntime(
  * unknown total rather than being handed the rows that happen to be loaded,
  * and a short page is the one thing it still proves about its own end.
  */
+/** The sizes the table's own rows-per-page control lists. */
+function offeredPageSizes(
+  query: TableRuntimeView<unknown>["query"]
+): readonly number[] {
+  const limit = query?.limit ?? 10;
+  const published =
+    (query as { defaultLimit?: number } | undefined)?.defaultLimit ?? limit;
+  return pageSizeOptions([limit, published]);
+}
+
 function serverPagination(
   view: TableRuntimeView<unknown> | undefined,
   query: TableRuntimeView<unknown>["query"]
@@ -434,6 +449,7 @@ function serverPagination(
   return agentPagination({
     page: query?.page ?? 1,
     pageSize: query?.limit ?? 10,
+    pageSizeOptions: offeredPageSizes(query),
     ...(counted && total !== undefined ? { totalRows: total } : {}),
     ...(loaded === undefined ? {} : { loadedRows: loaded }),
     // Only a source wired to take a page number can be sent one.

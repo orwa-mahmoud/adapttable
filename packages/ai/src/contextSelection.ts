@@ -137,6 +137,8 @@ const COMMON_FIRST: readonly string[] = [
   "view.setSearch",
   "view.setPage",
   "rows.read",
+  "view.setGroupBy",
+  "view.setAggregations",
 ];
 
 /** Compact's soft budget when the caller names none. */

@@ -93,6 +93,14 @@ describe("the name a capability's own title suggests", () => {
     ).toEqual({ set: { salary: "avg" } });
   });
 
+  it("reads the spoken aggregation name as the id the table takes", () => {
+    expect(
+      normalizeCapabilityArgs("view.setAggregations", {
+        set: { salary: "average" },
+      })
+    ).toEqual({ set: { salary: "avg" } });
+  });
+
   it("never overrides what the model actually named", () => {
     expect(
       normalizeCapabilityArgs("view.setGroupBy", {

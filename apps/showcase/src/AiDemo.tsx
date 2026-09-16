@@ -147,8 +147,8 @@ function raiseTeamCapability(
 }
 
 /**
- * Small enough to read at a glance, wide enough that an operation is visible.
- * Every suggestion names a row that exists here.
+ * Fifteen people at five a page is three pages. The named examples stay on
+ * page 1 so a scripted prompt still finds the row it talks about.
  */
 const SEED: readonly StaffRow[] = [
   {
@@ -214,6 +214,62 @@ const SEED: readonly StaffRow[] = [
     status: "On leave",
     salary: 165,
     started: "2020-02-17",
+  },
+  {
+    id: "k1",
+    person: "Kenji Sato",
+    team: "Platform",
+    status: "Active",
+    salary: 158,
+    started: "2023-07-11",
+  },
+  {
+    id: "l1",
+    person: "Leila Haddad",
+    team: "Core",
+    status: "Active",
+    salary: 139,
+    started: "2021-11-08",
+  },
+  {
+    id: "n1",
+    person: "Noah Berg",
+    team: "Data",
+    status: "On leave",
+    salary: 147,
+    started: "2020-05-21",
+  },
+  {
+    id: "y1",
+    person: "Yara Mensah",
+    team: "Platform",
+    status: "Active",
+    salary: 163,
+    started: "2022-03-04",
+  },
+  {
+    id: "i1",
+    person: "Ivan Petrov",
+    team: "Core",
+    status: "Active",
+    salary: 144,
+    started: "2019-12-16",
+  },
+  {
+    id: "r1",
+    person: "Sofia Reyes",
+    team: "Data",
+    status: "Active",
+    salary: 151,
+    started: "2024-01-22",
+  },
+  {
+    id: "h1",
+    person: "Aisha Rahman",
+    team: "Platform",
+    status: "Active",
+    salary: 168,
+    started: "2021-06-09",
   },
 ];
 
@@ -538,10 +594,10 @@ const INITIAL_TOGGLES: DemoToggles = {
   grouping: false,
   rowPinning: true,
   columnPinning: true,
-  paging: false,
+  paging: true,
 };
 
-/** Small enough that this staff list becomes two pages rather than one. */
+/** Five of fifteen: three pages, and 10 stays a real size the assistant can set. */
 const PAGE_LIMIT = 5;
 
 export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
@@ -772,13 +828,11 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         },
       }),
     ];
-    // Off by default so this is a normal table. Group by team is an
-    // assistant example once this feature is on — and it is the panel, not
-    // the static feature: a static `grouping("team")` reimposes its key on
-    // every render, so `view.setGroupBy` would report a change the table
-    // immediately undid. Grouping is live state the reader and the agent
-    // share, the same as filtering.
-    if (toggles.grouping) next.push(factories.grouping("team"));
+    // Off by default so this is a normal table. The panel is what offers
+    // setGroupBy — empty, not already grouped by team, so the model still
+    // has a grouping to apply. A static `grouping("team")` both starts
+    // grouped and reimposes that key on every render.
+    if (toggles.grouping) next.push(factories.grouping());
     if (toggles.rowPinning) {
       next.push(
         factories.rowPinning({
@@ -1058,8 +1112,8 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           features={[
             {
               key: "grouping",
-              label: "Group by team",
-              help: "Optional. Off by default so this starts as a normal table. A grouped table is a nested list, so row-pin examples leave while it is on.",
+              label: "Grouping",
+              help: "Offers grouping and aggregates to the assistant. The table stays flat until something actually groups it — that is the capability the model is meant to show.",
               on: toggles.grouping,
               onChange: toggle("grouping"),
             },
@@ -1080,7 +1134,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
             {
               key: "paging",
               label: "Pages of five",
-              help: "Splits the staff list over two pages, so the assistant has somewhere to page to and a position means a place on a page.",
+              help: "Fifteen people at five a page — three pages, so the assistant has somewhere to page to and a size of 10 is a real change.",
               on: toggles.paging,
               onChange: toggle("paging"),
             },

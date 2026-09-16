@@ -1155,7 +1155,7 @@ describe("createAgentHttpClient", () => {
     expect(editCells).toHaveBeenCalledTimes(1);
   });
 
-  it("spends the repair round once and then stops", async () => {
+  it("spends two repair rounds and then stops", async () => {
     const live = session();
     let rounds = 0;
     await runAgentHttpTurn(
@@ -1181,27 +1181,43 @@ describe("createAgentHttpClient", () => {
       { returnResults: true }
     );
 
-    // A backend that keeps sending the same malformed call does not get a
-    // repair round for each attempt.
-    expect(rounds).toBe(2);
+    // Initial attempt plus two repairs. A third identical refusal is shown.
+    expect(rounds).toBe(3);
   });
 
-  it("does not repair a phase that already changed the table", async () => {
-    const live = session();
+  it("repairs a refused call even when a sibling already landed", async () => {
+    const setPage = vi.fn();
+    const editCells = vi.fn();
+    const live = session({ setPage, editCells });
     let rounds = 0;
-    await runAgentHttpTurn(
+    const result = await runAgentHttpTurn(
       live,
       "Page 2 and an edit",
       {
         endpoint: "https://agent.example/turn",
-        request: () => {
+        request: (body) => {
           rounds += 1;
+          if (!body.toolResults) {
+            return Promise.resolve({
+              schemaVersion: AGENT_SCHEMA_VERSION,
+              text: "Doing both.",
+              toolCalls: [
+                { name: "view.setPage", args: { page: 2 }, id: "p1" },
+                { name: "edit.cells", args: { rowKey: "r1" }, id: "e1" },
+              ],
+            });
+          }
           return Promise.resolve({
             schemaVersion: AGENT_SCHEMA_VERSION,
-            text: "Doing both.",
+            text: "Fixed the edit.",
             toolCalls: [
-              { name: "view.setPage", args: { page: 2 }, id: "p1" },
-              { name: "edit.cells", args: { rowKey: "r1" }, id: "e1" },
+              {
+                name: "edit.cells",
+                args: {
+                  edits: [{ rowKey: "r1", column: "name", value: "Ada" }],
+                },
+                id: "e2",
+              },
             ],
           });
         },
@@ -1209,9 +1225,11 @@ describe("createAgentHttpClient", () => {
       { returnResults: true }
     );
 
-    // One call landed. A second plan built over the top of it could apply
-    // that change twice, so the refusal is reported rather than repaired.
-    expect(rounds).toBe(1);
+    expect(rounds).toBe(2);
+    expect(setPage).toHaveBeenCalledTimes(1);
+    expect(editCells).toHaveBeenCalledTimes(1);
+    expect(result.results.every((entry) => entry.ok)).toBe(true);
+    expect(result.results).toHaveLength(2);
   });
 
   it("returns execute receipts when the backend asks to continue", async () => {

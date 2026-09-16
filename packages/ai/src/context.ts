@@ -38,10 +38,30 @@ import type { AgentPagination } from "./pagination";
 import type {
   AgentAggregations,
   AgentFilter,
+  AgentManifest,
   AgentSession,
   RowProvenanceEnvelope,
   RowWindow,
 } from "./types";
+
+/**
+ * The operations the session already published, when the host did not hand
+ * a separate catalog in. HTTP builds context from the session alone, and a
+ * caller that has to guess between `avg` and `average` guesses wrong.
+ */
+function aggregationsFromManifest(
+  manifest: AgentManifest
+): AgentAggregations | undefined {
+  const listed = manifest.aggregateOperations;
+  if (!listed?.length) return undefined;
+  return {
+    columns: listed.map((column) => ({
+      id: column.id,
+      operations: column.operations.map((id) => ({ id, label: id })),
+    })),
+    active: [],
+  };
+}
 
 export {
   type AgentContextContract,
@@ -132,7 +152,7 @@ export function buildAgentContext(
     session,
     catalog,
     inputs.filters ?? [],
-    inputs.aggregations,
+    inputs.aggregations ?? aggregationsFromManifest(session.manifest()),
     inputs.samples
   );
   const measure =
@@ -184,12 +204,22 @@ export function buildAgentContext(
     capabilities: chosen.capabilities,
   };
   const manifest = session.manifest();
+  const pages = manifest.pagination;
   const view = buildView(
     {
       revision: manifest.viewRevision,
       // The table's own answer about its pages, so a caller cannot publish a
-      // page count that disagrees with the one the session enforces.
-      ...(manifest.pagination ? { pagination: manifest.pagination } : {}),
+      // page count that disagrees with the one the session enforces. Page
+      // and size ride with it: HTTP often has no host `inputs.view`, and
+      // defaulting those to 1 / 10 is how the model decided a 25-row table
+      // was already at 10.
+      ...(pages
+        ? {
+            pagination: pages,
+            page: pages.page,
+            limit: pages.pageSize,
+          }
+        : {}),
       ...inputs.view,
     },
     contract.filters

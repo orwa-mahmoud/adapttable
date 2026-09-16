@@ -31,6 +31,8 @@ const ALL = [
   "view.setFilters",
   "view.setSearch",
   "rows.read",
+  "view.setGroupBy",
+  "view.setAggregations",
   "edit.cells",
   "rows.delete",
 ].map(capability);
@@ -39,12 +41,14 @@ describe("the order guides are considered in", () => {
   it("puts the common operations first, in their own order", () => {
     const order = selectionOrder(ALL.map((entry) => entry.key));
 
-    expect(order.slice(0, 5)).toEqual([
+    expect(order.slice(0, 7)).toEqual([
       "view.setFilters",
       "view.setSort",
       "view.setSearch",
       "view.setPage",
       "rows.read",
+      "view.setGroupBy",
+      "view.setAggregations",
     ]);
   });
 
@@ -54,7 +58,7 @@ describe("the order guides are considered in", () => {
       ["rows.delete"]
     );
 
-    expect(order[5]).toBe("rows.delete");
+    expect(order[7]).toBe("rows.delete");
     expect(order).toContain("columns.describe");
   });
 
@@ -172,9 +176,9 @@ describe("choosing what travels upfront", () => {
       "view.setSearch",
       "view.setPage",
       "rows.read",
+      "view.setGroupBy",
     ]);
     expect(chosen.deferred.map((entry) => entry.key)).toContain("edit.cells");
-    expect(chosen.notes.join(" ")).toMatch(/deferred to stay within/);
   });
 
   it("carries a guide the backend already asked about, ahead of the rest", () => {

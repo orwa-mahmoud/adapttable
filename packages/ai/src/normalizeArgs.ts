@@ -215,10 +215,17 @@ export function normalizeCapabilityArgs(
     record.side = record.edge;
     delete record.edge;
   }
-  // And again: `setAggregations` taking `set` reads as a detail of this API,
-  // while `aggregations` is the word the capability itself uses.
+  if (key === "view.setAggregations") normalizeAggregationArgs(record);
+  return normalizeBatchArgs(record, input);
+}
+
+/**
+ * `setAggregations` taking `set` reads as a detail of this API, while
+ * `aggregations` is the word the capability itself uses. Spoken operation
+ * names (`average`) become the ids the table takes (`avg`).
+ */
+function normalizeAggregationArgs(record: Record<string, unknown>): void {
   if (
-    key === "view.setAggregations" &&
     !("set" in record) &&
     !("remove" in record) &&
     !("restoreDefaults" in record) &&
@@ -227,5 +234,27 @@ export function normalizeCapabilityArgs(
     record.set = record.aggregations;
     delete record.aggregations;
   }
-  return normalizeBatchArgs(record, input);
+  const next = spokenAggregationIds(record.set);
+  if (next !== undefined) record.set = next;
 }
+
+function spokenAggregationIds(
+  set: unknown
+): Record<string, unknown> | undefined {
+  const bag = asRecord(set);
+  if (!bag) return undefined;
+  const next = { ...bag };
+  for (const [column, operation] of Object.entries(next)) {
+    if (typeof operation !== "string") continue;
+    const id = AGGREGATION_IDS[operation.trim().toLowerCase()];
+    if (id) next[column] = id;
+  }
+  return next;
+}
+
+/** Spoken names a caller writes when the table takes the short id. */
+const AGGREGATION_IDS: Readonly<Record<string, string>> = {
+  average: "avg",
+  mean: "avg",
+  total: "sum",
+};
