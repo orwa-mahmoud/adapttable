@@ -765,7 +765,7 @@ Every scope and column option above works unchanged — which rows and columns
 leave the table is decided before the format is asked for anything.
 
 The button relabels itself: it reads **Export XLSX** here, not "Export CSV",
-from `labels.exportFile(format)` — translated in all seventeen locales, and
+from `labels.exportFile(format)` — translated in all eighteen locales, and
 given a caption for a format nobody planned for (a custom writer calling itself
 `tsv` gets "Export TSV"). CSV keeps `labels.exportCsv`, so its existing
 translations and any wording you overrode are untouched.

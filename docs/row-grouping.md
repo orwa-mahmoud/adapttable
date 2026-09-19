@@ -257,7 +257,7 @@ On a **server tier** the rest of a group is not in the browser yet, so
 `onGroupLoadMore(groupKey)` fires with the group that needs filling. Fetch it,
 hand back a longer `rows` for that group, and the next render shows them; the
 table reveals whatever it already holds either way. Both labels are localizable
-(`labels.moreGroups`, `labels.moreRowsInGroup`) in all seventeen locales, and the
+(`labels.moreGroups`, `labels.moreRowsInGroup`) in all eighteen locales, and the
 rows carry `group-more-row` / `group-more-cell` / `group-more` parts (with
 `groupMoreRow` / `groupMoreCell` class hooks in `@adapttable/unstyled`).
 
@@ -492,7 +492,7 @@ same way. Exports are unaffected — a footer is chrome, not a row, so a CSV
 carries the data and nothing else.
 
 Each footer is captioned through `labels.groupTotal`, translated in all
-seventeen locales, and carries `data-adapttable-part="group-footer-row"` /
+eighteen locales, and carries `data-adapttable-part="group-footer-row"` /
 `group-footer-cell` (plus the `groupFooterRow` / `groupFooterCell` class hooks
 in `@adapttable/unstyled`).
 

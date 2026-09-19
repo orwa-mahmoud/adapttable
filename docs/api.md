@@ -1692,7 +1692,7 @@ exports `Kit`, the union of UI kits `@adapttable/cli init` can detect.
 
 **Locale exports.** `@adapttable/i18n` exports one label set per locale, named
 by its tag: `ar`, `de`, `en`, `es`, `fa`, `fr`, `he`, `hi`, `it`, `ja`, `ko`,
-`pt`, `ru`, `tr`, `ur`, `zh`, `zhTW` — seventeen in all. See
+`pl`, `pt`, `ru`, `tr`, `ur`, `zh`, `zhTW` — eighteen in all. See
 [i18n & RTL](./i18n-rtl.md).
 
 Adapter-machinery names (`headerGroupRows`, `insertExtraRows`, `useFullscreen`,

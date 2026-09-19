@@ -211,7 +211,7 @@ overrides any other width. A column with nothing measurable on screen is left
 alone rather than collapsed.
 
 Both actions are localizable — `labels.autoSizeColumns` and
-`labels.autoSizeColumn` — in all seventeen locales.
+`labels.autoSizeColumn` — in all eighteen locales.
 
 Headless: `measureColumnWidth(root, key)` and `autoSizeColumns(root, keys,
 setWidth)`.

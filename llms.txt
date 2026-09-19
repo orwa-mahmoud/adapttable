@@ -26,7 +26,7 @@ automatic table-to-card responsive layouts.
 - [@adapttable/base-ui](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-base-ui): Base UI adapter — batteries-included `<DataTable>` on `@base-ui/react`.
 - [@adapttable/shadcn](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-shadcn): shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn class preset; a one-import styled `<DataTable>`.
 - [@adapttable/unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-unstyled): Headless/unstyled adapter with `data-*` + `className` hooks for Tailwind or any custom CSS.
-- [@adapttable/i18n](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/i18n): Locale presets for 17 languages (English, Arabic, German, Spanish, Persian, French, Hebrew, Hindi, Italian, Japanese, Korean, Portuguese, Russian, Turkish, Urdu, Simplified Chinese, Traditional Chinese) + RTL direction helpers.
+- [@adapttable/i18n](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/i18n): Locale presets for 18 languages (English, Arabic, German, Spanish, Persian, French, Hebrew, Hindi, Italian, Japanese, Korean, Polish, Portuguese, Russian, Turkish, Urdu, Simplified Chinese, Traditional Chinese) + RTL direction helpers.
 - [@adapttable/cli](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/cli): `npx @adapttable/cli init` — detects your UI kit and scaffolds a table.
 - [@adapttable/ai](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/ai): Optional provider-neutral capability discovery — `catalog` / `describe` / `execute`, the permitted context contract, and the framework-free conversation store. React-free. Not in the core or adapter roots.
 - [@adapttable/ai-react](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/ai-react): The React binding — `tableAgent` and `useTableAssistant`. This is where `tableAgent` lives.
@@ -106,7 +106,7 @@ const {
 - [Connect a backend](https://orwa-mahmoud.github.io/adapttable/ai-http/): optional HTTP bridge, protocol, and the runnable example — simulated playground stays the default
 - [React table with SSR, server components & streaming](https://orwa-mahmoud.github.io/adapttable/ssr-rsc/): Next.js App Router client boundary, DOM-free rendering, hydration, Suspense
 - [Responsive React table — automatic mobile card layout](https://orwa-mahmoud.github.io/adapttable/mobile/): rows become cards below the mobile breakpoint automatically — same filters, search, selection and URL state; sort-by select, infinite scroll via paginationMode auto, per-column mobileLabel/hideOnMobile, forceMobile to pin either layout.
-- [React table i18n & RTL — Arabic, Hebrew, 17 locales](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/): 17 locales, per-locale data paths, logical layout
+- [React table i18n & RTL — Arabic, Hebrew, 18 locales](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/): 18 locales, per-locale data paths, logical layout
 - [Accessible React data table — keyboard, screen readers, labelled controls](https://orwa-mahmoud.github.io/adapttable/accessibility/): on by default, no prop to turn on; try it from the keyboard in the live demo
 - [Realtime React data table — live row updates, websockets](https://orwa-mahmoud.github.io/adapttable/realtime/): neutral row-patch operations and React stream bindings for WebSocket/SSE updates; retain patch provenance for incremental derivation
 - [AdaptTable API reference — DataTable, columns, hooks](https://orwa-mahmoud.github.io/adapttable/api/): every prop in tables

@@ -1,4 +1,4 @@
-# React table i18n & RTL — Arabic, Hebrew, 17 locales
+# React table i18n & RTL — Arabic, Hebrew, 18 locales
 
 ▶ **See it working:** [flip the whole table to Arabic RTL in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rtl/) — a real table you can interact with, not a recording.
 
@@ -68,6 +68,7 @@ unknown locales; `hasLocale(locale)` tells you whether a preset exists.
 | `it`    | Italian               | ltr       |
 | `ja`    | Japanese              | ltr       |
 | `ko`    | Korean                | ltr       |
+| `pl`    | Polish                | ltr       |
 | `pt`    | Portuguese            | ltr       |
 | `ru`    | Russian               | ltr       |
 | `tr`    | Turkish               | ltr       |

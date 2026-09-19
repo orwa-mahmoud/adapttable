@@ -350,7 +350,7 @@ rejects, in a live region beside it (`data-adapttable-part="edit-cell-save-error
 A table that shows the new value before the server has agreed has to put the old
 one back when it disagrees — and only the host can write to its own rows, so
 `onEditRollback` receives the row as it was and restores it. The failed cell then
-offers an **Undo** (`labels.undoEdit`, localized in all seventeen locales), and
+offers an **Undo** (`labels.undoEdit`, localized in all eighteen locales), and
 pressing it calls that handler. Omit `onEditRollback` and the message shows
 without an undo, which is right for a table that refetches instead.
 

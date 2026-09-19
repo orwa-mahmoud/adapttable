@@ -1,10 +1,10 @@
 /**
  * `@adapttable/i18n` — locale presets and RTL helpers for AdaptTable.
  *
- * Bundles ready label sets for 17 languages (English, Arabic, German,
+ * Bundles ready label sets for 18 languages (English, Arabic, German,
  * Spanish, Persian, French, Hebrew, Hindi, Italian, Japanese, Korean,
- * Portuguese, Russian, Turkish, Urdu, Simplified Chinese, Traditional
- * Chinese) plus direction utilities, so consumers get multilingual +
+ * Polish, Portuguese, Russian, Turkish, Urdu, Simplified Chinese,
+ * Traditional Chinese) plus direction utilities, so consumers get multilingual +
  * right-to-left support without wiring an i18n library. The core stays
  * i18n-agnostic; this package is purely optional.
  *
