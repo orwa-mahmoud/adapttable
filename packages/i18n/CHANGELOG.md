@@ -1,5 +1,13 @@
 # @adapttable/i18n
 
+## 3.1.0
+
+### Minor Changes
+
+- 9806535: Add Polish. `pl` joins the bundled presets, so `getLabels("pl")` and
+  `locales.pl` return Polish chrome strings and `hasLocale("pl")` is true.
+  The package now ships 18 languages.
+
 ## 3.0.0
 
 ### Major Changes
