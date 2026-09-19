@@ -14,7 +14,7 @@
 
 **Easy by default, infinitely customizable.** [Automatic mobile card layout](https://orwa-mahmoud.github.io/adapttable/mobile/) — the table becomes a card list on phones by itself, no second layout to build. One unified data source for both client-side and server-side data, URL-synced shareable state, optional virtualization, infinite-scroll & paging (auto by device), a real filter UX, **column management** (reorder · pin · resize · show/hide), **inline cell editing**, **interactive row grouping** with header drag-and-drop and per-group aggregate choices, **CSV export**, first-class **i18n + RTL**, and seamless **dark mode** — out of the box.
 
-<video src="https://orwa-mahmoud.github.io/adapttable/media/ai/demo.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/ai/poster.png" controls playsinline preload="none" width="860">
+<video src="https://github.com/user-attachments/assets/33f8369f-dcd5-499b-80f6-03746fd7fd8f" poster="https://orwa-mahmoud.github.io/adapttable/media/ai/poster.png" controls playsinline preload="none" width="860">
   <a href="https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/">▶ Watch the AI demo — ask the table to filter, group, aggregate, hide and reorder columns.</a>
 </video>
 

@@ -98,7 +98,7 @@ feature PR mergeable:
 - **Core owns behavior; adapters own appearance.** State machines, keyboard
   handling, queries and accessibility semantics live in `@adapttable/core` as
   headless hooks and the render-model contracts under
-  `@adapttable/core/adapter`. An adapter maps those contracts to its kit's
+  `@adapttable/react/adapter`. An adapter maps those contracts to its kit's
   components and adds no logic. If a feature seems to need logic inside an
   adapter, the core contract needs extending instead.
 - **Everything is opt-in.** Omitting a feature's prop renders no UI, attaches

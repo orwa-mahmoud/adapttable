@@ -387,7 +387,7 @@ highlight.flashRow(saved.id);
 
 There is no new prop for this on purpose. `rowClassName` already reaches
 every adapter, so the highlight is a class you compute — which means it works
-in all nine kits and looks like the rest of your design system rather than
+in every kit and looks like the rest of your design system rather than
 like ours.
 
 Marks are keyed by row id, so one survives the sort, filter or page change
@@ -619,7 +619,7 @@ unchanged.
 Adapters build their panel over `SidePanelChrome` / `SidePanelSlots` /
 `SidePanelFrameProps` / `SidePanelTabProps` / `SidePanelCloseProps` and dock
 it with `SidePanelLayout` / `SidePanelLayoutProps`, all from
-`@adapttable/core/adapter`.
+`@adapttable/react/adapter`.
 
 ## Density
 
@@ -899,7 +899,7 @@ is in play, and `matrixToCsv` is the CSV half of it for anyone assembling values
 themselves.
 
 Custom adapters bind the button with `useExportHandler` from
-`@adapttable/core/adapter`: it takes the handler above and returns
+`@adapttable/react/adapter`: it takes the handler above and returns
 `{ onExportCsv, exportBusy }` (typed `ExportHandlerState`), which is how every
 built-in adapter gets identical single-flight behaviour.
 
@@ -950,7 +950,7 @@ the table.
 
 The six HTML kits (Mantine, MUI, Chakra, Radix, Base UI, Unstyled; shadcn
 follows Unstyled) paint from one shared plan on
-`@adapttable/core/adapter`. Ant Design stays on its native `<Table>`.
+`@adapttable/react/adapter`. Ant Design stays on its native `<Table>`.
 
 ```ts
 import {
@@ -959,7 +959,7 @@ import {
   DESKTOP_EXPANSION_WIDTH,
   DESKTOP_SELECTION_WIDTH,
   useDesktopTableAssembly,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 ```
 
 `useDesktopTableAssembly(props, options?)` takes

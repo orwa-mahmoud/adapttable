@@ -150,7 +150,7 @@ desktop-visible columns so every card keeps enough identity to be useful.
 ## The engine, and why it has no React in it
 
 Filtering, sorting, paging and grouping are decisions about data, not about
-the DOM. In v3 they live in `@adapttable/core` as a plain object with no
+the DOM. They live in `@adapttable/core` as a plain object with no
 framework in its import graph, and `@adapttable/react` is the binding that
 subscribes a component tree to one.
 

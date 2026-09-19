@@ -463,7 +463,7 @@ every locale.
 Headless: `useRowEditing` (`RowEditingState`, `RowEditDrafts`,
 `UseRowEditingOptions`), with `RowEditCell` (`RowEditCellProps`),
 `rowEditControls` (`RowEditControlsOptions` in, `RowEditControls` out)
-from `@adapttable/core/adapter`, `RowEditIcons` typing the glyph overrides,
+from `@adapttable/react/adapter`, `RowEditIcons` typing the glyph overrides,
 and `rowEditConflict` (`RowEditConflict` out) telling one row's controls that
 an answer is outstanding. `useEditConflict` grew `reconcileRow`
 (`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit, plus
@@ -514,7 +514,7 @@ Parts: `batch-edit-cell`, `batch-edit-bar`, `batch-edit-count`,
 
 Headless: `useBatchEditing` (`BatchEditingState`, `BatchRowEdit`,
 `UseBatchEditingOptions`), with `BatchEditCell` on
-`@adapttable/core/adapter`. Each adapter mounts `BatchEditBar` over
+`@adapttable/react/adapter`. Each adapter mounts `BatchEditBar` over
 `BatchEditBarChrome`.
 
 ## Adding, duplicating and deleting rows
@@ -602,7 +602,7 @@ own state another way — a refetch that agrees, a websocket echoing the value b
 `count` for an "unsaved changes" line.
 
 Headless: `useDirtyCells` (`DirtyCellState`, `UseDirtyCellsOptions`) and
-`rowIsDirty(editing, rowId)` from `@adapttable/core/adapter`.
+`rowIsDirty(editing, rowId)` from `@adapttable/react/adapter`.
 
 ## Headless editing
 
@@ -613,22 +613,22 @@ activation wrapper every built-in adapter renders (double-click / Enter / F2
 to begin, with the cell value as the accessible name and the edit hint as
 its `title`).
 
-| Export                                                                                                                   | Purpose                                                                                                         |
-| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `useCellEditing` / `CellEditingState`                                                                                    | The state machine hook and the state it returns.                                                                |
-| `EditableCellGate` / `EditableCellGateProps`                                                                             | Activation wrapper: display content when idle, the kit's editor while active.                                   |
-| `EditableCellEditing`                                                                                                    | The editing bundle adapters receive from the chrome (`chrome.editing`).                                         |
-| `CellEditCommit` / `CellEditTarget`                                                                                      | A commit payload (`row`, `key`, `value`) and the active-cell address.                                           |
-| `CellEditor` / `CellEditorOption`                                                                                        | The column `editor` descriptor and one option of a select editor.                                               |
-| `CellEditKeyAction` / `CellEditKeyOutcome` / `CellEditNavigation`                                                        | Keyboard-flow vocabulary: what a key press means and where focus goes next.                                     |
-| `EditableCellController` / `EditableCellEditorCtrl` / `EditableCellMode`                                                 | The controller handed to a custom editor: draft, commit/cancel, mode.                                           |
-| `MultiSelectEditorChrome` / `MultiSelectEditorChromeProps` / `MultiSelectEditorSlots` / `MultiSelectEditorCheckboxProps` | Checkbox-group multi-select editor for kits whose select holds one value.                                       |
-| `EditableColumnLike` / `isCellEditable` / `hasEditableColumns`                                                           | The minimal column shape editing reads, plus the two predicates the chrome uses.                                |
-| `parseCellEditValue` / `resolveCellEditor` / `normalizeEditorOptions`                                                    | Draft parsing (number editors yield `number \| null`) and editor/option resolution.                             |
-| `useEditValidation` / `EditValidationState` / `UseEditValidationOptions`                                                 | Validation state: which cells carry a message, which are still checking, and the `check` that gates one commit. |
-| `CellValidator` / `RowValidator` / `ValidationTarget`                                                                    | The two validator signatures and the cell address a check is about.                                             |
-| `resolveCommitValue`                                                                                                     | The row, column and parsed value a commit resolves to — what a validator judges before the host sees it.        |
-| `editorValidationProps`                                                                                                  | The `aria-invalid` / `aria-describedby` / `aria-busy` a kit's editor spreads while validation is in play.       |
+| Export                                                                                                                   | Purpose                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `useCellEditing` / `CellEditingState`                                                                                    | The state machine hook and the state it returns.                                                          |
+| `EditableCellGate` / `EditableCellGateProps`                                                                             | Activation wrapper: display content when idle, the kit's editor while active.                             |
+| `EditableCellEditing`                                                                                                    | The editing bundle adapters receive from the chrome (`chrome.editing`).                                   |
+| `CellEditCommit` / `CellEditTarget`                                                                                      | A commit payload (`row`, `key`, `value`) and the active-cell address.                                     |
+| `CellEditor` / `CellEditorOption`                                                                                        | The column `editor` descriptor and one option of a select editor.                                         |
+| `CellEditKeyAction` / `CellEditKeyOutcome` / `CellEditNavigation`                                                        | Keyboard-flow vocabulary: what a key press means and where focus goes next.                               |
+| `EditableCellController` / `EditableCellEditorCtrl` / `EditableCellMode`                                                 | The controller handed to a custom editor: draft, commit/cancel, mode.                                     |
+| `MultiSelectEditorChrome` / `MultiSelectEditorChromeProps` / `MultiSelectEditorSlots` / `MultiSelectEditorCheckboxProps` | Checkbox-group multi-select editor for kits whose select holds one value.                                 |
+| `EditableColumnLike` / `isCellEditable` / `hasEditableColumns`                                                           | The minimal column shape editing reads, plus the two predicates the chrome uses.                          |
+| `parseCellEditValue` / `resolveCellEditor` / `normalizeEditorOptions`                                                    | Draft parsing (number editors yield `number \| null`) and editor/option resolution.                       |
+| `EditValidationState` / `ValidationTarget` / `ValidationCheckResult`                                                     | Validation state: which cells carry a message, which are still checking, and what a check returned.       |
+| `CellValidator` / `RowValidator` / `ValidationTarget`                                                                    | The two validator signatures and the cell address a check is about.                                       |
+| `resolveCommitValue`                                                                                                     | The row, column and parsed value a commit resolves to — what a validator judges before the host sees it.  |
+| `editorValidationProps`                                                                                                  | The `aria-invalid` / `aria-describedby` / `aria-busy` a kit's editor spreads while validation is in play. |
 
 ## Applying changes without a refetch
 

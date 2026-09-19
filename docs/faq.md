@@ -209,7 +209,7 @@ Or install an adapter directly, e.g. `pnpm add @adapttable/mantine`. See
 
 ## Is AdaptTable production-ready?
 
-Yes — AdaptTable is **stable at 2.0** and follows semantic versioning, so
+Yes — AdaptTable is **stable at 3.0** and follows semantic versioning, so
 breaking changes ship only in a major release. It is strict-TypeScript, dual
 ESM/CJS with `.d.ts` types, axe-audited for accessibility in CI, and holds
 near-100% test coverage across every adapter.

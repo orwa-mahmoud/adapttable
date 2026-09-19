@@ -148,7 +148,7 @@ second move is ignored until that promise settles.
 Each adapter mounts `RowReorderHandle` (`RowReorderHandleProps`) and
 `RowReorderButtons` (`RowReorderButtonsProps`) over
 `RowReorderHandleChrome` / `RowReorderButtonsChrome`.
-`RowReorderAnnouncer` stays on `@adapttable/core/adapter`.
+`RowReorderAnnouncer` stays on `@adapttable/react/adapter`.
 `REORDER_COLUMN_WIDTH` is the pin-lead width every kit shares.
 `ROW_DND_MIME` is the HTML5 drag type.
 
