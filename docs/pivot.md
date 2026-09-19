@@ -187,7 +187,7 @@ no measure is a half-built configuration, not an error.
 
 ## The configuration panel
 
-`PivotPanelChrome` from `@adapttable/core/adapter` is the panel itself: three
+`PivotPanelChrome` from `@adapttable/react/adapter` is the panel itself: three
 zones, the fields in each, and the controls that move them. Structure, part
 names, ordering and labels live in core; every visible control is a required
 slot the adapter fills with its own kit's component, so a Mantine panel is

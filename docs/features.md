@@ -54,7 +54,7 @@ Every public adapter exports the same factories:
 | `@adapttable/<kit>/pivot`           | `PivotPanel` and the pivot engine (`pivot`, `pivotTableModel`, …) |
 
 `<kit>` is `mantine`, `mui`, `chakra`, `antd`, `radix`, `base-ui`, `shadcn`,
-or `unstyled`. The factories themselves live in `@adapttable/core/features`;
+or `unstyled`. The factories themselves live in `@adapttable/react/features`;
 the kit subpaths re-export them so the import path matches the table.
 
 The pivot engine stays a calculation — `import { pivot } from "@adapttable/core/pivot"`
@@ -222,7 +222,7 @@ import {
   FeatureStateScope,
   featureStateKey,
   type TableFeature,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 export const AUDIT = featureStateKey<{ count: number }>("audit-log");
 
@@ -266,7 +266,7 @@ import {
   FeatureSlot,
   featureSlotKey,
   slotRender,
-} from "@adapttable/core/adapter";
+} from "@adapttable/react/adapter";
 
 export const STATUS_BAR = featureSlotKey<{ total: number }>("status-bar");
 

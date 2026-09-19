@@ -143,8 +143,8 @@ plus the `AbortSignal` for the request it starts.
 
 ## Feature composition
 
-`features={[rowReorder(fn, options)]}` from `@adapttable/<kit>/row-reorder` (or the
-`@adapttable/<kit>/features` barrel, or `@adapttable/core/features`). The
+`features={[rowReorder(fn, options)]}` from `@adapttable/<kit>/row-reorder` (or
+the `@adapttable/<kit>/features` barrel, or `@adapttable/react/features`). The
 import is the switch, and it is the only way in — see
 [feature composition](./features.md) and, for a v2 table,
 [upgrading from v2](./migrate-from-v2.md).
@@ -187,7 +187,7 @@ and it draws once), `FIND_BAR` (`findInTable` from
 `FILTERS_FORM` (`filters` from `@adapttable/<kit>/filters` — one feature
 fills both the chip strip and the panel body). And
 `useFeatureSlotFilled` says whether anyone answered. All from
-`@adapttable/core/adapter`; see [feature composition](./features.md).
+`@adapttable/react/adapter`; see [feature composition](./features.md).
 
 Column-name controls stay kit-owned through `ColumnMenuSlotProps.onRenameColumn`
 and the optional `COLUMN_HEADER_RENAME` render slot
@@ -357,7 +357,7 @@ shared layout (no form controls) is `FilterTreeChrome` /
 `FilterTreeChromeProps` / `FilterTreeClassNames` / `FilterTreeSlots` /
 `FilterTreeSelectProps` / `FilterTreeInputProps` /
 `FilterTreeButtonProps` / `FilterTreeDisclosureProps` / `FilterTreeOption` on
-`@adapttable/core/adapter`.
+`@adapttable/react/adapter`.
 `filterDefs` lets the chrome label tree chips. A `checklist` filter is
 the Excel-style distinct-values widget (`ChecklistFilter` /
 `ChecklistFilterProps` / `useChecklistFilter` / `collectChecklistValues`);
@@ -379,7 +379,7 @@ the AND/OR tree still has a chrome. The shared layout is `FilterHeaderChrome`
 `FilterHeaderControlChromeProps` / `FilterHeaderClassNames` /
 `FilterHeaderSlots` / `FilterHeaderSearchProps` / `FilterHeaderSelectProps`
 / `FilterHeaderRangeProps` / `FilterHeaderMultiProps` / `FilterHeaderOption`
-on `@adapttable/core/adapter`. Helpers `filterDefForColumn` /
+on `@adapttable/react/adapter`. Helpers `filterDefForColumn` /
 `headerFilterStickTop` stay on core. Nested kit dropdowns (Select, DatePicker)
 are not "outside" — the overlay stays open until a true outside click, Escape,
 or (when `closeHeaderFilterOnSelect` is on) a finished single-control write
@@ -604,7 +604,7 @@ an adapter or a plugin genuinely needs it.
   `usePrefersReducedMotion()`, `useColorScheme(preference)`.
 
 - `useExportHandler(handler)` — binds the Export button: makes a host-handled
-  export single-flight and reports `exportBusy`. From `@adapttable/core/adapter`.
+  export single-flight and reports `exportBusy`. From `@adapttable/react/adapter`.
 
 Building blocks for columns, rows and queries:
 
@@ -645,7 +645,7 @@ text, number and select it names `boolean`, `date`, `datetime`, `time` and
 `isBooleanEditor` / `isSelectEditor` / `isMultiSelectEditor` tell them apart,
 `booleanDraft` / `isDraftChecked` and `formatMultiDraft` / `readMultiDraft`
 (joined by `MULTI_SEPARATOR`) are the draft shapes those two hold, and
-`commitBooleanDraft` / `multiDraftFromSelect` from `@adapttable/core/adapter`
+`commitBooleanDraft` / `multiDraftFromSelect` from `@adapttable/react/adapter`
 are the draft helpers the kits use for those two. Each adapter draws the
 checkbox and multi-select with its own controls. A ninth kind,
 `{ type: "custom", render }`, is a host's own component:
@@ -671,7 +671,7 @@ from a cell to a row: `useRowEditing(options)` (`UseRowEditingOptions` in,
 `RowEditingState` out, holding `RowEditDrafts`) opens every editable field
 together and hands the host one patch of what changed. `RowEditCell` (`RowEditCellProps`) and `rowEditControls`
 (`RowEditControlsOptions` in, `RowEditControls` out) stay on
-`@adapttable/core/adapter`. Each adapter mounts `RowEditActions`
+`@adapttable/react/adapter`. Each adapter mounts `RowEditActions`
 (`RowEditActionsProps`) over `RowEditActionsChrome` /
 `RowEditActionsChromeProps` / `RowEditActionsSlots` / `RowEditButtonProps`;
 `labels.editRow` and `labels.saveRow` name them, as accessible names over each
@@ -741,7 +741,7 @@ other.
 `useDirtyCells(options)` (`UseDirtyCellsOptions` in, `DirtyCellState` out) holds
 which cells hold an unconfirmed change, with `isDirty` / `isRowDirty`, a `count`,
 and `confirm` / `confirmRow` / `confirmAll` for a host that settles its own state.
-`rowIsDirty(editing, rowId)` from `@adapttable/core/adapter` is what a row reads.
+`rowIsDirty(editing, rowId)` from `@adapttable/react/adapter` is what a row reads.
 `cellFlashAttr` / `rowFlashSignature` are the same door for `data-flash`.
 
 **Validation gates the commit.** A column's `validate` (`CellValidator`) judges
@@ -752,7 +752,7 @@ are still checking — behind `EditValidationState` (`UseEditValidationOptions` 
 `ValidationTarget` naming the cell a check is about), and
 `resolveCommitValue(options)` is the row, column and parsed value a validator
 sees before the host does. `editorValidationProps(ctrl)` from
-`@adapttable/core/adapter` is the `aria-invalid` / `aria-describedby` /
+`@adapttable/react/adapter` is the `aria-invalid` / `aria-describedby` /
 `aria-busy` a kit's editor spreads, and `editorBusyProps(ctrl)` is just the busy
 flag for a kit whose own input owns the other two. `stopEditKeys(event)` keeps
 Enter, Escape and Tab inside the open editor: all three mean something to the
@@ -927,7 +927,7 @@ Nested move menus use `RowMoveMenuModel` / `RowMoveTarget`; the adapter seam is
 `RowReorderHandleSlots` / `RowReorderHandleSlotProps` and
 `RowReorderButtonsChrome` / `RowReorderButtonsChromeProps` /
 `RowReorderButtonsSlots` / `RowReorderMoveButtonProps`.
-`RowReorderAnnouncer` stays on `@adapttable/core/adapter`. Move-menu,
+`RowReorderAnnouncer` stays on `@adapttable/react/adapter`. Move-menu,
 confirmation, success, policy, sort, and cycle labels extend
 `RowReorderLabels` / `TableLabels`. See
 [row reordering](./row-reordering.md).
@@ -938,7 +938,7 @@ confirmation, success, policy, sort, and cycle labels extend
 
 **Row styling and heights.** `rowStyle` / `rowHeight` resolve through `resolveRowStyle` / `resolveRowHeight`. Height wins over `style.height`. `rowStyleSignature` is the memo digest; `rowStyleArmed` is whether either hook was passed; `estimateFromRowHeight` is the virtualizer estimator. Types: `RowStyle`, `RowHeight`. See [row styling and heights](./row-styling.md).
 
-**Row pinning.** `pinnedRowIds` / `onPinnedRowIdsChange` take a `RowPinState` (`{ top, bottom }` of `RowPinSide`). `applyRowPin(state, rowId, side)` is the in-memory helper; `partitionPinnedRows` splits a list into top / scroll / bottom; `EMPTY_ROW_PIN_STATE` is the empty lists. `useRowPinning` returns `RowPinningState`; `rowPinSignature` is the memo digest. Action keys: `PIN_TOP_ACTION_KEY`, `PIN_BOTTOM_ACTION_KEY`, `UNPIN_ROW_ACTION_KEY`. URL: `useRowPinningUrlState` (`UseRowPinningUrlStateOptions` / `UseRowPinningUrlStateResult`) writes `rowPin=id:top,id:bottom`. Labels: `pinToTop`, `pinToBottom`, `unpinRow` (`RowPinLabels`). `rowSourceIndex(entry)` is the dataset index when pinning remapped the window. From `@adapttable/core/adapter`: `pinnedRowStickyStyle` / `pinnedRowCellStyle`, `pinnedRowPart` / `pinnedRowSticky`, `orderedCardEntries`, `useOffsetHeight`, `PINNED_TOP_PART` / `PINNED_BOTTOM_PART`. See [row pinning](./row-pinning.md).
+**Row pinning.** `pinnedRowIds` / `onPinnedRowIdsChange` take a `RowPinState` (`{ top, bottom }` of `RowPinSide`). `applyRowPin(state, rowId, side)` is the in-memory helper; `partitionPinnedRows` splits a list into top / scroll / bottom; `EMPTY_ROW_PIN_STATE` is the empty lists. `useRowPinning` returns `RowPinningState`; `rowPinSignature` is the memo digest. Action keys: `PIN_TOP_ACTION_KEY`, `PIN_BOTTOM_ACTION_KEY`, `UNPIN_ROW_ACTION_KEY`. URL: `useRowPinningUrlState` (`UseRowPinningUrlStateOptions` / `UseRowPinningUrlStateResult`) writes `rowPin=id:top,id:bottom`. Labels: `pinToTop`, `pinToBottom`, `unpinRow` (`RowPinLabels`). `rowSourceIndex(entry)` is the dataset index when pinning remapped the window. From `@adapttable/react/adapter`: `pinnedRowStickyStyle` / `pinnedRowCellStyle`, `pinnedRowPart` / `pinnedRowSticky`, `orderedCardEntries`, `useOffsetHeight`, `PINNED_TOP_PART` / `PINNED_BOTTOM_PART`. See [row pinning](./row-pinning.md).
 
 **Pinned summary rows.** `pinnedSummaryRows({ top, bottom })` (`PinnedRows`) sticks host-owned objects outside the row model — sort, filter, grouping, pagination and selection never see them, so they coexist with grouped and tree tables. Identities are `pinnedSummaryRowId(side, index)` (`PINNED_SUMMARY_KEY_PREFIX` + `:side:index`); `PinnedSummaryEntry` / `isPinnedSummaryRowId` / `pinnedSummarySideFromId` / `pinnedSummaryEntries` / `allPinnedSummaryEntries` / `resolvePinnedRows` / `EMPTY_PINNED_ROWS` are the helpers. Parts: `PINNED_SUMMARY_TOP_PART` / `PINNED_SUMMARY_BOTTOM_PART` via `pinnedSummaryPart`. Labels: `pinnedSummaryRow`, `pinnedSummaryTop`, `pinnedSummaryBottom`. Not URL or Saved Views — the objects are host data. See [pinned summary rows](./pinned-summary-rows.md).
 
@@ -980,14 +980,14 @@ AND/OR trees: `FILTER_TREE_PARAM` / `FILTER_TREE_VERSION` /
 `removeFilterTreeNode` / `replaceFilterTreeNode` /
 `setFilterTreeCombinator` / `walkFilterTreeConditions` /
 `FilterTreeNode`. Builder (on each adapter): `FilterTreeBuilder` /
-`FilterTreeBuilderProps`. Layout (on `@adapttable/core/adapter`):
+`FilterTreeBuilderProps`. Layout (on `@adapttable/react/adapter`):
 `FilterTreeChrome` / `FilterTreeChromeProps` / `FilterTreeClassNames` /
 `FilterTreeSlots` / `FilterTreeSelectProps` / `FilterTreeInputProps` /
 `FilterTreeButtonProps` / `FilterTreeDisclosureProps` / `FilterTreeOption`.
 Chips:
 `useFilterTreeChips` / `UseFilterTreeChipsOptions` /
 `filterTreeChipLabel`. Checklist (on each adapter): `ChecklistFilter` /
-`ChecklistFilterProps`. Layout (on `@adapttable/core/adapter`):
+`ChecklistFilterProps`. Layout (on `@adapttable/react/adapter`):
 `ChecklistChrome` / `ChecklistChromeProps` / `ChecklistClassNames` /
 `ChecklistSlots` / `ChecklistSearchProps` / `ChecklistButtonProps` /
 `ChecklistCheckboxProps`. Headless: `useChecklistFilter` /
@@ -996,7 +996,7 @@ Chips:
 `CHECKLIST_LIST_HEIGHT`. Header row (on each adapter): `FilterHeaderRow` /
 `FilterHeaderControl` / `FilterHeaderRowProps` / `FilterHeaderControlProps`
 (`closeOnSelect`).
-Layout (on `@adapttable/core/adapter`): `FilterHeaderChrome` /
+Layout (on `@adapttable/react/adapter`): `FilterHeaderChrome` /
 `FilterHeaderControlChrome` / `FilterHeaderChromeProps` /
 `FilterHeaderControlChromeProps` / `FilterHeaderClassNames` /
 `FilterHeaderSlots` / `FilterHeaderSearchProps` / `FilterHeaderSelectProps`
@@ -1018,7 +1018,7 @@ and pure: `moveGridFocus(from, move, bounds)` over a `GridCell` and
 RTL swap). `sameGridCell` compares addresses. `GRID_CELL_ATTR` /
 `gridCellAttr(cell)` are the `data-grid-cell` attribute focus uses to find a
 cell in the DOM. `GridFocusAnnouncer` / `GridFocusAnnouncerProps` render the
-live region and come from `@adapttable/core/adapter`.
+live region and come from `@adapttable/react/adapter`.
 `contextMenuCopyTarget(gridFocus, target)` returns a `ContextMenuCopyTarget`
 saying what a context-menu Copy should take — the clicked cell, or the
 selection it landed inside — resolving the address through
@@ -1033,7 +1033,7 @@ into the same state Ctrl/Cmd+click reaches. `GridFocusState` resolves it:
 and `toggleColumn(col)` selects it or clears. The control is core chrome with a
 kit checkbox in it — `ColumnSelectCheckboxChrome` /
 `ColumnSelectCheckboxChromeProps` / `ColumnSelectCheckboxProps` /
-`ColumnSelectSlots` from `@adapttable/core/adapter`, with
+`ColumnSelectSlots` from `@adapttable/react/adapter`, with
 `columnSelectLabel(label, column)` composing `labels.selectColumn` and the
 column's name. See [cell navigation](./cell-navigation.md).
 
@@ -1070,7 +1070,7 @@ recipient (`CellFillHandlerOptions`), and `batchEditHandler(batch, onCellEdit)`
 is the rule both it and `cellPasteHandler` follow. Adapters export their
 kit-owned `FillHandle` and render it over `FillHandleChrome` /
 `FillHandleChromeProps` / `FillHandleSlots` / `FillHandleSlotProps` from
-`@adapttable/core/adapter`; on `<DataTable>` the prop is `onCellFill`. See
+`@adapttable/react/adapter`; on `<DataTable>` the prop is `onCellFill`. See
 [cell navigation](./cell-navigation.md).
 
 **Undo and redo.** `useEditHistory(options)` remembers gestures and replays
@@ -1115,7 +1115,7 @@ own column on double-click, and the column menu's action calls
 **Column virtualization.** `useColumnWindow(options)` windows the horizontal
 axis (`UseColumnWindowOptions` in, `ColumnWindow` out — the columns to render
 and the `paddingStart` / `paddingEnd` that hold the rest open), and
-`ColumnSpacer` / `ColumnSpacerProps` from `@adapttable/core/adapter` render one
+`ColumnSpacer` / `ColumnSpacerProps` from `@adapttable/react/adapter` render one
 of those spacers.
 The render model swaps the windowed columns in, so an adapter maps over
 `model.columns` as before and renders `model.columnSpacers` either side. On
@@ -1191,7 +1191,7 @@ Column-menu plugins return a `ColumnMenuItem`: either an ordinary action or a
 `buildGroupedFlatModel(options)` walks the tree into the flat `GroupedFlatEntry`
 list adapters render — each group entry carrying its `level`, its `groupBy` key,
 its `path` and the leaves of its whole subtree — and `groupIndentStyle(level)`
-from `@adapttable/core/adapter` is the indent every kit applies. `GroupSort`
+from `@adapttable/react/adapter` is the indent every kit applies. `GroupSort`
 names the orderings `groupSort` accepts (`"label"`, `"label-desc"`, `"count"`,
 `"count-desc"`, or a comparator) and `GroupNode` is what it and `groupFilter`
 receive: `value`, `label`, `level`, `groupBy` and the group's `leafRows`.
@@ -1241,7 +1241,7 @@ own component. `NestedTableDefaults` is what it receives: `urlSync: false`,
 `searchable: false`, the parent's `density`, `labels` and the `tableLabel`.
 `nestedTableDefaults(label, parent)` builds them and `nestedTableDetail(options)`
 turns the declaration into the `renderRowDetail` the table places under a row
-(both from `@adapttable/core/adapter`, with `NestedTableParent` for what the
+(both from `@adapttable/react/adapter`, with `NestedTableParent` for what the
 parent contributes). See [tree data](./tree-data.md).
 See [tree data](./tree-data.md).
 
@@ -1270,7 +1270,7 @@ selection holds no numbers (`SelectionStatsOptions` in). Adapters export their
 kit-owned `SelectionStatsBar` and render it over `SelectionStatsChrome` /
 `SelectionStatsChromeProps` / `SelectionStatsSlots` /
 `SelectionStatsSlotProps` / `SelectionStatPart` from
-`@adapttable/core/adapter`; it is empty below two cells. On `<DataTable>` the
+`@adapttable/react/adapter`; it is empty below two cells. On `<DataTable>` the
 prop is `selectionStats`. See
 [cell navigation](./cell-navigation.md).
 
@@ -1305,7 +1305,7 @@ without it a store keeps every other operation and `move` reorders for the
 session only. See [saved views](./saved-views.md).
 
 **The saved-views management panel.** `SavedViewsPanelChrome` from
-`@adapttable/core/adapter` is a titled card listing every saved view;
+`@adapttable/react/adapter` is a titled card listing every saved view;
 `SavedViewsPanelChromeProps` takes the views, the five handlers, and an
 optional `footer` rendered inside the card under the list. Applying a view is
 clicking its name; rename, move, set-default and delete are an icon cluster
@@ -1519,7 +1519,7 @@ sent — for the measures and their order — plus the same `format`. See
 [server queries](./server-queries.md).
 
 **The pivot configuration panel.** `PivotPanelChrome` from
-`@adapttable/core/adapter` renders the three zones and the controls that move
+`@adapttable/react/adapter` renders the three zones and the controls that move
 fields between them; `PivotPanelChromeProps` takes the fields, the config and
 an `onChange`. `PivotPanelSlots` names the five kit-supplied pieces —
 `PivotPanelSurfaceProps` (the body), `PivotZoneProps` (a titled zone),
@@ -1563,7 +1563,7 @@ the choice and starts at `"comfortable"`; pass `density` to control it and
 `onDensityChange` to observe requests. `fullscreen()` puts a fullscreen toggle
 beside it, and that button hides itself where the browser will not allow
 fullscreen at all. Adapters build both from `viewControlsToolbar(props,
-fullscreen)` / `ViewControlsToolbar` in `@adapttable/core/adapter`. Density
+fullscreen)` / `ViewControlsToolbar` in `@adapttable/react/adapter`. Density
 is an always-resolved read/write contract passed to the toolbar slots; whether
 the density button draws is decided by feature composition. Fullscreen stays
 present-or-absent from the feature and browser support.
@@ -1603,7 +1603,7 @@ elsewhere. Adapters build theirs over `CommandPaletteChrome` /
 `CommandPaletteSurfaceProps` / `CommandPaletteInputProps` /
 `CommandPaletteItemProps` and arm it with `useCommandPalette` (returning a
 `TableCommandPalette`; `UseCommandPaletteOptions` is the hook's input), from
-`@adapttable/core/adapter`. See
+`@adapttable/react/adapter`. See
 [customization](./customization.md#command-palette).
 
 **Context menus.** `contextMenu` arms right-click menus for headers, rows and
@@ -1618,7 +1618,7 @@ menu key, and a long press. Adapters build theirs over `ContextMenuChrome` /
 (`TableContextMenuOptions` is the hook's input; it returns a
 `TableContextMenu`: `regionProps` to bind once, plus `items`, `at` and
 `close`). `ContextMenuPoint` is the click coordinates the chrome hands the
-surface. All from `@adapttable/core/adapter`. The surface slot receives an
+surface. All from `@adapttable/react/adapter`. The surface slot receives an
 `anchorRef` — a zero-size element at the click point — because every kit's
 menu positions against an element rather than coordinates. See
 [customization](./customization.md#context-menus).
@@ -1640,7 +1640,7 @@ in a popover over them. `SidePanelOptions` types it — `panels`, `open`,
 host's. Adapters build theirs over `SidePanelChrome` / `SidePanelChromeProps`
 / `SidePanelSlots` / `SidePanelFrameProps` / `SidePanelTabProps` /
 `SidePanelCloseProps` and dock it with `SidePanelLayout` /
-`SidePanelLayoutProps` from `@adapttable/core/adapter`; the tab strip's
+`SidePanelLayoutProps` from `@adapttable/react/adapter`; the tab strip's
 keyboard contract lives in core, not in each kit. See
 [customization](./customization.md#side-panel).
 
@@ -1648,7 +1648,7 @@ keyboard contract lives in core, not in each kit. See
 range, how many rows are selected, and what a multi-cell selection adds up
 to. Adapters export their kit-owned `StatusBar` over `StatusBarChrome` /
 `StatusBarChromeProps` / `StatusBarSlots` / `StatusBarSlotProps` /
-`StatusBarItem` from `@adapttable/core/adapter`. It hosts the selection
+`StatusBarItem` from `@adapttable/react/adapter`. It hosts the selection
 figures rather than repeating them: with `enabled` false the chrome renders
 those alone, which is why an adapter has one element here and no branch. The
 row range comes from the same arithmetic the pagination footer uses.
@@ -1661,7 +1661,7 @@ silent no-op stays visible even when `statusBar` is off. See
 `toolbarSlots` (`ToolbarSlots` — `start`, `end`) fills either end.
 `undoRedoButtons` adds Undo and Redo, which render only when `editHistory` is
 armed and disable rather than disappear; `undoRedoToolbar(wanted, history,
-labels)` from `@adapttable/core/adapter` is the one rule both wiring paths
+labels)` from `@adapttable/react/adapter` is the one rule both wiring paths
 resolve that with. Labels are `undoEdit` and `redoEdit`. `printButton` adds a
 Print button, which renders only when `onPrint` is also wired;
 `printToolbar(wanted, onPrint, labels)` resolves that pair the same way
@@ -1697,7 +1697,7 @@ by its tag: `ar`, `de`, `en`, `es`, `fa`, `fr`, `he`, `hi`, `it`, `ja`, `ko`,
 
 Adapter-machinery names (`headerGroupRows`, `insertExtraRows`, `useFullscreen`,
 `columnMenuActions`, `BodyCell`, …) resolve only from
-`@adapttable/core/adapter`. The aggregate `useChromeBodyData` hook is gone;
+`@adapttable/react/adapter`. The aggregate `useChromeBodyData` hook is gone;
 choose `usePlainChromeBodyData` or `useVirtualChromeBodyData`.
 
 Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
@@ -1910,13 +1910,13 @@ optional `selectorKey` to re-project unchanged pages),
 ## The adapter contract
 
 Everything the eight built-in adapters are made of ships from its own
-entry point, **`@adapttable/core/adapter`** — the same public surface a
+entry point, **`@adapttable/react/adapter`** — the same public surface a
 ninth adapter would use; there are no private channels. Same package,
 same semver promise as the main entry. This tier is aimed at adapter
 authors; app code rarely (if ever) imports from it:
 
 ```ts
-import { useDataTableShell, paginationSlots } from "@adapttable/core/adapter";
+import { useDataTableShell, paginationSlots } from "@adapttable/react/adapter";
 ```
 
 A handful of names stay on the main entry even though adapters also use

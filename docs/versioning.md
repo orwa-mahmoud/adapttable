@@ -15,8 +15,9 @@ Given `MAJOR.MINOR.PATCH`:
 - **MAJOR** — breaking changes to the public API. We avoid these; when one is
   unavoidable, it ships in a major with a migration note in the CHANGELOG.
 
-The published packages (`@adapttable/core`, the adapters, `@adapttable/i18n`,
-`@adapttable/server`, `@adapttable/ai`, `@adapttable/ai-react`, and `@adapttable/cli`) each follow
+The published packages (`@adapttable/core`, `@adapttable/react`, the adapters,
+`@adapttable/i18n`, `@adapttable/server`, `@adapttable/ai`,
+`@adapttable/ai-react`, and `@adapttable/cli`) each follow
 [changesets](https://github.com/changesets/changesets) **independently**: a
 package only bumps when a changeset names it. Adapters, `@adapttable/i18n`
 and `@adapttable/server` depend on a concrete `@adapttable/core` version at
@@ -27,7 +28,7 @@ is still part of the public surface below.
 
 ## Stability
 
-AdaptTable is **stable at `2.0`**. The full SemVer contract above applies:
+AdaptTable is **stable at `3.0`**. The full SemVer contract above applies:
 breaking changes to the public API surface (below) ship only in a major
 release, with a migration note in the relevant package's `CHANGELOG.md`. In
 practice such changes are rare — most releases are additive minors and safe
@@ -62,42 +63,51 @@ cannot omit one.
 
 ### `@adapttable/core`
 
-The app-facing engine: `TableSource`; the `useFrontendData` /
-`useQuerySource` / `useServerData` source builders; `useDataTable` and its
-prop-getters; `ColumnDef` and the rest of the core types; `BaseDataTableProps`;
-URL-state hooks and `UrlStateAdapter`; column-layout, selection, sorting,
-pagination and virtualization hooks; filter primitives; the labels contract.
-The [API reference](./api.md) lists every export on this entry.
+The framework-neutral engine: `createTableEngine` and the view it publishes;
+`TableSource`; `ColumnDef` and the rest of the neutral types; the data
+operations — filtering, sorting, paging, grouping, aggregation; filter
+primitives; the labels contract. No React in its import graph. The
+[API reference](./api.md) lists every export on this entry.
 
-### `@adapttable/core/features`
+### `@adapttable/react`
+
+The React binding: the `useFrontendData` / `useQuerySource` / `useServerData`
+source builders; `useDataTable` and its prop-getters; `BaseDataTableProps`;
+URL-state hooks and `UrlStateAdapter`; column-layout, selection, sorting,
+pagination and virtualization hooks; the React column types and render
+callbacks that return elements.
+
+### `@adapttable/react/features`
 
 Canonical home of the feature factories (`rowReorder`, `savedViews`,
 `grouping`, `editing`, `virtualize`, `columnMenu`, `cellNavigation`,
 `applyTableFeatures`, …). Kit subpaths re-export this entry; values stay
 off the core main barrel.
 
-### `@adapttable/core/adapter`
+### `@adapttable/react/adapter`
 
-The supported **adapter-author** boundary. Eighth and ninth adapters are
-built from this entry — `useDataTableShell`, chrome components, slot
-contracts, pager and pin math, announcers — with the same SemVer promise as
-the main entry. App code rarely imports it; reaching for it is choosing
-that contract, not an undocumented escape. There is no private channel
-behind it.
+The supported **adapter-author** boundary. A ninth adapter is built from this
+entry — `useDataTableShell`, chrome components, slot contracts, pager and pin
+math, announcers — with the same SemVer promise as the main entry. App code
+rarely imports it; reaching for it is choosing that contract, not an
+undocumented escape. There is no private channel behind it.
 
 ### Focused core subpaths
 
 Each is a published, supported entry — not an implementation detail:
 
-| Entry                         | What it is                                                                 |
-| ----------------------------- | -------------------------------------------------------------------------- |
-| `@adapttable/core/formula`    | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                 |
-| `@adapttable/core/pdf`        | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …) |
-| `@adapttable/core/pivot`      | Pivot engine (`pivot`, `pivotTableModel`, aggregators)                     |
-| `@adapttable/core/query`      | The query model without React — codecs a backend can load                  |
-| `@adapttable/react/sparkline` | Sparkline column helper                                                    |
-| `@adapttable/core/stream`     | Live row patches (`RowPatch`, `RowPatchEvent`, …)                          |
-| `@adapttable/core/xlsx`       | Spreadsheet export writer                                                  |
+| Entry                      | What it is                                                                 |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `@adapttable/core/formula` | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                 |
+| `@adapttable/core/pdf`     | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …) |
+| `@adapttable/core/pivot`   | Pivot engine (`pivot`, `pivotTableModel`, aggregators)                     |
+| `@adapttable/core/query`   | The query model without React — codecs a backend can load                  |
+| `@adapttable/core/stream`  | Live row patches (`RowPatch`, `RowPatchEvent`, …)                          |
+| `@adapttable/core/xlsx`    | Spreadsheet export writer                                                  |
+
+`@adapttable/react` publishes the React-facing counterparts of the ones that
+need elements — `/formula`, `/pivot`, `/stream` — plus `/sparkline`, the
+sparkline column helper.
 
 ### Adapter main entries
 
@@ -115,14 +125,22 @@ their `classNames` are the documented wrapper hooks; per-node classes and
 
 ### Kit feature subpaths
 
-The same nine paths on every published adapter, re-exporting
-`@adapttable/core/features` (and the pivot panel on `/pivot`):
+Forty paths, the same on every published adapter, re-exporting
+`@adapttable/react/features` (and the pivot panel on `/pivot`):
 
-`/features`, `/row-reorder`, `/saved-views`, `/grouping`, `/editing`,
-`/virtualize`, `/column-menu`, `/cell-navigation`, `/pivot`.
+`/features`, `/preset`, `/assistant`, `/batch-editing`, `/bulk-actions`,
+`/cell-navigation`, `/cell-span`, `/column-groups`, `/column-menu`,
+`/column-selection`, `/command-palette`, `/context-menu`, `/density`,
+`/editing`, `/export`, `/extra-rows`, `/filters`, `/find-in-table`,
+`/fit-columns`, `/fullscreen`, `/grouping`, `/grouping-panel`,
+`/header-filters`, `/multi-sort`, `/nested-table`, `/pinned-summary-rows`,
+`/pivot`, `/print`, `/resizable-columns`, `/row-actions`, `/row-appearance`,
+`/row-detail`, `/row-pinning`, `/row-reorder`, `/saved-views`,
+`/selection-stats`, `/side-panel`, `/status-bar`, `/tree`, `/virtualize`.
 
-Import from the kit you mount (`@adapttable/mantine/row-reorder`, …) so the
-factory and the table share one package.
+`/preset` carries `standardFeatures` — the composed starting point. Import
+from the kit you mount (`@adapttable/mantine/row-reorder`, …) so the factory
+and the table share one package.
 
 ### `@adapttable/i18n`
 
@@ -174,7 +192,7 @@ pretend to be the last two:
    stable `data-adapttable-part` on every rendered node. That part map is
    the contract; see [customization](./customization.md).
 4. **Headless markup** — `useDataTable` and the prop-getters, or a custom
-   adapter over `@adapttable/core/adapter`. You own every pixel.
+   adapter over `@adapttable/react/adapter`. You own every pixel.
 
 Reach for the lowest rung that does the job. Jumping to `/adapter` or
 headless getters to restyle a button is using the wrong contract.

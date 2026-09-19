@@ -169,8 +169,8 @@ On mobile the cards are a list rather than a grid, so the bar opens and searches
 but the hits are not marked; the desktop layout is where a cell can be pointed
 at.
 
-Headless: `findMatches`, `matchKeySet`, `stepMatch`, `useFindInTable` in
-`@adapttable/core/adapter`. Each adapter mounts `FindBar` over
+Headless: `findMatches`, `matchKeySet` and `stepMatch` in `@adapttable/core`,
+`useFindInTable` in `@adapttable/react`. Each adapter mounts `FindBar` over
 `FindBarChrome`.
 
 ## What the selection adds up to
@@ -392,7 +392,7 @@ would share.
 | Export                                                    | Purpose                                                                                                                           |
 | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `useGridFocus` / `UseGridFocusOptions` / `GridFocusState` | The hook, its options, and the state it returns (`getGridProps`, `getCellPropsAt`, `getRowPropsAt`, `focusCell`, `announcement`). |
-| `GridFocusAnnouncer` / `GridFocusAnnouncerProps`          | The live region, from `@adapttable/core/adapter`. Renders nothing when navigation is off.                                         |
+| `GridFocusAnnouncer` / `GridFocusAnnouncerProps`          | The live region, from `@adapttable/react/adapter`. Renders nothing when navigation is off.                                        |
 | `moveGridFocus` / `GridFocusMove` / `GridBounds`          | The pure move arithmetic and its vocabulary — no React, no DOM.                                                                   |
 | `gridFocusMoveForKey` / `GridKeyPress`                    | Maps a key press to a move, applying the RTL swap.                                                                                |
 | `GridCell` / `sameGridCell`                               | A cell address, and address equality.                                                                                             |

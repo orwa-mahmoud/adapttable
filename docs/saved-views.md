@@ -142,7 +142,7 @@ a different job, and putting both in one dropdown makes the common one harder â€
 so management is a panel:
 
 ```tsx
-import { SavedViewsPanelChrome } from "@adapttable/core/adapter";
+import { SavedViewsPanelChrome } from "@adapttable/react/adapter";
 
 <SavedViewsPanelChrome
   views={views}

@@ -463,7 +463,7 @@ every locale.
 Headless: `useRowEditing` (`RowEditingState`, `RowEditDrafts`,
 `UseRowEditingOptions`), with `RowEditCell` (`RowEditCellProps`),
 `rowEditControls` (`RowEditControlsOptions` in, `RowEditControls` out)
-from `@adapttable/core/adapter`, `RowEditIcons` typing the glyph overrides,
+from `@adapttable/react/adapter`, `RowEditIcons` typing the glyph overrides,
 and `rowEditConflict` (`RowEditConflict` out) telling one row's controls that
 an answer is outstanding. `useEditConflict` grew `reconcileRow`
 (`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit, plus
@@ -514,7 +514,7 @@ Parts: `batch-edit-cell`, `batch-edit-bar`, `batch-edit-count`,
 
 Headless: `useBatchEditing` (`BatchEditingState`, `BatchRowEdit`,
 `UseBatchEditingOptions`), with `BatchEditCell` on
-`@adapttable/core/adapter`. Each adapter mounts `BatchEditBar` over
+`@adapttable/react/adapter`. Each adapter mounts `BatchEditBar` over
 `BatchEditBarChrome`.
 
 ## Adding, duplicating and deleting rows
@@ -602,7 +602,7 @@ own state another way — a refetch that agrees, a websocket echoing the value b
 `count` for an "unsaved changes" line.
 
 Headless: `useDirtyCells` (`DirtyCellState`, `UseDirtyCellsOptions`) and
-`rowIsDirty(editing, rowId)` from `@adapttable/core/adapter`.
+`rowIsDirty(editing, rowId)` from `@adapttable/react/adapter`.
 
 ## Headless editing
 

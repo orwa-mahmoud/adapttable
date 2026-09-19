@@ -247,7 +247,7 @@ your own body:
   tree column's cell in its chevron and its indent, and passes every
   other column through untouched. The indent goes on the wrapper around the
   content, so a name moves with its depth rather than sitting at the same margin
-  as its parent's. Layout is `TreeCellChrome` on `@adapttable/core/adapter`.
+  as its parent's. Layout is `TreeCellChrome` on `@adapttable/react/adapter`.
 - `TreeToggle` (on each adapter, props `TreeToggleProps<TRow>`) — the
   chevron itself: `aria-expanded`, a localized accessible name, and an
   equal-width spacer on a leaf. Layout is `TreeToggleChrome`.

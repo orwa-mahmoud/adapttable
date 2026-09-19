@@ -40,7 +40,7 @@ layouts.
   falls back to the column's string `header`, then to its key. Set it to `""`
   for a field with no label at all — a bare avatar or title line — rather than
   an empty caption taking a line. `resolveMobileLabel` from
-  `@adapttable/core/adapter` is the resolver every adapter uses, for a custom
+  `@adapttable/react/adapter` is the resolver every adapter uses, for a custom
   card layout that should match.
 - **`hideOnMobile`** (per column) — drop a column from cards entirely.
 - **`mobileIdentityColumns`** (default `3`) — how many leading desktop-visible
