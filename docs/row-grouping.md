@@ -46,7 +46,7 @@ supports Arrow Up/Down and logical Arrow Left/Right; the latter reverse in RTL
 so movement follows the visible order. Its remove button is the keyboard
 dismiss route. Every add, move, removal, and aggregation change is announced
 through a polite live region. The captions and announcement templates ship in
-all seventeen `@adapttable/i18n` locales.
+every bundled `@adapttable/i18n` locale.
 
 A column decides what it buckets rows by. Without help a group is one distinct
 sort value, which is right for a team or a status and wrong for anything
@@ -257,7 +257,7 @@ On a **server tier** the rest of a group is not in the browser yet, so
 `onGroupLoadMore(groupKey)` fires with the group that needs filling. Fetch it,
 hand back a longer `rows` for that group, and the next render shows them; the
 table reveals whatever it already holds either way. Both labels are localizable
-(`labels.moreGroups`, `labels.moreRowsInGroup`) in all seventeen locales, and the
+(`labels.moreGroups`, `labels.moreRowsInGroup`) in every bundled locale, and the
 rows carry `group-more-row` / `group-more-cell` / `group-more` parts (with
 `groupMoreRow` / `groupMoreCell` class hooks in `@adapttable/unstyled`).
 
@@ -491,8 +491,8 @@ On mobile the footer is a card of its own after the group's cards, captioned the
 same way. Exports are unaffected — a footer is chrome, not a row, so a CSV
 carries the data and nothing else.
 
-Each footer is captioned through `labels.groupTotal`, translated in all
-seventeen locales, and carries `data-adapttable-part="group-footer-row"` /
+Each footer is captioned through `labels.groupTotal`, translated in every
+bundled locale, and carries `data-adapttable-part="group-footer-row"` /
 `group-footer-cell` (plus the `groupFooterRow` / `groupFooterCell` class hooks
 in `@adapttable/unstyled`).
 

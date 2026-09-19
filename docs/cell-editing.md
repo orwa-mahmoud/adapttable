@@ -350,7 +350,7 @@ rejects, in a live region beside it (`data-adapttable-part="edit-cell-save-error
 A table that shows the new value before the server has agreed has to put the old
 one back when it disagrees — and only the host can write to its own rows, so
 `onEditRollback` receives the row as it was and restores it. The failed cell then
-offers an **Undo** (`labels.undoEdit`, localized in all seventeen locales), and
+offers an **Undo** (`labels.undoEdit`, localized in every bundled locale), and
 pressing it calls that handler. Omit `onEditRollback` and the message shows
 without an undo, which is right for a table that refetches instead.
 
@@ -564,8 +564,8 @@ Compose `rowPinning` and pin actions appear. See [row pinning](./row-pinning.md)
 
 **A delete asks first.** It goes through the same confirmation dialog a
 `rowActions` entry with a `confirm` block uses — `labels.deleteRow` as the title,
-`labels.deleteRowConfirm` as the question, both translated in all seventeen
-locales. Pass `confirmDeleteRow={false}` when your own UI already asked, or when
+`labels.deleteRowConfirm` as the question, both translated in every bundled
+locale. Pass `confirmDeleteRow={false}` when your own UI already asked, or when
 your delete is reversible.
 
 Nothing here needs `editing()`. Pair them and a reader adds a blank row and

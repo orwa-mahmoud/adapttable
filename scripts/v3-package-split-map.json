@@ -20363,6 +20363,14 @@
       "behavior": ""
     },
     {
+      "export": "pl",
+      "currentImport": "@adapttable/i18n",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n",
+      "behavior": ""
+    },
+    {
       "export": "primarySubtag",
       "currentImport": "@adapttable/i18n",
       "kind": "value",

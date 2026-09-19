@@ -6,8 +6,8 @@
 
 Locale presets and **RTL** helpers for [AdaptTable](https://github.com/orwa-mahmoud/adapttable).
 The core stays i18n-agnostic; this optional package gives you ready label
-sets for **17 languages** — English, Arabic, German, Spanish, Persian,
-French, Hebrew, Hindi, Italian, Japanese, Korean, Portuguese, Russian,
+sets for **18 languages** — English, Arabic, German, Spanish, Persian,
+French, Hebrew, Hindi, Italian, Japanese, Korean, Polish, Portuguese, Russian,
 Turkish, Urdu, Simplified Chinese, and Traditional Chinese — plus direction
 utilities, so you get multilingual, right-to-left support for free.
 

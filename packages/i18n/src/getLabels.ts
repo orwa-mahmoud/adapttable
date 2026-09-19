@@ -11,6 +11,7 @@ import { hi } from "./locales/hi";
 import { it } from "./locales/it";
 import { ja } from "./locales/ja";
 import { ko } from "./locales/ko";
+import { pl } from "./locales/pl";
 import { pt } from "./locales/pt";
 import { ru } from "./locales/ru";
 import { tr } from "./locales/tr";
@@ -35,6 +36,7 @@ export const locales = {
   it,
   ja,
   ko,
+  pl,
   pt,
   ru,
   tr,

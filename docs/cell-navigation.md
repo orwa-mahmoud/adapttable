@@ -229,7 +229,7 @@ that column. The gesture above is unchanged; this is the same state reached two
 ways it cannot be. A touchscreen has no Ctrl key to hold, and a gesture nothing
 announces is a gesture nobody finds — so the control is what a finger taps and
 what a screen reader reads, named `labels.selectColumn` plus the column's own
-name ("Select column: Team", translated in all seventeen locales).
+name ("Select column: Team", translated in every bundled locale).
 
 ```tsx
 import { cellNavigation } from "@adapttable/mantine/cell-navigation";
@@ -257,7 +257,7 @@ sort the column the same click just selected.
 
 Whenever the rectangle changes, the live region says what it now covers —
 `"selected rows 1 to 2, columns 1 to 2, 4 cells"` — through
-`labels.gridRangeSelection`, translated in all seventeen locales. A single cell
+`labels.gridRangeSelection`, translated in every bundled locale. A single cell
 stays silent: it announces itself already, and repeating "1 cell" on every arrow
 press turns navigation into noise.
 
@@ -323,7 +323,7 @@ absolute position:
 The cell's text comes from [`columnText`](./columns.md), so a column whose cell
 renders a badge or an avatar needs a `formatValue` to have anything readable.
 The position phrase is localizable through `labels.gridCellPosition`, and ships
-translated in all seventeen locales.
+translated in every bundled locale.
 
 ## Virtualization
 

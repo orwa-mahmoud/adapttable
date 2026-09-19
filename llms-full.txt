@@ -2955,7 +2955,7 @@ rejects, in a live region beside it (`data-adapttable-part="edit-cell-save-error
 A table that shows the new value before the server has agreed has to put the old
 one back when it disagrees — and only the host can write to its own rows, so
 `onEditRollback` receives the row as it was and restores it. The failed cell then
-offers an **Undo** (`labels.undoEdit`, localized in all seventeen locales), and
+offers an **Undo** (`labels.undoEdit`, localized in every bundled locale), and
 pressing it calls that handler. Omit `onEditRollback` and the message shows
 without an undo, which is right for a table that refetches instead.
 
@@ -3169,8 +3169,8 @@ Compose `rowPinning` and pin actions appear. See [row pinning](./row-pinning.md)
 
 **A delete asks first.** It goes through the same confirmation dialog a
 `rowActions` entry with a `confirm` block uses — `labels.deleteRow` as the title,
-`labels.deleteRowConfirm` as the question, both translated in all seventeen
-locales. Pass `confirmDeleteRow={false}` when your own UI already asked, or when
+`labels.deleteRowConfirm` as the question, both translated in every bundled
+locale. Pass `confirmDeleteRow={false}` when your own UI already asked, or when
 your delete is reversible.
 
 Nothing here needs `editing()`. Pair them and a reader adds a blank row and
@@ -4049,7 +4049,7 @@ that column. The gesture above is unchanged; this is the same state reached two
 ways it cannot be. A touchscreen has no Ctrl key to hold, and a gesture nothing
 announces is a gesture nobody finds — so the control is what a finger taps and
 what a screen reader reads, named `labels.selectColumn` plus the column's own
-name ("Select column: Team", translated in all seventeen locales).
+name ("Select column: Team", translated in every bundled locale).
 
 ```tsx
 import { cellNavigation } from "@adapttable/mantine/cell-navigation";
@@ -4077,7 +4077,7 @@ sort the column the same click just selected.
 
 Whenever the rectangle changes, the live region says what it now covers —
 `"selected rows 1 to 2, columns 1 to 2, 4 cells"` — through
-`labels.gridRangeSelection`, translated in all seventeen locales. A single cell
+`labels.gridRangeSelection`, translated in every bundled locale. A single cell
 stays silent: it announces itself already, and repeating "1 cell" on every arrow
 press turns navigation into noise.
 
@@ -4143,7 +4143,7 @@ absolute position:
 The cell's text comes from [`columnText`](./columns.md), so a column whose cell
 renders a badge or an avatar needs a `formatValue` to have anything readable.
 The position phrase is localizable through `labels.gridCellPosition`, and ships
-translated in all seventeen locales.
+translated in every bundled locale.
 
 ## Virtualization
 
@@ -4306,7 +4306,7 @@ supports Arrow Up/Down and logical Arrow Left/Right; the latter reverse in RTL
 so movement follows the visible order. Its remove button is the keyboard
 dismiss route. Every add, move, removal, and aggregation change is announced
 through a polite live region. The captions and announcement templates ship in
-all seventeen `@adapttable/i18n` locales.
+every bundled `@adapttable/i18n` locale.
 
 A column decides what it buckets rows by. Without help a group is one distinct
 sort value, which is right for a team or a status and wrong for anything
@@ -4517,7 +4517,7 @@ On a **server tier** the rest of a group is not in the browser yet, so
 `onGroupLoadMore(groupKey)` fires with the group that needs filling. Fetch it,
 hand back a longer `rows` for that group, and the next render shows them; the
 table reveals whatever it already holds either way. Both labels are localizable
-(`labels.moreGroups`, `labels.moreRowsInGroup`) in all seventeen locales, and the
+(`labels.moreGroups`, `labels.moreRowsInGroup`) in every bundled locale, and the
 rows carry `group-more-row` / `group-more-cell` / `group-more` parts (with
 `groupMoreRow` / `groupMoreCell` class hooks in `@adapttable/unstyled`).
 
@@ -4751,8 +4751,8 @@ On mobile the footer is a card of its own after the group's cards, captioned the
 same way. Exports are unaffected — a footer is chrome, not a row, so a CSV
 carries the data and nothing else.
 
-Each footer is captioned through `labels.groupTotal`, translated in all
-seventeen locales, and carries `data-adapttable-part="group-footer-row"` /
+Each footer is captioned through `labels.groupTotal`, translated in every
+bundled locale, and carries `data-adapttable-part="group-footer-row"` /
 `group-footer-cell` (plus the `groupFooterRow` / `groupFooterCell` class hooks
 in `@adapttable/unstyled`).
 
@@ -5995,7 +5995,7 @@ overrides any other width. A column with nothing measurable on screen is left
 alone rather than collapsed.
 
 Both actions are localizable — `labels.autoSizeColumns` and
-`labels.autoSizeColumn` — in all seventeen locales.
+`labels.autoSizeColumn` — in every bundled locale.
 
 Headless: `measureColumnWidth(root, key)` and `autoSizeColumns(root, keys,
 setWidth)`.
@@ -10178,7 +10178,7 @@ Every scope and column option above works unchanged — which rows and columns
 leave the table is decided before the format is asked for anything.
 
 The button relabels itself: it reads **Export XLSX** here, not "Export CSV",
-from `labels.exportFile(format)` — translated in all seventeen locales, and
+from `labels.exportFile(format)` — translated in every bundled locale, and
 given a caption for a format nobody planned for (a custom writer calling itself
 `tsv` gets "Export TSV"). CSV keeps `labels.exportCsv`, so its existing
 translations and any wording you overrode are untouched.
@@ -10450,7 +10450,7 @@ See the [Columns guide](./columns.md) and the
 
 ---
 
-# React table i18n & RTL — Arabic, Hebrew, 17 locales
+# React table i18n & RTL — Arabic, Hebrew, 18 locales
 
 ▶ **See it working:** [flip the whole table to Arabic RTL in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rtl/) — a real table you can interact with, not a recording.
 
@@ -10502,7 +10502,7 @@ export function People({ data }: { data: Person[] }) {
 
 ## Bundled presets
 
-Seventeen label sets ship in `@adapttable/i18n`. `getLabels` prefers an
+The label sets below ship in `@adapttable/i18n`. `getLabels` prefers an
 exact tag (`"zh-TW"` → Traditional Chinese), then the primary subtag
 (`"ar-EG"` → Arabic, `"de-AT"` → German), and falls back to English for
 unknown locales; `hasLocale(locale)` tells you whether a preset exists.
@@ -10520,6 +10520,7 @@ unknown locales; `hasLocale(locale)` tells you whether a preset exists.
 | `it`    | Italian               | ltr       |
 | `ja`    | Japanese              | ltr       |
 | `ko`    | Korean                | ltr       |
+| `pl`    | Polish                | ltr       |
 | `pt`    | Portuguese            | ltr       |
 | `ru`    | Russian               | ltr       |
 | `tr`    | Turkish               | ltr       |
@@ -12599,7 +12600,7 @@ exports `Kit`, the union of UI kits `@adapttable/cli init` can detect.
 
 **Locale exports.** `@adapttable/i18n` exports one label set per locale, named
 by its tag: `ar`, `de`, `en`, `es`, `fa`, `fr`, `he`, `hi`, `it`, `ja`, `ko`,
-`pt`, `ru`, `tr`, `ur`, `zh`, `zhTW` — seventeen in all. See
+`pl`, `pt`, `ru`, `tr`, `ur`, `zh`, `zhTW`. See
 [i18n & RTL](./i18n-rtl.md).
 
 Adapter-machinery names (`headerGroupRows`, `insertExtraRows`, `useFullscreen`,
@@ -13216,7 +13217,7 @@ capability is decided there, once, rather than per binding.
 
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
   `isRtlLocale(locale)`, `hasLocale(locale)`, `primarySubtag(locale)`,
-  `RTL_LANGUAGES`, `locales` (keyed by `LocaleKey`) and the seventeen
+  `RTL_LANGUAGES`, `locales` (keyed by `LocaleKey`) and the bundled
   presets (`en`, `ar`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
   … including `zhTW`) — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--force]`; programmatic
@@ -13347,8 +13348,8 @@ const source = useQuerySource({ usePaginatedQuery });
 
 Yes, RTL is first-class. Column alignment uses **logical CSS** (`start`/`end`),
 so it flips automatically under `dir="rtl"`. The optional `@adapttable/i18n`
-package ships **17 locales** — English, Arabic, German, Spanish, Persian,
-French, Hebrew, Hindi, Italian, Japanese, Korean, Portuguese, Russian,
+package ships **18 locales** — English, Arabic, German, Spanish, Persian,
+French, Hebrew, Hindi, Italian, Japanese, Korean, Polish, Portuguese, Russian,
 Turkish, Urdu, Simplified Chinese, and Traditional Chinese — plus `getDirection` /
 `isRtlLocale` helpers. Arabic, Hebrew, Persian, and Urdu are right-to-left.
 
@@ -14701,7 +14702,7 @@ Same Material look, on a current MUI — and your rows stay untouched.
 | `options.padding: "dense"`                           | `density="compact"`                                        | —                                                                                |
 | `options.exportButton`                               | `exportCsv()` / `rowsToCsv` + `downloadCsv`                | Compose `exportCsv()` for a built-in button; the writer picks CSV, Excel or PDF. |
 | `options.maxBodyHeight`                              | `maxHeight`                                                | Enables the scroll box + sticky pinning.                                         |
-| `localization`                                       | `labels` (+ [`@adapttable/i18n`](./i18n-rtl.md))           | Flat label object; presets for 17 locales incl. RTL.                             |
+| `localization`                                       | `labels` (+ [`@adapttable/i18n`](./i18n-rtl.md))           | Flat label object; presets for every bundled locale, RTL included.               |
 | `isLoading`                                          | `loading`                                                  | —                                                                                |
 
 Column def → `ColumnDef`:

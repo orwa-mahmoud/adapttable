@@ -11,7 +11,7 @@ import { exportButtonLabel } from "./exportLabel";
 
 describe("exportButtonLabel", () => {
   it("keeps the CSV label for CSV", () => {
-    // Seventeen translations of this string already exist; nothing renames it.
+    // Every locale already translates this string; nothing renames it.
     expect(exportButtonLabel(defaultLabels, "csv")).toBe("Export CSV");
   });
 

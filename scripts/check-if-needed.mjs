@@ -9,13 +9,9 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { classify } from "./ci-detect.mjs";
+import { gitBinary } from "./git-binary.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-
-const GIT =
-  process.platform === "win32"
-    ? "C:\\Program Files\\Git\\cmd\\git.exe"
-    : "/usr/bin/git";
 
 const PNPM = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 
@@ -90,7 +86,7 @@ export function checkReason(flags) {
 function changedFiles() {
   try {
     const out = execFileSync(
-      GIT,
+      gitBinary(),
       ["diff", "--name-only", "origin/main...HEAD"],
       {
         cwd: REPO_ROOT,

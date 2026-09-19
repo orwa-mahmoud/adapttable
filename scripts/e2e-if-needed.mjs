@@ -12,6 +12,8 @@ import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { gitBinary } from "./git-binary.mjs";
+
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 // `serve-showcase.mjs` builds and serves what the suite runs against, so a
@@ -47,10 +49,6 @@ export function e2ePlan(files) {
   return { kind: "full" };
 }
 
-const GIT =
-  process.platform === "win32"
-    ? "C:\\Program Files\\Git\\cmd\\git.exe"
-    : "/usr/bin/git";
 const PLAYWRIGHT = join(
   REPO_ROOT,
   "node_modules",
@@ -84,7 +82,7 @@ export function projectsFor(args) {
 function changedFiles() {
   try {
     const out = execFileSync(
-      GIT,
+      gitBinary(),
       ["diff", "--name-only", "origin/main...HEAD"],
       {
         cwd: REPO_ROOT,
