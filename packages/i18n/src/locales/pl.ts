@@ -165,7 +165,9 @@ export const pl: Required<TableLabels> = {
   editRow: "Edytuj wiersz",
   saveRow: "Zapisz wiersz",
   pendingRows: (count) =>
-    count === 1 ? "1 niezapisany wiersz" : `${String(count)} niezapisanych wierszy`,
+    count === 1
+      ? "1 niezapisany wiersz"
+      : `${String(count)} niezapisanych wierszy`,
   saveAll: "Zapisz wszystko",
   cancelAll: "Anuluj wszystko",
   approveProposal: "Zatwierdź",
@@ -194,7 +196,9 @@ export const pl: Required<TableLabels> = {
       .replace("{p}", String(pending)),
   approvalWaitingElsewhere: "Zmiana czeka na Twoją decyzję.",
   pendingProposals: (count) =>
-    count === 1 ? "1 zaproponowana zmiana" : `${String(count)} zaproponowanych zmian`,
+    count === 1
+      ? "1 zaproponowana zmiana"
+      : `${String(count)} zaproponowanych zmian`,
   proposalChange: ({ row, column, before, after }) => {
     const field = column ? `${row} · ${column}` : row;
     if (before === undefined && after === undefined) return field;
@@ -356,7 +360,8 @@ export const pl: Required<TableLabels> = {
   moveRowUp: "Przenieś wiersz wyżej",
   moveRowDown: "Przenieś wiersz niżej",
   rowLifted: (position) => `Wiersz ${String(position)} podniesiony`,
-  rowMoved: (from, to) => `Wiersz przeniesiono z ${String(from)} do ${String(to)}`,
+  rowMoved: (from, to) =>
+    `Wiersz przeniesiono z ${String(from)} do ${String(to)}`,
   rowReorderCancelled: "Anulowano zmianę kolejności",
   rowMoveOptions: "Opcje przenoszenia wiersza",
   moveToGroup: "Przenieś do grupy…",
@@ -370,8 +375,7 @@ export const pl: Required<TableLabels> = {
   rowMovedUnder: (parent) => `Wiersz przeniesiono pod ${parent}`,
   moveRejectedPolicyNever:
     "Przenoszenie wierszy pomiędzy limitami jest wyłączone",
-  moveRejectedSorted:
-    "Wyczyść sortowanie przed zmianą kolejności wierszy",
+  moveRejectedSorted: "Wyczyść sortowanie przed zmianą kolejności wierszy",
   moveRejectedCycle:
     "Wiersz nie może zostać przeniesiony do samego siebie ani do swojego potomka",
   moveUnavailable: "To przeniesienie wiersza jest niedostępne",
@@ -411,8 +415,7 @@ export const pl: Required<TableLabels> = {
   groupingAggregationReadOnly: "Zdefiniowane przez aplikację",
   groupingAggregationCustom: "Niestandardowe",
   groupingAggregateRemoved: (column) => `Usunięto agregację z ${column}`,
-  groupingAggregatesRestored:
-    "Przywrócono agregacje do wartości domyślnych",
+  groupingAggregatesRestored: "Przywrócono agregacje do wartości domyślnych",
   groupingAverage: "Średnia",
   groupingAdded: (label) => `Dodano ${label} do grupowania`,
   groupingRemoved: (label) => `Usunięto ${label} z grupowania`,
@@ -478,6 +481,5 @@ export const pl: Required<TableLabels> = {
     "Grupowanie jest wyłączone: to źródło nie obsługuje grupowania.",
   noticeExportAllPage:
     "Eksport wszystkich stron jest wyłączony: to źródło dostarcza dane strona po stronie.",
-  noticeEditWithoutWriter:
-    "Edycja jest wyłączona: brak kontrolera zapisu.",
+  noticeEditWithoutWriter: "Edycja jest wyłączona: brak kontrolera zapisu.",
 };
