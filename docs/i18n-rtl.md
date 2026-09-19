@@ -50,7 +50,7 @@ export function People({ data }: { data: Person[] }) {
 
 ## Bundled presets
 
-Seventeen label sets ship in `@adapttable/i18n`. `getLabels` prefers an
+The label sets below ship in `@adapttable/i18n`. `getLabels` prefers an
 exact tag (`"zh-TW"` → Traditional Chinese), then the primary subtag
 (`"ar-EG"` → Arabic, `"de-AT"` → German), and falls back to English for
 unknown locales; `hasLocale(locale)` tells you whether a preset exists.

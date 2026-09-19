@@ -89,7 +89,7 @@ Same Material look, on a current MUI — and your rows stay untouched.
 | `options.padding: "dense"`                           | `density="compact"`                                        | —                                                                                |
 | `options.exportButton`                               | `exportCsv()` / `rowsToCsv` + `downloadCsv`                | Compose `exportCsv()` for a built-in button; the writer picks CSV, Excel or PDF. |
 | `options.maxBodyHeight`                              | `maxHeight`                                                | Enables the scroll box + sticky pinning.                                         |
-| `localization`                                       | `labels` (+ [`@adapttable/i18n`](./i18n-rtl.md))           | Flat label object; presets for 18 locales incl. RTL.                             |
+| `localization`                                       | `labels` (+ [`@adapttable/i18n`](./i18n-rtl.md))           | Flat label object; presets for every bundled locale, RTL included.               |
 | `isLoading`                                          | `loading`                                                  | —                                                                                |
 
 Column def → `ColumnDef`:

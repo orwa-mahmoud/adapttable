@@ -3,8 +3,8 @@
  *
  * The button downloads whatever format its writer produces, so a fixed "Export
  * CSV" is wrong the moment a spreadsheet writer is passed — it names a file the
- * user is not getting. CSV keeps its own label, because seventeen translations
- * of it already exist and a host may have overridden the string; every other
+ * user is not getting. CSV keeps its own label, because a translation of it
+ * already ships in every locale and a host may have overridden the string; every other
  * format asks `TableLabels.exportFile` for a caption instead.
  */
 import type { TableLabels } from "../types";
