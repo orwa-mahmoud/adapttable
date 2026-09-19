@@ -26,9 +26,10 @@ same array — that is the public plugin surface, not a parallel API.
 
 A bundler follows imports, not prop values, so the import is the switch: a
 table downloads a feature's implementation when it names it, and not before.
-An adapter's `DataTable` is 63–73 kB gzipped and carries the base contract —
-responsive rendering, loading, error and empty states, accessibility, sorting,
-search and pagination. Everything else arrives with its own entry.
+An adapter's `DataTable` carries the base contract — responsive rendering,
+loading, error and empty states, accessibility, sorting, search and
+pagination — for the weight the [FAQ's measured table](./faq.md#how-big-is-it--is-it-tree-shakeable)
+reports. Everything else arrives with its own entry.
 
 The props that used to arm features are inert: `enableColumnMenu`,
 `bulkActions`, `contextMenu`, `commandPalette`, `statusBar`, `sidePanel`,

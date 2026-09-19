@@ -747,9 +747,10 @@ and `confirm` / `confirmRow` / `confirmAll` for a host that settles its own stat
 **Validation gates the commit.** A column's `validate` (`CellValidator`) judges
 one value; the table's `validateRow` (`RowValidator`) judges the row an edit
 would produce, with `applyEdit` saying how the edit lands on it.
-`useEditValidation(options)` holds the state — which cells carry a message, which
-are still checking — behind `EditValidationState` (`UseEditValidationOptions` in,
-`ValidationTarget` naming the cell a check is about), and
+`EditValidationState` carries what the table knows — which cells hold a
+message, which are still checking — and reaches a kit through the editing
+controller; `ValidationTarget` names the cell a check is about and
+`ValidationCheckResult` is what one returned.
 `resolveCommitValue(options)` is the row, column and parsed value a validator
 sees before the host does. `editorValidationProps(ctrl)` from
 `@adapttable/react/adapter` is the `aria-invalid` / `aria-describedby` /
@@ -1053,7 +1054,7 @@ rather than throwing. Coming back the other way, `readClipboardText` returns the
 clipboard's text or `null` when the browser refuses it, `parseClipboardTable`
 parses tab-separated text into a grid of raw strings (quoted tabs and newlines
 intact), and `pasteRangeEdits(options)` maps that grid onto a range
-(`PasteRangeOptions` in) as `PasteEdit` values — one per cell, already through
+(`PasteRangeOptions` in) as `CellEdit` values — one per cell, already through
 the column's `parseValue`, ready for the same handler an inline edit uses. `cellPasteHandler(options)`
 resolves who receives them — `onCellPaste` when given, otherwise `onCellEdit`
 one cell at a time, `undefined` when the table takes no edits at all
@@ -1413,9 +1414,9 @@ on subpaths: `@adapttable/ai/json` (`toJsonTools`, `JsonFunctionTool`,
 `runAgentHttpTurn`, `parseAgentHttpRequest`, `parseAgentHttpResponse`,
 `agentSystemPrompt`, `AgentSystemPromptInput`,
 `AGENT_HTTP_SCHEMA`, `AgentHttpKind` (`hello` / `schema` / `turn`),
-`AgentHttpMessage`, `AgentHttpNeeds`, `sessionId`, `viewRevision`,
-`pinCatalog`,
-`AgentHttpAction`, `AgentHttpRequest`, `AgentHttpResponse`,
+`AgentHttpMessage`, `AgentHttpUnresolved`, `sessionId`, `viewRevision`,
+`pinCatalog`, `AgentHttpPinAck`, `AgentHttpAudio`,
+`AgentHttpRequest`, `AgentHttpResponse`, `AgentHttpError`,
 `AgentHttpClientOptions`, `AgentHttpTurnResult`). See
 [adaptive capabilities](./agent-capabilities.md),
 [`@adapttable/ai`](./ai.md), [agent integrations](./ai-integrations.md)

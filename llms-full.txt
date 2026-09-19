@@ -526,9 +526,10 @@ same array — that is the public plugin surface, not a parallel API.
 
 A bundler follows imports, not prop values, so the import is the switch: a
 table downloads a feature's implementation when it names it, and not before.
-An adapter's `DataTable` is 63–73 kB gzipped and carries the base contract —
-responsive rendering, loading, error and empty states, accessibility, sorting,
-search and pagination. Everything else arrives with its own entry.
+An adapter's `DataTable` carries the base contract — responsive rendering,
+loading, error and empty states, accessibility, sorting, search and
+pagination — for the weight the [FAQ's measured table](./faq.md#how-big-is-it--is-it-tree-shakeable)
+reports. Everything else arrives with its own entry.
 
 The props that used to arm features are inert: `enableColumnMenu`,
 `bulkActions`, `contextMenu`, `commandPalette`, `statusBar`, `sidePanel`,
@@ -3218,22 +3219,22 @@ activation wrapper every built-in adapter renders (double-click / Enter / F2
 to begin, with the cell value as the accessible name and the edit hint as
 its `title`).
 
-| Export                                                                                                                   | Purpose                                                                                                         |
-| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `useCellEditing` / `CellEditingState`                                                                                    | The state machine hook and the state it returns.                                                                |
-| `EditableCellGate` / `EditableCellGateProps`                                                                             | Activation wrapper: display content when idle, the kit's editor while active.                                   |
-| `EditableCellEditing`                                                                                                    | The editing bundle adapters receive from the chrome (`chrome.editing`).                                         |
-| `CellEditCommit` / `CellEditTarget`                                                                                      | A commit payload (`row`, `key`, `value`) and the active-cell address.                                           |
-| `CellEditor` / `CellEditorOption`                                                                                        | The column `editor` descriptor and one option of a select editor.                                               |
-| `CellEditKeyAction` / `CellEditKeyOutcome` / `CellEditNavigation`                                                        | Keyboard-flow vocabulary: what a key press means and where focus goes next.                                     |
-| `EditableCellController` / `EditableCellEditorCtrl` / `EditableCellMode`                                                 | The controller handed to a custom editor: draft, commit/cancel, mode.                                           |
-| `MultiSelectEditorChrome` / `MultiSelectEditorChromeProps` / `MultiSelectEditorSlots` / `MultiSelectEditorCheckboxProps` | Checkbox-group multi-select editor for kits whose select holds one value.                                       |
-| `EditableColumnLike` / `isCellEditable` / `hasEditableColumns`                                                           | The minimal column shape editing reads, plus the two predicates the chrome uses.                                |
-| `parseCellEditValue` / `resolveCellEditor` / `normalizeEditorOptions`                                                    | Draft parsing (number editors yield `number \| null`) and editor/option resolution.                             |
-| `useEditValidation` / `EditValidationState` / `UseEditValidationOptions`                                                 | Validation state: which cells carry a message, which are still checking, and the `check` that gates one commit. |
-| `CellValidator` / `RowValidator` / `ValidationTarget`                                                                    | The two validator signatures and the cell address a check is about.                                             |
-| `resolveCommitValue`                                                                                                     | The row, column and parsed value a commit resolves to — what a validator judges before the host sees it.        |
-| `editorValidationProps`                                                                                                  | The `aria-invalid` / `aria-describedby` / `aria-busy` a kit's editor spreads while validation is in play.       |
+| Export                                                                                                                   | Purpose                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `useCellEditing` / `CellEditingState`                                                                                    | The state machine hook and the state it returns.                                                          |
+| `EditableCellGate` / `EditableCellGateProps`                                                                             | Activation wrapper: display content when idle, the kit's editor while active.                             |
+| `EditableCellEditing`                                                                                                    | The editing bundle adapters receive from the chrome (`chrome.editing`).                                   |
+| `CellEditCommit` / `CellEditTarget`                                                                                      | A commit payload (`row`, `key`, `value`) and the active-cell address.                                     |
+| `CellEditor` / `CellEditorOption`                                                                                        | The column `editor` descriptor and one option of a select editor.                                         |
+| `CellEditKeyAction` / `CellEditKeyOutcome` / `CellEditNavigation`                                                        | Keyboard-flow vocabulary: what a key press means and where focus goes next.                               |
+| `EditableCellController` / `EditableCellEditorCtrl` / `EditableCellMode`                                                 | The controller handed to a custom editor: draft, commit/cancel, mode.                                     |
+| `MultiSelectEditorChrome` / `MultiSelectEditorChromeProps` / `MultiSelectEditorSlots` / `MultiSelectEditorCheckboxProps` | Checkbox-group multi-select editor for kits whose select holds one value.                                 |
+| `EditableColumnLike` / `isCellEditable` / `hasEditableColumns`                                                           | The minimal column shape editing reads, plus the two predicates the chrome uses.                          |
+| `parseCellEditValue` / `resolveCellEditor` / `normalizeEditorOptions`                                                    | Draft parsing (number editors yield `number \| null`) and editor/option resolution.                       |
+| `EditValidationState` / `ValidationTarget` / `ValidationCheckResult`                                                     | Validation state: which cells carry a message, which are still checking, and what a check returned.       |
+| `CellValidator` / `RowValidator` / `ValidationTarget`                                                                    | The two validator signatures and the cell address a check is about.                                       |
+| `resolveCommitValue`                                                                                                     | The row, column and parsed value a commit resolves to — what a validator judges before the host sees it.  |
+| `editorValidationProps`                                                                                                  | The `aria-invalid` / `aria-describedby` / `aria-busy` a kit's editor spreads while validation is in play. |
 
 ## Applying changes without a refetch
 
@@ -5525,7 +5526,7 @@ Some data is a hierarchy before anyone asks a question of it: a folder holds
 files, a task has subtasks, an account rolls up to a parent. Pass `getChildren`
 (nested data) or `getParentId` (a flat list with a parent column) and the table
 renders that hierarchy — one chevron per parent, one indent step per level, in
-all nine adapters.
+every adapter.
 
 ```tsx
 <DataTable
@@ -9800,7 +9801,7 @@ highlight.flashRow(saved.id);
 
 There is no new prop for this on purpose. `rowClassName` already reaches
 every adapter, so the highlight is a class you compute — which means it works
-in all nine kits and looks like the rest of your design system rather than
+in every kit and looks like the rest of your design system rather than
 like ours.
 
 Marks are keyed by row id, so one survives the sort, filter or page change
@@ -11655,9 +11656,10 @@ and `confirm` / `confirmRow` / `confirmAll` for a host that settles its own stat
 **Validation gates the commit.** A column's `validate` (`CellValidator`) judges
 one value; the table's `validateRow` (`RowValidator`) judges the row an edit
 would produce, with `applyEdit` saying how the edit lands on it.
-`useEditValidation(options)` holds the state — which cells carry a message, which
-are still checking — behind `EditValidationState` (`UseEditValidationOptions` in,
-`ValidationTarget` naming the cell a check is about), and
+`EditValidationState` carries what the table knows — which cells hold a
+message, which are still checking — and reaches a kit through the editing
+controller; `ValidationTarget` names the cell a check is about and
+`ValidationCheckResult` is what one returned.
 `resolveCommitValue(options)` is the row, column and parsed value a validator
 sees before the host does. `editorValidationProps(ctrl)` from
 `@adapttable/react/adapter` is the `aria-invalid` / `aria-describedby` /
@@ -11961,7 +11963,7 @@ rather than throwing. Coming back the other way, `readClipboardText` returns the
 clipboard's text or `null` when the browser refuses it, `parseClipboardTable`
 parses tab-separated text into a grid of raw strings (quoted tabs and newlines
 intact), and `pasteRangeEdits(options)` maps that grid onto a range
-(`PasteRangeOptions` in) as `PasteEdit` values — one per cell, already through
+(`PasteRangeOptions` in) as `CellEdit` values — one per cell, already through
 the column's `parseValue`, ready for the same handler an inline edit uses. `cellPasteHandler(options)`
 resolves who receives them — `onCellPaste` when given, otherwise `onCellEdit`
 one cell at a time, `undefined` when the table takes no edits at all
@@ -12321,9 +12323,9 @@ on subpaths: `@adapttable/ai/json` (`toJsonTools`, `JsonFunctionTool`,
 `runAgentHttpTurn`, `parseAgentHttpRequest`, `parseAgentHttpResponse`,
 `agentSystemPrompt`, `AgentSystemPromptInput`,
 `AGENT_HTTP_SCHEMA`, `AgentHttpKind` (`hello` / `schema` / `turn`),
-`AgentHttpMessage`, `AgentHttpNeeds`, `sessionId`, `viewRevision`,
-`pinCatalog`,
-`AgentHttpAction`, `AgentHttpRequest`, `AgentHttpResponse`,
+`AgentHttpMessage`, `AgentHttpUnresolved`, `sessionId`, `viewRevision`,
+`pinCatalog`, `AgentHttpPinAck`, `AgentHttpAudio`,
+`AgentHttpRequest`, `AgentHttpResponse`, `AgentHttpError`,
 `AgentHttpClientOptions`, `AgentHttpTurnResult`). See
 [adaptive capabilities](./agent-capabilities.md),
 [`@adapttable/ai`](./ai.md), [agent integrations](./ai-integrations.md)
@@ -15745,18 +15747,21 @@ cannot omit one.
 ### `@adapttable/core`
 
 The framework-neutral engine: `createTableEngine` and the view it publishes;
-`TableSource`; `ColumnDef` and the rest of the neutral types; the data
-operations — filtering, sorting, paging, grouping, aggregation; filter
-primitives; the labels contract. No React in its import graph. The
+`TableSource`; the neutral column and filter models (`ColumnInput`,
+`ColumnFilter`, `ColumnLayoutState`, …); the data operations — filtering,
+sorting, paging, grouping, aggregation; URL-state codecs
+(`parseTableUrlState` / `applyTableUrlState` / `UrlStateAdapter` /
+`routerUrlAdapter`); the labels contract. No React in its import graph. The
 [API reference](./api.md) lists every export on this entry.
 
 ### `@adapttable/react`
 
 The React binding: the `useFrontendData` / `useQuerySource` / `useServerData`
 source builders; `useDataTable` and its prop-getters; `BaseDataTableProps`;
-URL-state hooks and `UrlStateAdapter`; column-layout, selection, sorting,
-pagination and virtualization hooks; the React column types and render
-callbacks that return elements.
+`ColumnDef` and the other React column types, whose render callbacks return
+elements; the URL-state hooks (`useColumnLayoutUrlState`,
+`useDensityUrlState`, …); column-layout, selection, sorting, pagination and
+virtualization hooks.
 
 ### `@adapttable/react/features`
 

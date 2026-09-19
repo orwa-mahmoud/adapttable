@@ -4,7 +4,7 @@ Some data is a hierarchy before anyone asks a question of it: a folder holds
 files, a task has subtasks, an account rolls up to a parent. Pass `getChildren`
 (nested data) or `getParentId` (a flat list with a parent column) and the table
 renders that hierarchy — one chevron per parent, one indent step per level, in
-all nine adapters.
+every adapter.
 
 ```tsx
 <DataTable

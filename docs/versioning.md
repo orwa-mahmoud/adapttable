@@ -64,18 +64,21 @@ cannot omit one.
 ### `@adapttable/core`
 
 The framework-neutral engine: `createTableEngine` and the view it publishes;
-`TableSource`; `ColumnDef` and the rest of the neutral types; the data
-operations — filtering, sorting, paging, grouping, aggregation; filter
-primitives; the labels contract. No React in its import graph. The
+`TableSource`; the neutral column and filter models (`ColumnInput`,
+`ColumnFilter`, `ColumnLayoutState`, …); the data operations — filtering,
+sorting, paging, grouping, aggregation; URL-state codecs
+(`parseTableUrlState` / `applyTableUrlState` / `UrlStateAdapter` /
+`routerUrlAdapter`); the labels contract. No React in its import graph. The
 [API reference](./api.md) lists every export on this entry.
 
 ### `@adapttable/react`
 
 The React binding: the `useFrontendData` / `useQuerySource` / `useServerData`
 source builders; `useDataTable` and its prop-getters; `BaseDataTableProps`;
-URL-state hooks and `UrlStateAdapter`; column-layout, selection, sorting,
-pagination and virtualization hooks; the React column types and render
-callbacks that return elements.
+`ColumnDef` and the other React column types, whose render callbacks return
+elements; the URL-state hooks (`useColumnLayoutUrlState`,
+`useDensityUrlState`, …); column-layout, selection, sorting, pagination and
+virtualization hooks.
 
 ### `@adapttable/react/features`
 

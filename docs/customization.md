@@ -387,7 +387,7 @@ highlight.flashRow(saved.id);
 
 There is no new prop for this on purpose. `rowClassName` already reaches
 every adapter, so the highlight is a class you compute — which means it works
-in all nine kits and looks like the rest of your design system rather than
+in every kit and looks like the rest of your design system rather than
 like ours.
 
 Marks are keyed by row id, so one survives the sort, filter or page change
