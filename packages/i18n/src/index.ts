@@ -30,6 +30,7 @@ export { hi } from "./locales/hi";
 export { it } from "./locales/it";
 export { ja } from "./locales/ja";
 export { ko } from "./locales/ko";
+export { pl } from "./locales/pl";
 export { pt } from "./locales/pt";
 export { ru } from "./locales/ru";
 export { tr } from "./locales/tr";
