@@ -3,10 +3,10 @@
 ▶ **See it working:** [collapse column groups in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/column-groups/) — one table, three groups, open by default: Contact folds to a chevron, Assignment keeps Team, Delivery shows a money-for-days brief (`align: "start"`). Actions stays ungrouped at the end. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 A parent with `children` is a **column group**: one spanning header over its
-leaves. Collapse is per group — each parent decides what remains. Omit
-`collapsibleColumnGroups` and the headers stay static.
+leaves. Collapse is per group — each parent decides what remains. Without
+`collapsibleColumnGroups()` the headers stay static.
 
-This is not [row grouping](./row-grouping.md). Rows fold under a `groupBy`;
+This is not [row grouping](./row-grouping.md). Rows fold under `grouping("team")`;
 columns span under a parent header.
 
 **Related:** [Columns](./columns.md) · [Column management](./column-management.md)
@@ -19,6 +19,7 @@ reorder cannot split them.
 
 ```tsx
 import { DataTable, type ColumnInput } from "@adapttable/mantine";
+import { collapsibleColumnGroups } from "@adapttable/mantine/column-groups";
 
 const columns: ColumnInput<Person>[] = [
   {
@@ -51,9 +52,19 @@ const columns: ColumnInput<Person>[] = [
   data={rows}
   columns={columns}
   rowKey={(row) => row.id}
-  collapsibleColumnGroups
+  features={[collapsibleColumnGroups()]}
 />;
 ```
+
+| `ColumnGroupDef` field | Type                           | Default | Description                                                    |
+| ---------------------- | ------------------------------ | ------- | -------------------------------------------------------------- |
+| `header`               | `string`                       | —       | Group caption; required.                                       |
+| `children`             | `ColumnInput[]`                | —       | Leaves and nested groups; required.                            |
+| `headerTooltip`        | `string`                       | —       | Native tooltip on the group caption.                           |
+| `align`                | `"start" \| "center" \| "end"` | —       | Alignment of the group caption.                                |
+| `collapsedKey`         | `string`                       | —       | Child that stays visible while collapsed.                      |
+| `collapsedRender`      | `(row) => DisplayValue`        | —       | One cell shown while collapsed; wins over `collapsedKey`.      |
+| `marryChildren`        | `boolean`                      | `true`  | Keep the children together; `false` lets a reorder split them. |
 
 HTML-table kits (Mantine, MUI, Chakra, Radix, Base UI, unstyled) render the
 same tree with `rowSpan` on ungrouped leaves, so Actions sits beside Delivery
@@ -64,7 +75,8 @@ groups do not share one stroke.
 
 ## Collapse
 
-Pass `collapsibleColumnGroups` and each real group header gains a toggle. What
+Compose `collapsibleColumnGroups()` from `@adapttable/<kit>/column-groups` and
+each real group header gains a toggle. What
 a collapsed group shows is that group's own options — there is no table-wide
 mode.
 
@@ -95,7 +107,7 @@ blank data column.
 
 Adjacent leaves with the same `group` still span under one header. A string is
 one level; a path stacks rows. That shortcut is **presentational**: a reorder
-that breaks adjacency splits the span, and collapse (when armed) is an arrow
+that breaks adjacency splits the span, and collapse (with `collapsibleColumnGroups()`) is an arrow
 stub unless a child sets `groupShow`. Prefer a tree parent when the group has
 collapse options or must stay married.
 

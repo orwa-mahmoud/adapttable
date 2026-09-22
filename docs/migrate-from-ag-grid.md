@@ -101,7 +101,7 @@ Grid-level (`<AgGridReact>` → `<DataTable>`):
 | `sortable` (default true)           | `sortable` (default false)                                      | Opt-in instead of opt-out.                         |
 | `comparator`                        | `sortValue`                                                     | Extract a comparable primitive.                    |
 | `filter: "agTextColumnFilter"` etc. | `filter: "text"` / `"select"` / `"numberRange"` / `"dateRange"` | Widgets + chips derived from the declaration.      |
-| `flex` / `width` / `minWidth`       | `width`                                                         | —                                                  |
+| `flex` / `width` / `minWidth`       | `flex` / `width` / `minWidth` (+ `maxWidth`)                    | Same names.                                        |
 | `pinned: "left" \| "right"`         | pinning via `columnMenu()` + `columnLayout`                     | Logical sides — RTL-correct.                       |
 | `hide`                              | `columnMenu()` + `columnLayout`                                 | User-facing visibility lives in the menu.          |
 | `resizable` (default true)          | `resizableColumns()` (table-level)                              | —                                                  |

@@ -29,8 +29,9 @@ import { toOpenAITools } from "@adapttable/ai/openai";
 import { mcpListChanged, toMcpResources, toMcpTools } from "@adapttable/ai/mcp";
 ```
 
-The root entry stays React-free. `@adapttable/ai-react` is only for
-`tableAgent`. The three integration subpaths never import a model SDK.
+The root entry stays React-free. `@adapttable/ai-react` holds the React
+binding (`tableAgent`, `useTableAssistant`, `useSpeechInput`). The JSON,
+OpenAI and MCP subpaths never import a model SDK.
 
 ## Three integration levels
 
@@ -150,9 +151,11 @@ Host write-safety chrome (not on the envelope):
 - `approval`: `"writes"` | `"destructive"` | `"never"` (default `"writes"`)
 - `commit`: `"stage"` | `"immediate"` (default `"stage"`)
 
-Stage records a proposal in the host edit callback. Immediate persists
-through that same callback. Approve, then Save, then Undo — the table
-never owns the data.
+Stage hands `edit.cells` to the host's `stageCells` callback, the table's
+dirty path. Immediate calls `editCells` and the add, delete and reorder
+callbacks directly. `rows.add`, `rows.delete` and `rows.reorder` have no
+staging path and return `commit-incompatible` under `"stage"`. Approve, then
+Save, then Undo — the table never owns the data.
 
 ## JSON, OpenAI, MCP
 
@@ -165,8 +168,8 @@ from `@adapttable/ai/json`.
 replace each `.` in a catalog key with `_` (`view.setPage` →
 `view_setPage`) because OpenAI function names cannot contain dots.
 `executeOpenAITool` maps those names back, and still accepts the dotted
-catalog key. Deferred `execute` requires both `key` and `args` (`args` is
-a JSON string under `strict`). Strict mode lists every property in
+catalog key. Deferred `execute` requires both `key` and `args`, a JSON-encoded string of
+the capability arguments. Strict mode lists every property in
 `required`, forbids open maps, and treats originally-optional fields as
 nullable.
 
@@ -211,6 +214,31 @@ requires the host's exact origin: a handshake posted to `"*"` would announce
 the table's contract to whatever else is listening. `approveThroughHost` and
 `askThroughHost` use the host's elicitation when it advertises one and return
 nothing when it does not, leaving the table's own approval in charge.
+
+```ts
+import type { ApprovalSubject } from "@adapttable/ai";
+import { toMcpTools } from "@adapttable/ai/mcp";
+import {
+  approveThroughHost,
+  createMcpAppBridge,
+  mcpAppResource,
+  withMcpAppMeta,
+} from "@adapttable/ai/mcp-apps";
+
+// Server: list the view, and point each tool at it.
+const resource = mcpAppResource(session, {
+  src: "https://view.example/table/",
+  security: { connectDomains: ["https://api.example"] },
+});
+const tools = withMcpAppMeta(toMcpTools(session), session);
+
+// View: talk to the embedding host, and only to it.
+const bridge = createMcpAppBridge({ hostOrigin: "https://host.example" });
+await bridge.initialize();
+// Resolves undefined when the host advertises no elicitation.
+const askHost = (subject: ApprovalSubject) =>
+  approveThroughHost(bridge, subject);
+```
 
 ### WebMCP — an agent in the page
 
@@ -263,7 +291,9 @@ its `STATE_SNAPSHOT` and then RFC 6902 `STATE_DELTA`s, and the conversation its
 `MESSAGES_SNAPSHOT`. A `RUN_FINISHED` interrupt with `reason: "confirmation"`
 becomes an `ApprovalSubject` and resumes with `resume[{ interruptId, status,
 payload }]`; `input_required` becomes a question for the reader. A tool call
-this table does not own is left to whoever registered it.
+this table does not own is left to whoever registered it. `AgUiOptions` also
+takes `askUser`, `threadId`, `maxRuns`, `presentation`, `context`,
+`contextInputs` and `onEvent`; `aguiTools` returns the tool definitions alone.
 
 ### AI SDK — client tools on your own route
 
@@ -285,6 +315,18 @@ sends. `tool-approval-request` becomes an `ApprovalSubject` and answers as an
 approval response; `output-denied` carries the reject reason. A stream that
 declares a version this adapter does not speak is refused with
 `unknown-stream-version` rather than parsed as though it were one it does.
+
+```ts
+import { aiSdkTransport } from "@adapttable/ai/ai-sdk";
+
+const transport = aiSdkTransport({
+  // POST the request to your route and yield its UI message stream parts.
+  connection: { run: (request, signal) => yourRoute(request, signal) },
+});
+```
+
+`AiSdkOptions` also takes `onApprove`, `presentation`, `context`,
+`contextInputs`, `maxRequests` and `onPart`.
 
 ## Examples
 

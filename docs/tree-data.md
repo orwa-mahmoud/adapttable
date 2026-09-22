@@ -1,34 +1,40 @@
 # React table tree data — hierarchical rows with expand/collapse
 
 Some data is a hierarchy before anyone asks a question of it: a folder holds
-files, a task has subtasks, an account rolls up to a parent. Pass `getChildren`
-(nested data) or `getParentId` (a flat list with a parent column) and the table
-renders that hierarchy — one chevron per parent, one indent step per level, in
-every adapter.
+files, a task has subtasks, an account rolls up to a parent. Compose `tree()`
+from `@adapttable/<kit>/tree` with `getChildren` (nested data) or `getParentId`
+(a flat list with a parent column) and the table renders that hierarchy — one
+chevron per parent, one indent step per level, in every adapter that ships the
+subpath (all except `@adapttable/bootstrap`).
+
+▶ **See it working:** [tree data in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/tree/) — the same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 ```tsx
+import { DataTable } from "@adapttable/mantine";
+import { tree } from "@adapttable/mantine/tree";
+
 <DataTable
   data={FILES}
   columns={columns}
   rowKey={(row) => row.id}
-  getChildren={(row) => row.children}
-/>
+  features={[tree({ getChildren: (row) => row.children })]}
+/>;
 ```
 
-Without either prop the table is the flat list it always was. Nothing is a mode
-to switch on: a tree is declared by the data.
+Without the `tree()` feature the table renders a flat list. The shape comes from
+the data: `tree()` only says how to read it.
 
 ## A tree is not a grouping
 
 They look alike and behave nothing alike, so AdaptTable ships them as two
 models rather than one with a flag:
 
-|                            | `groupBy`                 | `getChildren` / `getParentId` |
-| -------------------------- | ------------------------- | ----------------------------- |
-| Where the shape comes from | a value the reader picked | the rows themselves           |
-| Re-sorting a column        | regroups                  | leaves the hierarchy alone    |
-| Depth                      | the grouping keys         | whatever the data has         |
-| A parent row               | a synthetic header        | a real row with real cells    |
+|                            | `grouping()` / `groupingPanel()` | `tree({ getChildren \| getParentId })` |
+| -------------------------- | -------------------------------- | -------------------------------------- |
+| Where the shape comes from | a value the reader picked        | the rows themselves                    |
+| Re-sorting a column        | regroups                         | leaves the hierarchy alone             |
+| Depth                      | the grouping keys                | whatever the data has                  |
+| A parent row               | a synthetic header               | a real row with real cells             |
 
 Sharing one implementation would mean either grouping that cannot express a
 real hierarchy, or a tree that reshuffles when someone sorts a column. A table
@@ -36,10 +42,10 @@ may use both — group a tree by a column and the groups hold trees.
 
 ## Which column carries the chevron
 
-The first column, unless `treeColumn` names another:
+The first visible column, unless `treeColumn` names another:
 
 ```tsx
-<DataTable {...props} getChildren={getChildren} treeColumn="name" />
+<DataTable {...props} features={[tree({ getChildren, treeColumn: "name" })]} />
 ```
 
 The chevron and the indent go in that column's cell, wrapping its content — so
@@ -57,9 +63,9 @@ const [expandedIds, setExpandedIds] = useState<string[]>(["src"]);
 
 <DataTable
   {...props}
-  getChildren={getChildren}
-  expandedIds={expandedIds}
-  onExpandedIdsChange={setExpandedIds}
+  features={[
+    tree({ getChildren, expandedIds, onExpandedIdsChange: setExpandedIds }),
+  ]}
 />;
 ```
 
@@ -76,7 +82,7 @@ with `getParentId` and the table assembles the hierarchy itself:
   data={rows} // [{ id: "1" }, { id: "2", parentId: "1" }]
   columns={columns}
   rowKey={(row) => row.id}
-  getParentId={(row) => row.parentId}
+  features={[tree({ getParentId: (row) => row.parentId })]}
 />
 ```
 
@@ -93,12 +99,16 @@ browser has not fetched, and what to do when one is opened:
   data={rows}
   columns={columns}
   rowKey={(row) => row.id}
-  getChildren={(row) => row.children}
-  hasChildren={(row) => row.childCount > 0}
-  onLoadChildren={async (row) => {
-    const children = await fetchChildren(row.id);
-    setRows((current) => withChildren(current, row.id, children));
-  }}
+  features={[
+    tree({
+      getChildren: (row) => row.children,
+      hasChildren: (row) => row.childCount > 0,
+      onLoadChildren: async (row) => {
+        const children = await fetchChildren(row.id);
+        setRows((current) => withChildren(current, row.id, children));
+      },
+    }),
+  ]}
 />
 ```
 
@@ -109,8 +119,9 @@ reads; the table re-walks the hierarchy itself and needs nothing back.
 
 The node **opens immediately** and shows it is working: its chevron carries
 `data-loading` and `aria-busy` until the rows land, so nobody is left clicking a
-control that appears to do nothing. A rejection clears the flag and leaves the
-node closed and clickable, so the retry is the same gesture as the first attempt.
+control that appears to do nothing. A rejection clears the flag, records the node
+in `failedIds`, and leaves it open with nothing under it; the next click closes
+it, and opening it again retries the fetch.
 
 Headless: `useLazyChildren` holds the state (`LazyChildrenState`, options
 `UseLazyChildrenOptions`) and the table's tree bundle exposes `loadingIds` and
@@ -123,11 +134,13 @@ so a large hierarchy belongs to the side that has the data. Declare the
 capability and hand the source the open set:
 
 ```tsx
+import { DataTable, useQuerySource } from "@adapttable/mantine";
+import { tree } from "@adapttable/mantine/tree";
+
 const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
 const source = useQuerySource<Node, Params, Page>({
-  queryKey: ["files", expandedIds],
-  queryFn: fetchFiles,
+  usePaginatedQuery: useFilesQuery,
   supports: { tree: true },
   expandedIds,
 });
@@ -136,10 +149,14 @@ const source = useQuerySource<Node, Params, Page>({
   source={source}
   columns={columns}
   rowKey={(row) => row.id}
-  getParentId={(row) => row.parentId}
-  hasChildren={(row) => row.childCount > 0}
-  expandedIds={expandedIds}
-  onExpandedIdsChange={setExpandedIds}
+  features={[
+    tree({
+      getParentId: (row) => row.parentId,
+      hasChildren: (row) => row.childCount > 0,
+      expandedIds,
+      onExpandedIdsChange: setExpandedIds,
+    }),
+  ]}
 />;
 ```
 
@@ -162,52 +179,71 @@ which folds the same nodes. A phone gets a tree, not a flattened list.
 
 ▶ **See it working:** [nested tables in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/nested-tables/) — open a person onto their orders; the inner table is the same component. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
-`renderRowDetail` gives a blank panel, and a table built by hand in one has none
+`rowDetail()` gives a blank panel, and a table built by hand in one has none
 of the sorting, filtering, selection, keyboard navigation or accessibility the
-outer table has. `nestedTable` puts the same component in there instead:
+outer table has. `nestedTable()` from `@adapttable/<kit>/nested-table` puts the
+same component in there instead:
 
 ```tsx
+import { DataTable } from "@adapttable/mantine";
+import { nestedTable } from "@adapttable/mantine/nested-table";
+
 <DataTable
   data={people}
   columns={columns}
   rowKey={(row) => row.id}
-  nestedTable={(row) => ({
-    label: `Orders for ${row.name}`,
-    table: (defaults) => (
-      <DataTable
-        {...defaults}
-        data={row.orders}
-        columns={orderColumns}
-        rowKey={(order) => order.id}
-      />
-    ),
-  })}
-/>
+  features={[
+    nestedTable((row) => ({
+      label: `Orders for ${row.name}`,
+      table: (defaults) => (
+        <DataTable
+          {...defaults}
+          data={row.orders}
+          columns={orderColumns}
+          rowKey={(order) => order.id}
+        />
+      ),
+    })),
+  ]}
+/>;
 ```
 
 The child rows keep their own type — the closure holds it, so nothing is erased
-at a prop boundary — and the row gets the same expand chevron `renderRowDetail`
+at a prop boundary — and the row gets the same expand chevron `rowDetail()`
 gives it.
 
 `defaults` carries what a table inside a row cannot do without: `urlSync: false`
 (two tables writing `?page=` fight over one URL, and the loser silently resets
 while the reader is using it), `searchable: false` (a second search box inside a
 row reads as chrome, not as a feature — pass `searchable` after the spread to
-keep it), and the parent's `density` and `labels`. Spread them first and override
-anything after.
+keep it), the parent's `density` and `labels`, and `tableLabel` (the `label` you
+gave, "Row details" when omitted). Spread them first and override anything
+after.
 
-Return `undefined` for a row with no nested table. With `renderRowDetail` also
-set, those rows fall back to it, so master/detail and nested tables can live in
-one table. The region carries `data-adapttable-part="nested-table"` and is
-announced with the label you gave it. `defaultExpandedRowIds` opens those rows
-on the first render so the inner table is visible without a click.
+Return `undefined` for a row with no nested table. With `rowDetail(render)`
+composed beside it, those rows fall back to that panel, so master/detail and
+nested tables can live in one table. The region carries
+`data-adapttable-part="nested-table"` and is announced with the label you gave
+it. The second argument, `nestedTable(nested, defaultExpandedRowIds)`, opens
+those rows on the first render so the inner table is visible without a click.
 
 ## Reorder siblings or change parent
 
 Compose the kit's `rowReorder` feature with `tree`. Before/after drops reorder
 rows that already share a parent; the ordinary reorder handler receives
 sibling positions. A middle drop, **Move under…**, or **Move to top level**
-uses `onTreeMove(row, fromParent, toParent, position)`.
+uses `onTreeMove(row, fromParent, toParent, position)`, passed in the second
+argument of `rowReorder`:
+
+```tsx
+import { rowReorder } from "@adapttable/mantine/row-reorder";
+import { tree } from "@adapttable/mantine/tree";
+
+features={[
+  tree({ getParentId: (row) => row.parentId }),
+  rowReorder(onRowReorder, { onTreeMove, movePolicy: "confirm" }),
+]}
+```
 
 Set `movePolicy` to `"auto"`, `"confirm"`, or `"never"` (the default).
 Confirmation is kit-native and restores focus to its menu trigger; a host can
@@ -243,18 +279,19 @@ your own body:
 - `bodyRowEntries(rows, tree)` → `BodyRowEntry<TRow>[]` — the rows a body
   renders: the tree's visible entries when a tree is armed, the windowed rows
   otherwise. One `.map` either way.
-- `TreeCell` (on each adapter, props `TreeCellProps<TRow>`) — wraps the
+- `TreeCell` (on the antd, Base UI, Chakra, Mantine, MUI, Radix and unstyled
+  adapters, props `TreeCellProps<TRow>`) — wraps the
   tree column's cell in its chevron and its indent, and passes every
   other column through untouched. The indent goes on the wrapper around the
   content, so a name moves with its depth rather than sitting at the same margin
   as its parent's. Layout is `TreeCellChrome` on `@adapttable/react/adapter`.
-- `TreeToggle` (on each adapter, props `TreeToggleProps<TRow>`) — the
+- `TreeToggle` (on the same adapters, props `TreeToggleProps<TRow>`) — the
   chevron itself: `aria-expanded`, a localized accessible name, and an
   equal-width spacer on a leaf. Layout is `TreeToggleChrome`.
 
 ## Styling hooks
 
-`@adapttable/unstyled` and `@adapttable/shadcn` stamp `data-adapttable-part` on
-each piece: `tree-cell` (the indented wrapper), `tree-toggle` (the chevron), and
-`tree-spacer` (a leaf's placeholder). A node whose children are loading carries
-`data-loading` on its toggle.
+Every adapter stamps `data-adapttable-part` on each piece: `tree-cell` (the
+indented wrapper), `tree-toggle` (the chevron), and `tree-spacer` (a leaf's
+placeholder). A node whose children are loading carries `data-loading` and
+`aria-busy` on its toggle.

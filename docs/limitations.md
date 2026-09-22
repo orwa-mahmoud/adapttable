@@ -43,11 +43,11 @@ host array; it is not a URL or Saved Views parameter.
 A `TableSource` declares what it can retrieve. The table does not invent
 the rest:
 
-| Capability    | When it is false                                                                                                                                          |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fullDataset` | The browser holds the current page. `rows.read` with `scope: "full"` is denied. Export-all needs a source-owned `allFilteredRows` route or `onExportAll`. |
-| `grouping`    | `groupBy` is ignored and the status bar says why.                                                                                                         |
-| `exportScope` | The Export control is disabled with the reason on it.                                                                                                     |
+| Capability            | When it is not granted                                                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fullDataset: false`  | The browser holds the current page. `rows.read` with `scope: "full"` is denied. Export-all needs a source-owned `allFilteredRows` route or `onExportAll`, `request` or `fetchAll`. |
+| `grouping: false`     | `grouping()` is not applied, and a `grouping-unavailable` notice says why in the status strip.                                                                                     |
+| `exportScope: "page"` | `scope: "all"` with no host route renders the Export control disabled, with the reason on it.                                                                                      |
 
 Declared in [data tiers](./data-tiers.md). Copied, never re-inferred, into
 the agent manifest ([adaptive capabilities](./agent-capabilities.md)).
@@ -70,6 +70,13 @@ Browser `fetchAll` export walks the current query up to
 and does not write a file that pretends to be complete. Beyond that,
 `onExportAll` is a host job. [Exporting](./exporting.md).
 
+## URL state and page size
+
+One table's URL state — and therefore one saved view — holds at most 8,192
+encoded characters (`MAX_TABLE_URL_STATE_LENGTH`); see
+[URL state](./url-state.md). `limit` is clamped to 1–500 (`MAX_LIMIT`);
+see [pagination](./pagination.md).
+
 ## Bundle entrypoints
 
 Sizes are minified + gzipped AdaptTable bytes. React and the UI kit are
@@ -77,10 +84,11 @@ external — an application already ships them. The method is packed
 consumer fixtures in `scripts/bundle-budget.mjs`.
 
 - A published adapter's base `DataTable` is held to **≤ 80 KB**
-  (`PLAIN_ADAPTER_CEILING_KB`) and at least 35% under that kit's item-1
-  baseline. Omitted feature markers must be absent from the base graph.
-- Optional features arrive with their import. `standardFeatures()`
-  includes only factories that run with no required argument.
+  (`PLAIN_ADAPTER_CEILING_KB`) and at least 35% under that kit's recorded
+  pre-v3 size (`scripts/consumer-fixtures.mjs`). Omitted feature markers must be absent from the base graph.
+- Optional features arrive with their import. Called with no argument,
+  `standardFeatures()` composes only zero-argument factories; its options
+  add grouping, bulk actions, filters and saved views.
 - `@adapttable/ai` is a separate package. Eleven base graphs contain none
   of `createAgentSession`, `tableAgent`, `adapttable.agent.v1` or
   `@adapttable/ai` (`scripts/ai-isolation.mjs`).
@@ -105,13 +113,17 @@ The per-PR Playwright project is **Chromium** against the built showcase
 run on the nightly/pre-release workflow
 (`.github/workflows/e2e-nightly.yml`), not on every PR. Chromium visual
 baselines live in `e2e/visual/` and are compared on that same nightly
-job. An axe audit walks every kit landing plus key feature pages
-(`e2e/axe-audit.spec.ts`) and fails on serious or critical findings.
+job. An axe audit walks five feature pages per published kit — filtering,
+accessibility, mobile cards, saved views and pivot; antd's accessibility
+page is covered by `e2e/aria-parity.spec.ts` — and fails on serious or
+critical findings (`e2e/axe-audit.spec.ts`).
 
 The table is a client component. During SSR there is no `window` or
 `matchMedia`: pass `forceMobile` so server and first paint agree, and
 pass `createMemoryAdapter(search)` so URL state does not touch History.
-`@adapttable/i18n` is the one package without `"use client"`.
+`@adapttable/react`, `@adapttable/ai-react` and every adapter carry
+`"use client"`; `@adapttable/core`, `@adapttable/i18n`, `@adapttable/ai`,
+`@adapttable/server` and `@adapttable/cli` do not.
 [SSR & RSC](./ssr-rsc.md).
 
 `@adapttable/bootstrap` is private and unpublished. “All eight adapters”
@@ -138,9 +150,10 @@ a fix was attempted and failed. None is listed.
 
 - A spreadsheet host. Formula, pivot, fill and range paste are parts you
   compose; they are not one locked workbook surface.
-- A hosted agent service. `@adapttable/ai` ships no model SDK, API key
-  or chat UI. Core, every adapter root and `@adapttable/server` import
-  none of those.
+- A hosted agent service. `@adapttable/ai` ships no model SDK and holds
+  no API key; the opt-in `@adapttable/<kit>/assistant` panel talks to a
+  model the host provides. Core, every adapter root and
+  `@adapttable/server` import none of it.
 - A data store. There is no built-in backend, auth or sync.
 - A config-object API. Features are imports and callbacks, not a second
   options bag with synonyms.
@@ -156,6 +169,7 @@ a fix was attempted and failed. None is listed.
 | `readMax` default 50                     | `packages/ai/src/session.ts` `readMaxOf`                                                                 |
 | Virtualize DOM count                     | [virtualization](./virtualization.md)                                                                    |
 | Export 50,000 cap                        | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                  |
+| URL-state 8,192 cap, `limit` 1–500       | `MAX_TABLE_URL_STATE_LENGTH` in `packages/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`                    |
 | Adapter ≤ 80 KB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                             |
 | AI absent from base graphs               | `scripts/ai-isolation.mjs`                                                                               |
 | Perf baseline                            | `scripts/v3-perf-baseline.json`                                                                          |

@@ -43,8 +43,8 @@ Actions all work without an adapter — and returns a `ServerTableQuery`:
 | `offset`         | `(page - 1) * limit`, computed once so every caller does not |
 | `search`         | the free-text query, absent when there was none              |
 | `sort`           | the multi-sort chain, outermost first                        |
-| `groupBy`        | the grouping column, when the schema allows it               |
-| `filters`        | column filters, keyed by column                              |
+| `groupBy`        | a single grouping column, when the schema allows it          |
+| `filters`        | column filters, keyed by the name after `f_`                 |
 | `filterTree`     | the advanced AND/OR tree                                     |
 | `pivot`          | the [pivot configuration](./pivot.md)                        |
 | `pivotCollapsed` | the folded pivot groups, by collapse key                     |
@@ -67,6 +67,30 @@ the request.
 ```
 
 A schema cannot raise `maxLimit` past the table's own ceiling of 500.
+
+The parser reads `q`, `page`, `limit`, `sort` (or `sortBy` + `sortDir`),
+every `f_*` param, `groupBy`, `ft`, `pivot` and `cursor`, each under the
+`<urlKey>.` prefix when `urlKey` is set. Session-only params — `groupAgg`,
+`groupClosed`, `rowPin`, `formula`, `density`, the `col*` layout — are not
+read.
+
+Three encodings need care, because the parser checks names exactly as they
+appear after `f_` and in `groupBy`:
+
+- **Range filters** arrive under their bound keys: a `numberRange` on
+  `budget` writes `f_budgetMin` / `f_budgetMax`, a `dateRange` on `hiredAt`
+  writes `f_hiredAtFrom` / `f_hiredAtTo`. List those keys in `columns`
+  (`["budget", "budgetMin", "budgetMax"]`), or they are rejected as
+  `not a filterable column`.
+- **Multi-value filters** (`multiSelect`, checklist) arrive as one
+  comma-separated string with each entry percent-encoded, because that is
+  how the table writes them. Split and decode them yourself:
+  `value.split(",").map(decodeURIComponent)`. A repeated param is returned as
+  an array.
+- **Nested grouping** (`groupBy=team,status`) is compared as one name and
+  rejected as `not a groupable column`; only a single-column `groupBy`
+  passes. Read the raw param yourself when the table groups by more than one
+  column.
 
 ## Forgiving by default, strict on request
 
@@ -116,7 +140,7 @@ a query string or `URLSearchParams` — plus a `QuerySchema`, and returns a
 
 `QuerySchema` is the allowlist: `columns`, `maxLimit`, `defaultLimit`,
 `urlKey`. `ServerTableQuery` is the table above, where `filters` values are
-`ServerFilterValue` (one string, or several for a checklist), `pivotCollapsed`
+`ServerFilterValue` (one string, or an array for a repeated param), `pivotCollapsed`
 is absent rather than empty when nothing is folded, and `rejected` is a list of
 `QueryRejection` — each carrying the `param` it came from, the `value` that
 arrived, and the `reason` it was refused.
@@ -137,15 +161,19 @@ It exports the `ft=1.{…}` codec (`parseFilterTree`, `serializeFilterTree`,
 `isActiveFilterTree`, `FILTER_TREE_PARAM`, `FILTER_TREE_VERSION`), the
 `pivot=rows:…` codec (`serializePivot`, `deserializePivot`, and
 `serializePivotState` / `deserializePivotState` for the folded groups as well),
-`isFilterGroup` for walking a tree, and the types those speak in —
-`QueryCondition`, `QueryFilterGroup`, `SortLevel`, `SortDirection`,
-`PivotConfig`, `PivotMeasure` and `PivotUrlState`.
+the `formula=` codec (`serializeFormulaColumns`, `deserializeFormulaColumns`
+— it yields formula text and never evaluates it), `isFilterGroup` for walking
+a tree, and the types those speak in — `QueryCondition`, `QueryFilterGroup`,
+`SortLevel`, `SortDirection`, `SortableValue`, `DisplayValue`, `PivotConfig`,
+`PivotMeasure`, `PivotUrlState`, `FormulaColumnSpec`, `FormulaValue`,
+`AggregateName`, `AggregateOrderedValue` and `Aggregator`.
 
-Every one of those names is also on `@adapttable/core`, from the same source
-module. The narrow entry leaves out the hooks, which is what lets it carry no
-`"use client"` boundary and no React import at all — so it loads in a process
-that has never installed React, and the encoding it reads is the same one the
-table wrote.
+Every one of those names is also on `@adapttable/core`,
+`@adapttable/core/pivot` or `@adapttable/core/formula`, from the same source
+module. The narrow entry leaves out the engine, sources and models, so a
+backend loads only the codecs. Like every `@adapttable/core` entry it imports
+no React and carries no `"use client"` boundary, and the encoding it reads is
+the same one the table wrote.
 
 Reach for it when you want the pieces; reach for `parseTableQuery` when you
 want the allowlist, which is almost always.

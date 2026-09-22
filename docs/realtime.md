@@ -58,14 +58,14 @@ on 20,000 rows through the live Mantine table.
 
 ## Live patches over WebSocket or SSE
 
-`@adapttable/core/stream` is a separate entry, so a table that never opens
+`@adapttable/react/stream` is a separate entry, so a table that never opens
 a socket never downloads one. `useRowPatchStream` binds a WebSocket or an
 SSE endpoint to the rows you already own. Frames become ordinary row
 patches and go back through your setter — filters, sort, grouping and
 aggregates happen the way they do for any other change.
 
 ```tsx
-import { useRowPatchStream } from "@adapttable/core/stream";
+import { useRowPatchStream } from "@adapttable/react/stream";
 import { DataTable } from "@adapttable/mantine";
 
 function LiveTable({ initial, columns }) {
@@ -109,7 +109,8 @@ down either.
 ### Connection state
 
 `status` is one of `idle`, `connecting`, `open`, `reconnecting`, `error` or
-`closed`, with `error` carrying the reason. `isStreamLive` and
+`closed`. The hook also returns `error` (the reason, or `null`) and
+`close()`. `isStreamLive` and
 `isStreamSettled` are the two questions worth asking:
 
 |                |                                                            |
@@ -122,7 +123,8 @@ down either.
 | `closed`       | You closed it. Final.                                      |
 
 A dropped **WebSocket** is reopened here, after `reconnect.delayMs`
-(1000 ms by default) and at most `reconnect.maxAttempts` times. An
+(1000 ms by default) and at most `reconnect.maxAttempts` times (unlimited
+by default). An
 **EventSource** reconnects on its own, so it is left to do that and simply
 reported as `reconnecting` — retrying alongside it would give the server
 two subscriptions for one table.
@@ -137,8 +139,11 @@ useRowPatchStream({
 ```
 
 An authenticated connection, a wrapper, or a test double is
-`createWebSocket` / `createEventSource`. `openRowPatchStream` is the same
-connector without React — frames in, status out.
+`createWebSocket` / `createEventSource`; `protocols` passes WebSocket
+subprotocols. `onPatches` receives each frame's parsed patches before they
+are applied. `parseRowPatchFrame` is the default parser, exported for reuse
+in a custom `parse`. `openRowPatchStream` from `@adapttable/core/stream` is
+the same connector without React — frames in, status out.
 
 `enabled: false` keeps everything idle — nothing is opened, nothing retries.
 The table never owns your rows. `onPatch` hands you an updater, so it drops
@@ -157,12 +162,15 @@ It is off by default. `prefers-reduced-motion` is a hard opt-out of the
 pulse (unlike `useHighlight`, which still marks the row and holds it
 steady). An update is diffed, so a field sent back unchanged stays dark.
 An insert marks the whole row; a remove has no cells left to mark.
+`durationMs` sets how long a cell stays marked (1200 ms by default). The
+result also offers `isRowFlashing(rowId)`, `flashProps(rowId, columnKey)`
+for custom cells, and `clear()`.
 
 ```tsx
 import {
   useChangedCellFlash,
   useRowPatchStream,
-} from "@adapttable/core/stream";
+} from "@adapttable/react/stream";
 import { rowPatchLog } from "@adapttable/core";
 import { DataTable } from "@adapttable/mantine";
 

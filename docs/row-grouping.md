@@ -31,8 +31,10 @@ The first argument is an initial column key or ordered list; omit it to start
 with an empty strip. The second argument accepts the ordinary grouping extras,
 including `groupAggregates`, whose mapper has the **same signature as
 `summaryRow`**. Omit the factory and the table mounts neither grouping headers
-nor panel chrome. Plain `grouping()` remains the no-panel path for a host that
-deliberately fixes grouping in code. See [feature composition](./features.md).
+nor panel chrome. Plain `grouping("team")` from `@adapttable/<kit>/grouping` is
+the no-panel path for a host that deliberately fixes grouping in code, and the
+only grouping entry `@adapttable/bootstrap` ships. See
+[feature composition](./features.md).
 
 ## The grouping panel
 
@@ -123,8 +125,8 @@ Empty `operations` offers nothing. A custom `{ id, label, calculate }` is
 addressed by `id`; omit `calculate` for an operation only the backend can
 answer, and list that id on `supports.aggregateOperations`.
 
-`min` and `max` compare numbers as before, and also `Date` values and strict
-ISO date / datetime / time strings (`YYYY-MM-DD`, `YYYY-MM-DDTHH:mm:ssZ`,
+`min` and `max` compare numbers, `Date` values and strict ISO date / datetime /
+time strings (`YYYY-MM-DD`, `YYYY-MM-DDTHH:mm:ssZ`,
 `HH:mm`). Locale-dependent forms are skipped, not guessed. The winning
 original value is what `formatAggregate` receives — a number, a `Date`, or
 that ISO string — so a date column can format it without a numeric
@@ -136,8 +138,8 @@ with Count (or any allowed operation) stays selectable; the group's row
 count is not a substitute — missing values make those different.
 
 `groupAgg` encodes both the column key and the operation id, so custom ids
-with colons, commas, percents or Unicode round-trip. Built-in
-`budget:sum` URLs stay compatible.
+with colons, commas, percents or Unicode round-trip. A built-in operation
+encodes as `budget:sum`.
 
 A computed aggregate is a number, and a number under a money column should
 read as money. `formatAggregate` on the column says how one reads, and is
@@ -268,14 +270,12 @@ dataset, and the browser has a page of it. Declare the capability and the table
 sends the grouping keys with every query:
 
 ```tsx
+import { DataTable, useQuerySource } from "@adapttable/mantine";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
+
 const source = useQuerySource<Person, Params, Page>({
-  queryKey: ["people"],
-  queryFn: fetchPeople,
-  select: (page) => ({
-    rows: page.rows,
-    total: page.total,
-    groups: page.groups,
-  }),
+  usePaginatedQuery: usePeopleQuery,
+  selectPage: (page) => ({ rows: page.rows, total: page.total }),
   supports: { grouping: true, aggregates: true },
   aggregates: [{ key: "budget", fn: "sum" }],
 });
@@ -306,8 +306,11 @@ interface QueryGroupRow<TRow> {
 }
 ```
 
-Return them as `groups` on the source and the table renders them exactly as it
-renders local groups — same headers, same collapsing, same footers, same
+They reach the table through the `groups` field of a `TableSource`
+(`readonly groups?: readonly QueryGroupRow<TRow>[]`). `useQuerySource` and
+`useServerData` send the grouping request and leave `groups` unset, so a
+server-grouped tier is a `TableSource` that sets `groups` from the response.
+The table renders them exactly as it renders local groups — same headers, same collapsing, same footers, same
 selection. **The counts and aggregates are the server's**: a group of 4,000
 whose response carried 20 rows says 4,000, because counting what arrived would
 be a number the user can see is wrong.
@@ -388,6 +391,7 @@ extra bookkeeping.
 
 ```tsx
 import { groupingPanel } from "@adapttable/mantine/grouping-panel";
+import { useGroupCollapseUrlState } from "@adapttable/react";
 
 const groups = useGroupCollapseUrlState({ urlKey: "people" });
 
@@ -523,9 +527,9 @@ exactly as they did with one level.
 
 In the URL and in Saved Views the keys travel as one comma-separated value —
 `?groupBy=team,status`. Session aggregation overrides travel beside them as
-`groupAgg`, for example `groupAgg=budget:sum,headcount:count`. A link built
-before the panel existed still works, and `onGroupByChange` reports the keys as
-a list.
+`groupAgg`, for example `groupAgg=budget:sum,headcount:count`. A single key
+(`?groupBy=team`) and a list parse the same way, and `onGroupByChange` reports
+the keys as a list.
 
 ## Example
 
@@ -589,8 +593,8 @@ export function People() {
   neither — `capabilities.grouping: false`, declared or inferred — renders
   ungrouped, says so in the status bar and warns in development. See
   [source capabilities](./data-tiers.md#what-a-source-can-do--capabilities).
-- **Shared mapper.** `groupAggregates(rows)` uses the same
-  `(rows) => Partial<Record<string, ReactNode>>` shape as `summaryRow`; reuse
+- **Shared mapper.** `groupAggregates(rows)` uses the same `(rows) => cells`
+  shape as `summaryRow` (`SummaryRowFn` on `@adapttable/react`); reuse
   one function for both if the math is identical — or build both with
   `aggregate()` (below).
 - **Session aggregation overrides.** Each active column has its own operation.
@@ -631,7 +635,7 @@ cell:
 
 ```tsx
 const distinct = (values) => new Set(values).size;
-groupAggregates={aggregate({ team: distinct })}
+groupingPanel("team", { groupAggregates: aggregate({ team: distinct }) });
 ```
 
 Passing `columns` lets values resolve through a column's `sortValue`, exactly
@@ -657,7 +661,18 @@ Compose `groupingPanel` and the kit's `rowReorder` feature together. A reorder
 that stays inside one leaf group calls the ordinary handler with positions
 scoped to that group. Crossing a boundary — by drag, arrows, mobile controls,
 or **Move to group…** — calls
-`onGroupMove(row, fromGroup, toGroup, position)`.
+`onGroupMove(row, fromGroup, toGroup, position)`, passed in the second argument
+of `rowReorder`:
+
+```tsx
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
+import { rowReorder } from "@adapttable/mantine/row-reorder";
+
+features={[
+  groupingPanel("team"),
+  rowReorder(onRowReorder, { onGroupMove, movePolicy: "confirm" }),
+]}
+```
 
 `RowGroupRef.levels` gives the host every grouping column and raw destination
 value. `movePolicy` is `"never"` by default, `"confirm"` for a kit-native
@@ -670,14 +685,22 @@ confirmation, or `"auto"` for an immediate host write. See
 empty user-configurable panel, or pass a column key / ordered list. Companion
 options go in the second argument:
 
-| Field / prop                | Type                                                            | Default | Description                                                                                          |
-| --------------------------- | --------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
-| `groupBy` (1st arg)         | `string \| readonly string[]`                                   | `[]`    | Initial ordered grouping keys. The panel, composed column menu, URL, and source can change them.     |
-| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —       | Controlled change channel; falls back to `source.setGroupBy`.                                        |
-| `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —       | Per-group cells — **same signature as `summaryRow`**. Omit for headers without subtotals.            |
-| `collapsedGroupIds`         | `readonly string[]`                                             | —       | Controlled collapsed group keys (ephemeral — not URL-synced).                                        |
-| `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —       | Controlled collapse channel; uncontrolled mode uses internal state.                                  |
-| `labels`                    | `TableLabels`                                                   | English | Override group headers, panel controls, menu actions, aggregation names, and announcement templates. |
+| Field / prop                | Type                                                            | Default | Description                                                                                      |
+| --------------------------- | --------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------ |
+| `groupBy` (1st arg)         | `string \| readonly string[]`                                   | `[]`    | Initial ordered grouping keys. The panel, composed column menu, URL, and source can change them. |
+| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —       | Controlled change channel; falls back to `source.setGroupBy`.                                    |
+| `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —       | Per-group cells — **same signature as `summaryRow`**. Omit for headers without subtotals.        |
+| `groupSort`                 | `GroupSort<TRow>`                                               | —       | `"label"`, `"label-desc"`, `"count"`, `"count-desc"`, or `(a, b) => number` over `GroupNode`s.   |
+| `groupFilter`               | `(group: unknown) => boolean`                                   | —       | Keep only the groups this accepts; each call receives a `GroupNode<TRow>`.                       |
+| `groupFooters`              | `boolean`                                                       | `false` | Close every group with a footer row carrying its aggregates.                                     |
+| `groupPageSize`             | `number`                                                        | —       | Top-level groups shown before a "Show more groups" row.                                          |
+| `groupRowPageSize`          | `number`                                                        | —       | Rows shown per group before a "Show more in this group" row.                                     |
+| `onGroupLoadMore`           | `(groupKey: string) => void`                                    | —       | Server tier: fetch the rest of a group.                                                          |
+| `collapsedGroupIds`         | `readonly string[]`                                             | —       | Controlled collapsed group keys (ephemeral — not URL-synced).                                    |
+| `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —       | Controlled collapse channel; uncontrolled mode uses internal state.                              |
+
+`labels` on `DataTable` overrides group headers, panel controls, menu actions,
+aggregation names, and announcement templates.
 
 ## Grouped tables are a full-set view
 
@@ -697,27 +720,30 @@ structure the adapters do, at one level or nested:
 | `buildGroupedFlatModel` / `GroupedFlatEntry`   | Partition leaf rows into a flat list — group header, then its leaves (omitted when collapsed). |
 | `groupValueKey`                                | Stable, type-tagged string key for a group bucket (`5` and `"5"` never share one).             |
 | `useGroupCollapse` / `GroupCollapseState`      | Ephemeral collapse state — groups default to expanded; not URL-synced.                         |
-| `GroupAggregatesFn`                            | The `(rows) => Partial<Record<string, ReactNode>>` mapper shared with `summaryRow`.            |
+| `GroupAggregatesFn`                            | The `(rows) => Partial<Record<string, DisplayValue>>` mapper shared with `summaryRow`.         |
 | `formatGroupLabel`                             | The header label for a bucket value (localized blank-value fallback included).                 |
 | `groupSelectionState` / `HeaderSelectionState` | Tri-state for a group checkbox over its leaf ids — the same enum the header select-all uses.   |
 | `windowGroupedEntries`                         | Slice a flat grouped model to a virtual window (see [Virtualization](./virtualization.md)).    |
 
-The panel state is headless too. `GroupAggregateOverride` is
-`"sum" | "avg" | "min" | "max" | "count" | "none"`, and
+The panel state is headless too. `GroupAggregateOverride` is an
+`AggregateOperationId` (a built-in name or a custom operation id) or `"none"`,
+and
 `GroupAggregateOverrides` maps column keys to those choices.
 `serializeGroupAggregateOverrides` / `parseGroupAggregateOverrides` implement
 the `groupAgg` codec; `serializeAggregationDerivedKey` is the cache key for
 the same effective operations. `withGroupAggregateOverrides` overlays choices on a
 client mapper, and `withQueryAggregateOverrides` overlays them on server
-aggregate requests. Adapter authors build the panel with
-`GroupingPanelChrome` and its required slots.
+aggregate requests. `GroupingPanel` on `@adapttable/<kit>/grouping-panel` is the
+kit-wired panel for a host that places it itself; `useGroupPaging` (on
+`@adapttable/react`) holds the "show more" state. Adapter authors build the
+panel with `GroupingPanelChrome` and its required slots.
 
 ## Notes
 
-- Bucketing uses the column's `sortValue` when present, otherwise a path lookup
-  on the column key — never the JSX `accessor`.
-- Works on desktop rows and mobile cards, LTR and RTL, with and without
-  `virtualize` (virtual windows count collapsed groups as one row).
+- Bucketing uses the column's `groupValue`, then its `sortValue`, then a path
+  lookup on the column key — never the JSX `accessor`.
+- Works on desktop rows and mobile cards, LTR and RTL, with and without the
+  `virtualize()` feature (virtual windows count collapsed groups as one row).
 - The grouping panel configures row grouping and per-group aggregates.
   Pivoting remains a separate model — see [Pivot](./pivot.md).
 - Ant Design maps group headers onto its high-level `Table` via custom row

@@ -19,7 +19,7 @@ Features that are **paid** in MUI X but built into `@adapttable/mui`:
 - **Row virtualization** (Pro in v8) → `virtualize()`. Community `<DataGrid>` also
   caps pages at 100 rows; AdaptTable has no such cap.
 - **Multi-column sort** (Pro) → `multiSort()`.
-- **Multiple simultaneous filters** (Pro) → declarative `filters`, always
+- **Multiple simultaneous filters** (Pro) → declarative `filters([…])`, always
   multi-condition.
 - **Column resizing** (Pro) → `resizableColumns()`.
 - **Master-detail / detail panel** (Pro) → `rowDetail(fn)`.
@@ -61,7 +61,7 @@ DataGrid does.
 | `getRowId`                                           | `rowKey`                                                   | **Required** — `(row) => string`.                                      |
 | `sortModel` / `onSortModelChange`                    | `sortable` per column (+ `multiSort()`)                    | AdaptTable owns and applies sort state.                                |
 | `sortingMode: "server"`                              | `onQueryChange` (or `source`)                              | The consolidated query carries `sortBy`/`sortDir`.                     |
-| `filterModel` / `onFilterModelChange`                | column `filter` shorthand + table `filters`                | Widgets, chips, and URL params are derived for you.                    |
+| `filterModel` / `onFilterModelChange`                | column `filter` shorthand + `filters([…])`                 | Widgets, chips, and URL params are derived for you.                    |
 | `paginationModel` / `onPaginationModelChange`        | automatic (frontend) or `total` + `onQueryChange`          | No 100-row community cap.                                              |
 | `checkboxSelection` + `rowSelectionModel`            | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Multi-row selection is free; no `{ type, ids }` model to manage.       |
 | `getDetailPanelContent` (Pro)                        | `rowDetail(fn)`                                            | `(row) => ReactNode`.                                                  |
@@ -76,7 +76,7 @@ DataGrid does.
 | -------------------------------------- | ------------------------------------- | ------------------------------------------------------------- |
 | `field`                                | `key`                                 | Also the value path (dot paths supported).                    |
 | `headerName`                           | `header`                              | Auto-derived from `key` when omitted.                         |
-| `width` / `flex`                       | `width`                               | —                                                             |
+| `width` / `flex`                       | `width` / `flex`                      | Same names.                                                   |
 | `valueGetter: (value, row) => …`       | `accessor: (row) => …`                | AdaptTable reads the row directly — no v7/v8 signature churn. |
 | `valueFormatter` / `renderCell`        | `accessor` / `Cell`                   | `Cell` is a component receiving `{ row, rowIndex }`.          |
 | `type: "singleSelect"`, `valueOptions` | `filter: { type: "select", options }` | Turns the column into a native select filter.                 |
@@ -145,7 +145,7 @@ function PeopleTable({ people }: { people: Person[] }) {
 
 A big reason teams migrate is that each DataGrid major rewrites your code.
 If one of these breaking changes brought you here, the right column is what
-the same thing looks like in AdaptTable — where it hasn't changed since 1.0:
+the same thing looks like in AdaptTable:
 
 | DataGrid breaking change                                                                                                            | In AdaptTable                                                                  |
 | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
@@ -153,7 +153,7 @@ the same thing looks like in AdaptTable — where it hasn't changed since 1.0:
 | **`disableSelectionOnClick` renamed** to `disableRowSelectionOnClick` (v6)                                                          | selection never binds to row clicks; `onRowClick` is a separate, explicit prop |
 | **`rowSelectionModel` reshaped** in v8: a plain id array became `{ type: "include" \| "exclude", ids: Set }`                        | `onSelectionChange` hands you a plain `string[]` — no model object             |
 | **Row virtualization moved to Pro** in v8 (Community pages cap at 100 rows)                                                         | `virtualize()` — free, MIT, no page cap                                        |
-| **Multi-column sorting / multi-filters** gated behind Pro                                                                           | `multiSort()` and multi-condition `filters` — free                             |
+| **Multi-column sorting / multi-filters** gated behind Pro                                                                           | `multiSort()` and multi-condition `filters([…])` — free                        |
 | **Column resizing** gated behind Pro                                                                                                | `resizableColumns()` — free                                                    |
 
 One declarative API, semver-stable, and the features that keep moving behind

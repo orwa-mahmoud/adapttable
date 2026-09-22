@@ -22,8 +22,8 @@ import { exportCsv } from "@adapttable/mantine/export";
 />;
 ```
 
-`pdfWriter` is the production default for the export button: the same
-`exportCsv()` seam as [CSV and XLSX](./customization.md#export), the same
+`pdfWriter()` plugs into the export button through the same
+`exportCsv()` seam as [CSV and XLSX](./customization.md#export), with the same
 scopes (`page`, `all`, `selected`, `range`) and the same column subset.
 The button relabels itself **Export PDF** from `labels.exportFile("pdf")`.
 `buildTablePdf` is the same file, for a host assembling rows by hand.
@@ -38,7 +38,11 @@ group indents under RTL. `PrintLayoutOptions` / `PdfWriterOptions` /
 `PrintPageSize` / `PrintPageBreak` configure title, direction, paper and whether a
 top-level group starts a new page (`pageBreak: "group"`). Paper defaults
 to A4 landscape; direction inherits `document.documentElement.dir` when
-omitted, so print matches what the reader is looking at.
+omitted, so print matches what the reader is looking at. `PrintLayoutOptions` also takes `caption` (a
+visible caption when it should differ from `title`) and `lang` (the printed
+document's language). `printTable` and `buildTablePdf` also take
+`view` (grouped or tree `ExportViewEntry` rows) and `summary` (a grand-total
+row).
 
 What to print stays the host's call — the table never picks the rows for a
 dialog it cannot open. Compose `print(onPrint)` and Print becomes a palette command; pass

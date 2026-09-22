@@ -10,8 +10,10 @@ and toggle grouping and inline editing while you are there.
 <video src="https://orwa-mahmoud.github.io/adapttable/media/core/tour.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px"></video>
 
 AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
-your design system and you get a styled, sortable, filterable, paginated
-table with URL-synced state, selection + bulk actions, RTL, and dark mode.
+your design system and you get a styled, sortable, searchable, paginated
+table with URL-synced state, RTL, and dark mode. Filters, selection with bulk
+actions, and every other feature are opt-in imports composed in
+`features={[...]}`.
 
 ## Install
 
@@ -66,11 +68,11 @@ pnpm add @adapttable/core @adapttable/unstyled
 | ----------------- | --------------------------------------------------------------------- |
 | React / React DOM | `^18.0.0 \|\| ^19.0.0` (CI-tested on 18.3 / 19.0 / 19.2)              |
 | Mantine           | `^7.2.0 \|\| ^8 \|\| ^9`                                              |
-| MUI               | `^6 \|\| ^7 \|\| ^8 \|\| ^9`                                          |
+| MUI               | `^6.1.2 \|\| ^7 \|\| ^8 \|\| ^9`                                      |
 | Chakra UI         | `^3.13.0`                                                             |
 | Ant Design        | `^6`                                                                  |
 | Radix Themes      | `^3`                                                                  |
-| Base UI           | `^1`                                                                  |
+| Base UI           | `^1.6.0`                                                              |
 | Node.js           | `>=22.12.0` (packed releases are CI-tested on Node 22.12 and Node 24) |
 
 Each floor is the lowest version the adapter actually runs on — verified
@@ -257,13 +259,13 @@ The source for each lives in
   (show/hide, reorder, pin), resizing.
 - [Inline cell editing](./cell-editing.md) — compose `editing()`, kit-native
   editors, keyboard flow.
-- [Row reordering](./row-reordering.md) — opt-in `rowReorder`, Space-lift
+- [Row reordering](./row-reordering.md) — opt-in `rowReorder()`, Space-lift
+  keyboard, dataset-relative indices.
 - [Row pinning](./row-pinning.md) — sticky top and bottom rows, `{ top, bottom }` ids
 - [Pinned summary rows](./pinned-summary-rows.md) — host-owned totals outside the row model
 - [Row and column spanning](./row-spanning.md) — `getCellSpan`, one cell list per row
 - [Full-width and separator rows](./full-width-rows.md) — `extraRows`, host-injected slots
 - [Row styling and heights](./row-styling.md) — `rowStyle`, `rowHeight`, variable-height virtualizer
-  keyboard, dataset-relative indices.
 - [Filtering](./filtering.md) — every filter type, options sources, chips,
   popover vs drawer.
 - [Data tiers](./data-tiers.md) — server data without a query library

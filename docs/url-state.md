@@ -45,6 +45,7 @@ namespace and every param is prefixed (`people.q`, `orders.f_totalMin`, …):
 
 ```tsx
 import { DataTable } from "@adapttable/mantine";
+import { filters } from "@adapttable/mantine/filters";
 
 type Person = { id: string; name: string; status: string };
 type Order = { id: string; ref: string; total: number };
@@ -66,12 +67,14 @@ export function Dashboard({
         ]}
         rowKey={(r) => r.id}
         urlKey="people"
+        features={[filters([])]}
       />
       <DataTable
         data={orders}
         columns={[{ key: "ref" }, { key: "total", filter: "numberRange" }]}
         rowKey={(o) => o.id}
         urlKey="orders"
+        features={[filters([])]}
       />
     </>
   );
@@ -79,10 +82,11 @@ export function Dashboard({
 // → ?people.q=avery&people.page=2&people.atv=1&orders.f_totalMin=100&orders.atv=1
 ```
 
-The same `urlKey` option exists on `useFrontendData`, `useQuerySource`,
-`useTableUrlState`, `useColumnLayoutUrlState`, and `useSavedViews` for
-headless consumers. Omitting distinct `urlKey`s on shared-URL tables logs a
-development warning.
+The same `urlKey` option exists on `useFrontendData`, `useServerData`,
+`useQuerySource`, `useTableUrlState`, `useColumnLayoutUrlState`,
+`useDensityUrlState`, `useGroupCollapseUrlState`, `useRowPinningUrlState`, and
+`useSavedViews` for headless consumers. Omitting distinct `urlKey`s on
+shared-URL tables logs a development warning.
 
 ## URL adapters
 
@@ -101,8 +105,7 @@ interface UrlStateAdapter {
 - **`createMemoryAdapter(initial?)`** — in-memory; used for SSR, tests, and
   when URL sync is disabled (the table still gets fully working local state).
 
-Pass a custom adapter as `urlAdapter` on any `<DataTable>` (the headless
-hooks call the option `adapter`).
+Pass a custom adapter as `urlAdapter` on any `<DataTable>` or headless hook.
 
 ## Your router
 
@@ -225,7 +228,7 @@ modals or drawers where the address bar shouldn't change.
 | `q`                         | `q=avery`                      | Committed search term.                                                                                                                                                                                                                 |
 | `find`                      | `find=Ada`                     | Find-bar query (in-table walk). Empty or closed deletes the param; the current-match index is never stored.                                                                                                                            |
 | `page`                      | `page=3`                       | 1-based page; omitted at 1.                                                                                                                                                                                                            |
-| `limit`                     | `limit=50`                     | Page size, clamped to 1–500; omitted at the default (25).                                                                                                                                                                              |
+| `limit`                     | `limit=50`                     | Page size; a value outside 1–500 falls back to the default. Omitted at the default (25).                                                                                                                                               |
 | `sortBy` + `sortDir`        | `sortBy=name&sortDir=desc`     | Single-column sort (`sortDir` falls back to `asc`).                                                                                                                                                                                    |
 | `sort`                      | `sort=name:asc,age:desc`       | Multi-sort chain; supersedes `sortBy`/`sortDir` while present.                                                                                                                                                                         |
 | `groupBy`                   | `groupBy=team,status`          | Ordered row-grouping column keys, outermost first. Written by `groupingPanel()` and omitted when no grouping is active.                                                                                                                |
@@ -239,6 +242,12 @@ modals or drawers where the address bar shouldn't change.
 | `colOrder`                  | `colOrder=name,role,salary`    | Explicit column order.                                                                                                                                                                                                                 |
 | `colW`                      | `colW=name:220`                | Per-column pixel widths.                                                                                                                                                                                                               |
 | `colName`                   | `colName=name:Account%20owner` | User display names by stable column key.                                                                                                                                                                                               |
+| `colGroupCollapse`          | `colGroupCollapse=contact`     | Collapsed column groups (ids percent-encoded).                                                                                                                                                                                         |
+| `groupClosed`               | `groupClosed=Engineering`      | Collapsed row groups, by group key.                                                                                                                                                                                                    |
+| `rowPin`                    | `rowPin=id1:top,id2:bottom`    | Pinned rows and their edge.                                                                                                                                                                                                            |
+| `density`                   | `density=compact`              | Row density; omitted at the default.                                                                                                                                                                                                   |
+| `pivot`                     | `pivot=rows:…`                 | Pivot configuration and folded groups (see [pivot tables](./pivot.md)).                                                                                                                                                                |
+| `formula`                   | `formula=margin:…`             | User-typed formula columns, as text (see [formulas](./formulas.md)).                                                                                                                                                                   |
 
 With a `urlKey` every param is prefixed: `people.q`, `people.f_status`,
 `people.groupBy`, `people.groupAgg`, `people.colHide`, ….
@@ -265,23 +274,27 @@ empty one means "explicitly cleared".
 The codecs the table uses are published, so a route handler, a saved-view
 store, or a test can read and write the same URL without mounting a table.
 
-`parseTableUrlState(search)` reads a whole query string into table state;
-`updateTableUrlState(search, patch)` returns the next query string;
-`applyTableUrlState` and `captureTableUrlState` move that state on and off a
-live table.
+`parseTableUrlState(search, namespace)` returns one table's recognized
+params as `URLSearchParams`. `updateTableUrlState(search, namespace, mutate)`
+returns the next query string, preserving every unrelated param.
+`captureTableUrlState(search, namespace)` and
+`applyTableUrlState(search, savedSearch, namespace)` copy one table's state
+out of and into a query string. `namespace` is the param prefix: `"people."` for
+`urlKey="people"`, `""` for a table without one.
 
-Each param has a named constant and, where the value is not a plain string, a
-reader and a writer:
+The core params have named constants and, where the value is not a plain
+string, a reader and a writer:
 
 | Constant                                        | Reader / writer                                                        |
 | ----------------------------------------------- | ---------------------------------------------------------------------- |
-| `PARAM_PAGE`, `PARAM_LIMIT`                     | `readPage`, `readLimit`                                                |
+| `PARAM_PAGE`, `PARAM_LIMIT`, `MAX_LIMIT`        | `readPage`, `readLimit`                                                |
 | `PARAM_SEARCH`, `PARAM_FIND`                    | plain strings                                                          |
 | `PARAM_SORT_BY`, `PARAM_SORT_DIR`               | `readSortDir`; the chain is `readSortLevels` / `writeSortLevels`       |
 | `PARAM_GROUP_BY`, `PARAM_GROUP_AGGREGATES`      | ordered keys and the per-column overrides                              |
 | `PARAM_COL_HIDDEN`                              | `readColumnLayout` / `writeColumnLayout` cover the whole column layout |
 | `PARAM_DENSITY`, `PARAM_FORMULA`, `PARAM_PIVOT` | the density, formula-column and pivot codecs                           |
-| `f_<key>`                                       | `readExtra` / `writeExtra`                                             |
+| `FILTER_PREFIX` (`f_`)                          | `readExtra` / `writeExtra`; `isEmptyFilterValue`                       |
+| `PARAM_GROUP_CLOSED`                            | `readCollapsedGroups` / `writeCollapsedGroups`                         |
 | `ft`                                            | `readFilterTreeParam` / `writeFilterTreeParam`                         |
 | row pins                                        | `readRowPins` / `writeRowPins`                                         |
 

@@ -84,17 +84,17 @@ export function People() {
 
 ## Options
 
-| Prop / field  | Type                                                    | Default  | Description                                                                |
-| ------------- | ------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
-| `editing(fn)` | `(row: TRow, key: string, nextValue: unknown) => void`  | —        | First argument to `editing()`; its presence enables editing.               |
-| `editable`    | `boolean \| ((row: TRow) => boolean)`                   | —        | Whether this column can open an editor (still requires `editing()`).       |
-| `editor`      | `"text" \| "number" \| { type: "select"; options }`     | `"text"` | Widget for the active cell.                                                |
-| `editValue`   | `(row: TRow) => string`                                 | —        | Draft seed when the displayed cell is formatted but editing needs the raw. |
-| `parseValue`  | `(draft: string, row: TRow) => unknown`                 | —        | Turns the edited text into the value committed to your edit handler.       |
-| `labels`      | `TableLabels`                                           | English  | Override `editCell` for the activate control's accessible name.            |
-| `validate`    | `(value, row) => string \| undefined \| Promise<…>`     | —        | Column rule: return a message to reject the commit (see below).            |
-| `validateRow` | `(row) => string \| Record<string,string> \| undefined` | —        | Table rule over the row the edit would produce (cross-field).              |
-| `applyEdit`   | `(row, columnKey, value) => TRow`                       | spread   | How an edit lands on a row for `validateRow` to judge.                     |
+| Prop / field  | Type                                                    | Default  | Description                                                                                              |
+| ------------- | ------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `editing(fn)` | `(row: TRow, key: string, nextValue: unknown) => void`  | —        | First argument to `editing()`; its presence enables editing.                                             |
+| `editable`    | `boolean \| ((row: TRow) => boolean)`                   | —        | Whether this column can open an editor (still requires `editing()`).                                     |
+| `editor`      | `CellEditor` — see [the editor set](#the-editor-set)    | `"text"` | Widget for the active cell: text, number, boolean, date, datetime, time, select, multi-select or custom. |
+| `editValue`   | `(row: TRow) => string`                                 | —        | Draft seed when the displayed cell is formatted but editing needs the raw.                               |
+| `parseValue`  | `(draft: string, row: TRow) => unknown`                 | —        | Turns the edited text into the value committed to your edit handler.                                     |
+| `labels`      | `TableLabels`                                           | English  | Override `editCell` for the activate control's accessible name.                                          |
+| `validate`    | `(value, row) => string \| undefined \| Promise<…>`     | —        | Column rule: return a message to reject the commit (see below).                                          |
+| `validateRow` | `(row) => string \| Record<string,string> \| undefined` | —        | Table rule over the row the edit would produce (cross-field).                                            |
+| `applyEdit`   | `(row, columnKey, value) => TRow`                       | spread   | How an edit lands on a row for `validateRow` to judge.                                                   |
 
 ### Lifecycle events
 
@@ -228,7 +228,9 @@ picker, where choosing IS the gesture), `cancel`, `onKeyDown` (wire it to keep
 the keyboard flow; an editor that owns Enter simply does not call it for Enter),
 `onBlur`, and `focusRef` to point at what should take focus. `error`,
 `validating` and `errorId` are there so a component can mark itself invalid —
-the table renders the message either way.
+the table renders the message either way. `label` is the accessible name for
+the control, and `conflict` is set while a live-update conflict is open on the
+cell.
 
 The draft is a string, as it is for every editor; `parseValue` is still how a
 column turns it into whatever gets stored.
@@ -407,10 +409,16 @@ becomes the way in — the built-in **Edit** control stands down, and save and
 cancel still come from the open row:
 
 ```tsx
+import { DataTable } from "@adapttable/mantine";
+import { rowEditing } from "@adapttable/mantine/editing";
+import { rowActions } from "@adapttable/mantine/row-actions";
+
 const actions = [
   { key: "edit", label: "Edit", icon: <PencilIcon />, editsRow: true },
   { key: "delete", label: "Delete", onClick: remove },
 ];
+
+<DataTable {...props} features={[rowActions(actions), rowEditing(save)]} />;
 ```
 
 Such an action writes nothing itself, so it carries no `onClick`, and it renders
@@ -453,7 +461,15 @@ out the row. `rowEditIcons` changes that per control: a node is your own glyph,
 `false` asks for the label as text.
 
 ```tsx
-<DataTable {...props} rowEditIcons={{ save: <TickIcon />, cancel: false }} />
+import { DataTable } from "@adapttable/mantine";
+import { rowEditing } from "@adapttable/mantine/editing";
+
+<DataTable
+  {...props}
+  features={[
+    rowEditing(save, { rowEditIcons: { save: <TickIcon />, cancel: false } }),
+  ]}
+/>;
 ```
 
 Parts: `row-edit-begin`, `row-edit-actions`, `row-edit-save`, `row-edit-cancel`.
@@ -465,9 +481,9 @@ Headless: `useRowEditing` (`RowEditingState`, `RowEditDrafts`,
 `rowEditControls` (`RowEditControlsOptions` in, `RowEditControls` out)
 from `@adapttable/react/adapter`, `RowEditIcons` typing the glyph overrides,
 and `rowEditConflict` (`RowEditConflict` out) telling one row's controls that
-an answer is outstanding. `useEditConflict` grew `reconcileRow`
-(`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit, plus
-`reconcileBatch` (`ReconcileLiveBatchEdit` in) for a batch, and
+an answer is outstanding. `useEditConflict` returns `reconcileRow`
+(`ReconcileLiveRowEdit` in) and `isRowConflict` for the row unit, and
+`reconcileBatch` (`ReconcileLiveBatchEdit` in) for a batch;
 `CellConflictAsk` is what one field's notice needs, and `EditConflictChange`
 names each field that moved. Each adapter mounts `RowEditActions`
 (`RowEditActionsProps`) over `RowEditActionsChrome`, and resolves one row's
@@ -497,9 +513,8 @@ import { batchEditing } from "@adapttable/mantine/editing";
 />;
 ```
 
-`onBatchEdit` is called **once** per save through `batchEditing(handler)`, which
-is what lets the whole batch be
-one request — and makes it atomic if your endpoint treats it that way. A bar
+The `batchEditing` handler is called **once** per save, which is what lets the
+whole batch be one request — and makes it atomic if your endpoint treats it that way. A bar
 appears as soon as something is pending, with the count, Save all and Cancel all;
 it is a live region, so the count is heard as well as seen. Cancel restores
 everything at once, because nothing was ever applied.
@@ -511,6 +526,9 @@ rows". A value typed back to what it was stops counting. Changed cells carry
 Labels: `pendingRows(count)`, `saveAll`, `cancelAll` — localized in every locale.
 Parts: `batch-edit-cell`, `batch-edit-bar`, `batch-edit-count`,
 `batch-edit-save`, `batch-edit-cancel`.
+
+`batchEditing` is also its own entry, `@adapttable/<kit>/batch-editing`, for a
+table that wants only the batch mode.
 
 Headless: `useBatchEditing` (`BatchEditingState`, `BatchRowEdit`,
 `UseBatchEditingOptions`), with `BatchEditCell` on
@@ -560,7 +578,8 @@ do the list work.
 
 Changing which row sits where is the same one-way write: compose `rowReorder`
 and a grip appears. See [row reordering](./row-reordering.md).
-Compose `rowPinning` and pin actions appear. See [row pinning](./row-pinning.md).
+Compose `rowPinning({ onPinnedRowIdsChange })` and pin actions appear. See
+[row pinning](./row-pinning.md).
 
 **A delete asks first.** It goes through the same confirmation dialog a
 `rowActions` entry with a `confirm` block uses — `labels.deleteRow` as the title,
@@ -598,8 +617,9 @@ fades on its own says the change is safe when nobody checked.
 Off by default, because a mark is a claim about what the server has agreed to and
 a table whose host never says would be guessing. For a table that confirms its
 own state another way — a refetch that agrees, a websocket echoing the value back
-— `table.editing?.dirty` exposes `confirm`, `confirmRow` and `confirmAll`, plus a
-`count` for an "unsaved changes" line.
+— the `useDataTableShell` result from `@adapttable/react/adapter` carries it
+as `chrome.editing?.dirty`, with `confirm`, `confirmRow` and `confirmAll`, plus
+a `count` for an "unsaved changes" line.
 
 Headless: `useDirtyCells` (`DirtyCellState`, `UseDirtyCellsOptions`) and
 `rowIsDirty(editing, rowId)` from `@adapttable/react/adapter`.
@@ -613,6 +633,11 @@ activation wrapper every built-in adapter renders (double-click / Enter / F2
 to begin, with the cell value as the accessible name and the edit hint as
 its `title`).
 
+`useCellEditing`, `EditableCellGate` and the `MultiSelectEditor*` exports come
+from `@adapttable/react`; `isCellEditable`, `hasEditableColumns`,
+`parseCellEditValue`, `resolveCellEditor` and `resolveCommitValue` from
+`@adapttable/core`; `editorValidationProps` from `@adapttable/react/adapter`.
+
 | Export                                                                                                                   | Purpose                                                                                                   |
 | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
 | `useCellEditing` / `CellEditingState`                                                                                    | The state machine hook and the state it returns.                                                          |
@@ -625,7 +650,7 @@ its `title`).
 | `MultiSelectEditorChrome` / `MultiSelectEditorChromeProps` / `MultiSelectEditorSlots` / `MultiSelectEditorCheckboxProps` | Checkbox-group multi-select editor for kits whose select holds one value.                                 |
 | `EditableColumnLike` / `isCellEditable` / `hasEditableColumns`                                                           | The minimal column shape editing reads, plus the two predicates the chrome uses.                          |
 | `parseCellEditValue` / `resolveCellEditor` / `normalizeEditorOptions`                                                    | Draft parsing (number editors yield `number \| null`) and editor/option resolution.                       |
-| `EditValidationState` / `ValidationTarget` / `ValidationCheckResult`                                                     | Validation state: which cells carry a message, which are still checking, and what a check returned.       |
+| `EditValidationState` / `ValidationCheckResult`                                                                          | Validation state: which cells carry a message, which are still checking, and what a check returned.       |
 | `CellValidator` / `RowValidator` / `ValidationTarget`                                                                    | The two validator signatures and the cell address a check is about.                                       |
 | `resolveCommitValue`                                                                                                     | The row, column and parsed value a commit resolves to — what a validator judges before the host sees it.  |
 | `editorValidationProps`                                                                                                  | The `aria-invalid` / `aria-describedby` / `aria-busy` a kit's editor spreads while validation is in play. |
@@ -701,10 +726,13 @@ section.
 Compose `editHistory` from `@adapttable/<kit>/editing` and edits can be taken back:
 
 ```tsx
+import { DataTable } from "@adapttable/mantine";
 import { cellNavigation } from "@adapttable/mantine/cell-navigation";
 import { editHistory, editing } from "@adapttable/mantine/editing";
 
 <DataTable
+  data={rows}
+  rowKey={(row) => row.id}
   features={[cellNavigation(), editHistory(), editing(commit)]}
   columns={[{ key: "budget", header: "Budget", editable: true }]}
 />;
@@ -724,7 +752,32 @@ they ran on the way out.
 press, as does a fill; an inline edit is a gesture of one. Fifty gestures are
 kept by default — pass `{ depth: 200 }` to keep more.
 
-The keys live on the grid, so they need `cellNavigation()`. For your own buttons,
-`table.editHistory` carries `undo()`, `redo()`, `canUndo`, `canRedo` and
-`clear()` — call `clear()` when you replace the data underneath, since a
+The keys live on the grid, so they need `cellNavigation()`. For visible
+controls, compose `undoRedoButtons()` beside `editHistory()`: Undo and Redo sit
+in the toolbar and disable when there is nothing to take back. Without
+`editHistory()` they do not render.
+
+```tsx
+import { DataTable } from "@adapttable/mantine";
+import { cellNavigation } from "@adapttable/mantine/cell-navigation";
+import {
+  editHistory,
+  editing,
+  undoRedoButtons,
+} from "@adapttable/mantine/editing";
+
+<DataTable
+  {...props}
+  features={[
+    cellNavigation(),
+    editHistory(),
+    undoRedoButtons(),
+    editing(commit),
+  ]}
+/>;
+```
+
+For your own buttons, the `useDataTableShell` result from
+`@adapttable/react/adapter` carries `editHistory` with `undo()`, `redo()`,
+`canUndo`, `canRedo` and `clear()` — call `clear()` when you replace the data underneath, since a
 history of rows that no longer exist can only put back values nobody wants.

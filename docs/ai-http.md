@@ -2,12 +2,9 @@
 
 This is the setup page for a real model behind a live table. The [interactive
 playground](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
-defaults to **Simulated**: local scripted buttons, no credentials, no network
-model call. Switch to **Connect backend**, paste an endpoint, and the same
+defaults to **Simulated demo**: local scripted buttons, no credentials, no
+network model call. Switch to **Try it for real**, paste an endpoint, and the same
 `tableAgent` session sends the permitted context and executes the calls that come back.
-
-A recorded walkthrough of this page will land here when it exists. Absence of
-that video is not a missing feature.
 
 `@adapttable/ai` stays provider-neutral. It does not ship a model SDK, an API
 key field, or a hosted AdaptTable service. Provider selection lives in your
@@ -28,7 +25,9 @@ names every capability and explains the ones a turn is likely to need;
 anything else is asked for on demand, in one batched round rather than a
 request per key, and cached per connection and contract version. `full` sends
 every guide up front. Neither changes what the table permits — only how much
-explaining arrives before it is asked for.
+explaining arrives before it is asked for. `full` is the default; a client sets
+`compact` with `context: { profile: "compact" }` on `createAgentHttpClient` or
+`assistantHttpTransport`.
 
 A backend that asks for a guide or a row window puts that in `toolCalls`
 alongside anything it wants run; the bridge answers through `session.describe`
@@ -46,7 +45,7 @@ response, `returnResults` on the client).
 
 ## Path 1 — run our example
 
-Prerequisites: Node 22.6 or newer (the example runs TypeScript directly with
+Prerequisites: Node 22.12 or newer (the example runs TypeScript directly with
 `--experimental-strip-types`) and `pnpm install` at the repository root.
 
 From this repository:
@@ -68,7 +67,9 @@ pnpm --filter @adapttable/examples ai-http
 ```
 
 The server refuses to start on a configuration it cannot use: an
-`AGENT_PORT` that is not a port, an empty `AGENT_HOST` or `AGENT_MODEL`, an
+`AGENT_PORT` that is not a whole number between 1 and 65535, an
+`AGENT_MAX_BODY` that is not a positive whole number of bytes, an empty
+`AGENT_HOST` or `AGENT_MODEL`, an
 unknown `AGENT_PROVIDER`, or a provider whose API key is missing. Each of
 those exits with the name of the variable to fix.
 
@@ -83,7 +84,7 @@ many block it. Run the showcase on the same machine:
 pnpm --filter @adapttable/showcase dev
 ```
 
-Open `/mantine/ai/` (or any adapter AI page). Choose **Connect backend**. The
+Open `/mantine/ai/` (or any adapter AI page). Choose **Try it for real**. The
 URL defaults to `http://127.0.0.1:8787`. If the example set
 `AGENT_HTTP_TOKEN`, paste that same value into **Endpoint token** (Bearer
 for the HTTP endpoint — not a provider API key). Click **Connect**. A valid
@@ -93,7 +94,7 @@ hello body is required; a random 200 is a failure. Then type a message and
 **Hosted showcase.** Deploy the example with HTTPS, set
 `AGENT_ALLOWED_ORIGINS` to `https://orwa-mahmoud.github.io`, set
 `AGENT_HTTP_TOKEN` and a non-loopback `AGENT_HOST`, then paste the public
-URL and the same endpoint token into Connect backend. Do not point the
+URL and the same endpoint token into the connect dialog. Do not point the
 hosted page at `localhost`.
 
 ### Environment
@@ -134,7 +135,9 @@ proxy: it only calls the configured provider.
 
 ### Add another provider
 
-Implement a `complete({ system, user, signal })` that returns a JSON string,
+Implement an `ExampleComplete` —
+`({ system, user, history, signal }, onDelta?) => Promise<string>`, resolving
+with the JSON reply and calling `onDelta` with each fragment when streaming —
 then register it in `completeForProvider`. Arbitrary provider names do not
 work without that adapter.
 
@@ -188,6 +191,11 @@ rather than duplicating the shape; both refuse an unknown `schemaVersion`.
 | `conversation`     | a turn                                            | Earlier exchanges, oldest first                                                            |
 | `toolResults`      | a continuation                                    | Results for calls the client just ran                                                      |
 | `audio`            | a voice turn                                      | One clip, travelling once                                                                  |
+| `manifest`         | hello, schema, and every unpinned turn            | Compact capability snapshot; required on hello and schema                                  |
+| `catalog`          | hello, schema, and every unpinned turn            | Enabled keys and one-line summaries; required on hello and schema                          |
+| `turnId`           | a turn                                            | Stable identity of this send across its phases                                             |
+| `phaseId`          | a turn                                            | Monotonic position of this phase within the turn                                           |
+| `pendingCalls`     | a continuation                                    | The calls this phase has proposed so far                                                   |
 
 The contract and the view move on different clocks, which is why they are
 separate fields: pinning the contract does not pin the view, and a backend
@@ -224,8 +232,9 @@ for a revision it observed itself, and a stale call is refused with
 **`askUser`** puts a structured question to the reader instead of asking in
 prose. The turn stops at that call and resumes when they answer; the answer
 returns as that call's `toolResults` entry. A client with nowhere to draw one
-reports `unresolved: "no-reader-channel"` and still says what already ran, and
-a reader who declines reports `question-unanswered` — different facts.
+reports `unresolved` with code `no-reader-channel` and still says what already
+ran, and a reader who declines reports code `question-unanswered` — different
+facts.
 
 **`pin`** is the backend's answer about the contract it was sent:
 `acknowledged` (and only that) pins something; `expired` and `unknown` say a
@@ -240,12 +249,15 @@ a write is never retried.
 A turn that needs a guide asks for it in the same `toolCalls` list, and the
 client answers in one batched round rather than one request per key. Guides
 are cached per connection and contract version, so a second turn that needs
-the same guide does not ask again. Send `profile: "compact"` and let discovery
-do this; send `profile: "full"` when you would rather pay the bytes up front.
+the same guide does not ask again. Set `context: { profile: "compact" }` on the
+client and let discovery do this; keep the default `full` when you would rather
+pay the bytes up front.
 
 ### Streaming
 
-Ask for `text/event-stream` and the same reply arrives as events:
+Set `stream: true` on the client and it asks for `text/event-stream`;
+`onStreamText(text)` receives the text so far. A backend that answers JSON is
+used as-is. The same reply arrives as events:
 
 - `text-delta` — a piece of the answer, as it is produced
 - `transcript` — what the backend heard, on a voice turn
@@ -277,17 +289,17 @@ library only, run through `uv`:
 uv run --python 3.12 examples/ai-http-backend.py
 ```
 
-It reads the contract out of the request, decides one call, and answers in the
-shape above. Swap its `decide` for a real model call and nothing else changes.
+It listens on `http://127.0.0.1:8788`, reads the contract out of the request,
+decides one call, and answers in the shape above. Swap its `decide` for a real model call and nothing else changes.
 
 The machine-readable schema and the general rules text are generated from
 `AGENT_HTTP_LIMITS` and `agentInstructions` into `schemas/agent-http.v1.json`
 and `docs/agent-rules.txt` — build the package and run
 `node scripts/build-agent-schema.mjs`.
 
-## Live provider test (owner)
+## Live provider test
 
 Automated checks use mocked providers and never spend money. To try a real
 model: fill `examples/.env.ai-http`, start the example with
 `pnpm --filter @adapttable/examples ai-http`, run the local
-showcase, Connect, and send a message. That live test is yours.
+showcase, connect, and send a message.

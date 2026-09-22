@@ -39,8 +39,9 @@ export function People() {
 
 - `paginationMode` accepts `"paged"`, `"infinite"`, or `"auto"` (the default).
   `"auto"` resolves by device: **infinite scroll on mobile, paged on desktop**,
-  using the same breakpoint as the card/table layout switch, so the two never
-  drift.
+  from the default 768px media query. The card/table layout switch reads
+  `mobileBreakpoint` and `forceMobile`; `"auto"` reads neither, so set
+  `paginationMode` explicitly whenever you set one of them.
 - **Paged** renders a footer with a rows-per-page select, page buttons, and a
   "Showing X–Y of Z" summary.
 - **Infinite** auto-loads the next page when a sentinel below the last row
@@ -50,8 +51,9 @@ export function People() {
 - Page and page size live in the URL (`?page=`, `?limit=`), so reloads and
   shared links restore the exact view. `defaults={{ limit }}` applies only
   while the URL is silent about a key. The rows-per-page list is 10 / 25 /
-  50 / 100, plus that default when it isn't already in the list — so a
-  table that starts at 500 still offers 500 after you pick 10.
+  50 / 100 (`PAGE_SIZE_OPTIONS`; `pageSizeOptions()` builds the list, both
+  from `@adapttable/core`), plus that default when it isn't already in the
+  list — so a table that starts at 500 still offers 500 after you pick 10.
 - On the server tier, pagination state arrives in the consolidated
   `TableQuery` (`{ page, limit, … }`) passed to `onQueryChange` — forward both
   to your API and return `rows` + `total`; `total` drives the pager.
@@ -66,22 +68,42 @@ one", which cannot drift.
 Declare the capability and hand back the token your API returned:
 
 ```tsx
-const [data, setData] = useState({ rows: [], nextCursor: null });
+import { useState } from "react";
+import { useServerData } from "@adapttable/react";
+import { DataTable } from "@adapttable/mantine";
 
-const source = useServerData({
-  rows: data.rows,
-  total: 0, // cursor APIs usually have no count to give
-  nextCursor: data.nextCursor,
-  supports: { cursor: true },
-  onQueryChange: async ({ cursor, limit, search }, { signal }) => {
-    const res = await fetch(
-      `/api/rows?limit=${limit}&search=${search}` +
-        (cursor ? `&cursor=${cursor}` : ""),
-      { signal }
-    );
-    setData(await res.json()); // { rows, nextCursor }
-  },
-});
+interface Row {
+  id: string;
+  name: string;
+}
+
+export function Rows() {
+  const [data, setData] = useState<{
+    rows: Row[];
+    nextCursor: string | null;
+  }>({ rows: [], nextCursor: null });
+
+  const source = useServerData<Row>({
+    rows: data.rows,
+    total: 0, // cursor APIs usually have no count to give
+    nextCursor: data.nextCursor,
+    supports: { cursor: true },
+    onQueryChange: async ({ cursor, limit, search }, { signal }) => {
+      const params = new URLSearchParams({ limit: String(limit), search });
+      if (cursor) params.set("cursor", cursor);
+      const res = await fetch(`/api/rows?${params}`, { signal });
+      setData(await res.json()); // { rows, nextCursor }
+    },
+  });
+
+  return (
+    <DataTable
+      source={source}
+      columns={[{ key: "name" }]}
+      rowKey={(r) => r.id}
+    />
+  );
+}
 ```
 
 Return `nextCursor: null` when there are no more rows — that is what ends the
@@ -96,8 +118,8 @@ What the table guarantees:
   user has already seen replays their own cursors.
 - **A jump to an unvisited page does nothing.** Page 7 has no token, and
   sending none would silently re-serve page 1. This is the honest shape of
-  cursor pagination rather than a limitation to route around — use infinite
-  scroll (`paginationMode="infinite"`) where arbitrary jumps matter.
+  cursor pagination rather than a limitation to route around — use offset
+  paging (omit `supports.cursor`) where arbitrary jumps matter.
 - **A trail that no longer means anything is thrown away.** Change the search,
   the sort, a filter or the page size and every held token points into a result
   that no longer exists, so the trail resets to page 1 rather than paging into
@@ -110,12 +132,43 @@ hand-rolled tier: declare the capability and say where the token lives on your
 page.
 
 ```tsx
-const source = useQuerySource<Person, PeopleParams, PeoplePage>({
-  usePaginatedQuery: usePeopleQuery,
-  selectPage: (page) => ({ rows: page.items, total: 0 }),
-  supports: { cursor: true },
-  nextCursor: (page) => page.next, // the token that opens the NEXT page
-});
+import { useInfiniteQuery } from "@tanstack/react-query";
+import type { TableQueryParams } from "@adapttable/core";
+import { useQuerySource } from "@adapttable/mantine";
+
+interface Person {
+  id: string;
+  name: string;
+}
+type PeopleParams = TableQueryParams;
+interface PeoplePage {
+  items: Person[];
+  next: string | null;
+}
+
+function usePeopleQuery(params: Partial<PeopleParams>) {
+  return useInfiniteQuery({
+    queryKey: ["people", params],
+    queryFn: async (): Promise<PeoplePage> => {
+      const search = new URLSearchParams();
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined) search.set(key, String(value));
+      }
+      return (await fetch(`/api/people?${search}`)).json();
+    },
+    initialPageParam: params.page ?? 1,
+    getNextPageParam: () => undefined,
+  });
+}
+
+export function usePeopleSource() {
+  return useQuerySource<Person, PeopleParams, PeoplePage>({
+    usePaginatedQuery: usePeopleQuery,
+    selectPage: (page) => ({ rows: page.items, total: 0 }),
+    supports: { cursor: true },
+    nextCursor: (page) => page.next, // the token that opens the NEXT page
+  });
+}
 ```
 
 The token reaches your query function as `params.cursor`, alongside the params
@@ -127,32 +180,33 @@ it already receives — nothing else about the hook changes.
   page size stay shareable; an opaque token would be meaningless to whoever
   opened the link, and stale by the time they did.
 
-Using a query library instead? `useQuerySource` already supports cursors
-through your own `getNextPageParam` — the table reads `hasNextPage` and calls
-`fetchNextPage`, and never needs to see the token.
-
 ## Options
 
-| Prop             | Type                                   | Default                  | Description                                                            |
-| ---------------- | -------------------------------------- | ------------------------ | ---------------------------------------------------------------------- |
-| `paginationMode` | `"paged" \| "infinite" \| "auto"`      | `"auto"`                 | Pagination behaviour; `"auto"` = infinite on mobile, paged on desktop. |
-| `defaults`       | `{ page?: number; limit?: number; … }` | `{ page: 1, limit: 25 }` | Initial page/page-size, used while the URL has no value.               |
-| `labels`         | `TableLabels`                          | English                  | Override `rowsPerPage`, `loadMore`, and the `showing` range builder.   |
-| `skeletonRows`   | `number`                               | page size                | Number of skeleton rows shown while loading.                           |
+| Prop               | Type                                   | Default                  | Description                                                                               |
+| ------------------ | -------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------- |
+| `paginationMode`   | `"paged" \| "infinite" \| "auto"`      | `"auto"`                 | Pagination behaviour; `"auto"` = infinite on mobile, paged on desktop.                    |
+| `defaults`         | `{ page?: number; limit?: number; … }` | `{ page: 1, limit: 25 }` | Initial page/page-size, used while the URL has no value.                                  |
+| `labels`           | `TableLabels`                          | English                  | Override `rowsPerPage`, `loadMore`, and the `showing` range builder.                      |
+| `skeletonRows`     | `number`                               | page size                | Number of skeleton rows shown while loading.                                              |
+| `mobileBreakpoint` | `number`                               | `768`                    | Width at or below which the card layout takes over. `"auto"` pagination does not read it. |
+| `forceMobile`      | `boolean`                              | —                        | Pins the card layout. `"auto"` pagination does not read it.                               |
 
 ## Notes
 
-- `limit` is clamped to **1–500**, whether it comes from
-  `defaults` or a hand-edited URL.
-- Sources built with `useServerData` (the `onQueryChange` tier) are always
-  paged; `paginationMode` applies to the frontend tier and `useQuerySource`.
+- A URL `limit` outside **1–500** falls back to the default page size, and
+  the rows-per-page control clamps to 1–500. `defaults.limit` is used as
+  given.
+- `paginationMode` applies to every tier. On the `onQueryChange` tier
+  (`useServerData`) infinite mode appends each new page to the rows already
+  shown.
 - `nextCursor` is read only when the source declares `supports: { cursor: true }`.
   Without that declaration the field is ignored and no `cursor` is ever sent,
   so an endpoint written before cursors existed keeps its exact query.
 - In infinite mode the table slices `page × limit` rows, so "page" really
   means "how much is loaded" — `fetchNextPage` just bumps it.
-- The infinite-scroll sentinel is exported as a headless hook,
-  `useInfiniteScroll`, for custom markup; it no-ops safely where
+- The infinite-scroll sentinel is exported from `@adapttable/react` as a
+  headless hook, `useInfiniteScroll`, for custom markup (`rootMargin`
+  defaults to `"200px"`); it no-ops safely where
   `IntersectionObserver` is unavailable (SSR, tests).
 
 See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).

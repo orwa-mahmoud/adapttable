@@ -94,9 +94,9 @@ export function People() {
 ## How it works
 
 - A bare `{ key }` is a complete column: the key doubles as the row's data path (dot paths reach nested values, `"department.name"`), and the header is auto-humanised (`hiredAt` → "Hired At"). An explicit `header` always wins, in any language.
-- `renderHeader` replaces the caption only. The cell still owns sort, resize and the menu, and passes a `controller` (`label`, `sortDir`, `toggleSort`) so a custom caption can stay wired. `headerTooltip` is a native title; `headerActions` sit after the caption. `renderFooter` replaces one summary cell; `tableFooter` is a free slot under the table.
+- `renderHeader` replaces the caption only. The cell still owns sort, resize and the menu, and passes a `controller` (`label`, `sortDir`, `sortIndex`, `toggleSort({ shiftKey })`) so a custom caption can stay wired. `headerTooltip` is a native title; `headerActions` sit after the caption. `renderFooter` replaces one summary cell; `tableFooter` is a free slot under the table.
 - Cell content resolves `Cell` → `accessor` → the key's data path. `Cell` is a React component receiving `{ row, rowIndex }`; `accessor` is the lighter function form. Mini charts are a separate import — see [sparkline columns](./sparkline.md).
-- `sortable` opts a column into sorting; on frontend data the comparator reads `sortValue`, falling back to the column's accessor. See [sorting](./sorting.md).
+- `sortable` opts a column into sorting; on frontend data the comparator reads `sortValue`, falling back to `formatValue`, `exportValue`, then the key's data path; a JSX `accessor` is never compared. See [sorting](./sorting.md).
 - `i18n` maps locale tags to alternative data paths; the table's `locale` prop picks one (exact tag → primary subtag → `key`). The cell, client-side sort, and the column's filter all follow the resolved path — header text does not.
 - `renameable` opts a leaf into user naming when the table also provides
   `onColumnRename`. This changes display text, mobile and export labels while
@@ -107,31 +107,39 @@ export function People() {
 
 ## Options
 
-| Prop              | Type                                        | Default                      | Description                                                                                                   |
-| ----------------- | ------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `key`             | `string`                                    | required                     | Unique id; data path for the cell value; the backend `sortBy` value.                                          |
-| `header`          | `ReactNode`                                 | humanised from `key`         | Header content, pre-translated by the caller.                                                                 |
-| `renderHeader`    | `(ctx) => ReactNode`                        | —                            | Custom caption; receives a controller so sort/resize stay available.                                          |
-| `renderFooter`    | `(ctx) => ReactNode`                        | —                            | Custom summary-row cell.                                                                                      |
-| `headerTooltip`   | `string`                                    | —                            | Native tooltip on the caption.                                                                                |
-| `headerActions`   | `ReactNode`                                 | —                            | Host controls after the caption.                                                                              |
-| `renameable`      | `boolean`                                   | `false`                      | Allow a host-persisted user display name from the Columns menu.                                               |
-| `accessor`        | `(row) => ReactNode`                        | read the key's data path     | Lightweight cell renderer.                                                                                    |
-| `Cell`            | `ComponentType<CellProps<TRow>>`            | —                            | Component per row, receives `{ row, rowIndex }`; wins over `accessor`.                                        |
-| `sortable`        | `boolean`                                   | `false`                      | Enable sorting for this column.                                                                               |
-| `sortValue`       | `(row) => SortableValue`                    | the generated accessor value | Primitive extractor for the client-side sort. See [sorting](./sorting.md).                                    |
-| `exportValue`     | `(row) => unknown`                          | the display value            | Value written to a CSV export when the file should carry something other than the formatted cell.             |
-| `align`           | `"start" \| "center" \| "end"`              | `"start"`                    | Text alignment within the cell.                                                                               |
-| `width`           | `number \| string`                          | —                            | Width passed through to the rendered header/cell.                                                             |
-| `mobileLabel`     | `string`                                    | `header` (when a string)     | Label on mobile card layouts.                                                                                 |
-| `hideOnMobile`    | `boolean`                                   | `false`                      | Hide the column entirely on mobile.                                                                           |
-| `hideOnDesktop`   | `boolean`                                   | `false`                      | Hide the column entirely on desktop.                                                                          |
-| `aggregatable`    | `false \| true \| { default?, operations }` | omitted                      | Whether a reader may aggregate this column, and with which operations. See [row grouping](./row-grouping.md). |
-| `formatAggregate` | `(value, context) => DisplayValue`          | —                            | How a group aggregate of this column reads. Presentation only.                                                |
-| `group`           | `string`                                    | —                            | Spanning header above adjacent columns sharing the name. See below.                                           |
-| `i18n`            | `Record<string, string>`                    | —                            | Per-locale data paths for the column's value.                                                                 |
-| `meta`            | `Record<string, unknown>`                   | —                            | Free-form bag your own code can read back.                                                                    |
-| `locale`          | `string` (table prop)                       | —                            | Active locale tag (`"ar"`, `"ar-EG"`); drives `i18n` path resolution.                                         |
+| Prop                                                        | Type                                              | Default                                   | Description                                                                                                   |
+| ----------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `key`                                                       | `string`                                          | required                                  | Unique id; data path for the cell value; the backend `sortBy` value.                                          |
+| `header`                                                    | `ReactNode`                                       | humanised from `key`                      | Header content, pre-translated by the caller.                                                                 |
+| `renderHeader`                                              | `(ctx) => ReactNode`                              | —                                         | Custom caption; receives a controller so sort/resize stay available.                                          |
+| `renderFooter`                                              | `(ctx) => ReactNode`                              | —                                         | Custom summary-row cell.                                                                                      |
+| `headerTooltip`                                             | `string`                                          | —                                         | Native tooltip on the caption.                                                                                |
+| `headerActions`                                             | `ReactNode`                                       | —                                         | Host controls after the caption.                                                                              |
+| `renameable`                                                | `boolean`                                         | `false`                                   | Allow a host-persisted user display name from the Columns menu.                                               |
+| `accessor`                                                  | `(row) => ReactNode`                              | read the key's data path                  | Lightweight cell renderer.                                                                                    |
+| `Cell`                                                      | `ComponentType<CellProps<TRow>>`                  | —                                         | Component per row, receives `{ row, rowIndex }`; wins over `accessor`.                                        |
+| `sortable`                                                  | `boolean`                                         | `false`                                   | Enable sorting for this column.                                                                               |
+| `sortValue`                                                 | `(row) => SortableValue`                          | `formatValue` → `exportValue` → data path | Primitive extractor for the client-side sort. See [sorting](./sorting.md).                                    |
+| `formatValue`                                               | `(row) => string`                                 | —                                         | The cell as text, for screen readers, labels and copy. See below.                                             |
+| `exportValue`                                               | `(row) => unknown`                                | the display value                         | Value written to a CSV export when the file should carry something other than the formatted cell.             |
+| `align`                                                     | `"start" \| "center" \| "end"`                    | `"start"`                                 | Text alignment within the cell.                                                                               |
+| `width`                                                     | `number \| string`                                | —                                         | Width passed through to the rendered header/cell.                                                             |
+| `minWidth` / `maxWidth` / `flex`                            | `number`                                          | —                                         | Width bounds and a share of the leftover space. See [column management](./column-management.md).              |
+| `lockPosition` / `lockVisibility` / `lockWidth` / `lockPin` | `boolean`                                         | `false`                                   | Disable the matching Columns-menu and resize controls for this column.                                        |
+| `filter`                                                    | `FilterType \| Omit<FilterDef, "key" \| "label">` | —                                         | Declare this column's filter. See [filtering](./filtering.md).                                                |
+| `editable` / `editor`                                       | `boolean \| (row) => boolean` / `CellEditor`      | —                                         | Inline editing for this column. See [cell editing](./cell-editing.md).                                        |
+| `colSpan` / `rowSpan`                                       | `number \| (row) => number`                       | —                                         | Span every cell of this column. See [row spanning](./row-spanning.md).                                        |
+| `groupShow`                                                 | `"open" \| "closed" \| "always"`                  | `"open"` under a collapsible group        | When this leaf shows under a collapsed group. See [column groups](./column-groups.md).                        |
+| `responsivePriority`                                        | `number`                                          | —                                         | How readily the column is given up when the table is too narrow; priority 1 is kept longest.                  |
+| `mobileLabel`                                               | `string`                                          | `header` (when a string)                  | Label on mobile card layouts.                                                                                 |
+| `hideOnMobile`                                              | `boolean`                                         | `false`                                   | Hide the column entirely on mobile.                                                                           |
+| `hideOnDesktop`                                             | `boolean`                                         | `false`                                   | Hide the column entirely on desktop.                                                                          |
+| `aggregatable`                                              | `false \| true \| { default?, operations }`       | omitted                                   | Whether a reader may aggregate this column, and with which operations. See [row grouping](./row-grouping.md). |
+| `formatAggregate`                                           | `(value, context) => DisplayValue`                | —                                         | How a group aggregate of this column reads. Presentation only.                                                |
+| `group`                                                     | `string`                                          | —                                         | Spanning header above adjacent columns sharing the name. See below.                                           |
+| `i18n`                                                      | `Record<string, string>`                          | —                                         | Per-locale data paths for the column's value.                                                                 |
+| `meta`                                                      | `Record<string, unknown>`                         | —                                         | Free-form bag your own code can read back.                                                                    |
+| `locale`                                                    | `string` (table prop)                             | —                                         | Active locale tag (`"ar"`, `"ar-EG"`); drives `i18n` path resolution.                                         |
 
 ## The cell as text
 
@@ -157,14 +165,12 @@ _accurate_. `columnText(column, row)` resolves it in this order:
 1. `formatValue` — the column stating its own text
 2. `exportValue` — the underlying value, minus the formatting
 3. `sortValue` — a primitive by definition
-4. `accessor`, when it happens to return a primitive
-5. the key's data path
+4. the key's data path
 
-with one deliberate restriction on that last step: **a column that renders its
-own cell never falls back to the data path.** A column with
-`accessor: () => null` renders an empty cell, and reading its path would
-announce a value the user cannot see — worse than announcing nothing. Such a
-column resolves to `""`, and giving it a `formatValue` is the fix.
+The first that yields a string, number, boolean or `Date` (read as its ISO day)
+wins; nothing yields `""`. A React `accessor` or `Cell` is never consulted, so a
+column whose rendered cell differs from its data path sets `formatValue` to say
+what it shows.
 
 ## Computed columns
 
@@ -178,7 +184,7 @@ every render.
 `computed` declares the derivation once and wires all four surfaces from it:
 
 ```tsx
-import { computed } from "@adapttable/core";
+import { computed } from "@adapttable/react";
 
 const columns = [
   { key: "quantity" },
@@ -205,16 +211,16 @@ The screen shows `$1,240.00`; sorting, filtering and export all see `1240`.
   table cannot grow a cache it never releases.
 - **`format` is display only.** Leave it out and primitives and dates render as text; any other value renders empty, since an object has no useful reading in a cell.
 - **`column` carries everything else** a column can be — `sortable`, `align`,
-  `width`, `filter`, `hideOnMobile`. `accessor`, `sortValue` and `exportValue`
-  are derived and cannot be set here, which is what keeps the four surfaces
-  from disagreeing.
+  `width`, `filter`, `hideOnMobile`. `accessor`, `Cell`, `sortValue`,
+  `exportValue` and `formatValue` are derived and cannot be set here, which is
+  what keeps the four surfaces from disagreeing.
 
 **Define the columns at module level, or memoise them.** The cache lives
 inside the column `computed` returns, so rebuilding the column on every
 render throws the cache away with it — values stay correct, nothing is
 reused. It is the same rule `Cell` already asks for.
 
-Rows must be objects, since the cache is keyed by row identity. The spec type is exported as `ComputedColumnSpec` for callers that build columns dynamically.
+Rows must be objects, since the cache is keyed by row identity. `@adapttable/core` exports the same helper typed as a neutral `ColumnModel`, with its spec type `ComputedColumnSpec`, for headless and non-React callers.
 
 ## Grouped headers
 
@@ -247,7 +253,8 @@ column out of the middle of a group splits it into two spans rather than
 pretending the layout is something it is not. Reorder them back together and
 the group closes up again.
 
-Pass `collapsibleColumnGroups` and each real group header gains a toggle. What
+Compose `collapsibleColumnGroups()` from `@adapttable/<kit>/column-groups` and
+each real group header gains a toggle. What
 a collapsed group shows is that group's own options — an arrow stub by
 default, a kept child via `collapsedKey`, or a cell via `collapsedRender`.
 See [column groups](./column-groups.md). Collapse state lives on
@@ -260,7 +267,7 @@ leaves a collapsed group hid on desktop.
 
 - Define `Cell` components at module level (or memoise them) — an inline component re-mounts every render and defeats row memoisation.
 - Path-derived cells render primitives only; a non-primitive value at the path renders nothing. Use `accessor` or `Cell` for objects.
-- A column whose `accessor` returns JSX needs `sortValue` to be sortable — without it the sort silently no-ops and a dev warning fires.
+- A column whose `accessor` returns JSX sorts by its data path unless it sets `sortValue` (or `formatValue` / `exportValue`); without `sortValue` a dev warning fires.
 - `mobileLabel` only falls back to `header` when the header is a string; with a JSX header, set `mobileLabel` explicitly (it also names the column in the Columns menu).
 - Duplicate column keys trigger a development warning — keys must be unique within the table.
 

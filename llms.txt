@@ -76,10 +76,10 @@ const {
 - [React table advanced filters — AND/OR filter tree](https://orwa-mahmoud.github.io/adapttable/filter-tree/): nested AND/OR groups, kit-native `FilterTreeBuilder`, `ft=1.{…}` in the URL, same Filters popover or drawer as the simple fields
 - [React table pagination — paged, infinite scroll, auto by device](https://orwa-mahmoud.github.io/adapttable/pagination/): paged, infinite, auto by device
 - [React table row selection & bulk actions](https://orwa-mahmoud.github.io/adapttable/selection/): checkboxes, bulk bar, select-all-matching
-- [React table expandable rows & detail panels](https://orwa-mahmoud.github.io/adapttable/row-expansion/): renderRowDetail, useRowExpansion
-- [React table inline cell editing — opt-in onCellEdit](https://orwa-mahmoud.github.io/adapttable/cell-editing/): text/number/select/date/checkbox editors, validation, row and batch modes, add/duplicate/delete rows, lifecycle events, live-update conflicts, keyboard commit/cancel, kit-native inputs
+- [React table expandable rows & detail panels](https://orwa-mahmoud.github.io/adapttable/row-expansion/): rowDetail(render), nestedTable(...), useRowExpansion
+- [React table inline cell editing — opt-in editing()](https://orwa-mahmoud.github.io/adapttable/cell-editing/): text/number/select/date/checkbox editors, validation, row and batch modes, add/duplicate/delete rows, lifecycle events, live-update conflicts, keyboard commit/cancel, kit-native inputs
 - [React table row reordering — flat, grouped and tree rows](https://orwa-mahmoud.github.io/adapttable/row-reordering/): sibling reorder, cross-group moves, tree re-parenting with cycle guard, auto/confirm/never policy, drag + keyboard menu + mobile controls
-- [React table row pinning — sticky top and bottom rows](https://orwa-mahmoud.github.io/adapttable/row-pinning/): rowPin, pinRow/unpinRow, sticky sections, URL `rowPin`
+- [React table row pinning — sticky top and bottom rows](https://orwa-mahmoud.github.io/adapttable/row-pinning/): rowPinning({ pinnedRowIds, onPinnedRowIdsChange }), pin/unpin, sticky sections, URL `rowPin`
 - [React table pinned summary rows — totals outside the row model](https://orwa-mahmoud.github.io/adapttable/pinned-summary-rows/): pinnedSummaryRows({ top, bottom }), excluded from sort/filter/group/page/selection, works with grouping and trees
 - [React table row and column spanning — getCellSpan](https://orwa-mahmoud.github.io/adapttable/row-spanning/): colSpan and rowSpan per cell, covered cells omitted, CSV writes the origin once
 - [React table full-width and separator rows — extraRows](https://orwa-mahmoud.github.io/adapttable/full-width-rows/): host-injected slots spliced by beforeRowId, separator or one spanning cell, mobile cards keep the same slots

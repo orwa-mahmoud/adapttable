@@ -11,7 +11,7 @@ right place. This page says where that is and why.
 
 ```tsx
 // app/people/page.tsx — a server component
-import { DataTable } from "@adapttable/mantine";
+import { PeopleTable } from "./PeopleTable";
 
 export default async function PeoplePage() {
   const people = await db.people.findMany(); // runs on the server
@@ -24,6 +24,14 @@ export default async function PeoplePage() {
 "use client";
 
 import { DataTable } from "@adapttable/mantine";
+
+export interface Person {
+  id: string;
+  name: string;
+  role: string;
+}
+
+const columns = [{ key: "name", sortable: true }, { key: "role" }];
 
 export function PeopleTable({ data }: { data: Person[] }) {
   return <DataTable data={data} columns={columns} rowKey={(row) => row.id} />;
@@ -46,9 +54,11 @@ writing a wrapper. A test in the release gate asserts the directive is on every
 built entry — if it were ever dropped, an App Router build would fail on the
 first `useState` with an error pointing at your application rather than at us.
 
-**`@adapttable/i18n` is deliberately the exception.** It is plain data and pure
-functions — no hooks, no directive — so locale labels can be imported and
-resolved in a server component and passed down as props.
+**The packages without hooks carry no directive** — every entry of
+`@adapttable/core`, plus `@adapttable/i18n`, `@adapttable/server`,
+`@adapttable/ai` and `@adapttable/cli`. They are plain data and pure
+functions, so locale labels, URL codecs and query parsers can be imported and
+run in a server component and their results passed down as props.
 
 ## Server rendering without a DOM
 
@@ -61,20 +71,49 @@ Two seams matter when you render on a server:
 
 - **`forceMobile`** decides the card/table layout explicitly. The automatic
   choice comes from a media query, which a server cannot answer; passing the
-  value you want makes the server and the first client render agree.
-- **`urlAdapter`** defaults to the browser History API. On the server, pass
-  `createMemoryAdapter(searchParamsString)` so the table restores state from
-  the request's query string instead of reaching for a `window` that is not
-  there.
+  value you want makes the server and the first client render agree on the
+  layout. `paginationMode="auto"` resolves from the media query on its own and
+  does not read `forceMobile`, so pass `paginationMode` explicitly as well.
+- **`urlAdapter`** defaults to the browser History API, whose hydration
+  snapshot is an empty query string. To render the requested slice on the
+  server, pass the same explicit adapter in both renders — a router adapter
+  that reads the request's search params on the server and the address bar on
+  the client. With an explicit adapter the hydration snapshot is that
+  adapter's own search, so both renders start from the same state.
 
 ```tsx
-import { createMemoryAdapter } from "@adapttable/core";
+"use client";
 
-const urlAdapter =
-  typeof window === "undefined"
-    ? createMemoryAdapter(searchParams.toString())
-    : undefined; // the browser default
+import { DataTable } from "@adapttable/mantine";
+
+import { useNextAdapter } from "./useNextAdapter"; // the recipe in URL state
+
+export interface Person {
+  id: string;
+  name: string;
+  role: string;
+}
+
+const columns = [{ key: "name", sortable: true }, { key: "role" }];
+
+export function PeopleTable({ data }: { data: Person[] }) {
+  return (
+    <DataTable
+      data={data}
+      columns={columns}
+      rowKey={(row) => row.id}
+      urlAdapter={useNextAdapter()}
+      forceMobile={false} // decided per request, e.g. from the user agent
+      paginationMode="paged"
+    />
+  );
+}
 ```
+
+[`useNextAdapter`](./url-state.md#nextjs-app-router) wraps `useSearchParams()`,
+which Next.js answers from the request during SSR. A server-only
+`createMemoryAdapter(query)` (from `@adapttable/react` or the kit) with no
+adapter on the client does not match: the client hydrates from `""`.
 
 ## Hydration
 
@@ -83,10 +122,11 @@ render must match. Two things in a table can break it, and both have an answer
 above:
 
 - **Layout** — if the server guesses desktop and the client is a phone, the
-  first render disagrees. Pass `forceMobile` when you render on a server.
+  first render disagrees. Pass `forceMobile` and `paginationMode` when you
+  render on a server.
 - **URL-restored state** — sort, filters and page come from the query string.
-  Give the server the same query string the browser has, through
-  `createMemoryAdapter`, and both renders start from the same state.
+  Pass one explicit router adapter to both renders and they start from the
+  same state.
 
 Anything read from `localStorage` — saved views, a stored column layout —
 is applied after mount by design, so the first client render matches the

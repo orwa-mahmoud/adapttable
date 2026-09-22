@@ -18,8 +18,11 @@ have. The capabilities come from the table's configuration — you do not copy a
 schema into a backend, and there is nothing to keep in step.
 
 ```tsx
+import { useState } from "react";
+import type { AgentSession } from "@adapttable/ai";
 import { tableAgent, useTableAssistant } from "@adapttable/ai-react";
 import { assistantHttpTransport } from "@adapttable/ai/http";
+import { DataTable } from "@adapttable/mantine";
 import { TableAssistant } from "@adapttable/mantine/assistant";
 
 const transport = assistantHttpTransport({ endpoint: "/api/agent" });
@@ -57,9 +60,9 @@ function Orders({ rows }: { rows: Order[] }) {
 }
 ```
 
-`assistant.error` carries the last failure and each turn's receipts say what
-actually happened — `applied`, `staged`, `awaiting-approval`, `rejected`,
-`stale`, `failed` or `cancelled`. A staged write is not a saved one, and the
+`assistant.error` carries the last failure and each receipt says what
+actually happened — `executed`, `staged`, `partial`, `awaiting-approval`,
+`rejected`, `stale`, `failed` or `cancelled`. A staged write is not a saved one, and the
 panel says so rather than reporting success.
 
 **2. Your own agent, our executor.** You already have a model call and a reply
@@ -119,7 +122,7 @@ import { createAgentSession } from "@adapttable/ai";
 import { tableAgent } from "@adapttable/ai-react";
 ```
 
-## `tableAgent({ tableId, bridge, writePolicy, approval, commit, columns, readMax })`
+## `tableAgent(options)`
 
 Compose it next to the other features:
 
@@ -134,7 +137,7 @@ import { filters } from "@adapttable/mui/filters";
   data={rows}
   rowKey="id"
   features={[
-    filters(),
+    filters([]), // column `filter` declarations need the feature
     agentApproval(),
     tableAgent({
       tableId: "orders",
@@ -150,22 +153,36 @@ import { filters } from "@adapttable/mui/filters";
 />;
 ```
 
-`writePolicy` is `"allow"` or `"deny"`. Deny strips every write key.
+`writePolicy` is `"allow"` (default) or `"deny"`. Deny strips every write key.
 Allow still goes through the host's existing edit/reorder/add/delete
 callbacks — the table never owns the data.
 
 `approval` is `"writes"` (default — every mutating key), `"destructive"`
-(only `rows.delete`), or `"never"` (skip chrome and `onApprove`; still
-validate and honour commit). Host `onApprove?: (proposal) => Promise<boolean>`
-replaces the kit strip when it is set.
+(every capability of kind `destructive` — `rows.delete` among the built-ins),
+or `"never"` (skip chrome and `onApprove`; still validate and honour commit).
+Host `onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) =>
+Promise<ApprovalResult>` replaces the kit strip when it is set; it resolves
+`true` / `false`, or `{ approved: [indexes] }` for a per-row answer.
 
-`commit` is `"stage"` (default — dirty/batch path; Save still belongs to
-the reader) or `"immediate"` (invoke the host callback now).
+`commit` is `"stage"` (default — `edit.cells` goes to `apply.stageCells`, the
+table's dirty path; Save still belongs to the reader) or `"immediate"` (the
+host callback runs now). `rows.add`, `rows.delete` and `rows.reorder` have no
+staging path and return `commit-incompatible` under `"stage"`, so a table that
+offers them sets `commit: "immediate"`.
 
 `readMax` bounds `rows.read` (default 50). `scope: "full"` requires
 `source.fullDataset === true`. Readable-false columns are redacted.
 
 `columns` overlays readable/writable/type on the published column metadata.
+
+`capabilities` adds custom governed definitions (see
+[registering a capability](./agent-capabilities.md#registering-a-capability-of-your-own)).
+`excludeCapabilities` denies keys to the agent. `capabilityApproval` maps a
+capability key to `{ approval: { policy?: "required" | "automatic",
+presentation? } }` and replaces the table's `approval` for that one
+capability. `webmcp: true | { exposedTo?, onRegister? }` registers the
+capabilities as browser tools (see
+[WebMCP](./ai-integrations.md#webmcp--an-agent-in-the-page)).
 
 `bridge.publish` receives every new manifest (feature, column, permission or
 policy change). `bridge.attach` receives the live
@@ -179,10 +196,15 @@ session; they do not share revision or idempotency state.
   schemaVersion: "adapttable.agent.v1",
   tableId: string,
   viewRevision: number,
-  capabilities: CapabilityKey[],
-  columns: { id, label, type, readable, writable, sortable }[],
+  capabilities: string[], // built-in CapabilityKeys plus custom keys
+  columns: {
+    id, label, type, readable, writable, sortable,
+    hideable?, pinnable?, visible?, ai?,
+  }[],
   rowAddressing: { scope: "visible" | "page" | "full", key: "rowKey" },
   limits: { pageMax: number, readMax: number },
+  pagination?: AgentPagination,
+  aggregateOperations?: { id: string, operations: string[] }[],
   policy: {
     write: "deny" | "allow",
     approval: "writes" | "destructive" | "never",
@@ -238,7 +260,7 @@ before write. `rows.delete` addresses rows the same way:
 is removed, so a reference that names no row is refused while the deletion is
 still a proposal. The execute result is
 
-`{ ok, revision, idempotencyKey, result: { proposals, applied, approval, results? } }`.
+`{ ok, revision, idempotencyKey, error?, result: { proposals, applied, approval, approvalReason?, results? } }`.
 
 `createAgentSession({ observe, apply })` is the same contract without React —
 hand it the current observation and the apply hooks. See
@@ -467,22 +489,26 @@ replay record that answers a repeated action is in the session that went away.
 ## Approval, undo and what a reader agreed to
 
 `approval` answers two questions separately: **which** capabilities need a
-human (`policy`), and **where** they are asked (`presentation`). An action can
-override either for itself.
+human (`policy`), and **where** they are asked (`presentation`). A capability can
+override either for itself, through `capabilityApproval`.
 
 `alwaysAllow` is a third, and it is off unless you name the keys:
 
 ```ts
 tableAgent({
   tableId: "orders",
-  approval: { policy: "writes", alwaysAllow: ["edit.cells"] },
+  // A write that runs as one operation: kind "write", no row proposals.
+  capabilities: [settleOrders], // key: "orders.settle"
+  commit: "immediate",
+  approval: { policy: "writes", alwaysAllow: ["orders.settle"] },
 });
 ```
 
 The control appears only for a capability on that list. It never appears for a
-destructive one, never for a write that enumerates rows, and never for an
-action whose own configuration demands a human every time — and a host
-`onApprove` bypasses the chrome entirely, so nothing there can reach past it.
+destructive one, never for a write that enumerates rows — `edit.cells`,
+`rows.add` and `rows.delete` always ask — and never for a capability whose own
+configuration demands a human every time; a host `onApprove` bypasses the
+chrome entirely, so nothing there can reach past it.
 
 A panel mounted beside the table rather than inside it cannot read the table's
 feature state, so the standing decision travels through the bridge:
@@ -494,7 +520,7 @@ no way to take it back.
 ```ts
 const [allowed, setAllowed] = useState<AlwaysAllowedState | null>(null);
 
-tableAgent({ bridge: { alwaysAllowed: setAllowed } });
+tableAgent({ tableId: "orders", bridge: { alwaysAllowed: setAllowed } });
 useTableAssistant({ session, transport, alwaysAllow: allowed ?? undefined });
 ```
 
@@ -521,8 +547,10 @@ unchanged either way: the receipts stay in the conversation state.
 
 ## Protocol adapters
 
-Each is an optional subpath. None is in the root graph, and each routes every
-call back through `session.execute`.
+Each is an optional subpath, and each routes every call back through
+`session.execute`. `http`, `json`, `openai`, `mcp`, `mcp-apps`, `ag-ui` and
+`ai-sdk` stay out of the root graph; `assistant`, `context`, `voice` and
+`webmcp` are also re-exported from the root entry.
 
 | Subpath                    | For                                              |
 | -------------------------- | ------------------------------------------------ |
@@ -538,5 +566,5 @@ call back through `session.execute`.
 | `@adapttable/ai/ag-ui`     | The table as an AG-UI run's frontend tools       |
 | `@adapttable/ai/ai-sdk`    | The table as AI SDK client tools                 |
 
-`@adapttable/ai-react` is the React binding: `tableAgent` and
-`useTableAssistant`. It is the only one of these that imports React.
+`@adapttable/ai-react` is the React binding: `tableAgent`,
+`TABLE_AGENT_STATE`, `useTableAssistant` and `useSpeechInput`. It is the only one of these that imports React.

@@ -13,7 +13,7 @@ build.
 ## The shape
 
 ```tsx
-import { buildFormulaColumns } from "@adapttable/core/formula";
+import { buildFormulaColumns } from "@adapttable/react/formula";
 
 const {
   columns: computed,
@@ -30,6 +30,11 @@ const {
   rowKey={(r) => r.id}
 />;
 ```
+
+`@adapttable/react/formula` returns kit-ready `ColumnDef`s. The same builder
+on `@adapttable/core/formula` returns `ColumnMetadata` for React-free code.
+Each spec may also carry `format: (value: FormulaValue) => string` to turn a
+value into display text.
 
 A formula may reference a data field or another formula column by name.
 Bracket a name that contains spaces — `[Unit Price]` — which is why the
@@ -107,7 +112,7 @@ rendering of the data; it is a rendering of nobody having decided.
 | --------------------------------------------- | ------------------------------------------------------------------------------- |
 | `SUM(values…)`                                | Sum after numeric coercion; non-numeric text is skipped.                        |
 | `AVG(values…)`                                | Mean after numeric coercion; no numbers returns `#DIV/0!`.                      |
-| `MIN(values…)` / `MAX(values…)`               | Smallest or largest value after numeric coercion.                               |
+| `MIN(values…)` / `MAX(values…)`               | Smallest or largest value after numeric coercion; no numbers returns `0`.       |
 | `ABS(value)`                                  | Absolute numeric value.                                                         |
 | `ROUND(value, places)`                        | Number rounded to the requested decimal places.                                 |
 | `POWER(base, exponent)`                       | `base` raised to `exponent`; a non-real or non-finite result returns `#VALUE!`. |
@@ -149,7 +154,7 @@ with sort, filters and the pivot:
 import {
   buildFormulaColumns,
   useFormulaUrlState,
-} from "@adapttable/core/formula";
+} from "@adapttable/react/formula";
 
 const { formulas, onFormulasChange } = useFormulaUrlState({
   urlKey: "people",
@@ -164,10 +169,12 @@ const {
 } = buildFormulaColumns<Row>(formulas);
 ```
 
-The parameter is `formula=total:%3D%5BUnit%20Price%5D%20*%20Quantity:Total` —
-one `key:formula[:header]` entry per column, `;`-separated, every field
-percent-encoded so a formula may contain the delimiters. Writes are debounced
-(`FORMULA_URL_WRITE_DEBOUNCE_MS`), so a bar that writes while someone types
+The parameter is `formula=total:%3D%5BUnit%20Price%5D%20*%20Quantity:Total`
+(`people.formula=` with the `urlKey` above) — one `key:formula[:header]` entry
+per column, `;`-separated, every field percent-encoded so a formula may contain
+the delimiters. One URL carries at most 24 formula columns, and a `format`
+function stays in memory rather than in the link. Writes are debounced
+(`FORMULA_URL_WRITE_DEBOUNCE_MS`, on `@adapttable/react/formula`), so a bar that writes while someone types
 does not out-run Safari's `replaceState` limit; reads stay instant.
 
 [Saved views](./saved-views.md) capture the parameter with the rest of the
@@ -187,7 +194,11 @@ formula is the normal state of one being written.
 
 `FORMULA_FUNCTIONS` lists the function names the engine knows, for an
 autocomplete. `parseFormula` returns a tree or the reason it could not, and
-`formulaRefs` names the columns a formula depends on.
+`formulaRefs` names the columns a formula depends on. `evaluateFormula`,
+`toFormulaValue`, `formulaDisplay`, `formulaSortValue`, `isFormulaError`,
+`FORMULA_ERRORS`, `FORMULA_BLANK` and the `formulaNumber` / `formulaText` /
+`formulaBoolean` / `formulaError` constructors are the engine's pieces on their
+own.
 
 Related: [pivot tables](./pivot.md) · [row grouping](./row-grouping.md) ·
 [API reference](./api.md)

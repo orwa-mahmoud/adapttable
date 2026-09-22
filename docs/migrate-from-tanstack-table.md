@@ -5,7 +5,7 @@
 [TanStack Table](https://tanstack.com/table/latest) is a superb headless engine
 — you keep total control because it renders nothing: no markup, no toolbar, no
 filter inputs, no pagination controls, no URL sync. AdaptTable shares that
-philosophy. `@adapttable/core` is also headless (prop-getters, no forced
+philosophy. `@adapttable/react` is also headless (prop-getters, no forced
 markup), but it comes with the parts you rebuild on every TanStack project
 already wired: a filter UI, a toolbar, pagination, URL-synced state, and saved
 views. And when you _don't_ need bespoke markup, an adapter renders native kit
@@ -38,11 +38,11 @@ Everything TanStack leaves to you (verified from its docs), done for you:
 
 ## Install
 
-Headless core only, or core plus an adapter for ready UI:
+The headless React binding only, or an adapter for ready UI:
 
 ```bash
 # Headless (keep rendering your own markup, TanStack-style)
-pnpm add @adapttable/core
+pnpm add @adapttable/core @adapttable/react
 
 # Batteries — native components for your kit (delete the markup)
 pnpm add @adapttable/core @adapttable/mantine @mantine/core @mantine/hooks
@@ -50,23 +50,23 @@ pnpm add @adapttable/core @adapttable/mantine @mantine/core @mantine/hooks
 
 ## Concept mapping
 
-| TanStack Table                                                        | AdaptTable                                                      | Notes                                                                    |
-| --------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `useReactTable({ data, columns, getCoreRowModel })`                   | `useDataTable({ source, columns })` or an adapter `<DataTable>` | `source` from `useFrontendData`; adapters accept `data` directly.        |
-| `getSortedRowModel` / `getFilteredRowModel` / `getPaginationRowModel` | (none needed)                                                   | Applied automatically on the frontend tier.                              |
-| `flexRender(cell.column.columnDef.cell, …)`                           | adapter renders, or prop-getters (`getCellProps`, …)            | Headless route mirrors TanStack's model.                                 |
-| `columnHelper.accessor("name", …)`                                    | `{ key: "name" }`                                               | Dot paths work in both.                                                  |
-| `columnHelper.accessor(row => …)` (`accessorFn`)                      | `{ key, accessor: (row) => … }`                                 | —                                                                        |
-| `columnHelper.display({ cell })`                                      | `{ key, Cell }`                                                 | `Cell` receives `{ row, rowIndex }`.                                     |
-| `header` / `cell` / `footer`                                          | `header` / `Cell` (or `accessor`) / `summaryRow`                | Footer is one table-level function.                                      |
-| `enableSorting` / `state.sorting` / `onSortingChange`                 | `sortable` per column (+ `multiSort`)                           | AdaptTable owns sort state.                                              |
-| `columnFilters` + `getFilteredRowModel` + your inputs                 | column `filter` shorthand + `filters` array                     | Widgets + chips built for you.                                           |
-| `state.pagination` + `getPaginationRowModel` + your controls          | automatic pagination                                            | Paged on desktop, infinite on mobile.                                    |
-| `enableRowSelection` + `state.rowSelection` + your checkboxes         | `bulkActions` / `selectedIds` / `onSelectionChange`             | —                                                                        |
-| `getExpandedRowModel` + `row.getToggleExpandedHandler()`              | `renderRowDetail`                                               | Toggle UI is provided, not hand-added.                                   |
-| `columnVisibility` / `columnOrder` / `columnPinning` state            | `enableColumnMenu` / `columnLayout`                             | One built-in menu instead of hand-wired state + DnD.                     |
-| `manualSorting` / `manualFiltering` / `manualPagination`              | `onQueryChange` (or `source` via `useQuerySource`)              | One consolidated server query. See [data tiers](./data-tiers.md).        |
-| (serialize state to the URL yourself)                                 | `urlSync` / `urlKey` / `savedViews`                             | URL sync is on by default; `savedViews` is opt-in (pass a `storageKey`). |
+| TanStack Table                                                        | AdaptTable                                                              | Notes                                                             |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `useReactTable({ data, columns, getCoreRowModel })`                   | `useDataTable({ source, columns, rowKey })` or an adapter `<DataTable>` | `source` from `useFrontendData`; adapters accept `data` directly. |
+| `getSortedRowModel` / `getFilteredRowModel` / `getPaginationRowModel` | (none needed)                                                           | Applied automatically on the frontend tier.                       |
+| `flexRender(cell.column.columnDef.cell, …)`                           | adapter renders, or prop-getters (`getCellProps`, …)                    | Headless route mirrors TanStack's model.                          |
+| `columnHelper.accessor("name", …)`                                    | `{ key: "name" }`                                                       | Dot paths work in both.                                           |
+| `columnHelper.accessor(row => …)` (`accessorFn`)                      | `{ key, accessor: (row) => … }`                                         | —                                                                 |
+| `columnHelper.display({ cell })`                                      | `{ key, Cell }`                                                         | `Cell` receives `{ row, rowIndex }`.                              |
+| `header` / `cell` / `footer`                                          | `header` / `Cell` (or `accessor`) / `summaryRow`                        | Footer is one table-level function.                               |
+| `enableSorting` / `state.sorting` / `onSortingChange`                 | `sortable` per column (+ `multiSort()`)                                 | AdaptTable owns sort state.                                       |
+| `columnFilters` + `getFilteredRowModel` + your inputs                 | column `filter` shorthand + `filters([…])`                              | Widgets + chips built for you.                                    |
+| `state.pagination` + `getPaginationRowModel` + your controls          | automatic pagination                                                    | Paged on desktop, infinite on mobile.                             |
+| `enableRowSelection` + `state.rowSelection` + your checkboxes         | `bulkActions([…])` / `selectedIds` / `onSelectionChange`                | —                                                                 |
+| `getExpandedRowModel` + `row.getToggleExpandedHandler()`              | `rowDetail(fn)`                                                         | Toggle UI is provided, not hand-added.                            |
+| `columnVisibility` / `columnOrder` / `columnPinning` state            | `columnMenu()` / `columnLayout`                                         | One built-in menu instead of hand-wired state + DnD.              |
+| `manualSorting` / `manualFiltering` / `manualPagination`              | `onQueryChange` (or `source` via `useQuerySource`)                      | One consolidated server query. See [data tiers](./data-tiers.md). |
+| (serialize state to the URL yourself)                                 | `urlSync` / `urlKey` / `savedViews({ storageKey })`                     | URL sync is on by default; `savedViews()` is opt-in.              |
 
 ## Before / after
 
@@ -151,7 +151,7 @@ function PeopleTable({ people }: { people: Person[] }) {
 }
 ```
 
-Prefer to keep your own markup? Stay headless with `@adapttable/core`:
+Prefer to keep your own markup? Stay headless with `@adapttable/react`:
 `useFrontendData` for the source and `useDataTable` for the prop-getters
 (`getTableProps`, `getHeaderCellProps`, `getSortButtonProps`, `getRowProps`,
 `getCellProps`, `getSearchInputProps`) — the same headless shape as TanStack,
@@ -165,10 +165,12 @@ but with filters, pagination, and URL state already handled.
 - **Delete the opt-in row models.** No `getSortedRowModel` /
   `getFilteredRowModel` / `getPaginationRowModel` imports — those run for you.
 - **Filters are declarative, not hand-rendered.** Swap your custom filter inputs
-  for a `filter` shorthand; a bespoke control can still be JSX in `filters`.
+  for a `filter` shorthand; a bespoke control can still be JSX in `filters(<Form />)`.
 - **You keep the headless escape hatch.** `useDataTable` returns prop-getters, so
   moving to AdaptTable doesn't mean giving up control — it means not rebuilding
   the chrome first.
+- **Features compose in `features`.** Import each factory from its kit subpath
+  (`@adapttable/mantine/row-detail`, …). See [feature composition](./features.md).
 
 ## Still on react-table v7?
 
@@ -187,8 +189,8 @@ your table UI — the v7 plugin-hook API doesn't carry over:
 The v7 concepts map cleanly: `useTable({ columns, data })` → `<DataTable
 data={…} columns={…}>`; a v7 column's `Header`/`accessor`/`Cell` →
 AdaptTable's `header`/`key` (or `accessor`)/`Cell`; `useSortBy` → per-column
-`sortable`; `usePagination` → automatic; `useRowSelect` → `bulkActions` /
-`onSelectionChange`; `useExpanded` → `renderRowDetail`. Since you must rewrite
+`sortable`; `usePagination` → automatic; `useRowSelect` → `bulkActions([…])` /
+`onSelectionChange`; `useExpanded` → `rowDetail(fn)`. Since you must rewrite
 anyway, migrating "up" to batteries beats migrating sideways to another
 build-it-yourself engine.
 
