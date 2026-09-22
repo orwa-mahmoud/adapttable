@@ -755,7 +755,8 @@ kept by default — pass `{ depth: 200 }` to keep more.
 The keys live on the grid, so they need `cellNavigation()`. For visible
 controls, compose `undoRedoButtons()` beside `editHistory()`: Undo and Redo sit
 in the toolbar and disable when there is nothing to take back. Without
-`editHistory()` they do not render.
+`editHistory()` they do not render. See
+[toolbar and view controls](./toolbar-and-view-controls.md).
 
 ```tsx
 import { DataTable } from "@adapttable/mantine";

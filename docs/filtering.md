@@ -165,7 +165,7 @@ every filter lives on a column, or pass standalone defs as above. See
 | `options`     | `FilterOption[] \| "auto" \| () => Promise<FilterOption[]>` | —                     | Choices for `select` / `multiSelect`.                                                                                                                                                                                                                           |
 | `getValue`    | `(row) => unknown`                                          | reads `key` as a path | Row-value extractor for the client-side predicate.                                                                                                                                                                                                              |
 | `placeholder` | `string`                                                    | —                     | Placeholder for text-like inputs.                                                                                                                                                                                                                               |
-| `column`      | `string`                                                    | `key`                 | Column the header filter row places this widget under.                                                                                                                                                                                                          |
+| `column`      | `string`                                                    | `key`                 | Column whose header filter shows this widget.                                                                                                                                                                                                                   |
 | `ai`          | `false \| FilterAiOptions`                                  | visible, options ≤ 50 | Assistant catalog. `false` hides the filter. `{ options: false }` keeps it and omits values. A number sends values only when the static list is that long or shorter (`FILTER_AI_OPTIONS_LIMIT`). `"auto"` and async loaders are never fetched into the prompt. |
 
 | Factory / prop              | Type                                | Default     | Description                                                                                                                                                                  |
@@ -239,28 +239,26 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
   `filterTypeDefaultOp` / `filterTypeSpec` / `renderRegisteredFilter`
   look a spec up. A custom type with `widget: "text"` draws the text
   widget; `host.extendFilterType("text", { ops })` in a feature's `setup` adds
-  operators without forking. `urlArray` persists a custom type's value as a
+  operators to the AND/OR builder for that type; the field widgets keep their
+  own operator menus. See [custom filter types](./custom-filter-types.md). `urlArray` persists a custom type's value as a
   comma-separated array in the URL; `urlNumberKeys` persists its range bounds
   as numbers.
   `emptyFilterRegistry` seeds a registry from scratch.
   `FilterTypeRegistry` / `FilterWidgetKind` / `FilterWidgetRenderProps`
   are the types.
-- **Header filter row**: compose `headerFilters()` and set
-  `filtersMode="header"` (see [feature composition](./features.md))
-  mounts each adapter's `FilterHeaderRow` / `FilterHeaderControl` over
-  `FilterHeaderChrome` / `FilterHeaderControlChrome`. Helpers
-  `filterDefForColumn` (core) and `headerFilterStickTop` (`@adapttable/react`). The row
-  sits under the leaf header and hides the toolbar Filters button
-  (`resolveFilterMode` / `FilterChromeMode`).
-  Pads and column spacers match the header so sticky, pin offsets, and
-  column windowing stay aligned. A def whose bag key differs from the
-  column key sets `column` (`key: "name"` under `column: "person"`). Ant Design keeps the control inside the
-  header cell so `fixed` columns stay on antd's own header. Compact
-  range inputs default the operator to `gte` (no picker in the header);
-  checklist / multiSelect open a closed menu of checkboxes, not a native
-  `<select multiple>`. The funnel overlay stays open while you fill a
-  multi-input field; nested kit dropdowns are not treated as outside
-  clicks. Pass `closeHeaderFilterOnSelect` to dismiss after a finished
+- **Header filters**: compose `headerFilters()` and each filterable column
+  header gains a funnel that opens that column's field; composing it selects
+  header mode on its own and hides the toolbar Filters button unless the
+  AND/OR tree needs it (`resolveFilterMode` / `FilterChromeMode`). See
+  [header filters](./header-filters.md). `FilterHeaderRow` /
+  `FilterHeaderControl` over `FilterHeaderChrome` / `FilterHeaderControlChrome`
+  are the building blocks for a custom header. Helpers `filterDefForColumn`
+  (core) and `headerFilterStickTop` (`@adapttable/react`). A def whose bag key
+  differs from the column key sets `column` (`key: "name"` under
+  `column: "person"`). Checklist / multiSelect open a closed menu of
+  checkboxes, not a native `<select multiple>`. The funnel overlay stays open
+  while you fill a multi-input field; nested kit dropdowns are not treated as
+  outside clicks. Pass `closeHeaderFilterOnSelect` to dismiss after a finished
   single-control write (`useHeaderFilterOverlay` /
   `bindHeaderFilterDismiss` / `headerFilterFieldIsComplete` /
   `usePointerDismiss` / `HeaderFilterSessionProps` /
@@ -285,7 +283,7 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
   (including `options: "auto"`); `FilterRuntime` is everything the engine
   derives from the resolved definitions (defs, chip labels, URL keys,
   predicate).
-- **Search**: `defaultSearchText` is the default searchable-text projector —
+- **Search** ([page](./search.md)): `defaultSearchText` is the default searchable-text projector —
   it flattens a row's own values into the string the search box matches
   against. Replace it per source with `getSearchText`:
 

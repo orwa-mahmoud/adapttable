@@ -151,7 +151,7 @@ sent, so a server that only reads the simple form keeps working.
 
 Build a `TableSource` yourself — `useQuerySource` over TanStack Query (shown
 below; wrap your app in its `QueryClientProvider`), `useFrontendData` for
-headless in-memory use, or a hand-rolled object that fulfils the contract.
+headless in-memory use, or a [hand-rolled object that fulfils the contract](./custom-table-source.md).
 
 ```tsx
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";

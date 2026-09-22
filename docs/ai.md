@@ -552,19 +552,19 @@ Each is an optional subpath, and each routes every call back through
 `ai-sdk` stay out of the root graph; `assistant`, `context`, `voice` and
 `webmcp` are also re-exported from the root entry.
 
-| Subpath                    | For                                              |
-| -------------------------- | ------------------------------------------------ |
-| `@adapttable/ai/http`      | The wire, the client and the assistant transport |
-| `@adapttable/ai/assistant` | The framework-free conversation store            |
-| `@adapttable/ai/context`   | The permitted context, and column sampling       |
-| `@adapttable/ai/voice`     | Dictation, in the browser or through a backend   |
-| `@adapttable/ai/json`      | Plain JSON tools and `AgentEnvelope`             |
-| `@adapttable/ai/openai`    | Strict function tools with OpenAI-safe names     |
-| `@adapttable/ai/mcp`       | MCP tools, resources and annotations             |
-| `@adapttable/ai/mcp-apps`  | The table as a view an MCP host embeds           |
-| `@adapttable/ai/webmcp`    | The table as browser tools for a page agent      |
-| `@adapttable/ai/ag-ui`     | The table as an AG-UI run's frontend tools       |
-| `@adapttable/ai/ai-sdk`    | The table as AI SDK client tools                 |
+| Subpath                    | For                                                             |
+| -------------------------- | --------------------------------------------------------------- |
+| `@adapttable/ai/http`      | The wire, the client and the assistant transport                |
+| `@adapttable/ai/assistant` | The framework-free conversation store                           |
+| `@adapttable/ai/context`   | The permitted context, and column sampling                      |
+| `@adapttable/ai/voice`     | [Dictation](./ai-voice.md), in the browser or through a backend |
+| `@adapttable/ai/json`      | Plain JSON tools and `AgentEnvelope`                            |
+| `@adapttable/ai/openai`    | Strict function tools with OpenAI-safe names                    |
+| `@adapttable/ai/mcp`       | MCP tools, resources and annotations                            |
+| `@adapttable/ai/mcp-apps`  | The table as a view an MCP host embeds                          |
+| `@adapttable/ai/webmcp`    | The table as browser tools for a page agent                     |
+| `@adapttable/ai/ag-ui`     | The table as an AG-UI run's frontend tools                      |
+| `@adapttable/ai/ai-sdk`    | The table as AI SDK client tools                                |
 
 `@adapttable/ai-react` is the React binding: `tableAgent`,
 `TABLE_AGENT_STATE`, `useTableAssistant` and `useSpeechInput`. It is the only one of these that imports React.

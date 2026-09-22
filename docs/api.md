@@ -364,7 +364,7 @@ A parent header with `children`. Collapse options live here, not on the table.
 | Prop          | Type                       | Default         | Description                                                                                                                                                            |
 | ------------- | -------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `key`         | `string`                   | —               | State key in the filter bag and the `f_<key>` URL param (required); doubles as the row's dot-path for the client-side predicate.                                       |
-| `column`      | `string`                   | `key`           | Column the header filter row places this widget under, when the bag key and the column key differ.                                                                     |
+| `column`      | `string`                   | `key`           | Column whose header filter shows this widget, when the bag key and the column key differ.                                                                              |
 | `type`        | `string`                   | —               | Built-in `FilterType` or a custom type registered by `filterTypes()`.                                                                                                  |
 | `label`       | `string`                   | humanized `key` | Widget + chip label.                                                                                                                                                   |
 | `options`     | `FilterOptionsSource`      | —               | Choices for `select`/`multiSelect`/`checklist` labels: a static `FilterOption[]`, `"auto"`, or an async loader.                                                        |
@@ -607,7 +607,7 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
 ### The builder tier
 
 `@adapttable/react/adapter` publishes what the eight kits are made of, for
-anyone wiring a ninth. App code rarely reaches for these; each is here because
+anyone wiring a ninth ([build an adapter](./building-an-adapter.md)). App code rarely reaches for these; each is here because
 an adapter or a plugin genuinely needs it.
 
 | Name                                                                                                                                     | What it is                                                                                                                                                                         |
@@ -1694,8 +1694,9 @@ figures rather than repeating them: with `enabled` false the chrome renders
 those alone, which is why an adapter has one element here and no branch. The
 row range comes from the same arithmetic the pagination footer uses.
 `StatusBarChromeProps.notices` / `TableChrome.featureNotices` carry
-`FeatureNotice` values (`FeatureNoticeKind` names the inert opt-in) so a
-silent no-op stays visible even when `statusBar` is off. See
+`FeatureNotice` values (`FeatureNoticeKind` names the inert opt-in). They draw
+in the status strip when `statusBar()` or `selectionStats()` is composed, and
+the table root carries the active kinds in `data-adapttable-notices`. See
 [customization](./customization.md#toolbar-and-status-bar).
 
 **Toolbar regions and undo/redo.** `toolbar` fills the middle of the toolbar;

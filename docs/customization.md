@@ -326,6 +326,9 @@ reset the query.
 
 ## Toolbar and status bar
 
+Every view control, the toolbar order and feature notices are on
+[toolbar and view controls](./toolbar-and-view-controls.md).
+
 `toolbar` fills the middle of the toolbar — between the search input and
 the built-in buttons. `toolbarSlots` fills the two ends:
 
@@ -524,6 +527,8 @@ worse than no control.
 
 ## Command palette
 
+The full reference is [command palette and context menu](./command-palette.md).
+
 ```tsx
 import { commandPalette } from "@adapttable/mantine/command-palette";
 import { print } from "@adapttable/mantine/print";
@@ -563,14 +568,18 @@ import { commandPalette } from "@adapttable/mantine/command-palette";
 
 Shortcuts are data, not a key handler, because remapping is not a
 preference — your app may already own Cmd/Ctrl+K. `mod` means Cmd on a Mac
-and Ctrl elsewhere, so one chord is right on both. Pass `shortcuts: []` to
-bind nothing and open the palette from your own control instead.
+and Ctrl elsewhere, so one chord is right on both. `shortcuts: []` binds no
+key, and the palette then stays closed. See
+[command palette and context menu](./command-palette.md).
 
 `printTable` opens a browser dialog, so printing is the host's call to make.
 Compose `print(onPrint)` and it becomes a command; pass `true` as the second
 argument to also draw the toolbar button; leave it out and it is not offered.
 
 ## Context menus
+
+The full reference is
+[command palette and context menu](./command-palette.md#context-menu).
 
 ```tsx
 import { contextMenu } from "@adapttable/mantine/context-menu";
@@ -793,6 +802,9 @@ the two genuinely differ. Formula escaping still applies to whatever is
 returned.
 
 ### Spreadsheet (XLSX) export
+
+The full reference — cell typing, widths, sheet names and Node builds — is
+[Excel (XLSX) export](./export-xlsx.md).
 
 The same button writes a real `.xlsx` when you hand it the spreadsheet writer:
 

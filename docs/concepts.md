@@ -54,7 +54,7 @@ and the aggregate fields (`groupAggregateOverrides`, `groupAggregations`,
 [API reference](./api.md) has each one's type.
 
 Because the table is agnostic to the source's origin, you can switch between
-in-memory and server data — or build a custom source — without touching the
+in-memory and server data — or [build a custom source](./custom-table-source.md) — without touching the
 UI.
 
 ## Source builders
@@ -281,4 +281,5 @@ preset, and the plugin hooks.
 
 1. **Batteries-included** — `import { DataTable } from "@adapttable/<kit>"`.
 2. **Headless** — `import { useDataTable } from "@adapttable/react"` and render
-   your own markup with the returned prop-getters.
+   your own markup with the returned prop-getters — see
+   [headless rendering](./headless.md).

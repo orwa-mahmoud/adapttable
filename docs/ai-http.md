@@ -272,12 +272,15 @@ reported as `stream-incomplete` rather than treated as a short answer.
 
 ### Voice
 
-`@adapttable/ai/voice` has two modes. In **browser** mode the recognizer runs
-locally and heard text becomes the composer's draft — never a send, so a
+`@adapttable/ai/voice` has two modes. In **browser** mode the browser's speech
+recognizer turns speech into the composer's draft — never a send, so a
 misheard word is a typo the reader corrects. In **backend** mode one clip is
-recorded, released from the microphone on stop, and sent as `audio`; the
-backend answers with a `transcript`, which the panel shows in place of the
-reader's own bubble and sends as text on every later round of the turn.
+recorded and released from the microphone on stop, and `onClip` hands it to
+the host. The wire contract carries it: a turn may send one `audio` clip
+(`mimeType`, `base64`, `durationMs`) instead of `message`, and the reply may
+name what the backend heard in `transcript`. The built-in HTTP client sends
+text, so a host that uses backend mode sends the clip on its own request. See
+[voice input](./ai-voice.md).
 
 ### Any language
 

@@ -188,7 +188,7 @@ const assistant = useTableAssistant({ session, transport, suggestions });
 `"panel"` beside the table, `"sheet"` for a modal on a narrow viewport, or
 `"floating"`), `labels`, `className`, `launcher` (set `false` when the host
 supplies its own trigger — the toolbar button and the floating launcher drive
-ONE panel), `onSettings`, `approval`, `receipts`, `speech`, `greeting`, `note`,
+ONE panel), `onSettings`, `approval`, `receipts`, [`speech`](./ai-voice.md), `greeting`, `note`,
 `accent`, `avatars`, `boundary`, `dir` and `messageAction`. `tableAssistant()` binds the same component to the
 `TABLE_ASSISTANT` slot for hosts that compose it as a feature.
 

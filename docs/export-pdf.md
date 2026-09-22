@@ -23,7 +23,7 @@ import { exportCsv } from "@adapttable/mantine/export";
 ```
 
 `pdfWriter()` plugs into the export button through the same
-`exportCsv()` seam as [CSV and XLSX](./customization.md#export), with the same
+`exportCsv()` seam as [CSV](./exporting.md) and [XLSX](./export-xlsx.md), with the same
 scopes (`page`, `all`, `selected`, `range`) and the same column subset.
 The button relabels itself **Export PDF** from `labels.exportFile("pdf")`.
 `buildTablePdf` is the same file, for a host assembling rows by hand.

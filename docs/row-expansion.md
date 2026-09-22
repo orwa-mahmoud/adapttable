@@ -7,7 +7,7 @@
 Render a detail panel under any row by composing `rowDetail(render)` from
 `@adapttable/<kit>/row-detail`. To put a whole table in the panel instead, the
 same subpath exports `nestedTable(...)` — see
-[a real table under a row](./tree-data.md#a-real-table-under-a-row).
+[nested tables](./nested-tables.md).
 
 ## Example
 

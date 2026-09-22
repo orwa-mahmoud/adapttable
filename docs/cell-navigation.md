@@ -149,7 +149,7 @@ import { findInTable } from "@adapttable/mantine/find-in-table";
 Find needs `cellNavigation()`: the shortcut, the marks and the walk all live
 on the grid. Without it, only a link carrying `find` opens the bar.
 
-Find is not search. The search box asks "show me only the rows that match", and
+Find is not [search](./search.md). The search box asks "show me only the rows that match", and
 on a server tier it asks the server; find asks "where does this appear in what I
 am looking at", leaves every row where it is, and walks the hits. Both can be on
 at once.

@@ -144,7 +144,8 @@ loaded laptop as an idle one, which is what makes them worth publishing: run
   pair is measured as a pair, with the combined height handed to the virtualizer.
   A panel that grows later (an image loading, a nested table expanding) corrects
   its item's size when it does, so scroll positions hold.
-- The headless hook `useTableVirtualization` (from `@adapttable/react`) serves custom markup;
+- The headless hook `useTableVirtualization` (from `@adapttable/react`) serves custom markup
+  ([example](./headless.md#virtualization));
   when disabled it returns every row with no spacers, so one render path
   serves both cases.
 - A windowed table still tells assistive technology how big the data really

@@ -36,20 +36,20 @@ export async function GET(request: Request) {
 `URLSearchParams` — so Next.js route handlers, Remix loaders and Server
 Actions all work without an adapter — and returns a `ServerTableQuery`:
 
-| Field            | What it is                                                   |
-| ---------------- | ------------------------------------------------------------ |
-| `page`           | 1-based, always at least 1                                   |
-| `limit`          | clamped to the schema's ceiling                              |
-| `offset`         | `(page - 1) * limit`, computed once so every caller does not |
-| `search`         | the free-text query, absent when there was none              |
-| `sort`           | the multi-sort chain, outermost first                        |
-| `groupBy`        | a single grouping column, when the schema allows it          |
-| `filters`        | column filters, keyed by the name after `f_`                 |
-| `filterTree`     | the advanced AND/OR tree                                     |
-| `pivot`          | the [pivot configuration](./pivot.md)                        |
-| `pivotCollapsed` | the folded pivot groups, by collapse key                     |
-| `cursor`         | the opaque cursor, in cursor mode                            |
-| `rejected`       | everything it refused, and why                               |
+| Field            | What it is                                                            |
+| ---------------- | --------------------------------------------------------------------- |
+| `page`           | 1-based, always at least 1                                            |
+| `limit`          | clamped to the schema's ceiling                                       |
+| `offset`         | `(page - 1) * limit`, computed once so every caller does not          |
+| `search`         | the free-text [search](./search.md) query, absent when there was none |
+| `sort`           | the multi-sort chain, outermost first                                 |
+| `groupBy`        | a single grouping column, when the schema allows it                   |
+| `filters`        | column filters, keyed by the name after `f_`                          |
+| `filterTree`     | the advanced AND/OR tree                                              |
+| `pivot`          | the [pivot configuration](./pivot.md)                                 |
+| `pivotCollapsed` | the folded pivot groups, by collapse key                              |
+| `cursor`         | the opaque cursor, in cursor mode                                     |
+| `rejected`       | everything it refused, and why                                        |
 
 ## The schema is an allowlist
 

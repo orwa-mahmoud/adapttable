@@ -43,7 +43,8 @@ and announcement; a card list has no sticky chrome.
 Identities are namespaced (`adapttable:pinned-summary:top:0`) so they
 never collide with a data-row id.
 
-Lift a real person with [`rowPinning`](./row-pinning.md). Stick a total
+Totals computed from rows — `summaryRow` and group aggregates — are on the
+[aggregation](./aggregation.md) page. Lift a real person with [`rowPinning`](./row-pinning.md). Stick a total
 that is not in the dataset with this factory.
 
 Labels: `pinnedSummaryRow`, `pinnedSummaryTop`, `pinnedSummaryBottom`.

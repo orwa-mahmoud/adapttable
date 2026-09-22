@@ -151,7 +151,8 @@ function PeopleTable({ people }: { people: Person[] }) {
 }
 ```
 
-Prefer to keep your own markup? Stay headless with `@adapttable/react`:
+Prefer to keep your own markup? Stay headless with `@adapttable/react`
+([walkthrough](./headless.md)):
 `useFrontendData` for the source and `useDataTable` for the prop-getters
 (`getTableProps`, `getHeaderCellProps`, `getSortButtonProps`, `getRowProps`,
 `getCellProps`, `getSearchInputProps`) — the same headless shape as TanStack,

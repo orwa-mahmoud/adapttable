@@ -30,7 +30,7 @@ import { mcpListChanged, toMcpResources, toMcpTools } from "@adapttable/ai/mcp";
 ```
 
 The root entry stays React-free. `@adapttable/ai-react` holds the React
-binding (`tableAgent`, `useTableAssistant`, `useSpeechInput`). The JSON,
+binding (`tableAgent`, `useTableAssistant`, [`useSpeechInput`](./ai-voice.md)). The JSON,
 OpenAI and MCP subpaths never import a model SDK.
 
 ## Three integration levels

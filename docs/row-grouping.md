@@ -610,6 +610,9 @@ export function People() {
 
 ## Aggregate without writing the maths
 
+Every aggregation option — `aggregate()`, `aggregatable` columns, custom
+operations and server aggregates — is on the [aggregation](./aggregation.md) page.
+
 The mapper above is a function you write. When the sums are ordinary, declare
 them instead and `aggregate()` returns that same mapper:
 

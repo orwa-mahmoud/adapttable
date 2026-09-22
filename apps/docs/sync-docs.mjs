@@ -89,6 +89,18 @@ export const TITLES = {
     "Migrate from material-table — React table guide",
   "migrate-from-ag-grid.md": "Migrate from AG Grid — your UI kit, MIT",
   "versioning.md": "AdaptTable versioning & stability policy",
+  "search.md": "React table search — debounced & URL-synced",
+  "header-filters.md": "React table header filters — per-column funnels",
+  "custom-filter-types.md": "React table custom filter types & operators",
+  "nested-tables.md": "React nested tables — master/detail rows",
+  "aggregation.md": "React table aggregation — totals and averages",
+  "export-xlsx.md": "React table Excel export — XLSX, typed cells",
+  "toolbar-and-view-controls.md": "React table toolbar — density, fullscreen",
+  "command-palette.md": "React table command palette and context menu",
+  "headless.md": "Headless React table with useDataTable",
+  "custom-table-source.md": "React table custom data source — TableSource",
+  "building-an-adapter.md": "React table adapter for any UI kit",
+  "ai-voice.md": "React table voice input — dictate to the AI",
 };
 
 // Per-page meta descriptions — the SERP snippet + og:description Starlight
@@ -205,6 +217,30 @@ export const DESCRIPTIONS = {
     "Upgrade AdaptTable v2 to v3: move React hooks to @adapttable/react, replace enabling props with feature imports and check package compatibility.",
   "migrate-from-v1.md":
     "Migrate AdaptTable v1 to v2 — every rename and behavior change in one checklist, applied the same way across all eight adapters.",
+  "search.md":
+    "React table search with a debounced, URL-synced box: custom getSearchText, server-side q queries, mobile cards, and how search differs from find.",
+  "header-filters.md":
+    "Add per-column funnel filters to React table headers with headerFilters(): the same fields, chips and f_ URL params as the Filters panel. Desktop only.",
+  "custom-filter-types.md":
+    "Register custom React table filter types with filterTypes(): your own widget, operators, predicate, chips and URL state, sent as-is to server queries.",
+  "nested-tables.md":
+    "Put a full React DataTable inside an expanded row: nestedTable() gives each row its own columns, sorting and paging, plus a rowDetail fallback.",
+  "aggregation.md":
+    "Footer totals, group subtotals and reader-chosen Sum, Average, Min, Max or Count for a React table: aggregate(), aggregatable columns, server aggregates.",
+  "export-xlsx.md":
+    "Export a React table to Excel with xlsxWriter: typed numbers, dates and booleans, grouped outline levels, column widths and Node builds. No dependency.",
+  "toolbar-and-view-controls.md":
+    "Add a React table toolbar with density, fullscreen, print, undo/redo and export buttons, a status bar, feature notices and a docked side panel, all opt-in.",
+  "command-palette.md":
+    "A Cmd/Ctrl+K command palette and right-click context menus for React tables: built-in and custom commands, header and cell menus, keyboard and touch.",
+  "headless.md":
+    "Build a headless React table with useDataTable: prop-getters for ARIA, sorting and search over any TableSource, plus mobile cards and virtualization.",
+  "custom-table-source.md":
+    "Build a custom TableSource for a React data table: every required field and setter, optional members, capabilities and a complete WebSocket example.",
+  "building-an-adapter.md":
+    "Write an AdaptTable adapter for your React UI kit on @adapttable/react/adapter: the shell, Chrome + required slots, feature helpers, parts, packaging.",
+  "ai-voice.md":
+    "Add voice input to a React table assistant: useSpeechInput dictates into the draft through the Web Speech API or a recorded clip, with language memory.",
 };
 
 const SITE = "https://orwa-mahmoud.github.io/adapttable";

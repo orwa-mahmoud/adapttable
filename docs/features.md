@@ -114,10 +114,11 @@ import { standardFeatures } from "@adapttable/mantine/preset";
 
 With no arguments it composes the features that work with nothing else
 supplied: the Columns menu, the density chooser, CSV export, find-in-table,
-fit-columns, the fullscreen toggle, header filters, multi-sort, resizable
-columns and the status bar. Because `headerFilters()` is a member, the preset's
-filters open from the column headers (`filtersMode` resolves to `"header"`);
-compose the members individually for popover or drawer filters.
+fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
+columns and the status bar. Because `headerFilters()` is a member, filters
+from the preset's `filters` option open from the column headers (`filtersMode`
+resolves to `"header"`); compose the members individually for popover or drawer
+filters.
 
 Configurable preset members join only when you give them input — `grouping`,
 `bulkActions`, `filters` and `savedViews`. Features outside the preset append to
@@ -211,6 +212,8 @@ const currencyFilter: TableFeature = {
 
 <DataTable features={[currencyFilter, rowReorder(onReorder)]} … />;
 ```
+
+The full filter-type contract is on [custom filter types](./custom-filter-types.md).
 
 Every seam is a method on `TableFeatureHost`. Built-in factories that carry
 extras (`filterTypes`, `exportCsv` with a writer, `commandPalette` with extra
