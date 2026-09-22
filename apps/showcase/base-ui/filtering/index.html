@@ -167,9 +167,10 @@
         <p>Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all Base UI components.</p>
         <p>The popover shifts rather than flips — the form grows when an operator takes a second bound, and flipping threw it over the page header — and the drawer is Base UI's, with its swipe direction mirrored for right-to-left.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/base-ui&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/base-ui&quot;;
+import { filters } from &quot;@adapttable/base-ui/filters&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, filter: &quot;text&quot; },
   {
     key: &quot;team&quot;,
@@ -185,6 +186,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
+      features={[filters([])]}
       filtersMode=&quot;popover&quot;
       urlKey=&quot;f&quot;
     /&gt;

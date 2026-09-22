@@ -167,9 +167,10 @@
         <p>The whole filter state lives in the URL, so a filtered view is a link someone can send — and the popover, drawer, inputs and chips are native elements, each one addressable by class so the filter form looks like the form you wrote.</p>
         <p>The backdrop, panel, popover and every filter input carry the map's classes with an indigo focus ring, and a checked option fills its label in indigo; the checklist and the AND/OR builder are not in the map, so they read as browser defaults.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/unstyled&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/unstyled&quot;;
+import { filters } from &quot;@adapttable/unstyled/filters&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, filter: &quot;text&quot; },
   {
     key: &quot;team&quot;,
@@ -185,6 +186,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
+      features={[filters([])]}
       filtersMode=&quot;popover&quot;
       urlKey=&quot;f&quot;
     /&gt;

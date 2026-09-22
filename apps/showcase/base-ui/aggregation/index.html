@@ -167,12 +167,12 @@
         <p>The footer, the pinned summaries and the group totals render through Base UI's own table rows. Building and reordering group levels stays on the grouping page.</p>
         <p>Totals render as Base UI table rows; the pinned pair uses the adapter's sticky classes rather than a portal, so they stay in the scroll box.</p>
         <h2>The code</h2>
-        <pre><code>import { aggregate } from &quot;@adapttable/core&quot;;
+        <pre><code>import { aggregate } from &quot;@adapttable/react&quot;;
 import { DataTable } from &quot;@adapttable/base-ui&quot;;
 import { groupingPanel } from &quot;@adapttable/base-ui/grouping-panel&quot;;
 import { pinnedSummaryRows } from &quot;@adapttable/base-ui/pinned-summary-rows&quot;;
 
-export function Sales({ rows, columns }) {
+export function Sales({ rows, columns, teamTotal, grandTotal }) {
   const budgetSum = aggregate({ budget: &quot;sum&quot; }, { columns });
   return (
     &lt;DataTable
@@ -185,10 +185,7 @@ export function Sales({ rows, columns }) {
           groupAggregates: budgetSum,
           groupFooters: true,
         }),
-        pinnedSummaryRows({
-          top: [{ id: &quot;team-total&quot;, name: &quot;Team total&quot; }],
-          bottom: [{ id: &quot;grand-total&quot;, name: &quot;Grand total&quot; }],
-        }),
+        pinnedSummaryRows({ top: [teamTotal], bottom: [grandTotal] }),
       ]}
     /&gt;
   );

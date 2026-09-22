@@ -357,10 +357,14 @@ export function People({ rows, columns }) {
     ],
     card: "Rows down the side, dimensions across the top, subtotals at every level.",
     snippet: `import { DataTable, PivotPanel } from "{pkg}";
-import { usePivotUrlState } from "@adapttable/react/pivot";
+import {
+  pivot,
+  pivotTableModel,
+  usePivotUrlState,
+} from "@adapttable/react/pivot";
 
 export function Spend({ rows, fields }) {
-  const pivot = usePivotUrlState({
+  const { config, onConfigChange, collapsed } = usePivotUrlState({
     urlKey: "p",
     defaultConfig: {
       rows: ["team"],
@@ -368,13 +372,17 @@ export function Spend({ rows, fields }) {
       measures: [{ key: "budget", agg: "sum" }],
     },
   });
+  const model = pivotTableModel(pivot(rows, config, { collapsed }), {
+    fields,
+  });
   return (
     <>
-      <PivotPanel fields={fields} {...pivot} />
+      <PivotPanel fields={fields} config={config} onChange={onConfigChange} />
       <DataTable
-        data={rows}
-        columns={pivot.columns}
-        rowKey={(row) => row.id}
+        data={model.rows}
+        columns={model.columns}
+        rowKey={model.rowKey}
+        summaryRow={model.summaryRow}
       />
     </>
   );
@@ -430,7 +438,7 @@ export function People({ rows, columns }) {
   return (
     <DataTable
       data={rows}
-      columns={[...columns, ...derived]}
+      columns={[...columns, ...derived.columns]}
       rowKey={(row) => row.id}
     />
   );
@@ -466,9 +474,11 @@ export function People({ rows, columns }) {
       "With `cellNavigation` on, the same handler receives whole blocks: paste a spreadsheet range with Ctrl+V, drag the fill handle, and undo the entire paste with one Ctrl+Z.",
     ],
     card: "Kit-native editors in the cell; every write goes through your handler.",
-    snippet: `import { DataTable } from "{pkg}";
+    snippet: `import { DataTable, type ColumnDef } from "{pkg}";
+import { cellNavigation } from "{pkg}/cell-navigation";
+import { editHistory, editing } from "{pkg}/editing";
 
-const columns = [
+const columns: ColumnDef<Person>[] = [
   { key: "name", editable: true },
   {
     key: "status",
@@ -484,11 +494,13 @@ export function People({ rows, onSave }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      cellNavigation
-      editHistory
-      onCellEdit={(row, key, value) =>
-        onSave({ ...row, [key]: value })
-      }
+      features={[
+        cellNavigation(),
+        editHistory(),
+        editing((row: Person, key, value) =>
+          onSave({ ...row, [key]: value })
+        ),
+      ]}
     />
   );
 }`,
@@ -518,12 +530,13 @@ export function People({ rows, onSave }) {
     description:
       "Explore a {kit} React tree table with parent-child rows, expandable branches, keyboard navigation and URL expansion state. Includes integration code.",
     intro: [
-      "A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Point the table at `getChildren` or `getParentId` and it renders the hierarchy.",
+      "A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Compose `tree()` with `getChildren` or `getParentId` and it renders the hierarchy.",
       "Children indent under their parent, a chevron opens and closes each branch, and arrow keys walk the tree the way a tree widget should. Expansion is part of the table's state, so it lives in the URL like everything else.",
       "Sorting and filtering apply within the tree rather than flattening it. Moving a child under a new parent is a host callback on the row-reordering page — the table never rewrites your tree.",
     ],
     card: "Nesting, chevrons, URL expansion, and host-owned tree moves.",
     snippet: `import { DataTable } from "{pkg}";
+import { tree } from "{pkg}/tree";
 
 export function Org({ people, columns }) {
   return (
@@ -531,8 +544,9 @@ export function Org({ people, columns }) {
       data={people}
       columns={columns}
       rowKey={(row) => row.id}
-      getParentId={(row) => row.managerId}
-      treeColumn="name"
+      features={[
+        tree({ getParentId: (row) => row.managerId, treeColumn: "name" }),
+      ]}
       urlKey="org"
     />
   );
@@ -610,7 +624,7 @@ export function People({ rows, columns }) {
     description:
       "Scroll a large {kit} React table with row and column virtualization, sticky headers and pinned columns. Try sorting and inspect the integration code.",
     intro: [
-      "Turn `virtualize` on and the table renders the rows in view plus a small overscan, whatever the dataset's size. `virtualizeColumns` does the same across, for column sets far wider than the window.",
+      "Compose `virtualize()` and the table renders the rows in view plus a small overscan, whatever the dataset's size. `virtualize({ virtualizeColumns: true })` does the same across, for column sets far wider than the window.",
       "The header stays pinned, pinned columns stay put, and the scroll box scrolls — never the page. Sorting, filtering and selection keep working on the whole dataset rather than on what is drawn.",
       "Nothing about the markup changes: it is the same {kit} table, with the rows outside the window absent rather than hidden.",
     ],
@@ -708,9 +722,10 @@ export function People({ rows, columns, layout, onLayout }) {
       "Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all {kit} components.",
     ],
     card: "Operators, an AND/OR tree, chips, and find in the same URL.",
-    snippet: `import { DataTable } from "{pkg}";
+    snippet: `import { DataTable, type ColumnDef } from "{pkg}";
+import { filters } from "{pkg}/filters";
 
-const columns = [
+const columns: ColumnDef<Person>[] = [
   { key: "name", filter: "text" },
   {
     key: "team",
@@ -726,6 +741,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
+      features={[filters([])]}
       filtersMode="popover"
       urlKey="f"
     />
@@ -830,6 +846,7 @@ export function People({ source, columns, api }) {
     ],
     card: "A set of ids that survives paging, with bulk actions over it.",
     snippet: `import { DataTable } from "{pkg}";
+import { bulkActions } from "{pkg}/bulk-actions";
 
 export function People({ rows, columns, onArchive }) {
   return (
@@ -837,13 +854,19 @@ export function People({ rows, columns, onArchive }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      bulkActions={[
-        {
-          key: "archive",
-          label: "Archive",
-          confirm: true,
-          onAction: (ids) => onArchive(ids),
-        },
+      features={[
+        bulkActions([
+          {
+            key: "archive",
+            label: "Archive",
+            confirm: {
+              title: "Archive people",
+              message: (count) => \`Archive \${count} people?\`,
+              confirmLabel: "Archive",
+            },
+            onClick: (ids) => onArchive(ids),
+          },
+        ]),
       ]}
     />
   );
@@ -929,6 +952,7 @@ export function People({ rows, columns }) {
     ],
     card: "Spanning headers that collapse to a stub, a kept child, or a custom cell.",
     snippet: `import { DataTable, type ColumnInput } from "{pkg}";
+import { collapsibleColumnGroups } from "{pkg}/column-groups";
 
 const columns: ColumnInput<Person>[] = [
   {
@@ -963,7 +987,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      collapsibleColumnGroups
+      features={[collapsibleColumnGroups()]}
     />
   );
 }`,
@@ -1050,7 +1074,7 @@ export function People({ rows, columns, setRows }) {
     setRows(
       applyRowPatches(
         rows,
-        [updateRow(id, { budget })],
+        [updateRow<Person>(id, { budget })],
         (row) => row.id
       )
     );
@@ -1089,11 +1113,13 @@ export function People({ rows, columns, setRows }) {
       "Try {kit} table row pinning, merged cells and row-action menus. Keep rows at the top or bottom and handle add/delete operations in your application.",
     intro: [
       "A row is more than a record. Pin it under the header or to the floor of the scroll box, merge cells that share a team so the name is written once, and add or delete through the 3-dot menu.",
-      '`onPinnedRowIdsChange`, `getCellSpan` and `rowActionsLayout="menu"` are the props this page turns on. Add and delete are callbacks to the host — the table never owns the data. Movement across flat, grouped and tree rows lives on the dedicated row-reordering page.',
+      '`rowPinning()`, `cellSpan()` and `rowActionsLayout="menu"` are what this page turns on. Add and delete are callbacks to the host — the table never owns the data. Movement across flat, grouped and tree rows lives on the dedicated row-reordering page.',
       "The pin actions, the menu and the merged cells are {kit}. Independent pinned summary rows — totals that are not data rows — live on the aggregation page.",
     ],
     card: "Pin rows, merge cells, and a 3-dot menu for add and delete.",
     snippet: `import { DataTable } from "{pkg}";
+import { cellSpan } from "{pkg}/cell-span";
+import { rowPinning } from "{pkg}/row-pinning";
 
 export function People({ rows, columns, setPinned, spanTeam }) {
   return (
@@ -1102,8 +1128,10 @@ export function People({ rows, columns, setPinned, spanTeam }) {
       columns={columns}
       rowKey={(row) => row.id}
       rowActionsLayout="menu"
-      onPinnedRowIdsChange={setPinned}
-      getCellSpan={spanTeam}
+      features={[
+        rowPinning({ onPinnedRowIdsChange: setPinned }),
+        cellSpan(spanTeam),
+      ]}
     />
   );
 }`,
@@ -1134,11 +1162,12 @@ export function People({ rows, columns, setPinned, spanTeam }) {
       "Expand a {kit} table row to a nested detail table. Each child has its own columns, row IDs and controls; explore the working React example.",
     intro: [
       "Open a row and the panel holds another {kit} table — the same component, not a hand-built list. Each person has recent orders; the inner table has its own columns and row keys.",
-      "`nestedTable` mounts the kit's DataTable with defaults that keep the two tables from fighting over the URL. Rows with no nested table can still use `renderRowDetail`.",
+      "`nestedTable()` mounts the kit's DataTable with defaults that keep the two tables from fighting over the URL. Rows with no nested table can still use `rowDetail()`.",
       "The expand chevron and both tables are {kit}.",
     ],
     card: "A real table under a row — same engine, own columns, own keys.",
     snippet: `import { DataTable } from "{pkg}";
+import { nestedTable } from "{pkg}/nested-table";
 
 export function People({ rows, columns, orderColumns }) {
   return (
@@ -1146,17 +1175,19 @@ export function People({ rows, columns, orderColumns }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      nestedTable={(row) => ({
-        label: \`Orders for \${row.name}\`,
-        table: (defaults) => (
-          <DataTable
-            {...defaults}
-            data={row.orders}
-            columns={orderColumns}
-            rowKey={(order) => order.id}
-          />
-        ),
-      })}
+      features={[
+        nestedTable((row: Person) => ({
+          label: \`Orders for \${row.name}\`,
+          table: (defaults) => (
+            <DataTable
+              {...defaults}
+              data={row.orders}
+              columns={orderColumns}
+              rowKey={(order) => order.id}
+            />
+          ),
+        })),
+      ]}
     />
   );
 }`,
@@ -1192,6 +1223,8 @@ export function People({ rows, columns, orderColumns }) {
     ],
     card: "Arrow-key focus, a visible ring, forced-colors, and live announcements.",
     snippet: `import { DataTable } from "{pkg}";
+import { cellNavigation } from "{pkg}/cell-navigation";
+import { columnSelectionCheckbox } from "{pkg}/column-selection";
 
 export function People({ rows, columns }) {
   return (
@@ -1199,8 +1232,7 @@ export function People({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      cellNavigation
-      columnSelectionCheckbox
+      features={[cellNavigation(), columnSelectionCheckbox()]}
     />
   );
 }`,
@@ -1284,12 +1316,12 @@ export function Tasks({ rows, setRows, columns }) {
       "The footer, the pinned summaries and the group totals render through {kit}'s own table rows. Building and reordering group levels stays on the grouping page.",
     ],
     card: "Footer totals, pinned summaries, group aggregates — not data rows.",
-    snippet: `import { aggregate } from "@adapttable/core";
+    snippet: `import { aggregate } from "@adapttable/react";
 import { DataTable } from "{pkg}";
 import { groupingPanel } from "{pkg}/grouping-panel";
 import { pinnedSummaryRows } from "{pkg}/pinned-summary-rows";
 
-export function Sales({ rows, columns }) {
+export function Sales({ rows, columns, teamTotal, grandTotal }) {
   const budgetSum = aggregate({ budget: "sum" }, { columns });
   return (
     <DataTable
@@ -1302,10 +1334,7 @@ export function Sales({ rows, columns }) {
           groupAggregates: budgetSum,
           groupFooters: true,
         }),
-        pinnedSummaryRows({
-          top: [{ id: "team-total", name: "Team total" }],
-          bottom: [{ id: "grand-total", name: "Grand total" }],
-        }),
+        pinnedSummaryRows({ top: [teamTotal], bottom: [grandTotal] }),
       ]}
     />
   );
@@ -1341,7 +1370,8 @@ export function Sales({ rows, columns }) {
       "Three integration levels share that session: a custom bridge that maps any agent format onto `session.execute`, an `AgentEnvelope` on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.",
     ],
     card: "Native assistant, feature-aware prompts and governed action receipts.",
-    snippet: `import { useTableAssistant } from "@adapttable/ai-react";
+    snippet: `import type { AgentSession } from "@adapttable/ai";
+import { useTableAssistant } from "@adapttable/ai-react";
 import { assistantHttpTransport } from "@adapttable/ai/http";
 import { tableAgent } from "@adapttable/ai-react";
 import { DataTable, agentApproval } from "{pkg}";
@@ -1360,7 +1390,7 @@ const suggestions = [
 ];
 
 export function Orders({ rows, columns, onEdit }) {
-  const [session, setSession] = useState();
+  const [session, setSession] = useState<AgentSession>();
   const transport = useMemo(
     () => assistantHttpTransport({ endpoint: "/api/table-agent" }),
     []

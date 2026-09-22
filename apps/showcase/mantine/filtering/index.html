@@ -167,9 +167,10 @@
         <p>Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all Mantine components.</p>
         <p>The popover is Mantine's Popover and the drawer its Drawer; inside them the controls are TextInput, NumberInput, Select, MultiSelect and Checkbox — the filter form is Mantine all the way down.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/mantine&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/mantine&quot;;
+import { filters } from &quot;@adapttable/mantine/filters&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, filter: &quot;text&quot; },
   {
     key: &quot;team&quot;,
@@ -185,6 +186,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
+      features={[filters([])]}
       filtersMode=&quot;popover&quot;
       urlKey=&quot;f&quot;
     /&gt;

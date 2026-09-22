@@ -167,9 +167,10 @@
         <p>Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all Chakra components.</p>
         <p>The popover is Chakra's Popover and the drawer its Drawer, backdrop and all; inside, the operators are NativeSelects, the bounds are Inputs, and a multi-select filter is a group of Chakra Checkboxes.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/chakra&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/chakra&quot;;
+import { filters } from &quot;@adapttable/chakra/filters&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, filter: &quot;text&quot; },
   {
     key: &quot;team&quot;,
@@ -185,6 +186,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
+      features={[filters([])]}
       filtersMode=&quot;popover&quot;
       urlKey=&quot;f&quot;
     /&gt;

@@ -167,9 +167,10 @@
         <p>Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all Ant Design components.</p>
         <p>The popover lets antd portal its Selects and pickers to the body the way antd does everywhere, and teaches the outside-click handler to ignore those layers instead — numbers filter through an InputNumber, and each active filter is a closable Tag.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/antd&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/antd&quot;;
+import { filters } from &quot;@adapttable/antd/filters&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, filter: &quot;text&quot; },
   {
     key: &quot;team&quot;,
@@ -185,6 +186,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
+      features={[filters([])]}
       filtersMode=&quot;popover&quot;
       urlKey=&quot;f&quot;
     /&gt;

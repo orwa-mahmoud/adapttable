@@ -168,6 +168,7 @@
         <p>The boxes are native checkboxes tinted with accent-primary and set indeterminate through a ref, since HTML has no attribute for it; the bulk bar sits on bg-accent above the table.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/shadcn&quot;;
+import { bulkActions } from &quot;@adapttable/shadcn/bulk-actions&quot;;
 
 export function People({ rows, columns, onArchive }) {
   return (
@@ -175,13 +176,19 @@ export function People({ rows, columns, onArchive }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      bulkActions={[
-        {
-          key: &quot;archive&quot;,
-          label: &quot;Archive&quot;,
-          confirm: true,
-          onAction: (ids) =&gt; onArchive(ids),
-        },
+      features={[
+        bulkActions([
+          {
+            key: &quot;archive&quot;,
+            label: &quot;Archive&quot;,
+            confirm: {
+              title: &quot;Archive people&quot;,
+              message: (count) =&gt; `Archive ${count} people?`,
+              confirmLabel: &quot;Archive&quot;,
+            },
+            onClick: (ids) =&gt; onArchive(ids),
+          },
+        ]),
       ]}
     /&gt;
   );

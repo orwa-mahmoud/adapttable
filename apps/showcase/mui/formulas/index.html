@@ -187,7 +187,7 @@ export function People({ rows, columns }) {
   return (
     &lt;DataTable
       data={rows}
-      columns={[...columns, ...derived]}
+      columns={[...columns, ...derived.columns]}
       rowKey={(row) =&gt; row.id}
     /&gt;
   );

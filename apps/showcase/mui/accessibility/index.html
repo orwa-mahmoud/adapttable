@@ -168,6 +168,8 @@
         <p>The grid is MUI Table rows; the header checkbox is MUI's Checkbox, and the focus ring is the kit's outline on the active cell.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/mui&quot;;
+import { cellNavigation } from &quot;@adapttable/mui/cell-navigation&quot;;
+import { columnSelectionCheckbox } from &quot;@adapttable/mui/column-selection&quot;;
 
 export function People({ rows, columns }) {
   return (
@@ -175,8 +177,7 @@ export function People({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      cellNavigation
-      columnSelectionCheckbox
+      features={[cellNavigation(), columnSelectionCheckbox()]}
     /&gt;
   );
 }</code></pre>

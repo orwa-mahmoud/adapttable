@@ -167,7 +167,8 @@
         <p>Three integration levels share that session: a custom bridge that maps any agent format onto <code>session.execute</code>, an <code>AgentEnvelope</code> on your transport, and optional JSON, OpenAI, MCP or HTTP helpers from your own runtime. Execution never requires another model call.</p>
         <p>Ant Design supplies the optional assistant, filters and approval controls. Suggested prompts demonstrate table actions; receipts distinguish proposals from completed writes.</p>
         <h2>The code</h2>
-        <pre><code>import { useTableAssistant } from &quot;@adapttable/ai-react&quot;;
+        <pre><code>import type { AgentSession } from &quot;@adapttable/ai&quot;;
+import { useTableAssistant } from &quot;@adapttable/ai-react&quot;;
 import { assistantHttpTransport } from &quot;@adapttable/ai/http&quot;;
 import { tableAgent } from &quot;@adapttable/ai-react&quot;;
 import { DataTable, agentApproval } from &quot;@adapttable/antd&quot;;
@@ -186,7 +187,7 @@ const suggestions = [
 ];
 
 export function Orders({ rows, columns, onEdit }) {
-  const [session, setSession] = useState();
+  const [session, setSession] = useState&lt;AgentSession&gt;();
   const transport = useMemo(
     () =&gt; assistantHttpTransport({ endpoint: &quot;/api/table-agent&quot; }),
     []

@@ -167,9 +167,10 @@
         <p>Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all MUI components.</p>
         <p>The popover is a Popper over an elevated Paper rather than MUI's Popover, which is modal and would dim the table behind it; the drawer is a real Drawer, the operators are TextField selects, and a multi-select filter is an Autocomplete.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/mui&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/mui&quot;;
+import { filters } from &quot;@adapttable/mui/filters&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, filter: &quot;text&quot; },
   {
     key: &quot;team&quot;,
@@ -185,6 +186,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
+      features={[filters([])]}
       filtersMode=&quot;popover&quot;
       urlKey=&quot;f&quot;
     /&gt;

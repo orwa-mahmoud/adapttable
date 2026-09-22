@@ -167,9 +167,11 @@
         <p>With <code>cellNavigation</code> on, the same handler receives whole blocks: paste a spreadsheet range with Ctrl+V, drag the fill handle, and undo the entire paste with one Ctrl+Z.</p>
         <p>Text and number both edit in an antd Input rather than an InputNumber — one control, one commit path — while a select column edits in antd's Select and a multi-select in the same Select in multiple mode.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/antd&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/antd&quot;;
+import { cellNavigation } from &quot;@adapttable/antd/cell-navigation&quot;;
+import { editHistory, editing } from &quot;@adapttable/antd/editing&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, editable: true },
   {
     key: &quot;status&quot;,
@@ -185,11 +187,13 @@ export function People({ rows, onSave }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      cellNavigation
-      editHistory
-      onCellEdit={(row, key, value) =&gt;
-        onSave({ ...row, [key]: value })
-      }
+      features={[
+        cellNavigation(),
+        editHistory(),
+        editing((row: Person, key, value) =&gt;
+          onSave({ ...row, [key]: value })
+        ),
+      ]}
     /&gt;
   );
 }</code></pre>

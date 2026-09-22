@@ -168,6 +168,7 @@
         <p>A group header sits on the thead with the preset's classes, spanning its children, and the toggle is a native button wearing the map; a collapsed stub hides the caption.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnInput } from &quot;@adapttable/shadcn&quot;;
+import { collapsibleColumnGroups } from &quot;@adapttable/shadcn/column-groups&quot;;
 
 const columns: ColumnInput&lt;Person&gt;[] = [
   {
@@ -202,7 +203,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      collapsibleColumnGroups
+      features={[collapsibleColumnGroups()]}
     /&gt;
   );
 }</code></pre>

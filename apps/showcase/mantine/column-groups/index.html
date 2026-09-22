@@ -168,6 +168,7 @@
         <p>A group header is a centred Mantine Table.Th spanning its children, with the kit's ActionIcon chevron; a collapsed stub hides the visible caption and the button name still says the group.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnInput } from &quot;@adapttable/mantine&quot;;
+import { collapsibleColumnGroups } from &quot;@adapttable/mantine/column-groups&quot;;
 
 const columns: ColumnInput&lt;Person&gt;[] = [
   {
@@ -202,7 +203,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      collapsibleColumnGroups
+      features={[collapsibleColumnGroups()]}
     /&gt;
   );
 }</code></pre>
