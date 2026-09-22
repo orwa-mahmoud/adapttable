@@ -1,8 +1,25 @@
 import starlight from "@astrojs/starlight";
+import starlightVersions from "starlight-versions";
 import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
 import { defineConfig } from "astro/config";
+import { existsSync } from "node:fs";
 
 import { sidebar } from "./sidebar.mjs";
+import { CURRENT_VERSION_LABEL, DOCS_VERSIONS } from "./versions.mjs";
+
+// starlight-versions snapshots the CURRENT docs into any listed version that
+// has no folder, so a missing snapshot would ship this version's pages under
+// an older label. Only scripts/archive-docs-version.mjs, which names the one
+// version it is creating, may build without it.
+for (const { slug } of DOCS_VERSIONS) {
+  const snapshot = new URL(`./src/content/docs/${slug}/`, import.meta.url);
+  if (!existsSync(snapshot) && process.env.ARCHIVE_DOCS_VERSION !== slug) {
+    throw new Error(
+      `docs version ${slug} has no snapshot in src/content/docs/${slug}/ — ` +
+        `create it with scripts/archive-docs-version.mjs`
+    );
+  }
+}
 
 // Starlight injects `head` entries in dev as well as build, so analytics must
 // be gated or local work reports itself as real traffic. `import.meta.env.PROD`
@@ -171,6 +188,12 @@ export default defineConfig({
         },
       ],
       sidebar,
+      plugins: [
+        starlightVersions({
+          current: { label: CURRENT_VERSION_LABEL },
+          versions: DOCS_VERSIONS,
+        }),
+      ],
     }),
   ],
 });

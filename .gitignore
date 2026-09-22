@@ -44,3 +44,6 @@ pg-*.png
 /*.png
 /*.jpeg
 /*.jpg
+
+# scripts/archive-docs-version.mjs scratch site
+.archive-work-*/
