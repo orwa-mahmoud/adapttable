@@ -87,7 +87,7 @@ export default defineConfig({
     {
       name: "webkit",
       testMatch: CROSS_BROWSER_SPECS,
-      use: { ...devices["Desktop WebKit"] },
+      use: { ...devices["Desktop Safari"] },
     },
     {
       name: "mobile-chrome",

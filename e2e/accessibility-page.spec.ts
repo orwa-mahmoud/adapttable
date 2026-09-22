@@ -60,7 +60,12 @@ test("the grid takes arrow-key focus, and says where it went", async ({
   await expect(grid).toBeVisible();
   await expect(transcript(page)).toContainText("Nothing yet");
 
-  await demo(page).locator("tbody tr:visible td").first().click();
+  // A data cell, not the selection checkbox: WebKit never focuses a checkbox
+  // on click, so a click there leaves focus on the body.
+  await demo(page)
+    .locator("tbody tr:visible td:not(:has(input[type=checkbox]))")
+    .first()
+    .click();
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowDown");
 

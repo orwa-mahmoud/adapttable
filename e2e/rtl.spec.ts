@@ -47,6 +47,17 @@ for (const kit of KITS) {
       .first();
     await expect(popover).toBeVisible();
 
+    // Kits animate the card in (antd zooms it); measure it at rest. A
+    // transition the kit replaces ends cancelled, so wait for each to settle.
+    await page.evaluate(() =>
+      Promise.allSettled(
+        document
+          .getAnimations()
+          .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+          .map((a) => a.finished)
+      )
+    );
+
     const rtlRoot = popover.locator("xpath=ancestor::*[@dir='rtl'][1]");
     await expect(rtlRoot).toBeAttached();
     const title = rtlRoot.getByText("عوامل التصفية").first();
