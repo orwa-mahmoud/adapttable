@@ -286,7 +286,32 @@ function auditTitles() {
     stale: [...named]
       .filter((name) => !docPages.includes(name))
       .sort((a, b) => a.localeCompare(b)),
+    overlong: Object.entries(TITLES).filter(
+      ([, title]) => (title + TITLE_SUFFIX).length > MAX_TITLE_LENGTH
+    ),
+    duplicate: duplicateValues(TITLES),
   };
+}
+
+/**
+ * Starlight appends ` | AdaptTable` to every page title. Google shows about
+ * 600 px (~60 characters) of a title and Bing flags titles past ~70, so the
+ * full string stays within 60. A description past 160 characters is cut in
+ * both engines' snippets.
+ */
+const TITLE_SUFFIX = " | AdaptTable";
+const MAX_TITLE_LENGTH = 60;
+const MAX_DESCRIPTION_LENGTH = 160;
+
+/** Entries whose value another entry already uses: `[name, value][]`. */
+function duplicateValues(map) {
+  const seen = new Map();
+  const repeats = [];
+  for (const [name, value] of Object.entries(map)) {
+    if (seen.has(value)) repeats.push([name, value]);
+    else seen.set(value, name);
+  }
+  return repeats;
 }
 
 /**
@@ -301,10 +326,23 @@ function auditDescriptions() {
     stale: [...described]
       .filter((name) => !docPages.includes(name))
       .sort((a, b) => a.localeCompare(b)),
+    overlong: Object.entries(DESCRIPTIONS).filter(
+      ([, description]) => description.length > MAX_DESCRIPTION_LENGTH
+    ),
+    duplicate: duplicateValues(DESCRIPTIONS),
   };
 }
 
-function printDescriptionFailures({ undescribed, stale }) {
+function printDescriptionFailures({ undescribed, stale, overlong, duplicate }) {
+  for (const [name, description] of overlong) {
+    console.error(
+      `\nDESCRIPTIONS["${name}"] is ${description.length} characters; ` +
+        `search snippets cut it past ${MAX_DESCRIPTION_LENGTH}.`
+    );
+  }
+  for (const [name] of duplicate) {
+    console.error(`\nDESCRIPTIONS["${name}"] repeats another page's snippet.`);
+  }
   if (undescribed.length > 0) {
     console.error(
       `\n${undescribed.length} docs page(s) have no entry in the DESCRIPTIONS ` +
@@ -351,7 +389,16 @@ function printLlmsOrderFailures({ unlisted, stale }) {
   }
 }
 
-function printTitleFailures({ untitled, stale }) {
+function printTitleFailures({ untitled, stale, overlong, duplicate }) {
+  for (const [name, title] of overlong) {
+    console.error(
+      `\nTITLES["${name}"] is ${(title + TITLE_SUFFIX).length} characters ` +
+        `with "${TITLE_SUFFIX}"; search results cut it past ${MAX_TITLE_LENGTH}.`
+    );
+  }
+  for (const [name] of duplicate) {
+    console.error(`\nTITLES["${name}"] repeats another page's title.`);
+  }
   if (untitled.length > 0) {
     console.error(
       `\n${untitled.length} docs page(s) have no entry in the TITLES map of ` +
@@ -374,10 +421,17 @@ function main() {
   const audits = auditPackages();
   const nav = auditNav();
   const titles = auditTitles();
-  const titleFailures = titles.untitled.length + titles.stale.length;
+  const titleFailures =
+    titles.untitled.length +
+    titles.stale.length +
+    titles.overlong.length +
+    titles.duplicate.length;
   const descriptions = auditDescriptions();
   const descriptionFailures =
-    descriptions.undescribed.length + descriptions.stale.length;
+    descriptions.undescribed.length +
+    descriptions.stale.length +
+    descriptions.overlong.length +
+    descriptions.duplicate.length;
   const llmsOrder = auditLlmsOrder();
   const llmsOrderFailures = llmsOrder.unlisted.length + llmsOrder.stale.length;
   const navFailures = nav.orphans.length + nav.dead.length;
@@ -445,15 +499,17 @@ function main() {
     }
     if (titleFailures > 0) {
       console.error(
-        `${titleFailures} title mismatch(es). Every docs/*.md page needs a ` +
-          `TITLES entry in apps/docs/sync-docs.mjs, and every entry needs its page.`
+        `${titleFailures} title problem(s). Every docs/*.md page needs a ` +
+          `unique TITLES entry in apps/docs/sync-docs.mjs within ` +
+          `${MAX_TITLE_LENGTH} characters with the suffix, and every entry ` +
+          `needs its page.`
       );
     }
     if (descriptionFailures > 0) {
       console.error(
-        `${descriptionFailures} description mismatch(es). Every docs/*.md page ` +
-          `needs a DESCRIPTIONS entry in apps/docs/sync-docs.mjs, and every ` +
-          `entry needs its page.`
+        `${descriptionFailures} description problem(s). Every docs/*.md page ` +
+          `needs a unique DESCRIPTIONS entry in apps/docs/sync-docs.mjs within ` +
+          `${MAX_DESCRIPTION_LENGTH} characters, and every entry needs its page.`
       );
     }
     if (llmsOrderFailures > 0) {
