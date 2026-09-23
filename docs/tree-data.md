@@ -37,8 +37,10 @@ models rather than one with a flag:
 | A parent row               | a synthetic header               | a real row with real cells             |
 
 Sharing one implementation would mean either grouping that cannot express a
-real hierarchy, or a tree that reshuffles when someone sorts a column. A table
-may use both — group a tree by a column and the groups hold trees.
+real hierarchy, or a tree that reshuffles when someone sorts a column. The body
+draws one of them at a time: with grouping armed, a table that also declares a
+tree shows the groups, and their rows carry no tree chevrons. Row pinning is
+refused under either.
 
 ## Which column carries the chevron
 
