@@ -840,10 +840,15 @@ export interface ExpandToggleSlotProps {
 /**
  * The expand/collapse control.
  *
+ * `rowDetail` and `nestedTable` both fill it, and a row opens one panel, so
+ * the slot is single: composing both draws one control per row.
+ *
  * @public
  */
-export const EXPAND_TOGGLE =
-  featureSlotKey<ExpandToggleSlotProps>("expand-toggle");
+export const EXPAND_TOGGLE = featureSlotKey<ExpandToggleSlotProps>(
+  "expand-toggle",
+  { single: true }
+);
 
 /**
  * Toolbar extras (export, undo, print, density, fullscreen).
