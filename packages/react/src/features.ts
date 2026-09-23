@@ -1,5 +1,5 @@
 /**
- * Feature composition — `@adapttable/core/features`.
+ * Feature composition — `@adapttable/react/features`.
  *
  * A separate entry so a table that never composes features never downloads
  * the factories. The `features` prop and {@link applyTableFeatures} live

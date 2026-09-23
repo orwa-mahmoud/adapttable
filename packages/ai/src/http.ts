@@ -344,7 +344,7 @@ export interface AgentHttpClientOptions {
   /**
    * How much context to send, and how to select it.
    *
-   * Defaults to `compact`. Passed straight to `buildAgentContext`, so a host
+   * Defaults to the `full` profile. Passed straight to `buildAgentContext`, so a host
    * naming a budget, a tokenizer or a priority order here is turning the same
    * dials the neutral builder exposes.
    */

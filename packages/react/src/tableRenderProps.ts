@@ -107,7 +107,7 @@ export interface SharedTableRenderProps<TRow> {
   rowClassName?: (row: TRow, index: number) => string | undefined;
   /**
    * Mark cells a patch just changed — `data-flash` on the cell. Omit and
-   * nothing is marked. See `useChangedCellFlash` from `@adapttable/core/stream`.
+   * nothing is marked. See `useChangedCellFlash` from `@adapttable/react/stream`.
    */
   isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   /** When true, group headers render a collapse toggle. */

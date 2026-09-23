@@ -435,8 +435,9 @@ export interface FeatureProps<TRow> {
   /** Bulk actions — enabling these turns on row selection. */
   bulkActions?: BulkAction[];
   /**
-   * Opt-in CSV export toolbar button. Pass `true` for defaults
-   * (`export.csv`, current page) or an options object for filename/scope.
+   * Opt-in export toolbar button. Pass `true` for defaults (current page,
+   * `export.` plus the writer's extension) or an options object for
+   * filename, scope and writer.
    * Omit or `false` to hide the button.
    */
   exportCsv?: boolean | ExportCsvOptions<TRow>;
@@ -761,7 +762,7 @@ export interface BaseDataTableProps<TRow> {
   /**
    * Mark cells a patch just changed — `data-flash` on the cell and on the
    * matching card value. Pair with `useChangedCellFlash` from
-   * `@adapttable/core/stream`. Omit and nothing is marked.
+   * `@adapttable/react/stream`. Omit and nothing is marked.
    */
   isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   /**

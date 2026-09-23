@@ -1,7 +1,7 @@
 /**
  * Built-in feature factories — one per optional behavior.
  *
- * Import from `@adapttable/core/features` or `@adapttable/<kit>/<feature>`.
+ * Import from `@adapttable/react/features` or `@adapttable/<kit>/<feature>`.
  * Each factory is a {@link TableFeature}: host plugins are the same type
  * in the same `features` array.
  */

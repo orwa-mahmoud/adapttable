@@ -183,7 +183,10 @@ export interface UseDataTableResult<TRow> {
  * @public
  */
 export interface TableElementProps extends Props {
-  /** `grid` with cell navigation, `table` otherwise. */
+  /**
+   * `table`. The headless hook draws a plain table; a grid role belongs to
+   * the kit that wires cell navigation onto it.
+   */
   role: string;
   /** Writing direction, present only when the table sets it. */
   dir?: Direction;
