@@ -114,9 +114,9 @@ export interface UseTableVirtualizationOptions<TRow> {
  * @public
  */
 export function useTableVirtualization<TRow>(
-  options: UseTableVirtualizationOptions<TRow>
+  input: UseTableVirtualizationOptions<TRow>
 ): TableVirtualization<TRow> {
-  return useTableVirtualizer(options).virtualization;
+  return useTableVirtualizer(input).virtualization;
 }
 
 /**
@@ -316,14 +316,7 @@ function tableWindow<TRow>({
  *
  * @public
  */
-export function useKeyedVirtualization(
-  options: KeyedVirtualizationOptions
-): KeyedVirtualization {
-  return useKeyedVirtualizer(options).virtualization;
-}
-
-/** What {@link useKeyedVirtualization} takes. */
-interface KeyedVirtualizationOptions {
+export function useKeyedVirtualization(options: {
   keys: readonly string[];
   enabled?: boolean;
   estimateSize?: number | ((index: number) => number);
@@ -331,12 +324,16 @@ interface KeyedVirtualizationOptions {
   scrollMargin?: number;
   getScrollElement?: () => Element | null;
   onEndReached?: () => void;
+}): KeyedVirtualization {
+  return useKeyedVirtualizer(options).virtualization;
 }
 
 /**
  * {@link useKeyedVirtualization}, plus the virtualizer's own scroll.
  */
-export function useKeyedVirtualizer(options: KeyedVirtualizationOptions): {
+export function useKeyedVirtualizer(
+  options: Parameters<typeof useKeyedVirtualization>[0]
+): {
   virtualization: KeyedVirtualization;
   scrollToIndex: (index: number) => void;
 } {
