@@ -38,6 +38,7 @@ export {
   assertUniqueSuggestions,
   type AssistantAction,
   type AssistantAnswer,
+  type AssistantAudio,
   type AssistantConversation,
   type AssistantExchange,
   type AssistantOutcome,

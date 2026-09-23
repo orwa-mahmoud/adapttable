@@ -278,9 +278,14 @@ misheard word is a typo the reader corrects. In **backend** mode one clip is
 recorded and released from the microphone on stop, and `onClip` hands it to
 the host. The wire contract carries it: a turn may send one `audio` clip
 (`mimeType`, `base64`, `durationMs`) instead of `message`, and the reply may
-name what the backend heard in `transcript`. The built-in HTTP client sends
-text, so a host that uses backend mode sends the clip on its own request. See
-[voice input](./ai-voice.md).
+name what the backend heard in `transcript`. The built-in client sends a clip
+on the turn's first round only: `assistantHttpTransport` takes it from the
+assistant's `sendClip`, and `createAgentHttpClient().send(session, "", { audio,
+onTranscript })` takes it directly. Once a reply names the `transcript`, every
+later round of the turn sends those words as `message`; a turn that needs
+another round and never got a transcript stops with an error. The assistant
+shows the transcript as the reader's own message. See
+[voice input](./ai-voice.md#backend-mode).
 
 ### Any language
 

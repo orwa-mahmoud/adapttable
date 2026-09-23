@@ -280,6 +280,8 @@ export interface AssistantTransportReply {
    * hiding what already ran.
    */
   readonly unresolved?: AssistantUnresolved;
+  /** What the backend heard, when the turn was a voice clip. */
+  readonly transcript?: string;
 }
 
 /**
@@ -345,6 +347,13 @@ export interface AssistantTurnInput {
    */
   readonly onPartialText?: (text: string) => void;
   /**
+   * Report what the backend heard, on a voice turn, as soon as it is known.
+   *
+   * The controller writes it into the reader's own message, so the transcript
+   * stands where the recording was sent from.
+   */
+  readonly onTranscript?: (text: string) => void;
+  /**
    * Put a structured question to the reader and wait for their answer.
    *
    * Optional on both sides, exactly like `onPartialText`: a transport that
@@ -368,8 +377,28 @@ export interface AssistantTurnInput {
 
 /** One turn, started by the reader. @public */
 export interface AssistantSendInput extends AssistantTurnInput {
-  /** What the reader asked. */
+  /** What the reader asked. Empty when the turn is a voice clip. */
   readonly text: string;
+  /**
+   * A recording in place of typed text, for a backend that transcribes it.
+   * A transport that cannot carry one rejects the turn.
+   */
+  readonly audio?: AssistantAudio;
+}
+
+/**
+ * A recorded clip for a backend to transcribe — the shape backend-mode
+ * dictation produces.
+ *
+ * @public
+ */
+export interface AssistantAudio {
+  /** Media type, such as `audio/webm`. */
+  readonly mimeType: string;
+  /** The clip, base64-encoded. */
+  readonly base64: string;
+  /** How long it runs, in milliseconds. */
+  readonly durationMs: number;
 }
 
 /** One turn, rejoined where a connection left it. @public */

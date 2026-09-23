@@ -424,6 +424,49 @@ export interface AgentHttpTurnResult {
   readonly needsFulfilled: { readonly describe: number; readonly read: number };
   /** Present only when the turn stopped short of running everything. */
   readonly unresolved?: AgentHttpUnresolved;
+  /** What the backend heard, when the turn was a voice clip. */
+  readonly transcript?: string;
+}
+
+/**
+ * A voice turn's clip and what the backend heard, carried across its rounds.
+ *
+ * The clip goes on the first round only. Once a reply names the transcript,
+ * every later round sends that as its message instead.
+ */
+interface VoiceCarry {
+  audio?: AgentHttpAudio;
+  transcript?: string;
+  readonly onTranscript?: (text: string) => void;
+}
+
+/** What a round sends as the reader's words, and the clip if it still owes one. */
+function roundWords(
+  message: string,
+  voice: VoiceCarry | undefined
+): { readonly message: string; readonly audio?: AgentHttpAudio } {
+  if (!voice) return { message };
+  const words = voice.transcript ?? message;
+  if (voice.audio) return { message: words, audio: voice.audio };
+  if (!words) {
+    throw new Error(
+      "the backend answered a voice turn without a transcript, so the turn cannot continue"
+    );
+  }
+  return { message: words };
+}
+
+/** Record what a reply says the backend heard, once. */
+function takeTranscript(
+  voice: VoiceCarry | undefined,
+  reply: AgentHttpResponse
+): void {
+  if (!voice?.audio) return;
+  voice.audio = undefined;
+  const heard = reply.transcript?.trim();
+  if (!heard) return;
+  voice.transcript = heard;
+  voice.onTranscript?.(heard);
 }
 
 const MAX_NEED_ROUNDS = 3;
@@ -1645,6 +1688,7 @@ async function sendRound(
     readonly turn: HttpPhaseContext;
     readonly phaseId: number;
     readonly message: string;
+    readonly audio?: AgentHttpAudio;
     readonly conversation?: readonly AgentHttpMessage[];
     readonly toolResults?: readonly AgentHttpToolResult[];
     readonly pendingCalls: readonly AgentHttpToolCall[];
@@ -1667,7 +1711,8 @@ async function sendRound(
       session,
       "turn",
       {
-        message: round.message,
+        ...(round.message ? { message: round.message } : {}),
+        ...(round.audio ? { audio: round.audio } : {}),
         conversation: round.conversation,
         turnId: round.turn.turnId,
         phaseId: round.phaseId,
@@ -1761,6 +1806,8 @@ async function runPhase(
     readonly phaseId: number;
     /** Receipts of work an earlier phase completed, carried forward. */
     readonly toolResults?: readonly AgentHttpToolResult[];
+    /** The clip and transcript of a voice turn. */
+    readonly voice?: VoiceCarry;
   }
 ): Promise<{
   readonly last: AgentHttpResponse | undefined;
@@ -1811,12 +1858,16 @@ async function runPhase(
       questionOnly,
       turn,
       phaseId: input.phaseId,
-      message: input.message,
+      ...roundWords(input.message, input.voice),
       conversation: input.conversation,
       toolResults,
       pendingCalls: phase.pending(),
       signal: input.signal,
     });
+
+    // A reply that lost the pin is re-sent whole, clip included; any other
+    // reply to the clip is the one that says what the backend heard.
+    if (!pinLost(last)) takeTranscript(input.voice, last);
 
     if (pinLost(last) && mayRecoverPin) {
       // The backend answered nothing but "I no longer have that contract".
@@ -1909,14 +1960,33 @@ export async function runAgentHttpTurn(
     conversation?: readonly AgentHttpMessage[];
     returnResults?: boolean;
     signal?: AbortSignal;
+    /** A recording sent in place of typed text, once, on the first round. */
+    audio?: AgentHttpAudio;
+    /** Told what the backend heard, as soon as a reply names it. */
+    onTranscript?: (text: string) => void;
   } = {}
 ): Promise<AgentHttpTurnResult> {
   const trimmed = message.trim();
-  if (!trimmed) throw new Error("agent HTTP turn requires a message");
+  if (!trimmed && !extras.audio) {
+    throw new Error("agent HTTP turn requires a message or audio");
+  }
 
   const turnId = newHttpTurnId();
   const turn = phaseContext(session, turnId, 0);
-  return runTurnPhases(session, options, extras, trimmed, turn);
+  const voice: VoiceCarry | undefined = extras.audio
+    ? { audio: extras.audio, onTranscript: extras.onTranscript }
+    : undefined;
+  const result = await runTurnPhases(
+    session,
+    options,
+    extras,
+    trimmed,
+    turn,
+    voice
+  );
+  return voice?.transcript === undefined
+    ? result
+    : { ...result, transcript: voice.transcript };
 }
 
 async function runTurnPhases(
@@ -1928,7 +1998,8 @@ async function runTurnPhases(
     signal?: AbortSignal;
   },
   trimmed: string,
-  turn: HttpPhaseContext
+  turn: HttpPhaseContext,
+  voice?: VoiceCarry
 ): Promise<AgentHttpTurnResult> {
   const execution = createTurnExecution(session, turn);
   const results: ExecuteResult[] = [];
@@ -1952,6 +2023,7 @@ async function runTurnPhases(
       signal: extras.signal,
       phaseId,
       toolResults,
+      voice,
     });
     if (!pass.last) throw new Error("agent HTTP returned no response");
     assertTurnContext(session, turn);
@@ -2364,6 +2436,10 @@ export function createAgentHttpClient(options: AgentHttpClientOptions): {
       conversation?: readonly AgentHttpMessage[];
       returnResults?: boolean;
       signal?: AbortSignal;
+      /** A recording in place of typed text; pass `""` as the message. */
+      audio?: AgentHttpAudio;
+      /** Told what the backend heard, as soon as a reply names it. */
+      onTranscript?: (text: string) => void;
     }
   ) => Promise<AgentHttpTurnResult>;
   /**
@@ -2445,9 +2521,11 @@ export function assistantHttpTransport(
     send: async ({
       session,
       text,
+      audio,
       conversation,
       signal,
       onPartialText,
+      onTranscript,
       askUser,
     }) => {
       partialSink = onPartialText;
@@ -2460,6 +2538,8 @@ export function assistantHttpTransport(
           })),
           returnResults: true,
           signal,
+          ...(audio ? { audio } : {}),
+          ...(onTranscript ? { onTranscript } : {}),
         })
         .finally(() => {
           // Cleared whatever happened, so a later stream cannot write into the
@@ -2474,6 +2554,9 @@ export function assistantHttpTransport(
         keys: turn.keys,
         subjects: turn.subjects,
         ...(turn.unresolved ? { unresolved: turn.unresolved } : {}),
+        ...(turn.transcript === undefined
+          ? {}
+          : { transcript: turn.transcript }),
       };
     },
   };

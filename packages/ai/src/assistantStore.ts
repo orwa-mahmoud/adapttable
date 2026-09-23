@@ -29,6 +29,7 @@ import type { AgentProgress } from "@adapttable/core";
 
 import {
   type AssistantAnswer,
+  type AssistantAudio,
   type AssistantExchange,
   type AssistantQuestion,
   type AssistantResumeHandle,
@@ -126,6 +127,13 @@ export interface AssistantMessage {
    * nothing. Gone once it is answered; the reply follows it in the list.
    */
   readonly question?: AssistantQuestion;
+  /**
+   * A voice message whose transcript has not come back yet.
+   *
+   * `text` is empty until the backend says what it heard; a panel shows a
+   * placeholder for the recording in the meantime.
+   */
+  readonly transcribing?: boolean;
   /** What the actions in this turn actually did. */
   readonly receipts?: readonly AssistantReceipt[];
   /** The turn's overall outcome, when it ran actions. */
@@ -342,6 +350,12 @@ export interface TableAssistantStore {
   readonly setDraft: (draft: string) => void;
   /** Send the draft, or the given text. Resolves when the turn settles. */
   readonly send: (text?: string) => Promise<void>;
+  /**
+   * Send a recording as the reader's turn, for a transport whose backend
+   * transcribes it — the `onClip` of backend-mode dictation. The transcript
+   * the backend returns becomes the reader's message.
+   */
+  readonly sendClip: (clip: AssistantAudio) => Promise<void>;
   /**
    * End the turn in flight and the work behind it.
    *
@@ -1236,6 +1250,7 @@ export function createTableAssistant(
         readonly kind: "send";
         readonly text: string;
         readonly keepDraft: boolean;
+        readonly audio?: AssistantAudio;
       }
     | { readonly kind: "resume"; readonly handle: AssistantResumeHandle };
 
@@ -1261,20 +1276,57 @@ export function createTableAssistant(
     error = undefined;
     errorCode = undefined;
     status = "sending";
+    let userMessageId: string | undefined;
     if (start.kind === "send") {
       seq += 1;
       if (!start.keepDraft) draft = "";
+      userMessageId = messageId("user", seq);
       // `push` publishes; a resumed turn has nothing new to say, so it says
       // only that it is running again.
       push({
-        id: messageId("user", seq),
+        id: userMessageId,
         role: "user",
         text: start.text,
         at: Date.now(),
+        ...(start.audio ? { transcribing: true } : {}),
       });
     } else {
       publish();
     }
+    // What the backend heard replaces the recording's placeholder in the
+    // reader's own message, once, while the turn is still the current one.
+    let heard: string | undefined;
+    /** A recording nobody transcribed stops claiming it is being transcribed. */
+    const settleVoice = (): void => {
+      if (userMessageId === undefined || heard !== undefined) return;
+      if (
+        !messages.some(
+          (entry) => entry.id === userMessageId && entry.transcribing
+        )
+      ) {
+        return;
+      }
+      setMessages(
+        messages.map((entry) =>
+          entry.id === userMessageId ? { ...entry, transcribing: false } : entry
+        )
+      );
+      publish();
+    };
+    const writeTranscript = (text: string | undefined): void => {
+      if (userMessageId === undefined || heard !== undefined) return;
+      const words = text?.trim();
+      if (!words || !deliverable(mine, id, controller)) return;
+      heard = words;
+      setMessages(
+        messages.map((entry) =>
+          entry.id === userMessageId
+            ? { ...entry, text: words, transcribing: false }
+            : entry
+        )
+      );
+      publish();
+    };
 
     // One provisional message, updated in place as text arrives. A new entry
     // per delta would make the transcript grow by a message a token.
@@ -1322,11 +1374,13 @@ export function createTableAssistant(
         // is exactly when it is needed.
         if (!deliverable(mine, id, controller)) return;
         resumable = {
-          text: start.kind === "send" ? start.text : start.handle.text,
+          text:
+            start.kind === "send" ? (heard ?? start.text) : start.handle.text,
           token,
         };
         publish();
       },
+      onTranscript: writeTranscript,
       onPartialText: (partial: string) => {
         streamed = partial;
         // Coalesced rather than published per token: a repaint per delta is a
@@ -1363,8 +1417,13 @@ export function createTableAssistant(
     try {
       const reply =
         start.kind === "send"
-          ? await transport.send({ ...shared, text: start.text })
+          ? await transport.send({
+              ...shared,
+              text: start.text,
+              ...(start.audio ? { audio: start.audio } : {}),
+            })
           : await resumeWith(transport, shared, start.handle);
+      writeTranscript(reply.transcript);
       // The provisional message goes when the real one lands. A reply is the
       // authority for what happened; the words that preceded it are not.
       dropStreamingMessage(mine, id);
@@ -1385,6 +1444,7 @@ export function createTableAssistant(
         recover(cause, controller.signal.aborted, previousDraft);
       }
     } finally {
+      settleVoice();
       release(mine, id);
     }
   };
@@ -1411,6 +1471,24 @@ export function createTableAssistant(
     );
   };
 
+  const sendClip = async (clip: AssistantAudio): Promise<void> => {
+    if (disposed || sending) return;
+    const transport = live.transport;
+    const session = live.session;
+    if (!session || !transport) {
+      status = "disconnected";
+      error = "no transport is connected";
+      publish();
+      return;
+    }
+    resumable = undefined;
+    await runTurn(
+      { kind: "send", text: "", keepDraft: true, audio: clip },
+      transport,
+      session
+    );
+  };
+
   // Taken once, so `publish` always has something to compare against. Without
   // it the first republish notifies whatever happened — which is precisely the
   // case a binding hits when it hands over its live inputs on a render before
@@ -1430,6 +1508,7 @@ export function createTableAssistant(
       publish();
     },
     send,
+    sendClip,
     stop: () => {
       if (disposed || !sending) return;
       cancelTurn();

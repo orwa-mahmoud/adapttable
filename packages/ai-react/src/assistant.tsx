@@ -26,6 +26,7 @@ import {
   type AgentSession,
   type AlwaysAllowedState,
   type AssistantAllowance,
+  type AssistantAudio,
   type AssistantInterruption,
   type AssistantMessage,
   type AssistantResumeHandle,
@@ -185,6 +186,12 @@ export interface TableAssistantState {
   readonly setDraft: (draft: string) => void;
   /** Send the draft, or the given text. Resolves when the turn settles. */
   readonly send: (text?: string) => Promise<void>;
+  /**
+   * Send a recording as the reader's turn — pass it as `onClip` to
+   * backend-mode `useSpeechInput`. The transcript the backend returns becomes
+   * the reader's message.
+   */
+  readonly sendClip: (clip: AssistantAudio) => Promise<void>;
   /** Abort the turn in flight. Safe to call when nothing is in flight. */
   readonly stop: () => void;
   /**
@@ -339,6 +346,7 @@ export function useTableAssistant(
     draft: state.draft,
     setDraft: store.setDraft,
     send: store.send,
+    sendClip: store.sendClip,
     stop: store.stop,
     resume: store.resume,
     interrupted: state.interrupted,

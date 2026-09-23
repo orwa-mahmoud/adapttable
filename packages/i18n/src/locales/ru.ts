@@ -217,6 +217,7 @@ export const ru: Required<TableLabels> = {
   assistantVoiceStart: "Диктовать",
   assistantVoiceStop: "Остановить диктовку",
   assistantVoiceListening: "Слушаю",
+  assistantVoiceMessage: "Голосовое сообщение",
   assistantVoiceLanguage: "Язык диктовки",
   assistantYou: "Вы",
   assistantSpeaker: "Помощник",

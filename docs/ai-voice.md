@@ -106,9 +106,11 @@ draft as an ordinary text turn — the same turn, the same approval and the same
 receipts as a typed request. A misheard sentence is therefore a typo to fix,
 never an action the table already ran.
 
-In backend mode the clip goes wherever `onClip` sends it. The host decides what
-happens to the text that comes back; writing it into the draft keeps the same
-review step as browser mode (see [Backend mode](#backend-mode)).
+In backend mode the clip goes wherever `onClip` sends it. Pass
+`assistant.sendClip` and the clip is the turn: the backend transcribes it, and
+its transcript replaces a "Voice message" placeholder as the reader's message.
+Or transcribe it yourself and write the text into the draft, which keeps the
+same review step as browser mode (see [Backend mode](#backend-mode)).
 
 ## `useSpeechInput(options)`
 
@@ -247,6 +249,26 @@ Backend mode records the reader and hands the clip to the host. It covers
 languages the browser's recognizer does not, and hosts that transcribe with
 their own provider.
 
+### The clip as the turn
+
+With the HTTP transport, the backend that answers the turn also hears it:
+
+```tsx
+const speech = useSpeechInput({
+  voice: { mode: "backend", languages: ["ar-SA"] },
+  setDraft: assistant.setDraft,
+  onClip: assistant.sendClip,
+});
+```
+
+`sendClip` sends the recording as the turn's first round. The reader's message
+shows `labels.assistantVoiceMessage` ("Voice message") until the reply names
+the `transcript`, then shows the transcript. A host writing its own
+`AssistantTransport` receives the clip as `audio` on `send`, reports the words
+through `onTranscript`, and may return them as `transcript` on the reply.
+
+### Transcribing it yourself
+
 ```tsx
 import type { SpeechClip } from "@adapttable/ai/voice";
 import { type TableAssistantState, useSpeechInput } from "@adapttable/ai-react";
@@ -291,9 +313,11 @@ reply. `parseAgentHttpRequest` from `@adapttable/ai/http` refuses a clip that
 is not `audio/webm`, `audio/ogg`, `audio/mp4`, `audio/mpeg` or `audio/wav`,
 that decodes to more than 4,000,000 bytes, or that runs longer than 120,000 ms;
 `AGENT_HTTP_LIMITS` publishes the same ceilings as `maxAudioBytes`,
-`maxAudioMs` and `audioTypes` for a backend to enforce. The assistant's `send`
-takes text, so putting a clip on the wire is the job of the host's own request
-or transport.
+`maxAudioMs` and `audioTypes` for a backend to enforce.
+[`examples/ai-http-backend.ts`](https://github.com/orwa-mahmoud/adapttable/blob/main/examples/ai-http-backend.ts)
+takes a `transcribe(audio, signal)` function as the last argument of
+`handleExampleAgentTurn`, answers the words it returns and sends them back as
+`transcript`.
 
 ## Notes
 

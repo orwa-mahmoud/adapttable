@@ -437,7 +437,14 @@ export function AssistantMessage({
         {speaker}
       </span>
       <Spoken
-        message={message}
+        message={
+          message.transcribing && !message.text
+            ? {
+                ...message,
+                text: labels?.assistantVoiceMessage ?? "Voice message",
+              }
+            : message
+        }
         mine={mine}
         leads={leads}
         {...marks}
@@ -784,7 +791,9 @@ function Spoken({
       part="assistant-message-text"
       {...(chosen === undefined ? {} : { avatar: chosen })}
       {...(trailing ? { trailing } : {})}
-      {...(message.streaming ? { streaming: true } : {})}
+      {...(message.streaming || message.transcribing
+        ? { streaming: true }
+        : {})}
     >
       {/* While a reply is still arriving, what has landed is shown in its
           place — marked as provisional, because words are not a receipt. */}

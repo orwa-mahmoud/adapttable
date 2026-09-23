@@ -211,6 +211,7 @@ export const it: Required<TableLabels> = {
   assistantVoiceStart: "Detta",
   assistantVoiceStop: "Interrompi dettatura",
   assistantVoiceListening: "In ascolto",
+  assistantVoiceMessage: "Messaggio vocale",
   assistantVoiceLanguage: "Lingua della dettatura",
   assistantYou: "Tu",
   assistantSpeaker: "Assistente",

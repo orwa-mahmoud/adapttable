@@ -209,6 +209,7 @@ export const zh: Required<TableLabels> = {
   assistantVoiceStart: "语音输入",
   assistantVoiceStop: "停止语音输入",
   assistantVoiceListening: "正在聆听",
+  assistantVoiceMessage: "语音消息",
   assistantVoiceLanguage: "语音输入语言",
   assistantYou: "您",
   assistantSpeaker: "助手",

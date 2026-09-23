@@ -2209,3 +2209,75 @@ describe("how much of the conversation travels", () => {
     expect(store.getState().messages).toHaveLength(4);
   });
 });
+
+describe("a voice turn through the store", () => {
+  const CLIP = { mimeType: "audio/webm", base64: "AAAA", durationMs: 900 };
+
+  it("sends the clip, then shows the transcript as the reader's message", async () => {
+    let heard: ((text: string) => void) | undefined;
+    let settle: ((reply: AssistantTransportReply) => void) | undefined;
+    const send = vi.fn(
+      (input: Parameters<AssistantTransport["send"]>[0]) =>
+        new Promise<AssistantTransportReply>((resolve) => {
+          heard = input.onTranscript;
+          settle = resolve;
+        })
+    );
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: { send },
+    });
+    store.connect();
+    const turn = store.sendClip(CLIP);
+
+    expect(send.mock.calls[0]?.[0]).toMatchObject({ text: "", audio: CLIP });
+    const pending = store.getState().messages[0];
+    expect(pending).toMatchObject({
+      role: "user",
+      text: "",
+      transcribing: true,
+    });
+
+    heard?.("show only open orders");
+    expect(store.getState().messages[0]).toMatchObject({
+      text: "show only open orders",
+      transcribing: false,
+    });
+
+    settle?.({ text: "Filtered.", transcript: "show only open orders" });
+    await turn;
+    const settled = store.getState().messages;
+    expect(settled.map((entry) => entry.text)).toEqual([
+      "show only open orders",
+      "Filtered.",
+    ]);
+  });
+
+  it("takes the transcript from the reply when nothing reported it earlier", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: () => Promise.resolve({ text: "Done.", transcript: "page 3" }),
+      },
+    });
+    store.connect();
+    await store.sendClip(CLIP);
+
+    expect(store.getState().messages[0]).toMatchObject({
+      text: "page 3",
+      transcribing: false,
+    });
+  });
+
+  it("stops marking a clip as transcribing when the turn fails", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: { send: () => Promise.reject(new Error("offline")) },
+    });
+    store.connect();
+    await store.sendClip(CLIP);
+
+    expect(store.getState().messages[0]?.transcribing).toBe(false);
+    expect(store.getState().status).not.toBe("sending");
+  });
+});

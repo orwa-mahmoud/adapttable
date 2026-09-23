@@ -212,6 +212,7 @@ export const ko: Required<TableLabels> = {
   assistantVoiceStart: "받아쓰기",
   assistantVoiceStop: "받아쓰기 중지",
   assistantVoiceListening: "듣는 중",
+  assistantVoiceMessage: "음성 메시지",
   assistantVoiceLanguage: "받아쓰기 언어",
   assistantYou: "나",
   assistantSpeaker: "어시스턴트",

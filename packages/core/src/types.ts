@@ -772,6 +772,11 @@ export interface TableLabels {
   assistantVoiceStop?: string;
   /** Announced once when dictation starts. Never per word heard. */
   assistantVoiceListening?: string;
+  /**
+   * Shown in the reader's own bubble for a recording sent to the backend,
+   * until the backend says what it heard.
+   */
+  assistantVoiceMessage?: string;
   /** Accessible name for the dictation language chooser. */
   assistantVoiceLanguage?: string;
   /** How a reader's own message is named. */
