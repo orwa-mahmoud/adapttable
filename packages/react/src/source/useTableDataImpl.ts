@@ -43,6 +43,9 @@ const EMPTY_REGISTRY: FilterTypeRegistry = {
   types: () => [],
 };
 
+/** The inactive server hook's columns: none, so it asks for nothing. */
+const NO_COLUMNS: readonly never[] = [];
+
 const EMPTY_RUNTIME: FilterRuntime<never> = {
   defs: [],
   arrayExtraKeys: [],
@@ -551,7 +554,9 @@ export function useTableDataWithEngine<TRow>(
       facetKeys: derivedFacetKeys,
       facets: serverFacets,
     }),
-    columns: resolvedColumns,
+    // A column's default aggregate is a request to the server; the hook that
+    // would send it only runs for the server tier, so only that tier reads it.
+    columns: tier === "server" ? resolvedColumns : NO_COLUMNS,
     total,
     loading,
     error,
