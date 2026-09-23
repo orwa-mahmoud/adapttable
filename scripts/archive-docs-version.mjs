@@ -50,6 +50,8 @@ import { gitBinary } from "./git-binary.mjs";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS_APP = join(ROOT, "apps", "docs");
 const SITE = "https://orwa-mahmoud.github.io/adapttable";
+/** The site URL as a regular-expression literal: every metacharacter escaped. */
+const SITE_PATTERN = SITE.replaceAll(/[.*+?^${}()|[\]\\/]/g, String.raw`\$&`);
 const REPO = "https://github.com/orwa-mahmoud/adapttable";
 
 function option(name) {
@@ -211,11 +213,11 @@ function archivePage(markdown) {
     : `${front}\nhead:\n${ROBOTS}`;
   // The breadcrumb names the archived page, not the current one.
   front = front.replace(
-    new RegExp(`"item":"${SITE}/(?!og/)([a-z0-9-]+)/"`, "g"),
+    new RegExp(`"item":"${SITE_PATTERN}/(?!og/)([a-z0-9-]+)/"`, "g"),
     (_, page) => `"item":"${SITE}/${slug}/${page}/"`
   );
   front = front.replace(
-    new RegExp(`${SITE}/og/([a-z0-9-]+)\\.png`, "g"),
+    new RegExp(`${SITE_PATTERN}/og/([a-z0-9-]+)\\.png`, "g"),
     (url, page) =>
       existsSync(join(DOCS_APP, "public", "og", `${page}.png`))
         ? url
