@@ -260,6 +260,26 @@ for (const kit of kits) {
   });
 }
 
+/** The page's scroll offset once it has stopped moving. */
+async function settledScrollY(page: Page): Promise<number> {
+  return page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let last = window.scrollY;
+        const check = () => {
+          requestAnimationFrame(() => {
+            if (window.scrollY === last) resolve(last);
+            else {
+              last = window.scrollY;
+              check();
+            }
+          });
+        };
+        check();
+      })
+  );
+}
+
 test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
   test.beforeEach(async ({ page }) => {
     await openDemo(page, CANONICAL_AI_ADAPTER);
@@ -356,8 +376,10 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
     await page.mouse.click(box.x + box.width - 2, box.y + box.height / 2);
     await expect(drawer).toBeVisible();
 
-    // A wheel out in the dark moves the panel, never the page behind it.
-    const resting = await page.evaluate(() => window.scrollY);
+    // A wheel out in the dark moves the panel, never the page behind it. The
+    // page may still be settling from opening the panel, so the baseline is
+    // taken once two reads a frame apart agree.
+    const resting = await settledScrollY(page);
     await page.mouse.move(box.x / 2, box.y + box.height / 2);
     await page.mouse.wheel(0, 600);
     expect(await page.evaluate(() => window.scrollY)).toBe(resting);
