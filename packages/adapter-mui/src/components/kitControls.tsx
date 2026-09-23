@@ -754,6 +754,7 @@ function ReorderMove({
     <IconButton
       type="button"
       size="small"
+      sx={{ minWidth: 44, minHeight: 44 }}
       data-adapttable-part={part}
       aria-label={label}
       disabled={disabled}
