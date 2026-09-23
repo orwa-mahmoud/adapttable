@@ -730,6 +730,43 @@ export type ExampleTranscribe = (
   signal: AbortSignal
 ) => Promise<string>;
 
+/**
+ * What the reader said in a clip, or `""`.
+ *
+ * A clip arrives once, on the first round of its turn. What was heard is
+ * answered as the reader's message and returned as `transcript`, so every
+ * later round of the turn sends those words instead of the recording.
+ */
+async function heardTranscript(
+  incoming: AgentHttpRequest,
+  transcribe: ExampleTranscribe | undefined,
+  signal: AbortSignal
+): Promise<string> {
+  if (incoming.kind !== "turn" || !incoming.audio || !transcribe) return "";
+  return (await transcribe(incoming.audio, signal)).trim();
+}
+
+/** The answer to a `hello` or `schema` request: the contract, pinned. */
+function pinReply(request: AgentHttpRequest): AgentHttpResponse {
+  const sessionId = pinExampleSchema(request);
+  return {
+    schemaVersion: AGENT_HTTP_SCHEMA,
+    ok: true,
+    sessionId,
+    pin: {
+      status: "acknowledged",
+      ...(request.contractVersion
+        ? { contractVersion: request.contractVersion }
+        : {}),
+      ttlMs: EXAMPLE_PIN_TTL_MS,
+    },
+    text:
+      request.kind === "hello"
+        ? "Connected. Messages and permitted table context go to this backend."
+        : "Schema updated.",
+  };
+}
+
 export async function handleExampleAgentTurn(
   incoming: AgentHttpRequest,
   complete: ExampleComplete,
@@ -737,34 +774,12 @@ export async function handleExampleAgentTurn(
   onText?: (chunk: string) => void,
   transcribe?: ExampleTranscribe
 ): Promise<AgentHttpResponse> {
-  // A clip arrives once, on the first round of its turn. What was heard is
-  // answered as the reader's message and returned as `transcript`, so every
-  // later round of the turn sends those words instead of the recording.
-  const transcript =
-    incoming.kind === "turn" && incoming.audio && transcribe
-      ? (await transcribe(incoming.audio, signal)).trim()
-      : "";
+  const transcript = await heardTranscript(incoming, transcribe, signal);
   const request: AgentHttpRequest = transcript
     ? { ...incoming, message: transcript }
     : incoming;
   if (request.kind === "hello" || request.kind === "schema") {
-    const sessionId = pinExampleSchema(request);
-    return {
-      schemaVersion: AGENT_HTTP_SCHEMA,
-      ok: true,
-      sessionId,
-      pin: {
-        status: "acknowledged",
-        ...(request.contractVersion
-          ? { contractVersion: request.contractVersion }
-          : {}),
-        ttlMs: EXAMPLE_PIN_TTL_MS,
-      },
-      text:
-        request.kind === "hello"
-          ? "Connected. Messages and permitted table context go to this backend."
-          : "Schema updated.",
-    };
+    return pinReply(request);
   }
   const resolved = resolveExampleSchema(request);
   if (!resolved.schema) {
