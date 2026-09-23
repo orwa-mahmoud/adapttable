@@ -200,11 +200,7 @@ export function StatusBarChrome(props: Readonly<StatusBarChromeProps>) {
   const items = itemsFor(props);
   const showBar = props.enabled || items.length > 0;
   if (!showBar) return stats;
-  return (
-    <Bar
-      items={items}
-      className={props.className}
-      stats={props.enabled ? stats : null}
-    />
-  );
+  // A notice brings the strip up without `statusBar()`; the selection figures
+  // stay inside it rather than disappearing while the notice shows.
+  return <Bar items={items} className={props.className} stats={stats} />;
 }
