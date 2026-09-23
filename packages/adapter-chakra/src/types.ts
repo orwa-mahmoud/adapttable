@@ -3,6 +3,7 @@ import {
   type BaseDataTableProps,
   type Slot,
   type UrlStateAdapter,
+  type UseTableDataOptions,
 } from "@adapttable/react";
 import type { DataModeProps } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
@@ -60,10 +61,10 @@ export interface DataTableClassNames {
  *
  * @public
  */
-export interface DataTablePropsBase<TRow> extends Omit<
-  BaseDataTableProps<TRow>,
-  "source"
-> {
+export interface DataTablePropsBase<TRow>
+  extends
+    Omit<BaseDataTableProps<TRow>, "source">,
+    Pick<UseTableDataOptions<TRow>, "supports" | "facetKeys" | "facets"> {
   /**
    * Full-control tier: a prebuilt source (`useFrontendData`,
    * `useQuerySource`, `useServerData`, …). Omit it and pass `data` for the
@@ -81,6 +82,8 @@ export interface DataTablePropsBase<TRow> extends Omit<
   total?: number;
   /** Server tier: a request is in flight. */
   loading?: boolean;
+  /** Forwarded error to display in the table's error state. */
+  error?: Error | null;
   /**
    * URL-state backend for the built-in tiers. Defaults to the browser
    * History API; pass a router adapter (or a memory adapter) to integrate.

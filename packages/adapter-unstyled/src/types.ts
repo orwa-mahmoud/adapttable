@@ -3,6 +3,7 @@ import {
   type BaseDataTableProps,
   type Slot,
   type UrlStateAdapter,
+  type UseTableDataOptions,
 } from "@adapttable/react";
 import type { DataModeProps } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
@@ -557,10 +558,10 @@ export interface DataTableSlots {
  *
  * @public
  */
-export interface DataTablePropsBase<TRow> extends Omit<
-  BaseDataTableProps<TRow>,
-  "source"
-> {
+export interface DataTablePropsBase<TRow>
+  extends
+    Omit<BaseDataTableProps<TRow>, "source">,
+    Pick<UseTableDataOptions<TRow>, "supports" | "facetKeys" | "facets"> {
   /**
    * Full-control tier: a prebuilt source (`useFrontendData`,
    * `useQuerySource`, …), used as-is. Omit it and pass `data` instead for

@@ -141,8 +141,8 @@ backend could do, not an error.
 `cursor` and `expandedIds` need a source built with `useServerData` or
 `useQuerySource` and passed as `source`: they take the `nextCursor` and
 `expandedIds` options, which `<DataTable onQueryChange>` has no prop for.
-`supports`, `facetKeys` and `facets` are likewise options of those two hooks;
-the kit `DataTableProps` types do not declare them.
+`supports`, `facetKeys` and `facets` are props on every kit's `<DataTable>`
+as well as options of those two hooks.
 
 The flat `filters` bag is always populated, including when `filterTree` is
 sent, so a server that only reads the simple form keeps working.
