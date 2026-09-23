@@ -8,8 +8,10 @@ on:
     - cron: "17 4 * * *"
   workflow_dispatch:
 
+# One run per ref: a new run supersedes the last on the same branch, and the
+# scheduled run on main never cancels a run dispatched on another branch.
 concurrency:
-  group: e2e-nightly
+  group: e2e-nightly-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
