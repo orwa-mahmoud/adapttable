@@ -31,15 +31,15 @@ is still part of the public surface below.
 
 ## Stability
 
-Each package carries its own version:
+Each package carries its own version, and what its stability depends on is
+its major line. The exact current version is on npm and at the top of the
+package's `CHANGELOG.md`.
 
-| Package                                             | Version |
-| --------------------------------------------------- | ------- |
-| `@adapttable/core`, the adapters, `@adapttable/cli` | `3.0`   |
-| `@adapttable/i18n`                                  | `3.1`   |
-| `@adapttable/react`                                 | `1.0`   |
-| `@adapttable/server`                                | `0.2`   |
-| `@adapttable/ai`, `@adapttable/ai-react`            | `0.1`   |
+| Package                                                                 | Major line |
+| ----------------------------------------------------------------------- | ---------- |
+| `@adapttable/core`, the adapters, `@adapttable/cli`, `@adapttable/i18n` | `3.x`      |
+| `@adapttable/react`                                                     | `1.x`      |
+| `@adapttable/server`, `@adapttable/ai`, `@adapttable/ai-react`          | `0.x`      |
 
 The packages at `1.0` and above are **stable**. The full SemVer contract above
 applies to them: breaking changes to the public API surface (below) ship only
