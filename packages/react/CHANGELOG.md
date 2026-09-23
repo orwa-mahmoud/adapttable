@@ -1,5 +1,11 @@
 # @adapttable/react
 
+## 1.3.0
+
+### Minor Changes
+
+- 338e626: In a virtualized antd table, find brings a match outside the window into view — antd's own virtual table on desktop, and the card and grouped windows. `RowScrollContext` and `KeyedWindow` (with `scrollToIndex`) are exported from `@adapttable/react/adapter` for kits that render their own body.
+
 ## 1.2.0
 
 ### Minor Changes
