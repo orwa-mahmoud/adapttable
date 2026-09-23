@@ -1,5 +1,22 @@
 # @adapttable/react
 
+## 1.2.0
+
+### Minor Changes
+
+- 3cf4297: `mobileIdentityColumns` is deprecated and removed in v4: it never changed which fields a card shows, and `hideOnMobile` decides that. The prop and the `useDataTable` option are still accepted and ignored, and the third argument of `visibleColumns` is deprecated with them.
+- 06c3694: `standardFeatures({ findButton: true })` draws the toolbar Find control; without it the preset is unchanged. Ctrl/Cmd+F opens find after a click inside the table, even on a cell that takes no focus, and a click elsewhere hands the shortcut back to the browser. With `virtualize()`, find brings a match outside the window into view; Ant Design’s desktop table virtualizes through antd and is not covered.
+
+### Patch Changes
+
+- 5e66063: `editing(commit, { onDirtyChange })` tracks unsaved edits on its own and reports the real count without `dirtyIndicators()`; `dirtyIndicators()` adds the cell and row marks for the same set.
+- 14ba2ea: A frontend table whose columns declare a default aggregate no longer warns that its source does not declare `supports.aggregates`.
+- 037c2a5: Row grouping follows the column's locale path: with `locale="ar"`, a column declaring `i18n: { ar: "teamAr" }` groups by `teamAr` and heads each group in Arabic, matching its cells and sort. A column's own `groupValue` and `sortValue` still decide the bucket first.
+- 1039051: With `multiSort()`, the first shift-click (or shift-Enter) keeps the current sort as level one: click Name, then shift-click Salary sorts Name → Salary.
+- Updated dependencies [3cf4297]
+- Updated dependencies [037c2a5]
+  - @adapttable/core@3.2.0
+
 ## 1.1.0
 
 ### Minor Changes
