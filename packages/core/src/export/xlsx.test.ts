@@ -202,7 +202,7 @@ describe("text XML cannot carry", () => {
     // A parser reads a carriage return back as a line feed, as XML requires;
     // the written sheet still carries it.
     expect(sheet.getElementsByTagName("t")[1]?.textContent).toBe(
-      text.replace("\r", "\n")
+      text.replaceAll("\r", "\n")
     );
     expect(textOf(bytes)).toContain(text);
   });
