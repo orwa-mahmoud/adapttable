@@ -22,6 +22,7 @@ import type {
 import { tableAgent, useTableAssistant } from "@adapttable/ai-react";
 import {
   type ApprovalPresentation,
+  type BulkAction,
   type FilterDef,
   type RowPinState,
 } from "@adapttable/core";
@@ -568,6 +569,68 @@ function raisedRows(
   );
 }
 
+/** The named rows, marked on leave. Pure: React may call it twice. */
+function onLeaveRows(
+  rows: readonly StaffRow[],
+  keys: readonly string[]
+): StaffRow[] {
+  const chosen = new Set(keys);
+  return rows.map((row) =>
+    chosen.has(row.id) ? { ...row, status: "On leave" } : row
+  );
+}
+
+/** The bulk action's words, in the demo's two languages. */
+const ON_LEAVE_TEXT: Record<
+  Locale,
+  { label: string; title: string; message: (count: number) => string }
+> = {
+  en: {
+    label: "Mark on leave",
+    title: "Mark on leave",
+    message: (count) =>
+      `Mark ${String(count)} ${count === 1 ? "person" : "people"} as on leave?`,
+  },
+  ar: {
+    label: "تسجيل إجازة",
+    title: "تسجيل إجازة",
+    message: (count) => `تسجيل ${String(count)} في إجازة؟`,
+  },
+};
+
+/**
+ * One bulk action over the selection, with a confirmation.
+ *
+ * The confirmation is what a person clicking the bar is asked, and it is also
+ * what makes the assistant ask before it runs the action — the same question,
+ * in the approval rather than a dialog. The handler writes the page's own rows:
+ * the table hands over the selected keys and changes nothing itself.
+ *
+ * A host handler cannot be staged, so on a staged table the action stays the
+ * reader's alone (`ai: false`) rather than being offered to an agent that
+ * would be refused on every attempt.
+ */
+function markOnLeaveAction(
+  locale: Locale,
+  agentMayRun: boolean,
+  apply: (keys: readonly string[]) => void
+): BulkAction {
+  const text = ON_LEAVE_TEXT[locale];
+  return {
+    key: "markOnLeave",
+    label: text.label,
+    onClick: (ids) => {
+      apply(ids);
+    },
+    confirm: {
+      title: text.title,
+      message: text.message,
+      confirmLabel: text.label,
+    },
+    ...(agentMayRun ? {} : { ai: false as const }),
+  };
+}
+
 /** Remove the named rows. The seed is restored by Reset and by a refresh. */
 function removeRows(
   rows: readonly StaffRow[],
@@ -603,6 +666,9 @@ const INITIAL_TOGGLES: DemoToggles = {
   columnPinning: true,
   paging: true,
 };
+
+/** The people the bulk example selects: Jonah Okonkwo and Sefa Demir. */
+const LEAVE_EXAMPLE_KEYS: ReadonlySet<string> = new Set(["j1", "s1"]);
 
 /** Five of fifteen: three pages, and 10 stays a real size the assistant can set. */
 const PAGE_LIMIT = 5;
@@ -730,6 +796,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     namedRowKey: "p1",
     pinnedColumnKey: "person",
     coreTeam: [],
+    leaveRows: [],
   });
   // Deliberately not one of the rows the edit examples name, and read from the
   // live rows: once it has been deleted the example stops being offered rather
@@ -742,6 +809,10 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
     coreTeam: rows
       .filter((row) => row.team === "Core")
       .map((row) => ({ rowKey: row.id, salary: row.salary })),
+    // Both on page 1 and both Active, so the change is one a reader sees.
+    leaveRows: rows
+      .filter((row) => LEAVE_EXAMPLE_KEYS.has(row.id))
+      .map((row) => ({ rowKey: row.id, person: row.person })),
     ...(removable
       ? { removableRow: { rowKey: removable.id, person: removable.person } }
       : {}),
@@ -772,8 +843,19 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
 
   const features = useMemo((): TableFeature<StaffRow>[] => {
     const canWrite = toggles.editingMode !== "off";
+    // Staging needs the batch save path. Cell and row modes apply on approve,
+    // so the reader is not dropped into always-open fields.
+    const effectiveCommit =
+      toggles.editingMode === "batch" ? commit : "immediate";
     const next: TableFeature<StaffRow>[] = [
       factories.filters([TEAM_FILTER, STATUS_FILTER, STARTED_FILTER]),
+      // Selection and one bulk action over it, through the kit's own bar. The
+      // agent reaches it as `bulkAction.markOnLeave` after `view.setSelection`.
+      factories.bulkActions([
+        markOnLeaveAction(locale, effectiveCommit === "immediate", (keys) => {
+          setRows((current) => onLeaveRows(current, keys));
+        }),
+      ]),
       tableAgent({
         tableId: "ai-assistant-demo",
         writePolicy: "allow",
@@ -802,9 +884,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
         // other write here is: the table asks, the host does.
         capabilities: [raiseTeam],
         ...(webmcp ? { webmcp: { onRegister: setWebmcpNames } } : {}),
-        // Staging needs the batch save path. Cell and row modes apply on
-        // approve, so the reader is not dropped into always-open fields.
-        commit: toggles.editingMode === "batch" ? commit : "immediate",
+        commit: effectiveCommit,
         // Labels in the reader's language: a column id is a developer key,
         // and the approval review shows this name rather than that key.
         columns: {

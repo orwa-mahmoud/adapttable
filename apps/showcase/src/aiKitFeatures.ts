@@ -4,6 +4,7 @@
  */
 import { agentApproval as antdApproval } from "@adapttable/antd";
 import { TableAssistant as antdAssistant } from "@adapttable/antd/assistant";
+import { bulkActions as antdBulkActions } from "@adapttable/antd/bulk-actions";
 import { columnMenu as antdColumnMenu } from "@adapttable/antd/column-menu";
 import {
   batchEditing as antdBatch,
@@ -17,6 +18,7 @@ import { groupingPanel as antdGrouping } from "@adapttable/antd/grouping-panel";
 import { rowPinning as antdRowPinning } from "@adapttable/antd/row-pinning";
 import { agentApproval as baseUiApproval } from "@adapttable/base-ui";
 import { TableAssistant as baseUiAssistant } from "@adapttable/base-ui/assistant";
+import { bulkActions as baseUiBulkActions } from "@adapttable/base-ui/bulk-actions";
 import { columnMenu as baseUiColumnMenu } from "@adapttable/base-ui/column-menu";
 import {
   batchEditing as baseUiBatch,
@@ -30,6 +32,7 @@ import { groupingPanel as baseUiGrouping } from "@adapttable/base-ui/grouping-pa
 import { rowPinning as baseUiRowPinning } from "@adapttable/base-ui/row-pinning";
 import { agentApproval as chakraApproval } from "@adapttable/chakra";
 import { TableAssistant as chakraAssistant } from "@adapttable/chakra/assistant";
+import { bulkActions as chakraBulkActions } from "@adapttable/chakra/bulk-actions";
 import { columnMenu as chakraColumnMenu } from "@adapttable/chakra/column-menu";
 import {
   batchEditing as chakraBatch,
@@ -43,6 +46,7 @@ import { groupingPanel as chakraGrouping } from "@adapttable/chakra/grouping-pan
 import { rowPinning as chakraRowPinning } from "@adapttable/chakra/row-pinning";
 import { agentApproval as mantineApproval } from "@adapttable/mantine";
 import { TableAssistant as mantineAssistant } from "@adapttable/mantine/assistant";
+import { bulkActions as mantineBulkActions } from "@adapttable/mantine/bulk-actions";
 import { columnMenu as mantineColumnMenu } from "@adapttable/mantine/column-menu";
 import {
   batchEditing as mantineBatch,
@@ -56,6 +60,7 @@ import { groupingPanel as mantineGrouping } from "@adapttable/mantine/grouping-p
 import { rowPinning as mantineRowPinning } from "@adapttable/mantine/row-pinning";
 import { agentApproval as muiApproval } from "@adapttable/mui";
 import { TableAssistant as muiAssistant } from "@adapttable/mui/assistant";
+import { bulkActions as muiBulkActions } from "@adapttable/mui/bulk-actions";
 import { columnMenu as muiColumnMenu } from "@adapttable/mui/column-menu";
 import {
   batchEditing as muiBatch,
@@ -69,6 +74,7 @@ import { groupingPanel as muiGrouping } from "@adapttable/mui/grouping-panel";
 import { rowPinning as muiRowPinning } from "@adapttable/mui/row-pinning";
 import { agentApproval as radixApproval } from "@adapttable/radix";
 import { TableAssistant as radixAssistant } from "@adapttable/radix/assistant";
+import { bulkActions as radixBulkActions } from "@adapttable/radix/bulk-actions";
 import { columnMenu as radixColumnMenu } from "@adapttable/radix/column-menu";
 import {
   batchEditing as radixBatch,
@@ -82,6 +88,7 @@ import { groupingPanel as radixGrouping } from "@adapttable/radix/grouping-panel
 import { rowPinning as radixRowPinning } from "@adapttable/radix/row-pinning";
 import { agentApproval as shadcnApproval } from "@adapttable/shadcn";
 import { TableAssistant as shadcnAssistant } from "@adapttable/shadcn/assistant";
+import { bulkActions as shadcnBulkActions } from "@adapttable/shadcn/bulk-actions";
 import { columnMenu as shadcnColumnMenu } from "@adapttable/shadcn/column-menu";
 import {
   batchEditing as shadcnBatch,
@@ -95,6 +102,7 @@ import { groupingPanel as shadcnGrouping } from "@adapttable/shadcn/grouping-pan
 import { rowPinning as shadcnRowPinning } from "@adapttable/shadcn/row-pinning";
 import { agentApproval as unstyledApproval } from "@adapttable/unstyled";
 import { TableAssistant as unstyledAssistant } from "@adapttable/unstyled/assistant";
+import { bulkActions as unstyledBulkActions } from "@adapttable/unstyled/bulk-actions";
 import { columnMenu as unstyledColumnMenu } from "@adapttable/unstyled/column-menu";
 import {
   batchEditing as unstyledBatch,
@@ -120,6 +128,7 @@ export const AI_KIT_FEATURES = {
     grouping: mantineGrouping,
     rowPinning: mantineRowPinning,
     columnMenu: mantineColumnMenu,
+    bulkActions: mantineBulkActions,
   },
   mui: {
     approval: muiApproval,
@@ -133,6 +142,7 @@ export const AI_KIT_FEATURES = {
     grouping: muiGrouping,
     rowPinning: muiRowPinning,
     columnMenu: muiColumnMenu,
+    bulkActions: muiBulkActions,
   },
   chakra: {
     approval: chakraApproval,
@@ -146,6 +156,7 @@ export const AI_KIT_FEATURES = {
     grouping: chakraGrouping,
     rowPinning: chakraRowPinning,
     columnMenu: chakraColumnMenu,
+    bulkActions: chakraBulkActions,
   },
   antd: {
     approval: antdApproval,
@@ -159,6 +170,7 @@ export const AI_KIT_FEATURES = {
     grouping: antdGrouping,
     rowPinning: antdRowPinning,
     columnMenu: antdColumnMenu,
+    bulkActions: antdBulkActions,
   },
   radix: {
     approval: radixApproval,
@@ -172,6 +184,7 @@ export const AI_KIT_FEATURES = {
     grouping: radixGrouping,
     rowPinning: radixRowPinning,
     columnMenu: radixColumnMenu,
+    bulkActions: radixBulkActions,
   },
   "base-ui": {
     approval: baseUiApproval,
@@ -185,6 +198,7 @@ export const AI_KIT_FEATURES = {
     grouping: baseUiGrouping,
     rowPinning: baseUiRowPinning,
     columnMenu: baseUiColumnMenu,
+    bulkActions: baseUiBulkActions,
   },
   shadcn: {
     approval: shadcnApproval,
@@ -198,6 +212,7 @@ export const AI_KIT_FEATURES = {
     grouping: shadcnGrouping,
     rowPinning: shadcnRowPinning,
     columnMenu: shadcnColumnMenu,
+    bulkActions: shadcnBulkActions,
   },
   tailwind: {
     approval: unstyledApproval,
@@ -211,6 +226,7 @@ export const AI_KIT_FEATURES = {
     grouping: unstyledGrouping,
     rowPinning: unstyledRowPinning,
     columnMenu: unstyledColumnMenu,
+    bulkActions: unstyledBulkActions,
   },
 } as const;
 
