@@ -373,12 +373,12 @@ export function makeGroupRowKey(
 
 /** One level of a group path, with its separator escaped. */
 function escapeLevel(part: string): string {
-  return part.replaceAll("\\", "\\\\").replaceAll(">", "\\>");
+  return part.replaceAll("\\", String.raw`\\`).replaceAll(">", String.raw`\>`);
 }
 
 /** A grouping key, with the level and key/value separators escaped. */
 function escapeKey(part: string): string {
-  return escapeLevel(part).replaceAll(":", "\\:");
+  return escapeLevel(part).replaceAll(":", String.raw`\:`);
 }
 
 /**
