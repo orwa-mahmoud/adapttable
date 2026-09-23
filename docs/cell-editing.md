@@ -537,33 +537,41 @@ Headless: `useBatchEditing` (`BatchEditingState`, `BatchRowEdit`,
 
 ## Adding, duplicating and deleting rows
 
-Editing a value is one thing; changing which rows exist is another. Three
-handlers cover it, and each one puts its own control on screen:
+Editing a value is one thing; changing which rows exist is another. Pass the
+handlers as the second argument of `rowActions`, and each one puts its own
+control on screen:
 
 ```tsx
 import { rowActions } from "@adapttable/mantine/row-actions";
 
 <DataTable
   {...props}
-  features={[rowActions()]}
-  onAddRow={() => setRows((rows) => [blankTask(), ...rows])}
-  onDuplicateRow={(row) =>
-    setRows((rows) => [{ ...row, id: nextId() }, ...rows])
-  }
-  onDeleteRow={(row) => setRows((rows) => rows.filter((r) => r.id !== row.id))}
+  features={[
+    rowActions(undefined, {
+      onAddRow: () => setRows((rows) => [blankTask(), ...rows]),
+      onDuplicateRow: (row) =>
+        setRows((rows) => [{ ...row, id: nextId() }, ...rows]),
+      onDeleteRow: (row) =>
+        setRows((rows) => rows.filter((r) => r.id !== row.id)),
+    }),
+  ]}
 />;
 ```
 
 `onAddRow` puts an **Add row** button in the toolbar. `onDuplicateRow` and
 `onDeleteRow` put icon-only **Duplicate row** and **Delete row** on every row
-(the labels are the tooltip and accessible name), after your
-own `rowActions` — so a delete stays last, where a destructive action belongs.
-They ride the actions column like any other row action: hideable and end-pinnable
-from the Columns menu, buttons on desktop and card buttons on mobile.
+(the labels are the tooltip and accessible name), after your own row actions —
+the first argument of `rowActions` — so a delete stays last, where a
+destructive action belongs. They ride the actions column like any other row
+action: hideable and end-pinnable from the Columns menu, buttons on desktop and
+card buttons on mobile. The [row actions](./row-actions.md) page covers the
+column itself.
 
-Pass `rowActionsLayout="menu"` to collapse those buttons into a 3-dot menu
-(omit or `"buttons"` keeps today's strip). `renderRowActions` replaces the
-cell entirely when you want your own chrome — it wins over the layout.
+**A delete asks first.** It goes through the same confirmation dialog a
+`rowActions` entry with a `confirm` block uses — `labels.deleteRow` as the title,
+`labels.deleteRowConfirm` as the question, both translated in every bundled
+locale. Pass `confirmDeleteRow: false` when your own UI already asked, or when
+your delete is reversible.
 
 **The table asks; you do the rest.** It holds no draft and stores no row. A row
 you add arrives through the source like every other row, which is what keeps it
@@ -574,19 +582,6 @@ _means_ is yours: which fields carry over, which reset, what id it gets.
 For an in-memory table, [`insertRow`, `removeRow` and `applyRowPatches`](./api.md)
 do the list work.
 
-## Reordering rows
-
-Changing which row sits where is the same one-way write: compose `rowReorder`
-and a grip appears. See [row reordering](./row-reordering.md).
-Compose `rowPinning({ onPinnedRowIdsChange })` and pin actions appear. See
-[row pinning](./row-pinning.md).
-
-**A delete asks first.** It goes through the same confirmation dialog a
-`rowActions` entry with a `confirm` block uses — `labels.deleteRow` as the title,
-`labels.deleteRowConfirm` as the question, both translated in every bundled
-locale. Pass `confirmDeleteRow={false}` when your own UI already asked, or when
-your delete is reversible.
-
 Nothing here needs `editing()`. Pair them and a reader adds a blank row and
 fills it in place; leave editing off and Add is simply a button that runs your
 handler.
@@ -595,6 +590,13 @@ Headless: `useRowMutations` (`RowMutationHandlers`, `RowMutationsState`) builds
 the same state a kit renders, and `chrome.rowMutations` carries it — `canAdd`
 plus `addRow`, with the duplicate and delete actions already folded into
 `chrome.rowActions`.
+
+## Reordering rows
+
+Changing which row sits where is the same one-way write: compose `rowReorder`
+and a grip appears. See [row reordering](./row-reordering.md).
+Compose `rowPinning({ onPinnedRowIdsChange })` and pin actions appear. See
+[row pinning](./row-pinning.md).
 
 ## Dirty marks
 

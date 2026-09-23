@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
+import { rowActions } from "./row-actions";
 import type { ColumnDef } from "./index";
 
 interface Task {
@@ -115,5 +116,94 @@ describe("row mutations (radix)", () => {
     });
     expect(part("add-row")).toHaveTextContent("Neue Zeile");
     expect(buttonsNamed(/zeile löschen/i)).toHaveLength(ROWS.length);
+  });
+
+  describe("through rowActions(actions, handlers)", () => {
+    it("draws Add in the toolbar and asks the host, with no host prop set", () => {
+      const onAddRow = vi.fn();
+      table({ features: [rowActions<Task>(undefined, { onAddRow })] });
+      const add = part("add-row")!;
+      expect(add).not.toBeNull();
+      expect(add.tabIndex).not.toBe(-1);
+      fireEvent.click(add);
+      expect(onAddRow).toHaveBeenCalledTimes(1);
+    });
+
+    it("puts Duplicate and Delete on every row after the host's actions", () => {
+      const onDuplicateRow = vi.fn();
+      const onDeleteRow = vi.fn();
+      const confirm = vi
+        .spyOn(window, "confirm")
+        .mockImplementation(() => true);
+      table({
+        features: [
+          rowActions<Task>([{ key: "open", label: "Open", onClick: vi.fn() }], {
+            onDuplicateRow,
+            onDeleteRow,
+          }),
+        ],
+      });
+      expect(buttonsNamed(/duplicate row/i)).toHaveLength(ROWS.length);
+      expect(buttonsNamed(/delete row/i)).toHaveLength(ROWS.length);
+      const first = screen.getAllByRole("row")[1]!;
+      const names = [...first.querySelectorAll("button")].map(
+        (b) => b.getAttribute("aria-label") ?? b.textContent
+      );
+      expect(names).toEqual(["Open", "Duplicate row", "Delete row"]);
+      fireEvent.click(buttonsNamed(/duplicate row/i)[1]!);
+      expect(onDuplicateRow).toHaveBeenCalledWith(ROWS[1]);
+      fireEvent.click(buttonsNamed(/delete row/i)[0]!);
+      expect(confirm).toHaveBeenCalledTimes(1);
+      expect(onDeleteRow).toHaveBeenCalledWith(ROWS[0]);
+      confirm.mockRestore();
+    });
+
+    it("skips the confirmation when confirmDeleteRow is false", () => {
+      const onDeleteRow = vi.fn();
+      const confirm = vi.spyOn(window, "confirm");
+      table({
+        features: [
+          rowActions<Task>(undefined, { onDeleteRow, confirmDeleteRow: false }),
+        ],
+      });
+      fireEvent.click(buttonsNamed(/delete row/i)[1]!);
+      expect(confirm).not.toHaveBeenCalled();
+      expect(onDeleteRow).toHaveBeenCalledWith(ROWS[1]);
+      confirm.mockRestore();
+    });
+
+    it("keeps the actions on mobile cards", () => {
+      const onDuplicateRow = vi.fn();
+      table({
+        forceMobile: true,
+        features: [rowActions<Task>(undefined, { onDuplicateRow })],
+      });
+      expect(buttonsNamed(/duplicate row/i)).toHaveLength(ROWS.length);
+      fireEvent.click(buttonsNamed(/duplicate row/i)[0]!);
+      expect(onDuplicateRow).toHaveBeenCalledWith(ROWS[0]);
+    });
+
+    it("renders right to left with localized names", () => {
+      table({
+        dir: "rtl",
+        labels: { addRow: "إضافة صف", deleteRow: "حذف الصف" },
+        features: [
+          rowActions<Task>(undefined, {
+            onAddRow: vi.fn(),
+            onDeleteRow: vi.fn(),
+          }),
+        ],
+      });
+      expect(document.querySelector('[dir="rtl"]')).not.toBeNull();
+      expect(part("add-row")).toHaveTextContent("إضافة صف");
+      expect(buttonsNamed(/حذف الصف/)).toHaveLength(ROWS.length);
+    });
+
+    it("draws nothing when the handlers are empty", () => {
+      table({ features: [rowActions<Task>(undefined, {})] });
+      expect(part("add-row")).toBeNull();
+      expect(buttonsNamed(/duplicate row/i)).toHaveLength(0);
+      expect(buttonsNamed(/delete row/i)).toHaveLength(0);
+    });
   });
 });

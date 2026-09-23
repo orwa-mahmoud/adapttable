@@ -764,18 +764,18 @@ inspect input) is the headless state; `liveRowChanged` is the comparison.
 so Take theirs is a choice, not a blind swap.
 The same notice appears on a mobile card.
 
-**Adding, duplicating and deleting rows.** `onAddRow` puts an Add control in the
-toolbar; `onDuplicateRow` and `onDeleteRow` put icon-only Duplicate row and
-Delete row on every row, after the host's own `rowActions`, under the keys
-`DUPLICATE_ROW_ACTION_KEY` and `DELETE_ROW_ACTION_KEY`. The labels are the
-tooltip and accessible name. A delete confirms first
-unless `confirmDeleteRow={false}`. `useRowMutations(options)`
-(`UseRowMutationsOptions` in, `RowMutationsState` out, taking the
-`RowMutationHandlers`) is the state behind them; `labels.addRow`,
-`labels.duplicateRow`, `labels.deleteRow` and `labels.deleteRowConfirm` name
-them, and `labels.rowActionsMenu` names the 3-dot trigger when
-`rowActionsLayout="menu"`. The table stores nothing — a new row arrives through the source like any
-other.
+**Adding, duplicating and deleting rows.** `rowActions(actions?, handlers?)`
+takes the host's row actions and `RowMutationHandlers`. `onAddRow` puts an Add
+control in the toolbar; `onDuplicateRow` and `onDeleteRow` put icon-only
+Duplicate row and Delete row on every row, after the host's own actions, under
+the keys `DUPLICATE_ROW_ACTION_KEY` and `DELETE_ROW_ACTION_KEY`. The labels are
+the tooltip and accessible name. A delete confirms first unless
+`confirmDeleteRow: false`. `useRowMutations(options)` (`UseRowMutationsOptions`
+in, `RowMutationsState` out, taking the `RowMutationHandlers`) is the state
+behind them; `labels.addRow`, `labels.duplicateRow`, `labels.deleteRow` and
+`labels.deleteRowConfirm` name them, and `labels.rowActionsMenu` names the
+3-dot trigger when `rowActionsLayout="menu"`. The table stores nothing — a new
+row arrives through the source like any other. See [row actions](./row-actions.md).
 
 **Dirty marks.** `dirtyIndicators` turns them on;
 `useDirtyCells(options)` (`UseDirtyCellsOptions` in, `DirtyCellState` out) holds

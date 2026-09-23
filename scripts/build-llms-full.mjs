@@ -38,6 +38,7 @@ export const DOCS = [
   "custom-filter-types.md",
   "pagination.md",
   "selection.md",
+  "row-actions.md",
   "row-expansion.md",
   "nested-tables.md",
   "cell-editing.md",

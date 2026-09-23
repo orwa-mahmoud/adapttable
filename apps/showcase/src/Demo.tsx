@@ -644,7 +644,15 @@ function composeDemoFeatures(
           }),
         ]
       : []),
-    ...(flags.rowMutations ? [rowActions<Person>()] : []),
+    ...(flags.rowMutations
+      ? [
+          rowActions<Person>(undefined, {
+            onAddRow: flags.onAddRow,
+            onDuplicateRow: flags.onDuplicateRow,
+            onDeleteRow: flags.onDeleteRow,
+          }),
+        ]
+      : []),
     ...(flags.cellSpan && teamSpan ? [cellSpan<Person>(teamSpan)] : []),
     ...(demoExtraRows ? [extraRows(demoExtraRows)] : []),
     ...(accentRowStyle
@@ -812,13 +820,6 @@ function frontendColumnProps(
   applyRowModelFlags(next, flags, onRowEdit);
   if (flags.batch) {
     Object.assign(next, { batchEditing: true, onBatchEdit: flags.onBatchEdit });
-  }
-  if (flags.rowMutations) {
-    Object.assign(next, {
-      onAddRow: flags.onAddRow,
-      onDuplicateRow: flags.onDuplicateRow,
-      onDeleteRow: flags.onDeleteRow,
-    });
   }
   if (flags.rowPinning) {
     Object.assign(next, { onPinnedRowIdsChange: () => undefined });

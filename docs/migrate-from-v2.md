@@ -57,47 +57,47 @@ row from that callback.
 
 ## Every removed prop, and what replaces it
 
-| Removed prop                                                                  | Replacement                  | Import                                |
-| ----------------------------------------------------------------------------- | ---------------------------- | ------------------------------------- |
-| `batchEditing`, `onBatchEdit`                                                 | `batchEditing(…)`            | `@adapttable/<kit>/editing`           |
-| `bulkActions`                                                                 | `bulkActions(…)`             | `@adapttable/<kit>/bulk-actions`      |
-| `cellNavigation`                                                              | `cellNavigation(…)`          | `@adapttable/<kit>/cell-navigation`   |
-| `getCellSpan`, `cellSpanAppearance`                                           | `cellSpan(…)`                | `@adapttable/<kit>/cell-span`         |
-| `collapsibleColumnGroups`                                                     | `collapsibleColumnGroups(…)` | `@adapttable/<kit>/column-groups`     |
-| `enableColumnMenu`                                                            | `columnMenu(…)`              | `@adapttable/<kit>/column-menu`       |
-| `columnSelectionCheckbox`                                                     | `columnSelectionCheckbox(…)` | `@adapttable/<kit>/column-selection`  |
-| `commandPalette`                                                              | `commandPalette(…)`          | `@adapttable/<kit>/command-palette`   |
-| `contextMenu`                                                                 | `contextMenu(…)`             | `@adapttable/<kit>/context-menu`      |
-| `densityChooser`                                                              | `densityChooser(…)`          | `@adapttable/<kit>/density`           |
-| `dirtyIndicators`                                                             | `dirtyIndicators(…)`         | `@adapttable/<kit>/editing`           |
-| `editHistory`                                                                 | `editHistory(…)`             | `@adapttable/<kit>/editing`           |
-| `onCellEdit`                                                                  | `editing(…)`                 | `@adapttable/<kit>/editing`           |
-| `exportCsv`                                                                   | `exportCsv(…)`               | `@adapttable/<kit>/export`            |
-| `extraRows`                                                                   | `extraRows(…)`               | `@adapttable/<kit>/extra-rows`        |
-| `filters`                                                                     | `filters(…)`                 | `@adapttable/<kit>/filters`           |
-| `filterTypes`                                                                 | `filterTypes(…)`             | `@adapttable/<kit>/filters`           |
-| `findInTable`                                                                 | `findInTable(…)`             | `@adapttable/<kit>/find-in-table`     |
-| `fitColumns`                                                                  | `fitColumns(…)`              | `@adapttable/<kit>/fit-columns`       |
-| `fullscreen`                                                                  | `fullscreen(…)`              | `@adapttable/<kit>/fullscreen`        |
-| `groupBy`                                                                     | `grouping(…)`                | `@adapttable/<kit>/grouping`          |
-| `headerFilters`                                                               | `headerFilters(…)`           | `@adapttable/<kit>/header-filters`    |
-| `multiSort`                                                                   | `multiSort(…)`               | `@adapttable/<kit>/multi-sort`        |
-| `nestedTable`                                                                 | `nestedTable(…)`             | `@adapttable/<kit>/nested-table`      |
-| `onPrint`, `printButton`                                                      | `print(…)`                   | `@adapttable/<kit>/print`             |
-| `resizableColumns`                                                            | `resizableColumns(…)`        | `@adapttable/<kit>/resizable-columns` |
-| `onAddRow`, `onDuplicateRow`, `onDeleteRow`, `confirmDeleteRow`, `rowActions` | `rowActions(…)`              | `@adapttable/<kit>/row-actions`       |
-| `rowStyle`, `rowHeight`, `rowClassName`                                       | `rowAppearance(…)`           | `@adapttable/<kit>/row-appearance`    |
-| `renderRowDetail`, `defaultExpandedRowIds`                                    | `rowDetail(…)`               | `@adapttable/<kit>/row-detail`        |
-| `rowEditing`, `onRowEdit`                                                     | `rowEditing(…)`              | `@adapttable/<kit>/editing`           |
-| `pinnedRowIds`, `onPinnedRowIdsChange`                                        | `rowPinning(…)`              | `@adapttable/<kit>/row-pinning`       |
-| `onRowReorder`                                                                | `rowReorder(…)`              | `@adapttable/<kit>/row-reorder`       |
-| `savedViews`                                                                  | `savedViews(…)`              | `@adapttable/<kit>/saved-views`       |
-| `selectionStats`                                                              | `selectionStats(…)`          | `@adapttable/<kit>/selection-stats`   |
-| `sidePanel`                                                                   | `sidePanel(…)`               | `@adapttable/<kit>/side-panel`        |
-| `statusBar`                                                                   | `statusBar(…)`               | `@adapttable/<kit>/status-bar`        |
-| `getChildren`, `getParentId`, `treeColumn`, `onLoadChildren`                  | `tree(…)`                    | `@adapttable/<kit>/tree`              |
-| `undoRedoButtons`                                                             | `undoRedoButtons(…)`         | `@adapttable/<kit>/editing`           |
-| `virtualize`, `virtualizeColumns`                                             | `virtualize(…)`              | `@adapttable/<kit>/virtualize`        |
+| Removed prop                                                                  | Replacement                     | Import                                |
+| ----------------------------------------------------------------------------- | ------------------------------- | ------------------------------------- |
+| `batchEditing`, `onBatchEdit`                                                 | `batchEditing(…)`               | `@adapttable/<kit>/editing`           |
+| `bulkActions`                                                                 | `bulkActions(…)`                | `@adapttable/<kit>/bulk-actions`      |
+| `cellNavigation`                                                              | `cellNavigation(…)`             | `@adapttable/<kit>/cell-navigation`   |
+| `getCellSpan`, `cellSpanAppearance`                                           | `cellSpan(…)`                   | `@adapttable/<kit>/cell-span`         |
+| `collapsibleColumnGroups`                                                     | `collapsibleColumnGroups(…)`    | `@adapttable/<kit>/column-groups`     |
+| `enableColumnMenu`                                                            | `columnMenu(…)`                 | `@adapttable/<kit>/column-menu`       |
+| `columnSelectionCheckbox`                                                     | `columnSelectionCheckbox(…)`    | `@adapttable/<kit>/column-selection`  |
+| `commandPalette`                                                              | `commandPalette(…)`             | `@adapttable/<kit>/command-palette`   |
+| `contextMenu`                                                                 | `contextMenu(…)`                | `@adapttable/<kit>/context-menu`      |
+| `densityChooser`                                                              | `densityChooser(…)`             | `@adapttable/<kit>/density`           |
+| `dirtyIndicators`                                                             | `dirtyIndicators(…)`            | `@adapttable/<kit>/editing`           |
+| `editHistory`                                                                 | `editHistory(…)`                | `@adapttable/<kit>/editing`           |
+| `onCellEdit`                                                                  | `editing(…)`                    | `@adapttable/<kit>/editing`           |
+| `exportCsv`                                                                   | `exportCsv(…)`                  | `@adapttable/<kit>/export`            |
+| `extraRows`                                                                   | `extraRows(…)`                  | `@adapttable/<kit>/extra-rows`        |
+| `filters`                                                                     | `filters(…)`                    | `@adapttable/<kit>/filters`           |
+| `filterTypes`                                                                 | `filterTypes(…)`                | `@adapttable/<kit>/filters`           |
+| `findInTable`                                                                 | `findInTable(…)`                | `@adapttable/<kit>/find-in-table`     |
+| `fitColumns`                                                                  | `fitColumns(…)`                 | `@adapttable/<kit>/fit-columns`       |
+| `fullscreen`                                                                  | `fullscreen(…)`                 | `@adapttable/<kit>/fullscreen`        |
+| `groupBy`                                                                     | `grouping(…)`                   | `@adapttable/<kit>/grouping`          |
+| `headerFilters`                                                               | `headerFilters(…)`              | `@adapttable/<kit>/header-filters`    |
+| `multiSort`                                                                   | `multiSort(…)`                  | `@adapttable/<kit>/multi-sort`        |
+| `nestedTable`                                                                 | `nestedTable(…)`                | `@adapttable/<kit>/nested-table`      |
+| `onPrint`, `printButton`                                                      | `print(…)`                      | `@adapttable/<kit>/print`             |
+| `resizableColumns`                                                            | `resizableColumns(…)`           | `@adapttable/<kit>/resizable-columns` |
+| `onAddRow`, `onDuplicateRow`, `onDeleteRow`, `confirmDeleteRow`, `rowActions` | `rowActions(actions, handlers)` | `@adapttable/<kit>/row-actions`       |
+| `rowStyle`, `rowHeight`, `rowClassName`                                       | `rowAppearance(…)`              | `@adapttable/<kit>/row-appearance`    |
+| `renderRowDetail`, `defaultExpandedRowIds`                                    | `rowDetail(…)`                  | `@adapttable/<kit>/row-detail`        |
+| `rowEditing`, `onRowEdit`                                                     | `rowEditing(…)`                 | `@adapttable/<kit>/editing`           |
+| `pinnedRowIds`, `onPinnedRowIdsChange`                                        | `rowPinning(…)`                 | `@adapttable/<kit>/row-pinning`       |
+| `onRowReorder`                                                                | `rowReorder(…)`                 | `@adapttable/<kit>/row-reorder`       |
+| `savedViews`                                                                  | `savedViews(…)`                 | `@adapttable/<kit>/saved-views`       |
+| `selectionStats`                                                              | `selectionStats(…)`             | `@adapttable/<kit>/selection-stats`   |
+| `sidePanel`                                                                   | `sidePanel(…)`                  | `@adapttable/<kit>/side-panel`        |
+| `statusBar`                                                                   | `statusBar(…)`                  | `@adapttable/<kit>/status-bar`        |
+| `getChildren`, `getParentId`, `treeColumn`, `onLoadChildren`                  | `tree(…)`                       | `@adapttable/<kit>/tree`              |
+| `undoRedoButtons`                                                             | `undoRedoButtons(…)`            | `@adapttable/<kit>/editing`           |
+| `virtualize`, `virtualizeColumns`                                             | `virtualize(…)`                 | `@adapttable/<kit>/virtualize`        |
 
 Companion props travel with their feature: `cellSpanAppearance` is the second
 argument to `cellSpan`, `defaultExpandedRowIds` the second to `rowDetail` and

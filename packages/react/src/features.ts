@@ -86,6 +86,7 @@ export { virtualize, type VirtualizeOptions } from "./features/virtualize";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export type { FeatureProps } from "./props";
 export type { SidePanelOptions } from "./props";
+export type { RowMutationHandlers } from "./rows/rowMutations";
 export type { RowPinState } from "./rows/rowPinning";
 export type { RowReorderHandler } from "./rows/rowReorder";
 export type { NestedTableFor } from "./tree/nestedTable";

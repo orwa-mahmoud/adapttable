@@ -43,6 +43,7 @@ export const TITLES = {
   "filter-tree.md": "React table advanced filters — AND/OR groups",
   "pagination.md": "React table pagination — paged, infinite, auto",
   "selection.md": "React table row selection & bulk actions",
+  "row-actions.md": "React table row actions — add, copy, delete",
   "row-expansion.md": "React table expandable rows — detail panels",
   "cell-editing.md": "React table editing — validation, batch, undo",
   "row-reordering.md": "React table row reordering — groups and trees",
@@ -131,6 +132,8 @@ export const DESCRIPTIONS = {
     "Numbered pages on desktop, infinite scroll on mobile, or force either. Server-side paging and shareable URL state included.",
   "selection.md":
     "Row selection and bulk actions for React CRUD tables — select a page or every match across pages, with an injectable confirm dialog and kit-native checkboxes.",
+  "row-actions.md":
+    "Row actions for React data tables — your own per-row buttons or a 3-dot menu, plus add, duplicate and delete rows through host handlers, in every UI kit.",
   "row-expansion.md":
     "Expandable rows for React data tables — per-row detail panels with accessible toggles and keyboard support, on the same API across every UI kit adapter.",
   "cell-editing.md":

@@ -339,7 +339,14 @@ function bridgeViewProps<TRow>(
       props.onDeleteRow) &&
     !hasId(next, "row-actions")
   ) {
-    next.push(rowActions(props.rowActions));
+    next.push(
+      rowActions(props.rowActions, {
+        onAddRow: props.onAddRow,
+        onDuplicateRow: props.onDuplicateRow,
+        onDeleteRow: props.onDeleteRow,
+        confirmDeleteRow: props.confirmDeleteRow,
+      })
+    );
   }
 }
 

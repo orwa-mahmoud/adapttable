@@ -8,7 +8,7 @@ This page is not a roadmap.
 
 AdaptTable does not mutate your array. Edits, adds, deletes and reorders
 call host callbacks (`editing()`, `batchEditing()`, `rowEditing()`,
-add/delete handlers, reorder/move handlers). Undo, dirty state and
+the `rowActions` add / duplicate / delete handlers, reorder/move handlers). Undo, dirty state and
 persistence are whatever those callbacks already do.
 [Cell editing](./cell-editing.md) · [row reordering](./row-reordering.md).
 

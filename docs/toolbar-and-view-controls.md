@@ -95,20 +95,20 @@ draws it, after Print.
 
 Each entry appears only when its source is present:
 
-| Entry              | Appears when                                                                                                                |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| Search             | Always, unless `searchable={false}`.                                                                                        |
-| Mobile sort select | `sortByOptions` is set, or the table is in the mobile card layout and has sortable columns.                                 |
-| Filters            | [Filters](./filtering.md) are composed.                                                                                     |
-| Saved views        | [`savedViews(...)`](./saved-views.md) is composed.                                                                          |
-| Columns            | [`columnMenu()`](./column-management.md) is composed.                                                                       |
-| Density            | `densityChooser()` is composed.                                                                                             |
-| Export             | `exportCsv()` is composed. See [exporting](./exporting.md).                                                                 |
-| Fullscreen         | `fullscreen()` is composed and the browser allows fullscreen.                                                               |
-| Print              | `print(onPrint, true)` is composed.                                                                                         |
-| Undo/Redo          | `undoRedoButtons()` and `editHistory()` are both composed.                                                                  |
-| Add row            | `onAddRow` is set with `rowActions()` composed. See [cell editing](./cell-editing.md#adding-duplicating-and-deleting-rows). |
-| Rows per page      | The table loads more rows on scroll (infinite mode) and is not grouped. Paged tables show it in the footer.                 |
+| Entry              | Appears when                                                                                                                 |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Search             | Always, unless `searchable={false}`.                                                                                         |
+| Mobile sort select | `sortByOptions` is set, or the table is in the mobile card layout and has sortable columns.                                  |
+| Filters            | [Filters](./filtering.md) are composed.                                                                                      |
+| Saved views        | [`savedViews(...)`](./saved-views.md) is composed.                                                                           |
+| Columns            | [`columnMenu()`](./column-management.md) is composed.                                                                        |
+| Density            | `densityChooser()` is composed.                                                                                              |
+| Export             | `exportCsv()` is composed. See [exporting](./exporting.md).                                                                  |
+| Fullscreen         | `fullscreen()` is composed and the browser allows fullscreen.                                                                |
+| Print              | `print(onPrint, true)` is composed.                                                                                          |
+| Undo/Redo          | `undoRedoButtons()` and `editHistory()` are both composed.                                                                   |
+| Add row            | `rowActions(actions, { onAddRow })` is composed. See [cell editing](./cell-editing.md#adding-duplicating-and-deleting-rows). |
+| Rows per page      | The table loads more rows on scroll (infinite mode) and is not grouped. Paged tables show it in the footer.                  |
 
 ## Toolbar slots
 

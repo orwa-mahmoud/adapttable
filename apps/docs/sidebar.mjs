@@ -33,6 +33,7 @@ export const sidebar = [
       { label: "Custom filter types", slug: "custom-filter-types" },
       { label: "Pagination", slug: "pagination" },
       { label: "Selection & bulk actions", slug: "selection" },
+      { label: "Row actions", slug: "row-actions" },
       { label: "Row expansion", slug: "row-expansion" },
       { label: "Nested tables", slug: "nested-tables" },
       { label: "Inline cell editing", slug: "cell-editing" },
