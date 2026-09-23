@@ -224,7 +224,9 @@ Stable catalog order:
 `view.hideColumn`, `view.setColumnOrder`,
 `view.pinRow`, `view.setSelection`, `views.apply`, `rows.read`,
 `rows.resolve`, `export.run`, `edit.cells`, `rows.add`, `rows.delete`,
-`rows.reorder`.
+`rows.reorder`, then the table's own actions — `rowAction.<key>` for each row
+action and `bulkAction.<key>` for each bulk action the host composed (see
+[row and bulk actions](./agent-capabilities.md#row-and-bulk-actions)).
 
 `view.setFilters` takes `{ filters }` — the extra bag the table already
 uses (`{ team: ["Core"] }`, `{ salaryMin: 10000, salaryOp: "gt" }`) or an

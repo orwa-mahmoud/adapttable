@@ -216,9 +216,10 @@ export interface RowAction<TRow> {
   confirm?: ActionConfirm<TRow>;
   /**
    * Agent-invocation overrides. Omit and the shared assistant configuration
-   * applies. See {@link ActionAiOptions}.
+   * applies; `false` keeps the action away from an agent. See
+   * {@link ActionAiOptions}.
    */
-  ai?: ActionAiOptions;
+  ai?: ActionAiOptions | false;
 }
 
 /**
@@ -255,9 +256,10 @@ export interface BulkAction {
   confirm?: ActionConfirm<number>;
   /**
    * Agent-invocation overrides. Omit and the shared assistant configuration
-   * applies. See {@link ActionAiOptions}.
+   * applies; `false` keeps the action away from an agent. See
+   * {@link ActionAiOptions}.
    */
-  ai?: ActionAiOptions;
+  ai?: ActionAiOptions | false;
 }
 
 /**

@@ -28,6 +28,7 @@
  *   another table's row detail.
  */
 import {
+  type BulkAction,
   type ColumnMetadata,
   devWarn,
   type ExtraFilters,
@@ -37,6 +38,7 @@ import {
   type NeutralTable,
   type PinSide,
   type QueryAggregate,
+  type RowAction,
   type RowPinSide,
   type TableSourceCapabilities,
 } from "@adapttable/core";
@@ -314,6 +316,15 @@ export interface TableRuntimeView<TRow = unknown> {
    * source published a contract. Never inferred here.
    */
   readonly sourceCapabilities?: TableSourceCapabilities;
+  /**
+   * The host's own row and bulk actions, when it composed any. A binding may
+   * offer them to an agent; the table's built-in add, duplicate, delete and
+   * pin controls are not among them.
+   */
+  readonly actions?: {
+    readonly row: readonly RowAction<TRow>[];
+    readonly bulk: readonly BulkAction[];
+  };
   /** Live selection, when a selection-owning feature is composed. */
   readonly selection?: {
     readonly selectedIds: ReadonlySet<string>;

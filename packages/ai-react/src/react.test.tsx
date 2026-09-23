@@ -1713,3 +1713,52 @@ describe("the values a column's author asked to show", () => {
     await act(() => Promise.resolve());
   });
 });
+
+describe("tableAgent offers the table's own actions", () => {
+  it("lists a composed row action and runs the host's handler", async () => {
+    let session: AgentSession | undefined;
+    const open = vi.fn();
+    const rows = [{ id: "1", name: "Ada" }];
+    const { getByTestId } = render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "people",
+            approval: "never",
+            bridge: {
+              attach: (attached) => {
+                session = attached;
+              },
+            },
+          }),
+        ]}
+        view={{
+          rows,
+          getRowId: (row) => (row as { id: string }).id,
+          rowLabel: (row) => (row as { name: string }).name,
+          actions: {
+            row: [{ key: "open", label: "Open", onClick: open }],
+            bulk: [],
+          },
+        }}
+      />
+    );
+
+    await waitFor(() =>
+      expect(getByTestId("keys").textContent).toContain("rowAction.open")
+    );
+    const live = session;
+    if (!live) throw new Error("no session attached");
+    const result = await act(() =>
+      live.execute(
+        "rowAction.open",
+        { rowKey: "1" },
+        live.manifest().viewRevision,
+        "open-1"
+      )
+    );
+
+    expect(result.ok).toBe(true);
+    expect(open).toHaveBeenCalledExactlyOnceWith(rows[0]);
+  });
+});

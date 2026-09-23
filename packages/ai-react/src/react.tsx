@@ -11,8 +11,8 @@ import {
   agentColumnsFromNeutral,
   type AgentContextInputs,
   agentFiltersFromDefs,
-  type AgentObservation,
   agentObservation,
+  type AgentObservation,
   type AgentPagination,
   agentPagination,
   type AgentSession,
@@ -49,6 +49,8 @@ import {
   settleDecisions,
   type SharedApproval,
   sharedApproval,
+  tableActionCapabilities,
+  tableActionSignature,
   type TableAgentBridge as NeutralBridge,
   type TableAgentColumnPatch,
   type WritePolicy,
@@ -1064,7 +1066,23 @@ function bindLiveSession(
     onProgress: (report) => {
       reportProgress.current(report);
     },
-    capabilities: optionsRef.current.capabilities,
+    // The host's own definitions, then one per row and bulk action the table
+    // composed. The action set is part of the registry key, so a table that
+    // gains or loses an action gets a session that offers exactly those.
+    capabilities: [
+      ...(optionsRef.current.capabilities ?? []),
+      ...tableActionCapabilities(runtimeRef.current.view()?.actions, {
+        actions: () => runtimeRef.current.view()?.actions,
+        rowFor: (rowKey) => {
+          const view = runtimeRef.current.view();
+          return view?.rows.find((row) => view.getRowId(row) === rowKey);
+        },
+        selectedIds: () => {
+          const selection = runtimeRef.current.view()?.selection;
+          return selection ? [...selection.selectedIds] : undefined;
+        },
+      }),
+    ],
     ...(optionsRef.current.capabilityApproval
       ? { capabilityApproval: optionsRef.current.capabilityApproval }
       : {}),
@@ -1144,7 +1162,7 @@ function TableAgentProvider({
   // the agent may use — or to who has to approve it — is a different session,
   // not a different answer from the same one.
   const registryKeyOf = (next: TableAgentOptions): string =>
-    `${exclusionKey(next.excludeCapabilities)}!${JSON.stringify(next.capabilityApproval ?? {})}`;
+    `${exclusionKey(next.excludeCapabilities)}!${JSON.stringify(next.capabilityApproval ?? {})}!${tableActionSignature(runtime.view()?.actions)}`;
   const registryRef = useRef(registryKeyOf(options));
   const registryKey = registryKeyOf(options);
   const sessionRef = useRef<AgentSession | null>(null);

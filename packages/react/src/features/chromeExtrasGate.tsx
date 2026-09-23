@@ -16,7 +16,7 @@ import {
 import { type ReactNode, useRef } from "react";
 
 import { deriveRuntimeOperations } from "../agent/deriveRuntimeOperations";
-import type { BaseDataTableProps } from "../props";
+import type { ComposedTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";
 import {
   FeatureSlot,
@@ -45,7 +45,7 @@ function ExtraGate<TRow>({
 }: {
   readonly slot: typeof COLUMN_LAYOUT_LIVE;
   readonly chrome: TableChrome<TRow>;
-  readonly props: BaseDataTableProps<TRow>;
+  readonly props: ComposedTableProps<TRow>;
   readonly children: (chrome: TableChrome<TRow>) => ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(slot);
@@ -99,9 +99,11 @@ function readableRowLabel<TRow>(chrome: TableChrome<TRow>, row: TRow): string {
 
 function RuntimePublisher<TRow>({
   chrome,
+  props,
   children,
 }: {
   readonly chrome: TableChrome<TRow>;
+  readonly props: ComposedTableProps<TRow>;
   readonly children: (chrome: TableChrome<TRow>) => ReactNode;
 }): ReactNode {
   let renderedRows = chrome.source.rows;
@@ -161,6 +163,12 @@ function RuntimePublisher<TRow>({
     },
     tree: chrome.tree,
     sourceCapabilities: chrome.source.capabilities,
+    // The host's own lists, as composed — not the resolved column, which hides
+    // with the actions column and carries the built-in controls too.
+    actions:
+      (props.rowActions?.length ?? 0) + (props.bulkActions?.length ?? 0) > 0
+        ? { row: props.rowActions ?? [], bulk: props.bulkActions ?? [] }
+        : undefined,
     selection: chrome.table.selection
       ? {
           selectedIds: chrome.table.selection.selectedIds,
@@ -275,12 +283,14 @@ function ExtraGateChain<TRow>({
 }: {
   readonly index: number;
   readonly chrome: TableChrome<TRow>;
-  readonly props: BaseDataTableProps<TRow>;
+  readonly props: ComposedTableProps<TRow>;
   readonly children: (chrome: TableChrome<TRow>) => ReactNode;
 }): ReactNode {
   const slot = EXTRA_SLOTS[index];
   return slot === undefined ? (
-    <RuntimePublisher chrome={chrome}>{children}</RuntimePublisher>
+    <RuntimePublisher chrome={chrome} props={props}>
+      {children}
+    </RuntimePublisher>
   ) : (
     <ExtraGate slot={slot} chrome={chrome} props={props}>
       {(next) => (
@@ -303,7 +313,7 @@ export function ChromeExtrasGate<TRow>({
   children,
 }: {
   readonly chrome: TableChrome<TRow>;
-  readonly props: BaseDataTableProps<TRow>;
+  readonly props: ComposedTableProps<TRow>;
   readonly children: (chrome: TableChrome<TRow>) => ReactNode;
 }): ReactNode {
   return (

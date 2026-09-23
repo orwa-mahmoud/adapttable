@@ -15,6 +15,12 @@ export {
   applyAggregations,
 } from "./aggregationCommands";
 export {
+  type DeclaredTableActions,
+  type TableActionSource,
+  tableActionCapabilities,
+  tableActionSignature,
+} from "./capabilities/actions";
+export {
   resolveApproval,
   type ResolvedApproval,
   type SharedApproval,

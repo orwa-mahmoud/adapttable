@@ -140,6 +140,11 @@ export function PeopleTable() {
   `{ title, message, confirmLabel, danger? }` — all strings pre-translated.
   Your `confirm` handler receives the full `ConfirmRequest` (including
   `cancelLabel` and `onConfirm`).
+- With [`tableAgent`](./agent-capabilities.md#row-and-bulk-actions)
+  composed, each row and bulk action is also an agent capability
+  (`rowAction.<key>`, `bulkAction.<key>`) under the table's approval policy;
+  `ai: false` on an action keeps it away from the agent, and `ai.approval`
+  overrides the policy for that action.
 - The selection toolbar's strings (`selectedCount`, `selectAllMatching`,
   `allMatchingSelected`, …) are overridable via the `labels` prop.
 - Headless consumers can reuse the same machinery: `useSelection` (with a

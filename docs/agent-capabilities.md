@@ -42,6 +42,8 @@ Capabilities come from the live table:
   `rows.add`, `rows.delete` and `rows.reorder` have no staging path: under the
   default `commit: "stage"` they return `commit-incompatible`, so a table that
   offers them sets `commit: "immediate"`.
+- `rowAction.<key>` and `bulkAction.<key>` appear for every row and bulk
+  action the host composed — see [row and bulk actions](#row-and-bulk-actions).
 - Data-layer truth comes from the source's
   [`TableSourceCapabilities`](./data-tiers.md) — the manifest copies those
   fields and never re-infers them from shape.
@@ -419,6 +421,37 @@ It never dumps the dataset or every feature instruction. Bounded
 in [`@adapttable/ai`](./ai.md). The kit strip uses `agent-approval`,
 `agent-approval-list`, `agent-approval-approve`, `agent-approval-reject`,
 and `agent-approval-row`. Escape rejects. Enter is not a silent confirm.
+
+## Row and bulk actions
+
+`tableAgent` offers every action the host composed with `rowActions(…)` and
+`bulkActions(…)` as its own governed capability. Nothing else needs wiring:
+
+| Capability         | Input         | Runs                                                   |
+| ------------------ | ------------- | ------------------------------------------------------ |
+| `rowAction.<key>`  | `{ rowKey }`  | The action's `onClick(row)`, as a click would.         |
+| `bulkAction.<key>` | `{ rowKeys }` | The action's `onClick(ids, context)` on the selection. |
+
+Each is a write, and `destructive` when its `confirm` is marked `danger`, so
+the table's write policy, commit mode and approval apply before the host's
+handler runs. An action's `ai.approval` overrides the table's policy for that
+capability, field by field, exactly as `capabilityApproval` does; an action
+with a `confirm` block asks a person unless its `ai.approval.policy` says
+otherwise. `ai: false` keeps an action away from the agent.
+
+A row action refuses a row it is hidden or disabled for (`isHidden`,
+`disabledReason`, `isDisabled`) before anything runs. A bulk action runs on
+the current selection: the agent selects with `view.setSelection`, then passes
+the same keys as `rowKeys`, and a selection that changed in between is
+refused. The table's own add, duplicate, delete and pin controls are not
+offered this way — they are `rows.add`, `rows.delete` and `view.pinRow`.
+
+The table still never changes the data: the capability calls the host's own
+handler, and the host decides what the action does.
+
+Without React, `tableActionCapabilities(declared, source)` from
+`@adapttable/ai` builds the same definitions for `createAgentSession`, and
+`tableActionSignature(declared)` says when the set changed.
 
 ## Registering a capability of your own
 
