@@ -1084,7 +1084,7 @@
           "every @adapttable/<kit>"
         ],
         "warnedBy": "@deprecated on BaseDataTableProps, the useDataTable option and the visibleColumns overload",
-        "test": "packages/core/src/columns/visibleColumns.test.ts — \"never changes the mobile column set, whatever its count\"",
+        "test": "packages/core/src/columns/visibleColumns.test.ts — \"is every column without hideOnMobile, in declared order\"",
         "props": ["mobileIdentityColumns"]
       }
     ]
