@@ -367,8 +367,9 @@ const source = useQuerySource<Deal, Params, Page>({
 
 ## Options
 
-`aggregate(spec, options?)` — `AggregateSpec` maps a column key to
-`AggregateName | Aggregator`. `AggregateOptions<TRow>`:
+`aggregate(spec, options?)` — `AggregateSpec` maps a column key to a
+built-in name, a name registered with `registerAggregator`, or an
+`Aggregator` function. `AggregateOptions<TRow>`:
 
 | Option    | Type                                                                           | Default | Description                                                                           |
 | --------- | ------------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------- |

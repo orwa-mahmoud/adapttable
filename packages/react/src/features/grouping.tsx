@@ -17,6 +17,7 @@ import {
   type GroupByInput,
   groupedEntriesForStrategy,
   groupingComputationKind,
+  type GroupNode,
   type GroupSort,
   insertExtraRows,
   parseGroupBy,
@@ -309,8 +310,11 @@ export interface StaticGroupingExtras {
   groupPageSize?: number;
   /** Show this many rows inside each group. */
   groupRowPageSize?: number;
-  /** Keep only the groups this accepts. */
-  groupFilter?: (group: unknown) => boolean;
+  /**
+   * Keep only the groups this accepts. Row-independent here; the row-aware
+   * {@link GroupingExtras} types the group's rows.
+   */
+  groupFilter?: (group: GroupNode<never>) => boolean;
   /** Controlled collapse state. */
   collapsedGroupIds?: readonly string[];
   /** Told when a group opens or closes. */
@@ -332,6 +336,8 @@ export interface GroupingExtras<TRow> extends StaticGroupingExtras {
   groupAggregates?: (rows: readonly TRow[]) => unknown;
   /** Order the groups themselves. */
   groupSort?: GroupSort<TRow>;
+  /** Keep only the groups this accepts — each with its key, count and rows. */
+  groupFilter?: (group: GroupNode<TRow>) => boolean;
 }
 
 /**

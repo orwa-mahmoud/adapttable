@@ -694,7 +694,7 @@ options go in the second argument:
 | `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —       | Controlled change channel; falls back to `source.setGroupBy`.                                    |
 | `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —       | Per-group cells — **same signature as `summaryRow`**. Omit for headers without subtotals.        |
 | `groupSort`                 | `GroupSort<TRow>`                                               | —       | `"label"`, `"label-desc"`, `"count"`, `"count-desc"`, or `(a, b) => number` over `GroupNode`s.   |
-| `groupFilter`               | `(group: unknown) => boolean`                                   | —       | Keep only the groups this accepts; each call receives a `GroupNode<TRow>`.                       |
+| `groupFilter`               | `(group: GroupNode<TRow>) => boolean`                           | —       | Keep only the groups this accepts — each group with its `key`, `count` and `leafRows`.           |
 | `groupFooters`              | `boolean`                                                       | `false` | Close every group with a footer row carrying its aggregates.                                     |
 | `groupPageSize`             | `number`                                                        | —       | Top-level groups shown before a "Show more groups" row.                                          |
 | `groupRowPageSize`          | `number`                                                        | —       | Rows shown per group before a "Show more in this group" row.                                     |
