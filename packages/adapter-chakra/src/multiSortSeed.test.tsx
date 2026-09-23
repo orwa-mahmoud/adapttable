@@ -1,5 +1,5 @@
-import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { createMemoryAdapter } from "@adapttable/react";
+import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
