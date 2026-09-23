@@ -18,6 +18,7 @@ interface Row {
 const ROWS: Row[] = [
   { id: "1", name: "Zoe" },
   { id: "2", name: "Ada" },
+  { id: "3", name: "Adam" },
 ];
 const COLS: ColumnDef<Row>[] = [
   { key: "name", header: "Name", accessor: (r) => r.name },
@@ -44,10 +45,18 @@ function table(button = true) {
 }
 
 const scrolled = vi.fn();
+const scrolledElements: Element[] = [];
 const originalScroll = Element.prototype.scrollIntoView;
 beforeEach(() => {
   scrolled.mockClear();
-  Element.prototype.scrollIntoView = scrolled;
+  scrolledElements.length = 0;
+  Element.prototype.scrollIntoView = function (
+    this: Element,
+    arg?: boolean | ScrollIntoViewOptions
+  ) {
+    scrolledElements.push(this);
+    scrolled(arg);
+  };
 });
 afterEach(() => {
   Element.prototype.scrollIntoView = originalScroll;
@@ -76,6 +85,50 @@ describe("find without cell navigation (radix)", () => {
     fireEvent.keyDown(cell, { key: "f", ctrlKey: true });
 
     expect(part("find-bar")).not.toBeNull();
+  });
+
+  it("opens on Cmd+F with focus inside the table", () => {
+    table(false);
+    const cell = document.querySelector<HTMLElement>("tbody td")!;
+
+    fireEvent.keyDown(cell, { key: "f", metaKey: true });
+
+    expect(part("find-bar")).not.toBeNull();
+  });
+
+  it("scrolls the current match cell itself into view as the walk moves", async () => {
+    table();
+    fireEvent.click(part("find-button")!);
+    fireEvent.change(findInput()!, { target: { value: "ad" } });
+
+    const current = () => document.querySelector("[data-cell-match-current]");
+    await waitFor(() => {
+      expect(current()).toHaveTextContent("Ada");
+    });
+    await waitFor(() => {
+      expect(scrolledElements.at(-1)).toBe(current());
+    });
+
+    fireEvent.click(part("find-next")!);
+    await waitFor(() => {
+      expect(current()).toHaveTextContent("Adam");
+    });
+    await waitFor(() => {
+      expect(scrolledElements.at(-1)).toBe(current());
+    });
+  });
+
+  it("exposes the match count in an output for screen readers", async () => {
+    table();
+    fireEvent.click(part("find-button")!);
+    const count = part("find-count")!;
+    expect(count.tagName).toBe("OUTPUT");
+    expect(count).toHaveTextContent("No matches");
+
+    fireEvent.change(findInput()!, { target: { value: "ad" } });
+    await waitFor(() => {
+      expect(part("find-count")).toHaveTextContent("1 of 2");
+    });
   });
 
   it("marks the matches and brings the current one into view", async () => {

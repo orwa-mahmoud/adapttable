@@ -10,11 +10,13 @@ import { DataTable } from "./DataTable";
 import { grouping } from "./grouping";
 import type { ColumnDef } from "./index";
 import { rowPinning } from "./row-pinning";
+import { tree } from "./tree";
 
 interface Row {
   id: string;
   name: string;
   team: string;
+  parentId?: string;
 }
 
 const ROWS: Row[] = [
@@ -28,6 +30,8 @@ const COLS: ColumnDef<Row>[] = [
 
 const pinnedTop = () =>
   document.querySelector('[data-adapttable-part="pinned-top"]');
+const pinnedBottom = () =>
+  document.querySelector('[data-adapttable-part="pinned-bottom"]');
 
 describe("a bare rowPinning() (unstyled)", () => {
   it("pins and unpins a row, writing the lists to the URL", () => {
@@ -84,5 +88,52 @@ describe("a bare rowPinning() (unstyled)", () => {
     );
 
     expect(screen.queryByRole("button", { name: "Pin to top" })).toBeNull();
+  });
+
+  it("refuses to pin a tree the same way", () => {
+    renderKit(
+      <DataTable<Row>
+        data={[...ROWS, { id: "3", name: "Kid", team: "Core", parentId: "1" }]}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        features={[
+          rowPinning({ pinnedRowIds: { top: ["2"], bottom: [] } }),
+          tree({ getParentId: (r) => r.parentId }),
+        ]}
+      />
+    );
+
+    expect(screen.queryByRole("button", { name: "Pin to top" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Pin to bottom" })).toBeNull();
+    expect(pinnedTop()).toBeNull();
+    expect(screen.getByText("Ada")).toBeInTheDocument();
+  });
+
+  it("pins a row to the bottom, uncontrolled with urlSync off", () => {
+    renderKit(
+      <DataTable<Row>
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        features={[rowPinning()]}
+      />
+    );
+
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Pin to bottom" })[0]!
+    );
+
+    expect(pinnedBottom()).toHaveTextContent("Zoe");
+    expect(pinnedTop()).toBeNull();
+    expect(
+      new URLSearchParams(globalThis.location.search).get("rowPin")
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Unpin row" }));
+    expect(pinnedBottom()).toBeNull();
   });
 });

@@ -2,12 +2,14 @@
  * The server-tier props the shared shell reads, typed and honoured here.
  *
  * `error` renders this kit's own error state; `supports` and `facetKeys`
- * reach the query the table sends.
+ * reach the query the table sends, and the server's `facets` reach the
+ * checklist this kit draws.
  */
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./DataTable";
+import { filters } from "./filters";
 import type { ColumnDef } from "./index";
 
 interface Row {
@@ -50,5 +52,40 @@ describe("server-tier props (mui)", () => {
     );
     await waitFor(() => expect(seen.length).toBeGreaterThan(0));
     expect(seen.at(-1)?.facets).toEqual(["team"]);
+  });
+
+  it("counts the checklist from the server's facets, not the loaded page", async () => {
+    render(
+      <DataTable<Row>
+        data={ROWS}
+        total={10}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        supports={{ facets: true }}
+        facets={{
+          team: [
+            { value: "Core", label: "Core", count: 7 },
+            { value: "Web", label: "Web", count: 3 },
+          ],
+        }}
+        onQueryChange={() => undefined}
+        features={[
+          filters([{ key: "team", type: "checklist", label: "Team" }]),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /filters/i }));
+
+    expect(
+      await screen.findByRole("checkbox", { name: /Web/ })
+    ).toBeInTheDocument();
+    const counts = [
+      ...document.querySelectorAll(
+        '[data-adapttable-part="filter-checklist-count"]'
+      ),
+    ].map((node) => node.textContent);
+    expect(counts).toEqual(["(7)", "(3)"]);
   });
 });

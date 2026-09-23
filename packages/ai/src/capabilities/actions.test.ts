@@ -195,6 +195,36 @@ describe("row and bulk actions as agent capabilities", () => {
     expect(open).toHaveBeenCalledTimes(1);
   });
 
+  it("asks a person before a plain action on a table whose policy is writes", async () => {
+    const open = vi.fn();
+    const onApprove = vi.fn(() => Promise.resolve(false));
+    const { session } = tableWith(
+      { row: [{ key: "open", label: "Open", onClick: open }], bulk: [] },
+      { onApprove, approval: "writes" }
+    );
+
+    const result = await run(session, "rowAction.open", { rowKey: "r1" });
+
+    expect(onApprove).toHaveBeenCalledTimes(1);
+    expect(open).not.toHaveBeenCalled();
+    expect((result.result as { approval: string }).approval).toBe("rejected");
+  });
+
+  it("runs a plain action without asking on a table whose policy is never", async () => {
+    const open = vi.fn();
+    const onApprove = vi.fn(() => Promise.resolve(false));
+    const { session } = tableWith(
+      { row: [{ key: "open", label: "Open", onClick: open }], bulk: [] },
+      { onApprove, approval: "never" }
+    );
+
+    const result = await run(session, "rowAction.open", { rowKey: "r1" });
+
+    expect(result.ok).toBe(true);
+    expect(onApprove).not.toHaveBeenCalled();
+    expect(open).toHaveBeenCalledExactlyOnceWith(ROWS[0]);
+  });
+
   it("runs a bulk action on the selection it was told about", async () => {
     const archive = vi.fn();
     const bulk: BulkAction = {

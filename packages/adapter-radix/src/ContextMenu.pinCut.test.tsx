@@ -56,6 +56,78 @@ describe("context menu pin and cut (radix)", () => {
     );
   });
 
+  it("pins a row to the bottom from its menu", () => {
+    const onPinnedRowIdsChange = vi.fn();
+    renderKit(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        contextMenu
+        onPinnedRowIdsChange={onPinnedRowIdsChange}
+      />
+    );
+
+    fireEvent.contextMenu(cellOf("Zoe"), { clientX: 5, clientY: 5 });
+    fireEvent.click(screen.getByText("Pin to bottom"));
+
+    expect(onPinnedRowIdsChange).toHaveBeenLastCalledWith({
+      top: [],
+      bottom: ["1"],
+    });
+    expect(
+      document.querySelector('[data-adapttable-part="pinned-bottom"]')
+    ).toHaveTextContent("Zoe");
+    expect(
+      document.querySelector('[data-adapttable-part="context-menu"]')
+    ).toBeNull();
+  });
+
+  it.each([
+    ["the menu key", { key: "ContextMenu" }],
+    ["Shift+F10", { key: "F10", shiftKey: true }],
+  ])("opens from %s and walks to an entry by keyboard", async (_, open) => {
+    const onPinnedRowIdsChange = vi.fn();
+    renderKit(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        contextMenu
+        onPinnedRowIdsChange={onPinnedRowIdsChange}
+      />
+    );
+
+    fireEvent.keyDown(cellOf("Ada"), open);
+    const menu = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="context-menu"]'
+    )!;
+    // Radix focuses the menu itself on open; ArrowDown enters its items.
+    expect(document.activeElement).toBe(menu);
+    fireEvent.keyDown(menu, { key: "ArrowDown" });
+    const first = document.activeElement as HTMLElement;
+    expect(first).toHaveTextContent("Copy");
+    fireEvent.keyDown(first, { key: "ArrowDown" });
+    await waitFor(() => {
+      expect(document.activeElement).toHaveTextContent("Pin to top");
+    });
+    const entry = document.activeElement as HTMLElement;
+    expect(entry).toHaveAttribute("role", "menuitem");
+    fireEvent.keyDown(entry, { key: "Enter" });
+
+    expect(onPinnedRowIdsChange).toHaveBeenLastCalledWith({
+      top: ["2"],
+      bottom: [],
+    });
+    expect(
+      document.querySelector('[data-adapttable-part="pinned-top"]')
+    ).toHaveTextContent("Ada");
+  });
+
   it("offers no pin entries without row pinning", () => {
     renderKit(
       <DataTable

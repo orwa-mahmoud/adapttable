@@ -56,6 +56,74 @@ describe("context menu pin and cut (chakra)", () => {
     );
   });
 
+  it("pins a row to the bottom from its menu", () => {
+    const onPinnedRowIdsChange = vi.fn();
+    renderKit(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        contextMenu
+        onPinnedRowIdsChange={onPinnedRowIdsChange}
+      />
+    );
+
+    fireEvent.contextMenu(cellOf("Zoe"), { clientX: 5, clientY: 5 });
+    fireEvent.click(screen.getByText("Pin to bottom"));
+
+    expect(onPinnedRowIdsChange).toHaveBeenLastCalledWith({
+      top: [],
+      bottom: ["1"],
+    });
+    expect(
+      document.querySelector('[data-adapttable-part="pinned-bottom"]')
+    ).toHaveTextContent("Zoe");
+    expect(
+      document.querySelector('[data-adapttable-part="context-menu"]')
+    ).toBeNull();
+  });
+
+  it.each([
+    ["the menu key", { key: "ContextMenu" }],
+    ["Shift+F10", { key: "F10", shiftKey: true }],
+  ])("opens from %s and runs an entry reached by keyboard", (_, open) => {
+    const onPinnedRowIdsChange = vi.fn();
+    renderKit(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        contextMenu
+        onPinnedRowIdsChange={onPinnedRowIdsChange}
+      />
+    );
+
+    fireEvent.keyDown(cellOf("Ada"), open);
+    const menu = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="context-menu"]'
+    )!;
+    expect(menu).toHaveAttribute("role", "menu");
+    // The entries are native buttons in the Popover's tab order: Tab reaches
+    // them and Enter or Space activates one as a click, neither of which
+    // jsdom synthesizes from a key.
+    const entry = screen.getByRole("menuitem", { name: "Pin to top" });
+    expect(menu).toContainElement(entry);
+    expect(entry.tagName).toBe("BUTTON");
+    fireEvent.click(entry);
+
+    expect(onPinnedRowIdsChange).toHaveBeenLastCalledWith({
+      top: ["2"],
+      bottom: [],
+    });
+    expect(
+      document.querySelector('[data-adapttable-part="pinned-top"]')
+    ).toHaveTextContent("Ada");
+  });
+
   it("offers no pin entries without row pinning", () => {
     renderKit(
       <DataTable

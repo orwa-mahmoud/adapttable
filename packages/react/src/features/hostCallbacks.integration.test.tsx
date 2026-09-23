@@ -1,4 +1,4 @@
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
@@ -52,6 +52,55 @@ function Shell({
     </DataTableShellView>
   );
 }
+
+/**
+ * The shell's grid drawn as a bare table, so real key events reach the cell
+ * navigation handlers the way a kit's cells deliver them.
+ */
+function GridShell({ props }: { readonly props: DataTableShellProps<Row> }) {
+  const shell = useDataTableShell(props, noForm);
+  return (
+    <DataTableShellView<Row> shell={shell}>
+      {(view: DataTableShellResult<Row>) => (
+        <table {...view.gridFocus.getGridProps()}>
+          <tbody>
+            {ROWS.map((row, r) => (
+              <tr key={row.id}>
+                {columns.map((column, c) => (
+                  <td
+                    key={column.key}
+                    {...view.gridFocus.getCellProps({ row: r, col: c })}
+                  >
+                    {column.accessor?.(row) as string}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </DataTableShellView>
+  );
+}
+
+function mountGrid(features: readonly TableFeature<Row>[]) {
+  const props = applyTableFeatures({
+    features,
+    data: ROWS,
+    columns,
+    rowKey: (r: Row) => r.id,
+    urlSync: false,
+    forceMobile: false,
+  });
+  render(
+    <FeatureProviders props={props}>
+      <GridShell props={props} />
+    </FeatureProviders>
+  );
+}
+
+const gridCell = (row: number, col: number) =>
+  document.querySelector<HTMLElement>(`[data-grid-cell="${row}:${col}"]`)!;
 
 function mount(features: readonly TableFeature<Row>[]) {
   let latest: DataTableShellResult<Row> | undefined;
@@ -153,6 +202,89 @@ describe("host callbacks on the owning features", () => {
       view().gridFocus.selectRange(null);
     });
     expect(onRangeChange).toHaveBeenLastCalledWith(null);
+  });
+
+  it("reports the range real Shift+Arrow presses select", () => {
+    const onRangeChange = vi.fn();
+    mountGrid([cellNavigation({ onRangeChange })]);
+    expect(onRangeChange).toHaveBeenLastCalledWith(null);
+
+    act(() => gridCell(0, 0).focus());
+    fireEvent.keyDown(gridCell(0, 0), { key: "ArrowDown", shiftKey: true });
+    expect(onRangeChange).toHaveBeenLastCalledWith({
+      anchor: { row: 0, col: 0 },
+      head: { row: 1, col: 0 },
+    });
+    expect(document.activeElement).toBe(gridCell(1, 0));
+
+    fireEvent.keyDown(gridCell(1, 0), { key: "ArrowRight", shiftKey: true });
+    expect(onRangeChange).toHaveBeenLastCalledWith({
+      anchor: { row: 0, col: 0 },
+      head: { row: 1, col: 1 },
+    });
+    expect(gridCell(0, 1)).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("reports null once a plain arrow press leaves only the focused cell", () => {
+    const onRangeChange = vi.fn();
+    mountGrid([cellNavigation({ onRangeChange })]);
+
+    act(() => gridCell(0, 0).focus());
+    fireEvent.keyDown(gridCell(0, 0), { key: "ArrowDown", shiftKey: true });
+    expect(onRangeChange).toHaveBeenLastCalledWith({
+      anchor: { row: 0, col: 0 },
+      head: { row: 1, col: 0 },
+    });
+
+    onRangeChange.mockClear();
+    fireEvent.keyDown(gridCell(1, 0), { key: "ArrowRight" });
+    expect(onRangeChange).toHaveBeenCalledTimes(1);
+    expect(onRangeChange).toHaveBeenLastCalledWith(null);
+
+    fireEvent.keyDown(gridCell(1, 1), { key: "ArrowLeft" });
+    expect(onRangeChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("records and undoes with a bare editHistory(true)", () => {
+    const onEdit = vi.fn();
+    const view = mount([editing<Row>(onEdit), editHistory(true)]);
+    expect(view().editHistory.enabled).toBe(true);
+    expect(view().editHistory.canUndo).toBe(false);
+
+    act(() => {
+      view().chrome.editing?.onCellEdit?.(ROWS[0]!, "name", "Alicia");
+    });
+    expect(view().editHistory.canUndo).toBe(true);
+
+    act(() => {
+      view().editHistory.undo();
+    });
+    expect(onEdit).toHaveBeenLastCalledWith(ROWS[0], "name", "Alice");
+    expect(view().editHistory.canRedo).toBe(true);
+  });
+
+  it("keeps marking unsaved edits with extras that carry no onDirtyChange", () => {
+    const onEdit = vi.fn();
+    const onEditStart = vi.fn();
+    const view = mount([
+      editing<Row>(onEdit, { onEditStart }),
+      dirtyIndicators(),
+    ]);
+
+    act(() => {
+      view().chrome.editing?.dirty?.mark("a", "name");
+    });
+    expect(view().chrome.editing?.dirty?.count).toBe(1);
+
+    act(() => {
+      view().chrome.editing?.onCellEdit?.(ROWS[1]!, "name", "Robert");
+    });
+    expect(onEdit).toHaveBeenLastCalledWith(ROWS[1], "name", "Robert");
+
+    act(() => {
+      view().chrome.editing?.dirty?.confirmAll();
+    });
+    expect(view().chrome.editing?.dirty?.count).toBe(0);
   });
 
   it("keeps the existing calls working unchanged", () => {

@@ -9,6 +9,8 @@
 import {
   type AgentObservation,
   type AgentSession,
+  type AssistantAudio,
+  type AssistantSendInput,
   type AssistantSuggestion,
   type AssistantTransport,
   type AssistantTransportReply,
@@ -650,6 +652,54 @@ describe("late replies", () => {
       deferred.settle({ text: "too late" });
       await Promise.resolve();
     });
+  });
+});
+
+describe("voice clips", () => {
+  const clip: AssistantAudio = {
+    mimeType: "audio/webm",
+    base64: "AAAA",
+    durationMs: 1200,
+  };
+
+  it("sends the recording and shows what the backend heard as the reader's message", async () => {
+    const deferred = deferredTransport();
+    const inputs: AssistantSendInput[] = [];
+    const send = deferred.transport.send.bind(deferred.transport);
+    const transport: AssistantTransport = {
+      send: (input) => {
+        inputs.push(input);
+        return send(input);
+      },
+    };
+    const { result } = renderHook(() =>
+      useTableAssistant({ session: useHeldSession(), transport })
+    );
+
+    let sent: Promise<void> | undefined;
+    act(() => {
+      sent = result.current.sendClip(clip);
+    });
+
+    expect(result.current.messages).toHaveLength(1);
+    expect(result.current.messages[0]).toMatchObject({
+      role: "user",
+      text: "",
+      transcribing: true,
+    });
+
+    await act(async () => {
+      deferred.settle({ text: "Done.", transcript: "  show open orders " });
+      await sent;
+    });
+
+    expect(inputs).toHaveLength(1);
+    expect(inputs[0]?.audio).toEqual(clip);
+    const mine = result.current.messages.find(
+      (message) => message.role === "user"
+    );
+    expect(mine?.text).toBe("show open orders");
+    expect(mine?.transcribing).not.toBe(true);
   });
 });
 
