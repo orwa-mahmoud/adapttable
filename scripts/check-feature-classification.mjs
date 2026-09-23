@@ -37,6 +37,9 @@
  *    alias row names exports that name, and each removed-prop row's factory
  *    is the one the inventory maps the prop to and is exported from that
  *    subpath of every published kit.
+ * 7. **Every v4 removal is still a working, flagged API.** Each prop the
+ *    `v4Removals` inventory names is declared on `BaseDataTableProps` with a
+ *    `@deprecated` notice until the major that removes it.
  *
  *   node scripts/check-feature-classification.mjs
  */
@@ -696,6 +699,40 @@ for (const group of manifest.v3Removals.groups) {
   if (!existsSync(join(ROOT, path))) {
     problems.push(
       `v3Removals: ${group.id} names test ${path}, which does not exist`
+    );
+  }
+}
+
+/* 7. The v4 removal inventory: still declared, still flagged. ------------ */
+
+/**
+ * Whether the doc comment right above `  <prop>?:` in a source marks it
+ * `@deprecated`.
+ */
+function propDeprecated(source, prop) {
+  const declaration = new RegExp(`^  ${prop}\\??:`, "m").exec(source);
+  if (!declaration) return false;
+  const before = source.slice(0, declaration.index).trimEnd();
+  if (!before.endsWith("*/")) return false;
+  return before.slice(before.lastIndexOf("/**")).includes("@deprecated");
+}
+
+for (const group of manifest.v4Removals.groups) {
+  for (const prop of group.props ?? []) {
+    if (!new RegExp(`^  ${prop}\\??:`, "m").test(publicSurface)) {
+      problems.push(
+        `v4Removals: "${prop}" is inventoried for v4 but BaseDataTableProps no longer declares it`
+      );
+    } else if (!propDeprecated(publicSurface, prop)) {
+      problems.push(
+        `v4Removals: BaseDataTableProps declares "${prop}" without a @deprecated notice`
+      );
+    }
+  }
+  const path = group.test.split(" — ")[0];
+  if (!existsSync(join(ROOT, path))) {
+    problems.push(
+      `v4Removals: ${group.id} names test ${path}, which does not exist`
     );
   }
 }

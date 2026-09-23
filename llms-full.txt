@@ -707,11 +707,18 @@ import { standardFeatures } from "@adapttable/mantine/preset";
 
 With no arguments it composes the features that work with nothing else
 supplied: the Columns menu, the density chooser, CSV export, find-in-table
-(Ctrl/Cmd+F anywhere in the table), fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
+(Ctrl/Cmd+F after a click in the table), fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
 columns and the status bar. Because `headerFilters()` is a member, filters
 from the preset's `filters` option open from the column headers (`filtersMode`
 resolves to `"header"`); compose the members individually for popover or drawer
 filters.
+
+Find draws no toolbar control by default. `standardFeatures({ findButton: true })`
+adds the Find control after Export:
+
+```tsx
+features={standardFeatures({ findButton: true })}
+```
 
 Configurable preset members join only when you give them input — `grouping`,
 `bulkActions`, `filters` and `savedViews`. Features outside the preset append to
@@ -1623,7 +1630,7 @@ Query example is in [Data tiers — Full control](./data-tiers.md#3-full-control
 | `locale`                | `string`                            | —              | Resolves per-column `i18n` data paths for bare-key columns.                             |
 | `dir`                   | `"ltr" \| "rtl"`                    | `"ltr"`        | Written to the table element by `getTableProps`.                                        |
 | `forceMobile`           | `boolean`                           | `false`        | Use the mobile column set; reported back as `isMobile`.                                 |
-| `mobileIdentityColumns` | `number`                            | `3`            | Does not change the mobile column set: every column without `hideOnMobile` is in it.    |
+| `mobileIdentityColumns` | `number`                            | —              | Deprecated and ignored; removed in v4. `hideOnMobile` decides the mobile column set.    |
 | `searchDebounceMs`      | `number`                            | `300`          | Delay between typing and `source.setSearch`.                                            |
 | `multiSort`             | `boolean`                           | `false`        | Shift-press on a sort button adds or cycles a sort level instead of replacing the sort. |
 | `bulkActions`           | `BulkAction[]`                      | —              | Any action turns selection on.                                                          |
@@ -3282,7 +3289,7 @@ export function People() {
 - `renderHeader` replaces the caption only. The cell still owns sort, resize and the menu, and passes a `controller` (`label`, `sortDir`, `sortIndex`, `toggleSort({ shiftKey })`) so a custom caption can stay wired. `headerTooltip` is a native title; `headerActions` sit after the caption. `renderFooter` replaces one summary cell; `tableFooter` is a free slot under the table.
 - Cell content resolves `Cell` → `accessor` → the key's data path. `Cell` is a React component receiving `{ row, rowIndex }`; `accessor` is the lighter function form. Mini charts are a separate import — see [sparkline columns](./sparkline.md).
 - `sortable` opts a column into sorting; on frontend data the comparator reads `sortValue`, falling back to `formatValue`, `exportValue`, then the key's data path; a JSX `accessor` is never compared. See [sorting](./sorting.md).
-- `i18n` maps locale tags to alternative data paths; the table's `locale` prop picks one (exact tag → primary subtag → `key`). The cell, client-side sort, and the column's filter all follow the resolved path — header text does not.
+- `i18n` maps locale tags to alternative data paths; the table's `locale` prop picks one (exact tag → primary subtag → `key`). The cell, client-side sort, row grouping, and the column's filter all follow the resolved path — header text does not.
 - `renameable` opts a leaf into user naming when the table also provides
   `onColumnRename`. This changes display text, mobile and export labels while
   the key and localized data paths stay fixed. See
@@ -3761,7 +3768,7 @@ export function People() {
 - Frontend tier (`data` / `useFrontendData`): rows are compared by `sortValue`, falling back to `formatValue`, `exportValue`, then the key's data path. Numbers and booleans compare numerically, everything else by locale-aware string comparison; the sort is stable.
 - `null` / `undefined` / `NaN` always sort last — in both directions. A descending sort never flips the blanks to the top.
 - Sort state lives in the URL: `sortBy` + `sortDir` for a single sort, and the chain as `sort=name:asc,hiredAt:desc` with `multiSort()` composed. `defaults` apply only while the URL is silent; clearing a defaulted sort writes an empty `sortBy=` marker so it does not resurrect.
-- `multiSort()` adds shift-click (or shift-Enter): each shift-click adds the column to the chain or advances it (asc → desc → removed). Chained headers expose a 1-based `data-sort-index` for the order badge. A plain click resets the chain back to a single sort.
+- `multiSort()` adds shift-click (or shift-Enter): each shift-click adds the column to the chain or advances it (asc → desc → removed). The first shift-click keeps the current sort as level one, so click Name then shift-click Salary sorts Name → Salary. Chained headers expose a 1-based `data-sort-index` for the order badge. A plain click resets the chain back to a single sort.
 - Server tier (`onQueryChange` / `useQuerySource`): the table only emits the state — `query.sortBy`, `query.sortDir`, and `query.sortLevels` for a chain. Your backend does the comparing; `sortValue` is unused.
 
 ## Options
@@ -3968,17 +3975,18 @@ parameterise it.
 
 Search and find answer different questions, and a table can have both.
 
-|                   | Search                                        | Find in table                                                                   |
-| ----------------- | --------------------------------------------- | ------------------------------------------------------------------------------- |
-| Question          | "Show me only the rows that match"            | "Where does this appear in what I am looking at?"                               |
-| Rows              | Filters them; server tiers ask the server     | Leaves every row in place and walks the matching cells                          |
-| Reads             | `getSearchText(row)` — the raw row            | What each cell shows                                                            |
-| Scope             | The whole dataset                             | The loaded rows — the current page, or what is fetched                          |
-| URL               | `q`                                           | `find`                                                                          |
-| How to turn it on | Always there; `searchable={false}` removes it | `findInTable()` from `@adapttable/<kit>/find-in-table`, with `cellNavigation()` |
+|                   | Search                                        | Find in table                                          |
+| ----------------- | --------------------------------------------- | ------------------------------------------------------ |
+| Question          | "Show me only the rows that match"            | "Where does this appear in what I am looking at?"      |
+| Rows              | Filters them; server tiers ask the server     | Leaves every row in place and walks the matching cells |
+| Reads             | `getSearchText(row)` — the raw row            | What each cell shows                                   |
+| Scope             | The whole dataset                             | The loaded rows — the current page, or what is fetched |
+| URL               | `q`                                           | `find`                                                 |
+| How to turn it on | Always there; `searchable={false}` removes it | `findInTable()` from `@adapttable/<kit>/find-in-table` |
 
-Find needs `cellNavigation()` from `@adapttable/<kit>/cell-navigation`: the
-**Ctrl/Cmd+F** shortcut, the match marks and the walk all live on the grid.
+Find works with or without `cellNavigation()`: **Ctrl/Cmd+F** opens it while
+focus is inside the table or after a click in it, and with cell navigation
+the walk moves focus from match to match.
 [Keyboard & cell navigation](./cell-navigation.md#find-in-table) covers the
 find bar.
 
@@ -6320,16 +6328,18 @@ fades on its own says the change is safe when nobody checked.
 Off by default, because a mark is a claim about what the server has agreed to and
 a table whose host never says would be guessing. For a table that confirms its
 own state another way — a refetch that agrees, a websocket echoing the value back
-— `editing(commit, { onDirtyChange })` hands it over on mount and whenever a
-mark moves: `{ count, confirm, confirmRow, confirmAll }`, a `count` for an
-"unsaved changes" line and the functions that settle marks.
+— `editing(commit, { onDirtyChange })` tracks unsaved edits on its own and hands
+them over on mount and whenever one moves: `{ count, confirm, confirmRow,
+confirmAll }`, a `count` for an "unsaved changes" line and the functions that
+settle them. It draws no marks; add `dirtyIndicators()` for those, and both read
+the same set.
 
 ```tsx
 const [dirty, setDirty] = useState<DirtyEdits>();
 
 <DataTable
   {...props}
-  features={[editing(save, { onDirtyChange: setDirty }), dirtyIndicators()]}
+  features={[editing(save, { onDirtyChange: setDirty })]}
 />;
 // dirty?.count — "3 unsaved changes"; dirty?.confirmAll() after a refetch
 ```
@@ -7170,7 +7180,8 @@ Headless: `fillDirection`, `fillTargetRange` and `fillRangeEdits`;
 ## Find in table
 
 Compose `findInTable` from `@adapttable/<kit>/find-in-table` and **Ctrl/Cmd+F**
-with focus anywhere inside the table opens a find bar over it;
+opens a find bar over the table while focus is inside it or after a click in
+it — a click elsewhere on the page hands the shortcut back to the browser;
 `findInTable({ button: true })` also draws a **Find in table** control among
 the toolbar's view controls, with the kit's own button (part `find-button`,
 `aria-expanded` while the bar shows; `classNames.findButton` on unstyled and
@@ -8274,7 +8285,8 @@ panel with `GroupingPanelChrome` and its required slots.
 ## Notes
 
 - Bucketing uses the column's `groupValue`, then its `sortValue`, then a path
-  lookup on the column key — never the JSX `accessor`.
+  lookup on the column's data path — its `i18n` entry for the active
+  `locale`, else its key — never the JSX `accessor`.
 - Works on desktop rows and mobile cards, LTR and RTL, with and without the
   `virtualize()` feature (virtual windows count collapsed groups as one row).
 - The grouping panel configures row grouping and per-group aggregates.
@@ -10391,9 +10403,9 @@ layouts.
   card layout that should match.
 - **`hideOnMobile`** (per column) — drop a column from cards entirely.
 - **`hideOnDesktop`** (per column) — show a field on cards only.
-- **`mobileIdentityColumns`** (default `3`) — does not change which fields a
-  card shows: every column without `hideOnMobile` appears, and an explicit
-  `hideOnMobile` always wins.
+- **`mobileIdentityColumns`** — deprecated, accepted and ignored, removed in
+  v4. `hideOnMobile` decides what a card shows: every column without it
+  appears.
 - **`sortByOptions`** — the options offered by the mobile sort-by select.
 - **`forceMobile`** — pin either layout regardless of viewport: cards inside a
   desktop dashboard panel, or the full table in a tablet kiosk. The
@@ -10443,7 +10455,9 @@ actions and the detail panel. A custom card cannot drop the parts that make
 the list usable, because it never owns them.
 
 With `rowReorder(...)` from `@adapttable/mantine/row-reorder` composed, flat
-cards expose 44px up/down controls. Grouped and tree cards also expose the
+cards expose up/down controls with a touch target of at least 44×44 px in
+every kit (measured on the production build in
+[`scripts/bench-runs/2026-09-23-2.json`](https://github.com/orwa-mahmoud/adapttable/blob/main/scripts/bench-runs/2026-09-23-2.json)). Grouped and tree cards also expose the
 kit-native **Move to group…** / **Move under…** menu, including explicit
 confirmation with `rowReorder(onRowReorder, { movePolicy: "confirm" })`;
 touch never has to emulate a drag.
@@ -11662,23 +11676,23 @@ export async function GET(request: Request) {
 `URLSearchParams` — so Next.js route handlers, Remix loaders and Server
 Actions all work without an adapter — and returns a `ServerTableQuery`:
 
-| Field            | What it is                                                                                          |
-| ---------------- | --------------------------------------------------------------------------------------------------- |
-| `page`           | 1-based, always at least 1                                                                          |
-| `limit`          | clamped to the schema's ceiling                                                                     |
-| `offset`         | `(page - 1) * limit`, computed once so every caller does not                                        |
-| `search`         | the free-text [search](./search.md) query, absent when there was none                               |
-| `sort`           | the multi-sort chain, outermost first                                                               |
-| `groupBy`        | a single grouping column, when the schema allows it                                                 |
-| `groupByKeys`    | every grouping key, outermost first — at levels 0, 2 and 3, and at level 1 with `groupByKeys: true` |
-| `filters`        | column filters, keyed by the name after `f_`                                                        |
-| `shapedFilters`  | at level 0: each filter's operator beside it, a range's bounds joined, values as strings            |
-| `typedFilters`   | at levels 2 and 3: each declared filter typed, its operator and value checked                       |
-| `filterTree`     | the advanced AND/OR tree                                                                            |
-| `pivot`          | the [pivot configuration](./pivot.md)                                                               |
-| `pivotCollapsed` | the folded pivot groups, by collapse key                                                            |
-| `cursor`         | the opaque cursor, in cursor mode                                                                   |
-| `rejected`       | everything it refused, and why                                                                      |
+| Field            | What it is                                                                               |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `page`           | 1-based, always at least 1                                                               |
+| `limit`          | clamped to the schema's ceiling                                                          |
+| `offset`         | `(page - 1) * limit`, computed once so every caller does not                             |
+| `search`         | the free-text [search](./search.md) query, absent when there was none                    |
+| `sort`           | the multi-sort chain, outermost first                                                    |
+| `groupBy`        | a single grouping column, when the schema allows it                                      |
+| `groupByKeys`    | every grouping key, outermost first — at every level, with `groupByKeys: true`           |
+| `filters`        | column filters, keyed by the name after `f_`                                             |
+| `shapedFilters`  | at level 0: each filter's operator beside it, a range's bounds joined, values as strings |
+| `typedFilters`   | at levels 2 and 3: each declared filter typed, its operator and value checked            |
+| `filterTree`     | the advanced AND/OR tree                                                                 |
+| `pivot`          | the [pivot configuration](./pivot.md)                                                    |
+| `pivotCollapsed` | the folded pivot groups, by collapse key                                                 |
+| `cursor`         | the opaque cursor, in cursor mode                                                        |
+| `rejected`       | everything it refused, and why                                                           |
 
 ## The schema is an allowlist
 
@@ -11784,7 +11798,7 @@ is in `filters`, and `splitFilterValues(raw)` is the exact inverse.
 
 `groupByKeys` lists every grouping key, outermost first
 (`groupBy=team,status` → `["team", "status"]`), each checked against
-`columns`. It is reported at levels 0, 2 and 3, and at level 1 with
+`columns`. It is reported at every level when the schema sets
 `groupByKeys: true`. `groupBy` keeps its single-key meaning.
 
 ### What replaces a hand-written workaround
@@ -15505,9 +15519,11 @@ strip under the table reads "Showing 1–3 of 3". The snippets below reuse
 - A control renders only when the feature that makes it work is composed.
   The button and its behaviour arrive in the same import.
 - `standardFeatures()` from `@adapttable/<kit>/preset` includes
-  `densityChooser()`, `exportCsv()`, `fullscreen()` and `statusBar()`. It does
-  not include `print`, `selectionStats`, `sidePanel` or `undoRedoButtons`,
-  which need a handler, a sibling feature or content from you.
+  `densityChooser()`, `exportCsv()`, `fullscreen()` and `statusBar()`, and
+  find-in-table without its toolbar control; `standardFeatures({ findButton: true })`
+  draws the Find control too. It does not include `print`, `selectionStats`,
+  `sidePanel` or `undoRedoButtons`, which need a handler, a sibling feature or
+  content from you.
 
 ## Toolbar order
 
@@ -16330,9 +16346,9 @@ primary subtag, then `key`:
 { key: "name.en", i18n: { ar: "name.ar" } }
 ```
 
-The cell, the client-side sort, and the column's declarative filter all
-follow the resolved path, so searching and filtering match what the user
-sees. Header **text** stays whatever you pass in `header` — translate it
+The cell, the client-side sort, row grouping, and the column's declarative
+filter all follow the resolved path, so searching, filtering and group
+headers match what the user sees. Header **text** stays whatever you pass in `header` — translate it
 through your label pipeline, not `i18n`.
 
 ## RTL
@@ -16764,7 +16780,7 @@ per-column aggregation choices.
 | `onColumnRename`        | `(key: string, name: string) => void` | —       | Host persistence channel for a `renameable` column's accepted display name; stable keys never change.                          |
 | `maxHeight`             | `number`                              | —       | Fixed-height scroll box (px) enabling sideways scrolling + column pinning; omit for page scroll.                               |
 | `sortByOptions`         | `SortByOption[]`                      | —       | Options for a mobile sort-by select.                                                                                           |
-| `mobileIdentityColumns` | `number`                              | `3`     | Does not change which fields a card shows: every column without `hideOnMobile` appears, and `hideOnMobile` always wins.        |
+| `mobileIdentityColumns` | `number`                              | —       | Deprecated and ignored; removed in v4. `hideOnMobile` decides which fields a card shows.                                       |
 
 ### Filters & search
 
@@ -18196,7 +18212,7 @@ and `filters` — a shorthand record or the table's own `FilterDef[]`, read as
 `TypedFilter` per key: `TextFilter`, `SelectFilter`, `ListFilter`,
 `BooleanFilter`, `NumberRangeFilter`, `DateRangeFilter` or
 `CustomTypedFilter`), with `filterTypes` (`ServerFilterType`s) for registered
-types. `groupByKeys`
+types. `groupByKeys: true`
 lists every grouping key. `pickFilters(defs, keys)` scopes the declared
 filters per caller, and `splitFilterValues(raw)` inverts the table's
 multi-value encoding. `QueryInput` is a `Request`, `URL`, query string or
@@ -18511,19 +18527,19 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 
 ## Feature composition types
 
-| Export                         | What it is                                                                                                                                                       |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TableFeature<TRow>`           | A composed feature: `id`, optional `apply`, `setup`, `provider` and `renders`. Row-aware factories return this and infer `TRow` from their callback.             |
-| `StaticTableFeature`           | A feature whose configuration says nothing about rows — `grouping("team")`, `virtualize()`, `columnMenu()`. Composes into any table with no type argument.       |
-| `TableFeatureHost<TRow>`       | What `setup(host)` registers against: filter types, editors, aggregators, writers, column-menu actions, panels, commands, context-menu items.                    |
-| `StaticFeatureHost`            | The same host minus the two row-shaped registrations, which is what a static feature sees.                                                                       |
-| `standardFeatures(options?)`   | On each kit's `/preset` entry: the zero-configuration members plus the ones whose options you supply. Returns a plain array you can extend.                      |
-| `StandardFeatureOptions<TRow>` | `grouping`, `bulkActions`, `filters`, `savedViews` — each the argument its own factory already takes.                                                            |
-| `AdapterGroupingPanelFeature`  | The overloaded kit `groupingPanel()` factory after an adapter supplies its group headers and panel chrome.                                                       |
-| `GroupingExtras<TRow>`         | Everything `grouping` takes beyond the key, including the row-shaped `groupAggregates` and `groupSort`.                                                          |
-| `StaticGroupingExtras`         | The subset that says nothing about the row — paging, collapse state, footers — so `grouping(key, thoseOnly)` stays row-independent.                              |
-| `FeatureProps<TRow>`           | What a feature's `apply()` writes — the props v3 removed from `<DataTable>`. A host composes the feature instead; see [upgrading from v2](./migrate-from-v2.md). |
-| `ComposedTableProps<TRow>`     | `BaseDataTableProps` plus `FeatureProps`: the shape the table works with once features have applied, which is what an adapter's internals read.                  |
+| Export                         | What it is                                                                                                                                                                                     |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TableFeature<TRow>`           | A composed feature: `id`, optional `apply`, `setup`, `provider` and `renders`. Row-aware factories return this and infer `TRow` from their callback.                                           |
+| `StaticTableFeature`           | A feature whose configuration says nothing about rows — `grouping("team")`, `virtualize()`, `columnMenu()`. Composes into any table with no type argument.                                     |
+| `TableFeatureHost<TRow>`       | What `setup(host)` registers against: filter types, editors, aggregators, writers, column-menu actions, panels, commands, context-menu items.                                                  |
+| `StaticFeatureHost`            | The same host minus the two row-shaped registrations, which is what a static feature sees.                                                                                                     |
+| `standardFeatures(options?)`   | On each kit's `/preset` entry: the zero-configuration members plus the ones whose options you supply; `findButton: true` draws the toolbar Find control. Returns a plain array you can extend. |
+| `StandardFeatureOptions<TRow>` | `grouping`, `bulkActions`, `filters`, `savedViews` — each the argument its own factory already takes.                                                                                          |
+| `AdapterGroupingPanelFeature`  | The overloaded kit `groupingPanel()` factory after an adapter supplies its group headers and panel chrome.                                                                                     |
+| `GroupingExtras<TRow>`         | Everything `grouping` takes beyond the key, including the row-shaped `groupAggregates` and `groupSort`.                                                                                        |
+| `StaticGroupingExtras`         | The subset that says nothing about the row — paging, collapse state, footers — so `grouping(key, thoseOnly)` stays row-independent.                                                            |
+| `FeatureProps<TRow>`           | What a feature's `apply()` writes — the props v3 removed from `<DataTable>`. A host composes the feature instead; see [upgrading from v2](./migrate-from-v2.md).                               |
+| `ComposedTableProps<TRow>`     | `BaseDataTableProps` plus `FeatureProps`: the shape the table works with once features have applied, which is what an adapter's internals read.                                                |
 
 See [feature composition](./features.md).
 

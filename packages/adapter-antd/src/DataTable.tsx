@@ -2140,6 +2140,7 @@ function AntdTableBody<TRow>({
       pageOnly={c.featureNotices.some(
         (notice) => notice.kind === "export-all-page"
       )}
+      editing={c.editing}
     >
       {({ find, gridFocus, exportHandler, stats }) => {
         const handleVirtualScroll = virtualScrollEndHandler(

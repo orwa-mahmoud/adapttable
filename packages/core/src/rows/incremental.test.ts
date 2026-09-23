@@ -168,6 +168,7 @@ function oracle(
         rows: sorted,
         groupBy: config.groupBy,
         columns: config.columns ?? [],
+        locale: config.locale,
         getRowId: config.getRowId,
         collapsedGroupIds: config.collapsedGroupIds ?? new Set(),
         aggregates: config.groupAggregates,
@@ -406,6 +407,43 @@ describe("createIncrementalView / applyRowPatchesToView", () => {
         (entry) => entry.kind === "group" && entry.label === "Core"
       )
     ).toBe(false);
+  });
+
+  it("groups by the locale path and moves a row when that field changes", () => {
+    interface Translated {
+      id: string;
+      team: string;
+      teamAr: string;
+    }
+    const config: IncrementalViewConfig<Translated> = {
+      getRowId: (row) => row.id,
+      columns: [{ key: "team", i18n: { ar: "teamAr" } }],
+      groupBy: "team",
+      locale: "ar",
+    };
+    const labels = (view: IncrementalView<Translated>) =>
+      (view.groups ?? []).flatMap((entry) =>
+        entry.kind === "group" ? [entry.label] : []
+      );
+    const start = createIncrementalView<Translated>(
+      [
+        { id: "1", team: "Core", teamAr: "النواة" },
+        { id: "2", team: "Web", teamAr: "الويب" },
+      ],
+      config
+    );
+    expect(labels(start)).toEqual(["النواة", "الويب"]);
+
+    const moved = applyRowPatchesToView(start, [
+      updateRow<Translated>("1", { teamAr: "الويب" }),
+    ]);
+    expect(labels(moved)).toEqual(["الويب"]);
+    expect(labels(moved)).toEqual(
+      labels(createIncrementalView(moved.rows, config))
+    );
+
+    const english = configureIncrementalView(moved, { locale: "en" });
+    expect(labels(english)).toEqual(["Core", "Web"]);
   });
 
   it("matches nested grouping and first-seen order after an insert at the front", () => {

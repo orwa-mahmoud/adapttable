@@ -355,6 +355,7 @@ export interface BuildGroupedFlatModelOptions<TRow> {
     getRowId: (row: TRow) => string;
     groupBy: string | readonly string[];
     groupPageSize?: number;
+    locale?: string;
     paging?: GroupPaging;
     rowPageSize?: number;
     rows: readonly TRow[];
@@ -2139,6 +2140,7 @@ export interface GroupedEntriesForStrategyOptions<TRow> {
     groupPageSize?: number;
     // (undocumented)
     kind: GroupingComputationKind;
+    locale?: string;
     // (undocumented)
     paging?: GroupPaging;
     // (undocumented)
@@ -4711,7 +4713,10 @@ export interface VirtualTableRow<TRow> {
 }
 
 // @public
-export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], layout: TableLayout, mobileIdentityColumns?: number): TCol[];
+export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], layout: TableLayout): TCol[];
+
+// @public @deprecated
+export function visibleColumns<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], layout: TableLayout, mobileIdentityColumns: number): TCol[];
 
 // @public
 export function visibleRowActions<TRow>(actions: readonly RowAction<TRow>[], row: TRow): RowAction<TRow>[];

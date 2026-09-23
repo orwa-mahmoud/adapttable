@@ -96,6 +96,39 @@ describe("find without cell navigation (base-ui)", () => {
     expect(part("find-bar")).not.toBeNull();
   });
 
+  it("opens on Ctrl+F after a press on a plain cell", () => {
+    table(false);
+    const cell = document.querySelector<HTMLElement>("tbody td")!;
+
+    fireEvent.pointerDown(cell);
+    fireEvent.keyDown(document.body, { key: "f", ctrlKey: true });
+    expect(part("find-bar")).not.toBeNull();
+  });
+
+  it("opens on Cmd+F after a press on a plain cell", () => {
+    table(false);
+    const cell = document.querySelector<HTMLElement>("tbody td")!;
+
+    fireEvent.pointerDown(cell);
+    fireEvent.keyDown(document.body, { key: "f", metaKey: true });
+    expect(part("find-bar")).not.toBeNull();
+  });
+
+  it("leaves Ctrl/Cmd+F to the browser after a press outside the table", () => {
+    table(false);
+    const cell = document.querySelector<HTMLElement>("tbody td")!;
+
+    fireEvent.pointerDown(cell);
+    fireEvent.pointerDown(document.body);
+    const taken = !fireEvent.keyDown(document.body, {
+      key: "f",
+      ctrlKey: true,
+    });
+
+    expect(taken).toBe(false);
+    expect(part("find-bar")).toBeNull();
+  });
+
   it("scrolls the current match cell itself into view as the walk moves", async () => {
     table();
     fireEvent.click(part("find-button")!);

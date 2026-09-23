@@ -20,6 +20,11 @@ export interface StandardFeatureOptions<TRow> {
   readonly filters?: readonly FilterDef<TRow>[];
   /** Saved-view persistence and naming. */
   readonly savedViews?: UseSavedViewsOptions;
+  /**
+   * Draw the toolbar Find control. Off by default: find still opens from
+   * Ctrl/Cmd+F inside the table and from a `?find=` link.
+   */
+  readonly findButton?: boolean;
 }
 
 /**
@@ -37,8 +42,10 @@ export interface AdapterStandardFeatureFactories {
   readonly densityChooser: () => StaticTableFeature;
   /** CSV export control. */
   readonly exportCsv: () => StaticTableFeature;
-  /** Find-in-table control. */
-  readonly findInTable: () => StaticTableFeature;
+  /** Find in table; `button` draws its toolbar control. */
+  readonly findInTable: (options?: {
+    readonly button?: boolean;
+  }) => StaticTableFeature;
   /** Fit-columns action. */
   readonly fitColumns: () => StaticTableFeature;
   /** Fullscreen control. */
@@ -91,7 +98,7 @@ export function createAdapterStandardFeatures(
     factories.columnMenu(),
     factories.densityChooser(),
     factories.exportCsv(),
-    factories.findInTable(),
+    factories.findInTable(options.findButton === true ? { button: true } : {}),
     factories.fitColumns(),
     factories.fullscreen(),
     factories.headerFilters(),

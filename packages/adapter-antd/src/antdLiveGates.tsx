@@ -25,6 +25,8 @@ import {
   DISABLED_FIND,
   disabledHistory,
   EDIT_HISTORY_LIVE,
+  editableCellController,
+  type EditableCellEditing,
   type EditHistoryLiveSlotProps,
   type EditHistoryOptions,
   EXPORT_LIVE,
@@ -126,6 +128,7 @@ export function AntdInteractionGate<TRow>({
   featureHost,
   labels,
   pageOnly,
+  editing,
   root,
   children,
 }: {
@@ -146,6 +149,8 @@ export function AntdInteractionGate<TRow>({
   readonly featureHost: FeatureHostState | undefined;
   readonly labels: Required<TableLabels>;
   readonly pageOnly: boolean;
+  /** The editing bundle, so Enter and F2 can open a focused cell. */
+  readonly editing: EditableCellEditing<TRow> | undefined;
   /** The table root, for Ctrl/Cmd+F and scrolling to a match. */
   readonly root?: RefObject<HTMLElement | null>;
   readonly children: (live: AntdLiveState) => ReactNode;
@@ -171,6 +176,7 @@ export function AntdInteractionGate<TRow>({
           history={history}
           find={find}
           labels={labels}
+          editing={editing}
         >
           {(gridFocus) => (
             <AfterNav
@@ -310,6 +316,7 @@ function NavStage<TRow>({
   history,
   find,
   labels,
+  editing,
   children,
 }: {
   readonly props: LiveProps<TRow>;
@@ -322,6 +329,7 @@ function NavStage<TRow>({
   readonly history: EditHistoryState<TRow>;
   readonly find: FindInTableState;
   readonly labels: Required<TableLabels>;
+  readonly editing: EditableCellEditing<TRow> | undefined;
   readonly children: (gridFocus: GridFocusState) => ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(CELL_NAV_LIVE);
@@ -339,6 +347,22 @@ function NavStage<TRow>({
     labels,
     columnsWindowed,
     onCut: props.onCellCut,
+    // Enter and F2 on a focused cell open it, as in every other kit: the grid
+    // leaves those keys to the cell, and nothing else inside it handles them.
+    onActivate: (cell: { row: number; col: number }) => {
+      const row = rows[cell.row - firstRowIndex];
+      const column = columns[cell.col];
+      if (row === undefined || column === undefined) return;
+      editableCellController({
+        editing,
+        row,
+        column,
+        rowId: getRowId(row),
+        rows,
+        columns,
+        rowKey: getRowId,
+      }).begin();
+    },
   };
   const navProps = {
     options,

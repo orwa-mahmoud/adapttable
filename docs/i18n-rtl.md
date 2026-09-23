@@ -91,9 +91,9 @@ primary subtag, then `key`:
 { key: "name.en", i18n: { ar: "name.ar" } }
 ```
 
-The cell, the client-side sort, and the column's declarative filter all
-follow the resolved path, so searching and filtering match what the user
-sees. Header **text** stays whatever you pass in `header` — translate it
+The cell, the client-side sort, row grouping, and the column's declarative
+filter all follow the resolved path, so searching, filtering and group
+headers match what the user sees. Header **text** stays whatever you pass in `header` — translate it
 through your label pipeline, not `i18n`.
 
 ## RTL

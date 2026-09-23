@@ -288,8 +288,8 @@ export interface FeatureProps<TRow> {
   dirtyIndicators?: boolean;
   /**
    * Told the unsaved-edit state whenever it changes, and once on mount —
-   * `editing(commit, { onDirtyChange })`. Marks are kept when
-   * `dirtyIndicators()` is composed; without it the count stays 0.
+   * `editing(commit, { onDirtyChange })`. Passing it tracks unsaved edits on
+   * its own; `dirtyIndicators()` adds the cell and row marks for the same set.
    */
   onDirtyChange?: (dirty: DirtyEdits) => void;
   /**
@@ -782,10 +782,10 @@ export interface BaseDataTableProps<TRow> {
    */
   paginationMode?: PaginationMode;
   /**
-   * How many leading desktop-visible columns anchor the mobile identity
-   * block. The columns it anchors are ones without `hideOnMobile`, which a
-   * card shows anyway, so it does not change which fields a card shows: every
-   * column without `hideOnMobile` appears, and an explicit hide always wins.
+   * Accepted and ignored.
+   *
+   * @deprecated A card shows every column without `hideOnMobile`, so
+   * `hideOnMobile` decides what a card shows. Removed in v4.
    */
   mobileIdentityColumns?: number;
   /** Hover-prefetch callback fired on desktop row mouse-enter. */

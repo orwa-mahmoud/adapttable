@@ -34,16 +34,6 @@ describe("visibleColumns", () => {
     ]);
   });
 
-  it("anchors only columns without an explicit mobile hide", () => {
-    // Even with a single identity slot, explicit hides stay hidden and the
-    // remaining desktop-visible columns render as normal.
-    expect(visibleColumns(cols, "mobile", 1).map((c) => c.key)).toEqual([
-      "a",
-      "c",
-      "e",
-    ]);
-  });
-
   it("renders a mobile-only column (hideOnDesktop) on mobile but not desktop", () => {
     const mobileOnly: ColumnModel<Row>[] = [
       { key: "name", header: "Name" },
@@ -59,8 +49,8 @@ describe("visibleColumns", () => {
   });
 });
 
-describe("visibleColumns — the identity anchor", () => {
-  it("never changes the mobile column set, whatever its count", () => {
+describe("visibleColumns — the mobile column set", () => {
+  it("is every column without hideOnMobile, in declared order", () => {
     const columns: ColumnModel<Row>[] = [
       { key: "a", header: "A" },
       { key: "b", header: "B", hideOnMobile: true },
@@ -68,12 +58,12 @@ describe("visibleColumns — the identity anchor", () => {
       { key: "d", header: "D", hideOnDesktop: true },
       { key: "e", header: "E" },
     ];
-    const keys = (count: number) =>
-      visibleColumns(columns, "mobile", count).map((column) => column.key);
 
-    expect(keys(0)).toEqual(["a", "c", "d", "e"]);
-    expect(keys(1)).toEqual(keys(0));
-    expect(keys(3)).toEqual(keys(0));
-    expect(keys(10)).toEqual(keys(0));
+    expect(visibleColumns(columns, "mobile").map((c) => c.key)).toEqual([
+      "a",
+      "c",
+      "d",
+      "e",
+    ]);
   });
 });

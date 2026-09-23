@@ -110,6 +110,28 @@ const nsRegistry = new WeakMap<UrlStateAdapter, Map<string, number>>();
 const NO_KEYS: readonly string[] = [];
 
 /**
+ * The single sort a URL describes, with the hook's defaults applied.
+ *
+ * A defaulted sort adopts the defaulted direction — else ascending, so
+ * `defaults: { sortBy }` alone still yields a real sort (data actually
+ * ordered, aria-sort truthful, first header click cycles to descending
+ * instead of clearing). An explicit URL sort with no direction falls back to
+ * ascending too.
+ */
+function readSingleSort(
+  params: URLSearchParams,
+  ns: string,
+  defaults: Partial<TableQueryParams>
+): { sortBy?: string; sortDir?: SortDirection } {
+  const sortByRaw = params.get(ns + PARAM_SORT_BY);
+  const sortBy = sortByRaw === null ? defaults.sortBy : sortByRaw || undefined;
+  if (sortBy === undefined) return {};
+  const sortDirFallback =
+    sortByRaw === null ? (defaults.sortDir ?? "asc") : "asc";
+  return { sortBy, sortDir: readSortDir(params, ns) ?? sortDirFallback };
+}
+
+/**
  * Headless URL-synced table state. Keeps page / limit / search / sort and
  * an arbitrary `extra` filter bag in the query string (or a local store
  * when disabled), so reloads, shared links, and back/forward all restore
@@ -187,19 +209,7 @@ export function useTableUrlState(
     defaults.search ??
     ""
   ).trim();
-  const sortByRaw = params.get(ns + PARAM_SORT_BY);
-  const sortBy = sortByRaw === null ? defaults.sortBy : sortByRaw || undefined;
-  // A defaulted sort adopts the defaulted direction — else ascending, so
-  // `defaults: { sortBy }` alone still yields a real sort (data actually
-  // ordered, aria-sort truthful, first header click cycles to descending
-  // instead of clearing). An explicit URL sort with no direction falls
-  // back to ascending too.
-  const sortDirFallback =
-    sortByRaw === null ? (defaults.sortDir ?? "asc") : "asc";
-  const sortDir =
-    sortBy === undefined
-      ? undefined
-      : (readSortDir(params, ns) ?? sortDirFallback);
+  const { sortBy, sortDir } = readSingleSort(params, ns, defaults);
   const groupByRaw = params.get(ns + PARAM_GROUP_BY);
   const groupBy =
     groupByRaw === null ? defaults.groupBy : groupByRaw || undefined;
@@ -363,21 +373,37 @@ export function useTableUrlState(
   const toggleSortLevel = useCallback(
     (key: string) =>
       commit((p) => {
-        const levels = [...readSortLevels(p, ns)];
+        const chain = readSortLevels(p, ns);
+        // Starting a chain keeps the current single sort as its first level,
+        // so click Name then shift-click Salary sorts Name → Salary.
+        const single = readSingleSort(p, ns, {
+          sortBy: defaults.sortBy,
+          sortDir: defaults.sortDir,
+        });
+        const seeded =
+          chain.length === 0 && single.sortBy !== undefined
+            ? { key: single.sortBy, dir: single.sortDir ?? "asc" }
+            : undefined;
+        const levels = seeded ? [seeded] : [...chain];
         const index = levels.findIndex((l) => l.key === key);
         if (index === -1) levels.push({ key, dir: "asc" });
         else if (levels[index]!.dir === "asc")
           levels[index] = { key, dir: "desc" };
         else levels.splice(index, 1);
         writeSortLevels(p, levels, ns);
-        // The chain supersedes the single-sort params while present.
+        // The chain supersedes the single-sort params while present; a seeded
+        // sort toggled away clears them the way `setSort(undefined)` does.
         if (levels.length > 0) {
           p.delete(ns + PARAM_SORT_BY);
+          p.delete(ns + PARAM_SORT_DIR);
+        } else if (seeded) {
+          if (defaults.sortBy) p.set(ns + PARAM_SORT_BY, "");
+          else p.delete(ns + PARAM_SORT_BY);
           p.delete(ns + PARAM_SORT_DIR);
         }
         resetPage(p);
       }),
-    [commit, ns, resetPage]
+    [commit, defaults.sortBy, defaults.sortDir, ns, resetPage]
   );
 
   const setExtra = useCallback(

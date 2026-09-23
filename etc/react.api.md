@@ -189,6 +189,7 @@ export interface BaseDataTableProps<TRow> {
     locale?: string;
     maxHeight?: number;
     mobileBreakpoint?: number;
+    // @deprecated
     mobileIdentityColumns?: number;
     onCellCut?: (range: CellRange) => void;
     onCellFill?: (edits: CellEdit<TRow>[]) => void;
@@ -1947,6 +1948,7 @@ export interface UseDataTableOptions<TRow> {
     forceMobile?: boolean;
     labels?: TableLabels;
     locale?: string;
+    // @deprecated
     mobileIdentityColumns?: number;
     multiSort?: boolean;
     onSelectedIdsChange?: (selectedIds: string[]) => void;

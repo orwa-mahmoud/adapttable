@@ -1,5 +1,6 @@
 import type { ColumnMetadata } from "../columnModel";
 import type { DisplayValue } from "../display";
+import { resolveColumnPath } from "../engine/cellValue";
 import type { ExtraEntry } from "../rows/extraRows";
 import { getPath } from "../utils/path";
 import { parseGroupBy } from "./groupKeys";
@@ -210,6 +211,11 @@ export interface BuildGroupedFlatModelOptions<TRow> {
   groupBy: string | readonly string[];
   /** Visible columns, in order. */
   columns: readonly ColumnMetadata<TRow>[];
+  /**
+   * Active locale tag. A column with `i18n` groups by its path for this
+   * locale — the same path its cells and sort read.
+   */
+  locale?: string;
   /** Row identity function. */
   getRowId: (row: TRow) => string;
   /** Collapsed group keys (from `useGroupCollapse`). */
@@ -264,16 +270,18 @@ export interface GroupPaging {
 /**
  * Resolve the value used to bucket a row for `groupBy`. Prefers the column's
  * own `groupValue`, then `sortValue` (same primitive as client sort), then a
- * path lookup on the column key — never the JSX accessor.
+ * path lookup on the column's data path for `locale` (its `i18n` entry, else
+ * its key) — never the JSX accessor.
  */
 export function resolveGroupValue<TRow>(
   row: TRow,
   groupBy: string,
-  column: ColumnMetadata<TRow> | undefined
+  column: ColumnMetadata<TRow> | undefined,
+  locale?: string
 ): unknown {
   if (column?.groupValue) return column.groupValue(row);
   if (column?.sortValue) return column.sortValue(row);
-  const path = column?.key ?? groupBy;
+  const path = column ? resolveColumnPath(column, locale) : groupBy;
   return getPath(row, path);
 }
 
@@ -388,25 +396,28 @@ export function groupingKeys(groupBy: string | readonly string[]): string[] {
  * @param rows - The rows to partition.
  * @param groupBy - Column key, or an ordered list for nested grouping.
  * @param columns - The columns, for each key's `sortValue`.
+ * @param locale - Active locale tag, for each column's `i18n` path.
  * @returns The top-level buckets, or an empty list when there is no key.
  */
 export function partitionGroupedRows<TRow>(
   rows: readonly TRow[],
   groupBy: string | readonly string[],
-  columns: readonly ColumnMetadata<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[],
+  locale?: string
 ): GroupPartition<TRow>[] {
   const keys = groupingKeys(groupBy);
   if (keys.length === 0) return [];
-  return partitionLevel(rows, keys, 0, columns);
+  return partitionLevel(rows, keys, 0, columns, locale);
 }
 
 function partitionLevel<TRow>(
   rows: readonly TRow[],
   keys: readonly string[],
   level: number,
-  columns: readonly ColumnMetadata<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[],
+  locale: string | undefined
 ): GroupPartition<TRow>[] {
-  const { order, buckets } = bucketBy(rows, keys[level]!, columns);
+  const { order, buckets } = bucketBy(rows, keys[level]!, columns, locale);
   return order.map((valueKey) => {
     const bucket = buckets.get(valueKey)!;
     return {
@@ -415,7 +426,7 @@ function partitionLevel<TRow>(
       rows: bucket.rows,
       children:
         level + 1 < keys.length
-          ? partitionLevel(bucket.rows, keys, level + 1, columns)
+          ? partitionLevel(bucket.rows, keys, level + 1, columns, locale)
           : undefined,
     };
   });
@@ -597,7 +608,12 @@ export function buildGroupedFlatModel<TRow>(
   options: BuildGroupedFlatModelOptions<TRow>
 ): GroupedFlatEntry<TRow>[] {
   return flattenGroupPartitions(
-    partitionGroupedRows(options.rows, options.groupBy, options.columns),
+    partitionGroupedRows(
+      options.rows,
+      options.groupBy,
+      options.columns,
+      options.locale
+    ),
     options
   );
 }
@@ -694,12 +710,14 @@ function pageLimit(
  * @param rows - The rows to partition.
  * @param key - The grouping key for this level.
  * @param columns - The columns, for the key's `sortValue`.
+ * @param locale - Active locale tag, for the column's `i18n` path.
  * @returns The bucket keys in order, and the buckets themselves.
  */
 function bucketBy<TRow>(
   rows: readonly TRow[],
   key: string,
-  columns: readonly ColumnMetadata<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[],
+  locale: string | undefined
 ): {
   order: string[];
   buckets: Map<string, { value: unknown; rows: TRow[] }>;
@@ -708,7 +726,7 @@ function bucketBy<TRow>(
   const order: string[] = [];
   const buckets = new Map<string, { value: unknown; rows: TRow[] }>();
   for (const row of rows) {
-    const value = resolveGroupValue(row, key, column);
+    const value = resolveGroupValue(row, key, column, locale);
     const valueKey = groupValueKey(value);
     let bucket = buckets.get(valueKey);
     if (!bucket) {

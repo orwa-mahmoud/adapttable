@@ -19,14 +19,9 @@ export function applyReactColumnNames<TRow>(
 /** Preserve {@link ColumnDef} through neutral {@link visibleColumns}. */
 export function visibleReactColumns<TRow>(
   columns: readonly ColumnDef<TRow>[],
-  layout: TableLayout,
-  mobileIdentityColumns = 3
+  layout: TableLayout
 ): ColumnDef<TRow>[] {
-  return visibleColumns<ColumnDef<TRow>>(
-    columns,
-    layout,
-    mobileIdentityColumns
-  );
+  return visibleColumns<ColumnDef<TRow>>(columns, layout);
 }
 
 /** Preserve {@link ColumnDef} through neutral {@link declaredColumnLayout}. */

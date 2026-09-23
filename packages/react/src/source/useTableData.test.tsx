@@ -29,6 +29,28 @@ const columns: ColumnDef<Row>[] = [
 beforeEach(() => resetDevWarnings());
 
 describe("useTableData — frontend tier", () => {
+  it("asks no server for a column's default aggregate", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    renderHook(() =>
+      useTableData<Row>({
+        data: ROWS,
+        columns: [
+          ...columns,
+          {
+            key: "budget",
+            aggregatable: { default: "sum", operations: ["sum", "avg"] },
+          },
+        ],
+        urlAdapter: createMemoryAdapter(""),
+        paginationMode: "paged",
+      })
+    );
+    expect(warn.mock.calls.flat().join(" ")).not.toContain(
+      "supports.aggregates"
+    );
+    warn.mockRestore();
+  });
+
   it("auto-filters rows from the declarative runtime (URL-restored)", () => {
     const adapter = createMemoryAdapter("f_status=active&f_budgetMin=300");
     const { result } = renderHook(() =>

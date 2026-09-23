@@ -217,7 +217,7 @@ Query example is in [Data tiers — Full control](./data-tiers.md#3-full-control
 | `locale`                | `string`                            | —              | Resolves per-column `i18n` data paths for bare-key columns.                             |
 | `dir`                   | `"ltr" \| "rtl"`                    | `"ltr"`        | Written to the table element by `getTableProps`.                                        |
 | `forceMobile`           | `boolean`                           | `false`        | Use the mobile column set; reported back as `isMobile`.                                 |
-| `mobileIdentityColumns` | `number`                            | `3`            | Does not change the mobile column set: every column without `hideOnMobile` is in it.    |
+| `mobileIdentityColumns` | `number`                            | —              | Deprecated and ignored; removed in v4. `hideOnMobile` decides the mobile column set.    |
 | `searchDebounceMs`      | `number`                            | `300`          | Delay between typing and `source.setSearch`.                                            |
 | `multiSort`             | `boolean`                           | `false`        | Shift-press on a sort button adds or cycles a sort level instead of replacing the sort. |
 | `bulkActions`           | `BulkAction[]`                      | —              | Any action turns selection on.                                                          |

@@ -76,9 +76,11 @@ strip under the table reads "Showing 1–3 of 3". The snippets below reuse
 - A control renders only when the feature that makes it work is composed.
   The button and its behaviour arrive in the same import.
 - `standardFeatures()` from `@adapttable/<kit>/preset` includes
-  `densityChooser()`, `exportCsv()`, `fullscreen()` and `statusBar()`. It does
-  not include `print`, `selectionStats`, `sidePanel` or `undoRedoButtons`,
-  which need a handler, a sibling feature or content from you.
+  `densityChooser()`, `exportCsv()`, `fullscreen()` and `statusBar()`, and
+  find-in-table without its toolbar control; `standardFeatures({ findButton: true })`
+  draws the Find control too. It does not include `print`, `selectionStats`,
+  `sidePanel` or `undoRedoButtons`, which need a handler, a sibling feature or
+  content from you.
 
 ## Toolbar order
 

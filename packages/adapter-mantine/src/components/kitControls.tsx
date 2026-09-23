@@ -797,7 +797,7 @@ function ReorderMove({
   return (
     <ActionIcon
       type="button"
-      size="sm"
+      size="xl"
       variant="subtle"
       color="gray"
       data-adapttable-part={part}

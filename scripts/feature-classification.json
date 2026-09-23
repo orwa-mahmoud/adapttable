@@ -1070,6 +1070,25 @@
       }
     ]
   },
+  "v4Removals": {
+    "note": "Deprecated in v3 and removed by the v4 major. Each entry is still declared and still works, and carries a @deprecated notice until then; scripts/check-feature-classification.mjs holds each one to that.",
+    "groups": [
+      {
+        "id": "mobile-identity-columns",
+        "removes": "the `mobileIdentityColumns` prop and option, and the third argument of `visibleColumns`",
+        "v3Path": "<DataTable mobileIdentityColumns={2} />",
+        "v4Path": "<DataTable columns={[{ key: \"notes\", hideOnMobile: true }]} />",
+        "packages": [
+          "@adapttable/core",
+          "@adapttable/react",
+          "every @adapttable/<kit>"
+        ],
+        "warnedBy": "@deprecated on BaseDataTableProps, the useDataTable option and the visibleColumns overload",
+        "test": "packages/core/src/columns/visibleColumns.test.ts — \"is every column without hideOnMobile, in declared order\"",
+        "props": ["mobileIdentityColumns"]
+      }
+    ]
+  },
   "standardFeatures": {
     "note": "`standardFeatures()` with no arguments returns only factories that are callable with no required configuration. A factory that needs options is inert without them, so naming it in a preset would bundle an implementation the table cannot use. Those join through `standardFeatures({ ... })` when the caller supplies what they need. A factory that is callable bare but does nothing without a host prop or a sibling feature is not a member either: the preset composes what WORKS with no further input.",
     "zeroArgument": [

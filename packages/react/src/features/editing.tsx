@@ -12,7 +12,7 @@ import { devWarn } from "@adapttable/core";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import { type BatchRowEdit, useBatchEditing } from "../editing/batchEditing";
-import { useDirtyCells } from "../editing/dirtyCells";
+import { type DirtyCellState, useDirtyCells } from "../editing/dirtyCells";
 import { useEditConflict } from "../editing/editConflict";
 import { useEditLifecycle } from "../editing/editingEvents";
 import { useRowEditing } from "../editing/rowEditing";
@@ -53,6 +53,32 @@ function useReportDirty(
   }, [wired, count, signature, confirm, confirmRow, confirmAll]);
 }
 
+/** A dirty set that draws nothing, for a host that only counts. */
+const NOT_DIRTY = () => false;
+
+/**
+ * The dirty set the cells read. It is always the tracked one — the same
+ * marks, the same confirms, the same count — but without `dirtyIndicators()`
+ * it reports no cell or row as marked, so nothing is drawn.
+ */
+function useMarkerView(
+  tracked: DirtyCellState,
+  markers: boolean
+): DirtyCellState {
+  return useMemo(
+    () =>
+      markers
+        ? tracked
+        : {
+            ...tracked,
+            isDirty: NOT_DIRTY,
+            isRowDirty: NOT_DIRTY,
+            signature: "",
+          },
+    [tracked, markers]
+  );
+}
+
 function LiveEditing({
   chrome,
   props,
@@ -80,8 +106,12 @@ function LiveEditing({
     formatError: props.formatEditError,
     onEditError: lifecycle.onEditError,
   });
-  const dirty = useDirtyCells({ enabled: props.dirtyIndicators === true });
-  useReportDirty(props.onDirtyChange, dirty);
+  const markers = props.dirtyIndicators === true;
+  const tracked = useDirtyCells({
+    enabled: markers || props.onDirtyChange !== undefined,
+  });
+  useReportDirty(props.onDirtyChange, tracked);
+  const dirty = useMarkerView(tracked, markers);
   const rowModeArmed =
     props.rowEditing === true && props.onRowEdit !== undefined;
   const rowEditing = useRowEditing({

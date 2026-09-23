@@ -12,6 +12,7 @@ import { beginCellEdit } from "../editing/useCellEditing";
 import { withFindMarks } from "../find/findMarks";
 import type { DataTableShellResult } from "../useDataTableShell";
 import { undoRedoToolbar, viewControlsToolbar } from "../useTableChrome";
+import { sourceWindowStart } from "../virtual/chromeBodyShared";
 import { rememberFeatureHost } from "./featureHost";
 import { FeatureSlot, useFeatureSlotFilled } from "./providers";
 import {
@@ -112,10 +113,7 @@ interface StageProps<TRow> {
 
 /** Where the rendered slice begins in the dataset. */
 function windowStartOf<TRow>(shell: DataTableShellResult<TRow>): number {
-  const source = shell.chrome.source;
-  return source.paginationMode === "paged"
-    ? Math.max(0, (source.page - 1) * source.limit)
-    : 0;
+  return sourceWindowStart(shell.chrome.source);
 }
 
 function FindStage<TRow>({

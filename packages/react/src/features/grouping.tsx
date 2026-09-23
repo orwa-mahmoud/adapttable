@@ -83,6 +83,7 @@ function LiveGrouping({
     groupRowPageSize,
     onGroupLoadMore,
     extraRows,
+    locale,
   } = props;
   const aggregationSource = useMemo(
     () => ({
@@ -149,6 +150,7 @@ function LiveGrouping({
       // bucketed or what those buckets are called. Resolved without it, a
       // timeline groups by the instant it holds and every caption is an epoch.
       columns: chrome.allColumns,
+      locale,
       getRowId,
       collapsedGroupIds: groupCollapse.collapsedGroupIds,
       aggregates: effectiveGroupAggregates,
@@ -208,6 +210,7 @@ function LiveGrouping({
     };
   }, [
     groupByKeys,
+    locale,
     serverGroups,
     capabilities,
     source.allFilteredRows,

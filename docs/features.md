@@ -114,11 +114,18 @@ import { standardFeatures } from "@adapttable/mantine/preset";
 
 With no arguments it composes the features that work with nothing else
 supplied: the Columns menu, the density chooser, CSV export, find-in-table
-(Ctrl/Cmd+F anywhere in the table), fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
+(Ctrl/Cmd+F after a click in the table), fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
 columns and the status bar. Because `headerFilters()` is a member, filters
 from the preset's `filters` option open from the column headers (`filtersMode`
 resolves to `"header"`); compose the members individually for popover or drawer
 filters.
+
+Find draws no toolbar control by default. `standardFeatures({ findButton: true })`
+adds the Find control after Export:
+
+```tsx
+features={standardFeatures({ findButton: true })}
+```
 
 Configurable preset members join only when you give them input — `grouping`,
 `bulkActions`, `filters` and `savedViews`. Features outside the preset append to

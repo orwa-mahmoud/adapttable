@@ -44,9 +44,9 @@ layouts.
   card layout that should match.
 - **`hideOnMobile`** (per column) — drop a column from cards entirely.
 - **`hideOnDesktop`** (per column) — show a field on cards only.
-- **`mobileIdentityColumns`** (default `3`) — does not change which fields a
-  card shows: every column without `hideOnMobile` appears, and an explicit
-  `hideOnMobile` always wins.
+- **`mobileIdentityColumns`** — deprecated, accepted and ignored, removed in
+  v4. `hideOnMobile` decides what a card shows: every column without it
+  appears.
 - **`sortByOptions`** — the options offered by the mobile sort-by select.
 - **`forceMobile`** — pin either layout regardless of viewport: cards inside a
   desktop dashboard panel, or the full table in a tablet kiosk. The
@@ -96,7 +96,9 @@ actions and the detail panel. A custom card cannot drop the parts that make
 the list usable, because it never owns them.
 
 With `rowReorder(...)` from `@adapttable/mantine/row-reorder` composed, flat
-cards expose 44px up/down controls. Grouped and tree cards also expose the
+cards expose up/down controls with a touch target of at least 44×44 px in
+every kit (measured on the production build in
+[`scripts/bench-runs/2026-09-23-2.json`](https://github.com/orwa-mahmoud/adapttable/blob/main/scripts/bench-runs/2026-09-23-2.json)). Grouped and tree cards also expose the
 kit-native **Move to group…** / **Move under…** menu, including explicit
 confirmation with `rowReorder(onRowReorder, { movePolicy: "confirm" })`;
 touch never has to emulate a drag.

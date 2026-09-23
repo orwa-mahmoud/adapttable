@@ -744,7 +744,8 @@ panel with `GroupingPanelChrome` and its required slots.
 ## Notes
 
 - Bucketing uses the column's `groupValue`, then its `sortValue`, then a path
-  lookup on the column key — never the JSX `accessor`.
+  lookup on the column's data path — its `i18n` entry for the active
+  `locale`, else its key — never the JSX `accessor`.
 - Works on desktop rows and mobile cards, LTR and RTL, with and without the
   `virtualize()` feature (virtual windows count collapsed groups as one row).
 - The grouping panel configures row grouping and per-group aggregates.

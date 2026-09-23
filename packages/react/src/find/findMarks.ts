@@ -64,11 +64,13 @@ export function useFindState(): FindInTableState | null {
 }
 
 /**
- * Ctrl/Cmd+F with focus anywhere inside the table opens its find bar.
+ * Ctrl/Cmd+F inside the table opens its find bar.
  *
- * Listened for in the capture phase on the document and scoped to the table
- * root, so it works whether or not cell navigation owns the focused element,
- * and leaves the browser's own find alone everywhere else on the page.
+ * "Inside" is focus within the table root, or — since a plain cell takes no
+ * focus — a last pointer press that landed in it, until focus moves somewhere
+ * else on the page. Listened for in the capture phase on the document, so it
+ * works whether or not cell navigation owns the focused element, and leaves
+ * the browser's own find alone everywhere else.
  */
 export function useFindShortcut(
   root: RefObject<HTMLElement | null> | undefined,
@@ -76,18 +78,30 @@ export function useFindShortcut(
 ): void {
   useEffect(() => {
     if (!root || !openBar || typeof document === "undefined") return;
+    const inside = (target: EventTarget | null) =>
+      target instanceof Node && root.current?.contains(target) === true;
+    let pressedInside = false;
+    const onPointerDown = (event: Event) => {
+      pressedInside = inside(event.target);
+    };
+    const onFocusIn = (event: FocusEvent) => {
+      if (!inside(event.target)) pressedInside = false;
+    };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() !== "f") return;
       if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
         return;
       }
-      const target = event.target;
-      if (!(target instanceof Node) || !root.current?.contains(target)) return;
+      if (!inside(event.target) && !pressedInside) return;
       event.preventDefault();
       openBar();
     };
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("focusin", onFocusIn, true);
     document.addEventListener("keydown", onKeyDown, true);
     return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("focusin", onFocusIn, true);
       document.removeEventListener("keydown", onKeyDown, true);
     };
   }, [root, openBar]);

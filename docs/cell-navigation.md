@@ -133,7 +133,8 @@ Headless: `fillDirection`, `fillTargetRange` and `fillRangeEdits`;
 ## Find in table
 
 Compose `findInTable` from `@adapttable/<kit>/find-in-table` and **Ctrl/Cmd+F**
-with focus anywhere inside the table opens a find bar over it;
+opens a find bar over the table while focus is inside it or after a click in
+it — a click elsewhere on the page hands the shortcut back to the browser;
 `findInTable({ button: true })` also draws a **Find in table** control among
 the toolbar's view controls, with the kit's own button (part `find-button`,
 `aria-expanded` while the bar shows; `classNames.findButton` on unstyled and

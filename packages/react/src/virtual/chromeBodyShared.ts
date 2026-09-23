@@ -164,6 +164,20 @@ export function usePinnedScrollRows<TRow>(
   }, [pinState, rowKey, sourceRows]);
 }
 
+/**
+ * The dataset index of the first loaded row: the page's offset when paged,
+ * zero for an infinite list that holds everything from the top.
+ */
+export function sourceWindowStart(source: {
+  readonly paginationMode: string;
+  readonly page: number;
+  readonly limit: number;
+}): number {
+  return source.paginationMode === "paged"
+    ? Math.max(0, (source.page - 1) * source.limit)
+    : 0;
+}
+
 /** Fetch the next infinite page if the source still has one. */
 export function useFetchNextPage<TRow>(chrome: TableChrome<TRow>): () => void {
   const { source } = chrome;

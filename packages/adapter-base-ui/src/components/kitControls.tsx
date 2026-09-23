@@ -864,6 +864,9 @@ export function RowReorderHandle<TRow>(
   );
 }
 
+/** A card's move control: a 44 px touch target around the kit's glyph. */
+const MOVE_TARGET = { minWidth: 44, minHeight: 44 } as const;
+
 function ReorderMove({
   label,
   part,
@@ -876,6 +879,7 @@ function ReorderMove({
       type="button"
       size="1"
       variant="ghost"
+      style={MOVE_TARGET}
       data-adapttable-part={part}
       aria-label={label}
       disabled={disabled}

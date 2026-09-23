@@ -619,16 +619,18 @@ fades on its own says the change is safe when nobody checked.
 Off by default, because a mark is a claim about what the server has agreed to and
 a table whose host never says would be guessing. For a table that confirms its
 own state another way — a refetch that agrees, a websocket echoing the value back
-— `editing(commit, { onDirtyChange })` hands it over on mount and whenever a
-mark moves: `{ count, confirm, confirmRow, confirmAll }`, a `count` for an
-"unsaved changes" line and the functions that settle marks.
+— `editing(commit, { onDirtyChange })` tracks unsaved edits on its own and hands
+them over on mount and whenever one moves: `{ count, confirm, confirmRow,
+confirmAll }`, a `count` for an "unsaved changes" line and the functions that
+settle them. It draws no marks; add `dirtyIndicators()` for those, and both read
+the same set.
 
 ```tsx
 const [dirty, setDirty] = useState<DirtyEdits>();
 
 <DataTable
   {...props}
-  features={[editing(save, { onDirtyChange: setDirty }), dirtyIndicators()]}
+  features={[editing(save, { onDirtyChange: setDirty })]}
 />;
 // dirty?.count — "3 unsaved changes"; dirty?.confirmAll() after a refetch
 ```

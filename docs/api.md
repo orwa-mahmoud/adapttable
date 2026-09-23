@@ -54,7 +54,7 @@ per-column aggregation choices.
 | `onColumnRename`        | `(key: string, name: string) => void` | —       | Host persistence channel for a `renameable` column's accepted display name; stable keys never change.                          |
 | `maxHeight`             | `number`                              | —       | Fixed-height scroll box (px) enabling sideways scrolling + column pinning; omit for page scroll.                               |
 | `sortByOptions`         | `SortByOption[]`                      | —       | Options for a mobile sort-by select.                                                                                           |
-| `mobileIdentityColumns` | `number`                              | `3`     | Does not change which fields a card shows: every column without `hideOnMobile` appears, and `hideOnMobile` always wins.        |
+| `mobileIdentityColumns` | `number`                              | —       | Deprecated and ignored; removed in v4. `hideOnMobile` decides which fields a card shows.                                       |
 
 ### Filters & search
 
@@ -1486,7 +1486,7 @@ and `filters` — a shorthand record or the table's own `FilterDef[]`, read as
 `TypedFilter` per key: `TextFilter`, `SelectFilter`, `ListFilter`,
 `BooleanFilter`, `NumberRangeFilter`, `DateRangeFilter` or
 `CustomTypedFilter`), with `filterTypes` (`ServerFilterType`s) for registered
-types. `groupByKeys`
+types. `groupByKeys: true`
 lists every grouping key. `pickFilters(defs, keys)` scopes the declared
 filters per caller, and `splitFilterValues(raw)` inverts the table's
 multi-value encoding. `QueryInput` is a `Request`, `URL`, query string or
@@ -1801,19 +1801,19 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 
 ## Feature composition types
 
-| Export                         | What it is                                                                                                                                                       |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TableFeature<TRow>`           | A composed feature: `id`, optional `apply`, `setup`, `provider` and `renders`. Row-aware factories return this and infer `TRow` from their callback.             |
-| `StaticTableFeature`           | A feature whose configuration says nothing about rows — `grouping("team")`, `virtualize()`, `columnMenu()`. Composes into any table with no type argument.       |
-| `TableFeatureHost<TRow>`       | What `setup(host)` registers against: filter types, editors, aggregators, writers, column-menu actions, panels, commands, context-menu items.                    |
-| `StaticFeatureHost`            | The same host minus the two row-shaped registrations, which is what a static feature sees.                                                                       |
-| `standardFeatures(options?)`   | On each kit's `/preset` entry: the zero-configuration members plus the ones whose options you supply. Returns a plain array you can extend.                      |
-| `StandardFeatureOptions<TRow>` | `grouping`, `bulkActions`, `filters`, `savedViews` — each the argument its own factory already takes.                                                            |
-| `AdapterGroupingPanelFeature`  | The overloaded kit `groupingPanel()` factory after an adapter supplies its group headers and panel chrome.                                                       |
-| `GroupingExtras<TRow>`         | Everything `grouping` takes beyond the key, including the row-shaped `groupAggregates` and `groupSort`.                                                          |
-| `StaticGroupingExtras`         | The subset that says nothing about the row — paging, collapse state, footers — so `grouping(key, thoseOnly)` stays row-independent.                              |
-| `FeatureProps<TRow>`           | What a feature's `apply()` writes — the props v3 removed from `<DataTable>`. A host composes the feature instead; see [upgrading from v2](./migrate-from-v2.md). |
-| `ComposedTableProps<TRow>`     | `BaseDataTableProps` plus `FeatureProps`: the shape the table works with once features have applied, which is what an adapter's internals read.                  |
+| Export                         | What it is                                                                                                                                                                                     |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TableFeature<TRow>`           | A composed feature: `id`, optional `apply`, `setup`, `provider` and `renders`. Row-aware factories return this and infer `TRow` from their callback.                                           |
+| `StaticTableFeature`           | A feature whose configuration says nothing about rows — `grouping("team")`, `virtualize()`, `columnMenu()`. Composes into any table with no type argument.                                     |
+| `TableFeatureHost<TRow>`       | What `setup(host)` registers against: filter types, editors, aggregators, writers, column-menu actions, panels, commands, context-menu items.                                                  |
+| `StaticFeatureHost`            | The same host minus the two row-shaped registrations, which is what a static feature sees.                                                                                                     |
+| `standardFeatures(options?)`   | On each kit's `/preset` entry: the zero-configuration members plus the ones whose options you supply; `findButton: true` draws the toolbar Find control. Returns a plain array you can extend. |
+| `StandardFeatureOptions<TRow>` | `grouping`, `bulkActions`, `filters`, `savedViews` — each the argument its own factory already takes.                                                                                          |
+| `AdapterGroupingPanelFeature`  | The overloaded kit `groupingPanel()` factory after an adapter supplies its group headers and panel chrome.                                                                                     |
+| `GroupingExtras<TRow>`         | Everything `grouping` takes beyond the key, including the row-shaped `groupAggregates` and `groupSort`.                                                                                        |
+| `StaticGroupingExtras`         | The subset that says nothing about the row — paging, collapse state, footers — so `grouping(key, thoseOnly)` stays row-independent.                                                            |
+| `FeatureProps<TRow>`           | What a feature's `apply()` writes — the props v3 removed from `<DataTable>`. A host composes the feature instead; see [upgrading from v2](./migrate-from-v2.md).                               |
+| `ComposedTableProps<TRow>`     | `BaseDataTableProps` plus `FeatureProps`: the shape the table works with once features have applied, which is what an adapter's internals read.                                                |
 
 See [feature composition](./features.md).
 

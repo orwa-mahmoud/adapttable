@@ -16,6 +16,7 @@ import {
   useVirtualizer,
   useWindowVirtualizer,
   type VirtualItem,
+  type Virtualizer,
 } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
@@ -33,6 +34,10 @@ export {
   windowGroupedEntries,
 } from "@adapttable/core";
 export { rowSourceIndex } from "@adapttable/core/binding";
+
+/** Either TanStack virtualizer — window mode or element mode. */
+type ModeVirtualizer =
+  Virtualizer<Window, Element> | Virtualizer<Element, Element>;
 
 /** Wrap a constant estimate so both virtualizer modes share one shape. */
 function asSizeEstimator(
@@ -108,7 +113,17 @@ export interface UseTableVirtualizationOptions<TRow> {
  *
  * @public
  */
-export function useTableVirtualization<TRow>({
+export function useTableVirtualization<TRow>(
+  input: UseTableVirtualizationOptions<TRow>
+): TableVirtualization<TRow> {
+  return useTableVirtualizer(input).virtualization;
+}
+
+/**
+ * {@link useTableVirtualization}, plus the virtualizer's own scroll — what the
+ * table's body needs to bring an unrendered row into the window.
+ */
+export function useTableVirtualizer<TRow>({
   rows,
   rowKey,
   enabled = false,
@@ -118,7 +133,10 @@ export function useTableVirtualization<TRow>({
   getScrollElement,
   onEndReached,
   expandable = false,
-}: UseTableVirtualizationOptions<TRow>): TableVirtualization<TRow> {
+}: UseTableVirtualizationOptions<TRow>): {
+  virtualization: TableVirtualization<TRow>;
+  scrollToIndex: (index: number) => void;
+} {
   const elementMode = getScrollElement !== undefined;
   // Stable identity, re-keyed ONLY when the data changes: the virtualizer
   // memoises its measurements on `getItemKey`, so an inline closure (or the
@@ -200,6 +218,54 @@ export function useTableVirtualization<TRow>({
     }
   }, [active, onEndReached, rows.length, virtualItems]);
 
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      virtualizer.scrollToIndex(index, {
+        align: "center",
+        behavior: "instant",
+      });
+    },
+    [virtualizer]
+  );
+
+  return {
+    virtualization: tableWindow({
+      enabled,
+      active,
+      rows: materializedRows,
+      count: rows.length,
+      virtualizer,
+      virtualItems,
+      estimateSize,
+      expandable,
+      measureRowPair,
+    }),
+    scrollToIndex,
+  };
+}
+
+/** The window a table renders, from the virtualizer's current slice. */
+function tableWindow<TRow>({
+  enabled,
+  active,
+  rows: materializedRows,
+  count,
+  virtualizer,
+  virtualItems,
+  estimateSize,
+  expandable,
+  measureRowPair,
+}: {
+  enabled: boolean;
+  active: boolean;
+  rows: readonly VirtualTableRow<TRow>[];
+  count: number;
+  virtualizer: ModeVirtualizer;
+  virtualItems: readonly VirtualItem[];
+  estimateSize: number | ((index: number) => number);
+  expandable: boolean;
+  measureRowPair: TableVirtualization<TRow>["measureRowPair"];
+}): TableVirtualization<TRow> {
   if (!enabled) {
     return {
       enabled: false,
@@ -218,7 +284,7 @@ export function useTableVirtualization<TRow>({
       rows: materializedRows,
       paddingTop: 0,
       paddingBottom: pendingListSize(
-        rows.length,
+        count,
         virtualizer.getTotalSize(),
         estimateSize
       ),
@@ -262,6 +328,18 @@ export function useKeyedVirtualization(options: {
   getScrollElement?: () => Element | null;
   onEndReached?: () => void;
 }): KeyedVirtualization {
+  return useKeyedVirtualizer(options).virtualization;
+}
+
+/**
+ * {@link useKeyedVirtualization}, plus the virtualizer's own scroll.
+ */
+export function useKeyedVirtualizer(
+  options: Parameters<typeof useKeyedVirtualization>[0]
+): {
+  virtualization: KeyedVirtualization;
+  scrollToIndex: (index: number) => void;
+} {
   const {
     keys,
     enabled = false,
@@ -315,6 +393,48 @@ export function useKeyedVirtualization(options: {
     }
   }, [active, onEndReached, keys.length, virtualItems]);
 
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      virtualizer.scrollToIndex(index, {
+        align: "center",
+        behavior: "instant",
+      });
+    },
+    [virtualizer]
+  );
+
+  return {
+    virtualization: keyedWindow({
+      enabled,
+      active,
+      indices,
+      count: keys.length,
+      virtualizer,
+      virtualItems,
+      estimateSize,
+    }),
+    scrollToIndex,
+  };
+}
+
+/** The window a keyed list renders, from the virtualizer's current slice. */
+function keyedWindow({
+  enabled,
+  active,
+  indices,
+  count,
+  virtualizer,
+  virtualItems,
+  estimateSize,
+}: {
+  enabled: boolean;
+  active: boolean;
+  indices: readonly number[];
+  count: number;
+  virtualizer: ModeVirtualizer;
+  virtualItems: readonly VirtualItem[];
+  estimateSize: number | ((index: number) => number);
+}): KeyedVirtualization {
   if (!enabled) {
     return { enabled: false, indices, paddingTop: 0, paddingBottom: 0 };
   }
@@ -325,7 +445,7 @@ export function useKeyedVirtualization(options: {
       indices,
       paddingTop: 0,
       paddingBottom: pendingListSize(
-        keys.length,
+        count,
         virtualizer.getTotalSize(),
         estimateSize
       ),

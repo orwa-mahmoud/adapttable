@@ -777,6 +777,8 @@ function ReorderMove({
     <IconButton
       type="button"
       size="xs"
+      minW="11"
+      minH="11"
       variant="ghost"
       data-adapttable-part={part}
       aria-label={label}
