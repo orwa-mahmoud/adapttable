@@ -27,22 +27,20 @@ const toggles = () =>
 describe("one expand toggle (unstyled)", () => {
   it("draws a single toggle per row when both are composed", () => {
     render(
-      <>
-        <DataTable<Row>
-          data={ROWS}
-          columns={columns}
-          rowKey={(r) => r.id}
-          urlSync={false}
-          forceMobile={false}
-          features={[
-            rowDetail<Row>((row) => <div>Detail for {row.name}</div>),
-            nestedTable<Row>((row) => ({
-              label: `Orders for ${row.name}`,
-              table: () => <div>Nested for {row.name}</div>,
-            })),
-          ]}
-        />
-      </>
+      <DataTable<Row>
+        data={ROWS}
+        columns={columns}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        features={[
+          rowDetail<Row>((row) => <div>Detail for {row.name}</div>),
+          nestedTable<Row>((row) => ({
+            label: `Orders for ${row.name}`,
+            table: () => <div>Nested for {row.name}</div>,
+          })),
+        ]}
+      />
     );
     expect(toggles()).toHaveLength(ROWS.length);
     fireEvent.click(toggles()[0]!);
@@ -51,16 +49,14 @@ describe("one expand toggle (unstyled)", () => {
 
   it("draws one toggle per row for either feature alone", () => {
     render(
-      <>
-        <DataTable<Row>
-          data={ROWS}
-          columns={columns}
-          rowKey={(r) => r.id}
-          urlSync={false}
-          forceMobile={false}
-          features={[rowDetail<Row>((row) => <div>Detail for {row.name}</div>)]}
-        />
-      </>
+      <DataTable<Row>
+        data={ROWS}
+        columns={columns}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        forceMobile={false}
+        features={[rowDetail<Row>((row) => <div>Detail for {row.name}</div>)]}
+      />
     );
     expect(toggles()).toHaveLength(ROWS.length);
   });
