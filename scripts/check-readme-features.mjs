@@ -58,6 +58,15 @@ const FEATURES = {
   virtualization: /virtuali/i,
   mobile: /mobile card/i,
   "ssr-rsc": /server component/i,
+  search: /search box|global search/i,
+  "header-filters": /header filter/i,
+  "custom-filter-types": /custom filter type/i,
+  "nested-tables": /nested table/i,
+  "row-actions": /row actions/i,
+  aggregation: /aggregat/i,
+  "export-xlsx": /xlsx/i,
+  "command-palette": /command palette/i,
+  "toolbar-and-view-controls": /view control/i,
   // Not its own page — documented under customization.
   "csv-export": /csv/i,
 };
@@ -107,6 +116,13 @@ const IGNORED = new Set([
   "accessibility",
   "realtime",
   "versioning",
+  // Guides for building on the library, not features a kit ships: a new
+  // adapter, the markup-free `useDataTable` hook, and a hand-rolled source.
+  "building-an-adapter",
+  "headless",
+  "custom-table-source",
+  // Its own package (`@adapttable/ai`), like the other AI pages above.
+  "ai-voice",
 ]);
 for (const page of documented) {
   if (page.startsWith("migrate-") || IGNORED.has(page)) continue;
