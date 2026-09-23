@@ -9,7 +9,10 @@
  * snapshot pages carry `noindex`, and `fix-sitemap.mjs` leaves them out of the
  * sitemap, so only the current docs are indexed.
  */
-export const DOCS_VERSIONS = [{ slug: "v2", label: "v2" }];
+export const DOCS_VERSIONS = [
+  { slug: "v2", label: "v2" },
+  { slug: "v1", label: "v1" },
+];
 
 /** The picker's name for the current docs. */
 export const CURRENT_VERSION_LABEL = "v3 (latest)";

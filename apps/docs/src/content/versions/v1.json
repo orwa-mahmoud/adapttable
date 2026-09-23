@@ -1,0 +1,158 @@
+{
+  "sidebar": [
+    {
+      "label": "Start",
+      "items": [
+        {
+          "label": "Getting started",
+          "slug": "getting-started"
+        },
+        {
+          "label": "Concepts",
+          "slug": "concepts"
+        },
+        {
+          "label": "Data tiers",
+          "slug": "data-tiers"
+        }
+      ]
+    },
+    {
+      "label": "Features",
+      "items": [
+        {
+          "label": "Columns",
+          "slug": "columns"
+        },
+        {
+          "label": "Sorting",
+          "slug": "sorting"
+        },
+        {
+          "label": "Filtering",
+          "slug": "filtering"
+        },
+        {
+          "label": "Pagination",
+          "slug": "pagination"
+        },
+        {
+          "label": "Selection & bulk actions",
+          "slug": "selection"
+        },
+        {
+          "label": "Row actions",
+          "slug": "row-actions"
+        },
+        {
+          "label": "Row & display options",
+          "slug": "row-and-display-options"
+        },
+        {
+          "label": "Row expansion",
+          "slug": "row-expansion"
+        },
+        {
+          "label": "Inline cell editing",
+          "slug": "cell-editing"
+        },
+        {
+          "label": "Row grouping",
+          "slug": "row-grouping"
+        },
+        {
+          "label": "Column management",
+          "slug": "column-management"
+        },
+        {
+          "label": "Summary row",
+          "slug": "summary-row"
+        },
+        {
+          "label": "CSV export",
+          "slug": "csv-export"
+        },
+        {
+          "label": "Count filters",
+          "slug": "count-filters"
+        },
+        {
+          "label": "Saved views",
+          "slug": "saved-views"
+        },
+        {
+          "label": "Virtualization",
+          "slug": "virtualization"
+        }
+      ]
+    },
+    {
+      "label": "Beyond the table",
+      "items": [
+        {
+          "label": "URL state",
+          "slug": "url-state"
+        },
+        {
+          "label": "Customization",
+          "slug": "customization"
+        },
+        {
+          "label": "Headless",
+          "slug": "headless"
+        },
+        {
+          "label": "i18n & RTL",
+          "slug": "i18n-rtl"
+        }
+      ]
+    },
+    {
+      "label": "Reference",
+      "items": [
+        {
+          "label": "API reference",
+          "slug": "api"
+        },
+        {
+          "label": "FAQ",
+          "slug": "faq"
+        },
+        {
+          "label": "Comparison",
+          "slug": "comparison"
+        }
+      ]
+    },
+    {
+      "label": "Migrating",
+      "items": [
+        {
+          "label": "From mantine-datatable",
+          "slug": "migrate-from-mantine-datatable"
+        },
+        {
+          "label": "From MUI X DataGrid",
+          "slug": "migrate-from-mui-x-datagrid"
+        },
+        {
+          "label": "From TanStack Table",
+          "slug": "migrate-from-tanstack-table"
+        },
+        {
+          "label": "From mui-datatables",
+          "slug": "migrate-from-mui-datatables"
+        },
+        {
+          "label": "From material-table",
+          "slug": "migrate-from-material-table"
+        },
+        {
+          "label": "From ag-Grid",
+          "slug": "migrate-from-ag-grid"
+        }
+      ]
+    }
+  ],
+  "excluded": []
+}
