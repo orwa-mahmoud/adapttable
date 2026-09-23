@@ -349,7 +349,6 @@ export function MantineDemo({
                     ),
                   })
                 : makeColumns(locale, MANTINE_CELLS, {
-                    aggregatable: mode !== "backend",
                     groups: columnGroups,
                     sparkline,
                     editors: editorShowcase,

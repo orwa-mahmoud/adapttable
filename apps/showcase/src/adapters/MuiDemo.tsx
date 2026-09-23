@@ -366,7 +366,6 @@ export function MuiDemo({
                     ),
                   })
                 : makeColumns(locale, MUI_CELLS, {
-                    aggregatable: mode !== "backend",
                     groups: columnGroups,
                     sparkline,
                     editors: editorShowcase,

@@ -373,7 +373,6 @@ export function AntdDemo({
                     ),
                   })
                 : makeColumns(locale, ANTD_CELLS, {
-                    aggregatable: mode !== "backend",
                     groups: columnGroups,
                     sparkline,
                     editors: editorShowcase,

@@ -360,7 +360,6 @@ export function ChakraDemo({
                       ),
                     })
                   : makeColumns(locale, CHAKRA_CELLS, {
-                      aggregatable: mode !== "backend",
                       groups: columnGroups,
                       sparkline,
                       editors: editorShowcase,

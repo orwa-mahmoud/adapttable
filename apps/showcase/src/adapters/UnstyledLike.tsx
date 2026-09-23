@@ -393,7 +393,6 @@ export function UnstyledLike({
                     ),
                   })
                 : makeColumns(locale, TAILWIND_CELLS, {
-                    aggregatable: mode !== "backend",
                     groups: columnGroups,
                     sparkline,
                     editors: editorShowcase,
