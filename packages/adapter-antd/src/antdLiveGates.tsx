@@ -338,6 +338,7 @@ function NavStage<TRow>({
     dir: props.dir,
     labels,
     columnsWindowed,
+    onCut: props.onCellCut,
   };
   const navProps = {
     options,
