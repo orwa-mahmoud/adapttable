@@ -711,6 +711,7 @@ describe("useDesktopTableAssembly coverage paths", () => {
   it("measures scroll-body rows and exposes column spacers", () => {
     const measure = vi.fn();
     const pairRef = vi.fn();
+    const detailRef = vi.fn();
     const { result } = renderHook(() => {
       const chrome = useChrome();
       return useDesktopTableAssembly({
@@ -721,7 +722,7 @@ describe("useDesktopTableAssembly coverage paths", () => {
         measureElement: measure,
         measureRowPair: {
           row: () => pairRef,
-          detail: () => pairRef,
+          detail: () => detailRef,
         },
         columnWindow: {
           enabled: true,
@@ -744,6 +745,9 @@ describe("useDesktopTableAssembly coverage paths", () => {
     expect(row?.kind).toBe("row");
     if (row?.kind === "row") {
       expect(row.wiring.measureRef).toBe(pairRef);
+      // The detail panel's half of the pair, so its height stays counted
+      // once the row scrolls out of the window.
+      expect(row.wiring.detailMeasureRef).toBe(detailRef);
       expect(row.wiring.treeColumnKey).toBe("name");
     }
   });

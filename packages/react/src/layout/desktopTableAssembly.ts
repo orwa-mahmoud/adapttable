@@ -379,6 +379,11 @@ export interface DesktopRowWiring<TRow> {
   edgeRowPin: ReturnType<typeof pinnedRowCellStyle>;
   /** Ref that reports the row's box, absent when unmeasured. */
   measureRef: ((element: Element | null) => void) | undefined;
+  /**
+   * Ref for the row's open detail panel, so the virtualizer sizes the row and
+   * its panel together. Absent when nothing measures the pair.
+   */
+  detailMeasureRef?: (element: Element | null) => void;
   /** getRowProps plus grid / click / reorder — spread onto the kit row. */
   rowDomProps: Record<string, unknown>;
   /** Sticky offsets for one body cell, absent when unpinned. */
@@ -688,6 +693,19 @@ export function desktopRowMeasureRef(
   if (pinned) return undefined;
   if (measureRowPair) return measureRowPair.row(index);
   return measureElement;
+}
+
+/**
+ * The ref a row's detail panel carries, so its height counts toward the row's
+ * virtual item — the other half of {@link desktopRowMeasureRef}'s pair.
+ */
+function desktopDetailMeasureRef(
+  pinned: RowPinSide | undefined,
+  measureRowPair: RowPairMeasurer | undefined,
+  index: number
+): ((element: Element | null) => void) | undefined {
+  if (pinned || !measureRowPair) return undefined;
+  return measureRowPair.detail(index);
 }
 
 /**
@@ -1111,6 +1129,9 @@ function buildDesktopRowWiring<TRow>(
   const measureRef = measure
     ? desktopRowMeasureRef(rowPinSide, measureRowPair, index, measureElement)
     : undefined;
+  const detailMeasureRef = measure
+    ? desktopDetailMeasureRef(rowPinSide, measureRowPair, index)
+    : undefined;
   const reorderAttrs = summary ? undefined : rowReorder?.rowAttrs?.(id, index);
   const rowDomProps = desktopSummaryRowDomProps({
     table,
@@ -1199,6 +1220,7 @@ function buildDesktopRowWiring<TRow>(
     pinSticky,
     edgeRowPin,
     measureRef,
+    detailMeasureRef,
     rowDomProps,
     bodyPinStyle: (key: string) =>
       desktopBodyPinStyle(key, pinOffset, leads, rowPinSide, rowPinOffset),

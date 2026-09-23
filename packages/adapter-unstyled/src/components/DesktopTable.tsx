@@ -170,6 +170,7 @@ function DesktopRowBase<TRow>(
     focusIndex,
     edgeRowPin,
     measureRef,
+    detailMeasureRef,
     rowDomProps,
     bodyPinStyle,
   } = props;
@@ -363,7 +364,11 @@ function DesktopRowBase<TRow>(
         )}
       </tr>
       {expandable && expanded && (
-        <tr data-adapttable-part="detail-row" className={classNames.detailRow}>
+        <tr
+          ref={detailMeasureRef}
+          data-adapttable-part="detail-row"
+          className={classNames.detailRow}
+        >
           <td
             colSpan={columnSpan}
             data-adapttable-part="detail-cell"
