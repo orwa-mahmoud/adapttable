@@ -62,6 +62,19 @@ pnpm add @adapttable/core @adapttable/shadcn
 pnpm add @adapttable/core @adapttable/unstyled
 ```
 
+Every kit depends on `@adapttable/react`, so it is always installed — but a
+package manager with a strict layout (pnpm by default) lets you import only
+what your own `package.json` lists. Importing a hook such as
+`useDensityUrlState` or `useHighlight` from `@adapttable/react` then needs it
+added too:
+
+```bash
+pnpm add @adapttable/react
+```
+
+Keep it on the version your kit pins, which `pnpm why @adapttable/react`
+shows.
+
 ## Supported versions
 
 | Dependency        | Supported range                                                       |
