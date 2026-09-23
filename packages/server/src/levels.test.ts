@@ -174,6 +174,13 @@ describe("level 1 — a column list, exactly as before", () => {
     expect(query.rejected).toEqual([]);
   });
 
+  it("reports no grouping keys when asked but the URL groups by nothing", () => {
+    const flagged = { ...schema, groupByKeys: true };
+
+    expect(parseTableQuery("", flagged).groupByKeys).toBeUndefined();
+    expect(parseTableQuery("?groupBy=", flagged).groupByKeys).toBeUndefined();
+  });
+
   it("answers with groupBy alone without the flag", () => {
     const query = parseTableQuery("?groupBy=team", schema);
 
