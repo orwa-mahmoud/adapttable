@@ -24,6 +24,7 @@ import type {
 } from "../columnModel";
 import type { DisplayValue } from "../display";
 import { cellSortValue } from "../engine/cellValue";
+import { engineSearchText } from "../engine/searchText";
 import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 import {
   type BuildGroupedFlatModelOptions,
@@ -290,23 +291,14 @@ export function configureIncrementalView<TRow>(
 }
 
 /**
- * Default searchable-text projector: flatten a row's own values. Kept
- * here so this module does not import the React hook that publishes the
- * same helper on `useFrontendData`.
+ * Default searchable-text projector: flatten a row's own values — the
+ * engine's {@link engineSearchText}, under the name the incremental view
+ * has always published.
  *
  * @public
  */
 export function incrementalSearchText<TRow>(row: TRow): string {
-  if (row && typeof row === "object") {
-    return Object.values(row)
-      .map((value) => {
-        if (value == null) return "";
-        if (typeof value === "object") return JSON.stringify(value);
-        return String(value as string | number | boolean);
-      })
-      .join(" ");
-  }
-  return String(row ?? "");
+  return engineSearchText(row);
 }
 
 /**
