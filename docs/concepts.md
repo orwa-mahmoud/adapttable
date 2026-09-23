@@ -166,18 +166,19 @@ it on for long infinite lists.
 
 Adapters automatically switch from table rows to mobile cards at
 `mobileBreakpoint` (default 768px); `forceMobile` pins the card layout.
-`hideOnMobile` can hide low-value columns, while `mobileIdentityColumns`
-preserves a configurable number of leading desktop-visible columns so every
-card keeps enough identity to be useful. `renderCard` replaces a card's body
-while its shell — selection, toggles, row actions — stays.
+A card shows every column without `hideOnMobile`, so `hideOnMobile` on the
+low-value columns is what shapes it; `hideOnDesktop` adds a field to cards
+only. `renderCard` replaces a card's body while its shell — selection,
+toggles, row actions — stays.
 
 ```tsx
-<DataTable
-  data={people}
-  columns={columns}
-  rowKey={(row) => row.id}
-  mobileIdentityColumns={2}
-/>
+const columns = [
+  { key: "name" },
+  { key: "team" },
+  { key: "email", hideOnMobile: true },
+];
+
+<DataTable data={people} columns={columns} rowKey={(row) => row.id} />;
 ```
 
 ## The engine, and why it has no React in it

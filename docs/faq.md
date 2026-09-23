@@ -74,8 +74,8 @@ open-core AG Grid Enterprise or MUI X DataGrid Pro / Premium).
 ## How does it handle responsive tables on mobile?
 
 It does not try to squeeze desktop columns into a tiny viewport. The adapters
-automatically switch to mobile cards, with labels per value and a tunable
-`mobileIdentityColumns` option so the most important columns remain visible.
+automatically switch to mobile cards, with labels per value; `hideOnMobile`
+drops the low-value columns so the ones that matter lead each card.
 This avoids the horizontal-scroll table pattern that breaks many responsive
 apps.
 

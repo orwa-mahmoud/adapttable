@@ -783,8 +783,9 @@ export interface BaseDataTableProps<TRow> {
   paginationMode?: PaginationMode;
   /**
    * How many leading desktop-visible columns anchor the mobile identity
-   * block. Never overrides an explicit `hideOnMobile: true` — the
-   * author's hide always wins.
+   * block. The columns it anchors are ones without `hideOnMobile`, which a
+   * card shows anyway, so it does not change which fields a card shows: every
+   * column without `hideOnMobile` appears, and an explicit hide always wins.
    */
   mobileIdentityColumns?: number;
   /** Hover-prefetch callback fired on desktop row mouse-enter. */
