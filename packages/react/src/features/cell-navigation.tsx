@@ -11,6 +11,7 @@ import {
   cellPasteHandler,
   type CellRange,
   coveredAddressSet,
+  isSingleCell,
 } from "@adapttable/core";
 import { type ReactNode, useEffect, useRef } from "react";
 
@@ -72,11 +73,21 @@ function LiveCellNav({
   const reportRange = useRef(hostProps.onCellRangeChange);
   reportRange.current = hostProps.onCellRangeChange;
   const wired = hostProps.onCellRangeChange !== undefined;
-  const range = gridFocus.range;
+  // A lone focused cell is not a selection, so it reports `null`, and the
+  // host hears only when the reported rectangle changes.
+  const range =
+    gridFocus.range === null || isSingleCell(gridFocus.range)
+      ? null
+      : gridFocus.range;
+  const rangeKey = range
+    ? `${range.anchor.row}:${range.anchor.col}-${range.head.row}:${range.head.col}`
+    : "";
+  const latestRange = useRef(range);
+  latestRange.current = range;
   useEffect(() => {
     if (!wired) return;
-    reportRange.current?.(range);
-  }, [wired, range]);
+    reportRange.current?.(latestRange.current);
+  }, [wired, rangeKey]);
   return children(gridFocus);
 }
 

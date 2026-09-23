@@ -101,4 +101,30 @@ describe("resolveContextTarget", () => {
 
     expect(resolveContextTarget<Row>(at(id), rowFor)).toBeNull();
   });
+
+  it("reads a pinned row, which names its side instead of row", () => {
+    build(`
+      <table><tbody>
+        <tr data-adapttable-part="pinned-top" data-row-id="1">
+          <td data-adapttable-part="cell" data-column-key="name">
+            <span id="pinned-cell">Ada</span>
+          </td>
+        </tr>
+        <tr data-adapttable-part="pinned-bottom" data-row-id="1">
+          <td id="pinned-gap">x</td>
+        </tr>
+      </tbody></table>
+    `);
+
+    expect(
+      resolveContextTarget<Row>(at("pinned-cell"), rowFor)?.target
+    ).toEqual({ kind: "cell", row: ROWS["1"], rowId: "1", columnKey: "name" });
+    expect(resolveContextTarget<Row>(at("pinned-gap"), rowFor)?.target).toEqual(
+      {
+        kind: "row",
+        row: ROWS["1"],
+        rowId: "1",
+      }
+    );
+  });
 });

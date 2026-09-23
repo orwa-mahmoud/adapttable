@@ -41,6 +41,11 @@ export interface ResolvedContextTarget<TRow> {
   element: HTMLElement;
 }
 
+/** Every part name a rendered data row carries. */
+const ROW_SELECTOR = ["row", "pinned-top", "pinned-bottom"]
+  .map((part) => `[data-adapttable-part="${part}"]`)
+  .join(",");
+
 /** The nearest ancestor carrying a part name, or null. */
 function partAncestor(from: Element, part: string): HTMLElement | null {
   return from.closest<HTMLElement>(`[data-adapttable-part="${part}"]`);
@@ -68,7 +73,8 @@ export function resolveContextTarget<TRow>(
     if (columnKey === undefined) return null;
     return { target: { kind: "header", columnKey }, element: header };
   }
-  const row = partAncestor(from, "row");
+  // A pinned row names its side instead of `row`; it is still a row.
+  const row = from.closest<HTMLElement>(ROW_SELECTOR);
   if (!row) return null;
   const rowId = row.getAttribute(ROW_ID_ATTRIBUTE);
   if (rowId === null) return null;
