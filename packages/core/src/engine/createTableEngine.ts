@@ -79,8 +79,14 @@ export type TableRowScope = "visible" | "page" | "full";
  * @public
  */
 export interface TableSnapshot<TRow = unknown> {
+  /** A token per axis; one that changed means that part of the state changed. */
   readonly revisions: TableRevisions;
+  /** The columns the engine derives from. */
   readonly columns: readonly ColumnMetadata<TRow>[];
+  /**
+   * What the data reaches: the full set, grouping, selection across pages,
+   * export scope and row count.
+   */
   readonly capabilities: TableSourceCapabilities;
   /**
    * The page the engine is actually showing. A requested page past the end
@@ -92,13 +98,21 @@ export interface TableSnapshot<TRow = unknown> {
   readonly requestedPage: number;
   /** Last page for the current row count and limit. */
   readonly lastPage: number;
+  /** Rows per page. */
   readonly limit: number;
+  /** The search term, or `""`. */
   readonly search: string;
+  /** The sorted column, when one is. */
   readonly sortBy: string | undefined;
+  /** The sort direction, when a column is sorted. */
   readonly sortDir: SortDirection | undefined;
+  /** The filter values, by key. */
   readonly extra: ExtraFilters;
+  /** The grouping column, when rows are grouped. */
   readonly groupBy: string | undefined;
+  /** The selected row keys. */
   readonly selectedIds: readonly string[];
+  /** Rows matching the search and filters. */
   readonly total: number;
 }
 
@@ -192,7 +206,9 @@ export interface TableEngineReader<TRow = unknown> {
  * @public
  */
 export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
+  /** Stable id for this table. */
   readonly tableId: string;
+  /** Stable row identity. */
   readonly rowKey: (row: TRow) => string;
   /**
    * What the render in progress staged, or the committed state when nothing
@@ -200,10 +216,12 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
    * engine itself for the state everyone else can see.
    */
   readonly candidate: TableEngineReader<TRow>;
+  /** Listen for changes on some axes, or all; returns the unsubscribe. */
   readonly subscribe: (
     axes: readonly TableRevisionAxis[] | "all",
     listener: (revisions: TableRevisions) => void
   ) => () => void;
+  /** Apply one operation — a page, sort, search, filter or selection change. */
   readonly dispatch: (operation: TableOperation) => void;
   /**
    * Align incremental query options (filter tree, sort levels, grouping
@@ -250,6 +268,7 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
   readonly commitCandidate: () => void;
   /** Drop the candidate; the committed state is already what it was. */
   readonly discardCandidate: () => void;
+  /** Stop every subscription and release the engine. */
   readonly dispose: () => void;
 }
 

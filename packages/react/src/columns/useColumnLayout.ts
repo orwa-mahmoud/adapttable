@@ -28,7 +28,7 @@ export type {
 } from "@adapttable/core";
 export type { UseColumnLayoutResult } from "@adapttable/core";
 
-/** {@link useColumnLayout} preserves full React column defs in `visibleColumns`. */
+/** `useColumnLayout` preserves full React column defs in `visibleColumns`. @public */
 export interface ReactUseColumnLayoutResult<TRow> extends Omit<
   UseColumnLayoutResult<TRow>,
   "visibleColumns"

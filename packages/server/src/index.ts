@@ -109,7 +109,7 @@ export interface QuerySchema {
    * back in `typedFilters` with its operator checked against the type and its
    * value parsed; with definitions, a static option list is enforced too. Any
    * `f_` parameter that belongs to no declared filter is refused. Build the
-   * schema per request and pass {@link pickFilters} of what the caller may
+   * schema per request and pass `pickFilters` of what the caller may
    * use to scope filtering by user or role.
    */
   filters?: Readonly<Record<string, string>> | readonly ServerFilterDef[];

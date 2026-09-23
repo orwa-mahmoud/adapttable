@@ -406,7 +406,7 @@ export function aggregate<TRow>(
 }
 
 /**
- * What a mapper built by {@link aggregate} was declared to compute.
+ * What a mapper built by `aggregate()` was declared to compute.
  *
  * Column key to operation id, and `CUSTOM_AGGREGATE` where the declaration
  * was a function rather than a name. Ids only: a closure is not application
@@ -465,7 +465,7 @@ export function withDeclaredAggregates<TRow>(
 }
 
 /**
- * Read what a mapper declares, when it came from {@link aggregate}.
+ * Read what a mapper declares, when it came from `aggregate()`.
  *
  * The table asks this instead of running the mapper on invented rows: a
  * hand-written mapper answers nothing, which is the honest answer, and a

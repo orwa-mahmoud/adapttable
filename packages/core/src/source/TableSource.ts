@@ -78,7 +78,7 @@ export interface TableSource<TRow> extends TableStateMutators {
   refetch?: () => Promise<unknown> | void;
   /**
    * Framework-neutral engine for frontend tiers. Bindings read revisions and
-   * row scopes through {@link createNeutralTable}; server sources omit this.
+   * row scopes through `createNeutralTable`; server sources omit this.
    */
   readonly tableEngine?: TableEngine<TRow>;
   /** The resolved pagination mode (after `"auto"` → device resolution). */
