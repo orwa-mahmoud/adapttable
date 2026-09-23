@@ -100,6 +100,19 @@ describe("host callbacks on the owning features", () => {
     });
     expect(onEdit).toHaveBeenLastCalledWith(ROWS[0], "name", "Alice");
     expect(seen.at(-1)?.canRedo).toBe(true);
+
+    act(() => {
+      seen.at(-1)?.redo();
+    });
+    expect(onEdit).toHaveBeenLastCalledWith(ROWS[0], "name", "Alicia");
+    expect(seen.at(-1)?.canUndo).toBe(true);
+    expect(seen.at(-1)?.canRedo).toBe(false);
+
+    act(() => {
+      seen.at(-1)?.clear();
+    });
+    expect(seen.at(-1)?.canUndo).toBe(false);
+    expect(seen.at(-1)?.canRedo).toBe(false);
   });
 
   it("reports unsaved edits, and confirmAll clears them", () => {
