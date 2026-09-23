@@ -1,7 +1,10 @@
 # AdaptTable starters
 
 One minimal [Vite](https://vite.dev) app per adapter — the kit's provider, the
-adapter's `<DataTable>`, and a single table on a demo dataset. They exist so you
+adapter's `<DataTable>`, and a single table on a demo dataset. Every starter
+composes the same features from its own kit's subpaths: `filters([])`,
+`groupingPanel`, `columnMenu`, `resizableColumns`, `multiSort`,
+`cellNavigation`, `editHistory`, `editing` and `exportCsv`. They exist so you
 can try AdaptTable with **zero local setup**: open any one in StackBlitz and edit
 a real table in the browser.
 

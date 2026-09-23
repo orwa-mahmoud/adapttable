@@ -1,10 +1,13 @@
 import { useState } from "react";
 
 import { type ColumnDef, DataTable } from "@adapttable/mantine";
+import { cellNavigation } from "@adapttable/mantine/cell-navigation";
 import { columnMenu } from "@adapttable/mantine/column-menu";
-import { editing } from "@adapttable/mantine/editing";
+import { editHistory, editing } from "@adapttable/mantine/editing";
 import { exportCsv } from "@adapttable/mantine/export";
-import { grouping } from "@adapttable/mantine/grouping";
+import { filters } from "@adapttable/mantine/filters";
+import { groupingPanel } from "@adapttable/mantine/grouping-panel";
+import { multiSort } from "@adapttable/mantine/multi-sort";
 import { resizableColumns } from "@adapttable/mantine/resizable-columns";
 
 import { type Person, people } from "./data";
@@ -13,9 +16,10 @@ import { type Person, people } from "./data";
 // `filter` becomes a native kit widget with a removable chip and URL state.
 const columns: ColumnDef<Person>[] = [
   { key: "name", sortable: true, filter: "text", editable: true },
-  { key: "role", filter: { type: "select", options: "auto" } },
+  { key: "role", sortable: true, filter: { type: "select", options: "auto" } },
   {
     key: "status",
+    sortable: true,
     filter: { type: "select", options: "auto" },
     // Inline editing: double-click (or Enter/F2) opens the kit's own input.
     editable: true,
@@ -38,6 +42,13 @@ const columns: ColumnDef<Person>[] = [
   { key: "hiredAt", header: "Hired", sortable: true, filter: "dateRange" },
 ];
 
+// Per-group subtotals — the same mapper signature as `summaryRow`.
+const groupAggregates = (groupRows: readonly Person[]) => ({
+  salary: `$${groupRows
+    .reduce((sum, r) => sum + r.salary, 0)
+    .toLocaleString()}`,
+});
+
 export function App() {
   const [rows, setRows] = useState(people);
   return (
@@ -49,20 +60,19 @@ export function App() {
       // Each import is the switch: a feature the table never names is a
       // feature it never downloads.
       features={[
+        // Arms every column `filter` above: the Filters control, chips and URL.
+        filters([]),
+        // Drag a header onto the panel to group; starts grouped by role.
+        groupingPanel<Person>("role", { groupAggregates }),
         // Column menu (show/hide, pin, reorder) + drag/keyboard resizing.
         columnMenu(),
         resizableColumns(),
-        // Group rows by one column, with per-group subtotals — the same
-        // mapper signature as `summaryRow`.
-        grouping("role", {
-          groupAggregates: (groupRows: readonly Person[]) => ({
-            salary: `$${groupRows
-              .reduce((sum, r) => sum + r.salary, 0)
-              .toLocaleString()}`,
-          }),
-        }),
-        // One toolbar button: exports exactly what the table shows.
-        exportCsv({ filename: "people.csv", scope: "all" }),
+        // Shift-click a second header to sort by more than one column.
+        multiSort(),
+        // Arrow keys move between cells; Shift+arrows select a range to copy.
+        cellNavigation(),
+        // Undo / redo for edits (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z).
+        editHistory(),
         // The table never mutates rows — this handler applies each edit.
         editing((row: Person, key, nextValue) =>
           setRows((current) =>
@@ -71,6 +81,8 @@ export function App() {
             )
           )
         ),
+        // One toolbar button: exports every row that matches the view.
+        exportCsv({ filename: "people.csv", scope: "all" }),
       ]}
     />
   );

@@ -1,6 +1,6 @@
 # React table sorting — multi-column, server-side & URL-synced
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`sortable` columns); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`sortable` columns + `multiSort()` — shift-click a second header); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 Mark a column `sortable` and header clicks cycle it ascending → descending → cleared, with the state kept in the URL so reloads and shared links restore the exact order. Multi-column sorting is one feature import: `multiSort()` from `@adapttable/<kit>/multi-sort`.
 

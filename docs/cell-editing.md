@@ -1,6 +1,6 @@
 # React table inline cell editing — edit rows in place, validate & commit
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`editable` columns + `editing()`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`editable` columns + `editing()` + `editHistory()` for undo and redo); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [edit cells in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/editing/) — a real table you can type into, not a recording.
 

@@ -1,6 +1,6 @@
 # React table row grouping — interactive panel, nested groups & aggregates
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — edit the table in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — the starter is grouped by role with salary subtotals (`groupingPanel("role", { groupAggregates })`); drag another header onto the panel, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [collapse groups and override aggregations in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/grouping/) — a real table you can click, not a recording. Independent pinned totals and the footer grand total live on the [aggregation page](https://orwa-mahmoud.github.io/adapttable/demo/mantine/aggregation/).
 

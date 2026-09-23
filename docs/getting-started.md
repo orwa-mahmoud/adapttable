@@ -238,8 +238,11 @@ filter also drives its own removable chip, URL parsing, and row predicate.
 ## Try it in StackBlitz
 
 Prefer to try before installing? Each starter is a minimal Vite app — one table
-on a demo dataset — that boots in the browser with no local setup. Pick your
-kit:
+on a demo dataset — that boots in the browser with no local setup. Every
+starter composes the same features from its own kit: column filters with chips,
+a drag-to-group panel with subtotals, the column menu, resizing, multi-column
+sort, cell navigation, inline editing with undo and redo, and CSV export. Pick
+your kit:
 
 - [Mantine](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 - [Material UI](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mui)
