@@ -8,10 +8,12 @@
  * a host's tests read one contract either way.
  */
 import { type GridCell, sameGridCell } from "@adapttable/core";
-import { createContext, type RefObject, useContext, useEffect } from "react";
+import { type RefObject, useEffect } from "react";
 
 import { gridCellAttr, type GridFocusState } from "../focus/useGridFocus";
 import type { FindInTableState } from "./useFindInTable";
+
+export { FindStateContext, useFindState } from "./findState";
 
 /**
  * Lay find's match marks over cell props that carry none.
@@ -48,19 +50,6 @@ export function withFindMarks(
         base.getCellPropsAt(windowIndex, col)
       ),
   };
-}
-
-/** The live find state, for a control drawn somewhere else in the table. */
-export const FindStateContext = createContext<FindInTableState | null>(null);
-
-/**
- * The find state a toolbar control reads, or `null` outside a table that
- * composed `findInTable()`.
- *
- * @public
- */
-export function useFindState(): FindInTableState | null {
-  return useContext(FindStateContext);
 }
 
 /**

@@ -6,11 +6,14 @@
  */
 import {
   devWarn,
+  type GridCell,
+  type KeyedVirtualization,
   type TableVirtualization,
   windowGroupedEntries,
 } from "@adapttable/core";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
+import { useFindState } from "../find/findState";
 import type { ComposedTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";
 import {
@@ -19,14 +22,15 @@ import {
   estimateBodyItemSize,
   isBodyEligible,
   measureRowDetailAsPair,
+  sourceWindowStart,
   useBodyLoadMore,
   useFetchNextPage,
   usePinnedScrollRows,
 } from "./chromeBodyShared";
 import { useColumnWindow } from "./useColumnWindow";
 import {
-  useKeyedVirtualization,
-  useTableVirtualization,
+  useKeyedVirtualizer,
+  useTableVirtualizer,
 } from "./useTableVirtualization";
 import { useMeasuredWindowScrollMargin } from "./windowScrollMargin";
 
@@ -80,23 +84,35 @@ export function useVirtualChromeBodyData<TRow>(
     estimateSize,
   } as const;
 
-  const groupVirtualization = useKeyedVirtualization({
+  const groupWindow = useKeyedVirtualizer({
     keys: groupKeys,
     enabled: virtualize && groupingArmed && bodyEligible,
     ...scrollOpts,
   });
-  const treeVirtualization = useKeyedVirtualization({
+  const treeWindow = useKeyedVirtualizer({
     keys: treeKeys,
     enabled: virtualize && treeArmed && !groupingArmed && bodyEligible,
     ...scrollOpts,
   });
+  const groupVirtualization = groupWindow.virtualization;
+  const treeVirtualization = treeWindow.virtualization;
 
-  const virtualization = useTableVirtualization({
+  const flatWindow = useTableVirtualizer({
     rows: partitioned.scroll,
     rowKey,
     enabled: virtualize && !groupingArmed && !treeArmed && bodyEligible,
     expandable: measureRowDetailAsPair(chrome.isMobile, props.renderRowDetail),
     ...scrollOpts,
+  });
+  const virtualization = flatWindow.virtualization;
+
+  const keyedWindow = groupingArmed ? groupWindow : treeWindow;
+  useScrollToFindMatch({
+    current: useFindState()?.current ?? null,
+    matchRow: (cell) => source.rows[cell.row - sourceWindowStart(source)],
+    rowKey,
+    flat: { ...flatWindow, rows: partitioned.scroll },
+    keyed: { ...keyedWindow, keys: groupingArmed ? groupKeys : treeKeys },
   });
 
   const groupingEntries = chrome.grouping
@@ -156,6 +172,53 @@ export function useVirtualChromeBodyData<TRow>(
     pinnedSummaryBottom: chrome.pinnedRows?.bottom ?? [],
     columnWindow,
   };
+}
+
+/**
+ * Bring find's current match into the window when it is not rendered. The
+ * mark, the scroll into view and the grid's focus all need an element, and a
+ * row outside the window has none until the virtualizer scrolls to it.
+ *
+ * Runs when the walk moves, never on a scroll, so it cannot fight the reader.
+ */
+function useScrollToFindMatch<TRow>(options: {
+  current: GridCell | null;
+  matchRow: (cell: GridCell) => TRow | undefined;
+  rowKey: (row: TRow) => string;
+  flat: {
+    virtualization: TableVirtualization<TRow>;
+    scrollToIndex: (index: number) => void;
+    rows: readonly TRow[];
+  };
+  keyed: {
+    virtualization: KeyedVirtualization;
+    scrollToIndex: (index: number) => void;
+    keys: readonly string[];
+  };
+}): void {
+  const latest = useRef(options);
+  latest.current = options;
+  const { current } = options;
+  useEffect(() => {
+    if (!current) return;
+    const { matchRow, rowKey, flat, keyed } = latest.current;
+    const row = matchRow(current);
+    if (row === undefined) return;
+    const id = rowKey(row);
+    if (flat.virtualization.enabled) {
+      if (flat.virtualization.rows.some((entry) => entry.key === id)) return;
+      const index = flat.rows.findIndex(
+        (candidate) => rowKey(candidate) === id
+      );
+      if (index >= 0) flat.scrollToIndex(index);
+      return;
+    }
+    if (!keyed.virtualization.enabled) return;
+    const index = keyed.keys.indexOf(id);
+    if (index >= 0 && !keyed.virtualization.indices.includes(index)) {
+      keyed.scrollToIndex(index);
+    }
+  }, [current]);
 }
 
 function resolveBodyVirtualization<TRow>(
