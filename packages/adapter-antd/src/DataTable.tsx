@@ -2120,6 +2120,7 @@ function AntdTableBody<TRow>({
 
   return (
     <AntdInteractionGate
+      root={rootRef}
       props={props}
       source={c.source}
       columns={c.columnLayout.visibleColumns}

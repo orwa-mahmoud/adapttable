@@ -84,9 +84,9 @@ strip under the table reads "Showing 1–3 of 3". The snippets below reuse
 
 Left to right in a left-to-right table:
 
-| Kit       | Order                                                                                                                                                                     |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Every kit | `start` · Search · mobile sort select · `toolbar` · Filters · Saved views · Columns · Density · Export · Fullscreen · Print · Undo/Redo · Add row · `end` · Rows per page |
+| Kit       | Order                                                                                                                                                                            |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Every kit | `start` · Search · mobile sort select · `toolbar` · Filters · Saved views · Columns · Density · Export · Find · Fullscreen · Print · Undo/Redo · Add row · `end` · Rows per page |
 
 In MUI, `editHistory()` draws the Undo and Redo pair; in every other kit
 `undoRedoButtons()` draws it. Either way it sits after Print. To draw Undo
@@ -105,6 +105,7 @@ Each entry appears only when its source is present:
 | Columns            | [`columnMenu()`](./column-management.md) is composed.                                                                        |
 | Density            | `densityChooser()` is composed.                                                                                              |
 | Export             | `exportCsv()` is composed. See [exporting](./exporting.md).                                                                  |
+| Find               | `findInTable({ button: true })` is composed. See [find in table](./cell-navigation.md#find-in-table).                        |
 | Fullscreen         | `fullscreen()` is composed and the browser allows fullscreen.                                                                |
 | Print              | `print(onPrint, true)` is composed.                                                                                          |
 | Undo/Redo          | `undoRedoButtons()` and `editHistory()` are both composed.                                                                   |

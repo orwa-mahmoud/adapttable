@@ -113,8 +113,8 @@ import { standardFeatures } from "@adapttable/mantine/preset";
 ```
 
 With no arguments it composes the features that work with nothing else
-supplied: the Columns menu, the density chooser, CSV export, find-in-table,
-fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
+supplied: the Columns menu, the density chooser, CSV export, find-in-table
+(Ctrl/Cmd+F anywhere in the table), fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
 columns and the status bar. Because `headerFilters()` is a member, filters
 from the preset's `filters` option open from the column headers (`filtersMode`
 resolves to `"header"`); compose the members individually for popover or drawer

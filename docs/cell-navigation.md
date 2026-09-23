@@ -133,23 +133,26 @@ Headless: `fillDirection`, `fillTargetRange` and `fillRangeEdits`;
 ## Find in table
 
 Compose `findInTable` from `@adapttable/<kit>/find-in-table` and **Ctrl/Cmd+F**
-opens a find bar over the table:
+with focus anywhere inside the table opens a find bar over it;
+`findInTable({ button: true })` also draws a **Find in table** control among
+the toolbar's view controls, with the kit's own button (part `find-button`,
+`aria-expanded` while the bar shows; `classNames.findButton` on unstyled and
+shadcn):
 
 ```tsx
 import { DataTable } from "@adapttable/mantine";
-import { cellNavigation } from "@adapttable/mantine/cell-navigation";
 import { findInTable } from "@adapttable/mantine/find-in-table";
 
 <DataTable
   data={rows}
   columns={columns}
   rowKey={(row) => row.id}
-  features={[cellNavigation(), findInTable()]}
+  features={[findInTable({ button: true })]}
 />;
 ```
 
-Find needs `cellNavigation()`: the shortcut, the marks and the walk all live
-on the grid. Without it, only a link carrying `find` opens the bar.
+Find works on its own. With [`cellNavigation()`](#selecting-a-range) composed
+too, walking the hits also moves the grid's focus and selection with them.
 
 Find is not [search](./search.md). The search box asks "show me only the rows that match", and
 on a server tier it asks the server; find asks "where does this appear in what I
@@ -165,9 +168,10 @@ design-system token. `--adapttable-find-match` and
 in).
 
 **Enter** walks forward, **Shift+Enter** back, **Escape** closes and clears.
-Walking moves the table's focus with it, so the cell is scrolled into view,
-announced, and left selected — a find that highlighted without going there would
-leave you hunting for the highlight. The bar itself is one input, a count and
+The current hit is scrolled into view — a find that highlighted without going
+there would leave you hunting for the highlight — and the count is announced.
+With cell navigation, walking also moves the grid's focus to the hit, which is
+announced and left selected. The bar itself is one input, a count and
 three buttons, all named through `labels.findInTable`, `findPlaceholder`,
 `findMatchCount`, `findPrevious`, `findNext` and `findClose`.
 

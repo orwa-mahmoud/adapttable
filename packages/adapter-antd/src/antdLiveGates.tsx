@@ -41,8 +41,9 @@ import {
   useFeatureSlotFilled,
   type UseGridFocusOptions,
   windowedTableAria,
+  withFindMarks,
 } from "@adapttable/react/adapter";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 
 import type { DataTableProps } from "./types";
 
@@ -125,6 +126,7 @@ export function AntdInteractionGate<TRow>({
   featureHost,
   labels,
   pageOnly,
+  root,
   children,
 }: {
   readonly props: LiveProps<TRow>;
@@ -144,6 +146,8 @@ export function AntdInteractionGate<TRow>({
   readonly featureHost: FeatureHostState | undefined;
   readonly labels: Required<TableLabels>;
   readonly pageOnly: boolean;
+  /** The table root, for Ctrl/Cmd+F and scrolling to a match. */
+  readonly root?: RefObject<HTMLElement | null>;
   readonly children: (live: AntdLiveState) => ReactNode;
 }): ReactNode {
   return (
@@ -153,6 +157,7 @@ export function AntdInteractionGate<TRow>({
       rows={rows}
       firstRowIndex={firstRowIndex}
       urlAdapter={urlAdapter}
+      root={root}
     >
       {(find) => (
         <NavStage
@@ -265,6 +270,7 @@ function FindStage<TRow>({
   rows,
   firstRowIndex,
   urlAdapter,
+  root,
   children,
 }: {
   readonly props: LiveProps<TRow>;
@@ -272,6 +278,7 @@ function FindStage<TRow>({
   readonly rows: readonly TRow[];
   readonly firstRowIndex: number;
   readonly urlAdapter: NonNullable<LiveProps<TRow>["urlAdapter"]>;
+  readonly root?: RefObject<HTMLElement | null>;
   readonly children: (find: FindInTableState) => ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(FIND_LIVE);
@@ -282,6 +289,7 @@ function FindStage<TRow>({
     firstRowIndex,
     urlAdapter,
     urlKey: props.urlKey,
+    root,
     children,
   } as unknown as FindLiveSlotProps<never>;
   return filled ? (
@@ -346,13 +354,17 @@ function NavStage<TRow>({
     <FeatureSlot slot={CELL_NAV_LIVE} props={navProps} />
   ) : (
     children(
-      windowedTableAria({
-        rowCount,
-        rowsLength: rows.length,
-        columnsLength: columns.length,
-        columnsWindowed,
-        firstRowIndex,
-      })
+      withFindMarks(
+        windowedTableAria({
+          rowCount,
+          rowsLength: rows.length,
+          columnsLength: columns.length,
+          columnsWindowed,
+          firstRowIndex,
+        }),
+        find,
+        firstRowIndex
+      )
     )
   );
 }

@@ -116,6 +116,8 @@ export interface DataTableClassNames {
    * `commandPalette({ button: true })`.
    */
   commandPaletteButton?: string;
+  /** The toolbar control drawn by `findInTable({ button: true })`. */
+  findButton?: string;
   /** The Export CSV toolbar button contributed by `exportCsv()`. */
   exportCsvButton?: string;
   /**

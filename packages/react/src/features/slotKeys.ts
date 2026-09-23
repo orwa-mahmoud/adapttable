@@ -19,7 +19,7 @@ import {
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 
 import type { CommandPaletteChromeProps } from "../actions/CommandPaletteChrome";
 import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";
@@ -427,6 +427,11 @@ export const CONTEXT_MENU_LIVE = featureSlotKey<
 export interface FindLiveSlotProps<
   TRow = never,
 > extends UseFindInTableOptions<TRow> {
+  /**
+   * The table root, so Ctrl/Cmd+F with focus anywhere inside it opens the bar
+   * and the current match can be scrolled to without cell navigation.
+   */
+  root?: RefObject<HTMLElement | null>;
   /** The table; receives the find state. */
   children: (find: FindInTableState) => ReactNode;
 }

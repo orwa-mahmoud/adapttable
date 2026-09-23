@@ -87,6 +87,10 @@ export {
   createAdapterFiltersFeature,
 } from "./adapterFeatures/filters";
 export {
+  type AdapterFindButtonProps,
+  findButtonRender,
+} from "./adapterFeatures/findButton";
+export {
   type AdapterGroupingComponents,
   type AdapterGroupingFeature,
   createAdapterGroupingFeature,
@@ -425,6 +429,7 @@ export {
   type FilterTreeSelectProps,
   type FilterTreeSlots,
 } from "./filters/FilterTreeChrome";
+export { useFindState, withFindMarks } from "./find/findMarks";
 export {
   FindBarChrome,
   type FindBarChromeProps,

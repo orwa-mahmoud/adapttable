@@ -7,6 +7,7 @@
  */
 import {
   type AdapterCommandPaletteTriggerProps,
+  type AdapterFindButtonProps,
   ExportAnnouncer,
   ExportProgressChrome,
   type ExportProgressSurfaceSlotProps,
@@ -267,6 +268,23 @@ export function CommandPaletteButton({
       onClick={onOpenPalette}
     >
       {labels.commandPalette}
+    </Button>
+  );
+}
+
+export function FindButton({
+  labels,
+  onOpenFind,
+  findOpen,
+}: Readonly<AdapterFindButtonProps>): ReactNode {
+  return (
+    <Button
+      size="small"
+      data-adapttable-part="find-button"
+      aria-expanded={findOpen}
+      onClick={onOpenFind}
+    >
+      {labels.findInTable}
     </Button>
   );
 }
