@@ -270,6 +270,23 @@ export function configureIncrementalView<TRow>(
   view: IncrementalView<TRow>,
   patch: Partial<IncrementalViewConfig<TRow>>
 ): IncrementalView<TRow> {
+  return reconfigureIncrementalView(view, patch, []);
+}
+
+/**
+ * {@link configureIncrementalView}, plus fields to clear. `configure` ignores
+ * an `undefined` entry, so a caller that owns a field — the table engine
+ * clearing its sort or grouping — names it here to take it off the view.
+ *
+ * @param view - The latest snapshot.
+ * @param patch - Fields to merge. `undefined` entries are ignored.
+ * @param cleared - Fields to remove from the configuration.
+ */
+export function reconfigureIncrementalView<TRow>(
+  view: IncrementalView<TRow>,
+  patch: Partial<IncrementalViewConfig<TRow>>,
+  cleared: readonly (keyof IncrementalViewConfig<TRow>)[]
+): IncrementalView<TRow> {
   const state = getState(view);
   if (!state) {
     throw new Error(
@@ -280,6 +297,7 @@ export function configureIncrementalView<TRow>(
     ...state.config,
     ...definedConfigPatch(patch),
   };
+  for (const key of cleared) delete merged[key];
   const queryChanged =
     queryConfigFingerprint(state.config) !== queryConfigFingerprint(merged);
   const derivedChanged =
@@ -568,10 +586,17 @@ function derivedConfigFingerprint<TRow>(
     blankLabel: config.blankLabel ?? null,
     hasGroupAggregates: config.groupAggregates !== undefined,
     derivedKey: config.derivedKey ?? null,
-    hasGroupSort: config.groupSort !== undefined,
+    groupAggregateOps: config.groupAggregateOps ?? null,
+    // A named order is a value and is compared as one; a comparator is a
+    // function, which a host that changes it signals through `derivedKey`.
+    groupSort:
+      typeof config.groupSort === "string"
+        ? config.groupSort
+        : config.groupSort !== undefined,
     hasGroupFilter: config.groupFilter !== undefined,
     hasSummaryRow: config.summaryRow !== undefined,
-    hasAggregateSpec: config.aggregateSpec !== undefined,
+    aggregateSpec: config.aggregateSpec ?? null,
+    aggregateOptions: config.aggregateOptions ?? null,
   });
 }
 

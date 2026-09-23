@@ -8,13 +8,14 @@ import {
   type SortDirection,
 } from "../columnModel";
 import { DEFAULT_LIMIT } from "../constants";
+import { formatGroupBy } from "../grouping/groupKeys";
 import {
   applyRowPatchLogToView,
   attachIncrementalView,
-  configureIncrementalView,
   createIncrementalView,
   type IncrementalView,
   type IncrementalViewConfig,
+  reconfigureIncrementalView,
 } from "../rows/incremental";
 import { rowPatchLog } from "../rows/patch";
 import {
@@ -253,9 +254,10 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
    * calls {@link TableEngine.discardCandidate} — or simply never commits, and
    * the committed state was never touched either way.
    *
-   * Repeating the same stage is the same stage: the candidate is derived from
-   * the committed state each time, so a double render in Strict Mode and a
-   * render React replays both land on one identical candidate.
+   * Stages before a commit build one candidate: each patch applies on top of
+   * the candidate so far, the way a render stages its data and then its view.
+   * A dropped candidate — discarded, or replaced by a `configure`, `dispatch`
+   * or `invalidate` — leaves the committed state exactly as it was.
    */
   readonly stageCandidate: (
     patch: TableEngineConfigPatch<TRow>,
@@ -378,6 +380,10 @@ interface EngineView<TRow> {
   aggregateOptions?: NonNullable<
     IncrementalViewConfig<TRow>["aggregateOptions"]
   >;
+  derivedKey?: NonNullable<IncrementalViewConfig<TRow>["derivedKey"]>;
+  groupAggregateOps?: NonNullable<
+    IncrementalViewConfig<TRow>["groupAggregateOps"]
+  >;
 }
 
 const EMPTY_EXTRA: ExtraFilters = {};
@@ -410,7 +416,24 @@ const PASS_THROUGH_KEYS = [
   "summaryRow",
   "aggregateSpec",
   "aggregateOptions",
+  "derivedKey",
+  "groupAggregateOps",
 ] as const satisfies readonly (keyof EngineView<never>)[];
+
+/** The engine fields the incremental view reads under the same name. */
+const INCREMENTAL_KEYS = new Set<string>([
+  ...PASS_THROUGH_KEYS,
+  "search",
+  "groupBy",
+  "extra",
+]);
+
+/** Whether clearing `key` on the engine clears it on the incremental view. */
+function isIncrementalKey<TRow>(
+  key: keyof EngineView<TRow>
+): key is keyof EngineView<TRow> & keyof IncrementalViewConfig<TRow> {
+  return INCREMENTAL_KEYS.has(key);
+}
 
 function bump(
   revisions: TableRevisions,
@@ -421,11 +444,16 @@ function bump(
   return next;
 }
 
+/**
+ * One stored form for every grouping input: the comma-joined keys, outermost
+ * first, which the incremental view reads back as the same levels. A list
+ * keeps all of its levels; an empty one is no grouping.
+ */
 function normalizeGroupBy(
   groupBy: string | readonly string[] | undefined
 ): string | undefined {
   if (groupBy === undefined) return undefined;
-  return typeof groupBy === "string" ? groupBy : groupBy[0];
+  return formatGroupBy(groupBy);
 }
 
 function defaultSearchText<TRow>(row: TRow): string {
@@ -537,6 +565,8 @@ export function createTableEngine<TRow>(
       summaryRow: view.summaryRow,
       aggregateSpec: view.aggregateSpec,
       aggregateOptions: view.aggregateOptions,
+      derivedKey: view.derivedKey,
+      groupAggregateOps: view.groupAggregateOps,
     };
   }
 
@@ -546,8 +576,15 @@ export function createTableEngine<TRow>(
   );
   attachIncrementalView(derived.sorted, derived);
 
-  function syncDerived(): void {
-    derived = configureIncrementalView(derived, viewConfig());
+  /**
+   * Bring the incremental view in line with the engine's view. The fields the
+   * last patch cleared are named, because a configure merge ignores an
+   * `undefined` entry and would keep the old sort or grouping.
+   */
+  function syncDerived(
+    cleared: readonly (keyof IncrementalViewConfig<TRow>)[] = []
+  ): void {
+    derived = reconfigureIncrementalView(derived, viewConfig(), cleared);
     attachIncrementalView(derived.sorted, derived);
   }
 
@@ -661,11 +698,20 @@ export function createTableEngine<TRow>(
    */
   function dropCandidate(): void {
     if (!committed) return;
+    const staged = derived;
     view = committed.view;
     derived = committed.derived;
     revisions = committed.revisions;
     committed = undefined;
     pendingAxes = [];
+    // A candidate that re-derived wrote into the incremental state it shares
+    // with the committed view, so that state no longer describes the rows it
+    // holds. Rebuild it from the committed configuration before anything
+    // configures or patches it again.
+    if (staged !== derived) {
+      derived = createIncrementalView(view.data, viewConfig());
+      attachIncrementalView(derived.sorted, derived);
+    }
   }
 
   function publish(
@@ -701,6 +747,7 @@ export function createTableEngine<TRow>(
   ): readonly TableRevisionAxis[] {
     const next: EngineView<TRow> = { ...view };
     const changed = new Set<ViewChangeKind>();
+    const cleared: (keyof IncrementalViewConfig<TRow>)[] = [];
 
     const assign = <K extends keyof EngineView<TRow>>(
       key: K,
@@ -709,6 +756,7 @@ export function createTableEngine<TRow>(
       if (Object.is(view[key], value)) return;
       next[key] = value;
       changed.add(viewChangeKind(key));
+      if (value === undefined && isIncrementalKey(key)) cleared.push(key);
     };
 
     // Keys the patch hands straight to the view. `in` is the test, so an
@@ -740,7 +788,7 @@ export function createTableEngine<TRow>(
       derived = createIncrementalView(view.data, viewConfig());
       attachIncrementalView(derived.sorted, derived);
     } else if (changed.has("view") || changed.has("schema")) {
-      syncDerived();
+      syncDerived(cleared);
     }
     return axesForChange(changed);
   }
