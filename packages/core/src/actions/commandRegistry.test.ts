@@ -94,6 +94,18 @@ describe("tableCommands", () => {
     expect(built[0]?.label).toBe("Drucken");
   });
 
+  it("names the export after the writer when the button's label is given", () => {
+    const csv = tableCommands({ labels: {}, onExport: vi.fn() });
+    const xlsx = tableCommands({
+      labels: { exportCsv: "Export CSV" },
+      onExport: vi.fn(),
+      exportLabel: "Export XLSX",
+    });
+
+    expect(csv[0]?.label).toBe("Export CSV");
+    expect(xlsx[0]?.label).toBe("Export XLSX");
+  });
+
   it("runs the handler it was built from", () => {
     const onPrint = vi.fn();
     tableCommands({ labels: {}, onPrint })[0]?.onSelect();

@@ -364,6 +364,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                         labels,
                         onPrint: props.onPrint,
                         onExport: view.toolbarProps.onExportCsv,
+                        exportLabel: view.toolbarProps.exportLabel,
                         onClearFilters: c.clearFilters,
                         hasFilters: c.activeFilterCount > 0,
                         featureHost: shell.featureHost,

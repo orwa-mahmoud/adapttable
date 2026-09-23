@@ -2648,6 +2648,7 @@ function AntdTableBody<TRow>({
                       labels,
                       onPrint: props.onPrint,
                       onExport: exportHandler.onExportCsv,
+                      exportLabel: exportHandler.exportLabel,
                       onClearFilters: c.clearFilters,
                       hasFilters: c.activeFilterCount > 0,
                       featureHost,

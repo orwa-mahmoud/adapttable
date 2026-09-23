@@ -120,6 +120,7 @@ export function useCommandPalette(
               labels: options.labels,
               onPrint: options.onPrint,
               onExport: options.onExport,
+              exportLabel: options.exportLabel,
               onClearFilters: options.onClearFilters,
               hasFilters: options.hasFilters,
             }),
@@ -136,6 +137,7 @@ export function useCommandPalette(
       options.labels,
       options.onPrint,
       options.onExport,
+      options.exportLabel,
       options.onClearFilters,
       options.hasFilters,
     ]
