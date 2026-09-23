@@ -84,9 +84,8 @@ describe("keyboard flows (unstyled)", () => {
     fireEvent.click(nameSort);
     expect(nameSort.closest("th")).toHaveAttribute("aria-sort", "ascending");
 
-    // …and a shift-activation chains the second: BOTH headers now report
-    // sorted state, with data-sorted agreeing with aria-sort.
-    fireEvent.click(nameSort, { shiftKey: true });
+    // …and a shift-activation chains the second behind it: BOTH headers now
+    // report sorted state, with data-sorted agreeing with aria-sort.
     fireEvent.click(qtySort, { shiftKey: true });
     const nameTh = nameSort.closest("th")!;
     const qtyTh = qtySort.closest("th")!;
