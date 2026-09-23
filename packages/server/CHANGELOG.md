@@ -1,5 +1,17 @@
 # @adapttable/server
 
+## 0.4.0
+
+### Minor Changes
+
+- cc920fc: `groupByKeys` is opt-in for every schema: `parseTableQuery` lists every grouping key only when the schema sets `groupByKeys: true`. Schemas with `columns: "any"` or declared `filters` now return `groupByKeys` only with the flag; `groupBy` is unchanged.
+
+### Patch Changes
+
+- Updated dependencies [3cf4297]
+- Updated dependencies [037c2a5]
+  - @adapttable/core@3.2.0
+
 ## 0.3.0
 
 ### Minor Changes

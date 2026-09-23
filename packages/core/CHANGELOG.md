@@ -1,5 +1,15 @@
 # @adapttable/core
 
+## 3.2.0
+
+### Minor Changes
+
+- 3cf4297: `mobileIdentityColumns` is deprecated and removed in v4: it never changed which fields a card shows, and `hideOnMobile` decides that. The prop and the `useDataTable` option are still accepted and ignored, and the third argument of `visibleColumns` is deprecated with them.
+
+### Patch Changes
+
+- 037c2a5: Row grouping follows the column's locale path: with `locale="ar"`, a column declaring `i18n: { ar: "teamAr" }` groups by `teamAr` and heads each group in Arabic, matching its cells and sort. A column's own `groupValue` and `sortValue` still decide the bucket first.
+
 ## 3.1.0
 
 ### Minor Changes

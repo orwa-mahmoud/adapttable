@@ -1,5 +1,22 @@
 # @adapttable/unstyled
 
+## 3.2.0
+
+### Minor Changes
+
+- 06c3694: `standardFeatures({ findButton: true })` draws the toolbar Find control; without it the preset is unchanged. Ctrl/Cmd+F opens find after a click inside the table, even on a cell that takes no focus, and a click elsewhere hands the shortcut back to the browser. With `virtualize()`, find brings a match outside the window into view; Ant Design’s desktop table virtualizes through antd and is not covered.
+
+### Patch Changes
+
+- Updated dependencies [3cf4297]
+- Updated dependencies [5e66063]
+- Updated dependencies [06c3694]
+- Updated dependencies [14ba2ea]
+- Updated dependencies [037c2a5]
+- Updated dependencies [1039051]
+  - @adapttable/core@3.2.0
+  - @adapttable/react@1.2.0
+
 ## 3.1.0
 
 ### Minor Changes

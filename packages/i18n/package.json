@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/i18n",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Locale presets for 18 languages plus RTL direction helpers for AdaptTable — first-class right-to-left and Arabic support.",
   "keywords": [
     "react",
@@ -56,7 +56,7 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "dependencies": {
-    "@adapttable/core": "3.1.0"
+    "@adapttable/core": "3.2.0"
   },
   "devDependencies": {
     "react": "^19.2.8",
