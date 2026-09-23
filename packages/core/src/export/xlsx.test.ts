@@ -166,3 +166,51 @@ describe("xlsxWriter", () => {
     expect(sheet).toContain("Report");
   });
 });
+
+describe("text XML cannot carry", () => {
+  /** The worksheet part, parsed as XML the way a spreadsheet reader does. */
+  function parsedSheet(bytes: Uint8Array): Document {
+    const sheet = /<worksheet[\s\S]*?<\/worksheet>/.exec(textOf(bytes))?.[0];
+    expect(sheet).toBeDefined();
+    return new DOMParser().parseFromString(sheet!, "application/xml");
+  }
+
+  it("drops U+FFFE, U+FFFF and lone surrogates, so the sheet parses", () => {
+    const bytes = buildTableXlsx({
+      rows: [{ id: "1", text: "a￾b￿c\uD800d" }],
+      columns: [
+        { key: "text", header: "Text", exportValue: (row) => row.text },
+      ],
+    });
+    const sheet = parsedSheet(bytes);
+
+    expect(sheet.getElementsByTagName("parsererror")).toHaveLength(0);
+    expect(sheet.getElementsByTagName("t")[1]?.textContent).toBe("abcd");
+  });
+
+  it("keeps Arabic, emoji, tabs and line breaks", () => {
+    const text = "مرحبا 🙂\tone\ntwo\r";
+    const bytes = buildTableXlsx({
+      rows: [{ id: "1", text }],
+      columns: [
+        { key: "text", header: "Text", exportValue: (row) => row.text },
+      ],
+    });
+    const sheet = parsedSheet(bytes);
+
+    expect(sheet.getElementsByTagName("parsererror")).toHaveLength(0);
+    // A parser reads a carriage return back as a line feed, as XML requires;
+    // the written sheet still carries it.
+    expect(sheet.getElementsByTagName("t")[1]?.textContent).toBe(
+      text.replace("\r", "\n")
+    );
+    expect(textOf(bytes)).toContain(text);
+  });
+
+  it("cuts a long sheet name without splitting an emoji", () => {
+    const name = `${"x".repeat(30)}🙂`;
+    const safe = safeSheetName(name);
+    expect(safe).toBe("x".repeat(30));
+    expect(safeSheetName("tab￾name")).toBe("tabname");
+  });
+});
