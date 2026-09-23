@@ -796,9 +796,7 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
         silent?: boolean;
     }) => void;
     readonly discardCandidate: () => void;
-    // (undocumented)
     readonly dispatch: (operation: TableOperation) => void;
-    // (undocumented)
     readonly dispose: () => void;
     readonly invalidate: (axes: readonly TableRevisionAxis[], next?: {
         readonly data?: readonly TRow[];
@@ -806,15 +804,12 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
     }, options?: {
         silent?: boolean;
     }) => void;
-    // (undocumented)
     readonly rowKey: (row: TRow) => string;
     readonly stageCandidate: (patch: TableEngineConfigPatch<TRow>, next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
     }) => void;
-    // (undocumented)
     readonly subscribe: (axes: readonly TableRevisionAxis[] | "all", listener: (revisions: TableRevisions) => void) => () => void;
-    // (undocumented)
     readonly tableId: string;
 }
 
@@ -1249,30 +1244,19 @@ export type TableRowScope = "visible" | "page" | "full";
 
 // @public
 export interface TableSnapshot<TRow = unknown> {
-    // (undocumented)
     readonly capabilities: TableSourceCapabilities;
-    // (undocumented)
     readonly columns: readonly ColumnMetadata<TRow>[];
-    // (undocumented)
     readonly extra: ExtraFilters;
-    // (undocumented)
     readonly groupBy: string | undefined;
     readonly lastPage: number;
-    // (undocumented)
     readonly limit: number;
     readonly page: number;
     readonly requestedPage: number;
-    // (undocumented)
     readonly revisions: TableRevisions;
-    // (undocumented)
     readonly search: string;
-    // (undocumented)
     readonly selectedIds: readonly string[];
-    // (undocumented)
     readonly sortBy: string | undefined;
-    // (undocumented)
     readonly sortDir: SortDirection | undefined;
-    // (undocumented)
     readonly total: number;
 }
 

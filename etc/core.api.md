@@ -189,7 +189,7 @@ export function allPinnedSummaryEntries<TRow>(pinnedRows: PinnedRows<TRow> | und
 // @public
 export function appendByKey<T>(first: readonly T[], second: readonly T[], keyOf: (item: T) => string): T[];
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const applyCollapsedColumnGroups: typeof applyCollapsedColumnGroups_2;
 
 // @public
@@ -287,10 +287,10 @@ export function bindFeatureHostFn<Args extends unknown[], R>(host: FeatureHostSt
 // @public
 export function bindMobileCardList(virtualScrollRef: ((node: HTMLElement | null) => void) | undefined, extra?: ElementRef<HTMLElement>): (node: HTMLElement | null) => void;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type BodyCell<TRow> = TableBodyCell<TRow>;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const bodyCellsHaveRowSpan: typeof bodyCellsHaveRowSpan_2;
 
 // @public
@@ -371,7 +371,7 @@ export function buildTableCsv<TRow>(options: {
     context?: ExportContext<TRow>;
 }): string;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const buildTableXlsx: typeof buildTableXlsx_2;
 
 // @public
@@ -522,7 +522,7 @@ export function cellRangeIndices(range: CellRange): {
 // @public
 export function cellRangeSize(range: CellRange | null): number;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const cellsForRow: typeof cellsForRow_2;
 
 // @public
@@ -531,7 +531,7 @@ export function cellSortValue<TRow>(row: TRow, column: ColumnMetadata<TRow>, loc
 // @public
 export type CellSpanAppearance = "merged" | "plain";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const cellSpanMark: typeof cellSpanMark_2;
 
 // @public
@@ -605,16 +605,16 @@ export interface CollectFeatureNoticesInput<TRow = unknown> {
 // @public
 export type ColorScheme = "light" | "dark" | "auto";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const COLUMN_GROUP_ID_SEP: typeof COLUMN_GROUP_ID_SEP_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const COLUMN_GROUP_RENDER_PREFIX: typeof COLUMN_GROUP_RENDER_PREFIX_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const COLUMN_GROUP_STUB_PREFIX: typeof COLUMN_GROUP_STUB_PREFIX_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const COLUMN_GROUP_STUB_WIDTH: typeof COLUMN_GROUP_STUB_WIDTH_2;
 
 // @public
@@ -652,13 +652,13 @@ export interface ColumnGroupDef<TRow> {
     readonly marryChildren?: boolean;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const columnGroupHeaderCaption: typeof columnGroupHeaderCaption_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const columnGroupId: typeof columnGroupId_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const columnGroupPath: typeof columnGroupPath_2;
 
 // @public
@@ -676,7 +676,7 @@ export interface ColumnGroupRecord<TRow> {
 // @public
 export type ColumnGroupShow = "open" | "closed" | "always";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const columnGroupStubStyle: typeof columnGroupStubStyle_2;
 
 // @public
@@ -739,7 +739,7 @@ export interface ColumnMenuActionContext<TRow = unknown> {
 // @public
 export type ColumnMenuActionFactory<TRow = unknown> = (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const columnMenuActions: typeof columnMenuActions_2;
 
 // @public
@@ -1581,25 +1581,25 @@ export interface ExportWriter {
 // @public
 export function extendCellRange(range: CellRange | null, head: GridCell, fallbackAnchor: GridCell): CellRange;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const EXTRA_OVER_SPAN_ROW_STYLE: typeof EXTRA_OVER_SPAN_ROW_STYLE_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const EXTRA_OVER_SPAN_STYLE: typeof EXTRA_OVER_SPAN_STYLE_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const EXTRA_ROW_PARTS: typeof EXTRA_ROW_PARTS_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const extraCountBeforeRowIds: typeof extraCountBeforeRowIds_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const extraCoveredTableSlots: typeof extraCoveredTableSlots_2;
 
 // @public
 export type ExtraFilters = Record<string, FilterValue>;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const extraHostFillStyle: typeof extraHostFillStyle_2;
 
 // @public
@@ -1616,10 +1616,10 @@ export type ExtraRowKind = "separator" | "fullWidth";
 // @public
 export function extraRowsArmed(extraRows: readonly ExtraRow[] | undefined): boolean;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const extraRowsForSection: typeof extraRowsForSection_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const extraUncoveredColSpans: typeof extraUncoveredColSpans_2;
 
 // @public
@@ -1753,7 +1753,7 @@ export interface FilterAiOptions {
 // @public
 export type FilterChromeMode = "popover" | "drawer" | "header";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const filterColumnMenuRows: typeof filterColumnMenuRows_2;
 
 // @public
@@ -1921,7 +1921,7 @@ export interface FindMatchesOptions<TRow> {
 // @public
 export function fittedTableStyle(fitColumns?: boolean): CssProperties | undefined;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const flattenColumnTree: typeof flattenColumnTree_2;
 
 // @public
@@ -2199,16 +2199,16 @@ export type GroupedFlatEntry<TRow> = {
 // @public
 export type GroupedHeaderAlign = "start" | "center" | "end";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const groupedHeaderAlign: typeof groupedHeaderAlign_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const groupedHeaderCellStyle: typeof groupedHeaderCellStyle_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const groupedHeaderChildRule: typeof groupedHeaderChildRule_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const groupedHeaderLabelStyle: typeof groupedHeaderLabelStyle_2;
 
 // @public
@@ -2347,25 +2347,25 @@ export function hasEditableColumns(columns: readonly EditableColumnLike[]): bool
 // @public
 export function hasGroupingColumnDrag(event: Pick<DragEvent, "dataTransfer">): boolean;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type HeaderGroupCell = HeaderGroupCell_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const headerGroupRow: typeof headerGroupRow_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const headerGroupRows: typeof headerGroupRows_2;
 
 // @public
 export type HeaderSelectionState = "all" | "some" | "none";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const hideAllColumns: typeof hideAllColumns_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export type HtmlGroupedHeaderCell = HtmlGroupedHeaderCell_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const htmlGroupedHeaderPlan: typeof htmlGroupedHeaderPlan_2;
 
 // @public
@@ -2424,16 +2424,16 @@ export function incrementalViewConfig<TRow>(view: IncrementalView<TRow>): Increm
 // @public
 export function incrementalViewOf<TRow>(rows: readonly TRow[]): IncrementalView<TRow> | undefined;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const inflateBodyCellRowSpans: typeof inflateBodyCellRowSpans_2;
 
 // @public
 export function initialOperation(resolved: ResolvedAggregatable, source?: AggregationSourceSupport): string;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const insertExtraRows: typeof insertExtraRows_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const insertExtrasBeforeRows: typeof insertExtrasBeforeRows_2;
 
 // @public
@@ -2464,13 +2464,13 @@ export function isCellEditable<TRow>(column: EditableColumnLike<TRow>, row: TRow
 // @public
 export function isColumnGroup<TRow>(column: ColumnInput<TRow>): column is ColumnGroupDef<TRow>;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const isColumnGroupRenderKey: typeof isColumnGroupRenderKey_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const isColumnGroupStubKey: typeof isColumnGroupStubKey_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const isColumnGroupSummaryKey: typeof isColumnGroupSummaryKey_2;
 
 // @public
@@ -2494,7 +2494,7 @@ export function isEmptyFilterValue(value: FilterValue): boolean;
 // @public
 export function isEmptyRowValue(value: unknown): boolean;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const isExtraEntry: typeof isExtraEntry_2;
 
 // @public
@@ -2735,7 +2735,7 @@ export interface OpenRowPatchStreamOptions {
     websocket?: string;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const orderedCardEntries: typeof orderedCardEntries_2;
 
 // @public
@@ -2911,7 +2911,7 @@ export interface PinLeads {
     start?: number;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const PINNED_BOTTOM_PART: typeof PINNED_BOTTOM_PART_2;
 
 // @public
@@ -2923,7 +2923,7 @@ export const PINNED_SUMMARY_KEY_PREFIX = "adapttable:pinned-summary";
 // @public
 export const PINNED_SUMMARY_TOP_PART = "pinned-summary-top";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const PINNED_TOP_PART: typeof PINNED_TOP_PART_2;
 
 // @public
@@ -2940,10 +2940,10 @@ export function pinnedCellStyle(offset: PinOffset | undefined, zIndex?: number, 
 // @public
 export function pinnedColumnWidth(column: WidthColumn, widths?: Readonly<Record<string, number>>): number;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const pinnedRowCellStyle: typeof pinnedRowCellStyle_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const pinnedRowPart: typeof pinnedRowPart_2;
 
 // @public
@@ -2952,10 +2952,10 @@ export interface PinnedRows<TRow = unknown> {
     readonly top?: readonly TRow[];
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const pinnedRowSticky: typeof pinnedRowSticky_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const pinnedRowStickyStyle: typeof pinnedRowStickyStyle_2;
 
 // @public
@@ -3327,13 +3327,13 @@ export function renderRegisteredFilter<TRow>(def: FilterDef<TRow>, source: Filte
 // @public
 export const REORDER_COLUMN_KEY = "reorder";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const REORDER_COLUMN_WIDTH: typeof REORDER_COLUMN_WIDTH_2;
 
 // @public
 export function replaceFilterTreeNode(tree: QueryFilterGroup, path: readonly number[], next: FilterTreeNode): QueryFilterGroup;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const resetColumnLayout: typeof resetColumnLayout_2;
 
 // @public
@@ -3434,10 +3434,10 @@ export function resolvePinnedRows<TRow>(pinnedRows: PinnedRows<TRow> | undefined
 // @public
 export function resolveRelativeRange(raw: string | undefined, now?: number | Date): RelativeDateRange | undefined;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const resolveRowHeight: typeof resolveRowHeight_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const resolveRowStyle: typeof resolveRowStyle_2;
 
 // @public
@@ -3674,7 +3674,7 @@ export interface RowPinLookup {
 // @public
 export type RowPinSide = "top" | "bottom";
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowPinSignature: typeof rowPinSignature_2;
 
 // @public
@@ -3693,7 +3693,7 @@ export interface RowReorderDigest {
     pendingMove: unknown;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowReorderDropStyle: typeof rowReorderDropStyle_2;
 
 // @public
@@ -3704,16 +3704,16 @@ export interface RowReorderOptions<TRow> {
     readonly onTreeMove?: RowTreeMoveHandler<TRow>;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowReorderSignature: typeof rowReorderSignature_2;
 
 // @public
 export function rowsExcludingFilter<TRow>(rows: readonly TRow[], extra: ExtraFilters, key: string, filterFn: (row: TRow, extra: ExtraFilters) => boolean): readonly TRow[];
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowSourceIndex: typeof rowSourceIndex_2;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowSpanSignature: typeof rowSpanSignature_2;
 
 // @public
@@ -3732,7 +3732,7 @@ export type RowStyle<TRow> = (row: TRow, index: number) => CssProperties | undef
 // @public
 export function rowStyleArmed(rowStyle: RowStyle<unknown> | undefined, rowHeight: RowHeight<unknown> | undefined): boolean;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const rowStyleSignature: typeof rowStyleSignature_2;
 
 // @public
@@ -3835,7 +3835,7 @@ export function setFilterTreeCombinator(tree: QueryFilterGroup, path: readonly n
 // @public
 export function setMeasureAgg(config: PivotConfig, index: number, agg: AggregateName): PivotConfig;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const showAllColumns: typeof showAllColumns_2;
 
 // @public
@@ -3952,9 +3952,7 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
         silent?: boolean;
     }) => void;
     readonly discardCandidate: () => void;
-    // (undocumented)
     readonly dispatch: (operation: TableOperation) => void;
-    // (undocumented)
     readonly dispose: () => void;
     readonly invalidate: (axes: readonly TableRevisionAxis[], next?: {
         readonly data?: readonly TRow[];
@@ -3962,15 +3960,12 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
     }, options?: {
         silent?: boolean;
     }) => void;
-    // (undocumented)
     readonly rowKey: (row: TRow) => string;
     readonly stageCandidate: (patch: TableEngineConfigPatch<TRow>, next?: {
         readonly data?: readonly TRow[];
         readonly columns?: readonly ColumnMetadata<TRow>[];
     }) => void;
-    // (undocumented)
     readonly subscribe: (axes: readonly TableRevisionAxis[] | "all", listener: (revisions: TableRevisions) => void) => () => void;
-    // (undocumented)
     readonly tableId: string;
 }
 
@@ -4468,30 +4463,19 @@ export type TableRowScope = "visible" | "page" | "full";
 
 // @public
 export interface TableSnapshot<TRow = unknown> {
-    // (undocumented)
     readonly capabilities: TableSourceCapabilities;
-    // (undocumented)
     readonly columns: readonly ColumnMetadata<TRow>[];
-    // (undocumented)
     readonly extra: ExtraFilters;
-    // (undocumented)
     readonly groupBy: string | undefined;
     readonly lastPage: number;
-    // (undocumented)
     readonly limit: number;
     readonly page: number;
     readonly requestedPage: number;
-    // (undocumented)
     readonly revisions: TableRevisions;
-    // (undocumented)
     readonly search: string;
-    // (undocumented)
     readonly selectedIds: readonly string[];
-    // (undocumented)
     readonly sortBy: string | undefined;
-    // (undocumented)
     readonly sortDir: SortDirection | undefined;
-    // (undocumented)
     readonly total: number;
 }
 
@@ -4597,7 +4581,7 @@ export function toAggregateOrdered(value: AggregateOrderedValue): {
 // @public
 export function toFormulaValue(raw: unknown): FormulaValue;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const toggleCollapsedColumnGroup: typeof toggleCollapsedColumnGroup_2;
 
 // @public
@@ -4643,7 +4627,7 @@ export interface TreeShape<TRow> {
     hasChildren?: (row: TRow) => boolean;
 }
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const unpinAllColumns: typeof unpinAllColumns_2;
 
 // @public
@@ -4786,7 +4770,7 @@ export function writeSortLevels(params: URLSearchParams, levels: readonly {
     dir: SortDirection;
 }[], prefix?: string): void;
 
-// @public @deprecated (undocumented)
+// @public @deprecated
 export const xlsxWriter: typeof xlsxWriter_2;
 
 // (No @packageDocumentation comment for this package)
