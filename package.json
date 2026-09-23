@@ -40,6 +40,7 @@
     "verify:release": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run check:api-contract && pnpm run check:package-split && pnpm run typecheck && pnpm run test:coverage && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget && pnpm run consumer:harness && pnpm run migrate:rehearse && pnpm run peer:floors",
     "publint": "pnpm --filter \"./packages/*\" exec publint --strict",
     "smoke:dist": "node scripts/smoke-dist.mjs",
+    "perf:v3": "node scripts/v3-perf.mjs",
     "budget": "node scripts/bundle-budget.mjs && node scripts/check-adapter-feature-isolation.mjs && node scripts/ai-isolation.mjs",
     "check": "node scripts/run-parallel.mjs check:static test:coverage && pnpm run build && pnpm run check:packaged",
     "prepare": "husky",

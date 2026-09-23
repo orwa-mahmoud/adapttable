@@ -340,7 +340,10 @@ describe("values", () => {
     expect(formulaDisplay(toFormulaValue(true))).toBe("TRUE");
     expect(formulaDisplay(toFormulaValue(false))).toBe("FALSE");
     expect(formulaDisplay(toFormulaValue(7))).toBe("7");
-    expect(formulaDisplay(toFormulaValue(Number.NaN))).toBe("0");
+    // A number that is not one is an error, never a zero that looks real.
+    expect(formulaDisplay(toFormulaValue(Number.NaN))).toBe(
+      FORMULA_ERRORS.value
+    );
     // Not "[object Object]": that is a rendering of nobody having decided.
     expect(formulaDisplay(toFormulaValue({ a: 1 }))).toBe(FORMULA_ERRORS.value);
     expect(formulaDisplay(toFormulaValue(new Date(86400000)))).toBe("86400000");

@@ -225,6 +225,7 @@ function DesktopRowBase<TRow>(
     focusIndex,
     edgeRowPin,
     measureRef,
+    detailMeasureRef,
     rowDomProps,
     bodyPinStyle,
     dir,
@@ -410,7 +411,7 @@ function DesktopRowBase<TRow>(
         )}
       </TableRow>
       {expandable && expanded && (
-        <TableRow>
+        <TableRow ref={detailMeasureRef}>
           <TableCell colSpan={columnSpan}>{renderDetail(row)}</TableCell>
         </TableRow>
       )}

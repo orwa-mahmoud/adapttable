@@ -7,9 +7,15 @@
  * demo (search, sort, pager, column menu) and the packed adapter-root
  * fixtures, then holds the numbers against `scripts/v3-perf-baseline.json`.
  *
+ * A baseline belongs to the machine it was measured on: `--baseline` names
+ * another one, which the nightly workflow uses for the Linux runner
+ * (`scripts/v3-perf-baseline.linux.json`). A baseline that does not exist yet
+ * is written by the run that asks for it.
+ *
  *   node scripts/v3-perf.mjs
  *   node scripts/v3-perf.mjs --update
  *   node scripts/v3-perf.mjs --port 4321
+ *   node scripts/v3-perf.mjs --baseline scripts/v3-perf-baseline.linux.json
  */
 import { spawn } from "node:child_process";
 import {
@@ -29,12 +35,15 @@ import { measure } from "./bundle-budget.mjs";
 import { FIXTURES } from "./consumer-fixtures.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const BASELINE_PATH = join(ROOT, "scripts/v3-perf-baseline.json");
 const args = process.argv.slice(2);
 const flag = (name, fallback) => {
   const i = args.indexOf(`--${name}`);
   return i === -1 ? fallback : (args[i + 1] ?? true);
 };
+const BASELINE_PATH = join(
+  ROOT,
+  String(flag("baseline", "scripts/v3-perf-baseline.json"))
+);
 const PORT = flag("port", "4321");
 const UPDATE = args.includes("--update");
 const JSON_OUT = args.includes("--json");
@@ -293,7 +302,7 @@ try {
   const parseBuildMs = await measureParseBuild();
   const interaction = await sampleInteraction();
   const current = {
-    measuredAt: "2026-09-02",
+    measuredAt: new Date().toISOString().slice(0, 10),
     method:
       "rolldown parse of packed adapter-root fixtures; Playwright against /tailwind/ for first render, sort, page, search and column-menu first-open. React and the kit stay external in the parse fixtures.",
     parseBuildMs,

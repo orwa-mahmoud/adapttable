@@ -1743,6 +1743,7 @@ export interface DesktopRowWiring<TRow> {
     columnSpan: number;
     columnWidths?: Readonly<Record<string, number>>;
     confirm: ConfirmHandler;
+    detailMeasureRef?: (element: Element | null) => void;
     edgeRowPin: ReturnType<typeof pinnedRowCellStyle>;
     editing: EditableCellEditing<TRow> | undefined;
     editingSignature: string | null;

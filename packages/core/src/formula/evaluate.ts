@@ -116,7 +116,8 @@ export function isFormulaError(value: FormulaValue): boolean {
  * Turn a raw field off a row into a formula value.
  *
  * Anything the engine has no kind for — an object, a function — is `#VALUE!`
- * rather than its stringification. `[object Object]` in a cell is not a
+ * rather than its stringification, and so is a number that is not one:
+ * `NaN`, `Infinity` or an invalid date, which zero would quietly stand in for. `[object Object]` in a cell is not a
  * rendering of the data, it is a rendering of the fact that nobody decided
  * what to do, and it would go on to be concatenated into totals and exports.
  *
@@ -127,13 +128,11 @@ export function isFormulaError(value: FormulaValue): boolean {
  */
 export function toFormulaValue(raw: unknown): FormulaValue {
   if (raw === null || raw === undefined || raw === "") return FORMULA_BLANK;
-  if (typeof raw === "number") {
-    return formulaNumber(Number.isFinite(raw) ? raw : 0);
-  }
+  if (typeof raw === "number") return realResult(raw);
   if (typeof raw === "boolean") return formulaBoolean(raw);
   if (typeof raw === "string") return formulaText(raw);
   // A date is a number in a spreadsheet, and its time is the number it is.
-  if (raw instanceof Date) return formulaNumber(raw.getTime());
+  if (raw instanceof Date) return realResult(raw.getTime());
   return formulaError(FORMULA_ERRORS.value);
 }
 
@@ -229,7 +228,7 @@ function extreme(
 function mean(numbers: readonly number[]): FormulaValue {
   // Zero would be a number someone acts on; an error is one they check.
   if (numbers.length === 0) return formulaError(FORMULA_ERRORS.divideByZero);
-  return formulaNumber(
+  return realResult(
     numbers.reduce((total, n) => total + n, 0) / numbers.length
   );
 }
@@ -241,13 +240,13 @@ function round(value: FormulaValue, places: FormulaValue): FormulaValue {
   const b = asNumber(places);
   if (b.kind !== "number") return b;
   const factor = 10 ** b.value;
-  return formulaNumber(Math.round(a.value * factor) / factor);
+  return realResult(Math.round(a.value * factor) / factor);
 }
 
 /** Apply a unary numeric function, propagating an error operand. */
 function numeric(value: FormulaValue, fn: (n: number) => number): FormulaValue {
   const n = asNumber(value);
-  return n.kind === "number" ? formulaNumber(fn(n.value)) : n;
+  return n.kind === "number" ? realResult(fn(n.value)) : n;
 }
 
 /** A finite real result, or the spreadsheet error for an impossible number. */
@@ -301,7 +300,7 @@ const FUNCTIONS: Record<
 > = {
   SUM: (args) =>
     firstError(args) ??
-    formulaNumber(numbersIn(args).reduce((total, n) => total + n, 0)),
+    realResult(numbersIn(args).reduce((total, n) => total + n, 0)),
   MIN: (args) => firstError(args) ?? extreme(numbersIn(args), Math.min),
   MAX: (args) => firstError(args) ?? extreme(numbersIn(args), Math.max),
   AVG: (args) => firstError(args) ?? mean(numbersIn(args)),
@@ -369,17 +368,17 @@ function compareResult(op: string, order: number): FormulaValue {
 function arithmetic(op: string, a: number, b: number): FormulaValue {
   switch (op) {
     case "+":
-      return formulaNumber(a + b);
+      return realResult(a + b);
     case "-":
-      return formulaNumber(a - b);
+      return realResult(a - b);
     case "*":
-      return formulaNumber(a * b);
+      return realResult(a * b);
     default:
       // Division. A zero divisor is the error a spreadsheet is famous for,
       // and returning Infinity instead would be a number nobody can act on.
       return b === 0
         ? formulaError(FORMULA_ERRORS.divideByZero)
-        : formulaNumber(a / b);
+        : realResult(a / b);
   }
 }
 

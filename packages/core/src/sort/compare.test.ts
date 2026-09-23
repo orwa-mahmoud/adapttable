@@ -248,10 +248,16 @@ describe("sortRowsMulti", () => {
       Number.NaN,
       -3,
       0,
+      2,
       7,
+      10,
       "alpha",
       "beta",
       "",
+      "11",
+      "2",
+      true,
+      false,
     ] as const;
     for (const x of fixture) {
       for (const y of fixture) {
@@ -265,6 +271,17 @@ describe("sortRowsMulti", () => {
         }
       }
     }
+  });
+
+  it('orders mixed types by type, so 2 < 10 < "11" holds in one direction', () => {
+    expect(compareValues(2, 10)).toBeLessThan(0);
+    expect(compareValues(10, "11")).toBeLessThan(0);
+    expect(compareValues(2, "11")).toBeLessThan(0);
+    expect(compareValues(true, 0)).toBeLessThan(0);
+    const values = [10, "11", 2, "2", true];
+    const once = [...values].sort(compareValues);
+    expect([...values].reverse().sort(compareValues)).toEqual(once);
+    expect(once).toEqual([true, 2, 10, "11", "2"]);
   });
 
   it("level-two ordering applies when level one ties on null-ish or NaN", () => {

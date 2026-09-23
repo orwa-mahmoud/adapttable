@@ -10,8 +10,10 @@ function sortsLast(value: SortableValue): boolean {
 
 /**
  * Compare two sortable primitives for ascending order. `null` / `undefined` /
- * `NaN` sort last. Numbers compare numerically; everything else compares via
- * locale-aware string comparison.
+ * `NaN` sort last. Values of one type compare as that type — numbers
+ * numerically, booleans false-first, strings locale-aware. Values of different
+ * types order by type — booleans, then numbers, then strings — so a column
+ * that mixes `10` and `"11"` still has one consistent order.
  *
  * @returns Negative if `a < b`, positive if `a > b`, `0` if equal.
  *
@@ -28,11 +30,20 @@ export function compareValues(a: SortableValue, b: SortableValue): number {
     return aLast ? 1 : -1;
   }
   if (a === b) return 0;
+  const rank = typeRank(a) - typeRank(b);
+  if (rank !== 0) return rank;
   if (typeof a === "number" && typeof b === "number") return a - b;
   if (typeof a === "boolean" && typeof b === "boolean") {
     return Number(a) - Number(b);
   }
   return String(a).localeCompare(String(b));
+}
+
+/** Where an orderable value's type sits when two values' types differ. */
+function typeRank(value: SortableValue): number {
+  if (typeof value === "boolean") return 0;
+  if (typeof value === "number") return 1;
+  return 2;
 }
 
 /**

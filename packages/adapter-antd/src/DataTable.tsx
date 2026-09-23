@@ -1163,6 +1163,16 @@ function AntdGroupingWindow<TRow>({
       entries: windowGroupedEntries(grouping.entries, indices),
     });
   };
+  const finish = (window: KeyedWindow) => (
+    <>
+      {windowed(window.indices)}
+      <KeyedScrollRegistration
+        target={scrollTarget}
+        keys={keys}
+        keyed={window}
+      />
+    </>
+  );
   const slotProps: KeyedWindowSlotProps = {
     keys,
     enabled: Boolean(props.virtualize) && eligible,
@@ -1171,16 +1181,7 @@ function AntdGroupingWindow<TRow>({
       : 56,
     overscan: props.virtualOverscan,
     scrollMargin: props.virtualScrollMargin,
-    children: (window) => (
-      <>
-        {windowed(window.indices)}
-        <KeyedScrollRegistration
-          target={scrollTarget}
-          keys={keys}
-          keyed={window}
-        />
-      </>
-    ),
+    children: finish,
   };
   return filled ? (
     <FeatureSlot slot={KEYED_WINDOW} props={slotProps} />

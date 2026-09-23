@@ -99,8 +99,11 @@ a second estimate. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable) ·
 
 Interaction timings on the Tailwind showcase (first render, sort, page,
 search, column-menu open, CLS) are locked in
-`scripts/v3-perf-baseline.json`. They are a regression gate, not a
-promise to an application.
+`scripts/v3-perf-baseline.json`. The nightly workflow (`e2e-nightly.yml`)
+measures the production showcase on its Linux runner and fails when one of
+them regresses by more than 25% (or 80 ms) against that runner's own
+baseline; `pnpm perf:v3` runs the same check locally. They are a regression
+gate, not a promise to an application.
 
 ## Browser, SSR, and the e2e gate
 

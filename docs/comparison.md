@@ -28,8 +28,8 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation()`, and paste and fill write through editable columns and the composed `editing()` handler — the channel inline editing uses — unless `onCellPaste` / `onCellFill` take the batch whole; cut reports its range to `onCellCut`. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 70–79 kB min+gzip (measured
-2026-09-23 from packed fixtures; React and the kit stay external). Competitor
+A plain AdaptTable adapter `DataTable` is 70–80 kB min+gzip (measured
+2026-09-24 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of
 the grid: [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
