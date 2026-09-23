@@ -338,7 +338,7 @@ export interface GroupingExtras<TRow> extends Omit<
   groupAggregates?: (rows: readonly TRow[]) => unknown;
   /** Order the groups themselves. */
   groupSort?: GroupSort<TRow>;
-  /** Keep only the groups this accepts — each with its key, count and rows. */
+  /** Keep only the groups this accepts — each with its value, label and rows. */
   groupFilter?: (group: GroupNode<TRow>) => boolean;
 }
 

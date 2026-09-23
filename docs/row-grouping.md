@@ -688,19 +688,19 @@ confirmation, or `"auto"` for an immediate host write. See
 empty user-configurable panel, or pass a column key / ordered list. Companion
 options go in the second argument:
 
-| Field / prop                | Type                                                            | Default | Description                                                                                      |
-| --------------------------- | --------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------ |
-| `groupBy` (1st arg)         | `string \| readonly string[]`                                   | `[]`    | Initial ordered grouping keys. The panel, composed column menu, URL, and source can change them. |
-| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —       | Controlled change channel; falls back to `source.setGroupBy`.                                    |
-| `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —       | Per-group cells — **same signature as `summaryRow`**. Omit for headers without subtotals.        |
-| `groupSort`                 | `GroupSort<TRow>`                                               | —       | `"label"`, `"label-desc"`, `"count"`, `"count-desc"`, or `(a, b) => number` over `GroupNode`s.   |
-| `groupFilter`               | `(group: GroupNode<TRow>) => boolean`                           | —       | Keep only the groups this accepts — each group with its `key`, `count` and `leafRows`.           |
-| `groupFooters`              | `boolean`                                                       | `false` | Close every group with a footer row carrying its aggregates.                                     |
-| `groupPageSize`             | `number`                                                        | —       | Top-level groups shown before a "Show more groups" row.                                          |
-| `groupRowPageSize`          | `number`                                                        | —       | Rows shown per group before a "Show more in this group" row.                                     |
-| `onGroupLoadMore`           | `(groupKey: string) => void`                                    | —       | Server tier: fetch the rest of a group.                                                          |
-| `collapsedGroupIds`         | `readonly string[]`                                             | —       | Controlled collapsed group keys (ephemeral — not URL-synced).                                    |
-| `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —       | Controlled collapse channel; uncontrolled mode uses internal state.                              |
+| Field / prop                | Type                                                            | Default | Description                                                                                       |
+| --------------------------- | --------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------- |
+| `groupBy` (1st arg)         | `string \| readonly string[]`                                   | `[]`    | Initial ordered grouping keys. The panel, composed column menu, URL, and source can change them.  |
+| `onGroupByChange`           | `(groupBy: readonly string[]) => void`                          | —       | Controlled change channel; falls back to `source.setGroupBy`.                                     |
+| `groupAggregates`           | `(rows: readonly TRow[]) => Partial<Record<string, ReactNode>>` | —       | Per-group cells — **same signature as `summaryRow`**. Omit for headers without subtotals.         |
+| `groupSort`                 | `GroupSort<TRow>`                                               | —       | `"label"`, `"label-desc"`, `"count"`, `"count-desc"`, or `(a, b) => number` over `GroupNode`s.    |
+| `groupFilter`               | `(group: GroupNode<TRow>) => boolean`                           | —       | Keep only the groups this accepts — each group with its `value`, `label`, `level` and `leafRows`. |
+| `groupFooters`              | `boolean`                                                       | `false` | Close every group with a footer row carrying its aggregates.                                      |
+| `groupPageSize`             | `number`                                                        | —       | Top-level groups shown before a "Show more groups" row.                                           |
+| `groupRowPageSize`          | `number`                                                        | —       | Rows shown per group before a "Show more in this group" row.                                      |
+| `onGroupLoadMore`           | `(groupKey: string) => void`                                    | —       | Server tier: fetch the rest of a group.                                                           |
+| `collapsedGroupIds`         | `readonly string[]`                                             | —       | Controlled collapsed group keys (ephemeral — not URL-synced).                                     |
+| `onCollapsedGroupIdsChange` | `(ids: string[]) => void`                                       | —       | Controlled collapse channel; uncontrolled mode uses internal state.                               |
 
 `labels` on `DataTable` overrides group headers, panel controls, menu actions,
 aggregation names, and announcement templates.
