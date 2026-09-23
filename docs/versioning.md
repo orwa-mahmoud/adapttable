@@ -244,6 +244,14 @@ When an API is retired, it is **not** removed immediately:
 
 We never silently remove a documented public API.
 
+v3 is the one release that did not follow step 2 for its enabling props: the
+last v2 release (`@adapttable/core@2.9.0`) carried no `@deprecated` note on the
+`<DataTable>` props v3 replaced with features, and v3 removed them in the
+major. Its main-entry adapter aliases were deprecated in v2 as step 1
+describes. [Upgrading from v2](./migrate-from-v2.md) maps every removed prop
+to its feature, and `npx @adapttable/cli migrate-v3` reports each one in a
+codebase.
+
 ## Releasing
 
 Releases are produced by changesets: open a changeset describing which packages
