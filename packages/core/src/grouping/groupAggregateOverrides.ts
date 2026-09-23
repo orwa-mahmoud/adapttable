@@ -5,7 +5,6 @@ import {
 import {
   aggregate,
   AGGREGATE_NAMES,
-  type AggregateName,
   type AggregateOperationId,
   type AggregateSpec,
   CUSTOM_AGGREGATE,
@@ -162,7 +161,7 @@ function applyColumnAggregate<TRow>(
     applied.add(column.key);
     return;
   }
-  spec[column.key] = operationId as AggregateName;
+  spec[column.key] = operationId;
   applied.add(column.key);
 }
 

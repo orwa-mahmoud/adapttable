@@ -685,6 +685,14 @@ export * from "./bindingExports";
 // Adapter machinery on the main entry. Each name here shadows the same name
 // from the barrel above, so the main entry carries the notice and
 // `@adapttable/core/binding` and `@adapttable/react/adapter` do not.
+export type {
+  ColumnMenuChoice,
+  ColumnMenuChoiceOption,
+  ColumnMenuItem,
+  ColumnMenuLabels,
+  ColumnMenuRow,
+} from "./columns/columnMenuModel";
+export type { PinnedSide } from "./columns/columnMenuModel";
 export {
   /** @deprecated Import from `@adapttable/react/adapter`. */
   columnMenuActions,
@@ -699,12 +707,15 @@ export {
   /** @deprecated Import from `@adapttable/react/adapter`. */
   unpinAllColumns,
 } from "./columns/columnMenuModel";
+export type { ColumnResizeHandleProps } from "./columns/columnResize";
 export {
   /** @deprecated Import from `@adapttable/react/adapter`. */
   applyCollapsedColumnGroups,
   /** @deprecated Import from `@adapttable/react/adapter`. */
   flattenColumnTree,
 } from "./columns/columnTree";
+export type { WidthColumn } from "./columns/columnWidths";
+export type { GroupedHeaderAlign } from "./columns/headerGroups";
 export {
   /** @deprecated Import from `@adapttable/react/adapter`. */
   COLUMN_GROUP_ID_SEP,
@@ -749,6 +760,14 @@ export {
   /** @deprecated Import from `@adapttable/react/adapter`. */
   toggleCollapsedColumnGroup,
 } from "./columns/headerGroups";
+export type { ExportCsvProp } from "./export/tableCsv";
+export type { FeatureHostState } from "./features/currentHost";
+export type {
+  ColumnMenuActionFactory,
+  ContextMenuItemsFactory,
+  FilterTypeExtend,
+} from "./features/currentHost";
+export type { BuildGroupedFlatModelOptions } from "./grouping/groupRows";
 export {
   /** @deprecated Import from `@adapttable/react/adapter`. */
   bodyCellsHaveRowSpan,
@@ -821,6 +840,11 @@ export {
   /** @deprecated Import from `@adapttable/react/adapter`. */
   resolveRowHeight,
 } from "./rows/rowPresentation";
+export type {
+  FeatureNotice,
+  FeatureNoticeAppearance,
+  FeatureNoticeKind,
+} from "./state/featureNotices";
 export {
   /** @deprecated Import from `@adapttable/react/adapter`. */
   rowSourceIndex,
@@ -831,27 +855,3 @@ export {
   /** @deprecated Import from `@adapttable/core/xlsx`. */
   xlsxWriter,
 } from "./xlsx";
-export type {
-  ColumnMenuChoice,
-  ColumnMenuChoiceOption,
-  ColumnMenuItem,
-  ColumnMenuLabels,
-  ColumnMenuRow,
-} from "./columns/columnMenuModel";
-export type { PinnedSide } from "./columns/columnMenuModel";
-export type { ColumnResizeHandleProps } from "./columns/columnResize";
-export type { WidthColumn } from "./columns/columnWidths";
-export type { GroupedHeaderAlign } from "./columns/headerGroups";
-export type { ExportCsvProp } from "./export/tableCsv";
-export type { FeatureHostState } from "./features/currentHost";
-export type {
-  ColumnMenuActionFactory,
-  ContextMenuItemsFactory,
-  FilterTypeExtend,
-} from "./features/currentHost";
-export type { BuildGroupedFlatModelOptions } from "./grouping/groupRows";
-export type {
-  FeatureNotice,
-  FeatureNoticeAppearance,
-  FeatureNoticeKind,
-} from "./state/featureNotices";

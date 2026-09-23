@@ -12,11 +12,11 @@ import { describe, expect, it } from "vitest";
 import * as binding from "./binding";
 import * as bindingExports from "./bindingExports";
 import * as formula from "./formula";
+import * as main from "./index";
 import * as pdf from "./pdf";
 import * as pivot from "./pivot";
 import * as query from "./query";
 import * as stream from "./stream";
-import * as main from "./index";
 import * as xlsx from "./xlsx";
 
 describe("@adapttable/core/formula", () => {
@@ -86,8 +86,10 @@ describe("@adapttable/core/binding", () => {
   });
 
   it("serves the same functions the main entry still serves", () => {
-    expect(binding.columnGroupId).toBe(main.columnGroupId);
-    expect(binding.insertExtraRows).toBe(main.insertExtraRows);
-    expect(main.xlsxWriter).toBe(xlsx.xlsxWriter);
+    // Read by name: the main entry's copies carry the deprecation notice.
+    for (const name of ["columnGroupId", "insertExtraRows"]) {
+      expect(Reflect.get(main, name)).toBe(Reflect.get(binding, name));
+    }
+    expect(Reflect.get(main, "xlsxWriter")).toBe(xlsx.xlsxWriter);
   });
 });
