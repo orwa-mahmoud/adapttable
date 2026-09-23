@@ -622,7 +622,9 @@ if (RECORD) {
  */
 function unusedRecordName(dir, date) {
   let name = `${date}.json`;
-  for (let n = 2; existsSync(join(dir, name)); n++) {
+  let n = 1;
+  while (existsSync(join(dir, name))) {
+    n += 1;
     name = `${date}-${n}.json`;
   }
   return name;
