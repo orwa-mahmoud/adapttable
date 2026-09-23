@@ -302,7 +302,7 @@ try {
   const parseBuildMs = await measureParseBuild();
   const interaction = await sampleInteraction();
   const current = {
-    measuredAt: "2026-09-02",
+    measuredAt: new Date().toISOString().slice(0, 10),
     method:
       "rolldown parse of packed adapter-root fixtures; Playwright against /tailwind/ for first render, sort, page, search and column-menu first-open. React and the kit stay external in the parse fixtures.",
     parseBuildMs,
