@@ -213,6 +213,7 @@ as the configuration strip; when it is dormant these parts are never mounted.
 | ------------------------------------ | ---------------------------------------------------------- |
 | `densityToggle` / `fullscreenToggle` | The `densityChooser()` and `fullscreen()` toolbar buttons. |
 | `printButton`                        | The Print button drawn by `print(onPrint, true)`.          |
+| `commandPaletteButton`               | The control drawn by `commandPalette({ button: true })`.   |
 | `undoButton` / `redoButton`          | The Undo and Redo buttons from `undoRedoButtons()`.        |
 | `addRow`                             | The Add-row toolbar button.                                |
 

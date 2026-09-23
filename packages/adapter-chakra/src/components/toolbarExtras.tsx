@@ -6,6 +6,7 @@
  * neither the handler nor this button.
  */
 import {
+  type AdapterCommandPaletteTriggerProps,
   ExportAnnouncer,
   ExportProgressChrome,
   type ExportProgressSurfaceSlotProps,
@@ -268,6 +269,25 @@ export function FullscreenButton({
       onClick={onToggleFullscreen}
     >
       {isFullscreen === true ? "✕" : "⛶"}
+    </Button>
+  );
+}
+
+export function CommandPaletteButton({
+  labels,
+  onOpenPalette,
+  paletteOpen,
+}: Readonly<AdapterCommandPaletteTriggerProps>): ReactNode {
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      data-adapttable-part="command-palette-button"
+      aria-haspopup="dialog"
+      aria-expanded={paletteOpen}
+      onClick={onOpenPalette}
+    >
+      {labels.commandPalette}
     </Button>
   );
 }

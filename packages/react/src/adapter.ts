@@ -62,6 +62,7 @@ export { createAdapterAgentApprovalFeature } from "./adapterFeatures/agentApprov
 export {
   type AdapterCommandPaletteFeature,
   type AdapterCommandPaletteProps,
+  type AdapterCommandPaletteTriggerProps,
   createAdapterCommandPaletteFeature,
 } from "./adapterFeatures/commandPalette";
 export type { AdapterFeatureComponent } from "./adapterFeatures/component";

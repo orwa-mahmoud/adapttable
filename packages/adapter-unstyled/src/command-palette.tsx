@@ -5,6 +5,7 @@ import {
 
 import { useClassNames } from "./components/classNamesContext";
 import { CommandPalette } from "./components/CommandPalette";
+import { CommandPaletteButton } from "./components/toolbarExtras";
 
 function CommandPaletteSlot(props: Readonly<AdapterCommandPaletteProps>) {
   const classNames = useClassNames();
@@ -12,5 +13,7 @@ function CommandPaletteSlot(props: Readonly<AdapterCommandPaletteProps>) {
 }
 
 /** Add a searchable command palette drawn with native controls. @public */
-export const commandPalette =
-  createAdapterCommandPaletteFeature(CommandPaletteSlot);
+export const commandPalette = createAdapterCommandPaletteFeature(
+  CommandPaletteSlot,
+  CommandPaletteButton
+);

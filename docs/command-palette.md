@@ -167,18 +167,50 @@ character the keyboard layout produces. A chord without `mod`, `ctrl` or
 `meta` does not fire while focus is in a text input, textarea, select or
 editable element.
 
-`command-palette` is the only command key a shortcut runs. The palette opens
-only through its shortcuts, so `shortcuts: []` binds nothing and the palette
-cannot be opened.
+`command-palette` is the only command key a shortcut runs. `shortcuts: []`
+binds nothing; the palette still opens from a toolbar control
+(`button: true`) or from your own control through `open` and
+`onOpenChange`.
+
+### Opening it from a control
+
+`commandPalette({ button: true })` puts a **Command palette** button among the
+toolbar's view controls, drawn with the kit's own button (part
+`command-palette-button`, `aria-haspopup="dialog"`, `aria-expanded` while the
+palette shows; unstyled and shadcn style it through
+`classNames.commandPaletteButton`). The label is `labels.commandPalette`.
+
+To open it from a control of your own, hold the state:
+
+```tsx
+import { commandPalette } from "@adapttable/mantine/command-palette";
+
+const [paletteOpen, setPaletteOpen] = useState(false);
+
+<Button onClick={() => setPaletteOpen(true)}>Commands</Button>
+<DataTable
+  {...props}
+  features={[
+    commandPalette({ open: paletteOpen, onOpenChange: setPaletteOpen }),
+  ]}
+/>;
+```
+
+`onOpenChange` is told whenever the palette asks to open or close — the
+shortcut, the toolbar control, Escape, or a command having run — with or
+without `open`.
 
 ### `commandPalette` options
 
 `commandPalette(options?: boolean | CommandPaletteOptions)`:
 
-| Option      | Type                  | Default             | Description                           |
-| ----------- | --------------------- | ------------------- | ------------------------------------- |
-| `commands`  | `readonly Command[]`  | `[]`                | Entries appended after the built-ins. |
-| `shortcuts` | `readonly Shortcut[]` | `DEFAULT_SHORTCUTS` | The chords that open the palette.     |
+| Option         | Type                      | Default             | Description                                    |
+| -------------- | ------------------------- | ------------------- | ---------------------------------------------- |
+| `commands`     | `readonly Command[]`      | `[]`                | Entries appended after the built-ins.          |
+| `shortcuts`    | `readonly Shortcut[]`     | `DEFAULT_SHORTCUTS` | The chords that open the palette.              |
+| `button`       | `boolean`                 | `false`             | Draw a toolbar control that opens the palette. |
+| `open`         | `boolean`                 | —                   | Controlled open state.                         |
+| `onOpenChange` | `(open: boolean) => void` | —                   | Told when the palette asks to open or close.   |
 
 ## Context menu
 
@@ -201,25 +233,29 @@ no menu opens.
 Every kit with a `/context-menu` subpath (Mantine, MUI, Chakra UI, Ant Design,
 Radix, Base UI, shadcn/ui, unstyled) wires the same handlers:
 
-| Target        | Entry                           | Shown when                          | Does                                                    |
-| ------------- | ------------------------------- | ----------------------------------- | ------------------------------------------------------- |
-| `header`      | Sort ascending, Sort descending | The column is `sortable`.           | Sorts by the column; the current direction is disabled. |
-| `header`      | Filter column                   | The column has a `filter`.          | Opens the table's filter panel.                         |
-| `header`      | Hide column                     | The column is not `lockVisibility`. | Hides the column.                                       |
-| `cell`, `row` | Copy                            | Always; disabled on a `row` target. | Copies the cell, or the selection it sits inside.       |
+| Target        | Entry                            | Shown when                                                                         | Does                                                                        |
+| ------------- | -------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `header`      | Sort ascending, Sort descending  | The column is `sortable`.                                                          | Sorts by the column; the current direction is disabled.                     |
+| `header`      | Filter column                    | The column has a `filter`.                                                         | Opens the table's filter panel.                                             |
+| `header`      | Hide column                      | The column is not `lockVisibility`.                                                | Hides the column.                                                           |
+| `cell`, `row` | Copy                             | Always; disabled on a `row` target.                                                | Copies the cell, or the selection it sits inside.                           |
+| `cell`, `row` | Cut                              | `cellNavigation()` is composed and `onCellCut` is set; disabled on a `row` target. | Copies like Copy, then calls `onCellCut(range)` once the clipboard took it. |
+| `cell`, `row` | Pin to top, Pin to bottom, Unpin | `rowPinning()` is composed; each shows only where it applies.                      | Pins or unpins the row, as its row actions do.                              |
 
 Labels are `labels.sortAscending`, `sortDescending`, `filterColumn`,
-`hideColumn` and `copyCells`. Filter column is separated from the sorts by a
+`hideColumn`, `copyCells`, `cutCells`, `pinToTop`, `pinToBottom` and
+`unpinRow`. Filter column is separated from the sorts by a
 divider.
 
-Copy writes to the clipboard through the grid focus that
-[`cellNavigation()`](./cell-navigation.md#copying-from-the-context-menu)
-provides. Without it the entry is listed and copies nothing. A click inside a
-selected range copies the range; anywhere else copies the clicked cell.
+With [`cellNavigation()`](./cell-navigation.md#copying-from-the-context-menu)
+composed, Copy goes through the grid focus: a click inside a selected range
+copies the range; anywhere else copies the clicked cell. Without it, Copy
+writes the clicked cell's value. The row pin entries follow the divider after
+Copy and Cut.
 
-The model in `@adapttable/core` also defines Pin to start / Unpin
-(`onTogglePin`) and Cut (`onCut`). No kit wires either today, so neither
-appears.
+The model in `@adapttable/core` also defines a column Pin to start / Unpin
+entry for headers (`onTogglePin`); the kits leave it unwired, and the Columns
+menu owns column pinning.
 
 When a target has no entries — every built-in unwired or locked and no custom
 items — no menu renders.

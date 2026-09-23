@@ -237,6 +237,19 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                     if (!copy.available) return;
                     view.gridFocus.copyCells(copy.cell);
                   },
+                  // Cut writes the target to the clipboard, then asks the host to
+                  // clear it through onCellCut — offered only when both exist.
+                  onCut:
+                    props.onCellCut && view.gridFocus.enabled
+                      ? (target) => {
+                          const copy = contextMenuCopyTarget(
+                            view.gridFocus,
+                            target
+                          );
+                          if (!copy.available) return;
+                          view.gridFocus.copyCells(copy.cell, true);
+                        }
+                      : undefined,
                   onSort: (key, dir) => {
                     shell.source.setSort(key, dir);
                   },
@@ -249,6 +262,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                 },
                 sortBy: shell.source.sortBy,
                 sortDir: shell.source.sortDir,
+                rowPins: chrome.rowPinning?.actions,
                 featureHost: shell.featureHost,
                 container: view.fullscreen.container,
               }}

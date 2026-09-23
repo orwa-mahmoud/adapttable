@@ -28,6 +28,8 @@ a downloaded file cannot disagree about what a cell contains.
 **Ctrl/Cmd+X** copies the same text and then calls `onCellCut(range)`. The table
 clears nothing itself: what "cut" removes is your decision, and a cut that
 emptied cells before the clipboard accepted them would lose the data outright.
+With [`contextMenu()`](./command-palette.md#built-in-entries) composed, the
+cell menu offers the same Cut.
 
 Either way the outcome is announced — `labels.gridRangeCopied` on success,
 `labels.gridRangeCopyFailed` when the browser refuses (the Clipboard API needs a

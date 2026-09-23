@@ -15,9 +15,16 @@ import {
   tableCommands,
   type TableLabels,
 } from "@adapttable/core";
-import { useCallback, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 import { useFeatureHost } from "../features/featureHostContext";
+import { useEventCallback } from "../hooks/useEventCallback";
 import { type Shortcut, useShortcuts } from "./useShortcuts";
 
 /** The command key the default shortcut runs. */
@@ -40,6 +47,53 @@ export interface CommandPaletteOptions {
    * own to remap, or `[]` to bind nothing.
    */
   shortcuts?: readonly Shortcut[];
+  /**
+   * Draw a toolbar control that opens the palette, with the kit's own button.
+   * Off by default; the shortcut still works beside it.
+   */
+  button?: boolean;
+  /**
+   * Controlled open state, for a host that opens the palette from its own
+   * control. Pair with {@link CommandPaletteOptions.onOpenChange}.
+   */
+  open?: boolean;
+  /**
+   * Told when the palette asks to open or close — the shortcut, the toolbar
+   * control, Escape, or a command having run. Works with or without `open`.
+   */
+  onOpenChange?: (open: boolean) => void;
+}
+
+/** One table's palette open state, shared by the palette and its trigger. */
+interface PaletteOpenState {
+  readonly open: boolean;
+  readonly setOpen: (open: boolean) => void;
+}
+
+/**
+ * Where a composed palette keeps its open state, so the toolbar control and
+ * the dialog read the same answer.
+ */
+export const CommandPaletteOpenContext = createContext<PaletteOpenState | null>(
+  null
+);
+
+/**
+ * Hold a palette's open state: the host's, when it controls `open`, or the
+ * table's own otherwise.
+ */
+export function usePaletteOpenState(
+  options: CommandPaletteOptions | undefined
+): PaletteOpenState {
+  const [localOpen, setLocalOpen] = useState(false);
+  const controlled = options?.open !== undefined;
+  const onOpenChange = options?.onOpenChange;
+  const setOpen = useEventCallback((next: boolean) => {
+    if (!controlled) setLocalOpen(next);
+    onOpenChange?.(next);
+  });
+  const open = options?.open ?? localOpen;
+  return useMemo(() => ({ open, setOpen }), [open, setOpen]);
 }
 
 /**
@@ -90,20 +144,27 @@ export function useCommandPalette(
   const enabled =
     commandPalette !== false &&
     (commandPalette !== undefined || Boolean(pluginCommands?.length));
-  const [open, setOpen] = useState(false);
   const config =
     typeof commandPalette === "object" ? commandPalette : undefined;
+  // A composed palette shares its state with the toolbar control through the
+  // feature's provider; a hook called on its own holds its own.
+  const shared = useContext(CommandPaletteOpenContext);
+  const own = usePaletteOpenState(config);
+  const { open, setOpen } = shared ?? own;
 
   const close = useCallback(() => {
     setOpen(false);
-  }, []);
+  }, [setOpen]);
   const show = useCallback(() => {
     setOpen(true);
-  }, []);
+  }, [setOpen]);
 
-  const onCommand = useCallback((command: string) => {
-    if (command === OPEN_PALETTE_COMMAND) setOpen(true);
-  }, []);
+  const onCommand = useCallback(
+    (command: string) => {
+      if (command === OPEN_PALETTE_COMMAND) setOpen(true);
+    },
+    [setOpen]
+  );
 
   useShortcuts({
     enabled,

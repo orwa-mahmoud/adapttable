@@ -111,6 +111,11 @@ export interface DataTableClassNames {
   redoButton?: string;
   /** The Print toolbar button contributed by `print()`. */
   printButton?: string;
+  /**
+   * The toolbar control that opens the command palette, drawn by
+   * `commandPalette({ button: true })`.
+   */
+  commandPaletteButton?: string;
   /** The Export CSV toolbar button contributed by `exportCsv()`. */
   exportCsvButton?: string;
   /**

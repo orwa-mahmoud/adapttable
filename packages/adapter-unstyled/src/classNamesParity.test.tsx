@@ -289,7 +289,7 @@ function Harness(props: {
       cellNavigation
       columnSelectionCheckbox
       statusBar
-      commandPalette
+      commandPalette={{ button: true }}
       densityChooser
       onDensityChange={vi.fn()}
       fullscreen
@@ -713,6 +713,7 @@ const KEYS = [
   "undoButton",
   "redoButton",
   "printButton",
+  "commandPaletteButton",
   "exportCsvButton",
   "exportSpinner",
   "exportProgressSurface",
