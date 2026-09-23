@@ -298,11 +298,16 @@ export function resolveGroupValue<TRow>(
 export function groupValueKey(value: unknown): string {
   if (value == null || value === "") return "";
   if (typeof value === "string") return `s:${value}`;
-  if (typeof value === "number" || typeof value === "bigint") {
-    return `n:${String(value)}`;
-  }
+  if (typeof value === "number") return `n:${String(value)}`;
+  // Its own tag: `5n` and `5` are different values in different buckets.
+  if (typeof value === "bigint") return `i:${String(value)}`;
   if (typeof value === "boolean") return `b:${String(value)}`;
-  if (value instanceof Date) return `d:${value.toISOString()}`;
+  if (value instanceof Date) {
+    // Every invalid date is one bucket; `toISOString` throws on them.
+    return Number.isNaN(value.getTime())
+      ? "d:invalid"
+      : `d:${value.toISOString()}`;
+  }
   try {
     return `j:${JSON.stringify(value)}`;
   } catch {
@@ -321,10 +326,16 @@ export function formatGroupLabel(
 ): string {
   if (value == null || value === "") return blankLabel;
   if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") {
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    typeof value === "bigint"
+  ) {
     return String(value);
   }
-  if (value instanceof Date) return value.toISOString();
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? String(value) : value.toISOString();
+  }
   try {
     return JSON.stringify(value);
   } catch {
@@ -339,6 +350,11 @@ export function formatGroupLabel(
  * are different nodes — collapse one and the other stays open, which a key of
  * just the value could never express.
  *
+ * The separators inside a part are escaped — `>` between levels, and `:`
+ * between the keys and the values — so two different paths never write the
+ * same id, whatever their values contain. A part with none of them is written
+ * as it is.
+ *
  * @param keys - The grouping keys from the root down to this level.
  * @param valueKeys - The value keys down to this node.
  * @returns The id.
@@ -347,9 +363,22 @@ export function makeGroupRowKey(
   keys: string | readonly string[],
   valueKeys: string | readonly string[]
 ): string {
-  const k = typeof keys === "string" ? keys : keys.join(">");
-  const v = typeof valueKeys === "string" ? valueKeys : valueKeys.join(">");
+  const k = typeof keys === "string" ? keys : keys.map(escapeKey).join(">");
+  const v =
+    typeof valueKeys === "string"
+      ? valueKeys
+      : valueKeys.map(escapeLevel).join(">");
   return `group:${k}:${v}`;
+}
+
+/** One level of a group path, with its separator escaped. */
+function escapeLevel(part: string): string {
+  return part.replaceAll("\\", "\\\\").replaceAll(">", "\\>");
+}
+
+/** A grouping key, with the level and key/value separators escaped. */
+function escapeKey(part: string): string {
+  return escapeLevel(part).replaceAll(":", "\\:");
 }
 
 /**
