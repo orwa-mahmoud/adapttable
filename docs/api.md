@@ -1466,7 +1466,14 @@ and [connect a backend](./ai-http.md).
 `@adapttable/server` validates a request against a `QuerySchema` and returns a
 `ServerTableQuery` — page, limit, offset, search, sort chain, grouping,
 filters, filter tree, pivot, the folded pivot groups in `pivotCollapsed`, and
-cursor, plus a `QueryRejection[]` naming everything it refused. `QueryInput` is a `Request`, `URL`, query string or
+cursor, plus a `QueryRejection[]` naming everything it refused. The schema
+picks the level of checking: `columns: "any"` shapes every filter
+(`shapedFilters`), a column list checks names, and `filters` — a shorthand
+record or the table's own `FilterDef[]` — types and checks each filter
+(`typedFilters`), with `filterTypes` for registered types. `groupByKeys`
+lists every grouping key. `pickFilters(defs, keys)` scopes the declared
+filters per caller, and `splitFilterValues(raw)` inverts the table's
+multi-value encoding. `QueryInput` is a `Request`, `URL`, query string or
 `URLSearchParams`; `ServerFilterValue` is one filter's value. See
 [server queries](./server-queries.md).
 

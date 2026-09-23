@@ -41,12 +41,28 @@ export type {
   Aggregator,
 } from "./aggregate/aggregate";
 export {
+  FILTER_TYPES,
+  type FilterDef,
+  type FilterOption,
+  type FilterOptionsSource,
+  type FilterType,
+  RANGE_SUFFIXES,
+} from "./filters/filterDefs";
+export type { FilterTypeSpec } from "./filters/filterRegistry";
+export {
   FILTER_TREE_PARAM,
   FILTER_TREE_VERSION,
   isActiveFilterTree,
   parseFilterTree,
   serializeFilterTree,
 } from "./filters/filterTreeCodec";
+export {
+  DATE_OPS,
+  FILTER_OP_SUFFIX,
+  NUMBER_OPS,
+  TEXT_OPS,
+} from "./filters/operators";
+export { parseRelativeToken } from "./filters/relativeDates";
 export type { FormulaValue } from "./formula/evaluate";
 export type { FormulaColumnSpec } from "./formula/formulaColumn";
 export {

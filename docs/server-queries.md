@@ -74,23 +74,93 @@ every `f_*` param, `groupBy`, `ft`, `pivot` and `cursor`, each under the
 `groupClosed`, `rowPin`, `formula`, `density`, the `col*` layout — are not
 read.
 
-Three encodings need care, because the parser checks names exactly as they
-appear after `f_` and in `groupBy`:
+## Four levels of checking
 
-- **Range filters** arrive under their bound keys: a `numberRange` on
-  `budget` writes `f_budgetMin` / `f_budgetMax`, a `dateRange` on `hiredAt`
-  writes `f_hiredAtFrom` / `f_hiredAtTo`. List those keys in `columns`
-  (`["budget", "budgetMin", "budgetMax"]`), or they are rejected as
-  `not a filterable column`.
-- **Multi-value filters** (`multiSelect`, checklist) arrive as one
-  comma-separated string with each entry percent-encoded, because that is
-  how the table writes them. Split and decode them yourself:
-  `value.split(",").map(decodeURIComponent)`. A repeated param is returned as
-  an array.
-- **Nested grouping** (`groupBy=team,status`) is compared as one name and
-  rejected as `not a groupable column`; only a single-column `groupBy`
-  passes. Read the raw param yourself when the table groups by more than one
-  column.
+How much the parser checks is the schema's choice:
+
+| Level | Schema                   | Filters come back as                                                                                                            | Refused                                                                                             |
+| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 0     | `columns: "any"`         | `shapedFilters` — each filter's `op` beside it, a range's bounds joined into `{ min, max }` / `{ from, to }`, values as strings | Nothing for its name                                                                                |
+| 1     | `columns: [...]`         | `filters` — one raw string per `f_*` param, exactly as before                                                                   | A sort, filter, group, tree or pivot field outside `columns`                                        |
+| 2     | `filters: { key: type }` | `typedFilters` — typed values, operators checked against the type                                                               | Level 1, plus an undeclared filter, an operator the type does not allow, a malformed number or date |
+| 3     | `filters: FilterDef[]`   | `typedFilters`, as level 2                                                                                                      | Level 2, plus a value outside a static `select` / `multiSelect` option list                         |
+
+Level 0 still parses page, limit, sort, search, filters and the tree — it only
+stops checking names. The names are then the client's own words: map them to
+your fields, and never interpolate them into SQL.
+
+A column-list schema without `filters` returns exactly the object it always
+has. At levels 2 and 3 the typed filters are:
+
+```ts
+const query = parseTableQuery(request, {
+  columns: ["name", "team", "budget", "hiredAt"],
+  filters: {
+    name: "text",
+    team: "multiSelect",
+    budget: "numberRange",
+    hiredAt: "dateRange",
+  },
+});
+
+query.typedFilters;
+// {
+//   name:    { type: "text", op: "contains", value: "ada" },
+//   team:    { type: "multiSelect", op: "in", values: ["Core", "R&D"] },
+//   budget:  { type: "numberRange", op: "between", min: 1000, max: 5000 },
+//   hiredAt: { type: "dateRange", op: "gte", from: "2024-01-01" },
+// }
+```
+
+A filter's operator defaults to its type's own (`contains` for text, `gte`
+for a number range, `on` for a date range) when the link names none. A
+relative date arrives as `{ op: "relative", relative: "last:7" }`, and a
+`numberRange` `in` / `notIn` as `values`. Filter types the host registered go
+in `filterTypes` (a `FilterTypeSpec` fits) and come back as
+`{ type: "custom", filterType, op, value }`. At levels 2 and 3 the AND/OR
+tree gets the same checks per condition: a declared key, an allowed operator,
+a value of the type's shape — and, as always, one bad condition drops the
+whole tree.
+
+Level 3 takes the same `FilterDef` objects the browser passes to `filters(…)`
+— import them on the server from wherever the table's definitions live. A
+static `options` list is enforced; `options: "auto"` and a loader are accepted
+as they are.
+
+### Scoping filters by user or role
+
+The schema is built per request, so permission is passing the subset a caller
+may use:
+
+```ts
+import { parseTableQuery, pickFilters } from "@adapttable/server";
+
+const query = parseTableQuery(request, {
+  columns: COLUMNS,
+  filters: pickFilters(FILTER_DEFS, allowedFilterKeys(user)),
+});
+```
+
+A filter outside the subset is refused like any undeclared one.
+
+### Multi-value filters and nested grouping
+
+The table writes a multi-value filter (`multiSelect`, checklist) as ONE
+parameter: entries joined with commas, each percent-encoded, so a value may
+itself contain a comma. `typedFilters` splits it; at level 1 the raw string
+is in `filters`, and `splitFilterValues(raw)` is the exact inverse.
+
+`groupByKeys` lists every grouping key, outermost first
+(`groupBy=team,status` → `["team", "status"]`), each checked against
+`columns`. It is reported at levels 0, 2 and 3, and at level 1 with
+`groupByKeys: true`. `groupBy` keeps its single-key meaning.
+
+### Without a parser
+
+A host that owns both ends can skip the URL entirely: send the
+`TableQueryParams` object `onQueryChange` hands you as JSON, and read it on the
+server as the typed object it already is. `parseTableQuery` is for the case the
+URL is the request — a shared link, a server render, a route handler.
 
 ## Forgiving by default, strict on request
 
@@ -138,9 +208,13 @@ them like a search term.
 a query string or `URLSearchParams` — plus a `QuerySchema`, and returns a
 `ServerTableQuery`.
 
-`QuerySchema` is the allowlist: `columns`, `maxLimit`, `defaultLimit`,
-`urlKey`. `ServerTableQuery` is the table above, where `filters` values are
-`ServerFilterValue` (one string, or an array for a repeated param), `pivotCollapsed`
+`QuerySchema` is the allowlist: `columns`, `filters`, `filterTypes`,
+`groupByKeys`, `maxLimit`, `defaultLimit`, `urlKey`. `ServerTableQuery` is the
+table above, where `filters` values are `ServerFilterValue` (one string, or an
+array for a repeated param), `shapedFilters` is `ShapedFilter` per key,
+`typedFilters` is `TypedFilter` per key (`TextFilter`, `SelectFilter`,
+`ListFilter`, `BooleanFilter`, `NumberRangeFilter`, `DateRangeFilter`,
+`CustomTypedFilter`), `groupByKeys` lists every grouping key, `pivotCollapsed`
 is absent rather than empty when nothing is folded, and `rejected` is a list of
 `QueryRejection` — each carrying the `param` it came from, the `value` that
 arrived, and the `reason` it was refused.
@@ -166,7 +240,11 @@ the `formula=` codec (`serializeFormulaColumns`, `deserializeFormulaColumns`
 a tree, and the types those speak in — `QueryCondition`, `QueryFilterGroup`,
 `SortLevel`, `SortDirection`, `SortableValue`, `DisplayValue`, `PivotConfig`,
 `PivotMeasure`, `PivotUrlState`, `FormulaColumnSpec`, `FormulaValue`,
-`AggregateName`, `AggregateOrderedValue` and `Aggregator`.
+`AggregateName`, `AggregateOrderedValue` and `Aggregator`. The filter model is
+there too: `FILTER_TYPES`, `RANGE_SUFFIXES`, `FILTER_OP_SUFFIX`, `TEXT_OPS`,
+`NUMBER_OPS`, `DATE_OPS`, `parseRelativeToken`, and the `FilterDef`,
+`FilterType`, `FilterOption`, `FilterOptionsSource` and `FilterTypeSpec`
+types.
 
 Every one of those names is also on `@adapttable/core`,
 `@adapttable/core/pivot` or `@adapttable/core/formula`, from the same source
