@@ -29,7 +29,9 @@
  * `--record` also runs the probes — the published numbers that are not a
  * scenario: the embedded font in the Arabic PDF export and the size of the
  * mobile card move controls in every kit — and writes the whole run, with the
- * machine and browser it ran on, to `scripts/bench-runs/<date>.json`. Every
+ * machine and browser it ran on, to `scripts/bench-runs/<date>.json` — or
+ * `<date>-2.json`, `-3`… when that day already has a record, because a page
+ * that cites a record must keep reading the numbers it published. Every
  * number a docs page publishes points at one of those files.
  *
  * Reading the output: DOM rows is the number that must stay flat as rows grow
@@ -577,7 +579,8 @@ if (RECORD) {
   const probeBrowser = await chromium.launch();
   const browserVersion = probeBrowser.version();
   await probeBrowser.close();
-  const file = join(dir, `${date}.json`);
+  const name = unusedRecordName(dir, date);
+  const file = join(dir, name);
   writeFileSync(
     file,
     `${JSON.stringify(
@@ -610,8 +613,19 @@ if (RECORD) {
       2
     )}\n`
   );
-  if (!JSON_OUT)
-    console.log(`recorded this run in scripts/bench-runs/${date}.json`);
+  if (!JSON_OUT) console.log(`recorded this run in scripts/bench-runs/${name}`);
+}
+
+/**
+ * The first free record name for a day. A record is cited by the pages that
+ * publish its numbers, so a second run the same day never replaces it.
+ */
+function unusedRecordName(dir, date) {
+  let name = `${date}.json`;
+  for (let n = 2; existsSync(join(dir, name)); n++) {
+    name = `${date}-${n}.json`;
+  }
+  return name;
 }
 
 if (JSON_OUT) {

@@ -1,0 +1,304 @@
+{
+  "date": "2026-09-23",
+  "machine": {
+    "platform": "darwin",
+    "release": "25.6.0",
+    "cpu": "Apple M1 Max",
+    "cores": 10
+  },
+  "node": "v24.19.0",
+  "chromium": "151.0.7922.34",
+  "showcase": "production",
+  "smoke": false,
+  "results": [
+    {
+      "name": "baseline · 50k rows, windowed",
+      "query": "rows=50000",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 20,
+      "interactiveMs": 949,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "flat count · 1k rows, windowed",
+      "query": "rows=1000&all=1&virtualize=1",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 10,
+      "interactiveMs": 963,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "flat count · 50k rows, windowed",
+      "query": "rows=50000&all=1&virtualize=1",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 22,
+      "interactiveMs": 948,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "flat count · 100k rows, windowed",
+      "query": "rows=100000&all=1&virtualize=1",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 36,
+      "interactiveMs": 949,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "variable height · 20k rows, windowed",
+      "query": "rows=20000&rowHeight=1",
+      "expect": {
+        "maxDomRows": 80
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 14,
+      "interactiveMs": 992,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "100k rows, windowed",
+      "query": "rows=100000",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 30,
+      "interactiveMs": 887,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "10k rows, windowed (A/B arm)",
+      "query": "rows=10000&all=1&virtualize=1",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 11,
+      "interactiveMs": 963,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "10k rows, NOT windowed (A/B arm)",
+      "query": "rows=10000&all=1&virtualize=0",
+      "expect": {
+        "minDomRows": 9000
+      },
+      "domRows": 10000,
+      "domCells": 40000,
+      "heapMB": 202,
+      "interactiveMs": 4491,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "wide · 100 columns",
+      "query": "rows=5000&cols=100",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 901,
+      "heapMB": 14,
+      "interactiveMs": 983,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "wide · 500 columns",
+      "query": "rows=5000&cols=500",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 4501,
+      "heapMB": 30,
+      "interactiveMs": 1383,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "wide · 500 columns, windowed (A/B arm)",
+      "query": "rows=5000&cols=500&virtualizeColumns=1",
+      "expect": {
+        "maxDomRows": 60,
+        "maxCells": 3000
+      },
+      "domRows": 10,
+      "domCells": 100,
+      "heapMB": 11,
+      "interactiveMs": 961,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "tree · 50k rows, every parent open",
+      "query": "rows=50000&tree=1",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 20,
+      "interactiveMs": 1180,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "grouped by status",
+      "query": "rows=20000&scale.groupBy=status",
+      "expect": {
+        "maxDomRows": 400
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 14,
+      "interactiveMs": 963,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "pinned first column",
+      "query": "rows=20000&scale.colPin=name%3Astart",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 14,
+      "interactiveMs": 1969,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "sorted · 100k rows",
+      "query": "rows=100000&scale.sortBy=budget&scale.sortDir=desc",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 30,
+      "interactiveMs": 1010,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "server tier · 1M rows",
+      "query": "tier=server&rows=1000000",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 10,
+      "interactiveMs": 4181,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "editing · 20k rows",
+      "query": "rows=20000&edit=1",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 14,
+      "interactiveMs": 893,
+      "patchBurstMs": null,
+      "failures": []
+    },
+    {
+      "name": "realtime patches · 20k rows, 200 updates",
+      "query": "rows=20000&patch=200",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 16,
+      "interactiveMs": 1066,
+      "patchBurstMs": 5237.2,
+      "failures": []
+    },
+    {
+      "name": "realtime patches · incremental engine",
+      "query": "rows=20000&patch=200&incremental=1",
+      "expect": {
+        "maxDomRows": 60
+      },
+      "domRows": 10,
+      "domCells": 37,
+      "heapMB": 15,
+      "interactiveMs": 956,
+      "patchBurstMs": 987.7,
+      "failures": []
+    }
+  ],
+  "probes": {
+    "pdfFont": {
+      "sourceFontBytes": 431116,
+      "pdfBytes": 72883,
+      "embeddedFontBytes": 15528
+    },
+    "cardMoveControls": {
+      "mantine": {
+        "width": 44,
+        "height": 44
+      },
+      "mui": {
+        "width": 44,
+        "height": 44
+      },
+      "chakra": {
+        "width": 44,
+        "height": 44
+      },
+      "antd": {
+        "width": 44,
+        "height": 44
+      },
+      "radix": {
+        "width": 52,
+        "height": 52
+      },
+      "base-ui": {
+        "width": 44,
+        "height": 44
+      },
+      "shadcn": {
+        "width": 44,
+        "height": 44
+      },
+      "tailwind": {
+        "width": 44,
+        "height": 44
+      }
+    }
+  }
+}
