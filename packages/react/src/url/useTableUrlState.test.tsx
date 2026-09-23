@@ -481,18 +481,22 @@ describe("clearExtras", () => {
 });
 
 describe("multi-sort chain", () => {
-  it("toggleSortLevel cycles asc → desc → removed and supersedes single sort", () => {
+  it("toggleSortLevel seeds the chain from the single sort, then cycles asc → desc → removed", () => {
     const adapter = createMemoryAdapter("sortBy=name&sortDir=desc");
     const { result } = renderHook(() =>
       useTableUrlState({ urlAdapter: adapter })
     );
     act(() => result.current.toggleSortLevel("team"));
-    expect(result.current.sortLevels).toEqual([{ key: "team", dir: "asc" }]);
+    expect(result.current.sortLevels).toEqual([
+      { key: "name", dir: "desc" },
+      { key: "team", dir: "asc" },
+    ]);
     // Single-sort params dropped once a chain exists.
     expect(adapter.getSearch()).not.toContain("sortBy");
     act(() => result.current.toggleSortLevel("age"));
     act(() => result.current.toggleSortLevel("team"));
     expect(result.current.sortLevels).toEqual([
+      { key: "name", dir: "desc" },
       { key: "team", dir: "desc" },
       { key: "age", dir: "asc" },
     ]);
@@ -500,9 +504,44 @@ describe("multi-sort chain", () => {
     act(() => result.current.toggleSortLevel("team"));
     act(() => result.current.toggleSortLevel("team"));
     expect(result.current.sortLevels).toEqual([
+      { key: "name", dir: "desc" },
       { key: "age", dir: "asc" },
       { key: "team", dir: "desc" },
     ]);
+  });
+
+  it("starts a one-level chain when nothing is sorted", () => {
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() =>
+      useTableUrlState({ urlAdapter: adapter })
+    );
+    act(() => result.current.toggleSortLevel("team"));
+    expect(result.current.sortLevels).toEqual([{ key: "team", dir: "asc" }]);
+  });
+
+  it("seeds from a defaulted sort, and toggling it away keeps the default cleared", () => {
+    const adapter = createMemoryAdapter("");
+    const { result } = renderHook(() =>
+      useTableUrlState({
+        urlAdapter: adapter,
+        defaults: { sortBy: "name", sortDir: "desc" },
+      })
+    );
+    act(() => result.current.toggleSortLevel("name"));
+    expect(result.current.sortLevels).toEqual([]);
+    expect(result.current.sortBy).toBeUndefined();
+    expect(adapter.getSearch()).toContain("sortBy=");
+  });
+
+  it("a plain sort after a chain resets to one level", () => {
+    const adapter = createMemoryAdapter("sortBy=name&sortDir=asc");
+    const { result } = renderHook(() =>
+      useTableUrlState({ urlAdapter: adapter })
+    );
+    act(() => result.current.toggleSortLevel("team"));
+    act(() => result.current.setSort("age", "asc"));
+    expect(result.current.sortLevels).toEqual([]);
+    expect(result.current.sortBy).toBe("age");
   });
 
   it("round-trips the chain through the URL", () => {
