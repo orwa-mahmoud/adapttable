@@ -209,7 +209,10 @@ a query string or `URLSearchParams` — plus a `QuerySchema`, and returns a
 `ServerTableQuery`.
 
 `QuerySchema` is the allowlist: `columns`, `filters`, `filterTypes`,
-`groupByKeys`, `maxLimit`, `defaultLimit`, `urlKey`. `ServerTableQuery` is the
+`groupByKeys`, `maxLimit`, `defaultLimit`, `urlKey`. Declared `filters` are
+`ServerFilterDef`s — the `key`, `type` and optional `options` of a `FilterDef`,
+which fits as it is — and `filterTypes` are `ServerFilterType`s (`type`, `ops`,
+`defaultOp`), which a `FilterTypeSpec` fits. `ServerTableQuery` is the
 table above, where `filters` values are `ServerFilterValue` (one string, or an
 array for a repeated param), `shapedFilters` is `ShapedFilter` per key,
 `typedFilters` is `TypedFilter` per key (`TextFilter`, `SelectFilter`,

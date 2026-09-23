@@ -264,7 +264,9 @@ const speech = useSpeechInput({
 `sendClip` sends the recording as the turn's first round. The reader's message
 shows `labels.assistantVoiceMessage` ("Voice message") until the reply names
 the `transcript`, then shows the transcript. A host writing its own
-`AssistantTransport` receives the clip as `audio` on `send`, reports the words
+`AssistantTransport` receives the clip as `audio` on `send` — an
+`AssistantAudio`, the same `{ mimeType, base64, durationMs }` as a
+`SpeechClip` — reports the words
 through `onTranscript`, and may return them as `transcript` on the reply.
 
 ### Transcribing it yourself

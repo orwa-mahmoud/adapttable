@@ -235,7 +235,10 @@ rule — `AdapterEditingFeatures`,
 `AdapterGroupingComponents`, `AdapterGroupingFeature`,
 `AdapterRowDetailComponents`, `AdapterRowDetailFeatures`,
 `AdapterRowReorderComponents`, `AdapterRowReorderFeature`,
-`AdapterContextMenuFeature` and `AdapterCommandPaletteFeature`; normalized
+`AdapterContextMenuFeature` and `AdapterCommandPaletteFeature`, with
+`AdapterCommandPaletteTriggerProps` for the palette's optional toolbar trigger
+(`createAdapterCommandPaletteFeature(CommandPalette, Trigger)`, drawn for
+`commandPalette({ button: true })`); normalized
 `AdapterContextMenuProps` / `AdapterCommandPaletteProps` types keep the seam
 typed. `createAdapterStandardFeatures` takes
 `AdapterStandardFeatureFactories` and returns a `StandardFeaturesFactory`
@@ -1289,7 +1292,6 @@ own component. `NestedTableDefaults` is what it receives: `urlSync: false`,
 turns the declaration into the `renderRowDetail` the table places under a row
 (both from `@adapttable/react/adapter`, with `NestedTableParent` for what the
 parent contributes). See [tree data](./tree-data.md).
-See [tree data](./tree-data.md).
 
 **Find in table.** `findMatches(options)` returns every cell whose text
 contains the query, in absolute addresses (`FindMatchesOptions` in);
@@ -1307,7 +1309,12 @@ over `FindBarChrome` / `FindBarChromeProps` / `FindBarSlots` /
 selectRange)` is what takes the table's focus to the match the walk is on. Cells carry `data-cell-match` /
 `data-cell-match-current`, which `isMatchedCell` / `isCurrentMatchCell` read and
 `cellHighlightStyle(props, base, selected)` resolves into one background. Compose
-`findInTable()` to arm it. See
+`findInTable()` to arm it. From `@adapttable/react/adapter`,
+`findButtonRender(Button)` draws a kit's toolbar Find control
+(`AdapterFindButtonProps`: the toolbar props plus `onOpenFind` and `findOpen`),
+`useFindState()` reads the live find state, `null` outside a table that
+composed find, and `withFindMarks(base, find, firstRowIndex)` lays the match
+marks over cell props built without cell navigation. See
 [cell navigation](./cell-navigation.md).
 
 **Selection statistics.** `selectionStats(options)` returns `SelectionStats` —
@@ -1473,9 +1480,13 @@ and [connect a backend](./ai-http.md).
 filters, filter tree, pivot, the folded pivot groups in `pivotCollapsed`, and
 cursor, plus a `QueryRejection[]` naming everything it refused. The schema
 picks the level of checking: `columns: "any"` shapes every filter
-(`shapedFilters`), a column list checks names, and `filters` — a shorthand
-record or the table's own `FilterDef[]` — types and checks each filter
-(`typedFilters`), with `filterTypes` for registered types. `groupByKeys`
+(`shapedFilters`, one `ShapedFilter` per key), a column list checks names,
+and `filters` — a shorthand record or the table's own `FilterDef[]`, read as
+`ServerFilterDef`s — types and checks each filter (`typedFilters`, one
+`TypedFilter` per key: `TextFilter`, `SelectFilter`, `ListFilter`,
+`BooleanFilter`, `NumberRangeFilter`, `DateRangeFilter` or
+`CustomTypedFilter`), with `filterTypes` (`ServerFilterType`s) for registered
+types. `groupByKeys`
 lists every grouping key. `pickFilters(defs, keys)` scopes the declared
 filters per caller, and `splitFilterValues(raw)` inverts the table's
 multi-value encoding. `QueryInput` is a `Request`, `URL`, query string or
@@ -2171,7 +2182,8 @@ not. `AssistantQuestion`, `AssistantQuestionOption` and `AssistantAnswer` are
 the question channel. `AssistantSuggestion`s are filtered by
 `eligibleSuggestions` and checked by `assertUniqueSuggestions`;
 `CapabilityPresentation` says how a capability is shown. Every turn is given an
-`AssistantTurnInput` — an `AssistantSendInput` when the reader asked and an
+`AssistantTurnInput` — an `AssistantSendInput` when the reader asked (its
+`audio` an `AssistantAudio` clip when `sendClip` sent a recording) and an
 `AssistantResumeInput` when it is rejoining — and a transport that names work
 outliving its connection through `onResumable` hands back an
 `AssistantResumeHandle` that `resume` takes. `AssistantInterruption` says which
@@ -2208,6 +2220,15 @@ build that observation from the neutral engine, and `agentFiltersFromDefs` with
 `AgentAggregateOperation`, and applied with `aggregationsFor` /
 `applyAggregations` over `AggregationInputs` and `AggregationState`. Cell writes
 are `AgentCellEdit`s.
+
+**Row and bulk actions.** `tableActionCapabilities(declared, source)` turns a
+table's `DeclaredTableActions` into one `AgentCapabilityDefinition` per action,
+keyed `rowAction.<key>` or `bulkAction.<key>`, for
+`createAgentSession({ capabilities })`; the `TableActionSource` supplies the
+live actions, rows and selection each time one plans or runs.
+`tableActionSignature(declared)` changes when the offered set does — keys,
+labels, confirmation and approval. See
+[agent capabilities](./agent-capabilities.md#row-and-bulk-actions).
 
 **Streaming.** `createStreamReply` emits `AgentStreamEvent`s of
 `AgentStreamEventKind`, capped at `MAX_STREAM_EVENTS`; `splitRecords` and

@@ -375,7 +375,7 @@ returns the finished factory.
 | `createAdapterEditingFeatures`       | `editing`, `rowEditing`, `batchEditing`, `dirtyIndicators`, `editHistory`, `undoRedoButtons` | `EditableCell`, `RowEditActions`, `BatchEditBar`, `UndoRedoButtons`; optional `historyIncludesControls`                                                                                                                            |
 | `createAdapterRowDetailFeatures`     | `rowDetail`, `nestedTable`                                                                   | `ExpandToggle`                                                                                                                                                                                                                     |
 | `createAdapterRowReorderFeature`     | `rowReorder`                                                                                 | `RowReorderHandle`, `RowReorderButtons`                                                                                                                                                                                            |
-| `createAdapterCommandPaletteFeature` | `commandPalette`                                                                             | one `CommandPalette` component                                                                                                                                                                                                     |
+| `createAdapterCommandPaletteFeature` | `commandPalette`                                                                             | one `CommandPalette` component; optional `Trigger` (`AdapterCommandPaletteTriggerProps`), drawn in the toolbar for `commandPalette({ button: true })`                                                                              |
 | `createAdapterContextMenuFeature`    | `contextMenu`                                                                                | one `ContextMenu` component                                                                                                                                                                                                        |
 | `createAdapterTableAssistantFeature` | a `StaticTableFeature` — the kit wraps it as `tableAssistant()`                              | one `TableAssistant` component                                                                                                                                                                                                     |
 | `createAdapterAgentApprovalFeature`  | a `StaticTableFeature` — the kit wraps it as `agentApproval()`                               | one `AgentApproval` component                                                                                                                                                                                                      |
@@ -426,6 +426,15 @@ kit's render, as in [the fullscreen example](#example--a-feature-entry).
 | `SAVED_VIEWS`                         | `savedViews`                                         |
 | `SIDE_PANEL`                          | `sidePanel`                                          |
 | `TREE_CELL`, `TREE_TOGGLE`            | `tree`                                               |
+
+`findInTable({ button: true })` also appends `findButtonRender(FindButton)`,
+which draws the kit's Find control in `TOOLBAR_EXTRAS` with
+`AdapterFindButtonProps` — the toolbar props plus `onOpenFind` and `findOpen`
+— and renders nothing outside a table that composed find. Another control reads
+the same state with `useFindState()`. A kit that builds its own cell props when
+`cellNavigation()` is not composed passes them through
+`withFindMarks(base, find, firstRowIndex)`, so matches carry the same
+`data-cell-match` / `data-cell-match-current` attributes the grid writes.
 
 ### Headless pass-through
 

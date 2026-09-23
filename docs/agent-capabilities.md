@@ -452,8 +452,13 @@ The table still never changes the data: the capability calls the host's own
 handler, and the host decides what the action does.
 
 Without React, `tableActionCapabilities(declared, source)` from
-`@adapttable/ai` builds the same definitions for `createAgentSession`, and
-`tableActionSignature(declared)` says when the set changed.
+`@adapttable/ai` builds the same definitions for `createAgentSession`.
+`declared` is a `DeclaredTableActions` — the table's `row` and `bulk` actions —
+and `source` is a `TableActionSource`: `actions()`, `rowFor(rowKey)` and
+`selectedIds()`, read each time a capability plans or runs, so it acts on the
+live table. `tableActionSignature(declared)` says when the set changed; rebuild
+the definitions then, because a session's capabilities are fixed when it is
+built.
 
 ## Registering a capability of your own
 
