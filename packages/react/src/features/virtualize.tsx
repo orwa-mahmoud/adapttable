@@ -9,7 +9,7 @@
 import type { ReactNode } from "react";
 
 import { RowScrollContext } from "../virtual/rowScroll";
-import { useKeyedVirtualization } from "../virtual/useTableVirtualization";
+import { useKeyedVirtualizer } from "../virtual/useTableVirtualization";
 import { useVirtualChromeBody } from "../virtual/useVirtualChromeBodyData";
 import { slotRender } from "./providers";
 import {
@@ -69,7 +69,8 @@ function KeyedWindow({
   children,
   ...options
 }: KeyedWindowSlotProps): ReactNode {
-  return children(useKeyedVirtualization(options));
+  const { virtualization, scrollToIndex } = useKeyedVirtualizer(options);
+  return children({ ...virtualization, scrollToIndex });
 }
 
 /**

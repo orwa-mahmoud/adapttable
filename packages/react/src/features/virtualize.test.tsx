@@ -28,7 +28,7 @@ function Asking() {
     enabled: false,
     estimateSize: 48,
     children: (window) => (
-      <p data-testid="window">
+      <p data-testid="window" data-scroll={typeof window.scrollToIndex}>
         {filled ? "filled" : "empty"}:{window.indices.join(",")}:
         {String(window.paddingTop)}/{String(window.paddingBottom)}
       </p>
@@ -59,6 +59,11 @@ describe("virtualize fills the keyed window", () => {
     // Windowing is off in this ask, so the real hook hands back every index —
     // what matters is that the hook, not the stand-in, produced it.
     expect(screen.getByTestId("window")).toHaveTextContent("filled:0,1,2:0/0");
+    // …and the scroll a kit calls to bring an entry into it.
+    expect(screen.getByTestId("window")).toHaveAttribute(
+      "data-scroll",
+      "function"
+    );
   });
 
   it("leaves the slot empty without it, and the caller renders the lot", () => {

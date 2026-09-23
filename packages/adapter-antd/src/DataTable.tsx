@@ -77,6 +77,7 @@ import {
   isExtraEntry,
   KEYED_WINDOW,
   type KeyedVirtualization,
+  type KeyedWindow,
   type KeyedWindowSlotProps,
   mobileCardListStyle,
   OptionalSidePanel,
@@ -142,6 +143,13 @@ import {
 } from "react";
 
 import { AntdHistoryGate, AntdInteractionGate } from "./antdLiveGates";
+import {
+  type AntdRowScroll,
+  type AntdTableRef,
+  KeyedScrollRegistration,
+  scrollAntdRow,
+  useAntdRowScroll,
+} from "./antdRowScroll";
 import {
   ANTD_ACTIONS_COLUMN_WIDTH,
   buildColumns,
@@ -1025,6 +1033,7 @@ interface CardWindow<TRow> {
 function AntdCardWindow<TRow>({
   rows,
   rowKey,
+  scrollTarget,
   props,
   virtualize,
   isPaged,
@@ -1034,6 +1043,8 @@ function AntdCardWindow<TRow>({
 }: Readonly<{
   rows: readonly TRow[];
   rowKey: (row: TRow) => string;
+  /** Where the window keeps find's scroll while it windows. */
+  scrollTarget: AntdRowScroll["cards"];
   props: Readonly<ComposedProps<TRow>>;
   /** The resolved decision: antd's own virtual Table owns the desktop path. */
   virtualize: boolean;
@@ -1049,7 +1060,18 @@ function AntdCardWindow<TRow>({
   }, []);
   const listStyle = mobileCardListStyle(props.maxHeight);
   const inBox = props.maxHeight != null;
-  const finish = (window: KeyedVirtualization) =>
+  const keys = rows.map((row) => rowKey(row));
+  const finish = (window: KeyedWindow) => (
+    <>
+      {cardsFor(window)}
+      <KeyedScrollRegistration
+        target={scrollTarget}
+        keys={keys}
+        keyed={window}
+      />
+    </>
+  );
+  const cardsFor = (window: KeyedVirtualization) =>
     children({
       rowEntries: window.enabled
         ? window.indices.map((index) => ({
@@ -1065,7 +1087,7 @@ function AntdCardWindow<TRow>({
       listStyle,
     });
   const slotProps: KeyedWindowSlotProps = {
-    keys: rows.map((row) => rowKey(row)),
+    keys,
     enabled: virtualize && !isPaged && !error && body === "mobile",
     estimateSize: props.estimateCardSize ?? DEFAULT_CARD_SIZE_PX,
     overscan: props.virtualOverscan,
@@ -1109,6 +1131,7 @@ interface GroupingBundle<TRow> {
  */
 function AntdGroupingWindow<TRow>({
   grouping,
+  scrollTarget,
   props,
   isPaged,
   error,
@@ -1117,6 +1140,8 @@ function AntdGroupingWindow<TRow>({
   children,
 }: Readonly<{
   grouping: GroupingBundle<TRow> | undefined;
+  /** Where the window keeps find's scroll while it windows. */
+  scrollTarget: AntdRowScroll["groups"];
   props: Readonly<ComposedProps<TRow>>;
   isPaged: boolean;
   error: Error | null;
@@ -1146,7 +1171,16 @@ function AntdGroupingWindow<TRow>({
       : 56,
     overscan: props.virtualOverscan,
     scrollMargin: props.virtualScrollMargin,
-    children: (window) => windowed(window.indices),
+    children: (window) => (
+      <>
+        {windowed(window.indices)}
+        <KeyedScrollRegistration
+          target={scrollTarget}
+          keys={keys}
+          keyed={window}
+        />
+      </>
+    ),
   };
   return filled ? (
     <FeatureSlot slot={KEYED_WINDOW} props={slotProps} />
@@ -1218,6 +1252,8 @@ interface DataTableBodyRegionProps<TRow> {
   pinnedSummaryBottom: readonly TRow[];
   extraRows: ComposedProps<TRow>["extraRows"];
   pinRowSticky: boolean;
+  /** antd's table handle, for find's scroll to an off-window row. */
+  tableRef?: Ref<AntdTableRef>;
 }
 
 /** Desktop antd `<Table>` body — extracted to keep `DataTable` flat. */
@@ -1254,9 +1290,12 @@ function DesktopTableBody<TRow>({
   pinnedSummaryBottom = [],
   pinRowSticky,
   labels,
+  tableRef,
 }: Readonly<{
   /** Cell-navigation getters; inert unless `cellNavigation` is on. */
   gridFocus?: GridFocusState;
+  /** antd's table handle, for find's scroll to an off-window row. */
+  tableRef?: Ref<AntdTableRef>;
   tableLabel: string | undefined;
   columns: ReturnType<typeof buildColumns<TRow>>;
   dataSource: readonly GroupedDataRecord<TRow>[];
@@ -1347,6 +1386,7 @@ function DesktopTableBody<TRow>({
 
   const table = (
     <Table<GroupedDataRecord<TRow>>
+      ref={tableRef}
       aria-label={tableLabel}
       components={components}
       columns={columns}
@@ -1472,6 +1512,7 @@ function DataTableBodyRegion<TRow>(
 ): ReactNode {
   const {
     gridFocus,
+    tableRef,
     chromeBody,
     errorState,
     source,
@@ -1593,6 +1634,7 @@ function DataTableBodyRegion<TRow>(
     body = (
       <DesktopTableBody
         gridFocus={gridFocus}
+        tableRef={tableRef}
         tableLabel={tableLabel}
         columns={columns}
         dataSource={dataSource}
@@ -1883,12 +1925,14 @@ function AntdChromeSession<TRow>({
     groupAggregates: bindFeatureHostFn(featureHost, props.groupAggregates),
   };
   rememberFeatureHost(chromeProps, featureHost);
+  const rowScroll = useAntdRowScroll();
   const c = useTableChrome<TRow>(chromeProps);
   return (
     <ChromeExtrasGate chrome={c} props={chromeProps}>
       {(chrome) => (
         <AntdGroupingWindow<TRow>
           grouping={chrome.grouping}
+          scrollTarget={rowScroll.groups}
           props={props}
           isPaged={chrome.isPaged}
           error={chrome.source.error}
@@ -1898,6 +1942,7 @@ function AntdChromeSession<TRow>({
           {(grouping) => (
             <AntdTableBody<TRow>
               grouping={grouping}
+              rowScroll={rowScroll}
               props={props}
               chromeProps={chromeProps}
               density={density ?? "comfortable"}
@@ -1941,6 +1986,8 @@ type RenderModelAssembly<TRow> = Parameters<
 
 /** Everything the body needs from the half of the table above the gate. */
 interface AntdTableBodyProps<TRow> {
+  /** Find's scroll handles for this table's windows. */
+  readonly rowScroll: AntdRowScroll;
   readonly props: Readonly<ComposedProps<TRow>>;
   readonly chromeProps: Parameters<typeof useTableChrome<TRow>>[0];
   readonly density: "comfortable" | "compact";
@@ -2022,6 +2069,7 @@ function AntdTableBody<TRow>({
   size,
   filtersMode,
   grouping,
+  rowScroll,
 }: Readonly<AntdTableBodyProps<TRow>>) {
   const hasColumnHeaderRename = useFeatureSlotFilled(COLUMN_HEADER_RENAME);
   const { windowStart, cardSetSize, statusAnnouncement } =
@@ -2118,8 +2166,14 @@ function AntdTableBody<TRow>({
     ),
   });
 
+  const scrollToRow = useCallback(
+    (row: TRow) => scrollAntdRow(rowScroll, getRowId(row)),
+    [rowScroll, getRowId]
+  );
+
   return (
     <AntdInteractionGate
+      scrollToRow={virtualize ? scrollToRow : undefined}
       root={rootRef}
       props={props}
       source={c.source}
@@ -2324,6 +2378,7 @@ function AntdTableBody<TRow>({
           <AntdCardWindow<TRow>
             rows={source.rows}
             rowKey={getRowId}
+            scrollTarget={rowScroll.cards}
             props={props}
             virtualize={virtualBody}
             isPaged={c.isPaged}
@@ -2333,6 +2388,7 @@ function AntdTableBody<TRow>({
             {(cardWindow) => (
               <DataTableBodyRegion
                 gridFocus={gridFocus}
+                tableRef={rowScroll.table}
                 chromeBody={c.body}
                 errorState={c.errorState}
                 source={source}

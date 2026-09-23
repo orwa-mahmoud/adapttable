@@ -361,6 +361,7 @@ export {
   GROUPING_LIVE,
   GROUPING_PANEL,
   KEYED_WINDOW,
+  type KeyedWindow,
   type KeyedWindowSlotProps,
   PINNING_LIVE,
   ROW_ACTIONS_LIVE,
@@ -678,6 +679,7 @@ export {
   type RowPairMeasurer,
   useRowPairMeasurer,
 } from "./virtual/measureRowPair";
+export { RowScrollContext } from "./virtual/rowScroll";
 export {
   type ColumnWindow,
   useColumnWindow,

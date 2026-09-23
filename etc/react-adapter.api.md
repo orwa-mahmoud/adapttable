@@ -75,6 +75,7 @@ import { Command } from '@adapttable/core';
 import { ComponentType } from 'react';
 import { ConfirmHandler } from '@adapttable/core';
 import { ConfirmRequest } from '@adapttable/core';
+import { Context } from 'react';
 import { ContextMenuActions } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuItemsFactory } from '@adapttable/core';
@@ -3412,8 +3413,13 @@ export const KEYED_WINDOW: FeatureSlotKey<KeyedWindowSlotProps>;
 export { KeyedVirtualization }
 
 // @public
+export interface KeyedWindow extends KeyedVirtualization {
+    scrollToIndex?: (index: number) => void;
+}
+
+// @public
 export interface KeyedWindowSlotProps {
-    children: (window: KeyedVirtualization) => ReactNode;
+    children: (window: KeyedWindow) => ReactNode;
     enabled: boolean;
     estimateSize: number;
     getScrollElement?: () => Element | null;
@@ -4211,6 +4217,9 @@ export interface RowReorderState<TRow> {
     };
     selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
 }
+
+// @public
+export const RowScrollContext: Context<((row: never) => void) | null>;
 
 export { rowSourceIndex }
 

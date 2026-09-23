@@ -289,7 +289,19 @@ export interface KeyedWindowSlotProps {
   /** The scroll box, when the list scrolls inside one rather than the page. */
   getScrollElement?: () => Element | null;
   /** Finish with the window this slot produced. */
-  children: (window: KeyedVirtualization) => ReactNode;
+  children: (window: KeyedWindow) => ReactNode;
+}
+
+/**
+ * The window {@link KEYED_WINDOW} produces: the keyed virtualization, plus a
+ * scroll that brings one entry into it — what a kit calls when find walks to
+ * an entry outside the window.
+ *
+ * @public
+ */
+export interface KeyedWindow extends KeyedVirtualization {
+  /** Scroll the window so the entry at `index` is rendered. */
+  scrollToIndex?: (index: number) => void;
 }
 
 /**

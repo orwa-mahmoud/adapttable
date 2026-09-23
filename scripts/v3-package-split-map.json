@@ -29467,6 +29467,14 @@
       "behavior": ""
     },
     {
+      "export": "KeyedWindow",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "KeyedWindowSlotProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -30270,6 +30278,14 @@
       "export": "RowReorderState",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "RowScrollContext",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
       "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
