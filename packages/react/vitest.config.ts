@@ -9,9 +9,16 @@ const packageDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default mergeConfig(sharedConfig, {
   resolve: {
-    alias: {
-      "@adapttable/core": path.resolve(packageDir, "../core/src/index.ts"),
-    },
+    alias: [
+      {
+        find: /^@adapttable\/core$/,
+        replacement: path.resolve(packageDir, "../core/src/index.ts"),
+      },
+      {
+        find: /^@adapttable\/core\/(.+)$/,
+        replacement: path.resolve(packageDir, "../core/src/$1.ts"),
+      },
+    ],
   },
   test: {
     setupFiles: ["./vitest.setup.ts"],
