@@ -429,7 +429,9 @@ export interface AdapterStandardFeatureFactories {
     readonly densityChooser: () => StaticTableFeature;
     readonly exportCsv: () => StaticTableFeature;
     readonly filters: <TRow>(defs: readonly FilterDef<TRow>[]) => TableFeature<TRow>;
-    readonly findInTable: () => StaticTableFeature;
+    readonly findInTable: (options?: {
+        readonly button?: boolean;
+    }) => StaticTableFeature;
     readonly fitColumns: () => StaticTableFeature;
     readonly fullscreen: () => StaticTableFeature;
     readonly grouping: (groupBy: string | readonly string[]) => StaticTableFeature;
@@ -636,6 +638,7 @@ export interface BaseDataTableProps<TRow> {
     locale?: string;
     maxHeight?: number;
     mobileBreakpoint?: number;
+    // @deprecated
     mobileIdentityColumns?: number;
     onCellCut?: (range: CellRange) => void;
     onCellFill?: (edits: CellEdit<TRow>[]) => void;
@@ -4667,6 +4670,7 @@ export type SpeechInputStatus = "idle" | "listening" | "processing" | "denied" |
 export interface StandardFeatureOptions<TRow> {
     readonly bulkActions?: readonly BulkAction[];
     readonly filters?: readonly FilterDef<TRow>[];
+    readonly findButton?: boolean;
     readonly grouping?: string | readonly string[];
     readonly savedViews?: UseSavedViewsOptions;
 }
