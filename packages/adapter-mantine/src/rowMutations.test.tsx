@@ -3,8 +3,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
-import { rowActions } from "./row-actions";
 import type { ColumnDef } from "./index";
+import { rowActions } from "./row-actions";
 
 interface Task {
   id: string;
