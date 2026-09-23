@@ -123,7 +123,12 @@ heap and time-to-interactive for each:
 ```bash
 node scripts/bench.mjs                   # every scenario
 node scripts/bench.mjs --smoke           # the fast subset CI runs
+node scripts/bench.mjs --record          # also saves the run to scripts/bench-runs/
 ```
+
+`--record` writes the run — every scenario, the machine and the browser build it
+ran on — to a dated JSON file in
+[`scripts/bench-runs/`](https://github.com/orwa-mahmoud/adapttable/tree/main/scripts/bench-runs).
 
 A showcase already running on the port is used as-is, so
 `pnpm --filter @adapttable/showcase dev` in another terminal still works and is
