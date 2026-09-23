@@ -104,7 +104,10 @@ because answering "what should I use when this is missing" is its whole job.
 
 A field the engine has no kind for — an object, a function — is `#VALUE!`
 rather than its stringification. `[object Object]` in a cell is not a
-rendering of the data; it is a rendering of nobody having decided.
+rendering of the data; it is a rendering of nobody having decided. A field that
+is `NaN`, `Infinity` or an invalid date is `#VALUE!` too, and so is any result
+too large to be a number — an overflowing product, sum or `ROUND` — so a
+formula's answer is always a finite number or an error.
 
 ## Functions
 
