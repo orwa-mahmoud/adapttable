@@ -47,7 +47,7 @@
       "adapterComponents": [],
       "standardPreset": false,
       "note": "Pins reorder the row model and set a part name; no dedicated kit component.",
-      "requiresConfig": true
+      "requiresConfig": false
     },
     "pinnedSummaryRows": {
       "id": "pinned-summary-rows",

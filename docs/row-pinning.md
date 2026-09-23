@@ -1,11 +1,11 @@
 # React table row pinning — sticky top and bottom rows
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — compose `rowPinning({ onPinnedRowIdsChange })` and pin actions appear. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — compose `rowPinning()` and pin actions appear. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [pin and merge rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — sticky pins, Team written once down consecutive teammates (pin keeps that one merge), and a 3-dot menu. Movement lives on the [row-reordering page](https://orwa-mahmoud.github.io/adapttable/demo/mantine/row-reordering/). The same pages exist for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
-Import `rowPinning` from `@adapttable/<kit>/row-pinning` and compose it with
-`pinnedRowIds` and/or `onPinnedRowIdsChange`; every row gains icon-only
+Import `rowPinning` from `@adapttable/<kit>/row-pinning` and compose it; every
+row gains icon-only
 Pin to top / Pin to bottom / Unpin (labels on hover and as the accessible name),
 each hidden when it does not apply. A table that does not compose it carries
 none of this — see [feature composition](./features.md). The value is
@@ -36,9 +36,9 @@ function Tasks({ rows }: { rows: Task[] }) {
 }
 ```
 
-Uncontrolled: `rowPinning({ onPinnedRowIdsChange })` (an observer) and the
-table holds the lists; `rowPinning()` with no options renders nothing. In that
-mode the batteries-included shell writes them to the URL
+Uncontrolled: a bare `rowPinning()`, or `rowPinning({ onPinnedRowIdsChange })`
+to observe the lists, and the table holds them. In that mode the
+batteries-included shell writes them to the URL
 (`rowPin=id1:top,id2:bottom`) so a shared link keeps the same rows stuck, and
 Saved Views capture `rowPin` with the rest of the table. A controlled
 `pinnedRowIds` keeps the URL out of it. `useRowPinningUrlState` is the same

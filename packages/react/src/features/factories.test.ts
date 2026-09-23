@@ -87,9 +87,14 @@ describe("feature factories", () => {
         })
       )
     ).toEqual({
+      rowPinningArmed: true,
       pinnedRowIds: { top: ["a"], bottom: [] },
       onPinnedRowIdsChange,
     });
+  });
+
+  it("a bare rowPinning arms pinning on its own", () => {
+    expect(patch(rowPinning())).toEqual({ rowPinningArmed: true });
   });
 
   it("cellSpan writes the getter and appearance", () => {

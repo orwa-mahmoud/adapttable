@@ -354,10 +354,14 @@ export interface FeatureProps<TRow> {
   pinnedRowIds?: RowPinState;
   /**
    * Pin-list change channel. Uncontrolled: an observer. Controlled: apply
-   * the next lists to accept. Setting this (or `BaseDataTableProps.pinnedRowIds`)
-   * is what arms the feature — omit both and nothing renders.
+   * the next lists to accept.
    */
   onPinnedRowIdsChange?: (next: RowPinState) => void;
+  /**
+   * Row pinning is composed. `rowPinning()` sets it, so a bare call pins rows
+   * with the table holding the lists.
+   */
+  rowPinningArmed?: boolean;
   /**
    * Per-cell row/column span. Return `{ colSpan, rowSpan }` for the origin;
    * covered cells are omitted from the row's cell list. Column-level

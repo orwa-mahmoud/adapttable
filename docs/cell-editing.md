@@ -595,7 +595,7 @@ plus `addRow`, with the duplicate and delete actions already folded into
 
 Changing which row sits where is the same one-way write: compose `rowReorder`
 and a grip appears. See [row reordering](./row-reordering.md).
-Compose `rowPinning({ onPinnedRowIdsChange })` and pin actions appear. See
+Compose `rowPinning()` and pin actions appear. See
 [row pinning](./row-pinning.md).
 
 ## Dirty marks
