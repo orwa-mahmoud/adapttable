@@ -1,7 +1,8 @@
 name: E2E nightly
 
-# Extra browsers, mobile viewport, axe (again, on those engines) and
-# Chromium visual baselines. The per-PR gate stays Chromium-only in pr.yml.
+# Extra browsers, mobile viewport, axe (again, on those engines), Chromium
+# visual baselines and the base-table performance baseline. The per-PR gate
+# stays Chromium-only in pr.yml.
 on:
   schedule:
     # Daily, after the US evening — not on every PR.
@@ -92,4 +93,29 @@ jobs:
         with:
           name: playwright-nightly-visual
           path: playwright-report/
+          retention-days: 7
+
+  perf:
+    name: Base-table performance
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - uses: ./.github/actions/playwright-chromium
+      # The parse fixtures pack the built adapters, and the timings are taken
+      # on the production showcase, so both are built here.
+      - name: Build the packages and the showcase
+        run: pnpm turbo run build --filter=@adapttable/showcase
+      # Held against the runner's own baseline: a laptop's numbers say nothing
+      # about a shared Linux runner. A run with no baseline writes one.
+      - name: Hold the base table to its Linux baseline
+        run: pnpm perf:v3 --baseline scripts/v3-perf-baseline.linux.json
+      - name: Upload the measured baseline
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: v3-perf-baseline-linux
+          path: scripts/v3-perf-baseline.linux.json
+          if-no-files-found: ignore
           retention-days: 7
