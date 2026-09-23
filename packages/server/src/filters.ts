@@ -75,6 +75,7 @@ export interface ShapedFilter {
 
 /** A text filter, typed. @public */
 export interface TextFilter {
+  /** The filter type, which names the shape. */
   readonly type: "text";
   /** One of the text operators. */
   readonly op: string;
@@ -84,31 +85,43 @@ export interface TextFilter {
 
 /** A single-choice filter, typed. @public */
 export interface SelectFilter {
+  /** The filter type, which names the shape. */
   readonly type: "select";
+  /** Always `eq`. */
   readonly op: "eq";
+  /** The chosen option. */
   readonly value: string;
 }
 
 /** A multi-value filter, typed. @public */
 export interface ListFilter {
+  /** The filter type, which names the shape. */
   readonly type: "multiSelect" | "checklist";
+  /** Always `in`. */
   readonly op: "in";
+  /** The chosen options, in link order. */
   readonly values: readonly string[];
 }
 
 /** A yes/no filter, typed. @public */
 export interface BooleanFilter {
+  /** The filter type, which names the shape. */
   readonly type: "boolean";
+  /** Always `eq`. */
   readonly op: "eq";
+  /** `true` for yes, `false` for no. */
   readonly value: boolean;
 }
 
 /** A number range filter, typed. @public */
 export interface NumberRangeFilter {
+  /** The filter type, which names the shape. */
   readonly type: "numberRange";
   /** One of the number operators. */
   readonly op: string;
+  /** The lower bound, inclusive. */
   readonly min?: number;
+  /** The upper bound, inclusive. */
   readonly max?: number;
   /** The listed numbers, for `in` / `notIn`. */
   readonly values?: readonly number[];
@@ -116,6 +129,7 @@ export interface NumberRangeFilter {
 
 /** A date range filter, typed. @public */
 export interface DateRangeFilter {
+  /** The filter type, which names the shape. */
   readonly type: "dateRange";
   /** One of the date operators. */
   readonly op: string;
@@ -129,10 +143,13 @@ export interface DateRangeFilter {
 
 /** A filter of a host-registered type, typed by its declared operators. @public */
 export interface CustomTypedFilter {
+  /** The filter type, which names the shape. */
   readonly type: "custom";
   /** The registered type name. */
   readonly filterType: string;
+  /** One of the operators the type declares. */
   readonly op: string;
+  /** The value, when the operator takes one. */
   readonly value?: string;
 }
 
@@ -176,8 +193,11 @@ export interface ServerFilterDef {
  * @public
  */
 export interface ServerFilterType {
+  /** The type name filter definitions refer to. */
   readonly type: string;
+  /** Every operator the type accepts. */
   readonly ops: readonly string[];
+  /** The operator used when the link names none. */
   readonly defaultOp: string;
 }
 
@@ -218,15 +238,24 @@ export function pickFilters(
   keys: readonly string[]
 ): { readonly key: string }[] | Record<string, string> {
   const allowed = new Set(keys);
-  if (Array.isArray(defs)) {
-    return (defs as readonly { readonly key: string }[]).filter((def) =>
-      allowed.has(def.key)
-    );
-  }
+  return Array.isArray(defs)
+    ? pickDefs(defs as readonly { readonly key: string }[], allowed)
+    : pickTypes(defs as Readonly<Record<string, string>>, allowed);
+}
+
+function pickDefs(
+  defs: readonly { readonly key: string }[],
+  allowed: ReadonlySet<string>
+): { readonly key: string }[] {
+  return defs.filter((def) => allowed.has(def.key));
+}
+
+function pickTypes(
+  defs: Readonly<Record<string, string>>,
+  allowed: ReadonlySet<string>
+): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const [key, type] of Object.entries(
-    defs as Readonly<Record<string, string>>
-  )) {
+  for (const [key, type] of Object.entries(defs)) {
     if (allowed.has(key)) out[key] = type;
   }
   return out;
@@ -335,12 +364,18 @@ function numberOf(raw: string | undefined): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-const ISO_DATE =
-  /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})?)?$/;
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+const ISO_TIME = /^\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?$/;
+const ISO_ZONE = /(?:Z|[+-]\d{2}:\d{2})$/;
 
 /** An ISO date or date-time that names a real instant. */
 function isIsoDate(raw: string): boolean {
-  return ISO_DATE.test(raw) && !Number.isNaN(Date.parse(raw));
+  const [day = "", time, ...rest] = raw.split("T");
+  if (rest.length > 0 || !ISO_DAY.test(day)) return false;
+  if (time !== undefined && !ISO_TIME.test(time.replace(ISO_ZONE, ""))) {
+    return false;
+  }
+  return !Number.isNaN(Date.parse(raw));
 }
 
 /** What a check needs to report a refusal by its own parameter. */
@@ -420,10 +455,10 @@ function typedNumberRange(
 ): NumberRangeFilter | undefined {
   const { start, end } = RANGE_SUFFIXES.numberRange;
   if (op === "in" || op === "notIn") {
-    const listed = splitFilterValues(raw.value);
-    const values = listed.map(Number);
+    const text = raw.value ?? "";
+    const values = splitFilterValues(text).map(Number);
     if (values.some((n) => !Number.isFinite(n))) {
-      reader.refuse(reader.param(), raw.value ?? "", "not a list of numbers");
+      reader.refuse(reader.param(), text, "not a list of numbers");
       return undefined;
     }
     return values.length === 0
@@ -529,26 +564,23 @@ function typeOne(
   }
 }
 
-/** The parameters a declaration owns, by bare key. */
-function ownedKeys(def: ServerFilterDef): string[] {
-  const own = [def.key, def.key + FILTER_OP_SUFFIX];
+/** The parameters a declaration owns, by bare key, each with its part. */
+function ownedKeys(
+  def: ServerFilterDef
+): (readonly [string, keyof ShapedFilter])[] {
+  const own: (readonly [string, keyof ShapedFilter])[] = [
+    [def.key, "value"],
+    [def.key + FILTER_OP_SUFFIX, "op"],
+  ];
   if (def.type === "numberRange") {
     const { start, end } = RANGE_SUFFIXES.numberRange;
-    own.push(def.key + start, def.key + end);
+    own.push([def.key + start, "min"], [def.key + end, "max"]);
   }
   if (def.type === "dateRange") {
     const { start, end } = RANGE_SUFFIXES.dateRange;
-    own.push(def.key + start, def.key + end);
+    own.push([def.key + start, "from"], [def.key + end, "to"]);
   }
   return own;
-}
-
-/** Split an owned parameter back into its filter's part. */
-function partOf(def: ServerFilterDef, bare: string): keyof ShapedFilter {
-  if (bare === def.key) return "value";
-  const rest = bare.slice(def.key.length);
-  const found = SUFFIXES.find(([, text]) => text === rest);
-  return found ? found[0] : "value";
 }
 
 /**
@@ -568,21 +600,25 @@ export function typeFilters(
   readonly typed: Record<string, TypedFilter>;
   readonly raw: Record<string, string>;
 } {
-  const owner = new Map<string, ServerFilterDef>();
+  const owner = new Map<
+    string,
+    { readonly def: ServerFilterDef; readonly part: keyof ShapedFilter }
+  >();
   for (const def of defs) {
-    for (const key of ownedKeys(def)) owner.set(key, def);
+    for (const [key, part] of ownedKeys(def)) owner.set(key, { def, part });
   }
   const shaped = new Map<string, Record<string, string>>();
   const raw: Record<string, string> = {};
   for (const [bare, value] of filterParams(params, ns)) {
-    const def = owner.get(bare);
-    if (!def) {
+    const owned = owner.get(bare);
+    if (!owned) {
       refuse(`${FILTER_PREFIX}${bare}`, value, "not a declared filter");
       continue;
     }
     if (value === "") continue;
     raw[bare] = value;
-    shaped.set(def.key, { ...shaped.get(def.key), [partOf(def, bare)]: value });
+    const { def, part } = owned;
+    shaped.set(def.key, { ...shaped.get(def.key), [part]: value });
   }
   const typed: Record<string, TypedFilter> = {};
   for (const def of defs) {
@@ -637,48 +673,60 @@ export function treeProblem(
   return undefined;
 }
 
+type ValueCheck = (
+  condition: QueryCondition,
+  list: readonly unknown[],
+  def: ServerFilterDef
+) => string | undefined;
+
+const VALUE_CHECKS: Readonly<Record<string, ValueCheck>> = {
+  numberRange: (condition, list) =>
+    list.every((entry) => typeof entry === "number" && Number.isFinite(entry))
+      ? undefined
+      : `"${condition.key}" needs a number`,
+  dateRange: (condition, list) => {
+    if (condition.op === "relative") {
+      return typeof condition.value === "string" &&
+        parseRelativeToken(condition.value)
+        ? undefined
+        : `"${condition.key}" needs a relative date`;
+    }
+    return list.every((entry) => typeof entry === "string" && isIsoDate(entry))
+      ? undefined
+      : `"${condition.key}" needs an ISO date`;
+  },
+  boolean: (condition) =>
+    typeof condition.value === "boolean"
+      ? undefined
+      : `"${condition.key}" needs true or false`,
+  select: choiceProblem,
+  multiSelect: choiceProblem,
+  checklist: choiceProblem,
+};
+
+/** Why a choice filter's values are not text from its options. */
+function choiceProblem(
+  condition: QueryCondition,
+  list: readonly unknown[],
+  def: ServerFilterDef
+): string | undefined {
+  const texts = list.filter((entry) => typeof entry === "string");
+  if (texts.length !== list.length) {
+    return `"${condition.key}" needs text values`;
+  }
+  const choices = staticChoices(def);
+  return choices && !texts.every((entry) => choices.has(entry))
+    ? `"${condition.key}" names a value outside its options`
+    : undefined;
+}
+
 /** Why one tree condition's value does not fit its filter's type. */
 function valueProblem(
   def: ServerFilterDef,
   condition: QueryCondition
 ): string | undefined {
   const { value, op } = condition;
-  const noOperand = op === "empty" || op === "notEmpty";
-  if (noOperand) return undefined;
-  const choices = staticChoices(def);
-  const list = Array.isArray(value) ? value : [value];
-  switch (def.type) {
-    case "numberRange":
-      return list.every(
-        (entry) => typeof entry === "number" && Number.isFinite(entry)
-      )
-        ? undefined
-        : `"${condition.key}" needs a number`;
-    case "dateRange":
-      if (op === "relative") {
-        return typeof value === "string" && parseRelativeToken(value)
-          ? undefined
-          : `"${condition.key}" needs a relative date`;
-      }
-      return list.every(
-        (entry) => typeof entry === "string" && isIsoDate(entry)
-      )
-        ? undefined
-        : `"${condition.key}" needs an ISO date`;
-    case "boolean":
-      return typeof value === "boolean"
-        ? undefined
-        : `"${condition.key}" needs true or false`;
-    case "select":
-    case "multiSelect":
-    case "checklist":
-      if (!list.every((entry) => typeof entry === "string")) {
-        return `"${condition.key}" needs text values`;
-      }
-      return choices && !list.every((entry) => choices.has(entry as string))
-        ? `"${condition.key}" names a value outside its options`
-        : undefined;
-    default:
-      return undefined;
-  }
+  if (op === "empty" || op === "notEmpty") return undefined;
+  const check = VALUE_CHECKS[def.type];
+  return check?.(condition, Array.isArray(value) ? value : [value], def);
 }

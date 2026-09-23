@@ -212,15 +212,17 @@ describe("level 2 — a filter shorthand", () => {
     );
 
     expect(query.typedFilters).toEqual({});
-    expect(query.rejected.map((entry) => entry.param).sort()).toEqual(
-      [
-        "f_active",
-        "f_budgetMin",
-        "f_hiredAtFrom",
-        "f_nameOp",
-        "f_salary",
-      ].sort()
-    );
+    expect(
+      query.rejected
+        .map((entry) => entry.param)
+        .sort((a, b) => a.localeCompare(b))
+    ).toEqual([
+      "f_active",
+      "f_budgetMin",
+      "f_hiredAtFrom",
+      "f_nameOp",
+      "f_salary",
+    ]);
   });
 
   it("checks a filter tree's keys, operators and values", () => {

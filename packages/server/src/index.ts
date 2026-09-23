@@ -290,6 +290,43 @@ export function parseTableQuery(
     rejected.push({ param, value, reason });
   };
 
+  const { page, limit } = readPaging(get, schema, refuse);
+  const search = get("q") ?? undefined;
+  const cursor = get("cursor");
+  const sort = validSort(params, ns, allowed, refuse);
+  const grouping = readGrouping(
+    get("groupBy"),
+    schema,
+    listed,
+    allowed,
+    refuse
+  );
+  const filtering = readFiltering(params, ns, schema, listed, allowed, refuse);
+  const pivot = validPivot(get("pivot"), allowed, refuse);
+
+  return {
+    page,
+    limit,
+    offset: (page - 1) * limit,
+    ...(search === undefined || search === "" ? {} : { search }),
+    sort,
+    ...grouping,
+    ...filtering,
+    ...(pivot === undefined ? {} : { pivot: pivot.config }),
+    ...(pivot === undefined || pivot.collapsed.length === 0
+      ? {}
+      : { pivotCollapsed: pivot.collapsed }),
+    ...(cursor ? { cursor } : {}),
+    rejected,
+  };
+}
+
+/** The page and the page size, the size held to the schema's ceiling. */
+function readPaging(
+  get: (name: string) => string | null,
+  schema: QuerySchema,
+  refuse: Refuse
+): { readonly page: number; readonly limit: number } {
   const ceiling = Math.min(schema.maxLimit ?? TABLE_MAX_LIMIT, TABLE_MAX_LIMIT);
   const askedLimit = get("limit");
   const limit = readCount(askedLimit, schema.defaultLimit ?? DEFAULT_LIMIT);
@@ -300,57 +337,78 @@ export function parseTableQuery(
       `above the maximum of ${String(ceiling)}`
     );
   }
+  return { page: readCount(get("page"), 1), limit: Math.min(limit, ceiling) };
+}
 
-  const page = readCount(get("page"), 1);
-  const search = get("q") ?? undefined;
-  const cursor = get("cursor");
-
-  // A column-list schema without declared filters is the original contract,
-  // and its answer is exactly what it has always been.
-  const typedLevel = schema.filters !== undefined;
+/**
+ * The grouping column, and every grouping key when the schema reports them.
+ *
+ * A column-list schema without declared filters or `groupByKeys` answers
+ * with `groupBy` alone; every other schema also lists the keys, and refuses
+ * each one it does not allow exactly once.
+ */
+function readGrouping(
+  raw: string | null,
+  schema: QuerySchema,
+  listed: ReadonlySet<string> | undefined,
+  allowed: Allows,
+  refuse: Refuse
+): Pick<ServerTableQuery, "groupBy" | "groupByKeys"> {
   const reportsKeys =
-    typedLevel || listed === undefined || schema.groupByKeys === true;
-
-  const sort = validSort(params, ns, allowed, refuse);
+    schema.filters !== undefined ||
+    listed === undefined ||
+    schema.groupByKeys === true;
   const groupByKeys = reportsKeys
-    ? validGroupByKeys(get("groupBy"), allowed, refuse)
+    ? validGroupByKeys(raw, allowed, refuse)
     : undefined;
   const groupBy = validGroupBy(
-    get("groupBy"),
+    raw,
     allowed,
-    groupByKeys === undefined ? refuse : () => undefined
+    reportsKeys ? () => undefined : refuse
   );
-  const defs = typedLevel ? declaredFilters(schema.filters ?? []) : [];
-  const custom = schema.filterTypes ?? [];
-  const typed = typedLevel
-    ? typeFilters(params, ns, defs, custom, refuse)
-    : undefined;
-  const filters = typed?.raw ?? validFilters(params, ns, allowed, refuse);
-  const shapedFilters =
-    !typedLevel && listed === undefined ? shapeFilters(params, ns) : undefined;
-  const filterTree = typedLevel
-    ? typedTree(get("ft"), defs, custom, refuse)
-    : validTree(get("ft"), allowed, refuse);
-  const pivot = validPivot(get("pivot"), allowed, refuse);
-
   return {
-    page,
-    limit: Math.min(limit, ceiling),
-    offset: (page - 1) * Math.min(limit, ceiling),
-    ...(search === undefined || search === "" ? {} : { search }),
-    sort,
     ...(groupBy === undefined ? {} : { groupBy }),
     ...(groupByKeys === undefined ? {} : { groupByKeys }),
-    filters,
-    ...(shapedFilters === undefined ? {} : { shapedFilters }),
-    ...(typed === undefined ? {} : { typedFilters: typed.typed }),
+  };
+}
+
+/**
+ * The filters, the filter tree, and the shaped or typed view of them.
+ *
+ * Declared filters type and check every parameter; a column list checks the
+ * keys alone; `columns: "any"` without declarations shapes what it passes.
+ */
+function readFiltering(
+  params: URLSearchParams,
+  ns: string,
+  schema: QuerySchema,
+  listed: ReadonlySet<string> | undefined,
+  allowed: Allows,
+  refuse: Refuse
+): Pick<
+  ServerTableQuery,
+  "filters" | "shapedFilters" | "typedFilters" | "filterTree"
+> {
+  const tree = params.get(`${ns}ft`);
+  if (schema.filters === undefined) {
+    const filters = validFilters(params, ns, allowed, refuse);
+    const filterTree = validTree(tree, allowed, refuse);
+    return {
+      filters,
+      ...(listed === undefined
+        ? { shapedFilters: shapeFilters(params, ns) }
+        : {}),
+      ...(filterTree === undefined ? {} : { filterTree }),
+    };
+  }
+  const defs = declaredFilters(schema.filters);
+  const custom = schema.filterTypes ?? [];
+  const typed = typeFilters(params, ns, defs, custom, refuse);
+  const filterTree = typedTree(tree, defs, custom, refuse);
+  return {
+    filters: typed.raw,
+    typedFilters: typed.typed,
     ...(filterTree === undefined ? {} : { filterTree }),
-    ...(pivot === undefined ? {} : { pivot: pivot.config }),
-    ...(pivot === undefined || pivot.collapsed.length === 0
-      ? {}
-      : { pivotCollapsed: pivot.collapsed }),
-    ...(cursor ? { cursor } : {}),
-    rejected,
   };
 }
 
