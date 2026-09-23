@@ -124,6 +124,7 @@ export interface ActiveFilterChipsProps {
     clearAllLabel: string;
     label: string;
     onClearAll?: () => void;
+    removeLabel?: (label: string) => string;
 }
 
 // @public (undocumented)
