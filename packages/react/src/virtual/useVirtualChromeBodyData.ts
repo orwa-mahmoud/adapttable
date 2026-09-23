@@ -6,14 +6,12 @@
  */
 import {
   devWarn,
-  type GridCell,
   type KeyedVirtualization,
   type TableVirtualization,
   windowGroupedEntries,
 } from "@adapttable/core";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
-import { useFindState } from "../find/findState";
 import type { ComposedTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";
 import {
@@ -22,7 +20,6 @@ import {
   estimateBodyItemSize,
   isBodyEligible,
   measureRowDetailAsPair,
-  sourceWindowStart,
   useBodyLoadMore,
   useFetchNextPage,
   usePinnedScrollRows,
@@ -45,6 +42,17 @@ export function useVirtualChromeBodyData<TRow>(
   chrome: TableChrome<TRow>,
   props: ComposedTableProps<TRow>
 ): ChromeBodyData<TRow> {
+  return useVirtualChromeBody(chrome, props).body;
+}
+
+/**
+ * {@link useVirtualChromeBodyData}, plus a function that brings one row into
+ * the window — what find calls when its walk moves past it.
+ */
+export function useVirtualChromeBody<TRow>(
+  chrome: TableChrome<TRow>,
+  props: ComposedTableProps<TRow>
+): { body: ChromeBodyData<TRow>; scrollToRow: (row: TRow) => void } {
   const { rowKey, virtualize = false } = props;
   const { source } = chrome;
   const expandedBody =
@@ -68,11 +76,7 @@ export function useVirtualChromeBodyData<TRow>(
     },
     [observeWindowList]
   );
-  const bodyEligible = isBodyEligible(chrome);
   const groupingArmed = Boolean(chrome.grouping);
-  const groupKeys = entryKeys(chrome.grouping?.entries);
-  const treeArmed = Boolean(chrome.tree);
-  const treeKeys = entryKeys(chrome.tree?.entries);
   const pinState = chrome.rowPinning?.state;
   const partitioned = usePinnedScrollRows(chrome, rowKey);
   const estimateSize = estimateBodyItemSize(chrome, props, partitioned.scroll);
@@ -84,36 +88,12 @@ export function useVirtualChromeBodyData<TRow>(
     estimateSize,
   } as const;
 
-  const groupWindow = useKeyedVirtualizer({
-    keys: groupKeys,
-    enabled: virtualize && groupingArmed && bodyEligible,
-    ...scrollOpts,
-  });
-  const treeWindow = useKeyedVirtualizer({
-    keys: treeKeys,
-    enabled: virtualize && treeArmed && !groupingArmed && bodyEligible,
-    ...scrollOpts,
-  });
-  const groupVirtualization = groupWindow.virtualization;
-  const treeVirtualization = treeWindow.virtualization;
-
-  const flatWindow = useTableVirtualizer({
-    rows: partitioned.scroll,
-    rowKey,
-    enabled: virtualize && !groupingArmed && !treeArmed && bodyEligible,
-    expandable: measureRowDetailAsPair(chrome.isMobile, props.renderRowDetail),
-    ...scrollOpts,
-  });
-  const virtualization = flatWindow.virtualization;
-
-  const keyedWindow = groupingArmed ? groupWindow : treeWindow;
-  useScrollToFindMatch({
-    current: useFindState()?.current ?? null,
-    matchRow: (cell) => source.rows[cell.row - sourceWindowStart(source)],
-    rowKey,
-    flat: { ...flatWindow, rows: partitioned.scroll },
-    keyed: { ...keyedWindow, keys: groupingArmed ? groupKeys : treeKeys },
-  });
+  const {
+    groupVirtualization,
+    treeVirtualization,
+    virtualization,
+    scrollToRow,
+  } = useBodyWindows(chrome, props, partitioned.scroll, scrollOpts);
 
   const groupingEntries = chrome.grouping
     ? windowGroupedEntries(chrome.grouping.entries, groupVirtualization.indices)
@@ -159,7 +139,7 @@ export function useVirtualChromeBodyData<TRow>(
     };
   }, [pinState, resolvedVirtualization, sourceIndexById]);
 
-  return {
+  const body: ChromeBodyData<TRow> = {
     virtualization: pinnedVirtualization,
     groupingEntries,
     treeEntries,
@@ -172,18 +152,71 @@ export function useVirtualChromeBodyData<TRow>(
     pinnedSummaryBottom: chrome.pinnedRows?.bottom ?? [],
     columnWindow,
   };
+  return { body, scrollToRow };
 }
 
 /**
- * Bring find's current match into the window when it is not rendered. The
- * mark, the scroll into view and the grid's focus all need an element, and a
- * row outside the window has none until the virtualizer scrolls to it.
- *
- * Runs when the walk moves, never on a scroll, so it cannot fight the reader.
+ * The three windows a body can use — grouped entries, tree entries or flat
+ * rows, at most one of them armed — and the row scroll over whichever it is.
  */
-function useScrollToFindMatch<TRow>(options: {
-  current: GridCell | null;
-  matchRow: (cell: GridCell) => TRow | undefined;
+function useBodyWindows<TRow>(
+  chrome: TableChrome<TRow>,
+  props: ComposedTableProps<TRow>,
+  scrollRows: readonly TRow[],
+  scrollOpts: Omit<Parameters<typeof useKeyedVirtualizer>[0], "keys">
+): {
+  groupVirtualization: KeyedVirtualization;
+  treeVirtualization: KeyedVirtualization;
+  virtualization: TableVirtualization<TRow>;
+  scrollToRow: (row: TRow) => void;
+} {
+  const { rowKey, virtualize = false } = props;
+  const eligible = virtualize && isBodyEligible(chrome);
+  const groupingArmed = Boolean(chrome.grouping);
+  const treeArmed = Boolean(chrome.tree) && !groupingArmed;
+  const groupKeys = entryKeys(chrome.grouping?.entries);
+  const treeKeys = entryKeys(chrome.tree?.entries);
+
+  const groupWindow = useKeyedVirtualizer({
+    keys: groupKeys,
+    enabled: eligible && groupingArmed,
+    ...scrollOpts,
+  });
+  const treeWindow = useKeyedVirtualizer({
+    keys: treeKeys,
+    enabled: eligible && treeArmed,
+    ...scrollOpts,
+  });
+  const flatWindow = useTableVirtualizer({
+    rows: scrollRows,
+    rowKey,
+    enabled: eligible && !groupingArmed && !treeArmed,
+    expandable: measureRowDetailAsPair(chrome.isMobile, props.renderRowDetail),
+    ...scrollOpts,
+  });
+  const scrollToRow = useRowScroll({
+    rowKey,
+    flat: { ...flatWindow, rows: scrollRows },
+    keyed: groupingArmed
+      ? { ...groupWindow, keys: groupKeys }
+      : { ...treeWindow, keys: treeKeys },
+  });
+  return {
+    groupVirtualization: groupWindow.virtualization,
+    treeVirtualization: treeWindow.virtualization,
+    virtualization: flatWindow.virtualization,
+    scrollToRow,
+  };
+}
+
+/**
+ * Bring one row into the window when it is not rendered: the flat window by
+ * the row's index, a grouped or tree window by its entry key. A row already
+ * in the window is left where it is, so a call never fights the reader.
+ *
+ * The callback is stable and reads the current window through a ref.
+ */
+function useRowScroll<TRow>(options: {
   rowKey: (row: TRow) => string;
   flat: {
     virtualization: TableVirtualization<TRow>;
@@ -195,15 +228,11 @@ function useScrollToFindMatch<TRow>(options: {
     scrollToIndex: (index: number) => void;
     keys: readonly string[];
   };
-}): void {
+}): (row: TRow) => void {
   const latest = useRef(options);
   latest.current = options;
-  const { current } = options;
-  useEffect(() => {
-    if (!current) return;
-    const { matchRow, rowKey, flat, keyed } = latest.current;
-    const row = matchRow(current);
-    if (row === undefined) return;
+  return useCallback((row: TRow) => {
+    const { rowKey, flat, keyed } = latest.current;
     const id = rowKey(row);
     if (flat.virtualization.enabled) {
       if (flat.virtualization.rows.some((entry) => entry.key === id)) return;
@@ -218,7 +247,7 @@ function useScrollToFindMatch<TRow>(options: {
     if (index >= 0 && !keyed.virtualization.indices.includes(index)) {
       keyed.scrollToIndex(index);
     }
-  }, [current]);
+  }, []);
 }
 
 function resolveBodyVirtualization<TRow>(

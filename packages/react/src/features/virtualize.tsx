@@ -8,8 +8,9 @@
  */
 import type { ReactNode } from "react";
 
+import { RowScrollContext } from "../virtual/rowScroll";
 import { useKeyedVirtualization } from "../virtual/useTableVirtualization";
-import { useVirtualChromeBodyData } from "../virtual/useVirtualChromeBodyData";
+import { useVirtualChromeBody } from "../virtual/useVirtualChromeBodyData";
 import { slotRender } from "./providers";
 import {
   CHROME_BODY,
@@ -51,9 +52,13 @@ function VirtualChromeBody({
   chrome,
   props,
   children,
-}: ChromeBodySlotProps<never>): ReactNode {
-  const body = useVirtualChromeBodyData(chrome, props);
-  return children(body);
+}: Readonly<ChromeBodySlotProps<never>>): ReactNode {
+  const { body, scrollToRow } = useVirtualChromeBody(chrome, props);
+  return (
+    <RowScrollContext.Provider value={scrollToRow}>
+      {children(body)}
+    </RowScrollContext.Provider>
+  );
 }
 
 /**

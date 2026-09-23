@@ -220,7 +220,10 @@ export function useTableVirtualizer<TRow>({
 
   const scrollToIndex = useCallback(
     (index: number) => {
-      virtualizer.scrollToIndex(index, { align: "center" });
+      virtualizer.scrollToIndex(index, {
+        align: "center",
+        behavior: "instant",
+      });
     },
     [virtualizer]
   );
@@ -392,7 +395,10 @@ export function useKeyedVirtualizer(
 
   const scrollToIndex = useCallback(
     (index: number) => {
-      virtualizer.scrollToIndex(index, { align: "center" });
+      virtualizer.scrollToIndex(index, {
+        align: "center",
+        behavior: "instant",
+      });
     },
     [virtualizer]
   );
