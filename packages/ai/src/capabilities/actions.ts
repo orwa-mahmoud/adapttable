@@ -57,13 +57,17 @@ function capabilityKeyOf(scope: "rowAction" | "bulkAction", key: string) {
 }
 
 /** Actions the agent may see: host-declared, and not opted out. */
-function offered<T extends { readonly key: string; readonly ai?: unknown }>(
-  actions: readonly T[]
-): T[] {
+/** An action the agent may be offered: never one marked `ai: false`. */
+type Offered<T> = Omit<T, "ai"> & { readonly ai?: ActionAiOptions };
+
+function offered<
+  T extends { readonly key: string; readonly ai?: ActionAiOptions | false },
+>(actions: readonly T[]): Offered<T>[] {
   // `adapttable:` keys are the table's own controls (add, duplicate, delete,
   // pin), which carry their own capabilities.
   return actions.filter(
-    (action) => action.ai !== false && !action.key.startsWith("adapttable:")
+    (action): action is T & Offered<T> =>
+      action.ai !== false && !action.key.startsWith("adapttable:")
   );
 }
 
@@ -78,10 +82,9 @@ function kindOf(
  * unless the action says otherwise.
  */
 function approvalOf(
-  ai: ActionAiOptions | false | undefined,
+  own: ActionAiOptions | undefined,
   confirm: unknown
 ): ActionAiOptions | undefined {
-  const own = ai === false ? undefined : ai;
   if (!confirm || own?.approval?.policy !== undefined) return own;
   return { ...own, approval: { ...own?.approval, policy: "required" } };
 }
@@ -139,7 +142,7 @@ function rowKeysOf(args: unknown): readonly string[] {
 }
 
 function rowCapability<TRow>(
-  declared: RowAction<TRow>,
+  declared: Offered<RowAction<TRow>>,
   source: TableActionSource<TRow>
 ): AgentCapabilityDefinition {
   const live = (): RowAction<TRow> | undefined =>
@@ -197,7 +200,7 @@ function rowCapability<TRow>(
 }
 
 function bulkCapability<TRow>(
-  declared: BulkAction,
+  declared: Offered<BulkAction>,
   source: TableActionSource<TRow>
 ): AgentCapabilityDefinition {
   const live = (): BulkAction | undefined =>

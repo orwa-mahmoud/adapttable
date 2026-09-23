@@ -2280,4 +2280,141 @@ describe("a voice turn through the store", () => {
     expect(store.getState().messages[0]?.transcribing).toBe(false);
     expect(store.getState().status).not.toBe("sending");
   });
+
+  it("sends no clip after dispose or while a turn is running", async () => {
+    const send = vi.fn(
+      () => new Promise<AssistantTransportReply>(() => undefined)
+    );
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: { send },
+    });
+    store.connect();
+    void store.send("count everything");
+    await store.sendClip(CLIP);
+
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(store.getState().messages.map((entry) => entry.text)).toEqual([
+      "count everything",
+    ]);
+
+    store.dispose();
+    await store.sendClip(CLIP);
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports a missing transport instead of recording a clip turn", async () => {
+    const store = createTableAssistant({ session: tableSession() });
+    store.connect();
+
+    await store.sendClip(CLIP);
+
+    expect(store.getState().status).toBe("disconnected");
+    expect(store.getState().error).toBe("no transport is connected");
+    expect(store.getState().messages).toEqual([]);
+  });
+
+  it("writes the transcript into the clip's own message and leaves earlier ones alone", async () => {
+    let heard: ((text: string) => void) | undefined;
+    let settle: ((reply: AssistantTransportReply) => void) | undefined;
+    const send = vi.fn((input: Parameters<AssistantTransport["send"]>[0]) =>
+      input.audio
+        ? new Promise<AssistantTransportReply>((resolve) => {
+            heard = input.onTranscript;
+            settle = resolve;
+          })
+        : Promise.resolve({ text: "Hello." })
+    );
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: { send },
+    });
+    store.connect();
+    await store.send("hi");
+    const turn = store.sendClip(CLIP);
+
+    heard?.("   ");
+    expect(store.getState().messages.at(-1)).toMatchObject({
+      text: "",
+      transcribing: true,
+    });
+    heard?.("next page");
+    settle?.({ text: "Moved on." });
+    await turn;
+
+    expect(store.getState().messages.map((entry) => entry.text)).toEqual([
+      "hi",
+      "Hello.",
+      "next page",
+      "Moved on.",
+    ]);
+    expect(
+      store.getState().messages.some((entry) => entry.transcribing === true)
+    ).toBe(false);
+  });
+
+  it("settles only the failed clip's message when earlier turns exist", async () => {
+    const send = vi.fn((input: Parameters<AssistantTransport["send"]>[0]) =>
+      input.audio
+        ? Promise.reject(new Error("offline"))
+        : Promise.resolve({ text: "Hello." })
+    );
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: { send },
+    });
+    store.connect();
+    await store.send("hi");
+    await store.sendClip(CLIP);
+
+    const messages = store.getState().messages;
+    expect(messages.slice(0, 2).map((entry) => entry.text)).toEqual([
+      "hi",
+      "Hello.",
+    ]);
+    expect(messages[2]).toMatchObject({ role: "user", transcribing: false });
+  });
+
+  it("names a resumable clip turn by what the backend heard", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: ({ onTranscript, onResumable }) => {
+          onTranscript?.("count everything");
+          onResumable?.("job-1");
+          return new Promise<AssistantTransportReply>(() => undefined);
+        },
+      },
+    });
+    store.connect();
+    void store.sendClip(CLIP);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(store.getState().resumable).toEqual({
+      text: "count everything",
+      token: "job-1",
+    });
+  });
+
+  it("keeps a rejoined turn's own words when it is handed on again", async () => {
+    const store = createTableAssistant({
+      session: tableSession(),
+      transport: {
+        send: () => new Promise<AssistantTransportReply>(() => undefined),
+        resume: ({ onResumable }) => {
+          onResumable?.("job-2");
+          return new Promise<AssistantTransportReply>(() => undefined);
+        },
+      },
+      resumeHandle: { text: "count everything", token: "job-1" },
+    });
+    store.connect();
+    void store.resume();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(store.getState().resumable).toEqual({
+      text: "count everything",
+      token: "job-2",
+    });
+  });
 });

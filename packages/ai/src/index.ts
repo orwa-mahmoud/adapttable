@@ -15,12 +15,6 @@ export {
   applyAggregations,
 } from "./aggregationCommands";
 export {
-  type DeclaredTableActions,
-  type TableActionSource,
-  tableActionCapabilities,
-  tableActionSignature,
-} from "./capabilities/actions";
-export {
   resolveApproval,
   type ResolvedApproval,
   type SharedApproval,
@@ -104,6 +98,12 @@ export {
   type ProposalResolver,
   type TableAgentBridge,
 } from "./binding";
+export {
+  type DeclaredTableActions,
+  tableActionCapabilities,
+  tableActionSignature,
+  type TableActionSource,
+} from "./capabilities/actions";
 export { openAiToolNameMap } from "./capabilities/registry";
 export {
   type AgentContext,
