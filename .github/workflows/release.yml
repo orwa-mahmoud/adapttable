@@ -74,7 +74,7 @@ jobs:
     if: ${{ needs.detect.outputs.needPublish == 'true' }}
     name: Publish
     runs-on: ubuntu-latest
-    # contents: create git tags · id-token: npm OIDC trusted publishing.
+    # contents: create tags and releases · id-token: npm OIDC trusted publishing.
     # Provenance is automatic when trusted publishing is configured on npm.
     permissions:
       contents: write
@@ -129,3 +129,10 @@ jobs:
         run: pnpm release:gated
         env:
           HUSKY: "0"
+
+      - name: Create GitHub releases
+        # One release per published package version, tagged on this commit,
+        # with its CHANGELOG section as the notes.
+        run: node scripts/github-releases.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
