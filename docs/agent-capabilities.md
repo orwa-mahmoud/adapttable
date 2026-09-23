@@ -437,7 +437,9 @@ the table's write policy, commit mode and approval apply before the host's
 handler runs. An action's `ai.approval` overrides the table's policy for that
 capability, field by field, exactly as `capabilityApproval` does; an action
 with a `confirm` block asks a person unless its `ai.approval.policy` says
-otherwise. `ai: false` keeps an action away from the agent.
+otherwise. `ai: false` keeps an action away from the agent. A host handler
+cannot be staged, so the actions run on a `commit: "immediate"` table; a
+staged table refuses them with `commit-incompatible`.
 
 A row action refuses a row it is hidden or disabled for (`isHidden`,
 `disabledReason`, `isDisabled`) before anything runs. A bulk action runs on
