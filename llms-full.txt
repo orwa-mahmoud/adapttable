@@ -16989,7 +16989,11 @@ density, fullscreen), `SAVED_VIEWS` (`SavedViewsSlotProps`),
 `ChromeBodyGate` is what asks for it, falling back to the plain body. A kit
 that assembles its own table body — antd renders through its own `<Table>` —
 asks `KEYED_WINDOW` (`KeyedWindowSlotProps`) for a window over a keyed list
-instead, so the virtualizer stays behind the same import there too.
+instead, so the virtualizer stays behind the same import there too. The window
+it gets back is a `KeyedWindow`, whose `scrollToIndex` brings one entry into
+view. Find reaches a match outside the window through `RowScrollContext`: the
+`virtualize` body provides it, and a kit that renders its own body provides it
+above its find stage with a scroll for its own window.
 A kit dresses a core feature with its own parts through `extendFeature`.
 The heavy pieces of body assembly a feature can replace — cell spanning, extra
 rows, the resize handle — are typed as `AssemblyFns`, and `virtualize` takes

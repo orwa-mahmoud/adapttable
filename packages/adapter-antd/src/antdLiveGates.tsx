@@ -38,6 +38,7 @@ import {
   FIND_LIVE,
   type FindLiveSlotProps,
   type GridFocusState,
+  RowScrollContext,
   SELECTION_STATS_LIVE,
   type SelectionStatsLiveSlotProps,
   useFeatureSlotFilled,
@@ -130,6 +131,7 @@ export function AntdInteractionGate<TRow>({
   pageOnly,
   editing,
   root,
+  scrollToRow,
   children,
 }: {
   readonly props: LiveProps<TRow>;
@@ -153,55 +155,59 @@ export function AntdInteractionGate<TRow>({
   readonly editing: EditableCellEditing<TRow> | undefined;
   /** The table root, for Ctrl/Cmd+F and scrolling to a match. */
   readonly root?: RefObject<HTMLElement | null>;
+  /** Bring a row into the virtual window, for a find match outside it. */
+  readonly scrollToRow?: (row: TRow) => void;
   readonly children: (live: AntdLiveState) => ReactNode;
 }): ReactNode {
   return (
-    <FindStage
-      props={props}
-      columns={columns}
-      rows={rows}
-      firstRowIndex={firstRowIndex}
-      urlAdapter={urlAdapter}
-      root={root}
-    >
-      {(find) => (
-        <NavStage
-          props={props}
-          columns={columns}
-          rows={rows}
-          firstRowIndex={firstRowIndex}
-          rowCount={rowCount}
-          columnsWindowed={columnsWindowed}
-          getRowId={getRowId}
-          history={history}
-          find={find}
-          labels={labels}
-          editing={editing}
-        >
-          {(gridFocus) => (
-            <AfterNav
-              props={props}
-              source={source}
-              columns={columns}
-              rows={rows}
-              firstRowIndex={firstRowIndex}
-              gridFocus={gridFocus}
-              getRowId={getRowId}
-              selectedIds={selectedIds}
-              allColumns={allColumns}
-              grouping={grouping}
-              tree={tree}
-              featureHost={featureHost}
-              labels={labels}
-              pageOnly={pageOnly}
-              find={find}
-            >
-              {children}
-            </AfterNav>
-          )}
-        </NavStage>
-      )}
-    </FindStage>
+    <RowScrollContext.Provider value={scrollToRow ?? null}>
+      <FindStage
+        props={props}
+        columns={columns}
+        rows={rows}
+        firstRowIndex={firstRowIndex}
+        urlAdapter={urlAdapter}
+        root={root}
+      >
+        {(find) => (
+          <NavStage
+            props={props}
+            columns={columns}
+            rows={rows}
+            firstRowIndex={firstRowIndex}
+            rowCount={rowCount}
+            columnsWindowed={columnsWindowed}
+            getRowId={getRowId}
+            history={history}
+            find={find}
+            labels={labels}
+            editing={editing}
+          >
+            {(gridFocus) => (
+              <AfterNav
+                props={props}
+                source={source}
+                columns={columns}
+                rows={rows}
+                firstRowIndex={firstRowIndex}
+                gridFocus={gridFocus}
+                getRowId={getRowId}
+                selectedIds={selectedIds}
+                allColumns={allColumns}
+                grouping={grouping}
+                tree={tree}
+                featureHost={featureHost}
+                labels={labels}
+                pageOnly={pageOnly}
+                find={find}
+              >
+                {children}
+              </AfterNav>
+            )}
+          </NavStage>
+        )}
+      </FindStage>
+    </RowScrollContext.Provider>
   );
 }
 
