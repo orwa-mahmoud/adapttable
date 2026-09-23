@@ -19,12 +19,12 @@ import {
   groupingComputationKind,
   type GroupNode,
   type GroupSort,
-  insertExtraRows,
   parseGroupBy,
   serializeAggregationDerivedKey,
   sourceCapabilities,
   withGroupAggregateOverrides,
 } from "@adapttable/core";
+import { insertExtraRows } from "@adapttable/core/binding";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
 import { useGroupCollapse } from "../grouping/useGroupCollapse";

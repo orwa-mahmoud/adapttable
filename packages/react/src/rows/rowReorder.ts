@@ -19,8 +19,8 @@ import {
   type RowMovePolicy,
   type RowMoveRequest,
   type RowMoveTarget,
-  rowReorderSignature as coreRowReorderSignature,
 } from "@adapttable/core";
+import { rowReorderSignature as coreRowReorderSignature } from "@adapttable/core/binding";
 import {
   type CSSProperties,
   type DragEvent,

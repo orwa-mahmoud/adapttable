@@ -3,7 +3,6 @@ import {
   type AggregateSpec,
   applyFilterExtends,
   bindFeatureHostFn,
-  columnMenuActions,
   currentFeatureHost,
   defaultFilterRegistry,
   defaultLabels,
@@ -16,6 +15,7 @@ import {
   resolveFilterRegistry,
   runWithFeatureHost,
 } from "@adapttable/core";
+import { columnMenuActions } from "@adapttable/core/binding";
 import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";

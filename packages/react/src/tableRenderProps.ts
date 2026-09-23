@@ -14,7 +14,6 @@
  */
 import {
   type AssemblyFns,
-  type BodyCell,
   bodyRowEntries,
   type CellSpanAppearance,
   type ColumnGroupRecord,
@@ -40,6 +39,7 @@ import {
   virtualColumnSpan,
   type VirtualTableRow,
 } from "@adapttable/core";
+import { type BodyCell } from "@adapttable/core/binding";
 import { type ReactNode, useMemo, useRef } from "react";
 
 import type { ColumnDef } from "./columnDef";

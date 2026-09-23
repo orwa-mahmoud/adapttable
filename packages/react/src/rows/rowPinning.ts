@@ -16,7 +16,8 @@ import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 
-export { partitionPinnedRows, rowPinSignature } from "@adapttable/core";
+export { partitionPinnedRows } from "@adapttable/core";
+export { rowPinSignature } from "@adapttable/core/binding";
 
 /**
  * Which edge a pinned row sticks to.

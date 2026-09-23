@@ -9,11 +9,10 @@
 
 import {
   buildExportTable,
-  buildTableXlsx,
   columnLetter,
   safeSheetName,
-  xlsxWriter,
 } from "@adapttable/core";
+import { buildTableXlsx, xlsxWriter } from "@adapttable/core/xlsx";
 import { describe, expect, it } from "vitest";
 
 import type { ColumnDef } from "../columnDef";

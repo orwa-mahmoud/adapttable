@@ -116,9 +116,10 @@ grouping("team", {
 
 **Main-entry adapter machinery.** The 72 adapter-machinery names v2
 re-exported from `@adapttable/core` are all exported from
-`@adapttable/react/adapter`. The React-bound ones are exported only there; the
-framework-neutral helpers (column-group, extra-row, pinned-row and row-span
-math) also remain on `@adapttable/core`:
+`@adapttable/react/adapter`, which is where to import them. The React-bound
+ones are exported only there; the framework-neutral helpers (column-group,
+extra-row, pinned-row and row-span math) are also still on `@adapttable/core`,
+deprecated there:
 
 ```ts
 // v2
@@ -129,80 +130,80 @@ import { useFullscreen } from "@adapttable/react/adapter";
 
 Every name keeps the same spelling:
 
-| Name                         | v3 import                                         |
-| ---------------------------- | ------------------------------------------------- |
-| `COLUMN_GROUP_ID_SEP`        | `@adapttable/core` or `@adapttable/react/adapter` |
-| `COLUMN_GROUP_RENDER_PREFIX` | `@adapttable/core` or `@adapttable/react/adapter` |
-| `COLUMN_GROUP_STUB_PREFIX`   | `@adapttable/core` or `@adapttable/react/adapter` |
-| `COLUMN_GROUP_STUB_WIDTH`    | `@adapttable/core` or `@adapttable/react/adapter` |
-| `columnGroupHeaderCaption`   | `@adapttable/core` or `@adapttable/react/adapter` |
-| `columnGroupId`              | `@adapttable/core` or `@adapttable/react/adapter` |
-| `columnGroupPath`            | `@adapttable/core` or `@adapttable/react/adapter` |
-| `columnGroupStubStyle`       | `@adapttable/core` or `@adapttable/react/adapter` |
-| `groupedHeaderAlign`         | `@adapttable/core` or `@adapttable/react/adapter` |
-| `groupedHeaderCellStyle`     | `@adapttable/core` or `@adapttable/react/adapter` |
-| `groupedHeaderChildRule`     | `@adapttable/core` or `@adapttable/react/adapter` |
-| `groupedHeaderLabelStyle`    | `@adapttable/core` or `@adapttable/react/adapter` |
-| `HeaderGroupCell`            | `@adapttable/core` or `@adapttable/react/adapter` |
-| `headerGroupRow`             | `@adapttable/core` or `@adapttable/react/adapter` |
-| `headerGroupRows`            | `@adapttable/core` or `@adapttable/react/adapter` |
-| `HtmlGroupedHeaderCell`      | `@adapttable/core` or `@adapttable/react/adapter` |
-| `htmlGroupedHeaderPlan`      | `@adapttable/core` or `@adapttable/react/adapter` |
-| `isColumnGroupRenderKey`     | `@adapttable/core` or `@adapttable/react/adapter` |
-| `isColumnGroupStubKey`       | `@adapttable/core` or `@adapttable/react/adapter` |
-| `isColumnGroupSummaryKey`    | `@adapttable/core` or `@adapttable/react/adapter` |
-| `toggleCollapsedColumnGroup` | `@adapttable/core` or `@adapttable/react/adapter` |
-| `EXTRA_OVER_SPAN_ROW_STYLE`  | `@adapttable/core` or `@adapttable/react/adapter` |
-| `EXTRA_OVER_SPAN_STYLE`      | `@adapttable/core` or `@adapttable/react/adapter` |
-| `EXTRA_ROW_PARTS`            | `@adapttable/core` or `@adapttable/react/adapter` |
-| `extraCountBeforeRowIds`     | `@adapttable/core` or `@adapttable/react/adapter` |
-| `extraCoveredTableSlots`     | `@adapttable/core` or `@adapttable/react/adapter` |
-| `ExtraEntry`                 | `@adapttable/react/adapter`                       |
-| `extraHostFillStyle`         | `@adapttable/core` or `@adapttable/react/adapter` |
-| `extraRowsForSection`        | `@adapttable/core` or `@adapttable/react/adapter` |
-| `extraUncoveredColSpans`     | `@adapttable/core` or `@adapttable/react/adapter` |
-| `inflateBodyCellRowSpans`    | `@adapttable/core` or `@adapttable/react/adapter` |
-| `insertExtraRows`            | `@adapttable/core` or `@adapttable/react/adapter` |
-| `insertExtrasBeforeRows`     | `@adapttable/core` or `@adapttable/react/adapter` |
-| `isExtraEntry`               | `@adapttable/core` or `@adapttable/react/adapter` |
-| `orderedCardEntries`         | `@adapttable/core` or `@adapttable/react/adapter` |
-| `PINNED_BOTTOM_PART`         | `@adapttable/core` or `@adapttable/react/adapter` |
-| `PINNED_TOP_PART`            | `@adapttable/core` or `@adapttable/react/adapter` |
-| `pinnedRowCellStyle`         | `@adapttable/core` or `@adapttable/react/adapter` |
-| `pinnedRowPart`              | `@adapttable/core` or `@adapttable/react/adapter` |
-| `pinnedRowSticky`            | `@adapttable/core` or `@adapttable/react/adapter` |
-| `pinnedRowStickyStyle`       | `@adapttable/core` or `@adapttable/react/adapter` |
-| `useOffsetHeight`            | `@adapttable/react/adapter`                       |
-| `columnMenuActions`          | `@adapttable/core` or `@adapttable/react/adapter` |
-| `filterColumnMenuRows`       | `@adapttable/core` or `@adapttable/react/adapter` |
-| `hideAllColumns`             | `@adapttable/core` or `@adapttable/react/adapter` |
-| `resetColumnLayout`          | `@adapttable/core` or `@adapttable/react/adapter` |
-| `showAllColumns`             | `@adapttable/core` or `@adapttable/react/adapter` |
-| `unpinAllColumns`            | `@adapttable/core` or `@adapttable/react/adapter` |
-| `BodyCell`                   | `@adapttable/core` or `@adapttable/react/adapter` |
-| `bodyCellsHaveRowSpan`       | `@adapttable/core` or `@adapttable/react/adapter` |
-| `cellsForRow`                | `@adapttable/core` or `@adapttable/react/adapter` |
-| `cellSpanMark`               | `@adapttable/core` or `@adapttable/react/adapter` |
-| `rowSpanSignature`           | `@adapttable/core` or `@adapttable/react/adapter` |
-| `REORDER_COLUMN_WIDTH`       | `@adapttable/core` or `@adapttable/react/adapter` |
-| `ROW_DND_MIME`               | `@adapttable/react/adapter`                       |
-| `rowReorderDropStyle`        | `@adapttable/core` or `@adapttable/react/adapter` |
-| `rowReorderSignature`        | `@adapttable/core` or `@adapttable/react/adapter` |
-| `RowReorderState`            | `@adapttable/react/adapter`                       |
-| `resolveRowHeight`           | `@adapttable/core` or `@adapttable/react/adapter` |
-| `resolveRowStyle`            | `@adapttable/core` or `@adapttable/react/adapter` |
-| `rowStyleSignature`          | `@adapttable/core` or `@adapttable/react/adapter` |
-| `EditableCellActivateProps`  | `@adapttable/react/adapter`                       |
-| `EditableCellButtonProps`    | `@adapttable/react/adapter`                       |
-| `EditableCellSlots`          | `@adapttable/react/adapter`                       |
-| `FilterHeaderClassNames`     | `@adapttable/react/adapter`                       |
-| `FilterHeaderRowProps`       | `@adapttable/react/adapter`                       |
-| `applyCollapsedColumnGroups` | `@adapttable/core` or `@adapttable/react/adapter` |
-| `flattenColumnTree`          | `@adapttable/core` or `@adapttable/react/adapter` |
-| `FullscreenState`            | `@adapttable/react/adapter`                       |
-| `useFullscreen`              | `@adapttable/react/adapter`                       |
-| `rowPinSignature`            | `@adapttable/core` or `@adapttable/react/adapter` |
-| `rowSourceIndex`             | `@adapttable/core` or `@adapttable/react/adapter` |
+| Name                         | v3 import                   |
+| ---------------------------- | --------------------------- |
+| `COLUMN_GROUP_ID_SEP`        | `@adapttable/react/adapter` |
+| `COLUMN_GROUP_RENDER_PREFIX` | `@adapttable/react/adapter` |
+| `COLUMN_GROUP_STUB_PREFIX`   | `@adapttable/react/adapter` |
+| `COLUMN_GROUP_STUB_WIDTH`    | `@adapttable/react/adapter` |
+| `columnGroupHeaderCaption`   | `@adapttable/react/adapter` |
+| `columnGroupId`              | `@adapttable/react/adapter` |
+| `columnGroupPath`            | `@adapttable/react/adapter` |
+| `columnGroupStubStyle`       | `@adapttable/react/adapter` |
+| `groupedHeaderAlign`         | `@adapttable/react/adapter` |
+| `groupedHeaderCellStyle`     | `@adapttable/react/adapter` |
+| `groupedHeaderChildRule`     | `@adapttable/react/adapter` |
+| `groupedHeaderLabelStyle`    | `@adapttable/react/adapter` |
+| `HeaderGroupCell`            | `@adapttable/react/adapter` |
+| `headerGroupRow`             | `@adapttable/react/adapter` |
+| `headerGroupRows`            | `@adapttable/react/adapter` |
+| `HtmlGroupedHeaderCell`      | `@adapttable/react/adapter` |
+| `htmlGroupedHeaderPlan`      | `@adapttable/react/adapter` |
+| `isColumnGroupRenderKey`     | `@adapttable/react/adapter` |
+| `isColumnGroupStubKey`       | `@adapttable/react/adapter` |
+| `isColumnGroupSummaryKey`    | `@adapttable/react/adapter` |
+| `toggleCollapsedColumnGroup` | `@adapttable/react/adapter` |
+| `EXTRA_OVER_SPAN_ROW_STYLE`  | `@adapttable/react/adapter` |
+| `EXTRA_OVER_SPAN_STYLE`      | `@adapttable/react/adapter` |
+| `EXTRA_ROW_PARTS`            | `@adapttable/react/adapter` |
+| `extraCountBeforeRowIds`     | `@adapttable/react/adapter` |
+| `extraCoveredTableSlots`     | `@adapttable/react/adapter` |
+| `ExtraEntry`                 | `@adapttable/react/adapter` |
+| `extraHostFillStyle`         | `@adapttable/react/adapter` |
+| `extraRowsForSection`        | `@adapttable/react/adapter` |
+| `extraUncoveredColSpans`     | `@adapttable/react/adapter` |
+| `inflateBodyCellRowSpans`    | `@adapttable/react/adapter` |
+| `insertExtraRows`            | `@adapttable/react/adapter` |
+| `insertExtrasBeforeRows`     | `@adapttable/react/adapter` |
+| `isExtraEntry`               | `@adapttable/react/adapter` |
+| `orderedCardEntries`         | `@adapttable/react/adapter` |
+| `PINNED_BOTTOM_PART`         | `@adapttable/react/adapter` |
+| `PINNED_TOP_PART`            | `@adapttable/react/adapter` |
+| `pinnedRowCellStyle`         | `@adapttable/react/adapter` |
+| `pinnedRowPart`              | `@adapttable/react/adapter` |
+| `pinnedRowSticky`            | `@adapttable/react/adapter` |
+| `pinnedRowStickyStyle`       | `@adapttable/react/adapter` |
+| `useOffsetHeight`            | `@adapttable/react/adapter` |
+| `columnMenuActions`          | `@adapttable/react/adapter` |
+| `filterColumnMenuRows`       | `@adapttable/react/adapter` |
+| `hideAllColumns`             | `@adapttable/react/adapter` |
+| `resetColumnLayout`          | `@adapttable/react/adapter` |
+| `showAllColumns`             | `@adapttable/react/adapter` |
+| `unpinAllColumns`            | `@adapttable/react/adapter` |
+| `BodyCell`                   | `@adapttable/react/adapter` |
+| `bodyCellsHaveRowSpan`       | `@adapttable/react/adapter` |
+| `cellsForRow`                | `@adapttable/react/adapter` |
+| `cellSpanMark`               | `@adapttable/react/adapter` |
+| `rowSpanSignature`           | `@adapttable/react/adapter` |
+| `REORDER_COLUMN_WIDTH`       | `@adapttable/react/adapter` |
+| `ROW_DND_MIME`               | `@adapttable/react/adapter` |
+| `rowReorderDropStyle`        | `@adapttable/react/adapter` |
+| `rowReorderSignature`        | `@adapttable/react/adapter` |
+| `RowReorderState`            | `@adapttable/react/adapter` |
+| `resolveRowHeight`           | `@adapttable/react/adapter` |
+| `resolveRowStyle`            | `@adapttable/react/adapter` |
+| `rowStyleSignature`          | `@adapttable/react/adapter` |
+| `EditableCellActivateProps`  | `@adapttable/react/adapter` |
+| `EditableCellButtonProps`    | `@adapttable/react/adapter` |
+| `EditableCellSlots`          | `@adapttable/react/adapter` |
+| `FilterHeaderClassNames`     | `@adapttable/react/adapter` |
+| `FilterHeaderRowProps`       | `@adapttable/react/adapter` |
+| `applyCollapsedColumnGroups` | `@adapttable/react/adapter` |
+| `flattenColumnTree`          | `@adapttable/react/adapter` |
+| `FullscreenState`            | `@adapttable/react/adapter` |
+| `useFullscreen`              | `@adapttable/react/adapter` |
+| `rowPinSignature`            | `@adapttable/react/adapter` |
+| `rowSourceIndex`             | `@adapttable/react/adapter` |
 
 **`useChromeBodyData`.** Choose the implementation the host actually renders:
 `usePlainChromeBodyData` for a normal table, or `useVirtualChromeBodyData` for
@@ -402,7 +403,7 @@ column / AI contracts.
 | `TableSource`           | `@adapttable/core`                                           | Unchanged                                           |
 | `useQuerySource`        | `@adapttable/react`                                          | React source hook; query types stay on core         |
 | `useTableChrome`        | `@adapttable/react`                                          | Chrome binding                                      |
-| `HeaderGroupCell`       | `@adapttable/core` or `@adapttable/react/adapter`            | Neutral header-group model                          |
+| `HeaderGroupCell`       | `@adapttable/react/adapter`                                  | Neutral header-group model                          |
 | `sourceCapabilities`    | `@adapttable/core`                                           | Neutral helper                                      |
 | `grouping`              | `@adapttable/<kit>/grouping` or `@adapttable/react/features` | Feature factory that returns a React `TableFeature` |
 | `pivot`                 | `@adapttable/core/pivot`                                     | Pure engine                                         |

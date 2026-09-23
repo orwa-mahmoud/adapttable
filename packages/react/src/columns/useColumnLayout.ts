@@ -1,5 +1,4 @@
 import {
-  applyCollapsedColumnGroups,
   applyColumnOrder,
   type ColumnGroupRecord,
   type ColumnLayoutState,
@@ -9,9 +8,12 @@ import {
   marriedOrderHolds,
   parsePxWidth,
   type PinSide,
-  toggleCollapsedColumnGroup,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
+import {
+  applyCollapsedColumnGroups,
+  toggleCollapsedColumnGroup,
+} from "@adapttable/core/binding";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";

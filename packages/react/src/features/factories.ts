@@ -10,14 +10,9 @@ import {
   type BulkAction,
   type CellSpanAppearance,
   columnResizeHandleProps,
-  extraCoveredTableSlots,
-  extraHostFillStyle,
   type ExtraRow,
   type FilterTypeSpec,
   type GetCellSpan,
-  inflateBodyCellRowSpans,
-  insertExtraRows,
-  insertExtrasBeforeRows,
   type PinnedRows,
   type RowHeight,
   type RowStyle,
@@ -54,6 +49,13 @@ export type { NestedTableFor } from "../tree/nestedTable";
 export type { ExportCsvOptions } from "@adapttable/core";
 export type { FilterDef } from "@adapttable/core";
 export type { GroupSort } from "@adapttable/core";
+import {
+  extraCoveredTableSlots,
+  extraHostFillStyle,
+  inflateBodyCellRowSpans,
+  insertExtraRows,
+  insertExtrasBeforeRows,
+} from "@adapttable/core/binding";
 
 function define<TRow>(
   id: string,

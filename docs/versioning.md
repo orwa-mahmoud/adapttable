@@ -115,14 +115,15 @@ undocumented escape. There is no private channel behind it.
 
 Each is a published, supported entry — not an implementation detail:
 
-| Entry                      | What it is                                                                   |
-| -------------------------- | ---------------------------------------------------------------------------- |
-| `@adapttable/core/formula` | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                   |
-| `@adapttable/core/pdf`     | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …)   |
-| `@adapttable/core/pivot`   | Pivot engine (`pivot`, `serverPivotResult`, field helpers, pivot URL codecs) |
-| `@adapttable/core/query`   | The query model without React — codecs a backend can load                    |
-| `@adapttable/core/stream`  | Live row patches (`RowPatch`, `RowPatchEvent`, …)                            |
-| `@adapttable/core/xlsx`    | Spreadsheet export writer                                                    |
+| Entry                      | What it is                                                                                            |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `@adapttable/core/binding` | The framework-neutral adapter machinery `@adapttable/react/adapter` re-exports — import it from there |
+| `@adapttable/core/formula` | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                                            |
+| `@adapttable/core/pdf`     | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …)                            |
+| `@adapttable/core/pivot`   | Pivot engine (`pivot`, `serverPivotResult`, field helpers, pivot URL codecs)                          |
+| `@adapttable/core/query`   | The query model without React — codecs a backend can load                                             |
+| `@adapttable/core/stream`  | Live row patches (`RowPatch`, `RowPatchEvent`, …)                                                     |
+| `@adapttable/core/xlsx`    | Spreadsheet export writer                                                                             |
 
 `@adapttable/react` publishes the React-facing counterparts of the ones that
 need elements — `/formula`, `/pivot`, `/stream` — plus `/sparkline`, the

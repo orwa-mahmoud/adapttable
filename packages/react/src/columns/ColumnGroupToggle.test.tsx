@@ -1,4 +1,5 @@
-import { defaultLabels, type HeaderGroupCell } from "@adapttable/core";
+import { defaultLabels } from "@adapttable/core";
+import { type HeaderGroupCell } from "@adapttable/core/binding";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

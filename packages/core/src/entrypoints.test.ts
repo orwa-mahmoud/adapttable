@@ -9,12 +9,14 @@
  */
 import { describe, expect, it } from "vitest";
 
+import * as binding from "./binding";
 import * as bindingExports from "./bindingExports";
 import * as formula from "./formula";
 import * as pdf from "./pdf";
 import * as pivot from "./pivot";
 import * as query from "./query";
 import * as stream from "./stream";
+import * as main from "./index";
 import * as xlsx from "./xlsx";
 
 describe("@adapttable/core/formula", () => {
@@ -73,5 +75,19 @@ describe("the binding barrel", () => {
       expect(typeof value).not.toBe("symbol");
     }
     expect(Object.keys(bindingExports).length).toBeGreaterThan(0);
+  });
+});
+
+describe("@adapttable/core/binding", () => {
+  it("opens the adapter machinery the main entry marks for removal", () => {
+    expect(typeof binding.columnGroupId).toBe("function");
+    expect(typeof binding.insertExtraRows).toBe("function");
+    expect(typeof binding.flattenColumnTree).toBe("function");
+  });
+
+  it("serves the same functions the main entry still serves", () => {
+    expect(binding.columnGroupId).toBe(main.columnGroupId);
+    expect(binding.insertExtraRows).toBe(main.insertExtraRows);
+    expect(main.xlsxWriter).toBe(xlsx.xlsxWriter);
   });
 });
