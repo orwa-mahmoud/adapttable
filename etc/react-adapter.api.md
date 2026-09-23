@@ -14,13 +14,13 @@ import { AggregateFn } from '@adapttable/core';
 import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
-import { applyCollapsedColumnGroups } from '@adapttable/core';
+import { applyCollapsedColumnGroups } from '@adapttable/core/binding';
 import { AssemblyFns } from '@adapttable/core';
 import { bindFeatureHostFn } from '@adapttable/core';
 import { bindMobileCardList } from '@adapttable/core';
 import { TableBodyCell as BodyCell } from '@adapttable/core';
-import { BodyCell as BodyCell_2 } from '@adapttable/core';
-import { bodyCellsHaveRowSpan } from '@adapttable/core';
+import { BodyCell as BodyCell_2 } from '@adapttable/core/binding';
+import { bodyCellsHaveRowSpan } from '@adapttable/core/binding';
 import { buildBodyCells } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
@@ -32,26 +32,26 @@ import { CellEditTarget } from '@adapttable/core';
 import { cellFlashAttr } from '@adapttable/core';
 import { CellProps } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
-import { cellsForRow } from '@adapttable/core';
+import { cellsForRow } from '@adapttable/core/binding';
 import { CellSpanAppearance } from '@adapttable/core';
-import { cellSpanMark } from '@adapttable/core';
+import { cellSpanMark } from '@adapttable/core/binding';
 import { CellSpanRequest } from '@adapttable/core';
 import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
-import { COLUMN_GROUP_ID_SEP } from '@adapttable/core';
-import { COLUMN_GROUP_RENDER_PREFIX } from '@adapttable/core';
-import { COLUMN_GROUP_STUB_PREFIX } from '@adapttable/core';
-import { COLUMN_GROUP_STUB_WIDTH } from '@adapttable/core';
+import { COLUMN_GROUP_ID_SEP } from '@adapttable/core/binding';
+import { COLUMN_GROUP_RENDER_PREFIX } from '@adapttable/core/binding';
+import { COLUMN_GROUP_STUB_PREFIX } from '@adapttable/core/binding';
+import { COLUMN_GROUP_STUB_WIDTH } from '@adapttable/core/binding';
 import { ColumnFilter } from '@adapttable/core';
 import { columnFlexShares } from '@adapttable/core';
 import { ColumnFooterContext } from '@adapttable/core';
 import { ColumnGroupDef } from '@adapttable/core';
-import { columnGroupHeaderCaption } from '@adapttable/core';
-import { columnGroupId } from '@adapttable/core';
-import { columnGroupPath } from '@adapttable/core';
+import { columnGroupHeaderCaption } from '@adapttable/core/binding';
+import { columnGroupId } from '@adapttable/core/binding';
+import { columnGroupPath } from '@adapttable/core/binding';
 import { ColumnGroupRecord } from '@adapttable/core';
 import { ColumnGroupShow } from '@adapttable/core';
-import { columnGroupStubStyle } from '@adapttable/core';
+import { columnGroupStubStyle } from '@adapttable/core/binding';
 import { ColumnHeaderContext } from '@adapttable/core';
 import { ColumnHeaderController } from '@adapttable/core';
 import { ColumnInput } from '@adapttable/core';
@@ -59,7 +59,7 @@ import { ColumnLayoutState } from '@adapttable/core';
 import { ColumnMenuAction } from '@adapttable/core';
 import { ColumnMenuActionContext } from '@adapttable/core';
 import { ColumnMenuActionFactory } from '@adapttable/core';
-import { columnMenuActions } from '@adapttable/core';
+import { columnMenuActions } from '@adapttable/core/binding';
 import { ColumnMenuChoice } from '@adapttable/core';
 import { ColumnMenuChoiceOption } from '@adapttable/core';
 import { ColumnMenuChromeProps } from '@adapttable/core';
@@ -109,18 +109,18 @@ import { ExportScopeCapability } from '@adapttable/core';
 import { ExportTable } from '@adapttable/core';
 import { ExportWriteContext } from '@adapttable/core';
 import { ExportWriter } from '@adapttable/core';
-import { EXTRA_OVER_SPAN_ROW_STYLE } from '@adapttable/core';
-import { EXTRA_OVER_SPAN_STYLE } from '@adapttable/core';
-import { EXTRA_ROW_PARTS } from '@adapttable/core';
-import { extraCountBeforeRowIds } from '@adapttable/core';
-import { extraCoveredTableSlots } from '@adapttable/core';
+import { EXTRA_OVER_SPAN_ROW_STYLE } from '@adapttable/core/binding';
+import { EXTRA_OVER_SPAN_STYLE } from '@adapttable/core/binding';
+import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
+import { extraCountBeforeRowIds } from '@adapttable/core/binding';
+import { extraCoveredTableSlots } from '@adapttable/core/binding';
 import { TableExtraEntry as ExtraEntry } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
-import { extraHostFillStyle } from '@adapttable/core';
+import { extraHostFillStyle } from '@adapttable/core/binding';
 import { ExtraRow } from '@adapttable/core';
 import { ExtraRowKind } from '@adapttable/core';
-import { extraRowsForSection } from '@adapttable/core';
-import { extraUncoveredColSpans } from '@adapttable/core';
+import { extraRowsForSection } from '@adapttable/core/binding';
+import { extraUncoveredColSpans } from '@adapttable/core/binding';
 import { FacetCounts } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
 import { FeatureHostState } from '@adapttable/core';
@@ -129,7 +129,7 @@ import { FeatureNoticeAppearance } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
 import { FeatureRegistration } from '@adapttable/core';
 import { FetchAllExport } from '@adapttable/core';
-import { filterColumnMenuRows } from '@adapttable/core';
+import { filterColumnMenuRows } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
@@ -142,7 +142,7 @@ import { FilterValue } from '@adapttable/core';
 import { FilterWidgetKind } from '@adapttable/core';
 import { FilterWidgetRenderProps } from '@adapttable/core';
 import { fittedTableStyle } from '@adapttable/core';
-import { flattenColumnTree } from '@adapttable/core';
+import { flattenColumnTree } from '@adapttable/core/binding';
 import { FlattenedColumns } from '@adapttable/core';
 import { GetCellSpan } from '@adapttable/core';
 import { GetCellSpanArgs } from '@adapttable/core';
@@ -153,10 +153,10 @@ import { GroupAggregatesFn } from '@adapttable/core';
 import { GroupByInput } from '@adapttable/core';
 import { GroupedFlatEntry } from '@adapttable/core';
 import { GroupedHeaderAlign } from '@adapttable/core';
-import { groupedHeaderAlign } from '@adapttable/core';
-import { groupedHeaderCellStyle } from '@adapttable/core';
-import { groupedHeaderChildRule } from '@adapttable/core';
-import { groupedHeaderLabelStyle } from '@adapttable/core';
+import { groupedHeaderAlign } from '@adapttable/core/binding';
+import { groupedHeaderCellStyle } from '@adapttable/core/binding';
+import { groupedHeaderChildRule } from '@adapttable/core/binding';
+import { groupedHeaderLabelStyle } from '@adapttable/core/binding';
 import { GroupingCapability } from '@adapttable/core';
 import { GroupingChipKeyboardProps as GroupingChipKeyboardProps_2 } from '@adapttable/core';
 import { GroupingDragProps as GroupingDragProps_2 } from '@adapttable/core';
@@ -167,20 +167,20 @@ import { GroupingPanelInteractions } from '@adapttable/core';
 import { GroupingPanelState } from '@adapttable/core';
 import { GroupNode } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
-import { HeaderGroupCell } from '@adapttable/core';
-import { headerGroupRow } from '@adapttable/core';
-import { headerGroupRows } from '@adapttable/core';
-import { hideAllColumns } from '@adapttable/core';
+import { HeaderGroupCell } from '@adapttable/core/binding';
+import { headerGroupRow } from '@adapttable/core/binding';
+import { headerGroupRows } from '@adapttable/core/binding';
+import { hideAllColumns } from '@adapttable/core/binding';
 import { HTMLAttributes } from 'react';
-import { HtmlGroupedHeaderCell } from '@adapttable/core';
-import { htmlGroupedHeaderPlan } from '@adapttable/core';
-import { inflateBodyCellRowSpans } from '@adapttable/core';
-import { insertExtraRows } from '@adapttable/core';
-import { insertExtrasBeforeRows } from '@adapttable/core';
-import { isColumnGroupRenderKey } from '@adapttable/core';
-import { isColumnGroupStubKey } from '@adapttable/core';
-import { isColumnGroupSummaryKey } from '@adapttable/core';
-import { isExtraEntry } from '@adapttable/core';
+import { HtmlGroupedHeaderCell } from '@adapttable/core/binding';
+import { htmlGroupedHeaderPlan } from '@adapttable/core/binding';
+import { inflateBodyCellRowSpans } from '@adapttable/core/binding';
+import { insertExtraRows } from '@adapttable/core/binding';
+import { insertExtrasBeforeRows } from '@adapttable/core/binding';
+import { isColumnGroupRenderKey } from '@adapttable/core/binding';
+import { isColumnGroupStubKey } from '@adapttable/core/binding';
+import { isColumnGroupSummaryKey } from '@adapttable/core/binding';
+import { isExtraEntry } from '@adapttable/core/binding';
 import { isPinnedSummaryRowId } from '@adapttable/core';
 import { JSX } from 'react';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
@@ -195,7 +195,7 @@ import { NeutralFeatureHost } from '@adapttable/core';
 import { NeutralTable } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { normalizeEditorOptions } from '@adapttable/core';
-import { orderedCardEntries } from '@adapttable/core';
+import { orderedCardEntries } from '@adapttable/core/binding';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationItem } from '@adapttable/core';
 import { paginationItems } from '@adapttable/core';
@@ -204,17 +204,17 @@ import { PaginationSlot } from '@adapttable/core';
 import { paginationSlots } from '@adapttable/core';
 import { pinActionLabel } from '@adapttable/core';
 import { PinLeads } from '@adapttable/core';
-import { PINNED_BOTTOM_PART } from '@adapttable/core';
+import { PINNED_BOTTOM_PART } from '@adapttable/core/binding';
 import { PINNED_SUMMARY_BOTTOM_PART } from '@adapttable/core';
 import { PINNED_SUMMARY_TOP_PART } from '@adapttable/core';
-import { PINNED_TOP_PART } from '@adapttable/core';
+import { PINNED_TOP_PART } from '@adapttable/core/binding';
 import { PinnedCellStyle } from '@adapttable/core';
 import { pinnedColumnWidth } from '@adapttable/core';
-import { pinnedRowCellStyle } from '@adapttable/core';
-import { pinnedRowPart } from '@adapttable/core';
+import { pinnedRowCellStyle } from '@adapttable/core/binding';
+import { pinnedRowPart } from '@adapttable/core/binding';
 import { PinnedRows } from '@adapttable/core';
-import { pinnedRowSticky } from '@adapttable/core';
-import { pinnedRowStickyStyle } from '@adapttable/core';
+import { pinnedRowSticky } from '@adapttable/core/binding';
+import { pinnedRowStickyStyle } from '@adapttable/core/binding';
 import { PinnedSide } from '@adapttable/core';
 import { PinnedSummaryEntry } from '@adapttable/core';
 import { pinnedSummaryPart } from '@adapttable/core';
@@ -237,13 +237,13 @@ import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
-import { resetColumnLayout } from '@adapttable/core';
+import { resetColumnLayout } from '@adapttable/core/binding';
 import { resolveContextTarget } from '@adapttable/core';
 import { ResolvedContextTarget } from '@adapttable/core';
 import { resolveDisabledReason } from '@adapttable/core';
 import { ResolvedPaginationMode } from '@adapttable/core';
-import { resolveRowHeight } from '@adapttable/core';
-import { resolveRowStyle } from '@adapttable/core';
+import { resolveRowHeight } from '@adapttable/core/binding';
+import { resolveRowStyle } from '@adapttable/core/binding';
 import { resolveVirtualRows } from '@adapttable/core';
 import { ROW_ID_ATTRIBUTE } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
@@ -262,16 +262,16 @@ import { RowMovePolicy } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
 import { RowPinSide as RowPinSide_2 } from '@adapttable/core';
-import { rowPinSignature } from '@adapttable/core';
+import { rowPinSignature } from '@adapttable/core/binding';
 import { RowReorderOptions } from '@adapttable/core';
-import { rowSourceIndex } from '@adapttable/core';
-import { rowSpanSignature } from '@adapttable/core';
+import { rowSourceIndex } from '@adapttable/core/binding';
+import { rowSpanSignature } from '@adapttable/core/binding';
 import { RowStyle } from '@adapttable/core';
-import { rowStyleSignature } from '@adapttable/core';
+import { rowStyleSignature } from '@adapttable/core/binding';
 import { RowTreeMoveHandler } from '@adapttable/core';
 import { RowTreeParentRef } from '@adapttable/core';
 import { SelectionStats } from '@adapttable/core';
-import { showAllColumns } from '@adapttable/core';
+import { showAllColumns } from '@adapttable/core/binding';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
@@ -286,10 +286,10 @@ import { TableSource } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 import { TableStateMutators } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
-import { toggleCollapsedColumnGroup } from '@adapttable/core';
+import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
 import { TotalCountCapability } from '@adapttable/core';
 import { TreeEntry } from '@adapttable/core';
-import { unpinAllColumns } from '@adapttable/core';
+import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { virtualColumnSpan } from '@adapttable/core';
@@ -324,6 +324,12 @@ export type AdapterCommandPaletteFeature = (options?: boolean | CommandPaletteOp
 export type AdapterCommandPaletteProps = Omit<CommandPaletteChromeProps, "slots">;
 
 // @public
+export interface AdapterCommandPaletteTriggerProps extends ToolbarExtrasSlotProps {
+    readonly onOpenPalette: () => void;
+    readonly paletteOpen: boolean;
+}
+
+// @public
 export type AdapterContextMenuFeature = <TRow>(options?: boolean | ContextMenuOptions<TRow>) => TableFeature<TRow>;
 
 // @public
@@ -342,9 +348,7 @@ export interface AdapterEditingComponents {
 export interface AdapterEditingFeatures {
     readonly batchEditing: <TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown) => TableFeature<TRow>;
     readonly dirtyIndicators: () => StaticTableFeature;
-    readonly editHistory: (options?: boolean | {
-        depth?: number;
-    }) => StaticTableFeature;
+    readonly editHistory: (options?: boolean | EditHistoryOptions) => StaticTableFeature;
     readonly editing: <TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;
     readonly rowEditing: <TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;
     readonly undoRedoButtons: () => StaticTableFeature;
@@ -365,6 +369,12 @@ export interface AdapterFiltersComponents {
 export interface AdapterFiltersFeature {
     (form: ReactNode): StaticTableFeature;
     <TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
+}
+
+// @public
+export interface AdapterFindButtonProps extends ToolbarExtrasSlotProps {
+    readonly findOpen: boolean;
+    readonly onOpenFind: () => void;
 }
 
 // @public
@@ -1025,7 +1035,7 @@ export interface ChromeBodySlotProps<TRow = never> {
 // @public
 export function ChromeExtrasGate<TRow>(input: {
     readonly chrome: TableChrome<TRow>;
-    readonly props: BaseDataTableProps<TRow>;
+    readonly props: ComposedTableProps<TRow>;
     readonly children: (chrome: TableChrome<TRow>) => ReactNode;
 }): ReactNode;
 
@@ -1330,7 +1340,10 @@ export interface CommandPaletteItemProps {
 
 // @public
 export interface CommandPaletteOptions {
+    button?: boolean;
     commands?: readonly Command[];
+    onOpenChange?: (open: boolean) => void;
+    open?: boolean;
     shortcuts?: readonly Shortcut[];
 }
 
@@ -1454,12 +1467,12 @@ export { ContextMenuTarget }
 export function createAdapterAgentApprovalFeature(AgentApproval: AdapterFeatureComponent<AgentApprovalProps>): StaticTableFeature;
 
 // @public
-export function createAdapterCommandPaletteFeature(CommandPalette: AdapterFeatureComponent<AdapterCommandPaletteProps>): AdapterCommandPaletteFeature;
+export function createAdapterCommandPaletteFeature(CommandPalette: AdapterFeatureComponent<AdapterCommandPaletteProps>, Trigger?: AdapterFeatureComponent<AdapterCommandPaletteTriggerProps>): AdapterCommandPaletteFeature;
 
 // @public
 export function createAdapterContextMenuFeature(ContextMenu: AdapterFeatureComponent<AdapterContextMenuProps>): AdapterContextMenuFeature;
 
-// @public (undocumented)
+// @public
 export function createAdapterEditingFeatures(components: AdapterEditingComponents): AdapterEditingFeatures;
 
 // @public
@@ -1880,6 +1893,14 @@ export interface DirtyCellState {
 }
 
 // @public
+export interface DirtyEdits {
+    readonly confirm: (rowId: string, columnKey: string) => void;
+    readonly confirmAll: () => void;
+    readonly confirmRow: (rowId: string) => void;
+    readonly count: number;
+}
+
+// @public
 export const DISABLED_EXPORT: ExportHandlerState;
 
 // @public
@@ -2113,16 +2134,29 @@ export interface EditEvent<TRow> {
 export type EditEventHandler<TRow> = (event: EditEvent<TRow>) => void;
 
 // @public
+export interface EditHistoryHandle {
+    readonly canRedo: boolean;
+    readonly canUndo: boolean;
+    readonly clear: () => void;
+    readonly redo: () => number;
+    readonly undo: () => number;
+}
+
+// @public
 export interface EditHistoryLiveSlotProps<TRow = never> {
     children: (result: {
         history: EditHistoryState<TRow>;
         onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
     }) => ReactNode;
     columns: readonly ColumnDef<TRow>[];
-    editHistory: boolean | {
-        depth?: number;
-    } | undefined;
+    editHistory: boolean | EditHistoryOptions | undefined;
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+}
+
+// @public
+export interface EditHistoryOptions {
+    readonly depth?: number;
+    readonly onChange?: (history: EditHistoryHandle) => void;
 }
 
 // @public
@@ -2429,9 +2463,7 @@ export interface FeatureProps<TRow> {
     defaultExpandedRowIds?: readonly string[];
     densityChooser?: boolean;
     dirtyIndicators?: boolean;
-    editHistory?: boolean | {
-        depth?: number;
-    };
+    editHistory?: boolean | EditHistoryOptions;
     enableColumnMenu?: boolean;
     exportCsv?: boolean | ExportCsvOptions<TRow>;
     extraRows?: readonly ExtraRow[];
@@ -2450,7 +2482,9 @@ export interface FeatureProps<TRow> {
     onAddRow?: () => unknown;
     onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    onCellRangeChange?: (range: CellRange | null) => void;
     onDeleteRow?: (row: TRow) => unknown;
+    onDirtyChange?: (dirty: DirtyEdits) => void;
     onDuplicateRow?: (row: TRow) => unknown;
     onLoadChildren?: (row: TRow) => void | Promise<void>;
     onPinnedRowIdsChange?: (next: RowPinState) => void;
@@ -2466,6 +2500,7 @@ export interface FeatureProps<TRow> {
     rowEditIcons?: RowEditIcons;
     rowEditing?: boolean;
     rowHeight?: RowHeight<TRow>;
+    rowPinningArmed?: boolean;
     rowStyle?: RowStyle<TRow>;
     savedViews?: UseSavedViewsOptions;
     selectionStats?: boolean;
@@ -2496,6 +2531,7 @@ export function FeatureProviders(input: {
 
 // @public
 export interface FeatureRender<TProps> {
+    readonly orderAs?: string;
     readonly render: (props: TProps) => ReactNode;
     readonly slot: FeatureSlotKey<TProps>;
 }
@@ -2894,6 +2930,9 @@ export interface FindButtonProps {
 }
 
 // @public
+export function findButtonRender(Button: AdapterFeatureComponent<AdapterFindButtonProps>): FeatureRender<ToolbarExtrasSlotProps>;
+
+// @public
 export interface FindInTableState {
     current: GridCell | null;
     index: number;
@@ -2911,6 +2950,7 @@ export interface FindInTableState {
 // @public
 export interface FindLiveSlotProps<TRow = never> extends UseFindInTableOptions<TRow> {
     children: (find: FindInTableState) => ReactNode;
+    root?: RefObject<HTMLElement | null>;
 }
 
 // @public
@@ -3127,8 +3167,9 @@ export type GroupingDropProps = Omit<GroupingDropProps_2, "onDragEnter" | "onDra
 };
 
 // @public
-export interface GroupingExtras<TRow> extends StaticGroupingExtras {
+export interface GroupingExtras<TRow> extends Omit<StaticGroupingExtras, "groupFilter"> {
     groupAggregates?: (rows: readonly TRow[]) => unknown;
+    groupFilter?: (group: GroupNode<TRow>) => boolean;
     groupSort?: GroupSort<TRow>;
 }
 
@@ -4571,7 +4612,9 @@ export interface SidePanelTabProps {
 export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
 
 // @public
-export function slotRender<TProps>(slot: FeatureSlotKey<TProps>, render: (props: TProps) => ReactNode): FeatureRender<TProps>;
+export function slotRender<TProps>(slot: FeatureSlotKey<TProps>, render: (props: TProps) => ReactNode, options?: {
+    readonly orderAs?: string;
+}): FeatureRender<TProps>;
 
 export { SortableValue }
 
@@ -4640,7 +4683,7 @@ export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMen
 // @public
 export interface StaticGroupingExtras {
     collapsedGroupIds?: readonly string[];
-    groupFilter?: (group: unknown) => boolean;
+    groupFilter?: (group: GroupNode<unknown>) => boolean;
     groupFooters?: boolean;
     groupPageSize?: number;
     groupRowPageSize?: number;
@@ -4844,6 +4887,7 @@ export interface TableAssistantMessageView {
     readonly role: "user" | "assistant";
     readonly streaming?: boolean;
     readonly text: string;
+    readonly transcribing?: boolean;
 }
 
 // @public
@@ -5132,6 +5176,7 @@ export interface TableContextMenuOptions<TRow> {
     isPinned?: (columnKey: string) => boolean;
     labels: TableLabels;
     rowFor: (rowId: string) => TRow | undefined;
+    rowPins?: readonly RowAction<TRow>[];
     sortBy?: string;
     sortDir?: "asc" | "desc";
 }
@@ -5214,6 +5259,10 @@ export interface TableRuntime<TRow = unknown> {
 
 // @public
 export interface TableRuntimeView<TRow = unknown> {
+    readonly actions?: {
+        readonly row: readonly RowAction<TRow>[];
+        readonly bulk: readonly BulkAction[];
+    };
     readonly columnLayout?: {
         readonly keys: readonly string[];
         readonly hidden: readonly string[];
@@ -5588,6 +5637,9 @@ export interface UseFindInTableOptions<TRow> {
 }
 
 // @public
+export function useFindState(): FindInTableState | null;
+
+// @public
 export function useFullscreen(element: HTMLElement | null): FullscreenState;
 
 // @public
@@ -5677,6 +5729,7 @@ export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions
     facets?: FacetMap;
     forceMobile?: boolean;
     loading?: boolean;
+    mobileBreakpoint?: number;
     nextCursor?: string | null;
     onQueryChange?: (query: TableQuery, info: {
         signal: AbortSignal;
@@ -5788,6 +5841,9 @@ export function windowedTableAria(options: {
 }): GridFocusState;
 
 export { windowGroupedEntries }
+
+// @public
+export function withFindMarks(base: GridFocusState, find: Pick<FindInTableState, "matchKeys" | "current">, firstRowIndex: number): GridFocusState;
 
 // (No @packageDocumentation comment for this package)
 

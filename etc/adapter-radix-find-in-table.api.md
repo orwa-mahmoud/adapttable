@@ -7,7 +7,9 @@
 import { StaticTableFeature } from '@adapttable/react/adapter';
 
 // @public
-export function findInTable(): StaticTableFeature;
+export function findInTable(options?: {
+    readonly button?: boolean;
+}): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

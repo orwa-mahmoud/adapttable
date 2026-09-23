@@ -4,10 +4,13 @@
 
 ```ts
 
+import { CellNavigationOptions } from '@adapttable/react/features';
 import { StaticTableFeature } from '@adapttable/react/adapter';
 
 // @public
-export function cellNavigation(): StaticTableFeature;
+export function cellNavigation(options?: CellNavigationOptions): StaticTableFeature;
+
+export { CellNavigationOptions }
 
 // (No @packageDocumentation comment for this package)
 

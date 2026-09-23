@@ -5,6 +5,7 @@
 ```ts
 
 import { BatchRowEdit } from '@adapttable/react';
+import { EditHistoryOptions } from '@adapttable/react';
 import { FeaturePatch } from '@adapttable/react';
 import { StaticTableFeature } from '@adapttable/react';
 import { TableFeature } from '@adapttable/react';
@@ -16,9 +17,7 @@ export const batchEditing: <TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRo
 export const dirtyIndicators: () => StaticTableFeature;
 
 // @public
-export const editHistory: (options?: boolean | {
-    depth?: number;
-}) => StaticTableFeature;
+export const editHistory: (options?: boolean | EditHistoryOptions) => StaticTableFeature;
 
 // @public
 export const editing: <TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>) => TableFeature<TRow>;

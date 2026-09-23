@@ -258,6 +258,7 @@ export interface DataTableClassNames {
     commandInput?: string;
     commandItem?: string;
     commandPalette?: string;
+    commandPaletteButton?: string;
     contextMenu?: string;
     contextMenuItem?: string;
     contextMenuSeparator?: string;
@@ -324,6 +325,7 @@ export interface DataTableClassNames {
     filterTreeGroup?: string;
     filterTreeRemove?: string;
     filterTreeSummary?: string;
+    findButton?: string;
     footer?: string;
     fullscreenToggle?: string;
     fullWidthCell?: string;
@@ -447,7 +449,7 @@ export interface DataTableClassNames {
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> & DataModeProps<TRow>;
 
 // @public
-export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source"> {
+export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source">, Pick<UseTableDataOptions<TRow>, "supports" | "facetKeys" | "facets"> {
     animate?: boolean;
     classNames?: DataTableClassNames;
     data?: readonly TRow[];

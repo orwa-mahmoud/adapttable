@@ -123,6 +123,8 @@ export const shadcnClassNames: {
     undoButton: string;
     redoButton: string;
     printButton: string;
+    findButton: string;
+    commandPaletteButton: string;
     densityToggle: string;
     fullscreenToggle: string;
     commandPalette: string;

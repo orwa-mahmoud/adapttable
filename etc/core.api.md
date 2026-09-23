@@ -126,7 +126,7 @@ export interface AggregateOptions<TRow> {
 export type AggregateOrderedValue = SortableValue | Date;
 
 // @public
-export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
+export type AggregateSpec = Partial<Record<string, AggregateOperationId | Aggregator>>;
 
 // @public
 export interface AggregationCandidate {
@@ -408,7 +408,7 @@ export const builtInFilterSpecs: readonly FilterTypeSpec[];
 
 // @public
 export interface BulkAction {
-    ai?: ActionAiOptions;
+    ai?: ActionAiOptions | false;
     color?: string;
     confirm?: ActionConfirm<number>;
     disabledReason?: (ids: string[]) => string | undefined;
@@ -1049,6 +1049,7 @@ export interface ContextMenuModelOptions<TRow> {
     extra?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
     isPinned?: (columnKey: string) => boolean;
     labels: TableLabels;
+    rowPins?: readonly RowAction<TRow>[];
     sortBy?: string;
     sortDir?: "asc" | "desc";
     target: ContextMenuTarget<TRow>;
@@ -2473,6 +2474,7 @@ export interface IncrementalViewConfig<TRow> {
     groupFooters?: boolean;
     groupPageSize?: number;
     groupSort?: GroupSort<TRow>;
+    locale?: string;
     paging?: GroupPaging;
     rowPageSize?: number;
     search?: string;
@@ -3565,7 +3567,7 @@ export const ROW_ID_ATTRIBUTE = "data-row-id";
 
 // @public
 export interface RowAction<TRow> {
-    ai?: ActionAiOptions;
+    ai?: ActionAiOptions | false;
     color?: string;
     confirm?: ActionConfirm<TRow>;
     disabledReason?: (row: TRow) => string | undefined;
@@ -4007,6 +4009,7 @@ export function summaryExportValues(cells: Readonly<Partial<Record<string, unkno
 
 // @public
 export interface TableCommandOptions {
+    exportLabel?: string;
     hasFilters?: boolean;
     labels: {
         print?: string;
@@ -4159,6 +4162,7 @@ export interface TableLabels {
     assistantUnresolved?: (code: string) => string | undefined;
     assistantVoiceLanguage?: string;
     assistantVoiceListening?: string;
+    assistantVoiceMessage?: string;
     assistantVoiceStart?: string;
     assistantVoiceStop?: string;
     assistantYou?: string;

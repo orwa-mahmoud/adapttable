@@ -532,7 +532,10 @@ export interface ColumnWindow<TRow> {
 
 // @public
 export interface CommandPaletteOptions {
+    button?: boolean;
     commands?: readonly Command[];
+    onOpenChange?: (open: boolean) => void;
+    open?: boolean;
     shortcuts?: readonly Shortcut[];
 }
 
@@ -583,6 +586,14 @@ export interface DirtyCellState {
     isRowDirty: (rowId: string) => boolean;
     mark: (rowId: string, columnKey: string) => void;
     signature: string;
+}
+
+// @public
+export interface DirtyEdits {
+    readonly confirm: (rowId: string, columnKey: string) => void;
+    readonly confirmAll: () => void;
+    readonly confirmRow: (rowId: string) => void;
+    readonly count: number;
 }
 
 // @public
@@ -817,6 +828,21 @@ export interface EditHistoryEntry<TRow> {
 }
 
 // @public
+export interface EditHistoryHandle {
+    readonly canRedo: boolean;
+    readonly canUndo: boolean;
+    readonly clear: () => void;
+    readonly redo: () => number;
+    readonly undo: () => number;
+}
+
+// @public
+export interface EditHistoryOptions {
+    readonly depth?: number;
+    readonly onChange?: (history: EditHistoryHandle) => void;
+}
+
+// @public
 export interface EditHistoryState<TRow> {
     canRedo: boolean;
     canUndo: boolean;
@@ -896,9 +922,7 @@ export interface FeatureProps<TRow> {
     defaultExpandedRowIds?: readonly string[];
     densityChooser?: boolean;
     dirtyIndicators?: boolean;
-    editHistory?: boolean | {
-        depth?: number;
-    };
+    editHistory?: boolean | EditHistoryOptions;
     enableColumnMenu?: boolean;
     exportCsv?: boolean | ExportCsvOptions<TRow>;
     extraRows?: readonly ExtraRow[];
@@ -917,7 +941,9 @@ export interface FeatureProps<TRow> {
     onAddRow?: () => unknown;
     onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    onCellRangeChange?: (range: CellRange | null) => void;
     onDeleteRow?: (row: TRow) => unknown;
+    onDirtyChange?: (dirty: DirtyEdits) => void;
     onDuplicateRow?: (row: TRow) => unknown;
     onLoadChildren?: (row: TRow) => void | Promise<void>;
     onPinnedRowIdsChange?: (next: RowPinState) => void;
@@ -933,6 +959,7 @@ export interface FeatureProps<TRow> {
     rowEditIcons?: RowEditIcons;
     rowEditing?: boolean;
     rowHeight?: RowHeight<TRow>;
+    rowPinningArmed?: boolean;
     rowStyle?: RowStyle<TRow>;
     savedViews?: UseSavedViewsOptions;
     selectionStats?: boolean;
@@ -957,6 +984,7 @@ export interface FeatureProviderProps<TRow = unknown> {
 
 // @public
 export interface FeatureRender<TProps> {
+    readonly orderAs?: string;
     readonly render: (props: TProps) => ReactNode;
     readonly slot: FeatureSlotKey<TProps>;
 }
@@ -1680,9 +1708,7 @@ export interface TableChrome<TRow> {
 // @public
 export interface TableEditHistoryProps<TRow> {
     columns: readonly ColumnDef<TRow>[];
-    editHistory?: boolean | {
-        depth?: number;
-    };
+    editHistory?: boolean | EditHistoryOptions;
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
 }
 
@@ -2064,6 +2090,8 @@ export interface UseFrontendDataOptions<TRow> extends Pick<UseTableUrlStateOptio
     getSortValue?: (row: TRow, columnKey: string) => SortableValue;
     isFetching?: boolean;
     isLoading?: boolean;
+    locale?: string;
+    mobileBreakpoint?: number;
     paginationMode?: PaginationMode;
     refetch?: () => Promise<unknown> | void;
 }
@@ -2171,6 +2199,7 @@ export interface UseLazyChildrenOptions<TRow> {
     getRowId: (row: TRow) => string;
     hasLoadedChildren: (row: TRow) => boolean;
     onLoadChildren?: (row: TRow) => void | Promise<void>;
+    onLoadFailed?: (row: TRow, id: string) => void;
 }
 
 // @public
@@ -2196,6 +2225,7 @@ export interface UseQuerySourceOptions<TRow, TParams extends TableQueryParams, T
     expandedIds?: readonly string[];
     facetKeys?: readonly string[];
     forceMobile?: boolean;
+    mobileBreakpoint?: number;
     nextCursor?: (page: TPage) => string | null | undefined;
     paginationMode?: PaginationMode;
     sanitizeParams?: (params: Partial<TParams>) => Partial<TParams>;
@@ -2342,6 +2372,7 @@ export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions
     facets?: FacetMap;
     forceMobile?: boolean;
     loading?: boolean;
+    mobileBreakpoint?: number;
     nextCursor?: string | null;
     onQueryChange?: (query: TableQuery, info: {
         signal: AbortSignal;
@@ -2383,10 +2414,12 @@ export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions,
     filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
     filters?: readonly FilterDef<TRow>[] | ReactNode;
     filterTypes?: readonly FilterTypeSpec[];
+    forceMobile?: boolean;
     getSearchText?: (row: TRow) => string;
     getSortValue?: (row: TRow, columnKey: string) => SortableValue;
     loading?: boolean;
     locale?: string;
+    mobileBreakpoint?: number;
     mode?: "frontend" | "server";
     onQueryChange?: NonNullable<Parameters<typeof useServerData<TRow>>[0]["onQueryChange"]>;
     paginationMode?: PaginationMode;
