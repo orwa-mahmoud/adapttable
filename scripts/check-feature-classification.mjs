@@ -177,14 +177,26 @@ const factoryModules = readdirSync(join(PACKAGES, "react", "src", "features"))
   );
 const factories = factoryModules.join("\n");
 
+/**
+ * How a character moves the bracket depth. The `>` of an arrow (`=>`) closes
+ * nothing, so it leaves the depth where it was.
+ */
+function depthStep(text, i) {
+  const ch = text[i];
+  if ("<({[".includes(ch)) return 1;
+  if (ch === ">" && text[i - 1] === "=") return 0;
+  if (">)}]".includes(ch)) return -1;
+  return 0;
+}
+
 /** Split a parameter list on its top-level commas. */
 function parameters(text) {
   const parts = [];
   let depth = 0;
   let current = "";
-  for (const ch of text) {
-    if ("<({[".includes(ch)) depth++;
-    else if (">)}]".includes(ch)) depth--;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    depth += depthStep(text, i);
     if (ch === "," && depth === 0) {
       parts.push(current);
       current = "";
@@ -199,14 +211,11 @@ function isOptional(parameter) {
   if (/^\w+\s*\?\s*:/.test(parameter)) return true;
   let depth = 0;
   for (let i = 0; i < parameter.length; i++) {
-    const ch = parameter[i];
-    if ("<({[".includes(ch)) depth++;
-    else if (">)}]".includes(ch)) depth--;
-    else if (ch === "=" && depth === 0) {
-      if (parameter[i + 1] === ">" || parameter[i + 1] === "=") continue;
-      if ("=!<>".includes(parameter[i - 1])) continue;
-      return true;
-    }
+    depth += depthStep(parameter, i);
+    if (parameter[i] !== "=" || depth !== 0) continue;
+    if (parameter[i + 1] === ">" || parameter[i + 1] === "=") continue;
+    if ("=!<>".includes(parameter[i - 1])) continue;
+    return true;
   }
   return false;
 }
@@ -314,6 +323,57 @@ function relativeSource(from, specifier) {
   );
 }
 
+const DECLARATION_KINDS = new Set([
+  "const",
+  "function",
+  "interface",
+  "type",
+  "class",
+  "enum",
+]);
+
+/** The name an `export const|function|… Name` line declares, if it is one. */
+function declaredName(line) {
+  const words = line.split(/\s+/);
+  let at = 1;
+  while (words[at] === "declare" || words[at] === "async") at++;
+  if (!DECLARATION_KINDS.has(words[at] ?? "")) return undefined;
+  return /^[A-Za-z_$][\w$]*/.exec(words[at + 1] ?? "")?.[0];
+}
+
+/** The text with its block and line comments removed. */
+function withoutComments(text) {
+  let out = "";
+  let at = 0;
+  while (at < text.length) {
+    const block = text.indexOf("/*", at);
+    const line = text.indexOf("//", at);
+    const next = [block, line].filter((index) => index >= 0);
+    if (next.length === 0) return out + text.slice(at);
+    const start = Math.min(...next);
+    out += text.slice(at, start);
+    const end =
+      start === block
+        ? text.indexOf("*/", start + 2)
+        : text.indexOf("\n", start);
+    if (end < 0) return out;
+    at = start === block ? end + 2 : end;
+  }
+  return out;
+}
+
+/** One `{ … }` specifier: its exported name and whether it is deprecated. */
+function specifierName(raw) {
+  const specifier = withoutComments(raw)
+    .trim()
+    .replace(/^type\s+/, "");
+  if (!specifier) return undefined;
+  const aliasAt = specifier.lastIndexOf(" as ");
+  const name =
+    aliasAt < 0 ? specifier : specifier.slice(aliasAt + " as ".length);
+  return { name: name.trim(), deprecated: raw.includes("@deprecated") };
+}
+
 /**
  * Every name a module exports, with whether that export carries a
  * `@deprecated` notice: its own declarations and specifier lists, and the
@@ -325,32 +385,40 @@ function exportsOf(file, seen = new Set()) {
   if (!file || seen.has(file)) return out;
   seen.add(file);
   const source = readFileSync(file, "utf8");
-  for (const match of source.matchAll(
-    /^export\s+(?:declare\s+)?(?:async\s+)?(?:const|function|interface|type|class|enum)\s+([A-Za-z_$][\w$]*)/gm
-  )) {
-    out.set(match[1], false);
+  for (const line of source.split("\n")) {
+    const name = line.startsWith("export ") ? declaredName(line) : undefined;
+    if (name) out.set(name, false);
   }
-  for (const match of source.matchAll(/^export\s+(?:type\s+)?\{([^}]*)\}/gm)) {
+  for (const [name, deprecated] of specifierExports(source)) {
+    out.set(name, deprecated);
+  }
+  for (const [name, deprecated] of barrelExports(file, source, seen)) {
+    // An explicit export in this module shadows the barrel's.
+    if (!out.has(name)) out.set(name, deprecated);
+  }
+  return out;
+}
+
+/** Every name the module's `export { … }` lists carry. */
+function specifierExports(source) {
+  const out = new Map();
+  for (const match of source.matchAll(/^export (?:type )?\{([^}]*)\}/gm)) {
     for (const raw of match[1].split(",")) {
-      const deprecated = raw.includes("@deprecated");
-      const specifier = raw
-        .replaceAll(/\/\*[\s\S]*?\*\//g, "")
-        .replaceAll(/\/\/.*$/gm, "")
-        .trim()
-        .replace(/^type\s+/, "");
-      if (!specifier) continue;
-      const aliasAt = specifier.lastIndexOf(" as ");
-      const name =
-        aliasAt < 0 ? specifier : specifier.slice(aliasAt + " as ".length);
-      out.set(name.trim(), deprecated);
+      const entry = specifierName(raw);
+      if (entry) out.set(entry.name, entry.deprecated);
     }
   }
-  for (const match of source.matchAll(/^export\s+\*\s+from\s+"(\.[^"]+)";/gm)) {
+  return out;
+}
+
+/** Every name behind the module's relative `export *` barrels. */
+function barrelExports(file, source, seen) {
+  const out = new Map();
+  for (const match of source.matchAll(/^export \* from "(\.[^"]+)";/gm)) {
     for (const [name, deprecated] of exportsOf(
       relativeSource(file, match[1]),
       seen
     )) {
-      // An explicit export in this module shadows the barrel's.
       if (!out.has(name)) out.set(name, deprecated);
     }
   }
@@ -445,13 +513,21 @@ function entryExports(specifier) {
   }
   return exportCache.get(specifier);
 }
-const guideRows = [
-  ...migrationGuide.matchAll(/^\| `([^`|]+)`\s*\|\s*([^|]+?)\s*\|/gm),
-];
+/** A migration-guide table row: its first cell's code name and its second cell. */
+function guideRow(line) {
+  if (!line.startsWith("| `")) return undefined;
+  const cells = line.split("|").map((cell) => cell.trim());
+  const first = /^`([^`]+)`$/.exec(cells[1] ?? "");
+  return first ? { name: first[1], target: cells[2] ?? "" } : undefined;
+}
+const guideRows = migrationGuide
+  .split("\n")
+  .map(guideRow)
+  .filter((row) => row !== undefined);
 for (const name of inventoried) {
-  const row = guideRows.find((match) => match[1] === name);
+  const row = guideRows.find((entry) => entry.name === name);
   if (!row) continue;
-  const targets = [...row[2].matchAll(/`(@adapttable\/[\w/-]+)`/g)].map(
+  const targets = [...row.target.matchAll(/`(@adapttable\/[\w/-]+)`/g)].map(
     (match) => match[1]
   );
   if (targets.length === 0) {

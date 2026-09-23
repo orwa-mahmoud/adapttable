@@ -220,7 +220,7 @@
       "adapterComponents": ["ExpandToggle"],
       "standardPreset": false,
       "note": "Hierarchical row model plus the kit's disclosure control.",
-      "requiresConfig": true
+      "requiresConfig": false
     },
     "virtualize": {
       "id": "virtualize",
