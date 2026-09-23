@@ -80,3 +80,169 @@ export {
 } from "./rows/pinnedRowChrome";
 export { resolveRowHeight } from "./rows/rowPresentation";
 export { rowSourceIndex } from "./virtual/virtualTableModel";
+
+/**
+ * The member types the signatures above hand back, so a consumer of this
+ * entry can name every part of what it returns.
+ */
+export type { Command } from "./actions/commandRegistry";
+export type {
+  ContextMenuItem,
+  ContextMenuTarget,
+} from "./actions/contextMenuModel";
+export type {
+  Aggregatable,
+  AggregatableConfig,
+  AggregateOperation,
+  CustomAggregateOperation,
+  ResolvedAggregateOperation,
+} from "./aggregate/aggregatable";
+export type {
+  AggregateFormatContext,
+  AggregateName,
+  AggregateOperationId,
+  AggregateOptions,
+  AggregateOrderedValue,
+  AggregateSpec,
+  Aggregator,
+  DeclaredAggregates,
+} from "./aggregate/aggregate";
+export type {
+  AggregationCandidate,
+  AggregationItem,
+  AggregationModel,
+  AggregationOrigin,
+} from "./aggregate/aggregationModel";
+export type {
+  ColumnAiOptions,
+  ColumnGroupShow,
+  ColumnModel,
+  ColumnModelEditor,
+  ColumnModelFilter,
+  ExtraFilters,
+  FilterValue,
+  SortableValue,
+  SortDirection,
+} from "./columnModel";
+export type {
+  ColumnLayoutState,
+  PinOffset,
+  PinSide,
+  UseColumnLayoutResult,
+} from "./columns/columnLayoutModel";
+export type {
+  ColumnMenuAction,
+  ColumnMenuActionContext,
+  ColumnMenuChoice,
+  ColumnMenuChoiceOption,
+  ColumnMenuItem,
+  ColumnMenuLabels,
+  ColumnMenuRow,
+  PinnedSide,
+} from "./columns/columnMenuModel";
+export type {
+  ColumnGroupDef,
+  ColumnGroupRecord,
+  ColumnInput,
+  FlattenedColumns,
+} from "./columns/columnTree";
+export type { GroupedHeaderAlign } from "./columns/headerGroups";
+export type { DisplayValue } from "./display";
+export type {
+  CustomCellEditorConflict,
+  CustomCellEditorCtrl,
+  CustomCellEditorRender,
+} from "./editing/cellEditing";
+export type {
+  TableEngine,
+  TableEngineConfigPatch,
+  TableEngineReader,
+  TableOperation,
+  TableRevisionAxis,
+  TableRevisions,
+  TableRowScope,
+  TableSnapshot,
+} from "./engine/createTableEngine";
+export type {
+  ExportPayload,
+  ExportRowMeta,
+  ExportRowRole,
+  ExportTable,
+  ExportWriteContext,
+  ExportWriter,
+} from "./export/exportWriter";
+export type {
+  ColumnMenuActionFactory,
+  ContextMenuItemsFactory,
+  FeatureHostState,
+  FilterTypeExtend,
+  SidePanelEntry,
+} from "./features/currentHost";
+export type { ChecklistValue } from "./filters/checklistValues";
+export type { FacetCounts, FacetMap } from "./filters/facets";
+export {
+  type ChipLabelResolver,
+  FILTER_TYPES,
+  type FilterAiOptions,
+  type FilterDef,
+  type FilterOption,
+  type FilterOptionsSource,
+  type FilterType,
+} from "./filters/filterDefs";
+export type { FilterFormSource } from "./filters/filterFormModel";
+export type {
+  FilterTypeSpec,
+  FilterWidgetKind,
+  FilterWidgetRenderProps,
+} from "./filters/filterRegistry";
+export type {
+  GroupAggregateOverride,
+  GroupAggregateOverrides,
+} from "./grouping/groupAggregateOverrides";
+export type {
+  GroupingChipKeyboardProps,
+  GroupingDragProps,
+  GroupingDragSource,
+  GroupingDragState,
+  GroupingDropProps,
+  GroupingPanelInteractions,
+  GroupingPanelState,
+} from "./grouping/groupingPanelModel";
+export type { GroupAggregateOps } from "./grouping/groupRowLayout";
+export type {
+  GroupAggregatesFn,
+  GroupNode,
+  GroupPaging,
+  GroupSort,
+} from "./grouping/groupRows";
+export type { ExtraEntry, ExtraRow, ExtraRowKind } from "./rows/extraRows";
+export type { IncrementalViewConfig } from "./rows/incremental";
+export type { RowPinLookup, RowPinSide } from "./rows/rowPinModel";
+export type { RowReorderDigest } from "./rows/rowReorderModel";
+export type { RowHeight, RowStyle } from "./rows/rowStyle";
+export type { SortLevel } from "./sort/compare";
+export type {
+  ExportScopeCapability,
+  GroupingCapability,
+  TableSourceCapabilities,
+  TotalCountCapability,
+} from "./source/capabilities";
+export type {
+  AggregateFn,
+  QueryAggregate,
+  QueryCondition,
+  QueryFilterGroup,
+} from "./source/queryContract";
+export type { QueryGroupRow } from "./source/queryGroups";
+export type { TableSource } from "./source/TableSource";
+export type { CssProperties } from "./style/cssProperties";
+export type { TableStateMutators } from "./tableStateMutators";
+export type {
+  ColumnMetadata,
+  ResolvedPaginationMode,
+  TableLabels,
+} from "./types";
+export type {
+  VirtualItemMeta,
+  VirtualTableRow,
+} from "./virtual/virtualTableModel";

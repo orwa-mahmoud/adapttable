@@ -77,6 +77,7 @@ import type {
 // these two, so the entry that publishes the function publishes them too.
 export { agentSystemPrompt, type AgentSystemPromptInput } from "./agentPrompt";
 export type {
+  AssistantAudio,
   AssistantExchange,
   AssistantResumeHandle,
   AssistantResumeInput,

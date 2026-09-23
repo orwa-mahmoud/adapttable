@@ -958,6 +958,7 @@ export function aguiTransport(options: AgUiOptions): AssistantTransport {
 // every one of them to type its side.
 export type {
   AssistantAnswer,
+  AssistantAudio,
   AssistantExchange,
   AssistantQuestion,
   AssistantQuestionOption,
