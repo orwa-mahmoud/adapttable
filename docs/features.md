@@ -155,8 +155,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 69 kB gzipped and the same table with
-`standardFeatures()` composed is 122 kB.
+Measured on MUI, the table alone is 70 kB gzipped and the same table with
+`standardFeatures()` composed is 123 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
