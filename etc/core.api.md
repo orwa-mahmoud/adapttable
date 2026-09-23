@@ -189,8 +189,8 @@ export function allPinnedSummaryEntries<TRow>(pinnedRows: PinnedRows<TRow> | und
 // @public
 export function appendByKey<T>(first: readonly T[], second: readonly T[], keyOf: (item: T) => string): T[];
 
-// @public
-export function applyCollapsedColumnGroups<TRow>(columns: readonly ColumnMetadata<TRow>[], collapsedIds: readonly string[], groups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>): readonly ColumnMetadata<TRow>[];
+// @public @deprecated (undocumented)
+export const applyCollapsedColumnGroups: typeof applyCollapsedColumnGroups_2;
 
 // @public
 export function applyColumnNames<TCol extends ColumnMetadata<never>>(columns: readonly TCol[], names: Readonly<Record<string, string>> | undefined): TCol[];
@@ -237,7 +237,7 @@ export interface AssemblyFns<TRow = unknown> {
         firstRowIndex?: number;
         pinOffset?: (key: string) => PinOffset | undefined;
         windowKeys?: ReadonlySet<string>;
-    }) => ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+    }) => ReadonlyMap<string, readonly TableBodyCell<TRow>[]>;
     columnResizeHandleProps: (key: string, setWidth: (key: string, width: number) => void, label: string) => ColumnResizeHandleProps | undefined;
     extraCoveredTableSlots: (beforeRowId: string, options: {
         visualIds: readonly string[];
@@ -250,7 +250,7 @@ export interface AssemblyFns<TRow = unknown> {
         leadingCells: number;
     }) => ReadonlySet<number>;
     extraHostFillStyle: (extraKey: string, extraRows: readonly ExtraRow[] | undefined, rows: readonly TRow[], getRowId: (row: TRow) => string, rowStyle: RowStyle<TRow> | undefined) => CssProperties | undefined;
-    inflateBodyCellRowSpans: (cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>, visualIds: readonly string[], extraRows: readonly ExtraRow[] | undefined) => ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+    inflateBodyCellRowSpans: (cellsByRow: ReadonlyMap<string, readonly TableBodyCell<TRow>[]>, visualIds: readonly string[], extraRows: readonly ExtraRow[] | undefined) => ReadonlyMap<string, readonly TableBodyCell<TRow>[]>;
     insertExtraRows: <T extends {
         key: string;
     }>(entries: readonly T[], extraRows: readonly ExtraRow[] | undefined, dataKey: (entry: T) => string | undefined) => readonly (T | TableExtraEntry)[];
@@ -287,20 +287,11 @@ export function bindFeatureHostFn<Args extends unknown[], R>(host: FeatureHostSt
 // @public
 export function bindMobileCardList(virtualScrollRef: ((node: HTMLElement | null) => void) | undefined, extra?: ElementRef<HTMLElement>): (node: HTMLElement | null) => void;
 
-// @public
-interface BodyCell<TRow> {
-    colSpan: number;
-    column: ColumnMetadata<TRow>;
-    columnIndex: number;
-    rowSpan: number;
-}
-export { BodyCell }
-export { BodyCell as TableBodyCell }
+// @public @deprecated (undocumented)
+export type BodyCell<TRow> = TableBodyCell<TRow>;
 
-// @public
-export function bodyCellsHaveRowSpan(cellsByRow: ReadonlyMap<string, readonly {
-    rowSpan: number;
-}[]>): boolean;
+// @public @deprecated (undocumented)
+export const bodyCellsHaveRowSpan: typeof bodyCellsHaveRowSpan_2;
 
 // @public
 export function bodyRowEntries<TRow>(rows: readonly {
@@ -333,7 +324,7 @@ export function buildBodyCells<TRow>(options: {
     firstRowIndex?: number;
     pinOffset?: (key: string) => PinOffset | undefined;
     windowKeys?: ReadonlySet<string>;
-}): ReadonlyMap<string, readonly BodyCell<TRow>[]>;
+}): ReadonlyMap<string, readonly TableBodyCell<TRow>[]>;
 
 // @public
 export function buildExportTable<TRow>(rows: readonly TRow[], columns: readonly ColumnMetadata<TRow>[], span?: {
@@ -380,14 +371,8 @@ export function buildTableCsv<TRow>(options: {
     context?: ExportContext<TRow>;
 }): string;
 
-// @public
-export function buildTableXlsx<TRow>(options: {
-    rows: readonly TRow[];
-    columns: readonly ColumnMetadata<TRow>[];
-    sheetName?: string;
-    view?: readonly ExportViewEntry<TRow>[];
-    summary?: Readonly<Partial<Record<string, unknown>>>;
-}): Uint8Array<ArrayBuffer>;
+// @public @deprecated (undocumented)
+export const buildTableXlsx: typeof buildTableXlsx_2;
 
 // @public
 export function buildTreeEntries<TRow>(options: BuildTreeEntriesOptions<TRow>): TreeEntry<TRow>[];
@@ -537,8 +522,8 @@ export function cellRangeIndices(range: CellRange): {
 // @public
 export function cellRangeSize(range: CellRange | null): number;
 
-// @public
-export function cellsForRow<TRow>(cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]> | undefined, rowKey: string): readonly BodyCell<TRow>[];
+// @public @deprecated (undocumented)
+export const cellsForRow: typeof cellsForRow_2;
 
 // @public
 export function cellSortValue<TRow>(row: TRow, column: ColumnMetadata<TRow>, locale?: string): SortableValue;
@@ -546,8 +531,8 @@ export function cellSortValue<TRow>(row: TRow, column: ColumnMetadata<TRow>, loc
 // @public
 export type CellSpanAppearance = "merged" | "plain";
 
-// @public
-export function cellSpanMark(colSpan: number, rowSpan: number): string | undefined;
+// @public @deprecated (undocumented)
+export const cellSpanMark: typeof cellSpanMark_2;
 
 // @public
 export interface CellSpanRequest {
@@ -620,17 +605,17 @@ export interface CollectFeatureNoticesInput<TRow = unknown> {
 // @public
 export type ColorScheme = "light" | "dark" | "auto";
 
-// @public
-export const COLUMN_GROUP_ID_SEP = "";
+// @public @deprecated (undocumented)
+export const COLUMN_GROUP_ID_SEP: typeof COLUMN_GROUP_ID_SEP_2;
 
-// @public
-export const COLUMN_GROUP_RENDER_PREFIX = "__groupRender:";
+// @public @deprecated (undocumented)
+export const COLUMN_GROUP_RENDER_PREFIX: typeof COLUMN_GROUP_RENDER_PREFIX_2;
 
-// @public
-export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
+// @public @deprecated (undocumented)
+export const COLUMN_GROUP_STUB_PREFIX: typeof COLUMN_GROUP_STUB_PREFIX_2;
 
-// @public
-export const COLUMN_GROUP_STUB_WIDTH = 36;
+// @public @deprecated (undocumented)
+export const COLUMN_GROUP_STUB_WIDTH: typeof COLUMN_GROUP_STUB_WIDTH_2;
 
 // @public
 export function columnAggregationSignature<TRow>(column: ColumnMetadata<TRow>): string;
@@ -667,14 +652,14 @@ export interface ColumnGroupDef<TRow> {
     readonly marryChildren?: boolean;
 }
 
-// @public
-export function columnGroupHeaderCaption(cell: HeaderGroupCell): string | null;
+// @public @deprecated (undocumented)
+export const columnGroupHeaderCaption: typeof columnGroupHeaderCaption_2;
 
-// @public
-export function columnGroupId(path: readonly string[]): string;
+// @public @deprecated (undocumented)
+export const columnGroupId: typeof columnGroupId_2;
 
-// @public
-export function columnGroupPath<TRow>(column: Pick<ColumnMetadata<TRow>, "group">): readonly string[];
+// @public @deprecated (undocumented)
+export const columnGroupPath: typeof columnGroupPath_2;
 
 // @public
 export interface ColumnGroupRecord<TRow> {
@@ -691,8 +676,8 @@ export interface ColumnGroupRecord<TRow> {
 // @public
 export type ColumnGroupShow = "open" | "closed" | "always";
 
-// @public
-export function columnGroupStubStyle(): CssProperties;
+// @public @deprecated (undocumented)
+export const columnGroupStubStyle: typeof columnGroupStubStyle_2;
 
 // @public
 export interface ColumnHeaderContext<TRow> {
@@ -754,8 +739,8 @@ export interface ColumnMenuActionContext<TRow = unknown> {
 // @public
 export type ColumnMenuActionFactory<TRow = unknown> = (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined;
 
-// @public
-export function columnMenuActions<TRow>(row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>): ColumnMenuItem[];
+// @public @deprecated (undocumented)
+export const columnMenuActions: typeof columnMenuActions_2;
 
 // @public
 export interface ColumnMenuChoice {
@@ -1596,44 +1581,26 @@ export interface ExportWriter {
 // @public
 export function extendCellRange(range: CellRange | null, head: GridCell, fallbackAnchor: GridCell): CellRange;
 
-// @public
-export const EXTRA_OVER_SPAN_ROW_STYLE: CssProperties;
+// @public @deprecated (undocumented)
+export const EXTRA_OVER_SPAN_ROW_STYLE: typeof EXTRA_OVER_SPAN_ROW_STYLE_2;
 
-// @public
-export const EXTRA_OVER_SPAN_STYLE: CssProperties;
+// @public @deprecated (undocumented)
+export const EXTRA_OVER_SPAN_STYLE: typeof EXTRA_OVER_SPAN_STYLE_2;
 
-// @public
-export const EXTRA_ROW_PARTS: {
-    readonly separator: {
-        readonly row: "separator-row";
-        readonly cell: "separator-cell";
-    };
-    readonly fullWidth: {
-        readonly row: "full-width-row";
-        readonly cell: "full-width-cell";
-    };
-};
+// @public @deprecated (undocumented)
+export const EXTRA_ROW_PARTS: typeof EXTRA_ROW_PARTS_2;
 
-// @public
-export function extraCountBeforeRowIds(extraRows: readonly ExtraRow[] | undefined, ids: ReadonlySet<string>): number;
+// @public @deprecated (undocumented)
+export const extraCountBeforeRowIds: typeof extraCountBeforeRowIds_2;
 
-// @public
-export function extraCoveredTableSlots(beforeRowId: string, options: {
-    visualIds: readonly string[];
-    cellsByRow: ReadonlyMap<string, readonly {
-        columnIndex: number;
-        colSpan: number;
-        rowSpan: number;
-    }[]>;
-    extraRows?: readonly ExtraRow[];
-    leadingCells: number;
-}): ReadonlySet<number>;
+// @public @deprecated (undocumented)
+export const extraCoveredTableSlots: typeof extraCoveredTableSlots_2;
 
 // @public
 export type ExtraFilters = Record<string, FilterValue>;
 
-// @public
-export function extraHostFillStyle<TRow>(extraKey: string, extraRows: readonly ExtraRow[] | undefined, rows: readonly TRow[], getRowId: (row: TRow) => string, rowStyle: RowStyle<TRow> | undefined): CssProperties | undefined;
+// @public @deprecated (undocumented)
+export const extraHostFillStyle: typeof extraHostFillStyle_2;
 
 // @public
 export interface ExtraRow {
@@ -1649,11 +1616,11 @@ export type ExtraRowKind = "separator" | "fullWidth";
 // @public
 export function extraRowsArmed(extraRows: readonly ExtraRow[] | undefined): boolean;
 
-// @public
-export function extraRowsForSection(extraRows: readonly ExtraRow[] | undefined, rowIds: ReadonlySet<string>, appendUntargeted?: boolean): readonly ExtraRow[] | undefined;
+// @public @deprecated (undocumented)
+export const extraRowsForSection: typeof extraRowsForSection_2;
 
-// @public
-export function extraUncoveredColSpans(columnSpan: number, coveredSlots: ReadonlySet<number> | undefined): readonly number[];
+// @public @deprecated (undocumented)
+export const extraUncoveredColSpans: typeof extraUncoveredColSpans_2;
 
 // @public
 export type FacetCounts = readonly ChecklistValue[];
@@ -1786,8 +1753,8 @@ export interface FilterAiOptions {
 // @public
 export type FilterChromeMode = "popover" | "drawer" | "header";
 
-// @public
-export function filterColumnMenuRows<TRow>(rows: readonly ColumnMenuRow<TRow>[], query: string): ColumnMenuRow<TRow>[];
+// @public @deprecated (undocumented)
+export const filterColumnMenuRows: typeof filterColumnMenuRows_2;
 
 // @public
 export function filterCommands(commands: readonly Command[], query: string): Command[];
@@ -1954,8 +1921,8 @@ export interface FindMatchesOptions<TRow> {
 // @public
 export function fittedTableStyle(fitColumns?: boolean): CssProperties | undefined;
 
-// @public
-export function flattenColumnTree<TRow>(columns: readonly ColumnInput<TRow>[]): FlattenedColumns<TRow>;
+// @public @deprecated (undocumented)
+export const flattenColumnTree: typeof flattenColumnTree_2;
 
 // @public
 export interface FlattenedColumns<TRow> {
@@ -2232,26 +2199,17 @@ export type GroupedFlatEntry<TRow> = {
 // @public
 export type GroupedHeaderAlign = "start" | "center" | "end";
 
-// @public
-export function groupedHeaderAlign(align?: GroupedHeaderAlign): GroupedHeaderAlign;
+// @public @deprecated (undocumented)
+export const groupedHeaderAlign: typeof groupedHeaderAlign_2;
 
-// @public
-export function groupedHeaderCellStyle(cell: Readonly<{
-    rowSpan: number;
-    cell: HeaderGroupCell;
-}>, hairline: string): CssProperties;
+// @public @deprecated (undocumented)
+export const groupedHeaderCellStyle: typeof groupedHeaderCellStyle_2;
 
-// @public
-export function groupedHeaderChildRule(hairline: string): {
-    readonly borderBottom: string;
-    readonly backgroundImage: string;
-    readonly backgroundPosition: string;
-    readonly backgroundRepeat: string;
-    readonly backgroundSize: string;
-};
+// @public @deprecated (undocumented)
+export const groupedHeaderChildRule: typeof groupedHeaderChildRule_2;
 
-// @public
-export function groupedHeaderLabelStyle(): CssProperties;
+// @public @deprecated (undocumented)
+export const groupedHeaderLabelStyle: typeof groupedHeaderLabelStyle_2;
 
 // @public
 export const GROUPING_COLUMN_DND_MIME = "application/x-adapttable-grouping-column";
@@ -2389,50 +2347,26 @@ export function hasEditableColumns(columns: readonly EditableColumnLike[]): bool
 // @public
 export function hasGroupingColumnDrag(event: Pick<DragEvent, "dataTransfer">): boolean;
 
-// @public
-export interface HeaderGroupCell {
-    align?: GroupedHeaderAlign;
-    collapsed: boolean;
-    collapsible: boolean;
-    hideLabel: boolean;
-    id: string | null;
-    key: string;
-    label: string | null;
-    span: number;
-}
+// @public @deprecated (undocumented)
+export type HeaderGroupCell = HeaderGroupCell_2;
 
-// @public
-export function headerGroupRow<TRow>(columns: readonly ColumnMetadata<TRow>[]): HeaderGroupCell[] | null;
+// @public @deprecated (undocumented)
+export const headerGroupRow: typeof headerGroupRow_2;
 
-// @public
-export function headerGroupRows<TRow>(columns: readonly ColumnMetadata<TRow>[], collapsedIds?: readonly string[], collapsible?: boolean, groups?: ReadonlyMap<string, {
-    readonly align?: GroupedHeaderAlign;
-}>): HeaderGroupCell[][] | null;
+// @public @deprecated (undocumented)
+export const headerGroupRows: typeof headerGroupRows_2;
 
 // @public
 export type HeaderSelectionState = "all" | "some" | "none";
 
-// @public
-export function hideAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
+// @public @deprecated (undocumented)
+export const hideAllColumns: typeof hideAllColumns_2;
 
-// @public
-export type HtmlGroupedHeaderCell = {
-    readonly kind: "group";
-    readonly key: string;
-    readonly colSpan: number;
-    readonly rowSpan: number;
-    readonly cell: HeaderGroupCell;
-} | {
-    readonly kind: "leaf";
-    readonly key: string;
-    readonly columnIndex: number;
-    readonly rowSpan: number;
-};
+// @public @deprecated (undocumented)
+export type HtmlGroupedHeaderCell = HtmlGroupedHeaderCell_2;
 
-// @public
-export function htmlGroupedHeaderPlan<TRow>(columns: readonly ColumnMetadata<TRow>[], collapsedIds?: readonly string[], collapsible?: boolean, groups?: ReadonlyMap<string, {
-    readonly align?: GroupedHeaderAlign;
-}>): HtmlGroupedHeaderCell[][] | null;
+// @public @deprecated (undocumented)
+export const htmlGroupedHeaderPlan: typeof htmlGroupedHeaderPlan_2;
 
 // @public
 export function humanizeKey(key: string): string;
@@ -2490,26 +2424,17 @@ export function incrementalViewConfig<TRow>(view: IncrementalView<TRow>): Increm
 // @public
 export function incrementalViewOf<TRow>(rows: readonly TRow[]): IncrementalView<TRow> | undefined;
 
-// @public
-export function inflateBodyCellRowSpans<TCell extends {
-    columnIndex: number;
-    colSpan: number;
-    rowSpan: number;
-}>(cellsByRow: ReadonlyMap<string, readonly TCell[]>, visualIds: readonly string[], extraRows: readonly ExtraRow[] | undefined): ReadonlyMap<string, readonly TCell[]>;
+// @public @deprecated (undocumented)
+export const inflateBodyCellRowSpans: typeof inflateBodyCellRowSpans_2;
 
 // @public
 export function initialOperation(resolved: ResolvedAggregatable, source?: AggregationSourceSupport): string;
 
-// @public
-export function insertExtraRows<T extends {
-    key: string;
-}>(entries: readonly T[], extraRows: readonly ExtraRow[] | undefined, dataKey: (entry: T) => string | undefined): readonly (T | TableExtraEntry)[];
+// @public @deprecated (undocumented)
+export const insertExtraRows: typeof insertExtraRows_2;
 
-// @public
-export function insertExtrasBeforeRows<TRow>(rows: readonly TRow[], extraRows: readonly ExtraRow[] | undefined, getRowId: (row: TRow) => string): readonly ({
-    key: string;
-    row: TRow;
-} | TableExtraEntry)[];
+// @public @deprecated (undocumented)
+export const insertExtrasBeforeRows: typeof insertExtrasBeforeRows_2;
 
 // @public
 export interface InsertPatch<TRow> {
@@ -2539,14 +2464,14 @@ export function isCellEditable<TRow>(column: EditableColumnLike<TRow>, row: TRow
 // @public
 export function isColumnGroup<TRow>(column: ColumnInput<TRow>): column is ColumnGroupDef<TRow>;
 
-// @public
-export function isColumnGroupRenderKey(key: string): boolean;
+// @public @deprecated (undocumented)
+export const isColumnGroupRenderKey: typeof isColumnGroupRenderKey_2;
 
-// @public
-export function isColumnGroupStubKey(key: string): boolean;
+// @public @deprecated (undocumented)
+export const isColumnGroupStubKey: typeof isColumnGroupStubKey_2;
 
-// @public
-export function isColumnGroupSummaryKey(key: string): boolean;
+// @public @deprecated (undocumented)
+export const isColumnGroupSummaryKey: typeof isColumnGroupSummaryKey_2;
 
 // @public
 export function isCountFilterComplete(state: CountFilterState): boolean;
@@ -2569,8 +2494,8 @@ export function isEmptyFilterValue(value: FilterValue): boolean;
 // @public
 export function isEmptyRowValue(value: unknown): boolean;
 
-// @public
-export function isExtraEntry(entry: object): entry is TableExtraEntry;
+// @public @deprecated (undocumented)
+export const isExtraEntry: typeof isExtraEntry_2;
 
 // @public
 export function isFilterGroup(node: QueryCondition | QueryFilterGroup): node is QueryFilterGroup;
@@ -2810,8 +2735,8 @@ export interface OpenRowPatchStreamOptions {
     websocket?: string;
 }
 
-// @public
-export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[], summaryTop?: readonly TRow[], summaryBottom?: readonly TRow[]): readonly VirtualTableRow<TRow>[];
+// @public @deprecated (undocumented)
+export const orderedCardEntries: typeof orderedCardEntries_2;
 
 // @public
 export const PAGE_SIZE_OPTIONS: readonly [10, 25, 50, 100];
@@ -2986,8 +2911,8 @@ export interface PinLeads {
     start?: number;
 }
 
-// @public
-export const PINNED_BOTTOM_PART = "pinned-bottom";
+// @public @deprecated (undocumented)
+export const PINNED_BOTTOM_PART: typeof PINNED_BOTTOM_PART_2;
 
 // @public
 export const PINNED_SUMMARY_BOTTOM_PART = "pinned-summary-bottom";
@@ -2998,8 +2923,8 @@ export const PINNED_SUMMARY_KEY_PREFIX = "adapttable:pinned-summary";
 // @public
 export const PINNED_SUMMARY_TOP_PART = "pinned-summary-top";
 
-// @public
-export const PINNED_TOP_PART = "pinned-top";
+// @public @deprecated (undocumented)
+export const PINNED_TOP_PART: typeof PINNED_TOP_PART_2;
 
 // @public
 export interface PinnedCellStyle {
@@ -3015,16 +2940,11 @@ export function pinnedCellStyle(offset: PinOffset | undefined, zIndex?: number, 
 // @public
 export function pinnedColumnWidth(column: WidthColumn, widths?: Readonly<Record<string, number>>): number;
 
-// @public
-export function pinnedRowCellStyle(side: RowPinSide | undefined, headerOffsetPx: number, columnPinned: boolean): {
-    position?: "sticky";
-    top?: number;
-    bottom?: number;
-    zIndex?: number;
-};
+// @public @deprecated (undocumented)
+export const pinnedRowCellStyle: typeof pinnedRowCellStyle_2;
 
-// @public
-export function pinnedRowPart(side: RowPinSide | undefined): "pinned-top" | "pinned-bottom" | undefined;
+// @public @deprecated (undocumented)
+export const pinnedRowPart: typeof pinnedRowPart_2;
 
 // @public
 export interface PinnedRows<TRow = unknown> {
@@ -3032,16 +2952,11 @@ export interface PinnedRows<TRow = unknown> {
     readonly top?: readonly TRow[];
 }
 
-// @public
-export function pinnedRowSticky(side: RowPinSide | undefined, sticky: boolean, headerOffsetPx: number): ReturnType<typeof pinnedRowStickyStyle> | undefined;
+// @public @deprecated (undocumented)
+export const pinnedRowSticky: typeof pinnedRowSticky_2;
 
-// @public
-export function pinnedRowStickyStyle(side: RowPinSide, headerOffsetPx: number): {
-    position: "sticky";
-    top?: number;
-    bottom?: number;
-    zIndex: number;
-};
+// @public @deprecated (undocumented)
+export const pinnedRowStickyStyle: typeof pinnedRowStickyStyle_2;
 
 // @public
 export type PinnedSide = PinSide | undefined;
@@ -3412,14 +3327,14 @@ export function renderRegisteredFilter<TRow>(def: FilterDef<TRow>, source: Filte
 // @public
 export const REORDER_COLUMN_KEY = "reorder";
 
-// @public
-export const REORDER_COLUMN_WIDTH = 64;
+// @public @deprecated (undocumented)
+export const REORDER_COLUMN_WIDTH: typeof REORDER_COLUMN_WIDTH_2;
 
 // @public
 export function replaceFilterTreeNode(tree: QueryFilterGroup, path: readonly number[], next: FilterTreeNode): QueryFilterGroup;
 
-// @public
-export function resetColumnLayout<TRow>(row: ColumnMenuRow<TRow>, layout: UseColumnLayoutResult<TRow>): void;
+// @public @deprecated (undocumented)
+export const resetColumnLayout: typeof resetColumnLayout_2;
 
 // @public
 export function resetDevWarnings(): void;
@@ -3519,11 +3434,11 @@ export function resolvePinnedRows<TRow>(pinnedRows: PinnedRows<TRow> | undefined
 // @public
 export function resolveRelativeRange(raw: string | undefined, now?: number | Date): RelativeDateRange | undefined;
 
-// @public
-export function resolveRowHeight<TRow>(rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): number | undefined;
+// @public @deprecated (undocumented)
+export const resolveRowHeight: typeof resolveRowHeight_2;
 
-// @public
-export function resolveRowStyle<TRow>(rowStyle: RowStyle<TRow> | undefined, rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): CssProperties | undefined;
+// @public @deprecated (undocumented)
+export const resolveRowStyle: typeof resolveRowStyle_2;
 
 // @public
 export function resolveVirtualRows<TRow>(rows: readonly TRow[], rowKey: (row: TRow) => string, rowEntries?: readonly VirtualTableRow<TRow>[]): readonly VirtualTableRow<TRow>[];
@@ -3759,8 +3674,8 @@ export interface RowPinLookup {
 // @public
 export type RowPinSide = "top" | "bottom";
 
-// @public
-export function rowPinSignature(pinning: RowPinLookup | undefined, rowId: string): string | null;
+// @public @deprecated (undocumented)
+export const rowPinSignature: typeof rowPinSignature_2;
 
 // @public
 export interface RowPinState {
@@ -3778,11 +3693,8 @@ export interface RowReorderDigest {
     pendingMove: unknown;
 }
 
-// @public
-export function rowReorderDropStyle(attrs: {
-    "data-dragging"?: "";
-    "data-drop"?: "before" | "inside" | "after";
-} | undefined): CssProperties;
+// @public @deprecated (undocumented)
+export const rowReorderDropStyle: typeof rowReorderDropStyle_2;
 
 // @public
 export interface RowReorderOptions<TRow> {
@@ -3792,17 +3704,17 @@ export interface RowReorderOptions<TRow> {
     readonly onTreeMove?: RowTreeMoveHandler<TRow>;
 }
 
-// @public
-export function rowReorderSignature(reorder: RowReorderDigest | undefined, rowId: string, localIndex: number): string | null;
+// @public @deprecated (undocumented)
+export const rowReorderSignature: typeof rowReorderSignature_2;
 
 // @public
 export function rowsExcludingFilter<TRow>(rows: readonly TRow[], extra: ExtraFilters, key: string, filterFn: (row: TRow, extra: ExtraFilters) => boolean): readonly TRow[];
 
-// @public
-export function rowSourceIndex(entry: Pick<VirtualTableRow<unknown>, "index" | "sourceIndex">): number;
+// @public @deprecated (undocumented)
+export const rowSourceIndex: typeof rowSourceIndex_2;
 
-// @public
-export function rowSpanSignature<TRow>(cells: readonly BodyCell<TRow>[] | undefined): string;
+// @public @deprecated (undocumented)
+export const rowSpanSignature: typeof rowSpanSignature_2;
 
 // @public
 export function rowsToCsv<TRow>(rows: readonly TRow[], columns: readonly ColumnMetadata<TRow>[], options?: RowsToCsvOptions<TRow>): string;
@@ -3820,8 +3732,8 @@ export type RowStyle<TRow> = (row: TRow, index: number) => CssProperties | undef
 // @public
 export function rowStyleArmed(rowStyle: RowStyle<unknown> | undefined, rowHeight: RowHeight<unknown> | undefined): boolean;
 
-// @public
-export function rowStyleSignature(style: CssProperties | undefined): string;
+// @public @deprecated (undocumented)
+export const rowStyleSignature: typeof rowStyleSignature_2;
 
 // @public
 export type RowTreeMoveHandler<TRow> = (row: TRow, fromParent: RowTreeParentRef<TRow>, toParent: RowTreeParentRef<TRow>, position: number) => unknown;
@@ -3923,8 +3835,8 @@ export function setFilterTreeCombinator(tree: QueryFilterGroup, path: readonly n
 // @public
 export function setMeasureAgg(config: PivotConfig, index: number, agg: AggregateName): PivotConfig;
 
-// @public
-export function showAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
+// @public @deprecated (undocumented)
+export const showAllColumns: typeof showAllColumns_2;
 
 // @public
 export function showSimpleFilterFields(headerFiltersOn: boolean, filterFields?: boolean): boolean;
@@ -4006,6 +3918,14 @@ export interface StreamSocketEvent {
 
 // @public
 export function summaryExportValues(cells: Readonly<Partial<Record<string, unknown>>> | undefined): Partial<Record<string, unknown>> | undefined;
+
+// @public
+export interface TableBodyCell<TRow> {
+    colSpan: number;
+    column: ColumnMetadata<TRow>;
+    columnIndex: number;
+    rowSpan: number;
+}
 
 // @public
 export interface TableCommandOptions {
@@ -4677,8 +4597,8 @@ export function toAggregateOrdered(value: AggregateOrderedValue): {
 // @public
 export function toFormulaValue(raw: unknown): FormulaValue;
 
-// @public
-export function toggleCollapsedColumnGroup(collapsedIds: readonly string[], id: string): string[];
+// @public @deprecated (undocumented)
+export const toggleCollapsedColumnGroup: typeof toggleCollapsedColumnGroup_2;
 
 // @public
 export function toolbarShowsFilters(mode: FilterChromeMode, hasForm: boolean, hasFilterTree: boolean): boolean;
@@ -4723,8 +4643,8 @@ export interface TreeShape<TRow> {
     hasChildren?: (row: TRow) => boolean;
 }
 
-// @public
-export function unpinAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
+// @public @deprecated (undocumented)
+export const unpinAllColumns: typeof unpinAllColumns_2;
 
 // @public
 export interface UpdatePatch<TRow> {
@@ -4866,10 +4786,8 @@ export function writeSortLevels(params: URLSearchParams, levels: readonly {
     dir: SortDirection;
 }[], prefix?: string): void;
 
-// @public
-export function xlsxWriter(options?: {
-    sheetName?: string;
-}): ExportWriter;
+// @public @deprecated (undocumented)
+export const xlsxWriter: typeof xlsxWriter_2;
 
 // (No @packageDocumentation comment for this package)
 

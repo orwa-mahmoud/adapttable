@@ -16563,6 +16563,14 @@
       "behavior": ""
     },
     {
+      "export": "BodyCell",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "bodyCellsHaveRowSpan",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -22045,7 +22053,7 @@
     {
       "export": "TableBodyCell",
       "currentImport": "@adapttable/core",
-      "kind": "value",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""

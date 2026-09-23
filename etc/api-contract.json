@@ -1556,6 +1556,7 @@
       "BinaryOp",
       "bindFeatureHostFn",
       "bindMobileCardList",
+      "BodyCell",
       "bodyCellsHaveRowSpan",
       "bodyRowEntries",
       "BodyRowEntry",
