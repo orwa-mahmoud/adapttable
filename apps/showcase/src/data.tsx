@@ -645,6 +645,11 @@ export function makeColumns(
      * `onCellEdit` — the live demo must not warn in the console.
      */
     editable?: boolean;
+    /**
+     * Offer aggregation. On by default; the server tier turns it off, because
+     * its mock endpoint computes no aggregates.
+     */
+    aggregatable?: boolean;
   }
 ): ColumnInput<Person>[] {
   const s = STRINGS[locale];
@@ -878,9 +883,17 @@ export function makeColumns(
     // rather than in the middle of the set they already know.
     ...(options?.formulas ?? []),
   ];
+  const offered =
+    options?.aggregatable === false
+      ? leaves.map(({ aggregatable: _aggregatable, ...leaf }) => leaf)
+      : leaves;
   return grouped
-    ? nestDemoColumnGroups(columnGroupsDemoLeaves(leaves, locale, s), locale, s)
-    : leaves;
+    ? nestDemoColumnGroups(
+        columnGroupsDemoLeaves(offered, locale, s),
+        locale,
+        s
+      )
+    : offered;
 }
 
 /**

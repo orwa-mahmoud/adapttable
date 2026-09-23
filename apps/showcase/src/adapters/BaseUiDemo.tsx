@@ -381,6 +381,7 @@ export function BaseUiDemo({
                   ),
                 })
               : makeColumns(locale, BASE_UI_CELLS, {
+                  aggregatable: mode !== "backend",
                   groups: columnGroups,
                   sparkline,
                   editors: editorShowcase,

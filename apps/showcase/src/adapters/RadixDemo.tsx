@@ -359,6 +359,7 @@ export function RadixDemo({
                     ),
                   })
                 : makeColumns(locale, RADIX_CELLS, {
+                    aggregatable: mode !== "backend",
                     groups: columnGroups,
                     sparkline,
                     editors: editorShowcase,
