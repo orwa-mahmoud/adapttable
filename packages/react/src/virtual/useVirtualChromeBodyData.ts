@@ -222,7 +222,7 @@ function useScrollToFindMatch<TRow>(options: {
 }
 
 function resolveBodyVirtualization<TRow>(
-  keyed: ReturnType<typeof useKeyedVirtualization>,
+  keyed: KeyedVirtualization,
   virtualization: TableVirtualization<TRow>
 ): TableVirtualization<TRow> {
   if (!keyed.enabled) return virtualization;
