@@ -123,6 +123,12 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
    * Primarily a testing/SSR seam.
    */
   forceMobile?: boolean;
+  /**
+   * The width, in pixels, at or below which `paginationMode="auto"` resolves
+   * to infinite scroll. Defaults to 768. Pass the table's `mobileBreakpoint`
+   * so the mode follows the same rule as the card layout.
+   */
+  mobileBreakpoint?: number;
 }
 
 /**
@@ -180,10 +186,11 @@ export function useFrontendData<TRow>(
     isFetching = false,
     isLoading = false,
     forceMobile,
+    mobileBreakpoint,
     ...urlOptions
   } = options;
 
-  const mediaMobile = useIsMobile();
+  const mediaMobile = useIsMobile(mobileBreakpoint);
   const isMobile = forceMobile ?? mediaMobile;
   const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
   const paged = resolvedMode === "paged";

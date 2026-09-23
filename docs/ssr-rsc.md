@@ -72,8 +72,7 @@ Two seams matter when you render on a server:
 - **`forceMobile`** decides the card/table layout explicitly. The automatic
   choice comes from a media query, which a server cannot answer; passing the
   value you want makes the server and the first client render agree on the
-  layout. `paginationMode="auto"` resolves from the media query on its own and
-  does not read `forceMobile`, so pass `paginationMode` explicitly as well.
+  layout, and `paginationMode="auto"` follows it.
 - **`urlAdapter`** defaults to the browser History API, whose hydration
   snapshot is an empty query string. To render the requested slice on the
   server, pass the same explicit adapter in both renders — a router adapter
@@ -104,7 +103,6 @@ export function PeopleTable({ data }: { data: Person[] }) {
       rowKey={(row) => row.id}
       urlAdapter={useNextAdapter()}
       forceMobile={false} // decided per request, e.g. from the user agent
-      paginationMode="paged"
     />
   );
 }
@@ -122,8 +120,8 @@ render must match. Two things in a table can break it, and both have an answer
 above:
 
 - **Layout** — if the server guesses desktop and the client is a phone, the
-  first render disagrees. Pass `forceMobile` and `paginationMode` when you
-  render on a server.
+  first render disagrees. Pass `forceMobile` when you render on a server; the
+  layout and `paginationMode="auto"` both follow it.
 - **URL-restored state** — sort, filters and page come from the query string.
   Pass one explicit router adapter to both renders and they start from the
   same state.

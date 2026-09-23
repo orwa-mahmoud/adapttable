@@ -184,6 +184,31 @@ describe("useFrontendData", () => {
     expect(mobile.result.current.paginationMode).toBe("infinite");
   });
 
+  it("resolves auto mode from the given mobile breakpoint", () => {
+    // A 900px-wide viewport: desktop at the default 768, mobile at 1024.
+    const width = 900;
+    vi.stubGlobal("matchMedia", (query: string) => {
+      const max = Number(/max-width: (\d+)px/.exec(query)?.[1] ?? 0);
+      return {
+        matches: width <= max,
+        media: query,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      };
+    });
+    try {
+      const wide = render("", { paginationMode: "auto" });
+      expect(wide.result.current.paginationMode).toBe("paged");
+      const sidebar = render("", {
+        paginationMode: "auto",
+        mobileBreakpoint: 1024,
+      });
+      expect(sidebar.result.current.paginationMode).toBe("infinite");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("forwards error / refetch / loading flags", () => {
     const refetch = vi.fn();
     const err = new Error("boom");

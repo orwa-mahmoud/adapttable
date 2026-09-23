@@ -394,6 +394,8 @@ export function useDataTableShell<TRow>(
     featureHost,
     defaults: props.defaults,
     paginationMode: props.paginationMode,
+    forceMobile: props.forceMobile,
+    mobileBreakpoint: props.mobileBreakpoint,
     supports: props.supports,
     facetKeys: props.facetKeys,
     facets: props.facets,

@@ -99,9 +99,8 @@ interface ColumnDef<TRow> {
 ## Pagination modes
 
 `"auto"` (the default) resolves to **infinite scroll on mobile** and
-**paged on desktop**, from the default 768px media query. The card layout
-follows the same query unless you set `mobileBreakpoint` or `forceMobile`;
-`"auto"` reads neither, so set `paginationMode` explicitly alongside them.
+**paged on desktop**, by the same rule as the card layout: the 768px media
+query, or your `mobileBreakpoint`, and `forceMobile` over both.
 Force a mode with `paginationMode: "paged" | "infinite"`.
 
 In infinite mode the adapters auto-load the next page when the bottom of the

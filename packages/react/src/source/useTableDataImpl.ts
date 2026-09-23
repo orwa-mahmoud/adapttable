@@ -100,6 +100,18 @@ export interface UseTableDataOptions<TRow> extends Pick<
   filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
   /** Frontend tier: pagination mode (defaults to `"auto"`). */
   paginationMode?: PaginationMode;
+  /**
+   * Resolve `paginationMode="auto"` as the mobile layout (infinite scroll).
+   * The table passes its own `forceMobile`, so the server render and the
+   * first client render agree.
+   */
+  forceMobile?: boolean;
+  /**
+   * The width, in pixels, at or below which `paginationMode="auto"` resolves
+   * to infinite scroll. Defaults to 768. Pass the table's `mobileBreakpoint`
+   * so the mode follows the same rule as the card layout.
+   */
+  mobileBreakpoint?: number;
   /** Frontend tier: searchable-text projector. */
   getSearchText?: (row: TRow) => string;
   /** Frontend tier: sort-value resolver. */
@@ -423,6 +435,8 @@ export function useTableDataWithEngine<TRow>(
     filterTypes,
     filterFn,
     paginationMode,
+    forceMobile,
+    mobileBreakpoint,
     getSearchText,
     getSortValue,
     locale,
@@ -505,6 +519,8 @@ export function useTableDataWithEngine<TRow>(
     columns: resolvedColumns,
     filterFn: combinedFilterFn,
     paginationMode,
+    forceMobile,
+    mobileBreakpoint,
     getSearchText,
     getSortValue,
     error,
@@ -539,6 +555,8 @@ export function useTableDataWithEngine<TRow>(
     loading,
     error,
     paginationMode,
+    forceMobile,
+    mobileBreakpoint,
   });
 
   useQueryNotification(

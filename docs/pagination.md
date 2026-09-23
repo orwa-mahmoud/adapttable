@@ -39,9 +39,8 @@ export function People() {
 
 - `paginationMode` accepts `"paged"`, `"infinite"`, or `"auto"` (the default).
   `"auto"` resolves by device: **infinite scroll on mobile, paged on desktop**,
-  from the default 768px media query. The card/table layout switch reads
-  `mobileBreakpoint` and `forceMobile`; `"auto"` reads neither, so set
-  `paginationMode` explicitly whenever you set one of them.
+  by the same rule as the card/table layout switch — the 768px media query, or
+  `mobileBreakpoint` when you set it, and `forceMobile` over both.
 - **Paged** renders a footer with a rows-per-page select, page buttons, and a
   "Showing X–Y of Z" summary.
 - **Infinite** auto-loads the next page when a sentinel below the last row

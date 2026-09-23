@@ -522,6 +522,46 @@ describe("useDataTableShell", () => {
     expect(result.current.tableProps.prefetch).toBe(prefetch);
   });
 
+  it("resolves auto pagination by the table's own mobile rule", () => {
+    const width = 900;
+    vi.stubGlobal("matchMedia", (query: string) => {
+      const max = Number(/max-width: (\d+)px/.exec(query)?.[1] ?? 0);
+      return {
+        matches: width <= max,
+        media: query,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      };
+    });
+    try {
+      const shell = (extra: {
+        mobileBreakpoint?: number;
+        forceMobile?: boolean;
+      }) =>
+        renderHook(() =>
+          useDataTableShell(
+            {
+              data: ROWS,
+              columns,
+              rowKey,
+              urlAdapter: createMemoryAdapter(""),
+              paginationMode: "auto",
+              ...extra,
+            },
+            noForm
+          )
+        ).result.current;
+      expect(shell({}).source.paginationMode).toBe("paged");
+      const sidebar = shell({ mobileBreakpoint: 1024 });
+      expect(sidebar.source.paginationMode).toBe("infinite");
+      expect(shell({ forceMobile: true }).source.paginationMode).toBe(
+        "infinite"
+      );
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("forwards defaults and paginationMode into the resolved source", () => {
     const adapter = createMemoryAdapter("");
     const { result } = renderHook(() =>

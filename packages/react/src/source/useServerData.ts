@@ -77,6 +77,12 @@ export interface UseServerDataOptions<TRow> extends Pick<
   /** Force the resolved mobile state instead of a media query (test/SSR seam). */
   forceMobile?: boolean;
   /**
+   * The width, in pixels, at or below which `paginationMode="auto"` resolves
+   * to infinite scroll. Defaults to 768. Pass the table's `mobileBreakpoint`
+   * so the mode follows the same rule as the card layout.
+   */
+  mobileBreakpoint?: number;
+  /**
    * What this endpoint can answer beyond the baseline query. Declare a
    * capability and the matching field starts arriving in `onQueryChange`;
    * leave it out and the field is never sent, with a development warning if
@@ -165,6 +171,7 @@ export function useServerData<TRow>(
     error = null,
     paginationMode = "auto",
     forceMobile,
+    mobileBreakpoint,
     supports,
     aggregates,
     columns,
@@ -175,7 +182,7 @@ export function useServerData<TRow>(
     onQueryChange,
     ...urlOptions
   } = options;
-  const mediaMobile = useIsMobile();
+  const mediaMobile = useIsMobile(mobileBreakpoint);
   const isMobile = forceMobile ?? mediaMobile;
   const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
   const paged = resolvedMode === "paged";
