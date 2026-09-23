@@ -529,7 +529,7 @@ describe("<DataTable> (Radix)", () => {
       { override: { filterLabels: { status: (v) => `Status: ${v}` } } },
       "f_status=Active"
     );
-    fireEvent.click(screen.getByLabelText("Clear all: Status: Active"));
+    fireEvent.click(screen.getByLabelText("Remove filter: Status: Active"));
     expect(adapter.getSearch()).not.toContain("f_status");
   });
 

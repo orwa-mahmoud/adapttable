@@ -20,10 +20,12 @@ export function Chips({
         <WrapItem key={chip.key} as="li">
           <Tag.Root size="md" borderRadius="full">
             <Tag.Label>{chip.label}</Tag.Label>
-            <Tag.CloseTrigger
-              aria-label={`${labels.clearAll}: ${chip.label}`}
-              onClick={chip.onRemove}
-            />
+            <Tag.EndElement>
+              <Tag.CloseTrigger
+                aria-label={labels.removeFilter(chip.label)}
+                onClick={chip.onRemove}
+              />
+            </Tag.EndElement>
           </Tag.Root>
         </WrapItem>
       ))}

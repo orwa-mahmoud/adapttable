@@ -145,7 +145,7 @@ describe("ActiveFilterChips", () => {
     expect(screen.getByText("Status: Active")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Clear all"));
     expect(onClearAll).toHaveBeenCalled();
-    fireEvent.click(screen.getByLabelText("Clear all: Status: Active"));
+    fireEvent.click(screen.getByLabelText("Remove filter: Status: Active"));
     expect(onRemove).toHaveBeenCalled();
   });
 
@@ -162,7 +162,7 @@ describe("ActiveFilterChips", () => {
     // `getByRole` searches the accessibility tree, so a control the kit
     // hides from assistive tech never turns up here.
     const remove = screen.getByRole("button", {
-      name: "Clear all: Status: Active",
+      name: "Remove filter: Status: Active",
     });
     expect(remove.tabIndex).toBe(0);
 

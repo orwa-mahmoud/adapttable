@@ -2440,6 +2440,7 @@ function AntdTableBody<TRow>({
                 <div
                   ref={rootRef}
                   {...regionProps}
+                  data-adapttable-part="root"
                   dir={props.dir}
                   className={
                     [className, classNames?.root].filter(Boolean).join(" ") ||

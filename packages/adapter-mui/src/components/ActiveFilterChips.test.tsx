@@ -6,7 +6,7 @@ import { renderMui as renderChips } from "../test-utils";
 import { Chips } from "./ActiveFilterChips";
 
 const CHIP_LABEL = "Status: Active";
-const REMOVE_NAME = `${defaultLabels.clearAll}: ${CHIP_LABEL}`;
+const REMOVE_NAME = defaultLabels.removeFilter(CHIP_LABEL);
 
 describe("Chips", () => {
   it("gives each chip a named remove button in the tab order", () => {

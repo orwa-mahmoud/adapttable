@@ -125,7 +125,7 @@ describe("MUI gaps", () => {
       "paged",
       "f_status=Active"
     );
-    const remove = screen.getByLabelText("Clear all: Status: Active");
+    const remove = screen.getByLabelText("Remove filter: Status: Active");
     fireEvent.click(remove);
     expect(adapter.getSearch()).not.toContain("f_status");
   });
