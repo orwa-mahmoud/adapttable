@@ -179,17 +179,18 @@ parameterise it.
 
 Search and find answer different questions, and a table can have both.
 
-|                   | Search                                        | Find in table                                                                   |
-| ----------------- | --------------------------------------------- | ------------------------------------------------------------------------------- |
-| Question          | "Show me only the rows that match"            | "Where does this appear in what I am looking at?"                               |
-| Rows              | Filters them; server tiers ask the server     | Leaves every row in place and walks the matching cells                          |
-| Reads             | `getSearchText(row)` — the raw row            | What each cell shows                                                            |
-| Scope             | The whole dataset                             | The loaded rows — the current page, or what is fetched                          |
-| URL               | `q`                                           | `find`                                                                          |
-| How to turn it on | Always there; `searchable={false}` removes it | `findInTable()` from `@adapttable/<kit>/find-in-table`, with `cellNavigation()` |
+|                   | Search                                        | Find in table                                          |
+| ----------------- | --------------------------------------------- | ------------------------------------------------------ |
+| Question          | "Show me only the rows that match"            | "Where does this appear in what I am looking at?"      |
+| Rows              | Filters them; server tiers ask the server     | Leaves every row in place and walks the matching cells |
+| Reads             | `getSearchText(row)` — the raw row            | What each cell shows                                   |
+| Scope             | The whole dataset                             | The loaded rows — the current page, or what is fetched |
+| URL               | `q`                                           | `find`                                                 |
+| How to turn it on | Always there; `searchable={false}` removes it | `findInTable()` from `@adapttable/<kit>/find-in-table` |
 
-Find needs `cellNavigation()` from `@adapttable/<kit>/cell-navigation`: the
-**Ctrl/Cmd+F** shortcut, the match marks and the walk all live on the grid.
+Find works with or without `cellNavigation()`: **Ctrl/Cmd+F** opens it while
+focus is inside the table or after a click in it, and with cell navigation
+the walk moves focus from match to match.
 [Keyboard & cell navigation](./cell-navigation.md#find-in-table) covers the
 find bar.
 

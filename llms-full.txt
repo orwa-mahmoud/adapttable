@@ -707,7 +707,7 @@ import { standardFeatures } from "@adapttable/mantine/preset";
 
 With no arguments it composes the features that work with nothing else
 supplied: the Columns menu, the density chooser, CSV export, find-in-table
-(Ctrl/Cmd+F anywhere in the table), fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
+(Ctrl/Cmd+F after a click in the table), fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
 columns and the status bar. Because `headerFilters()` is a member, filters
 from the preset's `filters` option open from the column headers (`filtersMode`
 resolves to `"header"`); compose the members individually for popover or drawer
@@ -3975,17 +3975,18 @@ parameterise it.
 
 Search and find answer different questions, and a table can have both.
 
-|                   | Search                                        | Find in table                                                                   |
-| ----------------- | --------------------------------------------- | ------------------------------------------------------------------------------- |
-| Question          | "Show me only the rows that match"            | "Where does this appear in what I am looking at?"                               |
-| Rows              | Filters them; server tiers ask the server     | Leaves every row in place and walks the matching cells                          |
-| Reads             | `getSearchText(row)` — the raw row            | What each cell shows                                                            |
-| Scope             | The whole dataset                             | The loaded rows — the current page, or what is fetched                          |
-| URL               | `q`                                           | `find`                                                                          |
-| How to turn it on | Always there; `searchable={false}` removes it | `findInTable()` from `@adapttable/<kit>/find-in-table`, with `cellNavigation()` |
+|                   | Search                                        | Find in table                                          |
+| ----------------- | --------------------------------------------- | ------------------------------------------------------ |
+| Question          | "Show me only the rows that match"            | "Where does this appear in what I am looking at?"      |
+| Rows              | Filters them; server tiers ask the server     | Leaves every row in place and walks the matching cells |
+| Reads             | `getSearchText(row)` — the raw row            | What each cell shows                                   |
+| Scope             | The whole dataset                             | The loaded rows — the current page, or what is fetched |
+| URL               | `q`                                           | `find`                                                 |
+| How to turn it on | Always there; `searchable={false}` removes it | `findInTable()` from `@adapttable/<kit>/find-in-table` |
 
-Find needs `cellNavigation()` from `@adapttable/<kit>/cell-navigation`: the
-**Ctrl/Cmd+F** shortcut, the match marks and the walk all live on the grid.
+Find works with or without `cellNavigation()`: **Ctrl/Cmd+F** opens it while
+focus is inside the table or after a click in it, and with cell navigation
+the walk moves focus from match to match.
 [Keyboard & cell navigation](./cell-navigation.md#find-in-table) covers the
 find bar.
 
@@ -7179,7 +7180,8 @@ Headless: `fillDirection`, `fillTargetRange` and `fillRangeEdits`;
 ## Find in table
 
 Compose `findInTable` from `@adapttable/<kit>/find-in-table` and **Ctrl/Cmd+F**
-with focus anywhere inside the table opens a find bar over it;
+opens a find bar over the table while focus is inside it or after a click in
+it — a click elsewhere on the page hands the shortcut back to the browser;
 `findInTable({ button: true })` also draws a **Find in table** control among
 the toolbar's view controls, with the kit's own button (part `find-button`,
 `aria-expanded` while the bar shows; `classNames.findButton` on unstyled and
