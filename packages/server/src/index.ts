@@ -119,8 +119,8 @@ export interface QuerySchema {
    */
   filterTypes?: readonly ServerFilterType[];
   /**
-   * Report every grouping key in `groupByKeys` for a column-list schema. On
-   * by default when `columns` is `"any"` or `filters` is declared.
+   * Report every grouping key in `groupByKeys`. Off by default for every
+   * schema; `groupBy` is reported either way.
    */
   groupByKeys?: boolean;
   /**
@@ -294,13 +294,7 @@ export function parseTableQuery(
   const search = get("q") ?? undefined;
   const cursor = get("cursor");
   const sort = validSort(params, ns, allowed, refuse);
-  const grouping = readGrouping(
-    get("groupBy"),
-    schema,
-    listed,
-    allowed,
-    refuse
-  );
+  const grouping = readGrouping(get("groupBy"), schema, allowed, refuse);
   const filtering = readFiltering(params, ns, schema, listed, allowed, refuse);
   const pivot = validPivot(get("pivot"), allowed, refuse);
 
@@ -341,23 +335,19 @@ function readPaging(
 }
 
 /**
- * The grouping column, and every grouping key when the schema reports them.
+ * The grouping column, and every grouping key when the schema asks for them.
  *
- * A column-list schema without declared filters or `groupByKeys` answers
- * with `groupBy` alone; every other schema also lists the keys, and refuses
- * each one it does not allow exactly once.
+ * Every schema answers with `groupBy` alone unless it sets `groupByKeys:
+ * true`; then it also lists the keys, and refuses each one it does not allow
+ * exactly once.
  */
 function readGrouping(
   raw: string | null,
   schema: QuerySchema,
-  listed: ReadonlySet<string> | undefined,
   allowed: Allows,
   refuse: Refuse
 ): Pick<ServerTableQuery, "groupBy" | "groupByKeys"> {
-  const reportsKeys =
-    schema.filters !== undefined ||
-    listed === undefined ||
-    schema.groupByKeys === true;
+  const reportsKeys = schema.groupByKeys === true;
   const groupByKeys = reportsKeys
     ? validGroupByKeys(raw, allowed, refuse)
     : undefined;

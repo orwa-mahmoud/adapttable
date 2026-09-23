@@ -1486,7 +1486,7 @@ and `filters` — a shorthand record or the table's own `FilterDef[]`, read as
 `TypedFilter` per key: `TextFilter`, `SelectFilter`, `ListFilter`,
 `BooleanFilter`, `NumberRangeFilter`, `DateRangeFilter` or
 `CustomTypedFilter`), with `filterTypes` (`ServerFilterType`s) for registered
-types. `groupByKeys`
+types. `groupByKeys: true`
 lists every grouping key. `pickFilters(defs, keys)` scopes the declared
 filters per caller, and `splitFilterValues(raw)` inverts the table's
 multi-value encoding. `QueryInput` is a `Request`, `URL`, query string or

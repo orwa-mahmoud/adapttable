@@ -419,4 +419,17 @@ describe("grouping keys with declared filters", () => {
       { param: "groupBy", value: "secret", reason: "not a groupable column" },
     ]);
   });
+
+  it("refuses it once when the schema reports grouping keys too", () => {
+    const query = parseTableQuery("?groupBy=secret", {
+      ...schema,
+      groupByKeys: true,
+    });
+
+    expect(query.groupBy).toBeUndefined();
+    expect(query.groupByKeys).toBeUndefined();
+    expect(query.rejected).toEqual([
+      { param: "groupBy", value: "secret", reason: "not a groupable column" },
+    ]);
+  });
 });

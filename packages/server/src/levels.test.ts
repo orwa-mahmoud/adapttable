@@ -174,6 +174,14 @@ describe("level 1 — a column list, exactly as before", () => {
     expect(query.rejected).toEqual([]);
   });
 
+  it("answers with groupBy alone without the flag", () => {
+    const query = parseTableQuery("?groupBy=team", schema);
+
+    expect(query.groupBy).toBe("team");
+    expect(query.groupByKeys).toBeUndefined();
+    expect(query.rejected).toEqual([]);
+  });
+
   it("reports a single grouping key both ways when asked", () => {
     const query = parseTableQuery("?groupBy=team", {
       ...schema,
@@ -469,7 +477,7 @@ describe('level 0 — columns: "any"', () => {
         },
         { params: { sortBy: "secret", groupBy: "team,status" } }
       ),
-      { columns: "any" }
+      { columns: "any", groupByKeys: true }
     );
 
     expect(query.rejected).toEqual([]);
@@ -519,11 +527,17 @@ describe('level 0 — columns: "any"', () => {
     });
   });
 
-  it("reports a single grouping key both ways", () => {
-    const query = parseTableQuery("?groupBy=team", { columns: "any" });
+  it("reports grouping keys only when asked", () => {
+    const plain = parseTableQuery("?groupBy=team", { columns: "any" });
+    expect(plain.groupBy).toBe("team");
+    expect(plain.groupByKeys).toBeUndefined();
 
-    expect(query.groupBy).toBe("team");
-    expect(query.groupByKeys).toEqual(["team"]);
+    const asked = parseTableQuery("?groupBy=team", {
+      columns: "any",
+      groupByKeys: true,
+    });
+    expect(asked.groupBy).toBe("team");
+    expect(asked.groupByKeys).toEqual(["team"]);
   });
 });
 
@@ -652,12 +666,19 @@ describe("level 2 — a filter shorthand", () => {
     expect(bad.rejected[0]?.param).toBe("ft");
   });
 
-  it("reports a single grouping key both ways", () => {
-    const query = parseTableQuery("?groupBy=team", schema);
+  it("reports grouping keys only when asked", () => {
+    const plain = parseTableQuery("?groupBy=team", schema);
+    expect(plain.groupBy).toBe("team");
+    expect(plain.groupByKeys).toBeUndefined();
+    expect(plain.rejected).toEqual([]);
 
-    expect(query.groupBy).toBe("team");
-    expect(query.groupByKeys).toEqual(["team"]);
-    expect(query.rejected).toEqual([]);
+    const asked = parseTableQuery("?groupBy=team", {
+      ...schema,
+      groupByKeys: true,
+    });
+    expect(asked.groupBy).toBe("team");
+    expect(asked.groupByKeys).toEqual(["team"]);
+    expect(asked.rejected).toEqual([]);
   });
 });
 
@@ -782,15 +803,23 @@ describe("level 3 — the table's own filter definitions", () => {
     ).toHaveLength(1);
   });
 
-  it("reports a single grouping key both ways", () => {
-    const query = parseTableQuery("?groupBy=status", {
+  it("reports grouping keys only when asked", () => {
+    const plain = parseTableQuery("?groupBy=status", {
       columns: ["status"],
       filters: defs,
     });
+    expect(plain.groupBy).toBe("status");
+    expect(plain.groupByKeys).toBeUndefined();
+    expect(plain.rejected).toEqual([]);
 
-    expect(query.groupBy).toBe("status");
-    expect(query.groupByKeys).toEqual(["status"]);
-    expect(query.rejected).toEqual([]);
+    const asked = parseTableQuery("?groupBy=status", {
+      columns: ["status"],
+      filters: defs,
+      groupByKeys: true,
+    });
+    expect(asked.groupBy).toBe("status");
+    expect(asked.groupByKeys).toEqual(["status"]);
+    expect(asked.rejected).toEqual([]);
   });
 });
 
