@@ -1,5 +1,17 @@
 # @adapttable/core
 
+## 3.2.1
+
+### Patch Changes
+
+- 32677fd: The table engine applies every configuration change: clearing a sort, a sort chain or a grouping takes effect, an array `groupBy` keeps all of its levels, and changing an aggregate operation, a named group order, `derivedKey` or `groupAggregateOps` re-derives the groups and totals. A discarded candidate leaves the committed table ready for the next change.
+- 068ba7e: The engine reads a column's `i18n` path for a locale tag written in any case or with `_` (`ar_EG`, `AR-eg`), exactly as the columns do, so cells, sorting, grouping and exports agree on the localized field.
+- 6911b24: A formula's answer is always a finite number or an error: a field that is `NaN`, `Infinity` or an invalid date reads as `#VALUE!` instead of `0`, and a result too large to be a number — an overflowing product, sum, average or `ROUND` — is `#VALUE!` instead of `Infinity` or `NaN`.
+- 46a9ec3: Grouping gives two different nested paths two different ids even when their values contain the id's separators, so each collapses and pages on its own; ids of ordinary values are unchanged. An invalid date groups into one "Invalid Date" bucket instead of throwing, and a BigInt is labelled by its digits and bucketed apart from the equal number.
+- 7565dc4: Sorting a column that mixes types has one consistent order: values of different types order booleans, then numbers, then strings, and values of one type compare as before.
+- 79c9956: The default search no longer throws on a row that contains itself or holds a BigInt inside a nested value: a circular reference is left out of the search text and a BigInt is written as its digits.
+- 57d1217: The XLSX export writes only characters XML allows: U+FFFE, U+FFFF and lone surrogates are dropped from cells and the sheet name, and a long sheet name is cut without splitting an emoji, so the workbook always opens.
+
 ## 3.2.0
 
 ### Minor Changes
