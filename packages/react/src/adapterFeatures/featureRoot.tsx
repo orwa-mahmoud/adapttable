@@ -9,7 +9,8 @@ import {
   SIDE_PANEL,
 } from "../features/slotKeys";
 
-type ContextMenuProps = Omit<ContextMenuLiveSlotProps<never>, "children">;
+type MenuProps = Omit<ContextMenuLiveSlotProps<never>, "children">;
+type MenuTarget = Parameters<NonNullable<MenuProps["actions"]["onCopy"]>>[0];
 
 /**
  * Copy the one cell a context menu was opened over.
@@ -18,10 +19,7 @@ type ContextMenuProps = Omit<ContextMenuLiveSlotProps<never>, "children">;
  * target already names the row and the column, which is all a single cell
  * needs. The text is the cell's export value, as a range copy writes it.
  */
-function copyTargetCell(
-  props: ContextMenuProps,
-  target: Parameters<NonNullable<ContextMenuProps["actions"]["onCopy"]>>[0]
-): void {
+function copyTargetCell(props: MenuProps, target: MenuTarget): void {
   if (target.kind !== "cell") return;
   const column = props.columns.find((item) => item.key === target.columnKey);
   if (!column) return;
@@ -33,6 +31,20 @@ function copyTargetCell(
   // The menu has closed and nothing announces a result without cell
   // navigation; a refused clipboard leaves the clipboard as it was.
   void writeClipboardText(text);
+}
+
+/** The menu's props, with Copy falling back to the right-clicked cell. */
+function withCellCopy(props: MenuProps, gridNavigation: boolean): MenuProps {
+  if (gridNavigation || !props.actions.onCopy) return props;
+  return {
+    ...props,
+    actions: {
+      ...props.actions,
+      onCopy: (target) => {
+        copyTargetCell(props, target);
+      },
+    },
+  };
 }
 
 /**
@@ -47,27 +59,18 @@ export function ContextMenuLiveGate({
   props,
   children,
 }: {
-  readonly props: ContextMenuProps;
+  readonly props: Omit<ContextMenuLiveSlotProps<never>, "children">;
   readonly children: (regionProps: Record<string, unknown>) => ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(CONTEXT_MENU_LIVE);
   const gridNavigation = useFeatureSlotFilled(GRID_FOCUS_ANNOUNCER);
-  if (!filled) return children({});
-  const onCopy = props.actions.onCopy;
-  const menuProps: ContextMenuProps =
-    gridNavigation || !onCopy
-      ? props
-      : {
-          ...props,
-          actions: {
-            ...props.actions,
-            onCopy: (target) => {
-              copyTargetCell(props, target);
-            },
-          },
-        };
-  return (
-    <FeatureSlot slot={CONTEXT_MENU_LIVE} props={{ ...menuProps, children }} />
+  return filled ? (
+    <FeatureSlot
+      slot={CONTEXT_MENU_LIVE}
+      props={{ ...withCellCopy(props, gridNavigation), children }}
+    />
+  ) : (
+    children({})
   );
 }
 

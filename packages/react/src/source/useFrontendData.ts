@@ -119,14 +119,14 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
   /** Forwarded loading flag. */
   isLoading?: boolean;
   /**
-   * Force the resolved mobile state instead of using a media query.
-   * Primarily a testing/SSR seam.
-   */
-  /**
    * Active locale tag. Sorting reads each column's `i18n` path for it, the
    * same path its cells and filters read.
    */
   locale?: string;
+  /**
+   * Force the resolved mobile state instead of using a media query.
+   * Primarily a testing/SSR seam.
+   */
   forceMobile?: boolean;
   /**
    * The width, in pixels, at or below which `paginationMode="auto"` resolves
