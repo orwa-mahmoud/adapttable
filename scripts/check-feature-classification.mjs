@@ -309,9 +309,13 @@ function entrySource(specifier) {
   const match = /^@adapttable\/([\w-]+)(?:\/([\w-]+))?$/.exec(specifier);
   if (!match) return undefined;
   const [, pkg, sub] = match;
-  const dir = join(PACKAGES, pkg, "src");
-  return ["ts", "tsx"]
-    .map((ext) => join(dir, `${sub ?? "index"}.${ext}`))
+  // Kits publish as `@adapttable/<kit>` from `packages/adapter-<kit>`.
+  return [pkg, `adapter-${pkg}`]
+    .flatMap((dir) =>
+      ["ts", "tsx"].map((ext) =>
+        join(PACKAGES, dir, "src", `${sub ?? "index"}.${ext}`)
+      )
+    )
     .find((file) => existsSync(file));
 }
 
@@ -575,6 +579,51 @@ for (const name of inventoried) {
     if (!entryExports(target).has(name)) {
       problems.push(
         `v3Removals: docs/migrate-from-v2.md sends "${name}" to ${target}, which does not export it`
+      );
+    }
+  }
+}
+
+/**
+ * The entries a "name → import" row sends people to, when that cell holds
+ * nothing but entry specifiers (`@adapttable/core` or `@adapttable/react`).
+ */
+function importTargets(cell) {
+  const only =
+    /^`@adapttable\/[\w/-]+`(?:\s*(?:,|or|and)\s*`@adapttable\/[\w/-]+`)*$/;
+  if (!only.test(cell)) return [];
+  return [...cell.matchAll(/`(@adapttable\/[\w/-]+)`/g)].map((m) => m[1]);
+}
+for (const row of guideRows) {
+  if (inventoried.has(row.name)) continue;
+  for (const target of importTargets(row.target)) {
+    if (!entryExports(target).has(row.name)) {
+      problems.push(
+        `docs/migrate-from-v2.md sends "${row.name}" to ${target}, which does not export it`
+      );
+    }
+  }
+}
+
+/** Every `import { … } from "@adapttable/…"` a removal's v3 path shows. */
+function v3PathImports(v3Path) {
+  return [
+    ...v3Path.matchAll(
+      /import (?:type )?\{([^}]*)\} from "(@adapttable\/[\w/-]+)"/g
+    ),
+  ].flatMap((match) =>
+    match[1]
+      .split(",")
+      .map((raw) => raw.trim().split(" as ")[0].trim())
+      .filter((name) => name !== "")
+      .map((name) => ({ name, from: match[2] }))
+  );
+}
+for (const group of manifest.v3Removals.groups) {
+  for (const { name, from } of v3PathImports(group.v3Path)) {
+    if (!entryExports(from).has(name)) {
+      problems.push(
+        `v3Removals: ${group.id} shows importing ${name} from ${from}, which does not export it`
       );
     }
   }

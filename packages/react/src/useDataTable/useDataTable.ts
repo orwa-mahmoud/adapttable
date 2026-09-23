@@ -72,7 +72,11 @@ export interface UseDataTableOptions<TRow> {
    * bare-key columns, exactly as it does under `<DataTable>`.
    */
   locale?: string;
-  /** Number of leading desktop-visible columns always shown on mobile cards. */
+  /**
+   * Leading desktop-visible columns the card anchors. Those are columns
+   * without `hideOnMobile`, which a card shows anyway, so this does not change
+   * which fields a card shows.
+   */
   mobileIdentityColumns?: number;
   /** Search debounce in ms. Defaults to 300. */
   searchDebounceMs?: number;

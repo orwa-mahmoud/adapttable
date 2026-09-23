@@ -7,7 +7,11 @@ import {
 } from "@adapttable/unstyled";
 import { cellNavigation } from "@adapttable/unstyled/cell-navigation";
 import { columnMenu } from "@adapttable/unstyled/column-menu";
-import { editHistory, editing } from "@adapttable/unstyled/editing";
+import {
+  editHistory,
+  editing,
+  undoRedoButtons,
+} from "@adapttable/unstyled/editing";
 import { exportCsv } from "@adapttable/unstyled/export";
 import { filters } from "@adapttable/unstyled/filters";
 import { groupingPanel } from "@adapttable/unstyled/grouping-panel";
@@ -185,8 +189,10 @@ export function App() {
         multiSort(),
         // Arrow keys move between cells; Shift+arrows select a range to copy.
         cellNavigation(),
-        // Undo / redo for edits (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z).
+        // Undo / redo for edits: Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z in the grid,
+        // and toolbar buttons that also work on the phone's card layout.
         editHistory(),
+        undoRedoButtons(),
         // The table never mutates rows — this handler applies each edit.
         editing((row: Person, key, nextValue) =>
           setRows((current) =>

@@ -3,7 +3,11 @@ import { useState } from "react";
 import { type ColumnDef, DataTable } from "@adapttable/antd";
 import { cellNavigation } from "@adapttable/antd/cell-navigation";
 import { columnMenu } from "@adapttable/antd/column-menu";
-import { editHistory, editing } from "@adapttable/antd/editing";
+import {
+  editHistory,
+  editing,
+  undoRedoButtons,
+} from "@adapttable/antd/editing";
 import { exportCsv } from "@adapttable/antd/export";
 import { filters } from "@adapttable/antd/filters";
 import { groupingPanel } from "@adapttable/antd/grouping-panel";
@@ -71,8 +75,10 @@ export function App() {
         multiSort(),
         // Arrow keys move between cells; Shift+arrows select a range to copy.
         cellNavigation(),
-        // Undo / redo for edits (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z).
+        // Undo / redo for edits: Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z in the grid,
+        // and toolbar buttons that also work on the phone's card layout.
         editHistory(),
+        undoRedoButtons(),
         // The table never mutates rows — this handler applies each edit.
         editing((row: Person, key, nextValue) =>
           setRows((current) =>
