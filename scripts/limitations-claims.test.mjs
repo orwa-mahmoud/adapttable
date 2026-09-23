@@ -17,7 +17,7 @@ const EVIDENCE = [
   ["docs/formulas.md", "1e5"],
   ["docs/data-tiers.md", "fullDataset"],
   ["docs/agent-capabilities.md", "rows.read"],
-  ["docs/virtualization.md", "24"],
+  ["docs/virtualization.md", "Rows in the DOM | **10**"],
   ["docs/exporting.md", "EXPORT_FETCH_ALL_MAX_ROWS"],
   ["docs/ssr-rsc.md", "forceMobile"],
   ["docs/getting-started.md", "22.12.0"],

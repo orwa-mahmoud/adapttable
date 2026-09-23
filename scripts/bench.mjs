@@ -14,10 +14,12 @@
  *   node scripts/bench.mjs --port 4321 --json     # machine-readable
  *   node scripts/bench.mjs --record               # + probes, saved to bench-runs/
  *
- * It serves the showcase itself when nothing is already on the port, and stops
- * that server again when it finishes. Running `pnpm --filter
- * @adapttable/showcase dev` by hand first is still the faster loop while
- * iterating — an already-running server is used as-is and left alone.
+ * When nothing is already on the port it builds the showcase and serves the
+ * production build (`vite preview`), the code users download, and stops that
+ * server when it finishes. An already-running server is used as-is and left
+ * alone — the dev server is the faster loop while iterating, but React's
+ * development build runs slower and holds more memory, so `--record` refuses
+ * to measure one: a published number comes from a production build only.
  *
  * Playwright is already a dev dependency here (the e2e suite uses it), so
  * this needs no extra install — only its browser, once:
@@ -35,7 +37,7 @@
  * with the browser build and the machine, so compare arms within one run
  * rather than across days.
  */
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { cpus, platform, release } from "node:os";
 import { dirname, join } from "node:path";
@@ -323,11 +325,9 @@ function verdict(result, expect = {}) {
 /**
  * The demo has to be served for any of this to mean anything.
  *
- * Running the dev server by hand still works and is the faster loop while
- * iterating. But `pnpm bench` on its own used to die on a raw
- * ERR_CONNECTION_REFUSED stack trace, which says nothing about what to do —
- * so when the port is silent this starts the server, waits for it, and shuts
- * it down again at the end.
+ * When the port is silent this builds the showcase, serves the build, waits
+ * for it, and shuts it down again at the end. A server already on the port is
+ * used as it is.
  */
 async function serving() {
   try {
@@ -340,8 +340,8 @@ async function serving() {
   }
 }
 
-/** Start the showcase dev server and resolve once it answers. */
-async function startShowcase() {
+/** The showcase's vite binary. */
+function viteBinary() {
   // The showcase's own vite binary, by absolute path — nothing resolves
   // through PATH, so what runs is the version this repo installed.
   const vite = join(ROOT, "apps/showcase/node_modules/.bin/vite");
@@ -351,10 +351,31 @@ async function startShowcase() {
         `showcase by hand and re-run`
     );
   }
-  const child = spawn(vite, ["--port", String(PORT), "--strictPort"], {
+  return vite;
+}
+
+/** Build the showcase for production, as the published site is built. */
+function buildShowcase(vite) {
+  const build = spawnSync(vite, ["build"], {
     cwd: join(ROOT, "apps/showcase"),
-    stdio: "ignore",
+    stdio: JSON_OUT ? "ignore" : "inherit",
   });
+  if (build.status !== 0) {
+    throw new Error(
+      "the showcase production build failed — see the output above"
+    );
+  }
+}
+
+/** Build the showcase, serve the build, and resolve once it answers. */
+async function startShowcase() {
+  const vite = viteBinary();
+  buildShowcase(vite);
+  const child = spawn(
+    vite,
+    ["preview", "--port", String(PORT), "--strictPort"],
+    { cwd: join(ROOT, "apps/showcase"), stdio: "ignore" }
+  );
   const deadline = Date.now() + 60_000;
   while (Date.now() < deadline) {
     if (await serving()) return child;
@@ -362,14 +383,36 @@ async function startShowcase() {
   }
   child.kill();
   throw new Error(
-    `the showcase did not come up on port ${PORT} within 60s — start it by ` +
-      `hand with \`pnpm --filter @adapttable/showcase dev\` and re-run`
+    `the showcase build did not come up on port ${PORT} within 60s — serve it ` +
+      `by hand with \`pnpm --filter @adapttable/showcase preview\` and re-run`
   );
+}
+
+/**
+ * Which build the port serves. A Vite dev server injects its client into the
+ * page; a production build never does.
+ */
+async function servedBuild() {
+  const res = await fetch(`http://localhost:${PORT}/`);
+  const html = await res.text();
+  return html.includes("/@vite/client") ? "development" : "production";
 }
 
 const started = (await serving()) ? null : await startShowcase();
 if (started && !JSON_OUT) {
-  console.log(`started the showcase on :${PORT} for this run\n`);
+  console.log(
+    `serving the showcase production build on :${PORT} for this run\n`
+  );
+}
+const BUILD = await servedBuild();
+if (RECORD && BUILD !== "production") {
+  started?.kill();
+  throw new Error(
+    `:${PORT} serves the showcase dev server — a recorded run publishes ` +
+      `numbers, and they come from a production build only. Stop it, or run ` +
+      `\`pnpm --filter @adapttable/showcase build && pnpm --filter ` +
+      `@adapttable/showcase preview --port ${PORT}\`, then re-run.`
+  );
 }
 
 const chosen = (SMOKE ? SCENARIOS.filter((s) => s.smoke) : SCENARIOS).filter(
@@ -548,6 +591,7 @@ if (RECORD) {
         },
         node: process.version,
         chromium: browserVersion,
+        showcase: BUILD,
         smoke: SMOKE,
         results: results.map(({ name, query, expect, ...measured }) => ({
           name,
