@@ -15,16 +15,18 @@ const TITLE = "AdaptTable — Headless React Data Table for Any UI Kit";
 describe("landing page demo funnel", () => {
   it("keeps the ranked title and install plus demo above the fold", () => {
     assert.match(PAGE, new RegExp(`const TITLE = "${TITLE}"`));
-    const hero = PAGE.slice(
-      PAGE.indexOf('id="overview"'),
-      PAGE.indexOf('id="features"')
+    const heroAt = PAGE.indexOf('id="overview"');
+    const tourAt = PAGE.indexOf('id="tour"');
+    assert.ok(heroAt > 0 && tourAt > heroAt, "the tour follows the hero");
+    const hero = PAGE.slice(heroAt, tourAt);
+    assert.ok(
+      hero.includes("npx @adapttable/cli init"),
+      "install must sit in the hero"
     );
-    const installAt = hero.indexOf("npx @adapttable/cli init");
-    const demoAt = hero.indexOf("Try the live demo");
-    const mockAt = hero.indexOf('class="mock-link');
-    assert.ok(installAt > 0 && demoAt > 0 && mockAt > 0);
-    assert.ok(installAt < mockAt, "install must sit above the mock");
-    assert.ok(demoAt < mockAt, "demo CTA must sit above the mock");
+    assert.ok(
+      hero.includes("Try the live demo"),
+      "demo CTA must sit in the hero"
+    );
   });
 
   it("turns every pressable box into a real destination", () => {
@@ -34,7 +36,7 @@ describe("landing page demo funnel", () => {
     assert.match(PAGE, /<a class="hero__chip" href=\{kit\.href\}/);
     assert.match(
       PAGE,
-      /<a class="mock-link reveal" href=\{`\$\{SITE\}\/demo\/`\}/
+      /<a href=\{`\$\{SITE\}\/demo\/`\}>open the live demo<\/a>/
     );
     for (const href of [
       "${SITE}/demo/mantine/",

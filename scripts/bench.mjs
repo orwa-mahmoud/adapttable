@@ -632,13 +632,10 @@ if (JSON_OUT) {
       `arabic pdf: ${pdfFont.sourceFontBytes} B source face → ` +
         `${pdfFont.embeddedFontBytes ?? "?"} B embedded, ${pdfFont.pdfBytes} B file`
     );
-    console.log(
-      `card move controls: ${Object.entries(cardMoveControls)
-        .map(
-          ([kit, box]) => `${kit} ${box ? `${box.width}×${box.height}` : "—"}`
-        )
-        .join(", ")}`
+    const boxes = Object.entries(cardMoveControls).map(
+      ([kit, box]) => kit + " " + (box ? `${box.width}×${box.height}` : "—")
     );
+    console.log(`card move controls: ${boxes.join(", ")}`);
   }
   console.log(
     `\n${chosen.length - failed}/${chosen.length} scenarios within expectations`

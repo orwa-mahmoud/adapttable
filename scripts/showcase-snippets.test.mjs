@@ -53,16 +53,15 @@ describe("v3 showcase snippets compile", () => {
 
   it("aggregation imports published factories", () => {
     const snippet = fill(featureBySlug("aggregation").snippet);
-    assert.match(snippet, /from "@adapttable\/core"/);
-    assert.match(snippet, /aggregate/);
+    assert.match(snippet, /import \{ aggregate \} from "@adapttable\/react"/);
     assert.match(snippet, /from "@adapttable\/mantine\/grouping-panel"/);
     assert.match(snippet, /from "@adapttable\/mantine\/pinned-summary-rows"/);
     assert.match(snippet, /summaryRow=\{budgetSum\}/);
     assert.ok(mantinePkg.exports["./grouping-panel"]);
     assert.ok(mantinePkg.exports["./pinned-summary-rows"]);
     assert.match(
-      readFileSync(`${ROOT}/packages/core/src/index.ts`, "utf8"),
-      /aggregate/
+      readFileSync(`${ROOT}/packages/react/src/index.ts`, "utf8"),
+      /export \{ aggregate \} from/
     );
     assert.match(
       readFileSync(
