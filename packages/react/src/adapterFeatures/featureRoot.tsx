@@ -1,57 +1,14 @@
-import { clipboardRangeText, writeClipboardText } from "@adapttable/core";
 import type { ReactNode } from "react";
 
 import { FeatureSlot, useFeatureSlotFilled } from "../features/providers";
 import {
   CONTEXT_MENU_LIVE,
   type ContextMenuLiveSlotProps,
-  GRID_FOCUS_ANNOUNCER,
   SIDE_PANEL,
 } from "../features/slotKeys";
 
-type MenuProps = Omit<ContextMenuLiveSlotProps<never>, "children">;
-type MenuTarget = Parameters<NonNullable<MenuProps["actions"]["onCopy"]>>[0];
-
-/**
- * Copy the one cell a context menu was opened over.
- *
- * Without cell navigation there is no grid address and no range, but the
- * target already names the row and the column, which is all a single cell
- * needs. The text is the cell's export value, as a range copy writes it.
- */
-function copyTargetCell(props: MenuProps, target: MenuTarget): void {
-  if (target.kind !== "cell") return;
-  const column = props.columns.find((item) => item.key === target.columnKey);
-  if (!column) return;
-  const text = clipboardRangeText({
-    range: { anchor: { row: 0, col: 0 }, head: { row: 0, col: 0 } },
-    rows: [target.row],
-    columns: [column],
-  });
-  // The menu has closed and nothing announces a result without cell
-  // navigation; a refused clipboard leaves the clipboard as it was.
-  void writeClipboardText(text);
-}
-
-/** The menu's props, with Copy falling back to the right-clicked cell. */
-function withCellCopy(props: MenuProps, gridNavigation: boolean): MenuProps {
-  if (gridNavigation || !props.actions.onCopy) return props;
-  return {
-    ...props,
-    actions: {
-      ...props.actions,
-      onCopy: (target) => {
-        copyTargetCell(props, target);
-      },
-    },
-  };
-}
-
 /**
  * Mount a composed context-menu feature around an adapter's table region.
- *
- * Copy acts on the grid's selection when `cellNavigation()` is composed, and
- * on the right-clicked cell when it is not.
  *
  * @public
  */
@@ -63,12 +20,8 @@ export function ContextMenuLiveGate({
   readonly children: (regionProps: Record<string, unknown>) => ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(CONTEXT_MENU_LIVE);
-  const gridNavigation = useFeatureSlotFilled(GRID_FOCUS_ANNOUNCER);
   return filled ? (
-    <FeatureSlot
-      slot={CONTEXT_MENU_LIVE}
-      props={{ ...withCellCopy(props, gridNavigation), children }}
-    />
+    <FeatureSlot slot={CONTEXT_MENU_LIVE} props={{ ...props, children }} />
   ) : (
     children({})
   );

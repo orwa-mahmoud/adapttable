@@ -526,10 +526,12 @@ export interface FeatureRender<TProps> {
  *
  * Authoring the entry through this rather than as a literal is what lets the
  * render callback's argument be inferred, while the stored list erases to one
- * type so a feature can fill slots that take different props.
+ * type so a feature can fill slots that take different props. It has no side
+ * effects, so a render a table never composes is dropped with its module.
  *
  * @public
  */
+/* @__NO_SIDE_EFFECTS__ */
 export function slotRender<TProps>(
   slot: FeatureSlotKey<TProps>,
   render: (props: TProps) => ReactNode,
