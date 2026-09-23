@@ -86,6 +86,31 @@ describe("standard preset (base-ui)", () => {
     expect(part("bulk-bar")).toBeNull();
   });
 
+  it("draws no Find control unless asked", () => {
+    table(standardFeatures());
+
+    expect(part("find-button")).toBeNull();
+  });
+
+  it("findButton: true draws Find after Export and before Fullscreen, and it opens the find bar", () => {
+    table(standardFeatures<Row>({ findButton: true }));
+    const find = part("find-button")!;
+    const exportButton = screen.getByRole("button", { name: /export/i });
+    const fullscreen = part("fullscreen-toggle")!;
+
+    expect(
+      exportButton.compareDocumentPosition(find) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      find.compareDocumentPosition(fullscreen) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+
+    fireEvent.click(find);
+    expect(part("find-bar")).not.toBeNull();
+  });
+
   it("is an ordinary array a caller can extend", () => {
     const mine = { id: "mine", apply: () => ({ tableLabel: "Mine" }) };
     const composed = [...standardFeatures<Row>(), mine];
