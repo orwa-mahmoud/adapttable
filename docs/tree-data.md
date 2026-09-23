@@ -120,11 +120,10 @@ reads; the table re-walks the hierarchy itself and needs nothing back.
 The node **opens immediately** and shows it is working: its chevron carries
 `data-loading` and `aria-busy` until the rows land, so nobody is left clicking a
 control that appears to do nothing. A rejection clears the flag, records the node
-in `failedIds`, and leaves it open with nothing under it; the next click closes
-it, and opening it again retries the fetch.
+in `failedIds` and closes it again, so the next click retries the fetch.
 
 Headless: `useLazyChildren` holds the state (`LazyChildrenState`, options
-`UseLazyChildrenOptions`) and the table's tree bundle exposes `loadingIds` and
+`UseLazyChildrenOptions`, with `onLoadFailed` called on a rejection) and the table's tree bundle exposes `loadingIds` and
 `failedIds`.
 
 ## The whole tree on the server

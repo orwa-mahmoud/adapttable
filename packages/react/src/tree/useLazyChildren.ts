@@ -10,8 +10,9 @@
  * The set of loading ids lives here rather than in the host's state so the
  * chevron can show it without the host wiring anything: opening a node with
  * unfetched children marks it, and it clears when the rows arrive or the fetch
- * rejects. A node whose fetch failed is left closed and clickable, so the
- * reader's retry is the same gesture as the first attempt.
+ * rejects. A node whose fetch failed is closed again through `onLoadFailed`
+ * and stays clickable, so the reader's retry is the same gesture as the first
+ * attempt.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -33,6 +34,12 @@ export interface UseLazyChildrenOptions<TRow> {
   hasLoadedChildren: (row: TRow) => boolean;
   /** Row identity. */
   getRowId: (row: TRow) => string;
+  /**
+   * Called when a node's fetch rejects, after it is recorded in `failedIds`.
+   * The tree closes the node here, so the next click opens it and fetches
+   * again.
+   */
+  onLoadFailed?: (row: TRow, id: string) => void;
 }
 
 /**
@@ -82,7 +89,7 @@ export function useLazyChildren<TRow>(
     };
   }, []);
 
-  const settle = useEventCallback((id: string, failed: boolean) => {
+  const settle = useEventCallback((row: TRow, id: string, failed: boolean) => {
     if (!alive.current) return;
     setLoadingIds((current) => {
       const next = new Set(current);
@@ -92,6 +99,7 @@ export function useLazyChildren<TRow>(
     if (failed) {
       asked.current.delete(id);
       setFailedIds((current) => new Set(current).add(id));
+      options.onLoadFailed?.(row, id);
     }
   });
 
@@ -113,14 +121,14 @@ export function useLazyChildren<TRow>(
     try {
       void Promise.resolve(onLoadChildren(row)).then(
         () => {
-          settle(id, false);
+          settle(row, id, false);
         },
         () => {
-          settle(id, true);
+          settle(row, id, true);
         }
       );
     } catch {
-      settle(id, true);
+      settle(row, id, true);
     }
   });
 
