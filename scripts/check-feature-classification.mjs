@@ -31,7 +31,12 @@
  * 5. **The removal inventory matches the surface.** Every warned prop and
  *    every main-entry alias is accounted for in both directions, so the major
  *    cannot quietly drop something nobody wrote down — or keep advertising a
- *    removal that already happened.
+ *    removal that already happened. A moved name the main entry still serves
+ *    must carry `@deprecated`, seen through `export *` barrels too.
+ * 6. **Every migration row sends people somewhere real.** Each import an
+ *    alias row names exports that name, and each removed-prop row's factory
+ *    is the one the inventory maps the prop to and is exported from that
+ *    subpath of every published kit.
  *
  *   node scripts/check-feature-classification.mjs
  */
@@ -290,49 +295,88 @@ for (const prop of Object.keys(enabling.props)) {
   }
 }
 
+/** A source file for an entry specifier, or `undefined` when there is none. */
+function entrySource(specifier) {
+  const match = /^@adapttable\/([\w-]+)(?:\/([\w-]+))?$/.exec(specifier);
+  if (!match) return undefined;
+  const [, pkg, sub] = match;
+  const dir = join(PACKAGES, pkg, "src");
+  return ["ts", "tsx"]
+    .map((ext) => join(dir, `${sub ?? "index"}.${ext}`))
+    .find((file) => existsSync(file));
+}
+
+/** A relative module next to `from`, resolved the way the bundler does. */
+function relativeSource(from, specifier) {
+  const base = join(dirname(from), specifier);
+  return [`${base}.ts`, `${base}.tsx`, join(base, "index.ts")].find((file) =>
+    existsSync(file)
+  );
+}
+
 /**
- * The aliases are gone, and staying gone is the assertion now.
- *
- * Every name the inventory lists was re-exported from the MAIN entry as well
- * as from `@adapttable/core/adapter`; v3 removed the main-entry copy. If one
- * comes back — a stray `export * from` somewhere in the barrel — this is what
- * notices, because the adapter entry is the only place any of them may live.
+ * Every name a module exports, with whether that export carries a
+ * `@deprecated` notice: its own declarations and specifier lists, and the
+ * names behind any relative `export *`, which a check reading only the
+ * braces would miss.
  */
-const mainEntry = readFileSync(
-  join(PACKAGES, "core", "src", "index.ts"),
-  "utf8"
-);
-const mainEntryExports = new Set();
-for (const match of mainEntry.matchAll(
-  /^export\s+(?:declare\s+)?(?:const|function|interface|type|class|enum)\s+([A-Za-z_$][\w$]*)/gm
-)) {
-  mainEntryExports.add(match[1]);
-}
-for (const declaration of mainEntry.split(/^export\s+/m).slice(1)) {
-  const block = declaration.startsWith("type ")
-    ? declaration.slice("type ".length)
-    : declaration;
-  if (!block.startsWith("{")) continue;
-  const open = block.indexOf("{");
-  const close = block.indexOf("}", open + 1);
-  if (close < 0) continue;
-  for (const raw of block.slice(open + 1, close).split(",")) {
-    const trimmed = raw.trim();
-    const specifier = trimmed.startsWith("type ")
-      ? trimmed.slice("type ".length)
-      : trimmed;
-    if (!specifier) continue;
-    const aliasAt = specifier.lastIndexOf(" as ");
-    mainEntryExports.add(
-      aliasAt < 0 ? specifier : specifier.slice(aliasAt + " as ".length)
-    );
+function exportsOf(file, seen = new Set()) {
+  const out = new Map();
+  if (!file || seen.has(file)) return out;
+  seen.add(file);
+  const source = readFileSync(file, "utf8");
+  for (const match of source.matchAll(
+    /^export\s+(?:declare\s+)?(?:async\s+)?(?:const|function|interface|type|class|enum)\s+([A-Za-z_$][\w$]*)/gm
+  )) {
+    out.set(match[1], false);
   }
+  for (const match of source.matchAll(/^export\s+(?:type\s+)?\{([^}]*)\}/gm)) {
+    for (const raw of match[1].split(",")) {
+      const deprecated = raw.includes("@deprecated");
+      const specifier = raw
+        .replaceAll(/\/\*[\s\S]*?\*\//g, "")
+        .replaceAll(/\/\/.*$/gm, "")
+        .trim()
+        .replace(/^type\s+/, "");
+      if (!specifier) continue;
+      const aliasAt = specifier.lastIndexOf(" as ");
+      const name =
+        aliasAt < 0 ? specifier : specifier.slice(aliasAt + " as ".length);
+      out.set(name.trim(), deprecated);
+    }
+  }
+  for (const match of source.matchAll(/^export\s+\*\s+from\s+"(\.[^"]+)";/gm)) {
+    for (const [name, deprecated] of exportsOf(
+      relativeSource(file, match[1]),
+      seen
+    )) {
+      // An explicit export in this module shadows the barrel's.
+      if (!out.has(name)) out.set(name, deprecated);
+    }
+  }
+  return out;
 }
+
+/**
+ * What the main entry still serves of the names v3 moved.
+ *
+ * The 72 v2 aliases left for `@adapttable/react/adapter`. The framework-neutral
+ * ones are still exported from the main entry, each with a `@deprecated`
+ * notice until the major that removes them; a name the inventory keeps on the
+ * main entry on purpose is listed in `keptOnMain`. Anything else served there
+ * — undeprecated, through a barrel or a brace — is one that came back.
+ */
+const mainEntryExports = exportsOf(join(PACKAGES, "core", "src", "index.ts"));
+const keptOnMain = new Set(removals["main-entry-aliases"].keptOnMain ?? []);
 const inventoried = new Set(removals["main-entry-aliases"].names);
 for (const name of inventoried) {
-  if (mainEntryExports.has(name)) {
+  if (
+    mainEntryExports.has(name) &&
+    mainEntryExports.get(name) !== true &&
+    !keptOnMain.has(name)
+  ) {
     problems.push(
-      `v3Removals: "${name}" was removed from the main entry at v3 but is exported there again`
+      `v3Removals: "${name}" moved at v3 but the main entry serves it without a @deprecated notice`
     );
   }
 }
@@ -382,6 +426,93 @@ for (const name of [
     problems.push(
       `v3Removals: docs/migrate-from-v2.md does not name removed API "${name}"`
     );
+  }
+}
+
+/**
+ * Each migration row points at an import that really serves the name.
+ *
+ * An alias row names one or more entries (`@adapttable/react/adapter`, or
+ * `@adapttable/core` or `@adapttable/react`); every one must export it. A
+ * removed-prop row names a factory and a kit subpath; every kit must publish
+ * that subpath and export the factory from it, and the factory must be the one
+ * the inventory maps the prop to.
+ */
+const exportCache = new Map();
+function entryExports(specifier) {
+  if (!exportCache.has(specifier)) {
+    exportCache.set(specifier, exportsOf(entrySource(specifier)));
+  }
+  return exportCache.get(specifier);
+}
+const guideRows = [
+  ...migrationGuide.matchAll(/^\| `([^`|]+)`\s*\|\s*([^|]+?)\s*\|/gm),
+];
+for (const name of inventoried) {
+  const row = guideRows.find((match) => match[1] === name);
+  if (!row) continue;
+  const targets = [...row[2].matchAll(/`(@adapttable\/[\w/-]+)`/g)].map(
+    (match) => match[1]
+  );
+  if (targets.length === 0) {
+    problems.push(
+      `v3Removals: docs/migrate-from-v2.md names no import for "${name}"`
+    );
+  }
+  for (const target of targets) {
+    if (!entryExports(target).has(name)) {
+      problems.push(
+        `v3Removals: docs/migrate-from-v2.md sends "${name}" to ${target}, which does not export it`
+      );
+    }
+  }
+}
+
+const kitPackages = adapters.filter((adapter) =>
+  existsSync(join(PACKAGES, adapter, "package.json"))
+);
+const publishedKits = kitPackages.filter(
+  (adapter) =>
+    JSON.parse(readFileSync(join(PACKAGES, adapter, "package.json"), "utf8"))
+      .private !== true
+);
+for (const match of migrationGuide.matchAll(
+  /^\| (`[^|]+`)\s*\|\s*`(\w+)\([^`]*\)`\s*\|\s*`@adapttable\/<kit>\/([\w-]+)`\s*\|/gm
+)) {
+  const rowProps = [...match[1].matchAll(/`(\w+)`/g)].map((prop) => prop[1]);
+  const factory = match[2];
+  const subpath = match[3];
+  for (const prop of rowProps) {
+    const mapped = enabling.props[prop];
+    if (mapped !== undefined && mapped !== factory) {
+      problems.push(
+        `v3Removals: docs/migrate-from-v2.md replaces "${prop}" with ${factory}, but the inventory maps it to ${mapped}`
+      );
+    }
+  }
+  for (const adapter of publishedKits) {
+    const pkg = JSON.parse(
+      readFileSync(join(PACKAGES, adapter, "package.json"), "utf8")
+    );
+    if (!pkg.exports?.[`./${subpath}`]) {
+      problems.push(
+        `v3Removals: ${pkg.name} does not publish ./${subpath}, which docs/migrate-from-v2.md sends ${factory} to`
+      );
+      continue;
+    }
+    const file = relativeSource(
+      join(PACKAGES, adapter, "src", "index.ts"),
+      `./${subpath}`
+    );
+    const served = exportsOf(file);
+    const reExportsAll = file
+      ? /export\s+\*\s+from\s+"@adapttable\//.test(readFileSync(file, "utf8"))
+      : false;
+    if (!served.has(factory) && !reExportsAll) {
+      problems.push(
+        `v3Removals: ${pkg.name}/${subpath} does not export ${factory}`
+      );
+    }
   }
 }
 

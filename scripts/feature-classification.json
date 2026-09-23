@@ -962,6 +962,7 @@
           "useTreeExpansion",
           "useVirtualChromeBodyData"
         ],
+        "keptOnMain": ["SidePanelEntry", "isDeclarativeFilters"],
         "types": [
           "BodyCell",
           "EditableCellActivateProps",
@@ -1038,7 +1039,7 @@
           "useFullscreen",
           "useOffsetHeight"
         ],
-        "note": "Removed at v3. Each name still ships from @adapttable/react or @adapttable/react/adapter, which is the import a host moves to; the split below is what the consumer harness probes in a packed install — a type has to still name a type, a value has to still be one."
+        "note": "Each name ships from @adapttable/react or @adapttable/react/adapter, which is the import a host moves to. The framework-neutral adapter helpers are still exported from the main entry, each with a @deprecated notice, until the major that removes them; keptOnMain lists the two the main entry keeps undeprecated because @adapttable/core is one of their documented homes. The split below is what the consumer harness probes in a packed install — a type has to still name a type, a value has to still be one."
       },
       {
         "id": "chrome-body-hook",
