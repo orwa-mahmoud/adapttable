@@ -21,7 +21,7 @@ function LiveFind({
   children,
   root,
   ...options
-}: FindLiveSlotProps<never>): ReactNode {
+}: Readonly<FindLiveSlotProps<never>>): ReactNode {
   const find = useFindInTable(options);
   // With cell navigation the grid owns the walk's focus; without it, find
   // brings the current match into view itself.

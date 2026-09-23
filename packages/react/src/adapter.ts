@@ -429,7 +429,6 @@ export {
   type FilterTreeSelectProps,
   type FilterTreeSlots,
 } from "./filters/FilterTreeChrome";
-export { useFindState, withFindMarks } from "./find/findMarks";
 export {
   FindBarChrome,
   type FindBarChromeProps,
@@ -439,6 +438,7 @@ export {
   type FindButtonProps,
   type FindSearchProps,
 } from "./find/FindBar";
+export { useFindState, withFindMarks } from "./find/findMarks";
 export type {
   FindInTableState,
   UseFindInTableOptions,
@@ -782,7 +782,6 @@ export {
 } from "@adapttable/core";
 export { type ColumnGroupDef, type ColumnInput } from "@adapttable/core";
 export { pinnedColumnWidth } from "@adapttable/core";
-
 export { DEFAULT_CARD_SIZE_PX } from "@adapttable/core";
 export { exportButtonLabel } from "@adapttable/core";
 export { bindFeatureHostFn } from "@adapttable/core";
@@ -794,12 +793,11 @@ export {
 } from "@adapttable/core";
 export { cellFlashAttr, rowFlashSignature } from "@adapttable/core";
 export {
+  type TableBodyCell as BodyCell,
   buildBodyCells,
   type CellSpanAppearance,
-  type TableBodyCell as BodyCell,
 } from "@adapttable/core";
 export { type ExtraRow } from "@adapttable/core";
-
 export {
   isPinnedSummaryRowId,
   PINNED_SUMMARY_BOTTOM_PART,

@@ -1,7 +1,6 @@
 import { createElement, type ReactNode } from "react";
 
 import type { BatchRowEdit } from "../editing/batchEditing";
-import type { EditHistoryOptions } from "../props";
 import type {
   BatchEditBarProps,
   RowEditActionsProps,
@@ -28,6 +27,7 @@ import type {
   StaticTableFeature,
   TableFeature,
 } from "../features/tableFeature";
+import type { EditHistoryOptions } from "../props";
 import type { AdapterFeatureComponent } from "./component";
 
 /**
@@ -102,11 +102,6 @@ export interface AdapterEditingFeatures {
 }
 
 /**
- * Bind core's editing lifecycle to one kit's editors and controls.
- *
- * @public
- */
-/**
  * The kit's cell, with the content it shows when nothing is being edited
  * already worked out.
  *
@@ -133,6 +128,11 @@ function withResolvedDisplay(
   };
 }
 
+/**
+ * Bind core's editing lifecycle to one kit's editors and controls.
+ *
+ * @public
+ */
 export function createAdapterEditingFeatures(
   components: AdapterEditingComponents
 ): AdapterEditingFeatures {

@@ -8,8 +8,8 @@
 import {
   type CellEdit,
   cellFillHandler,
-  type CellRange,
   cellPasteHandler,
+  type CellRange,
   coveredAddressSet,
 } from "@adapttable/core";
 import { type ReactNode, useEffect, useRef } from "react";

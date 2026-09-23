@@ -318,6 +318,18 @@ function Receipt({
   );
 }
 
+/**
+ * The message as it reads while a voice clip is still being transcribed: the
+ * clip's placeholder until its words arrive.
+ */
+function withVoicePlaceholder(
+  message: TableAssistantMessageView,
+  labels: TableLabels | undefined
+): TableAssistantMessageView {
+  if (!message.transcribing || message.text) return message;
+  return { ...message, text: labels?.assistantVoiceMessage ?? "Voice message" };
+}
+
 /** One exchange. @internal */
 export function AssistantMessage({
   message,
@@ -437,14 +449,7 @@ export function AssistantMessage({
         {speaker}
       </span>
       <Spoken
-        message={
-          message.transcribing && !message.text
-            ? {
-                ...message,
-                text: labels?.assistantVoiceMessage ?? "Voice message",
-              }
-            : message
-        }
+        message={withVoicePlaceholder(message, labels)}
         mine={mine}
         leads={leads}
         {...marks}

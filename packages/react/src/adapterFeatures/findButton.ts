@@ -1,11 +1,11 @@
 import { createElement, type ReactNode } from "react";
 
-import { useFindState } from "../find/findMarks";
 import { type FeatureRender, slotRender } from "../features/providers";
 import {
   TOOLBAR_EXTRAS,
   type ToolbarExtrasSlotProps,
 } from "../features/slotKeys";
+import { useFindState } from "../find/findMarks";
 import type { AdapterFeatureComponent } from "./component";
 
 /**
