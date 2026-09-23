@@ -371,7 +371,12 @@ function specifierName(raw) {
   const aliasAt = specifier.lastIndexOf(" as ");
   const name =
     aliasAt < 0 ? specifier : specifier.slice(aliasAt + " as ".length);
-  return { name: name.trim(), deprecated: raw.includes("@deprecated") };
+  const source = aliasAt < 0 ? specifier : specifier.slice(0, aliasAt);
+  return {
+    name: name.trim(),
+    source: source.trim(),
+    deprecated: raw.includes("@deprecated"),
+  };
 }
 
 /**
@@ -385,11 +390,10 @@ function exportsOf(file, seen = new Set()) {
   if (!file || seen.has(file)) return out;
   seen.add(file);
   const source = readFileSync(file, "utf8");
-  for (const line of source.split("\n")) {
-    const name = line.startsWith("export ") ? declaredName(line) : undefined;
-    if (name) out.set(name, false);
+  for (const [name, deprecated] of declaredExports(source)) {
+    out.set(name, deprecated);
   }
-  for (const [name, deprecated] of specifierExports(source)) {
+  for (const [name, deprecated] of specifierExports(file, source, seen)) {
     out.set(name, deprecated);
   }
   for (const [name, deprecated] of barrelExports(file, source, seen)) {
@@ -399,13 +403,45 @@ function exportsOf(file, seen = new Set()) {
   return out;
 }
 
-/** Every name the module's `export { … }` lists carry. */
-function specifierExports(source) {
+/**
+ * Every name the module declares with `export`, and whether the doc comment
+ * right above the declaration marks it `@deprecated`.
+ */
+function declaredExports(source) {
   const out = new Map();
-  for (const match of source.matchAll(/^export (?:type )?\{([^}]*)\}/gm)) {
+  let doc = "";
+  let inDoc = false;
+  for (const line of source.split("\n")) {
+    const text = line.trim();
+    if (inDoc || text.startsWith("/**")) {
+      doc = inDoc ? doc + text : text;
+      inDoc = !text.endsWith("*/");
+      continue;
+    }
+    const name = line.startsWith("export ") ? declaredName(line) : undefined;
+    if (name) out.set(name, doc.includes("@deprecated"));
+    if (text !== "") doc = "";
+  }
+  return out;
+}
+
+/** Every name the module's `export { … }` lists carry. */
+function specifierExports(file, source, seen) {
+  const out = new Map();
+  for (const match of source.matchAll(
+    /^export (?:type )?\{([^}]*)\}(?: from "(\.[^"]+)")?/gm
+  )) {
+    // A relative re-export carries the notice its declaration has.
+    const target = match[2]
+      ? exportsOf(relativeSource(file, match[2]), new Set(seen))
+      : undefined;
     for (const raw of match[1].split(",")) {
       const entry = specifierName(raw);
-      if (entry) out.set(entry.name, entry.deprecated);
+      if (!entry) continue;
+      out.set(
+        entry.name,
+        entry.deprecated || target?.get(entry.source) === true
+      );
     }
   }
   return out;

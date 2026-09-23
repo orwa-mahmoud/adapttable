@@ -681,10 +681,6 @@ export {
  */
 export type { TableCommandOptions } from "./actions/commandRegistry";
 export * from "./bindingExports";
-
-// Adapter machinery on the main entry. Each name here shadows the same name
-// from the barrel above, so the main entry carries the notice and
-// `@adapttable/core/binding` and `@adapttable/react/adapter` do not.
 export type {
   ColumnMenuChoice,
   ColumnMenuChoiceOption,
@@ -693,73 +689,9 @@ export type {
   ColumnMenuRow,
 } from "./columns/columnMenuModel";
 export type { PinnedSide } from "./columns/columnMenuModel";
-export {
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  columnMenuActions,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  filterColumnMenuRows,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  hideAllColumns,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  resetColumnLayout,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  showAllColumns,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  unpinAllColumns,
-} from "./columns/columnMenuModel";
 export type { ColumnResizeHandleProps } from "./columns/columnResize";
-export {
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  applyCollapsedColumnGroups,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  flattenColumnTree,
-} from "./columns/columnTree";
 export type { WidthColumn } from "./columns/columnWidths";
 export type { GroupedHeaderAlign } from "./columns/headerGroups";
-export {
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  COLUMN_GROUP_ID_SEP,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  COLUMN_GROUP_RENDER_PREFIX,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  COLUMN_GROUP_STUB_PREFIX,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  COLUMN_GROUP_STUB_WIDTH,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  columnGroupHeaderCaption,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  columnGroupId,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  columnGroupPath,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  columnGroupStubStyle,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  groupedHeaderAlign,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  groupedHeaderCellStyle,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  groupedHeaderChildRule,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  groupedHeaderLabelStyle,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  type HeaderGroupCell,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  headerGroupRow,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  headerGroupRows,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  type HtmlGroupedHeaderCell,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  htmlGroupedHeaderPlan,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  isColumnGroupRenderKey,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  isColumnGroupStubKey,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  isColumnGroupSummaryKey,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  toggleCollapsedColumnGroup,
-} from "./columns/headerGroups";
 export type { ExportCsvProp } from "./export/tableCsv";
 export type { FeatureHostState } from "./features/currentHost";
 export type {
@@ -768,90 +700,76 @@ export type {
   FilterTypeExtend,
 } from "./features/currentHost";
 export type { BuildGroupedFlatModelOptions } from "./grouping/groupRows";
-export {
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  bodyCellsHaveRowSpan,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  cellsForRow,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  extraHostFillStyle,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  isExtraEntry,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  pinnedRowCellStyle,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  pinnedRowPart,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  pinnedRowSticky,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  REORDER_COLUMN_WIDTH,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  resolveRowStyle,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  rowPinSignature,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  rowReorderDropStyle,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  rowReorderSignature,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  rowSpanSignature,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  rowStyleSignature,
-} from "./layout/leanAssembly";
-export {
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  type BodyCell,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  cellSpanMark,
-} from "./rows/cellSpan";
-export {
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  EXTRA_OVER_SPAN_ROW_STYLE,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  EXTRA_OVER_SPAN_STYLE,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  EXTRA_ROW_PARTS,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  extraCountBeforeRowIds,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  extraCoveredTableSlots,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  extraRowsForSection,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  extraUncoveredColSpans,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  inflateBodyCellRowSpans,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  insertExtraRows,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  insertExtrasBeforeRows,
-} from "./rows/extraRows";
-export {
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  orderedCardEntries,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  PINNED_BOTTOM_PART,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  PINNED_TOP_PART,
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  pinnedRowStickyStyle,
-} from "./rows/pinnedRowChrome";
-export {
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  resolveRowHeight,
-} from "./rows/rowPresentation";
 export type {
   FeatureNotice,
   FeatureNoticeAppearance,
   FeatureNoticeKind,
 } from "./state/featureNotices";
+// Adapter machinery on the main entry, each name deprecated where it is
+// declared. These shadow the same names from the barrel above, so
+// `@adapttable/core/binding` and `@adapttable/react/adapter` carry no notice.
 export {
-  /** @deprecated Import from `@adapttable/react/adapter`. */
-  rowSourceIndex,
-} from "./virtual/virtualTableModel";
-export {
-  /** @deprecated Import from `@adapttable/core/xlsx`. */
+  applyCollapsedColumnGroups,
+  type BodyCell,
+  bodyCellsHaveRowSpan,
   buildTableXlsx,
-  /** @deprecated Import from `@adapttable/core/xlsx`. */
+  cellsForRow,
+  cellSpanMark,
+  COLUMN_GROUP_ID_SEP,
+  COLUMN_GROUP_RENDER_PREFIX,
+  COLUMN_GROUP_STUB_PREFIX,
+  COLUMN_GROUP_STUB_WIDTH,
+  columnGroupHeaderCaption,
+  columnGroupId,
+  columnGroupPath,
+  columnGroupStubStyle,
+  columnMenuActions,
+  EXTRA_OVER_SPAN_ROW_STYLE,
+  EXTRA_OVER_SPAN_STYLE,
+  EXTRA_ROW_PARTS,
+  extraCountBeforeRowIds,
+  extraCoveredTableSlots,
+  extraHostFillStyle,
+  extraRowsForSection,
+  extraUncoveredColSpans,
+  filterColumnMenuRows,
+  flattenColumnTree,
+  groupedHeaderAlign,
+  groupedHeaderCellStyle,
+  groupedHeaderChildRule,
+  groupedHeaderLabelStyle,
+  type HeaderGroupCell,
+  headerGroupRow,
+  headerGroupRows,
+  hideAllColumns,
+  type HtmlGroupedHeaderCell,
+  htmlGroupedHeaderPlan,
+  inflateBodyCellRowSpans,
+  insertExtraRows,
+  insertExtrasBeforeRows,
+  isColumnGroupRenderKey,
+  isColumnGroupStubKey,
+  isColumnGroupSummaryKey,
+  isExtraEntry,
+  orderedCardEntries,
+  PINNED_BOTTOM_PART,
+  PINNED_TOP_PART,
+  pinnedRowCellStyle,
+  pinnedRowPart,
+  pinnedRowSticky,
+  pinnedRowStickyStyle,
+  REORDER_COLUMN_WIDTH,
+  resetColumnLayout,
+  resolveRowHeight,
+  resolveRowStyle,
+  rowPinSignature,
+  rowReorderDropStyle,
+  rowReorderSignature,
+  rowSourceIndex,
+  rowSpanSignature,
+  rowStyleSignature,
+  showAllColumns,
+  toggleCollapsedColumnGroup,
+  unpinAllColumns,
   xlsxWriter,
-} from "./xlsx";
+} from "./adapterMachinery";
