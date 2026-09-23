@@ -2,6 +2,7 @@
  * Resolve a cell value from a neutral column. Never reads React renderers.
  */
 import type { ColumnMetadata, SortableValue } from "../columnModel";
+import { resolveLocaleTag } from "../utils/localeTag";
 import { getPath } from "../utils/path";
 
 function asSortable(value: unknown): SortableValue {
@@ -51,8 +52,9 @@ export function cellSortValue<TRow>(
 }
 
 /**
- * Data path for a column, honouring `i18n` the same way resolveColumns does:
- * exact locale tag, then primary subtag, then `key`.
+ * Data path for a column, honouring `i18n` through the one locale resolver
+ * every locale-shaped lookup shares (`resolveLocaleTag`): the exact tag in
+ * any case and with `-` or `_`, then its primary subtag, then `key`.
  *
  * @public
  */
@@ -61,9 +63,6 @@ export function resolveColumnPath<TRow>(
   locale?: string
 ): string {
   if (!locale || !column.i18n) return column.key;
-  const exact = column.i18n[locale];
-  if (exact) return exact;
-  const primary = locale.split("-")[0];
-  if (primary && column.i18n[primary]) return column.i18n[primary];
-  return column.key;
+  const tag = resolveLocaleTag(Object.keys(column.i18n), locale);
+  return (tag === undefined ? undefined : column.i18n[tag]) ?? column.key;
 }
