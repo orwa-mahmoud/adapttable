@@ -518,6 +518,7 @@ export function useTableDataWithEngine<TRow>(
     }),
     columns: resolvedColumns,
     filterFn: combinedFilterFn,
+    locale,
     paginationMode,
     forceMobile,
     mobileBreakpoint,

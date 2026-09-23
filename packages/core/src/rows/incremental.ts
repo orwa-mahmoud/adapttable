@@ -105,6 +105,11 @@ export interface IncrementalViewConfig<TRow> {
   filterTree?: QueryFilterGroup;
   /** Columns — sort and group values resolve through these. */
   columns?: readonly ColumnMetadata<TRow>[];
+  /**
+   * Active locale tag. A column's sort value reads its `i18n` path for this
+   * locale — the same path its cells and filters read.
+   */
+  locale?: string;
   /** Override a column's sort value. */
   getSortValue?: (row: TRow, columnKey: string) => SortableValue;
   /** Single-column sort. Ignored when `sortLevels` is non-empty. */
@@ -545,6 +550,7 @@ function queryConfigFingerprint<TRow>(
       dir: level.dir,
     })),
     columnKeys: (config.columns ?? []).map((column) => column.key),
+    locale: config.locale ?? null,
     hasFilterFn: config.filterFn !== undefined,
     hasFilterTreeFn: config.filterTreeFn !== undefined,
     hasGetSortValue: config.getSortValue !== undefined,
@@ -654,7 +660,7 @@ function resolveSortValue<TRow>(
   // accessor for those rows instead would order one column by two different
   // extractors at once: some rows by their value, the rest by their rendered
   // text, with nothing on screen to say which row got which.
-  if (column) return cellSortValue(row, column);
+  if (column) return cellSortValue(row, column, config.locale);
   return null;
 }
 

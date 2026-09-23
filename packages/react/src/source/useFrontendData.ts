@@ -122,6 +122,11 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
    * Force the resolved mobile state instead of using a media query.
    * Primarily a testing/SSR seam.
    */
+  /**
+   * Active locale tag. Sorting reads each column's `i18n` path for it, the
+   * same path its cells and filters read.
+   */
+  locale?: string;
   forceMobile?: boolean;
   /**
    * The width, in pixels, at or below which `paginationMode="auto"` resolves
@@ -187,6 +192,7 @@ export function useFrontendData<TRow>(
     isLoading = false,
     forceMobile,
     mobileBreakpoint,
+    locale,
     ...urlOptions
   } = options;
 
@@ -225,6 +231,7 @@ export function useFrontendData<TRow>(
     hasFilterFn: filterFn !== undefined,
     hasFilterTreeFn: filterTreeFn !== undefined,
     hasGetSortValue: getSortValue !== undefined,
+    locale,
   };
   const hookConfig: IncrementalViewConfig<TRow> = {
     getRowId,
@@ -234,6 +241,7 @@ export function useFrontendData<TRow>(
     filterTreeFn,
     filterTree: state.filterTree,
     columns,
+    locale,
     getSortValue,
     sortBy,
     sortDir,
@@ -248,6 +256,7 @@ export function useFrontendData<TRow>(
   engineRef.current ??= createTableEngine({
     data,
     columns: columns ?? [],
+    locale,
     rowKey: getRowId,
     paginationMode: paged ? "paged" : "infinite",
     defaults: {
@@ -416,6 +425,7 @@ interface FrontendViewFingerprint<TRow> {
   hasFilterFn: boolean;
   hasFilterTreeFn: boolean;
   hasGetSortValue: boolean;
+  locale: string | undefined;
 }
 
 function hookViewFingerprint<TRow>(
@@ -436,6 +446,7 @@ function hookViewFingerprint<TRow>(
     hasFilterFn: fingerprint.hasFilterFn,
     hasFilterTreeFn: fingerprint.hasFilterTreeFn,
     hasGetSortValue: fingerprint.hasGetSortValue,
+    locale: fingerprint.locale ?? null,
   });
 }
 

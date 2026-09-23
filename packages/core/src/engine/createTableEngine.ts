@@ -497,6 +497,7 @@ export function createTableEngine<TRow>(
       filterFn: view.filterFn ?? filterFn,
       extra: view.extra,
       columns: view.columns,
+      locale: view.locale,
       sortBy: view.sortBy,
       sortDir: view.sortDir,
       search: view.search,
