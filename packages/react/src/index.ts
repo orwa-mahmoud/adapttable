@@ -121,6 +121,9 @@ export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export type {
   BaseDataTableProps,
   ComposedTableProps,
+  DirtyEdits,
+  EditHistoryHandle,
+  EditHistoryOptions,
   FeatureProps,
   SidePanelOptions,
   SummaryRowFn,

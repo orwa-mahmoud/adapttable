@@ -1124,7 +1124,12 @@ records each inline edit as a one-cell gesture. `asGesture(apply, record)` wraps
 a cell-edit handler as one undo entry. `asBatchGesture(apply, record)` does the
 same for `onBatchEdit`, so one save is one undo. `readCellValue(row, column)` reads a
 cell's current value unstringified — what an undo puts back. Compose `editHistory()` to
-arm it. See [cell editing](./cell-editing.md).
+arm it; `editHistory({ depth, onChange })` (`EditHistoryOptions`) hands a host
+an `EditHistoryHandle` — `undo`, `redo`, `canUndo`, `canRedo`, `clear`.
+`editing(commit, { onDirtyChange })` reports `DirtyEdits` (`count`, `confirm`,
+`confirmRow`, `confirmAll`), and `cellNavigation({ onRangeChange })`
+(`CellNavigationOptions`) the selected `CellRange`, each on mount and on
+change. See [cell editing](./cell-editing.md).
 
 **Server-side grouping.** A source that declares `supports.grouping` receives
 `query.groupBy` (the keys, outermost first) and, with `supports.aggregates`,

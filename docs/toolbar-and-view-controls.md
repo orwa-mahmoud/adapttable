@@ -89,7 +89,10 @@ Left to right in a left-to-right table:
 | Every kit | `start` · Search · mobile sort select · `toolbar` · Filters · Saved views · Columns · Density · Export · Fullscreen · Print · Undo/Redo · Add row · `end` · Rows per page |
 
 In MUI, `editHistory()` draws the Undo and Redo pair; in every other kit
-`undoRedoButtons()` draws it. Either way it sits after Print.
+`undoRedoButtons()` draws it. Either way it sits after Print. To draw Undo
+and Redo yourself — outside the table, or in your own toolbar — take the
+history from `editHistory({ onChange })`; see
+[cell editing](./cell-editing.md#undo-and-redo).
 
 Each entry appears only when its source is present:
 

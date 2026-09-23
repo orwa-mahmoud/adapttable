@@ -57,7 +57,7 @@ import type {
 import type { GroupingPanelSlotProps } from "../grouping/GroupingPanelChrome";
 import type { SidePanelChromeProps } from "../layout/SidePanelChrome";
 import type { FullscreenState } from "../layout/useFullscreen";
-import type { ComposedTableProps } from "../props";
+import type { ComposedTableProps, EditHistoryOptions } from "../props";
 import type {
   RowReorderButtonsProps,
   RowReorderHandleProps,
@@ -447,7 +447,7 @@ export const FIND_LIVE = featureSlotKey<FindLiveSlotProps<never>>("find-live", {
  */
 export interface EditHistoryLiveSlotProps<TRow = never> {
   /** History options from the composed feature / prop. */
-  editHistory: boolean | { depth?: number } | undefined;
+  editHistory: boolean | EditHistoryOptions | undefined;
   /** Columns, for reading a cell's value before it changes. */
   columns: readonly ColumnDef<TRow>[];
   /** The host's commit channel. */

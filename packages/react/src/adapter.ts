@@ -552,6 +552,9 @@ export type { SummaryRowFn } from "./props";
 export type {
   BaseDataTableProps,
   ComposedTableProps,
+  DirtyEdits,
+  EditHistoryHandle,
+  EditHistoryOptions,
   FeatureProps,
   ToolbarSlots,
 } from "./props";

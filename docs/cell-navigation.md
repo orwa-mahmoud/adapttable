@@ -392,9 +392,21 @@ only once a real rectangle exists: marking every focused cell as selected would
 tell a screen reader the table is in selection mode when the user has merely
 arrowed around.
 
+`cellNavigation({ onRangeChange })` tells the host the rectangle on mount and
+whenever it changes — `null` when nothing beyond the focused cell is selected —
+which is what a "sum of selection" readout of your own reads:
+
+```tsx
+const [range, setRange] = useState<CellRange | null>(null);
+
+<DataTable
+  {...props}
+  features={[cellNavigation({ onRangeChange: setRange })]}
+/>;
+```
+
 Headless: `useGridFocus({ onRangeChange })` reports every change, and
-`gridFocus.range` (also on the `useDataTableShell` result from
-`@adapttable/react/adapter`) holds the current rectangle — which is what
+`gridFocus.range` holds the current rectangle — which is what
 `exportCsv({ scope: "range" })` reads.
 
 Headless: `CellRange` and `CellRangeBounds` are the shapes, `cellRangeBounds`

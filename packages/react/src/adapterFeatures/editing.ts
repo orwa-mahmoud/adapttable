@@ -1,6 +1,7 @@
 import { createElement, type ReactNode } from "react";
 
 import type { BatchRowEdit } from "../editing/batchEditing";
+import type { EditHistoryOptions } from "../props";
 import type {
   BatchEditBarProps,
   RowEditActionsProps,
@@ -90,7 +91,7 @@ export interface AdapterEditingFeatures {
   readonly dirtyIndicators: () => StaticTableFeature;
   /** Track edit history. */
   readonly editHistory: (
-    options?: boolean | { depth?: number }
+    options?: boolean | EditHistoryOptions
   ) => StaticTableFeature;
   /** Draw undo and redo controls. */
   readonly undoRedoButtons: () => StaticTableFeature;
@@ -167,7 +168,7 @@ export function createAdapterEditingFeatures(
   }
 
   function editHistory(
-    options: boolean | { depth?: number } = true
+    options: boolean | EditHistoryOptions = true
   ): StaticTableFeature {
     return extendFeature(
       coreEditHistory(options),

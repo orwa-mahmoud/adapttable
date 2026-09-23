@@ -8,10 +8,11 @@
 import {
   type CellEdit,
   cellFillHandler,
+  type CellRange,
   cellPasteHandler,
   coveredAddressSet,
 } from "@adapttable/core";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 import { asGesture } from "../editing/editHistory";
 import { useFindFocus } from "../find/useFindInTable";
@@ -68,7 +69,29 @@ function LiveCellNav({
     gridFocus.focusCell,
     gridFocus.selectRange
   );
+  const reportRange = useRef(hostProps.onCellRangeChange);
+  reportRange.current = hostProps.onCellRangeChange;
+  const wired = hostProps.onCellRangeChange !== undefined;
+  const range = gridFocus.range;
+  useEffect(() => {
+    if (!wired) return;
+    reportRange.current?.(range);
+  }, [wired, range]);
   return children(gridFocus);
+}
+
+/**
+ * Options for `cellNavigation(…)`.
+ *
+ * @public
+ */
+export interface CellNavigationOptions {
+  /**
+   * Told the selected rectangle whenever it changes, and once on mount —
+   * `null` when nothing beyond the focused cell is selected. What a
+   * "sum of selection" readout of your own reads.
+   */
+  readonly onRangeChange?: (range: CellRange | null) => void;
 }
 
 /**
@@ -76,10 +99,15 @@ function LiveCellNav({
  *
  * @public
  */
-export function cellNavigation(): StaticTableFeature {
+export function cellNavigation(
+  options: CellNavigationOptions = {}
+): StaticTableFeature {
   return {
     id: "cell-navigation",
-    apply: () => ({ cellNavigation: true }),
+    apply: () =>
+      options.onRangeChange
+        ? { cellNavigation: true, onCellRangeChange: options.onRangeChange }
+        : { cellNavigation: true },
     renders: [
       slotRender(CELL_NAV_LIVE, (props) => <LiveCellNav {...props} />),
       slotRender(GRID_FOCUS_ANNOUNCER, (props) => (

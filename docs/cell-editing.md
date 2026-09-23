@@ -619,9 +619,19 @@ fades on its own says the change is safe when nobody checked.
 Off by default, because a mark is a claim about what the server has agreed to and
 a table whose host never says would be guessing. For a table that confirms its
 own state another way — a refetch that agrees, a websocket echoing the value back
-— the `useDataTableShell` result from `@adapttable/react/adapter` carries it
-as `chrome.editing?.dirty`, with `confirm`, `confirmRow` and `confirmAll`, plus
-a `count` for an "unsaved changes" line.
+— `editing(commit, { onDirtyChange })` hands it over on mount and whenever a
+mark moves: `{ count, confirm, confirmRow, confirmAll }`, a `count` for an
+"unsaved changes" line and the functions that settle marks.
+
+```tsx
+const [dirty, setDirty] = useState<DirtyEdits>();
+
+<DataTable
+  {...props}
+  features={[editing(save, { onDirtyChange: setDirty }), dirtyIndicators()]}
+/>;
+// dirty?.count — "3 unsaved changes"; dirty?.confirmAll() after a refetch
+```
 
 Headless: `useDirtyCells` (`DirtyCellState`, `UseDirtyCellsOptions`) and
 `rowIsDirty(editing, rowId)` from `@adapttable/react/adapter`.
@@ -780,7 +790,22 @@ import {
 />;
 ```
 
-For your own buttons, the `useDataTableShell` result from
-`@adapttable/react/adapter` carries `editHistory` with `undo()`, `redo()`,
-`canUndo`, `canRedo` and `clear()` — call `clear()` when you replace the data underneath, since a
-history of rows that no longer exist can only put back values nobody wants.
+For your own buttons, `editHistory({ onChange })` hands over the history on
+mount and whenever `canUndo` or `canRedo` changes — `undo()`, `redo()`,
+`canUndo`, `canRedo` and `clear()`:
+
+```tsx
+const [history, setHistory] = useState<EditHistoryHandle>();
+
+<button disabled={!history?.canUndo} onClick={() => history?.undo()}>
+  Undo
+</button>
+<DataTable
+  {...props}
+  features={[editHistory({ onChange: setHistory }), editing(commit)]}
+/>;
+```
+
+The functions are stable and always act on the table's current history. Call
+`clear()` when you replace the data underneath, since a history of rows that no
+longer exist can only put back values nobody wants.

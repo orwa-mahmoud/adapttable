@@ -107,6 +107,56 @@ export interface SidePanelOptions {
 }
 
 /**
+ * The table's edit history as a host drives it: undo and redo through the
+ * table's own commit channel, whether either can run, and a reset.
+ *
+ * @public
+ */
+export interface EditHistoryHandle {
+  /** Put the last gesture back. Returns how many cells were restored. */
+  readonly undo: () => number;
+  /** Do the last undone gesture again. Returns how many cells were rewritten. */
+  readonly redo: () => number;
+  /** Whether anything can be undone right now. */
+  readonly canUndo: boolean;
+  /** Whether anything can be redone right now. */
+  readonly canRedo: boolean;
+  /** Forget every gesture. */
+  readonly clear: () => void;
+}
+
+/**
+ * Options for `editHistory(…)`.
+ *
+ * @public
+ */
+export interface EditHistoryOptions {
+  /** How many gestures to keep. Defaults to 50. */
+  readonly depth?: number;
+  /**
+   * Told the history whenever `canUndo` or `canRedo` changes, and once on
+   * mount, so a control of your own can undo, redo and enable itself.
+   */
+  readonly onChange?: (history: EditHistoryHandle) => void;
+}
+
+/**
+ * The unsaved-edit state as a host reads and settles it.
+ *
+ * @public
+ */
+export interface DirtyEdits {
+  /** How many cells hold a change nobody has confirmed. */
+  readonly count: number;
+  /** Clear one cell's mark — its save was confirmed. */
+  readonly confirm: (rowId: string, columnKey: string) => void;
+  /** Clear every mark in one row. */
+  readonly confirmRow: (rowId: string) => void;
+  /** Clear every mark. */
+  readonly confirmAll: () => void;
+}
+
+/**
  * What a FEATURE applies, and no host passes.
  *
  * Each of these was an enabling prop on `<DataTable>` before v3. A bundler
@@ -160,7 +210,7 @@ export interface FeatureProps<TRow> {
    * way back exactly as it ran on the way out. One gesture is one entry, so a
    * paste of two hundred cells undoes in a single press.
    */
-  editHistory?: boolean | { depth?: number };
+  editHistory?: boolean | EditHistoryOptions;
   /**
    * Show a find bar over the table — Ctrl/Cmd+F with `cellNavigation`, or
    * `table.find.setOpen(true)` from a control of your own.
@@ -236,6 +286,12 @@ export interface FeatureProps<TRow> {
    * table whose host never says would be guessing.
    */
   dirtyIndicators?: boolean;
+  /**
+   * Told the unsaved-edit state whenever it changes, and once on mount —
+   * `editing(commit, { onDirtyChange })`. Marks are kept when
+   * `dirtyIndicators()` is composed; without it the count stays 0.
+   */
+  onDirtyChange?: (dirty: DirtyEdits) => void;
   /**
    * Edit a whole row at once instead of a cell at a time: every field opens
    * together, holds its draft, and reaches the host as ONE patch when the reader
@@ -454,6 +510,12 @@ export interface FeatureProps<TRow> {
    * are a list, not a grid, and keep their list semantics.
    */
   cellNavigation?: boolean;
+  /**
+   * Told the selected cell rectangle whenever it changes, and once on mount —
+   * `null` when nothing beyond the focused cell is selected. Set through
+   * `cellNavigation({ onRangeChange })`.
+   */
+  onCellRangeChange?: (range: CellRange | null) => void;
   /**
    * Offer a checkbox in every column header that selects that column.
    * Defaults to false, and needs `cellNavigation` to do anything.

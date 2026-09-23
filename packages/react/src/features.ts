@@ -20,7 +20,10 @@ export type { CommandPaletteOptions } from "./actions/useCommandPalette";
 export type { ContextMenuOptions } from "./actions/useTableContextMenu";
 export type { BatchRowEdit } from "./editing/batchEditing";
 export type { RowEditIcons } from "./editing/RowEditGate";
-export { cellNavigation } from "./features/cell-navigation";
+export {
+  cellNavigation,
+  type CellNavigationOptions,
+} from "./features/cell-navigation";
 export { densityChooser } from "./features/density";
 export { editHistory } from "./features/edit-history";
 export {
@@ -84,7 +87,12 @@ export { applyTableFeatures } from "./features/tableFeature";
 export { tree } from "./features/tree";
 export { virtualize, type VirtualizeOptions } from "./features/virtualize";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
-export type { FeatureProps } from "./props";
+export type {
+  DirtyEdits,
+  EditHistoryHandle,
+  EditHistoryOptions,
+  FeatureProps,
+} from "./props";
 export type { SidePanelOptions } from "./props";
 export type { RowMutationHandlers } from "./rows/rowMutations";
 export type { RowPinState } from "./rows/rowPinning";

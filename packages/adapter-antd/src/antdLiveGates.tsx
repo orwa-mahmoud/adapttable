@@ -26,6 +26,7 @@ import {
   disabledHistory,
   EDIT_HISTORY_LIVE,
   type EditHistoryLiveSlotProps,
+  type EditHistoryOptions,
   EXPORT_LIVE,
   type ExportHandlerState,
   type ExportLiveSlotProps,
@@ -58,7 +59,7 @@ export function AntdHistoryGate<TRow>({
   onBatchEdit,
   children,
 }: {
-  readonly editHistory: boolean | { depth?: number } | undefined;
+  readonly editHistory: boolean | EditHistoryOptions | undefined;
   readonly columns: readonly ColumnDef<TRow>[];
   readonly onCellEdit:
     ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
