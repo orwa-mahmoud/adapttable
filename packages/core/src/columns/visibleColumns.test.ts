@@ -59,7 +59,7 @@ describe("visibleColumns", () => {
   });
 });
 
-describe("visibleColumns — the identity anchor", () => {
+describe("visibleColumns — the deprecated identity argument", () => {
   it("never changes the mobile column set, whatever its count", () => {
     const columns: ColumnModel<Row>[] = [
       { key: "a", header: "A" },

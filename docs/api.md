@@ -54,7 +54,7 @@ per-column aggregation choices.
 | `onColumnRename`        | `(key: string, name: string) => void` | —       | Host persistence channel for a `renameable` column's accepted display name; stable keys never change.                          |
 | `maxHeight`             | `number`                              | —       | Fixed-height scroll box (px) enabling sideways scrolling + column pinning; omit for page scroll.                               |
 | `sortByOptions`         | `SortByOption[]`                      | —       | Options for a mobile sort-by select.                                                                                           |
-| `mobileIdentityColumns` | `number`                              | `3`     | Does not change which fields a card shows: every column without `hideOnMobile` appears, and `hideOnMobile` always wins.        |
+| `mobileIdentityColumns` | `number`                              | —       | Deprecated and ignored; removed in v4. `hideOnMobile` decides which fields a card shows.                                       |
 
 ### Filters & search
 

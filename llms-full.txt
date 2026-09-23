@@ -1623,7 +1623,7 @@ Query example is in [Data tiers — Full control](./data-tiers.md#3-full-control
 | `locale`                | `string`                            | —              | Resolves per-column `i18n` data paths for bare-key columns.                             |
 | `dir`                   | `"ltr" \| "rtl"`                    | `"ltr"`        | Written to the table element by `getTableProps`.                                        |
 | `forceMobile`           | `boolean`                           | `false`        | Use the mobile column set; reported back as `isMobile`.                                 |
-| `mobileIdentityColumns` | `number`                            | `3`            | Does not change the mobile column set: every column without `hideOnMobile` is in it.    |
+| `mobileIdentityColumns` | `number`                            | —              | Deprecated and ignored; removed in v4. `hideOnMobile` decides the mobile column set.    |
 | `searchDebounceMs`      | `number`                            | `300`          | Delay between typing and `source.setSearch`.                                            |
 | `multiSort`             | `boolean`                           | `false`        | Shift-press on a sort button adds or cycles a sort level instead of replacing the sort. |
 | `bulkActions`           | `BulkAction[]`                      | —              | Any action turns selection on.                                                          |
@@ -10392,9 +10392,9 @@ layouts.
   card layout that should match.
 - **`hideOnMobile`** (per column) — drop a column from cards entirely.
 - **`hideOnDesktop`** (per column) — show a field on cards only.
-- **`mobileIdentityColumns`** (default `3`) — does not change which fields a
-  card shows: every column without `hideOnMobile` appears, and an explicit
-  `hideOnMobile` always wins.
+- **`mobileIdentityColumns`** — deprecated, accepted and ignored, removed in
+  v4. `hideOnMobile` decides what a card shows: every column without it
+  appears.
 - **`sortByOptions`** — the options offered by the mobile sort-by select.
 - **`forceMobile`** — pin either layout regardless of viewport: cards inside a
   desktop dashboard panel, or the full table in a tablet kiosk. The
@@ -16765,7 +16765,7 @@ per-column aggregation choices.
 | `onColumnRename`        | `(key: string, name: string) => void` | —       | Host persistence channel for a `renameable` column's accepted display name; stable keys never change.                          |
 | `maxHeight`             | `number`                              | —       | Fixed-height scroll box (px) enabling sideways scrolling + column pinning; omit for page scroll.                               |
 | `sortByOptions`         | `SortByOption[]`                      | —       | Options for a mobile sort-by select.                                                                                           |
-| `mobileIdentityColumns` | `number`                              | `3`     | Does not change which fields a card shows: every column without `hideOnMobile` appears, and `hideOnMobile` always wins.        |
+| `mobileIdentityColumns` | `number`                              | —       | Deprecated and ignored; removed in v4. `hideOnMobile` decides which fields a card shows.                                       |
 
 ### Filters & search
 

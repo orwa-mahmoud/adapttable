@@ -73,9 +73,10 @@ export interface UseDataTableOptions<TRow> {
    */
   locale?: string;
   /**
-   * Leading desktop-visible columns the card anchors. Those are columns
-   * without `hideOnMobile`, which a card shows anyway, so this does not change
-   * which fields a card shows.
+   * Accepted and ignored.
+   *
+   * @deprecated A card shows every column without `hideOnMobile`, so
+   * `hideOnMobile` decides what a card shows. Removed in v4.
    */
   mobileIdentityColumns?: number;
   /** Search debounce in ms. Defaults to 300. */
@@ -331,7 +332,6 @@ export function useDataTable<TRow>(
     labels: labelOverrides,
     dir = "ltr",
     forceMobile: isMobile = false,
-    mobileIdentityColumns = 3,
     searchDebounceMs = SEARCH_DEBOUNCE_MS,
     bulkActions,
     selectionGetId,
@@ -369,13 +369,8 @@ export function useDataTable<TRow>(
   }, [allColumns]);
 
   const columns = useMemo(
-    () =>
-      visibleReactColumns(
-        allColumns,
-        isMobile ? "mobile" : "desktop",
-        mobileIdentityColumns
-      ),
-    [allColumns, isMobile, mobileIdentityColumns]
+    () => visibleReactColumns(allColumns, isMobile ? "mobile" : "desktop"),
+    [allColumns, isMobile]
   );
 
   // Each flexible column's share of the leftover width, recomputed only when
