@@ -52,9 +52,11 @@ yourself. All eight adapters share it, including the mobile card layout.
 
 The scale demo measures both pipelines: `?patch=200` spreads (full rebuild)
 and `?patch=200&incremental=1` keeps the log. `node scripts/bench.mjs
---only patch` prints the burst times. A 2026-08-26 run on this machine was
-**13.5 s** full rebuild → **9.9 s** incremental (**1.4×**) for 200 updates
-on 20,000 rows through the live Mantine table.
+--only patch` prints the burst times. Measured on the showcase production
+build (Apple M1 Max, Chromium 151), 200 updates on 20,000 rows through the
+live Mantine table take **4.9 s** as full rebuilds and **0.97 s**
+incrementally (**5.0×**) — recorded in
+[`scripts/bench-runs/2026-09-23.json`](https://github.com/orwa-mahmoud/adapttable/blob/main/scripts/bench-runs/2026-09-23.json).
 
 ## Live patches over WebSocket or SSE
 

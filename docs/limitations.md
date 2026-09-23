@@ -60,7 +60,7 @@ grouping, editing or a dataset the table cannot see.
 
 Without `virtualize`, the body renders every row in the current view. At
 10,000 rows that is 10,000 `<tr>`s; the virtualized measurement on the
-same set is ~24 DOM rows and stays ~24 from 1k to 100k
+same set is 10 DOM rows and stays at 10 from 1k to 100k
 ([virtualization](./virtualization.md)). That is a measurement, not a
 supported-row SLA. A server page plus virtualize is the path for large
 sets.

@@ -60,7 +60,8 @@ still travel in `/ActualText`. Give it a font and that limit lifts; see
 
 `font` takes a TrueType file as bytes — `Uint8Array` or `ArrayBuffer` —
 and the writer embeds a **subset** of it: only the glyphs this table
-drew. A 421 KB Arabic face becomes about 20 KB in the file, which is what
+drew. A 421 KB Arabic face embeds as about 15 KB (the whole exported file is
+about 71 KB, recorded in [`scripts/bench-runs/2026-09-23.json`](https://github.com/orwa-mahmoud/adapttable/blob/main/scripts/bench-runs/2026-09-23.json)), which is what
 makes the option usable on a CJK font at all.
 
 ```tsx

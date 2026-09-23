@@ -91,28 +91,30 @@ accepted on `DataTable` as props too.
 
 Virtualization renders only the rows in view, so cost is bounded by the
 viewport — not the dataset. A measured A/B on the scale demo (Mantine adapter,
-the **same 10,000-row dataset fully loaded**, headless Chromium, 1280×900):
+the **same 10,000-row dataset fully loaded**, the showcase production build,
+headless Chromium 151 at 1280×900 on an Apple M1 Max), recorded in
+[`scripts/bench-runs/2026-09-23.json`](https://github.com/orwa-mahmoud/adapttable/blob/main/scripts/bench-runs/2026-09-23.json):
 
 |                                  | Rows in the DOM | Retained JS heap |
 | :------------------------------- | --------------: | ---------------: |
-| **Virtualized** (`virtualize()`) |          **24** |        **17 MB** |
-| Plain table — same 10,000 rows   |          10,000 |           368 MB |
+| **Virtualized** (`virtualize()`) |          **10** |        **11 MB** |
+| Plain table — same 10,000 rows   |          10,000 |           202 MB |
 
-Windowing mounts **417× fewer DOM nodes** (24 vs 10,000 — a viewport's worth
-plus overscan) and holds **351 MB less memory, about 95% less** — while the
+Windowing mounts **1,000× fewer rows** (10 vs 10,000 — a viewport's worth
+plus overscan) and holds **191 MB less memory, about 95% less** — while the
 plain table blocks the main thread rendering ten thousand `<tr>`s.
 
 The two arms differ in kind, not just degree: the plain table's memory sits in
 10,000 mounted rows, which cannot be released while they are on screen. The
-virtualized one mounts 24 and keeps the rest as a plain array, so what it costs
+virtualized one mounts 10 and keeps the rest as a plain array, so what it costs
 is your data, not your table.
 
-And it stays flat: the rendered row count holds at **~24 whether the dataset is
+And it stays flat: the rendered row count holds at **10 whether the dataset is
 1,000 or 100,000 rows**. Only your own data array grows — never the table's DOM:
 
 | Rows in the dataset |  1,000 | 10,000 | 50,000 | 100,000 |
 | ------------------: | -----: | -----: | -----: | ------: |
-|     Rows in the DOM | **24** | **24** | **24** |  **24** |
+|     Rows in the DOM | **10** | **10** | **10** |  **10** |
 
 Reproduce both with
 [`scripts/bench.mjs`](https://github.com/orwa-mahmoud/adapttable/blob/main/scripts/bench.mjs)
@@ -130,9 +132,12 @@ node scripts/bench.mjs --record          # also saves the run to scripts/bench-r
 ran on — to a dated JSON file in
 [`scripts/bench-runs/`](https://github.com/orwa-mahmoud/adapttable/tree/main/scripts/bench-runs).
 
-A showcase already running on the port is used as-is, so
-`pnpm --filter @adapttable/showcase dev` in another terminal still works and is
-the faster loop while iterating.
+With nothing on the port it builds the showcase and serves the production
+build — the code users download. A showcase already running on the port is
+used as it is, so `pnpm --filter @adapttable/showcase dev` in another terminal
+is the faster loop while iterating; `--record` refuses a dev server, because
+React's development build runs slower and holds more memory, and a published
+number comes from a production build only.
 
 Heap here is **retained** memory — measured after forcing collection and taking
 the floor across repeated runs, because the raw `usedJSHeapSize` figure counts
