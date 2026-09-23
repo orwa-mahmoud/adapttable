@@ -186,6 +186,52 @@ describe("host callbacks on the owning features", () => {
     expect(seen.at(-1)?.count).toBe(0);
   });
 
+  it("tracks unsaved edits from onDirtyChange alone, marking no cell or row", () => {
+    const seen: DirtyEdits[] = [];
+    const view = mount([
+      editing<Row>(vi.fn(), {
+        onDirtyChange: (dirty: DirtyEdits) => seen.push(dirty),
+      }),
+    ]);
+
+    act(() => {
+      view().chrome.editing?.dirty?.mark("a", "name");
+    });
+    expect(seen.at(-1)?.count).toBe(1);
+    expect(view().chrome.editing?.dirty?.isDirty("a", "name")).toBe(false);
+    expect(view().chrome.editing?.dirty?.isRowDirty("a")).toBe(false);
+
+    act(() => {
+      seen.at(-1)?.confirmAll();
+    });
+    expect(seen.at(-1)?.count).toBe(0);
+  });
+
+  it("with dirtyIndicators() the reported count and the marks agree", () => {
+    const seen: DirtyEdits[] = [];
+    const view = mount([
+      editing<Row>(vi.fn(), {
+        onDirtyChange: (dirty: DirtyEdits) => seen.push(dirty),
+      }),
+      dirtyIndicators(),
+    ]);
+
+    act(() => {
+      view().chrome.editing?.dirty?.mark("a", "name");
+    });
+    expect(seen.at(-1)?.count).toBe(1);
+    expect(view().chrome.editing?.dirty?.isDirty("a", "name")).toBe(true);
+  });
+
+  it("marks nothing for a table that passes neither", () => {
+    const view = mount([editing<Row>(vi.fn())]);
+
+    act(() => {
+      view().chrome.editing?.dirty?.mark("a", "name");
+    });
+    expect(view().chrome.editing?.dirty?.count).toBe(0);
+  });
+
   it("reports the selected range and its clearing", () => {
     const onRangeChange = vi.fn();
     const view = mount([cellNavigation({ onRangeChange })]);

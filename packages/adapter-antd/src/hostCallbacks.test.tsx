@@ -51,7 +51,10 @@ const settle = () => act(() => Promise.resolve());
  * Every callback composed on one table, as a host wires them: each test reads
  * the one it is about.
  */
-function table(commit: (row: Row, key: string, next: unknown) => unknown) {
+function table(
+  commit: (row: Row, key: string, next: unknown) => unknown,
+  markers = true
+) {
   const history: EditHistoryHandle[] = [];
   const dirty: DirtyEdits[] = [];
   const onRangeChange = vi.fn<(range: CellRange | null) => void>();
@@ -66,7 +69,7 @@ function table(commit: (row: Row, key: string, next: unknown) => unknown) {
         editing<Row>(commit, {
           onDirtyChange: (next: DirtyEdits) => dirty.push(next),
         }),
-        dirtyIndicators(),
+        ...(markers ? [dirtyIndicators()] : []),
         editHistory({ onChange: (next) => history.push(next) }),
         cellNavigation({ onRangeChange }),
       ]}
@@ -110,6 +113,21 @@ describe("host callbacks (antd)", () => {
     });
     expect(dirty.at(-1)?.count).toBe(0);
     expect(document.querySelector("[data-dirty]")).toBeNull();
+  });
+
+  it("tracks the unsaved-edit count without dirtyIndicators(), drawing no marks", async () => {
+    const { dirty } = table(() => new Promise<void>(() => undefined), false);
+    expect(dirty.at(-1)?.count).toBe(0);
+
+    editFirstCell("Augusta");
+    await settle();
+    expect(dirty.at(-1)?.count).toBe(1);
+    expect(document.querySelector("[data-dirty]")).toBeNull();
+
+    act(() => {
+      dirty.at(-1)?.confirmAll();
+    });
+    expect(dirty.at(-1)?.count).toBe(0);
   });
 
   it("reports the range Shift+Arrow selects from a focused cell", () => {

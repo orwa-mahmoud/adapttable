@@ -288,8 +288,8 @@ export interface FeatureProps<TRow> {
   dirtyIndicators?: boolean;
   /**
    * Told the unsaved-edit state whenever it changes, and once on mount —
-   * `editing(commit, { onDirtyChange })`. Marks are kept when
-   * `dirtyIndicators()` is composed; without it the count stays 0.
+   * `editing(commit, { onDirtyChange })`. Passing it tracks unsaved edits on
+   * its own; `dirtyIndicators()` adds the cell and row marks for the same set.
    */
   onDirtyChange?: (dirty: DirtyEdits) => void;
   /**
