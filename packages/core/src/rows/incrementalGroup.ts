@@ -33,6 +33,8 @@ export interface IncrementalGroupTree<TRow> {
   keys: readonly string[];
   /** Visible columns, in order. */
   columns: readonly ColumnMetadata<TRow>[];
+  /** Locale the partitions were resolved for. */
+  locale?: string;
   /** Top-level partitions. */
   roots: MutablePartition<TRow>[];
   /** Those roots, by value key. */
@@ -46,15 +48,17 @@ export interface IncrementalGroupTree<TRow> {
  * @param row - The row to place.
  * @param keys - Grouping keys, outermost first.
  * @param columns - Columns, for each key's `sortValue`.
+ * @param locale - Active locale tag, for each column's `i18n` path.
  */
 export function rowGroupPath<TRow>(
   row: TRow,
   keys: readonly string[],
-  columns: readonly ColumnMetadata<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[],
+  locale?: string
 ): { value: unknown; valueKey: string }[] {
   return keys.map((key) => {
     const column = columns.find((item) => item.key === key);
-    const value = resolveGroupValue(row, key, column);
+    const value = resolveGroupValue(row, key, column, locale);
     return { value, valueKey: groupValueKey(value) };
   });
 }
@@ -66,16 +70,19 @@ export function rowGroupPath<TRow>(
  * @param partitions - The buckets {@link partitionGroupedRows} produced.
  * @param groupBy - The grouping keys those buckets used.
  * @param columns - Columns, kept so later patches resolve the same way.
+ * @param locale - Locale the partitions used, kept for the same reason.
  */
 export function incrementalGroupTree<TRow>(
   partitions: readonly GroupPartition<TRow>[],
   groupBy: string | readonly string[],
-  columns: readonly ColumnMetadata<TRow>[]
+  columns: readonly ColumnMetadata<TRow>[],
+  locale?: string
 ): IncrementalGroupTree<TRow> {
   const roots = partitions.map(toMutable);
   return {
     keys: groupingKeys(groupBy),
     columns,
+    locale,
     roots,
     rootMap: mapOf(roots),
   };

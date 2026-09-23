@@ -97,7 +97,7 @@ export function People() {
 - `renderHeader` replaces the caption only. The cell still owns sort, resize and the menu, and passes a `controller` (`label`, `sortDir`, `sortIndex`, `toggleSort({ shiftKey })`) so a custom caption can stay wired. `headerTooltip` is a native title; `headerActions` sit after the caption. `renderFooter` replaces one summary cell; `tableFooter` is a free slot under the table.
 - Cell content resolves `Cell` → `accessor` → the key's data path. `Cell` is a React component receiving `{ row, rowIndex }`; `accessor` is the lighter function form. Mini charts are a separate import — see [sparkline columns](./sparkline.md).
 - `sortable` opts a column into sorting; on frontend data the comparator reads `sortValue`, falling back to `formatValue`, `exportValue`, then the key's data path; a JSX `accessor` is never compared. See [sorting](./sorting.md).
-- `i18n` maps locale tags to alternative data paths; the table's `locale` prop picks one (exact tag → primary subtag → `key`). The cell, client-side sort, and the column's filter all follow the resolved path — header text does not.
+- `i18n` maps locale tags to alternative data paths; the table's `locale` prop picks one (exact tag → primary subtag → `key`). The cell, client-side sort, row grouping, and the column's filter all follow the resolved path — header text does not.
 - `renameable` opts a leaf into user naming when the table also provides
   `onColumnRename`. This changes display text, mobile and export labels while
   the key and localized data paths stay fixed. See

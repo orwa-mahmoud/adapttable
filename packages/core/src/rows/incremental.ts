@@ -332,10 +332,12 @@ export function createIncrementalView<TRow>(
   const keys = groupingKeys(config.groupBy ?? []);
   const columns = config.columns ?? [];
   const partitions =
-    keys.length > 0 ? partitionGroupedRows(sorted, keys, columns) : [];
+    keys.length > 0
+      ? partitionGroupedRows(sorted, keys, columns, config.locale)
+      : [];
   const tree =
     keys.length > 0
-      ? incrementalGroupTree(partitions, keys, columns)
+      ? incrementalGroupTree(partitions, keys, columns, config.locale)
       : undefined;
   const groups =
     keys.length > 0
@@ -493,10 +495,12 @@ function republishDerived<TRow>(
   const keys = groupingKeys(config.groupBy ?? []);
   const columns = config.columns ?? [];
   const partitions =
-    keys.length > 0 ? partitionGroupedRows(state.sorted, keys, columns) : [];
+    keys.length > 0
+      ? partitionGroupedRows(state.sorted, keys, columns, config.locale)
+      : [];
   state.tree =
     keys.length > 0
-      ? incrementalGroupTree(partitions, keys, columns)
+      ? incrementalGroupTree(partitions, keys, columns, config.locale)
       : undefined;
   state.groupCells = new Map();
   state.dirtyGroups = new Set();
@@ -919,19 +923,29 @@ function applyGroupEvent<TRow>(
   if (!tree || delta.kind === "none") return;
   const getId = config.getRowId;
   if (delta.kind === "enter") {
-    const path = rowGroupPath(delta.row, tree.keys, tree.columns);
+    const path = rowGroupPath(delta.row, tree.keys, tree.columns, tree.locale);
     addGroupedRow(tree, delta.row, path, state.sortedPos, getId);
     markDirtyPath(state, tree.keys, path);
     return;
   }
   if (delta.kind === "leave") {
-    const path = rowGroupPath(delta.row, tree.keys, tree.columns);
+    const path = rowGroupPath(delta.row, tree.keys, tree.columns, tree.locale);
     removeGroupedRow(tree, delta.id, path, state.sortedPos, getId);
     markDirtyPath(state, tree.keys, path);
     return;
   }
-  const prevPath = rowGroupPath(delta.prev, tree.keys, tree.columns);
-  const nextPath = rowGroupPath(delta.next, tree.keys, tree.columns);
+  const prevPath = rowGroupPath(
+    delta.prev,
+    tree.keys,
+    tree.columns,
+    tree.locale
+  );
+  const nextPath = rowGroupPath(
+    delta.next,
+    tree.keys,
+    tree.columns,
+    tree.locale
+  );
   moveGroupedRow(
     tree,
     delta.prev,

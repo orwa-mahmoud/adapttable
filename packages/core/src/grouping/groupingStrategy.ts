@@ -72,6 +72,8 @@ export interface GroupedEntriesForStrategyOptions<TRow> {
   sourceGroups?: readonly QueryGroupRow<TRow>[];
   allFilteredRows?: readonly TRow[];
   columns: readonly ColumnMetadata<TRow>[];
+  /** Active locale tag, for each grouped column's `i18n` path. */
+  locale?: string;
   getRowId: (row: TRow) => string;
   collapsedGroupIds: ReadonlySet<string>;
   aggregates?: (rows: readonly TRow[]) => unknown;
@@ -139,6 +141,7 @@ export function groupedEntriesForStrategy<TRow>(
         rows,
         groupBy: options.groupByKeys,
         columns: options.columns,
+        locale: options.locale,
         getRowId: options.getRowId,
         collapsedGroupIds: options.collapsedGroupIds,
         aggregates: options.aggregates as GroupAggregatesFn<TRow> | undefined,

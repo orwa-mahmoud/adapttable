@@ -86,6 +86,52 @@ describe("resolveGroupValue / groupValueKey / formatGroupLabel", () => {
     expect(headers.filter((label) => label === "Core")).toHaveLength(1);
   });
 
+  it("reads the column's i18n path for the active locale", () => {
+    interface Translated {
+      id: string;
+      team: string;
+      teamAr: string;
+    }
+    const row: Translated = { id: "1", team: "Core", teamAr: "النواة" };
+    const translated: ColumnModel<Translated> = {
+      key: "team",
+      i18n: { ar: "teamAr" },
+    };
+    expect(resolveGroupValue(row, "team", translated, "ar")).toBe("النواة");
+    expect(resolveGroupValue(row, "team", translated, "ar-EG")).toBe("النواة");
+    expect(resolveGroupValue(row, "team", translated)).toBe("Core");
+    expect(resolveGroupValue(row, "team", translated, "fr")).toBe("Core");
+    expect(resolveGroupValue(row, "team", { key: "team" }, "ar")).toBe("Core");
+    expect(
+      resolveGroupValue(
+        row,
+        "team",
+        { ...translated, groupValue: (r) => r.team.toUpperCase() },
+        "ar"
+      )
+    ).toBe("CORE");
+  });
+
+  it("buckets and labels groups by the locale path", () => {
+    const rows = [
+      { id: "1", team: "Core", teamAr: "النواة" },
+      { id: "2", team: "Web", teamAr: "الويب" },
+      { id: "3", team: "Core", teamAr: "النواة" },
+    ];
+    const model = buildGroupedFlatModel({
+      rows,
+      groupBy: "team",
+      columns: [{ key: "team", i18n: { ar: "teamAr" } }],
+      locale: "ar",
+      getRowId: (r) => r.id,
+      collapsedGroupIds: new Set<string>(),
+    });
+    const headers = model.flatMap((entry) =>
+      entry.kind === "group" ? [entry.label] : []
+    );
+    expect(headers).toEqual(["النواة", "الويب"]);
+  });
+
   it("uses path lookup when column has no sortValue", () => {
     expect(resolveGroupValue(ROWS[0]!, "missing", undefined)).toBeUndefined();
   });
