@@ -93,6 +93,12 @@ describe("standard preset (base-ui)", () => {
   });
 
   it("findButton: true draws Find after Export and before Fullscreen, and it opens the find bar", () => {
+    // The fullscreen toggle hides where the browser forbids fullscreen, which
+    // is what jsdom reports.
+    Object.defineProperty(document, "fullscreenEnabled", {
+      value: true,
+      configurable: true,
+    });
     table(standardFeatures<Row>({ findButton: true }));
     const find = part("find-button")!;
     const exportButton = screen.getByRole("button", { name: /export/i });
@@ -109,6 +115,10 @@ describe("standard preset (base-ui)", () => {
 
     fireEvent.click(find);
     expect(part("find-bar")).not.toBeNull();
+    Object.defineProperty(document, "fullscreenEnabled", {
+      value: undefined,
+      configurable: true,
+    });
   });
 
   it("is an ordinary array a caller can extend", () => {
