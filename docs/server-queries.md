@@ -36,20 +36,23 @@ export async function GET(request: Request) {
 `URLSearchParams` — so Next.js route handlers, Remix loaders and Server
 Actions all work without an adapter — and returns a `ServerTableQuery`:
 
-| Field            | What it is                                                            |
-| ---------------- | --------------------------------------------------------------------- |
-| `page`           | 1-based, always at least 1                                            |
-| `limit`          | clamped to the schema's ceiling                                       |
-| `offset`         | `(page - 1) * limit`, computed once so every caller does not          |
-| `search`         | the free-text [search](./search.md) query, absent when there was none |
-| `sort`           | the multi-sort chain, outermost first                                 |
-| `groupBy`        | a single grouping column, when the schema allows it                   |
-| `filters`        | column filters, keyed by the name after `f_`                          |
-| `filterTree`     | the advanced AND/OR tree                                              |
-| `pivot`          | the [pivot configuration](./pivot.md)                                 |
-| `pivotCollapsed` | the folded pivot groups, by collapse key                              |
-| `cursor`         | the opaque cursor, in cursor mode                                     |
-| `rejected`       | everything it refused, and why                                        |
+| Field            | What it is                                                                                          |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| `page`           | 1-based, always at least 1                                                                          |
+| `limit`          | clamped to the schema's ceiling                                                                     |
+| `offset`         | `(page - 1) * limit`, computed once so every caller does not                                        |
+| `search`         | the free-text [search](./search.md) query, absent when there was none                               |
+| `sort`           | the multi-sort chain, outermost first                                                               |
+| `groupBy`        | a single grouping column, when the schema allows it                                                 |
+| `groupByKeys`    | every grouping key, outermost first — at levels 0, 2 and 3, and at level 1 with `groupByKeys: true` |
+| `filters`        | column filters, keyed by the name after `f_`                                                        |
+| `shapedFilters`  | at level 0: each filter's operator beside it, a range's bounds joined, values as strings            |
+| `typedFilters`   | at levels 2 and 3: each declared filter typed, its operator and value checked                       |
+| `filterTree`     | the advanced AND/OR tree                                                                            |
+| `pivot`          | the [pivot configuration](./pivot.md)                                                               |
+| `pivotCollapsed` | the folded pivot groups, by collapse key                                                            |
+| `cursor`         | the opaque cursor, in cursor mode                                                                   |
+| `rejected`       | everything it refused, and why                                                                      |
 
 ## The schema is an allowlist
 
@@ -81,16 +84,16 @@ How much the parser checks is the schema's choice:
 | Level | Schema                   | Filters come back as                                                                                                            | Refused                                                                                             |
 | ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | 0     | `columns: "any"`         | `shapedFilters` — each filter's `op` beside it, a range's bounds joined into `{ min, max }` / `{ from, to }`, values as strings | Nothing for its name                                                                                |
-| 1     | `columns: [...]`         | `filters` — one raw string per `f_*` param, exactly as before                                                                   | A sort, filter, group, tree or pivot field outside `columns`                                        |
+| 1     | `columns: [...]`         | `filters` — one raw string per `f_*` param                                                                                      | A sort, filter, group, tree or pivot field outside `columns`                                        |
 | 2     | `filters: { key: type }` | `typedFilters` — typed values, operators checked against the type                                                               | Level 1, plus an undeclared filter, an operator the type does not allow, a malformed number or date |
-| 3     | `filters: FilterDef[]`   | `typedFilters`, as level 2                                                                                                      | Level 2, plus a value outside a static `select` / `multiSelect` option list                         |
+| 3     | `filters: FilterDef[]`   | `typedFilters`, as level 2                                                                                                      | Level 2, plus a value outside a static `select` / `multiSelect` / `checklist` option list           |
 
 Level 0 still parses page, limit, sort, search, filters and the tree — it only
 stops checking names. The names are then the client's own words: map them to
 your fields, and never interpolate them into SQL.
 
-A column-list schema without `filters` returns exactly the object it always
-has. At levels 2 and 3 the typed filters are:
+A column-list schema without `filters` returns the fields in the table above
+and no typed view. At levels 2 and 3 the typed filters are:
 
 ```ts
 const query = parseTableQuery(request, {
@@ -112,8 +115,11 @@ query.typedFilters;
 // }
 ```
 
-A filter's operator defaults to its type's own (`contains` for text, `gte`
-for a number range, `on` for a date range) when the link names none. A
+When the link names no operator, a filter reads the way the table matches
+it: text as `contains`, and a number or date range by the bounds it carries —
+`between` for both (inclusive), `gte` for a lower bound alone, `lte` for an
+upper bound alone. A date filter's `eq`, the table's other spelling of `on`,
+arrives as `on`, in `typedFilters` and in the filter tree alike. A
 relative date arrives as `{ op: "relative", relative: "last:7" }`, and a
 `numberRange` `in` / `notIn` as `values`. Filter types the host registered go
 in `filterTypes` (a `FilterTypeSpec` fits) and come back as
@@ -154,6 +160,15 @@ is in `filters`, and `splitFilterValues(raw)` is the exact inverse.
 (`groupBy=team,status` → `["team", "status"]`), each checked against
 `columns`. It is reported at levels 0, 2 and 3, and at level 1 with
 `groupByKeys: true`. `groupBy` keeps its single-key meaning.
+
+### What replaces a hand-written workaround
+
+| Hand-written                                                     | Declared instead                                                                                  |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `budgetMin` / `budgetMax` listed in `columns` to let a range in  | `filters: { budget: "numberRange" }` — one `typedFilters.budget` with `op`, `min` and `max`       |
+| Splitting `"Core,Data"` on commas by hand                        | `splitFilterValues(raw)` at level 1, or a declared `multiSelect` / `checklist` for `values`       |
+| `f_<key>Op` refused on a column list, so the operator is guessed | Declared `filters` — the operator is read, checked against the type and returned beside the value |
+| Splitting `groupBy` on commas by hand                            | `groupByKeys` — every key, outermost first, each one checked                                      |
 
 ### Without a parser
 

@@ -4,12 +4,15 @@
  * `levels.test.ts` walks the levels of checking a host can choose; this file
  * pins what each filter type accepts and refuses once filters are declared —
  * the edge of every shape, where a hand-edited link or a stale bookmark
- * lands. Every URL is written the way the table writes it.
+ * lands. Every URL is written by the table's own writers, except where a test
+ * pins a link the table never writes.
  */
 import {
+  type ExtraFilters,
   type QueryFilterGroup,
-  serializeFilterTree,
-} from "@adapttable/core/query";
+  writeExtra,
+  writeFilterTreeParam,
+} from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -19,17 +22,19 @@ import {
   splitFilterValues,
 } from "./index";
 
-/** A query string from filter parameters, written without their `f_`. */
-function filterUrl(extra: Record<string, string>): string {
+/** A query string from the table's filter bag, as the table writes it. */
+function filterUrl(extra: ExtraFilters): string {
   const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(extra)) {
-    params.set(`f_${key}`, value);
-  }
+  writeExtra(params, extra);
   return `?${params.toString()}`;
 }
 
-const treeUrl = (tree: QueryFilterGroup) =>
-  `?ft=${encodeURIComponent(serializeFilterTree(tree) ?? "")}`;
+/** A query string carrying a filter tree, as the table writes it. */
+function treeUrl(tree: QueryFilterGroup): string {
+  const params = new URLSearchParams();
+  writeFilterTreeParam(params, tree);
+  return `?${params.toString()}`;
+}
 
 const schema: QuerySchema = {
   columns: ["name", "status", "team", "active", "budget", "hiredAt", "score"],
@@ -49,7 +54,7 @@ const schema: QuerySchema = {
   filterTypes: [{ type: "stars", ops: ["atLeast"], defaultOp: "atLeast" }],
 };
 
-const read = (extra: Record<string, string>, over: QuerySchema = schema) =>
+const read = (extra: ExtraFilters, over: QuerySchema = schema) =>
   parseTableQuery(filterUrl(extra), over);
 
 describe("splitFilterValues", () => {
@@ -99,7 +104,8 @@ describe('shaped filters — columns: "any"', () => {
 
 describe("typed filters", () => {
   it("ignores a declared filter the link sent empty", () => {
-    const query = read({ name: "" });
+    // The table drops an empty filter from the link; a hand-edited one keeps it.
+    const query = parseTableQuery("?f_name=", schema);
 
     expect(query.typedFilters).toEqual({});
     expect(query.filters).toEqual({});
@@ -269,8 +275,30 @@ describe("typed filters", () => {
 
     it("keeps a range open at the start when only the end is sent", () => {
       expect(read({ hiredAtTo: "2024-12-31" }).typedFilters).toEqual({
-        hiredAt: { type: "dateRange", op: "on", to: "2024-12-31" },
+        hiredAt: { type: "dateRange", op: "lte", to: "2024-12-31" },
       });
+    });
+
+    it("reads a bare value with no operator and no bounds as no filter", () => {
+      const query = parseTableQuery(
+        "?f_hiredAt=2024-01-01&f_budget=10",
+        schema
+      );
+
+      expect(query.typedFilters).toEqual({});
+      expect(query.rejected).toEqual([]);
+    });
+
+    it("refuses an operator no date filter has, `eq` aside", () => {
+      expect(
+        read({ hiredAtFrom: "2024-01-01", hiredAtOp: "gt" }).rejected
+      ).toEqual([
+        {
+          param: "f_hiredAtOp",
+          value: "gt",
+          reason: "not an operator a dateRange filter allows",
+        },
+      ]);
     });
   });
 });
@@ -327,6 +355,18 @@ describe("typed filter trees", () => {
         reason: "not a readable filter tree",
       },
     ]);
+  });
+
+  it("reports the first unusable condition when several are", () => {
+    const tree: QueryFilterGroup = {
+      combinator: "and",
+      conditions: [
+        { key: "salary", op: "eq", value: 1 },
+        { key: "name", op: "gt", value: "ad" },
+      ],
+    };
+
+    expect(reasonFor(tree)).toEqual(['"salary" is not a declared filter']);
   });
 
   it("refuses a condition on an undeclared filter", () => {

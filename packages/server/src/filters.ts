@@ -319,11 +319,40 @@ export function shapeFilters(
   return out;
 }
 
+/**
+ * The operator a range link without `f_<key>Op` is matched by: its bounds,
+ * inclusive on both ends — `between` for a pair, `gte` for a lower bound
+ * alone, `lte` for an upper bound alone.
+ */
+function boundsOp(
+  low: string | undefined,
+  high: string | undefined
+): string | undefined {
+  if (low !== undefined && high !== undefined) return "between";
+  if (low !== undefined) return "gte";
+  return high === undefined ? undefined : "lte";
+}
+
+/** `eq` is the table's other spelling of the date operator `on`. */
+const DATE_OP_ALIASES: ReadonlyMap<string, string> = new Map([["eq", "on"]]);
+
+/** What a type allows, and how it reads a link that names no operator. */
+interface Operators {
+  /** Every operator the type accepts. */
+  readonly ops: readonly string[];
+  /** The operator used when the link names none and implies none. */
+  readonly defaultOp: string;
+  /** Other spellings the table accepts, each to its operator. */
+  readonly aliases?: ReadonlyMap<string, string>;
+  /** The operator the parameters imply when the link names none. */
+  readonly implied?: (raw: ShapedFilter) => string | undefined;
+}
+
 /** The operators a type allows, and the one it uses when none is named. */
 function operatorsOf(
   type: string,
   custom: readonly ServerFilterType[]
-): { ops: readonly string[]; defaultOp: string } | undefined {
+): Operators | undefined {
   const registered = custom.find((spec) => spec.type === type);
   if (registered) return registered;
   switch (type) {
@@ -336,12 +365,32 @@ function operatorsOf(
     case "checklist":
       return { ops: ["in"], defaultOp: "in" };
     case "numberRange":
-      return { ops: NUMBER_OPS, defaultOp: "gte" };
+      return {
+        ops: NUMBER_OPS,
+        defaultOp: "gte",
+        implied: (raw) => boundsOp(raw.min, raw.max),
+      };
     case "dateRange":
-      return { ops: DATE_OPS, defaultOp: "on" };
+      return {
+        ops: DATE_OPS,
+        defaultOp: "on",
+        aliases: DATE_OP_ALIASES,
+        implied: (raw) => boundsOp(raw.from, raw.to),
+      };
     default:
       return undefined;
   }
+}
+
+/** An operator in the type's own spelling. */
+function spelled(operators: Operators, op: string): string {
+  return operators.aliases?.get(op) ?? op;
+}
+
+/** The operator a filter is matched by: named, implied, or the default. */
+function operatorFor(operators: Operators, raw: ShapedFilter): string {
+  if (raw.op !== undefined) return spelled(operators, raw.op);
+  return operators.implied?.(raw) ?? operators.defaultOp;
 }
 
 /** The static choices a definition allows, or `undefined` when any may come. */
@@ -529,7 +578,7 @@ function typeOne(
     reader.refuse(reader.param(), def.type, "not a known filter type");
     return undefined;
   }
-  const op = raw.op ?? operators.defaultOp;
+  const op = operatorFor(operators, raw);
   if (!operators.ops.includes(op)) {
     reader.refuse(
       reader.param(FILTER_OP_SUFFIX),
@@ -636,41 +685,53 @@ export function typeFilters(
   return { typed, raw };
 }
 
-/** Every condition in a filter tree, however deeply nested. */
-function conditionsOf(group: QueryFilterGroup): QueryCondition[] {
-  const found: QueryCondition[] = [];
-  const walk = (node: QueryFilterGroup) => {
-    for (const child of node.conditions) {
-      if (isFilterGroup(child)) walk(child);
-      else found.push(child);
-    }
-  };
-  walk(group);
-  return found;
-}
-
 /**
- * Why a filter tree cannot be used against the declared filters, or
- * `undefined` when every condition checks out: a declared key, an operator
- * its type allows, and a value of the type's shape.
+ * A filter tree checked against the declared filters: every condition a
+ * declared key, an operator its type allows, and a value of the type's shape.
+ * The tree comes back with each operator in its type's own spelling (a date
+ * condition's `eq` as `on`), or the first reason it cannot be used.
  */
-export function treeProblem(
+export function checkTree(
   tree: QueryFilterGroup,
   defs: readonly ServerFilterDef[],
   custom: readonly ServerFilterType[]
-): string | undefined {
+): { readonly tree: QueryFilterGroup } | { readonly problem: string } {
   const byKey = new Map(defs.map((def) => [def.key, def]));
-  for (const condition of conditionsOf(tree)) {
-    const def = byKey.get(condition.key);
-    if (!def) return `"${condition.key}" is not a declared filter`;
-    const operators = operatorsOf(def.type, custom);
-    if (!operators?.ops.includes(condition.op)) {
-      return `"${condition.op}" is not an operator a ${def.type} filter allows`;
-    }
-    const problem = valueProblem(def, condition);
-    if (problem) return problem;
+  let problem: string | undefined;
+  const walk = (group: QueryFilterGroup): QueryFilterGroup => ({
+    ...group,
+    conditions: group.conditions.map((child) => {
+      if (isFilterGroup(child)) return walk(child);
+      const checked = checkCondition(child, byKey, custom);
+      if ("problem" in checked) {
+        problem ??= checked.problem;
+        return child;
+      }
+      return checked.condition;
+    }),
+  });
+  const checked = walk(tree);
+  return problem === undefined ? { tree: checked } : { problem };
+}
+
+/** One tree condition in its type's spelling, or why it cannot be used. */
+function checkCondition(
+  condition: QueryCondition,
+  byKey: ReadonlyMap<string, ServerFilterDef>,
+  custom: readonly ServerFilterType[]
+): { readonly condition: QueryCondition } | { readonly problem: string } {
+  const def = byKey.get(condition.key);
+  if (!def) return { problem: `"${condition.key}" is not a declared filter` };
+  const operators = operatorsOf(def.type, custom);
+  const op = operators ? spelled(operators, condition.op) : condition.op;
+  if (!operators?.ops.includes(op)) {
+    return {
+      problem: `"${condition.op}" is not an operator a ${def.type} filter allows`,
+    };
   }
-  return undefined;
+  const own = op === condition.op ? condition : { ...condition, op };
+  const problem = valueProblem(def, own);
+  return problem === undefined ? { condition: own } : { problem };
 }
 
 type ValueCheck = (

@@ -49,13 +49,13 @@ import {
 } from "@adapttable/core/query";
 
 import {
+  checkTree,
   declaredFilters,
   FILTER_PREFIX,
   type ServerFilterDef,
   type ServerFilterType,
   type ShapedFilter,
   shapeFilters,
-  treeProblem,
   type TypedFilter,
   typeFilters,
 } from "./filters";
@@ -471,9 +471,20 @@ function readChain(raw: string | null): SortLevel[] {
   for (const part of raw.split(",")) {
     const [key, dir] = part.split(":");
     if (!key) continue;
-    out.push({ key, dir: dir === "desc" ? "desc" : "asc" });
+    out.push({ key: decodeKey(key), dir: dir === "desc" ? "desc" : "asc" });
   }
   return out;
+}
+
+/** A malformed `%` escape the table never writes; a key carrying one is kept. */
+const BROKEN_ESCAPE = /%(?![\dA-Fa-f]{2})/;
+
+/**
+ * A sort key as the table wrote it: percent-encoded, so a key holding `:` or
+ * `,` survives the chain's own separators.
+ */
+function decodeKey(key: string): string {
+  return BROKEN_ESCAPE.test(key) ? key : decodeURIComponent(key);
 }
 
 /** The grouping column, if the client may group by it. */
@@ -511,8 +522,9 @@ function validGroupByKeys(
 
 /**
  * The filter tree, checked against the declared filters: every condition a
- * declared key, an operator its type allows, a value of its shape. As with
- * columns, one bad condition drops the whole tree.
+ * declared key, an operator its type allows, a value of its shape, each
+ * operator in its type's own spelling. As with columns, one bad condition
+ * drops the whole tree.
  */
 function typedTree(
   raw: string | null,
@@ -526,12 +538,12 @@ function typedTree(
     refuse("ft", raw, "not a readable filter tree");
     return undefined;
   }
-  const problem = treeProblem(tree, defs, custom);
-  if (problem) {
-    refuse("ft", raw, problem);
+  const checked = checkTree(tree, defs, custom);
+  if ("problem" in checked) {
+    refuse("ft", raw, checked.problem);
     return undefined;
   }
-  return tree;
+  return checked.tree;
 }
 
 /** Column filters, minus any naming a column outside the schema. */
