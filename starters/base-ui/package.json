@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@adapttable/base-ui": "^3.2.0",
+    "@adapttable/base-ui": "^3.2.1",
     "@adapttable/core": "^3.2.0",
     "@base-ui/react": "^1.6.0",
     "react": "^19.2.8",

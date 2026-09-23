@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@adapttable/core": "^3.2.0",
-    "@adapttable/mantine": "^3.2.0",
+    "@adapttable/mantine": "^3.2.1",
     "@mantine/core": "^9.5.2",
     "@mantine/hooks": "^9.5.2",
     "react": "^19.2.8",
