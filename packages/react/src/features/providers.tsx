@@ -502,6 +502,12 @@ export interface FeatureRender<TProps> {
   readonly slot: FeatureSlotKey<TProps>;
   /** What to draw, given the props the table computed. */
   readonly render: (props: TProps) => ReactNode;
+  /**
+   * Place this entry among the slot's other fills as though it came from the
+   * feature with this id. Fills are ordered by feature id, so a control one
+   * kit draws from a different feature still lands where every kit puts it.
+   */
+  readonly orderAs?: string;
 }
 
 /**
@@ -515,9 +521,12 @@ export interface FeatureRender<TProps> {
  */
 export function slotRender<TProps>(
   slot: FeatureSlotKey<TProps>,
-  render: (props: TProps) => ReactNode
+  render: (props: TProps) => ReactNode,
+  options: { readonly orderAs?: string } = {}
 ): FeatureRender<TProps> {
-  return { slot, render };
+  return options.orderAs === undefined
+    ? { slot, render }
+    : { slot, render, orderAs: options.orderAs };
 }
 
 /**
@@ -578,7 +587,7 @@ function rendersOf<TRow>(features: readonly TableFeature<TRow>[]): RenderMap {
   for (const feature of features) {
     for (const entry of feature.renders ?? []) {
       const list = bySlot.get(entry.slot.id) ?? [];
-      list.push({ id: feature.id, render: entry.render });
+      list.push({ id: entry.orderAs ?? feature.id, render: entry.render });
       bySlot.set(entry.slot.id, list);
     }
   }

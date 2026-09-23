@@ -84,14 +84,12 @@ strip under the table reads "Showing 1–3 of 3". The snippets below reuse
 
 Left to right in a left-to-right table:
 
-| Kit                                                                 | Order                                                                                                                                                                         |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mantine, Chakra UI, Ant Design, Radix, Base UI, shadcn/ui, unstyled | `start` · Search · mobile sort select · `toolbar` · Filters · Saved views · Columns · Density · Export · Fullscreen · Print · Undo/Redo · Add row · `end` · Rows per page     |
-| MUI                                                                 | `start` · Search · mobile sort select · `toolbar` · Filters · Saved views · Columns · Density · **Undo/Redo** · Export · Fullscreen · Print · Add row · `end` · Rows per page |
+| Kit       | Order                                                                                                                                                                     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Every kit | `start` · Search · mobile sort select · `toolbar` · Filters · Saved views · Columns · Density · Export · Fullscreen · Print · Undo/Redo · Add row · `end` · Rows per page |
 
-In MUI, `editHistory()` draws the Undo and Redo pair, so it sits in the
-edit-history position after Density. In every other kit `undoRedoButtons()`
-draws it, after Print.
+In MUI, `editHistory()` draws the Undo and Redo pair; in every other kit
+`undoRedoButtons()` draws it. Either way it sits after Print.
 
 Each entry appears only when its source is present:
 

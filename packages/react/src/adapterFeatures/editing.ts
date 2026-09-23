@@ -142,9 +142,13 @@ export function createAdapterEditingFeatures(
       createElement(components.RowEditActions, props)
     ),
   ];
+  // Undo and redo sit where `undoRedoButtons` puts them in every kit, even in
+  // a kit whose `editHistory` draws them.
   const undoChrome = [
-    slotRender(TOOLBAR_EXTRAS, (props) =>
-      createElement(components.UndoRedoButtons, props)
+    slotRender(
+      TOOLBAR_EXTRAS,
+      (props) => createElement(components.UndoRedoButtons, props),
+      { orderAs: "undo-redo-buttons" }
     ),
   ];
 

@@ -342,8 +342,7 @@ the built-in buttons. `toolbarSlots` fills the two ends:
 
 The order is: `start` · Search · (mobile sort select) · `toolbar` ·
 Filters · Saved views · Columns · Density · Export · Fullscreen · Print ·
-Undo/Redo · Add · `end` · Rows per page. In MUI, Undo/Redo sits between
-Density and Export.
+Undo/Redo · Add · `end` · Rows per page, in every kit.
 
 `undoRedoButtons()` adds Undo and Redo to that row. They render only when
 `editHistory()` is composed, and they disable rather than disappear when there is
