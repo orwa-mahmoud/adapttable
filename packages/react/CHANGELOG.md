@@ -1,5 +1,43 @@
 # @adapttable/react
 
+## 1.1.0
+
+### Minor Changes
+
+- 96110a1: `tableAgent` offers every row and bulk action the host composed as a governed agent capability — `rowAction.<key>` on one row, `bulkAction.<key>` on the current selection. The table's write policy and approval apply, an action's `ai.approval` overrides them, an action with a `confirm` block asks a person, and `ai: false` keeps an action away from the agent. `tableActionCapabilities` builds the same definitions for `createAgentSession`.
+- 42f4117: A bare `rowPinning()` pins rows: every row gets Pin to top, Pin to bottom and Unpin, the table holds the lists, writes them to the URL as `rowPin` and Saved Views keep them. Controlled `pinnedRowIds` and observed `onPinnedRowIdsChange` behave as before.
+- bd95c61: Find in table works without `cellNavigation()`: Ctrl/Cmd+F with focus anywhere in the table opens the bar, the matches are marked and the current one is scrolled into view. `findInTable({ button: true })` adds a Find control to the toolbar, drawn with each kit's own button (`classNames.findButton` on unstyled and shadcn).
+- e82b90f: A `<DataTable>` hands its edit state to the host through the features that own it: `editHistory({ onChange })` gives undo, redo, `canUndo`, `canRedo` and `clear` for your own buttons, `editing(commit, { onDirtyChange })` the unsaved-edit count with `confirm`, `confirmRow` and `confirmAll`, and `cellNavigation({ onRangeChange })` the selected cell range. Each reports on mount and whenever it changes.
+- 832d63d: A backend-mode voice clip can be the assistant's turn: `useSpeechInput({ onClip: assistant.sendClip })` sends it through the HTTP transport on the turn's first round, and the backend's `transcript` becomes the reader's message, with a localized "Voice message" placeholder until it arrives. `createAgentHttpClient().send` takes `audio` and `onTranscript`, and `AssistantTransport.send` receives `audio`.
+- d6e7d65: `commandPalette({ button: true })` adds a toolbar control that opens the palette, and `commandPalette({ open, onOpenChange })` lets a host open it from its own control. The context menu offers Pin to top, Pin to bottom and Unpin on rows when `rowPinning()` is composed, and Cut on cells when `cellNavigation()` and `onCellCut` are both wired. Unstyled and shadcn style the new control through `classNames.commandPaletteButton`.
+- 0a5aa1b: `rowActions` accepts add, duplicate and delete handlers: `rowActions(actions, { onAddRow, onDuplicateRow, onDeleteRow, confirmDeleteRow })` puts Add row in the toolbar and Duplicate / Delete on every row. Every `/row-actions` entry also exports the `RowMutationHandlers` type.
+
+### Patch Changes
+
+- 9c0d3ef: The context menu's Copy copies the right-clicked cell when `cellNavigation()` is not composed, and the menu opens on pinned rows too. The Ant Design context menu opens at the pointer.
+- c587812: The 62 adapter-machinery helpers still exported from `@adapttable/core` (column-group, extra-row, pinned-row, row-span and row-style math, the column-menu actions), and `xlsxWriter` / `buildTableXlsx` on the main entry, are deprecated there. They keep working; import them from `@adapttable/react/adapter` and `@adapttable/core/xlsx`.
+- d90cdd1: `groupFilter` receives a typed `GroupNode` — its `value`, `label`, `level`, `groupBy` and `leafRows` — and an `AggregateSpec` accepts a name registered with `registerAggregator` without a cast.
+- 81eeb48: A tree node whose `onLoadChildren` fetch fails closes again, so one click retries it. `useLazyChildren` takes `onLoadFailed`.
+- e245987: Client-side sorting reads a column's `i18n` path for the active `locale`, the same path its cells and filters read. A column with its own `sortValue` sorts as before.
+- 65306b8: MUI draws Undo and Redo after Print, where every other kit puts them.
+- 84fbb7d: `paginationMode="auto"` follows the table's `mobileBreakpoint` and `forceMobile`, so infinite scroll and the card layout switch together, and a server render with `forceMobile` resolves the same mode as the first client render. `useFrontendData`, `useServerData` and `useQuerySource` take `mobileBreakpoint`.
+- d91b4f1: The command palette's Export entry names the configured writer's format — "Export XLSX", "Export PDF" — as the toolbar button does.
+- ad6532c: Ctrl+Shift+Z redoes on Windows and Linux, and undo and redo work with Caps Lock on.
+- 67d276d: A table that composes both `rowDetail()` and `nestedTable()` draws one expand toggle per row.
+- 091be10: Reference comments name the current entry points (`@adapttable/react/stream`, `@adapttable/react/features`), the `exportCsv({ writer })` feature form, the writer-derived default filename, the headless table's `table` role and the HTTP client's `full` default context profile.
+- aa57a3a: `selectionStats()` figures stay visible while a feature notice shows in the status strip, with or without `statusBar()`.
+- Updated dependencies [96110a1]
+- Updated dependencies [9c0d3ef]
+- Updated dependencies [c587812]
+- Updated dependencies [d90cdd1]
+- Updated dependencies [832d63d]
+- Updated dependencies [e245987]
+- Updated dependencies [d91b4f1]
+- Updated dependencies [d6e7d65]
+- Updated dependencies [ea48c20]
+- Updated dependencies [091be10]
+  - @adapttable/core@3.1.0
+
 ## 1.0.0
 
 ### Major Changes

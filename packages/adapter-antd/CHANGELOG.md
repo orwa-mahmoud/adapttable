@@ -1,5 +1,43 @@
 # @adapttable/antd
 
+## 3.1.0
+
+### Minor Changes
+
+- 42f4117: A bare `rowPinning()` pins rows: every row gets Pin to top, Pin to bottom and Unpin, the table holds the lists, writes them to the URL as `rowPin` and Saved Views keep them. Controlled `pinnedRowIds` and observed `onPinnedRowIdsChange` behave as before.
+- bd95c61: Find in table works without `cellNavigation()`: Ctrl/Cmd+F with focus anywhere in the table opens the bar, the matches are marked and the current one is scrolled into view. `findInTable({ button: true })` adds a Find control to the toolbar, drawn with each kit's own button (`classNames.findButton` on unstyled and shadcn).
+- e82b90f: A `<DataTable>` hands its edit state to the host through the features that own it: `editHistory({ onChange })` gives undo, redo, `canUndo`, `canRedo` and `clear` for your own buttons, `editing(commit, { onDirtyChange })` the unsaved-edit count with `confirm`, `confirmRow` and `confirmAll`, and `cellNavigation({ onRangeChange })` the selected cell range. Each reports on mount and whenever it changes.
+- d6e7d65: `commandPalette({ button: true })` adds a toolbar control that opens the palette, and `commandPalette({ open, onOpenChange })` lets a host open it from its own control. The context menu offers Pin to top, Pin to bottom and Unpin on rows when `rowPinning()` is composed, and Cut on cells when `cellNavigation()` and `onCellCut` are both wired. Unstyled and shadcn style the new control through `classNames.commandPaletteButton`.
+- 0a5aa1b: `rowActions` accepts add, duplicate and delete handlers: `rowActions(actions, { onAddRow, onDuplicateRow, onDeleteRow, confirmDeleteRow })` puts Add row in the toolbar and Duplicate / Delete on every row. Every `/row-actions` entry also exports the `RowMutationHandlers` type.
+
+### Patch Changes
+
+- 9c0d3ef: The context menu's Copy copies the right-clicked cell when `cellNavigation()` is not composed, and the menu opens on pinned rows too. The Ant Design context menu opens at the pointer.
+- 30fe0ad: Chakra filter chips show their remove button. Mantine body cells follow the column's `align`, including while a cell is highlighted. The Ant Design table root carries `data-adapttable-part="root"`. Filter chip remove buttons in every styled kit are named with the `removeFilter` label ("Remove filter: <chip>"), and Mantine's `ActiveFilterChips` accepts a `removeLabel` prop for it. The Chakra assistant's examples menu closes as soon as an example is chosen.
+- d91b4f1: The command palette's Export entry names the configured writer's format — "Export XLSX", "Export PDF" — as the toolbar button does.
+- Updated dependencies [96110a1]
+- Updated dependencies [42f4117]
+- Updated dependencies [9c0d3ef]
+- Updated dependencies [c587812]
+- Updated dependencies [bd95c61]
+- Updated dependencies [d90cdd1]
+- Updated dependencies [e82b90f]
+- Updated dependencies [832d63d]
+- Updated dependencies [81eeb48]
+- Updated dependencies [e245987]
+- Updated dependencies [65306b8]
+- Updated dependencies [84fbb7d]
+- Updated dependencies [d91b4f1]
+- Updated dependencies [d6e7d65]
+- Updated dependencies [ad6532c]
+- Updated dependencies [0a5aa1b]
+- Updated dependencies [ea48c20]
+- Updated dependencies [67d276d]
+- Updated dependencies [091be10]
+- Updated dependencies [aa57a3a]
+  - @adapttable/core@3.1.0
+  - @adapttable/react@1.1.0
+
 ## 3.0.0
 
 ### Major Changes

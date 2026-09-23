@@ -1,5 +1,25 @@
 # @adapttable/server
 
+## 0.3.0
+
+### Minor Changes
+
+- ea48c20: `parseTableQuery` checks at the level the schema asks for: `columns: "any"` parses and shapes every filter into `shapedFilters`; `filters` — a `{ key: type }` shorthand or the table's own `FilterDef[]` — types each one into `typedFilters`, checks its operator, numbers, dates and static options, and refuses undeclared filters and bad tree conditions. `groupByKeys` reports nested grouping, `pickFilters` scopes filters per user or role, and `splitFilterValues` reads a multi-value filter. A column-list schema returns exactly what it did before. `@adapttable/core/query` exports the filter model a server needs.
+
+### Patch Changes
+
+- Updated dependencies [96110a1]
+- Updated dependencies [9c0d3ef]
+- Updated dependencies [c587812]
+- Updated dependencies [d90cdd1]
+- Updated dependencies [832d63d]
+- Updated dependencies [e245987]
+- Updated dependencies [d91b4f1]
+- Updated dependencies [d6e7d65]
+- Updated dependencies [ea48c20]
+- Updated dependencies [091be10]
+  - @adapttable/core@3.1.0
+
 ## 0.2.0
 
 ### Minor Changes
