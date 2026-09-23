@@ -11,7 +11,8 @@ handling or its announcements — see [feature composition](./features.md).
 The table never mutates your array; you apply the move.
 
 ```tsx
-import { applyRowReorder, DataTable } from "@adapttable/mantine";
+import { DataTable } from "@adapttable/mantine";
+import { applyRowReorder } from "@adapttable/react";
 import { rowReorder } from "@adapttable/mantine/row-reorder";
 import { useState } from "react";
 
@@ -136,8 +137,9 @@ Columns menu. CSV export drops it the way it drops actions
 `RowGroupRef`, `treeMoveCreatesCycle` and `rowDropPosition` are the nested
 contracts. `RowReorderDecision` is the internal-seam result used to distinguish
 an order write, a membership move, or a rejection. `useRowReorder(options)`
-(`RowReorderState`, also exported as `TableRowReorderState`, is what it
-returns; `RowReorderHandler` is the ordinal write) is the grab state.
+is the grab state: it returns `TableRowReorderState` from `@adapttable/react`,
+the same shape adapters receive as `RowReorderState` from
+`@adapttable/react/adapter`; `RowReorderHandler` is the ordinal write.
 `datasetIndex(localIndex, windowStart)` turns a flat rendered slot into a
 dataset index. `rowReorderSignature(reorder, rowId, localIndex)` is the memo
 digest so a virtualized row repaints when lifted, targeted, or confirming.

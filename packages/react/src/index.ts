@@ -121,6 +121,9 @@ export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export type {
   BaseDataTableProps,
   ComposedTableProps,
+  DirtyEdits,
+  EditHistoryHandle,
+  EditHistoryOptions,
   FeatureProps,
   SidePanelOptions,
   SummaryRowFn,
@@ -282,7 +285,7 @@ export {
 /**
  * Six shapes the front door's own signatures hand back.
  *
- * v3 moved the adapter contracts to `@adapttable/core/adapter`; the main entry
+ * v3 moved the adapter contracts to `@adapttable/react/adapter`; the main entry
  * gives its returned shapes distinct public names because a return type a
  * caller cannot name is a signature they cannot write down.
  */

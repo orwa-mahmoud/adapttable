@@ -32,7 +32,7 @@ export function Chips({
                 variant="ghost"
                 radius="full"
                 color="gray"
-                aria-label={`${labels.clearAll}: ${chip.label}`}
+                aria-label={labels.removeFilter(chip.label)}
                 onClick={chip.onRemove}
               >
                 ×

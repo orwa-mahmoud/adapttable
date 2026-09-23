@@ -3,6 +3,7 @@ import {
   type BaseDataTableProps,
   type Slot,
   type UrlStateAdapter,
+  type UseTableDataOptions,
 } from "@adapttable/react";
 import type { DataModeProps } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
@@ -110,6 +111,13 @@ export interface DataTableClassNames {
   redoButton?: string;
   /** The Print toolbar button contributed by `print()`. */
   printButton?: string;
+  /**
+   * The toolbar control that opens the command palette, drawn by
+   * `commandPalette({ button: true })`.
+   */
+  commandPaletteButton?: string;
+  /** The toolbar control drawn by `findInTable({ button: true })`. */
+  findButton?: string;
   /** The Export CSV toolbar button contributed by `exportCsv()`. */
   exportCsvButton?: string;
   /**
@@ -557,10 +565,10 @@ export interface DataTableSlots {
  *
  * @public
  */
-export interface DataTablePropsBase<TRow> extends Omit<
-  BaseDataTableProps<TRow>,
-  "source"
-> {
+export interface DataTablePropsBase<TRow>
+  extends
+    Omit<BaseDataTableProps<TRow>, "source">,
+    Pick<UseTableDataOptions<TRow>, "supports" | "facetKeys" | "facets"> {
   /**
    * Full-control tier: a prebuilt source (`useFrontendData`,
    * `useQuerySource`, …), used as-is. Omit it and pass `data` instead for

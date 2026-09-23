@@ -211,6 +211,7 @@ export const fa: Required<TableLabels> = {
   assistantVoiceStart: "دیکته",
   assistantVoiceStop: "توقف دیکته",
   assistantVoiceListening: "در حال شنیدن",
+  assistantVoiceMessage: "پیام صوتی",
   assistantVoiceLanguage: "زبان دیکته",
   assistantYou: "شما",
   assistantSpeaker: "دستیار",

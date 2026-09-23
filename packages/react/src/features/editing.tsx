@@ -9,7 +9,7 @@
  * the same slot; apply() sets the channel each one owns.
  */
 import { devWarn } from "@adapttable/core";
-import { type ReactNode, useEffect, useMemo } from "react";
+import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import { type BatchRowEdit, useBatchEditing } from "../editing/batchEditing";
 import { useDirtyCells } from "../editing/dirtyCells";
@@ -19,6 +19,7 @@ import { useRowEditing } from "../editing/rowEditing";
 import { useCellSaveState } from "../editing/saveState";
 import { useCellEditing } from "../editing/useCellEditing";
 import { useEditValidation } from "../editing/validation";
+import type { ComposedTableProps } from "../props";
 import { featureHostOf } from "./featureHost";
 import { slotRender } from "./providers";
 import { type ChromeExtraSlotProps, EDITING_LIVE } from "./slotKeys";
@@ -27,6 +28,30 @@ import type {
   StaticTableFeature,
   TableFeature,
 } from "./tableFeature";
+
+/**
+ * Hand the host the unsaved-edit state on mount and whenever a mark moves.
+ * The confirm functions are the table's own stable ones.
+ */
+function useReportDirty(
+  onDirtyChange: ComposedTableProps<never>["onDirtyChange"],
+  dirty: {
+    readonly count: number;
+    readonly signature: string;
+    readonly confirm: (rowId: string, columnKey: string) => void;
+    readonly confirmRow: (rowId: string) => void;
+    readonly confirmAll: () => void;
+  }
+): void {
+  const report = useRef(onDirtyChange);
+  report.current = onDirtyChange;
+  const { count, signature, confirm, confirmRow, confirmAll } = dirty;
+  const wired = onDirtyChange !== undefined;
+  useEffect(() => {
+    if (!wired) return;
+    report.current?.({ count, confirm, confirmRow, confirmAll });
+  }, [wired, count, signature, confirm, confirmRow, confirmAll]);
+}
 
 function LiveEditing({
   chrome,
@@ -56,6 +81,7 @@ function LiveEditing({
     onEditError: lifecycle.onEditError,
   });
   const dirty = useDirtyCells({ enabled: props.dirtyIndicators === true });
+  useReportDirty(props.onDirtyChange, dirty);
   const rowModeArmed =
     props.rowEditing === true && props.onRowEdit !== undefined;
   const rowEditing = useRowEditing({

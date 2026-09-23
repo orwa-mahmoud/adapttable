@@ -5,13 +5,341 @@
 ```ts
 
 // @public
+export type Aggregatable<TValue = AggregateOrderedValue> = boolean | AggregatableConfig<TValue>;
+
+// @public
+export interface AggregatableConfig<TValue = AggregateOrderedValue> {
+    readonly default?: string;
+    readonly operations: readonly AggregateOperation<TValue>[];
+}
+
+// @public
+export type AggregateFn = "sum" | "avg" | "count" | "min" | "max";
+
+// @public
+export interface AggregateFormatContext {
+    readonly aggregation?: AggregateOperationId;
+    readonly columnKey: string;
+}
+
+// @public
 export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
+
+// @public
+export type AggregateOperation<TValue = AggregateOrderedValue> = AggregateName | CustomAggregateOperation<TValue>;
+
+// @public
+export type AggregateOperationId = AggregateName | (string & Record<never, never>);
+
+// @public
+export interface AggregateOptions<TRow> {
+    columns?: readonly ColumnMetadata<TRow>[];
+    format?: (value: DisplayValue | undefined, key: string) => DisplayValue | undefined;
+    host?: FeatureHostState;
+}
 
 // @public
 export type AggregateOrderedValue = SortableValue | Date;
 
 // @public
+export type AggregateSpec = Partial<Record<string, AggregateOperationId | Aggregator>>;
+
+// @public
+export interface AggregationCandidate {
+    readonly active: boolean;
+    readonly columnKey: string;
+    readonly operations: readonly ResolvedAggregateOperation[];
+}
+
+// @public
+export interface AggregationItem {
+    readonly columnKey: string;
+    readonly editable: boolean;
+    readonly operationId?: string;
+    readonly operations: readonly ResolvedAggregateOperation[];
+    readonly origin: AggregationOrigin;
+}
+
+// @public
+export interface AggregationModel {
+    readonly atDefaults: boolean;
+    readonly candidates: readonly AggregationCandidate[];
+    readonly hasDefaults: boolean;
+    readonly items: readonly AggregationItem[];
+}
+
+// @public
+export type AggregationOrigin = "reader" | "declared" | "host";
+
+// @public
 export type Aggregator<TValue = AggregateOrderedValue> = (values: readonly TValue[]) => DisplayValue | undefined;
+
+// @public
+export interface ChecklistValue {
+    count: number;
+    label: string;
+    value: string;
+}
+
+// @public
+export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
+
+// @public
+export interface ColumnAiOptions {
+    description?: string;
+    examples?: readonly unknown[];
+    sample?: boolean;
+}
+
+// @public
+export type ColumnGroupShow = "open" | "closed" | "always";
+
+// @public
+export interface ColumnLayoutState {
+    collapsedGroups?: readonly string[];
+    hidden: readonly string[];
+    names?: Readonly<Record<string, string>>;
+    order: readonly string[];
+    pinned: Readonly<Record<string, PinSide>>;
+    widths: Readonly<Record<string, number>>;
+}
+
+// @public
+export interface ColumnMenuAction {
+    disabled: boolean;
+    id: string;
+    label: string;
+    run: () => void;
+}
+
+// @public
+export interface ColumnMenuActionContext<TRow = unknown> {
+    featureHost?: FeatureHostState<TRow>;
+    groupingPanel?: GroupingPanelState;
+    labels: ColumnMenuLabels;
+    layout: UseColumnLayoutResult<TRow>;
+    onAutoSizeColumn?: (key: string) => void;
+    onBeginRename?: () => void;
+    onFilterColumn?: (key: string) => void;
+    onSortColumn?: (key: string, dir: "asc" | "desc") => void;
+    sortBy?: string;
+    sortDir?: "asc" | "desc";
+}
+
+// @public
+export type ColumnMenuActionFactory<TRow = unknown> = (row: ColumnMenuRow<TRow>, ctx: ColumnMenuActionContext<TRow>) => ColumnMenuItem | readonly ColumnMenuItem[] | undefined;
+
+// @public
+export interface ColumnMenuChoice {
+    disabled: boolean;
+    id: string;
+    kind: "choice";
+    label: string;
+    onChange: (value: string) => void;
+    options: readonly ColumnMenuChoiceOption[];
+    value: string;
+}
+
+// @public
+export interface ColumnMenuChoiceOption {
+    label: string;
+    value: string;
+}
+
+// @public
+export type ColumnMenuItem = ColumnMenuAction | ColumnMenuChoice;
+
+// @public
+export interface ColumnMenuLabels {
+    autoSizeColumn: string;
+    autoSizeColumns: string;
+    cancelColumnRename: string;
+    columnActions: string;
+    columnName: string;
+    columnNameRequired: string;
+    columnRenamed: (info: {
+        previous: string;
+        name: string;
+    }) => string;
+    columns: string;
+    filterColumn: string;
+    groupByColumn: (label: string) => string;
+    groupingAggregation: string;
+    groupingAggregationCustom: string;
+    groupingAverage: string;
+    groupingRemoveAggregation: (label: string) => string;
+    hideAllColumns: string;
+    hideColumn: string;
+    moveEnd: string;
+    moveStart: string;
+    pinEnd: string;
+    pinStart: string;
+    renameColumn: string;
+    resetColumn: string;
+    resetColumns: string;
+    saveColumnName: string;
+    searchColumns: string;
+    selectionCount: string;
+    selectionMax: string;
+    selectionMin: string;
+    selectionSum: string;
+    showAllColumns: string;
+    showColumn: string;
+    sortAscending: string;
+    sortDescending: string;
+    ungroupColumn: (label: string) => string;
+    unpin: string;
+    unpinAllColumns: string;
+}
+
+// @public
+export interface ColumnMenuRow<TRow> {
+    canFilter: boolean;
+    canHide: boolean;
+    canMove: boolean;
+    canPin: boolean;
+    canRename?: boolean;
+    canResize: boolean;
+    canSort: boolean;
+    column: ColumnMetadata<TRow>;
+    hidden: boolean;
+    index: number;
+    key: string;
+    name: string;
+    pinned: PinnedSide;
+}
+
+// @public
+export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter"> & {
+    header?: unknown;
+    filter?: unknown;
+};
+
+// @public
+export interface ColumnModel<TRow = unknown> {
+    accessor?: (row: TRow) => unknown;
+    aggregatable?: Aggregatable;
+    ai?: ColumnAiOptions;
+    align?: "start" | "center" | "end";
+    colSpan?: number | ((row: TRow) => number);
+    editable?: boolean | ((row: TRow) => boolean);
+    editor?: ColumnModelEditor;
+    editValue?: (row: TRow) => string;
+    exportValue?: (row: TRow) => unknown;
+    filter?: ColumnModelFilter;
+    flex?: number;
+    formatAggregate?: (value: DisplayValue | undefined, context: AggregateFormatContext) => DisplayValue | undefined;
+    formatValue?: (row: TRow) => string;
+    group?: string | readonly string[];
+    groupable?: boolean;
+    groupShow?: ColumnGroupShow;
+    groupValue?: (row: TRow) => unknown;
+    header?: string;
+    headerTooltip?: string;
+    hideOnDesktop?: boolean;
+    hideOnMobile?: boolean;
+    i18n?: Readonly<Record<string, string>>;
+    key: string;
+    lockPin?: boolean;
+    lockPosition?: boolean;
+    lockVisibility?: boolean;
+    lockWidth?: boolean;
+    maxWidth?: number;
+    meta?: Record<string, unknown>;
+    minWidth?: number;
+    mobileLabel?: string;
+    parseValue?: (draft: string, row: TRow) => unknown;
+    renameable?: boolean;
+    responsivePriority?: number;
+    rowSpan?: number | ((row: TRow) => number);
+    sortable?: boolean;
+    sortValue?: (row: TRow) => SortableValue;
+    validate?: (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+    width?: number | string;
+}
+
+// @public
+export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
+
+// @public
+export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
+
+// @public
+export type Command = ContextMenuItem;
+
+// @public
+export interface ContextMenuItem {
+    danger?: boolean;
+    disabled?: boolean;
+    key: string;
+    label: string;
+    onSelect: () => void;
+    separatorBefore?: boolean;
+}
+
+// @public
+export type ContextMenuItemsFactory<TRow = unknown> = (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
+
+// @public
+export type ContextMenuTarget<TRow> = {
+    kind: "header";
+    columnKey: string;
+} | {
+    kind: "row";
+    row: TRow;
+    rowId: string;
+} | {
+    kind: "cell";
+    row: TRow;
+    rowId: string;
+    columnKey: string;
+};
+
+// @public
+export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
+    readonly calculate?: Aggregator<TValue>;
+    readonly description?: string;
+    readonly id: string;
+    readonly label: string;
+}
+
+// @public
+export interface CustomCellEditorConflict {
+    readonly incomingValue: string;
+    readonly keep: () => void;
+    readonly take: () => void;
+}
+
+// @public
+export interface CustomCellEditorCtrl {
+    cancel: () => void;
+    commit: () => void;
+    conflict?: CustomCellEditorConflict;
+    draft: string;
+    error?: string;
+    errorId: string;
+    focusRef: (node: {
+        focus: () => void;
+    } | null) => void;
+    label: string;
+    onBlur: () => void;
+    onKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        shiftKey?: boolean;
+    }) => void;
+    setDraft: (value: string) => void;
+    validating: boolean;
+}
+
+// @public
+export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValue;
+
+// @public
+export const DATE_OPS: readonly ["before", "after", "on", "gte", "lte", "between", "relative", "empty"];
+
+// @public
+export type DeclaredAggregates = Readonly<Record<string, string>>;
 
 // @public
 export function deserializeFormulaColumns(raw: string | null): FormulaColumnSpec[];
@@ -26,10 +354,146 @@ export function deserializePivotState(raw: string | null): PivotUrlState;
 export type DisplayValue = string | number | boolean | bigint | object | null;
 
 // @public
+export interface ExportPayload {
+    mimeType: string;
+    parts: readonly BlobPart[];
+    text: string;
+}
+
+// @public
+export interface ExportRowMeta {
+    level: number;
+    role: ExportRowRole;
+}
+
+// @public
+export type ExportRowRole = "data" | "group" | "aggregate";
+
+// @public
+export type ExportScopeCapability = "all" | "page";
+
+// @public
+export interface ExportTable {
+    headers: readonly string[];
+    keys: readonly string[];
+    rowMeta?: readonly ExportRowMeta[];
+    rows: readonly (readonly unknown[])[];
+    widths?: readonly (number | undefined)[];
+}
+
+// @public
+export interface ExportWriteContext {
+    escapeFormulas?: boolean;
+    filename: string;
+    table: ExportTable;
+}
+
+// @public
+export interface ExportWriter {
+    build: (context: ExportWriteContext) => ExportPayload;
+    extension: string;
+}
+
+// @public
+export type ExtraFilters = Record<string, FilterValue>;
+
+// @public
+export type FacetCounts = readonly ChecklistValue[];
+
+// @public
+export type FacetMap = Readonly<Record<string, FacetCounts>>;
+
+// @public
+export interface FeatureHostState<TRow = unknown> {
+    readonly aggregators: ReadonlyMap<string, Aggregator>;
+    readonly columnMenuActions: readonly ColumnMenuActionFactory<TRow>[];
+    readonly commands: readonly Command[];
+    readonly contextMenuItems: readonly ContextMenuItemsFactory<TRow>[];
+    readonly editors: ReadonlyMap<string, CustomCellEditorRender>;
+    readonly filterExtends: readonly FilterTypeExtend[];
+    readonly filterTypes: readonly FilterTypeSpec[];
+    readonly panels: readonly SidePanelEntry[];
+    readonly writers: readonly ExportWriter[];
+}
+
+// @public
+export const FILTER_OP_SUFFIX = "Op";
+
+// @public
 export const FILTER_TREE_PARAM = "ft";
 
 // @public
 export const FILTER_TREE_VERSION = 1;
+
+// @public
+export const FILTER_TYPES: readonly ["text", "select", "multiSelect", "checklist", "boolean", "dateRange", "numberRange"];
+
+// @public
+export interface FilterAiOptions {
+    readonly options?: false | number;
+}
+
+// @public
+export interface FilterDef<TRow = unknown> {
+    ai?: false | FilterAiOptions;
+    column?: string;
+    getValue?: (row: TRow) => unknown;
+    key: string;
+    label?: string;
+    options?: FilterOptionsSource;
+    placeholder?: string;
+    type: string;
+}
+
+// @public
+export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
+
+// @public
+export interface FilterOption {
+    label: string;
+    value: string;
+}
+
+// @public
+export type FilterOptionsSource = readonly FilterOption[] | "auto" | (() => Promise<readonly FilterOption[]>);
+
+// @public
+export type FilterType = (typeof FILTER_TYPES)[number];
+
+// @public
+export interface FilterTypeExtend {
+    readonly patch: Partial<FilterTypeSpec>;
+    readonly type: string;
+}
+
+// @public
+export interface FilterTypeSpec {
+    chips<TRow>(def: FilterDef<TRow>): Record<string, ChipLabelResolver>;
+    conditionToExtra<TRow>(def: FilterDef<TRow>, condition: QueryCondition): ExtraFilters;
+    readonly defaultOp: string;
+    match<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, row: TRow): boolean;
+    readonly ops: readonly string[];
+    render?<TRow>(props: FilterWidgetRenderProps<TRow>): DisplayValue;
+    stateKeys(def: Pick<FilterDef, "key" | "type">): string[];
+    readonly type: string;
+    readonly urlArray?: boolean;
+    readonly urlNumberKeys?: boolean;
+    readonly widget: FilterWidgetKind;
+}
+
+// @public
+export type FilterValue = string | string[] | number | undefined;
+
+// @public
+export type FilterWidgetKind = FilterType;
+
+// @public
+export interface FilterWidgetRenderProps<TRow = unknown> {
+    readonly className?: string;
+    readonly def: FilterDef<TRow>;
+    readonly labels: Required<TableLabels>;
+    readonly source: FilterFormSource<TRow>;
+}
 
 // @public
 export interface FormulaColumnSpec {
@@ -60,13 +524,160 @@ export type FormulaValue = {
 };
 
 // @public
+export type GroupAggregateOps = Readonly<Partial<Record<string, AggregateOperationId | "none">>>;
+
+// @public
+export type GroupAggregateOverride = AggregateOperationId | "none";
+
+// @public
+export type GroupAggregateOverrides = Readonly<Partial<Record<string, GroupAggregateOverride>>>;
+
+// @public
+export type GroupAggregatesFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
+
+// @public
+export type GroupingCapability = "client" | "server" | false;
+
+// @public
+export interface GroupingChipKeyboardProps {
+    "aria-label": string;
+    onKeyDown: (event: KeyboardEvent) => void;
+    role: "button";
+    tabIndex: 0;
+}
+
+// @public
+export interface GroupingDragProps {
+    "data-grouping-dragging"?: boolean;
+    draggable?: boolean;
+    onDragEnd?: (event: DragEvent) => void;
+    onDragStart?: (event: DragEvent) => void;
+}
+
+// @public
+export type GroupingDragSource = "header" | "chip";
+
+// @public
+export interface GroupingDragState {
+    key: string;
+    overIndex?: number;
+    overRemove?: boolean;
+    source: GroupingDragSource;
+}
+
+// @public
+export interface GroupingDropProps {
+    "data-drop-active"?: boolean;
+    onDragEnter?: (event: DragEvent) => void;
+    onDragLeave?: (event: DragEvent) => void;
+    onDragOver?: (event: DragEvent) => void;
+    onDrop?: (event: DragEvent) => void;
+}
+
+// @public
+export interface GroupingPanelInteractions {
+    add: (key: string) => void;
+    addAggregate: (key: string) => void;
+    announcement: string;
+    chipDragProps: (key: string) => GroupingDragProps;
+    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps;
+    declaredAggregates?: DeclaredAggregates;
+    drag?: GroupingDragState;
+    dropProps: (index: number) => GroupingDropProps;
+    headerDragProps: (key: string) => GroupingDragProps;
+    moveBy: (key: string, delta: -1 | 1) => void;
+    remove: (key: string) => void;
+    removeAggregate: (key: string) => void;
+    removeDropProps: () => GroupingDropProps;
+    restoreAggregateDefaults: () => void;
+    setAggregate: (key: string, value: GroupAggregateOverride | undefined) => void;
+    setAggregateOperation: (key: string, operationId: string) => void;
+}
+
+// @public
+export interface GroupingPanelState extends GroupingPanelInteractions {
+    aggregateOverrides: GroupAggregateOverrides;
+    aggregations: AggregationModel;
+    canSetAggregates: boolean;
+    groupBy: readonly string[];
+}
+
+// @public
+export interface GroupNode<TRow> {
+    groupBy: string;
+    label: string;
+    leafRows: readonly TRow[];
+    level: number;
+    value: unknown;
+}
+
+// @public
+export interface GroupPaging {
+    groups?: number;
+    rows?: Readonly<Record<string, number>>;
+}
+
+// @public
+export type GroupSort<TRow> = "label" | "label-desc" | "count" | "count-desc" | ((a: GroupNode<TRow>, b: GroupNode<TRow>) => number);
+
+// @public
+export interface IncrementalViewConfig<TRow> {
+    aggregateOptions?: AggregateOptions<TRow>;
+    aggregateSpec?: AggregateSpec;
+    blankLabel?: string;
+    collapsedGroupIds?: ReadonlySet<string>;
+    columns?: readonly ColumnMetadata<TRow>[];
+    derivedKey?: string;
+    extra?: ExtraFilters;
+    filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    filterTree?: QueryFilterGroup;
+    filterTreeFn?: (row: TRow, tree: QueryFilterGroup) => boolean;
+    getRowId: (row: TRow) => string;
+    getSearchText?: (row: TRow) => string;
+    getSortValue?: (row: TRow, columnKey: string) => SortableValue;
+    groupAggregateOps?: GroupAggregateOps;
+    groupAggregates?: GroupAggregatesFn<TRow>;
+    groupBy?: string | readonly string[];
+    groupFilter?: (group: GroupNode<TRow>) => boolean;
+    groupFooters?: boolean;
+    groupPageSize?: number;
+    groupSort?: GroupSort<TRow>;
+    locale?: string;
+    paging?: GroupPaging;
+    rowPageSize?: number;
+    search?: string;
+    sortBy?: string;
+    sortDir?: SortDirection;
+    sortLevels?: readonly SortLevel[];
+    summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
+}
+
+// @public
 export function isActiveFilterTree(tree: QueryFilterGroup | undefined): tree is QueryFilterGroup;
 
 // @public
 export function isFilterGroup(node: QueryCondition | QueryFilterGroup): node is QueryFilterGroup;
 
 // @public
+export const NUMBER_OPS: readonly ["eq", "neq", "gt", "gte", "lt", "lte", "between", "in", "notIn"];
+
+// @public
 export function parseFilterTree(raw: string | null | undefined): QueryFilterGroup | undefined;
+
+// @public
+export function parseRelativeToken(raw: string | undefined): RelativeDateToken | undefined;
+
+// @public
+export type PinnedSide = PinSide | undefined;
+
+// @public
+export interface PinOffset {
+    inset: number;
+    side: PinSide;
+}
+
+// @public
+export type PinSide = "start" | "end";
 
 // @public
 export interface PivotConfig {
@@ -91,6 +702,12 @@ export interface PivotUrlState {
 }
 
 // @public
+export interface QueryAggregate {
+    fn: AggregateFn | (string & {});
+    key: string;
+}
+
+// @public
 export interface QueryCondition {
     key: string;
     op: string;
@@ -102,6 +719,45 @@ export interface QueryFilterGroup {
     combinator: "and" | "or";
     conditions: readonly (QueryCondition | QueryFilterGroup)[];
 }
+
+// @public
+export interface QueryGroupRow<TRow = unknown> {
+    aggregates?: Readonly<Record<string, unknown>>;
+    count: number;
+    groups?: readonly QueryGroupRow<TRow>[];
+    rows?: readonly TRow[];
+    value: unknown;
+}
+
+// @public
+export const RANGE_SUFFIXES: {
+    readonly dateRange: {
+        readonly start: "From";
+        readonly end: "To";
+    };
+    readonly numberRange: {
+        readonly start: "Min";
+        readonly end: "Max";
+    };
+};
+
+// @public
+export const RELATIVE_NAMED: readonly ["today", "yesterday", "tomorrow", "thisWeek", "thisMonth", "previousMonth"];
+
+// @public
+export type RelativeDateToken = (typeof RELATIVE_NAMED)[number] | `last:${number}` | `next:${number}`;
+
+// @public
+export interface ResolvedAggregateOperation {
+    readonly builtIn: boolean;
+    readonly calculate?: Aggregator;
+    readonly description?: string;
+    readonly id: string;
+    readonly label?: string;
+}
+
+// @public
+export type ResolvedPaginationMode = "infinite" | "paged";
 
 // @public
 export function serializeFilterTree(tree: QueryFilterGroup | undefined): string | undefined;
@@ -116,6 +772,11 @@ export function serializePivot(config: PivotConfig): string;
 export function serializePivotState(state: PivotUrlState): string;
 
 // @public
+export interface SidePanelEntry {
+    key: string;
+}
+
+// @public
 export type SortableValue = string | number | boolean | null | undefined;
 
 // @public
@@ -125,6 +786,564 @@ export type SortDirection = "asc" | "desc";
 export interface SortLevel {
     dir: SortDirection;
     key: string;
+}
+
+// @public
+export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
+    readonly candidate: TableEngineReader<TRow>;
+    readonly commitCandidate: () => void;
+    readonly configure: (patch: TableEngineConfigPatch<TRow>, options?: {
+        silent?: boolean;
+    }) => void;
+    readonly discardCandidate: () => void;
+    readonly dispatch: (operation: TableOperation) => void;
+    readonly dispose: () => void;
+    readonly invalidate: (axes: readonly TableRevisionAxis[], next?: {
+        readonly data?: readonly TRow[];
+        readonly columns?: readonly ColumnMetadata<TRow>[];
+    }, options?: {
+        silent?: boolean;
+    }) => void;
+    readonly rowKey: (row: TRow) => string;
+    readonly stageCandidate: (patch: TableEngineConfigPatch<TRow>, next?: {
+        readonly data?: readonly TRow[];
+        readonly columns?: readonly ColumnMetadata<TRow>[];
+    }) => void;
+    readonly subscribe: (axes: readonly TableRevisionAxis[] | "all", listener: (revisions: TableRevisions) => void) => () => void;
+    readonly tableId: string;
+}
+
+// @public
+export interface TableEngineConfigPatch<TRow> extends Partial<IncrementalViewConfig<TRow>> {
+    readonly limit?: number;
+    readonly locale?: string;
+    readonly page?: number;
+    readonly paginationMode?: "paged" | "infinite";
+}
+
+// @public
+export interface TableEngineReader<TRow = unknown> {
+    readonly cellValue: (row: TRow, columnKey: string) => unknown;
+    readonly getColumn: (key: string) => ColumnMetadata<TRow> | undefined;
+    readonly rowByKey: (rowKey: string) => TRow | undefined;
+    readonly rows: (scope: TableRowScope) => readonly TRow[];
+    readonly snapshot: () => TableSnapshot<TRow>;
+}
+
+// @public
+export interface TableLabels {
+    actions?: string;
+    addGroupingColumn?: string;
+    addRow?: string;
+    allMatchingSelected?: (total: number) => string;
+    alwaysAllowProposal?: string;
+    applyView?: string;
+    approvalWaitingElsewhere?: string;
+    approveAllProposals?: string;
+    approveProposal?: string;
+    approveRemainingProposals?: string;
+    assistantActions?: (count: number) => string;
+    assistantActionsTitle?: string;
+    assistantAlwaysAllowedRevoke?: (capability: string) => string;
+    assistantAlwaysAllowedTitle?: string;
+    assistantAnswerLabel?: string;
+    assistantAnswerPlaceholder?: string;
+    assistantAnswerSend?: string;
+    assistantBackToTable?: string;
+    assistantCapabilityName?: (capability: string) => string | undefined;
+    assistantClose?: string;
+    assistantConnection?: (status: string) => string;
+    assistantDetached?: string;
+    assistantDetail?: string;
+    assistantEmpty?: string;
+    assistantExamples?: string;
+    assistantNewMessages?: string;
+    assistantOpen?: string;
+    assistantPlaceholder?: string;
+    assistantProgress?: (done: number, total?: number) => string;
+    assistantReceipt?: (receipt: {
+        capability?: string;
+        status: string;
+    }) => string;
+    assistantReceiptAction?: (action: {
+        kind?: string;
+        status: string;
+        cleared?: boolean;
+    }) => string | undefined;
+    assistantReceiptChange?: (change: {
+        before: string;
+        after: string;
+    }) => string;
+    assistantReceiptProposed?: (change: {
+        before: string;
+        after: string;
+    }) => string;
+    assistantReceiptStatus?: (status: string) => string;
+    assistantReceiptTerms?: (subject: {
+        kind?: string;
+        terms?: readonly {
+            column?: string;
+            value?: string;
+        }[];
+        direction?: "asc" | "desc";
+    }) => string | undefined;
+    assistantRejoin?: string;
+    assistantSaveInTable?: string;
+    assistantSend?: string;
+    assistantSettings?: string;
+    assistantSpeaker?: string;
+    assistantStop?: string;
+    assistantTitle?: string;
+    assistantUnavailable?: string;
+    assistantUndo?: string;
+    assistantUndoAll?: string;
+    assistantUndoBlocked?: (code: string) => string | undefined;
+    assistantUnresolved?: (code: string) => string | undefined;
+    assistantVoiceLanguage?: string;
+    assistantVoiceListening?: string;
+    assistantVoiceMessage?: string;
+    assistantVoiceStart?: string;
+    assistantVoiceStop?: string;
+    assistantYou?: string;
+    autoSizeColumn?: string;
+    autoSizeColumns?: string;
+    backToConversation?: string;
+    boolAny?: string;
+    boolFalse?: string;
+    boolTrue?: string;
+    cancel?: string;
+    cancelAll?: string;
+    cancelColumnRename?: string;
+    checklistClear?: string;
+    checklistNoValues?: string;
+    checklistSearch?: string;
+    clearAll?: string;
+    closePanel?: string;
+    collapseColumnGroup?: string;
+    collapseGroup?: string;
+    collapseRow?: string;
+    columnActions?: string;
+    columnName?: string;
+    columnNameRequired?: string;
+    columnRenamed?: (info: {
+        previous: string;
+        name: string;
+    }) => string;
+    columns?: string;
+    commandEmpty?: string;
+    commandPalette?: string;
+    commandSearch?: string;
+    confirmRowMove?: string;
+    confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
+    confirmRowMoveTitle?: string;
+    contextMenu?: string;
+    copyCells?: string;
+    cutCells?: string;
+    defaultViewBadge?: string;
+    deleteRow?: string;
+    deleteRowConfirm?: string;
+    deleteView?: string;
+    density?: string;
+    densityComfortable?: string;
+    densityCompact?: string;
+    duplicateRow?: string;
+    editCell?: string;
+    editConflict?: string;
+    editNothingToUndo?: string;
+    editRedone?: (cells: number) => string;
+    editRow?: string;
+    editUndone?: (cells: number) => string;
+    enterFullscreen?: string;
+    errorMessage?: string;
+    errorTitle?: string;
+    exitFullscreen?: string;
+    expandColumnGroup?: string;
+    expandGroup?: string;
+    expandRow?: string;
+    exportCancelled?: string;
+    exportCsv?: string;
+    exportDismiss?: string;
+    exportDone?: string;
+    exportDownload?: string;
+    exportFailed?: string;
+    exportFile?: (format: string) => string;
+    exportProgress?: (progress: number) => string;
+    exportStarted?: string;
+    filterAddCondition?: string;
+    filterAddGroup?: string;
+    filterColumn?: string;
+    filterCombinatorAnd?: string;
+    filterCombinatorOr?: string;
+    filterField?: string;
+    filterRemoveCondition?: string;
+    filterRemoveGroup?: string;
+    filters?: string;
+    filtersDone?: string;
+    filterTree?: string;
+    findClose?: string;
+    findInTable?: string;
+    findMatchCount?: (current: number, total: number) => string;
+    findNext?: string;
+    findPlaceholder?: string;
+    findPrevious?: string;
+    from?: string;
+    goToPage?: (page: number) => string;
+    gridCellPosition?: (row: number, total: number) => string;
+    gridFillHandle?: string;
+    gridRangeCopied?: (cells: number) => string;
+    gridRangeCopyFailed?: string;
+    gridRangeFilled?: (cells: number) => string;
+    gridRangePasted?: (cells: number) => string;
+    gridRangePasteFailed?: string;
+    gridRangeSelection?: (range: {
+        fromRow: number;
+        toRow: number;
+        fromColumn: number;
+        toColumn: number;
+        cells: number;
+    }) => string;
+    groupByColumn?: (label: string) => string;
+    groupCount?: (count: number) => string;
+    groupingAddAggregation?: string;
+    groupingAdded?: (label: string) => string;
+    groupingAggregateChanged?: (label: string, aggregation: string) => string;
+    groupingAggregateColumn?: string;
+    groupingAggregateRemoved?: (column: string) => string;
+    groupingAggregatesRestored?: string;
+    groupingAggregation?: string;
+    groupingAggregationCustom?: string;
+    groupingAggregationDefault?: string;
+    groupingAggregationFor?: (column: string) => string;
+    groupingAggregationNone?: string;
+    groupingAggregationReadOnly?: string;
+    groupingAggregations?: string;
+    groupingAverage?: string;
+    groupingDropColumns?: string;
+    groupingDropToRemove?: string;
+    groupingMoved?: (label: string, position: number) => string;
+    groupingPanel?: string;
+    groupingRemoveAggregation?: (column: string) => string;
+    groupingRemoved?: (label: string) => string;
+    groupingRestoreAggregations?: string;
+    groupTotal?: (label: string) => string;
+    headerFilters?: string;
+    hideAllColumns?: string;
+    hideColumn?: string;
+    keepMine?: string;
+    loading?: string;
+    loadMore?: string;
+    moreGroups?: (remaining: number) => string;
+    moreRowsInGroup?: (remaining: number) => string;
+    moveEnd?: string;
+    moveGroupingColumn?: (label: string) => string;
+    moveRejectedCycle?: string;
+    moveRejectedPolicyNever?: string;
+    moveRejectedSorted?: string;
+    moveRowDown?: string;
+    moveRowUp?: string;
+    moveStart?: string;
+    moveToGroup?: string;
+    moveToTopLevel?: string;
+    moveUnavailable?: string;
+    moveUnder?: string;
+    moveViewDown?: string;
+    moveViewUp?: string;
+    nextPage?: string;
+    noData?: string;
+    noResults?: string;
+    noticeEditWithoutWriter?: string;
+    noticeExportAllPage?: string;
+    noticeGroupingUnavailable?: string;
+    noticePinNested?: string;
+    // @deprecated
+    noticeReorderNested?: string;
+    noticeVirtualizePaged?: string;
+    opAfter?: string;
+    opAtLeast?: string;
+    opAtMost?: string;
+    opBefore?: string;
+    opBetween?: string;
+    opContains?: string;
+    opEmpty?: string;
+    opEndsWith?: string;
+    opEqual?: string;
+    operator?: string;
+    opGreater?: string;
+    opIn?: string;
+    opLess?: string;
+    opNotContains?: string;
+    opNotEmpty?: string;
+    opNotEqual?: string;
+    opNotIn?: string;
+    opOn?: string;
+    opOnOrAfter?: string;
+    opOnOrBefore?: string;
+    opRelative?: string;
+    opStartsWith?: string;
+    pageOf?: (range: {
+        page: number;
+        total: number;
+    }) => string;
+    pageSelected?: (count: number) => string;
+    pendingProposals?: (count: number) => string;
+    pendingRows?: (count: number) => string;
+    pinEnd?: string;
+    pinnedSummaryBottom?: string;
+    pinnedSummaryRow?: string;
+    pinnedSummaryTop?: string;
+    pinStart?: string;
+    pinToBottom?: string;
+    pinToTop?: string;
+    pivotAdd?: string;
+    pivotAggregation?: string;
+    pivotColumns?: string;
+    pivotGrandTotal?: string;
+    pivotMeasures?: string;
+    pivotMoveDown?: string;
+    pivotMoveUp?: string;
+    pivotRemove?: string;
+    pivotRows?: string;
+    pivotTotal?: string;
+    previousPage?: string;
+    print?: string;
+    proposalChange?: (change: {
+        row: string;
+        column?: string;
+        before?: string;
+        after?: string;
+    }) => string;
+    proposalSummary?: (counts: {
+        changes: number;
+        rows: number;
+    }) => string;
+    proposalTally?: (counts: {
+        pending: number;
+        approved: number;
+        rejected: number;
+    }) => string;
+    proposalValueUnavailable?: string;
+    readOnlyViewBadge?: string;
+    redoEdit?: string;
+    rejectAllProposals?: string;
+    rejectProposal?: string;
+    rejectRemainingProposals?: string;
+    relLastN?: string;
+    relNextN?: string;
+    relPreviousMonth?: string;
+    relThisMonth?: string;
+    relThisWeek?: string;
+    relToday?: string;
+    relTomorrow?: string;
+    relYesterday?: string;
+    removeFilter?: (label: string) => string;
+    removeGroupingColumn?: (label: string) => string;
+    renameColumn?: string;
+    renameView?: string;
+    reorderRow?: string;
+    resetColumn?: string;
+    resetColumns?: string;
+    resizeColumn?: string;
+    retry?: string;
+    reviewAllProposals?: (count: number) => string;
+    rootLevel?: string;
+    rowActionsMenu?: string;
+    rowLifted?: (position: number) => string;
+    rowMoved?: (from: number, to: number) => string;
+    rowMovedToGroup?: (group: string) => string;
+    rowMovedUnder?: (parent: string) => string;
+    rowMoveOptions?: string;
+    rowReorderCancelled?: string;
+    rowSeparator?: string;
+    rowsPerPage?: string;
+    saveAll?: string;
+    saveColumnName?: string;
+    savedViews?: string;
+    saveRow?: string;
+    saveView?: string;
+    search?: string;
+    searchColumns?: string;
+    searchPlaceholder?: string;
+    selectAll?: string;
+    selectAllMatching?: (total: number) => string;
+    selectColumn?: string;
+    selectedCount?: (count: number) => string;
+    selectionAverage?: string;
+    selectionCount?: string;
+    selectionMax?: string;
+    selectionMin?: string;
+    selectionSum?: string;
+    selectRow?: string;
+    setDefaultView?: string;
+    showAllColumns?: string;
+    showColumn?: string;
+    showing?: (range: {
+        from: number;
+        to: number;
+        total: number;
+    }) => string;
+    sidePanel?: string;
+    sortAscending?: string;
+    sortBy?: string;
+    sortDescending?: string;
+    sortedBy?: (info: {
+        column: string;
+        ascending: boolean;
+    }) => string;
+    sortingCleared?: string;
+    table?: string;
+    takeTheirs?: string;
+    theirsValue?: (value: string) => string;
+    to?: string;
+    undoEdit?: string;
+    ungroupColumn?: (label: string) => string;
+    unpin?: string;
+    unpinAllColumns?: string;
+    unpinRow?: string;
+    value?: string;
+    viewName?: string;
+}
+
+// @public
+export type TableOperation = {
+    readonly type: "setSort";
+    readonly key?: string;
+    readonly dir?: SortDirection;
+} | {
+    readonly type: "setSearch";
+    readonly search: string;
+} | {
+    readonly type: "setPage";
+    readonly page: number;
+} | {
+    readonly type: "setLimit";
+    readonly limit: number;
+} | {
+    readonly type: "setFilters";
+    readonly filters: ExtraFilters;
+} | {
+    readonly type: "setGroupBy";
+    readonly key?: string;
+} | {
+    readonly type: "setSelection";
+    readonly ids?: readonly string[];
+};
+
+// @public
+export type TableRevisionAxis = keyof TableRevisions;
+
+// @public
+export interface TableRevisions {
+    readonly data: number;
+    readonly policy: number;
+    readonly schema: number;
+    readonly view: number;
+}
+
+// @public
+export type TableRowScope = "visible" | "page" | "full";
+
+// @public
+export interface TableSnapshot<TRow = unknown> {
+    readonly capabilities: TableSourceCapabilities;
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly extra: ExtraFilters;
+    readonly groupBy: string | undefined;
+    readonly lastPage: number;
+    readonly limit: number;
+    readonly page: number;
+    readonly requestedPage: number;
+    readonly revisions: TableRevisions;
+    readonly search: string;
+    readonly selectedIds: readonly string[];
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly total: number;
+}
+
+// @public
+export interface TableSource<TRow> extends TableStateMutators {
+    readonly aggregateOperations?: readonly string[];
+    readonly allFilteredRows?: readonly TRow[];
+    readonly allSearchedRows?: readonly TRow[];
+    readonly capabilities?: TableSourceCapabilities;
+    readonly defaultLimit: number;
+    readonly error: Error | null;
+    readonly extra: ExtraFilters;
+    readonly facets?: FacetMap;
+    fetchNextPage: () => void;
+    readonly filterTree?: QueryFilterGroup;
+    readonly groupAggregateOverrides?: GroupAggregateOverrides;
+    readonly groupAggregations?: GroupAggregateOps;
+    readonly groupBy: string | undefined;
+    readonly groups?: readonly QueryGroupRow<TRow>[];
+    readonly hasNextPage: boolean;
+    readonly honorsAggregates?: boolean;
+    readonly isFetching: boolean;
+    readonly isFetchingNextPage: boolean;
+    readonly isLoading: boolean;
+    readonly limit: number;
+    readonly page: number;
+    readonly paginationMode: ResolvedPaginationMode;
+    readonly queryAggregates?: readonly QueryAggregate[];
+    refetch?: () => Promise<unknown> | void;
+    readonly rows: readonly TRow[];
+    readonly search: string;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly tableEngine?: TableEngine<TRow>;
+    readonly total: number;
+}
+
+// @public
+export interface TableSourceCapabilities {
+    readonly aggregateOperations?: readonly string[];
+    readonly exportScope: ExportScopeCapability;
+    readonly fullDataset: boolean;
+    readonly grouping: GroupingCapability;
+    readonly selectAcrossPages: boolean;
+    readonly totalCount: TotalCountCapability;
+}
+
+// @public
+export interface TableStateMutators {
+    clearAll: () => void;
+    clearExtras: () => void;
+    initializeGroupBy?: (key: string) => void;
+    setExtra: (key: string, value: FilterValue) => void;
+    setExtras: (updates: ExtraFilters) => void;
+    setFilterTree?: (tree: QueryFilterGroup | undefined) => void;
+    setGroupAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
+    setGroupBy: (key: string | undefined) => void;
+    setLimit: (next: number) => void;
+    setPage: (next: number) => void;
+    setSearch: (next: string) => void;
+    setSort: (key: string | undefined, dir?: SortDirection) => void;
+    sortLevels: readonly SortLevel[];
+    toggleSortLevel: (key: string) => void;
+}
+
+// @public
+export const TEXT_OPS: readonly ["eq", "neq", "contains", "notContains", "startsWith", "endsWith", "empty", "notEmpty"];
+
+// @public
+export type TotalCountCapability = "exact" | "loaded";
+
+// @public
+export interface UseColumnLayoutResult<TRow> {
+    isHidden: (key: string) => boolean;
+    move: (key: string, toIndex: number) => void;
+    pinOffset: (key: string) => PinOffset | undefined;
+    reset: () => void;
+    resetName: (key: string) => void;
+    setHidden: (key: string, hidden: boolean) => void;
+    setName: (key: string, name: string) => void;
+    setOrder: (order: readonly string[]) => void;
+    setPinned: (key: string, side: PinSide | undefined) => void;
+    setWidth: (key: string, width: number | undefined) => void;
+    state: ColumnLayoutState;
+    toggleColumnGroup: (id: string) => void;
+    toggleVisible: (key: string) => void;
+    visibleColumns: ColumnMetadata<TRow>[];
 }
 
 // (No @packageDocumentation comment for this package)

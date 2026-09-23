@@ -211,7 +211,7 @@ function capabilityKind(key: CapabilityKey): AgentCapabilityDefinition["kind"] {
   return "view";
 }
 
-/** Build a reversible OpenAI function-name map and detect dot/underscore collisions. */
+/** Build a reversible OpenAI function-name map and detect dot/underscore collisions. @public */
 export function openAiToolNameMap(
   keys: readonly string[]
 ): ReadonlyMap<string, string> {

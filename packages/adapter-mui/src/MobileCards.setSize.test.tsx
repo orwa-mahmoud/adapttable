@@ -34,6 +34,7 @@ function mount(search: string) {
       rowKey={(r) => r.id}
       urlAdapter={createMemoryAdapter(search)}
       forceMobile
+      paginationMode="paged"
     />
   );
 }

@@ -8,8 +8,10 @@ on:
     - cron: "17 4 * * *"
   workflow_dispatch:
 
+# One run per ref: a new run supersedes the last on the same branch, and the
+# scheduled run on main never cancels a run dispatched on another branch.
 concurrency:
-  group: e2e-nightly
+  group: e2e-nightly-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -66,11 +68,16 @@ jobs:
     name: Chromium visual baselines
     needs: showcase-build
     runs-on: ubuntu-latest
+    # The image the Linux baselines are captured in (e2e/visual/README.md):
+    # the same browser build and the same fonts, so a kit that draws with the
+    # system font stack renders the pixels its baseline holds. Keep the tag on
+    # the installed @playwright/test version.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
-      - uses: ./.github/actions/playwright-chromium
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: showcase-dist

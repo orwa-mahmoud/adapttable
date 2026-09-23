@@ -28,6 +28,8 @@ a downloaded file cannot disagree about what a cell contains.
 **Ctrl/Cmd+X** copies the same text and then calls `onCellCut(range)`. The table
 clears nothing itself: what "cut" removes is your decision, and a cut that
 emptied cells before the clipboard accepted them would lose the data outright.
+With [`contextMenu()`](./command-palette.md#built-in-entries) composed, the
+cell menu offers the same Cut.
 
 Either way the outcome is announced — `labels.gridRangeCopied` on success,
 `labels.gridRangeCopyFailed` when the browser refuses (the Clipboard API needs a
@@ -49,6 +51,8 @@ import { cellNavigation } from "@adapttable/mantine/cell-navigation";
 import { editing } from "@adapttable/mantine/editing";
 
 <DataTable
+  data={rows}
+  rowKey={(row) => row.id}
   features={[
     cellNavigation(),
     editing((row, key, value) => save(row, key, value)),
@@ -67,6 +71,8 @@ To take the batch whole instead — one server round trip, one undo entry — se
 
 ```tsx
 <DataTable
+  data={rows}
+  rowKey={(row) => row.id}
   features={[cellNavigation(), editing(commit)]}
   onCellPaste={(edits) => saveAll(edits)}
   columns={[{ key: "budget", header: "Budget", editable: true }]}
@@ -110,6 +116,8 @@ table can be edited, and never when it cannot:
 
 ```tsx
 <DataTable
+  data={rows}
+  rowKey={(row) => row.id}
   features={[cellNavigation(), editing(commit)]}
   columns={[{ key: "budget", header: "Budget", editable: true }]}
 />
@@ -125,16 +133,28 @@ Headless: `fillDirection`, `fillTargetRange` and `fillRangeEdits`;
 ## Find in table
 
 Compose `findInTable` from `@adapttable/<kit>/find-in-table` and **Ctrl/Cmd+F**
-opens a find bar over the table:
+with focus anywhere inside the table opens a find bar over it;
+`findInTable({ button: true })` also draws a **Find in table** control among
+the toolbar's view controls, with the kit's own button (part `find-button`,
+`aria-expanded` while the bar shows; `classNames.findButton` on unstyled and
+shadcn):
 
 ```tsx
-import { cellNavigation } from "@adapttable/mantine/cell-navigation";
+import { DataTable } from "@adapttable/mantine";
 import { findInTable } from "@adapttable/mantine/find-in-table";
 
-<DataTable features={[cellNavigation(), findInTable()]} />;
+<DataTable
+  data={rows}
+  columns={columns}
+  rowKey={(row) => row.id}
+  features={[findInTable({ button: true })]}
+/>;
 ```
 
-Find is not search. The search box asks "show me only the rows that match", and
+Find works on its own. With [`cellNavigation()`](#selecting-a-range) composed
+too, walking the hits also moves the grid's focus and selection with them.
+
+Find is not [search](./search.md). The search box asks "show me only the rows that match", and
 on a server tier it asks the server; find asks "where does this appear in what I
 am looking at", leaves every row where it is, and walks the hits. Both can be on
 at once.
@@ -148,9 +168,10 @@ design-system token. `--adapttable-find-match` and
 in).
 
 **Enter** walks forward, **Shift+Enter** back, **Escape** closes and clears.
-Walking moves the table's focus with it, so the cell is scrolled into view,
-announced, and left selected — a find that highlighted without going there would
-leave you hunting for the highlight. The bar itself is one input, a count and
+The current hit is scrolled into view — a find that highlighted without going
+there would leave you hunting for the highlight — and the count is announced.
+With cell navigation, walking also moves the grid's focus to the hit, which is
+announced and left selected. The bar itself is one input, a count and
 three buttons, all named through `labels.findInTable`, `findPlaceholder`,
 `findMatchCount`, `findPrevious`, `findNext` and `findClose`.
 
@@ -179,13 +200,22 @@ Compose `selectionStats` from `@adapttable/<kit>/selection-stats` and a strip
 under the table says what is selected:
 
 ```tsx
+import { DataTable } from "@adapttable/mantine";
 import { cellNavigation } from "@adapttable/mantine/cell-navigation";
 import { selectionStats } from "@adapttable/mantine/selection-stats";
 
-<DataTable features={[cellNavigation(), selectionStats()]} />;
+<DataTable
+  data={rows}
+  columns={columns}
+  rowKey={(row) => row.id}
+  features={[cellNavigation(), selectionStats()]}
+/>;
 ```
 
 > Count 12 · Sum 1,240.5 · Avg 103.4 · Min 12 · Max 900
+
+Composing `selectionStats()` also adds the row-selection checkbox column. The
+figures need `cellNavigation()`, which is what produces a cell range.
 
 The count covers every selected cell; the arithmetic covers the numeric ones,
 so a rectangle spanning a name column and a budget column still has a sum.
@@ -232,14 +262,21 @@ what a screen reader reads, named `labels.selectColumn` plus the column's own
 name ("Select column: Team", translated in every bundled locale).
 
 ```tsx
+import { DataTable } from "@adapttable/mantine";
 import { cellNavigation } from "@adapttable/mantine/cell-navigation";
 import { columnSelectionCheckbox } from "@adapttable/mantine/column-selection";
 
-<DataTable features={[cellNavigation(), columnSelectionCheckbox()]} … />;
+<DataTable
+  data={rows}
+  columns={columns}
+  rowKey={(row) => row.id}
+  features={[cellNavigation(), columnSelectionCheckbox()]}
+/>;
 ```
 
 It needs `cellNavigation()`, because that is what makes a selection exist at all;
-either factory alone renders nothing. Ticking selects the column, unticking clears
+without it the header checkboxes do not render, and `columnSelectionCheckbox()`
+alone adds only the row-selection column. Ticking selects the column, unticking clears
 — nothing selected is the only state one checkbox can return to, since a
 rectangle cannot lose a column out of its middle. A box reads as checked only
 when the selection is exactly its column: inside a wider rectangle it stays
@@ -251,7 +288,7 @@ moves; a selected column keeps its box on screen either way. Where there is no
 hover — a touchscreen — it is always visible.
 
 The control is `data-adapttable-part="column-select"` (`columnSelect` in
-`classNames`), and it is each kit's own checkbox: core owns the layout, the
+`@adapttable/unstyled`'s `classNames`), and it is each kit's own checkbox: core owns the layout, the
 name, and keeping the click off the header underneath it, which would otherwise
 sort the column the same click just selected.
 
@@ -359,8 +396,22 @@ only once a real rectangle exists: marking every focused cell as selected would
 tell a screen reader the table is in selection mode when the user has merely
 arrowed around.
 
-`onRangeChange` fires whenever it changes and `table.gridFocus.range` holds the
-current rectangle — which is what `exportCsv` with `scope: "range"` reads.
+`cellNavigation({ onRangeChange })` tells the host the rectangle on mount and
+whenever it changes — `null` when nothing beyond the focused cell is selected —
+which is what a "sum of selection" readout of your own reads:
+
+```tsx
+const [range, setRange] = useState<CellRange | null>(null);
+
+<DataTable
+  {...props}
+  features={[cellNavigation({ onRangeChange: setRange })]}
+/>;
+```
+
+Headless: `useGridFocus({ onRangeChange })` reports every change, and
+`gridFocus.range` holds the current rectangle — which is what
+`exportCsv({ scope: "range" })` reads.
 
 Headless: `CellRange` and `CellRangeBounds` are the shapes, `cellRangeBounds`
 sorts the corners of a range dragged up or left, `isInCellRange` tests
@@ -380,8 +431,9 @@ label/value pairs, and a two-dimensional focus model does not describe it.
 
 Without `cellNavigation()` composed there is no `role="grid"`, no `tabIndex`, no key
 handler, no live region, and no extra attributes. Not "disabled" — absent. A
-test asserts the rendered markup is byte-identical to a table built without the
-feature at all, in every one of the eight adapters.
+core test asserts the markup is byte-identical to a table built without the
+feature, and each of the eight adapters asserts there is no grid role and no
+focusable cell.
 
 Focus position is also deliberately **not** saved to the URL or a Saved View.
 Where the keyboard is sitting is ephemeral UI state, not part of a view someone
@@ -434,4 +486,5 @@ because getting it wrong is invisible on screen.
 - Enter and F2 open the focused cell when its column is `editable`, and do
   nothing when it is not — so arrowing to a cell and pressing Enter edits it,
   which is the whole keyboard path.
-- A click moves focus too: state follows the DOM rather than fighting it.
+- A click that focuses a cell moves the grid's focus too; in Safari, clicking
+  the row-selection checkbox does not move focus into the grid.

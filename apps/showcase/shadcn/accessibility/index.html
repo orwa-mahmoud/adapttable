@@ -168,6 +168,8 @@
         <p>The grid is semantic markup wearing the preset; the header checkbox is a native input with the preset's classes, and the focus ring is the same outline the rest of the table uses.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/shadcn&quot;;
+import { cellNavigation } from &quot;@adapttable/shadcn/cell-navigation&quot;;
+import { columnSelectionCheckbox } from &quot;@adapttable/shadcn/column-selection&quot;;
 
 export function People({ rows, columns }) {
   return (
@@ -175,8 +177,7 @@ export function People({ rows, columns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      cellNavigation
-      columnSelectionCheckbox
+      features={[cellNavigation(), columnSelectionCheckbox()]}
     /&gt;
   );
 }</code></pre>

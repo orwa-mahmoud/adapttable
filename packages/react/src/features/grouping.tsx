@@ -17,13 +17,14 @@ import {
   type GroupByInput,
   groupedEntriesForStrategy,
   groupingComputationKind,
+  type GroupNode,
   type GroupSort,
-  insertExtraRows,
   parseGroupBy,
   serializeAggregationDerivedKey,
   sourceCapabilities,
   withGroupAggregateOverrides,
 } from "@adapttable/core";
+import { insertExtraRows } from "@adapttable/core/binding";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
 import { useGroupCollapse } from "../grouping/useGroupCollapse";
@@ -210,7 +211,6 @@ function LiveGrouping({
     serverGroups,
     capabilities,
     source.allFilteredRows,
-    chrome.columnLayout.visibleColumns,
     getRowId,
     groupCollapse,
     aggregateDerivedKey,
@@ -309,8 +309,11 @@ export interface StaticGroupingExtras {
   groupPageSize?: number;
   /** Show this many rows inside each group. */
   groupRowPageSize?: number;
-  /** Keep only the groups this accepts. */
-  groupFilter?: (group: unknown) => boolean;
+  /**
+   * Keep only the groups this accepts. Row-independent here; the row-aware
+   * {@link GroupingExtras} types the group's rows.
+   */
+  groupFilter?: (group: GroupNode<unknown>) => boolean;
   /** Controlled collapse state. */
   collapsedGroupIds?: readonly string[];
   /** Told when a group opens or closes. */
@@ -327,11 +330,16 @@ export interface StaticGroupingExtras {
  *
  * @public
  */
-export interface GroupingExtras<TRow> extends StaticGroupingExtras {
+export interface GroupingExtras<TRow> extends Omit<
+  StaticGroupingExtras,
+  "groupFilter"
+> {
   /** Per-group subtotals, the same mapper shape as `summaryRow`. */
   groupAggregates?: (rows: readonly TRow[]) => unknown;
   /** Order the groups themselves. */
   groupSort?: GroupSort<TRow>;
+  /** Keep only the groups this accepts — each with its value, label and rows. */
+  groupFilter?: (group: GroupNode<TRow>) => boolean;
 }
 
 /**

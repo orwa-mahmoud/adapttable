@@ -168,6 +168,7 @@
         <p>A group header is a centred TableCell spanning its children, with an IconButton chevron; a collapsed stub keeps the group name on aria-label rather than as visible text.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnInput } from &quot;@adapttable/mui&quot;;
+import { collapsibleColumnGroups } from &quot;@adapttable/mui/column-groups&quot;;
 
 const columns: ColumnInput&lt;Person&gt;[] = [
   {
@@ -202,7 +203,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      collapsibleColumnGroups
+      features={[collapsibleColumnGroups()]}
     /&gt;
   );
 }</code></pre>

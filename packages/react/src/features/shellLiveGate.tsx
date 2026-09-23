@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 
 import { asBatchGesture } from "../editing/editHistory";
 import { beginCellEdit } from "../editing/useCellEditing";
+import { withFindMarks } from "../find/findMarks";
 import type { DataTableShellResult } from "../useDataTableShell";
 import { undoRedoToolbar, viewControlsToolbar } from "../useTableChrome";
 import { rememberFeatureHost } from "./featureHost";
@@ -134,6 +135,7 @@ function FindStage<TRow>({
     urlAdapter: shell.urlAdapter,
     urlSync: shell.chromeProps.urlSync,
     urlKey: shell.chromeProps.urlKey,
+    root: chrome.rootRef,
     children: (find: typeof DISABLED_FIND) => children({ ...live, find }),
   } as unknown as FindLiveSlotProps<never>;
   return filled ? (
@@ -208,14 +210,19 @@ function CellNavStage<TRow>({
     children({
       ...live,
       // Without the feature the table still names its real size: assistive
-      // tech can only count the slice in the DOM.
-      gridFocus: windowedTableAria({
-        rowCount: options.rowCount,
-        rowsLength: options.rows.length,
-        columnsLength: options.columns.length,
-        columnsWindowed: options.columnsWindowed,
-        firstRowIndex: options.firstRowIndex,
-      }),
+      // tech can only count the slice in the DOM — and find still marks its
+      // matches.
+      gridFocus: withFindMarks(
+        windowedTableAria({
+          rowCount: options.rowCount,
+          rowsLength: options.rows.length,
+          columnsLength: options.columns.length,
+          columnsWindowed: options.columnsWindowed,
+          firstRowIndex: options.firstRowIndex,
+        }),
+        live.find,
+        windowStart
+      ),
     })
   );
 }

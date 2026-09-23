@@ -32,6 +32,7 @@ import { filters } from "./filters";
 import { findInTable } from "./find-in-table";
 import { fullscreen } from "./fullscreen";
 import { grouping } from "./grouping";
+import { rowActions } from "./row-actions";
 import { nestedTable, rowDetail } from "./row-detail";
 import { rowPinning } from "./row-pinning";
 import { selectionStats } from "./selection-stats";
@@ -45,6 +46,37 @@ function patch<T>(factory: { apply?: (input: object) => T }): T {
 }
 
 describe("feature factories", () => {
+  it("rowActions writes the host actions and the mutation handlers", () => {
+    const actions = [{ key: "open", label: "Open", onClick: vi.fn() }];
+    const onAddRow = vi.fn();
+    const onDuplicateRow = vi.fn();
+    const onDeleteRow = vi.fn();
+    expect(patch(rowActions())).toEqual({});
+    expect(patch(rowActions(actions))).toEqual({ rowActions: actions });
+    expect(
+      patch(
+        rowActions(actions, {
+          onAddRow,
+          onDuplicateRow,
+          onDeleteRow,
+          confirmDeleteRow: false,
+        })
+      )
+    ).toEqual({
+      rowActions: actions,
+      onAddRow,
+      onDuplicateRow,
+      onDeleteRow,
+      confirmDeleteRow: false,
+    });
+    expect(patch(rowActions(undefined, { onAddRow }))).toMatchObject({
+      onAddRow,
+    });
+    expect(patch(rowActions(undefined, { onAddRow }))).not.toHaveProperty(
+      "rowActions"
+    );
+  });
+
   it("rowPinning writes both pin channels", () => {
     const onPinnedRowIdsChange = vi.fn();
     expect(
@@ -55,9 +87,14 @@ describe("feature factories", () => {
         })
       )
     ).toEqual({
+      rowPinningArmed: true,
       pinnedRowIds: { top: ["a"], bottom: [] },
       onPinnedRowIdsChange,
     });
+  });
+
+  it("a bare rowPinning arms pinning on its own", () => {
+    expect(patch(rowPinning())).toEqual({ rowPinningArmed: true });
   });
 
   it("cellSpan writes the getter and appearance", () => {

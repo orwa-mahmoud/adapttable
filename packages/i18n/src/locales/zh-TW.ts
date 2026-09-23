@@ -210,6 +210,7 @@ export const zhTW: Required<TableLabels> = {
   assistantVoiceStart: "語音輸入",
   assistantVoiceStop: "停止語音輸入",
   assistantVoiceListening: "正在聆聽",
+  assistantVoiceMessage: "語音訊息",
   assistantVoiceLanguage: "語音輸入語言",
   assistantYou: "您",
   assistantSpeaker: "助理",

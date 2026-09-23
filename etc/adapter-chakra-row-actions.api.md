@@ -5,8 +5,11 @@
 ```ts
 
 import { rowActions } from '@adapttable/react/features';
+import { RowMutationHandlers } from '@adapttable/react/features';
 
 export { rowActions }
+
+export { RowMutationHandlers }
 
 // (No @packageDocumentation comment for this package)
 

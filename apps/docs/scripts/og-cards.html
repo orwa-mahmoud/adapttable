@@ -1,9 +1,9 @@
 <!doctype html>
 <!--
   Per-page Open Graph card generator. Each .card is exactly 1200x630 (the OG
-  spec). Regenerate the PNGs by opening this file and screenshotting each
-  card element (id="c-<slug>") into ../public/og/<slug>.png. No build
-  dependency — the cards are static HTML screenshotted locally.
+  spec) and is built from the sidebar: the group is the kicker, the entry's
+  label the title. `pnpm og:cards` serves this file and screenshots each card
+  element (id="c-<slug>") into ../public/og/<slug>.png.
 -->
 <html lang="en">
   <head>
@@ -113,7 +113,9 @@
   </head>
   <body>
     <div id="cards"></div>
-    <script>
+    <script type="module">
+      import { sidebar } from "../sidebar.mjs";
+
       const LOGO = `<svg width="40" height="40" viewBox="0 0 32 32" aria-hidden="true">
         <rect x="8.5" y="1.5" width="22" height="22" rx="5.5" fill="#6c5ce7" opacity="0.28"/>
         <rect x="5" y="5" width="22" height="22" rx="5.5" fill="#6c5ce7" opacity="0.55"/>
@@ -130,40 +132,22 @@
         "#8b5cf6",
       ];
       const DOTS = KITS.map((c) => `<i style="background:${c}"></i>`).join("");
-      const PAGES = [
-        ["getting-started", "Getting started", "Start"],
-        ["concepts", "Concepts", "Start"],
-        ["data-tiers", "Data tiers", "Start"],
-        ["columns", "Columns", "Features"],
-        ["sparkline", "Sparkline columns", "Features"],
-        ["sorting", "Sorting", "Features"],
-        ["filtering", "Filtering", "Features"],
-        ["pagination", "Pagination", "Features"],
-        ["selection", "Selection & bulk actions", "Features"],
-        ["row-expansion", "Row expansion", "Features"],
-        ["cell-editing", "Inline cell editing", "Features"],
-        ["row-reordering", "Row reordering", "Features"],
-        ["row-pinning", "Row pinning", "Features"],
-        ["pinned-summary-rows", "Pinned summary rows", "Features"],
-        ["row-spanning", "Row and column spanning", "Features"],
-        ["full-width-rows", "Full-width and separator rows", "Features"],
-        ["row-styling", "Row styling and heights", "Features"],
-        ["row-grouping", "Row grouping", "Features"],
-        ["column-management", "Column management", "Features"],
-        ["saved-views", "Saved views", "Features"],
-        ["virtualization", "Virtualization", "Features"],
-        ["url-state", "URL state", "Beyond the table"],
-        ["customization", "Customization", "Beyond the table"],
-        ["i18n-rtl", "i18n & RTL", "Beyond the table"],
-        ["api", "API reference", "Reference"],
-        ["faq", "FAQ", "Reference"],
-        [
-          "comparison",
-          "AdaptTable vs ag-Grid, MUI X & TanStack Table",
-          "Reference",
-        ],
-        ["versioning", "Versioning & stability", "Reference"],
-      ];
+      // Where a card should say more than its sidebar label.
+      const TITLES = {
+        comparison: "AdaptTable vs ag-Grid, MUI X & TanStack Table",
+      };
+      // Migration entries read "From X" in the sidebar; a card stands alone.
+      const cardTitle = (group, label) =>
+        group === "Migrating"
+          ? `Migrate ${label[0].toLowerCase()}${label.slice(1)}`
+          : label;
+      const PAGES = sidebar.flatMap((group) =>
+        group.items.map((item) => [
+          item.slug,
+          TITLES[item.slug] ?? cardTitle(group.label, item.label),
+          group.label,
+        ])
+      );
       document.getElementById("cards").innerHTML = PAGES.map(
         ([slug, title, kicker]) => `
         <div class="card" id="c-${slug}">

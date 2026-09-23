@@ -2,10 +2,11 @@
  * The scripted demo transport — this page's, not the library's.
  *
  * There is no model here and nothing pretends there is. A fixed table maps
- * each example request to ONE capability call, which then runs through the
- * ordinary session executor against the live revision. So what the reader
- * sees happen to the table is the real operation, and a request the table
- * cannot serve fails the same way it would with a backend attached.
+ * each example request to a fixed sequence of capability calls — usually one —
+ * each of which runs through the ordinary session executor against the live
+ * revision. So what the reader sees happen to the table is the real
+ * operation, and a request the table cannot serve fails the same way it would
+ * with a backend attached.
  *
  * Two rules keep it honest:
  *
@@ -23,6 +24,14 @@ import type {
   ExecuteResult,
 } from "@adapttable/ai";
 
+/** One capability call a scenario makes. @internal */
+export interface DemoCall {
+  /** The capability to run. */
+  readonly capabilityKey: string;
+  /** Built at send time, so ids and revisions are the live ones. */
+  readonly args: (context: DemoContext) => unknown;
+}
+
 /** One example the demo can actually carry out. @internal */
 export interface DemoScenario {
   /** The exact text a suggestion sends, and the only text this matches. */
@@ -37,6 +46,15 @@ export interface DemoScenario {
   readonly capabilityKey: string;
   /** Built at send time, so ids and revisions are the live ones. */
   readonly args: (context: DemoContext) => unknown;
+  /**
+   * Calls that run first, in order, before the scenario's own call.
+   *
+   * For a request that takes more than one step — a bulk action runs on the
+   * selection, so the rows are selected first. Each runs through the session
+   * against the revision the previous one left, and the first that fails ends
+   * the turn.
+   */
+  readonly before?: readonly DemoCall[];
   /** Capabilities the table must advertise for this to be offered. */
   readonly requires: readonly string[];
   /**
@@ -85,6 +103,8 @@ export interface DemoContext {
    * propose a deletion nobody could approve.
    */
   readonly removableRow?: { readonly rowKey: string; readonly person: string };
+  /** The people the bulk example selects and marks on leave. */
+  readonly leaveRows: readonly { rowKey: string; person: string }[];
 }
 
 /** What the demo says when it does not know a request. @internal */
@@ -251,6 +271,39 @@ export const DEMO_SCENARIOS: readonly DemoScenario[] = [
       rows: [{ rowKey: context.removableRow?.rowKey ?? "t1" }],
     }),
     requires: ["rows.delete"],
+  },
+  {
+    prompt: "Mark Jonah Okonkwo and Sefa Demir as on leave.",
+    ar: {
+      prompt: "سجّل Jonah Okonkwo و Sefa Demir في إجازة.",
+      title: "إجراء جماعي",
+      reply: "تم تحديدهما وتسجيلهما في إجازة بعد موافقتك.",
+    },
+    subject: (context) => ({
+      kind: "edit",
+      row: context.leaveRows.map((row) => row.person).join(", "),
+      column: "Status",
+      after: "On leave",
+    }),
+    title: "Run a bulk action",
+    kind: "edit",
+    // A bulk action runs on the selection, so the rows are selected first and
+    // the action is then asked for with the same keys. Its confirmation is
+    // what makes the reader approve it.
+    reply: "Selected them and marked them on leave once you approved it.",
+    before: [
+      {
+        capabilityKey: "view.setSelection",
+        args: (context) => ({
+          ids: context.leaveRows.map((row) => row.rowKey),
+        }),
+      },
+    ],
+    capabilityKey: "bulkAction.markOnLeave",
+    args: (context) => ({
+      rowKeys: context.leaveRows.map((row) => row.rowKey),
+    }),
+    requires: ["view.setSelection", "bulkAction.markOnLeave"],
   },
   {
     prompt: "Pin the person column to the start.",
@@ -423,29 +476,44 @@ export function demoTransport(context: () => DemoContext): AssistantTransport {
         return { text: describeCatalog(session) };
       }
 
+      const calls: readonly DemoCall[] = [
+        ...(scenario.before ?? []),
+        { capabilityKey: scenario.capabilityKey, args: scenario.args },
+      ];
       const offered = new Set(session.catalog().map((entry) => entry.key));
-      if (!offered.has(scenario.capabilityKey)) {
+      const missing = calls.find((call) => !offered.has(call.capabilityKey));
+      if (missing) {
         return {
-          text: `This table does not currently offer ${scenario.capabilityKey}.`,
+          text: `This table does not currently offer ${missing.capabilityKey}.`,
         };
       }
 
-      const result: ExecuteResult = await session.execute(
-        scenario.capabilityKey,
-        scenario.args(context()),
-        // The live revision, so a request planned against a view the table
-        // has left fails here exactly as it would with a backend.
-        session.manifest().viewRevision,
-        `demo-${scenario.capabilityKey}-${String(Date.now())}`
-      );
+      const results: ExecuteResult[] = [];
+      for (const call of calls) {
+        const result: ExecuteResult = await session.execute(
+          call.capabilityKey,
+          call.args(context()),
+          // The live revision, so a request planned against a view the table
+          // has left fails here exactly as it would with a backend.
+          session.manifest().viewRevision,
+          `demo-${call.capabilityKey}-${String(Date.now())}`
+        );
+        results.push(result);
+        if (!result.ok) break;
+      }
+      const finished =
+        results.length === calls.length && results.every((result) => result.ok);
 
       return {
-        text: replyFor(scenario, arabic, result.ok),
-        results: [result],
-        keys: [scenario.capabilityKey],
+        text: replyFor(scenario, arabic, finished),
+        results,
+        keys: calls.slice(0, results.length).map((call) => call.capabilityKey),
         // Described from the arguments this scenario ran, never from the
-        // reply text above it.
-        subjects: [scenario.subject?.(context())],
+        // reply text above it. Only the scenario's own call carries one; the
+        // steps before it are described by their capability.
+        subjects: results.map((_result, index) =>
+          index === calls.length - 1 ? scenario.subject?.(context()) : undefined
+        ),
       };
     },
   };

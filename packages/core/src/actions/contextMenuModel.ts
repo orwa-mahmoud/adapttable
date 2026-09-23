@@ -17,7 +17,7 @@
  * arrived from a menu.
  */
 import type { ColumnMetadata } from "../columnModel";
-import type { TableLabels } from "../types";
+import type { RowAction, TableLabels } from "../types";
 
 /**
  * Where the menu was opened.
@@ -85,6 +85,12 @@ export interface ContextMenuModelOptions<TRow> {
   sortDir?: "asc" | "desc";
   /** Whether the column is currently pinned, for the pin entry's wording. */
   isPinned?: (columnKey: string) => boolean;
+  /**
+   * The row's pin actions — Pin to top, Pin to bottom, Unpin — offered on a
+   * row's or a cell's menu. Each keeps its own `isHidden` and
+   * `disabledReason`, so the menu offers exactly what the row's actions do.
+   */
+  rowPins?: readonly RowAction<TRow>[];
   /**
    * Extra entries from the host. They are appended, with a divider, so a
    * custom action can never be mistaken for a built-in one — and cannot
@@ -195,6 +201,25 @@ function dataItems<TRow>(
       },
     });
   }
+  if (target.kind === "header") return items;
+  const row = target.row;
+  const pins = (options.rowPins ?? []).filter(
+    (action) => action.isHidden?.(row) !== true
+  );
+  pins.forEach((action, index) => {
+    const reason = action.disabledReason?.(row);
+    items.push({
+      key: `row-pin:${action.key}`,
+      label: action.label,
+      disabled:
+        (reason !== undefined && reason !== "") ||
+        action.isDisabled?.(row) === true,
+      separatorBefore: index === 0 && items.length > 0,
+      onSelect: () => {
+        action.onClick?.(row);
+      },
+    });
+  });
   return items;
 }
 

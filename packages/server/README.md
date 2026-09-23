@@ -31,7 +31,7 @@ Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 
   what you do with it is yours.
 - **No React** — the codecs come from `@adapttable/core/query`, the entry with
   no hooks and no client boundary, so an Express or Fastify service installs a
-  1.6 KB parser and not a UI library.
+  4.2 KB parser and not a UI library.
 
 ## Install
 

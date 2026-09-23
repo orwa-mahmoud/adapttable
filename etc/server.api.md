@@ -9,7 +9,55 @@ import { QueryFilterGroup } from '@adapttable/core/query';
 import { SortLevel } from '@adapttable/core/query';
 
 // @public
+export interface BooleanFilter {
+    readonly op: "eq";
+    readonly type: "boolean";
+    readonly value: boolean;
+}
+
+// @public
+export interface CustomTypedFilter {
+    readonly filterType: string;
+    readonly op: string;
+    readonly type: "custom";
+    readonly value?: string;
+}
+
+// @public
+export interface DateRangeFilter {
+    readonly from?: string;
+    readonly op: string;
+    readonly relative?: string;
+    readonly to?: string;
+    readonly type: "dateRange";
+}
+
+// @public
+export interface ListFilter {
+    readonly op: "in";
+    readonly type: "multiSelect" | "checklist";
+    readonly values: readonly string[];
+}
+
+// @public
+export interface NumberRangeFilter {
+    readonly max?: number;
+    readonly min?: number;
+    readonly op: string;
+    readonly type: "numberRange";
+    readonly values?: readonly number[];
+}
+
+// @public
 export function parseTableQuery(input: QueryInput, schema: QuerySchema): ServerTableQuery;
+
+// @public
+export function pickFilters<TDef extends {
+    readonly key: string;
+}>(defs: readonly TDef[], keys: readonly string[]): TDef[];
+
+// @public
+export function pickFilters(defs: Readonly<Record<string, string>>, keys: readonly string[]): Record<string, string>;
 
 // @public
 export type QueryInput = string | URL | URLSearchParams | {
@@ -25,10 +73,34 @@ export interface QueryRejection {
 
 // @public
 export interface QuerySchema {
-    columns: readonly string[];
+    columns: readonly string[] | "any";
     defaultLimit?: number;
+    filters?: Readonly<Record<string, string>> | readonly ServerFilterDef[];
+    filterTypes?: readonly ServerFilterType[];
+    groupByKeys?: boolean;
     maxLimit?: number;
     urlKey?: string;
+}
+
+// @public
+export interface SelectFilter {
+    readonly op: "eq";
+    readonly type: "select";
+    readonly value: string;
+}
+
+// @public
+export interface ServerFilterDef {
+    readonly key: string;
+    readonly options?: unknown;
+    readonly type: string;
+}
+
+// @public
+export interface ServerFilterType {
+    readonly defaultOp: string;
+    readonly ops: readonly string[];
+    readonly type: string;
 }
 
 // @public
@@ -40,6 +112,7 @@ export interface ServerTableQuery {
     filters: Readonly<Record<string, ServerFilterValue>>;
     filterTree?: QueryFilterGroup;
     groupBy?: string;
+    groupByKeys?: readonly string[];
     limit: number;
     offset: number;
     page: number;
@@ -47,8 +120,33 @@ export interface ServerTableQuery {
     pivotCollapsed?: readonly string[];
     rejected: readonly QueryRejection[];
     search?: string;
+    shapedFilters?: Readonly<Record<string, ShapedFilter>>;
     sort: readonly SortLevel[];
+    typedFilters?: Readonly<Record<string, TypedFilter>>;
 }
+
+// @public
+export interface ShapedFilter {
+    readonly from?: string;
+    readonly max?: string;
+    readonly min?: string;
+    readonly op?: string;
+    readonly to?: string;
+    readonly value?: string;
+}
+
+// @public
+export function splitFilterValues(raw: string | null | undefined): string[];
+
+// @public
+export interface TextFilter {
+    readonly op: string;
+    readonly type: "text";
+    readonly value?: string;
+}
+
+// @public
+export type TypedFilter = TextFilter | SelectFilter | ListFilter | BooleanFilter | NumberRangeFilter | DateRangeFilter | CustomTypedFilter;
 
 // (No @packageDocumentation comment for this package)
 

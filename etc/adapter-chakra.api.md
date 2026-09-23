@@ -193,11 +193,12 @@ export interface DataTableClassNames {
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> & DataModeProps<TRow>;
 
 // @public
-export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source"> {
+export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source">, Pick<UseTableDataOptions<TRow>, "supports" | "facetKeys" | "facets"> {
     accentColor?: string;
     animate?: boolean;
     classNames?: DataTableClassNames;
     data?: readonly TRow[];
+    error?: Error | null;
     loading?: boolean;
     size?: "sm" | "md" | "lg";
     slots?: DataTableSlots;

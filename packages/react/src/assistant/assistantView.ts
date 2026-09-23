@@ -79,6 +79,12 @@ export interface TableAssistantMessageView {
    */
   readonly streaming?: boolean;
   /**
+   * A voice message whose transcript has not come back yet. `text` is empty
+   * until it does; the chrome shows `labels.assistantVoiceMessage` in its
+   * place.
+   */
+  readonly transcribing?: boolean;
+  /**
    * The question this message is asking, while it is still unanswered.
    *
    * A question is a thing the assistant said, so it belongs to the message

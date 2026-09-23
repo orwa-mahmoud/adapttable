@@ -167,12 +167,12 @@
         <p>The footer, the pinned summaries and the group totals render through Mantine's own table rows. Building and reordering group levels stays on the grouping page.</p>
         <p>The footer is a Mantine Table.Tfoot, group totals close a Mantine table row, and pinned summaries are extra rows the same Table already knows how to stick.</p>
         <h2>The code</h2>
-        <pre><code>import { aggregate } from &quot;@adapttable/core&quot;;
+        <pre><code>import { aggregate } from &quot;@adapttable/react&quot;;
 import { DataTable } from &quot;@adapttable/mantine&quot;;
 import { groupingPanel } from &quot;@adapttable/mantine/grouping-panel&quot;;
 import { pinnedSummaryRows } from &quot;@adapttable/mantine/pinned-summary-rows&quot;;
 
-export function Sales({ rows, columns }) {
+export function Sales({ rows, columns, teamTotal, grandTotal }) {
   const budgetSum = aggregate({ budget: &quot;sum&quot; }, { columns });
   return (
     &lt;DataTable
@@ -185,10 +185,7 @@ export function Sales({ rows, columns }) {
           groupAggregates: budgetSum,
           groupFooters: true,
         }),
-        pinnedSummaryRows({
-          top: [{ id: &quot;team-total&quot;, name: &quot;Team total&quot; }],
-          bottom: [{ id: &quot;grand-total&quot;, name: &quot;Grand total&quot; }],
-        }),
+        pinnedSummaryRows({ top: [teamTotal], bottom: [grandTotal] }),
       ]}
     /&gt;
   );

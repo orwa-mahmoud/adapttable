@@ -167,6 +167,11 @@ async function visibleTableText(page: Page): Promise<string> {
   return (await region.innerText()).replace(/\s+/g, " ");
 }
 
+/** One person's row in the table, found by name. */
+function tableRow(page: Page, person: string) {
+  return page.getByRole("row").filter({ hasText: person });
+}
+
 for (const kit of kits) {
   test(`${kit} AI page mounts a real table and its own assistant`, async ({
     page,
@@ -223,6 +228,56 @@ for (const kit of kits) {
     expect(applied.join(" ")).toContain("Team is Core");
     expect(applied.join(" ")).not.toContain("view.setFilters");
   });
+
+  test(`${kit} runs a table bulk action after approval`, async ({ page }) => {
+    await openDemo(page, kit);
+    const jonah = tableRow(page, "Jonah Okonkwo");
+    const sefa = tableRow(page, "Sefa Demir");
+    await expect(jonah).toContainText("Active");
+    await expect(sefa).toContainText("Active");
+
+    await page.locator(part("assistant-examples-menu")).click();
+    await page
+      .locator(part("assistant-examples-item"))
+      .filter({ hasText: "Run a bulk action" })
+      .click();
+
+    // The action carries a confirmation, so the assistant asks first — in the
+    // conversation, through this kit's own approval controls.
+    const approve = page.locator(part("agent-approval-approve"));
+    await expect(approve).toBeVisible();
+    await expect(page.locator(part("assistant-approval"))).toBeVisible();
+    // Nothing has run yet: the rows are selected, not changed.
+    await expect(jonah).toContainText("Active");
+    await expect(sefa).toContainText("Active");
+
+    await approve.click();
+
+    await expect(jonah).toContainText("On leave");
+    await expect(sefa).toContainText("On leave");
+    // Only the selection: the row beside them is untouched.
+    await expect(tableRow(page, "Chioma Eze")).toContainText("Active");
+  });
+}
+
+/** The page's scroll offset once it has stopped moving. */
+async function settledScrollY(page: Page): Promise<number> {
+  return page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let last = window.scrollY;
+        const check = () => {
+          requestAnimationFrame(() => {
+            if (window.scrollY === last) resolve(last);
+            else {
+              last = window.scrollY;
+              check();
+            }
+          });
+        };
+        check();
+      })
+  );
 }
 
 test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
@@ -290,6 +345,26 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
     expect(await catalogText(page)).toContain("view.pinRow");
   });
 
+  test("offers the bulk action only where it can run", async ({ page }) => {
+    // Cell editing saves on approve, so the host's handler can run.
+    await expect
+      .poll(async () => catalogText(page))
+      .toContain("bulkAction.markOnLeave");
+
+    // Batch editing stages writes, and a host handler cannot be staged: the
+    // action stays on the bar for a person and leaves the agent's catalog.
+    await openDemoOptions(page);
+    await page.getByTestId("ai-editing-batch").click();
+    await expect
+      .poll(async () => catalogText(page))
+      .not.toContain("bulkAction.markOnLeave");
+
+    await page.getByTestId("ai-commit-immediate").click();
+    await expect
+      .poll(async () => catalogText(page))
+      .toContain("bulkAction.markOnLeave");
+  });
+
   test("closes the demo options on a click outside them", async ({ page }) => {
     const drawer = page.getByTestId("ai-demo-options-drawer");
     await openDemoOptions(page);
@@ -301,8 +376,10 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
     await page.mouse.click(box.x + box.width - 2, box.y + box.height / 2);
     await expect(drawer).toBeVisible();
 
-    // A wheel out in the dark moves the panel, never the page behind it.
-    const resting = await page.evaluate(() => window.scrollY);
+    // A wheel out in the dark moves the panel, never the page behind it. The
+    // page may still be settling from opening the panel, so the baseline is
+    // taken once two reads a frame apart agree.
+    const resting = await settledScrollY(page);
     await page.mouse.move(box.x / 2, box.y + box.height / 2);
     await page.mouse.wheel(0, 600);
     expect(await page.evaluate(() => window.scrollY)).toBe(resting);

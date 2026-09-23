@@ -37,8 +37,25 @@ async function setTheme(page: Page, theme: "light" | "dark"): Promise<void> {
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
 }
 
+/**
+ * Grow the viewport to the page's full height. A capture taller than the
+ * viewport is taken while scrolling, and every sticky element (the site
+ * header, a table toolbar) is painted at the scroll offset — in the middle of
+ * the image. With the whole page on screen nothing scrolls.
+ */
+async function fitViewportToPage(page: Page): Promise<void> {
+  const viewport = page.viewportSize()!;
+  const height = await page.evaluate(() =>
+    Math.ceil(document.documentElement.scrollHeight)
+  );
+  if (height > viewport.height) {
+    await page.setViewportSize({ width: viewport.width, height });
+  }
+}
+
 async function snapshotDemo(page: Page, name: string): Promise<void> {
   await waitForDemo(page);
+  await fitViewportToPage(page);
   await expect(demo(page)).toHaveScreenshot(`${name}.png`, SCREENSHOT);
 }
 
@@ -92,6 +109,7 @@ test.describe("overlays", () => {
       await page.goto(`/${kit}/filtering/`);
       await setTheme(page, "light");
       await waitForDemo(page);
+      await fitViewportToPage(page);
       await demo(page)
         .getByRole("button", { name: "Filters", exact: true })
         .click();
@@ -99,7 +117,22 @@ test.describe("overlays", () => {
         .locator('[data-adapttable-part="filters-form"]')
         .first();
       await expect(form).toBeVisible();
-      await expect(form).toHaveScreenshot(
+      // The form scrolls inside the kit's popover card, so its own box runs
+      // past the card into the page behind. The card — header, Clear all and
+      // the visible fields — is the first positioned ancestor in every kit.
+      await form.evaluate((element) => {
+        let node = element.parentElement;
+        while (
+          node &&
+          !["absolute", "fixed"].includes(getComputedStyle(node).position)
+        ) {
+          node = node.parentElement;
+        }
+        node?.setAttribute("data-visual-surface", "");
+      });
+      const card = page.locator("[data-visual-surface]");
+      await expect(card).toHaveCount(1);
+      await expect(card).toHaveScreenshot(
         `${kit}-overlay-filters.png`,
         SCREENSHOT
       );

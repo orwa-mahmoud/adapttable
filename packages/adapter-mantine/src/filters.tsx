@@ -43,7 +43,11 @@ function ChipsSlot({
 }: Readonly<{
   chips: Parameters<typeof ActiveFilterChips>[0]["chips"];
   onClearAll?: () => void;
-  labels: { filters: string; clearAll: string };
+  labels: {
+    filters: string;
+    clearAll: string;
+    removeFilter: (label: string) => string;
+  };
 }>) {
   return (
     <ActiveFilterChips
@@ -51,6 +55,7 @@ function ChipsSlot({
       onClearAll={onClearAll}
       label={labels.filters}
       clearAllLabel={labels.clearAll}
+      removeLabel={labels.removeFilter}
     />
   );
 }

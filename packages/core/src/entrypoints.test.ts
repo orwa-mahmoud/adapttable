@@ -9,8 +9,10 @@
  */
 import { describe, expect, it } from "vitest";
 
+import * as binding from "./binding";
 import * as bindingExports from "./bindingExports";
 import * as formula from "./formula";
+import * as main from "./index";
 import * as pdf from "./pdf";
 import * as pivot from "./pivot";
 import * as query from "./query";
@@ -73,5 +75,21 @@ describe("the binding barrel", () => {
       expect(typeof value).not.toBe("symbol");
     }
     expect(Object.keys(bindingExports).length).toBeGreaterThan(0);
+  });
+});
+
+describe("@adapttable/core/binding", () => {
+  it("opens the adapter machinery the main entry marks for removal", () => {
+    expect(typeof binding.columnGroupId).toBe("function");
+    expect(typeof binding.insertExtraRows).toBe("function");
+    expect(typeof binding.flattenColumnTree).toBe("function");
+  });
+
+  it("serves the same functions the main entry still serves", () => {
+    // Read by name: the main entry's copies carry the deprecation notice.
+    for (const name of ["columnGroupId", "insertExtraRows"]) {
+      expect(Reflect.get(main, name)).toBe(Reflect.get(binding, name));
+    }
+    expect(Reflect.get(main, "xlsxWriter")).toBe(xlsx.xlsxWriter);
   });
 });

@@ -47,6 +47,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./binding": {
+      "import": {
+        "types": "./dist/binding.d.ts",
+        "default": "./dist/binding.js"
+      },
+      "require": {
+        "types": "./dist/binding.d.cts",
+        "default": "./dist/binding.cjs"
+      }
+    },
     "./xlsx": {
       "import": {
         "types": "./dist/xlsx.d.ts",

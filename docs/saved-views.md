@@ -8,13 +8,14 @@ ready-made menu mounts in the toolbar; a headless hook backs custom UIs. The
 import and `features` entry are the switch; there is no `savedViews` table prop. See
 [feature composition](./features.md).
 
-A view captures **everything the table can put in a URL**: search, the
-multi-sort chain, page and page size, the simple filters and the advanced
-filter tree, ordered grouping keys (`groupBy`), session aggregation overrides
-(`groupAgg`), and which groups are collapsed, the whole column layout (order,
-hidden, pinned, widths, user-renamed column names, collapsed column groups),
-pinned rows, density,
-and the [pivot configuration](./pivot.md). The parts that take longest to
+A view captures **every parameter the table keeps in its URL**: search, the
+find-in-table query, the multi-sort chain, page and page size, the simple
+filters and the advanced filter tree, ordered grouping keys (`groupBy`),
+session aggregation overrides (`groupAgg`), formula columns, and the
+[pivot configuration](./pivot.md) — plus, when their URL hooks are wired, the
+whole column layout (order, hidden, pinned, widths, user-renamed column names,
+collapsed column groups), pinned rows, density and which groups are
+collapsed. The parts that take longest to
 rebuild by hand are exactly the parts worth capturing.
 
 ## Managing the list
@@ -22,6 +23,8 @@ rebuild by hand are exactly the parts worth capturing.
 `useSavedViews` returns the list plus the operations a management UI needs:
 
 ```tsx
+import { useSavedViews } from "@adapttable/react";
+
 const { views, save, apply, remove, rename, move, setDefault, defaultView } =
   useSavedViews({ storageKey: "people-views" });
 ```
@@ -117,7 +120,7 @@ someone else's edit. It arrives after the same operation's own `save` and
 the time its place in the list turns up.
 
 `reorder` is **optional**, and a store without it keeps working: `list`, `save`
-and `remove` carry saving, renaming, deleting and the default exactly as before.
+and `remove` carry saving, renaming, deleting and the default.
 What such a store cannot do is remember an order — `move` reorders the list on
 screen for that session, and the next `list()` decides the order again, as does
 where a renamed view lands. Implement `reorder` when reordering has to survive a
@@ -204,7 +207,7 @@ The card names four parts for styling and testing: `saved-views-panel` and
 
 ```tsx
 // Needs your kit's provider once at the root (e.g. <MantineProvider>).
-import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, shadcn, unstyled
+import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, base-ui, shadcn, unstyled
 import { columnMenu } from "@adapttable/mantine/column-menu";
 import { savedViews } from "@adapttable/mantine/saved-views";
 
@@ -281,20 +284,31 @@ export function PeopleTable() {
   over — other tables sharing the URL are untouched, and anything the view
   doesn't mention returns to its default.
 - The list persists as JSON under `storageKey` (localStorage by default).
-- `adapter` and `urlKey` default to the table's own `urlAdapter` / `urlKey`,
-  so usually only `storageKey` is needed.
+- `urlAdapter` and `urlKey` default to the table's own, so usually only
+  `storageKey` is needed.
 
 ## Options
 
 `savedViews(options)` takes `UseSavedViewsOptions` (the same options as the
 headless hook):
 
-| Prop         | Type              | Default                                | Description                                                  |
-| ------------ | ----------------- | -------------------------------------- | ------------------------------------------------------------ |
-| `storageKey` | `string`          | — (required)                           | Storage key for the view list, e.g. `"people-table-views"`.  |
-| `storage`    | `LayoutStorage`   | `localStorage` (memory-only under SSR) | Storage backend — supply your own to persist elsewhere.      |
-| `adapter`    | `UrlStateAdapter` | the table's `urlAdapter`               | The table's URL-state backend.                               |
-| `urlKey`     | `string`          | the table's `urlKey`                   | The table's URL namespace — must match the table's `urlKey`. |
+| Prop         | Type                  | Default                                | Description                                                      |
+| ------------ | --------------------- | -------------------------------------- | ---------------------------------------------------------------- |
+| `storageKey` | `string`              | — (required)                           | Storage key for the view list, e.g. `"people-table-views"`.      |
+| `storage`    | `LayoutStorage`       | `localStorage` (memory-only under SSR) | Storage backend — supply your own to persist elsewhere.          |
+| `store`      | `SavedViewsStore`     | —                                      | Server-side list; replaces `storage` entirely.                   |
+| `visibility` | `"private" \| "team"` | `"private"`                            | What `save` marks a new view as.                                 |
+| `migrate`    | `SavedViewMigration`  | —                                      | Upgrade a view behind `SAVED_VIEW_VERSION`, or drop it (`null`). |
+| `urlAdapter` | `UrlStateAdapter`     | the table's `urlAdapter`               | The table's URL-state backend.                                   |
+| `urlKey`     | `string`              | the table's `urlKey`                   | The table's URL namespace — must match the table's `urlKey`.     |
+| `urlSync`    | `boolean`             | `true`                                 | `false` captures and applies against in-memory state.            |
+
+The hook returns `UseSavedViewsResult`: `views`, `save`, `apply`, `remove`,
+`rename`, `move`, `setDefault`, `defaultView` and `reload`. Each entry is a
+`SavedView` — `name`, `search` (the table-scoped query string), `isDefault`,
+`visibility` (`SavedViewVisibility`), `version` and `readOnly`. A
+`SavedViewsStore` implements `list`, `save`, `remove` and an optional
+`reorder`; `SAVED_VIEW_VERSION` is the schema views are written at (`2`).
 
 ## Notes
 
@@ -309,16 +323,18 @@ headless hook):
   it):
 
   ```tsx
-  import { useSavedViews } from "@adapttable/core";
+  import { useSavedViews } from "@adapttable/react";
 
   const views = useSavedViews({ storageKey: "people-views", urlKey: "people" });
   // views.views, views.save("Active EU"), views.apply("Active EU"),
   // views.remove("Active EU")
   ```
 
-- Column layout is part of a view only when it lives in the URL (wire
-  `useColumnLayoutUrlState`); the localStorage-backed layout from
-  `useColumnLayoutStorageState` is not captured.
+- Column layout, density, pinned rows and collapsed groups are part of a
+  view only when they live in the URL (wire `useColumnLayoutUrlState`,
+  `useDensityUrlState`, `useRowPinningUrlState`, `useGroupCollapseUrlState`);
+  the localStorage-backed layout from `useColumnLayoutStorageState` is not
+  captured.
 - Views are local to the browser by default. Pass `storage` to persist them
   elsewhere; a full or denied storage degrades gracefully — the in-memory
   list keeps working for the session.

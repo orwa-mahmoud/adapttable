@@ -19,7 +19,7 @@ import {
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 
 import type { CommandPaletteChromeProps } from "../actions/CommandPaletteChrome";
 import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";
@@ -57,7 +57,7 @@ import type {
 import type { GroupingPanelSlotProps } from "../grouping/GroupingPanelChrome";
 import type { SidePanelChromeProps } from "../layout/SidePanelChrome";
 import type { FullscreenState } from "../layout/useFullscreen";
-import type { ComposedTableProps } from "../props";
+import type { ComposedTableProps, EditHistoryOptions } from "../props";
 import type {
   RowReorderButtonsProps,
   RowReorderHandleProps,
@@ -427,6 +427,11 @@ export const CONTEXT_MENU_LIVE = featureSlotKey<
 export interface FindLiveSlotProps<
   TRow = never,
 > extends UseFindInTableOptions<TRow> {
+  /**
+   * The table root, so Ctrl/Cmd+F with focus anywhere inside it opens the bar
+   * and the current match can be scrolled to without cell navigation.
+   */
+  root?: RefObject<HTMLElement | null>;
   /** The table; receives the find state. */
   children: (find: FindInTableState) => ReactNode;
 }
@@ -447,7 +452,7 @@ export const FIND_LIVE = featureSlotKey<FindLiveSlotProps<never>>("find-live", {
  */
 export interface EditHistoryLiveSlotProps<TRow = never> {
   /** History options from the composed feature / prop. */
-  editHistory: boolean | { depth?: number } | undefined;
+  editHistory: boolean | EditHistoryOptions | undefined;
   /** Columns, for reading a cell's value before it changes. */
   columns: readonly ColumnDef<TRow>[];
   /** The host's commit channel. */
@@ -840,10 +845,15 @@ export interface ExpandToggleSlotProps {
 /**
  * The expand/collapse control.
  *
+ * `rowDetail` and `nestedTable` both fill it, and a row opens one panel, so
+ * the slot is single: composing both draws one control per row.
+ *
  * @public
  */
-export const EXPAND_TOGGLE =
-  featureSlotKey<ExpandToggleSlotProps>("expand-toggle");
+export const EXPAND_TOGGLE = featureSlotKey<ExpandToggleSlotProps>(
+  "expand-toggle",
+  { single: true }
+);
 
 /**
  * Toolbar extras (export, undo, print, density, fullscreen).

@@ -31,6 +31,11 @@ function LiveTree({
     hasLoadedChildren: (row) =>
       hasLoadedChildren(row, chrome.source.rows, props),
     getRowId,
+    // A node whose children failed to arrive closes, so the next click is a
+    // retry rather than a close followed by an open.
+    onLoadFailed: (_row, id) => {
+      if (treeExpansion.isExpanded(id)) treeExpansion.toggle(id);
+    },
   });
   const treeEntries = useMemo(
     () =>

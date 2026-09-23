@@ -72,7 +72,11 @@ export interface UseDataTableOptions<TRow> {
    * bare-key columns, exactly as it does under `<DataTable>`.
    */
   locale?: string;
-  /** Number of leading desktop-visible columns always shown on mobile cards. */
+  /**
+   * Leading desktop-visible columns the card anchors. Those are columns
+   * without `hideOnMobile`, which a card shows anyway, so this does not change
+   * which fields a card shows.
+   */
   mobileIdentityColumns?: number;
   /** Search debounce in ms. Defaults to 300. */
   searchDebounceMs?: number;
@@ -183,7 +187,10 @@ export interface UseDataTableResult<TRow> {
  * @public
  */
 export interface TableElementProps extends Props {
-  /** `grid` with cell navigation, `table` otherwise. */
+  /**
+   * `table`. The headless hook draws a plain table; a grid role belongs to
+   * the kit that wires cell navigation onto it.
+   */
   role: string;
   /** Writing direction, present only when the table sets it. */
   dir?: Direction;

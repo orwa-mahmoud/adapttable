@@ -8,6 +8,13 @@ columns that were never in the data.
 never downloads the engine. It costs 2.1 KB gzipped to the tables that import
 it and nothing to the rest, which the bundle budget checks on every build.
 
+▶ **See it working:** [pivot in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/pivot/) — the same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+
+Three entries share the work: `@adapttable/core/pivot` holds the engine and the
+codecs; `@adapttable/react/pivot` re-exports them and adds `pivotTableModel`,
+`usePivotUrlState` and `PIVOT_ROW_COLUMN_KEY`; `@adapttable/<kit>/pivot` adds
+the kit's `PivotPanel` to the core re-export.
+
 ## The shape
 
 ```tsx
@@ -42,13 +49,18 @@ already has, so the result goes straight into the `DataTable` you are already
 using:
 
 ```tsx
-import { pivot, pivotTableModel } from "@adapttable/core/pivot";
 import { DataTable } from "@adapttable/mantine";
+import { pivot, pivotTableModel } from "@adapttable/react/pivot";
 
 const result = pivot(sales, config, { collapsed });
 const model = pivotTableModel(result, { fields, labels });
 
-<DataTable {...model} />;
+<DataTable
+  data={model.rows}
+  columns={model.columns}
+  rowKey={model.rowKey}
+  summaryRow={model.summaryRow}
+/>;
 ```
 
 The table is your kit's, with its own header groups, footer and sticky header —
@@ -90,8 +102,8 @@ pivotTableModel(result, {
 
 Rows that are totals are marked for styling: every row-header cell carries
 `data-adapttable-part="pivot-row-header"` with a `data-pivot-kind` of `leaf`,
-`subtotal` or `grandTotal`, and the row itself is yours through the table's
-`rowClassName`.
+`subtotal` or `grandTotal`, and the row itself is yours through
+`rowAppearance({ rowClassName })` from `@adapttable/<kit>/row-appearance`.
 
 ## Measures
 
@@ -122,6 +134,12 @@ would disagree with the footer of the same table:
 ```tsx
 pivot(sales, config, { columns });
 ```
+
+The same options take `aggregators`, a `ReadonlyMap<string, Aggregator>` that
+resolves a measure whose `agg` is a string naming a registered aggregator
+rather than a built-in, and `format`,
+`(value, measure) => DisplayValue | undefined`, which shapes each computed
+cell.
 
 ## Subtotals, totals and collapsing
 
@@ -193,8 +211,9 @@ names, ordering and labels live in core; every visible control is a required
 slot the adapter fills with its own kit's component, so a Mantine panel is
 built from Mantine buttons and an antd panel from antd buttons.
 
-Every adapter ships it pre-wired as `PivotPanel`, so a host imports one
-component rather than assembling slots:
+Every adapter except `@adapttable/bootstrap` ships it pre-wired as
+`PivotPanel`, from the kit root or `@adapttable/<kit>/pivot`, so a host imports
+one component rather than assembling slots:
 
 ```tsx
 import { PivotPanel } from "@adapttable/mantine";
@@ -282,7 +301,8 @@ axes, an order on each, and a measure list — which makes it the state most
 worth putting in a link:
 
 ```tsx
-import { pivot, usePivotUrlState } from "@adapttable/core/pivot";
+import { PivotPanel } from "@adapttable/mantine";
+import { pivot, usePivotUrlState } from "@adapttable/react/pivot";
 
 const { config, onConfigChange, collapsed, onCollapsedChange } =
   usePivotUrlState();
@@ -329,4 +349,4 @@ in memory and is left out of the link. Writing `sum` instead would quietly
 change what the link computes.
 
 Related: [row grouping](./row-grouping.md) ·
-[aggregation](./row-grouping.md#aggregates) · [API reference](./api.md)
+[aggregation](./row-grouping.md#aggregate-without-writing-the-maths) · [API reference](./api.md)

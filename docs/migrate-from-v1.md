@@ -1,5 +1,9 @@
 # Migrating from v1 to v2
 
+This guide ends at v2. Continue with [Upgrading from v2](./migrate-from-v2.md)
+to reach v3: several v2 names below — `virtualize` as a prop, MUI's `size`,
+`@adapttable/core/adapter` — are removed in v3.
+
 v2 is a truth-and-consistency release: every documented behavior now works
 as written, the same word always means the same thing across all eight
 adapters, and a batch of silent traps became loud. Nothing deprecated
@@ -36,7 +40,8 @@ through the rename table below.
 
 ## Behavior changes (and why)
 
-- **The adapter-builder tier moved to `@adapttable/core/adapter`.** The
+- **The adapter-builder tier moved to `@adapttable/core/adapter`** (in v3:
+  `@adapttable/react/adapter`). The
   ~65 exports only adapter implementations consume — `useDataTableShell`,
   the render prelude, chrome prop bundles, pinning and pager math, the
   inline icons — import from the new entry; `@adapttable/core` keeps the

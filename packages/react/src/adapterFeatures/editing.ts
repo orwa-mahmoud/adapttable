@@ -27,6 +27,7 @@ import type {
   StaticTableFeature,
   TableFeature,
 } from "../features/tableFeature";
+import type { EditHistoryOptions } from "../props";
 import type { AdapterFeatureComponent } from "./component";
 
 /**
@@ -90,7 +91,7 @@ export interface AdapterEditingFeatures {
   readonly dirtyIndicators: () => StaticTableFeature;
   /** Track edit history. */
   readonly editHistory: (
-    options?: boolean | { depth?: number }
+    options?: boolean | EditHistoryOptions
   ) => StaticTableFeature;
   /** Draw undo and redo controls. */
   readonly undoRedoButtons: () => StaticTableFeature;
@@ -100,11 +101,6 @@ export interface AdapterEditingFeatures {
   ) => TableFeature<TRow>;
 }
 
-/**
- * Bind core's editing lifecycle to one kit's editors and controls.
- *
- * @public
- */
 /**
  * The kit's cell, with the content it shows when nothing is being edited
  * already worked out.
@@ -132,6 +128,11 @@ function withResolvedDisplay(
   };
 }
 
+/**
+ * Bind core's editing lifecycle to one kit's editors and controls.
+ *
+ * @public
+ */
 export function createAdapterEditingFeatures(
   components: AdapterEditingComponents
 ): AdapterEditingFeatures {
@@ -142,9 +143,13 @@ export function createAdapterEditingFeatures(
       createElement(components.RowEditActions, props)
     ),
   ];
+  // Undo and redo sit where `undoRedoButtons` puts them in every kit, even in
+  // a kit whose `editHistory` draws them.
   const undoChrome = [
-    slotRender(TOOLBAR_EXTRAS, (props) =>
-      createElement(components.UndoRedoButtons, props)
+    slotRender(
+      TOOLBAR_EXTRAS,
+      (props) => createElement(components.UndoRedoButtons, props),
+      { orderAs: "undo-redo-buttons" }
     ),
   ];
 
@@ -163,7 +168,7 @@ export function createAdapterEditingFeatures(
   }
 
   function editHistory(
-    options: boolean | { depth?: number } = true
+    options: boolean | EditHistoryOptions = true
   ): StaticTableFeature {
     return extendFeature(
       coreEditHistory(options),

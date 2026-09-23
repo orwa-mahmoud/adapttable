@@ -7,6 +7,8 @@
  * style first; when that throws (jsdom stubs) or reports the initial `ltr`,
  * walk ancestors and skip those forced-ltr scroll wrappers so the table's
  * own `dir` wins.
+ *
+ * @public
  */
 export function isRtlElement(element: HTMLElement | null): boolean {
   if (element == null) return false;

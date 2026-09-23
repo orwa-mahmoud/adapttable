@@ -20,14 +20,14 @@ on a phone it renders the card list. Everything below is tuning.
 
 ## What changes on mobile — and what deliberately doesn't
 
-| Surface                                                             | Desktop                           | Mobile                                              |
-| ------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------- |
-| Rows                                                                | `<table>` rows                    | Cards — one per row, labels from the column headers |
-| Sorting                                                             | Clickable column headers          | A sort-by `<select>` (options via `sortByOptions`)  |
-| Pagination                                                          | Pager (or infinite)               | `paginationMode="auto"` resolves to infinite scroll |
-| Row actions                                                         | Trailing icon buttons             | Card buttons                                        |
-| Long lists                                                          | Row virtualization (`virtualize`) | Card virtualization through the same prop           |
-| Filters, chips, search, selection, bulk bar, saved views, URL state | identical                         | identical                                           |
+| Surface                                                             | Desktop                             | Mobile                                              |
+| ------------------------------------------------------------------- | ----------------------------------- | --------------------------------------------------- |
+| Rows                                                                | `<table>` rows                      | Cards — one per row, labels from the column headers |
+| Sorting                                                             | Clickable column headers            | A sort-by `<select>` (options via `sortByOptions`)  |
+| Pagination                                                          | Pager (or infinite)                 | `paginationMode="auto"` resolves to infinite scroll |
+| Row actions                                                         | Trailing icon buttons               | Card buttons                                        |
+| Long lists                                                          | Row virtualization (`virtualize()`) | Card virtualization through the same feature        |
+| Filters, chips, search, selection, bulk bar, saved views, URL state | identical                           | identical                                           |
 
 The second half of that table is the point: behavior that took real work to
 get right — declarative filters, select-across-pages, shareable URL state —
@@ -43,17 +43,20 @@ layouts.
   `@adapttable/react/adapter` is the resolver every adapter uses, for a custom
   card layout that should match.
 - **`hideOnMobile`** (per column) — drop a column from cards entirely.
-- **`mobileIdentityColumns`** (default `3`) — how many leading desktop-visible
-  columns the cards always keep.
+- **`hideOnDesktop`** (per column) — show a field on cards only.
+- **`mobileIdentityColumns`** (default `3`) — does not change which fields a
+  card shows: every column without `hideOnMobile` appears, and an explicit
+  `hideOnMobile` always wins.
 - **`sortByOptions`** — the options offered by the mobile sort-by select.
 - **`forceMobile`** — pin either layout regardless of viewport: cards inside a
   desktop dashboard panel, or the full table in a tablet kiosk. The
   [mobile demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/) uses
   exactly this prop for its toggle.
-- **`rowClassName`** applies to desktop rows and mobile cards alike, and the
+- **`rowAppearance({ rowClassName })`** applies to desktop rows and mobile
+  cards alike, and the
   [class-hook / `data-adapttable-part` surface](./customization.md) names the
   card regions (`cardDetail`, `group-card`, `summaryCard`) for styling.
-- **`rowStyle` / `rowHeight`** apply the same way — see
+- **`rowAppearance({ rowStyle, rowHeight })`** applies the same way — see
   [row styling and heights](./row-styling.md).
 
 ## Your own card
@@ -92,9 +95,11 @@ selection checkbox, the expand and tree toggles, the reorder controls, the row
 actions and the detail panel. A custom card cannot drop the parts that make
 the list usable, because it never owns them.
 
-Flat cards expose 44px up/down controls. Grouped and tree cards also expose
-the kit-native **Move to group…** / **Move under…** menu, including explicit
-confirmation when `movePolicy: "confirm"`; touch never has to emulate a drag.
+With `rowReorder(...)` from `@adapttable/mantine/row-reorder` composed, flat
+cards expose 44px up/down controls. Grouped and tree cards also expose the
+kit-native **Move to group…** / **Move under…** menu, including explicit
+confirmation with `rowReorder(onRowReorder, { movePolicy: "confirm" })`;
+touch never has to emulate a drag.
 
 `card.fields` is what the built-in would have laid out — each field's
 `column`, its resolved `label` (`undefined` when the column asked for none)

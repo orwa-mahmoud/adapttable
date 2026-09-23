@@ -47,6 +47,20 @@ describe("server rendering", () => {
     expect(renderToString(<Harness />)).toContain("Ada,Grace");
   });
 
+  it("resolves auto pagination from forceMobile on the server", () => {
+    function Harness() {
+      const source = useFrontendData({
+        data: ROWS,
+        columns: COLUMNS,
+        urlAdapter: createMemoryAdapter(""),
+        paginationMode: "auto",
+        forceMobile: true,
+      });
+      return <output>{source.paginationMode}</output>;
+    }
+    expect(renderToString(<Harness />)).toContain("infinite");
+  });
+
   it("renders the server tier with no DOM present", () => {
     function Harness() {
       const source = useServerData<Row>({

@@ -4,13 +4,16 @@
 
 ▶ **See it working:** [nested tables in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/nested-tables/) — open a row onto another table, not a blank panel. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
-Render a detail panel under any row by passing `renderRowDetail` — its
-presence is the whole API.
+Render a detail panel under any row by composing `rowDetail(render)` from
+`@adapttable/<kit>/row-detail`. To put a whole table in the panel instead, the
+same subpath exports `nestedTable(...)` — see
+[nested tables](./nested-tables.md).
 
 ## Example
 
 ```tsx
-import { DataTable } from "@adapttable/mantine"; // or @adapttable/mui, chakra, antd, radix, shadcn, unstyled
+import { DataTable } from "@adapttable/mantine"; // or @adapttable/mui, chakra, antd, radix, base-ui, shadcn, unstyled
+import { rowDetail } from "@adapttable/mantine/row-detail";
 
 interface Order {
   id: string;
@@ -31,13 +34,15 @@ export function Orders() {
       data={data}
       columns={[{ key: "customer", sortable: true }, { key: "total" }]}
       rowKey={(r) => r.id}
-      renderRowDetail={(row) => (
-        <ul>
-          {row.items.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      )}
+      features={[
+        rowDetail((row: Order) => (
+          <ul>
+            {row.items.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        )),
+      ]}
     />
   );
 }
@@ -45,10 +50,10 @@ export function Orders() {
 
 ## How it works
 
-- Passing `renderRowDetail(row)` enables a leading expand chevron on desktop
-  rows and a detail section on mobile cards — no extra flag.
-  `defaultExpandedRowIds` opens those rows on the first render; after that the
-  reader's toggles own the set.
+- Composing `rowDetail(render)` adds a leading expand chevron on desktop
+  rows and a detail section on mobile cards — no extra flag. The second
+  argument, `defaultExpandedRowIds`, opens those rows on the first render; after
+  that the reader's toggles own the set.
 - **Multiple rows may be open at once.** Expansion is keyed by row id, so an
   open panel survives sorting and paging: a row that leaves the page simply
   re-opens when it returns.
@@ -64,16 +69,23 @@ export function Orders() {
 
 ## Options
 
-| Prop                    | Type                       | Default | Description                                                              |
-| ----------------------- | -------------------------- | ------- | ------------------------------------------------------------------------ |
-| `renderRowDetail`       | `(row: TRow) => ReactNode` | —       | Detail-panel renderer; its presence enables expansion.                   |
-| `defaultExpandedRowIds` | `readonly string[]`        | —       | Row ids whose panel starts open. Later toggles own the set.              |
-| `labels`                | `TableLabels`              | English | Override `expandRow` / `collapseRow` for the chevron's accessible label. |
-| `rowKey`                | `(row: TRow) => string`    | —       | Already required; expansion state is keyed by this id.                   |
+`rowDetail(renderRowDetail, defaultExpandedRowIds?)`:
+
+| Argument                | Type                     | Default | Description                                                 |
+| ----------------------- | ------------------------ | ------- | ----------------------------------------------------------- |
+| `renderRowDetail`       | `(row: TRow) => unknown` | —       | Detail-panel renderer.                                      |
+| `defaultExpandedRowIds` | `readonly string[]`      | —       | Row ids whose panel starts open. Later toggles own the set. |
+
+Related `DataTable` props:
+
+| Prop     | Type                    | Default | Description                                                              |
+| -------- | ----------------------- | ------- | ------------------------------------------------------------------------ |
+| `labels` | `TableLabels`           | English | Override `expandRow` / `collapseRow` for the chevron's accessible label. |
+| `rowKey` | `(row: TRow) => string` | —       | Already required; expansion state is keyed by this id.                   |
 
 ## Notes
 
-- Works with `virtualize`. A table cannot nest a detail panel inside the row it
+- Works with the `virtualize()` feature. A table cannot nest a detail panel inside the row it
   belongs to, so the two are separate elements — the window measures them
   **together**, and an open panel reports its real height instead of its row's.
   A panel that grows later (an image loading, a nested table opening) corrects

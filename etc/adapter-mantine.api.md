@@ -124,6 +124,7 @@ export interface ActiveFilterChipsProps {
     clearAllLabel: string;
     label: string;
     onClearAll?: () => void;
+    removeLabel?: (label: string) => string;
 }
 
 // @public (undocumented)
@@ -218,7 +219,7 @@ export interface DataTableClassNames {
 export type DataTableProps<TRow> = DataTablePropsBase<TRow> & DataModeProps<TRow>;
 
 // @public
-export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source"> {
+export interface DataTablePropsBase<TRow> extends Omit<BaseDataTableProps<TRow>, "source">, Pick<UseTableDataOptions<TRow>, "supports" | "facetKeys" | "facets"> {
     animate?: boolean;
     classNames?: DataTableClassNames;
     data?: readonly TRow[];

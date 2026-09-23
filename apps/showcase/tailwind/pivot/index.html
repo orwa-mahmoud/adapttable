@@ -168,10 +168,14 @@
         <p>The pivot panel takes no class map at all, so its fieldset, legend, selects and buttons are browser defaults — the table below is fully styled, and the zone editor is yours to dress.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, PivotPanel } from &quot;@adapttable/unstyled&quot;;
-import { usePivotUrlState } from &quot;@adapttable/react/pivot&quot;;
+import {
+  pivot,
+  pivotTableModel,
+  usePivotUrlState,
+} from &quot;@adapttable/react/pivot&quot;;
 
 export function Spend({ rows, fields }) {
-  const pivot = usePivotUrlState({
+  const { config, onConfigChange, collapsed } = usePivotUrlState({
     urlKey: &quot;p&quot;,
     defaultConfig: {
       rows: [&quot;team&quot;],
@@ -179,13 +183,17 @@ export function Spend({ rows, fields }) {
       measures: [{ key: &quot;budget&quot;, agg: &quot;sum&quot; }],
     },
   });
+  const model = pivotTableModel(pivot(rows, config, { collapsed }), {
+    fields,
+  });
   return (
     &lt;&gt;
-      &lt;PivotPanel fields={fields} {...pivot} /&gt;
+      &lt;PivotPanel fields={fields} config={config} onChange={onConfigChange} /&gt;
       &lt;DataTable
-        data={rows}
-        columns={pivot.columns}
-        rowKey={(row) =&gt; row.id}
+        data={model.rows}
+        columns={model.columns}
+        rowKey={model.rowKey}
+        summaryRow={model.summaryRow}
       /&gt;
     &lt;/&gt;
   );

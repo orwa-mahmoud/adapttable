@@ -43,7 +43,17 @@ and announcement; a card list has no sticky chrome.
 Identities are namespaced (`adapttable:pinned-summary:top:0`) so they
 never collide with a data-row id.
 
-Lift a real person with [`rowPinning`](./row-pinning.md). Stick a total
+Totals computed from rows — `summaryRow` and group aggregates — are on the
+[aggregation](./aggregation.md) page. Lift a real person with [`rowPinning`](./row-pinning.md). Stick a total
 that is not in the dataset with this factory.
 
 Labels: `pinnedSummaryRow`, `pinnedSummaryTop`, `pinnedSummaryBottom`.
+
+Headless, from `@adapttable/core`: `PinnedRows` is the `{ top, bottom }`
+shape and `PinnedSummaryEntry` one resolved row; `resolvePinnedRows`,
+`pinnedSummaryEntries` and `allPinnedSummaryEntries` flatten them into keyed
+entries. `pinnedSummaryRowId(side, index)` builds the namespaced id,
+`isPinnedSummaryRowId(id)` and `pinnedSummarySideFromId(id)` read it back, and
+`pinnedSummaryPart(side)` names the row's part (`PINNED_SUMMARY_TOP_PART` /
+`PINNED_SUMMARY_BOTTOM_PART`). The id and part helpers are also on
+`@adapttable/react/adapter`.

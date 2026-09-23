@@ -216,9 +216,10 @@ export interface RowAction<TRow> {
   confirm?: ActionConfirm<TRow>;
   /**
    * Agent-invocation overrides. Omit and the shared assistant configuration
-   * applies. See {@link ActionAiOptions}.
+   * applies; `false` keeps the action away from an agent. See
+   * {@link ActionAiOptions}.
    */
-  ai?: ActionAiOptions;
+  ai?: ActionAiOptions | false;
 }
 
 /**
@@ -255,9 +256,10 @@ export interface BulkAction {
   confirm?: ActionConfirm<number>;
   /**
    * Agent-invocation overrides. Omit and the shared assistant configuration
-   * applies. See {@link ActionAiOptions}.
+   * applies; `false` keeps the action away from an agent. See
+   * {@link ActionAiOptions}.
    */
-  ai?: ActionAiOptions;
+  ai?: ActionAiOptions | false;
 }
 
 /**
@@ -772,6 +774,11 @@ export interface TableLabels {
   assistantVoiceStop?: string;
   /** Announced once when dictation starts. Never per word heard. */
   assistantVoiceListening?: string;
+  /**
+   * Shown in the reader's own bubble for a recording sent to the backend,
+   * until the backend says what it heard.
+   */
+  assistantVoiceMessage?: string;
   /** Accessible name for the dictation language chooser. */
   assistantVoiceLanguage?: string;
   /** How a reader's own message is named. */

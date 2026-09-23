@@ -716,3 +716,62 @@ describe("applyRowPatchesToView — misuse", () => {
     );
   });
 });
+
+describe("createIncrementalView — localized sort", () => {
+  interface Named {
+    id: string;
+    name: string;
+    nameAr: string;
+    rank: number;
+  }
+  const named: Named[] = [
+    { id: "1", name: "Alpha", nameAr: "ياء", rank: 2 },
+    { id: "2", name: "Beta", nameAr: "ألف", rank: 1 },
+  ];
+  const idOf = (row: Named) => row.id;
+
+  it("sorts by the column's i18n path for the active locale", () => {
+    const view = createIncrementalView(named, {
+      getRowId: idOf,
+      columns: [{ key: "name", i18n: { ar: "nameAr" } }],
+      locale: "ar",
+      sortBy: "name",
+      sortDir: "asc",
+    });
+    expect(view.sorted.map(idOf)).toEqual(["2", "1"]);
+  });
+
+  it("sorts by the key when no locale is active", () => {
+    const view = createIncrementalView(named, {
+      getRowId: idOf,
+      columns: [{ key: "name", i18n: { ar: "nameAr" } }],
+      sortBy: "name",
+      sortDir: "asc",
+    });
+    expect(view.sorted.map(idOf)).toEqual(["1", "2"]);
+  });
+
+  it("leaves a column's own sortValue in charge", () => {
+    const view = createIncrementalView(named, {
+      getRowId: idOf,
+      columns: [
+        { key: "name", i18n: { ar: "nameAr" }, sortValue: (row) => row.rank },
+      ],
+      locale: "ar",
+      sortBy: "name",
+      sortDir: "desc",
+    });
+    expect(view.sorted.map(idOf)).toEqual(["1", "2"]);
+  });
+
+  it("re-sorts when the locale changes", () => {
+    const view = createIncrementalView(named, {
+      getRowId: idOf,
+      columns: [{ key: "name", i18n: { ar: "nameAr" } }],
+      sortBy: "name",
+      sortDir: "asc",
+    });
+    const arabic = configureIncrementalView(view, { locale: "ar" });
+    expect(arabic.sorted.map(idOf)).toEqual(["2", "1"]);
+  });
+});

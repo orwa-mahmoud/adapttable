@@ -62,6 +62,7 @@ export { createAdapterAgentApprovalFeature } from "./adapterFeatures/agentApprov
 export {
   type AdapterCommandPaletteFeature,
   type AdapterCommandPaletteProps,
+  type AdapterCommandPaletteTriggerProps,
   createAdapterCommandPaletteFeature,
 } from "./adapterFeatures/commandPalette";
 export type { AdapterFeatureComponent } from "./adapterFeatures/component";
@@ -85,6 +86,10 @@ export {
   type AdapterFiltersFeature,
   createAdapterFiltersFeature,
 } from "./adapterFeatures/filters";
+export {
+  type AdapterFindButtonProps,
+  findButtonRender,
+} from "./adapterFeatures/findButton";
 export {
   type AdapterGroupingComponents,
   type AdapterGroupingFeature,
@@ -433,6 +438,7 @@ export {
   type FindButtonProps,
   type FindSearchProps,
 } from "./find/FindBar";
+export { useFindState, withFindMarks } from "./find/findMarks";
 export type {
   FindInTableState,
   UseFindInTableOptions,
@@ -551,6 +557,9 @@ export type { SummaryRowFn } from "./props";
 export type {
   BaseDataTableProps,
   ComposedTableProps,
+  DirtyEdits,
+  EditHistoryHandle,
+  EditHistoryOptions,
   FeatureProps,
   ToolbarSlots,
 } from "./props";
@@ -753,7 +762,6 @@ export {
 export {
   type ColumnMenuAction,
   type ColumnMenuActionContext,
-  columnMenuActions,
   type ColumnMenuChoice,
   type ColumnMenuChoiceOption,
   type ColumnMenuChromeProps,
@@ -761,14 +769,9 @@ export {
   type ColumnMenuLabels,
   type ColumnMenuRow,
   type ColumnMenuSlotProps,
-  filterColumnMenuRows,
-  hideAllColumns,
   nextPinSide,
   pinActionLabel,
   type PinnedSide,
-  resetColumnLayout,
-  showAllColumns,
-  unpinAllColumns,
 } from "@adapttable/core";
 export { type ColumnResizeHandleProps } from "@adapttable/core";
 export {
@@ -777,36 +780,8 @@ export {
   type ColumnSizingOptions,
   fittedTableStyle,
 } from "@adapttable/core";
-export {
-  applyCollapsedColumnGroups,
-  type ColumnGroupDef,
-  type ColumnInput,
-  flattenColumnTree,
-} from "@adapttable/core";
+export { type ColumnGroupDef, type ColumnInput } from "@adapttable/core";
 export { pinnedColumnWidth } from "@adapttable/core";
-export {
-  COLUMN_GROUP_ID_SEP,
-  COLUMN_GROUP_RENDER_PREFIX,
-  COLUMN_GROUP_STUB_PREFIX,
-  COLUMN_GROUP_STUB_WIDTH,
-  columnGroupHeaderCaption,
-  columnGroupId,
-  columnGroupPath,
-  columnGroupStubStyle,
-  groupedHeaderAlign,
-  groupedHeaderCellStyle,
-  groupedHeaderChildRule,
-  groupedHeaderLabelStyle,
-  type HeaderGroupCell,
-  headerGroupRow,
-  headerGroupRows,
-  type HtmlGroupedHeaderCell,
-  htmlGroupedHeaderPlan,
-  isColumnGroupRenderKey,
-  isColumnGroupStubKey,
-  isColumnGroupSummaryKey,
-  toggleCollapsedColumnGroup,
-} from "@adapttable/core";
 export { DEFAULT_CARD_SIZE_PX } from "@adapttable/core";
 export { exportButtonLabel } from "@adapttable/core";
 export { bindFeatureHostFn } from "@adapttable/core";
@@ -819,37 +794,10 @@ export {
 export { cellFlashAttr, rowFlashSignature } from "@adapttable/core";
 export {
   type TableBodyCell as BodyCell,
-  bodyCellsHaveRowSpan,
   buildBodyCells,
-  cellsForRow,
   type CellSpanAppearance,
-  cellSpanMark,
-  rowSpanSignature,
 } from "@adapttable/core";
-export {
-  EXTRA_OVER_SPAN_ROW_STYLE,
-  EXTRA_OVER_SPAN_STYLE,
-  EXTRA_ROW_PARTS,
-  extraCountBeforeRowIds,
-  extraCoveredTableSlots,
-  extraHostFillStyle,
-  type ExtraRow,
-  extraRowsForSection,
-  extraUncoveredColSpans,
-  inflateBodyCellRowSpans,
-  insertExtraRows,
-  insertExtrasBeforeRows,
-  isExtraEntry,
-} from "@adapttable/core";
-export {
-  orderedCardEntries,
-  PINNED_BOTTOM_PART,
-  PINNED_TOP_PART,
-  pinnedRowCellStyle,
-  pinnedRowPart,
-  pinnedRowSticky,
-  pinnedRowStickyStyle,
-} from "@adapttable/core";
+export { type ExtraRow } from "@adapttable/core";
 export {
   isPinnedSummaryRowId,
   PINNED_SUMMARY_BOTTOM_PART,
@@ -858,20 +806,13 @@ export {
   pinnedSummaryRowId,
   pinnedSummarySideFromId,
 } from "@adapttable/core";
-export {
-  resolveRowHeight,
-  resolveRowStyle,
-  type RowHeight,
-  type RowStyle,
-  rowStyleSignature,
-} from "@adapttable/core";
+export { type RowHeight, type RowStyle } from "@adapttable/core";
 export { deriveSortByOptions } from "@adapttable/core";
 export { tableErrorState } from "@adapttable/core";
 export { bindMobileCardList, mobileCardListStyle } from "@adapttable/core";
 export {
   type KeyedVirtualization,
   resolveVirtualRows,
-  rowSourceIndex,
   type TableVirtualization,
   virtualColumnSpan,
   type VirtualItemMeta,
@@ -1126,6 +1067,64 @@ export { editableCellController } from "./editing/editableCellController";
 export type { ExportRowRole } from "@adapttable/core";
 export type { AggregateFn } from "@adapttable/core";
 export { normalizeEditorOptions } from "@adapttable/core";
+export {
+  applyCollapsedColumnGroups,
+  bodyCellsHaveRowSpan,
+  cellsForRow,
+  cellSpanMark,
+  COLUMN_GROUP_ID_SEP,
+  COLUMN_GROUP_RENDER_PREFIX,
+  COLUMN_GROUP_STUB_PREFIX,
+  COLUMN_GROUP_STUB_WIDTH,
+  columnGroupHeaderCaption,
+  columnGroupId,
+  columnGroupPath,
+  columnGroupStubStyle,
+  columnMenuActions,
+  EXTRA_OVER_SPAN_ROW_STYLE,
+  EXTRA_OVER_SPAN_STYLE,
+  EXTRA_ROW_PARTS,
+  extraCountBeforeRowIds,
+  extraCoveredTableSlots,
+  extraHostFillStyle,
+  extraRowsForSection,
+  extraUncoveredColSpans,
+  filterColumnMenuRows,
+  flattenColumnTree,
+  groupedHeaderAlign,
+  groupedHeaderCellStyle,
+  groupedHeaderChildRule,
+  groupedHeaderLabelStyle,
+  type HeaderGroupCell,
+  headerGroupRow,
+  headerGroupRows,
+  hideAllColumns,
+  type HtmlGroupedHeaderCell,
+  htmlGroupedHeaderPlan,
+  inflateBodyCellRowSpans,
+  insertExtraRows,
+  insertExtrasBeforeRows,
+  isColumnGroupRenderKey,
+  isColumnGroupStubKey,
+  isColumnGroupSummaryKey,
+  isExtraEntry,
+  orderedCardEntries,
+  PINNED_BOTTOM_PART,
+  PINNED_TOP_PART,
+  pinnedRowCellStyle,
+  pinnedRowPart,
+  pinnedRowSticky,
+  pinnedRowStickyStyle,
+  resetColumnLayout,
+  resolveRowHeight,
+  resolveRowStyle,
+  rowSourceIndex,
+  rowSpanSignature,
+  rowStyleSignature,
+  showAllColumns,
+  toggleCollapsedColumnGroup,
+  unpinAllColumns,
+} from "@adapttable/core/binding";
 
 // What a live runtime offers, for a binding projecting it into the neutral
 // AI contracts. Nothing here decides what an operation means — that is

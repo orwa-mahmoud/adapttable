@@ -20,6 +20,7 @@ import {
   type ContextMenuTarget,
   type FeatureHostState,
   resolveContextTarget,
+  type RowAction,
   type TableLabels,
 } from "@adapttable/core";
 import { useCallback, useMemo } from "react";
@@ -63,6 +64,11 @@ export interface TableContextMenuOptions<TRow> {
   sortDir?: "asc" | "desc";
   /** Whether a column is pinned. */
   isPinned?: (columnKey: string) => boolean;
+  /**
+   * The row pin actions, offered on row and cell menus when `rowPinning()` is
+   * composed.
+   */
+  rowPins?: readonly RowAction<TRow>[];
   /** The host of THIS table. Omit it only under {@link FeatureHostProvider}. */
   featureHost?: FeatureHostState;
 }
@@ -221,6 +227,7 @@ export function useTableContextMenu<TRow>(
       sortBy: options.sortBy,
       sortDir: options.sortDir,
       isPinned: options.isPinned,
+      rowPins: options.rowPins,
       extra: itemsFor,
     });
   }, [menu.open, options, pluginMenus]);

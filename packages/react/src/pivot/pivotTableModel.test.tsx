@@ -10,12 +10,12 @@
  * twice.
  */
 import {
-  headerGroupRows,
   pivot,
   type PivotConfig,
   type PivotField,
   type PivotRow,
 } from "@adapttable/core";
+import { headerGroupRows } from "@adapttable/core/binding";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

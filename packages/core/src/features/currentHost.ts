@@ -30,7 +30,7 @@ import {
   withFilterType,
 } from "../filters/filterRegistry";
 
-/** Neutral panel tab identity. React chrome adds the rest. */
+/** Neutral panel tab identity. React chrome adds the rest. @public */
 export interface SidePanelEntry {
   /** Stable identity, used for the open-panel state and the URL. */
   key: string;
@@ -56,7 +56,7 @@ export type ContextMenuItemsFactory<TRow = unknown> = (
 ) => readonly ContextMenuItem[];
 
 /**
- * A patch {@link TableFeatureHost.extendFilterType} queued for the registry.
+ * A patch `TableFeatureHost.extendFilterType` queued for the registry.
  *
  * @public
  */
@@ -68,7 +68,7 @@ export interface FilterTypeExtend {
 }
 
 /**
- * Registrations collected during {@link TableFeature.setup}. The public host
+ * Registrations collected during `TableFeature.setup`. The public host
  * only has `register*` methods; the table reads these bags.
  *
  * @public

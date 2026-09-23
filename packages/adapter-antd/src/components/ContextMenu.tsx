@@ -13,8 +13,10 @@ import { Button, Divider, Popover } from "antd";
  * This kit builds its column menu on a Popover rather than a Menu
  * primitive, so the context menu follows it — same portalling, same
  * dismissal, same elevated surface its users already know. The trigger is a
- * zero-size element parked at the click point, because an overlay attaches
- * to an element and a right-click only has coordinates.
+ * one-pixel element parked at the click point, because an overlay attaches
+ * to an element and a right-click only has coordinates. antd places a
+ * popover only beside an anchor that has a size, so the pixel is real,
+ * transparent, and passes pointer events through.
  *
  * `role="menu"` and the entries' `menuitem` roles are set here: a Popover
  * has no menu semantics of its own, and a list of actions that does not
@@ -25,8 +27,10 @@ const anchorStyle = (at: { x: number; y: number }) =>
     position: "fixed",
     left: at.x,
     top: at.y,
-    width: 0,
-    height: 0,
+    width: 1,
+    height: 1,
+    opacity: 0,
+    pointerEvents: "none",
   }) as const;
 
 function Surface({

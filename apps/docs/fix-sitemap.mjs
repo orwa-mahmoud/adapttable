@@ -19,6 +19,7 @@ import {
   SITE,
 } from "../../scripts/sitemap-routes.mjs";
 import { SHOWCASE_PAGES } from "../showcase/pages.mjs";
+import { DOCS_VERSIONS } from "./versions.mjs";
 
 /**
  * The demo routes, read from the manifest Vite builds the pages from
@@ -34,8 +35,11 @@ xml = xml.replaceAll(`<loc>${SITE}</loc>`, `<loc>${SITE}/</loc>`);
 
 // slash-fixing the landing loc can duplicate an existing entry — dedupe by loc
 const seen = new Set();
+// Archived docs versions are noindex and stay out of every sitemap file.
+const ARCHIVED = DOCS_VERSIONS.map(({ slug }) => `${SITE}/${slug}/`);
 xml = xml.replace(/<url>.*?<\/url>/g, (block) => {
   const loc = /<loc>(.*?)<\/loc>/.exec(block)?.[1];
+  if (loc && ARCHIVED.some((prefix) => loc.startsWith(prefix))) return "";
   if (seen.has(loc)) return "";
   seen.add(loc);
   return block;

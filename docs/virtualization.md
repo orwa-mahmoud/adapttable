@@ -4,14 +4,16 @@
 
 ▶ **See it working:** [scroll 50,000 rows in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/scale/) — a real table you can scroll, not a recording.
 
-Long lists can opt into row/card windowing with one prop: `virtualize`. Fifty
+Long lists opt into row/card windowing with one feature: `virtualize()` from
+`@adapttable/<kit>/virtualize`. Fifty
 thousand rows render as a handful of DOM nodes, on the page or inside a
 fixed-height box.
 
 ## Example
 
 ```tsx
-import { DataTable } from "@adapttable/mantine"; // or @adapttable/mui, chakra, antd, radix, shadcn, unstyled
+import { DataTable } from "@adapttable/mantine"; // or @adapttable/mui, chakra, antd, radix, base-ui, shadcn, unstyled
+import { virtualize } from "@adapttable/mantine/virtualize";
 
 interface Reading {
   id: string;
@@ -32,7 +34,7 @@ export function Readings() {
       columns={[{ key: "sensor", sortable: true }, { key: "value" }]}
       rowKey={(r) => r.id}
       paginationMode="infinite"
-      virtualize
+      features={[virtualize()]}
       maxHeight={380}
       estimateRowSize={56}
       estimateCardSize={140}
@@ -46,17 +48,17 @@ real measured sizes (like the `140` above) when your cells differ.
 
 ## How it works
 
-- `virtualize` is opt-in (default `false`) and applies in **infinite (non-paged)
-  mode** — paged tables already cap the row count, so they never virtualize.
+- `virtualize()` is opt-in: a table that does not compose it never loads
+  `@tanstack/react-virtual`. It applies in **infinite (non-paged) mode** — paged tables already cap the row count, so they never virtualize.
 - **Window mode** (no `maxHeight`): the virtual window tracks the page scroll.
   The list's offset from the top of the document is measured automatically,
   so a table below page chrome does not open with a blank gap. Pass
   `virtualScrollMargin` only to override that measurement.
-- **Element mode** (any `maxHeight` box): the same prop virtualizes inside the
+- **Element mode** (any `maxHeight` box): the same feature virtualizes inside the
   scroll box instead — the box is the scroller and the window tracks it.
   Mobile cards attach that box to the card list itself (desktop rows attach it
-  to the table assembly), so `maxHeight` + `virtualize` never mounts every card.
-- `rowHeight` overrides the estimate when set — a function is per row, so
+  to the table assembly), so `maxHeight` + `virtualize()` never mounts every card.
+- `rowAppearance({ rowHeight })` overrides the estimate when set — a function is per row, so
   a variable-height table still windows. See [row styling and heights](./row-styling.md).
 - Rows/cards are measured after render; `estimateRowSize` (desktop rows) and
   `estimateCardSize` (mobile cards) seed the math, and `virtualOverscan` rows
@@ -64,23 +66,26 @@ real measured sizes (like the `140` above) when your cells differ.
 - Inside a `maxHeight` box the page-level **Load more** button and
   infinite-scroll sentinel are suppressed: the box never grows, so the virtual
   window extends itself at the box's scroll end instead.
-- Ant Design maps `virtualize` to antd's **native** virtual table mode on
+- Ant Design maps `virtualize()` to antd's **native** virtual table mode on
   desktop; on mobile the cards window through the shared engine, just like
   every other adapter, and the page-level sentinel keeps loading more.
-  `virtualizeColumns` has no effect there: antd owns its scroller, so there is
+  `virtualize({ virtualizeColumns: true })` has no effect there: antd owns its scroller, so there is
   no measured box for the horizontal window, and every column stays in the DOM.
 
 ## Options
 
-| Prop                  | Type      | Default | Description                                                       |
-| --------------------- | --------- | ------- | ----------------------------------------------------------------- |
-| `virtualize`          | `boolean` | `false` | Window the rendered rows/cards on long infinite lists.            |
-| `virtualizeColumns`   | `boolean` | `false` | Window the rendered columns on very wide tables.                  |
-| `maxHeight`           | `number`  | —       | Fixed-height scroll box (px); switches to element-mode windowing. |
-| `estimateRowSize`     | `number`  | `56`    | Desktop row-height estimate in px.                                |
-| `estimateCardSize`    | `number`  | —       | Mobile card-height estimate in px.                                |
-| `virtualOverscan`     | `number`  | `8`     | Extra rows/cards rendered before and after the visible window.    |
-| `virtualScrollMargin` | `number`  | —       | Override for the measured window-mode list offset.                |
+`virtualize(options?)` takes `true` (the default), `false`, or an options
+object with `virtualizeColumns` and the size knobs below. The size knobs are
+accepted on `DataTable` as props too.
+
+| Option                | Type      | Default | Description                                                                                                     |
+| --------------------- | --------- | ------- | --------------------------------------------------------------------------------------------------------------- |
+| `virtualizeColumns`   | `boolean` | `false` | Window the rendered columns on very wide tables. Applies with `maxHeight` or pinned columns; not in Ant Design. |
+| `maxHeight`           | `number`  | —       | `DataTable` prop. Fixed-height scroll box (px); switches to element-mode windowing.                             |
+| `estimateRowSize`     | `number`  | `56`    | Desktop row-height estimate in px.                                                                              |
+| `estimateCardSize`    | `number`  | `132`   | Mobile card-height estimate in px.                                                                              |
+| `virtualOverscan`     | `number`  | `8`     | Extra rows/cards rendered before and after the visible window.                                                  |
+| `virtualScrollMargin` | `number`  | —       | Override for the measured window-mode list offset.                                                              |
 
 ## Benchmark
 
@@ -88,10 +93,10 @@ Virtualization renders only the rows in view, so cost is bounded by the
 viewport — not the dataset. A measured A/B on the scale demo (Mantine adapter,
 the **same 10,000-row dataset fully loaded**, headless Chromium, 1280×900):
 
-|                                | Rows in the DOM | Retained JS heap |
-| :----------------------------- | --------------: | ---------------: |
-| **Virtualized** (`virtualize`) |          **24** |        **17 MB** |
-| Plain table — same 10,000 rows |          10,000 |           368 MB |
+|                                  | Rows in the DOM | Retained JS heap |
+| :------------------------------- | --------------: | ---------------: |
+| **Virtualized** (`virtualize()`) |          **24** |        **17 MB** |
+| Plain table — same 10,000 rows   |          10,000 |           368 MB |
 
 Windowing mounts **417× fewer DOM nodes** (24 vs 10,000 — a viewport's worth
 plus overscan) and holds **351 MB less memory, about 95% less** — while the
@@ -118,7 +123,12 @@ heap and time-to-interactive for each:
 ```bash
 node scripts/bench.mjs                   # every scenario
 node scripts/bench.mjs --smoke           # the fast subset CI runs
+node scripts/bench.mjs --record          # also saves the run to scripts/bench-runs/
 ```
+
+`--record` writes the run — every scenario, the machine and the browser build it
+ran on — to a dated JSON file in
+[`scripts/bench-runs/`](https://github.com/orwa-mahmoud/adapttable/tree/main/scripts/bench-runs).
 
 A showcase already running on the port is used as-is, so
 `pnpm --filter @adapttable/showcase dev` in another terminal still works and is
@@ -134,12 +144,13 @@ loaded laptop as an idle one, which is what makes them worth publishing: run
 ## Notes
 
 - Virtualization is optional — leave it off for small lists or paged tables.
-- `virtualize` and `renderRowDetail` work together. A `<tr>` cannot contain the
+- `virtualize()` and `rowDetail(...)` work together. A `<tr>` cannot contain the
   panel that belongs to it, so an open detail renders as a sibling row — and the
   pair is measured as a pair, with the combined height handed to the virtualizer.
   A panel that grows later (an image loading, a nested table expanding) corrects
   its item's size when it does, so scroll positions hold.
-- The headless hook is exported as `useTableVirtualization` for custom markup;
+- The headless hook `useTableVirtualization` (from `@adapttable/react`) serves custom markup
+  ([example](./headless.md#virtualization));
   when disabled it returns every row with no spacers, so one render path
   serves both cases.
 - A windowed table still tells assistive technology how big the data really

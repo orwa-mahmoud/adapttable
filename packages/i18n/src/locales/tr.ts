@@ -215,6 +215,7 @@ export const tr: Required<TableLabels> = {
   assistantVoiceStart: "Dikte et",
   assistantVoiceStop: "Diktesi durdur",
   assistantVoiceListening: "Dinleniyor",
+  assistantVoiceMessage: "Sesli mesaj",
   assistantVoiceLanguage: "Dikte dili",
   assistantYou: "Siz",
   assistantSpeaker: "Asistan",

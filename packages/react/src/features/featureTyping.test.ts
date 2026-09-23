@@ -79,3 +79,12 @@ describe("the documented examples compile with no type arguments", () => {
     expect(alsoForRow).toHaveLength(2);
   });
 });
+
+describe("groupFilter reads a typed group", () => {
+  it("hands the row-aware callback the group's own rows", () => {
+    const feature: TableFeature<Row> = grouping<Row>("team", {
+      groupFilter: (group) => group.leafRows.some((row) => row.team !== ""),
+    });
+    expect(feature.id).toBe("grouping");
+  });
+});

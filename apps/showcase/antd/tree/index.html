@@ -162,12 +162,13 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Ant Design</p>
         <h1>Tree data in Ant Design</h1>
-        <p>A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Point the table at <code>getChildren</code> or <code>getParentId</code> and it renders the hierarchy.</p>
+        <p>A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Compose <code>tree()</code> with <code>getChildren</code> or <code>getParentId</code> and it renders the hierarchy.</p>
         <p>Children indent under their parent, a chevron opens and closes each branch, and arrow keys walk the tree the way a tree widget should. Expansion is part of the table's state, so it lives in the URL like everything else.</p>
         <p>Sorting and filtering apply within the tree rather than flattening it. Moving a child under a new parent is a host callback on the row-reordering page — the table never rewrites your tree.</p>
         <p>The branch toggle is a text Button with a rotating caret rather than antd's built-in expand icon, which the adapter draws itself so the label follows the table's locale instead of the provider's.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/antd&quot;;
+import { tree } from &quot;@adapttable/antd/tree&quot;;
 
 export function Org({ people, columns }) {
   return (
@@ -175,8 +176,9 @@ export function Org({ people, columns }) {
       data={people}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      getParentId={(row) =&gt; row.managerId}
-      treeColumn=&quot;name&quot;
+      features={[
+        tree({ getParentId: (row) =&gt; row.managerId, treeColumn: &quot;name&quot; }),
+      ]}
       urlKey=&quot;org&quot;
     /&gt;
   );

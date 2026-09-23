@@ -163,11 +163,13 @@
         <p class="at-fallback__kicker">AdaptTable for Ant Design</p>
         <h1>Rows in Ant Design</h1>
         <p>A row is more than a record. Pin it under the header or to the floor of the scroll box, merge cells that share a team so the name is written once, and add or delete through the 3-dot menu.</p>
-        <p><code>onPinnedRowIdsChange</code>, <code>getCellSpan</code> and <code>rowActionsLayout=&quot;menu&quot;</code> are the props this page turns on. Add and delete are callbacks to the host — the table never owns the data. Movement across flat, grouped and tree rows lives on the dedicated row-reordering page.</p>
+        <p><code>rowPinning()</code>, <code>cellSpan()</code> and <code>rowActionsLayout=&quot;menu&quot;</code> are what this page turns on. Add and delete are callbacks to the host — the table never owns the data. Movement across flat, grouped and tree rows lives on the dedicated row-reordering page.</p>
         <p>The pin actions, the menu and the merged cells are Ant Design. Independent pinned summary rows — totals that are not data rows — live on the aggregation page.</p>
         <p>Pin and delete live in an antd Dropdown, and a Team merge is rowspan through antd's onCell hook so the span happens inside antd's Table. The drag grip lives on the row-reordering page.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/antd&quot;;
+import { cellSpan } from &quot;@adapttable/antd/cell-span&quot;;
+import { rowPinning } from &quot;@adapttable/antd/row-pinning&quot;;
 
 export function People({ rows, columns, setPinned, spanTeam }) {
   return (
@@ -176,8 +178,10 @@ export function People({ rows, columns, setPinned, spanTeam }) {
       columns={columns}
       rowKey={(row) =&gt; row.id}
       rowActionsLayout=&quot;menu&quot;
-      onPinnedRowIdsChange={setPinned}
-      getCellSpan={spanTeam}
+      features={[
+        rowPinning({ onPinnedRowIdsChange: setPinned }),
+        cellSpan(spanTeam),
+      ]}
     /&gt;
   );
 }</code></pre>

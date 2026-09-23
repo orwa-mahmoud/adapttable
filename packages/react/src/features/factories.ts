@@ -1,7 +1,7 @@
 /**
  * Built-in feature factories — one per optional behavior.
  *
- * Import from `@adapttable/core/features` or `@adapttable/<kit>/<feature>`.
+ * Import from `@adapttable/react/features` or `@adapttable/<kit>/<feature>`.
  * Each factory is a {@link TableFeature}: host plugins are the same type
  * in the same `features` array.
  */
@@ -10,14 +10,9 @@ import {
   type BulkAction,
   type CellSpanAppearance,
   columnResizeHandleProps,
-  extraCoveredTableSlots,
-  extraHostFillStyle,
   type ExtraRow,
   type FilterTypeSpec,
   type GetCellSpan,
-  inflateBodyCellRowSpans,
-  insertExtraRows,
-  insertExtrasBeforeRows,
   type PinnedRows,
   type RowHeight,
   type RowStyle,
@@ -54,6 +49,13 @@ export type { NestedTableFor } from "../tree/nestedTable";
 export type { ExportCsvOptions } from "@adapttable/core";
 export type { FilterDef } from "@adapttable/core";
 export type { GroupSort } from "@adapttable/core";
+import {
+  extraCoveredTableSlots,
+  extraHostFillStyle,
+  inflateBodyCellRowSpans,
+  insertExtraRows,
+  insertExtrasBeforeRows,
+} from "@adapttable/core/binding";
 
 function define<TRow>(
   id: string,

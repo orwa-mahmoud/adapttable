@@ -1,7 +1,7 @@
 /**
  * TanStack-backed row virtualization hooks.
  *
- * Import from `@adapttable/core` / `@adapttable/core/adapter` only when a
+ * Import from `@adapttable/core` / `@adapttable/core/binding` only when a
  * table composes {@link virtualize}. The base table graph must not reach this
  * file — types and pure helpers live in {@link ./virtualTableModel}.
  */
@@ -29,10 +29,10 @@ export type {
 } from "@adapttable/core";
 export {
   resolveVirtualRows,
-  rowSourceIndex,
   virtualColumnSpan,
   windowGroupedEntries,
 } from "@adapttable/core";
+export { rowSourceIndex } from "@adapttable/core/binding";
 
 /** Wrap a constant estimate so both virtualizer modes share one shape. */
 function asSizeEstimator(

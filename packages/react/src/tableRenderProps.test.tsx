@@ -2,12 +2,14 @@ import {
   buildBodyCells,
   columnResizeHandleProps,
   createIncrementalView,
+} from "@adapttable/core";
+import {
   extraCoveredTableSlots,
   extraHostFillStyle,
   inflateBodyCellRowSpans,
   insertExtraRows,
   insertExtrasBeforeRows,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import { act, render, renderHook } from "@testing-library/react";
 import { type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";

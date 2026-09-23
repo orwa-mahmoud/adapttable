@@ -1,3 +1,4 @@
+import { xlsxWriter } from "@adapttable/core/xlsx";
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
@@ -57,6 +58,16 @@ describe("command palette (mantine)", () => {
 
     expect(palette()).not.toBeNull();
     expect(screen.getByText("Print")).toBeInTheDocument();
+  });
+
+  it("names the export entry after the writer", () => {
+    table({ exportCsv: { writer: xlsxWriter() } });
+    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
+
+    expect(
+      screen.getByRole("option", { name: "Export XLSX" })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Export CSV" })).toBeNull();
   });
 
   it("takes focus into its search box", () => {

@@ -168,6 +168,7 @@
         <p>A group header is a centred Table.ColumnHeader spanning its children, with a Chakra IconButton chevron; a collapsed stub keeps the name on the control, not as a lonely caption.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnInput } from &quot;@adapttable/chakra&quot;;
+import { collapsibleColumnGroups } from &quot;@adapttable/chakra/column-groups&quot;;
 
 const columns: ColumnInput&lt;Person&gt;[] = [
   {
@@ -202,7 +203,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      collapsibleColumnGroups
+      features={[collapsibleColumnGroups()]}
     /&gt;
   );
 }</code></pre>

@@ -12,7 +12,7 @@ still run the 1.x line — which supports only Material-UI v4 and React
 Table's own docs describe the project as having "become abandoned.")
 
 If your table is one of those stranded 1.x installs, `@adapttable/mui`
-renders real Material UI components across **MUI v5 through v9** — migrating
+renders real Material UI components across **MUI v6 through v9** — migrating
 unblocks your MUI and React upgrades at the same time.
 
 ## First, the honest part: what does NOT map
@@ -29,12 +29,12 @@ is the closer fit):
   own UI, with the built-in `confirm` seam for destructive actions.
 - **Drag-to-group aggregation** (`options.grouping`) — AdaptTable ships
   [row grouping](./row-grouping.md) at any depth (`grouping("team")` or an
-  ordered list, plus optional `groupAggregates`); there is no
-  drag-a-column-to-group UI, so wire your own control to `groupBy` if you need
-  that gesture.
+  ordered list, plus optional `groupAggregates`); `groupingPanel()` adds the
+  drag-a-column-to-group strip with chip reorder/removal and aggregation
+  choices.
 - **Tree data** (`parentChildData`) — [`tree({ getParentId })`](./tree-data.md) is the
   same idea: a flat list with a parent column, rendered as a hierarchy.
-- **PDF export button** — compose `exportCsv({ writer: pdfWriter })` with
+- **PDF export button** — compose `exportCsv({ writer: pdfWriter() })` with
   `pdfWriter` from `@adapttable/core/pdf`. See
   [PDF export](./export-pdf.md).
 
@@ -82,7 +82,7 @@ Same Material look, on a current MUI — and your rows stay untouched.
 | `detailPanel`                                        | `rowDetail(fn)`                                            | `(row) => ReactNode`.                                                            |
 | `options.paging` / `pageSize` / `pageSizeOptions`    | automatic                                                  | Paged on desktop, infinite on mobile (`"auto"`).                                 |
 | `options.search` / `searchText` / `debounceInterval` | built-in search                                            | Debounced + URL-synced by default.                                               |
-| `options.filtering`                                  | column `filter` shorthands + `filters`                     | Real widgets + removable chips, not per-column text rows.                        |
+| `options.filtering`                                  | column `filter` shorthands + `filters([…])`                | Real widgets + removable chips, not per-column text rows.                        |
 | `options.columnsButton`                              | `columnMenu()`                                             | Show/hide, reorder, pin.                                                         |
 | `options.columnResizable`                            | `resizableColumns()`                                       | —                                                                                |
 | `options.fixedColumns: { left, right }`              | column pinning via `columnMenu()` + `columnLayout`         | Logical sides — RTL-correct.                                                     |
@@ -106,7 +106,7 @@ Column def → `ColumnDef`:
 | `customSort(a, b)`                 | `sortValue: (row) => primitive`               | Extract a comparable value instead of writing a comparator.                     |
 | `customFilterAndSearch`            | `filter` + `getValue`                         | Predicate derives from the declaration.                                         |
 | `hidden` / `hiddenByColumnsButton` | `columnMenu()` + `columnLayout`               | User-facing visibility lives in the menu.                                       |
-| `cellStyle` / `headerStyle`        | `align`, `width`, `className`, `Cell`         | Style through your own components/classes.                                      |
+| `cellStyle` / `headerStyle`        | `align`, `width`, `Cell`, table `classNames`  | Style through your own components/classes.                                      |
 
 ## Remote data: the query function maps almost 1:1
 

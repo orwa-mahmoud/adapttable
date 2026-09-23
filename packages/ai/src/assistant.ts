@@ -14,6 +14,7 @@
  */
 export type {
   AssistantAnswer,
+  AssistantAudio,
   AssistantExchange,
   AssistantQuestion,
   AssistantQuestionOption,

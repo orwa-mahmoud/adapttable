@@ -168,10 +168,14 @@
         <p>The zones are plain fieldsets rather than Cards, and both Selects set getPopupContainer so their dropdowns stay with the trigger instead of portalling to the body away from the panel they belong to.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, PivotPanel } from &quot;@adapttable/antd&quot;;
-import { usePivotUrlState } from &quot;@adapttable/react/pivot&quot;;
+import {
+  pivot,
+  pivotTableModel,
+  usePivotUrlState,
+} from &quot;@adapttable/react/pivot&quot;;
 
 export function Spend({ rows, fields }) {
-  const pivot = usePivotUrlState({
+  const { config, onConfigChange, collapsed } = usePivotUrlState({
     urlKey: &quot;p&quot;,
     defaultConfig: {
       rows: [&quot;team&quot;],
@@ -179,13 +183,17 @@ export function Spend({ rows, fields }) {
       measures: [{ key: &quot;budget&quot;, agg: &quot;sum&quot; }],
     },
   });
+  const model = pivotTableModel(pivot(rows, config, { collapsed }), {
+    fields,
+  });
   return (
     &lt;&gt;
-      &lt;PivotPanel fields={fields} {...pivot} /&gt;
+      &lt;PivotPanel fields={fields} config={config} onChange={onConfigChange} /&gt;
       &lt;DataTable
-        data={rows}
-        columns={pivot.columns}
-        rowKey={(row) =&gt; row.id}
+        data={model.rows}
+        columns={model.columns}
+        rowKey={model.rowKey}
+        summaryRow={model.summaryRow}
       /&gt;
     &lt;/&gt;
   );

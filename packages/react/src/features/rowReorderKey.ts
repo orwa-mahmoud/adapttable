@@ -11,7 +11,7 @@ import type { RowReorderState } from "../rows/rowReorder";
 import { featureStateKey } from "./providers";
 
 /**
- * Row-reorder state, published by `@adapttable/core/features/row-reorder`.
+ * Row-reorder state, published by the `rowReorder()` feature.
  *
  * @public
  */

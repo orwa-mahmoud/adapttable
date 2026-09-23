@@ -167,9 +167,10 @@
         <p>The whole filter state lives in the URL, so a filtered view is a link someone can send — and the popover, drawer, inputs and chips are semantic markup wearing shadcn's tokens rather than components you have to install.</p>
         <p>Plain DOM has no collision detection, so the popover clamps itself to the viewport in script; the drawer is a real modal dialog with its own focus trap, and a checkbox option hides its native box and turns the whole label into the swatch.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/shadcn&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/shadcn&quot;;
+import { filters } from &quot;@adapttable/shadcn/filters&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, filter: &quot;text&quot; },
   {
     key: &quot;team&quot;,
@@ -185,6 +186,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
+      features={[filters([])]}
       filtersMode=&quot;popover&quot;
       urlKey=&quot;f&quot;
     /&gt;

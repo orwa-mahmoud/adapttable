@@ -64,8 +64,9 @@ stays indeterminate without repeatedly announcing a fake percentage.
 
 The optional spreadsheet grid — one Tab stop, arrow keys through every cell,
 `role="grid"` — is a separate feature. See
-[keyboard & cell navigation](./cell-navigation.md). Omit that prop and the
-grid extras are absent; the default table above still stands.
+[keyboard & cell navigation](./cell-navigation.md). Without the
+`cellNavigation()` feature the grid extras are absent; the default table
+above still stands.
 
 ## High contrast and forced colors
 

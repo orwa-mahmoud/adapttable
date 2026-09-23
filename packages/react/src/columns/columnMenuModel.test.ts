@@ -1,18 +1,20 @@
 import {
   type ColumnMenuAction,
-  columnMenuActions,
   type ColumnMenuItem,
   columnMenuLabel,
   columnMenuRows,
   defaultLabels,
-  filterColumnMenuRows,
-  hideAllColumns,
   nextPinSide,
   pinActionLabel,
+} from "@adapttable/core";
+import {
+  columnMenuActions,
+  filterColumnMenuRows,
+  hideAllColumns,
   resetColumnLayout,
   showAllColumns,
   unpinAllColumns,
-} from "@adapttable/core";
+} from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";

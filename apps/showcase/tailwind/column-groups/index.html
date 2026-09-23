@@ -168,6 +168,7 @@
         <p>A group header is a spanning th carrying the map's classes; the toggle is a native button, and a collapsed stub hides the caption while the accessible name still names the group.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable, type ColumnInput } from &quot;@adapttable/unstyled&quot;;
+import { collapsibleColumnGroups } from &quot;@adapttable/unstyled/column-groups&quot;;
 
 const columns: ColumnInput&lt;Person&gt;[] = [
   {
@@ -202,7 +203,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      collapsibleColumnGroups
+      features={[collapsibleColumnGroups()]}
     /&gt;
   );
 }</code></pre>

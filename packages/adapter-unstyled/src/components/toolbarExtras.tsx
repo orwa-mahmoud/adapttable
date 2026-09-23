@@ -8,6 +8,8 @@
  * `data-adapttable-part` name and its `classNames` key.
  */
 import {
+  type AdapterCommandPaletteTriggerProps,
+  type AdapterFindButtonProps,
   ExportAnnouncer,
   ExportProgressChrome,
   type ExportProgressSurfaceSlotProps,
@@ -278,6 +280,41 @@ export function FullscreenButton(
       onClick={onToggleFullscreen}
     >
       {isFullscreen === true ? "✕" : "⛶"}
+    </button>
+  );
+}
+
+export function CommandPaletteButton(
+  props: Readonly<AdapterCommandPaletteTriggerProps>
+): ReactNode {
+  const { labels, onOpenPalette, paletteOpen } = props;
+  const classNames = classesOf(props);
+  return (
+    <button
+      type="button"
+      data-adapttable-part="command-palette-button"
+      className={classNames.commandPaletteButton}
+      aria-haspopup="dialog"
+      aria-expanded={paletteOpen}
+      onClick={onOpenPalette}
+    >
+      {labels.commandPalette}
+    </button>
+  );
+}
+
+export function FindButton(props: Readonly<AdapterFindButtonProps>): ReactNode {
+  const { labels, onOpenFind, findOpen } = props;
+  const classNames = classesOf(props);
+  return (
+    <button
+      type="button"
+      data-adapttable-part="find-button"
+      className={classNames.findButton}
+      aria-expanded={findOpen}
+      onClick={onOpenFind}
+    >
+      {labels.findInTable}
     </button>
   );
 }

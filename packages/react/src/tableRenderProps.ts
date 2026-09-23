@@ -14,7 +14,6 @@
  */
 import {
   type AssemblyFns,
-  type BodyCell,
   bodyRowEntries,
   type CellSpanAppearance,
   type ColumnGroupRecord,
@@ -40,6 +39,7 @@ import {
   virtualColumnSpan,
   type VirtualTableRow,
 } from "@adapttable/core";
+import { type BodyCell } from "@adapttable/core/binding";
 import { type ReactNode, useMemo, useRef } from "react";
 
 import type { ColumnDef } from "./columnDef";
@@ -107,7 +107,7 @@ export interface SharedTableRenderProps<TRow> {
   rowClassName?: (row: TRow, index: number) => string | undefined;
   /**
    * Mark cells a patch just changed — `data-flash` on the cell. Omit and
-   * nothing is marked. See `useChangedCellFlash` from `@adapttable/core/stream`.
+   * nothing is marked. See `useChangedCellFlash` from `@adapttable/react/stream`.
    */
   isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   /** When true, group headers render a collapse toggle. */

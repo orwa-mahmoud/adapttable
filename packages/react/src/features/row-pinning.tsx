@@ -51,6 +51,7 @@ function LivePinning({
   children,
 }: ChromeExtraSlotProps<never>): ReactNode {
   const requested =
+    props.rowPinningArmed === true ||
     props.pinnedRowIds !== undefined ||
     props.onPinnedRowIdsChange !== undefined;
   const pinUrl = useRowPinningUrlState({
@@ -103,6 +104,11 @@ function LivePinning({
 /**
  * Let rows be pinned to the top or bottom.
  *
+ * A bare `rowPinning()` runs uncontrolled: the table holds the lists, writes
+ * them to the URL as `rowPin` (unless `urlSync={false}`) and Saved Views keep
+ * them. Pass `pinnedRowIds` to control the lists, or `onPinnedRowIdsChange`
+ * to observe them.
+ *
  * @public
  */
 export function rowPinning(
@@ -113,7 +119,7 @@ export function rowPinning(
 ): StaticTableFeature {
   return {
     id: "row-pinning",
-    apply: () => options,
+    apply: () => ({ rowPinningArmed: true, ...options }),
     renders: [slotRender(PINNING_LIVE, (props) => <LivePinning {...props} />)],
   };
 }

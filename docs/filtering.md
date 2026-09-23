@@ -1,6 +1,6 @@
 # React table filtering — multi-condition, chips, operators & URL-synced
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (declarative `filter` widgets on four columns); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — the starter's column filters are already wired in `src/App.tsx` (`filter` on each column + `filters([])`), with chips and URL state; edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 Declare a filter once and AdaptTable derives everything from it: the
 kit-native widget, the `f_<key>` URL param, the removable chip, and (on
@@ -133,7 +133,7 @@ every filter lives on a column, or pass standalone defs as above. See
 - Widgets are operator-first. Text offers equals / not equals / contains /
   not contains / starts with / ends with / empty / not empty. Numbers offer
   `=` `≠` `>` `≥` `<` `≤` between / in / not in. Dates offer before / after /
-  on / on-or-after / on-or-before / between / empty. The operator token is
+  on / on-or-after / on-or-before / between / relative / empty. The operator token is
   stored as `f_<key>Op` (readable, stable across releases) beside the value
   keys (`f_name`, `f_salaryMin`/`f_salaryMax`, `f_hiredAtFrom`/`f_hiredAtTo`).
   Links written before `Op` existed still work: text defaults to contains,
@@ -148,8 +148,9 @@ every filter lives on a column, or pass standalone defs as above. See
   predicate (`"department.name"` reaches nested values); `getValue` overrides
   it for computed values.
 - Active filters render as removable chips with a clear-all that resets every
-  filter (and the page) while search and sort survive; `onClearFilters`
-  replaces the built-in handler.
+  filter (and the page) while search and sort survive; `onClearFilters` is
+  notified after the table clears them — supply `source.clearExtras` to replace
+  the clear itself.
 
 ## Options
 
@@ -164,19 +165,21 @@ every filter lives on a column, or pass standalone defs as above. See
 | `options`     | `FilterOption[] \| "auto" \| () => Promise<FilterOption[]>` | —                     | Choices for `select` / `multiSelect`.                                                                                                                                                                                                                           |
 | `getValue`    | `(row) => unknown`                                          | reads `key` as a path | Row-value extractor for the client-side predicate.                                                                                                                                                                                                              |
 | `placeholder` | `string`                                                    | —                     | Placeholder for text-like inputs.                                                                                                                                                                                                                               |
+| `column`      | `string`                                                    | `key`                 | Column whose header filter shows this widget.                                                                                                                                                                                                                   |
 | `ai`          | `false \| FilterAiOptions`                                  | visible, options ≤ 50 | Assistant catalog. `false` hides the filter. `{ options: false }` keeps it and omits values. A number sends values only when the static list is that long or shorter (`FILTER_AI_OPTIONS_LIMIT`). `"auto"` and async loaders are never fetched into the prompt. |
 
-| Factory / prop              | Type                                | Default        | Description                                                                                                                               |
-| --------------------------- | ----------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `filters([…])`              | `FilterDef[] \| ReactNode`          | —              | Declarative array → the adapter builds the form; JSX → you draw it (escape hatch). Use `filters([])` when every filter is on a column.    |
-| `filtersMode`               | `"popover" \| "drawer" \| "header"` | `"popover"`    | One container. Popover: anchored card, no backdrop. Drawer: panel + backdrop. Header: compact per-column row; hides the Filters button.   |
-| `onClearFilters`            | `() => void`                        | built-in clear | Clear handler used by the drawer and the chip strip.                                                                                      |
-| `filterLabels`              | `Record<string, ChipLabelResolver>` | derived        | Per-key chip label resolvers. Derived automatically by declarative filters; needed only for JSX filters (or to override a derived label). |
-| `extraChips`                | `ActiveFilterChip[]`                | —              | Extra chips driven by non-URL state, merged with the derived chips.                                                                       |
-| `activeFilterCount`         | `number`                            | chip count     | Overrides the Filters-button badge.                                                                                                       |
-| `closeHeaderFilterOnSelect` | `boolean`                           | `false`        | Close a header-filter overlay after a finished single-control write (select/boolean, or a valueless operator). Off by default.            |
-| `filterTypes([…])`          | `FilterTypeSpec[]`                  | built-ins      | Extra or replacement filter types merged onto `defaultFilterRegistry`. Same `type` replaces. Compose via `features`.                      |
-| `headerFilters()`           | factory                             | —              | Compose when `filtersMode="header"` (or pass `headerFilters` on a test harness). Desktop only. Never stacked with the popover or drawer.  |
+| Factory / prop              | Type                                | Default     | Description                                                                                                                                                                  |
+| --------------------------- | ----------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filters([…])`              | `FilterDef[] \| ReactNode`          | —           | Declarative array → the adapter builds the form; JSX → you draw it (escape hatch). Use `filters([])` when every filter is on a column.                                       |
+| `filtersMode`               | `"popover" \| "drawer" \| "header"` | `"popover"` | One container. Popover: anchored card, no backdrop. Drawer: panel + backdrop. Header: the per-column funnel from `headerFilters()`, which alone already selects header mode. |
+| `onClearFilters`            | `() => void`                        | —           | Notification after the table clears the filters (drawer, chip strip, no-results action).                                                                                     |
+| `filterLabels`              | `Record<string, ChipLabelResolver>` | derived     | Per-key chip label resolvers. Derived automatically by declarative filters; needed only for JSX filters (or to override a derived label).                                    |
+| `extraChips`                | `ActiveFilterChip[]`                | —           | Extra chips driven by non-URL state, merged with the derived chips.                                                                                                          |
+| `activeFilterCount`         | `number`                            | chip count  | Overrides the Filters-button badge.                                                                                                                                          |
+| `closeHeaderFilterOnSelect` | `boolean`                           | `false`     | Close a header-filter overlay after a finished single-control write (select/boolean, or a valueless operator). Off by default.                                               |
+| `filterFields`              | `boolean`                           | `true`      | Mount the per-field form inside Filters; `false` leaves only the AND/OR tree.                                                                                                |
+| `filterTypes([…])`          | `FilterTypeSpec[]`                  | built-ins   | Factory from `@adapttable/<kit>/filters`; extra or replacement filter types merged onto `defaultFilterRegistry`. Same `type` replaces.                                       |
+| `headerFilters()`           | factory                             | off         | Factory from `@adapttable/<kit>/header-filters`; per-column header filter funnel. Composing it selects header mode. Desktop only. Never stacked with the popover or drawer.  |
 
 ## Headless filter primitives
 
@@ -229,32 +232,33 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
 - **Type registry**: `FilterTypeSpec` is one type — widget kind, operators,
   predicate, chips, tree projection, optional `render`. Built-ins
   (`builtInFilterSpecs` / `defaultFilterRegistry`) are the first
-  consumers; `filterTypes` on the table merges extras via
+  consumers; `filterTypes([…])` (from `@adapttable/<kit>/filters`) merges extras via
   `resolveFilterRegistry` / `createFilterRegistry`. A custom type registers
   through `TableFeatureHost.registerFilterType` / `extendFilterType` in
   `feature.setup(host)`, or `features={[filterTypes(specs)]}`. `filterWidgetKind` / `filterTypeOps` /
   `filterTypeDefaultOp` / `filterTypeSpec` / `renderRegisteredFilter`
   look a spec up. A custom type with `widget: "text"` draws the text
-  widget; `extend("text", { ops })` adds operators without forking.
+  widget; `host.extendFilterType("text", { ops })` in a feature's `setup` adds
+  operators to the AND/OR builder for that type; the field widgets keep their
+  own operator menus. See [custom filter types](./custom-filter-types.md). `urlArray` persists a custom type's value as a
+  comma-separated array in the URL; `urlNumberKeys` persists its range bounds
+  as numbers.
   `emptyFilterRegistry` seeds a registry from scratch.
   `FilterTypeRegistry` / `FilterWidgetKind` / `FilterWidgetRenderProps`
   are the types.
-- **Header filter row**: compose `headerFilters()` and set
-  `filtersMode="header"` (see [feature composition](./features.md))
-  mounts each adapter's `FilterHeaderRow` / `FilterHeaderControl` over
-  `FilterHeaderChrome` / `FilterHeaderControlChrome`. Helpers
-  `filterDefForColumn` / `headerFilterStickTop` stay on core. The row
-  sits under the leaf header and hides the toolbar Filters button
-  (`resolveFilterMode` / `FilterChromeMode`).
-  Pads and column spacers match the header so sticky, pin offsets, and
-  column windowing stay aligned. A def whose bag key differs from the
-  column key sets `column` (`key: "name"` under `column: "person"`). Ant Design keeps the control inside the
-  header cell so `fixed` columns stay on antd's own header. Compact
-  range inputs default the operator to `gte` (no picker in the header);
-  checklist / multiSelect open a closed menu of checkboxes, not a native
-  `<select multiple>`. The funnel overlay stays open while you fill a
-  multi-input field; nested kit dropdowns are not treated as outside
-  clicks. Pass `closeHeaderFilterOnSelect` to dismiss after a finished
+- **Header filters**: compose `headerFilters()` and each filterable column
+  header gains a funnel that opens that column's field; composing it selects
+  header mode on its own and hides the toolbar Filters button unless the
+  AND/OR tree needs it (`resolveFilterMode` / `FilterChromeMode`). See
+  [header filters](./header-filters.md). `FilterHeaderRow` /
+  `FilterHeaderControl` over `FilterHeaderChrome` / `FilterHeaderControlChrome`
+  are the building blocks for a custom header. Helpers `filterDefForColumn`
+  (core) and `headerFilterStickTop` (`@adapttable/react`). A def whose bag key
+  differs from the column key sets `column` (`key: "name"` under
+  `column: "person"`). Checklist / multiSelect open a closed menu of
+  checkboxes, not a native `<select multiple>`. The funnel overlay stays open
+  while you fill a multi-input field; nested kit dropdowns are not treated as
+  outside clicks. Pass `closeHeaderFilterOnSelect` to dismiss after a finished
   single-control write (`useHeaderFilterOverlay` /
   `bindHeaderFilterDismiss` / `headerFilterFieldIsComplete` /
   `usePointerDismiss` / `HeaderFilterSessionProps` /
@@ -264,7 +268,8 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
   `numberRange` / `dateRange` fields — it returns a `RangeWidgetState` whose
   `RangeFieldWidget` entries carry the visible bounds, the active
   `RangeOp`, and a `RangeOpArity` (`none` / `one` / `two` / `list`);
-  `RANGE_SUFFIXES` names the persisted `Min` / `Max` key pair,
+  `RANGE_SUFFIXES` names the persisted key pair per type (`Min` / `Max` for
+  `numberRange`, `From` / `To` for `dateRange`),
   `RANGE_OPS` is the historical four-operator set (`eq` / `gte` / `lte` /
   `between`), and `RANGE_OP_LABEL_KEYS` / `RangeOpLabelKeys` map each
   operator to its `TableLabels` key. `writeRangeFilter` persists the pair
@@ -272,13 +277,13 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
 - **Definitions and state**: `filterStateKeys` lists the state keys a
   definition reads and writes; `scalarFilterText` renders a scalar filter
   value as input text; `listFilterValues` normalizes a multi-select value
-  list; `isDeclarativeFilters` narrows the `filters` prop to its array form;
+  list; `isDeclarativeFilters` narrows a `filters(…)` argument to its array form;
   `FilterFormSource` is the minimal source shape a filter form needs;
   `ResolvedFilterOptions` is the loaded state of a `filter`'s options
   (including `options: "auto"`); `FilterRuntime` is everything the engine
   derives from the resolved definitions (defs, chip labels, URL keys,
   predicate).
-- **Search**: `defaultSearchText` is the default searchable-text projector —
+- **Search** ([page](./search.md)): `defaultSearchText` is the default searchable-text projector —
   it flattens a row's own values into the string the search box matches
   against. Replace it per source with `getSearchText`:
 

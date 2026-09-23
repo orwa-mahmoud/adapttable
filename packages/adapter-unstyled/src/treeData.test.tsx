@@ -255,4 +255,23 @@ describe("lazy-loaded children (unstyled)", () => {
       document.querySelectorAll('tbody [data-column-key="name"]')
     ).toHaveLength(2);
   });
+
+  it("closes a node whose fetch fails, so the next click retries", async () => {
+    const onLoad = vi
+      .fn<(row: Lazy) => Promise<void>>()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce(undefined);
+    render(<LazyTable onLoad={onLoad} />);
+    fireEvent.click(toggle());
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(toggle().getAttribute("aria-expanded")).toBe("false");
+    expect(toggle()).not.toHaveAttribute("data-loading");
+
+    fireEvent.click(toggle());
+    expect(onLoad).toHaveBeenCalledTimes(2);
+    expect(toggle().getAttribute("aria-expanded")).toBe("true");
+  });
 });

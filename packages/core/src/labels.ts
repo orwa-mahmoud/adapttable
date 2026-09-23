@@ -326,6 +326,7 @@ export const defaultLabels: Required<TableLabels> = {
   assistantVoiceStart: "Dictate",
   assistantVoiceStop: "Stop dictation",
   assistantVoiceListening: "Listening",
+  assistantVoiceMessage: "Voice message",
   assistantVoiceLanguage: "Dictation language",
   assistantYou: "You",
   assistantSpeaker: "Assistant",

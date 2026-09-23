@@ -1713,3 +1713,106 @@ describe("the values a column's author asked to show", () => {
     await act(() => Promise.resolve());
   });
 });
+
+describe("tableAgent offers the table's own actions", () => {
+  it("lists a composed row action and runs the host's handler", async () => {
+    let session: AgentSession | undefined;
+    const open = vi.fn();
+    const rows = [{ id: "1", name: "Ada" }];
+    const { getByTestId } = render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "people",
+            approval: "never",
+            commit: "immediate",
+            bridge: {
+              attach: (attached) => {
+                session = attached;
+              },
+            },
+          }),
+        ]}
+        view={{
+          rows,
+          getRowId: (row) => (row as { id: string }).id,
+          rowLabel: (row) => (row as { name: string }).name,
+          actions: {
+            row: [{ key: "open", label: "Open", onClick: open }],
+            bulk: [],
+          },
+        }}
+      />
+    );
+
+    await waitFor(() =>
+      expect(getByTestId("keys").textContent).toContain("rowAction.open")
+    );
+    const live = session;
+    if (!live) throw new Error("no session attached");
+    const result = await act(() =>
+      live.execute(
+        "rowAction.open",
+        { rowKey: "1" },
+        live.manifest().viewRevision,
+        "open-1"
+      )
+    );
+
+    expect(result.ok).toBe(true);
+    expect(open).toHaveBeenCalledExactlyOnceWith(rows[0]);
+  });
+
+  it("runs a composed bulk action on the table's current selection", async () => {
+    let session: AgentSession | undefined;
+    const archive = vi.fn();
+    const rows = [
+      { id: "1", name: "Ada" },
+      { id: "2", name: "Alan" },
+    ];
+    const { getByTestId } = render(
+      <Harness
+        features={[
+          tableAgent({
+            tableId: "people",
+            approval: "never",
+            commit: "immediate",
+            bridge: {
+              attach: (attached) => {
+                session = attached;
+              },
+            },
+          }),
+        ]}
+        view={{
+          rows,
+          getRowId: (row) => (row as { id: string }).id,
+          rowLabel: (row) => (row as { name: string }).name,
+          selection: { selectedIds: new Set(["2"]), replace: vi.fn() },
+          actions: {
+            row: [],
+            bulk: [{ key: "archive", label: "Archive", onClick: archive }],
+          },
+        }}
+      />
+    );
+
+    await waitFor(() =>
+      expect(getByTestId("keys").textContent).toContain("bulkAction.archive")
+    );
+    const live = session;
+    if (!live) throw new Error("no session attached");
+    const result = await act(() =>
+      live.execute(
+        "bulkAction.archive",
+        { rowKeys: ["2"] },
+        live.manifest().viewRevision,
+        "archive-2"
+      )
+    );
+
+    expect(result.ok).toBe(true);
+    expect(archive).toHaveBeenCalledTimes(1);
+    expect(archive.mock.calls[0]?.[0]).toEqual(["2"]);
+  });
+});

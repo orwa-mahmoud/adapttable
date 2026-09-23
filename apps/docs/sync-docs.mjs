@@ -32,52 +32,52 @@ const target = join(here, "src/content/docs");
 export const TITLES = {
   "getting-started.md": "Get started — a React table for your UI kit",
   "concepts.md": "Headless table engine and React binding",
-  "features.md": "React table features — plugins and optional imports",
+  "features.md": "React table features — composable plugins",
   "columns.md": "React table columns — ColumnDef & custom cells",
   "column-groups.md": "React table column groups — collapsible headers",
   "sparkline.md": "React table sparkline columns — bar, line, area",
-  "exporting.md": "React table exports — browser files and server jobs",
+  "exporting.md": "React table export — browser files, server jobs",
   "export-pdf.md": "React table PDF export and print layout",
   "sorting.md": "React table sorting — multi-column, URL-synced",
   "filtering.md": "React table filtering — chips & URL-synced",
-  "filter-tree.md": "React table advanced filters — nested AND/OR groups",
+  "filter-tree.md": "React table advanced filters — AND/OR groups",
   "pagination.md": "React table pagination — paged, infinite, auto",
   "selection.md": "React table row selection & bulk actions",
+  "row-actions.md": "React table row actions — add, copy, delete",
   "row-expansion.md": "React table expandable rows — detail panels",
-  "cell-editing.md": "React table editing — validation, batch and undo",
+  "cell-editing.md": "React table editing — validation, batch, undo",
   "row-reordering.md": "React table row reordering — groups and trees",
   "row-pinning.md": "React table row pinning — sticky top and bottom",
-  "pinned-summary-rows.md":
-    "React table pinned summary rows — independent totals",
+  "pinned-summary-rows.md": "React table pinned summary and total rows",
   "row-spanning.md": "React table row and column spanning",
   "full-width-rows.md": "React table full-width and separator rows",
   "row-styling.md": "React table row styling and heights",
-  "cell-navigation.md": "React data grid navigation, range selection and copy",
+  "cell-navigation.md": "React data grid navigation, ranges and copy",
   "row-grouping.md": "React table row grouping with subtotals",
   "pivot.md": "React pivot table — rows, columns and measures",
-  "formulas.md": "React table formulas — spreadsheet computed columns",
+  "formulas.md": "React table formulas — computed columns",
   "server-queries.md": "React table server queries — parse and validate",
-  "agent-capabilities.md": "React table AI assistant — widgets and custom UI",
+  "agent-capabilities.md": "React table AI assistant — widgets, custom UI",
   "ai.md": "AI table API — sessions, approval and execution",
-  "ai-integrations.md": "React table AI integration — OpenAI, MCP and JSON",
+  "ai-integrations.md": "React table AI integration — OpenAI, MCP, JSON",
   "ai-http.md": "React table AI backend — HTTP and local example",
   "tree-data.md": "React table tree data — hierarchical rows",
-  "column-management.md": "React table column management — rename, pin, resize",
+  "column-management.md": "React table column management — pin, resize",
   "saved-views.md": "React table saved views, shareable by URL",
-  "virtualization.md": "React table virtualization — rows, columns and cards",
+  "virtualization.md": "React table virtualization — rows, columns",
   "mobile.md": "Responsive React table — mobile card layout",
   "data-tiers.md": "React table data — client, server, one API",
-  "customization.md": "React table customization — slots, menus and shortcuts",
+  "customization.md": "React table customization — slots and menus",
   "url-state.md": "React table URL state — filters, sort, page",
   "ssr-rsc.md": "React table SSR & server components — Next.js",
   "i18n-rtl.md": "React table i18n & RTL — Arabic, Hebrew",
-  "accessibility.md": "Accessible React data grid — keyboard and high contrast",
+  "accessibility.md": "Accessible React data grid — keyboard, contrast",
   "realtime.md": "Realtime React data table — live row updates",
   "api.md": "AdaptTable API reference — every export",
   "faq.md": "FAQ — the free MUI X & ag-Grid alternative",
-  "limitations.md": "Limitations and boundaries — what AdaptTable does not do",
+  "limitations.md": "Limitations — what AdaptTable does not do",
   "comparison.md": "React table comparison — AG Grid, TanStack, MUI",
-  "migrate-from-v2.md": "AdaptTable v2 to v3 migration — packages and features",
+  "migrate-from-v2.md": "AdaptTable v2 to v3 migration guide",
   "migrate-from-v1.md": "Migrate from AdaptTable v1 to v2 — every rename",
   "migrate-from-mantine-datatable.md":
     "Migrate from mantine-datatable — more built-in",
@@ -85,12 +85,23 @@ export const TITLES = {
   "migrate-from-tanstack-table.md":
     "Migrate from TanStack Table — headless, UI kits",
   "migrate-from-mui-datatables.md":
-    "Migrate from mui-datatables — columns, filters and events",
+    "Migrate from mui-datatables — maintained, v6+",
   "migrate-from-material-table.md":
     "Migrate from material-table — React table guide",
-  "migrate-from-ag-grid.md":
-    "Migrate from AG Grid — CRUD tables, your UI kit, MIT",
+  "migrate-from-ag-grid.md": "Migrate from AG Grid — your UI kit, MIT",
   "versioning.md": "AdaptTable versioning & stability policy",
+  "search.md": "React table search — debounced & URL-synced",
+  "header-filters.md": "React table header filters — per-column funnels",
+  "custom-filter-types.md": "React table custom filter types & operators",
+  "nested-tables.md": "React nested tables — master/detail rows",
+  "aggregation.md": "React table aggregation — totals and averages",
+  "export-xlsx.md": "React table Excel export — XLSX, typed cells",
+  "toolbar-and-view-controls.md": "React table toolbar — density, fullscreen",
+  "command-palette.md": "React table command palette and context menu",
+  "headless.md": "Headless React table with useDataTable",
+  "custom-table-source.md": "React table custom data source — TableSource",
+  "building-an-adapter.md": "React table adapter for any UI kit",
+  "ai-voice.md": "React table voice input — dictate to the AI",
 };
 
 // Per-page meta descriptions — the SERP snippet + og:description Starlight
@@ -110,9 +121,9 @@ export const DESCRIPTIONS = {
   "sparkline.md":
     "Add bar, line and area sparklines to React table cells with optional column helpers. Render inline SVG charts without adding charts to the base table import.",
   "exporting.md":
-    "Build React table exports in the browser or on the server with exact-view queries, determinate or indeterminate progress, cancellation, retry, and accessible download delivery.",
+    "Export React tables in the browser or on the server: exact-view queries, progress, cancellation, retry and accessible downloads for CSV, XLSX and PDF.",
   "export-pdf.md":
-    "Optional React table PDF export and print layout from @adapttable/core/pdf — pdfWriter on the export button, printTable for the browser dialog, so the base bundle never pays for a PDF writer.",
+    "React table PDF export and print layout from @adapttable/core/pdf: pdfWriter() on the export button, printTable for the browser dialog, loaded on demand.",
   "sorting.md":
     "React table sorting with single or multi-column sort, custom comparators, server-side sortBy and accessible aria-sort headers — URL-synced when you want it.",
   "filtering.md":
@@ -121,16 +132,18 @@ export const DESCRIPTIONS = {
     "Numbered pages on desktop, infinite scroll on mobile, or force either. Server-side paging and shareable URL state included.",
   "selection.md":
     "Row selection and bulk actions for React CRUD tables — select a page or every match across pages, with an injectable confirm dialog and kit-native checkboxes.",
+  "row-actions.md":
+    "Row actions for React data tables — your own per-row buttons or a 3-dot menu, plus add, duplicate and delete rows through host handlers, in every UI kit.",
   "row-expansion.md":
     "Expandable rows for React data tables — per-row detail panels with accessible toggles and keyboard support, on the same API across every UI kit adapter.",
   "cell-editing.md":
-    "Build editable React tables with text, number and select editors, validation, batch save and undo. Your application owns persistence; adapters supply native inputs.",
+    "Build editable React tables with text, number, select and date editors, validation, batch save and undo. Your app owns persistence; adapters use native inputs.",
   "row-reordering.md":
-    "Row reordering for React data tables — sibling reorder, cross-group moves, tree re-parenting with cycle guards, auto/confirm/never policy, keyboard menus, mobile and RTL.",
+    "Drag-and-drop row reordering for React data tables: sibling, cross-group and tree moves, confirm policy, keyboard menus, mobile controls and RTL.",
   "row-pinning.md":
     "Row pinning for React data tables — sticky top and bottom rows outside the virtual window, { top, bottom } id lists, URL-synced, mobile actions only.",
   "pinned-summary-rows.md":
-    "Pinned summary rows for React data tables — host-owned objects stuck outside sort, filter, grouping, pagination and selection, including on grouped and tree tables.",
+    "Pin total and summary rows above or below a React data table, outside sort, filter, grouping, pagination and selection, on grouped and tree tables too.",
   "row-spanning.md":
     "Row and column spanning for React data tables — getCellSpan and column.colSpan/rowSpan emit one cell list per row so covered cells never render twice.",
   "full-width-rows.md":
@@ -140,7 +153,7 @@ export const DESCRIPTIONS = {
   "cell-navigation.md":
     "Navigate a React data grid by keyboard, select cell ranges and copy or paste values. Learn ARIA grid behavior, virtual row indices and screen-reader feedback.",
   "row-grouping.md":
-    "Nested React table row grouping — groupBy takes one key or an ordered list, per-group aggregates sharing the summaryRow mapper, expand/collapse, frontend tier only.",
+    "Nested React table row grouping: group by one key or several, drag headers into a grouping panel, per-group aggregates, expand/collapse, client or server.",
   "column-management.md":
     "Let users rename, show, hide, reorder, pin and resize columns with native kit controls, persisted to the URL, Saved Views or localStorage.",
   "saved-views.md":
@@ -152,7 +165,7 @@ export const DESCRIPTIONS = {
   "data-tiers.md":
     "One React table API for in-memory rows and server-paginated APIs. Swap client data for a fetch function without rewriting the UI — TableSource is the contract.",
   "customization.md":
-    "Customize React tables with slots, classNames, renderers and prop-getters. Add context menus, command palettes and shortcuts while retaining your UI kit's theme.",
+    "Customize React tables with slots, classNames, renderers and prop-getters, plus context menus, command palettes and shortcuts in your UI kit's theme.",
   "url-state.md":
     "Want shareable React table links? Search, filters, sort and page sync to the URL (History, Next.js, react-router). Refresh-safe and SSR-friendly.",
   "ssr-rsc.md":
@@ -168,7 +181,7 @@ export const DESCRIPTIONS = {
   "faq.md":
     "AdaptTable FAQ: free MIT alternative to MUI X DataGrid and ag-Grid, URL state, RTL/Arabic, client+server data, bundle size, and when to stay on TanStack.",
   "limitations.md":
-    "Present-tense boundaries: data ownership, formula grammar, reorder policy, virtualization, export caps, adapter size, SSR, and kit coverage — each claim traced to a test or measurement.",
+    "What AdaptTable does not do: data ownership, formula grammar, reorder policy, virtualization, export caps, bundle size and SSR, each traced to a test.",
   "comparison.md":
     "AdaptTable against TanStack Table, ag-Grid and MUI X DataGrid, scoped to what each ships built-in: licence, size, URL state, fit.",
   "migrate-from-mantine-datatable.md":
@@ -207,6 +220,30 @@ export const DESCRIPTIONS = {
     "Upgrade AdaptTable v2 to v3: move React hooks to @adapttable/react, replace enabling props with feature imports and check package compatibility.",
   "migrate-from-v1.md":
     "Migrate AdaptTable v1 to v2 — every rename and behavior change in one checklist, applied the same way across all eight adapters.",
+  "search.md":
+    "React table search with a debounced, URL-synced box: custom getSearchText, server-side q queries, mobile cards, and how search differs from find.",
+  "header-filters.md":
+    "Add per-column funnel filters to React table headers with headerFilters(): the same fields, chips and f_ URL params as the Filters panel. Desktop only.",
+  "custom-filter-types.md":
+    "Register custom React table filter types with filterTypes(): your own widget, operators, predicate, chips and URL state, sent as-is to server queries.",
+  "nested-tables.md":
+    "Put a full React DataTable inside an expanded row: nestedTable() gives each row its own columns, sorting and paging, plus a rowDetail fallback.",
+  "aggregation.md":
+    "Footer totals, group subtotals and reader-chosen Sum, Average, Min, Max or Count for a React table: aggregate(), aggregatable columns, server aggregates.",
+  "export-xlsx.md":
+    "Export a React table to Excel with xlsxWriter: typed numbers, dates and booleans, grouped outline levels, column widths and Node builds. No dependency.",
+  "toolbar-and-view-controls.md":
+    "Add a React table toolbar with density, fullscreen, print, undo/redo and export buttons, a status bar, feature notices and a docked side panel, all opt-in.",
+  "command-palette.md":
+    "A Cmd/Ctrl+K command palette and right-click context menus for React tables: built-in and custom commands, header and cell menus, keyboard and touch.",
+  "headless.md":
+    "Build a headless React table with useDataTable: prop-getters for ARIA, sorting and search over any TableSource, plus mobile cards and virtualization.",
+  "custom-table-source.md":
+    "Build a custom TableSource for a React data table: every required field and setter, optional members, capabilities and a complete WebSocket example.",
+  "building-an-adapter.md":
+    "Write an AdaptTable adapter for your React UI kit on @adapttable/react/adapter: the shell, Chrome + required slots, feature helpers, parts, packaging.",
+  "ai-voice.md":
+    "Add voice input to a React table assistant: useSpeechInput dictates into the draft through the Web Speech API or a recorded clip, with language memory.",
 };
 
 const SITE = "https://orwa-mahmoud.github.io/adapttable";

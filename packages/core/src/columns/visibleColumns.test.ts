@@ -58,3 +58,22 @@ describe("visibleColumns", () => {
     ]);
   });
 });
+
+describe("visibleColumns — the identity anchor", () => {
+  it("never changes the mobile column set, whatever its count", () => {
+    const columns: ColumnModel<Row>[] = [
+      { key: "a", header: "A" },
+      { key: "b", header: "B", hideOnMobile: true },
+      { key: "c", header: "C" },
+      { key: "d", header: "D", hideOnDesktop: true },
+      { key: "e", header: "E" },
+    ];
+    const keys = (count: number) =>
+      visibleColumns(columns, "mobile", count).map((column) => column.key);
+
+    expect(keys(0)).toEqual(["a", "c", "d", "e"]);
+    expect(keys(1)).toEqual(keys(0));
+    expect(keys(3)).toEqual(keys(0));
+    expect(keys(10)).toEqual(keys(0));
+  });
+});

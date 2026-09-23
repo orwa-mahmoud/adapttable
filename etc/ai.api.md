@@ -10,6 +10,7 @@ import { AgentApprovalOperation } from '@adapttable/core';
 import { AgentApprovalProposal } from '@adapttable/core';
 import { AgentProgress } from '@adapttable/core';
 import { ApprovalPresentation } from '@adapttable/core';
+import { BulkAction } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
 import { FilterDef } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
@@ -17,6 +18,7 @@ import { GroupAggregateOverrides } from '@adapttable/core';
 import { NeutralTable } from '@adapttable/core';
 import { QueryAggregate } from '@adapttable/core';
 import { revisionToken } from '@adapttable/core';
+import { RowAction } from '@adapttable/core';
 import { TableRevisions } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 
@@ -564,6 +566,13 @@ export interface AssistantAnswer {
 }
 
 // @public
+export interface AssistantAudio {
+    readonly base64: string;
+    readonly durationMs: number;
+    readonly mimeType: string;
+}
+
+// @public
 export interface AssistantConversation {
     readonly tableId: string;
     readonly turns: readonly AssistantTurn[];
@@ -591,6 +600,7 @@ export interface AssistantMessage {
     readonly role: "user" | "assistant";
     readonly streaming?: boolean;
     readonly text: string;
+    readonly transcribing?: boolean;
 }
 
 // @public
@@ -689,6 +699,7 @@ export interface AssistantResumeInput extends AssistantTurnInput {
 
 // @public
 export interface AssistantSendInput extends AssistantTurnInput {
+    readonly audio?: AssistantAudio;
     readonly text: string;
 }
 
@@ -722,6 +733,7 @@ export interface AssistantTransportReply {
     readonly results?: readonly ExecuteResult[];
     readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
     readonly text: string;
+    readonly transcript?: string;
     readonly unresolved?: AssistantUnresolved;
 }
 
@@ -742,6 +754,7 @@ export interface AssistantTurnInput {
     readonly conversation: readonly AssistantExchange[];
     readonly onPartialText?: (text: string) => void;
     readonly onResumable?: (token: unknown) => void;
+    readonly onTranscript?: (text: string) => void;
     // (undocumented)
     readonly session: AgentSession;
     // (undocumented)
@@ -935,6 +948,12 @@ export function createStreamReply(onText?: (text: string) => void): {
 
 // @public
 export function createTableAssistant(inputs?: TableAssistantInputs): TableAssistantStore;
+
+// @public
+export interface DeclaredTableActions<TRow = unknown> {
+    readonly bulk: readonly BulkAction[];
+    readonly row: readonly RowAction<TRow>[];
+}
 
 // @public
 export const DEFAULT_CACHE_GUIDES = 64;
@@ -1402,6 +1421,19 @@ export function subjectFor(key: string, args: unknown, result: ExecuteResult, co
 export function summaryOf(key: CapabilityKey): string;
 
 // @public
+export function tableActionCapabilities<TRow>(declared: DeclaredTableActions<TRow> | undefined, source: TableActionSource<TRow>): AgentCapabilityDefinition[];
+
+// @public
+export function tableActionSignature(declared: DeclaredTableActions | undefined): string;
+
+// @public
+export interface TableActionSource<TRow = unknown> {
+    readonly actions: () => DeclaredTableActions<TRow> | undefined;
+    readonly rowFor: (rowKey: string) => TRow | undefined;
+    readonly selectedIds: () => readonly string[] | undefined;
+}
+
+// @public
 export interface TableAgentBridge<TPending = unknown> {
     readonly alwaysAllowed?: (state: AlwaysAllowedState) => void;
     readonly approvals?: (pending: TPending | null) => void;
@@ -1477,6 +1509,7 @@ export interface TableAssistantStore {
     readonly revokeAlwaysAllow: (capability: string) => void;
     readonly runSuggestion: (id: string) => Promise<void>;
     readonly send: (text?: string) => Promise<void>;
+    readonly sendClip: (clip: AssistantAudio) => Promise<void>;
     // (undocumented)
     readonly setDraft: (draft: string) => void;
     readonly stop: () => void;

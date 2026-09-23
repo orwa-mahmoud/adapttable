@@ -48,6 +48,34 @@ import {
   type SortLevel,
 } from "@adapttable/core/query";
 
+import {
+  checkTree,
+  declaredFilters,
+  FILTER_PREFIX,
+  type ServerFilterDef,
+  type ServerFilterType,
+  type ShapedFilter,
+  shapeFilters,
+  type TypedFilter,
+  typeFilters,
+} from "./filters";
+
+export {
+  type BooleanFilter,
+  type CustomTypedFilter,
+  type DateRangeFilter,
+  type ListFilter,
+  type NumberRangeFilter,
+  pickFilters,
+  type SelectFilter,
+  type ServerFilterDef,
+  type ServerFilterType,
+  type ShapedFilter,
+  splitFilterValues,
+  type TextFilter,
+  type TypedFilter,
+} from "./filters";
+
 /**
  * The table's own ceiling on a page size, mirrored rather than imported: it
  * is part of the wire contract, and the parser has to know it even when the
@@ -67,8 +95,34 @@ export interface QuerySchema {
    * This is the allowlist, and it is the reason this package exists. A
    * `sortBy` that reaches your database because nobody checked it is a column
    * name chosen by whoever sent the request.
+   *
+   * `"any"` checks no names at all: everything is parsed and shaped, and
+   * nothing is refused for its column. The names are then the client's own
+   * words — map them to your fields, never interpolate them into a query.
    */
-  columns: readonly string[];
+  columns: readonly string[] | "any";
+  /**
+   * The filters a client may use, typed.
+   *
+   * A record of key to filter type (`{ team: "multiSelect" }`), or the same
+   * `FilterDef` objects the browser passes to `filters(…)`. Each filter comes
+   * back in `typedFilters` with its operator checked against the type and its
+   * value parsed; with definitions, a static option list is enforced too. Any
+   * `f_` parameter that belongs to no declared filter is refused. Build the
+   * schema per request and pass `pickFilters` of what the caller may
+   * use to scope filtering by user or role.
+   */
+  filters?: Readonly<Record<string, string>> | readonly ServerFilterDef[];
+  /**
+   * Filter types the host registered on the table (`filterTypes`), so their
+   * operators can be checked. A `FilterTypeSpec` fits as it is.
+   */
+  filterTypes?: readonly ServerFilterType[];
+  /**
+   * Report every grouping key in `groupByKeys` for a column-list schema. On
+   * by default when `columns` is `"any"` or `filters` is declared.
+   */
+  groupByKeys?: boolean;
   /**
    * The largest page a client may ask for. Defaults to the table's own
    * ceiling. A backend that pages by 25 and never expects more should say so
@@ -112,8 +166,21 @@ export interface ServerTableQuery {
   sort: readonly SortLevel[];
   /** The grouping column, when it is one the schema allows. */
   groupBy?: string;
+  /**
+   * Every grouping key, outermost first, each one the schema allows — for a
+   * table grouped several levels deep (`groupBy=team,status`).
+   */
+  groupByKeys?: readonly string[];
   /** Column filters, keyed by column. Only columns in the schema appear. */
   filters: Readonly<Record<string, ServerFilterValue>>;
+  /**
+   * Every filter, shaped — its operator beside it, a range's bounds joined —
+   * when `columns` is `"any"` and no filters are declared. Values are strings,
+   * and the keys are the client's own words.
+   */
+  shapedFilters?: Readonly<Record<string, ShapedFilter>>;
+  /** Every declared filter, typed and checked, when `filters` is declared. */
+  typedFilters?: Readonly<Record<string, TypedFilter>>;
   /** The advanced filter tree, when one was sent and every column checked out. */
   filterTree?: QueryFilterGroup;
   /**
@@ -183,9 +250,6 @@ function toParams(input: QueryInput): URLSearchParams {
 /** The default page size, matching the table's own. */
 const DEFAULT_LIMIT = 25;
 
-/** Prefix for a column filter, as the table writes it. */
-const FILTER_PREFIX = "f_";
-
 /** Every column key a filter tree names, however deeply nested. */
 function treeColumns(group: QueryFilterGroup): string[] {
   const found: string[] = [];
@@ -219,12 +283,50 @@ export function parseTableQuery(
   const params = toParams(input);
   const ns = schema.urlKey ? `${schema.urlKey}.` : "";
   const get = (name: string) => params.get(`${ns}${name}`);
-  const allowed = new Set(schema.columns);
+  const listed = schema.columns === "any" ? undefined : new Set(schema.columns);
+  const allowed: Allows = (key) => listed === undefined || listed.has(key);
   const rejected: QueryRejection[] = [];
   const refuse = (param: string, value: string, reason: string) => {
     rejected.push({ param, value, reason });
   };
 
+  const { page, limit } = readPaging(get, schema, refuse);
+  const search = get("q") ?? undefined;
+  const cursor = get("cursor");
+  const sort = validSort(params, ns, allowed, refuse);
+  const grouping = readGrouping(
+    get("groupBy"),
+    schema,
+    listed,
+    allowed,
+    refuse
+  );
+  const filtering = readFiltering(params, ns, schema, listed, allowed, refuse);
+  const pivot = validPivot(get("pivot"), allowed, refuse);
+
+  return {
+    page,
+    limit,
+    offset: (page - 1) * limit,
+    ...(search === undefined || search === "" ? {} : { search }),
+    sort,
+    ...grouping,
+    ...filtering,
+    ...(pivot === undefined ? {} : { pivot: pivot.config }),
+    ...(pivot === undefined || pivot.collapsed.length === 0
+      ? {}
+      : { pivotCollapsed: pivot.collapsed }),
+    ...(cursor ? { cursor } : {}),
+    rejected,
+  };
+}
+
+/** The page and the page size, the size held to the schema's ceiling. */
+function readPaging(
+  get: (name: string) => string | null,
+  schema: QuerySchema,
+  refuse: Refuse
+): { readonly page: number; readonly limit: number } {
   const ceiling = Math.min(schema.maxLimit ?? TABLE_MAX_LIMIT, TABLE_MAX_LIMIT);
   const askedLimit = get("limit");
   const limit = readCount(askedLimit, schema.defaultLimit ?? DEFAULT_LIMIT);
@@ -235,32 +337,78 @@ export function parseTableQuery(
       `above the maximum of ${String(ceiling)}`
     );
   }
+  return { page: readCount(get("page"), 1), limit: Math.min(limit, ceiling) };
+}
 
-  const page = readCount(get("page"), 1);
-  const search = get("q") ?? undefined;
-  const cursor = get("cursor");
-
-  const sort = validSort(params, ns, allowed, refuse);
-  const groupBy = validGroupBy(get("groupBy"), allowed, refuse);
-  const filters = validFilters(params, ns, allowed, refuse);
-  const filterTree = validTree(get("ft"), allowed, refuse);
-  const pivot = validPivot(get("pivot"), allowed, refuse);
-
+/**
+ * The grouping column, and every grouping key when the schema reports them.
+ *
+ * A column-list schema without declared filters or `groupByKeys` answers
+ * with `groupBy` alone; every other schema also lists the keys, and refuses
+ * each one it does not allow exactly once.
+ */
+function readGrouping(
+  raw: string | null,
+  schema: QuerySchema,
+  listed: ReadonlySet<string> | undefined,
+  allowed: Allows,
+  refuse: Refuse
+): Pick<ServerTableQuery, "groupBy" | "groupByKeys"> {
+  const reportsKeys =
+    schema.filters !== undefined ||
+    listed === undefined ||
+    schema.groupByKeys === true;
+  const groupByKeys = reportsKeys
+    ? validGroupByKeys(raw, allowed, refuse)
+    : undefined;
+  const groupBy = validGroupBy(
+    raw,
+    allowed,
+    reportsKeys ? () => undefined : refuse
+  );
   return {
-    page,
-    limit: Math.min(limit, ceiling),
-    offset: (page - 1) * Math.min(limit, ceiling),
-    ...(search === undefined || search === "" ? {} : { search }),
-    sort,
     ...(groupBy === undefined ? {} : { groupBy }),
-    filters,
+    ...(groupByKeys === undefined ? {} : { groupByKeys }),
+  };
+}
+
+/**
+ * The filters, the filter tree, and the shaped or typed view of them.
+ *
+ * Declared filters type and check every parameter; a column list checks the
+ * keys alone; `columns: "any"` without declarations shapes what it passes.
+ */
+function readFiltering(
+  params: URLSearchParams,
+  ns: string,
+  schema: QuerySchema,
+  listed: ReadonlySet<string> | undefined,
+  allowed: Allows,
+  refuse: Refuse
+): Pick<
+  ServerTableQuery,
+  "filters" | "shapedFilters" | "typedFilters" | "filterTree"
+> {
+  const tree = params.get(`${ns}ft`);
+  if (schema.filters === undefined) {
+    const filters = validFilters(params, ns, allowed, refuse);
+    const filterTree = validTree(tree, allowed, refuse);
+    return {
+      filters,
+      ...(listed === undefined
+        ? { shapedFilters: shapeFilters(params, ns) }
+        : {}),
+      ...(filterTree === undefined ? {} : { filterTree }),
+    };
+  }
+  const defs = declaredFilters(schema.filters);
+  const custom = schema.filterTypes ?? [];
+  const typed = typeFilters(params, ns, defs, custom, refuse);
+  const filterTree = typedTree(tree, defs, custom, refuse);
+  return {
+    filters: typed.raw,
+    typedFilters: typed.typed,
     ...(filterTree === undefined ? {} : { filterTree }),
-    ...(pivot === undefined ? {} : { pivot: pivot.config }),
-    ...(pivot === undefined || pivot.collapsed.length === 0
-      ? {}
-      : { pivotCollapsed: pivot.collapsed }),
-    ...(cursor ? { cursor } : {}),
-    rejected,
   };
 }
 
@@ -280,17 +428,20 @@ function readCount(raw: string | null, fallback: number): number {
 /** What `refuse` looks like to the validators below. */
 type Refuse = (param: string, value: string, reason: string) => void;
 
+/** Whether the schema lets a client name a column. */
+type Allows = (key: string) => boolean;
+
 /** The sort chain, minus any level naming a column the client may not sort. */
 function validSort(
   params: URLSearchParams,
   ns: string,
-  allowed: ReadonlySet<string>,
+  allowed: Allows,
   refuse: Refuse
 ): SortLevel[] {
   const levels = readChain(params.get(`${ns}sort`));
   if (levels.length > 0) {
     return levels.filter((level) => {
-      if (allowed.has(level.key)) return true;
+      if (allowed(level.key)) return true;
       refuse("sort", level.key, "not a sortable column");
       return false;
     });
@@ -299,7 +450,7 @@ function validSort(
   // older links.
   const by = params.get(`${ns}sortBy`);
   if (by === null || by === "") return [];
-  if (!allowed.has(by)) {
+  if (!allowed(by)) {
     refuse("sortBy", by, "not a sortable column");
     return [];
   }
@@ -320,40 +471,100 @@ function readChain(raw: string | null): SortLevel[] {
   for (const part of raw.split(",")) {
     const [key, dir] = part.split(":");
     if (!key) continue;
-    out.push({ key, dir: dir === "desc" ? "desc" : "asc" });
+    out.push({ key: decodeKey(key), dir: dir === "desc" ? "desc" : "asc" });
   }
   return out;
+}
+
+/** A malformed `%` escape the table never writes; a key carrying one is kept. */
+const BROKEN_ESCAPE = /%(?![\dA-Fa-f]{2})/;
+
+/**
+ * A sort key as the table wrote it: percent-encoded, so a key holding `:` or
+ * `,` survives the chain's own separators.
+ */
+function decodeKey(key: string): string {
+  return BROKEN_ESCAPE.test(key) ? key : decodeURIComponent(key);
 }
 
 /** The grouping column, if the client may group by it. */
 function validGroupBy(
   raw: string | null,
-  allowed: ReadonlySet<string>,
+  allowed: Allows,
   refuse: Refuse
 ): string | undefined {
   if (raw === null || raw === "") return undefined;
-  if (allowed.has(raw)) return raw;
+  if (allowed(raw)) return raw;
   refuse("groupBy", raw, "not a groupable column");
   return undefined;
+}
+
+/**
+ * Every grouping key, outermost first, minus any the schema does not allow.
+ */
+function validGroupByKeys(
+  raw: string | null,
+  allowed: Allows,
+  refuse: Refuse
+): string[] | undefined {
+  if (raw === null || raw === "") return undefined;
+  const keys = raw
+    .split(",")
+    .map((key) => key.trim())
+    .filter((key) => key.length > 0);
+  const kept = keys.filter((key) => {
+    if (allowed(key)) return true;
+    refuse("groupBy", key, "not a groupable column");
+    return false;
+  });
+  return kept.length === 0 ? undefined : kept;
+}
+
+/**
+ * The filter tree, checked against the declared filters: every condition a
+ * declared key, an operator its type allows, a value of its shape, each
+ * operator in its type's own spelling. As with columns, one bad condition
+ * drops the whole tree.
+ */
+function typedTree(
+  raw: string | null,
+  defs: readonly ServerFilterDef[],
+  custom: readonly ServerFilterType[],
+  refuse: Refuse
+): QueryFilterGroup | undefined {
+  if (raw === null || raw === "") return undefined;
+  const tree = parseFilterTree(raw);
+  if (!tree) {
+    refuse("ft", raw, "not a readable filter tree");
+    return undefined;
+  }
+  const checked = checkTree(tree, defs, custom);
+  if ("problem" in checked) {
+    refuse("ft", raw, checked.problem);
+    return undefined;
+  }
+  return checked.tree;
 }
 
 /** Column filters, minus any naming a column outside the schema. */
 function validFilters(
   params: URLSearchParams,
   ns: string,
-  allowed: ReadonlySet<string>,
+  allowed: Allows,
   refuse: Refuse
 ): Record<string, ServerFilterValue> {
   const out: Record<string, ServerFilterValue> = {};
   params.forEach((value, key) => {
     if (!key.startsWith(`${ns}${FILTER_PREFIX}`)) return;
     const column = key.slice(ns.length + FILTER_PREFIX.length);
-    if (!allowed.has(column)) {
+    if (!allowed(column)) {
       refuse(key.slice(ns.length), value, "not a filterable column");
       return;
     }
-    // A repeated parameter is a multi-value filter, which is how the table
-    // writes a checklist.
+    // The table writes a multi-value filter as ONE parameter, entries joined
+    // with commas and each one percent-encoded — `splitFilterValues` reads
+    // that. A repeated parameter is kept as a list, for a client that sends
+    // one.
     const all = params.getAll(key);
     out[column] = all.length > 1 ? all : value;
   });
@@ -369,7 +580,7 @@ function validFilters(
  */
 function validTree(
   raw: string | null,
-  allowed: ReadonlySet<string>,
+  allowed: Allows,
   refuse: Refuse
 ): QueryFilterGroup | undefined {
   if (raw === null || raw === "") return undefined;
@@ -378,7 +589,7 @@ function validTree(
     refuse("ft", raw, "not a readable filter tree");
     return undefined;
   }
-  const unknown = treeColumns(tree).filter((field) => !allowed.has(field));
+  const unknown = treeColumns(tree).filter((field) => !allowed(field));
   if (unknown.length > 0) {
     refuse("ft", unknown.join(", "), "filter tree names unknown columns");
     return undefined;
@@ -397,13 +608,13 @@ function validTree(
  */
 function validPivot(
   raw: string | null,
-  allowed: ReadonlySet<string>,
+  allowed: Allows,
   refuse: Refuse
 ): PivotUrlState | undefined {
   if (raw === null || raw === "") return undefined;
   const { config, collapsed } = deserializePivotState(raw);
   const keep = (key: string, what: string) => {
-    if (allowed.has(key)) return true;
+    if (allowed(key)) return true;
     refuse("pivot", key, `not a ${what} column`);
     return false;
   };

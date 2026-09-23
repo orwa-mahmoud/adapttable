@@ -1,8 +1,8 @@
 import {
   type ColumnGroupRecord,
   type ColumnInput as CoreColumnInput,
-  flattenColumnTree as coreFlattenColumnTree,
 } from "@adapttable/core";
+import { flattenColumnTree as coreFlattenColumnTree } from "@adapttable/core/binding";
 
 import type { ColumnDef, ColumnInput } from "../columnDef";
 

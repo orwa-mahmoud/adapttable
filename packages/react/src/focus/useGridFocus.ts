@@ -565,20 +565,16 @@ export function useGridFocus<TRow>(
   });
 
   /**
-   * The Ctrl/Cmd gestures: copy, cut, fill down, paste.
+   * Ctrl/Cmd+Z and its two redo spellings, announced either way.
    *
-   * They live together and run before movement, so a modifier never doubles as
-   * a navigation key. Each stays the BROWSER'S own when the table has nothing
-   * to do with it — no selection, no host handler — which is what `false` says.
-   *
-   * @returns Whether the table took the key.
+   * The letter is compared without case: with Shift held, Windows and Linux
+   * browsers report `"Z"`, and Caps Lock makes either key upper-case.
    */
-  /** Ctrl/Cmd+Z and its two redo spellings, announced either way. */
   const handleHistoryKey = useEventCallback(
     (event: { key: string; shiftKey?: boolean }): boolean => {
-      const redo =
-        (event.key === "z" && event.shiftKey === true) || event.key === "y";
-      const undo = event.key === "z" && event.shiftKey !== true;
+      const key = event.key.toLowerCase();
+      const redo = (key === "z" && event.shiftKey === true) || key === "y";
+      const undo = key === "z" && event.shiftKey !== true;
       if (!undo && !redo) return false;
       const run = redo ? onRedo : onUndo;
       if (!run) return false;
@@ -595,6 +591,15 @@ export function useGridFocus<TRow>(
     }
   );
 
+  /**
+   * The Ctrl/Cmd gestures: copy, cut, fill down, paste.
+   *
+   * They live together and run before movement, so a modifier never doubles as
+   * a navigation key. Each stays the BROWSER'S own when the table has nothing
+   * to do with it — no selection, no host handler — which is what `false` says.
+   *
+   * @returns Whether the table took the key.
+   */
   const handleClipboardKey = useEventCallback(
     (
       event: {

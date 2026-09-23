@@ -105,6 +105,24 @@ describe("useLazyChildren", () => {
     expect([...result.current.failedIds]).toEqual([]);
   });
 
+  it("reports a rejection through onLoadFailed", async () => {
+    const onLoadFailed = vi.fn();
+    const { result } = renderHook(() =>
+      useLazyChildren<Node>({
+        onLoadChildren: () => Promise.reject(new Error("offline")),
+        hasLoadedChildren: () => false,
+        getRowId: (row) => row.id,
+        onLoadFailed,
+      })
+    );
+    await act(async () => {
+      result.current.loadIfNeeded(FOLDER);
+      await Promise.resolve();
+    });
+    expect(onLoadFailed).toHaveBeenCalledExactlyOnceWith(FOLDER, "src");
+    expect([...result.current.failedIds]).toEqual(["src"]);
+  });
+
   it("settles a handler that throws synchronously", async () => {
     const onLoadChildren = vi.fn(() => {
       throw new Error("boom");

@@ -28,8 +28,8 @@ Things mantine-datatable leaves to you that AdaptTable does for you:
   `records` in response to `sortStatus`/`page`.
 - **URL-synced, shareable, reload-safe state** — mantine-datatable keeps state
   in React only. See [URL state](./url-state.md).
-- **A ready Columns menu** (show/hide, reorder, pin) via `enableColumnMenu`, and
-  drag/keyboard resize via `resizableColumns`. mantine-datatable gives you the
+- **A ready Columns menu** (show/hide, reorder, pin) via `columnMenu()`, and
+  drag/keyboard resize via `resizableColumns()`. mantine-datatable gives you the
   column mechanics but no menu UI. See
   [column management](./column-management.md).
 - **Saved views, an automatic mobile card layout, and opt-in
@@ -54,30 +54,30 @@ through it exactly as mantine-datatable did.
 | `records`                                     | `data`                                                     | Frontend tier. Server tier: `data` (current page) + `total` + `onQueryChange`.                                                        |
 | `columns`                                     | `columns`                                                  | Field-by-field mapping below.                                                                                                         |
 | `idAccessor`                                  | `rowKey`                                                   | **Required** — `(row) => string`. There is no `"id"` default.                                                                         |
-| `sortStatus` / `onSortStatusChange`           | `sortable` per column (+ `multiSort`)                      | AdaptTable owns sort state and applies it; you don't sort `records` yourself.                                                         |
+| `sortStatus` / `onSortStatusChange`           | `sortable` per column (+ `multiSort()`)                    | AdaptTable owns sort state and applies it; you don't sort `records` yourself.                                                         |
 | `page` / `onPageChange` / `totalRecords`      | automatic (frontend) or `total` + `onQueryChange` (server) | Pagination is `"auto"`: paged on desktop, infinite on mobile.                                                                         |
 | `recordsPerPage` / `recordsPerPageOptions`    | built-in page-size control                                 | Defaults to `PAGE_SIZE_OPTIONS`; `DEFAULT_LIMIT` is 25.                                                                               |
-| `selectedRecords` / `onSelectedRecordsChange` | `bulkActions`, or `selectedIds` / `onSelectionChange`      | Providing `bulkActions` turns selection on and mounts the bulk bar.                                                                   |
+| `selectedRecords` / `onSelectedRecordsChange` | `bulkActions([…])`, or `selectedIds` / `onSelectionChange` | Composing `bulkActions()` turns selection on and mounts the bulk bar.                                                                 |
 | `isRecordSelectable`                          | — (gate in your bulk actions)                              | No per-row checkbox disable; use a bulk action's `disabledReason` to refuse ineligible ids (`selectionGetId` only customises the id). |
-| `rowExpansion={{ content }}`                  | `renderRowDetail`                                          | `(row) => ReactNode`; multiple rows may be open at once.                                                                              |
+| `rowExpansion={{ content }}`                  | `rowDetail(fn)`                                            | `(row) => ReactNode`; multiple rows may be open at once.                                                                              |
 | `fetching`                                    | `loading`                                                  | Server tier: skeleton when empty, subtle refresh indicator otherwise.                                                                 |
 | `noRecordsText` / `emptyState`                | `slots.empty`                                              | Replace the empty state; `slots.skeleton` replaces the loader.                                                                        |
-| `column.filter` (your JSX popover)            | column `filter` shorthand                                  | Declarative — see below. JSX is still allowed via the table-level `filters` prop.                                                     |
+| `column.filter` (your JSX popover)            | column `filter` shorthand                                  | Declarative — see below. JSX is still allowed via the `filters(<Form />)` feature.                                                    |
 
 Column fields (`DataTableColumn` → `ColumnDef`):
 
-| mantine-datatable           | `@adapttable/mantine`                               | Notes                                                                     |
-| --------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------- |
-| `accessor`                  | `key`                                               | Both support dot paths (`"department.name"`).                             |
-| `title`                     | `header`                                            | Auto-derived from `key` when omitted (`hiredAt` → "Hired At").            |
-| `render: (rec, i) => …`     | `Cell` (component) or `accessor: (row) => …`        | `Cell` receives `{ row, rowIndex }`; define it at module level.           |
-| `sortable`                  | `sortable`                                          | Add `sortValue` when the cell renders formatted/JSX content.              |
-| `textAlign: 'left'/'right'` | `align: 'start'/'end'`                              | Logical alignment — correct under RTL automatically.                      |
-| `width`                     | `width`                                             | —                                                                         |
-| `hidden` / `toggleable`     | `hideOnMobile`/`hideOnDesktop` + `enableColumnMenu` | Per-layout hiding is a column flag; user toggling lives in the menu.      |
-| `draggable` / `resizable`   | `enableColumnMenu` / `resizableColumns`             | Enabled once at the table level, not per column.                          |
-| `pinned: 'left'/'right'`    | `columnLayout` / `defaultColumnLayout`              | Pinning is part of the column-layout state (menu-driven or controlled).   |
-| `footer`                    | `summaryRow`                                        | One table-level function maps the page's rows to per-column footer cells. |
+| mantine-datatable           | `@adapttable/mantine`                           | Notes                                                                     |
+| --------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------- |
+| `accessor`                  | `key`                                           | Both support dot paths (`"department.name"`).                             |
+| `title`                     | `header`                                        | Auto-derived from `key` when omitted (`hiredAt` → "Hired At").            |
+| `render: (rec, i) => …`     | `Cell` (component) or `accessor: (row) => …`    | `Cell` receives `{ row, rowIndex }`; define it at module level.           |
+| `sortable`                  | `sortable`                                      | Add `sortValue` when the cell renders formatted/JSX content.              |
+| `textAlign: 'left'/'right'` | `align: 'start'/'end'`                          | Logical alignment — correct under RTL automatically.                      |
+| `width`                     | `width`                                         | —                                                                         |
+| `hidden` / `toggleable`     | `hideOnMobile`/`hideOnDesktop` + `columnMenu()` | Per-layout hiding is a column flag; user toggling lives in the menu.      |
+| `draggable` / `resizable`   | `columnMenu()` / `resizableColumns()`           | Enabled once at the table level, not per column.                          |
+| `pinned: 'left'/'right'`    | `columnLayout` / `defaultColumnLayout`          | Pinning is part of the column-layout state (menu-driven or controlled).   |
+| `footer`                    | `summaryRow`                                    | One table-level function maps the page's rows to per-column footer cells. |
 
 ## Before / after
 
@@ -162,9 +162,11 @@ and the row predicate — is code you would have written by hand before.
   returns formatted/JSX content needs `sortValue` to stay sortable.
 - **Filters are declarative.** Replace a hand-built `column.filter` popover with
   a `filter` shorthand (`"text"`, `"select"`, `"dateRange"`, …). A genuinely
-  bespoke control can still be passed as JSX to the table-level `filters` prop.
+  bespoke control can still be passed as JSX to the `filters(<Form />)` feature.
 - **`textAlign` values change.** `'left'`/`'right'` become the logical
   `'start'`/`'end'`, which flip correctly in RTL.
+- **Features compose in `features`.** Import each factory from its kit subpath
+  (`@adapttable/mantine/column-menu`, …). See [feature composition](./features.md).
 
 ## Where next
 

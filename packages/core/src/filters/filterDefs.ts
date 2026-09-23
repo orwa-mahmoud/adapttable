@@ -112,7 +112,7 @@ export interface FilterAiOptions {
    * Option list for the assistant.
    * `false` — never send values.
    * a number — send values only when the static list is this long or shorter.
-   * Omit — {@link FILTER_AI_OPTIONS_LIMIT}.
+   * Omit — `FILTER_AI_OPTIONS_LIMIT`.
    */
   readonly options?: false | number;
 }
@@ -153,7 +153,7 @@ export interface FilterDef<TRow = unknown> {
    * `{ options: false }` keeps the filter and omits the value list.
    * `{ options: 10 }` sends values only when the static list is that
    * long or shorter. Omit and the filter is visible, with values sent
-   * only when there are {@link FILTER_AI_OPTIONS_LIMIT} or fewer static
+   * only when there are `FILTER_AI_OPTIONS_LIMIT` or fewer static
    * choices.
    */
   ai?: false | FilterAiOptions;

@@ -74,8 +74,8 @@ open-core AG Grid Enterprise or MUI X DataGrid Pro / Premium).
 ## How does it handle responsive tables on mobile?
 
 It does not try to squeeze desktop columns into a tiny viewport. The adapters
-automatically switch to mobile cards, with labels per value and a tunable
-`mobileIdentityColumns` option so the most important columns remain visible.
+automatically switch to mobile cards, with labels per value; `hideOnMobile`
+drops the low-value columns so the ones that matter lead each card.
 This avoids the horizontal-scroll table pattern that breaks many responsive
 apps.
 
@@ -117,9 +117,8 @@ all — your call.
 
 ## Does it support virtualization?
 
-Yes. Long infinite lists can opt into row/card virtualization with
-Compose `virtualize()` and tune `estimateRowSize`, `estimateCardSize`, and
-`virtualOverscan`. Ant Design uses its native virtual table mode through the
+Yes. Compose `virtualize()` for row and card virtualization, and tune
+`estimateRowSize`, `estimateCardSize`, and `virtualOverscan`. Ant Design uses its native virtual table mode through the
 same feature.
 
 ## How do I add URL-synced (shareable, deep-linkable) table state?
@@ -142,7 +141,7 @@ Chakra, Ant Design, Radix, Base UI, or shadcn/ui. See
 ## Which React versions and bundlers are supported?
 
 React **18+**. Every package ships dual ESM/CJS builds with `.d.ts` types
-(verified with `publint --strict` and `are-the-types-wrong`), so it works with
+(verified with `publint --strict`), so it works with
 Vite, Next.js, Remix, webpack, and friends. It's written in strict TypeScript.
 
 ## Does AdaptTable work with Next.js and server components?
@@ -170,18 +169,18 @@ adapter is audited with `axe` in CI, on both desktop and mobile layouts. See
 
 ## How big is it / is it tree-shakeable?
 
-Every package sets `sideEffects: false` and ships ESM, so unused code is
-tree-shaken. You only install the one adapter you use; the headless core has
+Every package declares its side effects — none, or only its stylesheet in
+`@adapttable/base-ui` — and ships ESM, so unused code is tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-09-15 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-09-23 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~24 kB    |
 | every core export                          | ~56 kB    |
-| `DataTable` from an adapter                | ~69–79 kB |
+| `DataTable` from an adapter                | ~70–79 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. All eight adapters
@@ -211,8 +210,9 @@ Or install an adapter directly, e.g. `pnpm add @adapttable/mantine`. See
 
 Yes — AdaptTable is **stable at 3.0** and follows semantic versioning, so
 breaking changes ship only in a major release. It is strict-TypeScript, dual
-ESM/CJS with `.d.ts` types, axe-audited for accessibility in CI, and holds
-near-100% test coverage across every adapter.
+ESM/CJS with `.d.ts` types, axe-audited for accessibility in CI, and enforces
+per-package coverage floors (adapter line floors 96–100%, branch floors
+88–100%).
 
 ## What does AdaptTable not do?
 

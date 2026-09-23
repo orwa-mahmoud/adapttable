@@ -1,5 +1,5 @@
 /**
- * Live row patches — `@adapttable/core/stream`.
+ * Live row patches — `@adapttable/react/stream`.
  *
  * A separate entry point, so a table that never opens a socket never
  * downloads one. Bind a WebSocket or an SSE endpoint to the rows a host
@@ -8,7 +8,7 @@
  * already takes.
  *
  * ```tsx
- * import { useRowPatchStream } from "@adapttable/core/stream";
+ * import { useRowPatchStream } from "@adapttable/react/stream";
  *
  * const [rows, setRows] = useState(initial);
  * const stream = useRowPatchStream({

@@ -11,12 +11,12 @@ export type TableLayout = "desktop" | "mobile";
  * Resolve the columns visible for a layout.
  *
  * - Desktop: drops `hideOnDesktop` columns.
- * - Mobile: drops `hideOnMobile` columns, but the first three declared
- *   desktop-visible columns WITHOUT an explicit `hideOnMobile` surface so
- *   every card keeps a minimum identity block — an explicit hide always
- *   wins over the identity default. Mobile-only columns (`hideOnDesktop`
- *   without `hideOnMobile`) render here — they exist precisely for the
- *   card layout.
+ * - Mobile: drops `hideOnMobile` columns and keeps every other one, including
+ *   mobile-only columns (`hideOnDesktop` without `hideOnMobile`), which exist
+ *   precisely for the card layout. The identity anchor is the first
+ *   `mobileIdentityColumns` desktop-visible columns without `hideOnMobile` —
+ *   columns that are kept anyway — so it never changes the result, and an
+ *   explicit hide always wins.
  *
  * @typeParam TRow - The row type.
  * @param columns - All declared columns.

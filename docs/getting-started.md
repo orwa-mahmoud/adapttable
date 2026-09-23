@@ -10,8 +10,10 @@ and toggle grouping and inline editing while you are there.
 <video src="https://orwa-mahmoud.github.io/adapttable/media/core/tour.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px"></video>
 
 AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
-your design system and you get a styled, sortable, filterable, paginated
-table with URL-synced state, selection + bulk actions, RTL, and dark mode.
+your design system and you get a styled, sortable, searchable, paginated
+table with URL-synced state, RTL, and dark mode. Filters, selection with bulk
+actions, and every other feature are opt-in imports composed in
+`features={[...]}`.
 
 ## Install
 
@@ -26,7 +28,7 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 69–79 kB min+gzip (measured 2026-09-15 from
+A plain adapter `DataTable` is 70–79 kB min+gzip (measured 2026-09-23 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -60,17 +62,30 @@ pnpm add @adapttable/core @adapttable/shadcn
 pnpm add @adapttable/core @adapttable/unstyled
 ```
 
+Every kit depends on `@adapttable/react`, so it is always installed — but a
+package manager with a strict layout (pnpm by default) lets you import only
+what your own `package.json` lists. Importing a hook such as
+`useDensityUrlState` or `useHighlight` from `@adapttable/react` then needs it
+added too:
+
+```bash
+pnpm add @adapttable/react
+```
+
+Keep it on the version your kit pins, which `pnpm why @adapttable/react`
+shows.
+
 ## Supported versions
 
 | Dependency        | Supported range                                                       |
 | ----------------- | --------------------------------------------------------------------- |
 | React / React DOM | `^18.0.0 \|\| ^19.0.0` (CI-tested on 18.3 / 19.0 / 19.2)              |
 | Mantine           | `^7.2.0 \|\| ^8 \|\| ^9`                                              |
-| MUI               | `^6 \|\| ^7 \|\| ^8 \|\| ^9`                                          |
+| MUI               | `^6.1.2 \|\| ^7 \|\| ^8 \|\| ^9`                                      |
 | Chakra UI         | `^3.13.0`                                                             |
 | Ant Design        | `^6`                                                                  |
 | Radix Themes      | `^3`                                                                  |
-| Base UI           | `^1`                                                                  |
+| Base UI           | `^1.6.0`                                                              |
 | Node.js           | `>=22.12.0` (packed releases are CI-tested on Node 22.12 and Node 24) |
 
 Each floor is the lowest version the adapter actually runs on — verified
@@ -236,8 +251,11 @@ filter also drives its own removable chip, URL parsing, and row predicate.
 ## Try it in StackBlitz
 
 Prefer to try before installing? Each starter is a minimal Vite app — one table
-on a demo dataset — that boots in the browser with no local setup. Pick your
-kit:
+on a demo dataset — that boots in the browser with no local setup. Every
+starter composes the same features from its own kit: column filters with chips,
+a drag-to-group panel with subtotals, the column menu, resizing, multi-column
+sort, cell navigation, inline editing with undo and redo, and CSV export. Pick
+your kit:
 
 - [Mantine](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 - [Material UI](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mui)
@@ -257,13 +275,13 @@ The source for each lives in
   (show/hide, reorder, pin), resizing.
 - [Inline cell editing](./cell-editing.md) — compose `editing()`, kit-native
   editors, keyboard flow.
-- [Row reordering](./row-reordering.md) — opt-in `rowReorder`, Space-lift
+- [Row reordering](./row-reordering.md) — opt-in `rowReorder()`, Space-lift
+  keyboard, dataset-relative indices.
 - [Row pinning](./row-pinning.md) — sticky top and bottom rows, `{ top, bottom }` ids
 - [Pinned summary rows](./pinned-summary-rows.md) — host-owned totals outside the row model
 - [Row and column spanning](./row-spanning.md) — `getCellSpan`, one cell list per row
 - [Full-width and separator rows](./full-width-rows.md) — `extraRows`, host-injected slots
 - [Row styling and heights](./row-styling.md) — `rowStyle`, `rowHeight`, variable-height virtualizer
-  keyboard, dataset-relative indices.
 - [Filtering](./filtering.md) — every filter type, options sources, chips,
   popover vs drawer.
 - [Data tiers](./data-tiers.md) — server data without a query library

@@ -2120,6 +2120,7 @@ function AntdTableBody<TRow>({
 
   return (
     <AntdInteractionGate
+      root={rootRef}
       props={props}
       source={c.source}
       columns={c.columnLayout.visibleColumns}
@@ -2405,6 +2406,16 @@ function AntdTableBody<TRow>({
               if (!copy.available) return;
               gridFocus.copyCells(copy.cell);
             },
+            // Cut writes the target to the clipboard, then asks the host to
+            // clear it through onCellCut — offered only when both exist.
+            onCut:
+              props.onCellCut && gridFocus.enabled
+                ? (target) => {
+                    const copy = contextMenuCopyTarget(gridFocus, target);
+                    if (!copy.available) return;
+                    gridFocus.copyCells(copy.cell, true);
+                  }
+                : undefined,
             onSort: (key: string, dir: "asc" | "desc") => {
               source.setSort(key, dir);
             },
@@ -2417,6 +2428,7 @@ function AntdTableBody<TRow>({
           },
           sortBy: source.sortBy,
           sortDir: source.sortDir,
+          rowPins: c.rowPinning?.actions,
           featureHost,
           container: fullscreen.container,
         } as Omit<ContextMenuLiveSlotProps<never>, "children">;
@@ -2428,6 +2440,7 @@ function AntdTableBody<TRow>({
                 <div
                   ref={rootRef}
                   {...regionProps}
+                  data-adapttable-part="root"
                   dir={props.dir}
                   className={
                     [className, classNames?.root].filter(Boolean).join(" ") ||
@@ -2648,6 +2661,7 @@ function AntdTableBody<TRow>({
                       labels,
                       onPrint: props.onPrint,
                       onExport: exportHandler.onExportCsv,
+                      exportLabel: exportHandler.exportLabel,
                       onClearFilters: c.clearFilters,
                       hasFilters: c.activeFilterCount > 0,
                       featureHost,

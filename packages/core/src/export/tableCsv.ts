@@ -54,7 +54,10 @@ export type ExportColumnScope = "visible" | "all" | readonly string[];
  * @public
  */
 export interface ExportCsvOptions<TRow = unknown> {
-  /** Download filename. Defaults to `"export.csv"`. */
+  /**
+   * Download filename. Defaults to `export.` plus the writer's extension —
+   * `"export.csv"` for the built-in CSV writer.
+   */
   filename?: string;
   /**
    * Which rows the file contains.

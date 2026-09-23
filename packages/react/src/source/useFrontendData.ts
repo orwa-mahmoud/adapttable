@@ -119,10 +119,21 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
   /** Forwarded loading flag. */
   isLoading?: boolean;
   /**
+   * Active locale tag. Sorting reads each column's `i18n` path for it, the
+   * same path its cells and filters read.
+   */
+  locale?: string;
+  /**
    * Force the resolved mobile state instead of using a media query.
    * Primarily a testing/SSR seam.
    */
   forceMobile?: boolean;
+  /**
+   * The width, in pixels, at or below which `paginationMode="auto"` resolves
+   * to infinite scroll. Defaults to 768. Pass the table's `mobileBreakpoint`
+   * so the mode follows the same rule as the card layout.
+   */
+  mobileBreakpoint?: number;
 }
 
 /**
@@ -180,10 +191,12 @@ export function useFrontendData<TRow>(
     isFetching = false,
     isLoading = false,
     forceMobile,
+    mobileBreakpoint,
+    locale,
     ...urlOptions
   } = options;
 
-  const mediaMobile = useIsMobile();
+  const mediaMobile = useIsMobile(mobileBreakpoint);
   const isMobile = forceMobile ?? mediaMobile;
   const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
   const paged = resolvedMode === "paged";
@@ -218,6 +231,7 @@ export function useFrontendData<TRow>(
     hasFilterFn: filterFn !== undefined,
     hasFilterTreeFn: filterTreeFn !== undefined,
     hasGetSortValue: getSortValue !== undefined,
+    locale,
   };
   const hookConfig: IncrementalViewConfig<TRow> = {
     getRowId,
@@ -227,6 +241,7 @@ export function useFrontendData<TRow>(
     filterTreeFn,
     filterTree: state.filterTree,
     columns,
+    locale,
     getSortValue,
     sortBy,
     sortDir,
@@ -241,6 +256,7 @@ export function useFrontendData<TRow>(
   engineRef.current ??= createTableEngine({
     data,
     columns: columns ?? [],
+    locale,
     rowKey: getRowId,
     paginationMode: paged ? "paged" : "infinite",
     defaults: {
@@ -409,6 +425,7 @@ interface FrontendViewFingerprint<TRow> {
   hasFilterFn: boolean;
   hasFilterTreeFn: boolean;
   hasGetSortValue: boolean;
+  locale: string | undefined;
 }
 
 function hookViewFingerprint<TRow>(
@@ -429,6 +446,7 @@ function hookViewFingerprint<TRow>(
     hasFilterFn: fingerprint.hasFilterFn,
     hasFilterTreeFn: fingerprint.hasFilterTreeFn,
     hasGetSortValue: fingerprint.hasGetSortValue,
+    locale: fingerprint.locale ?? null,
   });
 }
 

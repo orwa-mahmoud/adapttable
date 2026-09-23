@@ -167,9 +167,10 @@
         <p>Filter state and the find query both live in the versioned URL, so a filtered-and-found view is a link someone can send — and the popover, drawer, inputs, chips and find field are all Radix components.</p>
         <p>Radix Themes ships no Drawer, so the drawer is a Dialog pinned to the inline edge; the popover holds its ground by clamping its own height rather than flipping, and the chips are full-radius Badges.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/radix&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/radix&quot;;
+import { filters } from &quot;@adapttable/radix/filters&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, filter: &quot;text&quot; },
   {
     key: &quot;team&quot;,
@@ -185,6 +186,7 @@ export function People({ rows }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
+      features={[filters([])]}
       filtersMode=&quot;popover&quot;
       urlKey=&quot;f&quot;
     /&gt;

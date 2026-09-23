@@ -150,3 +150,24 @@ describe("context menu copy targeting (radix)", () => {
     expect(writeText).not.toHaveBeenCalled();
   });
 });
+
+describe("context menu copy without cell navigation", () => {
+  it("copies the right-clicked cell's value", async () => {
+    const writeText = clipboard();
+    renderKit(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        contextMenu
+      />
+    );
+
+    copyOver(screen.getByText("Ada").closest("td")!);
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledExactlyOnceWith("Ada");
+    });
+  });
+});

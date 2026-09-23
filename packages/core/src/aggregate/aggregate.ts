@@ -91,11 +91,14 @@ export interface AggregateFormatContext {
 }
 
 /**
- * What to compute per column: a built-in name, or your own function.
+ * What to compute per column: a built-in name, a name registered with
+ * `registerAggregator`, or your own function.
  *
  * @public
  */
-export type AggregateSpec = Partial<Record<string, AggregateName | Aggregator>>;
+export type AggregateSpec = Partial<
+  Record<string, AggregateOperationId | Aggregator>
+>;
 
 /**
  * Options for `aggregate`.
@@ -325,6 +328,16 @@ function extreme(
  */
 export const AGGREGATE_NAMES = Object.keys(BUILT_INS) as AggregateName[];
 
+/** Whether an id is one of the built-in names. */
+function isAggregateName(id: string): id is AggregateName {
+  return (AGGREGATE_NAMES as readonly string[]).includes(id);
+}
+
+/** The built-in behind a name, or `undefined` for any other id. */
+function builtInAggregator(name: string): Aggregator | undefined {
+  return isAggregateName(name) ? BUILT_INS[name] : undefined;
+}
+
 /**
  * Resolve one column's value from a row the way the rest of the table does.
  * Incremental aggregates use the same path so a patched total matches a
@@ -373,7 +386,7 @@ export function aggregate<TRow>(
       if (!fn) continue;
       const aggregator =
         typeof fn === "string"
-          ? (BUILT_INS[fn] ??
+          ? (builtInAggregator(fn) ??
             (boundHost ?? currentFeatureHost())?.aggregators.get(fn))
           : fn;
       if (typeof aggregator !== "function") continue;
@@ -393,7 +406,7 @@ export function aggregate<TRow>(
 }
 
 /**
- * What a mapper built by {@link aggregate} was declared to compute.
+ * What a mapper built by `aggregate()` was declared to compute.
  *
  * Column key to operation id, and `CUSTOM_AGGREGATE` where the declaration
  * was a function rather than a name. Ids only: a closure is not application
@@ -452,7 +465,7 @@ export function withDeclaredAggregates<TRow>(
 }
 
 /**
- * Read what a mapper declares, when it came from {@link aggregate}.
+ * Read what a mapper declares, when it came from `aggregate()`.
  *
  * The table asks this instead of running the mapper on invented rows: a
  * hand-written mapper answers nothing, which is the honest answer, and a

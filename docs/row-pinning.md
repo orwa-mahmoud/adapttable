@@ -1,18 +1,21 @@
 # React table row pinning — sticky top and bottom rows
 
-▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — pass `onPinnedRowIdsChange` and pin actions appear. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
+▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — compose `rowPinning()` and pin actions appear. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
 ▶ **See it working:** [pin and merge rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — sticky pins, Team written once down consecutive teammates (pin keeps that one merge), and a 3-dot menu. Movement lives on the [row-reordering page](https://orwa-mahmoud.github.io/adapttable/demo/mantine/row-reordering/). The same pages exist for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
-Pass `pinnedRowIds` and/or `onPinnedRowIdsChange` and every row gains icon-only
-Pin to top / Pin to bottom / Unpin (labels on hover and as the accessible name).
-Omit both and nothing renders, nothing ships in
-the hot path — the same opt-in rule as `onCellEdit`. The value is
+Import `rowPinning` from `@adapttable/<kit>/row-pinning` and compose it; every
+row gains icon-only
+Pin to top / Pin to bottom / Unpin (labels on hover and as the accessible name),
+each hidden when it does not apply. A table that does not compose it carries
+none of this — see [feature composition](./features.md). The value is
 `{ top, bottom }` lists of row ids, not a flat array: which edge a row
 sticks to is the feature.
 
 ```tsx
-import { DataTable, type RowPinState } from "@adapttable/mantine";
+import { DataTable } from "@adapttable/mantine";
+import type { RowPinState } from "@adapttable/mantine/features";
+import { rowPinning } from "@adapttable/mantine/row-pinning";
 import { useState } from "react";
 
 function Tasks({ rows }: { rows: Task[] }) {
@@ -25,18 +28,21 @@ function Tasks({ rows }: { rows: Task[] }) {
       data={rows}
       columns={columns}
       rowKey={(row) => row.id}
-      pinnedRowIds={pinnedRowIds}
-      onPinnedRowIdsChange={setPinnedRowIds}
+      features={[
+        rowPinning({ pinnedRowIds, onPinnedRowIdsChange: setPinnedRowIds }),
+      ]}
     />
   );
 }
 ```
 
-Uncontrolled: pass only `onPinnedRowIdsChange` (an observer) and the table
-holds the lists. The batteries-included shell also writes them to the URL
-(`rowPin=id1:top,id2:bottom`) so a shared link keeps the same rows stuck.
-`useRowPinningUrlState` is the same pair for a host that wants to own the
-URL itself. Saved views capture `rowPin` with the rest of the table.
+Uncontrolled: a bare `rowPinning()`, or `rowPinning({ onPinnedRowIdsChange })`
+to observe the lists, and the table holds them. In that mode the
+batteries-included shell writes them to the URL
+(`rowPin=id1:top,id2:bottom`) so a shared link keeps the same rows stuck, and
+Saved Views capture `rowPin` with the rest of the table. A controlled
+`pinnedRowIds` keeps the URL out of it. `useRowPinningUrlState` is the same
+pair for a host that wants to own the URL itself.
 
 ## Outside the virtual window
 
@@ -58,8 +64,9 @@ grid. The list order still puts top pins first and bottom pins last.
 
 ## What it will not do
 
-**Grouping or a tree.** A nested list is not a flat pin stack. Passing the
-props while either is armed logs a `devWarn` and the actions do not render.
+**Grouping or a tree.** A nested list is not a flat pin stack. Composing
+`rowPinning(…)` while either is armed logs a `devWarn` and the actions do not
+render.
 Host-owned totals that are not data rows are a different feature —
 [`pinnedSummaryRows`](./pinned-summary-rows.md) sticks those objects above
 or below the scroll body on every table shape, including grouped and tree

@@ -127,6 +127,12 @@ export interface UseQuerySourceOptions<
   /** Force the resolved mobile state instead of a media query (test/SSR seam). */
   forceMobile?: boolean;
   /**
+   * The width, in pixels, at or below which `paginationMode="auto"` resolves
+   * to infinite scroll. Defaults to 768. Pass the table's `mobileBreakpoint`
+   * so the mode follows the same rule as the card layout.
+   */
+  mobileBreakpoint?: number;
+  /**
    * What the endpoint can answer, exactly as {@link useServerData} takes it.
    * Only a declared capability is ever sent; an undeclared one is dropped
    * before the request rather than sent and ignored.
@@ -198,6 +204,7 @@ export function useQuerySource<
     paginationMode = "auto",
     sanitizeParams,
     forceMobile,
+    mobileBreakpoint,
     supports,
     aggregates,
     columns,
@@ -207,7 +214,7 @@ export function useQuerySource<
     ...urlOptions
   } = options;
 
-  const mediaMobile = useIsMobile();
+  const mediaMobile = useIsMobile(mobileBreakpoint);
   const isMobile = forceMobile ?? mediaMobile;
   const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
   const paged = resolvedMode === "paged";

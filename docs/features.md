@@ -6,6 +6,7 @@ Every opt-in is an import and one entry in `features`. The import is the
 switch, which is what lets a table pay only for what it named:
 
 ```tsx
+import { applyRowReorder } from "@adapttable/react";
 import { DataTable } from "@adapttable/mantine";
 import { rowReorder } from "@adapttable/mantine/row-reorder";
 
@@ -31,32 +32,67 @@ loading, error and empty states, accessibility, sorting, search and
 pagination — for the weight the [FAQ's measured table](./faq.md#how-big-is-it--is-it-tree-shakeable)
 reports. Everything else arrives with its own entry.
 
-The props that used to arm features are inert: `enableColumnMenu`,
-`bulkActions`, `contextMenu`, `commandPalette`, `statusBar`, `sidePanel`,
-`findInTable` and the rest configure a feature you compose, and draw nothing on
-their own.
+`<DataTable>` has no enabling props: `enableColumnMenu`, `bulkActions`,
+`contextMenu`, `commandPalette`, `statusBar`, `sidePanel`, `findInTable` and
+the rest are not `DataTable` props. The factory from the matching subpath turns
+a feature on — see [migrating from v2](./migrate-from-v2.md).
 
 ## Kit subpaths
 
-Every public adapter exports the same factories:
+Every public adapter exports the same subpaths. **Kit** means the subpath binds
+the factory to that kit's own components; **headless** means it re-exports the
+`@adapttable/react/features` factory unchanged, because the feature draws no
+control of its own.
 
-| Import                              | Factory                                                           |
-| ----------------------------------- | ----------------------------------------------------------------- |
-| `@adapttable/<kit>/row-reorder`     | `rowReorder`                                                      |
-| `@adapttable/<kit>/saved-views`     | `savedViews`                                                      |
-| `@adapttable/<kit>/grouping-panel`  | `groupingPanel` — grouping headers + interactive panel            |
-| `@adapttable/<kit>/grouping`        | `grouping` — code-fixed grouping without the interactive panel    |
-| `@adapttable/<kit>/editing`         | `editing`                                                         |
-| `@adapttable/<kit>/virtualize`      | `virtualize`                                                      |
-| `@adapttable/<kit>/column-menu`     | `columnMenu`                                                      |
-| `@adapttable/<kit>/cell-navigation` | `cellNavigation`                                                  |
-| `@adapttable/<kit>/preset`          | `standardFeatures`, `StandardFeatureOptions`                      |
-| `@adapttable/<kit>/features`        | every factory, plus `applyTableFeatures`                          |
-| `@adapttable/<kit>/pivot`           | `PivotPanel` and the pivot engine (`pivot`, `pivotTableModel`, …) |
+| Import                                  | Exports                                                                                           | Draws    |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------- | -------- |
+| `@adapttable/<kit>/row-reorder`         | `rowReorder`                                                                                      | kit      |
+| `@adapttable/<kit>/row-pinning`         | `rowPinning`                                                                                      | headless |
+| `@adapttable/<kit>/pinned-summary-rows` | `pinnedSummaryRows`                                                                               | headless |
+| `@adapttable/<kit>/cell-span`           | `cellSpan`                                                                                        | headless |
+| `@adapttable/<kit>/extra-rows`          | `extraRows`                                                                                       | headless |
+| `@adapttable/<kit>/row-appearance`      | `rowAppearance`                                                                                   | headless |
+| `@adapttable/<kit>/row-detail`          | `rowDetail`, `nestedTable`                                                                        | kit      |
+| `@adapttable/<kit>/nested-table`        | `nestedTable`                                                                                     | kit      |
+| `@adapttable/<kit>/row-actions`         | `rowActions`                                                                                      | headless |
+| `@adapttable/<kit>/editing`             | `editing`, `rowEditing`, `batchEditing`, `editHistory`, `dirtyIndicators`, `undoRedoButtons`      | kit      |
+| `@adapttable/<kit>/batch-editing`       | `batchEditing`                                                                                    | kit      |
+| `@adapttable/<kit>/grouping`            | `grouping` — code-fixed grouping without the interactive panel                                    | kit      |
+| `@adapttable/<kit>/grouping-panel`      | `groupingPanel`, `GroupingPanel` — grouping headers + interactive panel                           | kit      |
+| `@adapttable/<kit>/tree`                | `tree`                                                                                            | kit      |
+| `@adapttable/<kit>/virtualize`          | `virtualize`                                                                                      | headless |
+| `@adapttable/<kit>/column-menu`         | `columnMenu`                                                                                      | kit      |
+| `@adapttable/<kit>/resizable-columns`   | `resizableColumns`                                                                                | headless |
+| `@adapttable/<kit>/fit-columns`         | `fitColumns`                                                                                      | headless |
+| `@adapttable/<kit>/column-groups`       | `collapsibleColumnGroups`                                                                         | kit      |
+| `@adapttable/<kit>/column-selection`    | `columnSelectionCheckbox`                                                                         | kit      |
+| `@adapttable/<kit>/multi-sort`          | `multiSort`                                                                                       | headless |
+| `@adapttable/<kit>/filters`             | `filters` (kit), `filterTypes` (headless)                                                         | kit      |
+| `@adapttable/<kit>/header-filters`      | `headerFilters`                                                                                   | kit      |
+| `@adapttable/<kit>/saved-views`         | `savedViews`                                                                                      | kit      |
+| `@adapttable/<kit>/export`              | `exportCsv`                                                                                       | kit      |
+| `@adapttable/<kit>/cell-navigation`     | `cellNavigation`                                                                                  | kit      |
+| `@adapttable/<kit>/selection-stats`     | `selectionStats`                                                                                  | kit      |
+| `@adapttable/<kit>/status-bar`          | `statusBar`, `selectionStats`                                                                     | kit      |
+| `@adapttable/<kit>/find-in-table`       | `findInTable`                                                                                     | kit      |
+| `@adapttable/<kit>/fullscreen`          | `fullscreen`                                                                                      | kit      |
+| `@adapttable/<kit>/density`             | `densityChooser`                                                                                  | kit      |
+| `@adapttable/<kit>/print`               | `print`                                                                                           | kit      |
+| `@adapttable/<kit>/command-palette`     | `commandPalette`                                                                                  | kit      |
+| `@adapttable/<kit>/context-menu`        | `contextMenu`                                                                                     | kit      |
+| `@adapttable/<kit>/side-panel`          | `sidePanel`                                                                                       | kit      |
+| `@adapttable/<kit>/bulk-actions`        | `bulkActions`                                                                                     | kit      |
+| `@adapttable/<kit>/assistant`           | `tableAssistant`, `TableAssistant`                                                                | kit      |
+| `@adapttable/<kit>/pivot`               | `PivotPanel` and the pivot engine (`pivot`, `pivotTableModel`, …)                                 | kit      |
+| `@adapttable/<kit>/preset`              | `standardFeatures`, `StandardFeatureOptions`                                                      | kit      |
+| `@adapttable/<kit>/features`            | the headless `@adapttable/react/features` surface: `applyTableFeatures`, `feature`, every factory | headless |
 
 `<kit>` is `mantine`, `mui`, `chakra`, `antd`, `radix`, `base-ui`, `shadcn`,
-or `unstyled`. The factories themselves live in `@adapttable/react/features`;
-the kit subpaths re-export them so the import path matches the table.
+or `unstyled`. `@adapttable/<kit>/features` forwards `@adapttable/react/features`
+as it is, so a factory that draws kit UI — `columnMenu`, `filters`,
+`headerFilters`, `collapsibleColumnGroups`, `rowReorder`, `groupingPanel`,
+`exportCsv`, … — renders no controls when imported from there. Import each one
+from its own `@adapttable/<kit>/<subpath>`.
 
 The pivot engine stays a calculation — `import { pivot } from "@adapttable/core/pivot"`
 — not a `<DataTable>` prop. The kit `/pivot` subpath is the panel plus that
@@ -77,12 +113,16 @@ import { standardFeatures } from "@adapttable/mantine/preset";
 ```
 
 With no arguments it composes the features that work with nothing else
-supplied: the Columns menu, the density chooser, CSV export, find-in-table,
-fit-columns, the fullscreen toggle, header filters, multi-sort, resizable
-columns and the status bar.
+supplied: the Columns menu, the density chooser, CSV export, find-in-table
+(Ctrl/Cmd+F anywhere in the table), fit-columns, the fullscreen toggle, [header filters](./header-filters.md), multi-sort, resizable
+columns and the status bar. Because `headerFilters()` is a member, filters
+from the preset's `filters` option open from the column headers (`filtersMode`
+resolves to `"header"`); compose the members individually for popover or drawer
+filters.
 
-Configurable preset members join only when you give them input. Features
-outside the preset append to the same ordinary array:
+Configurable preset members join only when you give them input — `grouping`,
+`bulkActions`, `filters` and `savedViews`. Features outside the preset append to
+the same ordinary array:
 
 ```tsx
 import { groupingPanel } from "@adapttable/mantine/grouping-panel";
@@ -91,7 +131,7 @@ import { groupingPanel } from "@adapttable/mantine/grouping-panel";
   ...standardFeatures({
     bulkActions: [{ key: "delete", label: "Delete", onClick: remove }],
     filters: [{ key: "team", type: "select", options: teams }],
-    savedViews: { storage: "local" },
+    savedViews: { storageKey: "people-table-views" },
   }),
   groupingPanel("team"),
 ];
@@ -115,8 +155,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 69 kB gzipped and the same table with
-`standardFeatures()` composed is 122 kB.
+Measured on MUI, the table alone is 70 kB gzipped and the same table with
+`standardFeatures()` composed is 123 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -156,7 +196,7 @@ const currencyFilter: TableFeature = {
   setup(host) {
     host.registerFilterType({
       type: "currency",
-      widget: "number",
+      widget: "numberRange",
       ops: ["eq", "gt", "lt"],
       defaultOp: "eq",
       stateKeys: (def) => [def.key],
@@ -172,6 +212,8 @@ const currencyFilter: TableFeature = {
 
 <DataTable features={[currencyFilter, rowReorder(onReorder)]} … />;
 ```
+
+The full filter-type contract is on [custom filter types](./custom-filter-types.md).
 
 Every seam is a method on `TableFeatureHost`. Built-in factories that carry
 extras (`filterTypes`, `exportCsv` with a writer, `commandPalette` with extra
@@ -223,7 +265,9 @@ import {
   FeatureStateScope,
   featureStateKey,
   type TableFeature,
+  useFeatureState,
 } from "@adapttable/react/adapter";
+import { useEffect, useState } from "react";
 
 export const AUDIT = featureStateKey<{ count: number }>("audit-log");
 
@@ -329,9 +373,12 @@ registry to learn and nothing global to collide over.
 `contextMenu` · `sidePanel` · `bulkActions` · `filters` · `filterTypes` ·
 `headerFilters` · `savedViews` · `selectionStats` · `densityChooser` ·
 `print` · `statusBar` · `undoRedoButtons` · `multiSort` · `fitColumns` ·
-`columnSelectionCheckbox` · `feature` (ad-hoc patch) · `applyTableFeatures`
-(the merge used by every adapter) · `useTableFeatures` (apply + `setup(host)`,
-the hook every adapter runs) · `featureHostOf` / `rememberFeatureHost` (the
-host of one table, never a sibling's) · `FeatureHostProvider` /
-`useFeatureHost` (hooks under that table) · `bindFeatureHostFn` (a mapper
-created outside the table still resolves names for the table that invokes it).
+`columnSelectionCheckbox` · `rowActions` · `feature` (ad-hoc patch) ·
+`applyTableFeatures` (the merge used by every adapter) · `useTableFeatures`
+(apply + `setup(host)`, the hook every adapter runs).
+
+Host helpers are exported from `@adapttable/react/adapter`: `featureHostOf` /
+`rememberFeatureHost` (the host of one table, never a sibling's) ·
+`FeatureHostProvider` / `useFeatureHost` (hooks under that table) ·
+`bindFeatureHostFn` (a mapper created outside the table still resolves names
+for the table that invokes it).

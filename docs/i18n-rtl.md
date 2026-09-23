@@ -13,6 +13,7 @@ per-column `i18n` data paths resolve — three independent props, one line each:
 
 ```tsx
 import { DataTable } from "@adapttable/mantine";
+import { filters } from "@adapttable/mantine/filters";
 import { getDirection, getLabels } from "@adapttable/i18n";
 
 type Person = {
@@ -40,6 +41,7 @@ export function People({ data }: { data: Person[] }) {
         { key: "hiredAt", header: "تاريخ التعيين", filter: "dateRange" },
       ]}
       rowKey={(r) => r.id}
+      features={[filters([])]} // runs the column `filter` declarations
       locale={locale}
       labels={getLabels(locale)} // Arabic chrome strings
       dir={getDirection(locale)} // "ar" → "rtl"
@@ -102,9 +104,9 @@ the adapter applies it through its direction provider and logical CSS:
 - Layout, alignment, and the filter drawer side flip automatically.
 - Column pinning is logical: pins use `insetInlineStart`/`insetInlineEnd`,
   so a "left" pin sticks to the correct edge in RTL too.
-- Column resizing is direction-aware: the handle sits on the column's
-  inline-end edge, and dragging outward (or pressing the leading arrow key)
-  widens the column in both LTR and RTL.
+- With `resizableColumns()` composed, column resizing is direction-aware:
+  the handle sits on the column's inline-end edge, and dragging outward (or
+  pressing the leading arrow key) widens the column in both LTR and RTL.
 
 Helpers from `@adapttable/i18n`:
 
@@ -112,6 +114,8 @@ Helpers from `@adapttable/i18n`:
 - `isRtlLocale(locale)` — covers ar, he, fa, ur, ps, and more
 - `RTL_LANGUAGES` — the raw list of RTL primary subtags
 - `primarySubtag(locale)` — `"ar-EG"` → `"ar"`
+- `locales` — every preset keyed by tag (`LocaleKey`); each preset is also a
+  named export (`ar`, `de`, …, `zhTW` for `zh-TW`)
 
 ## Custom labels
 

@@ -94,6 +94,11 @@ export interface TableCommandOptions {
   onPrint?: () => void;
   /** Run the export the toolbar button runs. */
   onExport?: () => void;
+  /**
+   * The export command's caption — the export button's own, which names the
+   * writer's format. Omit for `labels.exportCsv`.
+   */
+  exportLabel?: string;
   /** Clear every active filter. */
   onClearFilters?: () => void;
   /** Whether there is anything to clear, so the entry can say so. */
@@ -126,7 +131,7 @@ export function tableCommands(options: TableCommandOptions): Command[] {
   if (options.onExport) {
     commands.push({
       key: "export",
-      label: labels.exportCsv ?? "Export CSV",
+      label: options.exportLabel ?? labels.exportCsv ?? "Export CSV",
       onSelect: options.onExport,
     });
   }

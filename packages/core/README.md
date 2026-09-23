@@ -30,6 +30,7 @@ in `@adapttable/react` and the kit adapters.
 - **Automatic mobile cards** — core preserves one row/state model while the
   React and adapter layers render cards below the mobile breakpoint. [Docs](https://orwa-mahmoud.github.io/adapttable/mobile/).
 - **Client or server data** through one `TableSource` contract — same props either way.
+- **Global search** — the committed term, its `q` URL param and the default searchable-text projection (`engineSearchText`); adapters render the search box.
 - **URL-synced** search / sort / filters / page — shareable, deep-linkable links.
 - **Pagination** — paged or infinite scroll via `paginationMode`; server sources
   report their own totals, client sources derive them.
@@ -43,11 +44,14 @@ in `@adapttable/react` and the kit adapters.
   the result into accessible header state.
 - **Filtering** — filter model, operators and counts, including a nested AND/OR
   filter tree; adapters render the forms and chips.
+- **Header filters** — the filter chrome model behind `headerFilters()`; adapters draw the header funnel.
+- **Custom filter types** — the `FilterTypeSpec` registry behind `FILTER_TYPES`: widget, operators, predicate, chips and URL params per type.
 - **Selection + bulk actions** — selected ids and the bulk-action contract;
   adapters render tri-state controls and dialogs.
 - **Row actions** — contracts for visibility, disabled state and confirmation;
   adapters own the controls.
 - **Row expansion** — state behind the React binding's `rowDetail(...)` feature.
+- **Nested tables** — the React layer's `nestedTable(...)` renders a full kit `DataTable` inside an expanded row.
 - **Inline cell editing** — state behind `editing(handler)` and `editable` columns; text, number and select
   editors, keyboard commit/cancel, Tab advance. Omit the handler and no cell opens.
 - **Row reordering** — `rowReorder(handler)`; Space-lift keyboard, dataset-relative indices.
@@ -60,6 +64,7 @@ in `@adapttable/react` and the kit adapters.
   `cellNavigation()` feature, which adds ARIA grid semantics, arrow-key
   movement and screen-reader announcements.
 - **Row grouping** — model support for `grouping(...)` and `groupingPanel(...)`.
+- **Aggregation** — `aggregate()`, `aggregatable` column operations and the aggregation model behind footer and group totals, including custom operations.
 - **Pivot tables** — rows, columns and measures with subtotals and collapsible
   groups, from the optional `@adapttable/core/pivot` entry.
 - **Tree data** — the hierarchy model behind `tree(...)`.
@@ -76,6 +81,9 @@ in `@adapttable/react` and the kit adapters.
   Host plugins use the same `TableFeature` / `setup(host)` surface.
 - **CSV export** (`exportCsv(...)`) — current page, the full filtered set, or the
   selected rows; choose the columns, or hand the whole thing to your backend.
+- **XLSX export** (`@adapttable/core/xlsx`) — optional entry; `xlsxWriter()` on `exportCsv` writes a real `.xlsx` workbook with no extra dependency.
+- **Command palette and context menus** — the `Command` / `ContextMenuItem` model and the built-in `tableCommands` / `filterCommands`; adapters render `commandPalette()` and `contextMenu()`.
+- **View controls** — localized labels for density, fullscreen, print, status bar and side panel; the React layer and adapters own the toolbar controls.
 - **Virtualization** (`virtualize(...)`) — row/card windowing for very large lists.
 - **RTL** and i18n-agnostic labels — pass `labels` or a `t` function.
 - **Framework-neutral** — no components, styling, React or UI-kit imports.

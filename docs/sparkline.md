@@ -36,4 +36,21 @@ mirroring a series would put "last" on the left. Pass a `label` for a
 translated summary; the default is a numeric sentence (`3 values, min
 1, max 4, last 2`).
 
+| Option   | Type                                               | Default         | Description                                                     |
+| -------- | -------------------------------------------------- | --------------- | --------------------------------------------------------------- |
+| `key`    | `string`                                           | —               | Column key.                                                     |
+| `values` | `(row: TRow) => readonly number[]`                 | —               | The series. Non-finite values are dropped before drawing.       |
+| `kind`   | `"bar" \| "line" \| "area"`                        | `"line"`        | Chart form.                                                     |
+| `header` | `ReactNode`                                        | —               | Column header.                                                  |
+| `width`  | `number`                                           | `80`            | SVG width in CSS pixels.                                        |
+| `height` | `number`                                           | `28`            | SVG height in CSS pixels.                                       |
+| `color`  | `string`                                           | `currentColor`  | Fill and stroke colour.                                         |
+| `label`  | `(values: readonly number[], row: TRow) => string` | numeric summary | Accessible name of the chart.                                   |
+| `column` | `Partial<ColumnDef<TRow>>`                         | —               | Extra column fields (`width`, `sortable`, …) merged underneath. |
+
+`<Sparkline>` takes `values`, `kind`, `width`, `height`, `color` and a string
+`label`. The SVG carries `data-adapttable-part="sparkline"` and `data-kind`.
+`sparklineSummary`, `sparklineExportValue` and `finiteSparklineValues` are the
+default label, the export text and the finite-value filter on their own.
+
 Omit the import and nothing is drawn and nothing is downloaded.

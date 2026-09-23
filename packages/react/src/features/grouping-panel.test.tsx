@@ -1,5 +1,4 @@
 import {
-  columnMenuActions,
   type ColumnMenuChoice,
   type ColumnMenuRow,
   defaultLabels,
@@ -8,6 +7,7 @@ import {
   type GroupingPanelInteractions,
   type GroupingPanelState,
 } from "@adapttable/core";
+import { columnMenuActions } from "@adapttable/core/binding";
 import {
   act,
   fireEvent,

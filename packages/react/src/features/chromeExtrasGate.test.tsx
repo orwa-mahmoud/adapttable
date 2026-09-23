@@ -1,6 +1,6 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import { useEffect } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { useFrontendData } from "../source/useFrontendData";
@@ -14,6 +14,7 @@ import {
   type TableRuntimeView,
   useTableRuntime,
 } from "./providers";
+import { rowPinning } from "./row-pinning";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 import { tree } from "./tree";
 
@@ -36,7 +37,7 @@ function Probe({
 }: {
   features: readonly TableFeature<Row>[];
   columns: ColumnDef<Row>[];
-  extraProps?: { groupBy?: string };
+  extraProps?: { groupBy?: string; urlSync?: boolean };
   onView: (view: TableRuntimeView<Row> | undefined) => void;
 }) {
   const applied = applyTableFeatures({ features, columns });
@@ -125,5 +126,60 @@ describe("ChromeExtrasGate runtime publish", () => {
     const view = views.at(-1);
     expect(view?.rowLabel(ROWS[0]!)).toBe("a");
     expect(view?.tree).toBeDefined();
+  });
+
+  it("labels a row by a numeric or boolean cell when nothing formats it", () => {
+    const views: (TableRuntimeView<Row> | undefined)[] = [];
+    render(
+      <Probe
+        features={[]}
+        columns={[
+          { key: "flag", accessor: () => true },
+          { key: "score", accessor: (row) => row.score },
+        ]}
+        onView={(view) => views.push(view)}
+      />
+    );
+    expect(views.at(-1)?.rowLabel(ROWS[1]!)).toBe("true");
+  });
+
+  it("pins and unpins a row through the published pinning", () => {
+    const views: (TableRuntimeView<Row> | undefined)[] = [];
+    const onPinnedRowIdsChange = vi.fn();
+    render(
+      <Probe
+        features={[rowPinning({ onPinnedRowIdsChange })]}
+        columns={[{ key: "name", accessor: (row) => row.name }]}
+        extraProps={{ urlSync: false }}
+        onView={(view) => views.push(view)}
+      />
+    );
+    const setRowPin = views.at(-1)?.pinning?.setRowPin;
+    expect(setRowPin).toEqual(expect.any(Function));
+
+    act(() => {
+      setRowPin?.("b", "top");
+    });
+    expect(onPinnedRowIdsChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ top: ["b"] })
+    );
+    expect(views.at(-1)?.pinning?.rows?.top).toEqual(["b"]);
+
+    act(() => {
+      views.at(-1)?.pinning?.setRowPin?.("b", undefined);
+    });
+    expect(views.at(-1)?.pinning?.rows?.top).toEqual([]);
+  });
+
+  it("publishes no row pin action without row pinning", () => {
+    const views: (TableRuntimeView<Row> | undefined)[] = [];
+    render(
+      <Probe
+        features={[]}
+        columns={[{ key: "name", accessor: (row) => row.name }]}
+        onView={(view) => views.push(view)}
+      />
+    );
+    expect(views.at(-1)?.pinning?.setRowPin).toBeUndefined();
   });
 });

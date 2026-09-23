@@ -53,7 +53,7 @@ export function Chips({
                 {chip.label}
                 <IconButton
                   disableRipple
-                  aria-label={`${labels.clearAll}: ${chip.label}`}
+                  aria-label={labels.removeFilter(chip.label)}
                   onClick={chip.onRemove}
                   sx={removeButtonSx}
                 >

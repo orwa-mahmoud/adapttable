@@ -286,7 +286,32 @@ function auditTitles() {
     stale: [...named]
       .filter((name) => !docPages.includes(name))
       .sort((a, b) => a.localeCompare(b)),
+    overlong: Object.entries(TITLES).filter(
+      ([, title]) => (title + TITLE_SUFFIX).length > MAX_TITLE_LENGTH
+    ),
+    duplicate: duplicateValues(TITLES),
   };
+}
+
+/**
+ * Starlight appends ` | AdaptTable` to every page title. Google shows about
+ * 600 px (~60 characters) of a title and Bing flags titles past ~70, so the
+ * full string stays within 60. A description past 160 characters is cut in
+ * both engines' snippets.
+ */
+const TITLE_SUFFIX = " | AdaptTable";
+const MAX_TITLE_LENGTH = 60;
+const MAX_DESCRIPTION_LENGTH = 160;
+
+/** Entries whose value another entry already uses: `[name, value][]`. */
+function duplicateValues(map) {
+  const seen = new Map();
+  const repeats = [];
+  for (const [name, value] of Object.entries(map)) {
+    if (seen.has(value)) repeats.push([name, value]);
+    else seen.set(value, name);
+  }
+  return repeats;
 }
 
 /**
@@ -301,10 +326,23 @@ function auditDescriptions() {
     stale: [...described]
       .filter((name) => !docPages.includes(name))
       .sort((a, b) => a.localeCompare(b)),
+    overlong: Object.entries(DESCRIPTIONS).filter(
+      ([, description]) => description.length > MAX_DESCRIPTION_LENGTH
+    ),
+    duplicate: duplicateValues(DESCRIPTIONS),
   };
 }
 
-function printDescriptionFailures({ undescribed, stale }) {
+function printDescriptionFailures({ undescribed, stale, overlong, duplicate }) {
+  for (const [name, description] of overlong) {
+    console.error(
+      `\nDESCRIPTIONS["${name}"] is ${description.length} characters; ` +
+        `search snippets cut it past ${MAX_DESCRIPTION_LENGTH}.`
+    );
+  }
+  for (const [name] of duplicate) {
+    console.error(`\nDESCRIPTIONS["${name}"] repeats another page's snippet.`);
+  }
   if (undescribed.length > 0) {
     console.error(
       `\n${undescribed.length} docs page(s) have no entry in the DESCRIPTIONS ` +
@@ -351,7 +389,38 @@ function printLlmsOrderFailures({ unlisted, stale }) {
   }
 }
 
-function printTitleFailures({ untitled, stale }) {
+/**
+ * Every docs page advertises `og/<slug>.png` as its og:image and
+ * twitter:image (see `apps/docs/sync-docs.mjs`). A page without that file
+ * shares with a broken preview. `pnpm og:cards` renders the missing ones.
+ */
+const OG_DIR = join(REPO_ROOT, "apps", "docs", "public", "og");
+
+function auditOgImages() {
+  return docPages.filter(
+    (name) => !existsSync(join(OG_DIR, name.replace(/\.md$/, ".png")))
+  );
+}
+
+function printOgImageFailures(missing) {
+  if (missing.length === 0) return;
+  console.error(
+    `\n${missing.length} docs page(s) have no apps/docs/public/og image — ` +
+      `their og:image and twitter:image point at a missing file:`
+  );
+  for (const name of missing) console.error(`  - docs/${name}`);
+}
+
+function printTitleFailures({ untitled, stale, overlong, duplicate }) {
+  for (const [name, title] of overlong) {
+    console.error(
+      `\nTITLES["${name}"] is ${(title + TITLE_SUFFIX).length} characters ` +
+        `with "${TITLE_SUFFIX}"; search results cut it past ${MAX_TITLE_LENGTH}.`
+    );
+  }
+  for (const [name] of duplicate) {
+    console.error(`\nTITLES["${name}"] repeats another page's title.`);
+  }
   if (untitled.length > 0) {
     console.error(
       `\n${untitled.length} docs page(s) have no entry in the TITLES map of ` +
@@ -370,17 +439,81 @@ function printTitleFailures({ untitled, stale }) {
   }
 }
 
+/** One line per failing audit, after the detailed listings. */
+function printFailureSummary({
+  undocumentedTotal,
+  missingRefTotal,
+  navFailures,
+  titleFailures,
+  descriptionFailures,
+  llmsOrderFailures,
+  missingOgImages,
+}) {
+  if (undocumentedTotal > 0) {
+    console.error(
+      `\n${undocumentedTotal} undocumented export(s). Document each name in docs/ or stop exporting it.`
+    );
+  }
+  if (missingRefTotal > 0) {
+    console.error(
+      `${missingRefTotal} export(s) missing from docs/${REFERENCE_PAGE}. The reference page ` +
+        `claims every export; add a line for each, or stop exporting it.`
+    );
+  }
+  if (navFailures > 0) {
+    console.error(
+      `${navFailures} sidebar mismatch(es). Every docs/*.md page belongs in ` +
+        `apps/docs/sidebar.mjs, and every entry there needs its page.`
+    );
+  }
+  if (titleFailures > 0) {
+    console.error(
+      `${titleFailures} title problem(s). Every docs/*.md page needs a ` +
+        `unique TITLES entry in apps/docs/sync-docs.mjs within ` +
+        `${MAX_TITLE_LENGTH} characters with the suffix, and every entry ` +
+        `needs its page.`
+    );
+  }
+  if (descriptionFailures > 0) {
+    console.error(
+      `${descriptionFailures} description problem(s). Every docs/*.md page ` +
+        `needs a unique DESCRIPTIONS entry in apps/docs/sync-docs.mjs within ` +
+        `${MAX_DESCRIPTION_LENGTH} characters, and every entry needs its page.`
+    );
+  }
+  if (llmsOrderFailures > 0) {
+    console.error(
+      `${llmsOrderFailures} llms-full reading-order mismatch(es). Every ` +
+        `docs/*.md page belongs in the DOCS array of ` +
+        `scripts/build-llms-full.mjs, and every entry there needs its page.`
+    );
+  }
+  if (missingOgImages.length > 0) {
+    console.error(
+      `${missingOgImages.length} missing og image(s). Run \`pnpm og:cards\`.`
+    );
+  }
+}
+
 function main() {
   const audits = auditPackages();
   const nav = auditNav();
   const titles = auditTitles();
-  const titleFailures = titles.untitled.length + titles.stale.length;
+  const titleFailures =
+    titles.untitled.length +
+    titles.stale.length +
+    titles.overlong.length +
+    titles.duplicate.length;
   const descriptions = auditDescriptions();
   const descriptionFailures =
-    descriptions.undescribed.length + descriptions.stale.length;
+    descriptions.undescribed.length +
+    descriptions.stale.length +
+    descriptions.overlong.length +
+    descriptions.duplicate.length;
   const llmsOrder = auditLlmsOrder();
   const llmsOrderFailures = llmsOrder.unlisted.length + llmsOrder.stale.length;
   const navFailures = nav.orphans.length + nav.dead.length;
+  const missingOgImages = auditOgImages();
   const exportTotal = audits.reduce((sum, a) => sum + a.names.length, 0);
   const undocumentedTotal = audits.reduce(
     (sum, a) => sum + a.undocumented.size,
@@ -419,55 +552,30 @@ function main() {
     navFailures > 0 ||
     titleFailures > 0 ||
     descriptionFailures > 0 ||
-    llmsOrderFailures > 0
+    llmsOrderFailures > 0 ||
+    missingOgImages.length > 0
   ) {
     printFailures(audits, missingFromReference);
     printNavFailures(nav);
     printTitleFailures(titles);
     printDescriptionFailures(descriptions);
     printLlmsOrderFailures(llmsOrder);
-    if (undocumentedTotal > 0) {
-      console.error(
-        `\n${undocumentedTotal} undocumented export(s). Document each name in docs/ or stop exporting it.`
-      );
-    }
-    if (missingRefTotal > 0) {
-      console.error(
-        `${missingRefTotal} export(s) missing from docs/${REFERENCE_PAGE}. The reference page ` +
-          `claims every export; add a line for each, or stop exporting it.`
-      );
-    }
-    if (navFailures > 0) {
-      console.error(
-        `${navFailures} sidebar mismatch(es). Every docs/*.md page belongs in ` +
-          `apps/docs/sidebar.mjs, and every entry there needs its page.`
-      );
-    }
-    if (titleFailures > 0) {
-      console.error(
-        `${titleFailures} title mismatch(es). Every docs/*.md page needs a ` +
-          `TITLES entry in apps/docs/sync-docs.mjs, and every entry needs its page.`
-      );
-    }
-    if (descriptionFailures > 0) {
-      console.error(
-        `${descriptionFailures} description mismatch(es). Every docs/*.md page ` +
-          `needs a DESCRIPTIONS entry in apps/docs/sync-docs.mjs, and every ` +
-          `entry needs its page.`
-      );
-    }
-    if (llmsOrderFailures > 0) {
-      console.error(
-        `${llmsOrderFailures} llms-full reading-order mismatch(es). Every ` +
-          `docs/*.md page belongs in the DOCS array of ` +
-          `scripts/build-llms-full.mjs, and every entry there needs its page.`
-      );
-    }
+    printOgImageFailures(missingOgImages);
+    printFailureSummary({
+      undocumentedTotal,
+      missingRefTotal,
+      navFailures,
+      titleFailures,
+      descriptionFailures,
+      llmsOrderFailures,
+      missingOgImages,
+    });
     process.exit(1);
   }
   console.log(
     `doc-surface: all ${exportTotal} exports documented, ` +
-      `all ${docPages.length} pages in the sidebar, titled, described and in llms-full.`
+      `all ${docPages.length} pages in the sidebar, titled, described, ` +
+      `with an og image and in llms-full.`
   );
 }
 

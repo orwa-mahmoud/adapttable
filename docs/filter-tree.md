@@ -17,6 +17,7 @@ because a column icon cannot express a group.
 
 ```tsx
 import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, shadcn, unstyled
+import { filters } from "@adapttable/mantine/filters";
 
 export function People({ rows }) {
   return (
@@ -28,6 +29,7 @@ export function People({ rows }) {
         { key: "team", filter: { type: "select", options: "auto" } },
         { key: "budget", filter: "numberRange" },
       ]}
+      features={[filters([])]}
       filtersMode="popover"
       urlKey="f"
     />
@@ -35,10 +37,12 @@ export function People({ rows }) {
 }
 ```
 
-Pass `filterTreeFn` on `useFrontendData` (or `supports.filterTree` on a
-server source) so the engine evaluates the tree. Each adapter's
-`FilterTreeBuilder` mounts itself at the top of the Filters form when
-`source.setFilterTree` is set; omit the setter and the builder is gone.
+Compose `filters(…)`: the `data` tier then evaluates the tree itself. A host
+that builds its own source with `useFrontendData` passes `filterTreeFn`; a
+server source declares `supports.filterTree`. Each adapter's
+`FilterTreeBuilder` mounts at the top of the Filters form whenever the source
+exposes `source.setFilterTree` (every built-in source does) and at least one
+filter definition exists.
 
 ## How it works
 
@@ -54,6 +58,8 @@ server source) so the engine evaluates the tree. Each adapter's
   reinterpreted. Clear all drops `ft` with the flat `f_*` keys.
 - **Chips.** Tree leaves become chips via `useFilterTreeChips`. Removing a
   chip rewrites that node; it does not flatten the group.
+- **Tree only.** `filterFields={false}` removes the field list and opens the
+  builder expanded.
 - **Server.** A source that declares `supports.filterTree` receives the
   same tree on `query.filterTree`. The server must apply it all-or-nothing
   — dropping one condition out of an AND would lie.

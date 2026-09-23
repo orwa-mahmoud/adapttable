@@ -12,6 +12,7 @@
  *   node scripts/bench.mjs --smoke                # the CI subset
  *   node scripts/bench.mjs --only patch --port 4321
  *   node scripts/bench.mjs --port 4321 --json     # machine-readable
+ *   node scripts/bench.mjs --record               # + probes, saved to bench-runs/
  *
  * It serves the showcase itself when nothing is already on the port, and stops
  * that server again when it finishes. Running `pnpm --filter
@@ -23,17 +24,26 @@
  *
  *   npx playwright install chromium
  *
+ * `--record` also runs the probes — the published numbers that are not a
+ * scenario: the embedded font in the Arabic PDF export and the size of the
+ * mobile card move controls in every kit — and writes the whole run, with the
+ * machine and browser it ran on, to `scripts/bench-runs/<date>.json`. Every
+ * number a docs page publishes points at one of those files.
+ *
  * Reading the output: DOM rows is the number that must stay flat as rows grow
  * — that is windowing working. Heap is indicative, not a contract: it moves
  * with the browser build and the machine, so compare arms within one run
  * rather than across days.
  */
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { cpus, platform, release } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { chromium } from "@playwright/test";
+import { chromium, errors } from "@playwright/test";
+
+import { builtAdapters } from "../apps/showcase/matrix.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -44,6 +54,7 @@ const flag = (name, fallback) => {
 const PORT = flag("port", "5173");
 const SMOKE = args.includes("--smoke");
 const JSON_OUT = args.includes("--json");
+const RECORD = args.includes("--record");
 const onlyFlag = flag("only", "");
 const ONLY = typeof onlyFlag === "string" ? onlyFlag.toLowerCase() : "";
 
@@ -61,6 +72,26 @@ const SCENARIOS = [
     name: "baseline · 50k rows, windowed",
     query: "rows=50000",
     smoke: true,
+    expect: { maxDomRows: 60 },
+  },
+  // The flat-count sweep: the same fully loaded, windowed table at four
+  // dataset sizes. The DOM row count is the figure that must not move.
+  {
+    name: "flat count · 1k rows, windowed",
+    query: "rows=1000&all=1&virtualize=1",
+    smoke: false,
+    expect: { maxDomRows: 60 },
+  },
+  {
+    name: "flat count · 50k rows, windowed",
+    query: "rows=50000&all=1&virtualize=1",
+    smoke: false,
+    expect: { maxDomRows: 60 },
+  },
+  {
+    name: "flat count · 100k rows, windowed",
+    query: "rows=100000&all=1&virtualize=1",
+    smoke: false,
     expect: { maxDomRows: 60 },
   },
   {
@@ -388,8 +419,161 @@ for (const scenario of chosen) {
   }
 }
 
+/**
+ * The Arabic PDF export's size, and the size of the font stream inside it.
+ *
+ * The export page fetches a real TrueType face on the language switch and the
+ * writer embeds only the glyphs the sheet drew; this reads both figures out of
+ * the file a reader downloads.
+ */
+async function probePdfFont() {
+  const browser = await chromium.launch();
+  try {
+    const page = await browser
+      .newContext({
+        viewport: { width: 1280, height: 900 },
+        acceptDownloads: true,
+      })
+      .then((c) => c.newPage());
+    await page.goto(`http://localhost:${PORT}/mantine/export/`);
+    await page.getByRole("columnheader", { name: "Person" }).first().waitFor();
+    const fontLoaded = page.waitForResponse(
+      (response) =>
+        response.url().includes("Amiri-Regular.ttf") && response.ok()
+    );
+    await page.getByRole("button", { name: "العربية" }).click();
+    const fontResponse = await fontLoaded;
+    const sourceFontBytes = (await fontResponse.body()).byteLength;
+    const exportButton = page.getByRole("button", {
+      name: "تصدير PDF",
+      exact: true,
+    });
+    await exportButton.waitFor();
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      exportButton.click(),
+    ]);
+    const stream = await download.createReadStream();
+    const chunks = [];
+    for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+    const bytes = Buffer.concat(chunks);
+    const text = bytes.toString("latin1");
+    // `/FontFile2 N 0 R` names the embedded face; its object carries `/Length`.
+    const ref = /\/FontFile2 (\d+) 0 R/.exec(text);
+    const length = ref
+      ? new RegExp(`(?:^|\\s)${ref[1]} 0 obj[\\s\\S]*?/Length (\\d+)`).exec(
+          text
+        )
+      : null;
+    return {
+      sourceFontBytes,
+      pdfBytes: bytes.byteLength,
+      embeddedFontBytes: length ? Number(length[1]) : null,
+    };
+  } finally {
+    await browser.close();
+  }
+}
+
+/**
+ * The rendered size of the mobile card move controls, per kit, at phone width.
+ *
+ * Each kit draws the up / down buttons with its own component, so each kit is
+ * measured; `null` means the page drew no flat-card move control.
+ */
+async function probeCardMoveControls() {
+  const browser = await chromium.launch();
+  const sizes = {};
+  try {
+    for (const { key } of builtAdapters()) {
+      const page = await browser
+        .newContext({
+          viewport: { width: 375, height: 812 },
+          isMobile: true,
+          hasTouch: true,
+        })
+        .then((c) => c.newPage());
+      await page.goto(`http://localhost:${PORT}/${key}/row-reordering/`);
+      const up = page
+        .locator('[data-adapttable-part="row-reorder-up"]')
+        .first();
+      // A page with no flat-card move control is a measurement (`null`), and
+      // only a timeout means that; any other failure ends the run.
+      const found = await up
+        .waitFor({ state: "visible", timeout: 30_000 })
+        .then(
+          () => true,
+          (error) => {
+            if (error instanceof errors.TimeoutError) return false;
+            throw error;
+          }
+        );
+      const box = found ? await up.boundingBox() : null;
+      sizes[key] = box
+        ? { width: Math.round(box.width), height: Math.round(box.height) }
+        : null;
+      await page.context().close();
+    }
+  } finally {
+    await browser.close();
+  }
+  return sizes;
+}
+
+const probes = RECORD
+  ? {
+      pdfFont: await probePdfFont(),
+      cardMoveControls: await probeCardMoveControls(),
+    }
+  : undefined;
+
+if (RECORD) {
+  const date = new Date().toISOString().slice(0, 10);
+  const dir = join(ROOT, "scripts", "bench-runs");
+  mkdirSync(dir, { recursive: true });
+  const probeBrowser = await chromium.launch();
+  const browserVersion = probeBrowser.version();
+  await probeBrowser.close();
+  const file = join(dir, `${date}.json`);
+  writeFileSync(
+    file,
+    `${JSON.stringify(
+      {
+        date,
+        machine: {
+          platform: platform(),
+          release: release(),
+          cpu: cpus()[0]?.model ?? null,
+          cores: cpus().length,
+        },
+        node: process.version,
+        chromium: browserVersion,
+        smoke: SMOKE,
+        results: results.map(({ name, query, expect, ...measured }) => ({
+          name,
+          query,
+          expect,
+          domRows: measured.domRows,
+          domCells: measured.domCells,
+          heapMB: measured.heapMB,
+          interactiveMs: measured.interactiveMs,
+          patchBurstMs: measured.patchBurstMs,
+          failures: measured.failures,
+        })),
+        probes,
+      },
+      null,
+      2
+    )}\n`
+  );
+  if (!JSON_OUT)
+    console.log(`recorded this run in scripts/bench-runs/${date}.json`);
+}
+
 if (JSON_OUT) {
-  console.log(JSON.stringify({ port: PORT, smoke: SMOKE, results }, null, 2));
+  console.log(
+    JSON.stringify({ port: PORT, smoke: SMOKE, results, probes }, null, 2)
+  );
 } else {
   // The A/B is the headline claim: windowing renders a viewport, not a dataset.
   const on = results.find((r) => r.query.includes("virtualize=1"));
@@ -427,6 +611,31 @@ if (JSON_OUT) {
       `200-update burst: ${Math.round(full.patchBurstMs)}ms full rebuild → ` +
         `${Math.round(incr.patchBurstMs)}ms incremental (${times.toFixed(1)}x)`
     );
+  }
+  const flat = results.filter((r) => r.name.startsWith("flat count"));
+  const tenK = results.find((r) => r.query.includes("virtualize=1"));
+  if (flat.length > 0 && tenK) {
+    const arms = [...flat, tenK].sort(
+      (a, b) =>
+        Number(/rows=(\d+)/.exec(a.query)[1]) -
+        Number(/rows=(\d+)/.exec(b.query)[1])
+    );
+    console.log(
+      `flat count: ${arms
+        .map((r) => `${/rows=(\d+)/.exec(r.query)[1]} → ${r.domRows}`)
+        .join(", ")} DOM rows`
+    );
+  }
+  if (probes) {
+    const { pdfFont, cardMoveControls } = probes;
+    console.log(
+      `arabic pdf: ${pdfFont.sourceFontBytes} B source face → ` +
+        `${pdfFont.embeddedFontBytes ?? "?"} B embedded, ${pdfFont.pdfBytes} B file`
+    );
+    const boxes = Object.entries(cardMoveControls).map(
+      ([kit, box]) => kit + " " + (box ? `${box.width}×${box.height}` : "—")
+    );
+    console.log(`card move controls: ${boxes.join(", ")}`);
   }
   console.log(
     `\n${chosen.length - failed}/${chosen.length} scenarios within expectations`

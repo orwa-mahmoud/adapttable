@@ -572,6 +572,7 @@ function approvalMessage(subject: ApprovalSubject): string {
 // every one of them to type its side.
 export type {
   AssistantAnswer,
+  AssistantAudio,
   AssistantExchange,
   AssistantQuestion,
   AssistantQuestionOption,

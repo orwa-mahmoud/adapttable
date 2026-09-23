@@ -1070,6 +1070,25 @@ describe("useGridFocus — undo and redo keys", () => {
     expect(document.querySelector("output")?.textContent).toBe("1 cell redone");
   });
 
+  it("redoes whatever case the browser reports the letter in", () => {
+    const onRedo = vi.fn().mockReturnValue(1);
+    const onUndo = vi.fn().mockReturnValue(1);
+    render(<Grid rows={makeRows(3)} onRedo={onRedo} onUndo={onUndo} />);
+    act(() => cellAt(0, 0)!.focus());
+    // Windows and Linux report Shift+Z as "Z".
+    fireEvent.keyDown(cellAt(0, 0)!, {
+      key: "Z",
+      ctrlKey: true,
+      shiftKey: true,
+    });
+    fireEvent.keyDown(cellAt(0, 0)!, { key: "Y", ctrlKey: true });
+    expect(onRedo).toHaveBeenCalledTimes(2);
+    expect(onUndo).not.toHaveBeenCalled();
+    fireEvent.keyDown(cellAt(0, 0)!, { key: "z", ctrlKey: true });
+    expect(onUndo).toHaveBeenCalledOnce();
+    expect(onRedo).toHaveBeenCalledTimes(2);
+  });
+
   it("says so rather than swallowing an empty history", () => {
     render(<Grid rows={makeRows(3)} onUndo={() => 0} />);
     act(() => cellAt(0, 0)!.focus());

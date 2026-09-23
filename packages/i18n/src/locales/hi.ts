@@ -215,6 +215,7 @@ export const hi: Required<TableLabels> = {
   assistantVoiceStart: "बोलकर लिखें",
   assistantVoiceStop: "बोलना रोकें",
   assistantVoiceListening: "सुन रहे हैं",
+  assistantVoiceMessage: "वॉइस संदेश",
   assistantVoiceLanguage: "बोलने की भाषा",
   assistantYou: "आप",
   assistantSpeaker: "सहायक",

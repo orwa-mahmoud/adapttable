@@ -318,6 +318,18 @@ function Receipt({
   );
 }
 
+/**
+ * The message as it reads while a voice clip is still being transcribed: the
+ * clip's placeholder until its words arrive.
+ */
+function withVoicePlaceholder(
+  message: TableAssistantMessageView,
+  labels: TableLabels | undefined
+): TableAssistantMessageView {
+  if (!message.transcribing || message.text) return message;
+  return { ...message, text: labels?.assistantVoiceMessage ?? "Voice message" };
+}
+
 /** One exchange. @internal */
 export function AssistantMessage({
   message,
@@ -437,7 +449,7 @@ export function AssistantMessage({
         {speaker}
       </span>
       <Spoken
-        message={message}
+        message={withVoicePlaceholder(message, labels)}
         mine={mine}
         leads={leads}
         {...marks}
@@ -784,7 +796,9 @@ function Spoken({
       part="assistant-message-text"
       {...(chosen === undefined ? {} : { avatar: chosen })}
       {...(trailing ? { trailing } : {})}
-      {...(message.streaming ? { streaming: true } : {})}
+      {...(message.streaming || message.transcribing
+        ? { streaming: true }
+        : {})}
     >
       {/* While a reply is still arriving, what has landed is shown in its
           place — marked as provisional, because words are not a receipt. */}

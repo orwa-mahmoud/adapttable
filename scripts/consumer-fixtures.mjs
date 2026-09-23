@@ -178,7 +178,10 @@ const CORE_FIXTURES = [
     name: "server · parse a query",
     kind: "core",
     pkg: "server",
-    budgetKB: 2,
+    // Declared filters, filter-type checks, the typed filter tree and
+    // grouping keys all run inside parseTableQuery, so a column-list caller
+    // carries them too.
+    budgetKB: 5,
     code: `export { parseTableQuery } from "PKG";`,
     absent: ["useState", "PIVOT_BLANK", "toCsv"],
   },

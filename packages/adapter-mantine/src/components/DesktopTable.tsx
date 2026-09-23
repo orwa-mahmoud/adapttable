@@ -421,6 +421,7 @@ function DesktopRowBase<TRow>(
           const { column, columnIndex, colSpan, rowSpan } = cell;
           const pinStyle = paintPin(bodyPinStyle(column.key));
           const focusProps = gridFocus?.getCellPropsAt(focusIndex, columnIndex);
+          const cellProps = table.getCellProps(column as ColumnDef<TRow>);
           return (
             <Table.Td
               key={column.key}
@@ -430,11 +431,12 @@ function DesktopRowBase<TRow>(
               data-adapttable-part="cell"
               data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
               data-cell-span={cellSpanMark(colSpan, rowSpan)}
-              {...table.getCellProps(column as ColumnDef<TRow>)}
+              {...cellProps}
               {...focusProps}
               style={cellHighlightStyle(
                 focusProps,
                 {
+                  ...cellProps.style,
                   ...pinStyle,
                   ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
                 },

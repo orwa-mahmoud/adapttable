@@ -19,18 +19,34 @@ The published packages (`@adapttable/core`, `@adapttable/react`, the adapters,
 `@adapttable/i18n`, `@adapttable/server`, `@adapttable/ai`,
 `@adapttable/ai-react`, and `@adapttable/cli`) each follow
 [changesets](https://github.com/changesets/changesets) **independently**: a
-package only bumps when a changeset names it. Adapters, `@adapttable/i18n`
-and `@adapttable/server` depend on a concrete `@adapttable/core` version at
-publish time (exact pin), so you do not need matching version numbers across
+package only bumps when a changeset names it. Internal dependencies are exact
+pins at publish time: adapters pin `@adapttable/core` and `@adapttable/react`,
+`@adapttable/shadcn` pins `@adapttable/unstyled`, and `@adapttable/i18n`,
+`@adapttable/server`, `@adapttable/ai` and `@adapttable/ai-react` pin
+`@adapttable/core` (`@adapttable/ai-react` also pins `@adapttable/ai` and
+`@adapttable/react`), so you do not need matching version numbers across
 kits — install the adapter you use and let npm pull the core it was published
 against. `@adapttable/cli` versions on its own cadence; its programmatic API
 is still part of the public surface below.
 
 ## Stability
 
-AdaptTable is **stable at `3.0`**. The full SemVer contract above applies:
-breaking changes to the public API surface (below) ship only in a major
-release, with a migration note in the relevant package's `CHANGELOG.md`. In
+Each package carries its own version:
+
+| Package                                             | Version |
+| --------------------------------------------------- | ------- |
+| `@adapttable/core`, the adapters, `@adapttable/cli` | `3.0`   |
+| `@adapttable/i18n`                                  | `3.1`   |
+| `@adapttable/react`                                 | `1.0`   |
+| `@adapttable/server`                                | `0.2`   |
+| `@adapttable/ai`, `@adapttable/ai-react`            | `0.1`   |
+
+The packages at `1.0` and above are **stable**. The full SemVer contract above
+applies to them: breaking changes to the public API surface (below) ship only
+in a major release, with a migration note in the relevant package's
+`CHANGELOG.md`. `@adapttable/server`, `@adapttable/ai` and
+`@adapttable/ai-react` are `0.x`: under SemVer a `0.x` minor may carry a
+breaking change, and its changelog names it. In
 practice such changes are rare — most releases are additive minors and safe
 patches.
 
@@ -40,15 +56,15 @@ Each adapter declares a wide peer range for its kit, and a weekly, non-blocking
 peer-matrix workflow typechecks each adapter against the **oldest and newest**
 supported major — so a claimed-but-broken version is caught before you hit it:
 
-| Adapter                                       | Kit peer range                         |
-| --------------------------------------------- | -------------------------------------- |
-| `@adapttable/mantine`                         | `@mantine/core` + `@mantine/hooks` 7–9 |
-| `@adapttable/mui`                             | `@mui/material` 6.1.2+ – 9             |
-| `@adapttable/chakra`                          | `@chakra-ui/react` 3                   |
-| `@adapttable/antd`                            | `antd` 6                               |
-| `@adapttable/radix`                           | `@radix-ui/themes` 3                   |
-| `@adapttable/base-ui`                         | `@base-ui/react` ^1.6                  |
-| `@adapttable/unstyled` / `@adapttable/shadcn` | no UI-kit dependency                   |
+| Adapter                                       | Kit peer range                                   |
+| --------------------------------------------- | ------------------------------------------------ |
+| `@adapttable/mantine`                         | `@mantine/core` + `@mantine/hooks` 7.2+ – 9      |
+| `@adapttable/mui`                             | `@mui/material` 6.1.2+ – 9                       |
+| `@adapttable/chakra`                          | `@chakra-ui/react` 3.13+ and `@emotion/react` 11 |
+| `@adapttable/antd`                            | `antd` 6                                         |
+| `@adapttable/radix`                           | `@radix-ui/themes` 3                             |
+| `@adapttable/base-ui`                         | `@base-ui/react` ^1.6                            |
+| `@adapttable/unstyled` / `@adapttable/shadcn` | no UI-kit dependency                             |
 
 `react` / `react-dom` 18 and 19 are supported across every package.
 
@@ -99,18 +115,19 @@ undocumented escape. There is no private channel behind it.
 
 Each is a published, supported entry — not an implementation detail:
 
-| Entry                      | What it is                                                                 |
-| -------------------------- | -------------------------------------------------------------------------- |
-| `@adapttable/core/formula` | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                 |
-| `@adapttable/core/pdf`     | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …) |
-| `@adapttable/core/pivot`   | Pivot engine (`pivot`, `pivotTableModel`, aggregators)                     |
-| `@adapttable/core/query`   | The query model without React — codecs a backend can load                  |
-| `@adapttable/core/stream`  | Live row patches (`RowPatch`, `RowPatchEvent`, …)                          |
-| `@adapttable/core/xlsx`    | Spreadsheet export writer                                                  |
+| Entry                      | What it is                                                                                            |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `@adapttable/core/binding` | The framework-neutral adapter machinery `@adapttable/react/adapter` re-exports — import it from there |
+| `@adapttable/core/formula` | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                                            |
+| `@adapttable/core/pdf`     | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …)                            |
+| `@adapttable/core/pivot`   | Pivot engine (`pivot`, `serverPivotResult`, field helpers, pivot URL codecs)                          |
+| `@adapttable/core/query`   | The query model without React — codecs a backend can load                                             |
+| `@adapttable/core/stream`  | Live row patches (`RowPatch`, `RowPatchEvent`, …)                                                     |
+| `@adapttable/core/xlsx`    | Spreadsheet export writer                                                                             |
 
 `@adapttable/react` publishes the React-facing counterparts of the ones that
 need elements — `/formula`, `/pivot`, `/stream` — plus `/sparkline`, the
-sparkline column helper.
+sparkline column helper. `pivotTableModel` lives on `@adapttable/react/pivot`.
 
 ### Adapter main entries
 
@@ -122,7 +139,8 @@ Each main entry exports `<DataTable>` with `DataTableProps` /
 `DataTablePropsBase` / `DataTableSlots` / `SavedViewsMenuProps`, plus the
 documented kit extras (Mantine chrome components, unstyled/shadcn building
 blocks, Radix and Base UI accent unions, unstyled `IconProps`, shadcn's
-`shadcnClassNames`). Styled kits do **not** expose every internal node —
+`shadcnClassNames`). `@adapttable/base-ui` also publishes `./styles.css`, its
+minimal chrome stylesheet. Styled kits do **not** expose every internal node —
 their `classNames` are the documented wrapper hooks; per-node classes and
 `data-adapttable-part` are the unstyled/shadcn contract.
 
@@ -155,11 +173,25 @@ Locale presets (`en`, `ar`, …, `zhTW`), `getLabels` / `hasLocale` /
 
 `createAgentSession`, the `adapttable.agent.v1` manifest and the
 `CAPABILITY_KEYS` catalog. Optional — core and adapter roots do not
-re-export it.
+re-export it. Its subpaths are supported entries too:
+
+| Entry                      | What it is                                                                 |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `@adapttable/ai/json`      | Provider-neutral JSON tool envelope (`executeEnvelope`, `executeJsonTool`) |
+| `@adapttable/ai/openai`    | OpenAI tool definitions and execution (`executeOpenAITool`)                |
+| `@adapttable/ai/mcp`       | MCP tool execution (`executeMcpTool`, `mcpListChanged`)                    |
+| `@adapttable/ai/http`      | The agent HTTP wire (`AGENT_HTTP_LIMITS`, `AgentHttpError`)                |
+| `@adapttable/ai/assistant` | The assistant loop (`createTableAssistant`, `planUndo`)                    |
+| `@adapttable/ai/context`   | Context and prompt builders (`buildAgentContext`, `agentInstructions`)     |
+| `@adapttable/ai/voice`     | Dictation (`createSpeechInput`)                                            |
+| `@adapttable/ai/webmcp`    | WebMCP registration (`registerWebMcpTools`)                                |
+| `@adapttable/ai/ag-ui`     | AG-UI protocol tools (`aguiTools`)                                         |
+| `@adapttable/ai/ai-sdk`    | AI SDK stream adapter (`aiSdkCapability`)                                  |
+| `@adapttable/ai/mcp-apps`  | MCP Apps host bridge (`createMcpAppBridge`)                                |
 
 ### `@adapttable/ai-react`
 
-`tableAgent` and `useTableAssistant`. Depends on `@adapttable/ai` and
+`tableAgent`, `useTableAssistant`, `useSpeechInput` and `TABLE_AGENT_STATE`. Depends on `@adapttable/ai` and
 `@adapttable/react`. The AI root stays React-free.
 
 ### `@adapttable/server`
@@ -170,7 +202,8 @@ re-export it.
 
 ### `@adapttable/cli`
 
-The `adapttable init` binary, and the programmatic surface:
+The `adapttable` binary — `init [--force]` and `migrate-v3 [paths...] [--check]`
+— and the programmatic surface:
 `detectKit`, `runInit`, `choosePackageManager`, `installCommand`,
 `scaffoldFiles`, plus `KITS` / `Kit` / `KitInfo` / `SHADCN`,
 `packagesFor` / `mergeDependencies`, `starterComponent` / `ScaffoldFile` /
@@ -210,6 +243,14 @@ When an API is retired, it is **not** removed immediately:
 3. Removal happens in a **major** release.
 
 We never silently remove a documented public API.
+
+v3 is the one release that did not follow step 2 for its enabling props: the
+last v2 release (`@adapttable/core@2.9.0`) carried no `@deprecated` note on the
+`<DataTable>` props v3 replaced with features, and v3 removed them in the
+major. Its main-entry adapter aliases were deprecated in v2 as step 1
+describes. [Upgrading from v2](./migrate-from-v2.md) maps every removed prop
+to its feature, and `npx @adapttable/cli migrate-v3` reports each one in a
+codebase.
 
 ## Releasing
 

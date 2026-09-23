@@ -1274,3 +1274,122 @@ describe("a read the table refused", () => {
     expect(answered?.[0]?.error?.code).toBeDefined();
   });
 });
+
+describe("a voice turn over HTTP", () => {
+  const CLIP = {
+    mimeType: "audio/webm",
+    base64: "AAAA",
+    durationMs: 1200,
+  };
+
+  /** Turn bodies only, in the order they went out. */
+  function turns(bodies: readonly unknown[]): Record<string, unknown>[] {
+    return bodies.filter(
+      (body): body is Record<string, unknown> =>
+        typeof body === "object" &&
+        body !== null &&
+        (body as { kind?: unknown }).kind === "turn"
+    );
+  }
+
+  it("sends the clip once, then the transcript on every later round", async () => {
+    const live = session();
+    const bodies: unknown[] = [];
+    const replies = [
+      response({
+        transcript: "page two",
+        toolCalls: [{ id: "p2", name: "view.setPage", args: { page: 2 } }],
+        continueWithResults: true,
+      }),
+      response({ text: "On page two." }),
+    ];
+    let at = 0;
+    const onTranscript = vi.fn();
+    const result = await runAgentHttpTurn(
+      live,
+      "",
+      {
+        endpoint: "https://agent.example/turn",
+        pinCatalog: false,
+        request: (body) => {
+          bodies.push(body);
+          const reply = replies[Math.min(at, replies.length - 1)];
+          at += 1;
+          return Promise.resolve(reply);
+        },
+      },
+      { returnResults: true, audio: CLIP, onTranscript }
+    );
+
+    const sent = turns(bodies);
+    expect(sent[0]).toMatchObject({ audio: CLIP });
+    expect(sent[0]).not.toHaveProperty("message");
+    expect(sent[1]).toMatchObject({ message: "page two" });
+    expect(sent[1]).not.toHaveProperty("audio");
+    expect(onTranscript).toHaveBeenCalledExactlyOnceWith("page two");
+    expect(result.transcript).toBe("page two");
+    expect(result.text).toBe("On page two.");
+  });
+
+  it("refuses a turn with neither words nor a clip", async () => {
+    await expect(
+      runAgentHttpTurn(session(), "   ", {
+        endpoint: "https://agent.example/turn",
+        request: () => Promise.resolve(response({ text: "unused" })),
+      })
+    ).rejects.toThrow(/requires a message or audio/);
+  });
+
+  it("stops a voice turn whose backend never said what it heard", async () => {
+    const live = session();
+    const replies = [
+      response({
+        toolCalls: [{ id: "p2", name: "view.setPage", args: { page: 2 } }],
+        continueWithResults: true,
+      }),
+      response({ text: "never reached" }),
+    ];
+    let at = 0;
+    await expect(
+      runAgentHttpTurn(
+        live,
+        "",
+        {
+          endpoint: "https://agent.example/turn",
+          pinCatalog: false,
+          request: () => Promise.resolve(replies[at++] ?? replies[1]),
+        },
+        { returnResults: true, audio: CLIP }
+      )
+    ).rejects.toThrow(/without a transcript/);
+  });
+
+  it("carries a clip through the assistant transport and returns the transcript", async () => {
+    const live = session();
+    const bodies: unknown[] = [];
+    const transport = assistantHttpTransport({
+      endpoint: "https://agent.example/turn",
+      pinCatalog: false,
+      request: (body) => {
+        bodies.push(body);
+        return Promise.resolve(
+          response({ transcript: "sort by name", text: "Sorted." })
+        );
+      },
+    });
+    await transport.connect?.({ session: live });
+    const onTranscript = vi.fn();
+
+    const reply = await transport.send({
+      session: live,
+      text: "",
+      audio: CLIP,
+      conversation: [],
+      onTranscript,
+    });
+
+    expect(turns(bodies)[0]).toMatchObject({ audio: CLIP });
+    expect(reply.transcript).toBe("sort by name");
+    expect(onTranscript).toHaveBeenCalledWith("sort by name");
+  });
+});

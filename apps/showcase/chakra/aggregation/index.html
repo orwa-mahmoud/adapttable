@@ -167,12 +167,12 @@
         <p>The footer, the pinned summaries and the group totals render through Chakra's own table rows. Building and reordering group levels stays on the grouping page.</p>
         <p>Group totals and the footer are Table.Row cells; pinned summaries are additional rows with the kit's sticky positioning, not a second table.</p>
         <h2>The code</h2>
-        <pre><code>import { aggregate } from &quot;@adapttable/core&quot;;
+        <pre><code>import { aggregate } from &quot;@adapttable/react&quot;;
 import { DataTable } from &quot;@adapttable/chakra&quot;;
 import { groupingPanel } from &quot;@adapttable/chakra/grouping-panel&quot;;
 import { pinnedSummaryRows } from &quot;@adapttable/chakra/pinned-summary-rows&quot;;
 
-export function Sales({ rows, columns }) {
+export function Sales({ rows, columns, teamTotal, grandTotal }) {
   const budgetSum = aggregate({ budget: &quot;sum&quot; }, { columns });
   return (
     &lt;DataTable
@@ -185,10 +185,7 @@ export function Sales({ rows, columns }) {
           groupAggregates: budgetSum,
           groupFooters: true,
         }),
-        pinnedSummaryRows({
-          top: [{ id: &quot;team-total&quot;, name: &quot;Team total&quot; }],
-          bottom: [{ id: &quot;grand-total&quot;, name: &quot;Grand total&quot; }],
-        }),
+        pinnedSummaryRows({ top: [teamTotal], bottom: [grandTotal] }),
       ]}
     /&gt;
   );

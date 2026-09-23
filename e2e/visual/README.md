@@ -43,12 +43,17 @@ pnpm test:e2e:visual -- e2e/visual/v3-ui.spec.ts -g "mantine columns light" --up
 Linux baselines that match the nightly runner:
 
 ```bash
-# Playwright's official image, same browser build CI uses.
-# Mount the repo and regenerate only the visual project.
-docker run --rm -t \
-  -v "$PWD":/work -w /work \
+# Playwright's official image, same browser build CI uses. It runs on a
+# copy of the tree: the install inside the container writes Linux binaries
+# into node_modules, which must not replace the host's.
+rsync -a --delete --exclude node_modules --exclude .turbo --exclude dist \
+  ./ /tmp/adapttable-linux/
+docker run --rm -e CI=1 -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+  -v /tmp/adapttable-linux:/work -w /work \
   mcr.microsoft.com/playwright:v1.62.1-noble \
   bash -lc 'corepack enable && pnpm install --frozen-lockfile && pnpm exec playwright test --project=chromium-visual --update-snapshots'
+cp /tmp/adapttable-linux/e2e/visual/baselines/linux/*.png \
+  e2e/visual/baselines/linux/
 ```
 
 Commit the PNG files that changed. Do not hand-edit pixels.

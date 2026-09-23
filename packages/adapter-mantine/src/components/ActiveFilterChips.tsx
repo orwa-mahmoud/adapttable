@@ -1,3 +1,4 @@
+import { defaultLabels } from "@adapttable/core";
 import type { ActiveFilterChip } from "@adapttable/react";
 import { Anchor, Group, Pill } from "@mantine/core";
 
@@ -15,6 +16,8 @@ export interface ActiveFilterChipsProps {
   label: string;
   /** Clear-all link text. */
   clearAllLabel: string;
+  /** Accessible name for a chip's remove button, given the chip's label. */
+  removeLabel?: (label: string) => string;
 }
 
 /**
@@ -27,6 +30,7 @@ export function ActiveFilterChips({
   onClearAll,
   label,
   clearAllLabel,
+  removeLabel = defaultLabels.removeFilter,
 }: Readonly<ActiveFilterChipsProps>) {
   if (chips.length === 0) return null;
   return (
@@ -47,7 +51,7 @@ export function ActiveFilterChips({
           // the keyboard. A filter chip has no such owner, so the button
           // states its own name and takes its own place in the tab order.
           removeButtonProps={{
-            "aria-label": `${clearAllLabel}: ${chip.label}`,
+            "aria-label": removeLabel(chip.label),
             "aria-hidden": false,
             tabIndex: 0,
           }}

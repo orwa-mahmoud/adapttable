@@ -12,6 +12,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FilterHeaderRow } from "./components/kitControls";
 import { DataTable } from "./data-table.test-utils";
+import { findInTable } from "./find-in-table";
 import { groupingPanel } from "./grouping-panel";
 import {
   type ColumnDef,
@@ -289,7 +290,8 @@ function Harness(props: {
       cellNavigation
       columnSelectionCheckbox
       statusBar
-      commandPalette
+      commandPalette={{ button: true }}
+      features={[findInTable({ button: true })]}
       densityChooser
       onDensityChange={vi.fn()}
       fullscreen
@@ -713,6 +715,8 @@ const KEYS = [
   "undoButton",
   "redoButton",
   "printButton",
+  "commandPaletteButton",
+  "findButton",
   "exportCsvButton",
   "exportSpinner",
   "exportProgressSurface",

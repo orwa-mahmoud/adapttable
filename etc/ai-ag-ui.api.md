@@ -470,6 +470,13 @@ export interface AssistantAnswer {
 }
 
 // @public
+export interface AssistantAudio {
+    readonly base64: string;
+    readonly durationMs: number;
+    readonly mimeType: string;
+}
+
+// @public
 export interface AssistantExchange {
     // (undocumented)
     readonly role: "user" | "assistant";
@@ -525,6 +532,7 @@ export interface AssistantResumeInput extends AssistantTurnInput {
 
 // @public
 export interface AssistantSendInput extends AssistantTurnInput {
+    readonly audio?: AssistantAudio;
     readonly text: string;
 }
 
@@ -555,6 +563,7 @@ export interface AssistantTransportReply {
     readonly results?: readonly ExecuteResult[];
     readonly subjects?: readonly (AssistantReceiptSubject | undefined)[];
     readonly text: string;
+    readonly transcript?: string;
     readonly unresolved?: AssistantUnresolved;
 }
 
@@ -565,6 +574,7 @@ export interface AssistantTurnInput {
     readonly conversation: readonly AssistantExchange[];
     readonly onPartialText?: (text: string) => void;
     readonly onResumable?: (token: unknown) => void;
+    readonly onTranscript?: (text: string) => void;
     // (undocumented)
     readonly session: AgentSession;
     // (undocumented)

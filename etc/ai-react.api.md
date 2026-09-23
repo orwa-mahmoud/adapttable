@@ -17,6 +17,7 @@ import { ApprovalResult } from '@adapttable/ai';
 import { ApprovalSubject } from '@adapttable/ai';
 import { AssistantAllowance } from '@adapttable/ai';
 import { AssistantAnswer } from '@adapttable/ai';
+import { AssistantAudio } from '@adapttable/ai';
 import { AssistantInterruption } from '@adapttable/ai';
 import { AssistantMessage } from '@adapttable/ai';
 import { AssistantQuestion } from '@adapttable/ai';
@@ -130,6 +131,7 @@ export interface TableAssistantState {
     readonly revokeAlwaysAllow: (capability: string) => void;
     readonly runSuggestion: (id: string) => Promise<void>;
     readonly send: (text?: string) => Promise<void>;
+    readonly sendClip: (clip: AssistantAudio) => Promise<void>;
     // (undocumented)
     readonly setDraft: (draft: string) => void;
     // (undocumented)

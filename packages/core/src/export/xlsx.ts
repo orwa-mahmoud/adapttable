@@ -41,6 +41,8 @@ function xml(text: string): string {
  *
  * Base-26 with no zero digit, so the usual `% 26` loop is off by one without
  * the decrement — the bug that puts column 26 at "BA".
+ *
+ * @public
  */
 export function columnLetter(index: number): string {
   let n = index;

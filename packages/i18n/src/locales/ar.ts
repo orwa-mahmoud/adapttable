@@ -212,6 +212,7 @@ export const ar: Required<TableLabels> = {
   assistantVoiceStart: "إملاء",
   assistantVoiceStop: "إيقاف الإملاء",
   assistantVoiceListening: "جارٍ الاستماع",
+  assistantVoiceMessage: "رسالة صوتية",
   assistantVoiceLanguage: "لغة الإملاء",
   assistantYou: "أنت",
   assistantSpeaker: "المساعد",

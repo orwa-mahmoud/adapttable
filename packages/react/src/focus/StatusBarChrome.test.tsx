@@ -257,6 +257,32 @@ describe("StatusBarChrome", () => {
     expect(screen.queryByTestId("item-rows")).toBeNull();
   });
 
+  it("keeps the selection figures beside a notice without the status bar", () => {
+    render(
+      <StatusBarChrome
+        enabled={false}
+        shown={10}
+        total={10}
+        selected={0}
+        stats={RANGE}
+        notices={[
+          {
+            kind: "edit-without-writer",
+            appearance: "off",
+            message: "Editing is off",
+          },
+        ]}
+        slots={slots}
+      />
+    );
+
+    expect(screen.getByTestId("item-edit-without-writer")).toHaveTextContent(
+      "Editing is off"
+    );
+    expect(screen.getByTestId("stats")).toBeInTheDocument();
+    expect(screen.getAllByTestId("stats")).toHaveLength(1);
+  });
+
   it("passes the kit's class straight through", () => {
     render(
       <StatusBarChrome

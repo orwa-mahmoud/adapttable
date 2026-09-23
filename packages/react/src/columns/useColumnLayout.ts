@@ -1,5 +1,4 @@
 import {
-  applyCollapsedColumnGroups,
   applyColumnOrder,
   type ColumnGroupRecord,
   type ColumnLayoutState,
@@ -9,9 +8,12 @@ import {
   marriedOrderHolds,
   parsePxWidth,
   type PinSide,
-  toggleCollapsedColumnGroup,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
+import {
+  applyCollapsedColumnGroups,
+  toggleCollapsedColumnGroup,
+} from "@adapttable/core/binding";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";
@@ -26,7 +28,7 @@ export type {
 } from "@adapttable/core";
 export type { UseColumnLayoutResult } from "@adapttable/core";
 
-/** {@link useColumnLayout} preserves full React column defs in `visibleColumns`. */
+/** `useColumnLayout` preserves full React column defs in `visibleColumns`. @public */
 export interface ReactUseColumnLayoutResult<TRow> extends Omit<
   UseColumnLayoutResult<TRow>,
   "visibleColumns"

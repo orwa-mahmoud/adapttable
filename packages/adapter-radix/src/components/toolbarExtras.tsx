@@ -6,6 +6,8 @@
  * neither the handler nor this button.
  */
 import {
+  type AdapterCommandPaletteTriggerProps,
+  type AdapterFindButtonProps,
   ExportAnnouncer,
   ExportProgressChrome,
   type ExportProgressSurfaceSlotProps,
@@ -265,6 +267,45 @@ export function FullscreenButton({
       onClick={onToggleFullscreen}
     >
       {isFullscreen === true ? "\u2715" : "\u26f6"}
+    </Button>
+  );
+}
+
+export function CommandPaletteButton({
+  labels,
+  onOpenPalette,
+  paletteOpen,
+}: Readonly<AdapterCommandPaletteTriggerProps>): ReactNode {
+  return (
+    <Button
+      size="2"
+      variant="soft"
+      color="gray"
+      data-adapttable-part="command-palette-button"
+      aria-haspopup="dialog"
+      aria-expanded={paletteOpen}
+      onClick={onOpenPalette}
+    >
+      {labels.commandPalette}
+    </Button>
+  );
+}
+
+export function FindButton({
+  labels,
+  onOpenFind,
+  findOpen,
+}: Readonly<AdapterFindButtonProps>): ReactNode {
+  return (
+    <Button
+      size="2"
+      variant="soft"
+      color="gray"
+      data-adapttable-part="find-button"
+      aria-expanded={findOpen}
+      onClick={onOpenFind}
+    >
+      {labels.findInTable}
     </Button>
   );
 }

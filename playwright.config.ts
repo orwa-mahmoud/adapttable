@@ -51,7 +51,8 @@ export default defineConfig({
   // half the cores, which leaves most of a laptop idle across 1,588 browser
   // tests. Everything but the efficiency cores runs them instead.
   workers: process.env.CI ? 1 : Math.max(4, availableParallelism() - 2),
-  reporter: process.env.CI ? "line" : "list",
+  // CI also writes playwright-report/, which the workflows upload on failure.
+  reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "on-first-retry",
@@ -87,7 +88,7 @@ export default defineConfig({
     {
       name: "webkit",
       testMatch: CROSS_BROWSER_SPECS,
-      use: { ...devices["Desktop WebKit"] },
+      use: { ...devices["Desktop Safari"] },
     },
     {
       name: "mobile-chrome",

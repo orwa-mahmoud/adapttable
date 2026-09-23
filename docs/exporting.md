@@ -36,9 +36,12 @@ features={[
 ]}
 ```
 
+`maxRows` (default `EXPORT_FETCH_ALL_MAX_ROWS`) and `pageSize` tune the walk;
+`onCapped` receives `{ rows, maxRows }`.
+
 Use this route only when downloading every page and holding the resulting file
-in the tab is appropriate. The cap, paging behavior, and
-`onBeforeExport`/`onAfterExport` hooks are unchanged.
+in the tab is appropriate. The file goes through the normal writer, and
+`onBeforeExport`/`onAfterExport` run as they do for any browser-built export.
 
 ## Server-built export with progress
 

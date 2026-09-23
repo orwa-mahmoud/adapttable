@@ -175,7 +175,7 @@ export function People({ rows, columns, setRows }) {
     setRows(
       applyRowPatches(
         rows,
-        [updateRow(id, { budget })],
+        [updateRow&lt;Person&gt;(id, { budget })],
         (row) =&gt; row.id
       )
     );

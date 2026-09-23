@@ -31,6 +31,7 @@
     "clean": "turbo run clean && rimraf node_modules .turbo coverage",
     "sonar:coverage": "turbo run test:coverage --force && node scripts/fix-lcov-paths.mjs",
     "llms": "node scripts/build-llms-full.mjs",
+    "og:cards": "node scripts/render-og-cards.mjs",
     "react:matrix": "node scripts/react-matrix.mjs",
     "peer:floors": "node scripts/peer-floors.mjs",
     "changeset": "changeset",

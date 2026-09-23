@@ -45,12 +45,16 @@ pass `accentColor` to tint the table's own accents. Swap `useFrontendData` for
 
 - **Automatic mobile cards** — below the mobile breakpoint every row renders as a Radix `Card` (same filters, search, selection and URL state) and infinite scroll replaces the pager; tune per column with `mobileLabel` / `hideOnMobile`, pin either layout with `forceMobile`. [See it flip live](https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/).
 - **Client or server data** through one `TableSource` contract — same props either way.
+- **Global search box** — debounced; matches each row's searchable text on client data and hands the term to the backend on a server tier. Turn it off with `searchable={false}`.
 - **URL-synced** search / sort / filters / page — shareable, deep-linkable links.
 - **Sorting** via sortable headers.
 - **Filtering** — a `Popover` or `Dialog` of filters plus removable `Badge` chips, with a filter count on the trigger. Nested AND/OR filter tree in the same panel.
+- **Header filters** (`headerFilters()`) — a funnel in each filtered column's header opens the same field as the Filters panel, bound to the same state, URL params and chips.
+- **Custom filter types** (`filterTypes([...])`) — register a `FilterTypeSpec` with its own widget, operators and predicate; it gets the form field, header funnel, URL params and chips.
 - **Selection + bulk actions** using Radix `Checkbox`es, composed with `bulkActions(...)`.
 - **Row actions** with optional confirm, `isHidden` / `isDisabled` per row.
 - **Row expansion** — inline detail panels via `rowDetail(...)`.
+- **Nested tables** (`nestedTable(...)`) — a full `DataTable` with its own columns, sorting and paging inside an expanded row.
 - **Inline cell editing** (`editing(handler)` + `editable` columns) — text, number and select
   editors; Enter commits, Escape cancels, Tab moves on. Omit the handler and no cell opens.
 - **Row reordering** (`rowReorder(handler)`) — drag handle, Space-lift keyboard, dataset-relative indices.
@@ -63,6 +67,7 @@ pass `accentColor` to tint the table's own accents. Swap `useFrontendData` for
   ARIA grid semantics and screen-reader announcements. It is also the gate for
   cell-range selection, clipboard copy/paste of a range, and the fill handle.
 - **Row grouping** (`grouping(...)` or `groupingPanel(...)`) — one column key or an ordered list to nest, with per-group aggregates.
+- **Aggregation** — a footer `summaryRow`, group subtotals from `aggregatable` columns, and built-in or custom `aggregate()` operations; totals recompute from the filtered rows.
 - **Pivot tables** — rows, columns and measures with subtotals, from the optional
   `@adapttable/core/pivot` entry.
 - **Tree data** (`tree(...)`) — hierarchical rows with expand/collapse, on desktop and on cards.
@@ -74,6 +79,9 @@ pass `accentColor` to tint the table's own accents. Swap `useFrontendData` for
 - **Saved views** — name a filter/sort/column arrangement and switch between them.
 - **CSV export** (`exportCsv(...)`) — current page, the full filtered set, or the
   selected rows; choose the columns, or hand the whole thing to your backend.
+- **XLSX export** (`@adapttable/core/xlsx`) — optional entry; `xlsxWriter()` on `exportCsv` writes a real `.xlsx` workbook with no extra dependency.
+- **Command palette and context menus** (`commandPalette()`, `contextMenu()`) — Cmd/Ctrl+K opens a searchable list of table actions; right-click opens a menu for the header, row or cell.
+- **View controls** — `densityChooser()`, `fullscreen()`, `print(...)`, `statusBar()`, `selectionStats()`, `sidePanel(...)` and `undoRedoButtons()`, each an opt-in toolbar control from its own subpath.
 - **Virtualization** (`virtualize(...)`) — opt-in row/card windowing for very large lists.
 - **Pagination** — numbered pagination, or infinite scroll (auto by device).
 - **SSR & server components** — renders with no DOM; the client boundary is already in the build, so it drops straight into the Next.js App Router. [Docs](https://orwa-mahmoud.github.io/adapttable/ssr-rsc/).

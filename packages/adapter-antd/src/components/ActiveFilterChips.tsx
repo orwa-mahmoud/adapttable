@@ -28,7 +28,7 @@ export function Chips({
               close control itself, which otherwise announces antd's own
               untranslated "Close". */}
           <Tag
-            closable={{ "aria-label": `${labels.clearAll}: ${chip.label}` }}
+            closable={{ "aria-label": labels.removeFilter(chip.label) }}
             onClose={chip.onRemove}
           >
             {chip.label}

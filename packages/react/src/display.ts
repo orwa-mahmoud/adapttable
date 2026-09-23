@@ -1,4 +1,5 @@
-import { type CellSpanAppearance, cellSpanMark } from "@adapttable/core";
+import { type CellSpanAppearance } from "@adapttable/core";
+import { cellSpanMark } from "@adapttable/core/binding";
 import type { CSSProperties } from "react";
 
 import type { ColumnDef } from "./columnDef";

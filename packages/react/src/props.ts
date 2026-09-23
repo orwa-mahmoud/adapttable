@@ -107,6 +107,56 @@ export interface SidePanelOptions {
 }
 
 /**
+ * The table's edit history as a host drives it: undo and redo through the
+ * table's own commit channel, whether either can run, and a reset.
+ *
+ * @public
+ */
+export interface EditHistoryHandle {
+  /** Put the last gesture back. Returns how many cells were restored. */
+  readonly undo: () => number;
+  /** Do the last undone gesture again. Returns how many cells were rewritten. */
+  readonly redo: () => number;
+  /** Whether anything can be undone right now. */
+  readonly canUndo: boolean;
+  /** Whether anything can be redone right now. */
+  readonly canRedo: boolean;
+  /** Forget every gesture. */
+  readonly clear: () => void;
+}
+
+/**
+ * Options for `editHistory(…)`.
+ *
+ * @public
+ */
+export interface EditHistoryOptions {
+  /** How many gestures to keep. Defaults to 50. */
+  readonly depth?: number;
+  /**
+   * Told the history whenever `canUndo` or `canRedo` changes, and once on
+   * mount, so a control of your own can undo, redo and enable itself.
+   */
+  readonly onChange?: (history: EditHistoryHandle) => void;
+}
+
+/**
+ * The unsaved-edit state as a host reads and settles it.
+ *
+ * @public
+ */
+export interface DirtyEdits {
+  /** How many cells hold a change nobody has confirmed. */
+  readonly count: number;
+  /** Clear one cell's mark — its save was confirmed. */
+  readonly confirm: (rowId: string, columnKey: string) => void;
+  /** Clear every mark in one row. */
+  readonly confirmRow: (rowId: string) => void;
+  /** Clear every mark. */
+  readonly confirmAll: () => void;
+}
+
+/**
  * What a FEATURE applies, and no host passes.
  *
  * Each of these was an enabling prop on `<DataTable>` before v3. A bundler
@@ -160,7 +210,7 @@ export interface FeatureProps<TRow> {
    * way back exactly as it ran on the way out. One gesture is one entry, so a
    * paste of two hundred cells undoes in a single press.
    */
-  editHistory?: boolean | { depth?: number };
+  editHistory?: boolean | EditHistoryOptions;
   /**
    * Show a find bar over the table — Ctrl/Cmd+F with `cellNavigation`, or
    * `table.find.setOpen(true)` from a control of your own.
@@ -237,6 +287,12 @@ export interface FeatureProps<TRow> {
    */
   dirtyIndicators?: boolean;
   /**
+   * Told the unsaved-edit state whenever it changes, and once on mount —
+   * `editing(commit, { onDirtyChange })`. Marks are kept when
+   * `dirtyIndicators()` is composed; without it the count stays 0.
+   */
+  onDirtyChange?: (dirty: DirtyEdits) => void;
+  /**
    * Edit a whole row at once instead of a cell at a time: every field opens
    * together, holds its draft, and reaches the host as ONE patch when the reader
    * saves. Requires `BaseDataTableProps.onRowEdit`.
@@ -298,10 +354,14 @@ export interface FeatureProps<TRow> {
   pinnedRowIds?: RowPinState;
   /**
    * Pin-list change channel. Uncontrolled: an observer. Controlled: apply
-   * the next lists to accept. Setting this (or `BaseDataTableProps.pinnedRowIds`)
-   * is what arms the feature — omit both and nothing renders.
+   * the next lists to accept.
    */
   onPinnedRowIdsChange?: (next: RowPinState) => void;
+  /**
+   * Row pinning is composed. `rowPinning()` sets it, so a bare call pins rows
+   * with the table holding the lists.
+   */
+  rowPinningArmed?: boolean;
   /**
    * Per-cell row/column span. Return `{ colSpan, rowSpan }` for the origin;
    * covered cells are omitted from the row's cell list. Column-level
@@ -435,8 +495,9 @@ export interface FeatureProps<TRow> {
   /** Bulk actions — enabling these turns on row selection. */
   bulkActions?: BulkAction[];
   /**
-   * Opt-in CSV export toolbar button. Pass `true` for defaults
-   * (`export.csv`, current page) or an options object for filename/scope.
+   * Opt-in export toolbar button. Pass `true` for defaults (current page,
+   * `export.` plus the writer's extension) or an options object for
+   * filename, scope and writer.
    * Omit or `false` to hide the button.
    */
   exportCsv?: boolean | ExportCsvOptions<TRow>;
@@ -453,6 +514,12 @@ export interface FeatureProps<TRow> {
    * are a list, not a grid, and keep their list semantics.
    */
   cellNavigation?: boolean;
+  /**
+   * Told the selected cell rectangle whenever it changes, and once on mount —
+   * `null` when nothing beyond the focused cell is selected. Set through
+   * `cellNavigation({ onRangeChange })`.
+   */
+  onCellRangeChange?: (range: CellRange | null) => void;
   /**
    * Offer a checkbox in every column header that selects that column.
    * Defaults to false, and needs `cellNavigation` to do anything.
@@ -716,8 +783,9 @@ export interface BaseDataTableProps<TRow> {
   paginationMode?: PaginationMode;
   /**
    * How many leading desktop-visible columns anchor the mobile identity
-   * block. Never overrides an explicit `hideOnMobile: true` — the
-   * author's hide always wins.
+   * block. The columns it anchors are ones without `hideOnMobile`, which a
+   * card shows anyway, so it does not change which fields a card shows: every
+   * column without `hideOnMobile` appears, and an explicit hide always wins.
    */
   mobileIdentityColumns?: number;
   /** Hover-prefetch callback fired on desktop row mouse-enter. */
@@ -761,7 +829,7 @@ export interface BaseDataTableProps<TRow> {
   /**
    * Mark cells a patch just changed — `data-flash` on the cell and on the
    * matching card value. Pair with `useChangedCellFlash` from
-   * `@adapttable/core/stream`. Omit and nothing is marked.
+   * `@adapttable/react/stream`. Omit and nothing is marked.
    */
   isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   /**

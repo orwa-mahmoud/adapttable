@@ -1,7 +1,7 @@
 /**
  * How a kit paints a cell a patch just changed.
  *
- * `useChangedCellFlash` lives on `@adapttable/core/stream` so a table that
+ * `useChangedCellFlash` lives on `@adapttable/react/stream` so a table that
  * never patches never downloads a timer. The host passes `isCellFlashing`
  * in; these helpers turn that answer into the attribute kits already spread
  * the way they spread `data-dirty`, and into the memo digest memoized rows

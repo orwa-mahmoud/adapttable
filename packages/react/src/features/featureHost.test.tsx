@@ -3,7 +3,6 @@ import {
   type AggregateSpec,
   applyFilterExtends,
   bindFeatureHostFn,
-  columnMenuActions,
   currentFeatureHost,
   defaultFilterRegistry,
   defaultLabels,
@@ -16,6 +15,7 @@ import {
   resolveFilterRegistry,
   runWithFeatureHost,
 } from "@adapttable/core";
+import { columnMenuActions } from "@adapttable/core/binding";
 import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -191,7 +191,7 @@ describe("useTableFeatures", () => {
     const { result } = renderHook(() => {
       const props = useTableFeatures({ features: [plugin] });
       return runWithFeatureHost(featureHostOf(props), () =>
-        aggregate({ team: "distinct" } as unknown as AggregateSpec)([
+        aggregate({ team: "distinct" })([
           { team: "A" },
           { team: "B" },
           { team: "A" },
@@ -199,6 +199,11 @@ describe("useTableFeatures", () => {
       );
     });
     expect(result.current).toEqual({ team: 3 });
+  });
+
+  it("types a registered name in a spec without a cast", () => {
+    const spec: AggregateSpec = { team: "distinct", amount: "sum" };
+    expect(Object.keys(spec)).toEqual(["team", "amount"]);
   });
 
   it("a registered name resolves in a table-hosted pivot", () => {

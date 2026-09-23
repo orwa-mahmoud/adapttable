@@ -85,6 +85,9 @@ export function PeopleTable() {
 - `bulkActions(actions)` is the switch: composing it enables the checkbox
   column, the header tri-state (all / some / none of the visible rows), and
   the bulk bar that appears once at least one row is selected.
+  `selectionStats()` and `columnSelectionCheckbox()` share the same selection
+  state, so either one also adds the checkbox column; without `bulkActions`
+  there is no bulk bar.
 - **`RowAction` vs `BulkAction`**: a row action runs on one row
   (`onClick(row)`, `confirm.message(row)`); a bulk action runs on the
   selection (`onClick(ids, context)`, `confirm.message(count)`).
@@ -94,7 +97,8 @@ export function PeopleTable() {
   scope and your action receives `BulkActionContext` —
   `{ allMatching: true, total }` — so you act on the whole filtered set
   server-side, not just the page `ids`. Any explicit toggle narrows the scope
-  back to concrete ids.
+  back to concrete ids. The banner appears when the table can name the whole
+  matching set — client data, or a server source that reports `total`.
 - **Confirmation sized by scope**: a bulk action's `confirm.message(count)`
   receives `context.total` when all-matching is active, the page ids count
   otherwise. The dialog goes through the table's `confirm` handler
@@ -105,20 +109,21 @@ export function PeopleTable() {
   accept them, the same split as `columnLayout`.
 - Selection is keyed by id (`selectionGetId`, defaulting to `rowKey`), so it
   survives page, sort, and page-size changes — and resets automatically when
-  the result _set_ changes (a new search term or different filter values).
+  the result _set_ changes (a new search term, different filter values, or a
+  grouping change).
 
 ## Options
 
-| Factory / prop         | Type                       | Default          | Description                                                                                                                                                                                                                      |
-| ---------------------- | -------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bulkActions(actions)` | `BulkAction[]`             | —                | Factory from `@adapttable/<kit>/bulk-actions`; composing it turns on row selection and mounts the bulk bar with these buttons.                                                                                                   |
-| `rowActions(actions)`  | `RowAction<TRow>[]`        | —                | Factory from `@adapttable/<kit>/row-actions`; trailing per-row actions, independent of selection.                                                                                                                                |
-| `rowActionsLayout`     | `RowActionsLayout`         | `"buttons"`      | Omit or `"buttons"` for the strip; `"menu"` for a 3-dot menu.                                                                                                                                                                    |
-| `renderRowActions`     | `RowActionsRenderer<TRow>` | —                | Replace the trailing actions cell; wins over `rowActionsLayout`.                                                                                                                                                                 |
-| `selectedIds`          | `readonly string[]`        | — (uncontrolled) | Controlled selection ids.                                                                                                                                                                                                        |
-| `onSelectionChange`    | `(ids: string[]) => void`  | —                | Uncontrolled: observer for every change — once on mount with the (empty) initial set, per toggle/select-all, and on the automatic reset when search or a filter changes. Controlled: the change-request handler (no mount fire). |
-| `selectionGetId`       | `(row: TRow) => string`    | `rowKey`         | Selection id extractor when it must differ from the React key.                                                                                                                                                                   |
-| `confirm`              | `ConfirmHandler`           | `window.confirm` | Confirmation handler for actions with a `confirm` block; pass your own for a styled dialog.                                                                                                                                      |
+| Factory / prop                   | Type                       | Default          | Description                                                                                                                                                                                                                      |
+| -------------------------------- | -------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bulkActions(actions)`           | `BulkAction[]`             | —                | Factory from `@adapttable/<kit>/bulk-actions`; composing it turns on row selection and mounts the bulk bar with these buttons.                                                                                                   |
+| `rowActions(actions, handlers?)` | `RowAction<TRow>[]`        | —                | Factory from `@adapttable/<kit>/row-actions`; trailing per-row actions, independent of selection. `handlers` add Add / Duplicate / Delete — see [row actions](./row-actions.md).                                                 |
+| `rowActionsLayout`               | `RowActionsLayout`         | `"buttons"`      | Omit or `"buttons"` for the strip; `"menu"` for a 3-dot menu.                                                                                                                                                                    |
+| `renderRowActions`               | `RowActionsRenderer<TRow>` | —                | Replace the trailing actions cell; wins over `rowActionsLayout`.                                                                                                                                                                 |
+| `selectedIds`                    | `readonly string[]`        | — (uncontrolled) | Controlled selection ids.                                                                                                                                                                                                        |
+| `onSelectionChange`              | `(ids: string[]) => void`  | —                | Uncontrolled: observer for every change — once on mount with the (empty) initial set, per toggle/select-all, and on the automatic reset when search or a filter changes. Controlled: the change-request handler (no mount fire). |
+| `selectionGetId`                 | `(row: TRow) => string`    | `rowKey`         | Selection id extractor when it must differ from the React key.                                                                                                                                                                   |
+| `confirm`                        | `ConfirmHandler`           | `window.confirm` | Confirmation handler for actions with a `confirm` block; pass your own for a styled dialog.                                                                                                                                      |
 
 ## Notes
 
@@ -128,14 +133,22 @@ export function PeopleTable() {
 - `BulkAction.disabledReason(ids)` returns a non-empty string to grey the
   button out _and_ explain why (shown as its tooltip). Row actions have
   `disabledReason(row)`, `isDisabled(row)`, and `isHidden(row)`.
+- Both action types take `icon` and `color`. A `RowAction` with
+  `editsRow: true` opens row edit mode and carries no `onClick` (see
+  [cell editing](./cell-editing.md#opening-the-row-from-your-own-pencil)).
 - The per-action `confirm` block is
   `{ title, message, confirmLabel, danger? }` — all strings pre-translated.
   Your `confirm` handler receives the full `ConfirmRequest` (including
   `cancelLabel` and `onConfirm`).
+- With [`tableAgent`](./agent-capabilities.md#row-and-bulk-actions)
+  composed, each row and bulk action is also an agent capability
+  (`rowAction.<key>`, `bulkAction.<key>`) under the table's approval policy;
+  `ai: false` on an action keeps it away from the agent, and `ai.approval`
+  overrides the policy for that action.
 - The selection toolbar's strings (`selectedCount`, `selectAllMatching`,
   `allMatchingSelected`, …) are overridable via the `labels` prop.
 - Headless consumers can reuse the same machinery: `useSelection` (with a
-  `resetKey`), `useBulkActionRunner`, and `runRowAction` are exported from
-  `@adapttable/core`.
+  `resetKey`) and `useBulkActionRunner` are exported from `@adapttable/react`;
+  `runRowAction` from `@adapttable/core`.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
+See it live in the [selection demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/selection/).

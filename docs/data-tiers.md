@@ -105,6 +105,8 @@ ride as **optional** fields that a source opts into by declaring what its
 endpoint can answer:
 
 ```tsx
+import { useServerData } from "@adapttable/react";
+
 useServerData({
   rows,
   total,
@@ -127,13 +129,20 @@ field it never agreed to read — and development logs which capability would
 unlock it. That warning is the intended way to discover the next thing your
 backend could do, not an error.
 
-| Field        | Capability   | Carries                                                                                                                                                                                                                        |
-| ------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `groupBy`    | `grouping`   | Grouping keys, outermost first                                                                                                                                                                                                 |
-| `aggregates` | `aggregates` | `{ key, fn }` pairs to compute. Optional `supports.aggregateOperations` lists the ids the backend can answer; omit it and the five standard functions are assumed. Custom ids travel as strings, never as functions.           |
-| `filterTree` | `filterTree` | Nested AND/OR condition tree                                                                                                                                                                                                   |
-| `facets`     | `facets`     | Column keys needing distinct-value counts. The response returns the same keys as `facets` on the page (`PaginatedResponse.facets` / `PageSelector.facets`) — counts for the filtered set with each facet's own filter removed. |
-| `cursor`     | `cursor`     | Opaque cursor from the previous response                                                                                                                                                                                       |
+| Field         | Capability   | Carries                                                                                                                                                                                                                        |
+| ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `groupBy`     | `grouping`   | Grouping keys, outermost first                                                                                                                                                                                                 |
+| `aggregates`  | `aggregates` | `{ key, fn }` pairs to compute. Optional `supports.aggregateOperations` lists the ids the backend can answer; omit it and the five standard functions are assumed. Custom ids travel as strings, never as functions.           |
+| `filterTree`  | `filterTree` | Nested AND/OR condition tree                                                                                                                                                                                                   |
+| `facets`      | `facets`     | Column keys needing distinct-value counts. The response returns the same keys as `facets` on the page (`PaginatedResponse.facets` / `PageSelector.facets`) — counts for the filtered set with each facet's own filter removed. |
+| `cursor`      | `cursor`     | Opaque cursor from the previous response                                                                                                                                                                                       |
+| `expandedIds` | `tree`       | Open tree node ids, so the response can carry the children of every open branch                                                                                                                                                |
+
+`cursor` and `expandedIds` need a source built with `useServerData` or
+`useQuerySource` and passed as `source`: they take the `nextCursor` and
+`expandedIds` options, which `<DataTable onQueryChange>` has no prop for.
+`supports`, `facetKeys` and `facets` are props on every kit's `<DataTable>`
+as well as options of those two hooks.
 
 The flat `filters` bag is always populated, including when `filterTree` is
 sent, so a server that only reads the simple form keeps working.
@@ -142,18 +151,14 @@ sent, so a server that only reads the simple form keeps working.
 
 Build a `TableSource` yourself — `useQuerySource` over TanStack Query (shown
 below; wrap your app in its `QueryClientProvider`), `useFrontendData` for
-headless in-memory use, or a hand-rolled object that fulfils the contract.
+headless in-memory use, or a [hand-rolled object that fulfils the contract](./custom-table-source.md).
 
 ```tsx
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import type { PaginatedResponse, TableQueryParams } from "@adapttable/core";
 // or import from "@adapttable/mui", "@adapttable/chakra", "@adapttable/antd",
 // "@adapttable/radix", "@adapttable/shadcn", "@adapttable/unstyled" — same props everywhere.
-import {
-  DataTable,
-  type PaginatedResponse,
-  type TableQueryParams,
-  useQuerySource,
-} from "@adapttable/mantine";
+import { DataTable, useQuerySource } from "@adapttable/mantine";
 
 interface Person {
   id: string;
@@ -178,7 +183,7 @@ function usePeopleQuery(params: Partial<TableQueryParams>) {
     queryKey: ["people", params],
     queryFn: ({ pageParam }) => fetchPeople({ ...params, page: pageParam }),
     initialPageParam: params.page ?? 1,
-    getNextPageParam: (last) => (last.hasNext ? last.page + 1 : undefined),
+    getNextPageParam: (last) => (last.hasNextPage ? last.page + 1 : undefined),
     placeholderData: keepPreviousData,
   });
 }
@@ -224,8 +229,8 @@ with `source` dev-warns and `source` wins.
   `{ page, limit, search, sortBy, sortDir, sortLevels, filters }` — per real
   change, **including once on mount with the URL-restored values**. Your only
   job is to fetch and hand back `data` + `total`.
-- Server queries are value-keyed (`stableKey`), so identical re-renders and
-  StrictMode double-mounts never re-fire the same query; when a newer query
+- Server queries are value-keyed (`stableKey`), so identical re-renders never
+  re-fire the same query; when a newer query
   supersedes an in-flight one, the previous call's `signal` aborts — forward
   it to `fetch` and out-of-order responses die at the source.
 - **Full control**: every source builder returns the same
@@ -257,13 +262,14 @@ const source: TableSource<Person> = {
 };
 ```
 
-| Capability          | Values                          | What it permits                                                                                      | Off means                                                     |
-| ------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `fullDataset`       | `boolean`                       | Every row is reachable, not just the page on screen                                                  | The other four are decided independently                      |
-| `grouping`          | `"client" \| "server" \| false` | `groupBy` groups in the browser, or renders the server's group rows                                  | `groupBy` is ignored, and the status bar says why             |
-| `selectAcrossPages` | `boolean`                       | The "select all N matching" banner after a full page is selected                                     | Selection stays the rows on screen                            |
-| `exportScope`       | `"all" \| "page"`               | A source-owned `allFilteredRows` route may serve `scope: "all"`; it does not retrieve rows by itself | The Export button is disabled, with the reason on the control |
-| `totalCount`        | `"exact" \| "loaded"`           | `total` is the match count                                                                           | `total` is what has arrived so far                            |
+| Capability            | Values                          | What it permits                                                                                      | Off means                                                     |
+| --------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `fullDataset`         | `boolean`                       | Every row is reachable, not just the page on screen                                                  | The other four are decided independently                      |
+| `grouping`            | `"client" \| "server" \| false` | `groupBy` groups in the browser, or renders the server's group rows                                  | `groupBy` is ignored, and the status bar says why             |
+| `selectAcrossPages`   | `boolean`                       | The "select all N matching" banner after a full page is selected                                     | Selection stays the rows on screen                            |
+| `exportScope`         | `"all" \| "page"`               | A source-owned `allFilteredRows` route may serve `scope: "all"`; it does not retrieve rows by itself | The Export button is disabled, with the reason on the control |
+| `totalCount`          | `"exact" \| "loaded"`           | `total` is the match count                                                                           | `total` is what has arrived so far                            |
+| `aggregateOperations` | `readonly string[]` (optional)  | The aggregate ids the backend computes                                                               | The five standard functions are assumed                       |
 
 **Omit `capabilities` and nothing changes.** The table reads the same answers
 off the source's shape, exactly as it always has: `allFilteredRows` present
@@ -294,12 +300,17 @@ cache misses on every keystroke; and invalidation after a save either refetches
 the whole endpoint or only the page on screen.
 
 ```tsx
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { tableQueryKey, tableQueryBaseKey } from "@adapttable/core";
 
+// `query` is the `TableQuery` the table emitted; `fetchPeople` returns a
+// `PaginatedResponse` for it.
+const queryClient = useQueryClient();
 const infinite = useInfiniteQuery({
   queryKey: tableQueryKey(query, { scope: "people" }),
   queryFn: ({ signal }) => fetchPeople(query, signal),
-  getNextPageParam: (last) => last.nextCursor,
+  initialPageParam: 1,
+  getNextPageParam: (last) => (last.hasNextPage ? last.page + 1 : undefined),
 });
 
 // after a write — every page of this view, nothing else
@@ -327,12 +338,13 @@ happen to be exactly what both expect. The options shape is exported as
 
 ## Which requests actually fire
 
-`onQueryChange` fires per real change, not per render. Four guarantees, each
-covered by a test:
+`onQueryChange` fires per real change, not per render. Four guarantees:
 
 - **One request per query.** Queries are compared by value, so setting the same
-  search term three times in a tick, an identical re-render, or a StrictMode
-  double-mount all collapse into a single call.
+  search term three times in a tick or an identical re-render collapses into a
+  single call. Under StrictMode's development double-mount the handler runs
+  twice and the first call's `signal` is already aborted, so forwarding
+  `signal` to `fetch` leaves one live request.
 - **Setting a value it already holds is not a change.** No request fires.
 - **A superseded request aborts.** When a newer query replaces an in-flight
   one, the previous call's `signal` fires. Forward it to `fetch` and an
@@ -351,16 +363,17 @@ the way you configured it, and these guarantees do not apply.
 
 ## Options
 
-| Prop            | Type                                                                                       | Default | Description                                                                                                                                                                  |
-| --------------- | ------------------------------------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data`          | `readonly TRow[]`                                                                          | —       | Frontend tier: all rows. Server tier: the current page, exactly as the server returned it.                                                                                   |
-| `total`         | `number`                                                                                   | `0`     | Server tier: total row count across all pages (drives the pager).                                                                                                            |
-| `loading`       | `boolean`                                                                                  | `false` | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise).                                                                              |
-| `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | —       | Server tier: fired per consolidated query change, once on mount included. `info.key` identifies the request; echo it back as `responseKey` to say which one the rows answer. |
-| `responseKey`   | `string`                                                                                   | —       | The `info.key` of the request the current `data` answers (see [Row grouping](./row-grouping.md#server-tiers)).                                                               |
-| `aggregates`    | `readonly QueryAggregate[]`                                                                | —       | Developer defaults sent as `query.aggregates`; requires `supports.aggregates`. Reader overrides overlay this; Restore defaults returns here, not to the last response.       |
-| `error`         | `Error \| null`                                                                            | `null`  | Forwarded error to display.                                                                                                                                                  |
-| `source`        | `TableSource<TRow>`                                                                        | —       | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.                                                                                        |
+| Prop            | Type                                                                                       | Default  | Description                                                                                                                                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`          | `readonly TRow[]`                                                                          | —        | Frontend tier: all rows. Server tier: the current page, exactly as the server returned it.                                                                                                                                                     |
+| `total`         | `number`                                                                                   | `0`      | Server tier: total row count across all pages (drives the pager).                                                                                                                                                                              |
+| `loading`       | `boolean`                                                                                  | `false`  | Server tier: request in flight (skeleton when no rows yet, subtle refresh indicator otherwise).                                                                                                                                                |
+| `onQueryChange` | `(query: TableQuery, info: { signal: AbortSignal; key: string }) => void \| Promise<void>` | —        | Server tier: fired per consolidated query change, once on mount included. `info.key` identifies the request; echo it back as `responseKey` to say which one the rows answer.                                                                   |
+| `responseKey`   | `string`                                                                                   | —        | The `info.key` of the request the current `data` answers (see [Row grouping](./row-grouping.md#server-tiers)).                                                                                                                                 |
+| `aggregates`    | `readonly QueryAggregate[]`                                                                | —        | Developer defaults sent as `query.aggregates`; sent only when the source declares `supports.aggregates` (a `useServerData` / `useQuerySource` option). Reader overrides overlay this; Restore defaults returns here, not to the last response. |
+| `error`         | `Error \| null`                                                                            | `null`   | Forwarded error to display.                                                                                                                                                                                                                    |
+| `source`        | `TableSource<TRow>`                                                                        | —        | Full control: a prebuilt source from `useFrontendData` / `useQuerySource` / your own.                                                                                                                                                          |
+| `mode`          | `"frontend" \| "server"`                                                                   | inferred | Pins the tier; `"server"` requires `onQueryChange`, `"frontend"` turns it into a notification (see [Explicit `mode`](#explicit-mode--when-inference-isnt-what-you-meant)).                                                                     |
 
 ## Notes
 

@@ -21,7 +21,9 @@ Capabilities come from the live table:
   `view.setPage`.
 - Grouping, filters, export, editing and reorder appear only when that
   feature is composed **and** the host callback (where a write needs one)
-  is present.
+  is present. `view.setGroupBy` needs the grouping panel (`grouping-panel`),
+  because a static `grouping(key)` reimposes its key; `view.setAggregations`
+  appears with either grouping feature when a column is eligible.
 - `view.setSelection` appears when selection is wired (`apply.setSelection`).
 - `view.pinColumn` appears when column pinning is wired and at least one
   column is pinnable. `view.hideColumn` and `view.setColumnOrder` appear
@@ -37,6 +39,11 @@ Capabilities come from the live table:
   `writePolicy` is `"allow"`. `rows.delete` is destructive, and takes the same
   row references `edit.cells` does — a stable `rowKey`, or a 1-based
   `position` in a named `scope` — resolved before any row is removed.
+  `rows.add`, `rows.delete` and `rows.reorder` have no staging path: under the
+  default `commit: "stage"` they return `commit-incompatible`, so a table that
+  offers them sets `commit: "immediate"`.
+- `rowAction.<key>` and `bulkAction.<key>` appear for every row and bulk
+  action the host composed — see [row and bulk actions](#row-and-bulk-actions).
 - Data-layer truth comes from the source's
   [`TableSourceCapabilities`](./data-tiers.md) — the manifest copies those
   fields and never re-infers them from shape.
@@ -107,7 +114,7 @@ identically to a scripted call, and an action planned against a stale view
 fails instead of applying to a different one.
 
 `AssistantSuggestion` is an authored prompt with a stable `id`, a localizable
-`title`, and the capability keys it `requires`. Suggestions are never derived
+`title`, the `prompt` it sends, and the capability keys it `requires`. Suggestions are never derived
 from capability keys — a key is not a sentence.
 `eligibleSuggestions(suggestions, available)` hides the ones this table
 cannot run, and `assertUniqueSuggestions` catches a repeated id. A capability
@@ -119,9 +126,11 @@ Nothing in these contracts imports React or calls a model.
 
 `@adapttable/ai-react` turns those contracts into a conversation, and
 still renders nothing. `useTableAssistant({ session, transport, suggestions })`
-returns `status`, `messages`, `draft`/`setDraft`, `send`, `stop`, `clear`,
-the live `suggestions`, `runSuggestion`, `open`/`setOpen`
-and `error`. A host renders its own panel from those; the widget each kit
+returns `status`, `busy`, `messages`, `draft`/`setDraft`, `send`, `stop`,
+`clear`, the live `suggestions`, `runSuggestion`, `open`/`setOpen`, `error` and
+`errorCode`, plus the pending `approval`, `alwaysAllowed` /
+`revokeAlwaysAllow`, `undo` / `undoTurn` / `undoAction`, `interrupted`,
+`resumable` / `resume`, `progress` and `answer` for a structured question. A host renders its own panel from those; the widget each kit
 ships is written against the same values, so it is a convenience and never a
 requirement. `examples/ai-assistant-custom-ui.tsx` is a complete panel with no
 widget in it.
@@ -147,7 +156,7 @@ swaps transports — a backend for a scripted one — says so with `transportKey
 because a backend must never quietly become a simulated one.
 
 Receipts come from results, never from an outer flag. `receiptFromResult` and
-`receiptsFromResults` report `executed`, `staged`, `rejected`,
+`receiptsFromResults` report `executed`, `staged`, `partial`, `rejected`,
 `awaiting-approval`, `cancelled`, `stale` or `failed`; `turnStatus` summarizes
 a turn as `applied`, `partial`, `none`, `cancelled` or `failed`. An approved
 write that has not reached the host is `staged`, not executed — Save is still
@@ -178,10 +187,11 @@ const assistant = useTableAssistant({ session, transport, suggestions });
 
 `TableAssistant` takes `TableAssistantProps`: the `assistant` view, `open` and
 `onOpenChange`, an optional `presentation` (`TableAssistantPresentation` —
-`"panel"` beside the table, or `"sheet"` for a modal on a narrow viewport),
-`labels`, `className`, `launcher` (set `false` when the host supplies its own
-trigger — the toolbar button and the floating launcher drive ONE panel), and
-`onSettings`. `tableAssistant()` binds the same component to the
+`"panel"` beside the table, `"sheet"` for a modal on a narrow viewport, or
+`"floating"`), `labels`, `className`, `launcher` (set `false` when the host
+supplies its own trigger — the toolbar button and the floating launcher drive
+ONE panel), `onSettings`, `approval`, `receipts`, [`speech`](./ai-voice.md), `greeting`, `note`,
+`accent`, `avatars`, `boundary`, `dir` and `messageAction`. `tableAssistant()` binds the same component to the
 `TABLE_ASSISTANT` slot for hosts that compose it as a feature.
 
 The panel is a sibling of the table, never a cell inside it, so it can sit
@@ -191,8 +201,8 @@ beside the grid without covering the rows a reader is asking about.
 
 Structure, keyboard and announcements live in `TableAssistantChrome`
 (`TableAssistantChromeProps`); each kit fills `TableAssistantSlots` with its
-own `Panel`, `Sheet`, `Button`, `Composer` and `Badge`
-(`TableAssistantPanelProps`, `TableAssistantSheetProps`,
+own `Panel`, `Sheet`, `Window`, `Button`, `Composer` and `Badge`, and
+optionally `Menu` and `LanguageChip` (`TableAssistantPanelProps`, `TableAssistantSheetProps`,
 `TableAssistantButtonProps`, `TableAssistantComposerProps`,
 `TableAssistantBadgeProps`). Core draws no control, so a Mantine table's
 assistant is Mantine and an antd table's is antd —
@@ -412,6 +422,44 @@ in [`@adapttable/ai`](./ai.md). The kit strip uses `agent-approval`,
 `agent-approval-list`, `agent-approval-approve`, `agent-approval-reject`,
 and `agent-approval-row`. Escape rejects. Enter is not a silent confirm.
 
+## Row and bulk actions
+
+`tableAgent` offers every action the host composed with `rowActions(…)` and
+`bulkActions(…)` as its own governed capability. Nothing else needs wiring:
+
+| Capability         | Input         | Runs                                                   |
+| ------------------ | ------------- | ------------------------------------------------------ |
+| `rowAction.<key>`  | `{ rowKey }`  | The action's `onClick(row)`, as a click would.         |
+| `bulkAction.<key>` | `{ rowKeys }` | The action's `onClick(ids, context)` on the selection. |
+
+Each is a write, and `destructive` when its `confirm` is marked `danger`, so
+the table's write policy, commit mode and approval apply before the host's
+handler runs. An action's `ai.approval` overrides the table's policy for that
+capability, field by field, exactly as `capabilityApproval` does; an action
+with a `confirm` block asks a person unless its `ai.approval.policy` says
+otherwise. `ai: false` keeps an action away from the agent. A host handler
+cannot be staged, so the actions run on a `commit: "immediate"` table; a
+staged table refuses them with `commit-incompatible`.
+
+A row action refuses a row it is hidden or disabled for (`isHidden`,
+`disabledReason`, `isDisabled`) before anything runs. A bulk action runs on
+the current selection: the agent selects with `view.setSelection`, then passes
+the same keys as `rowKeys`, and a selection that changed in between is
+refused. The table's own add, duplicate, delete and pin controls are not
+offered this way — they are `rows.add`, `rows.delete` and `view.pinRow`.
+
+The table still never changes the data: the capability calls the host's own
+handler, and the host decides what the action does.
+
+Without React, `tableActionCapabilities(declared, source)` from
+`@adapttable/ai` builds the same definitions for `createAgentSession`.
+`declared` is a `DeclaredTableActions` — the table's `row` and `bulk` actions —
+and `source` is a `TableActionSource`: `actions()`, `rowFor(rowKey)` and
+`selectedIds()`, read each time a capability plans or runs, so it acts on the
+live table. `tableActionSignature(declared)` says when the set changed; rebuild
+the definitions then, because a session's capabilities are fixed when it is
+built.
+
 ## Registering a capability of your own
 
 `createAgentSession({ capabilities })` takes `AgentCapabilityDefinition`s. A
@@ -448,12 +496,13 @@ Staging is declared, not assumed. A governed capability defaults to
 `staging: "unsupported"`, so a table running `commit: "stage"` rejects the call
 with `commit-incompatible` before your handler runs rather than committing
 something the host wanted staged. Set `staging: "supported"` when the
-capability really can stage.
+capability really can stage. Among the built-ins only `edit.cells` stages.
 
 `AgentCapabilityContext` is what `execute` receives: the `observation` it was
 authorized against, the host's `apply` callbacks, a live `observe()`, the bound
-`onApprove`, the request's `signal` and `throwIfCancelled()`, and — for a
-governed write — the approved `plan` and the resolved `commit` mode.
+`onApprove`, the request's `signal` and `throwIfCancelled()`, an optional
+`reportProgress`, and — for a governed write — the approved `plan`, the
+resolved `commit` mode and, after a per-row decision, `approvedIndexes`.
 
 ### Wiring the review
 
@@ -483,7 +532,7 @@ hands the same value over:
 ```tsx
 const [approval, setApproval] = useState<AgentApprovalPending | null>(null);
 
-tableAgent({ bridge: { approvals: setApproval } });
+tableAgent({ tableId: "orders", bridge: { approvals: setApproval } });
 ```
 
 To draw the review yourself, read the model and render whatever you like. The
@@ -507,8 +556,8 @@ function MyApproval({ pending }: { pending: AgentApprovalPending }) {
           {item.proposal.rowLabel ?? item.proposal.rowKey}
         </button>
       ))}
-      <button onClick={pending.approve}>{review.approveLabel}</button>
-      <button onClick={pending.reject}>{review.rejectLabel}</button>
+      <button onClick={() => pending.approve()}>{review.approveLabel}</button>
+      <button onClick={() => pending.reject()}>{review.rejectLabel}</button>
     </aside>
   );
 }
@@ -618,7 +667,8 @@ choosing a surface authorizes nothing.
 The table sets both once:
 
 ```ts
-useTableAssistant({
+tableAgent({
+  tableId: "orders",
   approval: { policy: "writes", presentation: "widget" },
 });
 ```
@@ -626,39 +676,33 @@ useTableAssistant({
 `approval: "writes"` still works and means the policy alone. The defaults are
 `writes` and `widget`.
 
-An action overrides either field on its own:
+A capability overrides either field on its own, through `capabilityApproval`
+for a built-in key or `ai` on a custom definition:
 
 ```ts
-const actions: RowAction<Person>[] = [
-  { key: "email", label: "Email", onClick: email },
-  {
-    key: "delete",
-    label: "Delete",
-    onClick: remove,
+tableAgent({
+  tableId: "staff",
+  commit: "immediate",
+  approval: { policy: "writes", presentation: "widget" },
+  capabilityApproval: {
     // Always ask for this one, wherever the table reviews approvals.
-    ai: { approval: { policy: "required" } },
+    "rows.delete": { approval: { policy: "required" } },
   },
-];
+});
 ```
 
 Inheritance is per FIELD. Overriding the policy leaves the presentation as the
 shared one, and vice versa — so a table can say "review in the widget" once and
-then mark two sensitive actions as always-ask without repeating itself. An
-absent `ai` object changes nothing: there is no key whose absence means
-authorized.
+then mark two sensitive capabilities as always-ask without repeating itself. An
+absent entry changes nothing: there is no key whose absence means authorized.
 
 `policy: "automatic"` skips the human confirmation and nothing else.
 Permissions, schema validation, and the staging and save rules all still run,
 and a column the table marked unwritable is still refused.
 
-**`ai.approval` is not `confirm`.** `confirm` describes a person clicking the
-action themselves and being asked whether they meant it. `ai.approval`
-describes an agent asking to run it on their behalf. One agent execution
-raises one prompt — the approval — not both.
-
-The `ai` object carries overrides only. The action's key, label, handler and
-disabled rules stay where they are; it is plain data, so a table with no
-assistant carries no agent code because one of its actions mentions it.
+An entry carries overrides only. It never enables a capability the table does
+not wire or one in `excludeCapabilities`, and `required` drops
+`alwaysAllow` for that capability.
 
 ### Deciding a bulk write row by row
 

@@ -167,9 +167,11 @@
         <p>With <code>cellNavigation</code> on, the same handler receives whole blocks: paste a spreadsheet range with Ctrl+V, drag the fill handle, and undo the entire paste with one Ctrl+Z.</p>
         <p>Every editor is a small TextField — text, number and the select variant with MenuItem options — so a rejected value reports through the field's own error state and helperText rather than through chrome bolted beside it.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/mui&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/mui&quot;;
+import { cellNavigation } from &quot;@adapttable/mui/cell-navigation&quot;;
+import { editHistory, editing } from &quot;@adapttable/mui/editing&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, editable: true },
   {
     key: &quot;status&quot;,
@@ -185,11 +187,13 @@ export function People({ rows, onSave }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      cellNavigation
-      editHistory
-      onCellEdit={(row, key, value) =&gt;
-        onSave({ ...row, [key]: value })
-      }
+      features={[
+        cellNavigation(),
+        editHistory(),
+        editing((row: Person, key, value) =&gt;
+          onSave({ ...row, [key]: value })
+        ),
+      ]}
     /&gt;
   );
 }</code></pre>

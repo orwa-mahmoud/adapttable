@@ -1,4 +1,5 @@
-import { type HeaderGroupCell, type TableLabels } from "@adapttable/core";
+import { type TableLabels } from "@adapttable/core";
+import { type HeaderGroupCell } from "@adapttable/core/binding";
 import type { ReactElement, ReactNode } from "react";
 
 /**

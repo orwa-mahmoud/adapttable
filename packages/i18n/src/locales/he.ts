@@ -211,6 +211,7 @@ export const he: Required<TableLabels> = {
   assistantVoiceStart: "הכתבה",
   assistantVoiceStop: "עצירת ההכתבה",
   assistantVoiceListening: "מקשיב",
+  assistantVoiceMessage: "הודעה קולית",
   assistantVoiceLanguage: "שפת ההכתבה",
   assistantYou: "אתה",
   assistantSpeaker: "עוזר",

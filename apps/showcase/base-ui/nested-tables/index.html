@@ -163,11 +163,12 @@
         <p class="at-fallback__kicker">AdaptTable for Base UI</p>
         <h1>Nested tables in Base UI</h1>
         <p>Open a row and the panel holds another Base UI table — the same component, not a hand-built list. Each person has recent orders; the inner table has its own columns and row keys.</p>
-        <p><code>nestedTable</code> mounts the kit's DataTable with defaults that keep the two tables from fighting over the URL. Rows with no nested table can still use <code>renderRowDetail</code>.</p>
+        <p><code>nestedTable()</code> mounts the kit's DataTable with defaults that keep the two tables from fighting over the URL. Rows with no nested table can still use <code>rowDetail()</code>.</p>
         <p>The expand chevron and both tables are Base UI.</p>
         <p>The chevron is a Base UI Button; the inner table is another Base UI DataTable, so the nested orders are Base UI table rows.</p>
         <h2>The code</h2>
         <pre><code>import { DataTable } from &quot;@adapttable/base-ui&quot;;
+import { nestedTable } from &quot;@adapttable/base-ui/nested-table&quot;;
 
 export function People({ rows, columns, orderColumns }) {
   return (
@@ -175,17 +176,19 @@ export function People({ rows, columns, orderColumns }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      nestedTable={(row) =&gt; ({
-        label: `Orders for ${row.name}`,
-        table: (defaults) =&gt; (
-          &lt;DataTable
-            {...defaults}
-            data={row.orders}
-            columns={orderColumns}
-            rowKey={(order) =&gt; order.id}
-          /&gt;
-        ),
-      })}
+      features={[
+        nestedTable((row: Person) =&gt; ({
+          label: `Orders for ${row.name}`,
+          table: (defaults) =&gt; (
+            &lt;DataTable
+              {...defaults}
+              data={row.orders}
+              columns={orderColumns}
+              rowKey={(order) =&gt; order.id}
+            /&gt;
+          ),
+        })),
+      ]}
     /&gt;
   );
 }</code></pre>

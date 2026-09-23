@@ -7,8 +7,9 @@
  *
  * ```tsx
  * import { xlsxWriter } from "@adapttable/core/xlsx";
+ * import { exportCsv } from "@adapttable/mantine/export";
  *
- * <DataTable exportCsv={{ writer: xlsxWriter() }} … />
+ * <DataTable features={[exportCsv({ writer: xlsxWriter() })]} … />
  * ```
  */
 export type { ExportViewEntry, ExportWriter } from "./export/exportWriter";

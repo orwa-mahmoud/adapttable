@@ -25,6 +25,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
+import { useState } from "react";
 
 import { KitPortal } from "./components/kitPortal";
 import { NativeSelect } from "./components/primitives";
@@ -294,8 +295,17 @@ function AssistantMenu({
   onSelect,
   maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
+  // Held here rather than left to the menu, so choosing an item closes it
+  // before the item runs and the content can unmount the moment it closes.
+  const [open, setOpen] = useState(false);
   return (
-    <Menu.Root positioning={{ placement: "top-start" }}>
+    <Menu.Root
+      positioning={{ placement: "top-start" }}
+      open={open}
+      onOpenChange={(details) => {
+        setOpen(details.open);
+      }}
+    >
       <Menu.Trigger asChild>
         <IconButton
           type="button"
@@ -310,34 +320,41 @@ function AssistantMenu({
           {icon}
         </IconButton>
       </Menu.Trigger>
-      <Portal>
-        <Menu.Positioner>
-          <Menu.Content maxH={maxHeight} overflowY="auto">
-            {items.map((item) => (
-              <Menu.Item
-                key={item.id}
-                value={item.id}
-                data-adapttable-part={item.part}
-                onClick={() => {
-                  onSelect(item.id);
-                }}
-              >
-                <Box display="flex" gap="2" alignItems="flex-start">
-                  {item.icon}
-                  <Box>
-                    <Text fontSize="sm">{item.title}</Text>
-                    {item.description ? (
-                      <Text fontSize="xs" color="fg.muted">
-                        {item.description}
-                      </Text>
-                    ) : null}
+      {/* Mounted only while open: Chakra keeps closed content on screen until
+          its exit animation ends, and a turn that re-renders the panel
+          mid-exit can leave that end unfired, stranding the menu over the
+          conversation. */}
+      {open ? (
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content maxH={maxHeight} overflowY="auto">
+              {items.map((item) => (
+                <Menu.Item
+                  key={item.id}
+                  value={item.id}
+                  data-adapttable-part={item.part}
+                  onClick={() => {
+                    setOpen(false);
+                    onSelect(item.id);
+                  }}
+                >
+                  <Box display="flex" gap="2" alignItems="flex-start">
+                    {item.icon}
+                    <Box>
+                      <Text fontSize="sm">{item.title}</Text>
+                      {item.description ? (
+                        <Text fontSize="xs" color="fg.muted">
+                          {item.description}
+                        </Text>
+                      ) : null}
+                    </Box>
                   </Box>
-                </Box>
-              </Menu.Item>
-            ))}
-          </Menu.Content>
-        </Menu.Positioner>
-      </Portal>
+                </Menu.Item>
+              ))}
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
+      ) : null}
     </Menu.Root>
   );
 }

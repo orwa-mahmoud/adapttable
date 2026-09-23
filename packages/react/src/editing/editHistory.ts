@@ -17,6 +17,7 @@ import { type CellEdit, getPath } from "@adapttable/core";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";
+import type { EditHistoryOptions } from "../props";
 import type { BatchRowEdit } from "./batchEditing";
 
 /**
@@ -221,7 +222,7 @@ export function useEditHistory<TRow>(
  */
 export interface TableEditHistoryProps<TRow> {
   /** The `editHistory` prop as the host wrote it. */
-  editHistory?: boolean | { depth?: number };
+  editHistory?: boolean | EditHistoryOptions;
   /** The columns, for reading a cell's value before it changes. */
   columns: readonly ColumnDef<TRow>[];
   /** The host's commit channel. */

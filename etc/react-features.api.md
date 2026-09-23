@@ -13,6 +13,7 @@ import { BulkActionContext } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
 import { CellEditorOption } from '@adapttable/core';
 import { CellProps } from '@adapttable/core';
+import { CellRange } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
 import { CellSpanRequest } from '@adapttable/core';
 import { ChecklistValue } from '@adapttable/core';
@@ -153,7 +154,12 @@ export { CellEditor }
 export { CellEditorOption }
 
 // @public
-export function cellNavigation(): StaticTableFeature;
+export function cellNavigation(options?: CellNavigationOptions): StaticTableFeature;
+
+// @public
+export interface CellNavigationOptions {
+    readonly onRangeChange?: (range: CellRange | null) => void;
+}
 
 export { CellProps }
 
@@ -225,7 +231,10 @@ export function commandPalette(options?: boolean | CommandPaletteOptions): Stati
 
 // @public
 export interface CommandPaletteOptions {
+    button?: boolean;
     commands?: readonly Command[];
+    onOpenChange?: (open: boolean) => void;
+    open?: boolean;
     shortcuts?: readonly Shortcut[];
 }
 
@@ -254,12 +263,33 @@ export type Density = "comfortable" | "compact";
 export function densityChooser(): StaticTableFeature;
 
 // @public
+export interface DirtyEdits {
+    readonly confirm: (rowId: string, columnKey: string) => void;
+    readonly confirmAll: () => void;
+    readonly confirmRow: (rowId: string) => void;
+    readonly count: number;
+}
+
+// @public
 export function dirtyIndicators(): StaticTableFeature;
 
 // @public
-export function editHistory(options?: boolean | {
-    depth?: number;
-}): StaticTableFeature;
+export function editHistory(options?: boolean | EditHistoryOptions): StaticTableFeature;
+
+// @public
+export interface EditHistoryHandle {
+    readonly canRedo: boolean;
+    readonly canUndo: boolean;
+    readonly clear: () => void;
+    readonly redo: () => number;
+    readonly undo: () => number;
+}
+
+// @public
+export interface EditHistoryOptions {
+    readonly depth?: number;
+    readonly onChange?: (history: EditHistoryHandle) => void;
+}
 
 // @public
 export function editing<TRow>(onCellEdit: (row: TRow, key: string, nextValue: unknown) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
@@ -342,9 +372,7 @@ export interface FeatureProps<TRow> {
     defaultExpandedRowIds?: readonly string[];
     densityChooser?: boolean;
     dirtyIndicators?: boolean;
-    editHistory?: boolean | {
-        depth?: number;
-    };
+    editHistory?: boolean | EditHistoryOptions;
     enableColumnMenu?: boolean;
     exportCsv?: boolean | ExportCsvOptions<TRow>;
     extraRows?: readonly ExtraRow[];
@@ -363,7 +391,9 @@ export interface FeatureProps<TRow> {
     onAddRow?: () => unknown;
     onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    onCellRangeChange?: (range: CellRange | null) => void;
     onDeleteRow?: (row: TRow) => unknown;
+    onDirtyChange?: (dirty: DirtyEdits) => void;
     onDuplicateRow?: (row: TRow) => unknown;
     onLoadChildren?: (row: TRow) => void | Promise<void>;
     onPinnedRowIdsChange?: (next: RowPinState) => void;
@@ -379,6 +409,7 @@ export interface FeatureProps<TRow> {
     rowEditIcons?: RowEditIcons;
     rowEditing?: boolean;
     rowHeight?: RowHeight<TRow>;
+    rowPinningArmed?: boolean;
     rowStyle?: RowStyle<TRow>;
     savedViews?: UseSavedViewsOptions;
     selectionStats?: boolean;
@@ -403,6 +434,7 @@ export interface FeatureProviderProps<TRow = unknown> {
 
 // @public
 export interface FeatureRender<TProps> {
+    readonly orderAs?: string;
     readonly render: (props: TProps) => ReactNode;
     readonly slot: FeatureSlotKey<TProps>;
 }
@@ -482,8 +514,9 @@ export { GroupingDragState }
 export { GroupingDropProps }
 
 // @public
-export interface GroupingExtras<TRow> extends StaticGroupingExtras {
+export interface GroupingExtras<TRow> extends Omit<StaticGroupingExtras, "groupFilter"> {
     groupAggregates?: (rows: readonly TRow[]) => unknown;
+    groupFilter?: (group: GroupNode<TRow>) => boolean;
     groupSort?: GroupSort<TRow>;
 }
 
@@ -557,7 +590,7 @@ export { ResolvedPaginationMode }
 export { RowAction }
 
 // @public
-export function rowActions<TRow>(actions?: readonly RowAction<TRow>[]): TableFeature<TRow>;
+export function rowActions<TRow>(actions?: readonly RowAction<TRow>[], handlers?: RowMutationHandlers<TRow>): TableFeature<TRow>;
 
 // @public
 export function rowAppearance<TRow>(options: {
@@ -596,6 +629,14 @@ export { RowMovePolicy }
 export { RowMoveRequest }
 
 export { RowMoveTarget }
+
+// @public
+export interface RowMutationHandlers<TRow> {
+    confirmDeleteRow?: boolean;
+    onAddRow?: () => unknown;
+    onDeleteRow?: (row: TRow) => unknown;
+    onDuplicateRow?: (row: TRow) => unknown;
+}
 
 // @public
 export type RowOf<P> = P extends {
@@ -694,7 +735,7 @@ export type StaticFeatureHost = Omit<TableFeatureHost<never>, "registerColumnMen
 // @public
 export interface StaticGroupingExtras {
     collapsedGroupIds?: readonly string[];
-    groupFilter?: (group: unknown) => boolean;
+    groupFilter?: (group: GroupNode<unknown>) => boolean;
     groupFooters?: boolean;
     groupPageSize?: number;
     groupRowPageSize?: number;

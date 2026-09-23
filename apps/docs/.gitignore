@@ -1,6 +1,8 @@
 dist/
 .astro/
-# generated from ../../docs by sync-docs.mjs
-src/content/docs/
+# generated from ../../docs by sync-docs.mjs; the archived version
+# snapshots under it (v1/, v2/, …) are committed.
+src/content/docs/*
+!src/content/docs/v[0-9]*/
 public/llms.txt
 public/llms-full.txt

@@ -167,9 +167,11 @@
         <p>With <code>cellNavigation</code> on, the same handler receives whole blocks: paste a spreadsheet range with Ctrl+V, drag the fill handle, and undo the entire paste with one Ctrl+Z.</p>
         <p>The editors are Chakra's Input and NativeSelect at size sm; Chakra v3 ships no NumberInput here, so a number cell is an Input typed number and the validation message is the table's own.</p>
         <h2>The code</h2>
-        <pre><code>import { DataTable } from &quot;@adapttable/chakra&quot;;
+        <pre><code>import { DataTable, type ColumnDef } from &quot;@adapttable/chakra&quot;;
+import { cellNavigation } from &quot;@adapttable/chakra/cell-navigation&quot;;
+import { editHistory, editing } from &quot;@adapttable/chakra/editing&quot;;
 
-const columns = [
+const columns: ColumnDef&lt;Person&gt;[] = [
   { key: &quot;name&quot;, editable: true },
   {
     key: &quot;status&quot;,
@@ -185,11 +187,13 @@ export function People({ rows, onSave }) {
       data={rows}
       columns={columns}
       rowKey={(row) =&gt; row.id}
-      cellNavigation
-      editHistory
-      onCellEdit={(row, key, value) =&gt;
-        onSave({ ...row, [key]: value })
-      }
+      features={[
+        cellNavigation(),
+        editHistory(),
+        editing((row: Person, key, value) =&gt;
+          onSave({ ...row, [key]: value })
+        ),
+      ]}
     /&gt;
   );
 }</code></pre>

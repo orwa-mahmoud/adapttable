@@ -214,6 +214,7 @@ export const ur: Required<TableLabels> = {
   assistantVoiceStart: "بول کر لکھیں",
   assistantVoiceStop: "بولنا روکیں",
   assistantVoiceListening: "سن رہے ہیں",
+  assistantVoiceMessage: "صوتی پیغام",
   assistantVoiceLanguage: "بولنے کی زبان",
   assistantYou: "آپ",
   assistantSpeaker: "معاون",

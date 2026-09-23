@@ -210,6 +210,7 @@ export const ja: Required<TableLabels> = {
   assistantVoiceStart: "音声入力",
   assistantVoiceStop: "音声入力を停止",
   assistantVoiceListening: "認識中",
+  assistantVoiceMessage: "音声メッセージ",
   assistantVoiceLanguage: "音声入力の言語",
   assistantYou: "あなた",
   assistantSpeaker: "アシスタント",
