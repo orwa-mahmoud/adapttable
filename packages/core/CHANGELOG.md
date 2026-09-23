@@ -1,5 +1,23 @@
 # @adapttable/core
 
+## 3.1.0
+
+### Minor Changes
+
+- 96110a1: `tableAgent` offers every row and bulk action the host composed as a governed agent capability — `rowAction.<key>` on one row, `bulkAction.<key>` on the current selection. The table's write policy and approval apply, an action's `ai.approval` overrides them, an action with a `confirm` block asks a person, and `ai: false` keeps an action away from the agent. `tableActionCapabilities` builds the same definitions for `createAgentSession`.
+- c587812: The 62 adapter-machinery helpers still exported from `@adapttable/core` (column-group, extra-row, pinned-row, row-span and row-style math, the column-menu actions), and `xlsxWriter` / `buildTableXlsx` on the main entry, are deprecated there. They keep working; import them from `@adapttable/react/adapter` and `@adapttable/core/xlsx`.
+- 832d63d: A backend-mode voice clip can be the assistant's turn: `useSpeechInput({ onClip: assistant.sendClip })` sends it through the HTTP transport on the turn's first round, and the backend's `transcript` becomes the reader's message, with a localized "Voice message" placeholder until it arrives. `createAgentHttpClient().send` takes `audio` and `onTranscript`, and `AssistantTransport.send` receives `audio`.
+- d6e7d65: `commandPalette({ button: true })` adds a toolbar control that opens the palette, and `commandPalette({ open, onOpenChange })` lets a host open it from its own control. The context menu offers Pin to top, Pin to bottom and Unpin on rows when `rowPinning()` is composed, and Cut on cells when `cellNavigation()` and `onCellCut` are both wired. Unstyled and shadcn style the new control through `classNames.commandPaletteButton`.
+- ea48c20: `parseTableQuery` checks at the level the schema asks for: `columns: "any"` parses and shapes every filter into `shapedFilters`; `filters` — a `{ key: type }` shorthand or the table's own `FilterDef[]` — types each one into `typedFilters`, checks its operator, numbers, dates and static options, and refuses undeclared filters and bad tree conditions. `groupByKeys` reports nested grouping, `pickFilters` scopes filters per user or role, and `splitFilterValues` reads a multi-value filter. A column-list schema returns exactly what it did before. `@adapttable/core/query` exports the filter model a server needs.
+
+### Patch Changes
+
+- 9c0d3ef: The context menu's Copy copies the right-clicked cell when `cellNavigation()` is not composed, and the menu opens on pinned rows too. The Ant Design context menu opens at the pointer.
+- d90cdd1: `groupFilter` receives a typed `GroupNode` — its `value`, `label`, `level`, `groupBy` and `leafRows` — and an `AggregateSpec` accepts a name registered with `registerAggregator` without a cast.
+- e245987: Client-side sorting reads a column's `i18n` path for the active `locale`, the same path its cells and filters read. A column with its own `sortValue` sorts as before.
+- d91b4f1: The command palette's Export entry names the configured writer's format — "Export XLSX", "Export PDF" — as the toolbar button does.
+- 091be10: Reference comments name the current entry points (`@adapttable/react/stream`, `@adapttable/react/features`), the `exportCsv({ writer })` feature form, the writer-derived default filename, the headless table's `table` role and the HTTP client's `full` default context profile.
+
 ## 3.0.0
 
 ### Major Changes

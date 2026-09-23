@@ -1,5 +1,38 @@
 # @adapttable/ai-react
 
+## 0.2.0
+
+### Minor Changes
+
+- 96110a1: `tableAgent` offers every row and bulk action the host composed as a governed agent capability — `rowAction.<key>` on one row, `bulkAction.<key>` on the current selection. The table's write policy and approval apply, an action's `ai.approval` overrides them, an action with a `confirm` block asks a person, and `ai: false` keeps an action away from the agent. `tableActionCapabilities` builds the same definitions for `createAgentSession`.
+- 832d63d: A backend-mode voice clip can be the assistant's turn: `useSpeechInput({ onClip: assistant.sendClip })` sends it through the HTTP transport on the turn's first round, and the backend's `transcript` becomes the reader's message, with a localized "Voice message" placeholder until it arrives. `createAgentHttpClient().send` takes `audio` and `onTranscript`, and `AssistantTransport.send` receives `audio`.
+
+### Patch Changes
+
+- Updated dependencies [96110a1]
+- Updated dependencies [42f4117]
+- Updated dependencies [9c0d3ef]
+- Updated dependencies [c587812]
+- Updated dependencies [bd95c61]
+- Updated dependencies [d90cdd1]
+- Updated dependencies [e82b90f]
+- Updated dependencies [832d63d]
+- Updated dependencies [81eeb48]
+- Updated dependencies [e245987]
+- Updated dependencies [65306b8]
+- Updated dependencies [84fbb7d]
+- Updated dependencies [d91b4f1]
+- Updated dependencies [d6e7d65]
+- Updated dependencies [ad6532c]
+- Updated dependencies [0a5aa1b]
+- Updated dependencies [ea48c20]
+- Updated dependencies [67d276d]
+- Updated dependencies [091be10]
+- Updated dependencies [aa57a3a]
+  - @adapttable/ai@0.2.0
+  - @adapttable/core@3.1.0
+  - @adapttable/react@1.1.0
+
 ## 0.1.0
 
 ### Minor Changes

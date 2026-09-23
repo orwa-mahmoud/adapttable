@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/unstyled",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Headless, unstyled AdaptTable adapter \u2014 semantic HTML with class + data-attribute hooks for Tailwind, shadcn/ui, or your own CSS.",
   "keywords": [
     "react",
@@ -457,9 +457,9 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "dependencies": {
-    "@adapttable/core": "3.0.0",
+    "@adapttable/core": "3.1.0",
     "react-compiler-runtime": "^1.0.0",
-    "@adapttable/react": "1.0.0"
+    "@adapttable/react": "1.1.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

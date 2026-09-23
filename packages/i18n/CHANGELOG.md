@@ -1,5 +1,25 @@
 # @adapttable/i18n
 
+## 3.2.0
+
+### Minor Changes
+
+- 832d63d: A backend-mode voice clip can be the assistant's turn: `useSpeechInput({ onClip: assistant.sendClip })` sends it through the HTTP transport on the turn's first round, and the backend's `transcript` becomes the reader's message, with a localized "Voice message" placeholder until it arrives. `createAgentHttpClient().send` takes `audio` and `onTranscript`, and `AssistantTransport.send` receives `audio`.
+
+### Patch Changes
+
+- Updated dependencies [96110a1]
+- Updated dependencies [9c0d3ef]
+- Updated dependencies [c587812]
+- Updated dependencies [d90cdd1]
+- Updated dependencies [832d63d]
+- Updated dependencies [e245987]
+- Updated dependencies [d91b4f1]
+- Updated dependencies [d6e7d65]
+- Updated dependencies [ea48c20]
+- Updated dependencies [091be10]
+  - @adapttable/core@3.1.0
+
 ## 3.1.0
 
 ### Minor Changes
