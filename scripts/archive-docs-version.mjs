@@ -50,8 +50,12 @@ import { gitBinary } from "./git-binary.mjs";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS_APP = join(ROOT, "apps", "docs");
 const SITE = "https://orwa-mahmoud.github.io/adapttable";
-/** The site URL as a regular-expression literal: every metacharacter escaped. */
-const SITE_PATTERN = SITE.replaceAll(/[.*+?^${}()|[\]\\/]/g, String.raw`\$&`);
+/** A breadcrumb item that points at a current docs page of this site. */
+const BREADCRUMB_ITEM =
+  /"item":"https:\/\/orwa-mahmoud\.github\.io\/adapttable\/(?!og\/)([a-z0-9-]+)\/"/g;
+/** A page's Open Graph image on this site. */
+const OG_IMAGE =
+  /https:\/\/orwa-mahmoud\.github\.io\/adapttable\/og\/([a-z0-9-]+)\.png/g;
 const REPO = "https://github.com/orwa-mahmoud/adapttable";
 
 function option(name) {
@@ -213,15 +217,13 @@ function archivePage(markdown) {
     : `${front}\nhead:\n${ROBOTS}`;
   // The breadcrumb names the archived page, not the current one.
   front = front.replace(
-    new RegExp(`"item":"${SITE_PATTERN}/(?!og/)([a-z0-9-]+)/"`, "g"),
+    BREADCRUMB_ITEM,
     (_, page) => `"item":"${SITE}/${slug}/${page}/"`
   );
-  front = front.replace(
-    new RegExp(`${SITE_PATTERN}/og/([a-z0-9-]+)\\.png`, "g"),
-    (url, page) =>
-      existsSync(join(DOCS_APP, "public", "og", `${page}.png`))
-        ? url
-        : `${SITE}/og.png`
+  front = front.replace(OG_IMAGE, (url, page) =>
+    existsSync(join(DOCS_APP, "public", "og", `${page}.png`))
+      ? url
+      : `${SITE}/og.png`
   );
   const body = markdown
     .slice(match[0].length)

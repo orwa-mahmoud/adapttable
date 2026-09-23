@@ -25,6 +25,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
+import { useState } from "react";
 
 import { KitPortal } from "./components/kitPortal";
 import { NativeSelect } from "./components/primitives";
@@ -294,8 +295,18 @@ function AssistantMenu({
   onSelect,
   maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
+  // Held here rather than left to the menu: choosing an item closes it before
+  // the item runs, so a turn that disables the trigger cannot leave the menu
+  // open over the conversation.
+  const [open, setOpen] = useState(false);
   return (
-    <Menu.Root positioning={{ placement: "top-start" }}>
+    <Menu.Root
+      positioning={{ placement: "top-start" }}
+      open={open}
+      onOpenChange={(details) => {
+        setOpen(details.open);
+      }}
+    >
       <Menu.Trigger asChild>
         <IconButton
           type="button"
@@ -319,6 +330,7 @@ function AssistantMenu({
                 value={item.id}
                 data-adapttable-part={item.part}
                 onClick={() => {
+                  setOpen(false);
                   onSelect(item.id);
                 }}
               >
