@@ -278,6 +278,27 @@ describe("agent binding without an engine — reading", () => {
 
     expect(result.result).toMatchObject({ rowKey: "3" });
   });
+  it("reads a view whose rows hold values JSON cannot encode", async () => {
+    // Host rows are the host's type: a database id is often a BigInt, and a
+    // row may point back at its parent. Neither may break the binding.
+    const parent = { id: "0", name: "Root", team: "Core" } as Row & {
+      child?: unknown;
+    };
+    const rows = [
+      { ...ROWS[0]!, views: 9007199254740993n },
+      Object.assign(parent, { child: parent }),
+    ];
+    const session = await mount({ ...serverView(), rows });
+    const result = await run(
+      session,
+      "rows.read",
+      { offset: 0, limit: 10 },
+      "r-unencodable"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(windowOf(result).rows.map((row) => row.rowKey)).toEqual(["1", "0"]);
+  });
 });
 
 describe("agent binding without an engine — writing", () => {

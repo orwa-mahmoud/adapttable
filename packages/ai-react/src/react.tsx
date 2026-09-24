@@ -222,6 +222,30 @@ function cellRecord(
   return cells;
 }
 
+/**
+ * `JSON.stringify` that never throws on host rows: a BigInt is written as its
+ * digits with an `n`, and a value that contains itself is written once, not
+ * followed back in.
+ */
+function stampJson(value: unknown): string {
+  // The chain of objects from the root to the one being written. A value
+  // already on it is a cycle; one seen elsewhere is only shared, and is written.
+  const ancestors: unknown[] = [];
+  return JSON.stringify(
+    value,
+    function replace(this: unknown, _key: string, next: unknown): unknown {
+      if (typeof next === "bigint") return `${next.toString()}n`;
+      if (typeof next !== "object" || next === null) return next;
+      while (ancestors.length > 0 && ancestors.at(-1) !== this) {
+        ancestors.pop();
+      }
+      if (ancestors.includes(next)) return undefined;
+      ancestors.push(next);
+      return next;
+    }
+  );
+}
+
 function viewRevisionStamp(
   view: TableRuntimeView<unknown> | undefined
 ): string {
@@ -230,7 +254,7 @@ function viewRevisionStamp(
   const rows = view?.rows ?? [];
   const getRowId = view?.getRowId;
   const query = view?.query;
-  return JSON.stringify({
+  return stampJson({
     ids: rows.map((row) => (getRowId ? getRowId(row) : null)),
     payloads: rows,
     page: query?.page ?? 1,
@@ -808,7 +832,7 @@ function exclusionKey(keys: readonly string[] | undefined): string {
  * What a capability does to the table, from the live catalog.
  *
  * Read through the session rather than kept in a list here: the definition is
- * the only thing that knows, and item 11 published it on the catalog entry so
+ * the only thing that knows, and it is published on the catalog entry so
  * every surface reads the same answer.
  */
 function capabilityKind(
