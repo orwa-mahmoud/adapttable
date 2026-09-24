@@ -389,8 +389,8 @@ Rewriting a working library to clear a namespace buys nothing.
 named in `frameworkBoundary.engineModules` in the classification artifact must
 not import `react`, `react-dom`, `react-compiler-runtime` or a
 `@tanstack/react-*` package. And the built neutral entrypoints — core's `.`,
-`query`, `pivot`, `stream`, `formula`, `xlsx` and `pdf`, `@adapttable/server`,
-and every `@adapttable/ai` entry — must reach no React package, client
+`binding`, `query`, `pivot`, `stream`, `formula`, `xlsx` and `pdf`,
+`@adapttable/server`, and every `@adapttable/ai` entry — must reach no React package, client
 directive or React type anywhere in their transitive graph. New engine code
 joins that list; a module that becomes binding moves to `@adapttable/react`
 and leaves the list, with the reason in the commit.

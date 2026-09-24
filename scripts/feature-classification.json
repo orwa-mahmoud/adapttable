@@ -568,6 +568,7 @@
         "pkg": "core",
         "subpaths": [
           ".",
+          "./binding",
           "./query",
           "./pivot",
           "./stream",
