@@ -271,4 +271,4 @@ leaves a collapsed group hid on desktop.
 - `mobileLabel` only falls back to `header` when the header is a string; with a JSX header, set `mobileLabel` explicitly (it also names the column in the Columns menu).
 - Duplicate column keys trigger a development warning — keys must be unique within the table.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/).

@@ -4,7 +4,7 @@
 A live table publishes a compact catalog. Your runtime maps that contract
 onto the tools it already speaks, then calls `session.execute`.
 
-[Try the interactive demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
+[Try the interactive demo](https://adapttable.orwamahmoud.com/react/demo/mantine/ai/)
 — a real Mantine table you talk to. The demo answers a fixed set of example
 requests with no model behind them; connect your own backend from the
 assistant's settings for free-form conversation.

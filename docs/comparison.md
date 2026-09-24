@@ -162,4 +162,4 @@ Also: [Mobile cards](./mobile.md) · [URL state](./url-state.md) ·
 [Virtualization](./virtualization.md) · [i18n & RTL](./i18n-rtl.md) ·
 [Accessibility](./accessibility.md) · [Realtime](./realtime.md) ·
 [Limitations and boundaries](./limitations.md) ·
-[Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)
+[Live demo](https://adapttable.orwamahmoud.com/react/demo/)

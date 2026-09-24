@@ -37,8 +37,8 @@ export interface AiContextInspectorProps {
   readonly profile: DemoContextProfile;
   /** Tool names registered with the browser, when that is on. */
   readonly webmcpNames: readonly string[];
-  /** Where the reference pages live. */
-  readonly docsUrl: string;
+  /** The published URL of a docs page, by its `docs/*.md` basename. */
+  readonly docsUrl: (page: string) => string;
 }
 
 /** Bytes as something a reader can compare at a glance. */
@@ -230,9 +230,9 @@ export function AiContextInspector({
       </div>
 
       <p className="ai-demo__refs">
-        <a href={`${docsUrl}ai-http/`}>Connect a backend</a>
-        <a href={`${docsUrl}ai-integrations/`}>AI integrations</a>
-        <a href={`${docsUrl}agent-capabilities/`}>Capabilities</a>
+        <a href={docsUrl("ai-http")}>Connect a backend</a>
+        <a href={docsUrl("ai-integrations")}>AI integrations</a>
+        <a href={docsUrl("agent-capabilities")}>Capabilities</a>
       </p>
     </section>
   );

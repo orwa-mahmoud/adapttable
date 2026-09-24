@@ -6,11 +6,13 @@
  * the layer the unit tests drive directly (`sitemap-routes.test.mjs`).
  */
 
+import { ORIGIN } from "./site.mjs";
+
 /**
- * The published origin joined to Astro's `base` — `site` + `base` from
- * `apps/docs/astro.config.mjs`. Every `<loc>` in the sitemap starts with it.
+ * The published site root — Astro's `site`, served from the origin's root.
+ * Every `<loc>` in the sitemap starts with it.
  */
-export const SITE = "https://orwa-mahmoud.github.io/adapttable";
+export const SITE = ORIGIN;
 
 const LOC = /<loc>([^<]+)<\/loc>/g;
 
@@ -60,8 +62,8 @@ export const isRedirectPage = (html) =>
   (html.match(META) ?? []).some((tag) => HTTP_EQUIV_REFRESH.test(tag));
 
 /**
- * The public route a built file serves: `demo/columns/index.html` becomes
- * `/demo/columns/`. Takes a path relative to the composed site root, with
+ * The public route a built file serves: `react/demo/columns/index.html`
+ * becomes `/react/demo/columns/`. Takes a path relative to the composed site root, with
  * POSIX separators.
  */
 export const routeForFile = (relPath) =>

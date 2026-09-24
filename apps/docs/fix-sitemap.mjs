@@ -1,15 +1,13 @@
-// Post-build sitemap repair. Three real-world GSC problems on GitHub Pages:
-//   1. @astrojs/sitemap builds the landing loc as site+base WITHOUT a
-//      trailing slash — that URL sits OUTSIDE the URL-prefix property
-//      ("…/adapttable" vs the "…/adapttable/" scope GSC watches).
-//   2. GSC has left the sitemap-index.xml + sitemap-0.xml pair in
-//      "pending / never downloaded" limbo since Jun 16 — the widely
-//      confirmed workaround is a FLAT, conventionally named sitemap.xml.
-//   3. The demo pages are built by Vite in apps/showcase, not by Astro, so
-//      the sitemap plugin never sees them. Six live, linked, indexable pages
-//      were missing from the sitemap entirely — including /demo/editing/ and
-//      /demo/grouping/, which the docs link to as "see it working".
-// This emits dist/sitemap.xml (flat, slash-fixed, demo pages included)
+// Post-build sitemap repair:
+//   1. The landing <loc> carries its trailing slash — the form the site
+//      serves and the form a search console's property scope matches.
+//   2. A FLAT, conventionally named sitemap.xml ships beside the
+//      sitemap-index.xml + sitemap-0.xml pair, the form search consoles
+//      download reliably.
+//   3. The showcase pages are built by Vite in apps/showcase, not by Astro,
+//      so the sitemap plugin never sees them; they are appended from the
+//      page manifest.
+// This emits dist/sitemap.xml (flat, slash-fixed, showcase pages included)
 // alongside the originals.
 import { readFileSync, writeFileSync } from "node:fs";
 
@@ -24,7 +22,7 @@ import { DOCS_VERSIONS } from "./versions.mjs";
 /**
  * The demo routes, read from the manifest Vite builds the pages from
  * (`apps/showcase/pages.mjs`) — so a page cannot ship without appearing here,
- * and `indexable: false` entries such as the `/demo/export-pdf/` redirect stub
+ * and `indexable: false` entries such as the `export-pdf/` redirect stub
  * stay out on the manifest's own say-so.
  */
 const DEMO_ROUTES = indexableRoutes(SHOWCASE_PAGES);

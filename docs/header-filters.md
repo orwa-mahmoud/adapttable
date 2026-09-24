@@ -1,6 +1,6 @@
 # React table header filters — a funnel on every filtered column
 
-▶ **See it working:** [Filtering in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/filtering/) — switch the layout to **Header**: each filtered column gets a funnel, and Filters keeps the AND/OR tree. The same page exists for every kit.
+▶ **See it working:** [Filtering in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/filtering/) — switch the layout to **Header**: each filtered column gets a funnel, and Filters keeps the AND/OR tree. The same page exists for every kit.
 
 Header filters put each filter where its column is. Compose `headerFilters()`
 from `@adapttable/<kit>/header-filters` and every column with a filter

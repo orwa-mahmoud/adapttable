@@ -7,7 +7,7 @@ from `@adapttable/<kit>/tree` with `getChildren` (nested data) or `getParentId`
 chevron per parent, one indent step per level, in every adapter that ships the
 subpath (all except `@adapttable/bootstrap`).
 
-▶ **See it working:** [tree data in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/tree/) — the same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [tree data in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/tree/) — the same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 ```tsx
 import { DataTable } from "@adapttable/mantine";
@@ -180,7 +180,7 @@ which folds the same nodes. A phone gets a tree, not a flattened list.
 
 The full contract is on the [nested tables](./nested-tables.md) page.
 
-▶ **See it working:** [nested tables in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/nested-tables/) — open a person onto their orders; the inner table is the same component. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [nested tables in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/nested-tables/) — open a person onto their orders; the inner table is the same component. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 `rowDetail()` gives a blank panel, and a table built by hand in one has none
 of the sorting, filtering, selection, keyboard navigation or accessibility the

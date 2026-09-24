@@ -11,17 +11,17 @@ head:
   - tag: script
     attrs:
       type: application/ld+json
-    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://orwa-mahmoud.github.io/adapttable/"},{"@type":"ListItem","position":2,"name":"Client
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"Client
       & server React table data — one TableSource
-      API","item":"https://orwa-mahmoud.github.io/adapttable/v1/data-tiers/"}]}'
+      API","item":"https://adapttable.orwamahmoud.com/v1/data-tiers/"}]}'
   - tag: meta
     attrs:
       property: og:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/data-tiers.png
+      content: https://adapttable.orwamahmoud.com/og/data-tiers.png
   - tag: meta
     attrs:
       name: twitter:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/data-tiers.png
+      content: https://adapttable.orwamahmoud.com/og/data-tiers.png
 slug: v1/data-tiers
 ---
 
@@ -190,7 +190,7 @@ export function PeopleTable() {
   supersedes an in-flight one, the previous call's `signal` aborts — forward
   it to `fetch` and out-of-order responses die at the source.
 * **Full control**: every source builder returns the same
-  [`TableSource`](/adapttable/v1/concepts/) contract, so the table can't tell in-memory
+  [`TableSource`](/v1/concepts/) contract, so the table can't tell in-memory
   from server data — switch tiers without touching the UI.
 * Column `filter` shorthands and the `filters` array drive widgets, chips,
   and URL parsing in **all three tiers**; only the frontend tier also applies
@@ -228,4 +228,4 @@ export function PeopleTable() {
   clamped by `useBackendData` (paged mode) and `useFrontendData`; on the
   `onQueryChange` tier the requested `page` is emitted as-is.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/).

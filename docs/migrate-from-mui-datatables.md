@@ -1,6 +1,6 @@
 # Migrate from mui-datatables to AdaptTable — maintained, MUI v6+, React 19 ready
 
-▶ **See it before you install:** [the live demo running on real Material UI](https://orwa-mahmoud.github.io/adapttable/demo/?kit=mui) — nothing to set up.
+▶ **See it before you install:** [the live demo running on real Material UI](https://adapttable.orwamahmoud.com/react/demo/?kit=mui) — nothing to set up.
 
 [mui-datatables](https://github.com/gregnb/mui-datatables) served a generation
 of Material UI apps well — but it has had **no releases or commits since

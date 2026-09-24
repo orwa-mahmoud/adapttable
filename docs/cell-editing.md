@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's feature is already wired in `src/App.tsx` (`editable` columns + `editing()` + `editHistory()` for undo and redo); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [edit cells in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/editing/) — a real table you can type into, not a recording.
+▶ **See it working:** [edit cells in the live demo](https://adapttable.orwamahmoud.com/react/demo/mantine/editing/) — a real table you can type into, not a recording.
 
 Edit a cell in place by composing `editing` from `@adapttable/<kit>/editing`
 and marking columns `editable`. Omit the factory and the table never opens an
@@ -731,7 +731,7 @@ The patch shapes are exported for code that builds them dynamically:
 - Prefer updating your row list immutably in your `editing()` handler so React
   sees a new `data` / source identity.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/) —
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/) —
 double-click an editable cell (Person, Email, or Team) in the editing
 section.
 

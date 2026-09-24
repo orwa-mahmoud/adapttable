@@ -5,7 +5,7 @@
       "items": [
         {
           "label": "Getting started",
-          "slug": "getting-started"
+          "slug": "react/getting-started"
         },
         {
           "label": "Concepts",
@@ -22,87 +22,87 @@
       "items": [
         {
           "label": "Feature composition",
-          "slug": "features"
+          "slug": "react/features"
         },
         {
           "label": "Columns",
-          "slug": "columns"
+          "slug": "react/columns"
         },
         {
           "label": "Column groups",
-          "slug": "column-groups"
+          "slug": "react/column-groups"
         },
         {
           "label": "Sparkline columns",
-          "slug": "sparkline"
+          "slug": "react/sparkline"
         },
         {
           "label": "PDF export and print",
-          "slug": "export-pdf"
+          "slug": "react/export-pdf"
         },
         {
           "label": "Sorting",
-          "slug": "sorting"
+          "slug": "react/sorting"
         },
         {
           "label": "Filtering",
-          "slug": "filtering"
+          "slug": "react/filtering"
         },
         {
           "label": "Advanced AND/OR filters",
-          "slug": "filter-tree"
+          "slug": "react/filter-tree"
         },
         {
           "label": "Pagination",
-          "slug": "pagination"
+          "slug": "react/pagination"
         },
         {
           "label": "Selection & bulk actions",
-          "slug": "selection"
+          "slug": "react/selection"
         },
         {
           "label": "Row expansion",
-          "slug": "row-expansion"
+          "slug": "react/row-expansion"
         },
         {
           "label": "Inline cell editing",
-          "slug": "cell-editing"
+          "slug": "react/cell-editing"
         },
         {
           "label": "Keyboard & cell navigation",
-          "slug": "cell-navigation"
+          "slug": "react/cell-navigation"
         },
         {
           "label": "Row reordering",
-          "slug": "row-reordering"
+          "slug": "react/row-reordering"
         },
         {
           "label": "Row pinning",
-          "slug": "row-pinning"
+          "slug": "react/row-pinning"
         },
         {
           "label": "Row and column spanning",
-          "slug": "row-spanning"
+          "slug": "react/row-spanning"
         },
         {
           "label": "Full-width and separator rows",
-          "slug": "full-width-rows"
+          "slug": "react/full-width-rows"
         },
         {
           "label": "Row styling and heights",
-          "slug": "row-styling"
+          "slug": "react/row-styling"
         },
         {
           "label": "Row grouping",
-          "slug": "row-grouping"
+          "slug": "react/row-grouping"
         },
         {
           "label": "Pivot tables",
-          "slug": "pivot"
+          "slug": "react/pivot"
         },
         {
           "label": "Formulas",
-          "slug": "formulas"
+          "slug": "react/formulas"
         },
         {
           "label": "Server queries",
@@ -110,23 +110,23 @@
         },
         {
           "label": "Tree data",
-          "slug": "tree-data"
+          "slug": "react/tree-data"
         },
         {
           "label": "Column management",
-          "slug": "column-management"
+          "slug": "react/column-management"
         },
         {
           "label": "Saved views",
-          "slug": "saved-views"
+          "slug": "react/saved-views"
         },
         {
           "label": "Virtualization",
-          "slug": "virtualization"
+          "slug": "react/virtualization"
         },
         {
           "label": "Mobile cards",
-          "slug": "mobile"
+          "slug": "react/mobile"
         }
       ]
     },
@@ -135,27 +135,27 @@
       "items": [
         {
           "label": "URL state",
-          "slug": "url-state"
+          "slug": "react/url-state"
         },
         {
           "label": "SSR & RSC",
-          "slug": "ssr-rsc"
+          "slug": "react/ssr-rsc"
         },
         {
           "label": "Customization",
-          "slug": "customization"
+          "slug": "react/customization"
         },
         {
           "label": "i18n & RTL",
-          "slug": "i18n-rtl"
+          "slug": "react/i18n-rtl"
         },
         {
           "label": "Accessibility",
-          "slug": "accessibility"
+          "slug": "react/accessibility"
         },
         {
           "label": "Realtime",
-          "slug": "realtime"
+          "slug": "react/realtime"
         }
       ]
     },
@@ -164,7 +164,7 @@
       "items": [
         {
           "label": "API reference",
-          "slug": "api"
+          "slug": "react/api"
         },
         {
           "label": "FAQ",
@@ -172,7 +172,7 @@
         },
         {
           "label": "Comparison",
-          "slug": "comparison"
+          "slug": "react/comparison"
         },
         {
           "label": "Versioning & stability",
@@ -185,31 +185,31 @@
       "items": [
         {
           "label": "From AdaptTable v1",
-          "slug": "migrate-from-v1"
+          "slug": "react/migrate-from-v1"
         },
         {
           "label": "From mantine-datatable",
-          "slug": "migrate-from-mantine-datatable"
+          "slug": "react/migrate-from-mantine-datatable"
         },
         {
           "label": "From MUI X DataGrid",
-          "slug": "migrate-from-mui-x-datagrid"
+          "slug": "react/migrate-from-mui-x-datagrid"
         },
         {
           "label": "From TanStack Table",
-          "slug": "migrate-from-tanstack-table"
+          "slug": "react/migrate-from-tanstack-table"
         },
         {
           "label": "From mui-datatables",
-          "slug": "migrate-from-mui-datatables"
+          "slug": "react/migrate-from-mui-datatables"
         },
         {
           "label": "From material-table",
-          "slug": "migrate-from-material-table"
+          "slug": "react/migrate-from-material-table"
         },
         {
           "label": "From ag-Grid",
-          "slug": "migrate-from-ag-grid"
+          "slug": "react/migrate-from-ag-grid"
         }
       ]
     }

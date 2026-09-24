@@ -327,4 +327,4 @@ The pieces behind the auto-built forms are exported for custom filter UIs:
   comma-separated with each entry encoded, so values containing commas
   round-trip safely. With `urlKey="left"`, params become `left.f_status`, ….
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/).

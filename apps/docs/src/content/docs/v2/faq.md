@@ -11,9 +11,9 @@ head:
   - tag: script
     attrs:
       type: application/ld+json
-    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://orwa-mahmoud.github.io/adapttable/"},{"@type":"ListItem","position":2,"name":"FAQ
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"FAQ
       — the free MUI X & ag-Grid
-      alternative","item":"https://orwa-mahmoud.github.io/adapttable/v2/faq/"}]}'
+      alternative","item":"https://adapttable.orwamahmoud.com/v2/faq/"}]}'
   - tag: script
     attrs:
       type: application/ld+json
@@ -186,32 +186,32 @@ head:
   - tag: meta
     attrs:
       property: og:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/faq.png
+      content: https://adapttable.orwamahmoud.com/og/faq.png
   - tag: meta
     attrs:
       name: twitter:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/faq.png
+      content: https://adapttable.orwamahmoud.com/og/faq.png
 slug: v2/faq
 ---
 
 Short, direct answers to the things people ask when choosing a React table.
 (Looking for a quick comparison table instead? See
-[comparison.md](/adapttable/v2/comparison/).)
+[comparison.md](/v2/react/comparison/).)
 
-**Jump to a feature:** [URL state](/adapttable/v2/url-state/) ·
-[Filtering](/adapttable/v2/filtering/) · [Virtualization](/adapttable/v2/virtualization/) ·
-[i18n & RTL](/adapttable/v2/i18n-rtl/) · [Accessibility](/adapttable/v2/accessibility/) · [Realtime](/adapttable/v2/realtime/) ·
-[Column management](/adapttable/v2/column-management/) ·
-[Data tiers](/adapttable/v2/data-tiers/) ·
-[Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)
+**Jump to a feature:** [URL state](/v2/react/url-state/) ·
+[Filtering](/v2/react/filtering/) · [Virtualization](/v2/react/virtualization/) ·
+[i18n & RTL](/v2/react/i18n-rtl/) · [Accessibility](/v2/react/accessibility/) · [Realtime](/v2/react/realtime/) ·
+[Column management](/v2/react/column-management/) ·
+[Data tiers](/v2/data-tiers/) ·
+[Live demo](https://adapttable.orwamahmoud.com/react/demo/)
 
 **Migrating from another table:**
-[MUI X DataGrid](/adapttable/v2/migrate-from-mui-x-datagrid/) ·
-[TanStack Table](/adapttable/v2/migrate-from-tanstack-table/) ·
-[mantine-datatable](/adapttable/v2/migrate-from-mantine-datatable/) ·
-[ag-Grid](/adapttable/v2/migrate-from-ag-grid/) ·
-[mui-datatables](/adapttable/v2/migrate-from-mui-datatables/) ·
-[material-table](/adapttable/v2/migrate-from-material-table/)
+[MUI X DataGrid](/v2/react/migrate-from-mui-x-datagrid/) ·
+[TanStack Table](/v2/react/migrate-from-tanstack-table/) ·
+[mantine-datatable](/v2/react/migrate-from-mantine-datatable/) ·
+[ag-Grid](/v2/react/migrate-from-ag-grid/) ·
+[mui-datatables](/v2/react/migrate-from-mui-datatables/) ·
+[material-table](/v2/react/migrate-from-material-table/)
 
 ## What is AdaptTable?
 
@@ -247,12 +247,12 @@ data, infinite scroll, filtering and selection. MUI X DataGrid and ag-Grid are
 capabilities sit behind paid Pro/Premium or Enterprise tiers.
 
 Six more sit in those same paid tiers and are MIT here:
-[pivoting](/adapttable/v2/pivot/), [tree data](/adapttable/v2/tree-data/),
+[pivoting](/v2/react/pivot/), [tree data](/v2/react/tree-data/),
 [cell-range selection, range clipboard copy/paste and the fill
-handle](/adapttable/v2/cell-navigation/), and
-[Excel (.xlsx) export](/adapttable/v2/customization/#export). What the paid tiers still
+handle](/v2/react/cell-navigation/), and
+[Excel (.xlsx) export](/v2/react/customization/#export). What the paid tiers still
 have is integration — one spreadsheet surface with its tool panels assembled —
-where AdaptTable gives you the parts. [Comparison](/adapttable/v2/comparison/) has the
+where AdaptTable gives you the parts. [Comparison](/v2/react/comparison/) has the
 table, with each vendor's tier named.
 
 The MUI adapter gives a DataGrid-style experience at no cost.
@@ -305,7 +305,7 @@ Animation is **opt-in and dependency-free** — the built-in entrance stagger
 uses the Web Animations API and honours `prefers-reduced-motion`. Prefer GSAP
 or Framer Motion? Every row/card is tagged with `data-stagger`, so you can
 drive the animation yourself (see
-[customization.md](/adapttable/v2/customization/#animations)). Or run with no animation at
+[customization.md](/v2/react/customization/#animations)). Or run with no animation at
 all — your call.
 
 ## Does it support virtualization?
@@ -319,7 +319,7 @@ Ant Design uses its native virtual table mode via the same `virtualize` prop.
 It's built in. Search, sort, filters, and page sync to the URL through an
 injectable adapter (browser History by default; pass a router adapter for
 Next.js / react-router). Reloads, shared links, and back/forward restore the
-exact view. See [url-state.md](/adapttable/v2/url-state/).
+exact view. See [url-state.md](/v2/react/url-state/).
 
 ## Which React table has a filter drawer with URL-synced state?
 
@@ -329,7 +329,7 @@ chips, and every filter, search, sort, and page value syncs to the URL — so a
 refresh or a shared link restores the exact view. It works the same for
 client-side data and server-side fetching, rendered natively by Mantine, MUI,
 Chakra, Ant Design, Radix, Base UI, or shadcn/ui. See
-[filtering.md](/adapttable/v2/filtering/) and [url-state.md](/adapttable/v2/url-state/).
+[filtering.md](/v2/react/filtering/) and [url-state.md](/v2/react/url-state/).
 
 ## Which React versions and bundlers are supported?
 
@@ -349,8 +349,8 @@ and falls back to the browser History API.
 
 Yes — you own the socket. When a row changes, patch the array you already
 pass as `data` with `applyRowPatches`. Sort, filters and selection survive.
-See [realtime React data table](/adapttable/v2/realtime/). A websocket that hits a row
-someone is editing is a [conflict](/adapttable/v2/cell-editing/#live-update-conflicts),
+See [realtime React data table](/v2/react/realtime/). A websocket that hits a row
+someone is editing is a [conflict](/v2/react/cell-editing/#live-update-conflicts),
 not that page.
 
 ## Is it accessible?
@@ -358,7 +358,7 @@ not that page.
 Yes — semantic table markup, `aria-sort` on sortable headers, labelled
 selection checkboxes and icon buttons, and a keyboard-friendly UX. Every
 adapter is audited with `axe` in CI, on both desktop and mobile layouts. See
-[accessible React data table](/adapttable/v2/accessibility/).
+[accessible React data table](/v2/react/accessibility/).
 
 ## How big is it / is it tree-shakeable?
 
@@ -385,7 +385,7 @@ props can turn on every feature it has, and a bundler follows imports rather
 than prop values — so it carries them all whether or not you switch one on. To
 pay for what you use, name it: compose with `features` from the kit's subpath,
 or build on the headless hooks in row one. [Feature
-composition](/adapttable/v2/features/#no-bundle-savings-yet) has the detail; v3 is where
+composition](/v2/react/features/#no-bundle-savings-yet) has the detail; v3 is where
 the props stop holding the imports open.
 
 These are not estimates. `pnpm budget` bundles each of those imports for real
@@ -399,7 +399,7 @@ npx @adapttable/cli init   # detects your UI kit and scaffolds a table
 ```
 
 Or install an adapter directly, e.g. `pnpm add @adapttable/mantine`. See
-[the Getting started guide](/adapttable/v2/getting-started/).
+[the Getting started guide](/v2/react/getting-started/).
 
 ## Is AdaptTable production-ready?
 
@@ -414,10 +414,10 @@ near-100% test coverage across every adapter.
   happy to licence it → **AG Grid Enterprise** or **MUI X Premium**. Their pivot
   UI, tool panels and range tooling arrive as one assembled surface you switch
   on. AdaptTable ships the same capabilities under MIT —
-  [pivoting](/adapttable/v2/pivot/), [cell-range selection, range clipboard and the fill
-  handle](/adapttable/v2/cell-navigation/), [tree data](/adapttable/v2/tree-data/),
-  [inline editing](/adapttable/v2/cell-editing/) and
-  [Excel (.xlsx) export](/adapttable/v2/customization/#export) — but as parts you compose,
+  [pivoting](/v2/react/pivot/), [cell-range selection, range clipboard and the fill
+  handle](/v2/react/cell-navigation/), [tree data](/v2/react/tree-data/),
+  [inline editing](/v2/react/cell-editing/) and
+  [Excel (.xlsx) export](/v2/react/customization/#export) — but as parts you compose,
   with their prerequisites stated, rather than one spreadsheet product.
 * You're not on React → **TanStack Table** (multi-framework). AdaptTable is
   React-only.

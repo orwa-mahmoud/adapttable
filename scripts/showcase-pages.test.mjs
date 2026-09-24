@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import { builtAdapters, MATRIX_FEATURES } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES, SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
+import { DEMO_ROOT, demoRoute } from "./site.mjs";
 import { isRedirectPage } from "./sitemap-routes.mjs";
 
 const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
@@ -109,12 +110,12 @@ describe("the showcase page manifest", () => {
     assert.equal(adapters.length, 8);
     for (const adapter of adapters) {
       for (const slug of slugs) {
-        const route = `/demo/${adapter.key}/${slug}/`;
+        const route = demoRoute(`${adapter.key}/${slug}`);
         assert.ok(routes.has(route), route);
       }
     }
-    assert.equal(routes.has("/demo/bootstrap/row-reordering/"), false);
-    assert.equal(routes.has("/demo/bootstrap/aggregation/"), false);
+    assert.equal(routes.has(demoRoute("bootstrap/row-reordering")), false);
+    assert.equal(routes.has(demoRoute("bootstrap/aggregation")), false);
   });
 
   it("gives every page its own key and its own route", () => {
@@ -124,9 +125,9 @@ describe("the showcase page manifest", () => {
     assert.equal(new Set(routes).size, routes.length);
   });
 
-  it("routes every page under /demo/ with a trailing slash", () => {
+  it("routes every page under the demo root with a trailing slash", () => {
     for (const { route } of SHOWCASE_PAGES) {
-      assert.equal(route.startsWith("/demo/"), true, route);
+      assert.equal(route.startsWith(DEMO_ROOT), true, route);
       assert.equal(route.endsWith("/"), true, route);
     }
   });

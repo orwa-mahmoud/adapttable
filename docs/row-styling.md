@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — add `rowAppearance({ rowStyle, rowHeight })` from `@adapttable/mantine/row-appearance` to `features`. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [the all-options demo](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — turn **Row style** on.
+▶ **See it working:** [the all-options demo](https://adapttable.orwamahmoud.com/react/demo/all-options/) — turn **Row style** on.
 
 `rowAppearance` takes three options: `rowClassName` appends a class, and
 `rowStyle` / `rowHeight` set inline style and height. Each is a function of

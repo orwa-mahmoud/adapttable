@@ -151,4 +151,4 @@ export function PeopleTable() {
   `resetKey`) and `useBulkActionRunner` are exported from `@adapttable/react`;
   `runRowAction` from `@adapttable/core`.
 
-See it live in the [selection demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/selection/).
+See it live in the [selection demo](https://adapttable.orwamahmoud.com/react/demo/mantine/selection/).

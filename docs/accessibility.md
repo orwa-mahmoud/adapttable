@@ -1,6 +1,6 @@
 # Accessible React data table — keyboard, screen readers, labelled controls
 
-▶ **See it working:** [arrow through a Mantine table and read the live-region transcript](https://orwa-mahmoud.github.io/adapttable/demo/mantine/accessibility/) — Tab in, arrow between cells, and every announcement appears as text. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind. Keyboard walk is documented in [cell navigation](./cell-navigation.md).
+▶ **See it working:** [arrow through a Mantine table and read the live-region transcript](https://adapttable.orwamahmoud.com/react/demo/mantine/accessibility/) — Tab in, arrow between cells, and every announcement appears as text. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind. Keyboard walk is documented in [cell navigation](./cell-navigation.md).
 
 An accessible data table is one a person can use without a mouse, and one a
 screen reader can describe. AdaptTable ships that way. There is no
@@ -39,7 +39,7 @@ Every adapter is audited with `axe` in CI, on desktop and mobile card layouts.
 
 ## Try it yourself
 
-On the [accessibility demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/accessibility/):
+On the [accessibility demo](https://adapttable.orwamahmoud.com/react/demo/mantine/accessibility/):
 
 1. Press **Tab** until a cell shows a focus ring.
 2. Press the **arrow keys**. The ring moves cell to cell.

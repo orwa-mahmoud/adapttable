@@ -1,6 +1,6 @@
 # React table Excel export — xlsxWriter
 
-▶ **See it working:** [export a grouped table to XLSX](https://orwa-mahmoud.github.io/adapttable/demo/mantine/grouping/) — the Export button writes the grouped sheet with outline levels and bold totals.
+▶ **See it working:** [export a grouped table to XLSX](https://adapttable.orwamahmoud.com/react/demo/mantine/grouping/) — the Export button writes the grouped sheet with outline levels and bold totals.
 
 `xlsxWriter()` turns the export button into a real `.xlsx` download. It
 ships as `@adapttable/core/xlsx`, a separate entry point with no

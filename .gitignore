@@ -47,3 +47,6 @@ pg-*.png
 
 # scripts/archive-docs-version.mjs scratch site
 .archive-work-*/
+
+# Redirect-only site for the previous address, written by scripts/build-redirects.mjs
+legacy-site/

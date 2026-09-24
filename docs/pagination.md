@@ -208,4 +208,4 @@ it already receives — nothing else about the hook changes.
   defaults to `"200px"`); it no-ops safely where
   `IntersectionObserver` is unavailable (SSR, tests).
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/).

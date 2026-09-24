@@ -1,6 +1,7 @@
 import starlight from "@astrojs/starlight";
 import starlightVersions from "starlight-versions";
 import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
+import { demoRoute, docsSlug, ORIGIN, siteUrl } from "../../scripts/site.mjs";
 import { defineConfig } from "astro/config";
 import { existsSync } from "node:fs";
 
@@ -26,10 +27,21 @@ for (const { slug } of DOCS_VERSIONS) {
 // is not available while this config is evaluated, so read the CLI command.
 const IS_BUILD = process.argv.includes("build");
 
+/**
+ * The sidebar with each entry pointed at the section its page is served in —
+ * `sidebar.mjs` names pages by their `docs/*.md` basename, and the doc-surface
+ * gate holds it to `docs/` in those terms.
+ */
+const sectioned = (items) =>
+  items.map((item) => {
+    if ("items" in item) return { ...item, items: sectioned(item.items) };
+    if ("slug" in item) return { ...item, slug: docsSlug(item.slug) };
+    return item;
+  });
+
 // https://astro.build/config
 export default defineConfig({
-  site: "https://orwa-mahmoud.github.io",
-  base: "/adapttable",
+  site: ORIGIN,
   integrations: [
     starlight({
       title: "AdaptTable",
@@ -62,7 +74,7 @@ export default defineConfig({
             name: "AdaptTable",
             description:
               "Headless, UI-agnostic React data table with native adapters for Mantine, MUI, Chakra UI, Ant Design, Radix, Base UI and Tailwind/shadcn — URL-synced state, declarative filters, column management, virtualization, i18n and RTL.",
-            url: "https://orwa-mahmoud.github.io/adapttable/",
+            url: siteUrl("/"),
             applicationCategory: "DeveloperApplication",
             operatingSystem: "Any",
             license: "https://opensource.org/license/mit",
@@ -169,12 +181,12 @@ export default defineConfig({
         {
           icon: "external",
           label: "Landing page",
-          href: "https://orwa-mahmoud.github.io/adapttable/",
+          href: siteUrl("/"),
         },
         {
           icon: "rocket",
           label: "Live demo",
-          href: "https://orwa-mahmoud.github.io/adapttable/demo/",
+          href: siteUrl(demoRoute()),
         },
         {
           icon: "npm",
@@ -187,7 +199,7 @@ export default defineConfig({
           href: "https://github.com/orwa-mahmoud/adapttable",
         },
       ],
-      sidebar,
+      sidebar: sectioned(sidebar),
       plugins: [
         starlightVersions({
           current: { label: CURRENT_VERSION_LABEL },

@@ -420,4 +420,4 @@ the way you configured it, and these guarantees do not apply.
   out-of-range pages and stale responses are handled for you via the abort
   signal.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/).

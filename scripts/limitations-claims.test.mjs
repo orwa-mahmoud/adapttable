@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { sidebarSlugs } from "../apps/docs/sidebar.mjs";
 import { DESCRIPTIONS, TITLES } from "../apps/docs/sync-docs.mjs";
 import { DOCS } from "./build-llms-full.mjs";
+import { docsRoute, siteUrl } from "./site.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const PAGE = join(ROOT, "docs/limitations.md");
@@ -108,9 +109,9 @@ describe("limitations page claims", () => {
     assert.ok("limitations.md" in DESCRIPTIONS);
     assert.ok(sidebarSlugs().includes("limitations"));
     const llms = readFileSync(join(ROOT, "llms.txt"), "utf8");
-    assert.ok(llms.includes("/adapttable/limitations/"));
+    assert.ok(llms.includes(siteUrl(docsRoute("limitations"))));
     const readme = readFileSync(join(ROOT, "README.md"), "utf8");
-    assert.ok(readme.includes("/adapttable/limitations/"));
+    assert.ok(readme.includes(siteUrl(docsRoute("limitations"))));
     const comparison = readFileSync(join(ROOT, "docs/comparison.md"), "utf8");
     assert.ok(comparison.includes("./limitations.md"));
   });

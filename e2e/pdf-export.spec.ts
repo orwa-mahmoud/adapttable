@@ -10,6 +10,7 @@ import { builtAdapters } from "../apps/showcase/matrix.mjs";
 const KIT = builtAdapters()[0]!.key;
 
 import { REPLACED_PAGES } from "../apps/showcase/pages.mjs";
+import { demoRoute, siteUrl } from "../scripts/site.mjs";
 
 /**
  * The /export/ demo is the live PDF export: `pdfWriter` plus
@@ -223,9 +224,7 @@ for (const [from, to] of REPLACED_PAGES) {
 
       expect(html).toContain('http-equiv="refresh"');
       expect(html).toContain(`${to}/`);
-      expect(html).toContain(
-        `href="https://orwa-mahmoud.github.io/adapttable/demo/${to}/"`
-      );
+      expect(html).toContain(`href="${siteUrl(demoRoute(to))}"`);
 
       // Not thin content: a stub carrying one line of text reads as a soft
       // 404, so it says what moved and where in real prose.

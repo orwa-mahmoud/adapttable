@@ -10,17 +10,17 @@ head:
   - tag: script
     attrs:
       type: application/ld+json
-    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://orwa-mahmoud.github.io/adapttable/"},{"@type":"ListItem","position":2,"name":"React
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"React
       table server queries — parse and
-      validate","item":"https://orwa-mahmoud.github.io/adapttable/v2/server-queries/"}]}'
+      validate","item":"https://adapttable.orwamahmoud.com/v2/server-queries/"}]}'
   - tag: meta
     attrs:
       property: og:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/server-queries.png
+      content: https://adapttable.orwamahmoud.com/og/server-queries.png
   - tag: meta
     attrs:
       name: twitter:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/server-queries.png
+      content: https://adapttable.orwamahmoud.com/og/server-queries.png
 slug: v2/server-queries
 ---
 
@@ -70,7 +70,7 @@ Actions all work without an adapter — and returns a `ServerTableQuery`:
 | `groupBy`        | the grouping column, when the schema allows it               |
 | `filters`        | column filters, keyed by column                              |
 | `filterTree`     | the advanced AND/OR tree                                     |
-| `pivot`          | the [pivot configuration](/adapttable/v2/pivot/)                        |
+| `pivot`          | the [pivot configuration](/v2/react/pivot/)                        |
 | `pivotCollapsed` | the folded pivot groups, by collapse key                     |
 | `cursor`         | the opaque cursor, in cursor mode                            |
 | `rejected`       | everything it refused, and why                               |
@@ -183,5 +183,5 @@ table wrote.
 Reach for it when you want the pieces; reach for `parseTableQuery` when you
 want the allowlist, which is almost always.
 
-Related: [data tiers](/adapttable/v2/data-tiers/) · [URL state](/adapttable/v2/url-state/) ·
-[filtering](/adapttable/v2/filtering/) · [pivot tables](/adapttable/v2/pivot/)
+Related: [data tiers](/v2/data-tiers/) · [URL state](/v2/react/url-state/) ·
+[filtering](/v2/react/filtering/) · [pivot tables](/v2/react/pivot/)

@@ -1,8 +1,8 @@
 # @adapttable/cli
 
-[![AdaptTable — scaffold a table for any UI kit from one engine](https://orwa-mahmoud.github.io/adapttable/media/core/tour.gif)](https://orwa-mahmoud.github.io/adapttable/demo/)
+[![AdaptTable — scaffold a table for any UI kit from one engine](https://adapttable.orwamahmoud.com/media/core/tour.gif)](https://adapttable.orwamahmoud.com/react/demo/)
 
-**[📖 Documentation](https://orwa-mahmoud.github.io/adapttable/)** · **[🚀 Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)** · **[Get started](https://orwa-mahmoud.github.io/adapttable/getting-started/)**
+**[📖 Documentation](https://adapttable.orwamahmoud.com/)** · **[🚀 Live demo](https://adapttable.orwamahmoud.com/react/demo/)** · **[Get started](https://adapttable.orwamahmoud.com/react/getting-started/)**
 
 The scaffolding CLI for [AdaptTable](https://github.com/orwa-mahmoud/adapttable).
 One command detects your UI kit, picks your package manager, writes a
@@ -82,32 +82,32 @@ What `npx @adapttable/cli init` scaffolds, running.
 
 **Row grouping** — group rows by a column with per-group subtotals
 
-![row-grouping](https://orwa-mahmoud.github.io/adapttable/media/core/parts/row-grouping.gif)
+![row-grouping](https://adapttable.orwamahmoud.com/media/core/parts/row-grouping.gif)
 
 **Inline cell editing** — double-click a cell; text, number and select editors
 
-![cell-editing](https://orwa-mahmoud.github.io/adapttable/media/core/parts/cell-editing.gif)
+![cell-editing](https://adapttable.orwamahmoud.com/media/core/parts/cell-editing.gif)
 
 **Filtering** — type a bound and the table answers as you type
 
-![filtering](https://orwa-mahmoud.github.io/adapttable/media/core/parts/filtering.gif)
+![filtering](https://adapttable.orwamahmoud.com/media/core/parts/filtering.gif)
 
 **Column management** — show, hide, reorder, pin and resize
 
-![column-management](https://orwa-mahmoud.github.io/adapttable/media/core/parts/column-management.gif)
+![column-management](https://adapttable.orwamahmoud.com/media/core/parts/column-management.gif)
 
 **RTL** — the whole table mirrors, not just the text
 
-![rtl](https://orwa-mahmoud.github.io/adapttable/media/core/parts/rtl.gif)
+![rtl](https://adapttable.orwamahmoud.com/media/core/parts/rtl.gif)
 
 ## Documentation
 
-[Getting started](https://orwa-mahmoud.github.io/adapttable/getting-started/) · [Live demo](https://orwa-mahmoud.github.io/adapttable/demo/) · [Comparison vs ag-Grid · MUI X · TanStack](https://orwa-mahmoud.github.io/adapttable/comparison/)
+[Getting started](https://adapttable.orwamahmoud.com/react/getting-started/) · [Live demo](https://adapttable.orwamahmoud.com/react/demo/) · [Comparison vs ag-Grid · MUI X · TanStack](https://adapttable.orwamahmoud.com/react/comparison/)
 
-- **Data** — [client vs server tiers](https://orwa-mahmoud.github.io/adapttable/data-tiers/) · [pagination & infinite scroll](https://orwa-mahmoud.github.io/adapttable/pagination/) · [URL-synced state](https://orwa-mahmoud.github.io/adapttable/url-state/)
-- **Interaction** — [filtering](https://orwa-mahmoud.github.io/adapttable/filtering/) · [sorting](https://orwa-mahmoud.github.io/adapttable/sorting/) · [selection & bulk actions](https://orwa-mahmoud.github.io/adapttable/selection/) · [row expansion](https://orwa-mahmoud.github.io/adapttable/row-expansion/) · [inline cell editing](https://orwa-mahmoud.github.io/adapttable/cell-editing/)
-- **Columns** — [show/hide · reorder · pin · resize](https://orwa-mahmoud.github.io/adapttable/column-management/) · [row grouping & aggregates](https://orwa-mahmoud.github.io/adapttable/row-grouping/) · [CSV export](https://orwa-mahmoud.github.io/adapttable/customization/#csv-export)
-- **More** — [i18n & RTL](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/) · [virtualization](https://orwa-mahmoud.github.io/adapttable/virtualization/) · [customization](https://orwa-mahmoud.github.io/adapttable/customization/) · [API](https://orwa-mahmoud.github.io/adapttable/api/) · [FAQ](https://orwa-mahmoud.github.io/adapttable/faq/)
+- **Data** — [client vs server tiers](https://adapttable.orwamahmoud.com/data-tiers/) · [pagination & infinite scroll](https://adapttable.orwamahmoud.com/react/pagination/) · [URL-synced state](https://adapttable.orwamahmoud.com/react/url-state/)
+- **Interaction** — [filtering](https://adapttable.orwamahmoud.com/react/filtering/) · [sorting](https://adapttable.orwamahmoud.com/react/sorting/) · [selection & bulk actions](https://adapttable.orwamahmoud.com/react/selection/) · [row expansion](https://adapttable.orwamahmoud.com/react/row-expansion/) · [inline cell editing](https://adapttable.orwamahmoud.com/react/cell-editing/)
+- **Columns** — [show/hide · reorder · pin · resize](https://adapttable.orwamahmoud.com/react/column-management/) · [row grouping & aggregates](https://adapttable.orwamahmoud.com/react/row-grouping/) · [CSV export](https://adapttable.orwamahmoud.com/react/customization/#csv-export)
+- **More** — [i18n & RTL](https://adapttable.orwamahmoud.com/react/i18n-rtl/) · [virtualization](https://adapttable.orwamahmoud.com/react/virtualization/) · [customization](https://adapttable.orwamahmoud.com/react/customization/) · [API](https://adapttable.orwamahmoud.com/react/api/) · [FAQ](https://adapttable.orwamahmoud.com/faq/)
 
 ## License
 

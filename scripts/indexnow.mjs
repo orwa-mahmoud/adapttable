@@ -6,12 +6,12 @@
  * back, the site tells Bing, Yandex, Seznam and Naver which URLs to fetch.
  * Google does not participate — its indexing stays on the sitemap.
  *
- * After a Pages deploy the composed dist is hashed. Only URLs whose HTML
+ * After a deploy the composed dist is hashed. Only URLs whose HTML
  * changed (or that are new since the last successful deploy) are POSTed.
  * The first run seeds the hash map and submits nothing, so a whole-site
  * blast is not the default.
  *
- * Runs from the Site workflow after a Pages deploy, and standalone via
+ * Runs from the Site workflow after the site deploys, and standalone via
  * `node scripts/indexnow.mjs [--dist dir] [--state file]`.
  */
 
@@ -20,6 +20,7 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { hashesFromDist, urlsToSubmit } from "./indexnow-delta.mjs";
+import { ORIGIN } from "./site.mjs";
 
 /**
  * The key is public by design — it is served verbatim at KEY_LOCATION, and
@@ -29,19 +30,14 @@ import { hashesFromDist, urlsToSubmit } from "./indexnow-delta.mjs";
  */
 const KEY = "3066b6ad5c3c436ab2078c12c23ce05c";
 
-const HOST = "orwa-mahmoud.github.io";
+const HOST = new URL(ORIGIN).host;
 
 /**
- * The key lives at the host root so it authorises every project served from
- * this domain — IndexNow requires the key file to sit at or above every
+ * The key file ships at the site root via `apps/docs/public/`, which is the
+ * host root — IndexNow requires the key file to sit at or above every
  * submitted URL.
- *
- * An identical copy ships at /adapttable/ via apps/docs/public/. The site is
- * registered in Bing Webmaster Tools as that subdirectory, and its per-site
- * views look for the key at the registered root. The protocol allows many key
- * files per host, so both locations serve the same value.
  */
-const KEY_LOCATION = `https://${HOST}/${KEY}.txt`;
+const KEY_LOCATION = `${ORIGIN}/${KEY}.txt`;
 
 const ENDPOINT = "https://api.indexnow.org/indexnow";
 

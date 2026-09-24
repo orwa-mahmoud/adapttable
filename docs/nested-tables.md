@@ -1,6 +1,6 @@
 # React nested tables — master/detail with nestedTable()
 
-▶ **See it working:** [nested tables in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/nested-tables/) — open a person onto their recent orders; the inner table has its own columns and row keys. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [nested tables in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/nested-tables/) — open a person onto their recent orders; the inner table has its own columns and row keys. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 A nested table is a whole `DataTable` inside an expanded row: the kit's own
 component, with its own columns, row type, sorting, paging and keyboard

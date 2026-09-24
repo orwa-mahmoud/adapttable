@@ -13,9 +13,11 @@ import {
   adapterByKey,
   builtAdapters,
   CANONICAL_AI_ADAPTER,
+  docsUrl,
   MATRIX_FEATURES,
   SHOWCASE_ADAPTERS,
   type ShowcaseAdapter,
+  SITE_HOME,
 } from "./matrix/content";
 import { Check, External, Moon, Sun } from "./sectionIcons";
 
@@ -642,7 +644,7 @@ export function AppNav({
           </button>
           <a
             className="nav__docs"
-            href={`${DOCS_URL}getting-started/`}
+            href={docsUrl("getting-started")}
             target="_blank"
             rel="noreferrer"
           >
@@ -702,7 +704,6 @@ export function useNavHeight(): number {
   return height;
 }
 
-const DOCS_URL = "https://orwa-mahmoud.github.io/adapttable/";
 const REPO_URL = "https://github.com/orwa-mahmoud/adapttable";
 
 export function Install({ large = false }: Readonly<{ large?: boolean }>) {
@@ -745,7 +746,7 @@ export function TrialCta() {
       >
         <External size={14} /> Open in StackBlitz
       </a>
-      <a className="trial-cta__docs" href={`${DOCS_URL}getting-started/`}>
+      <a className="trial-cta__docs" href={docsUrl("getting-started")}>
         Docs
       </a>
     </div>
@@ -779,13 +780,13 @@ export function SectionHead({
 const FOOT_LINKS = [
   {
     label: "Landing",
-    href: DOCS_URL,
+    href: SITE_HOME,
     icon: ["M3 10.5 12 3l9 7.5", "M5 9.5V21h14V9.5", "M9 21v-7h6v7"],
     newTab: false,
   },
   {
     label: "Docs",
-    href: `${DOCS_URL}getting-started/`,
+    href: docsUrl("getting-started"),
     icon: [
       "M4 19.5A2.5 2.5 0 0 1 6.5 17H20",
       "M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z",

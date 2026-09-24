@@ -8,12 +8,14 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { buildLlmsFull } from "../../scripts/build-llms-full.mjs";
+import { docsRoute, docsSlug, siteUrl } from "../../scripts/site.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, "../..");
@@ -246,8 +248,6 @@ export const DESCRIPTIONS = {
     "Add voice input to a React table assistant: useSpeechInput dictates into the draft through the Web Speech API or a recorded clip, with language memory.",
 };
 
-const SITE = "https://orwa-mahmoud.github.io/adapttable";
-
 // Flatten an answer's markdown to plain text for FAQPage structured data.
 function mdToText(md) {
   return md
@@ -292,13 +292,13 @@ function breadcrumbList(title, slug) {
         "@type": "ListItem",
         position: 1,
         name: "AdaptTable",
-        item: `${SITE}/`,
+        item: siteUrl("/"),
       },
       {
         "@type": "ListItem",
         position: 2,
         name: title,
-        item: `${SITE}/${slug}/`,
+        item: siteUrl(docsRoute(slug)),
       },
     ],
   };
@@ -324,12 +324,13 @@ function syncDocs() {
     const raw = readFileSync(join(source, file), "utf8");
     // Drop the H1 (Starlight renders the frontmatter title) and rewrite
     // repo-relative links into their site equivalents: doc-to-doc .md links
-    // become page routes (anchors preserved), repo files point at GitHub.
+    // become the linked page's route in its section (anchors preserved),
+    // repo files point at GitHub.
     const body = raw
       .replace(/^# .*\n/, "")
       .replace(
         /\((?:\.\/)?([a-z0-9-]+)\.md(#[a-z0-9-]+)?\)/g,
-        "(/adapttable/$1/$2)"
+        (_link, page, anchor = "") => `(${docsRoute(page)}${anchor})`
       )
       .replace(
         /\(\.\.\/([^)]+)\)/g,
@@ -345,7 +346,7 @@ function syncDocs() {
     if (file === "faq.md") jsonLd.push(faqPage(parseFaq(raw)));
 
     // Per-page social-share card (generated under public/og/<slug>.png).
-    const ogImage = `${SITE}/og/${slug}.png`;
+    const ogImage = siteUrl(`/og/${slug}.png`);
     const head = [
       ...jsonLd.map(ldScript),
       metaEntry("property", "og:image", ogImage),
@@ -355,7 +356,13 @@ function syncDocs() {
     const fm = [`title: ${JSON.stringify(title)}`];
     if (description) fm.push(`description: ${JSON.stringify(description)}`);
     const frontmatter = `---\n${fm.join("\n")}\n${headBlock(head)}---\n\n`;
-    writeFileSync(join(target, file), `${frontmatter}${body}`);
+    // A page served in a framework section is written below it; a copy left
+    // at the collection root by an earlier layout would publish it twice.
+    const id = docsSlug(slug);
+    if (id !== slug) rmSync(join(target, file), { force: true });
+    const out = join(target, `${id}.md`);
+    mkdirSync(dirname(out), { recursive: true });
+    writeFileSync(out, `${frontmatter}${body}`);
   }
   // LLM-search surface (llmstxt.org): /llms.txt is the index, /llms-full.txt
   // the whole documentation in one file. Tools like Perplexity/ChatGPT
@@ -370,7 +377,7 @@ function syncDocs() {
   const unlinked = readdirSync(source).filter(
     (file) =>
       file.endsWith(".md") &&
-      !llmsIndex.includes(`/adapttable/${file.replace(/\.md$/, "")}/`)
+      !llmsIndex.includes(siteUrl(docsRoute(file.replace(/\.md$/, ""))))
   );
   if (unlinked.length > 0) {
     console.warn(

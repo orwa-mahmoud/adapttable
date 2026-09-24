@@ -20,7 +20,7 @@ import {
 import { assistantHttpTransport, connectAgentHttp } from "@adapttable/ai/http";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { DOCS_URL } from "./matrix/content";
+import { docsUrl } from "./matrix/content";
 
 /** Which transport the conversation is using. @internal */
 export type AiPlayMode = "simulated" | "backend" | "ag-ui" | "ai-sdk";
@@ -356,7 +356,7 @@ export function AiConnectionSettings({
             Your endpoint receives the table&apos;s capability list, its column
             names and the rows you ask about — never a cell the table marks
             unreadable. Model credentials stay on your backend.{" "}
-            <a href={`${DOCS_URL}ai-http/`}>Run the local example</a>.
+            <a href={docsUrl("ai-http")}>Run the local example</a>.
           </p>
           {error ? (
             <p className="ai-conn__error" role="alert">

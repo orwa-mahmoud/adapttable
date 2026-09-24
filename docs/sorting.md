@@ -113,4 +113,4 @@ export function People() {
 - A hand-edited URL sort with no `sortDir` falls back to ascending.
 - In multi-sort, ties at level N fall through to level N+1; rows that tie on every level keep their original order.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/).

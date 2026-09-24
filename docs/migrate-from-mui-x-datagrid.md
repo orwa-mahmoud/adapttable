@@ -1,6 +1,6 @@
 # Migrate from MUI X DataGrid to AdaptTable — v8 breaking changes mapped, Pro features free (MIT)
 
-▶ **See it before you install:** [the live demo running on real Material UI](https://orwa-mahmoud.github.io/adapttable/demo/?kit=mui) — same components you already use, nothing to set up.
+▶ **See it before you install:** [the live demo running on real Material UI](https://adapttable.orwamahmoud.com/react/demo/?kit=mui) — same components you already use, nothing to set up.
 
 [MUI X DataGrid](https://mui.com/x/react-data-grid/) is an excellent grid if
 you are all-in on Material UI. The catch is its licensing: many everyday table

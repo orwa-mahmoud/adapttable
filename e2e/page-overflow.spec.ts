@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
+import { DEMO_ROOT } from "../scripts/site.mjs";
 
 /**
  * No demo page scrolls the document sideways on a desktop.
@@ -18,8 +19,9 @@ import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
  * here without being listed twice.
  */
 
-/** The dev server serves the showcase at the root; the site serves it at /demo/. */
-const devPath = (route: string) => route.replace(/^\/demo/, "") || "/";
+/** The dev server serves the showcase at the root; the site serves it at DEMO_ROOT. */
+const devPath = (route: string) =>
+  route.startsWith(DEMO_ROOT) ? `/${route.slice(DEMO_ROOT.length)}` : route;
 
 /**
  * Both above the nav's 920px mobile breakpoint, where the `<select>` takes over:

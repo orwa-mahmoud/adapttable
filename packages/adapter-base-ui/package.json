@@ -17,7 +17,7 @@
     "node": ">=22.12.0"
   },
   "author": "Orwa Mahmoud",
-  "homepage": "https://orwa-mahmoud.github.io/adapttable/demo/base-ui/",
+  "homepage": "https://adapttable.orwamahmoud.com/react/demo/base-ui/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/orwa-mahmoud/adapttable.git",

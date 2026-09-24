@@ -14,7 +14,7 @@ import { PageShell } from "./PageShell";
  * Which page this is comes from `#root`'s `data-matrix-page` — written into
  * the served HTML by `scripts/build-showcase-html.mjs`. Reading it from the
  * markup rather than from `location.pathname` is what lets the dev server
- * (`/mantine/saved-views/`) and the published site (`/demo/mantine/…`) boot the
+ * (`/mantine/saved-views/`) and the published site (`/react/demo/mantine/…`) boot the
  * same file without either one having to know the other's mount point.
  */
 const container = document.getElementById("root");

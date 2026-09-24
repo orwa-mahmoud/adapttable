@@ -1,8 +1,8 @@
 # @adapttable/shadcn
 
-[![@adapttable/shadcn — a shadcn/ui data table built on AdaptTable](https://orwa-mahmoud.github.io/adapttable/media/adapters/shadcn/parts/filtering.gif)](https://orwa-mahmoud.github.io/adapttable/demo/?kit=shadcn)
+[![@adapttable/shadcn — a shadcn/ui data table built on AdaptTable](https://adapttable.orwamahmoud.com/media/adapters/shadcn/parts/filtering.gif)](https://adapttable.orwamahmoud.com/react/demo/?kit=shadcn)
 
-**[📖 Documentation](https://orwa-mahmoud.github.io/adapttable/)** · **[🚀 Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)** · **[Get started](https://orwa-mahmoud.github.io/adapttable/getting-started/)** · **[⚡ Try in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/shadcn)**
+**[📖 Documentation](https://adapttable.orwamahmoud.com/)** · **[🚀 Live demo](https://adapttable.orwamahmoud.com/react/demo/)** · **[Get started](https://adapttable.orwamahmoud.com/react/getting-started/)** · **[⚡ Try in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/shadcn)**
 
 The **shadcn/ui adapter** for [AdaptTable](https://github.com/orwa-mahmoud/adapttable) —
 a fully-styled React data table in **one import**, with sorting, filtering,
@@ -55,7 +55,7 @@ change.
 
 ## Features
 
-- **Automatic mobile cards** — below the mobile breakpoint every row renders as a shadcn-styled card (same filters, search, selection and URL state) and infinite scroll replaces the pager; tune per column with `mobileLabel` / `hideOnMobile`, pin either layout with `forceMobile`. [See it flip live](https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/).
+- **Automatic mobile cards** — below the mobile breakpoint every row renders as a shadcn-styled card (same filters, search, selection and URL state) and infinite scroll replaces the pager; tune per column with `mobileLabel` / `hideOnMobile`, pin either layout with `forceMobile`. [See it flip live](https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/).
 - **Client or server data** through one `TableSource` contract — same props either way.
 - **Global search box** — debounced; matches each row's searchable text on client data and hands the term to the backend on a server tier. Turn it off with `searchable={false}`.
 - **URL-synced** search / sort / filters / page — shareable, deep-linkable links.
@@ -96,7 +96,7 @@ change.
 - **View controls** — `densityChooser()`, `fullscreen()`, `print(...)`, `statusBar()`, `selectionStats()`, `sidePanel(...)` and `undoRedoButtons()`, each an opt-in toolbar control from its own subpath.
 - **Virtualization** (`virtualize(...)`) — opt-in row/card windowing for very large lists.
 - **Pagination** — numbered pagination, or infinite scroll (auto by device).
-- **SSR & server components** — renders with no DOM; the client boundary is already in the build, so it drops straight into the Next.js App Router. [Docs](https://orwa-mahmoud.github.io/adapttable/ssr-rsc/).
+- **SSR & server components** — renders with no DOM; the client boundary is already in the build, so it drops straight into the Next.js App Router. [Docs](https://adapttable.orwamahmoud.com/react/ssr-rsc/).
 - **States** — `Skeleton` loading, error with retry, and an empty state.
 - **RTL** via `dir`; **dark mode** via your Tailwind `dark:` class strategy.
 - **Customisation** — the components are copied into your project — edit them directly, plus `slots`, `className`, injectable `confirm`, and the full headless escape hatch via `@adapttable/react`.
@@ -128,32 +128,32 @@ Each clip is the real adapter, recorded on the live demo.
 
 **Row grouping** — group rows by a column with per-group subtotals
 
-![shadcn Row grouping](https://orwa-mahmoud.github.io/adapttable/media/adapters/shadcn/parts/row-grouping.gif)
+![shadcn Row grouping](https://adapttable.orwamahmoud.com/media/adapters/shadcn/parts/row-grouping.gif)
 
 **Inline cell editing** — double-click a cell; text, number and select editors
 
-![shadcn Inline cell editing](https://orwa-mahmoud.github.io/adapttable/media/adapters/shadcn/parts/cell-editing.gif)
+![shadcn Inline cell editing](https://adapttable.orwamahmoud.com/media/adapters/shadcn/parts/cell-editing.gif)
 
 **Filtering** — type a bound and the table answers as you type
 
-![shadcn Filtering](https://orwa-mahmoud.github.io/adapttable/media/adapters/shadcn/parts/filtering.gif)
+![shadcn Filtering](https://adapttable.orwamahmoud.com/media/adapters/shadcn/parts/filtering.gif)
 
 **Column management** — show, hide, reorder, pin and resize
 
-![shadcn Column management](https://orwa-mahmoud.github.io/adapttable/media/adapters/shadcn/parts/column-management.gif)
+![shadcn Column management](https://adapttable.orwamahmoud.com/media/adapters/shadcn/parts/column-management.gif)
 
 **RTL / Arabic** — the whole table mirrors, not just the text
 
-![shadcn RTL / Arabic](https://orwa-mahmoud.github.io/adapttable/media/adapters/shadcn/parts/rtl.gif)
+![shadcn RTL / Arabic](https://adapttable.orwamahmoud.com/media/adapters/shadcn/parts/rtl.gif)
 
 ## Documentation
 
-[Getting started](https://orwa-mahmoud.github.io/adapttable/getting-started/) · [Live demo](https://orwa-mahmoud.github.io/adapttable/demo/) · [Comparison vs ag-Grid · MUI X · TanStack](https://orwa-mahmoud.github.io/adapttable/comparison/)
+[Getting started](https://adapttable.orwamahmoud.com/react/getting-started/) · [Live demo](https://adapttable.orwamahmoud.com/react/demo/) · [Comparison vs ag-Grid · MUI X · TanStack](https://adapttable.orwamahmoud.com/react/comparison/)
 
-- **Data** — [client vs server tiers](https://orwa-mahmoud.github.io/adapttable/data-tiers/) · [pagination & infinite scroll](https://orwa-mahmoud.github.io/adapttable/pagination/) · [URL-synced state](https://orwa-mahmoud.github.io/adapttable/url-state/)
-- **Interaction** — [filtering](https://orwa-mahmoud.github.io/adapttable/filtering/) · [sorting](https://orwa-mahmoud.github.io/adapttable/sorting/) · [selection & bulk actions](https://orwa-mahmoud.github.io/adapttable/selection/) · [row expansion](https://orwa-mahmoud.github.io/adapttable/row-expansion/) · [inline cell editing](https://orwa-mahmoud.github.io/adapttable/cell-editing/)
-- **Columns** — [show/hide · reorder · pin · resize](https://orwa-mahmoud.github.io/adapttable/column-management/) · [row grouping & aggregates](https://orwa-mahmoud.github.io/adapttable/row-grouping/) · [CSV export](https://orwa-mahmoud.github.io/adapttable/customization/#csv-export)
-- **More** — [i18n & RTL](https://orwa-mahmoud.github.io/adapttable/i18n-rtl/) · [virtualization](https://orwa-mahmoud.github.io/adapttable/virtualization/) · [customization](https://orwa-mahmoud.github.io/adapttable/customization/) · [API](https://orwa-mahmoud.github.io/adapttable/api/) · [FAQ](https://orwa-mahmoud.github.io/adapttable/faq/)
+- **Data** — [client vs server tiers](https://adapttable.orwamahmoud.com/data-tiers/) · [pagination & infinite scroll](https://adapttable.orwamahmoud.com/react/pagination/) · [URL-synced state](https://adapttable.orwamahmoud.com/react/url-state/)
+- **Interaction** — [filtering](https://adapttable.orwamahmoud.com/react/filtering/) · [sorting](https://adapttable.orwamahmoud.com/react/sorting/) · [selection & bulk actions](https://adapttable.orwamahmoud.com/react/selection/) · [row expansion](https://adapttable.orwamahmoud.com/react/row-expansion/) · [inline cell editing](https://adapttable.orwamahmoud.com/react/cell-editing/)
+- **Columns** — [show/hide · reorder · pin · resize](https://adapttable.orwamahmoud.com/react/column-management/) · [row grouping & aggregates](https://adapttable.orwamahmoud.com/react/row-grouping/) · [CSV export](https://adapttable.orwamahmoud.com/react/customization/#csv-export)
+- **More** — [i18n & RTL](https://adapttable.orwamahmoud.com/react/i18n-rtl/) · [virtualization](https://adapttable.orwamahmoud.com/react/virtualization/) · [customization](https://adapttable.orwamahmoud.com/react/customization/) · [API](https://adapttable.orwamahmoud.com/react/api/) · [FAQ](https://adapttable.orwamahmoud.com/faq/)
 
 ## License
 

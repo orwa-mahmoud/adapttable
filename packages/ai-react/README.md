@@ -1,6 +1,6 @@
 # `@adapttable/ai-react`
 
-[![AdaptTable AI — ask the table to filter, group, and aggregate](https://orwa-mahmoud.github.io/adapttable/media/ai/demo.gif)](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
+[![AdaptTable AI — ask the table to filter, group, and aggregate](https://adapttable.orwamahmoud.com/media/ai/demo.gif)](https://adapttable.orwamahmoud.com/react/demo/mantine/ai/)
 
 React bindings for AdaptTable AI. `tableAgent` publishes a live capability
 manifest from a table. `useTableAssistant` owns the conversation.
@@ -27,19 +27,19 @@ Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 
 
 **Filter, sort, and page size** — active people, salary high first, then 10 rows a page
 
-![filter-sort](https://orwa-mahmoud.github.io/adapttable/media/ai/parts/filter-sort.gif)
+![filter-sort](https://adapttable.orwamahmoud.com/media/ai/parts/filter-sort.gif)
 
 **Group and aggregate** — group by team, average then min salary, then only active
 
-![group-average](https://orwa-mahmoud.github.io/adapttable/media/ai/parts/group-average.gif)
+![group-average](https://adapttable.orwamahmoud.com/media/ai/parts/group-average.gif)
 
 **Date range** — only rows that started between 2020 and 2022
 
-![date-range](https://orwa-mahmoud.github.io/adapttable/media/ai/parts/date-range.gif)
+![date-range](https://adapttable.orwamahmoud.com/media/ai/parts/date-range.gif)
 
 **Column management** — hide Person, show it again, Status first, then pin it
 
-![column-management](https://orwa-mahmoud.github.io/adapttable/media/ai/parts/column-management.gif)
+![column-management](https://adapttable.orwamahmoud.com/media/ai/parts/column-management.gif)
 
-[Integration guide](https://orwa-mahmoud.github.io/adapttable/ai-integrations/) ·
-[API reference](https://orwa-mahmoud.github.io/adapttable/ai/)
+[Integration guide](https://adapttable.orwamahmoud.com/ai-integrations/) ·
+[API reference](https://adapttable.orwamahmoud.com/ai/)

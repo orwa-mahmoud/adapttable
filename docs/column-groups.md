@@ -1,6 +1,6 @@
 # React table column groups — spanning headers, collapsible
 
-▶ **See it working:** [collapse column groups in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/column-groups/) — one table, three groups, open by default: Contact folds to a chevron, Assignment keeps Team, Delivery shows a money-for-days brief (`align: "start"`). Actions stays ungrouped at the end. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [collapse column groups in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/column-groups/) — one table, three groups, open by default: Contact folds to a chevron, Assignment keeps Team, Delivery shows a money-for-days brief (`align: "start"`). Actions stays ungrouped at the end. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 A parent with `children` is a **column group**: one spanning header over its
 leaves. Collapse is per group — each parent decides what remains. Without
@@ -143,4 +143,4 @@ the collapse chevron on the same line as the group title so a one-child
 group cannot wrap the arrow above the caption.
 `isColumnGroup` narrows a `ColumnInput` to a parent.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/column-groups/).
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/mantine/column-groups/).

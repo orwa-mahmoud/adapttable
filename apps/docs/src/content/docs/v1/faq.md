@@ -11,9 +11,9 @@ head:
   - tag: script
     attrs:
       type: application/ld+json
-    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://orwa-mahmoud.github.io/adapttable/"},{"@type":"ListItem","position":2,"name":"AdaptTable
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"AdaptTable
       FAQ — free MUI X / ag-Grid alternative, RTL,
-      SSR","item":"https://orwa-mahmoud.github.io/adapttable/v1/faq/"}]}'
+      SSR","item":"https://adapttable.orwamahmoud.com/v1/faq/"}]}'
   - tag: script
     attrs:
       type: application/ld+json
@@ -151,31 +151,31 @@ head:
   - tag: meta
     attrs:
       property: og:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/faq.png
+      content: https://adapttable.orwamahmoud.com/og/faq.png
   - tag: meta
     attrs:
       name: twitter:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/faq.png
+      content: https://adapttable.orwamahmoud.com/og/faq.png
 slug: v1/faq
 ---
 
 Short, direct answers to the things people ask when choosing a React table.
 (Looking for a quick comparison table instead? See
-[comparison.md](/adapttable/v1/comparison/).)
+[comparison.md](/v1/react/comparison/).)
 
-**Jump to a feature:** [URL state](/adapttable/v1/url-state/) ·
-[Filtering](/adapttable/v1/filtering/) · [Virtualization](/adapttable/v1/virtualization/) ·
-[i18n & RTL](/adapttable/v1/i18n-rtl/) · [Column management](/adapttable/v1/column-management/) ·
-[Data tiers](/adapttable/v1/data-tiers/) ·
-[Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)
+**Jump to a feature:** [URL state](/v1/react/url-state/) ·
+[Filtering](/v1/react/filtering/) · [Virtualization](/v1/react/virtualization/) ·
+[i18n & RTL](/v1/react/i18n-rtl/) · [Column management](/v1/react/column-management/) ·
+[Data tiers](/v1/data-tiers/) ·
+[Live demo](https://adapttable.orwamahmoud.com/react/demo/)
 
 **Migrating from another table:**
-[MUI X DataGrid](/adapttable/v1/migrate-from-mui-x-datagrid/) ·
-[TanStack Table](/adapttable/v1/migrate-from-tanstack-table/) ·
-[mantine-datatable](/adapttable/v1/migrate-from-mantine-datatable/) ·
-[ag-Grid](/adapttable/v1/migrate-from-ag-grid/) ·
-[mui-datatables](/adapttable/v1/migrate-from-mui-datatables/) ·
-[material-table](/adapttable/v1/migrate-from-material-table/)
+[MUI X DataGrid](/v1/react/migrate-from-mui-x-datagrid/) ·
+[TanStack Table](/v1/react/migrate-from-tanstack-table/) ·
+[mantine-datatable](/v1/react/migrate-from-mantine-datatable/) ·
+[ag-Grid](/v1/react/migrate-from-ag-grid/) ·
+[mui-datatables](/v1/react/migrate-from-mui-datatables/) ·
+[material-table](/v1/react/migrate-from-material-table/)
 
 ## What is AdaptTable?
 
@@ -258,7 +258,7 @@ Animation is **opt-in and dependency-free** — the built-in entrance stagger
 uses the Web Animations API and honours `prefers-reduced-motion`. Prefer GSAP
 or Framer Motion? Every row/card is tagged with `data-stagger`, so you can
 drive the animation yourself (see
-[customization.md](/adapttable/v1/customization/#theming-per-kit)). Or run with no animation at
+[customization.md](/v1/react/customization/#theming-per-kit)). Or run with no animation at
 all — your call.
 
 ## Does it support virtualization?
@@ -272,7 +272,7 @@ Ant Design uses its native virtual table mode via the same `virtualize` prop.
 It's built in. Search, sort, filters, and page sync to the URL through an
 injectable adapter (browser History by default; pass a router adapter for
 Next.js / react-router). Reloads, shared links, and back/forward restore the
-exact view. See [url-state.md](/adapttable/v1/url-state/).
+exact view. See [url-state.md](/v1/react/url-state/).
 
 ## Which React table has a filter drawer with URL-synced state?
 
@@ -282,7 +282,7 @@ chips, and every filter, search, sort, and page value syncs to the URL — so a
 refresh or a shared link restores the exact view. It works the same for
 client-side data and server-side fetching, rendered natively by Mantine, MUI,
 Chakra, Ant Design, Radix, Base UI, or shadcn/ui. See
-[filtering.md](/adapttable/v1/filtering/) and [url-state.md](/adapttable/v1/url-state/).
+[filtering.md](/v1/react/filtering/) and [url-state.md](/v1/react/url-state/).
 
 ## Which React versions and bundlers are supported?
 
@@ -317,7 +317,7 @@ npx @adapttable/cli init   # detects your UI kit and scaffolds a table
 ```
 
 Or install an adapter directly, e.g. `pnpm add @adapttable/mantine`. See
-[the Getting started guide](/adapttable/v1/getting-started/).
+[the Getting started guide](/v1/react/getting-started/).
 
 ## Is AdaptTable production-ready?
 
@@ -331,7 +331,7 @@ near-100% test coverage across every adapter.
 * You need a heavyweight enterprise grid with pivoting, range selection, and
   Excel-style fill-handle editing *today* → ag-Grid or MUI X DataGrid (paid).
   (AdaptTable does ship opt-in single-cell editing — see
-  [Inline cell editing](/adapttable/v1/cell-editing/).)
+  [Inline cell editing](/v1/react/cell-editing/).)
 * You're not on React → TanStack Table (multi-framework).
 * You need spreadsheet-grade enterprise features like pivoting, Excel fill
   handles, or range selection *today*.

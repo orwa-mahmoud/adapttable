@@ -10,17 +10,17 @@ head:
   - tag: script
     attrs:
       type: application/ld+json
-    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://orwa-mahmoud.github.io/adapttable/"},{"@type":"ListItem","position":2,"name":"AdaptTable
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"AdaptTable
       versioning & stability
-      policy","item":"https://orwa-mahmoud.github.io/adapttable/v2/versioning/"}]}'
+      policy","item":"https://adapttable.orwamahmoud.com/v2/versioning/"}]}'
   - tag: meta
     attrs:
       property: og:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/versioning.png
+      content: https://adapttable.orwamahmoud.com/og/versioning.png
   - tag: meta
     attrs:
       name: twitter:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/versioning.png
+      content: https://adapttable.orwamahmoud.com/og/versioning.png
 slug: v2/versioning
 ---
 
@@ -81,7 +81,7 @@ supported major — so a claimed-but-broken version is caught before you hit it:
 **What is exported and documented is supported.** Removal or narrowing of
 that surface happens in a major, with a migration note. A symbol tagged
 `@internal` is not the contract even when it appears in the published
-`.d.ts`. The complete name list lives on the [API reference](/adapttable/v2/api/);
+`.d.ts`. The complete name list lives on the [API reference](/v2/react/api/);
 this page names every **supported entrypoint** so a derived allowlist
 cannot omit one.
 
@@ -92,7 +92,7 @@ The app-facing engine: `TableSource`; the `useFrontendData` /
 prop-getters; `ColumnDef` and the rest of the core types; `BaseDataTableProps`;
 URL-state hooks and `UrlStateAdapter`; column-layout, selection, sorting,
 pagination and virtualization hooks; filter primitives; the labels contract.
-The [API reference](/adapttable/v2/api/) lists every export on this entry.
+The [API reference](/v2/react/api/) lists every export on this entry.
 
 ### `@adapttable/core/features`
 
@@ -186,7 +186,7 @@ pretend to be the last two:
 3. **Unstyled / shadcn per-node classes** — `@adapttable/unstyled` (and
    `@adapttable/shadcn` on top of it) expose a `classNames` key and a
    stable `data-adapttable-part` on every rendered node. That part map is
-   the contract; see [customization](/adapttable/v2/customization/).
+   the contract; see [customization](/v2/react/customization/).
 4. **Headless markup** — `useDataTable` and the prop-getters, or a custom
    adapter over `@adapttable/core/adapter`. You own every pixel.
 

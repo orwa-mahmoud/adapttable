@@ -1,6 +1,6 @@
 # @adapttable/react
 
-**[📖 Documentation](https://orwa-mahmoud.github.io/adapttable/)** · **[🚀 Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)** · **[Get started](https://orwa-mahmoud.github.io/adapttable/getting-started/)**
+**[📖 Documentation](https://adapttable.orwamahmoud.com/)** · **[🚀 Live demo](https://adapttable.orwamahmoud.com/react/demo/)** · **[Get started](https://adapttable.orwamahmoud.com/react/getting-started/)**
 
 Headless React binding for [AdaptTable](https://github.com/orwa-mahmoud/adapttable).
 Hooks, structural Chrome and React `ColumnDef` types live here. The
@@ -50,5 +50,5 @@ import for a host that wires Chrome itself.
 - Chrome components and feature providers — `@adapttable/react/adapter`,
   `@adapttable/react/features`
 
-See [Upgrading from v2](https://orwa-mahmoud.github.io/adapttable/migrate-from-v2/)
+See [Upgrading from v2](https://adapttable.orwamahmoud.com/react/migrate-from-v2/)
 for the core → react import map.

@@ -1,6 +1,6 @@
 # React table aggregation — aggregate(), summaryRow & group totals
 
-▶ **See it working:** [group totals, a footer grand total and pinned summaries in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/aggregation/) — filter the table and every total recomputes from the rows that remain. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [group totals, a footer grand total and pinned summaries in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/aggregation/) — filter the table and every total recomputes from the rows that remain. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 Aggregation turns rows into numbers the table shows beside them: a grand
 total in the footer, a subtotal on every group, a reader's own choice of
