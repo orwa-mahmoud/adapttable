@@ -94,21 +94,38 @@ describe("addressMap", () => {
 });
 
 describe("redirectsTable", () => {
-  it("answers each changed path, with and without its slash, and nothing unchanged", () => {
+  it("answers each changed path, with and without its slash", () => {
     const lines = redirectsTable(composed()).split("\n");
     const target = docsRoute("filtering");
     assert.ok(lines.includes(`/filtering/ ${target} 301`));
     assert.ok(lines.includes(`/filtering ${target} 301`));
     assert.ok(lines.includes(`/v1/filtering/ /v1${target} 301`));
-    assert.ok(lines.includes(`/demo/* ${DEMO_ROOT}:splat 301`));
-    assert.equal(
-      lines.some((line) => line.startsWith("/concepts")),
-      false
-    );
     assert.equal(
       lines.some((line) => line.startsWith("/ ")),
       false
     );
+  });
+
+  it("sends each page's slashless address to the page, once", () => {
+    const lines = redirectsTable(composed()).split("\n");
+    const filtering = docsRoute("filtering");
+    assert.ok(lines.includes(`${filtering.slice(0, -1)} ${filtering} 301`));
+    assert.deepEqual(
+      lines.filter((line) => line.startsWith("/concepts")),
+      ["/concepts /concepts/ 301"]
+    );
+    const sources = lines
+      .filter((line) => line !== "" && !line.startsWith("#"))
+      .map((line) => line.split(" ")[0]);
+    assert.equal(new Set(sources).size, sources.length);
+  });
+
+  it("ends on the one splat rule", () => {
+    const rules = redirectsTable(composed())
+      .split("\n")
+      .filter((line) => line !== "" && !line.startsWith("#"));
+    assert.equal(rules.at(-1), `/demo/* ${DEMO_ROOT}:splat 301`);
+    assert.equal(rules.filter((line) => line.includes("*")).length, 1);
   });
 });
 

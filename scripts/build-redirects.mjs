@@ -7,7 +7,7 @@
  * Both outputs are generated from the composed site and the mapping in
  * `legacy-routes.mjs`, so a page that ships is a page both of them cover:
  *
- * - `<site>/_redirects` — the Cloudflare Pages redirect table. Every page whose
+ * - `<site>/_redirects` — the Cloudflare redirect table. Every page whose
  *   path changed answers its previous path shape on the new origin with a
  *   `301`, so `/filtering/` reaches `/react/filtering/` and every showcase path
  *   under `/demo/` reaches `/react/demo/`.
@@ -118,9 +118,9 @@ export const addressMap = (root) =>
     .sort((a, b) => a.from.localeCompare(b.from));
 
 /**
- * The Cloudflare Pages `_redirects` table: each changed page's previous path,
- * with and without its trailing slash, plus one rule for the showcase and one
- * for the framework section's root.
+ * The `_redirects` table: each changed page's previous path, with and without
+ * its trailing slash; one rule for the showcase and one for the framework
+ * section's root; and every page's own slashless address.
  *
  * @param {string} root
  * @returns {string}
@@ -137,7 +137,18 @@ export const redirectsTable = (root) => {
     lines.push(`${from} ${to} 301`);
     if (from.length > 1) lines.push(`${from.slice(0, -1)} ${to} 301`);
   }
-  lines.push(`/demo ${DEMO_ROOT} 301`, `/demo/* ${DEMO_ROOT}:splat 301`);
+  lines.push(`/demo ${DEMO_ROOT} 301`);
+  // A page asked for without its trailing slash answers a permanent redirect
+  // to the address it is served and canonicalised at; the host's own slash
+  // handling would answer a temporary one.
+  const listed = new Set(lines.map((line) => line.split(" ")[0]));
+  for (const { route } of sitePages(root)) {
+    const bare = route.slice(0, -1);
+    if (bare !== "" && !listed.has(bare)) lines.push(`${bare} ${route} 301`);
+  }
+  // The one splat rule goes last: every rule after a dynamic one counts
+  // against the host's much smaller dynamic-rule limit.
+  lines.push(`/demo/* ${DEMO_ROOT}:splat 301`);
   return `${lines.join("\n")}\n`;
 };
 
