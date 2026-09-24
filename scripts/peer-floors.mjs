@@ -3,13 +3,12 @@
  * Peer-range FLOOR verification (blocking, local).
  *
  * Every adapter's kit peer range has a floor the code must actually run
- * on — item 36 raised each floor to the truth (Chakra 3.13, MUI 6,
- * Mantine 7.2, antd 6, Radix 3). This probe packs the CURRENT workspace
- * build of core + one adapter, installs it beside the kit pinned to its
- * EXACT floor version, and runs a jsdom render smoke (rows visible, sort,
- * filters, selection, column menu) under each kit's minimal provider. Filter
- * and bulk chrome come from `standardFeatures()` — they are not on the
- * adapter root in v3.
+ * on (Mantine 7.2, MUI 6.1, Chakra 3.13, antd 6, Radix Themes 3, Base UI
+ * 1.6). This probe packs the CURRENT workspace build of core + one adapter,
+ * installs it beside the kit pinned to its EXACT floor version, and runs a
+ * jsdom render smoke (rows visible, sort, filters, selection, column menu)
+ * under each kit's minimal provider. Filter and bulk chrome come from
+ * `standardFeatures()` — they are not on the adapter root in v3.
  *
  * Unlike the scheduled `peer-matrix` (published versions, tsc-only,
  * non-blocking), this validates the LOCAL build and fails loudly — run

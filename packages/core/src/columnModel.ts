@@ -41,14 +41,14 @@ export type FilterValue = string | string[] | number | undefined;
 export type ExtraFilters = Record<string, FilterValue>;
 
 /**
- * Neutral filter metadata. React `ColumnModel` narrows this to `ColumnFilter`.
+ * Neutral filter metadata. React `ColumnDef` narrows this to `ColumnFilter`.
  *
  * @public
  */
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 /**
- * Neutral editor metadata. React `ColumnModel` narrows this to `CellEditor`.
+ * Neutral editor metadata. React `ColumnDef` narrows this to `CellEditor`.
  *
  * @public
  */

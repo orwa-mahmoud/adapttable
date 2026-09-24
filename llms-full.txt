@@ -21357,8 +21357,7 @@ warning to grep for, because there is nothing left to deprecate.
 
 This repository rehearses that upgrade against packed tarballs for every
 published kit — preset-equivalent first, then the four-import minimal path —
-with `pnpm migrate:rehearse`. Headless consumers keep `useDataTable`. The
-release receipt is `scripts/v3-receipt.md`.
+with `pnpm migrate:rehearse`. Headless consumers keep `useDataTable`.
 
 Run the v3 codemod over the source directories:
 

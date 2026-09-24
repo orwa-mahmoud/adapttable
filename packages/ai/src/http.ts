@@ -1131,7 +1131,7 @@ function pinLost(response: AgentHttpResponse): boolean {
 /**
  * The context this client would send, built once per exchange.
  *
- * Built from the live session through item 6's exporter, which has already
+ * Built from the live session through `buildAgentContext`, which has already
  * applied the permission predicate, so nothing excluded can reach the wire.
  * The caller decides whether it travels; this only decides what it says.
  */

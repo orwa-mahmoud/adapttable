@@ -150,8 +150,8 @@ describe("both directions", () => {
     );
   });
 
-  // The direction that would have caught item 16: 993 classifications were
-  // withdrawn and the only guard asked the other question.
+  // The direction a one-way guard misses: an approved symbol withdrawn from
+  // `@public`.
   it("fails a contracted symbol that is no longer @public", () => {
     const manifest = agreeing();
     manifest.surfaces.core = [

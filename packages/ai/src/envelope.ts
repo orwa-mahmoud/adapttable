@@ -5,7 +5,7 @@ import type { AgentSession, ExecuteResult } from "./types";
  * Transport-neutral operation. Adapters map provider tool calls onto this
  * shape, then {@link executeEnvelope} hands it to `session.execute`.
  *
- * Host write-safety chrome (item 11-B) may sit *around* an envelope:
+ * Host write-safety chrome may sit *around* an envelope:
  * `approval` is `"writes"` | `"destructive"` | `"never"` (default
  * `"writes"`); `commit` is `"stage"` | `"immediate"` (default `"stage"`).
  * Those fields are not on the envelope — the session already validates

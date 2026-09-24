@@ -9,8 +9,8 @@
  *
  * The **table context** is this table: its permitted capabilities, the guides
  * that were actually selected, its columns, its filters, and where the view is
- * now. Rendered from the contract item 6 exports, so nothing here decides what
- * a model may know.
+ * now. Rendered from the `AgentContext` that `buildAgentContext` exports, so
+ * nothing here decides what a model may know.
  *
  * They are separate because they change on different clocks and because a
  * backend usually wants them in different places — rules in the system block,

@@ -5,24 +5,23 @@
  * `feature-classification.json` is the single source of truth for the v3
  * feature surface: what each opt-in is, which core modules carry it, which kit
  * components render it, which enabling prop it replaces, and whether
- * `standardFeatures()` includes it. The adapter split, the parity test and the
- * generated feature lists in README, the comparison page and the docs all read
- * it, so a stale entry does not stay a documentation problem for long — it
- * becomes a wrong feature list on a published page.
+ * `standardFeatures()` includes it. The feature-parity check, the
+ * framework-boundary check and the consumer harness all read it, so a stale
+ * entry fails a gate instead of staying a documentation problem.
  *
  * An inventory is only worth what it is reconciled against, so this checks the
  * claims rather than the format:
  *
  * 1. **Every factory is listed exactly once.** The factories exported from
- *    `@adapttable/core/features` are the population; a new one that nobody
- *    classified fails here rather than being quietly absent from every
- *    generated list.
+ *    `@adapttable/react/features` are the population; a new one that nobody
+ *    classified fails here rather than being quietly absent from every check
+ *    that reads the inventory.
  * 2. **Every named module exists.** Implementation paths and kit components
  *    are resolved on disk, so a rename cannot leave the manifest pointing at
  *    a file that moved.
- * 3. **Every replaced prop is real.** Each `replacesProps` entry must appear
- *    in the deprecation list `warnDeprecatedFeatureProps` warns on, which is
- *    what proves the v2 path and the v3 replacement are the same feature.
+ * 3. **Every replaced prop stays removed.** No `replacesProps` entry may be
+ *    declared again on the public `BaseDataTableProps` or on an adapter's
+ *    `DataTablePropsBase`.
  * 4. **`standardFeatures()` is honest.** Its zero-argument list may name only
  *    factories that are callable bare — a factory that needs options is inert
  *    without them, so naming it in a preset would bundle an implementation the
@@ -60,7 +59,7 @@ const adapters = readdirSync(PACKAGES).filter((name) =>
 
 const problems = [];
 
-/* 1. The factories core exports are exactly the factories listed. ---------- */
+/* 1. The factories the binding exports are exactly the factories listed. -- */
 
 const featuresEntry = readFileSync(
   join(PACKAGES, "react", "src", "features.ts"),

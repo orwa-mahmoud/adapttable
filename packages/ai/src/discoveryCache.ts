@@ -76,7 +76,7 @@ export function createDiscoveryCache(
   const maxVersions = options.maxVersions ?? DEFAULT_CACHE_VERSIONS;
   const maxGuides = options.maxGuides ?? DEFAULT_CACHE_GUIDES;
   // Keyed by connection first: what one backend was told is not what another
-  // was told, and item 3's pins are scoped the same way for the same reason.
+  // was told, and HTTP pins are scoped the same way for the same reason.
   const byConnection = new Map<string, Map<string, VersionEntry>>();
 
   const versions = (connectionId: string): Map<string, VersionEntry> => {

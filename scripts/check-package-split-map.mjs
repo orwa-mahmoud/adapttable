@@ -4,7 +4,7 @@
  *
  * Every current public symbol must appear exactly once per import specifier,
  * classified, with a destination. Representative engine / React / kit / AI
- * examples must agree with the frozen contracts in ARCHITECTURE.md.
+ * symbols must map to the package ARCHITECTURE.md assigns them.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";

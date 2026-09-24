@@ -2,7 +2,7 @@
 /**
  * Peer-dependency compatibility matrix (non-blocking).
  *
- * Every adapter advertises a WIDE kit peer range (Mantine 7–9, MUI 5–9, …) but
+ * Every adapter advertises a WIDE kit peer range (Mantine 7–9, MUI 6–9, …) but
  * the normal CI installs only one version of each. A claimed-but-broken major
  * would then be discovered by a user, not by us. This probe installs the
  * OLDEST and NEWEST supported major of each adapter's kit into a throwaway
@@ -11,7 +11,7 @@
  * break both surface, each attributed to its phase (install/resolve/tsc/render).
  *
  * It NEVER narrows a range or fails the build: a failing cell is a finding —
- * `ai_docs/peer-matrix-findings.md` for humans, `peer-matrix-summary.json` for
+ * `reports/peer-matrix/findings.md` for humans, `summary.json` beside it for
  * the workflow, which drives one tracking issue from it. Run standalone
  * (`node scripts/peer-matrix.mjs`) or from the scheduled `peer-matrix` workflow.
  */
@@ -28,6 +28,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const REPORT_DIR = join(REPO_ROOT, "reports", "peer-matrix");
 // The probe must test the major users currently install, so ranges are
 // derived from the workspace versions — a hardcoded range silently kept
 // testing v1 after the 2.0.0 release. Versioning is independent per
@@ -349,10 +350,9 @@ function main() {
 
   // Machine-readable summary, written on EVERY run (green included) — the
   // workflow uploads it and drives the tracking issue from it.
-  const summaryDir = join(REPO_ROOT, "ai_docs");
-  mkdirSync(summaryDir, { recursive: true });
+  mkdirSync(REPORT_DIR, { recursive: true });
   writeFileSync(
-    join(summaryDir, "peer-matrix-summary.json"),
+    join(REPORT_DIR, "summary.json"),
     `${JSON.stringify(
       {
         generatedAt: new Date().toISOString(),
@@ -373,10 +373,8 @@ function main() {
   );
 
   if (failures.length > 0) {
-    const dir = join(REPO_ROOT, "ai_docs");
-    mkdirSync(dir, { recursive: true });
     const body = [
-      "# Peer-matrix findings (private — triage, do not narrow ranges reflexively)",
+      "# Peer-matrix findings — triage, do not narrow ranges reflexively",
       "",
       "A cell below installs the named kit major with the current published",
       "adapter, typechecks a table that imports it, then mounts it in jsdom",
@@ -393,9 +391,9 @@ function main() {
         "",
       ]),
     ].join("\n");
-    writeFileSync(join(dir, "peer-matrix-findings.md"), `${body}\n`);
+    writeFileSync(join(REPORT_DIR, "findings.md"), `${body}\n`);
     console.log(
-      `${failures.length} cell(s) failed — details in ai_docs/peer-matrix-findings.md`
+      `${failures.length} cell(s) failed — details in reports/peer-matrix/findings.md`
     );
   }
 
