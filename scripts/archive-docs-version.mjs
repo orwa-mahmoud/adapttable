@@ -9,7 +9,8 @@
  * (`--ref`, extracted with `git archive`) or a directory already holding that
  * tree (`--source`, for an archive whose pages were corrected first). It must
  * contain `docs/*.md`, `apps/docs/sync-docs.mjs`, `apps/docs/sidebar.mjs`,
- * `scripts/` and `llms.txt` from that version.
+ * `scripts/` and `llms.txt` from that version, publishing its docs in framework
+ * sections (`scripts/site.mjs`) as every release from this layout on does.
  *
  * `starlight-versions` writes a snapshot the first time a configured version
  * has no folder, so the script builds the site once in a scratch copy of
@@ -46,16 +47,28 @@ import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { gitBinary } from "./git-binary.mjs";
+import { ORIGIN } from "./site.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS_APP = join(ROOT, "apps", "docs");
-const SITE = "https://orwa-mahmoud.github.io/adapttable";
-/** A breadcrumb item that points at a current docs page of this site. */
-const BREADCRUMB_ITEM =
-  /"item":"https:\/\/orwa-mahmoud\.github\.io\/adapttable\/(?!og\/)([a-z0-9-]+)\/"/g;
+const SITE = ORIGIN;
+const SITE_PATTERN = SITE.replaceAll(".", String.raw`\.`).replaceAll(
+  "/",
+  String.raw`\/`
+);
+/**
+ * A breadcrumb item that points at a current docs page of this site — at the
+ * root or in a framework section (`react/filtering`).
+ */
+const BREADCRUMB_ITEM = new RegExp(
+  String.raw`"item":"${SITE_PATTERN}\/(?!og\/)((?:[a-z0-9-]+\/)?[a-z0-9-]+)\/"`,
+  "g"
+);
 /** A page's Open Graph image on this site. */
-const OG_IMAGE =
-  /https:\/\/orwa-mahmoud\.github\.io\/adapttable\/og\/([a-z0-9-]+)\.png/g;
+const OG_IMAGE = new RegExp(
+  String.raw`${SITE_PATTERN}\/og\/([a-z0-9-]+)\.png`,
+  "g"
+);
 const REPO = "https://github.com/orwa-mahmoud/adapttable";
 
 function option(name) {
@@ -159,10 +172,9 @@ cpSync(DOCS_APP, siteApp, {
 symlinkSync(join(DOCS_APP, "node_modules"), join(siteApp, "node_modules"));
 cpSync(join(source, "docs"), join(site, "docs"), { recursive: true });
 cpSync(join(source, "scripts"), join(site, "scripts"), { recursive: true });
-cpSync(
-  join(ROOT, "scripts", "analytics-guard.mjs"),
-  join(site, "scripts", "analytics-guard.mjs")
-);
+for (const file of ["analytics-guard.mjs", "site.mjs"]) {
+  cpSync(join(ROOT, "scripts", file), join(site, "scripts", file));
+}
 cpSync(join(source, "llms.txt"), join(site, "llms.txt"));
 for (const file of ["sync-docs.mjs", "sidebar.mjs"]) {
   cpSync(join(source, "apps", "docs", file), join(siteApp, file));

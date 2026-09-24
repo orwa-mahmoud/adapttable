@@ -1,6 +1,6 @@
 # React table toolbar and view controls — density, fullscreen, print, status bar
 
-▶ **See it working:** [the Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — turn **Density & fullscreen**, **Print button**, **Status bar**, **Undo / Redo buttons** and **Side panel** on, on any kit.
+▶ **See it working:** [the Feature Lab](https://adapttable.orwamahmoud.com/react/demo/all-options/) — turn **Density & fullscreen**, **Print button**, **Status bar**, **Undo / Redo buttons** and **Side panel** on, on any kit.
 
 The toolbar above the table carries search and the controls of the features
 you compose. Every view control is opt-in: `densityChooser()`, `fullscreen()`,

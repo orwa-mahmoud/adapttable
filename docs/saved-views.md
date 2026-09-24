@@ -347,4 +347,4 @@ The hook returns `UseSavedViewsResult`: `views`, `save`, `apply`, `remove`,
 - The menu's `savedViews` / `saveView` / `viewName` / `deleteView` labels are
   overridable via `labels` and localized by the `@adapttable/i18n` presets.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/).

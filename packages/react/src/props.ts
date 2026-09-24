@@ -693,7 +693,7 @@ export interface BaseDataTableProps<TRow> {
    * imports. The import is the switch: a table downloads a feature when it
    * names one here, and nothing else brings it.
    *
-   * See [feature composition](https://orwa-mahmoud.github.io/adapttable/features/).
+   * See [feature composition](https://adapttable.orwamahmoud.com/react/features/).
    *
    * Built-in factories and host plugins are the same {@link TableFeature}
    * type in this one array.

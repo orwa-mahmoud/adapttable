@@ -1,6 +1,6 @@
 # React table i18n & RTL — Arabic, Hebrew, 18 locales
 
-▶ **See it working:** [flip the whole table to Arabic RTL in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rtl/) — a real table you can interact with, not a recording.
+▶ **See it working:** [flip the whole table to Arabic RTL in the live demo](https://adapttable.orwamahmoud.com/react/demo/mantine/rtl/) — a real table you can interact with, not a recording.
 
 AdaptTable is **i18n-agnostic at its core** — it never imports an i18n
 library. Strings come in through a `labels` prop, so you can use your own

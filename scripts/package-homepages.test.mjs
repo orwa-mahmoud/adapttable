@@ -5,10 +5,10 @@ import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { SHOWCASE_ADAPTERS } from "../apps/showcase/matrix.mjs";
+import { demoRoute, siteUrl } from "./site.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
-const SITE = "https://orwa-mahmoud.github.io/adapttable";
-const HUB = `${SITE}/demo/`;
+const HUB = siteUrl(demoRoute());
 const HUB_PACKAGES = new Set([
   "@adapttable/core",
   "@adapttable/react",
@@ -47,7 +47,7 @@ describe("published package homepages", () => {
     assert.ok(published.some(({ pkg }) => pkg.name === "@adapttable/ai"));
     for (const { path, pkg } of published) {
       const kit = kitByPkg.get(pkg.name);
-      const expected = kit ? `${SITE}/demo/${kit}/` : HUB;
+      const expected = kit ? siteUrl(demoRoute(kit)) : HUB;
       if (!kit) {
         assert.ok(
           HUB_PACKAGES.has(pkg.name),

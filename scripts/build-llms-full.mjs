@@ -10,11 +10,13 @@ import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { siteUrl } from "./site.mjs";
+
 const HEADER = `# AdaptTable — full documentation
 
 > AdaptTable v3 documentation: a framework-neutral data engine in @adapttable/core, headless React bindings in @adapttable/react, and native table adapters for Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. Individually imported features include filtering, grouping, pivot tables, formulas, editing, virtualization and export. Responsive mobile cards, URL state, i18n/RTL and optional provider-neutral AI sessions. MIT licensed; applications own data and persistence.
 
-Start with getting-started and concepts for package ownership, then features for opt-in composition. Use the v2-to-v3 migration guide when upgrading; historical migration examples describe their named versions, not current import paths. Vue and Angular bindings are not shipped. This file is generated from the canonical guides; the linked index is at https://orwa-mahmoud.github.io/adapttable/llms.txt.
+Start with getting-started and concepts for package ownership, then features for opt-in composition. Use the v2-to-v3 migration guide when upgrading; historical migration examples describe their named versions, not current import paths. Vue and Angular bindings are not shipped. This file is generated from the canonical guides; the linked index is at ${siteUrl("/llms.txt")}.
 
 `;
 

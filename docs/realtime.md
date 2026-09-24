@@ -1,6 +1,6 @@
 # Realtime React data table — live row updates, websockets
 
-▶ **See it working:** [watch rows patch in on the Mantine demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/realtime/) — budgets change while you read them; sort and selection hold. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [watch rows patch in on the Mantine demo](https://adapttable.orwamahmoud.com/react/demo/mantine/realtime/) — budgets change while you read them; sort and selection hold. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 A realtime table is one whose rows update as data arrives — a websocket, a
 poll, another tab. AdaptTable does not open the socket. You do. When a change

@@ -120,8 +120,8 @@ export async function runMcpHostExample(): Promise<void> {
   // Serve the table as a view the host embeds. `connectDomains` is the whole
   // channel the view gets: the CSP refuses everything else.
   const view = mcpAppResource(after, {
-    src: "https://orwa-mahmoud.github.io/adapttable/demo/mcp-app/",
-    security: { connectDomains: ["https://orwa-mahmoud.github.io"] },
+    src: "https://adapttable.orwamahmoud.com/react/demo/mcp-app/",
+    security: { connectDomains: ["https://adapttable.orwamahmoud.com"] },
     preferredSize: { width: 720, height: 480 },
   });
   console.log("MCP App resource:", view.uri, view.mimeType);

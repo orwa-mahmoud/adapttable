@@ -65,7 +65,7 @@ import { setAssistantActive } from "./assistantActivity";
 import type { Locale } from "./data";
 import { DemoFallback, Segmented } from "./kitDemos";
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
-import { DOCS_URL, SHOWCASE_ADAPTERS } from "./matrix/content";
+import { docsUrl, SHOWCASE_ADAPTERS, siteAsset } from "./matrix/content";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 
 interface StaffRow {
@@ -675,7 +675,7 @@ const PAGE_LIMIT = 5;
 
 const AI_DEMO_MEDIA = import.meta.env.DEV
   ? "/media/ai"
-  : "https://orwa-mahmoud.github.io/adapttable/media/ai";
+  : siteAsset("/media/ai");
 
 /**
  * Visible player, no autoload: the poster is what paints, and the file
@@ -1358,7 +1358,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           contextInputs={liveViewInputs}
           profile={contextProfile}
           webmcpNames={webmcpNames}
-          docsUrl={DOCS_URL}
+          docsUrl={docsUrl}
         />
       </InspectorPortal>
     </div>

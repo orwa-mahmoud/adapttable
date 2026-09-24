@@ -1,6 +1,6 @@
 # React table row actions — add, duplicate and delete rows
 
-▶ **See it working:** [row actions in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — a trailing actions column, collapsed into a 3-dot menu. The same pages exist for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [row actions in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/rows/) — a trailing actions column, collapsed into a 3-dot menu. The same pages exist for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 Import `rowActions` from `@adapttable/<kit>/row-actions`. It takes two
 optional arguments: your own per-row actions, and the handlers that add,

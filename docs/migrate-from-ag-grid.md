@@ -1,6 +1,6 @@
 # Migrate from AG Grid to AdaptTable — CRUD tables in your UI kit, MIT
 
-▶ **See it before you install:** [the live demo](https://orwa-mahmoud.github.io/adapttable/demo/) — flip between Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn and Tailwind on the same data.
+▶ **See it before you install:** [the live demo](https://adapttable.orwamahmoud.com/react/demo/) — flip between Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn and Tailwind on the same data.
 
 [AG Grid](https://www.ag-grid.com/) is the best spreadsheet-grade grid in the
 React ecosystem — and this page starts by telling you when **not** to migrate.

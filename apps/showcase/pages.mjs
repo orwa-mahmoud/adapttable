@@ -4,7 +4,7 @@
  * Three consumers read it and nothing else:
  *   - `apps/showcase/vite.config.ts` generates `rollupOptions.input` from it,
  *     so an entry here is a page that ships.
- *   - `apps/docs/fix-sitemap.mjs` generates the `/demo/` URLs of
+ *   - `apps/docs/fix-sitemap.mjs` generates the showcase URLs of
  *     `dist/sitemap.xml` from the indexable entries, and fails the docs build
  *     if one of them is not listed exactly once.
  *   - `scripts/check-sitemap.mjs` walks the composed site and fails when a
@@ -27,7 +27,7 @@
  * @property {string} html HTML entry, relative to the showcase package root —
  *   where this file and `vite.config.ts` both sit.
  * @property {string} route Public path on the composed site, which serves the
- *   showcase under `/demo/`. Trailing slash always: that is the form Pages
+ *   showcase under `DEMO_ROOT` (`scripts/site.mjs`). Trailing slash always: that is the form Pages
  *   serves a directory index at, and the form the sitemap has to carry.
  * @property {boolean} indexable Whether the route belongs in the sitemap. A
  *   page that must build but must never be indexed sets `false`. Redirect
@@ -36,6 +36,7 @@
  *   marketing tile uses it too and still boots a bundle.
  */
 
+import { demoRoute } from "../../scripts/site.mjs";
 import { matrixPages } from "./matrix.mjs";
 
 /**
@@ -49,7 +50,7 @@ import { matrixPages } from "./matrix.mjs";
 const demo = (dir, { indexable = true } = {}) => ({
   key: dir.replaceAll("/", "-"),
   html: `./${dir}/index.html`,
-  route: `/demo/${dir}/`,
+  route: demoRoute(dir),
   indexable,
 });
 
@@ -70,7 +71,7 @@ export const REPLACED_PAGES = [
   ["columns", "mantine/columns"],
   ["editing", "mantine/editing"],
   ["export", "mantine/export"],
-  // The export demo's first address, which already forwarded to `/demo/export/`
+  // The export demo's first address, which already forwarded to `export/`
   // — pointed at the live page rather than at another stub, because a chain of
   // two refreshes is two chances to lose the reader.
   ["export-pdf", "mantine/export"],
@@ -86,7 +87,7 @@ export const REPLACED_PAGES = [
  * @type {ShowcasePage[]}
  */
 export const SHOWCASE_PAGES = [
-  { key: "main", html: "./index.html", route: "/demo/", indexable: true },
+  { key: "main", html: "./index.html", route: demoRoute(), indexable: true },
   demo("all-options"),
   // Optional AI chrome — built for kit/e2e coverage, not a marketing tile.
   demo("agent-approval", { indexable: false }),

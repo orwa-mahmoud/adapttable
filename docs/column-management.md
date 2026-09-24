@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — this page's features are already wired in `src/App.tsx` (`columnMenu()` + `resizableColumns()`); edit it in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [rename, pin, resize and reorder columns in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/columns/) — a real table you can edit and drag, not a recording.
+▶ **See it working:** [rename, pin, resize and reorder columns in the live demo](https://adapttable.orwamahmoud.com/react/demo/mantine/columns/) — a real table you can edit and drag, not a recording.
 
 Let users rename, show/hide, reorder, pin, and resize columns — compose one factory per
 capability from `@adapttable/<kit>/<feature>`, with the resulting layout
@@ -151,7 +151,7 @@ in a feature's `setup` — see [feature composition](./features.md).
   paint with the default layout before the stored one applies. Blocked
   storage (Safari private mode, sandboxed webviews) is tolerated silently.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/).
 
 ## Widths, bounds and shares
 

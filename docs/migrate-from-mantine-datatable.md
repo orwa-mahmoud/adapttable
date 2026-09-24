@@ -1,6 +1,6 @@
 # Migrate from mantine-datatable to AdaptTable — more features, same Mantine look
 
-▶ **See it before you install:** [the live demo running on real Mantine](https://orwa-mahmoud.github.io/adapttable/demo/?kit=mantine) — same components you already use, nothing to set up.
+▶ **See it before you install:** [the live demo running on real Mantine](https://adapttable.orwamahmoud.com/react/demo/?kit=mantine) — same components you already use, nothing to set up.
 
 [mantine-datatable](https://icflorescu.github.io/mantine-datatable/) is a
 polished, Mantine-only table. `@adapttable/mantine` renders the **same Mantine

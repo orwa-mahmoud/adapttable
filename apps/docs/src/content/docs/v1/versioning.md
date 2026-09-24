@@ -11,17 +11,17 @@ head:
   - tag: script
     attrs:
       type: application/ld+json
-    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://orwa-mahmoud.github.io/adapttable/"},{"@type":"ListItem","position":2,"name":"AdaptTable
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"AdaptTable
       versioning & stability
-      policy","item":"https://orwa-mahmoud.github.io/adapttable/v1/versioning/"}]}'
+      policy","item":"https://adapttable.orwamahmoud.com/v1/versioning/"}]}'
   - tag: meta
     attrs:
       property: og:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/versioning.png
+      content: https://adapttable.orwamahmoud.com/og/versioning.png
   - tag: meta
     attrs:
       name: twitter:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/versioning.png
+      content: https://adapttable.orwamahmoud.com/og/versioning.png
 slug: v1/versioning
 ---
 

@@ -1,6 +1,6 @@
 # React table formulas — spreadsheet columns computed from your rows
 
-▶ **See it working:** [type a formula and watch the column appear in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/formulas/) — a real table you can click, not a recording.
+▶ **See it working:** [type a formula and watch the column appear in the live demo](https://adapttable.orwamahmoud.com/react/demo/mantine/formulas/) — a real table you can click, not a recording.
 
 A column whose value is `=[Unit Price] * Quantity`, typed by the user rather
 than written by you.

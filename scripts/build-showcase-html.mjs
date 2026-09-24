@@ -37,15 +37,12 @@ import {
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES } from "../apps/showcase/pages.mjs";
 import { appendScript, guarded } from "./analytics-guard.mjs";
-import { SITE } from "./sitemap-routes.mjs";
+import { demoRoute, docsRoute, siteUrl } from "./site.mjs";
 
 const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
 
-/** Where the docs site publishes the written reference for a feature. */
-const DOCS = `${SITE}/`;
-
 /** The social card every demo page shares. */
-const OG_IMAGE = `${SITE}/og.png`;
+const OG_IMAGE = siteUrl("/og.png");
 
 /** Cloudflare Web Analytics — cookieless, and already on every other page. */
 const CF_TOKEN = "dd71ff9f3b7b4064969d3f81e8c6ee9b";
@@ -83,13 +80,13 @@ const head = ({
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="${upTo(dir)}favicon.svg" />
     <meta name="description" content="${escapeHtml(description)}" />
-    <link rel="canonical" href="${SITE}${route}" />
+    <link rel="canonical" href="${siteUrl(route)}" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content="${escapeHtml(title)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />
-    <meta property="og:url" content="${SITE}${route}" />
+    <meta property="og:url" content="${siteUrl(route)}" />
     <meta property="og:image" content="${OG_IMAGE}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -103,7 +100,7 @@ const head = ({
         "@type": "SoftwareApplication",
         name: "AdaptTable",
         description,
-        url: `${SITE}${route}`,
+        url: `${siteUrl(route)}`,
         applicationCategory: "DeveloperApplication",
         operatingSystem: "Any",
         license: "https://opensource.org/license/mit",
@@ -247,7 +244,9 @@ ${bodyHtml}
 
 /** The written reference links a page closes with. */
 const docsList = (slugs) =>
-  slugs.map((slug) => `<a href="${DOCS}${slug}/">${slug}</a>`).join(", ");
+  slugs
+    .map((slug) => `<a href="${siteUrl(docsRoute(slug))}">${slug}</a>`)
+    .join(", ");
 
 /**
  * A navigation list, indented to sit inside the fallback `<main>`.
@@ -287,7 +286,7 @@ const siblingFeatures = (feature) =>
 const featurePage = (adapter, feature) => {
   const fill = (text) => fillTemplate(text, adapter);
   const dir = `${adapter.key}/${feature.slug}`;
-  const route = `/demo/${dir}/`;
+  const route = demoRoute(dir);
   const note = feature.notes[adapter.key];
   const body = `    <!-- Replaced by React on mount — the served markup carries the page's
          own words so a crawler, and anyone whose bundle has not arrived, reads
@@ -322,7 +321,7 @@ ${linkList(
         <p>
           Reference: ${docsList(feature.docs)}. More of this kit:
           <a href="../">AdaptTable for ${escapeHtml(adapter.label)}</a>, or
-          <a href="/adapttable/demo/">the live demo</a>.
+          <a href="${demoRoute()}">the live demo</a>.
         </p>
       </main>
     </div>
@@ -345,7 +344,7 @@ ${linkList(
 const landingPage = (adapter) => {
   const fill = (text) => fillTemplate(text, adapter);
   const dir = adapter.key;
-  const route = `/demo/${dir}/`;
+  const route = demoRoute(dir);
   const head_ = landingHead(adapter);
   const body = `    <!-- Replaced by React on mount — see the note on a feature page for why the
          served markup carries content. Written by
@@ -375,8 +374,8 @@ ${linkList(
   }))
 )}
         <p>
-          Reference: <a href="${DOCS}getting-started/">getting started</a>. Or
-          open <a href="/adapttable/demo/">the live demo</a> and switch kits on
+          Reference: <a href="${siteUrl(docsRoute("getting-started"))}">getting started</a>. Or
+          open <a href="${demoRoute()}">the live demo</a> and switch kits on
           the same table.
         </p>
       </main>
@@ -410,14 +409,14 @@ const stubPage = ([from, to]) => {
   const feature = featureBySlug(featureSlug);
   if (!adapter || !feature) {
     throw new Error(
-      `build-showcase-html: /demo/${from}/ forwards to /demo/${to}/, which the matrix does not build`
+      `build-showcase-html: ${demoRoute(from)} forwards to ${demoRoute(to)}, which the matrix does not build`
     );
   }
   const name = fillTemplate(feature.h1, adapter).toLowerCase();
-  const title = `AdaptTable demo — ${feature.label.toLowerCase()} moved to /demo/${to}/`;
-  const description = `The AdaptTable ${feature.label.toLowerCase()} demo is now ${name} at /demo/${to}/ — the same table, with that kit's install line and code on the page.`;
+  const title = `AdaptTable demo — ${feature.label.toLowerCase()} moved to ${demoRoute(to)}`;
+  const description = `The AdaptTable ${feature.label.toLowerCase()} demo is now ${name} at ${demoRoute(to)} — the same table, with that kit's install line and code on the page.`;
   const body = `    <main class="at-fallback">
-      <h1>This demo is now at /demo/${to}/</h1>
+      <h1>This demo is now at ${demoRoute(to)}</h1>
       <p>
         The demo is adapter-first: this page became
         <a href="${upTo(from)}${to}/">${escapeHtml(name)}</a>, which carries the
@@ -426,8 +425,8 @@ const stubPage = ([from, to]) => {
       </p>
       <p>
         Your browser follows the move on its own. If it has not, open
-        <a href="${upTo(from)}${to}/">/demo/${to}/</a> directly, or start from
-        <a href="/adapttable/demo/">the main showcase</a>.
+        <a href="${upTo(from)}${to}/">${demoRoute(to)}</a> directly, or start from
+        <a href="${demoRoute()}">the main showcase</a>.
       </p>
     </main>`;
   const headHtml = `    <meta charset="UTF-8" />
@@ -437,7 +436,7 @@ const stubPage = ([from, to]) => {
          document: meta-refresh carries a reader across, and the canonical
          link tells a crawler which URL is the real one. -->
     <meta http-equiv="refresh" content="0; url=${upTo(from)}${to}/" />
-    <link rel="canonical" href="${SITE}/demo/${to}/" />
+    <link rel="canonical" href="${siteUrl(demoRoute(to))}" />
     <meta name="description" content="${escapeHtml(description)}" />
     <title>${escapeHtml(title)}</title>
     <script>

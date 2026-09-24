@@ -1,6 +1,6 @@
 # Customize AdaptTable — slots, classNames, headless prop-getters
 
-▶ **See it working:** [the unstyled adapter in the live demo](https://orwa-mahmoud.github.io/adapttable/demo/?kit=tailwind) — same engine, your own classes.
+▶ **See it working:** [the unstyled adapter in the live demo](https://adapttable.orwamahmoud.com/react/demo/?kit=tailwind) — same engine, your own classes.
 
 A spectrum, all opt-in: restyle parts with `classNames`, replace parts with
 `slots`, tune the chrome with props, or theme through your kit's provider.

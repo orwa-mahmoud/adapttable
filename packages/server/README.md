@@ -1,6 +1,6 @@
 # @adapttable/server
 
-Parse and validate an [AdaptTable](https://orwa-mahmoud.github.io/adapttable/)
+Parse and validate an [AdaptTable](https://adapttable.orwamahmoud.com/)
 query on the server — one typed contract from the URL to your backend.
 
 The table puts its whole state in the URL, which is what makes a view
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
 }
 ```
 
-Full documentation: [Server queries](https://orwa-mahmoud.github.io/adapttable/server-queries/).
+Full documentation: [Server queries](https://adapttable.orwamahmoud.com/server-queries/).
 
 ## License
 

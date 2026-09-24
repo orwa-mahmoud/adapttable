@@ -7,6 +7,7 @@
  * pages need to look something up lives here rather than being re-derived in
  * each component.
  */
+import { docsRoute, siteUrl } from "../../../../scripts/site.mjs";
 import {
   adapterByKey,
   builtAdapters,
@@ -72,8 +73,24 @@ export function resolveMatrixRoute(id: string): MatrixRoute | null {
 export const kitAccent = (adapter: ShowcaseAdapter, dark: boolean): string =>
   dark ? adapter.accentDark : adapter.accentLight;
 
-/** Where the docs site publishes the written reference. */
-export const DOCS_URL = "https://orwa-mahmoud.github.io/adapttable/";
+/** The site's home page — the landing the docs and the showcase share. */
+export const SITE_HOME = siteUrl("/");
+
+/**
+ * Where the docs site publishes a page, in the section it is served in.
+ *
+ * @param page - The page's `docs/*.md` basename, e.g. `getting-started`.
+ * @returns The page's absolute URL.
+ */
+export const docsUrl = (page: string): string => siteUrl(docsRoute(page));
+
+/**
+ * An absolute URL on the published site, for assets the showcase links to.
+ *
+ * @param route - A path starting with `/`.
+ * @returns The absolute URL.
+ */
+export const siteAsset = (route: string): string => siteUrl(route);
 
 /**
  * Where a kit's own pages live, or — until they are built — the live demo

@@ -1,6 +1,6 @@
 # React table features — optional imports, presets and plugins
 
-▶ **See it working:** [the Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — every opt-in, on every kit.
+▶ **See it working:** [the Feature Lab](https://adapttable.orwamahmoud.com/react/demo/all-options/) — every opt-in, on every kit.
 
 Every opt-in is an import and one entry in `features`. The import is the
 switch, which is what lets a table pay only for what it named:

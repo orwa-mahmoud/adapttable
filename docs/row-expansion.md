@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — a real AdaptTable you can edit in the browser, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [nested tables in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/nested-tables/) — open a row onto another table, not a blank panel. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [nested tables in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/nested-tables/) — open a row onto another table, not a blank panel. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 Render a detail panel under any row by composing `rowDetail(render)` from
 `@adapttable/<kit>/row-detail`. To put a whole table in the panel instead, the
@@ -95,4 +95,4 @@ Related `DataTable` props:
 - Kits with native expand affordances keep their own look; only the labels
   are unified through `labels`.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/).
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/).

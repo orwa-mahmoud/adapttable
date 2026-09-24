@@ -11,21 +11,21 @@ head:
   - tag: script
     attrs:
       type: application/ld+json
-    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://orwa-mahmoud.github.io/adapttable/"},{"@type":"ListItem","position":2,"name":"AdaptTable
+    content: '{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AdaptTable","item":"https://adapttable.orwamahmoud.com/"},{"@type":"ListItem","position":2,"name":"AdaptTable
       concepts — headless core, TableSource,
-      adapters","item":"https://orwa-mahmoud.github.io/adapttable/v1/concepts/"}]}'
+      adapters","item":"https://adapttable.orwamahmoud.com/v1/concepts/"}]}'
   - tag: meta
     attrs:
       property: og:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/concepts.png
+      content: https://adapttable.orwamahmoud.com/og/concepts.png
   - tag: meta
     attrs:
       name: twitter:image
-      content: https://orwa-mahmoud.github.io/adapttable/og/concepts.png
+      content: https://adapttable.orwamahmoud.com/og/concepts.png
 slug: v1/concepts
 ---
 
-▶ **See it working:** [the live demo](https://orwa-mahmoud.github.io/adapttable/demo/) — one dataset, one feature set, re-rendered by every real adapter.
+▶ **See it working:** [the live demo](https://adapttable.orwamahmoud.com/react/demo/) — one dataset, one feature set, re-rendered by every real adapter.
 
 ## The `TableSource` contract
 

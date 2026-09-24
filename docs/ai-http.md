@@ -1,7 +1,7 @@
 # React table AI backend — HTTP protocol and local example
 
 This is the setup page for a real model behind a live table. The [interactive
-playground](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
+playground](https://adapttable.orwamahmoud.com/react/demo/mantine/ai/)
 defaults to **Simulated demo**: local scripted buttons, no credentials, no
 network model call. Switch to **Try it for real**, paste an endpoint, and the same
 `tableAgent` session sends the permitted context and executes the calls that come back.
@@ -92,7 +92,7 @@ hello body is required; a random 200 is a failure. Then type a message and
 **Send**. Writes still go through that kit’s approval and staged-save chrome.
 
 **Hosted showcase.** Deploy the example with HTTPS, set
-`AGENT_ALLOWED_ORIGINS` to `https://orwa-mahmoud.github.io`, set
+`AGENT_ALLOWED_ORIGINS` to `https://adapttable.orwamahmoud.com`, set
 `AGENT_HTTP_TOKEN` and a non-loopback `AGENT_HOST`, then paste the public
 URL and the same endpoint token into the connect dialog. Do not point the
 hosted page at `localhost`.

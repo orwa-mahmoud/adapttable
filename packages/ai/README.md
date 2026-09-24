@@ -1,6 +1,6 @@
 # `@adapttable/ai`
 
-[![AdaptTable AI — ask the table to filter, group, and aggregate](https://orwa-mahmoud.github.io/adapttable/media/ai/demo.gif)](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
+[![AdaptTable AI — ask the table to filter, group, and aggregate](https://adapttable.orwamahmoud.com/media/ai/demo.gif)](https://adapttable.orwamahmoud.com/react/demo/mantine/ai/)
 
 Provider-neutral context and execution for a live AdaptTable. Expose what this
 table can do **right now**, then execute the agent's commands against that
@@ -58,7 +58,7 @@ import { toMcpTools, toMcpResources, mcpListChanged } from "@adapttable/ai/mcp";
 - `@adapttable/ai/openai` — strict function tools with OpenAI-safe names (`view_setPage`); `{ deferred: true }` is the portable trio
 - `@adapttable/ai/mcp` — tools in catalog order with derived annotations, per-key guide resources, list-changed
 - `@adapttable/ai/mcp-apps` — the table as a view an MCP host embeds
-- `@adapttable/ai/http` — optional endpoint client and `agentSystemPrompt`; [connect a backend](https://orwa-mahmoud.github.io/adapttable/ai-http/)
+- `@adapttable/ai/http` — optional endpoint client and `agentSystemPrompt`; [connect a backend](https://adapttable.orwamahmoud.com/ai-http/)
 - `@adapttable/ai/context` — the permitted context contract, and bounded column sampling
 - `@adapttable/ai/assistant` — the conversation lifecycle, with no framework
 - `@adapttable/ai/voice` — dictation, in the browser or through a backend
@@ -80,23 +80,23 @@ already wired.
 
 **Filter, sort, and page size** — active people, salary high first, then 10 rows a page
 
-![filter-sort](https://orwa-mahmoud.github.io/adapttable/media/ai/parts/filter-sort.gif)
+![filter-sort](https://adapttable.orwamahmoud.com/media/ai/parts/filter-sort.gif)
 
 **Group and aggregate** — group by team, average then min salary, then only active
 
-![group-average](https://orwa-mahmoud.github.io/adapttable/media/ai/parts/group-average.gif)
+![group-average](https://adapttable.orwamahmoud.com/media/ai/parts/group-average.gif)
 
 **Date range** — only rows that started between 2020 and 2022
 
-![date-range](https://orwa-mahmoud.github.io/adapttable/media/ai/parts/date-range.gif)
+![date-range](https://adapttable.orwamahmoud.com/media/ai/parts/date-range.gif)
 
 **Column management** — hide Person, show it again, Status first, then pin it
 
-![column-management](https://orwa-mahmoud.github.io/adapttable/media/ai/parts/column-management.gif)
+![column-management](https://adapttable.orwamahmoud.com/media/ai/parts/column-management.gif)
 
-Try the [interactive playground](https://orwa-mahmoud.github.io/adapttable/demo/mantine/ai/)
+Try the [interactive playground](https://adapttable.orwamahmoud.com/react/demo/mantine/ai/)
 (no credentials). Guide:
-[agent integrations](https://orwa-mahmoud.github.io/adapttable/ai-integrations/).
+[agent integrations](https://adapttable.orwamahmoud.com/ai-integrations/).
 
-Docs: [capability contract](https://orwa-mahmoud.github.io/adapttable/agent-capabilities/) ·
-[reference](https://orwa-mahmoud.github.io/adapttable/ai/).
+Docs: [capability contract](https://adapttable.orwamahmoud.com/react/agent-capabilities/) ·
+[reference](https://adapttable.orwamahmoud.com/ai/).

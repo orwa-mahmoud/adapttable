@@ -1,13 +1,12 @@
 ---
 // Static landing at the site root, wearing the DEMO's chrome verbatim —
 // the same tokens, sticky nav, hero composition, section scaffolding,
-// get-started block and footer as /demo, so the funnel reads as one
+// get-started block and footer as the showcase, so the funnel reads as one
 // product. Pre-rendered text + JSON-LD carry the SEO; the live demo
-// stays at /demo, the guide at /getting-started/.
-const SITE = "https://orwa-mahmoud.github.io/adapttable";
+// stays at the showcase root, the guide at the React getting-started page.
+import { demoRoute, docsRoute, siteUrl } from "../../../../scripts/site.mjs";
+
 const REPO = "https://github.com/orwa-mahmoud/adapttable";
-// Site-relative root for assets under apps/docs/public.
-const BASE = "/adapttable";
 const TITLE = "AdaptTable — Headless React Data Table for Any UI Kit";
 const DESCRIPTION =
   "Build React data tables for Mantine, MUI, Chakra, Ant Design, Radix, Base UI or shadcn, with optional filtering, editing, pivots and mobile cards. MIT licensed.";
@@ -18,30 +17,30 @@ const KITS = [
   {
     label: "Mantine",
     c: "oklch(0.58 0.17 252)",
-    href: `${SITE}/demo/mantine/`,
+    href: `${siteUrl(demoRoute("mantine"))}`,
   },
-  { label: "MUI", c: "oklch(0.55 0.18 264)", href: `${SITE}/demo/mui/` },
-  { label: "Chakra", c: "oklch(0.6 0.1 188)", href: `${SITE}/demo/chakra/` },
+  { label: "MUI", c: "oklch(0.55 0.18 264)", href: `${siteUrl(demoRoute("mui"))}` },
+  { label: "Chakra", c: "oklch(0.6 0.1 188)", href: `${siteUrl(demoRoute("chakra"))}` },
   {
     label: "Ant Design",
     c: "oklch(0.56 0.2 262)",
-    href: `${SITE}/demo/antd/`,
+    href: `${siteUrl(demoRoute("antd"))}`,
   },
-  { label: "Radix", c: "oklch(0.54 0.19 280)", href: `${SITE}/demo/radix/` },
+  { label: "Radix", c: "oklch(0.54 0.19 280)", href: `${siteUrl(demoRoute("radix"))}` },
   {
     label: "Base UI",
     c: "oklch(0.55 0.19 255)",
-    href: `${SITE}/demo/base-ui/`,
+    href: `${siteUrl(demoRoute("base-ui"))}`,
   },
   {
     label: "shadcn / Tailwind",
     c: "oklch(0.28 0.01 264)",
-    href: `${SITE}/demo/shadcn/`,
+    href: `${siteUrl(demoRoute("shadcn"))}`,
   },
   {
     label: "Custom Tailwind",
     c: "oklch(0.55 0.2 277)",
-    href: `${SITE}/demo/tailwind/`,
+    href: `${siteUrl(demoRoute("tailwind"))}`,
   },
 ];
 
@@ -50,56 +49,56 @@ const FEATURES = [
     viz: "filter",
     hue: "274",
     title: "Columns & filters",
-    href: `${SITE}/demo/mantine/filtering/`,
+    href: `${siteUrl(demoRoute("mantine/filtering"))}`,
     body: "One declaration drives the widget, the URL params, the chips and the row predicate. Operator-first number and date filters: Equal, At least, At most, Between.",
   },
   {
     viz: "tiers",
     hue: "210",
     title: "Three data tiers",
-    href: `${SITE}/data-tiers/`,
+    href: `${siteUrl(docsRoute("data-tiers"))}`,
     body: "Hand the table an array and it filters, sorts and pages in memory. Or own the fetch: one consolidated query event with an abort signal. Or bring a full custom TableSource.",
   },
   {
     viz: "url",
     hue: "152",
     title: "URL-synced everything",
-    href: `${SITE}/url-state/`,
+    href: `${siteUrl(docsRoute("url-state"))}`,
     body: "Search, sort, filters, pagination, column layout and saved views live in shareable URLs — namespaced per table, SSR-safe, with a one-prop opt-out (urlSync={false}).",
   },
   {
     viz: "rows",
     hue: "60",
     title: "50,000 rows, no flinching",
-    href: `${SITE}/demo/mantine/scale/`,
+    href: `${siteUrl(demoRoute("mantine/scale"))}`,
     body: "Opt-in virtualization windows the DOM against the page or any max-height scroll box. The live demo scrolls fifty thousand rows with a handful of DOM nodes.",
   },
   {
     viz: "i18n",
     hue: "25",
     title: "i18n & RTL, for real",
-    href: `${SITE}/demo/mantine/rtl/`,
+    href: `${siteUrl(demoRoute("mantine/rtl"))}`,
     body: "Label presets for 18 locales. Columns map per-locale data paths, so cells, sorting and filtering follow the language. Pinning and layout are logical — Arabic and Hebrew just work.",
   },
   {
     viz: "columns",
     hue: "330",
     title: "Column management",
-    href: `${SITE}/demo/mantine/columns/`,
+    href: `${siteUrl(demoRoute("mantine/columns"))}`,
     body: "Show, hide, reorder, pin and resize — the row-actions column included. Capture any state as a named saved view and restore it later, per table.",
   },
   {
     viz: "bulk",
     hue: "10",
     title: "Selection & bulk actions",
-    href: `${SITE}/demo/mantine/selection/`,
+    href: `${siteUrl(demoRoute("mantine/selection"))}`,
     body: "Select the page — or all matches across every page. Bulk actions run through an injectable confirm, and per-row actions explain themselves with disabledReason.",
   },
   {
     viz: "a11y",
     hue: "120",
     title: "Accessible by default",
-    href: `${SITE}/demo/mantine/accessibility/`,
+    href: `${siteUrl(demoRoute("mantine/accessibility"))}`,
     body: "Real table roles, aria-sort, focus management and full keyboard navigation — column reorder and resize included, straight from the keyboard.",
   },
 ];
@@ -111,28 +110,28 @@ const MORE_FEATURES = [
     viz: "group",
     hue: "290",
     title: "Grouping & pivots",
-    href: `${SITE}/demo/mantine/grouping/`,
+    href: `${siteUrl(demoRoute("mantine/grouping"))}`,
     body: "Drag headers into a grouping panel and pick Sum, Average, Min, Max or Count per column — or pivot dimensions across both axes with collapsible subtotals.",
   },
   {
     viz: "edit",
     hue: "240",
     title: "Inline editing",
-    href: `${SITE}/demo/mantine/editing/`,
+    href: `${siteUrl(demoRoute("mantine/editing"))}`,
     body: "Text, number, select and date editors with validation, batch save and undo. Every write is a callback, so your application owns the data.",
   },
   {
     viz: "mobile",
     hue: "175",
     title: "Mobile cards",
-    href: `${SITE}/demo/mantine/mobile-cards/`,
+    href: `${siteUrl(demoRoute("mantine/mobile-cards"))}`,
     body: "Below 768px the rows become cards with the same search, filters, selection and URL state — no second layout to build.",
   },
   {
     viz: "export",
     hue: "95",
     title: "CSV, Excel & PDF export",
-    href: `${SITE}/exporting/`,
+    href: `${siteUrl(docsRoute("exporting"))}`,
     body: "Export the exact view on screen — the page, every matching row, the selection or a cell range — in the browser or through your server.",
   },
 ];
@@ -191,7 +190,7 @@ const JSON_LD = JSON.stringify({
       "@type": "SoftwareApplication",
       name: "AdaptTable",
       description: DESCRIPTION,
-      url: `${SITE}/`,
+      url: `${siteUrl("/")}`,
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
       license: "https://opensource.org/license/mit",
@@ -204,8 +203,8 @@ const JSON_LD = JSON.stringify({
       name: "AdaptTable tour — one React data table, every UI kit",
       description:
         "The same data table re-rendered through Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn and Tailwind from one headless engine.",
-      thumbnailUrl: `${SITE}/media/core/tour-poster.jpg`,
-      contentUrl: `${SITE}/media/core/tour.mp4`,
+      thumbnailUrl: `${siteUrl("/media/core/tour-poster.jpg")}`,
+      contentUrl: `${siteUrl("/media/core/tour.mp4")}`,
       uploadDate: "2026-07-22",
       duration: "PT58S",
     },
@@ -214,8 +213,8 @@ const JSON_LD = JSON.stringify({
       name: "AdaptTable AI assistant — ask a React table in plain words",
       description:
         "An assistant filters, groups, aggregates, hides and reorders columns of a live AdaptTable through the table's own governed actions.",
-      thumbnailUrl: `${SITE}/media/ai/poster.png`,
-      contentUrl: `${SITE}/media/ai/demo.mp4`,
+      thumbnailUrl: `${siteUrl("/media/ai/poster.png")}`,
+      contentUrl: `${siteUrl("/media/ai/demo.mp4")}`,
       uploadDate: "2026-09-16",
       duration: "PT54S",
     },
@@ -231,20 +230,20 @@ import { appendScript, guarded } from "../../../../scripts/analytics-guard.mjs";
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{TITLE}</title>
     <meta name="description" content={DESCRIPTION} />
-    <link rel="canonical" href={`${SITE}/`} />
-    <link rel="icon" href="/adapttable/favicon.svg" type="image/svg+xml" />
-    <link rel="sitemap" href={`${SITE}/sitemap-index.xml`} />
+    <link rel="canonical" href={`${siteUrl("/")}`} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href={`${siteUrl("/sitemap-index.xml")}`} />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content={TITLE} />
     <meta property="og:description" content={DESCRIPTION} />
-    <meta property="og:url" content={`${SITE}/`} />
-    <meta property="og:image" content={`${SITE}/og.png`} />
+    <meta property="og:url" content={`${siteUrl("/")}`} />
+    <meta property="og:image" content={`${siteUrl("/og.png")}`} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content={`${SITE}/og.png`} />
+    <meta name="twitter:image" content={`${siteUrl("/og.png")}`} />
     <script type="application/ld+json" set:html={JSON_LD} />
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a local run files no session. -->
@@ -424,7 +423,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
           <a href="#get-started">Get started</a>
         </nav>
         <div class="nav__right">
-          <a class="nav__docs" href={`${SITE}/getting-started/`}>
+          <a class="nav__docs" href={`${siteUrl(docsRoute("getting-started"))}`}>
             <svg
               width="14"
               height="14"
@@ -521,7 +520,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
               </svg>
             </button>
           </div>
-          <a class="btn-demo" href={`${SITE}/demo/`}>
+          <a class="btn-demo" href={`${siteUrl(demoRoute())}`}>
             Try the live demo
             <svg
               width="14"
@@ -585,10 +584,10 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
             preload="none"
             width="960"
             height="554"
-            poster={`${BASE}/media/core/tour-poster.jpg`}
+            poster={`/media/core/tour-poster.jpg`}
             aria-label="The same data table re-rendered through Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn and Tailwind"
           >
-            <source src={`${BASE}/media/core/tour.mp4`} type="video/mp4" />
+            <source src={`/media/core/tour.mp4`} type="video/mp4" />
           </video>
           <figcaption class="tour__caption">
             <button type="button" class="tour__toggle" data-video-toggle>
@@ -596,7 +595,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
             </button>
             <span>
               One dataset, one feature set, every kit —
-              <a href={`${SITE}/demo/`}>open the live demo</a>
+              <a href={`${siteUrl(demoRoute())}`}>open the live demo</a>
             </span>
           </figcaption>
         </figure>
@@ -731,10 +730,10 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
             </p>
           </div>
           <div class="ai__links">
-            <a class="gs-btn gs-btn--primary" href={`${SITE}/demo/mantine/ai/`}
+            <a class="gs-btn gs-btn--primary" href={`${siteUrl(demoRoute("mantine/ai"))}`}
               >Try the AI demo</a
             >
-            <a class="gs-btn gs-btn--ghost" href={`${SITE}/ai/`}>AI docs</a>
+            <a class="gs-btn gs-btn--ghost" href={`${siteUrl(docsRoute("ai"))}`}>AI docs</a>
           </div>
         </div>
         <figure class="aidemo reveal">
@@ -745,12 +744,12 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
             preload="none"
             width="960"
             height="474"
-            poster={`${BASE}/media/ai/poster.png`}
+            poster={`/media/ai/poster.png`}
           >
-            <source src={`${BASE}/media/ai/demo.mp4`} type="video/mp4" />
+            <source src={`/media/ai/demo.mp4`} type="video/mp4" />
             <track
               kind="captions"
-              src={`${BASE}/media/ai/captions.vtt`}
+              src={`/media/ai/captions.vtt`}
               srclang="en"
               label="English"
               default
@@ -777,7 +776,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
               point do you hit a wall and have to eject.
             </p>
           </div>
-          <a class="gs-btn gs-btn--ghost" href={`${SITE}/customization/`}>
+          <a class="gs-btn gs-btn--ghost" href={`${siteUrl(docsRoute("customization"))}`}>
             Customization guide
             <svg
               width="14"
@@ -849,7 +848,7 @@ import { filters } from "@adapttable/mantine/filters";
               <code>npx @adapttable/cli init</code>
             </div>
             <div class="getstarted__btns">
-              <a class="gs-btn gs-btn--primary" href={`${SITE}/getting-started/`}
+              <a class="gs-btn gs-btn--primary" href={`${siteUrl(docsRoute("getting-started"))}`}
                 >Get started</a
               >
               <a class="gs-btn gs-btn--ghost" href={REPO}>
@@ -880,7 +879,7 @@ import { filters } from "@adapttable/mantine/filters";
     <footer class="foot">
       <div class="foot__inner shell">
         <div class="foot__lead">
-          <a class="wm" href={`${SITE}/`}>
+          <a class="wm" href={`${siteUrl("/")}`}>
             <svg
               class="wm__mark"
               width="20"
@@ -962,7 +961,7 @@ import { filters } from "@adapttable/mantine/filters";
           <code>npx @adapttable/cli init</code>
         </div>
         <nav class="foot__links" aria-label="Footer">
-          <a href={`${SITE}/demo/`}>
+          <a href={`${siteUrl(demoRoute())}`}>
             <svg
               width="14"
               height="14"
@@ -979,7 +978,7 @@ import { filters } from "@adapttable/mantine/filters";
             </svg>
             Demo
           </a>
-          <a href={`${SITE}/getting-started/`}>
+          <a href={`${siteUrl(docsRoute("getting-started"))}`}>
             <svg
               width="14"
               height="14"

@@ -1,8 +1,8 @@
 # Responsive React table — automatic mobile card layout
 
-▶ **See it before you install:** [the live mobile demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/) — the same table flipped between desktop rows and phone cards with one toggle.
+▶ **See it before you install:** [the live mobile demo](https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/) — the same table flipped between desktop rows and phone cards with one toggle.
 
-<a href="https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/"><img src="https://orwa-mahmoud.github.io/adapttable/media/features/mobile.gif" alt="The same AdaptTable data table as phone cards — scrolling the card list, then switching to the desktop table" width="640" height="392" style="width:100%;height:auto;aspect-ratio:640/392;border-radius:8px" /></a>
+<a href="https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/"><img src="https://adapttable.orwamahmoud.com/media/features/mobile.gif" alt="The same AdaptTable data table as phone cards — scrolling the card list, then switching to the desktop table" width="640" height="392" style="width:100%;height:auto;aspect-ratio:640/392;border-radius:8px" /></a>
 
 Most React data tables answer the phone problem with a horizontal scrollbar.
 AdaptTable answers it with a different layout: below the mobile breakpoint,
@@ -50,7 +50,7 @@ layouts.
 - **`sortByOptions`** — the options offered by the mobile sort-by select.
 - **`forceMobile`** — pin either layout regardless of viewport: cards inside a
   desktop dashboard panel, or the full table in a tablet kiosk. The
-  [mobile demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/) uses
+  [mobile demo](https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/) uses
   exactly this prop for its toggle.
 - **`rowAppearance({ rowClassName })`** applies to desktop rows and mobile
   cards alike, and the
@@ -186,4 +186,4 @@ but the choice stays yours per table.
 
 Related: [Getting started](./getting-started.md) ·
 [API reference](./api.md) ·
-[Live mobile demo](https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/)
+[Live mobile demo](https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/)

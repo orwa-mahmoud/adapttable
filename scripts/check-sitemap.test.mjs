@@ -10,15 +10,19 @@ import {
   deadRoutes,
   demoPages,
 } from "./check-sitemap.mjs";
+import { DEMO_ROOT, demoRoute } from "./site.mjs";
 import { SITE } from "./sitemap-routes.mjs";
 
-const ROOT_ROUTE = "/demo/";
-const COLUMNS_ROUTE = "/demo/columns/";
-const STUB_ROUTE = "/demo/export-pdf/";
-const LEGACY_ROUTE = "/demo/legacy/";
-const ORPHAN_ROUTE = "/demo/orphan/";
+/** Where the showcase sits inside a composed site. */
+const DEMO_DIR = DEMO_ROOT.slice(1, -1);
+
+const ROOT_ROUTE = demoRoute();
+const COLUMNS_ROUTE = demoRoute("columns");
+const STUB_ROUTE = demoRoute("export-pdf");
+const LEGACY_ROUTE = demoRoute("legacy");
+const ORPHAN_ROUTE = demoRoute("orphan");
 /** Listed in a sitemap, built by nobody. */
-const GHOST_ROUTE = "/demo/ghost/";
+const GHOST_ROUTE = demoRoute("ghost");
 
 const INDEX = "index.html";
 const PAGE = '<!doctype html><meta charset="utf-8" /><title>A demo</title>';
@@ -26,7 +30,7 @@ const STUB =
   '<!doctype html><meta http-equiv="refresh" content="0; url=../export/" />';
 
 /**
- * `/demo/legacy/` is deliberately absent: it stands for a stub nobody
+ * The `legacy` stub is deliberately absent: it stands for a stub nobody
  * registered, which the meta-refresh sniff has to catch on its own.
  */
 const MANIFEST = [
@@ -57,12 +61,12 @@ const write = (root, rel, body) => {
 const composed = () => {
   const root = mkdtempSync(join(tmpdir(), "adapttable-sitemap-"));
   temps.push(root);
-  write(root, join("demo", INDEX), PAGE);
-  write(root, join("demo", "columns", INDEX), PAGE);
-  write(root, join("demo", "export-pdf", INDEX), STUB);
-  write(root, join("demo", "legacy", INDEX), STUB);
-  write(root, join("demo", "orphan", INDEX), PAGE);
-  write(root, join("demo", "assets", "app.js"), "// bundle");
+  write(root, join(DEMO_DIR, INDEX), PAGE);
+  write(root, join(DEMO_DIR, "columns", INDEX), PAGE);
+  write(root, join(DEMO_DIR, "export-pdf", INDEX), STUB);
+  write(root, join(DEMO_DIR, "legacy", INDEX), STUB);
+  write(root, join(DEMO_DIR, "orphan", INDEX), PAGE);
+  write(root, join(DEMO_DIR, "assets", "app.js"), "// bundle");
   return root;
 };
 

@@ -1,6 +1,6 @@
 # React table advanced filters — AND/OR filter tree
 
-▶ **Try it live:** [Filtering in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/filtering/)
+▶ **Try it live:** [Filtering in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/filtering/)
 — open Filters; Advanced is the first block in the popover. Switch the page
 to Drawer, or to Header (column icons for one field, Filters for the tree).
 [Other UI kits →](./getting-started.md#try-it-in-stackblitz)

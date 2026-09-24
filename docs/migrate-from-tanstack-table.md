@@ -1,6 +1,6 @@
 # Migrate from TanStack Table to AdaptTable — built-in UI, same headless control
 
-▶ **See it before you install:** [the live demo](https://orwa-mahmoud.github.io/adapttable/demo/?kit=tailwind) — the unstyled adapter with your own classes, plus seven kit-native ones in the switcher.
+▶ **See it before you install:** [the live demo](https://adapttable.orwamahmoud.com/react/demo/?kit=tailwind) — the unstyled adapter with your own classes, plus seven kit-native ones in the switcher.
 
 [TanStack Table](https://tanstack.com/table/latest) is a superb headless engine
 — you keep total control because it renders nothing: no markup, no toolbar, no

@@ -47,7 +47,7 @@ import {
 } from "../sectionIcons";
 import {
   adapterHref,
-  DOCS_URL,
+  docsUrl,
   fillTemplate,
   introFor,
   kitAccent,
@@ -335,7 +335,7 @@ function AdapterLanding({
           <div className="mx-actions">
             <a
               className="mx-btn mx-btn--primary"
-              href={`${DOCS_URL}getting-started/`}
+              href={docsUrl("getting-started")}
               target="_blank"
               rel="noreferrer"
             >
@@ -410,7 +410,7 @@ function FeaturePage({
             {feature.docs.map((slug) => (
               <a
                 key={slug}
-                href={`${DOCS_URL}${slug}/`}
+                href={docsUrl(slug)}
                 target="_blank"
                 rel="noreferrer"
               >

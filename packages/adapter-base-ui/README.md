@@ -1,8 +1,8 @@
 # @adapttable/base-ui
 
-[![@adapttable/base-ui — a Base UI data table built on AdaptTable](https://orwa-mahmoud.github.io/adapttable/media/adapters/base-ui/parts/filtering.gif)](https://orwa-mahmoud.github.io/adapttable/demo/?kit=base-ui)
+[![@adapttable/base-ui — a Base UI data table built on AdaptTable](https://adapttable.orwamahmoud.com/media/adapters/base-ui/parts/filtering.gif)](https://adapttable.orwamahmoud.com/react/demo/?kit=base-ui)
 
-**[📖 Documentation](https://orwa-mahmoud.github.io/adapttable/)** · **[🚀 Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)** · **[Get started](https://orwa-mahmoud.github.io/adapttable/getting-started/)** · **[⚡ Try in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/base-ui)**
+**[📖 Documentation](https://adapttable.orwamahmoud.com/)** · **[🚀 Live demo](https://adapttable.orwamahmoud.com/react/demo/)** · **[Get started](https://adapttable.orwamahmoud.com/react/getting-started/)** · **[⚡ Try in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/base-ui)**
 
 The **Base UI adapter** for [AdaptTable](https://github.com/orwa-mahmoud/adapttable) —
 a batteries-included Base UI data table with sorting, filtering, URL-synced
@@ -52,7 +52,7 @@ Behavior lives in `@adapttable/core`; this package only renders Base UI primitiv
 
 ## Features
 
-- **Automatic mobile cards** — below the mobile breakpoint every row renders as a card (same filters, search, selection and URL state) and infinite scroll replaces the pager; tune per column with `mobileLabel` / `hideOnMobile`, pin either layout with `forceMobile`. [See it flip live](https://orwa-mahmoud.github.io/adapttable/demo/mantine/mobile-cards/).
+- **Automatic mobile cards** — below the mobile breakpoint every row renders as a card (same filters, search, selection and URL state) and infinite scroll replaces the pager; tune per column with `mobileLabel` / `hideOnMobile`, pin either layout with `forceMobile`. [See it flip live](https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/).
 - **Client or server data** through one `TableSource` contract — same props either way.
 - **Global search box** — debounced; matches each row's searchable text on client data and hands the term to the backend on a server tier. Turn it off with `searchable={false}`.
 - **URL-synced** search / sort / filters / page — shareable, deep-linkable links.
@@ -93,7 +93,7 @@ Behavior lives in `@adapttable/core`; this package only renders Base UI primitiv
 - **View controls** — `densityChooser()`, `fullscreen()`, `print(...)`, `statusBar()`, `selectionStats()`, `sidePanel(...)` and `undoRedoButtons()`, each an opt-in toolbar control from its own subpath.
 - **Virtualization** (`virtualize(...)`) — opt-in row/card windowing for very large lists.
 - **Pagination** — numbered pagination, or infinite scroll (auto by device).
-- **SSR & server components** — renders with no DOM; the client boundary is already in the build, so it drops straight into the Next.js App Router. [Docs](https://orwa-mahmoud.github.io/adapttable/ssr-rsc/).
+- **SSR & server components** — renders with no DOM; the client boundary is already in the build, so it drops straight into the Next.js App Router. [Docs](https://adapttable.orwamahmoud.com/react/ssr-rsc/).
 - **States** — skeleton loading, error with retry, and an empty state.
 - **RTL** via `dir`; **dark mode** follows your theme tokens.
 - **Customisation** — `slots`, `className`, injectable `confirm` — Base UI ships unstyled, so every part is yours, and the full headless escape hatch via `@adapttable/react`.
@@ -104,28 +104,28 @@ Each clip is the real adapter, recorded on the live demo.
 
 **Row grouping** — group rows by a column with per-group subtotals
 
-![base-ui Row grouping](https://orwa-mahmoud.github.io/adapttable/media/adapters/base-ui/parts/row-grouping.gif)
+![base-ui Row grouping](https://adapttable.orwamahmoud.com/media/adapters/base-ui/parts/row-grouping.gif)
 
 **Inline cell editing** — double-click a cell; text, number and select editors
 
-![base-ui Inline cell editing](https://orwa-mahmoud.github.io/adapttable/media/adapters/base-ui/parts/cell-editing.gif)
+![base-ui Inline cell editing](https://adapttable.orwamahmoud.com/media/adapters/base-ui/parts/cell-editing.gif)
 
 **Filtering** — type a bound and the table answers as you type
 
-![base-ui Filtering](https://orwa-mahmoud.github.io/adapttable/media/adapters/base-ui/parts/filtering.gif)
+![base-ui Filtering](https://adapttable.orwamahmoud.com/media/adapters/base-ui/parts/filtering.gif)
 
 **Column management** — show, hide, reorder, pin and resize
 
-![base-ui Column management](https://orwa-mahmoud.github.io/adapttable/media/adapters/base-ui/parts/column-management.gif)
+![base-ui Column management](https://adapttable.orwamahmoud.com/media/adapters/base-ui/parts/column-management.gif)
 
 **RTL / Arabic** — the whole table mirrors, not just the text
 
-![base-ui RTL / Arabic](https://orwa-mahmoud.github.io/adapttable/media/adapters/base-ui/parts/rtl.gif)
+![base-ui RTL / Arabic](https://adapttable.orwamahmoud.com/media/adapters/base-ui/parts/rtl.gif)
 
 ## Links
 
-- [Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)
-- [Documentation](https://orwa-mahmoud.github.io/adapttable/)
+- [Live demo](https://adapttable.orwamahmoud.com/react/demo/)
+- [Documentation](https://adapttable.orwamahmoud.com/)
 - [StackBlitz starter](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/base-ui)
 
 ## License

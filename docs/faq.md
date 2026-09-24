@@ -10,7 +10,7 @@ do? See [limitations.md](./limitations.md).)
 [i18n & RTL](./i18n-rtl.md) · [Accessibility](./accessibility.md) · [Realtime](./realtime.md) ·
 [Column management](./column-management.md) ·
 [Data tiers](./data-tiers.md) ·
-[Live demo](https://orwa-mahmoud.github.io/adapttable/demo/)
+[Live demo](https://adapttable.orwamahmoud.com/react/demo/)
 
 **Migrating from another table:**
 [MUI X DataGrid](./migrate-from-mui-x-datagrid.md) ·

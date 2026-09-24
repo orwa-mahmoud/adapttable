@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — compose `rowReorder` and a grip appears. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [reorder flat, grouped and tree rows in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/row-reordering/) — Space lifts a row, arrows move it, Space drops it. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [reorder flat, grouped and tree rows in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/row-reordering/) — Space lifts a row, arrows move it, Space drops it. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 Import `rowReorder` from `@adapttable/<kit>/row-reorder` and a drag handle
 appears in a reserved leading column. The import is the switch: a table that

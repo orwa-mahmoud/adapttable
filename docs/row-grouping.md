@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — the starter is grouped by role with salary subtotals (`groupingPanel("role", { groupAggregates })`); drag another header onto the panel, no install. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [collapse groups and override aggregations in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/grouping/) — a real table you can click, not a recording. Independent pinned totals and the footer grand total live on the [aggregation page](https://orwa-mahmoud.github.io/adapttable/demo/mantine/aggregation/).
+▶ **See it working:** [collapse groups and override aggregations in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/grouping/) — a real table you can click, not a recording. Independent pinned totals and the footer grand total live on the [aggregation page](https://adapttable.orwamahmoud.com/react/demo/mantine/aggregation/).
 
 Each subtotal renders in its own column's cell, so it sits under the column it
 totals — on a mobile card, where there are no columns to align to, the same
@@ -753,5 +753,5 @@ panel with `GroupingPanelChrome` and its required slots.
 - Ant Design maps group headers onto its high-level `Table` via custom row
   rendering; every other kit renders native group header rows/cards.
 
-See it live in the [demo](https://orwa-mahmoud.github.io/adapttable/demo/) —
+See it live in the [demo](https://adapttable.orwamahmoud.com/react/demo/) —
 rows are grouped by team with a budget subtotal per group.

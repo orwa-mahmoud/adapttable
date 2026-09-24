@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — add `cellSpan(...)` from `@adapttable/mantine/cell-span` to `features`. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [merge cells in Mantine](https://orwa-mahmoud.github.io/adapttable/demo/mantine/rows/) — Team is written once down the people who share it. Person stays its own cell. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
+▶ **See it working:** [merge cells in Mantine](https://adapttable.orwamahmoud.com/react/demo/mantine/rows/) — Team is written once down the people who share it. Person stays its own cell. The same page exists for MUI, Chakra, antd, Radix, Base UI, shadcn and Tailwind.
 
 A span is a rectangle. The origin cell carries `colSpan` / `rowSpan`; every
 covered neighbour is omitted from that row's cell list, so every kit maps one

@@ -5,7 +5,7 @@
       "items": [
         {
           "label": "Getting started",
-          "slug": "getting-started"
+          "slug": "react/getting-started"
         },
         {
           "label": "Concepts",
@@ -22,67 +22,67 @@
       "items": [
         {
           "label": "Columns",
-          "slug": "columns"
+          "slug": "react/columns"
         },
         {
           "label": "Sorting",
-          "slug": "sorting"
+          "slug": "react/sorting"
         },
         {
           "label": "Filtering",
-          "slug": "filtering"
+          "slug": "react/filtering"
         },
         {
           "label": "Pagination",
-          "slug": "pagination"
+          "slug": "react/pagination"
         },
         {
           "label": "Selection & bulk actions",
-          "slug": "selection"
+          "slug": "react/selection"
         },
         {
           "label": "Row actions",
-          "slug": "row-actions"
+          "slug": "react/row-actions"
         },
         {
           "label": "Row & display options",
-          "slug": "row-and-display-options"
+          "slug": "react/row-and-display-options"
         },
         {
           "label": "Row expansion",
-          "slug": "row-expansion"
+          "slug": "react/row-expansion"
         },
         {
           "label": "Inline cell editing",
-          "slug": "cell-editing"
+          "slug": "react/cell-editing"
         },
         {
           "label": "Row grouping",
-          "slug": "row-grouping"
+          "slug": "react/row-grouping"
         },
         {
           "label": "Column management",
-          "slug": "column-management"
+          "slug": "react/column-management"
         },
         {
           "label": "Summary row",
-          "slug": "summary-row"
+          "slug": "react/summary-row"
         },
         {
           "label": "CSV export",
-          "slug": "csv-export"
+          "slug": "react/csv-export"
         },
         {
           "label": "Count filters",
-          "slug": "count-filters"
+          "slug": "react/count-filters"
         },
         {
           "label": "Saved views",
-          "slug": "saved-views"
+          "slug": "react/saved-views"
         },
         {
           "label": "Virtualization",
-          "slug": "virtualization"
+          "slug": "react/virtualization"
         }
       ]
     },
@@ -91,19 +91,19 @@
       "items": [
         {
           "label": "URL state",
-          "slug": "url-state"
+          "slug": "react/url-state"
         },
         {
           "label": "Customization",
-          "slug": "customization"
+          "slug": "react/customization"
         },
         {
           "label": "Headless",
-          "slug": "headless"
+          "slug": "react/headless"
         },
         {
           "label": "i18n & RTL",
-          "slug": "i18n-rtl"
+          "slug": "react/i18n-rtl"
         }
       ]
     },
@@ -112,7 +112,7 @@
       "items": [
         {
           "label": "API reference",
-          "slug": "api"
+          "slug": "react/api"
         },
         {
           "label": "FAQ",
@@ -120,7 +120,7 @@
         },
         {
           "label": "Comparison",
-          "slug": "comparison"
+          "slug": "react/comparison"
         }
       ]
     },
@@ -129,27 +129,27 @@
       "items": [
         {
           "label": "From mantine-datatable",
-          "slug": "migrate-from-mantine-datatable"
+          "slug": "react/migrate-from-mantine-datatable"
         },
         {
           "label": "From MUI X DataGrid",
-          "slug": "migrate-from-mui-x-datagrid"
+          "slug": "react/migrate-from-mui-x-datagrid"
         },
         {
           "label": "From TanStack Table",
-          "slug": "migrate-from-tanstack-table"
+          "slug": "react/migrate-from-tanstack-table"
         },
         {
           "label": "From mui-datatables",
-          "slug": "migrate-from-mui-datatables"
+          "slug": "react/migrate-from-mui-datatables"
         },
         {
           "label": "From material-table",
-          "slug": "migrate-from-material-table"
+          "slug": "react/migrate-from-material-table"
         },
         {
           "label": "From ag-Grid",
-          "slug": "migrate-from-ag-grid"
+          "slug": "react/migrate-from-ag-grid"
         }
       ]
     }

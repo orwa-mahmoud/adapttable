@@ -2,7 +2,7 @@
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — add `extraRows([...])` from `@adapttable/mantine/extra-rows` to `features`. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 
-▶ **See it working:** [the all-options demo](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — turn **Extra attached to a person** on.
+▶ **See it working:** [the all-options demo](https://adapttable.orwamahmoud.com/react/demo/all-options/) — turn **Extra attached to a person** on.
 
 A separator is a thin rule. A full-width row is one cell that spans the
 table. Both are host-injected slots in the same `kind`-tagged list grouping

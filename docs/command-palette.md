@@ -1,6 +1,6 @@
 # React table command palette and context menu — commandPalette, contextMenu
 
-▶ **See it working:** [the Feature Lab](https://orwa-mahmoud.github.io/adapttable/demo/all-options/) — turn **Command palette (⌘K)** and **Right-click menus** on, then press Cmd/Ctrl+K or right-click a header.
+▶ **See it working:** [the Feature Lab](https://adapttable.orwamahmoud.com/react/demo/all-options/) — turn **Command palette (⌘K)** and **Right-click menus** on, then press Cmd/Ctrl+K or right-click a header.
 
 Two opt-in features put the table's actions where people look for them.
 `commandPalette()` from `@adapttable/<kit>/command-palette` opens a searchable

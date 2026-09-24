@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://orwa-mahmoud.github.io/adapttable/sitemap-index.xml
+Sitemap: https://adapttable.orwamahmoud.com/sitemap-index.xml

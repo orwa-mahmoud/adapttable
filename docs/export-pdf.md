@@ -1,6 +1,6 @@
 # React table PDF export and print layout
 
-▶ **See it working:** [download a grouped PDF and print the same view](https://orwa-mahmoud.github.io/adapttable/demo/mantine/export/) — a real table, not a recording.
+▶ **See it working:** [download a grouped PDF and print the same view](https://adapttable.orwamahmoud.com/react/demo/mantine/export/) — a real table, not a recording.
 
 ▶ **Try it live:** [open a Mantine starter in StackBlitz](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine?file=src%2FApp.tsx) — import `@adapttable/core/pdf`. [Other UI kits →](./getting-started.md#try-it-in-stackblitz)
 

@@ -1,13 +1,13 @@
 # Get started with AdaptTable — React table for your UI kit
 
-▶ **Nothing to install yet — [open the live demo](https://orwa-mahmoud.github.io/adapttable/demo/) and use it.** Flip
-between [Mantine](https://orwa-mahmoud.github.io/adapttable/demo/?kit=mantine) · [MUI](https://orwa-mahmoud.github.io/adapttable/demo/?kit=mui) ·
-[Chakra](https://orwa-mahmoud.github.io/adapttable/demo/?kit=chakra) · [Ant Design](https://orwa-mahmoud.github.io/adapttable/demo/?kit=antd) ·
-[Radix](https://orwa-mahmoud.github.io/adapttable/demo/?kit=radix) · [Base UI](https://orwa-mahmoud.github.io/adapttable/demo/?kit=base-ui) ·
-[shadcn](https://orwa-mahmoud.github.io/adapttable/demo/?kit=shadcn) · [Tailwind](https://orwa-mahmoud.github.io/adapttable/demo/?kit=tailwind) on the same data,
+▶ **Nothing to install yet — [open the live demo](https://adapttable.orwamahmoud.com/react/demo/) and use it.** Flip
+between [Mantine](https://adapttable.orwamahmoud.com/react/demo/?kit=mantine) · [MUI](https://adapttable.orwamahmoud.com/react/demo/?kit=mui) ·
+[Chakra](https://adapttable.orwamahmoud.com/react/demo/?kit=chakra) · [Ant Design](https://adapttable.orwamahmoud.com/react/demo/?kit=antd) ·
+[Radix](https://adapttable.orwamahmoud.com/react/demo/?kit=radix) · [Base UI](https://adapttable.orwamahmoud.com/react/demo/?kit=base-ui) ·
+[shadcn](https://adapttable.orwamahmoud.com/react/demo/?kit=shadcn) · [Tailwind](https://adapttable.orwamahmoud.com/react/demo/?kit=tailwind) on the same data,
 and toggle grouping and inline editing while you are there.
 
-<video src="https://orwa-mahmoud.github.io/adapttable/media/core/tour.mp4" poster="https://orwa-mahmoud.github.io/adapttable/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px"></video>
+<video src="https://adapttable.orwamahmoud.com/media/core/tour.mp4" poster="https://adapttable.orwamahmoud.com/media/core/poster.png?v=2" controls playsinline preload="none" width="1500" height="1065" style="width:100%;height:auto;aspect-ratio:1500/1065;border-radius:8px"></video>
 
 AdaptTable is a headless, UI-agnostic React data table. Pick the adapter for
 your design system and you get a styled, sortable, searchable, paginated
@@ -286,7 +286,7 @@ The source for each lives in
   popover vs drawer.
 - [Data tiers](./data-tiers.md) — server data without a query library
   (`onQueryChange`), or full control via `source` and TanStack Query.
-- [Demo](https://orwa-mahmoud.github.io/adapttable/demo/) — every adapter,
+- [Demo](https://adapttable.orwamahmoud.com/react/demo/) — every adapter,
   live.
 
 Full surface: [API reference](./api.md) ·

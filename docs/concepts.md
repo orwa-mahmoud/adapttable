@@ -1,6 +1,6 @@
 # AdaptTable concepts — headless core, TableSource, adapters
 
-▶ **See it working:** [the live demo](https://orwa-mahmoud.github.io/adapttable/demo/) — one dataset, one feature set, re-rendered by every real adapter.
+▶ **See it working:** [the live demo](https://adapttable.orwamahmoud.com/react/demo/) — one dataset, one feature set, re-rendered by every real adapter.
 
 ## The `TableSource` contract
 

@@ -36,25 +36,25 @@ describe("landing page demo funnel", () => {
     assert.match(PAGE, /<a class="hero__chip" href=\{kit\.href\}/);
     assert.match(
       PAGE,
-      /<a href=\{`\$\{SITE\}\/demo\/`\}>open the live demo<\/a>/
+      /<a href=\{`\$\{siteUrl\(demoRoute\(\)\)\}`\}>open the live demo<\/a>/
     );
     for (const href of [
-      "${SITE}/demo/mantine/",
-      "${SITE}/demo/mui/",
-      "${SITE}/demo/chakra/",
-      "${SITE}/demo/antd/",
-      "${SITE}/demo/radix/",
-      "${SITE}/demo/base-ui/",
-      "${SITE}/demo/shadcn/",
-      "${SITE}/demo/tailwind/",
-      "${SITE}/demo/mantine/filtering/",
-      "${SITE}/data-tiers/",
-      "${SITE}/url-state/",
-      "${SITE}/demo/mantine/scale/",
-      "${SITE}/demo/mantine/rtl/",
-      "${SITE}/demo/mantine/columns/",
-      "${SITE}/demo/mantine/selection/",
-      "${SITE}/demo/mantine/accessibility/",
+      'siteUrl(demoRoute("mantine"))',
+      'siteUrl(demoRoute("mui"))',
+      'siteUrl(demoRoute("chakra"))',
+      'siteUrl(demoRoute("antd"))',
+      'siteUrl(demoRoute("radix"))',
+      'siteUrl(demoRoute("base-ui"))',
+      'siteUrl(demoRoute("shadcn"))',
+      'siteUrl(demoRoute("tailwind"))',
+      'siteUrl(demoRoute("mantine/filtering"))',
+      'siteUrl(docsRoute("data-tiers"))',
+      'siteUrl(docsRoute("url-state"))',
+      'siteUrl(demoRoute("mantine/scale"))',
+      'siteUrl(demoRoute("mantine/rtl"))',
+      'siteUrl(demoRoute("mantine/columns"))',
+      'siteUrl(demoRoute("mantine/selection"))',
+      'siteUrl(demoRoute("mantine/accessibility"))',
     ]) {
       assert.ok(PAGE.includes(href), `missing ${href}`);
     }
