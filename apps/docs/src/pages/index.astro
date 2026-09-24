@@ -577,7 +577,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
         <figure class="tour">
           <video
             class="tour__video"
-            data-autoplay
+            controls
             muted
             loop
             playsinline
@@ -590,13 +590,8 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
             <source src={`/media/core/tour.mp4`} type="video/mp4" />
           </video>
           <figcaption class="tour__caption">
-            <button type="button" class="tour__toggle" data-video-toggle>
-              Play
-            </button>
-            <span>
-              One dataset, one feature set, every kit —
-              <a href={`${siteUrl(demoRoute())}`}>open the live demo</a>
-            </span>
+            One dataset, one feature set, every kit —
+            <a href={`${siteUrl(demoRoute())}`}>open the live demo</a>
           </figcaption>
         </figure>
         </div>
@@ -1157,63 +1152,6 @@ import { filters } from "@adapttable/mantine/filters";
         watcher.observe(section);
       }
 
-      // The hero tour plays muted while it is on screen and pauses when it
-      // leaves. It never starts on its own for a reader who prefers
-      // reduced motion, and the caption button pauses or resumes it.
-      const tour = document.querySelector<HTMLVideoElement>(
-        "video[data-autoplay]"
-      );
-      const tourToggle = document.querySelector<HTMLButtonElement>(
-        "[data-video-toggle]"
-      );
-      if (tour && tourToggle) {
-        let heldByReader = window.matchMedia(
-          "(prefers-reduced-motion: reduce)"
-        ).matches;
-        const syncToggle = () => {
-          tourToggle.textContent = tour.paused ? "Play" : "Pause";
-          tourToggle.setAttribute(
-            "aria-label",
-            tour.paused ? "Play the tour video" : "Pause the tour video"
-          );
-        };
-        const start = () => {
-          tour.play().catch((error: unknown) => {
-            // A pause() that lands while the video is still loading rejects
-            // with AbortError and changes nothing. NotAllowedError means the
-            // browser refuses to autoplay, so the reader starts it instead.
-            if (error instanceof DOMException && error.name === "NotAllowedError") {
-              heldByReader = true;
-            }
-            syncToggle();
-          });
-        };
-        tour.addEventListener("play", syncToggle);
-        tour.addEventListener("pause", syncToggle);
-        tourToggle.addEventListener("click", () => {
-          heldByReader = !tour.paused;
-          if (tour.paused) start();
-          else tour.pause();
-        });
-        let onScreen = false;
-        new IntersectionObserver(
-          ([entry]) => {
-            if (!entry) return;
-            onScreen = entry.isIntersecting;
-            if (onScreen && !heldByReader) start();
-            else if (!onScreen) tour.pause();
-          },
-          { threshold: 0.25 }
-        ).observe(tour);
-        // Browsers pause video-only media in a background tab; resume it
-        // when the reader comes back to a slide it is still on.
-        document.addEventListener("visibilitychange", () => {
-          if (document.hidden) tour.pause();
-          else if (onScreen && !heldByReader) start();
-        });
-        syncToggle();
-      }
-
       // The demo's copy-to-clipboard affordance on the install pill.
       document.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach(
         (btn) => {
@@ -1696,8 +1634,8 @@ import { filters } from "@adapttable/mantine/filters";
   }
 
   /* ── The hero tour: the real adapters switching, sized to share the
-     hero slide. The poster paints first; the video loads only when it
-     plays. ─────────────────────────────────────────────────────────── */
+     hero slide. A click-to-play recording: the poster paints first and
+     the video loads only when the reader plays it. ──────────────────── */
   .tour {
     margin: clamp(14px, 2.8vh, 30px) auto 0;
     max-width: 860px;
@@ -1738,21 +1676,6 @@ import { filters } from "@adapttable/mantine/filters";
   }
   .tour__caption a {
     color: var(--brand);
-  }
-  .tour__toggle {
-    font: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border: 1px solid var(--page-border);
-    border-radius: 999px;
-    background: var(--page-surface);
-    color: var(--ink);
-    cursor: pointer;
-  }
-  .tour__toggle:focus-visible {
-    outline: 2px solid var(--brand);
-    outline-offset: 2px;
   }
   @media (max-height: 760px) {
     .tour__caption {
