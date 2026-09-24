@@ -87,13 +87,16 @@ async function main() {
   const previous = statePath ? readState(statePath) : {};
   const next = hashesFromDist(dist);
   const urls = urlsToSubmit(previous, next);
-
-  if (statePath) {
+  // The hashes are recorded only once IndexNow has accepted the URLs, so a
+  // refused submission is sent again on the next deploy.
+  const saveState = () => {
+    if (!statePath) return;
     mkdirSync(dirname(statePath), { recursive: true });
     writeFileSync(statePath, `${JSON.stringify(next)}\n`);
-  }
+  };
 
   if (urls.length === 0) {
+    saveState();
     const seeded = Object.keys(previous).length === 0;
     console.log(
       seeded
@@ -104,6 +107,7 @@ async function main() {
   }
 
   const status = await submit(urls);
+  saveState();
   console.log(
     `indexnow: submitted ${urls.length} URLs, HTTP ${status}` +
       (status === 202 ? " (accepted, key validation pending)" : "")
