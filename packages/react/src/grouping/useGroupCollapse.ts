@@ -31,7 +31,7 @@ export interface GroupCollapseState {
 
 /**
  * Headless collapse state for row groups, at any depth. Ephemeral — not
- * URL-synced (punch-list #62). Groups default to expanded (empty set).
+ * URL-synced. Groups default to expanded (empty set).
  *
  * @public
  */

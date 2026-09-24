@@ -1,14 +1,12 @@
 /**
  * Prove the repository's own guards still fail when they should.
  *
- * Item 17 found four guards that had been green for months while verifying
- * nothing. Three derived a package's files from a subpath NAME rather than its
- * exports map, so a module whose filename differs from its subpath was silently
- * skipped; the fourth read a previous build's `dist` from a stage scheduled
- * before the build, so it audited yesterday's output. Each was repaired. A
- * repair is not a guarantee: the same decay can happen again, and it is
- * invisible in a green run, because a guard that reads nothing reports nothing
- * wrong.
+ * A guard can stay green while verifying nothing. One that derives a
+ * package's files from a subpath NAME rather than its exports map silently
+ * skips a module whose filename differs from its subpath; one that reads `dist`
+ * from a stage scheduled before the build audits the previous build's output.
+ * That decay is invisible in a green run, because a guard that reads nothing
+ * reports nothing wrong.
  *
  * So each guard here is aimed at a broken fixture and must reject it. The
  * fixtures are built in a temporary directory and removed afterwards — never a
@@ -16,7 +14,7 @@
  * long as the test took to run and a lie if it crashed halfway.
  *
  * `bundle-budget.mjs` already works this way (`provePlantedLeak`); this is that
- * pattern applied to the four that had nothing.
+ * pattern applied to the guards below.
  */
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -58,8 +56,8 @@ after(() => {
 
 describe("check-doc-surface reads the exports map, not the subpath name", () => {
   it("finds a module whose filename differs from the subpath that exports it", () => {
-    // The exact decay item 17 found: `./ag-ui` was turned into `ag-ui.ts`, the
-    // module is `agui.ts`, and the guard crashed before auditing anything.
+    // The subpath `./ag-ui` is served by `agui.ts`, not `ag-ui.ts`; a guard that
+    // derives the filename from the subpath crashes before auditing anything.
     const root = tempRoot();
     fixturePackage(
       root,

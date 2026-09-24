@@ -2,18 +2,17 @@
  * The published contract, and both directions of checking it.
  *
  * An API report says what the tags currently claim. The manifest in
- * `etc/api-contract.json` says what the project has committed to. Item 16 is
- * the reason both directions matter: 993 classifications were quietly
- * withdrawn and nothing noticed, because the only guard asked "is every
- * `@public` symbol approved?" and never "is every approved symbol still
- * `@public`?".
+ * `etc/api-contract.json` says what the project has committed to. Both
+ * directions matter: a guard that only asks "is every `@public` symbol
+ * approved?" never notices an approved symbol withdrawn from `@public`, so
+ * this one also asks "is every approved symbol still `@public`?".
  *
  * What is checked, per published typed entry point:
  *
  * - every `@public` symbol in the report is in the manifest — an export
  *   nobody decided on, or machinery that leaked out of `@internal`
  * - every symbol in the manifest is still `@public` in the report — missing,
- *   renamed, or demoted, which is the direction that would have caught 16
+ *   renamed, or demoted, which is the direction a one-way guard misses
  * - a pure re-export entry forwards the surface its policy names
  *
  * And structurally, so the manifest cannot rot into decoration:

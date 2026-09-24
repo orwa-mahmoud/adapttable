@@ -38,7 +38,11 @@ export interface TableRevisions {
   readonly view: number;
   /** Column set, types, or operation metadata. */
   readonly schema: number;
-  /** Permissions, source capabilities, or wired operations. */
+  /**
+   * Permissions, source capabilities, or wired operations. The engine never
+   * infers these; a host that changes them bumps this with
+   * `invalidate(["policy"])`.
+   */
   readonly policy: number;
 }
 

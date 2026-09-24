@@ -34,9 +34,9 @@ describe("entrypoints", () => {
     }
   });
 
-  // The regression item 19 exists to close: the CLI is published, its exports
-  // map has ".", and its building blocks are documented as programmatic. It
-  // was skipped as "a bin, not an API" and its surface could change unseen.
+  // The CLI is published, its exports map has ".", and its building blocks are
+  // documented as programmatic — so it is an API, not just a bin, and its
+  // surface is reported like any other entry.
   it("includes the CLI's main entry, because the CLI is published", () => {
     const cli = ENTRIES.filter((e) => e.dir === "cli");
     assert.equal(packageJson("cli").private ?? false, false);

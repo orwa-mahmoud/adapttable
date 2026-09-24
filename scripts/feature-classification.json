@@ -2,7 +2,7 @@
   "$schema": "./feature-classification.schema.json",
   "version": 1,
   "generatedFor": "v3",
-  "note": "Single source of truth for the v3 feature surface. Every factory in @adapttable/core/features appears exactly once. Classification drives the adapter split (item 3-4), the parity test, and the generated feature lists in README, comparison and docs.",
+  "note": "Single source of truth for the v3 feature surface. Every factory exported from @adapttable/react/features appears exactly once. The feature-parity check, the framework-boundary check and the consumer harness read it.",
   "classifications": {
     "base": "Always present in the root DataTable; not an opt-in factory.",
     "headless": "Structure and state only. Core owns it; the kit renders it through slots it already has.",
@@ -16,7 +16,7 @@
     "single-column sorting",
     "search",
     "pagination and infinite data",
-    "column resolution — the `columns` array rendered in order, honouring `hidden`"
+    "column resolution — the `columns` array rendered in order"
   ],
   "features": {
     "rowReorder": {
@@ -710,7 +710,7 @@
     ]
   },
   "v3Removals": {
-    "note": "Everything the v3 major removed, with the import or call that replaces it. Executed in item 7; docs/migrate-from-v2.md is generated from this list, and scripts/check-feature-classification.mjs holds each removal to it.",
+    "note": "Everything the v3 major removed, with the import or call that replaces it. docs/migrate-from-v2.md names every entry, and scripts/check-feature-classification.mjs holds each removal to it.",
     "groups": [
       {
         "id": "row-reorder-prop",
@@ -1117,14 +1117,14 @@
         "sizeKB": 0.79,
         "essentialToThreeProp": false,
         "verdict": "feature",
-        "where": "The selection model is what `columnSelectionCheckbox`, `bulkActions` and `selectionStats` need; a three-prop table renders no checkbox and no bulk bar. Item 4 moves the hook behind those features."
+        "where": "The selection model is what `columnSelectionCheckbox`, `bulkActions` and `selectionStats` need; a three-prop table renders no checkbox and no bulk bar."
       },
       "row actions": {
         "module": "core/src/rows/rowActions.ts",
         "sizeKB": 0.1,
         "essentialToThreeProp": false,
         "verdict": "feature",
-        "where": "The trailing action column renders only when the host passes `rowActions`, and the buttons are the kit's own. Item 4 gives it a factory and its adapter contribution."
+        "where": "The trailing action column renders only when the host passes `rowActions`, and the buttons are the kit's own. The `rowActions` factory carries it with its adapter contribution."
       },
       "column visibility": {
         "module": "core/src/columns/useColumnLayout.ts",

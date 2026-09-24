@@ -23,8 +23,8 @@ import { applyTableFeatures, type TableFeature } from "./tableFeature";
  *
  * This is an architecture fixture: it builds a cell-navigation-shaped feature
  * out of the public seam and nothing else, so what it proves is that the seam
- * is sufficient. The real implementation belongs to item 4 — nothing here is
- * shipped, and nothing in core imports it.
+ * is sufficient. The shipped feature lives in `cell-navigation.tsx`; nothing
+ * here is shipped, and nothing in core imports it.
  */
 
 /** A cell, addressed the way a feature must be able to address one. */
