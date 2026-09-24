@@ -1,5 +1,11 @@
 # @adapttable/cli
 
+## 3.0.1
+
+### Patch Changes
+
+- cbe937e: The docs and live demo now live at [adapttable.orwamahmoud.com](https://adapttable.orwamahmoud.com/), with React docs under `/react/`. Package homepages and README links point there; the previous addresses redirect.
+
 ## 3.0.0
 
 ### Major Changes

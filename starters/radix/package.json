@@ -8,8 +8,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@adapttable/core": "^3.2.1",
-    "@adapttable/radix": "^3.2.2",
+    "@adapttable/core": "^3.2.2",
+    "@adapttable/radix": "^3.2.3",
     "@radix-ui/themes": "^3.3.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
