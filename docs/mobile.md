@@ -2,7 +2,7 @@
 
 ▶ **See it before you install:** [the live mobile demo](https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/) — the same table flipped between desktop rows and phone cards with one toggle.
 
-<a href="https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/"><img src="https://adapttable.orwamahmoud.com/media/features/mobile.gif" alt="The same AdaptTable data table as phone cards — scrolling the card list, then switching to the desktop table" width="640" height="392" style="width:100%;height:auto;aspect-ratio:640/392;border-radius:8px" /></a>
+<video src="https://adapttable.orwamahmoud.com/media/features/mobile.mp4" poster="https://adapttable.orwamahmoud.com/media/features/mobile-poster.png" aria-label="The same AdaptTable data table as phone cards — scrolling the card list, then switching to the desktop table" controls playsinline preload="none" width="1240" height="758" style="width:100%;height:auto;aspect-ratio:1240/758;border-radius:8px"></video>
 
 Most React data tables answer the phone problem with a horizontal scrollbar.
 AdaptTable answers it with a different layout: below the mobile breakpoint,

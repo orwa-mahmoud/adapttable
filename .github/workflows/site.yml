@@ -3,8 +3,8 @@ name: Site
 # Builds the composed site (docs + showcase) and every redirect that keeps its
 # previous addresses working. A pull request builds and checks it; a push to
 # main also deploys it:
-#   - the site to Cloudflare Pages, served at the origin in scripts/site.mjs,
-#     then an IndexNow ping for the pages that changed;
+#   - the site to its Cloudflare Worker (wrangler.jsonc), served at the origin
+#     in scripts/site.mjs, then an IndexNow ping for the pages that changed;
 #   - the redirect-only site to GitHub Pages, answering at the previous
 #     address — once the repository variable LEGACY_REDIRECTS is "true".
 #     Until then GitHub Pages keeps its last deployment.
@@ -31,6 +31,7 @@ on:
       - "scripts/build-showcase-html.mjs"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
+      - "wrangler.jsonc"
       - ".github/workflows/site.yml"
   pull_request:
     paths:
@@ -52,6 +53,7 @@ on:
       - "scripts/build-showcase-html.mjs"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
+      - "wrangler.jsonc"
       - ".github/workflows/site.yml"
   workflow_dispatch:
 
@@ -94,12 +96,12 @@ jobs:
           path: legacy-site
 
   deploy:
-    name: Deploy to Cloudflare Pages
+    name: Deploy to Cloudflare
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
-      name: cloudflare-pages
+      name: cloudflare
       url: https://adapttable.orwamahmoud.com/
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -114,9 +116,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: >
-          npx --yes wrangler@4.136.3 pages deploy apps/docs/dist
-          --project-name=adapttable --branch=main
+        run: npx --yes wrangler@4.136.3 deploy
 
   indexnow:
     name: Notify IndexNow
