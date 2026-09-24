@@ -15,6 +15,9 @@ coverage/
 .wrangler/
 /node-support-packs/
 
+# Peer-matrix probe output (scripts/peer-matrix.mjs).
+/reports/peer-matrix/
+
 # Stryker mutation testing — generated reports and scratch.
 .stryker-tmp/
 reports/mutation/

@@ -36,31 +36,31 @@ jobs:
         run: node scripts/peer-matrix.mjs
 
       - name: Upload summary
-        if: ${{ always() && hashFiles('ai_docs/peer-matrix-summary.json') != '' }}
+        if: ${{ always() && hashFiles('reports/peer-matrix/summary.json') != '' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: peer-matrix-summary
-          path: ai_docs/peer-matrix-summary.json
+          path: reports/peer-matrix/summary.json
           retention-days: 90
 
       - name: Upload findings (if any)
-        if: ${{ hashFiles('ai_docs/peer-matrix-findings.md') != '' }}
+        if: ${{ hashFiles('reports/peer-matrix/findings.md') != '' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: peer-matrix-findings
-          path: ai_docs/peer-matrix-findings.md
+          path: reports/peer-matrix/findings.md
           retention-days: 30
 
       # One tracking issue, not one per failure: created on the first red run,
       # updated in place on later ones, closed by a human after triage. A green
       # run leaves a comment on the open issue instead of silently going quiet.
       - name: Open or update the tracking issue
-        if: ${{ always() && hashFiles('ai_docs/peer-matrix-summary.json') != '' }}
+        if: ${{ always() && hashFiles('reports/peer-matrix/summary.json') != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           title="Peer matrix: failing compatibility cells"
-          failed="$(node -p 'JSON.parse(require("fs").readFileSync("ai_docs/peer-matrix-summary.json","utf8")).failed')"
+          failed="$(node -p 'JSON.parse(require("fs").readFileSync("reports/peer-matrix/summary.json","utf8")).failed')"
           existing="$(gh issue list --repo "${{ github.repository }}" --state open \
             --search "\"$title\" in:title" --json number --jq '.[0].number // empty')"
           if [ "$failed" = "0" ]; then
@@ -77,7 +77,7 @@ jobs:
             echo '| Adapter | Kit major | Phase |'
             echo '| --- | --- | --- |'
             node -p '
-              JSON.parse(require("fs").readFileSync("ai_docs/peer-matrix-summary.json","utf8"))
+              JSON.parse(require("fs").readFileSync("reports/peer-matrix/summary.json","utf8"))
                 .cells.filter(c => !c.ok)
                 .map(c => `| ${c.adapter} | v${c.major} | ${c.phase} |`)
                 .join("\n")'

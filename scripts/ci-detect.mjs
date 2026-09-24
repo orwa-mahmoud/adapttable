@@ -17,7 +17,7 @@ const ROOT_TOOLING =
   /^(scripts\/|vitest\.shared\.ts$|eslint\.config\.mjs$|package\.json$|pnpm-workspace\.yaml$|turbo\.json$)/;
 
 const DOCS_OR_META =
-  /^(docs\/|.*\.md$|llms.*\.txt$|.*\/robots\.txt$|\.github\/|\.changeset\/|ai_docs\/|\.husky\/)/;
+  /^(docs\/|.*\.md$|llms.*\.txt$|.*\/robots\.txt$|\.github\/|\.changeset\/|\.husky\/)/;
 
 const VERSION_ONLY =
   /^(packages\/[^/]+\/(package\.json|CHANGELOG\.md)|\.changeset\/)/;
