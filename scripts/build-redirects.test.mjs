@@ -168,9 +168,10 @@ describe("writeLegacySite", () => {
     const sitemap = readFileSync(join(out, "sitemap.xml"), "utf8");
     assert.ok(sitemap.includes(`<loc>${LEGACY_SITE}/filtering/</loc>`));
     assert.equal(sitemap.includes("/demo/columns/"), false);
-    assert.match(
-      readFileSync(join(out, "robots.txt"), "utf8"),
-      new RegExp(`Sitemap: ${LEGACY_SITE.replaceAll(".", "\\.")}/sitemap\\.xml`)
+    assert.ok(
+      readFileSync(join(out, "robots.txt"), "utf8").includes(
+        `Sitemap: ${LEGACY_SITE}/sitemap.xml`
+      )
     );
   });
 });
