@@ -12,6 +12,7 @@ dist/
 build/
 coverage/
 .turbo/
+.wrangler/
 /node-support-packs/
 
 # Stryker mutation testing — generated reports and scratch.
