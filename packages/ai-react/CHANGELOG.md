@@ -1,5 +1,11 @@
 # @adapttable/ai-react
 
+## 0.2.5
+
+### Patch Changes
+
+- 3bb83b4: The table agent reads server-data tables whose rows hold a `BigInt` or a circular reference; it no longer throws while building the manifest.
+
 ## 0.2.4
 
 ### Patch Changes
