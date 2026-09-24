@@ -1,5 +1,13 @@
 # @adapttable/react
 
+## 1.3.2
+
+### Patch Changes
+
+- cbe937e: The docs and live demo now live at [adapttable.orwamahmoud.com](https://adapttable.orwamahmoud.com/), with React docs under `/react/`. Package homepages and README links point there; the previous addresses redirect.
+- Updated dependencies [cbe937e]
+  - @adapttable/core@3.2.2
+
 ## 1.3.1
 
 ### Patch Changes

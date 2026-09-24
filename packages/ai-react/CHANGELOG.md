@@ -1,5 +1,15 @@
 # @adapttable/ai-react
 
+## 0.2.4
+
+### Patch Changes
+
+- cbe937e: The docs and live demo now live at [adapttable.orwamahmoud.com](https://adapttable.orwamahmoud.com/), with React docs under `/react/`. Package homepages and README links point there; the previous addresses redirect.
+- Updated dependencies [cbe937e]
+  - @adapttable/ai@0.2.3
+  - @adapttable/core@3.2.2
+  - @adapttable/react@1.3.2
+
 ## 0.2.3
 
 ### Patch Changes
