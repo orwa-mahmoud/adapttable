@@ -3,7 +3,8 @@ name: Site
 # Builds the composed site (docs + showcase) and every redirect that keeps its
 # previous addresses working. A pull request builds and checks it; a push to
 # main also deploys it:
-#   - the site to Cloudflare Pages, served at the origin in scripts/site.mjs;
+#   - the site to Cloudflare Pages, served at the origin in scripts/site.mjs,
+#     then an IndexNow ping for the pages that changed;
 #   - the redirect-only site to GitHub Pages, answering at the previous
 #     address — once the repository variable LEGACY_REDIRECTS is "true".
 #     Until then GitHub Pages keeps its last deployment.
@@ -116,6 +117,20 @@ jobs:
         run: >
           npx --yes wrangler@4.136.3 pages deploy apps/docs/dist
           --project-name=adapttable --branch=main
+
+  indexnow:
+    name: Notify IndexNow
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: composed-site
+          path: apps/docs/dist
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .indexnow-state.json
