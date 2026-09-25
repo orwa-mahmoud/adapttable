@@ -141,7 +141,7 @@ describe("advertised adapter count", () => {
   checkAdvertised(
     [
       { file: "CONTRIBUTING.md", occurrences: 1 },
-      { file: "README.md", occurrences: 2 },
+      { file: "README.md", occurrences: 1 },
       { file: "docs/accessibility.md", occurrences: 1 },
       { file: "docs/api.md", occurrences: 1 },
       { file: "docs/cell-navigation.md", occurrences: 2 },

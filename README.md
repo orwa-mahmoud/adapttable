@@ -231,27 +231,13 @@ Start with the
 
 ## Roadmap
 
-- [x] Framework-neutral `@adapttable/core`
-- [x] `@adapttable/mantine`
-- [x] `@adapttable/i18n` (en/ar + RTL)
-- [x] `@adapttable/unstyled` (Tailwind/shadcn)
-- [x] `@adapttable/mui`
-- [x] `@adapttable/chakra`
-- [x] `@adapttable/cli`
-- [x] Column management — show/hide, reorder, pin (sticky), and resize
-- [x] Docs (markdown + `llms.txt`) + examples
-- [x] Hosted [docs site](https://adapttable.orwamahmoud.com/) + [live demo](https://adapttable.orwamahmoud.com/react/demo/) (GitHub Pages, deployed on every push to `main`)
-- [x] Optional row/card virtualization (windowing) for very large lists
-- [x] Inline cell editing — opt-in `editing(...)`, kit-native editors
-- [x] Row reordering — opt-in `rowReorder(...)`, keyboard grab, dataset indices
-- [x] Row pinning — sticky top and bottom rows, `{ top, bottom }` id lists
-- [x] Pinned summary rows — host-owned totals outside the row model, including on grouped and tree tables
-- [x] Row and column spanning — opt-in `cellSpan(...)`, covered cells omitted
-- [x] Row grouping — opt-in `grouping(...)` at any depth, with per-group aggregates
-- [x] CSV export
-- [x] `v1.0` — stable, semver-committed public API
-- [x] `v2.0` — one name per concept across all eight adapters; React 18 & 19 proven in CI
-- [x] v3 architecture — framework-neutral core, React binding, kit feature subpaths
+The roadmap is tracked in GitHub issues:
+
+- [Neutral core for framework bindings](https://github.com/orwa-mahmoud/adapttable/issues/419) — the table's behavior moves into `@adapttable/core`, so every framework binding drives the same engine.
+- [Vue binding](https://github.com/orwa-mahmoud/adapttable/issues/420)
+- [Angular binding](https://github.com/orwa-mahmoud/adapttable/issues/421)
+
+Each one lists its work items and what blocks what. Open items with nothing blocking them are [ready to start](https://github.com/orwa-mahmoud/adapttable/issues?q=is%3Aissue%20state%3Aopen%20-is%3Ablocked%20has%3Aparent-issue). What has shipped is in each published package's `CHANGELOG.md`.
 
 ## Contributing
 
