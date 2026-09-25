@@ -14,12 +14,12 @@
 
 **Easy by default, infinitely customizable.** [Automatic mobile card layout](https://adapttable.orwamahmoud.com/react/mobile/) — the table becomes a card list on phones by itself, no second layout to build. One unified data source for both client-side and server-side data, URL-synced shareable state, optional virtualization, infinite-scroll & paging (auto by device), a real filter UX, **column management** (reorder · pin · resize · show/hide), **inline cell editing**, **interactive row grouping** with header drag-and-drop and per-group aggregate choices, **CSV export**, first-class **i18n + RTL**, and seamless **dark mode** — out of the box.
 
-<video src="https://github.com/user-attachments/assets/33f8369f-dcd5-499b-80f6-03746fd7fd8f" poster="https://adapttable.orwamahmoud.com/media/ai/poster.png" controls playsinline preload="none" width="860">
+<video src="https://github.com/user-attachments/assets/7eaa3edd-6238-4b45-8d12-fbca33c2e54d" poster="https://adapttable.orwamahmoud.com/media/ai/poster.png" controls playsinline preload="none" width="860">
   <a href="https://adapttable.orwamahmoud.com/react/demo/mantine/ai/">▶ Watch the AI demo — ask the table to filter, group, aggregate, hide and reorder columns.</a>
 </video>
 
-<video src="https://github.com/user-attachments/assets/3b9f8a41-a2d6-4a36-bc61-50fac3d8c3ed" poster="https://adapttable.orwamahmoud.com/media/core/poster.png?v=2" controls playsinline width="860">
-  <a href="https://github.com/user-attachments/assets/3b9f8a41-a2d6-4a36-bc61-50fac3d8c3ed">▶ Watch the tour — the same data table re-rendered through Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn, and Tailwind, from one headless engine.</a>
+<video src="https://github.com/user-attachments/assets/578c724c-0201-42df-b728-15d49aed5d01" poster="https://adapttable.orwamahmoud.com/media/core/poster.png?v=2" controls playsinline width="860">
+  <a href="https://github.com/user-attachments/assets/578c724c-0201-42df-b728-15d49aed5d01">▶ Watch the tour — the same data table re-rendered through Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn, and Tailwind, from one headless engine.</a>
 </video>
 
 </div>
