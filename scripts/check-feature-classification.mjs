@@ -20,7 +20,8 @@
  *    are resolved on disk, so a rename cannot leave the manifest pointing at
  *    a file that moved.
  * 3. **Every replaced prop stays removed.** No `replacesProps` entry may be
- *    declared again on the public `BaseDataTableProps` or on an adapter's
+ *    declared again on the public prop surface — React's `BaseDataTableProps`
+ *    and the core `TableOptions` it extends — or on an adapter's
  *    `DataTablePropsBase`.
  * 4. **`standardFeatures()` is honest.** Its zero-argument list may name only
  *    factories that are callable bare — a factory that needs options is inert
@@ -37,8 +38,8 @@
  *    is the one the inventory maps the prop to and is exported from that
  *    subpath of every published kit.
  * 7. **Every v4 removal is still a working, flagged API.** Each prop the
- *    `v4Removals` inventory names is declared on `BaseDataTableProps` with a
- *    `@deprecated` notice until the major that removes it.
+ *    `v4Removals` inventory names is declared on the public prop surface with
+ *    a `@deprecated` notice until the major that removes it.
  *
  *   node scripts/check-feature-classification.mjs
  */
@@ -138,16 +139,39 @@ for (const [name, feature] of Object.entries(listed)) {
  *
  * `FeatureProps` still declares each one, because that is the channel a
  * feature's `apply()` writes through; what must never come back is a
- * declaration on the public `BaseDataTableProps`, which is the only shape a
- * host can write.
+ * declaration on the public surface a host writes: React's
+ * `BaseDataTableProps` and the core `TableOptions` it extends.
  */
 const props = readFileSync(
   join(packageDir("react"), "src", "props.ts"),
   "utf8"
 );
-const publicSurface = props.slice(
-  props.indexOf("export interface BaseDataTableProps<TRow> {")
+
+/** The body of one exported interface, from its declaration to its close. */
+function interfaceBody(source, declaration, file) {
+  const start = source.indexOf(declaration);
+  if (start < 0) {
+    console.error(
+      `check-feature-classification: ${file} no longer declares "${declaration}"`
+    );
+    process.exit(1);
+  }
+  const end = source.indexOf("\n}\n", start);
+  return source.slice(start, end < 0 ? undefined : end + 3);
+}
+
+const tableOptions = readFileSync(
+  join(packageDir("core"), "src", "tableOptions.ts"),
+  "utf8"
 );
+const publicSurface = [
+  interfaceBody(props, "export interface BaseDataTableProps<TRow>", "props.ts"),
+  interfaceBody(
+    tableOptions,
+    "export interface TableOptions<TRow, TNode = unknown> {",
+    "tableOptions.ts"
+  ),
+].join("\n");
 const adapterPublicSurfaces = adapters.flatMap((adapter) => {
   const typesPath = join(packageDir(adapter), "src", "types.ts");
   if (!existsSync(typesPath)) return [];
@@ -162,7 +186,7 @@ for (const [name, feature] of Object.entries(listed)) {
   for (const prop of feature.replacesProps) {
     if (new RegExp(`^  ${prop}\\??:`, "m").test(publicSurface)) {
       problems.push(
-        `${name}: replacesProps names "${prop}", which v3 removed but BaseDataTableProps declares again`
+        `${name}: replacesProps names "${prop}", which v3 removed but the public prop surface declares again`
       );
     }
     for (const { adapter, surface } of adapterPublicSurfaces) {
@@ -302,7 +326,7 @@ for (const prop of Object.keys(enabling.props)) {
   // the internal channel — a prop features can write but no host can pass.
   if (new RegExp(`^  ${prop}\\??:`, "m").test(publicSurface)) {
     problems.push(
-      `v3Removals: "${prop}" is inventoried for removal but BaseDataTableProps declares it`
+      `v3Removals: "${prop}" is inventoried for removal but the public prop surface declares it`
     );
   }
   if (!new RegExp(`^  ${prop}\\??:`, "m").test(props)) {
@@ -735,11 +759,11 @@ for (const group of manifest.v4Removals.groups) {
   for (const prop of group.props ?? []) {
     if (!new RegExp(`^  ${prop}\\??:`, "m").test(publicSurface)) {
       problems.push(
-        `v4Removals: "${prop}" is inventoried for v4 but BaseDataTableProps no longer declares it`
+        `v4Removals: "${prop}" is inventoried for v4 but the public prop surface no longer declares it`
       );
     } else if (!propDeprecated(publicSurface, prop)) {
       problems.push(
-        `v4Removals: BaseDataTableProps declares "${prop}" without a @deprecated notice`
+        `v4Removals: the public prop surface declares "${prop}" without a @deprecated notice`
       );
     }
   }

@@ -44,6 +44,43 @@ export {
   toggleCollapsedColumnGroup,
 } from "./columns/headerGroups";
 export {
+  drawnSlotFills,
+  type FeatureRender,
+  type FeatureSlotKey,
+  featureSlotKey,
+  type FeatureStateKey,
+  featureStateKey,
+  type OrderedContribution,
+  orderedContributions,
+  type SlotFill,
+  slotFillsOf,
+  slotRender,
+} from "./features/featureKeys";
+export {
+  createFeatureHost,
+  disposeFeatureHost,
+  EMPTY_FEATURE_HOST,
+  type FeatureSetup,
+  LiveFeatureHost,
+} from "./features/liveFeatureHost";
+export {
+  ACTIVE_FILTER_CHIPS,
+  COLUMN_HEADER_RENAME,
+  COLUMN_MENU,
+  type ColumnHeaderRenameSlotProps,
+  EXPAND_TOGGLE,
+  type ExpandToggleSlotProps,
+  FILTER_DRAWER,
+  FILTER_POPOVER,
+  type FilterOverlaySlotProps,
+  ROW_REORDER_ANNOUNCER,
+} from "./features/slotContract";
+export type { TableRuntime, TableRuntimeView } from "./features/tableRuntime";
+export type {
+  ActiveFilterChip,
+  ActiveFilterChipsSlotProps,
+} from "./filters/activeFilterChips";
+export {
   bodyCellsHaveRowSpan,
   cellsForRow,
   extraHostFillStyle,
@@ -138,6 +175,7 @@ export type {
   ColumnMenuItem,
   ColumnMenuLabels,
   ColumnMenuRow,
+  ColumnMenuSlotProps,
   PinnedSide,
 } from "./columns/columnMenuModel";
 export type {
@@ -163,6 +201,7 @@ export type {
   TableRowScope,
   TableSnapshot,
 } from "./engine/createTableEngine";
+export type { NeutralTable } from "./engine/neutralTable";
 export type {
   ExportPayload,
   ExportRowMeta,
@@ -191,6 +230,7 @@ export {
 } from "./filters/filterDefs";
 export type { FilterFormSource } from "./filters/filterFormModel";
 export type {
+  FilterTypeRegistry,
   FilterTypeSpec,
   FilterWidgetKind,
   FilterWidgetRenderProps,
@@ -238,8 +278,11 @@ export type { TableSource } from "./source/TableSource";
 export type { CssProperties } from "./style/cssProperties";
 export type { TableStateMutators } from "./tableStateMutators";
 export type {
+  BulkAction,
   ColumnMetadata,
+  Direction,
   ResolvedPaginationMode,
+  RowAction,
   TableLabels,
 } from "./types";
 export type {

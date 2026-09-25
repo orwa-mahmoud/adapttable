@@ -28,20 +28,17 @@
  *   another table's row detail.
  */
 import {
-  type BulkAction,
-  type ColumnMetadata,
-  devWarn,
-  type ExtraFilters,
-  type FilterDef,
-  type FilterTypeRegistry,
-  type GroupAggregateOverrides,
-  type NeutralTable,
-  type PinSide,
-  type QueryAggregate,
-  type RowAction,
-  type RowPinSide,
-  type TableSourceCapabilities,
-} from "@adapttable/core";
+  drawnSlotFills,
+  type FeatureRender as NeutralFeatureRender,
+  type FeatureSlotKey,
+  type FeatureStateKey,
+  orderedContributions,
+  type SlotFill,
+  slotFillsOf,
+  slotRender as neutralSlotRender,
+  type TableRuntime,
+  type TableRuntimeView,
+} from "@adapttable/core/binding";
 import {
   type ComponentType,
   createContext,
@@ -59,34 +56,13 @@ import {
   type TableFeature,
 } from "./tableFeature";
 
-/**
- * A typed handle for one piece of feature-published state.
- *
- * The id is what the value is stored under; the type parameter is what a
- * reader gets back. Both halves of the exchange are typed, so this is a
- * contract rather than a bag with strings in it.
- *
- * @public
- */
-export interface FeatureStateKey<T> {
-  /** Stable id, conventionally the feature's own (`"row-reorder"`). */
-  readonly id: string;
-  /** Phantom marker that pins the published type; never read at runtime. */
-  readonly __state?: T;
-}
-
-/**
- * Declare a typed key for state a feature publishes.
- *
- * ```ts
- * export const ROW_REORDER = featureStateKey<RowReorderState<unknown>>("row-reorder");
- * ```
- *
- * @public
- */
-export function featureStateKey<T>(id: string): FeatureStateKey<T> {
-  return { id };
-}
+export type {
+  FeatureSlotKey,
+  FeatureStateKey,
+  TableRuntime,
+  TableRuntimeView,
+} from "@adapttable/core/binding";
+export { featureSlotKey, featureStateKey } from "@adapttable/core/binding";
 
 /**
  * What a feature's provider component receives.
@@ -120,11 +96,6 @@ export interface FeatureProviderContribution {
    */
   readonly Provider: ComponentType<FeatureProviderProps>;
 }
-
-/** A feature that carries one. Structural, so there is no second plugin type. */
-type WithProvider<TRow> = TableFeature<TRow> & {
-  readonly provider?: FeatureProviderContribution;
-};
 
 const FeatureStateContext = createContext<ReadonlyMap<string, unknown>>(
   new Map()
@@ -178,230 +149,16 @@ export function useFeatureState<T>(
 /**
  * The providers of one feature list, in canonical order and deduplicated.
  *
- * Sorting by id is what makes the tree independent of the order the host
- * happened to write the array in — the same features always nest the same way,
- * so no provider is remounted because a line moved.
+ * The order is by feature id, which is what makes the tree independent of the
+ * order the host happened to write the array in — the same features always
+ * nest the same way, so no provider is remounted because a line moved.
  */
-interface MountedProvider {
-  readonly id: string;
-  readonly Provider: ComponentType<FeatureProviderProps>;
-  readonly feature: TableFeature;
-}
-
-function providersOf<TRow>(
-  features: readonly TableFeature<TRow>[]
-): readonly MountedProvider[] {
-  const byId = new Map<string, MountedProvider>();
-  for (const feature of features) {
-    const contribution = (feature as WithProvider<TRow>).provider;
-    if (!contribution) continue;
-    if (byId.has(feature.id)) {
-      devWarn(
-        `Two features share the id "${feature.id}" and both contribute a ` +
-          `provider. The last one wins, as it does for \`apply\`. Give one of ` +
-          `them a different id.`
-      );
-    }
-    byId.set(feature.id, {
-      id: feature.id,
-      Provider: contribution.Provider,
-      feature: feature as TableFeature,
-    });
-  }
-  return [...byId.values()].sort((left, right) =>
-    left.id < right.id ? -1 : 1
+function providersOf<TRow>(features: readonly TableFeature<TRow>[]) {
+  return orderedContributions(
+    features as readonly TableFeature[],
+    (feature) => feature.provider?.Provider,
+    "provider"
   );
-}
-
-/**
- * What a provider can read about the table it wraps.
- *
- * A provider mounts ABOVE the chrome, so it cannot be handed values the chrome
- * computes — that is a cycle. It reads them instead, at the moment it needs
- * them, which for a drag handler or an announcement is always an event rather
- * than a render.
- *
- * @public
- */
-export interface TableRuntimeView<TRow = unknown> {
-  /** Rows in the materialized source view (page scope). */
-  readonly rows: readonly TRow[];
-  /**
-   * Rendered data-row order after grouping/tree expansion. When set, differs
-   * from {@link rows} under grouping or tree chrome.
-   */
-  readonly visibleRows?: readonly TRow[];
-  /** Live neutral binding when the source published an engine. */
-  readonly neutralTable?: NeutralTable<TRow>;
-  /** Stable row identity. */
-  readonly getRowId: (row: TRow) => string;
-  /** Best available human-readable row label. */
-  readonly rowLabel: (row: TRow) => string;
-  /** Active sort key, when visual order is source-controlled. */
-  readonly sortBy?: string;
-  /** Live grouping bundle; feature providers narrow this structurally. */
-  readonly grouping?: unknown;
-  /** URL/source-backed grouping state used by optional interaction chrome. */
-  readonly groupingState?: {
-    readonly groupBy: string | undefined;
-    readonly aggregateOverrides: GroupAggregateOverrides;
-    readonly columnLabel: (key: string) => string;
-    /**
-     * The table's columns — the schema, not the currently visible subset.
-     * Hiding a column must not drop its aggregate; a key gone from the
-     * schema is the one that is reconciled away.
-     */
-    readonly columns?: readonly ColumnMetadata<TRow>[];
-    /** Aggregate keys the host's mapper produced in a computed group row. */
-    readonly computedAggregateKeys?: readonly string[];
-    /**
-     * The developer's original `aggregates` declaration, not the response
-     * now on screen.
-     */
-    readonly queryAggregates?: readonly QueryAggregate[];
-    /** Operation ids the backend listed, when it named them. */
-    readonly aggregateOperations?: readonly string[];
-    /** Whether a server source will honour aggregate requests. */
-    readonly honorsAggregates?: boolean;
-    readonly setGroupBy: (key: string | undefined) => void;
-    readonly initializeGroupBy?: (key: string) => void;
-    readonly setAggregateOverrides?: (
-      overrides: GroupAggregateOverrides
-    ) => void;
-  };
-  /** Live tree bundle; feature providers narrow this structurally. */
-  readonly tree?: unknown;
-  /**
-   * Page, search and sort the source currently owns.
-   *
-   * Optional so a test-published view can omit it. Live chrome fills it
-   * so a feature above the table can apply ordinary view operations.
-   */
-  readonly query?: {
-    readonly page: number;
-    readonly limit: number;
-    /**
-     * Rows matching the current query, when the source counted them.
-     *
-     * The filtered total, not the dataset and not the rows on screen. Absent
-     * where the source cannot say, which a consumer must carry as unknown
-     * rather than substituting what happens to be loaded.
-     */
-    readonly total?: number;
-    /**
-     * The table's default page size, so a rows-per-page list can keep it
-     * after the reader picks another size.
-     */
-    readonly defaultLimit?: number;
-    readonly search: string;
-    readonly sortBy?: string;
-    readonly sortDir?: "asc" | "desc";
-    readonly setPage: (page: number) => void;
-    readonly setLimit: (limit: number) => void;
-    readonly setSearch: (search: string) => void;
-    readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
-    readonly extra?: ExtraFilters;
-    readonly setExtras?: (extra: ExtraFilters) => void;
-    readonly clearExtras?: () => void;
-  };
-  /**
-   * Declarative filter definitions the live chrome resolved. Absent when
-   * the host never published defs (a custom form with no catalog).
-   */
-  readonly filterDefs?: readonly FilterDef<TRow>[];
-  /** Type registry those defs were built against. */
-  readonly filterRegistry?: FilterTypeRegistry;
-  /**
-   * Declared source capabilities from the live `TableSource`, when the
-   * source published a contract. Never inferred here.
-   */
-  readonly sourceCapabilities?: TableSourceCapabilities;
-  /**
-   * The host's own row and bulk actions, when it composed any. A binding may
-   * offer them to an agent; the table's built-in add, duplicate, delete and
-   * pin controls are not among them.
-   */
-  readonly actions?: {
-    readonly row: readonly RowAction<TRow>[];
-    readonly bulk: readonly BulkAction[];
-  };
-  /** Live selection, when a selection-owning feature is composed. */
-  readonly selection?: {
-    readonly selectedIds: ReadonlySet<string>;
-    readonly replace: (ids: readonly string[] | undefined) => void;
-  };
-  /**
-   * Live pinning, when a pin-owning feature is composed.
-   *
-   * Column sides are logical (`start`/`end`), so the same request is correct
-   * under RTL. Row sides are physical (`top`/`bottom`) because a pinned row
-   * is above or below the scrolled body in every writing direction.
-   *
-   * `columns` and `rows` are the CURRENT state, so unpinning is an inverse
-   * of what is actually pinned rather than a reset of the whole layout.
-   */
-  readonly pinning?: {
-    /** Column key to the edge it is pinned to. */
-    readonly columns: Readonly<Record<string, PinSide>>;
-    /** Pin a column to an edge, or unpin it with `undefined`. */
-    readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
-    /** Row keys pinned above and below the scrolled body. */
-    readonly rows?: {
-      readonly top: readonly string[];
-      readonly bottom: readonly string[];
-    };
-    /** Pin a row to an edge, or unpin it with `undefined`. */
-    readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
-  };
-  /**
-   * Live hide and order, when a layout-owning feature is composed.
-   *
-   * Column layout is always present as state; the setters are only real
-   * when the reader can hide and reorder too. Advertising a no-op would
-   * tell the agent it moved a column the table left alone.
-   */
-  readonly columnLayout?: {
-    /** Full order, hidden columns included. */
-    readonly keys: readonly string[];
-    /** Column ids the reader has hidden. */
-    readonly hidden: readonly string[];
-    readonly setHidden?: (key: string, hidden: boolean) => void;
-    readonly move?: (key: string, toIndex: number) => void;
-    readonly setOrder?: (order: readonly string[]) => void;
-  };
-  /**
-   * Live editing channels. `onCellEdit` is the host callback; `stageCell`
-   * is the batch/dirty path when batch editing is composed.
-   */
-  readonly editing?: {
-    readonly onCellEdit?: (
-      row: TRow,
-      key: string,
-      nextValue: unknown
-    ) => unknown;
-    readonly stageCell?: (
-      row: TRow,
-      rowId: string,
-      columnKey: string,
-      value: string
-    ) => void;
-  };
-}
-
-/**
- * What a provider can read about the table it wraps.
- *
- * @public
- */
-export interface TableRuntime<TRow = unknown> {
-  /** The row at a rendered index, or `undefined` once it has scrolled away. */
-  rowAt(localIndex: number): TRow | undefined;
-  /** The table's resolved labels, for announcements. */
-  labels(): Readonly<Record<string, unknown>> | undefined;
-  /** Latest fully composed view, read only from event handlers. */
-  view(): TableRuntimeView<TRow> | undefined;
-  /** Composed feature ids for this table, including optional ones. */
-  featureIds(): readonly string[];
 }
 
 interface RuntimeCell {
@@ -460,66 +217,12 @@ export function useTableRuntime<TRow = unknown>(): TableRuntime<TRow> {
 }
 
 /**
- * A named position in the table that a feature may render into.
- *
- * The table computes the props and asks; the feature that owns that surface
- * answers with its kit's own components. Core never learns what is drawn
- * there, which is what keeps a kit's pixels out of the base graph.
+ * One feature's answer for one slot: `@adapttable/core`'s `FeatureRender`
+ * drawing React nodes.
  *
  * @public
  */
-export interface FeatureSlotKey<TProps> {
-  /** Stable id, conventionally the surface's name (`"status-bar"`). */
-  readonly id: string;
-  /**
-   * Whether this position is ONE element rather than a list.
-   *
-   * Some surfaces are shared: the status bar hosts both the strip the
-   * `statusBar` feature asks for and the figures `selectionStats` produces, and
-   * the rule that they must not print twice belongs to that one element. Both
-   * features offer the same renderer, and a single slot draws it once.
-   */
-  readonly single?: boolean;
-  /**
-   * Phantom marker that pins the props type; never read at runtime.
-   *
-   * It is a function of `TProps` rather than a `TProps` so the key erases
-   * soundly: one feature's `renders` list holds slots of different prop types,
-   * and that is only assignable when the parameter position varies the right
-   * way round.
-   */
-  readonly __props?: (value: TProps) => void;
-}
-
-/**
- * Declare a typed slot a feature can fill.
- *
- * @public
- */
-export function featureSlotKey<TProps>(
-  id: string,
-  options: { readonly single?: boolean } = {}
-): FeatureSlotKey<TProps> {
-  return options.single === true ? { id, single: true } : { id };
-}
-
-/**
- * One feature's answer for one slot.
- *
- * @public
- */
-export interface FeatureRender<TProps> {
-  /** The surface being filled. */
-  readonly slot: FeatureSlotKey<TProps>;
-  /** What to draw, given the props the table computed. */
-  readonly render: (props: TProps) => ReactNode;
-  /**
-   * Place this entry among the slot's other fills as though it came from the
-   * feature with this id. Fills are ordered by feature id, so a control one
-   * kit draws from a different feature still lands where every kit puts it.
-   */
-  readonly orderAs?: string;
-}
+export type FeatureRender<TProps> = NeutralFeatureRender<TProps, ReactNode>;
 
 /**
  * Pair a slot with what to draw in it, keeping the props type at the call site.
@@ -537,9 +240,7 @@ export function slotRender<TProps>(
   render: (props: TProps) => ReactNode,
   options: { readonly orderAs?: string } = {}
 ): FeatureRender<TProps> {
-  return options.orderAs === undefined
-    ? { slot, render }
-    : { slot, render, orderAs: options.orderAs };
+  return neutralSlotRender(slot, render, options);
 }
 
 /**
@@ -578,37 +279,9 @@ export function extendFeature<TRow>(
   };
 }
 
-type RenderMap = ReadonlyMap<
-  string,
-  readonly { id: string; render: (props: never) => ReactNode }[]
->;
+type RenderMap = ReadonlyMap<string, readonly SlotFill<ReactNode>[]>;
 
 const FeatureRenderContext = createContext<RenderMap>(new Map());
-
-/**
- * The renderers of one feature list, grouped by slot in feature-id order.
- *
- * Two features may fill one slot — a toolbar takes several controls — so this
- * keeps a list rather than the last writer, and orders it the same way the
- * providers nest so the result does not depend on how the array was written.
- */
-function rendersOf<TRow>(features: readonly TableFeature<TRow>[]): RenderMap {
-  const bySlot = new Map<
-    string,
-    { id: string; render: (props: never) => ReactNode }[]
-  >();
-  for (const feature of features) {
-    for (const entry of feature.renders ?? []) {
-      const list = bySlot.get(entry.slot.id) ?? [];
-      list.push({ id: entry.orderAs ?? feature.id, render: entry.render });
-      bySlot.set(entry.slot.id, list);
-    }
-  }
-  for (const list of bySlot.values()) {
-    list.sort((left, right) => (left.id < right.id ? -1 : 1));
-  }
-  return bySlot;
-}
 
 /**
  * Draw whatever features contributed to one slot, or nothing.
@@ -628,8 +301,7 @@ export function FeatureSlot<TProps>({
 }): ReactNode {
   const filled = useContext(FeatureRenderContext).get(slot.id);
   if (!filled) return null;
-  const drawn = slot.single === true ? filled.slice(0, 1) : filled;
-  return drawn.map(({ id, render }) => (
+  return drawnSlotFills(slot, filled).map(({ id, render }) => (
     <Fragment key={id}>{(render as (p: TProps) => ReactNode)(props)}</Fragment>
   ));
 }
@@ -669,9 +341,9 @@ export function FeatureProviders({
     featureIds: (features ?? []).map((feature) => feature.id),
   });
   cell.current.featureIds = (features ?? []).map((feature) => feature.id);
-  const renders = useMemo(() => rendersOf(features ?? []), [features]);
+  const renders = useMemo(() => slotFillsOf(features ?? []), [features]);
   const tree = providers.reduceRight<ReactNode>(
-    (inner, { id, Provider, feature }) => (
+    (inner, { id, contribution: Provider, feature }) => (
       <Provider key={id} feature={feature}>
         {inner}
       </Provider>

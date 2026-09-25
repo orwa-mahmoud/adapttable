@@ -1,21 +1,15 @@
 /**
- * Live {@link TableFeatureHost}: `setup(host)` registrations. The host is
- * stored on the resolved props ({@link featureHostOf}) and provided to the
- * tree by {@link FeatureHostProvider}. Chrome that runs in the same render
- * receives it as an argument; it is not left on a module stack.
+ * Live {@link TableFeatureHost}: `setup(host)` registrations, collected by
+ * `@adapttable/core`'s `LiveFeatureHost`. The host is stored on the resolved
+ * props ({@link featureHostOf}) and provided to the tree by
+ * {@link FeatureHostProvider}. Chrome that runs in the same render receives
+ * it as an argument; it is not left on a module stack.
  */
+import { appendByKey, type FeatureHostState } from "@adapttable/core";
 import {
-  type Aggregator,
-  appendByKey,
-  type ColumnMenuActionFactory,
-  type Command,
-  type ContextMenuItemsFactory,
-  type CustomCellEditorRender,
-  type ExportWriter,
-  type FeatureHostState,
-  type FilterTypeExtend,
-  type FilterTypeSpec,
-} from "@adapttable/core";
+  createFeatureHost,
+  disposeFeatureHost,
+} from "@adapttable/core/binding";
 import { useLayoutEffect, useRef } from "react";
 
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
@@ -25,62 +19,8 @@ import {
   getAppliedFeatures,
   rememberAppliedFeatures,
   type TableFeature,
-  type TableFeatureHost,
 } from "./tableFeature";
 
-class LiveFeatureHost<TRow = unknown>
-  implements TableFeatureHost<TRow>, FeatureHostState<TRow>
-{
-  readonly filterTypes: FilterTypeSpec[] = [];
-  readonly filterExtends: FilterTypeExtend[] = [];
-  readonly editors = new Map<string, CustomCellEditorRender>();
-  readonly aggregators = new Map<string, Aggregator>();
-  readonly writers: ExportWriter[] = [];
-  readonly columnMenuActions: ColumnMenuActionFactory<TRow>[] = [];
-  readonly panels: SidePanelEntry[] = [];
-  readonly commands: Command[] = [];
-  readonly contextMenuItems: ContextMenuItemsFactory<TRow>[] = [];
-  private readonly disposers: (() => void)[] = [];
-  private disposed = false;
-
-  onDispose(cleanup: () => void): void {
-    this.disposers.push(cleanup);
-  }
-  registerFilterType(spec: FilterTypeSpec): void {
-    this.filterTypes.push(spec);
-  }
-  extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void {
-    this.filterExtends.push({ type, patch });
-  }
-  registerEditor(type: string, render: CustomCellEditorRender): void {
-    this.editors.set(type, render);
-  }
-  registerAggregator(name: string, aggregator: Aggregator): void {
-    this.aggregators.set(name, aggregator);
-  }
-  registerWriter(writer: ExportWriter): void {
-    this.writers.push(writer);
-  }
-  registerColumnMenuAction(factory: ColumnMenuActionFactory<TRow>): void {
-    this.columnMenuActions.push(factory);
-  }
-  registerPanel(panel: SidePanelEntry): void {
-    this.panels.push(panel);
-  }
-  registerCommand(command: Command): void {
-    this.commands.push(command);
-  }
-  registerContextMenuItems(items: ContextMenuItemsFactory<TRow>): void {
-    this.contextMenuItems.push(items);
-  }
-  dispose(): void {
-    if (this.disposed) return;
-    this.disposed = true;
-    for (const cleanup of this.disposers) cleanup();
-  }
-}
-
-const EMPTY_HOST: FeatureHostState = new LiveFeatureHost();
 const hostOf = new WeakMap<object, FeatureHostState>();
 
 function sameFeatures(
@@ -93,18 +33,6 @@ function sameFeatures(
     if (left[i] !== right[i]) return false;
   }
   return true;
-}
-
-function createHost(
-  list: readonly TableFeature[] | undefined
-): FeatureHostState {
-  if (!list?.some((feature) => feature.setup != null)) return EMPTY_HOST;
-  const host = new LiveFeatureHost();
-  for (const feature of list) {
-    const extra = feature.setup?.(host);
-    if (extra) host.onDispose(extra);
-  }
-  return host;
 }
 
 function overlayPanels<P extends object>(props: P, host: FeatureHostState): P {
@@ -159,7 +87,7 @@ export function useTableFeatures<P extends object>(
   } else if (cache.current && sameFeatures(cache.current.list, list)) {
     host = cache.current.host;
   } else {
-    host = hostOf.get(applied) ?? createHost(list);
+    host = hostOf.get(applied) ?? createFeatureHost<SidePanelEntry>(list);
     cache.current = { list, host };
   }
 
@@ -172,9 +100,7 @@ export function useTableFeatures<P extends object>(
   }
 
   useLayoutEffect(() => {
-    return () => {
-      if (host !== EMPTY_HOST) (host as LiveFeatureHost).dispose();
-    };
+    return () => disposeFeatureHost(host);
   }, [host]);
 
   return props;

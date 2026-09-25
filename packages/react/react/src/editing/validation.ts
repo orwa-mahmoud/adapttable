@@ -19,47 +19,20 @@
  * busy rather than blocking the keystroke, and a newer draft supersedes an older
  * check — a stale answer must never mark a value the reader has already changed.
  */
+import type {
+  CellValidator,
+  RowValidator,
+  ValidationTarget,
+} from "@adapttable/core";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 
-/**
- * Validate one edited value. Return a message to reject it, nothing to allow.
- *
- * @public
- */
-export type CellValidator<TRow> = (
-  value: unknown,
-  row: TRow
-) => string | undefined | Promise<string | undefined>;
-
-/**
- * Validate the row an edit would produce.
- *
- * Return a message for a row-level problem, a map of column key → message to
- * mark individual cells, or nothing to allow the commit.
- *
- * @public
- */
-export type RowValidator<TRow> = (
-  row: TRow
-) =>
-  | string
-  | Record<string, string>
-  | undefined
-  | Promise<string | Record<string, string> | undefined>;
-
-/**
- * A cell address, as the editing state spells it.
- *
- * @public
- */
-export interface ValidationTarget {
-  /** Identity of the row. */
-  rowId: string;
-  /** Key of the column. */
-  columnKey: string;
-}
+export type {
+  CellValidator,
+  RowValidator,
+  ValidationTarget,
+} from "@adapttable/core";
 
 /** What {@link useEditValidation} needs. */
 export interface UseEditValidationOptions<TRow> {

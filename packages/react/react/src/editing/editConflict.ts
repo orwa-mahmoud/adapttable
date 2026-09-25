@@ -8,83 +8,24 @@
 import {
   devWarn,
   type EditableColumnLike,
+  type EditConflict,
+  type EditConflictChange,
+  type EditConflictChoice,
+  type EditConflictHandler,
+  type EditConflictPolicy,
   readEditableCellValue,
 } from "@adapttable/core";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 
-/**
- * How an unhandled conflict is resolved.
- *
- * @public
- */
-export type EditConflictPolicy = "keep" | "take" | "ask";
-
-/**
- * The host's choice, when it makes one.
- *
- * @public
- */
-export type EditConflictChoice = "keep" | "take";
-
-/**
- * One field that moved underneath an open editor.
- *
- * @public
- */
-export interface EditConflictChange {
-  /** The column whose stored value moved. */
-  readonly columnKey: string;
-  /** What it read when the editor opened. */
-  readonly previous: string;
-  /** What it reads now. */
-  readonly incoming: string;
-}
-
-/**
- * One conflict. `row` is what just arrived; `previous` is the snapshot the
- * editor opened against (or last accepted).
- *
- * @public
- */
-export interface EditConflict<TRow> {
-  /**
-   * What the reader has open: one cell, or a whole row edited as one unit.
-   * A row conflict names no column — every field in the form is affected.
-   */
-  unit: "cell" | "row";
-  /** The incoming row. */
-  row: TRow;
-  /** The row as it was when the editor opened (or last accepted). */
-  previous: TRow;
-  /** Its stable id. */
-  rowId: string;
-  /** The column being edited. */
-  columnKey: string;
-  /** What the reader has typed. */
-  draft: string;
-  /** The incoming cell value. */
-  incomingValue: string;
-  /** The cell value the editor opened against. */
-  previousValue: string;
-  /**
-   * Every editable field that moved, so a notice can say what arrived rather
-   * than only that something did. A cell conflict names its one field here
-   * too; a row conflict lists them all, and is empty when `rowVersion` says
-   * the row moved without any field the reader can see changing.
-   */
-  changes: readonly EditConflictChange[];
-}
-
-/**
- * What a host returns from {@link EditConflictHandler}. `void` defers to policy.
- *
- * @public
- */
-export type EditConflictHandler<TRow> = (
-  conflict: EditConflict<TRow>
-) => EditConflictChoice | void;
+export type {
+  EditConflict,
+  EditConflictChange,
+  EditConflictChoice,
+  EditConflictHandler,
+  EditConflictPolicy,
+} from "@adapttable/core";
 
 /**
  * Headless conflict state for the active editor.

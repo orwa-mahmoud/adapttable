@@ -6,65 +6,22 @@
  * able to change whether a commit lands: the table already decided, and the
  * events only report what happened.
  */
-import { devWarn } from "@adapttable/core";
+import {
+  devWarn,
+  type EditEvent,
+  type EditEventHandler,
+  type EditLifecycle,
+} from "@adapttable/core";
 import { useMemo } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 
-/**
- * Which commit unit produced an event.
- *
- * @public
- */
-export type EditUnit = "cell" | "row" | "batch";
-
-/**
- * One lifecycle event. `columnKey` is the edited field for a cell, and empty
- * for a row or batch whose payload is the whole patch (or list of patches).
- *
- * @public
- */
-export interface EditEvent<TRow> {
-  /** The row as it was when the gesture started. */
-  row: TRow;
-  /** Its stable id. */
-  rowId: string;
-  /** The column, or `""` when the unit is the whole row or a batch. */
-  columnKey: string;
-  /** What the reader arrived at — the parsed value, the patch, or the edits. */
-  value: unknown;
-  /** What was there before. */
-  previousValue: unknown;
-  /** Which commit unit fired this. */
-  unit: EditUnit;
-  /** Why a commit was refused, or why a save rejected. */
-  error?: string;
-}
-
-/**
- * A host callback that observes one kind of event.
- *
- * @public
- */
-export type EditEventHandler<TRow> = (event: EditEvent<TRow>) => void;
-
-/**
- * The five observers a host may wire. All optional, all inert when omitted.
- *
- * @public
- */
-export interface EditLifecycle<TRow> {
-  /** An editor opened. */
-  onEditStart?: EditEventHandler<TRow>;
-  /** The reader threw the draft away. */
-  onEditCancel?: EditEventHandler<TRow>;
-  /** The host received the value. */
-  onEditCommit?: EditEventHandler<TRow>;
-  /** A validator refused the value; the editor stayed open. */
-  onValidationFail?: EditEventHandler<TRow>;
-  /** A save promise rejected. */
-  onEditError?: EditEventHandler<TRow>;
-}
+export type {
+  EditEvent,
+  EditEventHandler,
+  EditLifecycle,
+  EditUnit,
+} from "@adapttable/core";
 
 /**
  * Call an observer without letting it own the outcome. A throw is reported

@@ -8,9 +8,6 @@
  */
 import {
   type CellRange,
-  type ColumnMenuLabels,
-  type ColumnMenuSlotProps,
-  type Direction,
   type ExportContext,
   type ExportCsvOptions,
   type FeatureHostState,
@@ -19,6 +16,13 @@ import {
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
+import {
+  COLUMN_HEADER_RENAME as NEUTRAL_COLUMN_HEADER_RENAME,
+  type ColumnHeaderRenameSlotProps as NeutralColumnHeaderRenameSlotProps,
+  FILTER_DRAWER as NEUTRAL_FILTER_DRAWER,
+  FILTER_POPOVER as NEUTRAL_FILTER_POPOVER,
+  type FilterOverlaySlotProps as NeutralFilterOverlaySlotProps,
+} from "@adapttable/core/binding";
 import type { ReactNode, RefObject } from "react";
 
 import type { CommandPaletteChromeProps } from "../actions/CommandPaletteChrome";
@@ -42,7 +46,6 @@ import type {
 } from "../export/useExportHandler";
 import type { FiltersFormSlotProps } from "../filters/filterForm";
 import type { FilterHeaderControlProps } from "../filters/FilterHeaderRow";
-import type { ActiveFilterChipsSlotProps } from "../filters/useActiveFilterChips";
 import type { FindBarProps } from "../find/FindBar";
 import type {
   FindInTableState,
@@ -70,7 +73,59 @@ import type { UseSavedViewsOptions } from "../url/useSavedViews";
 import type { BulkBarChromeProps, TableChrome } from "../useTableChrome";
 import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import type { KeyedVirtualization } from "../virtual/useTableVirtualization";
-import { featureSlotKey } from "./providers";
+import { type FeatureSlotKey, featureSlotKey } from "./providers";
+
+export {
+  ACTIVE_FILTER_CHIPS,
+  COLUMN_MENU,
+  EXPAND_TOGGLE,
+  type ExpandToggleSlotProps,
+  ROW_REORDER_ANNOUNCER,
+} from "@adapttable/core/binding";
+
+/**
+ * Props for a kit-owned direct column-name editor in a semantic header —
+ * `@adapttable/core`'s `ColumnHeaderRenameSlotProps` holding React nodes.
+ *
+ * @public
+ */
+export type ColumnHeaderRenameSlotProps =
+  NeutralColumnHeaderRenameSlotProps<ReactNode>;
+
+/**
+ * Direct header entry point supplied by the optional Columns-menu feature.
+ *
+ * The adapter root renders only this inert slot boundary. The kit input and its
+ * rename controller enter the graph when the host imports `columnMenu()`.
+ *
+ * @public
+ */
+export const COLUMN_HEADER_RENAME: FeatureSlotKey<ColumnHeaderRenameSlotProps> =
+  NEUTRAL_COLUMN_HEADER_RENAME;
+
+/**
+ * Drawer or popover chrome around the filters form — `@adapttable/core`'s
+ * `FilterOverlaySlotProps` holding React nodes.
+ *
+ * @public
+ */
+export type FilterOverlaySlotProps = NeutralFilterOverlaySlotProps<ReactNode>;
+
+/**
+ * The slide-in filters drawer.
+ *
+ * @public
+ */
+export const FILTER_DRAWER: FeatureSlotKey<FilterOverlaySlotProps> =
+  NEUTRAL_FILTER_DRAWER;
+
+/**
+ * The anchored filters popover.
+ *
+ * @public
+ */
+export const FILTER_POPOVER: FeatureSlotKey<FilterOverlaySlotProps> =
+  NEUTRAL_FILTER_POPOVER;
 
 /**
  * The status strip, and the selection figures it hosts.
@@ -158,53 +213,6 @@ export const SIDE_PANEL = featureSlotKey<Omit<SidePanelChromeProps, "slots">>(
 );
 
 /**
- * The Columns menu in the toolbar.
- *
- * The row type is erased to `never` because a slot key is one module-level
- * constant serving every table. Callers pass that table's columns and layout;
- * the renderer only reads them.
- *
- * @public
- */
-export const COLUMN_MENU = featureSlotKey<ColumnMenuSlotProps<never>>(
-  "column-menu",
-  { single: true }
-);
-
-/**
- * Props for a kit-owned direct column-name editor in a semantic header.
- *
- * @public
- */
-export interface ColumnHeaderRenameSlotProps {
-  /** Stable column identity; renaming never changes this value. */
-  columnKey: string;
-  /** Current prose display name. */
-  name: string;
-  /** Pre-translated rename form labels and announcement builder. */
-  labels: ColumnMenuLabels;
-  /** Commit a trimmed, validated display name. */
-  onRenameColumn: (key: string, name: string) => void;
-  /** Existing caption/sort control, rendered by adapters that replace it while editing. */
-  children?: ReactNode;
-}
-
-/**
- * Direct header entry point supplied by the optional Columns-menu feature.
- *
- * The adapter root renders only this inert slot boundary. The kit input and its
- * rename controller enter the graph when the host imports `columnMenu()`.
- *
- * @public
- */
-export const COLUMN_HEADER_RENAME = featureSlotKey<ColumnHeaderRenameSlotProps>(
-  "column-header-rename",
-  {
-    single: true,
-  }
-);
-
-/**
  * The selection bar with bulk actions.
  *
  * @public
@@ -212,16 +220,6 @@ export const COLUMN_HEADER_RENAME = featureSlotKey<ColumnHeaderRenameSlotProps>(
 export const BULK_BAR = featureSlotKey<BulkBarChromeProps>("bulk-bar", {
   single: true,
 });
-
-/**
- * Removable chips for the active filters.
- *
- * @public
- */
-export const ACTIVE_FILTER_CHIPS = featureSlotKey<ActiveFilterChipsSlotProps>(
-  "active-filter-chips",
-  { single: true }
-);
 
 /**
  * The filters panel body (tree builder + optional simple fields).
@@ -338,54 +336,6 @@ export interface SavedViewsSlotProps {
 export const SAVED_VIEWS = featureSlotKey<SavedViewsSlotProps>("saved-views", {
   single: true,
 });
-
-/**
- * Drawer or popover chrome around the filters form.
- *
- * @public
- */
-export interface FilterOverlaySlotProps {
-  /** Whether the overlay is showing. */
-  open: boolean;
-  /** Dismiss the overlay. */
-  onClose: () => void;
-  /** The filter fields to render inside. */
-  filters: ReactNode;
-  /** How many filters are currently set. */
-  activeFilterCount: number;
-  /** Clears every active filter. */
-  onClearFilters: () => void;
-  /** Resolved labels. */
-  labels: Required<TableLabels>;
-  /** Writing direction. */
-  dir?: Direction;
-  /** The Filters button, for the popover anchor. */
-  anchorEl?: HTMLElement | null;
-  /** Kit toolbars that wrap the trigger inside the popover pass it here. */
-  children?: ReactNode;
-  /** Kit accent token some overlays paint with. */
-  accentColor?: string;
-}
-
-/**
- * The slide-in filters drawer.
- *
- * @public
- */
-export const FILTER_DRAWER = featureSlotKey<FilterOverlaySlotProps>(
-  "filter-drawer",
-  { single: true }
-);
-
-/**
- * The anchored filters popover.
- *
- * @public
- */
-export const FILTER_POPOVER = featureSlotKey<FilterOverlaySlotProps>(
-  "filter-popover",
-  { single: true }
-);
 
 /**
  * The command palette plus the hook that arms it.
@@ -749,15 +699,6 @@ export const GRID_FOCUS_ANNOUNCER = featureSlotKey<{
 }>("grid-focus-announcer", { single: true });
 
 /**
- * Live region for row reorder.
- *
- * @public
- */
-export const ROW_REORDER_ANNOUNCER = featureSlotKey<{
-  announcement: string;
-}>("row-reorder-announcer", { single: true });
-
-/**
  * Per-column header filter trigger.
  *
  * @public
@@ -833,39 +774,6 @@ export interface FillHandleCellSlotProps {
  */
 export const FILL_HANDLE =
   featureSlotKey<FillHandleCellSlotProps>("fill-handle");
-
-/**
- * Row-detail / tree expand chevron.
- *
- * @public
- */
-export interface ExpandToggleSlotProps {
-  /** Row or node id this toggle controls. */
-  id: string;
-  /** Whether the row is expanded. */
-  expanded: boolean;
-  /** Flip expansion for an id. */
-  onToggle: (id: string) => void;
-  /** Writing direction. */
-  dir?: Direction;
-  /** Accessible expand label. */
-  expandLabel: string;
-  /** Accessible collapse label. */
-  collapseLabel: string;
-}
-
-/**
- * The expand/collapse control.
- *
- * `rowDetail` and `nestedTable` both fill it, and a row opens one panel, so
- * the slot is single: composing both draws one control per row.
- *
- * @public
- */
-export const EXPAND_TOGGLE = featureSlotKey<ExpandToggleSlotProps>(
-  "expand-toggle",
-  { single: true }
-);
 
 /**
  * Toolbar extras (export, undo, print, density, fullscreen).

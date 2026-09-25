@@ -149,9 +149,24 @@ export { columnText } from "./columns/columnText";
 export { computed, type ComputedColumnSpec } from "./columns/computed";
 export { localizedColumnPath } from "./columns/resolveColumns";
 export type {
+  CellValidator,
+  EditConflict,
+  EditConflictChange,
+  EditConflictChoice,
+  EditConflictHandler,
+  EditConflictPolicy,
+  EditEvent,
+  EditEventHandler,
+  EditLifecycle,
+  EditUnit,
+  RowValidator,
+  ValidationTarget,
+} from "./editing/editContracts";
+export type {
   FeatureRegistration,
   NeutralFeatureHost,
 } from "./features/featureRegistration";
+export type { ActiveFilterChip } from "./filters/activeFilterChips";
 export {
   computeFilterFacets,
   type FacetCounts,
@@ -373,6 +388,13 @@ export {
 } from "./filters/filterFormModel";
 export type { CssProperties } from "./style/cssProperties";
 export {
+  createHistoryAdapter,
+  createMemoryAdapter,
+  getHistoryAdapter,
+  resetHistoryAdapter,
+  resolveUrlAdapter,
+} from "./url/historyAdapter";
+export {
   routerUrlAdapter,
   type RouterUrlAdapterOptions,
 } from "./url/routerAdapter";
@@ -389,6 +411,11 @@ export type {
 } from "./source/capabilities";
 export { capabilityReason, sourceCapabilities } from "./source/capabilities";
 export type { TableSource } from "./source/TableSource";
+export type {
+  SummaryRowFn,
+  TableOptions,
+  TableToolbarSlots,
+} from "./tableOptions";
 export type { TableStateMutators } from "./tableStateMutators";
 /* ── Filters / chips ───────────────────────────────────────────────── */
 export {
