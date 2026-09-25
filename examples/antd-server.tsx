@@ -1,4 +1,5 @@
 import { DataTable, type TableQuery } from "@adapttable/antd";
+import { filters } from "@adapttable/antd/filters";
 import { ConfigProvider } from "antd";
 import { useState } from "react";
 
@@ -80,6 +81,8 @@ export function AntdServerExample() {
           },
         ]}
         rowKey={(r) => r.id}
+        // Composes the Filters control that column `filter` declarations use.
+        features={[filters([])]}
       />
     </ConfigProvider>
   );

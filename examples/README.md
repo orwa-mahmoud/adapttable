@@ -1,8 +1,9 @@
 # Examples
 
 Drop-in example components for each AdaptTable adapter. Each file is a
-complete, copy-pasteable React component — wrap it in your kit's provider
-(`MantineProvider`, `ThemeProvider`, `ChakraProvider`) and render it.
+complete, copy-pasteable React component that renders its kit's provider
+(`MantineProvider`, `ChakraProvider`, `ConfigProvider`, Radix `Theme`) where
+the kit needs one — render it as it is.
 
 | File                                                       | Adapter                | Shows                                            |
 | ---------------------------------------------------------- | ---------------------- | ------------------------------------------------ |
