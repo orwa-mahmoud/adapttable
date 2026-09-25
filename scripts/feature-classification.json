@@ -613,6 +613,7 @@
       "core/src/columns/resolveColumns.ts",
       "core/src/columns/responsiveColumns.ts",
       "core/src/columns/visibleColumns.ts",
+      "core/src/conformance/tableConformance.ts",
       "core/src/constants.ts",
       "core/src/display.ts",
       "core/src/editing/editContracts.ts",
