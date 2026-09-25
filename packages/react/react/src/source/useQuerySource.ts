@@ -1,17 +1,23 @@
 import {
   applyQuerySupport,
+  clampedPage,
   type ColumnMetadata,
+  type CursorTrail,
+  effectiveQueryAggregates,
+  EMPTY_CURSOR_TRAIL,
   type FacetMap,
+  type InfiniteQueryLike,
+  type PageSelector,
   type PaginatedResponse,
   type PaginationMode,
-  parseGroupBy,
   type QueryAggregate,
   queryAggregateOps,
+  queryGroupBy,
   type QuerySupport,
+  recordCursor,
   stableKey,
   type TableQueryParams,
   type TableSource,
-  withQueryAggregateOverrides,
 } from "@adapttable/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -22,55 +28,7 @@ import {
 } from "../url/useTableUrlState";
 import { useAggregateOpsForResponse } from "./aggregateOpsForResponse";
 
-/**
- * The minimal shape `useQuerySource` reads from a `useInfiniteQuery`
- * result. Declared structurally so `@tanstack/react-query` stays an
- * optional, type-only peer dependency (no runtime import).
- *
- * @typeParam TPage - The page type returned by each fetch.
- *
- * @public
- */
-export interface InfiniteQueryLike<TPage> {
-  /** The pages fetched so far, absent before the first one lands. */
-  data: { pages: TPage[]; pageParams: unknown[] } | undefined;
-  /** Whether the first page is still in flight. */
-  isLoading: boolean;
-  /** Whether any fetch is in flight, first page or not. */
-  isFetching: boolean;
-  /** Whether the next page in particular is in flight. */
-  isFetchingNextPage: boolean;
-  /** Whether another page exists to fetch. */
-  hasNextPage: boolean;
-  /** Fetches the next page. */
-  fetchNextPage: () => Promise<unknown> | void;
-  /** Re-fetches from the first page. */
-  refetch: () => Promise<unknown> | void;
-  /** The failure from the last fetch, or null. */
-  error: Error | null;
-  /**
-   * When the last SUCCESSFUL response landed, as a monotonic timestamp —
-   * TanStack's own `dataUpdatedAt`. Optional so a hand-rolled query object
-   * still satisfies this shape; with it, a column formatting a group's
-   * subtotal can be told which operation produced the rows on screen even
-   * when a later request failed, was cancelled, or is still travelling.
-   */
-  dataUpdatedAt?: number;
-}
-
-/**
- * Project a fetched page to its rows (and optional total).
- *
- * @public
- */
-export type PageSelector<TRow, TPage> = (page: TPage) => {
-  /** The rows this page carries. */
-  rows: readonly TRow[];
-  /** Rows in the whole matching set, when the page reports it. */
-  total?: number;
-  /** Distinct-value counts, when the endpoint answered them. */
-  facets?: FacetMap;
-};
+export type { InfiniteQueryLike, PageSelector } from "@adapttable/core";
 
 /**
  * Options for {@link useQuerySource}.
@@ -230,32 +188,17 @@ export function useQuerySource<
     groupAggregateOverrides,
     extra,
   } = state;
-  const queryAggregationSource = useMemo(() => {
-    if (supports?.aggregates || supports?.aggregateOperations) {
-      return {
-        grouping: "server" as const,
-        aggregateOperations: supports.aggregateOperations,
-      };
-    }
-    if (supports?.grouping) {
-      return { grouping: "server" as const, aggregateOperations: [] };
-    }
-    return undefined;
-  }, [supports]);
   const effectiveAggregates = useMemo(
     () =>
-      withQueryAggregateOverrides(
+      effectiveQueryAggregates(
         aggregates,
         groupAggregateOverrides,
         columns,
-        queryAggregationSource
+        supports
       ),
-    [aggregates, columns, groupAggregateOverrides, queryAggregationSource]
+    [aggregates, columns, groupAggregateOverrides, supports]
   );
-  const effectiveGroupBy = useMemo(() => {
-    const keys = parseGroupBy(groupBy);
-    return keys.length > 0 ? keys : undefined;
-  }, [groupBy]);
+  const effectiveGroupBy = useMemo(() => queryGroupBy(groupBy), [groupBy]);
   // What the request asks for, and what the answer on screen was asked for —
   // the same thing only while nothing is in flight.
   const requestedOps = useMemo(
@@ -272,9 +215,7 @@ export function useQuerySource<
   // and `cursors[n]` opens page n+1. The trail is what lets the user page BACK
   // through what they have already seen — a single "next cursor" cannot.
   const cursorMode = supports?.cursor === true;
-  const [cursors, setCursors] = useState<readonly (string | undefined)[]>([
-    undefined,
-  ]);
+  const [cursors, setCursors] = useState<CursorTrail>(EMPTY_CURSOR_TRAIL);
   const cursor = cursorMode ? cursors[page - 1] : undefined;
 
   const params = useMemo(() => {
@@ -337,12 +278,7 @@ export function useQuerySource<
   const token = cursorMode && lastPage ? nextCursor?.(lastPage) : undefined;
   useEffect(() => {
     if (!cursorMode || token === undefined || token === null) return;
-    setCursors((prev) => {
-      if (prev[page] === token) return prev;
-      const next = [...prev];
-      next[page] = token;
-      return next;
-    });
+    setCursors((prev) => recordCursor(prev, page, token));
   }, [cursorMode, token, page]);
 
   // A query whose cursor trail is stale must start over rather than page into
@@ -353,7 +289,7 @@ export function useQuerySource<
   useEffect(() => {
     if (!cursorMode || previousTrailKey.current === trailKey) return;
     previousTrailKey.current = trailKey;
-    setCursors([undefined]);
+    setCursors(EMPTY_CURSOR_TRAIL);
   }, [cursorMode, trailKey]);
 
   // Route the selector through a ref so the rows memo only refires when
@@ -413,9 +349,9 @@ export function useQuerySource<
   // Clamp out-of-range pages (hand-edited / stale shared links) once the
   // total is known and nothing is in flight.
   useEffect(() => {
-    if (!paged || query.isLoading || query.isFetching || total <= 0) return;
-    const lastPage = Math.max(1, Math.ceil(total / Math.max(limit, 1)));
-    if (page > lastPage) state.setPage(lastPage);
+    if (!paged || query.isLoading || query.isFetching) return;
+    const lastPage = clampedPage(page, limit, total);
+    if (lastPage !== undefined) state.setPage(lastPage);
   }, [paged, query.isLoading, query.isFetching, total, limit, page, state]);
 
   // Query libraries hand back a FRESH result object every render — latch

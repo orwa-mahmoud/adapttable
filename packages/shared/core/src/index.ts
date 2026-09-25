@@ -431,6 +431,36 @@ export type {
   TotalCountCapability,
 } from "./source/capabilities";
 export { capabilityReason, sourceCapabilities } from "./source/capabilities";
+export {
+  appendBaseKey,
+  appendedRows,
+  type AppendStash,
+  buildTableQuery,
+  canRequestCursorPage,
+  clampedPage,
+  createFilterOptionsLoader,
+  createFirstLoadLatch,
+  createQueryEmitter,
+  cursorHasMore,
+  type CursorTrail,
+  type DataTier,
+  effectiveQueryAggregates,
+  EMPTY_CURSOR_TRAIL,
+  type FilterOptionsLoader,
+  type FirstLoadLatch,
+  type InfiniteQueryLike,
+  type LoadedFilterOption,
+  type PageSelector,
+  queryAggregationSource,
+  type QueryEmitter,
+  queryGroupBy,
+  recordCursor,
+  resolveDataTier,
+  staleAppendStash,
+  type TableQueryInput,
+  type TableQueryListener,
+  warnDataTierMisuse,
+} from "./source/dataTier";
 export type { TableSource } from "./source/TableSource";
 export type {
   SummaryRowFn,

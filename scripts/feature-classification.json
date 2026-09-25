@@ -692,6 +692,7 @@
       "core/src/sort/cycleSort.ts",
       "core/src/sort/sortByOptions.ts",
       "core/src/source/TableSource.ts",
+      "core/src/source/dataTier.ts",
       "core/src/source/queryContract.ts",
       "core/src/source/queryKey.ts",
       "core/src/source/tableQuery.ts",

@@ -1,5 +1,6 @@
 import {
-  devWarn,
+  createFilterOptionsLoader,
+  createQueryEmitter,
   type ExtraFilters,
   type FacetMap,
   type FeatureHostState,
@@ -9,12 +10,15 @@ import {
   type FilterTypeRegistry,
   type FilterTypeSpec,
   isDeclarativeFilters,
+  type LoadedFilterOption,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
+  resolveDataTier,
   type SortableValue,
   stableKey,
   type TableSource,
+  warnDataTierMisuse,
 } from "@adapttable/core";
 import {
   type ReactNode,
@@ -149,8 +153,6 @@ export interface UseTableDataResult<TRow> {
   runtime: FilterRuntime<TRow>;
 }
 
-type DataTier = "source" | "server" | "frontend";
-
 /**
  * The consolidated query, and the abort signal for the request it starts.
  *
@@ -201,39 +203,6 @@ export type DataModeProps<_TRow = unknown> = {
     }
 );
 
-function resolveTier(
-  source: unknown,
-  mode: "frontend" | "server" | undefined,
-  onQueryChange: unknown
-): DataTier {
-  if (source) return "source";
-  if (mode) return mode;
-  return onQueryChange ? "server" : "frontend";
-}
-
-function warnTierMisuse(
-  source: unknown,
-  mode: "frontend" | "server" | undefined,
-  data: unknown,
-  onQueryChange: unknown
-): void {
-  if (source && mode) {
-    devWarn(
-      "`mode` is ignored when `source` is provided — the prebuilt source wins. Pass one data tier."
-    );
-  }
-  if (source && (data || onQueryChange)) {
-    devWarn(
-      "both `source` and `data`/`onQueryChange` were provided — using `source`. Pass one data tier."
-    );
-  }
-  if (!source && !data) {
-    devWarn(
-      "no data tier provided — pass `data` (frontend), `data` + `onQueryChange` (server) or `source`."
-    );
-  }
-}
-
 function useQueryNotification<TRow>(
   source: TableSource<TRow>,
   handler: TableQueryHandler | undefined
@@ -256,67 +225,29 @@ function useQueryNotification<TRow>(
   handlerRef.current = handler;
   const queryRef = useRef(query);
   queryRef.current = query;
-  const lastKeyRef = useRef(queryKey);
-  const controllerRef = useRef<AbortController | null>(null);
-  useEffect(() => {
-    if (lastKeyRef.current === queryKey) return;
-    lastKeyRef.current = queryKey;
-    const notify = handlerRef.current;
-    if (!notify) return;
-    controllerRef.current?.abort();
-    const controller = new AbortController();
-    controllerRef.current = controller;
-    void notify(queryRef.current, { signal: controller.signal, key: queryKey });
-    return () => controller.abort();
-  }, [queryKey]);
+  // The key the table mounted with is already seen: a notification is a
+  // CHANGE, and the mount is not one.
+  const [emitter] = useState(() => createQueryEmitter(queryKey));
+  useEffect(
+    () => emitter.emitIfChanged(handlerRef.current, queryRef.current, queryKey),
+    [emitter, queryKey]
+  );
 }
 
 /**
- * Shared data-tier hook. The filter engine is injected so the DataTable
- * root can omit it; headless callers pass the real implementation.
- *
- * @internal
- */
-interface LoadedOption {
-  value: string;
-  label: string;
-}
-
-/**
- * Resolve every option list a filter def loads on its own, once each.
- *
- * A def whose `options` is a function names a list the host fetches — a set of
- * assignees, the countries in use. The result is cached by key for the life of
- * the table, so opening the Filters form twice does not fetch twice, and a def
- * that appears later is picked up on the render that introduces it.
+ * Resolve every option list a filter def loads on its own, once each, for
+ * the life of the table — `@adapttable/core`'s filter-options loader.
  */
 function useAsyncFilterOptions(
   enabled: boolean,
   defs: readonly FilterDef<never>[],
-  onLoaded: (key: string, options: readonly LoadedOption[]) => void
+  onLoaded: (key: string, options: readonly LoadedFilterOption[]) => void
 ): void {
-  const awaitedRef = useRef(new Set<string>());
+  const [loader] = useState(createFilterOptionsLoader);
   useEffect(() => {
     if (!enabled) return;
-    let alive = true;
-    for (const def of defs) {
-      if (typeof def.options !== "function") continue;
-      if (awaitedRef.current.has(def.key)) continue;
-      awaitedRef.current.add(def.key);
-      const key = def.key;
-      void def.options().then(
-        (next) => {
-          if (alive) onLoaded(key, next);
-        },
-        () => {
-          // The form's useFilterOptions surfaces the failure.
-        }
-      );
-    }
-    return () => {
-      alive = false;
-    };
-  }, [enabled, defs, onLoaded]);
+    return loader.load(defs, onLoaded);
+  }, [loader, enabled, defs, onLoaded]);
 }
 
 /**
@@ -458,10 +389,10 @@ export function useTableDataWithEngine<TRow>(
     >()
   );
   const [loadedOptions, setLoadedOptions] = useState<
-    Record<string, readonly LoadedOption[]>
+    Record<string, readonly LoadedFilterOption[]>
   >({});
   const onOptionsLoaded = useCallback(
-    (key: string, next: readonly LoadedOption[]) => {
+    (key: string, next: readonly LoadedFilterOption[]) => {
       setLoadedOptions((prev) => ({ ...prev, [key]: next }));
     },
     []
@@ -492,8 +423,8 @@ export function useTableDataWithEngine<TRow>(
 
   useAsyncFilterOptions(engine !== undefined, runtime.defs, onOptionsLoaded);
 
-  const tier = resolveTier(source, mode, onQueryChange);
-  warnTierMisuse(source, mode, data, onQueryChange);
+  const tier = resolveDataTier(source, mode, onQueryChange);
+  warnDataTierMisuse(source, mode, data, onQueryChange);
 
   const combinedFilterFn = useMemo(
     () =>
