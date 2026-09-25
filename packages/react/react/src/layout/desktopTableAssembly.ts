@@ -848,10 +848,17 @@ function desktopSummaryRowDomProps<TRow>(args: {
     : args.rowReorder?.dropProps?.(args.index, args.row, args.windowStart);
   let selectedMark: string | undefined;
   if (!args.summary && args.selection?.isSelected(args.id)) selectedMark = "";
+  // The live selection is the one the row's checkbox toggles, so it is what
+  // the row announces; a table without selection announces nothing.
+  const ariaSelected =
+    args.summary || !args.selection
+      ? undefined
+      : args.selection.isSelected(args.id);
   let clickable: string | undefined;
   if (!args.summary && args.onRowClick) clickable = "";
   return {
     ...args.table.getRowProps(args.row, args.focusIndex),
+    "aria-selected": ariaSelected,
     ...args.gridFocus?.getRowPropsAt(args.focusIndex),
     ...rowClickProps(args.row, click, args.focusIndex),
     ...dropProps,

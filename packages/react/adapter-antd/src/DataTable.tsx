@@ -131,6 +131,7 @@ import {
   type CSSProperties,
   type HTMLAttributes,
   isValidElement,
+  type Key,
   type ReactElement,
   type ReactNode,
   type Ref,
@@ -303,6 +304,7 @@ type AntdRowHtmlAttrs = HTMLAttributes<HTMLElement> & {
   "data-row-pin"?: RowPinSide;
   "data-adapttable-part"?: string;
   "data-row-id"?: string;
+  "data-index"?: number;
   "data-stagger"?: string;
   "data-dirty"?: string;
   "data-collapsed"?: string;
@@ -382,6 +384,8 @@ function antdOnRow<TRow>(options: {
   rowStyle: ComposedProps<TRow>["rowStyle"];
   rowHeight: ComposedProps<TRow>["rowHeight"];
   labels: Required<TableLabels>;
+  /** The selected row keys, when rows are selectable. */
+  selectedRowKeys: readonly Key[] | undefined;
 }): AntdRowHtmlAttrs {
   const {
     record,
@@ -401,6 +405,7 @@ function antdOnRow<TRow>(options: {
     rowStyle,
     rowHeight,
     labels,
+    selectedRowKeys,
   } = options;
   const extraOrGroup = antdExtraOrGroupRowAttrs(record);
   if (extraOrGroup) return extraOrGroup;
@@ -463,6 +468,11 @@ function antdOnRow<TRow>(options: {
     // section through this same attribute and has to keep winning it.
     "data-adapttable-part": "row",
     "data-row-id": id,
+    // The rest of core's row identity, which the other kits spread: the row's
+    // index, and whether it is selected when rows are selectable.
+    "data-index": rowIndex,
+    "aria-selected":
+      selectedRowKeys === undefined ? undefined : selectedRowKeys.includes(id),
     ...pin,
     style: { ...visual, ...reorderStyle, ...pin.style },
     "data-stagger": "",
@@ -1429,6 +1439,7 @@ function DesktopTableBody<TRow>({
           rowStyle,
           rowHeight,
           labels,
+          selectedRowKeys: rowSelection?.selectedRowKeys,
         })
       }
       scroll={resolveScroll(
