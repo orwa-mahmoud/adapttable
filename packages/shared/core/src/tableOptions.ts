@@ -5,7 +5,7 @@
  * Every binding's `<DataTable>` props extend {@link TableOptions}, adding the
  * pieces that are its own — column definitions with renderers, the feature
  * array, a custom card. Options that carry rendered content take the
- * binding's render node as `TNode` (`ReactNode` in React), so one contract
+ * binding's render node as `TNode` (a React node in React), so one contract
  * serves every framework.
  */
 import type { ConfirmHandler } from "./actions/confirm";
@@ -40,7 +40,7 @@ import type {
  * are rendered, so their values are the binding's render node.
  *
  * @typeParam TRow - The row type.
- * @typeParam TNode - The binding's render node (`ReactNode` in React).
+ * @typeParam TNode - The binding's render node (a React node in React).
  *
  * @public
  */
@@ -57,7 +57,7 @@ export type SummaryRowFn<TRow, TNode = unknown> = (
  * put before everything or after everything without an adapter having to
  * know what the control is.
  *
- * @typeParam TNode - The binding's render node (`ReactNode` in React).
+ * @typeParam TNode - The binding's render node (a React node in React).
  *
  * @public
  */
@@ -76,7 +76,7 @@ export interface TableToolbarSlots<TNode = unknown> {
  * in one place.
  *
  * @typeParam TRow - The row type.
- * @typeParam TNode - The binding's render node (`ReactNode` in React).
+ * @typeParam TNode - The binding's render node (a React node in React).
  *
  * @public
  */

@@ -5,7 +5,7 @@
  *
  * Every binding composes features the same way, so the handles and the order
  * are part of the table, not of any one framework. What a slot is filled
- * WITH is the binding's render node — `ReactNode` in React — which is why
+ * WITH is the binding's render node — a React node in React — which is why
  * {@link FeatureRender} takes it as a type parameter.
  */
 import { devWarn } from "../utils/devWarn";
@@ -89,7 +89,7 @@ export function featureSlotKey<TProps>(
  * One feature's answer for one slot.
  *
  * @typeParam TProps - What the table computes for the slot.
- * @typeParam TNode - The binding's render node (`ReactNode` in React).
+ * @typeParam TNode - The binding's render node (a React node in React).
  *
  * @public
  */

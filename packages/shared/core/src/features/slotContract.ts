@@ -5,7 +5,7 @@
  * A slot's id and props are the contract between the table and every kit
  * that draws into it, in whichever framework: the table computes the props,
  * the kit answers with its own components. Props that carry rendered content
- * take the binding's render node as `TNode` (`ReactNode` in React); the keys
+ * take the binding's render node as `TNode` (a React node in React); the keys
  * declared here carry `unknown` there, and a binding re-declares a key with
  * its own node type when it needs the render callback typed.
  */
@@ -34,7 +34,7 @@ export const COLUMN_MENU = featureSlotKey<ColumnMenuSlotProps<never>>(
 /**
  * Props for a kit-owned direct column-name editor in a semantic header.
  *
- * @typeParam TNode - The binding's render node (`ReactNode` in React).
+ * @typeParam TNode - The binding's render node (a React node in React).
  *
  * @public
  */
@@ -77,7 +77,7 @@ export const ACTIVE_FILTER_CHIPS = featureSlotKey<ActiveFilterChipsSlotProps>(
 /**
  * Drawer or popover chrome around the filters form.
  *
- * @typeParam TNode - The binding's render node (`ReactNode` in React).
+ * @typeParam TNode - The binding's render node (a React node in React).
  *
  * @public
  */
