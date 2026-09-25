@@ -19,7 +19,7 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // `serve-showcase.mjs` builds and serves what the suite runs against, so a
 // change to it changes every result the suite can produce.
 const RELATED =
-  /^(packages\/|apps\/showcase\/|e2e\/|playwright\.config\.ts$|scripts\/serve-showcase\.mjs$|pnpm-lock\.yaml$)/;
+  /^(packages\/(shared|react)\/|apps\/showcase\/|e2e\/|playwright\.config\.ts$|scripts\/serve-showcase\.mjs$|pnpm-lock\.yaml$)/;
 
 /** @param {string} file */
 export function isE2eRelated(file) {

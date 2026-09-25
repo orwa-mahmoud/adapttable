@@ -4,11 +4,13 @@
  * drive this layer.
  */
 
+// The showcase, its e2e suite and the bench exercise the React packages, so
+// only the shared and React groups reach them.
 const PLAYWRIGHT =
-  /^(packages\/|apps\/showcase\/|e2e\/|playwright\.config\.ts$|pnpm-lock\.yaml$)/;
+  /^(packages\/(shared|react)\/|apps\/showcase\/|e2e\/|playwright\.config\.ts$|pnpm-lock\.yaml$)/;
 
 const BENCH =
-  /^(packages\/|apps\/showcase\/|scripts\/bench\.mjs$|pnpm-lock\.yaml$)/;
+  /^(packages\/(shared|react)\/|apps\/showcase\/|scripts\/bench\.mjs$|pnpm-lock\.yaml$)/;
 
 const PACKAGES =
   /^(packages\/|pnpm-lock\.yaml$|scripts\/consumer-harness\.mjs$)/;

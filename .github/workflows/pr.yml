@@ -191,11 +191,18 @@ jobs:
       matrix:
         name: [core, react, antd, mui, kits, tools]
     steps:
+      # Full history so turbo can diff against the base branch.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
       - name: Lint
         env:
           LANE: ${{ matrix.name }}
+          # Pull requests check only the packages the diff affects and their
+          # dependents; a push to main checks every package.
+          AFFECTED: ${{ github.event_name == 'pull_request' && '--affected' || '' }}
+          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
@@ -207,7 +214,7 @@ jobs:
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
           # 2-core runner: two packages at once, each lint is one process.
-          pnpm lint $f --concurrency=2
+          pnpm lint $f $AFFECTED --concurrency=2
 
   typescript:
     name: TypeScript
@@ -220,11 +227,18 @@ jobs:
       matrix:
         name: [core, react, antd, mui, kits, tools]
     steps:
+      # Full history so turbo can diff against the base branch.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
       - name: Typecheck
         env:
           LANE: ${{ matrix.name }}
+          # Pull requests check only the packages the diff affects and their
+          # dependents; a push to main checks every package.
+          AFFECTED: ${{ github.event_name == 'pull_request' && '--affected' || '' }}
+          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
@@ -235,7 +249,7 @@ jobs:
             tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/ai --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
-          pnpm typecheck $f
+          pnpm typecheck $f $AFFECTED
 
   lint:
     name: Lint
@@ -275,11 +289,18 @@ jobs:
           - name: base-ui · ai
           - name: radix · server · cli · i18n
     steps:
+      # Full history so turbo can diff against the base branch.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
       - name: Test with coverage
         env:
           LANE: ${{ matrix.name }}
+          # Pull requests check only the packages the diff affects and their
+          # dependents; a push to main checks every package.
+          AFFECTED: ${{ github.event_name == 'pull_request' && '--affected' || '' }}
+          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           case "$LANE" in
             antd) f="--filter=@adapttable/antd" ;;
@@ -296,7 +317,7 @@ jobs:
           # antd 85s, chakra 69s, mui 53s, react 52s, mantine 51s, base-ui
           # 46s, radix 45s, unstyled 40s, core 33s, shadcn 18s, ai 8s,
           # bootstrap 5s, server/cli/i18n ~1s each. antd alone sets the floor.
-          pnpm test:coverage $f --concurrency=2
+          pnpm test:coverage $f $AFFECTED --concurrency=2
 
   unit:
     name: Unit

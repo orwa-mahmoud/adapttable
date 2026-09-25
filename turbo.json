@@ -1,6 +1,16 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "stream",
+  "globalDependencies": [
+    ".nvmrc",
+    "eslint.config.mjs",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "scripts/vitest-workers.mjs",
+    "tsconfig.base.json",
+    "vitest.shared.ts"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

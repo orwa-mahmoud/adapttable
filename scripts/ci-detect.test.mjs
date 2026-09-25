@@ -83,6 +83,14 @@ describe("classify", () => {
     assert.equal(f.runKitsDocs, false);
   });
 
+  it("checks another framework's packages without the React showcase suite", () => {
+    const f = classify(["packages/vue/vue/src/index.ts"]);
+    assert.equal(f.runLint, true);
+    assert.equal(f.runUnit, true);
+    assert.equal(f.runPlaywright, false);
+    assert.equal(f.runBench, false);
+  });
+
   it("runs Playwright when only e2e specs change, not the packed harness", () => {
     const f = classify(["e2e/filtering-page.spec.ts"]);
     assert.equal(f.runPlaywright, true);
