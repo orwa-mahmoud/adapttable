@@ -1,14 +1,14 @@
-import { devWarn, safeLocalStorage, stableKey } from "@adapttable/core";
+import {
+  type LayoutStorage,
+  readStoredColumnLayout,
+  safeLocalStorage,
+  stableKey,
+} from "@adapttable/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { type ColumnLayoutState, EMPTY_COLUMN_LAYOUT } from "./useColumnLayout";
 
-/**
- * The subset of the Web `Storage` API the hook needs (injectable for tests).
- *
- * @public
- */
-export type LayoutStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+export type { LayoutStorage } from "@adapttable/core";
 
 /**
  * Options for {@link useColumnLayoutStorageState}.
@@ -34,90 +34,6 @@ export interface UseColumnLayoutStorageStateResult {
   layout: ColumnLayoutState;
   /** Persist a new layout. Wire to `onColumnLayoutChange`. */
   onLayoutChange: (next: ColumnLayoutState) => void;
-}
-
-/** Keep only string entries of a (possibly hostile) stored array. */
-function stringEntries(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((entry): entry is string => typeof entry === "string");
-}
-
-/** A non-null, non-array object — the only shape worth field-scanning. */
-function isPlainRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-/** Keep only valid pin sides of a (possibly hostile) stored record. */
-function sanitizePinned(value: unknown): Record<string, "start" | "end"> {
-  const pinned: Record<string, "start" | "end"> = {};
-  if (!isPlainRecord(value)) return pinned;
-  for (const [key, side] of Object.entries(value)) {
-    if (side === "start" || side === "end") pinned[key] = side;
-  }
-  return pinned;
-}
-
-/** Keep only finite positive widths of a (possibly hostile) stored record. */
-function sanitizeWidths(value: unknown): Record<string, number> {
-  const widths: Record<string, number> = {};
-  if (!isPlainRecord(value)) return widths;
-  for (const [key, px] of Object.entries(value)) {
-    if (typeof px === "number" && Number.isFinite(px) && px > 0) {
-      widths[key] = px;
-    }
-  }
-  return widths;
-}
-
-/** Keep only non-empty string names from a (possibly hostile) stored record. */
-function sanitizeNames(value: unknown): Record<string, string> {
-  const names: Record<string, string> = {};
-  if (!isPlainRecord(value)) return names;
-  for (const [key, name] of Object.entries(value)) {
-    if (typeof name === "string" && name.trim() !== "") {
-      names[key] = name.trim();
-    }
-  }
-  return names;
-}
-
-/**
- * Validate a parsed storage payload into a {@link ColumnLayoutState}.
- * Persisted data is external input — hand-edited or written by another
- * app version — so every field is checked; anything malformed is dropped
- * rather than crashing the table. Returns `null` when the payload is not
- * even an object.
- */
-function sanitizeStoredLayout(parsed: unknown): ColumnLayoutState | null {
-  if (!isPlainRecord(parsed)) return null;
-  const names = sanitizeNames(parsed.names);
-  return {
-    hidden: stringEntries(parsed.hidden),
-    order: stringEntries(parsed.order),
-    pinned: sanitizePinned(parsed.pinned),
-    widths: sanitizeWidths(parsed.widths),
-    ...(Object.keys(names).length > 0 ? { names } : {}),
-  };
-}
-
-function readStored(
-  storage: LayoutStorage | undefined,
-  storageKey: string
-): ColumnLayoutState | null {
-  try {
-    const raw = storage?.getItem(storageKey);
-    if (!raw) return null;
-    const sanitized = sanitizeStoredLayout(JSON.parse(raw));
-    if (sanitized === null) {
-      devWarn(
-        `stored column layout under "${storageKey}" is not a layout object — ignoring it.`
-      );
-    }
-    return sanitized;
-  } catch {
-    // Corrupted/inaccessible storage (private mode, quota) → just fall back.
-    return null;
-  }
 }
 
 /**
@@ -155,7 +71,7 @@ export function useColumnLayoutStorageState(
   // the server's whenever a layout was saved (hydration mismatch).
   const [layout, setLayout] = useState<ColumnLayoutState>(fallback);
   useEffect(() => {
-    const stored = readStored(storage, storageKey);
+    const stored = readStoredColumnLayout(storage, storageKey);
     if (stored !== null) setLayout(stored);
     // `storage` is module-stable (localStorage) or caller-provided.
   }, [storage, storageKey]);

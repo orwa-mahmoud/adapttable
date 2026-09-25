@@ -1,4 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
+import { toggleId } from "@adapttable/core";
+import { useCallback, useMemo } from "react";
+
+import {
+  UNCONTROLLED,
+  useControllableStore,
+} from "../hooks/useControllableStore";
 
 /**
  * Expansion state + actions returned by `useRowExpansion`.
@@ -26,8 +32,9 @@ export interface RowExpansionState {
 export function useRowExpansion(
   defaultExpandedIds?: readonly string[]
 ): RowExpansionState {
-  const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(
-    () => new Set(defaultExpandedIds)
+  const [expandedIds, store] = useControllableStore<ReadonlySet<string>>(
+    () => new Set(defaultExpandedIds),
+    UNCONTROLLED
   );
 
   const isExpanded = useCallback(
@@ -35,14 +42,10 @@ export function useRowExpansion(
     [expandedIds]
   );
 
-  const toggle = useCallback((id: string) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  const toggle = useCallback(
+    (id: string) => store.update((prev) => toggleId(prev, id)),
+    [store]
+  );
 
   return useMemo(
     () => ({ expandedIds, isExpanded, toggle }),

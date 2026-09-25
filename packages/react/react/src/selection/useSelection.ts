@@ -1,5 +1,14 @@
-import { applyGroupLeafSelection } from "@adapttable/core";
+import {
+  applyGroupLeafSelection,
+  headerSelectionOf,
+  idSetReader,
+  offersAllMatching as neutralOffersAllMatching,
+  toggleId,
+  toggleIds,
+} from "@adapttable/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { useControllableStore } from "../hooks/useControllableStore";
 
 /**
  * Tri-state of the "select all visible" header control.
@@ -98,11 +107,7 @@ export function offersAllMatching(
   selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">,
   total: number
 ): boolean {
-  return (
-    selection.acrossPages &&
-    selection.headerState === "all" &&
-    total > selection.visibleIds.length
-  );
+  return neutralOffersAllMatching(selection, total);
 }
 
 /**
@@ -121,36 +126,28 @@ export function useSelection<TRow>(
 ): SelectionState {
   const { rows, getId, resetKey } = options;
   const acrossPages = options.acrossPages ?? true;
-  const controlledValue = options.selectedIds;
+  const [readIds] = useState(idSetReader);
   const onChange = options.onSelectionChange;
-  const [internal, setInternal] = useState<Set<string>>(() => new Set());
   const [allMatching, setAllMatching] = useState(false);
-  const controlled = controlledValue !== undefined;
-  const selectedIds = useMemo(
-    () => (controlledValue === undefined ? internal : new Set(controlledValue)),
-    [controlledValue, internal]
+  // The store's mutators are permanently stable: memoized adapter rows can
+  // hold `toggle` forever, and a controlled commit still computes from the
+  // selection the host last rendered.
+  const [selectedIds, store] = useControllableStore<ReadonlySet<string>>(
+    () => new Set(),
+    {
+      value: readIds(options.selectedIds),
+      onChange: onChange && ((next) => onChange([...next])),
+    }
   );
-
-  // The mutators below close over `commit`; reading the live mode/state
-  // through this ref keeps their identities PERMANENTLY stable — memoized
-  // adapter rows can hold `toggle` forever without computing from a stale
-  // set in the controlled mode.
-  const modeRef = useRef({ controlled, onChange, selectedIds });
-  modeRef.current = { controlled, onChange, selectedIds };
 
   /** Route a change to the parent (controlled) or internal state. */
   const commit = useCallback(
     (compute: (prev: ReadonlySet<string>) => Set<string>) => {
       // Any explicit mutation narrows the scope back to concrete ids.
       setAllMatching(false);
-      const live = modeRef.current;
-      if (live.controlled) {
-        live.onChange?.([...compute(live.selectedIds)]);
-      } else {
-        setInternal((prev) => compute(prev));
-      }
+      store.update(compute);
     },
-    []
+    [store]
   );
 
   const selectAllMatching = useCallback(() => {
@@ -166,30 +163,21 @@ export function useSelection<TRow>(
   // is last-seen-value, not a boolean first-run flag: refs survive
   // StrictMode's simulated remount, so a boolean guard saw the doubled
   // mount effect as a "change" and wiped a controlled preselection.
-  const liveRef = useRef({ commit, size: selectedIds.size });
-  liveRef.current = { commit, size: selectedIds.size };
   const lastResetKeyRef = useRef(resetKey);
   useEffect(() => {
     if (Object.is(lastResetKeyRef.current, resetKey)) return;
     lastResetKeyRef.current = resetKey;
     // Identity-preserving no-op when there is nothing to clear.
-    if (liveRef.current.size === 0) return;
-    liveRef.current.commit(() => new Set());
-  }, [resetKey]);
+    if (store.current().size === 0) return;
+    commit(() => new Set());
+  }, [resetKey, store, commit]);
 
   const visibleIds = useMemo(() => rows.map(getId), [rows, getId]);
 
-  const selectedVisible = useMemo(
-    () => visibleIds.reduce((n, id) => (selectedIds.has(id) ? n + 1 : n), 0),
+  const headerState = useMemo(
+    () => headerSelectionOf(visibleIds, selectedIds),
     [visibleIds, selectedIds]
   );
-
-  let headerState: HeaderSelectionState = "none";
-  if (visibleIds.length > 0 && selectedVisible === visibleIds.length) {
-    headerState = "all";
-  } else if (selectedVisible > 0) {
-    headerState = "some";
-  }
 
   const isSelected = useCallback(
     (id: string) => selectedIds.has(id),
@@ -197,14 +185,7 @@ export function useSelection<TRow>(
   );
 
   const toggle = useCallback(
-    (id: string) => {
-      commit((prev) => {
-        const next = new Set(prev);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        return next;
-      });
-    },
+    (id: string) => commit((prev) => toggleId(prev, id)),
     [commit]
   );
 
@@ -215,18 +196,10 @@ export function useSelection<TRow>(
     [commit]
   );
 
-  const toggleAll = useCallback(() => {
-    commit((prev) => {
-      const next = new Set(prev);
-      const allSelected =
-        visibleIds.length > 0 && visibleIds.every((id) => next.has(id));
-      for (const id of visibleIds) {
-        if (allSelected) next.delete(id);
-        else next.add(id);
-      }
-      return next;
-    });
-  }, [commit, visibleIds]);
+  const toggleAll = useCallback(
+    () => commit((prev) => toggleIds(prev, visibleIds)),
+    [commit, visibleIds]
+  );
 
   const clear = useCallback(() => commit(() => new Set()), [commit]);
 

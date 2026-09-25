@@ -11,12 +11,19 @@
  * but there is no sticky chrome. The order of the list still puts top pins
  * first and bottom pins last.
  */
-import type { RowAction } from "@adapttable/core";
-import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  applyRowPin,
+  type ControllableStoreOptions,
+  type RowAction,
+  rowPinSideOf,
+  sameRowPins,
+} from "@adapttable/core";
+import { useCallback, useMemo } from "react";
 
+import { useControllableStore } from "../hooks/useControllableStore";
 import { useEventCallback } from "../hooks/useEventCallback";
 
-export { partitionPinnedRows } from "@adapttable/core";
+export { applyRowPin, partitionPinnedRows } from "@adapttable/core";
 export { rowPinSignature } from "@adapttable/core/binding";
 
 /**
@@ -96,39 +103,10 @@ export interface RowPinningState<TRow> {
   actions: readonly RowAction<TRow>[];
 }
 
-function withoutId(ids: readonly string[], rowId: string): string[] {
-  return ids.filter((id) => id !== rowId);
-}
-
-function withId(ids: readonly string[], rowId: string): string[] {
-  return ids.includes(rowId) ? [...ids] : [...ids, rowId];
-}
-
-/**
- * Apply a pin or unpin to a copy of the state.
- *
- * @public
- */
-export function applyRowPin(
-  state: RowPinState,
-  rowId: string,
-  side: RowPinSide | undefined
-): RowPinState {
-  const top = withoutId(state.top, rowId);
-  const bottom = withoutId(state.bottom, rowId);
-  if (side === "top") return { top: withId(top, rowId), bottom };
-  if (side === "bottom") return { top, bottom: withId(bottom, rowId) };
-  return { top, bottom };
-}
-
-function sameLists(a: readonly string[], b: readonly string[]): boolean {
-  if (a.length !== b.length) return false;
-  return a.every((id, index) => id === b[index]);
-}
-
-function sameState(a: RowPinState, b: RowPinState): boolean {
-  return sameLists(a.top, b.top) && sameLists(a.bottom, b.bottom);
-}
+/** A commit that leaves the lists as they are changes nothing. */
+const PIN_STORE_OPTIONS: ControllableStoreOptions<RowPinState> = {
+  equals: sameRowPins,
+};
 
 /**
  * Headless row pinning. Inert until the host passes `enabled`;
@@ -144,39 +122,23 @@ export function useRowPinning<TRow>(options: {
   labels: RowPinLabels;
 }): RowPinningState<TRow> {
   const { enabled, labels } = options;
-  const controlledValue = options.pinnedRowIds;
-  const onChange = options.onPinnedRowIdsChange;
-  const [internal, setInternal] = useState<RowPinState>(EMPTY_ROW_PIN_STATE);
-  const controlled = controlledValue !== undefined;
-  const state = controlledValue ?? internal;
-
-  const modeRef = useRef({ controlled, onChange, state, enabled });
-  modeRef.current = { controlled, onChange, state, enabled };
-
-  const commit = useCallback((next: RowPinState) => {
-    const live = modeRef.current;
-    if (!live.enabled) return;
-    if (sameState(live.state, next)) return;
-    if (live.controlled) {
-      live.onChange?.(next);
-    } else {
-      setInternal(next);
-    }
-  }, []);
+  const [state, store] = useControllableStore<RowPinState>(
+    () => EMPTY_ROW_PIN_STATE,
+    { value: options.pinnedRowIds, onChange: options.onPinnedRowIdsChange },
+    PIN_STORE_OPTIONS
+  );
 
   const pin = useEventCallback((rowId: string, side: RowPinSide) => {
-    commit(applyRowPin(modeRef.current.state, rowId, side));
+    if (enabled) store.update((current) => applyRowPin(current, rowId, side));
   });
   const unpin = useEventCallback((rowId: string) => {
-    commit(applyRowPin(modeRef.current.state, rowId, undefined));
+    if (enabled) {
+      store.update((current) => applyRowPin(current, rowId, undefined));
+    }
   });
 
   const sideOf = useCallback(
-    (rowId: string): RowPinSide | undefined => {
-      if (state.top.includes(rowId)) return "top";
-      if (state.bottom.includes(rowId)) return "bottom";
-      return undefined;
-    },
+    (rowId: string): RowPinSide | undefined => rowPinSideOf(state, rowId),
     [state]
   );
 

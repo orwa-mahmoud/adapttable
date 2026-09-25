@@ -358,7 +358,33 @@ export {
   tableQueryKey,
   type TableQueryKeyOptions,
 } from "./source/queryKey";
+export {
+  type ControllableControl,
+  type ControllableStore,
+  type ControllableStoreOptions,
+  createControllableStore,
+} from "./state/controllableStore";
 export type { Slot, TableErrorState } from "./state/errorState";
+export {
+  applyRowPin,
+  groupsCollapsedToDepth,
+  headerSelectionOf,
+  idSetReader,
+  initialColumnLayout,
+  type LayoutStorage,
+  offersAllMatching,
+  readStoredColumnLayout,
+  rowPinSideOf,
+  sameRowPins,
+  sanitizeStoredLayout,
+  toggleId,
+  toggleIds,
+  withColumnHidden,
+  withColumnMoved,
+  withColumnOrder,
+  withColumnPinned,
+  withColumnWidth,
+} from "./state/tableStores";
 export { isBrowser } from "./utils/env";
 export { humanizeKey } from "./utils/humanizeKey";
 export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
