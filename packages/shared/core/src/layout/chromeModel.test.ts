@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { PIN_Z } from "../columns/columnLayoutModel";
 import {
+  cellAttributes,
   chromeColumnPlan,
   columnAriaSort,
   columnTextAlign,
@@ -20,12 +21,18 @@ import {
   documentOffsetTop,
   entryKeys,
   extraRowCoveredSlots,
+  headerCellAttributes,
+  headerRowAttributes,
   measureRowDetailAsPair,
   measureWindowScrollMargin,
   pinnedRowIds,
+  rowAttributes,
+  searchInputAttributes,
+  sortButtonAttributes,
   sortIndexOf,
   sortLevelOf,
   sourceWindowStart,
+  tableAttributes,
   virtualListElement,
 } from "./chromeModel";
 import { REORDER_COLUMN_WIDTH } from "./leanAssembly";
@@ -297,5 +304,118 @@ describe("windowing", () => {
       top: -50,
     } as DOMRect);
     expect(documentOffsetTop(bare)).toBe(0);
+  });
+});
+
+describe("prop getters", () => {
+  const sizing = { flexShares: {}, columnWidths: { age: 80 } };
+
+  it("names the table and its header row", () => {
+    expect(tableAttributes("rtl", "People")).toEqual({
+      role: "table",
+      dir: "rtl",
+      "aria-label": "People",
+    });
+    expect(headerRowAttributes()).toEqual({ role: "row" });
+  });
+
+  it("announces a header's sort from the chain first, then the single sort", () => {
+    const sort = {
+      sortBy: "name",
+      sortDir: "asc" as const,
+      sortLevels: [{ key: "age", dir: "desc" as const }],
+    };
+    expect(
+      headerCellAttributes(
+        { key: "age", sortable: true, align: "end" },
+        sort,
+        sizing
+      )
+    ).toEqual({
+      role: "columnheader",
+      scope: "col",
+      "aria-sort": "descending",
+      "data-sort-index": 1,
+      "data-column-key": "age",
+      style: {
+        textAlign: "end",
+        width: 80,
+        minWidth: undefined,
+        maxWidth: undefined,
+      },
+    });
+    expect(
+      headerCellAttributes({ key: "name", sortable: true }, sort, sizing)[
+        "aria-sort"
+      ]
+    ).toBe("ascending");
+  });
+
+  it("sorts or extends the chain from the sort button", () => {
+    const toggleSort = vi.fn();
+    const toggleSortLevel = vi.fn();
+    const options = {
+      sortLevels: [],
+      sortByLabel: "Sort by",
+      multiSort: true,
+      toggleSort,
+      toggleSortLevel,
+    };
+    const button = sortButtonAttributes(
+      { key: "age", sortable: true, header: "Age" },
+      options
+    );
+    expect(button["aria-label"]).toBe("Sort by: Age");
+    button.onClick();
+    button.onClick({ shiftKey: true });
+    expect(toggleSort).toHaveBeenCalledWith("age");
+    expect(toggleSortLevel).toHaveBeenCalledWith("age");
+    const single = sortButtonAttributes(
+      { key: "age", sortable: true },
+      {
+        ...options,
+        multiSort: false,
+      }
+    );
+    expect(single["aria-label"]).toBe("Sort by: age");
+    single.onClick({ shiftKey: true });
+    expect(toggleSort).toHaveBeenCalledTimes(2);
+    const fixed = sortButtonAttributes({ key: "id" }, options);
+    expect(fixed.disabled).toBe(true);
+    fixed.onClick();
+    expect(toggleSort).toHaveBeenCalledTimes(2);
+  });
+
+  it("names rows and cells", () => {
+    expect(rowAttributes("7", 2, true)).toEqual({
+      role: "row",
+      "data-adapttable-part": "row",
+      "data-row-id": "7",
+      "data-index": 2,
+      "aria-selected": true,
+    });
+    expect(cellAttributes({ key: "name" }, sizing)).toEqual({
+      role: "cell",
+      "data-column-key": "name",
+      style: { textAlign: "start" },
+    });
+  });
+
+  it("wires the search input", () => {
+    const onValue = vi.fn();
+    const input = searchInputAttributes(
+      "ada",
+      { searchPlaceholder: "Search…", search: "Search" },
+      onValue
+    );
+    expect(input).toMatchObject({
+      type: "search",
+      role: "searchbox",
+      value: "ada",
+      placeholder: "Search…",
+      "aria-label": "Search",
+    });
+    input.onChange({ currentTarget: { value: "bob" } });
+    expect(onValue).toHaveBeenCalledWith("bob");
   });
 });

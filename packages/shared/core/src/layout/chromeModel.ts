@@ -18,12 +18,14 @@ import {
   pinnedCellStyle,
   type PinOffset,
 } from "../columns/columnLayoutModel";
+import { columnSizeStyle } from "../columns/columnSizing";
 import { pinnedColumnWidth } from "../columns/columnWidths";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { ExtraRow } from "../rows/extraRows";
 import type { RowPinSide } from "../rows/rowPinModel";
 import { pinnedRowCellStyle } from "../rows/rowPresentation";
-import type { SortDirection } from "../types";
+import type { CssProperties } from "../style/cssProperties";
+import type { ColumnMetadata, Direction, SortDirection } from "../types";
 import { REORDER_COLUMN_WIDTH } from "./leanAssembly";
 
 /* ── Desktop layout ────────────────────────────────────────────────── */
@@ -491,6 +493,219 @@ export function columnAriaSort(
   if (!column.sortable) return undefined;
   if (sortBy !== column.key) return "none";
   return sortDir === "asc" ? "ascending" : "descending";
+}
+
+/* ── Prop getters ──────────────────────────────────────────────────── */
+
+/**
+ * The sort state header attributes read.
+ *
+ * @public
+ */
+export interface ChromeSortState {
+  /** Single sort key. */
+  readonly sortBy: string | undefined;
+  /** Single sort direction. */
+  readonly sortDir: SortDirection | undefined;
+  /** Multi-column sort chain. */
+  readonly sortLevels: readonly { key: string; dir: SortDirection }[];
+}
+
+/**
+ * Sizing inputs for a header or body cell.
+ *
+ * @public
+ */
+export interface ChromeCellSizing {
+  /** Flex percentages from `columnFlexShares`. */
+  readonly flexShares: Readonly<Record<string, number>>;
+  /** User-set widths from the column layout. */
+  readonly columnWidths: Readonly<Record<string, number>> | undefined;
+}
+
+/**
+ * The attributes of the table element.
+ *
+ * @public
+ */
+export function tableAttributes(
+  dir: Direction | undefined,
+  label: string
+): { role: "table"; dir: Direction | undefined; "aria-label": string } {
+  return { role: "table", dir, "aria-label": label };
+}
+
+/**
+ * The attributes of a header row.
+ *
+ * @public
+ */
+export function headerRowAttributes(): { role: "row" } {
+  return { role: "row" };
+}
+
+/**
+ * The attributes of a header cell: its role and scope, what it announces
+ * about sorting, and its logical alignment and size.
+ *
+ * @public
+ */
+export function headerCellAttributes<TRow>(
+  column: ColumnMetadata<TRow> & { readonly sortable?: boolean },
+  sort: ChromeSortState,
+  sizing: ChromeCellSizing
+): {
+  role: "columnheader";
+  scope: "col";
+  "aria-sort": "ascending" | "descending" | "none" | undefined;
+  "data-sort-index": number | undefined;
+  "data-column-key": string;
+  style: CssProperties;
+} {
+  const level = sortLevelOf(sort.sortLevels, column.key);
+  return {
+    role: "columnheader",
+    // The HTML half of the statement the role makes, so a cell's header
+    // association does not depend on the kit.
+    scope: "col",
+    "aria-sort": columnAriaSort(
+      column,
+      level?.key ?? sort.sortBy,
+      level?.dir ?? sort.sortDir
+    ),
+    "data-sort-index": sortIndexOf(sort.sortLevels, column.key),
+    "data-column-key": column.key,
+    style: cellStyle(column, sizing),
+  };
+}
+
+/**
+ * The attributes of a header's sort button. A shift-click adds the column
+ * to a multi-sort chain when multi-sort is on; a plain click single-sorts.
+ *
+ * @public
+ */
+export function sortButtonAttributes(
+  column: {
+    readonly key: string;
+    readonly sortable?: boolean;
+    readonly header?: unknown;
+  },
+  options: {
+    readonly sortLevels: readonly { key: string; dir: SortDirection }[];
+    readonly sortByLabel: string;
+    readonly multiSort: boolean | undefined;
+    readonly toggleSort: (key: string) => void;
+    readonly toggleSortLevel: (key: string) => void;
+  }
+): {
+  type: "button";
+  disabled: boolean;
+  onClick: (event?: { shiftKey?: boolean }) => void;
+  "data-sort-index": number | undefined;
+  "aria-label": string;
+} {
+  return {
+    type: "button",
+    disabled: !column.sortable,
+    onClick: (event) => {
+      if (!column.sortable) return;
+      if (options.multiSort && event?.shiftKey) {
+        options.toggleSortLevel(column.key);
+        return;
+      }
+      options.toggleSort(column.key);
+    },
+    "data-sort-index": sortIndexOf(options.sortLevels, column.key),
+    "aria-label": `${options.sortByLabel}: ${
+      typeof column.header === "string" ? column.header : column.key
+    }`,
+  };
+}
+
+/**
+ * The attributes of a body row: its role and part name, the id an event is
+ * traced back to, its index, and its selection when rows are selectable.
+ *
+ * @public
+ */
+export function rowAttributes(
+  id: string,
+  index: number,
+  selected: boolean | undefined
+): {
+  role: "row";
+  "data-adapttable-part": "row";
+  "data-row-id": string;
+  "data-index": number;
+  "aria-selected": boolean | undefined;
+} {
+  return {
+    role: "row",
+    "data-adapttable-part": "row",
+    "data-row-id": id,
+    "data-index": index,
+    "aria-selected": selected,
+  };
+}
+
+/**
+ * The attributes of a body cell: its role, the column it belongs to (so
+ * auto-sizing and CSS can target one column in any kit), its logical
+ * alignment and size.
+ *
+ * @public
+ */
+export function cellAttributes<TRow>(
+  column: ColumnMetadata<TRow>,
+  sizing: ChromeCellSizing
+): { role: "cell"; "data-column-key": string; style: CssProperties } {
+  return {
+    role: "cell",
+    "data-column-key": column.key,
+    style: cellStyle(column, sizing),
+  };
+}
+
+/**
+ * The attributes of the search input.
+ *
+ * @public
+ */
+export function searchInputAttributes(
+  value: string,
+  labels: { readonly searchPlaceholder: string; readonly search: string },
+  onValue: (value: string) => void
+): {
+  type: "search";
+  role: "searchbox";
+  value: string;
+  placeholder: string;
+  "aria-label": string;
+  onChange: (event: { currentTarget: { value: string } }) => void;
+} {
+  return {
+    type: "search",
+    role: "searchbox",
+    value,
+    placeholder: labels.searchPlaceholder,
+    "aria-label": labels.search,
+    onChange: (event) => onValue(event.currentTarget.value),
+  };
+}
+
+function cellStyle<TRow>(
+  column: ColumnMetadata<TRow>,
+  sizing: ChromeCellSizing
+): CssProperties {
+  return {
+    textAlign: columnTextAlign(column.align),
+    ...columnSizeStyle(
+      column,
+      sizing.flexShares,
+      sizing.columnWidths?.[column.key]
+    ),
+  };
 }
 
 /* ── Body plan ─────────────────────────────────────────────────────── */
