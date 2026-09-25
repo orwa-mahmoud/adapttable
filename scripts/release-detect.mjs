@@ -72,26 +72,19 @@ function printPlan(plan) {
 const invokedDirectly = process.argv[1]?.endsWith("release-detect.mjs");
 if (invokedDirectly) {
   const { readdir, readFile } = await import("node:fs/promises");
-  const { join, dirname } = await import("node:path");
-  const { fileURLToPath } = await import("node:url");
+  const { join } = await import("node:path");
+  const { listPackages, REPO_ROOT: root } = await import("./packages.mjs");
 
-  const root = join(dirname(fileURLToPath(import.meta.url)), "..");
   const changesetDir = join(root, ".changeset");
   const config = JSON.parse(
     await readFile(join(changesetDir, "config.json"), "utf8")
   );
   const ignored = new Set(config.ignore ?? []);
   const changesetFiles = await readdir(changesetDir);
-  const pkgDirs = await readdir(join(root, "packages"), {
-    withFileTypes: true,
-  });
   /** @type {Publishable[]} */
   const packages = [];
-  for (const ent of pkgDirs) {
-    if (!ent.isDirectory()) continue;
-    const pkg = JSON.parse(
-      await readFile(join(root, "packages", ent.name, "package.json"), "utf8")
-    );
+  for (const { dir } of listPackages(root)) {
+    const pkg = JSON.parse(await readFile(join(dir, "package.json"), "utf8"));
     if (pkg.private || ignored.has(pkg.name) || !pkg.name || !pkg.version) {
       continue;
     }

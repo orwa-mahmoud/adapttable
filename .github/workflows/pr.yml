@@ -388,8 +388,8 @@ jobs:
           git fetch --quiet origin "$BASE_REF"
           floored="mantine mui chakra antd radix base-ui"
           changed="$(git diff --name-only "origin/$BASE_REF"...HEAD \
-            | grep -oE '^packages/adapter-[a-z-]+/' | sort -u \
-            | sed -e 's|packages/adapter-||' -e 's|/$||')" || true
+            | grep -oE '^packages/react/adapter-[a-z-]+/' | sort -u \
+            | sed -e 's|packages/react/adapter-||' -e 's|/$||')" || true
           kits=""
           for kit in $changed; do
             case " $floored " in *" $kit "*) kits="$kits $kit" ;; esac
@@ -447,7 +447,7 @@ jobs:
       - name: Restore built packages
         run: pnpm build
       - name: Publish preview packages
-        run: pnpm dlx pkg-pr-new publish --pnpm --compact './packages/*'
+        run: pnpm dlx pkg-pr-new publish --pnpm --compact './packages/*/*'
 
   package:
     name: Package

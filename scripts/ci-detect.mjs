@@ -20,7 +20,7 @@ const DOCS_OR_META =
   /^(docs\/|.*\.md$|llms.*\.txt$|.*\/robots\.txt$|\.github\/|\.changeset\/|\.husky\/)/;
 
 const VERSION_ONLY =
-  /^(packages\/[^/]+\/(package\.json|CHANGELOG\.md)|\.changeset\/)/;
+  /^(packages\/[^/]+\/[^/]+\/(package\.json|CHANGELOG\.md)|\.changeset\/)/;
 
 const EXAMPLES = /^examples\/.*\.(ts|tsx)$/;
 

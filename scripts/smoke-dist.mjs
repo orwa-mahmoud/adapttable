@@ -25,14 +25,19 @@ import { dirname, join, relative, resolve } from "node:path";
 
 import ts from "typescript";
 
+import { listPackages } from "./packages.mjs";
+
 const PACKAGES_DIR = join(process.cwd(), "packages");
 
-/** Every package under `packages/` — all of them ship a runtime `dist`. */
-const LIB_PACKAGES = readdirSync(PACKAGES_DIR);
+/** Every package under `packages/<group>/` — all of them ship a runtime `dist`. */
+const PACKAGE_DIRS = new Map(
+  listPackages(process.cwd()).map((pkg) => [pkg.name, pkg.dir])
+);
+const LIB_PACKAGES = [...PACKAGE_DIRS.keys()];
 
 function readPackageJson(pkg) {
   return JSON.parse(
-    readFileSync(join(PACKAGES_DIR, pkg, "package.json"), "utf8")
+    readFileSync(join(PACKAGE_DIRS.get(pkg), "package.json"), "utf8")
   );
 }
 
@@ -160,10 +165,7 @@ function hasClientDirective(file) {
 
 /** Every workspace package's directory, by the name it publishes under. */
 const PKG_DIR_BY_NAME = new Map(
-  LIB_PACKAGES.map((pkg) => [
-    readPackageJson(pkg).name,
-    join(PACKAGES_DIR, pkg),
-  ])
+  LIB_PACKAGES.map((pkg) => [readPackageJson(pkg).name, PACKAGE_DIRS.get(pkg)])
 );
 
 /**
@@ -260,7 +262,7 @@ function serverGraph(entryFiles) {
 let failures = 0;
 
 for (const pkg of LIB_PACKAGES) {
-  const pkgDir = join(PACKAGES_DIR, pkg);
+  const pkgDir = PACKAGE_DIRS.get(pkg);
   const pkgJson = readPackageJson(pkg);
   if (!pkgJson.exports && !pkgJson.main) continue;
 
@@ -399,7 +401,7 @@ function distFiles(dir, into = []) {
 }
 
 for (const pkg of LIB_PACKAGES) {
-  const pkgDir = join(PACKAGES_DIR, pkg);
+  const pkgDir = PACKAGE_DIRS.get(pkg);
   const distDir = join(pkgDir, "dist");
   if (!existsSync(distDir)) continue;
   const pkgJson = readPackageJson(pkg);

@@ -344,4 +344,4 @@ const transport = aiSdkTransport({
 - [ai-http-backend.py](../examples/ai-http-backend.py) — the same wire in Python, standard library only, run through `uv`
 
 Intention fixtures (no live model) live in
-`packages/ai/src/__fixtures__/intentions.json`.
+`packages/shared/ai/src/__fixtures__/intentions.json`.

@@ -24,12 +24,15 @@
  *
  *   node scripts/check-feature-typing.mjs
  */
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 import ts from "typescript";
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import { packageRel, REPO_ROOT } from "./packages.mjs";
+
+const CORE = packageRel("core");
+const REACT = packageRel("react");
+const MUI = packageRel("adapter-mui");
 const FIXTURES = join(REPO_ROOT, "scripts", "typing-fixtures");
 
 /** The same compiler settings the packages build under. */
@@ -46,12 +49,12 @@ const OPTIONS = {
   // build and cannot pass on a stale one.
   baseUrl: REPO_ROOT,
   paths: {
-    "@adapttable/core": ["packages/core/src/index.ts"],
-    "@adapttable/core/*": ["packages/core/src/*.ts"],
-    "@adapttable/react": ["packages/react/src/index.ts"],
-    "@adapttable/react/*": ["packages/react/src/*.ts"],
-    "@adapttable/mui": ["packages/adapter-mui/src/index.ts"],
-    "@adapttable/mui/*": ["packages/adapter-mui/src/*.ts"],
+    "@adapttable/core": [`${CORE}/src/index.ts`],
+    "@adapttable/core/*": [`${CORE}/src/*.ts`],
+    "@adapttable/react": [`${REACT}/src/index.ts`],
+    "@adapttable/react/*": [`${REACT}/src/*.ts`],
+    "@adapttable/mui": [`${MUI}/src/index.ts`],
+    "@adapttable/mui/*": [`${MUI}/src/*.ts`],
   },
 };
 
@@ -67,13 +70,12 @@ function diagnose(file) {
 /** Type-check generated consumer source against one adapter's source entry. */
 function diagnoseGenerated(file, source, packageName, packageDir) {
   const virtualFile = join(FIXTURES, file);
+  const kit = packageRel(`adapter-${packageDir}`);
   const options = {
     ...OPTIONS,
     paths: {
       ...OPTIONS.paths,
-      [`@adapttable/${packageName}/preset`]: [
-        `packages/adapter-${packageDir}/src/preset.ts`,
-      ],
+      [`@adapttable/${packageName}/preset`]: [`${kit}/src/preset.ts`],
     },
   };
   const host = ts.createCompilerHost(options);

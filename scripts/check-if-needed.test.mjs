@@ -37,8 +37,8 @@ describe("checkPlan", () => {
   it("runs publint on a version-only bump, not unit tests", () => {
     assert.deepEqual(
       labels([
-        "packages/core/package.json",
-        "packages/core/CHANGELOG.md",
+        "packages/shared/core/package.json",
+        "packages/shared/core/CHANGELOG.md",
         ".changeset/x.md",
       ]),
       [
@@ -52,8 +52,8 @@ describe("checkPlan", () => {
     assert.equal(
       checkReason(
         classify([
-          "packages/core/package.json",
-          "packages/core/CHANGELOG.md",
+          "packages/shared/core/package.json",
+          "packages/shared/core/CHANGELOG.md",
           ".changeset/x.md",
         ])
       ),
@@ -107,11 +107,14 @@ describe("checkPlan", () => {
   });
 
   it("runs the full pnpm check when an adapter changes", () => {
-    assert.deepEqual(labels(["packages/adapter-mantine/src/DataTable.tsx"]), [
-      "check",
-    ]);
+    assert.deepEqual(
+      labels(["packages/react/adapter-mantine/src/DataTable.tsx"]),
+      ["check"]
+    );
     assert.equal(
-      checkReason(classify(["packages/adapter-mantine/src/DataTable.tsx"])),
+      checkReason(
+        classify(["packages/react/adapter-mantine/src/DataTable.tsx"])
+      ),
       "package code changed"
     );
   });

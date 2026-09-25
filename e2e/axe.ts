@@ -15,7 +15,7 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 function resolveAxeSource(): string {
   try {
     return createRequire(
-      join(REPO_ROOT, "packages/adapter-unstyled/package.json")
+      join(REPO_ROOT, "packages/react/adapter-unstyled/package.json")
     ).resolve("axe-core/axe.min.js");
   } catch {
     const pnpm = join(REPO_ROOT, "node_modules/.pnpm");

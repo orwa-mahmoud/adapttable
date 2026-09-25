@@ -13,10 +13,10 @@ back state; the adapter renders it.
 
 ## Two ways to reach a kit
 
-| Your kit                                                                    | Build                                                                           | Reference                                                                                     |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| A class-based design system (utility classes, tokens, no component library) | A class map over `@adapttable/unstyled`, which renders native elements          | [`@adapttable/shadcn`](../packages/adapter-shadcn/src/DataTable.tsx)                          |
-| A component library (buttons, inputs, menus, drawers as components)         | A full adapter on `useDataTableShell`, every control drawn with a kit component | [`@adapttable/unstyled`](../packages/adapter-unstyled/src/DataTable.tsx), and each themed kit |
+| Your kit                                                                    | Build                                                                           | Reference                                                                                           |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| A class-based design system (utility classes, tokens, no component library) | A class map over `@adapttable/unstyled`, which renders native elements          | [`@adapttable/shadcn`](../packages/react/adapter-shadcn/src/DataTable.tsx)                          |
+| A component library (buttons, inputs, menus, drawers as components)         | A full adapter on `useDataTableShell`, every control drawn with a kit component | [`@adapttable/unstyled`](../packages/react/adapter-unstyled/src/DataTable.tsx), and each themed kit |
 
 The shadcn adapter is the whole of the first pattern: its `DataTable` passes
 `shadcnClassNames` to the unstyled `DataTable`, merging a caller's
@@ -453,7 +453,7 @@ re-exports `@adapttable/core/pivot`.
 ## Where the table places slots
 
 A feature fills a slot; the adapter decides where it sits. The unstyled root
-places these in [`DataTable.tsx`](../packages/adapter-unstyled/src/DataTable.tsx):
+places these in [`DataTable.tsx`](../packages/react/adapter-unstyled/src/DataTable.tsx):
 
 | Region          | Slots                                                                                                                                          |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -465,7 +465,7 @@ places these in [`DataTable.tsx`](../packages/adapter-unstyled/src/DataTable.tsx
 
 The root is wrapped in `ContextMenuLiveGate`, which spreads the context-menu
 region props onto it. Inside the desktop table and mobile cards,
-[`components/featureSlots.tsx`](../packages/adapter-unstyled/src/components/featureSlots.tsx)
+[`components/featureSlots.tsx`](../packages/react/adapter-unstyled/src/components/featureSlots.tsx)
 places `EDITABLE_CELL`, `TREE_CELL`, `TREE_TOGGLE`, `FILL_HANDLE`,
 `EXPAND_TOGGLE`, `FILTER_HEADER`, `ROW_EDIT_ACTIONS`, `ROW_REORDER_HANDLE`,
 `ROW_REORDER_BUTTONS`, `COLUMN_GROUP_TOGGLE`, `COLUMN_SELECT`,
@@ -497,7 +497,7 @@ key for every node, and each node's part name is the kebab-case form of its
 key (`searchField` → `data-adapttable-part="search-field"`). A documented
 key is honoured by every adapter that renders its part. When module-scope slot components need the class map, the unstyled
 adapter publishes it through context
-([`components/classNamesContext.tsx`](../packages/adapter-unstyled/src/components/classNamesContext.tsx))
+([`components/classNamesContext.tsx`](../packages/react/adapter-unstyled/src/components/classNamesContext.tsx))
 rather than defining slots inside the render: a component defined in render is
 a new type on every render, and React remounts it — an input loses focus
 mid-keystroke.
@@ -526,7 +526,7 @@ keeps a three-prop table's bundle free of every feature it did not name.
 
 ## The worked reference — `@adapttable/unstyled`
 
-[`packages/adapter-unstyled/src`](../packages/adapter-unstyled/src) is the
+[`packages/react/adapter-unstyled/src`](../packages/react/adapter-unstyled/src) is the
 complete adapter for native HTML. Its layout is the one to copy:
 
 | File                               | Holds                                                                                                                                                   |
@@ -543,7 +543,7 @@ complete adapter for native HTML. Its layout is the one to copy:
 | `components/classNamesContext.tsx` | The per-table class map for module-scope slots.                                                                                                         |
 | `tsdown.config.ts`                 | One build entry per subpath, a `"use client"` banner, and `react`, `react-dom` and `@adapttable/core` kept external.                                    |
 
-Each themed kit (`packages/adapter-mantine`, `adapter-mui`, `adapter-chakra`,
+Each themed kit (`packages/react/adapter-mantine`, `adapter-mui`, `adapter-chakra`,
 `adapter-antd`, `adapter-radix`, `adapter-base-ui`) has the same shape with
 its kit's components in place of native elements. Ant Design renders the
 desktop table through antd's own `<Table>` instead of the shared assembly.

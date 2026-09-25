@@ -16,13 +16,13 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import { packageDir, REPO_ROOT as ROOT } from "./packages.mjs";
+
 const FIXTURES = join(ROOT, "scripts", "boundary-consumer-fixtures");
 
-const CORE_DIST = join(ROOT, "packages", "core", "dist", "index.js");
-const REACT_DIST = join(ROOT, "packages", "react", "dist", "index.js");
+const CORE_DIST = join(packageDir("core"), "dist", "index.js");
+const REACT_DIST = join(packageDir("react"), "dist", "index.js");
 
 if (!existsSync(CORE_DIST) || !existsSync(REACT_DIST)) {
   console.error(
@@ -43,12 +43,12 @@ writeFileSync(
       private: true,
       type: "module",
       dependencies: {
-        "@adapttable/core": `file:${join(ROOT, "packages", "core")}`,
-        "@adapttable/react": `file:${join(ROOT, "packages", "react")}`,
+        "@adapttable/core": `file:${packageDir("core")}`,
+        "@adapttable/react": `file:${packageDir("react")}`,
         // Packed alongside, and deliberately without a React dependency of
         // its own: the neutral fixture imports its subpaths from a package
         // where React is not installed.
-        "@adapttable/ai": `file:${join(ROOT, "packages", "ai")}`,
+        "@adapttable/ai": `file:${packageDir("ai")}`,
         react: "^19.0.0",
         "react-dom": "^19.0.0",
       },

@@ -3,10 +3,9 @@
  * Write kit feature files that fill Chrome slots. Run from the repo root.
  */
 import { existsSync, unlinkSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import { packageDir } from "./packages.mjs";
 
 const KITS = [
   {
@@ -134,7 +133,7 @@ function write(path, contents) {
 }
 
 for (const kit of KITS) {
-  const src = join(ROOT, "packages", kit.dir, "src");
+  const src = join(packageDir(kit.dir), "src");
   const cn = cnImport(kit);
 
   write(

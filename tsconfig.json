@@ -4,8 +4,8 @@
     "noEmit": true
   },
   "include": [
-    "packages/*/src",
-    "packages/*/*.config.ts",
+    "packages/*/*/src",
+    "packages/*/*/*.config.ts",
     "*.config.ts",
     "*.config.mjs"
   ],

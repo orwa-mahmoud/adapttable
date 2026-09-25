@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   changelogSection,
   latestTag,
+  packageDirsInTree,
   plannedReleases,
   releaseTag,
 } from "./github-releases.mjs";
@@ -109,5 +110,35 @@ describe("plannedReleases", () => {
       }),
       []
     );
+  });
+});
+
+describe("packageDirsInTree", () => {
+  it("finds every grouped package manifest, sorted by folder name", () => {
+    const tree = [
+      "packages/shared/core/CHANGELOG.md",
+      "packages/shared/core/package.json",
+      "packages/shared/core/src/index.ts",
+      "packages/react/adapter-mui/package.json",
+      "packages/react/react/package.json",
+      "packages/shared/ai/package.json",
+      "",
+    ].join("\n");
+    assert.deepEqual(packageDirsInTree(tree), [
+      "packages/react/adapter-mui",
+      "packages/shared/ai",
+      "packages/shared/core",
+      "packages/react/react",
+    ]);
+  });
+
+  it("ignores manifests above or below the package depth", () => {
+    const tree = [
+      "packages/package.json",
+      "packages/shared/package.json",
+      "packages/shared/core/fixtures/app/package.json",
+      "packages/shared/core/package.json",
+    ].join("\n");
+    assert.deepEqual(packageDirsInTree(tree), ["packages/shared/core"]);
   });
 });

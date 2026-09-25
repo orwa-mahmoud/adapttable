@@ -22,18 +22,15 @@ toolchain so local work matches the primary CI jobs.
 
 ```
 packages/
-  core/             @adapttable/core       headless engine (zero UI imports)
-  adapter-mantine/  @adapttable/mantine
-  adapter-mui/      @adapttable/mui
-  adapter-chakra/   @adapttable/chakra
-  adapter-antd/     @adapttable/antd       Ant Design
-  adapter-radix/    @adapttable/radix      Radix Themes
-  adapter-base-ui/  @adapttable/base-ui    Base UI
-  adapter-shadcn/   @adapttable/shadcn     shadcn/ui (unstyled + shadcn preset)
-  adapter-unstyled/ @adapttable/unstyled   Tailwind / bring your own CSS
-  i18n/             @adapttable/i18n
-  cli/              @adapttable/cli
-examples/           one runnable example per adapter
+  shared/            framework-neutral packages
+    core/            @adapttable/core       engine — no framework imports
+    ai/ server/ i18n/ cli/
+  react/             the React binding and its kits
+    react/           @adapttable/react      headless React binding + structural Chrome
+    ai-react/        @adapttable/ai-react
+    adapter-<kit>/   @adapttable/<kit>      one adapter per React UI kit
+apps/                docs site and showcase
+examples/            runnable examples, listed in examples/README.md
 ```
 
 ## Your first PR

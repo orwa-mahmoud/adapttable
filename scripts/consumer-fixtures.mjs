@@ -10,6 +10,8 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { packageDir } from "./packages.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const classification = JSON.parse(
   readFileSync(join(ROOT, "scripts/feature-classification.json"), "utf8")
@@ -363,7 +365,7 @@ export function plantedLeakFixture(root = ROOT) {
     kind: "planted-leak",
     pkg: "adapter-antd",
     code: `export { DataTable } from "PKG";\nexport { useTableEditHistory } from ${JSON.stringify(
-      join(root, "packages/react/dist/index.js")
+      join(packageDir("react", root), "dist", "index.js")
     )};`,
     absent: ["useTableEditHistory"],
   };

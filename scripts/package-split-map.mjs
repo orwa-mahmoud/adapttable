@@ -10,6 +10,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { entrypoints } from "./api-entrypoints.mjs";
+import { packageDir } from "./packages.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ETC = join(ROOT, "etc");
@@ -45,9 +46,8 @@ const CLASSES = new Set([
 export { CLASSES };
 
 function packageName(dir) {
-  return JSON.parse(
-    readFileSync(join(ROOT, "packages", dir, "package.json"), "utf8")
-  ).name;
+  return JSON.parse(readFileSync(join(packageDir(dir), "package.json"), "utf8"))
+    .name;
 }
 
 function specifier(name, subpath) {

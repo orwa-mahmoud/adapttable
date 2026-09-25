@@ -25,10 +25,8 @@ const sonarRecommended = /** @type {import("eslint").Linter.Config} */ (
  * a query string, and `scripts/` builds the repo.
  */
 const REACT_SOURCES = [
-  "packages/core/**/*.{ts,tsx}",
+  "packages/shared/core/**/*.{ts,tsx}",
   "packages/react/**/*.{ts,tsx}",
-  "packages/adapter-*/**/*.{ts,tsx}",
-  "packages/ai-react/**/*.{ts,tsx}",
   "apps/showcase/**/*.{ts,tsx}",
   "examples/**/*.{ts,tsx}",
 ];

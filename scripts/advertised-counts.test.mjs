@@ -9,11 +9,17 @@
  */
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { describe, it } from "node:test";
-import { fileURLToPath } from "node:url";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import {
+  listPackages,
+  packageDir,
+  packageRel,
+  REPO_ROOT as ROOT,
+} from "./packages.mjs";
+
+const I18N = packageRel("i18n");
 
 const WORDS = [
   "zero",
@@ -79,9 +85,9 @@ function checkAdvertised(advertised, count, nouns) {
 }
 
 describe("advertised locale count", () => {
-  const count = readdirSync(
-    join(ROOT, "packages", "i18n", "src", "locales")
-  ).filter((name) => name.endsWith(".ts")).length;
+  const count = readdirSync(join(packageDir("i18n"), "src", "locales")).filter(
+    (name) => name.endsWith(".ts")
+  ).length;
 
   it("counts the locales that ship", () => {
     assert.ok(count > 0);
@@ -93,9 +99,9 @@ describe("advertised locale count", () => {
       { file: "docs/faq.md", occurrences: 1 },
       { file: "docs/i18n-rtl.md", occurrences: 1 },
       { file: "llms.txt", occurrences: 3 },
-      { file: "packages/i18n/README.md", occurrences: 1 },
-      { file: "packages/i18n/package.json", occurrences: 1 },
-      { file: "packages/i18n/src/index.ts", occurrences: 1 },
+      { file: `${I18N}/README.md`, occurrences: 1 },
+      { file: `${I18N}/package.json`, occurrences: 1 },
+      { file: `${I18N}/src/index.ts`, occurrences: 1 },
     ],
     count,
     "locales?|languages?"
@@ -121,12 +127,10 @@ describe("advertised locale count", () => {
 describe("advertised adapter count", () => {
   // The bootstrap adapter is in the tree but unpublished, so it is not one of
   // the kits the docs count.
-  const count = readdirSync(join(ROOT, "packages"))
-    .filter((name) => name.startsWith("adapter-"))
-    .filter((name) => {
-      const pkg = JSON.parse(
-        readFileSync(join(ROOT, "packages", name, "package.json"), "utf8")
-      );
+  const count = listPackages()
+    .filter(({ name }) => name.startsWith("adapter-"))
+    .filter(({ dir }) => {
+      const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
       return pkg.private !== true;
     }).length;
 

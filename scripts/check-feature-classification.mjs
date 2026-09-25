@@ -44,25 +44,28 @@
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import {
+  packageDir,
+  packageNames,
+  REPO_ROOT as ROOT,
+  resolvePackagePath,
+} from "./packages.mjs";
+
 const MANIFEST = join(ROOT, "scripts", "feature-classification.json");
-const PACKAGES = join(ROOT, "packages");
+const PACKAGE_NAMES = new Set(packageNames());
 
 const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
 const listed = manifest.features;
 
-const adapters = readdirSync(PACKAGES).filter((name) =>
-  name.startsWith("adapter-")
-);
+const adapters = packageNames().filter((name) => name.startsWith("adapter-"));
 
 const problems = [];
 
 /* 1. The factories the binding exports are exactly the factories listed. -- */
 
 const featuresEntry = readFileSync(
-  join(PACKAGES, "react", "src", "features.ts"),
+  join(packageDir("react"), "src", "features.ts"),
   "utf8"
 );
 /**
@@ -109,14 +112,14 @@ for (const name of Object.keys(listed)) {
 
 for (const [name, feature] of Object.entries(listed)) {
   for (const relative of feature.implementation) {
-    if (!existsSync(join(PACKAGES, relative))) {
+    if (!existsSync(resolvePackagePath(relative))) {
       problems.push(`${name}: implementation ${relative} does not exist`);
     }
   }
   for (const component of feature.adapterComponents) {
     const kits = adapters.filter((adapter) =>
       existsSync(
-        join(PACKAGES, adapter, "src", "components", `${component}.tsx`)
+        join(packageDir(adapter), "src", "components", `${component}.tsx`)
       )
     );
     if (kits.length === 0) {
@@ -138,12 +141,15 @@ for (const [name, feature] of Object.entries(listed)) {
  * declaration on the public `BaseDataTableProps`, which is the only shape a
  * host can write.
  */
-const props = readFileSync(join(PACKAGES, "react", "src", "props.ts"), "utf8");
+const props = readFileSync(
+  join(packageDir("react"), "src", "props.ts"),
+  "utf8"
+);
 const publicSurface = props.slice(
   props.indexOf("export interface BaseDataTableProps<TRow> {")
 );
 const adapterPublicSurfaces = adapters.flatMap((adapter) => {
-  const typesPath = join(PACKAGES, adapter, "src", "types.ts");
+  const typesPath = join(packageDir(adapter), "src", "types.ts");
   if (!existsSync(typesPath)) return [];
   const source = readFileSync(typesPath, "utf8");
   const start = source.indexOf("export interface DataTablePropsBase<TRow>");
@@ -172,10 +178,10 @@ for (const [name, feature] of Object.entries(listed)) {
 /* 4. `standardFeatures()` names only factories that work with no options. -- */
 
 /** Every module that defines a factory, shared or feature-owned. */
-const factoryModules = readdirSync(join(PACKAGES, "react", "src", "features"))
+const factoryModules = readdirSync(join(packageDir("react"), "src", "features"))
   .filter((name) => /\.tsx?$/.test(name) && !name.includes(".test."))
   .map((name) =>
-    readFileSync(join(PACKAGES, "react", "src", "features", name), "utf8")
+    readFileSync(join(packageDir("react"), "src", "features", name), "utf8")
   );
 const factories = factoryModules.join("\n");
 
@@ -311,11 +317,12 @@ function entrySource(specifier) {
   const match = /^@adapttable\/([\w-]+)(?:\/([\w-]+))?$/.exec(specifier);
   if (!match) return undefined;
   const [, pkg, sub] = match;
-  // Kits publish as `@adapttable/<kit>` from `packages/adapter-<kit>`.
+  // Kits publish as `@adapttable/<kit>` from `packages/react/adapter-<kit>`.
   return [pkg, `adapter-${pkg}`]
+    .filter((dir) => PACKAGE_NAMES.has(dir))
     .flatMap((dir) =>
       ["ts", "tsx"].map((ext) =>
-        join(PACKAGES, dir, "src", `${sub ?? "index"}.${ext}`)
+        join(packageDir(dir), "src", `${sub ?? "index"}.${ext}`)
       )
     )
     .find((file) => existsSync(file));
@@ -476,7 +483,7 @@ function barrelExports(file, source, seen) {
  * main entry on purpose is listed in `keptOnMain`. Anything else served there
  * — undeprecated, through a barrel or a brace — is one that came back.
  */
-const mainEntryExports = exportsOf(join(PACKAGES, "core", "src", "index.ts"));
+const mainEntryExports = exportsOf(join(packageDir("core"), "src", "index.ts"));
 const keptOnMain = new Set(removals["main-entry-aliases"].keptOnMain ?? []);
 const inventoried = new Set(removals["main-entry-aliases"].names);
 for (const name of inventoried) {
@@ -492,7 +499,7 @@ for (const name of inventoried) {
 }
 
 const codemodSource = readFileSync(
-  join(PACKAGES, "cli", "src", "migrateV3.ts"),
+  join(packageDir("cli"), "src", "migrateV3.ts"),
   "utf8"
 );
 // The codemod's route table maps every moved export to the package that now
@@ -632,11 +639,11 @@ for (const group of manifest.v3Removals.groups) {
 }
 
 const kitPackages = adapters.filter((adapter) =>
-  existsSync(join(PACKAGES, adapter, "package.json"))
+  existsSync(join(packageDir(adapter), "package.json"))
 );
 const publishedKits = kitPackages.filter(
   (adapter) =>
-    JSON.parse(readFileSync(join(PACKAGES, adapter, "package.json"), "utf8"))
+    JSON.parse(readFileSync(join(packageDir(adapter), "package.json"), "utf8"))
       .private !== true
 );
 for (const match of migrationGuide.matchAll(
@@ -655,7 +662,7 @@ for (const match of migrationGuide.matchAll(
   }
   for (const adapter of publishedKits) {
     const pkg = JSON.parse(
-      readFileSync(join(PACKAGES, adapter, "package.json"), "utf8")
+      readFileSync(join(packageDir(adapter), "package.json"), "utf8")
     );
     if (!pkg.exports?.[`./${subpath}`]) {
       problems.push(
@@ -664,7 +671,7 @@ for (const match of migrationGuide.matchAll(
       continue;
     }
     const file = relativeSource(
-      join(PACKAGES, adapter, "src", "index.ts"),
+      join(packageDir(adapter), "src", "index.ts"),
       `./${subpath}`
     );
     const served = exportsOf(file);
@@ -692,10 +699,18 @@ for (const prop of Object.keys(enabling.props)) {
   }
 }
 
+/**
+ * A test reference on disk. One under `packages/` names its package by folder,
+ * `packages/<name>/…`, and resolves through that package's group.
+ */
+function repoFile(path) {
+  return join(ROOT, path);
+}
+
 for (const group of manifest.v3Removals.groups) {
   // The test reference may carry a trailing " — <test name>"; the path is the head.
   const path = group.test.split(" — ")[0];
-  if (!existsSync(join(ROOT, path))) {
+  if (!existsSync(repoFile(path))) {
     problems.push(
       `v3Removals: ${group.id} names test ${path}, which does not exist`
     );
@@ -729,7 +744,7 @@ for (const group of manifest.v4Removals.groups) {
     }
   }
   const path = group.test.split(" — ")[0];
-  if (!existsSync(join(ROOT, path))) {
+  if (!existsSync(repoFile(path))) {
     problems.push(
       `v4Removals: ${group.id} names test ${path}, which does not exist`
     );

@@ -38,7 +38,6 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import {
   aliasRuntimeProbe,
@@ -51,9 +50,9 @@ import {
   removedV2Props,
   SENIOR,
 } from "./layer-fixtures.mjs";
+import { listPackages, REPO_ROOT } from "./packages.mjs";
 import { missingNames, NAMEABLE, NAMEABLE_PROBE } from "./packed-names.mjs";
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // Absolute executable paths — never a bare name off a writable PATH. npm
 // ships beside the running node; pnpm is the launcher that ran this script.
 const NPM_BIN = join(
@@ -76,12 +75,12 @@ const bin = (dir, name) =>
     process.platform === "win32" ? `${name}.cmd` : name
   );
 
-/** Pack one workspace package into `dest`, returning the tarball path. */
+/** Pack the workspace package at `pkgDir` into `dest`, returning the tarball path. */
 function packInto(pkgDir, dest) {
   const out = execFileSync(
     process.execPath,
     [PNPM_CLI, "pack", "--pack-destination", dest],
-    { cwd: join(REPO_ROOT, "packages", pkgDir), encoding: "utf8" }
+    { cwd: pkgDir, encoding: "utf8" }
   );
   const lines = out.trim().split("\n");
   return lines[lines.length - 1].trim();
@@ -155,11 +154,10 @@ function main() {
   });
 
   // ── Pack every publishable package ────────────────────────────────────
-  const pkgDirs = readdirSync(join(REPO_ROOT, "packages"));
   const tarballs = {};
-  for (const dir of pkgDirs) {
+  for (const { dir } of listPackages()) {
     const name = JSON.parse(
-      readFileSync(join(REPO_ROOT, "packages", dir, "package.json"), "utf8")
+      readFileSync(join(dir, "package.json"), "utf8")
     ).name;
     process.stdout.write(`packing ${name} … `);
     tarballs[name] = packInto(dir, packDir);

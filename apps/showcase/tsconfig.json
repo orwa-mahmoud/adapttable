@@ -19,7 +19,7 @@
     "resolveJsonModule": true,
     "types": ["vite/client", "node"],
     "paths": {
-      "@adapttable/core/pdf": ["../../packages/core/src/pdf.ts"]
+      "@adapttable/core/pdf": ["../../packages/shared/core/src/pdf.ts"]
     }
   },
   "include": ["src", "vite.config.ts", "matrix.mjs", "pages.mjs"]

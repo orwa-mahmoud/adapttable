@@ -3,29 +3,25 @@
  *
  * Shared by smoke-dist, framework-boundary checking, and isolation fixtures.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
 
-const PACKAGES_DIR = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "packages"
-);
+import { listPackages, REPO_ROOT } from "./packages.mjs";
 
 function readPackageJson(pkgDir) {
   return JSON.parse(readFileSync(join(pkgDir, "package.json"), "utf8"));
 }
 
-/** Every workspace package directory keyed by its published name. */
-export function buildPkgDirByName(packagesDir = PACKAGES_DIR) {
+/**
+ * Every workspace package directory keyed by its published name.
+ *
+ * @param {string} [root] repository root to read, for fixtures
+ */
+export function buildPkgDirByName(root = REPO_ROOT) {
   return new Map(
-    readdirSync(packagesDir).map((pkg) => {
-      const pkgDir = join(packagesDir, pkg);
-      return [readPackageJson(pkgDir).name, pkgDir];
-    })
+    listPackages(root).map(({ dir }) => [readPackageJson(dir).name, dir])
   );
 }
 
@@ -147,4 +143,4 @@ export function exportTargets(pkgJson) {
   return [...targets];
 }
 
-export { PACKAGES_DIR, readPackageJson };
+export { readPackageJson };

@@ -9,11 +9,12 @@
  */
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const dist = join(root, "packages/ai/dist");
+import { packageDir } from "./packages.mjs";
+
+const dist = join(packageDir("ai"), "dist");
 
 const ENTRIES = [
   {

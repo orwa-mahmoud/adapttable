@@ -1,13 +1,12 @@
 import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import { SHOWCASE_ADAPTERS } from "../apps/showcase/matrix.mjs";
+import { listPackages } from "./packages.mjs";
 import { demoRoute, siteUrl } from "./site.mjs";
 
-const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const HUB = siteUrl(demoRoute());
 const HUB_PACKAGES = new Set([
   "@adapttable/core",
@@ -26,10 +25,8 @@ function json(path) {
 }
 
 function publishedManifests() {
-  return readdirSync(join(ROOT, "packages"), { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => join(ROOT, "packages", entry.name, "package.json"))
-    .filter(existsSync)
+  return listPackages()
+    .map(({ dir }) => join(dir, "package.json"))
     .map((path) => ({ path, pkg: json(path) }))
     .filter(({ pkg }) => pkg.private !== true);
 }

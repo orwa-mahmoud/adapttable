@@ -5,11 +5,11 @@
       "entry": ["scripts/*.mjs", "vitest.shared.ts", "eslint.config.mjs"],
       "project": ["scripts/**/*.mjs", "*.ts", "*.mjs"]
     },
-    "packages/*": {
+    "packages/*/*": {
       "entry": ["src/*.ts!", "src/*.tsx!"],
       "project": ["src/**/*.{ts,tsx}!"]
     },
-    "packages/core": {
+    "packages/shared/core": {
       "entry": [
         "src/*.ts!",
         "src/*.tsx!",

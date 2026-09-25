@@ -720,7 +720,7 @@
         "v3Path": "import { rowReorder } from \"@adapttable/mui/row-reorder\";\n<DataTable features={[rowReorder(handler)]} />",
         "packages": ["@adapttable/core", "every @adapttable/<kit>"],
         "warnedBy": "removed — the feature import is the only way in",
-        "test": "packages/react/src/features/row-reorder.test.tsx",
+        "test": "packages/react/react/src/features/row-reorder.test.tsx",
         "note": "Removed ahead of the rest because row reordering is the feature that proves the provider seam: while the prop worked, the chrome had to import the hook to serve it, and nothing could leave the graph."
       },
       {
@@ -730,7 +730,7 @@
         "v3Path": "<DataTable features={[rowReorder(fn), grouping(\"team\"), virtualize()]} />",
         "packages": ["@adapttable/core", "every @adapttable/<kit>"],
         "warnedBy": "removed — the feature import is the only way in",
-        "test": "packages/react/src/features/tableFeature.test.ts — \"says nothing about a props object it is handed\"",
+        "test": "packages/react/react/src/features/tableFeature.test.ts — \"says nothing about a props object it is handed\"",
         "props": {
           "pinnedRowIds": "rowPinning",
           "onPinnedRowIdsChange": "rowPinning",
@@ -1049,7 +1049,7 @@
         "v3Path": "import { usePlainChromeBodyData, useVirtualChromeBodyData } from \"@adapttable/react\"",
         "packages": ["@adapttable/react"],
         "warnedBy": "removed — choose the plain or virtual implementation explicitly",
-        "test": "packages/react/src/useChromeBodyData.boxVirtual.test.tsx"
+        "test": "packages/react/react/src/useChromeBodyData.boxVirtual.test.tsx"
       },
       {
         "id": "filter-type-registry",
@@ -1058,7 +1058,7 @@
         "v3Path": "features={[{ id: \"my-filter\", setup: (host) => host.registerFilterType(spec) }]}",
         "packages": ["@adapttable/core"],
         "warnedBy": "removed — TableFeatureHost.registerFilterType is the only route",
-        "test": "packages/core/src/filters/filterRegistry.test.ts"
+        "test": "packages/shared/core/src/filters/filterRegistry.test.ts"
       },
       {
         "id": "mui-size-prop",
@@ -1067,7 +1067,7 @@
         "v3Path": "<DataTable density=\"compact\" />",
         "packages": ["@adapttable/mui"],
         "warnedBy": "removed — density is the only input",
-        "test": "packages/adapter-mui/src/DataTable.coverage.test.tsx — \"sizes its cells from density, which is the only input\""
+        "test": "packages/react/adapter-mui/src/DataTable.coverage.test.tsx — \"sizes its cells from density, which is the only input\""
       }
     ]
   },
@@ -1085,7 +1085,7 @@
           "every @adapttable/<kit>"
         ],
         "warnedBy": "@deprecated on BaseDataTableProps, the useDataTable option and the visibleColumns overload",
-        "test": "packages/core/src/columns/visibleColumns.test.ts — \"is every column without hideOnMobile, in declared order\"",
+        "test": "packages/shared/core/src/columns/visibleColumns.test.ts — \"is every column without hideOnMobile, in declared order\"",
         "props": ["mobileIdentityColumns"]
       }
     ]

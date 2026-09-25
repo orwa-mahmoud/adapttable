@@ -15,13 +15,15 @@ import { fileURLToPath } from "node:url";
 
 import prettier from "prettier";
 
+import { packageDir } from "./packages.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const { agentHttpJsonSchema } = await import(
-  join(ROOT, "packages/ai/dist/http.js")
+  join(packageDir("ai"), "dist", "http.js")
 );
 const { agentInstructions } = await import(
-  join(ROOT, "packages/ai/dist/context.js")
+  join(packageDir("ai"), "dist", "context.js")
 );
 
 /**

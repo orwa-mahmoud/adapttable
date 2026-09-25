@@ -73,6 +73,26 @@ export function plannedReleases({ packages, existing, ignored }) {
   });
 }
 
+/** A package manifest's path in the tree: `packages/<group>/<name>/package.json`. */
+const PACKAGE_MANIFEST = /^packages\/[^/]+\/([^/]+)\/package\.json$/;
+
+/**
+ * The package folders a commit holds, from the path list
+ * `git ls-tree -r --name-only <ref> -- packages` prints, sorted by folder name
+ * as the working tree lists them.
+ *
+ * @param {string} tree one repository-relative path per line
+ * @returns {string[]} each folder, as `packages/<group>/<name>`
+ */
+export function packageDirsInTree(tree) {
+  return tree
+    .split("\n")
+    .map((path) => PACKAGE_MANIFEST.exec(path.trim()))
+    .filter((match) => match !== null)
+    .sort((a, b) => a[1].localeCompare(b[1]))
+    .map((match) => match[0].slice(0, -"/package.json".length));
+}
+
 const invokedDirectly = process.argv[1]?.endsWith("github-releases.mjs");
 if (invokedDirectly) {
   const { execFileSync } = await import("node:child_process");
@@ -100,16 +120,16 @@ if (invokedDirectly) {
 
   const sha = run("git", ["rev-parse", ref]).trim();
   const config = JSON.parse(show(".changeset/config.json") ?? "{}");
-  const dirs = run("git", ["ls-tree", "--name-only", `${ref}:packages`])
-    .split("\n")
-    .filter(Boolean);
+  const dirs = packageDirsInTree(
+    run("git", ["ls-tree", "-r", "--name-only", ref, "--", "packages"])
+  );
   const packages = dirs.flatMap((dir) => {
-    const manifest = show(`packages/${dir}/package.json`);
+    const manifest = show(`${dir}/package.json`);
     if (manifest === null) return [];
     return [
       {
         manifest: JSON.parse(manifest),
-        changelog: show(`packages/${dir}/CHANGELOG.md`),
+        changelog: show(`${dir}/CHANGELOG.md`),
       },
     ];
   });

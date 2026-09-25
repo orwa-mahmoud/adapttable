@@ -6,6 +6,7 @@ import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 
 import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
+import { packageDir } from "../../scripts/packages.mjs";
 import { SHOWCASE_PAGES } from "./pages.mjs";
 
 const GA_MEASUREMENT_ID = "G-FT8LY7Z15Y";
@@ -155,9 +156,7 @@ const patchStream = (): Plugin => ({
 // always reflects the current library (and hot-reloads). The adapters are still
 // the REAL ones — each section mounts a genuine kit component, never a mock.
 const pkg = (rel: string, entry = "index", ext = "ts") =>
-  fileURLToPath(
-    new URL(`../../packages/${rel}/src/${entry}.${ext}`, import.meta.url)
-  );
+  `${packageDir(rel)}/src/${entry}.${ext}`;
 
 const page = (rel: string) => fileURLToPath(new URL(rel, import.meta.url));
 
