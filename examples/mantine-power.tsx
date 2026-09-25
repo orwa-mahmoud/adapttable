@@ -1,6 +1,7 @@
 import "@mantine/core/styles.css";
 
 import { DataTable } from "@adapttable/mantine";
+import { filters } from "@adapttable/mantine/filters";
 import { multiSort } from "@adapttable/mantine/multi-sort";
 import { rowDetail } from "@adapttable/mantine/row-detail";
 import { MantineProvider } from "@mantine/core";
@@ -69,7 +70,7 @@ export function MantinePowerExample() {
           },
         ]}
         rowKey={(o) => o.id}
-        features={[multiSort(), rowDetail((o: Order) => o.detail)]}
+        features={[multiSort(), rowDetail((o: Order) => o.detail), filters([])]}
         summaryRow={(rows) => ({
           amount: (
             <b>

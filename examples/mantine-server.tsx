@@ -1,6 +1,7 @@
 import "@mantine/core/styles.css";
 
 import { DataTable, type TableQuery } from "@adapttable/mantine";
+import { filters } from "@adapttable/mantine/filters";
 import { MantineProvider } from "@mantine/core";
 import { useState } from "react";
 
@@ -78,6 +79,8 @@ export function MantineServerExample() {
           },
         ]}
         rowKey={(r) => r.id}
+        // Composes the Filters control that column `filter` declarations use.
+        features={[filters([])]}
       />
     </MantineProvider>
   );
