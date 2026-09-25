@@ -16,27 +16,16 @@
  * other end is a server that never renders.
  */
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+  type PivotConfig,
+  pivotSlice,
+  URL_SLICE_WRITE_DEBOUNCE_MS,
+} from "@adapttable/core";
+import { useCallback, useMemo } from "react";
 
-import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
+import type { UrlStateAdapter } from "../url/adapter";
+import { useUrlSlice } from "../url/useUrlSlice";
 
 export type { UrlStateAdapter };
-import {
-  deserializePivotState,
-  EMPTY_PIVOT_CONFIG,
-  PARAM_PIVOT,
-  parseTableUrlState,
-  type PivotConfig,
-  type PivotUrlState,
-  serializePivotState,
-  updateTableUrlState,
-} from "@adapttable/core";
 
 /**
  * Trailing debounce for URL persistence, as the column-layout and formula hooks
@@ -46,10 +35,7 @@ import {
  * overlay gone and the URL not yet updated, so a field the reader just moved
  * jumps back to where it was.
  */
-export const PIVOT_URL_WRITE_DEBOUNCE_MS = 150;
-
-/** Nothing folded, with a stable identity so a read cannot churn a memo. */
-const NOTHING_COLLAPSED: readonly string[] = [];
+export const PIVOT_URL_WRITE_DEBOUNCE_MS = URL_SLICE_WRITE_DEBOUNCE_MS;
 
 /**
  * What {@link usePivotUrlState} needs.
@@ -97,106 +83,30 @@ export interface UsePivotUrlStateResult {
 export function usePivotUrlState(
   options: UsePivotUrlStateOptions = {}
 ): UsePivotUrlStateResult {
-  const { urlAdapter, urlSync, urlKey, defaultConfig } = options;
-  const ns = urlKey ? `${urlKey}.` : "";
-  const param = `${ns}${PARAM_PIVOT}`;
-  const resolved = useResolvedAdapter(urlAdapter, urlSync ?? true);
-  // Same SSR rule as the other URL hooks: only an explicit adapter is
-  // trusted to be hydration-consistent.
-  const search = useSyncExternalStore(
-    (onChange) => resolved.subscribe(onChange),
-    () => resolved.getSearch(),
-    () => (urlAdapter ? urlAdapter.getSearch() : "")
-  );
-  // Optimistic overlay: the change that has not reached the URL yet.
-  const [pending, setPending] = useState<PivotUrlState | null>(null);
-  const flushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const state = useMemo<PivotUrlState>(() => {
-    if (pending) return pending;
-    const raw = parseTableUrlState(search, ns).get(param);
-    if (raw === null) {
-      return {
-        config: defaultConfig ?? EMPTY_PIVOT_CONFIG,
-        collapsed: NOTHING_COLLAPSED,
-      };
-    }
-    return deserializePivotState(raw);
-  }, [pending, search, ns, param, defaultConfig]);
-
+  const [state, change, latest] = useUrlSlice(options, pivotSlice, {
+    defaultConfig: options.defaultConfig,
+  });
   const collapsed = useMemo(() => new Set(state.collapsed), [state.collapsed]);
 
-  const persist = useCallback(
-    (next: PivotUrlState) => {
-      resolved.setSearch(
-        updateTableUrlState(resolved.getSearch(), ns, (params) => {
-          const value = serializePivotState(next);
-          // An empty pivot writes no parameter: a URL should carry what someone
-          // built, not restate the nothing the table starts with.
-          if (value === "") params.delete(param);
-          else params.set(param, value);
-        })
-      );
-    },
-    [resolved, ns, param]
-  );
-
-  // What the setters below read. Two of them share one parameter, and a render
-  // is not guaranteed between them: a handler that changes the configuration and
-  // the folded set in one batch would otherwise write the second change over the
-  // first, because both would have read the state this render was built from.
-  const latest = useRef<PivotUrlState>(state);
-  latest.current = state;
-
-  const change = useCallback(
-    (next: PivotUrlState) => {
-      latest.current = next;
-      setPending(next);
-      if (flushTimer.current) clearTimeout(flushTimer.current);
-      flushTimer.current = setTimeout(() => {
-        flushTimer.current = null;
-        persist(next);
-        setPending(null);
-      }, PIVOT_URL_WRITE_DEBOUNCE_MS);
-    },
-    [persist]
-  );
-
+  // The setters read the latest state, a change not yet written included. Two
+  // of them share one parameter, and a render is not guaranteed between them:
+  // a handler that changes the configuration and the folded set in one batch
+  // would otherwise write the second change over the first.
   const onConfigChange = useCallback(
     (next: PivotConfig) => {
       // The folded keys ride along: a field moved on an axis does not unfold
       // what the reader had folded, and a key whose group is gone simply
       // matches nothing.
-      change({ config: next, collapsed: latest.current.collapsed });
+      change({ config: next, collapsed: latest().collapsed });
     },
-    [change]
+    [change, latest]
   );
 
   const onCollapsedChange = useCallback(
     (next: ReadonlySet<string>) => {
-      change({ config: latest.current.config, collapsed: [...next] });
+      change({ config: latest().config, collapsed: [...next] });
     },
-    [change]
-  );
-
-  // Flush a pending change on unmount, so the last move a reader made before
-  // navigating is not lost.
-  const latestRef = useRef<{
-    pending: PivotUrlState | null;
-    persist: typeof persist;
-  }>({ pending, persist });
-  latestRef.current = { pending, persist };
-  useEffect(
-    () => () => {
-      if (flushTimer.current) {
-        clearTimeout(flushTimer.current);
-        // Invariant: a live timer implies a pending change — the timeout
-        // clears the timer BEFORE it clears `pending`.
-        const { pending: last, persist: write } = latestRef.current;
-        write(last!);
-      }
-    },
-    []
+    [change, latest]
   );
 
   return { config: state.config, onConfigChange, collapsed, onCollapsedChange };

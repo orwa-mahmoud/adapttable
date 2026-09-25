@@ -10,25 +10,15 @@
  * evaluation happens later, in the engine, on purpose.
  */
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+  type FormulaColumnSpec,
+  formulaSlice,
+  URL_SLICE_WRITE_DEBOUNCE_MS,
+} from "@adapttable/core";
 
-import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
+import type { UrlStateAdapter } from "../url/adapter";
+import { useUrlSlice } from "../url/useUrlSlice";
 
 export type { UrlStateAdapter };
-import {
-  deserializeFormulaColumns,
-  type FormulaColumnSpec,
-  PARAM_FORMULA,
-  parseTableUrlState,
-  serializeFormulaColumns,
-  updateTableUrlState,
-} from "@adapttable/core";
 
 /**
  * Trailing debounce for URL persistence. A formula bar that writes as it is
@@ -38,10 +28,7 @@ import {
  *
  * @public
  */
-export const FORMULA_URL_WRITE_DEBOUNCE_MS = 150;
-
-/** Stable identity for "no formula columns", so a read cannot churn a memo. */
-const NO_FORMULAS: readonly FormulaColumnSpec[] = [];
+export const FORMULA_URL_WRITE_DEBOUNCE_MS = URL_SLICE_WRITE_DEBOUNCE_MS;
 
 /**
  * What {@link useFormulaUrlState} needs.
@@ -82,82 +69,8 @@ export interface UseFormulaUrlStateResult {
 export function useFormulaUrlState(
   options: UseFormulaUrlStateOptions = {}
 ): UseFormulaUrlStateResult {
-  const { urlAdapter, urlSync, urlKey, defaultFormulas } = options;
-  const ns = urlKey ? `${urlKey}.` : "";
-  const param = `${ns}${PARAM_FORMULA}`;
-  const resolved = useResolvedAdapter(urlAdapter, urlSync ?? true);
-  // Same SSR rule as the other URL hooks: only an explicit adapter is trusted
-  // to be hydration-consistent; the default history adapter hydrates from "".
-  const search = useSyncExternalStore(
-    (onChange) => resolved.subscribe(onChange),
-    () => resolved.getSearch(),
-    () => (urlAdapter ? urlAdapter.getSearch() : "")
-  );
-  // Optimistic overlay: the list that has not reached the URL yet.
-  const [pending, setPending] = useState<readonly FormulaColumnSpec[] | null>(
-    null
-  );
-  const flushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const formulas = useMemo<readonly FormulaColumnSpec[]>(() => {
-    if (pending) return pending;
-    const raw = parseTableUrlState(search, ns).get(param);
-    // Absent means nothing has been said, so the default applies. Present and
-    // empty means someone removed the last column, which is not the same thing.
-    if (raw === null) return defaultFormulas ?? NO_FORMULAS;
-    return deserializeFormulaColumns(raw);
-  }, [pending, search, ns, param, defaultFormulas]);
-
-  const persist = useCallback(
-    (next: readonly FormulaColumnSpec[]) => {
-      resolved.setSearch(
-        updateTableUrlState(resolved.getSearch(), ns, (params) => {
-          const value = serializeFormulaColumns(next);
-          if (value !== "") params.set(param, value);
-          else if (defaultFormulas && defaultFormulas.length > 0) {
-            // An emptied list writes the empty marker when there is a default
-            // to displace: deleting the parameter reads back as "nothing has
-            // been said", and removed columns would return on the next read.
-            params.set(param, "");
-          } else params.delete(param);
-        })
-      );
-    },
-    [resolved, ns, param, defaultFormulas]
-  );
-
-  const onFormulasChange = useCallback(
-    (next: readonly FormulaColumnSpec[]) => {
-      setPending(next);
-      if (flushTimer.current) clearTimeout(flushTimer.current);
-      flushTimer.current = setTimeout(() => {
-        flushTimer.current = null;
-        persist(next);
-        setPending(null);
-      }, FORMULA_URL_WRITE_DEBOUNCE_MS);
-    },
-    [persist]
-  );
-
-  // Flush a pending list on unmount so a formula typed and navigated away from
-  // is not lost.
-  const latestRef = useRef<{
-    pending: readonly FormulaColumnSpec[] | null;
-    persist: typeof persist;
-  }>({ pending, persist });
-  latestRef.current = { pending, persist };
-  useEffect(
-    () => () => {
-      if (flushTimer.current) {
-        clearTimeout(flushTimer.current);
-        // Invariant: a live timer implies a pending list — the timeout clears
-        // the timer BEFORE it clears `pending`.
-        const { pending: last, persist: write } = latestRef.current;
-        write(last!);
-      }
-    },
-    []
-  );
-
+  const [formulas, onFormulasChange] = useUrlSlice(options, formulaSlice, {
+    defaultFormulas: options.defaultFormulas,
+  });
   return { formulas, onFormulasChange };
 }

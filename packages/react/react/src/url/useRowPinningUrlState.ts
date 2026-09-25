@@ -7,16 +7,14 @@
  * batteries-included shell also writes this when pinning is armed and the
  * host has not taken control.
  */
-import {
-  parseTableUrlState,
-  readRowPins,
-  updateTableUrlState,
-  writeRowPins,
-} from "@adapttable/core";
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { rowPinningSlice } from "@adapttable/core";
 
-import { EMPTY_ROW_PIN_STATE, type RowPinState } from "../rows/rowPinning";
-import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
+import type { RowPinState } from "../rows/rowPinning";
+import type { UrlStateAdapter } from "./adapter";
+import { useUrlSlice } from "./useUrlSlice";
+
+/** Pinned rows take no configuration. */
+const NO_CONFIG = {};
 
 /**
  * What {@link useRowPinningUrlState} needs.
@@ -55,35 +53,10 @@ export interface UseRowPinningUrlStateResult {
 export function useRowPinningUrlState(
   options: UseRowPinningUrlStateOptions = {}
 ): UseRowPinningUrlStateResult {
-  const { urlAdapter, urlSync, urlKey } = options;
-  const ns = urlKey ? `${urlKey}.` : "";
-  const resolved = useResolvedAdapter(urlAdapter, urlSync ?? true);
-  const search = useSyncExternalStore(
-    (onChange) => resolved.subscribe(onChange),
-    () => resolved.getSearch(),
-    () => (urlAdapter ? urlAdapter.getSearch() : "")
+  const [pinnedRowIds, onPinnedRowIdsChange] = useUrlSlice(
+    options,
+    rowPinningSlice,
+    NO_CONFIG
   );
-  const [pending, setPending] = useState<RowPinState | null>(null);
-
-  const pinnedRowIds = useMemo(() => {
-    if (pending) return pending;
-    return (
-      readRowPins(parseTableUrlState(search, ns), ns) ?? EMPTY_ROW_PIN_STATE
-    );
-  }, [ns, pending, search]);
-
-  const onPinnedRowIdsChange = useCallback(
-    (next: RowPinState) => {
-      setPending(next);
-      resolved.setSearch(
-        updateTableUrlState(resolved.getSearch(), ns, (params) => {
-          writeRowPins(params, next, ns);
-        })
-      );
-      setPending(null);
-    },
-    [ns, resolved]
-  );
-
   return { pinnedRowIds, onPinnedRowIdsChange };
 }

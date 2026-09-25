@@ -386,6 +386,8 @@ export {
   type FilterFormSource,
   listFilterValues,
 } from "./filters/filterFormModel";
+export { formulaSlice } from "./formula/formulaUrlSlice";
+export { pivotSlice } from "./pivot/pivotUrlSlice";
 export type { CssProperties } from "./style/cssProperties";
 export {
   createHistoryAdapter,
@@ -399,6 +401,25 @@ export {
   type RouterUrlAdapterOptions,
 } from "./url/routerAdapter";
 export type { UrlStateAdapter } from "./url/urlStateAdapter";
+export {
+  columnLayoutSlice,
+  densitySlice,
+  groupCollapseSlice,
+  rowPinningSlice,
+  type TableDensity,
+  URL_SLICE_WRITE_DEBOUNCE_MS,
+} from "./url/viewStateSlices";
+export {
+  createTableViewStore,
+  createUrlSliceStore,
+  type TableViewState,
+  type TableViewStateConfig,
+  type TableViewStore,
+  type UrlSliceSpec,
+  type UrlSliceStore,
+  type ViewStateSource,
+  type ViewStateSubscription,
+} from "./url/viewStateStore";
 /* ── Shared render contracts ───────────────────────────────────────── */
 
 /* ── Sources ───────────────────────────────────────────────────────── */
