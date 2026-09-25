@@ -107,6 +107,14 @@ describe("classify", () => {
     assert.equal(f.runPlaywright, false);
   });
 
+  it("typechecks and lints when only an example changes", () => {
+    const f = classify(["examples/antd-server.tsx", "examples/README.md"]);
+    assert.equal(f.runLint, true);
+    assert.equal(f.runUnit, false);
+    assert.equal(f.runPlaywright, false);
+    assert.equal(f.needBuild, false);
+  });
+
   it("lints root tooling when only a script changes", () => {
     const f = classify(["scripts/ci-detect.mjs"]);
     assert.equal(f.runLintRoot, true);

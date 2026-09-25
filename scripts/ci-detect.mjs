@@ -22,6 +22,8 @@ const DOCS_OR_META =
 const VERSION_ONLY =
   /^(packages\/[^/]+\/(package\.json|CHANGELOG\.md)|\.changeset\/)/;
 
+const EXAMPLES = /^examples\/.*\.(ts|tsx)$/;
+
 const ESLINT_ROOT = /^eslint\.config\.mjs$/;
 const VITEST_SHARED = /^vitest\.shared\.ts$/;
 
@@ -67,6 +69,7 @@ export function classify(files) {
   const playwright = list.some((f) => PLAYWRIGHT.test(f));
   const bench = list.some((f) => BENCH.test(f));
   const eslintRoot = list.some((f) => ESLINT_ROOT.test(f));
+  const examples = list.some((f) => EXAMPLES.test(f));
   const vitestShared = list.some((f) => VITEST_SHARED.test(f));
   const versionOnly = list.every((f) => VERSION_ONLY.test(f));
   const docsOnly =
@@ -109,7 +112,7 @@ export function classify(files) {
 
   return gate(
     {
-      runLint: packagesChanged || eslintRoot,
+      runLint: packagesChanged || eslintRoot || examples,
       runLintRoot: packagesChanged || rootTooling,
       runUnit: packagesChanged || vitestShared,
       runPackage: packagesChanged,
