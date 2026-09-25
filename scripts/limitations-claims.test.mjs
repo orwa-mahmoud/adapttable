@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { sidebarSlugs } from "../apps/docs/sidebar.mjs";
 import { DESCRIPTIONS, TITLES } from "../apps/docs/sync-docs.mjs";
 import { DOCS } from "./build-llms-full.mjs";
+import { packageRel } from "./packages.mjs";
 import { docsRoute, siteUrl } from "./site.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -23,9 +24,9 @@ const EVIDENCE = [
   ["docs/ssr-rsc.md", "forceMobile"],
   ["docs/getting-started.md", "22.12.0"],
   ["docs/accessibility.md", "forced-colors"],
-  ["packages/ai/src/session.ts", "readMaxOf"],
-  ["packages/ai/src/session.governed.test.ts", "readMax"],
-  ["packages/core/src/export/tableCsv.ts", "EXPORT_FETCH_ALL_MAX_ROWS"],
+  [`${packageRel("ai")}/src/session.ts`, "readMaxOf"],
+  [`${packageRel("ai")}/src/session.governed.test.ts`, "readMax"],
+  [`${packageRel("core")}/src/export/tableCsv.ts`, "EXPORT_FETCH_ALL_MAX_ROWS"],
   ["scripts/consumer-fixtures.mjs", "PLAIN_ADAPTER_CEILING_KB"],
   ["scripts/bundle-budget.mjs", "PLAIN_ADAPTER_CEILING_KB"],
   ["scripts/ai-isolation.mjs", "createAgentSession"],

@@ -40,6 +40,7 @@ import {
   entryExports,
   summarize,
 } from "./api-warnings.mjs";
+import { packageDir } from "./packages.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ETC = join(REPO_ROOT, "etc");
@@ -99,7 +100,7 @@ function extractOne({ dir, report, entry, isMainEntry }) {
     : "";
   const config = ExtractorConfig.prepare({
     configObject: {
-      projectFolder: join(REPO_ROOT, "packages", dir),
+      projectFolder: packageDir(dir),
       mainEntryPointFilePath: entry,
       apiReport: {
         enabled: true,
@@ -134,7 +135,7 @@ function extractOne({ dir, report, entry, isMainEntry }) {
       },
     },
     configObjectFullPath: undefined,
-    packageJsonFullPath: join(REPO_ROOT, "packages", dir, "package.json"),
+    packageJsonFullPath: join(packageDir(dir), "package.json"),
   });
   // Always a "local" build: warnings (undocumented symbols, missing release
   // tags) are review information inside the report, never a gate failure.

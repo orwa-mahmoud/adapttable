@@ -25,9 +25,9 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import { packageDir, REPO_ROOT } from "./packages.mjs";
+
 const REPORT_DIR = join(REPO_ROOT, "reports", "peer-matrix");
 // The probe must test the major users currently install, so ranges are
 // derived from the workspace versions — a hardcoded range silently kept
@@ -36,7 +36,7 @@ const REPORT_DIR = join(REPO_ROOT, "reports", "peer-matrix");
 function workspaceMajor(pkgDir) {
   return Number(
     JSON.parse(
-      readFileSync(join(REPO_ROOT, "packages", pkgDir, "package.json"), "utf8")
+      readFileSync(join(packageDir(pkgDir), "package.json"), "utf8")
     ).version.split(".")[0]
   );
 }

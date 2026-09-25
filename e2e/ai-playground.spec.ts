@@ -508,7 +508,7 @@ test.describe(`${CANONICAL_AI_ADAPTER} conversational workflows`, () => {
     // Before the panel opens, because opening it takes the launcher out of the
     // DOM. Direction without the locale proves the layout and nothing about the
     // translations: an RTL frame around English is not what a reader in Arabic
-    // sees. Both strings come from `packages/i18n/src/locales/ar.ts`.
+    // sees. Both strings come from `packages/shared/i18n/src/locales/ar.ts`.
     await expect(page.locator(part("assistant-launcher"))).toHaveAccessibleName(
       "اسأل المساعد"
     );

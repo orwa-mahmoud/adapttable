@@ -9,7 +9,7 @@
  *   node scripts/check-framework-boundary.mjs
  */
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
+import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -18,8 +18,12 @@ import {
   resolvePublishedEntry,
   walkGraph,
 } from "./module-graph.mjs";
+import {
+  packageDir,
+  REPO_ROOT as ROOT,
+  resolvePackagePath,
+} from "./packages.mjs";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const MANIFEST = join(ROOT, "scripts", "feature-classification.json");
 
 const { frameworkBoundary } = JSON.parse(readFileSync(MANIFEST, "utf8"));
@@ -114,7 +118,7 @@ function checkSourceEngineModules() {
   const missing = [];
   const violations = [];
   for (const relativePath of engineModules) {
-    const file = join(ROOT, "packages", relativePath);
+    const file = resolvePackagePath(relativePath);
     if (!existsSync(file)) {
       missing.push(relativePath);
       continue;
@@ -181,7 +185,7 @@ export function runFrameworkBoundaryCheck() {
 }
 
 function main() {
-  const coreRuntime = join(ROOT, "packages", "core", "dist", "index.js");
+  const coreRuntime = join(packageDir("core"), "dist", "index.js");
   if (!existsSync(coreRuntime)) {
     console.error(
       "✗ not built, so the framework boundary is unproven.\n" +

@@ -1,30 +1,18 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { describe, it } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import {
   classifyForgottenExport,
   summarize,
   VALUE_BACKED,
 } from "./api-warnings.mjs";
+import { packageDir } from "./packages.mjs";
 
-const CORE_SRC = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "packages",
-  "core",
-  "src"
-);
+const CORE_SRC = join(packageDir("core"), "src");
 
-const REACT_SRC = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "packages",
-  "react",
-  "src"
-);
+const REACT_SRC = join(packageDir("react"), "src");
 
 /** Every field the classifier reads, with the safe defaults a test overrides. */
 const classify = (over) =>

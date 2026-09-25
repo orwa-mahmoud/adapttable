@@ -19,9 +19,9 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import { packageDir } from "./packages.mjs";
+
 const NPM_BIN = join(
   dirname(process.execPath),
   process.platform === "win32" ? "npm.cmd" : "npm"
@@ -231,7 +231,7 @@ function packInto(pkgDir, dest) {
   const out = execFileSync(
     process.execPath,
     [PNPM_CLI, "pack", "--pack-destination", dest],
-    { cwd: join(REPO_ROOT, "packages", pkgDir), encoding: "utf8" }
+    { cwd: packageDir(pkgDir), encoding: "utf8" }
   );
   const lines = out.trim().split("\n");
   return lines[lines.length - 1].trim();

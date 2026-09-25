@@ -4,10 +4,9 @@
  * published adapter. Run from the repo root.
  */
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import { packageDir } from "./packages.mjs";
 
 const SUBPATHS = [
   "row-reorder",
@@ -430,7 +429,7 @@ export function findInTable<TRow>(): TableFeature<TRow> {
 }
 
 for (const kit of KITS) {
-  const src = join(ROOT, "packages", kit.dir, "src");
+  const src = join(packageDir(kit.dir), "src");
   for (const [file, name] of Object.entries(HEADLESS)) {
     const ts = join(src, `${file}.ts`);
     const tsx = join(src, `${file}.tsx`);
@@ -471,24 +470,24 @@ export function DisplayCell<TRow>({
 `
   );
 
-  ensureExports(join(ROOT, "packages", kit.dir, "package.json"));
+  ensureExports(join(packageDir(kit.dir), "package.json"));
 
   const entries = [];
   for (const subpath of SUBPATHS) {
     for (const ext of [".tsx", ".ts"]) {
       const file = `src/${subpath}${ext}`;
-      if (existsSync(join(ROOT, "packages", kit.dir, file))) {
+      if (existsSync(join(packageDir(kit.dir), file))) {
         entries.push(file);
         break;
       }
     }
   }
-  ensureTsdown(join(ROOT, "packages", kit.dir, "tsdown.config.ts"), entries);
+  ensureTsdown(join(packageDir(kit.dir), "tsdown.config.ts"), entries);
 }
 
-const shadcnPkg = join(ROOT, "packages", "adapter-shadcn", "package.json");
+const shadcnPkg = join(packageDir("adapter-shadcn"), "package.json");
 ensureExports(shadcnPkg);
-const shadcnSrc = join(ROOT, "packages", "adapter-shadcn", "src");
+const shadcnSrc = join(packageDir("adapter-shadcn"), "src");
 for (const subpath of SUBPATHS) {
   const ts = join(shadcnSrc, `${subpath}.ts`);
   if (!existsSync(ts) && !existsSync(join(shadcnSrc, `${subpath}.tsx`))) {
@@ -499,11 +498,11 @@ const shadcnEntries = SUBPATHS.filter((subpath) =>
   existsSync(join(shadcnSrc, `${subpath}.ts`))
 ).map((subpath) => `src/${subpath}.ts`);
 ensureTsdown(
-  join(ROOT, "packages", "adapter-shadcn", "tsdown.config.ts"),
+  join(packageDir("adapter-shadcn"), "tsdown.config.ts"),
   shadcnEntries
 );
 
-const muiSrc = join(ROOT, "packages", "adapter-mui", "src");
+const muiSrc = join(packageDir("adapter-mui"), "src");
 for (const [file, name] of Object.entries(HEADLESS)) {
   const ts = join(muiSrc, `${file}.ts`);
   const tsx = join(muiSrc, `${file}.tsx`);
@@ -520,20 +519,17 @@ if (!existsSync(join(muiSrc, "selection-stats.ts"))) {
 if (!existsSync(join(muiSrc, "row-actions.ts"))) {
   writeFileSync(join(muiSrc, "row-actions.ts"), headlessFile("rowActions"));
 }
-ensureExports(join(ROOT, "packages", "adapter-mui", "package.json"));
+ensureExports(join(packageDir("adapter-mui"), "package.json"));
 const muiEntries = [];
 for (const subpath of SUBPATHS) {
   for (const ext of [".tsx", ".ts"]) {
     const file = `src/${subpath}${ext}`;
-    if (existsSync(join(ROOT, "packages", "adapter-mui", file))) {
+    if (existsSync(join(packageDir("adapter-mui"), file))) {
       muiEntries.push(file);
       break;
     }
   }
 }
-ensureTsdown(
-  join(ROOT, "packages", "adapter-mui", "tsdown.config.ts"),
-  muiEntries
-);
+ensureTsdown(join(packageDir("adapter-mui"), "tsdown.config.ts"), muiEntries);
 
 console.log("synced kit feature entries");

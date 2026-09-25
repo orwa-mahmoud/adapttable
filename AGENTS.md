@@ -99,7 +99,7 @@ format:check → lint → lint:root → check:readmes → check:docsurface
 All adapters at parity · mobile card layout handled (or the behavior stated
 explicitly) · RTL correct · keyboard accessible with screen-reader
 announcements where the feature speaks · new labels localized in every
-locale in `packages/i18n` · state serializes to URL / Saved Views where the
+locale in `packages/shared/i18n` · state serializes to URL / Saved Views where the
 feature is stateful · docs page + `llms.txt` registration + showcase
 coverage where visual · tests with the coverage floors met.
 
@@ -108,7 +108,7 @@ coverage where visual · tests with the coverage floors met.
 **The bump follows the change, per SemVer.** Pick it from what the change does,
 not from habit:
 
-1. Check real versions first — `packages/*/package.json` **and**
+1. Check real versions first — `packages/*/*/package.json` **and**
    `npm view <pkg> version`. Never guess from memory or chat.
 2. Docs, demo media, changelog-only, bug fixes, UI corrections, internal
    refactors → `patch`. New user-facing feature or new public export →

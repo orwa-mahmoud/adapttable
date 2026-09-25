@@ -37,6 +37,7 @@ import {
   PLAIN_ADAPTER_CEILING_KB,
   plantedLeakFixture,
 } from "./consumer-fixtures.mjs";
+import { packageDir, packageRel } from "./packages.mjs";
 import { publishedFigures, staleReason } from "./published-figures.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -71,26 +72,15 @@ function extraFiles(fixture) {
 }
 
 function entryCode(fixture) {
-  const target = join(
-    ROOT,
-    "packages",
-    fixture.pkg,
-    "dist",
-    fixture.entryFile ?? "index.js"
-  );
+  const dist = join(packageDir(fixture.pkg), "dist");
+  const target = join(dist, fixture.entryFile ?? "index.js");
   const extras = extraFiles(fixture);
   let code = fixture.code.replaceAll("PKG", target);
   for (let index = extras.length - 1; index >= 0; index--) {
-    code = code.replaceAll(
-      `ALSO${index}`,
-      join(ROOT, "packages", fixture.pkg, "dist", extras[index])
-    );
+    code = code.replaceAll(`ALSO${index}`, join(dist, extras[index]));
   }
   if (extras[0]) {
-    code = code.replaceAll(
-      "ALSO",
-      join(ROOT, "packages", fixture.pkg, "dist", extras[0])
-    );
+    code = code.replaceAll("ALSO", join(dist, extras[0]));
   }
   return code;
 }
@@ -214,7 +204,7 @@ const PUBLISHED = [
     from: ["core · pivot"],
   },
   {
-    doc: "packages/server/README.md",
+    doc: `${packageRel("server")}/README.md`,
     find: "  no hooks and no client boundary, so an Express",
     from: ["server · parse a query"],
   },

@@ -21,9 +21,9 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import { packageDir } from "./packages.mjs";
+
 // The oldest supported 18.x with createRoot semantics, each 19 minor's
 // floor, and the current 19.2 line the workspace itself develops on.
 const ALL_VERSIONS = ["18.3.1", "19.0.0", "19.2.8"];
@@ -181,7 +181,7 @@ function packInto(pkgDir, dest) {
     process.execPath,
     [PNPM_CLI, "pack", "--pack-destination", dest],
     {
-      cwd: join(REPO_ROOT, "packages", pkgDir),
+      cwd: packageDir(pkgDir),
       encoding: "utf8",
     }
   );

@@ -11,19 +11,22 @@
  */
 import { execFileSync } from "node:child_process";
 import {
-  existsSync,
   mkdirSync,
   mkdtempSync,
-  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import {
+  listPackages,
+  packageDir as packageDirOf,
+  REPO_ROOT as ROOT,
+} from "./packages.mjs";
+
 const PACK_DIR = join(ROOT, "node-support-packs");
 const MANIFEST = join(PACK_DIR, "manifest.json");
 const NPM_BIN = join(
@@ -54,17 +57,8 @@ function run(command, args, cwd, label, env = process.env) {
   }
 }
 
-function packageDirectories(root = ROOT) {
-  return readdirSync(join(root, "packages"), { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .filter((directory) =>
-      existsSync(join(root, "packages", directory, "package.json"))
-    );
-}
-
 /**
- * Non-private workspace packages, in directory order. The packed
+ * Non-private workspace packages, in folder-name order. The packed
  * manifest is judged against these names — never the other way around.
  *
  * @param {string} [root]
@@ -72,9 +66,9 @@ function packageDirectories(root = ROOT) {
  */
 export function publishedPackages(root = ROOT) {
   const published = [];
-  for (const directory of packageDirectories(root)) {
+  for (const { name: directory, dir } of listPackages(root)) {
     const manifest = JSON.parse(
-      readFileSync(join(root, "packages", directory, "package.json"), "utf8")
+      readFileSync(join(dir, "package.json"), "utf8")
     );
     if (manifest.private) continue;
     published.push({ name: manifest.name, directory, manifest });
@@ -160,7 +154,7 @@ function pack() {
   const packages = {};
 
   for (const { name, directory } of publishedPackages()) {
-    const packageDir = join(ROOT, "packages", directory);
+    const packageDir = packageDirOf(directory);
     const output = run(
       process.execPath,
       [pnpmCli, "pack", "--pack-destination", PACK_DIR],

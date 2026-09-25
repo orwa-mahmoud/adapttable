@@ -6,13 +6,11 @@
  * moved symbols must be nameable from their proposed destinations.
  */
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 import { readPackageJson } from "./module-graph.mjs";
+import { packageDir } from "./packages.mjs";
 import { exportedNames } from "./packed-names.mjs";
-
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const REMOVED_CORE_SUBPATHS = ["adapter", "features", "sparkline"];
 const REQUIRED_REACT_SUBPATHS = ["adapter", "features", "sparkline"];
@@ -32,11 +30,10 @@ const REPRESENTATIVE_DESTINATIONS = [
 
 function pkgDir(name) {
   const short = name.replace("@adapttable/", "");
-  if (short === "react") return join(ROOT, "packages", "react");
-  if (short === "core") return join(ROOT, "packages", "core");
-  if (short === "server") return join(ROOT, "packages", "server");
-  if (short === "ai") return join(ROOT, "packages", "ai");
-  return join(ROOT, "packages", `adapter-${short}`);
+  if (["react", "core", "server", "ai"].includes(short)) {
+    return packageDir(short);
+  }
+  return packageDir(`adapter-${short}`);
 }
 
 function subpathFile(pkgName, subpath) {
@@ -62,8 +59,8 @@ function parseImport(spec) {
   return { name, subpath: rest ? `./${rest}` : "." };
 }
 
-const coreManifest = readPackageJson(join(ROOT, "packages", "core"));
-const reactManifest = readPackageJson(join(ROOT, "packages", "react"));
+const coreManifest = readPackageJson(packageDir("core"));
+const reactManifest = readPackageJson(packageDir("react"));
 const errors = [];
 
 for (const sub of REMOVED_CORE_SUBPATHS) {

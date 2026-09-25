@@ -1,29 +1,27 @@
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { describe, it } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import { entrypoints } from "./api-entrypoints.mjs";
+import { packageDir, packageNames, REPO_ROOT } from "./packages.mjs";
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const PACKAGES_DIR = join(REPO_ROOT, "packages");
 const ETC = join(REPO_ROOT, "etc");
 
 const ENTRIES = entrypoints();
 const packageJson = (dir) =>
-  JSON.parse(readFileSync(join(PACKAGES_DIR, dir, "package.json"), "utf8"));
+  JSON.parse(readFileSync(join(packageDir(dir), "package.json"), "utf8"));
 
 describe("entrypoints", () => {
   it("covers every package under packages/", () => {
     assert.deepEqual(
       [...new Set(ENTRIES.map((e) => e.dir))].sort(),
-      readdirSync(PACKAGES_DIR).sort()
+      packageNames().sort()
     );
   });
 
   it("reads each package's own exports map rather than a hand-written list", () => {
-    for (const dir of readdirSync(PACKAGES_DIR)) {
+    for (const dir of packageNames()) {
       const advertised = Object.keys(packageJson(dir).exports ?? { ".": {} })
         .filter((key) => key === "." || !key.slice(2).includes("."))
         .sort();

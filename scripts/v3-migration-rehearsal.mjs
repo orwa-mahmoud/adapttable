@@ -11,17 +11,11 @@
  *   pnpm build && pnpm migrate:rehearse
  */
 import { execFileSync } from "node:child_process";
-import {
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
+import { packageDir, packageNames } from "./packages.mjs";
 import {
   HEADLESS_V3,
   KITS,
@@ -32,7 +26,6 @@ import {
   v3PresetApp,
 } from "./v3-migration-fixtures.mjs";
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const NPM_BIN = join(
   dirname(process.execPath),
   process.platform === "win32" ? "npm.cmd" : "npm"
@@ -64,7 +57,7 @@ function packInto(pkgDir, dest) {
   const out = execFileSync(
     process.execPath,
     [PNPM_CLI, "pack", "--pack-destination", dest],
-    { cwd: join(REPO_ROOT, "packages", pkgDir), encoding: "utf8" }
+    { cwd: packageDir(pkgDir), encoding: "utf8" }
   );
   const lines = out.trim().split("\n");
   return lines[lines.length - 1].trim();
@@ -116,9 +109,9 @@ function main() {
   });
 
   const tarballs = {};
-  for (const dir of readdirSync(join(REPO_ROOT, "packages"))) {
+  for (const dir of packageNames()) {
     const pkg = JSON.parse(
-      readFileSync(join(REPO_ROOT, "packages", dir, "package.json"), "utf8")
+      readFileSync(join(packageDir(dir), "package.json"), "utf8")
     );
     if (pkg.private === true) continue;
     process.stdout.write(`packing ${pkg.name} … `);

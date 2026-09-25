@@ -8,10 +8,11 @@
  * discovery only when it imports `@adapttable/ai`.
  */
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import { packageRel, REPO_ROOT as ROOT } from "./packages.mjs";
+
 const MARKERS = [
   "createAgentSession",
   "tableAgent",
@@ -27,19 +28,25 @@ const MARKERS = [
   "createMcpAppBridge",
 ];
 
-const GRAPHS = [
-  "packages/core/dist/index.js",
-  "packages/react/dist/index.js",
-  "packages/server/dist/index.js",
-  "packages/adapter-mantine/dist/index.js",
-  "packages/adapter-mui/dist/index.js",
-  "packages/adapter-chakra/dist/index.js",
-  "packages/adapter-antd/dist/index.js",
-  "packages/adapter-radix/dist/index.js",
-  "packages/adapter-base-ui/dist/index.js",
-  "packages/adapter-shadcn/dist/index.js",
-  "packages/adapter-unstyled/dist/index.js",
+/** The package folders whose root graph must stay free of the agent protocol. */
+const GRAPH_PACKAGES = [
+  "core",
+  "react",
+  "server",
+  "adapter-mantine",
+  "adapter-mui",
+  "adapter-chakra",
+  "adapter-antd",
+  "adapter-radix",
+  "adapter-base-ui",
+  "adapter-shadcn",
+  "adapter-unstyled",
 ];
+
+/** Each root graph, as a path relative to the repository root. */
+const GRAPHS = GRAPH_PACKAGES.map(
+  (name) => `${packageRel(name)}/dist/index.js`
+);
 
 /**
  * Every marker one graph's text carries.

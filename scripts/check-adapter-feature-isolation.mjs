@@ -9,12 +9,12 @@
  */
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 import { Rolldown } from "tsdown";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+import { packageDir } from "./packages.mjs";
+
 const KITS = [
   "mui",
   "mantine",
@@ -70,13 +70,7 @@ function adapterPackage(specifier) {
 
 async function graphFor(kit, entry, dir) {
   const input = join(dir, `${kit}-${entry}.js`);
-  const target = join(
-    ROOT,
-    "packages",
-    `adapter-${kit}`,
-    "dist",
-    `${entry}.js`
-  );
+  const target = join(packageDir(`adapter-${kit}`), "dist", `${entry}.js`);
   writeFileSync(input, `export * from ${JSON.stringify(target)};`);
   const adapterImports = new Set();
   const bundle = await Rolldown.rolldown({

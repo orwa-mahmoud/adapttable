@@ -60,8 +60,8 @@ describe("classify", () => {
 
   it("treats version-only bumps as publint without unit or Playwright", () => {
     const f = classify([
-      "packages/core/package.json",
-      "packages/core/CHANGELOG.md",
+      "packages/shared/core/package.json",
+      "packages/shared/core/CHANGELOG.md",
       ".changeset/some-thing.md",
     ]);
     assert.equal(f.versionOnly, true);
@@ -73,7 +73,7 @@ describe("classify", () => {
   });
 
   it("runs unit and Playwright when an adapter changes", () => {
-    const f = classify(["packages/adapter-mantine/src/DataTable.tsx"]);
+    const f = classify(["packages/react/adapter-mantine/src/DataTable.tsx"]);
     assert.equal(f.runLint, true);
     assert.equal(f.runUnit, true);
     assert.equal(f.runPackage, true);
@@ -81,6 +81,14 @@ describe("classify", () => {
     assert.equal(f.runPlaywright, true);
     assert.equal(f.runBench, true);
     assert.equal(f.runKitsDocs, false);
+  });
+
+  it("checks another framework's packages without the React showcase suite", () => {
+    const f = classify(["packages/vue/vue/src/index.ts"]);
+    assert.equal(f.runLint, true);
+    assert.equal(f.runUnit, true);
+    assert.equal(f.runPlaywright, false);
+    assert.equal(f.runBench, false);
   });
 
   it("runs Playwright when only e2e specs change, not the packed harness", () => {

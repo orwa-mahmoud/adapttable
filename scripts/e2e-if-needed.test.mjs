@@ -21,7 +21,9 @@ describe("e2ePlan", () => {
   });
 
   it("runs the full suite when a package changes", () => {
-    assert.deepEqual(e2ePlan(["packages/core/src/index.ts"]), { kind: "full" });
+    assert.deepEqual(e2ePlan(["packages/shared/core/src/index.ts"]), {
+      kind: "full",
+    });
   });
 
   it("runs only the spec files when those are all that changed", () => {

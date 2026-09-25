@@ -23,16 +23,21 @@
  * useful when auditing rather than gating.
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 import ts from "typescript";
 
 import { sidebarSlugs } from "../apps/docs/sidebar.mjs";
 import { DESCRIPTIONS, TITLES } from "../apps/docs/sync-docs.mjs";
 import { DOCS, unlistedDocs } from "./build-llms-full.mjs";
+import {
+  packageDir,
+  packageNames,
+  REPO_ROOT,
+  resolvePackagePath,
+} from "./packages.mjs";
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS_DIR = join(REPO_ROOT, "docs");
 /**
  * The reference page. Its title claims every export, so appearing on some
@@ -83,7 +88,7 @@ function targetOf(value) {
  */
 export function entriesOf(pkg, root = REPO_ROOT) {
   const manifest = JSON.parse(
-    readFileSync(join(root, "packages", pkg, "package.json"), "utf8")
+    readFileSync(join(packageDir(pkg, root), "package.json"), "utf8")
   );
   const exported = manifest.exports ?? { ".": "./dist/index.js" };
   return Object.keys(exported)
@@ -99,19 +104,14 @@ export function entriesOf(pkg, root = REPO_ROOT) {
           .replace(/\.[cm]?[jt]sx?$/, "")
       );
       // A feature entry that renders is `.tsx`; the rest are `.ts`.
-      const entry = existsSync(join(root, "packages", `${stem}.ts`))
+      const entry = existsSync(resolvePackagePath(`${stem}.ts`, root))
         ? `${stem}.ts`
         : `${stem}.tsx`;
       return { label: key === "." ? pkg : `${pkg}/${key.slice(2)}`, entry };
     });
 }
 
-const SURFACES = readdirSync(join(REPO_ROOT, "packages"), {
-  withFileTypes: true,
-})
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => entry.name)
-  .sort()
+const SURFACES = packageNames()
   // Wrapped, not passed by reference: `flatMap` hands the callback an index as
   // its second argument, which is now this function's `root`.
   .flatMap((pkg) => entriesOf(pkg));
@@ -161,9 +161,7 @@ function exportsOf(program, checker, entryPath) {
 }
 
 function auditPackages() {
-  const entries = SURFACES.map((surface) =>
-    join(REPO_ROOT, "packages", surface.entry)
-  );
+  const entries = SURFACES.map((surface) => resolvePackagePath(surface.entry));
   const program = ts.createProgram(entries, {
     jsx: ts.JsxEmit.ReactJSX,
     module: ts.ModuleKind.ESNext,

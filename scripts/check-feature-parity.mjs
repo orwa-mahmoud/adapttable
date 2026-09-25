@@ -11,18 +11,20 @@ import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { packageDir, packageNames } from "./packages.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGES = join(ROOT, "packages");
 const manifest = JSON.parse(
   readFileSync(join(ROOT, "scripts", "feature-classification.json"), "utf8")
 );
 
-const PUBLISHED = readdirSync(PACKAGES).filter((name) => {
+const PUBLISHED = packageNames().filter((name) => {
   if (!name.startsWith("adapter-") || name === "adapter-bootstrap") {
     return false;
   }
   const pkg = JSON.parse(
-    readFileSync(join(PACKAGES, name, "package.json"), "utf8")
+    readFileSync(join(packageDir(name), "package.json"), "utf8")
   );
   return pkg.private !== true;
 });
@@ -100,7 +102,7 @@ const problems = [];
 
 for (const adapter of PUBLISHED) {
   const pkg = JSON.parse(
-    readFileSync(join(PACKAGES, adapter, "package.json"), "utf8")
+    readFileSync(join(packageDir(adapter), "package.json"), "utf8")
   );
   const exports = pkg.exports ?? {};
   for (const subpath of subpaths) {
@@ -109,7 +111,7 @@ for (const adapter of PUBLISHED) {
     }
   }
 
-  const src = join(PACKAGES, adapter, "src");
+  const src = join(packageDir(adapter), "src");
   const files = readdirSync(src, { recursive: true })
     .filter((name) => typeof name === "string" && /\.(tsx?|jsx?)$/.test(name))
     .map((name) => join(src, name));

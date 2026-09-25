@@ -39,7 +39,7 @@ function tempRoot() {
 
 /** Write one fixture package with the manifest it is given. */
 function fixturePackage(root, name, manifest, files = {}) {
-  const dir = join(root, "packages", name);
+  const dir = join(root, "packages", "shared", name);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, "package.json"), JSON.stringify(manifest, null, 2));
   for (const [relative, body] of Object.entries(files)) {
@@ -135,7 +135,7 @@ describe("api-entrypoints derives from each manifest", () => {
       },
     });
 
-    const entries = entrypoints(join(root, "packages"));
+    const entries = entrypoints(root);
     const agui = entries.find((entry) => entry.subpath === "./ag-ui");
 
     assert.ok(agui, "the ./ag-ui entry point was not derived");
@@ -153,7 +153,7 @@ describe("api-entrypoints derives from each manifest", () => {
       exports: { ".": { types: "./dist/index.d.ts" } },
     });
 
-    const entries = entrypoints(join(root, "packages"));
+    const entries = entrypoints(root);
     assert.equal(entries.length, 1);
     assert.equal(entries[0].published, false);
   });

@@ -1,15 +1,14 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { describe, it } from "node:test";
-import { fileURLToPath } from "node:url";
 
+import { packageDir } from "./packages.mjs";
 import { exportedNames, missingNames, NAMEABLE } from "./packed-names.mjs";
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-/** An installed `@adapttable/<pkg>` maps to `packages/<dir>` in the tree. */
+/** An installed `@adapttable/<pkg>` maps to `packages/<group>/<dir>` in the tree. */
 const DIRS = { core: "core", react: "react", shadcn: "adapter-shadcn" };
-const distOf = (pkg) => join(REPO_ROOT, "packages", DIRS[pkg], "dist");
+const distOf = (pkg) => join(packageDir(DIRS[pkg]), "dist");
 
 /** The shape a rolled-up entry ends with: one long export block. */
 const ROLLUP = `

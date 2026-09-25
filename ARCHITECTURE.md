@@ -56,7 +56,7 @@ below are abridged; the source file named with each is authoritative.
 
 ### Column model vs React column
 
-`packages/core/src/columnModel.ts` and `packages/react/src/columnDef.ts`:
+`packages/shared/core/src/columnModel.ts` and `packages/react/react/src/columnDef.ts`:
 
 ```ts
 /** Neutral column — identity, values, and operation metadata. No renderers. */
@@ -104,13 +104,13 @@ export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
 ```
 
 The engine and AI resolve a cell's value in this order
-(`packages/core/src/engine/cellValue.ts`): `formatValue`, then `exportValue`,
+(`packages/shared/core/src/engine/cellValue.ts`): `formatValue`, then `exportValue`,
 then `sortValue`, then the `key` / `i18n` data path. A React accessor or
 `Cell` is never consulted, and a React node is never a cell value.
 
 ### Engine instance
 
-`packages/core/src/engine/createTableEngine.ts`:
+`packages/shared/core/src/engine/createTableEngine.ts`:
 
 ```ts
 export interface TableRevisions {
@@ -213,8 +213,8 @@ revision.
 
 ### Feature registration vs React features
 
-`packages/core/src/features/featureRegistration.ts` and
-`packages/react/src/features/tableFeature.ts`:
+`packages/shared/core/src/features/featureRegistration.ts` and
+`packages/react/react/src/features/tableFeature.ts`:
 
 ```ts
 /** Neutral plugin: id, operators, cleanup. No React configuration bags. */
@@ -248,7 +248,7 @@ Slot and `data-adapttable-part` names are part of the public contract. A React
 
 ### Neutral table interface for AI
 
-`packages/core/src/engine/neutralTable.ts`:
+`packages/shared/core/src/engine/neutralTable.ts`:
 
 ```ts
 export interface NeutralTable<TRow = unknown> {

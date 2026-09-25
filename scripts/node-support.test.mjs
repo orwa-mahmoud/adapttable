@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import {
   assertPackedMatchesExpected,
@@ -12,9 +11,8 @@ import {
   publishedPackageNames,
   publishedPackages,
 } from "./node-support-harness.mjs";
+import { listPackages, REPO_ROOT as ROOT } from "./packages.mjs";
 
-const ROOT = fileURLToPath(new URL("../", import.meta.url));
-const PACKAGES = join(ROOT, "packages");
 const FLOOR = ">=22.12.0";
 const README_CLAIM =
   "Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.";
@@ -41,10 +39,7 @@ function json(path) {
 }
 
 function packageManifests() {
-  return readdirSync(PACKAGES, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => join(PACKAGES, entry.name, "package.json"))
-    .filter(existsSync);
+  return listPackages().map(({ dir }) => join(dir, "package.json"));
 }
 
 describe("supported Node contract", () => {

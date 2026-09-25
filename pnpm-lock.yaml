@@ -183,43 +183,43 @@ importers:
     dependencies:
       '@adapttable/ai':
         specifier: workspace:*
-        version: link:../../packages/ai
+        version: link:../../packages/shared/ai
       '@adapttable/ai-react':
         specifier: workspace:*
-        version: link:../../packages/ai-react
+        version: link:../../packages/react/ai-react
       '@adapttable/antd':
         specifier: workspace:*
-        version: link:../../packages/adapter-antd
+        version: link:../../packages/react/adapter-antd
       '@adapttable/base-ui':
         specifier: workspace:*
-        version: link:../../packages/adapter-base-ui
+        version: link:../../packages/react/adapter-base-ui
       '@adapttable/chakra':
         specifier: workspace:*
-        version: link:../../packages/adapter-chakra
+        version: link:../../packages/react/adapter-chakra
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/shared/core
       '@adapttable/i18n':
         specifier: workspace:*
-        version: link:../../packages/i18n
+        version: link:../../packages/shared/i18n
       '@adapttable/mantine':
         specifier: workspace:*
-        version: link:../../packages/adapter-mantine
+        version: link:../../packages/react/adapter-mantine
       '@adapttable/mui':
         specifier: workspace:*
-        version: link:../../packages/adapter-mui
+        version: link:../../packages/react/adapter-mui
       '@adapttable/radix':
         specifier: workspace:*
-        version: link:../../packages/adapter-radix
+        version: link:../../packages/react/adapter-radix
       '@adapttable/react':
         specifier: workspace:*
-        version: link:../../packages/react
+        version: link:../../packages/react/react
       '@adapttable/shadcn':
         specifier: workspace:*
-        version: link:../../packages/adapter-shadcn
+        version: link:../../packages/react/adapter-shadcn
       '@adapttable/unstyled':
         specifier: workspace:*
-        version: link:../../packages/adapter-unstyled
+        version: link:../../packages/react/adapter-unstyled
       '@base-ui/react':
         specifier: ^1.7.0
         version: 1.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -286,43 +286,43 @@ importers:
     dependencies:
       '@adapttable/ai':
         specifier: workspace:*
-        version: link:../packages/ai
+        version: link:../packages/shared/ai
       '@adapttable/ai-react':
         specifier: workspace:*
-        version: link:../packages/ai-react
+        version: link:../packages/react/ai-react
       '@adapttable/antd':
         specifier: workspace:*
-        version: link:../packages/adapter-antd
+        version: link:../packages/react/adapter-antd
       '@adapttable/base-ui':
         specifier: workspace:*
-        version: link:../packages/adapter-base-ui
+        version: link:../packages/react/adapter-base-ui
       '@adapttable/chakra':
         specifier: workspace:*
-        version: link:../packages/adapter-chakra
+        version: link:../packages/react/adapter-chakra
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../packages/core
+        version: link:../packages/shared/core
       '@adapttable/i18n':
         specifier: workspace:*
-        version: link:../packages/i18n
+        version: link:../packages/shared/i18n
       '@adapttable/mantine':
         specifier: workspace:*
-        version: link:../packages/adapter-mantine
+        version: link:../packages/react/adapter-mantine
       '@adapttable/mui':
         specifier: workspace:*
-        version: link:../packages/adapter-mui
+        version: link:../packages/react/adapter-mui
       '@adapttable/radix':
         specifier: workspace:*
-        version: link:../packages/adapter-radix
+        version: link:../packages/react/adapter-radix
       '@adapttable/react':
         specifier: workspace:*
-        version: link:../packages/react
+        version: link:../packages/react/react
       '@adapttable/shadcn':
         specifier: workspace:*
-        version: link:../packages/adapter-shadcn
+        version: link:../packages/react/adapter-shadcn
       '@adapttable/unstyled':
         specifier: workspace:*
-        version: link:../packages/adapter-unstyled
+        version: link:../packages/react/adapter-unstyled
     devDependencies:
       '@base-ui/react':
         specifier: ^1.7.0
@@ -364,11 +364,11 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
 
-  packages/adapter-antd:
+  packages/react/adapter-antd:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../shared/core
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
@@ -401,11 +401,11 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.11)
 
-  packages/adapter-base-ui:
+  packages/react/adapter-base-ui:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../shared/core
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
@@ -441,11 +441,11 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.11)
 
-  packages/adapter-bootstrap:
+  packages/react/adapter-bootstrap:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../shared/core
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
@@ -481,11 +481,11 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.11)
 
-  packages/adapter-chakra:
+  packages/react/adapter-chakra:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../shared/core
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
@@ -527,11 +527,11 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.11)
 
-  packages/adapter-mantine:
+  packages/react/adapter-mantine:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../shared/core
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
@@ -576,11 +576,11 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.11)
 
-  packages/adapter-mui:
+  packages/react/adapter-mui:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../shared/core
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
@@ -619,11 +619,11 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.11)
 
-  packages/adapter-radix:
+  packages/react/adapter-radix:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../shared/core
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
@@ -656,7 +656,7 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.11)
 
-  packages/adapter-shadcn:
+  packages/react/adapter-shadcn:
     dependencies:
       '@adapttable/react':
         specifier: workspace:*
@@ -670,7 +670,7 @@ importers:
     devDependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../shared/core
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -693,11 +693,11 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.11)
 
-  packages/adapter-unstyled:
+  packages/react/adapter-unstyled:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../shared/core
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
@@ -727,20 +727,14 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.11)
 
-  packages/ai:
-    dependencies:
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../core
-
-  packages/ai-react:
+  packages/react/ai-react:
     dependencies:
       '@adapttable/ai':
         specifier: workspace:*
-        version: link:../ai
+        version: link:../../shared/ai
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../shared/core
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
@@ -758,9 +752,43 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
 
-  packages/cli: {}
+  packages/react/react:
+    dependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../../shared/core
+      '@tanstack/react-virtual':
+        specifier: ^3.14.10
+        version: 3.14.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react-compiler-runtime:
+        specifier: ^1.0.0
+        version: 1.0.0(react@19.2.8)
+    devDependencies:
+      '@testing-library/dom':
+        specifier: ^10.4.1
+        version: 10.4.1
+      '@testing-library/jest-dom':
+        specifier: ^7.0.1
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+      '@testing-library/react':
+        specifier: ^16.3.2
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
 
-  packages/core:
+  packages/shared/ai:
+    dependencies:
+      '@adapttable/core':
+        specifier: workspace:*
+        version: link:../core
+
+  packages/shared/cli: {}
+
+  packages/shared/core:
     devDependencies:
       '@stryker-mutator/core':
         specifier: ^9.6.1
@@ -790,7 +818,7 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
 
-  packages/i18n:
+  packages/shared/i18n:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
@@ -803,35 +831,7 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
 
-  packages/react:
-    dependencies:
-      '@adapttable/core':
-        specifier: workspace:*
-        version: link:../core
-      '@tanstack/react-virtual':
-        specifier: ^3.14.10
-        version: 3.14.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      react-compiler-runtime:
-        specifier: ^1.0.0
-        version: 1.0.0(react@19.2.8)
-    devDependencies:
-      '@testing-library/dom':
-        specifier: ^10.4.1
-        version: 10.4.1
-      '@testing-library/jest-dom':
-        specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
-      '@testing-library/react':
-        specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      react:
-        specifier: ^19.2.8
-        version: 19.2.8
-      react-dom:
-        specifier: ^19.2.8
-        version: 19.2.8(react@19.2.8)
-
-  packages/server:
+  packages/shared/server:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
@@ -841,10 +841,10 @@ importers:
     dependencies:
       '@adapttable/antd':
         specifier: workspace:*
-        version: link:../../packages/adapter-antd
+        version: link:../../packages/react/adapter-antd
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/shared/core
       antd:
         specifier: ^6.6.1
         version: 6.6.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -875,10 +875,10 @@ importers:
     dependencies:
       '@adapttable/base-ui':
         specifier: workspace:*
-        version: link:../../packages/adapter-base-ui
+        version: link:../../packages/react/adapter-base-ui
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/shared/core
       '@base-ui/react':
         specifier: ^1.6.0
         version: 1.6.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -909,10 +909,10 @@ importers:
     dependencies:
       '@adapttable/chakra':
         specifier: workspace:*
-        version: link:../../packages/adapter-chakra
+        version: link:../../packages/react/adapter-chakra
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/shared/core
       '@chakra-ui/react':
         specifier: ^3.36.1
         version: 3.36.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -946,10 +946,10 @@ importers:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/shared/core
       '@adapttable/mantine':
         specifier: workspace:*
-        version: link:../../packages/adapter-mantine
+        version: link:../../packages/react/adapter-mantine
       '@mantine/core':
         specifier: ^9.5.2
         version: 9.5.2(@mantine/hooks@9.5.2(react@19.2.8))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -983,10 +983,10 @@ importers:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/shared/core
       '@adapttable/mui':
         specifier: workspace:*
-        version: link:../../packages/adapter-mui
+        version: link:../../packages/react/adapter-mui
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.18)(react@19.2.8)
@@ -1023,10 +1023,10 @@ importers:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/shared/core
       '@adapttable/radix':
         specifier: workspace:*
-        version: link:../../packages/adapter-radix
+        version: link:../../packages/react/adapter-radix
       '@radix-ui/themes':
         specifier: ^3.3.0
         version: 3.3.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1057,10 +1057,10 @@ importers:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/shared/core
       '@adapttable/shadcn':
         specifier: workspace:*
-        version: link:../../packages/adapter-shadcn
+        version: link:../../packages/react/adapter-shadcn
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -1094,10 +1094,10 @@ importers:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/shared/core
       '@adapttable/unstyled':
         specifier: workspace:*
-        version: link:../../packages/adapter-unstyled
+        version: link:../../packages/react/adapter-unstyled
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -1125,10 +1125,10 @@ importers:
     dependencies:
       '@adapttable/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/shared/core
       '@adapttable/unstyled':
         specifier: workspace:*
-        version: link:../../packages/adapter-unstyled
+        version: link:../../packages/react/adapter-unstyled
       react:
         specifier: ^19.2.8
         version: 19.2.8

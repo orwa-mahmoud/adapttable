@@ -6,17 +6,20 @@ import { checkGraphs, GRAPHS, leaksIn, MARKERS } from "./ai-isolation.mjs";
 describe("AI isolation", () => {
   it("names the marker and the graph that carries it", () => {
     const found = leaksIn(
-      "packages/react/dist/index.js",
+      "packages/react/react/dist/index.js",
       'import { createAgentSession } from "@adapttable/ai";'
     );
     assert.deepEqual(found, [
-      "packages/react/dist/index.js contains createAgentSession",
-      "packages/react/dist/index.js contains @adapttable/ai",
+      "packages/react/react/dist/index.js contains createAgentSession",
+      "packages/react/react/dist/index.js contains @adapttable/ai",
     ]);
   });
 
   it("passes a graph that mentions none of them", () => {
-    assert.deepEqual(leaksIn("packages/core/dist/index.js", "export {};"), []);
+    assert.deepEqual(
+      leaksIn("packages/shared/core/dist/index.js", "export {};"),
+      []
+    );
   });
 
   it("watches every optional subpath, not only the package name", () => {
@@ -29,8 +32,12 @@ describe("AI isolation", () => {
     // A graph dropped from this list is a graph nobody checks, and the check
     // would still report success over the ones that remain.
     assert.equal(GRAPHS.length, 11);
-    for (const name of ["core", "react", "server"]) {
-      assert.ok(GRAPHS.includes(`packages/${name}/dist/index.js`), name);
+    for (const path of [
+      "packages/shared/core",
+      "packages/react/react",
+      "packages/shared/server",
+    ]) {
+      assert.ok(GRAPHS.includes(`${path}/dist/index.js`), path);
     }
   });
 
@@ -38,12 +45,12 @@ describe("AI isolation", () => {
     // A graph that is not there proves nothing about isolation. Reporting it
     // as clean is how a check keeps passing over a package nobody built.
     const { missing, leaked } = checkGraphs([
-      "packages/never-built/dist/index.js",
-      "packages/also-never-built/dist/index.js",
+      "packages/shared/never-built/dist/index.js",
+      "packages/shared/also-never-built/dist/index.js",
     ]);
     assert.deepEqual(missing, [
-      "packages/never-built/dist/index.js",
-      "packages/also-never-built/dist/index.js",
+      "packages/shared/never-built/dist/index.js",
+      "packages/shared/also-never-built/dist/index.js",
     ]);
     assert.deepEqual(leaked, []);
   });

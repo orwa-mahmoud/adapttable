@@ -62,11 +62,9 @@
  * find in every kit, and a missing one fails on its own.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const PACKAGES = join(REPO_ROOT, "packages");
+import { packageDir } from "./packages.mjs";
 
 /**
  * The adapters that render the shared shell's chrome with their own kit's
@@ -293,7 +291,7 @@ function sourceFiles(dir) {
  * when it hands the part through a prop object to an inner element.
  */
 function partsOf(pkg) {
-  const dir = join(PACKAGES, pkg, "src");
+  const dir = join(packageDir(pkg), "src");
   const found = new Set();
   for (const file of sourceFiles(dir)) {
     const text = readFileSync(file, "utf8");
@@ -340,8 +338,8 @@ function corePartNames() {
   // engine in `core`, and the structural Chrome and prop-getters in `react`.
   // Both are upstream of every kit, so both count as "core owns this name".
   const shared = [
-    ...sourceFiles(join(PACKAGES, "core", "src")),
-    ...sourceFiles(join(PACKAGES, "react", "src")),
+    ...sourceFiles(join(packageDir("core"), "src")),
+    ...sourceFiles(join(packageDir("react"), "src")),
   ];
   for (const file of shared) {
     const text = readFileSync(file, "utf8");
@@ -377,7 +375,7 @@ function corePartNames() {
 /** Whether a package's source calls one of core's prop-getters by name. */
 function callsCoreGetter(pkg, getter) {
   const call = new RegExp(`\\b${getter}\\b`);
-  return sourceFiles(join(PACKAGES, pkg, "src")).some((file) =>
+  return sourceFiles(join(packageDir(pkg), "src")).some((file) =>
     call.test(readFileSync(file, "utf8"))
   );
 }

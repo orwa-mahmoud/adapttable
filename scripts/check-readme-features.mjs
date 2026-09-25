@@ -18,10 +18,14 @@
  * telling people it exists.
  */
 import { readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+import {
+  packageDir,
+  packageNames,
+  packageRel,
+  REPO_ROOT as root,
+} from "./packages.mjs";
 
 /**
  * Feature docs pages → the pattern that proves a README mentions them.
@@ -73,7 +77,7 @@ const FEATURES = {
 
 function isPrivatePackage(dir) {
   const pkgJson = JSON.parse(
-    readFileSync(join(root, "packages", dir, "package.json"), "utf8")
+    readFileSync(join(packageDir(dir, root), "package.json"), "utf8")
   );
   return pkgJson.private === true;
 }
@@ -83,7 +87,7 @@ function isPrivatePackage(dir) {
 // need a Features section — a package page with none tells a reader nothing.
 // Unpublished (`private: true`) adapters are still in-progress and must not
 // need a marketing README.
-const adapters = readdirSync(join(root, "packages")).filter(
+const adapters = packageNames(root).filter(
   (d) => (d.startsWith("adapter-") || d === "core") && !isPrivatePackage(d)
 );
 const needSectionOnly = ["cli", "i18n"];
@@ -142,7 +146,7 @@ for (const page of documented) {
 // the same contract as the packages it advertises.
 const readmes = [
   "README.md",
-  ...adapters.map((a) => `packages/${a}/README.md`),
+  ...adapters.map((a) => `${packageRel(a, root)}/README.md`),
 ];
 
 for (const relative of readmes) {
@@ -164,9 +168,11 @@ for (const relative of readmes) {
 }
 
 for (const pkg of needSectionOnly) {
-  const readme = readFileSync(join(root, "packages", pkg, "README.md"), "utf8");
+  const readme = readFileSync(join(packageDir(pkg, root), "README.md"), "utf8");
   if (!/^## Features\n/m.test(readme)) {
-    problems.push(`packages/${pkg}/README.md has no "## Features" section.`);
+    problems.push(
+      `${packageRel(pkg, root)}/README.md has no "## Features" section.`
+    );
   }
 }
 
