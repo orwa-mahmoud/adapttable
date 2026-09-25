@@ -15,6 +15,7 @@ complete, copy-pasteable React component — wrap it in your kit's provider
 | [mui-query-source.tsx](./mui-query-source.tsx)             | `@adapttable/mui`      | Server pagination with TanStack Query            |
 | [chakra-selection.tsx](./chakra-selection.tsx)             | `@adapttable/chakra`   | Selection + bulk actions                         |
 | [antd-basic.tsx](./antd-basic.tsx)                         | `@adapttable/antd`     | AntD table, dark mode, row actions               |
+| [antd-server.tsx](./antd-server.tsx)                       | `@adapttable/antd`     | Server data via `onQueryChange` (no library)     |
 | [radix-basic.tsx](./radix-basic.tsx)                       | `@adapttable/radix`    | Radix Themes: theme-driven appearance            |
 | [base-ui-basic.tsx](./base-ui-basic.tsx)                   | `@adapttable/base-ui`  | Base UI primitives, self-injected styles         |
 | [shadcn-basic.tsx](./shadcn-basic.tsx)                     | `@adapttable/shadcn`   | shadcn/ui tokens, no provider                    |
