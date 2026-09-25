@@ -13,6 +13,7 @@
  * virtualizer keeps owning the layout; it is simply told the truth about how
  * tall the item is.
  */
+import type { RowPairMeasurer } from "@adapttable/core/binding";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 /**
@@ -25,17 +26,7 @@ export interface ResizableVirtualizer {
   resizeItem: (index: number, size: number) => void;
 }
 
-/**
- * Ref callbacks for the two halves of one row.
- *
- * @public
- */
-export interface RowPairMeasurer {
-  /** Ref for the row element itself. */
-  row: (index: number) => (node: Element | null) => void;
-  /** Ref for its detail element, when one is open. */
-  detail: (index: number) => (node: Element | null) => void;
-}
+export type { RowPairMeasurer } from "@adapttable/core/binding";
 
 /** The two elements of one item, either of which may be absent. */
 interface Pair {

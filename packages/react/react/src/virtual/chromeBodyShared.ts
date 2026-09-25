@@ -15,6 +15,12 @@ import {
 } from "@adapttable/core";
 import { type RefCallback, type RefObject, useCallback, useMemo } from "react";
 
+export {
+  entryKeys,
+  measureRowDetailAsPair,
+  sourceWindowStart,
+} from "@adapttable/core/binding";
+
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import type { ComposedTableProps } from "../props";
 import type { TableChrome } from "../useTableChrome";
@@ -77,11 +83,6 @@ export function hasLoadedChildren<TRow>(
   return rows.some((candidate) => getParentId(candidate) === id);
 }
 
-/** The keys of a walked model's entries — one shape for groups and trees. */
-export function entryKeys(entries?: readonly { key: string }[]): string[] {
-  return entries?.map((entry) => entry.key) ?? [];
-}
-
 /**
  * Whether the body is a real row/card list the window can apply to.
  *
@@ -98,17 +99,6 @@ export function isBodyEligible<TRow>(chrome: TableChrome<TRow>): boolean {
     !chrome.source.error &&
     (chrome.body === "desktop" || chrome.body === "mobile")
   );
-}
-
-/**
- * Desktop detail is a sibling of the row, so the window measures the pair.
- * A mobile card nests the detail inside the card — one element, not a pair.
- */
-export function measureRowDetailAsPair(
-  isMobile: boolean,
-  renderRowDetail: unknown
-): boolean {
-  return !isMobile && renderRowDetail !== undefined;
 }
 
 /** A card's height on a phone, a row's on a desktop — or `rowHeight`. */
@@ -162,20 +152,6 @@ export function usePinnedScrollRows<TRow>(
     }
     return partitionPinnedRows(sourceRows, pinState, rowKey);
   }, [pinState, rowKey, sourceRows]);
-}
-
-/**
- * The dataset index of the first loaded row: the page's offset when paged,
- * zero for an infinite list that holds everything from the top.
- */
-export function sourceWindowStart(source: {
-  readonly paginationMode: string;
-  readonly page: number;
-  readonly limit: number;
-}): number {
-  return source.paginationMode === "paged"
-    ? Math.max(0, (source.page - 1) * source.limit)
-    : 0;
 }
 
 /** Fetch the next infinite page if the source still has one. */

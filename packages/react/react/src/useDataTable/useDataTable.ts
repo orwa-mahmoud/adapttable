@@ -19,6 +19,12 @@ import {
   type TableSource,
 } from "@adapttable/core";
 import {
+  columnAriaSort,
+  columnTextAlign,
+  sortIndexOf,
+  sortLevelOf,
+} from "@adapttable/core/binding";
+import {
   createElement,
   type CSSProperties,
   type ReactNode,
@@ -271,44 +277,6 @@ export interface SearchInputElementProps extends Props {
   onChange: (event: { currentTarget: { value: string } }) => void;
 }
 
-function textAlign(
-  align: ColumnDef<TRowAny>["align"]
-): "start" | "center" | "end" {
-  if (align === "center") return "center";
-  if (align === "end") return "end";
-  return "start";
-}
-
-/** The chain level for a column, if multi-sort has one. */
-function chainLevel(
-  levels: readonly { key: string; dir: "asc" | "desc" }[],
-  key: string
-): { key: string; dir: "asc" | "desc" } | undefined {
-  return levels.find((l) => l.key === key);
-}
-
-/** 1-based chain position for the header badge, or undefined. */
-function sortIndexAttr(
-  levels: readonly { key: string; dir: "asc" | "desc" }[],
-  key: string
-): number | undefined {
-  const index = levels.findIndex((l) => l.key === key);
-  return index === -1 ? undefined : index + 1;
-}
-
-function ariaSort<TRow>(
-  column: ColumnDef<TRow>,
-  sortBy: string | undefined,
-  sortDir: SortDirection | undefined
-): "ascending" | "descending" | "none" | undefined {
-  if (!column.sortable) return undefined;
-  if (sortBy !== column.key) return "none";
-  return sortDir === "asc" ? "ascending" : "descending";
-}
-
-/** A row type we don't care about here — `align` is independent of it. */
-type TRowAny = Record<string, unknown>;
-
 /**
  * The headless entry point. Combines a {@link TableSource} with columns,
  * sorting, a debounced search input, selection, and filter chips, and
@@ -453,15 +421,15 @@ export function useDataTable<TRow>(
           // it on their own `<th>` and four did not, so a cell's header
           // association depended on which kit you picked.
           scope: "col",
-          "aria-sort": ariaSort(
+          "aria-sort": columnAriaSort(
             column,
-            chainLevel(source.sortLevels, column.key)?.key ?? source.sortBy,
-            chainLevel(source.sortLevels, column.key)?.dir ?? source.sortDir
+            sortLevelOf(source.sortLevels, column.key)?.key ?? source.sortBy,
+            sortLevelOf(source.sortLevels, column.key)?.dir ?? source.sortDir
           ),
-          "data-sort-index": sortIndexAttr(source.sortLevels, column.key),
+          "data-sort-index": sortIndexOf(source.sortLevels, column.key),
           "data-column-key": column.key,
           style: {
-            textAlign: textAlign(column.align),
+            textAlign: columnTextAlign(column.align),
             ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
           },
         },
@@ -484,7 +452,7 @@ export function useDataTable<TRow>(
             }
             toggleSort(column.key);
           },
-          "data-sort-index": sortIndexAttr(source.sortLevels, column.key),
+          "data-sort-index": sortIndexOf(source.sortLevels, column.key),
           "aria-label": `${labels.sortBy}: ${
             typeof column.header === "string" ? column.header : column.key
           }`,
@@ -537,7 +505,7 @@ export function useDataTable<TRow>(
           // column's content and CSS can target one column across any kit.
           "data-column-key": column.key,
           style: {
-            textAlign: textAlign(column.align),
+            textAlign: columnTextAlign(column.align),
             ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
           },
         },

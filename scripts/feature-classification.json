@@ -671,6 +671,7 @@
       "core/src/grouping/groupingPanelModel.ts",
       "core/src/index.ts",
       "core/src/labels.ts",
+      "core/src/layout/chromeModel.ts",
       "core/src/layout/writingDirection.ts",
       "core/src/pagination/paginationMath.ts",
       "core/src/pdf.ts",

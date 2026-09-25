@@ -11,8 +11,6 @@ import {
   type GroupedFlatEntry,
   PIN_Z,
   type PinLeads,
-  pinnedCellStyle,
-  pinnedColumnWidth,
   pinnedSummaryEntries,
   pinnedSummaryPart,
   type PinOffset,
@@ -26,6 +24,23 @@ import {
   type BodyCell,
   bodyCellsHaveRowSpan,
   cellsForRow,
+  type ChromeBodySlot,
+  type ChromeExtraSlot,
+  type ChromeGroupEntry,
+  type ChromeGroupSlot,
+  type ChromeRowSlot,
+  type ChromeVirtualPadSlot,
+  DESKTOP_RESIZE_HANDLE_STYLE as NEUTRAL_DESKTOP_RESIZE_HANDLE_STYLE,
+  desktopBodyPinStyle as neutralDesktopBodyPinStyle,
+  desktopChromeMetrics,
+  type DesktopChromeWidths,
+  desktopDetailMeasureRef,
+  desktopEdgeHeadPin,
+  desktopHasPinned,
+  desktopHeadCellGeometry,
+  desktopPinSignature,
+  desktopRowMeasureRef,
+  desktopScrollBoxStyle as neutralDesktopScrollBoxStyle,
   type HtmlGroupedHeaderCell,
   htmlGroupedHeaderPlan,
   isExtraEntry,
@@ -83,6 +98,21 @@ import type { RowPairMeasurer } from "../virtual/measureRowPair";
 import { useHorizontalOverflow } from "./useHorizontalOverflow";
 import { useOffsetHeight } from "./useOffsetHeight";
 
+export type { DesktopChromeWidths } from "@adapttable/core/binding";
+export {
+  DESKTOP_ACTIONS_WIDTH,
+  DESKTOP_EXPANSION_WIDTH,
+  DESKTOP_SELECTION_WIDTH,
+  desktopChromeMetrics,
+  desktopHasPinned,
+  desktopPinSignature,
+  desktopRowMeasureRef,
+} from "@adapttable/core/binding";
+
+/** Inline style for an absolutely-positioned column-resize handle. */
+export const DESKTOP_RESIZE_HANDLE_STYLE: CSSProperties =
+  NEUTRAL_DESKTOP_RESIZE_HANDLE_STYLE;
+
 export type {
   CellElementProps,
   EditableCellEditing,
@@ -93,58 +123,6 @@ export type {
   TreeEntry,
   UseDataTableResult,
 };
-
-/**
- * Width (px) reserved for the leading selection column.
- *
- * @public
- */
-export const DESKTOP_SELECTION_WIDTH = 48;
-
-/**
- * Width (px) reserved for the trailing actions column.
- *
- * @public
- */
-export const DESKTOP_ACTIONS_WIDTH = 120;
-
-/**
- * Width (px) reserved for the leading expand-chevron column.
- *
- * @public
- */
-export const DESKTOP_EXPANSION_WIDTH = 32;
-
-/** Inline style for an absolutely-positioned column-resize handle. */
-export const DESKTOP_RESIZE_HANDLE_STYLE: CSSProperties = {
-  position: "absolute",
-  insetInlineEnd: 0,
-  top: 0,
-  height: "100%",
-  width: 8,
-  cursor: "col-resize",
-  touchAction: "none",
-  userSelect: "none",
-};
-
-/**
- * Per-kit chrome column widths.
- *
- * @public
- */
-export interface DesktopChromeWidths {
-  /** Leading expand-chevron column. Default {@link DESKTOP_EXPANSION_WIDTH}. */
-  expansion?: number;
-  /** Leading selection column. Default {@link DESKTOP_SELECTION_WIDTH}. */
-  selection?: number;
-  /** Trailing actions column. Default {@link DESKTOP_ACTIONS_WIDTH}. */
-  actions?: number;
-  /**
-   * Whether the expand column contributes to start-pin leads.
-   * Most kits yes; unstyled keeps the chevron out of the pin math.
-   */
-  includeExpansionInLeads?: boolean;
-}
 
 /**
  * Options for {@link useDesktopTableAssembly}.
@@ -161,85 +139,47 @@ export interface DesktopAssemblyOptions {
  *
  * @public
  */
-export type DesktopGroupEntry<TRow> = Extract<
-  GroupedFlatEntry<TRow>,
-  { kind: "group" | "groupFooter" | "groupMore" }
->;
+export type DesktopGroupEntry<TRow> = ChromeGroupEntry<TRow>;
 
 /**
  * One host-injected extra in the assembled body.
  *
  * @public
  */
-export interface DesktopExtraSlot {
-  /** Discriminant for the slot union. */
-  kind: "extra";
-  /** React key for the slot. */
-  key: string;
-  /** Whether the extra row is a separator or spans the full width. */
-  extraKind: "separator" | "fullWidth";
-  /** Columns the row covers. */
-  colSpan: number;
-  /** Content of the row, absent for a bare separator. */
-  render?: () => ReactNode;
-  /** Style that makes the row fill its band. */
-  fillStyle?: CSSProperties;
-}
+export type DesktopExtraSlot = ChromeExtraSlot<ReactNode, CSSProperties>;
 
 /**
  * Virtual-window spacer.
  *
  * @public
  */
-export interface DesktopVirtualPadSlot {
-  /** Discriminant for the slot union. */
-  kind: "virtualPad";
-  /** React key for the slot. */
-  key: "pad-top" | "pad-bottom";
-  /** Pixel height standing in for the rows outside the window. */
-  height: number;
-  /** Columns the row covers. */
-  colSpan: number;
-}
+export type DesktopVirtualPadSlot = ChromeVirtualPadSlot;
 
 /**
  * Group header / footer / more row.
  *
  * @public
  */
-export interface DesktopGroupSlot<TRow> {
-  /** Discriminant for the slot union. */
-  kind: "group";
-  /** React key for the slot. */
-  key: string;
-  /** The group header this slot renders. */
-  entry: DesktopGroupEntry<TRow>;
-}
+export type DesktopGroupSlot<TRow> = ChromeGroupSlot<TRow>;
 
 /**
  * A data row, with wiring already assembled.
  *
  * @public
  */
-export interface DesktopRowSlot<TRow> {
-  /** Discriminant for the slot union. */
-  kind: "row";
-  /** React key for the slot. */
-  key: string;
-  /** Everything the row renderer needs. */
-  wiring: DesktopRowWiring<TRow>;
-}
+export type DesktopRowSlot<TRow> = ChromeRowSlot<DesktopRowWiring<TRow>>;
 
 /**
  * One visual slot in the assembled tbody, in reading order.
  *
  * @public
  */
-export type DesktopBodySlot<TRow> =
-  | DesktopExtraSlot
-  | DesktopVirtualPadSlot
-  | DesktopGroupSlot<TRow>
-  | DesktopRowSlot<TRow>;
+export type DesktopBodySlot<TRow> = ChromeBodySlot<
+  TRow,
+  DesktopRowWiring<TRow>,
+  ReactNode,
+  CSSProperties
+>;
 
 /**
  * Shared visual + behaviour inputs for one memoized desktop row.
@@ -575,73 +515,6 @@ export type DesktopAssemblyProps<TRow> = SharedTableRenderProps<TRow> & {
 };
 
 /**
- * Chrome column widths and pin leads.
- *
- * @param options - Which injected columns render, and their widths.
- */
-export function desktopChromeMetrics(options: {
-  expandable: boolean;
-  showReorder: boolean;
-  hasSelection: boolean;
-  showActions: boolean;
-  widths?: DesktopChromeWidths;
-}): {
-  leads: PinLeads;
-  extraMinWidth: number;
-  expansionLead: number;
-  reorderLead: number;
-  selectionLead: number;
-  expansion: number;
-  selection: number;
-  actions: number;
-  includeExpansionInLeads: boolean;
-} {
-  const expansion = options.widths?.expansion ?? DESKTOP_EXPANSION_WIDTH;
-  const selection = options.widths?.selection ?? DESKTOP_SELECTION_WIDTH;
-  const actions = options.widths?.actions ?? DESKTOP_ACTIONS_WIDTH;
-  const includeExpansionInLeads =
-    options.widths?.includeExpansionInLeads ?? true;
-  const expansionLead =
-    options.expandable && includeExpansionInLeads ? expansion : 0;
-  const reorderLead = options.showReorder ? REORDER_COLUMN_WIDTH : 0;
-  const selectionWidth = options.hasSelection ? selection : 0;
-  const actionsLead = options.showActions ? actions : 0;
-  const start = expansionLead + reorderLead + selectionWidth;
-  return {
-    leads: { start, end: actionsLead },
-    extraMinWidth: start + actionsLead,
-    expansionLead,
-    reorderLead,
-    selectionLead: expansionLead + reorderLead,
-    expansion,
-    selection,
-    actions,
-    includeExpansionInLeads,
-  };
-}
-
-/**
- * Whether any column or injected chrome is pinned.
- *
- * @param columns - Visible columns.
- * @param pinOffset - Pin lookup.
- * @param stickActions - Actions column is user-pinned.
- * @param reorderPinnedLead - Reorder column is start-pinned.
- */
-export function desktopHasPinned(
-  columns: readonly { key: string }[],
-  pinOffset: ((key: string) => unknown) | undefined,
-  stickActions: boolean,
-  reorderPinnedLead: boolean
-): boolean {
-  return (
-    columns.some((column) => pinOffset?.(column.key) != null) ||
-    stickActions ||
-    reorderPinnedLead
-  );
-}
-
-/**
  * Scroll-box style: a maxHeight box scrolls on both axes; otherwise the
  * wrapper scrolls sideways only when something needs it.
  *
@@ -652,60 +525,7 @@ export function desktopScrollBoxStyle(
   maxHeight: number | undefined,
   scrollX: boolean
 ): CSSProperties | undefined {
-  if (maxHeight != null) {
-    return { maxHeight, overflowX: "auto", overflowY: "auto" };
-  }
-  return scrollX ? { overflowX: "auto" } : undefined;
-}
-
-/**
- * Value-comparable digest of every column pin side + inset.
- *
- * @param columns - Visible columns.
- * @param pinOffset - Pin lookup.
- */
-export function desktopPinSignature(
-  columns: readonly { key: string }[],
-  pinOffset: ((key: string) => PinOffset | undefined) | undefined
-): string {
-  return columns
-    .map((column) => {
-      const pin = pinOffset?.(column.key);
-      return pin ? `${column.key}:${pin.side}:${String(pin.inset)}` : "";
-    })
-    .join("|");
-}
-
-/**
- * Ref that measures a scroll-body row (never a pinned one).
- *
- * @param pinned - Pin side, if any.
- * @param measureRowPair - Pair measurer when details can open.
- * @param index - Row index in the window.
- * @param measureElement - Single-element measurer.
- */
-export function desktopRowMeasureRef(
-  pinned: RowPinSide | undefined,
-  measureRowPair: RowPairMeasurer | undefined,
-  index: number,
-  measureElement: ((element: Element | null) => void) | undefined
-): ((element: Element | null) => void) | undefined {
-  if (pinned) return undefined;
-  if (measureRowPair) return measureRowPair.row(index);
-  return measureElement;
-}
-
-/**
- * The ref a row's detail panel carries, so its height counts toward the row's
- * virtual item — the other half of {@link desktopRowMeasureRef}'s pair.
- */
-function desktopDetailMeasureRef(
-  pinned: RowPinSide | undefined,
-  measureRowPair: RowPairMeasurer | undefined,
-  index: number
-): ((element: Element | null) => void) | undefined {
-  if (pinned || !measureRowPair) return undefined;
-  return measureRowPair.detail(index);
+  return neutralDesktopScrollBoxStyle(maxHeight, scrollX);
 }
 
 /**
@@ -724,14 +544,13 @@ export function desktopBodyPinStyle(
   rowPinSide: RowPinSide | undefined,
   rowPinOffset: number
 ): CSSProperties | undefined {
-  const column = pinnedCellStyle(pinOffset?.(key), PIN_Z.body, leads);
-  const rowPin = pinnedRowCellStyle(
+  return neutralDesktopBodyPinStyle(
+    key,
+    pinOffset,
+    leads,
     rowPinSide,
-    rowPinOffset,
-    column !== undefined
+    rowPinOffset
   );
-  if (!column && !rowPin.position) return undefined;
-  return { ...column, ...rowPin };
 }
 
 /**
@@ -750,15 +569,11 @@ export function desktopHeadCellStyle(
     stickyStyle?: CSSProperties;
   }
 ): CSSProperties | undefined {
-  const pin = pinnedCellStyle(
-    options.pinOffset?.(column.key),
-    PIN_Z.headerPinned,
-    options.leads
+  const { pin, width, anchorsResize } = desktopHeadCellGeometry(
+    column,
+    options
   );
-  const width = pin
-    ? pinnedColumnWidth(column, options.columnWidths)
-    : options.columnWidths?.[column.key];
-  if (!options.stickyStyle && !pin && width == null && !options.setWidth) {
+  if (!options.stickyStyle && !pin && width == null && !anchorsResize) {
     return undefined;
   }
   const merged: CSSProperties = {
@@ -766,7 +581,7 @@ export function desktopHeadCellStyle(
     ...pin,
     ...(width != null && { width }),
   };
-  if (options.setWidth && !merged.position) merged.position = "relative";
+  if (anchorsResize && !merged.position) merged.position = "relative";
   return merged;
 }
 
@@ -782,7 +597,7 @@ export function desktopEdgeHeadStyle(
   active: boolean,
   stickyStyle: CSSProperties | undefined
 ): CSSProperties | undefined {
-  const edge = edgePinStyle(side, active, PIN_Z.headerPinned);
+  const edge = desktopEdgeHeadPin(side, active);
   if (!stickyStyle && !edge) return undefined;
   return { ...stickyStyle, ...edge };
 }
