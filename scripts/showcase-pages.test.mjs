@@ -4,7 +4,13 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { builtAdapters, MATRIX_FEATURES } from "../apps/showcase/matrix.mjs";
+import {
+  adapterByKey,
+  builtAdapters,
+  frameworkOf,
+  MATRIX_FEATURES,
+  matrixPages,
+} from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES, SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
 import { DEMO_ROOT, demoRoute } from "./site.mjs";
 import { isRedirectPage } from "./sitemap-routes.mjs";
@@ -129,6 +135,30 @@ describe("the showcase page manifest", () => {
     for (const { route } of SHOWCASE_PAGES) {
       assert.equal(route.startsWith(DEMO_ROOT), true, route);
       assert.equal(route.endsWith("/"), true, route);
+    }
+  });
+
+  it("boots each page's framework entry, and no bundle from a redirect", () => {
+    const matrix = new Map(
+      matrixPages().map((page) => [`./${page.dir}/index.html`, page])
+    );
+    for (const page of SHOWCASE_PAGES) {
+      const source = readFileSync(join(SHOWCASE, page.html), "utf8");
+      if (page.framework === null) {
+        assert.equal(isRedirectPage(source), true, page.html);
+        continue;
+      }
+      assert.ok(entryModuleOf(source), page.html);
+      const spec = matrix.get(page.html);
+      if (!spec) continue;
+      const adapter = adapterByKey(spec.adapter);
+      assert.ok(adapter, spec.adapter);
+      assert.equal(page.framework, adapter.framework, page.html);
+      assert.equal(
+        `/${entryModuleOf(source)}`,
+        frameworkOf(adapter).entry,
+        page.html
+      );
     }
   });
 

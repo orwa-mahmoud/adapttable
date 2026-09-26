@@ -14,10 +14,13 @@ import {
   CANONICAL_AI_ADAPTER,
   featureBySlug,
   fillTemplate,
+  frameworkOf,
   introFor,
   LANDING,
   MATRIX_FEATURES,
   SHOWCASE_ADAPTERS,
+  SHOWCASE_FRAMEWORKS,
+  snippetFor,
 } from "../../matrix.mjs";
 
 export {
@@ -26,40 +29,53 @@ export {
   CANONICAL_AI_ADAPTER,
   featureBySlug,
   fillTemplate,
+  frameworkOf,
   introFor,
   LANDING,
   MATRIX_FEATURES,
   SHOWCASE_ADAPTERS,
+  SHOWCASE_FRAMEWORKS,
+  snippetFor,
 };
 
 export type ShowcaseAdapter = (typeof SHOWCASE_ADAPTERS)[number];
 export type MatrixFeature = (typeof MATRIX_FEATURES)[number];
+export type ShowcaseFramework = (typeof SHOWCASE_FRAMEWORKS)[number];
 
 /** Which adapter and feature a page is for, read from its own markup. */
 export interface MatrixRoute {
   readonly adapter: ShowcaseAdapter;
+  /** The framework the adapter's kit is built on — the one serving the page. */
+  readonly framework: ShowcaseFramework;
   /** `null` on an adapter's landing page. */
   readonly feature: MatrixFeature | null;
 }
 
 /**
  * Resolve `mantine` or `mantine/saved-views` to the adapter and feature it
- * names.
+ * names, for an entry that serves one framework's kits.
  *
  * The identifier is written into `#root`'s `data-matrix-page` by the HTML
  * generator, so the page knows what it is from its own markup rather than by
  * parsing a URL that the dev server and the published site spell differently.
+ * A kit built on another framework boots that framework's entry, so this entry
+ * resolves it to nothing rather than rendering it with the wrong binding.
  *
  * @param id - The page identifier.
- * @returns The route, or `null` when the id names nothing.
+ * @param framework - The framework the calling entry serves.
+ * @returns The route, or `null` when the id names nothing this entry serves.
  */
-export function resolveMatrixRoute(id: string): MatrixRoute | null {
+export function resolveMatrixRoute(
+  id: string,
+  framework: string
+): MatrixRoute | null {
   const [adapterKey, featureSlug] = id.split("/");
   const adapter = adapterKey ? adapterByKey(adapterKey) : undefined;
-  if (!adapter) return null;
-  if (!featureSlug) return { adapter, feature: null };
+  if (adapter?.framework !== framework) return null;
+  const route = { adapter, framework: frameworkOf(adapter) };
+  if (!featureSlug) return { ...route, feature: null };
   const feature = featureBySlug(featureSlug);
-  return feature ? { adapter, feature } : null;
+  return feature ? { ...route, feature } : null;
 }
 
 /**

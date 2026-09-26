@@ -52,10 +52,11 @@ Unify the **model**, never the **pixels**. The standing pattern is
 - The table never owns the data. Every write — edits, adds, deletes,
   reorders — is a callback to the host; the table asks, the host does.
 - `packages/react/adapter-bootstrap` is private and unfinished. It is not
-  published, and the kit contracts — the parts-parity check
-  (`CONTRACT_KITS`), the conformance suite and feature parity — do not bind
-  it. Its gaps are known: do not raise them as findings, add it to those
-  contracts or bring it to parity unless a task names it.
+  published, and its `private` role in the kit registry (`scripts/kits.mjs`)
+  keeps it out of the kit contracts — the parts-parity check, the
+  conformance suite and feature parity. Its gaps are known: do not raise
+  them as findings, add it to those contracts or bring it to parity unless a
+  task names it.
 
 ## Process
 

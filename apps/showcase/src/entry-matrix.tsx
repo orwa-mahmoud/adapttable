@@ -20,12 +20,17 @@ import { PageShell } from "./PageShell";
 const container = document.getElementById("root");
 if (!container) throw new Error("the showcase page has no #root to mount into");
 
+/** The framework this entry serves: the kits whose matrix pages boot it. */
+const FRAMEWORK = "react";
+
 const id = container.dataset.matrixPage ?? "";
-const route = resolveMatrixRoute(id);
+const route = resolveMatrixRoute(id, FRAMEWORK);
 if (!route) {
   // The page's static copy stays on screen rather than being replaced by a
   // blank root, and the fault is reported instead of being swallowed.
-  throw new Error(`the matrix does not build a page called "${id}"`);
+  throw new Error(
+    `the matrix does not build a ${FRAMEWORK} page called "${id}"`
+  );
 }
 
 /** `..` from an adapter landing, `../..` from one of its feature pages. */

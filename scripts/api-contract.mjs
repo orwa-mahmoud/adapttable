@@ -23,11 +23,18 @@
  * - no published typed entry point without a policy
  * - no documented entry point whose whole surface is `@internal`
  *
+ * And by framework, so a binding's contract is its own: `frameworks` files
+ * every surface under exactly one framework — `neutral` for the packages under
+ * `packages/shared`, one key per binding folder under `packages/` — and an
+ * entry point names only surfaces of its own package's framework. A new
+ * binding's packages are a new key there plus their surfaces and policies.
+ *
  * The manifest is committed, reviewed, and edited by hand. It is never
  * generated from the current reports during the gate: a list read back from
  * its own output approves whatever drift produced it, which is exactly how
  * the surface it replaced came to be wrong.
  */
+import { FRAMEWORKS, NEUTRAL } from "./kits.mjs";
 
 /** A tagged declaration in a report, and the release tag above it. */
 const TAG = /^\/\/ @(public|beta|alpha|internal)\b/;
@@ -142,6 +149,8 @@ export function checkContract({ manifest, entrypoints, reports }) {
   const policies = manifest.entrypoints ?? {};
   const errors = [
     ...shapeErrors(surfaces, policies),
+    ...frameworkErrors(manifest.frameworks ?? {}, surfaces),
+    ...entryFrameworkErrors(manifest.frameworks ?? {}, policies, entrypoints),
     ...coverageErrors(policies, entrypoints),
   ];
   for (const [reportName, policy] of Object.entries(policies)) {
@@ -189,6 +198,84 @@ function shapeErrors(surfaces, policies) {
     if (!used.has(name)) {
       errors.push(`surface "${name}" is defined but no entry point uses it`);
     }
+  }
+  return errors;
+}
+
+/**
+ * `surface name -> framework` for every surface `frameworks` files, in the
+ * order the manifest lists them.
+ */
+function surfaceFrameworks(frameworks) {
+  const owner = new Map();
+  for (const [framework, names] of Object.entries(frameworks)) {
+    for (const name of names) {
+      if (!owner.has(name)) owner.set(name, framework);
+    }
+  }
+  return owner;
+}
+
+/**
+ * The framework dimension read on its own: known frameworks only, every
+ * listed surface defined, and every surface filed under exactly one framework.
+ */
+function frameworkErrors(frameworks, surfaces) {
+  const errors = [];
+  const seen = new Map();
+  for (const [framework, names] of Object.entries(frameworks)) {
+    if (framework !== NEUTRAL && !(framework in FRAMEWORKS)) {
+      errors.push(
+        `framework "${framework}" is neither "${NEUTRAL}" nor a framework in scripts/kits.mjs`
+      );
+    }
+    for (const name of names) {
+      errors.push(...filingErrors(framework, name, surfaces, seen));
+    }
+  }
+  for (const name of Object.keys(surfaces)) {
+    if (!seen.has(name)) {
+      errors.push(`surface "${name}" is filed under no framework`);
+    }
+  }
+  return errors;
+}
+
+/**
+ * One surface filed under one framework: the surface is defined, and no
+ * framework has filed it before. Records the filing in `seen`.
+ */
+function filingErrors(framework, name, surfaces, seen) {
+  const errors = [];
+  if (!(name in surfaces)) {
+    errors.push(
+      `framework "${framework}" lists surface "${name}", which is not defined`
+    );
+  }
+  const earlier = seen.get(name);
+  if (earlier === framework) {
+    errors.push(`framework "${framework}" lists surface "${name}" twice`);
+  } else if (earlier !== undefined) {
+    errors.push(
+      `surface "${name}" is filed under both "${earlier}" and "${framework}"`
+    );
+  }
+  seen.set(name, earlier ?? framework);
+  return errors;
+}
+
+/** Every entry point names a surface of its own package's framework. */
+function entryFrameworkErrors(frameworks, policies, entrypoints) {
+  const owner = surfaceFrameworks(frameworks);
+  const errors = [];
+  for (const entry of entrypoints) {
+    const policy = policies[entry.report];
+    const named = policy?.surface ?? policy?.reexport;
+    const framework = owner.get(named);
+    if (framework === undefined || framework === entry.framework) continue;
+    errors.push(
+      `"${entry.report}" is a ${entry.framework} entry point but names surface "${named}", which is filed under ${framework}`
+    );
   }
   return errors;
 }

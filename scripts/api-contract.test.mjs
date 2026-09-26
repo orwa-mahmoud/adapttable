@@ -44,6 +44,7 @@ const REPORT = [
 
 const ENTRY = {
   dir: "core",
+  framework: "neutral",
   isMainEntry: true,
   published: true,
   report: "core.api.md",
@@ -52,6 +53,7 @@ const ENTRY = {
 
 /** A manifest that agrees with REPORT, which each test then breaks one way. */
 const agreeing = () => ({
+  frameworks: { neutral: ["core"] },
   surfaces: { core: ["ColumnDef", "pinnedRowPart", "print"] },
   entrypoints: { "core.api.md": { surface: "core" } },
 });
@@ -123,6 +125,7 @@ describe("both directions", () => {
     assert.deepEqual(
       checkContract({
         manifest: {
+          frameworks: { neutral: ["filters"] },
           surfaces: { filters: ["filterTypes"] },
           entrypoints: {
             "filters.api.md": { surface: "filters" },
@@ -260,6 +263,123 @@ describe("the manifest's own shape", () => {
   });
 });
 
+describe("the framework dimension", () => {
+  it("fails a surface filed under no framework", () => {
+    const manifest = agreeing();
+    manifest.frameworks = {};
+    assert.deepEqual(run(manifest), [
+      'surface "core" is filed under no framework',
+    ]);
+  });
+
+  it("fails a surface filed under two frameworks", () => {
+    const manifest = agreeing();
+    manifest.frameworks = { neutral: ["core"], react: ["core"] };
+    assert.ok(
+      run(manifest).some((e) =>
+        /"core" is filed under both "neutral" and "react"/.test(e)
+      )
+    );
+  });
+
+  it("fails a framework listing a surface that is not defined", () => {
+    const manifest = agreeing();
+    manifest.frameworks.neutral.push("ghost");
+    assert.ok(
+      run(manifest).some((e) =>
+        /framework "neutral" lists surface "ghost", which is not defined/.test(
+          e
+        )
+      )
+    );
+  });
+
+  it("fails a framework no binding in scripts/kits.mjs is", () => {
+    const manifest = agreeing();
+    manifest.frameworks = { neutral: [], svelte: ["core"] };
+    assert.ok(
+      run(manifest).some((e) => /framework "svelte" is neither/.test(e))
+    );
+  });
+
+  it("fails an entry point naming another framework's surface", () => {
+    // A binding's entry point forwarding the neutral engine's contract as its
+    // own would hand one promise to two packages.
+    const errors = checkContract({
+      manifest: agreeing(),
+      entrypoints: [{ ...ENTRY, framework: "react" }],
+      reports: { "core.api.md": REPORT },
+    });
+    assert.deepEqual(errors, [
+      '"core.api.md" is a react entry point but names surface "core", which is filed under neutral',
+    ]);
+  });
+
+  it("describes a second binding's packages as data beside the first", () => {
+    const errors = checkContract({
+      manifest: {
+        frameworks: { neutral: ["core"], react: ["kit"], vue: ["vue-kit"] },
+        surfaces: {
+          core: ["ColumnDef", "pinnedRowPart", "print"],
+          kit: ["DataTable"],
+          "vue-kit": ["DataTable"],
+        },
+        entrypoints: {
+          "core.api.md": { surface: "core" },
+          "adapter-mui.api.md": { surface: "kit" },
+          "adapter-vuetify.api.md": { surface: "vue-kit" },
+        },
+      },
+      entrypoints: [
+        ENTRY,
+        {
+          ...ENTRY,
+          dir: "adapter-mui",
+          framework: "react",
+          report: "adapter-mui.api.md",
+        },
+        {
+          ...ENTRY,
+          dir: "adapter-vuetify",
+          framework: "vue",
+          report: "adapter-vuetify.api.md",
+        },
+      ],
+      reports: {
+        "core.api.md": REPORT,
+        "adapter-mui.api.md":
+          "// @public\nexport declare function DataTable(): void;\n",
+        "adapter-vuetify.api.md":
+          "// @public\nexport declare function DataTable(): void;\n",
+      },
+    });
+    assert.deepEqual(errors, []);
+  });
+
+  it("files every entry point under the framework of the folder it sits in", () => {
+    const byReport = new Map(
+      entrypoints().map((entry) => [entry.report, entry.framework])
+    );
+    assert.equal(byReport.get("core.api.md"), "neutral");
+    assert.equal(byReport.get("core-binding.api.md"), "neutral");
+    assert.equal(byReport.get("ai.api.md"), "neutral");
+    assert.equal(byReport.get("react.api.md"), "react");
+    assert.equal(byReport.get("adapter-mui.api.md"), "react");
+  });
+
+  it("contracts the engine, its binding seam and the AI package as neutral", () => {
+    const manifest = JSON.parse(
+      readFileSync(join(REPO_ROOT, "etc", "api-contract.json"), "utf8")
+    );
+    for (const surface of ["core", "core-binding", "ai"]) {
+      assert.ok(manifest.frameworks.neutral.includes(surface), surface);
+    }
+    for (const surface of ["react", "ai-react", "adapter-mui"]) {
+      assert.ok(manifest.frameworks.react.includes(surface), surface);
+    }
+  });
+});
+
 describe("re-export policies", () => {
   const forwarding = 'export * from "@adapttable/unstyled/features";\n';
 
@@ -267,6 +387,7 @@ describe("re-export policies", () => {
     assert.deepEqual(
       checkContract({
         manifest: {
+          frameworks: { neutral: ["forwards unstyled/features"] },
           surfaces: {
             "forwards unstyled/features": ["@adapttable/unstyled/features"],
           },
@@ -293,6 +414,7 @@ describe("re-export policies", () => {
     assert.deepEqual(
       checkContract({
         manifest: {
+          frameworks: { neutral: ["kit/features"] },
           surfaces: { "kit/features": ["rowReorder", "savedViews"] },
           entrypoints: {
             "adapter-antd-features.api.md": {
@@ -320,6 +442,7 @@ describe("re-export policies", () => {
   it("fails when a canonical wildcard changes source", () => {
     const errors = checkContract({
       manifest: {
+        frameworks: { neutral: ["kit/features"] },
         surfaces: { "kit/features": ["rowReorder"] },
         entrypoints: {
           "adapter-antd-features.api.md": {
@@ -350,6 +473,7 @@ describe("re-export policies", () => {
   it("fails when a forwarded name stops arriving", () => {
     const errors = checkContract({
       manifest: {
+        frameworks: { neutral: ["kit/features"] },
         surfaces: { "kit/features": ["rowReorder", "savedViews"] },
         entrypoints: {
           "adapter-antd-features.api.md": { reexport: "kit/features" },
@@ -370,6 +494,7 @@ describe("re-export policies", () => {
   it("fails when a re-export entry starts declaring a surface of its own", () => {
     const errors = checkContract({
       manifest: {
+        frameworks: { neutral: ["kit/features"] },
         surfaces: { "kit/features": ["rowReorder"] },
         entrypoints: {
           "adapter-antd-features.api.md": { reexport: "kit/features" },

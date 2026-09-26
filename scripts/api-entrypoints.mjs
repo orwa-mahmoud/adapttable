@@ -21,6 +21,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { frameworkOfGroup } from "./kits.mjs";
 import { listPackages, REPO_ROOT } from "./packages.mjs";
 
 /** A subpath is extractable when it names a bare module, not a file. */
@@ -52,8 +53,12 @@ function typesTarget(value) {
 }
 
 /**
- * `{ dir, subpath, isMainEntry, report, entry, published }` for every typed entry
- * point, package by package, subpath sorted.
+ * `{ dir, framework, subpath, isMainEntry, report, entry, published }` for every
+ * typed entry point, package by package, subpath sorted.
+ *
+ * `framework` is the framework the package belongs to — `neutral` for the
+ * packages under `packages/shared`, the group folder's name for a binding's —
+ * which the contract holds each entry point's surface to.
  *
  * `published` is false for a workspace-private package (`@adapttable/bootstrap`
  * is `private: true`): its parity is still worth reporting, but it carries no
@@ -61,7 +66,7 @@ function typesTarget(value) {
  */
 export function entrypoints(root = REPO_ROOT) {
   const list = [];
-  for (const { name: dir, dir: packageDir } of listPackages(root)) {
+  for (const { name: dir, group, dir: packageDir } of listPackages(root)) {
     const manifest = JSON.parse(
       readFileSync(join(packageDir, "package.json"), "utf8")
     );
@@ -72,6 +77,7 @@ export function entrypoints(root = REPO_ROOT) {
       const name = key === "." ? "index" : key.slice(2);
       list.push({
         dir,
+        framework: frameworkOfGroup(group),
         // The exports-map key this came from. Carried rather than recovered
         // from the report name, which flattens a nested subpath's separator.
         subpath: key,

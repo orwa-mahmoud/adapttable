@@ -34,24 +34,34 @@
  *   stubs use that because listing one asks a crawler to index a URL whose
  *   whole content is "the page is elsewhere". A kit/e2e lab that is not a
  *   marketing tile uses it too and still boots a bundle.
+ * @property {string | null} framework The framework whose entry the page
+ *   boots — for a matrix page, the framework its adapter's kit is built on —
+ *   or `null` for a page that boots no bundle.
  */
 
 import { demoRoute } from "../../scripts/site.mjs";
 import { matrixPages } from "./matrix.mjs";
+
+/** The framework the showcase's own pages — landing, labs — are written in. */
+const SHOWCASE_FRAMEWORK = "react";
 
 /**
  * A demo whose directory name is also its key and its route segment — every
  * page except the landing page.
  *
  * @param {string} dir
- * @param {{ indexable?: boolean }} [options]
+ * @param {{ indexable?: boolean, framework?: string | null }} [options]
  * @returns {ShowcasePage}
  */
-const demo = (dir, { indexable = true } = {}) => ({
+const demo = (
+  dir,
+  { indexable = true, framework = SHOWCASE_FRAMEWORK } = {}
+) => ({
   key: dir.replaceAll("/", "-"),
   html: `./${dir}/index.html`,
   route: demoRoute(dir),
   indexable,
+  framework,
 });
 
 /**
@@ -87,7 +97,13 @@ export const REPLACED_PAGES = [
  * @type {ShowcasePage[]}
  */
 export const SHOWCASE_PAGES = [
-  { key: "main", html: "./index.html", route: demoRoute(), indexable: true },
+  {
+    key: "main",
+    html: "./index.html",
+    route: demoRoute(),
+    indexable: true,
+    framework: SHOWCASE_FRAMEWORK,
+  },
   demo("all-options"),
   // Optional AI chrome — built for kit/e2e coverage, not a marketing tile.
   demo("agent-approval", { indexable: false }),
@@ -96,7 +112,9 @@ export const SHOWCASE_PAGES = [
   demo("mcp-app", { indexable: false }),
   // The adapter × feature matrix — a landing plus the matrix feature pages per
   // built adapter, expanded from `matrix.mjs`.
-  ...matrixPages().map((page) => demo(page.dir)),
-  // The addresses those pages replaced.
-  ...REPLACED_PAGES.map(([from]) => demo(from, { indexable: false })),
+  ...matrixPages().map((page) => demo(page.dir, { framework: page.framework })),
+  // The addresses those pages replaced — static redirects with no bundle.
+  ...REPLACED_PAGES.map(([from]) =>
+    demo(from, { indexable: false, framework: null })
+  ),
 ];
