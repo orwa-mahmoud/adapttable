@@ -4,17 +4,11 @@
 
 ```ts
 
-import { ActionAiOptions } from '@adapttable/core';
-import { AgentApply } from '@adapttable/ai';
 import { AgentApprovalPending } from '@adapttable/react/adapter';
-import { AgentCapabilityDefinition } from '@adapttable/ai';
 import { AgentContextInputs } from '@adapttable/ai';
-import { AgentObservation } from '@adapttable/ai';
 import { AgentProgress } from '@adapttable/react/adapter';
 import { AgentSession } from '@adapttable/ai';
 import { AlwaysAllowedState } from '@adapttable/ai';
-import { ApprovalResult } from '@adapttable/ai';
-import { ApprovalSubject } from '@adapttable/ai';
 import { AssistantAllowance } from '@adapttable/ai';
 import { AssistantAnswer } from '@adapttable/ai';
 import { AssistantAudio } from '@adapttable/ai';
@@ -25,18 +19,17 @@ import { AssistantResumeHandle } from '@adapttable/ai';
 import { AssistantStatus } from '@adapttable/ai';
 import { AssistantSuggestion } from '@adapttable/ai';
 import { AssistantTransport } from '@adapttable/ai';
-import { CommitPolicy } from '@adapttable/ai';
-import { FeatureStateKey } from '@adapttable/react/adapter';
+import { FeatureStateKey } from '@adapttable/core/binding';
 import { SharedApproval } from '@adapttable/ai';
 import { SpeechClip } from '@adapttable/ai/voice';
 import { SpeechInputHandle } from '@adapttable/react/adapter';
 import { StaticTableFeature } from '@adapttable/react/adapter';
 import { TableAgentBridge as TableAgentBridge_2 } from '@adapttable/ai';
 import { TableAgentColumnPatch } from '@adapttable/ai';
+import { TableAgentRuntimeOptions } from '@adapttable/ai';
 import { TableAssistantSnapshot } from '@adapttable/ai';
 import { TableAssistantStore } from '@adapttable/ai';
 import { VoiceOptions } from '@adapttable/ai/voice';
-import { WritePolicy } from '@adapttable/ai';
 
 export { AssistantAnswer }
 
@@ -66,24 +59,12 @@ export type TableAgentBridge = TableAgentBridge_2<AgentApprovalPending>;
 export { TableAgentColumnPatch }
 
 // @public
-export interface TableAgentOptions {
-    readonly apply?: AgentApply;
-    readonly approval?: SharedApproval;
+export interface TableAgentOptions extends TableAgentRuntimeOptions {
     readonly bridge?: TableAgentBridge;
-    readonly capabilities?: readonly AgentCapabilityDefinition[];
-    readonly capabilityApproval?: Readonly<Record<string, ActionAiOptions>>;
-    readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
-    readonly commit?: CommitPolicy;
-    readonly excludeCapabilities?: readonly string[];
-    readonly observe?: () => AgentObservation;
-    readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
-    readonly readMax?: number;
-    readonly tableId: string;
     readonly webmcp?: true | {
         readonly exposedTo?: readonly string[];
         readonly onRegister?: (names: readonly string[]) => void;
     };
-    readonly writePolicy?: WritePolicy;
 }
 
 // @public

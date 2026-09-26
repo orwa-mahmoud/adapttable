@@ -5,6 +5,9 @@
 ```ts
 
 import { ActionConfirm } from '@adapttable/core';
+import { ACTIVE_FILTER_CHIPS } from '@adapttable/core/binding';
+import { ActiveFilterChip } from '@adapttable/core';
+import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
 import { AgentApprovalDecision } from '@adapttable/core';
 import { AgentApprovalOperation } from '@adapttable/core';
 import { AgentApprovalPending } from '@adapttable/core';
@@ -16,6 +19,7 @@ import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
 import { applyCollapsedColumnGroups } from '@adapttable/core/binding';
 import { AssemblyFns } from '@adapttable/core';
+import { BatchRowEdit } from '@adapttable/core';
 import { bindFeatureHostFn } from '@adapttable/core';
 import { bindMobileCardList } from '@adapttable/core';
 import { TableBodyCell as BodyCell } from '@adapttable/core';
@@ -26,22 +30,34 @@ import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditCommit } from '@adapttable/core';
+import { CellEditKeyAction } from '@adapttable/core';
+import { CellEditKeyOutcome } from '@adapttable/core';
+import { CellEditNavigation } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
 import { CellEditorOption } from '@adapttable/core';
 import { CellEditTarget } from '@adapttable/core';
 import { cellFlashAttr } from '@adapttable/core';
 import { CellProps } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
+import { CellSaveStatus } from '@adapttable/core';
 import { cellsForRow } from '@adapttable/core/binding';
 import { CellSpanAppearance } from '@adapttable/core';
 import { cellSpanMark } from '@adapttable/core/binding';
 import { CellSpanRequest } from '@adapttable/core';
+import { CellValidator } from '@adapttable/core';
 import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
+import { ChromeBodySlot } from '@adapttable/core/binding';
+import { ChromeExtraSlot } from '@adapttable/core/binding';
+import { ChromeGroupEntry } from '@adapttable/core/binding';
+import { ChromeGroupSlot } from '@adapttable/core/binding';
+import { ChromeRowSlot } from '@adapttable/core/binding';
+import { ChromeVirtualPadSlot } from '@adapttable/core/binding';
 import { COLUMN_GROUP_ID_SEP } from '@adapttable/core/binding';
 import { COLUMN_GROUP_RENDER_PREFIX } from '@adapttable/core/binding';
 import { COLUMN_GROUP_STUB_PREFIX } from '@adapttable/core/binding';
 import { COLUMN_GROUP_STUB_WIDTH } from '@adapttable/core/binding';
+import { COLUMN_MENU } from '@adapttable/core/binding';
 import { ColumnFilter } from '@adapttable/core';
 import { columnFlexShares } from '@adapttable/core';
 import { ColumnFooterContext } from '@adapttable/core';
@@ -54,6 +70,7 @@ import { ColumnGroupShow } from '@adapttable/core';
 import { columnGroupStubStyle } from '@adapttable/core/binding';
 import { ColumnHeaderContext } from '@adapttable/core';
 import { ColumnHeaderController } from '@adapttable/core';
+import { ColumnHeaderRenameSlotProps as ColumnHeaderRenameSlotProps_2 } from '@adapttable/core/binding';
 import { ColumnInput } from '@adapttable/core';
 import { ColumnLayoutState } from '@adapttable/core';
 import { ColumnMenuAction } from '@adapttable/core';
@@ -79,6 +96,7 @@ import { Context } from 'react';
 import { ContextMenuActions } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuItemsFactory } from '@adapttable/core';
+import { ContextMenuPoint } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
 import { CSSProperties } from 'react';
 import { CustomCellEditorConflict } from '@adapttable/core';
@@ -86,12 +104,28 @@ import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
 import { DEFAULT_CARD_SIZE_PX } from '@adapttable/core';
 import { DependencyList } from 'react';
+import { deriveRuntimeOperations } from '@adapttable/core/binding';
 import { deriveSortByOptions } from '@adapttable/core';
+import { DESKTOP_ACTIONS_WIDTH } from '@adapttable/core/binding';
+import { DESKTOP_EXPANSION_WIDTH } from '@adapttable/core/binding';
+import { DESKTOP_SELECTION_WIDTH } from '@adapttable/core/binding';
+import { DesktopChromeWidths } from '@adapttable/core/binding';
 import { Direction } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
 import { DragEventHandler } from 'react';
 import { EditableColumnLike } from '@adapttable/core';
+import { EditConflict } from '@adapttable/core';
+import { EditConflictChange } from '@adapttable/core';
+import { EditConflictChoice } from '@adapttable/core';
+import { EditConflictHandler } from '@adapttable/core';
+import { EditConflictPolicy } from '@adapttable/core';
+import { EditEvent } from '@adapttable/core';
+import { EditEventHandler } from '@adapttable/core';
+import { EditLifecycle } from '@adapttable/core';
+import { EditUnit } from '@adapttable/core';
+import { EXPAND_TOGGLE } from '@adapttable/core/binding';
+import { ExpandToggleSlotProps } from '@adapttable/core/binding';
 import { ExportAllControls } from '@adapttable/core';
 import { ExportAllQuery } from '@adapttable/core';
 import { ExportAllResult } from '@adapttable/core';
@@ -101,12 +135,14 @@ import { ExportContext } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportInfo } from '@adapttable/core';
 import { ExportPayload } from '@adapttable/core';
+import { ExportProgressState } from '@adapttable/core';
 import { ExportQuery } from '@adapttable/core';
 import { ExportRequest } from '@adapttable/core';
 import { ExportRowMeta } from '@adapttable/core';
 import { ExportRowRole } from '@adapttable/core';
 import { ExportRowScope } from '@adapttable/core';
 import { ExportScopeCapability } from '@adapttable/core';
+import { ExportStatus } from '@adapttable/core';
 import { ExportTable } from '@adapttable/core';
 import { ExportWriteContext } from '@adapttable/core';
 import { ExportWriter } from '@adapttable/core';
@@ -124,16 +160,23 @@ import { extraRowsForSection } from '@adapttable/core/binding';
 import { extraUncoveredColSpans } from '@adapttable/core/binding';
 import { FacetCounts } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
+import { FailedCellSave } from '@adapttable/core';
 import { FeatureHostState } from '@adapttable/core';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureNoticeAppearance } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
 import { FeatureRegistration } from '@adapttable/core';
+import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
+import { FeatureSlotKey } from '@adapttable/core/binding';
+import { featureSlotKey } from '@adapttable/core/binding';
+import { FeatureStateKey } from '@adapttable/core/binding';
+import { featureStateKey } from '@adapttable/core/binding';
 import { FetchAllExport } from '@adapttable/core';
 import { filterColumnMenuRows } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
+import { FilterOverlaySlotProps as FilterOverlaySlotProps_2 } from '@adapttable/core/binding';
 import { FilterRuntime } from '@adapttable/core';
 import { FilterType } from '@adapttable/core';
 import { FilterTypeExtend } from '@adapttable/core';
@@ -142,12 +185,14 @@ import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FilterWidgetKind } from '@adapttable/core';
 import { FilterWidgetRenderProps } from '@adapttable/core';
+import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { fittedTableStyle } from '@adapttable/core';
 import { flattenColumnTree } from '@adapttable/core/binding';
 import { FlattenedColumns } from '@adapttable/core';
 import { GetCellSpan } from '@adapttable/core';
 import { GetCellSpanArgs } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
+import { GridFocusControllerOptions } from '@adapttable/core';
 import { GroupAggregateOverride } from '@adapttable/core';
 import { GroupAggregateOverrides } from '@adapttable/core';
 import { GroupAggregatesFn } from '@adapttable/core';
@@ -187,13 +232,13 @@ import { JSX } from 'react';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
 import { KeyboardEventHandler } from 'react';
 import { KeyedVirtualization } from '@adapttable/core';
+import { LayoutStorage } from '@adapttable/core';
 import { MemoExoticComponent } from 'react';
 import { MobileCardField } from '@adapttable/core';
 import { mobileCardListStyle } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
 import { MobileCardRenderer } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
-import { NeutralTable } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { normalizeEditorOptions } from '@adapttable/core';
 import { orderedCardEntries } from '@adapttable/core/binding';
@@ -246,7 +291,9 @@ import { ResolvedPaginationMode } from '@adapttable/core';
 import { resolveRowHeight } from '@adapttable/core/binding';
 import { resolveRowStyle } from '@adapttable/core/binding';
 import { resolveVirtualRows } from '@adapttable/core';
+import { ROW_DND_MIME } from '@adapttable/core/binding';
 import { ROW_ID_ATTRIBUTE } from '@adapttable/core';
+import { ROW_REORDER_ANNOUNCER } from '@adapttable/core/binding';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
 import { RowActionsRenderContext } from '@adapttable/core';
@@ -262,8 +309,10 @@ import { RowMoveMenuModel } from '@adapttable/core';
 import { RowMovePolicy } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
-import { RowPinSide as RowPinSide_2 } from '@adapttable/core';
+import { RowPairMeasurer } from '@adapttable/core/binding';
 import { rowPinSignature } from '@adapttable/core/binding';
+import { RowReorderHandler } from '@adapttable/core';
+import { RowReorderLabels } from '@adapttable/core';
 import { RowReorderOptions } from '@adapttable/core';
 import { rowSourceIndex } from '@adapttable/core/binding';
 import { rowSpanSignature } from '@adapttable/core/binding';
@@ -271,21 +320,34 @@ import { RowStyle } from '@adapttable/core';
 import { rowStyleSignature } from '@adapttable/core/binding';
 import { RowTreeMoveHandler } from '@adapttable/core';
 import { RowTreeParentRef } from '@adapttable/core';
+import { RowValidator } from '@adapttable/core';
+import { SavedView } from '@adapttable/core';
+import { SavedViewMigration } from '@adapttable/core';
+import { SavedViewsControllerOptions } from '@adapttable/core';
+import { SavedViewsStore } from '@adapttable/core';
+import { SavedViewVisibility } from '@adapttable/core';
 import { SelectionStats } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core/binding';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { SortLevel } from '@adapttable/core';
+import { SummaryRowFn as SummaryRowFn_2 } from '@adapttable/core';
 import { TableCommandOptions } from '@adapttable/core';
+import { TableDensity } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
 import { tableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
+import { TableOptions } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
+import { TableRuntime } from '@adapttable/core/binding';
+import { TableRuntimeView } from '@adapttable/core/binding';
 import { TableSource } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 import { TableStateMutators } from '@adapttable/core';
+import { TableStatusAnnouncementOptions } from '@adapttable/core';
+import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
 import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
 import { TotalCountCapability } from '@adapttable/core';
@@ -293,6 +355,8 @@ import { TreeEntry } from '@adapttable/core';
 import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
+import { ValidationCheckResult } from '@adapttable/core';
+import { ValidationTarget } from '@adapttable/core';
 import { virtualColumnSpan } from '@adapttable/core';
 import { VirtualItemMeta } from '@adapttable/core';
 import { VirtualTableRow } from '@adapttable/core';
@@ -301,22 +365,11 @@ import { windowGroupedEntries } from '@adapttable/core';
 
 export { ActionConfirm }
 
-// @public
-export const ACTIVE_FILTER_CHIPS: FeatureSlotKey<ActiveFilterChipsSlotProps>;
+export { ACTIVE_FILTER_CHIPS }
 
-// @public
-export interface ActiveFilterChip {
-    key: string;
-    label: string;
-    onRemove: () => void;
-}
+export { ActiveFilterChip }
 
-// @public
-export interface ActiveFilterChipsSlotProps {
-    readonly chips: readonly ActiveFilterChip[];
-    readonly labels: Required<TableLabels>;
-    readonly onClearAll: () => void;
-}
+export { ActiveFilterChipsSlotProps }
 
 // @public
 export type AdapterCommandPaletteFeature = (options?: boolean | CommandPaletteOptions) => StaticTableFeature;
@@ -600,96 +653,10 @@ export function assistantIsBusy(status: string): boolean;
 export function assistantIsUsable(status: string): boolean;
 
 // @public
-export interface BaseDataTableProps<TRow> {
-    activeFilterCount?: number;
-    applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
-    closeHeaderFilterOnSelect?: boolean;
-    collapsedGroupIds?: readonly string[];
-    columnLayout?: ColumnLayoutState;
+export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> {
     columns: ColumnInput_2<TRow>[];
-    confirm?: ConfirmHandler;
-    defaultColumnLayout?: Partial<ColumnLayoutState>;
-    defaults?: Partial<TableQueryParams> & {
-        extra?: ExtraFilters;
-    };
-    density?: "comfortable" | "compact";
-    dir?: Direction;
-    editConflictPolicy?: EditConflictPolicy;
-    estimateCardSize?: number;
-    estimateRowSize?: number;
-    expandedIds?: readonly string[];
-    extraChips?: readonly ActiveFilterChip[];
     features?: readonly TableFeature<NoInfer<TRow>>[];
-    filterDefs?: readonly FilterDef<TRow>[];
-    filterFields?: boolean;
-    filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
-    filterRegistry?: FilterTypeRegistry;
-    filtersMode?: "popover" | "drawer" | "header";
-    forceMobile?: boolean;
-    formatEditError?: (error: unknown) => string;
-    groupAggregates?: SummaryRowFn<TRow>;
-    groupFilter?: (group: GroupNode<TRow>) => boolean;
-    groupFooters?: boolean;
-    groupPageSize?: number;
-    groupRowPageSize?: number;
-    groupSort?: GroupSort<TRow>;
-    hasChildren?: (row: TRow) => boolean;
-    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
-    labels?: TableLabels;
-    locale?: string;
-    maxHeight?: number;
-    mobileBreakpoint?: number;
-    // @deprecated
-    mobileIdentityColumns?: number;
-    onCellCut?: (range: CellRange) => void;
-    onCellFill?: (edits: CellEdit<TRow>[]) => void;
-    onCellPaste?: (edits: CellEdit<TRow>[]) => void;
-    onClearFilters?: () => void;
-    onCollapsedGroupIdsChange?: (ids: string[]) => void;
-    onColumnLayoutChange?: (next: ColumnLayoutState) => void;
-    onColumnRename?: (key: string, name: string) => void;
-    onDensityChange?: (next: "comfortable" | "compact") => void;
-    onEditCancel?: EditEventHandler<TRow>;
-    onEditCommit?: EditEventHandler<TRow>;
-    onEditConflict?: EditConflictHandler<TRow>;
-    onEditError?: EditEventHandler<TRow>;
-    onEditRollback?: (previous: TRow, columnKey: string) => void;
-    onEditStart?: EditEventHandler<TRow>;
-    onExpandedIdsChange?: (ids: string[]) => void;
-    onGroupByChange?: (groupBy: readonly string[]) => void;
-    onGroupLoadMore?: (groupKey: string) => void;
-    onRowClick?: (row: TRow) => void;
-    onRowsChange?: (rows: readonly TRow[]) => void;
-    onSelectionChange?: (selectedIds: string[]) => void;
-    onValidationFail?: EditEventHandler<TRow>;
-    paginationMode?: PaginationMode;
-    prefetch?: (row: TRow) => void;
     renderCard?: ReactMobileCardRenderer<TRow>;
-    renderRowActions?: RowActionsRenderer<TRow>;
-    rowActionsLayout?: RowActionsLayout;
-    rowKey: (row: TRow) => string;
-    rowVersion?: (row: TRow) => string | number;
-    scrollTopGap?: number;
-    scrollToTopOnChange?: boolean;
-    searchable?: boolean;
-    searchDebounceMs?: number;
-    searchPlaceholder?: string;
-    selectedIds?: readonly string[];
-    selectionGetId?: (row: TRow) => string;
-    skeletonRows?: number;
-    sortByOptions?: SortByOption[];
-    source: TableSource<TRow>;
-    stickyHeader?: boolean;
-    stickyToolbar?: boolean;
-    stickyTop?: number;
-    summaryRow?: SummaryRowFn<TRow>;
-    tableFooter?: ReactNode;
-    tableLabel?: string;
-    toolbar?: ReactNode;
-    toolbarSlots?: ToolbarSlots;
-    validateRow?: RowValidator<TRow>;
-    virtualOverscan?: number;
-    virtualScrollMargin?: number;
 }
 
 // @public
@@ -766,12 +733,7 @@ export interface BatchEditingState<TRow> {
     takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
 }
 
-// @public
-export interface BatchRowEdit<TRow> {
-    patch: Readonly<Record<string, unknown>>;
-    row: TRow;
-    rowId: string;
-}
+export { BatchRowEdit }
 
 export { bindFeatureHostFn }
 
@@ -854,22 +816,11 @@ export interface CellEditingState {
     takeLive: (row: unknown, value: string) => void;
 }
 
-// @public
-export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
+export { CellEditKeyAction }
 
-// @public
-export interface CellEditKeyOutcome {
-    action: CellEditKeyAction;
-    advanceTarget: CellEditTarget | null;
-    commit: CellEditCommit | null;
-}
+export { CellEditKeyOutcome }
 
-// @public
-export interface CellEditNavigation {
-    columns: readonly EditableColumnLike[];
-    rowKey: (row: unknown) => string;
-    rows: readonly unknown[];
-}
+export { CellEditNavigation }
 
 export { CellEditor }
 
@@ -925,8 +876,7 @@ export interface CellSaveState<TRow> {
     }) => Promise<boolean>;
 }
 
-// @public
-export type CellSaveStatus = "saving" | "failed";
+export { CellSaveStatus }
 
 export { cellsForRow }
 
@@ -936,8 +886,7 @@ export { cellSpanMark }
 
 export { CellSpanRequest }
 
-// @public
-export type CellValidator<TRow> = (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+export { CellValidator }
 
 // @public
 export interface ChecklistButtonProps {
@@ -1074,8 +1023,7 @@ export const COLUMN_HEADER_RENAME: FeatureSlotKey<ColumnHeaderRenameSlotProps>;
 // @public
 export const COLUMN_LAYOUT_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 
-// @public
-export const COLUMN_MENU: FeatureSlotKey<ColumnMenuSlotProps<never>>;
+export { COLUMN_MENU }
 
 // @public
 export const COLUMN_SELECT: FeatureSlotKey<Omit<ColumnSelectCheckboxChromeProps, "slots">>;
@@ -1170,13 +1118,7 @@ export { ColumnHeaderContext }
 export { ColumnHeaderController }
 
 // @public
-export interface ColumnHeaderRenameSlotProps {
-    children?: ReactNode;
-    columnKey: string;
-    labels: ColumnMenuLabels;
-    name: string;
-    onRenameColumn: (key: string, name: string) => void;
-}
+export type ColumnHeaderRenameSlotProps = ColumnHeaderRenameSlotProps_2<ReactNode>;
 
 export { ColumnInput }
 
@@ -1441,11 +1383,7 @@ export interface ContextMenuOptions<TRow> {
     items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
 }
 
-// @public
-export interface ContextMenuPoint {
-    x: number;
-    y: number;
-}
+export { ContextMenuPoint }
 
 // @public
 export interface ContextMenuSlots {
@@ -1639,21 +1577,17 @@ export function DataTableShellView<TRow>(input: {
 export { DEFAULT_CARD_SIZE_PX }
 
 // @public
-export type Density = "comfortable" | "compact";
+export type Density = TableDensity;
 
-// @public
-export function deriveRuntimeOperations<TRow>(view: TableRuntimeView<TRow> | undefined): Readonly<Record<string, boolean>>;
+export { deriveRuntimeOperations }
 
 export { deriveSortByOptions }
 
-// @public
-export const DESKTOP_ACTIONS_WIDTH = 120;
+export { DESKTOP_ACTIONS_WIDTH }
 
-// @public
-export const DESKTOP_EXPANSION_WIDTH = 32;
+export { DESKTOP_EXPANSION_WIDTH }
 
-// @public
-export const DESKTOP_SELECTION_WIDTH = 48;
+export { DESKTOP_SELECTION_WIDTH }
 
 // @public
 export interface DesktopAssemblyOptions {
@@ -1666,37 +1600,18 @@ export type DesktopAssemblyProps<TRow> = SharedTableRenderProps<TRow> & {
 };
 
 // @public
-export type DesktopBodySlot<TRow> = DesktopExtraSlot | DesktopVirtualPadSlot | DesktopGroupSlot<TRow> | DesktopRowSlot<TRow>;
+export type DesktopBodySlot<TRow> = ChromeBodySlot<TRow, DesktopRowWiring<TRow>, ReactNode, CSSProperties>;
+
+export { DesktopChromeWidths }
 
 // @public
-export interface DesktopChromeWidths {
-    actions?: number;
-    expansion?: number;
-    includeExpansionInLeads?: boolean;
-    selection?: number;
-}
+export type DesktopExtraSlot = ChromeExtraSlot<ReactNode, CSSProperties>;
 
 // @public
-export interface DesktopExtraSlot {
-    colSpan: number;
-    extraKind: "separator" | "fullWidth";
-    fillStyle?: CSSProperties;
-    key: string;
-    kind: "extra";
-    render?: () => ReactNode;
-}
+export type DesktopGroupEntry<TRow> = ChromeGroupEntry<TRow>;
 
 // @public
-export type DesktopGroupEntry<TRow> = Extract<GroupedFlatEntry<TRow>, {
-    kind: "group" | "groupFooter" | "groupMore";
-}>;
-
-// @public
-export interface DesktopGroupSlot<TRow> {
-    entry: DesktopGroupEntry<TRow>;
-    key: string;
-    kind: "group";
-}
+export type DesktopGroupSlot<TRow> = ChromeGroupSlot<TRow>;
 
 // @public
 export interface DesktopHeaderLeaf<TRow> {
@@ -1722,11 +1637,7 @@ export interface DesktopHeaderLeaf<TRow> {
 }
 
 // @public
-export interface DesktopRowSlot<TRow> {
-    key: string;
-    kind: "row";
-    wiring: DesktopRowWiring<TRow>;
-}
+export type DesktopRowSlot<TRow> = ChromeRowSlot<DesktopRowWiring<TRow>>;
 
 // @public
 export interface DesktopRowWiring<TRow> {
@@ -1876,12 +1787,7 @@ export interface DesktopTablePin {
 }
 
 // @public
-export interface DesktopVirtualPadSlot {
-    colSpan: number;
-    height: number;
-    key: "pad-top" | "pad-bottom";
-    kind: "virtualPad";
-}
+export type DesktopVirtualPadSlot = ChromeVirtualPadSlot;
 
 export { Direction }
 
@@ -2074,34 +1980,15 @@ export interface EditableCellSlots {
 
 export { EditableColumnLike }
 
-// @public
-export interface EditConflict<TRow> {
-    changes: readonly EditConflictChange[];
-    columnKey: string;
-    draft: string;
-    incomingValue: string;
-    previous: TRow;
-    previousValue: string;
-    row: TRow;
-    rowId: string;
-    unit: "cell" | "row";
-}
+export { EditConflict }
 
-// @public
-export interface EditConflictChange {
-    readonly columnKey: string;
-    readonly incoming: string;
-    readonly previous: string;
-}
+export { EditConflictChange }
 
-// @public
-export type EditConflictChoice = "keep" | "take";
+export { EditConflictChoice }
 
-// @public
-export type EditConflictHandler<TRow> = (conflict: EditConflict<TRow>) => EditConflictChoice | void;
+export { EditConflictHandler }
 
-// @public
-export type EditConflictPolicy = "keep" | "take" | "ask";
+export { EditConflictPolicy }
 
 // @public
 export interface EditConflictState<TRow> {
@@ -2124,19 +2011,9 @@ export interface EditConflictState<TRow> {
     takeCell: (rowId: string, columnKey: string) => void;
 }
 
-// @public
-export interface EditEvent<TRow> {
-    columnKey: string;
-    error?: string;
-    previousValue: unknown;
-    row: TRow;
-    rowId: string;
-    unit: EditUnit;
-    value: unknown;
-}
+export { EditEvent }
 
-// @public
-export type EditEventHandler<TRow> = (event: EditEvent<TRow>) => void;
+export { EditEventHandler }
 
 // @public
 export interface EditHistoryHandle {
@@ -2178,14 +2055,7 @@ export interface EditHistoryState<TRow> {
 // @public
 export const EDITING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 
-// @public
-export interface EditLifecycle<TRow> {
-    onEditCancel?: EditEventHandler<TRow>;
-    onEditCommit?: EditEventHandler<TRow>;
-    onEditError?: EditEventHandler<TRow>;
-    onEditStart?: EditEventHandler<TRow>;
-    onValidationFail?: EditEventHandler<TRow>;
-}
+export { EditLifecycle }
 
 // @public
 export function editorBusyProps(ctrl: EditableCellEditorCtrl): {
@@ -2202,8 +2072,7 @@ export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
     "data-conflict"?: "";
 };
 
-// @public
-export type EditUnit = "cell" | "row" | "batch";
+export { EditUnit }
 
 // @public
 export interface EditValidationState<TRow> {
@@ -2231,8 +2100,7 @@ export interface EscapeCloseOptions {
     readonly ignoreWithin?: string;
 }
 
-// @public
-export const EXPAND_TOGGLE: FeatureSlotKey<ExpandToggleSlotProps>;
+export { EXPAND_TOGGLE }
 
 // @public
 export function ExpandChevron(input: Readonly<{
@@ -2240,15 +2108,7 @@ export function ExpandChevron(input: Readonly<{
     dir?: "rtl" | "ltr";
 }>): ReactElement;
 
-// @public
-export interface ExpandToggleSlotProps {
-    collapseLabel: string;
-    dir?: Direction;
-    expanded: boolean;
-    expandLabel: string;
-    id: string;
-    onToggle: (id: string) => void;
-}
+export { ExpandToggleSlotProps }
 
 // @public
 export const EXPANSION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
@@ -2333,17 +2193,7 @@ export interface ExportProgressSlots {
     readonly Surface: (props: ExportProgressSurfaceSlotProps) => ReactNode;
 }
 
-// @public
-export interface ExportProgressState {
-    readonly downloadUrl: string | undefined;
-    readonly error: string;
-    readonly message: string;
-    readonly onCancel: (() => void) | undefined;
-    readonly onDismiss: (() => void) | undefined;
-    readonly onRetry: (() => void) | undefined;
-    readonly status: Exclude<ExportStatus, "idle">;
-    readonly value: number | undefined;
-}
+export { ExportProgressState }
 
 // @public
 export interface ExportProgressSurfaceSlotProps {
@@ -2371,8 +2221,7 @@ export { ExportRowScope }
 
 export { ExportScopeCapability }
 
-// @public
-export type ExportStatus = "idle" | "busy" | "done" | "failed" | "cancelled";
+export { ExportStatus }
 
 export { ExportTable }
 
@@ -2419,12 +2268,7 @@ export { FacetCounts }
 
 export { FacetMap }
 
-// @public
-export interface FailedCellSave<TRow> {
-    attempted: unknown;
-    message: string;
-    previous: TRow;
-}
+export { FailedCellSave }
 
 // @public
 export type FeatureApplyInput<TRow = unknown> = object & {
@@ -2535,11 +2379,7 @@ export function FeatureProviders(input: {
 }): ReactNode;
 
 // @public
-export interface FeatureRender<TProps> {
-    readonly orderAs?: string;
-    readonly render: (props: TProps) => ReactNode;
-    readonly slot: FeatureSlotKey<TProps>;
-}
+export type FeatureRender<TProps> = FeatureRender_2<TProps, ReactNode>;
 
 // @public
 export function FeatureSlot<TProps>(input: {
@@ -2547,26 +2387,13 @@ export function FeatureSlot<TProps>(input: {
     readonly props: TProps;
 }): ReactNode;
 
-// @public
-export interface FeatureSlotKey<TProps> {
-    readonly __props?: (value: TProps) => void;
-    readonly id: string;
-    readonly single?: boolean;
-}
+export { FeatureSlotKey }
 
-// @public
-export function featureSlotKey<TProps>(id: string, options?: {
-    readonly single?: boolean;
-}): FeatureSlotKey<TProps>;
+export { featureSlotKey }
 
-// @public
-export interface FeatureStateKey<T> {
-    readonly __state?: T;
-    readonly id: string;
-}
+export { FeatureStateKey }
 
-// @public
-export function featureStateKey<T>(id: string): FeatureStateKey<T>;
+export { featureStateKey }
 
 // @public
 export function FeatureStateScope<T>(input: {
@@ -2752,18 +2579,7 @@ export { FilterOption }
 export { FilterOptionsSource }
 
 // @public
-export interface FilterOverlaySlotProps {
-    accentColor?: string;
-    activeFilterCount: number;
-    anchorEl?: HTMLElement | null;
-    children?: ReactNode;
-    dir?: Direction;
-    filters: ReactNode;
-    labels: Required<TableLabels>;
-    onClearFilters: () => void;
-    onClose: () => void;
-    open: boolean;
-}
+export type FilterOverlaySlotProps = FilterOverlaySlotProps_2<ReactNode>;
 
 export { FilterRuntime }
 
@@ -2898,8 +2714,7 @@ export const FIND_BAR: FeatureSlotKey<FindBarProps>;
 // @public
 export const FIND_LIVE: FeatureSlotKey<FindLiveSlotProps<never>>;
 
-// @public
-export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
+export { FIND_URL_WRITE_DEBOUNCE_MS }
 
 // @public
 export function FindBarChrome(input: Readonly<FindBarChromeProps>): ReactElement | null;
@@ -3429,8 +3244,7 @@ export interface KeyedWindowSlotProps {
     scrollMargin?: number;
 }
 
-// @public
-export type LayoutStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+export { LayoutStorage }
 
 // @public
 export function LiveRegion(input: Readonly<LiveRegionProps>): ReactElement;
@@ -3810,18 +3624,14 @@ export function restoreFocusSoon(element: HTMLElement | null): () => void;
 // @public
 export const ROW_ACTIONS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 
-// @public
-export const ROW_DND_MIME = "application/x-adapttable-row";
+export { ROW_DND_MIME }
 
 // @public
 export const ROW_EDIT_ACTIONS: FeatureSlotKey<RowEditActionsProps<never>>;
 
 export { ROW_ID_ATTRIBUTE }
 
-// @public
-export const ROW_REORDER_ANNOUNCER: FeatureSlotKey<{
-    announcement: string;
-}>;
+export { ROW_REORDER_ANNOUNCER }
 
 // @public
 export const ROW_REORDER_BUTTONS: FeatureSlotKey<RowReorderButtonsProps<never>>;
@@ -4044,11 +3854,7 @@ export type RowOf<P> = P extends {
     rowKey: (row: infer TRow) => string;
 } ? TRow : unknown;
 
-// @public
-export interface RowPairMeasurer {
-    detail: (index: number) => (node: Element | null) => void;
-    row: (index: number) => (node: Element | null) => void;
-}
+export { RowPairMeasurer }
 
 // @public
 export interface RowPinningState<TRow> {
@@ -4128,8 +3934,7 @@ export interface RowReorderHandleProps<TRow> {
     windowStart: number;
 }
 
-// @public
-export type RowReorderHandler<TRow> = (from: number, to: number, row: TRow) => void;
+export { RowReorderHandler }
 
 // @public
 export interface RowReorderHandleSlotProps {
@@ -4148,28 +3953,7 @@ export interface RowReorderHandleSlots {
     readonly Menu: (props: RowMoveMenuSlotProps) => ReactNode;
 }
 
-// @public
-export interface RowReorderLabels {
-    cancel?: string;
-    confirmRowMove?: string;
-    confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
-    confirmRowMoveTitle?: string;
-    moveRejectedCycle?: string;
-    moveRejectedPolicyNever?: string;
-    moveRejectedSorted?: string;
-    moveRowDown: string;
-    moveRowUp: string;
-    moveToGroup?: string;
-    moveUnavailable?: string;
-    moveUnder?: string;
-    reorderRow: string;
-    rootLevel?: string;
-    rowLifted: (position: number) => string;
-    rowMoved: (from: number, to: number) => string;
-    rowMovedToGroup?: (group: string) => string;
-    rowMovedUnder?: (parent: string) => string;
-    rowReorderCancelled: string;
-}
+export { RowReorderLabels }
 
 // @public
 export interface RowReorderMoveButtonProps {
@@ -4234,27 +4018,17 @@ export { RowTreeMoveHandler }
 
 export { RowTreeParentRef }
 
-// @public
-export type RowValidator<TRow> = (row: TRow) => string | Record<string, string> | undefined | Promise<string | Record<string, string> | undefined>;
+export { RowValidator }
 
 // @public
 export const SAVED_VIEWS: FeatureSlotKey<SavedViewsSlotProps>;
 
-// @public
-export interface SavedView {
-    isDefault?: boolean;
-    name: string;
-    readOnly?: boolean;
-    search: string;
-    version?: number;
-    visibility?: SavedViewVisibility;
-}
+export { SavedView }
 
 // @public
 export type SavedViewControlKey = "rename" | "moveUp" | "moveDown" | "default" | "remove";
 
-// @public
-export type SavedViewMigration = (view: SavedView, from: number) => SavedView | null;
+export { SavedViewMigration }
 
 // @public
 export interface SavedViewRowControl {
@@ -4342,16 +4116,9 @@ export interface SavedViewsSlotProps {
     options: UseSavedViewsOptions;
 }
 
-// @public
-export interface SavedViewsStore {
-    list: () => Promise<readonly SavedView[]>;
-    remove: (name: string) => Promise<void>;
-    reorder?: (names: readonly string[]) => Promise<void>;
-    save: (view: SavedView) => Promise<void>;
-}
+export { SavedViewsStore }
 
-// @public
-export type SavedViewVisibility = "private" | "team";
+export { SavedViewVisibility }
 
 // @public
 export function SearchIcon(): ReactElement;
@@ -4764,7 +4531,7 @@ export function stopEditKeys(event: Readonly<{
 }>): void;
 
 // @public
-export type SummaryRowFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+export type SummaryRowFn<TRow> = SummaryRowFn_2<TRow, ReactNode>;
 
 // @public
 export const TABLE_ASSISTANT: FeatureSlotKey<TableAssistantProps>;
@@ -5263,85 +5030,9 @@ export interface TableRenderModel<TRow> {
 // @public
 export function tableRenderModel<TRow>(props: Pick<SharedTableRenderProps<TRow>, "table" | "rows" | "rowActions" | "getRowId" | "rowEntries" | "renderRowDetail" | "expansion" | "columnWindow" | "editing" | "rowReorder" | "pinnedTopRows" | "pinnedBottomRows" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "getCellSpan" | "pinOffset" | "tree" | "grouping" | "extraRows" | "assembly">): TableRenderModel<TRow>;
 
-// @public
-export interface TableRuntime<TRow = unknown> {
-    featureIds(): readonly string[];
-    labels(): Readonly<Record<string, unknown>> | undefined;
-    rowAt(localIndex: number): TRow | undefined;
-    view(): TableRuntimeView<TRow> | undefined;
-}
+export { TableRuntime }
 
-// @public
-export interface TableRuntimeView<TRow = unknown> {
-    readonly actions?: {
-        readonly row: readonly RowAction<TRow>[];
-        readonly bulk: readonly BulkAction[];
-    };
-    readonly columnLayout?: {
-        readonly keys: readonly string[];
-        readonly hidden: readonly string[];
-        readonly setHidden?: (key: string, hidden: boolean) => void;
-        readonly move?: (key: string, toIndex: number) => void;
-        readonly setOrder?: (order: readonly string[]) => void;
-    };
-    readonly editing?: {
-        readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
-        readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
-    };
-    readonly filterDefs?: readonly FilterDef<TRow>[];
-    readonly filterRegistry?: FilterTypeRegistry;
-    readonly getRowId: (row: TRow) => string;
-    readonly grouping?: unknown;
-    readonly groupingState?: {
-        readonly groupBy: string | undefined;
-        readonly aggregateOverrides: GroupAggregateOverrides;
-        readonly columnLabel: (key: string) => string;
-        readonly columns?: readonly ColumnMetadata<TRow>[];
-        readonly computedAggregateKeys?: readonly string[];
-        readonly queryAggregates?: readonly QueryAggregate[];
-        readonly aggregateOperations?: readonly string[];
-        readonly honorsAggregates?: boolean;
-        readonly setGroupBy: (key: string | undefined) => void;
-        readonly initializeGroupBy?: (key: string) => void;
-        readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
-    };
-    readonly neutralTable?: NeutralTable<TRow>;
-    readonly pinning?: {
-        readonly columns: Readonly<Record<string, PinSide>>;
-        readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
-        readonly rows?: {
-            readonly top: readonly string[];
-            readonly bottom: readonly string[];
-        };
-        readonly setRowPin?: (rowKey: string, side: RowPinSide_2 | undefined) => void;
-    };
-    readonly query?: {
-        readonly page: number;
-        readonly limit: number;
-        readonly total?: number;
-        readonly defaultLimit?: number;
-        readonly search: string;
-        readonly sortBy?: string;
-        readonly sortDir?: "asc" | "desc";
-        readonly setPage: (page: number) => void;
-        readonly setLimit: (limit: number) => void;
-        readonly setSearch: (search: string) => void;
-        readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
-        readonly extra?: ExtraFilters;
-        readonly setExtras?: (extra: ExtraFilters) => void;
-        readonly clearExtras?: () => void;
-    };
-    readonly rowLabel: (row: TRow) => string;
-    readonly rows: readonly TRow[];
-    readonly selection?: {
-        readonly selectedIds: ReadonlySet<string>;
-        readonly replace: (ids: readonly string[] | undefined) => void;
-    };
-    readonly sortBy?: string;
-    readonly sourceCapabilities?: TableSourceCapabilities;
-    readonly tree?: unknown;
-    readonly visibleRows?: readonly TRow[];
-}
+export { TableRuntimeView }
 
 export { TableSource }
 
@@ -5349,18 +5040,7 @@ export { TableSourceCapabilities }
 
 export { TableStateMutators }
 
-// @public
-export interface TableStatusAnnouncementOptions {
-    labels: Required<TableLabels>;
-    limit: number;
-    page: number;
-    paged: boolean;
-    shown: number;
-    sortBy?: string;
-    sortColumnName?: string;
-    sortDir?: SortDirection;
-    total: number;
-}
+export { TableStatusAnnouncementOptions }
 
 // @public
 export function TableStatusAnnouncer(input: Readonly<TableStatusAnnouncerProps>): ReactElement;
@@ -5445,10 +5125,7 @@ export interface ToolbarExtrasSlotProps {
 }
 
 // @public
-export interface ToolbarSlots {
-    end?: ReactNode;
-    start?: ReactNode;
-}
+export type ToolbarSlots = TableToolbarSlots<ReactNode>;
 
 // @public (undocumented)
 export function toReactColumnResizeHandleProps(props: ColumnResizeHandleProps): ReactColumnResizeHandleProps;
@@ -5657,30 +5334,8 @@ export function useFindState(): FindInTableState | null;
 export function useFullscreen(element: HTMLElement | null): FullscreenState;
 
 // @public
-export interface UseGridFocusOptions<TRow> {
+export interface UseGridFocusOptions<TRow> extends GridFocusControllerOptions<TRow> {
     columns: readonly ColumnDef<TRow>[];
-    columnsWindowed?: boolean;
-    currentMatch?: GridCell | null;
-    dir?: Direction;
-    enabled: boolean;
-    firstRowIndex?: number;
-    getRowId?: (row: TRow) => string;
-    headerCheckbox?: boolean;
-    isCoveredCell?: (cell: GridCell) => boolean;
-    labels?: TableLabels;
-    matchKeys?: ReadonlySet<string>;
-    onActivate?: (cell: GridCell) => void;
-    onCut?: (range: CellRange) => void;
-    onFill?: (edits: CellEdit<TRow>[]) => void;
-    onFind?: () => void;
-    onPaste?: (edits: CellEdit<TRow>[]) => void;
-    onRangeChange?: (range: CellRange | null) => void;
-    onRedo?: () => number;
-    onUndo?: () => number;
-    pageSize?: number;
-    rowCount: number;
-    rows: readonly TRow[];
-    scrollToRow?: (rowIndex: number) => void;
 }
 
 // @public
@@ -5722,15 +5377,8 @@ export function useResolvedDensity(input: {
 export function useRowPairMeasurer(virtualizer: ResizableVirtualizer | undefined, enabled: boolean): RowPairMeasurer;
 
 // @public
-export interface UseSavedViewsOptions {
-    migrate?: SavedViewMigration;
+export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, "storage"> {
     storage?: LayoutStorage;
-    storageKey: string;
-    store?: SavedViewsStore;
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-    visibility?: SavedViewVisibility;
 }
 
 // @public
@@ -5806,17 +5454,9 @@ export interface UseTableVirtualizationOptions<TRow> {
     scrollMargin?: number;
 }
 
-// @public
-export interface ValidationCheckResult {
-    allowed: boolean;
-    error?: string;
-}
+export { ValidationCheckResult }
 
-// @public
-export interface ValidationTarget {
-    columnKey: string;
-    rowId: string;
-}
+export { ValidationTarget }
 
 // @public
 export interface ViewControlsToolbar {

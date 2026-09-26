@@ -8,6 +8,7 @@ import { ActionConfirm } from '@adapttable/core';
 import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
+import { BatchRowEdit } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
@@ -64,6 +65,8 @@ import { FacetCounts } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
 import { FeatureHostState } from '@adapttable/core';
 import { FeatureRegistration } from '@adapttable/core';
+import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
+import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FetchAllExport } from '@adapttable/core';
 import { FilterDef } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
@@ -88,6 +91,7 @@ import { GroupingPanelInteractions } from '@adapttable/core';
 import { GroupingPanelState } from '@adapttable/core';
 import { GroupNode } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
+import { LayoutStorage } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
 import { PinnedRows } from '@adapttable/core';
 import { PinnedSide } from '@adapttable/core';
@@ -108,13 +112,20 @@ import { RowMoveMenuModel } from '@adapttable/core';
 import { RowMovePolicy } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
+import { RowReorderHandler } from '@adapttable/core';
 import { RowReorderOptions } from '@adapttable/core';
 import { RowStyle } from '@adapttable/core';
 import { RowTreeMoveHandler } from '@adapttable/core';
 import { RowTreeParentRef } from '@adapttable/core';
+import { SavedView } from '@adapttable/core';
+import { SavedViewMigration } from '@adapttable/core';
+import { SavedViewsControllerOptions } from '@adapttable/core';
+import { SavedViewsStore } from '@adapttable/core';
+import { SavedViewVisibility } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { SortLevel } from '@adapttable/core';
+import { TableDensity } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
@@ -135,12 +146,7 @@ export function applyTableFeatures<P extends object>(props: P): P;
 // @public
 export function batchEditing<TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
 
-// @public
-export interface BatchRowEdit<TRow> {
-    patch: Readonly<Record<string, unknown>>;
-    row: TRow;
-    rowId: string;
-}
+export { BatchRowEdit }
 
 export { BulkAction }
 
@@ -257,7 +263,7 @@ export { CustomCellEditorCtrl }
 export { CustomCellEditorRender }
 
 // @public
-export type Density = "comfortable" | "compact";
+export type Density = TableDensity;
 
 // @public
 export function densityChooser(): StaticTableFeature;
@@ -433,18 +439,9 @@ export interface FeatureProviderProps<TRow = unknown> {
 }
 
 // @public
-export interface FeatureRender<TProps> {
-    readonly orderAs?: string;
-    readonly render: (props: TProps) => ReactNode;
-    readonly slot: FeatureSlotKey<TProps>;
-}
+export type FeatureRender<TProps> = FeatureRender_2<TProps, ReactNode>;
 
-// @public
-export interface FeatureSlotKey<TProps> {
-    readonly __props?: (value: TProps) => void;
-    readonly id: string;
-    readonly single?: boolean;
-}
+export { FeatureSlotKey }
 
 export { FetchAllExport }
 
@@ -534,8 +531,7 @@ export { GroupSort }
 // @public
 export function headerFilters(): StaticTableFeature;
 
-// @public
-export type LayoutStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+export { LayoutStorage }
 
 // @public
 export function multiSort(): StaticTableFeature;
@@ -658,8 +654,7 @@ export interface RowPinState {
 // @public
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): TableFeature<TRow>;
 
-// @public
-export type RowReorderHandler<TRow> = (from: number, to: number, row: TRow) => void;
+export { RowReorderHandler }
 
 export { RowReorderOptions }
 
@@ -669,32 +664,16 @@ export { RowTreeMoveHandler }
 
 export { RowTreeParentRef }
 
-// @public
-export interface SavedView {
-    isDefault?: boolean;
-    name: string;
-    readOnly?: boolean;
-    search: string;
-    version?: number;
-    visibility?: SavedViewVisibility;
-}
+export { SavedView }
 
-// @public
-export type SavedViewMigration = (view: SavedView, from: number) => SavedView | null;
+export { SavedViewMigration }
 
 // @public
 export function savedViews(options: UseSavedViewsOptions): StaticTableFeature;
 
-// @public
-export interface SavedViewsStore {
-    list: () => Promise<readonly SavedView[]>;
-    remove: (name: string) => Promise<void>;
-    reorder?: (names: readonly string[]) => Promise<void>;
-    save: (view: SavedView) => Promise<void>;
-}
+export { SavedViewsStore }
 
-// @public
-export type SavedViewVisibility = "private" | "team";
+export { SavedViewVisibility }
 
 // @public
 export function selectionStats(): StaticTableFeature;
@@ -809,15 +788,8 @@ export { UrlStateAdapter }
 export { UseColumnLayoutResult }
 
 // @public
-export interface UseSavedViewsOptions {
-    migrate?: SavedViewMigration;
+export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, "storage"> {
     storage?: LayoutStorage;
-    storageKey: string;
-    store?: SavedViewsStore;
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-    visibility?: SavedViewVisibility;
 }
 
 // @public

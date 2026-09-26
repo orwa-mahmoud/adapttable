@@ -20,6 +20,8 @@ import { QueryAggregate } from '@adapttable/core';
 import { revisionToken } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { TableRevisions } from '@adapttable/core';
+import { TableRuntime } from '@adapttable/core/binding';
+import { TableRuntimeView } from '@adapttable/core/binding';
 import { TableSourceCapabilities } from '@adapttable/core';
 
 // @public
@@ -478,6 +480,9 @@ export interface AlwaysAllowedState {
 }
 
 // @public
+export function alwaysAllowFor(approval: SharedApproval | undefined, capabilities: readonly AgentCapabilityDefinition[] | undefined, capability: string | undefined): readonly string[];
+
+// @public
 export interface AlwaysAllowInput {
     readonly alwaysAllow: readonly string[];
     readonly capability: string | undefined;
@@ -788,6 +793,9 @@ export interface AssistantUnresolved {
 }
 
 // @public
+export function bindLiveSession(inputs: LiveSessionInputs): AgentSession;
+
+// @public
 export function buildAgentContext(session: AgentSession, options?: AgentContextOptions, inputs?: AgentContextInputs): AgentContext;
 
 // @public
@@ -814,6 +822,9 @@ export interface CapabilityGuide {
 
 // @public
 export type CapabilityKey = (typeof CAPABILITY_KEYS)[number];
+
+// @public
+export function capabilityKind(session: AgentSession | undefined, capability: string | undefined): AgentCapabilityDefinition["kind"] | undefined;
 
 // @public
 export type CapabilityPartial = "supported" | "unsupported";
@@ -936,6 +947,9 @@ export function createDiscoveryCache(options?: {
 }): DiscoveryCache;
 
 // @public
+export function createRevisionCounter(): RevisionCounter;
+
+// @public
 export function createSpeechInput(options?: SpeechInputOptions): SpeechInput;
 
 // @public
@@ -1013,6 +1027,9 @@ export function eligibleSuggestions(suggestions: readonly AssistantSuggestion[],
 export function enabledKeys(observation: AgentObservation): CapabilityKey[];
 
 // @public
+export function exclusionKey(keys: readonly string[] | undefined): string;
+
+// @public
 export interface ExecuteError {
     readonly code: string;
     readonly message: string;
@@ -1074,6 +1091,27 @@ export interface LiveObservationOptions {
     readonly tableId: string;
     // (undocumented)
     readonly writePolicy?: WritePolicy;
+}
+
+// @public
+export interface LiveSessionInputs {
+    readonly flush: (run: () => void) => void;
+    readonly flushAdmission: {
+        readonly current: () => void;
+    };
+    readonly options: {
+        readonly current: TableAgentRuntimeOptions;
+    };
+    readonly reportProgress: {
+        readonly current: (report: AgentProgress | null) => void;
+    };
+    readonly revisions: RevisionCounter;
+    readonly runtime: {
+        readonly current: TableRuntime;
+    };
+    readonly waitForChrome: {
+        readonly current: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
+    };
 }
 
 // @public
@@ -1230,6 +1268,9 @@ export interface PendingApproval {
 }
 
 // @public
+export function perItemRefusal(transaction: ApprovalTransaction, stated: string | undefined): ApprovalResult;
+
+// @public
 export type PinStatus = "acknowledged" | "expired" | "unknown" | "unsupported";
 
 // @public
@@ -1243,6 +1284,9 @@ export interface ProposalResolver {
     readonly readable: (column: string) => boolean;
     readonly rowLabel: (rowKey: string) => string | undefined;
 }
+
+// @public
+export function readerResolver(runtime: TableRuntime, columns: Readonly<Record<string, TableAgentColumnPatch>> | undefined): ProposalResolver;
 
 // @public
 export function readRememberedLanguage(key?: string): string | undefined;
@@ -1284,6 +1328,13 @@ export interface ResolvedRow {
 
 // @public
 export function resolveRowFromNeutral<TRow>(table: NeutralTable<TRow>, ref: RowRef): ResolvedRow;
+
+// @public
+export interface RevisionCounter {
+    readonly bumpFrom: (revisions: TableRevisions) => number;
+    readonly bumpFromStamp: (stamp: string) => number;
+    readonly current: () => number;
+}
 
 export { revisionToken }
 
@@ -1345,6 +1396,9 @@ export type RuntimeOperations = Readonly<Record<string, boolean>>;
 
 // @public
 export function runUndo(session: AgentSession, undo: AssistantUndo, idempotencyKey: string, signal?: AbortSignal, view?: AgentContextView): Promise<readonly ExecuteResult[]>;
+
+// @public
+export function sampledColumns(session: AgentSession): readonly string[];
 
 // @public
 export function settleDecisions(decisions: readonly AgentApprovalDecision[], fallback: AgentApprovalDecision): {
@@ -1458,6 +1512,22 @@ export interface TableAgentColumnPatch {
 }
 
 // @public
+export interface TableAgentRuntimeOptions {
+    readonly apply?: AgentApply;
+    readonly approval?: SharedApproval;
+    readonly capabilities?: readonly AgentCapabilityDefinition[];
+    readonly capabilityApproval?: Readonly<Record<string, ActionAiOptions>>;
+    readonly columns?: Readonly<Record<string, TableAgentColumnPatch>>;
+    readonly commit?: CommitPolicy;
+    readonly excludeCapabilities?: readonly string[];
+    readonly observe?: () => AgentObservation;
+    readonly onApprove?: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
+    readonly readMax?: number;
+    readonly tableId: string;
+    readonly writePolicy?: WritePolicy;
+}
+
+// @public
 export interface TableAssistantInputs {
     readonly alwaysAllowed?: readonly string[];
     readonly approval?: unknown;
@@ -1547,6 +1617,12 @@ export interface UndoCall {
 
 // @public
 export function validateSchema(schema: JsonSchema, value: unknown, path?: string): string | undefined;
+
+// @public
+export function viewInputsFromRuntime(runtime: TableRuntime, options: TableAgentRuntimeOptions, samples: Readonly<Record<string, readonly unknown[]>>): AgentContextInputs;
+
+// @public
+export function viewRevisionStamp(view: TableRuntimeView | undefined): string;
 
 // @public
 export interface VoiceOptions {

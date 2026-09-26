@@ -4,18 +4,29 @@
 
 ```ts
 
+import { ActiveFilterChip } from '@adapttable/core';
 import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateOptions } from '@adapttable/core';
 import { AggregateSpec } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
+import { applyRowPin } from '@adapttable/core';
+import { applyRowReorder } from '@adapttable/core';
+import { asBatchGesture } from '@adapttable/core';
+import { asGesture } from '@adapttable/core';
+import { BatchRowEdit } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditCommit } from '@adapttable/core';
+import { CellEditKeyAction } from '@adapttable/core';
+import { CellEditKeyOutcome } from '@adapttable/core';
+import { CellEditNavigation } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
 import { CellEditTarget } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
+import { CellSaveStatus } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
+import { CellValidator } from '@adapttable/core';
 import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
 import { collectChecklistValues } from '@adapttable/core';
@@ -35,9 +46,12 @@ import { ConfirmHandler } from '@adapttable/core';
 import { Context } from 'react';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { createHistoryAdapter } from '@adapttable/core';
+import { createMemoryAdapter } from '@adapttable/core';
 import { CreateTableEngineOptions } from '@adapttable/core';
 import { CSSProperties } from 'react';
 import { CustomCellEditorRender } from '@adapttable/core';
+import { datasetIndex } from '@adapttable/core';
 import { DATE_OP_LABEL_KEYS } from '@adapttable/core';
 import { DateOp } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
@@ -45,39 +59,60 @@ import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
 import { edgePinStyle } from '@adapttable/core';
 import { EditableColumnLike } from '@adapttable/core';
+import { EditConflict } from '@adapttable/core';
+import { EditConflictChange } from '@adapttable/core';
+import { EditConflictChoice } from '@adapttable/core';
+import { EditConflictHandler } from '@adapttable/core';
+import { EditConflictPolicy } from '@adapttable/core';
+import { EditEvent } from '@adapttable/core';
+import { EditEventHandler } from '@adapttable/core';
+import { EditHistoryEntry } from '@adapttable/core';
+import { EditLifecycle } from '@adapttable/core';
+import { EditUnit } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportWriter } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
 import { ExtraRow } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
+import { FailedCellSave } from '@adapttable/core';
 import { FeatureHostState } from '@adapttable/core';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
 import { FeatureRegistration } from '@adapttable/core';
+import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
+import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterRuntime } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
+import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { GetCellSpan } from '@adapttable/core';
+import { getHistoryAdapter } from '@adapttable/core';
+import { GRID_CELL_ATTR } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
+import { gridCellAttr } from '@adapttable/core';
+import { GridFocusControllerOptions } from '@adapttable/core';
 import { GroupAggregateOverrides } from '@adapttable/core';
 import { GroupAggregatesFn } from '@adapttable/core';
 import { GroupByInput } from '@adapttable/core';
 import { GroupedFlatEntry } from '@adapttable/core';
 import { GroupingPanelState } from '@adapttable/core';
-import { GroupNode } from '@adapttable/core';
 import { GroupPaging } from '@adapttable/core';
-import { GroupSort } from '@adapttable/core';
+import { headerFilterFieldIsComplete } from '@adapttable/core';
+import { HeaderFilterOpenHost } from '@adapttable/core';
+import { InfiniteQueryLike } from '@adapttable/core';
 import { isDeclarativeFilters } from '@adapttable/core';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
+import { LayoutStorage } from '@adapttable/core';
 import { MobileCardField } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
 import { normalizeEditorOptions } from '@adapttable/core';
 import { NUMBER_OP_LABEL_KEYS } from '@adapttable/core';
 import { NumberOp } from '@adapttable/core';
+import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
@@ -100,146 +135,66 @@ import { ReactNode } from 'react';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
 import { RowAction } from '@adapttable/core';
-import { RowActionsLayout } from '@adapttable/core';
-import { RowActionsRenderer } from '@adapttable/core';
 import { RowDropPosition } from '@adapttable/core';
 import { RowHeight } from '@adapttable/core';
-import { RowMoveConfirmHandler } from '@adapttable/core';
 import { RowMoveMenuModel } from '@adapttable/core';
-import { RowMovePolicy } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
+import { RowPairMeasurer } from '@adapttable/core/binding';
+import { RowReorderControllerOptions } from '@adapttable/core';
+import { RowReorderDecision } from '@adapttable/core';
+import { RowReorderHandler } from '@adapttable/core';
+import { RowReorderLabels } from '@adapttable/core';
 import { RowStyle } from '@adapttable/core';
+import { RowValidator } from '@adapttable/core';
+import { SAVED_VIEW_VERSION } from '@adapttable/core';
+import { SavedView } from '@adapttable/core';
+import { SavedViewMigration } from '@adapttable/core';
+import { SavedViewsControllerOptions } from '@adapttable/core';
+import { SavedViewsStore } from '@adapttable/core';
+import { SavedViewVisibility } from '@adapttable/core';
+import { HEADER_FILTER_SESSION_ATTR as SESSION_ATTR } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
+import { SummaryRowFn as SummaryRowFn_2 } from '@adapttable/core';
+import { TableDensity } from '@adapttable/core';
 import { TableEngine } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
+import { TableOptions } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
 import { TableStateMutators } from '@adapttable/core';
+import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
 import { TEXT_OP_LABEL_KEYS } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
 import { TreeEntry } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
+import { ValidationCheckResult } from '@adapttable/core';
+import { ValidationTarget } from '@adapttable/core';
 
-// @public
-export interface ActiveFilterChip {
-    key: string;
-    label: string;
-    onRemove: () => void;
-}
+export { ActiveFilterChip }
 
 // @public
 export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<TRow>): SummaryRowFn<TRow>;
 
-// @public
-export function applyRowPin(state: RowPinState, rowId: string, side: RowPinSide | undefined): RowPinState;
+export { applyRowPin }
+
+export { applyRowReorder }
+
+export { asBatchGesture }
+
+export { asGesture }
 
 // @public
-export function applyRowReorder<T>(rows: readonly T[], from: number, to: number): T[];
-
-// @public
-export function asBatchGesture<TRow>(apply: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
-
-// @public
-export function asGesture<TRow>(apply: ((edits: CellEdit<TRow>[]) => void) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: CellEdit<TRow>[]) => void) | undefined;
-
-// @public
-export interface BaseDataTableProps<TRow> {
-    activeFilterCount?: number;
-    applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
-    closeHeaderFilterOnSelect?: boolean;
-    collapsedGroupIds?: readonly string[];
-    columnLayout?: ColumnLayoutState;
+export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> {
     columns: ColumnInput<TRow>[];
-    confirm?: ConfirmHandler;
-    defaultColumnLayout?: Partial<ColumnLayoutState>;
-    defaults?: Partial<TableQueryParams> & {
-        extra?: ExtraFilters;
-    };
-    density?: "comfortable" | "compact";
-    dir?: Direction;
-    editConflictPolicy?: EditConflictPolicy;
-    estimateCardSize?: number;
-    estimateRowSize?: number;
-    expandedIds?: readonly string[];
-    extraChips?: readonly ActiveFilterChip[];
     features?: readonly TableFeature<NoInfer<TRow>>[];
-    filterDefs?: readonly FilterDef<TRow>[];
-    filterFields?: boolean;
-    filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
-    filterRegistry?: FilterTypeRegistry;
-    filtersMode?: "popover" | "drawer" | "header";
-    forceMobile?: boolean;
-    formatEditError?: (error: unknown) => string;
-    groupAggregates?: SummaryRowFn<TRow>;
-    groupFilter?: (group: GroupNode<TRow>) => boolean;
-    groupFooters?: boolean;
-    groupPageSize?: number;
-    groupRowPageSize?: number;
-    groupSort?: GroupSort<TRow>;
-    hasChildren?: (row: TRow) => boolean;
-    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
-    labels?: TableLabels;
-    locale?: string;
-    maxHeight?: number;
-    mobileBreakpoint?: number;
-    // @deprecated
-    mobileIdentityColumns?: number;
-    onCellCut?: (range: CellRange) => void;
-    onCellFill?: (edits: CellEdit<TRow>[]) => void;
-    onCellPaste?: (edits: CellEdit<TRow>[]) => void;
-    onClearFilters?: () => void;
-    onCollapsedGroupIdsChange?: (ids: string[]) => void;
-    onColumnLayoutChange?: (next: ColumnLayoutState) => void;
-    onColumnRename?: (key: string, name: string) => void;
-    onDensityChange?: (next: "comfortable" | "compact") => void;
-    onEditCancel?: EditEventHandler<TRow>;
-    onEditCommit?: EditEventHandler<TRow>;
-    onEditConflict?: EditConflictHandler<TRow>;
-    onEditError?: EditEventHandler<TRow>;
-    onEditRollback?: (previous: TRow, columnKey: string) => void;
-    onEditStart?: EditEventHandler<TRow>;
-    onExpandedIdsChange?: (ids: string[]) => void;
-    onGroupByChange?: (groupBy: readonly string[]) => void;
-    onGroupLoadMore?: (groupKey: string) => void;
-    onRowClick?: (row: TRow) => void;
-    onRowsChange?: (rows: readonly TRow[]) => void;
-    onSelectionChange?: (selectedIds: string[]) => void;
-    onValidationFail?: EditEventHandler<TRow>;
-    paginationMode?: PaginationMode;
-    prefetch?: (row: TRow) => void;
     renderCard?: ReactMobileCardRenderer<TRow>;
-    renderRowActions?: RowActionsRenderer<TRow>;
-    rowActionsLayout?: RowActionsLayout;
-    rowKey: (row: TRow) => string;
-    rowVersion?: (row: TRow) => string | number;
-    scrollTopGap?: number;
-    scrollToTopOnChange?: boolean;
-    searchable?: boolean;
-    searchDebounceMs?: number;
-    searchPlaceholder?: string;
-    selectedIds?: readonly string[];
-    selectionGetId?: (row: TRow) => string;
-    skeletonRows?: number;
-    sortByOptions?: SortByOption[];
-    source: TableSource<TRow>;
-    stickyHeader?: boolean;
-    stickyToolbar?: boolean;
-    stickyTop?: number;
-    summaryRow?: SummaryRowFn<TRow>;
-    tableFooter?: ReactNode;
-    tableLabel?: string;
-    toolbar?: ReactNode;
-    toolbarSlots?: ToolbarSlots;
-    validateRow?: RowValidator<TRow>;
-    virtualOverscan?: number;
-    virtualScrollMargin?: number;
 }
 
 // @public
@@ -265,12 +220,7 @@ export interface BatchEditingState<TRow> {
     takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
 }
 
-// @public
-export interface BatchRowEdit<TRow> {
-    patch: Readonly<Record<string, unknown>>;
-    row: TRow;
-    rowId: string;
-}
+export { BatchRowEdit }
 
 // @public
 export function bindHeaderFilterDismiss<TRow>(source: FilterFormSource<TRow>, options: {
@@ -326,22 +276,11 @@ export interface CellEditingState {
     takeLive: (row: unknown, value: string) => void;
 }
 
-// @public
-export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
+export { CellEditKeyAction }
 
-// @public
-export interface CellEditKeyOutcome {
-    action: CellEditKeyAction;
-    advanceTarget: CellEditTarget | null;
-    commit: CellEditCommit | null;
-}
+export { CellEditKeyOutcome }
 
-// @public
-export interface CellEditNavigation {
-    columns: readonly EditableColumnLike[];
-    rowKey: (row: unknown) => string;
-    rows: readonly unknown[];
-}
+export { CellEditNavigation }
 
 // @public
 export interface CellElementProps extends Props {
@@ -374,11 +313,9 @@ export interface CellSaveState<TRow> {
     }) => Promise<boolean>;
 }
 
-// @public
-export type CellSaveStatus = "saving" | "failed";
+export { CellSaveStatus }
 
-// @public
-export type CellValidator<TRow> = (value: unknown, row: TRow) => string | undefined | Promise<string | undefined>;
+export { CellValidator }
 
 // @public
 export const CHECKLIST_ITEM_HEIGHT = 28;
@@ -551,14 +488,11 @@ export interface ContextMenuOptions<TRow> {
     items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
 }
 
-// @public
-export function createHistoryAdapter(): UrlStateAdapter;
+export { createHistoryAdapter }
 
-// @public
-export function createMemoryAdapter(initialSearch?: string): UrlStateAdapter;
+export { createMemoryAdapter }
 
-// @public
-export function datasetIndex(localIndex: number, windowStart: number): number;
+export { datasetIndex }
 
 export { DateOp }
 
@@ -575,7 +509,7 @@ export function defaultSearchText<TRow>(row: TRow): string;
 export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
 
 // @public
-export type Density = "comfortable" | "compact";
+export type Density = TableDensity;
 
 // @public
 export interface DirtyCellState {
@@ -758,34 +692,15 @@ export interface EditableCellGateProps<TRow> {
 // @public
 export type EditableCellMode = "display" | "activatable" | "editing";
 
-// @public
-export interface EditConflict<TRow> {
-    changes: readonly EditConflictChange[];
-    columnKey: string;
-    draft: string;
-    incomingValue: string;
-    previous: TRow;
-    previousValue: string;
-    row: TRow;
-    rowId: string;
-    unit: "cell" | "row";
-}
+export { EditConflict }
 
-// @public
-export interface EditConflictChange {
-    readonly columnKey: string;
-    readonly incoming: string;
-    readonly previous: string;
-}
+export { EditConflictChange }
 
-// @public
-export type EditConflictChoice = "keep" | "take";
+export { EditConflictChoice }
 
-// @public
-export type EditConflictHandler<TRow> = (conflict: EditConflict<TRow>) => EditConflictChoice | void;
+export { EditConflictHandler }
 
-// @public
-export type EditConflictPolicy = "keep" | "take" | "ask";
+export { EditConflictPolicy }
 
 // @public
 export interface EditConflictState<TRow> {
@@ -808,25 +723,11 @@ export interface EditConflictState<TRow> {
     takeCell: (rowId: string, columnKey: string) => void;
 }
 
-// @public
-export interface EditEvent<TRow> {
-    columnKey: string;
-    error?: string;
-    previousValue: unknown;
-    row: TRow;
-    rowId: string;
-    unit: EditUnit;
-    value: unknown;
-}
+export { EditEvent }
 
-// @public
-export type EditEventHandler<TRow> = (event: EditEvent<TRow>) => void;
+export { EditEventHandler }
 
-// @public
-export interface EditHistoryEntry<TRow> {
-    redo: readonly CellEdit<TRow>[];
-    undo: readonly CellEdit<TRow>[];
-}
+export { EditHistoryEntry }
 
 // @public
 export interface EditHistoryHandle {
@@ -854,17 +755,9 @@ export interface EditHistoryState<TRow> {
     undo: () => number;
 }
 
-// @public
-export interface EditLifecycle<TRow> {
-    onEditCancel?: EditEventHandler<TRow>;
-    onEditCommit?: EditEventHandler<TRow>;
-    onEditError?: EditEventHandler<TRow>;
-    onEditStart?: EditEventHandler<TRow>;
-    onValidationFail?: EditEventHandler<TRow>;
-}
+export { EditLifecycle }
 
-// @public
-export type EditUnit = "cell" | "row" | "batch";
+export { EditUnit }
 
 // @public
 export interface EditValidationState<TRow> {
@@ -887,12 +780,7 @@ export interface EditValidationState<TRow> {
 // @public
 export const EMPTY_ROW_PIN_STATE: RowPinState;
 
-// @public
-export interface FailedCellSave<TRow> {
-    attempted: unknown;
-    message: string;
-    previous: TRow;
-}
+export { FailedCellSave }
 
 // @public
 export type FeatureApplyInput<TRow = unknown> = object & {
@@ -984,18 +872,9 @@ export interface FeatureProviderProps<TRow = unknown> {
 }
 
 // @public
-export interface FeatureRender<TProps> {
-    readonly orderAs?: string;
-    readonly render: (props: TProps) => ReactNode;
-    readonly slot: FeatureSlotKey<TProps>;
-}
+export type FeatureRender<TProps> = FeatureRender_2<TProps, ReactNode>;
 
-// @public
-export interface FeatureSlotKey<TProps> {
-    readonly __props?: (value: TProps) => void;
-    readonly id: string;
-    readonly single?: boolean;
-}
+export { FeatureSlotKey }
 
 // @public
 export function filterDefForColumn<TRow>(defs: readonly FilterDef<TRow>[], key: string): FilterDef<TRow> | undefined;
@@ -1015,8 +894,7 @@ export interface FilterTriggerToggle {
     onPointerDown: () => void;
 }
 
-// @public
-export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
+export { FIND_URL_WRITE_DEBOUNCE_MS }
 
 // @public
 export interface FindInTableState {
@@ -1033,14 +911,11 @@ export interface FindInTableState {
     setQuery: (query: string) => void;
 }
 
-// @public
-export function getHistoryAdapter(): UrlStateAdapter;
+export { getHistoryAdapter }
 
-// @public
-export const GRID_CELL_ATTR = "data-grid-cell";
+export { GRID_CELL_ATTR }
 
-// @public
-export function gridCellAttr(cell: GridCell): string;
+export { gridCellAttr }
 
 // @public
 export interface GridFocusState {
@@ -1090,17 +965,12 @@ export interface GroupPagingState {
     showMore: (pageSize: number, groupKey?: string) => void;
 }
 
-// @public
-export function headerFilterFieldIsComplete<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, registry?: FilterTypeRegistry): boolean;
+export { headerFilterFieldIsComplete }
 
 // @public
 export const HeaderFilterOpenContext: Context<HeaderFilterOpenHost | null>;
 
-// @public
-export interface HeaderFilterOpenHost {
-    readonly openKey: string | null;
-    readonly setOpenKey: (key: string | null) => void;
-}
+export { HeaderFilterOpenHost }
 
 // @public
 export function HeaderFilterOpenProvider(input: {
@@ -1140,26 +1010,11 @@ export interface HorizontalOverflow<E extends HTMLElement> {
     ref: (node: E | null) => void;
 }
 
-// @public
-export interface InfiniteQueryLike<TPage> {
-    data: {
-        pages: TPage[];
-        pageParams: unknown[];
-    } | undefined;
-    dataUpdatedAt?: number;
-    error: Error | null;
-    fetchNextPage: () => Promise<unknown> | void;
-    hasNextPage: boolean;
-    isFetching: boolean;
-    isFetchingNextPage: boolean;
-    isLoading: boolean;
-    refetch: () => Promise<unknown> | void;
-}
+export { InfiniteQueryLike }
 
 export { isDeclarativeFilters }
 
-// @public
-export type LayoutStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+export { LayoutStorage }
 
 // @public
 export interface LazyChildrenState<TRow> {
@@ -1230,12 +1085,7 @@ export { NumberOp }
 // @public
 export function offersAllMatching(selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">, total: number): boolean;
 
-// @public
-export type PageSelector<TRow, TPage> = (page: TPage) => {
-    rows: readonly TRow[];
-    total?: number;
-    facets?: FacetMap;
-};
+export { PageSelector }
 
 // @public
 export function parseBooleanChoice(value: FilterValue): BooleanChoice;
@@ -1444,11 +1294,7 @@ export interface RowMutationsState<TRow> {
     canAdd: boolean;
 }
 
-// @public
-export interface RowPairMeasurer {
-    detail: (index: number) => (node: Element | null) => void;
-    row: (index: number) => (node: Element | null) => void;
-}
+export { RowPairMeasurer }
 
 // @public
 export interface RowPinLabels {
@@ -1475,75 +1321,23 @@ export interface RowPinState {
     readonly top: readonly string[];
 }
 
-// @public
-export type RowReorderDecision<TRow> = {
-    readonly kind: "reorder";
-    readonly from: number;
-    readonly to: number;
-    readonly row: TRow;
-} | {
-    readonly kind: "move";
-    readonly request: RowMoveRequest<TRow>;
-} | {
-    readonly kind: "reject";
-    readonly message: string;
-};
+export { RowReorderDecision }
 
-// @public
-export type RowReorderHandler<TRow> = (from: number, to: number, row: TRow) => void;
+export { RowReorderHandler }
 
-// @public
-export interface RowReorderLabels {
-    cancel?: string;
-    confirmRowMove?: string;
-    confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
-    confirmRowMoveTitle?: string;
-    moveRejectedCycle?: string;
-    moveRejectedPolicyNever?: string;
-    moveRejectedSorted?: string;
-    moveRowDown: string;
-    moveRowUp: string;
-    moveToGroup?: string;
-    moveUnavailable?: string;
-    moveUnder?: string;
-    reorderRow: string;
-    rootLevel?: string;
-    rowLifted: (position: number) => string;
-    rowMoved: (from: number, to: number) => string;
-    rowMovedToGroup?: (group: string) => string;
-    rowMovedUnder?: (parent: string) => string;
-    rowReorderCancelled: string;
-}
+export { RowReorderLabels }
 
-// @public
-export type RowValidator<TRow> = (row: TRow) => string | Record<string, string> | undefined | Promise<string | Record<string, string> | undefined>;
+export { RowValidator }
 
-// @public
-export const SAVED_VIEW_VERSION = 2;
+export { SAVED_VIEW_VERSION }
 
-// @public
-export interface SavedView {
-    isDefault?: boolean;
-    name: string;
-    readOnly?: boolean;
-    search: string;
-    version?: number;
-    visibility?: SavedViewVisibility;
-}
+export { SavedView }
 
-// @public
-export type SavedViewMigration = (view: SavedView, from: number) => SavedView | null;
+export { SavedViewMigration }
 
-// @public
-export interface SavedViewsStore {
-    list: () => Promise<readonly SavedView[]>;
-    remove: (name: string) => Promise<void>;
-    reorder?: (names: readonly string[]) => Promise<void>;
-    save: (view: SavedView) => Promise<void>;
-}
+export { SavedViewsStore }
 
-// @public
-export type SavedViewVisibility = "private" | "team";
+export { SavedViewVisibility }
 
 // @public
 export function scalarFilterText(value: FilterValue): string;
@@ -1585,8 +1379,7 @@ export interface SelectionState {
     visibleIds: string[];
 }
 
-// @public
-export const SESSION_ATTR = "data-adapttable-header-filter";
+export { SESSION_ATTR }
 
 // @public
 export interface Shortcut {
@@ -1636,7 +1429,7 @@ export interface StaticTableFeature {
 }
 
 // @public
-export type SummaryRowFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+export type SummaryRowFn<TRow> = SummaryRowFn_2<TRow, ReactNode>;
 
 // @public
 export type TableBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
@@ -1797,10 +1590,7 @@ export interface TextFieldWidget {
 export { TextOp }
 
 // @public
-export interface ToolbarSlots {
-    end?: ReactNode;
-    start?: ReactNode;
-}
+export type ToolbarSlots = TableToolbarSlots<ReactNode>;
 
 // @public
 export interface TreeExpansionState {
@@ -2102,30 +1892,8 @@ export interface UseFrontendDataOptions<TRow> extends Pick<UseTableUrlStateOptio
 export function useGridFocus<TRow>(options: UseGridFocusOptions<TRow>): GridFocusState;
 
 // @public
-export interface UseGridFocusOptions<TRow> {
+export interface UseGridFocusOptions<TRow> extends GridFocusControllerOptions<TRow> {
     columns: readonly ColumnDef<TRow>[];
-    columnsWindowed?: boolean;
-    currentMatch?: GridCell | null;
-    dir?: Direction;
-    enabled: boolean;
-    firstRowIndex?: number;
-    getRowId?: (row: TRow) => string;
-    headerCheckbox?: boolean;
-    isCoveredCell?: (cell: GridCell) => boolean;
-    labels?: TableLabels;
-    matchKeys?: ReadonlySet<string>;
-    onActivate?: (cell: GridCell) => void;
-    onCut?: (range: CellRange) => void;
-    onFill?: (edits: CellEdit<TRow>[]) => void;
-    onFind?: () => void;
-    onPaste?: (edits: CellEdit<TRow>[]) => void;
-    onRangeChange?: (range: CellRange | null) => void;
-    onRedo?: () => number;
-    onUndo?: () => number;
-    pageSize?: number;
-    rowCount: number;
-    rows: readonly TRow[];
-    scrollToRow?: (rowIndex: number) => void;
 }
 
 // @public
@@ -2291,32 +2059,14 @@ export interface UseRowPinningUrlStateResult {
 }
 
 // @public
-export function useRowReorder<TRow>(options: {
-    enabled: boolean;
-    onRowReorder?: RowReorderHandler<TRow>;
-    movePolicy?: RowMovePolicy;
-    confirmMove?: RowMoveConfirmHandler<TRow>;
-    onRowMove?: (request: RowMoveRequest<TRow>) => unknown;
-    getMoveMenu?: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
-    resolveMove?: (row: TRow, target: TRow, position: RowDropPosition) => RowReorderDecision<TRow> | undefined;
-    labels: Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled"> & Partial<Pick<RowReorderLabels, "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever">>;
-    rowAt: (localIndex: number) => TRow | undefined;
-    getRowId?: (row: TRow) => string;
-}): TableRowReorderState<TRow>;
+export function useRowReorder<TRow>(options: RowReorderControllerOptions<TRow>): TableRowReorderState<TRow>;
 
 // @public
-export function useSavedViews(input: UseSavedViewsOptions): UseSavedViewsResult;
+export function useSavedViews(options: UseSavedViewsOptions): UseSavedViewsResult;
 
 // @public
-export interface UseSavedViewsOptions {
-    migrate?: SavedViewMigration;
+export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, "storage"> {
     storage?: LayoutStorage;
-    storageKey: string;
-    store?: SavedViewsStore;
-    urlAdapter?: UrlStateAdapter;
-    urlKey?: string;
-    urlSync?: boolean;
-    visibility?: SavedViewVisibility;
 }
 
 // @public
@@ -2503,17 +2253,9 @@ export function useTreeExpansion(controlled?: {
 // @public
 export function useVirtualChromeBodyData<TRow>(chrome: TableChrome<TRow>, props: ComposedTableProps<TRow>): ChromeBodyData<TRow>;
 
-// @public
-export interface ValidationCheckResult {
-    allowed: boolean;
-    error?: string;
-}
+export { ValidationCheckResult }
 
-// @public
-export interface ValidationTarget {
-    columnKey: string;
-    rowId: string;
-}
+export { ValidationTarget }
 
 // (No @packageDocumentation comment for this package)
 

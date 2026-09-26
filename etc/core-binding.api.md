@@ -5,6 +5,42 @@
 ```ts
 
 // @public
+export interface ActionAiOptions {
+    readonly approval?: {
+        readonly policy?: ActionApprovalPolicy;
+        readonly presentation?: ApprovalPresentation;
+    };
+}
+
+// @public
+export type ActionApprovalPolicy = "required" | "automatic";
+
+// @public
+export interface ActionConfirm<TArg> {
+    confirmLabel: string;
+    danger?: boolean;
+    message: (arg: TArg) => string;
+    title: string;
+}
+
+// @public
+export const ACTIVE_FILTER_CHIPS: FeatureSlotKey<ActiveFilterChipsSlotProps>;
+
+// @public
+export interface ActiveFilterChip {
+    key: string;
+    label: string;
+    onRemove: () => void;
+}
+
+// @public
+export interface ActiveFilterChipsSlotProps {
+    readonly chips: readonly ActiveFilterChip[];
+    readonly labels: Required<TableLabels>;
+    readonly onClearAll: () => void;
+}
+
+// @public
 export type Aggregatable<TValue = AggregateOrderedValue> = boolean | AggregatableConfig<TValue>;
 
 // @public
@@ -78,6 +114,9 @@ export type Aggregator<TValue = AggregateOrderedValue> = (values: readonly TValu
 export function applyCollapsedColumnGroups<TRow>(columns: readonly ColumnMetadata<TRow>[], collapsedIds: readonly string[], groups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>): readonly ColumnMetadata<TRow>[];
 
 // @public
+export type ApprovalPresentation = "widget" | "table" | "modal";
+
+// @public
 export interface BodyCell<TRow> {
     colSpan: number;
     column: ColumnMetadata<TRow>;
@@ -89,6 +128,31 @@ export interface BodyCell<TRow> {
 export function bodyCellsHaveRowSpan(cellsByRow: ReadonlyMap<string, readonly {
     rowSpan: number;
 }[]>): boolean;
+
+// @public
+export interface BulkAction {
+    ai?: ActionAiOptions | false;
+    color?: string;
+    confirm?: ActionConfirm<number>;
+    disabledReason?: (ids: string[]) => string | undefined;
+    icon?: DisplayValue;
+    key: string;
+    label: string;
+    onClick: (ids: string[], context: BulkActionContext) => void | Promise<unknown>;
+}
+
+// @public
+export interface BulkActionContext {
+    allMatching: boolean;
+    total: number;
+}
+
+// @public
+export function cellAttributes<TRow>(column: ColumnMetadata<TRow>, sizing: ChromeCellSizing): {
+    role: "cell";
+    "data-column-key": string;
+    style: CssProperties;
+};
 
 // @public
 export function cellsForRow<TRow>(cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]> | undefined, rowKey: string): readonly BodyCell<TRow>[];
@@ -107,6 +171,80 @@ export interface ChecklistValue {
 export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
 
 // @public
+export type ChromeBodySlot<TRow, TWiring, TNode = unknown, TStyle = unknown> = ChromeExtraSlot<TNode, TStyle> | ChromeVirtualPadSlot | ChromeGroupSlot<TRow> | ChromeRowSlot<TWiring>;
+
+// @public
+export interface ChromeCellSizing {
+    readonly columnWidths: Readonly<Record<string, number>> | undefined;
+    readonly flexShares: Readonly<Record<string, number>>;
+}
+
+// @public
+export interface ChromeColumnPlan {
+    readonly expandable: boolean;
+    readonly hasSelection: boolean;
+    readonly leadingCells: number;
+    readonly showActions: boolean;
+    readonly showReorder: boolean;
+}
+
+// @public
+export function chromeColumnPlan(input: {
+    readonly rowActionCount: number;
+    readonly rowEditing: boolean;
+    readonly rowReorder: boolean;
+    readonly rowDetail: boolean;
+    readonly selection: boolean;
+}): ChromeColumnPlan;
+
+// @public
+export interface ChromeExtraSlot<TNode = unknown, TStyle = unknown> {
+    colSpan: number;
+    extraKind: "separator" | "fullWidth";
+    fillStyle?: TStyle;
+    key: string;
+    kind: "extra";
+    render?: () => TNode;
+}
+
+// @public
+export type ChromeGroupEntry<TRow> = Extract<GroupedFlatEntry<TRow>, {
+    kind: "group" | "groupFooter" | "groupMore";
+}>;
+
+// @public
+export interface ChromeGroupSlot<TRow> {
+    entry: ChromeGroupEntry<TRow>;
+    key: string;
+    kind: "group";
+}
+
+// @public
+export interface ChromeRowSlot<TWiring> {
+    key: string;
+    kind: "row";
+    wiring: TWiring;
+}
+
+// @public
+export interface ChromeSortState {
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly {
+        key: string;
+        dir: SortDirection;
+    }[];
+}
+
+// @public
+export interface ChromeVirtualPadSlot {
+    colSpan: number;
+    height: number;
+    key: "pad-top" | "pad-bottom";
+    kind: "virtualPad";
+}
+
+// @public
 export const COLUMN_GROUP_ID_SEP = "";
 
 // @public
@@ -119,11 +257,23 @@ export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
 export const COLUMN_GROUP_STUB_WIDTH = 36;
 
 // @public
+export const COLUMN_HEADER_RENAME: FeatureSlotKey<ColumnHeaderRenameSlotProps<unknown>>;
+
+// @public
+export const COLUMN_MENU: FeatureSlotKey<ColumnMenuSlotProps<never>>;
+
+// @public
 export interface ColumnAiOptions {
     description?: string;
     examples?: readonly unknown[];
     sample?: boolean;
 }
+
+// @public
+export function columnAriaSort(column: {
+    readonly key: string;
+    readonly sortable?: boolean;
+}, sortBy: string | undefined, sortDir: SortDirection | undefined): "ascending" | "descending" | "none" | undefined;
 
 // @public
 export interface ColumnGroupDef<TRow> {
@@ -162,6 +312,15 @@ export type ColumnGroupShow = "open" | "closed" | "always";
 
 // @public
 export function columnGroupStubStyle(): CssProperties;
+
+// @public
+export interface ColumnHeaderRenameSlotProps<TNode = unknown> {
+    children?: TNode;
+    columnKey: string;
+    labels: ColumnMenuLabels;
+    name: string;
+    onRenameColumn: (key: string, name: string) => void;
+}
 
 // @public
 export type ColumnInput<TRow> = ColumnModel<TRow> | ColumnGroupDef<TRow>;
@@ -219,6 +378,13 @@ export interface ColumnMenuChoice {
 export interface ColumnMenuChoiceOption {
     label: string;
     value: string;
+}
+
+// @public
+export interface ColumnMenuChromeProps<TRow> {
+    allColumns: ColumnMetadata<TRow>[];
+    labels: ColumnMenuLabels;
+    layout: UseColumnLayoutResult<TRow>;
 }
 
 // @public
@@ -285,6 +451,25 @@ export interface ColumnMenuRow<TRow> {
 }
 
 // @public
+export interface ColumnMenuSlotProps<TRow> extends ColumnMenuChromeProps<TRow> {
+    dir?: Direction;
+    groupingPanel?: GroupingPanelState;
+    hasRowActions?: boolean;
+    hasRowReorder?: boolean;
+    labels: ColumnMenuLabels & {
+        actions: string;
+        reorderRow: string;
+    };
+    onAutoSize: () => void;
+    onAutoSizeColumn?: (key: string) => void;
+    onFilterColumn?: (key: string) => void;
+    onRenameColumn?: (key: string, name: string) => void;
+    onSortColumn?: (key: string, dir: "asc" | "desc") => void;
+    sortBy?: string;
+    sortDir?: "asc" | "desc";
+}
+
+// @public
 export type ColumnMetadata<TRow = unknown> = Omit<ColumnModel<TRow>, "header" | "filter"> & {
     header?: unknown;
     filter?: unknown;
@@ -340,6 +525,9 @@ export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 // @public
+export function columnTextAlign(align: string | undefined): "start" | "center" | "end";
+
+// @public
 export type Command = ContextMenuItem;
 
 // @public
@@ -369,6 +557,9 @@ export type ContextMenuTarget<TRow> = {
     rowId: string;
     columnKey: string;
 };
+
+// @public
+export function createFeatureHost<TPanel extends SidePanelEntry = SidePanelEntry>(features: readonly FeatureSetup<unknown, TPanel>[] | undefined): FeatureHostState;
 
 // @public
 export type CssProperties = Record<string, string | number | undefined>;
@@ -417,7 +608,151 @@ export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValu
 export type DeclaredAggregates = Readonly<Record<string, string>>;
 
 // @public
+export function deriveRuntimeOperations<TRow>(view: TableRuntimeView<TRow> | undefined): Readonly<Record<string, boolean>>;
+
+// @public
+export const DESKTOP_ACTIONS_WIDTH = 120;
+
+// @public
+export const DESKTOP_EXPANSION_WIDTH = 32;
+
+// @public
+export const DESKTOP_RESIZE_HANDLE_STYLE: {
+    readonly position: "absolute";
+    readonly insetInlineEnd: 0;
+    readonly top: 0;
+    readonly height: "100%";
+    readonly width: 8;
+    readonly cursor: "col-resize";
+    readonly touchAction: "none";
+    readonly userSelect: "none";
+};
+
+// @public
+export const DESKTOP_SELECTION_WIDTH = 48;
+
+// @public
+export type DesktopBodyPinStyle = Partial<PinnedCellStyle> & {
+    top?: number;
+    bottom?: number;
+};
+
+// @public
+export function desktopBodyPinStyle(key: string, pinOffset: ((key: string) => PinOffset | undefined) | undefined, leads: PinLeads, rowPinSide: RowPinSide | undefined, rowPinOffset: number): DesktopBodyPinStyle | undefined;
+
+// @public
+export function desktopChromeMetrics(options: {
+    expandable: boolean;
+    showReorder: boolean;
+    hasSelection: boolean;
+    showActions: boolean;
+    widths?: DesktopChromeWidths;
+}): {
+    leads: PinLeads;
+    extraMinWidth: number;
+    expansionLead: number;
+    reorderLead: number;
+    selectionLead: number;
+    expansion: number;
+    selection: number;
+    actions: number;
+    includeExpansionInLeads: boolean;
+};
+
+// @public
+export interface DesktopChromeWidths {
+    actions?: number;
+    expansion?: number;
+    includeExpansionInLeads?: boolean;
+    selection?: number;
+}
+
+// @public
+export function desktopDetailMeasureRef(pinned: RowPinSide | undefined, measureRowPair: RowPairMeasurer | undefined, index: number): ((element: Element | null) => void) | undefined;
+
+// @public
+export function desktopEdgeHeadPin(side: "start" | "end", active: boolean): PinnedCellStyle | undefined;
+
+// @public
+export function desktopHasPinned(columns: readonly {
+    key: string;
+}[], pinOffset: ((key: string) => unknown) | undefined, stickActions: boolean, reorderPinnedLead: boolean): boolean;
+
+// @public
+export interface DesktopHeadCellGeometry {
+    readonly anchorsResize: boolean;
+    readonly pin: PinnedCellStyle | undefined;
+    readonly width: number | undefined;
+}
+
+// @public
+export function desktopHeadCellGeometry(column: {
+    key: string;
+    width?: number | string;
+}, options: {
+    pinOffset?: (key: string) => PinOffset | undefined;
+    leads: PinLeads;
+    columnWidths?: Readonly<Record<string, number>>;
+    setWidth?: (key: string, width: number) => void;
+}): DesktopHeadCellGeometry;
+
+// @public
+export function desktopPinSignature(columns: readonly {
+    key: string;
+}[], pinOffset: ((key: string) => PinOffset | undefined) | undefined): string;
+
+// @public
+export function desktopRowMeasureRef(pinned: RowPinSide | undefined, measureRowPair: RowPairMeasurer | undefined, index: number, measureElement: ((element: Element | null) => void) | undefined): ((element: Element | null) => void) | undefined;
+
+// @public
+export type DesktopScrollBoxStyle = {
+    maxHeight: number;
+    overflowX: "auto";
+    overflowY: "auto";
+} | {
+    overflowX: "auto";
+};
+
+// @public
+export function desktopScrollBoxStyle(maxHeight: number | undefined, scrollX: boolean): DesktopScrollBoxStyle | undefined;
+
+// @public
+export type Direction = "ltr" | "rtl";
+
+// @public
 export type DisplayValue = string | number | boolean | bigint | object | null;
+
+// @public
+export function disposeFeatureHost(host: FeatureHostState): void;
+
+// @public
+export function documentOffsetTop(element: Element): number;
+
+// @public
+export function drawnSlotFills<TNode>(slot: {
+    readonly single?: boolean;
+}, fills: readonly SlotFill<TNode>[]): readonly SlotFill<TNode>[];
+
+// @public
+export const EMPTY_FEATURE_HOST: FeatureHostState;
+
+// @public
+export function entryKeys(entries?: readonly {
+    key: string;
+}[]): string[];
+
+// @public
+export const EXPAND_TOGGLE: FeatureSlotKey<ExpandToggleSlotProps>;
+
+// @public
+export interface ExpandToggleSlotProps {
+    collapseLabel: string;
+    dir?: Direction;
+    expanded: boolean;
+    expandLabel: string;
+    id: string;
+    onToggle: (id: string) => void;
+}
 
 // @public
 export interface ExportPayload {
@@ -518,6 +853,9 @@ export interface ExtraRow {
 }
 
 // @public
+export function extraRowCoveredSlots(extraRows: readonly ExtraRow[] | undefined, coveredSlots: (beforeRowId: string) => ReadonlySet<number>): Map<string, ReadonlySet<number>>;
+
+// @public
 export type ExtraRowKind = "separator" | "fullWidth";
 
 // @public
@@ -544,6 +882,45 @@ export interface FeatureHostState<TRow = unknown> {
     readonly panels: readonly SidePanelEntry[];
     readonly writers: readonly ExportWriter[];
 }
+
+// @public
+export interface FeatureRender<TProps, TNode = unknown> {
+    readonly orderAs?: string;
+    readonly render: (props: TProps) => TNode;
+    readonly slot: FeatureSlotKey<TProps>;
+}
+
+// @public
+export interface FeatureSetup<TRow, TPanel extends SidePanelEntry> {
+    setup?(host: LiveFeatureHost<TRow, TPanel>): void | (() => void);
+}
+
+// @public
+export interface FeatureSlotKey<TProps> {
+    readonly __props?: (value: TProps) => void;
+    readonly id: string;
+    readonly single?: boolean;
+}
+
+// @public
+export function featureSlotKey<TProps>(id: string, options?: {
+    readonly single?: boolean;
+}): FeatureSlotKey<TProps>;
+
+// @public
+export interface FeatureStateKey<T> {
+    readonly __state?: T;
+    readonly id: string;
+}
+
+// @public
+export function featureStateKey<T>(id: string): FeatureStateKey<T>;
+
+// @public
+export const FILTER_DRAWER: FeatureSlotKey<FilterOverlaySlotProps<unknown>>;
+
+// @public
+export const FILTER_POPOVER: FeatureSlotKey<FilterOverlaySlotProps<unknown>>;
 
 // @public
 export const FILTER_TYPES: readonly ["text", "select", "multiSelect", "checklist", "boolean", "dateRange", "numberRange"];
@@ -581,12 +958,33 @@ export interface FilterOption {
 export type FilterOptionsSource = readonly FilterOption[] | "auto" | (() => Promise<readonly FilterOption[]>);
 
 // @public
+export interface FilterOverlaySlotProps<TNode = unknown> {
+    accentColor?: string;
+    activeFilterCount: number;
+    anchorEl?: HTMLElement | null;
+    children?: TNode;
+    dir?: Direction;
+    filters: TNode;
+    labels: Required<TableLabels>;
+    onClearFilters: () => void;
+    onClose: () => void;
+    open: boolean;
+}
+
+// @public
 export type FilterType = (typeof FILTER_TYPES)[number];
 
 // @public
 export interface FilterTypeExtend {
     readonly patch: Partial<FilterTypeSpec>;
     readonly type: string;
+}
+
+// @public
+export interface FilterTypeRegistry {
+    get(type: string): FilterTypeSpec | undefined;
+    has(type: string): boolean;
+    types(): readonly string[];
 }
 
 // @public
@@ -638,6 +1036,53 @@ export type GroupAggregateOverrides = Readonly<Partial<Record<string, GroupAggre
 
 // @public
 export type GroupAggregatesFn<TRow> = (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
+
+// @public
+export type GroupedFlatEntry<TRow> = {
+    kind: "group";
+    key: string;
+    value: unknown;
+    label: string;
+    level: number;
+    groupBy: string;
+    path: readonly string[];
+    group?: RowGroupRef;
+    leafRows: readonly TRow[];
+    leafIds: readonly string[];
+    serverCount?: number;
+    aggregateCells?: Partial<Record<string, DisplayValue>>;
+    aggregateOps?: GroupAggregateOps;
+    collapsed: boolean;
+} | {
+    kind: "groupFooter";
+    key: string;
+    groupKey: string;
+    level: number;
+    groupBy: string;
+    label: string;
+    leafRows: readonly TRow[];
+    leafIds: readonly string[];
+    aggregateCells?: Partial<Record<string, DisplayValue>>;
+    aggregateOps?: GroupAggregateOps;
+} | {
+    kind: "groupMore";
+    key: string;
+    groupKey?: string;
+    level: number;
+    scope: "groups" | "rows";
+    remaining: number;
+    leafRows: readonly TRow[];
+    leafIds: readonly string[];
+    label: string;
+} | {
+    kind: "row";
+    key: string;
+    row: TRow;
+    index: number;
+    groupKey: string;
+    groupPosition?: number;
+    group?: RowGroupRef;
+} | ExtraEntry;
 
 // @public
 export type GroupedHeaderAlign = "start" | "center" | "end";
@@ -749,6 +1194,18 @@ export interface GroupPaging {
 export type GroupSort<TRow> = "label" | "label-desc" | "count" | "count-desc" | ((a: GroupNode<TRow>, b: GroupNode<TRow>) => number);
 
 // @public
+export function headerCellAttributes<TRow>(column: ColumnMetadata<TRow> & {
+    readonly sortable?: boolean;
+}, sort: ChromeSortState, sizing: ChromeCellSizing): {
+    role: "columnheader";
+    scope: "col";
+    "aria-sort": "ascending" | "descending" | "none" | undefined;
+    "data-sort-index": number | undefined;
+    "data-column-key": string;
+    style: CssProperties;
+};
+
+// @public
 export interface HeaderGroupCell {
     align?: GroupedHeaderAlign;
     collapsed: boolean;
@@ -767,6 +1224,11 @@ export function headerGroupRow<TRow>(columns: readonly ColumnMetadata<TRow>[]): 
 export function headerGroupRows<TRow>(columns: readonly ColumnMetadata<TRow>[], collapsedIds?: readonly string[], collapsible?: boolean, groups?: ReadonlyMap<string, {
     readonly align?: GroupedHeaderAlign;
 }>): HeaderGroupCell[][] | null;
+
+// @public
+export function headerRowAttributes(): {
+    role: "row";
+};
 
 // @public
 export function hideAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
@@ -853,7 +1315,81 @@ export function isColumnGroupSummaryKey(key: string): boolean;
 export function isExtraEntry(entry: object): entry is ExtraEntry;
 
 // @public
+export class LiveFeatureHost<TRow = unknown, TPanel extends SidePanelEntry = SidePanelEntry> implements FeatureHostState<TRow> {
+    readonly aggregators: Map<string, Aggregator>;
+    readonly columnMenuActions: ColumnMenuActionFactory<TRow>[];
+    readonly commands: Command[];
+    readonly contextMenuItems: ContextMenuItemsFactory<TRow>[];
+    dispose(): void;
+    readonly editors: Map<string, CustomCellEditorRender>;
+    extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
+    readonly filterExtends: FilterTypeExtend[];
+    readonly filterTypes: FilterTypeSpec[];
+    onDispose(cleanup: () => void): void;
+    readonly panels: TPanel[];
+    registerAggregator(name: string, aggregator: Aggregator): void;
+    registerColumnMenuAction(factory: ColumnMenuActionFactory<TRow>): void;
+    registerCommand(command: Command): void;
+    registerContextMenuItems(items: ContextMenuItemsFactory<TRow>): void;
+    registerEditor(type: string, render: CustomCellEditorRender): void;
+    registerFilterType(spec: FilterTypeSpec): void;
+    registerPanel(panel: TPanel): void;
+    registerWriter(writer: ExportWriter): void;
+    readonly writers: ExportWriter[];
+}
+
+// @public
+export function measureRowDetailAsPair(isMobile: boolean, renderRowDetail: unknown): boolean;
+
+// @public
+export function measureWindowScrollMargin(root: Element | null): number;
+
+// @public
+export interface NeutralTable<TRow = unknown> {
+    // (undocumented)
+    readonly capabilities: TableSourceCapabilities;
+    // (undocumented)
+    readonly cellValue: (row: TRow, columnKey: string) => unknown;
+    // (undocumented)
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    // (undocumented)
+    readonly dispose: () => void;
+    // (undocumented)
+    readonly operations: Readonly<Record<string, boolean>>;
+    // (undocumented)
+    readonly revisions: TableRevisions;
+    // (undocumented)
+    readonly rowByKey: (rowKey: string) => TRow | undefined;
+    // (undocumented)
+    readonly rowKey: (row: TRow) => string;
+    // (undocumented)
+    readonly rows: (scope: TableRowScope) => readonly TRow[];
+    // (undocumented)
+    readonly subscribe: TableEngine<TRow>["subscribe"];
+    // (undocumented)
+    readonly tableId: string;
+}
+
+// @public
 export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[], summaryTop?: readonly TRow[], summaryBottom?: readonly TRow[]): readonly VirtualTableRow<TRow>[];
+
+// @public
+export interface OrderedContribution<TFeature, TContribution> {
+    readonly contribution: TContribution;
+    readonly feature: TFeature;
+    readonly id: string;
+}
+
+// @public
+export function orderedContributions<TFeature extends {
+    readonly id: string;
+}, TContribution>(features: readonly TFeature[], pick: (feature: TFeature) => TContribution | undefined, kind: string): readonly OrderedContribution<TFeature, TContribution>[];
+
+// @public
+export interface PinLeads {
+    end?: number;
+    start?: number;
+}
 
 // @public
 export const PINNED_BOTTOM_PART = "pinned-bottom";
@@ -862,12 +1398,23 @@ export const PINNED_BOTTOM_PART = "pinned-bottom";
 export const PINNED_TOP_PART = "pinned-top";
 
 // @public
+export interface PinnedCellStyle {
+    insetInlineEnd?: number;
+    insetInlineStart?: number;
+    position: "sticky";
+    zIndex: number;
+}
+
+// @public
 export function pinnedRowCellStyle(side: RowPinSide | undefined, headerOffsetPx: number, columnPinned: boolean): {
     position?: "sticky";
     top?: number;
     bottom?: number;
     zIndex?: number;
 };
+
+// @public
+export function pinnedRowIds<TRow>(getRowId: (row: TRow) => string, pinnedTop: readonly TRow[] | undefined, pinnedBottom: readonly TRow[] | undefined): Set<string>;
 
 // @public
 export function pinnedRowPart(side: RowPinSide | undefined): "pinned-top" | "pinned-bottom" | undefined;
@@ -948,7 +1495,59 @@ export function resolveRowHeight<TRow>(rowHeight: RowHeight<TRow> | undefined, r
 export function resolveRowStyle<TRow>(rowStyle: RowStyle<TRow> | undefined, rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): CssProperties | undefined;
 
 // @public
+export const ROW_DND_MIME = "application/x-adapttable-row";
+
+// @public
+export const ROW_REORDER_ANNOUNCER: FeatureSlotKey<{
+    announcement: string;
+}>;
+
+// @public
+export interface RowAction<TRow> {
+    ai?: ActionAiOptions | false;
+    color?: string;
+    confirm?: ActionConfirm<TRow>;
+    disabledReason?: (row: TRow) => string | undefined;
+    editsRow?: boolean;
+    icon?: DisplayValue;
+    isDisabled?: (row: TRow) => boolean;
+    isHidden?: (row: TRow) => boolean;
+    key: string;
+    label: string;
+    onClick?: (row: TRow) => void;
+}
+
+// @public
+export function rowAttributes(id: string, index: number, selected: boolean | undefined): {
+    role: "row";
+    "data-adapttable-part": "row";
+    "data-row-id": string;
+    "data-index": number;
+    "aria-selected": boolean | undefined;
+};
+
+// @public
+export interface RowGroupLevel {
+    readonly key: string;
+    readonly label: string;
+    readonly value: unknown;
+}
+
+// @public
+export interface RowGroupRef {
+    readonly id: string;
+    readonly label: string;
+    readonly levels: readonly RowGroupLevel[];
+}
+
+// @public
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
+
+// @public
+export interface RowPairMeasurer {
+    detail: (index: number) => (node: Element | null) => void;
+    row: (index: number) => (node: Element | null) => void;
+}
 
 // @public
 export interface RowPinLookup {
@@ -993,6 +1592,23 @@ export type RowStyle<TRow> = (row: TRow, index: number) => CssProperties | undef
 export function rowStyleSignature(style: CssProperties | undefined): string;
 
 // @public
+export function searchInputAttributes(value: string, labels: {
+    readonly searchPlaceholder: string;
+    readonly search: string;
+}, onValue: (value: string) => void): {
+    type: "search";
+    role: "searchbox";
+    value: string;
+    placeholder: string;
+    "aria-label": string;
+    onChange: (event: {
+        currentTarget: {
+            value: string;
+        };
+    }) => void;
+};
+
+// @public
 export function showAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
 
 // @public
@@ -1001,16 +1617,86 @@ export interface SidePanelEntry {
 }
 
 // @public
+export interface SlotFill<TNode = unknown> {
+    readonly id: string;
+    readonly render: (props: never) => TNode;
+}
+
+// @public
+export function slotFillsOf<TNode>(features: readonly {
+    readonly id: string;
+    readonly renders?: readonly FeatureRender<never, TNode>[];
+}[]): ReadonlyMap<string, readonly SlotFill<TNode>[]>;
+
+// @public
+export function slotRender<TProps, TNode>(slot: FeatureSlotKey<TProps>, render: (props: TProps) => TNode, options?: {
+    readonly orderAs?: string;
+}): FeatureRender<TProps, TNode>;
+
+// @public
 export type SortableValue = string | number | boolean | null | undefined;
 
 // @public
+export function sortButtonAttributes(column: {
+    readonly key: string;
+    readonly sortable?: boolean;
+    readonly header?: unknown;
+}, options: {
+    readonly sortLevels: readonly {
+        key: string;
+        dir: SortDirection;
+    }[];
+    readonly sortByLabel: string;
+    readonly multiSort: boolean | undefined;
+    readonly toggleSort: (key: string) => void;
+    readonly toggleSortLevel: (key: string) => void;
+}): {
+    type: "button";
+    disabled: boolean;
+    onClick: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+    "data-sort-index": number | undefined;
+    "aria-label": string;
+};
+
+// @public
 export type SortDirection = "asc" | "desc";
+
+// @public
+export function sortIndexOf(levels: readonly {
+    key: string;
+    dir: SortDirection;
+}[], key: string): number | undefined;
 
 // @public
 export interface SortLevel {
     dir: SortDirection;
     key: string;
 }
+
+// @public
+export function sortLevelOf(levels: readonly {
+    key: string;
+    dir: SortDirection;
+}[], key: string): {
+    key: string;
+    dir: SortDirection;
+} | undefined;
+
+// @public
+export function sourceWindowStart(source: {
+    readonly paginationMode: string;
+    readonly page: number;
+    readonly limit: number;
+}): number;
+
+// @public
+export function tableAttributes(dir: Direction | undefined, label: string): {
+    role: "table";
+    dir: Direction | undefined;
+    "aria-label": string;
+};
 
 // @public
 export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
@@ -1467,6 +2153,86 @@ export interface TableRevisions {
 export type TableRowScope = "visible" | "page" | "full";
 
 // @public
+export interface TableRuntime<TRow = unknown> {
+    featureIds(): readonly string[];
+    labels(): Readonly<Record<string, unknown>> | undefined;
+    rowAt(localIndex: number): TRow | undefined;
+    view(): TableRuntimeView<TRow> | undefined;
+}
+
+// @public
+export interface TableRuntimeView<TRow = unknown> {
+    readonly actions?: {
+        readonly row: readonly RowAction<TRow>[];
+        readonly bulk: readonly BulkAction[];
+    };
+    readonly columnLayout?: {
+        readonly keys: readonly string[];
+        readonly hidden: readonly string[];
+        readonly setHidden?: (key: string, hidden: boolean) => void;
+        readonly move?: (key: string, toIndex: number) => void;
+        readonly setOrder?: (order: readonly string[]) => void;
+    };
+    readonly editing?: {
+        readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+        readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    };
+    readonly filterDefs?: readonly FilterDef<TRow>[];
+    readonly filterRegistry?: FilterTypeRegistry;
+    readonly getRowId: (row: TRow) => string;
+    readonly grouping?: unknown;
+    readonly groupingState?: {
+        readonly groupBy: string | undefined;
+        readonly aggregateOverrides: GroupAggregateOverrides;
+        readonly columnLabel: (key: string) => string;
+        readonly columns?: readonly ColumnMetadata<TRow>[];
+        readonly computedAggregateKeys?: readonly string[];
+        readonly queryAggregates?: readonly QueryAggregate[];
+        readonly aggregateOperations?: readonly string[];
+        readonly honorsAggregates?: boolean;
+        readonly setGroupBy: (key: string | undefined) => void;
+        readonly initializeGroupBy?: (key: string) => void;
+        readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
+    };
+    readonly neutralTable?: NeutralTable<TRow>;
+    readonly pinning?: {
+        readonly columns: Readonly<Record<string, PinSide>>;
+        readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
+        readonly rows?: {
+            readonly top: readonly string[];
+            readonly bottom: readonly string[];
+        };
+        readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
+    };
+    readonly query?: {
+        readonly page: number;
+        readonly limit: number;
+        readonly total?: number;
+        readonly defaultLimit?: number;
+        readonly search: string;
+        readonly sortBy?: string;
+        readonly sortDir?: "asc" | "desc";
+        readonly setPage: (page: number) => void;
+        readonly setLimit: (limit: number) => void;
+        readonly setSearch: (search: string) => void;
+        readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
+        readonly extra?: ExtraFilters;
+        readonly setExtras?: (extra: ExtraFilters) => void;
+        readonly clearExtras?: () => void;
+    };
+    readonly rowLabel: (row: TRow) => string;
+    readonly rows: readonly TRow[];
+    readonly selection?: {
+        readonly selectedIds: ReadonlySet<string>;
+        readonly replace: (ids: readonly string[] | undefined) => void;
+    };
+    readonly sortBy?: string;
+    readonly sourceCapabilities?: TableSourceCapabilities;
+    readonly tree?: unknown;
+    readonly visibleRows?: readonly TRow[];
+}
+
+// @public
 export interface TableSnapshot<TRow = unknown> {
     readonly capabilities: TableSourceCapabilities;
     readonly columns: readonly ColumnMetadata<TRow>[];
@@ -1582,6 +2348,9 @@ export interface VirtualItemMeta {
     size: number;
     start: number;
 }
+
+// @public
+export function virtualListElement(root: Element | null): Element | null;
 
 // @public
 export interface VirtualTableRow<TRow> {
