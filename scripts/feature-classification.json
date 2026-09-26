@@ -1,5 +1,4 @@
 {
-  "$schema": "./feature-classification.schema.json",
   "version": 1,
   "generatedFor": "v3",
   "note": "Single source of truth for the v3 feature surface. Every factory exported from @adapttable/react/features appears exactly once. The feature-parity check, the framework-boundary check and the consumer harness read it.",
