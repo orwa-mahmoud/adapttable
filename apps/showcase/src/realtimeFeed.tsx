@@ -106,7 +106,7 @@ function nextRealtimePatch(
 const PATCH_STREAM_URL = "/__adapttable/patches";
 
 /**
- * An EventSource stand-in for the static GitHub Pages build, where the
+ * An EventSource stand-in for the static site build, where the
  * showcase has no server to stream from. Same interval, same frames as
  * the Vite middleware, so parse / apply / status stay one path.
  */
@@ -169,7 +169,7 @@ function createDemoPatchSource(url: string): StreamSocket {
  * Drive a live feed of row patches, and report what was applied.
  *
  * The ticks arrive over SSE on the Vite server (a real EventSource) and
- * from a scripted source on the static GitHub Pages build. Both go through
+ * from a scripted source on the static site build. Both go through
  * `useRowPatchStream`, so the host's setter is the only write.
  */
 function useRealtimeFeed(

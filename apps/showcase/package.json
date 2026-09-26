@@ -2,7 +2,7 @@
   "name": "@adapttable/showcase",
   "version": "0.0.5",
   "private": true,
-  "description": "Public marketing showcase for AdaptTable — built on the real adapter packages (consumed like an end user), deployed to GitHub Pages.",
+  "description": "Public marketing showcase for AdaptTable — built on the real adapter packages (consumed like an end user), served under /react/demo/ on adapttable.orwamahmoud.com.",
   "type": "module",
   "scripts": {
     "dev": "vite",
