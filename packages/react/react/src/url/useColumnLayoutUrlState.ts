@@ -1,25 +1,8 @@
-import {
-  PARAM_COL_HIDDEN,
-  parseTableUrlState,
-  readColumnLayout,
-  stableKey,
-  updateTableUrlState,
-  writeColumnLayout,
-} from "@adapttable/core";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { columnLayoutSlice } from "@adapttable/core";
 
-import {
-  type ColumnLayoutState,
-  EMPTY_COLUMN_LAYOUT,
-} from "../columns/useColumnLayout";
-import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
+import type { ColumnLayoutState } from "../columns/useColumnLayout";
+import type { UrlStateAdapter } from "./adapter";
+import { useUrlSlice } from "./useUrlSlice";
 
 /**
  * Options for {@link useColumnLayoutUrlState}.
@@ -40,13 +23,7 @@ export interface UseColumnLayoutUrlStateOptions {
   urlKey?: string;
 }
 
-/**
- * Trailing debounce for URL persistence. A column-resize drag commits one
- * layout per animation frame; writing `history.replaceState` that often
- * trips Safari's rate limit (~100 calls per 30s, then it throws). Reads stay
- * instant via an optimistic overlay — only the URL write is deferred.
- */
-export const LAYOUT_URL_WRITE_DEBOUNCE_MS = 150;
+export { URL_SLICE_WRITE_DEBOUNCE_MS as LAYOUT_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
 
 /**
  * State + change handler returned by {@link useColumnLayoutUrlState}.
@@ -81,86 +58,8 @@ export interface UseColumnLayoutUrlStateResult {
 export function useColumnLayoutUrlState(
   options: UseColumnLayoutUrlStateOptions = {}
 ): UseColumnLayoutUrlStateResult {
-  const { urlAdapter, urlSync, defaultColumnLayout, urlKey } = options;
-  const baseLayout = defaultColumnLayout;
-  const backend = urlAdapter;
-  const syncToUrl = urlSync ?? true;
-  const ns = urlKey ? `${urlKey}.` : "";
-
-  const resolved = useResolvedAdapter(backend, syncToUrl);
-  // Same SSR rule as useTableUrlState: only an explicit adapter is trusted
-  // to be hydration-consistent; the default history adapter hydrates from "".
-  const search = useSyncExternalStore(
-    (onChange) => resolved.subscribe(onChange),
-    () => resolved.getSearch(),
-    () => (backend ? backend.getSearch() : "")
-  );
-  const params = useMemo(() => parseTableUrlState(search, ns), [search, ns]);
-
-  const fallback = useMemo<ColumnLayoutState>(
-    () => ({ ...EMPTY_COLUMN_LAYOUT, ...baseLayout }),
-    [baseLayout]
-  );
-  // Optimistic overlay: the most recent layout not yet flushed to the URL.
-  const [pending, setPending] = useState<ColumnLayoutState | null>(null);
-  const flushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const layout = useMemo<ColumnLayoutState>(
-    () => pending ?? readColumnLayout(params, ns) ?? fallback,
-    [pending, params, ns, fallback]
-  );
-
-  const persist = useCallback(
-    (next: ColumnLayoutState) => {
-      resolved.setSearch(
-        updateTableUrlState(resolved.getSearch(), ns, (params) => {
-          const isDefault = stableKey(next) === stableKey(fallback);
-          const isEmpty = stableKey(next) === stableKey(EMPTY_COLUMN_LAYOUT);
-          // Back to the exact default → drop the params; the default re-applies
-          // and shared URLs stay clean.
-          writeColumnLayout(params, isDefault ? EMPTY_COLUMN_LAYOUT : next, ns);
-          // An all-empty layout writes no params, which reads back as "use the
-          // default" — stamp a marker so an explicitly emptied layout sticks.
-          if (isEmpty && !isDefault) {
-            params.set(ns + PARAM_COL_HIDDEN, "");
-          }
-        })
-      );
-    },
-    [resolved, ns, fallback]
-  );
-
-  const onLayoutChange = useCallback(
-    (next: ColumnLayoutState) => {
-      setPending(next);
-      if (flushTimer.current) clearTimeout(flushTimer.current);
-      flushTimer.current = setTimeout(() => {
-        flushTimer.current = null;
-        persist(next);
-        setPending(null);
-      }, LAYOUT_URL_WRITE_DEBOUNCE_MS);
-    },
-    [persist]
-  );
-
-  // Flush a pending layout on unmount so the last drag frame is never lost.
-  const latestRef = useRef<{
-    pending: ColumnLayoutState | null;
-    persist: typeof persist;
-  }>({ pending, persist });
-  latestRef.current = { pending, persist };
-  useEffect(
-    () => () => {
-      if (flushTimer.current) {
-        clearTimeout(flushTimer.current);
-        // Invariant: a live timer implies a pending layout — the timeout
-        // clears the timer BEFORE it clears `pending`.
-        const { pending: last, persist: write } = latestRef.current;
-        write(last!);
-      }
-    },
-    []
-  );
-
+  const [layout, onLayoutChange] = useUrlSlice(options, columnLayoutSlice, {
+    defaultColumnLayout: options.defaultColumnLayout,
+  });
   return { layout, onLayoutChange };
 }

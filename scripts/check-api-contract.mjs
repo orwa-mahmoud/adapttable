@@ -49,5 +49,6 @@ if (errors.length > 0) {
 const published = entries.filter((entry) => entry.published).length;
 console.log(
   `api-contract: ${published} published entry point(s) match the contract, ` +
-    `${Object.keys(manifest.surfaces).length} surface(s) in ${Object.keys(manifest.entrypoints).length} policy(s).`
+    `${Object.keys(manifest.surfaces).length} surface(s) in ${Object.keys(manifest.entrypoints).length} policy(s) ` +
+    `across ${Object.keys(manifest.frameworks ?? {}).length} framework(s).`
 );

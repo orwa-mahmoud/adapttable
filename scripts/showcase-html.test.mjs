@@ -1,7 +1,18 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { readShowcaseHtml, showcaseHtmlFiles } from "./build-showcase-html.mjs";
+import {
+  adapterByKey,
+  featureBySlug,
+  frameworkOf,
+  matrixPages,
+} from "../apps/showcase/matrix.mjs";
+import {
+  featurePage,
+  landingPage,
+  readShowcaseHtml,
+  showcaseHtmlFiles,
+} from "./build-showcase-html.mjs";
 
 /**
  * The showcase's generated HTML is what is on disk.
@@ -117,5 +128,92 @@ describe("the generated showcase pages", () => {
         `${file.dir} serves too little copy to read as a page`
       );
     }
+  });
+});
+
+/**
+ * A kit's pages boot the entry of the framework it is built on and say that
+ * framework's name — the React pages above do it through the same lookup a kit
+ * from another framework would. The fixture is a Vue kit the showcase does not
+ * ship: it is handed to the page writers directly, never added to the matrix.
+ */
+describe("the framework a kit is built on", () => {
+  const files = new Map(showcaseHtmlFiles().map((file) => [file.dir, file]));
+
+  it("boots every matrix page from its adapter's framework entry", () => {
+    for (const page of matrixPages()) {
+      const adapter = adapterByKey(page.adapter);
+      assert.ok(adapter, page.adapter);
+      const { entry } = frameworkOf(adapter);
+      assert.equal(page.framework, adapter.framework);
+      assert.ok(
+        files
+          .get(page.dir)
+          ?.html.includes(`<script type="module" src="${entry}"></script>`),
+        `${page.dir} does not boot ${entry}`
+      );
+    }
+  });
+
+  const vue = {
+    key: "vue",
+    label: "Vue",
+    binding: "@adapttable/vue",
+    entry: "/src/vue/entry-matrix.ts",
+  };
+  const mantine = adapterByKey("mantine");
+  assert.ok(mantine);
+  const verdant = {
+    ...mantine,
+    key: "verdant",
+    framework: "vue",
+    label: "Verdant",
+    pkg: "@adapttable/verdant",
+    peer: "verdant-ui",
+    install: "pnpm add @adapttable/verdant @adapttable/core verdant-ui",
+  };
+  const formulas = featureBySlug("formulas");
+  assert.ok(formulas);
+
+  it("serves a kit from another framework through that framework's entry and code", () => {
+    const feature = {
+      ...formulas,
+      snippets: {
+        vue: '<script setup lang="ts">\nimport { DataTable } from "{pkg}";\n</script>',
+      },
+    };
+    const { dir, html } = featurePage(verdant, feature, vue);
+    assert.equal(dir, "verdant/formulas");
+    assert.match(
+      html,
+      /<script type="module" src="\/src\/vue\/entry-matrix\.ts"><\/script>/
+    );
+    assert.doesNotMatch(html, /entry-matrix\.tsx/);
+    assert.match(html, /Replaced by Vue on mount/);
+    assert.match(html, /Includes Vue integration code\./);
+    assert.match(
+      html,
+      /import \{ DataTable \} from &quot;@adapttable\/verdant&quot;/
+    );
+    assert.doesNotMatch(html, /@adapttable\/react/);
+
+    const landing = landingPage(verdant, vue);
+    assert.match(landing.html, /<title>Verdant Vue data table examples/);
+    assert.match(landing.html, /@adapttable\/vue connects it to Vue\./);
+    assert.match(landing.html, /src="\/src\/vue\/entry-matrix\.ts"/);
+  });
+
+  it("refuses to show a Vue kit the code written for React", () => {
+    assert.throws(
+      () => featurePage(verdant, formulas, vue),
+      /"formulas" has no Vue code for Verdant/
+    );
+  });
+
+  it("refuses a kit whose framework the showcase does not serve", () => {
+    assert.throws(
+      () => landingPage(verdant),
+      /Verdant is built on "vue", which SHOWCASE_FRAMEWORKS does not serve/
+    );
   });
 });

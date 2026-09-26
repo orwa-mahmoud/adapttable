@@ -9,9 +9,10 @@
  * Expanded rather than collapsed, unlike groups: a tree starts folded, so the
  * open set is the small one — the opposite default, and the same reasoning.
  */
+import { idSetReader, toggleId } from "@adapttable/core";
 import { useCallback, useMemo, useState } from "react";
 
-import { useEventCallback } from "../hooks/useEventCallback";
+import { useControllableStore } from "../hooks/useControllableStore";
 
 /**
  * Tree expansion state and the actions that change it.
@@ -45,23 +46,16 @@ export function useTreeExpansion(controlled?: {
   expandedIds?: readonly string[];
   onExpandedIdsChange?: (ids: string[]) => void;
 }): TreeExpansionState {
-  const controlledIds = controlled?.expandedIds;
-  const isControlled = controlledIds !== undefined;
-  const [uncontrolled, setUncontrolled] = useState<ReadonlySet<string>>(
-    () => new Set()
+  const [readIds] = useState(idSetReader);
+  const onExpandedIdsChange = controlled?.onExpandedIdsChange;
+  const [expandedIds, store] = useControllableStore<ReadonlySet<string>>(
+    () => new Set(),
+    {
+      value: readIds(controlled?.expandedIds),
+      onChange:
+        onExpandedIdsChange && ((next) => onExpandedIdsChange([...next])),
+    }
   );
-
-  const expandedIds = useMemo(
-    () => (isControlled ? new Set(controlledIds ?? []) : uncontrolled),
-    [isControlled, controlledIds, uncontrolled]
-  );
-
-  // Stable across renders: the options object arrives fresh every time, and a
-  // commit that changed with it would change every action here.
-  const commit = useEventCallback((next: Set<string>) => {
-    if (isControlled) controlled?.onExpandedIdsChange?.([...next]);
-    else setUncontrolled(next);
-  });
 
   const isExpanded = useCallback(
     (id: string) => expandedIds.has(id),
@@ -69,33 +63,24 @@ export function useTreeExpansion(controlled?: {
   );
 
   const toggle = useCallback(
-    (id: string) => {
-      const next = new Set(expandedIds);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      commit(next);
-    },
-    [expandedIds, commit]
+    (id: string) => store.update((prev) => toggleId(prev, id)),
+    [store]
   );
 
   const expand = useCallback(
     (id: string) => {
-      if (expandedIds.has(id)) return;
-      commit(new Set(expandedIds).add(id));
+      if (store.current().has(id)) return;
+      store.update((prev) => new Set(prev).add(id));
     },
-    [expandedIds, commit]
+    [store]
   );
 
   const expandAll = useCallback(
-    (ids: readonly string[]) => {
-      commit(new Set(ids));
-    },
-    [commit]
+    (ids: readonly string[]) => store.commit(new Set(ids)),
+    [store]
   );
 
-  const collapseAll = useCallback(() => {
-    commit(new Set());
-  }, [commit]);
+  const collapseAll = useCallback(() => store.commit(new Set()), [store]);
 
   return useMemo(
     () => ({

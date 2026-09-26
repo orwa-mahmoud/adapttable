@@ -1,3 +1,4 @@
+import { measureWindowScrollMargin } from "@adapttable/core/binding";
 import {
   type RefObject,
   useCallback,
@@ -6,32 +7,11 @@ import {
   useState,
 } from "react";
 
-/**
- * Document Y of an element — what TanStack's window virtualizer wants as
- * `scrollMargin` so a list that is not at y=0 does not treat the page chrome
- * above it as already-scrolled rows.
- */
-export function documentOffsetTop(el: Element): number {
-  return Math.max(
-    0,
-    Math.round(el.getBoundingClientRect().top + window.scrollY)
-  );
-}
-
-const LIST_SELECTOR =
-  '[data-adapttable-part="tbody"], [data-adapttable-part="cards"]';
-
-/** The virtualized list node inside a table root, or the root itself. */
-export function virtualListElement(root: Element | null): Element | null {
-  if (!root) return null;
-  return root.querySelector(LIST_SELECTOR) ?? root;
-}
-
-/** TanStack window `scrollMargin` for a mounted table root or scroll box. */
-export function measureWindowScrollMargin(root: Element | null): number {
-  const list = virtualListElement(root);
-  return list === null ? 0 : documentOffsetTop(list);
-}
+export {
+  documentOffsetTop,
+  measureWindowScrollMargin,
+  virtualListElement,
+} from "@adapttable/core/binding";
 
 /**
  * Keep the window virtualizer's scroll margin equal to the list's document

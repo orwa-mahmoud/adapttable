@@ -8,50 +8,24 @@
  */
 import {
   type CellEditCommit,
+  type CellEditKeyOutcome,
+  type CellEditNavigation,
   type CellEditTarget,
+  createCellEditSession,
   type EditableColumnLike,
   isCellEditable,
+  isCellEditActive,
   readEditableCellValue,
-  stepEditableCell,
 } from "@adapttable/core";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
-import { type EditEventHandler, observeEdit } from "./editingEvents";
+import type { EditEventHandler } from "./editingEvents";
 
-/**
- * Keyboard outcome from {@link CellEditingState.handleKeyDown}.
- *
- * @public
- */
-export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
-
-/**
- * Row/column context for Tab / Shift+Tab advance.
- *
- * @public
- */
-export interface CellEditNavigation {
-  /** The rendered rows. */
-  rows: readonly unknown[];
-  /** Visible columns, in order. */
-  columns: readonly EditableColumnLike[];
-  /** Row identity function. */
-  rowKey: (row: unknown) => string;
-}
-
-/**
- * Outcome of {@link CellEditingState.handleKeyDown}.
- *
- * @public
- */
-export interface CellEditKeyOutcome {
-  /** What the key press resolved to. */
-  action: CellEditKeyAction;
-  /** The commit to apply, when the press produced one. */
-  commit: CellEditCommit | null;
-  /** Cell focus moves to next, when the press moves it. */
-  advanceTarget: CellEditTarget | null;
-}
+export type {
+  CellEditKeyAction,
+  CellEditKeyOutcome,
+  CellEditNavigation,
+} from "@adapttable/core";
 
 /**
  * Headless cell-editing state returned by `useCellEditing`.
@@ -158,190 +132,19 @@ export interface UseCellEditingOptions<TRow = unknown> {
 export function useCellEditing<TRow = unknown>(
   options: UseCellEditingOptions<TRow> = {}
 ): CellEditingState {
-  const [active, setActive] = useState<CellEditTarget | null>(null);
-  const [draft, setDraft] = useState("");
-  // Refs so commit/cancel always see the latest values without stale
-  // closures when wired through a keydown listener.
-  const activeRef = useRef(active);
-  const draftRef = useRef(draft);
-  activeRef.current = active;
-  draftRef.current = draft;
-  const openedRef = useRef<{
-    rowId: string;
-    columnKey: string;
-    initial: string;
-    row: TRow | undefined;
-  } | null>(null);
-
-  /** Update draft state and the sync ref in the same tick. */
-  const writeDraft = useCallback((value: string) => {
-    draftRef.current = value;
-    setDraft(value);
-  }, []);
-
-  /**
-   * Same for the active cell: the ref exists so callers within one tick see
-   * what just happened, and a `setActive` that left the ref stale made
-   * `begin` right after `commit` a silent no-op — it read the cell it had
-   * just closed and treated the reopen as "same cell, keep the draft".
-   */
-  const writeActive = useCallback((next: CellEditTarget | null) => {
-    activeRef.current = next;
-    setActive(next);
-  }, []);
+  const [session] = useState(() => createCellEditSession<TRow>(options));
+  session.configure(options);
+  const snapshot = useSyncExternalStore(
+    session.subscribe,
+    session.getSnapshot,
+    session.getSnapshot
+  );
+  const { active, draft } = snapshot;
 
   const isActive = useCallback(
     (rowId: string, columnKey: string) =>
-      active?.rowId === rowId && active.columnKey === columnKey,
-    [active]
-  );
-
-  const fireCancel = useCallback(() => {
-    const opened = openedRef.current;
-    if (!opened?.row) return;
-    observeEdit(options.onEditCancel, {
-      row: opened.row,
-      rowId: opened.rowId,
-      columnKey: opened.columnKey,
-      value: draftRef.current,
-      previousValue: opened.initial,
-      unit: "cell",
-    });
-  }, [options.onEditCancel]);
-
-  const clearOpened = useCallback(() => {
-    openedRef.current = null;
-    writeActive(null);
-    writeDraft("");
-  }, [writeActive, writeDraft]);
-
-  const begin = useCallback(
-    (rowId: string, columnKey: string, initialValue: string, row?: unknown) => {
-      const current = activeRef.current;
-      if (current?.rowId === rowId && current.columnKey === columnKey) {
-        return;
-      }
-      if (current) fireCancel();
-      const typed = row as TRow | undefined;
-      openedRef.current = {
-        rowId,
-        columnKey,
-        initial: initialValue,
-        row: typed,
-      };
-      writeActive({ rowId, columnKey });
-      writeDraft(initialValue);
-      if (typed !== undefined) {
-        observeEdit(options.onEditStart, {
-          row: typed,
-          rowId,
-          columnKey,
-          value: initialValue,
-          previousValue: initialValue,
-          unit: "cell",
-        });
-      }
-    },
-    [fireCancel, options.onEditStart, writeActive, writeDraft]
-  );
-
-  const commit = useCallback((): CellEditCommit | null => {
-    const current = activeRef.current;
-    if (!current) return null;
-    const result: CellEditCommit = {
-      rowId: current.rowId,
-      columnKey: current.columnKey,
-      draft: draftRef.current,
-    };
-    openedRef.current = null;
-    writeActive(null);
-    writeDraft("");
-    return result;
-  }, [writeActive, writeDraft]);
-
-  const cancel = useCallback(() => {
-    fireCancel();
-    clearOpened();
-  }, [clearOpened, fireCancel]);
-
-  const close = useCallback(() => {
-    clearOpened();
-  }, [clearOpened]);
-
-  const discardIfRowMissing = useCallback(
-    (rows: readonly unknown[], rowKey: (row: unknown) => string) => {
-      const current = activeRef.current;
-      if (!current) return;
-      if (rows.some((row) => rowKey(row) === current.rowId)) return;
-      openedRef.current = null;
-      writeActive(null);
-      writeDraft("");
-    },
-    [writeActive, writeDraft]
-  );
-
-  const openedRow = useCallback(() => openedRef.current?.row, []);
-
-  const keepLive = useCallback((row: unknown) => {
-    const opened = openedRef.current;
-    if (!opened) return;
-    openedRef.current = { ...opened, row: row as TRow };
-  }, []);
-
-  const takeLive = useCallback(
-    (row: unknown, value: string) => {
-      const opened = openedRef.current;
-      if (!opened) return;
-      openedRef.current = { ...opened, row: row as TRow, initial: value };
-      writeDraft(value);
-    },
-    [writeDraft]
-  );
-
-  const handleKeyDown = useCallback(
-    (
-      event: { key: string; preventDefault: () => void; shiftKey?: boolean },
-      navigation?: CellEditNavigation
-    ): CellEditKeyOutcome | null => {
-      if (!activeRef.current) return null;
-
-      if (event.key === "Escape") {
-        event.preventDefault();
-        cancel();
-        return { action: "cancel", commit: null, advanceTarget: null };
-      }
-
-      if (event.key === "Enter") {
-        event.preventDefault();
-        return {
-          action: "commit",
-          commit: commit(),
-          advanceTarget: null,
-        };
-      }
-
-      if (event.key === "Tab" && navigation) {
-        event.preventDefault();
-        const result = commit();
-        const advanceTarget = result
-          ? stepEditableCell({
-              rows: navigation.rows,
-              columns: navigation.columns,
-              rowKey: navigation.rowKey,
-              from: { rowId: result.rowId, columnKey: result.columnKey },
-              direction: event.shiftKey ? -1 : 1,
-            })
-          : null;
-        return {
-          action: "commit-advance",
-          commit: result,
-          advanceTarget,
-        };
-      }
-
-      return null;
-    },
-    [cancel, commit]
+      isCellEditActive(snapshot, rowId, columnKey),
+    [snapshot]
   );
 
   return useMemo(
@@ -349,32 +152,18 @@ export function useCellEditing<TRow = unknown>(
       active,
       draft,
       isActive,
-      begin,
-      setDraft: writeDraft,
-      commit,
-      cancel,
-      close,
-      discardIfRowMissing,
-      openedRow,
-      keepLive,
-      takeLive,
-      handleKeyDown,
+      begin: session.begin,
+      setDraft: session.setDraft,
+      commit: session.commit,
+      cancel: session.cancel,
+      close: session.close,
+      discardIfRowMissing: session.discardIfRowMissing,
+      openedRow: session.openedRow,
+      keepLive: session.keepLive,
+      takeLive: session.takeLive,
+      handleKeyDown: session.handleKeyDown,
     }),
-    [
-      active,
-      draft,
-      isActive,
-      begin,
-      writeDraft,
-      commit,
-      cancel,
-      close,
-      discardIfRowMissing,
-      openedRow,
-      keepLive,
-      takeLive,
-      handleKeyDown,
-    ]
+    [active, draft, isActive, session]
   );
 }
 

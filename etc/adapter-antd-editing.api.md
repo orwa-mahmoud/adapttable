@@ -4,7 +4,7 @@
 
 ```ts
 
-import { BatchRowEdit } from '@adapttable/react';
+import { BatchRowEdit } from '@adapttable/core';
 import { EditHistoryOptions } from '@adapttable/react';
 import { FeaturePatch } from '@adapttable/react';
 import { StaticTableFeature } from '@adapttable/react';

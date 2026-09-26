@@ -1,17 +1,29 @@
 import {
-  applyQuerySupport,
+  appendBaseKey,
+  appendedRows,
+  type AppendStash,
+  buildTableQuery,
+  canRequestCursorPage,
+  clampedPage,
   type ColumnMetadata,
+  createFirstLoadLatch,
+  createQueryEmitter,
+  cursorHasMore,
+  type CursorTrail,
   devWarn,
+  effectiveQueryAggregates,
+  EMPTY_CURSOR_TRAIL,
   type FacetMap,
   type PaginationMode,
-  parseGroupBy,
   type QueryAggregate,
   queryAggregateOps,
+  queryGroupBy,
   type QuerySupport,
+  recordCursor,
   stableKey,
+  staleAppendStash,
   type TableQuery,
   type TableSource,
-  withQueryAggregateOverrides,
 } from "@adapttable/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -163,6 +175,10 @@ export interface UseServerDataOptions<TRow> extends Pick<
 export function useServerData<TRow>(
   options: UseServerDataOptions<TRow>
 ): TableSource<TRow> {
+  // Every table's base bundle carries this hook. Its options arrive as a fresh
+  // object on each render and each derived value is memoized explicitly, so
+  // the compiler's cache would add weight without adding hits.
+  "use no memo";
   const {
     rows,
     total,
@@ -199,68 +215,41 @@ export function useServerData<TRow>(
     sortLevels,
     extra,
   } = state;
-  const queryAggregationSource = useMemo(() => {
-    if (supports?.aggregates || supports?.aggregateOperations) {
-      return {
-        grouping: "server" as const,
-        aggregateOperations: supports.aggregateOperations,
-      };
-    }
-    // Grouping without aggregation: refuse every reader operation so a
-    // restored override cannot be requested and then silently dropped.
-    if (supports?.grouping) {
-      return { grouping: "server" as const, aggregateOperations: [] };
-    }
-    return undefined;
-  }, [supports]);
   const effectiveAggregates = useMemo(
     () =>
-      withQueryAggregateOverrides(
+      effectiveQueryAggregates(
         aggregates,
         groupAggregateOverrides,
         columns,
-        queryAggregationSource
+        supports
       ),
-    [aggregates, columns, groupAggregateOverrides, queryAggregationSource]
+    [aggregates, columns, groupAggregateOverrides, supports]
   );
-  const effectiveGroupBy = useMemo(() => {
-    const keys = parseGroupBy(groupBy);
-    return keys.length > 0 ? keys : undefined;
-  }, [groupBy]);
-  // Cursor mode keeps every token the server has handed out, indexed by the
-  // page it opens: `cursors[0]` is always `undefined` (page 1 needs no token)
-  // and `cursors[n]` is the token for page n+1. Keeping the trail rather than
-  // just the latest token is what lets the user page back through what they
-  // have already seen, which a single "next cursor" cannot do.
+  const effectiveGroupBy = useMemo(() => queryGroupBy(groupBy), [groupBy]);
+  // Cursor mode keeps the trail of every token the server has handed out —
+  // what lets the user page back through what they have already seen.
   const cursorMode = supports?.cursor === true;
-  const [cursors, setCursors] = useState<readonly (string | undefined)[]>([
-    undefined,
-  ]);
+  const [cursors, setCursors] = useState<CursorTrail>(EMPTY_CURSOR_TRAIL);
   const cursor = cursorMode ? cursors[page - 1] : undefined;
 
   const query = useMemo<TableQuery>(
-    () => ({
-      page,
-      limit,
-      search,
-      sortBy,
-      sortDir,
-      sortLevels,
-      filters: extra,
-      // Everything past the baseline is gated on what the source declared —
-      // an undeclared capability is dropped here, never sent and ignored.
-      ...applyQuerySupport(
-        {
-          groupBy: effectiveGroupBy,
-          aggregates: effectiveAggregates,
-          cursor,
-          expandedIds,
-          filterTree: state.filterTree,
-          facets: facetKeys,
-        },
-        supports
-      ),
-    }),
+    () =>
+      buildTableQuery({
+        page,
+        limit,
+        search,
+        sortBy,
+        sortDir,
+        sortLevels,
+        filters: extra,
+        groupBy: effectiveGroupBy,
+        aggregates: effectiveAggregates,
+        cursor,
+        expandedIds,
+        filterTree: state.filterTree,
+        facets: facetKeys,
+        supports,
+      }),
     [
       page,
       limit,
@@ -302,19 +291,14 @@ export function useServerData<TRow>(
 
   const [generation, setGeneration] = useState(0);
 
-  const controllerRef = useRef<AbortController | null>(null);
+  const [emitter] = useState(createQueryEmitter);
 
   // Emits the LATEST query / handler when the value-keyed query changes,
-  // without re-subscribing on every render.
-  const emitQuery = useEventCallback(() => {
-    if (!onQueryChange) return undefined;
-    controllerRef.current?.abort();
-    const controller = new AbortController();
-    controllerRef.current = controller;
-    void onQueryChange(query, { signal: controller.signal, key: queryKey });
-    // Abort the in-flight request when the table unmounts.
-    return () => controller.abort();
-  });
+  // without re-subscribing on every render. The emitter aborts the request
+  // a newer one supersedes; the returned abort runs when the table unmounts.
+  const emitQuery = useEventCallback(() =>
+    onQueryChange ? emitter.emit(onQueryChange, query, queryKey) : undefined
+  );
 
   useEffect(() => emitQuery(), [queryKey, generation, emitQuery]);
 
@@ -325,14 +309,11 @@ export function useServerData<TRow>(
   // Latched in an idempotent effect body so StrictMode's simulated remount
   // cannot mark it early.
   const rowsPresent = rows.length > 0;
-  const sawLoadingRef = useRef(false);
-  const firstLoadDoneRef = useRef(false);
+  const [firstLoad] = useState(createFirstLoadLatch);
   useEffect(() => {
-    if (rowsPresent) firstLoadDoneRef.current = true;
-    if (loading) sawLoadingRef.current = true;
-    else if (sawLoadingRef.current) firstLoadDoneRef.current = true;
-  }, [loading, rowsPresent]);
-  const isLoading = loading && !rowsPresent && !firstLoadDoneRef.current;
+    firstLoad.observe(loading, rowsPresent);
+  }, [firstLoad, loading, rowsPresent]);
+  const isLoading = firstLoad.isLoading(loading, rowsPresent);
 
   // Clamp out-of-range pages (hand-edited / stale shared links) once the
   // total is known and nothing is in flight — mirrors useQuerySource, so a
@@ -343,21 +324,16 @@ export function useServerData<TRow>(
     // Cursor mode has no offset arithmetic to clamp against — a page is
     // reachable only if its token is already in hand, which the trail below
     // enforces directly.
-    if (cursorMode || loading || total <= 0) return;
-    const lastPage = Math.max(1, Math.ceil(total / Math.max(limit, 1)));
-    if (page > lastPage) setPage(lastPage);
+    if (cursorMode || loading) return;
+    const lastPage = clampedPage(page, limit, total);
+    if (lastPage !== undefined) setPage(lastPage);
   }, [cursorMode, loading, total, limit, page, setPage]);
 
   // Record the token for the page after the one on screen, so "next" has
   // something to send and a later "back" can retrace the trail.
   useEffect(() => {
     if (!cursorMode || loading || nextCursor === null) return;
-    setCursors((prev) => {
-      if (prev[page] === nextCursor) return prev;
-      const next = prev.slice();
-      next[page] = nextCursor;
-      return next;
-    });
+    setCursors((prev) => recordCursor(prev, page, nextCursor));
   }, [cursorMode, loading, nextCursor, page]);
 
   // Infinite-append accumulation: `fetchNextPage` stashes the rows already
@@ -366,7 +342,7 @@ export function useServerData<TRow>(
   // back a NEW `rows` array for the advanced page, which is then appended.
   // Any base-query change (sort/filter/search/limit), a direct page jump,
   // or an error invalidates the stash, falling back to replacement.
-  const baseKey = stableKey({
+  const baseKey = appendBaseKey({
     limit,
     search,
     sortBy,
@@ -374,23 +350,11 @@ export function useServerData<TRow>(
     sortLevels,
     filters: extra,
   });
-  const [stash, setStash] = useState<{
-    key: string;
-    page: number;
-    rows: readonly TRow[];
-    prevProp: readonly TRow[];
-  } | null>(null);
-  const appending =
-    stash !== null && stash.key === baseKey && stash.page === page;
-  // The advanced page's response hasn't landed while the caller still
-  // passes the identical `rows` array the append started from.
-  const appendPending = appending && rows === stash.prevProp;
+  const [stash, setStash] = useState<AppendStash<TRow> | null>(null);
   useEffect(() => {
     // Memory hygiene + failure recovery: a stash for a superseded base
     // query can never apply, and an errored append stops accumulating.
-    if (stash !== null && (stash.key !== baseKey || error !== null)) {
-      setStash(null);
-    }
+    if (staleAppendStash(stash, baseKey, error !== null)) setStash(null);
   }, [stash, baseKey, error]);
 
   // A new sort, filter, search or page size makes every token the server
@@ -400,19 +364,21 @@ export function useServerData<TRow>(
   useEffect(() => {
     if (!cursorMode || cursorBaseRef.current === baseKey) return;
     cursorBaseRef.current = baseKey;
-    setCursors([undefined]);
+    setCursors(EMPTY_CURSOR_TRAIL);
     setPage(1);
   }, [cursorMode, baseKey, setPage]);
 
-  const displayRows = useMemo<readonly TRow[]>(() => {
-    if (!appending) return rows;
-    return appendPending ? stash.rows : [...stash.rows, ...rows];
-  }, [appending, appendPending, stash, rows]);
+  const appended = useMemo(
+    () => appendedRows(stash, baseKey, page, rows),
+    [stash, baseKey, page, rows]
+  );
+  const displayRows = appended.rows;
+  const appendPending = appended.pending;
 
   // Offset mode knows the end from the count; cursor mode only knows there
   // is more because the server said so by returning another token.
   const moreToLoad = cursorMode
-    ? cursors[page] !== undefined
+    ? cursorHasMore(cursors, page)
     : page * limit < total;
   const hasNextPage = !paged && moreToLoad;
   // Without a token a page cannot be requested at all, so in cursor mode
@@ -420,7 +386,7 @@ export function useServerData<TRow>(
   // click beyond that is ignored rather than silently re-serving page 1,
   // which is what sending an absent cursor would do.
   const setPageSafely = useEventCallback((next: number) => {
-    if (cursorMode && next > cursors.length) return;
+    if (cursorMode && !canRequestCursorPage(cursors, next)) return;
     setPage(next);
   });
 

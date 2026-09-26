@@ -44,6 +44,93 @@ export {
   toggleCollapsedColumnGroup,
 } from "./columns/headerGroups";
 export {
+  drawnSlotFills,
+  type FeatureRender,
+  type FeatureSlotKey,
+  featureSlotKey,
+  type FeatureStateKey,
+  featureStateKey,
+  type OrderedContribution,
+  orderedContributions,
+  type SlotFill,
+  slotFillsOf,
+  slotRender,
+} from "./features/featureKeys";
+export {
+  createFeatureHost,
+  disposeFeatureHost,
+  EMPTY_FEATURE_HOST,
+  type FeatureSetup,
+  LiveFeatureHost,
+} from "./features/liveFeatureHost";
+export { deriveRuntimeOperations } from "./features/runtimeOperations";
+export {
+  ACTIVE_FILTER_CHIPS,
+  COLUMN_HEADER_RENAME,
+  COLUMN_MENU,
+  type ColumnHeaderRenameSlotProps,
+  EXPAND_TOGGLE,
+  type ExpandToggleSlotProps,
+  FILTER_DRAWER,
+  FILTER_POPOVER,
+  type FilterOverlaySlotProps,
+  ROW_REORDER_ANNOUNCER,
+} from "./features/slotContract";
+export type { TableRuntime, TableRuntimeView } from "./features/tableRuntime";
+export type {
+  ActiveFilterChip,
+  ActiveFilterChipsSlotProps,
+} from "./filters/activeFilterChips";
+export {
+  cellAttributes,
+  type ChromeBodySlot,
+  type ChromeCellSizing,
+  type ChromeColumnPlan,
+  chromeColumnPlan,
+  type ChromeExtraSlot,
+  type ChromeGroupEntry,
+  type ChromeGroupSlot,
+  type ChromeRowSlot,
+  type ChromeSortState,
+  type ChromeVirtualPadSlot,
+  columnAriaSort,
+  columnTextAlign,
+  DESKTOP_ACTIONS_WIDTH,
+  DESKTOP_EXPANSION_WIDTH,
+  DESKTOP_RESIZE_HANDLE_STYLE,
+  DESKTOP_SELECTION_WIDTH,
+  type DesktopBodyPinStyle,
+  desktopBodyPinStyle,
+  desktopChromeMetrics,
+  type DesktopChromeWidths,
+  desktopDetailMeasureRef,
+  desktopEdgeHeadPin,
+  desktopHasPinned,
+  type DesktopHeadCellGeometry,
+  desktopHeadCellGeometry,
+  desktopPinSignature,
+  desktopRowMeasureRef,
+  type DesktopScrollBoxStyle,
+  desktopScrollBoxStyle,
+  documentOffsetTop,
+  entryKeys,
+  extraRowCoveredSlots,
+  headerCellAttributes,
+  headerRowAttributes,
+  measureRowDetailAsPair,
+  measureWindowScrollMargin,
+  pinnedRowIds,
+  rowAttributes,
+  type RowPairMeasurer,
+  searchInputAttributes,
+  sortButtonAttributes,
+  sortIndexOf,
+  sortLevelOf,
+  sourceWindowStart,
+  tableAttributes,
+  virtualListElement,
+} from "./layout/chromeModel";
+export {
   bodyCellsHaveRowSpan,
   cellsForRow,
   extraHostFillStyle,
@@ -126,6 +213,8 @@ export type {
 } from "./columnModel";
 export type {
   ColumnLayoutState,
+  PinLeads,
+  PinnedCellStyle,
   PinOffset,
   PinSide,
   UseColumnLayoutResult,
@@ -135,9 +224,11 @@ export type {
   ColumnMenuActionContext,
   ColumnMenuChoice,
   ColumnMenuChoiceOption,
+  ColumnMenuChromeProps,
   ColumnMenuItem,
   ColumnMenuLabels,
   ColumnMenuRow,
+  ColumnMenuSlotProps,
   PinnedSide,
 } from "./columns/columnMenuModel";
 export type {
@@ -163,6 +254,7 @@ export type {
   TableRowScope,
   TableSnapshot,
 } from "./engine/createTableEngine";
+export type { NeutralTable } from "./engine/neutralTable";
 export type {
   ExportPayload,
   ExportRowMeta,
@@ -191,6 +283,7 @@ export {
 } from "./filters/filterDefs";
 export type { FilterFormSource } from "./filters/filterFormModel";
 export type {
+  FilterTypeRegistry,
   FilterTypeSpec,
   FilterWidgetKind,
   FilterWidgetRenderProps,
@@ -211,13 +304,17 @@ export type {
 export type { GroupAggregateOps } from "./grouping/groupRowLayout";
 export type {
   GroupAggregatesFn,
+  GroupedFlatEntry,
   GroupNode,
   GroupPaging,
   GroupSort,
+  RowGroupLevel,
+  RowGroupRef,
 } from "./grouping/groupRows";
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "./rows/extraRows";
 export type { IncrementalViewConfig } from "./rows/incremental";
 export type { RowPinLookup, RowPinSide } from "./rows/rowPinModel";
+export { ROW_DND_MIME } from "./rows/rowReorderEngine";
 export type { RowReorderDigest } from "./rows/rowReorderModel";
 export type { RowHeight, RowStyle } from "./rows/rowStyle";
 export type { SortLevel } from "./sort/compare";
@@ -238,8 +335,16 @@ export type { TableSource } from "./source/TableSource";
 export type { CssProperties } from "./style/cssProperties";
 export type { TableStateMutators } from "./tableStateMutators";
 export type {
+  ActionAiOptions,
+  ActionApprovalPolicy,
+  ActionConfirm,
+  ApprovalPresentation,
+  BulkAction,
+  BulkActionContext,
   ColumnMetadata,
+  Direction,
   ResolvedPaginationMode,
+  RowAction,
   TableLabels,
 } from "./types";
 export type {

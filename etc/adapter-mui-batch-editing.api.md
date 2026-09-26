@@ -4,7 +4,7 @@
 
 ```ts
 
-import { BatchRowEdit } from '@adapttable/react';
+import { BatchRowEdit } from '@adapttable/core';
 import { TableFeature } from '@adapttable/react';
 
 // @public

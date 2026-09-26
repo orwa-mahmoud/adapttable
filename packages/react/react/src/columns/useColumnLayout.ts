@@ -2,21 +2,29 @@ import {
   applyColumnOrder,
   type ColumnGroupRecord,
   type ColumnLayoutState,
+  type ControllableStoreOptions,
   declaredColumnName,
   EMPTY_COLUMN_LAYOUT,
   FALLBACK_PIN_WIDTH,
+  initialColumnLayout,
   marriedOrderHolds,
   parsePxWidth,
   type PinSide,
   type UseColumnLayoutResult,
+  withColumnHidden,
+  withColumnMoved,
+  withColumnOrder,
+  withColumnPinned,
+  withColumnWidth,
 } from "@adapttable/core";
 import {
   applyCollapsedColumnGroups,
   toggleCollapsedColumnGroup,
 } from "@adapttable/core/binding";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 import type { ColumnDef } from "../columnDef";
+import { useControllableStore } from "../hooks/useControllableStore";
 import { applyReactColumnNames } from "./reactColumns";
 
 export type {
@@ -184,6 +192,12 @@ export interface UseColumnLayoutOptions<TRow> {
   columnGroups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
 }
 
+/** The layout store reports every change and reads its own commits. */
+const LAYOUT_STORE_OPTIONS: ControllableStoreOptions<ColumnLayoutState> = {
+  observeUncontrolled: true,
+  readsOwnCommits: true,
+};
+
 /**
  * Headless column-layout state. Uncontrolled by default; pass `layout` +
  * `onLayoutChange` to control it (and persist however you like — localStorage,
@@ -202,17 +216,15 @@ export function useColumnLayout<TRow>({
   collapsibleColumnGroups = false,
   columnGroups,
 }: UseColumnLayoutOptions<TRow>): ReactUseColumnLayoutResult<TRow> {
-  const [internal, setInternal] = useState<ColumnLayoutState>(() => ({
-    ...EMPTY_COLUMN_LAYOUT,
-    ...defaultColumnLayout,
-  }));
-  const state = layout ?? internal;
-
-  // Mutators read through this ref so two mutations in ONE event handler
-  // compose (the second sees the first's result) instead of the last write
-  // silently winning. `commit` advances it optimistically; renders re-sync it.
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  // `onLayoutChange` hears every change, controlled or not. Mutators read
+  // `store.current()`, so two mutations in ONE event handler compose (the
+  // second sees the first's result) instead of the last write silently
+  // winning; a render hands the host's value back over.
+  const [state, store] = useControllableStore(
+    () => initialColumnLayout(defaultColumnLayout),
+    { value: layout, onChange: onLayoutChange },
+    LAYOUT_STORE_OPTIONS
+  );
   // A host commonly writes the accepted name back into its `columns` prop.
   // Capture the declaration when a rename becomes active and ignore that
   // echo only while the override (or its stale post-reset echo) is live.
@@ -227,14 +239,7 @@ export function useColumnLayout<TRow>({
     staleEchoesRef.current
   );
 
-  const commit = useCallback(
-    (next: ColumnLayoutState) => {
-      stateRef.current = next;
-      if (layout === undefined) setInternal(next);
-      onLayoutChange?.(next);
-    },
-    [layout, onLayoutChange]
-  );
+  const commit = store.commit;
 
   const isHidden = useCallback(
     (key: string) => state.hidden.includes(key),
@@ -243,42 +248,28 @@ export function useColumnLayout<TRow>({
 
   const setHidden = useCallback(
     (key: string, hidden: boolean) => {
-      const current = stateRef.current;
-      const has = current.hidden.includes(key);
-      if (has === hidden) return;
-      const nextHidden = hidden
-        ? [...current.hidden, key]
-        : current.hidden.filter((k) => k !== key);
-      commit({ ...current, hidden: nextHidden });
+      const current = store.current();
+      const next = withColumnHidden(current, key, hidden);
+      if (next !== current) commit(next);
     },
-    [commit]
+    [store, commit]
   );
 
   const toggleVisible = useCallback(
-    (key: string) => setHidden(key, !stateRef.current.hidden.includes(key)),
-    [setHidden]
+    (key: string) => setHidden(key, !store.current().hidden.includes(key)),
+    [store, setHidden]
   );
 
   const setPinned = useCallback(
-    (key: string, side: PinSide | undefined) => {
-      const current = stateRef.current;
-      const next = { ...current.pinned };
-      if (side === undefined) delete next[key];
-      else next[key] = side;
-      commit({ ...current, pinned: next });
-    },
-    [commit]
+    (key: string, side: PinSide | undefined) =>
+      commit(withColumnPinned(store.current(), key, side)),
+    [store, commit]
   );
 
   const setWidth = useCallback(
-    (key: string, width: number | undefined) => {
-      const current = stateRef.current;
-      const next = { ...current.widths };
-      if (width === undefined) delete next[key];
-      else next[key] = width;
-      commit({ ...current, widths: next });
-    },
-    [commit]
+    (key: string, width: number | undefined) =>
+      commit(withColumnWidth(store.current(), key, width)),
+    [store, commit]
   );
 
   const setName = useCallback(
@@ -287,7 +278,7 @@ export function useColumnLayout<TRow>({
       if (column?.renameable !== true || !onColumnRename) return;
       const name = nextName.trim();
       if (name === "") return;
-      const current = stateRef.current;
+      const current = store.current();
       const declared =
         declaredNamesRef.current.get(key) ?? declaredColumnName(column);
       const effective = current.names?.[key] ?? declared;
@@ -312,13 +303,13 @@ export function useColumnLayout<TRow>({
       });
       onColumnRename(key, name);
     },
-    [columns, commit, onColumnRename]
+    [store, columns, commit, onColumnRename]
   );
 
   const resetName = useCallback(
     (key: string) => {
       const column = columns.find((candidate) => candidate.key === key);
-      const current = stateRef.current;
+      const current = store.current();
       if (
         column?.renameable !== true ||
         !onColumnRename ||
@@ -344,7 +335,7 @@ export function useColumnLayout<TRow>({
         declaredNamesRef.current.get(key) ?? declaredColumnName(column)
       );
     },
-    [columns, commit, onColumnRename]
+    [store, columns, commit, onColumnRename]
   );
 
   const namedColumns = useMemo(
@@ -374,7 +365,7 @@ export function useColumnLayout<TRow>({
   const toggleColumnGroup = useCallback(
     (id: string) => {
       if (!collapsibleColumnGroups) return;
-      const current = stateRef.current;
+      const current = store.current();
       const nextIds = toggleCollapsedColumnGroup(
         current.collapsedGroups ?? [],
         id
@@ -384,50 +375,40 @@ export function useColumnLayout<TRow>({
         collapsedGroups: nextIds.length > 0 ? nextIds : undefined,
       });
     },
-    [collapsibleColumnGroups, commit]
+    [store, collapsibleColumnGroups, commit]
+  );
+
+  /** Whether an order keeps every column group's members together. */
+  const orderHolds = useCallback(
+    (order: readonly string[]) =>
+      !columnGroups || marriedOrderHolds([...order], columnGroups),
+    [columnGroups]
   );
 
   const move = useCallback(
     (key: string, toIndex: number) => {
-      const latest = stateRef.current;
-      // Operate on the FULL ordered list (visible + hidden) so hiding a column
-      // never reorders the rest and reordering keeps hidden columns in place.
+      const latest = store.current();
       const current = applyColumnOrder(columns, latest.order).map((c) => c.key);
-      const from = current.indexOf(key);
-      if (from === -1) return;
-      const clamped = Math.max(0, Math.min(toIndex, current.length - 1));
-      if (from === clamped) return;
-      current.splice(from, 1);
-      current.splice(clamped, 0, key);
-      if (columnGroups && !marriedOrderHolds(current, columnGroups)) return;
-      commit({ ...latest, order: current });
+      const next = withColumnMoved(latest, current, key, toIndex, orderHolds);
+      if (next) commit(next);
     },
-    [commit, columns, columnGroups]
+    [store, commit, columns, orderHolds]
   );
 
   const setOrder = useCallback(
     (order: readonly string[]) => {
-      const latest = stateRef.current;
+      const latest = store.current();
       const current = applyColumnOrder(columns, latest.order).map(
         (column) => column.key
       );
-      if (order.length !== current.length) return;
-      const unique = new Set(order);
-      if (
-        unique.size !== current.length ||
-        !current.every((key) => unique.has(key))
-      ) {
-        return;
-      }
-      const next = [...order];
-      if (columnGroups && !marriedOrderHolds(next, columnGroups)) return;
-      commit({ ...latest, order: next });
+      const next = withColumnOrder(latest, current, order, orderHolds);
+      if (next) commit(next);
     },
-    [commit, columns, columnGroups]
+    [store, commit, columns, orderHolds]
   );
 
   const reset = useCallback(() => {
-    const names = stateRef.current.names ?? {};
+    const names = store.current().names ?? {};
     const renamedKeys = Object.keys(names);
     for (const key of renamedKeys) {
       endRenameOverride(
@@ -447,7 +428,7 @@ export function useColumnLayout<TRow>({
         );
       }
     }
-  }, [columns, commit, onColumnRename]);
+  }, [store, columns, commit, onColumnRename]);
 
   // Precompute every pinned column's inset once per layout change — adapters
   // call `pinOffset` per cell per render, so a lookup beats re-walking the

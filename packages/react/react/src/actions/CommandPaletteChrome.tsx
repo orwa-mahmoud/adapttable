@@ -26,8 +26,12 @@
  */
 import {
   type Command,
-  filterCommands,
+  commandListKeyAction,
+  commandListView,
+  createCommandList,
+  runCommand,
   type TableLabels,
+  tabTrapTarget,
 } from "@adapttable/core";
 import {
   type KeyboardEvent,
@@ -36,6 +40,7 @@ import {
   useId,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 
 export type { Command };
@@ -136,20 +141,6 @@ export interface CommandPaletteChromeProps {
   slots: CommandPaletteSlots;
 }
 
-/** Move the highlight, wrapping at both ends. */
-function nextActive(
-  key: string,
-  at: number,
-  count: number
-): number | undefined {
-  if (count === 0) return undefined;
-  if (key === "ArrowDown") return (at + 1) % count;
-  if (key === "ArrowUp") return (at - 1 + count) % count;
-  if (key === "Home") return 0;
-  if (key === "End") return count - 1;
-  return undefined;
-}
-
 /** Every element inside that can hold focus, for the Tab trap. */
 function focusablesIn(root: HTMLElement | null): HTMLElement[] {
   return [
@@ -171,8 +162,12 @@ export function CommandPaletteChrome(
   props: Readonly<CommandPaletteChromeProps>
 ) {
   const { commands, open, onClose, slots } = props;
-  const [query, setQuery] = useState("");
-  const [active, setActive] = useState(0);
+  const [list] = useState(createCommandList);
+  const snapshot = useSyncExternalStore(
+    list.subscribe,
+    list.getSnapshot,
+    list.getSnapshot
+  );
   const surface = useRef<HTMLDivElement | null>(null);
 
   // Clicking away closes it — decided here, beside Escape, rather than by
@@ -197,56 +192,46 @@ export function CommandPaletteChrome(
 
   useEffect(() => {
     if (!open) return;
-    setQuery("");
-    setActive(0);
+    list.reset();
     return () => {
       const back = opener.current;
       opener.current = null;
       if (back instanceof HTMLElement) back.focus();
     };
-  }, [open]);
+  }, [open, list]);
 
-  const matches = filterCommands(commands, query);
-  const clamped = Math.min(active, Math.max(0, matches.length - 1));
+  const view = commandListView(commands, snapshot);
+  const { matches, active: clamped } = view;
   const activeId = matches[clamped]
     ? `${listId}-${matches[clamped].key}`
     : undefined;
 
   const run = (command: Command | undefined) => {
-    if (!command || command.disabled === true) return;
-    // Close first, exactly as the context menu does: a command that opens
-    // a dialog must not do it under a palette that is still mounted.
-    onClose();
-    command.onSelect();
+    runCommand(command, onClose);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === "Escape") {
+    const action = commandListKeyAction(event.key, view);
+    if (action) {
       event.preventDefault();
-      onClose();
+      if (action.kind === "close") onClose();
+      else if (action.kind === "run") run(action.command);
+      else list.setActive(action.to);
       return;
     }
-    if (event.key === "Enter") {
-      event.preventDefault();
-      run(matches[clamped]);
-      return;
-    }
-    if (event.key === "Tab") {
-      // The trap. A modal that lets Tab reach the page behind it is a
-      // modal to the eye and not to the keyboard.
-      const focusable = focusablesIn(surface.current);
-      if (focusable.length === 0) return;
-      const at = focusable.indexOf(document.activeElement as HTMLElement);
-      const atEdge = event.shiftKey ? at === 0 : at === focusable.length - 1;
-      if (!atEdge) return;
-      event.preventDefault();
-      (event.shiftKey ? focusable.at(-1) : focusable[0])?.focus();
-      return;
-    }
-    const to = nextActive(event.key, clamped, matches.length);
-    if (to === undefined) return;
+    if (event.key !== "Tab") return;
+    // The trap. A modal that lets Tab reach the page behind it is a modal to
+    // the eye and not to the keyboard.
+    const target = tabTrapTarget(
+      focusablesIn(surface.current),
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null,
+      event.shiftKey
+    );
+    if (!target) return;
     event.preventDefault();
-    setActive(to);
+    target.focus();
   };
 
   if (!open) return null;
@@ -262,10 +247,9 @@ export function CommandPaletteChrome(
       <div ref={surface}>
         <slots.Input
           inputProps={{
-            value: query,
+            value: snapshot.query,
             onChange: (next) => {
-              setQuery(next);
-              setActive(0);
+              list.setQuery(next);
             },
             onKeyDown,
             // Focus is taken when the element ARRIVES, not when the
@@ -315,7 +299,7 @@ export function CommandPaletteChrome(
                   run(command);
                 },
                 onMouseEnter: () => {
-                  setActive(index);
+                  list.setActive(index);
                 },
               }}
             />

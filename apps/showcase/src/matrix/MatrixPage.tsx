@@ -5,7 +5,8 @@
  * different arguments, and so are the hundred and fifty that follow them.
  * The words come from `matrix.mjs`, the demo from `featureBodies.tsx`, and the kit's
  * accent from the adapter's own token — so a new adapter is a data entry, not a
- * new component.
+ * new component. The route carries the framework the kit is built on, and the
+ * copy and the code on the page are the ones written for that framework.
  *
  * The design is documented in `tokens.css`: the chrome is the engine, the demo
  * surface is the kit, and the seam between them is drawn rather than implied.
@@ -57,6 +58,8 @@ import {
   type MatrixRoute,
   SHOWCASE_ADAPTERS,
   type ShowcaseAdapter,
+  type ShowcaseFramework,
+  snippetFor,
 } from "./content";
 import { FEATURE_BODIES, LandingTable } from "./featureBodies";
 
@@ -317,10 +320,16 @@ function FeatureRail({
 /** "AdaptTable for Mantine": what the package is, what it costs, what it does. */
 function AdapterLanding({
   adapter,
+  framework,
   dark,
   root,
-}: Readonly<{ adapter: ShowcaseAdapter; dark: boolean; root: string }>) {
-  const fill = (text: string) => fillTemplate(text, adapter);
+}: Readonly<{
+  adapter: ShowcaseAdapter;
+  framework: ShowcaseFramework;
+  dark: boolean;
+  root: string;
+}>) {
+  const fill = (text: string) => fillTemplate(text, adapter, framework);
   return (
     <>
       <header className="mx-hero">
@@ -376,16 +385,18 @@ function AdapterLanding({
 /** "Saved views in Mantine": the words, the code, the kit's own note, the demo. */
 function FeaturePage({
   adapter,
+  framework,
   feature,
   dark,
   root,
 }: Readonly<{
   adapter: ShowcaseAdapter;
+  framework: ShowcaseFramework;
   feature: MatrixFeature;
   dark: boolean;
   root: string;
 }>) {
-  const fill = (text: string) => fillTemplate(text, adapter);
+  const fill = (text: string) => fillTemplate(text, adapter, framework);
   const Body = FEATURE_BODIES[feature.slug];
   if (!Body) {
     throw new Error(`No demo body for feature "${feature.slug}"`);
@@ -395,7 +406,7 @@ function FeaturePage({
     <div className="mx-brief">
       <CodeBlock
         title={`${feature.label} · ${adapter.label}`}
-        code={fill(feature.snippet)}
+        code={fill(snippetFor(feature, adapter, framework))}
       />
       <div className="mx-brief__side">
         {note ? (
@@ -480,7 +491,7 @@ export function MatrixPage({
   dark,
   root,
 }: Readonly<{ route: MatrixRoute; dark: boolean; root: string }>) {
-  const { adapter, feature } = route;
+  const { adapter, framework, feature } = route;
   return (
     <div
       className="mx shell"
@@ -492,12 +503,18 @@ export function MatrixPage({
       {feature ? (
         <FeaturePage
           adapter={adapter}
+          framework={framework}
           feature={feature}
           dark={dark}
           root={root}
         />
       ) : (
-        <AdapterLanding adapter={adapter} dark={dark} root={root} />
+        <AdapterLanding
+          adapter={adapter}
+          framework={framework}
+          dark={dark}
+          root={root}
+        />
       )}
     </div>
   );

@@ -13,23 +13,35 @@
  * "undo that paste" — and it is why the batch routes come through here rather
  * than each cell recording itself.
  */
-import { type CellEdit, getPath } from "@adapttable/core";
-import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  type CellEdit,
+  createEditHistoryStack,
+  DEFAULT_EDIT_HISTORY_DEPTH,
+  editHistoryEntry,
+  readCellValue as readNeutralCellValue,
+} from "@adapttable/core";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+
+export {
+  asBatchGesture,
+  asGesture,
+  type EditHistoryEntry,
+} from "@adapttable/core";
 
 import type { ColumnDef } from "../columnDef";
 import type { EditHistoryOptions } from "../props";
-import type { BatchRowEdit } from "./batchEditing";
 
 /**
- * One undoable gesture: what it wrote, and what was there before.
+ * A cell's current value as an undo would restore it: the column's
+ * `editValue`, else its `sortValue`, else the field at its key.
  *
  * @public
  */
-export interface EditHistoryEntry<TRow> {
-  /** The edits the gesture made, in the order it made them. */
-  redo: readonly CellEdit<TRow>[];
-  /** The values those cells held before it — the inverse, in the same order. */
-  undo: readonly CellEdit<TRow>[];
+export function readCellValue<TRow>(
+  row: TRow,
+  column: ColumnDef<TRow>
+): unknown {
+  return readNeutralCellValue(row, column);
 }
 
 /**
@@ -90,33 +102,6 @@ export interface EditHistoryState<TRow> {
 }
 
 /**
- * The value a cell holds right now, unstringified.
- *
- * The editor's seed is a string because an input needs one; an undo needs the
- * VALUE, so that putting back the number 10 does not put back `"10"`. Same
- * priority the editor uses otherwise: an explicit `editValue`, then
- * `sortValue`, then the key's data path.
- *
- * @typeParam TRow - The row type.
- * @param row - The row being read.
- * @param column - The column being read.
- * @returns The current value, in whatever type the row holds it.
- *
- * @public
- */
-export function readCellValue<TRow>(
-  row: TRow,
-  column: ColumnDef<TRow>
-): unknown {
-  if (column.editValue) return column.editValue(row);
-  if (column.sortValue) return column.sortValue(row);
-  return getPath(row, column.key);
-}
-
-/** The default number of gestures remembered — deep enough to feel infinite. */
-const DEFAULT_DEPTH = 50;
-
-/**
  * Remember edits so they can be replayed backwards.
  *
  * @typeParam TRow - The row type.
@@ -128,15 +113,18 @@ const DEFAULT_DEPTH = 50;
 export function useEditHistory<TRow>(
   options: UseEditHistoryOptions<TRow>
 ): EditHistoryState<TRow> {
-  const { enabled, depth = DEFAULT_DEPTH, columns, onCellEdit } = options;
-  const past = useRef<EditHistoryEntry<TRow>[]>([]);
-  const future = useRef<EditHistoryEntry<TRow>[]>([]);
-  // Depth counts are state because buttons enable and disable on them; the
-  // stacks themselves are refs, since nothing renders from their contents.
-  const [counts, setCounts] = useState({ past: 0, future: 0 });
-  const sync = useCallback(() => {
-    setCounts({ past: past.current.length, future: future.current.length });
-  }, []);
+  const {
+    enabled,
+    depth = DEFAULT_EDIT_HISTORY_DEPTH,
+    columns,
+    onCellEdit,
+  } = options;
+  const [stack] = useState(createEditHistoryStack<TRow>);
+  const counts = useSyncExternalStore(
+    stack.subscribe,
+    stack.getSnapshot,
+    stack.getSnapshot
+  );
 
   const columnFor = useCallback(
     (key: string) => columns.find((column) => column.key === key),
@@ -146,27 +134,22 @@ export function useEditHistory<TRow>(
   const record = useCallback(
     (edits: readonly CellEdit<TRow>[]) => {
       if (!enabled || edits.length === 0) return;
-      const undo = edits.flatMap((edit) => {
-        const column = columnFor(edit.columnKey);
-        return column
-          ? [
-              {
-                row: edit.row,
-                columnKey: edit.columnKey,
-                value: readCellValue(edit.row, column),
-              },
-            ]
-          : [];
-      });
-      past.current = [...past.current, { redo: edits, undo }].slice(-depth);
-      // A new edit ends the redo line, exactly as it does in an editor: the
-      // future that was undone is no longer reachable from here.
-      future.current = [];
-      sync();
+      stack.record(
+        editHistoryEntry(edits, (edit) => {
+          const column = columnFor(edit.columnKey);
+          return column
+            ? { value: readCellValue(edit.row, column) }
+            : undefined;
+        }),
+        depth
+      );
     },
-    [enabled, depth, columnFor, sync]
+    [enabled, depth, columnFor, stack]
   );
 
+  // An undo does not rewrite the host's data: it COMMITS the previous value
+  // back through the host's own channel, so whatever wraps editing runs on
+  // the way back exactly as it ran on the way out.
   const replay = useCallback(
     (edits: readonly CellEdit<TRow>[]) => {
       for (const edit of edits) {
@@ -178,28 +161,14 @@ export function useEditHistory<TRow>(
   );
 
   const undo = useCallback(() => {
-    const entry = past.current.at(-1);
-    if (!entry) return 0;
-    past.current = past.current.slice(0, -1);
-    future.current = [...future.current, entry];
-    sync();
-    return replay(entry.undo);
-  }, [replay, sync]);
+    const entry = stack.undo();
+    return entry ? replay(entry.undo) : 0;
+  }, [replay, stack]);
 
   const redo = useCallback(() => {
-    const entry = future.current.at(-1);
-    if (!entry) return 0;
-    future.current = future.current.slice(0, -1);
-    past.current = [...past.current, entry];
-    sync();
-    return replay(entry.redo);
-  }, [replay, sync]);
-
-  const clear = useCallback(() => {
-    past.current = [];
-    future.current = [];
-    sync();
-  }, [sync]);
+    const entry = stack.redo();
+    return entry ? replay(entry.redo) : 0;
+  }, [replay, stack]);
 
   return useMemo(
     () => ({
@@ -208,10 +177,10 @@ export function useEditHistory<TRow>(
       canRedo: enabled && counts.future > 0,
       undo,
       redo,
-      clear,
+      clear: stack.clear,
       record,
     }),
-    [enabled, counts, undo, redo, clear, record]
+    [enabled, counts, undo, redo, stack, record]
   );
 }
 
@@ -270,66 +239,4 @@ export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
     [record, onCellEdit]
   );
   return { history, onCellEdit: onCellEdit ? recording : undefined };
-}
-
-/**
- * Wrap a batch handler so the whole batch is one undo entry.
- *
- * Recording happens before the handler runs: the inverse is read from the rows
- * as they are NOW, and a host that applies the edits synchronously would
- * otherwise have already changed them.
- *
- * @typeParam TRow - The row type.
- * @param apply - The resolved handler, or `undefined` when nothing receives it.
- * @param record - The history recorder.
- * @returns The wrapped handler, or `undefined` when there was none to wrap.
- *
- * @public
- */
-export function asGesture<TRow>(
-  apply: ((edits: CellEdit<TRow>[]) => void) | undefined,
-  record: (edits: readonly CellEdit<TRow>[]) => void
-): ((edits: CellEdit<TRow>[]) => void) | undefined {
-  if (!apply) return undefined;
-  return (edits) => {
-    record(edits);
-    apply(edits);
-  };
-}
-
-/** Flatten a batch save into the cell list history records as one gesture. */
-function cellsOfBatch<TRow>(
-  edits: readonly BatchRowEdit<TRow>[]
-): CellEdit<TRow>[] {
-  const cells: CellEdit<TRow>[] = [];
-  for (const edit of edits) {
-    for (const [columnKey, value] of Object.entries(edit.patch)) {
-      cells.push({ row: edit.row, columnKey, value });
-    }
-  }
-  return cells;
-}
-
-/**
- * Wrap a batch-save handler so the whole save is one undo entry.
- *
- * Same rule as {@link asGesture}: record first, then apply, so the inverse
- * is read from the rows as they are now.
- *
- * @typeParam TRow - The row type.
- * @param apply - The host's `onBatchEdit`, or `undefined` when batch is off.
- * @param record - The history recorder.
- * @returns The wrapped handler, or `undefined` when there was none to wrap.
- *
- * @public
- */
-export function asBatchGesture<TRow>(
-  apply: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined,
-  record: (edits: readonly CellEdit<TRow>[]) => void
-): ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined {
-  if (!apply) return undefined;
-  return (edits) => {
-    record(cellsOfBatch(edits));
-    return apply(edits);
-  };
 }

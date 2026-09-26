@@ -10,16 +10,10 @@
  * Pair it with `<DataTable collapsedGroupIds onCollapsedGroupIdsChange>` and
  * grouping's state travels with the link.
  */
-import {
-  PARAM_GROUP_CLOSED,
-  parseTableUrlState,
-  readCollapsedGroups,
-  updateTableUrlState,
-  writeCollapsedGroups,
-} from "@adapttable/core";
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { groupCollapseSlice } from "@adapttable/core";
 
-import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
+import type { UrlStateAdapter } from "./adapter";
+import { useUrlSlice } from "./useUrlSlice";
 
 /**
  * What {@link useGroupCollapseUrlState} needs.
@@ -60,42 +54,10 @@ export interface UseGroupCollapseUrlStateResult {
 export function useGroupCollapseUrlState(
   options: UseGroupCollapseUrlStateOptions = {}
 ): UseGroupCollapseUrlStateResult {
-  const { urlAdapter, urlSync, urlKey, defaultCollapsedGroupIds } = options;
-  const ns = urlKey ? `${urlKey}.` : "";
-  const resolved = useResolvedAdapter(urlAdapter, urlSync ?? true);
-  // Same SSR rule as the other URL hooks: only an explicit adapter is trusted
-  // to be hydration-consistent; the default history adapter hydrates from "".
-  const search = useSyncExternalStore(
-    (onChange) => resolved.subscribe(onChange),
-    () => resolved.getSearch(),
-    () => (urlAdapter ? urlAdapter.getSearch() : "")
+  const [collapsedGroupIds, onCollapsedGroupIdsChange] = useUrlSlice(
+    options,
+    groupCollapseSlice,
+    { defaultCollapsedGroupIds: options.defaultCollapsedGroupIds }
   );
-  // Optimistic overlay: the click that has not reached the URL yet.
-  const [pending, setPending] = useState<string[] | null>(null);
-
-  const collapsedGroupIds = useMemo(() => {
-    if (pending) return pending;
-    const fromUrl = readCollapsedGroups(parseTableUrlState(search, ns), ns);
-    return fromUrl ?? [...(defaultCollapsedGroupIds ?? [])];
-  }, [pending, search, ns, defaultCollapsedGroupIds]);
-
-  const onCollapsedGroupIdsChange = useCallback(
-    (ids: string[]) => {
-      setPending(ids);
-      resolved.setSearch(
-        updateTableUrlState(resolved.getSearch(), ns, (params) => {
-          writeCollapsedGroups(params, ids, ns);
-          // An emptied set writes no parameter, which reads back as "nothing
-          // has been said" — so the default would re-apply. Stamp it empty.
-          if (ids.length === 0 && (defaultCollapsedGroupIds?.length ?? 0) > 0) {
-            params.set(ns + PARAM_GROUP_CLOSED, "");
-          }
-        })
-      );
-      setPending(null);
-    },
-    [resolved, ns, defaultCollapsedGroupIds]
-  );
-
   return { collapsedGroupIds, onCollapsedGroupIdsChange };
 }

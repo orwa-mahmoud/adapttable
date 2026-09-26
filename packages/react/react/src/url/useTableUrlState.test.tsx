@@ -1,5 +1,6 @@
-import * as env from "@adapttable/core";
 import { resetDevWarnings } from "@adapttable/core";
+// The module that defines `isBrowser`, so a spy reaches every reader of it.
+import * as env from "@adapttable/core/utils/env";
 import { act, renderHook } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";

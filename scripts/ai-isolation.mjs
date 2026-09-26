@@ -11,6 +11,13 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
+import {
+  CORE,
+  FRAMEWORKS,
+  frameworksIn,
+  KITS,
+  publishedKits,
+} from "./kits.mjs";
 import { packageRel, REPO_ROOT as ROOT } from "./packages.mjs";
 
 const MARKERS = [
@@ -28,19 +35,18 @@ const MARKERS = [
   "createMcpAppBridge",
 ];
 
-/** The package folders whose root graph must stay free of the agent protocol. */
+/**
+ * The package folders whose root graph must stay free of the agent protocol:
+ * the engine, the binding of every framework a published kit is built on, the
+ * server, and every published kit in `scripts/kits.mjs`.
+ */
 const GRAPH_PACKAGES = [
-  "core",
-  "react",
+  CORE,
+  ...frameworksIn(publishedKits(KITS)).map(
+    (framework) => FRAMEWORKS[framework].binding
+  ),
   "server",
-  "adapter-mantine",
-  "adapter-mui",
-  "adapter-chakra",
-  "adapter-antd",
-  "adapter-radix",
-  "adapter-base-ui",
-  "adapter-shadcn",
-  "adapter-unstyled",
+  ...publishedKits(KITS).map((kit) => kit.name),
 ];
 
 /** Each root graph, as a path relative to the repository root. */

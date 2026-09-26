@@ -1,49 +1,21 @@
 /**
- * Opening a context menu, by every route a user has.
+ * Opening a context menu, by every route a user has — the React binding.
  *
- * A right-click-only menu is a menu half the people who need it cannot
- * reach. Keyboard users open one with Shift+F10 or the dedicated menu key —
- * the same two keys that open one everywhere else in their operating
- * system, which is exactly why they are the two that must work. Touch users
- * have neither, and press and hold instead.
- *
- * All three arrive here and produce the same thing: a target, and a point
- * to put the menu at. The keyboard routes have no pointer position, so they
- * take the corner of the element that had focus, which is where the user is
- * already looking.
- *
- * The element that opened the menu is remembered, because closing has to
- * put focus back on it. A menu that drops focus to the document leaves a
- * keyboard user at the top of the page, having lost the row they were on.
+ * Right-click, Shift+F10 or the menu key, and a touch long press all open the
+ * same menu at a target and a point, and closing puts focus back on the
+ * element that opened it. That model is core's context-menu open controller;
+ * this hook subscribes to it and hands out its trigger handlers for an
+ * adapter to spread onto a header, row or cell.
  */
-import type { ContextMenuTarget } from "@adapttable/core";
-import { useCallback, useRef, useState } from "react";
+import {
+  type ContextMenuOpenController,
+  type ContextMenuState,
+  type ContextMenuTarget,
+  createContextMenuOpenController,
+} from "@adapttable/core";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
-/**
- * Where on screen the menu should appear.
- *
- * @public
- */
-export interface ContextMenuPoint {
-  /** Viewport x, in pixels. */
-  x: number;
-  /** Viewport y, in pixels. */
-  y: number;
-}
-
-/** The open menu, or `null` when there is none. */
-export interface ContextMenuState<TRow> {
-  /** What the menu was opened on. */
-  target: ContextMenuTarget<TRow>;
-  /** Where the menu opened. */
-  at: ContextMenuPoint;
-}
-
-/** How long a press has to last to count as a long press, in milliseconds. */
-const LONG_PRESS_MS = 500;
-
-/** How far a finger may travel before a press stops being one, in pixels. */
-const LONG_PRESS_SLOP = 10;
+export type { ContextMenuPoint, ContextMenuState } from "@adapttable/core";
 
 /** What {@link useContextMenu} returns. */
 export interface ContextMenuController<TRow> {
@@ -81,10 +53,30 @@ export interface ContextMenuController<TRow> {
   };
 }
 
-/** The corner of an element, for a menu opened without a pointer. */
-function cornerOf(element: Element): ContextMenuPoint {
-  const box = element.getBoundingClientRect();
-  return { x: box.left + box.width / 2, y: box.bottom };
+/**
+ * The open controller for one menu, subscribed and connected — the plumbing
+ * {@link useContextMenu} and the table's composed menu share.
+ *
+ * @param enabled - Whether the menu is armed at all.
+ * @returns The controller and the open menu, or `null`.
+ */
+export function useContextMenuOpen<TRow>(enabled: boolean): {
+  controller: ContextMenuOpenController<TRow>;
+  open: ContextMenuState<TRow> | null;
+} {
+  const [controller] = useState(() =>
+    createContextMenuOpenController<TRow>({ enabled })
+  );
+  controller.configure({ enabled });
+  const { open } = useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot,
+    controller.getSnapshot
+  );
+  // Unmounting mid-press abandons the press, so its timer never opens a menu
+  // nobody is showing.
+  useEffect(() => controller.connect(), [controller]);
+  return { controller, open };
 }
 
 /**
@@ -97,94 +89,13 @@ function cornerOf(element: Element): ContextMenuPoint {
 export function useContextMenu<TRow>(
   enabled: boolean
 ): ContextMenuController<TRow> {
-  const [open, setOpen] = useState<ContextMenuState<TRow> | null>(null);
-  const opener = useRef<Element | null>(null);
-  const press = useRef<{
-    timer: ReturnType<typeof setTimeout>;
-    at: ContextMenuPoint;
-  } | null>(null);
-
-  const cancelPress = useCallback(() => {
-    if (!press.current) return;
-    clearTimeout(press.current.timer);
-    press.current = null;
-  }, []);
-
-  const close = useCallback(() => {
-    setOpen(null);
-    // Focus goes back to the element the menu was opened from. Without
-    // this a keyboard user lands at the top of the document, having lost
-    // the row they were working on.
-    const element = opener.current;
-    opener.current = null;
-    if (element instanceof HTMLElement) element.focus();
-  }, []);
-
-  const triggerProps = useCallback(
-    (target: ContextMenuTarget<TRow>) => ({
-      onContextMenu: (event: {
-        preventDefault: () => void;
-        clientX: number;
-        clientY: number;
-        currentTarget: EventTarget & Element;
-      }) => {
-        if (!enabled) return;
-        event.preventDefault();
-        opener.current = event.currentTarget;
-        setOpen({ target, at: { x: event.clientX, y: event.clientY } });
-      },
-      onKeyDown: (event: {
-        key: string;
-        shiftKey: boolean;
-        preventDefault: () => void;
-        currentTarget: EventTarget & Element;
-      }) => {
-        if (!enabled) return;
-        // The two keys an operating system already uses for this. Anything
-        // else here would be a shortcut people have to be taught.
-        const wanted =
-          event.key === "ContextMenu" ||
-          (event.shiftKey && event.key === "F10");
-        if (!wanted) return;
-        event.preventDefault();
-        opener.current = event.currentTarget;
-        setOpen({ target, at: cornerOf(event.currentTarget) });
-      },
-      onPointerDown: (event: {
-        pointerType: string;
-        clientX: number;
-        clientY: number;
-        currentTarget: EventTarget & Element;
-      }) => {
-        // Only touch: a held mouse button is a drag, and a held pen is
-        // usually a barrel-button gesture the browser handles itself.
-        if (!enabled || event.pointerType !== "touch") return;
-        const element = event.currentTarget;
-        const at = { x: event.clientX, y: event.clientY };
-        cancelPress();
-        press.current = {
-          at,
-          timer: setTimeout(() => {
-            press.current = null;
-            opener.current = element;
-            setOpen({ target, at });
-          }, LONG_PRESS_MS),
-        };
-      },
-      onPointerMove: (event: { clientX: number; clientY: number }) => {
-        const held = press.current;
-        if (!held) return;
-        // A finger that travels is scrolling, not pressing.
-        const moved =
-          Math.abs(event.clientX - held.at.x) > LONG_PRESS_SLOP ||
-          Math.abs(event.clientY - held.at.y) > LONG_PRESS_SLOP;
-        if (moved) cancelPress();
-      },
-      onPointerUp: cancelPress,
-      onPointerCancel: cancelPress,
+  const { controller, open } = useContextMenuOpen<TRow>(enabled);
+  return useMemo(
+    () => ({
+      open,
+      close: controller.close,
+      triggerProps: controller.triggerHandlers,
     }),
-    [cancelPress, enabled]
+    [controller, open]
   );
-
-  return { open, close, triggerProps };
 }

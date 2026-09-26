@@ -28,6 +28,7 @@ import { FilterType } from '@adapttable/core';
 import { FORMULA_BLANK } from '@adapttable/core';
 import { FORMULA_ERRORS } from '@adapttable/core';
 import { FORMULA_FUNCTIONS } from '@adapttable/core';
+import { URL_SLICE_WRITE_DEBOUNCE_MS as FORMULA_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { formulaBoolean } from '@adapttable/core';
 import { FormulaColumnSpec } from '@adapttable/core';
 import { FormulaColumnsResult } from '@adapttable/core';
@@ -106,8 +107,7 @@ export { FORMULA_ERRORS }
 
 export { FORMULA_FUNCTIONS }
 
-// @public
-export const FORMULA_URL_WRITE_DEBOUNCE_MS = 150;
+export { FORMULA_URL_WRITE_DEBOUNCE_MS }
 
 export { formulaBoolean }
 

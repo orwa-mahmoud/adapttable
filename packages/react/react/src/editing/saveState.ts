@@ -13,31 +13,19 @@
  * the old one back: `onRollback` hands the host the previous value to restore,
  * because only the host can write to its own rows.
  */
-import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  cellSaveFailure,
+  cellSaveSignature,
+  type CellSaveStatus,
+  cellSaveStatus,
+  createCellSaveStore,
+  type FailedCellSave,
+} from "@adapttable/core";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
-import { useEventCallback } from "../hooks/useEventCallback";
-import { type EditEventHandler, observeEdit } from "./editingEvents";
+import type { EditEventHandler } from "./editingEvents";
 
-/**
- * What a cell's last save is doing.
- *
- * @public
- */
-export type CellSaveStatus = "saving" | "failed";
-
-/**
- * One cell's failed save, with what it takes to retry or undo it.
- *
- * @public
- */
-export interface FailedCellSave<TRow> {
-  /** The row as it was before the edit — what a rollback restores. */
-  previous: TRow;
-  /** The value the reader tried to save. */
-  attempted: unknown;
-  /** Why it failed, in a sentence a reader can read. */
-  message: string;
-}
+export type { CellSaveStatus, FailedCellSave } from "@adapttable/core";
 
 /**
  * What {@link useCellSaveState} needs.
@@ -106,25 +94,6 @@ export interface CellSaveState<TRow> {
   canRollback: boolean;
 }
 
-/** `rowId` and `columnKey` as one map key. */
-const cellKey = (rowId: string, columnKey: string) => `${rowId} ${columnKey}`;
-
-/** The default sentence for a rejection of any shape. */
-function defaultFormatError(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (typeof error === "string" && error !== "") return error;
-  return "Could not save";
-}
-
-/** Whether a value is a promise the table should wait on. */
-function isThenable(value: unknown): value is Promise<unknown> {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as { then?: unknown }).then === "function"
-  );
-}
-
 /**
  * Headless save state for inline editing.
  *
@@ -137,141 +106,37 @@ function isThenable(value: unknown): value is Promise<unknown> {
 export function useCellSaveState<TRow>(
   options: UseCellSaveStateOptions<TRow> = {}
 ): CellSaveState<TRow> {
-  const [saving, setSaving] = useState<ReadonlySet<string>>(() => new Set());
-  const [failures, setFailures] = useState<
-    ReadonlyMap<string, FailedCellSave<TRow>>
-  >(() => new Map());
-  // One token per cell: a save that settles after a newer one started must not
-  // mark a cell about a value the reader has already replaced.
-  const tokens = useRef(new Map<string, number>());
-
-  const markSaving = useEventCallback((key: string, busy: boolean) => {
-    setSaving((current) => {
-      if (current.has(key) === busy) return current;
-      const next = new Set(current);
-      if (busy) next.add(key);
-      else next.delete(key);
-      return next;
-    });
-  });
-
-  const setFailure = useEventCallback(
-    (key: string, failure: FailedCellSave<TRow> | undefined) => {
-      setFailures((current) => {
-        if (failure === undefined && !current.has(key)) return current;
-        const next = new Map(current);
-        if (failure === undefined) next.delete(key);
-        else next.set(key, failure);
-        return next;
-      });
-    }
+  const [store] = useState(() => createCellSaveStore<TRow>(options));
+  store.configure(options);
+  const snapshot = useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot
   );
-
-  const track = useEventCallback(
-    async (input: {
-      rowId: string;
-      columnKey: string;
-      previous: TRow;
-      attempted: unknown;
-      previousValue?: unknown;
-      result: unknown;
-    }): Promise<boolean> => {
-      const { rowId, columnKey, previous, attempted, previousValue, result } =
-        input;
-      // A host that saves synchronously has nothing to wait for, and paying a
-      // render for a state that lasts no time would be worse than useless.
-      if (!isThenable(result)) return true;
-
-      const key = cellKey(rowId, columnKey);
-      const token = (tokens.current.get(key) ?? 0) + 1;
-      tokens.current.set(key, token);
-      const current = () => tokens.current.get(key) === token;
-
-      setFailure(key, undefined);
-      markSaving(key, true);
-      try {
-        await result;
-        if (current()) setFailure(key, undefined);
-        return true;
-      } catch (error) {
-        // A superseded save says nothing either way: a newer one owns the cell.
-        if (!current()) return false;
-        const message = (options.formatError ?? defaultFormatError)(error);
-        setFailure(key, {
-          previous,
-          attempted,
-          message,
-        });
-        observeEdit(options.onEditError, {
-          row: previous,
-          rowId,
-          columnKey,
-          value: attempted,
-          previousValue: previousValue ?? previous,
-          unit: "cell",
-          error: message,
-        });
-        return false;
-      } finally {
-        if (current()) markSaving(key, false);
-      }
-    }
-  );
-
-  const rollback = useEventCallback((rowId: string, columnKey: string) => {
-    const key = cellKey(rowId, columnKey);
-    const failure = failures.get(key);
-    if (!failure) return;
-    setFailure(key, undefined);
-    options.onRollback?.(failure.previous, columnKey);
-  });
-
-  const clear = useEventCallback((rowId: string, columnKey: string) => {
-    setFailure(cellKey(rowId, columnKey), undefined);
-  });
-
-  const signature = useMemo(
-    () =>
-      [
-        ...saving,
-        ...[...failures.entries()].map(([key, f]) => key + f.message),
-      ].join(""),
-    [saving, failures]
-  );
+  const signature = useMemo(() => cellSaveSignature(snapshot), [snapshot]);
 
   const statusFor = useCallback(
-    (rowId: string, columnKey: string): CellSaveStatus | undefined => {
-      const key = cellKey(rowId, columnKey);
-      if (saving.has(key)) return "saving";
-      return failures.has(key) ? "failed" : undefined;
-    },
-    [saving, failures]
+    (rowId: string, columnKey: string): CellSaveStatus | undefined =>
+      cellSaveStatus(snapshot, rowId, columnKey),
+    [snapshot]
   );
 
   const failureFor = useCallback(
     (rowId: string, columnKey: string) =>
-      failures.get(cellKey(rowId, columnKey)),
-    [failures]
+      cellSaveFailure(snapshot, rowId, columnKey),
+    [snapshot]
   );
 
   return useMemo(
     () => ({
       statusFor,
       failureFor,
-      track,
-      rollback,
-      clear,
+      track: store.track,
+      rollback: store.rollback,
+      clear: store.clear,
       signature,
       canRollback: options.onRollback !== undefined,
     }),
-    [
-      statusFor,
-      failureFor,
-      track,
-      rollback,
-      clear,
-      signature,
-      options.onRollback,
-    ]
+    [statusFor, failureFor, store, signature, options.onRollback]
   );
 }

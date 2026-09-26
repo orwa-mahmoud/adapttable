@@ -29,11 +29,13 @@ import {
   builtAdapters,
   featureBySlug,
   fillTemplate,
+  frameworkOf,
   introFor,
   LANDING,
   landingHead,
   MATRIX_FEATURES,
   matrixPages,
+  snippetFor,
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES } from "../apps/showcase/pages.mjs";
 import { appendScript, guarded } from "./analytics-guard.mjs";
@@ -281,14 +283,24 @@ const siblingFeatures = (feature) =>
 
 /**
  * One feature page's static HTML: the words a crawler reads, and the mount
- * point React takes over.
+ * point the kit's framework takes over — the page boots that framework's
+ * entry and shows the code written for it.
+ *
+ * @param {import("../apps/showcase/matrix.mjs").ShowcaseAdapter} adapter
+ * @param {import("../apps/showcase/matrix.mjs").MatrixFeature} feature
+ * @param {import("../apps/showcase/matrix.mjs").ShowcaseFramework} [framework]
+ *   the framework the adapter's kit is built on
  */
-const featurePage = (adapter, feature) => {
-  const fill = (text) => fillTemplate(text, adapter);
+export const featurePage = (
+  adapter,
+  feature,
+  framework = frameworkOf(adapter)
+) => {
+  const fill = (text) => fillTemplate(text, adapter, framework);
   const dir = `${adapter.key}/${feature.slug}`;
   const route = demoRoute(dir);
   const note = feature.notes[adapter.key];
-  const body = `    <!-- Replaced by React on mount — the served markup carries the page's
+  const body = `    <!-- Replaced by ${framework.label} on mount — the served markup carries the page's
          own words so a crawler, and anyone whose bundle has not arrived, reads
          a real page. Written by scripts/build-showcase-html.mjs. -->
     <div id="root" data-matrix-page="${dir}">
@@ -299,7 +311,7 @@ ${introFor(feature, adapter)
   .map((line) => `        <p>${paragraph(fill(line))}</p>`)
   .join("\n")}
 ${note ? `        <p>${paragraph(note)}</p>\n` : ""}        <h2>The code</h2>
-        <pre><code>${escapeHtml(fill(feature.snippet))}</code></pre>
+        <pre><code>${escapeHtml(fill(snippetFor(feature, adapter, framework)))}</code></pre>
         <h2>Install</h2>
         <pre><code>${escapeHtml(adapter.install)}</code></pre>
         <h2>The same feature in the other kits</h2>
@@ -325,7 +337,7 @@ ${linkList(
         </p>
       </main>
     </div>
-    <script type="module" src="/src/entry-matrix.tsx"></script>`;
+    <script type="module" src="${framework.entry}"></script>`;
   return {
     dir,
     html: htmlDocument(
@@ -340,13 +352,20 @@ ${linkList(
   };
 };
 
-/** An adapter landing page's static HTML. */
-const landingPage = (adapter) => {
-  const fill = (text) => fillTemplate(text, adapter);
+/**
+ * An adapter landing page's static HTML, booting the entry of the framework
+ * the kit is built on.
+ *
+ * @param {import("../apps/showcase/matrix.mjs").ShowcaseAdapter} adapter
+ * @param {import("../apps/showcase/matrix.mjs").ShowcaseFramework} [framework]
+ *   the framework the adapter's kit is built on
+ */
+export const landingPage = (adapter, framework = frameworkOf(adapter)) => {
+  const fill = (text) => fillTemplate(text, adapter, framework);
   const dir = adapter.key;
   const route = demoRoute(dir);
   const head_ = landingHead(adapter);
-  const body = `    <!-- Replaced by React on mount — see the note on a feature page for why the
+  const body = `    <!-- Replaced by ${framework.label} on mount — see the note on a feature page for why the
          served markup carries content. Written by
          scripts/build-showcase-html.mjs. -->
     <div id="root" data-matrix-page="${dir}">
@@ -380,7 +399,7 @@ ${linkList(
         </p>
       </main>
     </div>
-    <script type="module" src="/src/entry-matrix.tsx"></script>`;
+    <script type="module" src="${framework.entry}"></script>`;
   return {
     dir,
     html: htmlDocument(

@@ -51,15 +51,24 @@ Unify the **model**, never the **pixels**. The standing pattern is
 - Everything is opt-in: omitting a prop renders nothing and costs nothing.
 - The table never owns the data. Every write — edits, adds, deletes,
   reorders — is a callback to the host; the table asks, the host does.
+- `packages/react/adapter-bootstrap` is private and unfinished. It is not
+  published, and its `private` role in the kit registry (`scripts/kits.mjs`)
+  keeps it out of the kit contracts — the parts-parity check, the
+  conformance suite and feature parity. Its gaps are known: do not raise
+  them as findings, add it to those contracts or bring it to parity unless a
+  task names it.
 
 ## Process
 
 - Branch off `main` for every change (`feat/…`, `fix/…`, `chore/…`); merge
   via PR. Never commit directly to `main`.
-- One concern per commit, named issues closed with `Closes #N` in the commit
-  body — a bare `(#N)` in the subject links but never closes. An issue closes
-  when the PR carrying that commit merges: work that is only committed locally
-  leaves its issue open, and closing one by hand is never the way it happens.
+- One concern per commit. A commit that belongs to an issue names it with
+  `Refs #N` in its body; the pull request body carries one `Closes #N` line per
+  issue it completes, so the closing list is reviewed — and corrected if
+  needed — before merge. A bare `(#N)` in a subject links but never closes. An
+  issue closes when the PR that lists it merges: work that is only committed
+  locally leaves its issue open, and closing one by hand is never the way it
+  happens.
 - Screenshots and scratch artifacts are temporary: keep them in
   `.playwright-mcp/` or `/tmp`, never the repo root, and delete them when
   done.

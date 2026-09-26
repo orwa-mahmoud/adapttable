@@ -1,31 +1,25 @@
 /**
- * The find bar's state: the query, the hits, and which one you are on.
+ * The find bar — the React binding.
  *
- * It knows nothing about focus. The shell moves focus to the current match
- * through the grid it already has, which keeps this hook pure enough to test
- * without a DOM and stops two pieces of code owning "where the table is
- * looking".
- *
- * The query itself is shareable table state: a `find` URL param (beside `q`)
- * reopens the bar and restarts the walk at the first hit. The current-match
- * index stays ephemeral — the receiving page's data may differ.
+ * Core's find controller owns whether the bar is open, the query and the
+ * walk, and writes the query to the URL through a debounce. This hook
+ * subscribes to it, derives the hits over the rows it is given, and leaves
+ * focus to the shell, which moves it to the current match through the grid it
+ * already has.
  */
 import {
   type CellRange,
+  clampMatchIndex,
+  createFindController,
   findMatches,
   type GridCell,
   matchKeySet,
-  PARAM_FIND,
-  parseTableUrlState,
   singleCellRange,
-  stepMatch,
-  updateTableUrlState,
 } from "@adapttable/core";
 import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -33,14 +27,7 @@ import {
 import type { ColumnDef } from "../columnDef";
 import { type UrlStateAdapter, useResolvedAdapter } from "../url/adapter";
 
-/**
- * Trailing debounce for writing the find query to the URL. Typing must not
- * spam `history.replaceState` (Safari caps ~100 calls / 30s); the bar itself
- * stays instant through local state.
- *
- * @public
- */
-export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
+export { FIND_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
 
 /**
  * What `useFindInTable` needs.
@@ -98,14 +85,6 @@ export interface FindInTableState {
   openBar?: () => void;
 }
 
-function readFindParam(search: string, namespace: string): string {
-  const raw = parseTableUrlState(search, namespace).get(
-    `${namespace}${PARAM_FIND}`
-  );
-  if (raw == null) return "";
-  return raw.trim();
-}
-
 /**
  * Find state over the loaded rows.
  *
@@ -127,105 +106,29 @@ export function useFindInTable<TRow>(
     urlSync,
     urlKey,
   } = options;
-  const ns = urlKey ? `${urlKey}.` : "";
-  const param = `${ns}${PARAM_FIND}`;
-  const resolved = useResolvedAdapter(urlAdapter, urlSync ?? true);
+  const adapter = useResolvedAdapter(urlAdapter, urlSync ?? true);
   const search = useSyncExternalStore(
-    (onChange) => resolved.subscribe(onChange),
-    () => resolved.getSearch(),
+    (onChange) => adapter.subscribe(onChange),
+    () => adapter.getSearch(),
     () => (urlAdapter ? urlAdapter.getSearch() : "")
   );
-  const urlQuery = useMemo(
-    () => (enabled ? readFindParam(search, ns) : ""),
-    [enabled, search, ns]
+  const [controller] = useState(() =>
+    createFindController({ enabled, adapter, urlKey })
+  );
+  controller.configure({ enabled, adapter, urlKey });
+  const { open, query, index, pending } = useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot,
+    controller.getSnapshot
   );
 
-  const [open, setOpen] = useState(() => urlQuery !== "");
-  const [query, setQuery] = useState(() => urlQuery);
-  const [index, setIndex] = useState(() => (urlQuery !== "" ? 0 : -1));
-  const [pending, setPending] = useState<string | null>(null);
-  const flushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // `setOpen(true)` then `setQuery(...)` in one turn must persist: the render
-  // that produced `open` is still the closed one.
-  const openRef = useRef(open);
-  openRef.current = open;
-  // Last URL value we have already reacted to. Local typing while the bar is
-  // closed must not look like an external URL change.
-  const seenUrlQuery = useRef(urlQuery);
-
-  const persist = useCallback(
-    (next: string) => {
-      const trimmed = next.trim();
-      seenUrlQuery.current = trimmed;
-      resolved.setSearch(
-        updateTableUrlState(resolved.getSearch(), ns, (params) => {
-          if (trimmed !== "") params.set(param, trimmed);
-          else params.delete(param);
-        }),
-        // Typing must never push history. The adapter default is replace;
-        // passing it keeps a custom adapter from treating silence as push.
-        { push: false }
-      );
-    },
-    [resolved, ns, param]
-  );
-
-  const schedulePersist = useCallback(
-    (next: string) => {
-      setPending(next.trim());
-      if (flushTimer.current) clearTimeout(flushTimer.current);
-      flushTimer.current = setTimeout(() => {
-        flushTimer.current = null;
-        persist(next);
-        setPending(null);
-      }, FIND_URL_WRITE_DEBOUNCE_MS);
-    },
-    [persist]
-  );
-
-  // Saved Views / back-forward / shared links: adopt the URL when we are not
-  // mid-keystroke. Pending writes win until they flush. A closed bar that
-  // holds a local query (never persisted) is not an external URL change.
+  // Saved Views / back-forward / shared links: adopt the URL when no typed
+  // query is waiting to be written.
   useEffect(() => {
-    if (!enabled || pending !== null) return;
-    if (urlQuery === seenUrlQuery.current) {
-      if (urlQuery !== "" && !open) setOpen(true);
-      return;
-    }
-    seenUrlQuery.current = urlQuery;
-    if (urlQuery === query.trim()) {
-      if (urlQuery !== "" && !open) setOpen(true);
-      return;
-    }
-    setQuery(urlQuery);
-    setOpen(urlQuery !== "");
-    setIndex(urlQuery !== "" ? 0 : -1);
-  }, [enabled, urlQuery, pending, query, open]);
+    controller.syncFromUrl();
+  }, [controller, enabled, search, pending, query, open]);
 
-  const writeQuery = useCallback(
-    (next: string) => {
-      setQuery(next);
-      // A new query starts the walk again: staying on hit 9 of the last search
-      // would land the user somewhere unrelated.
-      setIndex(next.trim() === "" ? -1 : 0);
-      if (!enabled) return;
-      // Persist while the bar is open, or when clearing (close drops the param).
-      // A closed bar that somehow receives keystrokes must not reopen via URL.
-      if (openRef.current || next.trim() === "") schedulePersist(next);
-    },
-    [enabled, schedulePersist]
-  );
-
-  const writeOpen = useCallback(
-    (next: boolean) => {
-      openRef.current = next;
-      setOpen(next);
-      // Closing clears the query, so reopening starts clean and no cell stays
-      // marked behind a bar that is no longer on screen.
-      if (!next) writeQuery("");
-    },
-    [writeQuery]
-  );
+  useEffect(() => controller.connect(), [controller]);
 
   const matches = useMemo(
     () =>
@@ -236,71 +139,39 @@ export function useFindInTable<TRow>(
   );
   const matchKeys = useMemo(() => matchKeySet(matches), [matches]);
 
-  const step = useCallback(
-    (by: number) => {
-      setIndex((current) => stepMatch(current, matches.length, by));
-    },
-    [matches.length]
-  );
-  const openBar = useCallback(() => {
-    writeOpen(true);
-  }, [writeOpen]);
   const next = useCallback(() => {
-    step(1);
-  }, [step]);
+    controller.step(1, matches.length);
+  }, [controller, matches.length]);
   const previous = useCallback(() => {
-    step(-1);
-  }, [step]);
+    controller.step(-1, matches.length);
+  }, [controller, matches.length]);
 
-  const latestRef = useRef<{
-    pending: string | null;
-    persist: typeof persist;
-  }>({ pending, persist });
-  latestRef.current = { pending, persist };
-  useEffect(
-    () => () => {
-      if (flushTimer.current) {
-        clearTimeout(flushTimer.current);
-        const { pending: last, persist: write } = latestRef.current;
-        write(last ?? "");
-      }
-    },
-    []
-  );
-
-  // The walk can outlive its target: typing narrows the hits, and a row can
-  // leave the window on the next page. Clamp rather than pointing at nothing.
-  const safeIndex =
-    matches.length === 0
-      ? -1
-      : Math.min(Math.max(index, 0), matches.length - 1);
+  const safeIndex = clampMatchIndex(index, matches.length);
 
   return useMemo(
     () => ({
       open: enabled && open,
-      setOpen: writeOpen,
+      setOpen: controller.setOpen,
       query,
-      setQuery: writeQuery,
+      setQuery: controller.setQuery,
       matches,
       matchKeys,
       index: safeIndex,
       current: safeIndex === -1 ? null : (matches[safeIndex] ?? null),
       next,
       previous,
-      openBar: enabled ? openBar : undefined,
+      openBar: enabled ? controller.openBar : undefined,
     }),
     [
+      controller,
       enabled,
       open,
-      writeOpen,
       query,
-      writeQuery,
       matches,
       matchKeys,
       safeIndex,
       next,
       previous,
-      openBar,
     ]
   );
 }

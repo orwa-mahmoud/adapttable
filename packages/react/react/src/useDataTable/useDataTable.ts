@@ -1,7 +1,6 @@
 import {
   type BulkAction,
   columnFlexShares,
-  columnSizeStyle,
   computePagination,
   deriveSortByOptions,
   devWarn,
@@ -18,6 +17,15 @@ import {
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
+import {
+  cellAttributes,
+  headerCellAttributes,
+  headerRowAttributes,
+  rowAttributes,
+  searchInputAttributes,
+  sortButtonAttributes,
+  tableAttributes,
+} from "@adapttable/core/binding";
 import {
   createElement,
   type CSSProperties,
@@ -271,44 +279,6 @@ export interface SearchInputElementProps extends Props {
   onChange: (event: { currentTarget: { value: string } }) => void;
 }
 
-function textAlign(
-  align: ColumnDef<TRowAny>["align"]
-): "start" | "center" | "end" {
-  if (align === "center") return "center";
-  if (align === "end") return "end";
-  return "start";
-}
-
-/** The chain level for a column, if multi-sort has one. */
-function chainLevel(
-  levels: readonly { key: string; dir: "asc" | "desc" }[],
-  key: string
-): { key: string; dir: "asc" | "desc" } | undefined {
-  return levels.find((l) => l.key === key);
-}
-
-/** 1-based chain position for the header badge, or undefined. */
-function sortIndexAttr(
-  levels: readonly { key: string; dir: "asc" | "desc" }[],
-  key: string
-): number | undefined {
-  const index = levels.findIndex((l) => l.key === key);
-  return index === -1 ? undefined : index + 1;
-}
-
-function ariaSort<TRow>(
-  column: ColumnDef<TRow>,
-  sortBy: string | undefined,
-  sortDir: SortDirection | undefined
-): "ascending" | "descending" | "none" | undefined {
-  if (!column.sortable) return undefined;
-  if (sortBy !== column.key) return "none";
-  return sortDir === "asc" ? "ascending" : "descending";
-}
-
-/** A row type we don't care about here — `align` is independent of it. */
-type TRowAny = Record<string, unknown>;
-
 /**
  * The headless entry point. Combines a {@link TableSource} with columns,
  * sorting, a debounced search input, selection, and filter chips, and
@@ -432,39 +402,27 @@ export function useDataTable<TRow>(
 
   const getTableProps = useCallback(
     (props?: Props) =>
-      mergeProps(
-        { role: "table", dir, "aria-label": tableLabel ?? labels.table },
-        props
-      ),
+      mergeProps(tableAttributes(dir, tableLabel ?? labels.table), props),
     [dir, tableLabel, labels.table]
   );
 
   const getHeaderRowProps = useCallback(
-    (props?: Props) => mergeProps({ role: "row" }, props),
+    (props?: Props) => mergeProps(headerRowAttributes(), props),
     []
   );
 
   const getHeaderCellProps = useCallback(
     (column: ColumnDef<TRow>, props?: Props) =>
       mergeProps(
-        {
-          role: "columnheader",
-          // The HTML half of the same statement the role makes. Four kits set
-          // it on their own `<th>` and four did not, so a cell's header
-          // association depended on which kit you picked.
-          scope: "col",
-          "aria-sort": ariaSort(
-            column,
-            chainLevel(source.sortLevels, column.key)?.key ?? source.sortBy,
-            chainLevel(source.sortLevels, column.key)?.dir ?? source.sortDir
-          ),
-          "data-sort-index": sortIndexAttr(source.sortLevels, column.key),
-          "data-column-key": column.key,
-          style: {
-            textAlign: textAlign(column.align),
-            ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
+        headerCellAttributes(
+          column,
+          {
+            sortBy: source.sortBy,
+            sortDir: source.sortDir,
+            sortLevels: source.sortLevels,
           },
-        },
+          { flexShares, columnWidths }
+        ),
         props
       ),
     [source.sortBy, source.sortDir, source.sortLevels, flexShares, columnWidths]
@@ -473,22 +431,13 @@ export function useDataTable<TRow>(
   const getSortButtonProps = useCallback(
     (column: ColumnDef<TRow>, props?: Props) =>
       mergeProps<SortButtonElementProps>(
-        {
-          type: "button",
-          disabled: !column.sortable,
-          onClick: (event?: { shiftKey?: boolean }) => {
-            if (!column.sortable) return;
-            if (multiSort && event?.shiftKey) {
-              source.toggleSortLevel(column.key);
-              return;
-            }
-            toggleSort(column.key);
-          },
-          "data-sort-index": sortIndexAttr(source.sortLevels, column.key),
-          "aria-label": `${labels.sortBy}: ${
-            typeof column.header === "string" ? column.header : column.key
-          }`,
-        },
+        sortButtonAttributes(column, {
+          sortLevels: source.sortLevels,
+          sortByLabel: labels.sortBy,
+          multiSort,
+          toggleSort,
+          toggleSortLevel: source.toggleSortLevel,
+        }),
         props
       ),
     [toggleSort, labels.sortBy, multiSort, source]
@@ -501,19 +450,10 @@ export function useDataTable<TRow>(
     (row: TRow, index: number, props?: Props) => {
       const id = getId(row);
       const selected = selection?.isSelected(id) ?? false;
+      // antd, whose <Table> builds its own <tr>, carries the part name and
+      // row id through `onRow` instead.
       return mergeProps<RowElementProps>(
-        {
-          role: "row",
-          // The part name a host styles and tests against, emitted here so
-          // one spread names the row in every kit that renders one.
-          "data-adapttable-part": "row",
-          // The id an event can be traced back to. It lives here because
-          // this is the row's prop-getter — antd, whose <Table> builds its
-          // own <tr>, carries both through `onRow` instead.
-          "data-row-id": id,
-          "data-index": index,
-          "aria-selected": hasBulk ? selected : undefined,
-        },
+        rowAttributes(id, index, hasBulk ? selected : undefined),
         props
       );
     },
@@ -530,37 +470,17 @@ export function useDataTable<TRow>(
 
   const getCellProps = useCallback(
     (column: ColumnDef<TRow>, props?: Props) =>
-      mergeProps(
-        {
-          role: "cell",
-          // Which column this cell belongs to, so auto-sizing can measure a
-          // column's content and CSS can target one column across any kit.
-          "data-column-key": column.key,
-          style: {
-            textAlign: textAlign(column.align),
-            ...columnSizeStyle(column, flexShares, columnWidths?.[column.key]),
-          },
-        },
-        props
-      ),
+      mergeProps(cellAttributes(column, { flexShares, columnWidths }), props),
     [flexShares, columnWidths]
   );
 
   const getSearchInputProps = useCallback(
     (props?: Props) =>
       mergeProps(
-        {
-          type: "search",
-          role: "searchbox",
-          value: searchValue,
-          placeholder: labels.searchPlaceholder,
-          "aria-label": labels.search,
-          onChange: (event: { currentTarget: { value: string } }) =>
-            setSearchValue(event.currentTarget.value),
-        },
+        searchInputAttributes(searchValue, labels, setSearchValue),
         props
       ),
-    [searchValue, setSearchValue, labels.searchPlaceholder, labels.search]
+    [searchValue, setSearchValue, labels]
   );
 
   return {

@@ -39,7 +39,12 @@ import {
   virtualColumnSpan,
   type VirtualTableRow,
 } from "@adapttable/core";
-import { type BodyCell } from "@adapttable/core/binding";
+import {
+  type BodyCell,
+  chromeColumnPlan,
+  extraRowCoveredSlots,
+  pinnedRowIds,
+} from "@adapttable/core/binding";
 import { type ReactNode, useMemo, useRef } from "react";
 
 import type { ColumnDef } from "./columnDef";
@@ -323,41 +328,6 @@ export interface TableRenderModel<TRow> {
   extraCoveredSlots: ReadonlyMap<string, ReadonlySet<number>>;
 }
 
-function pinnedIdSet<TRow>(
-  getRowId: (row: TRow) => string,
-  pinnedTop: readonly TRow[] | undefined,
-  pinnedBottom: readonly TRow[] | undefined
-): Set<string> {
-  const pinnedIds = new Set<string>();
-  for (const row of pinnedTop ?? []) pinnedIds.add(getRowId(row));
-  for (const row of pinnedBottom ?? []) pinnedIds.add(getRowId(row));
-  return pinnedIds;
-}
-
-function extraCoveredSlotMap<TRow>(
-  extraRows: readonly ExtraRow[] | undefined,
-  visualIds: readonly string[],
-  cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>,
-  leadingCells: number,
-  extraCoveredTableSlots: AssemblyFns<TRow>["extraCoveredTableSlots"]
-): Map<string, ReadonlySet<number>> {
-  const extraCoveredSlots = new Map<string, ReadonlySet<number>>();
-  for (const extra of extraRows ?? []) {
-    if (extra.beforeRowId === undefined) continue;
-    if (extraCoveredSlots.has(extra.beforeRowId)) continue;
-    extraCoveredSlots.set(
-      extra.beforeRowId,
-      extraCoveredTableSlots(extra.beforeRowId, {
-        visualIds,
-        cellsByRow,
-        extraRows,
-        leadingCells,
-      })
-    );
-  }
-  return extraCoveredSlots;
-}
-
 /**
  * Derive the shared render prelude from {@link SharedTableRenderProps} —
  * extracted so each adapter's renderer doesn't repeat the identical block
@@ -403,15 +373,15 @@ export function tableRenderModel<TRow>(
   // The trailing control column exists for row actions AND for row-mode's own
   // edit / save / cancel — both live there, and a row edit with nowhere to be
   // saved from would be a mode nobody can leave.
-  const showActions =
-    (props.rowActions?.length ?? 0) > 0 ||
-    props.editing?.rowEditing !== undefined;
-  const showReorder = props.rowReorder !== undefined;
-  const expandable = Boolean(props.renderRowDetail && props.expansion);
-  const hasSelection = Boolean(selection);
-  const leadingCells =
-    (expandable ? 1 : 0) + (showReorder ? 1 : 0) + (hasSelection ? 1 : 0);
-  const pinnedIds = pinnedIdSet(
+  const { showActions, showReorder, expandable, hasSelection, leadingCells } =
+    chromeColumnPlan({
+      rowActionCount: props.rowActions?.length ?? 0,
+      rowEditing: props.editing?.rowEditing !== undefined,
+      rowReorder: props.rowReorder !== undefined,
+      rowDetail: Boolean(props.renderRowDetail && props.expansion),
+      selection: Boolean(selection),
+    });
+  const pinnedIds = pinnedRowIds(
     props.getRowId,
     props.pinnedTopRows,
     props.pinnedBottomRows
@@ -490,12 +460,15 @@ export function tableRenderModel<TRow>(
     cellsByRow.clear();
     merge(spannedCells);
   }
-  const extraCoveredSlots = extraCoveredSlotMap(
+  const extraCoveredSlots = extraRowCoveredSlots(
     props.extraRows,
-    visualIds,
-    cellsByRow,
-    leadingCells,
-    assembly.extraCoveredTableSlots
+    (beforeRowId) =>
+      assembly.extraCoveredTableSlots(beforeRowId, {
+        visualIds,
+        cellsByRow,
+        extraRows: props.extraRows,
+        leadingCells,
+      })
   );
   return {
     columns,

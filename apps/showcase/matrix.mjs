@@ -22,16 +22,55 @@
  * manifest, the sitemap, the nav and the built HTML without being typed again.
  *
  * `{kit}`, `{pkg}` and `{peer}` in any string are filled from the adapter the
- * page is for — see `fillTemplate`. They are the only substitution: a sentence
- * that would need more than a name swapped is written per adapter in `notes`,
- * or it is not written at all.
+ * page is for, and `{framework}` and `{binding}` from the framework that
+ * adapter's kit is built on — see `fillTemplate`. They are the only
+ * substitution: a sentence that would need more than a name swapped is written
+ * per adapter in `notes`, or it is not written at all.
+ *
+ * Every adapter names its framework, and the framework decides how its pages
+ * boot: the entry module the served HTML loads, the name the copy uses and the
+ * code a feature page shows. A kit from another framework is an adapter entry
+ * plus its framework's entry in {@link SHOWCASE_FRAMEWORKS}.
  */
+
+/**
+ * A framework the showcase serves kits from.
+ *
+ * @typedef {object} ShowcaseFramework
+ * @property {string} key The framework's key, as `scripts/kits.mjs` spells it
+ *   — `react`.
+ * @property {string} label The framework's own name, as the copy says it —
+ *   `React`.
+ * @property {string} binding The binding package that connects the engine to
+ *   the framework — `@adapttable/react`.
+ * @property {string} entry The module every matrix page of the framework's kits
+ *   boots, addressed from the showcase root as the served HTML loads it.
+ */
+
+/**
+ * The frameworks the showcase serves kits from.
+ *
+ * @type {ShowcaseFramework[]}
+ */
+export const SHOWCASE_FRAMEWORKS = [
+  {
+    key: "react",
+    label: "React",
+    binding: "@adapttable/react",
+    entry: "/src/entry-matrix.tsx",
+  },
+];
+
+/** The framework every feature's `snippet` is written for. */
+const SNIPPET_FRAMEWORK = "react";
 
 /**
  * One UI kit AdaptTable adapts to.
  *
  * @typedef {object} ShowcaseAdapter
  * @property {string} key URL segment and switcher id — `mantine`.
+ * @property {string} framework The framework the kit is built on — a key of
+ *   {@link SHOWCASE_FRAMEWORKS}. Its pages boot that framework's entry.
  * @property {string} label The kit's own name — `Mantine`.
  * @property {string} blurb One phrase on the kit's look, for the switcher card.
  * @property {string} accentLight The kit's accent on a light page.
@@ -68,6 +107,7 @@
 export const SHOWCASE_ADAPTERS = [
   {
     key: "mantine",
+    framework: "react",
     label: "Mantine",
     blurb: "Rounded, friendly, filled controls",
     accentLight: "oklch(0.58 0.17 252)",
@@ -85,6 +125,7 @@ export const SHOWCASE_ADAPTERS = [
   },
   {
     key: "mui",
+    framework: "react",
     label: "MUI",
     blurb: "Material elevation, uppercase actions",
     accentLight: "oklch(0.55 0.18 264)",
@@ -100,6 +141,7 @@ export const SHOWCASE_ADAPTERS = [
   },
   {
     key: "chakra",
+    framework: "react",
     label: "Chakra",
     blurb: "Soft teal, generous radius",
     accentLight: "oklch(0.6 0.1 188)",
@@ -115,6 +157,7 @@ export const SHOWCASE_ADAPTERS = [
   },
   {
     key: "antd",
+    framework: "react",
     label: "Ant Design",
     blurb: "Compact, tinted header, crisp",
     accentLight: "oklch(0.56 0.2 262)",
@@ -129,6 +172,7 @@ export const SHOWCASE_ADAPTERS = [
   },
   {
     key: "radix",
+    framework: "react",
     label: "Radix",
     blurb: "Radix Themes, iris accent",
     accentLight: "oklch(0.54 0.19 280)",
@@ -143,6 +187,7 @@ export const SHOWCASE_ADAPTERS = [
   },
   {
     key: "base-ui",
+    framework: "react",
     label: "Base UI",
     blurb: "Unstyled primitives, blue accent",
     accentLight: "oklch(0.55 0.19 255)",
@@ -158,6 +203,7 @@ export const SHOWCASE_ADAPTERS = [
   },
   {
     key: "shadcn",
+    framework: "react",
     label: "shadcn",
     blurb: "Monochrome, ring focus",
     accentLight: "oklch(0.28 0.01 264)",
@@ -177,6 +223,7 @@ export const SHOWCASE_ADAPTERS = [
   },
   {
     key: "tailwind",
+    framework: "react",
     label: "Tailwind",
     blurb: "Unstyled — your own classes",
     accentLight: "oklch(0.55 0.2 277)",
@@ -209,8 +256,11 @@ export const SHOWCASE_ADAPTERS = [
  * @property {string[]} intro Two or three real sentences, served in the static
  *   HTML and rendered again by the page. Templated.
  * @property {string} card The one line under this feature on the landing grid.
- * @property {string} snippet The code, with the adapter's real import path.
- *   Templated.
+ * @property {string} snippet The code, with the adapter's real import path,
+ *   for a kit built on React. Templated.
+ * @property {Record<string, string>} [snippets] The code for a kit built on
+ *   another framework, keyed by framework. A page is never served with code
+ *   written for a different framework — see `snippetFor`.
  * @property {Record<string, string>} notes What is true about this feature in
  *   THIS kit, keyed by adapter — the sentence that cannot be templated. A kit
  *   with nothing honest to add has no entry, and the page shows none.
@@ -411,7 +461,7 @@ export function Spend({ rows, fields }) {
     h1: "Spreadsheet formulas in {kit}",
     title: "{kit} table formulas — AdaptTable",
     description:
-      "Try spreadsheet formulas in a {kit} table: ROUND, POWER, SQRT and IF, computed columns and explicit cell errors. Includes React integration code.",
+      "Try spreadsheet formulas in a {kit} table: ROUND, POWER, SQRT and IF, computed columns and explicit cell errors. Includes {framework} integration code.",
     intro: [
       "A formula column is a column nobody wrote code for: type `=ROUND(budget * 0.15, 0)` and the table computes it per row, sorts it, filters it and exports it like any other column.",
       "The engine covers arithmetic including POWER and SQRT, comparison, string joins, IF, and the aggregate functions a footer needs. A bad reference reports in the cell that caused it rather than blanking the table, and a circular reference reports `#CYCLE!` instead of recursing.",
@@ -467,7 +517,7 @@ export function People({ rows, columns }) {
     h1: "Inline cell editing in {kit}",
     title: "{kit} editable data table — AdaptTable",
     description:
-      "Try inline editing in a {kit} React table with text, number and select inputs, paste and undo. Your application validates and saves each change.",
+      "Try inline editing in a {kit} {framework} table with text, number and select inputs, paste and undo. Your application validates and saves each change.",
     intro: [
       "Mark a column `editable`, compose `editing(onCellEdit)`, and double-click opens a {kit} editor in the cell. Enter commits, Escape cancels, Tab moves to the next editable cell.",
       "The table never mutates your rows. It hands your handler the row, the column and the new value, and shows whatever you hand back — which is what makes optimistic updates, validation and rollback yours to decide.",
@@ -528,7 +578,7 @@ export function People({ rows, onSave }) {
     h1: "Tree data in {kit}",
     title: "{kit} tree table — AdaptTable",
     description:
-      "Explore a {kit} React tree table with parent-child rows, expandable branches, keyboard navigation and URL expansion state. Includes integration code.",
+      "Explore a {kit} {framework} tree table with parent-child rows, expandable branches, keyboard navigation and URL expansion state. Includes integration code.",
     intro: [
       "A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Compose `tree()` with `getChildren` or `getParentId` and it renders the hierarchy.",
       "Children indent under their parent, a chevron opens and closes each branch, and arrow keys walk the tree the way a tree widget should. Expansion is part of the table's state, so it lives in the URL like everything else.",
@@ -620,9 +670,9 @@ export function People({ rows, columns }) {
     slug: "scale",
     label: "Scale",
     h1: "Row and column virtualization in {kit}",
-    title: "{kit} virtualized React table — AdaptTable",
+    title: "{kit} virtualized {framework} table — AdaptTable",
     description:
-      "Scroll a large {kit} React table with row and column virtualization, sticky headers and pinned columns. Try sorting and inspect the integration code.",
+      "Scroll a large {kit} {framework} table with row and column virtualization, sticky headers and pinned columns. Try sorting and inspect the integration code.",
     intro: [
       "Compose `virtualize()` and the table renders the rows in view plus a small overscan, whatever the dataset's size. `virtualize({ virtualizeColumns: true })` does the same across, for column sets far wider than the window.",
       "The header stays pinned, pinned columns stay put, and the scroll box scrolls — never the page. Sorting, filtering and selection keep working on the whole dataset rather than on what is drawn.",
@@ -1059,7 +1109,7 @@ export function People({ rows, columns }) {
     h1: "Live updates in {kit}",
     title: "{kit} live-updating data table — AdaptTable",
     description:
-      "See live row updates in a {kit} React table. Apply incremental patches while preserving sort, filters and selection, with an on-page update feed.",
+      "See live row updates in a {kit} {framework} table. Apply incremental patches while preserving sort, filters and selection, with an on-page update feed.",
     intro: [
       "Rows patch in as they arrive, the way a websocket would. This page applies one budget change at a time so the movement is followable.",
       "Patches go through the row-patch API rather than replacing the array, so search, filters and sort re-run for the touched rows only — your scroll and selection survive.",
@@ -1159,7 +1209,7 @@ export function People({ rows, columns, setPinned, spanTeam }) {
     h1: "Nested tables in {kit}",
     title: "{kit} nested tables and expandable rows — AdaptTable",
     description:
-      "Expand a {kit} table row to a nested detail table. Each child has its own columns, row IDs and controls; explore the working React example.",
+      "Expand a {kit} table row to a nested detail table. Each child has its own columns, row IDs and controls; explore the working {framework} example.",
     intro: [
       "Open a row and the panel holds another {kit} table — the same component, not a hand-built list. Each person has recent orders; the inner table has its own columns and row keys.",
       "`nestedTable()` mounts the kit's DataTable with defaults that keep the two tables from fighting over the URL. Rows with no nested table can still use `rowDetail()`.",
@@ -1363,7 +1413,7 @@ export function Sales({ rows, columns, teamTotal, grandTotal }) {
     h1: "AI table assistant in {kit}",
     title: "{kit} AI table assistant demo — AdaptTable",
     description:
-      "Try a {kit} React table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend.",
+      "Try a {kit} {framework} table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend.",
     intro: [
       "`@adapttable/ai` is optional and provider-neutral. This {kit} demo combines a conversational assistant with a real table. Try filtering, grouping, column pinning and a proposed edit; available actions depend on the mounted features and the host's permissions. Row pinning requires an ungrouped view in this demo.",
       "Start in Simulated mode: suggested prompts run deterministic local scenarios, not a language model. The conversation shows action receipts; a proposed write still follows approval and save policy. Connect backend sends your prompt and permitted table context to an endpoint you run. The assistant keeps the same table session and {kit} controls in both modes.",
@@ -1488,12 +1538,12 @@ export const CANONICAL_AI_ADAPTER = "mantine";
  */
 export const LANDING = {
   h1: "AdaptTable for {kit}",
-  title: "{kit} React data table examples — AdaptTable",
+  title: "{kit} {framework} data table examples — AdaptTable",
   description:
-    "Explore {kit} React table examples for filtering, editing, grouping, pivot and export. Native controls, optional feature imports and MIT licensing.",
+    "Explore {kit} {framework} table examples for filtering, editing, grouping, pivot and export. Native controls, optional feature imports and MIT licensing.",
   intro: [
     "{tagline}",
-    "A framework-neutral @adapttable/core provides the data engine; @adapttable/react connects it to React. Add features through explicit imports. The visible controls are {surface}.",
+    "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. Add features through explicit imports. The visible controls are {surface}.",
     "That is the whole trade: one model to learn, and a table that belongs in a {kit} app rather than sitting inside one.",
   ],
   /** The heading over the feature pages — count comes from the matrix. */
@@ -1507,19 +1557,68 @@ export const LANDING = {
 };
 
 /**
- * Fill `{kit}`, `{pkg}` and `{peer}` from an adapter.
+ * The framework a kit is built on.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {ShowcaseFramework}
+ */
+export const frameworkOf = (adapter) => {
+  const framework = SHOWCASE_FRAMEWORKS.find(
+    (candidate) => candidate.key === adapter.framework
+  );
+  if (!framework) {
+    throw new Error(
+      `${adapter.label} is built on "${adapter.framework}", which SHOWCASE_FRAMEWORKS does not serve`
+    );
+  }
+  return framework;
+};
+
+/**
+ * Fill `{kit}`, `{pkg}` and `{peer}` from an adapter, and `{framework}` and
+ * `{binding}` from the framework its kit is built on.
  *
  * @param {string} text
  * @param {ShowcaseAdapter} adapter
+ * @param {ShowcaseFramework} [framework] the adapter's framework
  * @returns {string}
  */
-export const fillTemplate = (text, adapter) =>
+export const fillTemplate = (text, adapter, framework = frameworkOf(adapter)) =>
   text
     .replaceAll("{tagline}", adapter.tagline)
     .replaceAll("{surface}", adapter.surface)
     .replaceAll("{kit}", adapter.label)
     .replaceAll("{pkg}", adapter.pkg)
-    .replaceAll("{peer}", adapter.peer);
+    .replaceAll("{peer}", adapter.peer)
+    .replaceAll("{framework}", framework.label)
+    .replaceAll("{binding}", framework.binding);
+
+/**
+ * The code a feature page shows, written for the framework the kit is built
+ * on. A framework the feature has no code for fails here rather than serving
+ * a page whose code the reader cannot run.
+ *
+ * @param {MatrixFeature} feature
+ * @param {ShowcaseAdapter} adapter
+ * @param {ShowcaseFramework} [framework] the adapter's framework
+ * @returns {string}
+ */
+export const snippetFor = (
+  feature,
+  adapter,
+  framework = frameworkOf(adapter)
+) => {
+  const code =
+    framework.key === SNIPPET_FRAMEWORK
+      ? feature.snippet
+      : feature.snippets?.[framework.key];
+  if (code === undefined) {
+    throw new Error(
+      `"${feature.slug}" has no ${framework.label} code for ${adapter.label}`
+    );
+  }
+  return code;
+};
 
 /**
  * The paragraphs a feature page opens with, for the kit it is written for.
@@ -1554,6 +1653,8 @@ export const builtAdapters = () =>
  *
  * @typedef {object} MatrixPageSpec
  * @property {string} adapter The adapter key.
+ * @property {string} framework The framework the adapter's kit is built on,
+ *   whose entry the page boots.
  * @property {string | null} feature The feature slug, or `null` for the landing.
  * @property {string} dir The directory under the showcase root.
  */
@@ -1565,9 +1666,15 @@ export const builtAdapters = () =>
  */
 export const matrixPages = () =>
   builtAdapters().flatMap((adapter) => [
-    { adapter: adapter.key, feature: null, dir: adapter.key },
+    {
+      adapter: adapter.key,
+      framework: frameworkOf(adapter).key,
+      feature: null,
+      dir: adapter.key,
+    },
     ...MATRIX_FEATURES.map((feature) => ({
       adapter: adapter.key,
+      framework: frameworkOf(adapter).key,
       feature: feature.slug,
       dir: `${adapter.key}/${feature.slug}`,
     })),

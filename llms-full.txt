@@ -756,7 +756,7 @@ bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
 Measured on MUI, the table alone is 70 kB gzipped and the same table with
-`standardFeatures()` composed is 123 kB.
+`standardFeatures()` composed is 126 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -17340,6 +17340,171 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
   host supplies the visible rows and that map.
 - `devWarn(message)` — development-only warning, printed once per message.
 
+### Table options and runtime contracts
+
+- `TableOptions` — the non-rendering half of `DataTableProps`: data, columns,
+  query, selection, editing, URL and feature options, with no render types.
+  `TableToolbarSlots` names the toolbar slots a binding fills.
+- `TableQueryInput` / `buildTableQuery` / `TableQueryListener` /
+  `QueryEmitter` / `createQueryEmitter` — the one consolidated query a table
+  hands `onQueryChange`, and the emitter that fires it once per change.
+
+### The view-state store
+
+- `createTableViewStore(source, config?)` — the store over a
+  `ViewStateSource`'s URL adapter for everything the table writes to the URL,
+  configured by `TableViewStateConfig`: `getSnapshot()`, `subscribe()` and the
+  mutators. `TableViewStore` is the store, `TableViewState` its snapshot, and
+  `ViewStateSubscription` how a binding listens.
+- `createUrlSliceStore(source, spec, config)` — one debounced URL slice
+  (`URL_SLICE_WRITE_DEBOUNCE_MS`) described by a `UrlSliceSpec`, as a
+  `UrlSliceStore`. The slices the table ships: `columnLayoutSlice`,
+  `densitySlice` (`TableDensity`), `groupCollapseSlice`, `rowPinningSlice`,
+  `pivotSlice` and `formulaSlice`.
+- `resolveUrlAdapter(adapter, enabled, local)` — the adapter a table uses: the
+  host's, the browser history, or the caller's own memory store when URL sync
+  is off or there is no browser. `resetHistoryAdapter()` drops the shared
+  history adapter, for tests.
+
+### The data-tier controller
+
+- `DataTier` / `resolveDataTier(options)` — which tier serves the rows:
+  frontend, server, query or infinite. `warnDataTierMisuse` reports a
+  contradictory combination in development.
+- `queryAggregationSource`, `effectiveQueryAggregates`, `queryGroupBy` — what a
+  server query asks the backend to aggregate and group.
+- `FirstLoadLatch` / `createFirstLoadLatch` — holds the loading state until the
+  first answer. `clampedPage(page, limit, total)` — the last real page when
+  `page` is past it, `undefined` otherwise.
+- `CursorTrail` / `EMPTY_CURSOR_TRAIL` / `recordCursor` / `cursorHasMore` /
+  `canRequestCursorPage` — cursor paging's trail of seen cursors.
+- `AppendStash` / `appendBaseKey` / `appendedRows` / `staleAppendStash` —
+  infinite paging's accumulated rows and when they reset.
+- `LoadedFilterOption` / `FilterOptionsLoader` / `createFilterOptionsLoader` —
+  async filter options, loaded once per key and aborted when superseded.
+
+### Controllable stores
+
+- `createControllableStore(initial, options?)` — a value that is the host's
+  when controlled and the store's own otherwise, reporting every change.
+  `ControllableStore` is the store, `ControllableStoreOptions` its observer
+  mode and change detection, and `ControllableControl` the controlled half.
+- Selection: `toggleId`, `toggleIds`, `idSetReader`, `headerSelectionOf`.
+  Expansion: `groupsCollapsedToDepth`. Row pinning: `sameRowPins`,
+  `rowPinSideOf`.
+- Column layout: `withColumnHidden`, `withColumnPinned`, `withColumnWidth`,
+  `withColumnMoved`, `withColumnOrder`, `initialColumnLayout`,
+  `readStoredColumnLayout`, `sanitizeStoredLayout`.
+
+### Editing
+
+- `createCellEditSession(options: CellEditSessionOptions): CellEditSession` —
+  the active cell and its draft, Enter/Escape/Tab, and the start and cancel
+  observers. `CellEditSnapshot`, `isCellEditActive`, `observeEdit`.
+- `createCellSaveStore(options: CellSaveStoreOptions): CellSaveStore` — saving
+  and failed cells, superseded saves and rollback. `CellSaveSnapshot`,
+  `cellSaveKey`, `cellSaveStatus`, `cellSaveFailure`, `cellSaveSignature`,
+  `defaultSaveErrorMessage`.
+- `createEditValidationStore(options: EditValidationStoreOptions):
+EditValidationStore` — cell then row validation, with superseded checks
+  dropped. `EditValidationSnapshot`, `validationKey`, `validationErrorFor`,
+  `rowHasValidationError`, `validationSignature`.
+- `createEditHistoryStack(): EditHistoryStack` — undo and redo over edit
+  gestures; `DEFAULT_EDIT_HISTORY_DEPTH` is the depth a host that sets none
+  keeps. `EditHistorySnapshot`,
+  `editHistoryEntry`, `cellsOfBatch`.
+
+### Grid focus
+
+- `createGridFocusController(options: GridFocusControllerOptions):
+GridFocusController` — the active cell, the selected range, a fill drag, the
+  key dispatch (movement, Enter/F2, undo/redo, find, copy, cut, fill down,
+  paste) and the announcement, against an attached container element.
+  `GridFocusSnapshot`, `GridKeyEvent`, `PointerReleaseTarget`.
+- `gridContainerAttributes` (`GridContainerAttributes`), `gridCellAttributes`
+  (`GridCellAttributesInput`, `GridCellAttributes`), `gridRowAttributes`,
+  `gridColumnHeaderAttributes` — the roles, absolute ARIA indices and selection
+  and find marks every binding puts on the grid.
+- `isGridColumnSelected`, `gridFillHandleCell` — whether a column is selected
+  over every loaded row, and which cell carries the fill handle.
+
+### Row reordering
+
+- `createRowReorderController(options: RowReorderControllerOptions):
+RowReorderController` — the keyboard grab, drag and drop, the mobile swap and
+  the move policy. `RowReorderSnapshot`, `RowReorderSlot`, `RowDragEvent`,
+  `RowKeyEvent`.
+- `resolveRowMove(view, drop, options, labels)` — a drop inside grouped or tree
+  rows as a reorder, a move or a rejection. `rowMoveMenu` — the keyboard and
+  touch destinations. `RowMoveView`, `RowMoveDrop`.
+- `rowReorderAnnouncements(read)` / `defaultRowReorderAnnouncements` /
+  `RowReorderAnnouncements` — the announcements, each label read when spoken.
+- `rowReorderRowAttributes`, `isRowMovePending` — a row's drag marks, and
+  whether it owns the pending confirmation.
+
+### Interaction models
+
+- `createFindController(options: FindControllerOptions): FindController` — the
+  find bar's open state, query and walk, and the debounced `find` URL param.
+  `FindSnapshot`, `readFindQuery`, `clampMatchIndex`.
+- `createHeaderFilterOverlay(options: HeaderFilterOverlayOptions):
+HeaderFilterOverlayController` — one header filter's open state and reset
+  key. `HeaderFilterOverlaySnapshot`, `isHeaderFilterOpen`,
+  `HEADER_FILTER_SESSION_ATTR`, `headerFilterInsideSelector`,
+  `watchOverlayDismiss`, `HeaderFilterWrites`.
+- `createSavedViewsController(options: SavedViewsControllerOptions):
+SavedViewsController` — the saved views list, its storage and every
+  operation on it. `SavedViewsSnapshot`.
+- `createExportController(options: ExportControllerOptions): ExportController`
+  — an export run's progress, cancel and retry. `ExportSnapshot`,
+  `ExportRunHandler`, `resolveExportAnnouncement`,
+  `resolveExportDisabledReason`, `resolveExportProgressState`.
+- `resolveTableStatus(options)` — the status line a table announces after
+  loading, filtering or paging. `TableStatusSignature`.
+- `createContextMenuOpenController(options: ContextMenuOpenControllerOptions):
+ContextMenuOpenController` — the menu's open state and position, from a
+  right-click, a long press or the context-menu key. `ContextMenuOpenSnapshot`,
+  `ContextMenuState`, `ContextMenuTriggerHandlers`,
+  `ContextMenuRegionHandlers`, `ContextMenuPointerEvent`,
+  `ContextMenuPressEvent`, `ContextMenuMoveEvent`, `ContextMenuKeyEvent`,
+  `isContextMenuArmed`, `isContextMenuKey`, `composeContextMenuExtra`.
+- `createCommandPaletteController(options: CommandPaletteControllerOptions):
+CommandPaletteController` — the palette's open state, controlled or its own.
+  `CommandPaletteSnapshot`, `isCommandPaletteArmed`, `commandPaletteCommands`
+  (`CommandPaletteCommandsOptions`), `OPEN_PALETTE_COMMAND`.
+- `createCommandList(): CommandListController` — the palette's query and
+  highlighted row. `CommandListSnapshot`, `commandListView`
+  (`CommandListView`), `commandListKeyAction` (`CommandListKeyAction`),
+  `nextCommandIndex`, `runCommand`, `tabTrapTarget`.
+
+### `@adapttable/core/binding` — the Chrome model
+
+- `chromeColumnPlan` (`ChromeColumnPlan`) — the columns a desktop table draws,
+  with selection, expansion and action lanes.
+- `ChromeBodySlot`, `ChromeRowSlot`, `ChromeGroupSlot`, `ChromeGroupEntry`,
+  `ChromeExtraSlot`, `ChromeVirtualPadSlot` — the body as slots a binding
+  renders in order.
+- `tableAttributes`, `headerRowAttributes`, `headerCellAttributes`,
+  `sortButtonAttributes`, `rowAttributes`, `cellAttributes`,
+  `searchInputAttributes` — the prop getters, with `data-adapttable-part` names.
+  `ChromeSortState`, `ChromeCellSizing`, `columnAriaSort`, `columnTextAlign`,
+  `sortLevelOf`, `sortIndexOf`.
+- `desktopChromeMetrics`, `desktopHasPinned`, `desktopScrollBoxStyle`
+  (`DesktopScrollBoxStyle`), `desktopBodyPinStyle` (`DesktopBodyPinStyle`),
+  `desktopHeadCellGeometry` (`DesktopHeadCellGeometry`), `desktopEdgeHeadPin`,
+  `desktopPinSignature`, `DESKTOP_RESIZE_HANDLE_STYLE` — desktop layout and
+  pinning geometry.
+- `desktopRowMeasureRef`, `desktopDetailMeasureRef`, `measureRowDetailAsPair`,
+  `measureWindowScrollMargin`, `documentOffsetTop`, `virtualListElement`,
+  `sourceWindowStart` — measuring rows and the scroll window for
+  virtualization.
+- `entryKeys`, `extraRowCoveredSlots` — row keys and the slots an extra row
+  covers.
+- `LiveFeatureHost` / `createFeatureHost` / `disposeFeatureHost` /
+  `EMPTY_FEATURE_HOST` / `FeatureSetup` — the host that runs composed
+  features. `SlotFill`, `slotFillsOf`, `drawnSlotFills`, `OrderedContribution`,
+  `orderedContributions` — how features fill slots, in order.
+
 ### The builder tier
 
 `@adapttable/react/adapter` publishes what the eight kits are made of, for
@@ -18954,6 +19119,22 @@ build that observation from the neutral engine, and `agentFiltersFromDefs` with
 `applyAggregations` over `AggregationInputs` and `AggregationState`. Cell writes
 are `AgentCellEdit`s.
 
+**A live table runtime.** `bindLiveSession(inputs)` binds the `TableRuntime` a
+binding publishes to one `AgentSession`: it reads the runtime view as the
+observation, serves row reads and row resolution from it, and applies view
+changes and cell writes through the view's own setters, with the host's `apply`
+callbacks laid over them. `LiveSessionInputs` carries the binding's
+`TableAgentRuntimeOptions`, the runtime, a `RevisionCounter` from
+`createRevisionCounter`, and the binding's flush, approval and progress hooks;
+`viewRevisionStamp` is the stamp that counter moves on.
+`viewInputsFromRuntime` reads the same view in the shape the context builder
+takes, and `sampledColumns` names the columns whose author asked for live
+values. For approvals, `readerResolver` is the `ProposalResolver` over the
+runtime view, `capabilityKind` and `alwaysAllowFor` are what `mayAlwaysAllow`
+is asked with, `perItemRefusal` refuses every undecided row with the reader's
+stated reason, and `exclusionKey` makes an exclusion list comparable.
+`@adapttable/ai-react`'s `tableAgent` is this binding for React.
+
 **Row and bulk actions.** `tableActionCapabilities(declared, source)` turns a
 table's `DeclaredTableActions` into one `AgentCapabilityDefinition` per action,
 keyed `rowAction.<key>` or `bulkAction.<key>`, for
@@ -19326,16 +19507,16 @@ Every package declares its side effects — none, or only its stylesheet in
 `@adapttable/base-ui` — and ships ESM, so unused code is tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-09-24 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-09-26 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
-| `useFrontendData` + `useDataTable` (react) | ~25 kB    |
-| every core export                          | ~57 kB    |
+| `useFrontendData` + `useDataTable` (react) | ~24 kB    |
+| every core export                          | ~72 kB    |
 | `DataTable` from an adapter                | ~70–80 kB |
 
-The first row is the one to read: a headless table costs about a fifth of the
+The first row is the one to read: a headless table costs about a third of the
 full core, because the parts you never import never arrive. All eight adapters
 land within ~12 kB of each other, so switching kits does not change what you
 pay.

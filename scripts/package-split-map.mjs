@@ -74,6 +74,32 @@ function reportKind(text, exportName) {
   return exportName[0] === exportName[0]?.toUpperCase() ? "type" : "value";
 }
 
+/**
+ * Whether a report forwards a name it imports from `@adapttable/core` — a name
+ * the React-free core declares, whatever entry re-exports it.
+ */
+function forwardsCoreName(text, exportName) {
+  return new RegExp(
+    `^import \\{[^}]*\\b${exportName}\\b[^}]*\\} from '@adapttable/core(?:/[\\w-]+)?';`,
+    "m"
+  ).test(text);
+}
+
+/**
+ * A symbol's kind, read where it is declared: a name an entry forwards from
+ * `@adapttable/core` is declared in core's own reports.
+ */
+function symbolKind(reportText, exportName, coreReports) {
+  if (reportText && forwardsCoreName(reportText, exportName)) {
+    const alias = new RegExp(
+      `^import \\{\\s*(\\w+) as ${exportName}\\s*\\} from '@adapttable/core`,
+      "m"
+    ).exec(reportText);
+    return reportKind(coreReports, alias ? alias[1] : exportName);
+  }
+  return reportKind(reportText, exportName);
+}
+
 function mentionsReact(text, exportName) {
   if (!text) return false;
   const idx = text.search(
@@ -82,8 +108,10 @@ function mentionsReact(text, exportName) {
       "m"
     )
   );
-  if (idx < 0)
+  if (idx < 0) {
+    if (forwardsCoreName(text, exportName)) return false;
     return /React(?:Node|Element|Component)|ComponentType|RefObject/.test(text);
+  }
   const next = text.slice(idx + 1).search(/^export /m);
   const block = next < 0 ? text.slice(idx) : text.slice(idx, idx + 1 + next);
   return /React(?:Node|Element|Component)|ComponentType|CSSProperties|HTMLAttributes|RefObject|JSX\.|MouseEvent|KeyboardEvent/.test(
@@ -92,13 +120,7 @@ function mentionsReact(text, exportName) {
 }
 
 function classifyAi(subpath, name) {
-  if (
-    subpath === "./react" ||
-    name === "tableAgent" ||
-    name.startsWith("TableAgent")
-  ) {
-    return "react-binding";
-  }
+  if (subpath === "./react" || name === "tableAgent") return "react-binding";
   if (name.startsWith("use")) return "react-binding";
   if (
     /^(create|parse|connect|run|to|from|execute|build|guide|summary|enabled|validate)/.test(
@@ -123,8 +145,21 @@ function classifyCoreAdapter(name, reportText) {
   return chromeName ? "react-chrome" : "neutral-operation";
 }
 
+/**
+ * `@adapttable/core/binding` is the framework-neutral machinery a binding
+ * composes — the Chrome model among it — so a name there is React's only when
+ * its declaration says so.
+ */
+function classifyCoreBinding(name, reportText) {
+  if (name.startsWith("use") || mentionsReact(reportText, name)) {
+    return "react-binding";
+  }
+  return /^[a-z]/.test(name) ? "neutral-operation" : "neutral-model";
+}
+
 function classifyCore({ subpath, name, reportText }) {
   if (APPLICATION_HOOKS.has(name)) return "application-hook";
+  if (subpath === "./binding") return classifyCoreBinding(name, reportText);
   if (REACT_CHROME_NAMES.has(name) || /Chrome/.test(name))
     return "react-chrome";
   if (name.startsWith("use")) return "react-binding";
@@ -165,6 +200,10 @@ export function buildPackageSplitMap() {
     const path = join(ETC, file);
     if (existsSync(path)) reports[file] = readFileSync(path, "utf8");
   }
+  const coreReports = Object.entries(reports)
+    .filter(([file]) => file.startsWith("core"))
+    .map(([, text]) => text)
+    .join("\n");
   const symbols = [];
   const seen = new Set();
   for (const entry of entrypoints()) {
@@ -185,7 +224,7 @@ export function buildPackageSplitMap() {
       symbols.push({
         export: exportName,
         currentImport,
-        kind: reportKind(reportText, exportName),
+        kind: symbolKind(reportText, exportName, coreReports),
         class: cls,
         proposedImport: proposedImport(currentImport, cls, entry.dir),
         behavior: "",
