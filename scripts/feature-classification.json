@@ -617,6 +617,7 @@
       "core/src/constants.ts",
       "core/src/display.ts",
       "core/src/editing/editContracts.ts",
+      "core/src/editing/editingController.ts",
       "core/src/engine/cellValue.ts",
       "core/src/engine/createTableEngine.ts",
       "core/src/engine/neutralTable.ts",

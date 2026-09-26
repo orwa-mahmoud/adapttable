@@ -172,3 +172,17 @@ export interface ValidationTarget {
   /** Key of the column. */
   columnKey: string;
 }
+
+/**
+ * One row's pending changes.
+ *
+ * @public
+ */
+export interface BatchRowEdit<TRow> {
+  /** The row as it was when the reader started changing it. */
+  row: TRow;
+  /** Its stable id. */
+  rowId: string;
+  /** Parsed values by column key — only the fields that actually changed. */
+  patch: Readonly<Record<string, unknown>>;
+}

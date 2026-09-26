@@ -7,10 +7,10 @@
  * events only report what happened.
  */
 import {
-  devWarn,
   type EditEvent,
   type EditEventHandler,
   type EditLifecycle,
+  observeEdit,
 } from "@adapttable/core";
 import { useMemo } from "react";
 
@@ -22,26 +22,7 @@ export type {
   EditLifecycle,
   EditUnit,
 } from "@adapttable/core";
-
-/**
- * Call an observer without letting it own the outcome. A throw is reported
- * and swallowed: the commit already happened, or the cancel already did, and
- * a side-effect that blows up must not rewind it.
- */
-export function observeEdit<TRow>(
-  handler: EditEventHandler<TRow> | undefined,
-  event: EditEvent<TRow>
-): void {
-  if (!handler) return;
-  try {
-    handler(event);
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    devWarn(
-      `an onEdit* handler threw (${detail}) — the table ignored it so the commit could finish`
-    );
-  }
-}
+export { observeEdit } from "@adapttable/core";
 
 /**
  * Latch one observer: stable identity, missing stays missing. Calling through

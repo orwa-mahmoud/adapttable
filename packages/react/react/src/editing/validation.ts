@@ -19,18 +19,23 @@
  * busy rather than blocking the keystroke, and a newer draft supersedes an older
  * check — a stale answer must never mark a value the reader has already changed.
  */
-import type {
-  CellValidator,
-  RowValidator,
-  ValidationTarget,
+import {
+  type CellValidator,
+  createEditValidationStore,
+  rowHasValidationError,
+  type RowValidator,
+  type ValidationCheckResult,
+  validationErrorFor,
+  validationKey,
+  validationSignature,
+  type ValidationTarget,
 } from "@adapttable/core";
-import { useCallback, useMemo, useRef, useState } from "react";
-
-import { useEventCallback } from "../hooks/useEventCallback";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
 export type {
   CellValidator,
   RowValidator,
+  ValidationCheckResult,
   ValidationTarget,
 } from "@adapttable/core";
 
@@ -44,21 +49,6 @@ export interface UseEditValidationOptions<TRow> {
    * spread keyed by the column key.
    */
   applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
-}
-
-/**
- * Outcome of {@link EditValidationState.check}.
- *
- * @public
- */
-export interface ValidationCheckResult {
-  /** Whether the commit may proceed. */
-  allowed: boolean;
-  /**
-   * Why it may not, when it may not. Absent when a newer check superseded
-   * this one.
-   */
-  error?: string;
 }
 
 /**
@@ -103,18 +93,6 @@ export interface EditValidationState<TRow> {
 }
 
 /**
- * `rowId` and `columnKey` as one map key.
- *
- * A control character rather than a printable separator, because a column key
- * is arbitrary data: any separator that can appear inside one makes two
- * different cells share a key. Written as an escape so it is visible in this
- * file rather than invisible in it — a source file carrying a raw NUL is one
- * git treats as binary, with no diff and no blame.
- */
-const cellKey = (rowId: string, columnKey: string) =>
-  `${rowId}\u0000${columnKey}`;
-
-/**
  * Headless validation state for inline editing.
  *
  * @typeParam TRow - The row type.
@@ -124,137 +102,32 @@ const cellKey = (rowId: string, columnKey: string) =>
 export function useEditValidation<TRow>(
   options: UseEditValidationOptions<TRow> = {}
 ): EditValidationState<TRow> {
-  const [cellErrors, setCellErrors] = useState<ReadonlyMap<string, string>>(
-    () => new Map()
+  const [store] = useState(() => createEditValidationStore<TRow>(options));
+  store.configure(options);
+  const snapshot = useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot
   );
-  const [rowErrors, setRowErrors] = useState<ReadonlyMap<string, string>>(
-    () => new Map()
-  );
-  const [validating, setValidating] = useState<ReadonlySet<string>>(
-    () => new Set()
-  );
-  // One token per cell, bumped on every check: a check that resolves after a
-  // newer one started must not write its verdict over the newer answer.
-  const tokens = useRef(new Map<string, number>());
-
-  const setCellError = useEventCallback((key: string, message?: string) => {
-    setCellErrors((current) => {
-      if ((current.get(key) ?? undefined) === message) return current;
-      const next = new Map(current);
-      if (message === undefined) next.delete(key);
-      else next.set(key, message);
-      return next;
-    });
-  });
-
-  const setRowError = useEventCallback((rowId: string, message?: string) => {
-    setRowErrors((current) => {
-      if ((current.get(rowId) ?? undefined) === message) return current;
-      const next = new Map(current);
-      if (message === undefined) next.delete(rowId);
-      else next.set(rowId, message);
-      return next;
-    });
-  });
-
-  const markValidating = useEventCallback((key: string, busy: boolean) => {
-    setValidating((current) => {
-      if (current.has(key) === busy) return current;
-      const next = new Set(current);
-      if (busy) next.add(key);
-      else next.delete(key);
-      return next;
-    });
-  });
-
-  const check = useEventCallback(
-    async (input: {
-      target: ValidationTarget;
-      value: unknown;
-      row: TRow;
-      validateCell?: CellValidator<TRow>;
-    }): Promise<ValidationCheckResult> => {
-      const { target, value, row, validateCell } = input;
-      const { validateRow, applyEdit = shallowApplyEdit } = options;
-      if (!validateCell && !validateRow) return { allowed: true };
-
-      const key = cellKey(target.rowId, target.columnKey);
-      const token = (tokens.current.get(key) ?? 0) + 1;
-      tokens.current.set(key, token);
-      const current = () => tokens.current.get(key) === token;
-
-      markValidating(key, true);
-      try {
-        const cellMessage = await validateCell?.(value, row);
-        if (!current()) return { allowed: false };
-        if (cellMessage !== undefined) {
-          setCellError(key, cellMessage);
-          setRowError(target.rowId, undefined);
-          return { allowed: false, error: cellMessage };
-        }
-        const edited = applyEdit(row, target.columnKey, value);
-        const rowVerdict = await validateRow?.(edited);
-        if (!current()) return { allowed: false };
-        return settleRowVerdict({
-          verdict: rowVerdict,
-          target,
-          setCellError,
-          setRowError,
-        });
-      } finally {
-        if (current()) markValidating(key, false);
-      }
-    }
-  );
-
-  const clear = useEventCallback((rowId: string, columnKey: string) => {
-    const key = cellKey(rowId, columnKey);
-    tokens.current.set(key, (tokens.current.get(key) ?? 0) + 1);
-    setCellError(key, undefined);
-    setRowError(rowId, undefined);
-    markValidating(key, false);
-  });
-
-  const clearAll = useEventCallback(() => {
-    tokens.current.clear();
-    setCellErrors(new Map());
-    setRowErrors(new Map());
-    setValidating(new Set());
-  });
-
-  // A value digest, so a row memo can compare messages without holding maps.
-  const signature = useMemo(
-    () =>
-      [...cellErrors.entries(), ...rowErrors.entries(), ...validating]
-        .flat()
-        .join("\u0001"),
-    [cellErrors, rowErrors, validating]
-  );
+  const signature = useMemo(() => validationSignature(snapshot), [snapshot]);
 
   const errorFor = useCallback(
     (rowId: string, columnKey: string) =>
-      cellErrors.get(cellKey(rowId, columnKey)),
-    [cellErrors]
+      validationErrorFor(snapshot, rowId, columnKey),
+    [snapshot]
   );
   const rowErrorFor = useCallback(
-    (rowId: string) => rowErrors.get(rowId),
-    [rowErrors]
+    (rowId: string) => snapshot.rowErrors.get(rowId),
+    [snapshot]
   );
   const isValidating = useCallback(
     (rowId: string, columnKey: string) =>
-      validating.has(cellKey(rowId, columnKey)),
-    [validating]
+      snapshot.validating.has(validationKey(rowId, columnKey)),
+    [snapshot]
   );
   const rowHasError = useCallback(
-    (rowId: string) => {
-      if (rowErrors.has(rowId)) return true;
-      const prefix = `${rowId}\u0000`;
-      for (const key of cellErrors.keys()) {
-        if (key.startsWith(prefix)) return true;
-      }
-      return false;
-    },
-    [cellErrors, rowErrors]
+    (rowId: string) => rowHasValidationError(snapshot, rowId),
+    [snapshot]
   );
 
   return useMemo(
@@ -263,9 +136,9 @@ export function useEditValidation<TRow>(
       rowErrorFor,
       isValidating,
       rowHasError,
-      check,
-      clear,
-      clearAll,
+      check: store.check,
+      clear: store.clear,
+      clearAll: store.clearAll,
       signature,
       hasRowValidator: options.validateRow !== undefined,
     }),
@@ -274,64 +147,9 @@ export function useEditValidation<TRow>(
       rowErrorFor,
       isValidating,
       rowHasError,
-      check,
-      clear,
-      clearAll,
+      store,
       signature,
       options.validateRow,
     ]
   );
-}
-
-/**
- * Record a row validator's verdict.
- *
- * A bare string is the row's own problem; a map names cells, which is how a
- * cross-field rule points at the field the reader should look at.
- */
-function settleRowVerdict(input: {
-  verdict: string | Record<string, string> | undefined;
-  target: ValidationTarget;
-  setCellError: (key: string, message?: string) => void;
-  setRowError: (rowId: string, message?: string) => void;
-}): ValidationCheckResult {
-  const { verdict, target, setCellError, setRowError } = input;
-  const key = cellKey(target.rowId, target.columnKey);
-  if (verdict === undefined) {
-    setCellError(key, undefined);
-    setRowError(target.rowId, undefined);
-    return { allowed: true };
-  }
-  if (typeof verdict === "string") {
-    setCellError(key, undefined);
-    setRowError(target.rowId, verdict);
-    return { allowed: false, error: verdict };
-  }
-  setRowError(target.rowId, undefined);
-  for (const [columnKey, message] of Object.entries(verdict)) {
-    setCellError(cellKey(target.rowId, columnKey), message);
-  }
-  // An empty map is a pass: the validator ran and named nothing.
-  const keys = Object.keys(verdict);
-  const firstKey = keys[0];
-  if (firstKey === undefined) return { allowed: true };
-  return {
-    allowed: false,
-    error: verdict[target.columnKey] ?? verdict[firstKey],
-  };
-}
-
-/**
- * The row an edit would produce, without touching the stored one.
- *
- * A shallow spread keyed by the column key is right for the common case where a
- * column key IS the field. A host whose columns read nested paths passes its own
- * `applyEdit`.
- */
-function shallowApplyEdit<TRow>(
-  row: TRow,
-  columnKey: string,
-  value: unknown
-): TRow {
-  return { ...row, [columnKey]: value };
 }

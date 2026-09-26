@@ -13,6 +13,7 @@
  * with every change in it.
  */
 import {
+  type BatchRowEdit,
   type EditableColumnLike,
   type FeatureHostState,
   parseCellEditValue,
@@ -24,19 +25,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useEventCallback } from "../hooks/useEventCallback";
 import { type EditEventHandler, observeEdit } from "./editingEvents";
 
-/**
- * One row's pending changes.
- *
- * @public
- */
-export interface BatchRowEdit<TRow> {
-  /** The row as it was when the reader started changing it. */
-  row: TRow;
-  /** Its stable id. */
-  rowId: string;
-  /** Parsed values by column key — only the fields that actually changed. */
-  patch: Readonly<Record<string, unknown>>;
-}
+export type { BatchRowEdit } from "@adapttable/core";
 
 /**
  * Headless batch-editing state.
