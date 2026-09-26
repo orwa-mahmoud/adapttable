@@ -40,6 +40,10 @@ in `@adapttable/react` and the kit adapters.
 - **A React-free half** (`@adapttable/core/query`) — the filter-tree and pivot
   URL codecs on their own, so a route handler can decode a shared link in a
   process with no React installed.
+- **A conformance suite** (`@adapttable/core/conformance`) — the DOM
+  assertions every built-in adapter passes, runnable against any binding or
+  kit through a driver and the test runner of your choice.
+  [Docs](https://adapttable.orwamahmoud.com/react/building-an-adapter/#testing).
 - **Sorting** — comparator resolution and multi-key `sortValue`; React turns
   the result into accessible header state.
 - **Filtering** — filter model, operators and counts, including a nested AND/OR

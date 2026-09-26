@@ -14323,6 +14323,94 @@
       "behavior": ""
     },
     {
+      "export": "CONFORMANCE_COLUMNS",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "CONFORMANCE_ROWS",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceColumn",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceDriver",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceExpectation",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceHarness",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceMount",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceRow",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceScenario",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "ConformanceTest",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
+      "export": "tableConformanceTests",
+      "currentImport": "@adapttable/core/conformance",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/conformance",
+      "behavior": ""
+    },
+    {
       "export": "Aggregatable",
       "currentImport": "@adapttable/core/formula",
       "kind": "type",

@@ -76,7 +76,7 @@ those exits with the name of the variable to fix.
 The process binds `127.0.0.1` on port `8787` by default. A non-loopback
 `AGENT_HOST` requires `AGENT_HTTP_TOKEN`.
 
-**Local showcase (reliable).** Hosted GitHub Pages cannot be assumed to reach
+**Local showcase (reliable).** The hosted site cannot be assumed to reach
 `localhost` — browsers treat that as a cross-origin public-site request, and
 many block it. Run the showcase on the same machine:
 

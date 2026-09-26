@@ -116,7 +116,7 @@ const microsoftClarity = (): Plugin => ({
  * A real EventSource of patch ticks for the realtime page.
  *
  * The frames are just a clock — the demo's `parse` turns each tick into a
- * ranked budget patch so the row stays on page 1. GitHub Pages has no
+ * ranked budget patch so the row stays on page 1. The static site has no
  * server; the demo falls back to a scripted source with the same frames.
  */
 const PATCH_STREAM_PATH = "/__adapttable/patches";
@@ -205,7 +205,7 @@ export default defineConfig({
     patchStream(),
   ],
   // Multi-page app: each demo page is its own static HTML entry, linked
-  // with plain anchors — no client router, no GitHub Pages 404 tricks.
+  // with plain anchors — no client router, no 404 fallback tricks.
   build: {
     rollupOptions: {
       // Generated from `pages.mjs`, the manifest the docs sitemap and the

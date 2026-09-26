@@ -7,16 +7,13 @@ export default mergeConfig(sharedConfig, {
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       // Pure type-only modules (interfaces only) compile to nothing and
-      // would otherwise report as 0% covered. `chromeTestSlots.tsx` is test
-      // scaffolding rather than shipped code — it is exported from no entry
-      // point — and is classified the way adapter-mui classifies its own
-      // `src/test-utils.tsx`. Thresholds themselves do not move.
+      // would otherwise report as 0% covered. Thresholds themselves do not
+      // move.
       exclude: [
         "src/source/TableSource.ts",
         "src/columnModel.ts",
         "src/display.ts",
         "src/tableStateMutators.ts",
-        "src/internal/chromeTestSlots.tsx",
       ],
       thresholds: {
         // The remaining statements gap is the React Compiler's generated cache

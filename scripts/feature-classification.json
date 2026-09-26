@@ -1,5 +1,4 @@
 {
-  "$schema": "./feature-classification.schema.json",
   "version": 1,
   "generatedFor": "v3",
   "note": "Single source of truth for the v3 feature surface. Every factory exported from @adapttable/react/features appears exactly once. The feature-parity check, the framework-boundary check and the consumer harness read it.",
@@ -575,7 +574,8 @@
           "./stream",
           "./formula",
           "./xlsx",
-          "./pdf"
+          "./pdf",
+          "./conformance"
         ]
       },
       {
@@ -618,6 +618,7 @@
       "core/src/columns/resolveColumns.ts",
       "core/src/columns/responsiveColumns.ts",
       "core/src/columns/visibleColumns.ts",
+      "core/src/conformance.ts",
       "core/src/conformance/tableConformance.ts",
       "core/src/constants.ts",
       "core/src/display.ts",

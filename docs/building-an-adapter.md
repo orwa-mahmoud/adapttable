@@ -331,11 +331,12 @@ same model, each kit's pixels.
 
 ## The Chrome + slots contract
 
-Core unifies the model, never the pixels:
+AdaptTable unifies the model, never the pixels:
 
-- Core's `*Chrome` components own structure only — layout, recursion over
-  groups, keyboard wiring, localized labels and `data-adapttable-part` names —
-  plus the headless hooks and state machines behind them.
+- The `*Chrome` components on `@adapttable/react/adapter` own structure only —
+  layout, recursion over groups, keyboard wiring, localized labels and
+  `data-adapttable-part` names. The state machines behind them live in
+  `@adapttable/core`; the binding's hooks adapt them to React.
 - Every visible control — input, select, checkbox, button, anything a reader
   clicks — is a **required slot** the adapter fills with its own kit's
   component. Slot members are required in the types, so a missing one fails
@@ -345,10 +346,10 @@ Core unifies the model, never the pixels:
   Property 'Button' is missing in type '{}' but required in type 'ColumnGroupToggleSlots'.
   ```
 
-- Slots have no native fallback in core. `@adapttable/unstyled` renders native
+- Slots have no native fallback. `@adapttable/unstyled` renders native
   controls because native HTML is its kit; the shadcn adapter builds on it.
-- Invisible chrome — live regions, announcers, layout structure — lives in core
-  and is used as is: `TableStatusAnnouncer`, `GridFocusAnnouncer`,
+- Invisible chrome — live regions, announcers, layout structure — ships with
+  the binding and is used as is: `TableStatusAnnouncer`, `GridFocusAnnouncer`,
   `RowReorderAnnouncer`.
 - When a kit's overlay or portal misbehaves inside the filter popover, the fix
   belongs in that adapter — `disablePortal`, `getPopupContainer`, or the kit's
@@ -604,8 +605,82 @@ peers, and the AdaptTable packages as dependencies pinned to exact versions:
 
 ## Testing
 
-The repository exports no conformance suite. The built-in adapters are held to
-parity by:
+`@adapttable/core/conformance` is the suite every built-in adapter passes:
+the structural parts, the table's accessible name, row and cell identity,
+sorting and its `aria-sort`, right-to-left, mobile cards, the empty state and
+row selection. It asserts against the DOM and depends on no test runner and no
+framework. A driver renders the kit's table for each scenario; the runner
+registers the tests the suite returns:
+
+```tsx
+// src/conformance.test.tsx
+import {
+  type ConformanceDriver,
+  type ConformanceRow,
+  type ConformanceScenario,
+  tableConformanceTests,
+} from "@adapttable/core/conformance";
+import { fireEvent, render, waitFor } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+
+import { bulkActions } from "./bulk-actions";
+import { type ColumnDef, DataTable } from "./index";
+
+function columnsFor(
+  scenario: ConformanceScenario
+): ColumnDef<ConformanceRow>[] {
+  return scenario.columns.map((column) => ({
+    key: column.key,
+    header: column.header,
+    sortable: column.sortable,
+    accessor: (row: ConformanceRow) => row[column.key],
+  }));
+}
+
+const driver: ConformanceDriver = {
+  name: "acme",
+  mount: (scenario) =>
+    render(
+      <DataTable
+        data={[...scenario.rows]}
+        columns={columnsFor(scenario)}
+        rowKey={(row) => row.id}
+        urlSync={false}
+        tableLabel={scenario.tableLabel}
+        dir={scenario.dir}
+        forceMobile={scenario.mobile}
+        features={
+          scenario.selectable
+            ? [
+                bulkActions([
+                  {
+                    key: "archive",
+                    label: "Archive",
+                    onClick: () => undefined,
+                  },
+                ]),
+              ]
+            : []
+        }
+      />
+    ),
+};
+
+describe(`table conformance — ${driver.name}`, () => {
+  for (const test of tableConformanceTests(driver, {
+    expect,
+    fireEvent,
+    waitFor,
+  })) {
+    it(test.name, test.run);
+  }
+});
+```
+
+jsdom has no `matchMedia`; stub it with a non-matching implementation in the
+test setup so the table renders its desktop layout.
+
+Beyond the suite, the built-in adapters are held to parity by:
 
 - per-package unit tests — Vitest, Testing Library and `vitest-axe` — that
   render the kit's `DataTable` (the accessibility suite, for example, over
@@ -620,59 +695,6 @@ parity by:
 - Playwright specs in the showcase — `e2e/aria-parity.spec.ts` compares the
   ARIA shape every built kit produces, and `e2e/kit-classnames.spec.ts` checks
   the computed look of the class-map kits.
-
-An adapter outside the repository can hold itself to the same contract parts
-with a unit test:
-
-```tsx
-// src/DataTable.test.tsx
-import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-
-import { DataTable } from "./index";
-
-interface Person {
-  id: string;
-  name: string;
-}
-
-const PEOPLE: Person[] = [
-  { id: "1", name: "Ada Lovelace" },
-  { id: "2", name: "Alan Turing" },
-];
-
-const CONTRACT_PARTS = [
-  "table",
-  "thead",
-  "tbody",
-  "row",
-  "cell",
-  "header-cell",
-  "toolbar",
-];
-
-describe("DataTable", () => {
-  it("names every structural part", () => {
-    const { container } = render(
-      <DataTable
-        data={PEOPLE}
-        columns={[{ key: "name", sortable: true }]}
-        rowKey={(row) => row.id}
-        urlSync={false}
-      />
-    );
-    for (const part of CONTRACT_PARTS) {
-      expect(
-        container.querySelector(`[data-adapttable-part="${part}"]`),
-        part
-      ).not.toBeNull();
-    }
-  });
-});
-```
-
-jsdom has no `matchMedia`; stub it with a non-matching implementation in the
-test setup so the table renders its desktop layout.
 
 ## Notes
 

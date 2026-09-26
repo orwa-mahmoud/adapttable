@@ -1,12 +1,12 @@
-import { fireEvent, render, waitFor } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-
 import {
   type ConformanceDriver,
   type ConformanceRow,
   type ConformanceScenario,
   tableConformanceTests,
-} from "../../../shared/core/src/conformance/tableConformance";
+} from "@adapttable/core/conformance";
+import { fireEvent, render, waitFor } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 

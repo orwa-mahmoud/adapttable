@@ -5,27 +5,29 @@ contributors alike; PRs are reviewed against them.
 
 ## Architecture: core is headless
 
-`@adapttable/core` owns the engine — state, hooks, the filter model,
-operators, URL serialization, chips, mutations, registries. Adapters own the
-look. Switching the kit in the live demo must change how the whole table
-looks, including the Filters popover and drawer: an MUI table filters with
-MUI controls, a Mantine table with Mantine controls.
+`@adapttable/core` owns the engine — state, the filter model, operators, URL
+serialization, chips, mutations, registries, and the state machines behind
+every interaction. The framework binding, `@adapttable/react`, adapts them
+into hooks and renders structure. Adapters own the look. Switching the kit in
+the live demo must change how the whole table looks, including the Filters
+popover and drawer: an MUI table filters with MUI controls, a Mantine table
+with Mantine controls.
 
 Unify the **model**, never the **pixels**. The standing pattern is
 **Chrome + slots**:
 
-- Core ships `*Chrome` components that own structure only — layout, the
-  recursion over groups, keyboard wiring, localized labels, and the
-  `data-adapttable-part` names — plus the headless hooks and state machines
-  behind them.
+- The binding ships `*Chrome` components that own structure only — layout,
+  the recursion over groups, keyboard wiring, localized labels, and the
+  `data-adapttable-part` names — driven by the models and state machines in
+  core.
 - Every visible control (input, select, checkbox, button — anything the end
   user clicks) is a **required slot** the adapter fills with its own kit's
-  component. Slots have no native fallback in core: a kit cannot silently
-  render raw HTML. `adapter-unstyled` supplies native controls because
-  native IS its kit; shadcn/tailwind build on unstyled.
-- Do not add user-facing controls to core, and do not give a slot a default
-  implementation. Invisible chrome (live regions, announcers, layout
-  structure) is fine in core.
+  component. Slots have no native fallback in core or the binding: a kit
+  cannot silently render raw HTML. `adapter-unstyled` supplies native
+  controls because native IS its kit; shadcn/tailwind build on unstyled.
+- Do not add user-facing controls to core or the binding, and do not give a
+  slot a default implementation. Invisible chrome (live regions, announcers,
+  layout structure) is fine there.
 - Feature parity means every kit has the feature **with its own components**.
   A shared look is not parity — copying one adapter's raw-HTML control into
   another adapter is the same defect as drawing it in core.
