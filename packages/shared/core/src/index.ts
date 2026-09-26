@@ -368,6 +368,25 @@ export {
   sameGridCell,
 } from "./focus/gridFocus";
 export {
+  createGridFocusController,
+  GRID_CELL_ATTR,
+  gridCellAttr,
+  type GridCellAttributes,
+  gridCellAttributes,
+  type GridCellAttributesInput,
+  gridColumnHeaderAttributes,
+  type GridContainerAttributes,
+  gridContainerAttributes,
+  gridFillHandleCell,
+  type GridFocusController,
+  type GridFocusControllerOptions,
+  type GridFocusSnapshot,
+  type GridKeyEvent,
+  gridRowAttributes,
+  isGridColumnSelected,
+  type PointerReleaseTarget,
+} from "./focus/gridFocusController";
+export {
   cellFillHandler,
   type CellFillHandlerOptions,
   cellPasteHandler,

@@ -660,6 +660,7 @@
       "core/src/focus/clipboardRange.ts",
       "core/src/focus/fillRange.ts",
       "core/src/focus/gridFocus.ts",
+      "core/src/focus/gridFocusController.ts",
       "core/src/focus/pasteRange.ts",
       "core/src/focus/selectionStats.ts",
       "core/src/formula.ts",
