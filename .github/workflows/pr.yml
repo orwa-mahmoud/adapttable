@@ -176,6 +176,14 @@ jobs:
         if: needs.detect.outputs.skipAll != 'true'
         run: pnpm check:features
 
+      - name: Check the API reports match the published contract
+        if: needs.detect.outputs.skipAll != 'true'
+        run: pnpm check:api-contract
+
+      - name: Check the package-split map covers every public symbol
+        if: needs.detect.outputs.skipAll != 'true'
+        run: pnpm check:package-split
+
       - name: Lint root tooling
         if: needs.detect.outputs.runLintRoot == 'true'
         run: pnpm lint:root
