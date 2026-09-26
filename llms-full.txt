@@ -17351,17 +17351,20 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
 
 ### The view-state store
 
-- `createTableViewStore(config: TableViewStateConfig): TableViewStore` — the
-  store over a `UrlStateAdapter` for everything the table writes to the URL:
-  `getSnapshot()`, `subscribe()` and the mutators. `TableViewState` is its
-  snapshot, `ViewStateSource` / `ViewStateSubscription` how a binding feeds it.
-- `createUrlSliceStore(spec: UrlSliceSpec): UrlSliceStore` — one debounced URL
-  slice (`URL_SLICE_WRITE_DEBOUNCE_MS`). The slices the table ships:
-  `columnLayoutSlice`, `densitySlice` (`TableDensity`), `groupCollapseSlice`,
-  `rowPinningSlice`, `pivotSlice` and `formulaSlice`.
-- `resolveUrlAdapter(adapter, enabled, memory)` — the adapter a table uses:
-  the host's, the browser history, or a memory store when URL sync is off.
-  `resetHistoryAdapter()` drops the shared history adapter, for tests.
+- `createTableViewStore(source, config?)` — the store over a
+  `ViewStateSource`'s URL adapter for everything the table writes to the URL,
+  configured by `TableViewStateConfig`: `getSnapshot()`, `subscribe()` and the
+  mutators. `TableViewStore` is the store, `TableViewState` its snapshot, and
+  `ViewStateSubscription` how a binding listens.
+- `createUrlSliceStore(source, spec, config)` — one debounced URL slice
+  (`URL_SLICE_WRITE_DEBOUNCE_MS`) described by a `UrlSliceSpec`, as a
+  `UrlSliceStore`. The slices the table ships: `columnLayoutSlice`,
+  `densitySlice` (`TableDensity`), `groupCollapseSlice`, `rowPinningSlice`,
+  `pivotSlice` and `formulaSlice`.
+- `resolveUrlAdapter(adapter, enabled, local)` — the adapter a table uses: the
+  host's, the browser history, or the caller's own memory store when URL sync
+  is off or there is no browser. `resetHistoryAdapter()` drops the shared
+  history adapter, for tests.
 
 ### The data-tier controller
 
@@ -17371,7 +17374,8 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
 - `queryAggregationSource`, `effectiveQueryAggregates`, `queryGroupBy` — what a
   server query asks the backend to aggregate and group.
 - `FirstLoadLatch` / `createFirstLoadLatch` — holds the loading state until the
-  first answer. `clampedPage(page, total, limit)` — the last page that exists.
+  first answer. `clampedPage(page, limit, total)` — the last real page when
+  `page` is past it, `undefined` otherwise.
 - `CursorTrail` / `EMPTY_CURSOR_TRAIL` / `recordCursor` / `cursorHasMore` /
   `canRequestCursorPage` — cursor paging's trail of seen cursors.
 - `AppendStash` / `appendBaseKey` / `appendedRows` / `staleAppendStash` —
@@ -17381,9 +17385,10 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
 
 ### Controllable stores
 
-- `createControllableStore(options: ControllableStoreOptions): ControllableStore`
-  — a value that is the host's when controlled and the store's own otherwise,
-  reporting every change. `ControllableControl` is the controlled half.
+- `createControllableStore(initial, options?)` — a value that is the host's
+  when controlled and the store's own otherwise, reporting every change.
+  `ControllableStore` is the store, `ControllableStoreOptions` its observer
+  mode and change detection, and `ControllableControl` the controlled half.
 - Selection: `toggleId`, `toggleIds`, `idSetReader`, `headerSelectionOf`.
   Expansion: `groupsCollapsedToDepth`. Row pinning: `sameRowPins`,
   `rowPinSideOf`.
@@ -17404,8 +17409,9 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
 EditValidationStore` — cell then row validation, with superseded checks
   dropped. `EditValidationSnapshot`, `validationKey`, `validationErrorFor`,
   `rowHasValidationError`, `validationSignature`.
-- `createEditHistoryStack(depth?): EditHistoryStack` — undo and redo over
-  edit gestures, `DEFAULT_EDIT_HISTORY_DEPTH` deep. `EditHistorySnapshot`,
+- `createEditHistoryStack(): EditHistoryStack` — undo and redo over edit
+  gestures; `DEFAULT_EDIT_HISTORY_DEPTH` is the depth a host that sets none
+  keeps. `EditHistorySnapshot`,
   `editHistoryEntry`, `cellsOfBatch`.
 
 ### Grid focus
