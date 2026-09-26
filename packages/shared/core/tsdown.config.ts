@@ -11,6 +11,7 @@ export default defineConfig({
     "src/formula.ts",
     "src/stream.ts",
     "src/query.ts",
+    "src/conformance.ts",
   ],
   format: ["esm", "cjs"],
   dts: { eager: true },

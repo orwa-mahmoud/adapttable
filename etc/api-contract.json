@@ -17,6 +17,7 @@
       "cli",
       "core",
       "core-binding",
+      "core-conformance",
       "core-formula",
       "core-pdf",
       "core-pivot",
@@ -4852,6 +4853,19 @@
       "VirtualItemMeta",
       "virtualListElement",
       "VirtualTableRow"
+    ],
+    "core-conformance": [
+      "CONFORMANCE_COLUMNS",
+      "CONFORMANCE_ROWS",
+      "ConformanceColumn",
+      "ConformanceDriver",
+      "ConformanceExpectation",
+      "ConformanceHarness",
+      "ConformanceMount",
+      "ConformanceRow",
+      "ConformanceScenario",
+      "ConformanceTest",
+      "tableConformanceTests"
     ]
   },
   "entrypoints": {
@@ -5969,6 +5983,9 @@
     },
     "core-binding.api.md": {
       "surface": "core-binding"
+    },
+    "core-conformance.api.md": {
+      "surface": "core-conformance"
     }
   }
 }

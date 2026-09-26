@@ -2266,6 +2266,17 @@ the URL, in memory, or behind a server query;
 `localizedColumnPath`, `normalizeLocaleTag` and `resolveLocaleTag` are
 the shared locale-resolution algorithm (see [i18n & RTL](./i18n-rtl.md)).
 
+**Conformance.** `@adapttable/core/conformance` is the suite every built-in
+adapter passes, with no test runner and no framework in it.
+`tableConformanceTests(driver, harness)` returns the tests
+(`ConformanceTest`) for a runner to register. A `ConformanceDriver` mounts
+the table for a `ConformanceScenario` and returns a `ConformanceMount`; a
+`ConformanceHarness` carries the runner's `expect` (`ConformanceExpectation`)
+and DOM Testing Library's `fireEvent` and `waitFor`. `CONFORMANCE_ROWS`
+(`ConformanceRow`) and `CONFORMANCE_COLUMNS` (`ConformanceColumn`) are the
+scenario data. [Testing an adapter](./building-an-adapter.md#testing) shows a
+React driver.
+
 ## The AI packages
 
 `@adapttable/ai` is React-free and model-neutral: it turns a live table into a

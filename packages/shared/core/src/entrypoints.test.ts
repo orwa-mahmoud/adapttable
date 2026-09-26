@@ -11,6 +11,7 @@ import { describe, expect, it } from "vitest";
 
 import * as binding from "./binding";
 import * as bindingExports from "./bindingExports";
+import * as conformance from "./conformance";
 import * as formula from "./formula";
 import * as main from "./index";
 import * as pdf from "./pdf";
@@ -18,6 +19,17 @@ import * as pivot from "./pivot";
 import * as query from "./query";
 import * as stream from "./stream";
 import * as xlsx from "./xlsx";
+
+describe("@adapttable/core/conformance", () => {
+  it("opens the suite and its scenario data, with no runner in it", () => {
+    expect(typeof conformance.tableConformanceTests).toBe("function");
+    expect(conformance.CONFORMANCE_ROWS.length).toBeGreaterThan(0);
+    expect(conformance.CONFORMANCE_COLUMNS.length).toBeGreaterThan(0);
+    expect(Object.keys(conformance).sort((a, b) => a.localeCompare(b))).toEqual(
+      ["CONFORMANCE_COLUMNS", "CONFORMANCE_ROWS", "tableConformanceTests"]
+    );
+  });
+});
 
 describe("@adapttable/core/formula", () => {
   it("opens the formula builder and its evaluator", () => {
