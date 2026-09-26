@@ -175,6 +175,10 @@ export interface UseServerDataOptions<TRow> extends Pick<
 export function useServerData<TRow>(
   options: UseServerDataOptions<TRow>
 ): TableSource<TRow> {
+  // Every table's base bundle carries this hook. Its options arrive as a fresh
+  // object on each render and each derived value is memoized explicitly, so
+  // the compiler's cache would add weight without adding hits.
+  "use no memo";
   const {
     rows,
     total,

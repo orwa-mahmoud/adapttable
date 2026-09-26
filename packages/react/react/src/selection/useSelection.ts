@@ -124,6 +124,10 @@ export function offersAllMatching(
 export function useSelection<TRow>(
   options: UseSelectionOptions<TRow>
 ): SelectionState {
+  // Every selectable table's base bundle carries this hook. Its options arrive
+  // as a fresh object on each render and its callbacks are memoized
+  // explicitly, so the compiler's cache would add weight without adding hits.
+  "use no memo";
   const { rows, getId, resetKey } = options;
   const acrossPages = options.acrossPages ?? true;
   const [readIds] = useState(idSetReader);
