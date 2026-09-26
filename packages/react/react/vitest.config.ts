@@ -24,8 +24,7 @@ export default mergeConfig(sharedConfig, {
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       // Test scaffolding, not shipped code: no entry point exports these
-      // slots and no build emits them. Classified the way core classifies its
-      // own `chromeTestSlots.tsx`.
+      // slots and no build emits them.
       exclude: ["src/internal/chromeTestSlots.tsx"],
       thresholds: {
         statements: 97,
