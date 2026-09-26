@@ -15,11 +15,7 @@
  * and writes through: a browser is only one end of a shared link, and the
  * other end is a server that never renders.
  */
-import {
-  type PivotConfig,
-  pivotSlice,
-  URL_SLICE_WRITE_DEBOUNCE_MS,
-} from "@adapttable/core";
+import { type PivotConfig, pivotSlice } from "@adapttable/core";
 import { useCallback, useMemo } from "react";
 
 import type { UrlStateAdapter } from "../url/adapter";
@@ -27,15 +23,7 @@ import { useUrlSlice } from "../url/useUrlSlice";
 
 export type { UrlStateAdapter };
 
-/**
- * Trailing debounce for URL persistence, as the column-layout and formula hooks
- * use. Reads stay instant through the optimistic overlay below; the write waits,
- * which is what lets the overlay bridge a router whose navigation lands a tick
- * later — clearing it in the same batch as the write leaves one render with the
- * overlay gone and the URL not yet updated, so a field the reader just moved
- * jumps back to where it was.
- */
-export const PIVOT_URL_WRITE_DEBOUNCE_MS = URL_SLICE_WRITE_DEBOUNCE_MS;
+export { URL_SLICE_WRITE_DEBOUNCE_MS as PIVOT_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
 
 /**
  * What {@link usePivotUrlState} needs.

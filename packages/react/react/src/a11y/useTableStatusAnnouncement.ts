@@ -9,17 +9,16 @@
  */
 import {
   resolveTableStatus,
-  type SortDirection,
   type TableStatusAnnouncementOptions,
   type TableStatusSignature,
 } from "@adapttable/core";
 import { useEffect, useRef, useState } from "react";
 
+export type { SortDirection } from "@adapttable/core";
 export {
   resolveTableStatus,
   type TableStatusAnnouncementOptions,
 } from "@adapttable/core";
-export type { SortDirection };
 
 /**
  * Track the table's row set and sort, and return what to announce.

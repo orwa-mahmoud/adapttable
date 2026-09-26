@@ -11,11 +11,7 @@
  * controlled table's density is the host's business, and a URL that
  * silently overrode it would be a second source of truth.
  */
-import {
-  densitySlice,
-  type TableDensity,
-  URL_SLICE_WRITE_DEBOUNCE_MS,
-} from "@adapttable/core";
+import { densitySlice, type TableDensity } from "@adapttable/core";
 
 import type { UrlStateAdapter } from "./adapter";
 import { useUrlSlice } from "./useUrlSlice";
@@ -27,15 +23,7 @@ import { useUrlSlice } from "./useUrlSlice";
  */
 export type Density = TableDensity;
 
-/**
- * Trailing debounce for URL persistence, as the column-layout and formula hooks
- * use. Reads stay instant through the optimistic overlay below; the write waits,
- * which is what lets the overlay bridge a router whose navigation lands a tick
- * later — clearing it in the same batch as the write leaves one render with the
- * overlay gone and the URL not yet updated, so the table flicks back to the
- * density the reader just left.
- */
-export const DENSITY_URL_WRITE_DEBOUNCE_MS = URL_SLICE_WRITE_DEBOUNCE_MS;
+export { URL_SLICE_WRITE_DEBOUNCE_MS as DENSITY_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
 
 /**
  * What {@link useDensityUrlState} needs.

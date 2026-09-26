@@ -9,26 +9,14 @@
  * encoding is in {@link ./formulaUrlCodec}, which reads specs and nothing else;
  * evaluation happens later, in the engine, on purpose.
  */
-import {
-  type FormulaColumnSpec,
-  formulaSlice,
-  URL_SLICE_WRITE_DEBOUNCE_MS,
-} from "@adapttable/core";
+import { type FormulaColumnSpec, formulaSlice } from "@adapttable/core";
 
 import type { UrlStateAdapter } from "../url/adapter";
 import { useUrlSlice } from "../url/useUrlSlice";
 
 export type { UrlStateAdapter };
 
-/**
- * Trailing debounce for URL persistence. A formula bar that writes as it is
- * typed commits one list per keystroke, and `history.replaceState` at that rate
- * trips Safari's limit (~100 calls per 30s, then it throws). Reads stay instant
- * through the optimistic overlay below; only the URL write waits.
- *
- * @public
- */
-export const FORMULA_URL_WRITE_DEBOUNCE_MS = URL_SLICE_WRITE_DEBOUNCE_MS;
+export { URL_SLICE_WRITE_DEBOUNCE_MS as FORMULA_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
 
 /**
  * What {@link useFormulaUrlState} needs.

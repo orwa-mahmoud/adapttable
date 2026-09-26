@@ -30,11 +30,9 @@ import {
   revisionToken,
   sampledColumns,
   settleDecisions,
-  type SharedApproval,
   sharedApproval,
   tableActionSignature,
   type TableAgentBridge as NeutralBridge,
-  type TableAgentColumnPatch,
   type TableAgentRuntimeOptions,
   viewInputsFromRuntime,
   viewRevisionStamp,
@@ -68,7 +66,7 @@ import {
 } from "react";
 import { flushSync } from "react-dom";
 
-export type { SharedApproval, TableAgentColumnPatch };
+export type { SharedApproval, TableAgentColumnPatch } from "@adapttable/ai";
 
 // The bridge contract is `@adapttable/ai`'s — a manifest, a session and a
 // pending approval are what any binding publishes, none of it React. Named

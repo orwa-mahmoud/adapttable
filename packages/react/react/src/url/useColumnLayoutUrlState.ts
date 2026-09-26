@@ -1,7 +1,4 @@
-import {
-  columnLayoutSlice,
-  URL_SLICE_WRITE_DEBOUNCE_MS,
-} from "@adapttable/core";
+import { columnLayoutSlice } from "@adapttable/core";
 
 import type { ColumnLayoutState } from "../columns/useColumnLayout";
 import type { UrlStateAdapter } from "./adapter";
@@ -26,13 +23,7 @@ export interface UseColumnLayoutUrlStateOptions {
   urlKey?: string;
 }
 
-/**
- * Trailing debounce for URL persistence. A column-resize drag commits one
- * layout per animation frame; writing `history.replaceState` that often
- * trips Safari's rate limit (~100 calls per 30s, then it throws). Reads stay
- * instant via an optimistic overlay — only the URL write is deferred.
- */
-export const LAYOUT_URL_WRITE_DEBOUNCE_MS = URL_SLICE_WRITE_DEBOUNCE_MS;
+export { URL_SLICE_WRITE_DEBOUNCE_MS as LAYOUT_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
 
 /**
  * State + change handler returned by {@link useColumnLayoutUrlState}.
