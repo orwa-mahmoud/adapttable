@@ -331,11 +331,12 @@ same model, each kit's pixels.
 
 ## The Chrome + slots contract
 
-Core unifies the model, never the pixels:
+AdaptTable unifies the model, never the pixels:
 
-- Core's `*Chrome` components own structure only — layout, recursion over
-  groups, keyboard wiring, localized labels and `data-adapttable-part` names —
-  plus the headless hooks and state machines behind them.
+- The `*Chrome` components on `@adapttable/react/adapter` own structure only —
+  layout, recursion over groups, keyboard wiring, localized labels and
+  `data-adapttable-part` names. The state machines behind them live in
+  `@adapttable/core`; the binding's hooks adapt them to React.
 - Every visible control — input, select, checkbox, button, anything a reader
   clicks — is a **required slot** the adapter fills with its own kit's
   component. Slot members are required in the types, so a missing one fails
@@ -345,10 +346,10 @@ Core unifies the model, never the pixels:
   Property 'Button' is missing in type '{}' but required in type 'ColumnGroupToggleSlots'.
   ```
 
-- Slots have no native fallback in core. `@adapttable/unstyled` renders native
+- Slots have no native fallback. `@adapttable/unstyled` renders native
   controls because native HTML is its kit; the shadcn adapter builds on it.
-- Invisible chrome — live regions, announcers, layout structure — lives in core
-  and is used as is: `TableStatusAnnouncer`, `GridFocusAnnouncer`,
+- Invisible chrome — live regions, announcers, layout structure — ships with
+  the binding and is used as is: `TableStatusAnnouncer`, `GridFocusAnnouncer`,
   `RowReorderAnnouncer`.
 - When a kit's overlay or portal misbehaves inside the filter popover, the fix
   belongs in that adapter — `disablePortal`, `getPopupContainer`, or the kit's
