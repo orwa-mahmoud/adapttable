@@ -644,6 +644,7 @@
       "core/src/features/featureKeys.ts",
       "core/src/features/featureRegistration.ts",
       "core/src/features/liveFeatureHost.ts",
+      "core/src/features/runtimeOperations.ts",
       "core/src/features/slotContract.ts",
       "core/src/features/tableRuntime.ts",
       "core/src/filters/activeFilterChips.ts",

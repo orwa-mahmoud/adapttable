@@ -186,6 +186,21 @@ export {
   type PaginationInput,
 } from "./pagination";
 export { createAgentSession, type CreateAgentSessionOptions } from "./session";
+export {
+  alwaysAllowFor,
+  bindLiveSession,
+  capabilityKind,
+  createRevisionCounter,
+  exclusionKey,
+  type LiveSessionInputs,
+  perItemRefusal,
+  readerResolver,
+  type RevisionCounter,
+  sampledColumns,
+  type TableAgentRuntimeOptions,
+  viewInputsFromRuntime,
+  viewRevisionStamp,
+} from "./tableAgentRuntime";
 export type {
   AgentAggregateOperation,
   AgentAggregationColumn,

@@ -63,6 +63,7 @@ export {
   type FeatureSetup,
   LiveFeatureHost,
 } from "./features/liveFeatureHost";
+export { deriveRuntimeOperations } from "./features/runtimeOperations";
 export {
   ACTIVE_FILTER_CHIPS,
   COLUMN_HEADER_RENAME,
