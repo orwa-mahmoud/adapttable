@@ -8,8 +8,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@adapttable/chakra": "^3.2.3",
-    "@adapttable/core": "^3.2.2",
+    "@adapttable/chakra": "^3.2.4",
+    "@adapttable/core": "^3.3.0",
     "@chakra-ui/react": "^3.36.1",
     "@emotion/react": "^11.14.0",
     "react": "^19.2.8",

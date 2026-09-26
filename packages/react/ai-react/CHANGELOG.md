@@ -1,5 +1,20 @@
 # @adapttable/ai-react
 
+## 0.2.6
+
+### Patch Changes
+
+- 36d14b9: `@adapttable/ai` exports the mapping from a table's runtime view to an agent session — `bindLiveSession` with the observation, row reads, apply and approval helpers beside it — so a binding for any framework can put an agent on a live table. `@adapttable/ai-react` builds its session from it; its API and behaviour are unchanged.
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+  - @adapttable/ai@0.3.0
+  - @adapttable/core@3.3.0
+  - @adapttable/react@1.3.3
+
 ## 0.2.5
 
 ### Patch Changes

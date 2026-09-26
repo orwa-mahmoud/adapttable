@@ -1,5 +1,14 @@
 # @adapttable/core
 
+## 3.3.0
+
+### Minor Changes
+
+- 36d14b9: Core exports the Chrome model: the pure derivation from table state to layout, rows, `data-adapttable-part` names and prop getters, generic over the binding's render node. React's shell and chrome render from it.
+- 36d14b9: Core exports the table's interaction controllers: cell editing (drafts, validation, save state, undo and redo), grid focus and cell navigation (ranges, fill, clipboard, paste and announcements against a container element), the row reorder engine (keyboard grab, drag and drop, grouped and tree moves), and the models behind find in table, the context menu, the command palette, the export handler, saved views, the header-filter overlay and the status announcements. React's hooks subscribe to them with their API and behaviour unchanged.
+- 36d14b9: Core exports the table's state layer for any framework binding: `TableOptions` and the runtime contracts, the history and memory URL adapters, a view-state store for everything the table writes to the URL, the data-tier controller (tier resolution, `onQueryChange`, aborts, `refetch`, cursor and infinite paging), and controllable selection, expansion, pinning and column-layout stores. `@adapttable/react` runs on them with its API and behaviour unchanged.
+- 36d14b9: `tableConformanceTests` is a framework-agnostic conformance suite: it runs against any binding's rendered table through a `mount(scenario)` driver and DOM Testing Library, asserting roles, accessible names, part names, row identity, sorting, RTL, the phone layout, the empty state and row selection.
+
 ## 3.2.2
 
 ### Patch Changes
