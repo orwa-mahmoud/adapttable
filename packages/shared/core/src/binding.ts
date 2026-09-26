@@ -213,6 +213,8 @@ export type {
 } from "./columnModel";
 export type {
   ColumnLayoutState,
+  PinLeads,
+  PinnedCellStyle,
   PinOffset,
   PinSide,
   UseColumnLayoutResult,
@@ -222,6 +224,7 @@ export type {
   ColumnMenuActionContext,
   ColumnMenuChoice,
   ColumnMenuChoiceOption,
+  ColumnMenuChromeProps,
   ColumnMenuItem,
   ColumnMenuLabels,
   ColumnMenuRow,
@@ -301,9 +304,12 @@ export type {
 export type { GroupAggregateOps } from "./grouping/groupRowLayout";
 export type {
   GroupAggregatesFn,
+  GroupedFlatEntry,
   GroupNode,
   GroupPaging,
   GroupSort,
+  RowGroupLevel,
+  RowGroupRef,
 } from "./grouping/groupRows";
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "./rows/extraRows";
 export type { IncrementalViewConfig } from "./rows/incremental";
@@ -329,7 +335,12 @@ export type { TableSource } from "./source/TableSource";
 export type { CssProperties } from "./style/cssProperties";
 export type { TableStateMutators } from "./tableStateMutators";
 export type {
+  ActionAiOptions,
+  ActionApprovalPolicy,
+  ActionConfirm,
+  ApprovalPresentation,
   BulkAction,
+  BulkActionContext,
   ColumnMetadata,
   Direction,
   ResolvedPaginationMode,
