@@ -196,19 +196,20 @@ function part(root: ParentNode, name: string): Element | null {
   return root.querySelector(`[data-adapttable-part="${name}"]`);
 }
 
-function parts(root: ParentNode, name: string): Element[] {
-  return [...root.querySelectorAll(`[data-adapttable-part="${name}"]`)];
+function parts(root: ParentNode, name: string): HTMLElement[] {
+  return [
+    ...root.querySelectorAll<HTMLElement>(`[data-adapttable-part="${name}"]`),
+  ];
 }
 
 function rowIds(root: ParentNode): (string | null)[] {
-  return parts(root, "row").map((row) => row.getAttribute("data-row-id"));
+  return parts(root, "row").map((row) => row.dataset.rowId ?? null);
 }
 
 function headerFor(root: ParentNode, key: string): Element | null {
   return (
-    parts(root, "header-cell").find(
-      (cell) => cell.getAttribute("data-column-key") === key
-    ) ?? null
+    parts(root, "header-cell").find((cell) => cell.dataset.columnKey === key) ??
+    null
   );
 }
 
@@ -284,8 +285,8 @@ export function tableConformanceTests(
   it("renders one header cell per column, keyed by column", () =>
     withTable(BASE, (container) => {
       const keys = parts(container, "header-cell")
-        .map((cell) => cell.getAttribute("data-column-key"))
-        .filter((key) => key !== null);
+        .map((cell) => cell.dataset.columnKey)
+        .filter((key) => key !== undefined);
       expect(keys).toEqual(["name", "age"]);
     }));
 
@@ -298,18 +299,14 @@ export function tableConformanceTests(
         "row",
         "row",
       ]);
-      expect(rows.map((row) => row.getAttribute("data-index"))).toEqual([
-        "0",
-        "1",
-        "2",
-      ]);
+      expect(rows.map((row) => row.dataset.index)).toEqual(["0", "1", "2"]);
     }));
 
   it("keys every body cell by its column", () =>
     withTable(BASE, (container) => {
       const first = parts(container, "row")[0];
-      const keys = parts(first ?? container, "cell").map((cell) =>
-        cell.getAttribute("data-column-key")
+      const keys = parts(first ?? container, "cell").map(
+        (cell) => cell.dataset.columnKey
       );
       expect(keys).toEqual(["name", "age"]);
     }));
