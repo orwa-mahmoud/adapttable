@@ -8,11 +8,14 @@
  * was never bound simply never appears, and nothing on screen is missing.
  */
 import {
-  appendByKey,
   type Command,
+  commandPaletteCommands,
+  type CommandPaletteControllerOptions,
+  createCommandPaletteController,
   type FeatureHostState,
+  isCommandPaletteArmed,
+  OPEN_PALETTE_COMMAND,
   type TableCommandOptions,
-  tableCommands,
   type TableLabels,
 } from "@adapttable/core";
 import {
@@ -21,14 +24,13 @@ import {
   useContext,
   useMemo,
   useState,
+  useSyncExternalStore,
 } from "react";
 
 import { useFeatureHost } from "../features/featureHostContext";
-import { useEventCallback } from "../hooks/useEventCallback";
 import { type Shortcut, useShortcuts } from "./useShortcuts";
 
-/** The command key the default shortcut runs. */
-export const OPEN_PALETTE_COMMAND = "command-palette";
+export { OPEN_PALETTE_COMMAND } from "@adapttable/core";
 
 /**
  * How a host arms the palette.
@@ -78,6 +80,9 @@ export const CommandPaletteOpenContext = createContext<PaletteOpenState | null>(
   null
 );
 
+/** A palette configured with nothing: uncontrolled, and reporting to no one. */
+const UNCONFIGURED: CommandPaletteControllerOptions = {};
+
 /**
  * Hold a palette's open state: the host's, when it controls `open`, or the
  * table's own otherwise.
@@ -85,15 +90,19 @@ export const CommandPaletteOpenContext = createContext<PaletteOpenState | null>(
 export function usePaletteOpenState(
   options: CommandPaletteOptions | undefined
 ): PaletteOpenState {
-  const [localOpen, setLocalOpen] = useState(false);
-  const controlled = options?.open !== undefined;
-  const onOpenChange = options?.onOpenChange;
-  const setOpen = useEventCallback((next: boolean) => {
-    if (!controlled) setLocalOpen(next);
-    onOpenChange?.(next);
-  });
+  const settings = options ?? UNCONFIGURED;
+  const [controller] = useState(() => createCommandPaletteController(settings));
+  controller.configure(settings);
+  const { open: localOpen } = useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot,
+    controller.getSnapshot
+  );
   const open = options?.open ?? localOpen;
-  return useMemo(() => ({ open, setOpen }), [open, setOpen]);
+  return useMemo(
+    () => ({ open, setOpen: controller.setOpen }),
+    [open, controller]
+  );
 }
 
 /**
@@ -141,9 +150,7 @@ export function useCommandPalette(
   const { commandPalette } = options;
   const fromTree = useFeatureHost();
   const pluginCommands = (options.featureHost ?? fromTree)?.commands;
-  const enabled =
-    commandPalette !== false &&
-    (commandPalette !== undefined || Boolean(pluginCommands?.length));
+  const enabled = isCommandPaletteArmed(commandPalette, pluginCommands);
   const config =
     typeof commandPalette === "object" ? commandPalette : undefined;
   // A composed palette shares its state with the toolbar control through the
@@ -174,23 +181,17 @@ export function useCommandPalette(
 
   const commands = useMemo(
     () =>
-      !enabled
-        ? []
-        : [
-            ...tableCommands({
-              labels: options.labels,
-              onPrint: options.onPrint,
-              onExport: options.onExport,
-              exportLabel: options.exportLabel,
-              onClearFilters: options.onClearFilters,
-              hasFilters: options.hasFilters,
-            }),
-            ...appendByKey(
-              config?.commands ?? [],
-              pluginCommands ?? [],
-              (command) => command.key
-            ),
-          ],
+      commandPaletteCommands({
+        enabled,
+        labels: options.labels,
+        onPrint: options.onPrint,
+        onExport: options.onExport,
+        exportLabel: options.exportLabel,
+        onClearFilters: options.onClearFilters,
+        hasFilters: options.hasFilters,
+        commands: config?.commands,
+        registered: pluginCommands,
+      }),
     [
       enabled,
       config?.commands,
@@ -204,5 +205,9 @@ export function useCommandPalette(
     ]
   );
 
-  return { open: enabled && open, close, show, commands };
+  const shown = enabled && open;
+  return useMemo(
+    () => ({ open: shown, close, show, commands }),
+    [shown, close, show, commands]
+  );
 }

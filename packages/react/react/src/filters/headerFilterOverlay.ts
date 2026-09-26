@@ -1,40 +1,42 @@
 /**
- * Header-filter overlay session: stay open while the field is incomplete,
- * ignore nested kit dropdowns as "outside", and optionally dismiss once
- * a complete value is written (`closeOnSelect`).
+ * Header-filter overlay session — the React binding.
+ *
+ * Core's overlay model owns the session: the overlay stays open while the
+ * field is incomplete, ignores nested kit dropdowns as "outside", and
+ * optionally dismisses once a complete value is written (`closeOnSelect`).
+ * This module holds the shared open state in React context for kits whose
+ * headers remount on writes, and wires the model to React.
  */
 import {
-  defaultFilterRegistry,
-  type ExtraFilters,
+  bindHeaderFilterDismiss as bindNeutralDismiss,
+  createHeaderFilterOverlay,
   type FilterDef,
-  filterOpKey,
   type FilterTypeRegistry,
-  filterWidgetKind,
-  isValuelessFilterOp,
-  RANGE_SUFFIXES,
-  readRangeWidget,
+  HEADER_FILTER_SESSION_ATTR,
+  headerFilterInsideSelector,
+  type HeaderFilterOpenHost,
+  isHeaderFilterOpen,
+  watchOverlayDismiss,
 } from "@adapttable/core";
 import {
   createContext,
   createElement,
   type ReactNode,
-  useCallback,
   useContext,
   useEffect,
   useId,
   useMemo,
   useState,
+  useSyncExternalStore,
 } from "react";
 
-import { type FilterFormSource, scalarFilterText } from "./filterForm";
+import type { FilterFormSource } from "./filterForm";
 
-/**
- * Attribute tying a header filter's trigger to its overlay, so one editing
- * session is identifiable across both.
- *
- * @public
- */
-export const SESSION_ATTR = "data-adapttable-header-filter";
+export {
+  headerFilterFieldIsComplete,
+  type HeaderFilterOpenHost,
+  HEADER_FILTER_SESSION_ATTR as SESSION_ATTR,
+} from "@adapttable/core";
 
 /**
  * Props that keep one header filter's overlay session together.
@@ -43,20 +45,7 @@ export const SESSION_ATTR = "data-adapttable-header-filter";
  */
 export interface HeaderFilterSessionProps {
   /** Ties the trigger and its overlay to one editing session. */
-  readonly [SESSION_ATTR]: string;
-}
-
-/**
- * Host for header-filter open state that survives a kit remounting its
- * column title (antd rebuilds `columns[].title` on every extra-filter write).
- *
- * @public
- */
-export interface HeaderFilterOpenHost {
-  /** Column key whose overlay is open, or `null` when none is. */
-  readonly openKey: string | null;
-  /** Open this column's overlay, or pass `null` to close. */
-  readonly setOpenKey: (key: string | null) => void;
+  readonly [HEADER_FILTER_SESSION_ATTR]: string;
 }
 
 /**
@@ -83,42 +72,6 @@ export function HeaderFilterOpenProvider({
 }
 
 /**
- * Whether this write is a finished, single-control value — the only case
- * {@link bindHeaderFilterDismiss} will close the overlay when `closeOnSelect`
- * is on. Operator-only writes, typed terms, and multi-select toggles are
- * incomplete: another control is still waiting.
- *
- * @public
- */
-export function headerFilterFieldIsComplete<TRow>(
-  def: FilterDef<TRow>,
-  extra: ExtraFilters,
-  registry: FilterTypeRegistry = defaultFilterRegistry
-): boolean {
-  const kind = filterWidgetKind(def, registry) ?? def.type;
-  if (kind === "select" || kind === "boolean") {
-    return scalarFilterText(extra[def.key]) !== "";
-  }
-  if (kind === "text") {
-    const stored = extra[filterOpKey(def.key)];
-    return typeof stored === "string" && isValuelessFilterOp(stored);
-  }
-  if (kind === "dateRange") {
-    const suffixes = RANGE_SUFFIXES.dateRange;
-    const widget = readRangeWidget(
-      extra,
-      def.key + suffixes.start,
-      def.key + suffixes.end,
-      filterOpKey(def.key),
-      def.key,
-      "date"
-    );
-    return widget.op != null && isValuelessFilterOp(widget.op);
-  }
-  return false;
-}
-
-/**
  * Wrap a filter source so a complete write can dismiss the overlay.
  * Off unless `closeOnSelect` is true — the default is stay open.
  *
@@ -133,23 +86,7 @@ export function bindHeaderFilterDismiss<TRow>(
     registry?: FilterTypeRegistry;
   }
 ): FilterFormSource<TRow> {
-  if (options.closeOnSelect !== true) return source;
-  const afterWrite = (extra: ExtraFilters): void => {
-    if (headerFilterFieldIsComplete(options.def, extra, options.registry)) {
-      queueMicrotask(options.dismiss);
-    }
-  };
-  return {
-    ...source,
-    setExtra: (key, value) => {
-      source.setExtra(key, value);
-      afterWrite({ ...source.extra, [key]: value });
-    },
-    setExtras: (patch) => {
-      source.setExtras(patch);
-      afterWrite({ ...source.extra, ...patch });
-    },
-  };
+  return bindNeutralDismiss(source, options);
 }
 
 /**
@@ -164,41 +101,8 @@ export function usePointerDismiss(
   insideSelector: string
 ): void {
   useEffect(() => {
-    if (!open) return;
-    const isInside = (target: EventTarget | null): boolean => {
-      if (target instanceof Element && target.closest(insideSelector)) {
-        return true;
-      }
-      // Native <select> lists live outside the DOM. While that list is
-      // open the select stays focused inside the overlay — a click that
-      // lands on `document` after picking an option is not an outside click.
-      const active = document.activeElement;
-      return (
-        active instanceof HTMLSelectElement &&
-        active.closest(insideSelector) !== null
-      );
-    };
-    const onPointer = (event: Event): void => {
-      if (!armed) return;
-      if (isInside(event.target)) return;
-      dismiss();
-    };
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key === "Escape") dismiss();
-    };
-    let armed = false;
-    const arm = (): void => {
-      armed = true;
-    };
-    document.addEventListener("mousedown", onPointer);
-    document.addEventListener("touchstart", onPointer);
-    document.addEventListener("keydown", onKey);
-    queueMicrotask(arm);
-    return () => {
-      document.removeEventListener("mousedown", onPointer);
-      document.removeEventListener("touchstart", onPointer);
-      document.removeEventListener("keydown", onKey);
-    };
+    if (!open) return undefined;
+    return watchOverlayDismiss(document, insideSelector, dismiss);
   }, [open, dismiss, insideSelector]);
 }
 
@@ -229,50 +133,36 @@ export function useHeaderFilterOverlay<TRow>(
   const id = rawId.replaceAll(":", "");
   const persistKey = props.def.key;
   const host = useContext(HeaderFilterOpenContext);
-  const [localOpen, setLocalOpen] = useState(false);
-  const [resetKey, setResetKey] = useState(0);
-  const open = host != null ? host.openKey === persistKey : localOpen;
-  const setOpen = useCallback(
-    (next: boolean) => {
-      if (host != null) {
-        host.setOpenKey(next ? persistKey : null);
-        return;
-      }
-      setLocalOpen(next);
-    },
-    [host, persistKey]
+  const [controller] = useState(() =>
+    createHeaderFilterOverlay({ key: persistKey, host })
   );
-  const dismiss = useCallback(() => {
-    setOpen(false);
-    setResetKey((key) => key + 1);
-  }, [setOpen]);
+  controller.configure({ key: persistKey, host });
+  const { localOpen, resetKey } = useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot,
+    controller.getSnapshot
+  );
+  const open = isHeaderFilterOpen(host, persistKey, localOpen);
   const source = bindHeaderFilterDismiss(props.source, {
     def: props.def,
     closeOnSelect: props.closeOnSelect === true,
-    dismiss,
+    dismiss: controller.dismiss,
     registry: props.registry,
   });
-  const session = `[${SESSION_ATTR}="${id}"]`;
-  // Antd clones the header cell, so two triggers share one `openKey`. A click
-  // inside the clone's overlay is "outside" the other session and would clear
-  // the shared host. Treat every header-filter session as inside.
-  const inside =
-    host != null
-      ? `[${SESSION_ATTR}],[data-adapttable-part="filter-header-cell"]`
-      : session;
-  const selector = options?.nestedSelector
-    ? `${inside},${options.nestedSelector}`
-    : inside;
   usePointerDismiss(
     open && options?.pointerDismiss !== false,
-    dismiss,
-    selector
+    controller.dismiss,
+    headerFilterInsideSelector({
+      sessionId: id,
+      sharedHost: host != null,
+      nestedSelector: options?.nestedSelector,
+    })
   );
   return {
     open,
-    setOpen,
+    setOpen: controller.setOpen,
     source,
-    sessionProps: { [SESSION_ATTR]: id },
+    sessionProps: { [HEADER_FILTER_SESSION_ATTR]: id },
     resetKey,
   };
 }

@@ -35,6 +35,11 @@ export {
 export { engineSearchText } from "./engine/searchText";
 // Presentation contracts for an agent write awaiting a human. Type-only: an
 // adapter names them without any AI runtime reaching its graph.
+export {
+  resolveTableStatus,
+  type TableStatusAnnouncementOptions,
+  type TableStatusSignature,
+} from "./a11y/statusAnnouncement";
 export type {
   AgentApprovalDecision,
   AgentApprovalOperation,
@@ -80,6 +85,28 @@ export {
 } from "./actions/confirm";
 /* ── Shared prop surface + orchestration ───────────────────────────── */
 /* ── Declarative filters & data tiers ──────────────────────────────── */
+export {
+  type CommandListController,
+  type CommandListKeyAction,
+  commandListKeyAction,
+  type CommandListSnapshot,
+  type CommandListView,
+  commandListView,
+  createCommandList,
+  nextCommandIndex,
+  runCommand,
+  tabTrapTarget,
+} from "./actions/commandListModel";
+export {
+  commandPaletteCommands,
+  type CommandPaletteCommandsOptions,
+  type CommandPaletteController,
+  type CommandPaletteControllerOptions,
+  type CommandPaletteSnapshot,
+  createCommandPaletteController,
+  isCommandPaletteArmed,
+  OPEN_PALETTE_COMMAND,
+} from "./actions/commandPaletteController";
 export type { Command } from "./actions/commandRegistry";
 export { filterCommands, tableCommands } from "./actions/commandRegistry";
 export type {
@@ -87,6 +114,23 @@ export type {
   ContextMenuItem,
   ContextMenuTarget,
 } from "./actions/contextMenuModel";
+export {
+  composeContextMenuExtra,
+  type ContextMenuKeyEvent,
+  type ContextMenuMoveEvent,
+  type ContextMenuOpenController,
+  type ContextMenuOpenControllerOptions,
+  type ContextMenuOpenSnapshot,
+  type ContextMenuPoint,
+  type ContextMenuPointerEvent,
+  type ContextMenuPressEvent,
+  type ContextMenuRegionHandlers,
+  type ContextMenuState,
+  type ContextMenuTriggerHandlers,
+  createContextMenuOpenController,
+  isContextMenuArmed,
+  isContextMenuKey,
+} from "./actions/contextMenuOpenController";
 export {
   type Aggregatable,
   type AggregatableConfig,
@@ -280,6 +324,20 @@ export {
   walkFilterTreeConditions,
 } from "./filters/filterTreeMutations";
 export {
+  bindHeaderFilterDismiss,
+  createHeaderFilterOverlay,
+  HEADER_FILTER_SESSION_ATTR,
+  headerFilterFieldIsComplete,
+  headerFilterInsideSelector,
+  type HeaderFilterOpenHost,
+  type HeaderFilterOverlayController,
+  type HeaderFilterOverlayOptions,
+  type HeaderFilterOverlaySnapshot,
+  type HeaderFilterWrites,
+  isHeaderFilterOpen,
+  watchOverlayDismiss,
+} from "./filters/headerFilterOverlay";
+export {
   DATE_OP_LABEL_KEYS,
   DATE_OPS,
   FILTER_OP_SUFFIX,
@@ -326,6 +384,15 @@ export {
   resolveRelativeRange,
   splitRelativeToken,
 } from "./filters/relativeDates";
+export {
+  clampMatchIndex,
+  createFindController,
+  FIND_URL_WRITE_DEBOUNCE_MS,
+  type FindController,
+  type FindControllerOptions,
+  type FindSnapshot,
+  readFindQuery,
+} from "./find/findController";
 export {
   findMatches,
   type FindMatchesOptions,
@@ -487,6 +554,17 @@ export {
   routerUrlAdapter,
   type RouterUrlAdapterOptions,
 } from "./url/routerAdapter";
+export {
+  createSavedViewsController,
+  SAVED_VIEW_VERSION,
+  type SavedView,
+  type SavedViewMigration,
+  type SavedViewsController,
+  type SavedViewsControllerOptions,
+  type SavedViewsSnapshot,
+  type SavedViewsStore,
+  type SavedViewVisibility,
+} from "./url/savedViewsController";
 export type { UrlStateAdapter } from "./url/urlStateAdapter";
 export {
   columnLayoutSlice,
@@ -822,6 +900,18 @@ export {
   rowsToCsv,
   type RowsToCsvOptions,
 } from "./export/csv";
+export {
+  createExportController,
+  type ExportController,
+  type ExportControllerOptions,
+  type ExportProgressState,
+  type ExportRunHandler,
+  type ExportSnapshot,
+  type ExportStatus,
+  resolveExportAnnouncement,
+  resolveExportDisabledReason,
+  resolveExportProgressState,
+} from "./export/exportController";
 export {
   exportViewFromChrome,
   filterExportView,

@@ -14,20 +14,21 @@
  * chrome needs. There is no third thing to remember.
  */
 import {
+  composeContextMenuExtra,
   type ContextMenuActions,
   type ContextMenuItem,
   contextMenuItems,
   type ContextMenuTarget,
   type FeatureHostState,
-  resolveContextTarget,
+  isContextMenuArmed,
   type RowAction,
   type TableLabels,
 } from "@adapttable/core";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 import type { ColumnDef } from "../columnDef";
 import { useFeatureHost } from "../features/featureHostContext";
-import { type ContextMenuPoint, useContextMenu } from "./useContextMenu";
+import { type ContextMenuPoint, useContextMenuOpen } from "./useContextMenu";
 
 /**
  * How a host arms the context menu.
@@ -101,136 +102,63 @@ export interface TableContextMenu {
 export function useTableContextMenu<TRow>(
   options: TableContextMenuOptions<TRow>
 ): TableContextMenu {
+  const {
+    contextMenu,
+    columns,
+    labels,
+    rowFor,
+    actions,
+    sortBy,
+    sortDir,
+    isPinned,
+    rowPins,
+  } = options;
   const fromTree = useFeatureHost<TRow>();
   const pluginMenus = (options.featureHost ?? fromTree)?.contextMenuItems;
-  const enabled =
-    options.contextMenu !== false &&
-    (options.contextMenu !== undefined || Boolean(pluginMenus?.length));
-  const menu = useContextMenu<TRow>(enabled);
-  const { rowFor } = options;
+  const enabled = isContextMenuArmed(contextMenu, pluginMenus);
+  const { controller, open } = useContextMenuOpen<TRow>(enabled);
 
-  // The region's handlers are the trigger's, with the target resolved from
-  // whatever the event started at rather than fixed at bind time.
-  const forEvent = useCallback(
-    <E extends { target: EventTarget | null }>(
-      event: E,
-      run: (
-        props: ReturnType<typeof menu.triggerProps>,
-        element: Element
-      ) => void
-    ) => {
-      const from = event.target;
-      if (!(from instanceof Element)) return;
-      const found = resolveContextTarget<TRow>(from, rowFor);
-      if (!found) return;
-      run(menu.triggerProps(found.target), found.element);
-    },
-    [menu, rowFor]
+  // One set of handlers for the whole region; each opening route resolves its
+  // target from the element the event started at, and the press-tracking
+  // routes resolve none.
+  const regionProps = useMemo<Record<string, unknown>>(
+    () => (enabled ? { ...controller.regionHandlers(rowFor) } : {}),
+    [controller, enabled, rowFor]
   );
 
-  // The press handlers are target-free, so they are taken once rather than
-  // rebuilt per event: only the opening routes need to know what was hit.
-  const press = useMemo(
-    () => menu.triggerProps({ kind: "row", row: undefined as TRow, rowId: "" }),
-    [menu]
-  );
-
-  const regionProps = useMemo(
+  const extra = typeof contextMenu === "object" ? contextMenu.items : undefined;
+  const items = useMemo(
     () =>
-      enabled
-        ? {
-            onContextMenu: (event: React.MouseEvent<HTMLElement>) => {
-              const prevent = () => {
-                event.preventDefault();
-              };
-              forEvent(event, (props, element) => {
-                // Built field by field, never spread: a React synthetic
-                // event keeps `clientX` and the rest on its prototype, so
-                // `{...event}` yields an object with none of them and a
-                // menu that silently never opens.
-                props.onContextMenu({
-                  preventDefault: prevent,
-                  clientX: event.clientX,
-                  clientY: event.clientY,
-                  currentTarget: element,
-                });
-              });
-            },
-            onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
-              // The key is checked BEFORE the target is resolved. This fires
-              // on every keystroke in the table, typing in a cell editor
-              // included, and resolving a target first would put a DOM walk
-              // behind each one — the same mistake the pointer handlers made.
-              const opens =
-                event.key === "ContextMenu" ||
-                (event.shiftKey && event.key === "F10");
-              if (!opens) return;
-              const prevent = () => {
-                event.preventDefault();
-              };
-              forEvent(event, (props, element) => {
-                props.onKeyDown({
-                  key: event.key,
-                  shiftKey: event.shiftKey,
-                  preventDefault: prevent,
-                  currentTarget: element,
-                });
-              });
-            },
-            onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
-              forEvent(event, (props, element) => {
-                props.onPointerDown({
-                  pointerType: event.pointerType,
-                  clientX: event.clientX,
-                  clientY: event.clientY,
-                  currentTarget: element,
-                });
-              });
-            },
-            // These three need no target, so they must not resolve one.
-            // `onPointerMove` fires on every mouse movement across the whole
-            // table, and a `closest()` walk per movement made a browser test
-            // suite six times slower before this was noticed.
-            onPointerMove: (event: React.PointerEvent<HTMLElement>) => {
-              press.onPointerMove({
-                clientX: event.clientX,
-                clientY: event.clientY,
-              });
-            },
-            onPointerUp: press.onPointerUp,
-            onPointerCancel: press.onPointerCancel,
-          }
-        : {},
-    [enabled, forEvent, press]
+      open
+        ? contextMenuItems<TRow>({
+            target: open.target,
+            columns,
+            labels,
+            actions,
+            sortBy,
+            sortDir,
+            isPinned,
+            rowPins,
+            extra: composeContextMenuExtra(extra, pluginMenus),
+          })
+        : [],
+    [
+      open,
+      columns,
+      labels,
+      actions,
+      sortBy,
+      sortDir,
+      isPinned,
+      rowPins,
+      extra,
+      pluginMenus,
+    ]
   );
 
-  const items = useMemo(() => {
-    if (!menu.open) return [];
-    const extra =
-      typeof options.contextMenu === "object"
-        ? options.contextMenu.items
-        : undefined;
-    const plugins = extra
-      ? pluginMenus?.filter((factory) => factory !== extra)
-      : pluginMenus;
-    const itemsFor = plugins?.length
-      ? (target: ContextMenuTarget<TRow>) => [
-          ...(extra?.(target) ?? []),
-          ...plugins.flatMap((factory) => [...factory(target)]),
-        ]
-      : extra;
-    return contextMenuItems<TRow>({
-      target: menu.open.target,
-      columns: options.columns,
-      labels: options.labels,
-      actions: options.actions,
-      sortBy: options.sortBy,
-      sortDir: options.sortDir,
-      isPinned: options.isPinned,
-      rowPins: options.rowPins,
-      extra: itemsFor,
-    });
-  }, [menu.open, options, pluginMenus]);
-
-  return { regionProps, items, at: menu.open?.at ?? null, close: menu.close };
+  const at = open?.at ?? null;
+  return useMemo(
+    () => ({ regionProps, items, at, close: controller.close }),
+    [regionProps, items, at, controller]
+  );
 }
