@@ -1,5 +1,18 @@
 # @adapttable/antd
 
+## 3.2.4
+
+### Patch Changes
+
+- 36d14b9: A selectable row's `aria-selected` follows its checkbox, so screen readers hear a row become selected. Ant Design rows also carry `data-index` and `aria-selected`, as every other kit's rows do.
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+  - @adapttable/core@3.3.0
+  - @adapttable/react@1.3.3
+
 ## 3.2.3
 
 ### Patch Changes

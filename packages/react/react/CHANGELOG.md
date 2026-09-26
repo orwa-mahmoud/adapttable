@@ -1,5 +1,19 @@
 # @adapttable/react
 
+## 1.3.3
+
+### Patch Changes
+
+- 36d14b9: Core exports the Chrome model: the pure derivation from table state to layout, rows, `data-adapttable-part` names and prop getters, generic over the binding's render node. React's shell and chrome render from it.
+- 36d14b9: Core exports the table's interaction controllers: cell editing (drafts, validation, save state, undo and redo), grid focus and cell navigation (ranges, fill, clipboard, paste and announcements against a container element), the row reorder engine (keyboard grab, drag and drop, grouped and tree moves), and the models behind find in table, the context menu, the command palette, the export handler, saved views, the header-filter overlay and the status announcements. React's hooks subscribe to them with their API and behaviour unchanged.
+- 36d14b9: Core exports the table's state layer for any framework binding: `TableOptions` and the runtime contracts, the history and memory URL adapters, a view-state store for everything the table writes to the URL, the data-tier controller (tier resolution, `onQueryChange`, aborts, `refetch`, cursor and infinite paging), and controllable selection, expansion, pinning and column-layout stores. `@adapttable/react` runs on them with its API and behaviour unchanged.
+- 36d14b9: A selectable row's `aria-selected` follows its checkbox, so screen readers hear a row become selected. Ant Design rows also carry `data-index` and `aria-selected`, as every other kit's rows do.
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+  - @adapttable/core@3.3.0
+
 ## 1.3.2
 
 ### Patch Changes

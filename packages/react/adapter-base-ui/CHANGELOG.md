@@ -1,5 +1,17 @@
 # @adapttable/base-ui
 
+## 3.2.4
+
+### Patch Changes
+
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+- Updated dependencies [36d14b9]
+  - @adapttable/core@3.3.0
+  - @adapttable/react@1.3.3
+
 ## 3.2.3
 
 ### Patch Changes
