@@ -307,6 +307,7 @@ export type {
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "./rows/extraRows";
 export type { IncrementalViewConfig } from "./rows/incremental";
 export type { RowPinLookup, RowPinSide } from "./rows/rowPinModel";
+export { ROW_DND_MIME } from "./rows/rowReorderEngine";
 export type { RowReorderDigest } from "./rows/rowReorderModel";
 export type { RowHeight, RowStyle } from "./rows/rowStyle";
 export type { SortLevel } from "./sort/compare";

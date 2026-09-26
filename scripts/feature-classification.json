@@ -27,11 +27,12 @@
       "implementation": [
         "react/src/features/row-reorder.tsx",
         "react/src/rows/rowReorder.ts",
-        "core/src/rows/rowMove.ts"
+        "core/src/rows/rowMove.ts",
+        "core/src/rows/rowReorderEngine.ts"
       ],
       "adapterComponents": ["kitControls"],
       "standardPreset": false,
-      "note": "The feature provider owns flat and sibling reorder, grouped moves, tree re-parenting, confirmation policy, and cycle guards; adapters own the grip, mobile buttons, and kit-native destination menu. Nothing in the base graph reaches the move engine.",
+      "note": "Core's reorder engine owns flat and sibling reorder, grouped moves, tree re-parenting, confirmation policy, and cycle guards, and the feature provider wires it to the table; adapters own the grip, mobile buttons, and kit-native destination menu. Nothing in the base graph reaches the move engine.",
       "requiresConfig": true
     },
     "rowPinning": {
@@ -691,6 +692,7 @@
       "core/src/rows/rowEditingDigest.ts",
       "core/src/rows/rowPinModel.ts",
       "core/src/rows/rowReorderModel.ts",
+      "core/src/rows/rowReorderEngine.ts",
       "core/src/selection/selectionState.ts",
       "core/src/sort/compare.ts",
       "core/src/sort/cycleSort.ts",
