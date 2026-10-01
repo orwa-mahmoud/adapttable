@@ -1,0 +1,1 @@
+export { useDataTable } from "./useDataTable";
