@@ -27,6 +27,7 @@ import {
   Component,
   computed,
   input,
+  type Signal,
 } from "@angular/core";
 
 /** The entry either slot draws. */
@@ -118,10 +119,6 @@ function groupEntryView(
     aggregateCells: computed(() => {
       const current = entry();
       return current.kind === "groupMore" ? undefined : current.aggregateCells;
-    }),
-    aggregateOps: computed(() => {
-      const current = entry();
-      return current.kind === "groupMore" ? undefined : current.aggregateOps;
     }),
   };
 }
@@ -247,6 +244,13 @@ export class AdaptGroupHeaderRow {
 
   protected readonly chevron = CHEVRON;
   protected readonly moreSlots = { Button: AdaptGroupMore };
+  /** Operations for the current group or footer, retaining the model type. */
+  protected readonly aggregateOps: Signal<
+    Parameters<typeof groupRowLayout>[2]
+  > = computed(() => {
+    const current = this.props().entry;
+    return current.kind === "groupMore" ? undefined : current.aggregateOps;
+  });
   protected readonly view = groupEntryView(
     () => this.props().entry,
     () => this.props().selection
@@ -256,7 +260,7 @@ export class AdaptGroupHeaderRow {
     groupRowLayout<never, ColumnDef<never>>(
       this.props().columns,
       this.view.aggregateCells(),
-      this.view.aggregateOps()
+      this.aggregateOps()
     )
   );
 
@@ -360,6 +364,13 @@ export class AdaptGroupHeaderCard {
 
   protected readonly chevron = CHEVRON;
   protected readonly moreSlots = { Button: AdaptGroupMore };
+  /** Operations for the current group or footer, retaining the model type. */
+  protected readonly aggregateOps: Signal<
+    Parameters<typeof groupRowLayout>[2]
+  > = computed(() => {
+    const current = this.props().entry;
+    return current.kind === "groupMore" ? undefined : current.aggregateOps;
+  });
   protected readonly view = groupEntryView(
     () => this.props().entry,
     () => this.props().selection
@@ -369,7 +380,7 @@ export class AdaptGroupHeaderCard {
     groupAggregateEntries<never, ColumnDef<never>>(
       this.props().columns,
       this.view.aggregateCells(),
-      this.view.aggregateOps()
+      this.aggregateOps()
     )
   );
 

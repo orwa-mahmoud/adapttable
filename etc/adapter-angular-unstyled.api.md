@@ -11,7 +11,6 @@ import { AdaptPivotRowHeader } from '@adapttable/angular/pivot';
 import { AdaptTableFeature } from '@adapttable/angular';
 import { AfterViewInit } from '@angular/core';
 import { AgentApprovalProps } from '@adapttable/angular';
-import { AggregateOperationId } from '@adapttable/core';
 import { Attrs } from '@adapttable/angular';
 import { BatchEditBarProps } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/core';
@@ -77,6 +76,7 @@ import { GroupingPanelSlots } from '@adapttable/angular';
 import { GroupMoreButtonSlotProps } from '@adapttable/angular';
 import { GroupRowCell } from '@adapttable/core';
 import { GroupRowLayout } from '@adapttable/core';
+import { groupRowLayout } from '@adapttable/angular';
 import { HeaderSelectionState } from '@adapttable/core';
 import { HtmlGroupedHeaderCell } from '@adapttable/angular';
 import * as i0 from '@angular/core';
@@ -1043,6 +1043,7 @@ export class AdaptFullscreenButton {
 
 // @public
 export class AdaptGroupHeaderCard {
+    protected readonly aggregateOps: Signal<Parameters<typeof groupRowLayout>[2]>;
     // (undocumented)
     protected readonly aggregates: Signal<GroupRowCell<never, ColumnDef<never>>[]>;
     protected caption(column: ColumnDef<never>): string | undefined;
@@ -1055,58 +1056,57 @@ export class AdaptGroupHeaderCard {
     readonly props: InputSignal<GroupHeaderCardSlotProps<never, SelectionState, ColumnDef<never>>>;
     // (undocumented)
     protected readonly view: {
-        parts: Signal<    {
-        row: string;
-        cell: string;
-        card: string;
-        label: string;
+        parts: Signal<{
+            row: string;
+            cell: string;
+            card: string;
+            label: string;
         }>;
         plain: Signal<boolean>;
         expanded: Signal<boolean>;
         collapsed: Signal<"true" | null>;
-        group: Signal<    {
-        kind: "group";
-        key: string;
-        value: unknown;
-        label: string;
-        level: number;
-        groupBy: string;
-        path: readonly string[];
-        group?: RowGroupRef;
-        leafRows: readonly never[];
-        leafIds: readonly string[];
-        serverCount?: number;
-        aggregateCells?: Partial<Record<string, DisplayValue>>;
-        aggregateOps?: GroupAggregateOps;
-        collapsed: boolean;
+        group: Signal<{
+            kind: "group";
+            key: string;
+            value: unknown;
+            label: string;
+            level: number;
+            groupBy: string;
+            path: readonly string[];
+            group?: RowGroupRef;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            serverCount?: number;
+            aggregateCells?: Partial<Record<string, DisplayValue>>;
+            aggregateOps?: GroupAggregateOps;
+            collapsed: boolean;
         } | undefined>;
-        footer: Signal<    {
-        kind: "groupFooter";
-        key: string;
-        groupKey: string;
-        level: number;
-        groupBy: string;
-        label: string;
-        leafRows: readonly never[];
-        leafIds: readonly string[];
-        aggregateCells?: Partial<Record<string, DisplayValue>>;
-        aggregateOps?: GroupAggregateOps;
+        footer: Signal<{
+            kind: "groupFooter";
+            key: string;
+            groupKey: string;
+            level: number;
+            groupBy: string;
+            label: string;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            aggregateCells?: Partial<Record<string, DisplayValue>>;
+            aggregateOps?: GroupAggregateOps;
         } | undefined>;
-        more: Signal<    {
-        kind: "groupMore";
-        key: string;
-        groupKey?: string;
-        level: number;
-        scope: "groups" | "rows";
-        remaining: number;
-        leafRows: readonly never[];
-        leafIds: readonly string[];
-        label: string;
+        more: Signal<{
+            kind: "groupMore";
+            key: string;
+            groupKey?: string;
+            level: number;
+            scope: "groups" | "rows";
+            remaining: number;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            label: string;
         } | undefined>;
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
@@ -1122,12 +1122,13 @@ export class AdaptGroupHeaderCard {
 
 // @public
 export class AdaptGroupHeaderRow {
+    protected readonly aggregateOps: Signal<Parameters<typeof groupRowLayout>[2]>;
     // (undocumented)
     protected readonly chevron: IconDescriptor;
     // (undocumented)
-    protected readonly labelCellStyle: Signal<    {
-    paddingInlineStart?: string;
-    fontWeight: number;
+    protected readonly labelCellStyle: Signal<{
+        paddingInlineStart?: string;
+        fontWeight: number;
     }>;
     // (undocumented)
     protected readonly layout: Signal<GroupRowLayout<never, ColumnDef<never>>>;
@@ -1138,58 +1139,57 @@ export class AdaptGroupHeaderRow {
     readonly props: InputSignal<GroupHeaderRowSlotProps<never, SelectionState, ColumnDef<never>>>;
     // (undocumented)
     protected readonly view: {
-        parts: Signal<    {
-        row: string;
-        cell: string;
-        card: string;
-        label: string;
+        parts: Signal<{
+            row: string;
+            cell: string;
+            card: string;
+            label: string;
         }>;
         plain: Signal<boolean>;
         expanded: Signal<boolean>;
         collapsed: Signal<"true" | null>;
-        group: Signal<    {
-        kind: "group";
-        key: string;
-        value: unknown;
-        label: string;
-        level: number;
-        groupBy: string;
-        path: readonly string[];
-        group?: RowGroupRef;
-        leafRows: readonly never[];
-        leafIds: readonly string[];
-        serverCount?: number;
-        aggregateCells?: Partial<Record<string, DisplayValue>>;
-        aggregateOps?: GroupAggregateOps;
-        collapsed: boolean;
+        group: Signal<{
+            kind: "group";
+            key: string;
+            value: unknown;
+            label: string;
+            level: number;
+            groupBy: string;
+            path: readonly string[];
+            group?: RowGroupRef;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            serverCount?: number;
+            aggregateCells?: Partial<Record<string, DisplayValue>>;
+            aggregateOps?: GroupAggregateOps;
+            collapsed: boolean;
         } | undefined>;
-        footer: Signal<    {
-        kind: "groupFooter";
-        key: string;
-        groupKey: string;
-        level: number;
-        groupBy: string;
-        label: string;
-        leafRows: readonly never[];
-        leafIds: readonly string[];
-        aggregateCells?: Partial<Record<string, DisplayValue>>;
-        aggregateOps?: GroupAggregateOps;
+        footer: Signal<{
+            kind: "groupFooter";
+            key: string;
+            groupKey: string;
+            level: number;
+            groupBy: string;
+            label: string;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            aggregateCells?: Partial<Record<string, DisplayValue>>;
+            aggregateOps?: GroupAggregateOps;
         } | undefined>;
-        more: Signal<    {
-        kind: "groupMore";
-        key: string;
-        groupKey?: string;
-        level: number;
-        scope: "groups" | "rows";
-        remaining: number;
-        leafRows: readonly never[];
-        leafIds: readonly string[];
-        label: string;
+        more: Signal<{
+            kind: "groupMore";
+            key: string;
+            groupKey?: string;
+            level: number;
+            scope: "groups" | "rows";
+            remaining: number;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            label: string;
         } | undefined>;
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {
