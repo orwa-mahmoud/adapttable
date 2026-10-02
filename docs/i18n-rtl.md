@@ -1,4 +1,4 @@
-# React table i18n & RTL — Arabic, Hebrew, 18 locales
+# React table i18n & RTL — Arabic, Hebrew, 19 locales
 
 ▶ **See it working:** [flip the whole table to Arabic RTL in the live demo](https://adapttable.orwamahmoud.com/react/demo/mantine/rtl/) — a real table you can interact with, not a recording.
 
@@ -61,6 +61,7 @@ unknown locales; `hasLocale(locale)` tells you whether a preset exists.
 | ------- | --------------------- | --------- |
 | `en`    | English               | ltr       |
 | `ar`    | Arabic                | rtl       |
+| `cs`    | Czech                 | ltr       |
 | `de`    | German                | ltr       |
 | `es`    | Spanish               | ltr       |
 | `fa`    | Persian               | rtl       |
@@ -115,7 +116,7 @@ Helpers from `@adapttable/i18n`:
 - `RTL_LANGUAGES` — the raw list of RTL primary subtags
 - `primarySubtag(locale)` — `"ar-EG"` → `"ar"`
 - `locales` — every preset keyed by tag (`LocaleKey`); each preset is also a
-  named export (`ar`, `de`, …, `zhTW` for `zh-TW`)
+  named export (`ar`, `cs`, `de`, …, `zhTW` for `zh-TW`)
 
 ## Custom labels
 

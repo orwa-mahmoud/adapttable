@@ -6,7 +6,7 @@
 
 Locale presets and **RTL** helpers for [AdaptTable](https://github.com/orwa-mahmoud/adapttable).
 The core stays i18n-agnostic; this optional package gives you ready label
-sets for **18 languages** — English, Arabic, German, Spanish, Persian,
+sets for **19 languages** — English, Arabic, Czech, German, Spanish, Persian,
 French, Hebrew, Hindi, Italian, Japanese, Korean, Polish, Portuguese, Russian,
 Turkish, Urdu, Simplified Chinese, and Traditional Chinese — plus direction
 utilities, so you get multilingual, right-to-left support for free.
@@ -43,7 +43,7 @@ function LocalizedTable({ locale }: { locale: string }) {
   subtag, e.g. `"de-AT"` → German); falls back to English.
 - `getDirection(locale)` → `"ltr" | "rtl"`.
 - `isRtlLocale(locale)` / `primarySubtag(locale)` / `RTL_LANGUAGES`.
-- Raw preset objects: `en`, `ar`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`,
+- Raw preset objects: `en`, `ar`, `cs`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`,
   `zh`. `locales` — the keyed map; `hasLocale(locale)` — membership check.
 
 Bring your own languages by spreading a preset and overriding strings:

@@ -135,7 +135,7 @@ Optional behavior is imported from feature subpaths such as
 | `@adapttable/base-ui`          | Base UI adapter — batteries-included `<DataTable>` on `@base-ui/react`.    |
 | `@adapttable/unstyled`         | Headless primitives + Tailwind / shadcn classes.                           |
 | `@adapttable/shadcn`           | shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn preset. |
-| `@adapttable/i18n`             | Optional locale presets (18 languages, incl. RTL) + direction helpers.     |
+| `@adapttable/i18n`             | Optional locale presets (19 languages, incl. RTL) + direction helpers.     |
 | `@adapttable/cli`              | `npx @adapttable/cli init` / `migrate-v3` — scaffold or upgrade v2 source. |
 | `@adapttable/server`           | React-free query parsing for a host backend.                               |
 | `@adapttable/ai`               | Optional provider-neutral table agent contract.                            |
@@ -195,7 +195,7 @@ See the [customization guide](https://adapttable.orwamahmoud.com/react/customiza
 
 ## i18n, RTL & dark mode
 
-- **Core is i18n-agnostic** — pass `labels` (pre-translated strings from _your_ i18n stack), or grab ready presets from `@adapttable/i18n` (18 locales).
+- **Core is i18n-agnostic** — pass `labels` (pre-translated strings from _your_ i18n stack), or grab ready presets from `@adapttable/i18n` (19 locales).
 - **RTL** is first-class: `dir="rtl"` flows through logical CSS and each adapter's direction provider.
 - **Dark mode** follows the host app or `prefers-color-scheme`, mapped to each kit's theming.
 

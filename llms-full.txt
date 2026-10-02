@@ -16312,7 +16312,7 @@ the press is cancelled. Mouse and pen presses never open the menu by holding.
 
 ---
 
-# React table i18n & RTL — Arabic, Hebrew, 18 locales
+# React table i18n & RTL — Arabic, Hebrew, 19 locales
 
 ▶ **See it working:** [flip the whole table to Arabic RTL in the live demo](https://adapttable.orwamahmoud.com/react/demo/mantine/rtl/) — a real table you can interact with, not a recording.
 
@@ -16375,6 +16375,7 @@ unknown locales; `hasLocale(locale)` tells you whether a preset exists.
 | ------- | --------------------- | --------- |
 | `en`    | English               | ltr       |
 | `ar`    | Arabic                | rtl       |
+| `cs`    | Czech                 | ltr       |
 | `de`    | German                | ltr       |
 | `es`    | Spanish               | ltr       |
 | `fa`    | Persian               | rtl       |
@@ -16429,7 +16430,7 @@ Helpers from `@adapttable/i18n`:
 - `RTL_LANGUAGES` — the raw list of RTL primary subtags
 - `primarySubtag(locale)` — `"ar-EG"` → `"ar"`
 - `locales` — every preset keyed by tag (`LocaleKey`); each preset is also a
-  named export (`ar`, `de`, …, `zhTW` for `zh-TW`)
+  named export (`ar`, `cs`, `de`, …, `zhTW` for `zh-TW`)
 
 ## Custom labels
 
@@ -19082,7 +19083,7 @@ API the column-layout hook needs, injectable for tests. `SavedViewsMenu` /
 exports `Kit`, the union of UI kits `@adapttable/cli init` can detect.
 
 **Locale exports.** `@adapttable/i18n` exports one label set per locale, named
-by its tag: `ar`, `de`, `en`, `es`, `fa`, `fr`, `he`, `hi`, `it`, `ja`, `ko`,
+by its tag: `ar`, `cs`, `de`, `en`, `es`, `fa`, `fr`, `he`, `hi`, `it`, `ja`, `ko`,
 `pl`, `pt`, `ru`, `tr`, `ur`, `zh`, `zhTW`. See
 [i18n & RTL](./i18n-rtl.md).
 
@@ -20601,7 +20602,7 @@ Importing the root table does not import the assistant or AI runtime.
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
   `isRtlLocale(locale)`, `hasLocale(locale)`, `primarySubtag(locale)`,
   `RTL_LANGUAGES`, `locales` (keyed by `LocaleKey`) and the bundled
-  presets (`en`, `ar`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
+  presets (`en`, `ar`, `cs`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
   … including `zhTW`) — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--force]`; programmatic
   `detectFramework`, `detectKit`, `choosePackageManager`, `installCommand`,
@@ -20737,7 +20738,7 @@ const source = useQuerySource({ usePaginatedQuery });
 
 Yes, RTL is first-class. Column alignment uses **logical CSS** (`start`/`end`),
 so it flips automatically under `dir="rtl"`. The optional `@adapttable/i18n`
-package ships **18 locales** — English, Arabic, German, Spanish, Persian,
+package ships **19 locales** — English, Arabic, Czech, German, Spanish, Persian,
 French, Hebrew, Hindi, Italian, Japanese, Korean, Polish, Portuguese, Russian,
 Turkish, Urdu, Simplified Chinese, and Traditional Chinese — plus `getDirection` /
 `isRtlLocale` helpers. Arabic, Hebrew, Persian, and Urdu are right-to-left.

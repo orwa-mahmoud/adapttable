@@ -2295,7 +2295,7 @@ API the column-layout hook needs, injectable for tests. `SavedViewsMenu` /
 exports `Kit`, the union of UI kits `@adapttable/cli init` can detect.
 
 **Locale exports.** `@adapttable/i18n` exports one label set per locale, named
-by its tag: `ar`, `de`, `en`, `es`, `fa`, `fr`, `he`, `hi`, `it`, `ja`, `ko`,
+by its tag: `ar`, `cs`, `de`, `en`, `es`, `fa`, `fr`, `he`, `hi`, `it`, `ja`, `ko`,
 `pl`, `pt`, `ru`, `tr`, `ur`, `zh`, `zhTW`. See
 [i18n & RTL](./i18n-rtl.md).
 
@@ -3814,7 +3814,7 @@ Importing the root table does not import the assistant or AI runtime.
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
   `isRtlLocale(locale)`, `hasLocale(locale)`, `primarySubtag(locale)`,
   `RTL_LANGUAGES`, `locales` (keyed by `LocaleKey`) and the bundled
-  presets (`en`, `ar`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
+  presets (`en`, `ar`, `cs`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
   … including `zhTW`) — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--force]`; programmatic
   `detectFramework`, `detectKit`, `choosePackageManager`, `installCommand`,

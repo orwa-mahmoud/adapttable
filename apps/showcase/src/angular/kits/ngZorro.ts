@@ -38,6 +38,7 @@ import { tree } from "@adapttable/ng-zorro/tree";
 import { virtualize } from "@adapttable/ng-zorro/virtualize";
 import {
   ar_EG,
+  cs_CZ,
   de_DE,
   en_US,
   es_ES,
@@ -66,6 +67,7 @@ import type { ShowcaseKit } from "../showcaseKit";
 const NZ_LOCALES = {
   en: en_US,
   ar: ar_EG,
+  cs: cs_CZ,
   de: de_DE,
   es: es_ES,
   fa: fa_IR,
