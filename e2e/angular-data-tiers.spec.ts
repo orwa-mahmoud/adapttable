@@ -88,7 +88,7 @@ for (const kit of ANGULAR_KITS) {
         await expect(part(page, "row").first()).toContainText(
           "Alternate Ada Lovelace"
         );
-        await part(page, "search-input").fill("Alternate Ada");
+        await part(page, "search").fill("Alternate Ada");
         await expect(part(page, "row")).toHaveCount(1);
         expect(await table.evaluate((element) => element.isConnected)).toBe(
           true
@@ -101,10 +101,10 @@ for (const kit of ANGULAR_KITS) {
           "11"
         );
         expect(await names(page)).toEqual(queryPage);
-        await expect(part(page, "search-input")).toHaveValue("");
+        await expect(part(page, "search")).toHaveValue("");
 
         await alternate.click();
-        await expect(part(page, "search-input")).toHaveValue("Alternate Ada");
+        await expect(part(page, "search")).toHaveValue("Alternate Ada");
         await expect(part(page, "row")).toHaveCount(1);
         await expect(part(page, "row").first()).toContainText(
           "Alternate Ada Lovelace"
