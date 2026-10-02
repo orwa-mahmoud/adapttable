@@ -433,7 +433,7 @@ label/value pairs, and a two-dimensional focus model does not describe it.
 Without `cellNavigation()` composed there is no `role="grid"`, no `tabIndex`, no key
 handler, no live region, and no extra attributes. Not "disabled" — absent. A
 core test asserts the markup is byte-identical to a table built without the
-feature, and each of the eight adapters asserts there is no grid role and no
+feature, and each of the eight React adapters asserts there is no grid role and no
 focusable cell.
 
 Focus position is also deliberately **not** saved to the URL or a Saved View.
@@ -483,7 +483,7 @@ because getting it wrong is invisible on screen.
 
 ## Notes
 
-- Works in all eight adapters, verified by the same parity test in each.
+- Works in all eight React adapters, verified by the same parity test in each.
 - Enter and F2 open the focused cell when its column is `editable`, and do
   nothing when it is not — so arrowing to a cell and pressing Enter edits it,
   which is the whole keyboard path.

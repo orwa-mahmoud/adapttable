@@ -49,7 +49,8 @@ export class OrderedTasks {
 This example has a flat, unfiltered, unsorted list, so the source order and
 host array order agree. `applyRowReorder` returns a copy. For NG-ZORRO, use
 its root and `/row-reorder` imports; the neutral host helper stays in core.
-Both kits are unpublished [workspace packages](./getting-started.md).
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Index and write contracts
 

@@ -2,8 +2,8 @@
 
 `cellNavigation()` turns the desktop table into a keyboard grid with one active
 cell, range selection, clipboard actions and optional fill. Compose it from the
-same kit as `AdaptDataTable`. The kits are private workspace packages; the
-[getting-started guide](./getting-started.md) describes their current status.
+same kit as `AdaptDataTable`. The [getting-started guide](./getting-started.md) describes installation
+and first-release status.
 
 ## Observe the selected rectangle
 

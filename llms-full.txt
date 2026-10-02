@@ -1,8 +1,8 @@
 # AdaptTable — full documentation
 
-> AdaptTable v3 documentation: a framework-neutral data engine in @adapttable/core, headless React and Angular bindings, and native table adapters. React kits include Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. Angular has unstyled and NG-ZORRO workspace kits. Individually imported features include filtering, grouping, pivot tables, formulas, editing, virtualization and export. Responsive mobile cards, URL state, i18n/RTL and optional provider-neutral AI sessions. MIT licensed; applications own data and persistence.
+> AdaptTable v3 documentation: a framework-neutral data engine in @adapttable/core, headless React and Angular bindings, and native table adapters. React kits include Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. Angular has unstyled and NG-ZORRO kits. Individually imported features include filtering, grouping, pivot tables, formulas, editing, virtualization and export. Responsive mobile cards, URL state, i18n/RTL and optional provider-neutral AI sessions. MIT licensed; applications own data and persistence.
 
-Start with your framework's getting-started and the shared concepts for package ownership, then features for opt-in composition. Angular kits and @adapttable/ai-angular are private workspace packages; their implemented APIs do not imply npm availability. Vue is not supported. Use the v2-to-v3 migration guide when upgrading React; historical migration examples describe their named versions, not current import paths. This file is generated from the canonical guides; the linked index is at https://adapttable.orwamahmoud.com/llms.txt.
+Start with your framework's getting-started and the shared concepts for package ownership, then features for opt-in composition. Angular kits and @adapttable/ai-angular are prepared for their first public 0.1.0 release; npm publication is a separate owner-controlled step. Verify registry availability before installing, or use built local packages until publication. Vue is not supported. Use the v2-to-v3 migration guide when upgrading React; historical migration examples describe their named versions, not current import paths. This file is generated from the canonical guides; the linked index is at https://adapttable.orwamahmoud.com/llms.txt.
 
 
 ---
@@ -7521,7 +7521,7 @@ label/value pairs, and a two-dimensional focus model does not describe it.
 Without `cellNavigation()` composed there is no `role="grid"`, no `tabIndex`, no key
 handler, no live region, and no extra attributes. Not "disabled" — absent. A
 core test asserts the markup is byte-identical to a table built without the
-feature, and each of the eight adapters asserts there is no grid role and no
+feature, and each of the eight React adapters asserts there is no grid role and no
 focusable cell.
 
 Focus position is also deliberately **not** saved to the URL or a Saved View.
@@ -7571,7 +7571,7 @@ because getting it wrong is invisible on screen.
 
 ## Notes
 
-- Works in all eight adapters, verified by the same parity test in each.
+- Works in all eight React adapters, verified by the same parity test in each.
 - Enter and F2 open the focused cell when its column is `editable`, and do
   nothing when it is not — so arrowing to a cell and pressing Enter edits it,
   which is the whole keyboard path.
@@ -16561,7 +16561,7 @@ finds that cell's `columnheader` in the same grid.
 
 ## Notes
 
-- Works in all eight adapters. The demo is the same walk on each kit.
+- Works in all eight React adapters. The demo is the same walk on each kit.
 - Labels you pass through `labels` are the accessible names, including in
   Arabic and the other [bundled locales](./i18n-rtl.md).
 
@@ -16617,7 +16617,7 @@ setRows(applyRowPatches(rows, [updateRow(id, { budget })], byId));
 
 `createIncrementalView` / `applyRowPatchesToView` /
 `applyRowPatchLogToView` are the same engine if you hold the snapshot
-yourself. All eight adapters share it, including the mobile card layout.
+yourself. All eight React adapters share it, including the mobile card layout.
 
 The scale demo measures both pipelines: `?patch=200` spreads (full rebuild)
 and `?patch=200&incremental=1` keeps the log. `node scripts/bench.mjs
@@ -16779,7 +16779,7 @@ this page. That lives under [cell editing](./cell-editing.md#live-update-conflic
 
 ## Notes
 
-- Works in all eight adapters. The demo is the same feed on each kit.
+- Works in all eight React adapters. The demo is the same feed on each kit.
 - The table never owns your data. A patch is a new array you hand back.
 - [API reference](./api.md) lists `applyRowPatches`, `applyRowPatchesWithLog`
   and the patch shapes.
@@ -19763,9 +19763,11 @@ capability is decided there, once, rather than per binding.
 
 ## The Angular AI binding
 
-`@adapttable/ai-angular` is an unpublished, opt-in Angular binding over
-`@adapttable/ai`. Importing the Angular table or its native kit does not load an
-agent controller or a transport.
+`@adapttable/ai-angular` is an opt-in Angular binding over `@adapttable/ai`,
+prepared for its first public `0.1.0` release. Check
+[Angular getting started](./angular/getting-started.md) for release and
+installation guidance. Importing the Angular table or its native kit does not
+load an agent controller or a transport.
 
 - `tableAgent(options)` mounts the neutral table-agent controller. Options can
   be a signal: policy and callbacks stay current without recreating the table.
@@ -20393,9 +20395,10 @@ comes from a kit through a slot.
 ## The Angular native kit
 
 `@adapttable/angular-unstyled` is the Angular table drawn with native HTML.
-It participates in the native-kit contracts while remaining a private,
-unpublished workspace package. Publication is a separate decision from
-contract participation. `AdaptDataTable` (`<adapt-data-table>`)
+It participates in the native-kit contracts and is prepared for its first
+public `0.1.0` release. Registry publication is a separate step; see
+[Angular getting started](./angular/getting-started.md).
+`AdaptDataTable` (`<adapt-data-table>`)
 takes the rows, columns and row key as inputs — or a prebuilt `source`, or
 the page a host fetches through `onQueryChange` with `total`, `loading`,
 `error`, `supports`, `aggregates`, `responseKey`, `facets` and `facetKeys`,
@@ -20541,8 +20544,9 @@ cell and row/card marks without changing who owns the data or confirms it.
 `@adapttable/ng-zorro` is the themed Angular table built with
 `ng-zorro-antd` controls over `@adapttable/angular`. It targets Angular 22
 and NG-ZORRO 22.1.1. It participates in the shell-kit parts, feature and
-conformance contracts while remaining an unpublished workspace package
-(`private: true`, version `0.0.0`). The host loads NG-ZORRO's global theme,
+conformance contracts and is prepared for its first public `0.1.0` release.
+Check [Angular getting started](./angular/getting-started.md) for release and
+installation guidance. The host loads NG-ZORRO's global theme,
 for example `@import "ng-zorro-antd/ng-zorro-antd.min.css";` in its global
 stylesheet. The kit does not import the native kit or a second framework's
 binding.
@@ -20673,8 +20677,9 @@ Importing the root table does not import the assistant or AI runtime.
   `detectKit` accepts `framework` alongside the existing shadcn context, and
   `InitResult.framework` reports the choice. Angular scaffolds a standalone
   `PeopleTable` in `src/app/peopleTable.ts`, selecting `angular-unstyled` or
-  `ng-zorro`; React keeps `src/PeopleTable.tsx`. Angular kits remain unpublished
-  workspace packages, and init only prints installation guidance.
+  `ng-zorro`; React keeps `src/PeopleTable.tsx`. The Angular kits are prepared
+  for their first public release; init prints installation guidance without
+  checking registry availability or installing packages.
 - **React adapter packages** — each exports its `DataTable` with `DataTableProps`,
   `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
   shared core re-exports). `DataTableProps` is `DataTablePropsBase &
@@ -20738,7 +20743,7 @@ markup.
 
 ## Which UI libraries does AdaptTable support?
 
-Eight adapters from one API: **Mantine, MUI, Chakra UI, Ant Design, Radix
+Eight React adapters from one API: **Mantine, MUI, Chakra UI, Ant Design, Radix
 Themes, Base UI, shadcn/ui, and unstyled** (for Tailwind or your own CSS) —
 each kit adapter rendered with that kit's real components, plus a headless
 core (`useDataTable`) that works with any markup. Install only the adapter
@@ -20881,7 +20886,7 @@ React and the UI kit external because your app already ships those):
 | `DataTable` from an adapter                | ~72–80 kB |
 
 The first row is the one to read: a headless table costs about a quarter of the
-full core, because the parts you never import never arrive. All eight adapters
+full core, because the parts you never import never arrive. All eight React adapters
 land within ~12 kB of each other, so switching kits does not change what you
 pay.
 
@@ -21066,19 +21071,19 @@ critical findings (`e2e/axe-audit.spec.ts`).
 The table is a client component. During SSR there is no `window` or
 `matchMedia`: pass `forceMobile` so server and first paint agree, and
 pass `createMemoryAdapter(search)` so URL state does not touch History.
-`@adapttable/react`, `@adapttable/ai-react` and every adapter carry
+`@adapttable/react`, `@adapttable/ai-react` and every React adapter carry
 `"use client"`; `@adapttable/core`, `@adapttable/i18n`, `@adapttable/ai`,
 `@adapttable/server` and `@adapttable/cli` do not.
 [SSR & RSC](./ssr-rsc.md).
 
-`@adapttable/bootstrap` is private and unpublished. “All eight adapters”
+`@adapttable/bootstrap` is private and unpublished. “All eight React adapters”
 means Mantine, MUI, Chakra, Ant Design, Radix Themes, Base UI, shadcn/ui
 and unstyled.
 
 ## Accessibility
 
 Keyboard, names, RTL and forced-colors are on by default across the eight
-published kits ([accessibility](./accessibility.md)).
+published React kits ([accessibility](./accessibility.md)).
 
 antd keeps a sticky header. `role="grid"` sits on the wrapper around
 both of antd's tables so a cell and its `columnheader` share one grid.
@@ -23434,11 +23439,13 @@ a stable row key. Add feature imports when the table needs them.
 - `@adapttable/angular` supplies signals, column types and structural Chrome
   for either kit or your own renderer
 
-The binding's current repository version is `0.2.0`. Both kits are **unpublished
-workspace packages** with `private: true`; these examples assume your application
-can resolve the workspace packages or locally built packages. An npm install of
-either kit is not currently a supported distribution path. Package versions are
-independent; do not force the binding, core and kit to share a version.
+The binding's current repository version is `0.2.0`. Both kits and the optional
+`@adapttable/ai-angular` binding are prepared for their first public `0.1.0`
+release. Their manifests permit publication, but npm publication remains a
+separate owner-controlled step. Check registry availability before installing;
+until publication, these examples require built workspace or local packages
+that your application can resolve. Package versions are independent; do not
+force the binding, core and kit to share a version.
 
 The binding supports Angular 20, 21 and 22. NG-ZORRO's kit targets Angular 22
 and NG-ZORRO 22.1.1, including its Angular CDK, Common, Core, Forms,
@@ -23527,8 +23534,9 @@ The implemented CLI recognizes an Angular project when **both** `angular.json`
 and an `@angular/core` dependency are present. It supports the
 `angular-unstyled` and `ng-zorro` kit choices, and writes a standalone
 `PeopleTable` to `src/app/peopleTable.ts`. It does not mount that component in
-your app for you. The private kit packages still need to be resolvable in your
-development setup; generating a starter does not publish them.
+your app for you. The binding and chosen kit must be resolvable in your
+development setup. The CLI prints an install command; it does not install
+packages, check registry availability or publish a release.
 
 ## Data and callbacks
 
@@ -24949,7 +24957,7 @@ an AND/OR builder, field controls and removable chips. The frontend data tier
 evaluates the filters; the server tier sends their state to the host's query
 callback.
 
-These examples use the unpublished workspace kit `@adapttable/angular-unstyled`.
+These examples use the native kit `@adapttable/angular-unstyled`.
 For NG-ZORRO, import the component and factories from `@adapttable/ng-zorro`
 and its matching subpaths. See [getting started](./getting-started.md) for
 workspace setup.
@@ -25210,9 +25218,9 @@ export class HeaderFilters {
 }
 ```
 
-Use matching `@adapttable/ng-zorro` imports for its controls. Both kits are
-unpublished workspace packages; [getting started](./getting-started.md)
-explains setup.
+Use matching `@adapttable/ng-zorro` imports for its controls.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Placement and dismissal
 
@@ -25658,9 +25666,9 @@ selected IDs. Omit `[selectedIds]` for table-owned selection. When you supply
 it, update the signal in response to the output: the rendered selection is
 always the value the host supplies. `selectable` is read at initialization.
 
-The NG-ZORRO workspace kit has the same inputs and output. Replace the root
+The NG-ZORRO kit has the same inputs and output. Replace the root
 kit import with `@adapttable/ng-zorro`; see [getting started](./getting-started.md)
-for the packages' unpublished status and setup.
+for package installation and first-release status.
 
 ## Bulk actions and all matching rows
 
@@ -25873,8 +25881,9 @@ export class ExpandPeople {
 ```
 
 Use the NG-ZORRO root and `/row-detail` imports together for its disclosure
-control. Both kits are unpublished workspace packages; see
-[getting started](./getting-started.md).
+control.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Renderer and lifecycle
 
@@ -26041,7 +26050,7 @@ may change with `editable`. Every committed value goes to your callback. The
 table owns the draft and save state; your application owns the rows and the
 request that persists them.
 
-The Angular kits are currently private workspace packages. These examples use
+These examples use
 `@adapttable/angular-unstyled`; use `@adapttable/ng-zorro` and its matching
 feature entries for NG-ZORRO controls. See [Getting started](./getting-started.md).
 
@@ -26228,7 +26237,8 @@ export class OrderedTasks {
 This example has a flat, unfiltered, unsorted list, so the source order and
 host array order agree. `applyRowReorder` returns a copy. For NG-ZORRO, use
 its root and `/row-reorder` imports; the neutral host helper stays in core.
-Both kits are unpublished [workspace packages](./getting-started.md).
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Index and write contracts
 
@@ -26345,8 +26355,9 @@ export class PinnedPeople {
 ```
 
 The NG-ZORRO equivalent imports its table from `@adapttable/ng-zorro` and
-the feature from `@adapttable/ng-zorro/row-pinning`. Both are unpublished
-[workspace kits](./getting-started.md).
+the feature from `@adapttable/ng-zorro/row-pinning`.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Which rows can be pinned
 
@@ -26464,7 +26475,7 @@ export class BudgetSummary {
 ```
 
 For NG-ZORRO, use `@adapttable/ng-zorro` and its `/pinned-summary-rows`
-entry. The factories are implemented in both unpublished workspace kits;
+entry. The factories are implemented in both Angular kits;
 see [getting started](./getting-started.md).
 
 ## Host ownership and scope
@@ -26566,7 +26577,8 @@ export class TeamSpans {
 ```
 
 Use the NG-ZORRO root and `/cell-span` entry together for its rendering.
-These are unpublished [workspace kits](./getting-started.md).
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Callback contract
 
@@ -26777,7 +26789,9 @@ export class StyledTasks {
 ```
 
 Use `@adapttable/ng-zorro` and its `/row-appearance` entry for the NG-ZORRO
-table. Both kits are unpublished [workspace packages](./getting-started.md).
+table.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Callback values
 
@@ -26833,8 +26847,8 @@ and [customization](./customization.md).
 
 `cellNavigation()` turns the desktop table into a keyboard grid with one active
 cell, range selection, clipboard actions and optional fill. Compose it from the
-same kit as `AdaptDataTable`. The kits are private workspace packages; the
-[getting-started guide](./getting-started.md) describes their current status.
+same kit as `AdaptDataTable`. The [getting-started guide](./getting-started.md) describes installation
+and first-release status.
 
 ## Observe the selected rectangle
 
@@ -27001,7 +27015,9 @@ export class GroupedWork {
 For fixed groups, replace the panel factory with `grouping(["team", "status"])`
 from `/grouping`. The panel already owns grouping; a second `grouping()` feature
 is unnecessary. For NG-ZORRO, use its matching root, `/grouping` and
-`/grouping-panel` entries. Both Angular kits are private workspace packages.
+`/grouping-panel` entries.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## State and data scope
 
@@ -27117,7 +27133,8 @@ export class InvoiceTotals {
 }
 ```
 
-Both Angular kits are private workspace packages. Use the equivalent
+See [getting started](./getting-started.md) for installation
+and first-release status. Use the equivalent
 `@adapttable/angular-unstyled` imports for native controls; `aggregate` always
 comes from the binding.
 
@@ -27238,7 +27255,9 @@ export class SalesPivot {
 The initializer runs in an Angular injection context. `config` and `collapsed`
 are signals and must be called when rendering or calculating. Use
 `@adapttable/ng-zorro/pivot` with the NG-ZORRO root table for that kit's panel
-and row-header controls. Both kits remain private workspace packages.
+and row-header controls.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Configuration and collapse
 
@@ -27350,7 +27369,9 @@ export class FormulaLines {
 ```
 
 Use `@adapttable/ng-zorro` for the root component when using that kit; the
-formula imports stay on the binding. Both kits are private workspace packages.
+formula imports stay on the binding.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Expressions, references and errors
 
@@ -27686,8 +27707,9 @@ export class SavedPeople {
 }
 ```
 
-Use the corresponding `@adapttable/ng-zorro` imports for NG-ZORRO. Both are
-unpublished workspace kits; see [getting started](./getting-started.md).
+Use the corresponding `@adapttable/ng-zorro` imports for NG-ZORRO.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 The shell supplies its actual URL backend and namespace to the menu. This
 also works with `[urlSync]="false"`: the view captures the table's private
@@ -27822,7 +27844,9 @@ export class LargeInventory {
 ```
 
 Both kits expose `/virtualize`; change the root and feature imports together to
-`@adapttable/ng-zorro` for NG-ZORRO. They are private workspace packages.
+`@adapttable/ng-zorro` for NG-ZORRO.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Enable the appropriate window
 
@@ -28159,8 +28183,9 @@ export class InvoiceExport {
 ```
 
 The same factory is available from `@adapttable/ng-zorro/export`, paired with
-that kit's root `AdaptDataTable`. Both Angular kits are private workspace
-packages; see [Getting started](./getting-started.md).
+that kit's root `AdaptDataTable`.
+See [Getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Choose rows and columns explicitly
 
@@ -28282,7 +28307,7 @@ export class ShipmentWorkbook {
 }
 ```
 
-This example uses NG-ZORRO's private workspace kit. The equivalent native
+This example uses the NG-ZORRO kit. The equivalent native
 controls use `@adapttable/angular-unstyled` and
 `@adapttable/angular-unstyled/export`. Load NG-ZORRO's global stylesheet in
 the host as described in [Getting started](./getting-started.md).
@@ -28371,8 +28396,9 @@ export class PrintableLines {
 }
 ```
 
-Use the matching `@adapttable/ng-zorro` imports for NG-ZORRO controls. Both kits
-are private workspace packages. `print(callback, true)` adds a separate print
+Use the matching `@adapttable/ng-zorro` imports for NG-ZORRO controls.
+See [getting started](./getting-started.md) for installation and first-release
+status. `print(callback, true)` adds a separate print
 button; the host callback runs on activation and owns the browser print flow.
 It does not start automatically during SSR.
 
@@ -28491,8 +28517,9 @@ export const appConfig: ApplicationConfig = {
 Merge the hydration provider into your existing application configuration and
 use the server bootstrap generated for your Angular SSR application. The table
 does not replace that bootstrap. The equivalent NG-ZORRO root component is
-`@adapttable/ng-zorro`; load its global stylesheet in the host. Both kits are
-currently private workspace packages.
+`@adapttable/ng-zorro`; load its global stylesheet in the host.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Match the request and client state
 
@@ -28553,7 +28580,9 @@ and [NG-ZORRO](../../packages/angular/adapter-ng-zorro/src/dataTable.hydration.s
 agent integration. It observes the mounted table's rows, view and available
 operations; it does not insert a model SDK into the Angular binding or grant
 writes that the host has not wired. The AI Angular binding and both Angular
-kits are private, unpublished workspace packages.
+kits are prepared for their first public `0.1.0` release. See
+[getting started](./getting-started.md) for installation guidance while
+registry publication is pending.
 
 ## Attach a session to a table
 
@@ -28707,7 +28736,9 @@ See [AI and voice](./ai-voice.md), [Cell editing](./cell-editing.md),
 draft; the reader still chooses Send. Neither function chooses a model provider
 or creates a backend connection by itself.
 
-The AI Angular binding and both Angular kits are private workspace packages.
+The AI Angular binding and both Angular kits are prepared for their first
+public `0.1.0` release. See [getting started](./getting-started.md) for
+installation guidance while registry publication is pending.
 See [Agent capabilities](./agent-capabilities.md) for attaching a live session
 to a mounted table.
 
@@ -29012,7 +29043,8 @@ show its toolbar button. Without it, the print action can still be offered in
 the command palette.
 
 For NG-ZORRO, change all kit imports together to `@adapttable/ng-zorro`.
-Both Angular kits remain private, unpublished workspace packages.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Preset and individual entries
 
@@ -29141,7 +29173,8 @@ export class ProjectCommands {
 ```
 
 Use the root and feature entries under `@adapttable/ng-zorro` for its controls.
-Both kits are currently private workspace packages. A command is
+See [getting started](./getting-started.md) for installation
+and first-release status. A command is
 `{ key, label, onSelect }`, with optional `disabled`, `danger` and
 `separatorBefore`. `onSelect` is a function, not an Angular event output. Labels
 for custom commands are already-localized text supplied by the application.
@@ -29495,8 +29528,9 @@ Use a real application endpoint in place of `/api/stock/events`. The default
 frame format is a JSON patch array, for example
 `[{"type":"update","id":"s1","changes":{"available":9}}]`. A custom `parse`
 function can adapt another protocol. Use the NG-ZORRO root table if that is your
-kit; the stream entry remains on the binding. Both kits are private workspace
-packages.
+kit; the stream entry remains on the binding.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Connection lifecycle
 

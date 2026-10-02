@@ -59,8 +59,9 @@ Use a real application endpoint in place of `/api/stock/events`. The default
 frame format is a JSON patch array, for example
 `[{"type":"update","id":"s1","changes":{"available":9}}]`. A custom `parse`
 function can adapt another protocol. Use the NG-ZORRO root table if that is your
-kit; the stream entry remains on the binding. Both kits are private workspace
-packages.
+kit; the stream entry remains on the binding.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Connection lifecycle
 

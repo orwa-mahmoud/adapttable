@@ -48,8 +48,9 @@ export class ExpandPeople {
 ```
 
 Use the NG-ZORRO root and `/row-detail` imports together for its disclosure
-control. Both kits are unpublished workspace packages; see
-[getting started](./getting-started.md).
+control.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Renderer and lifecycle
 

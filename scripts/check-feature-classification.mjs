@@ -36,17 +36,27 @@
  * 6. **Every migration row sends people somewhere real.** Each import an
  *    alias row names exports that name, and each removed-prop row's factory
  *    is the one the inventory maps the prop to and is exported from that
- *    subpath of every published kit.
+ *    subpath of every published React kit: these are v2 React migration paths.
  * 7. **Every v4 removal is still a working, flagged API.** Each prop the
  *    `v4Removals` inventory names is declared on the public prop surface with
  *    a `@deprecated` notice until the major that removes it.
+ * 8. **Every published kit serves its canonical feature entries.** The
+ *    kit's own feature barrel may locate an entry differently across frameworks;
+ *    its configured source must still export every inventoried factory.
  *
  *   node scripts/check-feature-classification.mjs
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 
 import {
+  entryExports,
+  entrySource,
+  exportsOf,
+  featureEntryProblems,
+} from "./feature-entry-source.mjs";
+import {
+  listPackages,
   packageDir,
   packageNames,
   REPO_ROOT as ROOT,
@@ -54,7 +64,6 @@ import {
 } from "./packages.mjs";
 
 const MANIFEST = join(ROOT, "scripts", "feature-classification.json");
-const PACKAGE_NAMES = new Set(packageNames());
 
 const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
 const listed = manifest.features;
@@ -336,168 +345,6 @@ for (const prop of Object.keys(enabling.props)) {
   }
 }
 
-/** A source file for an entry specifier, or `undefined` when there is none. */
-function entrySource(specifier) {
-  const match = /^@adapttable\/([\w-]+)(?:\/([\w-]+))?$/.exec(specifier);
-  if (!match) return undefined;
-  const [, pkg, sub] = match;
-  // Kits publish as `@adapttable/<kit>` from `packages/react/adapter-<kit>`.
-  return [pkg, `adapter-${pkg}`]
-    .filter((dir) => PACKAGE_NAMES.has(dir))
-    .flatMap((dir) =>
-      ["ts", "tsx"].map((ext) =>
-        join(packageDir(dir), "src", `${sub ?? "index"}.${ext}`)
-      )
-    )
-    .find((file) => existsSync(file));
-}
-
-/** A relative module next to `from`, resolved the way the bundler does. */
-function relativeSource(from, specifier) {
-  const base = join(dirname(from), specifier);
-  return [`${base}.ts`, `${base}.tsx`, join(base, "index.ts")].find((file) =>
-    existsSync(file)
-  );
-}
-
-const DECLARATION_KINDS = new Set([
-  "const",
-  "function",
-  "interface",
-  "type",
-  "class",
-  "enum",
-]);
-
-/** The name an `export const|function|… Name` line declares, if it is one. */
-function declaredName(line) {
-  const words = line.split(/\s+/);
-  let at = 1;
-  while (words[at] === "declare" || words[at] === "async") at++;
-  if (!DECLARATION_KINDS.has(words[at] ?? "")) return undefined;
-  return /^[A-Za-z_$][\w$]*/.exec(words[at + 1] ?? "")?.[0];
-}
-
-/** The text with its block and line comments removed. */
-function withoutComments(text) {
-  let out = "";
-  let at = 0;
-  while (at < text.length) {
-    const block = text.indexOf("/*", at);
-    const line = text.indexOf("//", at);
-    const next = [block, line].filter((index) => index >= 0);
-    if (next.length === 0) return out + text.slice(at);
-    const start = Math.min(...next);
-    out += text.slice(at, start);
-    const end =
-      start === block
-        ? text.indexOf("*/", start + 2)
-        : text.indexOf("\n", start);
-    if (end < 0) return out;
-    at = start === block ? end + 2 : end;
-  }
-  return out;
-}
-
-/** One `{ … }` specifier: its exported name and whether it is deprecated. */
-function specifierName(raw) {
-  const specifier = withoutComments(raw)
-    .trim()
-    .replace(/^type\s+/, "");
-  if (!specifier) return undefined;
-  const aliasAt = specifier.lastIndexOf(" as ");
-  const name =
-    aliasAt < 0 ? specifier : specifier.slice(aliasAt + " as ".length);
-  const source = aliasAt < 0 ? specifier : specifier.slice(0, aliasAt);
-  return {
-    name: name.trim(),
-    source: source.trim(),
-    deprecated: raw.includes("@deprecated"),
-  };
-}
-
-/**
- * Every name a module exports, with whether that export carries a
- * `@deprecated` notice: its own declarations and specifier lists, and the
- * names behind any relative `export *`, which a check reading only the
- * braces would miss.
- */
-function exportsOf(file, seen = new Set()) {
-  const out = new Map();
-  if (!file || seen.has(file)) return out;
-  seen.add(file);
-  const source = readFileSync(file, "utf8");
-  for (const [name, deprecated] of declaredExports(source)) {
-    out.set(name, deprecated);
-  }
-  for (const [name, deprecated] of specifierExports(file, source, seen)) {
-    out.set(name, deprecated);
-  }
-  for (const [name, deprecated] of barrelExports(file, source, seen)) {
-    // An explicit export in this module shadows the barrel's.
-    if (!out.has(name)) out.set(name, deprecated);
-  }
-  return out;
-}
-
-/**
- * Every name the module declares with `export`, and whether the doc comment
- * right above the declaration marks it `@deprecated`.
- */
-function declaredExports(source) {
-  const out = new Map();
-  let doc = "";
-  let inDoc = false;
-  for (const line of source.split("\n")) {
-    const text = line.trim();
-    if (inDoc || text.startsWith("/**")) {
-      doc = inDoc ? doc + text : text;
-      inDoc = !text.endsWith("*/");
-      continue;
-    }
-    const name = line.startsWith("export ") ? declaredName(line) : undefined;
-    if (name) out.set(name, doc.includes("@deprecated"));
-    if (text !== "") doc = "";
-  }
-  return out;
-}
-
-/** Every name the module's `export { … }` lists carry. */
-function specifierExports(file, source, seen) {
-  const out = new Map();
-  for (const match of source.matchAll(
-    /^export (?:type )?\{([^}]*)\}(?: from "(\.[^"]+)")?/gm
-  )) {
-    // A relative re-export carries the notice its declaration has.
-    const target = match[2]
-      ? exportsOf(relativeSource(file, match[2]), new Set(seen))
-      : undefined;
-    for (const raw of match[1].split(",")) {
-      const entry = specifierName(raw);
-      if (!entry) continue;
-      out.set(
-        entry.name,
-        entry.deprecated || target?.get(entry.source) === true
-      );
-    }
-  }
-  return out;
-}
-
-/** Every name behind the module's relative `export *` barrels. */
-function barrelExports(file, source, seen) {
-  const out = new Map();
-  for (const match of source.matchAll(/^export \* from "(\.[^"]+)";/gm)) {
-    for (const [name, deprecated] of exportsOf(
-      relativeSource(file, match[1]),
-      seen
-    )) {
-      if (!out.has(name)) out.set(name, deprecated);
-    }
-  }
-  return out;
-}
-
 /**
  * What the main entry still serves of the names v3 moved.
  *
@@ -575,17 +422,10 @@ for (const name of [
  *
  * An alias row names one or more entries (`@adapttable/react/adapter`, or
  * `@adapttable/core` or `@adapttable/react`); every one must export it. A
- * removed-prop row names a factory and a kit subpath; every kit must publish
+ * removed-prop row names a factory and a kit subpath; every React kit must publish
  * that subpath and export the factory from it, and the factory must be the one
  * the inventory maps the prop to.
  */
-const exportCache = new Map();
-function entryExports(specifier) {
-  if (!exportCache.has(specifier)) {
-    exportCache.set(specifier, exportsOf(entrySource(specifier)));
-  }
-  return exportCache.get(specifier);
-}
 /** A migration-guide table row: its first cell's code name and its second cell. */
 function guideRow(line) {
   if (!line.startsWith("| `")) return undefined;
@@ -670,6 +510,22 @@ const publishedKits = kitPackages.filter(
     JSON.parse(readFileSync(join(packageDir(adapter), "package.json"), "utf8"))
       .private !== true
 );
+// Canonical feature entries belong to every published framework. The v2→v3
+// migration table below instead describes paths that existing React hosts used.
+for (const adapter of publishedKits) {
+  const pkg = JSON.parse(
+    readFileSync(join(packageDir(adapter), "package.json"), "utf8")
+  );
+  problems.push(...featureEntryProblems(pkg.name, listed));
+}
+const reactKits = new Set(
+  listPackages()
+    .filter(({ group }) => group === "react")
+    .map(({ name }) => name)
+);
+const publishedReactKits = publishedKits.filter((adapter) =>
+  reactKits.has(adapter)
+);
 for (const match of migrationGuide.matchAll(
   /^\| (`[^|]+`)\s*\|\s*`(\w+)\([^`]*\)`\s*\|\s*`@adapttable\/<kit>\/([\w-]+)`\s*\|/gm
 )) {
@@ -684,7 +540,7 @@ for (const match of migrationGuide.matchAll(
       );
     }
   }
-  for (const adapter of publishedKits) {
+  for (const adapter of publishedReactKits) {
     const pkg = JSON.parse(
       readFileSync(join(packageDir(adapter), "package.json"), "utf8")
     );
@@ -694,10 +550,7 @@ for (const match of migrationGuide.matchAll(
       );
       continue;
     }
-    const file = relativeSource(
-      join(packageDir(adapter), "src", "index.ts"),
-      `./${subpath}`
-    );
+    const file = entrySource(`${pkg.name}/${subpath}`);
     const served = exportsOf(file);
     const reExportsAll = file
       ? /export\s+\*\s+from\s+"@adapttable\//.test(readFileSync(file, "utf8"))

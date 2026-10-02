@@ -45,9 +45,9 @@ export class HeaderFilters {
 }
 ```
 
-Use matching `@adapttable/ng-zorro` imports for its controls. Both kits are
-unpublished workspace packages; [getting started](./getting-started.md)
-explains setup.
+Use matching `@adapttable/ng-zorro` imports for its controls.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Placement and dismissal
 

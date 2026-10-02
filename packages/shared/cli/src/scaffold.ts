@@ -126,7 +126,7 @@ export function scaffoldFiles(info: KitInfo): ScaffoldFile[] {
 
 /**
  * The package list for a kit (core + Angular binding when needed + adapter +
- * extras). Angular kits are unpublished and require a local package source.
+ * extras). This list does not check package availability in a registry.
  *
  * @param info - The chosen kit.
  * @returns The ordered package list.

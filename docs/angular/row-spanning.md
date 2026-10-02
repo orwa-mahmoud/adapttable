@@ -55,7 +55,8 @@ export class TeamSpans {
 ```
 
 Use the NG-ZORRO root and `/cell-span` entry together for its rendering.
-These are unpublished [workspace kits](./getting-started.md).
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Callback contract
 

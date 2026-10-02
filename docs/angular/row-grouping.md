@@ -61,7 +61,9 @@ export class GroupedWork {
 For fixed groups, replace the panel factory with `grouping(["team", "status"])`
 from `/grouping`. The panel already owns grouping; a second `grouping()` feature
 is unnecessary. For NG-ZORRO, use its matching root, `/grouping` and
-`/grouping-panel` entries. Both Angular kits are private workspace packages.
+`/grouping-panel` entries.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## State and data scope
 

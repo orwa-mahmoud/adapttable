@@ -58,7 +58,8 @@ show its toolbar button. Without it, the print action can still be offered in
 the command palette.
 
 For NG-ZORRO, change all kit imports together to `@adapttable/ng-zorro`.
-Both Angular kits remain private, unpublished workspace packages.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Preset and individual entries
 

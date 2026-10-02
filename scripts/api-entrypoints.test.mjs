@@ -78,12 +78,22 @@ describe("entrypoints", () => {
     const unpublished = [
       ...new Set(ENTRIES.filter((e) => !e.published).map((e) => e.dir)),
     ];
-    assert.deepEqual(unpublished, [
+    assert.deepEqual(unpublished, ["adapter-bootstrap"]);
+  });
+
+  it("includes every released Angular kit and AI entry in the public contract", () => {
+    for (const dir of [
       "adapter-angular-unstyled",
-      "adapter-bootstrap",
       "adapter-ng-zorro",
       "ai-angular",
-    ]);
+    ]) {
+      const entries = ENTRIES.filter((entry) => entry.dir === dir);
+      assert.ok(entries.length > 0, `${dir} exposes a public entry`);
+      assert.ok(
+        entries.every((entry) => entry.published),
+        dir
+      );
+    }
   });
 
   it("names a committed report for every entry point", () => {

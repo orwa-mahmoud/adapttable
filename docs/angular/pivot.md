@@ -69,7 +69,9 @@ export class SalesPivot {
 The initializer runs in an Angular injection context. `config` and `collapsed`
 are signals and must be called when rendering or calculating. Use
 `@adapttable/ng-zorro/pivot` with the NG-ZORRO root table for that kit's panel
-and row-header controls. Both kits remain private workspace packages.
+and row-header controls.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Configuration and collapse
 

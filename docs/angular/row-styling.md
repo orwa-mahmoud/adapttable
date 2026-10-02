@@ -52,7 +52,9 @@ export class StyledTasks {
 ```
 
 Use `@adapttable/ng-zorro` and its `/row-appearance` entry for the NG-ZORRO
-table. Both kits are unpublished [workspace packages](./getting-started.md).
+table.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Callback values
 

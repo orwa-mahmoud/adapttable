@@ -1,9 +1,27 @@
 # @adapttable/ai-angular
 
-Unpublished Angular bindings for AdaptTable AI. The neutral `@adapttable/ai`
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+Angular 20 supports that floor; Angular 22 requires Node 22.22.3+, 24.15.0+, or 26+ instead.
+
+Angular bindings for AdaptTable AI. The neutral `@adapttable/ai`
 controllers own capabilities, approvals, conversation execution and dictation;
 this package owns Angular signals and lifecycle. No provider SDK or UI kit is
 required.
+
+**First public `0.1.0` release prepared.** npm publication is a separate
+owner-controlled step. Check registry availability before installing; until
+publication, use a built workspace or local package.
+
+## Features
+
+- Observe a mounted table and execute its enabled capabilities through
+  `tableAgent`, preserving host callbacks, validation and approvals
+- Bind assistant messages, drafts, progress, resumable work and controlled
+  state to Angular signals with `injectTableAssistant`
+- Connect optional browser or backend dictation through `injectSpeechInput`;
+  recording updates a draft or delivers a clip to the host
+- Reuse the neutral AI package's transports without requiring a provider SDK
+  or a particular UI kit; Angular destruction cleans up subscriptions
 
 ## Observe a table
 

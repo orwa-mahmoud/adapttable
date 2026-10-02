@@ -5,7 +5,7 @@ an AND/OR builder, field controls and removable chips. The frontend data tier
 evaluates the filters; the server tier sends their state to the host's query
 callback.
 
-These examples use the unpublished workspace kit `@adapttable/angular-unstyled`.
+These examples use the native kit `@adapttable/angular-unstyled`.
 For NG-ZORRO, import the component and factories from `@adapttable/ng-zorro`
 and its matching subpaths. See [getting started](./getting-started.md) for
 workspace setup.

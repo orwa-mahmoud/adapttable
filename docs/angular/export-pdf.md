@@ -47,8 +47,9 @@ export class PrintableLines {
 }
 ```
 
-Use the matching `@adapttable/ng-zorro` imports for NG-ZORRO controls. Both kits
-are private workspace packages. `print(callback, true)` adds a separate print
+Use the matching `@adapttable/ng-zorro` imports for NG-ZORRO controls.
+See [getting started](./getting-started.md) for installation and first-release
+status. `print(callback, true)` adds a separate print
 button; the host callback runs on activation and owns the browser print flow.
 It does not start automatically during SSR.
 

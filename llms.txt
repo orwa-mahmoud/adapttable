@@ -4,7 +4,7 @@
 
 ## Version and integration boundaries
 
-This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Angular injection functions and renderer types come from `@adapttable/angular`. Individual features use kit subpaths; React's `standardFeatures()` and Angular's `standardPreset()` compose their documented common sets. Enabling props from v2 alone do not activate v3 features. The Angular kits and `@adapttable/ai-angular` are private workspace packages at version 0.0.0; implemented support does not imply npm availability. Vue is not supported.
+This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Angular injection functions and renderer types come from `@adapttable/angular`. Individual features use kit subpaths; React's `standardFeatures()` and Angular's `standardPreset()` compose their documented common sets. Enabling props from v2 alone do not activate v3 features. The Angular kits and `@adapttable/ai-angular` are prepared for their first public 0.1.0 release; npm publication is a separate owner-controlled step. Verify registry availability before installing, or use built local packages until publication. Vue is not supported.
 
 Use AdaptTable when you want TanStack-Table-style headless freedom but batteries-included for your specific UI kit — with URL state, RTL, a real filter UX, virtualization, and mobile layouts that do not break responsively.
 

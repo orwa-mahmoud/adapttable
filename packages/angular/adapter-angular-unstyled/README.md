@@ -1,12 +1,17 @@
 # @adapttable/angular-unstyled
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+Angular 20 supports that floor; Angular 22 requires Node 22.22.3+, 24.15.0+, or 26+ instead.
+
 The Angular AdaptTable drawn with native HTML over
 [`@adapttable/angular`](../angular/README.md). It supplies the controls and
 responsive table/card layouts; you supply the theme with CSS or Tailwind,
 using the shared `data-adapttable-part` names and `classNames` hooks.
 
-**Unpublished workspace package.** `private: true` remains set. The native
-kit participates in the kit contracts independently of publication status.
+**First public `0.1.0` release prepared.** npm publication is a separate
+owner-controlled step. Check registry availability before installing; until
+publication, use a built workspace or local package. The native kit
+participates in the kit contracts independently of publication status.
 
 [Angular demo](https://adapttable.orwamahmoud.com/angular/demo/unstyled/) ·
 [API reference](https://adapttable.orwamahmoud.com/react/api/#the-angular-native-kit)
@@ -58,22 +63,41 @@ Use `data` for in-memory rows, a prebuilt `source`, or `onQueryChange` with
 host-fetched rows and `total` for server data. The table never owns the
 rows: edits, additions, deletes and reorders call the host.
 
-## Opt-in features
+## Features
 
 Import a feature from its own secondary entry and compose it through the
 `features` input. The implemented surface includes:
 
-- Declarative and header filters, AND/OR filter trees, active chips and
-  saved views
-- Column menus, groups, selection, resizing, multi-sort and fit-to-content
-- Row selection, bulk actions, per-row actions, pinning, reordering,
-  expanded detail and nested tables
-- Grouping, aggregation controls, pivot tables, tree rows and virtualization
-- Inline, row and batch editing, validation, save/conflict feedback, dirty
-  indicators, undo/redo, keyboard cell navigation, paste and range fill
-- Find-in-table, command palette, context menu, side panel and status bar
-- Density, fullscreen, CSV/XLSX/PDF export and print
-- Opt-in assistant and approval controls on `/assistant`
+- **Feature composition** through individual kit subpaths and `standardPreset()`;
+  import only the behavior you need
+- **Global search, sorting and pagination** for in-memory or host-fetched data,
+  with URL-synced state and infinite scrolling on mobile
+- **Filtering** with kit-native controls, an AND/OR filter tree,
+  header filters, custom filter types, removable chips and saved views
+- **Column management** with visibility, ordering, pinning, resizing,
+  multi-sort, fit-to-content and collapsible column groups
+- **Selection and row actions**, including bulk actions, row expansion and
+  nested tables using Angular templates or component renderers
+- **Inline cell editing**, row and batch editing, validation, save/conflict
+  feedback, dirty indicators, undo/redo and keyboard navigation with paste
+  and range fill; writes always go through host callbacks
+- **Row reordering and row pinning**, pinned summary rows,
+  row and column spanning, full-width and separator rows, plus conditional
+  row styling and heights
+- **Grouping, aggregation and pivot** controls, tree data with hierarchical
+  rows, and row/column virtualization for large tables
+- **Spreadsheet formula engine and sparkline columns** through the Angular
+  binding's formula and sparkline entries
+- **CSV and XLSX export**, PDF export and print layout; custom writers and
+  host print callbacks remain opt-in
+- **Command palette and view controls**: find-in-table, context menus, side
+  panel, density, fullscreen and status bar
+- **Responsive mobile cards**, shared localized labels and RTL support;
+  custom card renderers retain the selection, editing and action shell
+- **Angular SSR and hydration** with deterministic initial data.
+  React Server Components are a React-only integration, not an Angular feature
+- **Optional assistant and approval controls** on `/assistant`, backed by the
+  separately imported AI bindings
 
 For example:
 
@@ -94,7 +118,9 @@ const features = [
 `standardPreset()`: column menu, density, CSV export, fullscreen, header
 filters and status bar, with grouping, bulk actions, filters and saved views
 included when their options are supplied. Import individual entries when
-controlling bundle cost.
+controlling bundle cost. See the
+[Angular feature guide](https://adapttable.orwamahmoud.com/angular/features/)
+for the complete entrypoint list and composition rules.
 
 ## Mobile cards and custom renderers
 
