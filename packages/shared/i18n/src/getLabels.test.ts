@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { getDirection } from "./direction";
 import { getLabels, hasLocale, locales } from "./getLabels";
 import { ar } from "./locales/ar";
+import { cs } from "./locales/cs";
 import { de } from "./locales/de";
 import { en } from "./locales/en";
 import { fa } from "./locales/fa";
@@ -46,6 +47,8 @@ describe("getLabels", () => {
 describe("hasLocale", () => {
   it("reports bundled locales", () => {
     expect(hasLocale("ar-EG")).toBe(true);
+    expect(hasLocale("cs")).toBe(true);
+    expect(hasLocale("cs-CZ")).toBe(true);
     expect(hasLocale("en")).toBe(true);
     expect(hasLocale("de")).toBe(true);
     expect(hasLocale("ja")).toBe(true);
@@ -66,6 +69,7 @@ describe("new locales direction", () => {
   });
 
   it("marks the new LTR locales as ltr", () => {
+    expect(getDirection("cs")).toBe("ltr");
     expect(getDirection("ko")).toBe("ltr");
     expect(getDirection("ru")).toBe("ltr");
     expect(getDirection("tr")).toBe("ltr");
@@ -78,11 +82,12 @@ describe("presets", () => {
   const cmp = (a: string, b: string) => a.localeCompare(b);
   const enKeys = Object.keys(en).sort(cmp);
 
-  it("bundles 18 locales", () => {
-    expect(Object.keys(locales)).toHaveLength(18);
+  it("bundles 19 locales", () => {
+    expect(Object.keys(locales)).toHaveLength(19);
   });
 
   it("exposes the new presets", () => {
+    expect(locales.cs).toBe(cs);
     expect(locales.ko).toBe(ko);
     expect(locales.fa).toBe(fa);
     expect(locales.ur).toBe(ur);
