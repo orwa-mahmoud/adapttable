@@ -89,6 +89,7 @@ for (const { key, route } of PAGES) {
   }) => {
     await page.setViewportSize({ width: 320, height: 800 });
     await page.goto(devPath(route));
+    await expect(page.locator(".nav__inner")).toBeVisible();
 
     const measured = await page.evaluate(() => {
       const root = document.documentElement;
