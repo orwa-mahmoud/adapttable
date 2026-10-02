@@ -1,0 +1,12 @@
+/** A fresh standalone app imports the table written by AdaptTable init. */
+import { Component } from "@angular/core";
+
+import { PeopleTable } from "./peopleTable";
+
+@Component({
+  selector: "app-root",
+  standalone: true,
+  imports: [PeopleTable],
+  template: "<people-table />",
+})
+export class App {}

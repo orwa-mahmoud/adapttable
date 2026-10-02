@@ -1,0 +1,21 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      "dependsOn": [
+        "^build",
+        "@adapttable/angular#build",
+        "@adapttable/angular-unstyled#build",
+        "@adapttable/ng-zorro#build"
+      ]
+    },
+    "test:coverage": {
+      "dependsOn": [
+        "^build",
+        "@adapttable/angular#build",
+        "@adapttable/angular-unstyled#build",
+        "@adapttable/ng-zorro#build"
+      ]
+    }
+  }
+}
