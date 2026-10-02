@@ -1,7 +1,8 @@
-# Angular cell editing
+# Editable Angular table: inline cell and batch editing
 
-Compose `editing()` from your kit's `/editing` entry and mark the columns that
-may change with `editable`. Every committed value goes to your callback. The
+Make an Angular table cell editable with validation, an async save callback and
+keyboard controls. Compose `editing()` from your kit's `/editing` entry and mark
+the columns that may change with `editable`. Every committed value goes to your callback. The
 table owns the draft and save state; your application owns the rows and the
 request that persists them.
 
@@ -9,7 +10,7 @@ These examples use
 `@adapttable/angular-unstyled`; use `@adapttable/ng-zorro` and its matching
 feature entries for NG-ZORRO controls. See [Getting started](./getting-started.md).
 
-## Commit through a host callback
+## Edit a table cell in Angular and save it to an API
 
 ```ts
 import { Component, signal } from "@angular/core";
@@ -118,6 +119,89 @@ that needs a navigation guard.
 For history, compose `editHistory()` and `undoRedoButtons()` from `/editing`.
 History replays changes through the host; it does not turn the table into a row
 store. Multi-cell paste and fill can be recorded as one gesture.
+
+## Save multiple edited rows in one batch
+
+Use batch editing when the reader should review several changes before saving.
+The following standalone example holds drafts until Save is pressed. Its host
+endpoint, `PATCH /api/tasks/batch`, must validate every patch and return the
+complete updated task list as `{ rows: Task[] }`. Implement that endpoint in
+your application; it is not an endpoint supplied by the table library.
+
+```ts
+import { Component, signal } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-unstyled";
+import { batchEditing } from "@adapttable/angular-unstyled/batch-editing";
+import { dirtyIndicators } from "@adapttable/angular-unstyled/editing";
+
+interface Task {
+  id: string;
+  title: string;
+  hours: number;
+}
+
+@Component({
+  selector: "app-batch-tasks",
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      tableLabel="Batch-edit tasks"
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  `,
+})
+export class BatchTasks {
+  readonly rows = signal<readonly Task[]>([
+    { id: "t1", title: "Review", hours: 2 },
+    { id: "t2", title: "Test", hours: 3 },
+  ]);
+  readonly rowKey = (row: Task) => row.id;
+  readonly columns: readonly ColumnDef<Task>[] = [
+    { key: "title", header: "Task" },
+    {
+      key: "hours",
+      header: "Hours",
+      editable: true,
+      editor: "number",
+      parseValue: (draft) => Number(draft),
+      validate: (value) =>
+        typeof value === "number" && Number.isFinite(value) && value >= 0
+          ? undefined
+          : "Enter a non-negative number",
+    },
+  ];
+  readonly features = [
+    batchEditing<Task>(async (edits) => {
+      const response = await fetch("/api/tasks/batch", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          edits: edits.map(({ rowId, patch }) => ({ id: rowId, patch })),
+        }),
+      });
+      if (!response.ok) throw new Error("The batch could not be saved");
+      const result = (await response.json()) as { rows: Task[] };
+      this.rows.set(result.rows);
+    }),
+    dirtyIndicators(),
+  ];
+}
+```
+
+Each edit contains `row` (the original record), `rowId` (its stable key) and
+`patch` (only changed fields, with parsed values). The example sends just the
+ID and patch; the backend must authorize each row and allowlist writable fields.
+Use a transactional endpoint if Save must be all-or-nothing. A rejected save
+must remain a rejection so the table can retain the drafts for correction or
+retry. Discard clears local drafts without persisting them.
+
+Try the [Angular inline-editing demo](https://adapttable.orwamahmoud.com/angular/demo/unstyled/editing/)
+or the [NG-ZORRO editing demo](https://adapttable.orwamahmoud.com/angular/demo/ng-zorro/editing/).
 
 ## Keyboard, mobile and incoming updates
 

@@ -1,4 +1,4 @@
-# Get started with AdaptTable for Angular
+# Build an Angular data table with signals
 
 AdaptTable combines a headless Angular binding with a kit that draws the
 controls. Start with `AdaptDataTable`, an array of rows, column definitions and
@@ -30,6 +30,28 @@ global stylesheet:
 ```
 
 The native kit does not supply a theme stylesheet.
+
+## Run the Angular examples from source
+
+Until the kits are published, use the repository showcase for a runnable setup.
+From a clone of this repository, with Node 22.22.3 or a supported newer Node
+release (the showcase uses Angular 22) and the package manager version declared
+in `package.json`:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm --filter @adapttable/showcase dev
+```
+
+Open the local address printed by Vite and navigate to `/unstyled/` for the
+unstyled kit or `/ng-zorro/` for NG-ZORRO. The local showcase serves its HTML
+entries directly; the published website adds the `/angular/demo/` prefix.
+The source checkout resolves workspace dependencies; these commands do not
+install an unpublished kit into an unrelated application.
+
+Try the hosted [unstyled Angular table](https://adapttable.orwamahmoud.com/angular/demo/unstyled/)
+or [NG-ZORRO table](https://adapttable.orwamahmoud.com/angular/demo/ng-zorro/)
+without a local install.
 
 ## A standalone table
 
@@ -110,6 +132,23 @@ and an `@angular/core` dependency are present. It supports the
 your app for you. The binding and chosen kit must be resolvable in your
 development setup. The CLI prints an install command; it does not install
 packages, check registry availability or publish a release.
+
+Build the repository CLI once, then invoke its built entry **from your Angular
+application root** (the folder containing `angular.json` and `package.json`):
+
+```sh
+# From the AdaptTable repository:
+pnpm --filter @adapttable/cli build
+
+# From your Angular application (replace the path with your checkout):
+node /path/to/adapttable/packages/shared/cli/dist/cli.js init
+```
+
+The CLI detects NG-ZORRO from `ng-zorro-antd` in your dependencies; otherwise it
+chooses the unstyled Angular kit. There is no `--kit` option. It prints a package
+installation command but does not run it. Existing scaffold files are skipped;
+use `init --force` only when you intend to overwrite them. Resolve the local kit
+packages as described above before using the generated component.
 
 ## Data and callbacks
 

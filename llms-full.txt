@@ -23425,7 +23425,7 @@ publishes them to npm with a generated per-package `CHANGELOG.md`. See
 
 ---
 
-# Get started with AdaptTable for Angular
+# Build an Angular data table with signals
 
 AdaptTable combines a headless Angular binding with a kit that draws the
 controls. Start with `AdaptDataTable`, an array of rows, column definitions and
@@ -23457,6 +23457,28 @@ global stylesheet:
 ```
 
 The native kit does not supply a theme stylesheet.
+
+## Run the Angular examples from source
+
+Until the kits are published, use the repository showcase for a runnable setup.
+From a clone of this repository, with Node 22.22.3 or a supported newer Node
+release (the showcase uses Angular 22) and the package manager version declared
+in `package.json`:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm --filter @adapttable/showcase dev
+```
+
+Open the local address printed by Vite and navigate to `/unstyled/` for the
+unstyled kit or `/ng-zorro/` for NG-ZORRO. The local showcase serves its HTML
+entries directly; the published website adds the `/angular/demo/` prefix.
+The source checkout resolves workspace dependencies; these commands do not
+install an unpublished kit into an unrelated application.
+
+Try the hosted [unstyled Angular table](https://adapttable.orwamahmoud.com/angular/demo/unstyled/)
+or [NG-ZORRO table](https://adapttable.orwamahmoud.com/angular/demo/ng-zorro/)
+without a local install.
 
 ## A standalone table
 
@@ -23537,6 +23559,23 @@ and an `@angular/core` dependency are present. It supports the
 your app for you. The binding and chosen kit must be resolvable in your
 development setup. The CLI prints an install command; it does not install
 packages, check registry availability or publish a release.
+
+Build the repository CLI once, then invoke its built entry **from your Angular
+application root** (the folder containing `angular.json` and `package.json`):
+
+```sh
+# From the AdaptTable repository:
+pnpm --filter @adapttable/cli build
+
+# From your Angular application (replace the path with your checkout):
+node /path/to/adapttable/packages/shared/cli/dist/cli.js init
+```
+
+The CLI detects NG-ZORRO from `ng-zorro-antd` in your dependencies; otherwise it
+chooses the unstyled Angular kit. There is no `--kit` option. It prints a package
+installation command but does not run it. Existing scaffold files are skipped;
+use `init --force` only when you intend to overwrite them. Resolve the local kit
+packages as described above before using the generated component.
 
 ## Data and callbacks
 
@@ -25521,7 +25560,7 @@ makes the intended invalidation clear.
 
 ---
 
-# Angular table pagination and infinite loading
+# Angular table pagination: client-side and server-side
 
 Pagination belongs to the source. Both Angular kits render the same source
 state through their own controls. Pages are one-based, and `total` is the
@@ -25585,7 +25624,22 @@ and stops at the end. Compose [virtualization](./virtualization.md) when a
 large growing row list should render only its visible window. Infinite
 loading by itself is not virtualization.
 
-## Server and cursor paging
+## Server-side pagination in Angular
+
+Use server-side pagination when an API owns the complete dataset. Bind its
+current page to `[data]`, the full matching count to `[total]`, and a stable
+loader to `[onQueryChange]`. Do not slice the returned page again in the host.
+The [complete server-side Angular table example](./data-tiers.md#server-pages-with-cancellation-and-errors)
+includes a standalone component, a POST request, cancellation, loading and
+error signals, and the response key needed to reject stale pages.
+
+For a page-number endpoint, translate the one-based query page into the
+backend's offset as `(page - 1) * limit`. Apply search, filters and sorting
+before that offset and limit, and compute `total` with the same filters.
+Changing from page size 25 to 50 must request a new first page, rather than
+reuse rows from the previous page size.
+
+## Cursor pagination and infinite scrolling
 
 On the server tier, changing page invokes `[onQueryChange]`; the host publishes
 that page's rows, total, loading state and response key. Search, filtering,
@@ -26043,10 +26097,11 @@ dataset with lazy children, use [tree data](./tree-data.md).
 
 ---
 
-# Angular cell editing
+# Editable Angular table: inline cell and batch editing
 
-Compose `editing()` from your kit's `/editing` entry and mark the columns that
-may change with `editable`. Every committed value goes to your callback. The
+Make an Angular table cell editable with validation, an async save callback and
+keyboard controls. Compose `editing()` from your kit's `/editing` entry and mark
+the columns that may change with `editable`. Every committed value goes to your callback. The
 table owns the draft and save state; your application owns the rows and the
 request that persists them.
 
@@ -26054,7 +26109,7 @@ These examples use
 `@adapttable/angular-unstyled`; use `@adapttable/ng-zorro` and its matching
 feature entries for NG-ZORRO controls. See [Getting started](./getting-started.md).
 
-## Commit through a host callback
+## Edit a table cell in Angular and save it to an API
 
 ```ts
 import { Component, signal } from "@angular/core";
@@ -26163,6 +26218,89 @@ that needs a navigation guard.
 For history, compose `editHistory()` and `undoRedoButtons()` from `/editing`.
 History replays changes through the host; it does not turn the table into a row
 store. Multi-cell paste and fill can be recorded as one gesture.
+
+## Save multiple edited rows in one batch
+
+Use batch editing when the reader should review several changes before saving.
+The following standalone example holds drafts until Save is pressed. Its host
+endpoint, `PATCH /api/tasks/batch`, must validate every patch and return the
+complete updated task list as `{ rows: Task[] }`. Implement that endpoint in
+your application; it is not an endpoint supplied by the table library.
+
+```ts
+import { Component, signal } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-unstyled";
+import { batchEditing } from "@adapttable/angular-unstyled/batch-editing";
+import { dirtyIndicators } from "@adapttable/angular-unstyled/editing";
+
+interface Task {
+  id: string;
+  title: string;
+  hours: number;
+}
+
+@Component({
+  selector: "app-batch-tasks",
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      tableLabel="Batch-edit tasks"
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  `,
+})
+export class BatchTasks {
+  readonly rows = signal<readonly Task[]>([
+    { id: "t1", title: "Review", hours: 2 },
+    { id: "t2", title: "Test", hours: 3 },
+  ]);
+  readonly rowKey = (row: Task) => row.id;
+  readonly columns: readonly ColumnDef<Task>[] = [
+    { key: "title", header: "Task" },
+    {
+      key: "hours",
+      header: "Hours",
+      editable: true,
+      editor: "number",
+      parseValue: (draft) => Number(draft),
+      validate: (value) =>
+        typeof value === "number" && Number.isFinite(value) && value >= 0
+          ? undefined
+          : "Enter a non-negative number",
+    },
+  ];
+  readonly features = [
+    batchEditing<Task>(async (edits) => {
+      const response = await fetch("/api/tasks/batch", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          edits: edits.map(({ rowId, patch }) => ({ id: rowId, patch })),
+        }),
+      });
+      if (!response.ok) throw new Error("The batch could not be saved");
+      const result = (await response.json()) as { rows: Task[] };
+      this.rows.set(result.rows);
+    }),
+    dirtyIndicators(),
+  ];
+}
+```
+
+Each edit contains `row` (the original record), `rowId` (its stable key) and
+`patch` (only changed fields, with parsed values). The example sends just the
+ID and patch; the backend must authorize each row and allowlist writable fields.
+Use a transactional endpoint if Save must be all-or-nothing. A rejected save
+must remain a rejection so the table can retain the drafts for correction or
+retry. Discard clears local drafts without persisting them.
+
+Try the [Angular inline-editing demo](https://adapttable.orwamahmoud.com/angular/demo/unstyled/editing/)
+or the [NG-ZORRO editing demo](https://adapttable.orwamahmoud.com/angular/demo/ng-zorro/editing/).
 
 ## Keyboard, mobile and incoming updates
 
@@ -26952,14 +27090,17 @@ cover host writes, copy failure, fill and read-only behavior.
 
 ---
 
-# Angular row grouping
+# Angular row grouping with nested groups and subtotals
 
 Group rows by one column or an ordered list of columns. `grouping()` supplies
 fixed keys; `groupingPanel()` also lets the reader add, remove and reorder
 grouping fields. Both factories render the selected kit's group headers on
 desktop and group header cards on phones.
 
-## Let the reader configure groups
+Try the [unstyled Angular row-grouping demo](https://adapttable.orwamahmoud.com/angular/demo/unstyled/grouping/)
+or the [NG-ZORRO row-grouping demo](https://adapttable.orwamahmoud.com/angular/demo/ng-zorro/grouping/).
+
+## Configure client-side grouping with an Angular grouping panel
 
 ```ts
 import { Component } from "@angular/core";
@@ -27019,7 +27160,7 @@ is unnecessary. For NG-ZORRO, use its matching root, `/grouping` and
 See [getting started](./getting-started.md) for installation
 and first-release status.
 
-## State and data scope
+## Grouping state, URL persistence and client-side pagination
 
 The panel's first argument seeds the grouping keys. Existing URL state wins
 over that seed. Keys are ordered outermost first; `onGroupByChange` receives the
@@ -27032,13 +27173,184 @@ at an ordinary page boundary. `groupPageSize` limits the number of groups and
 the next portion. `groupSort` orders groups, while `groupFilter` filters the
 group nodes. These are separate from sorting and filtering individual rows.
 
-Server grouping requires a source that supports the grouping contract and
-provides its groups/aggregate results. The library does not infer complete
-server groups from one loaded page. For incremental server groups,
-`onGroupLoadMore(groupKey)` lets the host request more; update the host-owned
-source when it resolves and expose fetching/failure state there.
+## Server-side Angular row-grouping recipe
 
-## Collapse, aggregates and interaction
+For server-side grouping, the backend groups the complete matching dataset and
+returns group counts, aggregates and any included records. The browser cannot
+infer full-dataset groups from one page. `supports: { grouping: true }` allows
+`groupBy` into the query; it does not itself attach response groups to the
+source. Wrap `injectServerData()` in a computed source that supplies `groups`.
+
+This component expects your application's `POST /api/work/groups` endpoint to
+accept `TableQuery` and return `GroupedWorkPage` below. This is a host-defined
+HTTP endpoint, not an AdaptTable service. When `query.groupBy` is empty, return
+ordinary paged `rows` and `groups: []`. Otherwise, return the requested group
+hierarchy with every materialized leaf record also present in `rows`, so
+selection and record identity can use the same records as the grouped view.
+`total` counts matching source records, not group headers.
+
+```ts
+import { Component, computed, signal } from "@angular/core";
+import {
+  injectServerData,
+  type ColumnDef,
+  type TableQueryHandler,
+  type TableSource,
+} from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-unstyled";
+import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
+
+interface Work {
+  id: string;
+  team: string;
+  status: string;
+  hours: number;
+}
+interface GroupedWorkPage {
+  rows: Work[];
+  total: number;
+  groups: NonNullable<TableSource<Work>["groups"]>;
+}
+
+@Component({
+  selector: "app-server-grouped-work",
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `
+    @if (error(); as failure) {
+      <p role="alert">{{ failure.message }}</p>
+      <button type="button" (click)="retry()">Retry groups</button>
+    }
+    <adapt-data-table
+      tableLabel="Server work groups"
+      [source]="source"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  `,
+})
+export class ServerGroupedWork {
+  private readonly page = signal<GroupedWorkPage>({
+    rows: [],
+    total: 0,
+    groups: [],
+  });
+  readonly loading = signal(false);
+  readonly error = signal<Error | null>(null);
+  readonly responseKey = signal<string | undefined>(undefined);
+  readonly rowKey = (row: Work) => row.id;
+  readonly columns: readonly ColumnDef<Work>[] = [
+    { key: "team", header: "Team" },
+    { key: "status", header: "Status" },
+    { key: "hours", header: "Hours", groupable: false },
+  ];
+  readonly features = [groupingPanel<Work>(["team"], { groupFooters: true })];
+
+  readonly load: TableQueryHandler = async (query, info) => {
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      const response = await fetch("/api/work/groups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(query),
+        signal: info.signal,
+      });
+      if (!response.ok)
+        throw new Error(`Group request failed: ${response.status}`);
+      const page = (await response.json()) as GroupedWorkPage;
+      if (info.signal.aborted) return;
+      this.page.set(page);
+      this.responseKey.set(info.key);
+    } catch (error) {
+      if (!info.signal.aborted) {
+        this.error.set(
+          error instanceof Error ? error : new Error(String(error))
+        );
+      }
+    } finally {
+      if (!info.signal.aborted) this.loading.set(false);
+    }
+  };
+
+  private readonly server = injectServerData<Work>({
+    rows: computed(() => this.page().rows),
+    total: computed(() => this.page().total),
+    loading: this.loading,
+    error: this.error,
+    responseKey: this.responseKey,
+    columns: this.columns,
+    supports: { grouping: true, aggregates: true },
+    aggregates: [{ key: "hours", fn: "sum" }],
+    onQueryChange: this.load,
+    paginationMode: "paged",
+    urlKey: "server-work-groups",
+    defaults: { groupBy: "team" },
+  });
+  readonly source = computed<TableSource<Work>>(() => ({
+    ...this.server(),
+    groups: this.loading() || this.error() ? [] : this.page().groups,
+  }));
+  readonly retry = () => this.server().refetch?.();
+}
+```
+
+For a query grouped by `team`, this is a valid response containing one group:
+
+```json
+{
+  "rows": [
+    { "id": "w1", "team": "Design", "status": "Open", "hours": 3 },
+    { "id": "w2", "team": "Design", "status": "Done", "hours": 2 }
+  ],
+  "total": 2,
+  "groups": [
+    {
+      "value": "Design",
+      "count": 2,
+      "aggregates": { "hours": 5 },
+      "rows": [
+        { "id": "w1", "team": "Design", "status": "Open", "hours": 3 },
+        { "id": "w2", "team": "Design", "status": "Done", "hours": 2 }
+      ]
+    }
+  ]
+}
+```
+
+Each group requires `value` and `count`; `aggregates`, nested `groups` and leaf
+`rows` are optional. Nest `groups` in the same order as `query.groupBy`.
+`count` and aggregate values must describe the backend's matching group,
+even if only some children were returned. The displayed subtotal comes from
+`aggregates`, not a fresh sum of the downloaded page. Validate field names,
+operations and filters on the backend, and validate JSON on the client in
+production; the cast above only documents its TypeScript shape.
+
+The request handler honors cancellation, ignores aborted responses and echoes
+`info.key` through `responseKey`. The wrapper hides groups during fetching and
+after failures rather than labeling an old group's values as the new result.
+A failed request can be retried through the source's `refetch` action.
+
+### Server group pagination and incremental loading
+
+Define server paging explicitly: which groups and children correspond to
+`page` and `limit`, and how a later response replaces or extends them. The
+server renderer preserves returned group order; local `groupSort`,
+`groupFilter`, `groupPageSize` and `groupRowPageSize` are not a substitute for
+backend ordering, filtering and paging.
+
+A count larger than the included `rows.length` does not automatically fetch
+children or create a server “Show more” row. Opening a group changes collapse
+state. `onGroupLoadMore(groupKey)` is called when the grouping model's show-more
+action requests rows, but merely supplying that callback does not implement a
+server transport. For partial groups, provide a host-owned load control and
+request handler, then immutably replace or merge the corresponding group and
+its materialized rows. Guard that request with the same query identity and
+cancellation checks. Never set `allFilteredRows` to one remote page to enable
+client grouping.
+
+## Collapse groups, show aggregate footers and support mobile cards
 
 `collapsedGroupIds` and `onCollapsedGroupIdsChange` support controlled collapse.
 Use the stable group IDs the model supplies, not display captions that can be
@@ -27053,8 +27365,9 @@ panel can inspect. `groupFooters` adds aligned subtotal rows. Set a column's
 The panel has an add control and removal/move controls as well as drag
 interaction. Keyboard users can move grouping chips and activate group
 toggles, and changes are announced through the binding's localized live region.
-Group selection applies to the group's rows; headers are structural entries,
-not records to edit or send to a mutation endpoint. On mobile, collapsing a
+Group selection applies to materialized member rows; a server count alone does
+not select unloaded records. Headers are structural entries, not records to
+edit or send to a mutation endpoint. On mobile, collapsing a
 header card hides its member cards using the same state.
 
 See [Aggregation](./aggregation.md), [Pivot](./pivot.md),
@@ -27184,12 +27497,17 @@ See [Row grouping](./row-grouping.md), [Pivot](./pivot.md),
 
 ---
 
-# Angular pivot tables
+# Angular pivot tables with row, column and measure axes
 
 Build a pivot with `pivot()`, turn its result into table inputs with your kit's
 `pivotTableModel()`, and use `AdaptPivotPanel` to edit the axes and measures.
 The calculation is separate from rendering; the model preserves the selected
 kit's row-header component, grouped columns and grand-total footer.
+
+Try the [unstyled Angular pivot demo](https://adapttable.orwamahmoud.com/angular/demo/unstyled/pivot/)
+or the [NG-ZORRO pivot demo](https://adapttable.orwamahmoud.com/angular/demo/ng-zorro/pivot/).
+
+## Build a client-side Angular pivot table
 
 ```ts
 import { Component, computed } from "@angular/core";
@@ -27259,7 +27577,7 @@ and row-header controls.
 See [getting started](./getting-started.md) for installation
 and first-release status.
 
-## Configuration and collapse
+## Configure pivot axes, measures and URL state
 
 The rows and columns arrays are ordered dimensions; measures specify a field
 and aggregation. The panel supplies add, remove and move controls, including
@@ -27278,14 +27596,166 @@ Angular template/component for foldable lines, and toggle that line's `key` in
 `state.collapsed()`. Preserve a text caption for export and announcements.
 The model's grand total remains a footer and is not a foldable row.
 
-## Data scope and result rendering
+## Server-side Angular pivot table recipe
 
 `pivot()` calculates from exactly the rows supplied. With a remote page, that
-would be a page pivot, not a complete dataset pivot. Use the backend pivot
-contract and `serverPivotResult` from the binding's `/pivot` entry when the
-backend owns the full set. Associate async results with their configuration and
-discard stale responses; surface failure before presenting an old pivot as the
-new result.
+would be a page pivot, not a complete dataset pivot. For large datasets, ask
+your backend to aggregate the full matching set and render its answer with
+`serverPivotResult()` from `@adapttable/angular/pivot`.
+
+This component expects an application-owned `POST /api/sales/pivot` endpoint.
+It accepts a `PivotConfig` as JSON and returns a `QueryPivotPage`; AdaptTable
+does not provide that HTTP endpoint. The backend must validate allowed field
+names and aggregate operations before constructing a database query.
+
+```ts
+import { Component, computed, effect, signal } from "@angular/core";
+import { AdaptDataTable } from "@adapttable/angular-unstyled";
+import {
+  AdaptPivotPanel,
+  injectPivotUrlState,
+  pivotTableModel,
+  type PivotField,
+} from "@adapttable/angular-unstyled/pivot";
+import {
+  serverPivotResult,
+  type PivotConfig,
+  type QueryPivotPage,
+} from "@adapttable/angular/pivot";
+
+@Component({
+  selector: "app-server-sales-pivot",
+  standalone: true,
+  imports: [AdaptDataTable, AdaptPivotPanel],
+  template: `
+    <adapt-pivot-panel
+      [fields]="fields"
+      [config]="state.config()"
+      [onChange]="state.onConfigChange"
+    />
+    @if (loading()) {
+      <p role="status">Loading pivot…</p>
+    }
+    @if (error(); as failure) {
+      <p role="alert">{{ failure.message }}</p>
+      <button type="button" (click)="retry()">Retry pivot</button>
+    }
+    @if (model(); as table) {
+      <adapt-data-table
+        tableLabel="Server sales pivot"
+        urlKey="server-sales-pivot-table"
+        [data]="table.rows"
+        [columns]="table.columns"
+        [rowKey]="table.rowKey"
+        [summaryRow]="table.summaryRow"
+      />
+    }
+  `,
+})
+export class ServerSalesPivot {
+  readonly fields: readonly PivotField[] = [
+    { key: "region", label: "Region" },
+    { key: "quarter", label: "Quarter" },
+    { key: "amount", label: "Amount" },
+  ];
+  readonly state = injectPivotUrlState({
+    urlKey: "server-sales-pivot",
+    defaultConfig: {
+      rows: ["region"],
+      columns: ["quarter"],
+      measures: [{ key: "amount", agg: "sum" }],
+    },
+  });
+  readonly loading = signal(false);
+  readonly error = signal<Error | null>(null);
+  private readonly refresh = signal(0);
+  private readonly result = signal<{
+    config: PivotConfig;
+    page: QueryPivotPage;
+  } | null>(null);
+  readonly model = computed(() => {
+    const result = this.result();
+    if (!result || result.config !== this.state.config()) return null;
+    return pivotTableModel(
+      serverPivotResult(result.page, { config: result.config }),
+      { fields: this.fields }
+    );
+  });
+
+  constructor() {
+    effect((onCleanup) => {
+      const config = this.state.config();
+      this.refresh();
+      const controller = new AbortController();
+      onCleanup(() => controller.abort());
+      void this.load(config, controller.signal);
+    });
+  }
+
+  readonly retry = () => this.refresh.update((value) => value + 1);
+
+  private async load(config: PivotConfig, signal: AbortSignal) {
+    this.loading.set(true);
+    this.error.set(null);
+    this.result.set(null);
+    try {
+      const response = await fetch("/api/sales/pivot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+        signal,
+      });
+      if (!response.ok)
+        throw new Error(`Pivot request failed: ${response.status}`);
+      const page = (await response.json()) as QueryPivotPage;
+      if (!signal.aborted) this.result.set({ config, page });
+    } catch (error) {
+      if (!signal.aborted) {
+        this.error.set(
+          error instanceof Error ? error : new Error(String(error))
+        );
+      }
+    } finally {
+      if (!signal.aborted) this.loading.set(false);
+    }
+  }
+}
+```
+
+For the default configuration, a valid response is:
+
+```json
+{
+  "columns": [["Q1"], ["Q2"]],
+  "rows": [
+    { "path": ["North"], "cells": [120, 80], "totals": [200], "count": 2 },
+    { "path": ["South"], "cells": [60, null], "totals": [60], "count": 1 }
+  ],
+  "total": { "path": [], "cells": [180, 80], "totals": [260], "count": 3 }
+}
+```
+
+`columns` contains dimension paths, not one entry per measure. Each row's
+`cells` follow column-path order, then measure order within that path. `totals`
+contains one value per measure for the grand-total columns. `total` is the
+optional grand-total row; `subtotal: true` identifies a subtotal body line.
+Missing cells stay empty. The backend must compute totals correctly: averages
+cannot be obtained by adding per-group averages. Honor the requested totals
+switches on the server; the translator renders a supplied `total` row.
+
+The effect cancels on configuration changes and component destruction, and the
+model only displays a response paired with the configuration that requested
+it. In production, validate the JSON at the HTTP boundary; the TypeScript cast
+above is not runtime validation. Include any application filters in your own
+request contract and in the effect's dependencies.
+
+`serverPivotResult` translates a result; it neither fetches nor applies the
+client pivot's collapsed-key set. This recipe renders every returned line.
+If server-side folding is needed, define it in your endpoint contract and
+return the visible lines, or explicitly project them in the host. Do not
+expect a URL collapse change alone to fetch or hide server rows.
+
+## Render grouped pivot columns, totals and responsive rows
 
 `pivotTableModel` returns `columns`, `rows`, `rowKey` and optional `summaryRow`.
 The generated rows are aggregate lines, not the original editable records.

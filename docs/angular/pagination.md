@@ -1,4 +1,4 @@
-# Angular table pagination and infinite loading
+# Angular table pagination: client-side and server-side
 
 Pagination belongs to the source. Both Angular kits render the same source
 state through their own controls. Pages are one-based, and `total` is the
@@ -62,7 +62,22 @@ and stops at the end. Compose [virtualization](./virtualization.md) when a
 large growing row list should render only its visible window. Infinite
 loading by itself is not virtualization.
 
-## Server and cursor paging
+## Server-side pagination in Angular
+
+Use server-side pagination when an API owns the complete dataset. Bind its
+current page to `[data]`, the full matching count to `[total]`, and a stable
+loader to `[onQueryChange]`. Do not slice the returned page again in the host.
+The [complete server-side Angular table example](./data-tiers.md#server-pages-with-cancellation-and-errors)
+includes a standalone component, a POST request, cancellation, loading and
+error signals, and the response key needed to reject stale pages.
+
+For a page-number endpoint, translate the one-based query page into the
+backend's offset as `(page - 1) * limit`. Apply search, filters and sorting
+before that offset and limit, and compute `total` with the same filters.
+Changing from page size 25 to 50 must request a new first page, rather than
+reuse rows from the previous page size.
+
+## Cursor pagination and infinite scrolling
 
 On the server tier, changing page invokes `[onQueryChange]`; the host publishes
 that page's rows, total, loading state and response key. Search, filtering,
