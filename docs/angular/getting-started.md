@@ -85,8 +85,8 @@ layout explicitly.
 
 ## Add features deliberately
 
-Import a feature from the same kit as the table, create its configuration once
-on the component, and bind it through `[features]`:
+Import a feature from the same kit as the table, keep its configuration on
+the component, and bind it through `[features]`:
 
 ```ts
 import { columnMenu } from "@adapttable/angular-unstyled/column-menu";

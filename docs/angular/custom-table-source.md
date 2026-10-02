@@ -110,6 +110,15 @@ and [server queries](../server-queries.md).
 source may also expose `tableEngine` for neutral revisions and row scopes.
 Do not fabricate an engine merely to claim capabilities.
 
+## Replacing a source
+
+The table follows both the current `[source]` input and a signal supplied as
+that input. Replacing the source redirects rendered rows and reader actions to
+the new source; later changes from the old signal no longer drive the table.
+Removing the input returns to the live `data` and `mode` tier. The active
+built-in tier owns URL persistence, while inactive tiers keep private state
+and cannot rewrite the visible query.
+
 ## Async and lifecycle rules
 
 Use request identity or cancellation to prevent an old response from replacing

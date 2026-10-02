@@ -49,10 +49,12 @@ The native kit exposes the same paths below
 `@adapttable/angular-unstyled`. NG-ZORRO requires its host theme and peer
 dependencies; see [Getting started](./getting-started.md).
 
-The shell reads its feature list when it starts. Build it once rather than
-calling factories from a template or expecting a new array to hot-swap a
-mounted feature. Host-owned row signals and supported controlled inputs can
-still change throughout the table's lifetime.
+Keep feature objects stable while their configuration is unchanged, instead
+of calling factories on every template evaluation. Bind a new feature list
+when the host changes configuration: the shell updates its options and slots,
+cleans up replaced or removed behavior, and preserves the table's data and
+unchanged feature state. Controlled inputs can also follow host signals
+without replacing their feature.
 
 ## The standard preset
 
@@ -121,8 +123,10 @@ registrations, `renders` for named slots and `mount` for live runtime behavior.
 
 A mounted feature receives the table runtime, injector and per-table feature
 state. Return a cleanup for subscriptions or resources. The shell disposes
-mounted behavior with the table; a custom adapter must preserve that lifecycle
-instead of mounting features during each render.
+replaced or removed behavior and cleans up the remaining features when the
+table is destroyed. Unchanged mounted features retain their runtime and state;
+a custom adapter must reconcile this lifecycle rather than mounting every
+feature again during each render.
 
 See [Building an adapter](./building-an-adapter.md),
 [Headless rendering](./headless.md), and the

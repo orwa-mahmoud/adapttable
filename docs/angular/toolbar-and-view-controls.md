@@ -102,3 +102,8 @@ See [Saved views](./saved-views.md), [Command palette](./command-palette.md),
 [Exporting](./exporting.md), [Cell editing](./cell-editing.md) and
 [URL state](./url-state.md). The [toolbar tests](../../packages/angular/adapter-angular-unstyled/src/toolbar.test.ts)
 exercise density, fullscreen, export and Escape focus restoration.
+
+When `[density]` is supplied, it is a live controlled value. The chooser emits
+`(densityChange)` and waits for the host to update the input; without a supplied
+value it keeps its own URL/local state. A host can observe `(densityChange)` in
+either mode.

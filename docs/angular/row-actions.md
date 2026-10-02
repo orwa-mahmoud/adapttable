@@ -107,7 +107,8 @@ technology users. The Columns menu can hide the reserved actions column.
 replacing the controls. An `editsRow: true` action can open a composed
 row-editing form; without a row form it is omitted.
 
-Configure the feature before mounting. The host's data changes can remain
+Replace the feature when its available actions or callbacks change; removed
+actions no longer target the old host callback. The host's data can remain
 reactive, as in the signal example. See [cell editing](./cell-editing.md),
 [selection and bulk actions](./selection.md) and
 [customization](./customization.md).

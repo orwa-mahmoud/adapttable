@@ -17448,8 +17448,10 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
   rows, the filtered and searched rows, `total`, the clamped `page` and
   `hasNextPage` — from the engine's candidate, then `commit()` once the frame
   is on screen. It caches each row's search text, restages only when a value
-  moved, and keeps one page slice per engine revision. `useFrontendData` runs
-  on it. `resolvePaginationMode(mode, isMobile)` turns `"auto"` into
+  moved, and keeps one page slice per engine revision. An optional
+  `filterKey` explicitly invalidates predicate meaning while retaining the data
+  revision; changing a callback reference alone does not restage the rows.
+  Both `useFrontendData` and Angular’s `injectFrontendData` forward that key. `resolvePaginationMode(mode, isMobile)` turns `"auto"` into
   `"infinite"` on mobile and `"paged"` elsewhere; `defaultSearchText` and
   `defaultFrontendRowId` are the defaults a source uses.
 - `createServerSource()` — the server tier as a `ServerSource`: call
@@ -17480,12 +17482,20 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
 - `createTableData()` — the table data controller as a `TableData`: `plan`
   a `TableDataConfig` (the data props plus the filter engine, when composed)
   into a `TableDataPlan` — the tier, the merged filter runtime, the combined
-  predicate, the tree predicate and the facet keys a server query asks for;
+  predicate, the tree predicate, a semantic `filterKey` and the facet keys a
+  server query asks for. Forward the key to the frontend source so replacing
+  declarative filter definitions or registry extensions refreshes matching
+  rows without changing the data array or query;
   `finish({ resolved, frontend })` adds facet counts computed from the
   searched rows when nothing answered them; `commit()` tells a
   `mode="frontend"` table's `onQueryChange` about each change (never the
   mount), `loadOptions()` loads each filter's own option list once, and
   `dispose()` aborts a notification in flight. `useTableData` runs on it.
+  The optional engine supplies `FilterRuntime.filterKey` from authored
+  definitions, registry extensions, locale and loaded options, excluding rows
+  and generated callbacks. A custom `FilterEngine` may omit it; to refresh
+  predicate meaning within the same engine, it supplies a new key. The data
+  controller also tracks engine replacement and host-predicate presence.
 - `ResponseAggregateOps` / `ResponseAggregateOpsInput` /
   `createResponseAggregateOps` — which aggregate
   operations the rows on screen were computed with: `remember` each request's
@@ -19841,16 +19851,28 @@ comes from a kit through a slot.
 
 - `AdaptTableFeature.mount` receives a `FeatureMountContext`: the live runtime,
   Angular injector, per-table `FeatureState`, and synchronous `flush` /
-  `flushAdmission` boundaries. `mountTableFeatures` orders the mounted features
-  and disposes each once. `tableFeaturesOf` combines injector-provided features
+  `flushAdmission` boundaries. `mountTableFeatures` accepts a feature list or
+  signal, retains unchanged mounts and disposes replaced or removed mounts once.
+  `createFeatureResources(injector)` returns `FeatureResources`: `reconcile`
+  assembles a view, `use(key, dependencies, create)` retains a controller's
+  injection scope while its dependencies are identical, and `dispose` releases
+  all remaining scopes. Removed resources and the table's destruction also
+  release their scopes. `tableFeaturesOf` combines injector-provided features
   with the table's own list; a later duplicate id wins for setup, options,
   rendering and mounting alike.
+- Both Angular kits accept live `selectable`, `cellNavigation`, `filtersMode`
+  and `closeHeaderFilterOnSelect` inputs. Their controlled `density` input
+  overrides the chooser's state; `densityChange` reports requests and waits
+  for the host to update the input. Omitting `density` keeps the chooser
+  uncontrolled. Kits share core's `resolveDensity` and `requestDensityChange`,
+  re-exported by the Angular binding.
 - `createFeatureState`, `ADAPTTABLE_FEATURE_STATE` and `injectFeatureState`
   publish and read typed `FeatureStateKey` handles declared with
   `featureStateKey`. Tables and slots have isolated state scopes. An explicit
   publication refreshes readers even when a mutable handle's identity is stable.
-  `tableRuntimeFor`, `RuntimeGrouping` and `RuntimeTableOptions` project the completed table's
-  filtering, selection, layout, row pins, grouping/tree order, edits and actions
+  `tableRuntimeFor` accepts a feature list or signal; retained runtime readers
+  observe the current feature IDs. `RuntimeGrouping` and `RuntimeTableOptions`
+  project the completed table's filtering, selection, layout, row pins, grouping/tree order, edits and actions
   through the neutral `TableRuntime` / `TableRuntimeView`.
 - `injectFrontendData(options)` is the in-memory tier: it takes
   `FrontendDataOptions` (the rows, as a value or a signal, plus the URL-state
@@ -23485,8 +23507,8 @@ layout explicitly.
 
 ## Add features deliberately
 
-Import a feature from the same kit as the table, create its configuration once
-on the component, and bind it through `[features]`:
+Import a feature from the same kit as the table, keep its configuration on
+the component, and bind it through `[features]`:
 
 ```ts
 import { columnMenu } from "@adapttable/angular-unstyled/column-menu";
@@ -23576,10 +23598,12 @@ The native kit exposes the same paths below
 `@adapttable/angular-unstyled`. NG-ZORRO requires its host theme and peer
 dependencies; see [Getting started](./getting-started.md).
 
-The shell reads its feature list when it starts. Build it once rather than
-calling factories from a template or expecting a new array to hot-swap a
-mounted feature. Host-owned row signals and supported controlled inputs can
-still change throughout the table's lifetime.
+Keep feature objects stable while their configuration is unchanged, instead
+of calling factories on every template evaluation. Bind a new feature list
+when the host changes configuration: the shell updates its options and slots,
+cleans up replaced or removed behavior, and preserves the table's data and
+unchanged feature state. Controlled inputs can also follow host signals
+without replacing their feature.
 
 ## The standard preset
 
@@ -23648,8 +23672,10 @@ registrations, `renders` for named slots and `mount` for live runtime behavior.
 
 A mounted feature receives the table runtime, injector and per-table feature
 state. Return a cleanup for subscriptions or resources. The shell disposes
-mounted behavior with the table; a custom adapter must preserve that lifecycle
-instead of mounting features during each render.
+replaced or removed behavior and cleans up the remaining features when the
+table is destroyed. Unchanged mounted features retain their runtime and state;
+a custom adapter must reconcile this lifecycle rather than mounting every
+feature again during each render.
 
 See [Building an adapter](./building-an-adapter.md),
 [Headless rendering](./headless.md), and the
@@ -24207,6 +24233,15 @@ and [server queries](../server-queries.md).
 source may also expose `tableEngine` for neutral revisions and row scopes.
 Do not fabricate an engine merely to claim capabilities.
 
+## Replacing a source
+
+The table follows both the current `[source]` input and a signal supplied as
+that input. Replacing the source redirects rendered rows and reader actions to
+the new source; later changes from the old signal no longer drive the table.
+Removing the input returns to the live `data` and `mode` tier. The active
+built-in tier owns URL persistence, while inactive tiers keep private state
+and cannot rewrite the visible query.
+
 ## Async and lifecycle rules
 
 Use request identity or cancellation to prevent an old response from replacing
@@ -24322,7 +24357,7 @@ the adapter, including the actual native or kit dialog.
 
 ## Assemble the shell
 
-The full kit shell performs these steps once for a mounted table:
+The full kit shell separates persistent table state from feature composition:
 
 1. Resolve inherited and local features, their options and slot fills
 2. Create `injectTableData`, preserving its source and filter runtime
@@ -24335,8 +24370,12 @@ The full kit shell performs these steps once for a mounted table:
 
 `AdaptSlot` creates a standalone slot component and updates its `props` input.
 The feature's `mount` callback may return cleanup; `mountTableFeatures` runs
-cleanup with table destruction and releases its child injector. Do not duplicate
-stores or registrations in the kit to work around missing wiring.
+cleanup when a feature is replaced or removed, and at table destruction. Its
+child injector is released with that behavior. Reconcile options, registrations
+and slot fills when the feature list changes, while keeping the source, layout
+and unchanged feature controllers alive. The retained runtime must expose the
+current capabilities, including revoked editing or mutation operations. Do not
+duplicate core stores or leave stale registrations in the kit.
 
 Use `AdaptCell`, `AdaptHeader` and `AdaptFooter` for column renderers. Custom
 mobile bodies receive real field templates; stamp each with its supplied
@@ -25459,6 +25498,19 @@ for building a complete custom form.
 See [filtering](./filtering.md), [filter trees](./filter-tree.md) and
 [URL state](./url-state.md).
 
+## Updating predicate meaning
+
+Replacing declarative filter definitions or registry extensions refreshes the
+matching rows even when the data array and active filter value stay the same.
+The table controller supplies the semantic key used by the neutral frontend
+source, so unrelated feature changes and row updates do not force a predicate
+reset.
+
+For a custom `injectFrontendData` predicate whose meaning changes without new
+rows or query state, update its `filterKey` value or signal. Changing a callback
+reference alone keeps the existing no-restaging behavior; an explicit key
+makes the intended invalidation clear.
+
 ---
 
 # Angular table pagination and infinite loading
@@ -25763,7 +25815,8 @@ technology users. The Columns menu can hide the reserved actions column.
 replacing the controls. An `editsRow: true` action can open a composed
 row-editing form; without a row form it is omitted.
 
-Configure the feature before mounting. The host's data changes can remain
+Replace the feature when its available actions or callbacks change; removed
+actions no longer target the old host callback. The host's data can remain
 reactive, as in the signal example. See [cell editing](./cell-editing.md),
 [selection and bulk actions](./selection.md) and
 [customization](./customization.md).
@@ -26445,10 +26498,10 @@ data. A column's `footer` renderer formats that summary value. This footer
 is separate from the independent top/bottom objects shown here; see
 [aggregation](./aggregation.md).
 
-The feature configuration is read when the table initializes. Keep mutable
-summary workflows in a host-controlled integration rather than assuming a
-new feature array updates the mounted shell. Summary objects are content,
-not view state, and are not stored in the URL or saved views.
+When summary content changes, create a new `pinnedSummaryRows()` feature with
+the replacement objects and bind the updated feature list. The mounted table
+uses the new content without resetting unrelated table state. Summary objects
+are content, not view state, and are not stored in the URL or saved views.
 
 For custom rendering, use Angular `cell` templates or components as on
 ordinary [columns](./columns.md). Pass `[labels]` and `dir` for the summary's
@@ -28011,10 +28064,15 @@ Only composed features consume their associated state.
 
 `[defaults]` supplies values while the URL has no value for that key.
 Clearing a defaulted value records an explicit empty parameter so it does
-not reappear. The shell reads defaults, namespace and URL-sync mode at
-initialization. In a custom integration, `injectTableUrlState` accepts
-signal-backed defaults and exposes a `state()` signal with setters such as
-`setSearch`, `setSort`, `setPage`, `setExtra` and `setFilterTree`.
+not reappear. Defaults, namespace and URL-sync changes follow the current host
+inputs. In a custom integration, `injectTableUrlState` accepts signal-backed
+defaults, `urlSync`, `urlAdapter` and `urlKey`, and exposes a `state()` signal with
+setters such as `setSearch`, `setSort`, `setPage`, `setExtra` and `setFilterTree`.
+Changing that controller's `urlSync` selects the real URL or its retained
+private backend; only the selected backend keeps a subscription and namespace
+claim. The table data controller similarly transfers URL ownership when its
+active frontend/server tier changes, so an inactive tier cannot rewrite the
+reader's query.
 
 Use `injectColumnLayoutUrlState`, `injectDensityUrlState`,
 `injectGroupCollapseUrlState` and `injectRowPinningUrlState` from the binding
@@ -28998,6 +29056,11 @@ See [Saved views](./saved-views.md), [Command palette](./command-palette.md),
 [Exporting](./exporting.md), [Cell editing](./cell-editing.md) and
 [URL state](./url-state.md). The [toolbar tests](../../packages/angular/adapter-angular-unstyled/src/toolbar.test.ts)
 exercise density, fullscreen, export and Escape focus restoration.
+
+When `[density]` is supplied, it is a live controlled value. The chooser emits
+`(densityChange)` and waits for the host to update the input; without a supplied
+value it keeps its own URL/local state. A host can observe `(densityChange)` in
+either mode.
 
 ---
 

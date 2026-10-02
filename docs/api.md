@@ -660,8 +660,10 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
   rows, the filtered and searched rows, `total`, the clamped `page` and
   `hasNextPage` — from the engine's candidate, then `commit()` once the frame
   is on screen. It caches each row's search text, restages only when a value
-  moved, and keeps one page slice per engine revision. `useFrontendData` runs
-  on it. `resolvePaginationMode(mode, isMobile)` turns `"auto"` into
+  moved, and keeps one page slice per engine revision. An optional
+  `filterKey` explicitly invalidates predicate meaning while retaining the data
+  revision; changing a callback reference alone does not restage the rows.
+  Both `useFrontendData` and Angular’s `injectFrontendData` forward that key. `resolvePaginationMode(mode, isMobile)` turns `"auto"` into
   `"infinite"` on mobile and `"paged"` elsewhere; `defaultSearchText` and
   `defaultFrontendRowId` are the defaults a source uses.
 - `createServerSource()` — the server tier as a `ServerSource`: call
@@ -692,12 +694,20 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
 - `createTableData()` — the table data controller as a `TableData`: `plan`
   a `TableDataConfig` (the data props plus the filter engine, when composed)
   into a `TableDataPlan` — the tier, the merged filter runtime, the combined
-  predicate, the tree predicate and the facet keys a server query asks for;
+  predicate, the tree predicate, a semantic `filterKey` and the facet keys a
+  server query asks for. Forward the key to the frontend source so replacing
+  declarative filter definitions or registry extensions refreshes matching
+  rows without changing the data array or query;
   `finish({ resolved, frontend })` adds facet counts computed from the
   searched rows when nothing answered them; `commit()` tells a
   `mode="frontend"` table's `onQueryChange` about each change (never the
   mount), `loadOptions()` loads each filter's own option list once, and
   `dispose()` aborts a notification in flight. `useTableData` runs on it.
+  The optional engine supplies `FilterRuntime.filterKey` from authored
+  definitions, registry extensions, locale and loaded options, excluding rows
+  and generated callbacks. A custom `FilterEngine` may omit it; to refresh
+  predicate meaning within the same engine, it supplies a new key. The data
+  controller also tracks engine replacement and host-predicate presence.
 - `ResponseAggregateOps` / `ResponseAggregateOpsInput` /
   `createResponseAggregateOps` — which aggregate
   operations the rows on screen were computed with: `remember` each request's
@@ -3053,16 +3063,28 @@ comes from a kit through a slot.
 
 - `AdaptTableFeature.mount` receives a `FeatureMountContext`: the live runtime,
   Angular injector, per-table `FeatureState`, and synchronous `flush` /
-  `flushAdmission` boundaries. `mountTableFeatures` orders the mounted features
-  and disposes each once. `tableFeaturesOf` combines injector-provided features
+  `flushAdmission` boundaries. `mountTableFeatures` accepts a feature list or
+  signal, retains unchanged mounts and disposes replaced or removed mounts once.
+  `createFeatureResources(injector)` returns `FeatureResources`: `reconcile`
+  assembles a view, `use(key, dependencies, create)` retains a controller's
+  injection scope while its dependencies are identical, and `dispose` releases
+  all remaining scopes. Removed resources and the table's destruction also
+  release their scopes. `tableFeaturesOf` combines injector-provided features
   with the table's own list; a later duplicate id wins for setup, options,
   rendering and mounting alike.
+- Both Angular kits accept live `selectable`, `cellNavigation`, `filtersMode`
+  and `closeHeaderFilterOnSelect` inputs. Their controlled `density` input
+  overrides the chooser's state; `densityChange` reports requests and waits
+  for the host to update the input. Omitting `density` keeps the chooser
+  uncontrolled. Kits share core's `resolveDensity` and `requestDensityChange`,
+  re-exported by the Angular binding.
 - `createFeatureState`, `ADAPTTABLE_FEATURE_STATE` and `injectFeatureState`
   publish and read typed `FeatureStateKey` handles declared with
   `featureStateKey`. Tables and slots have isolated state scopes. An explicit
   publication refreshes readers even when a mutable handle's identity is stable.
-  `tableRuntimeFor`, `RuntimeGrouping` and `RuntimeTableOptions` project the completed table's
-  filtering, selection, layout, row pins, grouping/tree order, edits and actions
+  `tableRuntimeFor` accepts a feature list or signal; retained runtime readers
+  observe the current feature IDs. `RuntimeGrouping` and `RuntimeTableOptions`
+  project the completed table's filtering, selection, layout, row pins, grouping/tree order, edits and actions
   through the neutral `TableRuntime` / `TableRuntimeView`.
 - `injectFrontendData(options)` is the in-memory tier: it takes
   `FrontendDataOptions` (the rows, as a value or a signal, plus the URL-state

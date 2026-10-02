@@ -240,3 +240,16 @@ for building a complete custom form.
 
 See [filtering](./filtering.md), [filter trees](./filter-tree.md) and
 [URL state](./url-state.md).
+
+## Updating predicate meaning
+
+Replacing declarative filter definitions or registry extensions refreshes the
+matching rows even when the data array and active filter value stay the same.
+The table controller supplies the semantic key used by the neutral frontend
+source, so unrelated feature changes and row updates do not force a predicate
+reset.
+
+For a custom `injectFrontendData` predicate whose meaning changes without new
+rows or query state, update its `filterKey` value or signal. Changing a callback
+reference alone keeps the existing no-restaging behavior; an explicit key
+makes the intended invalidation clear.

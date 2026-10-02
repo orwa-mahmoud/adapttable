@@ -61,10 +61,15 @@ Only composed features consume their associated state.
 
 `[defaults]` supplies values while the URL has no value for that key.
 Clearing a defaulted value records an explicit empty parameter so it does
-not reappear. The shell reads defaults, namespace and URL-sync mode at
-initialization. In a custom integration, `injectTableUrlState` accepts
-signal-backed defaults and exposes a `state()` signal with setters such as
-`setSearch`, `setSort`, `setPage`, `setExtra` and `setFilterTree`.
+not reappear. Defaults, namespace and URL-sync changes follow the current host
+inputs. In a custom integration, `injectTableUrlState` accepts signal-backed
+defaults, `urlSync`, `urlAdapter` and `urlKey`, and exposes a `state()` signal with
+setters such as `setSearch`, `setSort`, `setPage`, `setExtra` and `setFilterTree`.
+Changing that controller's `urlSync` selects the real URL or its retained
+private backend; only the selected backend keeps a subscription and namespace
+claim. The table data controller similarly transfers URL ownership when its
+active frontend/server tier changes, so an inactive tier cannot rewrite the
+reader's query.
 
 Use `injectColumnLayoutUrlState`, `injectDensityUrlState`,
 `injectGroupCollapseUrlState` and `injectRowPinningUrlState` from the binding

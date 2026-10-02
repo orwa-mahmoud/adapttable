@@ -83,10 +83,10 @@ data. A column's `footer` renderer formats that summary value. This footer
 is separate from the independent top/bottom objects shown here; see
 [aggregation](./aggregation.md).
 
-The feature configuration is read when the table initializes. Keep mutable
-summary workflows in a host-controlled integration rather than assuming a
-new feature array updates the mounted shell. Summary objects are content,
-not view state, and are not stored in the URL or saved views.
+When summary content changes, create a new `pinnedSummaryRows()` feature with
+the replacement objects and bind the updated feature list. The mounted table
+uses the new content without resetting unrelated table state. Summary objects
+are content, not view state, and are not stored in the URL or saved views.
 
 For custom rendering, use Angular `cell` templates or components as on
 ordinary [columns](./columns.md). Pass `[labels]` and `dir` for the summary's

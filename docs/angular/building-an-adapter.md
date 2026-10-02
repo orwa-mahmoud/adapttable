@@ -96,7 +96,7 @@ the adapter, including the actual native or kit dialog.
 
 ## Assemble the shell
 
-The full kit shell performs these steps once for a mounted table:
+The full kit shell separates persistent table state from feature composition:
 
 1. Resolve inherited and local features, their options and slot fills
 2. Create `injectTableData`, preserving its source and filter runtime
@@ -109,8 +109,12 @@ The full kit shell performs these steps once for a mounted table:
 
 `AdaptSlot` creates a standalone slot component and updates its `props` input.
 The feature's `mount` callback may return cleanup; `mountTableFeatures` runs
-cleanup with table destruction and releases its child injector. Do not duplicate
-stores or registrations in the kit to work around missing wiring.
+cleanup when a feature is replaced or removed, and at table destruction. Its
+child injector is released with that behavior. Reconcile options, registrations
+and slot fills when the feature list changes, while keeping the source, layout
+and unchanged feature controllers alive. The retained runtime must expose the
+current capabilities, including revoked editing or mutation operations. Do not
+duplicate core stores or leave stale registrations in the kit.
 
 Use `AdaptCell`, `AdaptHeader` and `AdaptFooter` for column renderers. Custom
 mobile bodies receive real field templates; stamp each with its supplied
