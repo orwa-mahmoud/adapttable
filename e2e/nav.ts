@@ -13,7 +13,7 @@ import { expect, type Page } from "@playwright/test";
 export type NavGroup = "Adapters";
 
 /** Open one of the nav's menus, and wait for the trigger to say it is open. */
-export async function openNavGroup(page: Page, group: NavGroup): Promise<void> {
+export async function openNavGroup(page: Page, group: string): Promise<void> {
   const trigger = page
     .locator(".nav")
     .getByRole("button", { name: group, exact: true });

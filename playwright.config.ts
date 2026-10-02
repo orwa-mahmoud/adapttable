@@ -42,6 +42,9 @@ const MOBILE_SPECS = [
 
 export default defineConfig({
   testDir: "./e2e",
+  // Browser runners restore the showcase artifact, not package builds.
+  // Test imports read neutral source through one explicit project.
+  tsconfig: "./e2e/tsconfig.json",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
