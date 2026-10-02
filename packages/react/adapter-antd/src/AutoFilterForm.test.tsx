@@ -552,3 +552,61 @@ describe("<AutoFilterForm> select labels (antd)", () => {
     ]);
   });
 });
+
+describe("<AutoFilterForm> field parts (Ant Design)", () => {
+  it("marks each labelled field root without replacing its control parts", () => {
+    const defs: FilterDef[] = [
+      { key: "name", type: "text", label: "Name" },
+      { key: "enabled", type: "boolean", label: "Enabled" },
+      {
+        key: "status",
+        type: "select",
+        label: "Status",
+        options: [{ value: "active", label: "Active" }],
+      },
+      {
+        key: "tags",
+        type: "multiSelect",
+        label: "Tags",
+        options: [{ value: "urgent", label: "Urgent" }],
+      },
+      { key: "budget", type: "numberRange", label: "Budget" },
+      { key: "created", type: "dateRange", label: "Created" },
+    ];
+    const { container } = render(
+      <AutoFilterForm
+        defs={defs}
+        source={staticSource({})}
+        labels={defaultLabels}
+      />
+    );
+    const fields = container.querySelectorAll(
+      '[data-adapttable-part="filter-field"]'
+    );
+    expect(fields).toHaveLength(defs.length);
+    const fieldAt = (index: number) => {
+      const field = fields[index];
+      if (!field) throw new Error(`Missing filter field at index ${index}`);
+      return field;
+    };
+    ["Name", "Enabled", "Status", "Tags", "Budget", "Created"].forEach(
+      (label, index) => {
+        const field = fieldAt(index);
+        expect(field).toHaveTextContent(label);
+        expect(field.querySelector("input, button, select")).not.toBeNull();
+        expect(
+          field.querySelector('[data-adapttable-part="filter-field"]')
+        ).toBeNull();
+      }
+    );
+    expect(
+      fieldAt(0).querySelector('[data-adapttable-part="filter-input"]')
+    ).toBeInTheDocument();
+    ["Enabled", "Status"].forEach((name, index) => {
+      const select = fieldAt(index + 1).querySelector(
+        '[data-adapttable-part="filter-select"]'
+      );
+      expect(select).toContainElement(screen.getByRole("combobox", { name }));
+    });
+  });
+});

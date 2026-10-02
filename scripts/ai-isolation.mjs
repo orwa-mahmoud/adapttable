@@ -16,7 +16,7 @@ import {
   FRAMEWORKS,
   frameworksIn,
   KITS,
-  publishedKits,
+  participatingKits,
 } from "./kits.mjs";
 import { packageDir, packageRel, REPO_ROOT as ROOT } from "./packages.mjs";
 
@@ -66,7 +66,7 @@ const angularKits = KITS.filter(
 );
 const guardedKits = [
   ...new Map(
-    [...publishedKits(KITS), ...angularKits].map((kit) => [kit.name, kit])
+    [...participatingKits(KITS), ...angularKits].map((kit) => [kit.name, kit])
   ).values(),
 ];
 const GRAPH_PACKAGES = [

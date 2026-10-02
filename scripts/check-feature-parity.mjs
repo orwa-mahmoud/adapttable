@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generated from `feature-classification.json`: every published kit exposes
+ * Generated from `feature-classification.json`: every participating kit exposes
  * the same feature subpaths, no root table imports a sibling kit or the
  * features aggregate barrel, and every kit passes core's header-cell props
  * through whole.
@@ -32,7 +32,7 @@ import {
   KITS,
   kitSourceDirs,
   packageNameAt,
-  publishedKits,
+  participatingKits,
 } from "./kits.mjs";
 import { REPO_ROOT } from "./packages.mjs";
 
@@ -50,8 +50,11 @@ const EXTRA_SUBPATHS = ["./preset"];
  * `leaf.headerProps` onto the header element, or handing the binding's
  * `getHeaderCellProps` to a kit that builds its own header (antd's
  * `onHeaderCell` is the whole of its `<th>`). React spreads in JSX; a Vue
- * template binds the object whole with `v-bind`. A framework with no entry has
- * no rule yet, and its kits fail until one is written.
+ * template binds the object whole with `v-bind`; Angular uses `adaptAttrs`.
+ * Angular's desktop assembly first preserves both table and grid attrs whole,
+ * then its paired template binds the merged record to the header element.
+ * A framework with no entry has no rule yet, and its kits fail until one is
+ * written.
  */
 const HEADER_RULES = {
   react: {
@@ -62,8 +65,43 @@ const HEADER_RULES = {
     spread: /v-bind=["']leaf\.headerProps["']|\.\.\.leaf\.headerProps(?!\s*\[)/,
     handoff: /getHeaderCellProps/,
   },
+  angular: {
+    spread: /<th\b[^>]*\[adaptAttrs\]\s*=\s*(["'])leaf\.headerProps\1/,
+    assembly: angularHeaderHandoff,
+  },
 };
 const HEADER_NAMED = /leaf\.headerProps\s*\[/;
+
+/**
+ * The Angular desktop header's two halves must agree: a call to the getter
+ * alone proves nothing when the template later copies only named fields.
+ * Keep this tied to the real component and its configured sibling template,
+ * rather than accepting an unused attrs helper elsewhere in the package.
+ */
+function angularHeaderHandoff(files) {
+  const source = files.get("src/components/desktopTable.ts") ?? "";
+  const template = files.get("src/components/desktopTable.html") ?? "";
+  if (!/templateUrl\s*:\s*(["'])\.\/desktopTable\.html\1/.test(source)) {
+    return false;
+  }
+  const body = source.match(
+    /\bheaderCells\s*=\s*computed\(\(\)\s*=>\s*\{([\s\S]*?)\breturn\s+cells\s*;\s*\}\)/
+  )?.[1];
+  if (!body) return false;
+  const compact = body.replace(/\s/g, "");
+  const wholeBase = compact.includes(
+    "constbase=view.grid?view.grid.headerCellAttrs(column,index):view.table.headerCellAttrs(column);"
+  );
+  const wholeMerge =
+    /cells\.set\(column\.key,panel===undefined\|\|column\.groupable===false\?base:\{\.\.\.base,\.\.\.panel\.headerDragProps\(column\.key\),?\},?\)/.test(
+      compact
+    );
+  const wholeBinding =
+    /<th\b[^>]*\[adaptAttrs\]\s*=\s*(["'])\s*headerCells\(\)\.get\(column\.key\)!?\s*\1/.test(
+      template
+    );
+  return wholeBase && wholeMerge && wholeBinding;
+}
 
 /**
  * The root table's file name, without its framework's extension, in any
@@ -208,6 +246,7 @@ function fileProblems(kit, kits, root) {
   const allowed = layersOf(kit, kits, root);
   const packagesRoot = join(root, "packages");
   let passesHeaderProps = false;
+  const code = new Map();
   const files = kitSourceDirs(kit, root).flatMap((dir) =>
     frameworkFiles(dir, kit.framework)
   );
@@ -216,8 +255,9 @@ function fileProblems(kit, kits, root) {
     // the preset's own usage block is what a reader types, not what this
     // module pulls in. Scan the code.
     const text = codeOf(file, kit.framework);
+    code.set(relative(kitDir(kit, root), file).split("\\").join("/"), text);
     const rel = relative(packagesRoot, file).split("\\").join("/");
-    if (rule && (rule.spread.test(text) || rule.handoff.test(text))) {
+    if (rule && (rule.spread.test(text) || rule.handoff?.test(text))) {
       passesHeaderProps = true;
     }
     problems.push(
@@ -231,6 +271,7 @@ function fileProblems(kit, kits, root) {
       problems.push(`${rel}: root table imports the features aggregate barrel`);
     }
   }
+  if (rule?.assembly?.(code)) passesHeaderProps = true;
   return { problems, passesHeaderProps };
 }
 
@@ -261,7 +302,7 @@ function kitProblems(kit, kits, root, subpaths) {
 }
 
 /**
- * Every feature-parity problem across the published kits.
+ * Every feature-parity problem across the participating kits.
  *
  * @param {object} [options] everything the check reads, for fixtures
  * @param {string} [options.root] repository root
@@ -278,22 +319,22 @@ export function checkFeatureParity({
   ),
 } = {}) {
   const registry = kitRegistryErrors(root, kits);
-  const published = publishedKits(kits).sort((a, b) =>
+  const participating = participatingKits(kits).sort((a, b) =>
     a.name.localeCompare(b.name)
   );
   const subpaths = subpathsOf(manifest);
   if (registry.length > 0) {
     return {
       problems: registry.map((error) => `kit registry: ${error}`),
-      kits: published.length,
+      kits: participating.length,
       subpaths: subpaths.length,
     };
   }
 
-  const problems = published.flatMap((kit) =>
+  const problems = participating.flatMap((kit) =>
     kitProblems(kit, kits, root, subpaths)
   );
-  return { problems, kits: published.length, subpaths: subpaths.length };
+  return { problems, kits: participating.length, subpaths: subpaths.length };
 }
 
 /** Subpaths every package exports whatever it ships. */

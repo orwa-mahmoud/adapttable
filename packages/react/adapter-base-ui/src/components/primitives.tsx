@@ -264,9 +264,21 @@ export function NativeSelect({
 export function FormField({
   label,
   children,
-}: Readonly<{ label: ReactNode; children: ReactNode }>) {
+  className,
+  "data-adapttable-part": dataPart,
+}: Readonly<{
+  label: ReactNode;
+  children: ReactNode;
+  className?: string;
+  "data-adapttable-part"?: string;
+}>) {
   return (
-    <Flex direction="column" gap="4">
+    <Flex
+      direction="column"
+      gap="4"
+      className={className}
+      data-adapttable-part={dataPart}
+    >
       <Text as="span" size="2">
         {label}
       </Text>

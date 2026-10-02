@@ -21,19 +21,18 @@
  *    (`wrapperProps={{ "data-adapttable-part": … }}` in Mantine's checkbox),
  *    so matching only `data-adapttable-part="x"` reports a defect that is not
  *    there.
- * 2. **Only shared surfaces are compared.** adapter-unstyled renders the
- *    native fallbacks for every kit and so names far more parts than any
- *    themed adapter; shadcn wraps it and names almost none. Neither is a
- *    defect, so parity is judged across the six themed adapters that share
- *    the shell, and `EXPECTED_GAPS` records the ones a kit genuinely cannot
- *    render — each with the reason, so an entry is an argument rather than a
- *    silencer.
+ * 2. **Ownership counts.** Native kits name the fallback elements they build;
+ *    derived kits inherit their base's parts. Themed kits are compared with
+ *    each other, and native kits must agree on their own plus their binding's
+ *    parts. Names supplied by themed Chrome also count as rendered by those
+ *    kits when deciding whether a native name is exclusive. `EXPECTED_GAPS`
+ *    records what a themed kit genuinely cannot render, with its reason.
  *
  * Two whole classes of part were invisible to it, which is how
  * `saved-view-readonly` and `saved-view-default` survived: emitted by
  * adapter-unstyled alone, they never entered the comparison at all, because a
  * name no themed kit spells cannot be missing from a themed kit. So there are
- * now three sources, not two:
+ * now these sources and comparisons:
  *
  * - **The themed kits**, compared part-for-part as before.
  * - **adapter-unstyled**, whose exclusive names are now checked rather than
@@ -49,6 +48,9 @@
  *   a `*_PARTS` table the kits render through, some set on a ref. Those land
  *   in every kit by construction, so they are exempt from the unstyled
  *   comparison and counted in the summary instead of being unaccounted for.
+ * - **The native kits together**, compared using each kit's own names plus
+ *   its framework's Chrome, so a part cannot disappear from one native kit
+ *   while another keeps the native-only union unchanged.
  *
  * Both lists are checked for rot in the other direction too: an entry that no
  * longer applies — the part is named by every themed kit now, or unstyled
@@ -69,8 +71,10 @@
  * per-framework too: `@adapttable/core` plus the binding the kit builds on.
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import ts from "typescript";
 
 import {
   bindingDir,
@@ -95,7 +99,6 @@ import { REPO_ROOT } from "./packages.mjs";
  * joins the contract.
  */
 export const REPORT_REFERENCES = {
-  "adapter-angular-unstyled": "adapter-unstyled",
   "adapter-ng-zorro": "adapter-antd",
 };
 
@@ -138,12 +141,15 @@ const CONTRACT = [
  *
  * `row` has two such routes in React. A kit that lays out its own body spreads
  * `getRowProps` directly; a kit thinned onto the shared desktop assembly
- * receives the same props already merged, through `createDesktopRow`. A
- * framework with no entry has no such route, and its kits name every contract
- * part themselves.
+ * receives the same props already merged, through `createDesktopRow`.
+ * Angular assembles each body entry from `table.rowAttrs` (or the grid's
+ * preserving wrapper), then binds that record whole with `adaptAttrs` on its
+ * `<tr>`. A framework with no entry has no such route, and its kits name every
+ * contract part themselves.
  */
 const CORE_GETTER_PARTS = {
   react: { row: ["getRowProps", "createDesktopRow"] },
+  angular: { row: ["rowAttrs"] },
 };
 
 /**
@@ -293,6 +299,8 @@ function accountedFor(groups) {
  * string literal; and a ref write where a third-party component owns the
  * element.
  */
+const DATASET_PART =
+  /dataset\.adapttablePart\s*=\s*["'](?<part>[a-z0-9-]+)["']/g;
 const KIT_PART_PATTERNS = [
   // `data-adapttable-part="x"` as a JSX or template attribute, and
   // `{ "data-adapttable-part": "x" }` handed through a prop object.
@@ -308,7 +316,7 @@ const KIT_PART_PATTERNS = [
   // only way to name the same element every other kit names is `setAttribute`
   // or the equivalent `dataset.adapttablePart` write.
   /setAttribute\(\s*["']data-adapttable-part["']\s*,\s*["'](?<part>[a-z0-9-]+)["']/g,
-  /dataset\.adapttablePart\s*=\s*["'](?<part>[a-z0-9-]+)["']/g,
+  DATASET_PART,
 ];
 
 /**
@@ -325,15 +333,409 @@ const CHROME_PART_PATTERNS = [
 /** A `*_PARTS` table the kits render through: every quoted name in it. */
 const PARTS_TABLE = /\b[A-Z][A-Z0-9_]*PARTS\b\s*=\s*(\{[\s\S]*?\n\})/g;
 
-/** Every name the patterns find in the files. */
+/** A value declaration that can introduce or shadow a JSX identifier. */
+function valueName(node) {
+  const declaresValue =
+    ts.isVariableDeclaration(node) ||
+    ts.isParameter(node) ||
+    ts.isBindingElement(node) ||
+    ts.isImportSpecifier(node) ||
+    ts.isImportClause(node) ||
+    ts.isNamespaceImport(node) ||
+    ts.isFunctionDeclaration(node) ||
+    ts.isClassDeclaration(node);
+  return declaresValue && node.name && ts.isIdentifier(node.name)
+    ? node.name.text
+    : undefined;
+}
+
+/**
+ * Definitions, rather than every string constant in a file. Ambiguous names
+ * are not followed: a parameter or local declaration can shadow the constant
+ * a naive file-wide lookup would mistakenly claim is rendered.
+ */
+function valueDeclarations(source) {
+  const declarations = new Map();
+  function visit(node) {
+    const name = valueName(node);
+    if (name) {
+      const entries = declarations.get(name) ?? [];
+      entries.push(node);
+      declarations.set(name, entries);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  return declarations;
+}
+
+/** A uniquely bound, immutable constant's initializer, if there is one. */
+function constantValue(name, declarations) {
+  const entries = declarations.get(name);
+  if (entries?.length !== 1) return undefined;
+  const [node] = entries;
+  if (
+    !ts.isVariableDeclaration(node) ||
+    !ts.isVariableDeclarationList(node.parent)
+  ) {
+    return undefined;
+  }
+  // Const is a single flag bit; the declaration may also carry parse-context
+  // flags, so equality with NodeFlags.Const would reject valid constants.
+  const isConst = Math.floor(node.parent.flags / ts.NodeFlags.Const) % 2 === 1;
+  return isConst ? node.initializer : undefined;
+}
+
+/** Only literal results of bounded expressions can be part names. */
+function expressionParts(expression, declarations, seen = new Set()) {
+  if (!expression) return [];
+  if (
+    ts.isStringLiteral(expression) ||
+    ts.isNoSubstitutionTemplateLiteral(expression)
+  ) {
+    return /^[a-z0-9-]+$/.test(expression.text) ? [expression.text] : [];
+  }
+  if (
+    ts.isParenthesizedExpression(expression) ||
+    ts.isAsExpression(expression) ||
+    ts.isTypeAssertionExpression(expression) ||
+    ts.isSatisfiesExpression(expression) ||
+    ts.isNonNullExpression(expression)
+  ) {
+    return expressionParts(expression.expression, declarations, seen);
+  }
+  if (ts.isIdentifier(expression)) {
+    if (seen.has(expression.text)) return [];
+    return expressionParts(
+      constantValue(expression.text, declarations),
+      declarations,
+      new Set([...seen, expression.text])
+    );
+  }
+  if (ts.isConditionalExpression(expression)) {
+    return [
+      ...expressionParts(expression.whenTrue, declarations, seen),
+      ...expressionParts(expression.whenFalse, declarations, seen),
+    ];
+  }
+  if (
+    ts.isBinaryExpression(expression) &&
+    expression.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken
+  ) {
+    return [
+      ...expressionParts(expression.left, declarations, seen),
+      ...expressionParts(expression.right, declarations, seen),
+    ];
+  }
+  // A string passed to a function, read from an arbitrary object, or used as
+  // the condition is not evidence that the expression renders that string.
+  return [];
+}
+
+/** Unshadowed named imports from the modules that own the relevant contract. */
+function bindingImports(source, declarations, importedName, modules) {
+  const names = new Set();
+  for (const statement of source.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteral(statement.moduleSpecifier)
+    ) {
+      continue;
+    }
+    if (!modules.includes(statement.moduleSpecifier.text)) continue;
+    const bindings = statement.importClause?.namedBindings;
+    if (!bindings || !ts.isNamedImports(bindings)) continue;
+    for (const imported of bindings.elements) {
+      if (
+        (imported.propertyName ?? imported.name).text === importedName &&
+        declarations.get(imported.name.text)?.length === 1
+      ) {
+        names.add(imported.name.text);
+      }
+    }
+  }
+  return names;
+}
+
+/** A DOM-style dataset write, excluding comparisons and unrelated properties. */
+function datasetPartValue(node) {
+  if (
+    !ts.isBinaryExpression(node) ||
+    node.operatorToken.kind !== ts.SyntaxKind.EqualsToken ||
+    !ts.isPropertyAccessExpression(node.left) ||
+    node.left.name.text !== "adapttablePart"
+  ) {
+    return undefined;
+  }
+  const target = node.left.expression;
+  return ts.isPropertyAccessExpression(target) && target.name.text === "dataset"
+    ? node.right
+    : undefined;
+}
+
+/**
+ * JSX expressions and real dataset writes: conditional or fallback names,
+ * referenced constants, and the binding's LiveRegion prop. Never infer a
+ * rendered part from arbitrary strings, comments or call arguments.
+ */
+function scriptPartNames(file, text) {
+  const found = new Set();
+  if (!/\.tsx?$/.test(file)) return found;
+  const source = ts.createSourceFile(
+    file,
+    text,
+    ts.ScriptTarget.Latest,
+    true,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  );
+  const declarations = valueDeclarations(source);
+  const liveRegions = bindingImports(source, declarations, "LiveRegion", [
+    "@adapttable/react",
+    "@adapttable/react/adapter",
+  ]);
+  function visit(node) {
+    for (const part of expressionParts(datasetPartValue(node), declarations)) {
+      found.add(part);
+    }
+    if (ts.isJsxAttribute(node) && ts.isIdentifier(node.name)) {
+      const tag = node.parent.parent.tagName;
+      const forwardsPart =
+        node.name.text === "part" &&
+        ts.isIdentifier(tag) &&
+        liveRegions.has(tag.text);
+      if (node.name.text === "data-adapttable-part" || forwardsPart) {
+        const initializer = node.initializer;
+        const value =
+          initializer && ts.isJsxExpression(initializer)
+            ? initializer.expression
+            : initializer;
+        for (const part of expressionParts(value, declarations)) {
+          found.add(part);
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  return found;
+}
+
+/** The end of an HTML opening tag, ignoring `>` inside attribute values. */
+function templateTagEnd(text, start) {
+  let quote;
+  for (let index = start + 1; index < text.length; index++) {
+    const char = text[index];
+    if (quote) {
+      if (char === quote) quote = undefined;
+    } else if (char === '"' || char === "'") {
+      quote = char;
+    } else if (char === ">") {
+      return index;
+    }
+  }
+  return -1;
+}
+
+/** Opening tags only, with whole HTML comments excluded. */
+function* templateTags(text) {
+  let offset = 0;
+  while (offset < text.length) {
+    const start = text.indexOf("<", offset);
+    if (start === -1) return;
+    if (text.startsWith("<!--", start)) {
+      const end = text.indexOf("-->", start + 4);
+      if (end === -1) return;
+      offset = end + 3;
+      continue;
+    }
+    if (!/^[a-z]/i.test(text.charAt(start + 1))) {
+      offset = start + 1;
+      continue;
+    }
+    const end = templateTagEnd(text, start);
+    if (end === -1) return;
+    offset = end + 1;
+    yield text.slice(start + 1, end);
+  }
+}
+
+/** The next non-whitespace character in a template tag. */
+function skipTemplateWhitespace(text, offset) {
+  while (/\s/.test(text.charAt(offset))) offset++;
+  return offset;
+}
+
+/** An opening tag's attributes, without interpreting unrelated values. */
+function templateAttributes(tag) {
+  const attributes = new Map();
+  const namePattern = /[^\s=<>]+/y;
+  const valuePattern = /"([^"]*)"|'([^']*)'|([^\s>]+)/y;
+  let offset = 0;
+  while (offset < tag.length) {
+    offset = skipTemplateWhitespace(tag, offset);
+    namePattern.lastIndex = offset;
+    const name = namePattern.exec(tag);
+    if (!name) {
+      offset++;
+      continue;
+    }
+    offset = skipTemplateWhitespace(tag, namePattern.lastIndex);
+    let value;
+    if (tag[offset] === "=") {
+      offset = skipTemplateWhitespace(tag, offset + 1);
+      valuePattern.lastIndex = offset;
+      const match = valuePattern.exec(tag);
+      if (match) {
+        value = match[1] ?? match[2] ?? match[3];
+        offset = valuePattern.lastIndex;
+      }
+    }
+    attributes.set(name[0], value);
+  }
+  return attributes;
+}
+
+/** Angular's literal/conditional subset also parses as a TypeScript expression. */
+function templateExpressionParts(text) {
+  if (text === undefined) return [];
+  const source = ts.createSourceFile(
+    "part-expression.ts",
+    `const part = (${text});`,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS
+  );
+  if (source.parseDiagnostics.length > 0) return [];
+  const [statement] = source.statements;
+  if (!statement || !ts.isVariableStatement(statement)) return [];
+  return expressionParts(
+    statement.declarationList.declarations[0].initializer,
+    new Map()
+  );
+}
+
+/** Bounded expressions on real attributes and the known live-region directive. */
+function angularTemplateParts(template, liveRegion = false) {
+  const found = new Set();
+  for (const tag of templateTags(template)) {
+    const attrs = templateAttributes(tag);
+    for (const part of templateExpressionParts(
+      attrs.get("[attr.data-adapttable-part]")
+    )) {
+      found.add(part);
+    }
+    if (
+      !liveRegion ||
+      (!attrs.has("[adaptLiveRegion]") && !attrs.has("adaptLiveRegion"))
+    ) {
+      continue;
+    }
+    const literal = attrs.get("part");
+    if (literal && /^[a-z0-9-]+$/.test(literal)) found.add(literal);
+    for (const part of templateExpressionParts(attrs.get("[part]"))) {
+      found.add(part);
+    }
+  }
+  return found;
+}
+
+/** Static metadata of a real @Component decorator, not a function argument. */
+function componentTemplate(node, components, liveRegions) {
+  if (
+    !ts.isDecorator(node) ||
+    !ts.isCallExpression(node.expression) ||
+    !ts.isIdentifier(node.expression.expression) ||
+    !components.has(node.expression.expression.text)
+  ) {
+    return undefined;
+  }
+  const [metadata] = node.expression.arguments;
+  if (!metadata || !ts.isObjectLiteralExpression(metadata)) return undefined;
+  const properties = new Map(
+    metadata.properties
+      .filter(ts.isPropertyAssignment)
+      .map((property) => [property.name.text, property.initializer])
+  );
+  const imports = properties.get("imports");
+  const liveRegion =
+    imports &&
+    ts.isArrayLiteralExpression(imports) &&
+    imports.elements.some(
+      (entry) => ts.isIdentifier(entry) && liveRegions.has(entry.text)
+    );
+  const template = properties.get("template");
+  if (
+    template &&
+    (ts.isStringLiteral(template) ||
+      ts.isNoSubstitutionTemplateLiteral(template))
+  ) {
+    return { template: template.text, liveRegion };
+  }
+  const templateUrl = properties.get("templateUrl");
+  return templateUrl && ts.isStringLiteral(templateUrl)
+    ? { templateUrl: templateUrl.text, liveRegion }
+    : undefined;
+}
+
+/** Inline Angular templates and their explicitly paired external templates. */
+function angularPartNames(sources) {
+  const found = new Set();
+  for (const [file, text] of sources) {
+    if (file.endsWith(".html")) {
+      for (const part of angularTemplateParts(text)) found.add(part);
+    }
+    if (!file.endsWith(".ts") || !text.includes("@angular/core")) continue;
+    const source = ts.createSourceFile(
+      file,
+      text,
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TS
+    );
+    const declarations = valueDeclarations(source);
+    const components = bindingImports(source, declarations, "Component", [
+      "@angular/core",
+    ]);
+    const liveRegions = bindingImports(
+      source,
+      declarations,
+      "AdaptLiveRegion",
+      ["@adapttable/angular"]
+    );
+    function visit(node) {
+      const entry = componentTemplate(node, components, liveRegions);
+      if (entry) {
+        const template =
+          entry.template ?? sources.get(join(dirname(file), entry.templateUrl));
+        if (template !== undefined) {
+          for (const part of angularTemplateParts(template, entry.liveRegion)) {
+            found.add(part);
+          }
+        }
+      }
+      ts.forEachChild(node, visit);
+    }
+    visit(source);
+  }
+  return found;
+}
+
+/** Every literal or bounded JSX expression that names a rendered part. */
 function namesIn(files, patterns) {
   const found = new Set();
-  for (const file of files) {
-    const text = readFileSync(file, "utf8");
+  const sources = new Map(
+    files.map((file) => [file, readFileSync(file, "utf8")])
+  );
+  for (const [file, text] of sources) {
+    for (const part of scriptPartNames(file, text)) found.add(part);
     for (const pattern of patterns) {
+      // Script assignments are parsed above so examples/comments do not
+      // count. A Vue template's script retains the existing literal route.
+      if (pattern === DATASET_PART && /\.tsx?$/.test(file)) continue;
       for (const match of text.matchAll(pattern)) found.add(match.groups.part);
     }
   }
+  for (const part of angularPartNames(sources)) found.add(part);
   return found;
 }
 
@@ -409,7 +811,13 @@ function chromeByFramework(frameworks, root) {
 
 /** Whether a kit's files call one of its binding's prop-getters by name. */
 function callsCoreGetter(kit, getter, root) {
-  const call = new RegExp(`\\b${getter}\\b`);
+  // Angular also uses `rowAttrs` for the assembled record and for reorder
+  // state. Only the table/grid call carries the canonical row part.
+  const call = new RegExp(
+    kit.framework === "angular"
+      ? `\\b(?:table|grid)\\.${getter}\\s*\\(`
+      : `\\b${getter}\\b`
+  );
   return kitFiles(kit, root).some((file) =>
     call.test(readFileSync(file, "utf8"))
   );
@@ -474,11 +882,18 @@ function contractFailures(byKit, chrome, context) {
 function nativeOnlyFailures(byKit, everyPart, chrome, context) {
   const fallback = accountedFor(context.fallbackOnly);
   const unnamed = accountedFor(context.unnamedInKits);
+  // A shell can receive a name from its binding rather than spelling it in
+  // its own files. Compare effective themed parts here as well: a native kit
+  // on another framework must not make that shared name look native-only.
+  const themedParts = new Set([
+    ...everyPart,
+    ...context.shellKits.flatMap((kit) => [...chrome.get(kit.framework)]),
+  ]);
   const gap = new Set();
   for (const kit of context.nativeKits) {
     const owned = chrome.get(kit.framework);
     for (const part of byKit.get(kit.name)) {
-      if (!everyPart.has(part) && !owned.has(part)) gap.add(part);
+      if (!themedParts.has(part) && !owned.has(part)) gap.add(part);
     }
   }
   const unaccounted = [...gap].filter(
@@ -490,6 +905,31 @@ function nativeOnlyFailures(byKit, everyPart, chrome, context) {
     stale: stale.sort(),
     unnamed: unnamed.size,
   };
+}
+
+/**
+ * Every native kit renders the same public parts, whether each name comes
+ * from the kit itself or its binding's Chrome. Comparing only the union of
+ * native literals against themed kits lets one native kit lose a part while
+ * another keeps it, hiding that loss even from the native-only account lists.
+ */
+function nativeParityFailures(byKit, chrome, context) {
+  const native = context.nativeKits;
+  const rendered = new Map(
+    native.map((kit) => [
+      kit.name,
+      new Set([...byKit.get(kit.name), ...chrome.get(kit.framework)]),
+    ])
+  );
+  const everyPart = new Set(
+    [...rendered.values()].flatMap((parts) => [...parts])
+  );
+  return [...everyPart].sort().flatMap((part) => {
+    const missing = native
+      .filter((kit) => !rendered.get(kit.name).has(part))
+      .map((kit) => kit.name);
+    return missing.length > 0 ? [{ part, missing }] : [];
+  });
 }
 
 /**
@@ -609,6 +1049,7 @@ export function checkPartsParity({
     "the native kits";
 
   const contractMissing = contractFailures(byKit, chrome, context);
+  const native = nativeParityFailures(byKit, chrome, context);
   const themed = themedFailures(byKit, nativeParts, everyPart, chrome, context);
   const { unaccounted, stale, unnamed } = nativeOnlyFailures(
     byKit,
@@ -628,6 +1069,17 @@ export function checkPartsParity({
         `2026-08-16): ${contract.join(" · ")}. Every kit that renders the ` +
         "shell emits all seven — put the attribute on the element that kit " +
         "renders, or route it through the core prop-getter every kit spreads.",
+    },
+    {
+      headline: `${native.length} part(s) differ between native kits:`,
+      lines: native.map(
+        ({ part, missing }) => `${part} — missing from ${missing.join(", ")}`
+      ),
+      advice:
+        "Every native kit renders the same public parts, supplied by its " +
+        "own elements or its binding's Chrome. Restore each missing part " +
+        "where that element renders; another native kit naming it does not " +
+        "satisfy this kit's contract.",
     },
     {
       headline: `${themed.length} part(s) are rendered by some adapters and not others:`,

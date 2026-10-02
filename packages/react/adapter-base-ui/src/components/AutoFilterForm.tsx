@@ -47,7 +47,7 @@ function GroupField({
   children,
 }: Readonly<{ label: ReactNode; id: string; children: ReactNode }>) {
   return (
-    <Flex direction="column" gap="4">
+    <Flex direction="column" gap="4" data-adapttable-part="filter-field">
       <Text id={id} as="span" size="2">
         {label}
       </Text>
@@ -145,7 +145,7 @@ function RangeField<TRow>({
     })),
   ];
   return (
-    <FormField label={label}>
+    <FormField label={label} data-adapttable-part="filter-field">
       {/* Operator and value(s) share ONE row — it reads like a sentence:
           "At least [5]". */}
       <Flex gap="2" align="start" wrap="wrap">
@@ -231,7 +231,7 @@ function TextFilterField<TRow>({
     label: filterOpLabel(labels, opLabelKeys[choice]),
   }));
   return (
-    <FormField label={label}>
+    <FormField label={label} data-adapttable-part="filter-field">
       <Flex gap="2" align="start" wrap="wrap">
         <NativeSelect
           size="1"
@@ -272,7 +272,7 @@ function BooleanFilterField<TRow>({
 }>) {
   const { label, choice, write } = useBooleanFilterWidget(def, source);
   return (
-    <FormField label={label}>
+    <FormField label={label} data-adapttable-part="filter-field">
       <NativeSelect
         size="1"
         aria-label={label}
@@ -329,10 +329,11 @@ function AutoFilterField<TRow>({
             })),
           ];
       return (
-        <FormField label={label}>
+        <FormField label={label} data-adapttable-part="filter-field">
           <NativeSelect
             size="1"
             aria-label={label}
+            data-adapttable-part="filter-select"
             value={scalarFilterText(extra[def.key])}
             options={selectOptions}
             onValueChange={(value) => setExtra(def.key, value)}

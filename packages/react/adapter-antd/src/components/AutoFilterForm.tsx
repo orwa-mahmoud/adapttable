@@ -318,6 +318,7 @@ function FilterControl<TRow>({
           size="small"
           style={{ width: "100%" }}
           aria-label={label}
+          data-adapttable-part="filter-select"
           value={scalarValue(extra[def.key])}
           loading={loading}
           getPopupContainer={filterSelectPopupContainer}
@@ -378,6 +379,7 @@ export function AutoFilterForm<TRow>({
       {defs.map((def) => (
         <Space
           key={def.key}
+          data-adapttable-part="filter-field"
           orientation="vertical"
           size={16}
           style={{ width: "100%" }}

@@ -25,27 +25,24 @@ function json(path) {
   return JSON.parse(readFileSync(path, "utf8"));
 }
 
-function publishedManifests() {
+function packageManifests() {
   return listPackages()
     .map(({ dir }) => join(dir, "package.json"))
-    .map((path) => ({ path, pkg: json(path) }))
-    .filter(({ pkg }) => pkg.private !== true);
+    .map((path) => ({ path, pkg: json(path) }));
 }
 
 describe("published package homepages", () => {
-  const published = publishedManifests();
+  const manifests = packageManifests();
+  const published = manifests.filter(({ pkg }) => pkg.private !== true);
   const kitByPkg = new Map(
-    SHOWCASE_ADAPTERS.filter((kit) => kit.built).map((kit) => [
-      kit.pkg,
-      kit.key,
-    ])
+    SHOWCASE_ADAPTERS.filter((kit) => kit.built).map((kit) => [kit.pkg, kit])
   );
 
   it("points every published package at its demo landing", () => {
     assert.ok(published.some(({ pkg }) => pkg.name === "@adapttable/ai"));
     for (const { path, pkg } of published) {
       const kit = kitByPkg.get(pkg.name);
-      const expected = kit ? siteUrl(demoRoute(kit)) : HUB;
+      const expected = kit ? siteUrl(demoRoute(kit.key, kit.framework)) : HUB;
       if (!kit) {
         assert.ok(
           HUB_PACKAGES.has(pkg.name),
@@ -53,6 +50,22 @@ describe("published package homepages", () => {
         );
       }
       assert.equal(pkg.homepage, expected, path);
+    }
+  });
+
+  it("keeps a completed private kit's homepage in its own framework", () => {
+    assert.equal(
+      kitByPkg.get("@adapttable/angular-unstyled")?.framework,
+      "angular"
+    );
+    for (const { path, pkg } of manifests) {
+      const kit = kitByPkg.get(pkg.name);
+      if (pkg.private !== true || !kit) continue;
+      assert.equal(
+        pkg.homepage,
+        siteUrl(demoRoute(kit.key, kit.framework)),
+        path
+      );
     }
   });
 

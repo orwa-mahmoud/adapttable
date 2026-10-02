@@ -11,7 +11,10 @@ import { dirname, join } from "node:path";
 import { after, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { featureGapReport } from "./check-feature-parity.mjs";
+import {
+  checkFeatureParity,
+  featureGapReport,
+} from "./check-feature-parity.mjs";
 
 const SCRIPT = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -45,6 +48,7 @@ function writePackage(root, group, name, subpaths, files = {}) {
   for (const subpath of subpaths) exports[`./${subpath}`] = `./${subpath}.js`;
   const manifest = {
     name: `@adapttable/${name.replace(/^adapter-/, "")}`,
+    private: true,
     exports,
   };
   for (const [relative, body] of Object.entries({
@@ -87,8 +91,8 @@ const report = (root) =>
     manifest: MANIFEST,
   });
 
-const NO_RULE =
-  "@adapttable/verdant: no header-props rule for angular in scripts/check-feature-parity.mjs";
+const MISSING_HEADER =
+  "@adapttable/verdant: never passes core's header-cell props to its header element";
 
 describe("featureGapReport", () => {
   it("lists each subpath the reference exports and the kit does not, with its features", () => {
@@ -100,7 +104,7 @@ describe("featureGapReport", () => {
           { subpath: "./preset", features: [] },
           { subpath: "./tree", features: ["tree"] },
         ],
-        problems: [NO_RULE],
+        problems: [MISSING_HEADER],
       },
     ]);
   });
@@ -121,7 +125,7 @@ describe("featureGapReport", () => {
     );
     assert.deepEqual(gap.problems, [
       "angular/adapter-verdant/filters/index.ts: imports sibling kit @adapttable/plain",
-      NO_RULE,
+      MISSING_HEADER,
     ]);
   });
 
@@ -135,7 +139,180 @@ describe("featureGapReport", () => {
     );
     assert.deepEqual(gap.problems, [
       "angular/adapter-verdant/src/dataTable.ts: root table imports the features aggregate barrel",
-      NO_RULE,
+      MISSING_HEADER,
+    ]);
+  });
+});
+
+const ANGULAR_SOURCE_PATH = "src/components/desktopTable.ts";
+const ANGULAR_TEMPLATE_PATH = "src/components/desktopTable.html";
+const ANGULAR_HEADER_SOURCE = `@Component({
+  templateUrl: "./desktopTable.html",
+})
+export class AdaptDesktopTable {
+  protected readonly headerCells = computed(() => {
+    const view = this.view();
+    const panel = view.groupingPanel?.().state;
+    const cells = new Map<string, Attrs>();
+    view.table.columns().forEach((column, index) => {
+      const base = view.grid
+        ? view.grid.headerCellAttrs(column, index)
+        : view.table.headerCellAttrs(column);
+      cells.set(
+        column.key,
+        panel === undefined || column.groupable === false
+          ? base
+          : { ...base, ...panel.headerDragProps(column.key) }
+      );
+    });
+    return cells;
+  });
+}
+`;
+const ANGULAR_HEADER_TEMPLATE = `<ng-template #leafHeader let-column>
+  <th data-adapttable-part="header-cell"
+    [adaptAttrs]="headerCells().get(column.key)!">
+    <span [adaptHeader]="column"></span>
+  </th>
+</ng-template>
+`;
+const NATIVE_KITS = KITS.map((kit) => ({ ...kit, role: "native" }));
+
+const parity = (root, kits = NATIVE_KITS) =>
+  checkFeatureParity({ root, kits, manifest: MANIFEST });
+
+/** The finished but unpublished Angular kit, with its real header assembly. */
+const contractRoot = ({ files = {}, subpaths } = {}) =>
+  fixtureRoot({
+    subpaths: subpaths ?? ["filters", "tree", "preset"],
+    files: {
+      [ANGULAR_SOURCE_PATH]: ANGULAR_HEADER_SOURCE,
+      [ANGULAR_TEMPLATE_PATH]: ANGULAR_HEADER_TEMPLATE,
+      ...files,
+    },
+  });
+
+describe("Angular feature contracts before publication", () => {
+  it("accepts a private native kit preserving grid and table attrs through its paired template", () => {
+    assert.deepEqual(parity(contractRoot()), {
+      problems: [],
+      kits: 2,
+      subpaths: 3,
+    });
+  });
+
+  it("checks every feature export of an unpublished native kit", () => {
+    assert.deepEqual(parity(contractRoot({ subpaths: ["preset"] })), {
+      problems: [
+        "@adapttable/verdant: missing export ./filters",
+        "@adapttable/verdant: missing export ./tree",
+      ],
+      kits: 2,
+      subpaths: 3,
+    });
+  });
+
+  it("leaves an unfinished role-private kit outside feature contracts", () => {
+    assert.deepEqual(parity(fixtureRoot(), KITS), {
+      problems: [],
+      kits: 1,
+      subpaths: 3,
+    });
+  });
+
+  it("accepts a direct whole-object Angular header binding", () => {
+    const root = contractRoot({
+      files: {
+        [ANGULAR_SOURCE_PATH]: "export {};\n",
+        [ANGULAR_TEMPLATE_PATH]: '<th [adaptAttrs]="leaf.headerProps"></th>',
+      },
+    });
+    assert.deepEqual(parity(root).problems, []);
+  });
+
+  for (const [name, before, after] of [
+    [
+      "grid attrs copied by name",
+      "view.grid.headerCellAttrs(column, index)",
+      '{ role: view.grid.headerCellAttrs(column, index)["role"] }',
+    ],
+    [
+      "table attrs copied by name",
+      "view.table.headerCellAttrs(column)",
+      '{ scope: view.table.headerCellAttrs(column)["scope"] }',
+    ],
+    [
+      "table attrs omitted from grouped headers",
+      "{ ...base, ...panel.headerDragProps(column.key) }",
+      "{ ...panel.headerDragProps(column.key) }",
+    ],
+    [
+      "ungrouped headers copying named fields",
+      "? base",
+      '? { role: base["role"] }',
+    ],
+    [
+      "a component pointing at a different template",
+      "./desktopTable.html",
+      "./unboundHeader.html",
+    ],
+  ]) {
+    it(`rejects ${name}`, () => {
+      const root = contractRoot({
+        files: {
+          [ANGULAR_SOURCE_PATH]: ANGULAR_HEADER_SOURCE.replace(before, after),
+        },
+      });
+      assert.deepEqual(parity(root).problems, [MISSING_HEADER]);
+    });
+  }
+
+  for (const [name, template] of [
+    [
+      "named fields from the merged record",
+      "<th [attr.role]=\"headerCells().get(column.key)!['role']\"></th>",
+    ],
+    ["an unused getter", '<th data-adapttable-part="header-cell"></th>'],
+    [
+      "a whole binding on a span instead of its header cell",
+      '<th><span [adaptAttrs]="headerCells().get(column.key)!"></span></th>',
+    ],
+    [
+      "a commented-out whole binding",
+      `<!-- ${ANGULAR_HEADER_TEMPLATE} -->\n<th></th>`,
+    ],
+  ]) {
+    it(`rejects ${name}`, () => {
+      assert.deepEqual(
+        parity(contractRoot({ files: { [ANGULAR_TEMPLATE_PATH]: template } }))
+          .problems,
+        [MISSING_HEADER]
+      );
+    });
+  }
+
+  it("does not count an unused assembly in a different component", () => {
+    const root = contractRoot({
+      files: {
+        [ANGULAR_SOURCE_PATH]: "export {};\n",
+        "src/components/unusedHeader.ts": ANGULAR_HEADER_SOURCE,
+      },
+    });
+    assert.deepEqual(parity(root).problems, [MISSING_HEADER]);
+  });
+
+  it("holds an unpublished shell kit to the same header and subpath rules", () => {
+    const root = contractRoot({
+      subpaths: ["preset"],
+      files: { [ANGULAR_TEMPLATE_PATH]: "<th></th>" },
+    });
+    const kits = NATIVE_KITS.map((kit) =>
+      kit.framework === "angular" ? { ...kit, role: "shell" } : kit
+    );
+    assert.deepEqual(parity(root, kits).problems, [
+      "@adapttable/verdant: missing export ./filters",
+      "@adapttable/verdant: missing export ./tree",
+      MISSING_HEADER,
     ]);
   });
 });
@@ -146,10 +323,7 @@ describe("check-feature-parity --report", () => {
       encoding: "utf8",
     });
     assert.equal(result.status, 0, result.stderr);
-    assert.match(
-      result.stdout,
-      /^adapter-angular-unstyled is missing \d+ subpath\(s\) adapter-unstyled exports:$/m
-    );
+    assert.doesNotMatch(result.stdout, /adapter-angular-unstyled/);
     assert.match(
       result.stdout,
       /^adapter-ng-zorro is missing \d+ subpath\(s\) adapter-antd exports:$/m

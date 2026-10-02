@@ -127,12 +127,14 @@ describe("advertised locale count", () => {
 describe("advertised adapter count", () => {
   // The bootstrap adapter is in the tree but unpublished, so it is not one of
   // the kits the docs count.
-  const count = listPackages()
+  const adapters = listPackages()
     .filter(({ name }) => name.startsWith("adapter-"))
     .filter(({ dir }) => {
       const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
       return pkg.private !== true;
-    }).length;
+    });
+  const count = adapters.length;
+  const reactCount = adapters.filter(({ group }) => group === "react").length;
 
   it("counts the adapters that publish", () => {
     assert.ok(count > 0);
@@ -143,7 +145,6 @@ describe("advertised adapter count", () => {
       { file: "CONTRIBUTING.md", occurrences: 1 },
       { file: "README.md", occurrences: 1 },
       { file: "docs/accessibility.md", occurrences: 1 },
-      { file: "docs/api.md", occurrences: 1 },
       { file: "docs/cell-navigation.md", occurrences: 2 },
       { file: "docs/faq.md", occurrences: 2 },
       { file: "docs/limitations.md", occurrences: 1 },
@@ -151,5 +152,13 @@ describe("advertised adapter count", () => {
     ],
     count,
     "adapters?|kits?"
+  );
+
+  // The API's two count claims describe the React binding's adapter surface.
+  // Publishing another framework's kit must not change that React-only count.
+  checkAdvertised(
+    [{ file: "docs/api.md", occurrences: 2 }],
+    reactCount,
+    "(?:built-in )?React (?:adapters?|kits?)"
   );
 });

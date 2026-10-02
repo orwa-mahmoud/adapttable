@@ -437,17 +437,20 @@ Active LTS. Raising either raises both.
 
 ## Adapter parity
 
-Eight adapters render the same chrome with different kits, so anything a host
-can see or style is contract in all of them:
+The kits in `scripts/kits.mjs` share the parts and behavior a host can see or
+style, across framework bindings:
 
-- `data-adapttable-part` names are compared across the themed adapters by
-  `scripts/check-parts-parity.mjs`; a genuine gap is recorded with its reason.
-- `headerProps` from `@adapttable/react` is spread whole onto the header cell. A public prop
-  whose effect depends on the kit is not a public prop, so no adapter reads
-  named fields out of it and drops the rest.
+- `scripts/check-parts-parity.mjs` compares themed kits and separately requires
+  equal part sets from the React and Angular native kits. Each kit's effective
+  parts include its framework's binding-owned Chrome; native-only widget
+  structure is explicitly accounted for, and genuine gaps carry reasons.
+- A header binds its complete props: React spreads `headerProps`, and Angular
+  applies `leaf.headerProps` through `adaptAttrs`. No adapter selects named
+  fields and silently drops the rest.
 - Labels are core `TableLabels`, localized in every `@adapttable/i18n`
   locale, and RTL is a layout requirement rather than a per-kit option.
 
-`adapter-unstyled` renders the native fallbacks for every kit and so names far
-more parts than a themed adapter; `adapter-shadcn` wraps it. Neither is a parity
-gap.
+Derived kits such as `adapter-shadcn` inherit their base kit's parts and
+header. Registry roles determine contract participation: native and shell
+kits participate even when their package remains unpublished; the `private`
+role keeps unfinished kits outside the contracts.

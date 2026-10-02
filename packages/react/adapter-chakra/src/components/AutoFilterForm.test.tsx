@@ -30,14 +30,14 @@ function renderForm(
 ) {
   const setExtra = vi.fn<(key: string, value: FilterValue) => void>();
   const setExtras = vi.fn<(updates: ExtraFilters) => void>();
-  renderChakra(
+  const view = renderChakra(
     <AutoFilterForm
       defs={defs}
       source={{ extra, setExtra, setExtras, allFilteredRows }}
       labels={labels}
     />
   );
-  return { setExtra, setExtras };
+  return { setExtra, setExtras, view };
 }
 
 describe("<AutoFilterForm> (Chakra)", () => {
@@ -444,5 +444,59 @@ describe("<AutoFilterForm> select labels (Chakra)", () => {
         .getAllByRole("option")
         .map((o) => o.textContent)
     ).toEqual(["Tous", "Active", "Inactive"]);
+  });
+});
+
+describe("<AutoFilterForm> field parts (Chakra)", () => {
+  it("marks each labelled field root without replacing its control parts", () => {
+    const defs: FilterDef[] = [
+      { key: "name", type: "text", label: "Name" },
+      { key: "enabled", type: "boolean", label: "Enabled" },
+      {
+        key: "status",
+        type: "select",
+        label: "Status",
+        options: [{ value: "active", label: "Active" }],
+      },
+      {
+        key: "tags",
+        type: "multiSelect",
+        label: "Tags",
+        options: [{ value: "urgent", label: "Urgent" }],
+      },
+      { key: "budget", type: "numberRange", label: "Budget" },
+      { key: "created", type: "dateRange", label: "Created" },
+    ];
+    const { view } = renderForm(defs);
+    const { container } = view;
+    const fields = container.querySelectorAll(
+      '[data-adapttable-part="filter-field"]'
+    );
+    expect(fields).toHaveLength(defs.length);
+    const fieldAt = (index: number) => {
+      const field = fields[index];
+      if (!field) throw new Error(`Missing filter field at index ${index}`);
+      return field;
+    };
+    ["Name", "Enabled", "Status", "Tags", "Budget", "Created"].forEach(
+      (label, index) => {
+        const field = fieldAt(index);
+        expect(field).toHaveTextContent(label);
+        expect(field.querySelector("input, button, select")).not.toBeNull();
+        expect(
+          field.querySelector('[data-adapttable-part="filter-field"]')
+        ).toBeNull();
+      }
+    );
+    expect(
+      fieldAt(0).querySelector('[data-adapttable-part="filter-input"]')
+    ).toBeInTheDocument();
+    ["Enabled", "Status"].forEach((name, index) => {
+      const select = screen.getByRole("combobox", { name });
+      expect(select).toHaveAttribute("data-adapttable-part", "filter-select");
+      expect(select.closest('[data-adapttable-part="filter-field"]')).toBe(
+        fieldAt(index + 1)
+      );
+    });
   });
 });

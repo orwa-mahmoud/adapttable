@@ -29,7 +29,7 @@ import { entrypoints } from "./api-entrypoints.mjs";
 import { entriesOf } from "./check-doc-surface.mjs";
 import { checkFeatureParity } from "./check-feature-parity.mjs";
 import { checkPartsParity } from "./check-parts-parity.mjs";
-import { kitRegistryErrors } from "./kits.mjs";
+import { kitRegistryErrors, KITS } from "./kits.mjs";
 
 const SCRIPTS = dirname(fileURLToPath(import.meta.url));
 const temps = [];
@@ -231,7 +231,14 @@ function fixtureLayer(root, group, name, source = "export {};\n") {
 }
 
 /** A kit package exporting the root entry and the given subpaths. */
-function fixtureKit(root, framework, name, files, subpaths = []) {
+function fixtureKit(
+  root,
+  framework,
+  name,
+  files,
+  subpaths = [],
+  isPrivate = false
+) {
   const exports = { ".": { types: "./dist/index.d.ts" } };
   for (const subpath of subpaths) {
     exports[`./${subpath}`] = { types: `./dist/${subpath}.d.ts` };
@@ -239,7 +246,11 @@ function fixtureKit(root, framework, name, files, subpaths = []) {
   fixturePackage(
     root,
     name,
-    { name: `@adapttable/${name.replace(/^adapter-/, "")}`, exports },
+    {
+      name: `@adapttable/${name.replace(/^adapter-/, "")}`,
+      private: isPrivate,
+      exports,
+    },
     files,
     framework
   );
@@ -406,6 +417,26 @@ describe("check-parts-parity reads each kit in its own framework", () => {
     ]);
   });
 
+  it("checks the structural parts of an unpublished shell kit", () => {
+    const root = partsRoot();
+    fixtureKit(
+      root,
+      "angular",
+      "adapter-meridian",
+      {
+        "src/data-table.component.html": MERIDIAN_TEMPLATE.replace(
+          'data-adapttable-part="table"',
+          ""
+        ),
+      },
+      [],
+      true
+    );
+    assert.deepEqual(partsParity(root).failures[0].lines, [
+      "table — adapter-meridian: not named",
+    ]);
+  });
+
   it("rejects a native-only part nobody accounted for", () => {
     const { failures } = partsParity(partsRoot(), { fallbackOnly: {} });
     assert.equal(
@@ -429,6 +460,17 @@ describe("check-parts-parity reads each kit in its own framework", () => {
 });
 
 describe("the kit registry holds to the packages on disk", () => {
+  it("binds the finished Angular unstyled kit to the native contracts", () => {
+    assert.deepEqual(
+      KITS.find((kit) => kit.name === "adapter-angular-unstyled"),
+      {
+        name: "adapter-angular-unstyled",
+        framework: "angular",
+        role: "native",
+      }
+    );
+  });
+
   it("names a kit filed under the wrong framework and a missing binding", () => {
     const root = tempRoot();
     fixtureLayer(root, "react", "react");
@@ -460,6 +502,27 @@ describe("the kit registry holds to the packages on disk", () => {
       ['adapter-alpha: role "private" but package.json is published']
     );
   });
+
+  for (const role of ["native", "shell", "derived"]) {
+    it(`allows an unpublished ${role} kit to participate before its first release`, () => {
+      const root = tempRoot();
+      fixtureLayer(root, "react", "react");
+      fixtureKit(root, "react", "adapter-plain", {});
+      fixtureKit(root, "react", "adapter-alpha", {}, [], true);
+      assert.deepEqual(
+        kitRegistryErrors(root, [
+          { name: "adapter-plain", framework: "react", role: "native" },
+          {
+            name: "adapter-alpha",
+            framework: "react",
+            role,
+            ...(role === "derived" ? { base: "adapter-plain" } : {}),
+          },
+        ]),
+        []
+      );
+    });
+  }
 });
 
 const FEATURE_KITS = [
@@ -598,7 +661,7 @@ describe("check-feature-parity reads each kit in its own framework", () => {
     ]);
   });
 
-  it("names a framework that has no header rule instead of passing its kit", () => {
+  it("rejects an Angular header that copies a single named field", () => {
     const meridian = {
       name: "adapter-meridian",
       framework: "angular",
@@ -616,7 +679,7 @@ describe("check-feature-parity reads each kit in its own framework", () => {
     fixtureLayer(root, "angular", "angular");
     const { problems } = featureParity(root, [...FEATURE_KITS, meridian]);
     assert.deepEqual(problems, [
-      "@adapttable/meridian: no header-props rule for angular in scripts/check-feature-parity.mjs",
+      "@adapttable/meridian: never passes core's header-cell props to its header element",
     ]);
   });
 });
