@@ -1,5 +1,18 @@
 # @adapttable/react
 
+## 1.5.0
+
+### Minor Changes
+
+- 42a4349: Expose optional `UseFrontendDataOptions.filterKey` and forward neutral filter-semantic keys so replacing declarative filter definitions refreshes matching rows with unchanged data and query state. Direct custom predicates can explicitly invalidate through `filterKey`.
+  
+  Expose the shared `resize-handle` styling hook on the real column-resize control while preserving its pointer and keyboard callbacks.
+
+### Patch Changes
+
+- Updated dependencies [42a4349]
+  - @adapttable/core@3.8.0
+
 ## 1.4.0
 
 ### Minor Changes

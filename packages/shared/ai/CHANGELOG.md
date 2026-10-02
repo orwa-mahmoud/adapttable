@@ -1,5 +1,13 @@
 # @adapttable/ai
 
+## 0.5.1
+
+### Patch Changes
+
+- 42a4349: Keep agent revisions, sampled values and custom capabilities current when a table source or capability handler changes. Reject retained-session execution after disconnect and cancel pending work, preventing obsolete plans or destroyed tables from being written to.
+- Updated dependencies [42a4349]
+  - @adapttable/core@3.8.0
+
 ## 0.5.0
 
 ### Minor Changes

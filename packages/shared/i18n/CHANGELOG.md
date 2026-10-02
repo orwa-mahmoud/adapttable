@@ -1,5 +1,17 @@
 # @adapttable/i18n
 
+## 3.3.0
+
+### Minor Changes
+
+- 412cc90: Add Czech (`cs`) locale preset for table labels via `getLabels("cs")`.
+
+### Patch Changes
+
+- 42a4349: Translate the select filter's unrestricted “All” option through `filterAll` in every translated locale, including Czech.
+- Updated dependencies [42a4349]
+  - @adapttable/core@3.8.0
+
 ## 3.2.8
 
 ### Patch Changes

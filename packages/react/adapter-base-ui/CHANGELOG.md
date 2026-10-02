@@ -1,5 +1,15 @@
 # @adapttable/base-ui
 
+## 3.3.1
+
+### Patch Changes
+
+- 42a4349: Restore shared table/filter/chip/card styling hooks, localize “All” and make bounded mobile-card scroll regions keyboard-focusable. Reduce repeated rendering code to keep the table fixture within its existing bundle budget. Expose the shared `grid` styling hook only while cell navigation is active.
+- Updated dependencies [42a4349]
+- Updated dependencies [42a4349]
+  - @adapttable/core@3.8.0
+  - @adapttable/react@1.5.0
+
 ## 3.3.0
 
 ### Minor Changes
