@@ -851,6 +851,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       <style>{STICKY_FIX_CSS}</style>
       <Table.Root
         ref={nameTableElement}
+        data-adapttable-part={gridRole === "grid" ? "grid" : undefined}
         size={size}
         variant="ghost"
         dir={dir}

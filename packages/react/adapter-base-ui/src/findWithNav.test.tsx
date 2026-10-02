@@ -2,7 +2,7 @@
  * Find with cell navigation: walking the matches moves the grid's focus — the
  * focus is what brings the cell into view — and the count is spoken.
  */
-import { act, fireEvent, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { cellNavigation } from "./cell-navigation";
@@ -36,7 +36,7 @@ const current = () =>
 const gridCell = (row: number, col: number) =>
   document.querySelector<HTMLElement>(`[data-grid-cell="${row}:${col}"]`)!;
 
-function table() {
+function table(navigable = true) {
   renderKit(
     <DataTable<Row>
       data={ROWS}
@@ -44,12 +44,59 @@ function table() {
       rowKey={(r) => r.id}
       urlSync={false}
       forceMobile={false}
-      features={[cellNavigation(), findInTable({ button: true })]}
+      tableLabel="People"
+      classNames={{ table: "navigation-table" }}
+      features={[
+        ...(navigable ? [cellNavigation()] : []),
+        findInTable({ button: true }),
+      ]}
     />
   );
 }
 
 describe("find with cell navigation (base-ui)", () => {
+  it("names the existing grid root and preserves table focus", () => {
+    table();
+    const grid = part("grid")!;
+    const semanticTable = part("table")!;
+
+    expect(
+      document.querySelectorAll('[data-adapttable-part="grid"]')
+    ).toHaveLength(1);
+    expect(grid.tagName).toBe("DIV");
+    expect(grid).toHaveClass("navigation-table");
+    expect(grid.querySelector('[data-adapttable-part="table"]')).toBe(
+      semanticTable
+    );
+    expect(semanticTable.tagName).toBe("TABLE");
+    expect(screen.getAllByRole("grid")).toEqual([semanticTable]);
+    expect(screen.getByRole("grid", { name: "People" })).toBe(semanticTable);
+    expect(semanticTable).toHaveAttribute("aria-rowcount", "3");
+    expect(semanticTable).toHaveAttribute("aria-colcount", "1");
+    expect(grid).not.toHaveAttribute("role");
+    expect(grid).not.toHaveAttribute("tabindex");
+    expect(grid).not.toHaveAttribute("aria-label");
+    expect(grid).not.toHaveAttribute("aria-rowcount");
+    expect(grid).not.toHaveAttribute("aria-colcount");
+
+    act(() => gridCell(0, 0).focus());
+    fireEvent.keyDown(gridCell(0, 0), { key: "ArrowDown" });
+    expect(gridCell(1, 0)).toHaveFocus();
+    expect(gridCell(1, 0)).toHaveAttribute("tabindex", "0");
+    expect(gridCell(0, 0)).toHaveAttribute("tabindex", "-1");
+    expect(
+      grid.querySelectorAll('[data-grid-cell][tabindex="0"]')
+    ).toHaveLength(1);
+  });
+
+  it("omits the grid hook without cell navigation", () => {
+    table(false);
+    expect(part("grid")).toBeNull();
+    expect(screen.queryByRole("grid")).toBeNull();
+    expect(screen.getByRole("table", { name: "People" })).toBe(part("table"));
+    expect(part("table")?.closest(".navigation-table")).not.toBeNull();
+  });
+
   it("opens from the toolbar control", () => {
     table();
     fireEvent.click(part("find-button")!);

@@ -222,7 +222,10 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
           );
         } else {
           body = (
-            <Box className={classNames?.table}>
+            <Box
+              className={classNames?.table}
+              data-adapttable-part={view.gridFocus.enabled ? "grid" : undefined}
+            >
               <DesktopTable {...tableProps} prefetch={props.prefetch} />
             </Box>
           );
