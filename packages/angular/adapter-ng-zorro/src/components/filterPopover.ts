@@ -33,6 +33,7 @@ import {
       [dir]="p.dir ?? 'ltr'"
       [nzPopoverTrigger]="null"
       [nzPopoverVisible]="p.open"
+      (nzPopoverVisibleChange)="onVisibleChange($event)"
       [nzPopoverBackdrop]="false"
       [nzPopoverContent]="content"
       [nzPopoverPlacement]="p.dir === 'rtl' ? 'bottomLeft' : 'bottomRight'"
@@ -82,6 +83,16 @@ export class AdaptFilterPopover {
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
   private readonly card = viewChild<ElementRef<HTMLElement>>("card");
+
+  protected onVisibleChange(open: boolean): void {
+    if (open || !this.props().open) return;
+    // CDK can dismiss on Escape before the document listener sees the key.
+    // Reflect that kit-owned dismissal in the controlled state and opener.
+    this.props().onClose();
+    this.anchor()
+      .nativeElement.querySelector<HTMLElement>('button, [role="button"]')
+      ?.focus();
+  }
 
   constructor() {
     effect((onCleanup) => {

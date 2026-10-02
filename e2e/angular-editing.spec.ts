@@ -51,6 +51,55 @@ for (const kit of ANGULAR_KITS) {
       );
     });
 
+    if (kit.key === "ng-zorro") {
+      test("keeps the select draft through pointer presses and saves only after leaving", async ({
+        page,
+      }) => {
+        await page.goto(PAGE);
+        await cell(page, 0, 2).dblclick();
+        const editor = part(page, "edit-cell-editor");
+        await expect(editor).toBeFocused();
+        const selector = editor
+          .locator("xpath=ancestor::nz-select[1]")
+          .locator("nz-select-top-control");
+        await selector.hover();
+        await page.mouse.down();
+        await expect(editor).toBeFocused();
+        await expect(log(page)).toHaveText(
+          "Every change goes through the host."
+        );
+        await page.mouse.up();
+        await expect(editor).toHaveAttribute("aria-expanded", "true");
+        const option = page.getByRole("option", {
+          name: "Blocked",
+          exact: true,
+        });
+        await option.hover();
+        await page.mouse.down();
+        await expect(editor).toBeFocused();
+        await expect(log(page)).toHaveText(
+          "Every change goes through the host."
+        );
+        await page.mouse.up();
+        await expect(editor).toHaveAttribute("aria-expanded", "false");
+        await expect(editor).toBeFocused();
+        await expectAngularSelection(kit, editor, {
+          value: "Blocked",
+          label: "Blocked",
+        });
+        await expect(log(page)).toHaveText(
+          "Every change goes through the host."
+        );
+        await page
+          .getByRole("heading", { name: "Inline cell editing in NG-ZORRO" })
+          .click();
+        await expect(cell(page, 0, 2)).toHaveText("Blocked");
+        await expect(log(page)).toHaveText(
+          "Saved status for Ada Lovelace: Blocked"
+        );
+      });
+    }
+
     test("edits a number and a date through the kit controls", async ({
       page,
     }) => {

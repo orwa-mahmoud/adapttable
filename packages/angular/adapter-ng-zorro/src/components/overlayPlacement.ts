@@ -62,7 +62,8 @@ export function overlayEscapeHandled(event: KeyboardEvent): boolean {
 /**
  * Associate an nz-select's real CDK portal with its owning panel. The select
  * still owns option navigation, value selection and its open state. This
- * bridge only prevents its first Escape from also dismissing the parent.
+ * bridge keeps pointer interaction on the combobox and prevents its first
+ * Escape from also dismissing the parent.
  *
  * @internal
  */
@@ -79,6 +80,29 @@ export class AdaptOverlayOrigin {
       this.select.cdkConnectedOverlay?.overlayRef?.overlayElement;
     const unregister = registerOverlayOrigin(origin, popup);
     let observer: MutationObserver | undefined;
+    const retainFocus = (event: MouseEvent): void => {
+      if (
+        event.button !== 0 ||
+        this.select.nzDisabled ||
+        !(event.target instanceof Element)
+      )
+        return;
+      const input: unknown =
+        this.select.nzSelectTopControlComponent?.nzSelectSearchComponent
+          ?.inputElement.nativeElement;
+      if (!(input instanceof Element) || event.target === input) return;
+      const option = event.target.closest("nz-option-item");
+      if (
+        !origin.contains(event.target) &&
+        (!option || !popup()?.contains(option))
+      )
+        return;
+      // NG-ZORRO focuses on click, after mousedown has already blurred the
+      // input. Keep the whole pointer gesture within this composite control,
+      // including its portalled options, so cell editors do not commit early.
+      event.preventDefault();
+      this.select.focus();
+    };
     const escape = (event: KeyboardEvent): void => {
       if (event.key !== "Escape" || !this.select.nzOpen) return;
       const target =
@@ -96,10 +120,12 @@ export class AdaptOverlayOrigin {
       this.select.setOpenState(false);
       this.select.focus();
     };
+    this.document.addEventListener("mousedown", retainFocus, true);
     this.document.addEventListener("keydown", escape, true);
     inject(DestroyRef).onDestroy(() => {
       unregister();
       observer?.disconnect();
+      this.document.removeEventListener("mousedown", retainFocus, true);
       this.document.removeEventListener("keydown", escape, true);
     });
     // Both user interaction and controlled nzOpen bindings update this model.

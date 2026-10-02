@@ -201,6 +201,73 @@ describe("NG-ZORRO filter overlays", () => {
     fixture.destroy();
   });
 
+  it("keeps pointer presses on the select and its options focused on the combobox", async () => {
+    const { fixture, host, trigger, settle } = await mount();
+    const select = document.querySelector<HTMLElement>("nz-select")!;
+    const input = select.querySelector<HTMLInputElement>("input")!;
+    const selector = select.querySelector<HTMLElement>(
+      "nz-select-top-control"
+    )!;
+    expect(document.activeElement).toBe(trigger);
+    const press = new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+    });
+    selector.dispatchEvent(press);
+    expect(press.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(input);
+    selector.click();
+    await settle();
+    expect(input.getAttribute("aria-expanded")).toBe("true");
+    const option = [
+      ...document.querySelectorAll<HTMLElement>('[role="option"]'),
+    ].find((node) => node.textContent?.trim() === "Amman")!;
+    const choose = new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+    });
+    option.dispatchEvent(choose);
+    expect(choose.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(input);
+    option.click();
+    await settle();
+    expect(host.value()).toBe("Amman");
+    expect(input.getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(input);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    const textPress = new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(textPress);
+    expect(textPress.defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(input);
+    fixture.destroy();
+  });
+
+  it("synchronizes a native Escape dismissal when focus has left the popover", async () => {
+    const { fixture, host, element, trigger, settle } = await mount();
+    const outside = element.querySelector<HTMLButtonElement>(".outside")!;
+    outside.focus();
+    expect(document.activeElement).toBe(outside);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    outside.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await settle();
+    expect(host.open()).toBe(false);
+    expect(part("filters-popover")).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(trigger);
+    expect(host.value()).toBe("Dubai");
+    fixture.destroy();
+  });
+
   it("scopes RTL to the child portal and gives the child the first Escape", async () => {
     const { fixture, trigger, settle } = await mount(false, true);
     const select = await openSelect(settle);

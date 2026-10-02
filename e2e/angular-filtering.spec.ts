@@ -100,6 +100,7 @@ for (const kit of ANGULAR_KITS) {
       });
       await selectAngularOption(kit, core, { value: "true", label: "True" });
       await expectAngularSelection(kit, core, { value: "true", label: "True" });
+      if (kit.key === "ng-zorro") await expect(core).toBeFocused();
       await expect(popover).toBeVisible();
       await expect(part(page, "row")).toHaveCount(6);
       expect(new Set(await teams(page))).toEqual(new Set(["Core"]));
