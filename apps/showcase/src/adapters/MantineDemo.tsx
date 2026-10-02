@@ -191,6 +191,7 @@ export function MantineDemo({
   cellNavigation,
   columnSelectionCheckbox,
   forceMobile,
+  maxHeight,
   exportCsv,
   headerFilters,
   filterFields,
@@ -278,6 +279,7 @@ export function MantineDemo({
   /** The column layout the page starts from. */
   defaultColumnLayout?: Partial<ColumnLayoutState>;
   forceMobile?: boolean;
+  maxHeight?: number;
   /** Dedicated pages hide unrelated filter/action/view chrome. */
   focused?: boolean;
   /**
@@ -412,6 +414,7 @@ export function MantineDemo({
             filterFields={filterFields}
             stickyTop={8}
             forceMobile={forceMobile}
+            maxHeight={maxHeight}
           />
         )}
       />

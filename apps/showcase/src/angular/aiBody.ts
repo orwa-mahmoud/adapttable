@@ -1,4 +1,4 @@
-/** A deterministic local agent over the real Angular table and native kit UI. */
+/** A deterministic local agent over the real Angular table and the selected kit UI. */
 import {
   type AgentContextInputs,
   type AgentSession,
@@ -12,15 +12,11 @@ import type {
   ColumnDef,
   TableAssistantProps,
 } from "@adapttable/angular";
-import { AdaptDataTable } from "@adapttable/angular-unstyled";
-import {
-  AdaptTableAssistant,
-  agentApproval,
-} from "@adapttable/angular-unstyled/assistant";
-import { editing } from "@adapttable/angular-unstyled/editing";
-import { Component, computed, signal } from "@angular/core";
+import { Component, computed, inject, signal } from "@angular/core";
 
 import { SHOWCASE_PRESENTATION } from "./data";
+import { AdaptShowcaseAssistant, AdaptShowcaseTable } from "./kitComponents";
+import { SHOWCASE_KIT } from "./showcaseKit";
 
 interface AgentPerson {
   id: string;
@@ -61,10 +57,11 @@ const SUGGESTIONS: readonly AssistantSuggestion[] = [
 /** The feature body mounted by the Angular matrix's AI page. */
 @Component({
   selector: "adapt-showcase-ai",
-  imports: [AdaptDataTable, AdaptTableAssistant],
+  imports: [AdaptShowcaseTable, AdaptShowcaseAssistant],
   templateUrl: "./aiBody.html",
 })
 export class AiBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = signal(INITIAL);
   readonly rowKey = (row: AgentPerson) => row.id;
@@ -182,7 +179,7 @@ export class AiBody {
   }));
 
   readonly features = [
-    editing<AgentPerson>((row, column, value) => {
+    this.kit.editing<AgentPerson>((row, column, value) => {
       if (column !== "salary") throw new Error("This demo only edits salary");
       const salary = Number(value);
       this.rows.update((rows) =>
@@ -192,7 +189,7 @@ export class AiBody {
       );
       this.log.set(`${row.name} salary saved: ${String(salary)}`);
     }),
-    agentApproval(),
+    this.kit.agentApproval(),
     tableAgent(
       computed(() => ({
         tableId: "angular-ai-people",

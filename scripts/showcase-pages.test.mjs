@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import ts from "typescript";
+
 import {
   adapterByKey,
   builtAdapters,
@@ -253,5 +255,47 @@ describe("the kit stylesheets every showcase page loads", () => {
           `depend on it import the module, not the sheet`
       );
     }
+  });
+
+  it("loads NG-ZORRO styles only through its route-selected kit module", () => {
+    const entry = readFileSync(
+      join(SHOWCASE, "src/angular/entry-matrix.ts"),
+      "utf8"
+    );
+    const ngZorro = readFileSync(
+      join(SHOWCASE, "src/angular/kits/ngZorro.ts"),
+      "utf8"
+    );
+    const unstyled = readFileSync(
+      join(SHOWCASE, "src/angular/kits/unstyled.ts"),
+      "utf8"
+    );
+    assert.match(
+      entry,
+      /case "ng-zorro":\s*return import\("\.\/kits\/ngZorro"\)/
+    );
+    const entrySource = ts.createSourceFile(
+      "entry.ts",
+      entry,
+      ts.ScriptTarget.Latest,
+      true
+    );
+    const eagerImports = entrySource.statements
+      .filter(ts.isImportDeclaration)
+      .filter((statement) => !statement.importClause?.isTypeOnly);
+    assert.equal(
+      eagerImports.some(
+        (statement) =>
+          ts.isStringLiteral(statement.moduleSpecifier) &&
+          statement.moduleSpecifier.text.includes("ngZorro")
+      ),
+      false
+    );
+    assert.ok(
+      sideEffectImportsIn(ngZorro).includes(
+        "ng-zorro-antd/ng-zorro-antd.min.css"
+      )
+    );
+    assert.doesNotMatch(unstyled, /ng-zorro-antd|ngZorro\.css|kits\/ngZorro/);
   });
 });

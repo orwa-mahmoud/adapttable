@@ -14,6 +14,7 @@ import { bootstrapApplication } from "@angular/platform-browser";
 
 import { resolveMatrixRoute } from "../matrix/content";
 import { AdaptShowcaseMatrixPage, MATRIX_PAGE } from "./matrixPage";
+import { SHOWCASE_KIT } from "./showcaseKit";
 
 const container = document.getElementById("root");
 if (!container) throw new Error("the showcase page has no #root to mount into");
@@ -31,6 +32,18 @@ if (!route) {
   );
 }
 
+/** Only the requested kit and its stylesheet enter this page's runtime graph. */
+const { kit } = await (() => {
+  switch (route.adapter.key) {
+    case "unstyled":
+      return import("./kits/unstyled");
+    case "ng-zorro":
+      return import("./kits/ngZorro");
+    default:
+      throw new Error(`No Angular showcase kit for "${route.adapter.key}"`);
+  }
+})();
+
 /** `..` from an adapter landing, `../..` from one of its feature pages. */
 const root = "..".concat("/..".repeat(id.split("/").length - 1));
 
@@ -38,6 +51,8 @@ container.replaceChildren(document.createElement("adapt-showcase-matrix-page"));
 await bootstrapApplication(AdaptShowcaseMatrixPage, {
   providers: [
     provideZonelessChangeDetection(),
+    ...kit.providers,
+    { provide: SHOWCASE_KIT, useValue: kit },
     { provide: MATRIX_PAGE, useValue: { route, root } },
   ],
 });

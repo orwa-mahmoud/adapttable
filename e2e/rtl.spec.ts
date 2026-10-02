@@ -2,6 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { builtAdapters, featuresOf } from "../apps/showcase/matrix.mjs";
 import { getDirection, locales } from "../packages/shared/i18n/src/index";
+import { angularPart } from "./angular-kit";
 import { gotoFromFeatureGrid } from "./nav";
 
 /**
@@ -125,20 +126,20 @@ for (const kit of builtAdapters("angular")) {
         root.locator('[data-adapttable-part="search"]')
       ).toHaveAttribute("placeholder", labels.searchPlaceholder);
       await expect(
-        root.locator('[data-adapttable-part="page-prev"]')
+        angularPart(kit, page, "page-prev", root)
       ).toHaveAccessibleName(labels.previousPage);
       await expect(
-        root.locator('[data-adapttable-part="page-next"]')
+        angularPart(kit, page, "page-next", root)
       ).toHaveAccessibleName(labels.nextPage);
-      const trigger = root.locator('[data-adapttable-part="filters-button"]');
+      const trigger = angularPart(kit, page, "filters-button", root);
       await expect(trigger).toHaveAccessibleName(labels.filters);
       await trigger.click();
-      const panel = page.locator('[data-adapttable-part="filters-popover"]');
+      const panel = angularPart(kit, page, "filters-popover");
       await expect(panel).toBeVisible();
       await expect(panel).toHaveAttribute("dir", getDirection(locale));
-      await expect(
-        panel.locator('[data-adapttable-part="filters-clear"]')
-      ).toHaveText(labels.clearAll);
+      await expect(angularPart(kit, page, "filters-clear", panel)).toHaveText(
+        labels.clearAll
+      );
       await page.keyboard.press("Escape");
       await expect(panel).toHaveCount(0);
       await expect(trigger).toBeFocused();

@@ -2,7 +2,7 @@
  * The demo each Angular feature page mounts under its seam, one component
  * per feature, and the table the kit's landing page shows.
  *
- * Every body is the real `@adapttable/angular-unstyled` table with that
+ * Every body mounts the selected kit’s real table and its own factories with that
  * feature composed, over the same people the React pages show. Where the
  * table asks the host to write — an edit, a move, a bulk action — the body
  * writes and says what it did on the line under the table, so what the host
@@ -22,40 +22,12 @@ import {
   buildFormulaColumns,
   injectFormulaUrlState,
 } from "@adapttable/angular/formula";
-import { AdaptDataTable } from "@adapttable/angular-unstyled";
-import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
-import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
-import { cellSpan } from "@adapttable/angular-unstyled/cell-span";
-import { collapsibleColumnGroups } from "@adapttable/angular-unstyled/column-groups";
-import { columnMenu } from "@adapttable/angular-unstyled/column-menu";
-import { columnSelectionCheckbox } from "@adapttable/angular-unstyled/column-selection";
-import { densityChooser } from "@adapttable/angular-unstyled/density";
 import {
-  editHistory,
-  editing,
-  undoRedoButtons,
-} from "@adapttable/angular-unstyled/editing";
-import { exportCsv } from "@adapttable/angular-unstyled/export";
-import { filters } from "@adapttable/angular-unstyled/filters";
-import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
-import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
-import { nestedTable } from "@adapttable/angular-unstyled/nested-table";
-import { pinnedSummaryRows } from "@adapttable/angular-unstyled/pinned-summary-rows";
-import {
-  AdaptPivotPanel,
   injectPivotUrlState,
   pivot,
   type PivotField,
   type PivotRow,
-  pivotTableModel,
-} from "@adapttable/angular-unstyled/pivot";
-import { resizableColumns } from "@adapttable/angular-unstyled/resizable-columns";
-import { rowActions } from "@adapttable/angular-unstyled/row-actions";
-import { rowPinning } from "@adapttable/angular-unstyled/row-pinning";
-import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
-import { savedViews } from "@adapttable/angular-unstyled/saved-views";
-import { tree } from "@adapttable/angular-unstyled/tree";
-import { virtualize } from "@adapttable/angular-unstyled/virtualize";
+} from "@adapttable/angular/pivot";
 import { applyRowPatches, applyRowReorder, updateRow } from "@adapttable/core";
 import { xlsxWriter } from "@adapttable/core/xlsx";
 import {
@@ -99,6 +71,8 @@ import {
   rowKey,
   SHOWCASE_PRESENTATION,
 } from "./data";
+import { AdaptShowcasePivotPanel, AdaptShowcaseTable } from "./kitComponents";
+import { SHOWCASE_KIT } from "./showcaseKit";
 
 /** The people columns, shared by every page that does not edit them. */
 const COLUMNS = peopleColumns();
@@ -109,7 +83,7 @@ type FilterLayout = "popover" | "drawer" | "header";
 /** Filters: popover, drawer or header funnels, chips, and URL state. */
 @Component({
   selector: "adapt-showcase-filtering",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="hint-row">
@@ -132,7 +106,7 @@ type FilterLayout = "popover" | "drawer" | "header";
       </div>
       <div class="mx-demo__body">
         @for (current of mounted(); track current) {
-          <adapt-data-table
+          <adapt-showcase-table
             [dir]="presentation.dir"
             [labels]="presentation.labels"
             [attr.lang]="presentation.locale"
@@ -150,6 +124,7 @@ type FilterLayout = "popover" | "drawer" | "header";
   `,
 })
 class FilteringBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
@@ -165,10 +140,12 @@ class FilteringBody {
    * changes, so switching remounts the table the way React's `key` does.
    */
   readonly mounted = computed(() => [this.layout()]);
-  private readonly panel: readonly AdaptTableFeature[] = [filters(FILTER_DEFS)];
+  private readonly panel: readonly AdaptTableFeature[] = [
+    this.kit.filters(FILTER_DEFS),
+  ];
   private readonly header: readonly AdaptTableFeature[] = [
-    filters(FILTER_DEFS),
-    headerFilters(),
+    this.kit.filters(FILTER_DEFS),
+    this.kit.headerFilters(),
   ];
 
   /** The header layout adds the funnels; the others keep the panel's fields. */
@@ -180,11 +157,11 @@ class FilteringBody {
 /** Selection: row and page checkboxes, and bulk actions over the set. */
 @Component({
   selector: "adapt-showcase-selection",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -203,13 +180,14 @@ class FilteringBody {
   `,
 })
 class SelectionBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly log = signal("Select rows, then run a bulk action.");
   readonly features: readonly AdaptTableFeature[] = [
-    bulkActions([
+    this.kit.bulkActions([
       {
         key: "export",
         label: "Export",
@@ -227,7 +205,7 @@ class SelectionBody {
 /** Row reordering: a grip, keyboard moves, and the host writing each move. */
 @Component({
   selector: "adapt-showcase-row-reordering",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="hint-row">
@@ -236,7 +214,7 @@ class SelectionBody {
         >
       </div>
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -254,13 +232,14 @@ class SelectionBody {
   `,
 })
 class RowReorderingBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = signal<readonly Person[]>(peopleRows());
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly log = signal("Drag a grip, or lift a row with Space.");
   readonly features: readonly AdaptTableFeature[] = [
-    rowReorder<Person>((from, to, row) => {
+    this.kit.rowReorder<Person>((from, to, row) => {
       this.rows.update((rows) => applyRowReorder(rows, from, to));
       this.log.set(
         `Moved ${row.name} from ${String(from + 1)} to ${String(to + 1)}`
@@ -272,7 +251,7 @@ class RowReorderingBody {
 /** Editing: kit-native editors in the cell; the host writes every change. */
 @Component({
   selector: "adapt-showcase-editing",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="hint-row">
@@ -296,7 +275,7 @@ class RowReorderingBody {
         </button>
       </div>
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -315,6 +294,7 @@ class RowReorderingBody {
   `,
 })
 class EditingBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = signal<readonly Person[]>(peopleRows());
   readonly columns = peopleColumns({ editable: true });
@@ -333,7 +313,7 @@ class EditingBody {
   }
 
   readonly features: readonly AdaptTableFeature[] = [
-    editing<Person>(
+    this.kit.editing<Person>(
       (row, key, value) => {
         this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
         if (this.rejectNext()) {
@@ -359,20 +339,20 @@ class EditingBody {
         },
       }
     ),
-    editHistory(),
-    undoRedoButtons(),
-    cellNavigation(),
+    this.kit.editHistory(),
+    this.kit.undoRedoButtons(),
+    this.kit.cellNavigation(),
   ];
 }
 
 /** Grouping: the panel, nested groups, and aggregates in the headers. */
 @Component({
   selector: "adapt-showcase-grouping",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -388,23 +368,24 @@ class EditingBody {
   `,
 })
 class GroupingBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [
-    groupingPanel(["team", "status"]),
+    this.kit.groupingPanel(["team", "status"]),
   ];
 }
 
 /** Export: a CSV of the current view from the toolbar. */
 @Component({
   selector: "adapt-showcase-export",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -421,6 +402,7 @@ class GroupingBody {
   `,
 })
 class ExportBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
@@ -433,8 +415,8 @@ class ExportBody {
     return scope === "selected" || scope === "range" ? scope : "page";
   })();
   readonly features: readonly AdaptTableFeature[] = [
-    exportCsv({ scope: this.scope }),
-    ...(this.scope === "range" ? [cellNavigation()] : []),
+    this.kit.exportCsv({ scope: this.scope }),
+    ...(this.scope === "range" ? [this.kit.cellNavigation()] : []),
   ];
 }
 
@@ -453,9 +435,9 @@ function scaleTier(): ScaleTier {
 /** The frontend tier: every row in memory, windowed. */
 @Component({
   selector: "adapt-showcase-scale-frontend",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
-    <adapt-data-table
+    <adapt-showcase-table
       [dir]="presentation.dir"
       [labels]="presentation.labels"
       [attr.lang]="presentation.locale"
@@ -472,12 +454,13 @@ function scaleTier(): ScaleTier {
   `,
 })
 class ScaleFrontendTable {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly count = SCALE_ROWS;
   readonly rows = makeLargeDirectory(SCALE_ROWS);
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [virtualize()];
+  readonly features: readonly AdaptTableFeature[] = [this.kit.virtualize()];
 }
 
 /**
@@ -487,9 +470,9 @@ class ScaleFrontendTable {
  */
 @Component({
   selector: "adapt-showcase-scale-server",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
-    <adapt-data-table
+    <adapt-showcase-table
       [dir]="presentation.dir"
       [labels]="presentation.labels"
       [attr.lang]="presentation.locale"
@@ -504,6 +487,7 @@ class ScaleFrontendTable {
   `,
 })
 class ScaleServerTable {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   private readonly slice = signal({ from: 0, limit: 500 });
   readonly source = injectServerData<Person>({
@@ -528,7 +512,7 @@ class ScaleServerTable {
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [
-    virtualize({ estimateRowSize: 48 }),
+    this.kit.virtualize({ estimateRowSize: 48 }),
   ];
 }
 
@@ -552,10 +536,10 @@ function injectPeopleQuery(params: Signal<Partial<PeopleParams>>) {
  */
 @Component({
   selector: "adapt-showcase-scale-query",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   providers: [provideTanStackQuery(new QueryClient())],
   template: `
-    <adapt-data-table
+    <adapt-showcase-table
       [dir]="presentation.dir"
       [labels]="presentation.labels"
       [attr.lang]="presentation.locale"
@@ -622,11 +606,11 @@ class ScaleBody {
 /** Mobile cards: the same table, every row a card, in a phone-width frame. */
 @Component({
   selector: "adapt-showcase-mobile-cards",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="mx-demo__body mx-phone">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -658,7 +642,7 @@ class MobileCardsBody {
 /** Saved views: name the table's state and pick it again from the menu. */
 @Component({
   selector: "adapt-showcase-saved-views",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="hint-row">
@@ -667,7 +651,7 @@ class MobileCardsBody {
         >
       </div>
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -684,14 +668,15 @@ class MobileCardsBody {
   `,
 })
 class SavedViewsBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [
-    filters(FILTER_DEFS),
-    savedViews({
-      storageKey: "adapttable-angular-demo-views",
+    this.kit.filters(FILTER_DEFS),
+    this.kit.savedViews({
+      storageKey: `adapttable-angular-${this.kit.key}-demo-views`,
       urlKey: "views",
     }),
   ];
@@ -700,11 +685,11 @@ class SavedViewsBody {
 /** The landing page's table: filters, sorting and paging, nothing to explain. */
 @Component({
   selector: "adapt-showcase-landing-table",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -721,11 +706,14 @@ class SavedViewsBody {
   `,
 })
 export class AdaptShowcaseLandingTable {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [filters(FILTER_DEFS)];
+  readonly features: readonly AdaptTableFeature[] = [
+    this.kit.filters(FILTER_DEFS),
+  ];
 }
 
 /**
@@ -734,14 +722,14 @@ export class AdaptShowcaseLandingTable {
  */
 @Component({
   selector: "adapt-showcase-tree",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="hint-row">
         <span class="hint">Each team lead opens onto their team</span>
       </div>
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -758,12 +746,13 @@ export class AdaptShowcaseLandingTable {
   `,
 })
 class TreeBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [
-    tree<Person>({ getParentId: reportsTo, treeColumn: "person" }),
+    this.kit.tree<Person>({ getParentId: reportsTo, treeColumn: "person" }),
   ];
 }
 
@@ -782,10 +771,10 @@ const ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
 /** One person's orders: this kit's own table, mounted with the defaults. */
 @Component({
   selector: "adapt-showcase-orders",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     @let d = defaults();
-    <adapt-data-table
+    <adapt-showcase-table
       [dir]="presentation.dir"
       [labels]="presentation.labels"
       [attr.lang]="presentation.locale"
@@ -811,7 +800,7 @@ class OrdersTable {
 /** Nested tables: each person's recent orders, in a table under the row. */
 @Component({
   selector: "adapt-showcase-nested-tables",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="hint-row">
@@ -819,7 +808,7 @@ class OrdersTable {
         <span class="hint">The orders have their own columns and row keys</span>
       </div>
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -836,12 +825,13 @@ class OrdersTable {
   `,
 })
 class NestedTablesBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [
-    nestedTable<Person>(
+    this.kit.nestedTable<Person>(
       (row) => ({ label: `Orders for ${row.name}`, table: OrdersTable }),
       [PEOPLE[0]!.id]
     ),
@@ -884,7 +874,7 @@ function teamSpan({
 /** Rows: pin from the 3-dot menu, and merge a team that runs down the page. */
 @Component({
   selector: "adapt-showcase-rows",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="hint-row">
@@ -892,7 +882,7 @@ function teamSpan({
         <span class="hint">A team that runs down the page is one cell</span>
       </div>
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -910,15 +900,16 @@ function teamSpan({
   `,
 })
 class RowsBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = signal(orderPeopleByTeam(PEOPLE));
   private nextId = Math.max(...PEOPLE.map((row) => Number(row.id)));
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [
-    rowPinning(),
-    cellSpan(teamSpan),
-    rowActions<Person>([], {
+    this.kit.rowPinning(),
+    this.kit.cellSpan(teamSpan),
+    this.kit.rowActions<Person>([], {
       layout: "menu",
       onAddRow: () => {
         this.rows.update((rows) => [
@@ -948,7 +939,7 @@ class RowsBody {
 /** Column groups: three header groups, each collapsing its own way. */
 @Component({
   selector: "adapt-showcase-column-groups",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="hint-row">
@@ -956,7 +947,7 @@ class RowsBody {
         <span class="hint">Collapse one to see how it folds</span>
       </div>
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
@@ -973,17 +964,20 @@ class RowsBody {
   `,
 })
 class ColumnGroupsBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = groupedPeopleColumns();
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [collapsibleColumnGroups()];
+  readonly features: readonly AdaptTableFeature[] = [
+    this.kit.collapsibleColumnGroups(),
+  ];
 }
 
-/** Column management, matching ColumnsDemo.tsx through the native kit. */
+/** Column management, matching ColumnsDemo.tsx through the selected kit. */
 @Component({
   selector: "adapt-showcase-columns",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <p class="hint">
@@ -991,7 +985,7 @@ class ColumnGroupsBody {
         range to export.
       </p>
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           tableLabel="People"
           urlKey="cols"
           [dir]="presentation.dir"
@@ -1010,6 +1004,7 @@ class ColumnGroupsBody {
   `,
 })
 class ColumnsBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly rowKey = rowKey;
@@ -1030,11 +1025,11 @@ class ColumnsBody {
     pinned: { person: "start" },
   });
   readonly features: readonly AdaptTableFeature[] = [
-    columnMenu(),
-    resizableColumns(),
-    densityChooser(),
-    cellNavigation(),
-    exportCsv({
+    this.kit.columnMenu(),
+    this.kit.resizableColumns(),
+    this.kit.densityChooser(),
+    this.kit.cellNavigation(),
+    this.kit.exportCsv({
       scope: "range",
       writer: xlsxWriter({ sheetName: "People" }),
       filename: "people.xlsx",
@@ -1045,7 +1040,7 @@ class ColumnsBody {
 /** Group and footer totals, matching AggregationDemo.tsx's three surfaces. */
 @Component({
   selector: "adapt-showcase-aggregation",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <p class="hint">
@@ -1053,7 +1048,7 @@ class ColumnsBody {
         stays outside the filtered data.
       </p>
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           tableLabel="People budgets"
           urlKey="agg"
           [maxHeight]="420"
@@ -1071,6 +1066,7 @@ class ColumnsBody {
   `,
 })
 class AggregationBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly rowKey = rowKey;
@@ -1086,14 +1082,14 @@ class AggregationBody {
     }
   );
   readonly features: readonly AdaptTableFeature[] = [
-    groupingPanel<Person>("team", {
+    this.kit.groupingPanel<Person>("team", {
       groupAggregates: aggregate<Person>(
         { budget: "sum" },
         { columns: this.columns }
       ),
       groupFooters: true,
     }),
-    pinnedSummaryRows<Person>({
+    this.kit.pinnedSummaryRows<Person>({
       top: [
         {
           ...PEOPLE[0]!,
@@ -1112,10 +1108,11 @@ class AggregationBody {
 /** Pivot axes, measures and folded groups, matching PivotDemo.tsx. */
 @Component({
   selector: "adapt-showcase-pivot",
-  imports: [AdaptDataTable, AdaptPivotPanel],
+  imports: [AdaptShowcaseTable, AdaptShowcasePivotPanel],
   templateUrl: "./pivotBody.html",
 })
 class PivotBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly fields: readonly PivotField[] = [
     { key: "team", label: "Team" },
@@ -1140,7 +1137,7 @@ class PivotBody {
     viewChild<TemplateRef<CellContext<PivotRow>>>("pivotCaption");
   readonly model = computed(() => {
     const caption = this.caption();
-    return pivotTableModel(
+    return this.kit.pivotTableModel(
       pivot(this.rows, this.state.config(), {
         collapsed: this.state.collapsed(),
         format: (value) =>
@@ -1165,7 +1162,7 @@ class PivotBody {
 /** Formula input, visible errors and shareable columns, from FormulasDemo.tsx. */
 @Component({
   selector: "adapt-showcase-formulas",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   templateUrl: "./formulasBody.html",
 })
 class FormulasBody {
@@ -1225,11 +1222,11 @@ class FormulasBody {
 /** Arabic controls and cell data, through the same filters kit as FilteringBody. */
 @Component({
   selector: "adapt-showcase-rtl",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           tableLabel="الأشخاص"
           urlKey="rtl"
           [dir]="presentation.dir"
@@ -1246,20 +1243,21 @@ class FormulasBody {
   `,
 })
 class RtlBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [
-    filters(FILTER_DEFS),
-    columnMenu(),
+    this.kit.filters(FILTER_DEFS),
+    this.kit.columnMenu(),
   ];
 }
 
 /** Timed row patches preserve the reader's view, matching RealtimeDemo.tsx. */
 @Component({
   selector: "adapt-showcase-realtime",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   template: `
     <div class="mx-demo">
       <div class="hint-row">
@@ -1279,7 +1277,7 @@ class RtlBody {
         >
       </div>
       <div class="mx-demo__body">
-        <adapt-data-table
+        <adapt-showcase-table
           tableLabel="Live people"
           [urlSync]="false"
           [dir]="presentation.dir"
@@ -1345,17 +1343,18 @@ class RealtimeBody {
 /** Keyboard focus and a real live-region transcript, from AccessibilityDemo.tsx. */
 @Component({
   selector: "adapt-showcase-accessibility",
-  imports: [AdaptDataTable],
+  imports: [AdaptShowcaseTable],
   templateUrl: "./accessibilityBody.html",
 })
 class AccessibilityBody {
+  private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [
-    cellNavigation(),
-    columnSelectionCheckbox(),
+    this.kit.cellNavigation(),
+    this.kit.columnSelectionCheckbox(),
   ];
   readonly tableRoot = viewChild<ElementRef<HTMLElement>>("tableRoot");
   readonly announcements = signal<readonly string[]>([]);

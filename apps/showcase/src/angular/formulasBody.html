@@ -1,4 +1,4 @@
-<!-- The host formula bar and the native table it configures. -->
+<!-- The host formula bar and the selected kit table it configures. -->
 <div class="mx-demo">
   <div class="fx" data-testid="formula-bar">
     <form class="fx__form" (submit)="$event.preventDefault(); add()">
@@ -46,7 +46,7 @@
     </div>
   </div>
   <div class="mx-demo__body">
-    <adapt-data-table
+    <adapt-showcase-table
       tableLabel="Computed people"
       urlKey="fx"
       [dir]="presentation.dir"

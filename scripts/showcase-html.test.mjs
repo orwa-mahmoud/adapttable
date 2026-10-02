@@ -34,13 +34,13 @@ describe("the generated showcase pages", () => {
 
   it("writes one page per matrix entry and per replaced address", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
-    // features — across all eight kits; the Angular unstyled kit's landing
+    // features — across all eight kits; both Angular kits' landings
     // plus all twenty-one feature destinations; and the eight replaced top-level
     // addresses. Kit `/accessibility/` URLs are matrix pages again, not
     // redirects to editing. Written out rather than recomputed from the
     // matrix: the writer reads that same list, so a derived count would agree
     // with itself no matter what it produced.
-    assert.equal(files.length, 8 * 22 + (1 + 21) + 8);
+    assert.equal(files.length, 8 * 22 + 2 * (1 + 21) + 8);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
   });
 
@@ -118,16 +118,31 @@ describe("the generated showcase pages", () => {
 
   it("names the v3 AI integration capabilities in static HTML", () => {
     const ai = files.filter((file) => file.dir.endsWith("/ai"));
-    assert.equal(ai.length, 9);
-    const angular = ai.find((file) => file.dir === "unstyled/ai");
-    assert.ok(angular, "the Angular assistant has a static page");
-    assert.match(angular.html, /injectTableAssistant/);
-    assert.match(angular.html, /tableAgent/);
-    assert.match(angular.html, /session\.execute/);
-    assert.match(angular.html, /No language model or API key is needed/);
-    assert.match(angular.html, /approved write updates the host/);
-    assert.doesNotMatch(angular.html, /Connect backend/);
-    const react = ai.filter((file) => file !== angular);
+    assert.equal(ai.length, 10);
+    const angularDirs = new Set(
+      matrixPages()
+        .filter((page) => page.framework === "angular")
+        .map((page) => page.dir)
+    );
+    const angular = ai.filter((file) => angularDirs.has(file.dir));
+    assert.deepEqual(angular.map((file) => file.dir).sort(), [
+      "ng-zorro/ai",
+      "unstyled/ai",
+    ]);
+    for (const file of angular) {
+      assert.match(file.html, /injectTableAssistant/);
+      assert.match(file.html, /tableAgent/);
+      assert.match(file.html, /session\.execute/);
+      assert.match(file.html, /No language model or API key is needed/);
+      assert.match(file.html, /approved write updates the host/);
+      assert.doesNotMatch(file.html, /Connect backend/);
+    }
+    const reactDirs = new Set(
+      matrixPages()
+        .filter((page) => page.framework === "react")
+        .map((page) => page.dir)
+    );
+    const react = ai.filter((file) => reactDirs.has(file.dir));
     assert.equal(react.length, 8);
     for (const file of react) {
       assert.match(file.html, /tableAgent/);

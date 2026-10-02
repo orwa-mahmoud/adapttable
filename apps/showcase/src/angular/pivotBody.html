@@ -1,7 +1,7 @@
-<!-- The pivot panel and native table, with host-owned fold controls. -->
+<!-- The pivot panel and selected kit table, with host-owned fold controls. -->
 <div class="mx-demo">
   <div class="mx-demo__body" [attr.dir]="presentation.dir">
-    <adapt-pivot-panel
+    <adapt-showcase-pivot-panel
       [fields]="fields"
       [config]="state.config()"
       [onChange]="state.onConfigChange"
@@ -30,7 +30,7 @@
       }
     </ng-template>
     @let table = model();
-    <adapt-data-table
+    <adapt-showcase-table
       tableLabel="Budget pivot"
       [dir]="presentation.dir"
       [labels]="presentation.labels"

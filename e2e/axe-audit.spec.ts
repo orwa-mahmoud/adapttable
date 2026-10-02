@@ -5,6 +5,7 @@ import {
   featuresOf,
   MATRIX_FEATURES,
 } from "../apps/showcase/matrix.mjs";
+import { angularOverlaySelector, angularPart } from "./angular-kit";
 import { expectNoBlockingAxe } from "./axe";
 
 /**
@@ -98,15 +99,16 @@ for (const kit of builtAdapters("angular")) {
       await demo(page)
         .getByRole("button", { name: layout, exact: true })
         .click();
-      const trigger = demo(page).locator(
-        '[data-adapttable-part="filters-button"]'
-      );
+      const trigger = angularPart(kit, page, "filters-button", demo(page));
       await trigger.click();
       const panelPart =
         layout === "Drawer" ? "filters-panel" : "filters-popover";
-      const panel = page.locator(`[data-adapttable-part="${panelPart}"]`);
+      const panel = angularPart(kit, page, panelPart);
       await expect(panel).toBeVisible();
-      await expectNoBlockingAxe(page, `[data-adapttable-part="${panelPart}"]`);
+      await expectNoBlockingAxe(
+        page,
+        angularOverlaySelector(kit, page, panelPart)
+      );
       await page.keyboard.press("Escape");
       await expect(panel).toHaveCount(0);
       await expect(trigger).toBeFocused();
@@ -125,13 +127,13 @@ for (const kit of builtAdapters("angular")) {
       page,
     }) => {
       await openKitPage(page, `/${kit.key}/${overlay.feature}/`);
-      await demo(page)
-        .locator(`[data-adapttable-part="${overlay.trigger}"]`)
-        .click();
-      await expect(
-        page.locator(`[data-adapttable-part="${overlay.panel}"]`)
-      ).toBeVisible();
+      await angularPart(kit, page, overlay.trigger, demo(page)).click();
+      await expect(angularPart(kit, page, overlay.panel)).toBeVisible();
       await expectNoBlockingAxe(page, ".mx-demo");
+      await expectNoBlockingAxe(
+        page,
+        angularOverlaySelector(kit, page, overlay.panel)
+      );
     });
   }
 

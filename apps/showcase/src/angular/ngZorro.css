@@ -1,0 +1,64 @@
+/* Loaded exclusively by the NG-ZORRO kit entry. Keep shared page chrome stable
+ * while genuine NG-ZORRO components own the table, controls and overlays. */
+.mx-ng--zorro .mx-demo {
+  min-inline-size: 0;
+}
+
+.mx-ng--zorro [data-adapttable-part="root"] {
+  min-inline-size: 0;
+  border: 1px solid var(--page-border);
+  border-radius: var(--r-md);
+}
+
+/* The binding owns scrolling, including pages without a height cap. */
+.mx-ng--zorro [data-adapttable-part="scroll-box"] {
+  overflow: auto;
+}
+
+.mx-ng--zorro [data-adapttable-part="toolbar"] {
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+}
+
+.mx-ng--zorro [data-adapttable-part="search-field"] {
+  flex: 1 1 200px;
+}
+
+.mx-ng--zorro [data-adapttable-part="search"] {
+  inline-size: 100%;
+}
+
+.mx-ng--zorro [data-adapttable-part="footer"] {
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.mx-ng--zorro [data-adapttable-part="pivot-panel"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+}
+
+.mx-ng--zorro [data-adapttable-part="pivot-zone"] {
+  min-inline-size: 0;
+}
+
+.mx-ng--zorro [data-grid-cell]:focus-visible {
+  outline: 2px solid var(--kit);
+  outline-offset: -2px;
+}
+
+.mx-ng--zorro [data-cell-selected] {
+  background: var(--kit-wash);
+  box-shadow: inset 0 0 0 1px var(--kit);
+}
+
+@media (forced-colors: active) {
+  .mx-ng--zorro [data-grid-cell]:focus-visible {
+    outline-color: Highlight;
+  }
+
+  .mx-ng--zorro [data-cell-selected] {
+    border: 1px solid Highlight;
+  }
+}

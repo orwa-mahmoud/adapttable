@@ -33,6 +33,12 @@
       "@adapttable/angular-unstyled/*": [
         "../../../../packages/angular/adapter-angular-unstyled/*/index.ts"
       ],
+      "@adapttable/ng-zorro": [
+        "../../../../packages/angular/adapter-ng-zorro/src/index.ts"
+      ],
+      "@adapttable/ng-zorro/*": [
+        "../../../../packages/angular/adapter-ng-zorro/*/index.ts"
+      ],
       "@adapttable/core": ["../../../../packages/shared/core/src/index.ts"],
       "@adapttable/core/*": ["../../../../packages/shared/core/src/*.ts"]
     }

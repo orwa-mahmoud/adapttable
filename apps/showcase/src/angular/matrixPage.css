@@ -33,7 +33,7 @@ adapt-showcase-matrix-page *::after {
   font-size: var(--fs-small);
 }
 
-.mx-ng [data-adapttable-part="root"] {
+.mx-ng--unstyled [data-adapttable-part="root"] {
   border: 1px solid var(--ng-line);
   border-radius: var(--r-md);
   background: var(--ng-surface);
@@ -41,14 +41,14 @@ adapt-showcase-matrix-page *::after {
 }
 
 /* Controls — every native button, input and select the kit draws. */
-.mx-ng button,
-.mx-ng input,
-.mx-ng select {
+.mx-ng--unstyled button,
+.mx-ng--unstyled input,
+.mx-ng--unstyled select {
   font: inherit;
   color: inherit;
 }
 
-.mx-ng :is(input:not([type="checkbox"], [type="radio"]), select) {
+.mx-ng--unstyled :is(input:not([type="checkbox"], [type="radio"]), select) {
   height: 32px;
   padding: 0 var(--sp-2);
   border: 1px solid var(--ng-line);
@@ -56,12 +56,12 @@ adapt-showcase-matrix-page *::after {
   background: var(--ng-surface);
 }
 
-.mx-ng :is(input, select, button):focus-visible {
+.mx-ng--unstyled :is(input, select, button):focus-visible {
   outline: 2px solid var(--ng-accent);
   outline-offset: 1px;
 }
 
-.mx-ng button {
+.mx-ng--unstyled button {
   cursor: pointer;
   border: 1px solid var(--ng-line);
   border-radius: var(--r-sm);
@@ -70,16 +70,16 @@ adapt-showcase-matrix-page *::after {
   min-height: 32px;
 }
 
-.mx-ng button:hover:not(:disabled) {
+.mx-ng--unstyled button:hover:not(:disabled) {
   background: var(--ng-raised);
 }
 
-.mx-ng button:disabled {
+.mx-ng--unstyled button:disabled {
   opacity: 0.45;
   cursor: default;
 }
 
-.mx-ng
+.mx-ng--unstyled
   :is(
     [data-adapttable-part="filters-done"],
     [data-adapttable-part="views-save"],
@@ -91,7 +91,7 @@ adapt-showcase-matrix-page *::after {
 }
 
 /* Toolbar, chips, footer. */
-.mx-ng [data-adapttable-part="toolbar"] {
+.mx-ng--unstyled [data-adapttable-part="toolbar"] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -100,16 +100,16 @@ adapt-showcase-matrix-page *::after {
   border-bottom: 1px solid var(--ng-line);
 }
 
-.mx-ng [data-adapttable-part="search-field"] {
+.mx-ng--unstyled [data-adapttable-part="search-field"] {
   flex: 1 1 200px;
   display: flex;
 }
 
-.mx-ng [data-adapttable-part="search"] {
+.mx-ng--unstyled [data-adapttable-part="search"] {
   width: 100%;
 }
 
-.mx-ng [data-adapttable-part="filters-count"] {
+.mx-ng--unstyled [data-adapttable-part="filters-count"] {
   display: inline-grid;
   place-items: center;
   min-width: 18px;
@@ -121,14 +121,14 @@ adapt-showcase-matrix-page *::after {
   font-size: var(--fs-micro);
 }
 
-.mx-ng [data-adapttable-part="chips"] {
+.mx-ng--unstyled [data-adapttable-part="chips"] {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-2);
   padding: var(--sp-2) var(--sp-3);
 }
 
-.mx-ng [data-adapttable-part="chip"] {
+.mx-ng--unstyled [data-adapttable-part="chip"] {
   display: inline-flex;
   align-items: center;
   gap: var(--sp-1);
@@ -138,14 +138,14 @@ adapt-showcase-matrix-page *::after {
   color: var(--kit-ink);
 }
 
-.mx-ng [data-adapttable-part="chip-remove"] {
+.mx-ng--unstyled [data-adapttable-part="chip-remove"] {
   min-height: 0;
   padding: 0 var(--sp-1);
   border: 0;
   background: transparent;
 }
 
-.mx-ng [data-adapttable-part="footer"] {
+.mx-ng--unstyled [data-adapttable-part="footer"] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -155,29 +155,29 @@ adapt-showcase-matrix-page *::after {
   color: var(--ink-2);
 }
 
-.mx-ng [data-adapttable-part="pager"] {
+.mx-ng--unstyled [data-adapttable-part="pager"] {
   display: flex;
   align-items: center;
   gap: var(--sp-1);
   margin-inline-start: auto;
 }
 
-.mx-ng [data-adapttable-part="pager"] button {
+.mx-ng--unstyled [data-adapttable-part="pager"] button {
   min-width: 32px;
   padding: 0 var(--sp-2);
 }
 
 /* The table. */
-.mx-ng [data-adapttable-part="scroll-box"] {
+.mx-ng--unstyled [data-adapttable-part="scroll-box"] {
   overflow: auto;
 }
 
-.mx-ng [data-adapttable-part="table"] {
+.mx-ng--unstyled [data-adapttable-part="table"] {
   width: 100%;
   border-collapse: collapse;
 }
 
-.mx-ng :is([data-adapttable-part="header-cell"], th) {
+.mx-ng--unstyled :is([data-adapttable-part="header-cell"], th) {
   padding: var(--sp-2) var(--sp-3);
   background: var(--ng-raised);
   border-bottom: 1px solid var(--ng-line);
@@ -187,7 +187,7 @@ adapt-showcase-matrix-page *::after {
   white-space: nowrap;
 }
 
-.mx-ng [data-adapttable-part="sort-button"] {
+.mx-ng--unstyled [data-adapttable-part="sort-button"] {
   min-height: 0;
   padding: 0;
   border: 0;
@@ -195,7 +195,7 @@ adapt-showcase-matrix-page *::after {
   font-weight: 600;
 }
 
-.mx-ng [data-adapttable-part="filter-header-trigger"] {
+.mx-ng--unstyled [data-adapttable-part="filter-header-trigger"] {
   min-height: 0;
   margin-inline-start: var(--sp-1);
   padding: 0 var(--sp-1);
@@ -204,56 +204,56 @@ adapt-showcase-matrix-page *::after {
   color: var(--ink-3);
 }
 
-.mx-ng [data-adapttable-part="cell"] {
+.mx-ng--unstyled [data-adapttable-part="cell"] {
   padding: var(--sp-2) var(--sp-3);
   border-bottom: 1px solid var(--ng-soft);
 }
 
-.mx-ng [data-adapttable-part="row"]:hover {
+.mx-ng--unstyled [data-adapttable-part="row"]:hover {
   background: var(--ng-raised);
 }
 
-.mx-ng [data-adapttable-part="row"][data-selected] {
+.mx-ng--unstyled [data-adapttable-part="row"][data-selected] {
   background: var(--ng-wash);
 }
 
-.mx-ng [data-adapttable-part="row"][data-dragging] {
+.mx-ng--unstyled [data-adapttable-part="row"][data-dragging] {
   opacity: 0.55;
 }
 
-.mx-ng [data-adapttable-part="row"][data-drop="before"] {
+.mx-ng--unstyled [data-adapttable-part="row"][data-drop="before"] {
   box-shadow: inset 0 2px 0 var(--ng-accent);
 }
 
-.mx-ng [data-adapttable-part="row"][data-drop="after"] {
+.mx-ng--unstyled [data-adapttable-part="row"][data-drop="after"] {
   box-shadow: inset 0 -2px 0 var(--ng-accent);
 }
 
-.mx-ng [data-adapttable-part="row-reorder-handle"] {
+.mx-ng--unstyled [data-adapttable-part="row-reorder-handle"] {
   cursor: grab;
   color: var(--ink-3);
 }
 
-.mx-ng [data-adapttable-part="group-row"] {
+.mx-ng--unstyled [data-adapttable-part="group-row"] {
   background: var(--ng-raised);
   font-weight: 600;
 }
 
-.mx-ng [data-adapttable-part="group-toggle"] {
+.mx-ng--unstyled [data-adapttable-part="group-toggle"] {
   min-height: 0;
   padding: 0 var(--sp-1);
   border: 0;
   background: transparent;
 }
 
-.mx-ng [data-adapttable-part="group-count"],
-.mx-ng [data-adapttable-part="group-aggregate"] {
+.mx-ng--unstyled [data-adapttable-part="group-count"],
+.mx-ng--unstyled [data-adapttable-part="group-aggregate"] {
   margin-inline-start: var(--sp-2);
   color: var(--ink-2);
   font-weight: 400;
 }
 
-.mx-ng [data-adapttable-part="empty"] {
+.mx-ng--unstyled [data-adapttable-part="empty"] {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -263,7 +263,7 @@ adapt-showcase-matrix-page *::after {
 }
 
 /* Overlays: the filters popover and drawer, and the menus. */
-.mx-ng
+.mx-ng--unstyled
   :is(
     [data-adapttable-part="filters-popover"],
     [data-adapttable-part="filters-panel"],
@@ -277,11 +277,11 @@ adapt-showcase-matrix-page *::after {
   color: var(--ink);
 }
 
-.mx-ng [data-adapttable-part="filters-backdrop"] {
+.mx-ng--unstyled [data-adapttable-part="filters-backdrop"] {
   background: oklch(0 0 0 / 0.35);
 }
 
-.mx-ng
+.mx-ng--unstyled
   :is(
     [data-adapttable-part="filters-header"],
     [data-adapttable-part="filters-footer"]
@@ -293,14 +293,14 @@ adapt-showcase-matrix-page *::after {
   padding: var(--sp-3) var(--sp-4);
 }
 
-.mx-ng [data-adapttable-part="filters-body"] {
+.mx-ng--unstyled [data-adapttable-part="filters-body"] {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
   padding: var(--sp-3) var(--sp-4);
 }
 
-.mx-ng [data-adapttable-part="filter-field"] {
+.mx-ng--unstyled [data-adapttable-part="filter-field"] {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
@@ -309,7 +309,7 @@ adapt-showcase-matrix-page *::after {
   border: 0;
 }
 
-.mx-ng [data-adapttable-part="filter-label"] {
+.mx-ng--unstyled [data-adapttable-part="filter-label"] {
   padding: 0;
   color: var(--ink-2);
   font-size: var(--fs-micro);
@@ -318,27 +318,27 @@ adapt-showcase-matrix-page *::after {
   text-transform: uppercase;
 }
 
-.mx-ng [data-adapttable-part="filter-checkbox-group"] {
+.mx-ng--unstyled [data-adapttable-part="filter-checkbox-group"] {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-2);
 }
 
-.mx-ng [data-adapttable-part="column-menu-item"],
-.mx-ng [data-adapttable-part="views-row"] {
+.mx-ng--unstyled [data-adapttable-part="column-menu-item"],
+.mx-ng--unstyled [data-adapttable-part="views-row"] {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
   padding: var(--sp-1);
 }
 
-.mx-ng [data-adapttable-part="column-menu-label"] {
+.mx-ng--unstyled [data-adapttable-part="column-menu-label"] {
   flex: 1;
 }
 
 /* Selection and bulk actions. */
-.mx-ng [data-adapttable-part="bulk-bar"],
-.mx-ng [data-adapttable-part="batch-edit-bar"] {
+.mx-ng--unstyled [data-adapttable-part="bulk-bar"],
+.mx-ng--unstyled [data-adapttable-part="batch-edit-bar"] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -348,22 +348,22 @@ adapt-showcase-matrix-page *::after {
   border-bottom: 1px solid var(--ng-line);
 }
 
-.mx-ng input[type="checkbox"] {
+.mx-ng--unstyled input[type="checkbox"] {
   accent-color: var(--ng-accent);
 }
 
 /* Editing. */
-.mx-ng [data-adapttable-part="edit-cell-editor"] {
+.mx-ng--unstyled [data-adapttable-part="edit-cell-editor"] {
   width: 100%;
 }
 
-.mx-ng [data-adapttable-part="edit-cell-error"] {
+.mx-ng--unstyled [data-adapttable-part="edit-cell-error"] {
   color: oklch(0.55 0.2 25);
   font-size: var(--fs-micro);
 }
 
 /* Grouping panel. */
-.mx-ng [data-adapttable-part="grouping-panel"] {
+.mx-ng--unstyled [data-adapttable-part="grouping-panel"] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -372,7 +372,7 @@ adapt-showcase-matrix-page *::after {
   border-bottom: 1px solid var(--ng-line);
 }
 
-.mx-ng [data-adapttable-part="grouping-chip"] {
+.mx-ng--unstyled [data-adapttable-part="grouping-chip"] {
   display: inline-flex;
   align-items: center;
   gap: var(--sp-1);
@@ -383,14 +383,14 @@ adapt-showcase-matrix-page *::after {
 }
 
 /* Mobile cards. */
-.mx-ng [data-adapttable-part="cards"] {
+.mx-ng--unstyled [data-adapttable-part="cards"] {
   display: grid;
   gap: var(--sp-3);
   margin: 0;
   padding: var(--sp-3);
 }
 
-.mx-ng [data-adapttable-part="card"] {
+.mx-ng--unstyled [data-adapttable-part="card"] {
   min-width: 0;
   list-style: none;
   padding: var(--sp-3);
@@ -399,20 +399,20 @@ adapt-showcase-matrix-page *::after {
   background: var(--ng-surface);
 }
 
-.mx-ng [data-adapttable-part="card-row"] {
+.mx-ng--unstyled [data-adapttable-part="card-row"] {
   display: flex;
   justify-content: space-between;
   gap: var(--sp-3);
   padding: var(--sp-1) 0;
 }
 
-.mx-ng [data-adapttable-part="card-label"] {
+.mx-ng--unstyled [data-adapttable-part="card-label"] {
   color: var(--ink-2);
   font-size: var(--fs-micro);
   text-transform: uppercase;
 }
 
-.mx-ng [data-adapttable-part="card-value"] {
+.mx-ng--unstyled [data-adapttable-part="card-value"] {
   min-width: 0;
   font-weight: 500;
   text-align: end;
@@ -431,20 +431,20 @@ adapt-showcase-matrix-page *::after {
 }
 
 /* The pivot uses the native kit's fieldsets and keeps each zone on a phone. */
-.mx-ng [data-adapttable-part="pivot-panel"] {
+.mx-ng--unstyled [data-adapttable-part="pivot-panel"] {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
   gap: var(--sp-3);
   padding: var(--sp-3);
 }
 
-.mx-ng [data-adapttable-part="pivot-zone"] {
+.mx-ng--unstyled [data-adapttable-part="pivot-zone"] {
   min-inline-size: 0;
   border: 1px solid var(--ng-line);
   border-radius: var(--r-md);
 }
 
-.mx-ng [data-adapttable-part="pivot-field"] {
+.mx-ng--unstyled [data-adapttable-part="pivot-field"] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -452,22 +452,22 @@ adapt-showcase-matrix-page *::after {
   margin-block: var(--sp-2);
 }
 
-.mx-ng [data-grid-cell]:focus-visible {
+.mx-ng--unstyled [data-grid-cell]:focus-visible {
   outline: 2px solid var(--ng-accent);
   outline-offset: -2px;
 }
 
-.mx-ng [data-cell-selected] {
+.mx-ng--unstyled [data-cell-selected] {
   background: var(--ng-wash);
   box-shadow: inset 0 0 0 1px var(--ng-accent);
 }
 
 @media (forced-colors: active) {
-  .mx-ng [data-grid-cell]:focus-visible {
+  .mx-ng--unstyled [data-grid-cell]:focus-visible {
     outline-color: Highlight;
   }
 
-  .mx-ng [data-cell-selected] {
+  .mx-ng--unstyled [data-cell-selected] {
     border: 1px solid Highlight;
   }
 }

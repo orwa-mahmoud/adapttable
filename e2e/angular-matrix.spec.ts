@@ -8,6 +8,7 @@ import {
   landingHead,
 } from "../apps/showcase/matrix.mjs";
 import { demoRoute, siteUrl } from "../scripts/site.mjs";
+import { angularPart, selectAngularOption } from "./angular-kit";
 
 /**
  * Every Angular kit's pages: each boots the Angular entry, mounts the real
@@ -26,8 +27,11 @@ function collectErrors(page: Page): string[] {
   return errors;
 }
 
-test("the showcase serves at least one Angular kit", () => {
+test("the showcase serves native and NG-ZORRO Angular kits", () => {
   expect(KITS.length).toBeGreaterThan(0);
+  expect(KITS.map((kit) => kit.key)).toEqual(
+    expect.arrayContaining(["unstyled", "ng-zorro"])
+  );
 });
 
 for (const kit of KITS) {
@@ -38,6 +42,54 @@ for (const kit of KITS) {
       heading: fillTemplate(headFor(feature, kit).h1, kit),
     })),
   ];
+
+  test(`${kit.key}: the landing renders its own kit's table and controls`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit.key}/`);
+    const root = page.locator('.mx-demo [data-adapttable-part="root"]');
+    await expect(root).toBeVisible();
+    await expect(root.locator('[data-adapttable-part="row"]')).toHaveCount(10);
+    await expect(
+      root.locator('[data-adapttable-part="row"]').first()
+    ).toContainText("Ada Lovelace");
+    if (kit.key === "ng-zorro") {
+      await expect(
+        root.locator('nz-table table[data-adapttable-part="table"]')
+      ).toBeVisible();
+      await expect(
+        root.locator('input[nz-input][data-adapttable-part="search"]')
+      ).toBeVisible();
+      await expect(root.locator("nz-pagination")).toBeVisible();
+      const trigger = angularPart(kit, page, "filters-button", root);
+      await expect(trigger).toHaveClass(/ant-btn/);
+      await expect(root.locator("select")).toHaveCount(0);
+      await trigger.click();
+      const filters = angularPart(kit, page, "filters-popover");
+      await expect(
+        filters.getByRole("combobox", { name: "Core team", exact: true })
+      ).toHaveClass(/ant-select-selection-search-input/);
+      await expect(
+        filters.getByRole("checkbox", { name: "Core", exact: true })
+      ).toHaveClass(/ant-checkbox-input/);
+      await expect(filters.locator("select")).toHaveCount(0);
+      await page.keyboard.press("Escape");
+      await expect(filters).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    } else {
+      await expect(
+        root.locator(
+          "nz-table, nz-pagination, button[nz-button], input[nz-input]"
+        )
+      ).toHaveCount(0);
+      await expect(
+        root.locator('table[data-adapttable-part="table"]')
+      ).toBeVisible();
+      await expect(
+        root.locator('input[data-adapttable-part="search"]')
+      ).toBeVisible();
+    }
+  });
 
   for (const { dir, heading } of pages) {
     test(`${dir}: mounts the kit's table with no errors`, async ({ page }) => {
@@ -121,8 +173,7 @@ for (const kit of KITS) {
 
 /** Every newly reached destination proves the operation its page names. */
 for (const kit of KITS) {
-  const part = (page: Page, name: string) =>
-    page.locator(`.mx-demo [data-adapttable-part="${name}"]`);
+  const part = (page: Page, name: string) => angularPart(kit, page, name);
 
   test(`${kit.key}/columns: hides and restores a column through the real menu`, async ({
     page,
@@ -168,7 +219,11 @@ for (const kit of KITS) {
     await page.goto(`/${kit.key}/pivot/`);
     const rowHeaders = part(page, "pivot-row-header");
     await expect(rowHeaders).toHaveCount(5);
-    await page.locator('[data-pivot-zone="rows"] select').selectOption("role");
+    await selectAngularOption(
+      kit,
+      page.locator('[data-pivot-zone="rows"]').getByRole("combobox"),
+      { value: "role", label: "Role" }
+    );
     await expect(page.getByTestId("pivot-fold")).toHaveCount(5);
     expect(await rowHeaders.count()).toBeGreaterThan(5);
     const fold = page.getByTestId("pivot-fold").first();

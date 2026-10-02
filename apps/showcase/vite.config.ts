@@ -214,6 +214,7 @@ const ANGULAR_SOURCES = [
   `${packageDir("angular")}${sep}`,
   `${packageDir("ai-angular")}${sep}`,
   `${packageDir("adapter-angular-unstyled")}${sep}`,
+  `${packageDir("adapter-ng-zorro")}${sep}`,
 ];
 
 /** Whether a module is Angular source the Angular compiler owns. */
@@ -286,6 +287,10 @@ export default defineConfig({
       { find: /^@adapttable\/radix$/, replacement: pkg("adapter-radix") },
       { find: /^@adapttable\/base-ui$/, replacement: pkg("adapter-base-ui") },
       { find: /^@adapttable\/angular$/, replacement: pkg("angular") },
+      {
+        find: /^@adapttable\/ng-zorro$/,
+        replacement: pkg("adapter-ng-zorro"),
+      },
       {
         find: /^@adapttable\/angular-unstyled$/,
         replacement: pkg("adapter-angular-unstyled"),

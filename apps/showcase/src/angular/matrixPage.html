@@ -31,7 +31,14 @@
 </header>
 
 <main>
-  <div class="mx mx-ng shell" [style.--kit]="accent()" [style.--c]="accent()">
+  <div
+    class="mx mx-ng shell"
+    [class.mx-ng--unstyled]="adapter().key === 'unstyled'"
+    [class.mx-ng--zorro]="adapter().key === 'ng-zorro'"
+    [attr.data-angular-kit]="adapter().key"
+    [style.--kit]="accent()"
+    [style.--c]="accent()"
+  >
     <header class="mx-hero" [class.mx-hero--solo]="feature()">
       <div class="mx-hero__body">
         <p class="mx-kicker">

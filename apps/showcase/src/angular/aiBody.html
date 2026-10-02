@@ -37,7 +37,7 @@
     "
   >
     <div style="min-inline-size: 0">
-      <adapt-data-table
+      <adapt-showcase-table
         [dir]="presentation.dir"
         [labels]="presentation.labels"
         [attr.lang]="presentation.locale"
@@ -51,6 +51,6 @@
       />
       <p class="hint" role="status" data-demo-log>{{ log() }}</p>
     </div>
-    <adapt-table-assistant [props]="assistantProps()" />
+    <adapt-showcase-assistant [props]="assistantProps()" />
   </div>
 </div>
