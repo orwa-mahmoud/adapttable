@@ -97,7 +97,7 @@
             } @else if (card.content?.component; as component) {
               <ng-container
                 [ngComponentOutlet]="component"
-                [ngComponentOutletInputs]="card.content?.inputs"
+                [ngComponentOutletInputs]="card.content.inputs"
               />
             } @else {
               @for (field of card.context.fields; track field.column.key) {

@@ -107,7 +107,7 @@ export type NestedTableFor<TRow> = (row: TRow) => NestedTable<TRow> | undefined;
         } @else if (view.content?.component; as component) {
           <ng-container
             [ngComponentOutlet]="component"
-            [ngComponentOutletInputs]="view.content?.inputs"
+            [ngComponentOutletInputs]="view.content.inputs"
           />
         }
       </section>
