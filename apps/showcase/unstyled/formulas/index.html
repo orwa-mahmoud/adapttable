@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
-    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/" />
+    <meta name="description" content="Try spreadsheet formulas in a Unstyled table: ROUND, POWER, SQRT and IF, computed columns and explicit cell errors. Includes Angular integration code." />
+    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/formulas/" />
     <meta name="robots" content="noindex, follow" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Unstyled table filtering — AdaptTable" />
-    <meta property="og:description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
-    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/" />
+    <meta property="og:title" content="Unstyled table formulas — AdaptTable" />
+    <meta property="og:description" content="Try spreadsheet formulas in a Unstyled table: ROUND, POWER, SQRT and IF, computed columns and explicit cell errors. Includes Angular integration code." />
+    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/formulas/" />
     <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Unstyled table filtering — AdaptTable" />
-    <meta name="twitter:description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
+    <meta name="twitter:title" content="Unstyled table formulas — AdaptTable" />
+    <meta name="twitter:description" content="Try spreadsheet formulas in a Unstyled table: ROUND, POWER, SQRT and IF, computed columns and explicit cell errors. Includes Angular integration code." />
     <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try spreadsheet formulas in a Unstyled table: ROUND, POWER, SQRT and IF, computed columns and explicit cell errors. Includes Angular integration code.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/formulas/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Unstyled table filtering — AdaptTable</title>
+    <title>Unstyled table formulas — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -158,51 +158,48 @@
     <!-- Replaced by Angular on mount — the served markup carries the page's
          own words so a crawler, and anyone whose bundle has not arrived, reads
          a real page. Written by scripts/build-showcase-html.mjs. -->
-    <div id="root" data-matrix-page="unstyled/filtering">
+    <div id="root" data-matrix-page="unstyled/formulas">
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Unstyled</p>
-        <h1>Filtering in Unstyled</h1>
-        <p>Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each a native element.</p>
-        <p>Filters opens as an anchored popover or as a drawer, with an AND/OR tree at the top for what one row of inputs cannot say. Header funnels filter one column in place, and every active filter shows as a chip that removes itself.</p>
-        <p>Filter state lives in the versioned URL, so a filtered view is a link someone can send.</p>
+        <h1>Spreadsheet formulas in Unstyled</h1>
+        <p>A formula column is a column nobody wrote code for: type <code>=ROUND(budget * 0.15, 0)</code> and the table computes it per row, sorts it, filters it and exports it like any other column.</p>
+        <p>The engine covers arithmetic including POWER and SQRT, comparison, string joins, IF, and the aggregate functions a footer needs. A bad reference reports in the cell that caused it rather than blanking the table, and a circular reference reports <code>#CYCLE!</code> instead of recursing.</p>
+        <p>Formula columns serialize to the URL with everything else, so a derived column travels in the same link as the filters it sits beside.</p>
         <h2>The code</h2>
-        <pre><code>import { Component, input } from &quot;@angular/core&quot;;
+        <pre><code>import { Component, computed, input } from &quot;@angular/core&quot;;
 import type { ColumnDef } from &quot;@adapttable/angular&quot;;
+import { buildFormulaColumns, injectFormulaUrlState } from &quot;@adapttable/angular/formula&quot;;
 import { AdaptDataTable } from &quot;@adapttable/angular-unstyled&quot;;
-import { filters } from &quot;@adapttable/angular-unstyled/filters&quot;;
-import { headerFilters } from &quot;@adapttable/angular-unstyled/header-filters&quot;;
-
-const columns: ColumnDef&lt;Person&gt;[] = [
-  { key: &quot;name&quot;, filter: &quot;text&quot; },
-  { key: &quot;team&quot;, filter: { type: &quot;multiSelect&quot;, options: &quot;auto&quot; } },
-  { key: &quot;budget&quot;, filter: &quot;numberRange&quot; },
-  { key: &quot;hiredAt&quot;, filter: &quot;dateRange&quot; },
-];
 
 @Component({
-  selector: &quot;app-people&quot;,
+  selector: &quot;app-computed-people&quot;,
   imports: [AdaptDataTable],
   template: `
     &lt;adapt-data-table
-      [data]=&quot;rows()&quot;
-      [columns]=&quot;columns&quot;
-      [rowKey]=&quot;rowKey&quot;
-      urlKey=&quot;f&quot;
-      filtersMode=&quot;popover&quot;
-      [features]=&quot;features&quot;
+      [data]=&quot;rows()&quot; [columns]=&quot;columns()&quot; [rowKey]=&quot;rowKey&quot;
     /&gt;
   `,
 })
-export class People {
+export class ComputedPeople {
   readonly rows = input.required&lt;readonly Person[]&gt;();
-  readonly columns = columns;
+  readonly baseColumns = input.required&lt;readonly ColumnDef&lt;Person&gt;[]&gt;();
   readonly rowKey = (row: Person) =&gt; row.id;
-  readonly features = [filters([]), headerFilters()];
+  readonly state = injectFormulaUrlState({
+    urlKey: &quot;fx&quot;,
+    defaultFormulas: [
+      { key: &quot;margin&quot;, header: &quot;Margin&quot;, formula: &quot;=ROUND(budget * 0.15, 0)&quot; },
+    ],
+  });
+  readonly columns = computed(() =&gt; [
+    ...this.baseColumns(),
+    ...buildFormulaColumns&lt;Person&gt;(this.state.formulas()).columns,
+  ]);
 }</code></pre>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core</code></pre>
         <h2>More Unstyled features</h2>
         <ul>
+          <li><a href="../filtering/">Filtering in Unstyled</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>
           <li><a href="../columns/">Column management in Unstyled</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
           <li><a href="../column-groups/">Column groups in Unstyled</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="../selection/">Row selection in Unstyled</a> — A set of ids that survives paging, with bulk actions over it.</li>
@@ -218,14 +215,13 @@ export class People {
           <li><a href="../mobile-cards/">Mobile cards in Unstyled</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="../pivot/">Pivot tables in Unstyled</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
           <li><a href="../saved-views/">Saved views in Unstyled</a> — Name an arrangement and restore it from the menu.</li>
-          <li><a href="../formulas/">Spreadsheet formulas in Unstyled</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
           <li><a href="../rtl/">Right-to-left Unstyled data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
           <li><a href="../realtime/">Live updates in Unstyled</a> — Rows change while you read them. Sort and selection hold.</li>
           <li><a href="../accessibility/">Accessible Unstyled data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
           <li><a href="../ai/">AI table assistant in Unstyled Angular</a> — Local sort, questions and approved edits with real table outcomes.</li>
         </ul>
         <p>
-          Reference: <a href="https://adapttable.orwamahmoud.com/react/filtering/">filtering</a>, <a href="https://adapttable.orwamahmoud.com/react/filter-tree/">filter-tree</a>, <a href="https://adapttable.orwamahmoud.com/react/url-state/">url-state</a>. More of this kit:
+          Reference: <a href="https://adapttable.orwamahmoud.com/react/formulas/">formulas</a>. More of this kit:
           <a href="../">AdaptTable for Unstyled</a>, or
           <a href="/react/demo/">the live demo</a>.
         </p>

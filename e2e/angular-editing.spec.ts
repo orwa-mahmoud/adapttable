@@ -203,3 +203,80 @@ test("drags the native fill handle across rows and undoes one fill gesture", asy
   await expect(cell(page, 2, 0)).toHaveText(before[1]!);
   await expect(part(page, "undo-button")).toBeDisabled();
 });
+
+/** Localized cells must write the field they display, on desktop and phones. */
+for (const width of [1280, 390]) {
+  const nameCell = (page: Page) =>
+    part(page, width === 390 ? "card" : "row")
+      .first()
+      .locator(
+        `[data-adapttable-part="${width === 390 ? "card-value" : "cell"}"]`
+      )
+      .first();
+
+  test(`Arabic name edits save, undo and redo the displayed value at ${String(width)}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`${PAGE}?locale=ar&dir=rtl`);
+    await expect(nameCell(page)).toHaveText("آدا لوفليس");
+    await part(page, "edit-cell-activate").first().dblclick();
+    const editor = part(page, "edit-cell-editor");
+    await expect(editor).toHaveValue("آدا لوفليس");
+    await editor.fill("آدا المعدلة");
+    await editor.press("Enter");
+    await expect(nameCell(page)).toHaveText("آدا المعدلة");
+    await expect(log(page)).toHaveText(
+      "Saved person for Ada Lovelace: آدا المعدلة"
+    );
+    await part(page, "undo-button").click();
+    await expect(nameCell(page)).toHaveText("آدا لوفليس");
+    await part(page, "redo-button").click();
+    await expect(nameCell(page)).toHaveText("آدا المعدلة");
+  });
+
+  test(`Arabic live conflicts preserve the local draft and commit it at ${String(width)}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`${PAGE}?locale=ar&dir=rtl`);
+    await expect(nameCell(page)).toHaveText("آدا لوفليس");
+    await part(page, "edit-cell-activate").first().dblclick();
+    await part(page, "edit-cell-editor").fill("آدا المحلية");
+    await page
+      .getByRole("button", { name: "Receive live name update" })
+      .click();
+    await expect(part(page, "edit-cell-conflict")).toBeVisible();
+    await expect(part(page, "edit-cell-incoming")).toContainText("Ada Live");
+    await part(page, "edit-cell-keep-mine").click();
+    await expect(part(page, "edit-cell-conflict")).toHaveCount(0);
+    await expect(part(page, "edit-cell-editor")).toHaveValue("آدا المحلية");
+    await part(page, "edit-cell-editor").press("Enter");
+    await expect(nameCell(page)).toHaveText("آدا المحلية");
+    await expect(log(page)).toHaveText(
+      "Saved person for Ada Lovelace: آدا المحلية"
+    );
+  });
+
+  test(`Arabic live conflicts can take the incoming value without saving the draft at ${String(width)}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`${PAGE}?locale=ar&dir=rtl`);
+    await expect(nameCell(page)).toHaveText("آدا لوفليس");
+    await part(page, "edit-cell-activate").first().dblclick();
+    await part(page, "edit-cell-editor").fill("مسودة مهملة");
+    await page
+      .getByRole("button", { name: "Receive live name update" })
+      .click();
+    await expect(part(page, "edit-cell-conflict")).toBeVisible();
+    await expect(part(page, "edit-cell-incoming")).toContainText("Ada Live");
+    await part(page, "edit-cell-take-theirs").click();
+    await expect(part(page, "edit-cell-conflict")).toHaveCount(0);
+    await expect(part(page, "edit-cell-editor")).toHaveValue("Ada Live");
+    await part(page, "edit-cell-editor").press("Escape");
+    await expect(part(page, "edit-cell-editor")).toHaveCount(0);
+    await expect(nameCell(page)).toHaveText("Ada Live");
+    await expect(log(page)).toHaveText("Received live name update: Ada Live");
+  });
+}

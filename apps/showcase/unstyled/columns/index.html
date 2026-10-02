@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
-    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/" />
+    <meta name="description" content="Pin, resize, reorder, rename and hide Unstyled table columns. Try the column menu and persist layouts to URLs, storage or your application." />
+    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/columns/" />
     <meta name="robots" content="noindex, follow" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Unstyled table filtering — AdaptTable" />
-    <meta property="og:description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
-    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/" />
+    <meta property="og:title" content="Unstyled table column pinning and resizing — AdaptTable" />
+    <meta property="og:description" content="Pin, resize, reorder, rename and hide Unstyled table columns. Try the column menu and persist layouts to URLs, storage or your application." />
+    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/columns/" />
     <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Unstyled table filtering — AdaptTable" />
-    <meta name="twitter:description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
+    <meta name="twitter:title" content="Unstyled table column pinning and resizing — AdaptTable" />
+    <meta name="twitter:description" content="Pin, resize, reorder, rename and hide Unstyled table columns. Try the column menu and persist layouts to URLs, storage or your application." />
     <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Pin, resize, reorder, rename and hide Unstyled table columns. Try the column menu and persist layouts to URLs, storage or your application.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/columns/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Unstyled table filtering — AdaptTable</title>
+    <title>Unstyled table column pinning and resizing — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -158,52 +158,45 @@
     <!-- Replaced by Angular on mount — the served markup carries the page's
          own words so a crawler, and anyone whose bundle has not arrived, reads
          a real page. Written by scripts/build-showcase-html.mjs. -->
-    <div id="root" data-matrix-page="unstyled/filtering">
+    <div id="root" data-matrix-page="unstyled/columns">
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Unstyled</p>
-        <h1>Filtering in Unstyled</h1>
-        <p>Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each a native element.</p>
-        <p>Filters opens as an anchored popover or as a drawer, with an AND/OR tree at the top for what one row of inputs cannot say. Header funnels filter one column in place, and every active filter shows as a chip that removes itself.</p>
-        <p>Filter state lives in the versioned URL, so a filtered view is a link someone can send.</p>
+        <h1>Column management in Unstyled</h1>
+        <p>Everything a user expects to do to a column, without writing a column-settings panel: rename, show and hide, reorder by drag, pin to either edge, resize by drag or keyboard, and switch row density.</p>
+        <p>Pinning is logical rather than physical, so a column pinned to the start stays on the correct side in a right-to-left layout.</p>
+        <p>The arrangement is state like any other: persist it to the URL, to localStorage, or to your own server through <code>columnLayout</code> and <code>onColumnLayoutChange</code>.</p>
         <h2>The code</h2>
-        <pre><code>import { Component, input } from &quot;@angular/core&quot;;
-import type { ColumnDef } from &quot;@adapttable/angular&quot;;
+        <pre><code>import { Component, input, signal } from &quot;@angular/core&quot;;
+import type { ColumnDef, ColumnLayoutState } from &quot;@adapttable/angular&quot;;
 import { AdaptDataTable } from &quot;@adapttable/angular-unstyled&quot;;
-import { filters } from &quot;@adapttable/angular-unstyled/filters&quot;;
-import { headerFilters } from &quot;@adapttable/angular-unstyled/header-filters&quot;;
-
-const columns: ColumnDef&lt;Person&gt;[] = [
-  { key: &quot;name&quot;, filter: &quot;text&quot; },
-  { key: &quot;team&quot;, filter: { type: &quot;multiSelect&quot;, options: &quot;auto&quot; } },
-  { key: &quot;budget&quot;, filter: &quot;numberRange&quot; },
-  { key: &quot;hiredAt&quot;, filter: &quot;dateRange&quot; },
-];
+import { columnMenu } from &quot;@adapttable/angular-unstyled/column-menu&quot;;
+import { resizableColumns } from &quot;@adapttable/angular-unstyled/resizable-columns&quot;;
 
 @Component({
   selector: &quot;app-people&quot;,
   imports: [AdaptDataTable],
   template: `
     &lt;adapt-data-table
-      [data]=&quot;rows()&quot;
-      [columns]=&quot;columns&quot;
-      [rowKey]=&quot;rowKey&quot;
-      urlKey=&quot;f&quot;
-      filtersMode=&quot;popover&quot;
-      [features]=&quot;features&quot;
+      [data]=&quot;rows()&quot; [columns]=&quot;columns()&quot; [rowKey]=&quot;rowKey&quot;
+      [features]=&quot;features&quot; [columnLayout]=&quot;layout()&quot;
+      (columnLayoutChange)=&quot;layout.set($event)&quot;
     /&gt;
   `,
 })
 export class People {
   readonly rows = input.required&lt;readonly Person[]&gt;();
-  readonly columns = columns;
+  readonly columns = input.required&lt;readonly ColumnDef&lt;Person&gt;[]&gt;();
   readonly rowKey = (row: Person) =&gt; row.id;
-  readonly features = [filters([]), headerFilters()];
+  readonly layout = signal&lt;ColumnLayoutState&gt;({
+    hidden: [], order: [], widths: {}, pinned: { name: &quot;start&quot; },
+  });
+  readonly features = [columnMenu(), resizableColumns()];
 }</code></pre>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core</code></pre>
         <h2>More Unstyled features</h2>
         <ul>
-          <li><a href="../columns/">Column management in Unstyled</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="../filtering/">Filtering in Unstyled</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>
           <li><a href="../column-groups/">Column groups in Unstyled</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="../selection/">Row selection in Unstyled</a> — A set of ids that survives paging, with bulk actions over it.</li>
           <li><a href="../rows/">Rows in Unstyled</a> — Pin rows from a 3-dot menu, and merge a team that runs down the page.</li>
@@ -225,7 +218,7 @@ export class People {
           <li><a href="../ai/">AI table assistant in Unstyled Angular</a> — Local sort, questions and approved edits with real table outcomes.</li>
         </ul>
         <p>
-          Reference: <a href="https://adapttable.orwamahmoud.com/react/filtering/">filtering</a>, <a href="https://adapttable.orwamahmoud.com/react/filter-tree/">filter-tree</a>, <a href="https://adapttable.orwamahmoud.com/react/url-state/">url-state</a>. More of this kit:
+          Reference: <a href="https://adapttable.orwamahmoud.com/react/column-management/">column-management</a>, <a href="https://adapttable.orwamahmoud.com/react/columns/">columns</a>. More of this kit:
           <a href="../">AdaptTable for Unstyled</a>, or
           <a href="/react/demo/">the live demo</a>.
         </p>

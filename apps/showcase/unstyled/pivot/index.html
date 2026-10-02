@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
-    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/" />
+    <meta name="description" content="Build a pivot table in Unstyled: drag-free row, column and measure zones, subtotals at every level, and the whole configuration carried in the URL." />
+    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/pivot/" />
     <meta name="robots" content="noindex, follow" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Unstyled table filtering — AdaptTable" />
-    <meta property="og:description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
-    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/" />
+    <meta property="og:title" content="Unstyled pivot table — AdaptTable" />
+    <meta property="og:description" content="Build a pivot table in Unstyled: drag-free row, column and measure zones, subtotals at every level, and the whole configuration carried in the URL." />
+    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/pivot/" />
     <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Unstyled table filtering — AdaptTable" />
-    <meta name="twitter:description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
+    <meta name="twitter:title" content="Unstyled pivot table — AdaptTable" />
+    <meta name="twitter:description" content="Build a pivot table in Unstyled: drag-free row, column and measure zones, subtotals at every level, and the whole configuration carried in the URL." />
     <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Build a pivot table in Unstyled: drag-free row, column and measure zones, subtotals at every level, and the whole configuration carried in the URL.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/pivot/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Unstyled table filtering — AdaptTable</title>
+    <title>Unstyled pivot table — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -158,51 +158,58 @@
     <!-- Replaced by Angular on mount — the served markup carries the page's
          own words so a crawler, and anyone whose bundle has not arrived, reads
          a real page. Written by scripts/build-showcase-html.mjs. -->
-    <div id="root" data-matrix-page="unstyled/filtering">
+    <div id="root" data-matrix-page="unstyled/pivot">
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Unstyled</p>
-        <h1>Filtering in Unstyled</h1>
-        <p>Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each a native element.</p>
-        <p>Filters opens as an anchored popover or as a drawer, with an AND/OR tree at the top for what one row of inputs cannot say. Header funnels filter one column in place, and every active filter shows as a chip that removes itself.</p>
-        <p>Filter state lives in the versioned URL, so a filtered view is a link someone can send.</p>
+        <h1>Pivot tables in Unstyled</h1>
+        <p>Grouping answers “what is the total per team”. A pivot answers “what is the total per team per status”, and that second dimension becomes columns your data never had.</p>
+        <p>Fields move between the three zones with buttons rather than drag, so the pivot can be built from the keyboard. Subtotals close every group and a grand total closes the table.</p>
+        <p>The configuration — axes, measures, aggregation and what you folded — lives in the URL, so a pivot you build is a pivot you can send someone.</p>
         <h2>The code</h2>
-        <pre><code>import { Component, input } from &quot;@angular/core&quot;;
-import type { ColumnDef } from &quot;@adapttable/angular&quot;;
+        <pre><code>import { Component, computed, input } from &quot;@angular/core&quot;;
 import { AdaptDataTable } from &quot;@adapttable/angular-unstyled&quot;;
-import { filters } from &quot;@adapttable/angular-unstyled/filters&quot;;
-import { headerFilters } from &quot;@adapttable/angular-unstyled/header-filters&quot;;
-
-const columns: ColumnDef&lt;Person&gt;[] = [
-  { key: &quot;name&quot;, filter: &quot;text&quot; },
-  { key: &quot;team&quot;, filter: { type: &quot;multiSelect&quot;, options: &quot;auto&quot; } },
-  { key: &quot;budget&quot;, filter: &quot;numberRange&quot; },
-  { key: &quot;hiredAt&quot;, filter: &quot;dateRange&quot; },
-];
+import {
+  AdaptPivotPanel, injectPivotUrlState, pivot, pivotTableModel,
+  type PivotField,
+} from &quot;@adapttable/angular-unstyled/pivot&quot;;
 
 @Component({
-  selector: &quot;app-people&quot;,
-  imports: [AdaptDataTable],
+  selector: &quot;app-spend&quot;,
+  imports: [AdaptDataTable, AdaptPivotPanel],
   template: `
+    &lt;adapt-pivot-panel
+      [fields]=&quot;fields&quot; [config]=&quot;state.config()&quot;
+      [onChange]=&quot;state.onConfigChange&quot;
+    /&gt;
     &lt;adapt-data-table
-      [data]=&quot;rows()&quot;
-      [columns]=&quot;columns&quot;
-      [rowKey]=&quot;rowKey&quot;
-      urlKey=&quot;f&quot;
-      filtersMode=&quot;popover&quot;
-      [features]=&quot;features&quot;
+      [data]=&quot;model().rows&quot; [columns]=&quot;model().columns&quot;
+      [rowKey]=&quot;model().rowKey&quot; [summaryRow]=&quot;model().summaryRow&quot;
     /&gt;
   `,
 })
-export class People {
+export class Spend {
   readonly rows = input.required&lt;readonly Person[]&gt;();
-  readonly columns = columns;
-  readonly rowKey = (row: Person) =&gt; row.id;
-  readonly features = [filters([]), headerFilters()];
+  readonly fields: readonly PivotField[] = [
+    { key: &quot;team&quot;, label: &quot;Team&quot; }, { key: &quot;status&quot;, label: &quot;Status&quot; },
+    { key: &quot;budget&quot;, label: &quot;Budget&quot; },
+  ];
+  readonly state = injectPivotUrlState({
+    urlKey: &quot;p&quot;,
+    defaultConfig: {
+      rows: [&quot;team&quot;], columns: [&quot;status&quot;],
+      measures: [{ key: &quot;budget&quot;, agg: &quot;sum&quot; }],
+    },
+  });
+  readonly model = computed(() =&gt; pivotTableModel(
+    pivot(this.rows(), this.state.config(), { collapsed: this.state.collapsed() }),
+    { fields: this.fields },
+  ));
 }</code></pre>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core</code></pre>
         <h2>More Unstyled features</h2>
         <ul>
+          <li><a href="../filtering/">Filtering in Unstyled</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>
           <li><a href="../columns/">Column management in Unstyled</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
           <li><a href="../column-groups/">Column groups in Unstyled</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="../selection/">Row selection in Unstyled</a> — A set of ids that survives paging, with bulk actions over it.</li>
@@ -216,7 +223,6 @@ export class People {
           <li><a href="../scale/">Row and column virtualization in Unstyled</a> — 40,000 rows in a scroll box, only the visible ones rendered.</li>
           <li><a href="../tree/">Tree data in Unstyled</a> — Nesting, chevrons, lazy children, and a tree on phones.</li>
           <li><a href="../mobile-cards/">Mobile cards in Unstyled</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
-          <li><a href="../pivot/">Pivot tables in Unstyled</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
           <li><a href="../saved-views/">Saved views in Unstyled</a> — Name an arrangement and restore it from the menu.</li>
           <li><a href="../formulas/">Spreadsheet formulas in Unstyled</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
           <li><a href="../rtl/">Right-to-left Unstyled data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
@@ -225,7 +231,7 @@ export class People {
           <li><a href="../ai/">AI table assistant in Unstyled Angular</a> — Local sort, questions and approved edits with real table outcomes.</li>
         </ul>
         <p>
-          Reference: <a href="https://adapttable.orwamahmoud.com/react/filtering/">filtering</a>, <a href="https://adapttable.orwamahmoud.com/react/filter-tree/">filter-tree</a>, <a href="https://adapttable.orwamahmoud.com/react/url-state/">url-state</a>. More of this kit:
+          Reference: <a href="https://adapttable.orwamahmoud.com/react/pivot/">pivot</a>. More of this kit:
           <a href="../">AdaptTable for Unstyled</a>, or
           <a href="/react/demo/">the live demo</a>.
         </p>

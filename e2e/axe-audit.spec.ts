@@ -1,6 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { builtAdapters, MATRIX_FEATURES } from "../apps/showcase/matrix.mjs";
+import {
+  builtAdapters,
+  featuresOf,
+  MATRIX_FEATURES,
+} from "../apps/showcase/matrix.mjs";
 import { expectNoBlockingAxe } from "./axe";
 
 /**
@@ -63,4 +67,94 @@ for (const kit of KITS) {
       await expectNoBlockingAxe(page, ".mx-demo");
     });
   }
+}
+
+/** Angular owns its entire matrix, including landing and every card layout. */
+for (const kit of builtAdapters("angular")) {
+  const paths = [
+    kit.key,
+    ...featuresOf(kit).map((feature) => `${kit.key}/${feature.slug}`),
+  ];
+  for (const path of paths) {
+    for (const viewport of [
+      { width: 1280, height: 900 },
+      { width: 390, height: 844 },
+    ]) {
+      test(`${path} at ${String(viewport.width)}px has no serious or critical axe violations`, async ({
+        page,
+      }) => {
+        await page.setViewportSize(viewport);
+        await openKitPage(page, `/${path}/`);
+        await expectNoBlockingAxe(page, ".mx-demo");
+      });
+    }
+  }
+
+  for (const layout of ["Popover", "Drawer"]) {
+    test(`${kit.key}/filtering: the open ${layout.toLowerCase()} passes axe and restores focus`, async ({
+      page,
+    }) => {
+      await openKitPage(page, `/${kit.key}/filtering/`);
+      await demo(page)
+        .getByRole("button", { name: layout, exact: true })
+        .click();
+      const trigger = demo(page).locator(
+        '[data-adapttable-part="filters-button"]'
+      );
+      await trigger.click();
+      const panelPart =
+        layout === "Drawer" ? "filters-panel" : "filters-popover";
+      const panel = page.locator(`[data-adapttable-part="${panelPart}"]`);
+      await expect(panel).toBeVisible();
+      await expectNoBlockingAxe(page, `[data-adapttable-part="${panelPart}"]`);
+      await page.keyboard.press("Escape");
+      await expect(panel).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    });
+  }
+
+  for (const overlay of [
+    {
+      feature: "columns",
+      trigger: "column-menu-button",
+      panel: "column-menu-panel",
+    },
+    { feature: "saved-views", trigger: "views-button", panel: "views-panel" },
+  ]) {
+    test(`${kit.key}/${overlay.feature}: the open menu passes axe`, async ({
+      page,
+    }) => {
+      await openKitPage(page, `/${kit.key}/${overlay.feature}/`);
+      await demo(page)
+        .locator(`[data-adapttable-part="${overlay.trigger}"]`)
+        .click();
+      await expect(
+        page.locator(`[data-adapttable-part="${overlay.panel}"]`)
+      ).toBeVisible();
+      await expectNoBlockingAxe(page, ".mx-demo");
+    });
+  }
+
+  test(`${kit.key}/ai: a pending modal approval passes axe before any write`, async ({
+    page,
+  }) => {
+    await openKitPage(page, `/${kit.key}/ai/`);
+    await page
+      .getByLabel("Approval surface", { exact: true })
+      .selectOption("modal");
+    const input = page.locator('[data-adapttable-part="assistant-input"]');
+    await input.fill("Propose Grace's salary as 150");
+    await input.press("Enter");
+    const modal = page.locator(
+      '[data-adapttable-part="assistant-approval-modal"]'
+    );
+    await expect(modal).toBeVisible();
+    await expect(page.locator("[data-demo-log]")).toHaveText(
+      "No host writes yet"
+    );
+    await expectNoBlockingAxe(
+      page,
+      '[data-adapttable-part="assistant-approval-modal"]'
+    );
+  });
 }

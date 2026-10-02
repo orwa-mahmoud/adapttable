@@ -298,6 +298,13 @@ export const SHOWCASE_ADAPTERS = [
       "nested-tables",
       "rows",
       "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
       "ai",
     ],
   },
@@ -517,6 +524,47 @@ export function People({ rows, columns }) {
   },
   {
     slug: "pivot",
+    snippets: {
+      angular: `import { Component, computed, input } from "@angular/core";
+import { AdaptDataTable } from "{pkg}";
+import {
+  AdaptPivotPanel, injectPivotUrlState, pivot, pivotTableModel,
+  type PivotField,
+} from "{pkg}/pivot";
+
+@Component({
+  selector: "app-spend",
+  imports: [AdaptDataTable, AdaptPivotPanel],
+  template: \`
+    <adapt-pivot-panel
+      [fields]="fields" [config]="state.config()"
+      [onChange]="state.onConfigChange"
+    />
+    <adapt-data-table
+      [data]="model().rows" [columns]="model().columns"
+      [rowKey]="model().rowKey" [summaryRow]="model().summaryRow"
+    />
+  \`,
+})
+export class Spend {
+  readonly rows = input.required<readonly Person[]>();
+  readonly fields: readonly PivotField[] = [
+    { key: "team", label: "Team" }, { key: "status", label: "Status" },
+    { key: "budget", label: "Budget" },
+  ];
+  readonly state = injectPivotUrlState({
+    urlKey: "p",
+    defaultConfig: {
+      rows: ["team"], columns: ["status"],
+      measures: [{ key: "budget", agg: "sum" }],
+    },
+  });
+  readonly model = computed(() => pivotTableModel(
+    pivot(this.rows(), this.state.config(), { collapsed: this.state.collapsed() }),
+    { fields: this.fields },
+  ));
+}`,
+    },
     label: "Pivot",
     h1: "Pivot tables in {kit}",
     title: "{kit} pivot table — AdaptTable",
@@ -579,6 +627,37 @@ export function Spend({ rows, fields }) {
   },
   {
     slug: "formulas",
+    snippets: {
+      angular: `import { Component, computed, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { buildFormulaColumns, injectFormulaUrlState } from "@adapttable/angular/formula";
+import { AdaptDataTable } from "{pkg}";
+
+@Component({
+  selector: "app-computed-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()" [columns]="columns()" [rowKey]="rowKey"
+    />
+  \`,
+})
+export class ComputedPeople {
+  readonly rows = input.required<readonly Person[]>();
+  readonly baseColumns = input.required<readonly ColumnDef<Person>[]>();
+  readonly rowKey = (row: Person) => row.id;
+  readonly state = injectFormulaUrlState({
+    urlKey: "fx",
+    defaultFormulas: [
+      { key: "margin", header: "Margin", formula: "=ROUND(budget * 0.15, 0)" },
+    ],
+  });
+  readonly columns = computed(() => [
+    ...this.baseColumns(),
+    ...buildFormulaColumns<Person>(this.state.formulas()).columns,
+  ]);
+}`,
+    },
     label: "Formulas",
     h1: "Spreadsheet formulas in {kit}",
     title: "{kit} table formulas — AdaptTable",
@@ -1034,6 +1113,34 @@ export function Ledger({ rows, columns }) {
   },
   {
     slug: "columns",
+    snippets: {
+      angular: `import { Component, input, signal } from "@angular/core";
+import type { ColumnDef, ColumnLayoutState } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { columnMenu } from "{pkg}/column-menu";
+import { resizableColumns } from "{pkg}/resizable-columns";
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()" [columns]="columns()" [rowKey]="rowKey"
+      [features]="features" [columnLayout]="layout()"
+      (columnLayoutChange)="layout.set($event)"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = input.required<readonly ColumnDef<Person>[]>();
+  readonly rowKey = (row: Person) => row.id;
+  readonly layout = signal<ColumnLayoutState>({
+    hidden: [], order: [], widths: {}, pinned: { name: "start" },
+  });
+  readonly features = [columnMenu(), resizableColumns()];
+}`,
+    },
     label: "Columns",
     h1: "Column management in {kit}",
     title: "{kit} table column pinning and resizing — AdaptTable",
@@ -1627,6 +1734,40 @@ export function People({ rows }) {
   },
   {
     slug: "rtl",
+    intros: {
+      unstyled: [
+        "Arabic labels and cell values mirror the table, its pager and the filter popover. Pinning uses logical edges, so start is the right edge.",
+        'Pass `getLabels("ar")` to `labels` and `getDirection("ar")` to `dir`. Every table, including nested tables, receives the same presentation settings.',
+        "Append `?locale=ar&dir=rtl` to any Angular feature page to exercise its real table in Arabic and right-to-left layout.",
+      ],
+    },
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { getDirection, getLabels } from "@adapttable/i18n";
+import { AdaptDataTable } from "{pkg}";
+import { filters } from "{pkg}/filters";
+
+@Component({
+  selector: "app-arabic-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()" [columns]="columns()" [rowKey]="rowKey"
+      [dir]="dir" [labels]="labels" [features]="features"
+      filtersMode="popover"
+    />
+  \`,
+})
+export class ArabicPeople {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = input.required<readonly ColumnDef<Person>[]>();
+  readonly rowKey = (row: Person) => row.id;
+  readonly dir = getDirection("ar");
+  readonly labels = getLabels("ar");
+  readonly features = [filters([{ key: "name", type: "text", label: "الاسم" }])];
+}`,
+    },
     label: "RTL",
     h1: "Right-to-left {kit} data table",
     title: "{kit} RTL data table — AdaptTable",
@@ -1671,6 +1812,33 @@ export function People({ rows, columns }) {
   },
   {
     slug: "realtime",
+    snippets: {
+      angular: `import { Component, input, signal } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { applyRowPatches, updateRow } from "@adapttable/core";
+import { AdaptDataTable } from "{pkg}";
+
+@Component({
+  selector: "app-live-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()" [columns]="columns()" [rowKey]="rowKey"
+    />
+  \`,
+})
+export class LivePeople {
+  readonly rows = signal<readonly Person[]>([]);
+  readonly columns = input.required<readonly ColumnDef<Person>[]>();
+  readonly rowKey = (row: Person) => row.id;
+
+  patchBudget(id: string, budget: number): void {
+    this.rows.update((rows) => applyRowPatches(
+      rows, [updateRow<Person>(id, { budget })], this.rowKey,
+    ));
+  }
+}`,
+    },
     label: "Realtime",
     h1: "Live updates in {kit}",
     title: "{kit} live-updating data table — AdaptTable",
@@ -1954,6 +2122,31 @@ export function People({ rows, columns, orderColumns }) {
   },
   {
     slug: "accessibility",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { cellNavigation } from "{pkg}/cell-navigation";
+import { columnSelectionCheckbox } from "{pkg}/column-selection";
+
+@Component({
+  selector: "app-keyboard-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      tableLabel="People keyboard grid"
+      [data]="rows()" [columns]="columns()" [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class KeyboardPeople {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = input.required<readonly ColumnDef<Person>[]>();
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [cellNavigation(), columnSelectionCheckbox()];
+}`,
+    },
     label: "Accessibility",
     h1: "Accessible {kit} data table",
     title: "{kit} accessible data table — AdaptTable",
@@ -2098,6 +2291,46 @@ export function Tasks({ rows, setRows, columns }) {
   },
   {
     slug: "aggregation",
+    intros: {
+      unstyled: [
+        "`aggregate()` computes the table footer and each team's `groupAggregates`; `groupFooters` closes each team with its subtotal.",
+        "Search the table and group totals and the footer recompute from matching rows. The host-owned portfolio total uses `pinnedSummaryRows` and remains above the scrolling body, independent of filtering and sorting.",
+        "All three surfaces render through the same native kit on desktop and in phone cards.",
+      ],
+    },
+    snippets: {
+      angular: `import { Component, computed, input } from "@angular/core";
+import { aggregate, type ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { groupingPanel } from "{pkg}/grouping-panel";
+import { pinnedSummaryRows } from "{pkg}/pinned-summary-rows";
+
+@Component({
+  selector: "app-totals",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()" [columns]="columns" [rowKey]="rowKey"
+      [summaryRow]="budgetSum" [features]="features()"
+    />
+  \`,
+})
+export class Totals {
+  readonly rows = input.required<readonly Person[]>();
+  readonly totals = input.required<readonly Person[]>();
+  readonly columns: ColumnDef<Person>[] = [
+    { key: "name" }, { key: "team" }, { key: "budget" },
+  ];
+  readonly rowKey = (row: Person) => row.id;
+  readonly budgetSum = aggregate<Person>({ budget: "sum" });
+  readonly features = computed(() => [
+    groupingPanel<Person>("team", {
+      groupAggregates: this.budgetSum, groupFooters: true,
+    }),
+    pinnedSummaryRows<Person>({ top: this.totals() }),
+  ]);
+}`,
+    },
     label: "Aggregation",
     h1: "Aggregation in {kit}",
     title: "{kit} table aggregation — AdaptTable",

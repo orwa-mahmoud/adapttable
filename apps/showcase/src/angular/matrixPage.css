@@ -429,3 +429,45 @@ adapt-showcase-matrix-page *::after {
   margin-top: var(--sp-3);
   color: var(--ink-2);
 }
+
+/* The pivot uses the native kit's fieldsets and keeps each zone on a phone. */
+.mx-ng [data-adapttable-part="pivot-panel"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+}
+
+.mx-ng [data-adapttable-part="pivot-zone"] {
+  min-inline-size: 0;
+  border: 1px solid var(--ng-line);
+  border-radius: var(--r-md);
+}
+
+.mx-ng [data-adapttable-part="pivot-field"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-block: var(--sp-2);
+}
+
+.mx-ng [data-grid-cell]:focus-visible {
+  outline: 2px solid var(--ng-accent);
+  outline-offset: -2px;
+}
+
+.mx-ng [data-cell-selected] {
+  background: var(--ng-wash);
+  box-shadow: inset 0 0 0 1px var(--ng-accent);
+}
+
+@media (forced-colors: active) {
+  .mx-ng [data-grid-cell]:focus-visible {
+    outline-color: Highlight;
+  }
+
+  .mx-ng [data-cell-selected] {
+    border: 1px solid Highlight;
+  }
+}

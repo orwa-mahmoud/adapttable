@@ -118,3 +118,146 @@ for (const kit of KITS) {
     await expect(html).toHaveAttribute("data-theme", "dark");
   });
 }
+
+/** Every newly reached destination proves the operation its page names. */
+for (const kit of KITS) {
+  const part = (page: Page, name: string) =>
+    page.locator(`.mx-demo [data-adapttable-part="${name}"]`);
+
+  test(`${kit.key}/columns: hides and restores a column through the real menu`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit.key}/columns/`);
+    const emailHeader = page
+      .getByRole("columnheader")
+      .and(page.locator('.mx-demo [data-column-key="email"]'));
+    await expect(emailHeader).toHaveCount(1);
+    await part(page, "column-menu-button").click();
+    await page
+      .getByRole("button", { name: "Hide column: Email", exact: true })
+      .click();
+    await expect(emailHeader).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "Show column: Email", exact: true })
+      .click();
+    await expect(emailHeader).toHaveCount(1);
+    await page.keyboard.press("Escape");
+    await expect(part(page, "column-menu-button")).toBeFocused();
+  });
+
+  test(`${kit.key}/aggregation: filtering recomputes group and footer totals without filtering the pinned total`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit.key}/aggregation/`);
+    const pinned = page.locator(
+      '.mx-demo [data-adapttable-part="pinned-summary-top"]'
+    );
+    await expect(pinned).toContainText("Portfolio total");
+    const portfolio = await pinned.textContent();
+    await part(page, "search").fill("Ada Lovelace");
+    await expect(part(page, "row")).toHaveCount(1);
+    await expect(part(page, "summary-cell").last()).toHaveText("$25,300");
+    await expect(part(page, "group-footer-row")).toContainText("25,300");
+    await expect(pinned).toHaveText(portfolio!);
+    await expect(pinned.getByRole("checkbox")).toHaveCount(0);
+  });
+
+  test(`${kit.key}/pivot: adding a row dimension changes real pivot rows and survives reload`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit.key}/pivot/`);
+    const rowHeaders = part(page, "pivot-row-header");
+    await expect(rowHeaders).toHaveCount(5);
+    await page.locator('[data-pivot-zone="rows"] select').selectOption("role");
+    await expect(page.getByTestId("pivot-fold")).toHaveCount(5);
+    expect(await rowHeaders.count()).toBeGreaterThan(5);
+    const fold = page.getByTestId("pivot-fold").first();
+    const caption = (await fold.textContent())!.replace(/[▶◀▼]/g, "").trim();
+    const count = await rowHeaders.count();
+    await fold.click();
+    await expect(fold).toHaveAttribute("aria-expanded", "false");
+    await expect.poll(() => rowHeaders.count()).toBeLessThan(count);
+    await expect
+      .poll(() => new URL(page.url()).searchParams.get("pivot.pivot"))
+      .toContain(";hide:");
+    await page.reload();
+    await expect(page.locator('[data-pivot-zone="rows"]')).toContainText(
+      "Role"
+    );
+    await expect(
+      page.getByTestId("pivot-fold").filter({ hasText: caption })
+    ).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test(`${kit.key}/accessibility: arrow focus, a column selection and its announcement are observable`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit.key}/accessibility/`);
+    await expect(part(page, "table")).toHaveAttribute("role", "grid");
+    const firstRow = part(page, "row").first();
+    const cells = firstRow.locator('[data-adapttable-part="cell"]');
+    await cells.first().focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(cells.nth(1)).toBeFocused();
+    await expect(part(page, "grid-announcer")).toContainText("Team");
+    await expect(page.getByTestId("announcements")).toContainText("Team");
+    const select = part(page, "column-select").first().getByRole("checkbox");
+    await select.check();
+    await expect(select).toBeChecked();
+    await expect(page.locator(".mx-demo [data-cell-selected]")).toHaveCount(10);
+  });
+
+  for (const width of [1280, 390]) {
+    test(`${kit.key}/formulas: computes an added expression and keeps it in the URL at ${String(width)}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/${kit.key}/formulas/`);
+      await page.getByTestId("formula-name").fill("Power");
+      await page.getByTestId("formula-text").fill("=POWER(2, 3)");
+      await page.getByTestId("formula-add").click();
+      const rows = part(page, width === 390 ? "card" : "row");
+      const values = rows
+        .first()
+        .locator(
+          `[data-adapttable-part="${width === 390 ? "card-value" : "cell"}"]`
+        );
+      await expect(values.last()).toHaveText("8");
+      await expect
+        .poll(() => new URL(page.url()).searchParams.get("fx.formula"))
+        .not.toBeNull();
+      await page.reload();
+      await expect(values.last()).toHaveText("8");
+      await page
+        .getByRole("button", { name: "Remove Power", exact: true })
+        .click();
+      await expect(page.getByTestId("formula-columns")).not.toContainText(
+        "Power:"
+      );
+      await page.getByTestId("formula-name").fill("Broken");
+      await page.getByTestId("formula-text").fill("=budget / 0");
+      await page.getByTestId("formula-add").click();
+      await expect(values.last()).toHaveText("#DIV/0!");
+    });
+
+    test(`${kit.key}/realtime: a row patch changes its budget without losing selection at ${String(width)}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/${kit.key}/realtime/?live=off`);
+      const rows = part(page, width === 390 ? "card" : "row");
+      const ada = rows.filter({ hasText: "Ada Lovelace" });
+      await expect(ada).toContainText("$25,300");
+      await ada.getByRole("checkbox").check();
+      await page
+        .getByRole("button", { name: "Apply next update", exact: true })
+        .click();
+      await expect(ada).toContainText("$26,300");
+      await expect(ada.getByRole("checkbox")).toBeChecked();
+      await expect(page.getByTestId("patch-feed")).toHaveText(
+        "Ada Lovelace: $25,300 → $26,300"
+      );
+      await expect(rows).toHaveCount(10);
+    });
+  }
+}

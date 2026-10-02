@@ -8,6 +8,7 @@
  */
 import type { ColumnDef, ColumnInput } from "@adapttable/angular";
 import { applyRowPatches, updateRow } from "@adapttable/core";
+import { type Direction, getDirection, getLabels } from "@adapttable/i18n";
 
 import {
   budget,
@@ -20,11 +21,13 @@ import {
   formatPercent,
   PEOPLE,
   type Person,
+  personName,
   personStatus,
   startDate,
   STATUS_LABELS,
   STATUSES,
   strings,
+  TEAM_LABELS,
   TEAMS,
   utilization,
 } from "../people";
@@ -40,7 +43,36 @@ export {
   reportsTo,
 } from "../people";
 
-const s = strings("en");
+/**
+ * One presentation configuration for every real table on an Angular page.
+ * `?locale=…` exercises every bundled label set; `?dir=rtl` can independently
+ * mirror any example. The RTL destination opens in Arabic without a query.
+ */
+export const SHOWCASE_PRESENTATION = ((): {
+  readonly locale: string;
+  readonly dir: Direction;
+  readonly labels: ReturnType<typeof getLabels>;
+} => {
+  const url =
+    typeof window === "undefined" ? undefined : new URL(window.location.href);
+  const locale =
+    url?.searchParams.get("locale") ??
+    (url?.pathname.includes("/rtl/") ? "ar" : "en");
+  const requestedDirection = url?.searchParams.get("dir");
+  return {
+    locale,
+    dir:
+      requestedDirection === "rtl" || requestedDirection === "ltr"
+        ? requestedDirection
+        : getDirection(locale),
+    labels: getLabels(locale),
+  };
+})();
+
+/** The seed includes Arabic cell data as well as English cell data. */
+const dataLocale =
+  SHOWCASE_PRESENTATION.locale.split("-")[0] === "ar" ? "ar" : "en";
+const s = strings(dataLocale);
 
 /** Every page keys its rows by the person's id. */
 export const rowKey = (row: Person): string => row.id;
@@ -50,7 +82,7 @@ export const rowKey = (row: Person): string => row.id;
  * definitions, with the name filter on the built-in text type the React pages
  * alias as `personText` to exercise their custom-type registry.
  */
-export const FILTER_DEFS = demoFilterDefs("en").map((def) =>
+export const FILTER_DEFS = demoFilterDefs(dataLocale).map((def) =>
   def.type === "personText" ? { ...def, type: "text" } : def
 );
 
@@ -72,8 +104,8 @@ export function peopleColumns(
     {
       key: "person",
       header: s.person,
-      accessor: (row) => row.name,
-      sortValue: (row) => row.name,
+      accessor: (row) => personName(row, dataLocale),
+      sortValue: (row) => personName(row, dataLocale),
       sortable: true,
       editable,
       editor: "text",
@@ -85,10 +117,14 @@ export function peopleColumns(
     {
       key: "team",
       header: s.team,
+      accessor: (row) => TEAM_LABELS[dataLocale][row.team] ?? row.team,
       editable,
       editor: {
         type: "select",
-        options: TEAMS.map((team) => ({ value: team, label: team })),
+        options: TEAMS.map((team) => ({
+          value: team,
+          label: TEAM_LABELS[dataLocale][team] ?? team,
+        })),
       },
       width: 130,
       mobileLabel: s.team,
@@ -96,7 +132,7 @@ export function peopleColumns(
     {
       key: "status",
       header: s.status,
-      accessor: (row) => STATUS_LABELS.en[personStatus(row)],
+      accessor: (row) => STATUS_LABELS[dataLocale][personStatus(row)],
       sortValue: (row) => personStatus(row),
       sortable: true,
       aggregatable: { operations: ["count"] },
@@ -105,7 +141,7 @@ export function peopleColumns(
         type: "select",
         options: STATUSES.map((status) => ({
           value: status,
-          label: STATUS_LABELS.en[status],
+          label: STATUS_LABELS[dataLocale][status],
         })),
       },
       editValue: (row) => personStatus(row),
@@ -116,9 +152,9 @@ export function peopleColumns(
       key: "timeline",
       header: s.timeline,
       accessor: (row) =>
-        `${formatDate(startDate(row))} → ${formatDate(dueDate(row))}`,
+        `${formatDate(startDate(row), dataLocale)} → ${formatDate(dueDate(row), dataLocale)}`,
       sortValue: (row) => startDate(row).getTime(),
-      groupValue: (row) => formatMonth(startDate(row)),
+      groupValue: (row) => formatMonth(startDate(row), dataLocale),
       exportValue: (row) => isoDay(startDate(row)),
       sortable: true,
       editable,
@@ -130,7 +166,7 @@ export function peopleColumns(
     {
       key: "budget",
       header: s.budget,
-      accessor: (row) => formatMoney(budget(row)),
+      accessor: (row) => formatMoney(budget(row), dataLocale),
       sortValue: (row) => budget(row),
       exportValue: (row) => budget(row),
       sortable: true,
@@ -140,7 +176,7 @@ export function peopleColumns(
       },
       formatAggregate: (value, context) =>
         typeof value === "number"
-          ? budgetAggregateText(value, context.aggregation)
+          ? budgetAggregateText(value, context.aggregation, dataLocale)
           : value,
       editable,
       editor: "number",
@@ -152,7 +188,7 @@ export function peopleColumns(
     {
       key: "load",
       header: s.load,
-      accessor: (row) => formatPercent(utilization(row)),
+      accessor: (row) => formatPercent(utilization(row), dataLocale),
       sortValue: (row) => utilization(row),
       sortable: true,
       width: 100,
@@ -164,7 +200,8 @@ export function peopleColumns(
 /**
  * The fields a cell edit writes: the column's field set to the value the
  * table hands the host, the way the React pages apply the same edit. The
- * timeline cell shows a range; its editor edits the start it sorts by.
+ * timeline cell shows a range; its editor edits the start it sorts by. A name
+ * edit writes the locale-specific field the cell reads, including live patches.
  *
  * @param key - The column that was edited.
  * @param value - The committed value.
@@ -173,7 +210,9 @@ export function peopleColumns(
 function personChanges(key: string, value: unknown): Partial<Person> {
   switch (key) {
     case "person":
-      return { name: String(value) };
+      return dataLocale === "ar"
+        ? { nameAr: String(value) }
+        : { name: String(value) };
     case "team":
       return { team: String(value) };
     case "status":
@@ -235,7 +274,8 @@ export function groupedPeopleColumns(): ColumnInput<Person>[] {
     {
       header: "Delivery",
       align: "start",
-      collapsedRender: (row) => `${formatMoney(budget(row))} budget`,
+      collapsedRender: (row) =>
+        `${formatMoney(budget(row), dataLocale)} budget`,
       children: [column("timeline"), column("budget")],
     },
     { header: "Workload", children: [column("load")] },

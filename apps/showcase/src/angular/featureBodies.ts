@@ -10,16 +10,26 @@
  */
 import {
   type AdaptTableFeature,
+  aggregate,
+  type CellContext,
   type ColumnDef,
+  type ColumnLayoutState,
   injectQuerySource,
   injectServerData,
   type NestedTableDefaults,
 } from "@adapttable/angular";
+import {
+  buildFormulaColumns,
+  injectFormulaUrlState,
+} from "@adapttable/angular/formula";
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
 import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
 import { cellSpan } from "@adapttable/angular-unstyled/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/angular-unstyled/column-groups";
+import { columnMenu } from "@adapttable/angular-unstyled/column-menu";
+import { columnSelectionCheckbox } from "@adapttable/angular-unstyled/column-selection";
+import { densityChooser } from "@adapttable/angular-unstyled/density";
 import {
   editHistory,
   editing,
@@ -30,20 +40,37 @@ import { filters } from "@adapttable/angular-unstyled/filters";
 import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
 import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
 import { nestedTable } from "@adapttable/angular-unstyled/nested-table";
+import { pinnedSummaryRows } from "@adapttable/angular-unstyled/pinned-summary-rows";
+import {
+  AdaptPivotPanel,
+  injectPivotUrlState,
+  pivot,
+  type PivotField,
+  type PivotRow,
+  pivotTableModel,
+} from "@adapttable/angular-unstyled/pivot";
+import { resizableColumns } from "@adapttable/angular-unstyled/resizable-columns";
 import { rowActions } from "@adapttable/angular-unstyled/row-actions";
 import { rowPinning } from "@adapttable/angular-unstyled/row-pinning";
 import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
 import { savedViews } from "@adapttable/angular-unstyled/saved-views";
 import { tree } from "@adapttable/angular-unstyled/tree";
 import { virtualize } from "@adapttable/angular-unstyled/virtualize";
-import { applyRowReorder } from "@adapttable/core";
+import { applyRowPatches, applyRowReorder, updateRow } from "@adapttable/core";
+import { xlsxWriter } from "@adapttable/core/xlsx";
 import {
+  afterNextRender,
   Component,
   computed,
+  DestroyRef,
+  type ElementRef,
+  inject,
   input,
   type Signal,
   signal,
+  type TemplateRef,
   type Type,
+  viewChild,
 } from "@angular/core";
 import {
   injectInfiniteQuery,
@@ -51,6 +78,7 @@ import {
   QueryClient,
 } from "@tanstack/angular-query-experimental";
 
+import { budget, formatMoney, personStatus, utilization } from "../people";
 import { AiBody } from "./aiBody";
 import {
   applyPersonEdit,
@@ -69,6 +97,7 @@ import {
   type Person,
   reportsTo,
   rowKey,
+  SHOWCASE_PRESENTATION,
 } from "./data";
 
 /** The people columns, shared by every page that does not edit them. */
@@ -104,6 +133,9 @@ type FilterLayout = "popover" | "drawer" | "header";
       <div class="mx-demo__body">
         @for (current of mounted(); track current) {
           <adapt-data-table
+            [dir]="presentation.dir"
+            [labels]="presentation.labels"
+            [attr.lang]="presentation.locale"
             tableLabel="People"
             urlKey="flt"
             [data]="rows"
@@ -118,6 +150,7 @@ type FilterLayout = "popover" | "drawer" | "header";
   `,
 })
 class FilteringBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
@@ -152,6 +185,9 @@ class FilteringBody {
     <div class="mx-demo">
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
           [data]="rows"
@@ -167,6 +203,7 @@ class FilteringBody {
   `,
 })
 class SelectionBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
@@ -200,6 +237,9 @@ class SelectionBody {
       </div>
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
           [data]="rows()"
@@ -214,6 +254,7 @@ class SelectionBody {
   `,
 })
 class RowReorderingBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = signal<readonly Person[]>(peopleRows());
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
@@ -256,6 +297,9 @@ class RowReorderingBody {
       </div>
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           editConflictPolicy="ask"
           [urlSync]="false"
@@ -271,13 +315,14 @@ class RowReorderingBody {
   `,
 })
 class EditingBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = signal<readonly Person[]>(peopleRows());
   readonly columns = peopleColumns({ editable: true });
   readonly rowKey = rowKey;
   readonly log = signal("Every change goes through the host.");
   readonly rejectNext = signal(false);
 
-  /** Simulate a remote write while a local draft remains open. */
+  /** Patch the same localized name field an editor reads while its draft stays open. */
   receiveLiveUpdate(): void {
     const row = this.rows()[0];
     if (!row) return;
@@ -328,6 +373,9 @@ class EditingBody {
     <div class="mx-demo">
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           urlKey="grp"
           [data]="rows"
@@ -340,6 +388,7 @@ class EditingBody {
   `,
 })
 class GroupingBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
@@ -356,6 +405,9 @@ class GroupingBody {
     <div class="mx-demo">
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
           [data]="rows"
@@ -369,6 +421,7 @@ class GroupingBody {
   `,
 })
 class ExportBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
@@ -403,6 +456,9 @@ function scaleTier(): ScaleTier {
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
+      [dir]="presentation.dir"
+      [labels]="presentation.labels"
+      [attr.lang]="presentation.locale"
       tableLabel="People"
       [urlSync]="false"
       paginationMode="infinite"
@@ -416,6 +472,7 @@ function scaleTier(): ScaleTier {
   `,
 })
 class ScaleFrontendTable {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly count = SCALE_ROWS;
   readonly rows = makeLargeDirectory(SCALE_ROWS);
   readonly columns = COLUMNS;
@@ -433,6 +490,9 @@ class ScaleFrontendTable {
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
+      [dir]="presentation.dir"
+      [labels]="presentation.labels"
+      [attr.lang]="presentation.locale"
       tableLabel="People"
       [urlSync]="false"
       [maxHeight]="480"
@@ -444,6 +504,7 @@ class ScaleFrontendTable {
   `,
 })
 class ScaleServerTable {
+  readonly presentation = SHOWCASE_PRESENTATION;
   private readonly slice = signal({ from: 0, limit: 500 });
   readonly source = injectServerData<Person>({
     rows: computed(() => {
@@ -495,6 +556,9 @@ function injectPeopleQuery(params: Signal<Partial<PeopleParams>>) {
   providers: [provideTanStackQuery(new QueryClient())],
   template: `
     <adapt-data-table
+      [dir]="presentation.dir"
+      [labels]="presentation.labels"
+      [attr.lang]="presentation.locale"
       tableLabel="People"
       [urlSync]="false"
       [source]="source"
@@ -504,6 +568,7 @@ function injectPeopleQuery(params: Signal<Partial<PeopleParams>>) {
   `,
 })
 class ScaleQueryTable {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly source = injectQuerySource<Person, PeopleParams, PeoplePage>({
     query: injectPeopleQuery,
     urlSync: false,
@@ -545,6 +610,7 @@ class ScaleQueryTable {
   `,
 })
 class ScaleBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly tier = scaleTier();
   readonly hint = {
     frontend: `${SCALE_ROWS} rows — only the ones in view render`,
@@ -561,19 +627,29 @@ class ScaleBody {
     <div class="mx-demo">
       <div class="mx-demo__body mx-phone">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
           [forceMobile]="true"
+          [selectable]="true"
+          [onRowClick]="activateRow"
           [data]="rows"
           [columns]="columns"
           [rowKey]="rowKey"
           [defaults]="{ limit: 8 }"
         />
       </div>
+      <p class="hint" role="status" data-demo-log>{{ log() }}</p>
     </div>
   `,
 })
 class MobileCardsBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
+  readonly log = signal("Activate a person to see the host callback.");
+  readonly activateRow = (row: Person): void =>
+    this.log.set(`Activated ${row.name}`);
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
@@ -592,6 +668,9 @@ class MobileCardsBody {
       </div>
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           urlKey="views"
           [urlSync]="false"
@@ -605,6 +684,7 @@ class MobileCardsBody {
   `,
 })
 class SavedViewsBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
@@ -625,6 +705,9 @@ class SavedViewsBody {
     <div class="mx-demo">
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
           [data]="rows"
@@ -638,6 +721,7 @@ class SavedViewsBody {
   `,
 })
 export class AdaptShowcaseLandingTable {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
@@ -658,6 +742,9 @@ export class AdaptShowcaseLandingTable {
       </div>
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
           [data]="rows"
@@ -671,6 +758,7 @@ export class AdaptShowcaseLandingTable {
   `,
 })
 class TreeBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
@@ -698,18 +786,21 @@ const ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
   template: `
     @let d = defaults();
     <adapt-data-table
+      [dir]="presentation.dir"
+      [labels]="presentation.labels"
+      [attr.lang]="presentation.locale"
       [data]="orders()"
       [columns]="columns"
       [rowKey]="orderKey"
       [urlSync]="d.urlSync"
       [searchable]="d.searchable"
       [density]="d.density"
-      [labels]="d.labels"
       [tableLabel]="d.tableLabel"
     />
   `,
 })
 class OrdersTable {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly row = input.required<Person>();
   readonly defaults = input.required<NestedTableDefaults>();
   readonly orders = computed(() => demoOrders(this.row()));
@@ -729,6 +820,9 @@ class OrdersTable {
       </div>
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
           [data]="rows"
@@ -742,6 +836,7 @@ class OrdersTable {
   `,
 })
 class NestedTablesBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
@@ -798,6 +893,9 @@ function teamSpan({
       </div>
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           urlKey="rows"
           [maxHeight]="420"
@@ -812,6 +910,7 @@ function teamSpan({
   `,
 })
 class RowsBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = signal(orderPeopleByTeam(PEOPLE));
   private nextId = Math.max(...PEOPLE.map((row) => Number(row.id)));
   readonly columns = COLUMNS;
@@ -858,6 +957,9 @@ class RowsBody {
       </div>
       <div class="mx-demo__body">
         <adapt-data-table
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
           [data]="rows"
@@ -871,16 +973,428 @@ class RowsBody {
   `,
 })
 class ColumnGroupsBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly columns = groupedPeopleColumns();
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [collapsibleColumnGroups()];
 }
 
+/** Column management, matching ColumnsDemo.tsx through the native kit. */
+@Component({
+  selector: "adapt-showcase-columns",
+  imports: [AdaptDataTable],
+  template: `
+    <div class="mx-demo">
+      <p class="hint">
+        Pin, resize, rename or hide a column from Columns. Shift+arrow selects a
+        range to export.
+      </p>
+      <div class="mx-demo__body">
+        <adapt-data-table
+          tableLabel="People"
+          urlKey="cols"
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
+          [data]="rows"
+          [columns]="columns"
+          [rowKey]="rowKey"
+          [columnLayout]="layout()"
+          (columnLayoutChange)="layout.set($event)"
+          [defaults]="{ limit: 10 }"
+          [features]="features"
+        />
+      </div>
+    </div>
+  `,
+})
+class ColumnsBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
+  readonly rows = PEOPLE;
+  readonly rowKey = rowKey;
+  readonly columns: readonly ColumnDef<Person>[] = [
+    ...COLUMNS,
+    { key: "email", header: "Email", width: 280 },
+    { key: "role", header: "Role", width: 220 },
+  ];
+  readonly layout = signal<ColumnLayoutState>({
+    hidden: [],
+    order: [],
+    widths: {},
+    pinned: { person: "start" },
+  });
+  readonly features: readonly AdaptTableFeature[] = [
+    columnMenu(),
+    resizableColumns(),
+    densityChooser(),
+    cellNavigation(),
+    exportCsv({
+      scope: "range",
+      writer: xlsxWriter({ sheetName: "People" }),
+      filename: "people.xlsx",
+    }),
+  ];
+}
+
+/** Group and footer totals, matching AggregationDemo.tsx's three surfaces. */
+@Component({
+  selector: "adapt-showcase-aggregation",
+  imports: [AdaptDataTable],
+  template: `
+    <div class="mx-demo">
+      <p class="hint">
+        Search updates the group and footer totals. The pinned portfolio total
+        stays outside the filtered data.
+      </p>
+      <div class="mx-demo__body">
+        <adapt-data-table
+          tableLabel="People budgets"
+          urlKey="agg"
+          [maxHeight]="420"
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
+          [data]="rows"
+          [columns]="columns"
+          [rowKey]="rowKey"
+          [summaryRow]="summary"
+          [features]="features"
+        />
+      </div>
+    </div>
+  `,
+})
+class AggregationBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
+  readonly rows = PEOPLE;
+  readonly rowKey = rowKey;
+  readonly columns = COLUMNS.filter((column) =>
+    ["person", "team", "budget"].includes(column.key)
+  );
+  readonly summary = aggregate<Person>(
+    { budget: "sum" },
+    {
+      columns: this.columns,
+      format: (value) =>
+        typeof value === "number" ? formatMoney(value) : value,
+    }
+  );
+  readonly features: readonly AdaptTableFeature[] = [
+    groupingPanel<Person>("team", {
+      groupAggregates: aggregate<Person>(
+        { budget: "sum" },
+        { columns: this.columns }
+      ),
+      groupFooters: true,
+    }),
+    pinnedSummaryRows<Person>({
+      top: [
+        {
+          ...PEOPLE[0]!,
+          id: "portfolio-total",
+          name: "Portfolio total",
+          nameAr: "إجمالي المحفظة",
+          team: "",
+          teamAr: "",
+          budget: PEOPLE.reduce((total, row) => total + budget(row), 0),
+        },
+      ],
+    }),
+  ];
+}
+
+/** Pivot axes, measures and folded groups, matching PivotDemo.tsx. */
+@Component({
+  selector: "adapt-showcase-pivot",
+  imports: [AdaptDataTable, AdaptPivotPanel],
+  templateUrl: "./pivotBody.html",
+})
+class PivotBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
+  readonly fields: readonly PivotField[] = [
+    { key: "team", label: "Team" },
+    { key: "role", label: "Role" },
+    { key: "status", label: "Status" },
+    { key: "budget", label: "Budget" },
+  ];
+  readonly rows = PEOPLE.map((row) => ({
+    ...row,
+    budget: budget(row),
+    status: personStatus(row),
+  }));
+  readonly state = injectPivotUrlState({
+    urlKey: "pivot",
+    defaultConfig: {
+      rows: ["team"],
+      columns: ["status"],
+      measures: [{ key: "budget", agg: "sum" }],
+    },
+  });
+  readonly caption =
+    viewChild<TemplateRef<CellContext<PivotRow>>>("pivotCaption");
+  readonly model = computed(() => {
+    const caption = this.caption();
+    return pivotTableModel(
+      pivot(this.rows, this.state.config(), {
+        collapsed: this.state.collapsed(),
+        format: (value) =>
+          typeof value === "number" ? formatMoney(value) : value,
+      }),
+      {
+        fields: this.fields,
+        labels: this.presentation.labels,
+        renderRowHeader: (row) => caption ?? row.label,
+      }
+    );
+  });
+
+  /** A subtotal's stable key is also the collapse key persisted in the URL. */
+  toggleFold(key: string): void {
+    const next = new Set(this.state.collapsed());
+    if (!next.delete(key)) next.add(key);
+    this.state.onCollapsedChange(next);
+  }
+}
+
+/** Formula input, visible errors and shareable columns, from FormulasDemo.tsx. */
+@Component({
+  selector: "adapt-showcase-formulas",
+  imports: [AdaptDataTable],
+  templateUrl: "./formulasBody.html",
+})
+class FormulasBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
+  readonly rows = PEOPLE.map((row) => ({
+    ...row,
+    budget: budget(row),
+    utilization: utilization(row),
+  }));
+  readonly rowKey = rowKey;
+  readonly name = signal("");
+  readonly formula = signal("");
+  readonly state = injectFormulaUrlState({
+    urlKey: "fx",
+    defaultFormulas: [
+      { key: "margin", header: "Margin", formula: "=ROUND(budget * 0.15, 0)" },
+      { key: "tag", header: "Tag", formula: '=UPPER(team) & " · " & role' },
+    ],
+  });
+  readonly derived = computed(() =>
+    buildFormulaColumns<Person>(this.state.formulas())
+  );
+  readonly columns = computed(() => [
+    ...COLUMNS.filter((column) =>
+      ["person", "team", "budget"].includes(column.key)
+    ),
+    ...this.derived().columns,
+  ]);
+  readonly errors = computed(() => Object.entries(this.derived().errors));
+
+  /** Build one new column through the binding; evaluation stays in core. */
+  add(): void {
+    const formula = this.formula().trim();
+    if (!formula) return;
+    const header = this.name().trim();
+    const stem = header.replaceAll(/\W/g, "") || "formula";
+    let key = stem;
+    let suffix = 1;
+    while (this.columns().some((column) => column.key === key))
+      key = `${stem}${String(++suffix)}`;
+    this.state.onFormulasChange([
+      ...this.state.formulas(),
+      { key, header: header || key, formula },
+    ]);
+    this.name.set("");
+    this.formula.set("");
+  }
+
+  /** Removing a formula also removes it from a copied or reloaded URL. */
+  remove(key: string): void {
+    this.state.onFormulasChange(
+      this.state.formulas().filter((formula) => formula.key !== key)
+    );
+  }
+}
+
+/** Arabic controls and cell data, through the same filters kit as FilteringBody. */
+@Component({
+  selector: "adapt-showcase-rtl",
+  imports: [AdaptDataTable],
+  template: `
+    <div class="mx-demo">
+      <div class="mx-demo__body">
+        <adapt-data-table
+          tableLabel="الأشخاص"
+          urlKey="rtl"
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
+          [data]="rows"
+          [columns]="columns"
+          [rowKey]="rowKey"
+          [defaults]="{ limit: 10 }"
+          [features]="features"
+        />
+      </div>
+    </div>
+  `,
+})
+class RtlBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
+  readonly rows = PEOPLE;
+  readonly columns = COLUMNS;
+  readonly rowKey = rowKey;
+  readonly features: readonly AdaptTableFeature[] = [
+    filters(FILTER_DEFS),
+    columnMenu(),
+  ];
+}
+
+/** Timed row patches preserve the reader's view, matching RealtimeDemo.tsx. */
+@Component({
+  selector: "adapt-showcase-realtime",
+  imports: [AdaptDataTable],
+  template: `
+    <div class="mx-demo">
+      <div class="hint-row">
+        <button
+          type="button"
+          class="seg__btn"
+          [attr.aria-pressed]="running()"
+          (click)="running.set(!running())"
+        >
+          {{ running() ? "Pause updates" : "Resume updates" }}
+        </button>
+        <button type="button" class="seg__btn" (click)="patch()">
+          Apply next update
+        </button>
+        <span class="hint"
+          >Sort or select a row; its identity survives each patch.</span
+        >
+      </div>
+      <div class="mx-demo__body">
+        <adapt-data-table
+          tableLabel="Live people"
+          [urlSync]="false"
+          [dir]="presentation.dir"
+          [labels]="presentation.labels"
+          [attr.lang]="presentation.locale"
+          [data]="rows()"
+          [columns]="columns"
+          [rowKey]="rowKey"
+          [selectable]="true"
+          [defaults]="{ limit: 10 }"
+        />
+      </div>
+      <ol data-testid="patch-feed" aria-label="Live updates">
+        @for (entry of feed(); track entry.id) {
+          <li>{{ entry.text }}</li>
+        }
+      </ol>
+    </div>
+  `,
+})
+class RealtimeBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
+  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly columns = COLUMNS;
+  readonly rowKey = rowKey;
+  readonly running = signal(
+    new URLSearchParams(location.search).get("live") !== "off"
+  );
+  readonly feed = signal<readonly { id: number; text: string }[]>([]);
+  private sequence = 0;
+
+  constructor() {
+    const timer = window.setInterval(() => {
+      if (this.running()) this.patch();
+    }, 2500);
+    inject(DestroyRef).onDestroy(() => window.clearInterval(timer));
+  }
+
+  /** Apply a core row patch, retaining the update journal and stable ids. */
+  patch(): void {
+    const row = this.rows()[this.sequence % 10];
+    if (!row) return;
+    const nextBudget = budget(row) + 1000;
+    this.rows.update((rows) =>
+      applyRowPatches(
+        rows,
+        [updateRow<Person>(row.id, { budget: nextBudget })],
+        rowKey
+      )
+    );
+    this.feed.update((feed) =>
+      [
+        {
+          id: ++this.sequence,
+          text: `${row.name}: ${formatMoney(budget(row))} → ${formatMoney(nextBudget)}`,
+        },
+        ...feed,
+      ].slice(0, 6)
+    );
+  }
+}
+
+/** Keyboard focus and a real live-region transcript, from AccessibilityDemo.tsx. */
+@Component({
+  selector: "adapt-showcase-accessibility",
+  imports: [AdaptDataTable],
+  templateUrl: "./accessibilityBody.html",
+})
+class AccessibilityBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
+  readonly rows = PEOPLE;
+  readonly columns = COLUMNS;
+  readonly rowKey = rowKey;
+  readonly features: readonly AdaptTableFeature[] = [
+    cellNavigation(),
+    columnSelectionCheckbox(),
+  ];
+  readonly tableRoot = viewChild<ElementRef<HTMLElement>>("tableRoot");
+  readonly announcements = signal<readonly string[]>([]);
+
+  constructor() {
+    let observer: MutationObserver | undefined;
+    afterNextRender(() => {
+      const root = this.tableRoot()?.nativeElement;
+      if (!root) return;
+      const previous = new WeakMap<Element, string>();
+      const read = (): void => {
+        for (const region of root.querySelectorAll(
+          '[aria-live], [role="status"], [role="alert"]'
+        )) {
+          const text = region.textContent?.trim() ?? "";
+          if (text === previous.get(region)) continue;
+          previous.set(region, text);
+          if (text)
+            this.announcements.update((lines) => [text, ...lines].slice(0, 6));
+        }
+      };
+      observer = new MutationObserver(read);
+      observer.observe(root, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+      });
+      read();
+    });
+    inject(DestroyRef).onDestroy(() => observer?.disconnect());
+  }
+}
+
 /** Feature slug to the demo that page shows. */
 export const FEATURE_BODIES: Readonly<Record<string, Type<unknown>>> = {
   ai: AiBody,
   "agent-approval": AiBody,
+  columns: ColumnsBody,
+  aggregation: AggregationBody,
+  pivot: PivotBody,
+  formulas: FormulasBody,
+  rtl: RtlBody,
+  realtime: RealtimeBody,
+  accessibility: AccessibilityBody,
   filtering: FilteringBody,
   selection: SelectionBody,
   "row-reordering": RowReorderingBody,

@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
-    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/" />
+    <meta name="description" content="Explore keyboard navigation and screen-reader announcements in a Unstyled data grid, with visible focus, column selection and forced-colors support." />
+    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/accessibility/" />
     <meta name="robots" content="noindex, follow" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Unstyled table filtering — AdaptTable" />
-    <meta property="og:description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
-    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/" />
+    <meta property="og:title" content="Unstyled accessible data table — AdaptTable" />
+    <meta property="og:description" content="Explore keyboard navigation and screen-reader announcements in a Unstyled data grid, with visible focus, column selection and forced-colors support." />
+    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/accessibility/" />
     <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Unstyled table filtering — AdaptTable" />
-    <meta name="twitter:description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
+    <meta name="twitter:title" content="Unstyled accessible data table — AdaptTable" />
+    <meta name="twitter:description" content="Explore keyboard navigation and screen-reader announcements in a Unstyled data grid, with visible focus, column selection and forced-colors support." />
     <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Explore keyboard navigation and screen-reader announcements in a Unstyled data grid, with visible focus, column selection and forced-colors support.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/accessibility/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Unstyled table filtering — AdaptTable</title>
+    <title>Unstyled accessible data table — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -158,51 +158,42 @@
     <!-- Replaced by Angular on mount — the served markup carries the page's
          own words so a crawler, and anyone whose bundle has not arrived, reads
          a real page. Written by scripts/build-showcase-html.mjs. -->
-    <div id="root" data-matrix-page="unstyled/filtering">
+    <div id="root" data-matrix-page="unstyled/accessibility">
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Unstyled</p>
-        <h1>Filtering in Unstyled</h1>
-        <p>Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each a native element.</p>
-        <p>Filters opens as an anchored popover or as a drawer, with an AND/OR tree at the top for what one row of inputs cannot say. Header funnels filter one column in place, and every active filter shows as a chip that removes itself.</p>
-        <p>Filter state lives in the versioned URL, so a filtered view is a link someone can send.</p>
+        <h1>Accessible Unstyled data table</h1>
+        <p>Tab into the grid and the arrows move a visible focus, one cell at a time. Home and End jump to the row's edges.</p>
+        <p>Every move, sort, filter and edit is announced through a live region — the part of a table a sighted reader cannot check, so this page repeats those announcements as text as they happen.</p>
+        <p><code>columnSelectionCheckbox</code> puts a named checkbox on each header so a column can be selected without a modifier key a touchscreen does not have. Focus, selection, status and disabled controls stay legible in high contrast and forced-colors — nothing is color-only. The grid and the checkboxes are Unstyled.</p>
         <h2>The code</h2>
         <pre><code>import { Component, input } from &quot;@angular/core&quot;;
 import type { ColumnDef } from &quot;@adapttable/angular&quot;;
 import { AdaptDataTable } from &quot;@adapttable/angular-unstyled&quot;;
-import { filters } from &quot;@adapttable/angular-unstyled/filters&quot;;
-import { headerFilters } from &quot;@adapttable/angular-unstyled/header-filters&quot;;
-
-const columns: ColumnDef&lt;Person&gt;[] = [
-  { key: &quot;name&quot;, filter: &quot;text&quot; },
-  { key: &quot;team&quot;, filter: { type: &quot;multiSelect&quot;, options: &quot;auto&quot; } },
-  { key: &quot;budget&quot;, filter: &quot;numberRange&quot; },
-  { key: &quot;hiredAt&quot;, filter: &quot;dateRange&quot; },
-];
+import { cellNavigation } from &quot;@adapttable/angular-unstyled/cell-navigation&quot;;
+import { columnSelectionCheckbox } from &quot;@adapttable/angular-unstyled/column-selection&quot;;
 
 @Component({
-  selector: &quot;app-people&quot;,
+  selector: &quot;app-keyboard-people&quot;,
   imports: [AdaptDataTable],
   template: `
     &lt;adapt-data-table
-      [data]=&quot;rows()&quot;
-      [columns]=&quot;columns&quot;
-      [rowKey]=&quot;rowKey&quot;
-      urlKey=&quot;f&quot;
-      filtersMode=&quot;popover&quot;
+      tableLabel=&quot;People keyboard grid&quot;
+      [data]=&quot;rows()&quot; [columns]=&quot;columns()&quot; [rowKey]=&quot;rowKey&quot;
       [features]=&quot;features&quot;
     /&gt;
   `,
 })
-export class People {
+export class KeyboardPeople {
   readonly rows = input.required&lt;readonly Person[]&gt;();
-  readonly columns = columns;
+  readonly columns = input.required&lt;readonly ColumnDef&lt;Person&gt;[]&gt;();
   readonly rowKey = (row: Person) =&gt; row.id;
-  readonly features = [filters([]), headerFilters()];
+  readonly features = [cellNavigation(), columnSelectionCheckbox()];
 }</code></pre>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core</code></pre>
         <h2>More Unstyled features</h2>
         <ul>
+          <li><a href="../filtering/">Filtering in Unstyled</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>
           <li><a href="../columns/">Column management in Unstyled</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
           <li><a href="../column-groups/">Column groups in Unstyled</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="../selection/">Row selection in Unstyled</a> — A set of ids that survives paging, with bulk actions over it.</li>
@@ -221,11 +212,10 @@ export class People {
           <li><a href="../formulas/">Spreadsheet formulas in Unstyled</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
           <li><a href="../rtl/">Right-to-left Unstyled data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
           <li><a href="../realtime/">Live updates in Unstyled</a> — Rows change while you read them. Sort and selection hold.</li>
-          <li><a href="../accessibility/">Accessible Unstyled data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
           <li><a href="../ai/">AI table assistant in Unstyled Angular</a> — Local sort, questions and approved edits with real table outcomes.</li>
         </ul>
         <p>
-          Reference: <a href="https://adapttable.orwamahmoud.com/react/filtering/">filtering</a>, <a href="https://adapttable.orwamahmoud.com/react/filter-tree/">filter-tree</a>, <a href="https://adapttable.orwamahmoud.com/react/url-state/">url-state</a>. More of this kit:
+          Reference: <a href="https://adapttable.orwamahmoud.com/react/accessibility/">accessibility</a>, <a href="https://adapttable.orwamahmoud.com/react/cell-navigation/">cell-navigation</a>. More of this kit:
           <a href="../">AdaptTable for Unstyled</a>, or
           <a href="/react/demo/">the live demo</a>.
         </p>

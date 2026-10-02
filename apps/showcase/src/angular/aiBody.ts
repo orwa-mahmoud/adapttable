@@ -20,6 +20,8 @@ import {
 import { editing } from "@adapttable/angular-unstyled/editing";
 import { Component, computed, signal } from "@angular/core";
 
+import { SHOWCASE_PRESENTATION } from "./data";
+
 interface AgentPerson {
   id: string;
   name: string;
@@ -63,6 +65,7 @@ const SUGGESTIONS: readonly AssistantSuggestion[] = [
   templateUrl: "./aiBody.html",
 })
 export class AiBody {
+  readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = signal(INITIAL);
   readonly rowKey = (row: AgentPerson) => row.id;
   readonly columns: readonly ColumnDef<AgentPerson>[] = [
@@ -80,11 +83,7 @@ export class AiBody {
   readonly open = signal(true);
   readonly approvalSurface = signal<"widget" | "table" | "modal">("widget");
   readonly log = signal("No host writes yet");
-  readonly direction =
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).get("dir") === "rtl"
-      ? "rtl"
-      : "ltr";
+  readonly direction = this.presentation.dir;
   private readView: (() => AgentContextInputs) | undefined;
   private turn = 0;
 
@@ -177,6 +176,7 @@ export class AiBody {
     onOpenChange: (open) => this.open.set(open),
     presentation: "panel",
     dir: this.direction,
+    labels: this.presentation.labels,
     note: "Scripted locally. Table changes and host writes are real.",
     greeting: "What would you like to do with these people?",
   }));

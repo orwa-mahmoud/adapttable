@@ -1,0 +1,33 @@
+<!-- The keyboard grid and a transcript of its actual live regions. -->
+<div class="mx-demo">
+  <p class="hint">
+    Tab into the grid, then use arrows, Home and End. A checkbox selects a whole
+    column.
+  </p>
+  <div #tableRoot class="mx-demo__body">
+    <adapt-data-table
+      tableLabel="People keyboard grid"
+      [dir]="presentation.dir"
+      [labels]="presentation.labels"
+      [attr.lang]="presentation.locale"
+      [urlSync]="false"
+      [data]="rows"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+      [defaults]="{ limit: 10 }"
+    />
+  </div>
+  <div class="mx-demo__body" data-testid="announcements">
+    <strong>Announced to a screen reader</strong>
+    @if (announcements().length === 0) {
+      <p>Move through the grid to hear its position and column.</p>
+    } @else {
+      <ol>
+        @for (line of announcements(); track $index) {
+          <li>{{ line }}</li>
+        }
+      </ol>
+    }
+  </div>
+</div>

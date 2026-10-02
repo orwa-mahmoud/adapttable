@@ -5,7 +5,9 @@ import {
   adapterByKey,
   builtAdapters,
   featureBySlug,
+  featuresOf,
   frameworkOf,
+  MATRIX_FEATURES,
   matrixPages,
 } from "../apps/showcase/matrix.mjs";
 import {
@@ -33,13 +35,26 @@ describe("the generated showcase pages", () => {
   it("writes one page per matrix entry and per replaced address", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
     // features — across all eight kits; the Angular unstyled kit's landing
-    // plus the fourteen features it renders; and the eight replaced top-level
+    // plus all twenty-one feature destinations; and the eight replaced top-level
     // addresses. Kit `/accessibility/` URLs are matrix pages again, not
     // redirects to editing. Written out rather than recomputed from the
     // matrix: the writer reads that same list, so a derived count would agree
     // with itself no matter what it produced.
-    assert.equal(files.length, 8 * 22 + (1 + 14) + 8);
+    assert.equal(files.length, 8 * 22 + (1 + 21) + 8);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
+  });
+
+  it("gives every Angular kit a destination for every matrix feature", () => {
+    const expected = MATRIX_FEATURES.map((feature) => feature.slug).sort();
+    for (const kit of builtAdapters("angular")) {
+      assert.deepEqual(
+        featuresOf(kit)
+          .map((feature) => feature.slug)
+          .sort(),
+        expected,
+        `${kit.key} leaves a feature without an Angular destination`
+      );
+    }
   });
 
   it("matches what is committed", () => {

@@ -38,6 +38,9 @@
   >
     <div style="min-inline-size: 0">
       <adapt-data-table
+        [dir]="presentation.dir"
+        [labels]="presentation.labels"
+        [attr.lang]="presentation.locale"
         tableLabel="AI people"
         [data]="rows()"
         [columns]="columns"

@@ -111,6 +111,7 @@ describe("Angular showcase snippets compile", () => {
     const aiAngular = packageDir("ai-angular");
     const kit = packageDir("adapter-angular-unstyled");
     const core = packageDir("core");
+    const i18n = packageDir("i18n");
     const showcase = join(REPO_ROOT, "apps", "showcase");
     return {
       extends: join(showcase, "src", "angular", "tsconfig.json"),
@@ -130,6 +131,7 @@ describe("Angular showcase snippets compile", () => {
           "@adapttable/angular/*": [join(angular, "*", "index.ts")],
           "@adapttable/angular-unstyled": [join(kit, "src", "index.ts")],
           "@adapttable/angular-unstyled/*": [join(kit, "*", "index.ts")],
+          "@adapttable/i18n": [join(i18n, "src", "index.ts")],
           "@adapttable/core": [join(core, "src", "index.ts")],
           "@adapttable/core/*": [join(core, "src", "*.ts")],
         },
