@@ -417,6 +417,11 @@ export function MobileCards<TRow>({
   virtualScrollRef,
 }: Readonly<SharedProps<TRow>>) {
   const { columns, selection, labels } = table;
+  const requestedRegionLabel = (
+    table.getTableProps()["aria-label"] ?? labels.table
+  ).trim();
+  const regionLabel =
+    requestedRegionLabel.length > 0 ? requestedRegionLabel : labels.table;
   const entries = orderedCardEntries(
     rows,
     getRowId,
@@ -491,162 +496,173 @@ export function MobileCards<TRow>({
   };
 
   return (
-    <ul
-      {...table.getTableProps({ role: undefined })}
+    <div
+      role="region"
+      aria-label={regionLabel}
+      dir={table.getTableProps().dir}
+      tabIndex={maxHeight == null ? undefined : 0}
       ref={virtualScrollRef}
-      data-adapttable-part="cards"
-      className={classNames.cards}
-      // No `list-style: none` here: Safari/VoiceOver strips list semantics
-      // from such lists. Markers are suppressed per-item with display:block.
-      style={{ margin: 0, padding: 0, ...mobileCardListStyle(maxHeight) }}
+      className={classNames.scrollBox}
+      style={mobileCardListStyle(maxHeight)}
     >
-      {paddingTop > 0 && (
-        <li
-          data-adapttable-part="virtual-spacer"
-          className={classNames.virtualSpacer}
-          style={{ display: "block", height: paddingTop }}
-        />
-      )}
-      {grouping
-        ? pinnedSummaryTop.map((row, index) =>
-            cardFor(row, index, pinnedSummaryRowId("top", index))
-          )
-        : null}
-      {grouping
-        ? grouping.entries.map((entry) => {
-            if (isExtraEntry(entry)) {
-              return (
+      <ul
+        {...table.getTableProps({ role: undefined })}
+        data-adapttable-part="cards"
+        className={classNames.cards}
+        // No `list-style: none` here: Safari/VoiceOver strips list semantics
+        // from such lists. Markers are suppressed per-item with display:block.
+        style={{ margin: 0, padding: 0 }}
+      >
+        {paddingTop > 0 && (
+          <li
+            data-adapttable-part="virtual-spacer"
+            className={classNames.virtualSpacer}
+            style={{ display: "block", height: paddingTop }}
+          />
+        )}
+        {grouping
+          ? pinnedSummaryTop.map((row, index) =>
+              cardFor(row, index, pinnedSummaryRowId("top", index))
+            )
+          : null}
+        {grouping
+          ? grouping.entries.map((entry) => {
+              if (isExtraEntry(entry)) {
+                return (
+                  <li
+                    key={entry.key}
+                    data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].row}
+                    role={entry.kind === "separator" ? "separator" : undefined}
+                    aria-label={
+                      entry.kind === "separator"
+                        ? labels.rowSeparator
+                        : undefined
+                    }
+                    className={
+                      entry.kind === "separator"
+                        ? classNames.separatorRow
+                        : classNames.fullWidthRow
+                    }
+                    style={{ display: "block" }}
+                  >
+                    <div
+                      data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}
+                      className={
+                        entry.kind === "separator"
+                          ? classNames.separatorCell
+                          : classNames.fullWidthCell
+                      }
+                    >
+                      {entry.kind === "fullWidth"
+                        ? (entry.render?.() as ReactNode)
+                        : null}
+                    </div>
+                  </li>
+                );
+              }
+              if (
+                entry.kind === "group" ||
+                entry.kind === "groupFooter" ||
+                entry.kind === "groupMore"
+              ) {
+                return (
+                  <li key={entry.key} style={{ display: "block" }}>
+                    <OptionalGroupHeaderCard
+                      entry={entry}
+                      columns={columns}
+                      selection={selection}
+                      labels={labels}
+                      compact={false}
+                      onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
+                      onShowMore={grouping.showMore}
+                    />
+                  </li>
+                );
+              }
+              return cardFor(entry.row, entry.index, entry.key);
+            })
+          : insertExtraRows(
+              bodyRowEntries(entries, tree),
+              extraRows,
+              (e) => e.key
+            ).map((slot) =>
+              isExtraEntry(slot) ? (
                 <li
-                  key={entry.key}
-                  data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].row}
-                  role={entry.kind === "separator" ? "separator" : undefined}
+                  key={slot.key}
+                  data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].row}
+                  role={slot.kind === "separator" ? "separator" : undefined}
                   aria-label={
-                    entry.kind === "separator" ? labels.rowSeparator : undefined
+                    slot.kind === "separator" ? labels.rowSeparator : undefined
                   }
                   className={
-                    entry.kind === "separator"
+                    slot.kind === "separator"
                       ? classNames.separatorRow
                       : classNames.fullWidthRow
                   }
                   style={{ display: "block" }}
                 >
                   <div
-                    data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}
+                    data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}
                     className={
-                      entry.kind === "separator"
+                      slot.kind === "separator"
                         ? classNames.separatorCell
                         : classNames.fullWidthCell
                     }
                   >
-                    {entry.kind === "fullWidth"
-                      ? (entry.render?.() as ReactNode)
+                    {slot.kind === "fullWidth"
+                      ? (slot.render?.() as ReactNode)
                       : null}
                   </div>
                 </li>
-              );
-            }
-            if (
-              entry.kind === "group" ||
-              entry.kind === "groupFooter" ||
-              entry.kind === "groupMore"
-            ) {
-              return (
-                <li key={entry.key} style={{ display: "block" }}>
-                  <OptionalGroupHeaderCard
-                    entry={entry}
-                    columns={columns}
-                    selection={selection}
-                    labels={labels}
-                    compact={false}
-                    onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
-                    onShowMore={grouping.showMore}
-                  />
-                </li>
-              );
-            }
-            return cardFor(entry.row, entry.index, entry.key);
-          })
-        : insertExtraRows(
-            bodyRowEntries(entries, tree),
-            extraRows,
-            (e) => e.key
-          ).map((slot) =>
-            isExtraEntry(slot) ? (
-              <li
-                key={slot.key}
-                data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].row}
-                role={slot.kind === "separator" ? "separator" : undefined}
-                aria-label={
-                  slot.kind === "separator" ? labels.rowSeparator : undefined
-                }
-                className={
-                  slot.kind === "separator"
-                    ? classNames.separatorRow
-                    : classNames.fullWidthRow
-                }
-                style={{ display: "block" }}
-              >
+              ) : (
+                cardFor(slot.row, slot.index, slot.key, slot.treeEntry)
+              )
+            )}
+        {grouping
+          ? pinnedSummaryBottom.map((row, index) =>
+              cardFor(row, index, pinnedSummaryRowId("bottom", index))
+            )
+          : null}
+        {paddingBottom > 0 && (
+          <li
+            data-adapttable-part="virtual-spacer"
+            className={classNames.virtualSpacer}
+            style={{ display: "block", height: paddingBottom }}
+          />
+        )}
+        {summary && (
+          <li
+            data-adapttable-part="summary-card"
+            className={cx(classNames.card, classNames.summaryCard)}
+            style={{ display: "block" }}
+          >
+            {columns.map((column) =>
+              summary[column.key] == null ? null : (
                 <div
-                  data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}
-                  className={
-                    slot.kind === "separator"
-                      ? classNames.separatorCell
-                      : classNames.fullWidthCell
-                  }
+                  key={column.key}
+                  data-adapttable-part="card-row"
+                  className={classNames.cardRow}
                 >
-                  {slot.kind === "fullWidth"
-                    ? (slot.render?.() as ReactNode)
-                    : null}
-                </div>
-              </li>
-            ) : (
-              cardFor(slot.row, slot.index, slot.key, slot.treeEntry)
-            )
-          )}
-      {grouping
-        ? pinnedSummaryBottom.map((row, index) =>
-            cardFor(row, index, pinnedSummaryRowId("bottom", index))
-          )
-        : null}
-      {paddingBottom > 0 && (
-        <li
-          data-adapttable-part="virtual-spacer"
-          className={classNames.virtualSpacer}
-          style={{ display: "block", height: paddingBottom }}
-        />
-      )}
-      {summary && (
-        <li
-          data-adapttable-part="summary-card"
-          className={cx(classNames.card, classNames.summaryCard)}
-          style={{ display: "block" }}
-        >
-          {columns.map((column) =>
-            summary[column.key] == null ? null : (
-              <div
-                key={column.key}
-                data-adapttable-part="card-row"
-                className={classNames.cardRow}
-              >
-                {resolveMobileLabel(column) && (
+                  {resolveMobileLabel(column) && (
+                    <span
+                      data-adapttable-part="card-label"
+                      className={classNames.cardLabel}
+                    >
+                      {resolveMobileLabel(column)}
+                    </span>
+                  )}
                   <span
-                    data-adapttable-part="card-label"
-                    className={classNames.cardLabel}
+                    data-adapttable-part="card-value"
+                    className={classNames.cardValue}
                   >
-                    {resolveMobileLabel(column)}
+                    {summary[column.key]}
                   </span>
-                )}
-                <span
-                  data-adapttable-part="card-value"
-                  className={classNames.cardValue}
-                >
-                  {summary[column.key]}
-                </span>
-              </div>
-            )
-          )}
-        </li>
-      )}
-    </ul>
+                </div>
+              )
+            )}
+          </li>
+        )}
+      </ul>
+    </div>
   );
 }

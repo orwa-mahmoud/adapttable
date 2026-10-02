@@ -1,8 +1,7 @@
 /**
- * summaryRow, header groups, and multiSort for the Radix table. Radix Themes
- * has no `<tfoot>`: the summary row renders as a `data-summary` row at the end
- * of the `<tbody>` (and a final summary card on mobile), so it is queried by
- * that marker, not by a footer section.
+ * summaryRow, header groups, and multiSort for the Radix table. The kit has no
+ * footer primitive, so the summary uses its row/cell components in a semantic
+ * `<tfoot>` while preserving the existing `data-summary` row marker.
  */
 import { createMemoryAdapter } from "@adapttable/react";
 import { Theme } from "@radix-ui/themes";
@@ -65,9 +64,9 @@ function renderTable(
   );
 }
 
-/** The data-summary row Radix appends to the tbody, if present. */
+/** The data-summary row Radix renders in the footer, if present. */
 function summaryRow(container: HTMLElement): HTMLElement | null {
-  return container.querySelector<HTMLElement>("tbody tr[data-summary]");
+  return container.querySelector<HTMLElement>("tfoot tr[data-summary]");
 }
 
 /** The city (3rd data column) cell of every NON-summary tbody row, DOM order. */

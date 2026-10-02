@@ -333,8 +333,13 @@ export function TextFieldRoot({
 export function TextFieldSlot({
   side: _side,
   children,
-}: Readonly<{ side?: "left" | "right"; children?: ReactNode }>) {
-  return <span aria-hidden="true">{children}</span>;
+  ...rest
+}: Readonly<HTMLAttributes<HTMLSpanElement> & { side?: "left" | "right" }>) {
+  return (
+    <span aria-hidden="true" {...rest}>
+      {children}
+    </span>
+  );
 }
 
 export const TextField = {
@@ -444,14 +449,14 @@ export const Callout = {
     role,
     children,
     className,
-  }: Readonly<{
-    color?: string;
-    role?: string;
-    children?: ReactNode;
-    className?: string;
-  }>) {
+    ...rest
+  }: Readonly<HTMLAttributes<HTMLDivElement> & { color?: string }>) {
     return (
-      <div className={cx("adapttable-callout", className)} role={role}>
+      <div
+        className={cx("adapttable-callout", className)}
+        role={role}
+        {...rest}
+      >
         {children}
       </div>
     );

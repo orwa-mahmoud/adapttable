@@ -37,6 +37,7 @@ export function Footer({
   const { safePage, totalPages, fromIndex, toIndex } = pagination;
   return (
     <HStack
+      data-adapttable-part="footer"
       gap={3}
       justify="space-between"
       flexWrap="wrap"

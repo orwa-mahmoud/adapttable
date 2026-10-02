@@ -174,13 +174,13 @@ describe("DesktopTable assembly paint (Radix)", () => {
     expect(noteCell).toHaveAttribute("rowspan", "2");
   });
 
-  it("pads the tbody summary for expand, reorder, selection and actions", () => {
+  it("pads the footer summary for expand, reorder, selection and actions", () => {
     const { container } = mount({
       ...fullChrome,
       summaryRow: () => ({ name: "2 people" }),
     });
     const summary = container.querySelector<HTMLElement>(
-      "tbody tr[data-summary]"
+      "tfoot tr[data-summary]"
     )!;
     const cells = within(summary).getAllByRole("cell");
     // expand + reorder + selection + name + city + note + actions

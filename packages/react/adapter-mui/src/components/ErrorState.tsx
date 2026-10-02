@@ -14,6 +14,7 @@ export function ErrorState({
 }>) {
   return (
     <Alert
+      data-adapttable-part="error"
       severity="error"
       action={
         onRetry ? (

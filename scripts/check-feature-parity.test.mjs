@@ -318,15 +318,11 @@ describe("Angular feature contracts before publication", () => {
 });
 
 describe("check-feature-parity --report", () => {
-  it("prints each private kit's gap and exits 0", () => {
+  it("prints no private-kit report after both Angular kits join the contracts", () => {
     const result = spawnSync(process.execPath, [SCRIPT, "--report"], {
       encoding: "utf8",
     });
     assert.equal(result.status, 0, result.stderr);
-    assert.doesNotMatch(result.stdout, /adapter-angular-unstyled/);
-    assert.match(
-      result.stdout,
-      /^adapter-ng-zorro is missing \d+ subpath\(s\) adapter-antd exports:$/m
-    );
+    assert.equal(result.stdout, "");
   });
 });

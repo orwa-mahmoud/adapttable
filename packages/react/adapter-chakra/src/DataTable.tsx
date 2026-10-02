@@ -156,7 +156,13 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
               : undefined) ??
             slots?.empty ??
             (chrome.emptyVariant === "noResults" ? (
-              <Stack role="status" align="center" py={10} gap={3}>
+              <Stack
+                data-adapttable-part="empty"
+                role="status"
+                align="center"
+                py={10}
+                gap={3}
+              >
                 <Text {...subtleText}>{labels.noResults}</Text>
                 <Button
                   size="sm"
@@ -168,7 +174,13 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                 </Button>
               </Stack>
             ) : (
-              <Text role="status" {...subtleText} textAlign="center" py={10}>
+              <Text
+                data-adapttable-part="empty"
+                role="status"
+                {...subtleText}
+                textAlign="center"
+                py={10}
+              >
                 {labels.noData}
               </Text>
             )),

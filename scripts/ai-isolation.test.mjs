@@ -34,10 +34,10 @@ describe("AI isolation", () => {
     }
   });
 
-  it("covers both bindings, Angular native development, core, server and published adapters", () => {
+  it("covers both bindings, the unpublished Angular kits, core, server and published adapters", () => {
     // A graph dropped from this list is a graph nobody checks, and the check
     // would still report success over the ones that remain.
-    assert.equal(GRAPHS.length, 13);
+    assert.equal(GRAPHS.length, 14);
     assert.ok(
       GRAPHS.includes(
         "packages/angular/angular/dist/fesm2022/adapttable-angular.mjs"
@@ -49,6 +49,11 @@ describe("AI isolation", () => {
       )
     );
     assert.ok(!GRAPHS.some((path) => path.includes("ai-angular")));
+    assert.ok(
+      GRAPHS.includes(
+        "packages/angular/adapter-ng-zorro/dist/fesm2022/adapttable-ng-zorro.mjs"
+      )
+    );
     for (const path of [
       "packages/shared/core",
       "packages/react/react",

@@ -98,9 +98,7 @@ import { REPO_ROOT } from "./packages.mjs";
  * `--report` prints the difference; an entry leaves this map when its kit
  * joins the contract.
  */
-export const REPORT_REFERENCES = {
-  "adapter-ng-zorro": "adapter-antd",
-};
+export const REPORT_REFERENCES = {};
 
 /**
  * Parts a kit genuinely cannot render, with the reason. An entry here is a
@@ -256,35 +254,12 @@ const FALLBACK_ONLY = {
 };
 
 /**
- * Parts the themed kits DO render an element for and have never named.
- *
- * Not a design decision — a gap, and the reason it is written down instead of
- * fixed in passing is that each one is six edits and a rendered assertion per
- * kit. Listed so the check has no blind spot: this file is where the debt is,
- * the summary prints its size on every run, and an entry that gets fixed has
- * to be removed or the check fails on the stale claim.
+ * Shared structural parts still missing from a themed kit. Each entry must
+ * name the concrete surface and its reason; the guard rejects stale entries
+ * once every themed kit names the real element. No shared structural gaps
+ * remain in the participating kits.
  */
-const UNNAMED_IN_KITS = {
-  "table structure": [
-    "footer",
-    "summary",
-    "summary-row",
-    "summary-cell",
-    "resize-handle",
-  ],
-  "row extras": [
-    "actions-cell",
-    "actions-header",
-    "detail-cell",
-    "detail-row",
-    "expand-cell",
-    "expand-header",
-  ],
-  "mobile cards": ["card-actions", "card-label", "card-row"],
-  "toolbar controls": ["search", "search-field", "search-icon"],
-  "filter chips": ["chip", "chip-remove", "chips"],
-  "empty and error states": ["empty", "error"],
-};
+const UNNAMED_IN_KITS = {};
 
 /** Every part named in one of the two accounted-for lists. */
 function accountedFor(groups) {

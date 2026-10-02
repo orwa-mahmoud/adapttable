@@ -974,6 +974,82 @@ describe("<DataTable> (unstyled)", () => {
     expect(screen.queryByRole("button", { name: /sort by/i })).toBeNull();
   });
 
+  it.each(["", "   "])(
+    "keeps a localized region name for a blank host label (%s)",
+    (tableLabel) => {
+      renderHarness({
+        isMobile: true,
+        override: {
+          maxHeight: 180,
+          tableLabel,
+          labels: { table: "Personnes" },
+        },
+      });
+      const region = screen.getByRole("region", { name: "Personnes" });
+      expect(region).toHaveAttribute("tabindex", "0");
+      expect(region).toContainElement(screen.getByRole("list"));
+    }
+  );
+
+  it.each([320, 0])(
+    "focuses the named bounded card region at maxHeight=%s",
+    (maxHeight) => {
+      renderHarness({
+        isMobile: true,
+        override: {
+          maxHeight,
+          tableLabel: "Contacts",
+          dir: "rtl",
+          classNames: { cards: "contact-cards" },
+        },
+      });
+      const region = screen.getByRole("region", { name: "Contacts" });
+      const list = screen.getByRole("list", { name: "Contacts" });
+      expect(region).toContainElement(list);
+      expect(region).toHaveAttribute("tabindex", "0");
+      expect(region).toHaveAttribute("dir", "rtl");
+      expect(region).toHaveStyle({
+        maxHeight: maxHeight === 0 ? "0" : `${maxHeight}px`,
+        overflowY: "auto",
+      });
+      expect(list).toHaveAttribute("data-adapttable-part", "cards");
+      expect(list).toHaveClass("contact-cards");
+      expect(list.tagName).toBe("UL");
+      expect(list).not.toHaveAttribute("role");
+      expect(list).not.toHaveAttribute("tabindex");
+      expect(list.style.maxHeight).toBe("");
+      expect(list.style.overflowY).toBe("");
+      act(() => region.focus());
+      expect(region).toHaveFocus();
+    }
+  );
+
+  it("removes the region's Tab stop when unbounded without replacing the list", () => {
+    const { rerender } = renderHarness({
+      isMobile: true,
+      override: { maxHeight: 320 },
+    });
+    const region = screen.getByRole("region", { name: "Data table" });
+    const list = screen.getByRole("list", { name: "Data table" });
+    act(() => region.focus());
+    expect(region).toHaveFocus();
+    const search = screen.getByPlaceholderText("Search…");
+    act(() => search.focus());
+    rerender(<Harness isMobile />);
+    expect(screen.getByRole("region", { name: "Data table" })).toBe(region);
+    expect(screen.getByRole("list", { name: "Data table" })).toBe(list);
+    expect(region).not.toHaveAttribute("tabindex");
+    expect(region.style.maxHeight).toBe("");
+    expect(region.style.overflowY).toBe("");
+    act(() => region.focus());
+    expect(search).toHaveFocus();
+    rerender(<Harness isMobile override={{ maxHeight: 0 }} />);
+    expect(screen.getByRole("list", { name: "Data table" })).toBe(list);
+    expect(region).toHaveAttribute("tabindex", "0");
+    act(() => region.focus());
+    expect(region).toHaveFocus();
+  });
+
   it("does not mount every mobile card when virtualize is on", () => {
     const many = Array.from({ length: 40 }, (_, i) => ({
       id: String(i),
@@ -992,8 +1068,14 @@ describe("<DataTable> (unstyled)", () => {
       },
       "limit=40"
     );
-    const list = container.querySelector('[data-adapttable-part="cards"]');
-    expect(list).toHaveStyle({ maxHeight: "400px", overflowY: "auto" });
+    const list = container.querySelector<HTMLUListElement>(
+      '[data-adapttable-part="cards"]'
+    );
+    const region = screen.getByRole("region", { name: "Data table" });
+    expect(region).toContainElement(list);
+    expect(region).toHaveStyle({ maxHeight: "400px", overflowY: "auto" });
+    expect(region).toHaveAttribute("tabindex", "0");
+    expect(list).not.toHaveAttribute("tabindex");
     const cards = container.querySelectorAll('[data-adapttable-part="card"]');
     expect(cards.length).toBeLessThan(15);
     expect(

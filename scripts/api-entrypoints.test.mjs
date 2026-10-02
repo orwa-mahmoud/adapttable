@@ -81,6 +81,7 @@ describe("entrypoints", () => {
     assert.deepEqual(unpublished, [
       "adapter-angular-unstyled",
       "adapter-bootstrap",
+      "adapter-ng-zorro",
       "ai-angular",
     ]);
   });

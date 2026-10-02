@@ -75,7 +75,48 @@
       "adapter-angular-unstyled-side-panel",
       "adapter-angular-unstyled-status-bar",
       "adapter-angular-unstyled-tree",
-      "adapter-angular-unstyled-virtualize"
+      "adapter-angular-unstyled-virtualize",
+      "adapter-ng-zorro",
+      "adapter-ng-zorro-assistant",
+      "adapter-ng-zorro-batch-editing",
+      "adapter-ng-zorro-bulk-actions",
+      "adapter-ng-zorro-cell-navigation",
+      "adapter-ng-zorro-cell-span",
+      "adapter-ng-zorro-column-groups",
+      "adapter-ng-zorro-column-menu",
+      "adapter-ng-zorro-column-selection",
+      "adapter-ng-zorro-command-palette",
+      "adapter-ng-zorro-context-menu",
+      "adapter-ng-zorro-density",
+      "adapter-ng-zorro-editing",
+      "adapter-ng-zorro-export",
+      "adapter-ng-zorro-extra-rows",
+      "adapter-ng-zorro-features",
+      "adapter-ng-zorro-filters",
+      "adapter-ng-zorro-find-in-table",
+      "adapter-ng-zorro-fit-columns",
+      "adapter-ng-zorro-fullscreen",
+      "adapter-ng-zorro-grouping",
+      "adapter-ng-zorro-grouping-panel",
+      "adapter-ng-zorro-header-filters",
+      "adapter-ng-zorro-multi-sort",
+      "adapter-ng-zorro-nested-table",
+      "adapter-ng-zorro-pinned-summary-rows",
+      "adapter-ng-zorro-pivot",
+      "adapter-ng-zorro-preset",
+      "adapter-ng-zorro-print",
+      "adapter-ng-zorro-resizable-columns",
+      "adapter-ng-zorro-row-actions",
+      "adapter-ng-zorro-row-appearance",
+      "adapter-ng-zorro-row-detail",
+      "adapter-ng-zorro-row-pinning",
+      "adapter-ng-zorro-row-reorder",
+      "adapter-ng-zorro-saved-views",
+      "adapter-ng-zorro-selection-stats",
+      "adapter-ng-zorro-side-panel",
+      "adapter-ng-zorro-status-bar",
+      "adapter-ng-zorro-tree",
+      "adapter-ng-zorro-virtualize"
     ],
     "react": [
       "adapter-antd",
@@ -6438,7 +6479,8 @@
       "DirtyCellsOptions",
       "DirtyEdits",
       "injectDirtyCells",
-      "dirtyMarkerView"
+      "dirtyMarkerView",
+      "formatMultiDraft"
     ],
     "angular-formula": [
       "AngularFormulaColumnsResult",
@@ -6830,6 +6872,292 @@
       "tree"
     ],
     "adapter-angular-unstyled-virtualize": [
+      "virtualize"
+    ],
+    "adapter-ng-zorro": [
+      "AdaptAutoFilterForm",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptNativeCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "MenuPopover",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps",
+      "menuPopover"
+    ],
+    "adapter-ng-zorro-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-ng-zorro-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-ng-zorro-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-ng-zorro-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-ng-zorro-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-ng-zorro-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-ng-zorro-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-ng-zorro-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-ng-zorro-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-ng-zorro-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-ng-zorro-density": [
+      "densityChooser"
+    ],
+    "adapter-ng-zorro-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-ng-zorro-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-ng-zorro-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-ng-zorro-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-ng-zorro-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-ng-zorro-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-ng-zorro-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-ng-zorro-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-ng-zorro-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-ng-zorro-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-ng-zorro-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-ng-zorro-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-ng-zorro-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-ng-zorro-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-ng-zorro-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-ng-zorro-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-ng-zorro-print": [
+      "print"
+    ],
+    "adapter-ng-zorro-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-ng-zorro-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-ng-zorro-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-ng-zorro-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-ng-zorro-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-ng-zorro-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-ng-zorro-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-ng-zorro-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-ng-zorro-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-ng-zorro-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-ng-zorro-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-ng-zorro-virtualize": [
       "virtualize"
     ]
   },
@@ -8095,6 +8423,129 @@
     },
     "adapter-angular-unstyled-virtualize.api.md": {
       "surface": "adapter-angular-unstyled-virtualize"
+    },
+    "adapter-ng-zorro.api.md": {
+      "surface": "adapter-ng-zorro"
+    },
+    "adapter-ng-zorro-assistant.api.md": {
+      "surface": "adapter-ng-zorro-assistant"
+    },
+    "adapter-ng-zorro-batch-editing.api.md": {
+      "surface": "adapter-ng-zorro-batch-editing"
+    },
+    "adapter-ng-zorro-bulk-actions.api.md": {
+      "surface": "adapter-ng-zorro-bulk-actions"
+    },
+    "adapter-ng-zorro-cell-navigation.api.md": {
+      "surface": "adapter-ng-zorro-cell-navigation"
+    },
+    "adapter-ng-zorro-cell-span.api.md": {
+      "reexport": "adapter-ng-zorro-cell-span"
+    },
+    "adapter-ng-zorro-column-groups.api.md": {
+      "surface": "adapter-ng-zorro-column-groups"
+    },
+    "adapter-ng-zorro-column-menu.api.md": {
+      "surface": "adapter-ng-zorro-column-menu"
+    },
+    "adapter-ng-zorro-column-selection.api.md": {
+      "surface": "adapter-ng-zorro-column-selection"
+    },
+    "adapter-ng-zorro-command-palette.api.md": {
+      "surface": "adapter-ng-zorro-command-palette"
+    },
+    "adapter-ng-zorro-context-menu.api.md": {
+      "surface": "adapter-ng-zorro-context-menu"
+    },
+    "adapter-ng-zorro-density.api.md": {
+      "surface": "adapter-ng-zorro-density"
+    },
+    "adapter-ng-zorro-editing.api.md": {
+      "surface": "adapter-ng-zorro-editing"
+    },
+    "adapter-ng-zorro-export.api.md": {
+      "surface": "adapter-ng-zorro-export"
+    },
+    "adapter-ng-zorro-extra-rows.api.md": {
+      "reexport": "adapter-ng-zorro-extra-rows"
+    },
+    "adapter-ng-zorro-features.api.md": {
+      "surface": "adapter-ng-zorro-features"
+    },
+    "adapter-ng-zorro-filters.api.md": {
+      "surface": "adapter-ng-zorro-filters"
+    },
+    "adapter-ng-zorro-find-in-table.api.md": {
+      "surface": "adapter-ng-zorro-find-in-table"
+    },
+    "adapter-ng-zorro-fit-columns.api.md": {
+      "reexport": "adapter-ng-zorro-fit-columns"
+    },
+    "adapter-ng-zorro-fullscreen.api.md": {
+      "surface": "adapter-ng-zorro-fullscreen"
+    },
+    "adapter-ng-zorro-grouping.api.md": {
+      "surface": "adapter-ng-zorro-grouping"
+    },
+    "adapter-ng-zorro-grouping-panel.api.md": {
+      "surface": "adapter-ng-zorro-grouping-panel"
+    },
+    "adapter-ng-zorro-header-filters.api.md": {
+      "surface": "adapter-ng-zorro-header-filters"
+    },
+    "adapter-ng-zorro-multi-sort.api.md": {
+      "reexport": "adapter-ng-zorro-multi-sort"
+    },
+    "adapter-ng-zorro-nested-table.api.md": {
+      "surface": "adapter-ng-zorro-nested-table"
+    },
+    "adapter-ng-zorro-pinned-summary-rows.api.md": {
+      "reexport": "adapter-ng-zorro-pinned-summary-rows"
+    },
+    "adapter-ng-zorro-pivot.api.md": {
+      "surface": "adapter-ng-zorro-pivot"
+    },
+    "adapter-ng-zorro-preset.api.md": {
+      "surface": "adapter-ng-zorro-preset"
+    },
+    "adapter-ng-zorro-print.api.md": {
+      "surface": "adapter-ng-zorro-print"
+    },
+    "adapter-ng-zorro-resizable-columns.api.md": {
+      "reexport": "adapter-ng-zorro-resizable-columns"
+    },
+    "adapter-ng-zorro-row-actions.api.md": {
+      "surface": "adapter-ng-zorro-row-actions"
+    },
+    "adapter-ng-zorro-row-appearance.api.md": {
+      "reexport": "adapter-ng-zorro-row-appearance"
+    },
+    "adapter-ng-zorro-row-detail.api.md": {
+      "surface": "adapter-ng-zorro-row-detail"
+    },
+    "adapter-ng-zorro-row-pinning.api.md": {
+      "reexport": "adapter-ng-zorro-row-pinning"
+    },
+    "adapter-ng-zorro-row-reorder.api.md": {
+      "surface": "adapter-ng-zorro-row-reorder"
+    },
+    "adapter-ng-zorro-saved-views.api.md": {
+      "surface": "adapter-ng-zorro-saved-views"
+    },
+    "adapter-ng-zorro-selection-stats.api.md": {
+      "surface": "adapter-ng-zorro-selection-stats"
+    },
+    "adapter-ng-zorro-side-panel.api.md": {
+      "surface": "adapter-ng-zorro-side-panel"
+    },
+    "adapter-ng-zorro-status-bar.api.md": {
+      "surface": "adapter-ng-zorro-status-bar"
+    },
+    "adapter-ng-zorro-tree.api.md": {
+      "surface": "adapter-ng-zorro-tree"
+    },
+    "adapter-ng-zorro-virtualize.api.md": {
+      "surface": "adapter-ng-zorro-virtualize"
     }
   }
 }

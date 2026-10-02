@@ -313,9 +313,14 @@ function MobileCardBase<TRow>({
       {renderCard
         ? renderCard(row, { index, fields, selected, expanded })
         : fields.map(({ column, label, value }) => (
-            <Box key={column.key} mb={compact ? "1" : "2"}>
+            <Box
+              key={column.key}
+              data-adapttable-part="card-row"
+              mb={compact ? "1" : "2"}
+            >
               {label && (
                 <Text
+                  data-adapttable-part="card-label"
                   as="div"
                   size="1"
                   color="gray"
@@ -361,15 +366,17 @@ function MobileCardBase<TRow>({
         />
       )}
       {rowEdit.actions.length > 0 && (
-        <RowActionButtons
-          row={row}
-          actions={rowEdit.actions}
-          confirm={confirm}
-          labels={labels}
-          layout={rowActionsLayout}
-          render={renderRowActions}
-          accentColor={accentColor}
-        />
+        <Box data-adapttable-part="card-actions">
+          <RowActionButtons
+            row={row}
+            actions={rowEdit.actions}
+            confirm={confirm}
+            labels={labels}
+            layout={rowActionsLayout}
+            render={renderRowActions}
+            accentColor={accentColor}
+          />
+        </Box>
       )}
     </Card>
   );
@@ -416,6 +423,11 @@ export function MobileCards<TRow>({
   virtualScrollRef,
 }: Readonly<SharedProps<TRow>>) {
   const { columns, selection, labels } = table;
+  const requestedRegionLabel = (
+    table.getTableProps()["aria-label"] ?? labels.table
+  ).trim();
+  const regionLabel =
+    requestedRegionLabel.length > 0 ? requestedRegionLabel : labels.table;
   const entries = orderedCardEntries(
     rows,
     getRowId,
@@ -491,125 +503,140 @@ export function MobileCards<TRow>({
   };
 
   return (
-    <Flex
-      direction="column"
-      gap={compact ? "2" : "3"}
+    <div
+      role="region"
+      aria-label={regionLabel}
+      tabIndex={maxHeight == null ? undefined : 0}
       ref={virtualScrollRef}
-      data-adapttable-part="cards"
-      role="list"
-      aria-label={table.getTableProps()["aria-label"]}
       style={mobileCardListStyle(maxHeight)}
     >
-      {paddingTop > 0 && <Box aria-hidden style={{ height: paddingTop }} />}
-      {grouping
-        ? pinnedSummaryTop.map((row, index) =>
-            cardFor(row, index, pinnedSummaryRowId("top", index))
-          )
-        : null}
-      {grouping
-        ? grouping.entries.map((entry) => {
-            if (isExtraEntry(entry)) {
-              return (
+      <Flex
+        direction="column"
+        gap={compact ? "2" : "3"}
+        data-adapttable-part="cards"
+        role="list"
+        aria-label={table.getTableProps()["aria-label"]}
+      >
+        {paddingTop > 0 && <Box aria-hidden style={{ height: paddingTop }} />}
+        {grouping
+          ? pinnedSummaryTop.map((row, index) =>
+              cardFor(row, index, pinnedSummaryRowId("top", index))
+            )
+          : null}
+        {grouping
+          ? grouping.entries.map((entry) => {
+              if (isExtraEntry(entry)) {
+                return (
+                  <Card
+                    key={entry.key}
+                    role={entry.kind === "separator" ? "separator" : "listitem"}
+                    aria-label={
+                      entry.kind === "separator"
+                        ? labels.rowSeparator
+                        : undefined
+                    }
+                    data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].row}
+                  >
+                    <Box
+                      data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}
+                    >
+                      {entry.kind === "fullWidth"
+                        ? (entry.render?.() as ReactNode)
+                        : null}
+                    </Box>
+                  </Card>
+                );
+              }
+              if (
+                entry.kind === "group" ||
+                entry.kind === "groupFooter" ||
+                entry.kind === "groupMore"
+              ) {
+                return (
+                  <OptionalGroupHeaderCard
+                    key={entry.key}
+                    entry={entry}
+                    columns={columns}
+                    selection={selection}
+                    labels={labels}
+                    compact={compact}
+                    onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
+                    onShowMore={grouping.showMore}
+                  />
+                );
+              }
+              return cardFor(entry.row, entry.index, entry.key);
+            })
+          : insertExtraRows(
+              bodyRowEntries(entries, tree),
+              extraRows,
+              (e) => e.key
+            ).map((slot) =>
+              "kind" in slot ? (
                 <Card
-                  key={entry.key}
-                  role={entry.kind === "separator" ? "separator" : "listitem"}
+                  key={slot.key}
+                  role={slot.kind === "separator" ? "separator" : "listitem"}
                   aria-label={
-                    entry.kind === "separator" ? labels.rowSeparator : undefined
+                    slot.kind === "separator" ? labels.rowSeparator : undefined
                   }
-                  data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].row}
+                  data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].row}
                 >
-                  <Box data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}>
-                    {entry.kind === "fullWidth"
-                      ? (entry.render?.() as ReactNode)
+                  <Box data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}>
+                    {slot.kind === "fullWidth"
+                      ? (slot.render?.() as ReactNode)
                       : null}
                   </Box>
                 </Card>
-              );
-            }
-            if (
-              entry.kind === "group" ||
-              entry.kind === "groupFooter" ||
-              entry.kind === "groupMore"
-            ) {
-              return (
-                <OptionalGroupHeaderCard
-                  key={entry.key}
-                  entry={entry}
-                  columns={columns}
-                  selection={selection}
-                  labels={labels}
-                  compact={compact}
-                  onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
-                  onShowMore={grouping.showMore}
-                />
-              );
-            }
-            return cardFor(entry.row, entry.index, entry.key);
-          })
-        : insertExtraRows(
-            bodyRowEntries(entries, tree),
-            extraRows,
-            (e) => e.key
-          ).map((slot) =>
-            "kind" in slot ? (
-              <Card
-                key={slot.key}
-                role={slot.kind === "separator" ? "separator" : "listitem"}
-                aria-label={
-                  slot.kind === "separator" ? labels.rowSeparator : undefined
-                }
-                data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].row}
-              >
-                <Box data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}>
-                  {slot.kind === "fullWidth"
-                    ? (slot.render?.() as ReactNode)
-                    : null}
-                </Box>
-              </Card>
-            ) : (
-              cardFor(slot.row, slot.index, slot.key, slot.treeEntry)
+              ) : (
+                cardFor(slot.row, slot.index, slot.key, slot.treeEntry)
+              )
+            )}
+        {grouping
+          ? pinnedSummaryBottom.map((row, index) =>
+              cardFor(row, index, pinnedSummaryRowId("bottom", index))
             )
-          )}
-      {grouping
-        ? pinnedSummaryBottom.map((row, index) =>
-            cardFor(row, index, pinnedSummaryRowId("bottom", index))
-          )
-        : null}
-      {paddingBottom > 0 && (
-        <Box aria-hidden style={{ height: paddingBottom }} />
-      )}
-      {summary && (
-        <Card
-          data-adapttable-part="summary-card"
-          size={compact ? "1" : "2"}
-          role="listitem"
-          className={className}
-        >
-          {columns.map((column) => {
-            const value = summary[column.key];
-            // Columns absent from the summary are skipped — a card has no grid
-            // to keep aligned, so empty entries are just noise.
-            if (value === undefined) return null;
-            return (
-              <Box key={column.key} mb={compact ? "1" : "2"}>
-                {resolveMobileLabel(column) && (
-                  <Text
-                    as="div"
-                    size="1"
-                    color="gray"
-                    style={{ textTransform: "uppercase" }}
-                  >
-                    {resolveMobileLabel(column)}
+          : null}
+        {paddingBottom > 0 && (
+          <Box aria-hidden style={{ height: paddingBottom }} />
+        )}
+        {summary && (
+          <Card
+            data-adapttable-part="summary-card"
+            size={compact ? "1" : "2"}
+            role="listitem"
+            className={className}
+          >
+            {columns.map((column) => {
+              const value = summary[column.key];
+              // Columns absent from the summary are skipped — a card has no grid
+              // to keep aligned, so empty entries are just noise.
+              if (value === undefined) return null;
+              return (
+                <Box
+                  key={column.key}
+                  data-adapttable-part="card-row"
+                  mb={compact ? "1" : "2"}
+                >
+                  {resolveMobileLabel(column) && (
+                    <Text
+                      data-adapttable-part="card-label"
+                      as="div"
+                      size="1"
+                      color="gray"
+                      style={{ textTransform: "uppercase" }}
+                    >
+                      {resolveMobileLabel(column)}
+                    </Text>
+                  )}
+                  <Text as="div" size="2" weight="bold">
+                    {value}
                   </Text>
-                )}
-                <Text as="div" size="2" weight="bold">
-                  {value}
-                </Text>
-              </Box>
-            );
-          })}
-        </Card>
-      )}
-    </Flex>
+                </Box>
+              );
+            })}
+          </Card>
+        )}
+      </Flex>
+    </div>
   );
 }

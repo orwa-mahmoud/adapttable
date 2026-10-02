@@ -13,7 +13,10 @@ export type ReactColumnResizeHandleProps = Omit<
   Pick<
     HTMLAttributes<HTMLElement>,
     "onPointerDown" | "onKeyDown" | "onDoubleClick"
-  >;
+  > & {
+    /** The shared styling hook on the actual resize control. */
+    readonly "data-adapttable-part"?: "resize-handle";
+  };
 
 /**
  * @public
@@ -21,5 +24,8 @@ export type ReactColumnResizeHandleProps = Omit<
 export function toReactColumnResizeHandleProps(
   props: CoreColumnResizeHandleProps
 ): ReactColumnResizeHandleProps {
-  return props as unknown as ReactColumnResizeHandleProps;
+  return {
+    ...props,
+    "data-adapttable-part": "resize-handle",
+  } as unknown as ReactColumnResizeHandleProps;
 }

@@ -135,14 +135,22 @@ export function Toolbar<TRow>({
       {toolbarSlots?.start}
       {searchable !== false && (
         <TextField
+          data-adapttable-part="search-field"
           size="small"
           value={searchProps.value}
           placeholder={searchProps.placeholder}
           slotProps={{
-            htmlInput: { "aria-label": labels.search, type: "search" },
+            htmlInput: {
+              "aria-label": labels.search,
+              type: "search",
+              "data-adapttable-part": "search",
+            },
             input: {
               startAdornment: (
-                <InputAdornment position="start">
+                <InputAdornment
+                  position="start"
+                  data-adapttable-part="search-icon"
+                >
                   <SearchIcon />
                 </InputAdornment>
               ),

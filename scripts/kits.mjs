@@ -102,12 +102,12 @@ export const KITS = Object.freeze([
   // Contract participation is independent of publication: a finished kit can
   // remain private until the owner chooses its first release.
   { name: "adapter-angular-unstyled", framework: "angular", role: "native" },
-  // The Angular kits are private placeholders until each is built: Angular
-  // Material (#467), PrimeNG (#468) and NG-ZORRO (#471). The pull request that
+  // The remaining Angular kits are private placeholders until each is built:
+  // Angular Material (#467) and PrimeNG (#468). The pull request that
   // builds one gives it the `shell` role here; publishing is a separate step.
   { name: "adapter-material", framework: "angular", role: "private" },
   { name: "adapter-primeng", framework: "angular", role: "private" },
-  { name: "adapter-ng-zorro", framework: "angular", role: "private" },
+  { name: "adapter-ng-zorro", framework: "angular", role: "shell" },
 ]);
 
 /** The folder-name prefix every kit package carries. */

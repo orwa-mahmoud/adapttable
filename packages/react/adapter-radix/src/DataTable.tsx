@@ -143,6 +143,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
             slots?.empty ??
             (chrome.emptyVariant === "noResults" ? (
               <Flex
+                data-adapttable-part="empty"
                 role="status"
                 direction="column"
                 align="center"
@@ -161,6 +162,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
               </Flex>
             ) : (
               <Text
+                data-adapttable-part="empty"
                 role="status"
                 {...subtleText}
                 align="center"

@@ -14,6 +14,11 @@ import { FiltersIcon } from "../icons";
 import type { RadixAccentColor } from "../types";
 import { NativeSelect, type SelectOption } from "./primitives";
 
+/** Name the actual input wrapper owned by the kit. */
+function nameSearchField(input: HTMLInputElement | null): void {
+  input?.parentElement?.setAttribute("data-adapttable-part", "search-field");
+}
+
 export function pageSizeSelectOptions(
   limit: number,
   defaultLimit: number = limit
@@ -125,6 +130,8 @@ export function Toolbar<TRow>({
       {searchable !== false && (
         <Box style={{ flex: 1, minWidth: 160, maxWidth: 360 }}>
           <TextField.Root
+            data-adapttable-part="search"
+            ref={nameSearchField}
             size="2"
             aria-label={labels.search}
             type="search"
@@ -132,7 +139,7 @@ export function Toolbar<TRow>({
             placeholder={searchProps.placeholder}
             onChange={searchProps.onChange}
           >
-            <TextField.Slot side="left">
+            <TextField.Slot side="left" data-adapttable-part="search-icon">
               <SearchIcon />
             </TextField.Slot>
           </TextField.Root>

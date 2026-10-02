@@ -2858,7 +2858,9 @@ export { QueryGroupRow }
 export { QuerySupport }
 
 // @public
-export type ReactColumnResizeHandleProps = Omit<ColumnResizeHandleProps, "onPointerDown" | "onKeyDown" | "onDoubleClick"> & Pick<HTMLAttributes<HTMLElement>, "onPointerDown" | "onKeyDown" | "onDoubleClick">;
+export type ReactColumnResizeHandleProps = Omit<ColumnResizeHandleProps, "onPointerDown" | "onKeyDown" | "onDoubleClick"> & Pick<HTMLAttributes<HTMLElement>, "onPointerDown" | "onKeyDown" | "onDoubleClick"> & {
+    readonly "data-adapttable-part"?: "resize-handle";
+};
 
 // @public
 export interface ReactMobileCardField<TRow> extends Omit<MobileCardField<TRow>, "value"> {

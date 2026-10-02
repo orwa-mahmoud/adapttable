@@ -460,6 +460,17 @@ describe("check-parts-parity reads each kit in its own framework", () => {
 });
 
 describe("the kit registry holds to the packages on disk", () => {
+  it("binds the finished NG-ZORRO kit to the shell contracts before publication", () => {
+    assert.deepEqual(
+      KITS.find((kit) => kit.name === "adapter-ng-zorro"),
+      {
+        name: "adapter-ng-zorro",
+        framework: "angular",
+        role: "shell",
+      }
+    );
+  });
+
   it("binds the finished Angular unstyled kit to the native contracts", () => {
     assert.deepEqual(
       KITS.find((kit) => kit.name === "adapter-angular-unstyled"),

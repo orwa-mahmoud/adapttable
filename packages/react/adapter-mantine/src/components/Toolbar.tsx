@@ -112,6 +112,9 @@ export function Toolbar<TRow>({
       {searchable !== false && (
         <TextInput
           {...searchProps}
+          data-adapttable-part="search"
+          wrapperProps={{ "data-adapttable-part": "search-field" }}
+          attributes={{ section: { "data-adapttable-part": "search-icon" } }}
           leftSection={<SearchIcon size={14} />}
           size="sm"
           style={{ flex: 1, minWidth: 160, maxWidth: 360 }}

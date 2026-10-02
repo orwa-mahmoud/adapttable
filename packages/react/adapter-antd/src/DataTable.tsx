@@ -144,6 +144,7 @@ import {
 } from "react";
 
 import { AntdHistoryGate, AntdInteractionGate } from "./antdLiveGates";
+import { useAntdTableParts } from "./antdParts";
 import {
   type AntdRowScroll,
   type AntdTableRef,
@@ -230,6 +231,7 @@ function LocalizedEmpty({
       }}
     >
       <Empty
+        data-adapttable-part="empty"
         description={description}
         image={
           <div aria-hidden="true" style={{ height: "100%" }}>
@@ -1376,6 +1378,7 @@ function DesktopTableBody<TRow>({
   labels: Required<TableLabels>;
 }>) {
   const [theadRef, headerHeight] = useOffsetHeight();
+  const partsRef = useAntdTableParts(tableRef);
   let stickyHeaderOffset: number | undefined;
   if (sticky === true) stickyHeaderOffset = 0;
   else if (sticky) stickyHeaderOffset = sticky.offsetHeader ?? 0;
@@ -1432,7 +1435,7 @@ function DesktopTableBody<TRow>({
 
   const table = (
     <Table<GroupedDataRecord<TRow>>
-      ref={tableRef}
+      ref={partsRef}
       aria-label={tableLabel}
       components={components}
       columns={columns}
@@ -2724,7 +2727,10 @@ function AntdTableBody<TRow>({
                     </div>
                     <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
                     {c.isPaged && !source.error && c.body === "desktop" && (
-                      <div className={classNames?.footer}>
+                      <div
+                        data-adapttable-part="footer"
+                        className={classNames?.footer}
+                      >
                         <PagedFooter
                           table={table}
                           source={source}

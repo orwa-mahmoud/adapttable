@@ -13,6 +13,11 @@ import { type ReactNode } from "react";
 import { FiltersIcon } from "../icons";
 import { NativeSelect } from "./primitives";
 
+const SEARCH_ICON_PROPS = {
+  "data-adapttable-part": "search-icon",
+  "aria-hidden": true,
+} as const;
+
 export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
   /** Which filter container opens from the Filters button. */
   filtersMode: "popover" | "drawer" | "header";
@@ -113,12 +118,15 @@ export function Toolbar<TRow>({
       {toolbarSlots?.start}
       {searchable !== false && (
         <InputGroup
+          data-adapttable-part="search-field"
           maxW="360px"
           flex="1"
           minW="160px"
           startElement={<SearchIcon />}
+          startElementProps={SEARCH_ICON_PROPS}
         >
           <Input
+            data-adapttable-part="search"
             size="sm"
             aria-label={labels.search}
             type="search"

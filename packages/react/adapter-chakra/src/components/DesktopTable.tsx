@@ -227,6 +227,7 @@ function DesktopRowBase<TRow>(
       >
         {expandable && (
           <Table.Cell
+            data-adapttable-part="expand-cell"
             px={1}
             style={{
               ...edgeCellStyle("start", hasStartPin, PIN_Z.body),
@@ -352,6 +353,7 @@ function DesktopRowBase<TRow>(
         {columnSpacers && <ColumnSpacer width={columnSpacers.end} side="end" />}
         {showActions && (
           <Table.Cell
+            data-adapttable-part="actions-cell"
             textAlign="end"
             style={{
               ...edgeCellStyle("end", hasEndPin || actionsPinned, PIN_Z.body),
@@ -384,8 +386,10 @@ function DesktopRowBase<TRow>(
         )}
       </Table.Row>
       {expandable && expanded && (
-        <Table.Row ref={detailMeasureRef}>
-          <Table.Cell colSpan={columnSpan}>{renderDetail(row)}</Table.Cell>
+        <Table.Row ref={detailMeasureRef} data-adapttable-part="detail-row">
+          <Table.Cell colSpan={columnSpan} data-adapttable-part="detail-cell">
+            {renderDetail(row)}
+          </Table.Cell>
         </Table.Row>
       )}
     </>
@@ -650,6 +654,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     <>
       {header.leading.expand && (
         <Table.ColumnHeader
+          data-adapttable-part="expand-header"
           {...stickyTh}
           aria-label={labels.expandRow}
           width={`${EXPANSION_WIDTH}px`}
@@ -707,6 +712,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       )}
       {header.trailing.actions && (
         <Table.ColumnHeader
+          data-adapttable-part="actions-header"
           textAlign="end"
           {...stickyTh}
           rowSpan={rowSpan > 1 ? rowSpan : undefined}
@@ -837,22 +843,27 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           })}
         </Table.Body>
         {showColumnFooter && (
-          <Table.Footer>
-            <Table.Row>
-              {header.leading.expand && <Table.Cell px={1} />}
+          <Table.Footer data-adapttable-part="summary">
+            <Table.Row data-adapttable-part="summary-row">
+              {header.leading.expand && (
+                <Table.Cell data-adapttable-part="summary-cell" px={1} />
+              )}
               <When show={showReorder}>
-                <Table.Cell px={1} />
+                <Table.Cell data-adapttable-part="summary-cell" px={1} />
               </When>
-              {selection && <Table.Cell />}
+              {selection && <Table.Cell data-adapttable-part="summary-cell" />}
               {columns.map((column) => (
                 <Table.Cell
+                  data-adapttable-part="summary-cell"
                   key={column.key}
                   textAlign={logicalAlign(column.align)}
                 >
                   {resolveColumnFooter(column, summary?.[column.key])}
                 </Table.Cell>
               ))}
-              {showActions && <Table.Cell />}
+              {showActions && (
+                <Table.Cell data-adapttable-part="summary-cell" />
+              )}
             </Table.Row>
           </Table.Footer>
         )}
