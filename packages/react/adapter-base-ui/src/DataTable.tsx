@@ -143,6 +143,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
             slots?.empty ??
             (chrome.emptyVariant === "noResults" ? (
               <output
+                data-adapttable-part="empty"
                 className="adapttable-flex"
                 style={{
                   display: "flex",
@@ -164,6 +165,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
               </output>
             ) : (
               <output
+                data-adapttable-part="empty"
                 className="adapttable-text"
                 data-muted="true"
                 data-align="center"

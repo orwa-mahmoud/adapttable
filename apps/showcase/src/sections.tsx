@@ -11,11 +11,11 @@ import {
 import { cssVars } from "./cssVars";
 import {
   adapterByKey,
+  adaptersOf,
   builtAdapters,
   CANONICAL_AI_ADAPTER,
   docsUrl,
   MATRIX_FEATURES,
-  SHOWCASE_ADAPTERS,
   type ShowcaseAdapter,
   SITE_HOME,
 } from "./matrix/content";
@@ -166,7 +166,7 @@ const buildGroups = (
     key: "adapters",
     label: "Adapters",
     wide: true,
-    pages: SHOWCASE_ADAPTERS.map((kit) => ({
+    pages: adaptersOf("react").map((kit) => ({
       key: kit.key,
       label: kit.label,
       hint: kit.blurb,

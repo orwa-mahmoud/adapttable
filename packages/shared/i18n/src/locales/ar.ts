@@ -70,6 +70,7 @@ export const ar: Required<TableLabels> = {
   relPreviousMonth: "الشهر السابق",
   relLastN: "آخر N أيام",
   relNextN: "الـ N أيام القادمة",
+  filterAll: "الكل",
   boolAny: "أي",
   boolTrue: "نعم",
   boolFalse: "لا",

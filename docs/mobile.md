@@ -59,6 +59,19 @@ layouts.
 - **`rowAppearance({ rowStyle, rowHeight })`** applies the same way — see
   [row styling and heights](./row-styling.md).
 
+## Keyboard scrolling inside a fixed-height list
+
+Set `maxHeight` to keep the cards inside a bounded scroll region. The region
+uses the table's accessible name and is a Tab stop, so keyboard readers can
+focus it and use native scrolling keys such as Page Down and Home. Mouse and
+touch scrolling remain native. The inner card list keeps its list semantics,
+row positions, styling parts and custom card content.
+
+Omit `maxHeight` to use page scrolling; the region adds no Tab stop. Changing
+only the height bound keeps the wrapper and list; virtualization still mounts
+and removes off-screen cards as needed. In the mobile demo, use **Bounded list**
+to try the two layouts.
+
 ## Your own card
 
 The built-in card is a stack of labelled fields, which is right for most

@@ -754,12 +754,101 @@ describe("the revision a session stamps", () => {
     expect(session.manifest().viewRevision).toBe(2);
   });
 
+  it("rejects a ticket from an engine replaced at the same revision tuple", async () => {
+    const first = neutralTable();
+    const second = neutralTable();
+    const viewFor = (source: ReturnType<typeof neutralTable>) =>
+      bareView({
+        neutralTable: source.table,
+        query: wiredQuery({
+          setSearch: (search) => {
+            source.engine.dispatch({ type: "setSearch", search });
+          },
+        }),
+      });
+    expect(second.table.revisions).toEqual(first.table.revisions);
+    const { session, setView, flushAdmission } = bind(
+      { tableId: "staff" },
+      viewFor(first)
+    );
+    const admitted = session.manifest().viewRevision;
+    // A commit can publish the new engine at the admission boundary itself.
+    flushAdmission.mockImplementation(() => {
+      setView(viewFor(second));
+    });
+    const stale = await session.execute(
+      "view.setSearch",
+      { query: "grace" },
+      admitted,
+      "old-engine-ticket"
+    );
+
+    expect(stale.error?.code).toBe("revision-mismatch");
+    expect(second.engine.snapshot().search).toBe("");
+    expect(first.engine.snapshot().search).toBe("");
+    const current = session.manifest().viewRevision;
+    expect(current).toBeGreaterThan(admitted);
+    expect(session.manifest().viewRevision).toBe(current);
+    expect((await run(session, "view.setSearch", { query: "grace" })).ok).toBe(
+      true
+    );
+    expect(second.engine.snapshot().search).toBe("grace");
+    expect(first.engine.snapshot().search).toBe("");
+  });
+
+  it("holds for the same engine and advances through source transitions", () => {
+    const first = neutralTable();
+    const second = neutralTable();
+    const { session, setView } = bind(
+      { tableId: "staff" },
+      bareView({ neutralTable: first.table })
+    );
+    expect(session.manifest().viewRevision).toBe(1);
+    setView(bareView({ neutralTable: first.table }));
+    expect(session.manifest().viewRevision).toBe(1);
+    setView(bareView());
+    expect(session.manifest().viewRevision).toBe(2);
+    setView(bareView());
+    expect(session.manifest().viewRevision).toBe(2);
+    setView(bareView({ neutralTable: second.table }));
+    expect(session.manifest().viewRevision).toBe(3);
+    setView(bareView({ neutralTable: first.table }));
+    expect(session.manifest().viewRevision).toBe(4);
+    setView(undefined);
+    expect(session.manifest().viewRevision).toBe(5);
+    setView(bareView({ neutralTable: first.table }));
+    expect(session.manifest().viewRevision).toBe(6);
+    first.engine.invalidate(["data"], { data: [ADA] });
+    expect(session.manifest().viewRevision).toBe(7);
+    expect(session.manifest().viewRevision).toBe(7);
+  });
+
   it("holds at the first revision while there is no view", () => {
     const { session } = bind({ tableId: "staff" }, undefined);
 
     expect(session.manifest().viewRevision).toBe(1);
     expect(session.manifest().viewRevision).toBe(1);
   });
+
+  it.each(["server", "engine"])(
+    "starts the first published %s view at revision 1 after bootstrap reads",
+    (source) => {
+      const { table } = neutralTable();
+      const view =
+        source === "engine" ? bareView({ neutralTable: table }) : bareView();
+      const { session, setView } = bind({ tableId: "staff" }, undefined);
+      expect(session.manifest().viewRevision).toBe(1);
+      expect(session.manifest().viewRevision).toBe(1);
+
+      setView(view);
+      expect(session.manifest().viewRevision).toBe(1);
+      expect(session.manifest().viewRevision).toBe(1);
+      setView(undefined);
+      expect(session.manifest().viewRevision).toBe(2);
+      setView(view);
+      expect(session.manifest().viewRevision).toBe(3);
+    }
+  );
 });
 
 describe("view operations through the runtime's own setters", () => {

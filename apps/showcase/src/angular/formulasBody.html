@@ -1,0 +1,61 @@
+<!-- The host formula bar and the selected kit table it configures. -->
+<div class="mx-demo">
+  <div class="fx" data-testid="formula-bar">
+    <form class="fx__form" (submit)="$event.preventDefault(); add()">
+      <label class="fx__field">
+        <span>Column</span>
+        <input
+          [value]="name()"
+          (input)="name.set($any($event.target).value)"
+          data-testid="formula-name"
+        />
+      </label>
+      <label class="fx__field fx__field--wide">
+        <span>Formula</span>
+        <input
+          [value]="formula()"
+          (input)="formula.set($any($event.target).value)"
+          placeholder="=ROUND(budget / 12, 0)"
+          [spellcheck]="false"
+          data-testid="formula-text"
+        />
+      </label>
+      <button type="submit" data-testid="formula-add">Add column</button>
+    </form>
+    <ul class="fx__chips" data-testid="formula-columns">
+      @for (spec of state.formulas(); track spec.key) {
+        <li>
+          <code>{{ spec.header ?? spec.key }}: {{ spec.formula }}</code>
+          <button
+            type="button"
+            [attr.aria-label]="'Remove ' + (spec.header ?? spec.key)"
+            (click)="remove(spec.key)"
+          >
+            ×
+          </button>
+        </li>
+      }
+    </ul>
+    <div data-testid="formula-report" role="status">
+      @for (error of errors(); track error[0]) {
+        <p>{{ error[0] }}: {{ error[1] }}</p>
+      }
+      @if (derived().cycles.length > 0) {
+        <p>{{ derived().cycles.join(", ") }}: #CYCLE!</p>
+      }
+    </div>
+  </div>
+  <div class="mx-demo__body">
+    <adapt-showcase-table
+      tableLabel="Computed people"
+      urlKey="fx"
+      [dir]="presentation.dir"
+      [labels]="presentation.labels"
+      [attr.lang]="presentation.locale"
+      [data]="rows"
+      [columns]="columns()"
+      [rowKey]="rowKey"
+      [defaults]="{ limit: 10 }"
+    />
+  </div>
+</div>

@@ -3,6 +3,14 @@ import type { ActiveFilterChip } from "@adapttable/react";
 import type { TableLabels } from "@adapttable/react/adapter";
 import { Button, Flex, Tag } from "antd";
 
+/** Name the actual close control without replacing Ant Design's icon or handlers. */
+function nameCloseControl(root: HTMLSpanElement | null) {
+  const close = root?.querySelector<HTMLElement>('[role="button"]');
+  if (!close) return;
+  close.dataset.adapttablePart = "chip-remove";
+  return () => close.removeAttribute("data-adapttable-part");
+}
+
 /** Removable antd tag chips. */
 export function Chips({
   chips,
@@ -16,6 +24,7 @@ export function Chips({
   if (chips.length === 0) return null;
   return (
     <Flex
+      data-adapttable-part="chips"
       gap={4}
       wrap
       align="center"
@@ -23,20 +32,32 @@ export function Chips({
       aria-label={labels.filters}
     >
       {chips.map((chip) => (
-        <li key={chip.key} style={{ listStyle: "none" }}>
+        <li
+          key={chip.key}
+          data-adapttable-part="chip"
+          style={{ listStyle: "none" }}
+        >
           {/* The object form of `closable` forwards ARIA attributes onto the
               close control itself, which otherwise announces antd's own
               untranslated "Close". */}
           <Tag
-            closable={{ "aria-label": labels.removeFilter(chip.label) }}
+            ref={nameCloseControl}
+            closable={{
+              "aria-label": labels.removeFilter(chip.label),
+            }}
             onClose={chip.onRemove}
           >
             {chip.label}
           </Tag>
         </li>
       ))}
-      <li style={{ listStyle: "none" }}>
-        <Button size="small" type="link" onClick={onClearAll}>
+      <li data-adapttable-part="chip" style={{ listStyle: "none" }}>
+        <Button
+          data-adapttable-part="chip-remove"
+          size="small"
+          type="link"
+          onClick={onClearAll}
+        >
           {labels.clearAll}
         </Button>
       </li>

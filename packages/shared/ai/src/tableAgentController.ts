@@ -21,12 +21,8 @@
  *
  * @packageDocumentation
  */
-import {
-  type AgentApprovalPending,
-  type AgentProgress,
-  revisionToken,
-} from "@adapttable/core";
-import type { TableRuntime } from "@adapttable/core/binding";
+import type { AgentApprovalPending, AgentProgress } from "@adapttable/core";
+import type { TableRuntime, TableRuntimeView } from "@adapttable/core/binding";
 
 import { sharedApproval } from "./approvalConfig";
 import {
@@ -47,6 +43,7 @@ import {
   type TableAgentBridge,
 } from "./binding";
 import { tableActionSignature } from "./capabilities/actions";
+import { capabilityDefinitionStamp } from "./capabilities/registry";
 import type { AgentContextInputs } from "./context";
 import { sampleColumns } from "./contextSampling";
 import {
@@ -177,8 +174,8 @@ export interface TableAgentController {
    * The live session.
    *
    * Rebuilt when the table's identity or what the agent may use changes —
-   * the exclusions, who approves what, the table's own actions — because
-   * those are a different session rather than a different answer from the
+   * the exclusions, who approves what, custom definitions and table actions —
+   * because those are a different session rather than a different answer from the
    * same one. Safe to call while rendering.
    */
   readonly session: () => AgentSession;
@@ -241,11 +238,52 @@ export function createTableAgentController(
   // the agent may use — or to who has to approve it — is a different session,
   // not a different answer from the same one.
   const registryKeyOf = (next: TableAgentControllerOptions): string =>
-    `${exclusionKey(next.excludeCapabilities)}!${JSON.stringify(next.capabilityApproval ?? {})}!${tableActionSignature(runtimeRef.current.view()?.actions)}`;
+    `${exclusionKey(next.excludeCapabilities)}!${JSON.stringify(next.capabilityApproval ?? {})}!${tableActionSignature(runtimeRef.current.view()?.actions)}!${JSON.stringify((next.capabilities ?? []).map(capabilityDefinitionStamp))}`;
   let tableId: string | undefined;
   let registryKey: string | undefined;
   let revisions: RevisionCounter = createRevisionCounter();
   let session: AgentSession | null = null;
+  let connected = true;
+  const activeCalls = new Set<AbortController>();
+
+  const bindLifecycle = (
+    live: AgentSession,
+    counter: RevisionCounter
+  ): AgentSession => ({
+    ...live,
+    execute: async (key, args, expectedRevision, idempotencyKey, signal) => {
+      // A retained bridge can outlive its table. Refuse before admission or
+      // observation: even reading the runtime can touch a destroyed binding.
+      if (!connected || signal?.aborted) {
+        return {
+          ok: false,
+          revision: counter.current(),
+          idempotencyKey,
+          error: { code: "cancelled", message: "execute cancelled" },
+        };
+      }
+      // Each call keeps its own cancellation after a reconnect. Fresh calls
+      // can resume on the same session; old plans and approvals cannot.
+      const controller = new AbortController();
+      const abort = () => {
+        controller.abort();
+      };
+      signal?.addEventListener("abort", abort, { once: true });
+      activeCalls.add(controller);
+      try {
+        return await live.execute(
+          key,
+          args,
+          expectedRevision,
+          idempotencyKey,
+          controller.signal
+        );
+      } finally {
+        activeCalls.delete(controller);
+        signal?.removeEventListener("abort", abort);
+      }
+    },
+  });
 
   // Handed to the session once and read when it needs them, so the session is
   // never holding the first call's closure.
@@ -269,7 +307,7 @@ export function createTableAgentController(
     tableId = options.tableId;
     registryKey = key;
     revisions = createRevisionCounter();
-    session = bindLiveSession({
+    const live = bindLiveSession({
       options: optionsRef,
       runtime: runtimeRef,
       revisions,
@@ -278,6 +316,7 @@ export function createTableAgentController(
       reportProgress: reportProgressRef,
       flush: inputs.flush,
     });
+    session = bindLifecycle(live, revisions);
     return session;
   };
 
@@ -290,8 +329,9 @@ export function createTableAgentController(
 
   const tableStamp = (): string => {
     const view = runtimeRef.current.view();
-    const table = view?.neutralTable;
-    return table ? revisionToken(table.revisions) : viewRevisionStamp(view);
+    // The session owns the source epoch. Reuse its observation revision so
+    // replacing an engine at the same tuple also republishes the snapshot.
+    return `${String(currentSession().manifest().viewRevision)}:${viewRevisionStamp(view)}`;
   };
 
   // --- approvals ---------------------------------------------------------
@@ -305,6 +345,7 @@ export function createTableAgentController(
   let allowances = 0;
   let transaction: ApprovalTransaction | null = null;
   let pending: PendingApproval | null = null;
+  let pendingSignal: AbortSignal | undefined;
   let transactionId = 0;
   let progress: AgentProgress | null = null;
 
@@ -397,7 +438,10 @@ export function createTableAgentController(
         resolve: (result: ApprovalResult) => {
           if (settled) return;
           settled = true;
-          if (pending === entry) pending = null;
+          if (pending === entry) {
+            pending = null;
+            pendingSignal = undefined;
+          }
           setTransaction(closeTransaction(entry));
           signal?.removeEventListener("abort", onAbort);
           resolve(result);
@@ -407,6 +451,7 @@ export function createTableAgentController(
         entry.resolve(false);
       };
       pending = entry;
+      pendingSignal = signal;
       // Identity and decisions in one write, so no snapshot ever shows this
       // write's rows beside the last write's answers. Resolved by the session
       // for THIS action, so an override of `ai.approval.presentation` reaches
@@ -505,8 +550,18 @@ export function createTableAgentController(
   // report that nothing moved between the two — which is exactly what
   // per-turn undo has to be able to tell.
   const view: TableAgentViewReader = {
-    read: () =>
-      viewInputsFromRuntime(runtimeRef.current, optionsRef.current, samples),
+    read: () => {
+      const runtime = runtimeRef.current;
+      const sameSource =
+        sampling !== null &&
+        !sampling.controller.signal.aborted &&
+        sampling.table === runtime.view()?.neutralTable;
+      return viewInputsFromRuntime(
+        runtime,
+        optionsRef.current,
+        sameSource ? samples : {}
+      );
+    },
   };
 
   // --- the snapshot ------------------------------------------------------
@@ -593,6 +648,7 @@ export function createTableAgentController(
   let sampling: {
     readonly session: AgentSession;
     readonly key: string;
+    readonly table: TableRuntimeView["neutralTable"];
     readonly controller: AbortController;
   } | null = null;
   let checkedAllowances: {
@@ -689,23 +745,31 @@ export function createTableAgentController(
     previous?.dispose();
   };
 
-  // Sampled once for the set of columns that asked, and again only when that
-  // set changes. Abandoned on disconnect: a read that comes back to a table
-  // the reader has left must not write into it.
+  // Sampled once for the source and set of columns that asked, never on an
+  // ordinary data tick. A replacement source abandons the old read just as a
+  // disconnect does: its values belong to a table the reader has left.
   const syncSamples = (live: AgentSession) => {
     const key = sampledColumns(live).join(" ");
-    if (sampling?.session === live && sampling.key === key) return;
-    sampling?.controller.abort();
-    const controller = new AbortController();
-    sampling = { session: live, key, controller };
-    const wanted = key === "" ? [] : key.split(" ");
-    if (wanted.length === 0) {
-      samples = {};
+    const table = runtimeRef.current.view()?.neutralTable;
+    if (
+      sampling?.session === live &&
+      sampling.key === key &&
+      sampling.table === table
+    )
       return;
-    }
+    sampling?.controller.abort();
+    samples = {};
+    const controller = new AbortController();
+    sampling = { session: live, key, table, controller };
+    const wanted = key === "" ? [] : key.split(" ");
+    if (wanted.length === 0) return;
     void sampleColumns(live, wanted, controller.signal).then(
       (values) => {
-        if (controller.signal.aborted) return;
+        if (
+          controller.signal.aborted ||
+          runtimeRef.current.view()?.neutralTable !== table
+        )
+          return;
         samples = values;
       },
       () => {
@@ -778,6 +842,7 @@ export function createTableAgentController(
       return table ? table.subscribe("all", listener) : () => undefined;
     },
     sync: () => {
+      connected = true;
       const live = currentSession();
       syncManifest(live);
       syncWebMcp(live);
@@ -788,8 +853,17 @@ export function createTableAgentController(
       syncAllowed();
     },
     disconnect: () => {
+      connected = false;
       withdraw();
+      const refusedSignal = pendingSignal;
       pending?.resolve(false);
+      const admitted = [...activeCalls];
+      activeCalls.clear();
+      for (const controller of admitted) {
+        // The open chrome approval is already terminally refused above.
+        // Preserve that receipt instead of racing its refusal with an abort.
+        if (controller.signal !== refusedSignal) controller.abort();
+      }
       sampling?.controller.abort();
       sampling = null;
       // Going away is a close. Without this the host is left showing

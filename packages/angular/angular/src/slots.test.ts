@@ -8,7 +8,7 @@ import { Component, inject, input, signal, type Type } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptControl } from "./control";
-import { extendFeature, featureSlotFillsOf } from "./features";
+import { extendFeature, featureSlotFillsOf } from "./featureHost";
 import { AdaptIcon } from "./icon";
 import { AdaptSlot, ADAPTTABLE_SLOT_TABLE, type SlotTable } from "./slots";
 
@@ -106,11 +106,11 @@ describe("AdaptSlot", () => {
     const { fixture, host, element } = await mount();
     host.slot.set(ONE);
     await fixture.whenStable();
-    expect(element.querySelectorAll("test-second").length).toBe(0);
-    expect(element.querySelectorAll("test-first").length).toBe(2);
+    expect(element.querySelectorAll("test-second")).toHaveLength(0);
+    expect(element.querySelectorAll("test-first")).toHaveLength(2);
     host.table.set(tableOf([]));
     await fixture.whenStable();
-    expect(element.querySelectorAll("test-first").length).toBe(1);
+    expect(element.querySelectorAll("test-first")).toHaveLength(1);
   });
 });
 

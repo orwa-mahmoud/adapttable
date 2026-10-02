@@ -30,7 +30,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import type { ReactElement, ReactNode } from "react";
+import type { HTMLAttributes, ReactElement, ReactNode } from "react";
 
 import { ChecklistFilter } from "./ChecklistFilter";
 
@@ -39,6 +39,15 @@ const FILTER_SELECT_SLOTS = {
   native: false,
   MenuProps: { sx: { zIndex: 10051 } },
 } as const;
+
+/** Keep the select control hook inside the labelled field root. */
+const FILTER_SELECT_DISPLAY_PROPS: HTMLAttributes<HTMLDivElement> & {
+  "data-adapttable-part": string;
+} = { "data-adapttable-part": "filter-select" };
+const FILTER_FIELD_SELECT_SLOTS = {
+  ...FILTER_SELECT_SLOTS,
+  SelectDisplayProps: FILTER_SELECT_DISPLAY_PROPS,
+};
 
 /** The slice of the source the auto-built form reads and writes. */
 type FilterBag<TRow> = Pick<
@@ -84,7 +93,12 @@ function TextFilter<TRow>({
   const { label, ops, opLabelKeys, op, value, needsValue, write } =
     useTextFilterWidget(def, source);
   return (
-    <FormControl component="fieldset" variant="standard" sx={{ width: "100%" }}>
+    <FormControl
+      component="fieldset"
+      variant="standard"
+      data-adapttable-part="filter-field"
+      sx={{ width: "100%" }}
+    >
       <FormLabel component="legend" sx={{ mb: 3 }}>
         {label}
       </FormLabel>
@@ -146,9 +160,9 @@ function BooleanFilter<TRow>({
         const next = e.target.value;
         if (next === "" || next === "true" || next === "false") write(next);
       }}
-      data-adapttable-part="filter-select"
+      data-adapttable-part="filter-field"
       slotProps={{
-        select: FILTER_SELECT_SLOTS,
+        select: FILTER_FIELD_SELECT_SLOTS,
         inputLabel: { shrink: true },
       }}
     >
@@ -159,7 +173,11 @@ function BooleanFilter<TRow>({
   );
 }
 
-function SelectFilter<TRow>({ def, source }: Readonly<FieldProps<TRow>>) {
+function SelectFilter<TRow>({
+  def,
+  source,
+  labels,
+}: Readonly<LabeledFieldProps<TRow>>) {
   // The options source may be an array OR an async loader — never map it
   // directly. The hook resolves both (and reports loader progress).
   const { options, loading } = useFilterOptions(def);
@@ -170,12 +188,13 @@ function SelectFilter<TRow>({ def, source }: Readonly<FieldProps<TRow>>) {
       label={filterLabel(def)}
       value={scalarText(source.extra[def.key])}
       onChange={(e) => source.setExtra(def.key, e.target.value)}
+      data-adapttable-part="filter-field"
       slotProps={{
-        select: FILTER_SELECT_SLOTS,
+        select: FILTER_FIELD_SELECT_SLOTS,
         inputLabel: { shrink: true },
       }}
     >
-      <MenuItem value="">All</MenuItem>
+      <MenuItem value="">{labels.filterAll}</MenuItem>
       {loading && (
         <MenuItem value="" disabled>
           …
@@ -200,6 +219,7 @@ function MultiSelectFilter<TRow>({ def, source }: Readonly<FieldProps<TRow>>) {
       {loading ? <CircularProgress color="inherit" size={16} /> : null}
       <Autocomplete
         multiple
+        data-adapttable-part="filter-field"
         options={[...options]}
         getOptionLabel={(option) => option.label}
         isOptionEqualToValue={(left, right) => left.value === right.value}
@@ -320,7 +340,12 @@ function RangeFilter<TRow>({
     bounds = input(labels.value, a, (raw) => write(op, raw, ""));
   }
   return (
-    <FormControl component="fieldset" variant="standard" sx={{ width: "100%" }}>
+    <FormControl
+      component="fieldset"
+      variant="standard"
+      data-adapttable-part="filter-field"
+      sx={{ width: "100%" }}
+    >
       <FormLabel component="legend" sx={{ mb: 3 }}>
         {label}
       </FormLabel>
@@ -373,7 +398,7 @@ function FilterField<TRow>({
     case "boolean":
       return <BooleanFilter def={def} source={source} labels={labels} />;
     case "select":
-      return <SelectFilter def={def} source={source} />;
+      return <SelectFilter def={def} source={source} labels={labels} />;
     case "multiSelect":
       return <MultiSelectFilter def={def} source={source} />;
     case "checklist":

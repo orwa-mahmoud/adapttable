@@ -7,7 +7,7 @@
  * the switcher, the nav's Adapters menu and that kit's own landing page cannot
  * describe it differently. This is the typed view of them.
  */
-import { SHOWCASE_ADAPTERS } from "../matrix.mjs";
+import { adaptersOf } from "../matrix.mjs";
 
 export interface AdapterToken {
   key: string;
@@ -17,4 +17,5 @@ export interface AdapterToken {
   accentDark: string;
 }
 
-export const ADAPTER_TOKENS: AdapterToken[] = SHOWCASE_ADAPTERS;
+/** The React kits — the ones the switcher can mount on these pages. */
+export const ADAPTER_TOKENS: AdapterToken[] = adaptersOf("react");

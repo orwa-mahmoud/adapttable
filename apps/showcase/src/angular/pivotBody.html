@@ -1,0 +1,47 @@
+<!-- The pivot panel and selected kit table, with host-owned fold controls. -->
+<div class="mx-demo">
+  <div class="mx-demo__body" [attr.dir]="presentation.dir">
+    <adapt-showcase-pivot-panel
+      [fields]="fields"
+      [config]="state.config()"
+      [onChange]="state.onConfigChange"
+      [labels]="presentation.labels"
+    />
+    <ng-template #pivotCaption let-row>
+      @if (row.kind === "subtotal") {
+        <button
+          type="button"
+          class="pivot-fold"
+          data-testid="pivot-fold"
+          [attr.aria-expanded]="!state.collapsed().has(row.key)"
+          (click)="toggleFold(row.key)"
+        >
+          <span aria-hidden="true">{{
+            state.collapsed().has(row.key)
+              ? presentation.dir === "rtl"
+                ? "◀"
+                : "▶"
+              : "▼"
+          }}</span>
+          {{ row.label }}
+        </button>
+      } @else {
+        {{ row.label }}
+      }
+    </ng-template>
+    @let table = model();
+    <adapt-showcase-table
+      tableLabel="Budget pivot"
+      [dir]="presentation.dir"
+      [labels]="presentation.labels"
+      [attr.lang]="presentation.locale"
+      [urlSync]="false"
+      [searchable]="false"
+      [data]="table.rows"
+      [columns]="table.columns"
+      [rowKey]="table.rowKey"
+      [summaryRow]="table.summaryRow"
+      [defaults]="{ limit: 100 }"
+    />
+  </div>
+</div>

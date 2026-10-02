@@ -509,7 +509,7 @@ jobs:
           case "$floors" in success|skipped) ;; *) echo "Floors: $floors"; exit 1 ;; esac
 
   showcase-build:
-    name: Build the showcase for E2E
+    name: Build the showcase and docs for E2E
     needs: detect
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPlaywright == 'true'
     runs-on: ubuntu-latest
@@ -521,10 +521,18 @@ jobs:
       # compile the same site.
       - name: Build
         run: pnpm turbo run build --filter=@adapttable/showcase
+      - name: Build Astro docs once for all browser shards
+        run: pnpm --filter @adapttable/docs build
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: showcase-dist
           path: apps/showcase/dist/
+          retention-days: 1
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: docs-dist
+          path: apps/docs/dist/
+          if-no-files-found: error
           retention-days: 1
 
   playwright-shard:
@@ -545,10 +553,15 @@ jobs:
         with:
           name: showcase-dist
           path: apps/showcase/dist/
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: docs-dist
+          path: apps/docs/dist/
       - name: Run E2E smoke suite
         run: pnpm exec playwright test --project=chromium --project=chromium-dev --shard=${{ matrix.shard }}/9
         env:
           SHOWCASE_SKIP_BUILD: "1"
+          DOCS_SKIP_BUILD: "1"
       - name: Upload report on failure
         if: ${{ failure() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

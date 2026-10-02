@@ -53,11 +53,8 @@ export function Checkbox({
   onToggle,
   size: _size,
   color: _color,
-  id,
-  value,
   className,
   inputRef,
-  onKeyDown,
   "aria-label": ariaLabel,
   "data-adapttable-part": dataPart,
   children,
@@ -88,11 +85,8 @@ export function Checkbox({
   // element MUI tags — and only to the box when there is nothing else.
   const box = (
     <BaseCheckbox.Root
-      id={id}
-      value={value}
       ref={inputRef}
       aria-label={children == null ? ariaLabel : undefined}
-      onKeyDown={onKeyDown}
       data-adapttable-part={children == null ? dataPart : undefined}
       checked={checked}
       indeterminate={indeterminate}
@@ -169,12 +163,9 @@ export function NativeSelect({
   placeholder,
   disabled,
   onValueChange,
-  onKeyDown,
   options,
   width,
   className,
-  "aria-label": ariaLabel,
-  "data-adapttable-part": part,
   ...rest
 }: Readonly<{
   size?: "1" | "2" | "3";
@@ -218,13 +209,10 @@ export function NativeSelect({
       }}
     >
       <Select.Trigger
-        aria-label={ariaLabel}
-        data-adapttable-part={part}
         className={className ?? "adapttable-btn"}
         data-size={size}
         data-variant="outline"
         data-slot="select-trigger"
-        onKeyDown={onKeyDown}
         style={width ? { width } : undefined}
         {...rest}
       >
@@ -264,9 +252,21 @@ export function NativeSelect({
 export function FormField({
   label,
   children,
-}: Readonly<{ label: ReactNode; children: ReactNode }>) {
+  className,
+  "data-adapttable-part": dataPart,
+}: Readonly<{
+  label: ReactNode;
+  children: ReactNode;
+  className?: string;
+  "data-adapttable-part"?: string;
+}>) {
   return (
-    <Flex direction="column" gap="4">
+    <Flex
+      direction="column"
+      gap="4"
+      className={className}
+      data-adapttable-part={dataPart}
+    >
       <Text as="span" size="2">
         {label}
       </Text>

@@ -1,6 +1,6 @@
 /**
  * Kit-owned DesktopTable paint: sticky-fix CSS, --adapttable-min-width,
- * native thead/tbody, the tbody summary row, and expansion/reorder/selection
+ * native thead/tbody, the footer summary row, and expansion/reorder/selection
  * leads against a start pin.
  */
 import { resolveLabels } from "@adapttable/core";
@@ -128,15 +128,15 @@ describe("DesktopTable assembly paint (Base UI)", () => {
     expect(container.querySelector("em")?.textContent).toBe("lead");
   });
 
-  it("keeps the summary row inside tbody and pads the leading chrome", () => {
+  it("keeps the summary row inside tfoot and pads the leading chrome", () => {
     const { container } = mount({
       ...fullChrome,
       summaryRow: () => ({ name: "2 people" }),
     });
     const summary = container.querySelector<HTMLElement>(
-      "tbody tr[data-summary]"
+      "tfoot tr[data-summary]"
     )!;
-    expect(summary.parentElement?.tagName).toBe("TBODY");
+    expect(summary.parentElement?.tagName).toBe("TFOOT");
     const cells = within(summary).getAllByRole("cell");
     expect(cells).toHaveLength(7);
     expect(cells[3]).toHaveTextContent("2 people");

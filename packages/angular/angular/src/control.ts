@@ -1,6 +1,6 @@
 /**
- * Draws one kit control — a component the kit supplies for a Chrome's slot —
- * with the props the Chrome computed for it.
+ * Draws one kit control — a component the kit supplies for a structural
+ * component's slot — with the props that component computed for it.
  */
 import {
   type ComponentRef,

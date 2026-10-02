@@ -251,6 +251,7 @@ export function BaseUiDemo({
   wide,
   defaultColumnLayout,
   forceMobile,
+  maxHeight,
   focused,
 }: Readonly<{
   mode: DataMode;
@@ -317,6 +318,7 @@ export function BaseUiDemo({
   /** The column layout the page starts from. */
   defaultColumnLayout?: Partial<ColumnLayoutState>;
   forceMobile?: boolean;
+  maxHeight?: number;
   /** Dedicated pages hide unrelated filter/action/view chrome. */
   focused?: boolean;
 }>) {
@@ -432,6 +434,7 @@ export function BaseUiDemo({
           onDensityChange={onDensityChange}
           {...columns}
           forceMobile={forceMobile}
+          maxHeight={maxHeight}
           density={density}
           filtersMode={filtersUi}
           labels={getLabels(locale)}

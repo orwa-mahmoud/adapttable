@@ -14,6 +14,7 @@ export function ErrorState({
 }>) {
   return (
     <Alert
+      data-adapttable-part="error"
       type="error"
       showIcon
       title={labels.errorTitle}

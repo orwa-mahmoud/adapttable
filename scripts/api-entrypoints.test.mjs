@@ -74,13 +74,15 @@ describe("entrypoints", () => {
     assert.ok(!ENTRIES.some((e) => e.report === "cli-cli.api.md"));
   });
 
-  it("marks the workspace-private adapters as unpublished and the rest as published", () => {
+  it("marks workspace-private packages as unpublished and the rest as published", () => {
     const unpublished = [
       ...new Set(ENTRIES.filter((e) => !e.published).map((e) => e.dir)),
     ];
     assert.deepEqual(unpublished, [
       "adapter-angular-unstyled",
       "adapter-bootstrap",
+      "adapter-ng-zorro",
+      "ai-angular",
     ]);
   });
 

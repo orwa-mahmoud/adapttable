@@ -210,9 +210,16 @@ export function NativeSelect({
 export function FormField({
   label,
   children,
-}: Readonly<{ label: ReactNode; children: ReactNode }>) {
+  className,
+  "data-adapttable-part": dataPart,
+}: Readonly<{
+  label: ReactNode;
+  children: ReactNode;
+  className?: string;
+  "data-adapttable-part"?: string;
+}>) {
   return (
-    <ChakraField.Root>
+    <ChakraField.Root className={className} data-adapttable-part={dataPart}>
       <ChakraField.Label fontSize="sm" mb={4}>
         {label}
       </ChakraField.Label>

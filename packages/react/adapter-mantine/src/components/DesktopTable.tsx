@@ -371,6 +371,7 @@ function DesktopRowBase<TRow>(
       >
         {expandable && (
           <Table.Td
+            data-adapttable-part="expand-cell"
             ta="center"
             style={{ ...expansionCellStyle, ...edgeRowPin }}
           >
@@ -477,7 +478,11 @@ function DesktopRowBase<TRow>(
         })}
         {columnSpacers && <ColumnSpacer width={columnSpacers.end} side="end" />}
         {showActions && (
-          <Table.Td ta="end" style={{ ...paintedActions, ...edgeRowPin }}>
+          <Table.Td
+            data-adapttable-part="actions-cell"
+            ta="end"
+            style={{ ...paintedActions, ...edgeRowPin }}
+          >
             {editing?.rowEditing && (
               <OptionalRowEditActions
                 rowEditing={editing.rowEditing}
@@ -507,8 +512,10 @@ function DesktopRowBase<TRow>(
         )}
       </Table.Tr>
       {expandable && expanded && (
-        <Table.Tr ref={detailMeasureRef}>
-          <Table.Td colSpan={columnSpan}>{renderDetail(row)}</Table.Td>
+        <Table.Tr ref={detailMeasureRef} data-adapttable-part="detail-row">
+          <Table.Td data-adapttable-part="detail-cell" colSpan={columnSpan}>
+            {renderDetail(row)}
+          </Table.Td>
         </Table.Tr>
       )}
     </>
@@ -641,6 +648,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
     <>
       {header.leading.expand && (
         <Table.Th
+          data-adapttable-part="expand-header"
           w={widths.expansion}
           ta="center"
           rowSpan={rowSpan > 1 ? rowSpan : undefined}
@@ -682,6 +690,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
     <>
       {header.trailing.actions && (
         <Table.Th
+          data-adapttable-part="actions-header"
           ta="end"
           w={widths.actions}
           rowSpan={rowSpan > 1 ? rowSpan : undefined}
@@ -699,141 +708,151 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
 
   return (
     <div
-      ref={scroll.bindScrollBox}
-      style={{ width: "100%", ...scroll.boxStyle }}
+      data-adapttable-part={gridProps?.role === "grid" ? "grid" : undefined}
+      style={{ display: "contents" }}
     >
-      <Table
-        data-adapttable-part="table"
-        {...tableProps}
-        {...gridProps}
-        className={className}
-        highlightOnHover
-        verticalSpacing={verticalSpacing}
-        horizontalSpacing={horizontalSpacing}
-        style={{
-          minWidth: Math.max(480, minWidth),
-          ...(stickyHeader
-            ? { borderCollapse: "separate" as const, borderSpacing: 0 }
-            : {}),
-          ...(tableStyle?.tableLayout
-            ? { tableLayout: tableStyle.tableLayout }
-            : {}),
-          ...(tableStyle?.width ? { width: tableStyle.width } : {}),
-        }}
+      <div
+        ref={scroll.bindScrollBox}
+        style={{ width: "100%", ...scroll.boxStyle }}
       >
-        <Table.Thead
-          data-adapttable-part="thead"
-          ref={header.theadRef}
-          style={{ background: SURFACE }}
+        <Table
+          data-adapttable-part="table"
+          {...tableProps}
+          {...gridProps}
+          className={className}
+          highlightOnHover
+          verticalSpacing={verticalSpacing}
+          horizontalSpacing={horizontalSpacing}
+          style={{
+            minWidth: Math.max(480, minWidth),
+            ...(stickyHeader
+              ? { borderCollapse: "separate" as const, borderSpacing: 0 }
+              : {}),
+            ...(tableStyle?.tableLayout
+              ? { tableLayout: tableStyle.tableLayout }
+              : {}),
+            ...(tableStyle?.width ? { width: tableStyle.width } : {}),
+          }}
         >
-          {headerPlan ? (
-            headerPlan.map((row, rowIndex) => {
-              const last = rowIndex === headerPlan.length - 1;
-              return (
-                <Table.Tr
-                  key={row.map((cell) => cell.key).join("|")}
-                  {...(last ? header.headerRowProps : {})}
-                  ref={last ? header.headerRowRef : undefined}
-                  data-adapttable-part={
-                    last ? "header-row" : "header-group-row"
-                  }
-                >
-                  {rowIndex === 0 ? leadingHeaders(headerBand) : null}
-                  {row.map(renderPlanCell)}
-                  {rowIndex === 0 ? trailingHeaders(headerBand) : null}
-                </Table.Tr>
-              );
-            })
-          ) : (
-            <Table.Tr
-              {...header.headerRowProps}
-              ref={header.headerRowRef}
-              data-adapttable-part="header-row"
-            >
-              {leadingHeaders(1)}
-              {columns.map((column, headerIndex) => (
-                <LeafHeader
-                  key={column.key}
-                  leaf={header.leaf(column, headerIndex)}
-                  {...leafProps}
-                />
-              ))}
-              {trailingHeaders(1)}
-            </Table.Tr>
-          )}
-        </Table.Thead>
-        <Table.Tbody ref={bodyRef} data-adapttable-part="tbody">
-          {bodySlots.map((slot) => {
-            if (slot.kind === "extra") {
-              return (
-                <ExtraSlotRow
-                  key={slot.key}
-                  kind={slot.extraKind}
-                  colSpan={slot.colSpan}
-                  render={slot.render}
-                  labels={labels}
-                  fillStyle={slot.fillStyle}
-                />
-              );
-            }
-            if (slot.kind === "virtualPad") {
-              return (
-                <Table.Tr key={slot.key} aria-hidden>
-                  <Table.Td
-                    colSpan={slot.colSpan}
-                    style={{ height: slot.height, padding: 0 }}
+          <Table.Thead
+            data-adapttable-part="thead"
+            ref={header.theadRef}
+            style={{ background: SURFACE }}
+          >
+            {headerPlan ? (
+              headerPlan.map((row, rowIndex) => {
+                const last = rowIndex === headerPlan.length - 1;
+                return (
+                  <Table.Tr
+                    key={row.map((cell) => cell.key).join("|")}
+                    {...(last ? header.headerRowProps : {})}
+                    ref={last ? header.headerRowRef : undefined}
+                    data-adapttable-part={
+                      last ? "header-row" : "header-group-row"
+                    }
+                  >
+                    {rowIndex === 0 ? leadingHeaders(headerBand) : null}
+                    {row.map(renderPlanCell)}
+                    {rowIndex === 0 ? trailingHeaders(headerBand) : null}
+                  </Table.Tr>
+                );
+              })
+            ) : (
+              <Table.Tr
+                {...header.headerRowProps}
+                ref={header.headerRowRef}
+                data-adapttable-part="header-row"
+              >
+                {leadingHeaders(1)}
+                {columns.map((column, headerIndex) => (
+                  <LeafHeader
+                    key={column.key}
+                    leaf={header.leaf(column, headerIndex)}
+                    {...leafProps}
                   />
-                </Table.Tr>
-              );
-            }
-            if (slot.kind === "group") {
+                ))}
+                {trailingHeaders(1)}
+              </Table.Tr>
+            )}
+          </Table.Thead>
+          <Table.Tbody ref={bodyRef} data-adapttable-part="tbody">
+            {bodySlots.map((slot) => {
+              if (slot.kind === "extra") {
+                return (
+                  <ExtraSlotRow
+                    key={slot.key}
+                    kind={slot.extraKind}
+                    colSpan={slot.colSpan}
+                    render={slot.render}
+                    labels={labels}
+                    fillStyle={slot.fillStyle}
+                  />
+                );
+              }
+              if (slot.kind === "virtualPad") {
+                return (
+                  <Table.Tr key={slot.key} aria-hidden>
+                    <Table.Td
+                      colSpan={slot.colSpan}
+                      style={{ height: slot.height, padding: 0 }}
+                    />
+                  </Table.Tr>
+                );
+              }
+              if (slot.kind === "group") {
+                return (
+                  <OptionalGroupHeaderRow
+                    key={slot.key}
+                    entry={slot.entry}
+                    columns={columns}
+                    leadingCells={leadingCells}
+                    showActions={showActions}
+                    getCellProps={props.table.getCellProps}
+                    selection={selection}
+                    labels={labels}
+                    onToggleCollapse={callbacks.onToggleGroup}
+                    onShowMore={props.grouping?.showMore ?? (() => undefined)}
+                  />
+                );
+              }
               return (
-                <OptionalGroupHeaderRow
+                <Row
                   key={slot.key}
-                  entry={slot.entry}
-                  columns={columns}
-                  leadingCells={leadingCells}
-                  showActions={showActions}
-                  getCellProps={props.table.getCellProps}
-                  selection={selection}
-                  labels={labels}
-                  onToggleCollapse={callbacks.onToggleGroup}
-                  onShowMore={props.grouping?.showMore ?? (() => undefined)}
+                  {...slot.wiring}
+                  stickyHeader={stickyHeader}
                 />
               );
-            }
-            return (
-              <Row
-                key={slot.key}
-                {...slot.wiring}
-                stickyHeader={stickyHeader}
-              />
-            );
-          })}
-        </Table.Tbody>
-        {showColumnFooter && (
-          <Table.Tfoot>
-            <Table.Tr>
-              {header.leading.expand && <Table.Td />}
-              <When show={showReorder}>
-                <Table.Td />
-              </When>
-              {selection && <Table.Td />}
-              {columns.map((column) => (
-                <Table.Td
-                  key={column.key}
-                  {...props.table.getCellProps(column)}
-                  fw={600}
-                  c="dimmed"
-                >
-                  {resolveColumnFooter(column, summary?.[column.key])}
-                </Table.Td>
-              ))}
-              {showActions && <Table.Td />}
-            </Table.Tr>
-          </Table.Tfoot>
-        )}
-      </Table>
+            })}
+          </Table.Tbody>
+          {showColumnFooter && (
+            <Table.Tfoot data-adapttable-part="summary">
+              <Table.Tr data-adapttable-part="summary-row">
+                {header.leading.expand && (
+                  <Table.Td data-adapttable-part="summary-cell" />
+                )}
+                <When show={showReorder}>
+                  <Table.Td data-adapttable-part="summary-cell" />
+                </When>
+                {selection && <Table.Td data-adapttable-part="summary-cell" />}
+                {columns.map((column) => (
+                  <Table.Td
+                    key={column.key}
+                    {...props.table.getCellProps(column)}
+                    data-adapttable-part="summary-cell"
+                    fw={600}
+                    c="dimmed"
+                  >
+                    {resolveColumnFooter(column, summary?.[column.key])}
+                  </Table.Td>
+                ))}
+                {showActions && (
+                  <Table.Td data-adapttable-part="summary-cell" />
+                )}
+              </Table.Tr>
+            </Table.Tfoot>
+          )}
+        </Table>
+      </div>
     </div>
   );
 }

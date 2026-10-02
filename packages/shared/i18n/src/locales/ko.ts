@@ -70,6 +70,7 @@ export const ko: Required<TableLabels> = {
   relPreviousMonth: "지난달",
   relLastN: "최근 N일",
   relNextN: "앞으로 N일",
+  filterAll: "전체",
   boolAny: "전체",
   boolTrue: "예",
   boolFalse: "아니요",

@@ -9,11 +9,14 @@ import { TestBed } from "@angular/core/testing";
 import { AdaptCellTemplate } from "./cell";
 import { type ColumnDef, resolveColumns } from "./columnDef";
 import { injectDataTable } from "./dataTable";
-import { injectFrontendData } from "./frontendData";
-import { injectIsMobile } from "./mobile";
-import { injectRowSelection } from "./selection";
+import { injectIsMobile } from "./hooks/isMobile";
+import { injectRowSelection } from "./selection/selection";
+import { injectFrontendData } from "./source/frontendData";
 import { fromStore } from "./store";
-import { ADAPTTABLE_URL_ADAPTER, injectTableUrlState } from "./url";
+import {
+  ADAPTTABLE_URL_ADAPTER,
+  injectTableUrlState,
+} from "./url/tableUrlState";
 
 interface Row {
   id: string;
@@ -257,7 +260,7 @@ describe("injectDataTable", () => {
     const [name] = dataTable.columns();
     const style = dataTable.cellAttrs(name!).style as
       Record<string, unknown> | undefined;
-    expect(style).toBeDefined();
+    expect(style).toEqual({ textAlign: "start", width: 120 });
   });
 
   it("changes the search, page size and multi-column sort", () => {
@@ -350,11 +353,26 @@ describe("injectRowSelection", () => {
 });
 
 describe("column auto-size", () => {
-  it("fits every column, or one, to its content", () => {
+  it("fits every column, or one, to its clipped content", () => {
     const dataTable = table({ columnLayout: undefined });
     const root = document.createElement("div");
+    // A cell whose content overflows it: 180px of content in a 100px cell.
+    const cell = (key: string, scroll: number) => {
+      const node = document.createElement("div");
+      node.setAttribute("data-column-key", key);
+      Object.defineProperty(node, "scrollWidth", { value: scroll });
+      Object.defineProperty(node, "clientWidth", { value: 100 });
+      root.append(node);
+    };
+    cell("name", 180);
+    cell("id", 140);
     dataTable.autoSizeColumns(root);
+    // The widest cell, plus 24px of breathing room.
+    expect(dataTable.layout().state.widths).toEqual({ name: 204, id: 164 });
+
+    root.replaceChildren();
+    cell("name", 300);
     dataTable.autoSizeColumn(root, "name");
-    expect(dataTable.layout().state.widths).toBeDefined();
+    expect(dataTable.layout().state.widths).toEqual({ name: 324, id: 164 });
   });
 });

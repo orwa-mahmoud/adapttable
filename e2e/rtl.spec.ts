@@ -1,6 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { builtAdapters } from "../apps/showcase/matrix.mjs";
+import { builtAdapters, featuresOf } from "../apps/showcase/matrix.mjs";
+import { getDirection, locales } from "../packages/shared/i18n/src/index";
+import { angularPart } from "./angular-kit";
 import { gotoFromFeatureGrid } from "./nav";
 
 /**
@@ -67,5 +69,119 @@ for (const kit of KITS) {
     expect(titleBox).not.toBeNull();
     expect(clearBox).not.toBeNull();
     expect(titleBox!.x).toBeGreaterThan(clearBox!.x);
+  });
+}
+
+/** A document direction alone cannot override a kit root's explicit ltr. */
+for (const kit of builtAdapters("angular")) {
+  const pages = [
+    kit.key,
+    ...featuresOf(kit).map((feature) => `${kit.key}/${feature.slug}`),
+  ];
+  for (const path of pages) {
+    for (const width of [1280, 390]) {
+      test(`${path}: every actual table is RTL at ${String(width)}px`, async ({
+        page,
+      }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(`/${path}/?locale=ar&dir=rtl`);
+        const roots = demo(page).locator('[data-adapttable-part="root"]');
+        await expect(roots.first()).toBeVisible();
+        // The nested destination opens its first child by default: assert both
+        // roots so removing the child's presentation binding cannot go green.
+        if (path.endsWith("/nested-tables")) await expect(roots).toHaveCount(2);
+        const count = await roots.count();
+        expect(count).toBeGreaterThan(0);
+        for (let index = 0; index < count; index++) {
+          await expect(roots.nth(index)).toHaveAttribute("dir", "rtl");
+          await expect(roots.nth(index)).toHaveCSS("direction", "rtl");
+        }
+        const search = demo(page).locator('[data-adapttable-part="search"]');
+        if (!path.endsWith("/pivot")) {
+          await expect(search.first()).toHaveAccessibleName(locales.ar.search);
+          await expect(search.first()).toHaveAttribute(
+            "placeholder",
+            locales.ar.searchPlaceholder
+          );
+        }
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - window.innerWidth
+        );
+        expect(overflow, path).toBeLessThanOrEqual(1);
+      });
+    }
+  }
+
+  for (const [locale, labels] of Object.entries(locales)) {
+    test(`${kit.key}: ${locale} labels reach the table, pager and filter overlay`, async ({
+      page,
+    }) => {
+      await page.goto(`/${kit.key}/?locale=${locale}`);
+      const root = demo(page).locator('[data-adapttable-part="root"]');
+      await expect(root).toHaveAttribute("dir", getDirection(locale));
+      await expect(
+        root.locator('[data-adapttable-part="search"]')
+      ).toHaveAccessibleName(labels.search);
+      await expect(
+        root.locator('[data-adapttable-part="search"]')
+      ).toHaveAttribute("placeholder", labels.searchPlaceholder);
+      await expect(
+        angularPart(kit, page, "page-prev", root)
+      ).toHaveAccessibleName(labels.previousPage);
+      await expect(
+        angularPart(kit, page, "page-next", root)
+      ).toHaveAccessibleName(labels.nextPage);
+      const trigger = angularPart(kit, page, "filters-button", root);
+      await expect(trigger).toHaveAccessibleName(labels.filters);
+      await trigger.click();
+      const panel = angularPart(kit, page, "filters-popover");
+      await expect(panel).toBeVisible();
+      await expect(panel).toHaveAttribute("dir", getDirection(locale));
+      await expect(angularPart(kit, page, "filters-clear", panel)).toHaveText(
+        labels.clearAll
+      );
+      await page.keyboard.press("Escape");
+      await expect(panel).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    });
+  }
+}
+
+for (const kit of builtAdapters("angular")) {
+  test(`${kit.key}: RTL grid arrows move along the visual axis`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit.key}/accessibility/?dir=rtl`);
+    const cells = demo(page)
+      .locator('[data-adapttable-part="row"]')
+      .first()
+      .locator('[data-adapttable-part="cell"]');
+    await cells.first().focus();
+    await page.keyboard.press("ArrowLeft");
+    await expect(cells.nth(1)).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await expect(cells.first()).toBeFocused();
+  });
+
+  test(`${kit.key}: a start-pinned column sticks to the right in RTL`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit.key}/columns/?dir=rtl`);
+    const pinned = demo(page)
+      .getByRole("columnheader")
+      .and(page.locator('[data-column-key="person"]'));
+    await expect(pinned).toHaveCSS("position", "sticky");
+    await expect(pinned).toHaveCSS("right", "0px");
+    const before = await pinned.boundingBox();
+    expect(before).not.toBeNull();
+    const scroller = demo(page).locator('[data-adapttable-part="scroll-box"]');
+    const offset = await scroller.evaluate((element) => {
+      element.scrollLeft = -300;
+      return element.scrollLeft;
+    });
+    expect(offset).toBeLessThan(-100);
+    const after = await pinned.boundingBox();
+    expect(after).not.toBeNull();
+    expect(Math.abs(after!.x - before!.x)).toBeLessThan(2);
   });
 }

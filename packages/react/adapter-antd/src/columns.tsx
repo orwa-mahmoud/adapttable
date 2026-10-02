@@ -813,6 +813,7 @@ export function buildColumns<TRow>({
                   setWidth,
                   `${resizeLabel}: ${columnLabel(column)}`
                 ) as unknown as HTMLAttributes<HTMLSpanElement>)}
+                data-adapttable-part="resize-handle"
                 style={RESIZE_HANDLE_STYLE}
               />
             )}
@@ -1029,9 +1030,12 @@ export function buildColumns<TRow>({
         if (isAdaptTableGroupRow(record) || isAdaptTableExtraRow(record)) {
           return { colSpan: 0 };
         }
-        return cellStyle("end");
+        return { ...cellStyle("end"), "data-adapttable-part": "actions-cell" };
       },
-      onHeaderCell: () => cellStyle("end"),
+      onHeaderCell: () => ({
+        ...cellStyle("end"),
+        "data-adapttable-part": "actions-header",
+      }),
       render: (_value: unknown, record: GroupedDataRecord<TRow>) => {
         if (isAdaptTableGroupRow(record) || isAdaptTableExtraRow(record)) {
           return null;

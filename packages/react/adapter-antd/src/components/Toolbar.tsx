@@ -95,6 +95,16 @@ export function Toolbar<TRow>({
       {searchable !== false && (
         <Input
           type="search"
+          data-adapttable-part="search"
+          ref={(input) => {
+            if (input?.nativeElement) {
+              input.nativeElement.dataset.adapttablePart = "search-field";
+            }
+            const icon = input?.input?.previousElementSibling;
+            if (icon instanceof HTMLElement) {
+              icon.dataset.adapttablePart = "search-icon";
+            }
+          }}
           allowClear
           prefix={<SearchIcon size={14} />}
           style={{ flex: 1, minWidth: 160, maxWidth: 360 }}

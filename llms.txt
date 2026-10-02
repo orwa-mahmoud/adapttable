@@ -1,10 +1,10 @@
 # AdaptTable
 
-> AdaptTable provides MIT-licensed React data tables for Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. In v3, `@adapttable/core` is the framework-neutral data engine and `@adapttable/react` supplies React hooks and structural rendering. Native kit adapters support responsive mobile cards, client/server data, URL state and individually imported features. Optional features include filtering, editing, row grouping, pivot tables, formulas, virtualization, export and provider-neutral AI tools. Applications own their data and persistence.
+> AdaptTable provides MIT-licensed React and Angular data tables. React kits include Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind; Angular has unstyled and NG-ZORRO workspace kits. In v3, `@adapttable/core` is the framework-neutral engine; `@adapttable/react` supplies React hooks and `@adapttable/angular` supplies Angular signals and structural rendering. Native kit adapters support responsive mobile cards, client/server data, URL state and individually imported features. Optional features include filtering, editing, row grouping, pivot tables, formulas, virtualization, export and provider-neutral AI tools. Applications own their data and persistence.
 
 ## Version and integration boundaries
 
-This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Individual features use kit subpaths; `standardFeatures()` from a kit's `/preset` composes a common set. Enabling props from v2 alone do not activate v3 features. Framework-neutral core does not imply that Vue or Angular adapters are available today.
+This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Angular injection functions and renderer types come from `@adapttable/angular`. Individual features use kit subpaths; React's `standardFeatures()` and Angular's `standardPreset()` compose their documented common sets. Enabling props from v2 alone do not activate v3 features. The Angular kits and `@adapttable/ai-angular` are private workspace packages at version 0.0.0; implemented support does not imply npm availability. Vue is not supported.
 
 Use AdaptTable when you want TanStack-Table-style headless freedom but batteries-included for your specific UI kit — with URL state, RTL, a real filter UX, virtualization, and mobile layouts that do not break responsively.
 
@@ -15,21 +15,28 @@ automatic table-to-card responsive layouts.
 
 ## Packages
 
-- [@adapttable/core](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/core): Framework-neutral engine, column/data models, filtering, sorting, grouping, revisions and pure operations. No React dependency.
-- [@adapttable/react](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react): Headless React hooks, `ColumnDef`, `useDataTable`, `useFrontendData`, `useQuerySource`, URL bindings and structural Chrome. Optional feature subpaths keep unrelated implementations out of base imports.
-- [@adapttable/server](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/server): Framework-neutral query parsing and validation against allowed columns/operators. Not a hosted service or model provider client.
-- [@adapttable/mantine](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-mantine): Mantine adapter — batteries-included `<DataTable>`.
-- [@adapttable/mui](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-mui): Material UI adapter (free MUI X DataGrid alternative).
-- [@adapttable/chakra](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-chakra): Chakra UI adapter.
-- [@adapttable/antd](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-antd): Ant Design adapter — batteries-included `<DataTable>` on antd's high-level `<Table>`.
-- [@adapttable/radix](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-radix): Radix Themes adapter — batteries-included `<DataTable>` on Radix Themes.
-- [@adapttable/base-ui](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-base-ui): Base UI adapter — batteries-included `<DataTable>` on `@base-ui/react`.
-- [@adapttable/shadcn](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-shadcn): shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn class preset; a one-import styled `<DataTable>`.
-- [@adapttable/unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/adapter-unstyled): Headless/unstyled adapter with `data-*` + `className` hooks for Tailwind or any custom CSS.
-- [@adapttable/i18n](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/i18n): Locale presets for 19 languages (English, Arabic, Czech, German, Spanish, Persian, French, Hebrew, Hindi, Italian, Japanese, Korean, Polish, Portuguese, Russian, Turkish, Urdu, Simplified Chinese, Traditional Chinese) + RTL direction helpers.
-- [@adapttable/cli](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/cli): `npx @adapttable/cli init` — detects your UI kit and scaffolds a table.
-- [@adapttable/ai](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/ai): Optional provider-neutral capability discovery — `catalog` / `describe` / `execute`, the permitted context contract, and the framework-free conversation store. React-free. Not in the core or adapter roots.
-- [@adapttable/ai-react](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/ai-react): The React binding — `tableAgent` and `useTableAssistant`. This is where `tableAgent` lives.
+- [@adapttable/core](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/shared/core): Framework-neutral engine, column/data models, filtering, sorting, grouping, revisions and pure operations. No React dependency.
+- [@adapttable/react](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/react): Headless React hooks, `ColumnDef`, `useDataTable`, `useFrontendData`, `useQuerySource`, URL bindings and structural Chrome. Optional feature subpaths keep unrelated implementations out of base imports.
+- [@adapttable/server](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/shared/server): Framework-neutral query parsing and validation against allowed columns/operators. Not a hosted service or model provider client.
+- [@adapttable/mantine](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/adapter-mantine): Mantine adapter — batteries-included `<DataTable>`.
+- [@adapttable/mui](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/adapter-mui): Material UI adapter (free MUI X DataGrid alternative).
+- [@adapttable/chakra](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/adapter-chakra): Chakra UI adapter.
+- [@adapttable/antd](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/adapter-antd): Ant Design adapter — batteries-included `<DataTable>` on antd's high-level `<Table>`.
+- [@adapttable/radix](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/adapter-radix): Radix Themes adapter — batteries-included `<DataTable>` on Radix Themes.
+- [@adapttable/base-ui](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/adapter-base-ui): Base UI adapter — batteries-included `<DataTable>` on `@base-ui/react`.
+- [@adapttable/shadcn](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/adapter-shadcn): shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn class preset; a one-import styled `<DataTable>`.
+- [@adapttable/unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/adapter-unstyled): Headless/unstyled adapter with `data-*` + `className` hooks for Tailwind or any custom CSS.
+- [@adapttable/i18n](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/shared/i18n): Locale presets for 19 languages (English, Arabic, Czech, German, Spanish, Persian, French, Hebrew, Hindi, Italian, Japanese, Korean, Polish, Portuguese, Russian, Turkish, Urdu, Simplified Chinese, Traditional Chinese) + RTL direction helpers.
+- [@adapttable/cli](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/shared/cli): `npx @adapttable/cli init` — detects your UI kit and scaffolds a table.
+- [@adapttable/ai](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/shared/ai): Optional provider-neutral capability discovery — `catalog` / `describe` / `execute`, the permitted context contract, and the framework-free conversation store. React-free. Not in the core or adapter roots.
+- [@adapttable/ai-react](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/ai-react): The React AI binding — `tableAgent` and `useTableAssistant` for mounted React tables.
+
+Angular package sources:
+
+- [@adapttable/angular](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/angular): Headless Angular signal bindings, `injectDataTable`, column renderers, structural Chrome and optional pivot, formula, stream, sparkline and router entries.
+- [@adapttable/angular-unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-angular-unstyled): Private workspace kit with native HTML controls, `AdaptDataTable` and individual feature entries.
+- [@adapttable/ng-zorro](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-ng-zorro): Private Angular 22 and NG-ZORRO 22.1.1 workspace kit; the host loads the NG-ZORRO stylesheet.
+- [@adapttable/ai-angular](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/ai-angular): Private optional Angular AI binding, with `tableAgent`, `injectTableAssistant` and `injectSpeechInput`; protocol helpers stay in `@adapttable/ai`.
 
 ## Quickstart (React adapter)
 
@@ -113,7 +120,7 @@ const {
 - [React table URL state — shareable filters, sort, and page](https://adapttable.orwamahmoud.com/react/url-state/): adapters, urlKey namespacing, urlSync opt-out
 - [Server queries — parse and validate the table's query](https://adapttable.orwamahmoud.com/server-queries/): `@adapttable/server` validates page, sort, filters, filter tree and pivot against an allowlist of columns before they reach a backend
 - [AI table assistant and capabilities](https://adapttable.orwamahmoud.com/react/agent-capabilities/): native optional kit widgets, headless useTableAssistant, custom UI and transport examples; only active capabilities are advertised
-- [@adapttable/ai](https://adapttable.orwamahmoud.com/ai/): the versioned manifest, catalog/describe/execute, `buildAgentContext` and `createTableAssistant`; `tableAgent` is `@adapttable/ai-react`
+- [@adapttable/ai](https://adapttable.orwamahmoud.com/ai/): the versioned manifest, catalog/describe/execute, `buildAgentContext` and `createTableAssistant`; `tableAgent` comes from the matching `@adapttable/ai-react` or `@adapttable/ai-angular` binding
 - [Agent integrations](https://adapttable.orwamahmoud.com/ai-integrations/): JSON, OpenAI and MCP adapters over the same catalog/describe/execute session — no hosted service
 - [Connect a backend](https://adapttable.orwamahmoud.com/ai-http/): optional HTTP bridge, protocol, and the runnable example — simulated playground stays the default
 - [Voice input](https://adapttable.orwamahmoud.com/react/ai-voice/): dictation for the table assistant — createSpeechInput, useSpeechInput, the kit TableAssistant speech prop, browser and clip modes, language memory, fallback and privacy
@@ -136,9 +143,64 @@ const {
 - [material-table migration — native MUI, MIT](https://adapttable.orwamahmoud.com/react/migrate-from-material-table/): columns, remote data, actions and differences that require application changes
 - [ag-Grid alternative for CRUD — native UI kits, MIT](https://adapttable.orwamahmoud.com/react/migrate-from-ag-grid/): CRUD tables only — pivoting, tree data, range selection and Excel export under MIT, native kit look, free master-detail/filters; honest "stay on ag-Grid" list
 
+## Angular docs
+
+- [Get started with Angular](https://adapttable.orwamahmoud.com/angular/getting-started/): workspace availability, peers, AdaptDataTable, signals and first table
+- [Angular feature composition](https://adapttable.orwamahmoud.com/angular/features/): kit subpaths, TableFeature and standardPreset
+- [Angular data tiers](https://adapttable.orwamahmoud.com/angular/data-tiers/): client data, server queries and query-library signals
+- [Headless Angular tables](https://adapttable.orwamahmoud.com/angular/headless/): injectDataTable, signal readers and attribute helpers
+- [Custom Angular table sources](https://adapttable.orwamahmoud.com/angular/custom-table-source/): TableSource, capabilities, signals and fromStore lifecycle
+- [Build an Angular adapter](https://adapttable.orwamahmoud.com/angular/building-an-adapter/): structural Chrome, required native kit slots and public parts
+- [Angular columns](https://adapttable.orwamahmoud.com/angular/columns/): ColumnDef, TemplateRef, component renderers and AdaptCellTemplate
+- [Angular column groups](https://adapttable.orwamahmoud.com/angular/column-groups/): spanning headers and collapse controls
+- [Angular sparklines](https://adapttable.orwamahmoud.com/angular/sparkline/): optional binding entry, chart values and exports
+- [Angular sorting](https://adapttable.orwamahmoud.com/angular/sorting/): single and multi-sort, value comparison and query state
+- [Angular search](https://adapttable.orwamahmoud.com/angular/search/): debounced search, searchable text and find-in-table
+- [Angular filtering](https://adapttable.orwamahmoud.com/angular/filtering/): kit-native fields, operators, chips and query serialization
+- [Angular filter trees](https://adapttable.orwamahmoud.com/angular/filter-tree/): nested AND/OR groups, shared model and validation
+- [Angular header filters](https://adapttable.orwamahmoud.com/angular/header-filters/): column funnels and shared filter state
+- [Angular custom filter types](https://adapttable.orwamahmoud.com/angular/custom-filter-types/): FilterTypeSpec, operators, predicates and widget slots
+- [Angular pagination](https://adapttable.orwamahmoud.com/angular/pagination/): page size, mobile behavior and server paging
+- [Angular selection](https://adapttable.orwamahmoud.com/angular/selection/): selected IDs, selectionChange, bulk actions and confirmation
+- [Angular row actions](https://adapttable.orwamahmoud.com/angular/row-actions/): custom actions, menus and host-owned row mutations
+- [Angular row expansion](https://adapttable.orwamahmoud.com/angular/row-expansion/): detail templates, expansion state and toggles
+- [Angular nested tables](https://adapttable.orwamahmoud.com/angular/nested-tables/): child tables, defaults and independent state
+- [Angular cell editing](https://adapttable.orwamahmoud.com/angular/cell-editing/): native editors, validation, row and batch edits, undo and persistence callbacks
+- [Angular row reordering](https://adapttable.orwamahmoud.com/angular/row-reordering/): drag, keyboard and mobile actions, move policy and host callbacks
+- [Angular row pinning](https://adapttable.orwamahmoud.com/angular/row-pinning/): top and bottom IDs, host changes and URL state
+- [Angular pinned summaries](https://adapttable.orwamahmoud.com/angular/pinned-summary-rows/): total rows outside sorting, filtering, selection and pagination
+- [Angular cell spanning](https://adapttable.orwamahmoud.com/angular/row-spanning/): row spans, column spans and covered cells
+- [Angular full-width rows](https://adapttable.orwamahmoud.com/angular/full-width-rows/): host-injected content and separators on desktop and mobile
+- [Angular row appearance](https://adapttable.orwamahmoud.com/angular/row-styling/): conditional styles and per-row heights
+- [Angular cell navigation](https://adapttable.orwamahmoud.com/angular/cell-navigation/): keyboard grid focus, ranges, clipboard and fill operations
+- [Angular grouping](https://adapttable.orwamahmoud.com/angular/row-grouping/): grouping panels, nested groups and subtotals
+- [Angular aggregation](https://adapttable.orwamahmoud.com/angular/aggregation/): summaries, column operations and server totals
+- [Angular pivot tables](https://adapttable.orwamahmoud.com/angular/pivot/): AdaptPivotPanel, pivotTableModel, measures and URL state
+- [Angular formulas](https://adapttable.orwamahmoud.com/angular/formulas/): buildFormulaColumns, parser semantics and formula URL state
+- [Angular tree data](https://adapttable.orwamahmoud.com/angular/tree-data/): hierarchy, lazy children and expansion
+- [Angular column management](https://adapttable.orwamahmoud.com/angular/column-management/): menus, visibility, order, pinning, resize and persistence
+- [Angular saved views](https://adapttable.orwamahmoud.com/angular/saved-views/): named layouts, storage, controller options and URLs
+- [Angular virtualization](https://adapttable.orwamahmoud.com/angular/virtualization/): row, column and mobile-card windows, sizing and overscan
+- [Angular mobile cards](https://adapttable.orwamahmoud.com/angular/mobile/): responsive layouts, custom card templates and field rendering
+- [Angular URL state](https://adapttable.orwamahmoud.com/angular/url-state/): browser History, Angular Router, namespaces and request URLs
+- [Angular exports](https://adapttable.orwamahmoud.com/angular/exporting/): optional controls, browser downloads and server jobs with progress and cancellation
+- [Angular Excel export](https://adapttable.orwamahmoud.com/angular/export-xlsx/): shared XLSX writer, typed values and grouping
+- [Angular PDF and print](https://adapttable.orwamahmoud.com/angular/export-pdf/): shared PDF writer, print helpers and output options
+- [Angular SSR and hydration](https://adapttable.orwamahmoud.com/angular/ssr-rsc/): platform guards, request state and server-rendered tables
+- [Angular AI assistant](https://adapttable.orwamahmoud.com/angular/agent-capabilities/): tableAgent, injectTableAssistant, native controls and governed operations
+- [Angular voice input](https://adapttable.orwamahmoud.com/angular/ai-voice/): injectSpeechInput, speech providers and explicit draft submission
+- [Angular customization](https://adapttable.orwamahmoud.com/angular/customization/): templates, renderer components, classNames and slots
+- [Angular toolbar controls](https://adapttable.orwamahmoud.com/angular/toolbar-and-view-controls/): density, fullscreen, print, undo, status bar and side panel
+- [Angular commands and menus](https://adapttable.orwamahmoud.com/angular/command-palette/): command palette, context menus, shortcuts, keyboard and touch
+- [Angular locales and RTL](https://adapttable.orwamahmoud.com/angular/i18n-rtl/): locale bundles, translated labels and direction inputs
+- [Angular accessibility](https://adapttable.orwamahmoud.com/angular/accessibility/): focus, labels, grid navigation and announcements
+- [Angular realtime data](https://adapttable.orwamahmoud.com/angular/realtime/): host-owned signal updates, row patch provenance and changed-cell feedback
+
 ## Demo
 
 - [Live demo](https://adapttable.orwamahmoud.com/react/demo/): every adapter on one dataset
+- [Angular unstyled demo](https://adapttable.orwamahmoud.com/angular/demo/unstyled/): Angular templates and native HTML controls
+- [Angular NG-ZORRO demo](https://adapttable.orwamahmoud.com/angular/demo/ng-zorro/): the same Angular features in NG-ZORRO controls
 
 The demo is adapter-first: each kit has a landing page, and twenty-one feature pages
 under it at `/demo/<kit>/<feature>/` — e.g. `/demo/antd/filtering/`,

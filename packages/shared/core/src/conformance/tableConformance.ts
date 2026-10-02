@@ -117,6 +117,24 @@ export interface ConformanceScenario {
   readonly pageSize?: number;
   /** Compose keyboard cell navigation. */
   readonly navigable?: boolean;
+  /**
+   * Make every column editable in place, handing each committed edit here —
+   * the row's id, the column and the value the host receives.
+   */
+  readonly onCellEdit?: (
+    rowId: string,
+    columnKey: string,
+    value: unknown
+  ) => void;
+  /** Compose row reorder, handing each move here. */
+  readonly onRowReorder?: (from: number, to: number, rowId: string) => void;
+  /** Group the rows under headers by one column. */
+  readonly groupBy?: "name" | "age";
+  /**
+   * Compose virtualization over an infinite list in a height-capped box, so
+   * the body renders a window of its rows.
+   */
+  readonly virtualize?: boolean;
   /** Labels that replace the defaults. */
   readonly labels?: ConformanceLabels;
 }
@@ -260,6 +278,23 @@ function controlNamed(root: ParentNode, name: string): Element | null {
         spoken(control) === name
     ) ?? null
   );
+}
+
+/**
+ * Type into a text field as a reader does: the value through the element's
+ * own setter (which frameworks track), then the input event.
+ */
+function typeInto(field: Element, value: string): void {
+  const input =
+    field instanceof HTMLInputElement
+      ? field
+      : field.querySelector<HTMLInputElement>("input");
+  if (!input) throw new Error("the editor has no text field");
+  Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    "value"
+  )?.set?.call(input, value);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 function gridCell(root: ParentNode, row: number, column: number) {
@@ -589,5 +624,100 @@ export function tableConformanceTests(
         expect(gridCell(container, 0, 0)).toBeNull();
       })
     ));
+
+  it("opens a cell's editor from the keyboard and hands the host the edit", () => {
+    const edits: unknown[][] = [];
+    return withTable(
+      {
+        ...BASE,
+        onCellEdit: (rowId, columnKey, value) => {
+          edits.push([rowId, columnKey, value]);
+        },
+      },
+      async (container) => {
+        const activate = parts(container, "edit-cell-activate")[0] ?? null;
+        expect(activate).not.toBeNull();
+        if (!activate) return;
+        fireEvent.keyDown(activate, { key: "Enter" });
+        const editor = await waitFor(() => {
+          const found = part(container, "edit-cell-editor");
+          expect(found).not.toBeNull();
+          return found!;
+        });
+        typeInto(editor, "Ada L");
+        const field =
+          editor instanceof HTMLInputElement
+            ? editor
+            : (editor.querySelector("input") ?? editor);
+        fireEvent.keyDown(field, { key: "Enter" });
+        await waitFor(() => {
+          expect(edits).toEqual([["r1", "name", "Ada L"]]);
+        });
+      }
+    );
+  });
+
+  it("moves a row with the keyboard and tells the host where", () => {
+    const moves: unknown[][] = [];
+    return withTable(
+      {
+        ...BASE,
+        onRowReorder: (from, to, rowId) => {
+          moves.push([from, to, rowId]);
+        },
+      },
+      async (container) => {
+        const grip = parts(container, "row-reorder-handle")[0] ?? null;
+        expect(grip).not.toBeNull();
+        if (!grip) return;
+        fireEvent.keyDown(grip, { key: " " });
+        fireEvent.keyDown(grip, { key: "ArrowDown" });
+        fireEvent.keyDown(grip, { key: " " });
+        await waitFor(() => {
+          expect(moves).toEqual([[0, 1, "r1"]]);
+        });
+      }
+    );
+  });
+
+  it("groups rows under headers with their counts, and collapses a group", () =>
+    withTable(
+      {
+        ...BASE,
+        rows: [
+          { id: "r1", name: "Ada", age: 36 },
+          { id: "r2", name: "Grace", age: 36 },
+          { id: "r3", name: "Linus", age: 54 },
+        ],
+        groupBy: "age",
+      },
+      async (container) => {
+        expect(parts(container, "group-label").map(spoken)).toEqual([
+          "36",
+          "54",
+        ]);
+        expect(parts(container, "group-count").map(spoken)).toEqual([
+          "(2)",
+          "(1)",
+        ]);
+        expect(rowIds(container)).toEqual(["r1", "r2", "r3"]);
+        const toggle = parts(container, "group-toggle")[0] ?? null;
+        expect(toggle).not.toBeNull();
+        if (!toggle) return;
+        fireEvent.click(toggle);
+        await waitFor(() => {
+          expect(rowIds(container)).toEqual(["r3"]);
+        });
+      }
+    ));
+
+  it("renders a window of virtualized phone cards, not every card", () =>
+    withTable({ ...BASE, virtualize: true, mobile: true }, (container) => {
+      expect(part(container, "cards")).not.toBeNull();
+      expect(parts(container, "card").length < CONFORMANCE_ROWS.length).toBe(
+        true
+      );
+    }));
+
   return tests;
 }

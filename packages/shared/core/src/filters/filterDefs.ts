@@ -749,6 +749,13 @@ export function filterPredicate<TRow>(
  * @public
  */
 export interface FilterRuntime<TRow> {
+  /**
+   * Authored predicate semantics supplied by a filter engine, independent of
+   * rows and generated callbacks. Custom engines change this key when the
+   * same engine's predicate meaning changes; without it the data controller
+   * tracks only engine replacement and host-predicate presence.
+   */
+  readonly filterKey?: string;
   /** The merged, ordered definitions (drives the auto-built form). */
   defs: readonly FilterDef<TRow>[];
   /** Keys whose URL values parse as comma-separated arrays. */

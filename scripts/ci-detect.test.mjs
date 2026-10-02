@@ -22,13 +22,31 @@ describe("classify", () => {
     assert.equal(f.needBuild, false);
   });
 
-  it("skips unit, package and Playwright on docs-only diffs", () => {
+  it("checks docs in Playwright without running the library gate", () => {
     const f = classify(["docs/filtering.md", ".github/ISSUE_TEMPLATE/bug.yml"]);
     assert.equal(f.runLint, false);
     assert.equal(f.runUnit, false);
-    assert.equal(f.runPlaywright, false);
+    assert.equal(f.runPlaywright, true);
     assert.equal(f.needBuild, false);
     assert.equal(f.runKitsDocs, false);
+  });
+
+  it("checks Angular guides, Astro and routing changes in Playwright", () => {
+    for (const file of [
+      "docs/angular/getting-started.md",
+      "apps/docs/src/components/FrameworkSwitch.astro",
+      "apps/docs/sync-docs.mjs",
+      "scripts/angular-docs.mjs",
+      "scripts/docs-files.mjs",
+      "scripts/site.mjs",
+      "scripts/build-llms-full.mjs",
+      "scripts/serve-showcase.mjs",
+    ]) {
+      const flags = classify([file]);
+      assert.equal(flags.runPlaywright, true, file);
+      assert.equal(flags.runUnit, false, file);
+      assert.equal(flags.runPackage, false, file);
+    }
   });
 
   it("does not lint adapters for a workflow-only change", () => {
@@ -89,6 +107,13 @@ describe("classify", () => {
     assert.equal(f.runUnit, true);
     assert.equal(f.runPlaywright, false);
     assert.equal(f.runBench, false);
+  });
+
+  it("checks Angular packages with their real showcase browser coverage", () => {
+    const flags = classify(["packages/angular/angular/src/index.ts"]);
+    assert.equal(flags.runPlaywright, true);
+    assert.equal(flags.runUnit, true);
+    assert.equal(flags.runBench, false);
   });
 
   it("runs Playwright when only e2e specs change, not the packed harness", () => {

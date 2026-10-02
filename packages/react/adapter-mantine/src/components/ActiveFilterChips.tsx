@@ -35,6 +35,7 @@ export function ActiveFilterChips({
   if (chips.length === 0) return null;
   return (
     <Group
+      data-adapttable-part="chips"
       gap={6}
       aria-label={label}
       component="ul"
@@ -44,6 +45,8 @@ export function ActiveFilterChips({
         <Pill
           key={chip.key}
           component="li"
+          data-adapttable-part="chip"
+          attributes={{ remove: { "data-adapttable-part": "chip-remove" } }}
           withRemoveButton
           onRemove={chip.onRemove}
           // Mantine's Pill defaults its close button to `aria-hidden` and
@@ -60,15 +63,18 @@ export function ActiveFilterChips({
         </Pill>
       ))}
       {onClearAll && (
-        <Anchor
-          component="button"
-          type="button"
-          fz="xs"
-          fw={600}
-          onClick={onClearAll}
-        >
-          {clearAllLabel}
-        </Anchor>
+        <li data-adapttable-part="chip" style={{ display: "flex" }}>
+          <Anchor
+            data-adapttable-part="chip-remove"
+            component="button"
+            type="button"
+            fz="xs"
+            fw={600}
+            onClick={onClearAll}
+          >
+            {clearAllLabel}
+          </Anchor>
+        </li>
       )}
     </Group>
   );

@@ -189,7 +189,7 @@ function RangeField<TRow>({
   }
 
   return (
-    <Stack gap="md">
+    <Stack gap="md" data-adapttable-part="filter-field">
       <Input.Label size="sm">{label}</Input.Label>
       {/* Operator and value(s) share a row when they fit — "At least [5]" —
           and wrap when they don't (date inputs have a wide native minimum,
@@ -233,6 +233,7 @@ function BooleanControl<TRow>({
       size="sm"
       label={label}
       styles={FILTER_LABEL_STYLES}
+      wrapperProps={{ "data-adapttable-part": "filter-field" }}
       comboboxProps={FILTER_COMBOBOX_PROPS}
       data-adapttable-part="filter-select"
       data={[
@@ -252,18 +253,25 @@ function BooleanControl<TRow>({
 function SelectControl<TRow>({
   def,
   source,
-}: Readonly<{ def: FilterDef<TRow>; source: TableSource<TRow> }>) {
+  labels,
+}: Readonly<{
+  def: FilterDef<TRow>;
+  source: TableSource<TRow>;
+  labels: Required<TableLabels>;
+}>) {
   const label = filterLabel(def);
   const { options, loading } = useFilterOptions(def);
   const data = loading
     ? [{ value: "", label: "…", disabled: true }]
-    : [{ value: "", label: "All" }, ...options];
+    : [{ value: "", label: labels.filterAll }, ...options];
   return (
     <Select
       size="sm"
       label={label}
       styles={FILTER_LABEL_STYLES}
+      wrapperProps={{ "data-adapttable-part": "filter-field" }}
       comboboxProps={FILTER_COMBOBOX_PROPS}
+      data-adapttable-part="filter-select"
       data={data}
       value={asText(source.extra[def.key])}
       onChange={(next) => source.setExtra(def.key, next ?? "")}
@@ -287,6 +295,7 @@ function MultiSelectControl<TRow>({
       size="sm"
       label={label}
       styles={FILTER_LABEL_STYLES}
+      wrapperProps={{ "data-adapttable-part": "filter-field" }}
       comboboxProps={FILTER_COMBOBOX_PROPS}
       searchable
       clearable
@@ -318,7 +327,7 @@ function TextFilterField<TRow>({
     label: filterOpLabel(labels, opLabelKeys[choice]),
   }));
   return (
-    <Stack gap="md">
+    <Stack gap="md" data-adapttable-part="filter-field">
       <Input.Label size="sm">{label}</Input.Label>
       <Group gap="sm" align="flex-start">
         <Select
@@ -370,7 +379,7 @@ function FilterControl<TRow>({
     case "boolean":
       return <BooleanControl def={def} source={source} labels={labels} />;
     case "select":
-      return <SelectControl def={def} source={source} />;
+      return <SelectControl def={def} source={source} labels={labels} />;
     case "multiSelect":
       return <MultiSelectControl def={def} source={source} />;
     case "checklist":

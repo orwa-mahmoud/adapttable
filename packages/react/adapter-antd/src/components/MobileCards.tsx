@@ -39,8 +39,14 @@ import {
   useSummaryCells,
   type VirtualTableRow,
 } from "@adapttable/react/adapter";
-import { Card, Checkbox, Descriptions, Space } from "antd";
-import { type CSSProperties, memo, type ReactNode, useMemo } from "react";
+import { Card, Checkbox, ConfigProvider, Descriptions, Space } from "antd";
+import {
+  type CSSProperties,
+  memo,
+  type ReactNode,
+  useContext,
+  useMemo,
+} from "react";
 
 import {
   OptionalEditableCell,
@@ -52,6 +58,40 @@ import {
 } from "./featureSlots";
 import { ADAPTTABLE_GROUP, type AdaptTableGroupRow } from "./grouping";
 import { RowActionButtons } from "./RowActionButtons";
+
+/** Name the real kit-owned field rows and label spans, without extra markup. */
+function CardDescriptions({ children }: Readonly<{ children: ReactNode }>) {
+  const { getPrefixCls } = useContext(ConfigProvider.ConfigContext);
+  const prefix = getPrefixCls("descriptions");
+  return (
+    <Descriptions
+      column={1}
+      size="small"
+      colon={false}
+      ref={(descriptions) => {
+        const root = descriptions?.nativeElement;
+        if (!root) return;
+        // The label/value content can contain another table, so only the
+        // Descriptions' own rows receive card hooks.
+        for (const row of root.querySelectorAll("tr")) {
+          if (row.closest("table")?.parentElement?.parentElement !== root)
+            continue;
+          row.dataset.adapttablePart = "card-row";
+          for (const label of row.querySelectorAll<HTMLElement>("span")) {
+            if (
+              label.closest("tr") === row &&
+              label.classList.contains(`${prefix}-item-label`)
+            ) {
+              label.dataset.adapttablePart = "card-label";
+            }
+          }
+        }
+      }}
+    >
+      {children}
+    </Descriptions>
+  );
+}
 
 /**
  * The mobile counterpart of the desktop footer summary: one trailing card
@@ -71,7 +111,7 @@ function SummaryCard<TRow>({
   const cells = useSummaryCells(summaryRow, rows) ?? {};
   return (
     <Card size="small" data-adapttable-part="summary-card">
-      <Descriptions column={1} size="small" colon={false}>
+      <CardDescriptions>
         {columns
           .filter((column) => cells[column.key] !== undefined)
           .map((column) => (
@@ -82,7 +122,7 @@ function SummaryCard<TRow>({
               {cells[column.key]}
             </Descriptions.Item>
           ))}
-      </Descriptions>
+      </CardDescriptions>
     </Card>
   );
 }
@@ -286,7 +326,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
       }
       extra={
         (onToggleExpand ?? actions ?? editing?.rowEditing) ? (
-          <Space size="small">
+          <Space size="small" data-adapttable-part="card-actions">
             {onToggleExpand && (
               <OptionalExpandToggle
                 id={id}
@@ -326,7 +366,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
       ) : (
         // The whole `Descriptions` goes, not just its items: a
         // `Descriptions.Item` only means anything inside one.
-        <Descriptions column={1} size="small" colon={false}>
+        <CardDescriptions>
           {fields.map(({ column, label, value }) => (
             <Descriptions.Item key={column.key} label={label}>
               <span
@@ -337,7 +377,7 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
               </span>
             </Descriptions.Item>
           ))}
-        </Descriptions>
+        </CardDescriptions>
       )}
       {rowReorder && (
         <OptionalRowReorderButtons
@@ -509,12 +549,15 @@ export function MobileCards<TRow>({
   pinnedSummaryTop?: readonly TRow[];
   pinnedSummaryBottom?: readonly TRow[];
   extraRows?: readonly ExtraRow[];
-  /** Attach the virtualizer to this list (window or maxHeight box). */
+  /** Attach the virtualizer to the card scroll region. */
   listRef?: (node: HTMLElement | null) => void;
   /** Clip style when the host passed `maxHeight`. */
   listStyle?: CSSProperties;
 }>) {
   const { labels, selection, columns } = table;
+  const requestedRegionLabel = (tableLabel ?? labels.table).trim();
+  const regionLabel =
+    requestedRegionLabel.length > 0 ? requestedRegionLabel : labels.table;
   // Either the virtual slice or every source row, resolved to render entries
   // with their ORIGINAL index (so cells and classes see the true row index).
   // Pinned rows lead / trail the list; cards have no sticky chrome.
@@ -639,113 +682,127 @@ export function MobileCards<TRow>({
   });
 
   return (
-    <ul
+    <div
+      role="region"
+      aria-label={regionLabel}
+      tabIndex={listStyle?.maxHeight == null ? undefined : 0}
       ref={listRef}
-      data-adapttable-part="cards"
-      aria-label={tableLabel}
-      style={{
-        listStyle: "none",
-        margin: 0,
-        padding: 0,
-        display: "flex",
-        flexDirection: "column",
-        gap: compact ? 4 : 8,
-        ...listStyle,
-      }}
+      style={listStyle}
     >
-      {paddingTop > 0 && <li aria-hidden style={{ height: paddingTop }} />}
-      {grouping
-        ? pinnedSummaryTop.map((row, index) =>
-            renderLeafCard(row, index, pinnedSummaryRowId("top", index))
-          )
-        : null}
-      {grouping
-        ? grouping.entries.map((entry) => {
-            if (isExtraEntry(entry)) {
-              return (
+      <ul
+        data-adapttable-part="cards"
+        aria-label={tableLabel}
+        style={{
+          listStyle: "none",
+          margin: 0,
+          padding: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: compact ? 4 : 8,
+        }}
+      >
+        {paddingTop > 0 && <li aria-hidden style={{ height: paddingTop }} />}
+        {grouping
+          ? pinnedSummaryTop.map((row, index) =>
+              renderLeafCard(row, index, pinnedSummaryRowId("top", index))
+            )
+          : null}
+        {grouping
+          ? grouping.entries.map((entry) => {
+              if (isExtraEntry(entry)) {
+                return (
+                  <li
+                    key={entry.key}
+                    data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].row}
+                    role={entry.kind === "separator" ? "separator" : undefined}
+                    aria-label={
+                      entry.kind === "separator"
+                        ? labels.rowSeparator
+                        : undefined
+                    }
+                  >
+                    <div
+                      data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}
+                    >
+                      {entry.kind === "fullWidth"
+                        ? (entry.render?.() as ReactNode)
+                        : null}
+                    </div>
+                  </li>
+                );
+              }
+              if (
+                entry.kind === "group" ||
+                entry.kind === "groupFooter" ||
+                entry.kind === "groupMore"
+              ) {
+                return (
+                  <li key={entry.key} ref={measureElement}>
+                    <OptionalGroupHeaderCard
+                      group={toGroupRow(entry)}
+                      labels={labels}
+                      onToggle={() => grouping.collapsed.toggle(entry.key)}
+                      selection={selection ?? undefined}
+                      onShowMore={grouping.showMore}
+                      aggregateNodes={
+                        entry.kind !== "groupMore" && entry.aggregateCells
+                          ? Object.entries(entry.aggregateCells).map(
+                              ([colKey, node]) => (
+                                <span key={colKey} data-column={colKey}>
+                                  {node as ReactNode}
+                                </span>
+                              )
+                            )
+                          : undefined
+                      }
+                    />
+                  </li>
+                );
+              }
+              return renderLeafCard(entry.row, entry.index, entry.key);
+            })
+          : insertExtraRows(
+              bodyRowEntries(entries, tree),
+              extraRows,
+              (e) => e.key
+            ).map((slot) =>
+              "kind" in slot ? (
                 <li
-                  key={entry.key}
-                  data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].row}
-                  role={entry.kind === "separator" ? "separator" : undefined}
+                  key={slot.key}
+                  data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].row}
+                  role={slot.kind === "separator" ? "separator" : undefined}
                   aria-label={
-                    entry.kind === "separator" ? labels.rowSeparator : undefined
+                    slot.kind === "separator" ? labels.rowSeparator : undefined
                   }
                 >
-                  <div data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}>
-                    {entry.kind === "fullWidth"
-                      ? (entry.render?.() as ReactNode)
+                  <div data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}>
+                    {slot.kind === "fullWidth"
+                      ? (slot.render?.() as ReactNode)
                       : null}
                   </div>
                 </li>
-              );
-            }
-            if (
-              entry.kind === "group" ||
-              entry.kind === "groupFooter" ||
-              entry.kind === "groupMore"
-            ) {
-              return (
-                <li key={entry.key} ref={measureElement}>
-                  <OptionalGroupHeaderCard
-                    group={toGroupRow(entry)}
-                    labels={labels}
-                    onToggle={() => grouping.collapsed.toggle(entry.key)}
-                    selection={selection ?? undefined}
-                    onShowMore={grouping.showMore}
-                    aggregateNodes={
-                      entry.kind !== "groupMore" && entry.aggregateCells
-                        ? Object.entries(entry.aggregateCells).map(
-                            ([colKey, node]) => (
-                              <span key={colKey} data-column={colKey}>
-                                {node as ReactNode}
-                              </span>
-                            )
-                          )
-                        : undefined
-                    }
-                  />
-                </li>
-              );
-            }
-            return renderLeafCard(entry.row, entry.index, entry.key);
-          })
-        : insertExtraRows(
-            bodyRowEntries(entries, tree),
-            extraRows,
-            (e) => e.key
-          ).map((slot) =>
-            "kind" in slot ? (
-              <li
-                key={slot.key}
-                data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].row}
-                role={slot.kind === "separator" ? "separator" : undefined}
-                aria-label={
-                  slot.kind === "separator" ? labels.rowSeparator : undefined
-                }
-              >
-                <div data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}>
-                  {slot.kind === "fullWidth"
-                    ? (slot.render?.() as ReactNode)
-                    : null}
-                </div>
-              </li>
-            ) : (
-              renderLeafCard(slot.row, slot.index, slot.key, slot.treeEntry)
+              ) : (
+                renderLeafCard(slot.row, slot.index, slot.key, slot.treeEntry)
+              )
+            )}
+        {grouping
+          ? pinnedSummaryBottom.map((row, index) =>
+              renderLeafCard(row, index, pinnedSummaryRowId("bottom", index))
             )
-          )}
-      {grouping
-        ? pinnedSummaryBottom.map((row, index) =>
-            renderLeafCard(row, index, pinnedSummaryRowId("bottom", index))
-          )
-        : null}
-      {summaryRow && (
-        <li>
-          <SummaryCard rows={rows} columns={columns} summaryRow={summaryRow} />
-        </li>
-      )}
-      {paddingBottom > 0 && (
-        <li aria-hidden style={{ height: paddingBottom }} />
-      )}
-    </ul>
+          : null}
+        {summaryRow && (
+          <li>
+            <SummaryCard
+              rows={rows}
+              columns={columns}
+              summaryRow={summaryRow}
+            />
+          </li>
+        )}
+        {paddingBottom > 0 && (
+          <li aria-hidden style={{ height: paddingBottom }} />
+        )}
+      </ul>
+    </div>
   );
 }

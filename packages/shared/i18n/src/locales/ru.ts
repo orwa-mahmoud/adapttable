@@ -73,6 +73,7 @@ export const ru: Required<TableLabels> = {
   relPreviousMonth: "Прошлый месяц",
   relLastN: "Последние N дней",
   relNextN: "Следующие N дней",
+  filterAll: "Все",
   boolAny: "Любое",
   boolTrue: "Да",
   boolFalse: "Нет",

@@ -58,6 +58,9 @@ const referenceDriver: ConformanceDriver = {
       page: 0,
       focus: [0, 0],
       status: "",
+      editing: undefined,
+      lifted: undefined,
+      collapsed: new Set<string>(),
     };
     const draw = (): void => {
       container.replaceChildren(build(scenario, state));
@@ -77,6 +80,55 @@ const referenceDriver: ConformanceDriver = {
           const id = box.closest("tr")?.getAttribute("data-row-id") ?? "";
           if (state.selected.has(id)) state.selected.delete(id);
           else state.selected.add(id);
+          draw();
+        });
+      }
+      for (const activate of container.querySelectorAll(
+        '[data-adapttable-part="edit-cell-activate"]'
+      )) {
+        activate.addEventListener("keydown", (event) => {
+          if ((event as KeyboardEvent).key !== "Enter") return;
+          state.editing = {
+            rowId: activate.closest("tr")?.getAttribute("data-row-id") ?? "",
+            key: activate.closest("td")?.getAttribute("data-column-key") ?? "",
+          };
+          draw();
+        });
+      }
+      container
+        .querySelector('[data-adapttable-part="edit-cell-editor"]')
+        ?.addEventListener("keydown", (event) => {
+          const editing = state.editing;
+          if ((event as KeyboardEvent).key !== "Enter" || !editing) return;
+          const input = event.target as HTMLInputElement;
+          scenario.onCellEdit?.(editing.rowId, editing.key, input.value);
+          state.editing = undefined;
+          draw();
+        });
+      for (const grip of container.querySelectorAll(
+        '[data-adapttable-part="row-reorder-handle"]'
+      )) {
+        grip.addEventListener("keydown", (event) => {
+          const key = (event as KeyboardEvent).key;
+          const index = Number(grip.closest("tr")?.getAttribute("data-index"));
+          const lifted = state.lifted;
+          if (key === " " && !lifted)
+            state.lifted = { from: index, over: index };
+          else if (key === "ArrowDown" && lifted) lifted.over += 1;
+          else if (key === " " && lifted) {
+            const rowId = grip.closest("tr")?.getAttribute("data-row-id") ?? "";
+            scenario.onRowReorder?.(lifted.from, lifted.over, rowId);
+            state.lifted = undefined;
+          }
+        });
+      }
+      for (const toggle of container.querySelectorAll(
+        '[data-adapttable-part="group-toggle"]'
+      )) {
+        toggle.addEventListener("click", () => {
+          const value = toggle.getAttribute("data-group") ?? "";
+          if (state.collapsed.has(value)) state.collapsed.delete(value);
+          else state.collapsed.add(value);
           draw();
         });
       }
@@ -119,6 +171,9 @@ interface DrawState {
   page: number;
   focus: [number, number];
   status: string;
+  editing: { rowId: string; key: string } | undefined;
+  lifted: { from: number; over: number } | undefined;
+  collapsed: Set<string>;
 }
 
 function element(
@@ -140,8 +195,132 @@ const ARIA_SORT = {
   none: "none",
 } as const;
 
+type Row = ConformanceScenario["rows"][number];
+
+/** A cell's content: its text, or the edit control while editing is on. */
+function cellContent(
+  scenario: ConformanceScenario,
+  state: DrawState,
+  row: Row,
+  key: "name" | "age"
+): (Node | string)[] {
+  const text = String(row[key]);
+  if (!scenario.onCellEdit) return [text];
+  const open = state.editing?.rowId === row.id && state.editing.key === key;
+  return open
+    ? [
+        element("input", {
+          "data-adapttable-part": "edit-cell-editor",
+          value: text,
+        }),
+      ]
+    : [
+        element("button", { "data-adapttable-part": "edit-cell-activate" }, [
+          text,
+        ]),
+      ];
+}
+
+/** One body row, with its reorder handle, checkbox and cells. */
+function rowElement(
+  scenario: ConformanceScenario,
+  state: DrawState,
+  row: Row,
+  index: number
+): HTMLElement {
+  const navigable = scenario.navigable === true;
+  return element(
+    "tr",
+    {
+      "data-adapttable-part": "row",
+      role: "row",
+      "data-row-id": row.id,
+      "data-index": String(index),
+      "aria-rowindex": navigable ? String(index + 1) : undefined,
+      "aria-selected": scenario.selectable
+        ? String(state.selected.has(row.id))
+        : undefined,
+    },
+    [
+      ...(scenario.onRowReorder
+        ? [
+            element("td", {}, [
+              element("button", {
+                "data-adapttable-part": "row-reorder-handle",
+              }),
+            ]),
+          ]
+        : []),
+      ...(scenario.selectable
+        ? [element("td", {}, [element("input", { type: "checkbox" })])]
+        : []),
+      ...scenario.columns.map((column, columnIndex) =>
+        element(
+          "td",
+          {
+            "data-adapttable-part": "cell",
+            "data-column-key": column.key,
+            ...(navigable ? gridCellAttributes(state, index, columnIndex) : {}),
+          },
+          cellContent(scenario, state, row, column.key)
+        )
+      ),
+    ]
+  );
+}
+
+/** A navigable cell's address, column index and roving tab stop. */
+function gridCellAttributes(
+  state: DrawState,
+  index: number,
+  columnIndex: number
+): Record<string, string> {
+  const focused = state.focus[0] === index && state.focus[1] === columnIndex;
+  return {
+    "data-grid-cell": `${index}:${columnIndex}`,
+    "aria-colindex": String(columnIndex + 1),
+    tabindex: focused ? "0" : "-1",
+  };
+}
+
+/** The body rows, under group headers when the scenario groups. */
+function bodyRows(
+  scenario: ConformanceScenario,
+  state: DrawState,
+  rows: readonly Row[]
+): HTMLElement[] {
+  const groupBy = scenario.groupBy;
+  if (!groupBy) {
+    return rows.map((row, index) => rowElement(scenario, state, row, index));
+  }
+  const labels = { ...defaultLabels, ...scenario.labels };
+  const body: HTMLElement[] = [];
+  for (const value of new Set(rows.map((row) => String(row[groupBy])))) {
+    const members = rows.filter((row) => String(row[groupBy]) === value);
+    body.push(
+      element("tr", { "data-adapttable-part": "group-row" }, [
+        element("td", {}, [
+          element("button", {
+            "data-adapttable-part": "group-toggle",
+            "data-group": value,
+          }),
+          element("span", { "data-adapttable-part": "group-label" }, [value]),
+          element("span", { "data-adapttable-part": "group-count" }, [
+            labels.groupCount(members.length),
+          ]),
+        ]),
+      ])
+    );
+    if (state.collapsed.has(value)) continue;
+    for (const row of members) {
+      body.push(rowElement(scenario, state, row, rows.indexOf(row)));
+    }
+  }
+  return body;
+}
+
 function build(scenario: ConformanceScenario, state: DrawState): HTMLElement {
-  const { sort, selected } = state;
+  const { sort } = state;
   const labels = { ...defaultLabels, ...scenario.labels };
   const navigable = scenario.navigable === true;
   const size = scenario.pageSize ?? scenario.rows.length;
@@ -178,7 +357,7 @@ function build(scenario: ConformanceScenario, state: DrawState): HTMLElement {
       element(
         "div",
         { "data-adapttable-part": "cards" },
-        rows.map((row) =>
+        (scenario.virtualize ? rows.slice(0, 1) : rows).map((row) =>
           element("div", { "data-adapttable-part": "card" }, [row.name])
         )
       )
@@ -198,46 +377,7 @@ function build(scenario: ConformanceScenario, state: DrawState): HTMLElement {
         : [column.header]
     )
   );
-  const body = rows.map((row, index) =>
-    element(
-      "tr",
-      {
-        "data-adapttable-part": "row",
-        role: "row",
-        "data-row-id": row.id,
-        "data-index": String(index),
-        "aria-rowindex": navigable ? String(index + 1) : undefined,
-        "aria-selected": scenario.selectable
-          ? String(selected.has(row.id))
-          : undefined,
-      },
-      [
-        ...(scenario.selectable
-          ? [element("td", {}, [element("input", { type: "checkbox" })])]
-          : []),
-        ...scenario.columns.map((column, columnIndex) =>
-          element(
-            "td",
-            {
-              "data-adapttable-part": "cell",
-              "data-column-key": column.key,
-              ...(navigable
-                ? {
-                    "data-grid-cell": `${index}:${columnIndex}`,
-                    "aria-colindex": String(columnIndex + 1),
-                    tabindex:
-                      state.focus[0] === index && state.focus[1] === columnIndex
-                        ? "0"
-                        : "-1",
-                  }
-                : {}),
-            },
-            [String(row[column.key])]
-          )
-        ),
-      ]
-    )
-  );
+  const body = bodyRows(scenario, state, rows);
   root.append(
     element(
       "table",
@@ -287,7 +427,7 @@ describe("the table conformance suite", () => {
   const failures: string[] = [];
 
   it("returns every assertion, in order", () => {
-    expect(tests.map((test) => test.name)).toHaveLength(21);
+    expect(tests.map((test) => test.name)).toHaveLength(25);
   });
 
   for (const test of tests) {

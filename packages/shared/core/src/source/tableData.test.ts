@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { LiveFeatureHost } from "../features/liveFeatureHost";
 import type { FilterDef, FilterRuntime } from "../filters/filterDefs";
-import type { FilterEngine } from "../filters/filterEngine";
+import { FILTER_ENGINE_IMPL, type FilterEngine } from "../filters/filterEngine";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import { resetDevWarnings } from "../utils/devWarn";
 import type { TableQueryListener } from "./dataTier";
@@ -66,6 +67,28 @@ function engineStub(): FilterEngine & {
         .map((row: Row) => ({ value: row.id, label: row.id, count: 1 })),
     })),
   } as never;
+}
+
+/** A structural third-party engine that predates optional runtime keys. */
+function firstRowEngine(): FilterEngine {
+  return {
+    buildRuntime({ data }) {
+      return {
+        defs: [],
+        arrayExtraKeys: [],
+        numberExtraKeys: [],
+        filterLabels: {},
+        filterFn: (row) => row === data[0],
+        registry: {
+          get: () => undefined,
+          has: () => false,
+          types: () => [],
+        },
+      };
+    },
+    evaluateTree: () => true,
+    computeFacets: () => ({}),
+  };
 }
 
 function config(
@@ -145,6 +168,163 @@ describe("createTableData", () => {
       first.runtime.defs,
       REGISTRY
     );
+  });
+
+  it("keeps the filter key through new rows, generated closures, and unrelated features", () => {
+    const table = createTableData<Row>();
+    const columns: TableDataConfig<Row>["columns"] = [
+      { key: "group", filter: "text", i18n: { en: "team" } },
+    ];
+    const first = table.plan(
+      config({ engine: FILTER_ENGINE_IMPL, columns, locale: "en" })
+    );
+    const featureHost = new LiveFeatureHost();
+    featureHost.registerPanel({ key: "details" });
+    const refreshed = table.plan(
+      config({
+        engine: FILTER_ENGINE_IMPL,
+        columns: columns.map((column) => ({ ...column })),
+        locale: "en",
+        data: [...ROWS],
+        featureHost,
+      })
+    );
+    expect(refreshed.runtime.filterFn).not.toBe(first.runtime.filterFn);
+    expect(refreshed.runtime.defs[0]!.getValue).not.toBe(
+      first.runtime.defs[0]!.getValue
+    );
+    expect(refreshed.filterKey).toBe(first.filterKey);
+
+    const predicate = table.plan(config({ filterFn: () => true }));
+    const replacement = table.plan(config({ filterFn: () => true }));
+    expect(replacement.filterKey).toBe(predicate.filterKey);
+  });
+
+  it("changes the filter key for declared predicates and registry extensions, and restores it when restored", () => {
+    const table = createTableData<Row>();
+    const original: FilterDef<Row>[] = [
+      { key: "team", type: "text", getValue: (row) => row.team },
+    ];
+    const originalConfig = config({
+      engine: FILTER_ENGINE_IMPL,
+      declaredFilters: original,
+    });
+    const first = table.plan(originalConfig);
+    expect(ROWS.filter((row) => first.filterFn(row, { team: "x" }))).toEqual([
+      ROWS[0],
+    ]);
+    const changed = table.plan(
+      config({
+        engine: FILTER_ENGINE_IMPL,
+        declaredFilters: [
+          {
+            ...original[0]!,
+            getValue: (row) => (row.team === "x" ? "y" : "x"),
+          },
+        ],
+      })
+    );
+    expect(changed.filterKey).not.toBe(first.filterKey);
+    expect(ROWS.filter((row) => changed.filterFn(row, { team: "x" }))).toEqual([
+      ROWS[1],
+    ]);
+
+    const removed = table.plan(
+      config({ engine: FILTER_ENGINE_IMPL, declaredFilters: [] })
+    );
+    expect(removed.filterKey).not.toBe(first.filterKey);
+    expect(ROWS.filter((row) => removed.filterFn(row, { team: "x" }))).toEqual(
+      ROWS
+    );
+    expect(table.plan(originalConfig).filterKey).toBe(first.filterKey);
+
+    const featureHost = new LiveFeatureHost();
+    featureHost.extendFilterType("text", { match: () => true });
+    const extended = table.plan({ ...originalConfig, featureHost });
+    expect(extended.filterKey).not.toBe(first.filterKey);
+    expect(ROWS.filter((row) => extended.filterFn(row, { team: "x" }))).toEqual(
+      ROWS
+    );
+  });
+
+  it("tracks structural engines without runtime keys through replacement and removal", () => {
+    const engine = firstRowEngine();
+    const replacement: FilterEngine = {
+      ...engine,
+      buildRuntime(input) {
+        return {
+          ...engine.buildRuntime(input),
+          filterFn: (row) => row === input.data[1],
+        };
+      },
+    };
+    const table = createTableData<Row>();
+    const first = table.plan(config({ engine }));
+    expect(first.runtime.filterKey).toBeUndefined();
+    expect(ROWS.filter((row) => first.filterFn(row, {}))).toEqual([ROWS[0]]);
+
+    const replaced = table.plan(config({ engine: replacement }));
+    expect(replaced.runtime.filterKey).toBeUndefined();
+    expect(replaced.filterKey).not.toBe(first.filterKey);
+    expect(ROWS.filter((row) => replaced.filterFn(row, {}))).toEqual([ROWS[1]]);
+
+    const removed = table.plan(config());
+    expect(removed.filterKey).not.toBe(first.filterKey);
+    expect(removed.filterKey).not.toBe(replaced.filterKey);
+    expect(ROWS.filter((row) => removed.filterFn(row, {}))).toEqual(ROWS);
+
+    const restored = table.plan(config({ engine }));
+    expect(restored.filterKey).toBe(first.filterKey);
+    expect(ROWS.filter((row) => restored.filterFn(row, {}))).toEqual([ROWS[0]]);
+  });
+
+  it("uses a custom runtime key for same-engine semantic changes", () => {
+    const base = firstRowEngine();
+    let revision = 0;
+    const engine: FilterEngine = {
+      ...base,
+      buildRuntime(input) {
+        const selected = input.data[revision];
+        return {
+          ...base.buildRuntime(input),
+          filterKey: String(revision),
+          filterFn: (row) => row === selected,
+        };
+      },
+    };
+    const table = createTableData<Row>();
+    const first = table.plan(config({ engine }));
+    const refreshed = table.plan(config({ engine, data: [...ROWS] }));
+    expect(refreshed.runtime.filterFn).not.toBe(first.runtime.filterFn);
+    expect(refreshed.filterKey).toBe(first.filterKey);
+    expect(ROWS.filter((row) => refreshed.filterFn(row, {}))).toEqual([
+      ROWS[0],
+    ]);
+
+    revision = 1;
+    const changed = table.plan(config({ engine, data: [...ROWS] }));
+    expect(changed.filterKey).not.toBe(first.filterKey);
+    expect(ROWS.filter((row) => changed.filterFn(row, {}))).toEqual([ROWS[1]]);
+
+    revision = 0;
+    const replaced = table.plan(config({ engine: { ...engine } }));
+    expect(replaced.runtime.filterKey).toBe(first.runtime.filterKey);
+    expect(replaced.filterKey).not.toBe(first.filterKey);
+    expect(table.plan(config({ engine })).filterKey).toBe(first.filterKey);
+  });
+
+  it("keys host predicate presence without keying its function identity", () => {
+    const engine = firstRowEngine();
+    const table = createTableData<Row>();
+    const first = table.plan(config({ engine }));
+    const added = table.plan(config({ engine, filterFn: () => true }));
+    expect(added.filterKey).not.toBe(first.filterKey);
+    expect(ROWS.filter((row) => added.filterFn(row, {}))).toEqual([ROWS[0]]);
+
+    const replaced = table.plan(config({ engine, filterFn: () => false }));
+    expect(replaced.filterKey).toBe(added.filterKey);
+    expect(ROWS.filter((row) => replaced.filterFn(row, {}))).toEqual([]);
+    expect(table.plan(config({ engine })).filterKey).toBe(first.filterKey);
   });
 
   it("asks the server for every checklist filter unless told which", () => {

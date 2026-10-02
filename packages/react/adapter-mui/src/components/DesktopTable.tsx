@@ -141,12 +141,6 @@ const RESIZE_HANDLE_SX = {
   userSelect: "none",
 } as const;
 
-/** Empty leading pad (group header / summary) — keeps DesktopTable lean. */
-function ExtraCheckboxCell({ show }: Readonly<{ show: boolean }>) {
-  if (!show) return null;
-  return <TableCell padding="checkbox" />;
-}
-
 /**
  * Identity-stable dispatcher for `selection.toggle` / `expansion.toggle`.
  * `selection.toggle` is recreated whenever the selection changes, so handing
@@ -256,6 +250,7 @@ function DesktopRowBase<TRow>(
       >
         {expandable && (
           <TableCell
+            data-adapttable-part="expand-cell"
             padding="checkbox"
             sx={PAPER_SX}
             style={{ ...edge(hasStartPin), ...edgeRowPin }}
@@ -372,6 +367,7 @@ function DesktopRowBase<TRow>(
         {columnSpacers && <ColumnSpacer width={columnSpacers.end} side="end" />}
         {showActions && (
           <TableCell
+            data-adapttable-part="actions-cell"
             sx={{ ...PAPER_SX, textAlign: "end" }}
             style={{
               ...pinnedEdgeCellStyle(
@@ -412,8 +408,10 @@ function DesktopRowBase<TRow>(
         )}
       </TableRow>
       {expandable && expanded && (
-        <TableRow ref={detailMeasureRef}>
-          <TableCell colSpan={columnSpan}>{renderDetail(row)}</TableCell>
+        <TableRow ref={detailMeasureRef} data-adapttable-part="detail-row">
+          <TableCell data-adapttable-part="detail-cell" colSpan={columnSpan}>
+            {renderDetail(row)}
+          </TableCell>
         </TableRow>
       )}
     </>
@@ -654,6 +652,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     <>
       {header.leading.expand && (
         <TableCell
+          data-adapttable-part="expand-header"
           padding="checkbox"
           rowSpan={rowSpan > 1 ? rowSpan : undefined}
           sx={edgeHeadSx(pin.hasStartPin)}
@@ -702,6 +701,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       )}
       {header.trailing.actions && (
         <TableCell
+          data-adapttable-part="actions-header"
           rowSpan={rowSpan > 1 ? rowSpan : undefined}
           sx={{
             ...edgeHeadSx(pin.hasEndPin || pin.stickActions),
@@ -829,20 +829,36 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           })}
         </TableBody>
         {showColumnFooter && (
-          <TableFooter>
-            <TableRow>
-              {header.leading.expand && <TableCell padding="checkbox" />}
-              <ExtraCheckboxCell show={showReorder} />
-              {selection && <TableCell padding="checkbox" />}
+          <TableFooter data-adapttable-part="summary">
+            <TableRow data-adapttable-part="summary-row">
+              {header.leading.expand && (
+                <TableCell
+                  data-adapttable-part="summary-cell"
+                  padding="checkbox"
+                />
+              )}
+              {showReorder && (
+                <TableCell
+                  data-adapttable-part="summary-cell"
+                  padding="checkbox"
+                />
+              )}
+              {selection && (
+                <TableCell
+                  data-adapttable-part="summary-cell"
+                  padding="checkbox"
+                />
+              )}
               {columns.map((column) => (
                 <TableCell
                   key={column.key}
+                  data-adapttable-part="summary-cell"
                   sx={{ textAlign: muiAlign(column.align) }}
                 >
                   {resolveColumnFooter(column, summary?.[column.key])}
                 </TableCell>
               ))}
-              {showActions && <TableCell />}
+              {showActions && <TableCell data-adapttable-part="summary-cell" />}
             </TableRow>
           </TableFooter>
         )}

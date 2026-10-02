@@ -1,9 +1,28 @@
 import { describe, expect, it } from "vitest";
 
-import { detectKit, KITS, mergeDependencies } from "./detect";
+import {
+  detectFramework,
+  detectKit,
+  type KitInfo,
+  KITS,
+  mergeDependencies,
+} from "./detect";
 import { InitError, type InitIO, runInit } from "./init";
 import { choosePackageManager, installCommand } from "./packageManager";
 import { packagesFor, scaffoldFiles, starterComponent } from "./scaffold";
+
+describe("detectFramework", () => {
+  it("requires both the Angular dependency and workspace file", () => {
+    expect(
+      detectFramework({ "@angular/core": "^22.2.0" }, { hasAngularJson: true })
+    ).toBe("angular");
+    expect(detectFramework({ "@angular/core": "^22.2.0" })).toBe("react");
+    expect(
+      detectFramework({ "@angular/core": "^22.2.0" }, { hasAngularJson: false })
+    ).toBe("react");
+    expect(detectFramework({}, { hasAngularJson: true })).toBe("react");
+  });
+});
 
 describe("detectKit", () => {
   it("detects each kit from its signal package", () => {
@@ -48,6 +67,43 @@ describe("detectKit", () => {
 
   it("falls back to unstyled when nothing matches", () => {
     expect(detectKit({ react: "18" }).kit).toBe("unstyled");
+  });
+
+  it("selects NG-ZORRO only for the Angular framework", () => {
+    const dependencies = {
+      "@angular/core": "^22.2.0",
+      "ng-zorro-antd": "^22.1.1",
+    };
+    expect(detectKit(dependencies, { framework: "angular" })).toMatchObject({
+      kit: "ng-zorro",
+      framework: "angular",
+      adapter: "@adapttable/ng-zorro",
+    });
+    expect(detectKit(dependencies).kit).toBe("unstyled");
+    expect(detectKit(dependencies, { framework: "react" }).kit).toBe(
+      "unstyled"
+    );
+  });
+
+  it("keeps Angular kit selection independent of React and shadcn signals", () => {
+    const dependencies = {
+      "@mantine/core": "8",
+      "@mui/material": "6",
+      tailwindcss: "4",
+    };
+    expect(
+      detectKit(dependencies, { framework: "angular", hasComponentsJson: true })
+    ).toMatchObject({
+      kit: "angular-unstyled",
+      framework: "angular",
+      adapter: "@adapttable/angular-unstyled",
+    });
+    expect(
+      detectKit(
+        { ...dependencies, "ng-zorro-antd": "^22.1.1" },
+        { framework: "angular", hasComponentsJson: true }
+      ).kit
+    ).toBe("ng-zorro");
   });
 });
 
@@ -107,6 +163,87 @@ describe("scaffold", () => {
     const files = scaffoldFiles(KITS[0]!);
     expect(files[0]?.path).toBe("src/PeopleTable.tsx");
   });
+
+  it("preserves the React scaffold for existing KitInfo literals", () => {
+    const info: KitInfo = {
+      kit: "unstyled",
+      adapter: "@adapttable/unstyled",
+      signals: [],
+      extras: [],
+      label: "Native HTML",
+    };
+    expect(scaffoldFiles(info)).toEqual([
+      { path: "src/PeopleTable.tsx", contents: starterComponent(info) },
+    ]);
+    expect(starterComponent(info)).toContain("export function PeopleTable()");
+    expect(packagesFor(info)).toEqual([
+      "@adapttable/core",
+      "@adapttable/unstyled",
+    ]);
+  });
+
+  it.each(["angular-unstyled", "ng-zorro"])(
+    "scaffolds a standalone Angular component for %s through public imports",
+    (kit) => {
+      const info = KITS.find((entry) => entry.kit === kit)!;
+      const files = scaffoldFiles(info);
+      expect(files.map((file) => file.path)).toEqual([
+        "src/app/peopleTable.ts",
+      ]);
+      const source = files[0]!.contents;
+      expect(source).toContain('import { Component } from "@angular/core"');
+      expect(source).toContain(
+        'import type { ColumnDef } from "@adapttable/angular"'
+      );
+      expect(source).toContain(
+        `import { AdaptDataTable } from "${info.adapter}"`
+      );
+      expect(source).toContain('selector: "people-table"');
+      expect(source).toContain("standalone: true");
+      expect(source).toContain("imports: [AdaptDataTable]");
+      expect(source).toContain("export class PeopleTable");
+      expect(source).toContain('[data]="people"');
+      expect(source).toContain('[columns]="columns"');
+      expect(source).toContain('[rowKey]="rowKey"');
+      expect(source).toContain(
+        'name: "Ada Lovelace", email: "ada@example.com", role: "Engineer"'
+      );
+      expect(source).toContain(
+        'name: "Alan Turing", email: "alan@example.com", role: "Founder"'
+      );
+      expect(source).toContain(
+        'name: "Grace Hopper", email: "grace@example.com", role: "Admiral"'
+      );
+      expect(source).toContain(
+        'key: "name", header: "Name", accessor: (r) => r.name, sortable: true'
+      );
+      expect(source).toContain(
+        'key: "role", header: "Role", accessor: (r) => r.role, sortable: true'
+      );
+      expect(source).not.toContain('"use client"');
+      expect(source).not.toContain("@adapttable/react");
+    }
+  );
+
+  it("includes the Angular binding and the NG-ZORRO kit's Angular 22 peers", () => {
+    expect(packagesFor(detectKit({}, { framework: "angular" }))).toEqual([
+      "@adapttable/core",
+      "@adapttable/angular",
+      "@adapttable/angular-unstyled",
+    ]);
+    expect(
+      packagesFor(
+        detectKit({ "ng-zorro-antd": "^22.1.1" }, { framework: "angular" })
+      )
+    ).toEqual([
+      "@adapttable/core",
+      "@adapttable/angular",
+      "@adapttable/ng-zorro",
+      "@angular/cdk@^22.0.0",
+      "@angular/forms@^22.0.0",
+      "@angular/router@^22.0.0",
+    ]);
+  });
 });
 
 function makeIO(
@@ -137,6 +274,7 @@ describe("runInit", () => {
       ["pnpm-lock.yaml"]
     );
     const result = runInit(io);
+    expect(result.framework).toBe("react");
     expect(result.kit).toBe("mantine");
     expect(result.packageManager).toBe("pnpm");
     expect(result.installCommand).toContain("pnpm add @adapttable/core");
@@ -214,6 +352,132 @@ describe("runInit", () => {
   it("throws InitError on invalid package.json", () => {
     const { io } = makeIO("{ not json");
     expect(() => runInit(io)).toThrow(/valid JSON/);
+  });
+
+  it("scaffolds native Angular from devDependencies and reports standalone setup", () => {
+    const { io, written, logs } = makeIO(
+      JSON.stringify({
+        dependencies: { "@mantine/core": "8", tailwindcss: "4" },
+        devDependencies: { "@angular/core": "^22.2.0" },
+      }),
+      ["yarn.lock"],
+      ["angular.json", "components.json"]
+    );
+    const result = runInit(io);
+    expect(result).toEqual({
+      framework: "angular",
+      kit: "angular-unstyled",
+      adapter: "@adapttable/angular-unstyled",
+      packageManager: "yarn",
+      packages: [
+        "@adapttable/core",
+        "@adapttable/angular",
+        "@adapttable/angular-unstyled",
+      ],
+      installCommand:
+        "yarn add @adapttable/core @adapttable/angular @adapttable/angular-unstyled",
+      written: ["src/app/peopleTable.ts"],
+      skipped: [],
+    });
+    expect(Object.keys(written)).toEqual(["src/app/peopleTable.ts"]);
+    expect(written["src/app/peopleTable.ts"]).toContain(
+      "export class PeopleTable"
+    );
+    expect(logs.join("\n")).toContain("detected Angular (Angular unstyled)");
+    expect(logs.join("\n")).toContain(
+      "Angular kits are unpublished workspace packages"
+    );
+    expect(logs.join("\n")).toContain(
+      "add PeopleTable to its imports, and render <people-table />"
+    );
+    expect(logs.join("\n")).not.toContain("MantineProvider");
+    expect(logs.join("\n")).not.toContain("ng-zorro-antd.min.css");
+  });
+
+  it("reports NG-ZORRO setup without reinstalling existing Angular peers", () => {
+    const { io, written, logs } = makeIO(
+      JSON.stringify({
+        dependencies: {
+          "@angular/core": "22.2.0",
+          "@angular/forms": "22.2.0",
+          "ng-zorro-antd": "^22.1.1",
+        },
+        devDependencies: { "@angular/cdk": "22.1.0" },
+      }),
+      ["bun.lock"],
+      ["angular.json"]
+    );
+    const result = runInit(io);
+    expect(result.framework).toBe("angular");
+    expect(result.kit).toBe("ng-zorro");
+    expect(result.adapter).toBe("@adapttable/ng-zorro");
+    expect(result.packages).toEqual([
+      "@adapttable/core",
+      "@adapttable/angular",
+      "@adapttable/ng-zorro",
+      "@angular/router@^22.0.0",
+    ]);
+    expect(result.installCommand).toBe(
+      "bun add @adapttable/core @adapttable/angular @adapttable/ng-zorro @angular/router@^22.0.0"
+    );
+    expect(written["src/app/peopleTable.ts"]).toContain(
+      'from "@adapttable/ng-zorro"'
+    );
+    expect(logs.join("\n")).toContain("NG-ZORRO requires Angular 22");
+    expect(logs.join("\n")).toContain(
+      '@import "ng-zorro-antd/ng-zorro-antd.min.css";'
+    );
+    expect(Object.keys(written)).toEqual(["src/app/peopleTable.ts"]);
+  });
+
+  it.each([
+    {
+      dependencies: { "@angular/core": "^22.2.0", tailwindcss: "4" },
+      markers: ["components.json"],
+    },
+    {
+      dependencies: { tailwindcss: "4" },
+      markers: ["angular.json", "components.json"],
+    },
+  ])(
+    "keeps the React shadcn scaffold when one Angular marker is missing ($markers)",
+    ({ dependencies, markers }) => {
+      const { io, written } = makeIO(
+        JSON.stringify({ dependencies }),
+        [],
+        markers
+      );
+      const result = runInit(io);
+      expect(result.framework).toBe("react");
+      expect(result.kit).toBe("shadcn");
+      expect(result.written).toEqual(["src/PeopleTable.tsx"]);
+      expect(Object.keys(written)).toEqual(["src/PeopleTable.tsx"]);
+      expect(written["src/PeopleTable.tsx"]).toContain('"use client"');
+    }
+  );
+
+  it("preserves an edited Angular component until --force is requested", () => {
+    const { io, written, logs } = makeIO(
+      JSON.stringify({ dependencies: { "@angular/core": "^22.2.0" } }),
+      ["pnpm-lock.yaml"],
+      ["angular.json"]
+    );
+    const path = "src/app/peopleTable.ts";
+    const original = runInit(io);
+    expect(original.written).toEqual([path]);
+    io.writeFile(path, "// host-owned Angular component");
+    const repeated = runInit(io);
+    expect(repeated.written).toEqual([]);
+    expect(repeated.skipped).toEqual([path]);
+    expect(written[path]).toBe("// host-owned Angular component");
+    expect(logs.join("\n")).toContain(
+      `Skipped (already exist, use --force to overwrite): ${path}`
+    );
+    const forced = runInit(io, { force: true });
+    expect(forced.written).toEqual([path]);
+    expect(forced.skipped).toEqual([]);
+    expect(written[path]).toContain("export class PeopleTable");
+    expect(written[path]).not.toContain("host-owned Angular component");
   });
 });
 

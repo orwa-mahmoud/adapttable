@@ -16,8 +16,8 @@ peerDependencyRules:
 
 # Transitive dependencies pinned by their parents' ranges, forced to patched
 # versions. None reach a published package — every @adapttable/* package ships
-# only @adapttable/* deps plus react-compiler-runtime and
-# @tanstack/react-virtual — so these are build/dev tooling only.
+# only @adapttable/* deps plus react-compiler-runtime, @tanstack/react-virtual,
+# @tanstack/angular-virtual and tslib — so these are build/dev tooling only.
 overrides:
   # Starters declare ^2.0.0 so StackBlitz installs from npm. The monorepo
   # must still typecheck them against workspace packages. Turbo `^build`
@@ -35,8 +35,10 @@ overrides:
   "@adapttable/unstyled": "workspace:*"
   "@adapttable/ai": "workspace:*"
   "@adapttable/ai-react": "workspace:*"
+  "@adapttable/ai-angular": "workspace:*"
   "@adapttable/angular": "workspace:*"
   "@adapttable/angular-unstyled": "workspace:*"
+  "@adapttable/ng-zorro": "workspace:*"
   "eslint-plugin-sonarjs>minimatch": "^10.2.3"
   # CRLF injection, cache-control disclosure, cookie injection, response
   # desync, private-cache crash, TLS validation bypass in BalancedPool,

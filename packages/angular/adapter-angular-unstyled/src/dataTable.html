@@ -4,14 +4,60 @@
     data-adapttable-part="root"
     [attr.dir]="v.table.dir()"
     [attr.data-density]="v.density()"
+    [attr.data-refreshing]="v.table.isRefreshing() ? '' : null"
+    [attr.aria-busy]="v.table.isRefreshing() ? true : null"
+    (contextmenu)="onMenuContext($event)"
+    (keydown)="onMenuKey($event)"
+    (pointerdown)="onMenuPointerDown($event)"
+    (pointermove)="onMenuPointerMove($event)"
+    (pointerup)="onMenuPointerUp()"
+    (pointercancel)="onMenuPointerCancel()"
   >
+    <ng-container
+      [adaptSlot]="commandPaletteSlot"
+      [adaptSlotProps]="v.commandPalette()"
+      [adaptSlotTable]="v.table"
+    />
+    <ng-container
+      [adaptSlot]="contextMenuSlot"
+      [adaptSlotProps]="v.contextMenu()"
+      [adaptSlotTable]="v.table"
+    />
+    @if (v.findBar; as findBar) {
+      <ng-container
+        [adaptSlot]="findBarSlot"
+        [adaptSlotProps]="findBar()"
+        [adaptSlotTable]="v.table"
+      />
+    }
     <div data-adapttable-part="toolbar">
-      <div data-adapttable-part="search-field">
-        <input
-          data-adapttable-part="search"
-          [adaptAttrs]="v.table.searchInputAttrs()"
-        />
-      </div>
+      @if (searchable()) {
+        <div data-adapttable-part="search-field">
+          <span data-adapttable-part="search-icon" style="display: inline-flex">
+            <svg [adaptIcon]="searchIcon"></svg>
+          </span>
+          <input
+            data-adapttable-part="search"
+            [adaptAttrs]="v.table.searchInputAttrs()"
+          />
+        </div>
+      }
+      @if (v.table.isMobile() && v.table.sortByOptions().length > 0) {
+        <label>
+          {{ v.table.labels().sortBy }}
+          <select
+            data-adapttable-part="sort-select"
+            [attr.aria-label]="v.table.labels().sortBy"
+            [value]="v.table.sortBy() ?? ''"
+            (change)="sortBy($event)"
+          >
+            <option value="">—</option>
+            @for (option of v.table.sortByOptions(); track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+      }
       @if (v.filters; as f) {
         <ng-template #filtersTrigger>
           <button
@@ -72,6 +118,15 @@
         [adaptSlotProps]="v.toolbarExtras()"
         [adaptSlotTable]="v.table"
       />
+      @if (v.rowMutations().canAdd) {
+        <button
+          type="button"
+          data-adapttable-part="add-row"
+          (click)="v.rowMutations().addRow()"
+        >
+          {{ v.table.labels().addRow }}
+        </button>
+      }
     </div>
 
     @if (v.filters; as f) {
@@ -89,12 +144,28 @@
       />
     }
 
+    <ng-container
+      [adaptSlot]="agentApprovalSlot"
+      [adaptSlotProps]="agentApprovalProps()"
+      [adaptSlotTable]="v.table"
+    />
+
     @if (v.bulkBar; as bulkBar) {
       <ng-container
         [adaptSlot]="bulkBarSlot"
         [adaptSlotProps]="bulkBar()"
         [adaptSlotTable]="v.table"
       />
+    }
+
+    @if (v.batchBar; as batchBar) {
+      @if (batchBar(); as batchProps) {
+        <ng-container
+          [adaptSlot]="batchEditBarSlot"
+          [adaptSlotProps]="batchProps"
+          [adaptSlotTable]="v.table"
+        />
+      }
     }
 
     @if (v.groupingPanel; as groupingPanel) {
@@ -105,315 +176,75 @@
       />
     }
 
-    @switch (v.table.bodyRegion()) {
-      @case ("skeleton") {
-        <div
-          data-adapttable-part="loading"
-          role="status"
-          [attr.aria-label]="v.table.labels().loading"
-        ></div>
-      }
-      @case ("empty") {
-        <output data-adapttable-part="empty">
-          {{
-            noResults() ? v.table.labels().noResults : v.table.labels().noData
-          }}
-          @if (noResults()) {
-            <button
-              type="button"
-              data-adapttable-part="empty-clear"
-              (click)="v.table.clearFilters()"
-            >
-              {{ v.table.labels().clearAll }}
-            </button>
-          }
-        </output>
-      }
-      @case ("mobile") {
-        <ul
-          data-adapttable-part="cards"
-          style="margin: 0; padding: 0"
-          [style.padding-top.px]="v.virtualization().paddingTop || null"
-          [style.padding-bottom.px]="v.virtualization().paddingBottom || null"
-        >
-          @for (
-            entry of v.virtualization().rows;
-            track entry.key;
-            let i = $index
-          ) {
-            <li
-              style="display: block"
-              [adaptAttrs]="v.table.cardAttrs(entry.row, entry.index)"
-              [attr.data-index]="entry.index"
-            >
-              @if (v.selection; as selection) {
-                <input
-                  data-adapttable-part="checkbox"
-                  [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
-                />
-              }
-              @for (column of v.table.columns(); track column.key) {
-                <div data-adapttable-part="card-row">
-                  <span data-adapttable-part="card-label">{{
-                    column.mobileLabel ?? column.header
-                  }}</span>
-                  <span
-                    data-adapttable-part="card-value"
-                    [adaptCell]="column"
-                    [adaptCellRow]="entry.row"
-                    [adaptCellIndex]="entry.index"
-                  ></span>
-                </div>
-              }
-              @if (v.rowActions(); as actions) {
-                <div data-adapttable-part="card-actions">
-                  <adapt-row-actions
-                    [row]="entry.row"
-                    [actions]="actions"
-                    [confirm]="v.confirm"
-                    [labels]="v.table.labels()"
-                    [layout]="v.rowActionsLayout"
-                  />
-                </div>
-              }
-            </li>
-          }
-        </ul>
-      }
-      @case ("desktop") {
-        <div
-          #scrollBox
-          data-adapttable-part="scroll-box"
-          [style]="scrollBoxStyle()"
-        >
-          <table
-            data-adapttable-part="table"
-            [adaptAttrs]="v.grid ? v.grid.tableAttrs() : v.table.tableAttrs()"
-          >
-            <thead data-adapttable-part="thead">
-              <tr
-                data-adapttable-part="header-row"
-                [adaptAttrs]="v.table.headerRowAttrs()"
-              >
-                @if (v.selection; as selection) {
-                  <th data-adapttable-part="selection-header" scope="col">
-                    <input
-                      data-adapttable-part="checkbox"
-                      [adaptAttrs]="selection.headerCheckboxAttrs()"
-                    />
-                  </th>
-                }
-                @if (v.reorder) {
-                  <th data-adapttable-part="reorder-header" scope="col">
-                    <span class="visually-hidden">Reorder</span>
-                  </th>
-                }
-                @for (
-                  column of v.table.columns();
-                  track column.key;
-                  let col = $index
-                ) {
-                  <th
-                    data-adapttable-part="header-cell"
-                    [adaptAttrs]="
-                      v.grid
-                        ? v.grid.headerCellAttrs(column, col)
-                        : v.table.headerCellAttrs(column)
-                    "
-                  >
-                    @if (column.sortable) {
-                      <button
-                        data-adapttable-part="sort-button"
-                        [adaptAttrs]="v.table.sortButtonAttrs(column)"
-                      >
-                        <span [adaptHeader]="column"></span>
-                        @if (v.table.sortBy() === column.key) {
-                          <span aria-hidden="true">{{
-                            v.table.sortDir() === "desc" ? "▼" : "▲"
-                          }}</span>
-                        }
-                      </button>
-                    } @else {
-                      <span [adaptHeader]="column"></span>
-                    }
-                    @if (v.filters?.header) {
-                      @if (v.filters?.headerProps()?.get(column.key); as hp) {
-                        <ng-container
-                          [adaptSlot]="filterSlots.header"
-                          [adaptSlotProps]="hp"
-                          [adaptSlotTable]="v.table"
-                        />
-                      }
-                    }
-                  </th>
-                }
-                @if (v.rowActions()) {
-                  <th data-adapttable-part="actions-header" scope="col">
-                    {{ v.table.labels().actions }}
-                  </th>
-                }
-              </tr>
-            </thead>
-            <tbody data-adapttable-part="tbody">
-              @if (v.virtualization().paddingTop > 0) {
-                <tr aria-hidden="true" data-adapttable-part="virtual-pad-top">
-                  <td
-                    [attr.colspan]="v.bodyColSpan()"
-                    [style.height.px]="v.virtualization().paddingTop"
-                  ></td>
-                </tr>
-              }
-              @for (
-                entry of v.virtualization().rows;
-                track entry.key;
-                let i = $index
-              ) {
-                <tr
-                  [adaptAttrs]="
-                    v.grid
-                      ? v.grid.rowAttrs(entry.row, entry.index)
-                      : v.table.rowAttrs(entry.row, entry.index)
-                  "
-                  [attr.data-dragging]="
-                    v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
-                      'data-dragging'
-                    ] ?? null
-                  "
-                  [attr.data-drop]="
-                    v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
-                      'data-drop'
-                    ] ?? null
-                  "
-                  (dragover)="
-                    v.reorder
-                      ?.()
-                      .dropProps(
-                        entry.index,
-                        entry.row,
-                        v.table.windowStart()
-                      )
-                      .onDragOver($event)
-                  "
-                  (drop)="
-                    v.reorder
-                      ?.()
-                      .dropProps(
-                        entry.index,
-                        entry.row,
-                        v.table.windowStart()
-                      )
-                      .onDrop($event)
-                  "
-                >
-                  @if (v.selection; as selection) {
-                    <td data-adapttable-part="selection-cell">
-                      <input
-                        data-adapttable-part="checkbox"
-                        [adaptAttrs]="
-                          selection.rowCheckboxAttrs(rowId(entry.row))
-                        "
-                      />
-                    </td>
-                  }
-                  @if (v.reorder; as reorder) {
-                    <td data-adapttable-part="reorder-cell">
-                      <button
-                        type="button"
-                        data-adapttable-part="reorder-handle"
-                        [attr.draggable]="true"
-                        [attr.aria-label]="'Reorder row'"
-                        (dragstart)="
-                          reorder()
-                            .dragProps(rowId(entry.row), entry.index)
-                            .onDragStart($event)
-                        "
-                        (dragend)="
-                          reorder()
-                            .dragProps(rowId(entry.row), entry.index)
-                            .onDragEnd()
-                        "
-                        (keydown)="
-                          reorder().handleKeyDown(
-                            $event,
-                            rowId(entry.row),
-                            entry.index,
-                            entry.row,
-                            v.table.windowStart(),
-                            v.table.source().total
-                          )
-                        "
-                      >
-                        ⋮⋮
-                      </button>
-                    </td>
-                  }
-                  @for (
-                    column of v.table.columns();
-                    track column.key;
-                    let col = $index
-                  ) {
-                    <td
-                      data-adapttable-part="cell"
-                      [adaptAttrs]="
-                        v.grid
-                          ? v.grid.cellAttrs(column, entry.index, col)
-                          : v.table.cellAttrs(column)
-                      "
-                      (dblclick)="beginEdit(entry.row, column)"
-                    >
-                      @if (
-                        v.editing?.().isActive(rowId(entry.row), column.key)
-                      ) {
-                        <input
-                          data-adapttable-part="cell-editor"
-                          [value]="v.editing?.().draft"
-                          (input)="
-                            v.editing
-                              ?.()
-                              .setDraft(($any($event.target)).value)
-                          "
-                          (keydown.enter)="commitEdit()"
-                          (keydown.escape)="cancelEdit()"
-                          (blur)="commitEdit()"
-                        />
-                      } @else {
-                        <span
-                          [adaptCell]="column"
-                          [adaptCellRow]="entry.row"
-                          [adaptCellIndex]="entry.index"
-                        ></span>
-                      }
-                    </td>
-                  }
-                  @if (v.rowActions(); as actions) {
-                    <td data-adapttable-part="actions-cell">
-                      <adapt-row-actions
-                        [row]="entry.row"
-                        [actions]="actions"
-                        [confirm]="v.confirm"
-                        [labels]="v.table.labels()"
-                        [layout]="v.rowActionsLayout"
-                      />
-                    </td>
-                  }
-                </tr>
-              }
-              @if (v.virtualization().paddingBottom > 0) {
-                <tr
-                  aria-hidden="true"
-                  data-adapttable-part="virtual-pad-bottom"
-                >
-                  <td
-                    [attr.colspan]="v.bodyColSpan()"
-                    [style.height.px]="v.virtualization().paddingBottom"
-                  ></td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
+    @if (v.table.isRefreshing()) {
+      <progress
+        [attr.aria-label]="v.table.labels().loading"
+        data-adapttable-part="refresh-indicator"
+      ></progress>
     }
+
+    <ng-template #featureSidePanel>
+      @if (sidePanelProps(); as props) {
+        <ng-container
+          [adaptSlot]="sidePanelSlot"
+          [adaptSlotProps]="props"
+          [adaptSlotTable]="v.table"
+        />
+      }
+    </ng-template>
+    <adapt-table-region [panel]="dockedPanel()" [side]="dockedSide()">
+      @if (v.table.errorState(); as failure) {
+        <adapt-error-state
+          [error]="failure.error"
+          [labels]="v.table.labels()"
+          [retry]="failure.retry"
+        />
+      } @else {
+        @switch (v.table.bodyRegion()) {
+          @case ("skeleton") {
+            <adapt-table-skeleton
+              [rows]="skeletonRows() ?? v.table.source().limit"
+              [columns]="v.table.columns().length"
+              [variant]="v.table.isMobile() ? 'cards' : 'table'"
+              [labels]="v.table.labels()"
+              [hasActions]="v.showActions()"
+            />
+          }
+          @case ("empty") {
+            <output data-adapttable-part="empty">
+              {{
+                noResults()
+                  ? v.table.labels().noResults
+                  : v.table.labels().noData
+              }}
+              @if (noResults()) {
+                <button
+                  type="button"
+                  data-adapttable-part="empty-clear"
+                  (click)="v.table.clearFilters()"
+                >
+                  {{ v.table.labels().clearAll }}
+                </button>
+              }
+            </output>
+          }
+          @case ("mobile") {
+            <adapt-mobile-cards
+              [view]="v"
+              [rowKey]="rowKey()"
+              [maxHeight]="maxHeight()"
+            />
+          }
+          @case ("desktop") {
+            <adapt-desktop-table
+              [view]="v"
+              [rowKey]="rowKey()"
+              [maxHeight]="maxHeight()"
+            />
+          }
+        }
+      }
+    </adapt-table-region>
 
     @if (v.table.canLoadMore()) {
       <div
@@ -430,87 +261,42 @@
     }
 
     @if (v.table.showFooter()) {
-      <div data-adapttable-part="footer">
-        <label>
-          {{ v.table.labels().rowsPerPage }}
-          <select
-            data-adapttable-part="rows-per-page"
-            [attr.aria-label]="v.table.labels().rowsPerPage"
-            [value]="v.table.source().limit"
-            (change)="v.table.setLimit(+$any($event.target).value)"
-          >
-            @for (size of v.table.pageSizeOptions(); track size) {
-              <option [value]="size">{{ size }}</option>
-            }
-          </select>
-        </label>
-        @if (v.table.source().total > 0) {
-          <span>{{
-            v.table.labels().showing({
-              from: v.table.pagination().fromIndex,
-              to: v.table.pagination().toIndex,
-              total: v.table.source().total,
-            })
-          }}</span>
-        }
-        <div data-adapttable-part="pager">
-          <span>{{
-            v.table.labels().pageOf({
-              page: v.table.pagination().safePage,
-              total: v.table.pagination().totalPages,
-            })
-          }}</span>
-          <button
-            type="button"
-            data-adapttable-part="page-prev"
-            [attr.aria-label]="v.table.labels().previousPage"
-            [disabled]="v.table.pagination().safePage <= 1"
-            (click)="v.table.setPage(v.table.pagination().safePage - 1)"
-          >
-            ‹
-          </button>
-          @for (slot of v.table.pagerSlots(); track slot.key) {
-            @if (slot.item === "ellipsis") {
-              <span data-adapttable-part="page-ellipsis" aria-hidden="true"
-                >…</span
-              >
-            } @else {
-              <button
-                type="button"
-                data-adapttable-part="page-number"
-                [attr.aria-current]="
-                  slot.item === v.table.pagination().safePage ? 'page' : null
-                "
-                (click)="v.table.setPage(+slot.item)"
-              >
-                {{ slot.item }}
-              </button>
-            }
-          }
-          <button
-            type="button"
-            data-adapttable-part="page-next"
-            [attr.aria-label]="v.table.labels().nextPage"
-            [disabled]="
-              v.table.pagination().safePage >= v.table.pagination().totalPages
-            "
-            (click)="v.table.setPage(v.table.pagination().safePage + 1)"
-          >
-            ›
-          </button>
-        </div>
+      <adapt-pagination-footer [view]="v" />
+    }
+
+    @if (tableFooter(); as footer) {
+      <div data-adapttable-part="table-footer">
+        <ng-container [ngTemplateOutlet]="footer" />
       </div>
     }
 
-    <div
-      [adaptLiveRegion]="v.table.statusAnnouncement()"
-      part="table-status-announcer"
-    ></div>
+    @if (assistant(); as props) {
+      <ng-container
+        [adaptSlot]="tableAssistantSlot"
+        [adaptSlotProps]="props"
+        [adaptSlotTable]="v.table"
+      />
+    }
+
+    <adapt-table-status-announcer
+      [announcement]="v.table.statusAnnouncement()"
+    />
+    @if (v.reorder; as reorder) {
+      <ng-container
+        [adaptSlot]="reorderAnnouncerSlot"
+        [adaptSlotProps]="{ announcement: reorder().announcement }"
+        [adaptSlotTable]="v.table"
+      />
+    }
+    @if (statusBarProps(); as props) {
+      <ng-container
+        [adaptSlot]="statusBarSlot"
+        [adaptSlotProps]="props"
+        [adaptSlotTable]="v.table"
+      />
+    }
     @if (v.grid; as grid) {
-      <output
-        [adaptLiveRegion]="grid.announcement()"
-        part="grid-announcer"
-      ></output>
+      <adapt-grid-focus-announcer [focus]="grid" />
     }
   </div>
 }

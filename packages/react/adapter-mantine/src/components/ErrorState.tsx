@@ -37,6 +37,7 @@ export function ErrorState({
 }: Readonly<ErrorStateProps>) {
   return (
     <Alert
+      data-adapttable-part="error"
       icon={<AlertIcon size={16} />}
       color="red"
       variant="light"

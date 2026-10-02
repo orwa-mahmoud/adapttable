@@ -4,12 +4,14 @@ import {
   type ColumnDef,
   type PaginationMode,
 } from "@adapttable/angular";
+import { editing } from "@adapttable/angular-unstyled/editing";
+import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
+import { virtualize } from "@adapttable/angular-unstyled/virtualize";
 import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
-import { editing, rowReorder, virtualize } from "./features";
 
 interface City {
   id: string;
@@ -67,6 +69,24 @@ class Host {
   readonly changes: string[][] = [];
 }
 
+@Component({
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="data"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="false"
+      [defaults]="{ limit: 25 }"
+    />
+  `,
+})
+class TwentyFivePerPage {
+  readonly data = CITIES;
+  readonly columns = COLUMNS;
+  readonly rowKey = (row: City) => row.id;
+}
+
 async function mount() {
   const fixture = TestBed.createComponent(Host);
   fixture.autoDetectChanges();
@@ -110,26 +130,37 @@ describe("the unstyled Angular table", () => {
     ]);
     expect(numbers[0]?.getAttribute("aria-current")).toBe("page");
     expect(part<HTMLButtonElement>("page-prev")?.disabled).toBe(true);
-    numbers[2]?.click();
+    numbers[2]!.click();
     await settle();
     expect(ids()).toEqual(["11", "12", "13", "14", "15"]);
-    part<HTMLButtonElement>("page-prev")?.click();
+    part<HTMLButtonElement>("page-prev")!.click();
     await settle();
     expect(ids()).toEqual(["6", "7", "8", "9", "10"]);
     const select = part<HTMLSelectElement>("rows-per-page");
     expect(select?.value).toBe("5");
-    if (!select) return;
+    if (!select) throw new Error("select is not rendered");
     select.value = "10";
     select.dispatchEvent(new Event("change"));
     await settle();
     expect(ids()).toHaveLength(10);
   });
 
+  it("shows the page size in force when it is not the first size offered", async () => {
+    const fixture = TestBed.createComponent(TwentyFivePerPage);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const { part, parts } = queryParts(fixture.nativeElement as HTMLElement);
+    const select = part<HTMLSelectElement>("rows-per-page")!;
+    expect(parts("row")).toHaveLength(25);
+    expect(select.value).toBe("25");
+    expect(select.selectedOptions[0]?.text).toBe("25");
+  });
+
   it("searches, says nothing matched, and offers to clear", async () => {
     const { part, parts, settle } = await mount();
     const search = part<HTMLInputElement>("search");
     expect(search?.placeholder).toBe("Find a city");
-    if (!search) return;
+    if (!search) throw new Error("search is not rendered");
     search.value = "Atlantis";
     search.dispatchEvent(new Event("input"));
     await new Promise((resolve) => setTimeout(resolve, 350));
@@ -137,7 +168,7 @@ describe("the unstyled Angular table", () => {
     expect(part("empty")?.textContent).toContain("No results");
     expect(parts("row")).toHaveLength(0);
     expect(part("footer")).toBeNull();
-    part<HTMLButtonElement>("empty-clear")?.click();
+    part<HTMLButtonElement>("empty-clear")!.click();
     await settle();
     // Clearing filters leaves the search: the host typed it.
     expect(part("empty")).not.toBeNull();
@@ -145,10 +176,10 @@ describe("the unstyled Angular table", () => {
 
   it("reports selection changes and shows the ids the host controls", async () => {
     const { fixture, part, parts, settle } = await mount();
-    parts<HTMLInputElement>("checkbox")[1]?.click();
+    parts<HTMLInputElement>("checkbox")[1]!.click();
     await settle();
     expect(fixture.componentInstance.changes.at(-1)).toEqual(["1"]);
-    part<HTMLInputElement>("checkbox")?.click();
+    part<HTMLInputElement>("checkbox")!.click();
     await settle();
     expect(fixture.componentInstance.changes.at(-1)).toEqual([
       "1",
@@ -172,7 +203,7 @@ describe("the unstyled Angular table", () => {
     expect(parts("card")).toHaveLength(5);
     const button = part<HTMLButtonElement>("load-more-button");
     expect(button?.textContent?.trim()).toBe("Load more");
-    button?.click();
+    button!.click();
     await settle();
     expect(parts("card")).toHaveLength(10);
   });
@@ -188,7 +219,7 @@ describe("the unstyled Angular table", () => {
         .slice(0, 2)
         .map((label) => label.textContent?.trim())
     ).toEqual(["Name", "Land"]);
-    cards[0]?.querySelector<HTMLInputElement>("input")?.click();
+    cards[0]?.querySelector<HTMLInputElement>("input")!.click();
     await settle();
     expect(fixture.componentInstance.changes.at(-1)).toEqual(["1"]);
     expect(parts("card")[0]?.hasAttribute("data-selected")).toBe(true);
@@ -262,18 +293,28 @@ afterEach(() => {
 });
 
 describe("unstyled Angular editing and virtualize", () => {
+  it("ignores a double-click when editing is not composed", async () => {
+    const { part, parts, settle } = await mountFeatures({ features: [] });
+    const cell = parts("cell")[0];
+    expect(cell).not.toBeUndefined();
+    cell!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    await settle();
+    expect(part("edit-cell-editor")).toBeNull();
+    expect(part("edit-cell-activate")).toBeNull();
+  });
+
   it("opens, commits and cancels an in-place cell editor", async () => {
     const onCellEdit = vi.fn();
     const { part, parts, settle } = await mountFeatures({
       features: [editing(onCellEdit)],
     });
-    const cell = parts("cell")[0];
-    expect(cell).toBeTruthy();
-    cell?.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    const activate = parts("edit-cell-activate")[0];
+    expect(activate).not.toBeNull();
+    activate!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
     await settle();
-    const editor = part<HTMLInputElement>("cell-editor");
+    const editor = part<HTMLInputElement>("edit-cell-editor");
     expect(editor).not.toBeNull();
-    if (!editor) return;
+    if (!editor) throw new Error("editor is not rendered");
     editor.value = "Renamed";
     editor.dispatchEvent(new Event("input"));
     editor.dispatchEvent(
@@ -284,17 +325,44 @@ describe("unstyled Angular editing and virtualize", () => {
     expect(onCellEdit.mock.calls[0]?.[1]).toBe("name");
     expect(onCellEdit.mock.calls[0]?.[2]).toBe("Renamed");
 
-    parts("cell")[0]?.dispatchEvent(
+    parts("edit-cell-activate")[0]!.dispatchEvent(
       new MouseEvent("dblclick", { bubbles: true })
     );
     await settle();
-    const again = part<HTMLInputElement>("cell-editor");
+    const again = part<HTMLInputElement>("edit-cell-editor");
     expect(again).not.toBeNull();
-    again?.dispatchEvent(
+    again!.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
     );
     await settle();
-    expect(part("cell-editor")).toBeNull();
+    expect(part("edit-cell-editor")).toBeNull();
+  });
+
+  it("edits a field on a phone card and hands the host the parsed value", async () => {
+    const onCellEdit = vi.fn();
+    const { part, parts, settle, element } = await mountFeatures({
+      features: [editing(onCellEdit)],
+      forceMobile: true,
+    });
+    expect(parts("card").length).toBeGreaterThan(0);
+    expect(part("table")).toBeNull();
+    const activate = element.querySelector<HTMLElement>(
+      '[data-adapttable-part="card-value"] [data-adapttable-part="edit-cell-activate"]'
+    );
+    expect(activate).not.toBeNull();
+    activate!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    await settle();
+    const editor = part<HTMLInputElement>("edit-cell-editor");
+    expect(editor).not.toBeNull();
+    editor!.value = "Card edit";
+    editor!.dispatchEvent(new Event("input"));
+    editor!.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+    );
+    await settle();
+    expect(onCellEdit).toHaveBeenCalledOnce();
+    expect(onCellEdit.mock.calls[0]?.[1]).toBe("name");
+    expect(onCellEdit.mock.calls[0]?.[2]).toBe("Card edit");
   });
 
   it("warns when virtualize is composed on a paged table", async () => {
@@ -326,8 +394,13 @@ describe("unstyled Angular editing and virtualize", () => {
     expect(box?.style.overflow).toBe("auto");
     // jsdom has no measured viewport: the window is armed with a spacer
     // rather than mounted rows (same as the headless virtualize tests).
-    expect(part("virtual-pad-bottom")).not.toBeNull();
-    expect(parts("reorder-header")).toHaveLength(1);
+    const spacer = part("virtual-spacer");
+    expect(spacer).not.toBeNull();
+    expect(spacer!.querySelector("td")!.style.height).toMatch(/^[1-9]\d*px$/);
+    // The reorder column is drawn and the spacer spans it with the data.
+    const [reorderHeader] = parts("reorder-header");
+    expect(reorderHeader!.getAttribute("aria-label")).toBe("Reorder row");
+    expect(spacer!.querySelector("td")!.colSpan).toBe(COLUMNS.length + 1);
   });
 
   it("accepts a string maxHeight on the scroll box", async () => {
@@ -339,13 +412,104 @@ describe("unstyled Angular editing and virtualize", () => {
     expect(part("scroll-box")?.style.maxHeight).toBe("50vh");
   });
 
-  it("uses the card size estimate when virtualizing on a phone", async () => {
-    const { part } = await mountFeatures({
-      features: [virtualize({ estimateCardSize: 160 })],
-      paginationMode: "infinite",
-      maxHeight: 320,
-      forceMobile: true,
+  it("windows phone cards inside the capped card list, and scrolling moves the window", async () => {
+    // jsdom lays nothing out: give the card list the height its cap sets and
+    // a scroll position the test controls.
+    let scrollTop = 0;
+    const height = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "offsetHeight"
+    );
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+      configurable: true,
+      get(this: HTMLElement) {
+        const part = this.dataset.adapttablePart;
+        if (part === "cards") return 320;
+        return part === "card" ? 160 : 0;
+      },
     });
-    expect(part("cards")).not.toBeNull();
+    const top = Object.getOwnPropertyDescriptor(Element.prototype, "scrollTop");
+    Object.defineProperty(Element.prototype, "scrollTop", {
+      configurable: true,
+      get(this: Element) {
+        return this.getAttribute("data-adapttable-part") === "cards"
+          ? scrollTop
+          : 0;
+      },
+      set() {
+        // The virtualizer's own scrolls are not what this test moves.
+      },
+    });
+    try {
+      const { part, parts, settle } = await mountFeatures({
+        features: [virtualize({ estimateCardSize: 160, virtualOverscan: 0 })],
+        paginationMode: "infinite",
+        maxHeight: 320,
+        forceMobile: true,
+      });
+      const list = part("cards")!;
+      expect(list.style.maxHeight).toBe("320px");
+      expect(list.style.overflowY).toBe("auto");
+      const titles = () =>
+        parts("card").map((card) =>
+          card
+            .querySelector('[data-adapttable-part="card-value"]')!
+            .textContent.trim()
+        );
+      expect(titles()).toEqual(["City 01", "City 02"]);
+
+      scrollTop = 1600;
+      list.dispatchEvent(new Event("scroll"));
+      await settle();
+      expect(titles()).toEqual(["City 11", "City 12"]);
+    } finally {
+      if (height)
+        Object.defineProperty(HTMLElement.prototype, "offsetHeight", height);
+      if (top) Object.defineProperty(Element.prototype, "scrollTop", top);
+    }
+  });
+});
+
+describe("unstyled Angular phone card captions", () => {
+  @Component({
+    imports: [AdaptDataTable],
+    template: `
+      <adapt-data-table
+        [data]="rows"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [urlSync]="false"
+        [forceMobile]="true"
+      />
+    `,
+  })
+  class CaptionHost {
+    readonly rows: City[] = CITIES.slice(0, 1);
+    readonly rowKey = (row: City) => row.id;
+    readonly columns: ColumnDef<City>[] = [
+      {
+        key: "name",
+        header: "City",
+        mobileLabel: "",
+        accessor: (row) => row.name,
+      },
+      { key: "country", header: "Country", accessor: (row) => row.country },
+    ];
+  }
+
+  it("captions a field by its header and drops the caption an empty mobileLabel asks to", async () => {
+    const fixture = TestBed.createComponent(CaptionHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const { parts } = queryParts(fixture.nativeElement as HTMLElement);
+    const rows = parts("card-row");
+    expect(rows).toHaveLength(2);
+    expect(
+      rows[0]!.querySelector('[data-adapttable-part="card-label"]')
+    ).toBeNull();
+    expect(rows[0]!.textContent.trim()).toBe("City 01");
+    expect(
+      parts("card-label").map((label) => label.textContent.trim())
+    ).toEqual(["Country"]);
   });
 });

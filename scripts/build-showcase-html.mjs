@@ -26,20 +26,23 @@ import { fileURLToPath } from "node:url";
 
 import {
   adapterByKey,
-  builtAdapters,
   featureBySlug,
+  featuresOf,
   fillTemplate,
   frameworkOf,
+  headFor,
   introFor,
+  isIndexable,
   LANDING,
   landingHead,
-  MATRIX_FEATURES,
+  landingIntro,
   matrixPages,
+  otherKitsOf,
   snippetFor,
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES } from "../apps/showcase/pages.mjs";
 import { appendScript, guarded } from "./analytics-guard.mjs";
-import { demoRoute, docsRoute, siteUrl } from "./site.mjs";
+import { demoRoute, docsReferenceRoute, siteUrl } from "./site.mjs";
 
 const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
 
@@ -78,12 +81,13 @@ const head = ({
   title,
   description,
   route,
+  indexable = true,
 }) => `    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="${upTo(dir)}favicon.svg" />
     <meta name="description" content="${escapeHtml(description)}" />
     <link rel="canonical" href="${siteUrl(route)}" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="robots" content="${indexable ? "index, follow, max-image-preview:large" : "noindex, follow"}" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content="${escapeHtml(title)}" />
@@ -245,9 +249,12 @@ ${bodyHtml}
 `;
 
 /** The written reference links a page closes with. */
-const docsList = (slugs) =>
+const docsList = (slugs, framework) =>
   slugs
-    .map((slug) => `<a href="${siteUrl(docsRoute(slug))}">${slug}</a>`)
+    .map(
+      (slug) =>
+        `<a href="${siteUrl(docsReferenceRoute(slug, framework))}">${slug}</a>`
+    )
     .join(", ");
 
 /**
@@ -273,13 +280,21 @@ const linkList = (items) =>
     "        </ul>",
   ].join("\n");
 
-/** The built kits other than this one, in matrix order. */
-const otherKits = (adapter) =>
-  builtAdapters().filter((other) => other.key !== adapter.key);
+/** The other kits on this kit's framework with a page for this feature. */
+const kitsWithFeature = (adapter, feature) =>
+  otherKitsOf(adapter).filter((other) =>
+    featuresOf(other).some((candidate) => candidate.slug === feature.slug)
+  );
 
 /** This kit's features other than this one, in demand order. */
-const siblingFeatures = (feature) =>
-  MATRIX_FEATURES.filter((other) => other.slug !== feature.slug);
+const siblingFeatures = (adapter, feature) =>
+  featuresOf(adapter).filter((other) => other.slug !== feature.slug);
+
+/** A titled list of links, or nothing when there is nothing to list. */
+const linkSection = (title, items) =>
+  items.length === 0
+    ? ""
+    : `        <h2>${escapeHtml(title)}</h2>\n${linkList(items)}\n`;
 
 /**
  * One feature page's static HTML: the words a crawler reads, and the mount
@@ -298,7 +313,8 @@ export const featurePage = (
 ) => {
   const fill = (text) => fillTemplate(text, adapter, framework);
   const dir = `${adapter.key}/${feature.slug}`;
-  const route = demoRoute(dir);
+  const route = demoRoute(dir, framework.key);
+  const own = headFor(feature, adapter);
   const note = feature.notes[adapter.key];
   const body = `    <!-- Replaced by ${framework.label} on mount — the served markup carries the page's
          own words so a crawler, and anyone whose bundle has not arrived, reads
@@ -306,7 +322,7 @@ export const featurePage = (
     <div id="root" data-matrix-page="${dir}">
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for ${escapeHtml(adapter.label)}</p>
-        <h1>${escapeHtml(fill(feature.h1))}</h1>
+        <h1>${escapeHtml(fill(own.h1))}</h1>
 ${introFor(feature, adapter)
   .map((line) => `        <p>${paragraph(fill(line))}</p>`)
   .join("\n")}
@@ -314,24 +330,22 @@ ${note ? `        <p>${paragraph(note)}</p>\n` : ""}        <h2>The code</h2>
         <pre><code>${escapeHtml(fill(snippetFor(feature, adapter, framework)))}</code></pre>
         <h2>Install</h2>
         <pre><code>${escapeHtml(adapter.install)}</code></pre>
-        <h2>The same feature in the other kits</h2>
-${linkList(
-  otherKits(adapter).map((other) => ({
+${linkSection(
+  "The same feature in the other kits",
+  kitsWithFeature(adapter, feature).map((other) => ({
     href: `../../${other.key}/${feature.slug}/`,
-    text: fillTemplate(feature.h1, other),
+    text: fillTemplate(headFor(feature, other).h1, other),
     note: other.blurb,
   }))
-)}
-        <h2>More ${escapeHtml(adapter.label)} features</h2>
-${linkList(
-  siblingFeatures(feature).map((sibling) => ({
-    href: `../${sibling.slug}/`,
-    text: fill(sibling.h1),
-    note: fill(sibling.card),
-  }))
-)}
-        <p>
-          Reference: ${docsList(feature.docs)}. More of this kit:
+)}${linkSection(
+    `More ${adapter.label} features`,
+    siblingFeatures(adapter, feature).map((sibling) => ({
+      href: `../${sibling.slug}/`,
+      text: fill(headFor(sibling, adapter).h1),
+      note: fill(headFor(sibling, adapter).card),
+    }))
+  )}        <p>
+          Reference: ${docsList(feature.docs, adapter.framework)}. More of this kit:
           <a href="../">AdaptTable for ${escapeHtml(adapter.label)}</a>, or
           <a href="${demoRoute()}">the live demo</a>.
         </p>
@@ -344,12 +358,29 @@ ${linkList(
       head({
         dir,
         route,
-        title: fill(feature.title),
-        description: fill(feature.description),
+        title: fill(own.title),
+        description: fill(own.description),
+        indexable: isIndexable(adapter),
       }),
       body
     ),
   };
+};
+
+/** The landing page's links to the other kits on its framework, if any. */
+const otherKitsSection = (adapter, fill) => {
+  const others = otherKitsOf(adapter);
+  if (others.length === 0) return "";
+  return `        <h2>${escapeHtml(fill(LANDING.kitsTitle))}</h2>
+        <p>${paragraph(fill(LANDING.kitsLead))}</p>
+${linkList(
+  others.map((other) => ({
+    href: `../${other.key}/`,
+    text: fillTemplate(LANDING.h1, other),
+    note: other.blurb,
+  }))
+)}
+`;
 };
 
 /**
@@ -363,7 +394,7 @@ ${linkList(
 export const landingPage = (adapter, framework = frameworkOf(adapter)) => {
   const fill = (text) => fillTemplate(text, adapter, framework);
   const dir = adapter.key;
-  const route = demoRoute(dir);
+  const route = demoRoute(dir, framework.key);
   const head_ = landingHead(adapter);
   const body = `    <!-- Replaced by ${framework.label} on mount — see the note on a feature page for why the
          served markup carries content. Written by
@@ -372,28 +403,21 @@ export const landingPage = (adapter, framework = frameworkOf(adapter)) => {
       <main class="at-fallback">
         <p class="at-fallback__kicker">${escapeHtml(adapter.pkg)}</p>
         <h1>${escapeHtml(fill(LANDING.h1))}</h1>
-${LANDING.intro.map((line) => `        <p>${paragraph(fill(line))}</p>`).join("\n")}
+${landingIntro(adapter)
+  .map((line) => `        <p>${paragraph(fill(line))}</p>`)
+  .join("\n")}
         <h2>Install</h2>
         <pre><code>${escapeHtml(adapter.install)}</code></pre>
         <h2>Every feature, on its own page</h2>
 ${linkList(
-  MATRIX_FEATURES.map((feature) => ({
+  featuresOf(adapter).map((feature) => ({
     href: `./${feature.slug}/`,
-    text: fill(feature.h1),
-    note: fill(feature.card),
+    text: fill(headFor(feature, adapter).h1),
+    note: fill(headFor(feature, adapter).card),
   }))
 )}
-        <h2>${escapeHtml(fill(LANDING.kitsTitle))}</h2>
-        <p>${paragraph(fill(LANDING.kitsLead))}</p>
-${linkList(
-  otherKits(adapter).map((other) => ({
-    href: `../${other.key}/`,
-    text: fillTemplate(LANDING.h1, other),
-    note: other.blurb,
-  }))
-)}
-        <p>
-          Reference: <a href="${siteUrl(docsRoute("getting-started"))}">getting started</a>. Or
+${otherKitsSection(adapter, fill)}        <p>
+          Reference: <a href="${siteUrl(docsReferenceRoute("getting-started", adapter.framework))}">getting started</a>. Or
           open <a href="${demoRoute()}">the live demo</a> and switch kits on
           the same table.
         </p>
@@ -408,6 +432,7 @@ ${linkList(
         route,
         title: fill(head_.title),
         description: fill(head_.description),
+        indexable: isIndexable(adapter),
       }),
       body
     ),

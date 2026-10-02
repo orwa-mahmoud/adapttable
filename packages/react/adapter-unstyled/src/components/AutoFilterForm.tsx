@@ -183,7 +183,8 @@ function SelectField<TRow>({
   def,
   source,
   classNames,
-}: Readonly<DefFieldProps<TRow>>) {
+  labels,
+}: Readonly<DefFieldProps<TRow> & { labels: Required<TableLabels> }>) {
   // `def.options` may be a static array, an async loader, or a leftover
   // "auto" — never map it directly; the hook resolves all three shapes.
   const { options, loading } = useFilterOptions(def);
@@ -211,7 +212,7 @@ function SelectField<TRow>({
           </option>
         ) : (
           <>
-            <option value="">All</option>
+            <option value="">{labels.filterAll}</option>
             {options.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -491,7 +492,14 @@ function FilterField<TRow>({
         />
       );
     case "select":
-      return <SelectField def={def} source={source} classNames={classNames} />;
+      return (
+        <SelectField
+          def={def}
+          source={source}
+          classNames={classNames}
+          labels={labels}
+        />
+      );
     case "multiSelect":
       return (
         <MultiSelectField def={def} source={source} classNames={classNames} />
@@ -543,7 +551,7 @@ export interface AutoFilterFormProps<TRow> {
 
 /**
  * The auto-built filter form for the declarative `filters` array: one
- * semantic field per definition (`text` input, `select` with an "All"
+ * semantic field per definition (`text` input, `select` with an "all values"
  * option, wrapping `multiSelect` chips, operator-first `dateRange` /
  * `numberRange` widgets), each carrying `data-adapttable-part` hooks and
  * `classNames` overrides. Controls read `source.extra` and write through

@@ -1,0 +1,61 @@
+<span data-adapttable-part="assistant-examples">
+  <button
+    #trigger
+    nz-button
+    nz-dropdown
+    nz-tooltip
+    type="button"
+    nzType="text"
+    nzSize="small"
+    [nzTooltipTitle]="props().label"
+    [nzDropdownMenu]="menu"
+    nzTrigger="click"
+    nzPlacement="topLeft"
+    [nzBackdrop]="false"
+    [nzOverlayStyle]="{ 'z-index': 10060 }"
+    [nzDisabled]="props().disabled === true"
+    [disabled]="props().disabled === true"
+    [nzVisible]="open()"
+    (nzVisibleChange)="open.set($event)"
+    [attr.aria-label]="props().label"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="menu"
+    [attr.data-adapttable-part]="props().part"
+    [class]="props().className"
+    (keydown)="onKeyDown($event)"
+  >
+    <adapt-assistant-content [content]="props().icon" />
+  </button>
+  <nz-dropdown-menu #menu="nzDropdownMenu">
+    <ul
+      nz-menu
+      [attr.aria-label]="props().label"
+      [style.max-height]="props().maxHeight"
+      style="overflow-y: auto"
+      (keydown)="onKeyDown($event)"
+    >
+      @for (item of props().items; track item.id) {
+        <li nz-menu-item [nzDisabled]="props().disabled === true">
+          <button
+            nz-button
+            nzType="text"
+            type="button"
+            [attr.data-adapttable-part]="item.part"
+            [disabled]="props().disabled === true"
+            (click)="select(item.id)"
+          >
+            <adapt-assistant-content [content]="item.icon" /><span
+              nz-typography
+              >{{ item.title }}</span
+            >
+            @if (item.description) {
+              <span nz-typography nzType="secondary" style="display: block">{{
+                item.description
+              }}</span>
+            }
+          </button>
+        </li>
+      }
+    </ul>
+  </nz-dropdown-menu>
+</span>

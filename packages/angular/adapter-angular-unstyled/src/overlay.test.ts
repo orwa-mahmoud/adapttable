@@ -8,7 +8,8 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { menuPopover, placeOverlayBelowTrigger } from "./overlay";
+import { menuPopover } from "./components/menuPopover";
+import { placeOverlayBelowTrigger } from "./components/overlayPlacement";
 
 function rect(left: number, right: number, bottom = 20): DOMRect {
   return { left, right, bottom, top: 0, width: right - left } as DOMRect;
@@ -108,12 +109,12 @@ describe("menuPopover", () => {
     );
     window.dispatchEvent(new Event("resize"));
     element
-      .querySelector(".inside")
-      ?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      .querySelector(".inside")!
+      .dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     expect(popover.open()).toBe(true);
     element
-      .querySelector(".outside")
-      ?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      .querySelector(".outside")!
+      .dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     await settle();
     expect(popover.open()).toBe(false);
   });

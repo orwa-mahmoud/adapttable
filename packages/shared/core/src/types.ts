@@ -428,6 +428,8 @@ export interface TableLabels {
   relLastN?: string;
   /** Relative date: next N days. */
   relNextN?: string;
+  /** A select filter's option for no restriction — every value (the default). */
+  filterAll?: string;
   /** Boolean filter: don't care (the default). */
   boolAny?: string;
   /** Boolean filter: require true. */

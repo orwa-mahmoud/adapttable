@@ -70,6 +70,7 @@ export const cs: Required<TableLabels> = {
   relPreviousMonth: "Předchozí měsíc",
   relLastN: "Posledních N dní",
   relNextN: "Následujících N dní",
+  filterAll: "Vše",
   boolAny: "Libovolné",
   boolTrue: "Ano",
   boolFalse: "Ne",

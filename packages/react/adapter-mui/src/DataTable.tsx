@@ -195,6 +195,7 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
             : undefined) ??
             slots?.empty ?? (
               <Stack
+                data-adapttable-part="empty"
                 role="status"
                 spacing={1.5}
                 sx={{ py: 6, alignItems: "center" }}
@@ -221,7 +222,10 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
           );
         } else {
           body = (
-            <Box className={classNames?.table}>
+            <Box
+              className={classNames?.table}
+              data-adapttable-part={view.gridFocus.enabled ? "grid" : undefined}
+            >
               <DesktopTable {...tableProps} prefetch={props.prefetch} />
             </Box>
           );
@@ -444,7 +448,10 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                     )}
                     <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
                     {c.showFooter && (
-                      <Box className={classNames?.footer}>
+                      <Box
+                        data-adapttable-part="footer"
+                        className={classNames?.footer}
+                      >
                         <Footer
                           pagination={table.pagination}
                           total={viewSource.total}

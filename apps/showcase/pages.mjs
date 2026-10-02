@@ -26,9 +26,11 @@
  *   page's chunk and CSS asset.
  * @property {string} html HTML entry, relative to the showcase package root —
  *   where this file and `vite.config.ts` both sit.
- * @property {string} route Public path on the composed site, which serves the
- *   showcase under `DEMO_ROOT` (`scripts/site.mjs`). Trailing slash always: that is the form Pages
- *   serves a directory index at, and the form the sitemap has to carry.
+ * @property {string} route Public path on the composed site, which serves
+ *   each framework's pages under that framework's demo root (`DEMO_ROOTS` in
+ *   `scripts/site.mjs`) — a page that boots no bundle under React's. Trailing
+ *   slash always: that is the form Pages serves a directory index at, and the
+ *   form the sitemap has to carry.
  * @property {boolean} indexable Whether the route belongs in the sitemap. A
  *   page that must build but must never be indexed sets `false`. Redirect
  *   stubs use that because listing one asks a crawler to index a URL whose
@@ -59,7 +61,7 @@ const demo = (
 ) => ({
   key: dir.replaceAll("/", "-"),
   html: `./${dir}/index.html`,
-  route: demoRoute(dir),
+  route: demoRoute(dir, framework ?? SHOWCASE_FRAMEWORK),
   indexable,
   framework,
 });
@@ -112,7 +114,9 @@ export const SHOWCASE_PAGES = [
   demo("mcp-app", { indexable: false }),
   // The adapter × feature matrix — a landing plus the matrix feature pages per
   // built adapter, expanded from `matrix.mjs`.
-  ...matrixPages().map((page) => demo(page.dir, { framework: page.framework })),
+  ...matrixPages().map((page) =>
+    demo(page.dir, { framework: page.framework, indexable: page.indexable })
+  ),
   // The addresses those pages replaced — static redirects with no bundle.
   ...REPLACED_PAGES.map(([from]) =>
     demo(from, { indexable: false, framework: null })

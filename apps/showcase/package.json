@@ -2,27 +2,30 @@
   "name": "@adapttable/showcase",
   "version": "0.0.5",
   "private": true,
-  "description": "Public marketing showcase for AdaptTable — built on the real adapter packages (consumed like an end user), served under /react/demo/ on adapttable.orwamahmoud.com.",
+  "description": "Public marketing showcase for AdaptTable \u2014 built on the real adapter packages (consumed like an end user), served under /react/demo/ on adapttable.orwamahmoud.com.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p src/angular"
   },
   "dependencies": {
     "@adapttable/ai": "workspace:*",
+    "@adapttable/ai-angular": "workspace:*",
     "@adapttable/ai-react": "workspace:*",
+    "@adapttable/angular": "workspace:*",
+    "@adapttable/angular-unstyled": "workspace:*",
     "@adapttable/antd": "workspace:*",
     "@adapttable/base-ui": "workspace:*",
     "@adapttable/chakra": "workspace:*",
     "@adapttable/core": "workspace:*",
     "@adapttable/i18n": "workspace:*",
-    "@adapttable/react": "workspace:*",
     "@adapttable/mantine": "workspace:*",
     "@adapttable/mui": "workspace:*",
     "@adapttable/radix": "workspace:*",
+    "@adapttable/react": "workspace:*",
     "@adapttable/shadcn": "workspace:*",
     "@adapttable/unstyled": "workspace:*",
     "@base-ui/react": "^1.7.0",
@@ -37,15 +40,29 @@
     "antd": "^6.6.1",
     "framer-motion": "^13.1.1",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "@adapttable/ng-zorro": "workspace:*",
+    "ng-zorro-antd": "^22.1.1"
   },
   "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.7.5",
+    "@angular/build": "^22.2.0",
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/compiler-cli": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
     "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/angular-query-experimental": "^5.104.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@vitejs/plugin-react": "^6.1.0",
+    "rxjs": "^7.8.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "@angular/forms": "22.2.0",
+    "@angular/router": "^22.2.0",
+    "@angular/cdk": "^22.0.0"
   }
 }

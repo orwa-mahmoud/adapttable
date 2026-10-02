@@ -49,7 +49,7 @@ function GroupField({
   children,
 }: Readonly<{ label: ReactNode; id: string; children: ReactNode }>) {
   return (
-    <Stack gap={4}>
+    <Stack gap={4} data-adapttable-part="filter-field">
       <Text id={id} as="span" fontSize="sm">
         {label}
       </Text>
@@ -142,7 +142,7 @@ function RangeField<TRow>({
   const { label, ops, opLabelKeys, inputType, arity, op, setOp, a, b, write } =
     useRangeFilterWidget(def, source);
   return (
-    <FormField label={label}>
+    <FormField label={label} data-adapttable-part="filter-field">
       {/* Operator and value(s) share ONE row — it reads like a sentence:
           "At least [5]". */}
       <HStack gap={2} align="flex-start" flexWrap="wrap" rowGap={2}>
@@ -238,7 +238,7 @@ function TextFilterField<TRow>({
   const { label, ops, opLabelKeys, op, value, needsValue, write } =
     useTextFilterWidget(def, source);
   return (
-    <FormField label={label}>
+    <FormField label={label} data-adapttable-part="filter-field">
       <HStack gap={2} align="flex-start" flexWrap="wrap" rowGap={2}>
         <NativeSelect
           size="sm"
@@ -287,7 +287,7 @@ function BooleanFilterField<TRow>({
 }>) {
   const { label, choice, write } = useBooleanFilterWidget(def, source);
   return (
-    <FormField label={label}>
+    <FormField label={label} data-adapttable-part="filter-field">
       <NativeSelect
         size="sm"
         aria-label={label}
@@ -335,9 +335,10 @@ function AutoFilterField<TRow>({
       return <BooleanFilterField def={def} source={source} labels={labels} />;
     case "select":
       return (
-        <FormField label={label}>
+        <FormField label={label} data-adapttable-part="filter-field">
           <NativeSelect
             size="sm"
+            data-adapttable-part="filter-select"
             value={scalarFilterText(extra[def.key])}
             onChange={(e) => setExtra(def.key, e.target.value)}
           >
@@ -347,7 +348,7 @@ function AutoFilterField<TRow>({
               </option>
             ) : (
               <>
-                <option value="">All</option>
+                <option value="">{labels.filterAll}</option>
                 {options.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}

@@ -234,6 +234,87 @@ describe("createFrontendSource", () => {
     expect(second.rows).toBe(first.rows);
   });
 
+  it("re-evaluates an explicit filter key on the same data and commits only the changed view", () => {
+    const source = createFrontendSource<Row>();
+    const first = source.update(
+      config({ filterFn: (row) => row.count >= 3, filterKey: "high" }),
+      VIEW
+    );
+    expect(ids(first.rows)).toEqual(["a", "b"]);
+    source.commit();
+    const before = source.engine.snapshot().revisions;
+    const notified = vi.fn();
+    source.engine.subscribe("all", notified);
+
+    const next = source.update(
+      config({ filterFn: (row) => row.count <= 3, filterKey: "low" }),
+      VIEW
+    );
+    expect(ids(next.rows)).toEqual(["a", "c"]);
+    expect(ids(source.engine.rows("page"))).toEqual(["a", "b"]);
+    expect(source.engine.candidate.snapshot().revisions.data).toBe(before.data);
+    expect(source.engine.candidate.snapshot().revisions.view).toBe(
+      before.view + 1
+    );
+    expect(notified).not.toHaveBeenCalled();
+
+    source.commit();
+    expect(ids(source.engine.rows("page"))).toEqual(["a", "c"]);
+    expect(source.engine.snapshot().revisions.data).toBe(before.data);
+    expect(notified).toHaveBeenCalledTimes(1);
+
+    const same = source.update(
+      config({ filterFn: (row) => row.count <= 3, filterKey: "low" }),
+      VIEW
+    );
+    expect(same.rows).toBe(next.rows);
+    source.commit();
+    expect(notified).toHaveBeenCalledTimes(1);
+  });
+
+  it("re-evaluates a changed filter tree predicate without changing its tree or data", () => {
+    const source = createFrontendSource<Row>();
+    const view: FrontendSourceViewState = {
+      ...VIEW,
+      filterTree: { combinator: "and", conditions: [] },
+    };
+    const first = source.update(
+      config({ filterTreeFn: (row) => row.id === "a", filterKey: "first" }),
+      view
+    );
+    expect(ids(first.rows)).toEqual(["a"]);
+    source.commit();
+    const next = source.update(
+      config({ filterTreeFn: (row) => row.id === "b", filterKey: "second" }),
+      view
+    );
+    expect(ids(next.rows)).toEqual(["b"]);
+    expect(ids(source.engine.rows("page"))).toEqual(["a"]);
+    source.commit();
+    expect(ids(source.engine.rows("page"))).toEqual(["b"]);
+  });
+
+  it("distinguishes numeric and string filter keys and re-evaluates when a key is cleared", () => {
+    const source = createFrontendSource<Row>();
+    const first = source.update(
+      config({ filterFn: (row) => row.id === "a", filterKey: 1 }),
+      VIEW
+    );
+    expect(ids(first.rows)).toEqual(["a"]);
+    source.commit();
+    const second = source.update(
+      config({ filterFn: (row) => row.id === "b", filterKey: "1" }),
+      VIEW
+    );
+    expect(ids(second.rows)).toEqual(["b"]);
+    source.commit();
+    const cleared = source.update(
+      config({ filterFn: (row) => row.id === "c" }),
+      VIEW
+    );
+    expect(ids(cleared.rows)).toEqual(["c"]);
+  });
+
   it("reads the newest callbacks without restaging", () => {
     const source = createFrontendSource<Row>();
     source.update(config({ getSearchText: () => "" }), VIEW);
@@ -295,6 +376,67 @@ describe("createFrontendSource", () => {
     });
     expect(ids(frame.rows)).toEqual(["a", "c", "d"]);
     expect(getSearchText.mock.calls.map(([row]) => row.id)).toEqual(["d"]);
+  });
+
+  it("refreshes every changed search value after two patches coalesce into one update", () => {
+    const getSearchText = vi.fn((row: Row) => row.name);
+    const source = createFrontendSource<Row>();
+    source.update(config({ getSearchText }), { ...VIEW, search: "a" });
+    source.commit();
+    getSearchText.mockClear();
+
+    const first = applyRowPatches<Row>(
+      ROWS,
+      [updateRow("a", { name: "Fresh Zoe" })],
+      (row) => row.id
+    );
+    const second = applyRowPatches<Row>(
+      first,
+      [updateRow("b", { name: "Fresh Bea" })],
+      (row) => row.id
+    );
+    const nextConfig = config({ getSearchText, data: second });
+    const frame = source.update(nextConfig, { ...VIEW, search: "fresh" });
+    expect(ids(frame.rows)).toEqual(["a", "b"]);
+    expect(frame.rows).toEqual([second[0], second[1]]);
+    expect(frame.allSearchedRows).toEqual([second[0], second[1]]);
+    expect(getSearchText.mock.calls.map(([row]) => row.id)).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
+    source.commit();
+
+    const zoe = source.update(nextConfig, { ...VIEW, search: "fresh zoe" });
+    expect(zoe.rows).toEqual([second[0]]);
+    const bea = source.update(nextConfig, { ...VIEW, search: "fresh bea" });
+    expect(bea.rows).toEqual([second[1]]);
+    const old = source.update(nextConfig, { ...VIEW, search: "alice" });
+    expect(old.rows).toEqual([]);
+    expect(ROWS[0]?.name).toBe("Alice");
+    expect(ROWS[1]?.name).toBe("Bob");
+  });
+
+  it("keeps immediate patch optimization after a no-op on the patched array", () => {
+    const filterFn = vi.fn((row: Row) => row.count > 0);
+    const source = createFrontendSource<Row>();
+    source.update(config({ filterFn }), VIEW);
+    source.commit();
+    filterFn.mockClear();
+    const changed = applyRowPatches<Row>(
+      ROWS,
+      [updateRow("a", { count: 9 })],
+      (row) => row.id
+    );
+    const noOp = applyRowPatches<Row>(
+      changed,
+      [updateRow("a", { count: 9 })],
+      (row) => row.id
+    );
+    const frame = source.update(config({ filterFn, data: noOp }), VIEW);
+    expect(frame.rows).toEqual(changed);
+    expect(frame.rows[1]).toBe(ROWS[1]);
+    expect(filterFn.mock.calls.map(([row]) => row.id)).toEqual(["a"]);
   });
 
   it("publishes the staged view only on commit", () => {

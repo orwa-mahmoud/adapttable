@@ -70,6 +70,7 @@ export const he: Required<TableLabels> = {
   relPreviousMonth: "החודש הקודם",
   relLastN: "N הימים האחרונים",
   relNextN: "N הימים הבאים",
+  filterAll: "הכל",
   boolAny: "הכל",
   boolTrue: "כן",
   boolFalse: "לא",

@@ -72,13 +72,17 @@ export interface ConformanceRow {
 export interface ConformanceScenario {
     readonly columns: readonly ConformanceColumn[];
     readonly dir?: "ltr" | "rtl";
+    readonly groupBy?: "name" | "age";
     readonly labels?: ConformanceLabels;
     readonly mobile?: boolean;
     readonly navigable?: boolean;
+    readonly onCellEdit?: (rowId: string, columnKey: string, value: unknown) => void;
+    readonly onRowReorder?: (from: number, to: number, rowId: string) => void;
     readonly pageSize?: number;
     readonly rows: readonly ConformanceRow[];
     readonly selectable?: boolean;
     readonly tableLabel: string;
+    readonly virtualize?: boolean;
 }
 
 // @public

@@ -48,15 +48,16 @@ import {
 } from "../sectionIcons";
 import {
   adapterHref,
+  adaptersOf,
   docsUrl,
   fillTemplate,
   introFor,
   kitAccent,
   LANDING,
+  landingIntro,
   MATRIX_FEATURES,
   type MatrixFeature,
   type MatrixRoute,
-  SHOWCASE_ADAPTERS,
   type ShowcaseAdapter,
   type ShowcaseFramework,
   snippetFor,
@@ -277,17 +278,19 @@ function KitStrip({
 }: Readonly<{ adapter: ShowcaseAdapter; dark: boolean; root: string }>) {
   return (
     <div className="mx-kits">
-      {SHOWCASE_ADAPTERS.filter((kit) => kit.key !== adapter.key).map((kit) => (
-        <a
-          key={kit.key}
-          className="mx-kit"
-          href={adapterHref(kit, root)}
-          style={cssVars({ "--c": kitAccent(kit, dark) })}
-        >
-          <span className="mx-kit__name">{kit.label}</span>
-          <span className="mx-kit__blurb">{kit.blurb}</span>
-        </a>
-      ))}
+      {adaptersOf(adapter.framework)
+        .filter((kit) => kit.key !== adapter.key)
+        .map((kit) => (
+          <a
+            key={kit.key}
+            className="mx-kit"
+            href={adapterHref(kit, root)}
+            style={cssVars({ "--c": kitAccent(kit, dark) })}
+          >
+            <span className="mx-kit__name">{kit.label}</span>
+            <span className="mx-kit__blurb">{kit.blurb}</span>
+          </a>
+        ))}
     </div>
   );
 }
@@ -338,7 +341,7 @@ function AdapterLanding({
             <span className="mx-kicker__pkg">{adapter.pkg}</span>
           </Kicker>
           <KitHeading text={fill(LANDING.h1)} kit={adapter.label} />
-          {LANDING.intro.map((line) => (
+          {landingIntro(adapter).map((line) => (
             <Lead key={line} text={fill(line)} />
           ))}
           <div className="mx-actions">

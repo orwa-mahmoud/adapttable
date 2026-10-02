@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- * Run Playwright only when the diff can affect the showcase, and only the
+ * Run Playwright only when the diff can affect the showcase or docs, and only the
  * spec files when those are all that changed.
  *
- * Same path set CI uses (packages, showcase, e2e, playwright.config, lockfile).
- * A docs-only push skips. A library change runs the full suite — there is no
+ * Same path set CI uses (packages, sites, e2e, playwright.config, lockfile).
+ * A canonical docs change also exercises the built Astro guides. A library
+ * change runs the full suite — there is no
  * safe map from `adapter-mui` to "the mui tests", because kit loops live in
  * many files. Spec-only diffs run just those files.
  */
@@ -16,10 +17,11 @@ import { gitBinary } from "./git-binary.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-// `serve-showcase.mjs` builds and serves what the suite runs against, so a
-// change to it changes every result the suite can produce.
+// The two real sites and their route/source inventories are browser inputs.
+// Keep this matcher shared with CI so a docs-only push cannot silently skip
+// the guide and framework-switch contracts.
 const RELATED =
-  /^(packages\/(shared|react)\/|apps\/showcase\/|e2e\/|playwright\.config\.ts$|scripts\/serve-showcase\.mjs$|pnpm-lock\.yaml$)/;
+  /^(packages\/(shared|react|angular)\/|apps\/(showcase|docs)\/|docs\/|e2e\/|playwright\.config\.ts$|scripts\/(serve-showcase|angular-docs|docs-files|site|build-llms-full)\.mjs$|pnpm-lock\.yaml$)/;
 
 /** @param {string} file */
 export function isE2eRelated(file) {
@@ -117,7 +119,7 @@ function main() {
   const plan = e2ePlan(files);
   if (plan.kind === "skip") {
     console.log(
-      "e2e: no showcase/library/e2e changes vs origin/main — skipping."
+      "e2e: no docs/showcase/library/e2e changes vs origin/main — skipping."
     );
     return;
   }
@@ -126,7 +128,9 @@ function main() {
     runPlaywright(plan.specs);
     return;
   }
-  console.log("e2e: library or showcase changed vs origin/main — full suite.");
+  console.log(
+    "e2e: library, showcase or docs changed vs origin/main — full suite."
+  );
   runPlaywright([]);
 }
 

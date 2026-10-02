@@ -78,8 +78,9 @@ export function checkPlan(flags) {
 export function checkReason(flags) {
   if (flags.runUnit && flags.runPackage) return "package code changed";
   if (flags.versionOnly) return "version-only bump";
-  if (flags.runPlaywright && !flags.runUnit) return "e2e-only";
   if (flags.runLintRoot || flags.runLint) return "root tooling";
+  // Docs, site sources and E2E specs can all need browsers without package tests.
+  if (flags.runPlaywright && !flags.runUnit) return "browser-related changes";
   return "docs/meta-only";
 }
 

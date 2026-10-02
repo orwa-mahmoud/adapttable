@@ -125,6 +125,30 @@ describe("useFrontendData", () => {
     expect(result.current.rows.map((r) => r.id)).toEqual(["b"]);
   });
 
+  it("re-evaluates an explicit filter key while retaining callback-only row identity", () => {
+    const adapter = createMemoryAdapter();
+    const { result, rerender } = renderHook(
+      ({ filterKey }: { filterKey: "high" | "low" }) =>
+        useFrontendData<Row>({
+          data: ROWS,
+          urlAdapter: adapter,
+          paginationMode: "paged",
+          filterKey,
+          filterFn: (row) =>
+            filterKey === "high" ? row.count >= 3 : row.count <= 3,
+        }),
+      { initialProps: { filterKey: "high" } }
+    );
+    expect(result.current.rows.map((row) => row.id)).toEqual(["a", "b"]);
+    const before = result.current.tableEngine!.snapshot().revisions.data;
+    rerender({ filterKey: "low" });
+    expect(result.current.rows.map((row) => row.id)).toEqual(["a", "c"]);
+    expect(result.current.tableEngine!.snapshot().revisions.data).toBe(before);
+    const rows = result.current.rows;
+    rerender({ filterKey: "low" });
+    expect(result.current.rows).toBe(rows);
+  });
+
   it("ANDs the filter tree after filterFn", () => {
     const { result } = render(
       "ft=1." +

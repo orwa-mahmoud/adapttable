@@ -22,7 +22,7 @@
  * `--report` prints the full per-package diff instead of failing fast —
  * useful when auditing rather than gating.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -30,13 +30,15 @@ import ts from "typescript";
 
 import { sidebarSlugs } from "../apps/docs/sidebar.mjs";
 import { DESCRIPTIONS, TITLES } from "../apps/docs/sync-docs.mjs";
-import { DOCS, unlistedDocs } from "./build-llms-full.mjs";
+import { DOCS } from "./build-llms-full.mjs";
+import { docLinkTarget, docsFiles } from "./docs-files.mjs";
 import {
   packageDir,
   packageNames,
   REPO_ROOT,
   resolvePackagePath,
 } from "./packages.mjs";
+import { docsRoute, siteUrl } from "./site.mjs";
 
 const DOCS_DIR = join(REPO_ROOT, "docs");
 /**
@@ -137,9 +139,7 @@ const SURFACES = packageNames()
   // its second argument, which is now this function's `root`.
   .flatMap((pkg) => entriesOf(pkg));
 
-const docPages = readdirSync(DOCS_DIR)
-  .filter((name) => name.endsWith(".md"))
-  .sort();
+const docPages = docsFiles(DOCS_DIR);
 
 const corpus = docPages
   .map((name) => readFileSync(join(DOCS_DIR, name), "utf8"))
@@ -263,9 +263,9 @@ function printFailures(audits, missingFromReference) {
  * which fails the Starlight build for everyone but is caught here first, in
  * seconds rather than after a full site build.
  */
-function auditNav() {
-  const slugs = docPages.map((name) => name.replace(/\.md$/, ""));
-  const linked = new Set(sidebarSlugs());
+export function auditNav(pages = docPages, sidebar = sidebarSlugs()) {
+  const slugs = pages.map((name) => name.replace(/\.md$/, ""));
+  const linked = new Set(sidebar);
   return {
     orphans: slugs.filter((slug) => !linked.has(slug)),
     dead: [...linked].filter((slug) => !slugs.includes(slug)).sort(),
@@ -298,17 +298,17 @@ function printNavFailures({ orphans, dead }) {
  * query and is the one string search results and browser tabs show first.
  * `stale` are entries whose markdown is gone; they mask the next real gap.
  */
-function auditTitles() {
-  const named = new Set(Object.keys(TITLES));
+export function auditTitles(pages = docPages, titles = TITLES) {
+  const named = new Set(Object.keys(titles));
   return {
-    untitled: docPages.filter((name) => !named.has(name)),
+    untitled: pages.filter((name) => !named.has(name)),
     stale: [...named]
-      .filter((name) => !docPages.includes(name))
+      .filter((name) => !pages.includes(name))
       .sort((a, b) => a.localeCompare(b)),
-    overlong: Object.entries(TITLES).filter(
+    overlong: Object.entries(titles).filter(
       ([, title]) => (title + TITLE_SUFFIX).length > MAX_TITLE_LENGTH
     ),
-    duplicate: duplicateValues(TITLES),
+    duplicate: duplicateValues(titles),
   };
 }
 
@@ -338,17 +338,20 @@ function duplicateValues(map) {
  * Starlight description, so every such page shares one SERP snippet and one
  * og:description. `stale` are entries whose markdown is gone.
  */
-function auditDescriptions() {
-  const described = new Set(Object.keys(DESCRIPTIONS));
+export function auditDescriptions(
+  pages = docPages,
+  descriptions = DESCRIPTIONS
+) {
+  const described = new Set(Object.keys(descriptions));
   return {
-    undescribed: docPages.filter((name) => !described.has(name)),
+    undescribed: pages.filter((name) => !described.has(name)),
     stale: [...described]
-      .filter((name) => !docPages.includes(name))
+      .filter((name) => !pages.includes(name))
       .sort((a, b) => a.localeCompare(b)),
-    overlong: Object.entries(DESCRIPTIONS).filter(
+    overlong: Object.entries(descriptions).filter(
       ([, description]) => description.length > MAX_DESCRIPTION_LENGTH
     ),
-    duplicate: duplicateValues(DESCRIPTIONS),
+    duplicate: duplicateValues(descriptions),
   };
 }
 
@@ -384,14 +387,16 @@ function printDescriptionFailures({ undescribed, stale, overlong, duplicate }) {
  * both ways. A page missing from that array still builds the site and
  * still appears in `llms.txt`; it just never lands in `llms-full.txt`.
  */
-function auditLlmsOrder() {
+export function auditLlmsOrder(pages = docPages, order = DOCS) {
   return {
-    unlisted: unlistedDocs(DOCS_DIR),
-    stale: DOCS.filter((name) => !docPages.includes(name)),
+    unlisted: pages.filter((name) => !order.includes(name)),
+    stale: order.filter((name) => !pages.includes(name)),
+    duplicate: order.filter((name, index) => order.indexOf(name) !== index),
   };
 }
 
-function printLlmsOrderFailures({ unlisted, stale }) {
+function printLlmsOrderFailures({ unlisted, stale, duplicate }) {
+  for (const name of duplicate) console.error(`\nDOCS repeats ${name}.`);
   if (unlisted.length > 0) {
     console.error(
       `\n${unlisted.length} docs page(s) are missing from the DOCS reading ` +
@@ -415,10 +420,84 @@ function printLlmsOrderFailures({ unlisted, stale }) {
  */
 const OG_DIR = join(REPO_ROOT, "apps", "docs", "public", "og");
 
-function auditOgImages() {
-  return docPages.filter(
-    (name) => !existsSync(join(OG_DIR, name.replace(/\.md$/, ".png")))
+export function auditOgImages(pages = docPages, directory = OG_DIR) {
+  return pages.filter(
+    (name) => !existsSync(join(directory, name.replace(/\.md$/, ".png")))
   );
+}
+
+/** Every canonical guide needs exactly one link in the hand-written LLM index. */
+export function auditLlmsIndex(
+  pages = docPages,
+  index = readFileSync(join(REPO_ROOT, "llms.txt"), "utf8")
+) {
+  const links = [...index.matchAll(/\]\((https?:\/\/[^\s)]+)\)/g)].map(
+    (match) => match[1]
+  );
+  return pages.flatMap((file) => {
+    const url = siteUrl(docsRoute(file));
+    const count = links.filter((link) => link === url).length;
+    return count === 1 ? [] : [{ file, count }];
+  });
+}
+
+/** Remove complete triple-backtick blocks without rescanning unmatched tails. */
+function withoutFencedCode(markdown) {
+  const parts = [];
+  let cursor = 0;
+  let opening = markdown.indexOf("```");
+  while (opening !== -1) {
+    const newline = markdown.indexOf("\n", opening + 3);
+    if (newline === -1) break;
+    const closing = markdown.indexOf("```", newline + 1);
+    if (closing === -1) break;
+    parts.push(markdown.slice(cursor, opening));
+    cursor = closing + 3;
+    opening = markdown.indexOf("```", cursor);
+  }
+  parts.push(markdown.slice(cursor));
+  return parts.join("");
+}
+
+/** Read inline link destinations, allowing optional titles after whitespace. */
+function markdownLinkHrefs(markdown) {
+  const hrefs = [];
+  let cursor = 0;
+  while (cursor < markdown.length) {
+    const opening = markdown.indexOf("](", cursor);
+    if (opening === -1) break;
+    const start = opening + 2;
+    let end = start;
+    while (end < markdown.length && !/[\s)]/.test(markdown[end])) end++;
+    if (end === start) {
+      cursor = end + 1;
+      continue;
+    }
+    const closing = markdown.indexOf(")", end);
+    if (closing === -1) break;
+    hrefs.push(markdown.slice(start, end));
+    cursor = closing + 1;
+  }
+  return hrefs;
+}
+
+/** Relative guide links must resolve from their source folder to a real guide. */
+export function auditDocLinks(
+  directory = DOCS_DIR,
+  pages = docsFiles(directory)
+) {
+  const sources = new Set(pages);
+  return pages.flatMap((file) => {
+    const markdown = withoutFencedCode(
+      readFileSync(join(directory, file), "utf8")
+    );
+    return markdownLinkHrefs(markdown).flatMap((href) => {
+      const target = docLinkTarget(file, href);
+      return target && !sources.has(target.file)
+        ? [{ file, href, target: target.file }]
+        : [];
+    });
+  });
 }
 
 function printOgImageFailures(missing) {
@@ -530,7 +609,12 @@ function main() {
     descriptions.overlong.length +
     descriptions.duplicate.length;
   const llmsOrder = auditLlmsOrder();
-  const llmsOrderFailures = llmsOrder.unlisted.length + llmsOrder.stale.length;
+  const llmsOrderFailures =
+    llmsOrder.unlisted.length +
+    llmsOrder.stale.length +
+    llmsOrder.duplicate.length;
+  const llmsIndex = auditLlmsIndex();
+  const docLinks = auditDocLinks();
   const navFailures = nav.orphans.length + nav.dead.length;
   const missingOgImages = auditOgImages();
   const exportTotal = audits.reduce((sum, a) => sum + a.names.length, 0);
@@ -563,6 +647,9 @@ function main() {
       `llms-full: ${llmsOrder.unlisted.length} page(s) missing from DOCS, ` +
         `${llmsOrder.stale.length} entr(ies) without a page.`
     );
+    console.log(
+      `Links: ${llmsIndex.length} LLM index mismatch(es), ${docLinks.length} dead relative docs link(s).`
+    );
     return;
   }
   if (
@@ -572,7 +659,9 @@ function main() {
     titleFailures > 0 ||
     descriptionFailures > 0 ||
     llmsOrderFailures > 0 ||
-    missingOgImages.length > 0
+    missingOgImages.length > 0 ||
+    llmsIndex.length > 0 ||
+    docLinks.length > 0
   ) {
     printFailures(audits, missingFromReference);
     printNavFailures(nav);
@@ -580,6 +669,12 @@ function main() {
     printDescriptionFailures(descriptions);
     printLlmsOrderFailures(llmsOrder);
     printOgImageFailures(missingOgImages);
+    for (const { file, count } of llmsIndex)
+      console.error(
+        `llms.txt: ${file} has ${count} canonical links; expected exactly one.`
+      );
+    for (const { file, href, target } of docLinks)
+      console.error(`docs/${file}: ${href} points to missing docs/${target}.`);
     printFailureSummary({
       undocumentedTotal,
       missingRefTotal,
@@ -594,7 +689,7 @@ function main() {
   console.log(
     `doc-surface: all ${exportTotal} exports documented, ` +
       `all ${docPages.length} pages in the sidebar, titled, described, ` +
-      `with an og image and in llms-full.`
+      `with an og image, one LLM index link, valid relative docs links and in llms-full.`
   );
 }
 

@@ -1,9 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import {
-  MATRIX_FEATURES,
-  SHOWCASE_ADAPTERS,
-} from "../apps/showcase/matrix.mjs";
+import { adaptersOf, MATRIX_FEATURES } from "../apps/showcase/matrix.mjs";
 import { openNavGroup } from "./nav";
 
 /**
@@ -39,7 +36,7 @@ test("the trigger opens its menu on click and says so", async ({ page }) => {
   await adapters.click();
   await expect(adapters).toHaveAttribute("aria-expanded", "true");
   await expect(menu(page, "adapters")).toBeVisible();
-  await expect(items(page, "adapters")).toHaveCount(SHOWCASE_ADAPTERS.length);
+  await expect(items(page, "adapters")).toHaveCount(adaptersOf("react").length);
 
   // A second click on the trigger puts it away again — the pointer-down
   // dismissal must not fight the toggle and reopen it.
@@ -175,7 +172,7 @@ test("the Adapters menu leads to every kit, and marks the one being read", async
 }) => {
   await page.goto("/mantine/pivot/");
   await openNavGroup(page, "Adapters");
-  await expect(items(page, "adapters")).toHaveCount(SHOWCASE_ADAPTERS.length);
+  await expect(items(page, "adapters")).toHaveCount(adaptersOf("react").length);
 
   // A feature page belongs to its kit: someone on mantine/pivot IS in Mantine,
   // so the kit reads as current even though the page is one level down…

@@ -7,17 +7,22 @@
  * pages need to look something up lives here rather than being re-derived in
  * each component.
  */
-import { docsRoute, siteUrl } from "../../../../scripts/site.mjs";
+import { docsReferenceRoute, siteUrl } from "../../../../scripts/site.mjs";
 import {
   adapterByKey,
+  adaptersOf,
   builtAdapters,
   CANONICAL_AI_ADAPTER,
   featureBySlug,
+  featuresOf,
   fillTemplate,
   frameworkOf,
+  headFor,
   introFor,
   LANDING,
+  landingIntro,
   MATRIX_FEATURES,
+  otherKitsOf,
   SHOWCASE_ADAPTERS,
   SHOWCASE_FRAMEWORKS,
   snippetFor,
@@ -25,14 +30,19 @@ import {
 
 export {
   adapterByKey,
+  adaptersOf,
   builtAdapters,
   CANONICAL_AI_ADAPTER,
   featureBySlug,
+  featuresOf,
   fillTemplate,
   frameworkOf,
+  headFor,
   introFor,
   LANDING,
+  landingIntro,
   MATRIX_FEATURES,
+  otherKitsOf,
   SHOWCASE_ADAPTERS,
   SHOWCASE_FRAMEWORKS,
   snippetFor,
@@ -98,7 +108,8 @@ export const SITE_HOME = siteUrl("/");
  * @param page - The page's `docs/*.md` basename, e.g. `getting-started`.
  * @returns The page's absolute URL.
  */
-export const docsUrl = (page: string): string => siteUrl(docsRoute(page));
+export const docsUrl = (page: string, framework = "react"): string =>
+  siteUrl(docsReferenceRoute(page, framework));
 
 /**
  * An absolute URL on the published site, for assets the showcase links to.

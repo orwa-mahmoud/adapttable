@@ -1,0 +1,57 @@
+{
+  // The Angular pages compile with Angular's compiler and its decorator
+  // settings, so they are their own TypeScript project; the showcase's
+  // `tsconfig.json` leaves this folder to it. The Angular packages resolve to
+  // their source, the way the showcase's Vite config resolves them.
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    // Analog compiles through TypeScript's emit, so this project emits;
+    // `pnpm typecheck` runs it with `--noEmit`.
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "target": "ES2022",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "declarationMap": false,
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@adapttable/ai-angular": [
+        "../../../../packages/angular/ai-angular/src/index.ts"
+      ],
+      "@adapttable/angular": [
+        "../../../../packages/angular/angular/src/index.ts"
+      ],
+      "@adapttable/angular/*": [
+        "../../../../packages/angular/angular/*/index.ts"
+      ],
+      "@adapttable/angular-unstyled": [
+        "../../../../packages/angular/adapter-angular-unstyled/src/index.ts"
+      ],
+      "@adapttable/angular-unstyled/*": [
+        "../../../../packages/angular/adapter-angular-unstyled/*/index.ts"
+      ],
+      "@adapttable/ng-zorro": [
+        "../../../../packages/angular/adapter-ng-zorro/src/index.ts"
+      ],
+      "@adapttable/ng-zorro/*": [
+        "../../../../packages/angular/adapter-ng-zorro/*/index.ts"
+      ],
+      "@adapttable/core": ["../../../../packages/shared/core/src/index.ts"],
+      "@adapttable/core/*": ["../../../../packages/shared/core/src/*.ts"]
+    }
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true
+  },
+  "include": [
+    "./**/*.ts",
+    "../people.ts",
+    "../mockApi.ts",
+    "../matrix/content.ts"
+  ]
+}

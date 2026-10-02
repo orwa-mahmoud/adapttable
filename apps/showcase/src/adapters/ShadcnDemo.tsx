@@ -73,6 +73,7 @@ export function ShadcnDemo({
   wide,
   defaultColumnLayout,
   forceMobile,
+  maxHeight,
   focused,
 }: Readonly<{
   mode: DataMode;
@@ -130,6 +131,7 @@ export function ShadcnDemo({
   wide?: boolean;
   defaultColumnLayout?: Partial<ColumnLayoutState>;
   forceMobile?: boolean;
+  maxHeight?: number;
   focused?: boolean;
 }>) {
   return (
@@ -187,6 +189,7 @@ export function ShadcnDemo({
       wide={wide}
       defaultColumnLayout={defaultColumnLayout}
       forceMobile={forceMobile}
+      maxHeight={maxHeight}
       focused={focused}
       classNames={shadcnClassNames}
     />

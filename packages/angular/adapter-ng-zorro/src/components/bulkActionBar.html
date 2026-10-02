@@ -1,0 +1,81 @@
+@let p = props();
+@let s = p.selection;
+@if (s.selectedCount > 0) {
+  <div
+    nz-flex
+    nzWrap="wrap"
+    nzAlign="center"
+    nzGap="small"
+    data-adapttable-part="bulk-bar"
+  >
+    <output nz-typography>{{ p.labels.selectedCount(s.selectedCount) }}</output>
+    @if (banner()) {
+      <div
+        nz-flex
+        nzWrap="wrap"
+        nzAlign="center"
+        nzGap="small"
+        data-adapttable-part="select-all-banner"
+      >
+        <span nz-typography data-adapttable-part="select-all-text">{{
+          s.allMatching
+            ? p.labels.allMatchingSelected(p.total)
+            : p.labels.pageSelected(s.visibleIds.length)
+        }}</span>
+        <button
+          nz-button
+          nzSize="small"
+          type="button"
+          data-adapttable-part="select-all-button"
+          nzType="link"
+          [disabled]="runner.pending() !== null"
+          (click)="s.allMatching ? s.clear() : s.selectAllMatching()"
+        >
+          <span
+            >{{
+              s.allMatching
+                ? p.labels.clearAll
+                : p.labels.selectAllMatching(p.total)
+            }}
+          </span>
+        </button>
+      </div>
+    }
+    <button
+      nz-button
+      nzSize="small"
+      type="button"
+      [disabled]="runner.pending() !== null"
+      (click)="s.clear()"
+    >
+      <span>{{ p.labels.clearAll }} </span>
+    </button>
+    @for (action of actions(); track action.action.key) {
+      <button
+        nz-button
+        nzSize="small"
+        type="button"
+        data-adapttable-part="bulk-button"
+        [attr.title]="action.reason ?? null"
+        [attr.data-color]="action.action.color ?? null"
+        [nzDanger]="
+          action.action.color === 'red' ||
+          action.action.color === 'danger' ||
+          action.action.color === 'error'
+        "
+        [disabled]="action.reason !== undefined || runner.pending() !== null"
+        (click)="run(action.action)"
+      >
+        <span>{{ action.action.label }} </span>
+      </button>
+    }
+    @if (errorMessage(); as message) {
+      <nz-alert
+        data-adapttable-part="bulk-error"
+        role="alert"
+        nzType="error"
+        [nzMessage]="p.labels.errorTitle + ': ' + message"
+      />
+    }
+  </div>
+}

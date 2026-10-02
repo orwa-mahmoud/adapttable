@@ -305,3 +305,28 @@ describe("<AutoFilterForm> standalone", () => {
     expect(screen.queryByRole("searchbox")).toBeNull();
   });
 });
+
+describe("<AutoFilterForm> select labels", () => {
+  it("offers the no-restriction option in the host's language", () => {
+    const { source } = stubSource({});
+    render(
+      <AutoFilterForm
+        defs={[
+          {
+            key: "city",
+            type: "select",
+            options: [{ value: "a", label: "Alpha" }],
+          },
+        ]}
+        source={source}
+        labels={{ filterAll: "Tous" }}
+      />
+    );
+    const select = screen.getByRole("combobox", { name: "City" });
+    expect(
+      within(select)
+        .getAllByRole("option")
+        .map((option) => option.textContent)
+    ).toEqual(["Tous", "Alpha"]);
+  });
+});

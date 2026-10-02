@@ -2,7 +2,10 @@
 
 # AdaptTable
 
-### The headless React data table that works with **any** UI kit — batteries-included adapters for Mantine, MUI, Chakra, Ant Design, Radix, Base UI, and shadcn/ui, plus an unstyled path for Tailwind & your own CSS.
+### A headless data table for React and Angular, with controls from your UI kit.
+
+React adapters cover Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn/ui
+and unstyled HTML. Angular offers native HTML and NG-ZORRO kits.
 
 [![npm version](https://img.shields.io/npm/v/@adapttable/core.svg)](https://www.npmjs.com/package/@adapttable/core)
 [![downloads](https://img.shields.io/npm/dm/@adapttable/core.svg)](https://www.npmjs.com/package/@adapttable/core)
@@ -10,7 +13,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6.svg)](./tsconfig.base.json)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 
-**[🌐 Website](https://adapttable.orwamahmoud.com/)** · **[🚀 Live demo](https://adapttable.orwamahmoud.com/react/demo/)** · **[📖 Docs](https://adapttable.orwamahmoud.com/react/getting-started/)** · **[📦 npm](https://www.npmjs.com/org/adapttable)** · **[Compare](https://adapttable.orwamahmoud.com/react/comparison/)**
+**[🌐 Website](https://adapttable.orwamahmoud.com/)** · **[🚀 Live demo](https://adapttable.orwamahmoud.com/react/demo/)** · **[📖 React docs](https://adapttable.orwamahmoud.com/react/getting-started/)** · **[Angular docs](https://adapttable.orwamahmoud.com/angular/getting-started/)** · **[📦 npm](https://www.npmjs.com/org/adapttable)** · **[Compare](https://adapttable.orwamahmoud.com/react/comparison/)**
 
 **Easy by default, infinitely customizable.** [Automatic mobile card layout](https://adapttable.orwamahmoud.com/react/mobile/) — the table becomes a card list on phones by itself, no second layout to build. One unified data source for both client-side and server-side data, URL-synced shareable state, optional virtualization, infinite-scroll & paging (auto by device), a real filter UX, **column management** (reorder · pin · resize · show/hide), **inline cell editing**, **interactive row grouping** with header drag-and-drop and per-group aggregate choices, **CSV export**, first-class **i18n + RTL**, and seamless **dark mode** — out of the box.
 
@@ -27,12 +30,14 @@
 ---
 
 **Runtime support:** Node.js 22.12.0 or newer and React 18 or 19. Packed
-releases are tested on Node 22.12 and Node 24.
+releases are tested on Node 22.12 and Node 24. The Angular binding, native kit and
+AI binding accept Angular 20, 21 or 22; the NG-ZORRO kit requires Angular 22.
+Both Angular kits and the AI binding are currently unpublished workspace packages.
 
 ## Features
 
-Every one of these works in **all eight adapters** — the same feature factories,
-whichever kit you use.
+Every one of these works in **all eight React adapters**. Angular’s native and
+NG-ZORRO kits compose the same neutral features through Angular factories.
 
 |             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -119,33 +124,43 @@ place: **[the comparison page](https://adapttable.orwamahmoud.com/react/comparis
 ## Packages
 
 The dependency graph is deliberately layered: framework-neutral
-`@adapttable/core` → headless `@adapttable/react` → the kit adapter you render.
+`@adapttable/core` → `@adapttable/react` or `@adapttable/angular` → the kit you render.
 Optional behavior is imported from feature subpaths such as
 `@adapttable/mantine/filters`; unused features stay out of the table.
 
-| Package                | What it is                                                                 |
-| ---------------------- | -------------------------------------------------------------------------- |
-| `@adapttable/core`     | The engine. Filter, sort, page and group, with no framework in its graph.  |
-| `@adapttable/react`    | The React binding: hooks, `ColumnDef`, prop-getters, structural Chrome.    |
-| `@adapttable/mantine`  | Mantine adapter — batteries-included `<DataTable>`.                        |
-| `@adapttable/mui`      | Material UI adapter.                                                       |
-| `@adapttable/chakra`   | Chakra UI adapter.                                                         |
-| `@adapttable/antd`     | Ant Design adapter — drives antd's high-level `<Table>`.                   |
-| `@adapttable/radix`    | Radix Themes adapter — batteries-included `<DataTable>`.                   |
-| `@adapttable/base-ui`  | Base UI adapter — batteries-included `<DataTable>` on `@base-ui/react`.    |
-| `@adapttable/unstyled` | Headless primitives + Tailwind / shadcn classes.                           |
-| `@adapttable/shadcn`   | shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn preset. |
-| `@adapttable/i18n`     | Optional locale presets (19 languages, incl. RTL) + direction helpers.     |
-| `@adapttable/cli`      | `npx @adapttable/cli init` / `migrate-v3` — scaffold or upgrade v2 source. |
-| `@adapttable/server`   | React-free query parsing for a host backend.                               |
-| `@adapttable/ai`       | Optional provider-neutral table agent contract.                            |
-| `@adapttable/ai-react` | React bindings for the agent — `tableAgent` and `useTableAssistant`.       |
+| Package                        | What it is                                                                   |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| `@adapttable/core`             | The engine. Filter, sort, page and group, with no framework in its graph.    |
+| `@adapttable/react`            | The React binding: hooks, `ColumnDef`, prop-getters, structural Chrome.      |
+| `@adapttable/mantine`          | Mantine adapter — batteries-included `<DataTable>`.                          |
+| `@adapttable/mui`              | Material UI adapter.                                                         |
+| `@adapttable/chakra`           | Chakra UI adapter.                                                           |
+| `@adapttable/antd`             | Ant Design adapter — drives antd's high-level `<Table>`.                     |
+| `@adapttable/radix`            | Radix Themes adapter — batteries-included `<DataTable>`.                     |
+| `@adapttable/base-ui`          | Base UI adapter — batteries-included `<DataTable>` on `@base-ui/react`.      |
+| `@adapttable/unstyled`         | Headless primitives + Tailwind / shadcn classes.                             |
+| `@adapttable/shadcn`           | shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn preset.   |
+| `@adapttable/i18n`             | Optional locale presets (19 languages, incl. RTL) + direction helpers.       |
+| `@adapttable/cli`              | `npx @adapttable/cli init` / `migrate-v3` — scaffold or upgrade v2 source.   |
+| `@adapttable/server`           | React-free query parsing for a host backend.                                 |
+| `@adapttable/ai`               | Optional provider-neutral table agent contract.                              |
+| `@adapttable/ai-react`         | React bindings for the agent — `tableAgent` and `useTableAssistant`.         |
+| `@adapttable/angular`          | The Angular binding: signals, templates and structural Chrome.               |
+| `@adapttable/angular-unstyled` | Native Angular table controls; unpublished workspace kit.                    |
+| `@adapttable/ng-zorro`         | NG-ZORRO Angular table controls; unpublished workspace kit.                  |
+| `@adapttable/ai-angular`       | Angular agent, assistant and speech bindings; unpublished workspace package. |
+
+The CLI recognizes an Angular project when both `@angular/core` and
+`angular.json` are present, then scaffolds the native or NG-ZORRO table.
+Both Angular kits are currently private workspace packages: use their workspace
+links until they are published, rather than assuming a registry install is available.
 
 ## AI, without a provider lock-in
 
 AI support is optional. `@adapttable/ai` exposes the enabled table as a
 provider-neutral capability contract; connect it to your own backend and model.
-Add `@adapttable/ai-react` plus a kit's `/assistant` widget when you want the
+Add `@adapttable/ai-react` or the workspace `@adapttable/ai-angular` binding,
+plus that framework’s kit `/assistant` widget, when you want the
 ready conversation UI, or build a custom interface on the same contract.
 Only enabled, permitted capabilities are offered to the agent. Commands run
 through the table's validation and configured approvals; your application
@@ -235,7 +250,7 @@ The roadmap is tracked in GitHub issues:
 
 - [Neutral core for framework bindings](https://github.com/orwa-mahmoud/adapttable/issues/419) — the table's behavior moves into `@adapttable/core`, so every framework binding drives the same engine.
 - [Vue binding](https://github.com/orwa-mahmoud/adapttable/issues/420)
-- [Angular binding](https://github.com/orwa-mahmoud/adapttable/issues/421)
+- [Angular binding](https://github.com/orwa-mahmoud/adapttable/issues/421) — implemented with [Angular guides](https://adapttable.orwamahmoud.com/angular/getting-started/) and native/NG-ZORRO workspace kits.
 
 Each one lists its work items and what blocks what. Open items with nothing blocking them are [ready to start](https://github.com/orwa-mahmoud/adapttable/issues?q=is%3Aissue%20state%3Aopen%20-is%3Ablocked%20has%3Aparent-issue). What has shipped is in each published package's `CHANGELOG.md`.
 

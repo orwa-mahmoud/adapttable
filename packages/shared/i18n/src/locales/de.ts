@@ -70,6 +70,7 @@ export const de: Required<TableLabels> = {
   relPreviousMonth: "Vormonat",
   relLastN: "Letzte N Tage",
   relNextN: "Nächste N Tage",
+  filterAll: "Alle",
   boolAny: "Beliebig",
   boolTrue: "Wahr",
   boolFalse: "Falsch",

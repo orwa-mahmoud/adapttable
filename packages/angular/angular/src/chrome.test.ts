@@ -2,15 +2,15 @@ import { createMemoryAdapter } from "@adapttable/core";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { AdaptLiveRegion } from "./a11y/liveRegion";
 import { AdaptAttrs } from "./attrs";
 import { AdaptCell } from "./cell";
 import type { ColumnDef } from "./columnDef";
 import { injectDataTable } from "./dataTable";
-import { injectFrontendData } from "./frontendData";
-import { injectGridFocus } from "./gridFocus";
-import { AdaptLiveRegion } from "./liveRegion";
-import { injectRowSelection } from "./selection";
-import { ADAPTTABLE_URL_ADAPTER } from "./url";
+import { injectGridFocus } from "./focus/gridFocus";
+import { injectRowSelection } from "./selection/selection";
+import { injectFrontendData } from "./source/frontendData";
+import { ADAPTTABLE_URL_ADAPTER } from "./url/tableUrlState";
 
 interface Person {
   id: string;
@@ -176,17 +176,17 @@ describe("the Angular table chrome", () => {
   it("moves focus with the arrow keys and follows a clicked cell", async () => {
     const { query, settle, fixture } = await mount();
     const table = query<HTMLTableElement>("table");
-    table?.dispatchEvent(
+    table!.dispatchEvent(
       new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })
     );
     await settle();
     expect(document.activeElement?.getAttribute("data-grid-cell")).toBe("0:1");
     expect(fixture.componentInstance.grid.active()).toEqual({ row: 0, col: 1 });
     const target = query<HTMLElement>('[data-grid-cell="1:0"]');
-    target?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    target?.dispatchEvent(new MouseEvent("mouseenter"));
-    target?.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    target?.dispatchEvent(new FocusEvent("focus"));
+    target!.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    target!.dispatchEvent(new MouseEvent("mouseenter"));
+    target!.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    target!.dispatchEvent(new FocusEvent("focus"));
     await settle();
     expect(fixture.componentInstance.grid.active()).toEqual({ row: 1, col: 0 });
     expect(fixture.componentInstance.grid.range()).toEqual({
@@ -220,7 +220,7 @@ describe("the Angular table chrome", () => {
     const selection = fixture.componentInstance.selection;
     const picks = all<HTMLInputElement>(".pick");
     expect(picks[0]?.getAttribute("aria-label")).toBe("Select row");
-    picks[0]?.click();
+    picks[0]!.click();
     await settle();
     expect(selection.isSelected("1")).toBe(true);
     expect(all("tbody tr")[0]?.getAttribute("aria-selected")).toBe("true");
@@ -228,12 +228,12 @@ describe("the Angular table chrome", () => {
     const header = query<HTMLInputElement>(".all");
     expect(header?.indeterminate).toBe(true);
     expect(selection.headerState()).toBe("some");
-    header?.click();
+    header!.click();
     await settle();
     expect(selection.headerState()).toBe("all");
     expect(header?.checked).toBe(true);
     expect(selection.selectedCount()).toBe(2);
-    header?.click();
+    header!.click();
     await settle();
     expect(selection.selectedCount()).toBe(0);
     selection.replace(["2", "3"]);
@@ -261,7 +261,7 @@ describe("the Angular table chrome", () => {
     const region = query<HTMLElement>('[data-adapttable-part="status"]');
     expect(region?.textContent).toBe("");
     expect(region?.getAttribute("aria-live")).toBe("polite");
-    query<HTMLButtonElement>("th:nth-child(2) button")?.click();
+    query<HTMLButtonElement>("th:nth-child(2) button")!.click();
     await settle();
     expect(region?.textContent).toContain("Sorted by Age, ascending");
     const table = fixture.componentInstance.table;
@@ -389,7 +389,7 @@ describe("an infinite Angular list", () => {
   it("loads the next rows from its button", async () => {
     const { element, count, settle } = await mountInfinite();
     expect(count()).toBe("3");
-    element.querySelector<HTMLButtonElement>(".more button")?.click();
+    element.querySelector<HTMLButtonElement>(".more button")!.click();
     await settle();
     expect(count()).toBe("6");
   });

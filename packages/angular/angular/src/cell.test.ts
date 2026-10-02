@@ -76,6 +76,16 @@ describe("cell and header content", () => {
     expect(header()).toBe("");
   });
 
+  it("reads a column without an accessor as core does: its plain text, then its key", async () => {
+    const formatted = await mount({
+      key: "summary",
+      formatValue: (row) => `${row.name} (collapsed)`,
+    });
+    expect(formatted.cell()).toBe("Ada (collapsed)");
+    const byKey = await mount({ key: "name" });
+    expect(byKey.cell()).toBe("Ada");
+  });
+
   it("renders a component with only the inputs it declares", async () => {
     const { cell, header } = await mount({
       key: "name",

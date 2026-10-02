@@ -11,6 +11,7 @@ import {
 } from "../features/currentHost";
 import type { QueryFilterGroup } from "../source/queryContract";
 import type { ExtraFilters } from "../types";
+import { stableKey } from "../utils/stableKey";
 import { computeFilterFacets, type FacetMap } from "./facets";
 import { resolveFilterRegistry } from "./filterBuiltins";
 import {
@@ -57,22 +58,83 @@ export interface FilterEngine {
   ): FacetMap;
 }
 
+// Callback identities belong to the optional engine, so plain tables do not
+// carry the authored-filter encoder. Weak keys never keep a callback alive.
+const references = new WeakMap<object, number>();
+let nextReference = 0;
+
+function reference(value: object): number {
+  const existing = references.get(value);
+  if (existing !== undefined) return existing;
+  const next = ++nextReference;
+  references.set(value, next);
+  return next;
+}
+
+/** Encode authored callbacks by identity without confusing them with data values. */
+function filterSemanticValue(value: unknown): unknown {
+  if (typeof value === "function") return ["function", reference(value)];
+  if (Array.isArray(value)) {
+    return ["array", value.map((entry) => filterSemanticValue(entry))];
+  }
+  if (value !== null && typeof value === "object") {
+    return [
+      "object",
+      Object.fromEntries(
+        Object.entries(value).map(([key, entry]) => [
+          key,
+          filterSemanticValue(entry),
+        ])
+      ),
+    ];
+  }
+  return value === undefined ? ["undefined"] : ["value", value];
+}
+
+/** Fingerprint declarations before row-dependent options or closures exist. */
+function filterSemanticKey<TRow>(
+  input: Parameters<typeof FILTER_ENGINE_IMPL.buildRuntime<TRow>>[0]
+): string {
+  const declared = input.declaredFilters ?? [];
+  const overridden = new Set(declared.map((def) => def.key));
+  return stableKey(
+    filterSemanticValue({
+      filters: declared,
+      columns: input.columns
+        .filter((column) => column.filter && !overridden.has(column.key))
+        .map((column) => ({
+          key: column.key,
+          filter: column.filter,
+          i18n: column.i18n,
+          label: typeof column.header === "string" ? column.header : undefined,
+        })),
+      locale: input.locale,
+      types: input.filterTypes ?? [],
+      registered: input.featureHost?.filterTypes ?? [],
+      extended: input.featureHost?.filterExtends ?? [],
+      loadedOptions: input.loadedOptions,
+    })
+  );
+}
+
 /**
  * The real engine. Imported only from the filters feature.
  *
  * @public
  */
 export const FILTER_ENGINE_IMPL: FilterEngine = {
-  buildRuntime({
-    columns,
-    declaredFilters,
-    locale,
-    data,
-    loadedOptions,
-    filterTypes,
-    featureHost,
-    optionCache,
-  }) {
+  buildRuntime(input) {
+    const {
+      columns,
+      declaredFilters,
+      locale,
+      data,
+      loadedOptions,
+      filterTypes,
+      featureHost,
+      optionCache,
+    } = input;
+    const filterKey = filterSemanticKey(input);
     const materialized = materializeAutoOptions(
       resolveFilterDefs(columns, declaredFilters, locale),
       data
@@ -92,10 +154,13 @@ export const FILTER_ENGINE_IMPL: FilterEngine = {
       }
       return { ...def, options: cached };
     });
-    return buildFilterRuntime(
-      withAsync,
-      applyFilterExtends(resolveFilterRegistry(filterTypes), featureHost)
-    );
+    return {
+      ...buildFilterRuntime(
+        withAsync,
+        applyFilterExtends(resolveFilterRegistry(filterTypes), featureHost)
+      ),
+      filterKey,
+    };
   },
   evaluateTree: evaluateFilterTree,
   computeFacets: computeFilterFacets,

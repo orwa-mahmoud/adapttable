@@ -1,0 +1,100 @@
+@let p = props();
+<nz-card
+  nzSize="small"
+  [attr.aria-label]="p.heading"
+  data-adapttable-part="export-progress-surface"
+  style="
+    position: fixed;
+    z-index: 10050;
+    inset-inline-end: 16px;
+    bottom: 16px;
+    width: 320px;
+    max-width: calc(100vw - 32px);
+  "
+>
+  <div nz-flex nzAlign="center" nzGap="small">
+    <strong nz-typography style="flex: 1">{{ p.heading }}</strong>
+    @if (p.dismiss; as dismiss) {
+      <button
+        nz-button
+        nzSize="small"
+        type="button"
+        data-adapttable-part="export-progress-dismiss"
+        (click)="dismiss.onAction()"
+      >
+        <span>{{ dismiss.label }} </span>
+      </button>
+    }
+  </div>
+  @if (p.status === "busy") {
+    @if (p.progress === undefined) {
+      <nz-spin
+        data-adapttable-part="export-progress-bar"
+        role="progressbar"
+        [attr.aria-label]="p.progressLabel"
+        [nzSpinning]="true"
+      />
+    } @else {
+      <nz-progress
+        data-adapttable-part="export-progress-bar"
+        role="progressbar"
+        [attr.aria-label]="p.progressLabel"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="p.progress"
+        [nzPercent]="p.progress"
+        [nzShowInfo]="false"
+        nzStatus="active"
+      />
+    }
+  }
+  @if (p.message) {
+    <p nz-typography data-adapttable-part="export-progress-message">
+      {{ p.message }}
+    </p>
+  }
+  @if (p.error) {
+    <p nz-typography data-adapttable-part="export-progress-message">
+      {{ p.error }}
+    </p>
+  }
+  <div
+    data-adapttable-part="export-progress-actions"
+    style="display: flex; justify-content: flex-end; gap: 8px"
+  >
+    @if (p.cancel; as cancel) {
+      <button
+        nz-button
+        nzSize="small"
+        type="button"
+        data-adapttable-part="export-progress-cancel"
+        (click)="cancel.onAction()"
+      >
+        <span>{{ cancel.label }} </span>
+      </button>
+    }
+    @if (p.retry; as retry) {
+      <button
+        nz-button
+        nzSize="small"
+        type="button"
+        data-adapttable-part="export-progress-retry"
+        (click)="retry.onAction()"
+      >
+        <span>{{ retry.label }} </span>
+      </button>
+    }
+    @if (p.download; as download) {
+      <a
+        nz-button
+        nzType="primary"
+        nzSize="small"
+        [href]="download.url"
+        download
+        data-adapttable-part="export-progress-download"
+      >
+        <span>{{ download.label }} </span></a
+      >
+    }
+  </div>
+</nz-card>

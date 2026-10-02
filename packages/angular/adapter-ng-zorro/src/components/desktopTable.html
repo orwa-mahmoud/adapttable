@@ -1,0 +1,459 @@
+@let v = view();
+<div #scrollBox data-adapttable-part="scroll-box" [style]="scrollBoxStyle()">
+  <nz-table
+    #kitTable
+    [nzTemplateMode]="true"
+    [nzFrontPagination]="false"
+    [nzShowPagination]="false"
+    [attr.data-adapttable-part]="tableAttrs()['role'] === 'grid' ? 'grid' : null"
+    [adaptAttrs]="tableAttrs()"
+    [adaptAttrsTarget]="tableElement"
+  >
+    <thead class="ant-table-thead" data-adapttable-part="thead">
+      <ng-template #leadingHeaders let-band>
+        @if (v.rowDetail) {
+          <th
+            data-adapttable-part="expand-header"
+            scope="col"
+            [attr.rowspan]="band > 1 ? band : null"
+            [attr.aria-label]="v.table.labels().expandRow"
+          ></th>
+        }
+        @if (v.reorder) {
+          <th
+            data-adapttable-part="reorder-header"
+            scope="col"
+            [attr.rowspan]="band > 1 ? band : null"
+            [attr.aria-label]="v.table.labels().reorderRow"
+          ></th>
+        }
+        @if (v.selection; as selection) {
+          <th
+            data-adapttable-part="selection-header"
+            scope="col"
+            [attr.rowspan]="band > 1 ? band : null"
+          >
+            <adapt-selection-checkbox
+              [attrs]="selection.headerCheckboxAttrs()"
+            />
+          </th>
+        }
+      </ng-template>
+      <ng-template #trailingHeaders let-band>
+        @if (v.showActions()) {
+          <th
+            data-adapttable-part="actions-header"
+            scope="col"
+            [attr.rowspan]="band > 1 ? band : null"
+          >
+            {{ v.table.labels().actions }}
+          </th>
+        }
+      </ng-template>
+      <ng-template #leafHeader let-column let-rowSpan="rowSpan">
+        <th
+          data-adapttable-part="header-cell"
+          [adaptAttrs]="headerCells().get(column.key)!"
+          [attr.rowspan]="rowSpan > 1 ? rowSpan : null"
+        >
+          @if (v.table.canRenameColumns && column.renameable) {
+            <adapt-column-header-rename
+              [columnKey]="column.key"
+              [name]="columnName(column)"
+              [onRename]="renameColumn"
+              [labels]="v.table.labels()"
+            >
+              <ng-container *ngTemplateOutlet="caption" />
+            </adapt-column-header-rename>
+          } @else {
+            <ng-container *ngTemplateOutlet="caption" />
+          }
+          <ng-template #caption>
+            <span data-adapttable-part="header-caption-control">
+              @if (column.sortable) {
+                <button
+                  nz-button
+                  [adaptAttrs]="v.table.sortButtonAttrs(column)"
+                >
+                  <span [adaptHeader]="column"></span>
+                  @if (sortIndex(column); as index) {
+                    <span>{{ index }}</span>
+                  }
+                  @if (v.table.sortBy() === column.key) {
+                    <span aria-hidden="true">{{
+                      v.table.sortDir() === "desc" ? "▼" : "▲"
+                    }}</span>
+                  }
+                </button>
+              } @else {
+                <span [adaptHeader]="column"></span>
+              }
+            </span>
+          </ng-template>
+          @if (column.headerActions) {
+            <span data-adapttable-part="header-actions">{{
+              column.headerActions
+            }}</span>
+          }
+          @if (columnSelects().get(column.key); as select) {
+            <ng-container
+              [adaptSlot]="columnSelectSlot"
+              [adaptSlotProps]="select"
+              [adaptSlotTable]="v.table"
+            />
+          }
+          @if (resizeHandle(column); as handle) {
+            <button
+              nz-button
+              nzType="text"
+              type="button"
+              data-adapttable-part="resize-handle"
+              [adaptAttrs]="handle"
+            ></button>
+          }
+          @if (v.filters?.header) {
+            @if (v.filters.headerProps().get(column.key); as hp) {
+              <ng-container
+                [adaptSlot]="filterSlots.header"
+                [adaptSlotProps]="hp"
+                [adaptSlotTable]="v.table"
+              />
+            }
+          }
+        </th>
+      </ng-template>
+      @if (headerPlan(); as plan) {
+        @for (row of plan; track $index; let first = $first, last = $last) {
+          <tr
+            [attr.data-adapttable-part]="
+              last ? 'header-row' : 'header-group-row'
+            "
+            [adaptAttrs]="last ? v.table.headerRowAttrs() : noAttrs"
+          >
+            @if (first) {
+              <ng-container
+                [ngTemplateOutlet]="leadingHeaders"
+                [ngTemplateOutletContext]="{ $implicit: plan.length }"
+              />
+            }
+            @for (cell of row; track cell.key) {
+              @if (cell.kind === "leaf") {
+                <ng-container
+                  [ngTemplateOutlet]="leafHeader"
+                  [ngTemplateOutletContext]="{
+                    $implicit: v.columns()[cell.columnIndex],
+                    rowSpan: cell.rowSpan,
+                  }"
+                />
+              } @else {
+                <th
+                  data-adapttable-part="header-group-cell"
+                  scope="colgroup"
+                  [attr.colspan]="cell.colSpan"
+                  [attr.rowspan]="cell.rowSpan > 1 ? cell.rowSpan : null"
+                  [adaptAttrs]="groupCells().get(cell.key)!.attrs"
+                >
+                  <span [adaptAttrs]="groupLabelAttrs">
+                    @if (groupCells().get(cell.key)!.toggle; as toggle) {
+                      <ng-container
+                        [adaptSlot]="columnGroupToggleSlot"
+                        [adaptSlotProps]="toggle"
+                        [adaptSlotTable]="v.table"
+                      />
+                    }
+                    {{ groupCells().get(cell.key)!.caption }}
+                  </span>
+                </th>
+              }
+            }
+            @if (first) {
+              <ng-container
+                [ngTemplateOutlet]="trailingHeaders"
+                [ngTemplateOutletContext]="{ $implicit: plan.length }"
+              />
+            }
+          </tr>
+        }
+      } @else {
+        <tr
+          data-adapttable-part="header-row"
+          [adaptAttrs]="v.table.headerRowAttrs()"
+        >
+          <ng-container
+            [ngTemplateOutlet]="leadingHeaders"
+            [ngTemplateOutletContext]="{ $implicit: 1 }"
+          />
+          @if (v.columnSpacers(); as spacers) {
+            <adapt-column-spacer [width]="spacers.start" side="start" as="th" />
+          }
+          @for (column of v.columns(); track column.key) {
+            <ng-container
+              [ngTemplateOutlet]="leafHeader"
+              [ngTemplateOutletContext]="{ $implicit: column, rowSpan: 1 }"
+            />
+          }
+          @if (v.columnSpacers(); as spacers) {
+            <adapt-column-spacer [width]="spacers.end" side="end" as="th" />
+          }
+          <ng-container
+            [ngTemplateOutlet]="trailingHeaders"
+            [ngTemplateOutletContext]="{ $implicit: 1 }"
+          />
+        </tr>
+      }
+    </thead>
+    <tbody data-adapttable-part="tbody">
+      @for (slot of v.body(); track slot.key) {
+        @switch (slot.kind) {
+          @case ("virtualPad") {
+            <tr aria-hidden="true">
+              <td
+                [attr.colspan]="slot.colSpan"
+                [style.height.px]="slot.height"
+                style="padding: 0"
+              ></td>
+            </tr>
+          }
+          @case ("extra") {
+            @let parts = extraParts[slot.extraKind];
+            @let separator = slot.extraKind === "separator";
+            <tr
+              [attr.data-adapttable-part]="parts.row"
+              [adaptAttrs]="{ style: extraRowStyle }"
+            >
+              <td
+                [attr.data-adapttable-part]="parts.cell"
+                [attr.colspan]="slot.colSpan"
+                [attr.role]="separator ? 'separator' : null"
+                [attr.aria-label]="
+                  separator ? v.table.labels().rowSeparator : null
+                "
+                [adaptAttrs]="{ style: extraCellStyle(slot.fillStyle) }"
+                [adaptExtraRowContent]="slot.render"
+              ></td>
+            </tr>
+          }
+          @case ("group") {
+            <ng-container
+              [adaptSlot]="groupHeaderRowSlot"
+              [adaptSlotProps]="v.groupHeaders().rows.get(slot.key)!"
+              [adaptSlotTable]="v.table"
+            />
+          }
+          @case ("row") {
+            @let entry = slot.wiring;
+            @let summary = entry.summary === true;
+            <tr
+              [adaptAttrs]="entry.rowAttrs"
+              [attr.data-dragging]="
+                summary
+                  ? null
+                  : (v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
+                      'data-dragging'
+                    ] ?? null)
+              "
+              [attr.data-drop]="
+                summary
+                  ? null
+                  : (v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
+                      'data-drop'
+                    ] ?? null)
+              "
+              (dragover)="
+                summary
+                  ? undefined
+                  : v
+                      .reorder?.()
+                      .dropProps(entry.index, entry.row, v.table.windowStart())
+                      .onDragOver($event)
+              "
+              (drop)="
+                summary
+                  ? undefined
+                  : v
+                      .reorder?.()
+                      .dropProps(entry.index, entry.row, v.table.windowStart())
+                      .onDrop($event)
+              "
+            >
+              @if (v.rowDetail) {
+                <td data-adapttable-part="expand-cell">
+                  @if (!summary) {
+                    <ng-container
+                      [adaptSlot]="expandToggleSlot"
+                      [adaptSlotProps]="v.expandToggles().get(entry.id)!"
+                      [adaptSlotTable]="v.table"
+                    />
+                  }
+                </td>
+              }
+              @if (v.reorder; as reorder) {
+                <td data-adapttable-part="reorder-cell">
+                  @if (!summary) {
+                    <ng-container
+                      [adaptSlot]="reorderHandleSlot"
+                      [adaptSlotProps]="
+                        reorderHandleProps(reorder(), entry.row, entry.index)
+                      "
+                      [adaptSlotTable]="v.table"
+                    />
+                  }
+                </td>
+              }
+              @if (v.selection; as selection) {
+                <td data-adapttable-part="selection-cell">
+                  @if (!summary) {
+                    <adapt-selection-checkbox
+                      [attrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
+                    />
+                  }
+                </td>
+              }
+              @if (v.columnSpacers(); as spacers) {
+                <adapt-column-spacer [width]="spacers.start" side="start" />
+              }
+              @for (
+                cell of v.bodyCells().get(entry.id);
+                track cell.column.key
+              ) {
+                @let column = cell.column;
+                <td
+                  data-adapttable-part="cell"
+                  [adaptAttrs]="
+                    spanned(
+                      v.markedCellAttrs(
+                        column,
+                        entry.index,
+                        v.columnIndex().get(column.key)!,
+                        summary ? undefined : entry.id
+                      ),
+                      cell
+                    )
+                  "
+                >
+                  <ng-template #cellContent>
+                    @if (!summary && v.editableCells; as editableCells) {
+                      <ng-container
+                        [adaptSlot]="editableCellSlot"
+                        [adaptSlotProps]="
+                          editableCells().get(
+                            rowId(entry.row) + ':' + column.key
+                          )!
+                        "
+                        [adaptSlotTable]="v.table"
+                      />
+                    } @else {
+                      <span
+                        [adaptCell]="column"
+                        [adaptCellRow]="entry.row"
+                        [adaptCellIndex]="entry.index"
+                      ></span>
+                    }
+                  </ng-template>
+                  @if (treeCellProps(entry, column.key, cellContent); as tree) {
+                    <ng-container
+                      [adaptSlot]="treeCellSlot"
+                      [adaptSlotProps]="tree"
+                      [adaptSlotTable]="v.table"
+                    />
+                  } @else {
+                    <ng-container [ngTemplateOutlet]="cellContent" />
+                  }
+                  @if (!summary && v.grid && v.table.hasSlot(fillHandleSlot)) {
+                    <ng-container
+                      [adaptSlot]="fillHandleSlot"
+                      [adaptSlotProps]="{
+                        focus: v.grid,
+                        windowIndex: entry.index,
+                        col: v.columnIndex().get(column.key)!,
+                        firstRowIndex: v.table.windowStart(),
+                      }"
+                      [adaptSlotTable]="v.table"
+                    />
+                  }
+                </td>
+              }
+              @if (v.columnSpacers(); as spacers) {
+                <adapt-column-spacer [width]="spacers.end" side="end" />
+              }
+              @if (v.showActions() && !summary) {
+                <td data-adapttable-part="actions-cell">
+                  @let actionsCell = v.actionsCells().get(rowId(entry.row))!;
+                  @if (actionsCell.rowEdit; as rowEdit) {
+                    <ng-container
+                      [adaptSlot]="rowEditActionsSlot"
+                      [adaptSlotProps]="rowEdit"
+                      [adaptSlotTable]="v.table"
+                    />
+                  }
+                  @if (actionsCell.actions.length > 0) {
+                    <adapt-row-actions
+                      [row]="entry.row"
+                      [actions]="actionsCell.actions"
+                      [confirm]="v.confirm"
+                      [labels]="v.table.labels()"
+                      [layout]="v.rowActionsLayout"
+                      [render]="v.renderRowActions()"
+                      [classNames]="v.classNames()"
+                    />
+                  }
+                </td>
+              }
+            </tr>
+            @if (v.rowDetail; as detail) {
+              @if (!summary && detail().expansion.isExpanded(entry.id)) {
+                <tr
+                  data-adapttable-part="detail-row"
+                  [adaptAttrs]="entry.detailAttrs"
+                >
+                  <td
+                    data-adapttable-part="detail-cell"
+                    [attr.colspan]="v.bodyColSpan()"
+                  >
+                    <adapt-row-detail
+                      [row]="entry.row"
+                      [render]="detail().render"
+                      [nested]="detail().nested"
+                      [parent]="v.detailParent()"
+                    />
+                  </td>
+                </tr>
+              }
+            }
+          }
+        }
+      }
+    </tbody>
+    @if (v.showSummary()) {
+      <tfoot data-adapttable-part="summary">
+        <tr data-adapttable-part="summary-row">
+          @if (v.rowDetail) {
+            <td data-adapttable-part="summary-cell"></td>
+          }
+          @if (v.reorder) {
+            <td data-adapttable-part="summary-cell"></td>
+          }
+          @if (v.selection) {
+            <td data-adapttable-part="summary-cell"></td>
+          }
+          @if (v.columnSpacers(); as spacers) {
+            <adapt-column-spacer [width]="spacers.start" side="start" />
+          }
+          @for (column of v.columns(); track column.key) {
+            <td
+              data-adapttable-part="summary-cell"
+              [adaptFooter]="column"
+              [adaptFooterValue]="v.summary()?.[column.key]"
+            ></td>
+          }
+          @if (v.columnSpacers(); as spacers) {
+            <adapt-column-spacer [width]="spacers.end" side="end" />
+          }
+          @if (v.showActions()) {
+            <td data-adapttable-part="summary-cell"></td>
+          }
+        </tr>
+      </tfoot>
+    }
+  </nz-table>
+</div>

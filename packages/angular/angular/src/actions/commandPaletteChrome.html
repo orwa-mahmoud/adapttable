@@ -1,0 +1,30 @@
+<ng-template #body>
+  <div #surface>
+    <ng-container
+      [adaptControl]="slots().Input"
+      [adaptControlProps]="inputProps()"
+    />
+    <div
+      [id]="listId"
+      role="listbox"
+      [attr.aria-label]="dialogLabel()"
+      data-adapttable-part="command-list"
+    >
+      @for (row of rows(); track row.command.key) {
+        <ng-container [adaptControl]="slots().Item" [adaptControlProps]="row" />
+      }
+    </div>
+    @if (view().matches.length === 0) {
+      <ng-container
+        [adaptControl]="slots().Empty"
+        [adaptControlProps]="emptyProps()"
+      />
+    }
+  </div>
+</ng-template>
+@if (open()) {
+  <ng-container
+    [adaptControl]="slots().Surface"
+    [adaptControlProps]="surfaceProps()"
+  />
+}

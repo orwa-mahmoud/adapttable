@@ -70,6 +70,7 @@ export const fa: Required<TableLabels> = {
   relPreviousMonth: "ماه قبل",
   relLastN: "N روز گذشته",
   relNextN: "N روز آینده",
+  filterAll: "همه",
   boolAny: "هر کدام",
   boolTrue: "درست",
   boolFalse: "نادرست",

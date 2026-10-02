@@ -17,7 +17,7 @@ import {
   type IncrementalViewConfig,
   reconfigureIncrementalView,
 } from "../rows/incremental";
-import { rowPatchLog } from "../rows/patch";
+import { rowPatchLog, rowPatchLogStartsAt } from "../rows/patch";
 import {
   sourceCapabilities,
   type TableSourceCapabilities,
@@ -594,7 +594,9 @@ export function createTableEngine<TRow>(
 
   function replaceData(next: readonly TRow[]): void {
     const log = rowPatchLog(next);
-    if (log && derived.rows === view.data) {
+    // A binding can coalesce several host patches into one update. The last
+    // log describes only its own base, not every change since our snapshot.
+    if (log && rowPatchLogStartsAt(log, derived.rows)) {
       derived = applyRowPatchLogToView(derived, log);
     } else {
       derived = createIncrementalView(next, viewConfig());

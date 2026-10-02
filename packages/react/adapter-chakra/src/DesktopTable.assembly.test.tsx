@@ -7,9 +7,10 @@ import {
   DUPLICATE_ROW_ACTION_KEY,
 } from "@adapttable/react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { cellNavigation } from "./cell-navigation";
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
@@ -87,6 +88,77 @@ const fullChrome = {
 } satisfies Partial<Omit<Parameters<typeof DataTable<Person>>[0], "mode">>;
 
 describe("DesktopTable assembly paint (Chakra)", () => {
+  it("keeps grid semantics and focus inside the transparent wrapper", () => {
+    const { container } = mount({
+      forceMobile: false,
+      features: [cellNavigation()],
+      maxHeight: 180,
+      tableLabel: "People",
+    });
+    const wrapper = container.querySelector<HTMLElement>(
+      '[data-adapttable-part="grid"]'
+    )!;
+    const scrollBox = container.querySelector<HTMLElement>(
+      '[data-adapttable-part="scroll-box"]'
+    )!;
+    const grid = screen.getByRole("grid", { name: "People" });
+
+    expect(wrapper).toHaveStyle({ display: "contents" });
+    expect(wrapper).not.toHaveAttribute("role");
+    expect(wrapper).not.toHaveAttribute("tabindex");
+    expect(wrapper).not.toHaveAttribute("aria-rowcount");
+    expect(wrapper).not.toHaveAttribute("aria-colcount");
+    expect(wrapper.children).toHaveLength(1);
+    expect(scrollBox.parentElement).toBe(wrapper);
+    expect(grid.parentElement).toBe(scrollBox);
+    expect(scrollBox).not.toHaveAttribute("role");
+    expect(scrollBox).not.toHaveAttribute("tabindex");
+    expect(screen.getAllByRole("grid")).toEqual([grid]);
+    expect(grid.tagName).toBe("TABLE");
+    expect(grid).toHaveAttribute("data-adapttable-part", "table");
+    expect(grid).toHaveAttribute("aria-rowcount", String(PEOPLE.length));
+    expect(grid).toHaveAttribute("aria-colcount", String(COLUMNS.length));
+    expect(grid).not.toHaveAttribute("tabindex");
+
+    const first = grid.querySelector<HTMLElement>('[data-grid-cell="0:0"]')!;
+    const right = grid.querySelector<HTMLElement>('[data-grid-cell="0:1"]')!;
+    const below = grid.querySelector<HTMLElement>('[data-grid-cell="1:1"]')!;
+    expect(
+      grid.querySelectorAll('[data-grid-cell][tabindex="0"]')
+    ).toHaveLength(1);
+    act(() => first.focus());
+    expect(first).toHaveFocus();
+    wrapper.focus();
+    expect(first).toHaveFocus();
+    fireEvent.keyDown(first, { key: "ArrowRight" });
+    expect(right).toHaveFocus();
+    expect(first).toHaveAttribute("tabindex", "-1");
+    expect(right).toHaveAttribute("tabindex", "0");
+    fireEvent.keyDown(right, { key: "ArrowDown" });
+    expect(below).toHaveFocus();
+    expect(right).toHaveAttribute("tabindex", "-1");
+    expect(below).toHaveAttribute("tabindex", "0");
+  });
+
+  it("omits the grid hook and role without cell navigation", () => {
+    const { container } = mount({ forceMobile: false, maxHeight: 180 });
+    const table = screen.getByRole("table");
+    const scrollBox = container.querySelector<HTMLElement>(
+      '[data-adapttable-part="scroll-box"]'
+    )!;
+    const wrapper = scrollBox.parentElement!;
+
+    expect(container.querySelector('[data-adapttable-part="grid"]')).toBeNull();
+    expect(screen.queryByRole("grid")).toBeNull();
+    expect(wrapper).toHaveStyle({ display: "contents" });
+    expect(wrapper).not.toHaveAttribute("role");
+    expect(wrapper).not.toHaveAttribute("tabindex");
+    expect(table.parentElement).toBe(scrollBox);
+    expect(table).toHaveAttribute("data-adapttable-part", "table");
+    expect(table).not.toHaveAttribute("tabindex");
+    expect(table.querySelector("[data-grid-cell]")).toBeNull();
+  });
+
   it("forwards size tokens onto the table root", () => {
     const sm = mount({ size: "sm" });
     expect(

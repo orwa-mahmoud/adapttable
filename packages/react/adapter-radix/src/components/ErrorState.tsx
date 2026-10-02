@@ -13,7 +13,7 @@ export function ErrorState({
   onRetry?: () => void;
 }>) {
   return (
-    <Callout.Root color="red" role="alert">
+    <Callout.Root data-adapttable-part="error" color="red" role="alert">
       <Callout.Text>
         <Text weight="bold">{labels.errorTitle}</Text> — {error.message}
       </Callout.Text>

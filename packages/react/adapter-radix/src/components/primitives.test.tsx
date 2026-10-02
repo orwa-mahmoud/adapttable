@@ -169,3 +169,29 @@ describe("FormField primitive (Radix)", () => {
     expect(screen.getByLabelText("My Label")).toBeInTheDocument();
   });
 });
+
+describe("FormField part forwarding (Radix)", () => {
+  it("places the part and class on the same labelled root", () => {
+    const { container } = renderNode(
+      <FormField
+        label="Filter label"
+        className="custom-filter-field"
+        data-adapttable-part="filter-field"
+      >
+        <input aria-label="Filter value" data-adapttable-part="filter-input" />
+      </FormField>
+    );
+    const field = container.querySelector(
+      '[data-adapttable-part="filter-field"]'
+    );
+    expect(field).toHaveClass("custom-filter-field");
+    expect(screen.getByText("Filter label").parentElement).toBe(field);
+    const input = screen.getByLabelText("Filter value");
+    expect(field).toContainElement(input);
+    expect(input).toHaveAttribute("data-adapttable-part", "filter-input");
+    expect(input).not.toHaveClass("custom-filter-field");
+    expect(
+      container.querySelectorAll('[data-adapttable-part="filter-field"]')
+    ).toHaveLength(1);
+  });
+});

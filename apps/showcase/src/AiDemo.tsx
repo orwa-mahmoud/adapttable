@@ -65,7 +65,7 @@ import { setAssistantActive } from "./assistantActivity";
 import type { Locale } from "./data";
 import { DemoFallback, Segmented } from "./kitDemos";
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
-import { docsUrl, SHOWCASE_ADAPTERS, siteAsset } from "./matrix/content";
+import { builtAdapters, docsUrl, siteAsset } from "./matrix/content";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 
 interface StaffRow {
@@ -1163,7 +1163,7 @@ export function AiDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
             className="ai-demo__kits"
             aria-label="Same demo in another adapter"
           >
-            {SHOWCASE_ADAPTERS.filter((kit) => kit.built).map((kit) => (
+            {builtAdapters().map((kit) => (
               <a
                 key={kit.key}
                 href={`../../${kit.key}/ai/#ai-demo`}

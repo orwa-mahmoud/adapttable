@@ -179,6 +179,17 @@ export interface RowPatchLog<TRow> {
 }
 
 const PATCH_LOGS = new WeakMap<WeakKey, RowPatchLog<unknown>>();
+const ROW_IDENTITIES = new WeakMap<WeakKey, object>();
+const PATCH_BASES = new WeakMap<WeakKey, object>();
+
+/** Check the exact pre-patch identity without retaining older row arrays. */
+export function rowPatchLogStartsAt<TRow>(
+  log: RowPatchLog<TRow>,
+  rows: readonly TRow[]
+): boolean {
+  const base = PATCH_BASES.get(log);
+  return base !== undefined && ROW_IDENTITIES.get(rows) === base;
+}
 
 /**
  * The log {@link applyRowPatches} attached to a result array, when the
@@ -202,9 +213,15 @@ export function rowPatchLog<TRow>(
   return PATCH_LOGS.get(rows) as RowPatchLog<TRow> | undefined;
 }
 
-function rememberLog<TRow>(log: RowPatchLog<TRow>): void {
+function rememberLog<TRow>(
+  log: RowPatchLog<TRow>,
+  base: readonly TRow[]
+): void {
   if (log.events.length === 0) return;
   PATCH_LOGS.set(log.rows, log);
+  const identity = ROW_IDENTITIES.get(base) ?? {};
+  ROW_IDENTITIES.set(base, identity);
+  PATCH_BASES.set(log, identity);
 }
 
 /** Apply one patch to a working copy. Returns the event when something changed. */
@@ -304,6 +321,6 @@ export function applyRowPatchesWithLog<TRow>(
     rows: events.length > 0 ? working : rows,
     events,
   };
-  rememberLog(log);
+  rememberLog(log, rows);
   return log;
 }

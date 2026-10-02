@@ -67,7 +67,7 @@ describe("previous addresses", () => {
   it("inverts cleanly for every page route", () => {
     const routes = [
       "/",
-      ...PAGES.map(docsRoute),
+      ...PAGES.map((page) => docsRoute(page)),
       DEMO_ROOT,
       `${DEMO_ROOT}mantine/pivot/`,
       `/v1${docsRoute("filtering")}`,

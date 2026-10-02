@@ -232,6 +232,7 @@ export function AntdDemo({
   undoRedoButtons,
   sidePanel,
   forceMobile,
+  maxHeight,
   focused,
 }: Readonly<{
   mode: DataMode;
@@ -302,6 +303,7 @@ export function AntdDemo({
   undoRedoButtons?: boolean;
   sidePanel?: NonNullable<FeatureProps<Person>["sidePanel"]>;
   forceMobile?: boolean;
+  maxHeight?: number;
   /** Dedicated pages hide unrelated filter/action/view chrome. */
   focused?: boolean;
 }>) {
@@ -424,6 +426,7 @@ export function AntdDemo({
             onDensityChange={onDensityChange}
             {...columns}
             forceMobile={forceMobile}
+            maxHeight={maxHeight}
             density={density}
             filtersMode={filtersUi}
             labels={getLabels(locale)}

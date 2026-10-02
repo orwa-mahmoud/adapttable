@@ -308,6 +308,7 @@ export function useTableDataWithEngine<TRow>(
     }),
     columns: resolvedColumns,
     filterFn: combinedFilterFn,
+    filterKey: plan.filterKey,
     locale,
     paginationMode,
     forceMobile,

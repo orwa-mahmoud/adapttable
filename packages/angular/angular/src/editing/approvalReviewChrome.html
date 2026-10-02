@@ -1,0 +1,135 @@
+<div
+  data-adapttable-part="approval-review"
+  [class]="className()"
+  [attr.aria-labelledby]="headingId"
+  style="display: flex; flex-direction: column; gap: 0.5em"
+>
+  <p
+    data-adapttable-part="approval-review-summary"
+    [id]="headingId"
+    style="margin: 0"
+  >
+    {{ review().summary }}
+  </p>
+  @if (review().tally; as tally) {
+    <p data-adapttable-part="approval-review-tally" style="margin: 0">
+      {{ tally }}
+    </p>
+  }
+  @if (review().operation; as operation) {
+    <div
+      data-adapttable-part="approval-review-operation"
+      style="display: flex; flex-direction: column; gap: 0.25em"
+    >
+      <span data-adapttable-part="approval-review-operation-name">
+        {{ operation.title ?? operation.capability }}
+      </span>
+      <dl
+        data-adapttable-part="approval-review-operation-arguments"
+        style="
+          display: grid;
+          grid-template-columns: auto 1fr;
+          gap: 0.15em 0.6em;
+          margin: 0;
+        "
+      >
+        @for (pair of pairs(); track $index) {
+          <dt style="opacity: 0.7">{{ pair.name }}</dt>
+          <dd style="margin: 0; font-weight: 550">{{ pair.value }}</dd>
+        }
+      </dl>
+    </div>
+  }
+  <ng-template #rowsTemplate>
+    @for (row of rows(); track row.item.id) {
+      <li
+        data-adapttable-part="agent-approval-row"
+        [attr.data-decision]="row.item.decision"
+        [attr.aria-label]="row.text"
+        [style.opacity]="row.item.decision === 'pending' ? 1 : 0.55"
+        [style.text-decoration]="
+          row.item.decision === 'rejected' ? 'line-through' : 'none'
+        "
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.4em 0.5em;
+          padding-block: 0.35em;
+          list-style: none;
+        "
+      >
+        <span
+          data-adapttable-part="approval-review-change"
+          style="flex: 1 1 12em; min-width: 0; overflow-wrap: anywhere"
+        >
+          {{ row.text }}
+        </span>
+        @if (perItem()) {
+          <span
+            data-adapttable-part="approval-review-row-actions"
+            style="
+              display: flex;
+              gap: 0.35em;
+              flex: 0 0 auto;
+              margin-inline-start: auto;
+            "
+          >
+            <ng-container
+              [adaptControl]="slots().Reject"
+              [adaptControlProps]="row.reject"
+            />
+            <ng-container
+              [adaptControl]="slots().Approve"
+              [adaptControlProps]="row.approve"
+            />
+          </span>
+        }
+      </li>
+    }
+  </ng-template>
+  @if (rows().length > 0) {
+    <div
+      data-adapttable-part="approval-review-scroll"
+      style="overflow-y: auto; max-height: 16em; min-height: 0"
+    >
+      <ng-container
+        [adaptControl]="slots().List"
+        [adaptControlProps]="listProps()"
+      />
+    </div>
+  }
+  @if (expandProps(); as props) {
+    <ng-container [adaptControl]="slots().Action" [adaptControlProps]="props" />
+  }
+  @if (backProps(); as props) {
+    <ng-container [adaptControl]="slots().Action" [adaptControlProps]="props" />
+  }
+  <div
+    data-adapttable-part="approval-review-actions"
+    style="
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      justify-content: flex-end;
+      align-items: center;
+      padding-block-start: 0.2em;
+    "
+  >
+    @if (alwaysAllowProps(); as props) {
+      <ng-container
+        [adaptControl]="slots().Action"
+        [adaptControlProps]="props"
+      />
+    }
+    <ng-container
+      [adaptControl]="slots().Reject"
+      [adaptControlProps]="rejectProps()"
+    />
+    <ng-container
+      [adaptControl]="slots().Approve"
+      [adaptControlProps]="approveProps()"
+    />
+  </div>
+</div>

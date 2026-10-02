@@ -1,9 +1,9 @@
 import type { ColumnDef, ColumnLayoutState } from "@adapttable/angular";
+import { columnMenu } from "@adapttable/angular-unstyled/column-menu";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptDataTable } from "./dataTable";
-import { columnMenu } from "./features";
 
 interface City {
   id: string;
@@ -95,7 +95,7 @@ async function mount() {
     parts("header-cell").map((cell) => cell.dataset.columnKey);
   const settle = () => fixture.whenStable();
   const open = async () => {
-    part<HTMLButtonElement>("column-menu-button")?.click();
+    part<HTMLButtonElement>("column-menu-button")!.click();
     await settle();
   };
   const item = (index: number) => parts("column-menu-item")[index];
@@ -144,7 +144,7 @@ describe("the unstyled Angular Columns menu", () => {
   it("hides and shows a column, and keeps a locked one", async () => {
     const { fixture, part, headers, open, item, settle } = await mount();
     await open();
-    part<HTMLButtonElement>("column-menu-visibility", item(1))?.click();
+    part<HTMLButtonElement>("column-menu-visibility", item(1))!.click();
     await settle();
     expect(headers()).toEqual(["name", "population"]);
     expect(
@@ -156,7 +156,7 @@ describe("the unstyled Angular Columns menu", () => {
     expect(fixture.componentInstance.layouts.at(-1)?.hidden).toEqual([
       "country",
     ]);
-    part<HTMLButtonElement>("column-menu-bulk-button")?.click();
+    part<HTMLButtonElement>("column-menu-bulk-button")!.click();
     await settle();
     expect(headers()).toEqual(["name", "country", "population"]);
   });
@@ -164,14 +164,14 @@ describe("the unstyled Angular Columns menu", () => {
   it("pins a column so it sticks to its edge", async () => {
     const { part, parts, open, item, settle } = await mount();
     await open();
-    part<HTMLButtonElement>("column-menu-pin", item(1))?.click();
+    part<HTMLButtonElement>("column-menu-pin", item(1))!.click();
     await settle();
     const country = parts("header-cell").find(
       (cell) => cell.dataset.columnKey === "country"
     );
     expect(country?.dataset.pinned).toBe("start");
     expect(country?.style.position).toBe("sticky");
-    parts<HTMLButtonElement>("column-menu-bulk-button")[2]?.click();
+    parts<HTMLButtonElement>("column-menu-bulk-button")[2]!.click();
     await settle();
     expect(
       parts("header-cell").find((cell) => cell.dataset.columnKey === "country")
@@ -182,12 +182,12 @@ describe("the unstyled Angular Columns menu", () => {
   it("moves a column with the grip's arrow keys, and resets the layout", async () => {
     const { part, headers, open, item, settle } = await mount();
     await open();
-    part("column-menu-grip", item(0))?.dispatchEvent(
+    part("column-menu-grip", item(0))!.dispatchEvent(
       new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
     );
     await settle();
     expect(headers()).toEqual(["country", "name", "population"]);
-    part<HTMLButtonElement>("column-menu-reset")?.click();
+    part<HTMLButtonElement>("column-menu-reset")!.click();
     await settle();
     expect(headers()).toEqual(["name", "country", "population"]);
   });
@@ -208,7 +208,7 @@ describe("the unstyled Angular Columns menu", () => {
     const fire = (element: Element | undefined, type: string) => {
       const event = new Event(type, { bubbles: true, cancelable: true });
       Object.defineProperty(event, "dataTransfer", { value: transfer });
-      element?.dispatchEvent(event);
+      element!.dispatchEvent(event);
     };
     fire(item(0), "dragstart");
     await settle();
@@ -226,7 +226,7 @@ describe("the unstyled Angular Columns menu", () => {
     const { part, parts, open, settle } = await mount();
     await open();
     const search = part<HTMLInputElement>("column-menu-search");
-    if (!search) return;
+    if (!search) throw new Error("search is not rendered");
     search.value = "coun";
     search.dispatchEvent(new Event("input"));
     await settle();
@@ -238,12 +238,12 @@ describe("the unstyled Angular Columns menu", () => {
   it("sorts from a column's submenu", async () => {
     const { part, parts, open, item, settle, element } = await mount();
     await open();
-    part<HTMLButtonElement>("column-menu-more", item(0))?.click();
+    part<HTMLButtonElement>("column-menu-more", item(0))!.click();
     await settle();
     const actions = parts<HTMLButtonElement>("column-menu-action", item(0));
     actions
-      .find((action) => action.textContent?.trim() === "Sort descending")
-      ?.click();
+      .find((action) => action.textContent?.trim() === "Sort descending")!
+      .click();
     await settle();
     expect(
       [...element.querySelectorAll('[data-adapttable-part="row"]')].map(
@@ -256,11 +256,13 @@ describe("the unstyled Angular Columns menu", () => {
   it("sizes one column to its content from its submenu", async () => {
     const { part, parts, open, item, settle } = await mount();
     await open();
-    part<HTMLButtonElement>("column-menu-more", item(0))?.click();
+    part<HTMLButtonElement>("column-menu-more", item(0))!.click();
     await settle();
     parts<HTMLButtonElement>("column-menu-action", item(0))
-      .find((action) => action.textContent?.trim() === "Size column to content")
-      ?.click();
+      .find(
+        (action) => action.textContent?.trim() === "Size column to content"
+      )!
+      .click();
     await settle();
     expect(part("column-menu-submenu", item(0))).toBeNull();
   });
@@ -268,16 +270,16 @@ describe("the unstyled Angular Columns menu", () => {
   it("renames a column, checks the name and announces it", async () => {
     const { fixture, part, parts, headers, open, item, settle } = await mount();
     await open();
-    part<HTMLButtonElement>("column-menu-more", item(1))?.click();
+    part<HTMLButtonElement>("column-menu-more", item(1))!.click();
     await settle();
     parts<HTMLButtonElement>("column-menu-action", item(1))
-      .find((action) => action.textContent?.trim() === "Rename column")
-      ?.click();
+      .find((action) => action.textContent?.trim() === "Rename column")!
+      .click();
     await settle();
     const input = part<HTMLInputElement>("column-rename-input", item(1));
     expect(input?.value).toBe("Country");
     expect(document.activeElement).toBe(input);
-    if (!input) return;
+    if (!input) throw new Error("input is not rendered");
     input.value = "  ";
     input.dispatchEvent(new Event("input"));
     input.dispatchEvent(new Event("blur"));
@@ -288,14 +290,14 @@ describe("the unstyled Angular Columns menu", () => {
     expect(input.getAttribute("aria-invalid")).toBe("true");
     input.value = "Nation";
     input.dispatchEvent(new Event("input"));
-    part<HTMLButtonElement>("column-rename-save", item(1))?.click();
+    part<HTMLButtonElement>("column-rename-save", item(1))!.click();
     await settle();
     expect(fixture.componentInstance.renames).toEqual([["country", "Nation"]]);
     expect(part("column-rename-announcer", item(1))?.textContent).toContain(
       "Nation"
     );
     expect(headers()).toEqual(["name", "country", "population"]);
-    expect(parts("header-cell")[1]?.textContent?.trim()).toBe("Nation");
+    expect(parts("header-cell")[1]?.textContent).toContain("Nation");
   });
 
   it("cancels a rename with Escape or its button", async () => {
@@ -303,20 +305,20 @@ describe("the unstyled Angular Columns menu", () => {
     await open();
     const beginRename = async () => {
       parts<HTMLButtonElement>("column-menu-action", item(0))
-        .find((action) => action.textContent?.trim() === "Rename column")
-        ?.click();
+        .find((action) => action.textContent?.trim() === "Rename column")!
+        .click();
       await settle();
     };
-    part<HTMLButtonElement>("column-menu-more", item(0))?.click();
+    part<HTMLButtonElement>("column-menu-more", item(0))!.click();
     await settle();
     await beginRename();
-    part("column-rename-input", item(0))?.dispatchEvent(
+    part("column-rename-input", item(0))!.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
     );
     await settle();
     expect(part("column-rename-form", item(0))).toBeNull();
     await beginRename();
-    part<HTMLButtonElement>("column-rename-cancel", item(0))?.click();
+    part<HTMLButtonElement>("column-rename-cancel", item(0))!.click();
     await settle();
     expect(part("column-rename-form", item(0))).toBeNull();
   });
@@ -324,11 +326,11 @@ describe("the unstyled Angular Columns menu", () => {
   it("hides every column it can, and sizes columns to their content", async () => {
     const { part, parts, headers, open, settle } = await mount();
     await open();
-    parts<HTMLButtonElement>("column-menu-bulk-button")[1]?.click();
+    parts<HTMLButtonElement>("column-menu-bulk-button")[1]!.click();
     await settle();
     // The locked column stays.
     expect(headers()).toEqual(["population"]);
-    part<HTMLButtonElement>("column-menu-auto-size")?.click();
+    part<HTMLButtonElement>("column-menu-auto-size")!.click();
     await settle();
     expect(part("table")).not.toBeNull();
   });

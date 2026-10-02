@@ -16,9 +16,9 @@ import {
   FRAMEWORKS,
   frameworksIn,
   KITS,
-  publishedKits,
+  participatingKits,
 } from "./kits.mjs";
-import { packageRel, REPO_ROOT as ROOT } from "./packages.mjs";
+import { packageDir, packageRel, REPO_ROOT as ROOT } from "./packages.mjs";
 
 const MARKERS = [
   "createAgentSession",
@@ -40,19 +40,50 @@ const MARKERS = [
  * the engine, the binding of every framework a published kit is built on, the
  * server, and every published kit in `scripts/kits.mjs`.
  */
+/** The JavaScript branch of an exports entry, without guessing the build format. */
+export function moduleEntry(entry) {
+  if (typeof entry === "string") return entry;
+  if (!entry || typeof entry !== "object") return undefined;
+  for (const condition of ["import", "default"]) {
+    const found = moduleEntry(entry[condition]);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+function manifestOf(name) {
+  return JSON.parse(
+    readFileSync(join(packageDir(name), "package.json"), "utf8")
+  );
+}
+
+// Angular's implemented kits must prove isolation before the campaign promotes
+// them to native/shell. Placeholder manifests have no root entry yet.
+const angularKits = KITS.filter(
+  (kit) =>
+    kit.framework === "angular" &&
+    moduleEntry(manifestOf(kit.name).exports?.["."])
+);
+const guardedKits = [
+  ...new Map(
+    [...participatingKits(KITS), ...angularKits].map((kit) => [kit.name, kit])
+  ).values(),
+];
 const GRAPH_PACKAGES = [
   CORE,
-  ...frameworksIn(publishedKits(KITS)).map(
+  ...frameworksIn(guardedKits).map(
     (framework) => FRAMEWORKS[framework].binding
   ),
   "server",
-  ...publishedKits(KITS).map((kit) => kit.name),
+  ...guardedKits.map((kit) => kit.name),
 ];
 
-/** Each root graph, as a path relative to the repository root. */
-const GRAPHS = GRAPH_PACKAGES.map(
-  (name) => `${packageRel(name)}/dist/index.js`
-);
+/** Each root graph, following the package's declared JavaScript entry. */
+const GRAPHS = GRAPH_PACKAGES.map((name) => {
+  const entry = moduleEntry(manifestOf(name).exports?.["."]);
+  if (!entry) throw new Error(`No JavaScript root export declared by ${name}`);
+  return `${packageRel(name)}/${entry.replace(/^\.\//u, "")}`;
+});
 
 /**
  * Every marker one graph's text carries.

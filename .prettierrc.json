@@ -7,7 +7,10 @@
   "arrowParens": "always",
   "overrides": [
     {
-      "files": "packages/angular/**/*.html",
+      "files": [
+        "packages/angular/**/*.html",
+        "apps/showcase/src/angular/**/*.html"
+      ],
       "options": {
         "parser": "angular"
       }

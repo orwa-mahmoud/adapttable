@@ -219,6 +219,7 @@ export function RadixDemo({
   wide,
   defaultColumnLayout,
   forceMobile,
+  maxHeight,
   focused,
 }: Readonly<{
   mode: DataMode;
@@ -285,6 +286,7 @@ export function RadixDemo({
   /** The column layout the page starts from. */
   defaultColumnLayout?: Partial<ColumnLayoutState>;
   forceMobile?: boolean;
+  maxHeight?: number;
   /** Dedicated pages hide unrelated filter/action/view chrome. */
   focused?: boolean;
 }>) {
@@ -410,6 +412,7 @@ export function RadixDemo({
             onDensityChange={onDensityChange}
             {...columns}
             forceMobile={forceMobile}
+            maxHeight={maxHeight}
             density={density}
             filtersMode={filtersUi}
             labels={getLabels(locale)}

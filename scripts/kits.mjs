@@ -70,7 +70,8 @@ export const FRAMEWORKS = Object.freeze({
  *     own components.
  *   - `derived` renders the kit named in `base`, restyled, and inherits its
  *     part names and its header.
- *   - `private` is unpublished and outside every kit contract.
+ *   - `private` is unfinished, unpublished and outside every kit contract.
+ *     Other roles participate even when their package stays unpublished.
  * @property {string} [base] The kit a `derived` kit renders.
  */
 
@@ -98,16 +99,15 @@ export const KITS = Object.freeze([
     base: "adapter-unstyled",
   },
   { name: "adapter-bootstrap", framework: "react", role: "private" },
-  // The Angular unstyled kit is private while it reaches parity with the
-  // React kits; it passes the conformance suite from its first release. The
-  // pull request that brings it to parity publishes it as `native`.
-  { name: "adapter-angular-unstyled", framework: "angular", role: "private" },
-  // The Angular kits are private placeholders until each is built: Angular
-  // Material (#467), PrimeNG (#468) and NG-ZORRO (#471). The pull request that
-  // builds one publishes its package and gives it the `shell` role here.
+  // Contract participation is independent of publication: a finished kit can
+  // remain private until the owner chooses its first release.
+  { name: "adapter-angular-unstyled", framework: "angular", role: "native" },
+  // The remaining Angular kits are private placeholders until each is built:
+  // Angular Material (#467) and PrimeNG (#468). The pull request that
+  // builds one gives it the `shell` role here; publishing is a separate step.
   { name: "adapter-material", framework: "angular", role: "private" },
   { name: "adapter-primeng", framework: "angular", role: "private" },
-  { name: "adapter-ng-zorro", framework: "angular", role: "private" },
+  { name: "adapter-ng-zorro", framework: "angular", role: "shell" },
 ]);
 
 /** The folder-name prefix every kit package carries. */
@@ -180,6 +180,31 @@ export const coreDir = (root = REPO_ROOT) =>
 export const packageNameAt = (dir) =>
   JSON.parse(readFileSync(join(dir, "package.json"), "utf8")).name;
 
+/**
+ * The directories a kit's sources live in: `src`, and each secondary entry
+ * point beside it (an Angular kit's `editing/`, `grouping/`, …).
+ *
+ * @param {Kit} kit
+ * @param {string} [root] repository root to read, for fixtures
+ * @returns {string[]}
+ */
+export function kitSourceDirs(kit, root = REPO_ROOT) {
+  const dir = kitDir(kit, root);
+  const entries = readdirSync(dir)
+    .filter((entry) => {
+      const path = join(dir, entry);
+      return (
+        statSync(path).isDirectory() &&
+        existsSync(join(path, "ng-package.json"))
+      );
+    })
+    .sort()
+    .map((entry) => join(dir, entry));
+  // A placeholder kit with no sources yet renders nothing.
+  const src = join(dir, "src");
+  return existsSync(src) ? [src, ...entries] : entries;
+}
+
 /** The kits the structural parts contract binds: every shell, every native. */
 export const contractKits = (kits = KITS) =>
   kits.filter((kit) => kit.role === "shell" || kit.role === "native");
@@ -192,8 +217,8 @@ export const shellKits = (kits = KITS) =>
 export const nativeKits = (kits = KITS) =>
   kits.filter((kit) => kit.role === "native");
 
-/** Every published kit — every kit outside the `private` role. */
-export const publishedKits = (kits = KITS) =>
+/** Every kit bound by feature contracts, including unpublished finished kits. */
+export const participatingKits = (kits = KITS) =>
   kits.filter((kit) => kit.role !== "private");
 
 /** The frameworks at least one of `kits` is built on, in first-seen order. */
@@ -269,12 +294,8 @@ function kitEntryErrors(kit, root, names) {
   const isPrivate =
     JSON.parse(readFileSync(join(dir, "package.json"), "utf8")).private ===
     true;
-  if (isPrivate !== (kit.role === "private")) {
-    errors.push(
-      isPrivate
-        ? `${kit.name}: package.json is private but the kit's role is "${kit.role}"`
-        : `${kit.name}: role "private" but package.json is published`
-    );
+  if (kit.role === "private" && !isPrivate) {
+    errors.push(`${kit.name}: role "private" but package.json is published`);
   }
   if (kit.role === "derived") {
     const base = names.get(kit.base);
@@ -291,7 +312,7 @@ function kitEntryErrors(kit, root, names) {
  * The registry held to the packages on disk.
  *
  * Every entry names a package that exists under its framework's group, carries
- * a known role, and agrees with its manifest about being private; every
+ * a known role, and remains unpublished while its role is private; every
  * framework a kit uses has its binding package; and every `adapter-*` package
  * under a framework group is registered — a kit left off the list would be a
  * kit no guard reads.

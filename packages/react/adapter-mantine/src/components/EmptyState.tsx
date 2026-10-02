@@ -32,6 +32,7 @@ export function EmptyState({
 }: Readonly<EmptyStateProps>) {
   return (
     <Stack
+      data-adapttable-part="empty"
       role="status"
       align="center"
       justify="center"

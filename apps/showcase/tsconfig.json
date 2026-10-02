@@ -22,5 +22,8 @@
       "@adapttable/core/pdf": ["../../packages/shared/core/src/pdf.ts"]
     }
   },
-  "include": ["src", "vite.config.ts", "matrix.mjs", "pages.mjs"]
+  "include": ["src", "vite.config.ts", "matrix.mjs", "pages.mjs"],
+  // Angular's pages are their own project, with Angular's decorator settings:
+  // `src/angular/tsconfig.json`.
+  "exclude": ["src/angular"]
 }

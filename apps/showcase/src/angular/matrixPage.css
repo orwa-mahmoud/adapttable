@@ -1,0 +1,473 @@
+/*
+ * The Angular unstyled kit's look on these pages.
+ *
+ * `@adapttable/angular-unstyled` renders native elements and names each one
+ * with `data-adapttable-part`; an app styles the table by selecting those
+ * names, and this is that stylesheet for the showcase. It reads the page's
+ * tokens, so the table follows the page into dark mode, and the kit's accent
+ * through `--kit`.
+ */
+
+/*
+ * The showcase chrome is laid out border-box; the React pages get that from
+ * Tailwind's base layer, which an Angular page does not load.
+ */
+adapt-showcase-matrix-page {
+  display: block;
+}
+
+adapt-showcase-matrix-page *,
+adapt-showcase-matrix-page *::before,
+adapt-showcase-matrix-page *::after {
+  box-sizing: border-box;
+}
+
+.mx-ng {
+  --ng-line: var(--page-border);
+  --ng-soft: var(--page-border-soft);
+  --ng-surface: var(--page-surface);
+  --ng-raised: var(--page-surface-2);
+  --ng-accent: var(--kit);
+  --ng-wash: var(--kit-wash);
+  color: var(--ink);
+  font-size: var(--fs-small);
+}
+
+.mx-ng--unstyled [data-adapttable-part="root"] {
+  border: 1px solid var(--ng-line);
+  border-radius: var(--r-md);
+  background: var(--ng-surface);
+  overflow: hidden;
+}
+
+/* Controls — every native button, input and select the kit draws. */
+.mx-ng--unstyled button,
+.mx-ng--unstyled input,
+.mx-ng--unstyled select {
+  font: inherit;
+  color: inherit;
+}
+
+.mx-ng--unstyled :is(input:not([type="checkbox"], [type="radio"]), select) {
+  height: 32px;
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--ng-line);
+  border-radius: var(--r-sm);
+  background: var(--ng-surface);
+}
+
+.mx-ng--unstyled :is(input, select, button):focus-visible {
+  outline: 2px solid var(--ng-accent);
+  outline-offset: 1px;
+}
+
+.mx-ng--unstyled button {
+  cursor: pointer;
+  border: 1px solid var(--ng-line);
+  border-radius: var(--r-sm);
+  background: var(--ng-surface);
+  padding: 0 var(--sp-3);
+  min-height: 32px;
+}
+
+.mx-ng--unstyled button:hover:not(:disabled) {
+  background: var(--ng-raised);
+}
+
+.mx-ng--unstyled button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.mx-ng--unstyled
+  :is(
+    [data-adapttable-part="filters-done"],
+    [data-adapttable-part="views-save"],
+    [data-adapttable-part="page-number"][aria-current="page"]
+  ) {
+  background: var(--ng-accent);
+  border-color: var(--ng-accent);
+  color: white;
+}
+
+/* Toolbar, chips, footer. */
+.mx-ng--unstyled [data-adapttable-part="toolbar"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--ng-line);
+}
+
+.mx-ng--unstyled [data-adapttable-part="search-field"] {
+  flex: 1 1 200px;
+  display: flex;
+}
+
+.mx-ng--unstyled [data-adapttable-part="search"] {
+  width: 100%;
+}
+
+.mx-ng--unstyled [data-adapttable-part="filters-count"] {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin-inline-start: var(--sp-1);
+  border-radius: 999px;
+  background: var(--ng-accent);
+  color: white;
+  font-size: var(--fs-micro);
+}
+
+.mx-ng--unstyled [data-adapttable-part="chips"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.mx-ng--unstyled [data-adapttable-part="chip"] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 2px var(--sp-1) 2px var(--sp-2);
+  border-radius: 999px;
+  background: var(--ng-wash);
+  color: var(--kit-ink);
+}
+
+.mx-ng--unstyled [data-adapttable-part="chip-remove"] {
+  min-height: 0;
+  padding: 0 var(--sp-1);
+  border: 0;
+  background: transparent;
+}
+
+.mx-ng--unstyled [data-adapttable-part="footer"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border-top: 1px solid var(--ng-line);
+  color: var(--ink-2);
+}
+
+.mx-ng--unstyled [data-adapttable-part="pager"] {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-inline-start: auto;
+}
+
+.mx-ng--unstyled [data-adapttable-part="pager"] button {
+  min-width: 32px;
+  padding: 0 var(--sp-2);
+}
+
+/* The table. */
+.mx-ng--unstyled [data-adapttable-part="scroll-box"] {
+  overflow: auto;
+}
+
+.mx-ng--unstyled [data-adapttable-part="table"] {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mx-ng--unstyled :is([data-adapttable-part="header-cell"], th) {
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--ng-raised);
+  border-bottom: 1px solid var(--ng-line);
+  color: var(--ink-2);
+  font-weight: 600;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.mx-ng--unstyled [data-adapttable-part="sort-button"] {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-weight: 600;
+}
+
+.mx-ng--unstyled [data-adapttable-part="filter-header-trigger"] {
+  min-height: 0;
+  margin-inline-start: var(--sp-1);
+  padding: 0 var(--sp-1);
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+}
+
+.mx-ng--unstyled [data-adapttable-part="cell"] {
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--ng-soft);
+}
+
+.mx-ng--unstyled [data-adapttable-part="row"]:hover {
+  background: var(--ng-raised);
+}
+
+.mx-ng--unstyled [data-adapttable-part="row"][data-selected] {
+  background: var(--ng-wash);
+}
+
+.mx-ng--unstyled [data-adapttable-part="row"][data-dragging] {
+  opacity: 0.55;
+}
+
+.mx-ng--unstyled [data-adapttable-part="row"][data-drop="before"] {
+  box-shadow: inset 0 2px 0 var(--ng-accent);
+}
+
+.mx-ng--unstyled [data-adapttable-part="row"][data-drop="after"] {
+  box-shadow: inset 0 -2px 0 var(--ng-accent);
+}
+
+.mx-ng--unstyled [data-adapttable-part="row-reorder-handle"] {
+  cursor: grab;
+  color: var(--ink-3);
+}
+
+.mx-ng--unstyled [data-adapttable-part="group-row"] {
+  background: var(--ng-raised);
+  font-weight: 600;
+}
+
+.mx-ng--unstyled [data-adapttable-part="group-toggle"] {
+  min-height: 0;
+  padding: 0 var(--sp-1);
+  border: 0;
+  background: transparent;
+}
+
+.mx-ng--unstyled [data-adapttable-part="group-count"],
+.mx-ng--unstyled [data-adapttable-part="group-aggregate"] {
+  margin-inline-start: var(--sp-2);
+  color: var(--ink-2);
+  font-weight: 400;
+}
+
+.mx-ng--unstyled [data-adapttable-part="empty"] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-6) var(--sp-4);
+  color: var(--ink-2);
+}
+
+/* Overlays: the filters popover and drawer, and the menus. */
+.mx-ng--unstyled
+  :is(
+    [data-adapttable-part="filters-popover"],
+    [data-adapttable-part="filters-panel"],
+    [data-adapttable-part="column-menu-panel"],
+    [data-adapttable-part="views-panel"]
+  ) {
+  border: 1px solid var(--ng-line);
+  border-radius: var(--r-md);
+  background: var(--ng-surface);
+  box-shadow: var(--shadow-lift);
+  color: var(--ink);
+}
+
+.mx-ng--unstyled [data-adapttable-part="filters-backdrop"] {
+  background: oklch(0 0 0 / 0.35);
+}
+
+.mx-ng--unstyled
+  :is(
+    [data-adapttable-part="filters-header"],
+    [data-adapttable-part="filters-footer"]
+  ) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+.mx-ng--unstyled [data-adapttable-part="filters-body"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+.mx-ng--unstyled [data-adapttable-part="filter-field"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.mx-ng--unstyled [data-adapttable-part="filter-label"] {
+  padding: 0;
+  color: var(--ink-2);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mx-ng--unstyled [data-adapttable-part="filter-checkbox-group"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.mx-ng--unstyled [data-adapttable-part="column-menu-item"],
+.mx-ng--unstyled [data-adapttable-part="views-row"] {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1);
+}
+
+.mx-ng--unstyled [data-adapttable-part="column-menu-label"] {
+  flex: 1;
+}
+
+/* Selection and bulk actions. */
+.mx-ng--unstyled [data-adapttable-part="bulk-bar"],
+.mx-ng--unstyled [data-adapttable-part="batch-edit-bar"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--ng-wash);
+  border-bottom: 1px solid var(--ng-line);
+}
+
+.mx-ng--unstyled input[type="checkbox"] {
+  accent-color: var(--ng-accent);
+}
+
+/* Editing. */
+.mx-ng--unstyled [data-adapttable-part="edit-cell-editor"] {
+  width: 100%;
+}
+
+.mx-ng--unstyled [data-adapttable-part="edit-cell-error"] {
+  color: oklch(0.55 0.2 25);
+  font-size: var(--fs-micro);
+}
+
+/* Grouping panel. */
+.mx-ng--unstyled [data-adapttable-part="grouping-panel"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--ng-line);
+}
+
+.mx-ng--unstyled [data-adapttable-part="grouping-chip"] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 2px var(--sp-2);
+  border: 1px solid var(--kit-line);
+  border-radius: 999px;
+  background: var(--ng-wash);
+}
+
+/* Mobile cards. */
+.mx-ng--unstyled [data-adapttable-part="cards"] {
+  display: grid;
+  gap: var(--sp-3);
+  margin: 0;
+  padding: var(--sp-3);
+}
+
+.mx-ng--unstyled [data-adapttable-part="card"] {
+  min-width: 0;
+  list-style: none;
+  padding: var(--sp-3);
+  border: 1px solid var(--ng-line);
+  border-radius: var(--r-md);
+  background: var(--ng-surface);
+}
+
+.mx-ng--unstyled [data-adapttable-part="card-row"] {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-1) 0;
+}
+
+.mx-ng--unstyled [data-adapttable-part="card-label"] {
+  color: var(--ink-2);
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+}
+
+.mx-ng--unstyled [data-adapttable-part="card-value"] {
+  min-width: 0;
+  font-weight: 500;
+  text-align: end;
+}
+
+/* The phone-width frame the mobile-cards page renders into. */
+.mx-ng .mx-phone {
+  max-width: 390px;
+  margin-inline: auto;
+}
+
+/* The line under a table where the page says what the host received. */
+.mx-ng [data-demo-log] {
+  margin-top: var(--sp-3);
+  color: var(--ink-2);
+}
+
+/* The pivot uses the native kit's fieldsets and keeps each zone on a phone. */
+.mx-ng--unstyled [data-adapttable-part="pivot-panel"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+}
+
+.mx-ng--unstyled [data-adapttable-part="pivot-zone"] {
+  min-inline-size: 0;
+  border: 1px solid var(--ng-line);
+  border-radius: var(--r-md);
+}
+
+.mx-ng--unstyled [data-adapttable-part="pivot-field"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-block: var(--sp-2);
+}
+
+.mx-ng--unstyled [data-grid-cell]:focus-visible {
+  outline: 2px solid var(--ng-accent);
+  outline-offset: -2px;
+}
+
+.mx-ng--unstyled [data-cell-selected] {
+  background: var(--ng-wash);
+  box-shadow: inset 0 0 0 1px var(--ng-accent);
+}
+
+@media (forced-colors: active) {
+  .mx-ng--unstyled [data-grid-cell]:focus-visible {
+    outline-color: Highlight;
+  }
+
+  .mx-ng--unstyled [data-cell-selected] {
+    border: 1px solid Highlight;
+  }
+}

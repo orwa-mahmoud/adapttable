@@ -7,6 +7,7 @@
 import {
   autoSizeColumns,
   columnFlexShares,
+  type ColumnGroupRecord,
   computePagination,
   deriveSortByOptions,
   devWarn,
@@ -21,13 +22,12 @@ import {
   PIN_Z,
   pinnedCellStyle,
   resolveLabels,
-  resolveTableStatus,
   SEARCH_DEBOUNCE_MS,
   type SortByOption,
   type SortDirection,
+  tableErrorState,
   type TableLabels,
   type TableSource,
-  type TableStatusSignature,
   visibleColumns,
 } from "@adapttable/core";
 import {
@@ -37,6 +37,7 @@ import {
   type ChromeBodyRegion,
   chromeBodyRegion,
   chromeEmptyVariant,
+  chromeIsRefreshing,
   chromeShowFooter,
   clearChromeFilters,
   type CssProperties,
@@ -44,10 +45,11 @@ import {
   fetchNextBodyPage,
   headerCellAttributes,
   headerRowAttributes,
+  type HtmlGroupedHeaderCell,
+  htmlGroupedHeaderPlan,
   rowAttributes,
   searchInputAttributes,
   sortButtonAttributes,
-  sortedColumnName,
   sourceWindowStart,
   tableAttributes,
 } from "@adapttable/core/binding";
@@ -60,25 +62,33 @@ import {
   type Signal,
   signal,
   type TemplateRef,
-  untracked,
 } from "@angular/core";
 
+import { trackTableStatus } from "./a11y/tableStatusAnnouncer";
 import type { Attrs } from "./attrs";
 import type { AdaptCellTemplate } from "./cell";
-import { type CellContext, type ColumnDef, resolveColumns } from "./columnDef";
+import {
+  type CellContext,
+  type ColumnDef,
+  type ColumnInput,
+  flattenColumns,
+  resolveColumns,
+} from "./columnDef";
 import {
   type ColumnLayout,
   columnLayoutFor,
   type ColumnLayoutOptions,
-} from "./columnLayout";
+} from "./columns/columnLayout";
 import {
   type AdaptTableFeature,
   featureHostFor,
   featureOptionsOf,
   featureSlotFillsOf,
-} from "./features";
+  tableFeaturesOf,
+} from "./featureHost";
+import { createFeatureState, type FeatureState } from "./featureState";
 import { createSearchInput } from "./searchInput";
-import type { RowSelection } from "./selection";
+import type { RowSelection } from "./selection/selection";
 import type { SlotFills } from "./slots";
 import { type MaybeSignal, type MaybeSignalOptional, readMaybe } from "./store";
 
@@ -90,8 +100,8 @@ import { type MaybeSignal, type MaybeSignalOptional, readMaybe } from "./store";
 export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
   /** The rows and view state, from `injectFrontendData` or your own tier. */
   readonly source: Signal<TableSource<TRow>>;
-  /** Column definitions. */
-  readonly columns: MaybeSignal<readonly ColumnDef<TRow>[]>;
+  /** Column definitions, and header groups over them. */
+  readonly columns: MaybeSignal<readonly ColumnInput<TRow>[]>;
   /** A row's stable id. */
   readonly rowKey: (row: TRow) => string;
   /** The table's accessible name. Defaults to the `table` label. */
@@ -132,7 +142,7 @@ export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
    */
   readonly activeFilterCount?: Signal<number>;
   /** Features this table composes, beside the provided ones. */
-  readonly features?: readonly AdaptTableFeature[];
+  readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
 }
@@ -153,11 +163,22 @@ export interface DataTable<TRow> {
   readonly columns: Signal<readonly ColumnDef<TRow>[]>;
   /** Every declared column, hidden ones included, defaults filled. */
   readonly allColumns: Signal<readonly ColumnDef<TRow>[]>;
+  /** The header groups over the columns, by id. */
+  readonly columnGroups: Signal<ReadonlyMap<string, ColumnGroupRecord<TRow>>>;
+  /**
+   * The header rows while any column sits in a group — group cells spanning
+   * their columns, then the columns — or `null` for one plain header row.
+   */
+  readonly headerPlan: Signal<HtmlGroupedHeaderCell[][] | null>;
   /**
    * The user's column layout: hidden, ordered, pinned, resized and renamed
    * columns, and every change a column menu makes.
    */
   readonly layout: Signal<ColumnLayout<TRow>>;
+  /**
+   * Whether a header can rename its column: the host passed `onColumnRename`.
+   */
+  readonly canRenameColumns: boolean;
   /** Whether the mobile layout's columns show. */
   readonly isMobile: Signal<boolean>;
   /** Labels: English defaults with the overrides merged. */
@@ -205,11 +226,29 @@ export interface DataTable<TRow> {
    * region that is present from the first paint.
    */
   readonly statusAnnouncement: Signal<string>;
+  /**
+   * The failure to show in place of the rows, or absent when the load
+   * succeeded. Retry is offered only when the source can ask again.
+   */
+  readonly errorState: Signal<
+    | {
+        readonly error: Error;
+        readonly retry?: () => void;
+        readonly retrying: boolean;
+      }
+    | undefined
+  >;
+  /**
+   * A background refresh: fetching, while the rows already on screen stay.
+   */
+  readonly isRefreshing: Signal<boolean>;
   /** The features composed on this table. */
   readonly featureHost: FeatureHostState;
+  /** Typed values mounted features share with this table's slot components. */
+  readonly featureState: FeatureState;
   /**
    * The configuration the features merge (`enableColumnMenu`,
-   * `densityChooser` and the rest), read once, when the table starts.
+   * `densityChooser` and the rest), from the current composition.
    */
   readonly featureOptions: Readonly<Record<string, unknown>>;
   /** Which components the features draw into each slot. */
@@ -294,9 +333,19 @@ export function injectDataTable<TRow>(
     () => options.columnWidths && readMaybe(options.columnWidths)
   );
 
+  const features = computed(() =>
+    tableFeaturesOf(injector, readMaybe(options.features))
+  );
+  const featureOptions = computed(() => featureOptionsOf(features()));
+  const featureHost = featureHostFor(injector, options.features);
+  const tree = computed(() => flattenColumns(readMaybe(options.columns)));
+  const columnGroups = computed(() => tree().groups);
+  const collapsibleGroups = computed(
+    () => featureOptions().collapsibleColumnGroups === true
+  );
   const allColumns = computed(() => {
     const templates = options.cellTemplates?.() ?? [];
-    const declared = readMaybe(options.columns).map((column) => {
+    const declared = tree().leaves.map((column) => {
       if (column.cell) return column;
       const template = templates.find(
         (candidate) => candidate.key() === column.key
@@ -331,7 +380,12 @@ export function injectDataTable<TRow>(
     { injector }
   );
 
-  const layout = columnLayoutFor(allColumns, options, injector);
+  const layout = columnLayoutFor(allColumns, options, injector, {
+    columnGroups,
+    get collapsible() {
+      return collapsibleGroups();
+    },
+  });
   const columns = computed(() =>
     visibleColumns(
       layout().visibleColumns as ColumnDef<TRow>[],
@@ -346,7 +400,9 @@ export function injectDataTable<TRow>(
   const flexShares = computed(() =>
     columnFlexShares({
       columns: columns(),
-      fitColumns: readMaybe(options.fitColumns ?? false),
+      fitColumns:
+        readMaybe(options.fitColumns ?? false) ||
+        featureOptions().fitColumns === true,
       widths: widths(),
     })
   );
@@ -405,7 +461,7 @@ export function injectDataTable<TRow>(
     injector
   );
 
-  const slotFills = featureSlotFillsOf(options.features ?? []);
+  const slotFills = computed(() => featureSlotFillsOf(features()));
 
   const toggleSort = (key: string): void => {
     const current = source();
@@ -419,7 +475,19 @@ export function injectDataTable<TRow>(
     isEmpty,
     columns,
     allColumns,
+    columnGroups,
+    headerPlan: computed(() =>
+      htmlGroupedHeaderPlan(
+        columns(),
+        layout().state.collapsedGroups ?? [],
+        collapsibleGroups(),
+        columnGroups()
+      )
+    ),
     layout,
+    get canRenameColumns() {
+      return options.onColumnRename !== undefined;
+    },
     isMobile,
     labels,
     dir,
@@ -458,10 +526,19 @@ export function injectDataTable<TRow>(
     canLoadMore,
     windowStart,
     statusAnnouncement,
-    featureHost: featureHostFor(injector, options.features),
-    featureOptions: featureOptionsOf(options.features ?? []),
-    slotFills,
-    hasSlot: (slot) => slotFills.has(slot.id),
+    errorState: computed(() => tableErrorState(source())),
+    isRefreshing: computed(() => chromeIsRefreshing(source())),
+    get featureHost() {
+      return featureHost();
+    },
+    featureState: createFeatureState(),
+    get featureOptions() {
+      return featureOptions();
+    },
+    get slotFills() {
+      return slotFills();
+    },
+    hasSlot: (slot) => slotFills().has(slot.id),
     toggleSort,
     setSearch: searchInput.commit,
     setSearchValue: searchInput.setValue,
@@ -518,7 +595,8 @@ export function injectDataTable<TRow>(
       sortButtonAttributes(column, {
         sortLevels: source().sortLevels,
         sortByLabel: labels().sortBy,
-        multiSort: options.multiSort,
+        multiSort:
+          options.multiSort === true || featureOptions().multiSort === true,
         toggleSort,
         toggleSortLevel: (key) => {
           source().toggleSortLevel(key);
@@ -570,67 +648,6 @@ export function injectDataTable<TRow>(
         searchInput.setValue
       ),
   };
-}
-
-/**
- * What the table announces after its rows settle. Only a move in the sort,
- * the count or the visible range can change the sentence, so a view-state
- * change that moves none of them leaves the region alone.
- */
-function trackTableStatus<TRow>(
-  source: Signal<TableSource<TRow>>,
-  labels: Signal<Required<TableLabels>>,
-  columns: Signal<readonly ColumnDef<TRow>[]>,
-  injector: Injector
-): Signal<string> {
-  const inputs = computed(
-    () => {
-      const current = source();
-      return {
-        total: current.total,
-        shown: current.rows.length,
-        page: current.page,
-        limit: current.limit,
-        paged: current.paginationMode === "paged",
-        sortBy: current.sortBy,
-        sortDir: current.sortDir,
-      };
-    },
-    {
-      equal: (a, b) =>
-        a.total === b.total &&
-        a.shown === b.shown &&
-        a.page === b.page &&
-        a.limit === b.limit &&
-        a.paged === b.paged &&
-        a.sortBy === b.sortBy &&
-        a.sortDir === b.sortDir,
-    }
-  );
-  const announcement = signal("");
-  let previous: TableStatusSignature | undefined;
-  effect(
-    () => {
-      const current = inputs();
-      untracked(() => {
-        const next = resolveTableStatus(
-          {
-            ...current,
-            labels: labels(),
-            sortColumnName: sortedColumnName(columns(), current.sortBy),
-          },
-          previous
-        );
-        previous = next.signature;
-        // Written every time, the empty result included: silence has to
-        // clear the region, or a message repeated after a quiet settle never
-        // changes the text and is never spoken.
-        announcement.set(next.announcement);
-      });
-    },
-    { injector }
-  );
-  return announcement.asReadonly();
 }
 
 /**

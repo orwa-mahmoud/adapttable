@@ -15,7 +15,7 @@ import {
   personStatus,
   startDate,
   utilization,
-} from "./data";
+} from "./people";
 
 /** One page of a server response. */
 export interface PeoplePage {

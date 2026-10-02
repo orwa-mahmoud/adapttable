@@ -59,6 +59,12 @@ export const SHOWCASE_FRAMEWORKS = [
     binding: "@adapttable/react",
     entry: "/src/entry-matrix.tsx",
   },
+  {
+    key: "angular",
+    label: "Angular",
+    binding: "@adapttable/angular",
+    entry: "/src/angular/entry-matrix.ts",
+  },
 ];
 
 /** The framework every feature's `snippet` is written for. */
@@ -86,17 +92,26 @@ const SNIPPET_FRAMEWORK = "react";
  * @property {boolean} built Whether this adapter has its own landing and
  *   feature pages yet. Until it does, the nav sends readers to the live demo
  *   pinned to that kit, which is a page that exists and shows that kit.
+ * @property {readonly string[]} [features] The slugs of the matrix features
+ *   this kit has a page for, where that is not every one of them — a kit whose
+ *   framework is still gaining features lists the ones it renders today.
+ * @property {boolean} [indexable] `false` keeps the kit's pages out of the
+ *   sitemap and out of search indexes while its package is unpublished.
  * @property {{ title: string, description: string }} [landing] The landing
  *   page's `<title>` and meta description, where the shared pair would not be
  *   true of this kit. The unstyled family is the case it exists for: shadcn and
  *   Tailwind render semantic markup wearing classes, so "rendered with its own
  *   components" is a claim about them that is simply false. Every other kit
- *   uses `LANDING`, and the page body needs no override anywhere — `tagline`
- *   and `surface` already carry what differs.
+ *   uses `LANDING`; `tagline` and `surface` carry what differs in the body.
+ * @property {string[]} [landingIntro] The landing page's paragraphs, where the
+ *   shared ones would not read true of this kit: "a table that belongs in a
+ *   {kit} app" names an app built on a kit, and an unstyled kit is no such
+ *   thing.
  */
 
 /**
- * The eight adapters, in the order the switcher and the nav show them.
+ * Every adapter: React's eight in the order the switcher and the nav show
+ * them, then the Angular kits.
  *
  * `label`, `blurb` and the two accents are the switcher's tokens — the same
  * values `src/themeTokens.ts` re-exports, kept here so the nav, the landing
@@ -241,6 +256,110 @@ export const SHOWCASE_ADAPTERS = [
     },
     built: true,
   },
+  {
+    key: "unstyled",
+    framework: "angular",
+    label: "Unstyled",
+    blurb: "Native elements — your own CSS",
+    accentLight: "oklch(0.55 0.2 18)",
+    accentDark: "oklch(0.7 0.16 18)",
+    pkg: "@adapttable/angular-unstyled",
+    peer: "@angular/core",
+    install:
+      "pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core",
+    provider: "",
+    tagline:
+      "Native elements and no opinions — every style is yours, addressed by part name.",
+    surface:
+      "native HTML elements, each carrying a `data-adapttable-part` name your CSS selects",
+    landing: {
+      title: "Unstyled Angular data table examples — AdaptTable",
+      description:
+        "Explore an unstyled Angular data table: native elements you style yourself, with filtering, editing, grouping, virtualization and export. MIT licensed.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. Add features through explicit imports. The visible controls are {surface}.",
+      "That is the whole trade: one model to learn, and a table that looks like the rest of your app because your own stylesheet draws it.",
+    ],
+    built: true,
+    indexable: false,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+      "tree",
+      "nested-tables",
+      "rows",
+      "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
+      "ai",
+    ],
+  },
+  {
+    key: "ng-zorro",
+    framework: "angular",
+    label: "NG-ZORRO",
+    blurb: "Ant Design components for Angular",
+    accentLight: "oklch(0.55 0.21 255)",
+    accentDark: "oklch(0.73 0.14 255)",
+    pkg: "@adapttable/ng-zorro",
+    peer: "@angular/core",
+    install:
+      "pnpm add @adapttable/ng-zorro @adapttable/angular @adapttable/core ng-zorro-antd @angular/forms @angular/router",
+    provider: "",
+    tagline:
+      "Ant Design tables, forms and overlays, with the same optional features and host-owned data.",
+    surface:
+      "real NG-ZORRO controls, each carrying the same `data-adapttable-part` hooks",
+    landing: {
+      title: "NG-ZORRO Angular data table examples — AdaptTable",
+      description:
+        "Explore an NG-ZORRO Angular data table with Ant Design controls for filtering, editing, grouping, pivot, virtualization, export and AI. MIT licensed.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. Add features through explicit imports. The visible controls are {surface}.",
+      "Load NG-ZORRO’s stylesheet in your application. The table and every optional feature use its components, including the assistant and approval dialogs.",
+    ],
+    built: true,
+    indexable: false,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+      "tree",
+      "nested-tables",
+      "rows",
+      "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
+      "ai",
+    ],
+  },
 ];
 
 /**
@@ -270,7 +389,22 @@ export const SHOWCASE_ADAPTERS = [
  *   kit's package, which is the one claim the unstyled family cannot make: it
  *   renders semantic markup and takes classes. Those get an intro of their own
  *   here rather than a sentence bent far enough to cover both.
+ * @property {Record<string, FeatureHead>} [heads] The label, heading, title,
+ *   description or card this feature needs in THIS kit, keyed by adapter, where
+ *   the shared one claims something the kit does not do yet.
  * @property {string[]} docs Documentation slugs this feature is written up in.
+ */
+
+/**
+ * A kit's own wording for a feature's page, field by field; a field left out
+ * is the shared one.
+ *
+ * @typedef {object} FeatureHead
+ * @property {string} [label]
+ * @property {string} [h1]
+ * @property {string} [title]
+ * @property {string} [description]
+ * @property {string} [card]
  */
 
 /**
@@ -320,6 +454,42 @@ const FEATURE_DEMAND_ORDER = [
 const MATRIX_FEATURES_DEFINED = [
   {
     slug: "saved-views",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { filters } from "{pkg}/filters";
+import { savedViews } from "{pkg}/saved-views";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      urlKey="people"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [
+    filters([]),
+    savedViews({ storageKey: "people-views", urlKey: "people" }),
+  ];
+}`,
+    },
     label: "Saved views",
     h1: "Saved views in {kit}",
     title: "{kit} table saved views — AdaptTable",
@@ -379,7 +549,27 @@ export function People({ rows, columns }) {
       tailwind:
         "Every row is native markup carrying the map's classes — a gray-bordered button per name, an indigo ring on the rename input, and the save action in bg-indigo-600.",
     },
+    heads: {
+      unstyled: {
+        description:
+          "Save and restore {kit} {framework} table filters, sorting and column layouts as named views from the views menu.",
+        card: "Name an arrangement and restore it from the menu.",
+      },
+      "ng-zorro": {
+        description:
+          "Save and restore {kit} {framework} table filters, sorting and column layouts as named views from the views menu.",
+        card: "Name an arrangement and restore it from the menu.",
+      },
+    },
     intros: {
+      unstyled: [
+        "A view is the table's state — search, sort, filters and the column layout — saved under a name.",
+        "Save one from the views menu and pick it again later to put the table back the way it was. The list lives in this browser's storage, or in any store you hand `savedViews`.",
+      ],
+      "ng-zorro": [
+        "A view is the table's state — search, sort, filters and the column layout — saved under a name.",
+        "Save one from the views menu and pick it again later to put the table back the way it was. The list lives in this browser's storage, or in any store you hand `savedViews`.",
+      ],
       shadcn: [
         "A view is everything the table can put in a URL — search, sort, filters, grouping, the column layout, density and the pivot — saved under a name.",
         "Readers pick one from the views menu; the panel beside the table renames, reorders, sets the default and deletes. A view someone else shared arrives read-only and says so on the row.",
@@ -395,6 +585,47 @@ export function People({ rows, columns }) {
   },
   {
     slug: "pivot",
+    snippets: {
+      angular: `import { Component, computed, input } from "@angular/core";
+import { AdaptDataTable } from "{pkg}";
+import {
+  AdaptPivotPanel, injectPivotUrlState, pivot, pivotTableModel,
+  type PivotField,
+} from "{pkg}/pivot";
+
+@Component({
+  selector: "app-spend",
+  imports: [AdaptDataTable, AdaptPivotPanel],
+  template: \`
+    <adapt-pivot-panel
+      [fields]="fields" [config]="state.config()"
+      [onChange]="state.onConfigChange"
+    />
+    <adapt-data-table
+      [data]="model().rows" [columns]="model().columns"
+      [rowKey]="model().rowKey" [summaryRow]="model().summaryRow"
+    />
+  \`,
+})
+export class Spend {
+  readonly rows = input.required<readonly Person[]>();
+  readonly fields: readonly PivotField[] = [
+    { key: "team", label: "Team" }, { key: "status", label: "Status" },
+    { key: "budget", label: "Budget" },
+  ];
+  readonly state = injectPivotUrlState({
+    urlKey: "p",
+    defaultConfig: {
+      rows: ["team"], columns: ["status"],
+      measures: [{ key: "budget", agg: "sum" }],
+    },
+  });
+  readonly model = computed(() => pivotTableModel(
+    pivot(this.rows(), this.state.config(), { collapsed: this.state.collapsed() }),
+    { fields: this.fields },
+  ));
+}`,
+    },
     label: "Pivot",
     h1: "Pivot tables in {kit}",
     title: "{kit} pivot table — AdaptTable",
@@ -457,6 +688,37 @@ export function Spend({ rows, fields }) {
   },
   {
     slug: "formulas",
+    snippets: {
+      angular: `import { Component, computed, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { buildFormulaColumns, injectFormulaUrlState } from "@adapttable/angular/formula";
+import { AdaptDataTable } from "{pkg}";
+
+@Component({
+  selector: "app-computed-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()" [columns]="columns()" [rowKey]="rowKey"
+    />
+  \`,
+})
+export class ComputedPeople {
+  readonly rows = input.required<readonly Person[]>();
+  readonly baseColumns = input.required<readonly ColumnDef<Person>[]>();
+  readonly rowKey = (row: Person) => row.id;
+  readonly state = injectFormulaUrlState({
+    urlKey: "fx",
+    defaultFormulas: [
+      { key: "margin", header: "Margin", formula: "=ROUND(budget * 0.15, 0)" },
+    ],
+  });
+  readonly columns = computed(() => [
+    ...this.baseColumns(),
+    ...buildFormulaColumns<Person>(this.state.formulas()).columns,
+  ]);
+}`,
+    },
     label: "Formulas",
     h1: "Spreadsheet formulas in {kit}",
     title: "{kit} table formulas — AdaptTable",
@@ -513,6 +775,76 @@ export function People({ rows, columns }) {
   },
   {
     slug: "editing",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { cellNavigation } from "{pkg}/cell-navigation";
+import { editing } from "{pkg}/editing";
+
+const columns: ColumnDef<Person>[] = [
+  {
+    key: "name",
+    editable: true,
+    editor: "text",
+    validate: (value) => (String(value).trim() ? undefined : "Required"),
+  },
+  { key: "budget", editable: true, editor: "number" },
+  {
+    key: "status",
+    editable: true,
+    editor: { type: "select", options: ["Active", "Planned", "Blocked"] },
+  },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly save =
+    input.required<(row: Person, key: string, value: unknown) => void>();
+  readonly features = [
+    editing<Person>((row, key, value) => this.save()(row, key, value)),
+    cellNavigation(),
+  ];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Try inline editing in a {kit} {framework} table with text, number, date and select editors. Your application validates and saves each change.",
+        card: "Native editors in the cell; every write goes through your handler.",
+      },
+      "ng-zorro": {
+        description:
+          "Try inline editing in a {kit} {framework} table with text, number, date and select editors. Your application validates and saves each change.",
+        card: "Native editors in the cell; every write goes through your handler.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Mark a column `editable`, compose `editing(onCellEdit)`, and double-click opens a native editor in the cell — text, number, date or select. Enter commits, Escape cancels.",
+        "The table never mutates your rows. It hands your handler the row, the column key and the new value, and a column's `validate` refuses a value before it reaches you: clear a name and try to commit it.",
+        "With `cellNavigation()` composed, the arrow keys move a visible focus from cell to cell.",
+      ],
+      "ng-zorro": [
+        "Mark a column `editable`, compose `editing(onCellEdit)`, and double-click opens an NG-ZORRO editor in the cell — text, number, date or select. Enter commits, Escape cancels.",
+        "The table never mutates your rows. It hands your handler the row, the column key and the new value, and a column's `validate` refuses a value before it reaches you: clear a name and try to commit it.",
+        "With `cellNavigation()` composed, the arrow keys move a visible focus from cell to cell.",
+      ],
+    },
     label: "Editing",
     h1: "Inline cell editing in {kit}",
     title: "{kit} editable data table — AdaptTable",
@@ -585,6 +917,66 @@ export function People({ rows, onSave }) {
       "Sorting and filtering apply within the tree rather than flattening it. Moving a child under a new parent is a host callback on the row-reordering page — the table never rewrites your tree.",
     ],
     card: "Nesting, chevrons, URL expansion, and host-owned tree moves.",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { tree } from "{pkg}/tree";
+
+interface Employee {
+  id: string;
+  name: string;
+  team: string;
+  managerId?: string;
+}
+
+const columns: ColumnDef<Employee>[] = [{ key: "name" }, { key: "team" }];
+
+@Component({
+  selector: "app-org",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="people()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class Org {
+  readonly people = input.required<readonly Employee[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Employee) => row.id;
+  readonly features = [
+    tree<Employee>({ getParentId: (row) => row.managerId, treeColumn: "name" }),
+  ];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Explore a {kit} {framework} tree table with parent-child rows, expandable branches, lazy children and phone cards. Includes integration code.",
+        card: "Nesting, chevrons, lazy children, and a tree on phones.",
+      },
+      "ng-zorro": {
+        description:
+          "Explore a {kit} {framework} tree table with parent-child rows, expandable branches, lazy children and phone cards. Includes integration code.",
+        card: "Nesting, chevrons, lazy children, and a tree on phones.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Compose `tree()` with `getChildren` or `getParentId` and it renders the hierarchy.",
+        "Children indent under their parent and a native chevron in the tree column opens and closes each branch. Give `hasChildren` and `onLoadChildren` and a branch fetches its children as it opens, showing that it is loading; a failed fetch closes it again, so the next click retries.",
+        "On a phone each card leads with the same chevron and indents by depth. Sorting reorders each branch in place, and a search shows the rows it matches.",
+      ],
+      "ng-zorro": [
+        "A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Compose `tree()` with `getChildren` or `getParentId` and it renders the hierarchy.",
+        "Children indent under their parent and an NG-ZORRO button in the tree column opens and closes each branch. Give `hasChildren` and `onLoadChildren` and a branch fetches its children as it opens, showing that it is loading; a failed fetch closes it again, so the next click retries.",
+        "On a phone each card leads with the same chevron and indents by depth. Sorting reorders each branch in place, and a search shows the rows it matches.",
+      ],
+    },
     snippet: `import { DataTable } from "{pkg}";
 import { tree } from "{pkg}/tree";
 
@@ -621,6 +1013,56 @@ export function Org({ people, columns }) {
   },
   {
     slug: "mobile-cards",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", mobileLabel: "" },
+  { key: "team", mobileLabel: "Team" },
+  { key: "email", hideOnMobile: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "A {kit} {framework} data table that becomes cards on phones — automatic below the mobile breakpoint, with the same columns and state and infinite scroll in place of the pager.",
+      },
+      "ng-zorro": {
+        description:
+          "A {kit} {framework} data table that becomes cards on phones — automatic below the mobile breakpoint, with the same columns and state and infinite scroll in place of the pager.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Below the mobile breakpoint every row becomes a card — same columns, same row content, same query state. This page forces the card layout inside a phone-width frame.",
+        "Per column, `mobileLabel` and `hideOnMobile` tune what a card shows, and on a phone the pager gives way to infinite scroll: the next rows load as the list reaches its end. There is no second layout to build.",
+      ],
+      "ng-zorro": [
+        "Below the mobile breakpoint every row becomes a card — same columns, same row content, same query state. This page forces the card layout inside a phone-width frame.",
+        "Per column, `mobileLabel` and `hideOnMobile` tune what a card shows, and on a phone the pager gives way to infinite scroll: the next rows load as the list reaches its end. There is no second layout to build.",
+      ],
+    },
     label: "Mobile cards",
     h1: "Mobile cards in {kit}",
     title: "{kit} responsive table and mobile cards — AdaptTable",
@@ -668,6 +1110,61 @@ export function People({ rows, columns }) {
   },
   {
     slug: "scale",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { virtualize } from "{pkg}/virtualize";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      paginationMode="infinite"
+      [maxHeight]="480"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [virtualize()];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Scroll a large {kit} {framework} table with row virtualization inside a scroll box. Sorting and filtering keep working on every row.",
+        card: "40,000 rows in a scroll box, only the visible ones rendered.",
+      },
+      "ng-zorro": {
+        description:
+          "Scroll a large {kit} {framework} table with row virtualization inside a scroll box. Sorting and filtering keep working on every row.",
+        card: "40,000 rows in a scroll box, only the visible ones rendered.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Compose `virtualize()` and the table renders the rows in view plus a small overscan, whatever the dataset's size — forty thousand rows on this page, a few dozen of them in the page at once.",
+        "The scroll box scrolls rather than the page, and sorting and filtering keep working on the whole dataset rather than on what is drawn. `virtualize({ virtualizeColumns: true })` does the same across, for column sets wider than the box.",
+      ],
+      "ng-zorro": [
+        "Compose `virtualize()` and the table renders the rows in view plus a small overscan, whatever the dataset's size — forty thousand rows on this page, a few dozen of them in the page at once.",
+        "The scroll box scrolls rather than the page, and sorting and filtering keep working on the whole dataset rather than on what is drawn. `virtualize({ virtualizeColumns: true })` does the same across, for column sets wider than the box.",
+      ],
+    },
     label: "Scale",
     h1: "Row and column virtualization in {kit}",
     title: "{kit} virtualized {framework} table — AdaptTable",
@@ -714,6 +1211,34 @@ export function Ledger({ rows, columns }) {
   },
   {
     slug: "columns",
+    snippets: {
+      angular: `import { Component, input, signal } from "@angular/core";
+import type { ColumnDef, ColumnLayoutState } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { columnMenu } from "{pkg}/column-menu";
+import { resizableColumns } from "{pkg}/resizable-columns";
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()" [columns]="columns()" [rowKey]="rowKey"
+      [features]="features" [columnLayout]="layout()"
+      (columnLayoutChange)="layout.set($event)"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = input.required<readonly ColumnDef<Person>[]>();
+  readonly rowKey = (row: Person) => row.id;
+  readonly layout = signal<ColumnLayoutState>({
+    hidden: [], order: [], widths: {}, pinned: { name: "start" },
+  });
+  readonly features = [columnMenu(), resizableColumns()];
+}`,
+    },
     label: "Columns",
     h1: "Column management in {kit}",
     title: "{kit} table column pinning and resizing — AdaptTable",
@@ -761,6 +1286,53 @@ export function People({ rows, columns, layout, onLayout }) {
   },
   {
     slug: "filtering",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { filters } from "{pkg}/filters";
+import { headerFilters } from "{pkg}/header-filters";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", filter: "text" },
+  { key: "team", filter: { type: "multiSelect", options: "auto" } },
+  { key: "budget", filter: "numberRange" },
+  { key: "hiredAt", filter: "dateRange" },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      urlKey="f"
+      filtersMode="popover"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [filters([]), headerFilters()];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Try {kit} {framework} table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL.",
+        card: "Ranges, selects, an AND/OR tree and chips — all in the URL.",
+      },
+      "ng-zorro": {
+        description:
+          "Try {kit} {framework} table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL.",
+        card: "Ranges, selects, an AND/OR tree and chips — all in the URL.",
+      },
+    },
     label: "Filtering",
     h1: "Filtering in {kit}",
     title: "{kit} table filtering — AdaptTable",
@@ -814,6 +1386,16 @@ export function People({ rows }) {
         "The backdrop, panel, popover and every filter input carry the map's classes with an indigo focus ring, and a checked option fills its label in indigo; the checklist and the AND/OR builder are not in the map, so they read as browser defaults.",
     },
     intros: {
+      unstyled: [
+        "Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each a native element.",
+        "Filters opens as an anchored popover or as a drawer, with an AND/OR tree at the top for what one row of inputs cannot say. Header funnels filter one column in place, and every active filter shows as a chip that removes itself.",
+        "Filter state lives in the versioned URL, so a filtered view is a link someone can send.",
+      ],
+      "ng-zorro": [
+        "Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each an NG-ZORRO control.",
+        "Filters opens as an anchored popover or as a drawer, with an AND/OR tree at the top for what one row of inputs cannot say. Header funnels filter one column in place, and every active filter shows as a chip that removes itself.",
+        "Filter state lives in the versioned URL, so a filtered view is a link someone can send.",
+      ],
       shadcn: [
         "Declare what a column filters by and the table builds the control: text and number operators, date ranges with relative presets, and a checklist of the values actually present.",
         "For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself.",
@@ -829,6 +1411,65 @@ export function People({ rows }) {
   },
   {
     slug: "export",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { exportCsv } from "{pkg}/export";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [exportCsv()];
+}`,
+    },
+    heads: {
+      unstyled: {
+        label: "CSV export",
+        h1: "CSV export in {kit}",
+        title: "{kit} {framework} table export to CSV — AdaptTable",
+        description:
+          "Export a {kit} {framework} data table to CSV from one toolbar button — the rows as they are sorted and filtered on screen.",
+        card: "One toolbar button, a CSV of the table as it stands.",
+      },
+      "ng-zorro": {
+        label: "CSV export",
+        h1: "CSV export in {kit}",
+        title: "{kit} {framework} table export to CSV — AdaptTable",
+        description:
+          "Export a {kit} {framework} data table to CSV from one toolbar button — the rows as they are sorted and filtered on screen.",
+        card: "One toolbar button, a CSV of the table as it stands.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Compose `exportCsv()` and an export button joins the toolbar. It writes the page on screen as it stands — sorted, filtered and searched — to a CSV file the browser downloads.",
+        "A column's `exportValue` decides what the file gets, so a cell that shows a formatted date range exports the plain start date a spreadsheet sorts.",
+      ],
+      "ng-zorro": [
+        "Compose `exportCsv()` and an export button joins the toolbar. It writes the page on screen as it stands — sorted, filtered and searched — to a CSV file the browser downloads.",
+        "A column's `exportValue` decides what the file gets, so a cell that shows a formatted date range exports the plain start date a spreadsheet sorts.",
+      ],
+    },
     label: "Export & print",
     h1: "Export and print in {kit}",
     title: "{kit} table export to CSV, Excel and PDF — AdaptTable",
@@ -884,6 +1525,63 @@ export function People({ source, columns, api }) {
   },
   {
     slug: "selection",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { bulkActions } from "{pkg}/bulk-actions";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [selectable]="true"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly archive = input.required<(ids: string[]) => void>();
+  readonly features = [
+    bulkActions([
+      { key: "archive", label: "Archive", onClick: (ids) => this.archive()(ids) },
+    ]),
+  ];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Select {kit} {framework} table rows with native checkboxes and run bulk actions through your own handler. The selection is a set of row ids that survives paging.",
+      },
+      "ng-zorro": {
+        description:
+          "Select {kit} {framework} table rows with NG-ZORRO checkboxes and run bulk actions through your own handler. The selection is a set of row ids that survives paging.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Tick rows one at a time or take the whole page from the header box, then every matching row from the banner that offers it. The selection is a set of ids rather than a slice of what is rendered, so a row chosen on page one is still chosen while page two is on screen.",
+        "Bulk actions run against that set and report back through your own handler — the table never performs the write. This page writes what each action received under the table.",
+      ],
+      "ng-zorro": [
+        "Tick rows one at a time or take the whole page from the header box, then every matching row from the banner that offers it. The selection is a set of ids rather than a slice of what is rendered, so a row chosen on page one is still chosen while page two is on screen.",
+        "Bulk actions run against that set and report back through your own handler — the table never performs the write. This page writes what each action received under the table.",
+      ],
+    },
     label: "Selection",
     h1: "Row selection in {kit}",
     title: "{kit} table row selection — AdaptTable",
@@ -941,6 +1639,61 @@ export function People({ rows, columns, onArchive }) {
   },
   {
     slug: "grouping",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { groupingPanel } from "{pkg}/grouping-panel";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name" },
+  { key: "team" },
+  { key: "status" },
+  { key: "budget", aggregatable: { operations: ["sum", "avg"] } },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      urlKey="g"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [groupingPanel(["team", "status"])];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Group rows in a {kit} {framework} data table by dragging headers or from a select, reorder levels by keyboard, fold each group and read its totals in the header.",
+        card: "Drag, select or keyboard grouping, with totals in the headers.",
+      },
+      "ng-zorro": {
+        description:
+          "Group rows in a {kit} {framework} data table by dragging headers or from a select, reorder levels by keyboard, fold each group and read its totals in the header.",
+        card: "Drag, select or keyboard grouping, with totals in the headers.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Compose `groupingPanel(groupBy)` and rows start nested by Team then Status. Drag a column header into the strip or add a level from its select, and reorder the levels by dragging a chip or with the arrow keys on its handle; every move is announced.",
+        "Each group header folds its rows and shows its row count and the totals its columns declare as `aggregatable` — Budget sums here, and the panel changes the operation. The grouping travels in the URL.",
+      ],
+      "ng-zorro": [
+        "Compose `groupingPanel(groupBy)` and rows start nested by Team then Status. Drag a column header into the strip or add a level from its select, and reorder the levels by dragging a chip or with the arrow keys on its handle; every move is announced.",
+        "Each group header folds its rows and shows its row count and the totals its columns declare as `aggregatable` — Budget sums here, and the panel changes the operation. The grouping travels in the URL.",
+      ],
+    },
     label: "Grouping",
     h1: "Row grouping in {kit}",
     title: "{kit} table row grouping — AdaptTable",
@@ -1001,6 +1754,68 @@ export function People({ rows, columns }) {
       "`collapsibleColumnGroups` arms the toggles. The headers and the chevrons are {kit}.",
     ],
     card: "Spanning headers that collapse to a stub, a kept child, or a custom cell.",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnInput } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { collapsibleColumnGroups } from "{pkg}/column-groups";
+
+interface Member {
+  id: string;
+  name: string;
+  team: string;
+  status: string;
+  budget: number;
+}
+
+const columns: ColumnInput<Member>[] = [
+  { key: "name", header: "Name" },
+  {
+    header: "Assignment",
+    collapsedKey: "team",
+    children: [
+      { key: "team", header: "Team" },
+      { key: "status", header: "Status" },
+    ],
+  },
+  {
+    header: "Budget",
+    collapsedRender: (row) => \`$\${row.budget}\`,
+    children: [{ key: "budget", header: "Amount" }],
+  },
+];
+
+@Component({
+  selector: "app-members",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class Members {
+  readonly rows = input.required<readonly Member[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Member) => row.id;
+  readonly features = [collapsibleColumnGroups()];
+}`,
+    },
+    intros: {
+      unstyled: [
+        "A parent with `children` is a column group: its caption spans its columns in a header row of its own. This table has three, open by default; collapse one to see how it folds.",
+        'Assignment is Team + Status with `collapsedKey: "team"`, so it keeps Team. Delivery is Timeline + Budget with `collapsedRender`, so it draws the budget in one cell. Workload has neither, so it folds to a narrow stub.',
+        "`collapsibleColumnGroups` arms the toggles. The group headers and their buttons are native elements.",
+      ],
+      "ng-zorro": [
+        "A parent with `children` is a column group: its caption spans its columns in a header row of its own. This table has three, open by default; collapse one to see how it folds.",
+        'Assignment is Team + Status with `collapsedKey: "team"`, so it keeps Team. Delivery is Timeline + Budget with `collapsedRender`, so it draws the budget in one cell. Workload has neither, so it folds to a narrow stub.',
+        "`collapsibleColumnGroups` arms the toggles. The group headers and their buttons use NG-ZORRO’s table and button components.",
+      ],
+    },
     snippet: `import { DataTable, type ColumnInput } from "{pkg}";
 import { collapsibleColumnGroups } from "{pkg}/column-groups";
 
@@ -1061,6 +1876,45 @@ export function People({ rows }) {
   },
   {
     slug: "rtl",
+    intros: {
+      unstyled: [
+        "Arabic labels and cell values mirror the table, its pager and the filter popover. Pinning uses logical edges, so start is the right edge.",
+        'Pass `getLabels("ar")` to `labels` and `getDirection("ar")` to `dir`. Every table, including nested tables, receives the same presentation settings.',
+        "Append `?locale=ar&dir=rtl` to any Angular feature page to exercise its real table in Arabic and right-to-left layout.",
+      ],
+      "ng-zorro": [
+        "Arabic labels and cell values mirror the table, its pager and the filter popover. Pinning uses logical edges, so start is the right edge.",
+        'Pass `getLabels("ar")` to `labels` and `getDirection("ar")` to `dir`. Every table, including nested tables, receives the same presentation settings.',
+        "Append `?locale=ar&dir=rtl` to any Angular feature page to exercise its real table in Arabic and right-to-left layout.",
+      ],
+    },
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { getDirection, getLabels } from "@adapttable/i18n";
+import { AdaptDataTable } from "{pkg}";
+import { filters } from "{pkg}/filters";
+
+@Component({
+  selector: "app-arabic-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()" [columns]="columns()" [rowKey]="rowKey"
+      [dir]="dir" [labels]="labels" [features]="features"
+      filtersMode="popover"
+    />
+  \`,
+})
+export class ArabicPeople {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = input.required<readonly ColumnDef<Person>[]>();
+  readonly rowKey = (row: Person) => row.id;
+  readonly dir = getDirection("ar");
+  readonly labels = getLabels("ar");
+  readonly features = [filters([{ key: "name", type: "text", label: "الاسم" }])];
+}`,
+    },
     label: "RTL",
     h1: "Right-to-left {kit} data table",
     title: "{kit} RTL data table — AdaptTable",
@@ -1105,6 +1959,33 @@ export function People({ rows, columns }) {
   },
   {
     slug: "realtime",
+    snippets: {
+      angular: `import { Component, input, signal } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { applyRowPatches, updateRow } from "@adapttable/core";
+import { AdaptDataTable } from "{pkg}";
+
+@Component({
+  selector: "app-live-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()" [columns]="columns()" [rowKey]="rowKey"
+    />
+  \`,
+})
+export class LivePeople {
+  readonly rows = signal<readonly Person[]>([]);
+  readonly columns = input.required<readonly ColumnDef<Person>[]>();
+  readonly rowKey = (row: Person) => row.id;
+
+  patchBudget(id: string, budget: number): void {
+    this.rows.update((rows) => applyRowPatches(
+      rows, [updateRow<Person>(id, { budget })], this.rowKey,
+    ));
+  }
+}`,
+    },
     label: "Realtime",
     h1: "Live updates in {kit}",
     title: "{kit} live-updating data table — AdaptTable",
@@ -1167,6 +2048,82 @@ export function People({ rows, columns, setRows }) {
       "The pin actions, the menu and the merged cells are {kit}. Independent pinned summary rows — totals that are not data rows — live on the aggregation page.",
     ],
     card: "Pin rows, merge cells, and a 3-dot menu for add and delete.",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { cellSpan } from "{pkg}/cell-span";
+import { rowActions } from "{pkg}/row-actions";
+import { rowPinning } from "{pkg}/row-pinning";
+
+const columns: ColumnDef<Person>[] = [{ key: "name" }, { key: "team" }];
+
+function spanTeam({
+  column,
+  sectionRows,
+  sectionRowIndex,
+}: {
+  column: { key: string };
+  sectionRows: readonly Person[];
+  sectionRowIndex: number;
+}) {
+  if (column.key !== "team") return undefined;
+  const team = sectionRows[sectionRowIndex]?.team;
+  if (sectionRows[sectionRowIndex - 1]?.team === team) return undefined;
+  let rowSpan = 1;
+  while (sectionRows[sectionRowIndex + rowSpan]?.team === team) rowSpan += 1;
+  return rowSpan > 1 ? { rowSpan } : undefined;
+}
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [
+    rowPinning(),
+    cellSpan(spanTeam),
+    rowActions<Person>([], { layout: "menu" }),
+  ];
+}`,
+    },
+    heads: {
+      unstyled: {
+        title: "{kit} table row pinning and cell spanning — AdaptTable",
+        description:
+          "Try {kit} {framework} table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once.",
+        card: "Pin rows from a 3-dot menu, and merge a team that runs down the page.",
+      },
+      "ng-zorro": {
+        title: "{kit} table row pinning and cell spanning — AdaptTable",
+        description:
+          "Try {kit} {framework} table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once.",
+        card: "Pin rows from a 3-dot menu, and merge a team that runs down the page.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "A row is more than a record. Pin it to the top or the bottom from its 3-dot menu, and merge a team that runs down consecutive rows so the name is written once.",
+        '`rowPinning()`, `cellSpan()` and a `"menu"` row-actions layout are what this page turns on. The table holds the pinned rows and keeps them in the URL, so a reload or a shared link keeps them where they were; pass `pinnedRowIds` to hold them yourself.',
+        "Grouping and trees refuse pinning: a nested list is not a flat pin stack. The pin keeps a team merge together — the person moves, the team stays one cell.",
+      ],
+      "ng-zorro": [
+        "A row is more than a record. Pin it to the top or the bottom from its 3-dot menu, and merge a team that runs down consecutive rows so the name is written once.",
+        '`rowPinning()`, `cellSpan()` and a `"menu"` row-actions layout are what this page turns on. The table holds the pinned rows and keeps them in the URL, so a reload or a shared link keeps them where they were; pass `pinnedRowIds` to hold them yourself.',
+        "Grouping and trees refuse pinning: a nested list is not a flat pin stack. The pin keeps a team merge together — the person moves, the team stays one cell.",
+      ],
+    },
     snippet: `import { DataTable } from "{pkg}";
 import { cellSpan } from "{pkg}/cell-span";
 import { rowPinning } from "{pkg}/row-pinning";
@@ -1216,6 +2173,68 @@ export function People({ rows, columns, setPinned, spanTeam }) {
       "The expand chevron and both tables are {kit}.",
     ],
     card: "A real table under a row — same engine, own columns, own keys.",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef, NestedTableDefaults } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { nestedTable } from "{pkg}/nested-table";
+
+interface Order {
+  id: string;
+  item: string;
+}
+
+interface Customer {
+  id: string;
+  name: string;
+  orders: Order[];
+}
+
+@Component({
+  selector: "app-orders",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="row().orders"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="defaults().urlSync"
+      [searchable]="defaults().searchable"
+      [tableLabel]="defaults().tableLabel"
+    />
+  \`,
+})
+export class Orders {
+  readonly row = input.required<Customer>();
+  readonly defaults = input.required<NestedTableDefaults>();
+  readonly columns: ColumnDef<Order>[] = [{ key: "item" }];
+  readonly rowKey = (order: Order) => order.id;
+}
+
+@Component({
+  selector: "app-customers",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class Customers {
+  readonly rows = input.required<readonly Customer[]>();
+  readonly columns: ColumnDef<Customer>[] = [{ key: "name" }];
+  readonly rowKey = (row: Customer) => row.id;
+  readonly features = [
+    nestedTable<Customer>((row) => ({
+      label: \`Orders for \${row.name}\`,
+      table: Orders,
+    })),
+  ];
+}`,
+    },
     snippet: `import { DataTable } from "{pkg}";
 import { nestedTable } from "{pkg}/nested-table";
 
@@ -1261,6 +2280,31 @@ export function People({ rows, columns, orderColumns }) {
   },
   {
     slug: "accessibility",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { cellNavigation } from "{pkg}/cell-navigation";
+import { columnSelectionCheckbox } from "{pkg}/column-selection";
+
+@Component({
+  selector: "app-keyboard-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      tableLabel="People keyboard grid"
+      [data]="rows()" [columns]="columns()" [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class KeyboardPeople {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = input.required<readonly ColumnDef<Person>[]>();
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [cellNavigation(), columnSelectionCheckbox()];
+}`,
+    },
     label: "Accessibility",
     h1: "Accessible {kit} data table",
     title: "{kit} accessible data table — AdaptTable",
@@ -1306,6 +2350,65 @@ export function People({ rows, columns }) {
   },
   {
     slug: "row-reordering",
+    snippets: {
+      angular: `import { Component, input, signal } from "@angular/core";
+import { applyRowReorder } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { rowReorder } from "{pkg}/row-reorder";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="order() ?? rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly order = signal<readonly Person[] | null>(null);
+  readonly features = [
+    rowReorder<Person>((from, to) =>
+      this.order.set(applyRowReorder(this.order() ?? this.rows(), from, to))
+    ),
+  ];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Move rows in a {kit} {framework} data table by pointer or keyboard, with every step announced, stable row identity and host-owned persistence.",
+        card: "Drag or keyboard moves, announced — the host writes.",
+      },
+      "ng-zorro": {
+        description:
+          "Move rows in a {kit} {framework} data table by pointer or keyboard, with every step announced, stable row identity and host-owned persistence.",
+        card: "Drag or keyboard moves, announced — the host writes.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Compose `rowReorder` from `{pkg}/row-reorder` and a grip appears on every row. Drag it, or press Space to lift a row, the arrows to move it and Space to drop it; a live region announces each step.",
+        "The table never mutates your array: `onRowReorder` asks the host with the row's old and new positions and the row itself, and the host writes. This page applies each move with core's `applyRowReorder` and says what it did.",
+      ],
+      "ng-zorro": [
+        "Compose `rowReorder` from `{pkg}/row-reorder` and a grip appears on every row. Drag it, or press Space to lift a row, the arrows to move it and Space to drop it; a live region announces each step.",
+        "The table never mutates your array: `onRowReorder` asks the host with the row's old and new positions and the row itself, and the host writes. This page applies each move with core's `applyRowReorder` and says what it did.",
+      ],
+    },
     label: "Row reordering",
     h1: "Row reordering in {kit}",
     title: "{kit} row reordering — AdaptTable",
@@ -1355,6 +2458,51 @@ export function Tasks({ rows, setRows, columns }) {
   },
   {
     slug: "aggregation",
+    intros: {
+      unstyled: [
+        "`aggregate()` computes the table footer and each team's `groupAggregates`; `groupFooters` closes each team with its subtotal.",
+        "Search the table and group totals and the footer recompute from matching rows. The host-owned portfolio total uses `pinnedSummaryRows` and remains above the scrolling body, independent of filtering and sorting.",
+        "All three surfaces render through the same native kit on desktop and in phone cards.",
+      ],
+      "ng-zorro": [
+        "`aggregate()` computes the table footer and each team's `groupAggregates`; `groupFooters` closes each team with its subtotal.",
+        "Search the table and group totals and the footer recompute from matching rows. The host-owned portfolio total uses `pinnedSummaryRows` and remains above the scrolling body, independent of filtering and sorting.",
+        "All three surfaces render through the same NG-ZORRO kit on desktop and in phone cards.",
+      ],
+    },
+    snippets: {
+      angular: `import { Component, computed, input } from "@angular/core";
+import { aggregate, type ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { groupingPanel } from "{pkg}/grouping-panel";
+import { pinnedSummaryRows } from "{pkg}/pinned-summary-rows";
+
+@Component({
+  selector: "app-totals",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()" [columns]="columns" [rowKey]="rowKey"
+      [summaryRow]="budgetSum" [features]="features()"
+    />
+  \`,
+})
+export class Totals {
+  readonly rows = input.required<readonly Person[]>();
+  readonly totals = input.required<readonly Person[]>();
+  readonly columns: ColumnDef<Person>[] = [
+    { key: "name" }, { key: "team" }, { key: "budget" },
+  ];
+  readonly rowKey = (row: Person) => row.id;
+  readonly budgetSum = aggregate<Person>({ budget: "sum" });
+  readonly features = computed(() => [
+    groupingPanel<Person>("team", {
+      groupAggregates: this.budgetSum, groupFooters: true,
+    }),
+    pinnedSummaryRows<Person>({ top: this.totals() }),
+  ]);
+}`,
+    },
     label: "Aggregation",
     h1: "Aggregation in {kit}",
     title: "{kit} table aggregation — AdaptTable",
@@ -1414,6 +2562,34 @@ export function Sales({ rows, columns, teamTotal, grandTotal }) {
     title: "{kit} AI table assistant demo — AdaptTable",
     description:
       "Try a {kit} {framework} table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend.",
+    heads: {
+      unstyled: {
+        h1: "AI table assistant in {kit} {framework}",
+        title: "{kit} {framework} AI table assistant demo — AdaptTable",
+        description:
+          "Try a local {kit} {framework} table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required.",
+        card: "Local sort, questions and approved edits with real table outcomes.",
+      },
+      "ng-zorro": {
+        h1: "AI table assistant in {kit} {framework}",
+        title: "{kit} {framework} AI table assistant demo — AdaptTable",
+        description:
+          "Try a local {kit} {framework} table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required.",
+        card: "Local sort, questions and approved edits with real table outcomes.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "This deterministic local demo mounts a real {kit} {framework} table and its native assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.",
+        "A question filters the table only after you answer. A proposed edit waits for your approval in the assistant, the table or a dialog; an approved write updates the host's data and its status line. Rejecting leaves the data unchanged, and the conversation records the execution result.",
+        "`tableAgent` and `injectTableAssistant` from `@adapttable/ai-angular` share the mounted table's session. The snippet below shows a minimal local sorting transport; the demo also includes questions and governed edits. JSON, OpenAI, HTTP, MCP, MCP Apps, WebMCP, AG-UI and AI SDK helpers can use the same session in your application.",
+      ],
+      "ng-zorro": [
+        "This deterministic local demo mounts a real {kit} {framework} table and its NG-ZORRO assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.",
+        "A question filters the table only after you answer. A proposed edit waits for your approval in the assistant, the table or a dialog; an approved write updates the host's data and its status line. Rejecting leaves the data unchanged, and the conversation records the execution result.",
+        "`tableAgent` and `injectTableAssistant` from `@adapttable/ai-angular` share the mounted table's session. The snippet below shows a minimal local sorting transport; the demo also includes questions and governed edits. JSON, OpenAI, HTTP, MCP, MCP Apps, WebMCP, AG-UI and AI SDK helpers can use the same session in your application.",
+      ],
+    },
     intro: [
       "`@adapttable/ai` is optional and provider-neutral. This {kit} demo combines a conversational assistant with a real table. Try filtering, grouping, column pinning and a proposed edit; available actions depend on the mounted features and the host's permissions. Row pinning requires an ungrouped view in this demo.",
       "Start in Simulated mode: suggested prompts run deterministic local scenarios, not a language model. The conversation shows action receipts; a proposed write still follows approval and save policy. Connect backend sends your prompt and permitted table context to an endpoint you run. The assistant keeps the same table session and {kit} controls in both modes.",
@@ -1475,7 +2651,80 @@ export function Orders({ rows, columns, onEdit }) {
     </>
   );
 }`,
+    snippets: {
+      angular: `import type { AgentSession, AssistantTransport } from "@adapttable/ai";
+import { injectTableAssistant, tableAgent } from "@adapttable/ai-angular";
+import type { ColumnDef, TableAssistantProps } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { AdaptTableAssistant } from "{pkg}/assistant";
+import { Component, computed, signal } from "@angular/core";
+
+interface AgentPerson { id: string; name: string; salary: number }
+
+// A minimal local transport: no model, endpoint or API key.
+const transport: AssistantTransport = {
+  send: async ({ session, text, signal }) => {
+    if (!text.toLowerCase().includes("sort")) {
+      return { text: "Try: sort salaries highest first." };
+    }
+    const key = "view.setSort";
+    const result = await session.execute(
+      key,
+      { key: "salary", dir: "desc" },
+      session.manifest().viewRevision,
+      crypto.randomUUID(),
+      signal
+    );
+    return {
+      text: result.ok ? "Highest salary first." : "The sort was not applied.",
+      keys: [key],
+      results: [result],
+    };
+  },
+};
+
+@Component({
+  selector: "app-people-assistant",
+  imports: [AdaptDataTable, AdaptTableAssistant],
+  template: \`
+    <adapt-data-table
+      [data]="rows" [columns]="columns" [rowKey]="rowKey"
+      [features]="features" [urlSync]="false"
+    />
+    <adapt-table-assistant [props]="props()" />
+  \`,
+})
+export class PeopleAssistant {
+  readonly rows: readonly AgentPerson[] = [
+    { id: "ada", name: "Ada Lovelace", salary: 120 },
+    { id: "grace", name: "Grace Hopper", salary: 140 },
+  ];
+  readonly columns: readonly ColumnDef<AgentPerson>[] = [
+    { key: "name", header: "Person" },
+    { key: "salary", header: "Salary", sortable: true },
+  ];
+  readonly rowKey = (row: AgentPerson) => row.id;
+  readonly session = signal<AgentSession | undefined>(undefined);
+  readonly open = signal(true);
+  readonly assistant = injectTableAssistant(computed(() => ({
+    session: this.session(), transport,
+  })));
+  readonly props = computed((): TableAssistantProps => ({
+    assistant: this.assistant(),
+    open: this.open(),
+    onOpenChange: (open) => this.open.set(open),
+    presentation: "panel",
+  }));
+  readonly features = [tableAgent({
+    tableId: "people", approval: "never",
+    columns: { salary: { type: "number", sortable: true } },
+    bridge: { attach: (session) => this.session.set(session) },
+  })];
+}`,
+    },
     notes: {
+      unstyled:
+        "The assistant, question choices and approval controls are native HTML. This page runs a local script only; the host status line records approved writes, and the approval-surface selector chooses assistant, table or dialog review.",
       mantine:
         "The optional assistant, filters and approval controls use Mantine. Import the assistant separately, or build your own conversation UI on the headless controller.",
       mui: "The optional assistant uses MUI controls alongside the Material table and approval strip. Its separate import keeps chat UI out of tables that do not need it.",
@@ -1546,12 +2795,12 @@ export const LANDING = {
     "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. Add features through explicit imports. The visible controls are {surface}.",
     "That is the whole trade: one model to learn, and a table that belongs in a {kit} app rather than sitting inside one.",
   ],
-  /** The heading over the feature pages — count comes from the matrix. */
-  gridTitle: `${String(MATRIX_FEATURES.length)} features, each on its own {kit} page`,
+  /** The heading over the feature pages — `{featureCount}` is the kit's own. */
+  gridTitle: "{featureCount} features, each on its own {kit} page",
   gridLead:
     "Every one is the same engine and {kit}'s own components. Each page carries the code for that feature and a table you can drive.",
-  /** The heading over the other seven kits. */
-  kitsTitle: "The same table, in seven other kits",
+  /** The heading over the other kits of the same framework. */
+  kitsTitle: "The same table, in {otherKits}",
   kitsLead:
     "Switching kit changes the components, never the model — the props on this page are the props there.",
 };
@@ -1574,9 +2823,39 @@ export const frameworkOf = (adapter) => {
   return framework;
 };
 
+/** Counts as the copy spells them. */
+const NUMBER_WORDS = [
+  "no",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+];
+
 /**
- * Fill `{kit}`, `{pkg}` and `{peer}` from an adapter, and `{framework}` and
- * `{binding}` from the framework its kit is built on.
+ * "seven other kits" — how many other built kits share this adapter's
+ * framework, as a phrase.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {string}
+ */
+const otherKitsPhrase = (adapter) => {
+  const count = otherKitsOf(adapter).length;
+  const word = NUMBER_WORDS[count] ?? String(count);
+  return `${word} other ${count === 1 ? "kit" : "kits"}`;
+};
+
+/**
+ * Fill `{kit}`, `{pkg}` and `{peer}` from an adapter, `{featureCount}` with how
+ * many feature pages it has and `{otherKits}` with how many other kits share its
+ * framework, and `{framework}` and `{binding}` from the framework its kit is
+ * built on.
  *
  * @param {string} text
  * @param {ShowcaseAdapter} adapter
@@ -1590,6 +2869,8 @@ export const fillTemplate = (text, adapter, framework = frameworkOf(adapter)) =>
     .replaceAll("{kit}", adapter.label)
     .replaceAll("{pkg}", adapter.pkg)
     .replaceAll("{peer}", adapter.peer)
+    .replaceAll("{featureCount}", String(featuresOf(adapter).length))
+    .replaceAll("{otherKits}", otherKitsPhrase(adapter))
     .replaceAll("{framework}", framework.label)
     .replaceAll("{binding}", framework.binding);
 
@@ -1621,6 +2902,23 @@ export const snippetFor = (
 };
 
 /**
+ * A feature's label, heading, title, description and card, as the kit it is
+ * written for states them.
+ *
+ * @param {MatrixFeature} feature
+ * @param {ShowcaseAdapter} adapter
+ * @returns {Required<FeatureHead>}
+ */
+export const headFor = (feature, adapter) => ({
+  label: feature.label,
+  h1: feature.h1,
+  title: feature.title,
+  description: feature.description,
+  card: feature.card,
+  ...feature.heads?.[adapter.key],
+});
+
+/**
  * The paragraphs a feature page opens with, for the kit it is written for.
  *
  * @param {MatrixFeature} feature
@@ -1640,13 +2938,63 @@ export const landingHead = (adapter) =>
   adapter.landing ?? { title: LANDING.title, description: LANDING.description };
 
 /**
- * The adapters whose own pages are built. Every other kit is reachable, and
- * shown, through the live demo pinned to it.
+ * The paragraphs this kit's landing page opens with.
  *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {string[]}
+ */
+export const landingIntro = (adapter) => adapter.landingIntro ?? LANDING.intro;
+
+/**
+ * The adapters built on one framework.
+ *
+ * @param {string} framework A key of {@link SHOWCASE_FRAMEWORKS}.
  * @returns {ShowcaseAdapter[]}
  */
-export const builtAdapters = () =>
-  SHOWCASE_ADAPTERS.filter((adapter) => adapter.built);
+export const adaptersOf = (framework) =>
+  SHOWCASE_ADAPTERS.filter((adapter) => adapter.framework === framework);
+
+/**
+ * The adapters of one framework whose own pages are built — React's unless
+ * another framework is named, since the kit switcher, the nav and the live
+ * demo are React's. Every other kit is reachable, and shown, through the live
+ * demo pinned to it.
+ *
+ * @param {string} [framework] A key of {@link SHOWCASE_FRAMEWORKS}.
+ * @returns {ShowcaseAdapter[]}
+ */
+export const builtAdapters = (framework = SNIPPET_FRAMEWORK) =>
+  adaptersOf(framework).filter((adapter) => adapter.built);
+
+/**
+ * The other built kits on this adapter's framework, in matrix order.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {ShowcaseAdapter[]}
+ */
+export const otherKitsOf = (adapter) =>
+  builtAdapters(adapter.framework).filter((other) => other.key !== adapter.key);
+
+/**
+ * The matrix features this kit has a page for, in demand order.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {MatrixFeature[]}
+ */
+export const featuresOf = (adapter) =>
+  adapter.features
+    ? MATRIX_FEATURES.filter((feature) =>
+        adapter.features?.includes(feature.slug)
+      )
+    : MATRIX_FEATURES;
+
+/**
+ * Whether this kit's pages belong in the sitemap and in search indexes.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {boolean}
+ */
+export const isIndexable = (adapter) => adapter.indexable !== false;
 
 /**
  * One built page of the matrix: an adapter landing, or an adapter's feature.
@@ -1657,6 +3005,7 @@ export const builtAdapters = () =>
  *   whose entry the page boots.
  * @property {string | null} feature The feature slug, or `null` for the landing.
  * @property {string} dir The directory under the showcase root.
+ * @property {boolean} indexable Whether the page belongs in the sitemap.
  */
 
 /**
@@ -1665,20 +3014,24 @@ export const builtAdapters = () =>
  * @returns {MatrixPageSpec[]}
  */
 export const matrixPages = () =>
-  builtAdapters().flatMap((adapter) => [
-    {
-      adapter: adapter.key,
-      framework: frameworkOf(adapter).key,
-      feature: null,
-      dir: adapter.key,
-    },
-    ...MATRIX_FEATURES.map((feature) => ({
-      adapter: adapter.key,
-      framework: frameworkOf(adapter).key,
-      feature: feature.slug,
-      dir: `${adapter.key}/${feature.slug}`,
-    })),
-  ]);
+  SHOWCASE_FRAMEWORKS.flatMap((framework) =>
+    builtAdapters(framework.key).flatMap((adapter) => [
+      {
+        adapter: adapter.key,
+        framework: framework.key,
+        feature: null,
+        dir: adapter.key,
+        indexable: isIndexable(adapter),
+      },
+      ...featuresOf(adapter).map((feature) => ({
+        adapter: adapter.key,
+        framework: framework.key,
+        feature: feature.slug,
+        dir: `${adapter.key}/${feature.slug}`,
+        indexable: isIndexable(adapter),
+      })),
+    ])
+  );
 
 /**
  * The adapter with this key.

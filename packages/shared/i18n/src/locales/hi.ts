@@ -70,6 +70,7 @@ export const hi: Required<TableLabels> = {
   relPreviousMonth: "पिछला महीना",
   relLastN: "पिछले N दिन",
   relNextN: "अगले N दिन",
+  filterAll: "सभी",
   boolAny: "कोई भी",
   boolTrue: "सत्य",
   boolFalse: "असत्य",

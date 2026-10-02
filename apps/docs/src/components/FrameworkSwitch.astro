@@ -1,0 +1,53 @@
+---
+/** Link to each framework's matching guide or its getting-started fallback. */
+import { DOCS } from "../../../../scripts/build-llms-full.mjs";
+import { switchDocsRoute } from "../../../../scripts/site.mjs";
+
+const archived = /^\/v\d+\//.test(Astro.url.pathname);
+const page = Astro.url.pathname.replace(/^\/v\d+\//, "/");
+const frameworks = [
+  { key: "react", label: "React" },
+  { key: "angular", label: "Angular" },
+];
+---
+
+<nav aria-label={archived ? "Current framework documentation" : "Framework documentation"}>
+  {
+    frameworks.map(({ key, label }) => {
+      const href = switchDocsRoute(page, key, DOCS);
+      const current = !archived && page.startsWith(`/${key}/`) && Astro.url.pathname === href;
+      return (
+        <a href={href} aria-current={current ? "page" : undefined} title={`${archived ? "Current " : ""}${label} documentation`}>
+          {label}
+        </a>
+      );
+    })
+  }
+</nav>
+
+<style>
+  nav {
+    display: flex;
+    gap: 0.2rem;
+    align-items: center;
+    font-size: var(--sl-text-xs);
+    white-space: nowrap;
+  }
+  a {
+    padding: 0.25rem 0.4rem;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    color: var(--sl-color-text);
+  }
+  a[aria-current="page"] {
+    background: var(--sl-color-accent-low);
+    color: var(--sl-color-text-accent);
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  a:focus-visible {
+    outline: 2px solid var(--sl-color-text-accent);
+    outline-offset: 1px;
+  }
+</style>

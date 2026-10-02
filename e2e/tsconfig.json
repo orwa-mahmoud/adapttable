@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": false,
+    "paths": {
+      "@adapttable/core": ["../packages/shared/core/src/index.ts"]
+    },
+    "types": ["node"]
+  },
+  "include": ["./**/*.ts"]
+}

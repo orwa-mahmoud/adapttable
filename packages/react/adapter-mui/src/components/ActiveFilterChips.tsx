@@ -37,6 +37,7 @@ export function Chips({
   if (chips.length === 0) return null;
   return (
     <Stack
+      data-adapttable-part="chips"
       direction="row"
       spacing={0.5}
       useFlexGap
@@ -45,13 +46,14 @@ export function Chips({
       sx={{ listStyle: "none", p: 0, m: 0, flexWrap: "wrap" }}
     >
       {chips.map((chip) => (
-        <li key={chip.key}>
+        <li key={chip.key} data-adapttable-part="chip">
           <Chip
             size="small"
             label={
               <>
                 {chip.label}
                 <IconButton
+                  data-adapttable-part="chip-remove"
                   disableRipple
                   aria-label={labels.removeFilter(chip.label)}
                   onClick={chip.onRemove}
@@ -64,8 +66,12 @@ export function Chips({
           />
         </li>
       ))}
-      <li>
-        <Button size="small" onClick={onClearAll}>
+      <li data-adapttable-part="chip">
+        <Button
+          data-adapttable-part="chip-remove"
+          size="small"
+          onClick={onClearAll}
+        >
           {labels.clearAll}
         </Button>
       </li>

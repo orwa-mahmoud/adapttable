@@ -6,8 +6,8 @@ import { AdaptAttrs } from "./attrs";
 import { AdaptCell, AdaptCellTemplate, AdaptHeader } from "./cell";
 import type { ColumnDef } from "./columnDef";
 import { injectDataTable } from "./dataTable";
-import { injectFrontendData } from "./frontendData";
-import { ADAPTTABLE_URL_ADAPTER } from "./url";
+import { injectFrontendData } from "./source/frontendData";
+import { ADAPTTABLE_URL_ADAPTER } from "./url/tableUrlState";
 
 interface Person {
   id: string;

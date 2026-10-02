@@ -70,6 +70,7 @@ export const tr: Required<TableLabels> = {
   relPreviousMonth: "Geçen ay",
   relLastN: "Son N gün",
   relNextN: "Önümüzdeki N gün",
+  filterAll: "Tümü",
   boolAny: "Herhangi",
   boolTrue: "Doğru",
   boolFalse: "Yanlış",

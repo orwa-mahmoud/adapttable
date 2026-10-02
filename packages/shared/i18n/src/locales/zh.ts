@@ -70,6 +70,7 @@ export const zh: Required<TableLabels> = {
   relPreviousMonth: "上月",
   relLastN: "最近 N 天",
   relNextN: "未来 N 天",
+  filterAll: "全部",
   boolAny: "全部",
   boolTrue: "是",
   boolFalse: "否",

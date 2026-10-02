@@ -190,6 +190,7 @@ export const defaultLabels: Required<TableLabels> = {
   relPreviousMonth: "Previous month",
   relLastN: "Last N days",
   relNextN: "Next N days",
+  filterAll: "All",
   boolAny: "Any",
   boolTrue: "True",
   boolFalse: "False",

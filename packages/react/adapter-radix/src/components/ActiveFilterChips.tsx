@@ -22,12 +22,16 @@ export function Chips({
       align="center"
       aria-label={labels.filters}
     >
-      <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+      <ul
+        data-adapttable-part="chips"
+        style={{ listStyle: "none", padding: 0, margin: 0 }}
+      >
         {chips.map((chip) => (
-          <li key={chip.key}>
+          <li key={chip.key} data-adapttable-part="chip">
             <Badge size="2" radius="full">
               {chip.label}
               <IconButton
+                data-adapttable-part="chip-remove"
                 size="1"
                 variant="ghost"
                 radius="full"
@@ -40,8 +44,13 @@ export function Chips({
             </Badge>
           </li>
         ))}
-        <li>
-          <Button size="1" variant="ghost" onClick={onClearAll}>
+        <li data-adapttable-part="chip">
+          <Button
+            data-adapttable-part="chip-remove"
+            size="1"
+            variant="ghost"
+            onClick={onClearAll}
+          >
             {labels.clearAll}
           </Button>
         </li>

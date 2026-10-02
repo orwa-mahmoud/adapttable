@@ -6,15 +6,15 @@
 import {
   copyFileSync,
   mkdirSync,
-  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, posix } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { buildLlmsFull } from "../../scripts/build-llms-full.mjs";
+import { docLinkTarget, docsFiles } from "../../scripts/docs-files.mjs";
 import { docsRoute, docsSlug, siteUrl } from "../../scripts/site.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -32,8 +32,58 @@ const target = join(here, "src/content/docs");
  * `docs/` to each other.
  */
 export const TITLES = {
+  "angular/getting-started.md": "Get started with Angular tables",
+  "angular/features.md": "Angular table features and presets",
+  "angular/data-tiers.md": "Angular table data — client and server",
+  "angular/headless.md": "Headless Angular tables with signals",
+  "angular/custom-table-source.md": "Angular custom table sources",
+  "angular/building-an-adapter.md": "Build an Angular table adapter",
+  "angular/columns.md": "Angular columns and cell templates",
+  "angular/column-groups.md": "Angular collapsible column groups",
+  "angular/sparkline.md": "Angular sparkline columns",
+  "angular/sorting.md": "Angular table sorting and multi-sort",
+  "angular/search.md": "Angular table search and find",
+  "angular/filtering.md": "Angular filters, operators and chips",
+  "angular/filter-tree.md": "Angular AND/OR filter groups",
+  "angular/header-filters.md": "Angular per-column header filters",
+  "angular/custom-filter-types.md": "Angular custom filter types",
+  "angular/pagination.md": "Angular table pagination",
+  "angular/selection.md": "Angular row selection and bulk actions",
+  "angular/row-actions.md": "Angular row actions and mutations",
+  "angular/row-expansion.md": "Angular expandable detail rows",
+  "angular/nested-tables.md": "Angular nested tables",
+  "angular/cell-editing.md": "Angular editing, validation and undo",
+  "angular/row-reordering.md": "Angular row reordering",
+  "angular/row-pinning.md": "Angular pinned rows",
+  "angular/pinned-summary-rows.md": "Angular pinned summary and total rows",
+  "angular/row-spanning.md": "Angular row and column spanning",
+  "angular/full-width-rows.md": "Angular full-width and separator rows",
+  "angular/row-styling.md": "Angular row styles and heights",
+  "angular/cell-navigation.md": "Angular grid navigation and ranges",
+  "angular/row-grouping.md": "Angular row grouping and subtotals",
+  "angular/aggregation.md": "Angular table aggregation",
+  "angular/pivot.md": "Angular pivot tables and measures",
+  "angular/formulas.md": "Angular formula columns",
+  "angular/tree-data.md": "Angular tree tables and lazy children",
+  "angular/column-management.md": "Angular column menus, pinning and resize",
+  "angular/saved-views.md": "Angular saved views and layouts",
+  "angular/virtualization.md": "Angular table and card virtualization",
+  "angular/mobile.md": "Angular responsive mobile cards",
+  "angular/url-state.md": "Angular URL state and Router integration",
+  "angular/exporting.md": "Angular browser and server exports",
+  "angular/export-xlsx.md": "Angular Excel exports with typed cells",
+  "angular/export-pdf.md": "Angular PDF export and print",
+  "angular/ssr-rsc.md": "Angular SSR and hydration",
+  "angular/agent-capabilities.md": "Angular table AI assistant",
+  "angular/ai-voice.md": "Angular assistant voice input",
+  "angular/customization.md": "Angular table templates and slots",
+  "angular/toolbar-and-view-controls.md": "Angular toolbar and view controls",
+  "angular/command-palette.md": "Angular command palette and context menus",
+  "angular/i18n-rtl.md": "Angular table locales and RTL",
+  "angular/accessibility.md": "Accessible Angular tables and grids",
+  "angular/realtime.md": "Angular realtime table updates",
   "getting-started.md": "Get started — a React table for your UI kit",
-  "concepts.md": "Headless table engine and React binding",
+  "concepts.md": "Headless engine, React and Angular bindings",
   "features.md": "React table features — composable plugins",
   "columns.md": "React table columns — ColumnDef & custom cells",
   "column-groups.md": "React table column groups — collapsible headers",
@@ -61,8 +111,8 @@ export const TITLES = {
   "server-queries.md": "React table server queries — parse and validate",
   "agent-capabilities.md": "React table AI assistant — widgets, custom UI",
   "ai.md": "AI table API — sessions, approval and execution",
-  "ai-integrations.md": "React table AI integration — OpenAI, MCP, JSON",
-  "ai-http.md": "React table AI backend — HTTP and local example",
+  "ai-integrations.md": "Table AI integration — OpenAI, MCP, JSON",
+  "ai-http.md": "Table AI backend — HTTP and local example",
   "tree-data.md": "React table tree data — hierarchical rows",
   "column-management.md": "React table column management — pin, resize",
   "saved-views.md": "React table saved views, shareable by URL",
@@ -110,10 +160,110 @@ export const TITLES = {
 // emits from `description`. Keyword-rich and unique per page so search and
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
+  "angular/getting-started.md":
+    "Build your first Angular table with AdaptDataTable, signal-backed rows and the unstyled or NG-ZORRO workspace kit. Check package availability and peers.",
+  "angular/features.md":
+    "Compose Angular table features through kit subpaths and standardPreset. Add only the required controls and keep data ownership in your application.",
+  "angular/data-tiers.md":
+    "Connect Angular tables to in-memory data, server paging or query-library signals with injectTableData, injectServerData and injectQuerySource.",
+  "angular/headless.md":
+    "Render a headless Angular table with injectDataTable, signal readers and attribute helpers. Use your own templates while retaining the table engine.",
+  "angular/custom-table-source.md":
+    "Consume a custom TableSource in Angular through signals. Supply required state and setters, declare capabilities and manage subscriptions with fromStore.",
+  "angular/building-an-adapter.md":
+    "Build an Angular UI-kit adapter with structural Chrome and required slots. Keep visible controls kit-native and preserve the public parts contract.",
+  "angular/columns.md":
+    "Define Angular ColumnDef columns with plain headers, value accessors and TemplateRef or component renderers. Bind cell contexts with AdaptCellTemplate.",
+  "angular/column-groups.md":
+    "Group Angular table columns under spanning headers and add collapse controls. Configure kept columns and preserve the grouping model in your kit.",
+  "angular/sparkline.md":
+    "Render Angular sparkline cells through the optional binding entry. Configure bar, line and area charts with explicit values and export behavior.",
+  "angular/sorting.md":
+    "Sort Angular tables by one or multiple columns. Configure value comparison, server queries and accessible sort headers with optional URL persistence.",
+  "angular/search.md":
+    "Add Angular table search with debounce and host query callbacks. Configure row text and distinguish dataset search from the find-in-table feature.",
+  "angular/filtering.md":
+    "Compose Angular filters using kit-native fields, operators and removable chips. Connect declarative definitions to client predicates and server queries.",
+  "angular/filter-tree.md":
+    "Build nested AND/OR filter groups in Angular. Use the kit's filter tree controls with the shared model, validation and URL serialization.",
+  "angular/header-filters.md":
+    "Place Angular column filters in header funnels through the header-filters entry. Share filter definitions, chips and state with the full filter panel.",
+  "angular/custom-filter-types.md":
+    "Register custom Angular filter types with operators, matching rules and required widget slots. Keep the shared filter model separate from kit controls.",
+  "angular/pagination.md":
+    "Page Angular tables with client or server data. Configure page size, mobile behavior and signal-driven query updates while the host owns row loading.",
+  "angular/selection.md":
+    "Select Angular table rows and run bulk actions with kit-native checkboxes. Handle selectionChange, selected IDs and host-owned confirmation callbacks.",
+  "angular/row-actions.md":
+    "Add Angular row menus, custom action renderers and add, duplicate or delete callbacks. The host performs each mutation and supplies the resulting rows.",
+  "angular/row-expansion.md":
+    "Expand Angular table rows into detail templates with accessible toggles. Configure expansion state and render row-specific content through kit slots.",
+  "angular/nested-tables.md":
+    "Render nested Angular tables inside detail rows. Provide child columns and data, configure defaults and retain independent table state for each child.",
+  "angular/cell-editing.md":
+    "Edit Angular cells and rows with native kit inputs, validation, batch changes and undo. Wire explicit host callbacks for saving and conflict handling.",
+  "angular/row-reordering.md":
+    "Reorder Angular rows through drag handles or keyboard and mobile actions. Apply host callbacks, move policies and tree or group constraints.",
+  "angular/row-pinning.md":
+    "Pin Angular rows above or below the main body with explicit ID lists. Handle pin changes in the host and persist supported state to the URL.",
+  "angular/pinned-summary-rows.md":
+    "Add pinned summary rows to Angular tables outside the ordinary row model. Display totals without including them in selection, filtering or paging.",
+  "angular/row-spanning.md":
+    "Span Angular table cells across rows or columns. Derive cell spans from neutral helpers and omit covered cells while preserving valid table structure.",
+  "angular/full-width-rows.md":
+    "Insert full-width content and separator rows into Angular tables. Position host-provided slots by row ID and account for mobile card rendering.",
+  "angular/row-styling.md":
+    "Set conditional Angular row styles and heights from host callbacks. Apply appearance consistently to desktop rows and responsive mobile cards.",
+  "angular/cell-navigation.md":
+    "Navigate Angular grids by keyboard, select cell ranges and connect clipboard or fill operations. Preserve focus and screen-reader feedback.",
+  "angular/row-grouping.md":
+    "Group Angular table rows with kit-native grouping panels. Configure nested keys, group expansion, subtotals and server grouping capabilities.",
+  "angular/aggregation.md":
+    "Compute Angular table summaries and group aggregates. Configure operations, aggregatable columns and host-provided server totals.",
+  "angular/pivot.md":
+    "Build Angular pivot views with AdaptPivotPanel, pivotTableModel and kit controls. Configure dimensions, measures and optional pivot URL state.",
+  "angular/formulas.md":
+    "Add Angular formula columns through the binding's formula entry. Build computed columns and synchronize formulas with the URL without evaluating code.",
+  "angular/tree-data.md":
+    "Display hierarchical Angular data with tree expansion and lazy children. Configure row identity, loading and accessible desktop or mobile controls.",
+  "angular/column-management.md":
+    "Manage Angular column visibility, order, pinning and size with kit-native menus. Persist layouts and handle columnLayoutChange in the host.",
+  "angular/saved-views.md":
+    "Save and restore named Angular table views using the kit's saved-views controls. Configure storage, URL state and explicit controller options.",
+  "angular/virtualization.md":
+    "Window Angular table rows, columns and mobile cards with optional virtualization. Configure sizing and overscan while maintaining table behavior.",
+  "angular/mobile.md":
+    "Render Angular table data as responsive mobile cards. Preserve field templates, selection and editing when supplying a custom card body.",
+  "angular/url-state.md":
+    "Synchronize Angular table state with browser History or Angular Router. Namespace table keys and handle request URLs during server rendering.",
+  "angular/exporting.md":
+    "Export Angular table data through optional kit controls. Configure browser downloads, host server jobs, progress, cancellation and accessible status.",
+  "angular/export-xlsx.md":
+    "Export Angular tables to Excel with the shared XLSX writer. Preserve typed values, column widths and grouping while keeping the writer optional.",
+  "angular/export-pdf.md":
+    "Connect Angular table exports to the shared PDF writer and print helpers. Configure output and load export controls only when needed.",
+  "angular/ssr-rsc.md":
+    "Server-render and hydrate Angular tables with platform-safe bindings. Supply request state explicitly and keep browser-only work behind platform guards.",
+  "angular/agent-capabilities.md":
+    "Connect Angular tables to provider-neutral AI through tableAgent and injectTableAssistant. Render native kit controls and govern host-owned operations.",
+  "angular/ai-voice.md":
+    "Dictate into an Angular table assistant draft with injectSpeechInput. Configure speech providers and controls while keeping message submission explicit.",
+  "angular/customization.md":
+    "Customize Angular tables with templates, renderer components, classNames and required slots. Keep context values and mobile rendering intact.",
+  "angular/toolbar-and-view-controls.md":
+    "Compose Angular toolbar controls for density, fullscreen, print, export and undo. Add a status bar or side panel through optional kit features.",
+  "angular/command-palette.md":
+    "Add Angular command palettes, context menus and shortcuts with kit-native controls. Register actions and support keyboard and touch entry points.",
+  "angular/i18n-rtl.md":
+    "Localize Angular tables with shared locale bundles and direction inputs. Configure translated labels and RTL-aware table and feature layouts.",
+  "angular/accessibility.md":
+    "Build accessible Angular tables with keyboard focus, labels and announcements. Account for grid navigation, mobile cards and kit-native controls.",
+  "angular/realtime.md":
+    "Apply realtime row patches to host-owned Angular signals. Preserve patch provenance and use changed-cell feedback without giving the table persistence.",
   "getting-started.md":
     "Install AdaptTable for Mantine, MUI, Chakra, Ant, Radix, Base UI or shadcn — one CLI command, or a StackBlitz starter with no install.",
   "concepts.md":
-    "Understand AdaptTable's framework-neutral core, React binding, TableSource contract and native UI adapters. Keep data ownership and optional features separate.",
+    "Understand AdaptTable's neutral core, React and Angular bindings, TableSource contract and native UI adapters. Keep data and persistence in your application.",
   "features.md":
     "Add React table features individually or use a preset. Compose filters, editing, grouping and custom plugins without importing unused feature implementations.",
   "columns.md":
@@ -179,7 +329,7 @@ export const DESCRIPTIONS = {
   "realtime.md":
     "Update React table rows from WebSocket or SSE events with useRowPatchStream or applyRowPatches, preserving filtering, sorting, grouping and aggregates.",
   "api.md":
-    "Complete AdaptTable API reference — DataTable props, ColumnDef, filters, source builders, prop-getters and the headless useDataTable hook for React.",
+    "AdaptTable API reference for the neutral engine, React and Angular bindings, native kits, filters, sources, optional features and provider-neutral AI.",
   "faq.md":
     "AdaptTable FAQ: free MIT alternative to MUI X DataGrid and ag-Grid, URL state, RTL/Arabic, client+server data, bundle size, and when to stay on TanStack.",
   "limitations.md":
@@ -317,25 +467,34 @@ function headBlock(entries) {
   return `head:\n${entries.join("\n")}\n`;
 }
 
+/** Rewrite links from a canonical source path before assigning its site route. */
+export function rewriteDocLinks(markdown, file) {
+  return markdown.replace(
+    /(\]\()([^\s)]+)([^)]*\))/g,
+    (_link, open, href, close) => {
+      const doc = docLinkTarget(file, href);
+      if (doc) return `${open}${docsRoute(doc.file)}${doc.suffix}${close}`;
+      if (href.startsWith("../")) {
+        const repositoryPath = posix.normalize(
+          posix.join("docs", posix.dirname(file), href)
+        );
+        return `${open}https://github.com/orwa-mahmoud/adapttable/blob/main/${repositoryPath}${close}`;
+      }
+      return `${open}${href}${close}`;
+    }
+  );
+}
+
 function syncDocs() {
   mkdirSync(target, { recursive: true });
-  for (const file of readdirSync(source)) {
-    if (!file.endsWith(".md")) continue;
+  const files = docsFiles(source);
+  for (const file of files) {
     const raw = readFileSync(join(source, file), "utf8");
     // Drop the H1 (Starlight renders the frontmatter title) and rewrite
     // repo-relative links into their site equivalents: doc-to-doc .md links
     // become the linked page's route in its section (anchors preserved),
     // repo files point at GitHub.
-    const body = raw
-      .replace(/^# .*\n/, "")
-      .replace(
-        /\((?:\.\/)?([a-z0-9-]+)\.md(#[a-z0-9-]+)?\)/g,
-        (_link, page, anchor = "") => `(${docsRoute(page)}${anchor})`
-      )
-      .replace(
-        /\(\.\.\/([^)]+)\)/g,
-        "(https://github.com/orwa-mahmoud/adapttable/blob/main/$1)"
-      );
+    const body = rewriteDocLinks(raw.replace(/^# .*\n/, ""), file);
     const title = TITLES[file] ?? file.replace(/\.md$/, "");
     const description = DESCRIPTIONS[file];
     const slug = file.replace(/\.md$/, "");
@@ -374,10 +533,8 @@ function syncDocs() {
   buildLlmsFull(repoRoot);
   copyFileSync(join(repoRoot, "llms-full.txt"), join(pub, "llms-full.txt"));
   const llmsIndex = readFileSync(join(repoRoot, "llms.txt"), "utf8");
-  const unlinked = readdirSync(source).filter(
-    (file) =>
-      file.endsWith(".md") &&
-      !llmsIndex.includes(siteUrl(docsRoute(file.replace(/\.md$/, ""))))
+  const unlinked = files.filter(
+    (file) => !llmsIndex.includes(siteUrl(docsRoute(file.replace(/\.md$/, ""))))
   );
   if (unlinked.length > 0) {
     console.warn(

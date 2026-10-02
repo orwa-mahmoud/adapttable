@@ -13,6 +13,7 @@ import {
   insertRow,
   removeRow,
   rowPatchLog,
+  rowPatchLogStartsAt,
   updateRow,
   upsertRow,
 } from "./patch";
@@ -142,5 +143,41 @@ describe("applyRowPatches", () => {
     const next = apply([updateRow("2", { team: "Core" }), removeRow("nope")]);
     const stillThere = next.filter((row) => selected.has(row.id));
     expect(stillThere.map((r) => r.id)).toEqual(["1", "3"]);
+  });
+
+  it("recognizes only a log's exact input array without changing its public shape", () => {
+    const first = applyRowPatchesWithLog(
+      ROWS,
+      [updateRow("1", { name: "Augusta" })],
+      byId
+    );
+    const second = applyRowPatchesWithLog(
+      first.rows,
+      [updateRow("2", { name: "Alan T." })],
+      byId
+    );
+    expect(rowPatchLogStartsAt(first, ROWS)).toBe(true);
+    expect(rowPatchLogStartsAt(second, first.rows)).toBe(true);
+    expect(rowPatchLogStartsAt(second, ROWS)).toBe(false);
+    expect(rowPatchLogStartsAt(first, [...ROWS])).toBe(false);
+    expect(rowPatchLogStartsAt({ ...first }, ROWS)).toBe(false);
+    expect(Object.keys(first)).toEqual(["rows", "events"]);
+  });
+
+  it("keeps the changing log and its base after a no-op on its result", () => {
+    const changed = applyRowPatchesWithLog(
+      ROWS,
+      [updateRow("1", { name: "Augusta" })],
+      byId
+    );
+    const noOp = applyRowPatchesWithLog(
+      changed.rows,
+      [updateRow("1", { name: "Augusta" })],
+      byId
+    );
+    expect(noOp.rows).toBe(changed.rows);
+    expect(rowPatchLog(noOp.rows)).toBe(changed);
+    expect(rowPatchLogStartsAt(changed, ROWS)).toBe(true);
+    expect(rowPatchLogStartsAt(noOp, changed.rows)).toBe(false);
   });
 });

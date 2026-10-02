@@ -15,13 +15,19 @@ export function Chips({
 }>) {
   if (chips.length === 0) return null;
   return (
-    <Wrap aria-label={labels.filters} as="ul" listStyleType="none">
+    <Wrap
+      data-adapttable-part="chips"
+      aria-label={labels.filters}
+      as="ul"
+      listStyleType="none"
+    >
       {chips.map((chip) => (
-        <WrapItem key={chip.key} as="li">
+        <WrapItem key={chip.key} as="li" data-adapttable-part="chip">
           <Tag.Root size="md" borderRadius="full">
             <Tag.Label>{chip.label}</Tag.Label>
             <Tag.EndElement>
               <Tag.CloseTrigger
+                data-adapttable-part="chip-remove"
                 aria-label={labels.removeFilter(chip.label)}
                 onClick={chip.onRemove}
               />
@@ -29,8 +35,13 @@ export function Chips({
           </Tag.Root>
         </WrapItem>
       ))}
-      <WrapItem as="li">
-        <Button size="xs" variant="plain" onClick={onClearAll}>
+      <WrapItem as="li" data-adapttable-part="chip">
+        <Button
+          data-adapttable-part="chip-remove"
+          size="xs"
+          variant="plain"
+          onClick={onClearAll}
+        >
           {labels.clearAll}
         </Button>
       </WrapItem>

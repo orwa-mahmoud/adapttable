@@ -105,6 +105,8 @@ export type KitDemoProps = Readonly<{
   /** The toolbar Export button's configuration. */
   exportCsv?: NonNullable<FeatureProps<Person>["exportCsv"]>;
   forceMobile?: boolean;
+  /** Bound the table body so the mobile list can scroll independently. */
+  maxHeight?: number;
   pageMode?: PageMode;
   focused?: boolean;
 }>;

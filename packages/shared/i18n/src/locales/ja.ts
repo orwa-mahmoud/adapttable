@@ -70,6 +70,7 @@ export const ja: Required<TableLabels> = {
   relPreviousMonth: "先月",
   relLastN: "過去 N 日",
   relNextN: "今後 N 日",
+  filterAll: "すべて",
   boolAny: "すべて",
   boolTrue: "はい",
   boolFalse: "いいえ",

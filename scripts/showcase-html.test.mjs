@@ -3,8 +3,11 @@ import { describe, it } from "node:test";
 
 import {
   adapterByKey,
+  builtAdapters,
   featureBySlug,
+  featuresOf,
   frameworkOf,
+  MATRIX_FEATURES,
   matrixPages,
 } from "../apps/showcase/matrix.mjs";
 import {
@@ -13,6 +16,7 @@ import {
   readShowcaseHtml,
   showcaseHtmlFiles,
 } from "./build-showcase-html.mjs";
+import { docsReferenceRoute, docsRoute, siteUrl } from "./site.mjs";
 
 /**
  * The showcase's generated HTML is what is on disk.
@@ -30,14 +34,65 @@ describe("the generated showcase pages", () => {
   const files = showcaseHtmlFiles();
 
   it("writes one page per matrix entry and per replaced address", () => {
-    // Twenty-two pages per adapter — a landing plus twenty-one features — across
-    // all eight kits, plus the eight replaced top-level addresses. Kit
-    // `/accessibility/` URLs are matrix pages again, not redirects to editing.
-    // Written out rather than recomputed from the matrix: the writer reads
-    // that same list, so a derived count would agree with itself no matter
-    // what it produced.
-    assert.equal(files.length, 8 * 22 + 8);
+    // Twenty-two pages per React adapter — a landing plus twenty-one
+    // features — across all eight kits; both Angular kits' landings
+    // plus all twenty-one feature destinations; and the eight replaced top-level
+    // addresses. Kit `/accessibility/` URLs are matrix pages again, not
+    // redirects to editing. Written out rather than recomputed from the
+    // matrix: the writer reads that same list, so a derived count would agree
+    // with itself no matter what it produced.
+    assert.equal(files.length, 8 * 22 + 2 * (1 + 21) + 8);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
+  });
+
+  it("gives every Angular kit a destination for every matrix feature", () => {
+    const expected = MATRIX_FEATURES.map((feature) => feature.slug).sort();
+    for (const kit of builtAdapters("angular")) {
+      assert.deepEqual(
+        featuresOf(kit)
+          .map((feature) => feature.slug)
+          .sort(),
+        expected,
+        `${kit.key} leaves a feature without an Angular destination`
+      );
+    }
+  });
+
+  it("links Angular showcase pages to Angular guides and preserves shared references", () => {
+    for (const kit of builtAdapters("angular")) {
+      assert.ok(
+        landingPage(kit).html.includes(
+          `href="${siteUrl(docsRoute("angular/getting-started"))}"`
+        )
+      );
+      for (const feature of featuresOf(kit)) {
+        const { html } = featurePage(kit, feature);
+        for (const page of feature.docs)
+          assert.ok(
+            html.includes(
+              `href="${siteUrl(docsReferenceRoute(page, "angular"))}"`
+            ),
+            `${kit.key}/${feature.slug}: ${page}`
+          );
+      }
+      const { html } = featurePage(kit, featureBySlug("filtering"));
+      assert.ok(
+        html.includes(`href="${siteUrl(docsRoute("angular/filtering"))}"`)
+      );
+      assert.equal(
+        html.includes(`href="${siteUrl(docsRoute("filtering"))}"`),
+        false
+      );
+    }
+    for (const kit of builtAdapters("react")) {
+      assert.ok(
+        landingPage(kit).html.includes(
+          `href="${siteUrl(docsRoute("getting-started"))}"`
+        )
+      );
+      const { html } = featurePage(kit, featureBySlug("filtering"));
+      assert.ok(html.includes(`href="${siteUrl(docsRoute("filtering"))}"`));
+    }
   });
 
   it("matches what is committed", () => {
@@ -72,10 +127,16 @@ describe("the generated showcase pages", () => {
   });
 
   it("names the v3 row-reordering and aggregation capabilities in static HTML", () => {
-    const reorder = files.filter((file) =>
+    // React's code on React's pages; the Angular kit's own page states what
+    // it renders.
+    const react = new Set(builtAdapters("react").map((adapter) => adapter.key));
+    const reactFiles = files.filter((file) =>
+      react.has(file.dir.split("/")[0] ?? "")
+    );
+    const reorder = reactFiles.filter((file) =>
       file.dir.endsWith("/row-reordering")
     );
-    const aggregation = files.filter((file) =>
+    const aggregation = reactFiles.filter((file) =>
       file.dir.endsWith("/aggregation")
     );
     assert.equal(reorder.length, 8);
@@ -95,8 +156,33 @@ describe("the generated showcase pages", () => {
 
   it("names the v3 AI integration capabilities in static HTML", () => {
     const ai = files.filter((file) => file.dir.endsWith("/ai"));
-    assert.equal(ai.length, 8);
-    for (const file of ai) {
+    assert.equal(ai.length, 10);
+    const angularDirs = new Set(
+      matrixPages()
+        .filter((page) => page.framework === "angular")
+        .map((page) => page.dir)
+    );
+    const angular = ai.filter((file) => angularDirs.has(file.dir));
+    assert.deepEqual(angular.map((file) => file.dir).sort(), [
+      "ng-zorro/ai",
+      "unstyled/ai",
+    ]);
+    for (const file of angular) {
+      assert.match(file.html, /injectTableAssistant/);
+      assert.match(file.html, /tableAgent/);
+      assert.match(file.html, /session\.execute/);
+      assert.match(file.html, /No language model or API key is needed/);
+      assert.match(file.html, /approved write updates the host/);
+      assert.doesNotMatch(file.html, /Connect backend/);
+    }
+    const reactDirs = new Set(
+      matrixPages()
+        .filter((page) => page.framework === "react")
+        .map((page) => page.dir)
+    );
+    const react = ai.filter((file) => reactDirs.has(file.dir));
+    assert.equal(react.length, 8);
+    for (const file of react) {
       assert.match(file.html, /tableAgent/);
       assert.match(file.html, /session\.execute|catalog/);
       assert.match(file.html, /agentApproval/);

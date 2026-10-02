@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Serve the built showcase for the end-to-end suite.
+ * Serve the built showcase or Astro docs for the end-to-end suite.
  *
  * The suite used to drive the Vite dev server, which compiles each route the
  * first time a spec asks for it. Under parallel load that first compile can
@@ -23,6 +23,7 @@
  *    is the current library rather than a stale package build.
  *
  *   node scripts/serve-showcase.mjs [--port 4321]
+ *   node scripts/serve-showcase.mjs --docs --port 4323
  */
 import { spawnSync } from "node:child_process";
 import { createReadStream, existsSync, statSync } from "node:fs";
@@ -32,7 +33,9 @@ import { dirname, extname, isAbsolute, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const DIST = join(ROOT, "apps", "showcase", "dist");
+const DOCS = process.argv.includes("--docs");
+const APP = DOCS ? "docs" : "showcase";
+const DIST = join(ROOT, "apps", APP, "dist");
 
 const portArg = process.argv.indexOf("--port");
 const PORT = Number(
@@ -70,7 +73,8 @@ const TYPES = new Map(
  * guard that quietly stops working.
  */
 function build() {
-  if (process.env.SHOWCASE_SKIP_BUILD === "1") return;
+  if (process.env[DOCS ? "DOCS_SKIP_BUILD" : "SHOWCASE_SKIP_BUILD"] === "1")
+    return;
   // Resolved from the installed package and run with this interpreter, so
   // neither the binary nor the runtime is taken from PATH.
   const require = createRequire(import.meta.url);
@@ -81,14 +85,23 @@ function build() {
   );
   const result = spawnSync(
     process.execPath,
-    [turbo, "run", "build", "--filter=@adapttable/showcase"],
+    [
+      turbo,
+      "run",
+      "build",
+      `--filter=@adapttable/${APP}`,
+      // Canonical docs live outside the Astro package, beyond its default
+      // Turbo inputs. Force a fresh local build; CI restores one exact-head
+      // artifact and sets DOCS_SKIP_BUILD, so shards never rebuild it.
+      ...(DOCS ? ["--force"] : []),
+    ],
     {
       cwd: ROOT,
       stdio: "inherit",
     }
   );
   if (result.status !== 0) {
-    console.error("showcase build failed");
+    console.error(`${APP} build failed`);
     process.exit(result.status ?? 1);
   }
 }
@@ -171,7 +184,7 @@ process.on("uncaughtException", (err) => {
 
 createServer((req, res) => {
   const url = req.url ?? "/";
-  if (url.split("?")[0] === PATCH_STREAM_PATH) {
+  if (!DOCS && url.split("?")[0] === PATCH_STREAM_PATH) {
     patchStream(req, res);
     return;
   }
@@ -201,5 +214,5 @@ createServer((req, res) => {
   res.on("close", () => stream.destroy());
   stream.pipe(res);
 }).listen(PORT, () => {
-  console.log(`showcase served from ${DIST} on http://localhost:${PORT}`);
+  console.log(`${APP} served from ${DIST} on http://localhost:${PORT}`);
 });

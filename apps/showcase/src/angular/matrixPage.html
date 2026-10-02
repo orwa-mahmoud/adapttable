@@ -1,0 +1,211 @@
+<header class="nav">
+  <div class="nav__inner shell">
+    <adapt-showcase-wordmark [href]="root() + '/' + adapter().key + '/'" />
+    <nav class="nav__links" aria-label="Demo pages">
+      <a
+        [href]="root() + '/' + adapter().key + '/'"
+        [class.is-on]="!feature()"
+        [attr.aria-current]="feature() ? null : 'page'"
+        >{{ adapter().label }}</a
+      >
+      <a [href]="reactDemo">React demo</a>
+    </nav>
+    <div class="nav__right">
+      <button
+        type="button"
+        class="nav__icon"
+        aria-label="Toggle dark mode"
+        (click)="toggleDark()"
+      >
+        {{ dark() ? "☀" : "☾" }}
+      </button>
+      <a
+        class="nav__docs"
+        [href]="gettingStarted"
+        target="_blank"
+        rel="noreferrer"
+        >Docs</a
+      >
+    </div>
+  </div>
+</header>
+
+<main>
+  <div
+    class="mx mx-ng shell"
+    [class.mx-ng--unstyled]="adapter().key === 'unstyled'"
+    [class.mx-ng--zorro]="adapter().key === 'ng-zorro'"
+    [attr.data-angular-kit]="adapter().key"
+    [style.--kit]="accent()"
+    [style.--c]="accent()"
+  >
+    <header class="mx-hero" [class.mx-hero--solo]="feature()">
+      <div class="mx-hero__body">
+        <p class="mx-kicker">
+          @if (feature(); as current) {
+            <a [href]="root() + '/' + adapter().key + '/'"
+              >AdaptTable for {{ adapter().label }}</a
+            >
+            <span class="mx-kicker__sep">/</span>
+            {{ head(current).label }}
+          } @else {
+            <span class="mx-kicker__pkg">{{ adapter().pkg }}</span>
+          }
+        </p>
+        <h1 class="mx-title">
+          {{ heading().before }}<em>{{ adapter().label }}</em
+          >{{ heading().after }}
+        </h1>
+        @for (line of intro(); track $index) {
+          <p class="mx-lead" [innerHTML]="leadHtml(line)"></p>
+        }
+        @if (!feature()) {
+          <div class="mx-actions">
+            <a
+              class="mx-btn mx-btn--primary"
+              [href]="gettingStarted"
+              target="_blank"
+              rel="noreferrer"
+              >Get started</a
+            >
+          </div>
+        }
+      </div>
+      @if (!feature()) {
+        <aside class="mx-plate">
+          <div class="mx-plate__head">
+            <span>{{ adapter().pkg }}</span>
+            <button
+              type="button"
+              class="mx-code__copy"
+              [class.is-done]="copied() === 'install'"
+              (click)="copy('install', adapter().install)"
+            >
+              {{ copied() === "install" ? "Copied" : "Copy install" }}
+            </button>
+          </div>
+          <div class="mx-plate__row">
+            <span class="mx-plate__key">Install</span>
+            <code class="mx-plate__val">{{ adapter().install }}</code>
+          </div>
+          <div class="mx-plate__row">
+            <span class="mx-plate__key">Import</span>
+            <code class="mx-plate__val">{{ importLine() }}</code>
+          </div>
+          <div class="mx-plate__row">
+            <span class="mx-plate__key">Peer</span>
+            <code class="mx-plate__val">{{ adapter().peer }}</code>
+          </div>
+        </aside>
+      }
+    </header>
+
+    @if (feature(); as current) {
+      <div class="mx-brief">
+        <div class="mx-code">
+          <div class="mx-code__bar">
+            <span>{{ head(current).label }} · {{ adapter().label }}</span>
+            <button
+              type="button"
+              class="mx-code__copy"
+              [class.is-done]="copied() === 'code'"
+              (click)="copy('code', code())"
+            >
+              {{ copied() === "code" ? "Copied" : "Copy" }}
+            </button>
+          </div>
+          <pre><code>{{ code() }}</code></pre>
+        </div>
+        <div class="mx-brief__side">
+          @if (note(); as text) {
+            <div class="mx-note">
+              <span class="mx-note__key">In {{ adapter().label }}</span>
+              <p>{{ text }}</p>
+            </div>
+          }
+          <div class="mx-refs">
+            <span class="mx-refs__key">Reference</span>
+            <div class="mx-refs__list">
+              @for (slug of current.docs; track slug) {
+                <a [href]="docsUrl(slug)" target="_blank" rel="noreferrer">{{
+                  slug.replaceAll("-", " ")
+                }}</a>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <p class="mx-seam">
+      rendered by <span class="mx-seam__pkg">{{ adapter().pkg }}</span>
+    </p>
+    <ng-container *ngComponentOutlet="body()" />
+
+    @if (feature(); as current) {
+      <section class="mx-section">
+        <div class="mx-section__head">
+          <h2 class="mx-h2">The rest of {{ adapter().label }}</h2>
+          <p class="mx-section__lead">
+            Same engine, same inputs, one page each.
+          </p>
+        </div>
+        <nav class="mx-rail" [attr.aria-label]="adapter().label + ' features'">
+          @for (item of features(); track item.slug) {
+            <a
+              [href]="root() + '/' + adapter().key + '/' + item.slug + '/'"
+              [attr.aria-current]="item.slug === current.slug ? 'page' : null"
+              >{{ head(item).label }}</a
+            >
+          }
+        </nav>
+      </section>
+    } @else {
+      <section class="mx-section">
+        <div class="mx-section__head">
+          <h2 class="mx-h2">{{ fill(landing.gridTitle) }}</h2>
+          <p class="mx-section__lead">{{ fill(landing.gridLead) }}</p>
+        </div>
+        <div class="mx-grid">
+          @for (item of features(); track item.slug) {
+            <a
+              class="mx-card"
+              [href]="root() + '/' + adapter().key + '/' + item.slug + '/'"
+            >
+              <span class="mx-card__name">{{ head(item).label }}</span>
+              <p class="mx-card__desc">{{ fill(head(item).card) }}</p>
+              <span class="mx-card__path"
+                >/{{ adapter().key }}/{{ item.slug }}/</span
+              >
+            </a>
+          }
+        </div>
+      </section>
+      @if (otherKits().length > 0) {
+        <section class="mx-section">
+          <div class="mx-section__head">
+            <h2 class="mx-h2">{{ fill(landing.kitsTitle) }}</h2>
+            <p class="mx-section__lead">{{ fill(landing.kitsLead) }}</p>
+          </div>
+          <div class="mx-kits">
+            @for (kit of otherKits(); track kit.key) {
+              <a class="mx-kit" [href]="root() + '/' + kit.key + '/'">
+                <span class="mx-kit__name">{{ kit.label }}</span>
+                <span class="mx-kit__blurb">{{ kit.blurb }}</span>
+              </a>
+            }
+          </div>
+        </section>
+      }
+    }
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot__inner shell">
+    <div class="foot__lead">
+      <adapt-showcase-wordmark [href]="siteHome" />
+      <p>Headless freedom, batteries included.</p>
+    </div>
+  </div>
+</footer>

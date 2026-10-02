@@ -70,6 +70,7 @@ export const ur: Required<TableLabels> = {
   relPreviousMonth: "پچھلا مہینہ",
   relLastN: "گزشتہ N دن",
   relNextN: "اگلے N دن",
+  filterAll: "سب",
   boolAny: "کوئی بھی",
   boolTrue: "درست",
   boolFalse: "غلط",

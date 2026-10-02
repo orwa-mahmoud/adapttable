@@ -1,12 +1,14 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { join, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import angular from "@analogjs/vite-plugin-angular";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 
 import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
-import { packageDir } from "../../scripts/packages.mjs";
+import { listPackages, packageDir } from "../../scripts/packages.mjs";
 import { SHOWCASE_PAGES } from "./pages.mjs";
 
 const GA_MEASUREMENT_ID = "G-FT8LY7Z15Y";
@@ -160,6 +162,29 @@ const pkg = (rel: string, entry = "index", ext = "ts") =>
 
 const page = (rel: string) => fileURLToPath(new URL(rel, import.meta.url));
 
+/** Every workspace package's folder, by the name it is published under. */
+const PACKAGE_DIRS = new Map(
+  listPackages().map(({ dir }) => [
+    (
+      JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as {
+        name: string;
+      }
+    ).name,
+    dir,
+  ])
+);
+
+/**
+ * The source file of one entry point: a React package's `src/<entry>.tsx` or
+ * `src/<entry>.ts`, or an Angular package's secondary entry `<entry>/index.ts`.
+ */
+const entrySource = (dir: string, entry: string): string | null =>
+  [
+    `${dir}/src/${entry}.tsx`,
+    `${dir}/src/${entry}.ts`,
+    `${dir}/${entry}/index.ts`,
+  ].find((file) => existsSync(file)) ?? null;
+
 /**
  * Resolve every `@adapttable/<pkg>/<feature>` subpath to its TypeScript source.
  *
@@ -167,38 +192,47 @@ const page = (rel: string) => fileURLToPath(new URL(rel, import.meta.url));
  * kit now publishes one entry point per feature — which is exactly what the
  * demo imports to arm them. Listing those by hand meant a new import silently
  * resolved to `.../src/index.ts/<feature>` and broke the page, so the mapping
- * is derived: `enforce: "pre"` puts it ahead of the bare-package aliases that
- * would otherwise swallow the subpath.
+ * is derived from the packages' own names: `enforce: "pre"` puts it ahead of
+ * the bare-package aliases that would otherwise swallow the subpath.
  */
 function adapttableSubpaths(): Plugin {
   return {
     name: "adapttable-source-subpaths",
     enforce: "pre",
     resolveId(id) {
-      const match = /^@adapttable\/([a-z0-9-]+)\/([a-z0-9-]+)$/.exec(id);
-      if (!match) return null;
-      const dir =
-        match[1] === "core" ||
-        match[1] === "ai" ||
-        match[1] === "ai-react" ||
-        match[1] === "i18n" ||
-        match[1] === "react"
-          ? match[1]
-          : `adapter-${match[1]}`;
-      for (const ext of ["tsx", "ts"]) {
-        const file = pkg(dir, match[2], ext);
-        if (existsSync(file)) return file;
-      }
-      return null;
+      const match = /^(@adapttable\/[a-z0-9-]+)\/([a-z0-9-]+)$/.exec(id);
+      const dir = match ? PACKAGE_DIRS.get(match[1] ?? "") : undefined;
+      if (!match || dir === undefined) return null;
+      return entrySource(dir, match[2] ?? "");
     },
   };
 }
+
+/** Where the Angular pages and the Angular packages they compile live. */
+const ANGULAR_SOURCES = [
+  fileURLToPath(new URL("./src/angular/", import.meta.url)),
+  `${packageDir("angular")}${sep}`,
+  `${packageDir("ai-angular")}${sep}`,
+  `${packageDir("adapter-angular-unstyled")}${sep}`,
+  `${packageDir("adapter-ng-zorro")}${sep}`,
+];
+
+/** Whether a module is Angular source the Angular compiler owns. */
+const isAngularSource = (id: string): boolean =>
+  ANGULAR_SOURCES.some((dir) => id.startsWith(dir));
 
 export default defineConfig({
   base: "./",
   plugins: [
     adapttableSubpaths(),
-    react(),
+    // The Angular pages and the Angular packages compile with Angular's own
+    // compiler, from source like every other package here; React's plugin
+    // keeps to everything else.
+    angular({
+      tsconfig: page("./src/angular/tsconfig.json"),
+      transformFilter: (_code, id) => isAngularSource(id),
+    }),
+    react({ exclude: ANGULAR_SOURCES.map((dir) => `${dir}**`) }),
     tailwindcss(),
     googleAnalytics(),
     microsoftClarity(),
@@ -242,6 +276,7 @@ export default defineConfig({
       { find: /^@adapttable\/react$/, replacement: pkg("react") },
       { find: /^@adapttable\/ai$/, replacement: pkg("ai") },
       { find: /^@adapttable\/ai-react$/, replacement: pkg("ai-react") },
+      { find: /^@adapttable\/ai-angular$/, replacement: pkg("ai-angular") },
       { find: /^@adapttable\/i18n$/, replacement: pkg("i18n") },
       { find: /^@adapttable\/mantine$/, replacement: pkg("adapter-mantine") },
       { find: /^@adapttable\/mui$/, replacement: pkg("adapter-mui") },
@@ -251,6 +286,15 @@ export default defineConfig({
       { find: /^@adapttable\/antd$/, replacement: pkg("adapter-antd") },
       { find: /^@adapttable\/radix$/, replacement: pkg("adapter-radix") },
       { find: /^@adapttable\/base-ui$/, replacement: pkg("adapter-base-ui") },
+      { find: /^@adapttable\/angular$/, replacement: pkg("angular") },
+      {
+        find: /^@adapttable\/ng-zorro$/,
+        replacement: pkg("adapter-ng-zorro"),
+      },
+      {
+        find: /^@adapttable\/angular-unstyled$/,
+        replacement: pkg("adapter-angular-unstyled"),
+      },
     ],
     dedupe: [
       "react",

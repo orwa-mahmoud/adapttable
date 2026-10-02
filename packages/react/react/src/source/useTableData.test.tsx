@@ -1,4 +1,4 @@
-import { resetDevWarnings } from "@adapttable/core";
+import { type FilterDef, resetDevWarnings } from "@adapttable/core";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
@@ -66,6 +66,56 @@ describe("useTableData — frontend tier", () => {
     expect(result.current.source.rows.map((r) => r.name)).toEqual(["Cara"]);
     // numberRange registered its keys, so the URL value parsed as a number.
     expect(result.current.source.extra.budgetMin).toBe(300);
+  });
+
+  it("re-evaluates live filter definitions without replacing data or churning unchanged predicates", () => {
+    const adapter = createMemoryAdapter("f_status=active");
+    const original: FilterDef<Row>[] = [{ key: "status", type: "select" }];
+    const changed: FilterDef<Row>[] = [
+      {
+        key: "status",
+        type: "select",
+        getValue: (row) => (row.status === "active" ? "blocked" : "active"),
+      },
+    ];
+    const initialProps: { filters: readonly FilterDef<Row>[] } = {
+      filters: [],
+    };
+    const { result, rerender } = renderHook(
+      ({ filters }: { filters: readonly FilterDef<Row>[] }) =>
+        useTableData<Row>({
+          data: ROWS,
+          columns: [{ key: "name" }],
+          filters,
+          urlAdapter: adapter,
+          paginationMode: "paged",
+        }),
+      { initialProps }
+    );
+    expect(result.current.source.rows).toEqual(ROWS);
+    rerender({ filters: original });
+    expect(result.current.source.rows.map((row) => row.name)).toEqual([
+      "Alice",
+      "Cara",
+    ]);
+    const before = result.current.source.tableEngine!.snapshot().revisions.data;
+    const stable = result.current.source.rows;
+    rerender({ filters: original.map((def) => ({ ...def })) });
+    expect(result.current.source.rows).toBe(stable);
+
+    rerender({ filters: changed });
+    expect(result.current.source.rows.map((row) => row.name)).toEqual(["Bob"]);
+    expect(result.current.source.tableEngine!.snapshot().revisions.data).toBe(
+      before
+    );
+    rerender({ filters: [] });
+    expect(result.current.source.rows).toEqual(ROWS);
+    rerender({ filters: original });
+    expect(result.current.source.rows.map((row) => row.name)).toEqual([
+      "Alice",
+      "Cara",
+    ]);
+    expect(adapter.getSearch()).toBe("f_status=active");
   });
 
   it("AND-composes a user filterFn with the declarative predicate", () => {

@@ -17,6 +17,16 @@ export function cx(...parts: (string | false | null | undefined)[]): string {
 type Size = "1" | "2" | "3";
 type Variant = "solid" | "soft" | "ghost" | "outline";
 
+const JUSTIFY: Readonly<Record<string, CSSProperties["justifyContent"]>> = {
+  between: "space-between",
+  end: "flex-end",
+  start: "flex-start",
+};
+const ALIGN: Readonly<Record<string, CSSProperties["alignItems"]>> = {
+  center: "center",
+  start: "flex-start",
+};
+
 /** Convert a Themes-style space token (`"2"` / `2`) to rem. */
 function space(value: string | number | undefined): string | undefined {
   if (value == null) return undefined;
@@ -37,7 +47,6 @@ export function Flex({
   mt,
   className,
   style,
-  children,
   ref,
   ...rest
 }: Readonly<
@@ -47,8 +56,8 @@ export function Flex({
     gap?: string | number;
     wrap?: "wrap" | "nowrap";
     // csstype admits any string here, so the shorthand aliases below
-    // (`between`, `end`, `start`, `center`) are already assignable; justifyMap
-    // and alignMap translate them to their flexbox values.
+    // (`between`, `end`, `start`, `center`) are already assignable; JUSTIFY
+    // and ALIGN translate them to their flexbox values.
     justify?: NonNullable<CSSProperties["justifyContent"]>;
     align?: NonNullable<CSSProperties["alignItems"]>;
     py?: string | number;
@@ -59,27 +68,17 @@ export function Flex({
     ref?: Ref<HTMLElement>;
   } & HTMLAttributes<HTMLElement>
 >) {
-  const justifyMap: Record<string, CSSProperties["justifyContent"]> = {
-    between: "space-between",
-    end: "flex-end",
-    start: "flex-start",
-  };
-  const alignMap: Record<string, CSSProperties["alignItems"]> = {
-    center: "center",
-    start: "flex-start",
-  };
   const merged: CSSProperties = {
     flexDirection: direction,
     gap: space(gap),
-    justifyContent:
-      justify == null ? undefined : (justifyMap[justify] ?? justify),
-    alignItems: align == null ? undefined : (alignMap[align] ?? align),
+    justifyContent: justify == null ? undefined : (JUSTIFY[justify] ?? justify),
+    alignItems: align == null ? undefined : (ALIGN[align] ?? align),
     paddingBlock: space(py),
     marginTop: space(mt),
     ...style,
   };
   if (asChild) {
-    return <>{children}</>;
+    return <>{rest.children}</>;
   }
   return (
     <div
@@ -88,22 +87,17 @@ export function Flex({
       data-wrap={wrap === "wrap" ? "true" : undefined}
       style={merged}
       {...rest}
-    >
-      {children}
-    </div>
+    />
   );
 }
 
 /** Generic box / div wrapper with common spacing tokens. */
 export function Box({
-  className,
   style,
   p,
   pt,
   mb,
   mt,
-  children,
-  ref,
   ...rest
 }: Readonly<
   {
@@ -119,8 +113,6 @@ export function Box({
 >) {
   return (
     <div
-      ref={ref}
-      className={className}
       style={{
         padding: space(p),
         paddingTop: space(pt),
@@ -129,9 +121,7 @@ export function Box({
         ...style,
       }}
       {...rest}
-    >
-      {children}
-    </div>
+    />
   );
 }
 
@@ -173,23 +163,18 @@ export function Text({
   ml,
   className,
   style,
-  children,
   ...rest
 }: Readonly<TextProps>): React.ReactElement {
-  return createElement(
-    as,
-    {
-      className: cx("adapttable-text", className),
-      "data-size": size,
-      "data-weight": weight,
-      "data-color": color,
-      "data-muted": color === "gray" ? "true" : undefined,
-      "data-align": align,
-      style: { marginInlineStart: space(ml), ...style },
-      ...rest,
-    },
-    children
-  );
+  return createElement(as, {
+    className: cx("adapttable-text", className),
+    "data-size": size,
+    "data-weight": weight,
+    "data-color": color,
+    "data-muted": color === "gray" ? "true" : undefined,
+    "data-align": align,
+    style: { marginInlineStart: space(ml), ...style },
+    ...rest,
+  });
 }
 
 /** Primary / ghost / outline button. */
@@ -199,7 +184,6 @@ export function Button({
   color,
   loading,
   className,
-  style,
   children,
   disabled,
   ...rest
@@ -221,7 +205,6 @@ export function Button({
       data-variant={variant}
       data-color={color}
       disabled={disabled === true || loading === true}
-      style={style}
       {...rest}
     >
       {loading ? "…" : null}
@@ -237,7 +220,6 @@ export function IconButton({
   color,
   radius: _radius,
   className,
-  children,
   ...rest
 }: Readonly<
   {
@@ -256,9 +238,7 @@ export function IconButton({
       data-variant={variant}
       data-color={color}
       {...rest}
-    >
-      {children}
-    </BaseButton>
+    />
   );
 }
 
@@ -269,7 +249,6 @@ export function Badge({
   color,
   variant: _variant,
   className,
-  children,
   ...rest
 }: Readonly<
   {
@@ -286,9 +265,7 @@ export function Badge({
       className={cx("adapttable-badge", className)}
       data-color={color}
       {...rest}
-    >
-      {children}
-    </span>
+    />
   );
 }
 
@@ -332,9 +309,9 @@ export function TextFieldRoot({
 /** Left/right adornment for {@link TextFieldRoot}. */
 export function TextFieldSlot({
   side: _side,
-  children,
-}: Readonly<{ side?: "left" | "right"; children?: ReactNode }>) {
-  return <span aria-hidden="true">{children}</span>;
+  ...rest
+}: Readonly<HTMLAttributes<HTMLSpanElement> & { side?: "left" | "right" }>) {
+  return <span aria-hidden="true" {...rest} />;
 }
 
 export const TextField = {
@@ -346,8 +323,6 @@ export const TextField = {
 export function Card({
   className,
   size: _size,
-  children,
-  ref,
   ...rest
 }: Readonly<
   {
@@ -357,11 +332,7 @@ export function Card({
     ref?: Ref<HTMLDivElement>;
   } & HTMLAttributes<HTMLDivElement>
 >) {
-  return (
-    <div ref={ref} className={cx("adapttable-card", className)} {...rest}>
-      {children}
-    </div>
-  );
+  return <div className={cx("adapttable-card", className)} {...rest} />;
 }
 
 /** Horizontal rule. */
@@ -441,20 +412,10 @@ export function VisuallyHidden({
 export const Callout = {
   Root({
     color: _color,
-    role,
-    children,
     className,
-  }: Readonly<{
-    color?: string;
-    role?: string;
-    children?: ReactNode;
-    className?: string;
-  }>) {
-    return (
-      <div className={cx("adapttable-callout", className)} role={role}>
-        {children}
-      </div>
-    );
+    ...rest
+  }: Readonly<HTMLAttributes<HTMLDivElement> & { color?: string }>) {
+    return <div className={cx("adapttable-callout", className)} {...rest} />;
   },
   Text({ children }: Readonly<{ children?: ReactNode }>) {
     return <div>{children}</div>;
@@ -493,6 +454,7 @@ export const Table = {
     return (
       <div
         className={cx("adapttable-table-root", className)}
+        data-adapttable-part={role === "grid" ? "grid" : undefined}
         data-size={size}
         {...rest}
       >
@@ -515,33 +477,20 @@ export const Table = {
   Body({ children }: Readonly<{ children?: ReactNode }>) {
     return <tbody>{children}</tbody>;
   },
-  Row({
-    children,
-    className,
-    style,
-    ref,
-    ...rest
-  }: Readonly<
-    {
-      children?: ReactNode;
-      className?: string;
-      style?: CSSProperties;
-      ref?: Ref<HTMLTableRowElement>;
-    } & HTMLAttributes<HTMLTableRowElement>
-  >) {
-    return (
-      <tr ref={ref} className={className} style={style} {...rest}>
-        {children}
-      </tr>
-    );
+  Row(
+    props: Readonly<
+      {
+        children?: ReactNode;
+        className?: string;
+        style?: CSSProperties;
+        ref?: Ref<HTMLTableRowElement>;
+      } & HTMLAttributes<HTMLTableRowElement>
+    >
+  ) {
+    return <tr {...props} />;
   },
   Cell({
-    children,
     justify,
-    colSpan,
-    rowSpan,
-    style,
-    className,
     ...rest
   }: Readonly<
     {
@@ -553,26 +502,10 @@ export const Table = {
       className?: string;
     } & HTMLAttributes<HTMLTableCellElement>
   >) {
-    return (
-      <td
-        className={className}
-        data-justify={justify}
-        colSpan={colSpan}
-        rowSpan={rowSpan}
-        style={style}
-        {...rest}
-      >
-        {children}
-      </td>
-    );
+    return <td data-justify={justify} {...rest} />;
   },
   ColumnHeaderCell({
-    children,
     justify,
-    colSpan,
-    rowSpan,
-    style,
-    className,
     ...rest
   }: Readonly<
     {
@@ -584,18 +517,6 @@ export const Table = {
       className?: string;
     } & HTMLAttributes<HTMLTableCellElement>
   >) {
-    return (
-      <th
-        className={className}
-        data-justify={justify}
-        colSpan={colSpan}
-        rowSpan={rowSpan}
-        style={style}
-        scope="col"
-        {...rest}
-      >
-        {children}
-      </th>
-    );
+    return <th data-justify={justify} scope="col" {...rest} />;
   },
 };

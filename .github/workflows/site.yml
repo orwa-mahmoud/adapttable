@@ -76,10 +76,8 @@ jobs:
         run: pnpm --filter @adapttable/docs build
       - name: Build live demo (showcase)
         run: pnpm --filter @adapttable/showcase build
-      - name: Compose site (showcase under /react/demo)
-        run: |
-          mkdir -p apps/docs/dist/react/demo
-          cp -R apps/showcase/dist/* apps/docs/dist/react/demo/
+      - name: Compose site (each framework's demo pages under its demo root)
+        run: node scripts/compose-site.mjs
       - name: Check every demo route is in the sitemap
         run: pnpm check:sitemap
       - name: Check every same-site link resolves

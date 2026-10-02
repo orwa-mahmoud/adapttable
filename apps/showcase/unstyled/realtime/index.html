@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <meta name="description" content="See live row updates in a Unstyled Angular table. Apply incremental patches while preserving sort, filters and selection, with an on-page update feed." />
+    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/realtime/" />
+    <meta name="robots" content="noindex, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AdaptTable" />
+    <meta property="og:title" content="Unstyled live-updating data table — AdaptTable" />
+    <meta property="og:description" content="See live row updates in a Unstyled Angular table. Apply incremental patches while preserving sort, filters and selection, with an on-page update feed." />
+    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/realtime/" />
+    <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Unstyled live-updating data table — AdaptTable" />
+    <meta name="twitter:description" content="See live row updates in a Unstyled Angular table. Apply incremental patches while preserving sort, filters and selection, with an on-page update feed." />
+    <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"See live row updates in a Unstyled Angular table. Apply incremental patches while preserving sort, filters and selection, with an on-page update feed.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/realtime/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      (function () {
+  var isLocal = function(){
+  var h = location.hostname || "";
+  if (location.protocol === "file:") return true;
+  if (h === "" || h === "localhost" || h === "0.0.0.0" || h === "[::1]" || h === "::1") return true;
+  if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+  return false;
+};
+  if (isLocal()) return;
+  (function () {
+    var s = document.createElement('script');
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.defer = true;
+    s.setAttribute("data-cf-beacon", "{\"token\": \"dd71ff9f3b7b4064969d3f81e8c6ee9b\"}");
+    document.head.appendChild(s);
+  })();
+})();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <title>Unstyled live-updating data table — AdaptTable</title>
+    <script>
+      try {
+        if (localStorage.getItem("adapttable-demo-theme") === "dark")
+          document.documentElement.dataset.theme = "dark";
+      } catch {}
+    </script>
+    <style>
+      /* The pre-mount fallback inside #root. React replaces it on mount, so
+         this paints only while the bundle is still downloading — or
+         permanently, when JavaScript is unavailable. Styled so that moment
+         reads as the page arriving rather than as broken markup. */
+      .at-fallback {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 4.5rem 1.5rem;
+        font-family: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+        color: #52525b;
+        line-height: 1.65;
+      }
+      .at-fallback p {
+        text-wrap: pretty;
+      }
+      .at-fallback__kicker {
+        margin: 0 0 0.75rem;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #71717a;
+      }
+      .at-fallback h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #18181b;
+        margin: 0 0 1rem;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+      .at-fallback h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #18181b;
+        margin: 2rem 0 0.6rem;
+      }
+      .at-fallback pre {
+        overflow-x: auto;
+        padding: 1rem 1.1rem;
+        border: 1px solid #e4e4e7;
+        border-radius: 12px;
+        background: #fafafa;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.8rem;
+        line-height: 1.7;
+        color: #3f3f46;
+      }
+      .at-fallback p code {
+        padding: 1px 5px;
+        border-radius: 5px;
+        background: #f4f4f5;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.86em;
+        color: #27272a;
+      }
+      .at-fallback ul {
+        padding-inline-start: 1.2rem;
+        margin: 0;
+      }
+      .at-fallback li {
+        margin: 0.4rem 0;
+      }
+      .at-fallback a {
+        color: #4f46e5;
+      }
+      [data-theme="dark"] .at-fallback {
+        color: #a1a1aa;
+      }
+      [data-theme="dark"] .at-fallback :is(h1, h2) {
+        color: #fafafa;
+      }
+      [data-theme="dark"] .at-fallback pre {
+        border-color: #3f3f46;
+        background: #18181b;
+        color: #d4d4d8;
+      }
+      [data-theme="dark"] .at-fallback p code {
+        background: #27272a;
+        color: #e4e4e7;
+      }
+      [data-theme="dark"] .at-fallback a {
+        color: #a5b4fc;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Replaced by Angular on mount — the served markup carries the page's
+         own words so a crawler, and anyone whose bundle has not arrived, reads
+         a real page. Written by scripts/build-showcase-html.mjs. -->
+    <div id="root" data-matrix-page="unstyled/realtime">
+      <main class="at-fallback">
+        <p class="at-fallback__kicker">AdaptTable for Unstyled</p>
+        <h1>Live updates in Unstyled</h1>
+        <p>Rows patch in as they arrive, the way a websocket would. This page applies one budget change at a time so the movement is followable.</p>
+        <p>Patches go through the row-patch API rather than replacing the array, so search, filters and sort re-run for the touched rows only — your scroll and selection survive.</p>
+        <p>The feed lists every patch as it lands. The table is Unstyled.</p>
+        <h2>The code</h2>
+        <pre><code>import { Component, input, signal } from &quot;@angular/core&quot;;
+import type { ColumnDef } from &quot;@adapttable/angular&quot;;
+import { applyRowPatches, updateRow } from &quot;@adapttable/core&quot;;
+import { AdaptDataTable } from &quot;@adapttable/angular-unstyled&quot;;
+
+@Component({
+  selector: &quot;app-live-people&quot;,
+  imports: [AdaptDataTable],
+  template: `
+    &lt;adapt-data-table
+      [data]=&quot;rows()&quot; [columns]=&quot;columns()&quot; [rowKey]=&quot;rowKey&quot;
+    /&gt;
+  `,
+})
+export class LivePeople {
+  readonly rows = signal&lt;readonly Person[]&gt;([]);
+  readonly columns = input.required&lt;readonly ColumnDef&lt;Person&gt;[]&gt;();
+  readonly rowKey = (row: Person) =&gt; row.id;
+
+  patchBudget(id: string, budget: number): void {
+    this.rows.update((rows) =&gt; applyRowPatches(
+      rows, [updateRow&lt;Person&gt;(id, { budget })], this.rowKey,
+    ));
+  }
+}</code></pre>
+        <h2>Install</h2>
+        <pre><code>pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core</code></pre>
+        <h2>The same feature in the other kits</h2>
+        <ul>
+          <li><a href="../../ng-zorro/realtime/">Live updates in NG-ZORRO</a> — Ant Design components for Angular</li>
+        </ul>
+        <h2>More Unstyled features</h2>
+        <ul>
+          <li><a href="../filtering/">Filtering in Unstyled</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>
+          <li><a href="../columns/">Column management in Unstyled</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="../column-groups/">Column groups in Unstyled</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="../selection/">Row selection in Unstyled</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="../rows/">Rows in Unstyled</a> — Pin rows from a 3-dot menu, and merge a team that runs down the page.</li>
+          <li><a href="../row-reordering/">Row reordering in Unstyled</a> — Drag or keyboard moves, announced — the host writes.</li>
+          <li><a href="../editing/">Inline cell editing in Unstyled</a> — Native editors in the cell; every write goes through your handler.</li>
+          <li><a href="../grouping/">Row grouping in Unstyled</a> — Drag, select or keyboard grouping, with totals in the headers.</li>
+          <li><a href="../aggregation/">Aggregation in Unstyled</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
+          <li><a href="../nested-tables/">Nested tables in Unstyled</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="../export/">CSV export in Unstyled</a> — One toolbar button, a CSV of the table as it stands.</li>
+          <li><a href="../scale/">Row and column virtualization in Unstyled</a> — 40,000 rows in a scroll box, only the visible ones rendered.</li>
+          <li><a href="../tree/">Tree data in Unstyled</a> — Nesting, chevrons, lazy children, and a tree on phones.</li>
+          <li><a href="../mobile-cards/">Mobile cards in Unstyled</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="../pivot/">Pivot tables in Unstyled</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="../saved-views/">Saved views in Unstyled</a> — Name an arrangement and restore it from the menu.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in Unstyled</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="../rtl/">Right-to-left Unstyled data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="../accessibility/">Accessible Unstyled data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="../ai/">AI table assistant in Unstyled Angular</a> — Local sort, questions and approved edits with real table outcomes.</li>
+        </ul>
+        <p>
+          Reference: <a href="https://adapttable.orwamahmoud.com/angular/realtime/">realtime</a>, <a href="https://adapttable.orwamahmoud.com/angular/cell-editing/">cell-editing</a>. More of this kit:
+          <a href="../">AdaptTable for Unstyled</a>, or
+          <a href="/react/demo/">the live demo</a>.
+        </p>
+      </main>
+    </div>
+    <script type="module" src="/src/angular/entry-matrix.ts"></script>
+  </body>
+</html>

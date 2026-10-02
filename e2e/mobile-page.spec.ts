@@ -72,6 +72,78 @@ for (const kit of KITS) {
 }
 
 for (const kit of KITS) {
+  test(`${kit}: bounded cards scroll by keyboard and wheel`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit}/mobile-cards/`);
+    // Keep a fixed page of rows while testing the scroll container itself.
+    await page.getByRole("button", { name: "Paged", exact: true }).click();
+    const root = demo(page).locator(`[data-adapter="${kit}"]`);
+    const region = root.getByRole("region").filter({
+      has: page.locator(':scope > [data-adapttable-part="cards"]'),
+    });
+    const list = region.getByRole("list");
+    const cards = list.getByRole("listitem");
+    const bounded = page.getByRole("button", {
+      name: "Bounded list",
+      exact: true,
+    });
+
+    await expect(bounded).toHaveAttribute("aria-pressed", "false");
+    await expect(region).not.toHaveAttribute("tabindex");
+    await expect(list).toHaveAttribute("data-adapttable-part", "cards");
+    await expect(cards.first()).toHaveAttribute("data-adapttable-part", "card");
+    const cardCount = await cards.count();
+
+    await bounded.click();
+    await expect(bounded).toHaveAttribute("aria-pressed", "true");
+    await expect(region).toBeVisible();
+    await expect(region).toHaveAccessibleName(/\S/);
+    await expect(region).toHaveAttribute("tabindex", "0");
+    await expect(region).toHaveCSS("max-height", "240px");
+    await expect(region).toHaveCSS("overflow-y", "auto");
+    await expect(list).toHaveAttribute("data-adapttable-part", "cards");
+    await expect(cards).toHaveCount(cardCount);
+    await expect
+      .poll(() =>
+        region.evaluate(
+          (element) => element.scrollHeight - element.clientHeight
+        )
+      )
+      .toBeGreaterThan(0);
+
+    // Native input is the proof: evaluate only reads the scroll position.
+    await region.scrollIntoViewIfNeeded();
+    await region.focus();
+    await expect(region).toBeFocused();
+    await page.keyboard.press("PageDown");
+    await expect
+      .poll(() => region.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(0);
+
+    // Start again at the top so a pending PageDown animation cannot pass
+    // the wheel assertion by itself.
+    await page.keyboard.press("Home");
+    await expect
+      .poll(() => region.evaluate((element) => element.scrollTop))
+      .toBe(0);
+    await region.hover();
+    await page.mouse.wheel(0, 200);
+    await expect
+      .poll(() => region.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(0);
+
+    await bounded.click();
+    await expect(bounded).toHaveAttribute("aria-pressed", "false");
+    await expect(region).not.toHaveAttribute("tabindex");
+    await expect(region).toHaveCSS("max-height", "none");
+    await expect(list).toHaveAttribute("data-adapttable-part", "cards");
+    await expect(list).not.toHaveAttribute("tabindex");
+    await expect(cards).toHaveCount(cardCount);
+  });
+}
+
+for (const kit of KITS) {
   test(`${kit}: a custom card body keeps the list semantics`, async ({
     page,
   }) => {

@@ -13,11 +13,13 @@ import { Check, Monitor, Phone } from "./sectionIcons";
  *
  * Both pagination styles are demoed explicitly: infinite scroll (what
  * `paginationMode="auto"` picks on phones) and the classic pager.
+ * A bounded list demonstrates the table's own keyboard-scrollable body.
  */
 export function MobileDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [phone, setPhone] = useState(true);
   const [pageMode, setPageMode] = useState<PageMode>("infinite");
   const [customCard, setCustomCard] = useState(false);
+  const [bounded, setBounded] = useState(false);
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;
   return (
     <div className="mx-demo">
@@ -76,6 +78,14 @@ export function MobileDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
             Custom card
           </button>
         </div>
+        <button
+          type="button"
+          className={`seg__btn${bounded ? " is-on" : ""}`}
+          aria-pressed={bounded}
+          onClick={() => setBounded((value) => !value)}
+        >
+          Bounded list
+        </button>
         <span className="hint">
           <Check size={12} /> search and pagination stay identical
         </span>
@@ -91,6 +101,7 @@ export function MobileDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                   dark={dark}
                   urlKey="mob"
                   forceMobile={phone}
+                  maxHeight={bounded ? 240 : undefined}
                   pageMode={pageMode}
                   customCard={customCard}
                   focused

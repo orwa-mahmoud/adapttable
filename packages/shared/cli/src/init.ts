@@ -1,4 +1,10 @@
-import { detectKit, type Kit, mergeDependencies, SHADCN } from "./detect";
+import {
+  detectFramework,
+  detectKit,
+  type Framework,
+  type Kit,
+  mergeDependencies,
+} from "./detect";
 import {
   choosePackageManager,
   installCommand,
@@ -40,6 +46,8 @@ export interface InitOptions {
  * @public
  */
 export interface InitResult {
+  /** The detected framework. */
+  framework: Framework;
   /** The detected kit identifier. */
   kit: Kit;
   /** The adapter package that was scaffolded. */
@@ -48,7 +56,7 @@ export interface InitResult {
   packageManager: PackageManager;
   /** Packages the printed install command will add. */
   packages: string[];
-  /** The runnable install command. */
+  /** The install command; unpublished Angular kits need a local package source. */
   installCommand: string;
   /** Scaffold paths that were written. */
   written: string[];
@@ -108,15 +116,22 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
   }
 
   const deps = mergeDependencies(pkg);
-  const detected = detectKit(deps);
-  // A Tailwind project with a shadcn config (`components.json`) is a shadcn/ui
-  // project — scaffold its pre-wired adapter rather than the bare unstyled one.
-  const info =
-    detected.kit === "unstyled" && io.exists("components.json")
-      ? SHADCN
-      : detected;
+  const framework = detectFramework(deps, {
+    hasAngularJson: io.exists("angular.json"),
+  });
+  const info = detectKit(deps, {
+    framework,
+    hasComponentsJson: io.exists("components.json"),
+  });
   const pm = choosePackageManager(io.listRootFiles());
-  const packages = packagesFor(info);
+  const packages = packagesFor(info).filter((specifier) => {
+    if (framework !== "angular" || !info.extras.includes(specifier))
+      return true;
+    // Angular extras in KITS carry version ranges; compare their bare names so
+    // an existing host peer is not reinstalled or upgraded by the command.
+    const name = specifier.slice(0, specifier.lastIndexOf("@"));
+    return !Object.hasOwn(deps, name);
+  });
   const command = installCommand(pm, packages);
 
   const written: string[] = [];
@@ -130,9 +145,18 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
     written.push(file.path);
   }
 
-  io.log(`AdaptTable — detected ${info.label}.`);
+  io.log(
+    framework === "angular"
+      ? `AdaptTable — detected Angular (${info.label}).`
+      : `AdaptTable — detected ${info.label}.`
+  );
   const chakraNote = chakraVersionWarning(info.kit, deps["@chakra-ui/react"]);
   if (chakraNote) io.log(chakraNote);
+  if (framework === "angular") {
+    io.log(
+      "   Note: Angular kits are unpublished workspace packages. Link the built Angular binding and kit locally; the install command below requires a package source that provides them."
+    );
+  }
   io.log("");
   io.log("1. Install the packages:");
   io.log(`   ${command}`);
@@ -146,12 +170,24 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
     );
   }
   io.log("");
-  io.log(
-    "3. Wrap your app in your UI kit's provider (MantineProvider / ThemeProvider / ChakraProvider / ConfigProvider — per its docs), render <PeopleTable />, done."
-  );
+  if (framework === "angular") {
+    io.log(
+      '3. Import { PeopleTable } from "./peopleTable" in your host component, add PeopleTable to its imports, and render <people-table />.'
+    );
+    if (info.kit === "ng-zorro") {
+      io.log(
+        '   NG-ZORRO requires Angular 22 and ng-zorro-antd 22.1.1-compatible peers. Match any missing Angular peers to your installed Angular version. Add @import "ng-zorro-antd/ng-zorro-antd.min.css"; to your global stylesheet.'
+      );
+    }
+  } else {
+    io.log(
+      "3. Wrap your app in your UI kit's provider (MantineProvider / ThemeProvider / ChakraProvider / ConfigProvider — per its docs), render <PeopleTable />, done."
+    );
+  }
   io.log("   Docs: https://github.com/orwa-mahmoud/adapttable");
 
   return {
+    framework,
     kit: info.kit,
     adapter: info.adapter,
     packageManager: pm,

@@ -11995,9 +11995,25 @@
       "behavior": ""
     },
     {
+      "export": "detectFramework",
+      "currentImport": "@adapttable/cli",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/cli",
+      "behavior": ""
+    },
+    {
       "export": "detectKit",
       "currentImport": "@adapttable/cli",
       "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/cli",
+      "behavior": ""
+    },
+    {
+      "export": "Framework",
+      "currentImport": "@adapttable/cli",
+      "kind": "type",
       "class": "application-hook",
       "proposedImport": "@adapttable/cli",
       "behavior": ""

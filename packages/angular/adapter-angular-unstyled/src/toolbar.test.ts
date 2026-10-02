@@ -1,15 +1,18 @@
 import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
+import { densityChooser } from "@adapttable/angular-unstyled/density";
+import {
+  exportCsv,
+  exportPdf,
+  exportXlsx,
+} from "@adapttable/angular-unstyled/export";
+import { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
+import { print } from "@adapttable/angular-unstyled/print";
+import { rowActions } from "@adapttable/angular-unstyled/row-actions";
+import { savedViews } from "@adapttable/angular-unstyled/saved-views";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptDataTable } from "./dataTable";
-import {
-  densityChooser,
-  exportCsv,
-  fullscreen,
-  rowActions,
-  savedViews,
-} from "./features";
 
 interface City {
   id: string;
@@ -83,11 +86,11 @@ describe("the unstyled Angular toolbar controls", () => {
     expect(part("root")?.getAttribute("data-density")).toBe("comfortable");
     const toggle = part<HTMLButtonElement>("density-toggle");
     expect(toggle?.getAttribute("aria-label")).toBe("Density");
-    toggle?.click();
+    toggle!.click();
     await settle();
     expect(part("root")?.getAttribute("data-density")).toBe("compact");
     expect(toggle?.textContent?.trim()).toBe("Compact");
-    toggle?.click();
+    toggle!.click();
     await settle();
     expect(part("root")?.getAttribute("data-density")).toBe("comfortable");
   });
@@ -123,13 +126,13 @@ describe("the unstyled Angular toolbar controls", () => {
     const { part, settle } = await mount([fullscreen()]);
     const toggle = part<HTMLButtonElement>("fullscreen-toggle");
     expect(toggle?.getAttribute("aria-label")).toBe("Enter fullscreen");
-    toggle?.click();
+    toggle!.click();
     await settle();
     expect(requests).toEqual([part("root")]);
     expect(part("fullscreen-toggle")?.getAttribute("aria-label")).toBe(
       "Exit fullscreen"
     );
-    part<HTMLButtonElement>("fullscreen-toggle")?.click();
+    part<HTMLButtonElement>("fullscreen-toggle")!.click();
     await settle();
     expect(part("fullscreen-toggle")?.getAttribute("aria-label")).toBe(
       "Enter fullscreen"
@@ -153,7 +156,7 @@ describe("the unstyled Angular toolbar controls", () => {
     });
     const button = part<HTMLButtonElement>("export-csv-button");
     expect(button?.textContent?.trim()).toBe("Export CSV");
-    button?.click();
+    button!.click();
     await settle();
     await new Promise((resolve) => setTimeout(resolve, 0));
     await settle();
@@ -166,12 +169,39 @@ describe("the unstyled Angular toolbar controls", () => {
     const { part, settle } = await mount([
       savedViews({ storageKey: "esc-views", storage: null }),
     ]);
-    part<HTMLButtonElement>("views-button")?.click();
+    part<HTMLButtonElement>("views-button")!.click();
     await settle();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     await settle();
     expect(part("views-panel")).toBeNull();
     expect(document.activeElement).toBe(part("views-button"));
+  });
+
+  it("labels XLSX and PDF buttons, and prints from the toolbar", async () => {
+    expect(exportXlsx(false)).toBeTruthy();
+    expect(exportXlsx({ filename: "cities.xlsx" })).toBeTruthy();
+    expect(exportPdf(false)).toBeTruthy();
+    expect(print(() => undefined)).toBeTruthy();
+
+    const printed: string[] = [];
+    const workbook = await mount([exportXlsx()]);
+    expect(workbook.part("export-csv-button")?.textContent).toContain("XLSX");
+    workbook.fixture.destroy();
+
+    const pdf = await mount([exportPdf()]);
+    expect(pdf.part("export-csv-button")?.textContent).toContain("PDF");
+    pdf.fixture.destroy();
+
+    const { part, settle } = await mount([
+      print(() => {
+        printed.push("print");
+      }, true),
+    ]);
+    const button = part<HTMLButtonElement>("print-button");
+    expect(button?.textContent?.trim()).toBe("Print");
+    button!.click();
+    await settle();
+    expect(printed).toEqual(["print"]);
   });
 
   it("exports with the defaults, beside an empty actions list", async () => {
@@ -185,36 +215,36 @@ describe("the unstyled Angular toolbar controls", () => {
       savedViews({ storageKey: "cities-views", storage: null }),
     ]);
     const open = async () => {
-      part<HTMLButtonElement>("views-button")?.click();
+      part<HTMLButtonElement>("views-button")!.click();
       await settle();
     };
-    part<HTMLButtonElement>("sort-button")?.click();
+    part<HTMLButtonElement>("sort-button")!.click();
     await settle();
     expect(ids()).toEqual(["2", "3", "1"]);
     await open();
     const input = part<HTMLInputElement>("views-input");
-    if (!input) return;
+    if (!input) throw new Error("input is not rendered");
     expect(part<HTMLButtonElement>("views-save")?.disabled).toBe(true);
     input.value = "By name";
     input.dispatchEvent(new Event("input"));
     await settle();
-    part<HTMLButtonElement>("views-save")?.click();
+    part<HTMLButtonElement>("views-save")!.click();
     await settle();
     expect(parts("views-item").map((item) => item.textContent?.trim())).toEqual(
       ["By name"]
     );
     // Clear the sort, then bring it back from the view.
-    part<HTMLButtonElement>("sort-button")?.click();
-    part<HTMLButtonElement>("sort-button")?.click();
+    part<HTMLButtonElement>("sort-button")!.click();
+    part<HTMLButtonElement>("sort-button")!.click();
     await settle();
     expect(ids()).toEqual(["1", "2", "3"]);
     if (!part("views-panel")) await open();
-    part<HTMLButtonElement>("views-item")?.click();
+    part<HTMLButtonElement>("views-item")!.click();
     await settle();
     expect(ids()).toEqual(["2", "3", "1"]);
     expect(part("views-panel")).toBeNull();
     await open();
-    part<HTMLButtonElement>("views-delete")?.click();
+    part<HTMLButtonElement>("views-delete")!.click();
     await settle();
     expect(parts("views-item")).toEqual([]);
   });

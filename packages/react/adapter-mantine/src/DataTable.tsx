@@ -487,7 +487,10 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                     ) : null}
 
                     {chrome.showFooter && (
-                      <Box className={classNames?.footer}>
+                      <Box
+                        data-adapttable-part="footer"
+                        className={classNames?.footer}
+                      >
                         <PaginationFooter
                           page={table.pagination.safePage}
                           totalPages={table.pagination.totalPages}

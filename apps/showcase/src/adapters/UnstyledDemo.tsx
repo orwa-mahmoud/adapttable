@@ -67,6 +67,7 @@ export function UnstyledDemo({
   wide,
   defaultColumnLayout,
   forceMobile,
+  maxHeight,
   focused,
 }: Readonly<{
   mode: DataMode;
@@ -124,6 +125,7 @@ export function UnstyledDemo({
   wide?: boolean;
   defaultColumnLayout?: Partial<ColumnLayoutState>;
   forceMobile?: boolean;
+  maxHeight?: number;
   focused?: boolean;
 }>) {
   return (
@@ -181,6 +183,7 @@ export function UnstyledDemo({
       wide={wide}
       defaultColumnLayout={defaultColumnLayout}
       forceMobile={forceMobile}
+      maxHeight={maxHeight}
       focused={focused}
       classNames={tailwindClassNames}
     />

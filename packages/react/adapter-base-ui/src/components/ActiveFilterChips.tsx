@@ -17,6 +17,7 @@ export function Chips({
   if (chips.length === 0) return null;
   return (
     <ul
+      data-adapttable-part="chips"
       aria-label={labels.filters}
       style={{
         listStyle: "none",
@@ -29,10 +30,11 @@ export function Chips({
       }}
     >
       {chips.map((chip) => (
-        <li key={chip.key}>
+        <li key={chip.key} data-adapttable-part="chip">
           <Badge size="2" radius="full">
             {chip.label}
             <IconButton
+              data-adapttable-part="chip-remove"
               size="1"
               variant="ghost"
               radius="full"
@@ -45,8 +47,13 @@ export function Chips({
           </Badge>
         </li>
       ))}
-      <li>
-        <Button size="1" variant="ghost" onClick={onClearAll}>
+      <li data-adapttable-part="chip">
+        <Button
+          data-adapttable-part="chip-remove"
+          size="1"
+          variant="ghost"
+          onClick={onClearAll}
+        >
           {labels.clearAll}
         </Button>
       </li>

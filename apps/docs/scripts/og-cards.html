@@ -114,7 +114,7 @@
   <body>
     <div id="cards"></div>
     <script type="module">
-      import { sidebar } from "../sidebar.mjs";
+      import { escapeCardText, ogCardMetadata } from "../../../scripts/og-cards.mjs";
 
       const LOGO = `<svg width="40" height="40" viewBox="0 0 32 32" aria-hidden="true">
         <rect x="8.5" y="1.5" width="22" height="22" rx="5.5" fill="#6c5ce7" opacity="0.28"/>
@@ -132,33 +132,18 @@
         "#8b5cf6",
       ];
       const DOTS = KITS.map((c) => `<i style="background:${c}"></i>`).join("");
-      // Where a card should say more than its sidebar label.
-      const TITLES = {
-        comparison: "AdaptTable vs ag-Grid, MUI X & TanStack Table",
-      };
-      // Migration entries read "From X" in the sidebar; a card stands alone.
-      const cardTitle = (group, label) =>
-        group === "Migrating"
-          ? `Migrate ${label[0].toLowerCase()}${label.slice(1)}`
-          : label;
-      const PAGES = sidebar.flatMap((group) =>
-        group.items.map((item) => [
-          item.slug,
-          TITLES[item.slug] ?? cardTitle(group.label, item.label),
-          group.label,
-        ])
-      );
-      document.getElementById("cards").innerHTML = PAGES.map(
-        ([slug, title, kicker]) => `
-        <div class="card" id="c-${slug}">
+      const text = escapeCardText;
+      document.getElementById("cards").innerHTML = ogCardMetadata().map(
+        ({ slug, title, kicker, footer }) => `
+        <div class="card" id="c-${text(slug)}">
           <div class="brand">${LOGO}<span>Adapt<b>Table</b></span></div>
           <div class="body">
-            <div class="kicker">${kicker}</div>
-            <div class="title${title.length > 28 ? " long" : ""}">${title}</div>
+            <div class="kicker">${text(kicker)}</div>
+            <div class="title${title.length > 28 ? " long" : ""}">${text(title)}</div>
           </div>
           <div class="foot">
             <div class="dots">${DOTS}</div>
-            <span>Headless React data table · one API, every UI kit</span>
+            <span>${text(footer)}</span>
           </div>
           <div class="bar"></div>
         </div>`

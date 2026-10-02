@@ -1,0 +1,11 @@
+/** Bootstrap the actual generated app and expose its stability to the DOM test. */
+import { type ApplicationRef } from "@angular/core";
+import { bootstrapApplication } from "@angular/platform-browser";
+
+import { App } from "./app/app";
+
+declare global {
+  var angularFixtureApplication: Promise<ApplicationRef>;
+}
+
+globalThis.angularFixtureApplication = bootstrapApplication(App);

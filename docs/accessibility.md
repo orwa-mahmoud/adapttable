@@ -17,6 +17,8 @@ Every table you render already:
 - uses a real `<table>` with header and body cells
 - names every control it draws (Filters, checkboxes, close, Done — not icon-only)
 - marks sortable headers with `aria-sort`
+- gives a bounded mobile card list a named, keyboard-focusable scroll region;
+  the inner list remains a list, and omitting `maxHeight` adds no Tab stop
 - states the real dataset size when only part of it is in the DOM — a virtualized or paged
   table carries `aria-rowcount` with each row's absolute `aria-rowindex`, a table whose columns
   are windowed carries `aria-colcount` with an absolute `aria-colindex` on every body and header

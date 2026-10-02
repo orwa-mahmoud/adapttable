@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "cli": {
+    "analytics": false,
+    "cache": { "enabled": false }
+  },
+  "projects": {
+    "fixture": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.json",
+            "styles": ["src/styles.css"],
+            "aot": true,
+            "optimization": false,
+            "sourceMap": false,
+            "outputHashing": "none",
+            "progress": false
+          }
+        }
+      }
+    }
+  }
+}

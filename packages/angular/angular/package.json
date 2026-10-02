@@ -36,6 +36,26 @@
       "types": "./dist/types/adapttable-angular.d.ts",
       "default": "./dist/fesm2022/adapttable-angular.mjs"
     },
+    "./formula": {
+      "types": "./dist/types/adapttable-angular-formula.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-formula.mjs"
+    },
+    "./pivot": {
+      "types": "./dist/types/adapttable-angular-pivot.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-pivot.mjs"
+    },
+    "./router": {
+      "types": "./dist/types/adapttable-angular-router.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-router.mjs"
+    },
+    "./sparkline": {
+      "types": "./dist/types/adapttable-angular-sparkline.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-sparkline.mjs"
+    },
+    "./stream": {
+      "types": "./dist/types/adapttable-angular-stream.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-stream.mjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -48,7 +68,17 @@
   },
   "peerDependencies": {
     "@angular/common": "^20.0.0 || ^21.0.0 || ^22.0.0",
-    "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0"
+    "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "@angular/router": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "@tanstack/angular-query-experimental": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@angular/router": {
+      "optional": true
+    },
+    "@tanstack/angular-query-experimental": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@adapttable/core": "3.7.0",
@@ -70,6 +100,8 @@
     "@angular/compiler-cli": "^22.2.0",
     "@angular/core": "^22.2.0",
     "@angular/platform-browser": "^22.2.0",
+    "@angular/router": "^22.2.0",
+    "@tanstack/angular-query-experimental": "^5.104.0",
     "ng-packagr": "^22.2.1",
     "rxjs": "^7.8.2"
   }

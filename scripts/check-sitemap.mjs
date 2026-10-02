@@ -3,18 +3,19 @@
  * Verify the COMPOSED site lists every demo page it actually ships.
  *
  * The docs site (Astro) and the showcase (Vite) build separately and are then
- * copied together — showcase `dist` into `apps/docs/dist/react/demo`. The deployable
- * tree exists only after that copy, so only then can the sitemap be compared
- * with what shipped. This walks every `index.html` built under `react/demo/`, sets
- * aside the pages that merely forward the reader on, and fails with the names
- * of any remaining route the sitemap does not carry.
+ * composed — each framework's demo pages under its demo root
+ * (`scripts/compose-site.mjs`). The deployable tree exists only after that, so
+ * only then can the sitemap be compared with what shipped. This walks every
+ * `index.html` built under every demo root, sets aside the pages that merely
+ * forward the reader on, and fails with the names of any remaining route the
+ * sitemap does not carry.
  *
  * A page is set aside on either of two independent grounds: the manifest marks
  * it `indexable: false`, or its built HTML carries a meta refresh. The sniff is
  * what makes an unregistered stub safe — it is excluded on its own evidence
  * rather than on being listed anywhere.
  *
- * The reverse direction is checked too: a sitemap `<loc>` under `/react/demo/` with
+ * The reverse direction is checked too: a sitemap `<loc>` under a demo root with
  * no built page behind it is a URL that 404s for every crawler that follows it.
  *
  * Runs in the docs workflow right after the compose step, and standalone via
@@ -26,7 +27,8 @@ import { join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
-import { DEMO_ROOT } from "./site.mjs";
+import { DOCS } from "./build-llms-full.mjs";
+import { DEMO_ROOT, DEMO_ROOTS, docsRoute, siteUrl } from "./site.mjs";
 import {
   isRedirectPage,
   locsIn,
@@ -34,8 +36,11 @@ import {
   SITE,
 } from "./sitemap-routes.mjs";
 
-/** Where the showcase is mounted inside the composed site. */
+/** Where React's demo pages are mounted inside the composed site. */
 const DEMO_DIR = DEMO_ROOT.slice(1, -1);
+
+/** Every framework's demo root inside the composed site, as a folder. */
+const DEMO_DIRS = Object.values(DEMO_ROOTS).map((root) => root.slice(1, -1));
 
 const DEFAULT_ROOT = fileURLToPath(
   new URL("../apps/docs/dist", import.meta.url)
@@ -48,18 +53,18 @@ const INDEX = "index.html";
  * route order. Directory entries and bundled assets are not pages, so only
  * `index.html` files count.
  */
-export const demoPages = (root) => {
-  const dir = join(root, DEMO_DIR);
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir, { recursive: true })
-    .map((entry) => entry.split(sep).join("/"))
-    .filter((rel) => rel === INDEX || rel.endsWith(`/${INDEX}`))
-    .map((rel) => ({
-      route: routeForFile(`${DEMO_DIR}/${rel}`),
-      file: join(dir, rel),
-    }))
-    .sort((a, b) => a.route.localeCompare(b.route));
-};
+export const demoPages = (root) =>
+  DEMO_DIRS.flatMap((demoDir) => {
+    const dir = join(root, demoDir);
+    if (!existsSync(dir)) return [];
+    return readdirSync(dir, { recursive: true })
+      .map((entry) => entry.split(sep).join("/"))
+      .filter((rel) => rel === INDEX || rel.endsWith(`/${INDEX}`))
+      .map((rel) => ({
+        route: routeForFile(`${demoDir}/${rel}`),
+        file: join(dir, rel),
+      }));
+  }).sort((a, b) => a.route.localeCompare(b.route));
 
 /**
  * Split the built pages into the routes the sitemap must carry and the ones it
@@ -82,7 +87,9 @@ export const classifyDemoPages = (root, manifest = SHOWCASE_PAGES) => {
 /** Demo routes the sitemap advertises that the composed site does not serve. */
 export const deadRoutes = (root, xml) =>
   locsIn(xml)
-    .filter((loc) => loc.startsWith(`${SITE}/${DEMO_DIR}/`))
+    .filter((loc) =>
+      DEMO_DIRS.some((demoDir) => loc.startsWith(`${SITE}/${demoDir}/`))
+    )
     .map((loc) => loc.slice(SITE.length))
     .filter((route) => !existsSync(join(root, route.slice(1), INDEX)));
 
@@ -100,6 +107,43 @@ export const auditDemoRoutes = (root, xml, manifest = SHOWCASE_PAGES) => {
     missing: crawlable.filter((route) => !locs.has(`${SITE}${route}`)),
     dead: deadRoutes(root, xml),
   };
+};
+
+/** Required canonical docs routes, checked independently of the demo audit. */
+export const auditDocsRoutes = (root, xml, sources = DOCS) => {
+  const routes = sources.map((source) => docsRoute(source));
+  const locs = locsIn(xml);
+  const missing = [];
+  const duplicate = [];
+  const unbuilt = [];
+  const canonical = [];
+  for (const route of routes) {
+    const url = siteUrl(route);
+    const count = locs.filter((loc) => loc === url).length;
+    if (count === 0) missing.push(route);
+    if (count > 1) duplicate.push(route);
+    const file = join(root, route.slice(1), INDEX);
+    if (!existsSync(file)) {
+      unbuilt.push(route);
+      continue;
+    }
+    const html = readFileSync(file, "utf8");
+    const links = [...html.matchAll(/<link\b[^>]*>/gi)]
+      .map((match) => match[0])
+      .filter((link) => /\brel\s*=\s*["']canonical["']/i.test(link))
+      .map((link) => /\bhref\s*=\s*["']([^"']+)["']/i.exec(link)?.[1]);
+    if (isRedirectPage(html) || links.length !== 1 || links[0] !== url)
+      canonical.push(route);
+  }
+  const dead = locs
+    .filter(
+      (loc) =>
+        loc.startsWith(siteUrl("/angular/")) &&
+        !loc.startsWith(siteUrl(DEMO_ROOTS.angular))
+    )
+    .map((loc) => loc.slice(SITE.length))
+    .filter((route) => !existsSync(join(root, route.slice(1), INDEX)));
+  return { routes, missing, duplicate, unbuilt, canonical, dead };
 };
 
 const fail = (message) => {
@@ -128,7 +172,7 @@ const main = () => {
   if (!existsSync(join(root, DEMO_DIR))) {
     fail(
       `no demo pages under ${join(root, DEMO_DIR)} — build the docs site and ` +
-        `the showcase, copy apps/showcase/dist into apps/docs/dist/${DEMO_DIR}, then ` +
+        `the showcase, compose them with node scripts/compose-site.mjs, then ` +
         `run this again.`
     );
   }
@@ -138,6 +182,24 @@ const main = () => {
 
   const xml = readFileSync(sitemap, "utf8");
   const { crawlable, redirects, missing, dead } = auditDemoRoutes(root, xml);
+  const docs = auditDocsRoutes(root, xml);
+  const docsFailures = [
+    ...docs.missing.map((route) => `  docs missing from sitemap.xml: ${route}`),
+    ...docs.duplicate.map(
+      (route) => `  docs repeated in sitemap.xml: ${route}`
+    ),
+    ...docs.unbuilt.map((route) => `  docs page not built: ${route}`),
+    ...docs.canonical.map(
+      (route) =>
+        `  docs page has an incorrect canonical URL or redirects: ${route}`
+    ),
+    ...docs.dead.map(
+      (route) => `  Angular docs sitemap URL has no built page: ${route}`
+    ),
+  ];
+  if (docsFailures.length > 0) {
+    fail(`the documentation sitemap proof failed:\n${docsFailures.join("\n")}`);
+  }
 
   if (missing.length > 0 || dead.length > 0) {
     const lines = [
@@ -154,6 +216,9 @@ const main = () => {
   }
 
   console.log(summary(crawlable, redirects));
+  console.log(
+    `check-sitemap: ${docs.routes.length} canonical docs routes, each built and listed exactly once with its own canonical URL`
+  );
 };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

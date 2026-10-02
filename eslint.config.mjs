@@ -11,6 +11,11 @@ import simpleImportSort from "eslint-plugin-simple-import-sort";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
 
+import {
+  BOUNDED_SCROLL_REGION_FILES,
+  boundedScrollRegionRule,
+} from "./scripts/bounded-scroll-region-rule.mjs";
+
 // The default export types `.configs` as optional and its `recommended` entry
 // as a loose config union, neither of which matches the `defineConfig()`
 // parameter type. Guard the access and cast (via `unknown`) to a flat config.
@@ -30,6 +35,11 @@ const REACT_SOURCES = [
   "apps/showcase/**/*.{ts,tsx}",
   "examples/**/*.{ts,tsx}",
 ];
+
+const noninteractiveTabindexOptions =
+  jsxA11y.flatConfigs.recommended.rules[
+    "jsx-a11y/no-noninteractive-tabindex"
+  ][1];
 
 export default defineConfig(
   {
@@ -100,6 +110,9 @@ export default defineConfig(
     // `@adapttable/i18n` is left out too: it carries react only as a dev
     // dependency for its tests and ships no component.
     files: REACT_SOURCES,
+    // The showcase's Angular pages are Angular, compiled by Angular's own
+    // compiler; React's rules have nothing to say about them.
+    ignores: ["apps/showcase/src/angular/**"],
     settings: { react: { version: "detect" } },
     rules: {
       ...react.configs.recommended.rules,
@@ -114,6 +127,27 @@ export default defineConfig(
       // intermediate bindings (`const props = applyTableFeatures(incoming)`).
       "react/prop-types": "off",
       ...jsxA11y.flatConfigs.recommended.rules,
+    },
+  },
+  {
+    // A named, height-bounded native scroll region is keyboard reachable.
+    // Keep this role allowance on the seven wrappers, with a companion guard
+    // tying the tab stop to the applied height. Lists get no tag allowance.
+    files: BOUNDED_SCROLL_REGION_FILES,
+    plugins: {
+      adapttable: {
+        rules: { "bounded-scroll-region": boundedScrollRegionRule },
+      },
+    },
+    rules: {
+      "jsx-a11y/no-noninteractive-tabindex": [
+        "error",
+        {
+          ...noninteractiveTabindexOptions,
+          roles: [...noninteractiveTabindexOptions.roles, "region"],
+        },
+      ],
+      "adapttable/bounded-scroll-region": "error",
     },
   },
   {

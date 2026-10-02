@@ -1,5 +1,5 @@
 {
-  "$comment": "The published contract: what each entry point commits to, checked both ways by scripts/check-api-contract.mjs. Bootstrapped from origin/main's committed reports plus the additions this branch made deliberately, each audited before this file was written \u2014 never read back from the current reports, because a list derived from its own output approves whatever drift produced it. Edit by hand, with a changeset saying what moved. Every surface is filed under one framework in `frameworks`: `neutral` for the packages under packages/shared, one key per binding folder under packages/ \u2014 an entry point names only surfaces of its own package's framework.",
+  "$comment": "The public API contract: what each participating entry point commits to, checked both ways by scripts/check-api-contract.mjs. Bootstrapped from origin/main's committed reports plus the additions this branch made deliberately, each audited before this file was written \u2014 never read back from the current reports, because a list derived from its own output approves whatever drift produced it. Edit by hand, with a changeset saying what moved. Every surface is filed under one framework in `frameworks`: `neutral` for the packages under packages/shared, one key per binding folder under packages/ \u2014 an entry point names only surfaces of its own package's framework.",
   "frameworks": {
     "neutral": [
       "ai",
@@ -28,7 +28,95 @@
       "server"
     ],
     "angular": [
-      "angular"
+      "angular",
+      "angular-formula",
+      "angular-pivot",
+      "angular-router",
+      "angular-sparkline",
+      "angular-stream",
+      "ai-angular",
+      "adapter-angular-unstyled",
+      "adapter-angular-unstyled-assistant",
+      "adapter-angular-unstyled-batch-editing",
+      "adapter-angular-unstyled-bulk-actions",
+      "adapter-angular-unstyled-cell-navigation",
+      "adapter-angular-unstyled-cell-span",
+      "adapter-angular-unstyled-column-groups",
+      "adapter-angular-unstyled-column-menu",
+      "adapter-angular-unstyled-column-selection",
+      "adapter-angular-unstyled-command-palette",
+      "adapter-angular-unstyled-context-menu",
+      "adapter-angular-unstyled-density",
+      "adapter-angular-unstyled-editing",
+      "adapter-angular-unstyled-export",
+      "adapter-angular-unstyled-extra-rows",
+      "adapter-angular-unstyled-features",
+      "adapter-angular-unstyled-filters",
+      "adapter-angular-unstyled-find-in-table",
+      "adapter-angular-unstyled-fit-columns",
+      "adapter-angular-unstyled-fullscreen",
+      "adapter-angular-unstyled-grouping",
+      "adapter-angular-unstyled-grouping-panel",
+      "adapter-angular-unstyled-header-filters",
+      "adapter-angular-unstyled-multi-sort",
+      "adapter-angular-unstyled-nested-table",
+      "adapter-angular-unstyled-pinned-summary-rows",
+      "adapter-angular-unstyled-pivot",
+      "adapter-angular-unstyled-preset",
+      "adapter-angular-unstyled-print",
+      "adapter-angular-unstyled-resizable-columns",
+      "adapter-angular-unstyled-row-actions",
+      "adapter-angular-unstyled-row-appearance",
+      "adapter-angular-unstyled-row-detail",
+      "adapter-angular-unstyled-row-pinning",
+      "adapter-angular-unstyled-row-reorder",
+      "adapter-angular-unstyled-saved-views",
+      "adapter-angular-unstyled-selection-stats",
+      "adapter-angular-unstyled-side-panel",
+      "adapter-angular-unstyled-status-bar",
+      "adapter-angular-unstyled-tree",
+      "adapter-angular-unstyled-virtualize",
+      "adapter-ng-zorro",
+      "adapter-ng-zorro-assistant",
+      "adapter-ng-zorro-batch-editing",
+      "adapter-ng-zorro-bulk-actions",
+      "adapter-ng-zorro-cell-navigation",
+      "adapter-ng-zorro-cell-span",
+      "adapter-ng-zorro-column-groups",
+      "adapter-ng-zorro-column-menu",
+      "adapter-ng-zorro-column-selection",
+      "adapter-ng-zorro-command-palette",
+      "adapter-ng-zorro-context-menu",
+      "adapter-ng-zorro-density",
+      "adapter-ng-zorro-editing",
+      "adapter-ng-zorro-export",
+      "adapter-ng-zorro-extra-rows",
+      "adapter-ng-zorro-features",
+      "adapter-ng-zorro-filters",
+      "adapter-ng-zorro-find-in-table",
+      "adapter-ng-zorro-fit-columns",
+      "adapter-ng-zorro-fullscreen",
+      "adapter-ng-zorro-grouping",
+      "adapter-ng-zorro-grouping-panel",
+      "adapter-ng-zorro-header-filters",
+      "adapter-ng-zorro-multi-sort",
+      "adapter-ng-zorro-nested-table",
+      "adapter-ng-zorro-pinned-summary-rows",
+      "adapter-ng-zorro-pivot",
+      "adapter-ng-zorro-preset",
+      "adapter-ng-zorro-print",
+      "adapter-ng-zorro-resizable-columns",
+      "adapter-ng-zorro-row-actions",
+      "adapter-ng-zorro-row-appearance",
+      "adapter-ng-zorro-row-detail",
+      "adapter-ng-zorro-row-pinning",
+      "adapter-ng-zorro-row-reorder",
+      "adapter-ng-zorro-saved-views",
+      "adapter-ng-zorro-selection-stats",
+      "adapter-ng-zorro-side-panel",
+      "adapter-ng-zorro-status-bar",
+      "adapter-ng-zorro-tree",
+      "adapter-ng-zorro-virtualize"
     ],
     "react": [
       "adapter-antd",
@@ -1691,7 +1779,9 @@
     ],
     "cli": [
       "choosePackageManager",
+      "detectFramework",
       "detectKit",
+      "Framework",
       "InitError",
       "InitIO",
       "InitOptions",
@@ -5860,143 +5950,1224 @@
       "tableConformanceTests"
     ],
     "angular": [
+      "ADAPTTABLE_CONTEXT_MENU",
       "ADAPTTABLE_FEATURES",
+      "ADAPTTABLE_FEATURE_STATE",
+      "ADAPTTABLE_FIND_STATE",
+      "ADAPTTABLE_PALETTE_OPEN",
       "ADAPTTABLE_SLOT_TABLE",
       "ADAPTTABLE_URL_ADAPTER",
+      "AGENT_ALWAYS_ALLOW_STATE",
+      "AGENT_APPROVAL",
+      "AGENT_APPROVAL_STATE",
+      "AGENT_PROGRESS_STATE",
+      "AGENT_VIEW_STATE",
+      "AdaptAgentApprovalChrome",
+      "AdaptApprovalReviewChrome",
+      "AdaptAssistantAlwaysAllowed",
+      "AdaptAssistantComposer",
+      "AdaptAssistantContent",
+      "AdaptAssistantMessage",
+      "AdaptAssistantReceipt",
+      "AdaptAssistantWorking",
       "AdaptAttrs",
+      "AdaptBatchEditBarChrome",
+      "AdaptBatchEditCell",
       "AdaptCell",
+      "AdaptCellConflictNotice",
       "AdaptCellTemplate",
       "AdaptChecklistChrome",
+      "AdaptColumnGroupToggleChrome",
+      "AdaptColumnSelectCheckboxChrome",
+      "AdaptColumnSpacer",
+      "AdaptCommandPaletteChrome",
+      "AdaptContextMenuChrome",
       "AdaptControl",
+      "AdaptEditableCellGate",
+      "AdaptExportAnnouncer",
+      "AdaptExportProgressChrome",
+      "AdaptExtraRowContent",
+      "AdaptFillHandleChrome",
+      "AdaptFilterHeaderChrome",
+      "AdaptFilterHeaderControlChrome",
       "AdaptFilterTreeChrome",
+      "AdaptFindBarChrome",
+      "AdaptFooter",
+      "AdaptGridFocusAnnouncer",
+      "AdaptGroupMoreButtonChrome",
+      "AdaptGroupToggleSpacer",
       "AdaptGroupingPanelChrome",
       "AdaptHeader",
       "AdaptIcon",
       "AdaptLiveRegion",
+      "AdaptMultiSelectEditorChrome",
+      "AdaptRowDetail",
+      "AdaptRowEditActionsChrome",
+      "AdaptRowEditCell",
+      "AdaptRowReorderAnnouncer",
+      "AdaptRowReorderButtonsChrome",
+      "AdaptRowReorderHandleChrome",
+      "AdaptSavedViewGlyph",
+      "AdaptSavedViewsPanelChrome",
+      "AdaptSelectionStatsChrome",
+      "AdaptSidePanelChrome",
+      "AdaptSidePanelLayout",
       "AdaptSlot",
+      "AdaptSpeakerMark",
+      "AdaptStatusBarChrome",
+      "AdaptTableAssistantChrome",
       "AdaptTableFeature",
+      "AdaptTableStatusAnnouncer",
+      "AdaptTreeCellChrome",
+      "AdaptTreeToggleChrome",
+      "AgentAlwaysAllowState",
+      "AgentApprovalButtonProps",
+      "AgentApprovalChromeProps",
+      "AgentApprovalDecision",
+      "AgentApprovalListProps",
+      "AgentApprovalOperation",
+      "AgentApprovalPending",
+      "AgentApprovalProposal",
+      "AgentApprovalProps",
+      "AgentApprovalSlots",
+      "AgentProgress",
+      "AgentViewState",
       "AngularFilterTreeDisclosureProps",
       "AngularGroupingPanelAggregationItemProps",
       "AngularGroupingPanelSurfaceProps",
+      "ApprovalReview",
+      "ApprovalReviewChromeProps",
+      "ApprovalReviewItem",
+      "ApprovalReviewSlots",
+      "AssemblyFns",
+      "AssistantComposerProps",
       "Attrs",
+      "BatchEditBarProps",
+      "BatchEditBarSlots",
+      "BatchEditButtonProps",
       "BatchEditHandler",
       "BatchEditingInjectOptions",
       "BatchEditingState",
       "BatchRowEdit",
       "BulkActionRunnerOptions",
       "BulkActionRunnerState",
+      "CellConflictAsk",
+      "CellConflictNoticeProps",
       "CellContext",
       "CellEditHandler",
       "CellEditingOptions",
       "CellEditingState",
+      "CellNavigationChannelsOptions",
       "CellNavigationOptions",
+      "CellSaveStateInjectOptions",
+      "ChangedCellFlash",
+      "ChangedCellFlashOptions",
       "ChecklistSlots",
       "ColumnDef",
       "ColumnDrag",
+      "ColumnGroup",
+      "ColumnGroupToggleSlots",
+      "ColumnInput",
       "ColumnLayout",
       "ColumnLayoutOptions",
+      "ColumnLayoutUrlState",
+      "ColumnLayoutUrlStateOptions",
       "ColumnRenameEditorOptions",
       "ColumnRenameEditorState",
+      "ColumnResizeHandleProps",
+      "ColumnSelectSlots",
+      "ColumnWindow",
+      "ColumnWindowOptions",
+      "CommandPaletteInjectOptions",
+      "CommandPaletteOptions",
+      "CommandPaletteSlots",
+      "ContextMenuController",
+      "ContextMenuOptions",
+      "ContextMenuRegionHandlers",
+      "ContextMenuRow",
+      "ContextMenuSlots",
+      "ConversationScroll",
+      "DEFAULT_SHORTCUTS",
       "DataTable",
       "DataTableOptions",
       "DensityOptions",
       "DensityState",
+      "DensityUrlState",
+      "DensityUrlStateOptions",
+      "EXTRA_OVER_SPAN_ROW_STYLE",
+      "EXTRA_OVER_SPAN_STYLE",
+      "EditConflict",
+      "EditConflictChange",
+      "EditConflictChoice",
+      "EditConflictHandler",
+      "EditConflictPolicy",
+      "EditConflictState",
+      "EditEvent",
+      "EditEventHandler",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "EditHistoryState",
+      "EditLifecycle",
+      "EditUnit",
+      "EditValidationInjectOptions",
+      "EditableCellActivateProps",
+      "EditableCellButtonProps",
+      "EditableCellController",
+      "EditableCellEditing",
+      "EditableCellEditorCtrl",
+      "EditableCellMode",
+      "EditableCellSlots",
+      "EditingBundle",
+      "EditingLifecycleExtras",
+      "ExportContext",
       "ExportCsvHandlerOptions",
+      "ExportProgressSlots",
       "ExternalStore",
+      "FILL_HANDLE",
+      "FLOATING_MIN_WIDTH",
+      "FeatureMountContext",
+      "FeatureResources",
+      "FeatureState",
+      "FeatureStateKey",
+      "FillHandleChromeProps",
+      "FillHandleFocus",
+      "FillHandleSlotProps",
+      "FillHandleSlots",
+      "FilterHeaderSlots",
       "FilterOptionsState",
       "FilterRuntimeOptions",
       "FilterTreeSlots",
+      "FindBarSlots",
+      "FindInTableOptions",
+      "FooterContext",
       "FromStoreOptions",
       "FrontendDataOptions",
       "GridFocus",
+      "GridFocusAnnouncement",
       "GridFocusOptions",
+      "GroupCollapseOptions",
+      "GroupCollapseState",
+      "GroupCollapseUrlState",
+      "GroupCollapseUrlStateOptions",
+      "GroupMoreButtonProps",
+      "GroupMoreButtonSlotProps",
+      "GroupMoreButtonSlots",
+      "GroupPagingOptions",
+      "GroupPagingState",
+      "GroupSort",
+      "GroupingExtras",
+      "GroupingOptions",
       "GroupingPanelExtras",
       "GroupingPanelSlots",
       "GroupingPanelStateOptions",
       "HeaderContext",
+      "Highlight",
+      "InfiniteQuerySignals",
       "IsMobileOptions",
       "KeyedVirtualization",
       "KeyedVirtualizationOptions",
+      "LazyChildrenInjectOptions",
+      "LiveEditConflictInput",
+      "LiveEditConflictOptions",
       "MaybeSignal",
       "MaybeSignalOptional",
+      "MeasuredWindowScrollMarginOptions",
+      "MergedCellStyle",
+      "MultiSelectEditorCheckboxProps",
+      "MultiSelectEditorSlots",
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableFor",
+      "OPEN_PALETTE_COMMAND",
       "PaginationMode",
+      "PaletteOpenState",
+      "QuerySourceOptions",
+      "ReconcileLiveBatchEdit",
+      "ReconcileLiveEdit",
+      "ReconcileLiveRowEdit",
       "Renderer",
+      "ResizableVirtualizer",
       "ResolvedRenderer",
       "RowActionsOptions",
+      "RowMutationHandlers",
+      "RowMutationsOptions",
+      "RowMutationsState",
+      "RowAppearanceOptions",
+      "RowDetailContext",
+      "RowDetailOptions",
+      "RowEditActionsProps",
+      "RowEditActionsSlots",
+      "RowEditButtonProps",
+      "RowEditConflict",
+      "RowEditControls",
+      "RowEditControlsOptions",
       "RowEditHandler",
+      "RowEditIcons",
       "RowEditingInjectOptions",
       "RowEditingState",
+      "RowExpansionOptions",
+      "RowMoveMenuSlotProps",
+      "RowPairMeasurer",
+      "RowPairMeasurerOptions",
+      "RowPinningFeatureOptions",
+      "RowPinningOptions",
+      "RowPinningUrlState",
+      "RowReorderButtonsProps",
+      "RowReorderButtonsSlots",
+      "RowReorderHandleProps",
+      "RowReorderHandleSlotProps",
+      "RowReorderHandleSlots",
       "RowReorderHandler",
+      "RowReorderLabels",
+      "RowReorderMoveButtonProps",
       "RowReorderOptions",
       "RowReorderState",
       "RowReorderStateOptions",
       "RowSelection",
       "RowSelectionOptions",
+      "RuntimeGrouping",
+      "RuntimeTableOptions",
       "SavedViewsOptions",
+      "SavedViewsPanelSlots",
       "SavedViewsState",
+      "SelectionStats",
+      "SelectionStatsOptions",
+      "SelectionStatsSlots",
+      "ServerDataOptions",
+      "SidePanelOptions",
+      "SidePanelPanel",
+      "SidePanelSlots",
       "SlotComponent",
       "SlotFills",
       "SlotTable",
+      "SpeechInputHandle",
+      "SpeechInputState",
+      "SpeechInputStatus",
+      "StatusBarSlots",
+      "TABLE_ASSISTANT",
+      "TableAssistantAllowanceView",
+      "TableAssistantAvatars",
+      "TableAssistantBadgeProps",
+      "TableAssistantBoundary",
+      "TableAssistantButtonProps",
+      "TableAssistantChromeProps",
+      "TableAssistantComposerProps",
+      "TableAssistantFace",
+      "TableAssistantLanguageChipProps",
+      "TableAssistantMenuItem",
+      "TableAssistantMenuProps",
+      "TableAssistantMessageView",
+      "TableAssistantNode",
+      "TableAssistantPanelProps",
+      "TableAssistantPresentation",
+      "TableAssistantProgressView",
+      "TableAssistantProps",
+      "TableAssistantQuestionOption",
+      "TableAssistantQuestionView",
+      "TableAssistantReceiptSubject",
+      "TableAssistantReceiptView",
+      "TableAssistantResumableView",
+      "TableAssistantSheetProps",
+      "TableAssistantSlots",
+      "TableAssistantSuggestionView",
+      "TableAssistantUndoView",
+      "TableAssistantView",
+      "TableAssistantWindowProps",
+      "TableCommandPalette",
+      "TableContextMenu",
+      "TableContextMenuOptions",
+      "TableDataOptions",
+      "TableDataResult",
+      "TableEditHistoryProps",
       "TableFilters",
+      "TableGrouping",
+      "TableQueryHandler",
+      "TableRowDetail",
+      "TableRowPinningOptions",
+      "TableRuntime",
+      "TableRuntimeView",
+      "TableTree",
       "TableUrlState",
       "TableUrlStateOptions",
       "TableVirtualization",
       "TableVirtualizationOptions",
+      "TreeExpansionOptions",
+      "TreeFeatureOptions",
+      "TreeOptions",
+      "TreeToggleSlots",
+      "UrlSlice",
+      "UrlSliceOptions",
+      "UseShortcutsOptions",
       "VirtualTableRow",
       "VirtualizeOptions",
+      "activeFilterChipsFor",
+      "aggregate",
+      "approvalReview",
+      "asBatchGesture",
+      "assistantIsBusy",
+      "assistantIsUsable",
       "batchEditing",
-      "beginCellEdit",
       "booleanFilterFor",
+      "bulkActions",
       "cellNavigation",
+      "cellSpan",
+      "cellSpanMark",
+      "checklistSlice",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectLabel",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "commitBooleanDraft",
+      "contextMenu",
+      "copyContextMenuSelection",
+      "createAdapterAgentApprovalFeature",
+      "createAdapterTableAssistantFeature",
+      "createFeatureResources",
+      "createFeatureState",
       "devWarn",
+      "dirtyIndicators",
+      "editableCellController",
+      "editHistory",
       "editing",
+      "editorBusyProps",
+      "editorValidationProps",
+      "exportPdf",
+      "exportXlsx",
       "extendFeature",
+      "extraHostFillStyle",
+      "extraRows",
+      "feature",
       "featureOptionsOf",
+      "featureStateKey",
       "filterChipsFor",
       "filterOptionsFor",
       "filterRuntimeFor",
+      "filterTreeChips",
+      "filterTypes",
+      "findInTable",
+      "findMarkAttrs",
+      "fitColumns",
+      "flattenColumns",
+      "floatingFits",
+      "floatingStyle",
+      "focusEditorOnMount",
       "fromStore",
+      "grouping",
       "groupingPanel",
+      "headerFilters",
+      "injectAssistantFloatingFits",
       "injectBatchEditing",
       "injectBulkActionRunner",
       "injectCellEditing",
+      "injectCellSaveState",
+      "injectChangedCellFlash",
       "injectColumnDrag",
+      "injectColumnLayoutUrlState",
       "injectColumnRenameEditor",
+      "injectColumnResize",
+      "injectColumnWindow",
+      "injectCommandPalette",
+      "injectContextMenu",
+      "injectConversationScroll",
       "injectDataTable",
       "injectDensity",
+      "injectDensityUrlState",
+      "injectEditConflict",
+      "injectEditValidation",
       "injectExportCsv",
+      "injectExportHandler",
+      "injectFeatureState",
+      "injectFindFocus",
+      "injectFindInTable",
+      "injectFindScroll",
+      "injectFindShortcut",
+      "injectFindWindowScroll",
       "injectFrontendData",
       "injectFullscreen",
       "injectGridFocus",
+      "injectGroupCollapse",
+      "injectGroupCollapseUrlState",
+      "injectGroupPaging",
+      "injectGrouping",
       "injectGroupingPanelState",
+      "injectHeaderFilterOverlay",
+      "injectHighlight",
       "injectIsMobile",
       "injectKeyedVirtualization",
       "injectKeyedVirtualizer",
+      "injectLazyChildren",
+      "injectLiveEditConflict",
+      "injectMeasuredWindowScrollMargin",
+      "injectMediaQuery",
+      "injectPrefersReducedMotion",
+      "injectQuerySource",
+      "injectRowDetail",
       "injectRowEditing",
+      "injectRowExpansion",
+      "injectRowPairMeasurer",
+      "injectRowPinning",
+      "injectRowPinningUrlState",
+      "injectRowMutations",
       "injectRowReorder",
       "injectRowSelection",
       "injectSavedViews",
+      "injectServerData",
+      "injectShortcuts",
+      "injectTableContextMenu",
+      "injectTableEditHistory",
+      "injectTableData",
+      "injectTableRowPinning",
       "injectTableUrlState",
       "injectTableVirtualization",
       "injectTableVirtualizer",
-      "isBodyEligible",
-      "isCellEditable",
-      "parseCellEditValue",
+      "injectTree",
+      "injectTreeExpansion",
+      "injectUrlSlice",
+      "isCurrentMatchCell",
+      "isMatchedCell",
+      "isSelectedCell",
+      "launcherStyle",
+      "mergedCellStyle",
+      "mountTableFeatures",
+      "multiDraftFromSelect",
+      "multiSort",
+      "nestedTable",
+      "nextChecklistViewport",
+      "pinnedSummaryRows",
+      "print",
       "provideAdaptTableFeatures",
       "rangeFilterFor",
-      "readEditableCellValue",
+      "readMaybe",
+      "renderedRowsOf",
+      "requestDensityChange",
+      "resizableColumns",
       "resolveCellEditor",
       "resolveColumns",
-      "resolveVirtualRows",
+      "resolveDensity",
+      "resolveRowStyle",
+      "restoreFocusSoon",
       "rowActionsFor",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditControls",
       "rowEditing",
+      "rowEditingSignature",
+      "rowIsDirty",
+      "rowPinning",
       "rowReorder",
-      "rowSourceIndex",
+      "savedViews",
+      "selectionStats",
+      "selectionStatsOf",
+      "sidePanel",
+      "statusBar",
+      "stopCellEditKeyboard",
+      "stopEditKeys",
+      "tableFeaturesOf",
+      "tableRuntimeFor",
       "textFilterFor",
+      "tree",
+      "undoRedoButtons",
+      "undoRedoToolbarProps",
       "urlAdapterFor",
-      "virtualColumnSpan",
       "virtualize",
-      "virtualizeIgnoredOnPage"
+      "virtualizeIgnoredOnPage",
+      "withRowMutationActions",
+      "CommandPaletteSurfaceProps",
+      "resolveRenderer",
+      "RowClickProps",
+      "rowClickProps",
+      "MobileCardContext",
+      "MobileCardField",
+      "MobileCardRenderer",
+      "RowActionsContext",
+      "RowActionsRenderer",
+      "DirtyCellState",
+      "DirtyCellsOptions",
+      "DirtyEdits",
+      "injectDirtyCells",
+      "dirtyMarkerView",
+      "formatMultiDraft",
+      "FilterWidgetRenderProps",
+      "renderRegisteredFilter"
+    ],
+    "angular-formula": [
+      "AngularFormulaColumnsResult",
+      "CellContext",
+      "ColumnDef",
+      "FORMULA_URL_WRITE_DEBOUNCE_MS",
+      "FooterContext",
+      "FormulaColumnSpec",
+      "FormulaUrlState",
+      "FormulaUrlStateOptions",
+      "HeaderContext",
+      "MaybeSignalOptional",
+      "Renderer",
+      "TableUrlStateOptions",
+      "UrlSliceOptions",
+      "buildFormulaColumns",
+      "injectFormulaUrlState"
+    ],
+    "angular-pivot": [
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "CellContext",
+      "ColumnDef",
+      "FooterContext",
+      "HeaderContext",
+      "MaybeSignalOptional",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotPanelSlots",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "Renderer",
+      "TableUrlStateOptions",
+      "UrlSliceOptions",
+      "injectPivotUrlState",
+      "pivotTableModel"
+    ],
+    "angular-router": [
+      "angularRouterAdapter",
+      "provideAdaptTableRouterUrl"
+    ],
+    "angular-sparkline": [
+      "AdaptSparkline",
+      "CellContext",
+      "ColumnDef",
+      "FooterContext",
+      "HeaderContext",
+      "Renderer",
+      "SparklineColumnSpec",
+      "SparklineKind",
+      "SparklineProps",
+      "finiteSparklineValues",
+      "sparklineColumn",
+      "sparklineExportValue",
+      "sparklineSummary"
+    ],
+    "angular-stream": [
+      "Attrs",
+      "ChangedCellFlash",
+      "ChangedCellFlashOptions",
+      "MaybeSignal",
+      "MaybeSignalOptional",
+      "RowPatchStream",
+      "RowPatchStreamOptions",
+      "injectChangedCellFlash",
+      "injectRowPatchStream"
+    ],
+    "ai-angular": [
+      "ApprovalPolicy",
+      "AssistantAnswer",
+      "AssistantExchange",
+      "AssistantInterruption",
+      "AssistantMessage",
+      "AssistantQuestion",
+      "AssistantReceipt",
+      "AssistantReceiptStatus",
+      "AssistantReceiptSubject",
+      "AssistantResumeHandle",
+      "AssistantStatus",
+      "AssistantSuggestion",
+      "AssistantTransport",
+      "AssistantTransportReply",
+      "AssistantTurnStatus",
+      "AssistantUndoOffer",
+      "CommitPolicy",
+      "RowAddressScope",
+      "SharedApproval",
+      "SpeechClip",
+      "SpeechInputOptions",
+      "TABLE_AGENT_STATE",
+      "TableAgentBridge",
+      "TableAgentColumnPatch",
+      "TableAgentOptions",
+      "TableAssistantOptions",
+      "TableAssistantSnapshot",
+      "TableAssistantState",
+      "TableAssistantStore",
+      "VoiceOptions",
+      "WritePolicy",
+      "injectSpeechInput",
+      "injectTableAssistant",
+      "tableAgent"
+    ],
+    "adapter-angular-unstyled": [
+      "AdaptAutoFilterForm",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptNativeCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "MenuPopover",
+      "OVERLAY_Z",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps",
+      "menuPopover",
+      "placeOverlayBelowTrigger"
+    ],
+    "adapter-angular-unstyled-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-angular-unstyled-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-angular-unstyled-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-angular-unstyled-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-angular-unstyled-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-angular-unstyled-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-angular-unstyled-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-angular-unstyled-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-angular-unstyled-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-angular-unstyled-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-angular-unstyled-density": [
+      "densityChooser"
+    ],
+    "adapter-angular-unstyled-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-angular-unstyled-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-angular-unstyled-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-angular-unstyled-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-angular-unstyled-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-angular-unstyled-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-angular-unstyled-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-angular-unstyled-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-angular-unstyled-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-angular-unstyled-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-angular-unstyled-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-angular-unstyled-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-angular-unstyled-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-angular-unstyled-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-angular-unstyled-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-angular-unstyled-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-angular-unstyled-print": [
+      "print"
+    ],
+    "adapter-angular-unstyled-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-angular-unstyled-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-angular-unstyled-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-angular-unstyled-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-angular-unstyled-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-angular-unstyled-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-angular-unstyled-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-angular-unstyled-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-angular-unstyled-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-angular-unstyled-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-angular-unstyled-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-angular-unstyled-virtualize": [
+      "virtualize"
+    ],
+    "adapter-ng-zorro": [
+      "AdaptAutoFilterForm",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptNativeCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "MenuPopover",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps",
+      "menuPopover"
+    ],
+    "adapter-ng-zorro-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-ng-zorro-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-ng-zorro-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-ng-zorro-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-ng-zorro-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-ng-zorro-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-ng-zorro-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-ng-zorro-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-ng-zorro-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-ng-zorro-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-ng-zorro-density": [
+      "densityChooser"
+    ],
+    "adapter-ng-zorro-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-ng-zorro-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-ng-zorro-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-ng-zorro-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-ng-zorro-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-ng-zorro-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-ng-zorro-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-ng-zorro-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-ng-zorro-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-ng-zorro-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-ng-zorro-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-ng-zorro-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-ng-zorro-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-ng-zorro-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-ng-zorro-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-ng-zorro-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-ng-zorro-print": [
+      "print"
+    ],
+    "adapter-ng-zorro-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-ng-zorro-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-ng-zorro-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-ng-zorro-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-ng-zorro-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-ng-zorro-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-ng-zorro-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-ng-zorro-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-ng-zorro-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-ng-zorro-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-ng-zorro-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-ng-zorro-virtualize": [
+      "virtualize"
     ]
   },
   "entrypoints": {
@@ -7120,6 +8291,270 @@
     },
     "angular.api.md": {
       "surface": "angular"
+    },
+    "angular-formula.api.md": {
+      "surface": "angular-formula"
+    },
+    "angular-pivot.api.md": {
+      "surface": "angular-pivot"
+    },
+    "angular-router.api.md": {
+      "surface": "angular-router"
+    },
+    "angular-sparkline.api.md": {
+      "surface": "angular-sparkline"
+    },
+    "angular-stream.api.md": {
+      "surface": "angular-stream"
+    },
+    "ai-angular.api.md": {
+      "surface": "ai-angular"
+    },
+    "adapter-angular-unstyled.api.md": {
+      "surface": "adapter-angular-unstyled"
+    },
+    "adapter-angular-unstyled-assistant.api.md": {
+      "surface": "adapter-angular-unstyled-assistant"
+    },
+    "adapter-angular-unstyled-batch-editing.api.md": {
+      "surface": "adapter-angular-unstyled-batch-editing"
+    },
+    "adapter-angular-unstyled-bulk-actions.api.md": {
+      "surface": "adapter-angular-unstyled-bulk-actions"
+    },
+    "adapter-angular-unstyled-cell-navigation.api.md": {
+      "surface": "adapter-angular-unstyled-cell-navigation"
+    },
+    "adapter-angular-unstyled-cell-span.api.md": {
+      "reexport": "adapter-angular-unstyled-cell-span"
+    },
+    "adapter-angular-unstyled-column-groups.api.md": {
+      "surface": "adapter-angular-unstyled-column-groups"
+    },
+    "adapter-angular-unstyled-column-menu.api.md": {
+      "surface": "adapter-angular-unstyled-column-menu"
+    },
+    "adapter-angular-unstyled-column-selection.api.md": {
+      "surface": "adapter-angular-unstyled-column-selection"
+    },
+    "adapter-angular-unstyled-command-palette.api.md": {
+      "surface": "adapter-angular-unstyled-command-palette"
+    },
+    "adapter-angular-unstyled-context-menu.api.md": {
+      "surface": "adapter-angular-unstyled-context-menu"
+    },
+    "adapter-angular-unstyled-density.api.md": {
+      "surface": "adapter-angular-unstyled-density"
+    },
+    "adapter-angular-unstyled-editing.api.md": {
+      "surface": "adapter-angular-unstyled-editing"
+    },
+    "adapter-angular-unstyled-export.api.md": {
+      "surface": "adapter-angular-unstyled-export"
+    },
+    "adapter-angular-unstyled-extra-rows.api.md": {
+      "reexport": "adapter-angular-unstyled-extra-rows"
+    },
+    "adapter-angular-unstyled-features.api.md": {
+      "surface": "adapter-angular-unstyled-features"
+    },
+    "adapter-angular-unstyled-filters.api.md": {
+      "surface": "adapter-angular-unstyled-filters"
+    },
+    "adapter-angular-unstyled-find-in-table.api.md": {
+      "surface": "adapter-angular-unstyled-find-in-table"
+    },
+    "adapter-angular-unstyled-fit-columns.api.md": {
+      "reexport": "adapter-angular-unstyled-fit-columns"
+    },
+    "adapter-angular-unstyled-fullscreen.api.md": {
+      "surface": "adapter-angular-unstyled-fullscreen"
+    },
+    "adapter-angular-unstyled-grouping.api.md": {
+      "surface": "adapter-angular-unstyled-grouping"
+    },
+    "adapter-angular-unstyled-grouping-panel.api.md": {
+      "surface": "adapter-angular-unstyled-grouping-panel"
+    },
+    "adapter-angular-unstyled-header-filters.api.md": {
+      "surface": "adapter-angular-unstyled-header-filters"
+    },
+    "adapter-angular-unstyled-multi-sort.api.md": {
+      "reexport": "adapter-angular-unstyled-multi-sort"
+    },
+    "adapter-angular-unstyled-nested-table.api.md": {
+      "surface": "adapter-angular-unstyled-nested-table"
+    },
+    "adapter-angular-unstyled-pinned-summary-rows.api.md": {
+      "reexport": "adapter-angular-unstyled-pinned-summary-rows"
+    },
+    "adapter-angular-unstyled-pivot.api.md": {
+      "surface": "adapter-angular-unstyled-pivot"
+    },
+    "adapter-angular-unstyled-preset.api.md": {
+      "surface": "adapter-angular-unstyled-preset"
+    },
+    "adapter-angular-unstyled-print.api.md": {
+      "surface": "adapter-angular-unstyled-print"
+    },
+    "adapter-angular-unstyled-resizable-columns.api.md": {
+      "reexport": "adapter-angular-unstyled-resizable-columns"
+    },
+    "adapter-angular-unstyled-row-actions.api.md": {
+      "surface": "adapter-angular-unstyled-row-actions"
+    },
+    "adapter-angular-unstyled-row-appearance.api.md": {
+      "reexport": "adapter-angular-unstyled-row-appearance"
+    },
+    "adapter-angular-unstyled-row-detail.api.md": {
+      "surface": "adapter-angular-unstyled-row-detail"
+    },
+    "adapter-angular-unstyled-row-pinning.api.md": {
+      "reexport": "adapter-angular-unstyled-row-pinning"
+    },
+    "adapter-angular-unstyled-row-reorder.api.md": {
+      "surface": "adapter-angular-unstyled-row-reorder"
+    },
+    "adapter-angular-unstyled-saved-views.api.md": {
+      "surface": "adapter-angular-unstyled-saved-views"
+    },
+    "adapter-angular-unstyled-selection-stats.api.md": {
+      "surface": "adapter-angular-unstyled-selection-stats"
+    },
+    "adapter-angular-unstyled-side-panel.api.md": {
+      "surface": "adapter-angular-unstyled-side-panel"
+    },
+    "adapter-angular-unstyled-status-bar.api.md": {
+      "surface": "adapter-angular-unstyled-status-bar"
+    },
+    "adapter-angular-unstyled-tree.api.md": {
+      "surface": "adapter-angular-unstyled-tree"
+    },
+    "adapter-angular-unstyled-virtualize.api.md": {
+      "surface": "adapter-angular-unstyled-virtualize"
+    },
+    "adapter-ng-zorro.api.md": {
+      "surface": "adapter-ng-zorro"
+    },
+    "adapter-ng-zorro-assistant.api.md": {
+      "surface": "adapter-ng-zorro-assistant"
+    },
+    "adapter-ng-zorro-batch-editing.api.md": {
+      "surface": "adapter-ng-zorro-batch-editing"
+    },
+    "adapter-ng-zorro-bulk-actions.api.md": {
+      "surface": "adapter-ng-zorro-bulk-actions"
+    },
+    "adapter-ng-zorro-cell-navigation.api.md": {
+      "surface": "adapter-ng-zorro-cell-navigation"
+    },
+    "adapter-ng-zorro-cell-span.api.md": {
+      "reexport": "adapter-ng-zorro-cell-span"
+    },
+    "adapter-ng-zorro-column-groups.api.md": {
+      "surface": "adapter-ng-zorro-column-groups"
+    },
+    "adapter-ng-zorro-column-menu.api.md": {
+      "surface": "adapter-ng-zorro-column-menu"
+    },
+    "adapter-ng-zorro-column-selection.api.md": {
+      "surface": "adapter-ng-zorro-column-selection"
+    },
+    "adapter-ng-zorro-command-palette.api.md": {
+      "surface": "adapter-ng-zorro-command-palette"
+    },
+    "adapter-ng-zorro-context-menu.api.md": {
+      "surface": "adapter-ng-zorro-context-menu"
+    },
+    "adapter-ng-zorro-density.api.md": {
+      "surface": "adapter-ng-zorro-density"
+    },
+    "adapter-ng-zorro-editing.api.md": {
+      "surface": "adapter-ng-zorro-editing"
+    },
+    "adapter-ng-zorro-export.api.md": {
+      "surface": "adapter-ng-zorro-export"
+    },
+    "adapter-ng-zorro-extra-rows.api.md": {
+      "reexport": "adapter-ng-zorro-extra-rows"
+    },
+    "adapter-ng-zorro-features.api.md": {
+      "surface": "adapter-ng-zorro-features"
+    },
+    "adapter-ng-zorro-filters.api.md": {
+      "surface": "adapter-ng-zorro-filters"
+    },
+    "adapter-ng-zorro-find-in-table.api.md": {
+      "surface": "adapter-ng-zorro-find-in-table"
+    },
+    "adapter-ng-zorro-fit-columns.api.md": {
+      "reexport": "adapter-ng-zorro-fit-columns"
+    },
+    "adapter-ng-zorro-fullscreen.api.md": {
+      "surface": "adapter-ng-zorro-fullscreen"
+    },
+    "adapter-ng-zorro-grouping.api.md": {
+      "surface": "adapter-ng-zorro-grouping"
+    },
+    "adapter-ng-zorro-grouping-panel.api.md": {
+      "surface": "adapter-ng-zorro-grouping-panel"
+    },
+    "adapter-ng-zorro-header-filters.api.md": {
+      "surface": "adapter-ng-zorro-header-filters"
+    },
+    "adapter-ng-zorro-multi-sort.api.md": {
+      "reexport": "adapter-ng-zorro-multi-sort"
+    },
+    "adapter-ng-zorro-nested-table.api.md": {
+      "surface": "adapter-ng-zorro-nested-table"
+    },
+    "adapter-ng-zorro-pinned-summary-rows.api.md": {
+      "reexport": "adapter-ng-zorro-pinned-summary-rows"
+    },
+    "adapter-ng-zorro-pivot.api.md": {
+      "surface": "adapter-ng-zorro-pivot"
+    },
+    "adapter-ng-zorro-preset.api.md": {
+      "surface": "adapter-ng-zorro-preset"
+    },
+    "adapter-ng-zorro-print.api.md": {
+      "surface": "adapter-ng-zorro-print"
+    },
+    "adapter-ng-zorro-resizable-columns.api.md": {
+      "reexport": "adapter-ng-zorro-resizable-columns"
+    },
+    "adapter-ng-zorro-row-actions.api.md": {
+      "surface": "adapter-ng-zorro-row-actions"
+    },
+    "adapter-ng-zorro-row-appearance.api.md": {
+      "reexport": "adapter-ng-zorro-row-appearance"
+    },
+    "adapter-ng-zorro-row-detail.api.md": {
+      "surface": "adapter-ng-zorro-row-detail"
+    },
+    "adapter-ng-zorro-row-pinning.api.md": {
+      "reexport": "adapter-ng-zorro-row-pinning"
+    },
+    "adapter-ng-zorro-row-reorder.api.md": {
+      "surface": "adapter-ng-zorro-row-reorder"
+    },
+    "adapter-ng-zorro-saved-views.api.md": {
+      "surface": "adapter-ng-zorro-saved-views"
+    },
+    "adapter-ng-zorro-selection-stats.api.md": {
+      "surface": "adapter-ng-zorro-selection-stats"
+    },
+    "adapter-ng-zorro-side-panel.api.md": {
+      "surface": "adapter-ng-zorro-side-panel"
+    },
+    "adapter-ng-zorro-status-bar.api.md": {
+      "surface": "adapter-ng-zorro-status-bar"
+    },
+    "adapter-ng-zorro-tree.api.md": {
+      "surface": "adapter-ng-zorro-tree"
+    },
+    "adapter-ng-zorro-virtualize.api.md": {
+      "surface": "adapter-ng-zorro-virtualize"
     }
   }
 }

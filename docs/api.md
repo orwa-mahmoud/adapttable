@@ -660,8 +660,10 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
   rows, the filtered and searched rows, `total`, the clamped `page` and
   `hasNextPage` — from the engine's candidate, then `commit()` once the frame
   is on screen. It caches each row's search text, restages only when a value
-  moved, and keeps one page slice per engine revision. `useFrontendData` runs
-  on it. `resolvePaginationMode(mode, isMobile)` turns `"auto"` into
+  moved, and keeps one page slice per engine revision. An optional
+  `filterKey` explicitly invalidates predicate meaning while retaining the data
+  revision; changing a callback reference alone does not restage the rows.
+  Both `useFrontendData` and Angular’s `injectFrontendData` forward that key. `resolvePaginationMode(mode, isMobile)` turns `"auto"` into
   `"infinite"` on mobile and `"paged"` elsewhere; `defaultSearchText` and
   `defaultFrontendRowId` are the defaults a source uses.
 - `createServerSource()` — the server tier as a `ServerSource`: call
@@ -692,12 +694,20 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
 - `createTableData()` — the table data controller as a `TableData`: `plan`
   a `TableDataConfig` (the data props plus the filter engine, when composed)
   into a `TableDataPlan` — the tier, the merged filter runtime, the combined
-  predicate, the tree predicate and the facet keys a server query asks for;
+  predicate, the tree predicate, a semantic `filterKey` and the facet keys a
+  server query asks for. Forward the key to the frontend source so replacing
+  declarative filter definitions or registry extensions refreshes matching
+  rows without changing the data array or query;
   `finish({ resolved, frontend })` adds facet counts computed from the
   searched rows when nothing answered them; `commit()` tells a
   `mode="frontend"` table's `onQueryChange` about each change (never the
   mount), `loadOptions()` loads each filter's own option list once, and
   `dispose()` aborts a notification in flight. `useTableData` runs on it.
+  The optional engine supplies `FilterRuntime.filterKey` from authored
+  definitions, registry extensions, locale and loaded options, excluding rows
+  and generated callbacks. A custom `FilterEngine` may omit it; to refresh
+  predicate meaning within the same engine, it supplies a new key. The data
+  controller also tracks engine replacement and host-predicate presence.
 - `ResponseAggregateOps` / `ResponseAggregateOpsInput` /
   `createResponseAggregateOps` — which aggregate
   operations the rows on screen were computed with: `remember` each request's
@@ -1135,7 +1145,7 @@ shares, so a new binding calls them rather than re-deriving them.
 
 ### The builder tier
 
-`@adapttable/react/adapter` publishes what the eight kits are made of, for
+`@adapttable/react/adapter` publishes what the eight React kits are made of, for
 anyone wiring a ninth ([build an adapter](./building-an-adapter.md)). App code rarely reaches for these; each is here because
 an adapter or a plugin genuinely needs it.
 
@@ -2512,7 +2522,7 @@ optional `selectorKey` to re-project unchanged pages),
 
 ## The adapter contract
 
-Everything the eight built-in adapters are made of ships from its own
+Everything the eight built-in React adapters are made of ships from its own
 entry point, **`@adapttable/react/adapter`** — the same public surface a
 ninth adapter would use; there are no private channels. Same package,
 same semver promise as the main entry. This tier is aimed at adapter
@@ -2963,20 +2973,178 @@ itself, for a binding projecting them into `@adapttable/ai`'s
 `agentObservation`. It reports what the runtime does; what that means for a
 capability is decided there, once, rather than per binding.
 
+## The Angular AI binding
+
+`@adapttable/ai-angular` is an unpublished, opt-in Angular binding over
+`@adapttable/ai`. Importing the Angular table or its native kit does not load an
+agent controller or a transport.
+
+- `tableAgent(options)` mounts the neutral table-agent controller. Options can
+  be a signal: policy and callbacks stay current without recreating the table.
+  `TableAgentOptions`, `TableAgentBridge`, `TableAgentColumnPatch` and
+  `SharedApproval` describe that boundary. `TABLE_AGENT_STATE` publishes the
+  live session. Removing the table releases subscriptions, parked approval,
+  bridge announcements, pending sampling and WebMCP registrations.
+- `injectTableAssistant(options)` returns a signal of `TableAssistantState`;
+  `TableAssistantOptions` supplies the session, transport, optional host-owned
+  transcript/open state, context, suggestions and resume handle. Sending,
+  cancellation, receipts, questions, interrupted turns, resume and undo use
+  the same neutral controller as other bindings. Explicit host context and
+  always-allow inputs override table feature state.
+- `injectSpeechInput(options)` returns a signal of the structural
+  `SpeechInputHandle`. `SpeechInputOptions`, `VoiceOptions` and `SpeechClip`
+  describe browser dictation or a backend recording, live draft/clip callbacks,
+  offered languages and locale. Recognized words update the draft without
+  automatically sending it; destruction releases the input.
+- HTTP, JSON, OpenAI, MCP, MCP Apps, WebMCP, AG-UI and AI SDK integrations still
+  come from `@adapttable/ai`'s existing subpaths. Angular changes the mounting
+  lifecycle, not the transport or protocol. The `angular-ai-*` examples show
+  each path against a real native Angular table.
+
+## Angular assistant and approval controls
+
+The binding's `AdaptTableAssistantChrome` renders a `TableAssistantProps` view
+through required `TableAssistantSlots`; `TableAssistantChromeProps` also names
+those controls. `TableAssistantNode` is Angular template/text/icon content,
+with `TableAssistantFace` / `TableAssistantAvatars` for the speaker marks and
+`TableAssistantMenuItem` for menu entries. Slot contracts are
+`TableAssistantButtonProps`, `TableAssistantComposerProps`,
+`TableAssistantMenuProps`, `TableAssistantPanelProps`,
+`TableAssistantSheetProps`, `TableAssistantWindowProps`,
+`TableAssistantBadgeProps` and `TableAssistantLanguageChipProps`.
+`TableAssistantPresentation` selects floating, panel or sheet, while
+`TableAssistantBoundary` selects the viewport or containing table.
+
+`AdaptAssistantContent`, `AdaptAssistantMessage`, `AdaptSpeakerMark`,
+`AdaptAssistantWorking`, `AdaptAssistantAlwaysAllowed` and
+`AdaptAssistantReceipt` render core's message, status, receipt and allowance
+models. `AdaptAssistantComposer` takes `AssistantComposerProps`; it preserves
+IME input and Shift+Enter, and sends on an unmodified Enter. The
+`injectConversationScroll` / `ConversationScroll` pair follows new messages
+only while the reader remains near the end. `FLOATING_MIN_WIDTH`,
+`floatingFits`, `floatingStyle`, `launcherStyle` and
+`injectAssistantFloatingFits` adapt core's placement to Angular.
+`createAdapterTableAssistantFeature` fills `TABLE_ASSISTANT` with the kit's
+component. The native table accepts optional `assistant` props for that slot,
+or a host can render the component beside the table.
+
+`AdaptAgentApprovalChrome` takes `AgentApprovalChromeProps` and required
+`AgentApprovalSlots`. `AdaptApprovalReviewChrome` shares the review body using
+`ApprovalReviewChromeProps`, `ApprovalReviewSlots` and Angular
+`AgentApprovalListProps`. `createAdapterAgentApprovalFeature` fills
+`AGENT_APPROVAL`. Core's `approvalReview` supplies `ApprovalReview` and
+`ApprovalReviewItem`; `AgentApprovalDecision`, `AgentApprovalOperation`,
+`AgentApprovalProposal`, `AgentApprovalPending` and `AgentApprovalButtonProps`
+keep host decisions typed. Exactly one of the table, widget or modal surfaces
+owns a pending decision. Escape rejects; Enter is not blanket approval.
+
+The `AGENT_APPROVAL_STATE`, `AGENT_ALWAYS_ALLOW_STATE`, `AGENT_PROGRESS_STATE`
+and `AGENT_VIEW_STATE` keys carry `AgentApprovalPending`,
+`AgentAlwaysAllowState`, `AgentProgress` and `AgentViewState` respectively.
+The neutral `TableAssistantView` family describes the rendered conversation;
+`assistantIsBusy` and `assistantIsUsable` remain core's status predicates.
+
+`@adapttable/angular-unstyled/assistant` exports `AdaptTableAssistant`,
+`tableAssistant`, `TABLE_ASSISTANT_SLOTS`, `AdaptAssistantButton`,
+`AdaptAssistantInput`, `AdaptAssistantBadge`, `AdaptAssistantPanel`,
+`AdaptAssistantSheet`, `AdaptAssistantWindow`, `AdaptAssistantLanguageChip`
+and `AdaptAssistantMenu`. Approval exports are `AdaptAgentApproval`,
+`agentApproval`, `AdaptApprovalButton`, `AdaptApprovalAction`,
+`AdaptApprovalList` and `AGENT_APPROVAL_SLOTS`. These are native controls;
+Chrome owns the structural parts, keyboard rules and localized labels.
+
 ## The Angular binding
 
-`@adapttable/angular` is the headless binding for Angular 20 and newer. It
-adapts the same core stores as `@adapttable/react`, as signals, and draws no
-controls: the host writes its own markup.
+`@adapttable/angular` is the Angular binding for Angular 20 and newer. It
+runs the same core stores and controllers as `@adapttable/react`, as
+signals. It lays out structure — rows, cards, headers, keyboard wiring,
+labels, live regions and part names — and every control a reader clicks
+comes from a kit through a slot.
 
+- `AdaptTableFeature.mount` receives a `FeatureMountContext`: the live runtime,
+  Angular injector, per-table `FeatureState`, and synchronous `flush` /
+  `flushAdmission` boundaries. `mountTableFeatures` accepts a feature list or
+  signal, retains unchanged mounts and disposes replaced or removed mounts once.
+  `createFeatureResources(injector)` returns `FeatureResources`: `reconcile`
+  assembles a view, `use(key, dependencies, create)` retains a controller's
+  injection scope while its dependencies are identical, and `dispose` releases
+  all remaining scopes. Removed resources and the table's destruction also
+  release their scopes. `tableFeaturesOf` combines injector-provided features
+  with the table's own list; a later duplicate id wins for setup, options,
+  rendering and mounting alike.
+- Both Angular kits accept live `selectable`, `cellNavigation`, `filtersMode`
+  and `closeHeaderFilterOnSelect` inputs. Their controlled `density` input
+  overrides the chooser's state; `densityChange` reports requests and waits
+  for the host to update the input. Omitting `density` keeps the chooser
+  uncontrolled. Kits share core's `resolveDensity` and `requestDensityChange`,
+  re-exported by the Angular binding.
+- `createFeatureState`, `ADAPTTABLE_FEATURE_STATE` and `injectFeatureState`
+  publish and read typed `FeatureStateKey` handles declared with
+  `featureStateKey`. Tables and slots have isolated state scopes. An explicit
+  publication refreshes readers even when a mutable handle's identity is stable.
+  `tableRuntimeFor` accepts a feature list or signal; retained runtime readers
+  observe the current feature IDs. `RuntimeGrouping` and `RuntimeTableOptions`
+  project the completed table's filtering, selection, layout, row pins, grouping/tree order, edits and actions
+  through the neutral `TableRuntime` / `TableRuntimeView`.
 - `injectFrontendData(options)` is the in-memory tier: it takes
   `FrontendDataOptions` (the rows, as a value or a signal, plus the URL-state
-  options) and returns a signal of the core `TableSource`.
+  options, and `isLoading`, `isFetching`, `error` and `refetch` to show when
+  the rows came from a request) and returns a signal of the core
+  `TableSource`.
+- `injectServerData(options)` is the server tier: it takes
+  `ServerDataOptions` — the page the host fetched (`rows`, `total`, and
+  `loading`, `error`, `nextCursor` as values or signals), what the endpoint
+  `supports`, and `onQueryChange`, a `TableQueryHandler` or a signal of one —
+  and returns a signal of the core `TableSource`. `onQueryChange` receives one consolidated query per real
+  change, once on first render with the URL-restored values; the request it
+  supersedes has its `signal` aborted, and so does the one in flight when the
+  injection context is destroyed. `isLoading` is the first load only; in
+  infinite mode `fetchNextPage` appends; with `supports.cursor` the query
+  carries the token the server issued, and paging back retraces them.
+- `injectQuerySource(options)` is the query-library tier: its
+  `QuerySourceOptions.query` is a function that receives the table's params
+  as a signal and returns the host's infinite query — `injectInfiniteQuery`
+  from `@tanstack/angular-query-experimental` (an optional peer), or anything
+  with the `InfiniteQuerySignals` shape; pass a named function so the query's
+  own options type it. It returns a signal of the core `TableSource`. The
+  params follow the view (page, sort, search, filters, grouping) with
+  `baseParams` merged underneath and `sanitizeParams` applied last; in paged
+  mode the table shows the last page, in infinite mode every page so far, and
+  `fetchNextPage` appends. With `supports.cursor` and `nextCursor`, paging
+  forward sends the token the last page returned.
+- `injectTableData(options)` chooses the tier a table runs on from
+  `TableDataOptions`: a prebuilt `source`; `data` with `onQueryChange` (or
+  `mode: "server"`), which the server tier asks the host to fetch; or `data`
+  alone, which the frontend tier searches, sorts and pages — and with
+  `mode: "frontend"`, `onQueryChange` is told of each change, not of the
+  first render. Given the filter `engine`, it merges the declared `filters`
+  with the columns' `filter` shorthands, loads each filter's own option list
+  once, and counts checklist facets from the rows when no server answered
+  them. It returns `TableDataResult`: the `source` and the filter `runtime`,
+  as signals.
 - `injectTableUrlState(options)` is the URL-synced view state: a
   `TableUrlState` with a `state` signal and the store's setters, configured by
-  `TableUrlStateOptions`. `ADAPTTABLE_URL_ADAPTER` is the injection token that
-  sets the URL adapter every table under an injector uses, such as one over the
-  Angular Router.
+  `TableUrlStateOptions`, whose `defaults`, `numberExtraKeys` and
+  `arrayExtraKeys` may be signals the state follows. `ADAPTTABLE_URL_ADAPTER`
+  is the injection token that sets the URL adapter every table under an
+  injector uses.
+- The other pieces of view state keep to the URL the same way:
+  `injectColumnLayoutUrlState` (`ColumnLayoutUrlStateOptions`, returning a
+  `ColumnLayoutUrlState` with the `layout` signal and `onLayoutChange`),
+  `injectDensityUrlState` (`DensityUrlStateOptions`, `DensityUrlState`),
+  `injectGroupCollapseUrlState` (`GroupCollapseUrlStateOptions`,
+  `GroupCollapseUrlState`) and `injectRowPinningUrlState`
+  (`RowPinningUrlState`, holding a `RowPinState`). Each is an `injectUrlSlice`
+  (`UrlSliceOptions`, returning a `UrlSlice`: the `value` signal, `set` and
+  `latest`) over core's slice: it reads its default while the URL is silent,
+  writes after the store's debounce, flushes a waiting write when its
+  injection context is destroyed, and follows a URL someone else changed.
+- `@adapttable/angular/router` keeps table state in the Angular Router's URL:
+  `provideAdaptTableRouterUrl()` provides `ADAPTTABLE_URL_ADAPTER` for an
+  application or a route, and `angularRouterAdapter()` builds the adapter
+  itself. It writes through `navigateByUrl` — replacing the history entry
+  unless a write pushes — keeps the path and fragment, and tells the table
+  about navigations it did not make. `@angular/router` is an optional peer.
 - `injectDataTable(options)` is the headless table, configured by
   `DataTableOptions` and returning `DataTable`: rows, visible columns,
   pagination, sort, search, labels and direction as signals, plus the core
@@ -2986,76 +3154,404 @@ controls: the host writes its own markup.
   empty, cards or table), `emptyVariant`, `showFooter`, `pagerSlots`,
   `pageSizeOptions`, `canLoadMore` with `loadMore` and the load-more
   attributes for an infinite list, and `statusAnnouncement`, the sentence a
-  sort or a page speaks. `injectIsMobile` (with `IsMobileOptions`) is the viewport breakpoint
-  as a signal.
+  sort or a page speaks. `injectIsMobile` (with `IsMobileOptions`) is the
+  viewport breakpoint as a signal.
+- `injectExportHandler` accepts a signal of `ExportContext` for selected rows,
+  cell ranges, hidden columns, grouped or tree views, spans and summary values.
+  It checks full-export capabilities at click time and disables unsupported
+  all-row exports with the table's localized reason. The native kit supplies
+  the current context automatically.
+- `injectRowMutations(options, injector?)` exposes host-owned add, duplicate and delete
+  actions as a signal. `RowMutationHandlers`, `RowMutationsOptions` and
+  `RowMutationsState` describe the callbacks, localized labels and result.
+  Deletion confirms by default. The native kit accepts these handlers through
+  `rowActions(actions, options)` and renders Add in its toolbar.
+- `editHistory(options)` enables undo and redo for inline and batch edits.
+  `EditHistoryOptions` sets depth and an `onChange` observer receiving an
+  `EditHistoryHandle`. `injectTableEditHistory` adapts `TableEditHistoryProps`
+  to an `EditHistoryState` and a recording inline commit channel. Replays go
+  through the original host callback. `undoRedoButtons()` from the native
+  kit's `/editing` entry renders `AdaptUndoRedoButtons`; grid navigation
+  forwards Ctrl/Cmd+Z and redo shortcuts. Kit plumbing includes
+  `asBatchGesture`, `undoRedoToolbarProps` and `withRowMutationActions`.
+- `injectEditConflict` exposes core's `EditConflictState` as a signal;
+  `injectLiveEditConflict` connects it to cell, row and batch sessions through
+  `LiveEditConflictInput` and `LiveEditConflictOptions`. `EditConflict`,
+  `EditConflictChange`, `EditConflictChoice`, `EditConflictHandler` and
+  `EditConflictPolicy` describe incoming changes and host decisions;
+  `ReconcileLiveEdit`, `ReconcileLiveRowEdit` and `ReconcileLiveBatchEdit`
+  describe explicit reconciliation. The native table wires live rows itself,
+  with reactive `rowVersion`, `editConflictPolicy` and `onEditConflict` inputs.
+  Untouched fields take incoming values; contested drafts ask before saving.
+  Kit plumbing uses `renderedRowsOf` to exclude structural group headers.
+- Editing extras accept `formatEditError`, `onEditError` and `onEditRollback`:
+  a rejected host promise shows its message, reports the exact edit and offers
+  rollback only when the host supplied it. `validateRow`, `applyEdit` and
+  `onValidationFail` support whole-row validation without mutating host data.
+- `injectDirtyCells(options)` returns a signal of `DirtyCellState` over
+  core's dirty-cell store. `DirtyCellsOptions` accepts `enabled` as a value or
+  signal, an optional `injector`, and `onDirtyChange`. The callback receives
+  `DirtyEdits` on mount and when the dirty set changes: `count` plus stable
+  `confirm(rowId, columnKey)`, `confirmRow(rowId)` and `confirmAll()` methods.
+  In the kit, `editing(commit, { onDirtyChange })` enables tracking even
+  without visible marks. Core's editing arming keeps `trackDirty` separate
+  from `dirtyMarkers`: either the observer or `dirtyIndicators()` arms
+  tracking, while only `dirtyIndicators()` draws marks. `dirtyMarkerView`
+  preserves the tracked count and confirmation methods while hiding the
+  cell/row predicates when markers are off. The table never decides that an
+  unacknowledged edit is saved merely because time passed.
+- `injectGridFocus` connects range paste and fill to the original host callbacks
+  through `CellNavigationChannelsOptions`. `editHistory()` records each range
+  write as one gesture. `AdaptFillHandleChrome`, `FillHandleChromeProps`,
+  `FillHandleFocus`, `FillHandleSlots` and `FillHandleSlotProps` draw a localized
+  corner handle using a required kit control. The native `cellNavigation()`
+  feature fills `FILL_HANDLE` with `AdaptFillHandle` and
+  `AdaptFillHandleControl`; phone cards retain their inline editors.
+- `AdaptMultiSelectEditorChrome` draws a group of required kit checkboxes,
+  described by `MultiSelectEditorSlots` and `MultiSelectEditorCheckboxProps`.
+  It keeps option order, focuses the first control and commits only when focus
+  leaves the group. Native-capable editors retain the browser's multiple select.
+  The native kit also exports `AdaptCheckboxCellEditor`: pass it to
+  `AdaptEditableCell`'s `editor` input to choose checkboxes for multi-selects,
+  with native controls for other editor kinds. The default remains
+  `AdaptNativeCellEditor`.
 - `injectRowSelection(options)` is row selection as signals, configured by
   `RowSelectionOptions` and returning `RowSelection`: the selected ids, the
   select-all tri-state, the toggles, and the attributes of the row and
   select-all checkboxes. Pass it to `injectDataTable` as `selection`, and each
   row states whether it is selected. It is uncontrolled unless `selectedIds`
   is given.
-- `injectGridFocus(options)` is keyboard cell navigation, configured by
-  `GridFocusOptions` and returning `GridFocus`: the active cell and range as
-  signals, the announcement, and attribute getters that wrap the table's own
-  with the grid's roles, indices, roving tab stop and handlers. Off, they are
-  the table's attributes unchanged.
-- `AdaptLiveRegion` makes an element a polite, visually hidden live region
-  that speaks its text — the table's status and the grid's announcer.
 - `ColumnDef` is the Angular column. Its `cell`, `headerCell` and `footer`
   are a `Renderer`: an `ng-template` or a standalone component, which receives
   a `CellContext` or a `HeaderContext`. `resolveColumns` fills the defaults a
-  column leaves out, and `ResolvedRenderer` is a renderer split into its
-  template or component.
+  column leaves out. `resolveRenderer(renderer, context)` returns a
+  `ResolvedRenderer`: either the template, or the component with the context
+  fields it declares as inputs; it returns `null` without a renderer.
+  A template receives the whole context; components need not declare inputs
+  for fields they do not use.
+- `MobileCardRenderer<TRow>` is a `Renderer<MobileCardContext<TRow>>`.
+  A custom card body receives `$implicit` / `row`, `index`, `selected`,
+  `expanded` and `fields`. Each `MobileCardField` carries its Angular
+  `column`, resolved `label`, a real `TemplateRef<CellContext<TRow>>` in
+  `value`, and that template's `context`. Stamp `value` with `context` through
+  `NgTemplateOutlet` to preserve the column renderer and the composed inline,
+  row or batch editor. The value is renderable content, not a preformatted
+  string. `RowActionsRenderer<TRow>` similarly takes `RowActionsContext`:
+  `$implicit` / `row`, the row's resolved `actions`, `confirm` and live
+  `labels`, as template context or matching component inputs.
+- `rowClickProps(row, onRowClick, index?)` returns `RowClickProps`, or
+  `undefined` without a callback. It guards clicks from interactive children,
+  activates the focused row on Enter/Space and moves focus and the Tab stop
+  between sibling rows with ArrowUp/ArrowDown. A binding applies the complete
+  result, including its event handlers, `tabIndex`, row marker and style.
 - `AdaptCell` and `AdaptHeader` render a column's content into the host's own
   `<td>` and `<th>`, `AdaptCellTemplate` declares a cell template beside the
-  table (`<ng-template adaptCellTemplate="status" let-row>`), and
-  `AdaptAttrs` applies an `Attrs` record to an element.
-- `provideAdaptTableFeatures(...features)` composes features through
-  dependency injection into the `ADAPTTABLE_FEATURES` multi-provider; an
-  `AdaptTableFeature` has any of `apply` (configuration it merges into the
-  table), `setup` (registrations against the live table) and `renders` (the
-  slots it fills, each drawn by a `SlotComponent`). `extendFeature` adds
-  renders to a core feature, which is how a kit puts its own controls in;
-  `featureOptionsOf` is the merged configuration of a feature list.
+  table (`<ng-template adaptCellTemplate="status" let-row>`), `AdaptAttrs`
+  applies an `Attrs` record to an element. Its optional `adaptAttrsTarget`
+  accepts an inner element or a stable getter returning one, so a kit's
+  generated control receives the whole record. `undefined` uses the host;
+  `null` defers writes until a target is available. Replacing the target
+  releases its old attributes, styles, event handlers and ref before applying
+  the record to the new element. `AdaptLiveRegion` makes an
+  element a polite, visually hidden live region that speaks its text.
+  `AdaptTableStatusAnnouncer` is that region for the table's own row changes:
+  present from the first paint, polite and atomic, and without `role="status"`
+  so the empty state and the other announcers can still be the status.
+- `formatMultiDraft(values)` serializes a multi-select editor's values with
+  the neutral format consumed by `readMultiDraft`, preserving values that
+  contain commas instead of rebuilding the encoding in a kit.
+- Features: `provideAdaptTableFeatures(...features)` composes features
+  through dependency injection into the `ADAPTTABLE_FEATURES`
+  multi-provider; an `AdaptTableFeature` has any of `apply` (configuration it
+  merges into the table), `setup` (registrations against the live table) and
+  `renders` (the slots it fills, each drawn by a `SlotComponent`).
+  `extendFeature` adds renders to a feature, which is how a kit puts its own
+  controls in; `featureOptionsOf` is the merged configuration of a feature
+  list.
+- Built-in feature factories write the same configuration as every other
+  binding's, each over its core half: `cellSpan`, `extraRows`,
+  `pinnedSummaryRows`, `rowAppearance` (`RowAppearanceOptions`),
+  `AdaptExtraRowContent` draws a full-width extra row's `render` — an
+  `ng-template`, a standalone component, or text. A spanned cell carries
+  `cellSpanMark` and `mergedCellStyle` (`MergedCellStyle`); `isMatchedCell`,
+  `isCurrentMatchCell` and `isSelectedCell` read the match and selection
+  marks. `EXTRA_OVER_SPAN_ROW_STYLE`, `EXTRA_OVER_SPAN_STYLE` and
+  `extraHostFillStyle` lift an extra row over a continuing span.
+  `resolveRowStyle` and `AssemblyFns` are the row-style and assembly helpers
+  the desktop body uses.
+  `columnMenu`, `resizableColumns`, `collapsibleColumnGroups`, `multiSort`,
+  `fitColumns`, `columnSelectionCheckbox`, `headerFilters`, `bulkActions`,
+  `savedViews`, `print`, `statusBar`, `undoRedoButtons`, `dirtyIndicators`,
+  `commandPalette` (`CommandPaletteOptions`), `contextMenu`
+  (`ContextMenuOptions`) and `sidePanel` (`SidePanelOptions`). Commands,
+  context-menu entries and panels in their options register on the live
+  table. `feature(id, patch, setup)` puts a host plugin on the same surface.
+  A kit extends a factory with the components that fill its slots.
 - Slots: `AdaptSlot` draws what the table's features put in one named slot,
   handing each component the slot's props; `SlotFills` is the table's map of
   fills, `SlotTable` what a slot component can ask of its table, and
   `ADAPTTABLE_SLOT_TABLE` the token that provides it. `AdaptControl` draws one
-  kit control inside a Chrome, and `AdaptIcon` draws a core glyph as SVG.
+  kit control with the props a structural component computed for it, and
+  `AdaptIcon` draws a core glyph as SVG.
+- Column groups: a table's `columns` take `ColumnInput`s — columns, and
+  `ColumnGroup`s whose caption spans their `children`. `flattenColumns`
+  flattens them into the columns, each carrying its group path, and the
+  group records. The table's `columnGroups` are those records and its
+  `headerPlan` the grouped header rows (group cells spanning their columns,
+  then the columns), or `null` when nothing is grouped. With
+  `collapsibleColumnGroups`, a group collapses to its `collapsedKey` column
+  through the layout's `toggleColumnGroup`, and `AdaptColumnGroupToggleChrome`
+  (`ColumnGroupToggleSlots`) draws its control through the kit's button.
+- Column selection: `columnSelectionCheckbox` puts a checkbox in each column
+  header that selects the whole column, over the keyboard grid's
+  `isColumnSelected` and `toggleColumn`. `AdaptColumnSelectCheckboxChrome`
+  (`ColumnSelectSlots`) holds the kit's checkbox: on a hovering pointer it
+  fades in on hover or focus, and its clicks and keys never reach the header
+  or the grid. `columnSelectLabel` names it for the column.
 - Column layout: `DataTableOptions` takes `ColumnLayoutOptions` (controlled
   or default layout, the change callback and the rename handler), and the
   table's `layout` is a `ColumnLayout` signal — hidden, order, pins, widths
   and names with their setters. `injectColumnDrag` returns a `ColumnDrag`
   (row and grip attributes that reorder a Columns menu by drag or keyboard),
   and `injectColumnRenameEditor` the inline column-name editor.
-- Filters: `filterRuntimeFor` (`FilterRuntimeOptions`) derives a
+  `injectColumnResize` (`ColumnResizeHandleProps`) is the header's resize
+  handle: pointer drag, arrow keys and a double-click that sizes to content.
+  `@adapttable/angular-unstyled/resizable-columns`, `/multi-sort` and
+  `/fit-columns` turn those on; the desktop header draws `resize-handle`,
+  `sort-index` and `header-actions`, `AdaptColumnHeaderRename` the
+  `header-rename-*` parts, and a phone draws `sort-select`.
+- Filters: `filterTypes()` registers custom filter types.
+  `FilterWidgetRenderProps` and `renderRegisteredFilter` are public root exports.
+  `renderRegisteredFilter(def, source, labels, registry, className?)` calls
+  `FilterTypeSpec.render` with the definition, `FilterFormSource`, resolved
+  labels and class hook. Both kits' `AdaptAutoFilterForm` and
+  `AdaptFilterHeaderRow` / `AdaptFilterHeaderControl` prefer a returned
+  `TemplateRef`, Angular component type (`Type<unknown>`), or truthy string
+  or number over the registered widget. Templates receive `def`, `source`,
+  `labels` and `className` as named context fields and the whole props object
+  as `$implicit`; components receive their declared matching inputs. The
+  form passes `className: undefined`; the header passes its control class.
+  Empty or unsupported results, including `""`, `0`, booleans, plain objects
+  and non-component functions, retain the kit widget. Live context updates
+  preserve an unchanged renderer's instance; replacing or removing it runs
+  Angular teardown. See [Angular custom filter types](./angular/custom-filter-types.md).
+  `filterRuntimeFor` (`FilterRuntimeOptions`) derives a
   `TableFilters` runtime from the definitions — the predicates and the URL
-  keys; `filterChipsFor` the active chips and their count;
+  keys; `filterChipsFor` and `activeFilterChipsFor` the active chips and
+  their count, `filterTreeChips` one chip per tree condition;
   `filterOptionsFor` a definition's choices as a `FilterOptionsState`; and
   `textFilterFor`, `rangeFilterFor` and `booleanFilterFor` the per-field
-  widgets a kit's form draws. `AdaptFilterTreeChrome` (with
+  widgets a kit's form draws. `checklistSlice` and `nextChecklistViewport`
+  window a long checklist. `AdaptFilterHeaderChrome` and
+  `AdaptFilterHeaderControlChrome` are the compact header-filter row.
+  `FilterHeaderSlots` names the kit's search, select, range and multi
+  controls (`FilterHeaderSearchProps`, `FilterHeaderSelectProps`,
+  `FilterHeaderRangeProps`, `FilterHeaderMultiProps`, `FilterHeaderOption`);
+  `FilterHeaderClassNames` are the row's class hooks. `injectHeaderFilterOverlay`
+  keeps one column's overlay open, dismisses it on an outside press, and can
+  close it after a finished write. `AdaptFilterTreeChrome` (with
   `AngularFilterTreeDisclosureProps`) and `AdaptChecklistChrome` are the
   nested AND/OR builder and the checklist filter, structure only; the kit
-  hands its controls in `slots`. `AdaptGroupingPanelChrome` is the grouping
-  strip — chips, insertion carets, aggregations and the ungroup target —
-  with `GroupingPanelSlots`, `AngularGroupingPanelSurfaceProps` and
-  `AngularGroupingPanelAggregationItemProps`. `groupingPanel` (with
-  `GroupingPanelExtras`) is the feature that owns the group-by state;
-  `injectGroupingPanelState` (`GroupingPanelStateOptions`) publishes the
-  strip's props for the `GROUPING_PANEL` slot. `virtualize`
-  (`VirtualizeOptions`) windows the body through `@tanstack/angular-virtual`;
-  `injectTableVirtualization` / `injectKeyedVirtualization` (with
-  `TableVirtualizationOptions` / `KeyedVirtualizationOptions`) and the
-  `injectTableVirtualizer` / `injectKeyedVirtualizer` scroll helpers are the
-  headless hooks kits call. `cellNavigation` (`CellNavigationOptions`) turns
-  on the keyboard grid; `injectGridFocus` is the underlying hook.
-  `rowReorder` / `injectRowReorder` (`RowReorderStateOptions`) publish the
-  drag and keyboard grab model. `editing` / `injectCellEditing`
-  (`CellEditHandler`, `CellEditingOptions`) arm in-place cell edits;
-  `rowEditing` / `injectRowEditing` (`RowEditHandler`,
-  `RowEditingInjectOptions`) and `batchEditing` / `injectBatchEditing`
-  (`BatchEditHandler`, `BatchEditingInjectOptions`) arm whole-row and
-  batch commits.
+  hands its controls in `slots`.
+- Find: `findInTable()` (over `coreFindInTable`) turns the bar on.
+  `injectFindInTable` (`FindInTableOptions`) is the live `FindInTableState`:
+  the query, the walk and `openBar`. `AdaptFindBarChrome` lays out the bar
+  (`FIND_BAR`); `FindBarSlots` names the kit's search and buttons
+  (`FindSearchProps`, `FindButtonProps`, `FindButtonKind`, `FindBarProps`).
+  `findMarkAttrs` paints `data-cell-match` when no grid does.
+  `injectFindShortcut` opens the bar on Ctrl/Cmd+F inside the table,
+  `injectFindScroll` brings the current hit into view, `injectFindFocus`
+  moves grid focus onto it, and `injectFindWindowScroll` asks a virtual
+  window to render that row. `ADAPTTABLE_FIND_STATE` is the token a toolbar
+  button reads.
+- Command palette: `commandPalette()` lists every wired action.
+  `CommandPaletteOptions.open` is `boolean | Signal<boolean>`; both kit
+  shells follow a supplied signal after mounting. Pass the signal itself
+  and accept `onOpenChange` requests by calling its `set` method. Omitting
+  `open` keeps state internal, with the callback optionally observing it.
+  The signal can also open or close the palette from host controls without
+  rebuilding the feature. See [Angular command palette](./angular/command-palette.md).
+  `injectCommandPalette` (`CommandPaletteInjectOptions`) is the live
+  `TableCommandPalette`: whether it is open, `close`, `show` and the
+  commands. `AdaptCommandPaletteChrome` owns the inner listbox structure,
+  search, command highlight, keyboard handling, focus trap and return focus.
+  `CommandPaletteSlots` requires `Surface`, `Input`, `Item` and `Empty`;
+  there is no fallback dialog in the binding. The kit's `Surface` receives
+  one `props` input typed as `CommandPaletteSurfaceProps`: the localized
+  `label`, `onClose`, optional `className` and `children`, a
+  `TemplateRef<unknown> | undefined` containing the binding's structure.
+  The surface renders that template and supplies the actual dialog, its
+  accessible name, modality and dismissal channel. The native kit supplies
+  the HTML dialog surface; another kit supplies its own modal component.
+  `injectShortcuts` (`UseShortcutsOptions`) binds `DEFAULT_SHORTCUTS`, and
+  `OPEN_PALETTE_COMMAND` is the chord that opens it.
+  `ADAPTTABLE_PALETTE_OPEN` publishes a `PaletteOpenState` a toolbar button
+  reads.
+- Context menu: `contextMenu()` arms right-click, Shift+F10, the menu key
+  and a touch long press. `injectContextMenu` (`ContextMenuController`) is
+  one target's open state. `injectTableContextMenu`
+  (`TableContextMenuOptions`) is the table's `TableContextMenu`: the region
+  handlers, the entries, where it opened and `close`.
+  `AdaptContextMenuChrome` lays out the anchor; `ContextMenuSlots` names the
+  kit's surface, entry and divider, and `ContextMenuRow` is one entry that
+  closes the menu before it runs. `ADAPTTABLE_CONTEXT_MENU` publishes the
+  `ContextMenuRegionHandlers` the table binds. `copyContextMenuSelection`
+  copies or cuts the cell the menu was opened on when cell navigation is on.
+- Side panel: `sidePanel()` docks one or more panels beside the body.
+  `SidePanelOptions` is the strip, which panel is open and which edge it
+  sits on. `SidePanelPanel` is one panel: a key, an optional label and
+  optional content (a template or text). `AdaptSidePanelChrome` lays out
+  the header, the tabs and the body; `SidePanelSlots` names the kit's
+  frame, tab and close control. `AdaptSidePanelLayout` is the row the
+  panel sits in beside the table.
+- Status bar: `statusBar()` is the strip under the table — rows showing,
+  rows selected, and notices for a feature that cannot run.
+  `AdaptStatusBarChrome` lays it out; `StatusBarSlots` names the kit's bar
+  and the selection figures. `selectionStats()` arms the aggregates, and
+  `selectionStatsOf` counts them. `AdaptSelectionStatsChrome` formats the
+  figures; `SelectionStatsSlots` names the kit's strip. `SelectionStats` is
+  the count, sum, average, min and max. `AdaptGridFocusAnnouncer` speaks
+  the focused cell; `GridFocusAnnouncement` is the focus it reads.
+- Export and print: `injectExportHandler` runs one export — CSV, XLSX or PDF —
+  and `injectExportCsv` is that run for a CSV file. `exportXlsx()` and
+  `exportPdf()` arm the workbook and PDF writers. `AdaptExportProgressChrome`
+  lays out a server export's progress; `ExportProgressSlots` names the kit's
+  surface. `AdaptExportAnnouncer` says how the file ended. `print(onPrint, true)`
+  adds the toolbar's print button.
+- Pivot: `pivot` and `pivotTableModel` (`@adapttable/angular/pivot`) turn rows
+  into table props — a row-header column, one column per leaf, and the grand
+  total as `summaryRow`. `AdaptPivotRowHeader` draws that row header.
+  `PivotTableModelOptions.renderRowHeader` can return text, a template or a
+  standalone component receiving the cell context, including the pivot row's
+  key for fold controls. The unstyled kit uses the same renderer; exports and
+  grand-total captions remain text.
+  `AdaptPivotPanelChrome` lays out the three zones; `PivotPanelSlots` names
+  the kit's surface, zone, field, add control and aggregation chooser.
+  `injectPivotUrlState` (`PivotUrlStateOptions`) keeps the configuration and
+  the folded lines in the URL and returns a `PivotUrlBinding`.
+  `PIVOT_ROW_COLUMN_KEY` is the row-header column.
+  `PIVOT_URL_WRITE_DEBOUNCE_MS` is how long a change waits before the URL
+  follows.
+- Grouping: `grouping` (with `GroupingExtras`) groups rows under collapsible
+  headers, with per-group subtotals, optional footers and paged groups.
+  `injectGrouping` (`GroupingOptions`) is its live model, a `TableGrouping`
+  of headers, footers, "show more" rows and leaves with the actions that
+  change them; a grouped table renders the full filtered set as one page.
+  `injectGroupCollapse` (`GroupCollapseOptions`) holds which groups are
+  closed, controlled or not, and `injectGroupPaging` (`GroupPagingOptions`)
+  how many more groups or rows are showing. `AdaptGroupMoreButtonChrome`
+  words the "show more" offer and `AdaptGroupToggleSpacer` keeps a footer's
+  indent where a toggle would be. `RuntimeGrouping` is the grouped entries
+  the runtime view reads. `groupingPanel` (with `GroupingPanelExtras`) adds
+  the interactive strip, which owns the group-by state;
+  `injectGroupingPanelState` (`GroupingPanelStateOptions`) publishes its
+  props for the `GROUPING_PANEL` slot, and `AdaptGroupingPanelChrome` lays it
+  out — chips, insertion carets, aggregations and the ungroup target — with
+  `GroupingPanelSlots`, `AngularGroupingPanelSurfaceProps` and
+  `AngularGroupingPanelAggregationItemProps`. A column header drags into the
+  strip to group by it.
+- Row reorder: `rowReorder` / `injectRowReorder` (`RowReorderStateOptions`)
+  publish the drag and keyboard model: Space lifts and drops, arrows move,
+  Escape cancels, and a grouped table offers a move menu and, under a
+  `confirm` policy, a confirmation before the host is asked.
+  `AdaptRowReorderHandleChrome`, `AdaptRowReorderButtonsChrome` and
+  `AdaptRowReorderAnnouncer` are the grip, the phone up/down pair and the
+  live region, with `RowReorderHandleSlots` / `RowReorderButtonsSlots`; kits
+  fill `ROW_REORDER_HANDLE`, `ROW_REORDER_BUTTONS` and
+  `ROW_REORDER_ANNOUNCER`.
+- Virtualization: `virtualize` (`VirtualizeOptions`) windows the body
+  through `@tanstack/angular-virtual`. `injectTableVirtualization` /
+  `injectKeyedVirtualization` (with `TableVirtualizationOptions` /
+  `KeyedVirtualizationOptions`) and the `injectTableVirtualizer` /
+  `injectKeyedVirtualizer` scroll helpers window rows and keyed entries. A
+  virtualized row or card hands itself to the window's `measureElement`, so
+  rows taller than their estimate keep the true scroll height;
+  `injectRowPairMeasurer` (`RowPairMeasurerOptions`, with
+  `ResizableVirtualizer` and `RowPairMeasurer`) measures a row together with
+  its open detail panel. `injectMeasuredWindowScrollMargin`
+  (`MeasuredWindowScrollMarginOptions`) keeps a page-scrolled window's margin
+  equal to where the list starts, so a table down the page windows the rows
+  in view. `injectColumnWindow` (`ColumnWindowOptions`, returning
+  `ColumnWindow`) windows a wide table's columns — pinned ones always
+  rendered — and `AdaptColumnSpacer` holds the skipped width open on either
+  side.
+- Tree: `tree` (`TreeFeatureOptions`) renders rows as an expandable tree,
+  nested (`getChildren`) or flat (`getParentId`), with lazy children
+  (`hasChildren`, `onLoadChildren`) and a controlled open set.
+  `TreeFeatureOptions.expandedIds` accepts `MaybeSignal<readonly string[]>`:
+  a fixed array or a live Angular signal followed by both kit shells.
+  Pair the signal with `onExpandedIdsChange: ids => expandedIds.set(ids)`;
+  host writes update the mounted tree, and `expandedIds.set([])` closes all
+  nodes. Omit `expandedIds` for internal state. Tree expansion is separate
+  from row detail and is not automatically persisted to URL or saved views.
+  See [Angular tree data](./angular/tree-data.md). `injectTree`
+  (`TreeOptions`) is its live model, a `TableTree`: the walked entries, every
+  loaded node for export, the open set, which nodes are loading or failed,
+  and the chevron's column. Opening a node fetches its children while it
+  shows loading; a failed fetch closes the node, so the next click retries.
+  `injectTreeExpansion` (`TreeExpansionOptions`) holds the open nodes,
+  controlled or not, and `injectLazyChildren` (`LazyChildrenInjectOptions`)
+  the fetches. `AdaptTreeCellChrome` wraps the tree column's cell with its
+  chevron and indent and passes every other cell through;
+  `AdaptTreeToggleChrome` draws the chevron through the kit's `Button`
+  (`TreeToggleSlots`) or a leaf's spacer. Kits fill `TREE_CELL` and
+  `TREE_TOGGLE`.
+- Row detail: `rowDetail` renders a panel under an expanded row from an
+  `ng-template` or component handed a `RowDetailContext`; `nestedTable`
+  renders a `NestedTable` per row (`NestedTableFor`) — the kit's own table,
+  mounted from a template handed a `NestedTableContext` of core's
+  `NestedTableDefaults` (no URL writes, no search box, the parent's density
+  and labels, an accessible name). `injectRowDetail` (`RowDetailOptions`) is
+  their live model, a `TableRowDetail`, and `injectRowExpansion`
+  (`RowExpansionOptions`) the open rows, several at once, keyed by id.
+  `AdaptRowDetail` draws a row's detail: its nested table inside a region
+  named for assistive technology, else the host's panel. Kits fill
+  `EXPAND_TOGGLE`.
+- Row pinning: `rowPinning` (`RowPinningFeatureOptions`) lets rows be
+  pinned to the top or bottom from their actions menu; the table holds the
+  lists and keeps them in the URL unless the host passes `pinnedRowIds`, and
+  grouping or a tree refuses it. `RowPinningFeatureOptions.pinnedRowIds`
+  accepts `MaybeSignal<RowPinState>`: a state object or a live signal of
+  `{ top, bottom }` lists. Both kit shells follow host signal writes after
+  mounting; pair it with `onPinnedRowIdsChange: next => pinnedRowIds.set(next)`.
+  Set both lists to `[]` to clear all pins. Controlled state disables the
+  feature's automatic URL writes; a host can supply the signal and callback
+  from `injectRowPinningUrlState` when it owns that persistence.
+  See [Angular row pinning](./angular/row-pinning.md). `injectTableRowPinning`
+  (`TableRowPinningOptions`) is its live state, and `injectRowPinning`
+  (`RowPinningOptions`, returning `RowPinningState`) the lists, which side a
+  row is on, `pin`, `unpin` and the pin entries for the actions menu.
+- Summaries: `aggregate` builds a `SummaryRowFn` from an `AggregateSpec` —
+  what a table's summary row and a grouping's subtotals take — and
+  `AdaptFooter` draws a column's footer cell, its `footer` renderer handed a
+  `FooterContext` with the summary value, or the value as text.
+- Cell navigation: `cellNavigation` (`CellNavigationOptions`) makes the
+  table one tab stop whose cells the arrow keys move between, and tells
+  `onRangeChange` the selected rectangle. `injectGridFocus(options)`
+  (`GridFocusOptions`, returning `GridFocus`) is the grid itself: the active
+  cell and range as signals, the announcement, and attribute getters that
+  wrap the table's own with the grid's roles, indices, roving tab stop and
+  handlers. Off, they are the table's attributes unchanged.
+- Editing: `editing` / `injectCellEditing` (`CellEditHandler`,
+  `CellEditingOptions`, `EditingLifecycleExtras`) edit one cell in place;
+  `injectEditValidation` (`EditValidationInjectOptions`) and
+  `injectCellSaveState` (`CellSaveStateInjectOptions`) track validators and
+  rejected saves. `AdaptEditableCellGate` draws the activate control and the
+  editor (`EDITABLE_CELL`, `EditableCellSlotProps`, `EditableCellSlots`,
+  `EditableCellEditorCtrl`, `EditableCellActivateProps`,
+  `EditableCellButtonProps`): Enter or F2 opens a cell, the editor takes
+  focus, and focus returns to the cell after a commit or cancel.
+  `AdaptCellConflictNotice` (`CellConflictNoticeProps`) is the keep/take
+  question when a live row moves under the editor. `rowEditing` /
+  `injectRowEditing` (`RowEditHandler`, `RowEditingInjectOptions`) and
+  `batchEditing` / `injectBatchEditing` (`BatchEditHandler`,
+  `BatchEditingInjectOptions`) edit whole rows and batches. `AdaptRowEditCell`
+  binds a row's fields to its draft (Enter saves the row, Escape cancels it,
+  the first field takes focus) and `AdaptRowEditActionsChrome` draws its
+  edit, save and cancel controls for the `ROW_EDIT_ACTIONS` slot;
+  `AdaptBatchEditCell` turns every editable cell into a field marked
+  `data-changed` once edited, and `AdaptBatchEditBarChrome` fills
+  `BATCH_EDIT_BAR` with the unsaved-row count, Save all and Cancel all.
 - Actions: `injectBulkActionRunner` runs bulk actions and returns a
   `BulkActionRunnerState`; `rowActionsFor` (`RowActionsOptions`) is the
   actions column's list, with Duplicate and Delete appended for the host's
@@ -3064,29 +3560,310 @@ controls: the host writes its own markup.
   row density kept in the URL, `injectFullscreen` the fullscreen toggle,
   `injectExportCsv` (`ExportCsvHandlerOptions`) the Export button's state,
   and `injectSavedViews` (`SavedViewsOptions`, returning `SavedViewsState`)
-  the saved views over the table's URL. `urlAdapterFor` resolves the one URL
+  the saved views over the table's URL. `AdaptSavedViewsPanelChrome`
+  (`SavedViewsPanelSlots`) is the management panel for that list — rename,
+  reorder, choose the default and delete — and `AdaptSavedViewGlyph` draws
+  each row's control. `urlAdapterFor` resolves the one URL
   adapter a table and its features share.
 - `fromStore(store, options)` turns any core store, an `ExternalStore`, into a
   read-only signal that ends with its injector (`FromStoreOptions`).
   `MaybeSignal` and `MaybeSignalOptional` are the option types that take a
-  value or a signal of one.
+  value or a signal of one, and `readMaybe` reads either. The secondary
+  entry `./sparkline` exports
+  `AdaptSparkline`, `sparklineColumn` (`SparklineProps`,
+  `SparklineColumnSpec`, `SparklineKind`), `finiteSparklineValues`,
+  `sparklineSummary` and `sparklineExportValue`: a cell draws a bar, line or
+  area from the series, and sort and export read the numbers.
+  `./formula` exports `buildFormulaColumns`
+  (`AngularFormulaColumnsResult`, `FormulaColumnSpec`) and
+  `injectFormulaUrlState` (`FormulaUrlState`, `FormulaUrlStateOptions`,
+  `FORMULA_URL_WRITE_DEBOUNCE_MS`), so a typed column is a `ColumnDef` and
+  survives in the URL.
+- `injectHighlight(enabled)` marks a row (`flashRow`) or a cell
+  (`flashCell`) for a moment over core's highlight store and returns a
+  `Highlight`: `isRowHighlighted` and `isCellHighlighted`, tracked where they
+  are read, `clear`, and `animated`, false when the reader prefers reduced
+  motion, when the mark is shorter and still. `injectChangedCellFlash`
+  (`ChangedCellFlashOptions`) marks the cells a live patch changed — `mark`
+  takes the patch events — and returns a `ChangedCellFlash` with
+  `isFlashing`, `isRowFlashing` and `flashAttrs`, the `data-flash` attribute
+  for `[adaptAttrs]`; it lights nothing for a reader who prefers reduced
+  motion and drops what is lit when turned off. `injectMediaQuery` and
+  `injectPrefersReducedMotion` are the media queries they read, as signals
+  that are false on the server.
+- `@adapttable/angular/stream` binds a WebSocket or server-sent-events
+  endpoint to rows the host owns: `injectRowPatchStream`
+  (`RowPatchStreamOptions`, returning a `RowPatchStream` with `status` and
+  `error` signals and `close`) opens while its URL is set and `enabled`,
+  applies each frame's patches through `onPatch` — hand it
+  `(update) => rows.update(update)` — reopens when the URL changes, closes
+  when its injection context is destroyed, and reconnects as `reconnect`
+  says. The entry also carries `injectChangedCellFlash` and core's
+  `openRowPatchStream`, `parseRowPatchFrame`, `isStreamLive`,
+  `isStreamSettled` and the patch and socket types.
 
-`@adapttable/angular-unstyled` is the Angular table drawn with native HTML,
-unpublished while it reaches parity with the React kits. `AdaptDataTable`
-(`<adapt-data-table>`) takes the rows, columns and row key as inputs and
-renders search, sorting, paging, the phone card layout, row selection and
-keyboard cell navigation with the `data-adapttable-part` names every kit
-shares. Its `features` input composes `columnMenu`, `filters`,
-`headerFilters`, `bulkActions`, `rowActions` (`RowActionsFeatureOptions`),
-`densityChooser`, `fullscreen`, `exportCsv`, `savedViews`,
-`groupingPanel`, `virtualize`, `cellNavigation`, `rowReorder`, `editing`,
-`rowEditing` and `batchEditing`; `filtersMode`
-(`FiltersMode`) picks the anchored popover or the drawer. Each feature draws
-the kit's own native controls. `AdaptGroupingPanel` draws the grouping
-strip with those same native controls. `paginationMode` and `maxHeight` arm
-infinite lists and a scroll-box window. `TableView` is what the table renders from
-once its inputs have arrived, and `FiltersView` is the filters on that view:
-the button, the open panel, and the form, overlay, chips and header funnels.
+## The Angular native kit
+
+`@adapttable/angular-unstyled` is the Angular table drawn with native HTML.
+It participates in the native-kit contracts while remaining a private,
+unpublished workspace package. Publication is a separate decision from
+contract participation. `AdaptDataTable` (`<adapt-data-table>`)
+takes the rows, columns and row key as inputs — or a prebuilt `source`, or
+the page a host fetches through `onQueryChange` with `total`, `loading`,
+`error`, `supports`, `aggregates`, `responseKey`, `facets` and `facetKeys`,
+the tier chosen by `injectTableData` and `mode` — and renders search, sorting,
+paging, the phone card layout, row selection and keyboard cell navigation
+with the `data-adapttable-part` names every kit shares. `AdaptDesktopTable`
+and `AdaptMobileCards` are the internal desktop body and phone card list;
+`AdaptPaginationFooter` is the internal pager. `AdaptTableSkeleton` is the first-load
+placeholder (table or cards), `AdaptErrorState` is a failed load with its
+retry, and `AdaptTableRegion` sits a projected side panel beside the body.
+A `#tableFooter` template renders under the pager. `AdaptDataTable`'s `features` input composes
+factories from secondary entries, each drawing the kit's own native
+controls — `columnMenu` (`AdaptColumnMenu`), `AdaptColumnHeaderRename`
+(the inline header rename form), `filters` (`AdaptFiltersForm`,
+`AdaptFilterDrawer`, `AdaptFilterPopover`, `AdaptFilterChips`,
+`AdaptAutoFilterForm`), `headerFilters`, `AdaptFilterHeaderRow`,
+`AdaptFilterHeaderControl`, `bulkActions` (`AdaptBulkBar`),
+`rowActions` (`RowActionsFeatureOptions`), `densityChooser`
+(`AdaptDensityButton`), `fullscreen` (`AdaptFullscreenButton`), `exportCsv`
+(`AdaptExportButton`), `savedViews` (`AdaptSavedViewsMenu`, `AdaptSavedViewsPanel`), `grouping`
+(`AdaptGroupHeaderRow` on desktop and `AdaptGroupHeaderCard` on phones draw
+group headers, footers and "show more" rows, the last with `AdaptGroupMore`),
+`groupingPanel`
+(`AdaptGroupingPanel`), `collapsibleColumnGroups`
+(`/column-groups`; `AdaptColumnGroupToggle` with `AdaptColumnGroupButton`
+fills `COLUMN_GROUP_TOGGLE`, and the desktop header draws each `ColumnGroup`
+as a spanning group row), `columnSelectionCheckbox` (`/column-selection`;
+`AdaptColumnSelectCheckbox` with the native `AdaptColumnSelectBox` fills
+`COLUMN_SELECT`), `tree` (`TreeFeatureOptions`; `AdaptTreeCell` fills
+`TREE_CELL` with `TreeCellSlotProps`, the cell's content as a template,
+`AdaptTreeToggle` leads each phone card, and `AdaptTreeButton` is the native
+chevron), `rowDetail` and `nestedTable` (`@adapttable/angular-unstyled/row-detail`
+and `/nested-table`; `AdaptExpandToggle` fills `EXPAND_TOGGLE` in each row's
+leading cell and on each card, and the panel opens beneath the row or inside
+the card), `virtualize`, `cellNavigation`, `findInTable` (`AdaptFindBar`,
+`AdaptFindToolbarButton`), `commandPalette` (`AdaptCommandPaletteLive`,
+`AdaptCommandPaletteButton`), `contextMenu` (`AdaptContextMenuLive`,
+`AdaptContextMenuSurface`, `AdaptContextMenuItem`,
+`AdaptContextMenuSeparator`), `sidePanel` (`AdaptSidePanelLive`,
+`AdaptSidePanelFrame`, `AdaptSidePanelTab`, `AdaptSidePanelClose`), `statusBar` (`AdaptStatusBarLive`,
+`AdaptStatusBar`, `AdaptSelectionStatsBar`), `selectionStats`,
+`exportXlsx`, `exportPdf`, `print` (`AdaptPrintButton`),
+`AdaptPivotPanel` and `pivotTableModel` (`@adapttable/angular-unstyled/pivot`;
+`AdaptPivotRowHeader` fills the row-header cell),
+`rowReorder`,
+`editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
+opens `AdaptNativeCellEditor`,
+`AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`), `dirtyIndicators`,
+`editHistory` / `undoRedoButtons` and `batchEditing`
+(`AdaptBatchEditBar` fills `BATCH_EDIT_BAR`), `cellSpan`
+(`@adapttable/angular-unstyled/cell-span`; each drawn cell is a
+`BodyCellView`, and its `mark` is the `data-cell-span` attribute), `extraRows` (`/extra-rows`;
+separator and full-width rows on the desktop body and the phone cards) and
+`rowAppearance` (`/row-appearance`; a class, style and height on each row
+and card) — each importable from its own
+subpath (or from `@adapttable/angular-unstyled/features`). `standardPreset`
+(`@adapttable/angular-unstyled/preset`, `StandardPresetOptions`) assembles
+the zero-configuration set. Overlay helpers `menuPopover` / `MenuPopover`,
+`OVERLAY_Z` and `placeOverlayBelowTrigger` position kit menus, and
+`filtersMode` (`FiltersMode`) picks the anchored popover or the drawer.
+`searchable` draws the search box (on by default; a nested table turns it
+off). `summaryRow` adds a summary row under the body (a `summary` table
+footer, and a `summary-card` on phones). `rowPinning`
+(`@adapttable/angular-unstyled/row-pinning`, `RowPinningFeatureOptions`) keeps
+a pinned row above or below the scrolling rows, stuck there inside a scroll
+box, and `pinnedSummaryRows` (`/pinned-summary-rows`) draws host summary rows
+above and below without a data row's controls. `paginationMode` arms infinite lists, and `maxHeight` caps the desktop body
+or the phone card list, which then scrolls itself and is what a composed
+`virtualize` windows. `TableView` is what the table renders from once its
+inputs have arrived: its body as `BodySlot` entries in reading order, each
+data row a `BodyRow`, and each row's `RowActionsCell` — the row-edit
+controls and host actions its actions cell draws. `FiltersView` is the
+filters on that view: the button, the open panel, and the form, overlay,
+chips and header funnels.
+
+The root exports `DataTableClassNames` for the `classNames` input. Card hooks
+are `cards`, `card`, `cardRow`, `cardLabel`, `cardValue`, `cardActions`,
+`cardDetail` and `summaryCard`; selection, tree and reorder hooks are
+`checkbox`, `treeToggle`, `treeSpacer`, `rowReorderButtons`, `rowReorderUp`
+and `rowReorderDown`. `actionButton`, `rowActionsMenu` and
+`rowActionsTrigger` style the native actions on desktop and phones.
+`separatorRow`, `separatorCell`, `fullWidthRow`, `fullWidthCell` and
+`virtualSpacer` cover structural rows. Classes supplement the shared
+`data-adapttable-part` names and state attributes; `rowAppearance` supplies
+per-row classes, styles and heights alongside them.
+
+`renderCard` accepts a `MobileCardRenderer`. It replaces only each data
+card's field layout: the native shell still owns selection, tree/detail
+expansion, reorder controls, row editing/actions and the expanded detail.
+Pinned and trailing summary cards stay read-only and use their summary
+layout. For example, import `NgTemplateOutlet` from `@angular/common` into
+the host component and render the supplied field templates:
+
+```html
+<ng-template #cardBody let-row let-fields="fields" let-selected="selected">
+  <section [attr.data-selected]="selected ? '' : null">
+    @for (field of fields; track field.column.key) {
+    <div>
+      @if (field.label) {
+      <span>{{ field.label }}</span>
+      }
+      <ng-container
+        [ngTemplateOutlet]="field.value"
+        [ngTemplateOutletContext]="field.context"
+      />
+    </div>
+    }
+  </section>
+</ng-template>
+<adapt-data-table
+  [data]="people"
+  [columns]="columns"
+  [rowKey]="rowKey"
+  [features]="features"
+  [renderCard]="cardBody"
+/>
+```
+
+A standalone component passed as `renderCard` receives the same context
+fields as its declared inputs. `renderRowActions` accepts a
+`RowActionsRenderer` on desktop and cards. Custom action renderers own
+rendering and running the supplied actions; use the supplied confirmation
+gate and labels to preserve each action's behavior.
+
+`onRowClick` is a host callback input, used by both desktop rows and cards.
+The shared `rowClickProps` guard prevents selection checkboxes, action
+buttons, links and editors from also activating the row. Enter/Space
+activate only when the row itself has focus; ArrowUp/ArrowDown move among
+sibling data rows with a roving Tab stop. Summary rows and summary cards are
+not activatable.
+
+`isCellFlashing(rowId, columnKey)` is an optional live callback input,
+for example `[isCellFlashing]="flash.isFlashing"` when `flash` comes from
+`injectChangedCellFlash`. It supplies `data-flash` on desktop cells and the
+built-in mobile `card-value` wrappers. A custom card body owns its wrappers
+and can apply the same callback there. Dirty tracking is independent:
+`editing(commit, { onDirtyChange })` reports unsaved counts even when no
+`dirtyIndicators()` feature is composed; adding that feature draws the
+cell and row/card marks without changing who owns the data or confirms it.
+
+## The Angular NG-ZORRO kit
+
+`@adapttable/ng-zorro` is the themed Angular table built with
+`ng-zorro-antd` controls over `@adapttable/angular`. It targets Angular 22
+and NG-ZORRO 22.1.1. It participates in the shell-kit parts, feature and
+conformance contracts while remaining an unpublished workspace package
+(`private: true`, version `0.0.0`). The host loads NG-ZORRO's global theme,
+for example `@import "ng-zorro-antd/ng-zorro-antd.min.css";` in its global
+stylesheet. The kit does not import the native kit or a second framework's
+binding.
+
+Import `AdaptDataTable` from the root and compose features from this kit's
+own secondary entries. Its `<adapt-data-table>` uses the same Angular
+`ColumnDef`, cell/header/footer templates and data modes: `data`, a prebuilt
+`source`, or host-fetched rows with `onQueryChange` and `total`. The binding
+owns filtering, sorting, pagination and virtualization; NG-ZORRO's visual
+table does not introduce a second state controller. Every write still calls
+the host. `renderCard`, `renderRowActions`, `onRowClick`, `rowAppearance`,
+`isCellFlashing`, `classNames` (`DataTableClassNames`) and the live labels
+keep their Angular contracts on desktop and on the NG-ZORRO card layout.
+
+The matching feature entries are:
+
+- `/filters`: `filters`, `filterTypes`; `/header-filters`: `headerFilters`,
+  `AdaptFilterHeaderRow`, `AdaptFilterHeaderControl`; `/saved-views`:
+  `savedViews`, `AdaptSavedViewsPanel`
+- `/column-menu`: `columnMenu`; `/column-groups`: `collapsibleColumnGroups`,
+  `ColumnGroup`, `ColumnInput`; `/column-selection`:
+  `columnSelectionCheckbox`; `/resizable-columns`: `resizableColumns`;
+  `/multi-sort`: `multiSort`; `/fit-columns`: `fitColumns`
+- `/bulk-actions`: `bulkActions`; `/row-actions`: `rowActions`,
+  `RowActionsFeatureOptions`; `/row-reorder`: `rowReorder`; `/row-pinning`:
+  `rowPinning`, `RowPinningFeatureOptions`; `/pinned-summary-rows`:
+  `pinnedSummaryRows`; `/row-appearance`: `rowAppearance`,
+  `RowAppearanceOptions`; `/extra-rows`: `extraRows`; `/cell-span`: `cellSpan`
+- `/grouping`: `grouping`, `GroupingExtras`, `GroupSort`;
+  `/grouping-panel`: `groupingPanel`; `/tree`: `tree`, `TreeFeatureOptions`;
+  `/row-detail`: `rowDetail`, `RowDetailContext`, `nestedTable` and its
+  `NestedTable`, `NestedTableContext`, `NestedTableDefaults`, `NestedTableFor`
+  types; `/nested-table` also forwards that nested-table surface;
+  `/virtualize`: `virtualize`
+- `/editing`: `editing`, `rowEditing`, `AdaptRowEditActions`,
+  `dirtyIndicators`, `editHistory`, `EditHistoryHandle`, `EditHistoryOptions`,
+  `undoRedoButtons`; `/batch-editing`: `batchEditing`, `AdaptBatchEditBar`;
+  `/cell-navigation`: `cellNavigation`
+- `/find-in-table`: `findInTable`, `AdaptFindBar`, `AdaptFindToolbarButton`;
+  `/command-palette`: `commandPalette`, `AdaptCommandPaletteLive`,
+  `AdaptCommandPaletteButton`; `/context-menu`: `contextMenu`,
+  `AdaptContextMenuLive`, `AdaptContextMenuSurface`, `AdaptContextMenuItem`,
+  `AdaptContextMenuSeparator`
+- `/side-panel`: `sidePanel`, `AdaptSidePanelLive`, `AdaptSidePanelFrame`,
+  `AdaptSidePanelTab`, `AdaptSidePanelClose`; `/status-bar`: `statusBar`,
+  `AdaptStatusBarLive`, `AdaptStatusBar`, `AdaptSelectionStatsBar`;
+  `/selection-stats`: `selectionStats`
+- `/density`: `densityChooser`; `/fullscreen`: `fullscreen`; `/export`:
+  `exportCsv`, `exportXlsx`, `exportPdf`; `/print`: `print`
+
+`/pivot` exports this kit's `AdaptPivotPanel`, `AdaptPivotRowHeader` and
+`pivotTableModel`, together with the Angular pivot contracts described
+above: `AdaptPivotPanelChrome`, `PivotPanelSlots`, `PivotConfig`, `PivotField`,
+`PivotResult`, `PivotRow`, `PivotTableModel`, `PivotTableModelOptions`,
+`PivotUrlBinding`, `PivotUrlStateOptions`, `injectPivotUrlState`, `pivot`,
+`EMPTY_PIVOT_CONFIG`, `PIVOT_ROW_COLUMN_KEY` and
+`PIVOT_URL_WRITE_DEBOUNCE_MS`.
+
+`/features` gathers the feature factories and `RowActionsFeatureOptions`.
+`/preset` exports `standardPreset` and `StandardPresetOptions`: its default
+set is column menu, density, CSV export, fullscreen, header filters and
+status bar; grouping, bulk actions, filters and saved views join when their
+options are supplied. An omitted feature renders no controls.
+
+The root also exposes the kit's reusable table components:
+`AdaptAutoFilterForm`, `AdaptColumnMenu`, `AdaptColumnHeaderRename`,
+`AdaptColumnGroupToggle`, `AdaptColumnGroupButton`,
+`AdaptColumnSelectCheckbox`, `AdaptColumnSelectBox`, `AdaptEditableCell`,
+`AdaptNativeCellEditor`, `AdaptCheckboxCellEditor`, `AdaptFillHandle`,
+`AdaptFillHandleControl`, `AdaptExpandToggle`, `AdaptGroupHeaderRow`,
+`AdaptGroupHeaderCard`, `AdaptGroupMore`, `AdaptGroupingPanel`,
+`AdaptPivotPanel`, `AdaptPivotRowHeader`, `AdaptSavedViewsPanel`,
+`AdaptErrorState`, `AdaptTableSkeleton`, `AdaptTableRegion`, `AdaptTreeCell`,
+`AdaptTreeToggle` and `AdaptTreeButton`. `AdaptNativeCellEditor` retains the
+Angular component name but renders this kit's NG-ZORRO inputs, selects and
+checkboxes. `BodyCellView`, `BodyRow`, `BodySlot`, `RowActionsCell`,
+`TableView`, `TreeCellSlotProps`, `FiltersView` and `FiltersMode` describe the
+same Angular view and slot inputs. `menuPopover` / `MenuPopover` manage
+disclosure and dismissal; NG-ZORRO positions the actual portal.
+
+The filter popover has no backdrop, sets the trigger's `aria-expanded`,
+closes on an outside interaction or Escape, and restores trigger focus on
+Escape. A nested select keeps the parent open while choosing an option and
+consumes Escape before the parent. The filter drawer uses NG-ZORRO's real
+backdrop. The command palette supplies the required
+`CommandPaletteSlots.Surface` with an NG-ZORRO modal. `AdaptAttrs` forwards
+whole prop records to the generated semantic table and inner controls using
+its target bridge, so labels, validation, focus refs and event behavior land
+on the real element.
+
+The exported `AdaptDesktopTable`, `AdaptMobileCards`, `AdaptPaginationFooter`,
+`AdaptFiltersForm`, `AdaptFilterDrawer`, `AdaptFilterPopover`,
+`AdaptFilterChips`, `AdaptBulkBar`, `AdaptSavedViewsMenu`,
+`AdaptDensityButton`, `AdaptFullscreenButton`, `AdaptExportButton`,
+`AdaptPrintButton` and `AdaptUndoRedoButtons` remain internal composition
+controls. `AdaptOverlayOrigin`, `registerOverlayOrigin`, `overlayContains`,
+`overlayEscapeHandled` and `OVERLAY_Z` are internal portal-ownership and
+dismissal bridges, not additional public feature APIs.
+
+`@adapttable/ng-zorro/assistant` is opt-in. `tableAssistant` and
+`agentApproval` compose `AdaptTableAssistant` and `AdaptAgentApproval`.
+`TABLE_ASSISTANT_SLOTS` contains `AdaptAssistantPanel`,
+`AdaptAssistantSheet`, `AdaptAssistantWindow`, `AdaptAssistantButton`,
+`AdaptAssistantInput`, `AdaptAssistantBadge`, `AdaptAssistantMenu` and
+`AdaptAssistantLanguageChip`. `AGENT_APPROVAL_SLOTS` contains
+`AdaptApprovalButton`, `AdaptApprovalAction` and `AdaptApprovalList`.
+These controls use NG-ZORRO cards, drawer, buttons, input, tags, menu and
+select; AI sessions and transports remain in the separate AI packages.
+Importing the root table does not import the assistant or AI runtime.
 
 ## Other packages
 
@@ -3096,15 +3873,21 @@ the button, the open panel, and the form, overlay, chips and header funnels.
   presets (`en`, `ar`, `cs`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
   … including `zhTW`) — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--force]`; programmatic
-  `detectKit`, `choosePackageManager`, `installCommand`, `scaffoldFiles`,
-  `runInit` plus the pieces they compose: `KITS` / `KitInfo` / `SHADCN`
+  `detectFramework`, `detectKit`, `choosePackageManager`, `installCommand`,
+  `scaffoldFiles`, `runInit` plus the pieces they compose: `KITS` / `KitInfo` / `SHADCN`
   describe the detectable kits, `packagesFor` and `mergeDependencies`
   compute what to install, `starterComponent` / `ScaffoldFile` /
   `STARTER_PATH` describe the scaffold, `PackageManager` names the
   supported managers, `InitError` is the typed failure, and
   `InitOptions` / `InitResult` / `InitIO` parameterize `runInit` for
-  testing.
-- **Adapter packages** — each exports its `DataTable` with `DataTableProps`,
+  testing. `Framework` is `"react" | "angular"`; `detectFramework` requires both
+  an `@angular/core` dependency and `hasAngularJson: true` to select Angular.
+  `detectKit` accepts `framework` alongside the existing shadcn context, and
+  `InitResult.framework` reports the choice. Angular scaffolds a standalone
+  `PeopleTable` in `src/app/peopleTable.ts`, selecting `angular-unstyled` or
+  `ng-zorro`; React keeps `src/PeopleTable.tsx`. Angular kits remain unpublished
+  workspace packages, and init only prints installation guidance.
+- **React adapter packages** — each exports its `DataTable` with `DataTableProps`,
   `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
   shared core re-exports). `DataTableProps` is `DataTablePropsBase &
 DataModeProps`: the base carries every prop except the data mode, which is

@@ -5,7 +5,7 @@
 **[📖 Documentation](https://adapttable.orwamahmoud.com/)** · **[🚀 Live demo](https://adapttable.orwamahmoud.com/react/demo/)** · **[Get started](https://adapttable.orwamahmoud.com/react/getting-started/)**
 
 The scaffolding CLI for [AdaptTable](https://github.com/orwa-mahmoud/adapttable).
-One command detects your UI kit, picks your package manager, writes a
+One command detects your framework and UI kit, picks your package manager, writes a
 starter table, and tells you exactly what to install.
 
 ```bash
@@ -27,19 +27,72 @@ Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 
 
 ## What it does
 
+- **Detects Angular** only when `package.json` lists `@angular/core` in
+  dependencies or devDependencies **and** `angular.json` is present.
+  Otherwise it keeps the React scaffold.
 - **Detects your UI kit** from `package.json` — Mantine, MUI, Chakra, Ant
   Design, Radix Themes, Base UI, shadcn/ui (via `components.json`), or
-  Tailwind — falling back to the unstyled adapter.
+  Tailwind for React; NG-ZORRO or native unstyled controls for Angular.
+  Kit detection stays within the detected framework, including in mixed projects.
 - **Detects your package manager** from the lockfile (pnpm / yarn / bun /
   npm) and **prints** the right install command — it never installs
   anything itself; you run the command it shows.
-- **Scaffolds** `src/PeopleTable.tsx`, a sortable starter table wired to
+- **Scaffolds** `src/PeopleTable.tsx` for React or `src/app/peopleTable.ts`
+  for Angular, a sortable starter table wired to
   the matching adapter (every optional behavior is one feature import away — see
   the docs). Pass `--force` to overwrite an existing file.
 - **One step it can't do for you:** wrap your app in the kit's provider
   (`MantineProvider`, MUI's `ThemeProvider`, `ChakraProvider`, antd's
   `ConfigProvider`, Radix's `Theme`) if it isn't already — that's the
-  most common first-run failure.
+  most common React first-run failure. Angular setup is below.
+
+## Angular setup
+
+With both Angular markers present, `init` writes a standalone `PeopleTable`
+component. `ng-zorro-antd` selects `@adapttable/ng-zorro`; without it, the
+component uses `@adapttable/angular-unstyled`. React kit dependencies,
+Tailwind and `components.json` do not override that Angular selection.
+
+**Both Angular kits are unpublished workspace packages.** Use built local
+packages for the `@adapttable/angular` binding and chosen kit. The printed
+install command lists the required packages, but needs a workspace or local
+package source that provides those unpublished kits; it is not a public npm
+installation path. The CLI never installs packages or edits `package.json`.
+
+In an app component beside the generated file, import and render it:
+
+```ts
+import { Component } from "@angular/core";
+import { PeopleTable } from "./peopleTable";
+
+@Component({
+  selector: "app-root",
+  standalone: true,
+  imports: [PeopleTable],
+  template: "<people-table />",
+})
+export class App {}
+```
+
+The component uses `ColumnDef` from `@adapttable/angular` and `AdaptDataTable`
+from the chosen kit, with Ada Lovelace, Alan Turing and Grace Hopper as starter
+rows. Name and Role are sortable. The CLI leaves your app component,
+`angular.json` and styles unchanged, and preserves an existing generated
+component unless you pass `--force`.
+
+The NG-ZORRO kit targets Angular 22 and NG-ZORRO 22.1.1. Its host peers are
+`@angular/cdk`, `@angular/common`, `@angular/core`, `@angular/forms`,
+`@angular/platform-browser`, `@angular/router` and `ng-zorro-antd`.
+The printed command includes missing CDK/forms/router peers with Angular 22
+ranges and leaves already declared peers out; match any missing Angular
+peers to your installed Angular version. Load the NG-ZORRO stylesheet once
+from your app's global CSS:
+
+```css
+@import "ng-zorro-antd/ng-zorro-antd.min.css";
+```
+
+The native kit requires no theme stylesheet.
 
 ## Migrate from v2
 
@@ -57,17 +110,27 @@ with their source locations and left untouched. A second run is a no-op.
 The building blocks are exported and pure (easy to test/automate):
 
 ```ts
-import { detectKit, runInit } from "@adapttable/cli";
+import { detectFramework, detectKit, runInit } from "@adapttable/cli";
 
 detectKit({ "@mui/material": "^6" }).kit; // "mui"
+
+const dependencies = { "@angular/core": "^22.2.0", "ng-zorro-antd": "^22.1.1" };
+const framework = detectFramework(dependencies, { hasAngularJson: true });
+detectKit(dependencies, { framework }).kit; // "ng-zorro"
 ```
+
+`runInit` reports the detected `framework` alongside its kit, generated paths
+and install command. `detectKit` defaults to React when its framework option
+is omitted, and existing `KitInfo` values need no new required property.
 
 ## Features
 
 - **Detects your UI kit** from `package.json` — Mantine, MUI, Chakra, Ant Design, Radix,
-  Base UI, shadcn/ui (via `components.json`) or Tailwind.
+  Base UI, shadcn/ui (via `components.json`) or Tailwind for React; NG-ZORRO or
+  native controls for Angular.
 - **Prints the exact install command** for the matching adapter plus the peer
-  packages it needs (run it yourself with your package manager).
+  packages it needs (run it yourself with your package manager; unpublished
+  Angular kits need a local package source).
 - **Scaffolds a working table** wired to your kit, not a blank file: sortable out
   of the box, with the full AdaptTable feature set (filtering, selection, editing,
   grouping, saved views, CSV export, virtualization, …) each one import away.
