@@ -1,0 +1,1647 @@
+import type {
+  AgentAggregationsPatch,
+  AgentCapabilityDefinition,
+  AgentManifest,
+  AgentSession,
+} from "@adapttable/ai";
+import { type TableRuntimeView } from "@adapttable/angular";
+import { createNeutralTable, createTableEngine } from "@adapttable/core";
+import { describe, expect, it, vi } from "vitest";
+
+import {
+  act,
+  mountRuntime,
+  testAgent as tableAgent,
+  waitFor,
+} from "./tableAgent.fixture";
+
+/** Whether a row object carries a `name` field worth declaring a column for. */
+
+describe("tableAgent", () => {
+  it("publishes a live manifest and updates when features change", async () => {
+    const manifests: AgentManifest[] = [];
+    const attached: AgentSession[] = [];
+    const setPage = vi.fn();
+    const { rerender, getByTestId } = mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "one",
+          bridge: {
+            publish: (m) => manifests.push(m),
+            attach: (s) => attached.push(s),
+          },
+        }),
+      ],
+      view: {
+        rows: [],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage,
+          setLimit: vi.fn(),
+          setSearch: vi.fn(),
+          setSort: vi.fn(),
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(attached.length).toBeGreaterThan(0));
+    expect(getByTestId("keys").textContent).toContain("view.setPage");
+    expect(manifests.at(-1)?.tableId).toBe("one");
+    expect(manifests.at(-1)?.capabilities).toContain("view.setPage");
+
+    rerender({
+      features: [
+        tableAgent({
+          tableId: "one",
+          columns: { name: { type: "string" } },
+          apply: { setFilters: vi.fn() },
+          bridge: {
+            publish: (m) => manifests.push(m),
+            attach: (s) => attached.push(s),
+          },
+        }),
+        { id: "filters" },
+      ],
+      view: {
+        rows: [],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage,
+          setLimit: vi.fn(),
+          setSearch: vi.fn(),
+          setSort: vi.fn(),
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() =>
+      expect(getByTestId("keys").textContent).toContain("view.setFilters")
+    );
+  });
+
+  it("omits view.setFilters until an apply path exists", async () => {
+    let session: AgentSession | undefined;
+    const { rerender, getByTestId } = mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "one",
+          bridge: { attach: (s) => (session = s) },
+        }),
+        { id: "filters" },
+      ],
+      view: {
+        rows: [],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    expect(getByTestId("keys").textContent).not.toContain("view.setFilters");
+
+    session = undefined;
+    const setExtras = vi.fn();
+    rerender({
+      features: [
+        tableAgent({
+          tableId: "one",
+          bridge: { attach: (s) => (session = s) },
+        }),
+        { id: "filters" },
+      ],
+      view: {
+        rows: [],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage: vi.fn(),
+          setLimit: vi.fn(),
+          setSearch: vi.fn(),
+          setSort: vi.fn(),
+          extra: {},
+          setExtras,
+          clearExtras: vi.fn(),
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() =>
+      expect(getByTestId("keys").textContent).toContain("view.setFilters")
+    );
+    await session!.execute(
+      "view.setFilters",
+      { filters: { team: ["Core"] } },
+      session!.manifest().viewRevision,
+      "live-filter"
+    );
+    expect(setExtras).toHaveBeenCalledWith({ team: ["Core"] });
+  });
+
+  it("publishes the live filter catalog and rejects an unknown option", async () => {
+    let session: AgentSession | undefined;
+    const setExtras = vi.fn();
+    mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "one",
+          columns: { salary: { readable: false } },
+          bridge: { attach: (s) => (session = s) },
+        }),
+        { id: "filters" },
+      ],
+      view: {
+        rows: [],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        filterDefs: [
+          {
+            key: "team",
+            type: "multiSelect",
+            label: "Team",
+            options: [
+              { value: "Core", label: "Core" },
+              { value: "Data", label: "Data" },
+            ],
+          },
+          { key: "salary", type: "numberRange", label: "Salary" },
+          { key: "internal", type: "text", ai: false },
+        ],
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage: vi.fn(),
+          setLimit: vi.fn(),
+          setSearch: vi.fn(),
+          setSort: vi.fn(),
+          extra: { team: ["Core"] },
+          setExtras,
+          clearExtras: vi.fn(),
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    const guide = session!.describe("view.setFilters");
+    expect(guide.guide).toContain("team [");
+    expect(guide.guide).toContain("options: Core, Data");
+    expect(guide.guide).not.toContain("salary [");
+    expect(guide.guide).not.toContain("internal [");
+    const refused = await session!.execute(
+      "view.setFilters",
+      { filters: { team: ["Ghost"] } },
+      session!.manifest().viewRevision,
+      "bad-option"
+    );
+    expect(refused.ok).toBe(false);
+    expect(setExtras).not.toHaveBeenCalled();
+    await session!.execute(
+      "view.setFilters",
+      { filters: { team: ["Data"] } },
+      session!.manifest().viewRevision,
+      "good-option"
+    );
+    expect(setExtras).toHaveBeenCalledWith({ team: ["Data"] });
+  });
+
+  it("keeps one session and bumps revision when the live view changes", async () => {
+    const attached: AgentSession[] = [];
+    const feature = tableAgent({
+      tableId: "one",
+      bridge: { attach: (s) => attached.push(s) },
+    });
+    const { rerender } = mountRuntime({
+      features: [feature],
+      view: {
+        rows: [{ id: "a" }],
+        getRowId: (row) => row.id,
+        rowLabel: () => "a",
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage: vi.fn(),
+          setLimit: vi.fn(),
+          setSearch: vi.fn(),
+          setSort: vi.fn(),
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(attached).toHaveLength(1));
+    expect(attached[0]!.manifest().viewRevision).toBe(1);
+
+    rerender({
+      features: [feature],
+      view: {
+        rows: [{ id: "b" }],
+        getRowId: (row) => row.id,
+        rowLabel: () => "b",
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage: vi.fn(),
+          setLimit: vi.fn(),
+          setSearch: vi.fn(),
+          setSort: vi.fn(),
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() =>
+      expect(attached[0]!.manifest().viewRevision).toBeGreaterThan(1)
+    );
+    expect(attached.at(-1)).toBe(attached[0]);
+  });
+
+  it("uses a host observe/apply pair and keeps two tables isolated", async () => {
+    let page = 1;
+    const aKeys: string[] = [];
+    const bKeys: string[] = [];
+    function Dual() {
+      const props = {
+        features: [
+          tableAgent({
+            tableId: "left",
+            observe: () => ({
+              tableId: "left",
+              viewRevision: 1,
+              featureIds: [],
+              columns: [],
+              source: {
+                fullDataset: false,
+                grouping: false,
+                selectAcrossPages: false,
+                exportScope: "page",
+                totalCount: "loaded",
+              },
+              writePolicy: "allow",
+              hasPagination: true,
+              hasSearch: false,
+              hasSort: false,
+              hasFilters: false,
+              hasExport: false,
+              hasEdit: false,
+              hasReorder: false,
+              page,
+              limit: 10,
+              search: "",
+              pageMax: 10,
+              rowAddressScope: "visible",
+            }),
+            apply: { setPage: (n) => (page = n) },
+            bridge: {
+              attach: (s) => aKeys.push(...s.catalog().map((e) => e.key)),
+            },
+          }),
+        ],
+      };
+      const other = {
+        features: [
+          tableAgent({
+            tableId: "right",
+            observe: () => ({
+              tableId: "right",
+              viewRevision: 2,
+              featureIds: ["editing"],
+              columns: [],
+              source: {
+                fullDataset: false,
+                grouping: false,
+                selectAcrossPages: false,
+                exportScope: "page",
+                totalCount: "loaded",
+              },
+              writePolicy: "deny",
+              hasPagination: false,
+              hasSearch: false,
+              hasSort: false,
+              hasFilters: false,
+              hasExport: false,
+              hasEdit: true,
+              hasReorder: false,
+              page: 1,
+              limit: 10,
+              search: "",
+              pageMax: 10,
+              rowAddressScope: "page",
+            }),
+            apply: {},
+            bridge: {
+              attach: (s) => bKeys.push(...s.catalog().map((e) => e.key)),
+            },
+          }),
+        ],
+      };
+      mountRuntime({ ...props, frontend: true });
+      mountRuntime({ ...other, frontend: true });
+    }
+    Dual();
+    await waitFor(() => expect(aKeys).toContain("view.setPage"));
+    expect(bKeys).not.toContain("view.setPage");
+    expect(bKeys).not.toContain("edit.cells");
+    expect(bKeys).toContain("columns.describe");
+  });
+
+  it("executes view.setPage through the live runtime apply path", async () => {
+    const setPage = vi.fn();
+    const setLimit = vi.fn();
+    const setSearch = vi.fn();
+    const setSort = vi.fn();
+    const setGroupBy = vi.fn();
+    let session: AgentSession | undefined;
+    mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "live",
+          columns: {
+            name: {
+              label: "Name",
+              type: "string",
+              sortable: true,
+              writable: true,
+            },
+          },
+          bridge: { attach: (s) => (session = s) },
+        }),
+      ],
+      view: {
+        rows: [{ id: "1", name: "Ada" }],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        groupingState: {
+          groupBy: undefined,
+          aggregateOverrides: {},
+          columnLabel: (key) => key,
+          setGroupBy,
+        },
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage,
+          setLimit,
+          setSearch,
+          setSort,
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    const search = await session!.execute(
+      "view.setSearch",
+      { query: "ada" },
+      session!.manifest().viewRevision,
+      "s"
+    );
+    const sort = await session!.execute(
+      "view.setSort",
+      { key: "name", dir: "asc" },
+      session!.manifest().viewRevision,
+      "o"
+    );
+    const page = await session!.execute(
+      "view.setPage",
+      { page: 1, limit: 25 },
+      session!.manifest().viewRevision,
+      "p"
+    );
+    expect(search.ok && sort.ok && page.ok).toBe(true);
+    expect(setSearch).toHaveBeenCalledWith("ada");
+    expect(setSort).toHaveBeenCalledWith("name", "asc");
+    expect(setPage).toHaveBeenCalledWith(1);
+    expect(setLimit).toHaveBeenCalledWith(25);
+    expect(setGroupBy).not.toHaveBeenCalled();
+  });
+
+  it("omits add and delete unless the host wired those callbacks", async () => {
+    let session: AgentSession | undefined;
+    const { rerender } = mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "one",
+          bridge: { attach: (s) => (session = s) },
+        }),
+      ],
+      view: {
+        rows: [],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.catalog().map((entry) => entry.key)).not.toEqual(
+      expect.arrayContaining(["rows.add", "rows.delete"])
+    );
+
+    session = undefined;
+    rerender({
+      features: [
+        tableAgent({
+          tableId: "one",
+          apply: { addRows: vi.fn(), deleteRows: vi.fn() },
+          bridge: { attach: (s) => (session = s) },
+        }),
+      ],
+      view: {
+        rows: [],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    const keys = session!.catalog().map((entry) => entry.key);
+    expect(keys).toContain("rows.add");
+    expect(keys).toContain("rows.delete");
+  });
+
+  it("keeps one session across new options objects and bumps revision on row values", async () => {
+    let session: AgentSession | undefined;
+    const setPage = vi.fn();
+    const view = (name: string): TableRuntimeView => ({
+      rows: [{ id: "r1", name }],
+      getRowId: (row) => (row as { id: string }).id,
+      rowLabel: () => name,
+      query: {
+        page: 1,
+        limit: 10,
+        search: "",
+        setPage,
+        setLimit: vi.fn(),
+        setSearch: vi.fn(),
+        setSort: vi.fn(),
+      },
+    });
+    const { rerender } = mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "one",
+          apply: { setPage },
+          bridge: { attach: (next) => (session = next) },
+        }),
+      ],
+      view: view("Ada"),
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    const first = session!;
+    await first.execute(
+      "view.setPage",
+      { page: 1 },
+      first.manifest().viewRevision,
+      "page-once"
+    );
+    expect(setPage).toHaveBeenCalledTimes(1);
+
+    rerender({
+      features: [
+        tableAgent({
+          tableId: "one",
+          apply: { setPage },
+          bridge: { attach: (next) => (session = next) },
+        }),
+      ],
+      view: view("Ada"),
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBe(first));
+    const replayed = await first.execute(
+      "view.setPage",
+      { page: 1 },
+      first.manifest().viewRevision,
+      "page-once"
+    );
+    expect(replayed.ok).toBe(true);
+    expect(setPage).toHaveBeenCalledTimes(1);
+    const afterReplay = first.manifest().viewRevision;
+
+    rerender({
+      features: [
+        tableAgent({
+          tableId: "one",
+          apply: { setPage },
+          bridge: { attach: (next) => (session = next) },
+        }),
+      ],
+      view: view("Ada Lovelace"),
+      frontend: true,
+    });
+    await waitFor(() =>
+      expect(first.manifest().viewRevision).toBeGreaterThan(afterReplay)
+    );
+  });
+
+  it("rejects a second chrome approval while one is pending", async () => {
+    let session: AgentSession | undefined;
+    const editCells = vi.fn();
+    const { unmount } = mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "one",
+          approval: "writes",
+          commit: "immediate",
+          columns: { name: { type: "string", writable: true } },
+          apply: {
+            editCells,
+            resolveRow: () => ({ rowKey: "r1", scope: "visible" }),
+          },
+          bridge: { attach: (next) => (session = next) },
+        }),
+        { id: "editing" },
+      ],
+      view: {
+        rows: [{ id: "r1", name: "Ada" }],
+        getRowId: (row) => (row as { id: string }).id,
+        rowLabel: () => "Ada",
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    const first = session!.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Ada Lovelace" }] },
+      session!.manifest().viewRevision,
+      "edit-1"
+    );
+    const second = await session!.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "r1", column: "name", value: "Other" }] },
+      session!.manifest().viewRevision,
+      "edit-2"
+    );
+    expect(second.ok).toBe(false);
+    expect(second.error?.message).toMatch(/already pending/);
+    expect(editCells).not.toHaveBeenCalled();
+    unmount();
+    await first;
+  });
+
+  it("registers a custom capability through tableAgent", async () => {
+    let session: AgentSession | undefined;
+    mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "custom",
+          capabilities: [
+            {
+              key: "demo.echo",
+              summary: "Echo a label.",
+              kind: "read",
+              guide: {
+                guide: "Return the label unchanged.",
+                input: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: { label: { type: "string" } },
+                  required: ["label"],
+                },
+                output: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: { echo: { type: "string" } },
+                  required: ["echo"],
+                },
+              },
+              isEnabled: () => true,
+              execute: (_context, args) => ({
+                echo: (args as { label: string }).label,
+              }),
+            },
+          ],
+          bridge: { attach: (next) => (session = next) },
+        }),
+      ],
+      view: {
+        rows: [{ id: "1" }],
+        getRowId: (row) => row.id,
+        rowLabel: () => "1",
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.catalog().map((entry) => entry.key)).toContain("demo.echo");
+    const result = await session!.execute(
+      "demo.echo",
+      { label: "live" },
+      session!.manifest().viewRevision,
+      "echo-live"
+    );
+    expect(result.ok).toBe(true);
+    expect(result.result).toEqual({ echo: "live" });
+  });
+
+  it("executes view.setAggregations through the live grouping state", async () => {
+    const setAggregateOverrides = vi.fn();
+    let session: AgentSession | undefined;
+    const columns = [
+      {
+        key: "salary",
+        aggregatable: { default: "sum", operations: ["sum", "avg"] as const },
+      },
+    ];
+    const groupingState = {
+      groupBy: "team",
+      aggregateOverrides: { salary: "sum" },
+      columnLabel: (key: string) => key,
+      columns,
+      queryAggregates: [{ key: "salary", fn: "sum" as const }],
+      setGroupBy: vi.fn(),
+      setAggregateOverrides,
+    };
+    mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "agg",
+          columns: { salary: { label: "Salary", type: "number" } },
+          bridge: { attach: (s) => (session = s) },
+        }),
+        { id: "grouping" },
+      ],
+      view: {
+        rows: [{ id: "1", salary: 10 }],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        sourceCapabilities: {
+          fullDataset: true,
+          grouping: "client",
+          selectAcrossPages: false,
+          exportScope: "page",
+          totalCount: "loaded",
+        },
+        groupingState,
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.catalog().map((entry) => entry.key)).toContain(
+      "view.setAggregations"
+    );
+    const described = session!.describe("view.setAggregations");
+    expect(described.guide).toContain("salary");
+    expect(described.guide).toContain("avg");
+
+    const set = await session!.execute(
+      "view.setAggregations",
+      { set: { salary: "avg" } },
+      session!.manifest().viewRevision,
+      "set-avg"
+    );
+    expect(set.ok).toBe(true);
+    expect(set.result).toMatchObject({ applied: true, pending: false });
+    expect(setAggregateOverrides).toHaveBeenCalledWith({ salary: "avg" });
+
+    const removed = await session!.execute(
+      "view.setAggregations",
+      { remove: ["salary"] },
+      session!.manifest().viewRevision,
+      "remove-salary"
+    );
+    expect(removed.ok).toBe(true);
+    expect(setAggregateOverrides).toHaveBeenCalledWith({ salary: "none" });
+
+    const restored = await session!.execute(
+      "view.setAggregations",
+      { restoreDefaults: true },
+      session!.manifest().viewRevision,
+      "restore"
+    );
+    expect(restored.ok).toBe(true);
+    expect(setAggregateOverrides).toHaveBeenCalledWith({});
+  });
+
+  it("does not advertise aggregations the source will not honour", async () => {
+    let session: AgentSession | undefined;
+    mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "server",
+          bridge: { attach: (s) => (session = s) },
+        }),
+        { id: "grouping" },
+      ],
+      view: {
+        rows: [{ id: "1" }],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        sourceCapabilities: {
+          fullDataset: false,
+          grouping: "server",
+          selectAcrossPages: false,
+          exportScope: "page",
+          totalCount: "loaded",
+        },
+        groupingState: {
+          groupBy: "team",
+          aggregateOverrides: {},
+          columnLabel: (key) => key,
+          columns: [{ key: "salary", aggregatable: { operations: ["sum"] } }],
+          honorsAggregates: false,
+          setGroupBy: vi.fn(),
+          setAggregateOverrides: vi.fn(),
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.catalog().map((entry) => entry.key)).not.toContain(
+      "view.setAggregations"
+    );
+  });
+
+  it("applies aggregations only when the live grouping state can honour them", async () => {
+    const setAggregateOverrides = vi.fn();
+    let session: AgentSession | undefined;
+    const drive: AgentCapabilityDefinition = {
+      key: "demo.aggregations",
+      summary: "Drive live aggregations.",
+      kind: "view",
+      guide: {
+        guide: "Apply a raw aggregation patch.",
+        input: { type: "object" },
+        output: { type: "object" },
+      },
+      isEnabled: () => true,
+      execute: (context, args) => {
+        context.apply.setAggregations?.(args as AgentAggregationsPatch);
+        return { ok: true };
+      },
+    };
+    const { rerender } = mountRuntime<{ id: string; salary?: number }>({
+      features: [
+        tableAgent({
+          tableId: "agg",
+          capabilities: [drive],
+          bridge: { attach: (s) => (session = s) },
+        }),
+        { id: "grouping" },
+      ],
+      view: {
+        rows: [{ id: "1", salary: 10 }],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        sourceCapabilities: {
+          fullDataset: true,
+          grouping: "client",
+          selectAcrossPages: false,
+          exportScope: "page",
+          totalCount: "loaded",
+        },
+        groupingState: {
+          groupBy: "team",
+          aggregateOverrides: {},
+          columnLabel: (key) => key,
+          columns: [
+            {
+              key: "salary",
+              aggregatable: { operations: ["sum", "avg"] as const },
+            },
+            { key: "note" },
+          ],
+          setGroupBy: vi.fn(),
+          setAggregateOverrides,
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    const badOp = await session!.execute(
+      "demo.aggregations",
+      { set: { salary: "median" } },
+      session!.manifest().viewRevision,
+      "bad-op"
+    );
+    expect(badOp.ok).toBe(false);
+    expect(badOp.error?.message).toMatch(/cannot use operation "median"/);
+    const badRemove = await session!.execute(
+      "demo.aggregations",
+      { remove: ["note"] },
+      session!.manifest().viewRevision,
+      "bad-remove"
+    );
+    expect(badRemove.ok).toBe(false);
+    expect(badRemove.error?.message).toMatch(/cannot be removed/);
+    const added = await session!.execute(
+      "demo.aggregations",
+      { set: { salary: "avg" } },
+      session!.manifest().viewRevision,
+      "add-reader"
+    );
+    expect(added.ok).toBe(true);
+    expect(setAggregateOverrides).toHaveBeenCalledWith({ salary: "avg" });
+    const dropped = await session!.execute(
+      "demo.aggregations",
+      { remove: ["salary"] },
+      session!.manifest().viewRevision,
+      "drop-reader"
+    );
+    expect(dropped.ok).toBe(true);
+    expect(setAggregateOverrides).toHaveBeenLastCalledWith({});
+
+    session = undefined;
+    rerender({
+      features: [
+        tableAgent({
+          tableId: "agg",
+          capabilities: [drive],
+          bridge: { attach: (s) => (session = s) },
+        }),
+      ],
+      view: {
+        rows: [{ id: "1" }],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        sourceCapabilities: {
+          fullDataset: true,
+          grouping: false,
+          selectAcrossPages: false,
+          exportScope: "page",
+          totalCount: "loaded",
+        },
+        groupingState: {
+          groupBy: undefined,
+          aggregateOverrides: {},
+          columnLabel: (key) => key,
+          columns: [{ key: "salary", aggregatable: true }],
+          setGroupBy: vi.fn(),
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.catalog().map((entry) => entry.key)).not.toContain(
+      "view.setAggregations"
+    );
+    const unwired = await session!.execute(
+      "demo.aggregations",
+      { restoreDefaults: true },
+      session!.manifest().viewRevision,
+      "unwired"
+    );
+    expect(unwired.ok).toBe(false);
+    expect(unwired.error?.message).toMatch(/setAggregations is not wired/);
+  });
+
+  it("executes a server-only custom aggregator the catalog advertised", async () => {
+    const setAggregateOverrides = vi.fn();
+    let session: AgentSession | undefined;
+    mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "server-median",
+          columns: { salary: { label: "Salary", type: "number" } },
+          bridge: { attach: (next) => (session = next) },
+        }),
+        { id: "grouping" },
+      ],
+      view: {
+        rows: [{ id: "1", salary: 10 }],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        sourceCapabilities: {
+          fullDataset: false,
+          grouping: "server",
+          selectAcrossPages: false,
+          exportScope: "page",
+          totalCount: "loaded",
+        },
+        groupingState: {
+          groupBy: "team",
+          aggregateOverrides: {},
+          columnLabel: (key) => key,
+          columns: [
+            {
+              key: "salary",
+              aggregatable: {
+                operations: [{ id: "median", label: "Median" }],
+              },
+            },
+          ],
+          aggregateOperations: ["median"],
+          honorsAggregates: true,
+          setGroupBy: vi.fn(),
+          setAggregateOverrides,
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    const described = session!.describe("view.setAggregations");
+    expect(described.guide).toContain("median");
+    const set = await session!.execute(
+      "view.setAggregations",
+      { set: { salary: "median" } },
+      session!.manifest().viewRevision,
+      "set-median"
+    );
+    expect(set.ok).toBe(true);
+    expect(setAggregateOverrides).toHaveBeenCalledWith({ salary: "median" });
+  });
+
+  it("does not advertise or accept aggregations on an unreadable column", async () => {
+    const setAggregateOverrides = vi.fn();
+    let session: AgentSession | undefined;
+    const groupingState = {
+      groupBy: "team",
+      aggregateOverrides: {},
+      columnLabel: (key: string) => key,
+      columns: [
+        {
+          key: "salary",
+          aggregatable: { operations: ["sum", "avg"] as const },
+        },
+        {
+          key: "headcount",
+          aggregatable: { operations: ["count"] as const },
+        },
+      ],
+      setGroupBy: vi.fn(),
+      setAggregateOverrides,
+    };
+    const capabilities = {
+      fullDataset: true,
+      grouping: "client" as const,
+      selectAcrossPages: false,
+      exportScope: "page" as const,
+      totalCount: "loaded" as const,
+    };
+    const view = {
+      rows: [{ id: "1", salary: 10, headcount: 1 }],
+      getRowId: () => "1",
+      rowLabel: () => "1",
+      sourceCapabilities: capabilities,
+      groupingState,
+    };
+    const { rerender } = mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "hidden-agg",
+          columns: {
+            salary: { label: "Salary", type: "number", readable: false },
+            headcount: { label: "Headcount", type: "number" },
+          },
+          bridge: { attach: (next) => (session = next) },
+        }),
+        { id: "grouping" },
+      ],
+      view: view,
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    const described = session!.describe("view.setAggregations");
+    expect(described.guide).toContain("headcount");
+    expect(described.guide).not.toContain("salary");
+    const hidden = await session!.execute(
+      "view.setAggregations",
+      { set: { salary: "sum" } },
+      session!.manifest().viewRevision,
+      "hidden-sum"
+    );
+    expect(hidden.ok).toBe(false);
+    expect(hidden.error?.message).toMatch(/cannot use operation "sum"/);
+    expect(setAggregateOverrides).not.toHaveBeenCalled();
+
+    session = undefined;
+    rerender({
+      features: [
+        tableAgent({
+          tableId: "hidden-agg",
+          columns: {
+            salary: { label: "Salary", type: "number" },
+            headcount: { label: "Headcount", type: "number" },
+          },
+          bridge: { attach: (next) => (session = next) },
+        }),
+        { id: "grouping" },
+      ],
+      view: view,
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    expect(session!.describe("view.setAggregations").guide).toContain("salary");
+
+    session = undefined;
+    rerender({
+      features: [
+        tableAgent({
+          tableId: "hidden-agg",
+          columns: {
+            salary: { label: "Salary", type: "number", readable: false },
+            headcount: { label: "Headcount", type: "number" },
+          },
+          bridge: { attach: (next) => (session = next) },
+        }),
+        { id: "grouping" },
+      ],
+      view: view,
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    const revoked = await session!.execute(
+      "view.setAggregations",
+      { set: { salary: "avg" } },
+      session!.manifest().viewRevision,
+      "revoked-avg"
+    );
+    expect(revoked.ok).toBe(false);
+    expect(revoked.error?.message).toMatch(/cannot use operation "avg"/);
+    expect(setAggregateOverrides).not.toHaveBeenCalled();
+  });
+});
+
+describe("what a host may do instead of the table", () => {
+  /** Drive one session with whatever `apply` the test wants to supply. */
+  async function withApply(
+    apply: Record<string, unknown>,
+    commit: "immediate" | "stage" = "immediate"
+  ): Promise<AgentSession> {
+    let session: AgentSession | undefined;
+    mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "one",
+          columns: { name: { type: "string", writable: true } },
+          apply,
+          // Nobody is here to answer, so the table applies its own writes.
+          approval: "never",
+          commit,
+          bridge: { attach: (s) => (session = s) },
+        }),
+        { id: "editing" },
+      ],
+      view: {
+        rows: [{ id: "1", name: "Ada" }],
+        getRowId: (row: unknown) => String((row as { id: string }).id),
+        rowLabel: () => "Ada",
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage: vi.fn(),
+          setLimit: vi.fn(),
+          setSearch: vi.fn(),
+          setSort: vi.fn(),
+        },
+      },
+      frontend: true,
+    });
+    await waitFor(() => expect(session).toBeDefined());
+    return session!;
+  }
+
+  it("writes through the host's own editCells when it supplied one", async () => {
+    const editCells = vi.fn(() => ({ saved: 1 }));
+    const session = await withApply({ editCells });
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "name", value: "Grace" }] },
+      session.manifest().viewRevision,
+      "ed"
+    );
+
+    // A host that wired its own write path keeps it: the binding does not
+    // reach past it into the table.
+    expect(result.ok).toBe(true);
+    expect(editCells).toHaveBeenCalled();
+  });
+
+  it("stages through the host's own stageCells when the table stages", async () => {
+    const stageCells = vi.fn(() => ({ staged: 1 }));
+    const session = await withApply({ stageCells }, "stage");
+
+    const result = await session.execute(
+      "edit.cells",
+      { edits: [{ rowKey: "1", column: "name", value: "Grace" }] },
+      session.manifest().viewRevision,
+      "ed"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(stageCells).toHaveBeenCalled();
+  });
+
+  it("reads through the host's own readRows when it supplied one", async () => {
+    const readRows = vi.fn(() => ({
+      offset: 0,
+      limit: 1,
+      redacted: [],
+      rows: [{ rowKey: "1", cells: { name: "Ada" } }],
+    }));
+    const session = await withApply({ readRows });
+
+    const result = await session.execute(
+      "rows.read",
+      { offset: 0, limit: 1 },
+      session.manifest().viewRevision,
+      "read"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(readRows).toHaveBeenCalled();
+  });
+
+  it("resolves a row through the host's own resolveRow when it supplied one", async () => {
+    const resolveRow = vi.fn(() => ({
+      rowKey: "1",
+      scope: "visible" as const,
+    }));
+    const session = await withApply({ resolveRow });
+
+    const revision = session.manifest().viewRevision;
+    const result = await session.execute(
+      "rows.resolve",
+      { position: 1, expectedRevision: revision },
+      revision,
+      "res"
+    );
+
+    expect(result.ok).toBe(true);
+    expect(resolveRow).toHaveBeenCalled();
+  });
+
+  it("refuses a grouping the table never wired", async () => {
+    const session = await withApply({});
+
+    const result = await session.execute(
+      "view.setGroupBy",
+      { key: "team" },
+      session.manifest().viewRevision,
+      "g"
+    );
+
+    expect(result.ok).toBe(false);
+  });
+});
+
+describe("the view a turn is told about", () => {
+  /** Reads the live view the context builder would send. */
+
+  it("names everything the reader has actually done to it", async () => {
+    let seen: { view?: Record<string, unknown> } | undefined;
+    mountRuntime({
+      ...{
+        features: [
+          tableAgent({
+            tableId: "one",
+            columns: { name: { type: "string" } },
+            apply: { setFilters: vi.fn(), setGroupBy: vi.fn() },
+          }),
+          { id: "filters" },
+          { id: "grouping" },
+        ],
+      },
+      frontend: true,
+      view: {
+        rows: [{ id: "1", name: "Ada" }],
+        getRowId: (row: unknown) => String((row as { id: string }).id),
+        rowLabel: () => "Ada",
+        query: {
+          page: 3,
+          limit: 25,
+          search: "ada",
+          sortBy: "name",
+          sortDir: "desc",
+          extra: { team: ["Core"] },
+          setPage: vi.fn(),
+          setLimit: vi.fn(),
+          setSearch: vi.fn(),
+          setSort: vi.fn(),
+        },
+        pinning: {
+          columns: { name: "start" },
+          rows: { top: ["1"], bottom: [] },
+        },
+      },
+      onRead: (value) => (seen = value as typeof seen),
+    });
+
+    await waitFor(() => expect(seen?.view).toBeDefined());
+
+    // Everything the reader can see is everything the model is told: a turn
+    // planned against a different view is a turn planned against the wrong
+    // table.
+    expect(seen?.view).toMatchObject({
+      page: 3,
+      limit: 25,
+      search: "ada",
+      sortBy: "name",
+      sortDir: "desc",
+      filters: { team: ["Core"] },
+      pinnedColumns: { name: "start" },
+      pinnedRows: { top: ["1"] },
+    });
+  });
+
+  it("leaves out what the reader has not touched", async () => {
+    let seen: { view?: Record<string, unknown> } | undefined;
+    mountRuntime({
+      ...{
+        features: [tableAgent({ tableId: "one" })],
+      },
+      frontend: true,
+      view: {
+        rows: [],
+        getRowId: () => "1",
+        rowLabel: () => "1",
+        query: {
+          page: 1,
+          limit: 10,
+          search: "",
+          setPage: vi.fn(),
+          setLimit: vi.fn(),
+          setSearch: vi.fn(),
+          setSort: vi.fn(),
+        },
+      },
+      onRead: (value) => (seen = value as typeof seen),
+    });
+
+    await waitFor(() => expect(seen?.view).toBeDefined());
+
+    // Nothing invented: a sort nobody set is not reported as a sort.
+    expect(seen?.view).not.toHaveProperty("sortBy");
+    expect(seen?.view).not.toHaveProperty("groupBy");
+    expect(seen?.view).not.toHaveProperty("pinnedColumns");
+  });
+});
+
+describe("publishing the table as in-page tools", () => {
+  /** Stand in for a browser that implements WebMCP. */
+  function fakeModelContext(): {
+    registered: unknown[];
+    restore: () => void;
+  } {
+    const registered: unknown[] = [];
+    const saved = Object.getOwnPropertyDescriptor(document, "modelContext");
+    Object.defineProperty(document, "modelContext", {
+      value: {
+        registerTool: (tool: unknown) => {
+          registered.push(tool);
+          return { unregister: () => registered.splice(0, registered.length) };
+        },
+      },
+      configurable: true,
+      writable: true,
+    });
+    return {
+      registered,
+      restore: () => {
+        if (saved) Object.defineProperty(document, "modelContext", saved);
+        else
+          delete (document as unknown as Record<string, unknown>).modelContext;
+      },
+    };
+  }
+
+  it("offers the table's tools while it is mounted, and takes them back", async () => {
+    const browser = fakeModelContext();
+    const onRegister = vi.fn();
+    try {
+      const { unmount } = mountRuntime({
+        features: [
+          tableAgent({
+            tableId: "one",
+            columns: { name: { type: "string" } },
+            webmcp: { onRegister },
+          }),
+        ],
+        view: {
+          rows: [],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+          query: {
+            page: 1,
+            limit: 10,
+            search: "",
+            setPage: vi.fn(),
+            setLimit: vi.fn(),
+            setSearch: vi.fn(),
+            setSort: vi.fn(),
+          },
+        },
+        frontend: true,
+      });
+
+      await waitFor(() => expect(onRegister).toHaveBeenCalled());
+      expect(onRegister.mock.calls[0]?.[0]).not.toHaveLength(0);
+
+      unmount();
+      // Said plainly rather than left standing: a surface listing the tools
+      // would otherwise show a set nothing can call.
+      await waitFor(() => expect(onRegister).toHaveBeenLastCalledWith([]));
+    } finally {
+      browser.restore();
+    }
+  });
+
+  it("warns once when the page forbids model-context tools", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const saved = Object.getOwnPropertyDescriptor(document, "modelContext");
+    Object.defineProperty(document, "modelContext", {
+      value: {
+        registerTool: () => {
+          const error = new Error("model context is disallowed by policy");
+          error.name = "NotAllowedError";
+          throw error;
+        },
+      },
+      configurable: true,
+    });
+    try {
+      mountRuntime({
+        features: [
+          tableAgent({
+            tableId: "forbidden",
+            columns: { name: { type: "string" } },
+            webmcp: true,
+          }),
+        ],
+        view: {
+          rows: [],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+          query: {
+            page: 1,
+            limit: 10,
+            search: "",
+            setPage: vi.fn(),
+            setLimit: vi.fn(),
+            setSearch: vi.fn(),
+            setSort: vi.fn(),
+          },
+        },
+        frontend: true,
+      });
+      await waitFor(() => {
+        expect(warn).toHaveBeenCalled();
+      });
+      expect(String(warn.mock.calls[0]?.[0])).toMatch(/webmcp/);
+    } finally {
+      warn.mockRestore();
+      if (saved) Object.defineProperty(document, "modelContext", saved);
+      else delete (document as unknown as Record<string, unknown>).modelContext;
+    }
+  });
+
+  it("publishes nothing when the host did not ask for it", async () => {
+    const browser = fakeModelContext();
+    try {
+      mountRuntime({
+        features: [tableAgent({ tableId: "one" })],
+        view: {
+          rows: [],
+          getRowId: () => "1",
+          rowLabel: () => "1",
+          query: {
+            page: 1,
+            limit: 10,
+            search: "",
+            setPage: vi.fn(),
+            setLimit: vi.fn(),
+            setSearch: vi.fn(),
+            setSort: vi.fn(),
+          },
+        },
+        frontend: true,
+      });
+
+      // Everything is opt-in: omitting the prop registers nothing.
+      await waitFor(() => expect(browser.registered).toHaveLength(0));
+    } finally {
+      browser.restore();
+    }
+  });
+});
+
+describe("the values a column's author asked to show", () => {
+  /** Reads the live inputs the context builder would send, as they settle. */
+
+  /** A table whose `team` column asks for live values, and whose `name` does not. */
+  function sampledTable(patch: { readonly sample?: boolean } = {}) {
+    const engine = createTableEngine({
+      data: [
+        { id: "1", name: "Ada", team: "Core" },
+        { id: "2", name: "Grace", team: "Platform" },
+        { id: "3", name: "Katherine", team: "Core" },
+      ],
+      columns: [
+        { key: "name", header: "Name" },
+        {
+          key: "team",
+          header: "Team",
+          // The author's opt-in, written where the column is defined. It is
+          // theirs, which is why the agent's own column patch cannot set it.
+          ...(patch.sample === false ? {} : { ai: { sample: true } }),
+        },
+      ],
+      rowKey: (row) => (row as { id: string }).id,
+    });
+    return createNeutralTable(
+      engine as ReturnType<typeof createTableEngine>,
+      "test",
+      {}
+    );
+  }
+
+  function view(neutralTable: ReturnType<typeof createNeutralTable>) {
+    return {
+      rows: [
+        { id: "1", name: "Ada", team: "Core" },
+        { id: "2", name: "Grace", team: "Platform" },
+        { id: "3", name: "Katherine", team: "Core" },
+      ],
+      getRowId: (row: unknown) => String((row as { id: string }).id),
+      rowLabel: (row: unknown) => String((row as { name: string }).name),
+      neutralTable,
+    } as unknown as TableRuntimeView;
+  }
+
+  it("carries live values for a column that opted in", async () => {
+    let seen: { samples?: Record<string, readonly unknown[]> } | undefined;
+    mountRuntime({
+      ...{
+        features: [tableAgent({ tableId: "one" })],
+      },
+      frontend: true,
+      view: view(sampledTable()),
+      onRead: (value) => (seen = value as typeof seen),
+    });
+
+    await waitFor(() => expect(seen?.samples?.team).toBeDefined());
+    // The values as the table stores them, so a model filtering on "Core"
+    // sends the spelling the table will match rather than guessing one.
+    expect(seen?.samples?.team).toContain("Core");
+    expect(seen?.samples?.team).toContain("Platform");
+    // Only the column that asked.
+    expect(seen?.samples?.name).toBeUndefined();
+  });
+
+  it("samples nothing for a column the agent may not read", async () => {
+    let seen: { samples?: Record<string, readonly unknown[]> } | undefined;
+    mountRuntime({
+      ...{
+        features: [
+          // Opted in by its author and forbidden by the table. Forbidden
+          // wins: asking to show values cannot widen what the agent reads.
+          tableAgent({
+            tableId: "one",
+            columns: { team: { readable: false } },
+          }),
+        ],
+      },
+      frontend: true,
+      view: view(sampledTable()),
+      onRead: (value) => (seen = value as typeof seen),
+    });
+
+    await waitFor(() => expect(seen).toBeDefined());
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    expect(seen?.samples).toBeUndefined();
+  });
+
+  it("carries nothing when no column asked", async () => {
+    let seen: { samples?: Record<string, readonly unknown[]> } | undefined;
+    mountRuntime({
+      ...{
+        features: [tableAgent({ tableId: "one" })],
+      },
+      frontend: true,
+      view: view(sampledTable({ sample: false })),
+      onRead: (value) => (seen = value as typeof seen),
+    });
+
+    await waitFor(() => expect(seen).toBeDefined());
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    expect(seen?.samples).toBeUndefined();
+  });
+
+  it("abandons a sample that comes back after the table is gone", async () => {
+    const { unmount } = mountRuntime({
+      ...{
+        features: [tableAgent({ tableId: "gone" })],
+      },
+      frontend: true,
+      view: view(sampledTable()),
+    });
+    // Leaving the page mid-read must not throw into the next table.
+    expect(() => {
+      unmount();
+    }).not.toThrow();
+    await act(() => Promise.resolve());
+  });
+});
+
+describe("tableAgent offers the table's own actions", () => {
+  it("lists a composed row action and runs the host's handler", async () => {
+    let session: AgentSession | undefined;
+    const open = vi.fn();
+    const rows = [{ id: "1", name: "Ada" }];
+    const { getByTestId } = mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "people",
+          approval: "never",
+          commit: "immediate",
+          bridge: {
+            attach: (attached) => {
+              session = attached;
+            },
+          },
+        }),
+      ],
+      view: {
+        rows,
+        getRowId: (row) => (row as { id: string }).id,
+        rowLabel: (row) => (row as { name: string }).name,
+        actions: {
+          row: [{ key: "open", label: "Open", onClick: open }],
+          bulk: [],
+        },
+      },
+      frontend: true,
+    });
+
+    await waitFor(() =>
+      expect(getByTestId("keys").textContent).toContain("rowAction.open")
+    );
+    const live = session;
+    if (!live) throw new Error("no session attached");
+    const result = await act(() =>
+      live.execute(
+        "rowAction.open",
+        { rowKey: "1" },
+        live.manifest().viewRevision,
+        "open-1"
+      )
+    );
+
+    expect(result.ok).toBe(true);
+    expect(open).toHaveBeenCalledExactlyOnceWith(rows[0]);
+  });
+
+  it("runs a composed bulk action on the table's current selection", async () => {
+    let session: AgentSession | undefined;
+    const archive = vi.fn();
+    const rows = [
+      { id: "1", name: "Ada" },
+      { id: "2", name: "Alan" },
+    ];
+    const { getByTestId } = mountRuntime({
+      features: [
+        tableAgent({
+          tableId: "people",
+          approval: "never",
+          commit: "immediate",
+          bridge: {
+            attach: (attached) => {
+              session = attached;
+            },
+          },
+        }),
+      ],
+      view: {
+        rows,
+        getRowId: (row) => (row as { id: string }).id,
+        rowLabel: (row) => (row as { name: string }).name,
+        selection: { selectedIds: new Set(["2"]), replace: vi.fn() },
+        actions: {
+          row: [],
+          bulk: [{ key: "archive", label: "Archive", onClick: archive }],
+        },
+      },
+      frontend: true,
+    });
+
+    await waitFor(() =>
+      expect(getByTestId("keys").textContent).toContain("bulkAction.archive")
+    );
+    const live = session;
+    if (!live) throw new Error("no session attached");
+    const result = await act(() =>
+      live.execute(
+        "bulkAction.archive",
+        { rowKeys: ["2"] },
+        live.manifest().viewRevision,
+        "archive-2"
+      )
+    );
+
+    expect(result.ok).toBe(true);
+    expect(archive).toHaveBeenCalledTimes(1);
+    expect(archive.mock.calls[0]?.[0]).toEqual(["2"]);
+  });
+});
