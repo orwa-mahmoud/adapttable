@@ -19,7 +19,7 @@ import {
   provideServerRendering,
   renderApplication,
 } from "@angular/platform-server";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
 
@@ -82,8 +82,17 @@ function renderOnServer(url: string): Promise<string> {
   );
 }
 
+beforeEach(() => {
+  vi.spyOn(console, "error");
+});
+
 afterEach(() => {
-  vi.unstubAllGlobals();
+  try {
+    expect(console.error).not.toHaveBeenCalled();
+  } finally {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  }
 });
 
 describe("the unstyled Angular table on the server", () => {
@@ -120,4 +129,24 @@ describe("the unstyled Angular table on the server", () => {
     expect(html).toContain("Irbid");
     expect(html).not.toContain("Amman");
   });
+
+  it.each([
+    { source: "default", url: "/cities", limit: 2 },
+    { source: "requested", url: "/cities?limit=25", limit: 25 },
+  ])(
+    "serializes the $source page size as the selected option",
+    async ({ url, limit }) => {
+      const html = await renderOnServer(url);
+      const select =
+        /<select\b[^>]*data-adapttable-part="rows-per-page"[^>]*>([\s\S]*?)<\/select>/.exec(
+          html
+        )?.[1] ?? "";
+      expect(select).not.toBe("");
+      const selected = [...select.matchAll(/<option\b[^>]*>/g)]
+        .map((match) => match[0])
+        .filter((option) => /\sselected(?:=|\s|>)/.test(option));
+      expect(selected).toHaveLength(1);
+      expect(selected[0]).toContain(`value="${String(limit)}"`);
+    }
+  );
 });

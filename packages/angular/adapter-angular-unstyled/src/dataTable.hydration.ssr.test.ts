@@ -24,7 +24,7 @@ import {
   provideServerRendering,
   renderApplication,
 } from "@angular/platform-server";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
 
@@ -135,10 +135,19 @@ function jsdomWindow(): object {
   return window;
 }
 
+beforeEach(() => {
+  vi.spyOn(console, "error");
+});
+
 afterEach(() => {
-  history.replaceState(null, "", "/");
-  document.body.replaceChildren();
-  Reflect.deleteProperty(globalThis, EARLY_EVENTS);
+  try {
+    expect(console.error).not.toHaveBeenCalled();
+  } finally {
+    vi.restoreAllMocks();
+    history.replaceState(null, "", "/");
+    document.body.replaceChildren();
+    Reflect.deleteProperty(globalThis, EARLY_EVENTS);
+  }
 });
 
 describe("the unstyled Angular table hydrating over its server render", () => {
@@ -146,14 +155,9 @@ describe("the unstyled Angular table hydrating over its server render", () => {
     await loadServerPage("/cities?page=2");
     const serverRow = rows()[0];
     expect(names()).toEqual(["Irbid"]);
-    const errors: unknown[] = [];
-    vi.spyOn(console, "error").mockImplementation((...args) => {
-      errors.push(args);
-    });
-
     const app = await bootstrapApplication(App, { providers: hydration() });
     await app.whenStable();
-    expect(errors).toEqual([]);
+    expect(console.error).not.toHaveBeenCalled();
     // Hydration keeps the server's elements rather than drawing new ones.
     expect(rows()[0]).toBe(serverRow);
     expect(names()).toEqual(["Irbid"]);
@@ -180,5 +184,46 @@ describe("the unstyled Angular table hydrating over its server render", () => {
       expect(names()).toEqual(["Amman", "Dubai"]);
     });
     app.destroy();
+  });
+
+  it("keeps the requested page size selected before and after hydration", async () => {
+    await loadServerPage("/cities?limit=25");
+    const select = document.querySelector<HTMLSelectElement>(
+      '[data-adapttable-part="rows-per-page"]'
+    )!;
+    // Vitest aliases defaultView to its global, whose Event SSR replaces.
+    const browser = jsdomWindow() as Window & typeof globalThis;
+    expect(select.options[0]?.value).toBe("2");
+    expect(select.value).toBe("25");
+    expect(
+      [...select.options]
+        .filter((option) => option.hasAttribute("selected"))
+        .map((option) => option.value)
+    ).toEqual(["25"]);
+
+    const app = await bootstrapApplication(App, { providers: hydration() });
+    try {
+      await app.whenStable();
+      expect(
+        document.querySelector('[data-adapttable-part="rows-per-page"]')
+      ).toBe(select);
+      expect(select.value).toBe("25");
+
+      select.value = "10";
+      select.dispatchEvent(new browser.Event("change"));
+      await app.whenStable();
+      expect(select.value).toBe("10");
+      expect(new URLSearchParams(location.search).get("limit")).toBe("10");
+
+      history.replaceState(null, "", "/cities?limit=50");
+      browser.dispatchEvent(new browser.PopStateEvent("popstate"));
+      await app.whenStable();
+      expect(select.value).toBe("50");
+      expect([...select.selectedOptions].map((option) => option.value)).toEqual(
+        ["50"]
+      );
+    } finally {
+      app.destroy();
+    }
   });
 });

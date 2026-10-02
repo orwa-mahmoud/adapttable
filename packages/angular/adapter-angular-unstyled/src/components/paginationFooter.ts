@@ -1,7 +1,7 @@
 /**
  * Row count and the windowed pager.
  */
-import { AdaptIcon, expandChevronIcon } from "@adapttable/angular";
+import { AdaptAttrs, AdaptIcon, expandChevronIcon } from "@adapttable/angular";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -18,7 +18,7 @@ import type { TableView } from "../dataTable";
  */
 @Component({
   selector: "adapt-pagination-footer",
-  imports: [AdaptIcon],
+  imports: [AdaptAttrs, AdaptIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
@@ -29,11 +29,14 @@ import type { TableView } from "../dataTable";
         <select
           data-adapttable-part="rows-per-page"
           [attr.aria-label]="v.table.labels().rowsPerPage"
-          [value]="v.table.source().limit"
+          [adaptAttrs]="{ value: v.table.source().limit }"
           (change)="v.table.setLimit(+$any($event.target).value)"
         >
           @for (size of v.table.pageSizeOptions(); track size) {
-            <option [value]="size" [selected]="size === v.table.source().limit">
+            <option
+              [value]="size"
+              [attr.selected]="size === v.table.source().limit ? '' : null"
+            >
               {{ size }}
             </option>
           }
