@@ -203,6 +203,45 @@ describe("injectGridFocus range gestures", () => {
     return event;
   }
 
+  it("keeps focus and active state when a child already consumed the key", async () => {
+    const { fixture, grid } = await editableGrid();
+    grid.focusCell({ row: 0, col: 0 });
+    await fixture.whenStable();
+    const cells = document.querySelectorAll<HTMLElement>("td");
+    const first = cells[0]!;
+    const nextRow = cells[2]!;
+    expect(document.activeElement).toBe(first);
+    first.addEventListener("keydown", (event) => event.preventDefault(), {
+      once: true,
+    });
+    first.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "ArrowDown",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await fixture.whenStable();
+    expect(grid.active()).toEqual({ row: 0, col: 0 });
+    expect(grid.range()).toBeNull();
+    expect(document.activeElement).toBe(first);
+
+    first.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "ArrowDown",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await fixture.whenStable();
+    expect(grid.active()).toEqual({ row: 1, col: 0 });
+    expect(grid.range()).toEqual({
+      anchor: { row: 1, col: 0 },
+      head: { row: 1, col: 0 },
+    });
+    expect(document.activeElement).toBe(nextRow);
+  });
+
   it("pastes a rectangle through the batch host and records one gesture", async () => {
     const onCellPaste = vi.fn();
     const onCellEdit = vi.fn();

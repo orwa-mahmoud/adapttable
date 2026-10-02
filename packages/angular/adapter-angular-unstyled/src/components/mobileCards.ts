@@ -7,31 +7,40 @@ import {
   AdaptExtraRowContent,
   AdaptRowDetail,
   AdaptSlot,
+  type Attrs,
+  type CellContext,
   type ColumnDef,
   EDITABLE_CELL,
   EXPAND_TOGGLE,
   EXTRA_ROW_PARTS,
   GROUP_HEADER_CARD,
+  type MobileCardContext,
+  type MobileCardField,
   mobileCardListStyle,
   resolveMobileLabel,
+  resolveRenderer,
   ROW_EDIT_ACTIONS,
   ROW_REORDER_BUTTONS,
   type RowReorderButtonsProps,
   type RowReorderState,
+  type TableLabels,
   TREE_TOGGLE,
   treeCardStyle,
   type TreeToggleProps,
 } from "@adapttable/angular";
+import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   type ElementRef,
   input,
+  type TemplateRef,
   viewChild,
 } from "@angular/core";
 
 import type { TableView } from "../dataTable";
+import type { DataTableClassNames } from "../types";
 import { AdaptRowActions } from "./rowActionButtons";
 
 /**
@@ -51,6 +60,8 @@ import { AdaptRowActions } from "./rowActionButtons";
     AdaptRowActions,
     AdaptRowDetail,
     AdaptSlot,
+    NgComponentOutlet,
+    NgTemplateOutlet,
   ],
   templateUrl: "./mobileCards.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -95,6 +106,7 @@ export class AdaptMobileCards<TRow> {
     >();
     if (!tree) return cards;
     const labels = view.table.labels();
+    const classes = view.classNames();
     for (const entry of tree.entries) {
       cards.set(entry.key, {
         // Slot props erase the row type: core types every slot's row as
@@ -103,6 +115,8 @@ export class AdaptMobileCards<TRow> {
           entry,
           labels,
           onToggle: tree.expansion.toggle,
+          toggleClassName: classes.treeToggle,
+          spacerClassName: classes.treeSpacer,
         } as unknown as TreeToggleProps<never>,
         indent: treeCardStyle(entry.level).marginInlineStart ?? null,
       });
@@ -110,8 +124,79 @@ export class AdaptMobileCards<TRow> {
     return cards;
   });
 
-  private buttonsPropsCache = new Map<string, RowReorderButtonsProps<never>>();
+  private buttonsPropsCache = new Map<string, RowReorderButtonsProps<TRow>>();
   private buttonsPropsToken = "";
+  private buttonsPropsLabels: TableLabels | undefined;
+  private buttonsPropsClasses: DataTableClassNames | undefined;
+
+  private readonly fieldValue =
+    viewChild<TemplateRef<CellContext<TRow>>>("fieldValue");
+
+  /** Every card uses the same real field template in either body layout. */
+  protected readonly cardBodies = computed(() => {
+    const view = this.view();
+    const value = this.fieldValue();
+    const columns = view.table.columns();
+    const classes = view.classNames();
+    const render = view.renderCard();
+    const selection = view.selection?.state();
+    const detail = view.rowDetail?.();
+    const cards = new Map<
+      string,
+      {
+        readonly attrs: Attrs;
+        readonly context: MobileCardContext<TRow>;
+        readonly content: ReturnType<
+          typeof resolveRenderer<MobileCardContext<TRow>>
+        >;
+      }
+    >();
+    for (const slot of view.body()) {
+      if (slot.kind !== "row") continue;
+      const entry = slot.wiring;
+      const summary = entry.summary === true;
+      const fields: readonly MobileCardField<TRow>[] = value
+        ? columns.map((column) => ({
+            column,
+            label: resolveMobileLabel(column),
+            value,
+            context: {
+              $implicit: entry.row,
+              row: entry.row,
+              rowIndex: entry.index,
+              column,
+              value: view.table.cellValue(column, entry.row),
+              summary,
+            },
+          }))
+        : [];
+      const context: MobileCardContext<TRow> = {
+        $implicit: entry.row,
+        row: entry.row,
+        index: entry.index,
+        fields,
+        selected: !summary && (selection?.isSelected(entry.id) ?? false),
+        expanded: !summary && (detail?.expansion.isExpanded(entry.id) ?? false),
+      };
+      const attrs = entry.cardAttrs;
+      cards.set(slot.key, {
+        attrs: {
+          ...attrs,
+          class:
+            [classes.card, attrs.class].filter(Boolean).join(" ") || undefined,
+          style: {
+            ...treeCardStyle(summary ? 0 : (entry.treeEntry?.level ?? 0)),
+            ...(typeof attrs.style === "object" && attrs.style !== null
+              ? attrs.style
+              : {}),
+          },
+        },
+        context,
+        content: resolveRenderer(summary ? undefined : render, context),
+      });
+    }
+    return cards;
+  });
 
   /**
    * Cap the card list's height; the list scrolls inside the cap and a
@@ -152,6 +237,17 @@ export class AdaptMobileCards<TRow> {
       : null;
   });
 
+  /** Preserve the table's name and direction while retaining native list semantics. */
+  protected readonly listAttrs = computed((): Attrs => ({
+    ...this.view().table.tableAttrs(),
+    role: undefined,
+    "aria-rowcount": undefined,
+    "aria-colcount": undefined,
+    "data-adapttable-part": "cards",
+    class: this.view().classNames().cards,
+    style: { margin: 0, padding: 0, ...this.listStyle() },
+  }));
+
   /**
    * A field's caption: its `mobileLabel`, else a string header, else its
    * key; an empty `mobileLabel` shows none.
@@ -185,6 +281,8 @@ export class AdaptMobileCards<TRow> {
     const view = this.view();
     const windowStart = view.table.windowStart();
     const rowCount = view.table.source().rows.length;
+    const labels = view.table.labels();
+    const classes = view.classNames();
     const token = [
       reorder.lifted?.rowId ?? "",
       String(reorder.overIndex ?? ""),
@@ -195,22 +293,33 @@ export class AdaptMobileCards<TRow> {
       String(rowCount),
       reorder.pendingMove ? "1" : "0",
     ].join("|");
-    if (token !== this.buttonsPropsToken) {
+    if (
+      token !== this.buttonsPropsToken ||
+      labels !== this.buttonsPropsLabels ||
+      classes !== this.buttonsPropsClasses
+    ) {
       this.buttonsPropsCache = new Map();
       this.buttonsPropsToken = token;
+      this.buttonsPropsLabels = labels;
+      this.buttonsPropsClasses = classes;
     }
     const key = `${this.rowId(row)}:${String(localIndex)}`;
     const cached = this.buttonsPropsCache.get(key);
-    if (cached) return cached;
-    const props = {
+    if (cached?.reorder === reorder && cached.row === row) {
+      return cached as unknown as RowReorderButtonsProps<never>;
+    }
+    const props: RowReorderButtonsProps<TRow> = {
       reorder,
-      labels: view.table.labels(),
+      labels,
       localIndex,
       row,
       windowStart,
       rowCount,
-    } as unknown as RowReorderButtonsProps<never>;
+      className: classes.rowReorderButtons,
+      upClassName: classes.rowReorderUp,
+      downClassName: classes.rowReorderDown,
+    };
     this.buttonsPropsCache.set(key, props);
-    return props;
+    return props as unknown as RowReorderButtonsProps<never>;
   }
 }

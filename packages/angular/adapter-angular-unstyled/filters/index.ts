@@ -41,3 +41,5 @@ export function filters<TRow>(
     slotRender(ACTIVE_FILTER_CHIPS, () => AdaptFilterChips),
   ]);
 }
+
+export { filterTypes } from "@adapttable/angular";

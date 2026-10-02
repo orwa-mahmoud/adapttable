@@ -7,7 +7,7 @@ import type { AdaptTableFeature, ColumnInput } from "@adapttable/angular";
 import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
 import { collapsibleColumnGroups } from "@adapttable/angular-unstyled/column-groups";
 import { columnSelectionCheckbox } from "@adapttable/angular-unstyled/column-selection";
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -48,11 +48,13 @@ let features: AdaptTableFeature[] = [];
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
+      [dir]="direction()"
       [features]="features"
     />
   `,
 })
 class Host {
+  readonly direction = signal<"ltr" | "rtl">("ltr");
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = (row: Person) => row.id;
@@ -64,7 +66,10 @@ async function mount() {
   document.body.append(fixture.nativeElement as HTMLElement);
   fixture.autoDetectChanges();
   await fixture.whenStable();
-  return { settle: () => fixture.whenStable() };
+  return {
+    host: fixture.componentInstance,
+    settle: () => fixture.whenStable(),
+  };
 }
 
 const parts = (name: string, root: ParentNode = document) => [
@@ -82,6 +87,7 @@ const firstRowCells = () => texts(parts("cell", only("row")));
 
 afterEach(() => {
   document.body.replaceChildren();
+  document.body.removeAttribute("dir");
   features = [];
 });
 
@@ -104,6 +110,44 @@ describe("the unstyled table's column groups", () => {
     expect(firstRowCells()).toEqual(["Ada", "London", "UK"]);
     // Not collapsible unless the feature asks.
     expect(parts("column-group-toggle")).toEqual([]);
+  });
+
+  it("mirrors the closed disclosure for inherited RTL while keeping open down", async () => {
+    features = [collapsibleColumnGroups()];
+    document.body.setAttribute("dir", "rtl");
+    const { host, settle } = await mount();
+    const toggle = () => only("column-group-toggle");
+    const wrapper = () =>
+      toggle().querySelector<HTMLElement>(".column-group-chevron")!;
+    const icon = () => toggle().querySelector<SVGElement>("svg")!;
+    expect(toggle().getAttribute("aria-label")).toBe(
+      "Collapse column group: Place"
+    );
+    expect(icon().getAttribute("aria-hidden")).toBe("true");
+    expect(icon().style.transform).toBe("rotate(90deg)");
+    expect(getComputedStyle(wrapper()).transform).not.toBe("scaleX(-1)");
+
+    host.direction.set("rtl");
+    await settle();
+    expect(getComputedStyle(wrapper()).transform).toBe("scaleX(-1)");
+    expect(icon().style.transform).toBe("rotate(90deg)");
+    toggle().click();
+    await settle();
+    expect(toggle().getAttribute("aria-label")).toBe(
+      "Expand column group: Place"
+    );
+    expect(toggle().getAttribute("aria-expanded")).toBe("false");
+    expect(icon().style.transform).toBe("");
+    expect(getComputedStyle(wrapper()).transform).toBe("scaleX(-1)");
+    expect(firstRowCells()).toEqual(["Ada", "UK"]);
+
+    host.direction.set("ltr");
+    await settle();
+    expect(getComputedStyle(wrapper()).transform).not.toBe("scaleX(-1)");
+    toggle().click();
+    await settle();
+    expect(icon().style.transform).toBe("rotate(90deg)");
+    expect(firstRowCells()).toEqual(["Ada", "London", "UK"]);
   });
 
   it("collapses a group to its summary column, and opens it again", async () => {

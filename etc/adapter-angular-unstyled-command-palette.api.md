@@ -16,7 +16,7 @@ import { TableCommandPalette } from '@adapttable/angular';
 import { ToolbarExtrasSlotProps } from '@adapttable/angular';
 import { WritableSignal } from '@angular/core';
 
-// @public
+// @internal
 export class AdaptCommandEmpty {
     readonly props: InputSignal<    {
     readonly message: string;
@@ -33,7 +33,7 @@ export class AdaptCommandEmpty {
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptCommandEmpty, never>;
 }
 
-// @public
+// @internal
 export class AdaptCommandInput {
     constructor();
     protected changed(event: Event): void;
@@ -71,7 +71,7 @@ export class AdaptCommandInput {
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptCommandInput, never>;
 }
 
-// @public
+// @internal
 export class AdaptCommandItem {
     readonly props: InputSignal<    {
     readonly command: {

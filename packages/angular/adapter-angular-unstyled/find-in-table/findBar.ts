@@ -27,7 +27,7 @@ const FIND_GLYPH: Record<FindButtonKind, string> = {
   close: "✕",
 };
 
-/** The search box the find bar focuses when it opens. */
+/** The search box the find bar focuses when it opens. @internal */
 @Component({
   selector: "adapt-find-search",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,7 +64,7 @@ export class AdaptFindSearch {
   }
 }
 
-/** Previous, next and close. */
+/** Previous, next and close. @internal */
 @Component({
   selector: "adapt-find-step",
   changeDetection: ChangeDetectionStrategy.OnPush,

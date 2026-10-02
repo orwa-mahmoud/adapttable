@@ -91,6 +91,7 @@ import { ColumnSelectCheckboxChromeProps } from '@adapttable/core/binding';
 import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
 import { COMMAND_PALETTE_LIVE } from '@adapttable/core/binding';
+import { CommandPaletteSurfaceProps as CommandPaletteSurfaceProps_2 } from '@adapttable/core/binding';
 import { ConfirmHandler } from '@adapttable/core';
 import { CONTEXT_MENU_LIVE } from '@adapttable/core/binding';
 import { ContextMenuActions } from '@adapttable/core';
@@ -122,6 +123,8 @@ import { desktopRowMeasureRef } from '@adapttable/core/binding';
 import { DesktopRowWiringArgs } from '@adapttable/core/binding';
 import { devWarn } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
+import { DirtyCellState } from '@adapttable/core';
+import { dirtyMarkerView } from '@adapttable/core';
 import { EDITABLE_CELL } from '@adapttable/core/binding';
 import { EditableCellActivateProps as EditableCellActivateProps_2 } from '@adapttable/core/binding';
 import { EditableCellButtonProps } from '@adapttable/core/binding';
@@ -291,7 +294,9 @@ import { LazyChildrenState } from '@adapttable/core/binding';
 import { listFilterValues } from '@adapttable/core';
 import { MergedCellStyle } from '@adapttable/core/binding';
 import { mergedCellStyle } from '@adapttable/core/binding';
+import { MobileCardField as MobileCardField_2 } from '@adapttable/core';
 import { mobileCardListStyle } from '@adapttable/core';
+import { MobileCardModel } from '@adapttable/core';
 import { MultiSelectEditorCheckboxProps as MultiSelectEditorCheckboxProps_2 } from '@adapttable/core/binding';
 import { NestedTableDefaults } from '@adapttable/core';
 import { NestedTableParent } from '@adapttable/core';
@@ -344,6 +349,9 @@ import { ROW_REORDER_BUTTONS } from '@adapttable/core/binding';
 import { ROW_REORDER_HANDLE } from '@adapttable/core/binding';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
+import { RowActionsRenderContext } from '@adapttable/core';
+import { RowClickProps } from '@adapttable/core';
+import { rowClickProps } from '@adapttable/core';
 import { RowEditActionsLayout } from '@adapttable/core';
 import { RowEditActionsProps } from '@adapttable/core/binding';
 import { RowEditButtonProps } from '@adapttable/core/binding';
@@ -554,6 +562,8 @@ export class AdaptApprovalReviewChrome {
     protected readonly backProps: Signal<AgentApprovalButtonProps | undefined>;
     readonly buttonClassName: InputSignal<string | undefined>;
     readonly className: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly copy: Signal<Required<TableLabels>>;
     readonly expanded: InputSignal<boolean | undefined>;
     // (undocumented)
     protected readonly expandProps: Signal<AgentApprovalButtonProps | undefined>;
@@ -661,6 +671,8 @@ export class AdaptAssistantAlwaysAllowed {
     button: TableAssistantButtonProps;
     }[]>;
     // (undocumented)
+    protected readonly copy: Signal<Required<TableLabels>>;
+    // (undocumented)
     readonly labels: InputSignal<TableLabels | undefined>;
     // (undocumented)
     readonly onRevoke: InputSignal<(capability: string) => void>;
@@ -701,6 +713,8 @@ export class AdaptAssistantComposer {
     protected readonly busy: Signal<boolean>;
     // (undocumented)
     protected readonly composer: Signal<TableAssistantComposerProps>;
+    // (undocumented)
+    protected readonly copy: Signal<Required<TableLabels>>;
     protected readonly exampleButtons: Signal<    {
     id: string;
     button: TableAssistantButtonProps;
@@ -789,6 +803,8 @@ export class AdaptAssistantMessage {
     }[]>;
     // (undocumented)
     readonly avatars: InputSignal<TableAssistantAvatars | undefined>;
+    // (undocumented)
+    protected readonly copy: Signal<Required<TableLabels>>;
     // (undocumented)
     protected readonly expanded: WritableSignal<boolean>;
     // (undocumented)
@@ -911,6 +927,8 @@ export class AdaptAssistantReceipt {
     spoken: string;
     } | null>;
     // (undocumented)
+    protected readonly copy: Signal<Required<TableLabels>>;
+    // (undocumented)
     protected readonly detail: Signal<string | undefined>;
     // (undocumented)
     protected readonly detailButton: Signal<TableAssistantButtonProps>;
@@ -972,6 +990,8 @@ export class AdaptAssistantReceipt {
 
 // @public
 export class AdaptAssistantWorking {
+    // (undocumented)
+    protected readonly copy: Signal<Required<TableLabels>>;
     // (undocumented)
     readonly labels: InputSignal<TableLabels | undefined>;
     // (undocumented)
@@ -1457,6 +1477,8 @@ export class AdaptCommandPaletteChrome {
     constructor();
     readonly className: InputSignal<string | undefined>;
     readonly commands: InputSignal<readonly ContextMenuItem[]>;
+    // (undocumented)
+    protected readonly copy: Signal<Required<TableLabels>>;
     protected readonly dialogLabel: Signal<string>;
     protected readonly emptyProps: Signal<    {
     message: string;
@@ -1494,6 +1516,7 @@ export class AdaptCommandPaletteChrome {
     };
     }[]>;
     readonly slots: InputSignal<CommandPaletteSlots>;
+    protected readonly surfaceProps: Signal<CommandPaletteSurfaceProps>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptCommandPaletteChrome, "adapt-command-palette-chrome", never, {
         "commands": {
@@ -2088,6 +2111,8 @@ export class AdaptFilterTreeChrome<TRow> {
 export class AdaptFindBarChrome {
     readonly className: InputSignal<string | undefined>;
     protected readonly closeProps: Signal<FindButtonProps>;
+    // (undocumented)
+    protected readonly copy: Signal<Required<TableLabels>>;
     protected readonly count: Signal<string>;
     readonly find: InputSignal<FindInTableState>;
     readonly labels: InputSignal<TableLabels | undefined>;
@@ -3195,6 +3220,8 @@ export class AdaptTableAssistantChrome {
     // (undocumented)
     protected readonly composer: Signal<AssistantComposerProps>;
     // (undocumented)
+    protected readonly copy: Signal<Required<TableLabels>>;
+    // (undocumented)
     protected readonly error: Signal<string | undefined>;
     // (undocumented)
     protected readonly expand: () => void;
@@ -3932,7 +3959,11 @@ export interface CommandPaletteSlots {
     readonly Empty: Type<unknown>;
     readonly Input: Type<unknown>;
     readonly Item: Type<unknown>;
+    readonly Surface: Type<unknown>;
 }
+
+// @public
+export type CommandPaletteSurfaceProps = CommandPaletteSurfaceProps_2<TemplateRef<unknown> | undefined>;
 
 // @public
 export function commitBooleanDraft(ctrl: EditableCellEditorCtrl, checked: boolean): void;
@@ -4148,7 +4179,21 @@ export { devWarn }
 export { Direction }
 
 // @public
+export interface DirtyCellsOptions {
+    readonly enabled?: MaybeSignal<boolean>;
+    readonly injector?: Injector;
+    readonly onDirtyChange?: (dirty: DirtyEdits) => void;
+}
+
+export { DirtyCellState }
+
+// @public
+export type DirtyEdits = Readonly<Pick<DirtyCellState, "count" | "confirm" | "confirmRow" | "confirmAll">>;
+
+// @public
 export function dirtyIndicators(): AdaptTableFeature;
+
+export { dirtyMarkerView }
 
 export { EDITABLE_CELL }
 
@@ -4254,6 +4299,7 @@ export interface EditingLifecycleExtras<TRow = unknown> {
     readonly applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
     readonly editConflictPolicy?: EditConflictPolicy;
     readonly formatEditError?: (error: unknown) => string;
+    readonly onDirtyChange?: (dirty: DirtyEdits) => void;
     readonly onEditCancel?: EditEventHandler<TRow>;
     readonly onEditCommit?: EditEventHandler<TRow>;
     readonly onEditConflict?: EditConflictHandler<TRow>;
@@ -4902,6 +4948,9 @@ export function injectDensity(options?: DensityOptions): DensityState;
 export function injectDensityUrlState(options?: DensityUrlStateOptions): DensityUrlState;
 
 // @public
+export function injectDirtyCells(options?: DirtyCellsOptions): Signal<DirtyCellState>;
+
+// @public
 export function injectEditConflict<TRow>(options?: FromStoreOptions): Signal<EditConflictState<TRow>>;
 
 // @public
@@ -5191,7 +5240,25 @@ export { MergedCellStyle }
 
 export { mergedCellStyle }
 
+// @public
+export interface MobileCardContext<TRow> extends Readonly<Omit<MobileCardModel<TRow>, "fields">> {
+    readonly $implicit: TRow;
+    readonly fields: readonly MobileCardField<TRow>[];
+    readonly row: TRow;
+}
+
+// @public
+export interface MobileCardField<TRow> extends Omit<MobileCardField_2<TRow>, "column" | "label" | "value"> {
+    readonly column: ColumnDef<TRow>;
+    readonly context: CellContext<TRow>;
+    readonly label: string | undefined;
+    readonly value: TemplateRef<CellContext<TRow>>;
+}
+
 export { mobileCardListStyle }
+
+// @public
+export type MobileCardRenderer<TRow> = Renderer<MobileCardContext<TRow>>;
 
 // @public
 export function mountTableFeatures<TRow>(features: readonly AdaptTableFeature[], options: {
@@ -5380,6 +5447,9 @@ export { resolveEditingArming }
 
 export { resolveMobileLabel }
 
+// @public
+export function resolveRenderer<TContext extends object>(renderer: Renderer<TContext> | undefined, context: TContext): ResolvedRenderer<TContext> | null;
+
 export { resolveRowEditTrigger }
 
 export { resolveRowStyle }
@@ -5395,6 +5465,11 @@ export { ROW_REORDER_BUTTONS }
 export { ROW_REORDER_HANDLE }
 
 export { RowAction }
+
+// @public
+export interface RowActionsContext<TRow> extends Readonly<RowActionsRenderContext<TRow>> {
+    readonly $implicit: TRow;
+}
 
 // @public
 export function rowActionsFor<TRow>(options: RowActionsOptions<TRow>): Signal<{
@@ -5415,6 +5490,9 @@ export interface RowActionsOptions<TRow> {
 }
 
 // @public
+export type RowActionsRenderer<TRow> = Renderer<RowActionsContext<TRow>>;
+
+// @public
 export function rowAppearance<TRow>(options: RowAppearanceOptions<TRow>): AdaptTableFeature;
 
 // @public
@@ -5423,6 +5501,10 @@ export interface RowAppearanceOptions<TRow> {
     readonly rowHeight?: RowHeight<TRow>;
     readonly rowStyle?: RowStyle<TRow>;
 }
+
+export { RowClickProps }
+
+export { rowClickProps }
 
 // @public
 export function rowDetail<TRow>(renderRowDetail: Renderer<RowDetailContext<TRow>>, defaultExpandedRowIds?: readonly string[]): AdaptTableFeature;

@@ -9,6 +9,7 @@ import {
   AdaptGroupToggleSpacer,
   AdaptIcon,
   type ColumnDef,
+  expandChevronIcon,
   groupAggregateEntries,
   type GroupHeaderCardSlotProps,
   type GroupHeaderRowSlotProps,
@@ -37,19 +38,15 @@ type Entry = GroupHeaderRowSlotProps<
   ColumnDef<never>
 >["entry"];
 
-/** A chevron pointing into the row; the toggle turns it down when open. */
-const CHEVRON: IconDescriptor = {
-  viewBox: "0 0 24 24",
-  width: 14,
-  height: 14,
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  focusable: "false",
-  shapes: [{ tag: "path", d: "m9 6 6 6-6 6" }],
-};
+/** Reflect only the decorative wrapper; an open/down chevron remains down. */
+const GROUP_CHEVRON_STYLE = `
+  .group-chevron {
+    display: inline-flex;
+  }
+  .group-chevron:dir(rtl) {
+    transform: scaleX(-1);
+  }
+`;
 
 /**
  * The "show more" button inside a more row or card.
@@ -132,6 +129,7 @@ function groupEntryView(
  */
 @Component({
   selector: "tr[adaptGroupHeaderRow]",
+  styles: GROUP_CHEVRON_STYLE,
   imports: [
     AdaptAttrs,
     AdaptGroupMoreButtonChrome,
@@ -164,13 +162,8 @@ function groupEntryView(
             "
             (click)="p.onToggleCollapse(group.key)"
           >
-            <span
-              style="display: inline-flex; transition: transform 150ms ease"
-              [style.transform]="
-                view.expanded() ? 'rotate(90deg)' : 'rotate(0deg)'
-              "
-            >
-              <svg [adaptIcon]="chevron"></svg>
+            <span aria-hidden="true" class="group-chevron">
+              <svg [adaptIcon]="chevron()"></svg>
             </span>
           </button>
           @if (p.selection; as selection) {
@@ -242,7 +235,11 @@ export class AdaptGroupHeaderRow {
       GroupHeaderRowSlotProps<never, SelectionState, ColumnDef<never>>
     >();
 
-  protected readonly chevron = CHEVRON;
+  protected readonly chevron: Signal<IconDescriptor> = computed(() => ({
+    ...expandChevronIcon({ open: this.view.expanded() }),
+    width: 14,
+    height: 14,
+  }));
   protected readonly moreSlots = { Button: AdaptGroupMore };
   /** Operations for the current group or footer, retaining the model type. */
   protected readonly aggregateOps: Signal<
@@ -278,6 +275,7 @@ export class AdaptGroupHeaderRow {
  */
 @Component({
   selector: "adapt-group-header-card",
+  styles: GROUP_CHEVRON_STYLE,
   imports: [AdaptGroupMoreButtonChrome, AdaptIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
@@ -299,13 +297,8 @@ export class AdaptGroupHeaderRow {
             "
             (click)="p.onToggleCollapse(group.key)"
           >
-            <span
-              style="display: inline-flex; transition: transform 150ms ease"
-              [style.transform]="
-                view.expanded() ? 'rotate(90deg)' : 'rotate(0deg)'
-              "
-            >
-              <svg [adaptIcon]="chevron"></svg>
+            <span aria-hidden="true" class="group-chevron">
+              <svg [adaptIcon]="chevron()"></svg>
             </span>
           </button>
           @if (p.selection; as selection) {
@@ -362,7 +355,11 @@ export class AdaptGroupHeaderCard {
       GroupHeaderCardSlotProps<never, SelectionState, ColumnDef<never>>
     >();
 
-  protected readonly chevron = CHEVRON;
+  protected readonly chevron: Signal<IconDescriptor> = computed(() => ({
+    ...expandChevronIcon({ open: this.view.expanded() }),
+    width: 14,
+    height: 14,
+  }));
   protected readonly moreSlots = { Button: AdaptGroupMore };
   /** Operations for the current group or footer, retaining the model type. */
   protected readonly aggregateOps: Signal<

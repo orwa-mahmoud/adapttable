@@ -3,6 +3,7 @@
  * Ctrl/Cmd+click on a header makes, reachable by a finger and by a screen
  * reader. Kits pass the checkbox.
  */
+import { defaultLabels } from "@adapttable/core";
 import type { ColumnSelectCheckboxProps } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
@@ -47,7 +48,7 @@ export function columnSelectLabel(
   label: string | undefined,
   column: { readonly header?: string; readonly key: string }
 ): string {
-  return `${label ?? "Select column"}: ${column.header ?? column.key}`;
+  return `${label ?? defaultLabels.selectColumn}: ${column.header ?? column.key}`;
 }
 
 /**

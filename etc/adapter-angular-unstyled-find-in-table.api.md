@@ -31,7 +31,7 @@ export class AdaptFindBar {
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFindBar, never>;
 }
 
-// @public
+// @internal
 export class AdaptFindSearch {
     constructor();
     protected changed(event: Event): void;
@@ -48,7 +48,7 @@ export class AdaptFindSearch {
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFindSearch, never>;
 }
 
-// @public
+// @internal
 export class AdaptFindStep {
     protected glyph(): string;
     readonly props: InputSignal<FindButtonProps>;

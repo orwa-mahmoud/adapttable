@@ -5,10 +5,11 @@
  * before an entry runs, so an entry that opens a dialog does not do it under
  * a menu that is still mounted.
  */
-import type {
-  ContextMenuItem,
-  ContextMenuPoint,
-  TableLabels,
+import {
+  type ContextMenuItem,
+  type ContextMenuPoint,
+  resolveLabels,
+  type TableLabels,
 } from "@adapttable/core";
 import {
   ChangeDetectionStrategy,
@@ -115,7 +116,7 @@ export class AdaptContextMenuChrome {
     return {
       at: point ?? { x: 0, y: 0 },
       anchorRef: { current: this.anchor()?.nativeElement ?? null },
-      label: this.labels()?.contextMenu ?? "Table actions",
+      label: resolveLabels(this.labels()).contextMenu,
       onClose: this.onClose(),
       className: this.className(),
       rows: this.rows(),

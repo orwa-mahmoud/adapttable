@@ -315,7 +315,9 @@ export function injectGridFocus<TRow>(
           rowCount: table.source().total,
           colCount: table.columns().length,
         }),
-        onKeyDown: controller.keyDown,
+        onKeyDown: (event: KeyboardEvent) => {
+          if (!event.defaultPrevented) controller.keyDown(event);
+        },
         ref: controller.attach,
       };
     },

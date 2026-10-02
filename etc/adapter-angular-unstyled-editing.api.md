@@ -6,6 +6,7 @@
 
 import { AdaptTableFeature } from '@adapttable/angular';
 import { CellEditHandler } from '@adapttable/angular';
+import { dirtyIndicators } from '@adapttable/angular';
 import { editHistory } from '@adapttable/angular';
 import { EditHistoryHandle } from '@adapttable/angular';
 import { EditHistoryOptions } from '@adapttable/angular';
@@ -31,6 +32,8 @@ export class AdaptRowEditActions<TRow> {
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRowEditActions<any>, never>;
 }
+
+export { dirtyIndicators }
 
 export { editHistory }
 

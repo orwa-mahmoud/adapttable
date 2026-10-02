@@ -237,26 +237,34 @@
             <tr
               [adaptAttrs]="entry.rowAttrs"
               [attr.data-dragging]="
-                v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
-                  'data-dragging'
-                ] ?? null
+                summary
+                  ? null
+                  : (v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
+                      'data-dragging'
+                    ] ?? null)
               "
               [attr.data-drop]="
-                v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
-                  'data-drop'
-                ] ?? null
+                summary
+                  ? null
+                  : (v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
+                      'data-drop'
+                    ] ?? null)
               "
               (dragover)="
-                v
-                  .reorder?.()
-                  .dropProps(entry.index, entry.row, v.table.windowStart())
-                  .onDragOver($event)
+                summary
+                  ? undefined
+                  : v
+                      .reorder?.()
+                      .dropProps(entry.index, entry.row, v.table.windowStart())
+                      .onDragOver($event)
               "
               (drop)="
-                v
-                  .reorder?.()
-                  .dropProps(entry.index, entry.row, v.table.windowStart())
-                  .onDrop($event)
+                summary
+                  ? undefined
+                  : v
+                      .reorder?.()
+                      .dropProps(entry.index, entry.row, v.table.windowStart())
+                      .onDrop($event)
               "
             >
               @if (v.rowDetail) {
@@ -310,7 +318,8 @@
                       v.markedCellAttrs(
                         column,
                         entry.index,
-                        v.columnIndex().get(column.key)!
+                        v.columnIndex().get(column.key)!,
+                        summary ? undefined : entry.id
                       ),
                       cell
                     )
@@ -378,6 +387,8 @@
                       [confirm]="v.confirm"
                       [labels]="v.table.labels()"
                       [layout]="v.rowActionsLayout"
+                      [render]="v.renderRowActions()"
+                      [classNames]="v.classNames()"
                     />
                   }
                 </td>

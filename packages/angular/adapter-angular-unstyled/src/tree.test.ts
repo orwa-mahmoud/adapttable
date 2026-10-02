@@ -6,6 +6,7 @@
 import {
   type AdaptTableFeature,
   type ColumnDef,
+  type TableLabels,
   tree as bindingTree,
 } from "@adapttable/angular";
 import { tree } from "@adapttable/angular-unstyled/tree";
@@ -58,6 +59,8 @@ let features: readonly AdaptTableFeature[] | undefined;
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="mobile"
+      [dir]="direction()"
+      [labels]="labels()"
       paginationMode="infinite"
       [maxHeight]="400"
       [features]="features"
@@ -69,6 +72,8 @@ class Host {
   readonly columns = COLUMNS;
   readonly rowKey = (row: Person) => row.id;
   readonly mobile = mobile;
+  readonly direction = signal<"ltr" | "rtl">("ltr");
+  readonly labels = signal<TableLabels>({});
   readonly features = features ?? [
     tree<Person>({
       getChildren: (row) => row.reports,
@@ -103,6 +108,7 @@ const rowById = (id: string) =>
 
 afterEach(() => {
   document.body.replaceChildren();
+  document.body.removeAttribute("dir");
   mobile = false;
   onLoadChildren = undefined;
   features = undefined;
@@ -126,6 +132,30 @@ describe("the unstyled table's tree", () => {
     const toggle = toggleOf(rowById("1"));
     expect(toggle.getAttribute("aria-expanded")).toBe("false");
     expect(toggle.getAttribute("aria-label")).toBe("Expand row");
+  });
+
+  it("relabels desktop tree disclosures when only the labels change", async () => {
+    const { host, settle } = await mount();
+    const toggle = toggleOf(rowById("1"));
+    expect(toggle.getAttribute("aria-label")).toBe("Expand row");
+    host.labels.set({
+      expandRow: "Afficher les enfants",
+      collapseRow: "Masquer les enfants",
+    });
+    await settle();
+    expect(toggle.getAttribute("aria-label")).toBe("Afficher les enfants");
+    expect(rowIds("row")).toEqual(["1", "4"]);
+    toggle.click();
+    await settle();
+    expect(toggle.getAttribute("aria-label")).toBe("Masquer les enfants");
+    expect(rowIds("row")).toEqual(["1", "2", "4"]);
+    host.labels.set({
+      expandRow: "Show children",
+      collapseRow: "Hide children",
+    });
+    await settle();
+    expect(toggle.getAttribute("aria-label")).toBe("Hide children");
+    expect(rowIds("row")).toEqual(["1", "2", "4"]);
   });
 
   it("opens a node to show its children, indented by depth", async () => {
@@ -195,6 +225,43 @@ describe("the unstyled table's tree", () => {
     expect(card("1").style.marginInlineStart).toBe("");
     expect(toggleOf(card("1")).getAttribute("aria-expanded")).toBe("true");
   });
+
+  it.each([false, true])(
+    "follows live inherited direction without turning an open chevron sideways (mobile=%s)",
+    async (isMobile) => {
+      mobile = isMobile;
+      document.body.setAttribute("dir", "rtl");
+      const { host, settle } = await mount();
+      const row = parts(isMobile ? "card" : "row")[0]!;
+      const toggle = toggleOf(row);
+      const wrapper = toggle.querySelector<HTMLElement>(".tree-chevron")!;
+      const icon = toggle.querySelector<SVGElement>("svg")!;
+      expect(icon.getAttribute("aria-hidden")).toBe("true");
+      expect(icon.querySelector("path")?.getAttribute("d")).toBe(
+        "m9 6 6 6-6 6"
+      );
+      expect(icon.style.transform).toBe("");
+      expect(getComputedStyle(wrapper).transform).not.toBe("scaleX(-1)");
+
+      host.direction.set("rtl");
+      await settle();
+      expect(getComputedStyle(wrapper).transform).toBe("scaleX(-1)");
+      toggle.click();
+      await settle();
+      expect(toggle.getAttribute("aria-expanded")).toBe("true");
+      expect(toggle.getAttribute("aria-label")).toBe("Collapse row");
+      expect(icon.style.transform).toBe("rotate(90deg)");
+
+      host.direction.set("ltr");
+      await settle();
+      expect(getComputedStyle(wrapper).transform).not.toBe("scaleX(-1)");
+      expect(icon.style.transform).toBe("rotate(90deg)");
+      toggle.click();
+      await settle();
+      expect(icon.style.transform).toBe("");
+      expect(toggle.getAttribute("aria-label")).toBe("Expand row");
+    }
+  );
 
   it("windows a virtualized tree over its open nodes", async () => {
     // jsdom lays nothing out: give the scroll box a height to window into.

@@ -69,7 +69,7 @@ export interface ResolvedRenderer<TContext> {
  * Split a renderer into the template to stamp or the component to create,
  * with only the context fields the component declares as inputs.
  *
- * @internal
+ * @public
  */
 export function resolveRenderer<TContext extends object>(
   renderer: Renderer<TContext> | undefined,

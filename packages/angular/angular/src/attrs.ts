@@ -157,7 +157,11 @@ export class AdaptAttrs {
       this.apply(this.adaptAttrs());
     });
     inject(DestroyRef).onDestroy(() => {
+      for (const stopListening of this.listening.values()) stopListening();
+      this.listening.clear();
+      this.handlers.clear();
       this.ref?.(null);
+      this.ref = undefined;
     });
   }
 

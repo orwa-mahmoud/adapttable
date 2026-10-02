@@ -4,11 +4,18 @@
  */
 import {
   AdaptColumnGroupToggleChrome,
+  AdaptIcon,
   type ColumnGroupToggleButtonProps,
   type ColumnGroupToggleProps,
   type ColumnGroupToggleSlots,
+  expandChevronIcon,
 } from "@adapttable/angular";
-import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from "@angular/core";
 
 /**
  * A native button with a disclosure glyph.
@@ -17,6 +24,15 @@ import { ChangeDetectionStrategy, Component, input } from "@angular/core";
  */
 @Component({
   selector: "adapt-column-group-button",
+  imports: [AdaptIcon],
+  styles: `
+    .column-group-chevron {
+      display: inline-flex;
+    }
+    .column-group-chevron:dir(rtl) {
+      transform: scaleX(-1);
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
@@ -43,13 +59,20 @@ import { ChangeDetectionStrategy, Component, input } from "@angular/core";
       "
       (click)="p.onClick()"
     >
-      {{ p.expanded ? "▼" : "▶" }}
+      <span aria-hidden="true" class="column-group-chevron">
+        <svg [adaptIcon]="chevron()"></svg>
+      </span>
     </button>
   `,
 })
 export class AdaptColumnGroupButton {
   /** The button's name, state and click. */
   readonly props = input.required<ColumnGroupToggleButtonProps>();
+
+  /** Shape and open state come from core; direction follows the host. */
+  protected readonly chevron = computed(() =>
+    expandChevronIcon({ open: this.props().expanded })
+  );
 }
 
 const SLOTS: ColumnGroupToggleSlots = { Button: AdaptColumnGroupButton };

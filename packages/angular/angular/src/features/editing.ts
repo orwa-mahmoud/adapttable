@@ -15,6 +15,7 @@ import {
   coreRowEditing,
 } from "@adapttable/core/binding";
 
+import type { DirtyEdits } from "../editing/dirtyCells";
 import type {
   BatchEditHandler,
   CellEditHandler,
@@ -28,6 +29,8 @@ import type { AdaptTableFeature } from "../featureHost";
  * @public
  */
 export interface EditingLifecycleExtras<TRow = unknown> {
+  /** Unsaved-edit count and confirmation operations, on mount and on change. */
+  readonly onDirtyChange?: (dirty: DirtyEdits) => void;
   /** An editor opened. */
   readonly onEditStart?: EditEventHandler<TRow>;
   /** A commit reached the host. */

@@ -1,7 +1,13 @@
 /**
  * Row count and the windowed pager.
  */
-import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+import { AdaptIcon, expandChevronIcon } from "@adapttable/angular";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from "@angular/core";
 
 import type { TableView } from "../dataTable";
 
@@ -12,6 +18,7 @@ import type { TableView } from "../dataTable";
  */
 @Component({
   selector: "adapt-pagination-footer",
+  imports: [AdaptIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
@@ -55,7 +62,7 @@ import type { TableView } from "../dataTable";
           [disabled]="v.table.pagination().safePage <= 1"
           (click)="v.table.setPage(v.table.pagination().safePage - 1)"
         >
-          ‹
+          <svg [adaptIcon]="previousIcon()"></svg>
         </button>
         @for (slot of v.table.pagerSlots(); track slot.key) {
           @if (slot.item === "ellipsis") {
@@ -66,6 +73,7 @@ import type { TableView } from "../dataTable";
             <button
               type="button"
               data-adapttable-part="page-number"
+              [attr.aria-label]="v.table.labels().goToPage(+slot.item)"
               [attr.aria-current]="
                 slot.item === v.table.pagination().safePage ? 'page' : null
               "
@@ -84,7 +92,7 @@ import type { TableView } from "../dataTable";
           "
           (click)="v.table.setPage(v.table.pagination().safePage + 1)"
         >
-          ›
+          <svg [adaptIcon]="nextIcon()"></svg>
         </button>
       </div>
     </div>
@@ -93,4 +101,15 @@ import type { TableView } from "../dataTable";
 export class AdaptPaginationFooter<TRow> {
   /** What the table renders from. */
   readonly view = input.required<TableView<TRow>>();
+
+  /** Pagination follows reading order, including live direction changes. */
+  protected readonly previousIcon = computed(() =>
+    expandChevronIcon({
+      open: false,
+      dir: this.view().table.dir() === "rtl" ? "ltr" : "rtl",
+    })
+  );
+  protected readonly nextIcon = computed(() =>
+    expandChevronIcon({ open: false, dir: this.view().table.dir() })
+  );
 }

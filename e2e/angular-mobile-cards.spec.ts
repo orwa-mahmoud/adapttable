@@ -19,6 +19,48 @@ test("draws every row as a card with its column labels", async ({ page }) => {
     .locator('[data-adapttable-part="card-row"]');
   await expect(rows.first()).toHaveText("Ada Lovelace");
   await expect(rows.nth(1)).toHaveText(/Team\s*Core/);
+  await expect(
+    page.getByRole("list", { name: "People", exact: true })
+  ).toHaveAttribute("data-adapttable-part", "cards");
+  await expect(part(page, "cards")).not.toHaveAttribute("role", "table");
+});
+
+test("activates cards with keyboard navigation and keeps checkbox clicks separate", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+  const cards = part(page, "card");
+  const log = page.locator(".mx-demo [data-demo-log]");
+  await expect(log).toHaveText("Activate a person to see the host callback.");
+  await cards.first().getByRole("checkbox").check();
+  await expect(cards.first()).toHaveAttribute("data-selected", "");
+  await expect(log).toHaveText("Activate a person to see the host callback.");
+  await cards.first().focus();
+  await page.keyboard.press("Enter");
+  await expect(log).toHaveText("Activated Ada Lovelace");
+  await page.keyboard.press("ArrowDown");
+  await expect(cards.nth(1)).toBeFocused();
+  await expect(cards.first()).toHaveAttribute("tabindex", "-1");
+  await expect(cards.nth(1)).toHaveAttribute("tabindex", "0");
+  await page.keyboard.press("Space");
+  await expect(log).toHaveText("Activated Grace Hopper");
+  await page.keyboard.press("ArrowUp");
+  await expect(cards.first()).toBeFocused();
+});
+
+test("keeps named card-list semantics and localized controls in RTL", async ({
+  page,
+}) => {
+  await page.goto(`${PAGE}?locale=ar&dir=rtl`);
+  const list = page.getByRole("list", { name: "People", exact: true });
+  await expect(list).toHaveAttribute("dir", "rtl");
+  await expect(list).not.toHaveAttribute("role", "table");
+  await expect(part(page, "card").first()).toContainText("آدا لوفليس");
+  const checkbox = part(page, "card").first().getByRole("checkbox");
+  await expect(checkbox).toHaveAccessibleName(/.+/);
+  await expect(checkbox).not.toHaveAccessibleName("Select row");
+  await checkbox.check();
+  await expect(part(page, "card").first()).toHaveAttribute("data-selected", "");
 });
 
 test("sorts the cards from the phone sort select", async ({ page }) => {

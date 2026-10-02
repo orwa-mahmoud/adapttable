@@ -1,15 +1,33 @@
 @let v = view();
-<ul
-  #scrollBox
-  data-adapttable-part="cards"
-  style="margin: 0; padding: 0"
-  [style]="listStyle()"
+@let classes = v.classNames();
+<ng-template
+  #fieldValue
+  let-row="row"
+  let-column="column"
+  let-index="rowIndex"
+  let-summary="summary"
 >
+  @if (!summary && v.editableCells; as editableCells) {
+    <ng-container
+      [adaptSlot]="editableCellSlot"
+      [adaptSlotProps]="editableCells().get(rowId(row) + ':' + column.key)!"
+      [adaptSlotTable]="v.table"
+    />
+  } @else {
+    <span
+      [adaptCell]="column"
+      [adaptCellRow]="row"
+      [adaptCellIndex]="index"
+    ></span>
+  }
+</ng-template>
+<ul #scrollBox data-adapttable-part="cards" [adaptAttrs]="listAttrs()">
   @for (slot of v.body(); track slot.key) {
     @switch (slot.kind) {
       @case ("virtualPad") {
         <li
           data-adapttable-part="virtual-spacer"
+          [class]="classes.virtualSpacer"
           style="display: block"
           [style.height.px]="slot.height"
         ></li>
@@ -20,11 +38,13 @@
         <li
           style="display: block"
           [attr.data-adapttable-part]="parts.row"
+          [class]="separator ? classes.separatorRow : classes.fullWidthRow"
           [attr.role]="separator ? 'separator' : null"
           [attr.aria-label]="separator ? v.table.labels().rowSeparator : null"
         >
           <div
             [attr.data-adapttable-part]="parts.cell"
+            [class]="separator ? classes.separatorCell : classes.fullWidthCell"
             [adaptExtraRowContent]="slot.render"
           ></div>
         </li>
@@ -41,12 +61,12 @@
       @case ("row") {
         @let entry = slot.wiring;
         @let summary = entry.summary === true;
-        @let treeCard = treeCards().get(rowId(entry.row));
+        @let treeCard = summary ? undefined : treeCards().get(rowId(entry.row));
+        @let card = cardBodies().get(slot.key)!;
         <li
           style="display: block"
-          [adaptAttrs]="entry.cardAttrs"
+          [adaptAttrs]="card.attrs"
           [attr.data-index]="entry.index"
-          [style.margin-inline-start]="treeCard?.indent ?? null"
         >
           @if (treeCard) {
             <ng-container
@@ -58,6 +78,7 @@
           @if (!summary && v.selection; as selection) {
             <input
               data-adapttable-part="checkbox"
+              [class]="classes.checkbox"
               [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
             />
           }
@@ -68,29 +89,42 @@
               [adaptSlotTable]="v.table"
             />
           }
-          @for (column of v.table.columns(); track column.key) {
-            <div data-adapttable-part="card-row">
-              @if (caption(column); as label) {
-                <span data-adapttable-part="card-label">{{ label }}</span>
-              }
-              <span data-adapttable-part="card-value">
-                @if (!summary && v.editableCells; as editableCells) {
-                  <ng-container
-                    [adaptSlot]="editableCellSlot"
-                    [adaptSlotProps]="
-                      editableCells().get(rowId(entry.row) + ':' + column.key)!
-                    "
-                    [adaptSlotTable]="v.table"
-                  />
-                } @else {
+          @if (card.content?.template; as template) {
+            <ng-container
+              [ngTemplateOutlet]="template"
+              [ngTemplateOutletContext]="card.context"
+            />
+          } @else if (card.content?.component; as component) {
+            <ng-container
+              [ngComponentOutlet]="component"
+              [ngComponentOutletInputs]="card.content?.inputs"
+            />
+          } @else {
+            @for (field of card.context.fields; track field.column.key) {
+              <div data-adapttable-part="card-row" [class]="classes.cardRow">
+                @if (field.label; as label) {
                   <span
-                    [adaptCell]="column"
-                    [adaptCellRow]="entry.row"
-                    [adaptCellIndex]="entry.index"
-                  ></span>
+                    data-adapttable-part="card-label"
+                    [class]="classes.cardLabel"
+                    >{{ label }}</span
+                  >
                 }
-              </span>
-            </div>
+                <span
+                  data-adapttable-part="card-value"
+                  [class]="classes.cardValue"
+                  [attr.data-flash]="
+                    !summary && v.isCellFlashing(entry.id, field.column.key)
+                      ? ''
+                      : null
+                  "
+                >
+                  <ng-container
+                    [ngTemplateOutlet]="field.value"
+                    [ngTemplateOutletContext]="field.context"
+                  />
+                </span>
+              </div>
+            }
           }
           @if (!summary && v.reorder; as reorder) {
             <ng-container
@@ -102,7 +136,10 @@
             />
           }
           @if (v.showActions() && !summary) {
-            <div data-adapttable-part="card-actions">
+            <div
+              data-adapttable-part="card-actions"
+              [class]="classes.cardActions"
+            >
               @let actionsCell = v.actionsCells().get(rowId(entry.row))!;
               @if (actionsCell.rowEdit; as rowEdit) {
                 <ng-container
@@ -118,13 +155,18 @@
                   [confirm]="v.confirm"
                   [labels]="v.table.labels()"
                   [layout]="v.rowActionsLayout"
+                  [render]="v.renderRowActions()"
+                  [classNames]="classes"
                 />
               }
             </div>
           }
           @if (v.rowDetail; as detail) {
             @if (!summary && detail().expansion.isExpanded(entry.id)) {
-              <div data-adapttable-part="card-detail">
+              <div
+                data-adapttable-part="card-detail"
+                [class]="classes.cardDetail"
+              >
                 <adapt-row-detail
                   [row]="entry.row"
                   [render]="detail().render"
@@ -139,16 +181,26 @@
     }
   }
   @if (v.summary(); as summary) {
-    <li data-adapttable-part="summary-card" style="display: block">
+    <li
+      data-adapttable-part="summary-card"
+      style="display: block"
+      [class]="[classes.card, classes.summaryCard]"
+    >
       @for (column of v.table.columns(); track column.key) {
         @if (summary[column.key] != null) {
-          <div data-adapttable-part="card-row">
+          <div data-adapttable-part="card-row" [class]="classes.cardRow">
             @if (caption(column); as label) {
-              <span data-adapttable-part="card-label">{{ label }}</span>
+              <span
+                data-adapttable-part="card-label"
+                [class]="classes.cardLabel"
+                >{{ label }}</span
+              >
             }
-            <span data-adapttable-part="card-value">{{
-              summary[column.key]
-            }}</span>
+            <span
+              data-adapttable-part="card-value"
+              [class]="classes.cardValue"
+              >{{ summary[column.key] }}</span
+            >
           </div>
         }
       }

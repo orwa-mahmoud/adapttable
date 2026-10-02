@@ -1,5 +1,5 @@
 /** The one composer: Enter sends, Shift+Enter and IME composition stay text. */
-import type { TableLabels } from "@adapttable/core";
+import { resolveLabels, type TableLabels } from "@adapttable/core";
 import { assistantIsBusy, assistantIsUsable } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
@@ -58,6 +58,7 @@ export class AdaptAssistantComposer {
   readonly props = input.required<AssistantComposerProps>();
   /** Required kit controls. */
   readonly slots = input.required<TableAssistantSlots>();
+  protected readonly copy = computed(() => resolveLabels(this.props().labels));
   protected readonly busy = computed(
     () => this.props().busy ?? assistantIsBusy(this.props().status)
   );
@@ -68,11 +69,8 @@ export class AdaptAssistantComposer {
     () => this.props().speech?.state.status === "listening"
   );
   protected readonly composer = computed((): TableAssistantComposerProps => ({
-    label: this.props().labels?.assistantPlaceholder ?? "Ask about this table…",
-    placeholder:
-      this.props().placeholder ??
-      this.props().labels?.assistantPlaceholder ??
-      "Ask about this table…",
+    label: this.copy().assistantPlaceholder,
+    placeholder: this.props().placeholder ?? this.copy().assistantPlaceholder,
     part: "assistant-input",
     value: this.props().draft,
     disabled: !this.usable(),
@@ -97,8 +95,7 @@ export class AdaptAssistantComposer {
     const speech = this.props().speech;
     return speech?.available && speech.languages.length > 1
       ? {
-          label:
-            this.props().labels?.assistantVoiceLanguage ?? "Dictation language",
+          label: this.copy().assistantVoiceLanguage,
           value: speech.state.language,
           options: speech.languages.map((value) => ({ value, label: value })),
           part: "assistant-voice-language",
@@ -110,8 +107,8 @@ export class AdaptAssistantComposer {
   protected readonly microphone = computed((): TableAssistantButtonProps => {
     const speech = this.props().speech;
     const label = this.listening()
-      ? (this.props().labels?.assistantVoiceStop ?? "Stop dictation")
-      : (this.props().labels?.assistantVoiceStart ?? "Dictate");
+      ? this.copy().assistantVoiceStop
+      : this.copy().assistantVoiceStart;
     return {
       label,
       tooltip: label,
@@ -129,9 +126,7 @@ export class AdaptAssistantComposer {
   protected readonly action = computed((): TableAssistantButtonProps => {
     const props = this.props();
     const busy = this.busy();
-    const label = busy
-      ? (props.labels?.assistantStop ?? "Stop")
-      : (props.labels?.assistantSend ?? "Send");
+    const label = busy ? this.copy().assistantStop : this.copy().assistantSend;
     return {
       label,
       tooltip: label,

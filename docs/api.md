@@ -1135,7 +1135,7 @@ shares, so a new binding calls them rather than re-deriving them.
 
 ### The builder tier
 
-`@adapttable/react/adapter` publishes what the eight kits are made of, for
+`@adapttable/react/adapter` publishes what the eight React kits are made of, for
 anyone wiring a ninth ([build an adapter](./building-an-adapter.md)). App code rarely reaches for these; each is here because
 an adapter or a plugin genuinely needs it.
 
@@ -2512,7 +2512,7 @@ optional `selectorKey` to re-project unchanged pages),
 
 ## The adapter contract
 
-Everything the eight built-in adapters are made of ships from its own
+Everything the eight built-in React adapters are made of ships from its own
 entry point, **`@adapttable/react/adapter`** — the same public surface a
 ninth adapter would use; there are no private channels. Same package,
 same semver promise as the main entry. This tier is aimed at adapter
@@ -3166,6 +3166,18 @@ comes from a kit through a slot.
   a rejected host promise shows its message, reports the exact edit and offers
   rollback only when the host supplied it. `validateRow`, `applyEdit` and
   `onValidationFail` support whole-row validation without mutating host data.
+- `injectDirtyCells(options)` returns a signal of `DirtyCellState` over
+  core's dirty-cell store. `DirtyCellsOptions` accepts `enabled` as a value or
+  signal, an optional `injector`, and `onDirtyChange`. The callback receives
+  `DirtyEdits` on mount and when the dirty set changes: `count` plus stable
+  `confirm(rowId, columnKey)`, `confirmRow(rowId)` and `confirmAll()` methods.
+  In the kit, `editing(commit, { onDirtyChange })` enables tracking even
+  without visible marks. Core's editing arming keeps `trackDirty` separate
+  from `dirtyMarkers`: either the observer or `dirtyIndicators()` arms
+  tracking, while only `dirtyIndicators()` draws marks. `dirtyMarkerView`
+  preserves the tracked count and confirmation methods while hiding the
+  cell/row predicates when markers are off. The table never decides that an
+  unacknowledged edit is saved merely because time passed.
 - `injectGridFocus` connects range paste and fill to the original host callbacks
   through `CellNavigationChannelsOptions`. `editHistory()` records each range
   write as one gesture. `AdaptFillHandleChrome`, `FillHandleChromeProps`,
@@ -3190,8 +3202,26 @@ comes from a kit through a slot.
 - `ColumnDef` is the Angular column. Its `cell`, `headerCell` and `footer`
   are a `Renderer`: an `ng-template` or a standalone component, which receives
   a `CellContext` or a `HeaderContext`. `resolveColumns` fills the defaults a
-  column leaves out, and `ResolvedRenderer` is a renderer split into its
-  template or component.
+  column leaves out. `resolveRenderer(renderer, context)` returns a
+  `ResolvedRenderer`: either the template, or the component with the context
+  fields it declares as inputs; it returns `null` without a renderer.
+  A template receives the whole context; components need not declare inputs
+  for fields they do not use.
+- `MobileCardRenderer<TRow>` is a `Renderer<MobileCardContext<TRow>>`.
+  A custom card body receives `$implicit` / `row`, `index`, `selected`,
+  `expanded` and `fields`. Each `MobileCardField` carries its Angular
+  `column`, resolved `label`, a real `TemplateRef<CellContext<TRow>>` in
+  `value`, and that template's `context`. Stamp `value` with `context` through
+  `NgTemplateOutlet` to preserve the column renderer and the composed inline,
+  row or batch editor. The value is renderable content, not a preformatted
+  string. `RowActionsRenderer<TRow>` similarly takes `RowActionsContext`:
+  `$implicit` / `row`, the row's resolved `actions`, `confirm` and live
+  `labels`, as template context or matching component inputs.
+- `rowClickProps(row, onRowClick, index?)` returns `RowClickProps`, or
+  `undefined` without a callback. It guards clicks from interactive children,
+  activates the focused row on Enter/Space and moves focus and the Tab stop
+  between sibling rows with ArrowUp/ArrowDown. A binding applies the complete
+  result, including its event handlers, `tabIndex`, row marker and style.
 - `AdaptCell` and `AdaptHeader` render a column's content into the host's own
   `<td>` and `<th>`, `AdaptCellTemplate` declares a cell template beside the
   table (`<ng-template adaptCellTemplate="status" let-row>`), `AdaptAttrs`
@@ -3293,8 +3323,16 @@ comes from a kit through a slot.
 - Command palette: `commandPalette()` lists every wired action.
   `injectCommandPalette` (`CommandPaletteInjectOptions`) is the live
   `TableCommandPalette`: whether it is open, `close`, `show` and the
-  commands. `AdaptCommandPaletteChrome` lays out the dialog;
-  `CommandPaletteSlots` names the kit's input, rows and empty line.
+  commands. `AdaptCommandPaletteChrome` owns the inner listbox structure,
+  search, command highlight, keyboard handling, focus trap and return focus.
+  `CommandPaletteSlots` requires `Surface`, `Input`, `Item` and `Empty`;
+  there is no fallback dialog in the binding. The kit's `Surface` receives
+  one `props` input typed as `CommandPaletteSurfaceProps`: the localized
+  `label`, `onClose`, optional `className` and `children`, a
+  `TemplateRef<unknown> | undefined` containing the binding's structure.
+  The surface renders that template and supplies the actual dialog, its
+  accessible name, modality and dismissal channel. The native kit supplies
+  the HTML dialog surface; another kit supplies its own modal component.
   `injectShortcuts` (`UseShortcutsOptions`) binds `DEFAULT_SHORTCUTS`, and
   `OPEN_PALETTE_COMMAND` is the chord that opens it.
   `ADAPTTABLE_PALETTE_OPEN` publishes a `PaletteOpenState` a toolbar button
@@ -3467,8 +3505,7 @@ comes from a kit through a slot.
   read-only signal that ends with its injector (`FromStoreOptions`).
   `MaybeSignal` and `MaybeSignalOptional` are the option types that take a
   value or a signal of one, and `readMaybe` reads either. The secondary
-  entry `./pivot` is reserved and exports no public API; it carries one
-  internal marker (`__angularPivotReserved`). `./sparkline` exports
+  entry `./sparkline` exports
   `AdaptSparkline`, `sparklineColumn` (`SparklineProps`,
   `SparklineColumnSpec`, `SparklineKind`), `finiteSparklineValues`,
   `sparklineSummary` and `sparklineExportValue`: a cell draws a bar, line or
@@ -3501,16 +3538,20 @@ comes from a kit through a slot.
   `openRowPatchStream`, `parseRowPatchFrame`, `isStreamLive`,
   `isStreamSettled` and the patch and socket types.
 
-`@adapttable/angular-unstyled` is the Angular table drawn with native HTML;
-it is private and not published. `AdaptDataTable` (`<adapt-data-table>`)
+## The Angular native kit
+
+`@adapttable/angular-unstyled` is the Angular table drawn with native HTML.
+It participates in the native-kit contracts while remaining a private,
+unpublished workspace package. Publication is a separate decision from
+contract participation. `AdaptDataTable` (`<adapt-data-table>`)
 takes the rows, columns and row key as inputs — or a prebuilt `source`, or
 the page a host fetches through `onQueryChange` with `total`, `loading`,
 `error`, `supports`, `aggregates`, `responseKey`, `facets` and `facetKeys`,
 the tier chosen by `injectTableData` and `mode` — and renders search, sorting,
 paging, the phone card layout, row selection and keyboard cell navigation
 with the `data-adapttable-part` names every kit shares. `AdaptDesktopTable`
-and `AdaptMobileCards` are the desktop body and phone card list;
-`AdaptPaginationFooter` is the pager. `AdaptTableSkeleton` is the first-load
+and `AdaptMobileCards` are the internal desktop body and phone card list;
+`AdaptPaginationFooter` is the internal pager. `AdaptTableSkeleton` is the first-load
 placeholder (table or cards), `AdaptErrorState` is a failed load with its
 retry, and `AdaptTableRegion` sits a projected side panel beside the body.
 A `#tableFooter` template renders under the pager. `AdaptDataTable`'s `features` input composes
@@ -3550,7 +3591,8 @@ the card), `virtualize`, `cellNavigation`, `findInTable` (`AdaptFindBar`,
 `rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
 opens `AdaptNativeCellEditor`,
-`AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`
+`AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`), `dirtyIndicators`,
+`editHistory` / `undoRedoButtons` and `batchEditing`
 (`AdaptBatchEditBar` fills `BATCH_EDIT_BAR`), `cellSpan`
 (`@adapttable/angular-unstyled/cell-span`; each drawn cell is a
 `BodyCellView`, and its `mark` is the `data-cell-span` attribute), `extraRows` (`/extra-rows`;
@@ -3577,6 +3619,71 @@ controls and host actions its actions cell draws. `FiltersView` is the
 filters on that view: the button, the open panel, and the form, overlay,
 chips and header funnels.
 
+The root exports `DataTableClassNames` for the `classNames` input. Card hooks
+are `cards`, `card`, `cardRow`, `cardLabel`, `cardValue`, `cardActions`,
+`cardDetail` and `summaryCard`; selection, tree and reorder hooks are
+`checkbox`, `treeToggle`, `treeSpacer`, `rowReorderButtons`, `rowReorderUp`
+and `rowReorderDown`. `actionButton`, `rowActionsMenu` and
+`rowActionsTrigger` style the native actions on desktop and phones.
+`separatorRow`, `separatorCell`, `fullWidthRow`, `fullWidthCell` and
+`virtualSpacer` cover structural rows. Classes supplement the shared
+`data-adapttable-part` names and state attributes; `rowAppearance` supplies
+per-row classes, styles and heights alongside them.
+
+`renderCard` accepts a `MobileCardRenderer`. It replaces only each data
+card's field layout: the native shell still owns selection, tree/detail
+expansion, reorder controls, row editing/actions and the expanded detail.
+Pinned and trailing summary cards stay read-only and use their summary
+layout. For example, import `NgTemplateOutlet` from `@angular/common` into
+the host component and render the supplied field templates:
+
+```html
+<ng-template #cardBody let-row let-fields="fields" let-selected="selected">
+  <section [attr.data-selected]="selected ? '' : null">
+    @for (field of fields; track field.column.key) {
+    <div>
+      @if (field.label) {
+      <span>{{ field.label }}</span>
+      }
+      <ng-container
+        [ngTemplateOutlet]="field.value"
+        [ngTemplateOutletContext]="field.context"
+      />
+    </div>
+    }
+  </section>
+</ng-template>
+<adapt-data-table
+  [data]="people"
+  [columns]="columns"
+  [rowKey]="rowKey"
+  [features]="features"
+  [renderCard]="cardBody"
+/>
+```
+
+A standalone component passed as `renderCard` receives the same context
+fields as its declared inputs. `renderRowActions` accepts a
+`RowActionsRenderer` on desktop and cards. Custom action renderers own
+rendering and running the supplied actions; use the supplied confirmation
+gate and labels to preserve each action's behavior.
+
+`onRowClick` is a host callback input, used by both desktop rows and cards.
+The shared `rowClickProps` guard prevents selection checkboxes, action
+buttons, links and editors from also activating the row. Enter/Space
+activate only when the row itself has focus; ArrowUp/ArrowDown move among
+sibling data rows with a roving Tab stop. Summary rows and summary cards are
+not activatable.
+
+`isCellFlashing(rowId, columnKey)` is an optional live callback input,
+for example `[isCellFlashing]="flash.isFlashing"` when `flash` comes from
+`injectChangedCellFlash`. It supplies `data-flash` on desktop cells and the
+built-in mobile `card-value` wrappers. A custom card body owns its wrappers
+and can apply the same callback there. Dirty tracking is independent:
+`editing(commit, { onDirtyChange })` reports unsaved counts even when no
+`dirtyIndicators()` feature is composed; adding that feature draws the
+cell and row/card marks without changing who owns the data or confirms it.
+
 ## Other packages
 
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
@@ -3593,7 +3700,7 @@ chips and header funnels.
   supported managers, `InitError` is the typed failure, and
   `InitOptions` / `InitResult` / `InitIO` parameterize `runInit` for
   testing.
-- **Adapter packages** — each exports its `DataTable` with `DataTableProps`,
+- **React adapter packages** — each exports its `DataTable` with `DataTableProps`,
   `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
   shared core re-exports). `DataTableProps` is `DataTablePropsBase &
 DataModeProps`: the base carries every prop except the data mode, which is

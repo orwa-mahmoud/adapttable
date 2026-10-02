@@ -37,7 +37,11 @@ export class AdaptSelectionStatsBar {
 // @public
 export class AdaptStatusBar {
     readonly props: InputSignal<    {
-    readonly items: readonly StatusItem[];
+    readonly items: readonly {
+    readonly key: string;
+    readonly text: string;
+    readonly appearance?: string;
+    }[];
     readonly stats?: TemplateRef<unknown>;
     readonly className?: string;
     }>;
@@ -83,16 +87,6 @@ export class AdaptStatusBarLive {
 
 // @public
 export function statusBar(): AdaptTableFeature;
-
-// @public
-export interface StatusItem {
-    // (undocumented)
-    readonly appearance?: string;
-    // (undocumented)
-    readonly key: string;
-    // (undocumented)
-    readonly text: string;
-}
 
 // (No @packageDocumentation comment for this package)
 

@@ -25,6 +25,7 @@ export {
 export {
   AdaptCommandPaletteChrome,
   type CommandPaletteSlots,
+  type CommandPaletteSurfaceProps,
 } from "./actions/commandPaletteChrome";
 export {
   ADAPTTABLE_CONTEXT_MENU,
@@ -108,6 +109,7 @@ export {
   AdaptFooter,
   AdaptHeader,
   type ResolvedRenderer,
+  resolveRenderer,
 } from "./cell";
 export {
   type CellContext,
@@ -158,6 +160,12 @@ export {
   type ApprovalReviewChromeProps,
   type ApprovalReviewSlots,
 } from "./editing/approvalReviewChrome";
+export {
+  type DirtyCellsOptions,
+  type DirtyCellState,
+  type DirtyEdits,
+  injectDirtyCells,
+} from "./editing/dirtyCells";
 export {
   type EditableCellController,
   editableCellController,
@@ -485,6 +493,12 @@ export {
 } from "./rows/changedCellFlash";
 export { AdaptExtraRowContent } from "./rows/extraRowContent";
 export { type Highlight, injectHighlight } from "./rows/highlight";
+export type {
+  MobileCardContext,
+  MobileCardField,
+  MobileCardRenderer,
+} from "./rows/mobileCard";
+export type { RowActionsContext, RowActionsRenderer } from "./rows/rowActions";
 export {
   injectRowExpansion,
   type RowExpansionOptions,

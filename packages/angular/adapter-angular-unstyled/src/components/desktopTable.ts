@@ -37,6 +37,7 @@ import {
   ROW_REORDER_HANDLE,
   type RowReorderHandleProps,
   type RowReorderState,
+  type TableLabels,
   type TableTree,
   TREE_CELL,
   type TreeCellProps,
@@ -246,10 +247,12 @@ export class AdaptDesktopTable<TRow> {
   /** The tree column's cell slot. @internal */
   protected readonly treeCellSlot = TREE_CELL;
 
-  private handlePropsCache = new Map<string, RowReorderHandleProps<never>>();
+  private handlePropsCache = new Map<string, RowReorderHandleProps<TRow>>();
   private handlePropsToken = "";
+  private handlePropsLabels: TableLabels | undefined;
   private treeCellCache = new Map<string, TreeCellProps<never>>();
   private treeCellModel: TableTree<TRow> | undefined;
+  private treeCellLabels: TableLabels | undefined;
 
   /**
    * The scroll box that owns `maxHeight`, when virtualization tracks it.
@@ -351,6 +354,7 @@ export class AdaptDesktopTable<TRow> {
     const view = this.view();
     const windowStart = view.table.windowStart();
     const rowCount = view.table.source().rows.length;
+    const labels = view.table.labels();
     const token = [
       reorder.lifted?.rowId ?? "",
       String(reorder.overIndex ?? ""),
@@ -361,25 +365,28 @@ export class AdaptDesktopTable<TRow> {
       String(rowCount),
       reorder.pendingMove ? "1" : "0",
     ].join("|");
-    if (token !== this.handlePropsToken) {
+    if (token !== this.handlePropsToken || labels !== this.handlePropsLabels) {
       this.handlePropsCache = new Map();
       this.handlePropsToken = token;
+      this.handlePropsLabels = labels;
     }
     const rowId = this.rowId(row);
     const key = `${rowId}:${String(localIndex)}`;
     const cached = this.handlePropsCache.get(key);
-    if (cached) return cached;
-    const props = {
+    if (cached?.reorder === reorder && cached.row === row) {
+      return cached as unknown as RowReorderHandleProps<never>;
+    }
+    const props: RowReorderHandleProps<TRow> = {
       reorder,
-      labels: view.table.labels(),
+      labels,
       rowId,
       localIndex,
       row,
       windowStart,
       rowCount,
-    } as unknown as RowReorderHandleProps<never>;
+    };
     this.handlePropsCache.set(key, props);
-    return props;
+    return props as unknown as RowReorderHandleProps<never>;
   }
 
   /**
@@ -398,9 +405,11 @@ export class AdaptDesktopTable<TRow> {
     const tree = view.tree?.();
     if (!tree || !view.treeCellFilled || !entry.treeEntry) return undefined;
     if (columnKey !== tree.columnKey) return undefined;
-    if (tree !== this.treeCellModel) {
+    const labels = view.table.labels();
+    if (tree !== this.treeCellModel || labels !== this.treeCellLabels) {
       this.treeCellCache = new Map();
       this.treeCellModel = tree;
+      this.treeCellLabels = labels;
     }
     const cached = this.treeCellCache.get(entry.treeEntry.key);
     if (cached?.children === children) return cached;
@@ -409,7 +418,7 @@ export class AdaptDesktopTable<TRow> {
       entry: entry.treeEntry,
       columnKey,
       treeColumnKey: tree.columnKey,
-      labels: view.table.labels(),
+      labels,
       onToggle: tree.expansion.toggle,
       children,
     } as unknown as TreeCellProps<never>;

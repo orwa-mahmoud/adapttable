@@ -138,9 +138,7 @@
         <strong
           [id]="headingId"
           style="font-size: 0.85em; opacity: 0.75; font-weight: 600"
-          >{{
-            labels()?.assistantActionsTitle ?? "What this turn changed"
-          }}</strong
+          >{{ copy().assistantActionsTitle }}</strong
         >
         @if (undo() && onUndo() && perRow() !== 1) {
           <span data-adapttable-part="assistant-receipts-undo-all"

@@ -2,11 +2,12 @@
  * The shared approval review body. Core owns the review model; this Chrome
  * owns its structure and every control is supplied by the kit.
  */
-import type {
-  AgentApprovalProposal,
-  ApprovalReview,
-  ApprovalReviewItem,
-  TableLabels,
+import {
+  type AgentApprovalProposal,
+  type ApprovalReview,
+  type ApprovalReviewItem,
+  resolveLabels,
+  type TableLabels,
 } from "@adapttable/core";
 import type {
   AgentApprovalButtonProps,
@@ -23,6 +24,16 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
+
+/** The controls carry these parts on the kit's actual elements. */
+const APPROVAL_REVIEW_PARTS = {
+  approve: "agent-approval-approve",
+  alwaysAllow: "agent-approval-always-allow",
+  expand: "approval-review-expand",
+  back: "approval-review-back",
+  rowApprove: "approval-review-row-approve",
+  rowReject: "approval-review-row-reject",
+} as const;
 
 let nextHeadingId = 0;
 
@@ -87,20 +98,15 @@ function describeItem(
   proposal: AgentApprovalProposal,
   labels: TableLabels | undefined
 ): string {
-  const describe =
-    labels?.proposalChange ??
-    (({ row, column, before, after }) => {
-      const field = column ? `${row} · ${column}` : row;
-      if (before === undefined && after === undefined) return field;
-      return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
-    });
+  const copy = resolveLabels(labels);
+  const describe = copy.proposalChange;
   return describe({
     row: proposal.rowLabel ?? proposal.rowKey,
     ...(proposal.column === undefined
       ? {}
       : { column: proposal.columnLabel ?? proposal.column }),
     before: proposal.beforeUnavailable
-      ? (labels?.proposalValueUnavailable ?? "Unavailable")
+      ? copy.proposalValueUnavailable
       : (proposal.beforeText ?? display(proposal.before)),
     after: proposal.afterText ?? display(proposal.after),
   });
@@ -144,6 +150,7 @@ export class AdaptApprovalReviewChrome {
   readonly slots = input.required<ApprovalReviewSlots>();
   /** Localized labels. */
   readonly labels = input<TableLabels>();
+  protected readonly copy = computed(() => resolveLabels(this.labels()));
   /** Whether to show every proposal. */
   readonly expanded = input<boolean | undefined>(false);
   /** Expand the list. */
@@ -190,19 +197,19 @@ export class AdaptApprovalReviewChrome {
       readonly approve: AgentApprovalButtonProps;
       readonly reject: AgentApprovalButtonProps;
     }[] => {
-      const labels = this.labels();
+      const labels = this.copy();
       const decide = this.onDecide();
       return this.shown().map((item) => ({
         item,
         text: describeItem(item.proposal, labels),
         approve: this.button(
-          labels?.approveProposal ?? "Approve",
-          "approval-review-row-approve",
+          labels.approveProposal,
+          APPROVAL_REVIEW_PARTS.rowApprove,
           () => decide?.(item.index, true)
         ),
         reject: this.button(
-          labels?.rejectProposal ?? "Reject",
-          "approval-review-row-reject",
+          labels.rejectProposal,
+          APPROVAL_REVIEW_PARTS.rowReject,
           () => decide?.(item.index, false)
         ),
       }));
@@ -219,7 +226,7 @@ export class AdaptApprovalReviewChrome {
   protected readonly approveProps = computed(() =>
     this.button(
       this.review().approveLabel,
-      "agent-approval-approve",
+      APPROVAL_REVIEW_PARTS.approve,
       this.onApprove()
     )
   );
@@ -236,7 +243,7 @@ export class AdaptApprovalReviewChrome {
     const label = this.review().reviewAllLabel;
     const expand = this.onExpand();
     return !this.expanded() && label && expand
-      ? this.button(label, "approval-review-expand", expand)
+      ? this.button(label, APPROVAL_REVIEW_PARTS.expand, expand)
       : undefined;
   });
 
@@ -244,8 +251,8 @@ export class AdaptApprovalReviewChrome {
     const back = this.onBack();
     return this.expanded() && back
       ? this.button(
-          this.labels()?.backToConversation ?? "Back to conversation",
-          "approval-review-back",
+          this.copy().backToConversation,
+          APPROVAL_REVIEW_PARTS.back,
           back
         )
       : undefined;
@@ -255,8 +262,8 @@ export class AdaptApprovalReviewChrome {
     const allow = this.onAlwaysAllow();
     return allow
       ? this.button(
-          this.labels()?.alwaysAllowProposal ?? "Always allow",
-          "agent-approval-always-allow",
+          this.copy().alwaysAllowProposal,
+          APPROVAL_REVIEW_PARTS.alwaysAllow,
           allow
         )
       : undefined;

@@ -2,7 +2,7 @@
   "name": "@adapttable/angular-unstyled",
   "version": "0.0.0",
   "private": true,
-  "description": "AdaptTable's Angular DataTable with native HTML controls and no styles of its own. Unpublished while it reaches parity with the React kits.",
+  "description": "AdaptTable's Angular DataTable with native HTML controls, responsive cards, opt-in features and no theme of its own. Unpublished workspace package.",
   "keywords": [
     "angular",
     "data-table",
@@ -13,6 +13,7 @@
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
+  "homepage": "https://adapttable.orwamahmoud.com/angular/demo/unstyled/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/orwa-mahmoud/adapttable.git",

@@ -6,9 +6,11 @@ import {
   ADAPTTABLE_PALETTE_OPEN,
   type CommandPaletteInjectOptions,
   type CommandPaletteSlots,
+  type CommandPaletteSurfaceProps,
   injectCommandPalette,
   type ToolbarExtrasSlotProps,
 } from "@adapttable/angular";
+import { NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
   ChangeDetectionStrategy,
@@ -20,7 +22,34 @@ import {
   viewChild,
 } from "@angular/core";
 
-/** The search box. */
+/** The native dialog surface; the binding keeps its keyboard and focus model. */
+@Component({
+  selector: "adapt-command-surface",
+  imports: [NgTemplateOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    <div
+      style="position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: flex-start; justify-content: center; padding-block-start: 12vh; z-index: 1000"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-label]="props().label"
+        [class]="props().className"
+        data-adapttable-part="command-palette"
+        style="min-inline-size: min(360px, 100%); max-inline-size: 520px; inline-size: 100%"
+      >
+        <ng-container [ngTemplateOutlet]="props().children ?? null" />
+      </div>
+    </div>
+  `,
+})
+class AdaptCommandSurface {
+  readonly props = input.required<CommandPaletteSurfaceProps>();
+}
+
+/** The search box. @internal */
 @Component({
   selector: "adapt-command-input",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,7 +102,7 @@ export class AdaptCommandInput {
   }
 }
 
-/** One command. */
+/** One command. @internal */
 @Component({
   selector: "adapt-command-item",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -110,7 +139,7 @@ export class AdaptCommandItem {
   }>();
 }
 
-/** Shown when the query matches nothing. */
+/** Shown when the query matches nothing. @internal */
 @Component({
   selector: "adapt-command-empty",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -124,6 +153,7 @@ export class AdaptCommandEmpty {
 }
 
 const SLOTS: CommandPaletteSlots = {
+  Surface: AdaptCommandSurface,
   Input: AdaptCommandInput,
   Item: AdaptCommandItem,
   Empty: AdaptCommandEmpty,

@@ -1,5 +1,5 @@
 /** Conversation structure and factual receipts, with all actions supplied by a kit. */
-import type { TableLabels } from "@adapttable/core";
+import { resolveLabels, type TableLabels } from "@adapttable/core";
 import {
   assistantActionsName,
   assistantInitials,
@@ -122,16 +122,17 @@ export class AdaptAssistantReceipt {
   readonly receipt = input.required<TableAssistantReceiptView>();
   readonly slots = input.required<TableAssistantSlots>();
   readonly labels = input<TableLabels | undefined>();
+  protected readonly copy = computed(() => resolveLabels(this.labels()));
   readonly onUndo = input<(() => void) | undefined>();
   protected readonly expanded = signal(false);
   protected readonly glyph = computed(() =>
     assistantReceiptIcon(this.receipt().subject?.kind)
   );
   protected readonly headline = computed(() =>
-    assistantReceiptHeadline(this.receipt(), this.labels())
+    assistantReceiptHeadline(this.receipt(), this.copy())
   );
   protected readonly detail = computed(() =>
-    assistantReceiptDetail(this.receipt(), this.labels())
+    assistantReceiptDetail(this.receipt(), this.copy())
   );
   protected readonly where = computed(() =>
     assistantReceiptWhere(this.receipt())
@@ -146,12 +147,12 @@ export class AdaptAssistantReceipt {
     if (!before || !after) return null;
     const phrase =
       receipt.status === "executed"
-        ? this.labels()?.assistantReceiptChange
-        : this.labels()?.assistantReceiptProposed;
-    return { before, after, spoken: phrase?.({ before, after }) ?? "" };
+        ? this.copy().assistantReceiptChange
+        : this.copy().assistantReceiptProposed;
+    return { before, after, spoken: phrase({ before, after }) };
   });
   protected readonly undoButton = computed((): TableAssistantButtonProps => ({
-    label: this.labels()?.assistantUndo ?? "Undo",
+    label: this.copy().assistantUndo,
     part: "assistant-receipt-undo-button",
     variant: "subtle",
     icon: ASSISTANT_UNDO_ICON,
@@ -160,14 +161,12 @@ export class AdaptAssistantReceipt {
     },
   }));
   protected readonly saveBadge = computed(() => ({
-    label:
-      this.labels()?.assistantSaveInTable ??
-      "Save in the table to keep this change.",
+    label: this.copy().assistantSaveInTable,
     part: "assistant-receipt-save-badge",
     tone: "warning" as const,
   }));
   protected readonly detailButton = computed((): TableAssistantButtonProps => ({
-    label: this.labels()?.assistantDetail ?? "Details",
+    label: this.copy().assistantDetail,
     part: "assistant-receipt-detail",
     variant: "subtle",
     expanded: this.expanded(),
@@ -209,6 +208,7 @@ let nextReceiptHeading = 0;
 export class AdaptAssistantMessage {
   readonly message = input.required<TableAssistantMessageView>();
   readonly labels = input<TableLabels | undefined>();
+  protected readonly copy = computed(() => resolveLabels(this.labels()));
   readonly slots = input.required<TableAssistantSlots>();
   readonly action = input<
     { readonly label: string; readonly onRun: () => void } | undefined
@@ -229,12 +229,10 @@ export class AdaptAssistantMessage {
   protected readonly tailInset = signal<number | undefined>(undefined);
   protected readonly mine = computed(() => this.message().role === "user");
   protected readonly speaker = computed(() =>
-    this.mine()
-      ? (this.labels()?.assistantYou ?? "You")
-      : (this.labels()?.assistantSpeaker ?? "Assistant")
+    this.mine() ? this.copy().assistantYou : this.copy().assistantSpeaker
   );
   protected readonly spoken = computed(() =>
-    assistantVoicePlaceholder(this.message(), this.labels())
+    assistantVoicePlaceholder(this.message(), this.copy())
   );
   protected readonly shown = computed(() =>
     assistantShownReceipts(this.message().receipts)
@@ -248,12 +246,12 @@ export class AdaptAssistantMessage {
       : 0
   );
   protected readonly undoReason = computed(() =>
-    assistantUndoReason(this.undo()?.blockedCode, this.labels())
+    assistantUndoReason(this.undo()?.blockedCode, this.copy())
   );
   protected readonly actionsButton = computed(
     (): TableAssistantButtonProps => ({
-      label: assistantActionsName(this.shown().length, this.labels()),
-      tooltip: assistantActionsName(this.shown().length, this.labels()),
+      label: assistantActionsName(this.shown().length, this.copy()),
+      tooltip: assistantActionsName(this.shown().length, this.copy()),
       part: "assistant-receipts-toggle-button",
       variant: "subtle",
       icon: ASSISTANT_ACTIONS_ICON,
@@ -265,7 +263,7 @@ export class AdaptAssistantMessage {
     })
   );
   protected readonly wholeUndo = computed((): TableAssistantButtonProps => ({
-    label: assistantUndoTurnLabel(this.perRow(), this.labels()),
+    label: assistantUndoTurnLabel(this.perRow(), this.copy()),
     part: "assistant-receipts-undo-all-button",
     variant: "subtle",
     icon: ASSISTANT_UNDO_ICON,
@@ -277,7 +275,7 @@ export class AdaptAssistantMessage {
   }));
   protected readonly loneUndo = computed((): TableAssistantButtonProps => ({
     ...this.wholeUndo(),
-    label: this.labels()?.assistantUndo ?? "Undo",
+    label: this.copy().assistantUndo,
     part: "assistant-undo-button",
     variant: "secondary",
   }));
@@ -401,9 +399,10 @@ export class AdaptAssistantMessage {
 })
 export class AdaptAssistantWorking {
   readonly labels = input<TableLabels | undefined>();
+  protected readonly copy = computed(() => resolveLabels(this.labels()));
   readonly progress = input<TableAssistantProgressView | null | undefined>();
   protected readonly word = computed(() =>
-    assistantWorkingText(this.progress(), this.labels())
+    assistantWorkingText(this.progress(), this.copy())
   );
 }
 
@@ -419,7 +418,7 @@ export class AdaptAssistantWorking {
       style="display:flex;flex-direction:column;gap:0.3em"
     >
       <span data-adapttable-part="assistant-always-allowed-title">{{
-        labels()?.assistantAlwaysAllowedTitle ?? "Not asking about"
+        copy().assistantAlwaysAllowedTitle
       }}</span>
       <ul
         style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:0.3em"
@@ -439,19 +438,18 @@ export class AdaptAssistantWorking {
 export class AdaptAssistantAlwaysAllowed {
   readonly allowed = input.required<readonly TableAssistantAllowanceView[]>();
   readonly labels = input<TableLabels | undefined>();
+  protected readonly copy = computed(() => resolveLabels(this.labels()));
   readonly slots = input.required<TableAssistantSlots>();
   readonly onRevoke = input.required<(capability: string) => void>();
   /** Stable slot props also keep the native button focused across harmless checks. */
   protected readonly controls = computed(() => {
-    const labels = this.labels();
+    const labels = this.copy();
     const revoke = this.onRevoke();
     return this.allowed().map(({ capability, name }) => {
       const button: TableAssistantButtonProps = {
-        label:
-          labels?.assistantAlwaysAllowedRevoke?.(capability) ??
-          `Ask about ${capability} again`,
+        label: labels.assistantAlwaysAllowedRevoke(capability),
         children:
-          labels?.assistantCapabilityName?.(capability) ?? name ?? capability,
+          labels.assistantCapabilityName(capability) ?? name ?? capability,
         part: "assistant-always-allowed-revoke",
         variant: "subtle",
         onClick: () => {

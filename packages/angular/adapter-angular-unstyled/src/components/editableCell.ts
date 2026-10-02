@@ -2,6 +2,7 @@
  * Native editable cell — the kit fill for {@link EDITABLE_CELL}.
  */
 import {
+  AdaptCell,
   AdaptEditableCellGate,
   AdaptMultiSelectEditorChrome,
   type ColumnDef,
@@ -22,22 +23,25 @@ import {
   type MultiSelectEditorCheckboxProps,
   type MultiSelectEditorSlots,
   readMultiDraft,
-  resolveEditableCellDisplay,
   stopCellEditKeyboard,
   stopEditKeys,
 } from "@adapttable/angular";
+import { NgTemplateOutlet } from "@angular/common";
 import {
   type AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
   type ElementRef,
   input,
+  TemplateRef,
   type Type,
   viewChild,
 } from "@angular/core";
 
 @Component({
   selector: "adapt-edit-cell-activate",
+  imports: [NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
@@ -56,12 +60,20 @@ import {
       (click)="p.onClick($event)"
       (keydown)="p.onKeyDown($event)"
     >
-      {{ p.display }}
+      @if (displayTemplate(); as template) {
+        <ng-container [ngTemplateOutlet]="template" />
+      } @else {
+        {{ p.display }}
+      }
     </button>
   `,
 })
 class AdaptEditCellActivate implements AfterViewInit {
   readonly props = input.required<EditableCellActivateProps>();
+  protected readonly displayTemplate = computed(() => {
+    const content = this.props().display;
+    return content instanceof TemplateRef ? content : null;
+  });
   private readonly btn = viewChild<ElementRef<HTMLButtonElement>>("btn");
   ngAfterViewInit(): void {
     this.props().activateRef(this.btn()?.nativeElement ?? null);
@@ -290,11 +302,18 @@ const SLOTS: EditableCellSlots = {
  */
 @Component({
   selector: "adapt-editable-cell",
-  imports: [AdaptEditableCellGate],
+  imports: [AdaptCell, AdaptEditableCellGate],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
     @let p = props();
+    <ng-template #display>
+      <span
+        [adaptCell]="column()"
+        [adaptCellRow]="p.row"
+        [adaptCellIndex]="p.rowIndex"
+      ></span>
+    </ng-template>
     <adapt-editable-cell-gate
       [editing]="editing()"
       [row]="p.row"
@@ -305,7 +324,7 @@ const SLOTS: EditableCellSlots = {
       [rowKey]="p.rowKey"
       [editLabel]="p.editLabel"
       [undoLabel]="p.undoLabel"
-      [display]="resolvedDisplay()"
+      [display]="p.display ?? display"
       [editor]="editor()"
       [slots]="slots"
     />
@@ -344,22 +363,6 @@ export class AdaptEditableCell<TRow> {
    */
   protected columns(): readonly ColumnDef<TRow>[] {
     return this.props().columns;
-  }
-
-  /**
-   * Resolved display for the activate control — the precomputed display, the
-   * column's accessor, or nothing when neither is set.
-   *
-   * @internal
-   */
-  protected resolvedDisplay(): unknown {
-    const p = this.props();
-    return resolveEditableCellDisplay(
-      p.display,
-      p.column,
-      () => undefined,
-      p.row
-    );
   }
 }
 

@@ -9,10 +9,12 @@ import {
   commandListKeyAction,
   commandListView,
   createCommandList,
+  resolveLabels,
   runCommand,
   type TableLabels,
   tabTrapTarget,
 } from "@adapttable/core";
+import type { CommandPaletteSurfaceProps as NeutralCommandPaletteSurfaceProps } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,12 +22,18 @@ import {
   effect,
   type ElementRef,
   input,
+  type TemplateRef,
   type Type,
   viewChild,
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
 import { fromStore } from "../store";
+
+/** The kit owns its dialog and outlets the binding's structured content. @public */
+export type CommandPaletteSurfaceProps = NeutralCommandPaletteSurfaceProps<
+  TemplateRef<unknown> | undefined
+>;
 
 let nextListId = 0;
 
@@ -36,6 +44,8 @@ let nextListId = 0;
  * @public
  */
 export interface CommandPaletteSlots {
+  /** The kit's own modal surface, including its dismiss channel. */
+  readonly Surface: Type<unknown>;
   /** The search box. */
   readonly Input: Type<unknown>;
   /** One command. */
@@ -64,47 +74,7 @@ function focusablesIn(root: HTMLElement | undefined): HTMLElement[] {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AdaptControl],
   host: { style: "display: contents" },
-  template: `
-    @if (open()) {
-      <div
-        style="position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: flex-start; justify-content: center; padding-top: 12vh; z-index: 1000"
-      >
-        <div
-          #surface
-          role="dialog"
-          aria-modal="true"
-          [attr.aria-label]="dialogLabel()"
-          [class]="className()"
-          data-adapttable-part="command-palette"
-          style="min-width: 360px; max-width: 520px; width: 100%"
-        >
-          <ng-container
-            [adaptControl]="slots().Input"
-            [adaptControlProps]="inputProps()"
-          />
-          <div
-            [id]="listId"
-            role="listbox"
-            [attr.aria-label]="dialogLabel()"
-            data-adapttable-part="command-list"
-          >
-            @for (row of rows(); track row.command.key) {
-              <ng-container
-                [adaptControl]="slots().Item"
-                [adaptControlProps]="row"
-              />
-            }
-          </div>
-          @if (view().matches.length === 0) {
-            <ng-container
-              [adaptControl]="slots().Empty"
-              [adaptControlProps]="emptyProps()"
-            />
-          }
-        </div>
-      </div>
-    }
-  `,
+  templateUrl: "./commandPaletteChrome.html",
 })
 export class AdaptCommandPaletteChrome {
   /** Every command available right now. */
@@ -115,6 +85,7 @@ export class AdaptCommandPaletteChrome {
   readonly onClose = input.required<() => void>();
   /** Labels; gaps fall back to English. */
   readonly labels = input<TableLabels | undefined>(undefined);
+  protected readonly copy = computed(() => resolveLabels(this.labels()));
   /** A kit's own class for the surface. */
   readonly className = input<string | undefined>(undefined);
   /** The kit's input, row and empty line. */
@@ -123,14 +94,22 @@ export class AdaptCommandPaletteChrome {
   private readonly list = createCommandList();
   private readonly snapshot = fromStore(this.list);
   private readonly surface = viewChild<ElementRef<HTMLElement>>("surface");
+  private readonly body = viewChild<TemplateRef<unknown>>("body");
+  /** The surface can render through a portal without duplicating this structure. */
+  protected readonly surfaceProps = computed(
+    (): CommandPaletteSurfaceProps => ({
+      label: this.dialogLabel(),
+      onClose: this.onClose(),
+      children: this.body(),
+      className: this.className(),
+    })
+  );
   private opener: HTMLElement | null = null;
   /** The listbox id the input points at. */
   readonly listId = `command-list-${String(++nextListId)}`;
 
   /** The dialog's accessible name. */
-  protected readonly dialogLabel = computed(
-    () => this.labels()?.commandPalette ?? "Command palette"
-  );
+  protected readonly dialogLabel = computed(() => this.copy().commandPalette);
   private readonly view = computed(() =>
     commandListView(this.commands(), this.snapshot())
   );
@@ -159,7 +138,7 @@ export class AdaptCommandPaletteChrome {
   protected readonly inputProps = computed(() => {
     const shown = this.view();
     const active = shown.matches[shown.active];
-    const search = this.labels()?.commandSearch ?? "Search commands";
+    const search = this.copy().commandSearch;
     return {
       inputProps: {
         value: this.snapshot().query,
@@ -186,7 +165,7 @@ export class AdaptCommandPaletteChrome {
   });
   /** Props for the empty line. */
   protected readonly emptyProps = computed(() => ({
-    message: this.labels()?.commandEmpty ?? "No matching command",
+    message: this.copy().commandEmpty,
   }));
 
   constructor() {
@@ -194,7 +173,7 @@ export class AdaptCommandPaletteChrome {
       if (!this.open()) return;
       this.list.reset();
       const onDown = (event: PointerEvent) => {
-        const node = this.surface()?.nativeElement;
+        const node = this.surfaceBounds();
         if (node && !node.contains(event.target as Node)) this.onClose()();
       };
       document.addEventListener("pointerdown", onDown);
@@ -205,6 +184,16 @@ export class AdaptCommandPaletteChrome {
         back?.focus();
       });
     });
+  }
+
+  /** The kit's actual surface also contains padding outside the inner layout. */
+  private surfaceBounds(): HTMLElement | undefined {
+    const content = this.surface()?.nativeElement;
+    return (
+      content?.closest<HTMLElement>(
+        '[data-adapttable-part="command-palette"]'
+      ) ?? content
+    );
   }
 
   /** Run a command, closing first. */
@@ -226,7 +215,7 @@ export class AdaptCommandPaletteChrome {
     }
     if (event.key !== "Tab") return;
     const target = tabTrapTarget(
-      focusablesIn(this.surface()?.nativeElement),
+      focusablesIn(this.surfaceBounds()),
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null,

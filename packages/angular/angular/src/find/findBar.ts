@@ -6,6 +6,7 @@ import {
   findMatchCountText,
   focusEditorOnMount,
   handleFindBarKey,
+  resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
 import type {
@@ -84,6 +85,7 @@ export class AdaptFindBarChrome {
   readonly find = input.required<FindInTableState>();
   /** Labels; falls back to the built-in English. */
   readonly labels = input<TableLabels>();
+  protected readonly copy = computed(() => resolveLabels(this.labels()));
   /** A kit's own class for the bar. */
   readonly className = input<string>();
   /** The kit's search field and buttons. */
@@ -92,16 +94,16 @@ export class AdaptFindBarChrome {
   /** "3 of 12", or the host's own wording. */
   protected readonly count = computed(() => {
     const find = this.find();
-    return findMatchCountText(this.labels(), find.index, find.matches.length);
+    return findMatchCountText(this.copy(), find.index, find.matches.length);
   });
 
   /** The search field's props, including the keys the bar owns. */
   protected readonly searchProps = computed((): FindSearchProps => {
     const find = this.find();
-    const labels = this.labels();
+    const labels = this.copy();
     return {
-      label: labels?.findInTable ?? "Find in table",
-      placeholder: labels?.findPlaceholder ?? "Find in table",
+      label: labels.findInTable,
+      placeholder: labels.findPlaceholder,
       value: find.query,
       focusRef: focusEditorOnMount,
       onChange: find.setQuery,
@@ -115,7 +117,7 @@ export class AdaptFindBarChrome {
   protected readonly previousProps = computed((): FindButtonProps => {
     const find = this.find();
     return {
-      label: this.labels()?.findPrevious ?? "Previous match",
+      label: this.copy().findPrevious,
       part: "find-previous",
       kind: "previous",
       disabled: find.matches.length === 0,
@@ -127,7 +129,7 @@ export class AdaptFindBarChrome {
   protected readonly nextProps = computed((): FindButtonProps => {
     const find = this.find();
     return {
-      label: this.labels()?.findNext ?? "Next match",
+      label: this.copy().findNext,
       part: "find-next",
       kind: "next",
       disabled: find.matches.length === 0,
@@ -137,7 +139,7 @@ export class AdaptFindBarChrome {
 
   /** Close the bar. */
   protected readonly closeProps = computed((): FindButtonProps => ({
-    label: this.labels()?.findClose ?? "Close find",
+    label: this.copy().findClose,
     part: "find-close",
     kind: "close",
     onClick: () => {

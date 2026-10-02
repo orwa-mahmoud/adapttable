@@ -2,6 +2,7 @@
  * The palette chrome: the dialog, the list keys, and the outside press.
  */
 import type { Command } from "@adapttable/core";
+import { NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
   Component,
@@ -16,7 +17,29 @@ import { describe, expect, it, vi } from "vitest";
 import {
   AdaptCommandPaletteChrome,
   type CommandPaletteSlots,
+  type CommandPaletteSurfaceProps,
 } from "./commandPaletteChrome";
+
+@Component({
+  selector: "palette-surface",
+  imports: [NgTemplateOutlet],
+  template: `
+    <section
+      role="dialog"
+      aria-modal="true"
+      data-kit-surface
+      data-adapttable-part="command-palette"
+      [attr.aria-label]="props().label"
+      [class]="props().className"
+      (surfaceDismiss)="props().onClose()"
+    >
+      <ng-container [ngTemplateOutlet]="props().children ?? null" />
+    </section>
+  `,
+})
+class PaletteSurface {
+  readonly props = input.required<CommandPaletteSurfaceProps>();
+}
 
 @Component({
   selector: "palette-input",
@@ -91,6 +114,7 @@ class PaletteEmpty {
 }
 
 const SLOTS: CommandPaletteSlots = {
+  Surface: PaletteSurface,
   Input: PaletteInput,
   Item: PaletteItem,
   Empty: PaletteEmpty,
@@ -151,6 +175,32 @@ async function mount(
 }
 
 describe("AdaptCommandPaletteChrome", () => {
+  it("lets the kit own the only dialog surface and route its dismiss channel", async () => {
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    const fixture = await mount();
+    const host = fixture.componentInstance;
+    host.labels.set({ commandPalette: "Table actions" });
+    host.className.set("host-surface");
+    fixture.detectChanges();
+    const surface = document.querySelector<HTMLElement>("[data-kit-surface]");
+    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+    expect(surface?.getAttribute("aria-label")).toBe("Table actions");
+    expect(surface?.className).toBe("host-surface");
+    expect(
+      surface?.querySelector('[data-adapttable-part="command-input"]')
+    ).toBe(document.activeElement);
+    surface?.dispatchEvent(new Event("surfaceDismiss"));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.closed).toHaveBeenCalledOnce();
+    expect(part("command-palette")).toBeNull();
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+    fixture.destroy();
+  });
+
   it("draws nothing while it is closed", async () => {
     const fixture = await mount(false);
     expect(part("command-palette")).toBeNull();

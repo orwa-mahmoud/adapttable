@@ -9,21 +9,35 @@ import { BatchEditHandler } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/angular';
 import { CellEditHandler } from '@adapttable/angular';
 import { CellNavigationOptions } from '@adapttable/angular';
+import { cellSpan } from '@adapttable/angular';
 import { CommandPaletteOptions } from '@adapttable/angular';
 import { ContextMenuOptions } from '@adapttable/angular';
+import { dirtyIndicators } from '@adapttable/angular';
 import { editHistory } from '@adapttable/angular';
 import { EditingLifecycleExtras } from '@adapttable/angular';
 import { ExportCsvOptions } from '@adapttable/angular';
+import { extraRows } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
+import { filterTypes } from '@adapttable/angular';
+import { fitColumns } from '@adapttable/angular';
 import { GroupingExtras } from '@adapttable/angular';
 import { GroupingPanelExtras } from '@adapttable/angular';
+import { multiSort } from '@adapttable/angular';
+import { NestedTableFor } from '@adapttable/angular';
+import { pinnedSummaryRows } from '@adapttable/angular';
+import { Renderer } from '@adapttable/angular';
+import { resizableColumns } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
+import { rowAppearance } from '@adapttable/angular';
+import { RowDetailContext } from '@adapttable/angular';
 import { RowEditHandler } from '@adapttable/angular';
+import { rowPinning } from '@adapttable/angular';
 import { RowReorderHandler } from '@adapttable/angular';
 import { RowReorderOptions } from '@adapttable/angular';
 import { SavedViewsControllerOptions } from '@adapttable/angular';
 import { SidePanelOptions } from '@adapttable/angular';
+import { TreeFeatureOptions } from '@adapttable/angular';
 import { VirtualizeOptions } from '@adapttable/angular';
 
 // @public
@@ -38,8 +52,16 @@ export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature;
 // @public
 export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
 
+export { cellSpan }
+
+// @public
+export function collapsibleColumnGroups(): AdaptTableFeature;
+
 // @public
 export function columnMenu(): AdaptTableFeature;
+
+// @public
+export function columnSelectionCheckbox(): AdaptTableFeature;
 
 // @public
 export function commandPalette(options?: boolean | CommandPaletteOptions): AdaptTableFeature;
@@ -49,6 +71,8 @@ export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>):
 
 // @public
 export function densityChooser(): AdaptTableFeature;
+
+export { dirtyIndicators }
 
 export { editHistory }
 
@@ -64,13 +88,19 @@ export function exportPdf<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>,
 // @public
 export function exportXlsx<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
 
+export { extraRows }
+
 // @public
 export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;
+
+export { filterTypes }
 
 // @public
 export function findInTable(options?: {
     readonly button?: boolean;
 }): AdaptTableFeature;
+
+export { fitColumns }
 
 // @public
 export function fullscreen(): AdaptTableFeature;
@@ -84,9 +114,18 @@ export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string
 // @public
 export function headerFilters(): AdaptTableFeature;
 
+export { multiSort }
+
+// @public
+export function nestedTable<TRow>(nested: NestedTableFor<TRow>, defaultExpandedRowIds?: readonly string[]): AdaptTableFeature;
+
+export { pinnedSummaryRows }
+
 // @public
 function print_2(onPrint: () => void, printButton?: boolean): AdaptTableFeature;
 export { print_2 as print }
+
+export { resizableColumns }
 
 // @public
 export function rowActions<TRow>(actions?: readonly RowAction<TRow>[], options?: RowActionsFeatureOptions<TRow>): AdaptTableFeature;
@@ -100,8 +139,15 @@ export interface RowActionsFeatureOptions<TRow> {
     readonly onDuplicateRow?: (row: TRow) => void;
 }
 
+export { rowAppearance }
+
+// @public
+export function rowDetail<TRow>(renderRowDetail: Renderer<RowDetailContext<TRow>>, defaultExpandedRowIds?: readonly string[]): AdaptTableFeature;
+
 // @public
 export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): AdaptTableFeature;
+
+export { rowPinning }
 
 // @public
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;
@@ -120,6 +166,9 @@ export function statusBar(): AdaptTableFeature;
 
 // @public
 export function tableAssistant(): AdaptTableFeature;
+
+// @public
+export function tree<TRow>(options?: TreeFeatureOptions<TRow>): AdaptTableFeature;
 
 // @public
 export function undoRedoButtons(): AdaptTableFeature;

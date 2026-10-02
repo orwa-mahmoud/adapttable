@@ -1,5 +1,9 @@
 /** The assistant's structure, keyboard behavior and announcements; controls belong to the kit. */
-import { type AgentApprovalPending, approvalReview } from "@adapttable/core";
+import {
+  type AgentApprovalPending,
+  approvalReview,
+  resolveLabels,
+} from "@adapttable/core";
 import {
   type AgentApprovalButtonProps,
   assistantBadgeTone,
@@ -167,24 +171,17 @@ export class AdaptTableAssistantChrome {
     computed(() => this.props().assistant.messages.length),
     computed(() => this.conversation()?.nativeElement)
   );
-  protected readonly title = computed(
-    () => this.props().labels?.assistantTitle ?? "Table assistant"
-  );
+  protected readonly copy = computed(() => resolveLabels(this.props().labels));
+  protected readonly title = computed(() => this.copy().assistantTitle);
   protected readonly resolved = computed(() => {
     const mode = this.props().presentation ?? "panel";
     return mode === "floating" && !this.fits() ? "sheet" : mode;
   });
-  protected readonly status = computed(
-    () =>
-      this.props().labels?.assistantConnection?.(
-        this.props().assistant.status
-      ) ?? this.props().assistant.status
+  protected readonly status = computed(() =>
+    this.copy().assistantConnection(this.props().assistant.status)
   );
   protected readonly badge = computed(() => ({
-    label:
-      this.props().labels?.assistantConnection?.(
-        this.props().assistant.status
-      ) ?? this.props().assistant.status.replace("-", " "),
+    label: this.copy().assistantConnection(this.props().assistant.status),
     part: "assistant-connection",
     tone: assistantBadgeTone(this.props().assistant.status),
   }));
@@ -266,7 +263,7 @@ export class AdaptTableAssistantChrome {
       part: "assistant-launcher",
       variant: "subtle",
       iconOnly: true,
-      tooltip: this.props().labels?.assistantOpen ?? "Ask AI",
+      tooltip: this.copy().assistantOpen,
       icon: this.launcherContent() ?? null,
       onClick: () => {
         this.props().onOpenChange(true);
@@ -317,8 +314,8 @@ export class AdaptTableAssistantChrome {
     void this.props().assistant.undoAction?.(key);
   };
   protected readonly closeButton = computed((): TableAssistantButtonProps => ({
-    label: this.props().labels?.assistantClose ?? "Close",
-    tooltip: this.props().labels?.assistantClose ?? "Close",
+    label: this.copy().assistantClose,
+    tooltip: this.copy().assistantClose,
     part: "assistant-close",
     variant: "subtle",
     icon: ASSISTANT_CLOSE_ICON,
@@ -327,8 +324,8 @@ export class AdaptTableAssistantChrome {
   }));
   protected readonly settingsButton = computed(
     (): TableAssistantButtonProps => ({
-      label: this.props().labels?.assistantSettings ?? "Assistant settings",
-      tooltip: this.props().labels?.assistantSettings ?? "Assistant settings",
+      label: this.copy().assistantSettings,
+      tooltip: this.copy().assistantSettings,
       part: "assistant-settings",
       variant: "subtle",
       icon: ASSISTANT_SETTINGS_ICON,
@@ -339,19 +336,19 @@ export class AdaptTableAssistantChrome {
     })
   );
   protected readonly jumpButton = computed((): TableAssistantButtonProps => ({
-    label: this.props().labels?.assistantNewMessages ?? "New messages",
+    label: this.copy().assistantNewMessages,
     part: "assistant-jump-latest",
     variant: "secondary",
     onClick: this.scroll.jumpToLatest,
   }));
   protected readonly backButton = computed((): TableAssistantButtonProps => ({
-    label: this.props().labels?.assistantBackToTable ?? "Back to table",
+    label: this.copy().assistantBackToTable,
     part: "assistant-back",
     variant: "subtle",
     onClick: this.close,
   }));
   protected readonly rejoinButton = computed((): TableAssistantButtonProps => ({
-    label: this.props().labels?.assistantRejoin ?? "Rejoin",
+    label: this.copy().assistantRejoin,
     part: "assistant-rejoin",
     variant: "secondary",
     onClick: () => {
@@ -366,7 +363,7 @@ export class AdaptTableAssistantChrome {
     return (
       (assistant.errorCode === undefined
         ? undefined
-        : this.props().labels?.assistantUnresolved?.(assistant.errorCode)) ??
+        : this.copy().assistantUnresolved(assistant.errorCode)) ??
       assistant.error
     );
   });
@@ -375,7 +372,7 @@ export class AdaptTableAssistantChrome {
     const assistant = props.assistant;
     const state = assistantComposerState(assistant);
     return {
-      labels: props.labels,
+      labels: this.copy(),
       status: assistant.status,
       ...(state.busy === undefined ? {} : { busy: state.busy }),
       draft: assistant.draft,
@@ -384,13 +381,12 @@ export class AdaptTableAssistantChrome {
       onStop: assistant.stop,
       ...(state.answering
         ? {
-            placeholder:
-              props.labels?.assistantAnswerPlaceholder ?? "Type an answer",
+            placeholder: this.copy().assistantAnswerPlaceholder,
           }
         : {}),
       ...(props.speech ? { speech: props.speech } : {}),
       examples: {
-        label: props.labels?.assistantExamples ?? "Examples",
+        label: this.copy().assistantExamples,
         items: assistant.suggestions.map((item) => ({
           id: item.id,
           title: item.title,

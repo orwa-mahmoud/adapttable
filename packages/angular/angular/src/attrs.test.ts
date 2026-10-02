@@ -22,7 +22,7 @@ async function mount(attrs: Attrs) {
     fixture.componentInstance.attrs.set(next);
     await fixture.whenStable();
   };
-  return { button, update };
+  return { button, update, fixture };
 }
 
 describe("AdaptAttrs", () => {
@@ -117,5 +117,27 @@ describe("AdaptAttrs", () => {
     const { button } = await mount({ onChange });
     button.dispatchEvent(new Event("input"));
     expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("releases listeners and its ref when a retained node is detached on destroy", async () => {
+    const onClick = vi.fn();
+    const onKeyDown = vi.fn();
+    const ref = vi.fn();
+    const { button, fixture } = await mount({ onClick, onKeyDown, ref });
+    document.body.append(fixture.nativeElement as HTMLElement);
+    button.click();
+    button.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+    expect(ref).toHaveBeenCalledExactlyOnceWith(button);
+
+    fixture.destroy();
+    (fixture.nativeElement as HTMLElement).remove();
+    expect(button.isConnected).toBe(false);
+    expect(ref.mock.calls).toEqual([[button], [null]]);
+    button.click();
+    button.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
   });
 });

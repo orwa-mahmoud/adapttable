@@ -46,6 +46,7 @@ const sumPoints = (rows: readonly Task[]) => ({
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="mobile()"
+      [dir]="direction()"
       [paginationMode]="paginationMode()"
       [maxHeight]="maxHeight()"
       [selectable]="selectable()"
@@ -57,6 +58,7 @@ class Host {
   readonly features = input<readonly AdaptTableFeature[]>([]);
   readonly data = input<readonly Task[]>(ROWS);
   readonly mobile = input<boolean | undefined>(undefined);
+  readonly direction = input<"ltr" | "rtl">("ltr");
   readonly paginationMode = input<"paged" | "infinite">("paged");
   readonly maxHeight = input<number | undefined>(undefined);
   readonly selectable = input(false);
@@ -69,6 +71,7 @@ async function mount(
   inputs: Partial<{
     data: readonly Task[];
     mobile: boolean;
+    direction: "ltr" | "rtl";
     paginationMode: "paged" | "infinite";
     maxHeight: number;
     selectable: boolean;
@@ -129,6 +132,7 @@ class FakeTransfer {
 
 afterEach(() => {
   document.body.replaceChildren();
+  document.body.removeAttribute("dir");
 });
 
 describe("grouping (unstyled Angular)", () => {
@@ -173,6 +177,44 @@ describe("grouping (unstyled Angular)", () => {
     expect(texts("group-count")).toEqual(["(12)", "(18)"]);
     expect(texts("page-number")).toEqual(["1"]);
   });
+
+  it.each([
+    [false, "ltr"],
+    [false, "rtl"],
+    [true, "ltr"],
+    [true, "rtl"],
+  ] as const)(
+    "points closed groups into the row and open groups down (mobile=%s, dir=%s)",
+    async (mobile, direction) => {
+      document.body.setAttribute("dir", "rtl");
+      const settle = await mount([grouping("team")], { mobile, direction });
+      const toggle = () => all("group-toggle")[0]!;
+      const wrapper = () =>
+        toggle().querySelector<HTMLElement>(".group-chevron")!;
+      const icon = () => toggle().querySelector<SVGElement>("svg")!;
+      const rowPart = mobile ? "card" : "row";
+      expect(all(rowPart)).toHaveLength(5);
+      expect(toggle().getAttribute("aria-label")).toBe("Collapse group");
+      expect(icon().getAttribute("aria-hidden")).toBe("true");
+      expect(icon().style.transform).toBe("rotate(90deg)");
+      expect(getComputedStyle(wrapper()).transform === "scaleX(-1)").toBe(
+        direction === "rtl"
+      );
+      toggle().click();
+      await settle();
+      expect(toggle().getAttribute("aria-label")).toBe("Expand group");
+      expect(toggle().getAttribute("aria-expanded")).toBe("false");
+      expect(icon().style.transform).toBe("");
+      expect(getComputedStyle(wrapper()).transform === "scaleX(-1)").toBe(
+        direction === "rtl"
+      );
+      expect(all(rowPart)).toHaveLength(2);
+      toggle().click();
+      await settle();
+      expect(icon().style.transform).toBe("rotate(90deg)");
+      expect(all(rowPart)).toHaveLength(5);
+    }
+  );
 
   it("hides a group's rows when it collapses and brings them back", async () => {
     const settle = await mount([grouping("team")]);

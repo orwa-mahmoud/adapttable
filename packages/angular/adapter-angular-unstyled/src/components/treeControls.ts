@@ -3,8 +3,10 @@
  * desktop, and the disclosure a phone card leads with.
  */
 import {
+  AdaptIcon,
   AdaptTreeCellChrome,
   AdaptTreeToggleChrome,
+  expandChevronIcon,
   type TreeCellProps,
   type TreeToggleButtonProps,
   type TreeToggleProps,
@@ -14,6 +16,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   type TemplateRef,
 } from "@angular/core";
@@ -26,6 +29,15 @@ import {
  */
 @Component({
   selector: "adapt-tree-button",
+  imports: [AdaptIcon],
+  styles: `
+    .tree-chevron {
+      display: inline-flex;
+    }
+    .tree-chevron:dir(rtl) {
+      transform: scaleX(-1);
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
@@ -53,18 +65,20 @@ import {
       "
       (click)="p.onClick()"
     >
-      <span
-        aria-hidden="true"
-        style="display: inline-block; transition: transform 150ms ease"
-        [style.transform]="p.expanded ? 'rotate(90deg)' : 'none'"
-        >▸</span
-      >
+      <span aria-hidden="true" class="tree-chevron">
+        <svg [adaptIcon]="chevron()"></svg>
+      </span>
     </button>
   `,
 })
 export class AdaptTreeButton {
   /** The chevron's state and handler. */
   readonly props = input.required<TreeToggleButtonProps>();
+
+  /** The descriptor supplies shape and expansion; CSS follows inherited RTL. */
+  protected readonly chevron = computed(() =>
+    expandChevronIcon({ open: this.props().expanded })
+  );
 }
 
 /** The kit's components for the tree's parts. */

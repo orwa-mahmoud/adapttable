@@ -4,12 +4,16 @@
 import {
   type ConfirmHandler,
   resolveDisabledReason,
+  resolveRenderer,
   type RowAction,
+  type RowActionsContext,
   type RowActionsLayout,
+  type RowActionsRenderer,
   runRowAction,
   type TableLabels,
   visibleRowActions,
 } from "@adapttable/angular";
+import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -19,6 +23,8 @@ import {
   viewChild,
 } from "@angular/core";
 
+import type { DataTableClassNames } from "../types";
+
 /**
  * One row's actions: a strip of buttons, or a menu behind a "more" button.
  *
@@ -26,52 +32,10 @@ import {
  */
 @Component({
   selector: "adapt-row-actions",
+  imports: [NgComponentOutlet, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
-  template: `
-    @if (layout() === "menu") {
-      <details
-        #menu
-        data-adapttable-part="row-actions-menu"
-        (pointerdown)="$event.stopPropagation()"
-      >
-        <summary
-          data-adapttable-part="row-actions-trigger"
-          [attr.aria-label]="labels().rowActionsMenu"
-          (click)="$event.stopPropagation()"
-        >
-          ⋮
-        </summary>
-        @for (item of items(); track item.action.key) {
-          <button
-            type="button"
-            data-adapttable-part="action-button"
-            [attr.aria-label]="item.action.label"
-            [attr.title]="item.reason ?? null"
-            [attr.data-color]="item.action.color ?? null"
-            [disabled]="item.disabled"
-            (click)="run($event, item.action)"
-          >
-            {{ item.action.label }}
-          </button>
-        }
-      </details>
-    } @else {
-      @for (item of items(); track item.action.key) {
-        <button
-          type="button"
-          data-adapttable-part="action-button"
-          [attr.aria-label]="item.action.label"
-          [attr.title]="item.reason ?? null"
-          [attr.data-color]="item.action.color ?? null"
-          [disabled]="item.disabled"
-          (click)="run($event, item.action)"
-        >
-          {{ item.action.label }}
-        </button>
-      }
-    }
-  `,
+  templateUrl: "./rowActionButtons.html",
 })
 export class AdaptRowActions<TRow> {
   /** The row. */
@@ -84,6 +48,23 @@ export class AdaptRowActions<TRow> {
   readonly labels = input.required<Required<TableLabels>>();
   /** A strip of buttons, or a menu. */
   readonly layout = input<RowActionsLayout | undefined>();
+
+  /** Host override, handed the same resolved actions and confirmation gate. */
+  readonly render = input<RowActionsRenderer<TRow>>();
+  /** Class hooks shared by desktop and mobile actions. */
+  readonly classNames = input<DataTableClassNames>({});
+
+  protected readonly context = computed<RowActionsContext<TRow>>(() => ({
+    $implicit: this.row(),
+    row: this.row(),
+    actions: this.actions(),
+    confirm: this.confirm(),
+    labels: this.labels(),
+  }));
+
+  protected readonly renderer = computed(() =>
+    resolveRenderer(this.render(), this.context())
+  );
 
   private readonly menu = viewChild<ElementRef<HTMLDetailsElement>>("menu");
 

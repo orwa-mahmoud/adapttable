@@ -4,10 +4,12 @@
 import {
   AdaptBatchEditBarChrome,
   type BatchEditBarProps,
+  type BatchEditBarSlots,
   type BatchEditButtonProps,
 } from "@adapttable/angular";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
+/** The batch bar's native button slot. @internal */
 @Component({
   selector: "adapt-batch-edit-button",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,5 +55,7 @@ class AdaptBatchEditButton {
 export class AdaptBatchEditBar<TRow> {
   /** Slot props from the table's batch-edit-bar fill. */
   readonly props = input.required<BatchEditBarProps<TRow>>();
-  protected readonly slots = { Button: AdaptBatchEditButton };
+  protected readonly slots: BatchEditBarSlots = {
+    Button: AdaptBatchEditButton,
+  };
 }

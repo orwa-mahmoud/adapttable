@@ -122,6 +122,11 @@ export {
   approvalReview,
   type ApprovalReviewItem,
 } from "@adapttable/core";
+export {
+  dirtyMarkerView,
+  type RowClickProps,
+  rowClickProps,
+} from "@adapttable/core";
 export type {
   ColumnMenuSlotProps,
   FeatureRender,

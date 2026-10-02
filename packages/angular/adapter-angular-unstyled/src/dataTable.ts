@@ -59,6 +59,8 @@ import {
   type DesktopRowWiringArgs,
   devWarn,
   type Direction,
+  type DirtyEdits,
+  dirtyMarkerView,
   editableCellController,
   type EditableCellEditing,
   type EditableCellSlotProps,
@@ -102,6 +104,7 @@ import {
   injectColumnWindow,
   injectDataTable,
   injectDensity,
+  injectDirtyCells,
   injectEditValidation,
   injectExportCsv,
   injectFindFocus,
@@ -130,6 +133,7 @@ import {
   insertExtraRows,
   insertExtrasBeforeRows,
   type LiveEditConflictInput,
+  type MobileCardRenderer,
   mountTableFeatures,
   type NestedTableParent,
   type PaginationMode,
@@ -150,11 +154,14 @@ import {
   ROW_REORDER_ANNOUNCER,
   type RowAction,
   type RowActionsLayout,
+  type RowActionsRenderer,
+  rowClickProps,
   type RowEditActionsProps,
   rowEditConflict,
   type RowEditHandler,
   type RowEditIcons,
   type RowHeight,
+  rowIsDirty,
   type RowMutationsState,
   type RowReorderState,
   type RowSelection,
@@ -224,6 +231,7 @@ import {
   type FiltersView,
   filtersViewFor,
 } from "./tableFilters";
+import type { DataTableClassNames } from "./types";
 
 /** Mount optional behavior over the same reactive channels the kit renders. */
 function mountLiveFeatures<TRow>(options: {
@@ -360,6 +368,12 @@ function editingBundleFor<TRow>(options: {
       EditEventHandler<TRow> | undefined,
     injector: options.injector,
   });
+  const tracked = injectDirtyCells({
+    enabled: armed.trackDirty,
+    onDirtyChange: options.featureOptions.onDirtyChange as
+      ((dirty: DirtyEdits) => void) | undefined,
+    injector: options.injector,
+  });
   const rowEditIcons = options.featureOptions.rowEditIcons as
     RowEditIcons | undefined;
   const lifecycle = {
@@ -407,6 +421,7 @@ function editingBundleFor<TRow>(options: {
       state: cellState(),
       validation: validation(),
       saving: saving(),
+      dirty: dirtyMarkerView(tracked(), armed.dirtyMarkers),
       rowEditing: rowEditing?.(),
       rowEditIcons,
       batch: batch?.(),
@@ -1030,6 +1045,14 @@ function bodyWindowFor<TRow>(options: {
 export interface TableView<TRow> {
   /** The headless table. */
   readonly table: DataTable<TRow>;
+  /** Live class hooks for the mobile and row-action parts. */
+  readonly classNames: Signal<DataTableClassNames>;
+  /** A host template or component replacing only the card's field layout. */
+  readonly renderCard: Signal<MobileCardRenderer<TRow> | undefined>;
+  /** A host template or component replacing the resolved row actions. */
+  readonly renderRowActions: Signal<RowActionsRenderer<TRow> | undefined>;
+  /** The host's live changed-cell marks, shared by cells and card values. */
+  readonly isCellFlashing: (rowId: string, columnKey: string) => boolean;
   /** Row selection, when the table is selectable. */
   readonly selection: RowSelection | undefined;
   /** Cell navigation, when it is on. */
@@ -1051,7 +1074,8 @@ export interface TableView<TRow> {
   readonly markedCellAttrs: (
     column: ColumnDef<TRow>,
     index: number,
-    col: number
+    col: number,
+    rowId?: string
   ) => Attrs;
   /** Whether the Columns menu is composed. */
   readonly columnMenu: boolean;
@@ -1231,6 +1255,17 @@ export class AdaptDataTable<TRow> implements OnInit {
   readonly dir = input<Direction>("ltr");
   /** Show the phone layout whatever the viewport. */
   readonly forceMobile = input<boolean>();
+  /** Classes for mobile-card and row-action parts. */
+  readonly classNames = input<DataTableClassNames>({});
+  /** Replace a card's fields while preserving its interactive shell. */
+  readonly renderCard = input<MobileCardRenderer<TRow>>();
+  /** Replace row actions on desktop and cards with a template or component. */
+  readonly renderRowActions = input<RowActionsRenderer<TRow>>();
+  /** Activate a row by clicking its body, Enter or Space. */
+  readonly onRowClick = input<(row: TRow) => void>();
+  /** Live changed-cell reader, such as `injectChangedCellFlash().isFlashing`. */
+  readonly isCellFlashing =
+    input<(rowId: string, columnKey: string) => boolean>();
   /** Translated labels, merged over the English defaults. */
   readonly labels = input<TableLabels>();
   /** The search box's placeholder. Defaults to the `searchPlaceholder` label. */
@@ -1858,6 +1893,13 @@ export class AdaptDataTable<TRow> implements OnInit {
       ((row: TRow, index: number) => string | undefined) | undefined;
     const rowStyle = featureOptions.rowStyle as RowStyle<TRow> | undefined;
     const rowHeight = featureOptions.rowHeight as RowHeight<TRow> | undefined;
+    const isCellFlashing = (rowId: string, columnKey: string): boolean => {
+      const reader =
+        this.isCellFlashing() ??
+        (featureOptions.isCellFlashing as
+          ((rowId: string, columnKey: string) => boolean) | undefined);
+      return reader?.(rowId, columnKey) ?? false;
+    };
     // The pin entries ride the actions column beside the host's actions.
     const mergedActions = computed(() =>
       withRowPinActions({
@@ -2102,9 +2144,39 @@ export class AdaptDataTable<TRow> implements OnInit {
         },
       };
     };
+    // Core owns activation, interactive-child guards and arrow-key roving.
+    // Pinned summaries are read-only labels, never row-navigation stops.
+    const interactiveAttrs = (
+      attrs: Attrs,
+      args: DesktopRowWiringArgs<TRow>,
+      focusIndex: number
+    ): Attrs => {
+      if (args.summary === true) {
+        return { ...attrs, "data-selected": undefined };
+      }
+      const click = rowClickProps(
+        args.row,
+        this.onRowClick() ??
+          (featureOptions.onRowClick as ((row: TRow) => void) | undefined),
+        focusIndex
+      );
+      return {
+        ...attrs,
+        ...click,
+        "data-clickable": click ? "" : undefined,
+        "data-dirty": rowIsDirty(editing?.(), args.id) ? "" : undefined,
+        style: {
+          ...click?.style,
+          ...(typeof attrs.style === "object" && attrs.style !== null
+            ? attrs.style
+            : {}),
+        },
+      };
+    };
     const body = computed((): readonly BodySlot<TRow>[] => {
       const window = bodyWindow();
       const entries = window.groupingEntries;
+      let focusIndex = 0;
       return desktopBodySlots<TRow, BodyRow<TRow>>({
         pinnedTopRows: pinnedRows()?.top ?? [],
         pinnedBottomRows: pinnedRows()?.bottom ?? [],
@@ -2134,15 +2206,20 @@ export class AdaptDataTable<TRow> implements OnInit {
         rows: table.source().rows,
         wiring: (args) => {
           const window = virtualization();
+          const rowFocusIndex = args.summary === true ? -1 : focusIndex++;
           return {
             ...args,
             rowAttrs: withRef(
               pinnedAttrs(
-                appearance(
-                  grid && args.summary !== true
-                    ? grid.rowAttrs(args.row, args.index)
-                    : table.rowAttrs(args.row, args.index),
-                  args
+                interactiveAttrs(
+                  appearance(
+                    grid && args.summary !== true
+                      ? grid.rowAttrs(args.row, args.index)
+                      : table.rowAttrs(args.row, args.index),
+                    args
+                  ),
+                  args,
+                  rowFocusIndex
                 ),
                 args,
                 false
@@ -2156,7 +2233,11 @@ export class AdaptDataTable<TRow> implements OnInit {
             ),
             cardAttrs: (args.measure ? measured : (attrs: Attrs) => attrs)(
               pinnedAttrs(
-                appearance(table.cardAttrs(args.row, args.index), args),
+                interactiveAttrs(
+                  appearance(table.cardAttrs(args.row, args.index), args),
+                  args,
+                  rowFocusIndex
+                ),
                 args,
                 true
               )
@@ -2249,9 +2330,27 @@ export class AdaptDataTable<TRow> implements OnInit {
       rowKey: (row) => this.rowKey()(row),
       onCellCut: this.onCellCut,
     });
-    const markedCellAttrs = cellAttrsWithFind(table, grid, find);
+    const cellAttrs = cellAttrsWithFind(table, grid, find);
+    const markedCellAttrs = (
+      column: ColumnDef<TRow>,
+      index: number,
+      col: number,
+      rowId?: string
+    ): Attrs => {
+      return {
+        ...cellAttrs(column, index, col),
+        "data-flash":
+          rowId !== undefined && isCellFlashing(rowId, column.key)
+            ? ""
+            : undefined,
+      };
+    };
     this.view.set({
       table,
+      classNames: this.classNames,
+      renderCard: this.renderCard,
+      renderRowActions: this.renderRowActions,
+      isCellFlashing,
       selection,
       grid,
       findBar,

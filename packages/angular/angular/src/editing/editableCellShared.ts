@@ -10,11 +10,13 @@ import {
   formatMultiDraft,
 } from "@adapttable/core";
 import type { EditableCellButtonProps } from "@adapttable/core/binding";
+import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   input,
+  TemplateRef,
   type Type,
 } from "@angular/core";
 
@@ -200,17 +202,28 @@ export class AdaptCellConflictNotice {
 }
 
 /**
- * Pass-through host that renders a text display for tests and kits that
- * hand a string (or any printable) as the idle cell content.
+ * Pass-through host for a kit's idle content: stamp its Angular template,
+ * or show the printable value it supplied.
  *
  * @internal
  */
 @Component({
   selector: "adapt-editable-cell-display",
+  imports: [NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
-  template: `{{ props() }}`,
+  template: `
+    @if (template(); as content) {
+      <ng-container [ngTemplateOutlet]="content" />
+    } @else {
+      {{ props() }}
+    }
+  `,
 })
 export class AdaptEditableCellDisplay {
   readonly props = input.required<unknown>();
+  protected readonly template = computed(() => {
+    const content = this.props();
+    return content instanceof TemplateRef ? content : null;
+  });
 }

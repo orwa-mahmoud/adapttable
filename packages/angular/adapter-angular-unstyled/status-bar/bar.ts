@@ -9,13 +9,6 @@ import {
   type TemplateRef,
 } from "@angular/core";
 
-/** One status figure, as the chrome describes it. */
-interface StatusItem {
-  readonly key: string;
-  readonly text: string;
-  readonly appearance?: string;
-}
-
 /** The strip under the table. */
 @Component({
   selector: "adapt-status-bar",
@@ -45,7 +38,11 @@ interface StatusItem {
 export class AdaptStatusBar {
   /** The figures and the selection strip. */
   readonly props = input.required<{
-    readonly items: readonly StatusItem[];
+    readonly items: readonly {
+      readonly key: string;
+      readonly text: string;
+      readonly appearance?: string;
+    }[];
     readonly stats?: TemplateRef<unknown>;
     readonly className?: string;
   }>();

@@ -72,6 +72,7 @@ export function undoRedoButtons(): AdaptTableFeature {
   ]);
 }
 export {
+  dirtyIndicators,
   editHistory,
   type EditHistoryHandle,
   type EditHistoryOptions,

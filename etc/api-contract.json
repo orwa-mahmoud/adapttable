@@ -1,5 +1,5 @@
 {
-  "$comment": "The published contract: what each entry point commits to, checked both ways by scripts/check-api-contract.mjs. Bootstrapped from origin/main's committed reports plus the additions this branch made deliberately, each audited before this file was written — never read back from the current reports, because a list derived from its own output approves whatever drift produced it. Edit by hand, with a changeset saying what moved. Every surface is filed under one framework in `frameworks`: `neutral` for the packages under packages/shared, one key per binding folder under packages/ — an entry point names only surfaces of its own package's framework.",
+  "$comment": "The public API contract: what each participating entry point commits to, checked both ways by scripts/check-api-contract.mjs. Bootstrapped from origin/main's committed reports plus the additions this branch made deliberately, each audited before this file was written \u2014 never read back from the current reports, because a list derived from its own output approves whatever drift produced it. Edit by hand, with a changeset saying what moved. Every surface is filed under one framework in `frameworks`: `neutral` for the packages under packages/shared, one key per binding folder under packages/ \u2014 an entry point names only surfaces of its own package's framework.",
   "frameworks": {
     "neutral": [
       "ai",
@@ -34,7 +34,48 @@
       "angular-router",
       "angular-sparkline",
       "angular-stream",
-      "ai-angular"
+      "ai-angular",
+      "adapter-angular-unstyled",
+      "adapter-angular-unstyled-assistant",
+      "adapter-angular-unstyled-batch-editing",
+      "adapter-angular-unstyled-bulk-actions",
+      "adapter-angular-unstyled-cell-navigation",
+      "adapter-angular-unstyled-cell-span",
+      "adapter-angular-unstyled-column-groups",
+      "adapter-angular-unstyled-column-menu",
+      "adapter-angular-unstyled-column-selection",
+      "adapter-angular-unstyled-command-palette",
+      "adapter-angular-unstyled-context-menu",
+      "adapter-angular-unstyled-density",
+      "adapter-angular-unstyled-editing",
+      "adapter-angular-unstyled-export",
+      "adapter-angular-unstyled-extra-rows",
+      "adapter-angular-unstyled-features",
+      "adapter-angular-unstyled-filters",
+      "adapter-angular-unstyled-find-in-table",
+      "adapter-angular-unstyled-fit-columns",
+      "adapter-angular-unstyled-fullscreen",
+      "adapter-angular-unstyled-grouping",
+      "adapter-angular-unstyled-grouping-panel",
+      "adapter-angular-unstyled-header-filters",
+      "adapter-angular-unstyled-multi-sort",
+      "adapter-angular-unstyled-nested-table",
+      "adapter-angular-unstyled-pinned-summary-rows",
+      "adapter-angular-unstyled-pivot",
+      "adapter-angular-unstyled-preset",
+      "adapter-angular-unstyled-print",
+      "adapter-angular-unstyled-resizable-columns",
+      "adapter-angular-unstyled-row-actions",
+      "adapter-angular-unstyled-row-appearance",
+      "adapter-angular-unstyled-row-detail",
+      "adapter-angular-unstyled-row-pinning",
+      "adapter-angular-unstyled-row-reorder",
+      "adapter-angular-unstyled-saved-views",
+      "adapter-angular-unstyled-selection-stats",
+      "adapter-angular-unstyled-side-panel",
+      "adapter-angular-unstyled-status-bar",
+      "adapter-angular-unstyled-tree",
+      "adapter-angular-unstyled-virtualize"
     ],
     "react": [
       "adapter-antd",
@@ -6383,7 +6424,21 @@
       "urlAdapterFor",
       "virtualize",
       "virtualizeIgnoredOnPage",
-      "withRowMutationActions"
+      "withRowMutationActions",
+      "CommandPaletteSurfaceProps",
+      "resolveRenderer",
+      "RowClickProps",
+      "rowClickProps",
+      "MobileCardContext",
+      "MobileCardField",
+      "MobileCardRenderer",
+      "RowActionsContext",
+      "RowActionsRenderer",
+      "DirtyCellState",
+      "DirtyCellsOptions",
+      "DirtyEdits",
+      "injectDirtyCells",
+      "dirtyMarkerView"
     ],
     "angular-formula": [
       "AngularFormulaColumnsResult",
@@ -6488,6 +6543,294 @@
       "injectSpeechInput",
       "injectTableAssistant",
       "tableAgent"
+    ],
+    "adapter-angular-unstyled": [
+      "AdaptAutoFilterForm",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptNativeCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "MenuPopover",
+      "OVERLAY_Z",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps",
+      "menuPopover",
+      "placeOverlayBelowTrigger"
+    ],
+    "adapter-angular-unstyled-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-angular-unstyled-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-angular-unstyled-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-angular-unstyled-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-angular-unstyled-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-angular-unstyled-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-angular-unstyled-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-angular-unstyled-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-angular-unstyled-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-angular-unstyled-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-angular-unstyled-density": [
+      "densityChooser"
+    ],
+    "adapter-angular-unstyled-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-angular-unstyled-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-angular-unstyled-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-angular-unstyled-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-angular-unstyled-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-angular-unstyled-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-angular-unstyled-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-angular-unstyled-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-angular-unstyled-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-angular-unstyled-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-angular-unstyled-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-angular-unstyled-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-angular-unstyled-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-angular-unstyled-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-angular-unstyled-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-angular-unstyled-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-angular-unstyled-print": [
+      "print"
+    ],
+    "adapter-angular-unstyled-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-angular-unstyled-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-angular-unstyled-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-angular-unstyled-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-angular-unstyled-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-angular-unstyled-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-angular-unstyled-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-angular-unstyled-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-angular-unstyled-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-angular-unstyled-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-angular-unstyled-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-angular-unstyled-virtualize": [
+      "virtualize"
     ]
   },
   "entrypoints": {
@@ -7629,6 +7972,129 @@
     },
     "ai-angular.api.md": {
       "surface": "ai-angular"
+    },
+    "adapter-angular-unstyled.api.md": {
+      "surface": "adapter-angular-unstyled"
+    },
+    "adapter-angular-unstyled-assistant.api.md": {
+      "surface": "adapter-angular-unstyled-assistant"
+    },
+    "adapter-angular-unstyled-batch-editing.api.md": {
+      "surface": "adapter-angular-unstyled-batch-editing"
+    },
+    "adapter-angular-unstyled-bulk-actions.api.md": {
+      "surface": "adapter-angular-unstyled-bulk-actions"
+    },
+    "adapter-angular-unstyled-cell-navigation.api.md": {
+      "surface": "adapter-angular-unstyled-cell-navigation"
+    },
+    "adapter-angular-unstyled-cell-span.api.md": {
+      "reexport": "adapter-angular-unstyled-cell-span"
+    },
+    "adapter-angular-unstyled-column-groups.api.md": {
+      "surface": "adapter-angular-unstyled-column-groups"
+    },
+    "adapter-angular-unstyled-column-menu.api.md": {
+      "surface": "adapter-angular-unstyled-column-menu"
+    },
+    "adapter-angular-unstyled-column-selection.api.md": {
+      "surface": "adapter-angular-unstyled-column-selection"
+    },
+    "adapter-angular-unstyled-command-palette.api.md": {
+      "surface": "adapter-angular-unstyled-command-palette"
+    },
+    "adapter-angular-unstyled-context-menu.api.md": {
+      "surface": "adapter-angular-unstyled-context-menu"
+    },
+    "adapter-angular-unstyled-density.api.md": {
+      "surface": "adapter-angular-unstyled-density"
+    },
+    "adapter-angular-unstyled-editing.api.md": {
+      "surface": "adapter-angular-unstyled-editing"
+    },
+    "adapter-angular-unstyled-export.api.md": {
+      "surface": "adapter-angular-unstyled-export"
+    },
+    "adapter-angular-unstyled-extra-rows.api.md": {
+      "reexport": "adapter-angular-unstyled-extra-rows"
+    },
+    "adapter-angular-unstyled-features.api.md": {
+      "surface": "adapter-angular-unstyled-features"
+    },
+    "adapter-angular-unstyled-filters.api.md": {
+      "surface": "adapter-angular-unstyled-filters"
+    },
+    "adapter-angular-unstyled-find-in-table.api.md": {
+      "surface": "adapter-angular-unstyled-find-in-table"
+    },
+    "adapter-angular-unstyled-fit-columns.api.md": {
+      "reexport": "adapter-angular-unstyled-fit-columns"
+    },
+    "adapter-angular-unstyled-fullscreen.api.md": {
+      "surface": "adapter-angular-unstyled-fullscreen"
+    },
+    "adapter-angular-unstyled-grouping.api.md": {
+      "surface": "adapter-angular-unstyled-grouping"
+    },
+    "adapter-angular-unstyled-grouping-panel.api.md": {
+      "surface": "adapter-angular-unstyled-grouping-panel"
+    },
+    "adapter-angular-unstyled-header-filters.api.md": {
+      "surface": "adapter-angular-unstyled-header-filters"
+    },
+    "adapter-angular-unstyled-multi-sort.api.md": {
+      "reexport": "adapter-angular-unstyled-multi-sort"
+    },
+    "adapter-angular-unstyled-nested-table.api.md": {
+      "surface": "adapter-angular-unstyled-nested-table"
+    },
+    "adapter-angular-unstyled-pinned-summary-rows.api.md": {
+      "reexport": "adapter-angular-unstyled-pinned-summary-rows"
+    },
+    "adapter-angular-unstyled-pivot.api.md": {
+      "surface": "adapter-angular-unstyled-pivot"
+    },
+    "adapter-angular-unstyled-preset.api.md": {
+      "surface": "adapter-angular-unstyled-preset"
+    },
+    "adapter-angular-unstyled-print.api.md": {
+      "surface": "adapter-angular-unstyled-print"
+    },
+    "adapter-angular-unstyled-resizable-columns.api.md": {
+      "reexport": "adapter-angular-unstyled-resizable-columns"
+    },
+    "adapter-angular-unstyled-row-actions.api.md": {
+      "surface": "adapter-angular-unstyled-row-actions"
+    },
+    "adapter-angular-unstyled-row-appearance.api.md": {
+      "reexport": "adapter-angular-unstyled-row-appearance"
+    },
+    "adapter-angular-unstyled-row-detail.api.md": {
+      "surface": "adapter-angular-unstyled-row-detail"
+    },
+    "adapter-angular-unstyled-row-pinning.api.md": {
+      "reexport": "adapter-angular-unstyled-row-pinning"
+    },
+    "adapter-angular-unstyled-row-reorder.api.md": {
+      "surface": "adapter-angular-unstyled-row-reorder"
+    },
+    "adapter-angular-unstyled-saved-views.api.md": {
+      "surface": "adapter-angular-unstyled-saved-views"
+    },
+    "adapter-angular-unstyled-selection-stats.api.md": {
+      "surface": "adapter-angular-unstyled-selection-stats"
+    },
+    "adapter-angular-unstyled-side-panel.api.md": {
+      "surface": "adapter-angular-unstyled-side-panel"
+    },
+    "adapter-angular-unstyled-status-bar.api.md": {
+      "surface": "adapter-angular-unstyled-status-bar"
+    },
+    "adapter-angular-unstyled-tree.api.md": {
+      "surface": "adapter-angular-unstyled-tree"
+    },
+    "adapter-angular-unstyled-virtualize.api.md": {
+      "surface": "adapter-angular-unstyled-virtualize"
     }
   }
 }

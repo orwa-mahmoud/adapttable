@@ -2,6 +2,7 @@
  * Row-reorder Chrome: the grip, the mobile up/down pair, and the live
  * region — structure and wiring only. Every visible control is the kit's.
  */
+import { resolveLabels } from "@adapttable/core";
 import type {
   RowMoveMenuSlotProps,
   RowReorderButtonsProps as NeutralRowReorderButtonsProps,
@@ -94,6 +95,7 @@ function moveMenuProps<TRow>(
   row: TRow,
   moveLocked: boolean
 ): RowMoveMenuSlotProps | undefined {
+  const copy = resolveLabels(labels);
   const menu = reorder.moveMenu?.(row);
   if (!menu) return undefined;
   const ownsPending =
@@ -119,12 +121,14 @@ function moveMenuProps<TRow>(
     confirmation:
       pending && from && to
         ? {
-            title: labels.confirmRowMoveTitle ?? "Confirm row move",
-            description:
-              labels.confirmRowMoveDescription?.(pending.rowLabel, from, to) ??
-              `Move ${pending.rowLabel} from ${from} to ${to}?`,
-            confirmLabel: labels.confirmRowMove ?? "Move",
-            cancelLabel: labels.cancel ?? "Cancel",
+            title: copy.confirmRowMoveTitle,
+            description: copy.confirmRowMoveDescription(
+              pending.rowLabel,
+              from,
+              to
+            ),
+            confirmLabel: copy.confirmRowMove,
+            cancelLabel: copy.cancel,
             onConfirm: reorder.confirmMove,
             onCancel: reorder.cancelMove,
           }

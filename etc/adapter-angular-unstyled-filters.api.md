@@ -6,9 +6,12 @@
 
 import { AdaptTableFeature } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
+import { filterTypes } from '@adapttable/angular';
 
 // @public
 export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;
+
+export { filterTypes }
 
 // (No @packageDocumentation comment for this package)
 

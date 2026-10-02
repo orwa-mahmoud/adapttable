@@ -75,3 +75,4 @@ export {
   type TableView,
 } from "./dataTable";
 export type { FiltersMode, FiltersView } from "./tableFilters";
+export type { DataTableClassNames } from "./types";

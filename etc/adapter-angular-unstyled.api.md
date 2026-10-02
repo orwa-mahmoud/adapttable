@@ -87,6 +87,8 @@ import { isBooleanEditor } from '@adapttable/angular';
 import { isDraftChecked } from '@adapttable/angular';
 import { isMultiSelectEditor } from '@adapttable/angular';
 import { isSelectEditor } from '@adapttable/angular';
+import { MobileCardContext } from '@adapttable/angular';
+import { MobileCardRenderer } from '@adapttable/angular';
 import { multiDraftFromSelect } from '@adapttable/angular';
 import { MultiSelectEditorSlots } from '@adapttable/angular';
 import { NestedTableParent } from '@adapttable/angular';
@@ -99,8 +101,10 @@ import { PivotPanelSlots } from '@adapttable/angular/pivot';
 import { QueryAggregate } from '@adapttable/angular';
 import { QuerySupport } from '@adapttable/angular';
 import { readMultiDraft } from '@adapttable/angular';
+import { resolveRenderer } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
+import { RowActionsRenderer } from '@adapttable/angular';
 import { RowEditActionsProps } from '@adapttable/angular';
 import { RowGroupRef } from '@adapttable/core';
 import { RowMutationsState } from '@adapttable/angular';
@@ -233,6 +237,7 @@ export class AdaptCheckboxCellEditor {
 
 // @public
 export class AdaptColumnGroupButton {
+    protected readonly chevron: Signal<IconDescriptor>;
     readonly props: InputSignal<ColumnGroupToggleButtonProps>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnGroupButton, "adapt-column-group-button", never, {
@@ -380,6 +385,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     readonly cellNavigation: InputSignal<boolean>;
     // @internal
     protected readonly cellTemplates: Signal<readonly AdaptCellTemplate[]>;
+    readonly classNames: InputSignal<DataTableClassNames>;
     readonly closeHeaderFilterOnSelect: InputSignal<boolean>;
     readonly columnLayout: InputSignal<ColumnLayoutState | undefined>;
     readonly columnLayoutChange: OutputEmitterRef<ColumnLayoutState>;
@@ -427,6 +433,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     readonly forceMobile: InputSignal<boolean | undefined>;
     // @internal
     protected readonly groupingPanelSlot: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
+    readonly isCellFlashing: InputSignal<((rowId: string, columnKey: string) => boolean) | undefined>;
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly loading: InputSignal<boolean | undefined>;
     readonly maxHeight: InputSignal<string | number | undefined>;
@@ -447,7 +454,10 @@ export class AdaptDataTable<TRow> implements OnInit {
     protected onMenuPointerMove(event: PointerEvent): void;
     protected onMenuPointerUp(): void;
     readonly onQueryChange: InputSignal<TableQueryHandler | undefined>;
+    readonly onRowClick: InputSignal<((row: TRow) => void) | undefined>;
     readonly paginationMode: InputSignal<PaginationMode | undefined>;
+    readonly renderCard: InputSignal<MobileCardRenderer<TRow> | undefined>;
+    readonly renderRowActions: InputSignal<RowActionsRenderer<TRow> | undefined>;
     // @internal
     protected readonly reorderAnnouncerSlot: FeatureSlotKey<    {
     announcement: string;
@@ -589,6 +599,31 @@ export class AdaptDataTable<TRow> implements OnInit {
         };
         "forceMobile": {
             "alias": "forceMobile";
+            "required": false;
+            "isSignal": true;
+        };
+        "classNames": {
+            "alias": "classNames";
+            "required": false;
+            "isSignal": true;
+        };
+        "renderCard": {
+            "alias": "renderCard";
+            "required": false;
+            "isSignal": true;
+        };
+        "renderRowActions": {
+            "alias": "renderRowActions";
+            "required": false;
+            "isSignal": true;
+        };
+        "onRowClick": {
+            "alias": "onRowClick";
+            "required": false;
+            "isSignal": true;
+        };
+        "isCellFlashing": {
+            "alias": "isCellFlashing";
             "required": false;
             "isSignal": true;
         };
@@ -847,8 +882,6 @@ export class AdaptEditableCell<TRow> {
     protected editing(): EditableCellEditing<TRow> | undefined;
     readonly editor: InputSignal<Type<unknown>>;
     readonly props: InputSignal<EditableCellSlotProps<TRow, unknown, ColumnModel<TRow>, unknown>>;
-    // @internal
-    protected resolvedDisplay(): unknown;
     // (undocumented)
     protected readonly slots: EditableCellSlots;
     // (undocumented)
@@ -1048,7 +1081,7 @@ export class AdaptGroupHeaderCard {
     protected readonly aggregates: Signal<GroupRowCell<never, ColumnDef<never>>[]>;
     protected caption(column: ColumnDef<never>): string | undefined;
     // (undocumented)
-    protected readonly chevron: IconDescriptor;
+    protected readonly chevron: Signal<IconDescriptor>;
     // (undocumented)
     protected readonly moreSlots: {
         Button: typeof AdaptGroupMore;
@@ -1124,7 +1157,7 @@ export class AdaptGroupHeaderCard {
 export class AdaptGroupHeaderRow {
     protected readonly aggregateOps: Signal<Parameters<typeof groupRowLayout>[2]>;
     // (undocumented)
-    protected readonly chevron: IconDescriptor;
+    protected readonly chevron: Signal<IconDescriptor>;
     // (undocumented)
     protected readonly labelCellStyle: Signal<{
         paddingInlineStart?: string;
@@ -1239,6 +1272,11 @@ export class AdaptGroupMore {
 // @internal
 export class AdaptMobileCards<TRow> {
     protected caption(column: ColumnDef<TRow>): string | undefined;
+    protected readonly cardBodies: Signal<Map<string, {
+    readonly attrs: Attrs;
+    readonly context: MobileCardContext<TRow>;
+    readonly content: ReturnType<typeof resolveRenderer<MobileCardContext<TRow>>>;
+    }>>;
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
     protected readonly expandToggleSlot: FeatureSlotKey<ExpandToggleSlotProps>;
     protected readonly extraParts: {
@@ -1252,6 +1290,7 @@ export class AdaptMobileCards<TRow> {
         };
     };
     protected readonly groupHeaderCardSlot: FeatureSlotKey<GroupHeaderCardSlotProps<never, unknown, ColumnModel<never>>>;
+    protected readonly listAttrs: Signal<Readonly<Record<string, unknown>>>;
     protected readonly listStyle: Signal<    {
     maxHeight: string;
     overflowY: string;
@@ -1332,6 +1371,9 @@ export class AdaptNativeCellEditor implements AfterViewInit {
 
 // @internal
 export class AdaptPaginationFooter<TRow> {
+    // (undocumented)
+    protected readonly nextIcon: Signal<IconDescriptor>;
+    protected readonly previousIcon: Signal<IconDescriptor>;
     readonly view: InputSignal<TableView<TRow>>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPaginationFooter<any>, "adapt-pagination-footer", never, {
@@ -1571,6 +1613,7 @@ export class AdaptTableSkeleton {
 
 // @public
 export class AdaptTreeButton {
+    protected readonly chevron: Signal<IconDescriptor>;
     readonly props: InputSignal<TreeToggleButtonProps>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTreeButton, "adapt-tree-button", never, {
@@ -1653,6 +1696,32 @@ export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
 export type BodySlot<TRow> = ChromeBodySlot<TRow, BodyRow<TRow>>;
 
 // @public
+export interface DataTableClassNames {
+    readonly actionButton?: string;
+    readonly card?: string;
+    readonly cardActions?: string;
+    readonly cardDetail?: string;
+    readonly cardLabel?: string;
+    readonly cardRow?: string;
+    readonly cards?: string;
+    readonly cardValue?: string;
+    readonly checkbox?: string;
+    readonly fullWidthCell?: string;
+    readonly fullWidthRow?: string;
+    readonly rowActionsMenu?: string;
+    readonly rowActionsTrigger?: string;
+    readonly rowReorderButtons?: string;
+    readonly rowReorderDown?: string;
+    readonly rowReorderUp?: string;
+    readonly separatorCell?: string;
+    readonly separatorRow?: string;
+    readonly summaryCard?: string;
+    readonly treeSpacer?: string;
+    readonly treeToggle?: string;
+    readonly virtualSpacer?: string;
+}
+
+// @public
 export type FiltersMode = "popover" | "drawer";
 
 // @public
@@ -1706,6 +1775,7 @@ export interface TableView<TRow> {
     readonly bodyColSpan: Signal<number>;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
     readonly cellSpanAppearance: CellSpanAppearance | undefined;
+    readonly classNames: Signal<DataTableClassNames>;
     readonly columnIndex: Signal<ReadonlyMap<string, number>>;
     readonly columnMenu: boolean;
     readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
@@ -1734,7 +1804,10 @@ export interface TableView<TRow> {
     }>;
     readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
     readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
-    readonly markedCellAttrs: (column: ColumnDef<TRow>, index: number, col: number) => Attrs;
+    readonly isCellFlashing: (rowId: string, columnKey: string) => boolean;
+    readonly markedCellAttrs: (column: ColumnDef<TRow>, index: number, col: number, rowId?: string) => Attrs;
+    readonly renderCard: Signal<MobileCardRenderer<TRow> | undefined>;
+    readonly renderRowActions: Signal<RowActionsRenderer<TRow> | undefined>;
     readonly reorder: Signal<RowReorderState<TRow>> | undefined;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
