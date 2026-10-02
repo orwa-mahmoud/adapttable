@@ -1,0 +1,89 @@
+@let content = renderer();
+@if (content?.template; as template) {
+  <ng-container
+    [ngTemplateOutlet]="template"
+    [ngTemplateOutletContext]="context()"
+  />
+} @else if (content?.component; as component) {
+  <ng-container
+    [ngComponentOutlet]="component"
+    [ngComponentOutletInputs]="content?.inputs"
+  />
+} @else if (layout() === "menu") {
+  <button
+    #trigger
+    nz-button
+    nzType="text"
+    nz-dropdown
+    type="button"
+    nzTrigger="click"
+    [nzDropdownMenu]="menu"
+    [nzBackdrop]="false"
+    [nzVisible]="menuOpen()"
+    (nzVisibleChange)="menuOpen.set($event)"
+    data-adapttable-part="row-actions-trigger"
+    [class]="classNames().rowActionsTrigger"
+    [attr.aria-label]="labels().rowActionsMenu"
+    aria-haspopup="menu"
+    [attr.aria-expanded]="menuOpen()"
+    (pointerdown)="$event.stopPropagation()"
+    (click)="$event.stopPropagation()"
+    (keydown)="triggerKey($event)"
+  >
+    <span>⋮ </span>
+  </button>
+  <nz-dropdown-menu #menu="nzDropdownMenu">
+    <ul
+      #menuPanel
+      nz-menu
+      role="menu"
+      data-adapttable-part="row-actions-menu"
+      [class]="classNames().rowActionsMenu"
+      [attr.aria-label]="labels().rowActionsMenu"
+      (keydown)="menuKey($event)"
+      (pointerdown)="$event.stopPropagation()"
+    >
+      @for (item of items(); track item.action.key) {
+        <li role="none">
+          <button
+            nz-menu-item
+            role="menuitem"
+            tabindex="-1"
+            type="button"
+            data-adapttable-part="action-button"
+            [class]="classNames().actionButton"
+            [attr.aria-label]="item.action.label"
+            [attr.title]="item.reason ?? null"
+            [attr.data-color]="item.action.color ?? null"
+            [nzDanger]="item.danger"
+            [nzDisabled]="item.disabled"
+            [disabled]="item.disabled"
+            (click)="run($event, item.action)"
+          >
+            {{ item.action.label }}
+          </button>
+        </li>
+      }
+    </ul>
+  </nz-dropdown-menu>
+} @else {
+  @for (item of items(); track item.action.key) {
+    <button
+      nz-button
+      nzType="text"
+      nz-tooltip
+      [nzTooltipTitle]="item.reason ?? item.action.label"
+      [nzDanger]="item.danger"
+      type="button"
+      data-adapttable-part="action-button"
+      [class]="classNames().actionButton"
+      [attr.aria-label]="item.action.label"
+      [attr.title]="item.reason ?? null"
+      [attr.data-color]="item.action.color ?? null"
+      [disabled]="item.disabled"
+      (click)="run($event, item.action)"
+    >
+      <span>{{ item.action.label }} </span>
+    </button>
+  }
+}

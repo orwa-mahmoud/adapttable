@@ -76,6 +76,7 @@ export {
 export { restoreFocusSoon } from "@adapttable/core";
 export {
   editorInputType,
+  formatMultiDraft,
   isBooleanEditor,
   isDraftChecked,
   isMultiSelectEditor,

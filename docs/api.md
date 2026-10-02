@@ -3225,11 +3225,19 @@ comes from a kit through a slot.
 - `AdaptCell` and `AdaptHeader` render a column's content into the host's own
   `<td>` and `<th>`, `AdaptCellTemplate` declares a cell template beside the
   table (`<ng-template adaptCellTemplate="status" let-row>`), `AdaptAttrs`
-  applies an `Attrs` record to an element, and `AdaptLiveRegion` makes an
+  applies an `Attrs` record to an element. Its optional `adaptAttrsTarget`
+  accepts an inner element or a stable getter returning one, so a kit's
+  generated control receives the whole record. `undefined` uses the host;
+  `null` defers writes until a target is available. Replacing the target
+  releases its old attributes, styles, event handlers and ref before applying
+  the record to the new element. `AdaptLiveRegion` makes an
   element a polite, visually hidden live region that speaks its text.
   `AdaptTableStatusAnnouncer` is that region for the table's own row changes:
   present from the first paint, polite and atomic, and without `role="status"`
   so the empty state and the other announcers can still be the status.
+- `formatMultiDraft(values)` serializes a multi-select editor's values with
+  the neutral format consumed by `readMultiDraft`, preserving values that
+  contain commas instead of rebuilding the encoding in a kit.
 - Features: `provideAdaptTableFeatures(...features)` composes features
   through dependency injection into the `ADAPTTABLE_FEATURES`
   multi-provider; an `AdaptTableFeature` has any of `apply` (configuration it
@@ -3683,6 +3691,123 @@ and can apply the same callback there. Dirty tracking is independent:
 `editing(commit, { onDirtyChange })` reports unsaved counts even when no
 `dirtyIndicators()` feature is composed; adding that feature draws the
 cell and row/card marks without changing who owns the data or confirms it.
+
+## The Angular NG-ZORRO kit
+
+`@adapttable/ng-zorro` is the themed Angular table built with
+`ng-zorro-antd` controls over `@adapttable/angular`. It targets Angular 22
+and NG-ZORRO 22.1.1. It participates in the shell-kit parts, feature and
+conformance contracts while remaining an unpublished workspace package
+(`private: true`, version `0.0.0`). The host loads NG-ZORRO's global theme,
+for example `@import "ng-zorro-antd/ng-zorro-antd.min.css";` in its global
+stylesheet. The kit does not import the native kit or a second framework's
+binding.
+
+Import `AdaptDataTable` from the root and compose features from this kit's
+own secondary entries. Its `<adapt-data-table>` uses the same Angular
+`ColumnDef`, cell/header/footer templates and data modes: `data`, a prebuilt
+`source`, or host-fetched rows with `onQueryChange` and `total`. The binding
+owns filtering, sorting, pagination and virtualization; NG-ZORRO's visual
+table does not introduce a second state controller. Every write still calls
+the host. `renderCard`, `renderRowActions`, `onRowClick`, `rowAppearance`,
+`isCellFlashing`, `classNames` (`DataTableClassNames`) and the live labels
+keep their Angular contracts on desktop and on the NG-ZORRO card layout.
+
+The matching feature entries are:
+
+- `/filters`: `filters`, `filterTypes`; `/header-filters`: `headerFilters`,
+  `AdaptFilterHeaderRow`, `AdaptFilterHeaderControl`; `/saved-views`:
+  `savedViews`, `AdaptSavedViewsPanel`
+- `/column-menu`: `columnMenu`; `/column-groups`: `collapsibleColumnGroups`,
+  `ColumnGroup`, `ColumnInput`; `/column-selection`:
+  `columnSelectionCheckbox`; `/resizable-columns`: `resizableColumns`;
+  `/multi-sort`: `multiSort`; `/fit-columns`: `fitColumns`
+- `/bulk-actions`: `bulkActions`; `/row-actions`: `rowActions`,
+  `RowActionsFeatureOptions`; `/row-reorder`: `rowReorder`; `/row-pinning`:
+  `rowPinning`, `RowPinningFeatureOptions`; `/pinned-summary-rows`:
+  `pinnedSummaryRows`; `/row-appearance`: `rowAppearance`,
+  `RowAppearanceOptions`; `/extra-rows`: `extraRows`; `/cell-span`: `cellSpan`
+- `/grouping`: `grouping`, `GroupingExtras`, `GroupSort`;
+  `/grouping-panel`: `groupingPanel`; `/tree`: `tree`, `TreeFeatureOptions`;
+  `/row-detail`: `rowDetail`, `RowDetailContext`, `nestedTable` and its
+  `NestedTable`, `NestedTableContext`, `NestedTableDefaults`, `NestedTableFor`
+  types; `/nested-table` also forwards that nested-table surface;
+  `/virtualize`: `virtualize`
+- `/editing`: `editing`, `rowEditing`, `AdaptRowEditActions`,
+  `dirtyIndicators`, `editHistory`, `EditHistoryHandle`, `EditHistoryOptions`,
+  `undoRedoButtons`; `/batch-editing`: `batchEditing`, `AdaptBatchEditBar`;
+  `/cell-navigation`: `cellNavigation`
+- `/find-in-table`: `findInTable`, `AdaptFindBar`, `AdaptFindToolbarButton`;
+  `/command-palette`: `commandPalette`, `AdaptCommandPaletteLive`,
+  `AdaptCommandPaletteButton`; `/context-menu`: `contextMenu`,
+  `AdaptContextMenuLive`, `AdaptContextMenuSurface`, `AdaptContextMenuItem`,
+  `AdaptContextMenuSeparator`
+- `/side-panel`: `sidePanel`, `AdaptSidePanelLive`, `AdaptSidePanelFrame`,
+  `AdaptSidePanelTab`, `AdaptSidePanelClose`; `/status-bar`: `statusBar`,
+  `AdaptStatusBarLive`, `AdaptStatusBar`, `AdaptSelectionStatsBar`;
+  `/selection-stats`: `selectionStats`
+- `/density`: `densityChooser`; `/fullscreen`: `fullscreen`; `/export`:
+  `exportCsv`, `exportXlsx`, `exportPdf`; `/print`: `print`
+
+`/pivot` exports this kit's `AdaptPivotPanel`, `AdaptPivotRowHeader` and
+`pivotTableModel`, together with the Angular pivot contracts described
+above: `AdaptPivotPanelChrome`, `PivotPanelSlots`, `PivotConfig`, `PivotField`,
+`PivotResult`, `PivotRow`, `PivotTableModel`, `PivotTableModelOptions`,
+`PivotUrlBinding`, `PivotUrlStateOptions`, `injectPivotUrlState`, `pivot`,
+`EMPTY_PIVOT_CONFIG`, `PIVOT_ROW_COLUMN_KEY` and
+`PIVOT_URL_WRITE_DEBOUNCE_MS`.
+
+`/features` gathers the feature factories and `RowActionsFeatureOptions`.
+`/preset` exports `standardPreset` and `StandardPresetOptions`: its default
+set is column menu, density, CSV export, fullscreen, header filters and
+status bar; grouping, bulk actions, filters and saved views join when their
+options are supplied. An omitted feature renders no controls.
+
+The root also exposes the kit's reusable table components:
+`AdaptAutoFilterForm`, `AdaptColumnMenu`, `AdaptColumnHeaderRename`,
+`AdaptColumnGroupToggle`, `AdaptColumnGroupButton`,
+`AdaptColumnSelectCheckbox`, `AdaptColumnSelectBox`, `AdaptEditableCell`,
+`AdaptNativeCellEditor`, `AdaptCheckboxCellEditor`, `AdaptFillHandle`,
+`AdaptFillHandleControl`, `AdaptExpandToggle`, `AdaptGroupHeaderRow`,
+`AdaptGroupHeaderCard`, `AdaptGroupMore`, `AdaptGroupingPanel`,
+`AdaptPivotPanel`, `AdaptPivotRowHeader`, `AdaptSavedViewsPanel`,
+`AdaptErrorState`, `AdaptTableSkeleton`, `AdaptTableRegion`, `AdaptTreeCell`,
+`AdaptTreeToggle` and `AdaptTreeButton`. `AdaptNativeCellEditor` retains the
+Angular component name but renders this kit's NG-ZORRO inputs, selects and
+checkboxes. `BodyCellView`, `BodyRow`, `BodySlot`, `RowActionsCell`,
+`TableView`, `TreeCellSlotProps`, `FiltersView` and `FiltersMode` describe the
+same Angular view and slot inputs. `menuPopover` / `MenuPopover` manage
+disclosure and dismissal; NG-ZORRO positions the actual portal.
+
+The filter popover has no backdrop, sets the trigger's `aria-expanded`,
+closes on an outside interaction or Escape, and restores trigger focus on
+Escape. A nested select keeps the parent open while choosing an option and
+consumes Escape before the parent. The filter drawer uses NG-ZORRO's real
+backdrop. The command palette supplies the required
+`CommandPaletteSlots.Surface` with an NG-ZORRO modal. `AdaptAttrs` forwards
+whole prop records to the generated semantic table and inner controls using
+its target bridge, so labels, validation, focus refs and event behavior land
+on the real element.
+
+The exported `AdaptDesktopTable`, `AdaptMobileCards`, `AdaptPaginationFooter`,
+`AdaptFiltersForm`, `AdaptFilterDrawer`, `AdaptFilterPopover`,
+`AdaptFilterChips`, `AdaptBulkBar`, `AdaptSavedViewsMenu`,
+`AdaptDensityButton`, `AdaptFullscreenButton`, `AdaptExportButton`,
+`AdaptPrintButton` and `AdaptUndoRedoButtons` remain internal composition
+controls. `AdaptOverlayOrigin`, `registerOverlayOrigin`, `overlayContains`,
+`overlayEscapeHandled` and `OVERLAY_Z` are internal portal-ownership and
+dismissal bridges, not additional public feature APIs.
+
+`@adapttable/ng-zorro/assistant` is opt-in. `tableAssistant` and
+`agentApproval` compose `AdaptTableAssistant` and `AdaptAgentApproval`.
+`TABLE_ASSISTANT_SLOTS` contains `AdaptAssistantPanel`,
+`AdaptAssistantSheet`, `AdaptAssistantWindow`, `AdaptAssistantButton`,
+`AdaptAssistantInput`, `AdaptAssistantBadge`, `AdaptAssistantMenu` and
+`AdaptAssistantLanguageChip`. `AGENT_APPROVAL_SLOTS` contains
+`AdaptApprovalButton`, `AdaptApprovalAction` and `AdaptApprovalList`.
+These controls use NG-ZORRO cards, drawer, buttons, input, tags, menu and
+select; AI sessions and transports remain in the separate AI packages.
+Importing the root table does not import the assistant or AI runtime.
 
 ## Other packages
 

@@ -8,6 +8,7 @@ import { ACTIONS_COLUMN_KEY } from '@adapttable/core';
 import { ACTIVE_FILTER_CHIPS } from '@adapttable/core/binding';
 import { ActiveFilterChip } from '@adapttable/core';
 import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
+import { AfterViewChecked } from '@angular/core';
 import { AGENT_ALWAYS_ALLOW_STATE } from '@adapttable/core/binding';
 import { AGENT_APPROVAL } from '@adapttable/core/binding';
 import { AGENT_APPROVAL_STATE } from '@adapttable/core/binding';
@@ -222,6 +223,7 @@ import { FindButtonProps } from '@adapttable/core/binding';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FindSearchProps } from '@adapttable/core/binding';
 import { focusEditorOnMount } from '@adapttable/core';
+import { formatMultiDraft } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
@@ -1022,14 +1024,21 @@ export class AdaptAssistantWorking {
 }
 
 // @public
-export class AdaptAttrs {
+export class AdaptAttrs implements AfterViewChecked {
     constructor();
     readonly adaptAttrs: InputSignal<Readonly<Record<string, unknown>>>;
+    readonly adaptAttrsTarget: InputSignal<HTMLElement | (() => HTMLElement | null) | null | undefined>;
+    ngAfterViewChecked(): void;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptAttrs, "[adaptAttrs]", never, {
         "adaptAttrs": {
             "alias": "adaptAttrs";
             "required": true;
+            "isSignal": true;
+        };
+        "adaptAttrsTarget": {
+            "alias": "adaptAttrsTarget";
+            "required": false;
             "isSignal": true;
         };
     }, {}, never, never, true, never>;
@@ -4630,6 +4639,8 @@ export { focusEditorOnMount }
 export interface FooterContext<TRow> extends HeaderContext<TRow> {
     readonly value: unknown;
 }
+
+export { formatMultiDraft }
 
 // @public
 export function fromStore<T>(store: ExternalStore<T>, options?: FromStoreOptions): Signal<T>;

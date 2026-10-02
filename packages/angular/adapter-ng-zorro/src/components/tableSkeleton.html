@@ -1,0 +1,76 @@
+<!-- Decorative placeholders stay separate from the live loading sentence. -->
+<div aria-busy="true" aria-live="polite">
+  @if (variant() === "table") {
+    <nz-table
+      aria-hidden="true"
+      nzSize="small"
+      [nzData]="rowKeys()"
+      [nzFrontPagination]="false"
+      [nzShowPagination]="false"
+      [nzTemplateMode]="true"
+    >
+      <thead>
+        <tr>
+          @for (column of columnKeys(); track column) {
+            <th>
+              <nz-skeleton-element
+                nzType="input"
+                nzSize="small"
+                [nzActive]="true"
+                [nzBlock]="true"
+                [style.width]="lineWidth(column)"
+              ></nz-skeleton-element>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rowKeys(); track row) {
+          <tr>
+            @for (column of columnKeys(); track column) {
+              <td>
+                <nz-skeleton-element
+                  nzType="input"
+                  nzSize="small"
+                  [nzActive]="true"
+                  [nzBlock]="true"
+                  [style.width]="lineWidth(column)"
+                ></nz-skeleton-element>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  } @else {
+    <div aria-hidden="true">
+      @for (row of rowKeys(); track row) {
+        <nz-card nzSize="small">
+          @for (column of cardColumns(); track column) {
+            <nz-skeleton-element
+              nzType="input"
+              nzSize="small"
+              [nzActive]="true"
+              [nzBlock]="true"
+              [style.width]="lineWidth(column)"
+            ></nz-skeleton-element>
+          }
+        </nz-card>
+      }
+    </div>
+  }
+  <span
+    style="
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    "
+    >{{ labels().loading }}</span
+  >
+</div>
