@@ -12,7 +12,10 @@
   },
   "dependencies": {
     "@adapttable/ai": "workspace:*",
+    "@adapttable/ai-angular": "workspace:*",
     "@adapttable/ai-react": "workspace:*",
+    "@adapttable/angular": "workspace:*",
+    "@adapttable/angular-unstyled": "workspace:*",
     "@adapttable/antd": "workspace:*",
     "@adapttable/base-ui": "workspace:*",
     "@adapttable/chakra": "workspace:*",
@@ -23,7 +26,8 @@
     "@adapttable/radix": "workspace:*",
     "@adapttable/react": "workspace:*",
     "@adapttable/shadcn": "workspace:*",
-    "@adapttable/unstyled": "workspace:*"
+    "@adapttable/unstyled": "workspace:*",
+    "@angular/core": "^22.2.0"
   },
   "devDependencies": {
     "@base-ui/react": "^1.7.0",

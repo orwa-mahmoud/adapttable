@@ -33,12 +33,12 @@ describe("the generated showcase pages", () => {
   it("writes one page per matrix entry and per replaced address", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
     // features — across all eight kits; the Angular unstyled kit's landing
-    // plus the thirteen features it renders; and the eight replaced top-level
+    // plus the fourteen features it renders; and the eight replaced top-level
     // addresses. Kit `/accessibility/` URLs are matrix pages again, not
     // redirects to editing. Written out rather than recomputed from the
     // matrix: the writer reads that same list, so a derived count would agree
     // with itself no matter what it produced.
-    assert.equal(files.length, 8 * 22 + (1 + 13) + 8);
+    assert.equal(files.length, 8 * 22 + (1 + 14) + 8);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
   });
 
@@ -103,8 +103,18 @@ describe("the generated showcase pages", () => {
 
   it("names the v3 AI integration capabilities in static HTML", () => {
     const ai = files.filter((file) => file.dir.endsWith("/ai"));
-    assert.equal(ai.length, 8);
-    for (const file of ai) {
+    assert.equal(ai.length, 9);
+    const angular = ai.find((file) => file.dir === "unstyled/ai");
+    assert.ok(angular, "the Angular assistant has a static page");
+    assert.match(angular.html, /injectTableAssistant/);
+    assert.match(angular.html, /tableAgent/);
+    assert.match(angular.html, /session\.execute/);
+    assert.match(angular.html, /No language model or API key is needed/);
+    assert.match(angular.html, /approved write updates the host/);
+    assert.doesNotMatch(angular.html, /Connect backend/);
+    const react = ai.filter((file) => file !== angular);
+    assert.equal(react.length, 8);
+    for (const file of react) {
       assert.match(file.html, /tableAgent/);
       assert.match(file.html, /session\.execute|catalog/);
       assert.match(file.html, /agentApproval/);

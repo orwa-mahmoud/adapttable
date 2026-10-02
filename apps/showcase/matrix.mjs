@@ -298,6 +298,7 @@ export const SHOWCASE_ADAPTERS = [
       "nested-tables",
       "rows",
       "column-groups",
+      "ai",
     ],
   },
 ];
@@ -2156,6 +2157,22 @@ export function Sales({ rows, columns, teamTotal, grandTotal }) {
     title: "{kit} AI table assistant demo — AdaptTable",
     description:
       "Try a {kit} {framework} table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend.",
+    heads: {
+      unstyled: {
+        h1: "AI table assistant in {kit} {framework}",
+        title: "{kit} {framework} AI table assistant demo — AdaptTable",
+        description:
+          "Try a local {kit} {framework} table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required.",
+        card: "Local sort, questions and approved edits with real table outcomes.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "This deterministic local demo mounts a real {kit} {framework} table and its native assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.",
+        "A question filters the table only after you answer. A proposed edit waits for your approval in the assistant, the table or a dialog; an approved write updates the host's data and its status line. Rejecting leaves the data unchanged, and the conversation records the execution result.",
+        "`tableAgent` and `injectTableAssistant` from `@adapttable/ai-angular` share the mounted table's session. The snippet below shows a minimal local sorting transport; the demo also includes questions and governed edits. JSON, OpenAI, HTTP, MCP, MCP Apps, WebMCP, AG-UI and AI SDK helpers can use the same session in your application.",
+      ],
+    },
     intro: [
       "`@adapttable/ai` is optional and provider-neutral. This {kit} demo combines a conversational assistant with a real table. Try filtering, grouping, column pinning and a proposed edit; available actions depend on the mounted features and the host's permissions. Row pinning requires an ungrouped view in this demo.",
       "Start in Simulated mode: suggested prompts run deterministic local scenarios, not a language model. The conversation shows action receipts; a proposed write still follows approval and save policy. Connect backend sends your prompt and permitted table context to an endpoint you run. The assistant keeps the same table session and {kit} controls in both modes.",
@@ -2217,7 +2234,80 @@ export function Orders({ rows, columns, onEdit }) {
     </>
   );
 }`,
+    snippets: {
+      angular: `import type { AgentSession, AssistantTransport } from "@adapttable/ai";
+import { injectTableAssistant, tableAgent } from "@adapttable/ai-angular";
+import type { ColumnDef, TableAssistantProps } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { AdaptTableAssistant } from "{pkg}/assistant";
+import { Component, computed, signal } from "@angular/core";
+
+interface AgentPerson { id: string; name: string; salary: number }
+
+// A minimal local transport: no model, endpoint or API key.
+const transport: AssistantTransport = {
+  send: async ({ session, text, signal }) => {
+    if (!text.toLowerCase().includes("sort")) {
+      return { text: "Try: sort salaries highest first." };
+    }
+    const key = "view.setSort";
+    const result = await session.execute(
+      key,
+      { key: "salary", dir: "desc" },
+      session.manifest().viewRevision,
+      crypto.randomUUID(),
+      signal
+    );
+    return {
+      text: result.ok ? "Highest salary first." : "The sort was not applied.",
+      keys: [key],
+      results: [result],
+    };
+  },
+};
+
+@Component({
+  selector: "app-people-assistant",
+  imports: [AdaptDataTable, AdaptTableAssistant],
+  template: \`
+    <adapt-data-table
+      [data]="rows" [columns]="columns" [rowKey]="rowKey"
+      [features]="features" [urlSync]="false"
+    />
+    <adapt-table-assistant [props]="props()" />
+  \`,
+})
+export class PeopleAssistant {
+  readonly rows: readonly AgentPerson[] = [
+    { id: "ada", name: "Ada Lovelace", salary: 120 },
+    { id: "grace", name: "Grace Hopper", salary: 140 },
+  ];
+  readonly columns: readonly ColumnDef<AgentPerson>[] = [
+    { key: "name", header: "Person" },
+    { key: "salary", header: "Salary", sortable: true },
+  ];
+  readonly rowKey = (row: AgentPerson) => row.id;
+  readonly session = signal<AgentSession | undefined>(undefined);
+  readonly open = signal(true);
+  readonly assistant = injectTableAssistant(computed(() => ({
+    session: this.session(), transport,
+  })));
+  readonly props = computed((): TableAssistantProps => ({
+    assistant: this.assistant(),
+    open: this.open(),
+    onOpenChange: (open) => this.open.set(open),
+    presentation: "panel",
+  }));
+  readonly features = [tableAgent({
+    tableId: "people", approval: "never",
+    columns: { salary: { type: "number", sortable: true } },
+    bridge: { attach: (session) => this.session.set(session) },
+  })];
+}`,
+    },
     notes: {
+      unstyled:
+        "The assistant, question choices and approval controls are native HTML. This page runs a local script only; the host status line records approved writes, and the approval-surface selector chooses assistant, table or dialog review.",
       mantine:
         "The optional assistant, filters and approval controls use Mantine. Import the assistant separately, or build your own conversation UI on the headless controller.",
       mui: "The optional assistant uses MUI controls alongside the Material table and approval strip. Its separate import keeps chat UI out of tables that do not need it.",

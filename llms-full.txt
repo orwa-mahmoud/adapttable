@@ -19733,6 +19733,86 @@ itself, for a binding projecting them into `@adapttable/ai`'s
 `agentObservation`. It reports what the runtime does; what that means for a
 capability is decided there, once, rather than per binding.
 
+## The Angular AI binding
+
+`@adapttable/ai-angular` is an unpublished, opt-in Angular binding over
+`@adapttable/ai`. Importing the Angular table or its native kit does not load an
+agent controller or a transport.
+
+- `tableAgent(options)` mounts the neutral table-agent controller. Options can
+  be a signal: policy and callbacks stay current without recreating the table.
+  `TableAgentOptions`, `TableAgentBridge`, `TableAgentColumnPatch` and
+  `SharedApproval` describe that boundary. `TABLE_AGENT_STATE` publishes the
+  live session. Removing the table releases subscriptions, parked approval,
+  bridge announcements, pending sampling and WebMCP registrations.
+- `injectTableAssistant(options)` returns a signal of `TableAssistantState`;
+  `TableAssistantOptions` supplies the session, transport, optional host-owned
+  transcript/open state, context, suggestions and resume handle. Sending,
+  cancellation, receipts, questions, interrupted turns, resume and undo use
+  the same neutral controller as other bindings. Explicit host context and
+  always-allow inputs override table feature state.
+- `injectSpeechInput(options)` returns a signal of the structural
+  `SpeechInputHandle`. `SpeechInputOptions`, `VoiceOptions` and `SpeechClip`
+  describe browser dictation or a backend recording, live draft/clip callbacks,
+  offered languages and locale. Recognized words update the draft without
+  automatically sending it; destruction releases the input.
+- HTTP, JSON, OpenAI, MCP, MCP Apps, WebMCP, AG-UI and AI SDK integrations still
+  come from `@adapttable/ai`'s existing subpaths. Angular changes the mounting
+  lifecycle, not the transport or protocol. The `angular-ai-*` examples show
+  each path against a real native Angular table.
+
+## Angular assistant and approval controls
+
+The binding's `AdaptTableAssistantChrome` renders a `TableAssistantProps` view
+through required `TableAssistantSlots`; `TableAssistantChromeProps` also names
+those controls. `TableAssistantNode` is Angular template/text/icon content,
+with `TableAssistantFace` / `TableAssistantAvatars` for the speaker marks and
+`TableAssistantMenuItem` for menu entries. Slot contracts are
+`TableAssistantButtonProps`, `TableAssistantComposerProps`,
+`TableAssistantMenuProps`, `TableAssistantPanelProps`,
+`TableAssistantSheetProps`, `TableAssistantWindowProps`,
+`TableAssistantBadgeProps` and `TableAssistantLanguageChipProps`.
+`TableAssistantPresentation` selects floating, panel or sheet, while
+`TableAssistantBoundary` selects the viewport or containing table.
+
+`AdaptAssistantContent`, `AdaptAssistantMessage`, `AdaptSpeakerMark`,
+`AdaptAssistantWorking`, `AdaptAssistantAlwaysAllowed` and
+`AdaptAssistantReceipt` render core's message, status, receipt and allowance
+models. `AdaptAssistantComposer` takes `AssistantComposerProps`; it preserves
+IME input and Shift+Enter, and sends on an unmodified Enter. The
+`injectConversationScroll` / `ConversationScroll` pair follows new messages
+only while the reader remains near the end. `FLOATING_MIN_WIDTH`,
+`floatingFits`, `floatingStyle`, `launcherStyle` and
+`injectAssistantFloatingFits` adapt core's placement to Angular.
+`createAdapterTableAssistantFeature` fills `TABLE_ASSISTANT` with the kit's
+component. The native table accepts optional `assistant` props for that slot,
+or a host can render the component beside the table.
+
+`AdaptAgentApprovalChrome` takes `AgentApprovalChromeProps` and required
+`AgentApprovalSlots`. `AdaptApprovalReviewChrome` shares the review body using
+`ApprovalReviewChromeProps`, `ApprovalReviewSlots` and Angular
+`AgentApprovalListProps`. `createAdapterAgentApprovalFeature` fills
+`AGENT_APPROVAL`. Core's `approvalReview` supplies `ApprovalReview` and
+`ApprovalReviewItem`; `AgentApprovalDecision`, `AgentApprovalOperation`,
+`AgentApprovalProposal`, `AgentApprovalPending` and `AgentApprovalButtonProps`
+keep host decisions typed. Exactly one of the table, widget or modal surfaces
+owns a pending decision. Escape rejects; Enter is not blanket approval.
+
+The `AGENT_APPROVAL_STATE`, `AGENT_ALWAYS_ALLOW_STATE`, `AGENT_PROGRESS_STATE`
+and `AGENT_VIEW_STATE` keys carry `AgentApprovalPending`,
+`AgentAlwaysAllowState`, `AgentProgress` and `AgentViewState` respectively.
+The neutral `TableAssistantView` family describes the rendered conversation;
+`assistantIsBusy` and `assistantIsUsable` remain core's status predicates.
+
+`@adapttable/angular-unstyled/assistant` exports `AdaptTableAssistant`,
+`tableAssistant`, `TABLE_ASSISTANT_SLOTS`, `AdaptAssistantButton`,
+`AdaptAssistantInput`, `AdaptAssistantBadge`, `AdaptAssistantPanel`,
+`AdaptAssistantSheet`, `AdaptAssistantWindow`, `AdaptAssistantLanguageChip`
+and `AdaptAssistantMenu`. Approval exports are `AdaptAgentApproval`,
+`agentApproval`, `AdaptApprovalButton`, `AdaptApprovalAction`,
+`AdaptApprovalList` and `AGENT_APPROVAL_SLOTS`. These are native controls;
+Chrome owns the structural parts, keyboard rules and localized labels.
+
 ## The Angular binding
 
 `@adapttable/angular` is the Angular binding for Angular 20 and newer. It
@@ -19741,6 +19821,19 @@ signals. It lays out structure — rows, cards, headers, keyboard wiring,
 labels, live regions and part names — and every control a reader clicks
 comes from a kit through a slot.
 
+- `AdaptTableFeature.mount` receives a `FeatureMountContext`: the live runtime,
+  Angular injector, per-table `FeatureState`, and synchronous `flush` /
+  `flushAdmission` boundaries. `mountTableFeatures` orders the mounted features
+  and disposes each once. `tableFeaturesOf` combines injector-provided features
+  with the table's own list; a later duplicate id wins for setup, options,
+  rendering and mounting alike.
+- `createFeatureState`, `ADAPTTABLE_FEATURE_STATE` and `injectFeatureState`
+  publish and read typed `FeatureStateKey` handles declared with
+  `featureStateKey`. Tables and slots have isolated state scopes. An explicit
+  publication refreshes readers even when a mutable handle's identity is stable.
+  `tableRuntimeFor`, `RuntimeGrouping` and `RuntimeTableOptions` project the completed table's
+  filtering, selection, layout, row pins, grouping/tree order, edits and actions
+  through the neutral `TableRuntime` / `TableRuntimeView`.
 - `injectFrontendData(options)` is the in-memory tier: it takes
   `FrontendDataOptions` (the rows, as a value or a signal, plus the URL-state
   options, and `isLoading`, `isFetching`, `error` and `refetch` to show when

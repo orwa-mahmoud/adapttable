@@ -212,6 +212,7 @@ function adapttableSubpaths(): Plugin {
 const ANGULAR_SOURCES = [
   fileURLToPath(new URL("./src/angular/", import.meta.url)),
   `${packageDir("angular")}${sep}`,
+  `${packageDir("ai-angular")}${sep}`,
   `${packageDir("adapter-angular-unstyled")}${sep}`,
 ];
 
@@ -274,6 +275,7 @@ export default defineConfig({
       { find: /^@adapttable\/react$/, replacement: pkg("react") },
       { find: /^@adapttable\/ai$/, replacement: pkg("ai") },
       { find: /^@adapttable\/ai-react$/, replacement: pkg("ai-react") },
+      { find: /^@adapttable\/ai-angular$/, replacement: pkg("ai-angular") },
       { find: /^@adapttable\/i18n$/, replacement: pkg("i18n") },
       { find: /^@adapttable\/mantine$/, replacement: pkg("adapter-mantine") },
       { find: /^@adapttable\/mui$/, replacement: pkg("adapter-mui") },

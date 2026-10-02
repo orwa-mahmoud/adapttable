@@ -8,10 +8,32 @@ import { ACTIONS_COLUMN_KEY } from '@adapttable/core';
 import { ACTIVE_FILTER_CHIPS } from '@adapttable/core/binding';
 import { ActiveFilterChip } from '@adapttable/core';
 import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
+import { AGENT_ALWAYS_ALLOW_STATE } from '@adapttable/core/binding';
+import { AGENT_APPROVAL } from '@adapttable/core/binding';
+import { AGENT_APPROVAL_STATE } from '@adapttable/core/binding';
+import { AGENT_PROGRESS_STATE } from '@adapttable/core/binding';
+import { AGENT_VIEW_STATE } from '@adapttable/core/binding';
+import { AgentAlwaysAllowState } from '@adapttable/core/binding';
+import { AgentApprovalButtonProps } from '@adapttable/core/binding';
+import { AgentApprovalDecision } from '@adapttable/core';
+import { AgentApprovalListProps as AgentApprovalListProps_2 } from '@adapttable/core/binding';
+import { AgentApprovalOperation } from '@adapttable/core';
+import { AgentApprovalPending } from '@adapttable/core/binding';
+import { AgentApprovalPending as AgentApprovalPending_2 } from '@adapttable/core';
+import { AgentApprovalProposal } from '@adapttable/core';
+import { AgentApprovalProps } from '@adapttable/core/binding';
+import { AgentProgress } from '@adapttable/core/binding';
+import { AgentViewState } from '@adapttable/core/binding';
 import { AggregateOptions } from '@adapttable/core';
 import { AggregateSpec } from '@adapttable/core';
+import { ApprovalReview } from '@adapttable/core';
+import { approvalReview } from '@adapttable/core';
+import { ApprovalReviewItem } from '@adapttable/core';
 import { asBatchGesture } from '@adapttable/core';
 import { AssemblyFns } from '@adapttable/core/binding';
+import { assistantFloatingFits } from '@adapttable/core/binding';
+import { assistantIsBusy } from '@adapttable/core/binding';
+import { assistantIsUsable } from '@adapttable/core/binding';
 import { BATCH_EDIT_BAR } from '@adapttable/core/binding';
 import { BatchEditBarModel } from '@adapttable/core';
 import { BatchEditBarProps } from '@adapttable/core/binding';
@@ -153,6 +175,8 @@ import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSetup } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
+import { FeatureStateKey } from '@adapttable/core/binding';
+import { featureStateKey } from '@adapttable/core/binding';
 import { FILL_HANDLE } from '@adapttable/core/binding';
 import { FillHandleSlotProps } from '@adapttable/core/binding';
 import { FILTER_DRAWER } from '@adapttable/core/binding';
@@ -352,6 +376,7 @@ import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
 import { RowStyle } from '@adapttable/core';
 import { RowValidator } from '@adapttable/core';
 import { runRowAction } from '@adapttable/core';
+import { RuntimeChromeInput } from '@adapttable/core/binding';
 import { SAVED_VIEWS } from '@adapttable/core/binding';
 import { SavedView } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
@@ -373,18 +398,52 @@ import { slotRender } from '@adapttable/core/binding';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
+import { SpeechInputHandle } from '@adapttable/core/binding';
+import { SpeechInputState } from '@adapttable/core/binding';
+import { SpeechInputStatus } from '@adapttable/core/binding';
 import { splitRelativeToken } from '@adapttable/core';
 import { STATUS_BAR } from '@adapttable/core/binding';
 import { StatusBarItem } from '@adapttable/core';
 import { stopCellEditKeyboard } from '@adapttable/core';
 import { stopEditKeys } from '@adapttable/core';
 import { SummaryRowFn } from '@adapttable/core';
+import { TABLE_ASSISTANT } from '@adapttable/core/binding';
+import { TableAssistantAllowanceView } from '@adapttable/core/binding';
+import { TableAssistantAvatars as TableAssistantAvatars_2 } from '@adapttable/core/binding';
+import { TableAssistantBadgeProps } from '@adapttable/core/binding';
+import { TableAssistantBadgeTone } from '@adapttable/core/binding';
+import { TableAssistantBoundary } from '@adapttable/core/binding';
+import { TableAssistantButtonProps as TableAssistantButtonProps_2 } from '@adapttable/core/binding';
+import { TableAssistantComposerProps as TableAssistantComposerProps_2 } from '@adapttable/core/binding';
+import { TableAssistantFace as TableAssistantFace_2 } from '@adapttable/core/binding';
+import { TableAssistantLanguageChipProps } from '@adapttable/core/binding';
+import { TableAssistantMenuItem as TableAssistantMenuItem_2 } from '@adapttable/core/binding';
+import { TableAssistantMenuProps as TableAssistantMenuProps_2 } from '@adapttable/core/binding';
+import { TableAssistantMessageView } from '@adapttable/core/binding';
+import { TableAssistantPanelProps as TableAssistantPanelProps_2 } from '@adapttable/core/binding';
+import { TableAssistantPlacement } from '@adapttable/core/binding';
+import { TableAssistantPresentation } from '@adapttable/core/binding';
+import { TableAssistantProgressView } from '@adapttable/core/binding';
+import { TableAssistantProps as TableAssistantProps_2 } from '@adapttable/core/binding';
+import { TableAssistantQuestionOption } from '@adapttable/core/binding';
+import { TableAssistantQuestionView } from '@adapttable/core/binding';
+import { TableAssistantReceiptSubject } from '@adapttable/core/binding';
+import { TableAssistantReceiptView } from '@adapttable/core/binding';
+import { TableAssistantResumableView } from '@adapttable/core/binding';
+import { TableAssistantSheetProps as TableAssistantSheetProps_2 } from '@adapttable/core/binding';
+import { TableAssistantSuggestionView } from '@adapttable/core/binding';
+import { TableAssistantUndoView } from '@adapttable/core/binding';
+import { TableAssistantView } from '@adapttable/core/binding';
+import { TableAssistantWindowProps as TableAssistantWindowProps_2 } from '@adapttable/core/binding';
 import { TableCommandOptions } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableLabels as TableLabels_2 } from '@adapttable/core/binding';
 import { TableQuery } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
+import { TableRuntime } from '@adapttable/core/binding';
+import { TableRuntime as TableRuntime_2 } from '@adapttable/core';
+import { TableRuntimeView } from '@adapttable/core/binding';
 import { TableSource } from '@adapttable/core';
 import { TableViewState } from '@adapttable/core';
 import { TableViewStore } from '@adapttable/core';
@@ -433,6 +492,508 @@ export function activeFilterChipsFor<TRow>(source: Signal<TableSource<TRow>>, ru
 }>;
 
 export { ActiveFilterChipsSlotProps }
+
+// @public
+export class AdaptAgentApprovalChrome {
+    constructor();
+    // (undocumented)
+    protected readonly back: () => void;
+    readonly buttonClassName: InputSignal<string | undefined>;
+    readonly className: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly expand: () => void;
+    // (undocumented)
+    protected readonly expanded: WritableSignal<boolean>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    // (undocumented)
+    protected readonly mine: Signal<AgentApprovalPending_2 | null>;
+    protected onKeyDown(event: KeyboardEvent): void;
+    readonly pending: InputSignal<AgentApprovalPending_2 | null | undefined>;
+    // (undocumented)
+    protected readonly review: Signal<ApprovalReview | null>;
+    readonly slots: InputSignal<ApprovalReviewSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAgentApprovalChrome, "adapt-agent-approval-chrome", never, {
+        "pending": {
+            "alias": "pending";
+            "required": false;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "buttonClassName": {
+            "alias": "buttonClassName";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptAgentApprovalChrome, never>;
+}
+
+// @public
+export class AdaptApprovalReviewChrome {
+    // (undocumented)
+    protected readonly alwaysAllowProps: Signal<AgentApprovalButtonProps | undefined>;
+    // (undocumented)
+    protected readonly approveProps: Signal<AgentApprovalButtonProps>;
+    // (undocumented)
+    protected readonly backProps: Signal<AgentApprovalButtonProps | undefined>;
+    readonly buttonClassName: InputSignal<string | undefined>;
+    readonly className: InputSignal<string | undefined>;
+    readonly expanded: InputSignal<boolean | undefined>;
+    // (undocumented)
+    protected readonly expandProps: Signal<AgentApprovalButtonProps | undefined>;
+    protected readonly headingId: string;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    // (undocumented)
+    protected readonly listProps: Signal<AgentApprovalListProps>;
+    readonly onAlwaysAllow: InputSignal<(() => void) | undefined>;
+    readonly onApprove: InputSignal<() => void>;
+    readonly onBack: InputSignal<(() => void) | undefined>;
+    readonly onDecide: InputSignal<((index: number, approved: boolean) => void) | undefined>;
+    readonly onExpand: InputSignal<(() => void) | undefined>;
+    readonly onReject: InputSignal<() => void>;
+    // (undocumented)
+    protected readonly pairs: Signal<readonly {
+    name: string;
+    value: string;
+    }[]>;
+    // (undocumented)
+    protected readonly perItem: Signal<boolean>;
+    // (undocumented)
+    protected readonly rejectProps: Signal<AgentApprovalButtonProps>;
+    readonly review: InputSignal<ApprovalReview>;
+    // (undocumented)
+    protected readonly rows: Signal<readonly {
+    readonly item: ApprovalReviewItem;
+    readonly text: string;
+    readonly approve: AgentApprovalButtonProps;
+    readonly reject: AgentApprovalButtonProps;
+    }[]>;
+    readonly slots: InputSignal<ApprovalReviewSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptApprovalReviewChrome, "adapt-approval-review-chrome", never, {
+        "review": {
+            "alias": "review";
+            "required": true;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "expanded": {
+            "alias": "expanded";
+            "required": false;
+            "isSignal": true;
+        };
+        "onExpand": {
+            "alias": "onExpand";
+            "required": false;
+            "isSignal": true;
+        };
+        "onBack": {
+            "alias": "onBack";
+            "required": false;
+            "isSignal": true;
+        };
+        "onApprove": {
+            "alias": "onApprove";
+            "required": true;
+            "isSignal": true;
+        };
+        "onReject": {
+            "alias": "onReject";
+            "required": true;
+            "isSignal": true;
+        };
+        "onDecide": {
+            "alias": "onDecide";
+            "required": false;
+            "isSignal": true;
+        };
+        "onAlwaysAllow": {
+            "alias": "onAlwaysAllow";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "buttonClassName": {
+            "alias": "buttonClassName";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptApprovalReviewChrome, never>;
+}
+
+// @public
+export class AdaptAssistantAlwaysAllowed {
+    // (undocumented)
+    readonly allowed: InputSignal<readonly TableAssistantAllowanceView[]>;
+    protected readonly controls: Signal<    {
+    capability: string;
+    button: TableAssistantButtonProps;
+    }[]>;
+    // (undocumented)
+    readonly labels: InputSignal<TableLabels | undefined>;
+    // (undocumented)
+    readonly onRevoke: InputSignal<(capability: string) => void>;
+    // (undocumented)
+    readonly slots: InputSignal<TableAssistantSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantAlwaysAllowed, "adapt-assistant-always-allowed", never, {
+        "allowed": {
+            "alias": "allowed";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+        "onRevoke": {
+            "alias": "onRevoke";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptAssistantAlwaysAllowed, never>;
+}
+
+// @public
+export class AdaptAssistantComposer {
+    // (undocumented)
+    protected readonly action: Signal<TableAssistantButtonProps>;
+    // (undocumented)
+    protected readonly busy: Signal<boolean>;
+    // (undocumented)
+    protected readonly composer: Signal<TableAssistantComposerProps>;
+    protected readonly exampleButtons: Signal<    {
+    id: string;
+    button: TableAssistantButtonProps;
+    }[]>;
+    // (undocumented)
+    protected readonly language: Signal<    {
+    label: string;
+    value: string;
+    options: {
+    value: string;
+    label: string;
+    }[];
+    part: string;
+    disabled: boolean;
+    onChange: (language: string) => void;
+    } | null>;
+    // (undocumented)
+    protected readonly listening: Signal<boolean>;
+    // (undocumented)
+    protected readonly menu: Signal<    {
+    part: string;
+    icon: IconDescriptor;
+    disabled: boolean;
+    maxHeight: string;
+    label: string;
+    items: readonly TableAssistantMenuItem_2<TableAssistantNode>[];
+    onSelect: (id: string) => void;
+    } | null>;
+    // (undocumented)
+    protected readonly microphone: Signal<TableAssistantButtonProps>;
+    readonly props: InputSignal<AssistantComposerProps>;
+    readonly slots: InputSignal<TableAssistantSlots>;
+    // (undocumented)
+    protected readonly usable: Signal<boolean>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantComposer, "adapt-assistant-composer", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptAssistantComposer, never>;
+}
+
+// @public
+export class AdaptAssistantContent {
+    readonly content: InputSignal<TableAssistantNode | undefined>;
+    // (undocumented)
+    protected readonly icon: Signal<IconDescriptor | null>;
+    // (undocumented)
+    protected readonly template: Signal<TemplateRef<unknown> | null>;
+    // (undocumented)
+    protected readonly text: Signal<TableAssistantNode | undefined>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantContent, "adapt-assistant-content", never, {
+        "content": {
+            "alias": "content";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptAssistantContent, never>;
+}
+
+// @public
+export class AdaptAssistantMessage {
+    constructor();
+    // (undocumented)
+    readonly action: InputSignal<    {
+    readonly label: string;
+    readonly onRun: () => void;
+    } | undefined>;
+    // (undocumented)
+    protected readonly actionsButton: Signal<TableAssistantButtonProps>;
+    protected readonly answerOptions: Signal<    {
+    id: string;
+    button: TableAssistantButtonProps;
+    }[]>;
+    // (undocumented)
+    readonly avatars: InputSignal<TableAssistantAvatars | undefined>;
+    // (undocumented)
+    protected readonly expanded: WritableSignal<boolean>;
+    // (undocumented)
+    protected readonly hasActions: Signal<boolean>;
+    // (undocumented)
+    protected readonly headingId: string;
+    // (undocumented)
+    readonly labels: InputSignal<TableLabels | undefined>;
+    // (undocumented)
+    readonly leads: InputSignal<boolean>;
+    // (undocumented)
+    protected readonly loneUndo: Signal<TableAssistantButtonProps>;
+    // (undocumented)
+    readonly message: InputSignal<TableAssistantMessageView>;
+    // (undocumented)
+    protected readonly mine: Signal<boolean>;
+    // (undocumented)
+    protected readonly offerButton: Signal<TableAssistantButtonProps | null>;
+    // (undocumented)
+    readonly onAnswer: InputSignal<((answer: {
+    optionId?: string;
+    text?: string;
+    }) => void) | undefined>;
+    // (undocumented)
+    readonly onUndo: InputSignal<(() => void) | undefined>;
+    // (undocumented)
+    readonly onUndoAction: InputSignal<((idempotencyKey: string) => void) | undefined>;
+    // (undocumented)
+    protected readonly perRow: Signal<number>;
+    protected readonly receiptRows: Signal<    {
+    receipt: TableAssistantReceiptView;
+    onUndo: (() => void) | undefined;
+    }[]>;
+    // (undocumented)
+    readonly receipts: InputSignal<boolean>;
+    // (undocumented)
+    protected readonly shown: Signal<readonly TableAssistantReceiptView[]>;
+    // (undocumented)
+    readonly slots: InputSignal<TableAssistantSlots>;
+    // (undocumented)
+    protected readonly speaker: Signal<string>;
+    // (undocumented)
+    protected readonly spoken: Signal<TableAssistantMessageView>;
+    // (undocumented)
+    protected readonly tailInset: WritableSignal<number | undefined>;
+    // (undocumented)
+    readonly undo: InputSignal<TableAssistantUndoView | undefined>;
+    // (undocumented)
+    protected readonly undoReason: Signal<string>;
+    // (undocumented)
+    protected readonly wholeUndo: Signal<TableAssistantButtonProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantMessage, "adapt-assistant-message", never, {
+        "message": {
+            "alias": "message";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+        "action": {
+            "alias": "action";
+            "required": false;
+            "isSignal": true;
+        };
+        "undo": {
+            "alias": "undo";
+            "required": false;
+            "isSignal": true;
+        };
+        "onUndo": {
+            "alias": "onUndo";
+            "required": false;
+            "isSignal": true;
+        };
+        "onUndoAction": {
+            "alias": "onUndoAction";
+            "required": false;
+            "isSignal": true;
+        };
+        "receipts": {
+            "alias": "receipts";
+            "required": false;
+            "isSignal": true;
+        };
+        "leads": {
+            "alias": "leads";
+            "required": false;
+            "isSignal": true;
+        };
+        "avatars": {
+            "alias": "avatars";
+            "required": false;
+            "isSignal": true;
+        };
+        "onAnswer": {
+            "alias": "onAnswer";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptAssistantMessage, never>;
+}
+
+// @public
+export class AdaptAssistantReceipt {
+    // (undocumented)
+    protected readonly change: Signal<    {
+    before: string;
+    after: string;
+    spoken: string;
+    } | null>;
+    // (undocumented)
+    protected readonly detail: Signal<string | undefined>;
+    // (undocumented)
+    protected readonly detailButton: Signal<TableAssistantButtonProps>;
+    // (undocumented)
+    protected readonly expanded: WritableSignal<boolean>;
+    // (undocumented)
+    protected readonly glyph: Signal<    {
+    readonly icon: IconDescriptor;
+    readonly ink: string;
+    }>;
+    // (undocumented)
+    protected readonly headline: Signal<string>;
+    // (undocumented)
+    readonly labels: InputSignal<TableLabels | undefined>;
+    // (undocumented)
+    protected readonly needsSave: Signal<boolean>;
+    // (undocumented)
+    readonly onUndo: InputSignal<(() => void) | undefined>;
+    // (undocumented)
+    readonly receipt: InputSignal<TableAssistantReceiptView>;
+    // (undocumented)
+    protected readonly saveBadge: Signal<    {
+    label: string;
+    part: string;
+    tone: "warning";
+    }>;
+    // (undocumented)
+    readonly slots: InputSignal<TableAssistantSlots>;
+    // (undocumented)
+    protected readonly undoButton: Signal<TableAssistantButtonProps>;
+    // (undocumented)
+    protected readonly where: Signal<string>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantReceipt, "adapt-assistant-receipt", never, {
+        "receipt": {
+            "alias": "receipt";
+            "required": true;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "onUndo": {
+            "alias": "onUndo";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptAssistantReceipt, never>;
+}
+
+// @public
+export class AdaptAssistantWorking {
+    // (undocumented)
+    readonly labels: InputSignal<TableLabels | undefined>;
+    // (undocumented)
+    readonly progress: InputSignal<TableAssistantProgressView | null | undefined>;
+    // (undocumented)
+    protected readonly word: Signal<string>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantWorking, "adapt-assistant-working", never, {
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "progress": {
+            "alias": "progress";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptAssistantWorking, never>;
+}
 
 // @public
 export class AdaptAttrs {
@@ -2461,6 +3022,51 @@ export class AdaptSlot<TProps> {
 }
 
 // @public
+export class AdaptSpeakerMark {
+    // (undocumented)
+    readonly avatar: InputSignal<TableAssistantNode | undefined>;
+    // (undocumented)
+    protected readonly custom: Signal<boolean>;
+    // (undocumented)
+    protected readonly defaultIcon: Signal<IconDescriptor>;
+    // (undocumented)
+    readonly hidden: InputSignal<boolean>;
+    // (undocumented)
+    protected readonly initials: Signal<string>;
+    // (undocumented)
+    protected readonly markPart: Signal<string>;
+    // (undocumented)
+    readonly mine: InputSignal<boolean>;
+    // (undocumented)
+    readonly part: InputSignal<string | undefined>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptSpeakerMark, "adapt-speaker-mark", never, {
+        "mine": {
+            "alias": "mine";
+            "required": false;
+            "isSignal": true;
+        };
+        "hidden": {
+            "alias": "hidden";
+            "required": false;
+            "isSignal": true;
+        };
+        "avatar": {
+            "alias": "avatar";
+            "required": false;
+            "isSignal": true;
+        };
+        "part": {
+            "alias": "part";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSpeakerMark, never>;
+}
+
+// @public
 export class AdaptStatusBarChrome {
     protected readonly barProps: Signal<    {
     readonly items: readonly StatusBarItem[];
@@ -2552,6 +3158,9 @@ export class AdaptStatusBarChrome {
 export const ADAPTTABLE_CONTEXT_MENU: InjectionToken<WritableSignal<ContextMenuRegionHandlers | null>>;
 
 // @public
+export const ADAPTTABLE_FEATURE_STATE: InjectionToken<FeatureState>;
+
+// @public
 export const ADAPTTABLE_FEATURES: InjectionToken<readonly AdaptTableFeature[]>;
 
 // @public
@@ -2567,9 +3176,139 @@ export const ADAPTTABLE_SLOT_TABLE: InjectionToken<SlotTable>;
 export const ADAPTTABLE_URL_ADAPTER: InjectionToken<UrlStateAdapter>;
 
 // @public
+export class AdaptTableAssistantChrome {
+    constructor();
+    // (undocumented)
+    protected readonly back: () => void;
+    // (undocumented)
+    protected readonly backButton: Signal<TableAssistantButtonProps>;
+    // (undocumented)
+    protected readonly badge: Signal<{
+        label: string;
+        part: string;
+        tone: TableAssistantBadgeTone;
+    }>;
+    // (undocumented)
+    protected readonly close: () => void;
+    // (undocumented)
+    protected readonly closeButton: Signal<TableAssistantButtonProps>;
+    // (undocumented)
+    protected readonly composer: Signal<AssistantComposerProps>;
+    // (undocumented)
+    protected readonly error: Signal<string | undefined>;
+    // (undocumented)
+    protected readonly expand: () => void;
+    // (undocumented)
+    protected readonly expanded: WritableSignal<boolean>;
+    // (undocumented)
+    protected readonly jumpButton: Signal<TableAssistantButtonProps>;
+    // (undocumented)
+    protected readonly launcherButton: Signal<TableAssistantButtonProps>;
+    // (undocumented)
+    protected readonly launcherPlacement: Signal<TableAssistantPlacement | {
+        display: string;
+    }>;
+    protected readonly messageRows: Signal<{
+        message: TableAssistantMessageView;
+        leads: boolean;
+        action: {
+            readonly label: string;
+            readonly onRun: () => void;
+        } | undefined;
+        undo: TableAssistantUndoView | undefined;
+        onAnswer: ((answer: {
+            optionId?: string;
+            text?: string;
+        }) => void) | undefined;
+    }[]>;
+    // (undocumented)
+    protected readonly messages: Signal<readonly TableAssistantMessageView[]>;
+    // (undocumented)
+    protected readonly modalReview: Signal<ApprovalReview | null>;
+    // (undocumented)
+    protected readonly modalSheet: Signal<{
+        dir?: "rtl" | "ltr" | undefined;
+        label: string;
+        part: string;
+        open: boolean;
+        onClose: (reason?: string) => void;
+        children: TemplateRef<unknown>;
+    } | null>;
+    // (undocumented)
+    protected onKeyDown(event: KeyboardEvent): void;
+    readonly props: InputSignal<TableAssistantProps>;
+    // (undocumented)
+    protected readonly rejoinable: Signal<boolean>;
+    // (undocumented)
+    protected readonly rejoinButton: Signal<TableAssistantButtonProps>;
+    // (undocumented)
+    protected readonly resolved: Signal<TableAssistantPresentation>;
+    // (undocumented)
+    protected readonly review: Signal<ApprovalReview | null>;
+    // (undocumented)
+    protected readonly reviewSlots: Signal<ApprovalReviewSlots>;
+    // (undocumented)
+    protected readonly scroll: ConversationScroll;
+    // (undocumented)
+    protected readonly settingsButton: Signal<TableAssistantButtonProps>;
+    readonly slots: InputSignal<TableAssistantSlots>;
+    // (undocumented)
+    protected readonly status: Signal<string>;
+    // (undocumented)
+    protected readonly surfaceComponent: Signal<Type<unknown>>;
+    // (undocumented)
+    protected readonly surfaceProps: Signal<{
+        className?: string | undefined;
+        label: string;
+        part: string;
+        children: TemplateRef<unknown>;
+    } | {
+        style: TableAssistantPlacement;
+        className?: string | undefined;
+        label: string;
+        part: string;
+        children: TemplateRef<unknown>;
+    } | {
+        dir?: "rtl" | "ltr" | undefined;
+        open: boolean;
+        onClose: () => void;
+        className?: string | undefined;
+        label: string;
+        part: string;
+        children: TemplateRef<unknown>;
+    } | null>;
+    // (undocumented)
+    protected readonly title: Signal<string>;
+    // (undocumented)
+    protected readonly undoAction: (key: string) => void;
+    // (undocumented)
+    protected readonly undoTurn: () => void;
+    // (undocumented)
+    protected readonly widgetApproval: Signal<AgentApprovalPending_2 | null>;
+    // (undocumented)
+    protected readonly working: Signal<boolean>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTableAssistantChrome, "adapt-table-assistant-chrome", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTableAssistantChrome, never>;
+}
+
+// @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     readonly id?: string;
+    mount?(context: FeatureMountContext): void | (() => void);
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
 
@@ -2709,6 +3448,45 @@ export class AdaptTreeToggleChrome {
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTreeToggleChrome, never>;
 }
 
+export { AGENT_ALWAYS_ALLOW_STATE }
+
+export { AGENT_APPROVAL }
+
+export { AGENT_APPROVAL_STATE }
+
+export { AGENT_PROGRESS_STATE }
+
+export { AGENT_VIEW_STATE }
+
+export { AgentAlwaysAllowState }
+
+export { AgentApprovalButtonProps }
+
+// @public
+export interface AgentApprovalChromeProps extends AgentApprovalProps {
+    readonly slots: AgentApprovalSlots;
+}
+
+export { AgentApprovalDecision }
+
+// @public
+export type AgentApprovalListProps = AgentApprovalListProps_2<TemplateRef<unknown> | undefined>;
+
+export { AgentApprovalOperation }
+
+export { AgentApprovalPending }
+
+export { AgentApprovalProposal }
+
+export { AgentApprovalProps }
+
+// @public
+export type AgentApprovalSlots = ApprovalReviewSlots;
+
+export { AgentProgress }
+
+export { AgentViewState }
+
 // @public
 export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<TRow>): SummaryRowFn<TRow>;
 
@@ -2736,9 +3514,67 @@ export interface AngularGroupingPanelAggregationItemProps {
 // @public
 export type AngularGroupingPanelSurfaceProps = GroupingPanelSurfaceProps<TemplateRef<unknown>, DragEvent>;
 
+export { ApprovalReview }
+
+export { approvalReview }
+
+// @public
+export interface ApprovalReviewChromeProps {
+    readonly buttonClassName?: string;
+    readonly className?: string;
+    readonly expanded?: boolean;
+    readonly labels?: TableLabels;
+    readonly onAlwaysAllow?: () => void;
+    readonly onApprove: () => void;
+    readonly onBack?: () => void;
+    readonly onDecide?: (index: number, approved: boolean) => void;
+    readonly onExpand?: () => void;
+    readonly onReject: () => void;
+    readonly review: ApprovalReview;
+    readonly slots: ApprovalReviewSlots;
+}
+
+export { ApprovalReviewItem }
+
+// @public
+export interface ApprovalReviewSlots {
+    readonly Action: Type<unknown>;
+    readonly Approve: Type<unknown>;
+    readonly List: Type<unknown>;
+    readonly Reject: Type<unknown>;
+}
+
 export { asBatchGesture }
 
 export { AssemblyFns }
+
+// @public
+export interface AssistantComposerProps {
+    // (undocumented)
+    readonly busy?: boolean;
+    // (undocumented)
+    readonly draft: string;
+    // (undocumented)
+    readonly examples?: Pick<TableAssistantMenuProps, "label" | "items" | "onSelect">;
+    // (undocumented)
+    readonly labels?: TableLabels;
+    // (undocumented)
+    readonly onSend: () => void;
+    // (undocumented)
+    readonly onStop: () => void;
+    // (undocumented)
+    readonly placeholder?: string;
+    // (undocumented)
+    readonly setDraft: (draft: string) => void;
+    // (undocumented)
+    readonly speech?: SpeechInputHandle;
+    // (undocumented)
+    readonly status: string;
+}
+
+export { assistantIsBusy }
+
+export { assistantIsUsable }
 
 // @public
 export type Attrs = Readonly<Record<string, unknown>>;
@@ -3139,6 +3975,16 @@ export interface ContextMenuSlots {
 
 export { ContextMenuTarget }
 
+// @public
+export interface ConversationScroll {
+    // (undocumented)
+    readonly hasUnseen: Signal<boolean>;
+    // (undocumented)
+    readonly jumpToLatest: () => void;
+    // (undocumented)
+    readonly onScroll: () => void;
+}
+
 export { copyContextMenuSelection }
 
 export { coreBulkActions }
@@ -3166,6 +4012,15 @@ export { coreRowActions }
 export { coreSavedViews }
 
 // @public
+export function createAdapterAgentApprovalFeature(component: SlotComponent): AdaptTableFeature;
+
+// @public
+export function createAdapterTableAssistantFeature(component: Type<unknown>): AdaptTableFeature;
+
+// @public
+export function createFeatureState(): FeatureState;
+
+// @public
 export interface DataTable<TRow> {
     readonly allColumns: Signal<readonly ColumnDef<TRow>[]>;
     readonly autoSizeColumn: (root: Element | null, key: string) => void;
@@ -3188,6 +4043,7 @@ export interface DataTable<TRow> {
     } | undefined>;
     readonly featureHost: FeatureHostState_2;
     readonly featureOptions: Readonly<Record<string, unknown>>;
+    readonly featureState: FeatureState;
     readonly hasSlot: (slot: {
         readonly id: string;
     }) => boolean;
@@ -3499,6 +4355,15 @@ export { FacetMap }
 // @public
 export function feature(id: string, patch?: FeaturePatch, setup?: AdaptTableFeature["setup"]): AdaptTableFeature;
 
+// @public
+export interface FeatureMountContext {
+    flush<T>(run: () => T): T;
+    flushAdmission(): void;
+    readonly injector: Injector;
+    readonly runtime: TableRuntime_2;
+    readonly state: FeatureState;
+}
+
 export { FeatureNotice }
 
 // @public
@@ -3509,6 +4374,16 @@ export { FeaturePatch }
 export { FeatureRender }
 
 export { FeatureSlotKey }
+
+// @public
+export interface FeatureState {
+    get<T>(key: FeatureStateKey<T>): Signal<T | undefined>;
+    set<T>(key: FeatureStateKey<T>, value: T | undefined): void;
+}
+
+export { FeatureStateKey }
+
+export { featureStateKey }
 
 export { FILL_HANDLE }
 
@@ -3687,6 +4562,15 @@ export function flattenColumns<TRow>(columns: readonly ColumnInput<TRow>[]): {
     readonly leaves: ColumnDef<TRow>[];
     readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
 };
+
+// @public (undocumented)
+export const FLOATING_MIN_WIDTH = 640;
+
+// @public (undocumented)
+export const floatingFits: typeof assistantFloatingFits;
+
+// @public
+export function floatingStyle(boundary: TableAssistantBoundary): TableAssistantPlacement;
 
 export { focusEditorOnMount }
 
@@ -3967,6 +4851,9 @@ export interface InfiniteQuerySignals<TPage> {
 }
 
 // @public
+export function injectAssistantFloatingFits(): Signal<boolean>;
+
+// @public
 export function injectBatchEditing<TRow>(options: BatchEditingInjectOptions<TRow>): Signal<BatchEditingState<TRow>>;
 
 // @public
@@ -4003,6 +4890,9 @@ export function injectCommandPalette(options: Signal<CommandPaletteInjectOptions
 export function injectContextMenu<TRow>(enabled: Signal<boolean>, injector?: Injector): Signal<ContextMenuController<TRow>>;
 
 // @public
+export function injectConversationScroll(count: Signal<number>, element: Signal<HTMLElement | undefined>): ConversationScroll;
+
+// @public
 export function injectDataTable<TRow>(options: DataTableOptions<TRow>): DataTable<TRow>;
 
 // @public
@@ -4022,6 +4912,9 @@ export function injectExportCsv<TRow>(options: ExportCsvHandlerOptions<TRow>): S
 
 // @public
 export function injectExportHandler<TRow>(options: ExportCsvHandlerOptions<TRow>): Signal<ExportHandlerState>;
+
+// @public
+export function injectFeatureState<T>(key: FeatureStateKey<T>, injector?: Injector): Signal<T | undefined>;
 
 // @public
 export function injectFindFocus(options: {
@@ -4252,6 +5145,9 @@ export interface KeyedVirtualizationOptions {
 }
 
 // @public
+export function launcherStyle(boundary: TableAssistantBoundary): TableAssistantPlacement;
+
+// @public
 export interface LazyChildrenInjectOptions<TRow> extends LazyChildrenOptions<TRow> {
     readonly injector?: Injector;
 }
@@ -4296,6 +5192,13 @@ export { MergedCellStyle }
 export { mergedCellStyle }
 
 export { mobileCardListStyle }
+
+// @public
+export function mountTableFeatures<TRow>(features: readonly AdaptTableFeature[], options: {
+    readonly runtime: TableRuntime_2<TRow>;
+    readonly state: FeatureState;
+    readonly injector: Injector;
+}): () => void;
 
 // @public
 export function multiDraftFromSelect(select: HTMLSelectElement): string;
@@ -4733,6 +5636,13 @@ export interface RuntimeGrouping<TRow> {
     readonly entries: readonly GroupedFlatEntry_2<TRow>[];
 }
 
+// @public
+export interface RuntimeTableOptions<TRow> extends Pick<RuntimeChromeInput<TRow>, "filterDefs" | "filterRegistry" | "columnLayoutLive" | "tree" | "rowPinning" | "editing"> {
+    readonly bulkActions?: readonly BulkAction[];
+    readonly rowActions?: readonly RowAction<TRow>[];
+    readonly selection?: Exclude<RuntimeChromeInput<TRow>["table"]["selection"], undefined>;
+}
+
 export { SAVED_VIEWS }
 
 export { SavedView }
@@ -4848,10 +5758,17 @@ export { slotRender }
 // @public
 export interface SlotTable {
     readonly featureHost: FeatureHostState_2;
+    readonly featureState?: FeatureState;
     readonly slotFills: SlotFills;
 }
 
 export { SortDirection }
+
+export { SpeechInputHandle }
+
+export { SpeechInputState }
+
+export { SpeechInputStatus }
 
 export { splitRelativeToken }
 
@@ -4871,6 +5788,97 @@ export { stopCellEditKeyboard }
 export { stopEditKeys }
 
 export { SummaryRowFn }
+
+export { TABLE_ASSISTANT }
+
+export { TableAssistantAllowanceView }
+
+// @public
+export type TableAssistantAvatars = TableAssistantAvatars_2<TableAssistantNode>;
+
+export { TableAssistantBadgeProps }
+
+export { TableAssistantBoundary }
+
+// @public
+export type TableAssistantButtonProps = TableAssistantButtonProps_2<TableAssistantNode>;
+
+// @public
+export interface TableAssistantChromeProps extends TableAssistantProps {
+    // (undocumented)
+    readonly slots: TableAssistantSlots;
+}
+
+// @public
+export type TableAssistantComposerProps = TableAssistantComposerProps_2<KeyboardEvent>;
+
+// @public
+export type TableAssistantFace = TableAssistantFace_2<TableAssistantNode>;
+
+export { TableAssistantLanguageChipProps }
+
+// @public
+export type TableAssistantMenuItem = TableAssistantMenuItem_2<TableAssistantNode>;
+
+// @public
+export type TableAssistantMenuProps = TableAssistantMenuProps_2<TableAssistantNode>;
+
+export { TableAssistantMessageView }
+
+// @public
+export type TableAssistantNode = string | TemplateRef<unknown> | IconDescriptor | null;
+
+// @public
+export type TableAssistantPanelProps = TableAssistantPanelProps_2<TemplateRef<unknown>>;
+
+export { TableAssistantPresentation }
+
+export { TableAssistantProgressView }
+
+// @public
+export type TableAssistantProps = TableAssistantProps_2<TableAssistantNode>;
+
+export { TableAssistantQuestionOption }
+
+export { TableAssistantQuestionView }
+
+export { TableAssistantReceiptSubject }
+
+export { TableAssistantReceiptView }
+
+export { TableAssistantResumableView }
+
+// @public
+export type TableAssistantSheetProps = TableAssistantSheetProps_2<TemplateRef<unknown>>;
+
+// @public
+export interface TableAssistantSlots {
+    // (undocumented)
+    readonly Badge: Type<unknown>;
+    // (undocumented)
+    readonly Button: Type<unknown>;
+    // (undocumented)
+    readonly Composer: Type<unknown>;
+    // (undocumented)
+    readonly LanguageChip?: Type<unknown>;
+    // (undocumented)
+    readonly Menu?: Type<unknown>;
+    // (undocumented)
+    readonly Panel: Type<unknown>;
+    // (undocumented)
+    readonly Sheet: Type<unknown>;
+    // (undocumented)
+    readonly Window: Type<unknown>;
+}
+
+export { TableAssistantSuggestionView }
+
+export { TableAssistantUndoView }
+
+export { TableAssistantView }
+
+// @public
+export type TableAssistantWindowProps = TableAssistantWindowProps_2<TemplateRef<unknown>, TableAssistantPlacement>;
 
 // @public
 export interface TableCommandPalette {
@@ -4949,6 +5957,9 @@ export interface TableEditHistoryProps<TRow> {
 }
 
 // @public
+export function tableFeaturesOf(injector: Injector, own: readonly AdaptTableFeature[] | undefined): readonly AdaptTableFeature[];
+
+// @public
 export interface TableFilters<TRow> {
     readonly arrayExtraKeys: readonly string[];
     readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
@@ -5003,6 +6014,13 @@ export interface TableRowPinningOptions<TRow> {
     readonly urlKey?: string;
     readonly urlSync?: boolean;
 }
+
+export { TableRuntime }
+
+// @public
+export function tableRuntimeFor<TRow>(table: DataTable<TRow>, source: Signal<TableSource<TRow>>, features: readonly AdaptTableFeature[], grouping?: Signal<RuntimeGrouping<TRow> | undefined>, options?: Signal<RuntimeTableOptions<TRow>>): TableRuntime_2<TRow>;
+
+export { TableRuntimeView }
 
 export { TableSource }
 

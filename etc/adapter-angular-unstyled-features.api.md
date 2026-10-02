@@ -27,6 +27,9 @@ import { SidePanelOptions } from '@adapttable/angular';
 import { VirtualizeOptions } from '@adapttable/angular';
 
 // @public
+export function agentApproval(): AdaptTableFeature;
+
+// @public
 export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
 
 // @public
@@ -114,6 +117,9 @@ export function sidePanel(options: SidePanelOptions): AdaptTableFeature;
 
 // @public
 export function statusBar(): AdaptTableFeature;
+
+// @public
+export function tableAssistant(): AdaptTableFeature;
 
 // @public
 export function undoRedoButtons(): AdaptTableFeature;

@@ -3,7 +3,9 @@
   "compilerOptions": {
     "noEmit": true,
     "types": ["node", "react"],
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
   },
   "include": ["*.tsx", "*.ts", "css.d.ts"]
 }

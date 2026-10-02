@@ -10,6 +10,7 @@ import { AdaptCellTemplate } from '@adapttable/angular';
 import { AdaptPivotRowHeader } from '@adapttable/angular/pivot';
 import { AdaptTableFeature } from '@adapttable/angular';
 import { AfterViewInit } from '@angular/core';
+import { AgentApprovalProps } from '@adapttable/angular';
 import { AggregateOperationId } from '@adapttable/core';
 import { Attrs } from '@adapttable/angular';
 import { BatchEditBarProps } from '@adapttable/angular';
@@ -122,6 +123,8 @@ import { SidePanelPanel } from '@adapttable/angular';
 import { Signal } from '@angular/core';
 import { StatusBarChromeProps } from '@adapttable/core/binding';
 import { SummaryRowFn } from '@adapttable/angular';
+import { TableAssistantProps } from '@adapttable/angular';
+import { TableAssistantProps as TableAssistantProps_2 } from '@adapttable/core/binding';
 import { TableContextMenuOptions } from '@adapttable/angular';
 import { TableDensity } from '@adapttable/angular';
 import { TableGrouping } from '@adapttable/angular';
@@ -365,7 +368,11 @@ export class AdaptColumnSelectCheckbox {
 
 // @public
 export class AdaptDataTable<TRow> implements OnInit {
+    // (undocumented)
+    protected readonly agentApprovalProps: Signal<AgentApprovalProps>;
+    protected readonly agentApprovalSlot: FeatureSlotKey<AgentApprovalProps>;
     readonly aggregates: InputSignal<readonly QueryAggregate[] | undefined>;
+    readonly assistant: InputSignal<TableAssistantProps | undefined>;
     // @internal
     protected readonly batchEditBarSlot: FeatureSlotKey<BatchEditBarProps<never>>;
     // @internal
@@ -487,6 +494,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     protected readonly statusBarSlot: FeatureSlotKey<Omit<StatusBarChromeProps<unknown>, "slots">>;
     readonly summaryRow: InputSignal<SummaryRowFn<TRow> | undefined>;
     readonly supports: InputSignal<QuerySupport | undefined>;
+    // (undocumented)
+    protected readonly tableAssistantSlot: FeatureSlotKey<TableAssistantProps_2<unknown>>;
     readonly tableFooter: Signal<TemplateRef<unknown> | undefined>;
     readonly tableLabel: InputSignal<string | undefined>;
     // @internal
@@ -660,6 +669,11 @@ export class AdaptDataTable<TRow> implements OnInit {
         };
         "features": {
             "alias": "features";
+            "required": false;
+            "isSignal": true;
+        };
+        "assistant": {
+            "alias": "assistant";
             "required": false;
             "isSignal": true;
         };
@@ -1092,7 +1106,7 @@ export class AdaptGroupHeaderCard {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
@@ -1175,7 +1189,7 @@ export class AdaptGroupHeaderRow {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {

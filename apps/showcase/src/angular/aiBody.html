@@ -1,0 +1,53 @@
+<div class="mx-demo ai-demo" [attr.dir]="direction">
+  <p class="hint">
+    This local demo needs no model or API key. Sort salaries, choose a person,
+    or propose Grace's salary as 150. Writes wait for your decision.
+  </p>
+  <div class="hint-row">
+    <button type="button" (click)="open.set(true)" [disabled]="open()">
+      Open assistant
+    </button>
+    <button
+      type="button"
+      (click)="send('Show everyone')"
+      [disabled]="assistant().busy || !session()"
+    >
+      Show everyone
+    </button>
+    <label>
+      Approval surface
+      <select
+        aria-label="Approval surface"
+        [value]="approvalSurface()"
+        (change)="changeSurface($event)"
+        [disabled]="assistant().busy"
+      >
+        <option value="widget">Assistant</option>
+        <option value="table">Table</option>
+        <option value="modal">Dialog</option>
+      </select>
+    </label>
+  </div>
+  <div
+    style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+      gap: 1rem;
+      align-items: start;
+    "
+  >
+    <div style="min-inline-size: 0">
+      <adapt-data-table
+        tableLabel="AI people"
+        [data]="rows()"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [urlSync]="false"
+        [defaults]="{ limit: 10 }"
+        [features]="features"
+      />
+      <p class="hint" role="status" data-demo-log>{{ log() }}</p>
+    </div>
+    <adapt-table-assistant [props]="assistantProps()" />
+  </div>
+</div>

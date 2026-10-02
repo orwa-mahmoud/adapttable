@@ -107,6 +107,8 @@ describe("Angular showcase snippets compile", () => {
   /** The scratch project's config: the showcase's, pointed at source. */
   const tsconfig = () => {
     const angular = packageDir("angular");
+    const ai = packageDir("ai");
+    const aiAngular = packageDir("ai-angular");
     const kit = packageDir("adapter-angular-unstyled");
     const core = packageDir("core");
     const showcase = join(REPO_ROOT, "apps", "showcase");
@@ -118,6 +120,12 @@ describe("Angular showcase snippets compile", () => {
         types: [],
         paths: {
           "@angular/*": [join(showcase, "node_modules", "@angular", "*")],
+          "@adapttable/ai": [join(ai, "src", "index.ts")],
+          "@adapttable/ai/ag-ui": [join(ai, "src", "agui.ts")],
+          "@adapttable/ai/ai-sdk": [join(ai, "src", "aiSdk.ts")],
+          "@adapttable/ai/mcp-apps": [join(ai, "src", "mcpApps.ts")],
+          "@adapttable/ai/*": [join(ai, "src", "*.ts")],
+          "@adapttable/ai-angular": [join(aiAngular, "src", "index.ts")],
           "@adapttable/angular": [join(angular, "src", "index.ts")],
           "@adapttable/angular/*": [join(angular, "*", "index.ts")],
           "@adapttable/angular-unstyled": [join(kit, "src", "index.ts")],

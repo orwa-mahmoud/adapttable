@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
-    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/" />
+    <meta name="description" content="Try a local Unstyled Angular table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required." />
+    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/ai/" />
     <meta name="robots" content="noindex, follow" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Unstyled table filtering — AdaptTable" />
-    <meta property="og:description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
-    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/" />
+    <meta property="og:title" content="Unstyled Angular AI table assistant demo — AdaptTable" />
+    <meta property="og:description" content="Try a local Unstyled Angular table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required." />
+    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/ai/" />
     <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Unstyled table filtering — AdaptTable" />
-    <meta name="twitter:description" content="Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
+    <meta name="twitter:title" content="Unstyled Angular AI table assistant demo — AdaptTable" />
+    <meta name="twitter:description" content="Try a local Unstyled Angular table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required." />
     <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Unstyled Angular table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/filtering/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try a local Unstyled Angular table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/ai/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Unstyled table filtering — AdaptTable</title>
+    <title>Unstyled Angular AI table assistant demo — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -158,51 +158,89 @@
     <!-- Replaced by Angular on mount — the served markup carries the page's
          own words so a crawler, and anyone whose bundle has not arrived, reads
          a real page. Written by scripts/build-showcase-html.mjs. -->
-    <div id="root" data-matrix-page="unstyled/filtering">
+    <div id="root" data-matrix-page="unstyled/ai">
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Unstyled</p>
-        <h1>Filtering in Unstyled</h1>
-        <p>Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each a native element.</p>
-        <p>Filters opens as an anchored popover or as a drawer, with an AND/OR tree at the top for what one row of inputs cannot say. Header funnels filter one column in place, and every active filter shows as a chip that removes itself.</p>
-        <p>Filter state lives in the versioned URL, so a filtered view is a link someone can send.</p>
+        <h1>AI table assistant in Unstyled Angular</h1>
+        <p>This deterministic local demo mounts a real Unstyled Angular table and its native assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.</p>
+        <p>A question filters the table only after you answer. A proposed edit waits for your approval in the assistant, the table or a dialog; an approved write updates the host's data and its status line. Rejecting leaves the data unchanged, and the conversation records the execution result.</p>
+        <p><code>tableAgent</code> and <code>injectTableAssistant</code> from <code>@adapttable/ai-angular</code> share the mounted table's session. The snippet below shows a minimal local sorting transport; the demo also includes questions and governed edits. JSON, OpenAI, HTTP, MCP, MCP Apps, WebMCP, AG-UI and AI SDK helpers can use the same session in your application.</p>
+        <p>The assistant, question choices and approval controls are native HTML. This page runs a local script only; the host status line records approved writes, and the approval-surface selector chooses assistant, table or dialog review.</p>
         <h2>The code</h2>
-        <pre><code>import { Component, input } from &quot;@angular/core&quot;;
-import type { ColumnDef } from &quot;@adapttable/angular&quot;;
+        <pre><code>import type { AgentSession, AssistantTransport } from &quot;@adapttable/ai&quot;;
+import { injectTableAssistant, tableAgent } from &quot;@adapttable/ai-angular&quot;;
+import type { ColumnDef, TableAssistantProps } from &quot;@adapttable/angular&quot;;
 import { AdaptDataTable } from &quot;@adapttable/angular-unstyled&quot;;
-import { filters } from &quot;@adapttable/angular-unstyled/filters&quot;;
-import { headerFilters } from &quot;@adapttable/angular-unstyled/header-filters&quot;;
+import { AdaptTableAssistant } from &quot;@adapttable/angular-unstyled/assistant&quot;;
+import { Component, computed, signal } from &quot;@angular/core&quot;;
 
-const columns: ColumnDef&lt;Person&gt;[] = [
-  { key: &quot;name&quot;, filter: &quot;text&quot; },
-  { key: &quot;team&quot;, filter: { type: &quot;multiSelect&quot;, options: &quot;auto&quot; } },
-  { key: &quot;budget&quot;, filter: &quot;numberRange&quot; },
-  { key: &quot;hiredAt&quot;, filter: &quot;dateRange&quot; },
-];
+interface AgentPerson { id: string; name: string; salary: number }
+
+// A minimal local transport: no model, endpoint or API key.
+const transport: AssistantTransport = {
+  send: async ({ session, text, signal }) =&gt; {
+    if (!text.toLowerCase().includes(&quot;sort&quot;)) {
+      return { text: &quot;Try: sort salaries highest first.&quot; };
+    }
+    const key = &quot;view.setSort&quot;;
+    const result = await session.execute(
+      key,
+      { key: &quot;salary&quot;, dir: &quot;desc&quot; },
+      session.manifest().viewRevision,
+      crypto.randomUUID(),
+      signal
+    );
+    return {
+      text: result.ok ? &quot;Highest salary first.&quot; : &quot;The sort was not applied.&quot;,
+      keys: [key],
+      results: [result],
+    };
+  },
+};
 
 @Component({
-  selector: &quot;app-people&quot;,
-  imports: [AdaptDataTable],
+  selector: &quot;app-people-assistant&quot;,
+  imports: [AdaptDataTable, AdaptTableAssistant],
   template: `
     &lt;adapt-data-table
-      [data]=&quot;rows()&quot;
-      [columns]=&quot;columns&quot;
-      [rowKey]=&quot;rowKey&quot;
-      urlKey=&quot;f&quot;
-      filtersMode=&quot;popover&quot;
-      [features]=&quot;features&quot;
+      [data]=&quot;rows&quot; [columns]=&quot;columns&quot; [rowKey]=&quot;rowKey&quot;
+      [features]=&quot;features&quot; [urlSync]=&quot;false&quot;
     /&gt;
+    &lt;adapt-table-assistant [props]=&quot;props()&quot; /&gt;
   `,
 })
-export class People {
-  readonly rows = input.required&lt;readonly Person[]&gt;();
-  readonly columns = columns;
-  readonly rowKey = (row: Person) =&gt; row.id;
-  readonly features = [filters([]), headerFilters()];
+export class PeopleAssistant {
+  readonly rows: readonly AgentPerson[] = [
+    { id: &quot;ada&quot;, name: &quot;Ada Lovelace&quot;, salary: 120 },
+    { id: &quot;grace&quot;, name: &quot;Grace Hopper&quot;, salary: 140 },
+  ];
+  readonly columns: readonly ColumnDef&lt;AgentPerson&gt;[] = [
+    { key: &quot;name&quot;, header: &quot;Person&quot; },
+    { key: &quot;salary&quot;, header: &quot;Salary&quot;, sortable: true },
+  ];
+  readonly rowKey = (row: AgentPerson) =&gt; row.id;
+  readonly session = signal&lt;AgentSession | undefined&gt;(undefined);
+  readonly open = signal(true);
+  readonly assistant = injectTableAssistant(computed(() =&gt; ({
+    session: this.session(), transport,
+  })));
+  readonly props = computed((): TableAssistantProps =&gt; ({
+    assistant: this.assistant(),
+    open: this.open(),
+    onOpenChange: (open) =&gt; this.open.set(open),
+    presentation: &quot;panel&quot;,
+  }));
+  readonly features = [tableAgent({
+    tableId: &quot;people&quot;, approval: &quot;never&quot;,
+    columns: { salary: { type: &quot;number&quot;, sortable: true } },
+    bridge: { attach: (session) =&gt; this.session.set(session) },
+  })];
 }</code></pre>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core</code></pre>
         <h2>More Unstyled features</h2>
         <ul>
+          <li><a href="../filtering/">Filtering in Unstyled</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>
           <li><a href="../column-groups/">Column groups in Unstyled</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
           <li><a href="../selection/">Row selection in Unstyled</a> — A set of ids that survives paging, with bulk actions over it.</li>
           <li><a href="../rows/">Rows in Unstyled</a> — Pin rows from a 3-dot menu, and merge a team that runs down the page.</li>
@@ -215,10 +253,9 @@ export class People {
           <li><a href="../tree/">Tree data in Unstyled</a> — Nesting, chevrons, lazy children, and a tree on phones.</li>
           <li><a href="../mobile-cards/">Mobile cards in Unstyled</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="../saved-views/">Saved views in Unstyled</a> — Name an arrangement and restore it from the menu.</li>
-          <li><a href="../ai/">AI table assistant in Unstyled Angular</a> — Local sort, questions and approved edits with real table outcomes.</li>
         </ul>
         <p>
-          Reference: <a href="https://adapttable.orwamahmoud.com/react/filtering/">filtering</a>, <a href="https://adapttable.orwamahmoud.com/react/filter-tree/">filter-tree</a>, <a href="https://adapttable.orwamahmoud.com/react/url-state/">url-state</a>. More of this kit:
+          Reference: <a href="https://adapttable.orwamahmoud.com/ai-http/">ai-http</a>, <a href="https://adapttable.orwamahmoud.com/ai-integrations/">ai-integrations</a>, <a href="https://adapttable.orwamahmoud.com/ai/">ai</a>, <a href="https://adapttable.orwamahmoud.com/react/agent-capabilities/">agent-capabilities</a>. More of this kit:
           <a href="../">AdaptTable for Unstyled</a>, or
           <a href="/react/demo/">the live demo</a>.
         </p>

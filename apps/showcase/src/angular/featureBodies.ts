@@ -51,6 +51,7 @@ import {
   QueryClient,
 } from "@tanstack/angular-query-experimental";
 
+import { AiBody } from "./aiBody";
 import {
   applyPersonEdit,
   type DemoOrder,
@@ -878,6 +879,8 @@ class ColumnGroupsBody {
 
 /** Feature slug to the demo that page shows. */
 export const FEATURE_BODIES: Readonly<Record<string, Type<unknown>>> = {
+  ai: AiBody,
+  "agent-approval": AiBody,
   filtering: FilteringBody,
   selection: SelectionBody,
   "row-reordering": RowReorderingBody,

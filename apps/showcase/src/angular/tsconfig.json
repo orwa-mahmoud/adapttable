@@ -18,6 +18,9 @@
     "declarationMap": false,
     "types": ["vite/client", "node"],
     "paths": {
+      "@adapttable/ai-angular": [
+        "../../../../packages/angular/ai-angular/src/index.ts"
+      ],
       "@adapttable/angular": [
         "../../../../packages/angular/angular/src/index.ts"
       ],

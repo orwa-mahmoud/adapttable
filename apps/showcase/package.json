@@ -2,7 +2,7 @@
   "name": "@adapttable/showcase",
   "version": "0.0.5",
   "private": true,
-  "description": "Public marketing showcase for AdaptTable — built on the real adapter packages (consumed like an end user), served under /react/demo/ on adapttable.orwamahmoud.com.",
+  "description": "Public marketing showcase for AdaptTable \u2014 built on the real adapter packages (consumed like an end user), served under /react/demo/ on adapttable.orwamahmoud.com.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@adapttable/ai": "workspace:*",
+    "@adapttable/ai-angular": "workspace:*",
     "@adapttable/ai-react": "workspace:*",
     "@adapttable/angular": "workspace:*",
     "@adapttable/angular-unstyled": "workspace:*",
