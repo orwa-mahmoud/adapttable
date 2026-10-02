@@ -177,7 +177,7 @@ describe("the unstyled Angular toolbar controls", () => {
     expect(document.activeElement).toBe(part("views-button"));
   });
 
-  it("exports a workbook and a pdf, and prints from the toolbar", async () => {
+  it("labels XLSX and PDF buttons, and prints from the toolbar", async () => {
     expect(exportXlsx(false)).toBeTruthy();
     expect(exportXlsx({ filename: "cities.xlsx" })).toBeTruthy();
     expect(exportPdf(false)).toBeTruthy();

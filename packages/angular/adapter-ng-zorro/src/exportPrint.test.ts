@@ -11,7 +11,7 @@ import { type ExportProgressState, type ExportTable } from "@adapttable/core";
 import { bulkActions } from "@adapttable/ng-zorro/bulk-actions";
 import { cellNavigation } from "@adapttable/ng-zorro/cell-navigation";
 import { columnMenu } from "@adapttable/ng-zorro/column-menu";
-import { exportCsv } from "@adapttable/ng-zorro/export";
+import { exportCsv, exportPdf, exportXlsx } from "@adapttable/ng-zorro/export";
 import { grouping } from "@adapttable/ng-zorro/grouping";
 import { tree } from "@adapttable/ng-zorro/tree";
 import { Component, input } from "@angular/core";
@@ -358,6 +358,141 @@ describe("the table export context", () => {
     ]);
     expect(table.rowMeta?.map((row) => row.level)).toEqual([0, 1]);
   });
+});
+
+/** Read the actual download; jsdom's Blob does not provide arrayBuffer(). */
+function readDownload(blob: Blob): Promise<ArrayBuffer> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as ArrayBuffer);
+    reader.onerror = () =>
+      reject(reader.error ?? new Error("Could not read the export download"));
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
+async function downloadBinary(
+  format: "xlsx" | "pdf",
+  columns: "visible" | "all"
+): Promise<Uint8Array> {
+  const blobs: Blob[] = [];
+  const downloads: { filename: string; href: string }[] = [];
+  vi.stubGlobal("URL", {
+    ...URL,
+    createObjectURL: (blob: Blob) => {
+      blobs.push(blob);
+      return "blob:export";
+    },
+    revokeObjectURL: () => undefined,
+  });
+  vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (
+    this: HTMLAnchorElement
+  ) {
+    downloads.push({ filename: this.download, href: this.href });
+  });
+  const exportFeature =
+    format === "xlsx" ? exportXlsx<ExportCity> : exportPdf<ExportCity>;
+  const filename = `selected-cities.${format}`;
+  const fixture = TestBed.createComponent(ExportTableHost);
+  fixture.componentRef.setInput("hidden", ["country"]);
+  fixture.componentRef.setInput("features", [
+    columnMenu(),
+    bulkActions([
+      { key: "inspect", label: "Inspect", onClick: () => undefined },
+    ]),
+    exportFeature({ scope: "selected", columns, filename }),
+  ]);
+  document.body.append(fixture.nativeElement);
+  fixture.autoDetectChanges();
+  await fixture.whenStable();
+  const element = fixture.nativeElement as HTMLElement;
+  expect(
+    [...element.querySelectorAll('[data-adapttable-part="header-cell"]')].map(
+      (node) => node.getAttribute("data-column-key")
+    )
+  ).toEqual(["name"]);
+  const box = element.querySelector<HTMLInputElement>(
+    `[data-row-id="2"] ${kitSelector("checkbox")}`
+  );
+  expect(box).not.toBeNull();
+  expect(box!.checked).toBe(false);
+  box!.click();
+  await fixture.whenStable();
+  expect(box!.checked).toBe(true);
+  const button = element.querySelector<HTMLButtonElement>(
+    '[data-adapttable-part="export-csv-button"]'
+  );
+  expect(button).not.toBeNull();
+  expect(button!.textContent?.trim()).toBe(`Export ${format.toUpperCase()}`);
+  expect(downloads).toEqual([]);
+  button!.click();
+  await fixture.whenStable();
+  await vi.waitFor(() =>
+    expect(downloads).toEqual([{ filename, href: "blob:export" }])
+  );
+  expect(blobs).toHaveLength(1);
+  const blob = blobs[0]!;
+  expect(blob.type).toBe(
+    format === "xlsx"
+      ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      : "application/pdf"
+  );
+  await vi.waitFor(() =>
+    expect(
+      element.querySelector('[data-adapttable-part="export-announcer"]')
+        ?.textContent
+    ).toBe("Export complete\u2063")
+  );
+  return new Uint8Array(await readDownload(blob));
+}
+
+function workbookRows(bytes: Uint8Array): (string | null)[][] {
+  expect([...bytes.slice(0, 4)]).toEqual([0x50, 0x4b, 0x03, 0x04]);
+  const text = new TextDecoder().decode(bytes);
+  expect(text).toContain("[Content_Types].xml");
+  expect(text).toContain("xl/workbook.xml");
+  expect(text).toContain("xl/worksheets/sheet1.xml");
+  // Core stores worksheet entries uncompressed, so their XML is readable.
+  const sheet = /<worksheet\b[\s\S]*?<\/worksheet>/.exec(text);
+  expect(sheet).not.toBeNull();
+  const document = new DOMParser().parseFromString(sheet![0], "text/xml");
+  expect(document.querySelector("parsererror")).toBeNull();
+  return [...document.querySelectorAll("sheetData > row")].map((row) =>
+    [...row.querySelectorAll("c")].map((cell) => cell.textContent)
+  );
+}
+
+function pdfCells(bytes: Uint8Array): string[] {
+  const text = new TextDecoder("latin1").decode(bytes);
+  expect(text.startsWith("%PDF-1.4")).toBe(true);
+  expect(text).toContain("/Type /Catalog");
+  expect(text).toContain("/Title (selected-cities)");
+  const trailer = /startxref\n(\d+)\n%%EOF\n$/.exec(text);
+  expect(trailer).not.toBeNull();
+  const xref = Number(trailer![1]);
+  expect(text.slice(xref, xref + 4)).toBe("xref");
+  // ActualText marks table cells, excluding the document title and page footer.
+  return [...text.matchAll(/\/ActualText <[^>]+> >> BDC\n\(([^)]*)\) Tj/g)].map(
+    (match) => match[1]!
+  );
+}
+
+describe.each(["xlsx", "pdf"] as const)("%s downloads", (format) => {
+  it.each(["visible", "all"] as const)(
+    "downloads checked rows with %s columns",
+    async (columns) => {
+      const bytes = await downloadBinary(format, columns);
+      const expected =
+        columns === "all"
+          ? [
+              ["Name", "Country"],
+              ["Amman", "Jordan"],
+            ]
+          : [["Name"], ["Amman"]];
+      if (format === "xlsx") expect(workbookRows(bytes)).toEqual(expected);
+      else expect(pdfCells(bytes)).toEqual(expected.flat());
+    }
+  );
 });
 
 afterEach(() => {
