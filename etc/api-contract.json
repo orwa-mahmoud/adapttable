@@ -6483,7 +6483,9 @@
       "DirtyEdits",
       "injectDirtyCells",
       "dirtyMarkerView",
-      "formatMultiDraft"
+      "formatMultiDraft",
+      "FilterWidgetRenderProps",
+      "renderRegisteredFilter"
     ],
     "angular-formula": [
       "AngularFormulaColumnsResult",

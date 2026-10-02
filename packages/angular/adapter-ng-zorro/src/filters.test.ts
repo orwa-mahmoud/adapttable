@@ -1,11 +1,34 @@
-import type { ColumnDef, FilterDef } from "@adapttable/angular";
-import { filters } from "@adapttable/ng-zorro/filters";
+import {
+  type ColumnDef,
+  defaultFilterRegistry,
+  type FilterDef,
+  type FilterFormSource,
+  filterRuntimeFor,
+  type FilterTypeSpec,
+  type FilterWidgetRenderProps,
+  injectDataTable,
+  injectFrontendData,
+  type TableLabels,
+} from "@adapttable/angular";
+import { filters, filterTypes } from "@adapttable/ng-zorro/filters";
 import { headerFilters } from "@adapttable/ng-zorro/header-filters";
-import { Component, getDebugNode, input } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  getDebugNode,
+  inject,
+  input,
+  signal,
+  type TemplateRef,
+  viewChild,
+} from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 
 import { kitSelector } from "../testUtils";
+import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";
 
@@ -81,6 +104,15 @@ const DEFS: FilterDef<Person>[] = [
 @Component({
   imports: [AdaptDataTable],
   template: `
+    <ng-template #custom let-props let-source="source" let-labels="labels">
+      <input
+        data-custom-filter
+        [attr.aria-label]="props.def.label"
+        [placeholder]="labels.search"
+        [value]="source.extra[props.def.key] ?? ''"
+        (input)="source.setExtra(props.def.key, $any($event.target).value)"
+      />
+    </ng-template>
     <adapt-data-table
       [data]="data"
       [columns]="columns"
@@ -96,7 +128,9 @@ const DEFS: FilterDef<Person>[] = [
 class Host {
   readonly features = input([filters(DEFS)]);
   readonly mode = input<FiltersMode>("popover");
-  readonly labels = input<{ filterAll?: string } | undefined>(undefined);
+  readonly labels = input<Partial<TableLabels> | undefined>(undefined);
+  readonly custom =
+    viewChild.required<TemplateRef<FilterWidgetRenderProps<Person>>>("custom");
   readonly data = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = (row: Person) => row.id;
@@ -532,4 +566,242 @@ describe("filters select labels (NG-ZORRO Angular)", () => {
       getDebugNode(city)?.injector.get(NzSelectComponent).listOfValue
     ).toEqual([""]);
   });
+});
+
+const customCreated = vi.fn();
+const customDestroyed = vi.fn();
+
+@Component({
+  selector: "test-custom-filter",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<input
+    data-custom-filter
+    [attr.aria-label]="def().label"
+    [placeholder]="labels().search"
+    [value]="source().extra[def().key] ?? ''"
+    (input)="source().setExtra(def().key, $any($event.target).value)"
+  />`,
+})
+class CustomFilter {
+  readonly def = input.required<FilterDef<Person>>();
+  readonly source = input.required<FilterFormSource<Person>>();
+  readonly labels = input.required<Required<TableLabels>>();
+
+  constructor() {
+    customCreated();
+    inject(DestroyRef).onDestroy(customDestroyed);
+  }
+}
+
+function customSpec(render: FilterTypeSpec["render"]): FilterTypeSpec {
+  return { ...defaultFilterRegistry.get("text")!, type: "custom", render };
+}
+
+const CUSTOM_DEFS: readonly FilterDef<Person>[] = [
+  { key: "name", type: "custom", label: "Person" },
+];
+
+@Component({
+  imports: [AdaptAutoFilterForm],
+  template: `
+    <ng-template #custom let-props let-source="source" let-labels="labels">
+      <input
+        data-custom-filter
+        [attr.aria-label]="props.def.label"
+        [placeholder]="labels.search"
+        [value]="source.extra[props.def.key] ?? ''"
+        (input)="source.setExtra(props.def.key, $any($event.target).value)"
+      />
+    </ng-template>
+    @if (customTemplate()) {
+      <adapt-auto-filter-form
+        [defs]="defs()"
+        [source]="source()"
+        [labels]="table.labels()"
+        [registry]="filterModel.runtime().registry"
+      />
+    }
+    @for (row of source().rows; track row.id) {
+      <span data-filtered-row [attr.data-row-id]="row.id">{{ row.name }}</span>
+    }
+  `,
+})
+class AutoFilterFormHost {
+  readonly defs = signal<readonly FilterDef<Person>[]>(CUSTOM_DEFS);
+  readonly columns = computed(() =>
+    this.defs().map((def) => ({ key: def.key, filter: def }))
+  );
+  readonly customTemplate =
+    viewChild<TemplateRef<FilterWidgetRenderProps<Person>>>("custom");
+  readonly render = vi.fn(() => this.customTemplate() ?? "");
+  readonly filterModel = filterRuntimeFor<Person>({
+    columns: this.columns,
+    defs: undefined,
+    data: PEOPLE,
+    filterTypes: [customSpec(this.render)],
+  });
+  readonly source = injectFrontendData({
+    data: PEOPLE,
+    columns: this.columns,
+    urlSync: false,
+    forceMobile: false,
+    filterFn: this.filterModel.filterFn,
+  });
+  readonly table = injectDataTable({
+    source: this.source,
+    columns: COLUMNS,
+    rowKey: (row) => row.id,
+  });
+}
+
+describe("registered Angular form renderers", () => {
+  it("renders a real component before the widget, updates it, and destroys it on close", async () => {
+    customCreated.mockClear();
+    customDestroyed.mockClear();
+    const { fixture, part, ids, openFilters, settle, type } = await mount([
+      filters(CUSTOM_DEFS),
+      filterTypes([customSpec(() => CustomFilter)]),
+    ]);
+    await openFilters();
+    const field = () =>
+      document.querySelector<HTMLInputElement>("[data-custom-filter]")!;
+    expect(
+      [
+        ...document.querySelectorAll<HTMLInputElement>("[data-custom-filter]"),
+      ].map((input) => input.getAttribute("aria-label"))
+    ).toEqual(["Person"]);
+    const original = field();
+    expect(original.getAttribute("aria-label")).toBe("Person");
+    expect(part("filter-input")).toBeNull();
+    await type(original, "Grace");
+    expect(ids()).toEqual(["2"]);
+    fixture.componentRef.setInput("labels", { search: "Find a person" });
+    await settle();
+    expect(field()).toBe(original);
+    expect(field().value).toBe("Grace");
+    expect(field().placeholder).toBe("Find a person");
+    expect(customCreated).toHaveBeenCalledTimes(1);
+    expect(customDestroyed).not.toHaveBeenCalled();
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    await settle();
+    expect(field()).toBeNull();
+    expect(customDestroyed).toHaveBeenCalledTimes(1);
+    await openFilters();
+    expect(field().value).toBe("Grace");
+    expect(customCreated).toHaveBeenCalledTimes(2);
+    fixture.destroy();
+    expect(customDestroyed).toHaveBeenCalledTimes(2);
+  });
+
+  it("binds a template's named and implicit context to the live filter source", async () => {
+    const template: { current?: TemplateRef<FilterWidgetRenderProps<Person>> } =
+      {};
+    const render = vi.fn(() => template.current ?? "");
+    const { fixture, ids, openFilters, settle, type } = await mount([
+      filters(CUSTOM_DEFS),
+      filterTypes([customSpec(render)]),
+    ]);
+    template.current = fixture.componentInstance.custom();
+    await openFilters();
+    const field = () =>
+      document.querySelector<HTMLInputElement>("[data-custom-filter]")!;
+    expect(
+      [
+        ...document.querySelectorAll<HTMLInputElement>("[data-custom-filter]"),
+      ].map((input) => input.getAttribute("aria-label"))
+    ).toEqual(["Person"]);
+    const original = field();
+    expect(original.getAttribute("aria-label")).toBe("Person");
+    expect(render).toHaveBeenCalledWith(
+      expect.objectContaining({
+        def: expect.objectContaining({ key: "name", type: "custom" }),
+        source: expect.objectContaining({ setExtra: expect.any(Function) }),
+      })
+    );
+    await type(original, "li");
+    expect(ids()).toEqual(["3"]);
+    fixture.componentRef.setInput("labels", { search: "Find a person" });
+    await settle();
+    expect(field()).toBe(original);
+    expect(field().value).toBe("li");
+    expect(field().placeholder).toBe("Find a person");
+  });
+
+  it("replaces live custom form definitions and binds template writes to the current source", async () => {
+    const fixture = TestBed.createComponent(AutoFilterFormHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host = fixture.componentInstance;
+    const element = fixture.nativeElement as HTMLElement;
+    const field = () =>
+      element.querySelector<HTMLInputElement>("[data-custom-filter]")!;
+    const ids = () =>
+      [...element.querySelectorAll<HTMLElement>("[data-filtered-row]")].map(
+        (row) => row.dataset.rowId
+      );
+    const type = async (value: string) => {
+      field().value = value;
+      field().dispatchEvent(new Event("input"));
+      await fixture.whenStable();
+    };
+    expect(
+      [
+        ...element.querySelectorAll<HTMLInputElement>("[data-custom-filter]"),
+      ].map((input) => input.getAttribute("aria-label"))
+    ).toEqual(["Person"]);
+    await type("li");
+    expect(host.source().extra).toEqual({ name: "li" });
+    expect(ids()).toEqual(["3"]);
+
+    host.defs.set([{ key: "city", type: "custom", label: "Home city" }]);
+    await fixture.whenStable();
+    expect(field().getAttribute("aria-label")).toBe("Home city");
+    expect(field().value).toBe("");
+    expect(host.render).toHaveBeenLastCalledWith({
+      def: host.defs()[0],
+      source: host.source(),
+      labels: host.table.labels(),
+      className: undefined,
+    });
+    await type("Dubai");
+    expect(host.source().extra).toEqual({ name: "li", city: "Dubai" });
+    expect(ids()).toEqual(["1", "3"]);
+
+    host.source().setExtra("city", "Amman");
+    await fixture.whenStable();
+    expect(field().value).toBe("Amman");
+    expect(ids()).toEqual(["2"]);
+  });
+
+  it.each([
+    { value: "Custom caption", text: "Custom caption" },
+    { value: 7, text: "7" },
+    { value: undefined, text: null },
+    { value: 0, text: null },
+    { value: {}, text: null },
+  ])(
+    "renders text or uses the kit widget for $value",
+    async ({ value, text }) => {
+      const { part, openFilters } = await mount([
+        filters(CUSTOM_DEFS),
+        filterTypes([
+          customSpec(value === undefined ? undefined : () => value),
+        ]),
+      ]);
+      await openFilters();
+      if (text) {
+        expect(part("filters-form")?.textContent).toContain(text);
+        expect(part("filter-input")).toBeNull();
+      } else {
+        expect(part("filter-input")).not.toBeNull();
+        expect(part("filter-input")?.classList.contains("ant-input")).toBe(
+          true
+        );
+        expect(part("filters-form")?.textContent).not.toContain(
+          "[object Object]"
+        );
+      }
+    }
+  );
 });

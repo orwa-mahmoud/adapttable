@@ -32,6 +32,7 @@ import type {
   FilterHeaderSearchProps,
   FilterHeaderSelectProps,
 } from "@adapttable/core/binding";
+import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -42,9 +43,11 @@ import {
   input,
   type OnInit,
   signal,
+  TemplateRef,
   type Type,
 } from "@angular/core";
 
+import { resolveRenderer } from "../cell";
 import { AdaptControl } from "../control";
 import { AdaptColumnSpacer } from "../virtual/columnSpacer";
 import { filterOptionsFor } from "./filters";
@@ -77,29 +80,6 @@ function joinClass(
 }
 
 /**
- * A custom filter's caption, when its registry render returns text. Anything
- * else falls through to the built-in control for that shape.
- */
-function registeredCaption<TRow>(
-  def: FilterDef<TRow>,
-  source: FilterFormSource<TRow>,
-  labels: Required<TableLabels>,
-  registry: FilterTypeRegistry,
-  className: string | undefined
-): string | null {
-  const value = renderRegisteredFilter(
-    def,
-    source,
-    labels,
-    registry,
-    className
-  );
-  if (typeof value !== "string" && typeof value !== "number") return null;
-  if (!value) return null;
-  return String(value);
-}
-
-/**
  * Compact control for one filter definition — one cell of the header row,
  * or a single column title.
  *
@@ -107,11 +87,22 @@ function registeredCaption<TRow>(
  */
 @Component({
   selector: "adapt-filter-header-control-chrome",
-  imports: [AdaptControl],
+  imports: [AdaptControl, NgComponentOutlet, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
-    @if (caption(); as text) {
+    @let content = custom();
+    @if (content.renderer?.template; as template) {
+      <ng-container
+        [ngTemplateOutlet]="template"
+        [ngTemplateOutletContext]="content.context"
+      />
+    } @else if (content.renderer?.component; as component) {
+      <ng-container
+        [ngComponentOutlet]="component"
+        [ngComponentOutletInputs]="content.renderer.inputs"
+      />
+    } @else if (content.text; as text) {
       {{ text }}
     } @else {
       @switch (kind()) {
@@ -185,16 +176,37 @@ export class AdaptFilterHeaderControlChrome<TRow> implements OnInit {
     () => this.registry() ?? defaultFilterRegistry
   );
 
-  /** Text a custom render returned, or nothing so the built-in control draws. */
-  protected readonly caption = computed(() =>
-    registeredCaption(
-      this.def(),
-      this.source(),
-      this.labels(),
+  /** A host template, component, or text takes precedence over the kit widget. */
+  protected readonly custom = computed(() => {
+    const props = {
+      def: this.def(),
+      source: this.source(),
+      labels: this.labels(),
+      className: this.className(),
+    };
+    const value = renderRegisteredFilter(
+      props.def,
+      props.source,
+      props.labels,
       this.resolved(),
-      this.className()
-    )
-  );
+      props.className
+    );
+    const context = { ...props, $implicit: props };
+    let renderer: TemplateRef<typeof context> | Type<unknown> | undefined;
+    if (value instanceof TemplateRef) {
+      renderer = value;
+    } else if (typeof value === "function" && "ɵcmp" in value) {
+      renderer = value as unknown as Type<unknown>;
+    }
+    return {
+      context,
+      renderer: resolveRenderer(renderer, context),
+      text:
+        value && (typeof value === "string" || typeof value === "number")
+          ? String(value)
+          : null,
+    };
+  });
 
   /** Which built-in control this definition draws. */
   protected readonly kind = computed(() =>

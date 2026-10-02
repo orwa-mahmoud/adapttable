@@ -3,12 +3,15 @@
  * spacers aligned with the leaf header, and nothing when the row is off.
  */
 import {
+  defaultFilterRegistry,
   defaultLabels,
   type ExtraFilters,
   type FilterDef,
   type FilterFormSource,
   type FilterTypeRegistry,
   type FilterTypeSpec,
+  type FilterWidgetRenderProps,
+  type TableLabels,
 } from "@adapttable/core";
 import type {
   FilterHeaderClassNames,
@@ -17,12 +20,23 @@ import type {
   FilterHeaderSearchProps,
   FilterHeaderSelectProps,
 } from "@adapttable/core/binding";
-import { Component, computed, input, signal } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  signal,
+  type TemplateRef,
+  viewChild,
+} from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   AdaptFilterHeaderChrome,
+  AdaptFilterHeaderControlChrome,
   type FilterHeaderSlots,
 } from "./filterHeaderRow";
 
@@ -421,4 +435,203 @@ describe("AdaptFilterHeaderChrome", () => {
     expect(labeled("Zero")).toHaveLength(1);
     expect(element.querySelector('[data-column-key="note"] input')).toBeNull();
   });
+});
+
+const customCreated = vi.fn();
+const customDestroyed = vi.fn();
+
+@Component({
+  selector: "test-custom-filter",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<input
+    data-custom-filter
+    [attr.aria-label]="def().label"
+    [class]="className()"
+    [placeholder]="labels().search"
+    [value]="source().extra[def().key] ?? ''"
+    (input)="source().setExtra(def().key, $any($event.target).value)"
+  />`,
+})
+class CustomFilter {
+  readonly def = input.required<FilterDef<Row>>();
+  readonly source = input.required<FilterFormSource<Row>>();
+  readonly labels = input.required<Required<TableLabels>>();
+  readonly className = input<string>();
+
+  constructor() {
+    customCreated();
+    inject(DestroyRef).onDestroy(customDestroyed);
+  }
+}
+
+@Component({
+  imports: [AdaptFilterHeaderControlChrome],
+  template: `
+    <ng-template
+      #custom
+      let-props
+      let-source="source"
+      let-labels="labels"
+      let-className="className"
+    >
+      <input
+        data-custom-filter
+        [attr.aria-label]="props.def.label"
+        [class]="className"
+        [placeholder]="labels.search"
+        [value]="source.extra[props.def.key] ?? ''"
+        (input)="source.setExtra(props.def.key, $any($event.target).value)"
+      />
+    </ng-template>
+    <adapt-filter-header-control-chrome
+      [def]="def()"
+      [source]="source()"
+      [labels]="labels()"
+      [className]="className()"
+      [registry]="registry()"
+      [slots]="slots"
+    />
+  `,
+})
+class RendererHost {
+  readonly slots = SLOTS;
+  readonly extra = signal<ExtraFilters>({ name: "Ada" });
+  readonly def = signal<FilterDef<Row>>({
+    key: "name",
+    type: "custom",
+    label: "Name",
+  });
+  readonly source = signal(sourceFrom(this.extra));
+  readonly labels = signal(defaultLabels);
+  readonly className = signal("custom-class");
+  readonly render = signal<FilterTypeSpec["render"]>(undefined);
+  readonly custom =
+    viewChild.required<TemplateRef<FilterWidgetRenderProps<Row>>>("custom");
+  readonly registry = computed((): FilterTypeRegistry => {
+    const spec: FilterTypeSpec = {
+      ...defaultFilterRegistry.get("text")!,
+      type: "custom",
+      render: this.render(),
+    };
+    return {
+      get: (type) =>
+        type === "custom" ? spec : defaultFilterRegistry.get(type),
+      has: (type) => type === "custom" || defaultFilterRegistry.has(type),
+      types: () => [...defaultFilterRegistry.types(), "custom"],
+    };
+  });
+}
+
+describe("registered Angular header-filter renderers", () => {
+  it("binds template props, live values, and host writes across input changes", async () => {
+    const fixture = TestBed.createComponent(RendererHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host = fixture.componentInstance;
+    const render = vi.fn(() => host.custom());
+    host.render.set(render);
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    const field = () =>
+      element.querySelector<HTMLInputElement>("[data-custom-filter]")!;
+    expect(
+      [
+        ...element.querySelectorAll<HTMLInputElement>("[data-custom-filter]"),
+      ].map((input) => input.value)
+    ).toEqual(["Ada"]);
+    const original = field();
+    expect(original.value).toBe("Ada");
+    expect(original.className).toBe("custom-class");
+    expect(render).toHaveBeenLastCalledWith({
+      def: host.def(),
+      source: host.source(),
+      labels: host.labels(),
+      className: "custom-class",
+    });
+    original.value = "Grace";
+    original.dispatchEvent(new Event("input"));
+    await fixture.whenStable();
+    expect(host.extra()).toEqual({ name: "Grace" });
+    host.extra.set({ name: "Linus" });
+    host.labels.set({ ...defaultLabels, search: "Chercher" });
+    host.className.set("updated-class");
+    await fixture.whenStable();
+    expect(field()).toBe(original);
+    expect(field().value).toBe("Linus");
+    expect(field().placeholder).toBe("Chercher");
+    expect(field().className).toBe("updated-class");
+
+    const replacement = signal<ExtraFilters>({ team: "Core" });
+    host.source.set(sourceFrom(replacement));
+    host.def.set({ key: "team", type: "custom", label: "Team" });
+    await fixture.whenStable();
+    expect(field().value).toBe("Core");
+    expect(field().getAttribute("aria-label")).toBe("Team");
+    field().value = "Web";
+    field().dispatchEvent(new Event("input"));
+    await fixture.whenStable();
+    expect(replacement()).toEqual({ team: "Web" });
+    expect(host.extra()).toEqual({ name: "Linus" });
+  });
+
+  it("updates component inputs without recreating it and destroys replaced renderers", async () => {
+    customCreated.mockClear();
+    customDestroyed.mockClear();
+    const fixture = TestBed.createComponent(RendererHost);
+    const host = fixture.componentInstance;
+    host.render.set(() => CustomFilter);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    const field = () =>
+      element.querySelector<HTMLInputElement>("[data-custom-filter]")!;
+    expect(
+      [
+        ...element.querySelectorAll<HTMLInputElement>("[data-custom-filter]"),
+      ].map((input) => input.value)
+    ).toEqual(["Ada"]);
+    const original = field();
+    expect(original.value).toBe("Ada");
+    original.value = "Grace";
+    original.dispatchEvent(new Event("input"));
+    await fixture.whenStable();
+    expect(host.extra()).toEqual({ name: "Grace" });
+    host.extra.set({ name: "Linus" });
+    host.labels.set({ ...defaultLabels, search: "Chercher" });
+    host.className.set("updated-class");
+    host.render.set(() => CustomFilter);
+    await fixture.whenStable();
+    expect(field()).toBe(original);
+    expect(field().value).toBe("Linus");
+    expect(field().placeholder).toBe("Chercher");
+    expect(field().className).toBe("updated-class");
+    expect(customCreated).toHaveBeenCalledTimes(1);
+    expect(customDestroyed).not.toHaveBeenCalled();
+
+    host.render.set(() => host.custom());
+    await fixture.whenStable();
+    expect(field()).not.toBe(original);
+    expect(customDestroyed).toHaveBeenCalledTimes(1);
+    host.render.set(() => CustomFilter);
+    await fixture.whenStable();
+    expect(customCreated).toHaveBeenCalledTimes(2);
+    fixture.destroy();
+    expect(customDestroyed).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([undefined, null, false, "", 0, {}, () => "foreign renderer"])(
+    "uses the kit widget for an empty or unsupported result: %s",
+    async (value) => {
+      const fixture = TestBed.createComponent(RendererHost);
+      fixture.componentInstance.render.set(
+        value === undefined ? undefined : () => value
+      );
+      fixture.autoDetectChanges();
+      await fixture.whenStable();
+      const element = fixture.nativeElement as HTMLElement;
+      expect(element.querySelector("test-search input")).not.toBeNull();
+      expect(element.querySelector("[data-custom-filter]")).toBeNull();
+      expect(element.textContent).not.toContain("[object Object]");
+    }
+  );
 });

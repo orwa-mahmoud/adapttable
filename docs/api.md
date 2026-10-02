@@ -3299,6 +3299,20 @@ comes from a kit through a slot.
   `sort-index` and `header-actions`, `AdaptColumnHeaderRename` the
   `header-rename-*` parts, and a phone draws `sort-select`.
 - Filters: `filterTypes()` registers custom filter types.
+  `FilterWidgetRenderProps` and `renderRegisteredFilter` are public root exports.
+  `renderRegisteredFilter(def, source, labels, registry, className?)` calls
+  `FilterTypeSpec.render` with the definition, `FilterFormSource`, resolved
+  labels and class hook. Both kits' `AdaptAutoFilterForm` and
+  `AdaptFilterHeaderRow` / `AdaptFilterHeaderControl` prefer a returned
+  `TemplateRef`, Angular component type (`Type<unknown>`), or truthy string
+  or number over the registered widget. Templates receive `def`, `source`,
+  `labels` and `className` as named context fields and the whole props object
+  as `$implicit`; components receive their declared matching inputs. The
+  form passes `className: undefined`; the header passes its control class.
+  Empty or unsupported results, including `""`, `0`, booleans, plain objects
+  and non-component functions, retain the kit widget. Live context updates
+  preserve an unchanged renderer's instance; replacing or removing it runs
+  Angular teardown. See [Angular custom filter types](./angular/custom-filter-types.md).
   `filterRuntimeFor` (`FilterRuntimeOptions`) derives a
   `TableFilters` runtime from the definitions — the predicates and the URL
   keys; `filterChipsFor` and `activeFilterChipsFor` the active chips and
@@ -3329,6 +3343,12 @@ comes from a kit through a slot.
   window to render that row. `ADAPTTABLE_FIND_STATE` is the token a toolbar
   button reads.
 - Command palette: `commandPalette()` lists every wired action.
+  `CommandPaletteOptions.open` is `boolean | Signal<boolean>`; both kit
+  shells follow a supplied signal after mounting. Pass the signal itself
+  and accept `onOpenChange` requests by calling its `set` method. Omitting
+  `open` keeps state internal, with the callback optionally observing it.
+  The signal can also open or close the palette from host controls without
+  rebuilding the feature. See [Angular command palette](./angular/command-palette.md).
   `injectCommandPalette` (`CommandPaletteInjectOptions`) is the live
   `TableCommandPalette`: whether it is open, `close`, `show` and the
   commands. `AdaptCommandPaletteChrome` owns the inner listbox structure,
@@ -3435,7 +3455,14 @@ comes from a kit through a slot.
   side.
 - Tree: `tree` (`TreeFeatureOptions`) renders rows as an expandable tree,
   nested (`getChildren`) or flat (`getParentId`), with lazy children
-  (`hasChildren`, `onLoadChildren`) and a controlled open set. `injectTree`
+  (`hasChildren`, `onLoadChildren`) and a controlled open set.
+  `TreeFeatureOptions.expandedIds` accepts `MaybeSignal<readonly string[]>`:
+  a fixed array or a live Angular signal followed by both kit shells.
+  Pair the signal with `onExpandedIdsChange: ids => expandedIds.set(ids)`;
+  host writes update the mounted tree, and `expandedIds.set([])` closes all
+  nodes. Omit `expandedIds` for internal state. Tree expansion is separate
+  from row detail and is not automatically persisted to URL or saved views.
+  See [Angular tree data](./angular/tree-data.md). `injectTree`
   (`TreeOptions`) is its live model, a `TableTree`: the walked entries, every
   loaded node for export, the open set, which nodes are loading or failed,
   and the chevron's column. Opening a node fetches its children while it
@@ -3461,7 +3488,14 @@ comes from a kit through a slot.
 - Row pinning: `rowPinning` (`RowPinningFeatureOptions`) lets rows be
   pinned to the top or bottom from their actions menu; the table holds the
   lists and keeps them in the URL unless the host passes `pinnedRowIds`, and
-  grouping or a tree refuses it. `injectTableRowPinning`
+  grouping or a tree refuses it. `RowPinningFeatureOptions.pinnedRowIds`
+  accepts `MaybeSignal<RowPinState>`: a state object or a live signal of
+  `{ top, bottom }` lists. Both kit shells follow host signal writes after
+  mounting; pair it with `onPinnedRowIdsChange: next => pinnedRowIds.set(next)`.
+  Set both lists to `[]` to clear all pins. Controlled state disables the
+  feature's automatic URL writes; a host can supply the signal and callback
+  from `injectRowPinningUrlState` when it owns that persistence.
+  See [Angular row pinning](./angular/row-pinning.md). `injectTableRowPinning`
   (`TableRowPinningOptions`) is its live state, and `injectRowPinning`
   (`RowPinningOptions`, returning `RowPinningState`) the lists, which side a
   row is on, `pin`, `unpin` and the pin entries for the actions menu.

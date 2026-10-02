@@ -15,6 +15,7 @@ import {
   type FilterOptionsState,
   type FilterTypeRegistry,
   filterWidgetKind,
+  type FilterWidgetRenderProps,
   joinRelativeToken,
   listFilterValues,
   rangeFilterFor,
@@ -22,12 +23,15 @@ import {
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   type RelativePreset,
+  renderRegisteredFilter,
+  resolveRenderer,
   splitRelativeToken,
   type TableLabels,
   type TableSource,
   textFilterFor,
   type TextOp,
 } from "@adapttable/angular";
+import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -41,6 +45,8 @@ import {
   output,
   type Signal,
   signal,
+  TemplateRef,
+  type Type,
   viewChild,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
@@ -556,50 +562,67 @@ export class AdaptRangeFilterField<TRow> {
     AdaptRangeFilterField,
     AdaptSelectFilterField,
     AdaptTextFilterField,
+    NgComponentOutlet,
+    NgTemplateOutlet,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
-    @for (def of defs(); track def.key) {
-      @switch (kindOf(def)) {
-        @case ("text") {
-          <adapt-text-filter-field
-            [def]="def"
-            [source]="source()"
-            [labels]="labels()"
-          />
-        }
-        @case ("boolean") {
-          <adapt-boolean-filter-field
-            [def]="def"
-            [source]="source()"
-            [labels]="labels()"
-          />
-        }
-        @case ("select") {
-          <adapt-select-filter-field
-            [def]="def"
-            [source]="source()"
-            [labels]="labels()"
-          />
-        }
-        @case ("multiSelect") {
-          <adapt-multi-select-filter-field [def]="def" [source]="source()" />
-        }
-        @case ("checklist") {
-          <adapt-checklist-chrome
-            [def]="def"
-            [source]="source()"
-            [labels]="labels()"
-            [slots]="checklistSlots"
-          />
-        }
-        @case ("range") {
-          <adapt-range-filter-field
-            [def]="def"
-            [source]="source()"
-            [labels]="labels()"
-          />
+    @for (field of fields(); track field.def.key) {
+      @let def = field.def;
+      @if (field.renderer?.template; as template) {
+        <ng-container
+          [ngTemplateOutlet]="template"
+          [ngTemplateOutletContext]="field.context"
+        />
+      } @else if (field.renderer?.component; as component) {
+        <ng-container
+          [ngComponentOutlet]="component"
+          [ngComponentOutletInputs]="field.renderer.inputs"
+        />
+      } @else if (field.text; as text) {
+        {{ text }}
+      } @else {
+        @switch (kindOf(def)) {
+          @case ("text") {
+            <adapt-text-filter-field
+              [def]="def"
+              [source]="source()"
+              [labels]="labels()"
+            />
+          }
+          @case ("boolean") {
+            <adapt-boolean-filter-field
+              [def]="def"
+              [source]="source()"
+              [labels]="labels()"
+            />
+          }
+          @case ("select") {
+            <adapt-select-filter-field
+              [def]="def"
+              [source]="source()"
+              [labels]="labels()"
+            />
+          }
+          @case ("multiSelect") {
+            <adapt-multi-select-filter-field [def]="def" [source]="source()" />
+          }
+          @case ("checklist") {
+            <adapt-checklist-chrome
+              [def]="def"
+              [source]="source()"
+              [labels]="labels()"
+              [slots]="checklistSlots"
+            />
+          }
+          @case ("range") {
+            <adapt-range-filter-field
+              [def]="def"
+              [source]="source()"
+              [labels]="labels()"
+            />
+          }
         }
       }
     }
@@ -616,6 +639,38 @@ export class AdaptAutoFilterForm<TRow> {
   readonly registry = input<FilterTypeRegistry>(defaultFilterRegistry);
 
   protected readonly checklistSlots = CHECKLIST_SLOTS;
+
+  /** Resolve each host renderer with the same live props its callback receives. */
+  protected readonly fields = computed(() => {
+    const source = this.source();
+    const labels = this.labels();
+    const registry = this.registry();
+    return this.defs().map((def) => {
+      const props: FilterWidgetRenderProps<TRow> = {
+        def,
+        source,
+        labels,
+        className: undefined,
+      };
+      const value = renderRegisteredFilter(def, source, labels, registry);
+      const context = { ...props, $implicit: props };
+      let renderer: TemplateRef<typeof context> | Type<unknown> | undefined;
+      if (value instanceof TemplateRef) {
+        renderer = value;
+      } else if (typeof value === "function" && "ɵcmp" in value) {
+        renderer = value as unknown as Type<unknown>;
+      }
+      return {
+        def,
+        context,
+        renderer: resolveRenderer(renderer, context),
+        text:
+          value && (typeof value === "string" || typeof value === "number")
+            ? String(value)
+            : null,
+      };
+    });
+  });
 
   /** Which field draws a definition. */
   protected kindOf(def: FilterDef<TRow>): string {
