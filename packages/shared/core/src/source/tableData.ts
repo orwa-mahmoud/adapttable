@@ -97,6 +97,8 @@ export interface TableDataPlan<TRow> {
   readonly tier: DataTier;
   /** The merged declarative-filter runtime. */
   readonly runtime: FilterRuntime<TRow>;
+  /** Stable key for declared filter semantics, independent of rows and generated callbacks. */
+  readonly filterKey: string;
   /** The declarative filters AND-ed with the host's `filterFn`. */
   readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
   /** Evaluates the AND/OR filter tree, when the engine is composed. */
@@ -162,6 +164,19 @@ function noticeOf<TRow>(source: TableSource<TRow>): TableQuery {
 export function createTableData<TRow>(): TableData<TRow> {
   const signal = createSourceSignal();
   const { notify } = signal;
+  // Plain tables never allocate filter identity bookkeeping. The optional
+  // engine owns authored semantics; this controller only tracks replacement.
+  let engines: WeakMap<FilterEngine, number> | undefined;
+  let nextEngine = 0;
+  const engineKey = (engine: FilterEngine | undefined): number => {
+    if (!engine) return 0;
+    engines ??= new WeakMap();
+    const existing = engines.get(engine);
+    if (existing !== undefined) return existing;
+    const next = ++nextEngine;
+    engines.set(engine, next);
+    return next;
+  };
 
   const loader = createFilterOptionsLoader();
   const optionCache = new Map<
@@ -255,6 +270,11 @@ export function createTableData<TRow>(): TableData<TRow> {
     const next: TableDataPlan<TRow> = {
       tier,
       runtime,
+      filterKey: stableKey([
+        engineKey(engine),
+        config.filterFn !== undefined,
+        runtime.filterKey,
+      ]),
       filterFn: combinedFilterOf(runtime, config.filterFn),
       filterTreeFn: engine
         ? (row, tree) =>

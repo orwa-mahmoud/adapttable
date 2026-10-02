@@ -56,6 +56,7 @@ describe("FILTER_ENGINE_IMPL.buildRuntime", () => {
   it("resolves a column's shorthand into a real definition", () => {
     const runtime = build(undefined);
     expect(runtime.defs.map((def) => def.key)).toEqual(["team"]);
+    expect(typeof runtime.filterKey).toBe("string");
   });
 
   it("derives an auto option list from the rows themselves", () => {
@@ -69,9 +70,16 @@ describe("FILTER_ENGINE_IMPL.buildRuntime", () => {
 
   it("prefers an already-loaded list over calling the loader again", () => {
     const options = vi.fn(() => Promise.resolve([]));
-    const runtime = build([{ key: "city", type: "select", options }], {
+    const defs = [{ key: "city", type: "select", options }];
+    const pending = build(defs);
+    const runtime = build(defs, {
       city: [{ value: "Paris", label: "Paris" }],
     });
+    expect(runtime.filterKey).not.toBe(pending.filterKey);
+    expect(
+      build(defs, { city: [{ value: "Paris", label: "Paris" }] }).filterKey
+    ).toBe(runtime.filterKey);
+    expect(build(defs).filterKey).toBe(pending.filterKey);
     expect(runtime.defs[1]?.options).toEqual([
       { value: "Paris", label: "Paris" },
     ]);
@@ -89,6 +97,10 @@ describe("FILTER_ENGINE_IMPL.buildRuntime", () => {
     const defs = [{ key: "city", type: "select" as const, options }];
     const first = build(defs, {}, optionCache);
     const second = build(defs, {}, optionCache);
+    const freshCache = build(defs);
+    expect(second.filterKey).toBe(first.filterKey);
+    expect(freshCache.filterKey).toBe(first.filterKey);
+    expect(freshCache.defs[1]?.options).not.toBe(first.defs[1]?.options);
     const load = first.defs[1]?.options as () => Promise<unknown>;
     const again = second.defs[1]?.options as () => Promise<unknown>;
     await Promise.all([load(), again(), load()]);

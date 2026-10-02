@@ -1401,6 +1401,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<UseTableUrlStateOptio
     data: readonly TRow[];
     error?: Error | null;
     filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    filterKey?: string | number;
     filterTreeFn?: (row: TRow, tree: QueryFilterGroup) => boolean;
     forceMobile?: boolean;
     getRowId?: (row: TRow) => string;

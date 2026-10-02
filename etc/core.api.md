@@ -3477,6 +3477,7 @@ export interface FilterRuntime<TRow> {
     arrayExtraKeys: string[];
     defs: readonly FilterDef<TRow>[];
     filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterKey?: string;
     filterLabels: Record<string, ChipLabelResolver>;
     numberExtraKeys: string[];
     registry: FilterTypeRegistry;
@@ -3870,6 +3871,7 @@ export interface FrontendSourceConfig<TRow> {
     readonly columns?: readonly ColumnMetadata<TRow>[];
     readonly data: readonly TRow[];
     readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterKey?: string | number;
     readonly filterTreeFn?: (row: TRow, tree: QueryFilterGroup) => boolean;
     readonly getRowId?: (row: TRow) => string;
     readonly getSearchText?: (row: TRow) => string;
@@ -7640,6 +7642,7 @@ export interface TableDataConfig<TRow> {
 export interface TableDataPlan<TRow> {
     readonly facetKeys: readonly string[] | undefined;
     readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterKey: string;
     readonly filterTreeFn: ((row: TRow, tree: QueryFilterGroup) => boolean) | undefined;
     readonly runtime: FilterRuntime<TRow>;
     readonly tier: DataTier;

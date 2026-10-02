@@ -63,6 +63,8 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
    * tree is stored but not applied (server tiers send it instead).
    */
   filterTreeFn?: (row: TRow, tree: QueryFilterGroup) => boolean;
+  /** Re-evaluate unchanged rows when the filter predicates' meaning changes. */
+  filterKey?: string | number;
   /** Pagination mode. Defaults to `"auto"` (mobile → infinite). */
   paginationMode?: PaginationMode;
   /** Forwarded error to display (e.g. from a query that produced `data`). */
@@ -121,6 +123,7 @@ export function useFrontendData<TRow>(
     columns,
     filterFn,
     filterTreeFn,
+    filterKey,
     paginationMode = "auto",
     error = null,
     refetch,
@@ -152,6 +155,7 @@ export function useFrontendData<TRow>(
       columns,
       filterFn,
       filterTreeFn,
+      filterKey,
       locale,
       paginationMode: resolvedMode,
     },

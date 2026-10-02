@@ -234,6 +234,87 @@ describe("createFrontendSource", () => {
     expect(second.rows).toBe(first.rows);
   });
 
+  it("re-evaluates an explicit filter key on the same data and commits only the changed view", () => {
+    const source = createFrontendSource<Row>();
+    const first = source.update(
+      config({ filterFn: (row) => row.count >= 3, filterKey: "high" }),
+      VIEW
+    );
+    expect(ids(first.rows)).toEqual(["a", "b"]);
+    source.commit();
+    const before = source.engine.snapshot().revisions;
+    const notified = vi.fn();
+    source.engine.subscribe("all", notified);
+
+    const next = source.update(
+      config({ filterFn: (row) => row.count <= 3, filterKey: "low" }),
+      VIEW
+    );
+    expect(ids(next.rows)).toEqual(["a", "c"]);
+    expect(ids(source.engine.rows("page"))).toEqual(["a", "b"]);
+    expect(source.engine.candidate.snapshot().revisions.data).toBe(before.data);
+    expect(source.engine.candidate.snapshot().revisions.view).toBe(
+      before.view + 1
+    );
+    expect(notified).not.toHaveBeenCalled();
+
+    source.commit();
+    expect(ids(source.engine.rows("page"))).toEqual(["a", "c"]);
+    expect(source.engine.snapshot().revisions.data).toBe(before.data);
+    expect(notified).toHaveBeenCalledTimes(1);
+
+    const same = source.update(
+      config({ filterFn: (row) => row.count <= 3, filterKey: "low" }),
+      VIEW
+    );
+    expect(same.rows).toBe(next.rows);
+    source.commit();
+    expect(notified).toHaveBeenCalledTimes(1);
+  });
+
+  it("re-evaluates a changed filter tree predicate without changing its tree or data", () => {
+    const source = createFrontendSource<Row>();
+    const view: FrontendSourceViewState = {
+      ...VIEW,
+      filterTree: { combinator: "and", conditions: [] },
+    };
+    const first = source.update(
+      config({ filterTreeFn: (row) => row.id === "a", filterKey: "first" }),
+      view
+    );
+    expect(ids(first.rows)).toEqual(["a"]);
+    source.commit();
+    const next = source.update(
+      config({ filterTreeFn: (row) => row.id === "b", filterKey: "second" }),
+      view
+    );
+    expect(ids(next.rows)).toEqual(["b"]);
+    expect(ids(source.engine.rows("page"))).toEqual(["a"]);
+    source.commit();
+    expect(ids(source.engine.rows("page"))).toEqual(["b"]);
+  });
+
+  it("distinguishes numeric and string filter keys and re-evaluates when a key is cleared", () => {
+    const source = createFrontendSource<Row>();
+    const first = source.update(
+      config({ filterFn: (row) => row.id === "a", filterKey: 1 }),
+      VIEW
+    );
+    expect(ids(first.rows)).toEqual(["a"]);
+    source.commit();
+    const second = source.update(
+      config({ filterFn: (row) => row.id === "b", filterKey: "1" }),
+      VIEW
+    );
+    expect(ids(second.rows)).toEqual(["b"]);
+    source.commit();
+    const cleared = source.update(
+      config({ filterFn: (row) => row.id === "c" }),
+      VIEW
+    );
+    expect(ids(cleared.rows)).toEqual(["c"]);
+  });
+
   it("reads the newest callbacks without restaging", () => {
     const source = createFrontendSource<Row>();
     source.update(config({ getSearchText: () => "" }), VIEW);

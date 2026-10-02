@@ -101,6 +101,11 @@ export interface FrontendSourceConfig<TRow> {
   readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
   /** Client filter over the nested filter tree. */
   readonly filterTreeFn?: (row: TRow, tree: QueryFilterGroup) => boolean;
+  /**
+   * Semantic version of the filter predicates. Change it when their meaning
+   * changes without a data or query change; callback identity alone is inert.
+   */
+  readonly filterKey?: string | number;
   /** Active locale for `i18n` column paths. */
   readonly locale?: string;
   /** `"paged"` shows one page; `"infinite"` grows the window. */
@@ -277,6 +282,7 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
   let engine: TableEngine<TRow> | undefined;
   let data: readonly TRow[] | undefined;
   let fingerprint: string | undefined;
+  let filterKey: string | number | undefined;
   let getRowId: (row: TRow) => string = defaultFrontendRowId;
   let getSearchText: (row: TRow) => string = defaultSearchText;
   const searchCache = new Map<string, string>();
@@ -380,14 +386,23 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
     // strategy and the page window — so the engine can never describe a
     // different window than the rows this frame returns.
     const nextFingerprint = viewFingerprint(config, view);
-    if (fingerprint !== nextFingerprint) {
+    const filtersChanged =
+      fingerprint !== undefined && !Object.is(filterKey, config.filterKey);
+    if (fingerprint !== nextFingerprint || filtersChanged) {
       table.stageCandidate({
         ...viewConfig,
         paginationMode: config.paginationMode,
         page: view.page,
         limit: view.limit,
       });
+      if (filtersChanged) {
+        // First adopt the new callbacks, then re-evaluate the same dataset.
+        // The engine stages changed row membership as a view revision and
+        // publishes it only at commit; the host's data identity stays intact.
+        table.stageCandidate({}, { data: config.data });
+      }
       fingerprint = nextFingerprint;
+      filterKey = config.filterKey;
       stages += 1;
     }
 

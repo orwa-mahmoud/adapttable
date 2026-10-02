@@ -3043,6 +3043,7 @@ export interface FilterRuntime<TRow> {
     arrayExtraKeys: string[];
     defs: readonly FilterDef<TRow>[];
     filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterKey?: string;
     filterLabels: Record<string, ChipLabelResolver>;
     numberExtraKeys: string[];
     registry: FilterTypeRegistry;
