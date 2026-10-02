@@ -59,11 +59,13 @@ import { FillHandleChromeProps } from '@adapttable/angular';
 import { FillHandleSlotProps } from '@adapttable/angular';
 import { FillHandleSlots } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
+import { FilterFormSource } from '@adapttable/core';
 import { FilterHeaderControlProps } from '@adapttable/angular';
 import { FilterOverlaySlotProps } from '@adapttable/angular';
 import { FiltersFormSlotProps } from '@adapttable/angular';
 import { FilterTreeSlots } from '@adapttable/angular';
 import { FilterTypeRegistry } from '@adapttable/angular';
+import { FilterWidgetRenderProps } from '@adapttable/angular';
 import { FindBarProps } from '@adapttable/angular';
 import { GridFocus } from '@adapttable/angular';
 import { GroupAggregateOps } from '@adapttable/core';
@@ -97,6 +99,7 @@ import { PivotField } from '@adapttable/angular/pivot';
 import { PivotPanelSlots } from '@adapttable/angular/pivot';
 import { QueryAggregate } from '@adapttable/angular';
 import { QuerySupport } from '@adapttable/angular';
+import { ResolvedRenderer } from '@adapttable/angular';
 import { resolveRenderer } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
@@ -149,6 +152,24 @@ export class AdaptAutoFilterForm<TRow> {
     // (undocumented)
     protected readonly checklistSlots: ChecklistSlots;
     readonly defs: InputSignal<readonly FilterDef<TRow>[]>;
+    protected readonly fields: Signal<{
+        def: FilterDef<TRow>;
+        context: {
+            $implicit: FilterWidgetRenderProps<TRow>;
+            def: FilterDef<TRow>;
+            source: FilterFormSource<TRow>;
+            labels: Required<TableLabels>;
+            className?: string;
+        };
+        renderer: ResolvedRenderer<    {
+        $implicit: FilterWidgetRenderProps<TRow>;
+        def: FilterDef<TRow>;
+        source: FilterFormSource<TRow>;
+        labels: Required<TableLabels>;
+        className?: string;
+        }> | null;
+        text: string | null;
+    }[]>;
     protected kindOf(def: FilterDef<TRow>): string;
     readonly labels: InputSignal<Required<TableLabels>>;
     readonly registry: InputSignal<FilterTypeRegistry>;
@@ -1034,6 +1055,8 @@ export class AdaptFilterDrawer {
 // @internal (undocumented)
 export class AdaptFilterPopover {
     constructor();
+    // (undocumented)
+    protected onVisibleChange(open: boolean): void;
     // (undocumented)
     protected readonly overlayStyle: {
         zIndex: string;

@@ -216,6 +216,7 @@ import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { filterWidgetKind } from '@adapttable/core';
+import { FilterWidgetRenderProps } from '@adapttable/core';
 import { FIND_BAR } from '@adapttable/core/binding';
 import { FindBarProps } from '@adapttable/core/binding';
 import { FindButtonKind } from '@adapttable/core/binding';
@@ -335,6 +336,7 @@ import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
 import { RELATIVE_PRESETS } from '@adapttable/core';
 import { RelativePreset } from '@adapttable/core';
 import { renderedRowsOf } from '@adapttable/core/binding';
+import { renderRegisteredFilter } from '@adapttable/core';
 import { REORDER_COLUMN_KEY } from '@adapttable/core';
 import { resolveBodyVirtualization } from '@adapttable/core/binding';
 import { resolveCellEditor } from '@adapttable/core';
@@ -2019,8 +2021,34 @@ export class AdaptFilterHeaderChrome<TRow> {
 // @public
 export class AdaptFilterHeaderControlChrome<TRow> implements OnInit {
     protected readonly booleanProps: Signal<FilterHeaderSelectProps>;
-    protected readonly caption: Signal<string | null>;
     readonly className: InputSignal<string | undefined>;
+    protected readonly custom: Signal<    {
+    context: {
+    $implicit: {
+    def: FilterDef<TRow>;
+    source: FilterFormSource<TRow>;
+    labels: Required<TableLabels>;
+    className: string | undefined;
+    };
+    def: FilterDef<TRow>;
+    source: FilterFormSource<TRow>;
+    labels: Required<TableLabels>;
+    className: string | undefined;
+    };
+    renderer: ResolvedRenderer<    {
+    $implicit: {
+    def: FilterDef<TRow>;
+    source: FilterFormSource<TRow>;
+    labels: Required<TableLabels>;
+    className: string | undefined;
+    };
+    def: FilterDef<TRow>;
+    source: FilterFormSource<TRow>;
+    labels: Required<TableLabels>;
+    className: string | undefined;
+    }> | null;
+    text: string | null;
+    }>;
     readonly def: InputSignal<FilterDef<TRow>>;
     protected readonly kind: Signal<HeaderFilterCellKind | undefined>;
     readonly labels: InputSignal<Required<TableLabels>>;
@@ -3965,7 +3993,7 @@ export interface CommandPaletteOptions {
     readonly button?: boolean;
     readonly commands?: readonly Command[];
     readonly onOpenChange?: (open: boolean) => void;
-    readonly open?: boolean;
+    readonly open?: boolean | Signal<boolean>;
     readonly shortcuts?: readonly Shortcut[];
 }
 
@@ -4578,6 +4606,8 @@ export { FilterTypeSpec }
 export { FilterValue }
 
 export { filterWidgetKind }
+
+export { FilterWidgetRenderProps }
 
 export { FIND_BAR }
 
@@ -5432,6 +5462,8 @@ export { renderedRowsOf }
 // @public
 export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
 
+export { renderRegisteredFilter }
+
 export { REORDER_COLUMN_KEY }
 
 // @public
@@ -5629,7 +5661,7 @@ export function rowPinning(options?: RowPinningFeatureOptions): AdaptTableFeatur
 // @public
 export interface RowPinningFeatureOptions {
     readonly onPinnedRowIdsChange?: (next: RowPinState_2) => void;
-    readonly pinnedRowIds?: RowPinState_2;
+    readonly pinnedRowIds?: MaybeSignal<RowPinState_2>;
 }
 
 // @public
@@ -6200,7 +6232,7 @@ export { TreeExpansionState }
 
 // @public
 export interface TreeFeatureOptions<TRow> {
-    readonly expandedIds?: readonly string[];
+    readonly expandedIds?: MaybeSignal<readonly string[]>;
     readonly getChildren?: (row: TRow) => readonly TRow[] | undefined;
     readonly getParentId?: (row: TRow) => string | undefined;
     readonly hasChildren?: (row: TRow) => boolean;
