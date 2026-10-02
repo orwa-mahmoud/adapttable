@@ -1,0 +1,153 @@
+<li
+  data-adapttable-part="assistant-receipt"
+  [attr.data-status]="receipt().status"
+  [attr.data-kind]="receipt().subject?.kind"
+  style="
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6em;
+    flex-wrap: wrap;
+    padding: 0.55em 0.6em;
+    border-radius: 0.7em;
+    border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  "
+>
+  <span
+    data-adapttable-part="assistant-receipt-summary"
+    style="
+      display: flex;
+      align-items: center;
+      gap: 0.65em;
+      flex: 1 1 10em;
+      min-width: 0;
+    "
+  >
+    <span
+      data-adapttable-part="assistant-receipt-icon"
+      aria-hidden="true"
+      [attr.data-kind]="receipt().subject?.kind"
+      [style.color]="glyph().ink"
+      [style.background]="
+        'color-mix(in oklab,' + glyph().ink + ' 16%,transparent)'
+      "
+      style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        inline-size: 2.3em;
+        block-size: 2.3em;
+        flex-shrink: 0;
+        border-radius: 0.7em;
+        font-size: 0.95em;
+      "
+      ><svg [adaptIcon]="glyph().icon"></svg
+    ></span>
+    <span
+      style="
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        line-height: 1.35;
+      "
+    >
+      <strong style="font-weight: 700; font-size: 1.05em">{{
+        headline()
+      }}</strong>
+      <span
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          gap: 0 0.45em;
+          opacity: 0.6;
+          font-size: 0.9em;
+          overflow-wrap: anywhere;
+        "
+      >
+        @if (detail()) {
+          <span data-adapttable-part="assistant-receipt-detail-text">{{
+            detail()
+          }}</span>
+        }
+        @if (where()) {
+          <span data-adapttable-part="assistant-receipt-where">{{
+            where()
+          }}</span>
+        }
+        @if (change(); as values) {
+          <span
+            data-adapttable-part="assistant-receipt-change"
+            style="display: flex; align-items: center; gap: 0.4em"
+            ><s data-adapttable-part="assistant-receipt-before">{{
+              values.before
+            }}</s
+            ><span aria-hidden="true">→</span
+            ><strong data-adapttable-part="assistant-receipt-after">{{
+              values.after
+            }}</strong
+            ><span
+              style="
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+              "
+              >{{ values.spoken }}</span
+            ></span
+          >
+        }
+      </span>
+    </span>
+  </span>
+  <span
+    data-adapttable-part="assistant-receipt-outcome"
+    style="
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      margin-inline-start: auto;
+      flex-shrink: 0;
+    "
+  >
+    @if (onUndo()) {
+      <span data-adapttable-part="assistant-receipt-undo"
+        ><ng-container
+          [adaptControl]="slots().Button"
+          [adaptControlProps]="undoButton()"
+      /></span>
+    }
+  </span>
+  @if (needsSave()) {
+    <span data-adapttable-part="assistant-receipt-save"
+      ><ng-container
+        [adaptControl]="slots().Badge"
+        [adaptControlProps]="saveBadge()"
+    /></span>
+  }
+  @if (receipt().message) {
+    <ng-container
+      [adaptControl]="slots().Button"
+      [adaptControlProps]="detailButton()"
+    />
+    @if (expanded()) {
+      <span
+        data-adapttable-part="assistant-receipt-message"
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.3em;
+          overflow-wrap: anywhere;
+        "
+        >{{ receipt().message }}
+        @if (receipt().capabilityKey) {
+          <code data-adapttable-part="assistant-receipt-capability">{{
+            receipt().capabilityKey
+          }}</code>
+        }
+      </span>
+    }
+  }
+</li>

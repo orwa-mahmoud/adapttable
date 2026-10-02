@@ -1,0 +1,295 @@
+<ng-template #launcherContent>
+  <span
+    data-adapttable-part="assistant-launcher-mark"
+    style="display: flex; font-size: 1.85em"
+    ><adapt-speaker-mark [avatar]="props().avatars?.assistant" />
+    @if (props().approval) {
+      <span
+        data-adapttable-part="assistant-launcher-waiting"
+        aria-hidden="true"
+      >
+        •</span
+      >
+    }
+  </span>
+</ng-template>
+<ng-template #modalContent>
+  @if (modalReview(); as review) {
+    @if (props().approval; as pending) {
+      <adapt-approval-review-chrome
+        [review]="review"
+        [labels]="props().labels"
+        [slots]="reviewSlots()"
+        [expanded]="true"
+        [onApprove]="pending.approve"
+        [onReject]="pending.reject"
+        [onDecide]="pending.decideAt"
+        [onAlwaysAllow]="pending.alwaysAllow"
+      />
+    }
+  }
+</ng-template>
+@if (modalSheet(); as modal) {
+  <ng-container [adaptControl]="slots().Sheet" [adaptControlProps]="modal" />
+}
+<span
+  #launcherAnchor
+  data-adapttable-part="assistant-launcher-anchor"
+  [style]="launcherPlacement()"
+  [style.--adapttable-assistant-accent]="props().accent"
+>
+  @if (props().launcher !== false && !props().open) {
+    <ng-container
+      [adaptControl]="slots().Button"
+      [adaptControlProps]="launcherButton()"
+    />
+  }
+</span>
+<ng-template #contents>
+  <div
+    #surface
+    data-adapttable-part="assistant-surface"
+    [attr.dir]="props().dir"
+    [style.--adapttable-assistant-accent]="props().accent"
+    style="
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+      height: 100%;
+      min-height: 0;
+    "
+    (keydown)="onKeyDown($event)"
+  >
+    <header
+      data-adapttable-part="assistant-header"
+      style="
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        min-height: 3.5em;
+        padding-inline: 0.25em;
+        flex-shrink: 0;
+      "
+    >
+      <adapt-speaker-mark
+        part="assistant-mark"
+        [avatar]="props().avatars?.assistant"
+      />
+      <span
+        data-adapttable-part="assistant-title"
+        style="
+          font-weight: 600;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        "
+        >{{ title() }}</span
+      >
+      <ng-container
+        [adaptControl]="slots().Badge"
+        [adaptControlProps]="badge()"
+      />
+      <span
+        style="
+          margin-inline-start: auto;
+          display: flex;
+          align-items: center;
+          gap: 0.15em;
+        "
+      >
+        @if (props().onSettings) {
+          <ng-container
+            [adaptControl]="slots().Button"
+            [adaptControlProps]="settingsButton()"
+          />
+        }
+        <ng-container
+          [adaptControl]="slots().Button"
+          [adaptControlProps]="closeButton()"
+      /></span>
+    </header>
+    <output [adaptLiveRegion]="status()" part="assistant-status"></output>
+    <div
+      data-adapttable-part="assistant-conversation-region"
+      style="
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      "
+    >
+      @if (review(); as currentReview) {
+        @if (expanded()) {
+          @if (widgetApproval(); as pending) {
+            <div
+              data-adapttable-part="assistant-approval-full"
+              style="height: 100%; overflow-y: auto"
+            >
+              <adapt-approval-review-chrome
+                [review]="currentReview"
+                [labels]="props().labels"
+                [slots]="reviewSlots()"
+                [expanded]="true"
+                [onBack]="back"
+                [onApprove]="pending.approve"
+                [onReject]="pending.reject"
+                [onDecide]="pending.decideAt"
+                [onAlwaysAllow]="pending.alwaysAllow"
+              />
+            </div>
+          }
+        }
+      }
+      <div
+        #conversation
+        data-adapttable-part="assistant-conversation"
+        [hidden]="!!review() && expanded()"
+        style="height: 100%; overflow-y: auto; overflow-x: hidden"
+        (scroll)="scroll.onScroll()"
+      >
+        <ul
+          data-adapttable-part="assistant-messages"
+          style="
+            list-style: none;
+            margin: 0;
+            padding: 0 0.5em;
+            display: flex;
+            flex-direction: column;
+            gap: 1.15em;
+          "
+        >
+          @for (row of messageRows(); track row.message.id) {
+            <adapt-assistant-message
+              [message]="row.message"
+              [leads]="row.leads"
+              [labels]="props().labels"
+              [slots]="slots()"
+              [avatars]="props().avatars"
+              [action]="row.action"
+              [undo]="row.undo"
+              [onUndo]="undoTurn"
+              [onUndoAction]="undoAction"
+              [receipts]="props().receipts !== false"
+              [onAnswer]="row.onAnswer"
+            />
+          }
+          @if (working()) {
+            <adapt-assistant-working
+              [labels]="props().labels"
+              [progress]="props().assistant.progress"
+            />
+          }
+        </ul>
+        @if (props().note && props().assistant.messages.length === 0) {
+          <p
+            data-adapttable-part="assistant-empty-note"
+            style="
+              margin: 0.5em 0 0 2.6em;
+              opacity: 0.7;
+              font-size: 0.9em;
+              max-inline-size: 26em;
+            "
+          >
+            {{ props().note }}
+          </p>
+        }
+        @if (props().assistant.revokeAlwaysAllow; as revoke) {
+          <adapt-assistant-always-allowed
+            [allowed]="props().assistant.alwaysAllowed ?? []"
+            [labels]="props().labels"
+            [slots]="slots()"
+            [onRevoke]="revoke"
+          />
+        }
+      </div>
+      @if (review(); as currentReview) {
+        @if (!expanded()) {
+          @if (widgetApproval(); as pending) {
+            <div
+              data-adapttable-part="assistant-approval"
+              style="
+                flex: 0 0 auto;
+                border-block-start: 1px solid;
+                border-color: inherit;
+                padding: 0.5em 0;
+              "
+            >
+              <adapt-approval-review-chrome
+                [review]="currentReview"
+                [labels]="props().labels"
+                [slots]="reviewSlots()"
+                [onExpand]="expand"
+                [onApprove]="pending.approve"
+                [onReject]="pending.reject"
+                [onDecide]="pending.decideAt"
+                [onAlwaysAllow]="pending.alwaysAllow"
+              />
+            </div>
+          }
+        }
+      }
+      @if (props().approval && !widgetApproval()) {
+        <p
+          data-adapttable-part="assistant-approval-elsewhere"
+          style="margin: 0"
+        >
+          {{
+            props().labels?.approvalWaitingElsewhere ??
+              "A change is waiting for your decision."
+          }}
+        </p>
+      }
+      @if (scroll.hasUnseen()) {
+        <span
+          style="
+            position: absolute;
+            inset-block-end: 0.5em;
+            inset-inline-start: 50%;
+          "
+          ><ng-container
+            [adaptControl]="slots().Button"
+            [adaptControlProps]="jumpButton()"
+        /></span>
+      }
+    </div>
+    @if (props().assistant.error !== undefined) {
+      <p data-adapttable-part="assistant-error" role="alert">
+        {{ error() }}
+      </p>
+    } @else if (rejoinable()) {
+      <p data-adapttable-part="assistant-detached">
+        {{
+          props().labels?.assistantDetached ??
+            "The connection went. The work may still be running."
+        }}
+        <ng-container
+          [adaptControl]="slots().Button"
+          [adaptControlProps]="rejoinButton()"
+        />
+      </p>
+    } @else if (props().assistant.status === "disconnected") {
+      <p data-adapttable-part="assistant-unavailable">
+        {{
+          props().labels?.assistantUnavailable ??
+            "The assistant is not connected."
+        }}
+      </p>
+    }
+    <adapt-assistant-composer [props]="composer()" [slots]="slots()" />
+    @if (resolved() === "sheet") {
+      <ng-container
+        [adaptControl]="slots().Button"
+        [adaptControlProps]="backButton()"
+      />
+    }
+  </div>
+</ng-template>
+@if (props().open) {
+  @if (surfaceProps(); as surface) {
+    <ng-container
+      [adaptControl]="surfaceComponent()"
+      [adaptControlProps]="surface"
+    />
+  }
+}

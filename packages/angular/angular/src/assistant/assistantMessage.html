@@ -1,0 +1,225 @@
+<li
+  data-adapttable-part="assistant-message"
+  [attr.data-role]="message().role"
+  [style.align-items]="mine() ? 'flex-end' : 'flex-start'"
+  style="display: flex; flex-direction: column; gap: 0.25em"
+>
+  <span
+    data-adapttable-part="assistant-message-speaker"
+    style="
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    "
+    >{{ speaker() }}</span
+  >
+  <span
+    [style.flex-direction]="mine() ? 'row-reverse' : 'row'"
+    style="display: flex; gap: 0.7em; align-items: flex-end; max-width: 88%"
+  >
+    <adapt-speaker-mark
+      [mine]="mine()"
+      [hidden]="!leads()"
+      [avatar]="mine() ? avatars()?.user : avatars()?.assistant"
+    />
+    <span
+      data-adapttable-part="assistant-message-text"
+      [attr.data-mine]="mine() ? 'true' : 'false'"
+      [attr.data-streaming]="
+        message().streaming || message().transcribing ? 'true' : null
+      "
+      [style.background]="
+        mine()
+          ? 'color-mix(in srgb,currentColor 10%,transparent)'
+          : 'color-mix(in srgb,var(--adapttable-assistant-accent,currentColor) 14%,transparent)'
+      "
+      [style.border-radius]="
+        mine() ? '1.1em 1.1em 0.35em 1.1em' : '1.1em 1.1em 1.1em 0.35em'
+      "
+      style="
+        margin: 0;
+        padding: 0.6em 0.8em;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+        display: flex;
+        align-items: flex-end;
+        gap: 0.4em;
+        min-width: 0;
+        position: relative;
+        font-weight: 400;
+        line-height: 1.5;
+      "
+    >
+      <span style="min-width: 0">{{ spoken().text }}</span>
+      @if (hasActions()) {
+        <span
+          data-adapttable-part="assistant-message-trailing"
+          style="
+            display: flex;
+            align-self: flex-end;
+            flex-shrink: 0;
+            margin-inline-end: -0.35em;
+            margin-block-end: -0.25em;
+          "
+          ><span
+            #mark
+            data-adapttable-part="assistant-receipts-toggle"
+            style="display: flex"
+            ><ng-container
+              [adaptControl]="slots().Button"
+              [adaptControlProps]="actionsButton()" /></span
+        ></span>
+      }
+    </span>
+  </span>
+  @if (hasActions() && expanded()) {
+    <section
+      #card
+      data-adapttable-part="assistant-receipts-group"
+      [attr.aria-labelledby]="headingId"
+      style="
+        align-self: stretch;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3em;
+        font-size: 0.92em;
+        min-inline-size: 0;
+        margin-block-start: 0.55em;
+        padding: 0.6em 0.7em;
+        border-radius: 0.85em;
+        border: 1px solid
+          color-mix(
+            in srgb,
+            var(--adapttable-assistant-accent, currentColor) 22%,
+            transparent
+          );
+        background: color-mix(
+          in srgb,
+          var(--adapttable-assistant-accent, currentColor) 5%,
+          transparent
+        );
+      "
+    >
+      <span
+        aria-hidden="true"
+        data-adapttable-part="assistant-receipts-tail"
+        [style.inset-inline-end]="
+          tailInset() === undefined
+            ? '1.15em'
+            : 'calc(' + tailInset() + 'px - 0.4em)'
+        "
+        [style.visibility]="tailInset() === undefined ? 'hidden' : 'visible'"
+        style="
+          position: absolute;
+          inset-block-start: -0.42em;
+          inline-size: 0.8em;
+          block-size: 0.42em;
+          background: inherit;
+          border-inline-start: 1px solid;
+          border-block-start: 1px solid;
+          border-color: inherit;
+          clip-path: polygon(50% 0, 100% 100%, 0 100%);
+        "
+      ></span>
+      <div
+        data-adapttable-part="assistant-receipts-heading"
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5em;
+          flex-wrap: wrap;
+        "
+      >
+        <strong
+          [id]="headingId"
+          style="font-size: 0.85em; opacity: 0.75; font-weight: 600"
+          >{{
+            labels()?.assistantActionsTitle ?? "What this turn changed"
+          }}</strong
+        >
+        @if (undo() && onUndo() && perRow() !== 1) {
+          <span data-adapttable-part="assistant-receipts-undo-all"
+            ><ng-container
+              [adaptControl]="slots().Button"
+              [adaptControlProps]="wholeUndo()"
+          /></span>
+        }
+      </div>
+      <ul
+        data-adapttable-part="assistant-receipts"
+        style="
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 0.15em;
+        "
+      >
+        @for (row of receiptRows(); track row.receipt.idempotencyKey) {
+          <adapt-assistant-receipt
+            [receipt]="row.receipt"
+            [labels]="labels()"
+            [slots]="slots()"
+            [onUndo]="row.onUndo"
+          />
+        }
+      </ul>
+    </section>
+  }
+  @if (message().question; as question) {
+    @if (onAnswer() && question.options?.length) {
+      <div
+        data-adapttable-part="assistant-question-options"
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-start;
+          gap: 0.35em;
+          margin-inline-start: 2.6em;
+        "
+      >
+        @for (option of answerOptions(); track option.id) {
+          <ng-container
+            [adaptControl]="slots().Button"
+            [adaptControlProps]="option.button"
+          />
+        }
+      </div>
+    }
+  }
+  @if (offerButton(); as offer) {
+    <span
+      data-adapttable-part="assistant-message-action"
+      style="
+        display: flex;
+        justify-content: center;
+        align-self: stretch;
+        margin-block-start: 0.75em;
+      "
+      ><ng-container
+        [adaptControl]="slots().Button"
+        [adaptControlProps]="offer"
+    /></span>
+  }
+  @if (undo() && !hasActions()) {
+    <span data-adapttable-part="assistant-undo"
+      ><ng-container
+        [adaptControl]="slots().Button"
+        [adaptControlProps]="loneUndo()"
+      />
+      @if (!undo()?.available) {
+        <span
+          data-adapttable-part="assistant-undo-reason"
+          style="opacity: 0.8"
+          >{{ undoReason() }}</span
+        >
+      }
+    </span>
+  }
+</li>
