@@ -2,6 +2,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { JSDOM } from "jsdom";
+
 import { ANGULAR_DOCS } from "./angular-docs.mjs";
 import { ogCardMetadata, ogCardSvg, wrapCardTitle } from "./og-cards.mjs";
 
@@ -58,24 +60,60 @@ describe("browser-free SVG cards", () => {
     assert.throws(() => wrapCardTitle("label", 0), /positive integer/);
   });
 
-  it("escapes all user-visible strings and declares exact dimensions", () => {
-    const card = {
-      title: '<script> & "title"',
-      kicker: "A < B",
-      footer: "It’s 'safe' & visible",
-    };
-    const svg = ogCardSvg(card);
-    assert.match(svg, /width="1200" height="630" viewBox="0 0 1200 630"/);
-    assert.doesNotMatch(svg, /<script>/);
-    assert.match(svg, /&lt;script&gt; &amp; &quot;title&quot;/);
-    assert.match(svg, /A &lt; B/);
-    assert.match(svg, /&#39;safe&#39; &amp; visible/);
-    assert.equal(ogCardSvg(card), svg);
-    assert.throws(
-      () => ogCardSvg({ ...card, title: "a ".repeat(100) }),
-      /more than three lines/
-    );
-  });
+  for (const [title, escapedTitle] of [
+    ['<script> & "title"', "&lt;script&gt; &amp; &quot;title&quot;"],
+    ['<SCRIPT> & "title"', "&lt;SCRIPT&gt; &amp; &quot;title&quot;"],
+  ]) {
+    it(`escapes all user-visible strings and declares exact dimensions (${title})`, () => {
+      const card = {
+        title,
+        kicker: "A < B",
+        footer: "It’s 'safe' & visible",
+      };
+      const svg = ogCardSvg(card);
+      const document = new JSDOM(svg, { contentType: "image/svg+xml" }).window
+        .document;
+      const root = document.documentElement;
+      assert.equal(root.localName, "svg");
+      assert.equal(root.namespaceURI, "http://www.w3.org/2000/svg");
+      assert.equal(root.getAttribute("width"), "1200");
+      assert.equal(root.getAttribute("height"), "630");
+      assert.equal(root.getAttribute("viewBox"), "0 0 1200 630");
+      assert.equal(root.getAttribute("aria-labelledby"), "card-title");
+      assert.equal(
+        [...document.querySelectorAll("*")].some(
+          (element) => element.localName.toLowerCase() === "script"
+        ),
+        false
+      );
+      const accessibleTitle = document.querySelector("title#card-title");
+      assert.equal(accessibleTitle.textContent, card.title);
+      assert.equal(accessibleTitle.childElementCount, 0);
+      const visibleTitle = document.querySelector('text[font-size="64"]');
+      assert.deepEqual(
+        [...visibleTitle.children].map((line) => ({
+          tag: line.localName,
+          text: line.textContent,
+          children: line.childElementCount,
+        })),
+        [{ tag: "tspan", text: card.title, children: 0 }]
+      );
+      const kicker = document.querySelector('text[y="216"]');
+      assert.equal(kicker.textContent, card.kicker.toUpperCase());
+      assert.equal(kicker.childElementCount, 0);
+      const footer = document.querySelector('text[y="554"]');
+      assert.equal(footer.textContent, card.footer);
+      assert.equal(footer.childElementCount, 0);
+      assert.ok(svg.includes(`<title id="card-title">${escapedTitle}</title>`));
+      assert.match(svg, /A &lt; B/);
+      assert.match(svg, /&#39;safe&#39; &amp; visible/);
+      assert.equal(ogCardSvg(card), svg);
+      assert.throws(
+        () => ogCardSvg({ ...card, title: "a ".repeat(100) }),
+        /more than three lines/
+      );
+    });
+  }
 
   it("renders every registered title without clipping it to a fixed line count", () => {
     for (const card of ogCardMetadata()) {
