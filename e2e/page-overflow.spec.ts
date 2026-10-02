@@ -95,6 +95,15 @@ for (const { key, route } of PAGES) {
       const root = document.documentElement;
       return {
         overflow: root.scrollWidth - root.clientWidth,
+        outliers: Array.from(document.querySelectorAll("body *"))
+          .map((element) => ({
+            tag: element.tagName,
+            classes: element.getAttribute("class"),
+            part: element.getAttribute("data-adapttable-part"),
+            right: Math.round(element.getBoundingClientRect().right),
+          }))
+          .filter((element) => element.right > root.clientWidth + 1)
+          .slice(0, 20),
         clipped: [root, document.body].map(
           (element) => getComputedStyle(element).overflowX
         ),
@@ -103,7 +112,7 @@ for (const { key, route } of PAGES) {
 
     expect(
       measured.overflow,
-      `${devPath(route)} overflows its viewport by ${measured.overflow}px at 320px`
+      `${devPath(route)} overflows its viewport by ${measured.overflow}px at 320px: ${JSON.stringify(measured.outliers)}`
     ).toBeLessThanOrEqual(1);
     for (const overflowX of measured.clipped) {
       expect(overflowX).not.toBe("hidden");

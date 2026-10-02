@@ -10,6 +10,12 @@
   border-radius: var(--r-md);
 }
 
+/* Email addresses and other long card values must not widen a phone card. */
+.mx-ng--zorro [data-adapttable-part="card-value"] {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
 /* The binding owns scrolling, including pages without a height cap. */
 .mx-ng--zorro [data-adapttable-part="scroll-box"] {
   overflow: auto;
