@@ -185,6 +185,93 @@ const contractRoot = () =>
     },
   });
 
+describe("shared structural part factories", () => {
+  const source = `export function groupRowParts(kind) {
+  if (kind === "groupMore") {
+    return { row: "group-more-row", cell: "group-more-cell", card: "group-more-card", label: "group-more-label" };
+  }
+  if (kind === "groupFooter") {
+    return { row: "group-footer-row", cell: "group-footer-cell", card: "group-footer-card", label: "group-label" };
+  }
+  return { row: "group-row", cell: "group-cell", card: "group-card", label: "group-label" };
+}`;
+  const rendered = [
+    "group-more-row",
+    "group-more-cell",
+    "group-more-card",
+    "group-more-label",
+    "group-footer-row",
+    "group-footer-cell",
+    "group-footer-card",
+    "group-row",
+    "group-cell",
+    "group-card",
+    "group-label",
+  ];
+
+  function factoryRoot(factory = source) {
+    const root = contractRoot();
+    writePackage(root, "shared", "core", {
+      "src/groupParts.ts": factory,
+    });
+    writePackage(root, "react", "adapter-plain", {
+      "src/Group.tsx": `export const Group = () => <>${rendered
+        .map((part) => `<div data-adapttable-part="${part}" />`)
+        .join("")}</>;`,
+    });
+    return root;
+  }
+
+  it("counts all returned group row, footer and more parts from neutral core", () => {
+    assert.deepEqual(report(factoryRoot())[0].missing, []);
+  });
+
+  it("reports the exact part removed from a factory return", () => {
+    assert.deepEqual(
+      report(
+        factoryRoot(source.replace('card: "group-card"', "card: undefined"))
+      )[0].missing,
+      ["group-card"]
+    );
+  });
+
+  it("reads bounded values from returned records and immutable aliases", () => {
+    const root = contractRoot();
+    writePackage(root, "angular", "angular", {
+      "src/parts.ts": `const CARD = "group-card";
+const PARTS = { card: CARD };
+export function groupedParts(footer) {
+  return footer ? { cell: "group-footer-cell" } : PARTS;
+}`,
+    });
+    assert.deepEqual(
+      parity(root).failures.flatMap(({ lines }) => lines),
+      [
+        "group-card — missing from adapter-plain",
+        "group-footer-cell — missing from adapter-plain",
+      ]
+    );
+  });
+
+  it("ignores incidental strings, nested returns and unrelated functions", () => {
+    const root = contractRoot();
+    writePackage(root, "angular", "angular", {
+      "src/parts.ts": `export function groupedParts(kind) {
+  const unused = { cell: "unused-part" };
+  const callback = () => { return { cell: "callback-part" }; };
+  function helper() { return { cell: "nested-part" }; }
+  if (kind === "condition-part") return makeRecord("argument-part");
+  return { cell: makePart("value-argument-part"), nested: { cell: "nested-object-part" } };
+}
+export function unrelated() { return { cell: "unrelated-part" }; }
+function privateParts() { return { cell: "private-part" }; }
+// export function commentParts() { return { cell: "comment-part" }; }
+export const example = 'export function exampleParts() { return { cell: "string-part" }; }';`,
+    });
+    assert.deepEqual(parity(root).failures, []);
+  });
+});
+
 describe("native parts contracts before publication", () => {
   it("accepts unpublished native kits with equal effective parts", () => {
     const result = parity(contractRoot());

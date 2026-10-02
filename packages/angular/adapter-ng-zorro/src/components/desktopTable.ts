@@ -102,7 +102,11 @@ export class AdaptDesktopTable<TRow> {
     "data-adapttable-part": "table",
   }));
 
-  /** Whole binding props belong on NG-ZORRO's generated semantic table. */
+  /**
+   * NG-ZORRO's host names the composite grid for styling; its single generated
+   * table owns all roles, refs and keyboard props. React AntD instead needs a
+   * semantic wrapper because its sticky header splits into sibling tables.
+   */
   protected readonly tableElement = (): HTMLTableElement | null =>
     this.kitTable()?.nativeElement.querySelector("table") ?? null;
 

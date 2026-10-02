@@ -5,6 +5,7 @@
     [nzTemplateMode]="true"
     [nzFrontPagination]="false"
     [nzShowPagination]="false"
+    [attr.data-adapttable-part]="tableAttrs()['role'] === 'grid' ? 'grid' : null"
     [adaptAttrs]="tableAttrs()"
     [adaptAttrsTarget]="tableElement"
   >

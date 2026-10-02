@@ -46,11 +46,12 @@ class Host {
   readonly rowKey = (row: City) => row.id;
 }
 
-async function mount(onRangeChange = vi.fn()) {
+async function mount(onRangeChange = vi.fn(), navigation = true) {
   const fixture = TestBed.createComponent(Host);
-  fixture.componentRef.setInput("features", [
-    cellNavigation({ onRangeChange }),
-  ]);
+  fixture.componentRef.setInput(
+    "features",
+    navigation ? [cellNavigation({ onRangeChange })] : []
+  );
   document.body.append(fixture.nativeElement as HTMLElement);
   fixture.autoDetectChanges();
   await fixture.whenStable();
@@ -77,7 +78,20 @@ describe("cellNavigation() (NG-ZORRO Angular)", () => {
   it("turns the table into one tab stop whose cells the arrows move between", async () => {
     const { settle } = await mount();
     const table = document.querySelector('[data-adapttable-part="table"]')!;
+    const composites = [
+      ...document.querySelectorAll('[data-adapttable-part="grid"]'),
+    ];
+    expect(composites.map((element) => element.tagName)).toEqual(["NZ-TABLE"]);
+    const composite = composites[0]!;
+    expect(composite.querySelectorAll("table")).toHaveLength(1);
+    expect(composite.querySelector("table")).toBe(table);
+    expect(composite.getAttribute("role")).toBeNull();
+    expect(composite.hasAttribute("tabindex")).toBe(false);
+    expect(document.querySelectorAll('[role="grid"]')).toHaveLength(1);
     expect(table.getAttribute("role")).toBe("grid");
+    expect(
+      table.contains(document.querySelector('[data-adapttable-part="thead"]'))
+    ).toBe(true);
     const all = cells();
     expect(all.map((cell) => cell.getAttribute("tabindex"))).toEqual([
       "0",
@@ -94,6 +108,16 @@ describe("cellNavigation() (NG-ZORRO Angular)", () => {
     press("ArrowDown");
     await settle();
     expect(document.activeElement).toBe(cells()[3]);
+  });
+
+  it("keeps the native table without a composite grid hook when navigation is absent", async () => {
+    await mount(vi.fn(), false);
+    const composite = document.querySelector("nz-table")!;
+    const table = composite.querySelector("table")!;
+    expect(composite.hasAttribute("data-adapttable-part")).toBe(false);
+    expect(table.getAttribute("data-adapttable-part")).toBe("table");
+    expect(table.getAttribute("role")).not.toBe("grid");
+    expect(document.querySelector('[role="grid"]')).toBeNull();
   });
 });
 

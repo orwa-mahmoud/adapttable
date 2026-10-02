@@ -45,8 +45,8 @@
  *   fails: that is the drift this check now catches at the moment it appears.
  * - **Core's chrome**, which names parts the kits never spell — some rendered
  *   by core itself, some handed to a kit's slot as a `part` prop, some kept in
- *   a `*_PARTS` table the kits render through, some set on a ref. Those land
- *   in every kit by construction, so they are exempt from the unstyled
+ *   a `*_PARTS` table or `*Parts` factory the kits render through, some set on a
+ *   ref. Those land in every kit by construction, so they are exempt from the unstyled
  *   comparison and counted in the summary instead of being unaccounted for.
  * - **The native kits together**, compared using each kit's own names plus
  *   its framework's Chrome, so a part cannot disappear from one native kit
@@ -307,6 +307,80 @@ const CHROME_PART_PATTERNS = [
 
 /** A `*_PARTS` table the kits render through: every quoted name in it. */
 const PARTS_TABLE = /\b[A-Z][A-Z0-9_]*PARTS\b\s*=\s*(\{[\s\S]*?\n\})/g;
+
+/** A structural part factory returns records, not arbitrary nested strings. */
+function returnedRecordParts(expression, declarations, seen = new Set()) {
+  if (!expression) return [];
+  if (
+    ts.isParenthesizedExpression(expression) ||
+    ts.isAsExpression(expression) ||
+    ts.isTypeAssertionExpression(expression) ||
+    ts.isSatisfiesExpression(expression)
+  ) {
+    return returnedRecordParts(expression.expression, declarations, seen);
+  }
+  if (ts.isIdentifier(expression)) {
+    if (seen.has(expression.text)) return [];
+    return returnedRecordParts(
+      constantValue(expression.text, declarations),
+      declarations,
+      new Set([...seen, expression.text])
+    );
+  }
+  if (ts.isConditionalExpression(expression)) {
+    return [
+      ...returnedRecordParts(expression.whenTrue, declarations, seen),
+      ...returnedRecordParts(expression.whenFalse, declarations, seen),
+    ];
+  }
+  if (!ts.isObjectLiteralExpression(expression)) return [];
+  return expression.properties.flatMap((property) =>
+    ts.isPropertyAssignment(property)
+      ? expressionParts(property.initializer, declarations)
+      : []
+  );
+}
+
+/**
+ * Exported `*Parts` functions are the dynamic form of `*_PARTS` tables. Only
+ * the values of their returned records are structural names: conditions,
+ * helper arguments, unused records and nested callbacks are not outputs.
+ */
+function factoryPartNames(file, text) {
+  const found = new Set();
+  if (!/\.tsx?$/.test(file)) return found;
+  const source = ts.createSourceFile(
+    file,
+    text,
+    ts.ScriptTarget.Latest,
+    true,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  );
+  const declarations = valueDeclarations(source);
+  for (const statement of source.statements) {
+    if (
+      !ts.isFunctionDeclaration(statement) ||
+      !statement.name?.text.endsWith("Parts") ||
+      !statement.body ||
+      !statement.modifiers?.some(
+        (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
+      )
+    ) {
+      continue;
+    }
+    function visit(node) {
+      if (ts.isFunctionLike(node)) return;
+      if (ts.isReturnStatement(node)) {
+        for (const part of returnedRecordParts(node.expression, declarations)) {
+          found.add(part);
+        }
+      }
+      ts.forEachChild(node, visit);
+    }
+    visit(statement.body);
+  }
+  return found;
+}
 
 /** A value declaration that can introduce or shadow a JSX identifier. */
 function valueName(node) {
@@ -729,11 +803,11 @@ function partsOf(kit, root) {
 /**
  * The part names the chrome in these files owns.
  *
- * Chrome names a part in four ways, and only the first looks like the others:
+ * Chrome names a part in five ways, and only the first looks like the others:
  * the attribute it renders itself, the `part` prop it hands a kit's slot to put
- * on the kit's own element, a `*_PARTS` table the kits render through, and a
- * `setAttribute` / `dataset.adapttablePart` on a ref where the element belongs
- * to the kit but the naming does not. All four land in every kit by
+ * on the kit's own element, a `*_PARTS` table or `*Parts` factory the kits render
+ * through, and a `setAttribute` / `dataset.adapttablePart` on a ref where the element belongs
+ * to the kit but the naming does not. All five land in every kit by
  * construction, which is exactly why none of them shows up in an adapter's
  * source.
  */
@@ -741,6 +815,7 @@ function chromeNamesIn(files) {
   const found = namesIn(files, CHROME_PART_PATTERNS);
   for (const file of files) {
     const text = readFileSync(file, "utf8");
+    for (const part of factoryPartNames(file, text)) found.add(part);
     for (const match of text.matchAll(PARTS_TABLE)) {
       for (const name of match[1].matchAll(/["']([a-z0-9-]+)["']/g)) {
         found.add(name[1]);
