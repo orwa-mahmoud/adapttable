@@ -20,8 +20,14 @@ function linkText(markdown: string): string {
   while (cursor < markdown.length) {
     const start = markdown.indexOf("[", cursor);
     if (start < 0) break;
-    const labelEnd = markdown.indexOf("](", start + 1);
+    const labelEnd = markdown.indexOf("]", start + 1);
     if (labelEnd < 0) break;
+    if (markdown[labelEnd + 1] !== "(") {
+      // Preserve literal arrays such as filters([]) before the next real link.
+      result += markdown.slice(cursor, labelEnd + 1);
+      cursor = labelEnd + 1;
+      continue;
+    }
     const end = markdown.indexOf(")", labelEnd + 2);
     if (end < 0) break;
     result +=
@@ -31,16 +37,24 @@ function linkText(markdown: string): string {
   return result + markdown.slice(cursor);
 }
 
+function proseText(text: string): string {
+  // Starlight smartens prose quotes, but preserves quotes inside inline code.
+  return text
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function articleIntroduction(markdown: string): string {
   const introduction = markdown
     .replace(/^# .*\n/, "")
     .trim()
     .split(/\n\s*\n/)[0];
   if (!introduction) throw new Error("A guide needs an introduction");
-  return linkText(introduction)
-    .replace(/`+/g, "")
-    .replace(/\*\*/g, "")
-    .replace(/\s+/g, " ");
+  return proseText(
+    linkText(introduction).replace(/`+/g, "").replace(/\*\*/g, "")
+  );
 }
 
 async function expectGuide(page: Page, source: string, route: string) {
@@ -58,9 +72,11 @@ async function expectGuide(page: Page, source: string, route: string) {
   const article = page.locator("main .sl-markdown-content");
   await expect(article).toHaveCount(1);
   await expect(article).toBeVisible();
-  await expect(article).toContainText(
-    articleIntroduction(readFileSync(join(DOCS_ROOT, source), "utf8"))
-  );
+  const introduction = article.locator(":scope > p").first();
+  await expect(introduction).toBeVisible();
+  await expect
+    .poll(async () => proseText(await introduction.innerText()))
+    .toBe(articleIntroduction(readFileSync(join(DOCS_ROOT, source), "utf8")));
   return article;
 }
 
@@ -97,9 +113,14 @@ for (const source of ANGULAR_DOCS) {
     const markdown = readFileSync(join(DOCS_ROOT, source), "utf8");
     const snippet = /```ts\n([\s\S]*?)\n```/.exec(markdown)?.[1];
     expect(snippet, `${source} needs a real Angular code example`).toBeTruthy();
-    await expect(
-      article.locator("pre").filter({ hasText: snippet!.trim() })
-    ).toHaveCount(1);
+    const example = article.locator('pre[data-language="ts"]').first();
+    await expect(example).toBeVisible();
+    // Expressive Code uses block elements for lines without text-node newlines.
+    // Check every complete line in order, including blank lines, not textContent
+    // for the entire pre, which concatenates otherwise correctly rendered lines.
+    await expect(example.locator(".ec-line .code")).toHaveText(
+      snippet!.trim().split("\n")
+    );
     expect((await article.innerText()).split(/\s+/).length).toBeGreaterThan(
       150
     );
