@@ -55,8 +55,9 @@ export class InvoiceExport {
 ```
 
 The same factory is available from `@adapttable/ng-zorro/export`, paired with
-that kit's root `AdaptDataTable`. Both Angular kits are private workspace
-packages; see [Getting started](./getting-started.md).
+that kit's root `AdaptDataTable`.
+See [Getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Choose rows and columns explicitly
 

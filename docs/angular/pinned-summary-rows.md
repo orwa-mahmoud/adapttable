@@ -49,7 +49,7 @@ export class BudgetSummary {
 ```
 
 For NG-ZORRO, use `@adapttable/ng-zorro` and its `/pinned-summary-rows`
-entry. The factories are implemented in both unpublished workspace kits;
+entry. The factories are implemented in both Angular kits;
 see [getting started](./getting-started.md).
 
 ## Host ownership and scope

@@ -56,7 +56,7 @@ export interface InitResult {
   packageManager: PackageManager;
   /** Packages the printed install command will add. */
   packages: string[];
-  /** The install command; unpublished Angular kits need a local package source. */
+  /** The install command; package availability is not checked. */
   installCommand: string;
   /** Scaffold paths that were written. */
   written: string[];
@@ -154,7 +154,7 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
   if (chakraNote) io.log(chakraNote);
   if (framework === "angular") {
     io.log(
-      "   Note: Angular kits are unpublished workspace packages. Link the built Angular binding and kit locally; the install command below requires a package source that provides them."
+      "   Note: Angular kits are prepared for their first public release. Check registry availability before installing; use built local packages until your registry provides the Angular binding and kit."
     );
   }
   io.log("");

@@ -66,7 +66,8 @@ export class InvoiceTotals {
 }
 ```
 
-Both Angular kits are private workspace packages. Use the equivalent
+See [getting started](./getting-started.md) for installation
+and first-release status. Use the equivalent
 `@adapttable/angular-unstyled` imports for native controls; `aggregate` always
 comes from the binding.
 

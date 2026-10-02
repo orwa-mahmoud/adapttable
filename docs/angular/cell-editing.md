@@ -5,7 +5,7 @@ may change with `editable`. Every committed value goes to your callback. The
 table owns the draft and save state; your application owns the rows and the
 request that persists them.
 
-The Angular kits are currently private workspace packages. These examples use
+These examples use
 `@adapttable/angular-unstyled`; use `@adapttable/ng-zorro` and its matching
 feature entries for NG-ZORRO controls. See [Getting started](./getting-started.md).
 

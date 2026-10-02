@@ -52,8 +52,9 @@ export const appConfig: ApplicationConfig = {
 Merge the hydration provider into your existing application configuration and
 use the server bootstrap generated for your Angular SSR application. The table
 does not replace that bootstrap. The equivalent NG-ZORRO root component is
-`@adapttable/ng-zorro`; load its global stylesheet in the host. Both kits are
-currently private workspace packages.
+`@adapttable/ng-zorro`; load its global stylesheet in the host.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Match the request and client state
 

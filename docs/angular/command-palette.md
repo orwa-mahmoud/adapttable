@@ -75,7 +75,8 @@ export class ProjectCommands {
 ```
 
 Use the root and feature entries under `@adapttable/ng-zorro` for its controls.
-Both kits are currently private workspace packages. A command is
+See [getting started](./getting-started.md) for installation
+and first-release status. A command is
 `{ key, label, onSelect }`, with optional `disabled`, `danger` and
 `separatorBefore`. `onSelect` is a function, not an Angular event output. Labels
 for custom commands are already-localized text supplied by the application.

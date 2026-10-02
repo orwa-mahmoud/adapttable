@@ -19,8 +19,10 @@ const README_CLAIM =
   "Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.";
 const PUBLISHED_SNAPSHOT = [
   "@adapttable/ai",
+  "@adapttable/ai-angular",
   "@adapttable/ai-react",
   "@adapttable/angular",
+  "@adapttable/angular-unstyled",
   "@adapttable/antd",
   "@adapttable/base-ui",
   "@adapttable/chakra",
@@ -29,6 +31,7 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/i18n",
   "@adapttable/mantine",
   "@adapttable/mui",
+  "@adapttable/ng-zorro",
   "@adapttable/radix",
   "@adapttable/react",
   "@adapttable/server",
@@ -91,7 +94,7 @@ describe("supported Node contract", () => {
   it("derives the packed set from non-private manifests, not a count", () => {
     const names = publishedPackageNames();
     assert.deepEqual(names, PUBLISHED_SNAPSHOT);
-    assert.equal(names.length, 16);
+    assert.equal(names.length, 19);
     assert.ok(!names.includes("@adapttable/bootstrap"));
   });
 

@@ -48,7 +48,7 @@ setRows(applyRowPatches(rows, [updateRow(id, { budget })], byId));
 
 `createIncrementalView` / `applyRowPatchesToView` /
 `applyRowPatchLogToView` are the same engine if you hold the snapshot
-yourself. All eight adapters share it, including the mobile card layout.
+yourself. All eight React adapters share it, including the mobile card layout.
 
 The scale demo measures both pipelines: `?patch=200` spreads (full rebuild)
 and `?patch=200&incremental=1` keeps the log. `node scripts/bench.mjs
@@ -210,7 +210,7 @@ this page. That lives under [cell editing](./cell-editing.md#live-update-conflic
 
 ## Notes
 
-- Works in all eight adapters. The demo is the same feed on each kit.
+- Works in all eight React adapters. The demo is the same feed on each kit.
 - The table never owns your data. A patch is a new array you hand back.
 - [API reference](./api.md) lists `applyRowPatches`, `applyRowPatchesWithLog`
   and the patch shapes.

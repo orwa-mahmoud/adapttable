@@ -12,11 +12,13 @@ a stable row key. Add feature imports when the table needs them.
 - `@adapttable/angular` supplies signals, column types and structural Chrome
   for either kit or your own renderer
 
-The binding's current repository version is `0.2.0`. Both kits are **unpublished
-workspace packages** with `private: true`; these examples assume your application
-can resolve the workspace packages or locally built packages. An npm install of
-either kit is not currently a supported distribution path. Package versions are
-independent; do not force the binding, core and kit to share a version.
+The binding's current repository version is `0.2.0`. Both kits and the optional
+`@adapttable/ai-angular` binding are prepared for their first public `0.1.0`
+release. Their manifests permit publication, but npm publication remains a
+separate owner-controlled step. Check registry availability before installing;
+until publication, these examples require built workspace or local packages
+that your application can resolve. Package versions are independent; do not
+force the binding, core and kit to share a version.
 
 The binding supports Angular 20, 21 and 22. NG-ZORRO's kit targets Angular 22
 and NG-ZORRO 22.1.1, including its Angular CDK, Common, Core, Forms,
@@ -105,8 +107,9 @@ The implemented CLI recognizes an Angular project when **both** `angular.json`
 and an `@angular/core` dependency are present. It supports the
 `angular-unstyled` and `ng-zorro` kit choices, and writes a standalone
 `PeopleTable` to `src/app/peopleTable.ts`. It does not mount that component in
-your app for you. The private kit packages still need to be resolvable in your
-development setup; generating a starter does not publish them.
+your app for you. The binding and chosen kit must be resolvable in your
+development setup. The CLI prints an install command; it does not install
+packages, check registry availability or publish a release.
 
 ## Data and callbacks
 

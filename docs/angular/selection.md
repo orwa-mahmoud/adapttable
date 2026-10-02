@@ -46,9 +46,9 @@ selected IDs. Omit `[selectedIds]` for table-owned selection. When you supply
 it, update the signal in response to the output: the rendered selection is
 always the value the host supplies. `selectable` is read at initialization.
 
-The NG-ZORRO workspace kit has the same inputs and output. Replace the root
+The NG-ZORRO kit has the same inputs and output. Replace the root
 kit import with `@adapttable/ng-zorro`; see [getting started](./getting-started.md)
-for the packages' unpublished status and setup.
+for package installation and first-release status.
 
 ## Bulk actions and all matching rows
 

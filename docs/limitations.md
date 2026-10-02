@@ -124,19 +124,19 @@ critical findings (`e2e/axe-audit.spec.ts`).
 The table is a client component. During SSR there is no `window` or
 `matchMedia`: pass `forceMobile` so server and first paint agree, and
 pass `createMemoryAdapter(search)` so URL state does not touch History.
-`@adapttable/react`, `@adapttable/ai-react` and every adapter carry
+`@adapttable/react`, `@adapttable/ai-react` and every React adapter carry
 `"use client"`; `@adapttable/core`, `@adapttable/i18n`, `@adapttable/ai`,
 `@adapttable/server` and `@adapttable/cli` do not.
 [SSR & RSC](./ssr-rsc.md).
 
-`@adapttable/bootstrap` is private and unpublished. “All eight adapters”
+`@adapttable/bootstrap` is private and unpublished. “All eight React adapters”
 means Mantine, MUI, Chakra, Ant Design, Radix Themes, Base UI, shadcn/ui
 and unstyled.
 
 ## Accessibility
 
 Keyboard, names, RTL and forced-colors are on by default across the eight
-published kits ([accessibility](./accessibility.md)).
+published React kits ([accessibility](./accessibility.md)).
 
 antd keeps a sticky header. `role="grid"` sits on the wrapper around
 both of antd's tables so a cell and its `columnheader` share one grid.

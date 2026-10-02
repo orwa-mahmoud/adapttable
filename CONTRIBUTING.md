@@ -89,7 +89,7 @@ feature proposals, each with its own template.
 
 ## How features are built here
 
-AdaptTable keeps one brain and eight faces. These boundaries are what make a
+AdaptTable keeps one brain and ten faces. These boundaries are what make a
 feature PR mergeable:
 
 - **Core owns behavior; adapters own appearance.** State machines, keyboard
@@ -111,7 +111,7 @@ feature PR mergeable:
 - **One word per concept.** Reuse the existing vocabulary (`server` for the
   remote tier, `useQuerySource` for query libraries) rather than introducing
   synonyms.
-- **A feature ships everywhere or it isn't done:** all eight adapters, the
+- **A feature ships everywhere or it isn't done:** all ten adapters, the
   mobile card layout, RTL, keyboard and screen-reader accessibility, and
   localizable labels.
 - **A new docs page registers twice:** in the `DOCS` array of

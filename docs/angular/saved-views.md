@@ -42,8 +42,9 @@ export class SavedPeople {
 }
 ```
 
-Use the corresponding `@adapttable/ng-zorro` imports for NG-ZORRO. Both are
-unpublished workspace kits; see [getting started](./getting-started.md).
+Use the corresponding `@adapttable/ng-zorro` imports for NG-ZORRO.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 The shell supplies its actual URL backend and namespace to the menu. This
 also works with `[urlSync]="false"`: the view captures the table's private

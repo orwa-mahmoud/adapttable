@@ -40,7 +40,7 @@ markup.
 
 ## Which UI libraries does AdaptTable support?
 
-Eight adapters from one API: **Mantine, MUI, Chakra UI, Ant Design, Radix
+Eight React adapters from one API: **Mantine, MUI, Chakra UI, Ant Design, Radix
 Themes, Base UI, shadcn/ui, and unstyled** (for Tailwind or your own CSS) —
 each kit adapter rendered with that kit's real components, plus a headless
 core (`useDataTable`) that works with any markup. Install only the adapter
@@ -183,7 +183,7 @@ React and the UI kit external because your app already ships those):
 | `DataTable` from an adapter                | ~72–80 kB |
 
 The first row is the one to read: a headless table costs about a quarter of the
-full core, because the parts you never import never arrive. All eight adapters
+full core, because the parts you never import never arrive. All eight React adapters
 land within ~12 kB of each other, so switching kits does not change what you
 pay.
 

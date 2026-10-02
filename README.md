@@ -32,7 +32,8 @@ and unstyled HTML. Angular offers native HTML and NG-ZORRO kits.
 **Runtime support:** Node.js 22.12.0 or newer and React 18 or 19. Packed
 releases are tested on Node 22.12 and Node 24. The Angular binding, native kit and
 AI binding accept Angular 20, 21 or 22; the NG-ZORRO kit requires Angular 22.
-Both Angular kits and the AI binding are currently unpublished workspace packages.
+Both Angular kits and the AI binding are prepared for their first public
+`0.1.0` release; npm publication is a separate owner-controlled step.
 
 ## Features
 
@@ -146,20 +147,21 @@ Optional behavior is imported from feature subpaths such as
 | `@adapttable/ai`               | Optional provider-neutral table agent contract.                              |
 | `@adapttable/ai-react`         | React bindings for the agent — `tableAgent` and `useTableAssistant`.         |
 | `@adapttable/angular`          | The Angular binding: signals, templates and structural Chrome.               |
-| `@adapttable/angular-unstyled` | Native Angular table controls; unpublished workspace kit.                    |
-| `@adapttable/ng-zorro`         | NG-ZORRO Angular table controls; unpublished workspace kit.                  |
-| `@adapttable/ai-angular`       | Angular agent, assistant and speech bindings; unpublished workspace package. |
+| `@adapttable/angular-unstyled` | Native Angular table controls; first public release prepared.                |
+| `@adapttable/ng-zorro`         | NG-ZORRO Angular table controls; first public release prepared.              |
+| `@adapttable/ai-angular`       | Angular agent, assistant and speech bindings; first public release prepared. |
 
 The CLI recognizes an Angular project when both `@angular/core` and
 `angular.json` are present, then scaffolds the native or NG-ZORRO table.
-Both Angular kits are currently private workspace packages: use their workspace
-links until they are published, rather than assuming a registry install is available.
+Check registry availability before installing the Angular kits. Until their
+first release is published, use built workspace or local packages; see the
+[Angular setup guide](https://adapttable.orwamahmoud.com/angular/getting-started/).
 
 ## AI, without a provider lock-in
 
 AI support is optional. `@adapttable/ai` exposes the enabled table as a
 provider-neutral capability contract; connect it to your own backend and model.
-Add `@adapttable/ai-react` or the workspace `@adapttable/ai-angular` binding,
+Add `@adapttable/ai-react` or the `@adapttable/ai-angular` binding,
 plus that framework’s kit `/assistant` widget, when you want the
 ready conversation UI, or build a custom interface on the same contract.
 Only enabled, permitted capabilities are offered to the agent. Commands run

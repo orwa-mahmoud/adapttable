@@ -56,8 +56,10 @@ Unify the **model**, never the **pixels**. The standing pattern is
   native HTML and NG-ZORRO controls through that binding.
 - `packages/angular/ai-angular` adds optional agent, assistant and speech
   bindings over neutral `@adapttable/ai`.
-- Angular kits and AI bindings remain private workspace packages until the
-  owner releases them. Implemented support does not imply npm publication.
+- `@adapttable/angular-unstyled`, `@adapttable/ng-zorro` and
+  `@adapttable/ai-angular` are prepared for their first public `0.1.0` release.
+  npm publication is a separate owner-controlled step; publishable manifests
+  and implemented support do not imply registry availability.
 
 ## Product decisions — settled, do not reopen
 

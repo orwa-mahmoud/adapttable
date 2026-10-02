@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/ai-angular",
   "version": "0.0.0",
-  "description": "Angular bindings for AdaptTable AI \u2014 tableAgent, injectTableAssistant and injectSpeechInput.",
+  "description": "Angular bindings for AdaptTable AI — tableAgent, injectTableAssistant and injectSpeechInput.",
   "keywords": [
     "angular",
     "signals",
@@ -13,7 +13,7 @@
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
-  "homepage": "https://adapttable.orwamahmoud.com/react/demo/",
+  "homepage": "https://adapttable.orwamahmoud.com/angular/demo/unstyled/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
@@ -73,6 +73,5 @@
     "rxjs": "^7.8.2",
     "@adapttable/angular-unstyled": "workspace:*",
     "@adapttable/core": "3.7.0"
-  },
-  "private": true
+  }
 }

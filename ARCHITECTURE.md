@@ -68,8 +68,10 @@ Angular hosts import `AdaptDataTable` from `@adapttable/angular-unstyled` or
 `@adapttable/ng-zorro`, and features from that kit’s subpaths. Its
 `standardPreset()` composes the default feature set. Templates and component
 renderers stay in the binding; neutral values and operations stay in core.
-The Angular kits and `@adapttable/ai-angular` are private workspace packages
-until an explicit release; the binding is `@adapttable/angular`.
+The Angular kits and `@adapttable/ai-angular` are prepared for their first
+public `0.1.0` release; the binding is `@adapttable/angular`. Publishable
+packages do not imply registry availability: npm publication remains a
+separate owner-controlled step.
 
 ## Neutral contracts
 

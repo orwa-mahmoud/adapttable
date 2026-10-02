@@ -61,8 +61,9 @@ export class PinnedPeople {
 ```
 
 The NG-ZORRO equivalent imports its table from `@adapttable/ng-zorro` and
-the feature from `@adapttable/ng-zorro/row-pinning`. Both are unpublished
-[workspace kits](./getting-started.md).
+the feature from `@adapttable/ng-zorro/row-pinning`.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Which rows can be pinned
 

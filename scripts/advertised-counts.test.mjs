@@ -141,14 +141,7 @@ describe("advertised adapter count", () => {
   });
 
   checkAdvertised(
-    [
-      { file: "CONTRIBUTING.md", occurrences: 1 },
-      { file: "docs/accessibility.md", occurrences: 1 },
-      { file: "docs/cell-navigation.md", occurrences: 2 },
-      { file: "docs/faq.md", occurrences: 2 },
-      { file: "docs/limitations.md", occurrences: 1 },
-      { file: "docs/realtime.md", occurrences: 2 },
-    ],
+    [{ file: "CONTRIBUTING.md", occurrences: 1 }],
     count,
     "adapters?|kits?"
   );
@@ -159,6 +152,11 @@ describe("advertised adapter count", () => {
     [
       { file: "README.md", occurrences: 1 },
       { file: "docs/api.md", occurrences: 2 },
+      { file: "docs/accessibility.md", occurrences: 1 },
+      { file: "docs/cell-navigation.md", occurrences: 2 },
+      { file: "docs/faq.md", occurrences: 2 },
+      { file: "docs/limitations.md", occurrences: 1 },
+      { file: "docs/realtime.md", occurrences: 2 },
     ],
     reactCount,
     "(?:built-in )?React (?:adapters?|kits?)"

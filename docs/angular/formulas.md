@@ -63,7 +63,9 @@ export class FormulaLines {
 ```
 
 Use `@adapttable/ng-zorro` for the root component when using that kit; the
-formula imports stay on the binding. Both kits are private workspace packages.
+formula imports stay on the binding.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Expressions, references and errors
 

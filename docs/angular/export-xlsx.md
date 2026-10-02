@@ -60,7 +60,7 @@ export class ShipmentWorkbook {
 }
 ```
 
-This example uses NG-ZORRO's private workspace kit. The equivalent native
+This example uses the NG-ZORRO kit. The equivalent native
 controls use `@adapttable/angular-unstyled` and
 `@adapttable/angular-unstyled/export`. Load NG-ZORRO's global stylesheet in
 the host as described in [Getting started](./getting-started.md).

@@ -385,11 +385,15 @@ describe("runInit", () => {
     );
     expect(logs.join("\n")).toContain("detected Angular (Angular unstyled)");
     expect(logs.join("\n")).toContain(
-      "Angular kits are unpublished workspace packages"
+      "Angular kits are prepared for their first public release"
     );
     expect(logs.join("\n")).toContain(
       "add PeopleTable to its imports, and render <people-table />"
     );
+    expect(logs.join("\n")).toContain(
+      "Check registry availability before installing; use built local packages"
+    );
+    expect(logs.join("\n")).not.toContain("private workspace packages");
     expect(logs.join("\n")).not.toContain("MantineProvider");
     expect(logs.join("\n")).not.toContain("ng-zorro-antd.min.css");
   });
@@ -423,6 +427,13 @@ describe("runInit", () => {
     expect(written["src/app/peopleTable.ts"]).toContain(
       'from "@adapttable/ng-zorro"'
     );
+    expect(logs.join("\n")).toContain(
+      "Angular kits are prepared for their first public release"
+    );
+    expect(logs.join("\n")).toContain(
+      "Check registry availability before installing; use built local packages"
+    );
+    expect(logs.join("\n")).not.toContain("private workspace packages");
     expect(logs.join("\n")).toContain("NG-ZORRO requires Angular 22");
     expect(logs.join("\n")).toContain(
       '@import "ng-zorro-antd/ng-zorro-antd.min.css";'

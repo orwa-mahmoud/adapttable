@@ -57,7 +57,9 @@ export class LargeInventory {
 ```
 
 Both kits expose `/virtualize`; change the root and feature imports together to
-`@adapttable/ng-zorro` for NG-ZORRO. They are private workspace packages.
+`@adapttable/ng-zorro` for NG-ZORRO.
+See [getting started](./getting-started.md) for installation
+and first-release status.
 
 ## Enable the appropriate window
 
