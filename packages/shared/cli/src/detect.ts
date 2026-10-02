@@ -1,4 +1,11 @@
 /**
+ * A framework the CLI can scaffold a table for.
+ *
+ * @public
+ */
+export type Framework = "react" | "angular";
+
+/**
  * A UI kit AdaptTable can scaffold for.
  *
  * @public
@@ -11,7 +18,9 @@ export type Kit =
   | "radix"
   | "base-ui"
   | "shadcn"
-  | "unstyled";
+  | "unstyled"
+  | "angular-unstyled"
+  | "ng-zorro";
 
 /**
  * Metadata about a kit's adapter and the packages it needs.
@@ -21,11 +30,13 @@ export type Kit =
 export interface KitInfo {
   /** The kit identifier. */
   kit: Kit;
+  /** The kit's framework. Omitted for React, preserving existing callers. */
+  framework?: Framework;
   /** The AdaptTable adapter package. */
   adapter: string;
   /** Dependency package names that signal this kit is present. */
   signals: string[];
-  /** Extra peer packages to install alongside the adapter. */
+  /** Extra peer package specifiers to install alongside the adapter. */
   extras: string[];
   /** Human label for messages. */
   label: string;
@@ -99,9 +110,31 @@ export const KITS: readonly KitInfo[] = [
     extras: [],
     label: "Tailwind / unstyled",
   },
+  {
+    kit: "ng-zorro",
+    framework: "angular",
+    adapter: "@adapttable/ng-zorro",
+    signals: ["ng-zorro-antd"],
+    // The kit targets Angular 22. Do not upgrade host peers to a newer major.
+    extras: [
+      "@angular/cdk@^22.0.0",
+      "@angular/forms@^22.0.0",
+      "@angular/router@^22.0.0",
+    ],
+    label: "NG-ZORRO",
+  },
+  {
+    kit: "angular-unstyled",
+    framework: "angular",
+    adapter: "@adapttable/angular-unstyled",
+    signals: [],
+    extras: [],
+    label: "Angular unstyled",
+  },
 ];
 
 const UNSTYLED = KITS.find((k) => k.kit === "unstyled")!;
+const ANGULAR_UNSTYLED = KITS.find((k) => k.kit === "angular-unstyled")!;
 
 /**
  * The shadcn/ui kit — selected by `runInit` when a `components.json` is found.
@@ -111,9 +144,28 @@ const UNSTYLED = KITS.find((k) => k.kit === "unstyled")!;
 export const SHADCN = KITS.find((k) => k.kit === "shadcn")!;
 
 /**
+ * Detect Angular only when both its dependency and workspace file are present.
+ * All other projects retain the React scaffold.
+ *
+ * @param dependencies - Merged `dependencies` + `devDependencies` map.
+ * @param options - Whether the project contains `angular.json`.
+ * @returns The framework to scaffold.
+ * @public
+ */
+export function detectFramework(
+  dependencies: Readonly<Record<string, string>>,
+  options?: { hasAngularJson?: boolean }
+): Framework {
+  return options?.hasAngularJson && Object.hasOwn(dependencies, "@angular/core")
+    ? "angular"
+    : "react";
+}
+
+/**
  * Detect which UI kit a project uses from its merged dependency map. The
  * first kit (in priority order) whose signal package is present wins;
- * falls back to the unstyled adapter when none match.
+ * falls back to that framework's unstyled adapter when none match. The
+ * framework defaults to React for existing callers.
  *
  * shadcn/ui ships no package of its own, so it has no dependency signal —
  * pass `hasComponentsJson` (the presence of shadcn's `components.json`)
@@ -127,15 +179,18 @@ export const SHADCN = KITS.find((k) => k.kit === "shadcn")!;
  */
 export function detectKit(
   dependencies: Readonly<Record<string, string>>,
-  options?: { hasComponentsJson?: boolean }
+  options?: { hasComponentsJson?: boolean; framework?: Framework }
 ): KitInfo {
+  const framework = options?.framework ?? "react";
   for (const info of KITS) {
+    if ((info.framework ?? "react") !== framework) continue;
     if (info.signals.some((pkg) => Object.hasOwn(dependencies, pkg))) {
       return info.kit === "unstyled" && options?.hasComponentsJson
         ? SHADCN
         : info;
     }
   }
+  if (framework === "angular") return ANGULAR_UNSTYLED;
   return options?.hasComponentsJson ? SHADCN : UNSTYLED;
 }
 

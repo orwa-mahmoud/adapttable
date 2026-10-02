@@ -1779,7 +1779,9 @@
     ],
     "cli": [
       "choosePackageManager",
+      "detectFramework",
       "detectKit",
+      "Framework",
       "InitError",
       "InitIO",
       "InitOptions",

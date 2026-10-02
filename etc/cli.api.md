@@ -8,9 +8,18 @@
 export function choosePackageManager(files: readonly string[]): PackageManager;
 
 // @public
+export function detectFramework(dependencies: Readonly<Record<string, string>>, options?: {
+    hasAngularJson?: boolean;
+}): Framework;
+
+// @public
 export function detectKit(dependencies: Readonly<Record<string, string>>, options?: {
     hasComponentsJson?: boolean;
+    framework?: Framework;
 }): KitInfo;
+
+// @public
+export type Framework = "react" | "angular";
 
 // @public
 export class InitError extends Error {}
@@ -32,6 +41,7 @@ export interface InitOptions {
 // @public
 export interface InitResult {
     adapter: string;
+    framework: Framework;
     installCommand: string;
     kit: Kit;
     packageManager: PackageManager;
@@ -44,12 +54,13 @@ export interface InitResult {
 export function installCommand(pm: PackageManager, packages: readonly string[]): string;
 
 // @public
-export type Kit = "mantine" | "mui" | "chakra" | "antd" | "radix" | "base-ui" | "shadcn" | "unstyled";
+export type Kit = "mantine" | "mui" | "chakra" | "antd" | "radix" | "base-ui" | "shadcn" | "unstyled" | "angular-unstyled" | "ng-zorro";
 
 // @public
 export interface KitInfo {
     adapter: string;
     extras: string[];
+    framework?: Framework;
     kit: Kit;
     label: string;
     signals: string[];
