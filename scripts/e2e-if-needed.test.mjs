@@ -11,13 +11,24 @@ import {
 } from "./e2e-if-needed.mjs";
 
 describe("e2ePlan", () => {
-  it("skips docs-only diffs", () => {
-    assert.deepEqual(
-      e2ePlan(["docs/api.md", "README.md", ".changeset/foo.md"]),
-      {
-        kind: "skip",
-      }
-    );
+  it("skips metadata-only diffs", () => {
+    assert.deepEqual(e2ePlan(["README.md", ".changeset/foo.md"]), {
+      kind: "skip",
+    });
+  });
+
+  it("runs the full suite for canonical docs and Astro changes", () => {
+    for (const file of [
+      "docs/angular/filtering.md",
+      "docs/filtering.md",
+      "apps/docs/src/components/FrameworkSwitch.astro",
+      "scripts/angular-docs.mjs",
+      "scripts/docs-files.mjs",
+      "scripts/site.mjs",
+      "scripts/build-llms-full.mjs",
+    ]) {
+      assert.deepEqual(e2ePlan([file]), { kind: "full" }, file);
+    }
   });
 
   it("runs the full suite when a package changes", () => {
@@ -27,9 +38,15 @@ describe("e2ePlan", () => {
   });
 
   it("runs only the spec files when those are all that changed", () => {
-    assert.deepEqual(e2ePlan(["e2e/checklist-filter.spec.ts", "docs/x.md"]), {
+    assert.deepEqual(e2ePlan(["e2e/checklist-filter.spec.ts", "README.md"]), {
       kind: "specs",
       specs: ["e2e/checklist-filter.spec.ts"],
+    });
+  });
+
+  it("does not limit a docs-plus-spec change to the changed spec", () => {
+    assert.deepEqual(e2ePlan(["e2e/checklist-filter.spec.ts", "docs/x.md"]), {
+      kind: "full",
     });
   });
 
@@ -46,6 +63,7 @@ describe("path matchers", () => {
     assert.equal(isE2eRelated("playwright.config.ts"), true);
     assert.equal(isE2eRelated("scripts/serve-showcase.mjs"), true);
     assert.equal(isE2eRelated("apps/showcase/src/Demo.tsx"), true);
+    assert.equal(isE2eRelated("packages/angular/angular/src/index.ts"), true);
   });
 
   it("does not treat a helper as a spec", () => {

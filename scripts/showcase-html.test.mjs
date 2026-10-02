@@ -16,6 +16,7 @@ import {
   readShowcaseHtml,
   showcaseHtmlFiles,
 } from "./build-showcase-html.mjs";
+import { docsReferenceRoute, docsRoute, siteUrl } from "./site.mjs";
 
 /**
  * The showcase's generated HTML is what is on disk.
@@ -54,6 +55,43 @@ describe("the generated showcase pages", () => {
         expected,
         `${kit.key} leaves a feature without an Angular destination`
       );
+    }
+  });
+
+  it("links Angular showcase pages to Angular guides and preserves shared references", () => {
+    for (const kit of builtAdapters("angular")) {
+      assert.ok(
+        landingPage(kit).html.includes(
+          `href="${siteUrl(docsRoute("angular/getting-started"))}"`
+        )
+      );
+      for (const feature of featuresOf(kit)) {
+        const { html } = featurePage(kit, feature);
+        for (const page of feature.docs)
+          assert.ok(
+            html.includes(
+              `href="${siteUrl(docsReferenceRoute(page, "angular"))}"`
+            ),
+            `${kit.key}/${feature.slug}: ${page}`
+          );
+      }
+      const { html } = featurePage(kit, featureBySlug("filtering"));
+      assert.ok(
+        html.includes(`href="${siteUrl(docsRoute("angular/filtering"))}"`)
+      );
+      assert.equal(
+        html.includes(`href="${siteUrl(docsRoute("filtering"))}"`),
+        false
+      );
+    }
+    for (const kit of builtAdapters("react")) {
+      assert.ok(
+        landingPage(kit).html.includes(
+          `href="${siteUrl(docsRoute("getting-started"))}"`
+        )
+      );
+      const { html } = featurePage(kit, featureBySlug("filtering"));
+      assert.ok(html.includes(`href="${siteUrl(docsRoute("filtering"))}"`));
     }
   });
 

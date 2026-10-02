@@ -42,7 +42,7 @@ import {
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES } from "../apps/showcase/pages.mjs";
 import { appendScript, guarded } from "./analytics-guard.mjs";
-import { demoRoute, docsRoute, siteUrl } from "./site.mjs";
+import { demoRoute, docsReferenceRoute, siteUrl } from "./site.mjs";
 
 const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
 
@@ -249,9 +249,12 @@ ${bodyHtml}
 `;
 
 /** The written reference links a page closes with. */
-const docsList = (slugs) =>
+const docsList = (slugs, framework) =>
   slugs
-    .map((slug) => `<a href="${siteUrl(docsRoute(slug))}">${slug}</a>`)
+    .map(
+      (slug) =>
+        `<a href="${siteUrl(docsReferenceRoute(slug, framework))}">${slug}</a>`
+    )
     .join(", ");
 
 /**
@@ -342,7 +345,7 @@ ${linkSection(
       note: fill(headFor(sibling, adapter).card),
     }))
   )}        <p>
-          Reference: ${docsList(feature.docs)}. More of this kit:
+          Reference: ${docsList(feature.docs, adapter.framework)}. More of this kit:
           <a href="../">AdaptTable for ${escapeHtml(adapter.label)}</a>, or
           <a href="${demoRoute()}">the live demo</a>.
         </p>
@@ -414,7 +417,7 @@ ${linkList(
   }))
 )}
 ${otherKitsSection(adapter, fill)}        <p>
-          Reference: <a href="${siteUrl(docsRoute("getting-started"))}">getting started</a>. Or
+          Reference: <a href="${siteUrl(docsReferenceRoute("getting-started", adapter.framework))}">getting started</a>. Or
           open <a href="${demoRoute()}">the live demo</a> and switch kits on
           the same table.
         </p>

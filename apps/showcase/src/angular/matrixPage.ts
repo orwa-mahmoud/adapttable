@@ -208,9 +208,9 @@ export class AdaptShowcaseMatrixPage {
 
   readonly siteHome = SITE_HOME;
   readonly reactDemo = demoRoute();
-  readonly gettingStarted = docsUrl("getting-started");
+  readonly gettingStarted = docsUrl("getting-started", "angular");
   readonly leadHtml = leadHtml;
-  readonly docsUrl = docsUrl;
+  readonly docsUrl = (page: string): string => docsUrl(page, "angular");
 
   readonly adapter = computed(() => this.route().adapter);
   readonly feature = computed(() => this.route().feature);

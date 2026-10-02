@@ -4,11 +4,9 @@
  * drive this layer.
  */
 
-// The showcase, its e2e suite and the bench exercise the React packages, so
-// only the shared and React groups reach them.
-const PLAYWRIGHT =
-  /^(packages\/(shared|react)\/|apps\/showcase\/|e2e\/|playwright\.config\.ts$|pnpm-lock\.yaml$)/;
+import { isE2eRelated } from "./e2e-if-needed.mjs";
 
+// The performance baseline still measures the React showcase.
 const BENCH =
   /^(packages\/(shared|react)\/|apps\/showcase\/|scripts\/bench\.mjs$|pnpm-lock\.yaml$)/;
 
@@ -68,7 +66,7 @@ export function classify(files) {
 
   const packagesChanged = list.some((f) => PACKAGES.test(f));
   const rootTooling = list.some((f) => ROOT_TOOLING.test(f));
-  const playwright = list.some((f) => PLAYWRIGHT.test(f));
+  const playwright = list.some(isE2eRelated);
   const bench = list.some((f) => BENCH.test(f));
   const eslintRoot = list.some((f) => ESLINT_ROOT.test(f));
   const examples = list.some((f) => EXAMPLES.test(f));
@@ -86,7 +84,7 @@ export function classify(files) {
         runUnit: false,
         runPackage: false,
         runPublint: false,
-        runPlaywright: false,
+        runPlaywright: playwright,
         runBench: false,
         runPreview: false,
         versionOnly: false,

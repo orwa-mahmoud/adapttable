@@ -132,6 +132,8 @@ export const redirectsTable = (root) => {
     "# origin, answered with a permanent redirect to the page's current route.",
     `/${FRAMEWORK} ${docsRoute("getting-started")} 302`,
     `/${FRAMEWORK}/ ${docsRoute("getting-started")} 302`,
+    `/angular ${docsRoute("angular/getting-started")} 302`,
+    `/angular/ ${docsRoute("angular/getting-started")} 302`,
   ];
   for (const { from, to } of addressMap(root)) {
     if (from === to || from.startsWith("/demo/")) continue;

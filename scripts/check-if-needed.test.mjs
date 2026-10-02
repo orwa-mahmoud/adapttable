@@ -30,8 +30,38 @@ describe("checkPlan", () => {
     ]);
     assert.equal(
       checkReason(classify(["docs/filtering.md"])),
-      "docs/meta-only"
+      "browser-related changes"
     );
+    assert.equal(classify(["docs/filtering.md"]).runPlaywright, true);
+  });
+
+  it("keeps lightweight guards for browser specs and docs site changes", () => {
+    for (const file of [
+      "e2e/docs/framework-switch.spec.ts",
+      "apps/docs/src/components/FrameworkSwitch.astro",
+    ]) {
+      assert.deepEqual(labels([file]), [
+        "format:check",
+        "check:readmes",
+        "check:docsurface",
+        "test:scripts",
+      ]);
+      assert.equal(checkReason(classify([file])), "browser-related changes");
+      assert.equal(classify([file]).runPlaywright, true);
+    }
+  });
+
+  it("keeps root lint when tooling also affects browser routes", () => {
+    const files = ["scripts/site.mjs"];
+    assert.deepEqual(labels(files), [
+      "format:check",
+      "lint:root",
+      "check:readmes",
+      "check:docsurface",
+      "test:scripts",
+    ]);
+    assert.equal(checkReason(classify(files)), "root tooling");
+    assert.equal(classify(files).runPlaywright, true);
   });
 
   it("runs publint on a version-only bump, not unit tests", () => {

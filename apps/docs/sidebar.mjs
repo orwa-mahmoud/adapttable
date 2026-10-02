@@ -6,7 +6,9 @@
  * a way in, and every entry points at a file that exists. Both read this array,
  * so the check can never drift from what the site renders.
  */
-export const sidebar = [
+import { ANGULAR_DOCS } from "../../scripts/angular-docs.mjs";
+
+const primarySidebar = [
   {
     label: "Start",
     items: [
@@ -126,7 +128,37 @@ export const sidebar = [
   },
 ];
 
-/** Every slug the sidebar links, flattened across groups. */
-export function sidebarSlugs() {
-  return sidebar.flatMap((group) => group.items.map((item) => item.slug));
+const angularSources = new Set(ANGULAR_DOCS);
+
+export const sidebar = [
+  ...primarySidebar,
+  {
+    label: "Angular",
+    items: primarySidebar
+      .map((group) => ({
+        label: group.label,
+        items: group.items
+          .filter((item) => angularSources.has(`angular/${item.slug}.md`))
+          .map((item) => ({
+            ...item,
+            label: item.slug === "ssr-rsc" ? "SSR & hydration" : item.label,
+            slug: `angular/${item.slug}`,
+          })),
+      }))
+      .filter((group) => group.items.length > 0),
+  },
+];
+
+/** Every leaf with its nearest group, at any nesting depth. */
+export function sidebarPages(items = sidebar, group = "") {
+  return items.flatMap((item) =>
+    "items" in item
+      ? sidebarPages(item.items, item.label)
+      : [{ ...item, group }]
+  );
+}
+
+/** Every canonical source slug the sidebar links, flattened recursively. */
+export function sidebarSlugs(items = sidebar) {
+  return sidebarPages(items).map((item) => item.slug);
 }

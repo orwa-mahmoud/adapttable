@@ -95,6 +95,13 @@ describe("addressMap", () => {
 });
 
 describe("redirectsTable", () => {
+  it("gives React and Angular section roots their own getting-started front doors", () => {
+    const lines = redirectsTable(composed()).split("\n");
+    assert.ok(lines.includes("/react /react/getting-started/ 302"));
+    assert.ok(lines.includes("/react/ /react/getting-started/ 302"));
+    assert.ok(lines.includes("/angular /angular/getting-started/ 302"));
+    assert.ok(lines.includes("/angular/ /angular/getting-started/ 302"));
+  });
   it("answers each changed path, with and without its slash", () => {
     const lines = redirectsTable(composed()).split("\n");
     const target = docsRoute("filtering");

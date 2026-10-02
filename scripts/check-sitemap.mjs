@@ -27,7 +27,8 @@ import { join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
-import { DEMO_ROOT, DEMO_ROOTS } from "./site.mjs";
+import { DOCS } from "./build-llms-full.mjs";
+import { DEMO_ROOT, DEMO_ROOTS, docsRoute, siteUrl } from "./site.mjs";
 import {
   isRedirectPage,
   locsIn,
@@ -108,6 +109,43 @@ export const auditDemoRoutes = (root, xml, manifest = SHOWCASE_PAGES) => {
   };
 };
 
+/** Required canonical docs routes, checked independently of the demo audit. */
+export const auditDocsRoutes = (root, xml, sources = DOCS) => {
+  const routes = sources.map((source) => docsRoute(source));
+  const locs = locsIn(xml);
+  const missing = [];
+  const duplicate = [];
+  const unbuilt = [];
+  const canonical = [];
+  for (const route of routes) {
+    const url = siteUrl(route);
+    const count = locs.filter((loc) => loc === url).length;
+    if (count === 0) missing.push(route);
+    if (count > 1) duplicate.push(route);
+    const file = join(root, route.slice(1), INDEX);
+    if (!existsSync(file)) {
+      unbuilt.push(route);
+      continue;
+    }
+    const html = readFileSync(file, "utf8");
+    const links = [...html.matchAll(/<link\b[^>]*>/gi)]
+      .map((match) => match[0])
+      .filter((link) => /\brel\s*=\s*["']canonical["']/i.test(link))
+      .map((link) => /\bhref\s*=\s*["']([^"']+)["']/i.exec(link)?.[1]);
+    if (isRedirectPage(html) || links.length !== 1 || links[0] !== url)
+      canonical.push(route);
+  }
+  const dead = locs
+    .filter(
+      (loc) =>
+        loc.startsWith(siteUrl("/angular/")) &&
+        !loc.startsWith(siteUrl(DEMO_ROOTS.angular))
+    )
+    .map((loc) => loc.slice(SITE.length))
+    .filter((route) => !existsSync(join(root, route.slice(1), INDEX)));
+  return { routes, missing, duplicate, unbuilt, canonical, dead };
+};
+
 const fail = (message) => {
   console.error(`check-sitemap: ${message}`);
   process.exit(1);
@@ -144,6 +182,24 @@ const main = () => {
 
   const xml = readFileSync(sitemap, "utf8");
   const { crawlable, redirects, missing, dead } = auditDemoRoutes(root, xml);
+  const docs = auditDocsRoutes(root, xml);
+  const docsFailures = [
+    ...docs.missing.map((route) => `  docs missing from sitemap.xml: ${route}`),
+    ...docs.duplicate.map(
+      (route) => `  docs repeated in sitemap.xml: ${route}`
+    ),
+    ...docs.unbuilt.map((route) => `  docs page not built: ${route}`),
+    ...docs.canonical.map(
+      (route) =>
+        `  docs page has an incorrect canonical URL or redirects: ${route}`
+    ),
+    ...docs.dead.map(
+      (route) => `  Angular docs sitemap URL has no built page: ${route}`
+    ),
+  ];
+  if (docsFailures.length > 0) {
+    fail(`the documentation sitemap proof failed:\n${docsFailures.join("\n")}`);
+  }
 
   if (missing.length > 0 || dead.length > 0) {
     const lines = [
@@ -160,6 +216,9 @@ const main = () => {
   }
 
   console.log(summary(crawlable, redirects));
+  console.log(
+    `check-sitemap: ${docs.routes.length} canonical docs routes, each built and listed exactly once with its own canonical URL`
+  );
 };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

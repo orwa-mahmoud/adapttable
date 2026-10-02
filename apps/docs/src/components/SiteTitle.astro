@@ -1,0 +1,32 @@
+---
+/** Keep the site title and framework navigation together in the docs header. */
+import SiteTitle from "@astrojs/starlight/components/SiteTitle.astro";
+import FrameworkSwitch from "./FrameworkSwitch.astro";
+---
+
+<div class="title-and-framework">
+  <SiteTitle />
+  <FrameworkSwitch />
+</div>
+
+<style>
+  .title-and-framework {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+  }
+  @media (max-width: 49.999rem) {
+    :global(:root) {
+      --sl-nav-height: 5rem;
+      --sl-nav-pad-y: 0.5rem;
+    }
+  }
+  @media (min-width: 50rem) {
+    .title-and-framework {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.8rem;
+    }
+  }
+</style>

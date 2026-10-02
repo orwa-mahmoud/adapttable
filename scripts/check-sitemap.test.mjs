@@ -6,6 +6,7 @@ import { after, describe, it } from "node:test";
 
 import {
   auditDemoRoutes,
+  auditDocsRoutes,
   classifyDemoPages,
   deadRoutes,
   demoPages,
@@ -180,5 +181,78 @@ describe("every framework's demo root", () => {
     const { missing, dead } = auditDemoRoutes(withAngular(), xml, MANIFEST);
     assert.deepEqual(missing, [ANGULAR_ROUTE]);
     assert.deepEqual(dead, [ANGULAR_GHOST]);
+  });
+});
+
+describe("canonical documentation routes", () => {
+  const sources = [
+    "filtering.md",
+    "angular/filtering.md",
+    "data-tiers.md",
+    "angular/data-tiers.md",
+  ];
+  const routes = [
+    "/react/filtering/",
+    "/angular/filtering/",
+    "/data-tiers/",
+    "/angular/data-tiers/",
+  ];
+  const docs = () => {
+    const root = empty();
+    for (const route of routes)
+      write(
+        root,
+        `${route.slice(1)}index.html`,
+        `${PAGE}<link href="${SITE}${route}" rel="canonical">`
+      );
+    return root;
+  };
+
+  it("requires a real page and one canonical sitemap entry for every source", () => {
+    const result = auditDocsRoutes(docs(), urlset(routes), sources);
+    assert.deepEqual(result, {
+      routes,
+      missing: [],
+      duplicate: [],
+      unbuilt: [],
+      canonical: [],
+      dead: [],
+    });
+  });
+
+  it("rejects missing and repeated Angular sitemap entries", () => {
+    const result = auditDocsRoutes(
+      docs(),
+      urlset([routes[0], routes[1], routes[1], routes[2]]),
+      sources
+    );
+    assert.deepEqual(result.missing, ["/angular/data-tiers/"]);
+    assert.deepEqual(result.duplicate, ["/angular/filtering/"]);
+  });
+
+  it("rejects Angular pages without HTML even if they are in the sitemap", () => {
+    const root = docs();
+    rmSync(join(root, "angular/filtering/index.html"));
+    const result = auditDocsRoutes(root, urlset(routes), sources);
+    assert.deepEqual(result.unbuilt, ["/angular/filtering/"]);
+    assert.deepEqual(result.dead, ["/angular/filtering/"]);
+  });
+
+  it("rejects a React canonical URL on an Angular page and canonical redirects", () => {
+    const root = docs();
+    write(
+      root,
+      "angular/filtering/index.html",
+      `${PAGE}<link rel="canonical" href="${SITE}/react/filtering/">`
+    );
+    write(
+      root,
+      "angular/data-tiers/index.html",
+      `${STUB}<link rel="canonical" href="${SITE}/angular/data-tiers/">`
+    );
+    assert.deepEqual(auditDocsRoutes(root, urlset(routes), sources).canonical, [
+      "/angular/filtering/",
+      "/angular/data-tiers/",
+    ]);
   });
 });

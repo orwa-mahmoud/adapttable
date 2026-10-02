@@ -20,6 +20,8 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = 4321;
 /** The dev server the `chromium-dev` project needs, on its own port. */
 const DEV_PORT = 4322;
+/** Built Astro docs have their own origin; a showcase route is not a guide. */
+const DOCS_PORT = 4323;
 
 /** Smoke the extra browsers run. Not the full Chromium suite. */
 const CROSS_BROWSER_SPECS = [
@@ -32,17 +34,19 @@ const CROSS_BROWSER_SPECS = [
   "**/aria-parity.spec.ts",
   "**/accessibility-page.spec.ts",
   "**/rtl.spec.ts",
+  "**/docs/framework-switch.spec.ts",
 ];
 
 const MOBILE_SPECS = [
   "**/nightly-smoke.spec.ts",
   "**/mobile-page.spec.ts",
   "**/axe-audit.spec.ts",
+  "**/docs/framework-switch.spec.ts",
 ];
 
 export default defineConfig({
   testDir: "./e2e",
-  // Browser runners restore the showcase artifact, not package builds.
+  // Browser runners restore showcase and docs artifacts, not package builds.
   // Test imports read neutral source through one explicit project.
   tsconfig: "./e2e/tsconfig.json",
   fullyParallel: true,
@@ -127,6 +131,13 @@ export default defineConfig({
       url: `http://localhost:${DEV_PORT}`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
+    },
+    {
+      command: `node scripts/serve-showcase.mjs --docs --port ${DOCS_PORT}`,
+      // Astro has no docs index at /; wait on an actual Angular guide.
+      url: `http://localhost:${DOCS_PORT}/angular/getting-started/`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 600_000,
     },
   ],
 });

@@ -6,17 +6,19 @@
  * Runs automatically inside the docs build (apps/docs/sync-docs.mjs) and
  * standalone via `node scripts/build-llms-full.mjs`.
  */
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { ANGULAR_DOCS } from "./angular-docs.mjs";
+import { docsFiles } from "./docs-files.mjs";
 import { siteUrl } from "./site.mjs";
 
 const HEADER = `# AdaptTable — full documentation
 
-> AdaptTable v3 documentation: a framework-neutral data engine in @adapttable/core, headless React bindings in @adapttable/react, and native table adapters for Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. Individually imported features include filtering, grouping, pivot tables, formulas, editing, virtualization and export. Responsive mobile cards, URL state, i18n/RTL and optional provider-neutral AI sessions. MIT licensed; applications own data and persistence.
+> AdaptTable v3 documentation: a framework-neutral data engine in @adapttable/core, headless React and Angular bindings, and native table adapters. React kits include Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. Angular has unstyled and NG-ZORRO workspace kits. Individually imported features include filtering, grouping, pivot tables, formulas, editing, virtualization and export. Responsive mobile cards, URL state, i18n/RTL and optional provider-neutral AI sessions. MIT licensed; applications own data and persistence.
 
-Start with getting-started and concepts for package ownership, then features for opt-in composition. Use the v2-to-v3 migration guide when upgrading; historical migration examples describe their named versions, not current import paths. Vue and Angular bindings are not shipped. This file is generated from the canonical guides; the linked index is at ${siteUrl("/llms.txt")}.
+Start with your framework's getting-started and the shared concepts for package ownership, then features for opt-in composition. Angular kits and @adapttable/ai-angular are private workspace packages; their implemented APIs do not imply npm availability. Vue is not supported. Use the v2-to-v3 migration guide when upgrading React; historical migration examples describe their named versions, not current import paths. This file is generated from the canonical guides; the linked index is at ${siteUrl("/llms.txt")}.
 
 `;
 
@@ -90,6 +92,7 @@ export const DOCS = [
   "migrate-from-v2.md",
   "migrate-from-v1.md",
   "versioning.md",
+  ...ANGULAR_DOCS,
 ];
 
 /**
@@ -101,9 +104,7 @@ export const DOCS = [
  */
 export function unlistedDocs(docsDir) {
   const listed = new Set(DOCS);
-  return readdirSync(docsDir)
-    .filter((file) => file.endsWith(".md") && !listed.has(file))
-    .sort();
+  return docsFiles(docsDir).filter((file) => !listed.has(file));
 }
 
 /** Rebuild `<repoRoot>/llms-full.txt` from `<repoRoot>/docs`. */
