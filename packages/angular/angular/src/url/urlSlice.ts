@@ -3,7 +3,11 @@
  * the column layout, the density, the collapsed groups, the pinned rows —
  * read and written through `@adapttable/core`'s URL slice store.
  */
-import { createUrlSliceStore, type UrlSliceSpec } from "@adapttable/core";
+import {
+  createUrlSliceStore,
+  type UrlSliceSpec,
+  type UrlStateAdapter,
+} from "@adapttable/core";
 import {
   assertInInjectionContext,
   computed,
@@ -15,17 +19,20 @@ import {
 } from "@angular/core";
 
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
-import { type TableUrlStateOptions, urlAdapterFor } from "./tableUrlState";
+import { urlAdapterFor } from "./tableUrlState";
 
 /**
  * Where a URL slice is kept.
  *
  * @public
  */
-export interface UrlSliceOptions extends Pick<
-  TableUrlStateOptions,
-  "urlAdapter" | "urlSync" | "urlKey"
-> {
+export interface UrlSliceOptions {
+  /** URL-state backend. Chosen once when this slice is created. */
+  readonly urlAdapter?: UrlStateAdapter;
+  /** Keep this slice in the URL. Chosen once when it is created. */
+  readonly urlSync?: boolean;
+  /** URL namespace. Chosen once when this slice is created. */
+  readonly urlKey?: string;
   /** The injector to run in. Omit inside an injection context. */
   readonly injector?: Injector;
 }

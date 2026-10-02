@@ -16,15 +16,21 @@ import {
   slotFillsOf,
 } from "@adapttable/core/binding";
 import {
+  computed,
   DestroyRef,
+  effect,
   type EnvironmentProviders,
   InjectionToken,
-  type Injector,
+  Injector,
   makeEnvironmentProviders,
+  runInInjectionContext,
+  type Signal,
   type Type,
+  untracked,
 } from "@angular/core";
 
 import type { FeatureMountContext } from "./featureLifecycle";
+import { type MaybeSignalOptional, readMaybe } from "./store";
 
 /**
  * What a slot draws in Angular: a standalone component that takes the slot's
@@ -77,6 +83,12 @@ export function extendFeature(
   return { ...base, renders: [...(base.renders ?? []), ...renders] };
 }
 
+/** Anonymous declarations keep their identity when the host replaces only its array. */
+const anonymousFeatures = new WeakMap<
+  AdaptTableFeature,
+  Map<string, AdaptTableFeature & { readonly id: string }>
+>();
+
 /** A feature's id, or its place in the list when it has none. */
 function withIds(
   features: readonly AdaptTableFeature[]
@@ -85,7 +97,21 @@ function withIds(
   features.forEach((feature, index) => {
     const id = feature.id ?? `feature-${String(index)}`;
     byId.delete(id);
-    byId.set(id, { ...feature, id });
+    if (feature.id !== undefined) {
+      byId.set(id, feature as AdaptTableFeature & { readonly id: string });
+      return;
+    }
+    let resolved = anonymousFeatures.get(feature);
+    if (!resolved) {
+      resolved = new Map();
+      anonymousFeatures.set(feature, resolved);
+    }
+    let declaration = resolved.get(id);
+    if (!declaration) {
+      declaration = { ...feature, id };
+      resolved.set(id, declaration);
+    }
+    byId.set(id, declaration);
   });
   return [...byId.values()];
 }
@@ -164,16 +190,72 @@ export function tableFeaturesOf(
 }
 
 /**
- * The feature host for a table: every provided feature and every one the
- * table names, set up once and disposed with the injection context.
+ * The feature host for a live composition. Setup follows core's host
+ * lifecycle: changed members receive a fresh host, and the old host disposes.
  */
 export function featureHostFor(
   injector: Injector,
-  own: readonly AdaptTableFeature[] | undefined
-): FeatureHostState {
-  const host = createFeatureHost(tableFeaturesOf(injector, own));
-  injector.get(DestroyRef).onDestroy(() => {
-    disposeFeatureHost(host);
+  own: MaybeSignalOptional<readonly AdaptTableFeature[]> | undefined
+): Signal<FeatureHostState> {
+  const features = computed(() => tableFeaturesOf(injector, readMaybe(own)), {
+    equal: (left, right) =>
+      left.length === right.length &&
+      left.every((feature, index) => feature === right[index]),
   });
+  let current:
+    | {
+        readonly host: FeatureHostState;
+        readonly scope: ReturnType<typeof Injector.create>;
+      }
+    | undefined;
+  const disposeCurrent = (): void => {
+    const mounted = current;
+    current = undefined;
+    if (!mounted) return;
+    const failures: unknown[] = [];
+    try {
+      disposeFeatureHost(mounted.host);
+    } catch (error) {
+      failures.push(error);
+    }
+    try {
+      mounted.scope.destroy();
+    } catch (error) {
+      failures.push(error);
+    }
+    if (failures.length > 0)
+      throw new AggregateError(failures, "Table feature setup cleanup failed");
+  };
+  const host = computed(() => {
+    const list = features();
+    return untracked(() => {
+      disposeCurrent();
+      const scope = Injector.create({ providers: [], parent: injector });
+      try {
+        const created = runInInjectionContext(scope, () =>
+          createFeatureHost(list)
+        );
+        current = { host: created, scope };
+        return created;
+      } catch (error) {
+        try {
+          scope.destroy();
+        } catch (cleanupError) {
+          throw new AggregateError(
+            [error, cleanupError],
+            "Table feature setup and cleanup failed"
+          );
+        }
+        throw error;
+      }
+    });
+  });
+  effect(
+    () => {
+      host();
+    },
+    { injector }
+  );
+  injector.get(DestroyRef).onDestroy(disposeCurrent);
   return host;
 }

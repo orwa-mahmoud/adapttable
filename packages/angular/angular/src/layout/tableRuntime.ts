@@ -18,6 +18,7 @@ import { computed, type Signal, untracked } from "@angular/core";
 
 import type { DataTable } from "../dataTable";
 import type { AdaptTableFeature } from "../featureHost";
+import { type MaybeSignal, readMaybe } from "../store";
 
 /**
  * The chrome fields {@link TableRuntimePublisher} needs from an Angular
@@ -107,12 +108,14 @@ export interface RuntimeTableOptions<TRow> extends Pick<
 export function tableRuntimeFor<TRow>(
   table: DataTable<TRow>,
   source: Signal<TableSource<TRow>>,
-  features: readonly AdaptTableFeature[],
+  features: MaybeSignal<readonly AdaptTableFeature[]>,
   grouping?: Signal<RuntimeGrouping<TRow> | undefined>,
   options?: Signal<RuntimeTableOptions<TRow>>
 ): TableRuntime<TRow> {
-  const featureIds = features.map(
-    (feature, index) => feature.id ?? `feature-${String(index)}`
+  const featureIds = computed(() =>
+    readMaybe(features).map(
+      (feature, index) => feature.id ?? `feature-${String(index)}`
+    )
   );
   let publisher = new TableRuntimePublisher<TRow>();
   let publishedEngine: TableSource<TRow>["tableEngine"];
@@ -149,7 +152,7 @@ export function tableRuntimeFor<TRow>(
       return (view.visibleRows ?? view.rows)[index];
     },
     labels: () => table.labels(),
-    featureIds: () => featureIds,
+    featureIds,
     view: () => publish(),
   };
 }

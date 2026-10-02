@@ -14,6 +14,7 @@ import {
   type CellContext,
   type ColumnDef,
   type ColumnLayoutState,
+  injectFrontendData,
   injectQuerySource,
   injectServerData,
   type NestedTableDefaults,
@@ -255,6 +256,15 @@ class RowReorderingBody {
   template: `
     <div class="mx-demo">
       <div class="hint-row">
+        <button
+          type="button"
+          class="seg__btn"
+          [attr.aria-pressed]="editingEnabled()"
+          (mousedown)="$event.preventDefault()"
+          (click)="editingEnabled.set(!editingEnabled())"
+        >
+          Allow editing
+        </button>
         <span class="hint">Double-click a cell to edit it</span>
         <span class="hint">Enter commits, Escape cancels</span>
         <button
@@ -286,7 +296,7 @@ class RowReorderingBody {
           [columns]="columns"
           [rowKey]="rowKey"
           [defaults]="{ limit: 10 }"
-          [features]="features"
+          [features]="features()"
         />
       </div>
       <p class="hint" role="status" data-demo-log>{{ log() }}</p>
@@ -301,6 +311,7 @@ class EditingBody {
   readonly rowKey = rowKey;
   readonly log = signal("Every change goes through the host.");
   readonly rejectNext = signal(false);
+  readonly editingEnabled = signal(true);
 
   /** Patch the same localized name field an editor reads while its draft stays open. */
   receiveLiveUpdate(): void {
@@ -312,37 +323,41 @@ class EditingBody {
     this.log.set("Received live name update: Ada Live");
   }
 
-  readonly features: readonly AdaptTableFeature[] = [
-    this.kit.editing<Person>(
-      (row, key, value) => {
-        this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
-        if (this.rejectNext()) {
-          this.rejectNext.set(false);
-          this.log.set(
-            `Save rejected for ${row.name}; undo the optimistic change.`
-          );
-          return Promise.reject(
-            new Error("The demo server rejected this change")
-          );
-        }
-        this.log.set(`Saved ${key} for ${row.name}: ${String(value)}`);
-        return undefined;
-      },
-      {
-        formatEditError: (error: unknown) =>
-          error instanceof Error ? error.message : "The demo save failed",
-        onEditRollback: (previous: Person) => {
-          this.rows.update((rows) =>
-            rows.map((row) => (row.id === previous.id ? previous : row))
-          );
-          this.log.set(`Restored ${previous.name} after the rejected save.`);
-        },
+  private readonly editingFeature = this.kit.editing<Person>(
+    (row, key, value) => {
+      this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
+      if (this.rejectNext()) {
+        this.rejectNext.set(false);
+        this.log.set(
+          `Save rejected for ${row.name}; undo the optimistic change.`
+        );
+        return Promise.reject(
+          new Error("The demo server rejected this change")
+        );
       }
-    ),
+      this.log.set(`Saved ${key} for ${row.name}: ${String(value)}`);
+      return undefined;
+    },
+    {
+      formatEditError: (error: unknown) =>
+        error instanceof Error ? error.message : "The demo save failed",
+      onEditRollback: (previous: Person) => {
+        this.rows.update((rows) =>
+          rows.map((row) => (row.id === previous.id ? previous : row))
+        );
+        this.log.set(`Restored ${previous.name} after the rejected save.`);
+      },
+    }
+  );
+  private readonly persistentFeatures = [
     this.kit.editHistory(),
     this.kit.undoRedoButtons(),
     this.kit.cellNavigation(),
   ];
+  readonly features = computed<readonly AdaptTableFeature[]>(() => [
+    ...(this.editingEnabled() ? [this.editingFeature] : []),
+    ...this.persistentFeatures,
+  ]);
 }
 
 /** Grouping: the panel, nested groups, and aggregates in the headers. */
@@ -539,13 +554,21 @@ function injectPeopleQuery(params: Signal<Partial<PeopleParams>>) {
   imports: [AdaptShowcaseTable],
   providers: [provideTanStackQuery(new QueryClient())],
   template: `
+    <button
+      type="button"
+      class="seg__btn"
+      [attr.aria-pressed]="alternate()"
+      (click)="alternate.set(!alternate())"
+    >
+      Use alternate data
+    </button>
     <adapt-showcase-table
       [dir]="presentation.dir"
       [labels]="presentation.labels"
       [attr.lang]="presentation.locale"
       tableLabel="People"
       [urlSync]="false"
-      [source]="source"
+      [source]="activeSource()"
       [columns]="columns"
       [rowKey]="rowKey"
     />
@@ -553,17 +576,35 @@ function injectPeopleQuery(params: Signal<Partial<PeopleParams>>) {
 })
 class ScaleQueryTable {
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly source = injectQuerySource<Person, PeopleParams, PeoplePage>({
-    query: injectPeopleQuery,
+  readonly alternate = signal(false);
+  private readonly source = injectQuerySource<Person, PeopleParams, PeoplePage>(
+    {
+      query: injectPeopleQuery,
+      urlSync: false,
+      paginationMode: "paged",
+      defaults: { limit: 10 },
+      selectPage: (page) => ({
+        rows: page.items,
+        total: page.total,
+        facets: page.facets,
+      }),
+    }
+  );
+  private readonly alternateSource = injectFrontendData<Person>({
+    data: peopleRows()
+      .slice(0, 2)
+      .map((row) => ({
+        ...row,
+        name: `Alternate ${row.name}`,
+      })),
+    columns: COLUMNS,
+    getRowId: rowKey,
     urlSync: false,
-    paginationMode: "paged",
     defaults: { limit: 10 },
-    selectPage: (page) => ({
-      rows: page.items,
-      total: page.total,
-      facets: page.facets,
-    }),
   });
+  readonly activeSource = computed(() =>
+    this.alternate() ? this.alternateSource : this.source
+  );
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
 }

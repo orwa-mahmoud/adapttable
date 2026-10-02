@@ -159,6 +159,63 @@ function deferred() {
 describe("filterOptionsFor", () => {
   const injector = () => TestBed.inject(Injector);
 
+  it("follows same-key replacements without restarting unchanged loaders", async () => {
+    const first = deferred();
+    const load = vi.fn(() => first.promise);
+    const def = signal<FilterDef<Person>>({
+      key: "k",
+      type: "select",
+      options: load,
+    });
+    const choices = filterOptionsFor(def, injector());
+    TestBed.tick();
+    def.update((value) => ({ ...value, label: "Renamed" }));
+    TestBed.tick();
+    expect(load).toHaveBeenCalledTimes(1);
+    const options = [{ value: "current", label: "Current" }];
+    def.update((value) => ({ ...value, options }));
+    // A replaced loader must not publish even before the effect runs.
+    first.resolve([{ value: "stale", label: "Stale" }]);
+    await Promise.resolve();
+    expect(choices().options).not.toContainEqual({
+      value: "stale",
+      label: "Stale",
+    });
+    TestBed.tick();
+    expect(choices()).toEqual({ options, loading: false });
+    def.update((value) => ({ ...value, options: undefined }));
+    TestBed.tick();
+    expect(choices()).toEqual({ options: [], loading: false });
+  });
+
+  it("switches loaders and suppresses failures from a replaced definition", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const stale = deferred();
+    const current = deferred();
+    const def = signal<FilterDef<Person>>({
+      key: "replaced-options",
+      type: "multiSelect",
+      options: () => stale.promise,
+    });
+    const choices = filterOptionsFor(def, injector());
+    TestBed.tick();
+    def.update((value) => ({ ...value, options: () => current.promise }));
+    TestBed.tick();
+    current.resolve([{ value: "new", label: "New" }]);
+    await Promise.resolve();
+    stale.reject(new Error("obsolete"));
+    await Promise.resolve();
+    expect(choices()).toEqual({
+      options: [{ value: "new", label: "New" }],
+      loading: false,
+    });
+    expect(warn).not.toHaveBeenCalled();
+    def.update((value) => ({ ...value, options: "auto" }));
+    TestBed.tick();
+    expect(choices()).toEqual({ options: [], loading: false });
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
   it("hands a static list straight over", () => {
     const options = [{ value: "a", label: "A" }];
     expect(filterOptionsFor({ key: "k", options }, injector())()).toEqual({

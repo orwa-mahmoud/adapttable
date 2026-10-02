@@ -84,6 +84,7 @@ export class AdaptFilterPopover {
     viewChild.required<ElementRef<HTMLElement>>("anchor");
   private readonly card = viewChild<ElementRef<HTMLElement>>("card");
 
+  /** Synchronize native dismissal with host state and restore the opener. */
   protected onVisibleChange(open: boolean): void {
     if (open || !this.props().open) return;
     // CDK can dismiss on Escape before the document listener sees the key.

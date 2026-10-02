@@ -37,11 +37,11 @@ import {
   Component,
   computed,
   Directive,
-  effect,
   ElementRef,
   inject,
   Injector,
   input,
+  type OnInit,
   output,
   type Signal,
   signal,
@@ -190,9 +190,9 @@ export class AdaptBooleanFilterField<TRow> {
   }
 }
 
-/** The choices of a select or checkbox field, loaded once the field starts. */
+/** The choices of a select or checkbox field, following its definition. */
 @Directive()
-abstract class OptionsField<TRow> {
+abstract class OptionsField<TRow> implements OnInit {
   abstract readonly def: Signal<FilterDef<TRow>>;
   private readonly injector = inject(Injector);
   protected readonly choices = signal<Signal<FilterOptionsState> | undefined>(
@@ -202,10 +202,8 @@ abstract class OptionsField<TRow> {
     () => this.choices()?.() ?? { options: [], loading: false }
   );
 
-  constructor() {
-    effect(() => {
-      this.choices.set(filterOptionsFor(this.def(), this.injector));
-    });
+  ngOnInit(): void {
+    this.choices.set(filterOptionsFor(this.def, this.injector));
   }
 }
 

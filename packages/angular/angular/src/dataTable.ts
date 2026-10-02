@@ -142,7 +142,7 @@ export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
    */
   readonly activeFilterCount?: Signal<number>;
   /** Features this table composes, beside the provided ones. */
-  readonly features?: readonly AdaptTableFeature[];
+  readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
 }
@@ -248,7 +248,7 @@ export interface DataTable<TRow> {
   readonly featureState: FeatureState;
   /**
    * The configuration the features merge (`enableColumnMenu`,
-   * `densityChooser` and the rest), read once, when the table starts.
+   * `densityChooser` and the rest), from the current composition.
    */
   readonly featureOptions: Readonly<Record<string, unknown>>;
   /** Which components the features draw into each slot. */
@@ -333,11 +333,16 @@ export function injectDataTable<TRow>(
     () => options.columnWidths && readMaybe(options.columnWidths)
   );
 
-  const features = tableFeaturesOf(injector, options.features);
-  const featureOptions = featureOptionsOf(features);
+  const features = computed(() =>
+    tableFeaturesOf(injector, readMaybe(options.features))
+  );
+  const featureOptions = computed(() => featureOptionsOf(features()));
+  const featureHost = featureHostFor(injector, options.features);
   const tree = computed(() => flattenColumns(readMaybe(options.columns)));
   const columnGroups = computed(() => tree().groups);
-  const collapsibleGroups = featureOptions.collapsibleColumnGroups === true;
+  const collapsibleGroups = computed(
+    () => featureOptions().collapsibleColumnGroups === true
+  );
   const allColumns = computed(() => {
     const templates = options.cellTemplates?.() ?? [];
     const declared = tree().leaves.map((column) => {
@@ -377,7 +382,9 @@ export function injectDataTable<TRow>(
 
   const layout = columnLayoutFor(allColumns, options, injector, {
     columnGroups,
-    collapsible: collapsibleGroups,
+    get collapsible() {
+      return collapsibleGroups();
+    },
   });
   const columns = computed(() =>
     visibleColumns(
@@ -395,7 +402,7 @@ export function injectDataTable<TRow>(
       columns: columns(),
       fitColumns:
         readMaybe(options.fitColumns ?? false) ||
-        featureOptions.fitColumns === true,
+        featureOptions().fitColumns === true,
       widths: widths(),
     })
   );
@@ -454,7 +461,7 @@ export function injectDataTable<TRow>(
     injector
   );
 
-  const slotFills = featureSlotFillsOf(features);
+  const slotFills = computed(() => featureSlotFillsOf(features()));
 
   const toggleSort = (key: string): void => {
     const current = source();
@@ -473,12 +480,14 @@ export function injectDataTable<TRow>(
       htmlGroupedHeaderPlan(
         columns(),
         layout().state.collapsedGroups ?? [],
-        collapsibleGroups,
+        collapsibleGroups(),
         columnGroups()
       )
     ),
     layout,
-    canRenameColumns: options.onColumnRename !== undefined,
+    get canRenameColumns() {
+      return options.onColumnRename !== undefined;
+    },
     isMobile,
     labels,
     dir,
@@ -519,11 +528,17 @@ export function injectDataTable<TRow>(
     statusAnnouncement,
     errorState: computed(() => tableErrorState(source())),
     isRefreshing: computed(() => chromeIsRefreshing(source())),
-    featureHost: featureHostFor(injector, options.features),
+    get featureHost() {
+      return featureHost();
+    },
     featureState: createFeatureState(),
-    featureOptions,
-    slotFills,
-    hasSlot: (slot) => slotFills.has(slot.id),
+    get featureOptions() {
+      return featureOptions();
+    },
+    get slotFills() {
+      return slotFills();
+    },
+    hasSlot: (slot) => slotFills().has(slot.id),
     toggleSort,
     setSearch: searchInput.commit,
     setSearchValue: searchInput.setValue,
@@ -581,7 +596,7 @@ export function injectDataTable<TRow>(
         sortLevels: source().sortLevels,
         sortByLabel: labels().sortBy,
         multiSort:
-          options.multiSort === true || featureOptions.multiSort === true,
+          options.multiSort === true || featureOptions().multiSort === true,
         toggleSort,
         toggleSortLevel: (key) => {
           source().toggleSortLevel(key);

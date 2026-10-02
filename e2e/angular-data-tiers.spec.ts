@@ -65,6 +65,55 @@ for (const kit of ANGULAR_KITS) {
     test.describe("query tier", () => {
       const PAGE = `/${kit.key}/scale/?tier=query`;
 
+      test("replaces the source in place and restores each source's own query", async ({
+        page,
+      }) => {
+        await page.goto(PAGE);
+        await expect(part(page, "row")).toHaveCount(10);
+        await part(page, "page-next").click();
+        await expect(part(page, "row").first()).toHaveAttribute(
+          "data-row-id",
+          "11"
+        );
+        const queryPage = await names(page);
+        const table = await part(page, "table").elementHandle();
+        expect(table).not.toBeNull();
+        const alternate = page.getByRole("button", {
+          name: "Use alternate data",
+          exact: true,
+        });
+        await alternate.click();
+        await expect(alternate).toHaveAttribute("aria-pressed", "true");
+        await expect(part(page, "row")).toHaveCount(2);
+        await expect(part(page, "row").first()).toContainText(
+          "Alternate Ada Lovelace"
+        );
+        await part(page, "search-input").fill("Alternate Ada");
+        await expect(part(page, "row")).toHaveCount(1);
+        expect(await table.evaluate((element) => element.isConnected)).toBe(
+          true
+        );
+
+        await alternate.click();
+        await expect(part(page, "row")).toHaveCount(10);
+        await expect(part(page, "row").first()).toHaveAttribute(
+          "data-row-id",
+          "11"
+        );
+        expect(await names(page)).toEqual(queryPage);
+        await expect(part(page, "search-input")).toHaveValue("");
+
+        await alternate.click();
+        await expect(part(page, "search-input")).toHaveValue("Alternate Ada");
+        await expect(part(page, "row")).toHaveCount(1);
+        await expect(part(page, "row").first()).toContainText(
+          "Alternate Ada Lovelace"
+        );
+        expect(await table.evaluate((element) => element.isConnected)).toBe(
+          true
+        );
+      });
+
       test("pages, sorts and searches through the infinite query", async ({
         page,
       }) => {

@@ -267,6 +267,49 @@ const row = (element: HTMLElement) =>
   );
 
 describe("AdaptFilterHeaderChrome", () => {
+  it("replaces options on mounted same-key controls and discards late loaders", async () => {
+    let resolve:
+      ((options: { value: string; label: string }[]) => void) | undefined;
+    const pending = new Promise<{ value: string; label: string }[]>((done) => {
+      resolve = done;
+    });
+    const { host, element, labeled, choose, fixture } = await mount(
+      (instance) => {
+        instance.defs.set(
+          DEFS.map((def) =>
+            def.key === "team" || def.key === "tags"
+              ? { ...def, options: () => pending }
+              : def
+          )
+        );
+      }
+    );
+    const select = labeled("Team")[0] as HTMLSelectElement;
+    host.defs.update((defs) =>
+      defs.map((def) =>
+        def.key === "team" || def.key === "tags"
+          ? { ...def, options: [{ value: "new", label: "Current" }] }
+          : def
+      )
+    );
+    await fixture.whenStable();
+    resolve?.([{ value: "old", label: "Obsolete" }]);
+    await fixture.whenStable();
+    expect(labeled("Team")[0]).toBe(select);
+    expect(
+      [...select.options].map((option) => option.textContent?.trim())
+    ).toContain("Current");
+    expect(element.textContent).not.toContain("Obsolete");
+    choose(select, "new");
+    const checkbox =
+      element.querySelector<HTMLInputElement>("test-multi input");
+    if (!checkbox) throw new Error("Missing current checkbox");
+    expect(checkbox.closest("label")?.textContent).toContain("Current");
+    checkbox.click();
+    await fixture.whenStable();
+    expect(host.extra()).toMatchObject({ team: ["new"], tags: ["new"] });
+  });
+
   it("writes every compact header widget", async () => {
     const { element, labeled, typeInto, choose, fixture } = await mount();
     expect(row(element)?.getAttribute("aria-label")).toBe(

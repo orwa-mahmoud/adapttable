@@ -13,12 +13,15 @@ import {
   assertInInjectionContext,
   computed,
   DestroyRef,
+  effect,
   inject,
   Injector,
+  isSignal,
   type Signal,
+  untracked,
 } from "@angular/core";
 
-import { fromStore } from "../store";
+import { fromStore, type MaybeSignal, readMaybe } from "../store";
 
 /**
  * Options for {@link injectSavedViews}.
@@ -49,24 +52,52 @@ export interface SavedViewsState extends Omit<
 /**
  * Saved views for a table.
  *
- * @param options - Where the views are kept, and the table's URL backend.
+ * @param options - Where the views are kept and the URL backend, or a live
+ * signal of that configuration. Persistence destination changes reload the
+ * list; URL and callback changes preserve the current views.
  * @returns See {@link SavedViewsState}.
  *
  * @public
  */
-export function injectSavedViews(options: SavedViewsOptions): SavedViewsState {
-  if (!options.injector) assertInInjectionContext(injectSavedViews);
-  const injector = options.injector ?? inject(Injector);
+export function injectSavedViews(
+  options: MaybeSignal<SavedViewsOptions>
+): SavedViewsState {
+  const initial = untracked(() => readMaybe(options));
+  if (!initial.injector) assertInInjectionContext(injectSavedViews);
+  const injector = initial.injector ?? inject(Injector);
   // No backend at all — the server, blocked storage — keeps them in memory.
-  const controller = createSavedViewsController({
-    ...options,
+  const resolve = (next: SavedViewsOptions): SavedViewsControllerOptions => ({
+    ...next,
     storage:
-      options.storage === undefined
-        ? (safeLocalStorage() ?? null)
-        : options.storage,
+      next.storage === undefined ? (safeLocalStorage() ?? null) : next.storage,
   });
-  injector.get(DestroyRef).onDestroy(controller.connect());
+  let configured = resolve(initial);
+  const controller = createSavedViewsController(configured);
+  let disconnect = controller.connect();
+  injector.get(DestroyRef).onDestroy(() => disconnect());
   const snapshot = fromStore(controller, { injector });
+  if (isSignal(options)) {
+    effect(
+      () => {
+        const next = resolve(options());
+        untracked(() => {
+          controller.configure(next);
+          // A new persistence destination loads its own list. URL and
+          // callback changes configure operations without losing local edits.
+          if (
+            next.storageKey !== configured.storageKey ||
+            next.storage !== configured.storage ||
+            next.store !== configured.store
+          ) {
+            disconnect();
+            disconnect = controller.connect();
+          }
+          configured = next;
+        });
+      },
+      { injector }
+    );
+  }
   return {
     views: computed(() => snapshot().views),
     defaultView: computed(() => snapshot().defaultView),

@@ -85,14 +85,17 @@ export interface TableUrlStateOptions {
     }>;
     readonly injector?: Injector;
     readonly numberExtraKeys?: MaybeSignalOptional<readonly string[]>;
-    readonly urlAdapter?: UrlStateAdapter;
-    readonly urlKey?: string;
-    readonly urlSync?: boolean;
+    readonly urlAdapter?: MaybeSignalOptional<UrlStateAdapter>;
+    readonly urlKey?: MaybeSignalOptional<string>;
+    readonly urlSync?: MaybeSignalOptional<boolean>;
 }
 
 // @public
-export interface UrlSliceOptions extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "urlKey"> {
+export interface UrlSliceOptions {
     readonly injector?: Injector;
+    readonly urlAdapter?: UrlStateAdapter;
+    readonly urlKey?: string;
+    readonly urlSync?: boolean;
 }
 
 // (No @packageDocumentation comment for this package)

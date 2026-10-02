@@ -338,8 +338,10 @@ import { RelativePreset } from '@adapttable/core';
 import { renderedRowsOf } from '@adapttable/core/binding';
 import { renderRegisteredFilter } from '@adapttable/core';
 import { REORDER_COLUMN_KEY } from '@adapttable/core';
+import { requestDensityChange } from '@adapttable/core';
 import { resolveBodyVirtualization } from '@adapttable/core/binding';
 import { resolveCellEditor } from '@adapttable/core';
+import { resolveDensity } from '@adapttable/core';
 import { resolveDisabledReason } from '@adapttable/core';
 import { resolveEditableCellDisplay } from '@adapttable/core';
 import { resolveEditingArming } from '@adapttable/core';
@@ -4092,6 +4094,9 @@ export function createAdapterAgentApprovalFeature(component: SlotComponent): Ada
 export function createAdapterTableAssistantFeature(component: Type<unknown>): AdaptTableFeature;
 
 // @public
+export function createFeatureResources(parent: Injector): FeatureResources;
+
+// @public
 export function createFeatureState(): FeatureState;
 
 // @public
@@ -4165,7 +4170,7 @@ export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly columns: MaybeSignal<readonly ColumnInput<TRow>[]>;
     readonly columnWidths?: MaybeSignalOptional<Readonly<Record<string, number>>>;
     readonly dir?: MaybeSignal<Direction>;
-    readonly features?: readonly AdaptTableFeature[];
+    readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
     readonly fitColumns?: MaybeSignal<boolean>;
     readonly forceMobile?: MaybeSignal<boolean>;
     readonly injector?: Injector;
@@ -4187,9 +4192,12 @@ export { defaultConfirm }
 export { defaultFilterRegistry }
 
 // @public
-export interface DensityOptions extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "urlKey"> {
+export interface DensityOptions {
     readonly defaultDensity?: TableDensity;
     readonly injector?: Injector;
+    readonly urlAdapter?: UrlStateAdapter;
+    readonly urlKey?: string;
+    readonly urlSync?: boolean;
 }
 
 // @public
@@ -4462,6 +4470,13 @@ export { FeaturePatch }
 
 export { FeatureRender }
 
+// @public
+export interface FeatureResources {
+    dispose(): void;
+    reconcile<T>(assemble: () => T): T;
+    use<T>(key: string, dependencies: readonly unknown[], create: (injector: Injector) => T): T;
+}
+
 export { FeatureSlotKey }
 
 // @public
@@ -4546,7 +4561,7 @@ export { filterOpLabel }
 export { FilterOption }
 
 // @public
-export function filterOptionsFor<TRow>(def: Pick<FilterDef<TRow>, "key" | "options">, injector: Injector): Signal<FilterOptionsState>;
+export function filterOptionsFor<TRow>(def: MaybeSignal<Pick<FilterDef<TRow>, "key" | "options">>, injector: Injector): Signal<FilterOptionsState>;
 
 // @public
 export interface FilterOptionsState {
@@ -4686,6 +4701,7 @@ export interface FrontendDataOptions<TRow> extends Omit<TableUrlStateOptions, "i
     readonly data: MaybeSignal<readonly TRow[]>;
     readonly error?: MaybeSignalOptional<Error | null>;
     readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterKey?: MaybeSignalOptional<string | number>;
     readonly filterTreeFn?: (row: TRow, tree: QueryFilterGroup) => boolean;
     readonly forceMobile?: MaybeSignalOptional<boolean>;
     readonly getRowId?: (row: TRow) => string;
@@ -5152,7 +5168,7 @@ export function injectRowReorder<TRow>(options: RowReorderStateOptions<TRow>): S
 export function injectRowSelection<TRow>(options: RowSelectionOptions<TRow>): RowSelection;
 
 // @public
-export function injectSavedViews(options: SavedViewsOptions): SavedViewsState;
+export function injectSavedViews(options: MaybeSignal<SavedViewsOptions>): SavedViewsState;
 
 // @public
 export function injectServerData<TRow>(options: ServerDataOptions<TRow>): Signal<TableSource<TRow>>;
@@ -5308,7 +5324,7 @@ export { mobileCardListStyle }
 export type MobileCardRenderer<TRow> = Renderer<MobileCardContext<TRow>>;
 
 // @public
-export function mountTableFeatures<TRow>(features: readonly AdaptTableFeature[], options: {
+export function mountTableFeatures<TRow>(features: MaybeSignal<readonly AdaptTableFeature[]>, options: {
     readonly runtime: TableRuntime_2<TRow>;
     readonly state: FeatureState;
     readonly injector: Injector;
@@ -5466,6 +5482,8 @@ export { renderRegisteredFilter }
 
 export { REORDER_COLUMN_KEY }
 
+export { requestDensityChange }
+
 // @public
 export function resizableColumns(): AdaptTableFeature;
 
@@ -5480,6 +5498,8 @@ export { resolveCellEditor }
 
 // @public
 export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale?: string): ColumnDef<TRow>[];
+
+export { resolveDensity }
 
 export { resolveDisabledReason }
 
@@ -6149,7 +6169,7 @@ export interface TableRowPinningOptions<TRow> {
 export { TableRuntime }
 
 // @public
-export function tableRuntimeFor<TRow>(table: DataTable<TRow>, source: Signal<TableSource<TRow>>, features: readonly AdaptTableFeature[], grouping?: Signal<RuntimeGrouping<TRow> | undefined>, options?: Signal<RuntimeTableOptions<TRow>>): TableRuntime_2<TRow>;
+export function tableRuntimeFor<TRow>(table: DataTable<TRow>, source: Signal<TableSource<TRow>>, features: MaybeSignal<readonly AdaptTableFeature[]>, grouping?: Signal<RuntimeGrouping<TRow> | undefined>, options?: Signal<RuntimeTableOptions<TRow>>): TableRuntime_2<TRow>;
 
 export { TableRuntimeView }
 
@@ -6178,9 +6198,9 @@ export interface TableUrlStateOptions {
     }>;
     readonly injector?: Injector;
     readonly numberExtraKeys?: MaybeSignalOptional<readonly string[]>;
-    readonly urlAdapter?: UrlStateAdapter;
-    readonly urlKey?: string;
-    readonly urlSync?: boolean;
+    readonly urlAdapter?: MaybeSignalOptional<UrlStateAdapter>;
+    readonly urlKey?: MaybeSignalOptional<string>;
+    readonly urlSync?: MaybeSignalOptional<boolean>;
 }
 
 export { TableVirtualization }
@@ -6276,8 +6296,11 @@ export interface UrlSlice<T> {
 }
 
 // @public
-export interface UrlSliceOptions extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "urlKey"> {
+export interface UrlSliceOptions {
     readonly injector?: Injector;
+    readonly urlAdapter?: UrlStateAdapter;
+    readonly urlKey?: string;
+    readonly urlSync?: boolean;
 }
 
 export { UrlStateAdapter }

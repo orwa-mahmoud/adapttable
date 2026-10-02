@@ -427,6 +427,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     extra?: ExtraFilters;
     }) | undefined>;
     readonly density: InputSignal<TableDensity | undefined>;
+    readonly densityChange: OutputEmitterRef<TableDensity>;
     // @internal
     protected readonly desktopTable: Signal<AdaptDesktopTable<any> | undefined>;
     readonly dir: InputSignal<Direction>;
@@ -790,6 +791,7 @@ export class AdaptDataTable<TRow> implements OnInit {
             "isSignal": true;
         };
     }, {
+        "densityChange": "densityChange";
         "selectionChange": "selectionChange";
         "columnLayoutChange": "columnLayoutChange";
     }, ["cellTemplates", "tableFooter", "sidePanel"], never, true, never>;
@@ -1055,7 +1057,6 @@ export class AdaptFilterDrawer {
 // @internal (undocumented)
 export class AdaptFilterPopover {
     constructor();
-    // (undocumented)
     protected onVisibleChange(open: boolean): void;
     // (undocumented)
     protected readonly overlayStyle: {

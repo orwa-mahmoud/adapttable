@@ -57,6 +57,8 @@ export interface FrontendDataOptions<TRow> extends Omit<
   readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
   /** Client filter over the nested filter tree. */
   readonly filterTreeFn?: (row: TRow, tree: QueryFilterGroup) => boolean;
+  /** Re-evaluate unchanged rows when the filter predicates' meaning changes. */
+  readonly filterKey?: MaybeSignalOptional<string | number>;
   /** Active locale for `i18n` column paths. */
   readonly locale?: MaybeSignalOptional<string>;
   /** Pagination mode. Defaults to `"auto"` (mobile → infinite). */
@@ -117,6 +119,7 @@ export function injectFrontendData<TRow>(
         getSortValue: options.getSortValue,
         filterFn: options.filterFn,
         filterTreeFn: options.filterTreeFn,
+        filterKey: readMaybe(options.filterKey),
         locale: options.locale && readMaybe(options.locale),
         paginationMode: mode(),
       },

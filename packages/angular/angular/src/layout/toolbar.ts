@@ -2,7 +2,11 @@
  * The toolbar's optional controls, as signals: row density kept in the URL,
  * the fullscreen toggle, and CSV export — each over core's model.
  */
-import { densitySlice, type TableDensity } from "@adapttable/core";
+import {
+  densitySlice,
+  type TableDensity,
+  type UrlStateAdapter,
+} from "@adapttable/core";
 import type { FullscreenState } from "@adapttable/core/binding";
 import { DOCUMENT } from "@angular/common";
 import {
@@ -16,7 +20,6 @@ import {
 } from "@angular/core";
 
 import { onBrowser } from "../hooks/platform";
-import type { TableUrlStateOptions } from "../url/tableUrlState";
 import { injectUrlSlice } from "../url/urlSlice";
 
 /**
@@ -24,10 +27,13 @@ import { injectUrlSlice } from "../url/urlSlice";
  *
  * @public
  */
-export interface DensityOptions extends Pick<
-  TableUrlStateOptions,
-  "urlAdapter" | "urlSync" | "urlKey"
-> {
+export interface DensityOptions {
+  /** URL-state backend. Chosen once when this slice is created. */
+  readonly urlAdapter?: UrlStateAdapter;
+  /** Keep this slice in the URL. Chosen once when it is created. */
+  readonly urlSync?: boolean;
+  /** URL namespace. Chosen once when this slice is created. */
+  readonly urlKey?: string;
   /** The density while the URL says nothing. Defaults to comfortable. */
   readonly defaultDensity?: TableDensity;
   /** The injector to run in. Omit inside an injection context. */

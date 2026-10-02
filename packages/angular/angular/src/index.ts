@@ -269,7 +269,9 @@ export {
 } from "./featureHost";
 export { tableFeaturesOf } from "./featureHost";
 export {
+  createFeatureResources,
   type FeatureMountContext,
+  type FeatureResources,
   mountTableFeatures,
 } from "./featureLifecycle";
 export { createAdapterAgentApprovalFeature } from "./features/agentApproval";

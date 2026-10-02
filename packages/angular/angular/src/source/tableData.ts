@@ -132,8 +132,8 @@ export interface TableDataResult<TRow> {
  * Resolve a table's data tier and its declarative-filter runtime.
  *
  * Both built-in tiers exist for the table's lifetime; the one not serving
- * it is handed no rows, no query callback and no URL, and the tier the table
- * starts on keeps the URL.
+ * it is handed no rows, no query callback and no URL. The active tier owns
+ * the URL, including after replacing a source or changing the data mode.
  *
  * @param options - See {@link TableDataOptions}.
  * @returns The source and the filter runtime.
@@ -174,9 +174,8 @@ export function injectTableData<TRow>(
     });
   });
   const tier = computed(() => plan().tier);
-  // Which tier owns the URL is decided once, when the stores are made; the
-  // filter keys the URL parses as lists and numbers follow the runtime.
-  const first = untracked(plan);
+  // The active tier owns the URL; each inactive tier retains private view
+  // state. Filter keys parsed as lists and numbers follow the runtime.
   const urlOptions = {
     urlAdapter: options.urlAdapter,
     urlKey: options.urlKey,
@@ -189,16 +188,21 @@ export function injectTableData<TRow>(
   const mode = options.paginationMode;
   const frontend = injectFrontendData<TRow>({
     ...urlOptions,
-    urlSync: first.tier === "frontend" ? options.urlSync : false,
+    urlSync: computed(() =>
+      onFrontend() ? readMaybe(options.urlSync) : false
+    ),
     data: computed(() => (onFrontend() ? (data() ?? []) : [])),
     columns,
     getRowId: options.getRowId,
     getSearchText: options.getSearchText,
     getSortValue: options.getSortValue,
-    filterFn: (row, extra) => plan().filterFn(row, extra),
-    filterTreeFn: first.filterTreeFn
-      ? (row, tree) => plan().filterTreeFn?.(row, tree) ?? true
-      : undefined,
+    get filterFn() {
+      return plan().filterFn;
+    },
+    get filterTreeFn() {
+      return plan().filterTreeFn;
+    },
+    filterKey: computed(() => plan().filterKey),
     locale,
     paginationMode: mode,
     forceMobile: options.forceMobile,
@@ -213,7 +217,7 @@ export function injectTableData<TRow>(
   });
   const server = injectServerData<TRow>({
     ...urlOptions,
-    urlSync: first.tier === "server" ? options.urlSync : false,
+    urlSync: computed(() => (onServer() ? readMaybe(options.urlSync) : false)),
     rows: computed(() => (onServer() ? (data() ?? []) : [])),
     total: computed(() => readMaybe(options.total) ?? 0),
     loading: options.loading,

@@ -51,6 +51,42 @@ for (const kit of ANGULAR_KITS) {
       );
     });
 
+    test("removes and restores editing without replacing the table or its rows", async ({
+      page,
+    }) => {
+      await page.goto(PAGE);
+      const table = await part(page, "table").elementHandle();
+      expect(table).not.toBeNull();
+      const permission = page.getByRole("button", {
+        name: "Allow editing",
+        exact: true,
+      });
+      await cell(page, 0, 0).dblclick();
+      await part(page, "edit-cell-editor").fill("Ada Approved");
+      await part(page, "edit-cell-editor").press("Enter");
+      await expect(cell(page, 0, 0)).toHaveText("Ada Approved");
+      const saved = await log(page).innerText();
+
+      await permission.click();
+      await expect(permission).toHaveAttribute("aria-pressed", "false");
+      await cell(page, 0, 0).dblclick();
+      await expect(part(page, "edit-cell-editor")).toHaveCount(0);
+      await expect(cell(page, 0, 0)).toHaveText("Ada Approved");
+      await expect(log(page)).toHaveText(saved);
+      expect(await table.evaluate((element) => element.isConnected)).toBe(true);
+
+      await permission.click();
+      await expect(permission).toHaveAttribute("aria-pressed", "true");
+      await cell(page, 0, 0).dblclick();
+      await part(page, "edit-cell-editor").fill("Ada Restored");
+      await part(page, "edit-cell-editor").press("Enter");
+      await expect(cell(page, 0, 0)).toHaveText("Ada Restored");
+      await expect(log(page)).toHaveText(
+        "Saved person for Ada Approved: Ada Restored"
+      );
+      expect(await table.evaluate((element) => element.isConnected)).toBe(true);
+    });
+
     if (kit.key === "ng-zorro") {
       test("keeps the select draft through pointer presses and saves only after leaving", async ({
         page,

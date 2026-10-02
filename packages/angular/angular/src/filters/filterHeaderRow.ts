@@ -307,9 +307,9 @@ export class AdaptFilterHeaderControlChrome<TRow> implements OnInit {
   /** The upper bound, present only for a between pair. */
   protected readonly rangeUpper = computed(() => this.range().upper);
 
-  /** Load the definition's choices once its input is bound. */
+  /** Follow the definition's choices once its input is bound. */
   ngOnInit(): void {
-    const state = filterOptionsFor(this.def(), this.injector);
+    const state = filterOptionsFor(this.def, this.injector);
     this.options.set(state().options);
     effect(
       () => {

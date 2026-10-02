@@ -68,6 +68,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
   readonly features = input<readonly AdaptTableFeature[]>([]);
   readonly onRowClick = input<(row: TRow) => void>();
   readonly density = input<TableDensity>();
+  readonly densityChange = output<TableDensity>();
   readonly summaryRow = input<SummaryRowFn<TRow>>();
   readonly editConflictPolicy = input<EditConflictPolicy>();
   readonly columnLayout = input<ColumnLayoutState>();
@@ -97,6 +98,9 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         inputBinding("features", this.features),
         inputBinding("onRowClick", this.onRowClick),
         inputBinding("density", this.density),
+        outputBinding<TableDensity>("densityChange", (density) =>
+          this.densityChange.emit(density)
+        ),
         inputBinding("summaryRow", this.summaryRow),
         inputBinding("editConflictPolicy", this.editConflictPolicy),
         inputBinding("columnLayout", this.columnLayout),

@@ -76,6 +76,7 @@ export {
   visibleRowActions,
 } from "@adapttable/core";
 export { restoreFocusSoon } from "@adapttable/core";
+export { requestDensityChange, resolveDensity } from "@adapttable/core";
 export {
   editorInputType,
   formatMultiDraft,

@@ -16,6 +16,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { injectDataTable } from "../dataTable";
+import type { AdaptTableFeature } from "../featureHost";
 import { grouping, injectGrouping } from "../features/grouping";
 import { groupingPanel } from "../features/groupingPanel";
 import { rowReorder } from "../features/rowReorder";
@@ -49,6 +50,61 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 describe("tableRuntimeFor", () => {
+  it("publishes live feature ids without replacing the runtime or neutral table", async () => {
+    @Component({ template: "" })
+    class Host {
+      readonly features = signal<readonly AdaptTableFeature[]>([
+        { id: "first" },
+        {},
+      ]);
+      readonly source = injectFrontendData({
+        data: PEOPLE,
+        columns: COLUMNS,
+        urlSync: false,
+      });
+      readonly table = injectDataTable({
+        source: this.source,
+        columns: COLUMNS,
+        rowKey: (row) => row.id,
+        features: this.features,
+      });
+      readonly runtime = tableRuntimeFor(
+        this.table,
+        this.source,
+        this.features
+      );
+    }
+    const fixture = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host = fixture.componentInstance;
+    const runtime = host.runtime;
+    const neutral = runtime.view()!.neutralTable!;
+    const notifications = vi.fn();
+    const unsubscribe = neutral.subscribe("all", notifications);
+    expect(runtime.featureIds()).toEqual(["first", "feature-1"]);
+    expect(neutral.rows("visible")).toEqual(PEOPLE);
+
+    host.features.set([{ id: "second" }]);
+    await fixture.whenStable();
+    expect(host.runtime).toBe(runtime);
+    expect(runtime.featureIds()).toEqual(["second"]);
+    expect(runtime.view()!.neutralTable).toBe(neutral);
+    host.source().setSearch("Grace");
+    await fixture.whenStable();
+    expect(runtime.rowAt(0)).toBe(PEOPLE[1]);
+    expect(neutral.rows("visible")).toEqual([PEOPLE[1]]);
+    expect(notifications).toHaveBeenLastCalledWith(neutral.revisions);
+
+    host.features.set([]);
+    await fixture.whenStable();
+    expect(runtime.featureIds()).toEqual([]);
+    expect(runtime.view()!.neutralTable).toBe(neutral);
+    expect(neutral.rows("visible")).toEqual([PEOPLE[1]]);
+    unsubscribe();
+    fixture.destroy();
+  });
+
   it("refuses reorder on a sorted table and announces moveRejectedSorted", async () => {
     @Component({ template: "" })
     class Host {

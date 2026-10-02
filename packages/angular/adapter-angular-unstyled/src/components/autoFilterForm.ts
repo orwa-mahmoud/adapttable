@@ -169,7 +169,7 @@ export class AdaptBooleanFilterField<TRow> {
   }
 }
 
-/** The choices of a select or checkbox field, loaded once the field starts. */
+/** The choices of a select or checkbox field, following its definition. */
 @Directive()
 abstract class OptionsField<TRow> implements OnInit {
   abstract readonly def: Signal<FilterDef<TRow>>;
@@ -182,7 +182,7 @@ abstract class OptionsField<TRow> implements OnInit {
   );
 
   ngOnInit(): void {
-    this.choices.set(filterOptionsFor(this.def(), this.injector));
+    this.choices.set(filterOptionsFor(this.def, this.injector));
   }
 }
 

@@ -123,7 +123,9 @@ export class AdaptSavedViewsMenu implements OnInit {
   /** Open the views where the props say they are kept. */
   ngOnInit(): void {
     this.views.set(
-      injectSavedViews({ ...this.props().options, injector: this.injector })
+      injectSavedViews(
+        computed(() => ({ ...this.props().options, injector: this.injector }))
+      )
     );
   }
 
