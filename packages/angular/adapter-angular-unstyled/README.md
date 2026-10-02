@@ -1,6 +1,7 @@
 # @adapttable/angular-unstyled
 
 Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+Angular 20 supports that floor; Angular 22 requires Node 22.22.3+, 24.15.0+, or 26+ instead.
 
 The Angular AdaptTable drawn with native HTML over
 [`@adapttable/angular`](../angular/README.md). It supplies the controls and

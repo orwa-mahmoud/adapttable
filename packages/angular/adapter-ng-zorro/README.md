@@ -1,6 +1,6 @@
 # @adapttable/ng-zorro
 
-Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**, matching Angular 22. Packed releases are tested on Node 22.22.3 and Node 24.
 
 The Angular AdaptTable rendered with NG-ZORRO components over the headless
 [`@adapttable/angular`](../angular/README.md) binding. Tables, cards, inputs,

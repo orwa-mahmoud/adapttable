@@ -7,10 +7,12 @@ import {
   assertPackedMatchesExpected,
   EXTRA_PROBE_ROUTES,
   kitLoadDependencies,
+  packagesForRuntime,
   probePrelude,
   probeRoutes,
   publishedPackageNames,
   publishedPackages,
+  supportsAngular22,
 } from "./node-support-harness.mjs";
 import { listPackages, REPO_ROOT as ROOT } from "./packages.mjs";
 
@@ -48,11 +50,16 @@ function packageManifests() {
 }
 
 describe("supported Node contract", () => {
-  it("declares one floor in the repo and every package", () => {
+  it("declares the baseline floor and NG-ZORRO’s Angular 22 floor", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
     assert.equal(manifests.length, 23);
     for (const manifest of manifests) {
-      assert.equal(json(manifest).engines?.node, FLOOR, manifest);
+      const pkg = json(manifest);
+      const floor =
+        pkg.name === "@adapttable/ng-zorro"
+          ? "^22.22.3 || ^24.15.0 || >=26.0.0"
+          : FLOOR;
+      assert.equal(pkg.engines?.node, floor, manifest);
     }
   });
 
@@ -61,7 +68,11 @@ describe("supported Node contract", () => {
       const pkg = json(manifest);
       if (pkg.private) continue;
       const readme = readFileSync(join(dirname(manifest), "README.md"), "utf8");
-      assert.ok(readme.includes(README_CLAIM), pkg.name);
+      const claim =
+        pkg.name === "@adapttable/ng-zorro"
+          ? "Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**"
+          : README_CLAIM;
+      assert.ok(readme.includes(claim), pkg.name);
     }
   });
 
@@ -70,7 +81,7 @@ describe("supported Node contract", () => {
       join(ROOT, ".github/workflows/pr.yml"),
       "utf8"
     );
-    assert.ok(workflow.includes('node: ["22.12.0", "24"]'));
+    assert.ok(workflow.includes('node: ["22.12.0", "22.22.3", "24"]'));
     assert.ok(workflow.includes("node-version: ${{ matrix.node }}"));
     assert.match(
       workflow,
@@ -161,7 +172,7 @@ describe("supported Node contract", () => {
   });
 
   it("installs kit peers so every adapter root can load", () => {
-    const deps = kitLoadDependencies(publishedPackages());
+    const deps = kitLoadDependencies(publishedPackages(), "24.15.0");
     assert.ok(deps["@mui/material"]);
     assert.ok(deps["@emotion/react"]);
     assert.ok(deps.antd);
@@ -170,10 +181,53 @@ describe("supported Node contract", () => {
   });
 
   it("installs and preloads the Angular compiler for the Angular binding", () => {
-    const deps = kitLoadDependencies(publishedPackages());
+    const deps = kitLoadDependencies(publishedPackages(), "24.15.0");
     assert.equal(deps["@angular/compiler"], deps["@angular/core"]);
     assert.ok(deps.rxjs);
     assert.deepEqual(probePrelude(deps), ["@angular/compiler"]);
     assert.deepEqual(probePrelude({ antd: "^5.0.0" }), []);
+  });
+});
+
+describe("Angular-aware packed runtime coverage", () => {
+  it("honors Angular 22's exact Node version boundaries", () => {
+    for (const version of [
+      "22.12.0",
+      "22.22.2",
+      "23.0.0",
+      "24.14.9",
+      "25.0.0",
+    ]) {
+      assert.equal(supportsAngular22(version), false, version);
+    }
+    for (const version of ["22.22.3", "22.23.0", "24.15.0", "26.0.0"]) {
+      assert.equal(supportsAngular22(version), true, version);
+    }
+  });
+
+  it("tests every package on Angular 22's floor and Node 24", () => {
+    const packages = publishedPackages();
+    for (const version of ["22.22.3", "24.15.0"]) {
+      assert.deepEqual(packagesForRuntime(packages, version), packages);
+    }
+  });
+
+  it("keeps all baseline packages and Angular 20 on Node 22.12", () => {
+    const packages = packagesForRuntime(publishedPackages(), "22.12.0");
+    assert.deepEqual(
+      packages.map((entry) => entry.name).sort(),
+      PUBLISHED_SNAPSHOT.filter((name) => name !== "@adapttable/ng-zorro")
+    );
+    const deps = kitLoadDependencies(packages, "22.12.0");
+    assert.equal(deps["@angular/core"], "^20.0.0");
+    assert.equal(deps["@angular/compiler"], "^20.0.0");
+    assert.equal(deps["ng-zorro-antd"], undefined);
+  });
+
+  it("rejects NG-ZORRO on an incompatible runtime instead of relaxing engine checks", () => {
+    assert.throws(
+      () => kitLoadDependencies(publishedPackages(), "22.12.0"),
+      /NG-ZORRO requires an Angular 22-compatible Node runtime/
+    );
   });
 });

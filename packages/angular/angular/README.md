@@ -13,6 +13,7 @@ pnpm add @adapttable/angular @adapttable/core
 ```
 
 Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+Angular 20 supports that floor; Angular 22 requires Node 22.22.3+, 24.15.0+, or 26+ instead.
 Requires Angular 20 or newer (`@angular/core` and `@angular/common`).
 
 ## Usage

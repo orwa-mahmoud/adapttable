@@ -116,6 +116,26 @@ export function probeRoutes(publishedNames) {
   return [...new Set([...publishedNames, ...EXTRA_PROBE_ROUTES])].sort();
 }
 
+/** Angular 22's Node range; older supported runtimes use Angular 20. */
+export function supportsAngular22(nodeVersion) {
+  const [major, minor, patch] = nodeVersion
+    .replace(/^v/, "")
+    .split(".")
+    .map(Number);
+  return (
+    major >= 26 ||
+    (major === 24 && minor >= 15) ||
+    (major === 22 && (minor > 22 || (minor === 22 && patch >= 3)))
+  );
+}
+
+/** Only NG-ZORRO requires Angular 22; the other Angular packages support 20. */
+export function packagesForRuntime(packages, nodeVersion) {
+  return supportsAngular22(nodeVersion)
+    ? packages
+    : packages.filter((entry) => entry.name !== "@adapttable/ng-zorro");
+}
+
 /**
  * Kit peers needed to load adapter roots. Workspace packages and React
  * are already installed as tarballs / explicit deps. When MUI is a peer,
@@ -123,7 +143,10 @@ export function probeRoutes(publishedNames) {
  *
  * @param {ReturnType<typeof publishedPackages>} packages
  */
-export function kitLoadDependencies(packages) {
+export function kitLoadDependencies(
+  packages,
+  nodeVersion = process.versions.node
+) {
   const published = new Set(packages.map((entry) => entry.name));
   const skip = new Set(["react", "react-dom", ...published]);
   /** @type {Record<string, string>} */
@@ -146,7 +169,19 @@ export function kitLoadDependencies(packages) {
     deps["@angular/compiler"] ??= deps["@angular/core"];
     deps.rxjs ??= "^7.4.0";
   }
+  useCompatibleAngularPeers(deps, packages, nodeVersion);
   return deps;
+}
+
+/** Keep the Angular peer major compatible with the probed Node runtime. */
+function useCompatibleAngularPeers(deps, packages, nodeVersion) {
+  if (supportsAngular22(nodeVersion)) return;
+  if (packages.some((entry) => entry.name === "@adapttable/ng-zorro")) {
+    throw new Error("NG-ZORRO requires an Angular 22-compatible Node runtime");
+  }
+  for (const name of Object.keys(deps)) {
+    if (name.startsWith("@angular/")) deps[name] = "^20.0.0";
+  }
 }
 
 /**
@@ -196,16 +231,28 @@ function verify() {
   const { packages } = JSON.parse(readFileSync(MANIFEST, "utf8"));
   const packedNames = Object.keys(packages);
   assertPackedMatchesExpected(packedNames, expected);
-  const count = expected.length;
-  console.log(`node-support: verifying ${count} published packages`);
+  const compatible = packagesForRuntime(
+    publishedPackages(),
+    process.versions.node
+  );
+  const runtimeNames = compatible.map((entry) => entry.name).sort();
+  const count = runtimeNames.length;
+  console.log(
+    `node-support: verifying ${count} runtime-compatible published packages`
+  );
+  for (const name of expected.filter((name) => !runtimeNames.includes(name))) {
+    console.log(
+      `${name} requires Angular 22; tested on Node 22.22.3 and Node 24`
+    );
+  }
 
   const scratch = mkdtempSync(join(tmpdir(), "adapttable-node-support-"));
   process.on("exit", () => rmSync(scratch, { recursive: true, force: true }));
   const tarballs = Object.fromEntries(
-    packedNames.map((name) => [name, `file:${join(PACK_DIR, packages[name])}`])
+    runtimeNames.map((name) => [name, `file:${join(PACK_DIR, packages[name])}`])
   );
-  const routes = probeRoutes(expected);
-  const loadDependencies = kitLoadDependencies(publishedPackages());
+  const routes = probeRoutes(runtimeNames);
+  const loadDependencies = kitLoadDependencies(compatible);
   const prelude = probePrelude(loadDependencies);
 
   writeFileSync(
@@ -266,15 +313,15 @@ for (const route of routes) {
   run(process.execPath, ["probe.mjs"], scratch, "ESM probe");
   run(process.execPath, ["probe.cjs"], scratch, "CommonJS probe");
 
-  for (const name of expected) {
+  for (const { name, manifest } of compatible) {
     const installed = JSON.parse(
       readFileSync(
         join(scratch, "node_modules", ...name.split("/"), "package.json"),
         "utf8"
       )
     );
-    if (installed.engines?.node !== ">=22.12.0") {
-      throw new Error(`${name} packed engines.node is not >=22.12.0`);
+    if (installed.engines?.node !== manifest.engines?.node) {
+      throw new Error(`${name} packed engines.node differs from its manifest`);
     }
   }
 
