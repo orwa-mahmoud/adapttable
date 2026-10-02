@@ -7,10 +7,14 @@ The Angular AdaptTable rendered with NG-ZORRO components over the headless
 selects, checkboxes, buttons and overlays use `ng-zorro-antd`; the binding
 owns state, structure, keyboard behavior and localized labels.
 
-**First public `0.1.0` release prepared.** npm publication is a separate
-owner-controlled step. Check registry availability before installing; until
-publication, use a built workspace or local package. The kit participates in
-the shell-kit contracts independently of publication status.
+Available on npm as `@adapttable/ng-zorro`. The kit participates in the
+shell-kit contracts.
+
+```bash
+pnpm add @adapttable/ng-zorro @adapttable/angular @adapttable/core
+```
+
+Install the Angular and NG-ZORRO peers listed below in the host application.
 
 [NG-ZORRO demo](https://adapttable.orwamahmoud.com/angular/demo/ng-zorro/) ·
 [API reference](https://adapttable.orwamahmoud.com/react/api/#the-angular-ng-zorro-kit)

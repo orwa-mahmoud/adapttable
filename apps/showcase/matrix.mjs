@@ -283,7 +283,6 @@ export const SHOWCASE_ADAPTERS = [
       "That is the whole trade: one model to learn, and a table that looks like the rest of your app because your own stylesheet draws it.",
     ],
     built: true,
-    indexable: false,
     features: [
       "filtering",
       "selection",
@@ -335,7 +334,6 @@ export const SHOWCASE_ADAPTERS = [
       "Load NG-ZORRO’s stylesheet in your application. The table and every optional feature use its components, including the assistant and approval dialogs.",
     ],
     built: true,
-    indexable: false,
     features: [
       "filtering",
       "selection",

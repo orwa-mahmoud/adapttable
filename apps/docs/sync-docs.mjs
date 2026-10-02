@@ -161,7 +161,7 @@ export const TITLES = {
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
   "angular/getting-started.md":
-    "Build your first Angular table with AdaptDataTable, signal-backed rows and the unstyled or NG-ZORRO workspace kit. Check package availability and peers.",
+    "Install an Angular table with native HTML or NG-ZORRO controls. Follow npm setup, CLI scaffolding and a standalone component example with signal-backed rows.",
   "angular/features.md":
     "Compose Angular table features through kit subpaths and standardPreset. Add only the required controls and keep data ownership in your application.",
   "angular/data-tiers.md":

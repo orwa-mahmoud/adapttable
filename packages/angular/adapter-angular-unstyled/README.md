@@ -8,10 +8,12 @@ The Angular AdaptTable drawn with native HTML over
 responsive table/card layouts; you supply the theme with CSS or Tailwind,
 using the shared `data-adapttable-part` names and `classNames` hooks.
 
-**First public `0.1.0` release prepared.** npm publication is a separate
-owner-controlled step. Check registry availability before installing; until
-publication, use a built workspace or local package. The native kit
-participates in the kit contracts independently of publication status.
+Available on npm as `@adapttable/angular-unstyled`. The native kit
+participates in the kit contracts.
+
+```bash
+pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core
+```
 
 [Angular demo](https://adapttable.orwamahmoud.com/angular/demo/unstyled/) ·
 [API reference](https://adapttable.orwamahmoud.com/react/api/#the-angular-native-kit)

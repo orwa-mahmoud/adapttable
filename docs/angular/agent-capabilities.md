@@ -4,9 +4,8 @@
 agent integration. It observes the mounted table's rows, view and available
 operations; it does not insert a model SDK into the Angular binding or grant
 writes that the host has not wired. The AI Angular binding and both Angular
-kits are prepared for their first public `0.1.0` release. See
-[getting started](./getting-started.md) for installation guidance while
-registry publication is pending.
+kits are public npm packages. See
+[getting started](./getting-started.md) for installation guidance.
 
 ## Attach a session to a table
 

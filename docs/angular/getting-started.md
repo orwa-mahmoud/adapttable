@@ -12,13 +12,36 @@ a stable row key. Add feature imports when the table needs them.
 - `@adapttable/angular` supplies signals, column types and structural Chrome
   for either kit or your own renderer
 
-The binding's current repository version is `0.2.0`. Both kits and the optional
-`@adapttable/ai-angular` binding are prepared for their first public `0.1.0`
-release. Their manifests permit publication, but npm publication remains a
-separate owner-controlled step. Check registry availability before installing;
-until publication, these examples require built workspace or local packages
-that your application can resolve. Package versions are independent; do not
-force the binding, core and kit to share a version.
+The Angular binding, both kits and the optional AI binding are available on npm.
+Package versions are independent; each kit declares its compatible binding and
+engine dependencies. Do not force core, binding and kit to share a version.
+
+## Install an Angular table package
+
+Inside an existing Angular application, choose one kit. For native HTML
+controls that you style yourself:
+
+```sh
+npm install @adapttable/angular-unstyled @adapttable/angular
+```
+
+For an Angular 22 application using NG-ZORRO:
+
+```sh
+npm install @adapttable/ng-zorro @adapttable/angular ng-zorro-antd@^22.1.1 @angular/cdk@^22 @angular/forms@^22 @angular/router@^22
+```
+
+Keep the host's Angular packages on compatible versions. The NG-ZORRO kit
+also requires Angular Common, Core and Platform Browser 22, normally already
+present in an Angular 22 application. Use Node `^22.22.3`, `^24.15.0` or
+`>=26.0.0` for the Angular 22 setup. The native kit and binding also support
+Angular 20 and 21; use the Node version supported by your Angular release.
+
+For optional AI table sessions, assistants and speech bindings, add:
+
+```sh
+npm install @adapttable/ai-angular @adapttable/ai
+```
 
 The binding supports Angular 20, 21 and 22. NG-ZORRO's kit targets Angular 22
 and NG-ZORRO 22.1.1, including its Angular CDK, Common, Core, Forms,
@@ -33,10 +56,9 @@ The native kit does not supply a theme stylesheet.
 
 ## Run the Angular examples from source
 
-Until the kits are published, use the repository showcase for a runnable setup.
-From a clone of this repository, with Node 22.22.3 or a supported newer Node
-release (the showcase uses Angular 22) and the package manager version declared
-in `package.json`:
+To explore all features together, run the repository showcase. From a clone
+of this repository, use a Node version listed above for Angular 22 and the
+package manager version declared in `package.json`:
 
 ```sh
 pnpm install --frozen-lockfile
@@ -46,8 +68,8 @@ pnpm --filter @adapttable/showcase dev
 Open the local address printed by Vite and navigate to `/unstyled/` for the
 unstyled kit or `/ng-zorro/` for NG-ZORRO. The local showcase serves its HTML
 entries directly; the published website adds the `/angular/demo/` prefix.
-The source checkout resolves workspace dependencies; these commands do not
-install an unpublished kit into an unrelated application.
+The source checkout resolves workspace dependencies. Use the npm commands
+above when adding a table to your own application.
 
 Try the hosted [unstyled Angular table](https://adapttable.orwamahmoud.com/angular/demo/unstyled/)
 or [NG-ZORRO table](https://adapttable.orwamahmoud.com/angular/demo/ng-zorro/)
@@ -123,18 +145,30 @@ const features = [columnMenu(), multiSort()];
 composition. See [Features](./features.md) for its exact members and the
 individual imports.
 
-## Scaffold from the repository CLI
+## Scaffold an Angular table with the CLI
 
-The implemented CLI recognizes an Angular project when **both** `angular.json`
-and an `@angular/core` dependency are present. It supports the
-`angular-unstyled` and `ng-zorro` kit choices, and writes a standalone
-`PeopleTable` to `src/app/peopleTable.ts`. It does not mount that component in
-your app for you. The binding and chosen kit must be resolvable in your
-development setup. The CLI prints an install command; it does not install
-packages, check registry availability or publish a release.
+From your Angular application root (the folder containing `angular.json` and
+`package.json`), run:
 
-Build the repository CLI once, then invoke its built entry **from your Angular
-application root** (the folder containing `angular.json` and `package.json`):
+```sh
+npx @adapttable/cli@3.1.0 init
+```
+
+The CLI recognizes an Angular project when **both** `angular.json` and an
+`@angular/core` dependency are present. It detects NG-ZORRO from `ng-zorro-antd`
+in your dependencies; otherwise it chooses the unstyled Angular kit. Install
+NG-ZORRO before running the command if that is the kit you want. There is no
+`--kit` option.
+
+It writes a standalone `PeopleTable` to `src/app/peopleTable.ts` and prints the
+package installation command. Run that printed command, then import
+`PeopleTable` into your host component's `imports` and render `<people-table />`.
+The CLI does not mount the component or run installation for you. Existing
+scaffold files are skipped; use `init --force` only when you intend to overwrite
+them. The CLI's version does not need to match the table packages.
+
+To test changes to the CLI itself, build it from this repository and invoke its
+entry from your Angular application root:
 
 ```sh
 # From the AdaptTable repository:
@@ -143,12 +177,6 @@ pnpm --filter @adapttable/cli build
 # From your Angular application (replace the path with your checkout):
 node /path/to/adapttable/packages/shared/cli/dist/cli.js init
 ```
-
-The CLI detects NG-ZORRO from `ng-zorro-antd` in your dependencies; otherwise it
-chooses the unstyled Angular kit. There is no `--kit` option. It prints a package
-installation command but does not run it. Existing scaffold files are skipped;
-use `init --force` only when you intend to overwrite them. Resolve the local kit
-packages as described above before using the generated component.
 
 ## Data and callbacks
 

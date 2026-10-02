@@ -19,8 +19,9 @@ for an isolated in-memory view.
 />
 ```
 
-Import `AdaptDataTable` from your workspace kit in the host component's
-`imports`. The first table writes keys such as `people.q` and `people.page`;
+Import `AdaptDataTable` from `@adapttable/angular-unstyled` or
+`@adapttable/ng-zorro` in the host component's `imports`. The first table writes
+keys such as `people.q` and `people.page`;
 the second writes `orders.q` and `orders.page`. Unrelated application
 parameters stay intact. Tables without distinct namespaces can overwrite
 each other's view and receive a development warning.

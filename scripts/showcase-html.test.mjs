@@ -58,6 +58,24 @@ describe("the generated showcase pages", () => {
     }
   });
 
+  it("indexes every published Angular kit landing and feature page", () => {
+    const pages = matrixPages().filter((page) => page.framework === "angular");
+    assert.equal(pages.length, 44);
+    for (const page of pages) {
+      assert.equal(page.indexable, true, page.dir);
+      const kit = adapterByKey(page.adapter);
+      const generated = page.feature
+        ? featurePage(kit, featureBySlug(page.feature))
+        : landingPage(kit);
+      assert.ok(
+        generated.html.includes(
+          'name="robots" content="index, follow, max-image-preview:large"'
+        ),
+        page.dir
+      );
+    }
+  });
+
   it("links Angular showcase pages to Angular guides and preserves shared references", () => {
     for (const kit of builtAdapters("angular")) {
       assert.ok(

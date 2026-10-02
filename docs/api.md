@@ -2975,11 +2975,11 @@ capability is decided there, once, rather than per binding.
 
 ## The Angular AI binding
 
-`@adapttable/ai-angular` is an opt-in Angular binding over `@adapttable/ai`,
-prepared for its first public `0.1.0` release. Check
-[Angular getting started](./angular/getting-started.md) for release and
-installation guidance. Importing the Angular table or its native kit does not
-load an agent controller or a transport.
+`@adapttable/ai-angular` is a public, opt-in Angular binding over
+`@adapttable/ai`. See
+[Angular getting started](./angular/getting-started.md) for installation guidance.
+Importing the Angular table or its native kit does not load an agent controller
+or a transport.
 
 - `tableAgent(options)` mounts the neutral table-agent controller. Options can
   be a signal: policy and callbacks stay current without recreating the table.
@@ -3607,9 +3607,8 @@ comes from a kit through a slot.
 ## The Angular native kit
 
 `@adapttable/angular-unstyled` is the Angular table drawn with native HTML.
-It participates in the native-kit contracts and is prepared for its first
-public `0.1.0` release. Registry publication is a separate step; see
-[Angular getting started](./angular/getting-started.md).
+It is a public npm package and participates in the native-kit contracts.
+See [Angular getting started](./angular/getting-started.md) for installation.
 `AdaptDataTable` (`<adapt-data-table>`)
 takes the rows, columns and row key as inputs — or a prebuilt `source`, or
 the page a host fetches through `onQueryChange` with `total`, `loading`,
@@ -3756,9 +3755,9 @@ cell and row/card marks without changing who owns the data or confirms it.
 `@adapttable/ng-zorro` is the themed Angular table built with
 `ng-zorro-antd` controls over `@adapttable/angular`. It targets Angular 22
 and NG-ZORRO 22.1.1. It participates in the shell-kit parts, feature and
-conformance contracts and is prepared for its first public `0.1.0` release.
-Check [Angular getting started](./angular/getting-started.md) for release and
-installation guidance. The host loads NG-ZORRO's global theme,
+conformance contracts and is a public npm package.
+See [Angular getting started](./angular/getting-started.md) for installation
+guidance. The host loads NG-ZORRO's global theme,
 for example `@import "ng-zorro-antd/ng-zorro-antd.min.css";` in its global
 stylesheet. The kit does not import the native kit or a second framework's
 binding.
@@ -3889,9 +3888,9 @@ Importing the root table does not import the assistant or AI runtime.
   `detectKit` accepts `framework` alongside the existing shadcn context, and
   `InitResult.framework` reports the choice. Angular scaffolds a standalone
   `PeopleTable` in `src/app/peopleTable.ts`, selecting `angular-unstyled` or
-  `ng-zorro`; React keeps `src/PeopleTable.tsx`. The Angular kits are prepared
-  for their first public release; init prints installation guidance without
-  checking registry availability or installing packages.
+  `ng-zorro`; React keeps `src/PeopleTable.tsx`. Both Angular kits are public npm
+  packages. Init prints installation guidance without checking registry
+  availability or installing packages.
 - **React adapter packages** — each exports its `DataTable` with `DataTableProps`,
   `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
   shared core re-exports). `DataTableProps` is `DataTablePropsBase &

@@ -5,9 +5,8 @@
 draft; the reader still chooses Send. Neither function chooses a model provider
 or creates a backend connection by itself.
 
-The AI Angular binding and both Angular kits are prepared for their first
-public `0.1.0` release. See [getting started](./getting-started.md) for
-installation guidance while registry publication is pending.
+The AI Angular binding and both Angular kits are public npm packages.
+See [getting started](./getting-started.md) for installation guidance.
 See [Agent capabilities](./agent-capabilities.md) for attaching a live session
 to a mounted table.
 
