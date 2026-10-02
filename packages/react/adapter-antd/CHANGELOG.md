@@ -1,5 +1,15 @@
 # @adapttable/antd
 
+## 3.3.1
+
+### Patch Changes
+
+- 42a4349: Restore shared styling hooks on real Ant Design filter, chip, card, summary, detail, action and resize elements; localize “All”; and make bounded mobile-card scroll regions keyboard-focusable. Keep hooks correct across virtual-row replacement and nested tables.
+- Updated dependencies [42a4349]
+- Updated dependencies [42a4349]
+  - @adapttable/core@3.8.0
+  - @adapttable/react@1.5.0
+
 ## 3.3.0
 
 ### Minor Changes
