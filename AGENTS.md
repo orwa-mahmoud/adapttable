@@ -7,8 +7,8 @@ contributors alike; PRs are reviewed against them.
 
 `@adapttable/core` owns the engine — state, the filter model, operators, URL
 serialization, chips, mutations, registries, and the state machines behind
-every interaction. The framework binding, `@adapttable/react`, adapts them
-into hooks and renders structure. Adapters own the look. Switching the kit in
+every interaction. The framework bindings adapt them into hooks (`@adapttable/react`) or signals
+(`@adapttable/angular`) and render structure. Adapters own the look. Switching the kit in
 the live demo must change how the whole table looks, including the Filters
 popover and drawer: an MUI table filters with MUI controls, a Mantine table
 with Mantine controls.
@@ -44,6 +44,20 @@ Unify the **model**, never the **pixels**. The standing pattern is
   binding — never import core from the kit. Core's deprecation notes point to
   core (`@adapttable/core/binding`), never to a framework package. ESLint
   enforces this on kit sources.
+
+## Framework packages
+
+- `packages/react/react` is the React binding; its eight supported kits live
+  under `packages/react/adapter-*`.
+- `packages/angular/angular` is the Angular binding, with signal controllers,
+  templates, component renderers and structural Chrome.
+- `@adapttable/angular-unstyled` (`packages/angular/adapter-angular-unstyled`)
+  and `@adapttable/ng-zorro` (`packages/angular/adapter-ng-zorro`) provide
+  native HTML and NG-ZORRO controls through that binding.
+- `packages/angular/ai-angular` adds optional agent, assistant and speech
+  bindings over neutral `@adapttable/ai`.
+- Angular kits and AI bindings remain private workspace packages until the
+  owner releases them. Implemented support does not imply npm publication.
 
 ## Product decisions — settled, do not reopen
 
@@ -105,9 +119,11 @@ format:check → lint → lint:root → check:readmes → check:docsurface
   test is wrong — find out which.
 - **`pnpm test:e2e` is part of the bar** — `pnpm check` does not run it.
   Pre-push runs `pnpm e2e:if-needed`: skip when the diff vs `origin/main` has
-  no packages/showcase/e2e; run only changed `e2e/*.spec.ts` when that is all
-  that changed; otherwise the full suite. The PR workflow skips Playwright
-  on the same path set. Needs Chromium once: `pnpm exec playwright install chromium`.
+  no browser-relevant package, showcase, docs or E2E changes; run only changed
+  E2E specs when that is all that changed; otherwise the full suite. Shared,
+  React and Angular package edits and docs-only edits run Playwright. The PR
+  workflow uses the same path set; README/metadata-only edits still skip it.
+  Needs Chromium once: `pnpm exec playwright install chromium`.
 - A change is not done until the gate is green with real command output —
   evidence, not assertions. Anything visual or keyboard-driven is also
   verified in a real browser.

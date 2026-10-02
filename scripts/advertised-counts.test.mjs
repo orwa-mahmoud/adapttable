@@ -143,7 +143,6 @@ describe("advertised adapter count", () => {
   checkAdvertised(
     [
       { file: "CONTRIBUTING.md", occurrences: 1 },
-      { file: "README.md", occurrences: 1 },
       { file: "docs/accessibility.md", occurrences: 1 },
       { file: "docs/cell-navigation.md", occurrences: 2 },
       { file: "docs/faq.md", occurrences: 2 },
@@ -154,10 +153,13 @@ describe("advertised adapter count", () => {
     "adapters?|kits?"
   );
 
-  // The API's two count claims describe the React binding's adapter surface.
+  // These claims describe the React binding's adapter surface.
   // Publishing another framework's kit must not change that React-only count.
   checkAdvertised(
-    [{ file: "docs/api.md", occurrences: 2 }],
+    [
+      { file: "README.md", occurrences: 1 },
+      { file: "docs/api.md", occurrences: 2 },
+    ],
     reactCount,
     "(?:built-in )?React (?:adapters?|kits?)"
   );

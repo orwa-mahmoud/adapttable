@@ -232,8 +232,9 @@ a test, a measurement, or a documented decision.
   [inline editing](./cell-editing.md) and
   [Excel (.xlsx) export](./customization.md#export) — but as parts you compose,
   with their prerequisites stated, rather than one spreadsheet product.
-- You're not on React → **TanStack Table** (multi-framework). AdaptTable is
-  React-only.
+- You need a framework beyond React and Angular. AdaptTable supplies those
+  two bindings; its Angular native and NG-ZORRO kits currently need workspace
+  packages. See [Angular setup](./angular/getting-started.md).
 - You want the table to draw its own look rather than your design system's.
   Every AdaptTable adapter renders your UI kit's real components, which is the
   whole point of it — and the wrong trade if you would rather not own the

@@ -15,7 +15,8 @@ migration rules live in [Upgrading from v2](docs/migrate-from-v2.md#v3-package-s
 ```
 @adapttable/core              neutral engine — models, state, operations
         ↑
-@adapttable/react             headless React binding + structural Chrome
+@adapttable/react             hooks + React structural Chrome
+@adapttable/angular           signals + Angular structural Chrome
         ↑
 @adapttable/<kit>             kit DataTable, feature factories, required slots
         ↑
@@ -23,24 +24,28 @@ your application              columns, data / source, rowKey
 
 @adapttable/ai                neutral session / catalog / execute
 @adapttable/ai-react          tableAgent + live React session
+@adapttable/ai-angular        tableAgent + Angular assistant/speech signals
 @adapttable/ai/{json,openai,mcp,http,ag-ui,ai-sdk,…}
                               optional provider / transport helpers
 ```
 
 Canonical names:
 
-| Package                | Owns                                                                                                                                                | Must not own                             |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| `@adapttable/core`     | Column models, `TableSource`, query/filter/sort/page/group/tree contracts, revisions, operations, feature **registrations** (operators, not pixels) | React, React types, Chrome, AI           |
-| `@adapttable/react`    | `useDataTable`, hooks, Chrome, React `ColumnDef` / renderer types, feature **providers**                                                            | A UI kit, a model SDK                    |
-| `@adapttable/<kit>`    | `DataTable`, kit-native slots, kit feature entrypoints                                                                                              | Engine state, AI runtime                 |
-| `@adapttable/ai`       | Provider-neutral session, manifest, schemas, validation                                                                                             | React (root), model SDKs, hosted service |
-| `@adapttable/ai-react` | `tableAgent`, observation from a mounted React table                                                                                                | Kit components                           |
+| Package                                                 | Owns                                                                                                                                                | Must not own                             |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `@adapttable/core`                                      | Column models, `TableSource`, query/filter/sort/page/group/tree contracts, revisions, operations, feature **registrations** (operators, not pixels) | React, React types, Chrome, AI           |
+| `@adapttable/react`                                     | `useDataTable`, hooks, Chrome, React `ColumnDef` / renderer types, feature **providers**                                                            | A UI kit, a model SDK                    |
+| `@adapttable/angular`                                   | Signal controllers, Angular `ColumnDef`, templates/components and structural Chrome                                                                 | Kit widgets, engine state, AI runtime    |
+| `@adapttable/angular-unstyled` / `@adapttable/ng-zorro` | Native/NG-ZORRO `AdaptDataTable`, kit controls and feature entrypoints                                                                              | Engine state, another framework binding  |
+| `@adapttable/<kit>`                                     | `DataTable`, kit-native slots, kit feature entrypoints                                                                                              | Engine state, AI runtime                 |
+| `@adapttable/ai`                                        | Provider-neutral session, manifest, schemas, validation                                                                                             | React (root), model SDKs, hosted service |
+| `@adapttable/ai-react`                                  | `tableAgent`, observation from a mounted React table                                                                                                | Kit components                           |
+| `@adapttable/ai-angular`                                | Agent observation, assistant and speech signals for a mounted Angular table                                                                         | Kit widgets, model SDKs                  |
 
 `@adapttable/server` parses and validates table queries on the server;
 `@adapttable/i18n` carries the locale bundles; `@adapttable/cli` scaffolds and
-migrates. None of them are on the render path. Core imports neither React nor
-AI. AI depends only on neutral `@adapttable/core` contracts. AI React imports
+migrates. None of them are on the render path. Core imports neither React, Angular
+nor AI. AI depends only on neutral `@adapttable/core` contracts. AI React imports
 the binding through `@adapttable/react/adapter`. The React package does not
 depend on a kit; `@adapttable/shadcn` builds on `@adapttable/unstyled`.
 
@@ -58,6 +63,13 @@ Kit imports: `import { DataTable } from "@adapttable/mui"`,
 `import { grouping } from "@adapttable/mui/grouping"`, and
 `standardFeatures()` from `@adapttable/mui/preset`. Preset options affect
 behavior, not a guarantee that unused members disappear.
+
+Angular hosts import `AdaptDataTable` from `@adapttable/angular-unstyled` or
+`@adapttable/ng-zorro`, and features from that kit’s subpaths. Its
+`standardPreset()` composes the default feature set. Templates and component
+renderers stay in the binding; neutral values and operations stay in core.
+The Angular kits and `@adapttable/ai-angular` are private workspace packages
+until an explicit release; the binding is `@adapttable/angular`.
 
 ## Neutral contracts
 

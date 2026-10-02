@@ -421,6 +421,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
           <a href="#ai">AI</a>
           <a href="#customize">Customize</a>
           <a href="#get-started">Get started</a>
+          <a href={siteUrl(docsRoute("angular/getting-started"))}>Angular docs</a>
         </nav>
         <div class="nav__right">
           <a class="nav__docs" href={`${siteUrl(docsRoute("getting-started"))}`}>
@@ -846,6 +847,9 @@ import { filters } from "@adapttable/mantine/filters";
               <a class="gs-btn gs-btn--primary" href={`${siteUrl(docsRoute("getting-started"))}`}
                 >Get started</a
               >
+              <a class="gs-btn gs-btn--ghost" href={siteUrl(docsRoute("angular/getting-started"))}>
+                Angular guide
+              </a>
               <a class="gs-btn gs-btn--ghost" href={REPO}>
                 <svg
                   width="15"
