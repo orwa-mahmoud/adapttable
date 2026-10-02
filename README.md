@@ -123,23 +123,31 @@ The dependency graph is deliberately layered: framework-neutral
 Optional behavior is imported from feature subpaths such as
 `@adapttable/mantine/filters`; unused features stay out of the table.
 
-| Package                | What it is                                                                 |
-| ---------------------- | -------------------------------------------------------------------------- |
-| `@adapttable/core`     | The engine. Filter, sort, page and group, with no framework in its graph.  |
-| `@adapttable/react`    | The React binding: hooks, `ColumnDef`, prop-getters, structural Chrome.    |
-| `@adapttable/mantine`  | Mantine adapter — batteries-included `<DataTable>`.                        |
-| `@adapttable/mui`      | Material UI adapter.                                                       |
-| `@adapttable/chakra`   | Chakra UI adapter.                                                         |
-| `@adapttable/antd`     | Ant Design adapter — drives antd's high-level `<Table>`.                   |
-| `@adapttable/radix`    | Radix Themes adapter — batteries-included `<DataTable>`.                   |
-| `@adapttable/base-ui`  | Base UI adapter — batteries-included `<DataTable>` on `@base-ui/react`.    |
-| `@adapttable/unstyled` | Headless primitives + Tailwind / shadcn classes.                           |
-| `@adapttable/shadcn`   | shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn preset. |
-| `@adapttable/i18n`     | Optional locale presets (18 languages, incl. RTL) + direction helpers.     |
-| `@adapttable/cli`      | `npx @adapttable/cli init` / `migrate-v3` — scaffold or upgrade v2 source. |
-| `@adapttable/server`   | React-free query parsing for a host backend.                               |
-| `@adapttable/ai`       | Optional provider-neutral table agent contract.                            |
-| `@adapttable/ai-react` | React bindings for the agent — `tableAgent` and `useTableAssistant`.       |
+| Package                        | What it is                                                                 |
+| ------------------------------ | -------------------------------------------------------------------------- |
+| `@adapttable/core`             | The engine. Filter, sort, page and group, with no framework in its graph.  |
+| `@adapttable/react`            | The React binding: hooks, `ColumnDef`, prop-getters, structural Chrome.    |
+| `@adapttable/mantine`          | Mantine adapter — batteries-included `<DataTable>`.                        |
+| `@adapttable/mui`              | Material UI adapter.                                                       |
+| `@adapttable/chakra`           | Chakra UI adapter.                                                         |
+| `@adapttable/antd`             | Ant Design adapter — drives antd's high-level `<Table>`.                   |
+| `@adapttable/radix`            | Radix Themes adapter — batteries-included `<DataTable>`.                   |
+| `@adapttable/base-ui`          | Base UI adapter — batteries-included `<DataTable>` on `@base-ui/react`.    |
+| `@adapttable/unstyled`         | Headless primitives + Tailwind / shadcn classes.                           |
+| `@adapttable/shadcn`           | shadcn/ui adapter — the unstyled adapter pre-wired with the shadcn preset. |
+| `@adapttable/i18n`             | Optional locale presets (18 languages, incl. RTL) + direction helpers.     |
+| `@adapttable/cli`              | `npx @adapttable/cli init` / `migrate-v3` — scaffold or upgrade v2 source. |
+| `@adapttable/server`           | React-free query parsing for a host backend.                               |
+| `@adapttable/ai`               | Optional provider-neutral table agent contract.                            |
+| `@adapttable/ai-react`         | React bindings for the agent — `tableAgent` and `useTableAssistant`.       |
+| `@adapttable/angular`          | The Angular binding: signals, templates and structural Chrome.             |
+| `@adapttable/angular-unstyled` | Native Angular table controls; unpublished workspace kit.                  |
+| `@adapttable/ng-zorro`         | NG-ZORRO Angular table controls; unpublished workspace kit.                |
+
+The CLI recognizes an Angular project when both `@angular/core` and
+`angular.json` are present, then scaffolds the native or NG-ZORRO table.
+Both Angular kits are currently private workspace packages: use their workspace
+links until they are published, rather than assuming a registry install is available.
 
 ## AI, without a provider lock-in
 

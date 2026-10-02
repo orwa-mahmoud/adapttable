@@ -20604,14 +20604,20 @@ Importing the root table does not import the assistant or AI runtime.
   presets (`en`, `ar`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
   … including `zhTW`) — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--force]`; programmatic
-  `detectKit`, `choosePackageManager`, `installCommand`, `scaffoldFiles`,
-  `runInit` plus the pieces they compose: `KITS` / `KitInfo` / `SHADCN`
+  `detectFramework`, `detectKit`, `choosePackageManager`, `installCommand`,
+  `scaffoldFiles`, `runInit` plus the pieces they compose: `KITS` / `KitInfo` / `SHADCN`
   describe the detectable kits, `packagesFor` and `mergeDependencies`
   compute what to install, `starterComponent` / `ScaffoldFile` /
   `STARTER_PATH` describe the scaffold, `PackageManager` names the
   supported managers, `InitError` is the typed failure, and
   `InitOptions` / `InitResult` / `InitIO` parameterize `runInit` for
-  testing.
+  testing. `Framework` is `"react" | "angular"`; `detectFramework` requires both
+  an `@angular/core` dependency and `hasAngularJson: true` to select Angular.
+  `detectKit` accepts `framework` alongside the existing shadcn context, and
+  `InitResult.framework` reports the choice. Angular scaffolds a standalone
+  `PeopleTable` in `src/app/peopleTable.ts`, selecting `angular-unstyled` or
+  `ng-zorro`; React keeps `src/PeopleTable.tsx`. Angular kits remain unpublished
+  workspace packages, and init only prints installation guidance.
 - **React adapter packages** — each exports its `DataTable` with `DataTableProps`,
   `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
   shared core re-exports). `DataTableProps` is `DataTablePropsBase &
