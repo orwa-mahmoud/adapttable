@@ -13,5 +13,5 @@
     "compilationMode": "partial"
   },
   "include": ["src"],
-  "exclude": ["src/**/*.test.ts", "assistant/**/*.test.ts"]
+  "exclude": ["src/**/*.test.ts", "src/**/*.fixture.ts"]
 }

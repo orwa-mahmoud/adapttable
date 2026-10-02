@@ -114,6 +114,14 @@ export {
   type EditHistoryState,
   withRowMutationActions,
 } from "@adapttable/core";
+export {
+  type AgentApprovalDecision,
+  type AgentApprovalOperation,
+  type AgentApprovalProposal,
+  type ApprovalReview,
+  approvalReview,
+  type ApprovalReviewItem,
+} from "@adapttable/core";
 export type {
   ColumnMenuSlotProps,
   FeatureRender,
@@ -172,6 +180,10 @@ export type {
   RowReorderMoveButtonProps,
 } from "@adapttable/core/binding";
 export type { FeatureNotice } from "@adapttable/core/binding";
+export type {
+  AgentApprovalButtonProps,
+  AgentApprovalProps,
+} from "@adapttable/core/binding";
 export {
   coreGrouping,
   coreGroupingPanel,
@@ -305,3 +317,37 @@ export {
 } from "@adapttable/core/binding";
 export { renderedRowsOf } from "@adapttable/core/binding";
 export { FILL_HANDLE } from "@adapttable/core/binding";
+export {
+  AGENT_ALWAYS_ALLOW_STATE,
+  AGENT_APPROVAL,
+  AGENT_APPROVAL_STATE,
+  AGENT_PROGRESS_STATE,
+  AGENT_VIEW_STATE,
+  type AgentAlwaysAllowState,
+  type AgentApprovalPending,
+  type AgentProgress,
+  type AgentViewState,
+  type FeatureStateKey,
+  featureStateKey,
+  type SpeechInputHandle,
+  type SpeechInputState,
+  type SpeechInputStatus,
+  TABLE_ASSISTANT,
+  type TableRuntime,
+  type TableRuntimeView,
+} from "@adapttable/core/binding";
+export {
+  assistantIsBusy,
+  assistantIsUsable,
+  type TableAssistantAllowanceView,
+  type TableAssistantMessageView,
+  type TableAssistantProgressView,
+  type TableAssistantQuestionOption,
+  type TableAssistantQuestionView,
+  type TableAssistantReceiptSubject,
+  type TableAssistantReceiptView,
+  type TableAssistantResumableView,
+  type TableAssistantSuggestionView,
+  type TableAssistantUndoView,
+  type TableAssistantView,
+} from "@adapttable/core/binding";

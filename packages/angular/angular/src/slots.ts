@@ -14,6 +14,8 @@ import {
 } from "@adapttable/core/binding";
 import {
   type ComponentRef,
+  type DestroyableInjector,
+  DestroyRef,
   Directive,
   effect,
   inject,
@@ -25,6 +27,11 @@ import {
 } from "@angular/core";
 
 import type { SlotComponent } from "./featureHost";
+import {
+  ADAPTTABLE_FEATURE_STATE,
+  createFeatureState,
+  type FeatureState,
+} from "./featureState";
 
 /**
  * Which components draw each slot — `DataTable.slotFills`.
@@ -43,6 +50,8 @@ export interface SlotTable {
   readonly slotFills: SlotFills;
   /** The features' registrations: menu items, commands, writers. */
   readonly featureHost: FeatureHostState;
+  /** Reactive values published by the table's mounted features. */
+  readonly featureState?: FeatureState;
 }
 
 /**
@@ -96,8 +105,13 @@ export class AdaptSlot<TProps> {
   private readonly injector = inject(Injector);
   private drawn: readonly SlotComponent[] = [];
   private refs: ComponentRef<unknown>[] = [];
+  private drawnTable: SlotTable | undefined;
+  private slotInjector: DestroyableInjector | undefined;
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => {
+      this.slotInjector?.destroy();
+    });
     effect(() => {
       const slot = this.slot();
       const props = this.props();
@@ -107,16 +121,25 @@ export class AdaptSlot<TProps> {
         table.slotFills.get(slot.id) ?? []
       ).map((fill) => (fill.render as (value: TProps) => SlotComponent)(props));
       untracked(() => {
-        if (!sameDraw(components, this.drawn)) {
+        if (table !== this.drawnTable || !sameDraw(components, this.drawn)) {
           this.container.clear();
+          this.slotInjector?.destroy();
           const injector = Injector.create({
-            providers: [{ provide: ADAPTTABLE_SLOT_TABLE, useValue: table }],
+            providers: [
+              { provide: ADAPTTABLE_SLOT_TABLE, useValue: table },
+              {
+                provide: ADAPTTABLE_FEATURE_STATE,
+                useValue: table.featureState ?? createFeatureState(),
+              },
+            ],
             parent: this.injector,
           });
+          this.slotInjector = injector;
           this.refs = components.map((component) =>
             this.container.createComponent(component, { injector })
           );
           this.drawn = components;
+          this.drawnTable = table;
         }
         for (const ref of this.refs) ref.setInput("props", props);
       });

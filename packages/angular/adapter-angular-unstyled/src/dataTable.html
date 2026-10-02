@@ -144,6 +144,12 @@
       />
     }
 
+    <ng-container
+      [adaptSlot]="agentApprovalSlot"
+      [adaptSlotProps]="agentApprovalProps()"
+      [adaptSlotTable]="v.table"
+    />
+
     @if (v.bulkBar; as bulkBar) {
       <ng-container
         [adaptSlot]="bulkBarSlot"
@@ -262,6 +268,14 @@
       <div data-adapttable-part="table-footer">
         <ng-container [ngTemplateOutlet]="footer" />
       </div>
+    }
+
+    @if (assistant(); as props) {
+      <ng-container
+        [adaptSlot]="tableAssistantSlot"
+        [adaptSlotProps]="props"
+        [adaptSlotTable]="v.table"
+      />
     }
 
     <adapt-table-status-announcer

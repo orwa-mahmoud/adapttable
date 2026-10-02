@@ -35,6 +35,7 @@ overrides:
   "@adapttable/unstyled": "workspace:*"
   "@adapttable/ai": "workspace:*"
   "@adapttable/ai-react": "workspace:*"
+  "@adapttable/ai-angular": "workspace:*"
   "@adapttable/angular": "workspace:*"
   "@adapttable/angular-unstyled": "workspace:*"
   "eslint-plugin-sonarjs>minimatch": "^10.2.3"

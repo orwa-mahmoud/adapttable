@@ -40,7 +40,11 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
-    include: ["src/**/*.test.ts", "row-reorder/**/*.test.ts"],
+    include: [
+      "src/**/*.test.ts",
+      "row-reorder/**/*.test.ts",
+      "assistant/**/*.test.ts",
+    ],
     // Server rendering runs in Node without the browser testing platform.
     exclude: ["src/**/*.ssr.test.ts"],
     clearMocks: true,
@@ -52,6 +56,7 @@ export default defineConfig({
       provider: "istanbul",
       reporter: ["text", "lcov", "html"],
       include: [
+        "assistant/**/*.ts",
         "cell-span/**/*.ts",
         "extra-rows/**/*.ts",
         "row-appearance/**/*.ts",
@@ -92,6 +97,7 @@ export default defineConfig({
         "virtualize/**/*.ts",
       ],
       exclude: [
+        "assistant/**/*.test.ts",
         "src/**/*.test.ts",
         "src/**/index.ts",
         "row-reorder/**/*.test.ts",

@@ -17,6 +17,9 @@ import {
   ADAPTTABLE_PALETTE_OPEN,
   type AdaptTableFeature,
   AdaptTableStatusAnnouncer,
+  AGENT_APPROVAL,
+  AGENT_APPROVAL_STATE,
+  type AgentApprovalProps,
   asBatchGesture,
   type AssemblyFns,
   type Attrs,
@@ -127,6 +130,7 @@ import {
   insertExtraRows,
   insertExtrasBeforeRows,
   type LiveEditConflictInput,
+  mountTableFeatures,
   type NestedTableParent,
   type PaginationMode,
   type PaletteOpenState,
@@ -165,13 +169,17 @@ import {
   type SidePanelOptions,
   STATUS_BAR,
   type SummaryRowFn,
+  TABLE_ASSISTANT,
+  type TableAssistantProps,
   type TableContextMenuOptions,
   type TableDensity,
+  tableFeaturesOf,
   type TableGrouping,
   type TableLabels,
   type TableQueryHandler,
   type TableQueryParams,
   type TableRowDetail,
+  tableRuntimeFor,
   type TableSource,
   type TableTree,
   type TableVirtualization,
@@ -216,6 +224,56 @@ import {
   type FiltersView,
   filtersViewFor,
 } from "./tableFilters";
+
+/** Mount optional behavior over the same reactive channels the kit renders. */
+function mountLiveFeatures<TRow>(options: {
+  readonly table: DataTable<TRow>;
+  readonly source: Signal<TableSource<TRow>>;
+  readonly features: readonly AdaptTableFeature[];
+  readonly filters: ReturnType<typeof injectTableData<TRow>>["runtime"];
+  readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
+  readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
+  readonly pinning: ReturnType<typeof injectTableRowPinning<TRow>>;
+  readonly selection: RowSelection | undefined;
+  readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
+  readonly rowActions: readonly RowAction<TRow>[] | undefined;
+  readonly bulkActions: readonly BulkAction[] | undefined;
+  readonly injector: Injector;
+}): void {
+  if (!options.features.some((feature) => feature.mount !== undefined)) return;
+  const columnLayoutLive = options.features.some((feature) =>
+    [
+      "column-menu",
+      "resizable-columns",
+      "collapsible-column-groups",
+      "context-menu",
+      "saved-views",
+      "fit-columns",
+    ].includes(feature.id ?? "")
+  );
+  const runtime = tableRuntimeFor(
+    options.table,
+    options.source,
+    options.features,
+    options.grouping,
+    computed(() => ({
+      filterDefs: options.filters().defs,
+      filterRegistry: options.filters().registry,
+      columnLayoutLive,
+      selection: options.selection?.state(),
+      tree: options.tree?.(),
+      rowPinning: options.pinning?.(),
+      editing: options.editing?.(),
+      rowActions: options.rowActions,
+      bulkActions: options.bulkActions,
+    }))
+  );
+  mountTableFeatures(options.features, {
+    runtime,
+    state: options.table.featureState,
+    injector: options.injector,
+  });
+}
 
 /** Read an opt-in history from the feature configuration. */
 function historyFor<TRow>(
@@ -1234,6 +1292,8 @@ export class AdaptDataTable<TRow> implements OnInit {
    * when the table starts.
    */
   readonly features = input<readonly AdaptTableFeature[]>([]);
+  /** Optional conversation props drawn by a composed assistant feature. */
+  readonly assistant = input<TableAssistantProps>();
   /** Optional whole-row version used to detect a live cell edit conflict. */
   readonly rowVersion = input<(row: TRow) => string | number>();
   /** How to resolve incoming changes while a draft is open. Defaults to asking. */
@@ -1291,13 +1351,21 @@ export class AdaptDataTable<TRow> implements OnInit {
     viewChild<TemplateRef<unknown>>("featureSidePanel");
   /** The side-panel slot. @internal */
   protected readonly sidePanelSlot = SIDE_PANEL;
+  /** A pending feature-owned approval, drawn only by its composed kit slot. */
+  protected readonly agentApprovalSlot = AGENT_APPROVAL;
+  protected readonly tableAssistantSlot = TABLE_ASSISTANT;
+  protected readonly agentApprovalProps = computed((): AgentApprovalProps => ({
+    pending:
+      this.view()?.table.featureState.get(AGENT_APPROVAL_STATE)() ?? null,
+    labels: this.view()?.table.labels(),
+  }));
   /** The status-bar slot. @internal */
   protected readonly statusBarSlot = STATUS_BAR;
   /** The feature's panel options, read live so a controlled `open` updates. */
   private readonly liveSidePanel = computed(
     () =>
-      featureOptionsOf(this.features()).sidePanel as
-        SidePanelOptions | undefined
+      featureOptionsOf(tableFeaturesOf(this.injector, this.features()))
+        .sidePanel as SidePanelOptions | undefined
   );
   /** Which edge the docked panel sits on. */
   protected readonly dockedSide = computed(
@@ -1449,7 +1517,8 @@ export class AdaptDataTable<TRow> implements OnInit {
         ? this.labels()
         : { ...this.labels(), searchPlaceholder: placeholder };
     });
-    const features = this.features();
+    const ownFeatures = this.features();
+    const features = tableFeaturesOf(injector, ownFeatures);
     const featureOptions = featureOptionsOf(features);
     const declaredFilters = featureOptions.filters;
     const filtersOn = Array.isArray(declaredFilters);
@@ -1522,7 +1591,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       forceMobile: isMobile,
       cellTemplates: this.cellTemplates,
       selection,
-      features,
+      features: ownFeatures,
       activeFilterCount: computed(() => filtersRef.current?.count() ?? 0),
       columnLayout: this.columnLayout,
       onColumnLayoutChange: (next) => {
@@ -1833,6 +1902,21 @@ export class AdaptDataTable<TRow> implements OnInit {
       columns: computed(() => table.allColumns()),
       featureHost: table.featureHost,
       labels: table.labels,
+      injector,
+    });
+    mountLiveFeatures({
+      table,
+      source: viewSource,
+      features,
+      filters: data.runtime,
+      grouping,
+      tree,
+      pinning,
+      selection,
+      editing,
+      rowActions: featureOptions.rowActions as
+        readonly RowAction<TRow>[] | undefined,
+      bulkActions: bulk,
       injector,
     });
     const batchBar =

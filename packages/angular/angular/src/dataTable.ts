@@ -84,7 +84,9 @@ import {
   featureHostFor,
   featureOptionsOf,
   featureSlotFillsOf,
+  tableFeaturesOf,
 } from "./featureHost";
+import { createFeatureState, type FeatureState } from "./featureState";
 import { createSearchInput } from "./searchInput";
 import type { RowSelection } from "./selection/selection";
 import type { SlotFills } from "./slots";
@@ -242,6 +244,8 @@ export interface DataTable<TRow> {
   readonly isRefreshing: Signal<boolean>;
   /** The features composed on this table. */
   readonly featureHost: FeatureHostState;
+  /** Typed values mounted features share with this table's slot components. */
+  readonly featureState: FeatureState;
   /**
    * The configuration the features merge (`enableColumnMenu`,
    * `densityChooser` and the rest), read once, when the table starts.
@@ -329,7 +333,8 @@ export function injectDataTable<TRow>(
     () => options.columnWidths && readMaybe(options.columnWidths)
   );
 
-  const featureOptions = featureOptionsOf(options.features ?? []);
+  const features = tableFeaturesOf(injector, options.features);
+  const featureOptions = featureOptionsOf(features);
   const tree = computed(() => flattenColumns(readMaybe(options.columns)));
   const columnGroups = computed(() => tree().groups);
   const collapsibleGroups = featureOptions.collapsibleColumnGroups === true;
@@ -449,7 +454,7 @@ export function injectDataTable<TRow>(
     injector
   );
 
-  const slotFills = featureSlotFillsOf(options.features ?? []);
+  const slotFills = featureSlotFillsOf(features);
 
   const toggleSort = (key: string): void => {
     const current = source();
@@ -515,6 +520,7 @@ export function injectDataTable<TRow>(
     errorState: computed(() => tableErrorState(source())),
     isRefreshing: computed(() => chromeIsRefreshing(source())),
     featureHost: featureHostFor(injector, options.features),
+    featureState: createFeatureState(),
     featureOptions,
     slotFills,
     hasSlot: (slot) => slotFills.has(slot.id),

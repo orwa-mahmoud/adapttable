@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { checkGraphs, GRAPHS, leaksIn, MARKERS } from "./ai-isolation.mjs";
+import {
+  checkGraphs,
+  GRAPHS,
+  leaksIn,
+  MARKERS,
+  moduleEntry,
+} from "./ai-isolation.mjs";
 
 describe("AI isolation", () => {
   it("names the marker and the graph that carries it", () => {
@@ -28,10 +34,21 @@ describe("AI isolation", () => {
     }
   });
 
-  it("covers core, react, server and every published adapter root", () => {
+  it("covers both bindings, Angular native development, core, server and published adapters", () => {
     // A graph dropped from this list is a graph nobody checks, and the check
     // would still report success over the ones that remain.
-    assert.equal(GRAPHS.length, 11);
+    assert.equal(GRAPHS.length, 13);
+    assert.ok(
+      GRAPHS.includes(
+        "packages/angular/angular/dist/fesm2022/adapttable-angular.mjs"
+      )
+    );
+    assert.ok(
+      GRAPHS.includes(
+        "packages/angular/adapter-angular-unstyled/dist/fesm2022/adapttable-angular-unstyled.mjs"
+      )
+    );
+    assert.ok(!GRAPHS.some((path) => path.includes("ai-angular")));
     for (const path of [
       "packages/shared/core",
       "packages/react/react",
@@ -39,6 +56,24 @@ describe("AI isolation", () => {
     ]) {
       assert.ok(GRAPHS.includes(`${path}/dist/index.js`), path);
     }
+  });
+
+  it("resolves nested import/default exports and never mistakes declarations for code", () => {
+    assert.equal(
+      moduleEntry({
+        types: "./dist/index.d.ts",
+        import: {
+          types: "./dist/entry.d.ts",
+          default: "./dist/fesm2022/entry.mjs",
+        },
+      }),
+      "./dist/fesm2022/entry.mjs"
+    );
+    assert.equal(
+      moduleEntry({ import: "./dist/index.js", default: "./dist/index.cjs" }),
+      "./dist/index.js"
+    );
+    assert.equal(moduleEntry({ types: "./dist/index.d.ts" }), undefined);
   });
 
   it("treats an unbuilt entry as a failure rather than a graph it skipped", () => {

@@ -56,6 +56,51 @@ export {
   type AggregateSpec,
   type SummaryRowFn,
 } from "./aggregate/aggregate";
+export {
+  AdaptAssistantComposer,
+  type AssistantComposerProps,
+} from "./assistant/assistantComposer";
+export { AdaptAssistantContent } from "./assistant/assistantIcons";
+export {
+  AdaptAssistantAlwaysAllowed,
+  AdaptAssistantMessage,
+  AdaptAssistantReceipt,
+  AdaptAssistantWorking,
+  AdaptSpeakerMark,
+} from "./assistant/assistantMessages";
+export {
+  FLOATING_MIN_WIDTH,
+  floatingFits,
+  floatingStyle,
+  injectAssistantFloatingFits,
+  launcherStyle,
+  type TableAssistantBoundary,
+} from "./assistant/assistantPlacement";
+export type {
+  TableAssistantAvatars,
+  TableAssistantBadgeProps,
+  TableAssistantButtonProps,
+  TableAssistantComposerProps,
+  TableAssistantFace,
+  TableAssistantLanguageChipProps,
+  TableAssistantMenuItem,
+  TableAssistantMenuProps,
+  TableAssistantNode,
+  TableAssistantPanelProps,
+  TableAssistantPresentation,
+  TableAssistantProps,
+  TableAssistantSheetProps,
+  TableAssistantSlots,
+  TableAssistantWindowProps,
+} from "./assistant/assistantSlots";
+export {
+  type ConversationScroll,
+  injectConversationScroll,
+} from "./assistant/conversationScroll";
+export {
+  AdaptTableAssistantChrome,
+  type TableAssistantChromeProps,
+} from "./assistant/tableAssistantChrome";
 export { AdaptAttrs, type Attrs } from "./attrs";
 export {
   AdaptCell,
@@ -102,6 +147,17 @@ export {
   type DataTableOptions,
   injectDataTable,
 } from "./dataTable";
+export {
+  AdaptAgentApprovalChrome,
+  type AgentApprovalChromeProps,
+  type AgentApprovalListProps,
+  type AgentApprovalSlots,
+} from "./editing/agentApprovalChrome";
+export {
+  AdaptApprovalReviewChrome,
+  type ApprovalReviewChromeProps,
+  type ApprovalReviewSlots,
+} from "./editing/approvalReviewChrome";
 export {
   type EditableCellController,
   editableCellController,
@@ -203,6 +259,12 @@ export {
   provideAdaptTableFeatures,
   type SlotComponent,
 } from "./featureHost";
+export { tableFeaturesOf } from "./featureHost";
+export {
+  type FeatureMountContext,
+  mountTableFeatures,
+} from "./featureLifecycle";
+export { createAdapterAgentApprovalFeature } from "./features/agentApproval";
 export {
   cellNavigation,
   type CellNavigationOptions,
@@ -276,6 +338,7 @@ export {
   selectionStatsOf,
   type SelectionStatsOptions,
 } from "./features/selectionStats";
+export { createAdapterTableAssistantFeature } from "./features/tableAssistant";
 export {
   injectTree,
   type TableTree,
@@ -284,6 +347,12 @@ export {
   type TreeOptions,
 } from "./features/tree";
 export { virtualize, type VirtualizeOptions } from "./features/virtualize";
+export {
+  ADAPTTABLE_FEATURE_STATE,
+  createFeatureState,
+  type FeatureState,
+  injectFeatureState,
+} from "./featureState";
 export { activeFilterChipsFor } from "./filters/activeFilterChips";
 export {
   AdaptChecklistChrome,
@@ -393,7 +462,11 @@ export {
   AdaptSidePanelLayout,
   type SidePanelSlots,
 } from "./layout/sidePanelChrome";
-export type { RuntimeGrouping } from "./layout/tableRuntime";
+export {
+  type RuntimeGrouping,
+  type RuntimeTableOptions,
+  tableRuntimeFor,
+} from "./layout/tableRuntime";
 export {
   type DensityOptions,
   type DensityState,

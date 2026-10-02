@@ -1,4 +1,4 @@
-import type { ActionAiOptions } from "@adapttable/core";
+import { type ActionAiOptions, stableKey } from "@adapttable/core";
 
 import { guideOf, summaryOf } from "../guides";
 import {
@@ -110,6 +110,65 @@ class SessionCapabilityRegistry implements CapabilityRegistry {
       output: def.guide.output,
     };
   }
+}
+
+const referenceIds = new WeakMap<object, number>();
+let nextReferenceId = 0;
+
+function referenceId(reference: object | undefined): number | undefined {
+  if (!reference) return undefined;
+  const existing = referenceIds.get(reference);
+  if (existing !== undefined) return existing;
+  nextReferenceId += 1;
+  referenceIds.set(reference, nextReferenceId);
+  return nextReferenceId;
+}
+
+function callbackId(
+  definition: AgentCapabilityDefinition,
+  key: "isEnabled" | "plan" | "execute"
+): number | undefined {
+  // Inspect identity only; never detach and invoke a receiver-bound method.
+  const callback: unknown = Reflect.get(definition, key);
+  return typeof callback === "function" ? referenceId(callback) : undefined;
+}
+
+/**
+ * A captured custom definition's contract and callbacks, without depending on
+ * the identity of an inline array or a copy of the same definition.
+ *
+ * Unlike table actions, custom execution is captured by the registry rather
+ * than looked up when it runs. Replacing a callback therefore changes this
+ * contract too. Shared by registry refresh and old-session admission.
+ *
+ * @internal
+ */
+export function capabilityDefinitionStamp(
+  definition: AgentCapabilityDefinition
+): string {
+  const prototype: unknown = Object.getPrototypeOf(definition);
+  // Prototype methods share identity across instances, but their private
+  // receiver state does not. Plain definition copies remain interchangeable.
+  const receiver =
+    prototype === Object.prototype || prototype === null
+      ? undefined
+      : definition;
+  return stableKey([
+    referenceId(receiver),
+    definition.key,
+    definition.summary,
+    definition.guide,
+    definition.kind,
+    definition.discovery,
+    definition.presentation,
+    definition.staging,
+    definition.partial,
+    definition.idempotent,
+    definition.ai,
+    callbackId(definition, "isEnabled"),
+    callbackId(definition, "plan"),
+    callbackId(definition, "execute"),
+  ]);
 }
 
 /**

@@ -4,6 +4,10 @@
  *
  * @packageDocumentation
  */
+export {
+  agentApproval,
+  tableAssistant,
+} from "@adapttable/angular-unstyled/assistant";
 export { batchEditing } from "@adapttable/angular-unstyled/batch-editing";
 export { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
 export { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";

@@ -45,6 +45,7 @@
     "side-panel",
     "status-bar",
     "tree",
-    "virtualize"
+    "virtualize",
+    "assistant"
   ]
 }

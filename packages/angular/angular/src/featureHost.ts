@@ -24,6 +24,8 @@ import {
   type Type,
 } from "@angular/core";
 
+import type { FeatureMountContext } from "./featureLifecycle";
+
 /**
  * What a slot draws in Angular: a standalone component that takes the slot's
  * props through one `props` input.
@@ -54,6 +56,8 @@ export interface AdaptTableFeature extends FeatureSetup<
   apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
   /** The slots this feature draws into, and what draws each one. */
   readonly renders?: readonly FeatureRender<never, SlotComponent>[];
+  /** Start live behavior once the table runtime exists; dispose with the table. */
+  mount?(context: FeatureMountContext): void | (() => void);
 }
 
 /**
@@ -77,10 +81,13 @@ export function extendFeature(
 function withIds(
   features: readonly AdaptTableFeature[]
 ): (AdaptTableFeature & { readonly id: string })[] {
-  return features.map((feature, index) => ({
-    ...feature,
-    id: feature.id ?? `feature-${String(index)}`,
-  }));
+  const byId = new Map<string, AdaptTableFeature & { readonly id: string }>();
+  features.forEach((feature, index) => {
+    const id = feature.id ?? `feature-${String(index)}`;
+    byId.delete(id);
+    byId.set(id, { ...feature, id });
+  });
+  return [...byId.values()];
 }
 
 /**
@@ -142,6 +149,21 @@ export function provideAdaptTableFeatures(
 }
 
 /**
+ * Resolve provided features before the table's own features. Duplicate ids
+ * resolve to the last declaration, consistently for setup, apply and slots.
+ *
+ * @public
+ */
+export function tableFeaturesOf(
+  injector: Injector,
+  own: readonly AdaptTableFeature[] | undefined
+): readonly AdaptTableFeature[] {
+  const provided =
+    injector.get(ADAPTTABLE_FEATURES, null, { optional: true }) ?? [];
+  return withIds([...provided, ...(own ?? [])]);
+}
+
+/**
  * The feature host for a table: every provided feature and every one the
  * table names, set up once and disposed with the injection context.
  */
@@ -149,9 +171,7 @@ export function featureHostFor(
   injector: Injector,
   own: readonly AdaptTableFeature[] | undefined
 ): FeatureHostState {
-  const provided =
-    injector.get(ADAPTTABLE_FEATURES, null, { optional: true }) ?? [];
-  const host = createFeatureHost([...provided, ...(own ?? [])]);
+  const host = createFeatureHost(tableFeaturesOf(injector, own));
   injector.get(DestroyRef).onDestroy(() => {
     disposeFeatureHost(host);
   });

@@ -35,6 +35,7 @@ import {
 } from "./approvalTransaction";
 import type { ProposalResolver } from "./binding";
 import { tableActionCapabilities } from "./capabilities/actions";
+import { capabilityDefinitionStamp } from "./capabilities/registry";
 import type { AgentContextInputs } from "./context";
 import { agentFiltersFromDefs } from "./filterCatalog";
 import type { CommitPolicy, RowAddressScope, WritePolicy } from "./keys";
@@ -1078,18 +1079,30 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
       },
     }
   );
+  let observedTable: TableRuntimeView["neutralTable"];
+  let sourceEpoch = 0;
+  let hasObservedView = false;
   const observe = () => {
     const options = optionsRef.current;
     if (options.observe) return options.observe();
     const runtimeView = runtimeRef.current.view();
     const table = runtimeView?.neutralTable;
-    let viewRevision = revisionCounter.current();
-    if (table) viewRevision = revisionCounter.bumpFrom(table.revisions);
-    else if (runtimeView) {
-      viewRevision = revisionCounter.bumpFromStamp(
-        viewRevisionStamp(runtimeView)
-      );
+    // Revisions belong to one engine. A replacement can start at exactly
+    // the same tuple, but work admitted against the old source is stale.
+    // Remember absence too, so engine -> server -> engine is never a reset.
+    if (table !== observedTable) {
+      observedTable = table;
+      sourceEpoch += 1;
     }
+    // Bindings can observe before their first view is published. That is
+    // bootstrap, not a previous source: reserve revision 1 for the first
+    // real view. Once published, absence is a transition like any other.
+    if (runtimeView) hasObservedView = true;
+    const viewRevision = hasObservedView
+      ? revisionCounter.bumpFromStamp(
+          `${String(sourceEpoch)}:${viewRevisionStamp(runtimeView)}`
+        )
+      : revisionCounter.current();
     return observationFromRuntime(
       options,
       runtimeRef.current,
@@ -1106,6 +1119,39 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
     // one action always-ask.
     return waitForChrome.current(subject, signal);
   };
+  const customCapabilities = (optionsRef.current.capabilities ?? []).map(
+    (definition): AgentCapabilityDefinition => {
+      const stamp = capabilityDefinitionStamp(definition);
+      // Read metadata from the original and bind methods to it. A custom
+      // definition can be a class whose getters and handlers use private state.
+      return {
+        key: definition.key,
+        summary: definition.summary,
+        guide: definition.guide,
+        kind: definition.kind,
+        discovery: definition.discovery,
+        presentation: definition.presentation,
+        staging: definition.staging,
+        partial: definition.partial,
+        idempotent: definition.idempotent,
+        ai: definition.ai,
+        plan: definition.plan?.bind(definition),
+        execute: definition.execute.bind(definition),
+        isEnabled: (observation) => {
+          const current = optionsRef.current.capabilities?.find(
+            (candidate) => candidate.key === definition.key
+          );
+          // A retained session must not run an old handler after the host
+          // removed or replaced its definition, including after approval.
+          return (
+            current !== undefined &&
+            capabilityDefinitionStamp(current) === stamp &&
+            current.isEnabled(observation)
+          );
+        },
+      };
+    }
+  );
   const inner = createAgentSession({
     observe,
     apply,
@@ -1121,7 +1167,7 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
     // composed. The action set is part of the registry key, so a table that
     // gains or loses an action gets a session that offers exactly those.
     capabilities: [
-      ...(optionsRef.current.capabilities ?? []),
+      ...customCapabilities,
       ...tableActionCapabilities(runtimeRef.current.view()?.actions, {
         actions: () => runtimeRef.current.view()?.actions,
         rowFor: (rowKey) => {

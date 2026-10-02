@@ -189,7 +189,11 @@
       "types": "./dist/types/adapttable-angular-unstyled-virtualize.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-virtualize.mjs"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./assistant": {
+      "types": "./dist/types/adapttable-angular-unstyled-assistant.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-assistant.mjs"
+    }
   },
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c tsconfig.build.json && node -e \"require('node:fs').rmSync('dist/package.json')\"",

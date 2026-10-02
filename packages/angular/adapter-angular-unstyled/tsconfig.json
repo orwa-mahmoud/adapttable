@@ -57,7 +57,8 @@
     "tree",
     "virtualize",
     "vitest.config.ts",
-    "vitest.setup.ts"
+    "vitest.setup.ts",
+    "assistant"
   ],
   "exclude": ["node_modules", "dist", "coverage"]
 }
