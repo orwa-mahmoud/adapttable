@@ -1,9 +1,10 @@
 /** A deterministic local agent over the real Angular table and native kit UI. */
-import type {
-  AgentContextInputs,
-  AgentSession,
-  AssistantSuggestion,
-  AssistantTransport,
+import {
+  type AgentContextInputs,
+  type AgentSession,
+  type AssistantSuggestion,
+  type AssistantTransport,
+  receiptFromResult,
 } from "@adapttable/ai";
 import { injectTableAssistant, tableAgent } from "@adapttable/ai-angular";
 import type {
@@ -140,10 +141,16 @@ export class AiBody {
         `angular-demo-${String(++this.turn)}`,
         abort
       );
+      const receipt = receiptFromResult(
+        result,
+        key,
+        session.manifest().policy.commit
+      );
       return {
-        text: result.ok
-          ? success
-          : `No change applied: ${result.error?.message ?? "the request was refused"}.`,
+        text:
+          receipt.status === "executed"
+            ? success
+            : `No change applied: ${result.error?.message ?? "the request was refused"}.`,
         keys: [key],
         results: [result],
       };

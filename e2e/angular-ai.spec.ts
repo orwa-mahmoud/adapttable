@@ -96,12 +96,17 @@ test("rejecting a proposal leaves the real host data unchanged", async ({
   await expect(part(page, "agent-approval-reject")).toBeVisible();
   await part(page, "agent-approval-reject").click();
   await expect(part(page, "assistant-approval")).toHaveCount(0);
-  await expect(part(page, "assistant-message-text").last()).toContainText(
-    "No change applied"
-  );
   await expect(salary(page)).toHaveText("140");
   await expect(page.locator("[data-demo-log]")).toHaveText(
     "No host writes yet"
+  );
+  await expect(part(page, "assistant-message-text").last()).toContainText(
+    "No change applied"
+  );
+  await part(page, "assistant-receipts-toggle-button").last().click();
+  await expect(part(page, "assistant-receipt").last()).toHaveAttribute(
+    "data-status",
+    "rejected"
   );
 });
 
