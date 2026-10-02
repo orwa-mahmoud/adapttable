@@ -47,12 +47,12 @@ export const TITLES = {
   "angular/filter-tree.md": "Angular AND/OR filter groups",
   "angular/header-filters.md": "Angular per-column header filters",
   "angular/custom-filter-types.md": "Angular custom filter types",
-  "angular/pagination.md": "Angular table pagination",
+  "angular/pagination.md": "Angular table pagination: client and server",
   "angular/selection.md": "Angular row selection and bulk actions",
   "angular/row-actions.md": "Angular row actions and mutations",
   "angular/row-expansion.md": "Angular expandable detail rows",
   "angular/nested-tables.md": "Angular nested tables",
-  "angular/cell-editing.md": "Angular editing, validation and undo",
+  "angular/cell-editing.md": "Editable Angular table cells and batch editing",
   "angular/row-reordering.md": "Angular row reordering",
   "angular/row-pinning.md": "Angular pinned rows",
   "angular/pinned-summary-rows.md": "Angular pinned summary and total rows",
@@ -161,7 +161,7 @@ export const TITLES = {
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
   "angular/getting-started.md":
-    "Build your first Angular table with AdaptDataTable, signal-backed rows and the unstyled or NG-ZORRO workspace kit. Check package availability and peers.",
+    "Install an Angular table with native HTML or NG-ZORRO controls. Follow npm setup, CLI scaffolding and a standalone component example with signal-backed rows.",
   "angular/features.md":
     "Compose Angular table features through kit subpaths and standardPreset. Add only the required controls and keep data ownership in your application.",
   "angular/data-tiers.md":
@@ -191,7 +191,7 @@ export const DESCRIPTIONS = {
   "angular/custom-filter-types.md":
     "Register custom Angular filter types with operators, matching rules and required widget slots. Keep the shared filter model separate from kit controls.",
   "angular/pagination.md":
-    "Page Angular tables with client or server data. Configure page size, mobile behavior and signal-driven query updates while the host owns row loading.",
+    "Add client-side or server-side pagination to an Angular table. Configure page size, total counts, loading states and cursor-based infinite scrolling.",
   "angular/selection.md":
     "Select Angular table rows and run bulk actions with kit-native checkboxes. Handle selectionChange, selected IDs and host-owned confirmation callbacks.",
   "angular/row-actions.md":
@@ -201,7 +201,7 @@ export const DESCRIPTIONS = {
   "angular/nested-tables.md":
     "Render nested Angular tables inside detail rows. Provide child columns and data, configure defaults and retain independent table state for each child.",
   "angular/cell-editing.md":
-    "Edit Angular cells and rows with native kit inputs, validation, batch changes and undo. Wire explicit host callbacks for saving and conflict handling.",
+    "Make Angular table cells editable with validation and save callbacks. Follow inline and batch editing examples with error handling, keyboard support and undo.",
   "angular/row-reordering.md":
     "Reorder Angular rows through drag handles or keyboard and mobile actions. Apply host callbacks, move policies and tree or group constraints.",
   "angular/row-pinning.md":
@@ -221,7 +221,7 @@ export const DESCRIPTIONS = {
   "angular/aggregation.md":
     "Compute Angular table summaries and group aggregates. Configure operations, aggregatable columns and host-provided server totals.",
   "angular/pivot.md":
-    "Build Angular pivot views with AdaptPivotPanel, pivotTableModel and kit controls. Configure dimensions, measures and optional pivot URL state.",
+    "Build Angular pivot tables with row and column axes, measures and totals. Follow client-side and server-side recipes with loading, errors and URL state.",
   "angular/formulas.md":
     "Add Angular formula columns through the binding's formula entry. Build computed columns and synchronize formulas with the URL without evaluating code.",
   "angular/tree-data.md":

@@ -1,10 +1,10 @@
 # AdaptTable
 
-> AdaptTable provides MIT-licensed React and Angular data tables. React kits include Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind; Angular has unstyled and NG-ZORRO workspace kits. In v3, `@adapttable/core` is the framework-neutral engine; `@adapttable/react` supplies React hooks and `@adapttable/angular` supplies Angular signals and structural rendering. Native kit adapters support responsive mobile cards, client/server data, URL state and individually imported features. Optional features include filtering, editing, row grouping, pivot tables, formulas, virtualization, export and provider-neutral AI tools. Applications own their data and persistence.
+> AdaptTable provides MIT-licensed React and Angular data tables. React kits include Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind; Angular has public unstyled and NG-ZORRO kits. In v3, `@adapttable/core` is the framework-neutral engine; `@adapttable/react` supplies React hooks and `@adapttable/angular` supplies Angular signals and structural rendering. Native kit adapters support responsive mobile cards, client/server data, URL state and individually imported features. Optional features include filtering, editing, row grouping, pivot tables, formulas, virtualization, export and provider-neutral AI tools. Applications own their data and persistence.
 
 ## Version and integration boundaries
 
-This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Angular injection functions and renderer types come from `@adapttable/angular`. Individual features use kit subpaths; React's `standardFeatures()` and Angular's `standardPreset()` compose their documented common sets. Enabling props from v2 alone do not activate v3 features. The Angular kits and `@adapttable/ai-angular` are prepared for their first public 0.1.0 release; npm publication is a separate owner-controlled step. Verify registry availability before installing, or use built local packages until publication. Vue is not supported.
+This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Angular injection functions and renderer types come from `@adapttable/angular`. Individual features use kit subpaths; React's `standardFeatures()` and Angular's `standardPreset()` compose their documented common sets. Enabling props from v2 alone do not activate v3 features. The Angular kits and `@adapttable/ai-angular` are public npm packages. Vue is not supported.
 
 Use AdaptTable when you want TanStack-Table-style headless freedom but batteries-included for your specific UI kit — with URL state, RTL, a real filter UX, virtualization, and mobile layouts that do not break responsively.
 
@@ -31,12 +31,12 @@ automatic table-to-card responsive layouts.
 - [@adapttable/ai](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/shared/ai): Optional provider-neutral capability discovery — `catalog` / `describe` / `execute`, the permitted context contract, and the framework-free conversation store. React-free. Not in the core or adapter roots.
 - [@adapttable/ai-react](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/react/ai-react): The React AI binding — `tableAgent` and `useTableAssistant` for mounted React tables.
 
-Angular package sources:
+Angular packages:
 
 - [@adapttable/angular](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/angular): Headless Angular signal bindings, `injectDataTable`, column renderers, structural Chrome and optional pivot, formula, stream, sparkline and router entries.
-- [@adapttable/angular-unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-angular-unstyled): Private workspace kit with native HTML controls, `AdaptDataTable` and individual feature entries.
-- [@adapttable/ng-zorro](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-ng-zorro): Private Angular 22 and NG-ZORRO 22.1.1 workspace kit; the host loads the NG-ZORRO stylesheet.
-- [@adapttable/ai-angular](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/ai-angular): Private optional Angular AI binding, with `tableAgent`, `injectTableAssistant` and `injectSpeechInput`; protocol helpers stay in `@adapttable/ai`.
+- [@adapttable/angular-unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-angular-unstyled): Public Angular kit with native HTML controls, `AdaptDataTable` and individual feature entries.
+- [@adapttable/ng-zorro](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-ng-zorro): Public Angular 22 and NG-ZORRO 22.1.1 kit; the host loads the NG-ZORRO stylesheet.
+- [@adapttable/ai-angular](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/ai-angular): Public optional Angular AI binding, with `tableAgent`, `injectTableAssistant` and `injectSpeechInput`; protocol helpers stay in `@adapttable/ai`.
 
 ## Quickstart (React adapter)
 

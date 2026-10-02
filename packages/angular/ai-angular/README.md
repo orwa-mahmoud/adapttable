@@ -8,9 +8,12 @@ controllers own capabilities, approvals, conversation execution and dictation;
 this package owns Angular signals and lifecycle. No provider SDK or UI kit is
 required.
 
-**First public `0.1.0` release prepared.** npm publication is a separate
-owner-controlled step. Check registry availability before installing; until
-publication, use a built workspace or local package.
+Available on npm as `@adapttable/ai-angular`. Add it only when your table
+needs agent, assistant or speech bindings:
+
+```bash
+pnpm add @adapttable/ai-angular @adapttable/ai @adapttable/angular @adapttable/core
+```
 
 ## Features
 

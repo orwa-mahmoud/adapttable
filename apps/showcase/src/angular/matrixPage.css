@@ -33,6 +33,11 @@ adapt-showcase-matrix-page *::after {
   font-size: var(--fs-small);
 }
 
+/* Long package identifiers need their own line on narrow phones. */
+.mx-ng .mx-seam {
+  flex-wrap: wrap;
+}
+
 .mx-ng--unstyled [data-adapttable-part="root"] {
   border: 1px solid var(--ng-line);
   border-radius: var(--r-md);

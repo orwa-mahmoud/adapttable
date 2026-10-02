@@ -53,11 +53,9 @@ component. `ng-zorro-antd` selects `@adapttable/ng-zorro`; without it, the
 component uses `@adapttable/angular-unstyled`. React kit dependencies,
 Tailwind and `components.json` do not override that Angular selection.
 
-**Both Angular kits are prepared for their first public `0.1.0` release.**
-Publication is a separate owner-controlled step. Check that your registry
-provides the binding and chosen kit before running the printed install command;
-until publication, use built workspace or local packages. The CLI does not
-check registry availability, install packages or edit `package.json`.
+Both Angular kits are public npm packages. Run the printed install command
+with your package manager. The CLI does not check registry availability,
+install packages or edit `package.json`.
 
 In an app component beside the generated file, import and render it:
 
@@ -129,8 +127,7 @@ is omitted, and existing `KitInfo` values need no new required property.
   Base UI, shadcn/ui (via `components.json`) or Tailwind for React; NG-ZORRO or
   native controls for Angular.
 - **Prints the exact install command** for the matching adapter plus the peer
-  packages it needs (run it yourself with your package manager after checking
-  availability; use built local Angular packages until their first publication).
+  packages it needs; run it yourself with your package manager.
 - **Scaffolds a working table** wired to your kit, not a blank file: sortable out
   of the box, with the full AdaptTable feature set (filtering, selection, editing,
   grouping, saved views, CSV export, virtualization, …) each one import away.
