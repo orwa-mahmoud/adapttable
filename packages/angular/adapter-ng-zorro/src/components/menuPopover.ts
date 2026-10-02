@@ -35,6 +35,8 @@ export function menuPopover(
   effect(
     (onCleanup) => {
       if (!open()) return;
+      const root = elements.root();
+      const panel = elements.panel();
       const onDown = (event: MouseEvent): void => {
         if (
           overlayContains(elements.root(), event.target) ||
@@ -45,12 +47,19 @@ export function menuPopover(
       };
       const onKey = (event: KeyboardEvent): void => {
         if (event.key !== "Escape" || overlayEscapeHandled(event)) return;
+        event.stopPropagation();
         close();
         elements.trigger()?.focus();
       };
+      // CDK handles Escape on body and prevents its default before document.
+      // Listen on both surfaces so child controls go first, then this menu.
+      root?.addEventListener("keydown", onKey);
+      panel?.addEventListener("keydown", onKey);
       document.addEventListener("mousedown", onDown);
       document.addEventListener("keydown", onKey);
       onCleanup(() => {
+        root?.removeEventListener("keydown", onKey);
+        panel?.removeEventListener("keydown", onKey);
         document.removeEventListener("mousedown", onDown);
         document.removeEventListener("keydown", onKey);
       });

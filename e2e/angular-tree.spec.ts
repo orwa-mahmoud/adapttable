@@ -36,6 +36,7 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await page.goto(PAGE);
+      await expect(part(page, "row").first()).toBeVisible();
       const leads = await outline(page);
       expect(leads.length).toBeGreaterThan(1);
       expect(leads.every((entry) => !entry.nested)).toBe(true);
@@ -67,6 +68,7 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await page.goto(PAGE);
+      await expect(part(page, "row").first()).toBeVisible();
       const lead = (await outline(page))[0]!.id!;
       const toggle = row(page, lead).locator(
         '[data-adapttable-part="tree-toggle"]'
@@ -93,6 +95,7 @@ for (const kit of ANGULAR_KITS) {
 
     test("shows the rows a search matches", async ({ page }) => {
       await page.goto(PAGE);
+      await expect(part(page, "row").first()).toBeVisible();
       const lead = (await outline(page))[0]!.id!;
       const toggle = row(page, lead).locator(
         '[data-adapttable-part="tree-toggle"]'

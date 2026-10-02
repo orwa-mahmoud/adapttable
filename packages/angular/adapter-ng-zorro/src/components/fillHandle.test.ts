@@ -77,6 +77,8 @@ describe("NG-ZORRO range editing", () => {
     expect(handle.title).toBe("Fill from selection");
     expect(handle.tagName).toBe("BUTTON");
     expect(handle.classList.contains("ant-btn-primary")).toBe(true);
+    // NG-ZORRO hides .ant-btn:empty; the pointer affordance must remain drawn.
+    expect(handle.matches(".ant-btn:empty")).toBe(false);
     expect(handle.tabIndex).toBe(-1);
     expect(handle.getAttribute("aria-hidden")).toBe("true");
     expect(handle.style.insetInlineEnd).toBe("-3px");

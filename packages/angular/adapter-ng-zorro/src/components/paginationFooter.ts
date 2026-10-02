@@ -92,7 +92,7 @@ import { AdaptOverlayOrigin } from "./overlayPlacement";
           [nzShowSizeChanger]="false"
           [nzShowQuickJumper]="false"
           [nzItemRender]="paginationItem"
-          (nzPageIndexChange)="v.table.setPage($event)"
+          (nzPageIndexChange)="changePage($event)"
         />
         <ng-template #paginationItem let-kind let-page="page">
           @switch (kind) {
@@ -183,6 +183,15 @@ export class AdaptPaginationFooter<TRow> {
         },
       });
     });
+  }
+
+  /** NG-ZORRO also emits when a changed total clamps its controlled input. */
+  protected changePage(page: number): void {
+    const table = this.view().table;
+    // A pending query can temporarily report total 0. Echoing that rendered
+    // page back would cancel the requested page before its response arrives.
+    // The source owns clamping once the host's total has settled.
+    if (page !== table.pagination().safePage) table.setPage(page);
   }
 
   /** The kit's five-page jump still announces the binding's bounded destination. */

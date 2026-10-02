@@ -87,6 +87,8 @@ export class AdaptFilterPopover {
     effect((onCleanup) => {
       const { open, onClose } = this.props();
       if (!open) return;
+      const anchor = this.anchor().nativeElement;
+      const card = this.card()?.nativeElement;
       const onClick = (event: MouseEvent): void => {
         if (!(event.target instanceof Node) || !document.contains(event.target))
           return;
@@ -99,14 +101,19 @@ export class AdaptFilterPopover {
       };
       const onKey = (event: KeyboardEvent): void => {
         if (event.key !== "Escape" || overlayEscapeHandled(event)) return;
+        event.stopPropagation();
         onClose();
-        this.anchor()
-          .nativeElement.querySelector<HTMLElement>('button, [role="button"]')
-          ?.focus();
+        anchor.querySelector<HTMLElement>('button, [role="button"]')?.focus();
       };
+      // Let nested controls consume Escape before CDK's body listener can
+      // detach this portal without updating the controlled open state.
+      anchor.addEventListener("keydown", onKey);
+      card?.addEventListener("keydown", onKey);
       document.addEventListener("click", onClick);
       document.addEventListener("keydown", onKey);
       onCleanup(() => {
+        anchor.removeEventListener("keydown", onKey);
+        card?.removeEventListener("keydown", onKey);
         document.removeEventListener("click", onClick);
         document.removeEventListener("keydown", onKey);
       });

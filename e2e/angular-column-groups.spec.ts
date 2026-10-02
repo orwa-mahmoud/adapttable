@@ -42,6 +42,7 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await page.goto(PAGE);
+      await expect(part(page, "header-cell").first()).toBeVisible();
       const before = await leafHeaders(page);
       expect(before).toContain("Status");
       await toggle(page, "Assignment").click();
@@ -68,6 +69,7 @@ for (const kit of ANGULAR_KITS) {
 
     test("folds Workload to a narrow stub", async ({ page }) => {
       await page.goto(PAGE);
+      await expect(part(page, "row").first()).toBeVisible();
       const cellsBefore = await part(page, "row")
         .first()
         .locator('[data-adapttable-part="cell"]')

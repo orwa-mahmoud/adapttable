@@ -161,7 +161,12 @@ export async function expectAngularSelection(
 /** Follow the combobox's own popup, including a portal outside .mx-demo. */
 export async function openAngularOptions(control: Locator): Promise<Locator> {
   const combobox = angularCombobox(control);
-  await combobox.click();
+  // NG-ZORRO overlays its readonly input with the selected label. The visible
+  // selector is the pointer target a reader uses; the input retains keyboard ARIA.
+  await combobox
+    .locator("xpath=ancestor::nz-select[1]")
+    .locator("nz-select-top-control")
+    .click();
   await expect(combobox).toHaveAttribute("aria-expanded", "true");
   await expect(combobox).toHaveAttribute("aria-controls", /\S+/);
   const listId = (await combobox.getAttribute("aria-controls"))!;

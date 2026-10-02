@@ -220,6 +220,7 @@ for (const kit of ANGULAR_KITS) {
       await cell(page, 0, 0).click();
       const handle = part(page, "fill-handle");
       await expect(handle).toHaveCount(1);
+      await expect(handle).toBeVisible();
       await handle.hover();
       await page.mouse.down();
       await cell(page, 2, 0).hover();

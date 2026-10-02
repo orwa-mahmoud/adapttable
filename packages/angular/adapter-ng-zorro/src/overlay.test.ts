@@ -163,7 +163,14 @@ describe("NG-ZORRO filter overlays", () => {
       document.querySelector(".cdk-overlay-backdrop, .ant-drawer-mask")
     ).toBeNull();
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    trigger.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await settle();
     expect(part("filters-popover")).toBeNull();
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
@@ -211,6 +218,7 @@ describe("NG-ZORRO filter overlays", () => {
     input.dispatchEvent(
       new KeyboardEvent("keydown", {
         key: "Escape",
+        keyCode: 27,
         bubbles: true,
         cancelable: true,
       })
@@ -218,16 +226,19 @@ describe("NG-ZORRO filter overlays", () => {
     await settle();
     expect(input.getAttribute("aria-expanded")).toBe("false");
     expect(part("filters-popover")).not.toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
     expect(document.activeElement).toBe(input);
     input.dispatchEvent(
       new KeyboardEvent("keydown", {
         key: "Escape",
+        keyCode: 27,
         bubbles: true,
         cancelable: true,
       })
     );
     await settle();
     expect(part("filters-popover")).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
     expect(document.activeElement).toBe(trigger);
     fixture.destroy();
   });

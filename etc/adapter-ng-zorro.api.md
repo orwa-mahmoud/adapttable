@@ -1417,6 +1417,7 @@ export class AdaptOverlayOrigin {
 // @internal
 export class AdaptPaginationFooter<TRow> {
     constructor();
+    protected changePage(page: number): void;
     protected jumpPage(kind: string): number;
     // (undocumented)
     protected readonly nextIcon: Signal<IconDescriptor>;

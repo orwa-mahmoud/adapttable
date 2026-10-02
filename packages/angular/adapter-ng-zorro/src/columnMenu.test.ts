@@ -126,10 +126,49 @@ describe("the NG-ZORRO Angular Columns menu", () => {
     expect(
       parts("column-menu-label").map((label) => label.textContent)
     ).toEqual(["Name", "Country", "Population"]);
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    button!.focus();
+    button!.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await settle();
     expect(part("column-menu-panel")).toBeNull();
+    expect(button?.getAttribute("aria-expanded")).toBe("false");
     expect(document.activeElement).toBe(button);
+  });
+
+  it("closes from a portalled visibility button after hiding and restoring a column", async () => {
+    const { element, part, headers, open, item, settle } = await mount();
+    const trigger = part<HTMLButtonElement>("column-menu-button")!;
+    await open();
+    const visibility = () =>
+      part<HTMLButtonElement>("column-menu-visibility", item(1))!;
+    expect(element.contains(visibility())).toBe(false);
+    visibility().focus();
+    visibility().click();
+    await settle();
+    expect(headers()).toEqual(["name", "population"]);
+    visibility().focus();
+    visibility().click();
+    await settle();
+    expect(headers()).toEqual(["name", "country", "population"]);
+    expect(document.activeElement).toBe(visibility());
+    visibility().dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await settle();
+    expect(part("column-menu-panel")).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(trigger);
   });
 
   it("closes on a press outside it", async () => {
@@ -312,10 +351,19 @@ describe("the NG-ZORRO Angular Columns menu", () => {
     await settle();
     await beginRename();
     part("column-rename-input", item(0))!.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+        cancelable: true,
+      })
     );
     await settle();
     expect(part("column-rename-form", item(0))).toBeNull();
+    expect(part("column-menu-panel")).not.toBeNull();
+    expect(part("column-menu-button")?.getAttribute("aria-expanded")).toBe(
+      "true"
+    );
     await beginRename();
     part<HTMLButtonElement>("column-rename-cancel", item(0))!.click();
     await settle();

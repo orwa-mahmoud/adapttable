@@ -31,7 +31,9 @@ import { NzButtonModule } from "ng-zorro-antd/button";
         [title]="props().label"
         [class]="props().className ?? ''"
         style="position: absolute; inset-inline-end: -3px; bottom: -3px; width: 8px; height: 8px; min-width: 0; padding: 0; border-radius: 1px; cursor: crosshair"
-      ></button>
+      >
+        <span aria-hidden="true"></span>
+      </button>
     </span>
   `,
 })

@@ -8,9 +8,16 @@ import {
   injectQuerySource,
   type PaginatedResponse,
   type TableQuery,
+  type TableQueryParams,
   type TableSource,
 } from "@adapttable/angular";
-import { Component, type Signal, signal } from "@angular/core";
+import {
+  Component,
+  computed,
+  effect,
+  type Signal,
+  signal,
+} from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -107,23 +114,6 @@ class FrontendHost {
   readonly notified = vi.fn();
 }
 
-/** A query that has already answered with every city. */
-function injectAnsweredQuery(): InfiniteQuerySignals<PaginatedResponse<City>> {
-  return {
-    data: signal({
-      pages: [{ rows: CITIES.slice(0, 2), total: 5, page: 1, limit: 2 }],
-      pageParams: [1],
-    }),
-    isLoading: signal(false),
-    isFetching: signal(false),
-    isFetchingNextPage: signal(false),
-    hasNextPage: signal(true),
-    error: signal(null),
-    fetchNextPage: () => undefined,
-    refetch: () => undefined,
-  };
-}
-
 @Component({
   imports: [AdaptDataTable],
   template: `
@@ -137,14 +127,54 @@ function injectAnsweredQuery(): InfiniteQuerySignals<PaginatedResponse<City>> {
   `,
 })
 class SourceHost {
+  private readonly reply = signal<PaginatedResponse<City>>({
+    rows: CITIES.slice(0, 2),
+    total: CITIES.length,
+    page: 1,
+    limit: 2,
+  });
+  readonly asked: Partial<TableQueryParams>[] = [];
   readonly source: Signal<TableSource<City>> = injectQuerySource<City>({
     urlSync: false,
     defaults: { limit: 2 },
     paginationMode: "paged",
-    query: injectAnsweredQuery,
+    query: (params): InfiniteQuerySignals<PaginatedResponse<City>> => {
+      effect(() => {
+        this.asked.push(params());
+      });
+      // A new query has no data until the host answers that page, matching
+      // an infinite query whose key includes the live page and page size.
+      const data = computed(() => {
+        const reply = this.reply();
+        const current = params();
+        return reply.page === current.page && reply.limit === current.limit
+          ? { pages: [reply], pageParams: [reply.page] }
+          : undefined;
+      });
+      const pending = computed(() => data() === undefined);
+      return {
+        data,
+        isLoading: pending,
+        isFetching: pending,
+        isFetchingNextPage: signal(false),
+        hasNextPage: signal(false),
+        error: signal(null),
+        fetchNextPage: () => undefined,
+        refetch: () => undefined,
+      };
+    },
   });
   readonly columns = COLUMNS;
   readonly rowKey = (row: City) => row.id;
+
+  answer(page: number, total = CITIES.length): void {
+    this.reply.set({
+      rows: CITIES.slice(0, total).slice((page - 1) * 2, page * 2),
+      total,
+      page,
+      limit: 2,
+    });
+  }
 }
 
 async function mount<T>(host: new () => T) {
@@ -210,5 +240,57 @@ describe("the NG-ZORRO Angular table's data tiers", () => {
     await mount(SourceHost);
     expect(names()).toEqual(["City 1", "City 2"]);
     expect(part("footer")?.textContent).toContain("5");
+  });
+
+  it("keeps a requested query page while its rows and total are pending", async () => {
+    const { host, settle } = await mount(SourceHost);
+    expect(names()).toEqual(["City 1", "City 2"]);
+
+    part("page-next")!.click();
+    await settle();
+    expect(host.asked.at(-1)).toMatchObject({ page: 2, limit: 2 });
+    expect(host.source()).toMatchObject({
+      page: 2,
+      total: 0,
+      isLoading: true,
+    });
+    expect(names()).toEqual([]);
+
+    host.answer(2);
+    await settle();
+    expect(names()).toEqual(["City 3", "City 4"]);
+    expect(part("pager")?.textContent).toContain("Page 2 of 3");
+    expect(
+      document
+        .querySelector('nz-pagination button[aria-current="page"]')
+        ?.textContent?.trim()
+    ).toBe("2");
+
+    part("page-prev")!.click();
+    await settle();
+    expect(host.asked.at(-1)).toMatchObject({ page: 1, limit: 2 });
+    host.answer(1);
+    await settle();
+    expect(names()).toEqual(["City 1", "City 2"]);
+    expect(part("pager")?.textContent).toContain("Page 1 of 3");
+  });
+
+  it("lets the source clamp a query page after a smaller total arrives", async () => {
+    const { host, settle } = await mount(SourceHost);
+    document
+      .querySelectorAll<HTMLButtonElement>(kitSelector("page-number"))[2]!
+      .click();
+    await settle();
+    expect(host.source().page).toBe(3);
+
+    host.answer(3, 3);
+    await settle();
+    expect(host.asked.at(-1)).toMatchObject({ page: 2, limit: 2 });
+    expect(host.source().page).toBe(2);
+    host.answer(2, 3);
+    await settle();
+    expect(names()).toEqual(["City 3"]);
+    expect(part("pager")?.textContent).toContain("Page 2 of 2");
+    expect((part("page-next") as HTMLButtonElement).disabled).toBe(true);
   });
 });
