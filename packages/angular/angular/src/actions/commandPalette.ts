@@ -22,7 +22,7 @@ import {
 } from "@angular/core";
 
 import type { CommandPaletteOptions } from "../features/factories";
-import { fromStore } from "../store";
+import { fromStore, readMaybe } from "../store";
 import { ADAPTTABLE_PALETTE_OPEN } from "./paletteState";
 import { injectShortcuts } from "./shortcuts";
 
@@ -88,7 +88,7 @@ export function injectCommandPalette(
     () => {
       const config = paletteConfig(options().commandPalette);
       controller.configure({
-        open: config?.open,
+        open: readMaybe(config?.open),
         onOpenChange: config?.onOpenChange,
       });
     },
@@ -96,7 +96,7 @@ export function injectCommandPalette(
   );
   const open = computed(() => {
     const config = paletteConfig(options().commandPalette);
-    return config?.open ?? local().open;
+    return readMaybe(config?.open) ?? local().open;
   });
   const setOpen = (next: boolean) => {
     controller.setOpen(next);

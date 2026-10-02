@@ -175,5 +175,32 @@ describe("injectTree", () => {
     expect(keys(model)).toEqual(["1", "2", "4"]);
     model!()!.expansion.toggle("2");
     expect(onExpandedIdsChange).toHaveBeenCalledWith(["1", "2"]);
+    expect(keys(model)).toEqual(["1", "2", "4"]);
+  });
+
+  it("follows the host's signal through callbacks, replacement and clear", () => {
+    const expandedIds = signal<readonly string[]>(["1"]);
+    const onExpandedIdsChange = vi.fn((ids: string[]) => {
+      expandedIds.set(ids);
+    });
+    const { model } = treeWith([
+      tree({ ...nested, expandedIds, onExpandedIdsChange }),
+    ]);
+    expect(keys(model)).toEqual(["1", "2", "4"]);
+    model!()!.expansion.toggle("2");
+    expect(onExpandedIdsChange).toHaveBeenLastCalledWith(["1", "2"]);
+    expect(keys(model)).toEqual(["1", "2", "3", "4"]);
+
+    expandedIds.set(["1"]);
+    expect(keys(model)).toEqual(["1", "2", "4"]);
+    model!()!.expansion.toggle("1");
+    expect(onExpandedIdsChange).toHaveBeenLastCalledWith([]);
+    expect(keys(model)).toEqual(["1", "4"]);
+
+    expandedIds.set(["1", "2"]);
+    expect(keys(model)).toEqual(["1", "2", "3", "4"]);
+    expandedIds.set([]);
+    expect(keys(model)).toEqual(["1", "4"]);
+    expect(onExpandedIdsChange).toHaveBeenCalledTimes(2);
   });
 });

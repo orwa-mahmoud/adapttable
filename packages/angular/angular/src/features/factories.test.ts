@@ -3,6 +3,7 @@
  * its options register on the live table.
  */
 import { createFeatureHost } from "@adapttable/core/binding";
+import { signal } from "@angular/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { type AdaptTableFeature, featureOptionsOf } from "../featureHost";
@@ -105,8 +106,10 @@ describe("feature factories", () => {
   it("commandPalette writes its options and registers its commands", () => {
     expect(patch(commandPalette())).toEqual({ commandPalette: true });
     const command = { key: "audit", label: "Audit", onSelect: vi.fn() };
-    const built = commandPalette({ commands: [command] });
-    expect(patch(built)).toEqual({ commandPalette: { commands: [command] } });
+    const open = signal(false);
+    const options = { commands: [command], open };
+    const built = commandPalette(options);
+    expect(patch(built)).toEqual({ commandPalette: options });
     expect(createFeatureHost([built]).commands).toEqual([command]);
   });
 

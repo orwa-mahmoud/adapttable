@@ -84,6 +84,46 @@ describe("injectTableRowPinning", () => {
       bottom: ["a"],
     });
     expect(urlAdapter.getSearch()).not.toContain("rowPin");
+    expect(pinning!()!.sideOf("a")).toBeUndefined();
+  });
+
+  it("follows the host's signal without writing its lists to the URL", () => {
+    const pinnedRowIds = signal<RowPinState>({ top: ["a"], bottom: [] });
+    const onPinnedRowIdsChange = vi.fn((next: RowPinState) => {
+      pinnedRowIds.set(next);
+    });
+    const { pinning, urlAdapter } = liveWith({
+      features: [rowPinning({ pinnedRowIds, onPinnedRowIdsChange })],
+    });
+    expect(pinning!()!.state).toEqual({ top: ["a"], bottom: [] });
+    pinning!()!.pin("b", "bottom");
+    expect(onPinnedRowIdsChange).toHaveBeenLastCalledWith({
+      top: ["a"],
+      bottom: ["b"],
+    });
+    expect(pinning!()!.state).toEqual({ top: ["a"], bottom: ["b"] });
+
+    pinnedRowIds.set({ top: ["c"], bottom: ["a"] });
+    expect(pinning!()!.sideOf("b")).toBeUndefined();
+    expect(pinning!()!.sideOf("c")).toBe("top");
+    pinning!()!.unpin("a");
+    expect(onPinnedRowIdsChange).toHaveBeenLastCalledWith({
+      top: ["c"],
+      bottom: [],
+    });
+    expect(pinning!()!.state).toEqual({ top: ["c"], bottom: [] });
+
+    pinnedRowIds.set({ top: [], bottom: [] });
+    expect(pinning!()!.state).toEqual({ top: [], bottom: [] });
+    expect(onPinnedRowIdsChange).toHaveBeenCalledTimes(2);
+    expect(urlAdapter.getSearch()).toBe("");
+  });
+
+  it("keeps an uncontrolled table's lists local when URL sync is off", () => {
+    const { pinning, urlAdapter } = liveWith({ urlSync: false });
+    pinning!()!.pin("a", "top");
+    expect(pinning!()!.state).toEqual({ top: ["a"], bottom: [] });
+    expect(urlAdapter.getSearch()).toBe("");
   });
 
   it("observes a table's own lists without holding them", () => {

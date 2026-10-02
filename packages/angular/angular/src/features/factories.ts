@@ -43,7 +43,7 @@ import {
   type FeaturePatch,
   type SidePanelEntry,
 } from "@adapttable/core/binding";
-import type { TemplateRef } from "@angular/core";
+import type { Signal, TemplateRef } from "@angular/core";
 
 import type { AdaptTableFeature } from "../featureHost";
 
@@ -65,8 +65,11 @@ export interface CommandPaletteOptions {
   readonly shortcuts?: readonly Shortcut[];
   /** Draw a toolbar control that opens the palette. Off by default. */
   readonly button?: boolean;
-  /** Controlled open state, for a host that opens the palette itself. */
-  readonly open?: boolean;
+  /**
+   * Controlled open state. Pass a signal to update it after the feature is
+   * created, and pair it with {@link CommandPaletteOptions.onOpenChange}.
+   */
+  readonly open?: boolean | Signal<boolean>;
   /** Told when the palette asks to open or close. */
   readonly onOpenChange?: (open: boolean) => void;
 }

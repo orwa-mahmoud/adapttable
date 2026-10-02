@@ -26,6 +26,7 @@ import {
 
 import { type AdaptTableFeature, featureOptionsOf } from "../featureHost";
 import { injectRowPinning } from "../rows/rowPinning";
+import { type MaybeSignal, readMaybe } from "../store";
 import { injectRowPinningUrlState } from "../url/rowPinningUrlState";
 
 /**
@@ -34,8 +35,11 @@ import { injectRowPinningUrlState } from "../url/rowPinningUrlState";
  * @public
  */
 export interface RowPinningFeatureOptions {
-  /** The pinned rows, when the host holds them. */
-  readonly pinnedRowIds?: RowPinState;
+  /**
+   * The host's pin lists. Pass a signal to follow changes; clear both lists
+   * to unpin all.
+   */
+  readonly pinnedRowIds?: MaybeSignal<RowPinState>;
   /** Told the next lists whenever a row is pinned or unpinned. */
   readonly onPinnedRowIdsChange?: (next: RowPinState) => void;
 }
@@ -82,10 +86,8 @@ export interface TableRowPinningOptions<TRow> {
 }
 
 /** The pin options the feature writes. */
-interface PinPatch {
+interface PinPatch extends RowPinningFeatureOptions {
   readonly rowPinningArmed?: boolean;
-  readonly pinnedRowIds?: RowPinState;
-  readonly onPinnedRowIdsChange?: (next: RowPinState) => void;
 }
 
 /**
@@ -102,7 +104,11 @@ export function injectTableRowPinning<TRow>(
   options: TableRowPinningOptions<TRow>
 ): Signal<RowPinningState<TRow> | undefined> | undefined {
   const declared = featureOptionsOf(options.features) as PinPatch;
-  const requested = rowPinningRequested(declared);
+  const pinnedRowIds = computed(() => readMaybe(declared.pinnedRowIds));
+  const requested = rowPinningRequested({
+    ...declared,
+    pinnedRowIds: untracked(pinnedRowIds),
+  });
   if (!requested) return undefined;
   if (!options.injector) assertInInjectionContext(injectTableRowPinning);
   const injector = options.injector ?? inject(Injector);
@@ -111,7 +117,7 @@ export function injectTableRowPinning<TRow>(
     urlSync: rowPinningUrlSync({
       urlSync: options.urlSync,
       requested,
-      pinnedRowIds: declared.pinnedRowIds,
+      pinnedRowIds: untracked(pinnedRowIds),
     }),
     urlKey: options.urlKey,
     injector,
@@ -119,7 +125,7 @@ export function injectTableRowPinning<TRow>(
   const control = computed(() =>
     rowPinningControl({
       requested,
-      pinnedRowIds: declared.pinnedRowIds,
+      pinnedRowIds: pinnedRowIds(),
       onPinnedRowIdsChange: declared.onPinnedRowIdsChange,
       urlPinnedRowIds: url.pinnedRowIds(),
       writeUrl: url.onPinnedRowIdsChange,

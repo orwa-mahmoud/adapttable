@@ -27,6 +27,7 @@ import {
 
 import type { DataTable } from "../dataTable";
 import { type AdaptTableFeature, featureOptionsOf } from "../featureHost";
+import type { MaybeSignal } from "../store";
 import { injectLazyChildren } from "../tree/lazyChildren";
 import { injectTreeExpansion } from "../tree/treeExpansion";
 
@@ -49,8 +50,10 @@ export interface TreeFeatureOptions<TRow> {
    * the table reads.
    */
   readonly onLoadChildren?: (row: TRow) => void | Promise<void>;
-  /** The open node ids, when the host holds them. */
-  readonly expandedIds?: readonly string[];
+  /**
+   * The host's open node ids. Pass a signal to follow changes; clear with `[]`.
+   */
+  readonly expandedIds?: MaybeSignal<readonly string[]>;
   /** Told the next open ids whenever a node opens or closes. */
   readonly onExpandedIdsChange?: (ids: string[]) => void;
 }

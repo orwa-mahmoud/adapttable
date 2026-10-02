@@ -62,6 +62,42 @@ describe("injectCommandPalette", () => {
     expect(fixture.componentInstance.palette().commands).toEqual([]);
   });
 
+  it("tracks a nested open signal and leaves each requested change to the host", () => {
+    @Component({ template: "" })
+    class ControlledHost {
+      readonly open = signal(false);
+      readonly onOpenChange = vi.fn();
+      readonly options = signal<CommandPaletteInjectOptions>({
+        commandPalette: {
+          open: this.open.asReadonly(),
+          onOpenChange: this.onOpenChange,
+        },
+        labels: {},
+      });
+      readonly palette = injectCommandPalette(this.options);
+    }
+
+    const fixture = TestBed.createComponent(ControlledHost);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    expect(host.palette().open).toBe(false);
+
+    host.open.set(true);
+    fixture.detectChanges();
+    expect(host.palette().open).toBe(true);
+    expect(host.onOpenChange).not.toHaveBeenCalled();
+    host.palette().close();
+    expect(host.onOpenChange).toHaveBeenLastCalledWith(false);
+    expect(host.palette().open).toBe(true);
+
+    host.open.set(false);
+    fixture.detectChanges();
+    expect(host.palette().open).toBe(false);
+    host.palette().show();
+    expect(host.onOpenChange.mock.calls).toEqual([[false], [true]]);
+    expect(host.palette().open).toBe(false);
+  });
+
   it("publishes open state and follows a controlled flag", () => {
     const published = signal<PaletteOpenState | null>(null);
     const onOpenChange = vi.fn();
@@ -116,6 +152,7 @@ describe("injectCommandPalette", () => {
     expect(host.palette().open).toBe(true);
     host.palette().close();
     expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(host.palette().open).toBe(true);
 
     host.options.set({ commandPalette: false, labels: {} });
     fixture.detectChanges();

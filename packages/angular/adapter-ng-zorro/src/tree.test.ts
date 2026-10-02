@@ -48,6 +48,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 let mobile = false;
+let controlled = false;
 let onLoadChildren: ((row: Person) => Promise<void>) | undefined;
 let features: readonly AdaptTableFeature[] | undefined;
 
@@ -75,11 +76,21 @@ class Host {
   readonly mobile = mobile;
   readonly direction = signal<"ltr" | "rtl">("ltr");
   readonly labels = signal<TableLabels>({});
+  readonly expandedIds = signal<readonly string[]>([]);
+  readonly onExpandedIdsChange = vi.fn((ids: string[]) => {
+    this.expandedIds.set(ids);
+  });
   readonly features = features ?? [
     tree<Person>({
       getChildren: (row) => row.reports,
       hasChildren: (row) => row.reports !== undefined || row.id === "4",
       onLoadChildren,
+      ...(controlled
+        ? {
+            expandedIds: this.expandedIds,
+            onExpandedIdsChange: this.onExpandedIdsChange,
+          }
+        : {}),
     }),
   ];
 }
@@ -91,15 +102,16 @@ async function mount() {
   await fixture.whenStable();
   return {
     host: fixture.componentInstance,
+    root: fixture.nativeElement as HTMLElement,
     settle: () => fixture.whenStable(),
   };
 }
 
-const parts = (name: string) => [
-  ...document.querySelectorAll<HTMLElement>(kitSelector(name)),
+const parts = (name: string, root: ParentNode = document) => [
+  ...root.querySelectorAll<HTMLElement>(kitSelector(name)),
 ];
-const rowIds = (part: "row" | "card") =>
-  parts(part).map((row) => row.getAttribute("data-row-id"));
+const rowIds = (part: "row" | "card", root: ParentNode = document) =>
+  parts(part, root).map((row) => row.getAttribute("data-row-id"));
 const toggleOf = (container: Element) =>
   container.querySelector<HTMLButtonElement>(
     '[data-adapttable-part="tree-toggle"]'
@@ -111,6 +123,7 @@ afterEach(() => {
   document.body.replaceChildren();
   document.body.removeAttribute("dir");
   mobile = false;
+  controlled = false;
   onLoadChildren = undefined;
   features = undefined;
 });
@@ -134,6 +147,63 @@ describe("the NG-ZORRO table's tree", () => {
     expect(toggle.getAttribute("aria-expanded")).toBe("false");
     expect(toggle.getAttribute("aria-label")).toBe("Expand row");
   });
+
+  it.each([false, true])(
+    "follows independent host expansion signals through callbacks and external clears (mobile=%s)",
+    async (isMobile) => {
+      mobile = isMobile;
+      controlled = true;
+      const first = await mount();
+      const second = await mount();
+      const part = isMobile ? "card" : "row";
+      const row = (root: ParentNode, id: string) =>
+        root.querySelector(
+          `[data-adapttable-part="${part}"][data-row-id="${id}"]`
+        )!;
+      const ids = (root: ParentNode) => rowIds(part, root);
+      expect(ids(first.root)).toEqual(["1", "4"]);
+      expect(ids(second.root)).toEqual(["1", "4"]);
+
+      toggleOf(row(first.root, "1")).click();
+      await first.settle();
+      expect(first.host.onExpandedIdsChange).toHaveBeenLastCalledWith(["1"]);
+      expect(first.host.expandedIds()).toEqual(["1"]);
+      expect(ids(first.root)).toEqual(["1", "2", "4"]);
+      expect(toggleOf(row(first.root, "1")).getAttribute("aria-expanded")).toBe(
+        "true"
+      );
+      expect(ids(second.root)).toEqual(["1", "4"]);
+      expect(second.host.onExpandedIdsChange).not.toHaveBeenCalled();
+
+      toggleOf(row(first.root, "2")).click();
+      await first.settle();
+      expect(first.host.expandedIds()).toEqual(["1", "2"]);
+      expect(ids(first.root)).toEqual(["1", "2", "3", "4"]);
+      first.host.expandedIds.set(["1"]);
+      await first.settle();
+      expect(ids(first.root)).toEqual(["1", "2", "4"]);
+      expect(toggleOf(row(first.root, "2")).getAttribute("aria-expanded")).toBe(
+        "false"
+      );
+      toggleOf(row(first.root, "1")).click();
+      await first.settle();
+      expect(first.host.onExpandedIdsChange).toHaveBeenLastCalledWith([]);
+      expect(ids(first.root)).toEqual(["1", "4"]);
+
+      second.host.expandedIds.set(["1", "2"]);
+      await second.settle();
+      expect(ids(second.root)).toEqual(["1", "2", "3", "4"]);
+      expect(ids(first.root)).toEqual(["1", "4"]);
+      second.host.expandedIds.set([]);
+      await second.settle();
+      expect(ids(second.root)).toEqual(["1", "4"]);
+      expect(
+        toggleOf(row(second.root, "1")).getAttribute("aria-expanded")
+      ).toBe("false");
+      expect(second.host.onExpandedIdsChange).not.toHaveBeenCalled();
+      expect(first.host.onExpandedIdsChange).toHaveBeenCalledTimes(3);
+    }
+  );
 
   it("relabels desktop tree disclosures when only the labels change", async () => {
     const { host, settle } = await mount();
