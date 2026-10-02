@@ -40,7 +40,9 @@
     "antd": "^6.6.1",
     "framer-motion": "^13.1.1",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "@adapttable/ng-zorro": "workspace:*",
+    "ng-zorro-antd": "^22.1.1"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.7.5",
@@ -58,6 +60,9 @@
     "rxjs": "^7.8.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "@angular/forms": "22.2.0",
+    "@angular/router": "^22.2.0",
+    "@angular/cdk": "^22.0.0"
   }
 }

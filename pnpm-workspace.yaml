@@ -38,6 +38,7 @@ overrides:
   "@adapttable/ai-angular": "workspace:*"
   "@adapttable/angular": "workspace:*"
   "@adapttable/angular-unstyled": "workspace:*"
+  "@adapttable/ng-zorro": "workspace:*"
   "eslint-plugin-sonarjs>minimatch": "^10.2.3"
   # CRLF injection, cache-control disclosure, cookie injection, response
   # desync, private-cache crash

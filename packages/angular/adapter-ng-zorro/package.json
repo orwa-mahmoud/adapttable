@@ -2,9 +2,18 @@
   "name": "@adapttable/ng-zorro",
   "version": "0.0.0",
   "private": true,
-  "description": "AdaptTable's Angular DataTable rendered with NG-ZORRO components. Not built yet: a private placeholder for #471.",
+  "description": "AdaptTable's Angular DataTable rendered with NG-ZORRO components.",
+  "keywords": [
+    "angular",
+    "data-table",
+    "table",
+    "ng-zorro",
+    "headless",
+    "adapttable"
+  ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
+  "homepage": "https://adapttable.orwamahmoud.com/angular/demo/ng-zorro/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
@@ -12,8 +21,222 @@
   },
   "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
   "type": "module",
-  "exports": {},
+  "sideEffects": false,
+  "files": [
+    "LICENSE",
+    "dist",
+    "README.md"
+  ],
+  "module": "./dist/fesm2022/adapttable-ng-zorro.mjs",
+  "types": "./dist/types/adapttable-ng-zorro.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/adapttable-ng-zorro.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro.mjs"
+    },
+    "./batch-editing": {
+      "types": "./dist/types/adapttable-ng-zorro-batch-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-batch-editing.mjs"
+    },
+    "./bulk-actions": {
+      "types": "./dist/types/adapttable-ng-zorro-bulk-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-bulk-actions.mjs"
+    },
+    "./cell-navigation": {
+      "types": "./dist/types/adapttable-ng-zorro-cell-navigation.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-cell-navigation.mjs"
+    },
+    "./cell-span": {
+      "types": "./dist/types/adapttable-ng-zorro-cell-span.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-cell-span.mjs"
+    },
+    "./column-groups": {
+      "types": "./dist/types/adapttable-ng-zorro-column-groups.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-column-groups.mjs"
+    },
+    "./column-menu": {
+      "types": "./dist/types/adapttable-ng-zorro-column-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-column-menu.mjs"
+    },
+    "./column-selection": {
+      "types": "./dist/types/adapttable-ng-zorro-column-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-column-selection.mjs"
+    },
+    "./command-palette": {
+      "types": "./dist/types/adapttable-ng-zorro-command-palette.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-command-palette.mjs"
+    },
+    "./context-menu": {
+      "types": "./dist/types/adapttable-ng-zorro-context-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-context-menu.mjs"
+    },
+    "./density": {
+      "types": "./dist/types/adapttable-ng-zorro-density.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-density.mjs"
+    },
+    "./editing": {
+      "types": "./dist/types/adapttable-ng-zorro-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-editing.mjs"
+    },
+    "./export": {
+      "types": "./dist/types/adapttable-ng-zorro-export.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-export.mjs"
+    },
+    "./extra-rows": {
+      "types": "./dist/types/adapttable-ng-zorro-extra-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-extra-rows.mjs"
+    },
+    "./features": {
+      "types": "./dist/types/adapttable-ng-zorro-features.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-features.mjs"
+    },
+    "./find-in-table": {
+      "types": "./dist/types/adapttable-ng-zorro-find-in-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-find-in-table.mjs"
+    },
+    "./filters": {
+      "types": "./dist/types/adapttable-ng-zorro-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-filters.mjs"
+    },
+    "./fit-columns": {
+      "types": "./dist/types/adapttable-ng-zorro-fit-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-fit-columns.mjs"
+    },
+    "./fullscreen": {
+      "types": "./dist/types/adapttable-ng-zorro-fullscreen.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-fullscreen.mjs"
+    },
+    "./grouping": {
+      "types": "./dist/types/adapttable-ng-zorro-grouping.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-grouping.mjs"
+    },
+    "./grouping-panel": {
+      "types": "./dist/types/adapttable-ng-zorro-grouping-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-grouping-panel.mjs"
+    },
+    "./header-filters": {
+      "types": "./dist/types/adapttable-ng-zorro-header-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-header-filters.mjs"
+    },
+    "./multi-sort": {
+      "types": "./dist/types/adapttable-ng-zorro-multi-sort.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-multi-sort.mjs"
+    },
+    "./nested-table": {
+      "types": "./dist/types/adapttable-ng-zorro-nested-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-nested-table.mjs"
+    },
+    "./pinned-summary-rows": {
+      "types": "./dist/types/adapttable-ng-zorro-pinned-summary-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-pinned-summary-rows.mjs"
+    },
+    "./preset": {
+      "types": "./dist/types/adapttable-ng-zorro-preset.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-preset.mjs"
+    },
+    "./pivot": {
+      "types": "./dist/types/adapttable-ng-zorro-pivot.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-pivot.mjs"
+    },
+    "./print": {
+      "types": "./dist/types/adapttable-ng-zorro-print.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-print.mjs"
+    },
+    "./resizable-columns": {
+      "types": "./dist/types/adapttable-ng-zorro-resizable-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-resizable-columns.mjs"
+    },
+    "./row-actions": {
+      "types": "./dist/types/adapttable-ng-zorro-row-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-row-actions.mjs"
+    },
+    "./row-appearance": {
+      "types": "./dist/types/adapttable-ng-zorro-row-appearance.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-row-appearance.mjs"
+    },
+    "./row-detail": {
+      "types": "./dist/types/adapttable-ng-zorro-row-detail.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-row-detail.mjs"
+    },
+    "./row-pinning": {
+      "types": "./dist/types/adapttable-ng-zorro-row-pinning.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-row-pinning.mjs"
+    },
+    "./row-reorder": {
+      "types": "./dist/types/adapttable-ng-zorro-row-reorder.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-row-reorder.mjs"
+    },
+    "./saved-views": {
+      "types": "./dist/types/adapttable-ng-zorro-saved-views.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-saved-views.mjs"
+    },
+    "./selection-stats": {
+      "types": "./dist/types/adapttable-ng-zorro-selection-stats.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-selection-stats.mjs"
+    },
+    "./side-panel": {
+      "types": "./dist/types/adapttable-ng-zorro-side-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-side-panel.mjs"
+    },
+    "./status-bar": {
+      "types": "./dist/types/adapttable-ng-zorro-status-bar.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-status-bar.mjs"
+    },
+    "./tree": {
+      "types": "./dist/types/adapttable-ng-zorro-tree.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-tree.mjs"
+    },
+    "./virtualize": {
+      "types": "./dist/types/adapttable-ng-zorro-virtualize.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-virtualize.mjs"
+    },
+    "./package.json": "./package.json",
+    "./assistant": {
+      "types": "./dist/types/adapttable-ng-zorro-assistant.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-zorro-assistant.mjs"
+    }
+  },
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json -c tsconfig.build.json && node -e \"require('node:fs').rmSync('dist/package.json')\"",
+    "test": "vitest run && vitest run -c vitest.ssr.config.ts",
+    "test:coverage": "vitest run --coverage && vitest run -c vitest.ssr.config.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist coverage .turbo"
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "@angular/router": "^22.0.0",
+    "ng-zorro-antd": "^22.1.1",
+    "@angular/cdk": "^22.0.0"
+  },
+  "dependencies": {
+    "@adapttable/angular": "0.2.0",
+    "tslib": "^2.8.1"
+  },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "devDependencies": {
+    "@adapttable/core": "3.7.0",
+    "@analogjs/vite-plugin-angular": "^2.7.5",
+    "@analogjs/vitest-angular": "^2.7.5",
+    "@angular/build": "^22.2.0",
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/compiler-cli": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "@angular/platform-server": "^22.2.0",
+    "@testing-library/dom": "^10.4.1",
+    "ng-packagr": "^22.2.1",
+    "rxjs": "^7.8.2",
+    "@angular/forms": "22.2.0",
+    "@angular/router": "^22.2.0",
+    "ng-zorro-antd": "^22.1.1",
+    "@angular/cdk": "^22.0.0"
   }
 }
