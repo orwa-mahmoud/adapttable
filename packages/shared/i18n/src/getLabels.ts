@@ -1,6 +1,7 @@
 import { resolveLocaleTag, type TableLabels } from "@adapttable/core";
 
 import { ar } from "./locales/ar";
+import { cs } from "./locales/cs";
 import { de } from "./locales/de";
 import { en } from "./locales/en";
 import { es } from "./locales/es";
@@ -27,6 +28,7 @@ import { zhTW } from "./locales/zh-TW";
 export const locales = {
   en,
   ar,
+  cs,
   de,
   es,
   fa,
