@@ -42,8 +42,9 @@ test("activates cards with keyboard navigation and keeps checkbox clicks separat
   await expect(cards.nth(1)).toBeFocused();
   await expect(cards.first()).toHaveAttribute("tabindex", "-1");
   await expect(cards.nth(1)).toHaveAttribute("tabindex", "0");
+  await expect(cards.nth(1)).toContainText("Alan Turing");
   await page.keyboard.press("Space");
-  await expect(log).toHaveText("Activated Grace Hopper");
+  await expect(log).toHaveText("Activated Alan Turing");
   await page.keyboard.press("ArrowUp");
   await expect(cards.first()).toBeFocused();
 });

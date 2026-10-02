@@ -1,6 +1,10 @@
 /** Mounted contract coverage: neutral Chrome renders only kit-supplied controls. */
 import type { AgentApprovalPending, TableLabels } from "@adapttable/core";
-import type { TableAssistantView } from "@adapttable/core/binding";
+import type {
+  TableAssistantMessageView,
+  TableAssistantReceiptView,
+  TableAssistantView,
+} from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   Component,
@@ -13,6 +17,11 @@ import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptAssistantContent } from "./assistantIcons";
+import {
+  AdaptAssistantMessage,
+  AdaptAssistantReceipt,
+  AdaptAssistantWorking,
+} from "./assistantMessages";
 import { injectAssistantFloatingFits } from "./assistantPlacement";
 import type {
   TableAssistantButtonProps,
@@ -153,6 +162,33 @@ const SLOTS: TableAssistantSlots = {
   Menu: TestMenu,
   LanguageChip: TestLanguage,
 };
+@Component({
+  imports: [
+    AdaptAssistantMessage,
+    AdaptAssistantReceipt,
+    AdaptAssistantWorking,
+  ],
+  template: `
+    <adapt-assistant-message [message]="message()" [slots]="slots" />
+    <adapt-assistant-receipt [receipt]="receipt()" [slots]="slots" />
+    <adapt-assistant-working
+      [progress]="{ label: 'Rows', done: 1, total: 2 }"
+    />
+  `,
+})
+class LegacyMessagesHost {
+  readonly slots = SLOTS;
+  readonly message = signal<TableAssistantMessageView>({
+    id: "legacy",
+    role: "assistant",
+    text: "Legacy message",
+  });
+  readonly receipt = signal<TableAssistantReceiptView>({
+    idempotencyKey: "legacy-receipt",
+    status: "executed",
+    subject: { kind: "edit", before: "Before", after: "After" },
+  });
+}
 const EMPTY: TableAssistantView = {
   status: "ready",
   messages: [],
@@ -206,6 +242,24 @@ async function settle(fixture: ComponentFixture<Host>): Promise<void> {
 function part(name: string): HTMLElement | null {
   return document.querySelector(`[data-adapttable-part="${name}"]`);
 }
+function expectNativeList(name: string, itemParts: readonly string[]): void {
+  const list = part(name);
+  expect(list?.tagName).toBe("UL");
+  expect(list?.hasAttribute("role")).toBe(false);
+  const items = [...(list?.children ?? [])];
+  expect(items.map((item) => item.tagName)).toEqual(itemParts.map(() => "LI"));
+  expect(
+    items.map((item) => item.getAttribute("data-adapttable-part"))
+  ).toEqual(itemParts);
+  for (const item of items) {
+    expect(item.parentElement).toBe(list);
+    expect(item.hasAttribute("role")).toBe(false);
+    if (item.getAttribute("data-adapttable-part") !== "assistant-working")
+      expect(item.hasAttribute("aria-hidden")).toBe(false);
+  }
+  for (const item of list?.querySelectorAll("li") ?? [])
+    expect(item.parentElement?.matches("ul,ol")).toBe(true);
+}
 function click(name: string): void {
   const target = part(name);
   expect(target).not.toBeNull();
@@ -247,6 +301,109 @@ describe("AdaptTableAssistantChrome", () => {
     await settle(fixture);
     expect(host.open()).toBe(false);
     expect(document.activeElement).toBe(part("assistant-launcher"));
+  });
+  it.each(["panel", "floating", "sheet"] as const)(
+    "keeps greeting, pending and streaming rows directly inside the %s list",
+    async (presentation) => {
+      vi.stubGlobal("innerWidth", 1000);
+      const fixture = await mounted({ presentation });
+      expectNativeList("assistant-messages", ["assistant-message"]);
+      const host = fixture.componentInstance;
+      host.extras.set({ presentation, greeting: "" });
+      host.view.update((view) => ({
+        ...view,
+        busy: true,
+        status: "sending",
+        messages: [{ id: "user", role: "user", text: "Find a row" }],
+      }));
+      await settle(fixture);
+      expectNativeList("assistant-messages", [
+        "assistant-message",
+        "assistant-working",
+      ]);
+      const user = part("assistant-message");
+      expect(user?.getAttribute("data-role")).toBe("user");
+      expect(user?.style.alignItems).toBe("flex-end");
+      expect(user?.style.display).toBe("flex");
+      expect(part("assistant-working")?.style.display).toBe("flex");
+      expect(part("assistant-working")?.getAttribute("aria-hidden")).toBe(
+        "true"
+      );
+      host.view.update((view) => ({
+        ...view,
+        messages: [
+          ...view.messages,
+          { id: "answer", role: "assistant", text: "A row", streaming: true },
+        ],
+      }));
+      await settle(fixture);
+      expectNativeList("assistant-messages", [
+        "assistant-message",
+        "assistant-message",
+        "assistant-working",
+      ]);
+      expect(part("assistant-message")).toBe(user);
+      expect(document.querySelectorAll('[data-streaming="true"]')).toHaveLength(
+        1
+      );
+      host.view.update((view) => ({
+        ...view,
+        busy: false,
+        status: "ready",
+        messages: view.messages.map((message) => ({
+          ...message,
+          streaming: false,
+        })),
+      }));
+      await settle(fixture);
+      expectNativeList("assistant-messages", [
+        "assistant-message",
+        "assistant-message",
+      ]);
+      expect(part("assistant-working")).toBeNull();
+      expect(part("assistant-message")).toBe(user);
+      host.view.update((view) => ({ ...view, messages: [] }));
+      await settle(fixture);
+      expectNativeList("assistant-messages", []);
+    }
+  );
+  it("preserves legacy custom selectors and their inner list-item parts", async () => {
+    const fixture = TestBed.createComponent(LegacyMessagesHost);
+    document.body.append(fixture.nativeElement);
+    try {
+      fixture.detectChanges();
+      await fixture.whenStable();
+      for (const name of [
+        "assistant-message",
+        "assistant-receipt",
+        "assistant-working",
+      ]) {
+        const item = part(name);
+        expect(item?.tagName).toBe("LI");
+        expect(item?.parentElement?.localName).toBe(`adapt-${name}`);
+        expect(item?.parentElement?.hasAttribute("data-adapttable-part")).toBe(
+          false
+        );
+        expect(item?.parentElement?.style.display).toBe("contents");
+        expect(item?.style.display).toBe("flex");
+      }
+      expect(part("assistant-message")?.textContent).toContain(
+        "Legacy message"
+      );
+      expect(part("assistant-message")?.style.alignItems).toBe("flex-start");
+      expect(part("assistant-receipt-before")?.textContent).toBe("Before");
+      expect(part("assistant-working-text")?.textContent).toContain("Rows");
+      fixture.componentInstance.message.update((message) => ({
+        ...message,
+        role: "user",
+      }));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(part("assistant-message")?.getAttribute("data-role")).toBe("user");
+      expect(part("assistant-message")?.style.alignItems).toBe("flex-end");
+    } finally {
+      fixture.destroy();
+    }
   });
   it("preserves nested-overlay Escape and non-Escape keys", async () => {
     const fixture = await mounted();
@@ -422,6 +579,7 @@ describe("AdaptTableAssistantChrome", () => {
       }
     );
     expect(part("assistant-working")).toBeNull();
+    expectNativeList("assistant-messages", ["assistant-message"]);
     expect(part("assistant-input")?.getAttribute("placeholder")).toBe(
       "Type an answer"
     );
@@ -618,11 +776,22 @@ describe("AdaptTableAssistantChrome", () => {
     expect(part("assistant-receipts-group")).toBeNull();
     click("assistant-message-action-button");
     expect(offer).toHaveBeenCalledOnce();
+    const toggle = part("assistant-receipts-toggle-button");
+    toggle?.focus();
     click("assistant-receipts-toggle-button");
     await settle(fixture);
-    expect(
-      document.querySelectorAll('[data-adapttable-part="assistant-receipt"]')
-    ).toHaveLength(2);
+    expect(document.activeElement).toBe(toggle);
+    expectNativeList("assistant-receipts", [
+      "assistant-receipt",
+      "assistant-receipt",
+    ]);
+    expectNativeList("assistant-messages", ["assistant-message"]);
+    expect(part("assistant-receipt")?.getAttribute("data-status")).toBe(
+      "executed"
+    );
+    expect(part("assistant-receipt")?.getAttribute("data-kind")).toBe("edit");
+    expect(part("assistant-receipt")?.style.display).toBe("flex");
+    expect(part("assistant-receipts-tail")?.style.visibility).toBe("visible");
     expect(part("assistant-receipt-before")?.textContent).toBe("A");
     expect(part("assistant-receipt-after")?.textContent).toBe("B");
     expect(part("assistant-receipt-where")?.textContent).toContain("Ada");
@@ -804,7 +973,9 @@ describe("AdaptTableAssistantChrome", () => {
     const calls = messageAction.mock.calls.length;
     const choice = part("assistant-question-option");
     const allowance = part("assistant-always-allowed-revoke");
+    choice?.focus();
     for (let check = 0; check < 3; check += 1) await settle(fixture);
+    expect(document.activeElement).toBe(choice);
     expect(messageAction).toHaveBeenCalledTimes(calls);
     expect(part("assistant-question-option")).toBe(choice);
     expect(part("assistant-always-allowed-revoke")).toBe(allowance);
@@ -839,6 +1010,7 @@ describe("AdaptTableAssistantChrome", () => {
     );
     expect(part("assistant-approval")).not.toBeNull();
     expect(part("assistant-working")).toBeNull();
+    expectNativeList("assistant-messages", ["assistant-message"]);
     expect(part("assistant-approval-elsewhere")).toBeNull();
     fixture.componentInstance.extras.set({
       approval: { ...approval, presentation: "modal" },

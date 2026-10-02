@@ -1013,10 +1013,15 @@ class ColumnsBody {
   readonly presentation = SHOWCASE_PRESENTATION;
   readonly rows = PEOPLE;
   readonly rowKey = rowKey;
+  // This deliberately wide demo needs width floors: automatic table layout
+  // may shrink preferred widths until there is no overflow to demonstrate.
   readonly columns: readonly ColumnDef<Person>[] = [
-    ...COLUMNS,
-    { key: "email", header: "Email", width: 280 },
-    { key: "role", header: "Role", width: 220 },
+    ...COLUMNS.map((column) => ({
+      ...column,
+      minWidth: typeof column.width === "number" ? column.width : undefined,
+    })),
+    { key: "email", header: "Email", width: 280, minWidth: 280 },
+    { key: "role", header: "Role", width: 220, minWidth: 220 },
   ];
   readonly layout = signal<ColumnLayoutState>({
     hidden: [],

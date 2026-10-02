@@ -160,7 +160,8 @@
           "
         >
           @for (row of messageRows(); track row.message.id) {
-            <adapt-assistant-message
+            <li
+              adaptAssistantMessage
               [message]="row.message"
               [leads]="row.leads"
               [labels]="props().labels"
@@ -172,13 +173,14 @@
               [onUndoAction]="undoAction"
               [receipts]="props().receipts !== false"
               [onAnswer]="row.onAnswer"
-            />
+            ></li>
           }
           @if (working()) {
-            <adapt-assistant-working
+            <li
+              adaptAssistantWorking
               [labels]="props().labels"
               [progress]="props().assistant.progress"
-            />
+            ></li>
           }
         </ul>
         @if (props().note && props().assistant.messages.length === 0) {

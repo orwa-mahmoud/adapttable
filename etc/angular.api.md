@@ -822,6 +822,8 @@ export class AdaptAssistantMessage {
     // (undocumented)
     protected readonly mine: Signal<boolean>;
     // (undocumented)
+    protected readonly nativeListItem: boolean;
+    // (undocumented)
     protected readonly offerButton: Signal<TableAssistantButtonProps | null>;
     // (undocumented)
     readonly onAnswer: InputSignal<((answer: {
@@ -857,7 +859,7 @@ export class AdaptAssistantMessage {
     // (undocumented)
     protected readonly wholeUndo: Signal<TableAssistantButtonProps>;
     // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantMessage, "adapt-assistant-message", never, {
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantMessage, "adapt-assistant-message, li[adaptAssistantMessage]", never, {
         "message": {
             "alias": "message";
             "required": true;
@@ -944,6 +946,8 @@ export class AdaptAssistantReceipt {
     // (undocumented)
     readonly labels: InputSignal<TableLabels | undefined>;
     // (undocumented)
+    protected readonly nativeListItem: boolean;
+    // (undocumented)
     protected readonly needsSave: Signal<boolean>;
     // (undocumented)
     readonly onUndo: InputSignal<(() => void) | undefined>;
@@ -962,7 +966,7 @@ export class AdaptAssistantReceipt {
     // (undocumented)
     protected readonly where: Signal<string>;
     // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantReceipt, "adapt-assistant-receipt", never, {
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantReceipt, "adapt-assistant-receipt, li[adaptAssistantReceipt]", never, {
         "receipt": {
             "alias": "receipt";
             "required": true;
@@ -995,11 +999,13 @@ export class AdaptAssistantWorking {
     // (undocumented)
     readonly labels: InputSignal<TableLabels | undefined>;
     // (undocumented)
+    protected readonly nativeListItem: boolean;
+    // (undocumented)
     readonly progress: InputSignal<TableAssistantProgressView | null | undefined>;
     // (undocumented)
     protected readonly word: Signal<string>;
     // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantWorking, "adapt-assistant-working", never, {
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantWorking, "adapt-assistant-working, li[adaptAssistantWorking]", never, {
         "labels": {
             "alias": "labels";
             "required": false;

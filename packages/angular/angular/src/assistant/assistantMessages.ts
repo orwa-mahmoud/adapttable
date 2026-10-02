@@ -18,12 +18,14 @@ import {
   type TableAssistantReceiptView,
   type TableAssistantUndoView,
 } from "@adapttable/core/binding";
+import { NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
-  type ElementRef,
+  ElementRef,
+  inject,
   input,
   signal,
   viewChild,
@@ -110,15 +112,30 @@ export class AdaptSpeakerMark {
   );
 }
 
-/** An action outcome, never inferred from the assistant's prose. @public */
+/**
+ * An action outcome, never inferred from the assistant's prose.
+ * Use `li[adaptAssistantReceipt]` inside a native receipt list.
+ *
+ * @public
+ */
 @Component({
-  selector: "adapt-assistant-receipt",
-  imports: [AdaptControl, AdaptIcon],
+  selector: "adapt-assistant-receipt, li[adaptAssistantReceipt]",
+  imports: [AdaptControl, AdaptIcon, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: "display: contents" },
+  host: {
+    "[attr.data-adapttable-part]":
+      "nativeListItem ? 'assistant-receipt' : null",
+    "[attr.data-status]": "nativeListItem ? receipt().status : null",
+    "[attr.data-kind]": "nativeListItem ? receipt().subject?.kind : null",
+    "[style]":
+      "nativeListItem ? 'display:flex;align-items:center;justify-content:space-between;gap:0.6em;flex-wrap:wrap;padding:0.55em 0.6em;border-radius:0.7em;border:1px solid color-mix(in srgb,currentColor 12%,transparent)' : 'display:contents'",
+  },
   templateUrl: "./assistantReceipt.html",
 })
 export class AdaptAssistantReceipt {
+  protected readonly nativeListItem =
+    inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.localName ===
+    "li";
   readonly receipt = input.required<TableAssistantReceiptView>();
   readonly slots = input.required<TableAssistantSlots>();
   readonly labels = input<TableLabels | undefined>();
@@ -177,12 +194,30 @@ export class AdaptAssistantReceipt {
 }
 
 let nextReceiptHeading = 0;
-/** A message and its optional question, receipts, undo, and host action. @public */
+/**
+ * A message and its optional question, receipts, undo, and host action.
+ * Use `li[adaptAssistantMessage]` inside a native conversation list.
+ *
+ * @public
+ */
 @Component({
-  selector: "adapt-assistant-message",
-  imports: [AdaptControl, AdaptSpeakerMark, AdaptAssistantReceipt],
+  selector: "adapt-assistant-message, li[adaptAssistantMessage]",
+  imports: [
+    AdaptControl,
+    AdaptSpeakerMark,
+    AdaptAssistantReceipt,
+    NgTemplateOutlet,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: "display: contents" },
+  host: {
+    "[attr.data-adapttable-part]":
+      "nativeListItem ? 'assistant-message' : null",
+    "[attr.data-role]": "nativeListItem ? message().role : null",
+    "[style.align-items]":
+      "nativeListItem ? (mine() ? 'flex-end' : 'flex-start') : null",
+    "[style]":
+      "nativeListItem ? 'display:flex;flex-direction:column;gap:0.25em' : 'display:contents'",
+  },
   styles: [
     `
       [data-mine]::after {
@@ -206,6 +241,9 @@ let nextReceiptHeading = 0;
   templateUrl: "./assistantMessage.html",
 })
 export class AdaptAssistantMessage {
+  protected readonly nativeListItem =
+    inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.localName ===
+    "li";
   readonly message = input.required<TableAssistantMessageView>();
   readonly labels = input<TableLabels | undefined>();
   protected readonly copy = computed(() => resolveLabels(this.labels()));
@@ -349,12 +387,23 @@ export class AdaptAssistantMessage {
   );
 }
 
-/** A running turn occupies the same place as its eventual answer. @public */
+/**
+ * A running turn occupies the same place as its eventual answer.
+ * Use `li[adaptAssistantWorking]` inside a native conversation list.
+ *
+ * @public
+ */
 @Component({
-  selector: "adapt-assistant-working",
-  imports: [AdaptSpeakerMark],
+  selector: "adapt-assistant-working, li[adaptAssistantWorking]",
+  imports: [AdaptSpeakerMark, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: "display: contents" },
+  host: {
+    "[attr.data-adapttable-part]":
+      "nativeListItem ? 'assistant-working' : null",
+    "[attr.aria-hidden]": "nativeListItem ? 'true' : null",
+    "[style]":
+      "nativeListItem ? 'display:flex;align-items:center;gap:0.5em;opacity:0.75;min-height:1.5em' : 'display:contents'",
+  },
   styles: [
     `
       @keyframes adapttable-assistant-dot {
@@ -377,27 +426,39 @@ export class AdaptAssistantMessage {
       }
     `,
   ],
-  template: `<li
-    data-adapttable-part="assistant-working"
-    aria-hidden="true"
-    style="display:flex;align-items:center;gap:0.5em;opacity:0.75;min-height:1.5em"
-  >
-    <adapt-speaker-mark /><span style="display:inline-flex;gap:0.25em">
-      @for (index of [0, 1, 2]; track index) {
-        <span
-          data-adapttable-part="assistant-working-dot"
-          [style.animation]="
-            'adapttable-assistant-dot 1.2s ' +
-            index * 0.16 +
-            's infinite ease-in-out'
-          "
-          style="width:0.35em;height:0.35em;border-radius:50%;background:currentColor"
-        ></span>
-      }</span
-    ><span data-adapttable-part="assistant-working-text">{{ word() }}</span>
-  </li>`,
+  template: `
+    <ng-template #content>
+      <adapt-speaker-mark /><span style="display:inline-flex;gap:0.25em">
+        @for (index of [0, 1, 2]; track index) {
+          <span
+            data-adapttable-part="assistant-working-dot"
+            [style.animation]="
+              'adapttable-assistant-dot 1.2s ' +
+              index * 0.16 +
+              's infinite ease-in-out'
+            "
+            style="width:0.35em;height:0.35em;border-radius:50%;background:currentColor"
+          ></span>
+        }</span
+      ><span data-adapttable-part="assistant-working-text">{{ word() }}</span>
+    </ng-template>
+    @if (nativeListItem) {
+      <ng-container [ngTemplateOutlet]="content" />
+    } @else {
+      <li
+        data-adapttable-part="assistant-working"
+        aria-hidden="true"
+        style="display:flex;align-items:center;gap:0.5em;opacity:0.75;min-height:1.5em"
+      >
+        <ng-container [ngTemplateOutlet]="content" />
+      </li>
+    }
+  `,
 })
 export class AdaptAssistantWorking {
+  protected readonly nativeListItem =
+    inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.localName ===
+    "li";
   readonly labels = input<TableLabels | undefined>();
   protected readonly copy = computed(() => resolveLabels(this.labels()));
   readonly progress = input<TableAssistantProgressView | null | undefined>();

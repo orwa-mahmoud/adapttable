@@ -153,7 +153,8 @@ class Detail {
       [dir]="dir()"
       [urlSync]="false"
       [forceMobile]="mobile()"
-      [selectable]="true"
+      [selectable]="selectable()"
+      [maxHeight]="maxHeight()"
       [features]="features()"
       [classNames]="classes()"
       [renderCard]="
@@ -190,6 +191,8 @@ class Host {
   readonly rowKey = (row: Person) => row.id;
   readonly features = input<readonly AdaptTableFeature[]>([]);
   readonly mobile = input(true);
+  readonly selectable = input(true);
+  readonly maxHeight = input<number | string>();
   readonly bodyKind = input<"template" | "component">();
   readonly actionsKind = input<"template" | "component">();
   readonly summary = input<() => Partial<Record<string, unknown>>>();
@@ -209,6 +212,8 @@ async function mount(
   options: {
     features?: readonly AdaptTableFeature[];
     mobile?: boolean;
+    selectable?: boolean;
+    maxHeight?: number | string;
     bodyKind?: "template" | "component";
     actionsKind?: "template" | "component";
     activate?: (row: Person) => void;
@@ -342,6 +347,40 @@ describe("mobile card reach", () => {
     expect(list.getAttribute("dir")).toBe("ltr");
     expect(list.getAttribute("aria-label")).toBe("Available people");
   });
+
+  it.each([280, "18rem", 0])(
+    "makes the bounded native list keyboard-focusable for maxHeight=%s",
+    async (maxHeight) => {
+      const { fixture, settle } = await mount({ selectable: false });
+      const list = part("cards");
+      expect(list.hasAttribute("tabindex")).toBe(false);
+      expect(list.tabIndex).toBe(-1);
+      expect(list.style.overflowY).toBe("");
+      expect(list.querySelector("button,input,[tabindex]")).toBeNull();
+
+      fixture.componentRef.setInput("maxHeight", maxHeight);
+      await settle();
+      expect(part("cards")).toBe(list);
+      expect(list.tagName).toBe("UL");
+      expect(list.hasAttribute("role")).toBe(false);
+      expect(list.getAttribute("aria-label")).toBe("People on call");
+      expect(list.getAttribute("tabindex")).toBe("0");
+      expect(list.style.maxHeight).toBe(
+        typeof maxHeight === "number" ? `${String(maxHeight)}px` : maxHeight
+      );
+      expect(list.style.overflowY).toBe("auto");
+      list.focus();
+      expect(document.activeElement).toBe(list);
+
+      fixture.componentRef.setInput("maxHeight", undefined);
+      await settle();
+      expect(part("cards")).toBe(list);
+      expect(list.hasAttribute("tabindex")).toBe(false);
+      expect(list.tabIndex).toBe(-1);
+      expect(list.style.maxHeight).toBe("");
+      expect(list.style.overflowY).toBe("");
+    }
+  );
 
   it("activates with Enter, Space and body clicks while roving past pinned summaries", async () => {
     const activate = vi.fn();

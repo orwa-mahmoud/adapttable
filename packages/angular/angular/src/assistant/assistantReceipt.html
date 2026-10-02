@@ -1,18 +1,4 @@
-<li
-  data-adapttable-part="assistant-receipt"
-  [attr.data-status]="receipt().status"
-  [attr.data-kind]="receipt().subject?.kind"
-  style="
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6em;
-    flex-wrap: wrap;
-    padding: 0.55em 0.6em;
-    border-radius: 0.7em;
-    border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
-  "
->
+<ng-template #content>
   <span
     data-adapttable-part="assistant-receipt-summary"
     style="
@@ -150,4 +136,25 @@
       </span>
     }
   }
-</li>
+</ng-template>
+@if (nativeListItem) {
+  <ng-container [ngTemplateOutlet]="content" />
+} @else {
+  <li
+    data-adapttable-part="assistant-receipt"
+    [attr.data-status]="receipt().status"
+    [attr.data-kind]="receipt().subject?.kind"
+    style="
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6em;
+      flex-wrap: wrap;
+      padding: 0.55em 0.6em;
+      border-radius: 0.7em;
+      border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+    "
+  >
+    <ng-container [ngTemplateOutlet]="content" />
+  </li>
+}

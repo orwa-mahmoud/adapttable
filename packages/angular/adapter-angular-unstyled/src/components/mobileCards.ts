@@ -237,12 +237,13 @@ export class AdaptMobileCards<TRow> {
       : null;
   });
 
-  /** Preserve the table's name and direction while retaining native list semantics. */
+  /** Preserve native list semantics; a capped list is also a keyboard scroll stop. */
   protected readonly listAttrs = computed((): Attrs => ({
     ...this.view().table.tableAttrs(),
     role: undefined,
     "aria-rowcount": undefined,
     "aria-colcount": undefined,
+    tabIndex: this.maxHeight() == null ? undefined : 0,
     "data-adapttable-part": "cards",
     class: this.view().classNames().cards,
     style: { margin: 0, padding: 0, ...this.listStyle() },
