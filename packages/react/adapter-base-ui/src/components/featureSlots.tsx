@@ -16,6 +16,7 @@ import {
   EXPAND_TOGGLE,
   type ExpandToggleSlotProps,
   FeatureSlot,
+  type FeatureSlotKey,
   FILL_HANDLE,
   type FillHandleCellSlotProps,
   FILTER_HEADER,
@@ -73,109 +74,55 @@ export function OptionalTreeCell<TRow>(
   );
 }
 
-export function OptionalTreeToggle<TRow>(
+/** Bind a fixed slot once; every pass-through uses the same render path. */
+function optionalSlot<TProps>(slot: FeatureSlotKey<TProps>) {
+  return function OptionalSlot(props: Readonly<TProps>): ReactNode {
+    return <FeatureSlot slot={slot} props={props} />;
+  };
+}
+
+export const OptionalTreeToggle = optionalSlot(TREE_TOGGLE) as unknown as <
+  TRow,
+>(
   props: Readonly<TreeToggleProps<TRow>>
-): ReactNode {
-  return (
-    <FeatureSlot
-      slot={TREE_TOGGLE}
-      props={props as unknown as TreeToggleProps<never>}
-    />
-  );
-}
+) => ReactNode;
 
-export function OptionalFillHandle(
-  props: Readonly<FillHandleCellSlotProps>
-): ReactNode {
-  return <FeatureSlot slot={FILL_HANDLE} props={props} />;
-}
-
-export function OptionalExpandToggle(
-  props: Readonly<ExpandToggleSlotProps>
-): ReactNode {
-  return <FeatureSlot slot={EXPAND_TOGGLE} props={props} />;
-}
-
-export function OptionalFilterHeader<TRow>(
+export const OptionalFillHandle =
+  optionalSlot<FillHandleCellSlotProps>(FILL_HANDLE);
+export const OptionalExpandToggle =
+  optionalSlot<ExpandToggleSlotProps>(EXPAND_TOGGLE);
+export const OptionalFilterHeader = optionalSlot(FILTER_HEADER) as unknown as <
+  TRow,
+>(
   props: Readonly<FilterHeaderControlProps<TRow>>
-): ReactNode {
-  return (
-    <FeatureSlot
-      slot={FILTER_HEADER}
-      props={props as unknown as FilterHeaderControlProps<never>}
-    />
-  );
-}
-
-export function OptionalRowEditActions<TRow>(
-  props: Readonly<RowEditActionsProps<TRow>>
-): ReactNode {
-  return (
-    <FeatureSlot
-      slot={ROW_EDIT_ACTIONS}
-      props={props as unknown as RowEditActionsProps<never>}
-    />
-  );
-}
-
-export function OptionalRowReorderHandle<TRow>(
+) => ReactNode;
+export const OptionalRowEditActions = optionalSlot(
+  ROW_EDIT_ACTIONS
+) as unknown as <TRow>(props: Readonly<RowEditActionsProps<TRow>>) => ReactNode;
+export const OptionalRowReorderHandle = optionalSlot(
+  ROW_REORDER_HANDLE
+) as unknown as <TRow>(
   props: Readonly<RowReorderHandleProps<TRow>>
-): ReactNode {
-  return (
-    <FeatureSlot
-      slot={ROW_REORDER_HANDLE}
-      props={props as unknown as RowReorderHandleProps<never>}
-    />
-  );
-}
-
-export function OptionalRowReorderButtons<TRow>(
+) => ReactNode;
+export const OptionalRowReorderButtons = optionalSlot(
+  ROW_REORDER_BUTTONS
+) as unknown as <TRow>(
   props: Readonly<RowReorderButtonsProps<TRow>>
-): ReactNode {
-  return (
-    <FeatureSlot
-      slot={ROW_REORDER_BUTTONS}
-      props={props as unknown as RowReorderButtonsProps<never>}
-    />
-  );
-}
-
-export function OptionalColumnGroupToggle(
-  props: Readonly<ColumnGroupToggleProps>
-): ReactNode {
-  return <FeatureSlot slot={COLUMN_GROUP_TOGGLE} props={props} />;
-}
-
-export function OptionalColumnSelect(
-  props: Readonly<Omit<ColumnSelectCheckboxChromeProps, "slots">>
-): ReactNode {
-  return <FeatureSlot slot={COLUMN_SELECT} props={props} />;
-}
-
-export function OptionalColumnHeaderRename(
-  props: Readonly<ColumnHeaderRenameSlotProps & { children?: ReactNode }>
-): ReactNode {
-  return <FeatureSlot slot={COLUMN_HEADER_RENAME} props={props} />;
-}
-
-export function OptionalGroupHeaderRow<TRow>(
+) => ReactNode;
+export const OptionalColumnGroupToggle =
+  optionalSlot<ColumnGroupToggleProps>(COLUMN_GROUP_TOGGLE);
+export const OptionalColumnSelect =
+  optionalSlot<Omit<ColumnSelectCheckboxChromeProps, "slots">>(COLUMN_SELECT);
+export const OptionalColumnHeaderRename = optionalSlot<
+  ColumnHeaderRenameSlotProps & { children?: ReactNode }
+>(COLUMN_HEADER_RENAME);
+export const OptionalGroupHeaderRow = optionalSlot(
+  GROUP_HEADER_ROW
+) as unknown as <TRow>(
   props: Readonly<GroupHeaderRowSlotProps<TRow>>
-): ReactNode {
-  return (
-    <FeatureSlot
-      slot={GROUP_HEADER_ROW}
-      props={props as unknown as GroupHeaderRowSlotProps<never>}
-    />
-  );
-}
-
-export function OptionalGroupHeaderCard<TRow>(
+) => ReactNode;
+export const OptionalGroupHeaderCard = optionalSlot(
+  GROUP_HEADER_CARD
+) as unknown as <TRow>(
   props: Readonly<GroupHeaderCardSlotProps<TRow>>
-): ReactNode {
-  return (
-    <FeatureSlot
-      slot={GROUP_HEADER_CARD}
-      props={props as unknown as GroupHeaderCardSlotProps<never>}
-    />
-  );
-}
+) => ReactNode;
