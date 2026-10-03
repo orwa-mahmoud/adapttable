@@ -152,6 +152,17 @@
       [data-theme="dark"] .at-fallback a {
         color: #a5b4fc;
       }
+      .at-fallback {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .at-fallback pre {
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
+      }
     </style>
   </head>
   <body>
@@ -162,7 +173,7 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Unstyled</p>
         <h1>AI table assistant in Unstyled Angular</h1>
-        <p>This deterministic local demo mounts a real Unstyled Angular table and its native assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.</p>
+        <p>This deterministic local demo mounts a real Unstyled Angular table and its Unstyled assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.</p>
         <p>A question filters the table only after you answer. A proposed edit waits for your approval in the assistant, the table or a dialog; an approved write updates the host's data and its status line. Rejecting leaves the data unchanged, and the conversation records the execution result.</p>
         <p><code>tableAgent</code> and <code>injectTableAssistant</code> from <code>@adapttable/ai-angular</code> share the mounted table's session. The snippet below shows a minimal local sorting transport; the demo also includes questions and governed edits. JSON, OpenAI, HTTP, MCP, MCP Apps, WebMCP, AG-UI and AI SDK helpers can use the same session in your application.</p>
         <p>The assistant, question choices and approval controls are native HTML. This page runs a local script only; the host status line records approved writes, and the approval-surface selector chooses assistant, table or dialog review.</p>
@@ -241,6 +252,13 @@ export class PeopleAssistant {
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="../../ng-zorro/ai/">AI table assistant in NG-ZORRO Angular</a> — Ant Design components for Angular</li>
+          <li><a href="../../material/ai/">AI table assistant in Angular Material Angular</a> — Angular Material controls for Angular</li>
+          <li><a href="../../ng-bootstrap/ai/">AI table assistant in ng-bootstrap Angular</a> — ng-bootstrap controls for Angular</li>
+          <li><a href="../../aria/ai/">AI table assistant in Angular Aria Angular</a> — Angular Aria controls for Angular</li>
+          <li><a href="../../ngx-bootstrap/ai/">AI table assistant in ngx-bootstrap Angular</a> — ngx-bootstrap controls for Angular</li>
+          <li><a href="../../angular-cdk/ai/">AI table assistant in Angular CDK Angular</a> — Angular CDK controls for Angular</li>
+          <li><a href="../../spartan/ai/">AI table assistant in Spartan Angular</a> — Spartan controls for Angular</li>
+          <li><a href="../../taiga-ui/ai/">AI table assistant in Taiga UI Angular</a> — Taiga UI controls for Angular</li>
         </ul>
         <h2>More Unstyled features</h2>
         <ul>
@@ -268,7 +286,7 @@ export class PeopleAssistant {
         <p>
           Reference: <a href="https://adapttable.orwamahmoud.com/ai-http/">ai-http</a>, <a href="https://adapttable.orwamahmoud.com/ai-integrations/">ai-integrations</a>, <a href="https://adapttable.orwamahmoud.com/ai/">ai</a>, <a href="https://adapttable.orwamahmoud.com/angular/agent-capabilities/">agent-capabilities</a>. More of this kit:
           <a href="../">AdaptTable for Unstyled</a>, or
-          <a href="/react/demo/">the live demo</a>.
+          <a href="/angular/demo/unstyled/">the live demo</a>.
         </p>
       </main>
     </div>

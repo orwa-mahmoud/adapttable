@@ -3,6 +3,9 @@ import { expect, type Page, test } from "@playwright/test";
 import {
   ANGULAR_KITS,
   angularPart,
+  checkAngularCheckbox,
+  dismissTaigaDrawerBackdrop,
+  expectAngularDrawerBackdrop,
   expectAngularSelection,
   openAngularOptions,
   selectAngularOption,
@@ -60,9 +63,10 @@ for (const kit of ANGULAR_KITS) {
     }) => {
       await page.goto(PAGE);
       await part(page, "filters-button").click();
-      await part(page, "filters-popover")
-        .getByRole("checkbox", { name: "Core" })
-        .check();
+      await checkAngularCheckbox(
+        kit,
+        part(page, "filters-popover").getByRole("checkbox", { name: "Core" })
+      );
       await expect(part(page, "row")).toHaveCount(6);
       expect(new Set(await teams(page))).toEqual(new Set(["Core"]));
       await expect(part(page, "chip").first()).toContainText("Team: Core");
@@ -98,7 +102,7 @@ for (const kit of ANGULAR_KITS) {
         name: "Core team",
         exact: true,
       });
-      await selectAngularOption(kit, core, { value: "true", label: "True" });
+      await selectAngularOption(core, { value: "true", label: "True" });
       await expectAngularSelection(kit, core, { value: "true", label: "True" });
       if (kit.key === "ng-zorro") await expect(core).toBeFocused();
       await expect(popover).toBeVisible();
@@ -179,7 +183,7 @@ for (const kit of ANGULAR_KITS) {
       await part(page, "filters-button").click();
       const drawer = part(page, "filters-panel");
       await expect(drawer).toBeVisible();
-      await expect(part(page, "filters-backdrop")).toBeVisible();
+      await expectAngularDrawerBackdrop(kit, page, drawer);
       await expect
         .poll(() =>
           drawer.evaluate((panel) => panel.contains(document.activeElement))
@@ -188,6 +192,18 @@ for (const kit of ANGULAR_KITS) {
       await page.keyboard.press("Escape");
       await expect(drawer).toHaveCount(0);
       await expect(part(page, "filters-button")).toBeFocused();
+      if (kit.key === "taiga-ui") {
+        await part(page, "filters-button").click();
+        await expect(drawer).toBeVisible();
+        await expectAngularDrawerBackdrop(kit, page, drawer);
+        await drawer
+          .getByRole("heading", { name: "Filters", exact: true })
+          .click();
+        await expect(drawer).toBeVisible();
+        await dismissTaigaDrawerBackdrop(page, drawer);
+        await expect(drawer).toHaveCount(0);
+        await expect(part(page, "filters-button")).toBeFocused();
+      }
     });
 
     test("filters one column from its header funnel", async ({ page }) => {
@@ -197,7 +213,10 @@ for (const kit of ANGULAR_KITS) {
       // Person, Team, Status, Timeline, Budget, Load — every column with a filter.
       await expect(funnels).toHaveCount(6);
       await funnels.nth(1).click();
-      await page.getByRole("checkbox", { name: "Core" }).check();
+      await checkAngularCheckbox(
+        kit,
+        page.getByRole("checkbox", { name: "Core" })
+      );
       await expect(part(page, "row")).toHaveCount(6);
       expect(new Set(await teams(page))).toEqual(new Set(["Core"]));
     });

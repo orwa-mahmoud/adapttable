@@ -56,6 +56,7 @@
           [adaptAttrs]="headerCells().get(column.key)!"
           [attr.rowspan]="rowSpan > 1 ? rowSpan : null"
         >
+          <div class="adapt-header-controls">
           @if (v.table.canRenameColumns && column.renameable) {
             <adapt-column-header-rename
               [columnKey]="column.key"
@@ -73,6 +74,8 @@
               @if (column.sortable) {
                 <button
                   nz-button
+                  nzType="text"
+                  nzSize="small"
                   [adaptAttrs]="v.table.sortButtonAttrs(column)"
                 >
                   <span [adaptHeader]="column"></span>
@@ -120,6 +123,7 @@
               />
             }
           }
+          </div>
         </th>
       </ng-template>
       @if (headerPlan(); as plan) {

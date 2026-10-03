@@ -26,7 +26,6 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
-  rmSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -35,6 +34,7 @@ import { fileURLToPath } from "node:url";
 import { Extractor, ExtractorConfig } from "@microsoft/api-extractor";
 
 import { entrypoints } from "./api-entrypoints.mjs";
+import { finishApiReportOutput } from "./api-report-diagnostics.mjs";
 import {
   classifyForgottenExport,
   entryExports,
@@ -77,6 +77,7 @@ const counts = {
 
 /** Every entry point that hands back a type it does not export, named. */
 const findings = [];
+const generatedReports = [];
 
 /** api-extractor's opening lines, said once for the run rather than per entry. */
 const SAID_ONCE = new Set([
@@ -210,6 +211,7 @@ function extractOne({ dir, report, entry, isMainEntry }) {
     return false;
   }
   const fresh = readFileSync(join(OUT, report), "utf8");
+  generatedReports.push(report);
   const same = fresh === committed;
   if (!LOCAL && !same) {
     console.error(
@@ -226,7 +228,6 @@ let ok = true;
 for (const target of entrypoints()) {
   ok = extractOne(target) && ok;
 }
-if (!LOCAL) rmSync(OUT, { recursive: true, force: true });
 // Only claim a match when every report actually matched. A run that prints
 // "every committed report matches" under the line saying one is out of date is
 // the same failure as reporting one warning class as if it were the total.
@@ -261,5 +262,13 @@ if (holes > 0) {
       `Export the type from that entry, or give the signature one the entry already names.`
   );
   ok = false;
+}
+if (!LOCAL) {
+  finishApiReportOutput({
+    output: OUT,
+    diagnosticsDirectory: process.env.ADAPTTABLE_API_REPORTS_DIAGNOSTICS_DIR,
+    reports: generatedReports,
+    success: ok,
+  });
 }
 if (!ok) process.exit(1);

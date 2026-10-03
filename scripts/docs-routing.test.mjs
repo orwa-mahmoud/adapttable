@@ -9,6 +9,7 @@ import { sidebarPages, sidebarSlugs } from "../apps/docs/sidebar.mjs";
 import { rewriteDocLinks } from "../apps/docs/sync-docs.mjs";
 import { unlistedDocs } from "./build-llms-full.mjs";
 import { docsFiles } from "./docs-files.mjs";
+import { REPO_ROOT } from "./packages.mjs";
 
 const temporary = [];
 after(() =>
@@ -55,20 +56,25 @@ describe("canonical docs sources", () => {
     assert.deepEqual(sidebarPages(tree), [
       { label: "Filtering", slug: "angular/filtering", group: "Features" },
     ]);
-    assert.equal(
-      sidebarSlugs().filter((slug) => slug.startsWith("angular/")).length,
-      50
+    assert.deepEqual(
+      sidebarSlugs()
+        .filter((slug) => slug.startsWith("angular/"))
+        .sort(),
+      docsFiles(join(REPO_ROOT, "docs"))
+        .filter((file) => file.startsWith("angular/"))
+        .map((file) => file.replace(/\.md$/, ""))
+        .sort()
     );
   });
 });
 
 describe("source-relative markdown links", () => {
-  it("resolves Angular siblings, shared parents and the API reference with anchors", () => {
+  it("preserves Angular siblings and shared anchors while explaining an unavailable API guide", () => {
     const source =
       "[Filters](./filtering.md#operators) [Concepts](../concepts.md) [API](../api.md#the-angular-binding)";
     assert.equal(
       rewriteDocLinks(source, "angular/columns.md"),
-      "[Filters](/angular/filtering/#operators) [Concepts](/concepts/) [API](/react/api/#the-angular-binding)"
+      "[Filters](/angular/filtering/#operators) [Concepts](/concepts/) [API](/angular/getting-started/?unavailable=api)"
     );
   });
 

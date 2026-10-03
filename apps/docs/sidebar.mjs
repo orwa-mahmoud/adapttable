@@ -134,18 +134,32 @@ export const sidebar = [
   ...primarySidebar,
   {
     label: "Angular",
-    items: primarySidebar
-      .map((group) => ({
-        label: group.label,
-        items: group.items
-          .filter((item) => angularSources.has(`angular/${item.slug}.md`))
-          .map((item) => ({
-            ...item,
-            label: item.slug === "ssr-rsc" ? "SSR & hydration" : item.label,
-            slug: `angular/${item.slug}`,
-          })),
-      }))
-      .filter((group) => group.items.length > 0),
+    items: [
+      {
+        label: "UI kits",
+        items: [
+          { label: "Angular Material", slug: "angular/material" },
+          { label: "ng-bootstrap", slug: "angular/ng-bootstrap" },
+          { label: "Spartan", slug: "angular/spartan" },
+          { label: "Taiga UI", slug: "angular/taiga-ui" },
+          { label: "Angular CDK", slug: "angular/angular-cdk" },
+          { label: "ngx-bootstrap", slug: "angular/ngx-bootstrap" },
+          { label: "Angular Aria", slug: "angular/aria" },
+        ],
+      },
+      ...primarySidebar
+        .map((group) => ({
+          label: group.label,
+          items: group.items
+            .filter((item) => angularSources.has(`angular/${item.slug}.md`))
+            .map((item) => ({
+              ...item,
+              label: item.slug === "ssr-rsc" ? "SSR & hydration" : item.label,
+              slug: `angular/${item.slug}`,
+            })),
+        }))
+        .filter((group) => group.items.length > 0),
+    ],
   },
 ];
 

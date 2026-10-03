@@ -1,6 +1,9 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
 import { builtAdapters } from "../apps/showcase/matrix.mjs";
+import { kitSelector as materialPart } from "../packages/angular/adapter-material/testUtils";
+import { ngBootstrapPart } from "../packages/angular/adapter-ng-bootstrap/testUtils";
+import { ngxBootstrapPart } from "../packages/angular/adapter-ngx-bootstrap/testUtils";
 import { getLabels } from "../packages/shared/i18n/src/index";
 
 /** Every registered Angular shell runs the same operation assertions. */
@@ -21,6 +24,19 @@ const escapeRegExp = (text: string): string =>
 const labelsFor = (page: Page) =>
   getLabels(new URL(page.url()).searchParams.get("locale") ?? "en");
 
+/** Each themed kit keeps native-only hooks outside the public parts contract. */
+function themedPart(kit: AngularKit, name: string): string {
+  if (kit.key === "ngx-bootstrap") return ngxBootstrapPart(name);
+  if (kit.key === "material") return materialPart(name);
+  const selector = ngBootstrapPart(name);
+  if (kit.key === "ng-bootstrap") return selector;
+  if (kit.key === "spartan")
+    return selector.replace("data-ng-bootstrap-part", "data-spartan-part");
+  if (kit.key === "taiga-ui")
+    return selector.replace("data-ng-bootstrap-part", "data-taiga-part");
+  return `[data-adapttable-part="${name}"]`;
+}
+
 /** Native-only widget parts map to the real NG-ZORRO surface for axe too. */
 export function angularOverlaySelector(
   kit: AngularKit,
@@ -40,7 +56,7 @@ export function angularOverlaySelector(
         return `.ant-popover fieldset[aria-label=${JSON.stringify(labels.columns)}]`;
     }
   }
-  return `[data-adapttable-part="${name}"]`;
+  return themedPart(kit, name);
 }
 
 /**
@@ -129,7 +145,107 @@ export function angularPart(
         });
     }
   }
-  return scope.locator(`[data-adapttable-part="${name}"]`);
+  const overlay = [
+    "filters-popover",
+    "filters-panel",
+    "filters-backdrop",
+    "views-panel",
+    "column-menu-panel",
+  ].includes(name);
+  return (overlay ? page.locator("body") : scope).locator(
+    themedPart(kit, name)
+  );
+}
+
+/** Brain's button commits through Angular's render; native inputs update during the click. */
+export async function checkAngularCheckbox(
+  kit: AngularKit,
+  control: Locator
+): Promise<void> {
+  if (kit.key === "spartan") {
+    await expect(control).toHaveJSProperty("tagName", "BUTTON");
+    await expect(control).toHaveAttribute("role", "checkbox");
+    await expect(control).toHaveAttribute("aria-checked", "false");
+    await control.click();
+    await expect(control).toBeChecked();
+    return;
+  }
+  await control.check();
+}
+
+/** A mixed Brain checkbox exposes ARIA; native checkboxes expose indeterminate. */
+export async function expectAngularCheckboxMixed(
+  kit: AngularKit,
+  control: Locator,
+  mixed: boolean
+): Promise<void> {
+  if (kit.key === "spartan") {
+    if (mixed) await expect(control).toHaveAttribute("aria-checked", "mixed");
+    else
+      await expect(control).toHaveAttribute("aria-checked", /^(true|false)$/);
+    return;
+  }
+  await expect(control).toHaveJSProperty("indeterminate", mixed);
+}
+
+/** Taiga's real backdrop is a fixed pseudo-element on its native drawer. */
+export async function expectAngularDrawerBackdrop(
+  kit: AngularKit,
+  page: Page,
+  drawer: Locator
+): Promise<void> {
+  if (kit.key !== "taiga-ui") {
+    await expect(angularPart(kit, page, "filters-backdrop")).toBeVisible();
+    return;
+  }
+  await expect(drawer).toHaveJSProperty("tagName", "TUI-DRAWER");
+  await expect(drawer).toHaveClass(/(?:^|\s)_overlay(?:\s|$)/);
+  await expect
+    .poll(() =>
+      drawer.evaluate((panel) => {
+        const backdrop = getComputedStyle(panel, "::before");
+        return (
+          backdrop.content === '""' &&
+          backdrop.position === "fixed" &&
+          backdrop.visibility === "visible" &&
+          backdrop.display !== "none" &&
+          backdrop.pointerEvents !== "none" &&
+          Number(backdrop.opacity) > 0 &&
+          backdrop.backgroundColor !== "transparent" &&
+          backdrop.backgroundColor !== "rgba(0, 0, 0, 0)" &&
+          Number.parseFloat(backdrop.top) <= -innerHeight &&
+          Number.parseFloat(backdrop.bottom) <= -innerHeight &&
+          Number.parseFloat(backdrop.left) <= -innerWidth &&
+          Number.parseFloat(backdrop.right) <= -innerWidth
+        );
+      })
+    )
+    .toBe(true);
+}
+
+/** Hit the native pseudo-backdrop outside the visible Taiga drawer content. */
+export async function dismissTaigaDrawerBackdrop(
+  page: Page,
+  drawer: Locator
+): Promise<void> {
+  const bounds = (await drawer.boundingBox())!;
+  const viewport = page.viewportSize()!;
+  const left = Math.max(0, bounds.x);
+  const right = Math.max(0, viewport.width - bounds.x - bounds.width);
+  expect(Math.max(left, right)).toBeGreaterThan(16);
+  const point = {
+    x: left >= right ? left / 2 : bounds.x + bounds.width + right / 2,
+    y: viewport.height / 2,
+  };
+  await expect
+    .poll(() =>
+      drawer.evaluate(
+        (panel, point) => document.elementFromPoint(point.x, point.y) === panel,
+        point
+      )
+    )
+    .toBe(true);
+  await page.mouse.click(point.x, point.y);
 }
 
 /** Parts can identify the select host or its actual, focusable input. */
@@ -145,9 +261,17 @@ export async function expectAngularSelection(
   control: Locator,
   option: SelectOption
 ): Promise<void> {
-  if (kit.key === "unstyled") {
+  if (await control.evaluate((element) => element.tagName === "SELECT")) {
     await expect(control).toHaveValue(option.value);
     await expect(control.locator("option:checked")).toHaveText(option.label);
+    return;
+  }
+  if (kit.key === "aria") {
+    await expect(angularCombobox(control)).toContainText(option.label);
+    return;
+  }
+  if (kit.key === "taiga-ui") {
+    await expect(angularCombobox(control)).toHaveValue(option.label);
     return;
   }
   await expect(angularCombobox(control)).toBeVisible();
@@ -163,10 +287,12 @@ export async function openAngularOptions(control: Locator): Promise<Locator> {
   const combobox = angularCombobox(control);
   // NG-ZORRO overlays its readonly input with the selected label. The visible
   // selector is the pointer target a reader uses; the input retains keyboard ARIA.
-  await combobox
-    .locator("xpath=ancestor::nz-select[1]")
-    .locator("nz-select-top-control")
-    .click();
+  // Resolve the rendered native control before classifying its host. A count
+  // on a not-yet-mounted select would choose the generic input click path.
+  await expect(combobox).toBeVisible();
+  const zorro = combobox.locator("xpath=ancestor::nz-select[1]");
+  if (await zorro.count()) await zorro.locator("nz-select-top-control").click();
+  else await combobox.click();
   await expect(combobox).toHaveAttribute("aria-expanded", "true");
   await expect(combobox).toHaveAttribute("aria-controls", /\S+/);
   const listId = (await combobox.getAttribute("aria-controls"))!;
@@ -180,12 +306,11 @@ export async function openAngularOptions(control: Locator): Promise<Locator> {
 
 /** Exercise each kit's real control without assigning its model directly. */
 export async function selectAngularOption(
-  kit: AngularKit,
   control: Locator,
   option: SelectOption,
   optionCount?: number
 ): Promise<void> {
-  if (kit.key === "unstyled") {
+  if (await control.evaluate((element) => element.tagName === "SELECT")) {
     if (optionCount !== undefined) {
       await expect(control.locator("option")).toHaveCount(optionCount);
     }

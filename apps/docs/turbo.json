@@ -10,6 +10,8 @@
         "$TURBO_ROOT$/scripts/angular-docs.mjs",
         "$TURBO_ROOT$/scripts/build-llms-full.mjs",
         "$TURBO_ROOT$/scripts/docs-files.mjs",
+        "$TURBO_ROOT$/scripts/site-notices.mjs",
+        "$TURBO_ROOT$/scripts/third-party-licenses/**",
         "$TURBO_ROOT$/scripts/site.mjs",
         "$TURBO_ROOT$/scripts/sitemap-routes.mjs",
         "$TURBO_ROOT$/apps/showcase/matrix.mjs",

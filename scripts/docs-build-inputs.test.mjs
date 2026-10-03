@@ -36,6 +36,9 @@ describe("docs build cache inputs", () => {
     }
     assert.ok(includesExternal("docs/angular/future-guide.md"));
     assert.ok(includesExternal("llms.txt"));
+    assert.ok(includesExternal("scripts/site-notices.mjs"));
+    assert.ok(includesExternal("scripts/third-party-licenses/manifest.json"));
+    assert.ok(includesExternal("scripts/third-party-licenses/future-LICENSE"));
     // sync-docs generates this from the canonical markdown before copying
     // it. Hashing it as an input would invalidate the build on its own output.
     assert.equal(includesExternal("llms-full.txt"), false);

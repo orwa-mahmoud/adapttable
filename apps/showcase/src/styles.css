@@ -2288,3 +2288,49 @@ a {
     max-height: 200px;
   }
 }
+
+/* A compact framework control immediately before the existing theme button. */
+.nav__framework {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  font-size: var(--fs-small);
+  color: var(--ink);
+}
+.nav__framework select {
+  font: inherit;
+  color: inherit;
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: var(--r-sm);
+  padding: 0.4rem 0.25rem;
+  max-width: 6.5rem;
+  cursor: pointer;
+}
+.nav__framework select:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+@media (max-width: 560px) {
+  .nav__inner:has(.nav__framework) {
+    gap: 6px;
+  }
+  .nav__inner:has(.nav__framework) .nav__mobile {
+    flex: 1 1 112px;
+    min-width: 0;
+  }
+  .nav__inner:has(.nav__framework) .nav__mobile select {
+    width: 100%;
+    min-width: 0;
+    max-width: 112px;
+    padding-inline: 5px 20px;
+  }
+  .nav__framework > span {
+    display: none;
+  }
+  .nav__framework select {
+    max-width: 5rem;
+    font-size: 12px;
+  }
+}

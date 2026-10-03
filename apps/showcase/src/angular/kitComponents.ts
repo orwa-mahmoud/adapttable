@@ -34,7 +34,7 @@ import {
   ViewContainerRef,
 } from "@angular/core";
 
-import { SHOWCASE_KIT } from "./showcaseKit";
+import { SHOWCASE_DARK, SHOWCASE_KIT } from "./showcaseKit";
 
 /** The demo's table inputs, forwarded reactively to its actual kit table. */
 @Component({
@@ -44,11 +44,15 @@ import { SHOWCASE_KIT } from "./showcaseKit";
 })
 export class AdaptShowcaseTable<TRow> implements OnInit {
   private readonly kit = inject(SHOWCASE_KIT);
+  private readonly dark = inject(SHOWCASE_DARK);
   @ViewChild("mount", { read: ViewContainerRef, static: true })
   private mount?: ViewContainerRef;
 
   readonly data = input<readonly TRow[]>();
   readonly source = input<Signal<TableSource<TRow>> | TableSource<TRow>>();
+  readonly loading = input<boolean>();
+  readonly error = input<Error | null>();
+  readonly skeletonRows = input<number>();
   readonly columns = input.required<readonly ColumnInput<TRow>[]>();
   readonly rowKey = input.required<(row: TRow) => string>();
   readonly tableLabel = input<string>();
@@ -79,8 +83,14 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
     if (!this.mount) throw new Error("The showcase table has no mount point");
     this.mount.createComponent(this.kit.table, {
       bindings: [
+        ...(["ng-bootstrap", "ngx-bootstrap"].includes(this.kit.key)
+          ? [inputBinding("theme", () => (this.dark() ? "dark" : "light"))]
+          : []),
         inputBinding("data", this.data),
         inputBinding("source", this.source),
+        inputBinding("loading", this.loading),
+        inputBinding("error", this.error),
+        inputBinding("skeletonRows", this.skeletonRows),
         inputBinding("columns", this.columns),
         inputBinding("rowKey", this.rowKey),
         inputBinding("tableLabel", this.tableLabel),

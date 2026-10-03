@@ -1,0 +1,306 @@
+@if (view(); as v) {
+  <div
+    #root
+    data-adapttable-kit="spartan"
+    data-adapttable-part="root"
+    [attr.dir]="v.table.dir()"
+    [attr.data-density]="v.density()"
+    [attr.data-refreshing]="v.table.isRefreshing() ? '' : null"
+    [attr.aria-busy]="v.table.isRefreshing() ? true : null"
+    (contextmenu)="onMenuContext($event)"
+    (keydown)="onMenuKey($event)"
+    (pointerdown)="onMenuPointerDown($event)"
+    (pointermove)="onMenuPointerMove($event)"
+    (pointerup)="onMenuPointerUp()"
+    (pointercancel)="onMenuPointerCancel()"
+  >
+    <ng-container
+      [adaptSlot]="commandPaletteSlot"
+      [adaptSlotProps]="v.commandPalette()"
+      [adaptSlotTable]="v.table"
+    />
+    <ng-container
+      [adaptSlot]="contextMenuSlot"
+      [adaptSlotProps]="v.contextMenu()"
+      [adaptSlotTable]="v.table"
+    />
+    @if (v.findBar; as findBar) {
+      <ng-container
+        [adaptSlot]="findBarSlot"
+        [adaptSlotProps]="findBar()"
+        [adaptSlotTable]="v.table"
+      />
+    }
+    <div data-adapttable-part="toolbar">
+      @if (searchable()) {
+        <div data-adapttable-part="search-field">
+          <span data-adapttable-part="search-icon" style="display: inline-flex">
+            <svg [adaptIcon]="searchIcon"></svg>
+          </span>
+          <input
+            adaptHlmInput
+            data-adapttable-part="search"
+            [adaptAttrs]="v.table.searchInputAttrs()"
+          />
+        </div>
+      }
+      @if (v.table.isMobile() && v.table.sortByOptions().length > 0) {
+        <label>
+          {{ v.table.labels().sortBy }}
+          <select
+            adaptHlmNativeSelect
+            data-spartan-part="sort-select"
+            [attr.aria-label]="v.table.labels().sortBy"
+            [value]="v.table.sortBy() ?? ''"
+            (change)="sortBy($event)"
+          >
+            <option adaptHlmNativeOption value="">—</option>
+            @for (option of v.table.sortByOptions(); track option.value) {
+              <option adaptHlmNativeOption [value]="option.value">
+                {{ option.label }}
+              </option>
+            }
+          </select>
+        </label>
+      }
+      @if (v.filters; as f) {
+        <ng-template #filtersTrigger>
+          <button
+            adaptHlmButton
+            type="button"
+            data-spartan-part="filters-button"
+            style="flex-shrink: 0; white-space: nowrap"
+            [attr.aria-expanded]="f.mode === 'popover' ? f.open() : null"
+            [attr.data-active]="f.open() ? '' : null"
+            (pointerdown)="f.pointerDown()"
+            (click)="f.click()"
+          >
+            <span data-spartan-part="filters-icon" style="display: inline-flex"
+              ><svg [adaptIcon]="filtersIcon"></svg
+            ></span>
+            {{ v.table.labels().filters }}
+            @if (f.count() > 0) {
+              <span data-spartan-part="filters-count">{{ f.count() }}</span>
+            }
+          </button>
+        </ng-template>
+        <ng-template #filtersForm>
+          <ng-container
+            [adaptSlot]="filterSlots.form"
+            [adaptSlotProps]="f.form()"
+            [adaptSlotTable]="v.table"
+          />
+        </ng-template>
+        @if (f.button) {
+          @if (f.mode === "popover") {
+            <ng-container
+              [adaptSlot]="filterSlots.popover"
+              [adaptSlotProps]="f.overlay()"
+              [adaptSlotTable]="v.table"
+            />
+          } @else {
+            <ng-container [ngTemplateOutlet]="filtersTrigger" />
+          }
+        }
+      }
+      @if (v.savedViews; as savedViews) {
+        <ng-container
+          [adaptSlot]="savedViewsSlot"
+          [adaptSlotProps]="savedViews()"
+          [adaptSlotTable]="v.table"
+        />
+      }
+      @if (v.columnMenu && !v.table.isMobile()) {
+        <ng-container
+          [adaptSlot]="columnMenuSlot"
+          [adaptSlotProps]="v.columnMenuProps()"
+          [adaptSlotTable]="v.table"
+        />
+      }
+      <ng-container
+        [adaptSlot]="toolbarExtrasSlot"
+        [adaptSlotProps]="v.toolbarExtras()"
+        [adaptSlotTable]="v.table"
+      />
+      @if (v.rowMutations().canAdd) {
+        <button
+          adaptHlmButton
+          type="button"
+          data-adapttable-part="add-row"
+          (click)="v.rowMutations().addRow()"
+        >
+          {{ v.table.labels().addRow }}
+        </button>
+      }
+    </div>
+
+    @if (v.filters; as f) {
+      @if (f.button && f.mode === "drawer") {
+        <ng-container
+          [adaptSlot]="filterSlots.drawer"
+          [adaptSlotProps]="f.overlay()"
+          [adaptSlotTable]="v.table"
+        />
+      }
+      <ng-container
+        [adaptSlot]="filterSlots.chips"
+        [adaptSlotProps]="f.chips()"
+        [adaptSlotTable]="v.table"
+      />
+    }
+
+    <ng-container
+      [adaptSlot]="agentApprovalSlot"
+      [adaptSlotProps]="agentApprovalProps()"
+      [adaptSlotTable]="v.table"
+    />
+
+    @if (v.bulkBar; as bulkBar) {
+      <ng-container
+        [adaptSlot]="bulkBarSlot"
+        [adaptSlotProps]="bulkBar()"
+        [adaptSlotTable]="v.table"
+      />
+    }
+
+    @if (v.batchBar; as batchBar) {
+      @if (batchBar(); as batchProps) {
+        <ng-container
+          [adaptSlot]="batchEditBarSlot"
+          [adaptSlotProps]="batchProps"
+          [adaptSlotTable]="v.table"
+        />
+      }
+    }
+
+    @if (v.groupingPanel; as groupingPanel) {
+      <ng-container
+        [adaptSlot]="groupingPanelSlot"
+        [adaptSlotProps]="groupingPanel()"
+        [adaptSlotTable]="v.table"
+      />
+    }
+
+    @if (v.table.isRefreshing()) {
+      <progress
+        [attr.aria-label]="v.table.labels().loading"
+        data-spartan-part="refresh-indicator"
+      ></progress>
+    }
+
+    <ng-template #featureSidePanel>
+      @if (sidePanelProps(); as props) {
+        <ng-container
+          [adaptSlot]="sidePanelSlot"
+          [adaptSlotProps]="props"
+          [adaptSlotTable]="v.table"
+        />
+      }
+    </ng-template>
+    <adapt-table-region [panel]="dockedPanel()" [side]="dockedSide()">
+      @if (v.table.errorState(); as failure) {
+        <adapt-error-state
+          [error]="failure.error"
+          [labels]="v.table.labels()"
+          [retry]="failure.retry"
+        />
+      } @else {
+        @switch (v.table.bodyRegion()) {
+          @case ("skeleton") {
+            <adapt-table-skeleton
+              [rows]="skeletonRows() ?? v.table.source().limit"
+              [columns]="v.table.columns().length"
+              [variant]="v.table.isMobile() ? 'cards' : 'table'"
+              [labels]="v.table.labels()"
+              [hasActions]="v.showActions()"
+            />
+          }
+          @case ("empty") {
+            <output data-adapttable-part="empty">
+              {{
+                noResults()
+                  ? v.table.labels().noResults
+                  : v.table.labels().noData
+              }}
+              @if (noResults()) {
+                <button
+                  adaptHlmButton
+                  type="button"
+                  data-spartan-part="empty-clear"
+                  (click)="v.table.clearFilters()"
+                >
+                  {{ v.table.labels().clearAll }}
+                </button>
+              }
+            </output>
+          }
+          @case ("mobile") {
+            <adapt-mobile-cards
+              [view]="v"
+              [rowKey]="rowKey()"
+              [maxHeight]="maxHeight()"
+            />
+          }
+          @case ("desktop") {
+            <adapt-desktop-table
+              [view]="v"
+              [rowKey]="rowKey()"
+              [maxHeight]="maxHeight()"
+            />
+          }
+        }
+      }
+    </adapt-table-region>
+
+    @if (v.table.canLoadMore()) {
+      <div data-spartan-part="load-more" [adaptAttrs]="v.table.loadMoreAttrs()">
+        <button
+          adaptHlmButton
+          data-spartan-part="load-more-button"
+          [adaptAttrs]="v.table.loadMoreButtonAttrs()"
+        >
+          {{ v.table.labels().loadMore }}
+        </button>
+      </div>
+    }
+
+    @if (v.table.showFooter()) {
+      <adapt-pagination-footer [view]="v" />
+    }
+
+    @if (tableFooter(); as footer) {
+      <div data-adapttable-part="table-footer">
+        <ng-container [ngTemplateOutlet]="footer" />
+      </div>
+    }
+
+    @if (assistant(); as props) {
+      <ng-container
+        [adaptSlot]="tableAssistantSlot"
+        [adaptSlotProps]="props"
+        [adaptSlotTable]="v.table"
+      />
+    }
+
+    <adapt-table-status-announcer
+      [announcement]="v.table.statusAnnouncement()"
+    />
+    @if (v.reorder; as reorder) {
+      <ng-container
+        [adaptSlot]="reorderAnnouncerSlot"
+        [adaptSlotProps]="{ announcement: reorder().announcement }"
+        [adaptSlotTable]="v.table"
+      />
+    }
+    @if (statusBarProps(); as props) {
+      <ng-container
+        [adaptSlot]="statusBarSlot"
+        [adaptSlotProps]="props"
+        [adaptSlotTable]="v.table"
+      />
+    }
+    @if (v.grid; as grid) {
+      <adapt-grid-focus-announcer [focus]="grid" />
+    }
+  </div>
+}

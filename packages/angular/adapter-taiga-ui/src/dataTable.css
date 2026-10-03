@@ -1,0 +1,105 @@
+[data-adapttable-kit="taiga-ui"] {
+  --adapt-cell-pad: 0.75rem;
+  color: var(--tui-text-primary);
+  background: var(--tui-background-base);
+  font: var(--tui-font-text-m);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+[data-adapttable-kit="taiga-ui"][data-density="compact"] {
+  --adapt-cell-pad: 0.375rem;
+}
+[data-adapttable-kit="taiga-ui"][data-density="comfortable"] {
+  --adapt-cell-pad: 1rem;
+}
+[data-adapttable-kit="taiga-ui"] [data-adapttable-part="table"] {
+  border-collapse: separate;
+  border-spacing: 0;
+  inline-size: 100%;
+}
+[data-adapttable-kit="taiga-ui"] :is(th, td) {
+  padding: var(--adapt-cell-pad);
+  text-align: start;
+  border-block-end: 1px solid var(--tui-border-normal);
+  background: var(--tui-background-base);
+}
+[data-adapttable-kit="taiga-ui"] th {
+  font-weight: 600;
+  background: var(--tui-background-neutral-1);
+}
+[data-adapttable-kit="taiga-ui"]
+  :is(
+    [data-adapttable-part="toolbar"],
+    [data-adapttable-part="pagination"],
+    [data-adapttable-part="footer"]
+  ) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.75rem;
+}
+[data-adapttable-kit="taiga-ui"] [data-adapttable-part="scroll-box"] {
+  max-inline-size: 100%;
+  overflow: auto;
+}
+[data-adapttable-kit="taiga-ui"] tui-textfield {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+/* Native textfield inputs are absolutely positioned, so their flex wrappers
+   need a preferred width independent of the input's text or clear button. */
+[data-adapttable-kit="taiga-ui"] [data-adapttable-part="search-field"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 16rem;
+  min-inline-size: 0;
+  max-inline-size: 24rem;
+}
+[data-adapttable-kit="taiga-ui"] [data-adapttable-part="search-icon"] {
+  flex: none;
+}
+[data-adapttable-kit="taiga-ui"] [data-taiga-part="sort-field"] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 0 1 12rem;
+  min-inline-size: 0;
+}
+[data-adapttable-kit="taiga-ui"]
+  :is([data-adapttable-part="search-field"], [data-taiga-part="sort-field"])
+  > tui-textfield {
+  inline-size: 100%;
+}
+[data-adapttable-kit="taiga-ui"]
+  [data-adapttable-part="search-field"]
+  > tui-textfield {
+  flex: 1 1 auto;
+}
+[data-adapttable-kit="taiga-ui"]
+  :is([data-adapttable-part="mobile-card"], [data-adapttable-part="card"]) {
+  border: 1px solid var(--tui-border-normal);
+  border-radius: var(--tui-radius-m);
+  padding: var(--adapt-cell-pad);
+  margin-block: 0.5rem;
+}
+[data-adapttable-kit="taiga-ui"] [data-adapttable-part="th-content"] {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.25rem;
+  min-inline-size: 0;
+}
+[data-adapttable-kit="taiga-ui"] :focus-visible {
+  outline: 2px solid var(--tui-border-focus);
+  outline-offset: 2px;
+}
+@media (max-width: 40rem) {
+  [data-adapttable-kit="taiga-ui"] {
+    --adapt-cell-pad: 0.5rem;
+  }
+  [data-adapttable-kit="taiga-ui"] [data-adapttable-part="toolbar"] > * {
+    max-inline-size: 100%;
+  }
+}

@@ -18,21 +18,65 @@ for (const kit of ANGULAR_KITS) {
     /** Choose an entry from a row's 3-dot menu. */
     async function choose(page: Page, id: string, entry: string) {
       const target = row(page, id);
-      await target
-        .locator('[data-adapttable-part="row-actions-trigger"]')
-        .click();
-      const menu = page.locator(
-        '[data-adapttable-part="row-actions-menu"]:visible'
+      const trigger = target.locator(
+        '[data-adapttable-part="row-actions-trigger"]'
       );
+      await trigger.click();
+      const nativeDetails = ["unstyled", "aria"].includes(kit.key);
+      let menu = nativeDetails
+        ? target.locator(
+            'details[data-adapttable-part="row-actions-menu"][open]'
+          )
+        : page.locator('[data-adapttable-part="row-actions-menu"]:visible');
+      if (
+        [
+          "material",
+          "ng-bootstrap",
+          "ngx-bootstrap",
+          "angular-cdk",
+          "spartan",
+          "taiga-ui",
+        ].includes(kit.key)
+      ) {
+        await expect(trigger).toHaveAttribute("aria-expanded", "true");
+        await expect(trigger).toHaveAttribute("aria-controls", /\S+/);
+        const menuId = (await trigger.getAttribute("aria-controls"))!;
+        const role = ["spartan", "taiga-ui"].includes(kit.key)
+          ? "dialog"
+          : "menu";
+        menu = page
+          .getByRole(role)
+          .and(page.locator(`[id=${JSON.stringify(menuId)}]`));
+        if (role === "dialog")
+          await expect(menu).toHaveAccessibleName("Row actions");
+        await expect(menu).toBeVisible();
+      }
       const action = menu.locator('[data-adapttable-part="action-button"]');
       await action
         .and(
-          page.getByRole(kit.key === "unstyled" ? "button" : "menuitem", {
-            name: entry,
-            exact: true,
-          })
+          page.getByRole(
+            ["unstyled", "spartan", "taiga-ui"].includes(kit.key)
+              ? "button"
+              : "menuitem",
+            {
+              name: entry,
+              exact: true,
+            }
+          )
         )
         .click();
+      if (nativeDetails) {
+        // A closed details host (and its summary) stays visible. Its open
+        // state, not the wrapper's visibility, proves dismissal after a row
+        // moves or is removed by the host action.
+        await expect(
+          demo(page).locator(
+            'details[data-adapttable-part="row-actions-menu"][open]'
+          )
+        ).toHaveCount(0);
+      } else {
+        await expect(menu).toBeHidden();
+      }
     }
 
     test("pins a row from its menu and keeps it through a reload", async ({
@@ -69,7 +113,13 @@ for (const kit of ANGULAR_KITS) {
       await box.evaluate((element) => {
         element.scrollTop = element.scrollHeight;
       });
-      const boxTop = (await box.boundingBox())!.y;
+      await expect
+        .poll(() => box.evaluate((element) => element.scrollTop))
+        .toBeGreaterThan(0);
+      // Sticky rows attach to the scroll viewport inside its border.
+      const boxTop = await box.evaluate(
+        (element) => element.getBoundingClientRect().top + element.clientTop
+      );
       await expect
         .poll(async () => Math.round((await row(page, "5").boundingBox())!.y))
         .toBe(Math.round(boxTop));

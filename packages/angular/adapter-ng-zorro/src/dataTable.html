@@ -38,16 +38,21 @@
       data-adapttable-part="toolbar"
     >
       @if (searchable()) {
-        <div data-adapttable-part="search-field">
-          <span data-adapttable-part="search-icon" style="display: inline-flex">
+        <nz-input-wrapper data-adapttable-part="search-field">
+          <span
+            nzInputPrefix
+            data-adapttable-part="search-icon"
+            style="display: inline-flex"
+          >
             <svg [adaptIcon]="searchIcon"></svg>
           </span>
+
           <input
             nz-input
             data-adapttable-part="search"
             [adaptAttrs]="v.table.searchInputAttrs()"
           />
-        </div>
+        </nz-input-wrapper>
       }
       @if (v.table.isMobile() && v.table.sortByOptions().length > 0) {
         <span>

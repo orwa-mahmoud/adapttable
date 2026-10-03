@@ -78,7 +78,25 @@ describe("entrypoints", () => {
     const unpublished = [
       ...new Set(ENTRIES.filter((e) => !e.published).map((e) => e.dir)),
     ];
-    assert.deepEqual(unpublished, ["adapter-bootstrap"]);
+    assert.deepEqual(unpublished, [
+      "adapter-angular-aria",
+      "adapter-angular-cdk",
+      "adapter-bootstrap",
+      "adapter-material",
+      "adapter-ng-bootstrap",
+      "adapter-ngx-bootstrap",
+      "adapter-spartan",
+      "adapter-taiga-ui",
+    ]);
+    // Publication is a manifest decision, separate from kit participation.
+    // Check every subpath so one correct root cannot hide a misfiled feature.
+    for (const entry of ENTRIES) {
+      assert.equal(
+        entry.published,
+        packageJson(entry.dir).private !== true,
+        `${entry.dir}${entry.subpath}`
+      );
+    }
   });
 
   it("includes every released Angular kit and AI entry in the public contract", () => {

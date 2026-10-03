@@ -1,14 +1,21 @@
 /** Compile the Angular guides' actual examples, including their templates. */
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { it } from "node:test";
 
 import { ANGULAR_DOCS } from "./angular-docs.mjs";
-import { packageDir, REPO_ROOT } from "./packages.mjs";
+import { entrySource } from "./feature-entry-source.mjs";
+import { listPackages, packageDir, REPO_ROOT } from "./packages.mjs";
 
 const SHOWCASE = join(REPO_ROOT, "apps", "showcase");
 const URL_GUIDE = "angular/url-state.md";
@@ -30,13 +37,34 @@ function codeBlocks(markdown) {
   );
 }
 
+/** Resolve every advertised kit entry through its authored ng-packagr source. */
+function angularKitSourcePaths() {
+  const paths = {};
+  for (const pkg of listPackages()) {
+    if (pkg.group !== "angular" || !pkg.name.startsWith("adapter-")) continue;
+    const manifest = JSON.parse(
+      readFileSync(join(pkg.dir, "package.json"), "utf8")
+    );
+    for (const key of Object.keys(manifest.exports ?? {})) {
+      if (key !== "." && key.slice(2).includes(".")) continue;
+      const specifier =
+        key === "." ? manifest.name : `${manifest.name}/${key.slice(2)}`;
+      const source = entrySource(specifier);
+      assert.ok(
+        source,
+        `${specifier} must resolve to an authored source entry`
+      );
+      paths[specifier] = [source];
+    }
+  }
+  return paths;
+}
+
 /** Source resolution follows the showcase snippet test; no dist build needed. */
 function projectConfig(files) {
   const angular = packageDir("angular");
   const ai = packageDir("ai");
   const aiAngular = packageDir("ai-angular");
-  const native = packageDir("adapter-angular-unstyled");
-  const ngZorro = packageDir("adapter-ng-zorro");
   const core = packageDir("core");
   const i18n = packageDir("i18n");
   return {
@@ -45,15 +73,6 @@ function projectConfig(files) {
       noEmit: true,
       types: [],
       paths: {
-        "@angular/*": [join(SHOWCASE, "node_modules", "@angular", "*")],
-        "@tanstack/angular-query-experimental": [
-          join(
-            SHOWCASE,
-            "node_modules",
-            "@tanstack/angular-query-experimental"
-          ),
-        ],
-        rxjs: [join(SHOWCASE, "node_modules", "rxjs")],
         "@adapttable/ai": [join(ai, "src", "index.ts")],
         "@adapttable/ai/ag-ui": [join(ai, "src", "agui.ts")],
         "@adapttable/ai/ai-sdk": [join(ai, "src", "aiSdk.ts")],
@@ -62,10 +81,7 @@ function projectConfig(files) {
         "@adapttable/ai-angular": [join(aiAngular, "src", "index.ts")],
         "@adapttable/angular": [join(angular, "src", "index.ts")],
         "@adapttable/angular/*": [join(angular, "*", "index.ts")],
-        "@adapttable/angular-unstyled": [join(native, "src", "index.ts")],
-        "@adapttable/angular-unstyled/*": [join(native, "*", "index.ts")],
-        "@adapttable/ng-zorro": [join(ngZorro, "src", "index.ts")],
-        "@adapttable/ng-zorro/*": [join(ngZorro, "*", "index.ts")],
+        ...angularKitSourcePaths(),
         "@adapttable/core": [join(core, "src", "index.ts")],
         "@adapttable/core/*": [join(core, "src", "*.ts")],
         "@adapttable/i18n": [join(i18n, "src", "index.ts")],
@@ -120,6 +136,14 @@ export class UrlStateHost {
 it("compiles every Angular guide's TypeScript examples and strict component templates", () => {
   const scratch = mkdtempSync(join(tmpdir(), "adapttable-angular-docs-"));
   try {
+    // Resolve installed peers through their actual package exports, including
+    // nested entries such as localize/init and platform-browser/animations.
+    // Only this disposable link is removed; the showcase dependencies stay put.
+    symlinkSync(
+      join(SHOWCASE, "node_modules"),
+      join(scratch, "node_modules"),
+      "junction"
+    );
     const files = [];
     const sources = [];
     assert.ok(ANGULAR_DOCS.length > 0, "no Angular guides are registered");

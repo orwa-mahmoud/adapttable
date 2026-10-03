@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
+
+import { builtAdapters } from "../apps/showcase/matrix.mjs";
+import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
+import { demoRoute } from "./site.mjs";
 
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const PAGE = readFileSync(
@@ -33,7 +37,15 @@ describe("landing page demo funnel", () => {
     assert.equal(PAGE.includes('<article class="card"'), false);
     assert.equal(PAGE.includes('class="mock__btn"'), false);
     assert.match(PAGE, /<a class="card" href=\{f\.href\}/);
-    assert.match(PAGE, /<a class="hero__chip" href=\{kit\.href\}/);
+    assert.match(
+      PAGE,
+      /<a\b(?=[^>]*\bdata-framework-only="react")(?=[^>]*\bclass="hero__chip")(?=[^>]*\bhref=\{kit\.href\})[^>]*>/
+    );
+    assert.match(PAGE, /const ANGULAR_KITS = builtAdapters\("angular"\)/);
+    assert.match(
+      PAGE,
+      /<a\b(?=[^>]*\bhidden\b)(?=[^>]*\bdata-framework-only="angular")(?=[^>]*\bclass="hero__chip")(?=[^>]*\bhref=\{siteUrl\(demoRoute\(kit\.key, "angular"\)\)\})[^>]*>/
+    );
     assert.match(
       PAGE,
       /<a href=\{`\$\{siteUrl\(demoRoute\(\)\)\}`\}>open the live demo<\/a>/
@@ -57,6 +69,19 @@ describe("landing page demo funnel", () => {
       'siteUrl(demoRoute("mantine/accessibility"))',
     ]) {
       assert.ok(PAGE.includes(href), `missing ${href}`);
+    }
+    const destinations = new Map(
+      SHOWCASE_PAGES.map((page) => [page.route, page])
+    );
+    for (const framework of ["react", "angular"]) {
+      for (const kit of builtAdapters(framework)) {
+        const route = demoRoute(kit.key, framework);
+        const page = destinations.get(route);
+        assert.ok(page, `missing kit destination: ${route}`);
+        assert.equal(page.framework, framework, route);
+        assert.equal(page.indexable, true, route);
+        assert.ok(existsSync(join(ROOT, "apps/showcase", page.html)), route);
+      }
     }
   });
 

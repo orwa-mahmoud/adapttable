@@ -1,0 +1,258 @@
+{
+  "name": "@adapttable/taiga-ui",
+  "version": "0.0.0",
+  "description": "AdaptTable's Angular DataTable rendered with Taiga UI controls.",
+  "keywords": [
+    "angular",
+    "data-table",
+    "table",
+    "headless",
+    "adapttable",
+    "taiga-ui"
+  ],
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "homepage": "https://adapttable.orwamahmoud.com/angular/demo/taiga-ui/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/angular/adapter-taiga-ui"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "LICENSE",
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "module": "./dist/fesm2022/adapttable-taiga-ui.mjs",
+  "types": "./dist/types/adapttable-taiga-ui.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/adapttable-taiga-ui.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui.mjs"
+    },
+    "./batch-editing": {
+      "types": "./dist/types/adapttable-taiga-ui-batch-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-batch-editing.mjs"
+    },
+    "./bulk-actions": {
+      "types": "./dist/types/adapttable-taiga-ui-bulk-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-bulk-actions.mjs"
+    },
+    "./cell-navigation": {
+      "types": "./dist/types/adapttable-taiga-ui-cell-navigation.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-cell-navigation.mjs"
+    },
+    "./cell-span": {
+      "types": "./dist/types/adapttable-taiga-ui-cell-span.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-cell-span.mjs"
+    },
+    "./column-groups": {
+      "types": "./dist/types/adapttable-taiga-ui-column-groups.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-column-groups.mjs"
+    },
+    "./column-menu": {
+      "types": "./dist/types/adapttable-taiga-ui-column-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-column-menu.mjs"
+    },
+    "./column-selection": {
+      "types": "./dist/types/adapttable-taiga-ui-column-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-column-selection.mjs"
+    },
+    "./command-palette": {
+      "types": "./dist/types/adapttable-taiga-ui-command-palette.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-command-palette.mjs"
+    },
+    "./context-menu": {
+      "types": "./dist/types/adapttable-taiga-ui-context-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-context-menu.mjs"
+    },
+    "./density": {
+      "types": "./dist/types/adapttable-taiga-ui-density.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-density.mjs"
+    },
+    "./editing": {
+      "types": "./dist/types/adapttable-taiga-ui-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-editing.mjs"
+    },
+    "./export": {
+      "types": "./dist/types/adapttable-taiga-ui-export.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-export.mjs"
+    },
+    "./extra-rows": {
+      "types": "./dist/types/adapttable-taiga-ui-extra-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-extra-rows.mjs"
+    },
+    "./features": {
+      "types": "./dist/types/adapttable-taiga-ui-features.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-features.mjs"
+    },
+    "./find-in-table": {
+      "types": "./dist/types/adapttable-taiga-ui-find-in-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-find-in-table.mjs"
+    },
+    "./filters": {
+      "types": "./dist/types/adapttable-taiga-ui-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-filters.mjs"
+    },
+    "./fit-columns": {
+      "types": "./dist/types/adapttable-taiga-ui-fit-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-fit-columns.mjs"
+    },
+    "./fullscreen": {
+      "types": "./dist/types/adapttable-taiga-ui-fullscreen.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-fullscreen.mjs"
+    },
+    "./grouping": {
+      "types": "./dist/types/adapttable-taiga-ui-grouping.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-grouping.mjs"
+    },
+    "./grouping-panel": {
+      "types": "./dist/types/adapttable-taiga-ui-grouping-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-grouping-panel.mjs"
+    },
+    "./header-filters": {
+      "types": "./dist/types/adapttable-taiga-ui-header-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-header-filters.mjs"
+    },
+    "./multi-sort": {
+      "types": "./dist/types/adapttable-taiga-ui-multi-sort.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-multi-sort.mjs"
+    },
+    "./nested-table": {
+      "types": "./dist/types/adapttable-taiga-ui-nested-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-nested-table.mjs"
+    },
+    "./pinned-summary-rows": {
+      "types": "./dist/types/adapttable-taiga-ui-pinned-summary-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-pinned-summary-rows.mjs"
+    },
+    "./preset": {
+      "types": "./dist/types/adapttable-taiga-ui-preset.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-preset.mjs"
+    },
+    "./pivot": {
+      "types": "./dist/types/adapttable-taiga-ui-pivot.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-pivot.mjs"
+    },
+    "./print": {
+      "types": "./dist/types/adapttable-taiga-ui-print.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-print.mjs"
+    },
+    "./resizable-columns": {
+      "types": "./dist/types/adapttable-taiga-ui-resizable-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-resizable-columns.mjs"
+    },
+    "./row-actions": {
+      "types": "./dist/types/adapttable-taiga-ui-row-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-row-actions.mjs"
+    },
+    "./row-appearance": {
+      "types": "./dist/types/adapttable-taiga-ui-row-appearance.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-row-appearance.mjs"
+    },
+    "./row-detail": {
+      "types": "./dist/types/adapttable-taiga-ui-row-detail.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-row-detail.mjs"
+    },
+    "./row-pinning": {
+      "types": "./dist/types/adapttable-taiga-ui-row-pinning.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-row-pinning.mjs"
+    },
+    "./row-reorder": {
+      "types": "./dist/types/adapttable-taiga-ui-row-reorder.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-row-reorder.mjs"
+    },
+    "./saved-views": {
+      "types": "./dist/types/adapttable-taiga-ui-saved-views.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-saved-views.mjs"
+    },
+    "./selection-stats": {
+      "types": "./dist/types/adapttable-taiga-ui-selection-stats.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-selection-stats.mjs"
+    },
+    "./side-panel": {
+      "types": "./dist/types/adapttable-taiga-ui-side-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-side-panel.mjs"
+    },
+    "./status-bar": {
+      "types": "./dist/types/adapttable-taiga-ui-status-bar.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-status-bar.mjs"
+    },
+    "./tree": {
+      "types": "./dist/types/adapttable-taiga-ui-tree.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-tree.mjs"
+    },
+    "./virtualize": {
+      "types": "./dist/types/adapttable-taiga-ui-virtualize.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-virtualize.mjs"
+    },
+    "./package.json": "./package.json",
+    "./assistant": {
+      "types": "./dist/types/adapttable-taiga-ui-assistant.d.ts",
+      "default": "./dist/fesm2022/adapttable-taiga-ui-assistant.mjs"
+    }
+  },
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json -c tsconfig.build.json && node -e \"require('node:fs').rmSync('dist/package.json')\"",
+    "test": "vitest run && vitest run -c vitest.ssr.config.ts",
+    "test:coverage": "vitest run --coverage && vitest run -c vitest.ssr.config.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist coverage .turbo",
+    "test:contracts": "node --test ../../../scripts/angular-taiga-contracts.test.mjs"
+  },
+  "peerDependencies": {
+    "@angular/common": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "@taiga-ui/core": "5.26.0",
+    "@taiga-ui/kit": "5.26.0",
+    "@taiga-ui/cdk": "5.26.0",
+    "@taiga-ui/i18n": "5.26.0",
+    "@taiga-ui/styles": "5.26.0",
+    "@angular/forms": "^22.0.0",
+    "@angular/cdk": "^22.0.0",
+    "@angular/router": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "@taiga-ui/event-plugins": "^5.0.0"
+  },
+  "dependencies": {
+    "@adapttable/core": "3.8.0",
+    "@adapttable/angular": "0.3.0",
+    "tslib": "^2.8.1"
+  },
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.7.5",
+    "@analogjs/vitest-angular": "^2.7.5",
+    "@angular/build": "^22.2.0",
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/compiler-cli": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "@angular/platform-server": "^22.2.0",
+    "@testing-library/dom": "^10.4.1",
+    "ng-packagr": "^22.2.1",
+    "rxjs": "^7.8.2",
+    "@taiga-ui/core": "5.26.0",
+    "@taiga-ui/kit": "5.26.0",
+    "@taiga-ui/cdk": "5.26.0",
+    "@taiga-ui/i18n": "5.26.0",
+    "@taiga-ui/styles": "5.26.0",
+    "@angular/forms": "^22.2.0",
+    "@angular/router": "^22.2.0",
+    "@angular/cdk": "^22.2.0",
+    "@taiga-ui/icons": "5.26.0",
+    "@taiga-ui/event-plugins": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": true
+}

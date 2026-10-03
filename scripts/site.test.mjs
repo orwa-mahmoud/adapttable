@@ -58,7 +58,20 @@ describe("site addresses", () => {
     assert.equal(docsRoute("data-tiers"), "/data-tiers/");
     assert.equal(docsRoute("custom-table-source"), "/custom-table-source/");
     assert.equal(docsRoute("concepts", "angular"), "/concepts/");
-    assert.equal(ANGULAR_DOCS.length, 50);
+    assert.equal(ANGULAR_DOCS.length, 57);
+    for (const kit of [
+      "material",
+      "ng-bootstrap",
+      "spartan",
+      "taiga-ui",
+      "angular-cdk",
+      "ngx-bootstrap",
+      "aria",
+    ]) {
+      assert.ok(ANGULAR_DOCS.includes(`angular/${kit}.md`), kit);
+      assert.ok(PAGES.includes(`angular/${kit}`), kit);
+      assert.equal(docsRoute(`angular/${kit}.md`), `/angular/${kit}/`);
+    }
     for (const source of ANGULAR_DOCS)
       assert.equal(docsRoute(source), `/${source.replace(/\.md$/, "")}/`);
   });
@@ -73,7 +86,10 @@ describe("site addresses", () => {
       "/angular/data-tiers/"
     );
     assert.equal(docsReferenceRoute("ai", "angular"), "/ai/");
-    assert.equal(docsReferenceRoute("api", "angular"), "/react/api/");
+    assert.equal(
+      docsReferenceRoute("api", "angular"),
+      "/angular/getting-started/?unavailable=api"
+    );
     assert.equal(docsReferenceRoute("filtering"), "/react/filtering/");
   });
 
@@ -141,6 +157,10 @@ describe("site addresses", () => {
 
   it("mounts each framework's demo pages in that framework's section", () => {
     assert.equal(demoRoute("", "angular"), "/angular/demo/");
+    assert.equal(
+      demoRoute("all-options", "angular"),
+      "/angular/demo/all-options/"
+    );
     assert.equal(
       demoRoute("unstyled/filtering", "angular"),
       "/angular/demo/unstyled/filtering/"

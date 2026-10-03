@@ -1,10 +1,18 @@
 {
   "name": "@adapttable/angular-material",
   "version": "0.0.0",
-  "private": true,
-  "description": "AdaptTable's Angular DataTable rendered with Angular Material components. Not built yet: a private placeholder for #467.",
+  "description": "AdaptTable's Angular DataTable rendered with Angular Material components.",
+  "keywords": [
+    "angular",
+    "data-table",
+    "table",
+    "angular-material",
+    "headless",
+    "adapttable"
+  ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
+  "homepage": "https://adapttable.orwamahmoud.com/angular/demo/material/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
@@ -12,8 +20,230 @@
   },
   "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
   "type": "module",
-  "exports": {},
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "LICENSE",
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "styles.css"
+  ],
+  "module": "./dist/fesm2022/adapttable-angular-material.mjs",
+  "types": "./dist/types/adapttable-angular-material.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/adapttable-angular-material.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material.mjs"
+    },
+    "./batch-editing": {
+      "types": "./dist/types/adapttable-angular-material-batch-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-batch-editing.mjs"
+    },
+    "./bulk-actions": {
+      "types": "./dist/types/adapttable-angular-material-bulk-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-bulk-actions.mjs"
+    },
+    "./cell-navigation": {
+      "types": "./dist/types/adapttable-angular-material-cell-navigation.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-cell-navigation.mjs"
+    },
+    "./cell-span": {
+      "types": "./dist/types/adapttable-angular-material-cell-span.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-cell-span.mjs"
+    },
+    "./column-groups": {
+      "types": "./dist/types/adapttable-angular-material-column-groups.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-column-groups.mjs"
+    },
+    "./column-menu": {
+      "types": "./dist/types/adapttable-angular-material-column-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-column-menu.mjs"
+    },
+    "./column-selection": {
+      "types": "./dist/types/adapttable-angular-material-column-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-column-selection.mjs"
+    },
+    "./command-palette": {
+      "types": "./dist/types/adapttable-angular-material-command-palette.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-command-palette.mjs"
+    },
+    "./context-menu": {
+      "types": "./dist/types/adapttable-angular-material-context-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-context-menu.mjs"
+    },
+    "./density": {
+      "types": "./dist/types/adapttable-angular-material-density.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-density.mjs"
+    },
+    "./editing": {
+      "types": "./dist/types/adapttable-angular-material-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-editing.mjs"
+    },
+    "./export": {
+      "types": "./dist/types/adapttable-angular-material-export.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-export.mjs"
+    },
+    "./extra-rows": {
+      "types": "./dist/types/adapttable-angular-material-extra-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-extra-rows.mjs"
+    },
+    "./features": {
+      "types": "./dist/types/adapttable-angular-material-features.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-features.mjs"
+    },
+    "./find-in-table": {
+      "types": "./dist/types/adapttable-angular-material-find-in-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-find-in-table.mjs"
+    },
+    "./filters": {
+      "types": "./dist/types/adapttable-angular-material-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-filters.mjs"
+    },
+    "./fit-columns": {
+      "types": "./dist/types/adapttable-angular-material-fit-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-fit-columns.mjs"
+    },
+    "./fullscreen": {
+      "types": "./dist/types/adapttable-angular-material-fullscreen.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-fullscreen.mjs"
+    },
+    "./grouping": {
+      "types": "./dist/types/adapttable-angular-material-grouping.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-grouping.mjs"
+    },
+    "./grouping-panel": {
+      "types": "./dist/types/adapttable-angular-material-grouping-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-grouping-panel.mjs"
+    },
+    "./header-filters": {
+      "types": "./dist/types/adapttable-angular-material-header-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-header-filters.mjs"
+    },
+    "./multi-sort": {
+      "types": "./dist/types/adapttable-angular-material-multi-sort.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-multi-sort.mjs"
+    },
+    "./nested-table": {
+      "types": "./dist/types/adapttable-angular-material-nested-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-nested-table.mjs"
+    },
+    "./pinned-summary-rows": {
+      "types": "./dist/types/adapttable-angular-material-pinned-summary-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-pinned-summary-rows.mjs"
+    },
+    "./preset": {
+      "types": "./dist/types/adapttable-angular-material-preset.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-preset.mjs"
+    },
+    "./pivot": {
+      "types": "./dist/types/adapttable-angular-material-pivot.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-pivot.mjs"
+    },
+    "./print": {
+      "types": "./dist/types/adapttable-angular-material-print.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-print.mjs"
+    },
+    "./resizable-columns": {
+      "types": "./dist/types/adapttable-angular-material-resizable-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-resizable-columns.mjs"
+    },
+    "./row-actions": {
+      "types": "./dist/types/adapttable-angular-material-row-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-row-actions.mjs"
+    },
+    "./row-appearance": {
+      "types": "./dist/types/adapttable-angular-material-row-appearance.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-row-appearance.mjs"
+    },
+    "./row-detail": {
+      "types": "./dist/types/adapttable-angular-material-row-detail.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-row-detail.mjs"
+    },
+    "./row-pinning": {
+      "types": "./dist/types/adapttable-angular-material-row-pinning.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-row-pinning.mjs"
+    },
+    "./row-reorder": {
+      "types": "./dist/types/adapttable-angular-material-row-reorder.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-row-reorder.mjs"
+    },
+    "./saved-views": {
+      "types": "./dist/types/adapttable-angular-material-saved-views.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-saved-views.mjs"
+    },
+    "./selection-stats": {
+      "types": "./dist/types/adapttable-angular-material-selection-stats.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-selection-stats.mjs"
+    },
+    "./side-panel": {
+      "types": "./dist/types/adapttable-angular-material-side-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-side-panel.mjs"
+    },
+    "./status-bar": {
+      "types": "./dist/types/adapttable-angular-material-status-bar.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-status-bar.mjs"
+    },
+    "./tree": {
+      "types": "./dist/types/adapttable-angular-material-tree.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-tree.mjs"
+    },
+    "./virtualize": {
+      "types": "./dist/types/adapttable-angular-material-virtualize.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-virtualize.mjs"
+    },
+    "./package.json": "./package.json",
+    "./assistant": {
+      "types": "./dist/types/adapttable-angular-material-assistant.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-material-assistant.mjs"
+    },
+    "./styles.css": "./styles.css"
+  },
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json -c tsconfig.build.json && node -e \"require('node:fs').rmSync('dist/package.json')\"",
+    "test": "vitest run && vitest run -c vitest.ssr.config.ts",
+    "test:coverage": "vitest run --coverage && vitest run -c vitest.ssr.config.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist coverage .turbo"
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "@angular/material": "^22.2.1",
+    "@angular/cdk": "^22.2.1",
+    "rxjs": "^7.8.0"
+  },
+  "dependencies": {
+    "@adapttable/core": "3.8.0",
+    "@adapttable/angular": "0.3.0",
+    "tslib": "^2.8.1"
+  },
   "engines": {
-    "node": ">=22.12.0"
-  }
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.7.5",
+    "@analogjs/vitest-angular": "^2.7.5",
+    "@angular/build": "^22.2.0",
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/compiler-cli": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "@angular/platform-server": "^22.2.0",
+    "@testing-library/dom": "^10.4.1",
+    "ng-packagr": "^22.2.1",
+    "rxjs": "^7.8.2",
+    "@angular/material": "^22.2.1",
+    "@angular/cdk": "^22.2.1",
+    "@angular/forms": "^22.2.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": true
 }

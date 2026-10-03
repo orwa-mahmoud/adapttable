@@ -152,6 +152,17 @@
       [data-theme="dark"] .at-fallback a {
         color: #a5b4fc;
       }
+      .at-fallback {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .at-fallback pre {
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
+      }
     </style>
   </head>
   <body>
@@ -163,7 +174,7 @@
         <p class="at-fallback__kicker">AdaptTable for Unstyled</p>
         <h1>Tree data in Unstyled</h1>
         <p>A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Compose <code>tree()</code> with <code>getChildren</code> or <code>getParentId</code> and it renders the hierarchy.</p>
-        <p>Children indent under their parent and a native chevron in the tree column opens and closes each branch. Give <code>hasChildren</code> and <code>onLoadChildren</code> and a branch fetches its children as it opens, showing that it is loading; a failed fetch closes it again, so the next click retries.</p>
+        <p>Children indent under their parent and a Unstyled chevron control in the tree column opens and closes each branch. Give <code>hasChildren</code> and <code>onLoadChildren</code> and a branch fetches its children as it opens, showing that it is loading; a failed fetch closes it again, so the next click retries.</p>
         <p>On a phone each card leads with the same chevron and indents by depth. Sorting reorders each branch in place, and a search shows the rows it matches.</p>
         <h2>The code</h2>
         <pre><code>import { Component, input } from &quot;@angular/core&quot;;
@@ -205,6 +216,13 @@ export class Org {
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="../../ng-zorro/tree/">Tree data in NG-ZORRO</a> — Ant Design components for Angular</li>
+          <li><a href="../../material/tree/">Tree data in Angular Material</a> — Angular Material controls for Angular</li>
+          <li><a href="../../ng-bootstrap/tree/">Tree data in ng-bootstrap</a> — ng-bootstrap controls for Angular</li>
+          <li><a href="../../aria/tree/">Tree data in Angular Aria</a> — Angular Aria controls for Angular</li>
+          <li><a href="../../ngx-bootstrap/tree/">Tree data in ngx-bootstrap</a> — ngx-bootstrap controls for Angular</li>
+          <li><a href="../../angular-cdk/tree/">Tree data in Angular CDK</a> — Angular CDK controls for Angular</li>
+          <li><a href="../../spartan/tree/">Tree data in Spartan</a> — Spartan controls for Angular</li>
+          <li><a href="../../taiga-ui/tree/">Tree data in Taiga UI</a> — Taiga UI controls for Angular</li>
         </ul>
         <h2>More Unstyled features</h2>
         <ul>
@@ -232,7 +250,7 @@ export class Org {
         <p>
           Reference: <a href="https://adapttable.orwamahmoud.com/angular/tree-data/">tree-data</a>. More of this kit:
           <a href="../">AdaptTable for Unstyled</a>, or
-          <a href="/react/demo/">the live demo</a>.
+          <a href="/angular/demo/unstyled/">the live demo</a>.
         </p>
       </main>
     </div>

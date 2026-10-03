@@ -32,11 +32,9 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await page.goto(PAGE);
-      expect(await people(page, 3)).toEqual([
-        "Ada Lovelace",
-        "Alan Turing",
-        "Grace Hopper",
-      ]);
+      await expect
+        .poll(() => people(page, 3))
+        .toEqual(["Ada Lovelace", "Alan Turing", "Grace Hopper"]);
       const grip = part(page, "row-reorder-handle").first();
       await grip.focus();
       await page.keyboard.press("Space");
@@ -67,7 +65,9 @@ for (const kit of ANGULAR_KITS) {
       await page.keyboard.press("Space");
       await page.keyboard.press("ArrowDown");
       await page.keyboard.press("Escape");
-      expect(await people(page, 2)).toEqual(["Ada Lovelace", "Alan Turing"]);
+      await expect
+        .poll(() => people(page, 2))
+        .toEqual(["Ada Lovelace", "Alan Turing"]);
       await expect(page.locator("[data-demo-log]")).toHaveText(
         "Drag a grip, or lift a row with Space."
       );

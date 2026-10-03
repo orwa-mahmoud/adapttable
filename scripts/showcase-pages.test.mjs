@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, posix } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -20,6 +20,15 @@ import { isRedirectPage } from "./sitemap-routes.mjs";
 const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
 
 const INDEX = "index.html";
+
+const STANDALONE_ENTRIES = new Map([
+  ["main", "src/main.tsx"],
+  ["all-options", "src/entry-all-options.tsx"],
+  ["agent-approval", "src/entry-agent-approval.tsx"],
+  ["mcp-app", "src/entry-mcp-app.tsx"],
+  ["angular-main", "src/angular/entry-demo.ts"],
+  ["angular-all-options", "src/angular/entry-demo.ts"],
+]);
 
 /** Not page directories: build output, dependencies, static assets, source. */
 const NOT_PAGES = new Set(["dist", "node_modules", "public", "src"]);
@@ -71,13 +80,17 @@ const SRC = /\bsrc="([^"]+)"/;
 const SIDE_EFFECT_IMPORT = /^import\s+"([^"]+)";/gm;
 
 /** The module script a page's HTML boots, as a path under the showcase root. */
-const entryModuleOf = (html) => {
+const entryModuleOf = (html, pageHtml) => {
   const tag = (html.match(MODULE_SCRIPT) ?? []).find((candidate) =>
     SRC.test(candidate)
   );
   const src = tag?.match(SRC)?.[1];
-  // Vite resolves a root-absolute `src` against the showcase package root.
-  return src?.startsWith("/") ? src.slice(1) : src;
+  if (!src) return undefined;
+  // Root-absolute entries use the showcase root; relative entries use the
+  // HTML document's directory, including the Angular live/lab front doors.
+  return src.startsWith("/")
+    ? src.slice(1)
+    : posix.normalize(posix.join(posix.dirname(pageHtml), src));
 };
 
 /** The booting pages of React's kits, whose entries carry the switcher. */
@@ -91,13 +104,28 @@ const sideEffectImportsIn = (source) =>
 const bootingPages = () =>
   SHOWCASE_PAGES.map((page) => {
     const html = readFileSync(join(SHOWCASE, page.html), "utf8");
-    const module = entryModuleOf(html);
+    const module = entryModuleOf(html, page.html);
     return {
       page,
       module,
       source: module ? readFileSync(join(SHOWCASE, module), "utf8") : null,
     };
   }).filter((entry) => entry.module);
+
+function assertStandaloneEntry(page, source, entry) {
+  assert.ok(STANDALONE_ENTRIES.has(page.key), page.html);
+  assert.equal(entry, STANDALONE_ENTRIES.get(page.key), page.html);
+  if (page.framework === "angular") {
+    const lab = page.key === "angular-all-options";
+    assert.equal(page.key, lab ? "angular-all-options" : "angular-main");
+    assert.equal(page.route, demoRoute(lab ? "all-options" : "", "angular"));
+    assert.equal(page.indexable, true, page.html);
+    assert.ok(source.includes(`data-angular-mode="${lab ? "lab" : "live"}"`));
+    assert.doesNotMatch(source, /data-matrix-page/);
+  } else {
+    assert.equal(page.framework, "react", page.html);
+  }
+}
 
 describe("the showcase page manifest", () => {
   it("lists every page directory, and only pages that exist", () => {
@@ -153,19 +181,26 @@ describe("the showcase page manifest", () => {
       const source = readFileSync(join(SHOWCASE, page.html), "utf8");
       if (page.framework === null) {
         assert.equal(isRedirectPage(source), true, page.html);
+        assert.equal(entryModuleOf(source, page.html), undefined, page.html);
         continue;
       }
-      assert.ok(entryModuleOf(source), page.html);
+      const entry = entryModuleOf(source, page.html);
+      assert.ok(entry, page.html);
+      assert.equal(
+        (source.match(MODULE_SCRIPT) ?? []).filter((tag) => SRC.test(tag))
+          .length,
+        1,
+        `${page.html} must bootstrap exactly one module`
+      );
       const spec = matrix.get(page.html);
-      if (!spec) continue;
+      if (!spec) {
+        assertStandaloneEntry(page, source, entry);
+        continue;
+      }
       const adapter = adapterByKey(spec.adapter);
       assert.ok(adapter, spec.adapter);
       assert.equal(page.framework, adapter.framework, page.html);
-      assert.equal(
-        `/${entryModuleOf(source)}`,
-        frameworkOf(adapter).entry,
-        page.html
-      );
+      assert.equal(`/${entry}`, frameworkOf(adapter).entry, page.html);
     }
   });
 
@@ -181,7 +216,7 @@ describe("the showcase page manifest", () => {
         continue;
       }
       assert.equal(isRedirectPage(source), false, html);
-      assert.ok(entryModuleOf(source), html);
+      assert.ok(entryModuleOf(source, html), html);
     }
   });
 });
@@ -191,13 +226,13 @@ describe("the showcase page manifest", () => {
  * to render any React kit — and a kit whose stylesheet never loaded renders
  * bare HTML. The stylesheets therefore belong to one shared module, and this
  * walks the manifest to prove no React page entry skips it. An Angular page
- * shows its one kit, styled by the page's own stylesheet.
+ * lazily loads the selected kit through either its matrix or live/lab entry.
  */
 describe("the kit stylesheets every showcase page loads", () => {
   it("boots a module from every page that is not a redirect", () => {
     for (const page of SHOWCASE_PAGES) {
       const html = readFileSync(join(SHOWCASE, page.html), "utf8");
-      const module = entryModuleOf(html);
+      const module = entryModuleOf(html, page.html);
       if (isRedirectPage(html)) continue;
       assert.ok(module, `${page.html} boots no module script`);
       assert.equal(
@@ -236,6 +271,10 @@ describe("the kit stylesheets every showcase page loads", () => {
       ({ page }) => page.framework === "angular"
     );
     assert.ok(angular.length > 0, "no Angular page boots a module");
+    assert.deepEqual(sorted(new Set(angular.map(({ module }) => module))), [
+      "src/angular/entry-demo.ts",
+      "src/angular/entry-matrix.ts",
+    ]);
     for (const { module, source } of angular) {
       const sheets = sideEffectImportsIn(source).filter((imported) =>
         imported.endsWith(".css")
@@ -257,11 +296,7 @@ describe("the kit stylesheets every showcase page loads", () => {
     }
   });
 
-  it("loads NG-ZORRO styles only through its route-selected kit module", () => {
-    const entry = readFileSync(
-      join(SHOWCASE, "src/angular/entry-matrix.ts"),
-      "utf8"
-    );
+  it("loads Angular kit styles only through lazy kit modules in both modes", () => {
     const ngZorro = readFileSync(
       join(SHOWCASE, "src/angular/kits/ngZorro.ts"),
       "utf8"
@@ -270,27 +305,71 @@ describe("the kit stylesheets every showcase page loads", () => {
       join(SHOWCASE, "src/angular/kits/unstyled.ts"),
       "utf8"
     );
-    assert.match(
-      entry,
-      /case "ng-zorro":\s*return import\("\.\/kits\/ngZorro"\)/
-    );
-    const entrySource = ts.createSourceFile(
-      "entry.ts",
-      entry,
-      ts.ScriptTarget.Latest,
-      true
-    );
-    const eagerImports = entrySource.statements
-      .filter(ts.isImportDeclaration)
-      .filter((statement) => !statement.importClause?.isTypeOnly);
-    assert.equal(
-      eagerImports.some(
-        (statement) =>
-          ts.isStringLiteral(statement.moduleSpecifier) &&
-          statement.moduleSpecifier.text.includes("ngZorro")
-      ),
-      false
-    );
+    const kitModules = [
+      "angularCdk",
+      "aria",
+      "material",
+      "ngBootstrap",
+      "ngZorro",
+      "ngxBootstrap",
+      "spartan",
+      "taigaUi",
+      "unstyled",
+    ];
+    for (const module of ["entry-matrix.ts", "entry-demo.ts"]) {
+      const entry = readFileSync(join(SHOWCASE, "src/angular", module), "utf8");
+      assert.match(
+        entry,
+        /case "ng-zorro":\s*return import\("\.\/kits\/ngZorro"\)/
+      );
+      const entrySource = ts.createSourceFile(
+        module,
+        entry,
+        ts.ScriptTarget.Latest,
+        true
+      );
+      const eagerImports = entrySource.statements
+        .filter(ts.isImportDeclaration)
+        .filter((statement) => !statement.importClause?.isTypeOnly);
+      assert.equal(
+        eagerImports.some(
+          (statement) =>
+            ts.isStringLiteral(statement.moduleSpecifier) &&
+            statement.moduleSpecifier.text.includes("/kits/")
+        ),
+        false,
+        `${module} must not eagerly import a kit`
+      );
+      const lazy = [];
+      const visit = (node) => {
+        if (
+          ts.isCallExpression(node) &&
+          node.expression.kind === ts.SyntaxKind.ImportKeyword
+        ) {
+          const specifier = node.arguments[0];
+          if (
+            specifier &&
+            ts.isStringLiteral(specifier) &&
+            specifier.text.startsWith("./kits/")
+          ) {
+            lazy.push(specifier.text);
+          }
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(entrySource);
+      assert.deepEqual(
+        sorted(lazy),
+        sorted(kitModules.map((kit) => `./kits/${kit}`)),
+        module
+      );
+      for (const specifier of lazy) {
+        assert.ok(
+          existsSync(join(SHOWCASE, "src/angular", `${specifier}.ts`)),
+          specifier
+        );
+      }
+    }
     assert.ok(
       sideEffectImportsIn(ngZorro).includes(
         "ng-zorro-antd/ng-zorro-antd.min.css"

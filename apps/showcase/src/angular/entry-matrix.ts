@@ -14,7 +14,7 @@ import { bootstrapApplication } from "@angular/platform-browser";
 
 import { resolveMatrixRoute } from "../matrix/content";
 import { AdaptShowcaseMatrixPage, MATRIX_PAGE } from "./matrixPage";
-import { SHOWCASE_KIT } from "./showcaseKit";
+import { SHOWCASE_ASSET_ROOT, SHOWCASE_KIT } from "./showcaseKit";
 
 const container = document.getElementById("root");
 if (!container) throw new Error("the showcase page has no #root to mount into");
@@ -37,6 +37,20 @@ const { kit } = await (() => {
   switch (route.adapter.key) {
     case "unstyled":
       return import("./kits/unstyled");
+    case "material":
+      return import("./kits/material");
+    case "ng-bootstrap":
+      return import("./kits/ngBootstrap");
+    case "spartan":
+      return import("./kits/spartan");
+    case "taiga-ui":
+      return import("./kits/taigaUi");
+    case "aria":
+      return import("./kits/aria");
+    case "ngx-bootstrap":
+      return import("./kits/ngxBootstrap");
+    case "angular-cdk":
+      return import("./kits/angularCdk");
     case "ng-zorro":
       return import("./kits/ngZorro");
     default:
@@ -52,6 +66,10 @@ await bootstrapApplication(AdaptShowcaseMatrixPage, {
   providers: [
     provideZonelessChangeDetection(),
     ...kit.providers,
+    {
+      provide: SHOWCASE_ASSET_ROOT,
+      useValue: new URL(`${root}/assets`, document.baseURI).pathname,
+    },
     { provide: SHOWCASE_KIT, useValue: kit },
     { provide: MATRIX_PAGE, useValue: { route, root } },
   ],

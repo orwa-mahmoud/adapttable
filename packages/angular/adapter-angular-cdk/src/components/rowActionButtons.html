@@ -1,0 +1,75 @@
+@let content = renderer();
+@if (content?.template; as template) {
+  <ng-container
+    [ngTemplateOutlet]="template"
+    [ngTemplateOutletContext]="context()"
+  />
+} @else if (content?.component; as component) {
+  <ng-container
+    [ngComponentOutlet]="component"
+    [ngComponentOutletInputs]="content?.inputs"
+  />
+} @else if (layout() === "menu") {
+  <span
+    data-adapttable-part="row-actions-menu"
+    [class]="classNames().rowActionsMenu"
+    (pointerdown)="$event.stopPropagation()"
+  >
+    <button
+      cdkMonitorElementFocus
+      data-adapttable-cdk-control
+      type="button"
+      [cdkMenuTriggerFor]="menuContent"
+      adaptCdkMenuDirection
+      data-adapttable-part="row-actions-trigger"
+      [class]="classNames().rowActionsTrigger"
+      [attr.aria-label]="labels().rowActionsMenu"
+      (click)="$event.stopPropagation()"
+    >
+      ⋮
+    </button>
+    <ng-template #menuContent>
+      <div
+        cdkMenu
+        class="adapt-cdk-surface"
+        [attr.aria-label]="labels().rowActionsMenu"
+      >
+        @for (item of items(); track item.action.key) {
+          <button
+            cdkMonitorElementFocus
+            data-adapttable-cdk-control
+            type="button"
+            cdkMenuItem
+            [cdkMenuItemDisabled]="item.disabled"
+            data-adapttable-part="action-button"
+            [class]="classNames().actionButton"
+            [attr.aria-label]="item.action.label"
+            [attr.title]="item.reason ?? null"
+            [attr.data-color]="item.action.color ?? null"
+            [disabled]="item.disabled"
+            (click)="run($event, item.action)"
+          >
+            {{ item.action.label }}
+          </button>
+        }
+      </div>
+    </ng-template>
+  </span>
+} @else {
+  @for (item of items(); track item.action.key) {
+    <button
+      cdkMonitorElementFocus
+      data-adapttable-cdk-control
+      type="button"
+      data-adapttable-part="action-button"
+      [class]="classNames().actionButton"
+      [attr.aria-label]="item.action.label"
+      [attr.title]="item.reason ?? null"
+      [attr.data-color]="item.action.color ?? null"
+      [disabled]="item.disabled"
+      (click)="run($event, item.action)"
+    >
+      {{ item.action.label }}
+    </button>
+  }
+}

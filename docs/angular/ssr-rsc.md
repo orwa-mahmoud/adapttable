@@ -85,6 +85,13 @@ an action made before hydration using Angular's event-dispatch setup. Let the
 Angular application own that event infrastructure rather than adding a second
 table-specific replay system.
 
+The ngx-bootstrap 22.0.0 kit has a narrow
+[upstream pagination replay limitation](./ngx-bootstrap.md#known-upstream-event-replay-limitation):
+an early pagination-link click is rejected during replay. Rendering, ordinary
+hydration and a manual click after hydration work; the early click is not
+retried automatically. Its explicit known-failure test does not relax the
+other kits' replay checks or its own normal hydration and recovery checks.
+
 Viewport-dependent card layout and virtualization measurement belong to the
 client. Do not guess a phone width on the server and render a different tree
 from the browser's initial tree. If your app deliberately fixes a layout with

@@ -1,0 +1,51 @@
+@use "@angular/material" as mat;
+
+/* Material's tokens stay within its showcase surface and its own portals. */
+[data-angular-kit="material"],
+.adapt-material-overlay {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: (
+        plain-family: (
+          Roboto,
+          sans-serif,
+        ),
+      ),
+      density: -1,
+    )
+  );
+}
+
+html[data-theme="dark"] [data-angular-kit="material"],
+html[data-theme="dark"] .adapt-material-overlay {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: dark,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+    )
+  );
+}
+
+[data-angular-kit="material"] [data-density="compact"] {
+  @include mat.theme(
+    (
+      density: -3,
+    )
+  );
+}
+
+[data-angular-kit="material"] [data-density="comfortable"] {
+  @include mat.theme(
+    (
+      density: 0,
+    )
+  );
+}

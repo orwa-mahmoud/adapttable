@@ -1,0 +1,84 @@
+@let content = renderer();
+@if (content?.template; as template) {
+  <ng-container
+    [ngTemplateOutlet]="template"
+    [ngTemplateOutletContext]="context()"
+  />
+} @else if (content?.component; as component) {
+  <ng-container
+    [ngComponentOutlet]="component"
+    [ngComponentOutletInputs]="content?.inputs"
+  />
+} @else if (layout() === "menu") {
+  <div
+    dropdown
+    [isAnimated]="false"
+    [container]="overlayContainer()"
+    [autoClose]="true"
+    [insideClick]="true"
+    #menu="bs-dropdown"
+    data-adapttable-part="row-actions-menu"
+    [class]="classNames().rowActionsMenu"
+    (pointerdown)="$event.stopPropagation()"
+  >
+    <button
+      type="button"
+      dropdownToggle
+      #trigger
+      class="btn btn-outline-secondary btn-sm"
+      data-adapttable-part="row-actions-trigger"
+      [attr.aria-controls]="menuId"
+      aria-haspopup="menu"
+      [class]="classNames().rowActionsTrigger"
+      [attr.aria-label]="labels().rowActionsMenu"
+      (click)="$event.stopPropagation()"
+    >
+      ⋮
+    </button>
+    <div
+      class="dropdown-menu"
+      *dropdownMenu
+      role="menu"
+      [id]="menuId"
+      (keydown.escape)="
+        $event.preventDefault();
+        $event.stopPropagation();
+        menu.hide();
+        trigger.focus()
+      "
+    >
+      @for (item of items(); track item.action.key) {
+        <button
+          class="dropdown-item"
+          role="menuitem"
+          type="button"
+          data-adapttable-part="action-button"
+          [class]="classNames().actionButton"
+          [attr.aria-label]="item.action.label"
+          [attr.title]="item.reason ?? null"
+          [attr.data-color]="item.action.color ?? null"
+          [disabled]="item.disabled"
+          (click)="run($event, item.action)"
+        >
+          {{ item.action.label }}
+        </button>
+      }
+    </div>
+  </div>
+} @else {
+  @for (item of items(); track item.action.key) {
+    <button
+      class="btn btn-outline-secondary btn-sm"
+      type="button"
+      data-adapttable-part="action-button"
+      [class]="classNames().actionButton"
+      [attr.aria-label]="item.action.label"
+      [attr.title]="item.reason ?? null"
+      [attr.data-color]="item.action.color ?? null"
+      [disabled]="item.disabled"
+      (click)="run($event, item.action)"
+    >
+      {{ item.action.label }}
+    </button>
+  }
+}

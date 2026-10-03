@@ -39,6 +39,48 @@
       "@adapttable/ng-zorro/*": [
         "../../../../packages/angular/adapter-ng-zorro/*/index.ts"
       ],
+      "@adapttable/angular-material": [
+        "../../../../packages/angular/adapter-material/src/index.ts"
+      ],
+      "@adapttable/angular-material/*": [
+        "../../../../packages/angular/adapter-material/*/index.ts"
+      ],
+      "@adapttable/ng-bootstrap": [
+        "../../../../packages/angular/adapter-ng-bootstrap/src/index.ts"
+      ],
+      "@adapttable/ng-bootstrap/*": [
+        "../../../../packages/angular/adapter-ng-bootstrap/*/index.ts"
+      ],
+      "@adapttable/spartan": [
+        "../../../../packages/angular/adapter-spartan/src/index.ts"
+      ],
+      "@adapttable/spartan/*": [
+        "../../../../packages/angular/adapter-spartan/*/index.ts"
+      ],
+      "@adapttable/taiga-ui": [
+        "../../../../packages/angular/adapter-taiga-ui/src/index.ts"
+      ],
+      "@adapttable/taiga-ui/*": [
+        "../../../../packages/angular/adapter-taiga-ui/*/index.ts"
+      ],
+      "@adapttable/angular-aria": [
+        "../../../../packages/angular/adapter-angular-aria/src/index.ts"
+      ],
+      "@adapttable/angular-aria/*": [
+        "../../../../packages/angular/adapter-angular-aria/*/index.ts"
+      ],
+      "@adapttable/ngx-bootstrap": [
+        "../../../../packages/angular/adapter-ngx-bootstrap/src/index.ts"
+      ],
+      "@adapttable/ngx-bootstrap/*": [
+        "../../../../packages/angular/adapter-ngx-bootstrap/*/index.ts"
+      ],
+      "@adapttable/angular-cdk": [
+        "../../../../packages/angular/adapter-angular-cdk/src/index.ts"
+      ],
+      "@adapttable/angular-cdk/*": [
+        "../../../../packages/angular/adapter-angular-cdk/*/index.ts"
+      ],
       "@adapttable/core": ["../../../../packages/shared/core/src/index.ts"],
       "@adapttable/core/*": ["../../../../packages/shared/core/src/*.ts"]
     }

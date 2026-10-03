@@ -1,6 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { ANGULAR_KITS, angularPart } from "./angular-kit";
+import {
+  ANGULAR_KITS,
+  angularPart,
+  checkAngularCheckbox,
+  expectAngularCheckboxMixed,
+} from "./angular-kit";
 
 for (const kit of ANGULAR_KITS) {
   test.describe(kit.key, () => {
@@ -20,12 +25,15 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await page.goto(PAGE);
-      await rowBox(page, 0).check();
-      await rowBox(page, 2).check();
+      await checkAngularCheckbox(kit, rowBox(page, 0));
+      await checkAngularCheckbox(kit, rowBox(page, 2));
       await expect(part(page, "bulk-bar")).toContainText("2 selected");
 
       await part(page, "page-number").nth(1).click();
-      await part(page, "selection-header").getByRole("checkbox").check();
+      await checkAngularCheckbox(
+        kit,
+        part(page, "selection-header").getByRole("checkbox")
+      );
       await expect(part(page, "bulk-bar")).toContainText("12 selected");
 
       await part(page, "page-number").nth(0).click();
@@ -44,7 +52,10 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await page.goto(PAGE);
-      await part(page, "selection-header").getByRole("checkbox").check();
+      await checkAngularCheckbox(
+        kit,
+        part(page, "selection-header").getByRole("checkbox")
+      );
       const banner = part(page, "select-all-banner");
       await expect(banner).toContainText("10 on this page");
       await part(page, "select-all-button").click();
@@ -56,21 +67,21 @@ for (const kit of ANGULAR_KITS) {
     }) => {
       await page.goto(PAGE);
       const header = part(page, "selection-header").getByRole("checkbox");
-      await rowBox(page, 0).check();
-      await expect(header).toHaveJSProperty("indeterminate", true);
+      await checkAngularCheckbox(kit, rowBox(page, 0));
+      await expectAngularCheckboxMixed(kit, header, true);
       await expect(header).toHaveAccessibleName(/.+/);
       await header.focus();
       await expect(header).toBeFocused();
       await page.keyboard.press("Space");
       await expect(header).toBeChecked();
-      await expect(header).toHaveJSProperty("indeterminate", false);
+      await expectAngularCheckboxMixed(kit, header, false);
       await expect(
         part(page, "row").getByRole("checkbox", { checked: true })
       ).toHaveCount(10);
       await expect(part(page, "bulk-bar")).toContainText("10 selected");
       await page.keyboard.press("Space");
       await expect(header).not.toBeChecked();
-      await expect(header).toHaveJSProperty("indeterminate", false);
+      await expectAngularCheckboxMixed(kit, header, false);
       await expect(
         part(page, "row").getByRole("checkbox", { checked: true })
       ).toHaveCount(0);

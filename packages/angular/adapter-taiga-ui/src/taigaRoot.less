@@ -1,0 +1,46 @@
+@import "@taiga-ui/styles/mixins/theme.less";
+
+[data-adapttable-taiga-root] {
+  .taiga-ui-theme();
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  font: var(--tui-font-text-m);
+
+  // The native fixed portal needs its own stacking level above host-page chrome.
+  > tui-popups {
+    z-index: var(--adapttable-overlay-z-index, 1000);
+  }
+
+  // A dynamically declared template can create another native portal root
+  // inside this content wrapper. Let that portal reach the host-page stack.
+  > .t-root-content:has([data-adapttable-taiga-root] > tui-popups) {
+    isolation: auto;
+  }
+
+  html[data-theme="dark"] &:not([tuiTheme="light"]),
+  html.dark &:not([tuiTheme="light"]) {
+    .tui-theme-dark();
+  }
+
+  [data-taiga-part="filters-popover"],
+  [data-taiga-part="column-menu-panel"],
+  [data-taiga-part="views-panel"] {
+    margin: 0;
+    border: 0;
+    padding: 1rem;
+    max-inline-size: calc(100vw - 2rem);
+    max-block-size: min(35rem, calc(100dvh - 3rem));
+    overflow: auto;
+    background: var(--tui-background-elevation-1);
+    color: var(--tui-text-primary);
+  }
+
+  [data-taiga-part="filters-header"],
+  [data-taiga-part="filters-footer"] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}

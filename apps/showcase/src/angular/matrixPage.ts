@@ -7,7 +7,7 @@
  * Angular kit's page reads exactly as its React neighbours do. The chrome is
  * the page's own; everything under the seam is the kit.
  */
-import { NgComponentOutlet } from "@angular/common";
+import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   Component,
   computed,
@@ -15,12 +15,15 @@ import {
   effect,
   inject,
   InjectionToken,
-  input,
   signal,
   ViewEncapsulation,
 } from "@angular/core";
 
-import { demoRoute } from "../../../../scripts/site.mjs";
+import {
+  FRAMEWORK_STORAGE_KEY,
+  frameworkDemoTarget,
+  SITE_FRAMEWORKS,
+} from "../../../../scripts/framework-navigation.mjs";
 import {
   docsUrl,
   featuresOf,
@@ -33,10 +36,13 @@ import {
   type MatrixFeature,
   type MatrixRoute,
   otherKitsOf,
+  SHOWCASE_ADAPTERS,
   SITE_HOME,
   snippetFor,
 } from "../matrix/content";
 import { AdaptShowcaseLandingTable, FEATURE_BODIES } from "./featureBodies";
+import { SHOWCASE_DARK, SHOWCASE_KIT } from "./showcaseKit";
+import { AdaptShowcaseWordmark } from "./wordmark";
 
 /** Where every showcase page keeps the reader's theme between pages. */
 const THEME_KEY = "adapttable-demo-theme";
@@ -77,99 +83,7 @@ const escapeHtml = (text: string): string =>
 export const leadHtml = (text: string): string =>
   escapeHtml(text).replace(/`([^`]+)`/g, "<code>$1</code>");
 
-/** The AdaptTable wordmark, as every showcase page draws it. */
-@Component({
-  selector: "adapt-showcase-wordmark",
-  template: `
-    <a class="wm" [href]="href()">
-      <svg
-        class="wm__mark"
-        viewBox="0 0 32 32"
-        width="20"
-        height="20"
-        aria-hidden="true"
-      >
-        <rect
-          x="8.5"
-          y="1.5"
-          width="22"
-          height="22"
-          rx="5.5"
-          fill="var(--brand)"
-          opacity="0.25"
-        />
-        <rect
-          x="5"
-          y="5"
-          width="22"
-          height="22"
-          rx="5.5"
-          fill="var(--brand)"
-          opacity="0.5"
-        />
-        <rect
-          x="1.5"
-          y="8.5"
-          width="22"
-          height="22"
-          rx="5.5"
-          fill="var(--brand)"
-        />
-        <rect x="4.5" y="12.5" width="16" height="2.8" rx="1.2" fill="#fff" />
-        <rect
-          x="11.1"
-          y="12.5"
-          width="2.8"
-          height="14.5"
-          rx="1.2"
-          fill="#fff"
-        />
-        <rect
-          x="4.5"
-          y="18.8"
-          width="4.6"
-          height="2.2"
-          rx="1"
-          fill="#fff"
-          opacity="0.4"
-        />
-        <rect
-          x="4.5"
-          y="23"
-          width="4.6"
-          height="2.2"
-          rx="1"
-          fill="#fff"
-          opacity="0.4"
-        />
-        <rect
-          x="15.9"
-          y="18.8"
-          width="4.6"
-          height="2.2"
-          rx="1"
-          fill="#fff"
-          opacity="0.4"
-        />
-        <rect
-          x="15.9"
-          y="23"
-          width="4.6"
-          height="2.2"
-          rx="1"
-          fill="#fff"
-          opacity="0.4"
-        />
-      </svg>
-      <span class="wm__txt">Adapt<strong>Table</strong></span>
-    </a>
-  `,
-  host: { style: "display: contents" },
-})
-export class AdaptShowcaseWordmark {
-  /** Where the wordmark links. */
-  readonly href = input.required<string>();
-}
+export { AdaptShowcaseWordmark } from "./wordmark";
 
 /** Which page this is, and the relative prefix back to the showcase root. */
 export interface MatrixPageContext {
@@ -187,7 +101,7 @@ export const MATRIX_PAGE = new InjectionToken<MatrixPageContext>(
  */
 @Component({
   selector: "adapt-showcase-matrix-page",
-  imports: [AdaptShowcaseWordmark, NgComponentOutlet],
+  imports: [AdaptShowcaseWordmark, NgComponentOutlet, NgTemplateOutlet],
   templateUrl: "./matrixPage.html",
   styleUrl: "./matrixPage.css",
   // The stylesheet addresses the kit's elements by part name, which lie in
@@ -195,6 +109,7 @@ export const MATRIX_PAGE = new InjectionToken<MatrixPageContext>(
   encapsulation: ViewEncapsulation.None,
 })
 export class AdaptShowcaseMatrixPage {
+  protected readonly kit = inject(SHOWCASE_KIT);
   private readonly page = inject(MATRIX_PAGE);
   /** Which kit and feature this page is for. */
   readonly route = signal(this.page.route).asReadonly();
@@ -202,13 +117,46 @@ export class AdaptShowcaseMatrixPage {
   readonly root = signal(this.page.root).asReadonly();
 
   /** Whether the page is dark. */
-  readonly dark = signal(readStoredTheme());
+  readonly dark = inject(SHOWCASE_DARK);
   /** Which copy button last copied, for its "Copied" state. */
   readonly copied = signal<"code" | "install" | null>(null);
 
   readonly siteHome = SITE_HOME;
-  readonly reactDemo = demoRoute();
+  readonly frameworks = SITE_FRAMEWORKS;
+  readonly unavailableKit = new URLSearchParams(window.location.search).get(
+    "kit-unavailable"
+  );
+  readonly unavailable = new URLSearchParams(window.location.search).get(
+    "unavailable"
+  );
+  switchFramework(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+    try {
+      window.localStorage.setItem(FRAMEWORK_STORAGE_KEY, target.value);
+    } catch {
+      /* Storage is optional. */
+    }
+    window.location.assign(
+      frameworkDemoTarget(
+        window.location.pathname,
+        target.value,
+        SHOWCASE_ADAPTERS,
+        featuresOf
+      ).href
+    );
+  }
   readonly gettingStarted = docsUrl("getting-started", "angular");
+  readonly liveDemo = window.location.pathname.startsWith("/angular/demo/")
+    ? "/angular/demo/"
+    : `${this.page.root}/angular-main/`;
+  readonly featureLab = window.location.pathname.startsWith("/angular/demo/")
+    ? "/angular/demo/all-options/"
+    : `${this.page.root}/angular-all-options/`;
+  readonly angularAdapters = SHOWCASE_ADAPTERS.filter(
+    (adapter) => adapter.framework === "angular" && adapter.built
+  );
+
   readonly leadHtml = leadHtml;
   readonly docsUrl = (page: string): string => docsUrl(page, "angular");
 
@@ -273,6 +221,12 @@ export class AdaptShowcaseMatrixPage {
   private copyTimer: number | undefined;
 
   constructor() {
+    this.dark.set(readStoredTheme());
+    try {
+      window.localStorage.setItem(FRAMEWORK_STORAGE_KEY, "angular");
+    } catch {
+      /* Storage is optional. */
+    }
     effect(() => {
       const dark = this.dark();
       document.documentElement.dataset.theme = dark ? "dark" : "light";

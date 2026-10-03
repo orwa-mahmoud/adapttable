@@ -1,4 +1,9 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src"]
+  "include": ["src"],
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {}
+  },
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
 }

@@ -283,7 +283,13 @@ describe("init in a fresh Angular application", { concurrent: false }, () => {
             timeout: 120000,
             maxBuffer: 4 * 1024 * 1024,
           }
-        );
+        ).catch((error: unknown) => {
+          const failure = error as Error & { stdout?: string; stderr?: string };
+          throw new Error(
+            `${failure.message}\n${failure.stdout ?? ""}\n${failure.stderr ?? ""}`,
+            { cause: error }
+          );
+        });
         const rendered = JSON.parse(
           readFileSync(resolve(root, "rendered.json"), "utf8")
         ) as RenderedApp;

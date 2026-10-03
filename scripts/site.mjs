@@ -75,18 +75,21 @@ export const docsRoute = (page, framework = FRAMEWORK) =>
   `/${docsSlug(page, framework)}/`;
 
 /**
- * A reference uses its framework's guide when registered, then the root source.
+ * A reference uses its framework's guide or a shared contract. Missing Angular
+ * counterparts point to an explicitly explained Angular front door.
  * @param {string} page - A source basename, with optional `.md`.
  * @param {string} [framework] - The framework requesting the reference.
  * @returns {string} The route of an available guide.
  */
 export const docsReferenceRoute = (page, framework = FRAMEWORK) => {
   const source = page.replace(/\.md$/, "");
-  return docsRoute(
-    framework === "angular" && ANGULAR_DOCS.includes(`angular/${source}.md`)
-      ? `angular/${source}`
-      : source
-  );
+  if (framework === "angular") {
+    if (ANGULAR_DOCS.includes(`angular/${source}.md`))
+      return docsRoute(`angular/${source}`);
+    if (!SHARED.has(source))
+      return `${docsRoute("angular/getting-started")}?unavailable=${encodeURIComponent(source)}`;
+  }
+  return docsRoute(source);
 };
 
 /**

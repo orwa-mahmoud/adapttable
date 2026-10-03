@@ -1,0 +1,279 @@
+/* Angular Aria supplies behavior, not a theme. These are the adapter's own tokens. */
+.adapt-aria {
+  --adapt-aria-surface: #ffffff;
+  --adapt-aria-muted: #f4f5fa;
+  --adapt-aria-ink: #202333;
+  --adapt-aria-line: #d8dbe6;
+  --adapt-aria-accent: #6540cb;
+  --adapt-aria-space: 0.65rem 0.85rem;
+  font:
+    400 0.875rem/1.5 system-ui,
+    sans-serif;
+  color: var(--adapt-aria-ink);
+  accent-color: var(--adapt-aria-accent);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+.dark .adapt-aria,
+[data-theme="dark"] .adapt-aria {
+  --adapt-aria-surface: #20212b;
+  --adapt-aria-muted: #2b2d3a;
+  --adapt-aria-ink: #f0edf8;
+  --adapt-aria-line: #494b60;
+  --adapt-aria-accent: #bca4ff;
+}
+.adapt-aria [data-density="compact"] {
+  --adapt-aria-space: 0.3rem 0.55rem;
+}
+.adapt-aria [data-density="comfortable"] {
+  --adapt-aria-space: 1rem 1.1rem;
+}
+.adapt-aria :is(button, input, select, textarea, .adapt-aria-select) {
+  font: inherit;
+  color: inherit;
+  box-sizing: border-box;
+  background: var(--adapt-aria-surface);
+  border: 1px solid var(--adapt-aria-line);
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.65rem;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+.adapt-aria :is(button, summary, [role="combobox"], [role="option"]) {
+  cursor: pointer;
+}
+.adapt-aria :is(button:hover, [role="option"]:hover) {
+  background: var(--adapt-aria-muted);
+}
+.adapt-aria :is(button:disabled, [aria-disabled="true"]) {
+  opacity: 0.5;
+  cursor: default;
+}
+.adapt-aria :is(button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--adapt-aria-accent);
+  outline-offset: 2px;
+}
+.adapt-aria
+  :is([aria-selected="true"], [aria-pressed="true"], [aria-current="page"]) {
+  background: color-mix(
+    in srgb,
+    var(--adapt-aria-accent) 14%,
+    var(--adapt-aria-surface)
+  );
+  border-color: var(--adapt-aria-accent);
+}
+.adapt-aria input[type="checkbox"] {
+  inline-size: 1rem;
+  block-size: 1rem;
+  padding: 0;
+}
+.adapt-aria svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  flex: 0 0 auto;
+}
+.adapt-aria
+  :is(
+    [data-adapttable-part="toolbar"],
+    [data-adapttable-part="footer"],
+    [data-adapttable-part="toolbar-extras"],
+    [data-adapttable-part="bulk-bar"],
+    [data-adapttable-part="search-field"],
+    [data-adapttable-part="pager"]
+  ) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.adapt-aria [data-adapttable-part="toolbar"] {
+  margin-block-end: 0.8rem;
+}
+.adapt-aria [data-adapttable-part="footer"] {
+  justify-content: space-between;
+  margin-block-start: 0.8rem;
+}
+.adapt-aria [data-adapttable-part="search-field"] {
+  flex-wrap: nowrap;
+  flex: 1 1 12rem;
+  max-inline-size: 24rem;
+}
+.adapt-aria [data-adapttable-part="search"] {
+  inline-size: 100%;
+}
+.adapt-aria [data-adapttable-part="scroll-box"] {
+  overflow: auto;
+  border: 1px solid var(--adapt-aria-line);
+  border-radius: 0.6rem;
+}
+.adapt-aria [data-adapttable-part="table"] {
+  inline-size: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+.adapt-aria :is(th, td) {
+  text-align: start;
+  padding: var(--adapt-aria-space);
+  background: var(--adapt-aria-surface);
+  border-block-end: 1px solid var(--adapt-aria-line);
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+.adapt-aria th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.adapt-aria [data-adapttable-part="sort-button"] {
+  border: 0;
+  padding: 0.15rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  font-weight: inherit;
+}
+.adapt-aria [data-adapttable-part="header-filter-trigger"] {
+  vertical-align: middle;
+  margin-inline-start: 0.3rem;
+}
+.adapt-aria [data-adapttable-part="cards"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+.adapt-aria
+  :is([data-adapttable-part="card"], [data-adapttable-part="summary-card"]) {
+  min-inline-size: 0;
+  background: var(--adapt-aria-surface);
+  border: 1px solid var(--adapt-aria-line);
+  border-radius: 0.6rem;
+  padding: 0.8rem;
+}
+.adapt-aria [data-adapttable-part="card-row"] {
+  display: grid;
+  grid-template-columns: minmax(6rem, 1fr) minmax(0, 2fr);
+  gap: 0.5rem;
+  padding-block: 0.3rem;
+}
+.adapt-aria [data-adapttable-part="card-label"] {
+  font-weight: 600;
+}
+.adapt-aria [data-adapttable-part="card-value"] {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+.adapt-aria-popup,
+.adapt-aria
+  :is(
+    [data-adapttable-part="filters-panel"],
+    [data-adapttable-part="column-menu-panel"],
+    [data-adapttable-part="views-panel"],
+    [data-adapttable-part="context-menu"],
+    [data-adapttable-part="command-palette"]
+  ) {
+  background: var(--adapt-aria-surface);
+  color: var(--adapt-aria-ink);
+  border: 1px solid var(--adapt-aria-line);
+  border-radius: 0.65rem;
+  box-shadow: 0 10px 36px #0003;
+  padding: 0.85rem;
+}
+.adapt-aria-popup {
+  max-block-size: min(70vh, 32rem);
+  overflow: auto;
+}
+.adapt-aria
+  :is(
+    [data-adapttable-part="filters-header"],
+    [data-adapttable-part="filters-footer"],
+    [data-adapttable-part="column-menu-item"],
+    [data-adapttable-part="column-menu-bulk"],
+    [data-adapttable-part="views-row"]
+  ) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.adapt-aria [data-adapttable-part="filters-title"] {
+  margin: 0;
+  flex: 1;
+  font-size: 1rem;
+}
+.adapt-aria [data-adapttable-part="filters-body"] {
+  padding-block: 1rem;
+}
+.adapt-aria [data-adapttable-part="filters-backdrop"] {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  border: 0;
+  border-radius: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  background: #11182788;
+}
+.adapt-aria [data-adapttable-part="filters-panel"] {
+  inline-size: min(28rem, 100vw);
+  overflow: auto;
+}
+.adapt-aria [ngAccordionPanel][inert] {
+  display: none;
+}
+.adapt-aria [ngOption] {
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.35rem;
+}
+.adapt-aria [ngOption][data-active] {
+  outline: 2px solid var(--adapt-aria-accent);
+  outline-offset: -2px;
+}
+.adapt-aria .adapt-aria-select {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  min-inline-size: 7rem;
+}
+.adapt-aria [data-adapttable-part="row-actions-menu"] {
+  position: relative;
+}
+.adapt-aria [data-adapttable-part="row-actions-menu"] > [ngMenu] {
+  position: absolute;
+  inset-inline-end: 0;
+  z-index: 80;
+  min-inline-size: 10rem;
+  padding: 0.3rem;
+  border: 1px solid var(--adapt-aria-line);
+  border-radius: 0.4rem;
+  background: var(--adapt-aria-surface);
+  box-shadow: 0 6px 20px #0002;
+}
+.adapt-aria [ngMenu] button {
+  display: block;
+  inline-size: 100%;
+  text-align: start;
+  border: 0;
+}
+.adapt-aria [data-adapttable-part="filter-tree-summary"] {
+  inline-size: 100%;
+  text-align: start;
+  font-weight: 600;
+  margin-block-end: 0.6rem;
+}
+@media (max-width: 480px) {
+  .adapt-aria [data-adapttable-part="toolbar"] > * {
+    max-inline-size: 100%;
+  }
+  .adapt-aria [data-adapttable-part="footer"] {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adapt-aria * {
+    scroll-behavior: auto;
+    animation: none;
+    transition: none;
+  }
+}

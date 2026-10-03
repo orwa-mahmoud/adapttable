@@ -1,0 +1,254 @@
+{
+  "name": "@adapttable/ng-bootstrap",
+  "version": "0.0.0",
+  "description": "AdaptTable Angular tables with ng-bootstrap overlays and isolated Bootstrap controls.",
+  "keywords": [
+    "angular",
+    "data-table",
+    "ng-bootstrap",
+    "bootstrap",
+    "adapttable"
+  ],
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "homepage": "https://adapttable.orwamahmoud.com/angular/demo/ng-bootstrap/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/angular/adapter-ng-bootstrap"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "LICENSE",
+    "dist",
+    "README.md",
+    "styles.css",
+    "BOOTSTRAP-LICENSE"
+  ],
+  "module": "./dist/fesm2022/adapttable-ng-bootstrap.mjs",
+  "types": "./dist/types/adapttable-ng-bootstrap.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/adapttable-ng-bootstrap.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap.mjs"
+    },
+    "./batch-editing": {
+      "types": "./dist/types/adapttable-ng-bootstrap-batch-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-batch-editing.mjs"
+    },
+    "./bulk-actions": {
+      "types": "./dist/types/adapttable-ng-bootstrap-bulk-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-bulk-actions.mjs"
+    },
+    "./cell-navigation": {
+      "types": "./dist/types/adapttable-ng-bootstrap-cell-navigation.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-cell-navigation.mjs"
+    },
+    "./cell-span": {
+      "types": "./dist/types/adapttable-ng-bootstrap-cell-span.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-cell-span.mjs"
+    },
+    "./column-groups": {
+      "types": "./dist/types/adapttable-ng-bootstrap-column-groups.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-column-groups.mjs"
+    },
+    "./column-menu": {
+      "types": "./dist/types/adapttable-ng-bootstrap-column-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-column-menu.mjs"
+    },
+    "./column-selection": {
+      "types": "./dist/types/adapttable-ng-bootstrap-column-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-column-selection.mjs"
+    },
+    "./command-palette": {
+      "types": "./dist/types/adapttable-ng-bootstrap-command-palette.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-command-palette.mjs"
+    },
+    "./context-menu": {
+      "types": "./dist/types/adapttable-ng-bootstrap-context-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-context-menu.mjs"
+    },
+    "./density": {
+      "types": "./dist/types/adapttable-ng-bootstrap-density.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-density.mjs"
+    },
+    "./editing": {
+      "types": "./dist/types/adapttable-ng-bootstrap-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-editing.mjs"
+    },
+    "./export": {
+      "types": "./dist/types/adapttable-ng-bootstrap-export.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-export.mjs"
+    },
+    "./extra-rows": {
+      "types": "./dist/types/adapttable-ng-bootstrap-extra-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-extra-rows.mjs"
+    },
+    "./features": {
+      "types": "./dist/types/adapttable-ng-bootstrap-features.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-features.mjs"
+    },
+    "./find-in-table": {
+      "types": "./dist/types/adapttable-ng-bootstrap-find-in-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-find-in-table.mjs"
+    },
+    "./filters": {
+      "types": "./dist/types/adapttable-ng-bootstrap-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-filters.mjs"
+    },
+    "./fit-columns": {
+      "types": "./dist/types/adapttable-ng-bootstrap-fit-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-fit-columns.mjs"
+    },
+    "./fullscreen": {
+      "types": "./dist/types/adapttable-ng-bootstrap-fullscreen.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-fullscreen.mjs"
+    },
+    "./grouping": {
+      "types": "./dist/types/adapttable-ng-bootstrap-grouping.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-grouping.mjs"
+    },
+    "./grouping-panel": {
+      "types": "./dist/types/adapttable-ng-bootstrap-grouping-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-grouping-panel.mjs"
+    },
+    "./header-filters": {
+      "types": "./dist/types/adapttable-ng-bootstrap-header-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-header-filters.mjs"
+    },
+    "./multi-sort": {
+      "types": "./dist/types/adapttable-ng-bootstrap-multi-sort.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-multi-sort.mjs"
+    },
+    "./nested-table": {
+      "types": "./dist/types/adapttable-ng-bootstrap-nested-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-nested-table.mjs"
+    },
+    "./pinned-summary-rows": {
+      "types": "./dist/types/adapttable-ng-bootstrap-pinned-summary-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-pinned-summary-rows.mjs"
+    },
+    "./preset": {
+      "types": "./dist/types/adapttable-ng-bootstrap-preset.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-preset.mjs"
+    },
+    "./pivot": {
+      "types": "./dist/types/adapttable-ng-bootstrap-pivot.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-pivot.mjs"
+    },
+    "./print": {
+      "types": "./dist/types/adapttable-ng-bootstrap-print.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-print.mjs"
+    },
+    "./resizable-columns": {
+      "types": "./dist/types/adapttable-ng-bootstrap-resizable-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-resizable-columns.mjs"
+    },
+    "./row-actions": {
+      "types": "./dist/types/adapttable-ng-bootstrap-row-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-row-actions.mjs"
+    },
+    "./row-appearance": {
+      "types": "./dist/types/adapttable-ng-bootstrap-row-appearance.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-row-appearance.mjs"
+    },
+    "./row-detail": {
+      "types": "./dist/types/adapttable-ng-bootstrap-row-detail.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-row-detail.mjs"
+    },
+    "./row-pinning": {
+      "types": "./dist/types/adapttable-ng-bootstrap-row-pinning.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-row-pinning.mjs"
+    },
+    "./row-reorder": {
+      "types": "./dist/types/adapttable-ng-bootstrap-row-reorder.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-row-reorder.mjs"
+    },
+    "./saved-views": {
+      "types": "./dist/types/adapttable-ng-bootstrap-saved-views.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-saved-views.mjs"
+    },
+    "./selection-stats": {
+      "types": "./dist/types/adapttable-ng-bootstrap-selection-stats.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-selection-stats.mjs"
+    },
+    "./side-panel": {
+      "types": "./dist/types/adapttable-ng-bootstrap-side-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-side-panel.mjs"
+    },
+    "./status-bar": {
+      "types": "./dist/types/adapttable-ng-bootstrap-status-bar.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-status-bar.mjs"
+    },
+    "./tree": {
+      "types": "./dist/types/adapttable-ng-bootstrap-tree.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-tree.mjs"
+    },
+    "./virtualize": {
+      "types": "./dist/types/adapttable-ng-bootstrap-virtualize.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-virtualize.mjs"
+    },
+    "./package.json": "./package.json",
+    "./assistant": {
+      "types": "./dist/types/adapttable-ng-bootstrap-assistant.d.ts",
+      "default": "./dist/fesm2022/adapttable-ng-bootstrap-assistant.mjs"
+    },
+    "./styles.css": "./styles.css"
+  },
+  "scripts": {
+    "build": "node scripts/build-styles.mjs && ng-packagr -p ng-package.json -c tsconfig.build.json && node -e \"require('node:fs').rmSync('dist/package.json')\"",
+    "test": "node --test scripts/styles.test.mjs && vitest run && vitest run -c vitest.ssr.config.ts",
+    "test:coverage": "node --test scripts/styles.test.mjs && vitest run --coverage && vitest run -c vitest.ssr.config.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist coverage .turbo",
+    "styles": "node scripts/build-styles.mjs"
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "@ng-bootstrap/ng-bootstrap": "^21.0.0",
+    "@popperjs/core": "^2.11.8",
+    "@angular/localize": "^22.0.0",
+    "rxjs": "^7.4.0"
+  },
+  "dependencies": {
+    "@adapttable/core": "3.8.0",
+    "@adapttable/angular": "0.3.0",
+    "tslib": "^2.8.1"
+  },
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.7.5",
+    "@analogjs/vitest-angular": "^2.7.5",
+    "@angular/build": "^22.2.0",
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/compiler-cli": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "@angular/platform-server": "^22.2.0",
+    "@testing-library/dom": "^10.4.1",
+    "ng-packagr": "^22.2.1",
+    "rxjs": "^7.8.2",
+    "@angular/forms": "^22.2.0",
+    "@ng-bootstrap/ng-bootstrap": "^21.0.0",
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "5.3.8",
+    "sass": "^1.105.0",
+    "postcss": "^8.5.6",
+    "@angular/localize": "^22.2.0",
+    "prettier": "^3.9.6"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": true
+}

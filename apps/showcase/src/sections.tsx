@@ -8,6 +8,11 @@ import {
   useState,
 } from "react";
 
+import {
+  FRAMEWORK_STORAGE_KEY,
+  frameworkDemoTarget,
+  SITE_FRAMEWORKS,
+} from "../../../scripts/framework-navigation.mjs";
 import { cssVars } from "./cssVars";
 import {
   adapterByKey,
@@ -15,7 +20,9 @@ import {
   builtAdapters,
   CANONICAL_AI_ADAPTER,
   docsUrl,
+  featuresOf,
   MATRIX_FEATURES,
+  SHOWCASE_ADAPTERS,
   type ShowcaseAdapter,
   SITE_HOME,
 } from "./matrix/content";
@@ -492,6 +499,17 @@ export function AppNav({
   const href = (path: string) =>
     path === "" ? `${root}/` : `${root}/${path}/`;
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(FRAMEWORK_STORAGE_KEY, "react");
+    } catch {
+      /* Storage is optional. */
+    }
+  }, []);
+  const unavailableKit =
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("kit-unavailable");
   const kit = currentAdapter(active);
   const groups = buildGroups(href, dark);
   const topPages: readonly NavPage[] = [
@@ -634,6 +652,35 @@ export function AppNav({
           <span aria-hidden>▾</span>
         </label>
         <div className="nav__right">
+          <label className="nav__framework">
+            <span aria-hidden="true">⚛</span>
+            <select
+              aria-label="Framework"
+              value="react"
+              onChange={(event) => {
+                const framework = event.currentTarget.value;
+                try {
+                  localStorage.setItem(FRAMEWORK_STORAGE_KEY, framework);
+                } catch {
+                  /* Storage is optional. */
+                }
+                window.location.assign(
+                  frameworkDemoTarget(
+                    window.location.pathname,
+                    framework,
+                    SHOWCASE_ADAPTERS,
+                    featuresOf
+                  ).href
+                );
+              }}
+            >
+              {SITE_FRAMEWORKS.map(({ key, label }) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             type="button"
             className="nav__icon"
@@ -674,6 +721,12 @@ export function AppNav({
           </a>
         </div>
       </div>
+      {unavailableKit && (
+        <p className="shell" role="status">
+          {unavailableKit} has no matching React kit. This example uses{" "}
+          {kit.label} and retains the feature where available.
+        </p>
+      )}
     </header>
   );
 }
@@ -820,6 +873,7 @@ export function Footer({ root }: Readonly<{ root: string }>) {
         </div>
         <Install large />
         <div className="foot__links">
+          <a href={`${root}/third-party-notices.txt`}>Third-party notices</a>
           {FOOT_LINKS.map((l) => (
             <a
               key={l.label}

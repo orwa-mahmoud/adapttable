@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <meta name="description" content="Pin, resize, reorder, rename and hide Angular Aria table columns. Try the column menu and persist layouts to URLs, storage or your application." />
+    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/aria/columns/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AdaptTable" />
+    <meta property="og:title" content="Angular Aria table column pinning and resizing — AdaptTable" />
+    <meta property="og:description" content="Pin, resize, reorder, rename and hide Angular Aria table columns. Try the column menu and persist layouts to URLs, storage or your application." />
+    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/aria/columns/" />
+    <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Angular Aria table column pinning and resizing — AdaptTable" />
+    <meta name="twitter:description" content="Pin, resize, reorder, rename and hide Angular Aria table columns. Try the column menu and persist layouts to URLs, storage or your application." />
+    <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Pin, resize, reorder, rename and hide Angular Aria table columns. Try the column menu and persist layouts to URLs, storage or your application.","url":"https://adapttable.orwamahmoud.com/angular/demo/aria/columns/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      (function () {
+  var isLocal = function(){
+  var h = location.hostname || "";
+  if (location.protocol === "file:") return true;
+  if (h === "" || h === "localhost" || h === "0.0.0.0" || h === "[::1]" || h === "::1") return true;
+  if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+  return false;
+};
+  if (isLocal()) return;
+  (function () {
+    var s = document.createElement('script');
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.defer = true;
+    s.setAttribute("data-cf-beacon", "{\"token\": \"dd71ff9f3b7b4064969d3f81e8c6ee9b\"}");
+    document.head.appendChild(s);
+  })();
+})();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <title>Angular Aria table column pinning and resizing — AdaptTable</title>
+    <script>
+      try {
+        if (localStorage.getItem("adapttable-demo-theme") === "dark")
+          document.documentElement.dataset.theme = "dark";
+      } catch {}
+    </script>
+    <style>
+      /* The pre-mount fallback inside #root. React replaces it on mount, so
+         this paints only while the bundle is still downloading — or
+         permanently, when JavaScript is unavailable. Styled so that moment
+         reads as the page arriving rather than as broken markup. */
+      .at-fallback {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 4.5rem 1.5rem;
+        font-family: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+        color: #52525b;
+        line-height: 1.65;
+      }
+      .at-fallback p {
+        text-wrap: pretty;
+      }
+      .at-fallback__kicker {
+        margin: 0 0 0.75rem;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #71717a;
+      }
+      .at-fallback h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #18181b;
+        margin: 0 0 1rem;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+      .at-fallback h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #18181b;
+        margin: 2rem 0 0.6rem;
+      }
+      .at-fallback pre {
+        overflow-x: auto;
+        padding: 1rem 1.1rem;
+        border: 1px solid #e4e4e7;
+        border-radius: 12px;
+        background: #fafafa;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.8rem;
+        line-height: 1.7;
+        color: #3f3f46;
+      }
+      .at-fallback p code {
+        padding: 1px 5px;
+        border-radius: 5px;
+        background: #f4f4f5;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.86em;
+        color: #27272a;
+      }
+      .at-fallback ul {
+        padding-inline-start: 1.2rem;
+        margin: 0;
+      }
+      .at-fallback li {
+        margin: 0.4rem 0;
+      }
+      .at-fallback a {
+        color: #4f46e5;
+      }
+      [data-theme="dark"] .at-fallback {
+        color: #a1a1aa;
+      }
+      [data-theme="dark"] .at-fallback :is(h1, h2) {
+        color: #fafafa;
+      }
+      [data-theme="dark"] .at-fallback pre {
+        border-color: #3f3f46;
+        background: #18181b;
+        color: #d4d4d8;
+      }
+      [data-theme="dark"] .at-fallback p code {
+        background: #27272a;
+        color: #e4e4e7;
+      }
+      [data-theme="dark"] .at-fallback a {
+        color: #a5b4fc;
+      }
+      .at-fallback {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .at-fallback pre {
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Replaced by Angular on mount — the served markup carries the page's
+         own words so a crawler, and anyone whose bundle has not arrived, reads
+         a real page. Written by scripts/build-showcase-html.mjs. -->
+    <div id="root" data-matrix-page="aria/columns">
+      <main class="at-fallback">
+        <p class="at-fallback__kicker">AdaptTable for Angular Aria</p>
+        <h1>Column management in Angular Aria</h1>
+        <p>Everything a user expects to do to a column, without writing a column-settings panel: rename, show and hide, reorder by drag, pin to either edge, resize by drag or keyboard, and switch row density.</p>
+        <p>Pinning is logical rather than physical, so a column pinned to the start stays on the correct side in a right-to-left layout.</p>
+        <p>The arrangement is state like any other: persist it to the URL, to localStorage, or to your own server through <code>columnLayout</code> and <code>onColumnLayoutChange</code>.</p>
+        <h2>The code</h2>
+        <pre><code>import { Component, input, signal } from &quot;@angular/core&quot;;
+import type { ColumnDef, ColumnLayoutState } from &quot;@adapttable/angular&quot;;
+import { AdaptDataTable } from &quot;@adapttable/angular-aria&quot;;
+import { columnMenu } from &quot;@adapttable/angular-aria/column-menu&quot;;
+import { resizableColumns } from &quot;@adapttable/angular-aria/resizable-columns&quot;;
+
+@Component({
+  selector: &quot;app-people&quot;,
+  imports: [AdaptDataTable],
+  template: `
+    &lt;adapt-data-table
+      [data]=&quot;rows()&quot; [columns]=&quot;columns()&quot; [rowKey]=&quot;rowKey&quot;
+      [features]=&quot;features&quot; [columnLayout]=&quot;layout()&quot;
+      (columnLayoutChange)=&quot;layout.set($event)&quot;
+    /&gt;
+  `,
+})
+export class People {
+  readonly rows = input.required&lt;readonly Person[]&gt;();
+  readonly columns = input.required&lt;readonly ColumnDef&lt;Person&gt;[]&gt;();
+  readonly rowKey = (row: Person) =&gt; row.id;
+  readonly layout = signal&lt;ColumnLayoutState&gt;({
+    hidden: [], order: [], widths: {}, pinned: { name: &quot;start&quot; },
+  });
+  readonly features = [columnMenu(), resizableColumns()];
+}</code></pre>
+        <h2>Install</h2>
+        <pre><code>Private workspace preview: @adapttable/angular-aria (not on npm)</code></pre>
+        <h2>The same feature in the other kits</h2>
+        <ul>
+          <li><a href="../../unstyled/columns/">Column management in Unstyled</a> — Native elements — your own CSS</li>
+          <li><a href="../../ng-zorro/columns/">Column management in NG-ZORRO</a> — Ant Design components for Angular</li>
+          <li><a href="../../material/columns/">Column management in Angular Material</a> — Angular Material controls for Angular</li>
+          <li><a href="../../ng-bootstrap/columns/">Column management in ng-bootstrap</a> — ng-bootstrap controls for Angular</li>
+          <li><a href="../../ngx-bootstrap/columns/">Column management in ngx-bootstrap</a> — ngx-bootstrap controls for Angular</li>
+          <li><a href="../../angular-cdk/columns/">Column management in Angular CDK</a> — Angular CDK controls for Angular</li>
+          <li><a href="../../spartan/columns/">Column management in Spartan</a> — Spartan controls for Angular</li>
+          <li><a href="../../taiga-ui/columns/">Column management in Taiga UI</a> — Taiga UI controls for Angular</li>
+        </ul>
+        <h2>More Angular Aria features</h2>
+        <ul>
+          <li><a href="../filtering/">Filtering in Angular Aria</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>
+          <li><a href="../column-groups/">Column groups in Angular Aria</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="../selection/">Row selection in Angular Aria</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="../rows/">Rows in Angular Aria</a> — Pin rows from a 3-dot menu, and merge a team that runs down the page.</li>
+          <li><a href="../row-reordering/">Row reordering in Angular Aria</a> — Drag or keyboard moves, announced — the host writes.</li>
+          <li><a href="../editing/">Inline cell editing in Angular Aria</a> — Native editors in the cell; every write goes through your handler.</li>
+          <li><a href="../grouping/">Row grouping in Angular Aria</a> — Drag, select or keyboard grouping, with totals in the headers.</li>
+          <li><a href="../aggregation/">Aggregation in Angular Aria</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
+          <li><a href="../nested-tables/">Nested tables in Angular Aria</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="../export/">CSV export in Angular Aria</a> — One toolbar button, a CSV of the table as it stands.</li>
+          <li><a href="../scale/">Row and column virtualization in Angular Aria</a> — 40,000 rows in a scroll box, only the visible ones rendered.</li>
+          <li><a href="../tree/">Tree data in Angular Aria</a> — Nesting, chevrons, lazy children, and a tree on phones.</li>
+          <li><a href="../mobile-cards/">Mobile cards in Angular Aria</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="../pivot/">Pivot tables in Angular Aria</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="../saved-views/">Saved views in Angular Aria</a> — Name an arrangement and restore it from the menu.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in Angular Aria</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="../rtl/">Right-to-left Angular Aria data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="../realtime/">Live updates in Angular Aria</a> — Rows change while you read them. Sort and selection hold.</li>
+          <li><a href="../accessibility/">Accessible Angular Aria data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="../ai/">AI table assistant in Angular Aria Angular</a> — Local sort, questions and approved edits with real table outcomes.</li>
+        </ul>
+        <p>
+          Reference: <a href="https://adapttable.orwamahmoud.com/angular/column-management/">column-management</a>, <a href="https://adapttable.orwamahmoud.com/angular/columns/">columns</a>. More of this kit:
+          <a href="../">AdaptTable for Angular Aria</a>, or
+          <a href="/angular/demo/aria/">the live demo</a>.
+        </p>
+      </main>
+    </div>
+    <script type="module" src="/src/angular/entry-matrix.ts"></script>
+  </body>
+</html>

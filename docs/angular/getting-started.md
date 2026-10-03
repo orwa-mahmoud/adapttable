@@ -4,6 +4,17 @@ AdaptTable combines a headless Angular binding with a kit that draws the
 controls. Start with `AdaptDataTable`, an array of rows, column definitions and
 a stable row key. Add feature imports when the table needs them.
 
+## Private kit previews
+
+Additional local previews are available for [Angular Material](material.md),
+[ng-bootstrap](ng-bootstrap.md), [Spartan](spartan.md), [Taiga UI](taiga-ui.md),
+[Angular Aria](aria.md), [Angular CDK](angular-cdk.md) and
+[ngx-bootstrap](ngx-bootstrap.md).
+These packages remain private at `0.0.0` and are not published to npm. Each guide
+covers the kit's peers, styling and assets. Their local showcase routes are
+`/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`,
+`/angular-cdk/` and `/ngx-bootstrap/`.
+
 ## Choose a kit
 
 - `@adapttable/angular-unstyled` uses native HTML. Supply your own CSS or

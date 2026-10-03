@@ -8,7 +8,11 @@ import {
   landingHead,
 } from "../apps/showcase/matrix.mjs";
 import { demoRoute, siteUrl } from "../scripts/site.mjs";
-import { angularPart, selectAngularOption } from "./angular-kit";
+import {
+  angularPart,
+  checkAngularCheckbox,
+  selectAngularOption,
+} from "./angular-kit";
 
 /**
  * Every Angular kit's pages: each boots the Angular entry, mounts the real
@@ -184,6 +188,48 @@ for (const kit of KITS) {
       .and(page.locator('.mx-demo [data-column-key="email"]'));
     await expect(emailHeader).toHaveCount(1);
     await part(page, "column-menu-button").click();
+    const hideEmail = page.getByRole("button", {
+      name: "Hide column: Email",
+      exact: true,
+    });
+    await test.info().attach(`${kit.key}-columns-open`, {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+    await test.info().attach(`${kit.key}-columns-geometry`, {
+      body: JSON.stringify(
+        await hideEmail.evaluate((button) => {
+          const panel = button.closest(
+            "fieldset, [role='menu'], [role='dialog']"
+          );
+          const rect = button.getBoundingClientRect();
+          const panelRect = panel?.getBoundingClientRect();
+          return {
+            button: {
+              x: rect.x,
+              y: rect.y,
+              width: rect.width,
+              height: rect.height,
+            },
+            viewport: { width: innerWidth, height: innerHeight },
+            panel:
+              panel && panelRect
+                ? {
+                    tag: panel.tagName,
+                    rect: {
+                      x: panelRect.x,
+                      y: panelRect.y,
+                      width: panelRect.width,
+                      height: panelRect.height,
+                    },
+                    overflow: getComputedStyle(panel).overflow,
+                  }
+                : null,
+          };
+        })
+      ),
+      contentType: "application/json",
+    });
     await page
       .getByRole("button", { name: "Hide column: Email", exact: true })
       .click();
@@ -220,7 +266,6 @@ for (const kit of KITS) {
     const rowHeaders = part(page, "pivot-row-header");
     await expect(rowHeaders).toHaveCount(5);
     await selectAngularOption(
-      kit,
       page.locator('[data-pivot-zone="rows"]').getByRole("combobox"),
       { value: "role", label: "Role" }
     );
@@ -257,7 +302,7 @@ for (const kit of KITS) {
     await expect(part(page, "grid-announcer")).toContainText("Team");
     await expect(page.getByTestId("announcements")).toContainText("Team");
     const select = part(page, "column-select").first().getByRole("checkbox");
-    await select.check();
+    await checkAngularCheckbox(kit, select);
     await expect(select).toBeChecked();
     await expect(page.locator(".mx-demo [data-cell-selected]")).toHaveCount(10);
   });
@@ -303,7 +348,7 @@ for (const kit of KITS) {
       const rows = part(page, width === 390 ? "card" : "row");
       const ada = rows.filter({ hasText: "Ada Lovelace" });
       await expect(ada).toContainText("$25,300");
-      await ada.getByRole("checkbox").check();
+      await checkAngularCheckbox(kit, ada.getByRole("checkbox"));
       await page
         .getByRole("button", { name: "Apply next update", exact: true })
         .click();

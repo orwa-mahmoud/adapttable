@@ -1,0 +1,209 @@
+/* Import after the application's Angular Material theme. Scope every rule to this kit. */
+.adapt-material,
+.adapt-material-overlay {
+  color: var(--mat-sys-on-surface, #1d1b20);
+  font-family: var(--mat-sys-body-medium-font, Roboto, sans-serif);
+  font-size: 14px;
+  --adapt-material-surface: var(--mat-sys-surface, #fffbfe);
+  --adapt-material-line: var(--mat-sys-outline-variant, #cac4d0);
+  --adapt-material-cell-space: 12px 16px;
+}
+.adapt-material {
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+.adapt-material [data-adapttable-part="root"] {
+  min-inline-size: 0;
+}
+.adapt-material [data-density="compact"] {
+  --adapt-material-cell-space: 6px 12px;
+}
+.adapt-material [data-density="comfortable"] {
+  --adapt-material-cell-space: 18px 20px;
+}
+.adapt-material [data-adapttable-part="toolbar"],
+.adapt-material [data-adapttable-part="footer"],
+.adapt-material .adapt-material-pager,
+.adapt-material [data-adapttable-part="bulk-bar"],
+.adapt-material [data-adapttable-part="toolbar-extras"],
+.adapt-material [data-adapttable-part="search-field"],
+.adapt-material-overlay .adapt-material-filters-header,
+.adapt-material-overlay .adapt-material-filters-footer,
+.adapt-material-overlay [data-adapttable-part="column-menu-item"],
+.adapt-material-overlay [data-adapttable-part="column-menu-bulk"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.adapt-material [data-adapttable-part="toolbar"] {
+  margin-block-end: 16px;
+}
+.adapt-material [data-adapttable-part="footer"] {
+  justify-content: space-between;
+  padding-block: 12px;
+}
+.adapt-material [data-adapttable-part="search-field"] {
+  flex: 1 1 200px;
+  max-inline-size: 360px;
+  flex-wrap: nowrap;
+}
+.adapt-material .mat-mdc-form-field,
+.adapt-material-overlay .mat-mdc-form-field {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+.adapt-material [data-adapttable-part="search-field"] .mat-mdc-form-field {
+  inline-size: 100%;
+}
+.adapt-material [data-adapttable-part="scroll-box"] {
+  overflow: auto;
+  max-inline-size: 100%;
+  border: 1px solid var(--adapt-material-line);
+  border-radius: 12px;
+}
+.adapt-material [data-adapttable-part="table"] {
+  border-collapse: separate;
+  border-spacing: 0;
+  inline-size: 100%;
+  table-layout: fixed;
+  background: var(--adapt-material-surface);
+}
+.adapt-material :is(th, td) {
+  box-sizing: border-box;
+  padding: var(--adapt-material-cell-space);
+  text-align: start;
+  border-block-end: 1px solid var(--adapt-material-line);
+  background: var(--adapt-material-surface);
+  overflow-wrap: anywhere;
+}
+.adapt-material th {
+  font-weight: 600;
+  position: relative;
+  white-space: nowrap;
+}
+.adapt-material th .adapt-material-sort-button {
+  min-inline-size: 0;
+  padding-inline: 4px;
+  font-weight: inherit;
+}
+.adapt-material th adapt-header-filter-trigger {
+  display: inline-flex;
+  vertical-align: middle;
+}
+.adapt-material
+  :is(
+    [data-adapttable-part="selection-cell"],
+    [data-adapttable-part="selection-header"],
+    [data-adapttable-part="expand-cell"],
+    [data-adapttable-part="expand-header"],
+    [data-adapttable-part="reorder-cell"],
+    [data-adapttable-part="reorder-header"]
+  ) {
+  inline-size: 56px;
+  padding: 4px;
+}
+.adapt-material [data-adapttable-part="resize-handle"] {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block: 0;
+  inline-size: 8px;
+  min-inline-size: 0;
+  block-size: 100%;
+  padding: 0;
+  cursor: col-resize;
+  border-radius: 0;
+}
+.adapt-material [data-adapttable-part="resize-handle"]:hover {
+  background: var(--mat-sys-primary-container, #eaddff);
+}
+.adapt-material [data-adapttable-part="cards"] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.adapt-material [data-adapttable-part="card-row"] {
+  display: flex;
+  gap: 12px;
+  padding-block: 8px;
+  border-block-end: 1px solid var(--adapt-material-line);
+}
+.adapt-material [data-adapttable-part="card-label"] {
+  flex: 0 1 35%;
+  font-weight: 600;
+}
+.adapt-material [data-adapttable-part="card-value"] {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+.adapt-material [data-adapttable-part="card-actions"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-block-start: 8px;
+}
+.adapt-material-overlay .adapt-material-column-menu-panel {
+  min-inline-size: min(320px, calc(100vw - 48px));
+  border: 0;
+  padding: 0;
+}
+.adapt-material-overlay .adapt-material-column-menu-label {
+  flex: 1;
+  min-inline-size: 60px;
+}
+.adapt-material-overlay .adapt-material-filters-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-block: 16px;
+}
+.adapt-material-overlay .adapt-material-filters-header {
+  justify-content: space-between;
+}
+.adapt-material-overlay .adapt-material-filters-footer {
+  justify-content: flex-end;
+}
+.adapt-material-overlay [data-adapttable-part="filter-field"] {
+  min-inline-size: 0;
+}
+.adapt-material-overlay [data-adapttable-part="filter-tree"] {
+  box-shadow: none;
+}
+.adapt-material
+  :is([data-adapttable-part="empty"], [data-adapttable-part="error"]) {
+  padding: 32px;
+  text-align: center;
+}
+.adapt-material .adapt-material-loading-line {
+  display: block;
+  height: 12px;
+  background: var(--mat-sys-surface-container-highest, #e6e0e9);
+  border-radius: 6px;
+}
+.adapt-material :is([data-selected], [aria-selected="true"]) > td {
+  background: var(--mat-sys-secondary-container, #e8def8);
+}
+.adapt-material-overlay .mat-mdc-card {
+  background: var(--adapt-material-surface);
+}
+.adapt-material :is(button, input, select):focus-visible,
+.adapt-material-overlay :is(button, input, select):focus-visible {
+  outline: 2px solid var(--mat-sys-primary, #6750a4);
+  outline-offset: 2px;
+}
+@media (max-width: 480px) {
+  .adapt-material [data-adapttable-part="toolbar"] > * {
+    max-inline-size: 100%;
+  }
+  .adapt-material [data-adapttable-part="search-field"] {
+    flex-basis: 100%;
+    max-inline-size: none;
+  }
+  .adapt-material .adapt-material-pager {
+    gap: 0;
+  }
+}

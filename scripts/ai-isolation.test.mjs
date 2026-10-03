@@ -34,33 +34,40 @@ describe("AI isolation", () => {
     }
   });
 
-  it("covers both bindings, the unpublished Angular kits, core, server and published adapters", () => {
-    // A graph dropped from this list is a graph nobody checks, and the check
-    // would still report success over the ones that remain.
-    assert.equal(GRAPHS.length, 14);
-    assert.ok(
-      GRAPHS.includes(
-        "packages/angular/angular/dist/fesm2022/adapttable-angular.mjs"
-      )
-    );
-    assert.ok(
-      GRAPHS.includes(
-        "packages/angular/adapter-angular-unstyled/dist/fesm2022/adapttable-angular-unstyled.mjs"
-      )
-    );
-    assert.ok(!GRAPHS.some((path) => path.includes("ai-angular")));
-    assert.ok(
-      GRAPHS.includes(
-        "packages/angular/adapter-ng-zorro/dist/fesm2022/adapttable-ng-zorro.mjs"
-      )
-    );
-    for (const path of [
-      "packages/shared/core",
-      "packages/react/react",
-      "packages/shared/server",
-    ]) {
-      assert.ok(GRAPHS.includes(`${path}/dist/index.js`), path);
-    }
+  it("covers both bindings, every implemented Angular kit, core, server and published React adapters", () => {
+    // Exact paths catch a dropped graph, a duplicate or an unintended extra.
+    // Private implemented Angular kits still owe proof of AI isolation.
+    const expected = [
+      "packages/shared/core/dist/index.js",
+      "packages/react/react/dist/index.js",
+      "packages/angular/angular/dist/fesm2022/adapttable-angular.mjs",
+      "packages/shared/server/dist/index.js",
+      ...[
+        "mantine",
+        "mui",
+        "chakra",
+        "antd",
+        "radix",
+        "base-ui",
+        "unstyled",
+        "shadcn",
+      ].map((kit) => `packages/react/adapter-${kit}/dist/index.js`),
+      ...[
+        ["angular-unstyled", "angular-unstyled"],
+        ["material", "angular-material"],
+        ["ng-bootstrap", "ng-bootstrap"],
+        ["spartan", "spartan"],
+        ["taiga-ui", "taiga-ui"],
+        ["angular-aria", "angular-aria"],
+        ["ngx-bootstrap", "ngx-bootstrap"],
+        ["angular-cdk", "angular-cdk"],
+        ["ng-zorro", "ng-zorro"],
+      ].map(
+        ([folder, name]) =>
+          `packages/angular/adapter-${folder}/dist/fesm2022/adapttable-${name}.mjs`
+      ),
+    ];
+    assert.deepEqual([...GRAPHS].sort(), expected.sort());
   });
 
   it("resolves nested import/default exports and never mistakes declarations for code", () => {

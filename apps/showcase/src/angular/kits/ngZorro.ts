@@ -10,30 +10,43 @@ import {
   AdaptTableAssistant,
   agentApproval,
 } from "@adapttable/ng-zorro/assistant";
+import { batchEditing } from "@adapttable/ng-zorro/batch-editing";
 import { bulkActions } from "@adapttable/ng-zorro/bulk-actions";
 import { cellNavigation } from "@adapttable/ng-zorro/cell-navigation";
 import { cellSpan } from "@adapttable/ng-zorro/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/ng-zorro/column-groups";
 import { columnMenu } from "@adapttable/ng-zorro/column-menu";
 import { columnSelectionCheckbox } from "@adapttable/ng-zorro/column-selection";
+import { commandPalette } from "@adapttable/ng-zorro/command-palette";
+import { contextMenu } from "@adapttable/ng-zorro/context-menu";
 import { densityChooser } from "@adapttable/ng-zorro/density";
 import {
   editHistory,
   editing,
+  rowEditing,
   undoRedoButtons,
 } from "@adapttable/ng-zorro/editing";
 import { exportCsv } from "@adapttable/ng-zorro/export";
+import { extraRows } from "@adapttable/ng-zorro/extra-rows";
 import { filters } from "@adapttable/ng-zorro/filters";
+import { fullscreen } from "@adapttable/ng-zorro/fullscreen";
 import { groupingPanel } from "@adapttable/ng-zorro/grouping-panel";
 import { headerFilters } from "@adapttable/ng-zorro/header-filters";
 import { nestedTable } from "@adapttable/ng-zorro/nested-table";
 import { pinnedSummaryRows } from "@adapttable/ng-zorro/pinned-summary-rows";
 import { AdaptPivotPanel, pivotTableModel } from "@adapttable/ng-zorro/pivot";
+import { print } from "@adapttable/ng-zorro/print";
 import { resizableColumns } from "@adapttable/ng-zorro/resizable-columns";
 import { rowActions } from "@adapttable/ng-zorro/row-actions";
+import { rowAppearance } from "@adapttable/ng-zorro/row-appearance";
 import { rowPinning } from "@adapttable/ng-zorro/row-pinning";
 import { rowReorder } from "@adapttable/ng-zorro/row-reorder";
-import { savedViews } from "@adapttable/ng-zorro/saved-views";
+import {
+  AdaptSavedViewsPanel,
+  savedViews,
+} from "@adapttable/ng-zorro/saved-views";
+import { sidePanel } from "@adapttable/ng-zorro/side-panel";
+import { statusBar } from "@adapttable/ng-zorro/status-bar";
 import { tree } from "@adapttable/ng-zorro/tree";
 import { virtualize } from "@adapttable/ng-zorro/virtualize";
 import {
@@ -99,6 +112,7 @@ export const kit = {
   table: AdaptDataTable,
   pivotPanel: AdaptPivotPanel,
   assistant: AdaptTableAssistant,
+  savedViewsPanel: AdaptSavedViewsPanel,
   bulkActions,
   cellNavigation,
   cellSpan,
@@ -108,6 +122,7 @@ export const kit = {
   densityChooser,
   editHistory,
   editing,
+  rowEditing,
   undoRedoButtons,
   exportCsv,
   filters,
@@ -123,5 +138,14 @@ export const kit = {
   savedViews,
   tree,
   virtualize,
+  batchEditing,
+  contextMenu,
+  commandPalette,
+  extraRows,
+  rowAppearance,
+  statusBar,
+  sidePanel,
+  fullscreen,
+  print,
   agentApproval,
 } satisfies ShowcaseKit;

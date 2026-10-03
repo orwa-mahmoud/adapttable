@@ -21,6 +21,11 @@ permissions:
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  ADAPTTABLE_CHECK_CONCURRENCY: "1"
+  ADAPTTABLE_TEST_WORKERS: "1"
+  NG_BUILD_MAX_WORKERS: "1"
+  RAYON_NUM_THREADS: "1"
+  UV_THREADPOOL_SIZE: "1"
 
 jobs:
   detect:
@@ -123,7 +128,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Build packages
-        run: pnpm build
+        run: pnpm build --concurrency=1
       - name: Pack Node support fixtures
         if: needs.detect.outputs.runPackage == 'true'
         run: pnpm node:support:pack
@@ -222,7 +227,7 @@ jobs:
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
           # 2-core runner: two packages at once, each lint is one process.
-          pnpm lint $f $AFFECTED --concurrency=2
+          pnpm lint $f $AFFECTED --concurrency=1 --continue=dependencies-successful
 
   typescript:
     name: TypeScript
@@ -257,7 +262,7 @@ jobs:
             tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/ai --filter=./packages/angular/* --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
-          pnpm typecheck $f $AFFECTED
+          pnpm typecheck $f $AFFECTED --concurrency=1
 
   lint:
     name: Lint
@@ -283,7 +288,8 @@ jobs:
     needs: [detect, build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runUnit == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Angular adapters run sequentially; retain enough time to report every kit.
+    timeout-minutes: ${{ matrix.name == 'angular' && 45 || 15 }}
     strategy:
       fail-fast: false
       matrix:
@@ -329,7 +335,7 @@ jobs:
           # bootstrap 5s, server/cli/i18n ~1s each. antd alone sets the floor.
           # angular runs alone: its suites compile with Angular's compiler,
           # not the React plugin the other lanes share.
-          pnpm test:coverage $f $AFFECTED --concurrency=2
+          pnpm test:coverage $f $AFFECTED --concurrency=1 --continue=dependencies-successful
 
   unit:
     name: Unit
@@ -355,14 +361,25 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Restore built packages
-        run: pnpm build
+        run: pnpm build --concurrency=1
       - name: Check the engine imports no framework
         run: pnpm check:boundary
       - name: Validate published package configs
         run: pnpm publint
       - name: Check the extracted API reports are current
+        id: api-reports
         if: needs.detect.outputs.runPackage == 'true'
+        env:
+          ADAPTTABLE_API_REPORTS_DIAGNOSTICS_DIR: ${{ runner.temp }}/adapttable-api-reports
         run: pnpm api:check
+      - name: Retain generated API reports after a failed check
+        if: failure() && steps.api-reports.outcome == 'failure'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: api-report-diagnostics
+          path: ${{ runner.temp }}/adapttable-api-reports/*.api.md
+          if-no-files-found: warn
+          retention-days: 7
       - name: Smoke-check built package artifacts
         if: needs.detect.outputs.runPackage == 'true'
         run: pnpm smoke:dist
@@ -379,7 +396,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Restore built packages
-        run: pnpm build
+        run: pnpm build --concurrency=1
       - name: Run the packed-consumer harness
         run: pnpm consumer:harness
 
@@ -436,7 +453,7 @@ jobs:
         if: steps.kits.outputs.kits != ''
         run: |
           for kit in ${{ steps.kits.outputs.kits }}; do
-            pnpm turbo run build --filter="@adapttable/${kit}..."
+            pnpm turbo run build --filter="@adapttable/${kit}..." --concurrency=1
           done
       - name: Run the floor probes
         if: steps.kits.outputs.kits != ''
@@ -458,7 +475,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Restore the probed packages
-        run: pnpm turbo run build --filter=@adapttable/unstyled...
+        run: pnpm turbo run build --filter=@adapttable/unstyled... --concurrency=1
       - name: Smoke-test against React ${{ matrix.react }}
         run: pnpm react:matrix ${{ matrix.react }}
 
@@ -478,7 +495,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Restore built packages
-        run: pnpm build
+        run: pnpm build --concurrency=1
       - name: Publish preview packages
         run: pnpm dlx pkg-pr-new publish --pnpm --compact './packages/*/*'
 
@@ -520,7 +537,7 @@ jobs:
       # Every shard runs against this one build, so nine runners do not each
       # compile the same site.
       - name: Build
-        run: pnpm turbo run build --filter=@adapttable/showcase
+        run: pnpm turbo run build --filter=@adapttable/showcase --concurrency=1
       - name: Build Astro docs once for all browser shards
         run: pnpm --filter @adapttable/docs build
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -540,7 +557,8 @@ jobs:
     needs: [detect, showcase-build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPlaywright == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Keep the expanded browser matrix sequential within each shard.
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
@@ -562,8 +580,8 @@ jobs:
         env:
           SHOWCASE_SKIP_BUILD: "1"
           DOCS_SKIP_BUILD: "1"
-      - name: Upload report on failure
-        if: ${{ failure() }}
+      - name: Upload browser report
+        if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report-${{ matrix.shard }}
@@ -604,6 +622,15 @@ jobs:
         with:
           languages: javascript-typescript
       - uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        id: codeql
+      - name: Retain security analysis results
+        if: ${{ always() && steps.codeql.outputs.sarif-output != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: codeql-results
+          path: ${{ steps.codeql.outputs.sarif-output }}
+          if-no-files-found: error
+          retention-days: 7
 
   bench:
     name: Bench

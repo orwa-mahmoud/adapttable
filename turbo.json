@@ -7,6 +7,7 @@
     "package.json",
     "pnpm-lock.yaml",
     "pnpm-workspace.yaml",
+    "scripts/build-library.mjs",
     "scripts/vitest-workers.mjs",
     "tsconfig.base.json",
     "vitest.shared.ts"

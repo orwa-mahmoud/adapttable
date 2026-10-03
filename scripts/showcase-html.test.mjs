@@ -16,7 +16,15 @@ import {
   readShowcaseHtml,
   showcaseHtmlFiles,
 } from "./build-showcase-html.mjs";
-import { docsReferenceRoute, docsRoute, siteUrl } from "./site.mjs";
+import { demoRoute, docsReferenceRoute, docsRoute, siteUrl } from "./site.mjs";
+
+const ANGULAR_MODES = new Map([
+  ["angular-main", { mode: "live", route: demoRoute("", "angular") }],
+  [
+    "angular-all-options",
+    { mode: "lab", route: demoRoute("all-options", "angular") },
+  ],
+]);
 
 /**
  * The showcase's generated HTML is what is on disk.
@@ -35,13 +43,13 @@ describe("the generated showcase pages", () => {
 
   it("writes one page per matrix entry and per replaced address", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
-    // features — across all eight kits; both Angular kits' landings
+    // features — across all eight kits; all nine Angular kits' landings
     // plus all twenty-one feature destinations; and the eight replaced top-level
     // addresses. Kit `/accessibility/` URLs are matrix pages again, not
     // redirects to editing. Written out rather than recomputed from the
     // matrix: the writer reads that same list, so a derived count would agree
     // with itself no matter what it produced.
-    assert.equal(files.length, 8 * 22 + 2 * (1 + 21) + 8);
+    assert.equal(files.length, 8 * 22 + 9 * (1 + 21) + 8 + 2);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
   });
 
@@ -58,9 +66,9 @@ describe("the generated showcase pages", () => {
     }
   });
 
-  it("indexes every published Angular kit landing and feature page", () => {
+  it("indexes every registered Angular kit landing and feature page", () => {
     const pages = matrixPages().filter((page) => page.framework === "angular");
-    assert.equal(pages.length, 44);
+    assert.equal(pages.length, 198);
     for (const page of pages) {
       assert.equal(page.indexable, true, page.dir);
       const kit = adapterByKey(page.adapter);
@@ -174,7 +182,7 @@ describe("the generated showcase pages", () => {
 
   it("names the v3 AI integration capabilities in static HTML", () => {
     const ai = files.filter((file) => file.dir.endsWith("/ai"));
-    assert.equal(ai.length, 10);
+    assert.equal(ai.length, 17);
     const angularDirs = new Set(
       matrixPages()
         .filter((page) => page.framework === "angular")
@@ -182,7 +190,14 @@ describe("the generated showcase pages", () => {
     );
     const angular = ai.filter((file) => angularDirs.has(file.dir));
     assert.deepEqual(angular.map((file) => file.dir).sort(), [
+      "angular-cdk/ai",
+      "aria/ai",
+      "material/ai",
+      "ng-bootstrap/ai",
       "ng-zorro/ai",
+      "ngx-bootstrap/ai",
+      "spartan/ai",
+      "taiga-ui/ai",
       "unstyled/ai",
     ]);
     for (const file of angular) {
@@ -216,7 +231,8 @@ describe("the generated showcase pages", () => {
     }
   });
 
-  it("serves each page's own code and copy without JavaScript", () => {
+  it("serves matrix code and mode-specific live/lab fallbacks without JavaScript", () => {
+    const matrixDirs = new Set(matrixPages().map((page) => page.dir));
     for (const file of files) {
       if (file.html.includes('http-equiv="refresh"')) continue;
       const main = /<main[\s\S]*?<\/main>/.exec(file.html)?.[0] ?? "";
@@ -225,6 +241,32 @@ describe("the generated showcase pages", () => {
         (main.match(/<h1>/g) ?? []).length,
         1,
         `${file.dir} serves more than one h1`
+      );
+      const mode = ANGULAR_MODES.get(file.dir);
+      if (mode) {
+        assert.match(
+          file.html,
+          new RegExp(`<div id="root" data-angular-mode="${mode.mode}">`),
+          file.dir
+        );
+        assert.ok(
+          file.html.includes(
+            `<link rel="canonical" href="${siteUrl(mode.route)}"`
+          ),
+          file.dir
+        );
+        assert.match(main, /<p>[^<]{40,}<\/p>/, file.dir);
+        assert.ok(
+          main.includes(`href="${docsRoute("angular/getting-started")}"`),
+          file.dir
+        );
+        assert.match(file.html, /src="\.\.\/src\/angular\/entry-demo\.ts"/);
+        assert.doesNotMatch(file.html, /data-matrix-page|entry-matrix/);
+        continue;
+      }
+      assert.ok(
+        matrixDirs.has(file.dir),
+        `unclassified live page: ${file.dir}`
       );
       assert.match(main, /<pre><code>/, `${file.dir} serves no code`);
       assert.ok(
