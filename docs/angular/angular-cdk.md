@@ -15,6 +15,66 @@ Customize the neutral palette through `--adapt-cdk-accent`, `--adapt-cdk-border`
 `--adapt-cdk-background` and `--adapt-cdk-color`. Shared part names and class hooks
 remain available on the same public elements.
 
+## Minimal table
+
+Link the private kit from this repository's workspace, alongside
+`@adapttable/angular`, Angular 22 common/core/forms/platform-browser packages,
+CDK 22.2.1 and RxJS 7. Load these imports in the application's global stylesheet:
+
+```css
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "@adapttable/angular-cdk/styles.css";
+```
+
+The adapter does not require a kit-specific application provider. Import its
+standalone table and opt into its own CDK-backed filter controls:
+
+```ts
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-cdk";
+import { filters } from "@adapttable/angular-cdk/filters";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+@Component({
+  selector: "people-table",
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="people"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+      [urlSync]="false"
+      tableLabel="People"
+    />
+  `,
+})
+export class PeopleTable {
+  readonly people: Person[] = [{ id: "1", name: "Ada" }];
+  readonly columns: ColumnDef<Person>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+    },
+  ];
+  readonly rowKey = (person: Person) => person.id;
+  readonly features = [filters<Person>([{ key: "name", type: "text" }])];
+}
+```
+
+The rows remain host-owned. This example turns URL synchronization off; see the
+[URL state guide](./url-state.md) when connecting the table to application routes.
+
+## Feature surface
+
 The implementation includes the full 40-entry feature surface, the optional
 assistant, desktop and responsive mobile cards, RTL, SSR fixtures and host-owned
 writes. Filters use an anchored, backdrop-free card by default; drawer mode

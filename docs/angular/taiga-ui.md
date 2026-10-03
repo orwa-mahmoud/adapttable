@@ -16,25 +16,72 @@ bootstrap providers. It enables Taiga's event plugins and stable options without
 writing theme attributes to `document.body`, disabling scrollbars globally, or
 adding document metadata. Use `AdaptTaigaRoot` for the scoped theme instead.
 
+In a workspace checkout, link the private `@adapttable/taiga-ui` and
+`@adapttable/angular` packages. Use Taiga 5.26.0 core/kit/cdk/i18n/styles and
+icons, the styles package's design-tokens dependency, Angular 22
+common/core/forms/router/platform-browser and CDK peers, and RxJS 7.
+Copy `@taiga-ui/icons/src` to the application's `assets/taiga-ui/icons` folder.
+The adapter compiles its scoped Less theme; do not add a document-wide Taiga reset.
+
+Merge these providers into the config passed to `bootstrapApplication`:
+
 ```ts
-import { AdaptDataTable, AdaptTaigaRoot } from "@adapttable/taiga-ui";
-import { filters } from "@adapttable/taiga-ui/filters";
-import { editing } from "@adapttable/taiga-ui/editing";
+import type { ApplicationConfig } from "@angular/core";
+import { provideAdaptTaiga } from "@adapttable/taiga-ui";
+import { TUI_ASSETS_PATH } from "@taiga-ui/core";
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    ...provideAdaptTaiga(),
+    { provide: TUI_ASSETS_PATH, useValue: "assets/taiga-ui/icons" },
+  ],
+};
 ```
 
-The table includes a nested-safe Taiga root. Wrap a table and standalone feature
-panels in `AdaptTaigaRoot` to share the same theme and portal host:
+The table includes a nested-safe Taiga root. This complete host wraps its table
+in `AdaptTaigaRoot` so standalone panels can share the same theme and portal host:
 
-```html
-<adapt-taiga-root theme="dark" dir="rtl">
-  <adapt-data-table
-    [data]="rows"
-    [columns]="columns"
-    [rowKey]="rowKey"
-    [features]="features"
-    tableLabel="People"
-  />
-</adapt-taiga-root>
+```ts
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable, AdaptTaigaRoot } from "@adapttable/taiga-ui";
+import { filters } from "@adapttable/taiga-ui/filters";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+@Component({
+  selector: "people-table",
+  standalone: true,
+  imports: [AdaptDataTable, AdaptTaigaRoot],
+  template: `
+    <adapt-taiga-root theme="dark" dir="rtl">
+      <adapt-data-table
+        [data]="people"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [features]="features"
+        [urlSync]="false"
+        tableLabel="People"
+      />
+    </adapt-taiga-root>
+  `,
+})
+export class PeopleTable {
+  readonly people: Person[] = [{ id: "1", name: "Ada" }];
+  readonly columns: ColumnDef<Person>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+    },
+  ];
+  readonly rowKey = (person: Person) => person.id;
+  readonly features = [filters<Person>([{ key: "name", type: "text" }])];
+}
 ```
 
 The component's `theme` and `dir` inputs also accept `light` and `ltr`.

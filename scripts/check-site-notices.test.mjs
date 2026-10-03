@@ -53,9 +53,33 @@ it("requires complete notices in docs and both composed demo roots", () => {
 it("wires notice generation and checking into the existing site pipeline", () => {
   const source = (path) =>
     readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
-  assert.match(source("apps/showcase/vite.config.ts"), /siteNotices\(\)/);
+  const showcase = source("apps/showcase/vite.config.ts");
+  assert.match(showcase, /siteNotices\(\{/);
+  for (const name of [
+    "@taiga-ui/icons",
+    "@taiga-ui/styles",
+    "@taiga-ui/design-tokens",
+    "bootstrap",
+  ]) {
+    assert.ok(
+      showcase.includes(`{ name: "${name}" }`),
+      `missing bundled stylesheet/icon notice: ${name}`
+    );
+  }
   assert.match(source("apps/docs/astro.config.mjs"), /siteNotices\(/);
-  assert.match(source(".github/workflows/site.yml"), /pnpm check:site-notices/);
+  const workflow = source(".github/workflows/site.yml");
+  assert.match(workflow, /pnpm check:site-notices/);
+  assert.match(
+    workflow,
+    /pnpm -r --workspace-concurrency=1 --filter '\.\/packages\/\*\/\*' build/
+  );
+  for (const variable of [
+    "NG_BUILD_MAX_WORKERS",
+    "RAYON_NUM_THREADS",
+    "UV_THREADPOOL_SIZE",
+  ]) {
+    assert.ok(workflow.includes(`${variable}: "1"`), variable);
+  }
   assert.match(
     source("apps/showcase/src/sections.tsx"),
     /third-party-notices\.txt/

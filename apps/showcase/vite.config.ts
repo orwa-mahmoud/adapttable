@@ -257,7 +257,6 @@ const ANGULAR_SOURCES = [
   `${packageDir("adapter-spartan")}${sep}`,
   `${packageDir("adapter-taiga-ui")}${sep}`,
   `${packageDir("adapter-angular-cdk")}${sep}`,
-  `${packageDir("adapter-clarity")}${sep}`,
   `${packageDir("adapter-ngx-bootstrap")}${sep}`,
   `${packageDir("adapter-angular-aria")}${sep}`,
 ];
@@ -286,7 +285,6 @@ export default defineConfig({
         { name: "@taiga-ui/styles" },
         { name: "@taiga-ui/design-tokens" },
         { name: "bootstrap" },
-        { name: "@clr/ui" },
       ],
     }),
     googleAnalytics(),
@@ -378,11 +376,6 @@ export default defineConfig({
       {
         find: "@adapttable/ngx-bootstrap/styles.css",
         replacement: `${packageDir("adapter-ngx-bootstrap")}/styles.css`,
-      },
-      { find: /^@adapttable\/clarity$/, replacement: pkg("adapter-clarity") },
-      {
-        find: "@adapttable/clarity/styles.css",
-        replacement: `${packageDir("adapter-clarity")}/styles.css`,
       },
       {
         find: /^@adapttable\/angular-cdk$/,

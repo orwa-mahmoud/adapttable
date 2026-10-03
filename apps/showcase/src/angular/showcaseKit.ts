@@ -54,7 +54,6 @@ export interface ShowcaseKit {
     | "spartan"
     | "aria"
     | "ngx-bootstrap"
-    | "clarity"
     | "angular-cdk"
     | "taiga-ui";
   readonly root?: Type<unknown>;

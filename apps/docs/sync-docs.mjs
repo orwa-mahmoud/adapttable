@@ -39,7 +39,6 @@ const target = join(here, "src/content/docs");
 export const TITLES = {
   "angular/angular-cdk.md": "Angular CDK tables",
   "angular/aria.md": "Angular Aria tables",
-  "angular/clarity.md": "Clarity Angular tables",
   "angular/material.md": "Angular Material tables",
   "angular/ng-bootstrap.md": "ng-bootstrap Angular tables",
   "angular/ngx-bootstrap.md": "ngx-bootstrap Angular tables",
@@ -177,8 +176,6 @@ export const DESCRIPTIONS = {
     "Use the private Angular CDK table adapter with CDK overlays, focus handling, native controls and composable features.",
   "angular/aria.md":
     "Use the private Angular Aria table adapter with accessible behavior primitives, native controls and composable features.",
-  "angular/clarity.md":
-    "Build Angular tables with the private Clarity adapter, native forms and overlays, scoped styles and composable features.",
   "angular/material.md":
     "Build Angular tables with the private Material adapter, native controls, scoped themes and composable features.",
   "angular/ng-bootstrap.md":

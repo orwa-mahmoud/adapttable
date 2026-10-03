@@ -75,6 +75,12 @@ const REORDER_BUTTON = {
       <div
         class="dropdown-menu"
         *dropdownMenu
+        (keydown.escape)="
+          $event.preventDefault();
+          $event.stopPropagation();
+          p.confirmation ? finish(p.confirmation.onCancel) : details.hide();
+          trigger.focus()
+        "
         role="menu"
         [attr.aria-label]="p.label"
         data-adapttable-part="row-move-menu-content"

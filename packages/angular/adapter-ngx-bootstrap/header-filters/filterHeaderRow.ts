@@ -104,6 +104,7 @@ class AdaptHeaderFilterRange {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
+      #menu="bs-dropdown"
       dropdown
       [isAnimated]="false"
       [container]="overlayContainer()"
@@ -112,6 +113,7 @@ class AdaptHeaderFilterRange {
       style="position: relative; width: 100%"
     >
       <button
+        #trigger
         class="btn btn-outline-secondary btn-sm"
         type="button"
         dropdownToggle
@@ -128,6 +130,12 @@ class AdaptHeaderFilterRange {
       </button>
       <fieldset
         *dropdownMenu
+        (keydown.escape)="
+          $event.preventDefault();
+          $event.stopPropagation();
+          menu.hide();
+          trigger.focus()
+        "
         data-adapttable-part="filter-header-menu"
         [attr.aria-label]="props().label"
         [class]="props().menuClassName"

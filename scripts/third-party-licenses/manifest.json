@@ -42,5 +42,30 @@
     "source": "https://raw.githubusercontent.com/theKashey/react-remove-scroll-bar/7301c160fda44cb8cf2b9fdfde61efad35736196/LICENSE",
     "files": ["react-remove-scroll-bar-2.3.8.txt"],
     "note": "The npm release declares MIT but omits its terms. The maintainer subsequently added this MIT text to the same upstream repository; retain the author attribution verbatim."
+  },
+  "@taiga-ui/icons@5.26.0": {
+    "source": "https://raw.githubusercontent.com/taiga-family/taiga-ui/ddaa84ea32e512bc072e7929c39ce35a981081eb/LICENSE",
+    "files": [
+      "taiga-ui-icons-5.26.0-apache.txt",
+      "taiga-ui-icons-5.26.0-lucide-feather.txt"
+    ],
+    "sources": {
+      "taiga-ui-icons-5.26.0-lucide-feather.txt": "https://raw.githubusercontent.com/lucide-icons/lucide/b7b6ecf1316d0af64c97a6b0392abe5e816a8e30/LICENSE"
+    },
+    "note": "npm 5.26.0 declares Apache-2.0 and gitHead ddaa84ea32e512bc072e7929c39ce35a981081eb (also the v5.26.0 tag target). Its projects/icons/package.json pins lucide-static 1.31.0. Preserve the package-shipped ISC LICENSE unchanged; supplement it with the exact Taiga release Apache grant and the Lucide 1.31.0 full ISC/Feather MIT grant, including the upstream list of Feather-derived icons.",
+    "packageMetadata": "https://registry.npmjs.org/@taiga-ui/icons/5.26.0",
+    "dependencySource": "https://raw.githubusercontent.com/taiga-family/taiga-ui/ddaa84ea32e512bc072e7929c39ce35a981081eb/projects/icons/package.json"
+  },
+  "@taiga-ui/design-tokens@0.320.0": {
+    "source": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+    "files": ["taiga-ui-design-tokens-0.320.0-apache.txt"],
+    "packageMetadata": "https://registry.npmjs.org/@taiga-ui/design-tokens/0.320.0",
+    "note": "Exact npm version 0.320.0 declares Apache-2.0 and gitHead 9addf0f355cdbe5a82a5a5a33095eb5a145cc448, but supplies neither a repository URL nor LICENSE/NOTICE text. This is the unmodified Apache Software Foundation Apache-2.0 text, not a claimed project-specific upstream grant. No copyright holder, project NOTICE, or source-revision repository mapping has been invented."
+  },
+  "@taiga-ui/font-watcher@0.6.0": {
+    "source": "https://raw.githubusercontent.com/taiga-family/utils/c819dfc25b2b5173dc2002f3360c9866e247abaf/LICENSE",
+    "files": ["taiga-ui-font-watcher-0.6.0.txt"],
+    "packageMetadata": "https://registry.npmjs.org/@taiga-ui/font-watcher/0.6.0",
+    "note": "The npm tarball omits its declared Apache-2.0 license. The registry identifies taiga-family/utils and gitHead c819dfc25b2b5173dc2002f3360c9866e247abaf; this is that immutable revision's complete root LICENSE, including its Acpekt attribution. The committed font-watcher package.json at that registry-reported gitHead still says 0.5.0; provenance follows npm 0.6.0 publication metadata, not an inferred version tag."
   }
 }

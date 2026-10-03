@@ -54,7 +54,7 @@ export interface InitResult {
 export function installCommand(pm: PackageManager, packages: readonly string[]): string;
 
 // @public
-export type Kit = "mantine" | "mui" | "chakra" | "antd" | "radix" | "base-ui" | "shadcn" | "unstyled" | "angular-unstyled" | "ng-zorro" | "angular-material" | "ng-bootstrap" | "spartan" | "taiga-ui" | "angular-aria" | "angular-cdk" | "clarity" | "ngx-bootstrap";
+export type Kit = "mantine" | "mui" | "chakra" | "antd" | "radix" | "base-ui" | "shadcn" | "unstyled" | "angular-unstyled" | "ng-zorro" | "angular-material" | "ng-bootstrap" | "spartan" | "taiga-ui" | "angular-aria" | "angular-cdk" | "ngx-bootstrap";
 
 // @public
 export interface KitInfo {

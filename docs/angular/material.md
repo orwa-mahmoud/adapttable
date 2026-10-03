@@ -112,7 +112,10 @@ export class PeopleTable {
     },
     { key: "team", header: "Team", accessor: (row) => row.team },
   ];
-  readonly features = [filters<Person>(), columnMenu()];
+  readonly features = [
+    filters<Person>([{ key: "name", type: "text" }]),
+    columnMenu(),
+  ];
 }
 ```
 

@@ -12,7 +12,7 @@ import { savedViews } from "@adapttable/ngx-bootstrap/saved-views";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { ngxBootstrapPart } from "../testUtils";
+import { ngxBootstrapPart, pressEscapeFrom } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface City {
@@ -170,12 +170,25 @@ describe("the unstyled Angular toolbar controls", () => {
     const { part, settle } = await mount([
       savedViews({ storageKey: "esc-views", storage: null }),
     ]);
-    part<HTMLButtonElement>("views-button")!.click();
+    const button = part<HTMLButtonElement>("views-button")!;
+    button.click();
     await settle();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    const input = part<HTMLInputElement>("views-input")!;
+    expect(input.closest("[data-ngx-bootstrap-overlay]")).not.toBeNull();
+    expect(pressEscapeFrom(input).defaultPrevented).toBe(true);
     await settle();
     expect(part("views-panel")).toBeNull();
-    expect(document.activeElement).toBe(part("views-button"));
+    expect(button.getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(button);
+    button.click();
+    await settle();
+    expect(button.getAttribute("aria-expanded")).toBe("true");
+    expect(
+      pressEscapeFrom(part<HTMLInputElement>("views-input")!).defaultPrevented
+    ).toBe(true);
+    await settle();
+    expect(part("views-panel")).toBeNull();
+    expect(document.activeElement).toBe(button);
   });
 
   it("labels XLSX and PDF buttons, and prints from the toolbar", async () => {

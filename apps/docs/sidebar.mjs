@@ -143,7 +143,6 @@ export const sidebar = [
           { label: "Spartan", slug: "angular/spartan" },
           { label: "Taiga UI", slug: "angular/taiga-ui" },
           { label: "Angular CDK", slug: "angular/angular-cdk" },
-          { label: "Clarity", slug: "angular/clarity" },
           { label: "ngx-bootstrap", slug: "angular/ngx-bootstrap" },
           { label: "Angular Aria", slug: "angular/aria" },
         ],

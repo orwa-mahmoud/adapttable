@@ -14,6 +14,7 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "../src/dataTable";
+import { pressEscapeFrom } from "../testUtils";
 import { AdaptRowMoveMenu } from "./rowMoveMenu";
 import { AdaptRowReorderButtons } from "./rowReorderButtons";
 import { AdaptRowReorderGrip } from "./rowReorderGrip";
@@ -429,9 +430,13 @@ describe("row reorder kit controls", () => {
       new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
     );
     expect(host.onCancel).not.toHaveBeenCalled();
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
-    );
+    expect(
+      pressEscapeFrom(
+        element.querySelector<HTMLButtonElement>(
+          '[data-adapttable-part="row-move-confirmation"] button'
+        )!
+      ).defaultPrevented
+    ).toBe(true);
     await fixture.whenStable();
     expect(host.onCancel).toHaveBeenCalledOnce();
     expect(host.onConfirm).not.toHaveBeenCalled();
@@ -468,6 +473,28 @@ describe("row reorder kit controls", () => {
     expect(
       element.querySelectorAll('[data-adapttable-part="row-move-confirmation"]')
     ).toHaveLength(1);
+  });
+
+  it("dismisses a focused portalled destination without cancelling a nonexistent confirmation", async () => {
+    const { fixture, host, element, trigger } = await mountMoveMenu(false);
+    for (let cycle = 0; cycle < 2; cycle += 1) {
+      trigger.click();
+      await fixture.whenStable();
+      expect(trigger.getAttribute("aria-expanded")).toBe("true");
+      const item = element.querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="row-move-menu-item"]'
+      )!;
+      expect(item.closest("[data-ngx-bootstrap-overlay]")).not.toBeNull();
+      expect(pressEscapeFrom(item).defaultPrevented).toBe(true);
+      await fixture.whenStable();
+      expect(trigger.getAttribute("aria-expanded")).toBe("false");
+      expect(
+        element.querySelector('[data-adapttable-part="row-move-menu-content"]')
+      ).toBeNull();
+      expect(document.activeElement).toBe(trigger);
+      expect(host.onCancel).not.toHaveBeenCalled();
+      expect(host.onConfirm).not.toHaveBeenCalled();
+    }
   });
 
   it("selects a destination item when no confirmation is pending", async () => {

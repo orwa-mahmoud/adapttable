@@ -49,8 +49,6 @@ const { kit } = await (() => {
       return import("./kits/aria");
     case "ngx-bootstrap":
       return import("./kits/ngxBootstrap");
-    case "clarity":
-      return import("./kits/clarity");
     case "angular-cdk":
       return import("./kits/angularCdk");
     case "ng-zorro":

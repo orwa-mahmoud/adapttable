@@ -17,6 +17,16 @@ import {
 import { listPackages, REPO_ROOT as ROOT } from "./packages.mjs";
 
 const FLOOR = ">=22.12.0";
+const ANGULAR_22_KITS = new Set([
+  "@adapttable/angular-aria",
+  "@adapttable/angular-cdk",
+  "@adapttable/angular-material",
+  "@adapttable/ng-bootstrap",
+  "@adapttable/ng-zorro",
+  "@adapttable/ngx-bootstrap",
+  "@adapttable/spartan",
+  "@adapttable/taiga-ui",
+]);
 const README_CLAIM =
   "Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.";
 const PUBLISHED_SNAPSHOT = [
@@ -50,15 +60,14 @@ function packageManifests() {
 }
 
 describe("supported Node contract", () => {
-  it("declares the baseline floor and NG-ZORRO’s Angular 22 floor", () => {
+  it("declares the baseline floor and every Angular 22 native kit floor", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
-    assert.equal(manifests.length, 23);
+    assert.equal(manifests.length, 29);
     for (const manifest of manifests) {
       const pkg = json(manifest);
-      const floor =
-        pkg.name === "@adapttable/ng-zorro"
-          ? "^22.22.3 || ^24.15.0 || >=26.0.0"
-          : FLOOR;
+      const floor = ANGULAR_22_KITS.has(pkg.name)
+        ? "^22.22.3 || ^24.15.0 || >=26.0.0"
+        : FLOOR;
       assert.equal(pkg.engines?.node, floor, manifest);
     }
   });

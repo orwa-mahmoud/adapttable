@@ -27,7 +27,6 @@ export type Kit =
   | "taiga-ui"
   | "angular-aria"
   | "angular-cdk"
-  | "clarity"
   | "ngx-bootstrap";
 
 /**
@@ -205,21 +204,6 @@ export const KITS: readonly KitInfo[] = [
     signals: ["@angular/aria"],
     extras: ["@angular/aria@22.2.1", "@angular/cdk@22.2.1"],
     label: "Angular Aria",
-  },
-  {
-    kit: "clarity",
-    framework: "angular",
-    privatePreview: true,
-    adapter: "@adapttable/clarity",
-    signals: ["@clr/angular"],
-    extras: [
-      "@clr/angular@18.3.0",
-      "@clr/ui@18.3.0",
-      "@angular/forms@^22.0.0",
-      "@angular/animations@^22.0.0",
-      "@angular/cdk@^22.0.0",
-    ],
-    label: "Clarity",
   },
   {
     kit: "ngx-bootstrap",

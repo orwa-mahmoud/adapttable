@@ -45,6 +45,7 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
     @let l = props().labels;
     <div
       #root
+      #menu="bs-dropdown"
       dropdown
       [isAnimated]="false"
       [container]="overlayContainer()"
@@ -67,7 +68,16 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
       >
         {{ l.savedViews }}
       </button>
-      <div class="dropdown-menu" *dropdownMenu>
+      <div
+        class="dropdown-menu"
+        *dropdownMenu
+        (keydown.escape)="
+          $event.preventDefault();
+          $event.stopPropagation();
+          menu.hide();
+          trigger.focus()
+        "
+      >
         @if (popover.open()) {
           <div
             #panel

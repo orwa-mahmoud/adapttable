@@ -126,16 +126,26 @@ describe("the Taiga UI Angular Columns menu", () => {
     const { part, parts, open, settle } = await mount();
     const button = part<HTMLButtonElement>("column-menu-button");
     expect(button?.getAttribute("aria-expanded")).toBe("false");
+    button!.focus();
     await open();
     expect(button?.getAttribute("aria-expanded")).toBe("true");
     expect(part("column-menu-panel")).not.toBeNull();
     expect(
       parts("column-menu-label").map((label) => label.textContent)
     ).toEqual(["Name", "Country", "Population"]);
+    part<HTMLInputElement>("column-menu-search")!.focus();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     await settle();
     expect(part("column-menu-panel")).toBeNull();
+    expect(button?.getAttribute("aria-expanded")).toBe("false");
     expect(document.activeElement).toBe(button);
+    await open();
+    expect(part("column-menu-panel")).not.toBeNull();
+    expect(button?.getAttribute("aria-expanded")).toBe("true");
+    button!.click();
+    await settle();
+    expect(part("column-menu-panel")).toBeNull();
+    expect(button?.getAttribute("aria-expanded")).toBe("false");
   });
 
   it("closes on a press outside it", async () => {

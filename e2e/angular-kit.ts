@@ -1,7 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
 import { builtAdapters } from "../apps/showcase/matrix.mjs";
-import { kitPart as clarityPart } from "../packages/angular/adapter-clarity/testUtils";
 import { kitSelector as materialPart } from "../packages/angular/adapter-material/testUtils";
 import { ngBootstrapPart } from "../packages/angular/adapter-ng-bootstrap/testUtils";
 import { ngxBootstrapPart } from "../packages/angular/adapter-ngx-bootstrap/testUtils";
@@ -27,7 +26,6 @@ const labelsFor = (page: Page) =>
 
 /** Each themed kit keeps native-only hooks outside the public parts contract. */
 function themedPart(kit: AngularKit, name: string): string {
-  if (kit.key === "clarity") return clarityPart(name);
   if (kit.key === "ngx-bootstrap") return ngxBootstrapPart(name);
   if (kit.key === "material") return materialPart(name);
   const selector = ngBootstrapPart(name);

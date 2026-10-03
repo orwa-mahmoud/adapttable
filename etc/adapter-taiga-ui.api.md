@@ -1842,6 +1842,7 @@ export interface FiltersView {
 export interface MenuPopover {
     readonly close: () => void;
     readonly open: Signal<boolean>;
+    readonly setOpen: (value: boolean) => void;
     readonly toggle: () => void;
 }
 

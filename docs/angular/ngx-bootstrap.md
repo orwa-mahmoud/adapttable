@@ -12,11 +12,56 @@ The adapter compiles Bootstrap **5.3.8** into a host-scoped stylesheet and
 ships its MIT license. Do not add global Bootstrap CSS or its JavaScript bundle.
 No Angular localize initializer or Popper dependency is required by this kit.
 
+Link the private `@adapttable/ngx-bootstrap` and `@adapttable/angular`
+packages from this workspace. Import the scoped stylesheet in the host's global
+styles, alongside its existing application styles:
+
+```css
+@import "@adapttable/ngx-bootstrap/styles.css";
+```
+
+Angular 22 is zoneless by default; no additional kit application providers are
+required. The table and filter factory both come from the ngx-bootstrap kit:
+
 ```ts
-import "@adapttable/ngx-bootstrap/styles.css";
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/ngx-bootstrap";
 import { filters } from "@adapttable/ngx-bootstrap/filters";
-import { editing } from "@adapttable/ngx-bootstrap/editing";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+@Component({
+  selector: "people-table",
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="people"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+      [urlSync]="false"
+      tableLabel="People"
+    />
+  `,
+})
+export class PeopleTable {
+  readonly people: Person[] = [{ id: "1", name: "Ada" }];
+  readonly columns: ColumnDef<Person>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+    },
+  ];
+  readonly rowKey = (person: Person) => person.id;
+  readonly features = [filters<Person>([{ key: "name", type: "text" }])];
+}
 ```
 
 Use the same Angular table inputs and Chrome slot contracts as the Angular

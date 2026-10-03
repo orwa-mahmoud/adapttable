@@ -75,12 +75,6 @@
       "@adapttable/ngx-bootstrap/*": [
         "../../../../packages/angular/adapter-ngx-bootstrap/*/index.ts"
       ],
-      "@adapttable/clarity": [
-        "../../../../packages/angular/adapter-clarity/src/index.ts"
-      ],
-      "@adapttable/clarity/*": [
-        "../../../../packages/angular/adapter-clarity/*/index.ts"
-      ],
       "@adapttable/angular-cdk": [
         "../../../../packages/angular/adapter-angular-cdk/src/index.ts"
       ],

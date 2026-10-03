@@ -20656,6 +20656,38 @@ These controls use NG-ZORRO cards, drawer, buttons, input, tags, menu and
 select; AI sessions and transports remain in the separate AI packages.
 Importing the root table does not import the assistant or AI runtime.
 
+## Angular workspace-preview kits
+
+Seven additional Angular kits are private workspace previews at `0.0.0`, not
+published npm packages. They use the same `AdaptDataTable` inputs, public parts,
+and feature-factory contracts described above, with kit-owned controls:
+
+- [Angular Material](./angular/material.md): `@adapttable/angular-material`.
+- [Taiga UI](./angular/taiga-ui.md): `@adapttable/taiga-ui`.
+- [ng-bootstrap](./angular/ng-bootstrap.md): `@adapttable/ng-bootstrap`.
+- [Spartan](./angular/spartan.md): `@adapttable/spartan`.
+- [ngx-bootstrap](./angular/ngx-bootstrap.md): `@adapttable/ngx-bootstrap`.
+- [Angular Aria](./angular/aria.md): `@adapttable/angular-aria`.
+- [Angular CDK](./angular/angular-cdk.md): `@adapttable/angular-cdk`.
+
+Aria and CDK combine their behavior primitives with adapter-owned native controls;
+they are not a styled component kit. Follow each guide's peer dependencies,
+styles and provider setup, and link the private workspace package locally.
+
+Material exports `AdaptMaterialCellEditor`, the kit's editable-cell surface,
+and the overlay surfaces `AdaptMaterialDialog` and `AdaptMaterialPopover`.
+The CDK overlay surface is `AdaptCdkPopover`; `CdkPopoverTriggerContext` describes
+its trigger template context. Taiga's `provideAdaptTaiga` installs its integration
+providers, and `AdaptTaigaRoot` supplies the required root/content environment.
+
+The following `ɵ` exports are internal cross-entry implementation bridges, not
+application extension points or a stable API: Taiga's `ɵTAIGA_CONTROLS` and
+`ɵAdaptTaigaLabels`; ng-bootstrap's `ɵbootstrapModal` and
+`ɵbootstrapPopperOptions`; ngx-bootstrap's `ɵbootstrapModal` and
+`ɵinjectBootstrapOverlayContainer`; and Spartan's `ɵHlmButton`, `ɵHlmInput`,
+`ɵHlmCheckbox`, `ɵHlmNativeSelect`, `ɵHlmNativeOption` and `ɵSpartanSelection`.
+Applications should use the documented table, feature and provider APIs instead.
+
 ## Other packages
 
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
@@ -20675,10 +20707,12 @@ Importing the root table does not import the assistant or AI runtime.
   an `@angular/core` dependency and `hasAngularJson: true` to select Angular.
   `detectKit` accepts `framework` alongside the existing shadcn context, and
   `InitResult.framework` reports the choice. Angular scaffolds a standalone
-  `PeopleTable` in `src/app/peopleTable.ts`, selecting `angular-unstyled` or
-  `ng-zorro`; React keeps `src/PeopleTable.tsx`. Both Angular kits are public npm
-  packages. Init prints installation guidance without checking registry
-  availability or installing packages.
+  `PeopleTable` in `src/app/peopleTable.ts`; React keeps `src/PeopleTable.tsx`.
+  `angular-unstyled` and `ng-zorro` are public npm packages. The seven private
+  Angular previews above are also detected: `KitInfo.privatePreview` marks
+  them, and init prints local-linking guidance rather than an npm install
+  command for an unpublished adapter. Init only prints guidance; it does not
+  install packages or query registry availability.
 - **React adapter packages** — each exports its `DataTable` with `DataTableProps`,
   `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
   shared core re-exports). `DataTableProps` is `DataTablePropsBase &
@@ -23434,12 +23468,12 @@ a stable row key. Add feature imports when the table needs them.
 
 Additional local previews are available for [Angular Material](material.md),
 [ng-bootstrap](ng-bootstrap.md), [Spartan](spartan.md), [Taiga UI](taiga-ui.md),
-[Angular Aria](aria.md), [Angular CDK](angular-cdk.md), [Clarity](clarity.md) and
+[Angular Aria](aria.md), [Angular CDK](angular-cdk.md) and
 [ngx-bootstrap](ngx-bootstrap.md).
 These packages remain private at `0.0.0` and are not published to npm. Each guide
 covers the kit's peers, styling and assets. Their local showcase routes are
 `/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`,
-`/angular-cdk/`, `/clarity/` and `/ngx-bootstrap/`.
+`/angular-cdk/` and `/ngx-bootstrap/`.
 
 ## Choose a kit
 
@@ -23746,7 +23780,10 @@ export class PeopleTable {
     },
     { key: "team", header: "Team", accessor: (row) => row.team },
   ];
-  readonly features = [filters<Person>(), columnMenu()];
+  readonly features = [
+    filters<Person>([{ key: "name", type: "text" }]),
+    columnMenu(),
+  ];
 }
 ```
 
@@ -23840,7 +23877,6 @@ explicitly prepared. Do not substitute a React Bootstrap package.
 
 ```ts
 import "@angular/localize/init";
-import "@adapttable/ng-bootstrap/styles.css";
 import { Component } from "@angular/core";
 import { type ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/ng-bootstrap";
@@ -23886,8 +23922,13 @@ binding's contracts.
 
 ## Isolated Bootstrap styles
 
-Import only `@adapttable/ng-bootstrap/styles.css` for this kit. Its upstream
-Bootstrap rules are compiled with every selector bounded by
+Load this kit's stylesheet once through the application's global CSS pipeline:
+
+```css
+@import "@adapttable/ng-bootstrap/styles.css";
+```
+
+Its upstream Bootstrap rules are compiled with every selector bounded by
 `.adapttable-ng-bootstrap`, including Reboot, color-mode variables and overlays.
 Animation names are namespaced. The Bootstrap MIT attribution ships alongside
 the stylesheet. Do not import global Bootstrap CSS, RTL CSS or Bootstrap JS into
@@ -24066,25 +24107,72 @@ bootstrap providers. It enables Taiga's event plugins and stable options without
 writing theme attributes to `document.body`, disabling scrollbars globally, or
 adding document metadata. Use `AdaptTaigaRoot` for the scoped theme instead.
 
+In a workspace checkout, link the private `@adapttable/taiga-ui` and
+`@adapttable/angular` packages. Use Taiga 5.26.0 core/kit/cdk/i18n/styles and
+icons, the styles package's design-tokens dependency, Angular 22
+common/core/forms/router/platform-browser and CDK peers, and RxJS 7.
+Copy `@taiga-ui/icons/src` to the application's `assets/taiga-ui/icons` folder.
+The adapter compiles its scoped Less theme; do not add a document-wide Taiga reset.
+
+Merge these providers into the config passed to `bootstrapApplication`:
+
 ```ts
-import { AdaptDataTable, AdaptTaigaRoot } from "@adapttable/taiga-ui";
-import { filters } from "@adapttable/taiga-ui/filters";
-import { editing } from "@adapttable/taiga-ui/editing";
+import type { ApplicationConfig } from "@angular/core";
+import { provideAdaptTaiga } from "@adapttable/taiga-ui";
+import { TUI_ASSETS_PATH } from "@taiga-ui/core";
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    ...provideAdaptTaiga(),
+    { provide: TUI_ASSETS_PATH, useValue: "assets/taiga-ui/icons" },
+  ],
+};
 ```
 
-The table includes a nested-safe Taiga root. Wrap a table and standalone feature
-panels in `AdaptTaigaRoot` to share the same theme and portal host:
+The table includes a nested-safe Taiga root. This complete host wraps its table
+in `AdaptTaigaRoot` so standalone panels can share the same theme and portal host:
 
-```html
-<adapt-taiga-root theme="dark" dir="rtl">
-  <adapt-data-table
-    [data]="rows"
-    [columns]="columns"
-    [rowKey]="rowKey"
-    [features]="features"
-    tableLabel="People"
-  />
-</adapt-taiga-root>
+```ts
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable, AdaptTaigaRoot } from "@adapttable/taiga-ui";
+import { filters } from "@adapttable/taiga-ui/filters";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+@Component({
+  selector: "people-table",
+  standalone: true,
+  imports: [AdaptDataTable, AdaptTaigaRoot],
+  template: `
+    <adapt-taiga-root theme="dark" dir="rtl">
+      <adapt-data-table
+        [data]="people"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [features]="features"
+        [urlSync]="false"
+        tableLabel="People"
+      />
+    </adapt-taiga-root>
+  `,
+})
+export class PeopleTable {
+  readonly people: Person[] = [{ id: "1", name: "Ada" }];
+  readonly columns: ColumnDef<Person>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+    },
+  ];
+  readonly rowKey = (person: Person) => person.id;
+  readonly features = [filters<Person>([{ key: "name", type: "text" }])];
+}
 ```
 
 The component's `theme` and `dir` inputs also accept `light` and `ltr`.
@@ -24138,6 +24226,66 @@ Customize the neutral palette through `--adapt-cdk-accent`, `--adapt-cdk-border`
 `--adapt-cdk-background` and `--adapt-cdk-color`. Shared part names and class hooks
 remain available on the same public elements.
 
+## Minimal table
+
+Link the private kit from this repository's workspace, alongside
+`@adapttable/angular`, Angular 22 common/core/forms/platform-browser packages,
+CDK 22.2.1 and RxJS 7. Load these imports in the application's global stylesheet:
+
+```css
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "@adapttable/angular-cdk/styles.css";
+```
+
+The adapter does not require a kit-specific application provider. Import its
+standalone table and opt into its own CDK-backed filter controls:
+
+```ts
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-cdk";
+import { filters } from "@adapttable/angular-cdk/filters";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+@Component({
+  selector: "people-table",
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="people"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+      [urlSync]="false"
+      tableLabel="People"
+    />
+  `,
+})
+export class PeopleTable {
+  readonly people: Person[] = [{ id: "1", name: "Ada" }];
+  readonly columns: ColumnDef<Person>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+    },
+  ];
+  readonly rowKey = (person: Person) => person.id;
+  readonly features = [filters<Person>([{ key: "name", type: "text" }])];
+}
+```
+
+The rows remain host-owned. This example turns URL synchronization off; see the
+[URL state guide](./url-state.md) when connecting the table to application routes.
+
+## Feature surface
+
 The implementation includes the full 40-entry feature surface, the optional
 assistant, desktop and responsive mobile cards, RTL, SSR fixtures and host-owned
 writes. Filters use an anchored, backdrop-free card by default; drawer mode
@@ -24145,48 +24293,6 @@ blocks the background and traps focus. Individual feature imports remain opt-in.
 
 The implementation and its focused CDK fixtures require integrated Angular 22
 compiler, coverage and browser verification before any release claim.
-
----
-
-# Clarity Angular adapter
-
-`@adapttable/clarity` is a private `0.0.0` workspace implementation, not an
-npm release. It composes the Angular binding's Chrome and required slots
-with Clarity Angular 18.3.0 and scoped Clarity UI 18.3.0 styling.
-
-## Setup
-
-Use Angular 21.1 or 22 and matching Angular forms, animations and CDK.
-The selected Clarity package declares Angular/CDK `>=21.1.0`. Angular 22
-requires Node 22.22.3+, 24.15.0+, or 26+.
-Import `@adapttable/clarity/styles.css` once. Do not import global Clarity
-CSS for this adapter: its distribution is scoped to `.adapttable-clarity`.
-Embedded upstream fonts are omitted; the host controls font loading.
-
-## Features and composition
-
-Import `AdaptDataTable` from the root and feature factories from their
-individual subpaths, or use `/preset` for `standardPreset()`. Filtering,
-saved views, column tools, grouping, editing, row actions, tree/pivot,
-selection, navigation, export, virtualization and optional assistant
-controls retain the Angular binding's model and host-callback contracts.
-Clarity components own form controls, dropdowns, modals and the filter
-drawer. Clarity UI classes style buttons and tables.
-
-Mobile cards retain their selection, editing and row-action shell. Custom
-card templates replace only the field body. The binding supplies localized
-labels and RTL direction; the adapter uses logical layout properties.
-`classNames` and public `data-adapttable-part` hooks retain their shared
-meaning; private Clarity DOM fixtures use `data-clarity-part` separately.
-
-## Integration status
-
-See the package README for source-level usage. The showcase entry is
-`apps/showcase/src/angular/kits/clarity.ts`. Shared registry, CLI, dependency
-lockfile and docs-index registration are integrated separately. Runtime,
-SSR/hydration, accessibility and browser gates must pass before any release
-or verified parity claim. Package fixtures include Clarity dropdown/modal
-selectors and scoped-style checks; their presence does not assert a pass.
 
 ---
 
@@ -24204,11 +24310,56 @@ The adapter compiles Bootstrap **5.3.8** into a host-scoped stylesheet and
 ships its MIT license. Do not add global Bootstrap CSS or its JavaScript bundle.
 No Angular localize initializer or Popper dependency is required by this kit.
 
+Link the private `@adapttable/ngx-bootstrap` and `@adapttable/angular`
+packages from this workspace. Import the scoped stylesheet in the host's global
+styles, alongside its existing application styles:
+
+```css
+@import "@adapttable/ngx-bootstrap/styles.css";
+```
+
+Angular 22 is zoneless by default; no additional kit application providers are
+required. The table and filter factory both come from the ngx-bootstrap kit:
+
 ```ts
-import "@adapttable/ngx-bootstrap/styles.css";
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/ngx-bootstrap";
 import { filters } from "@adapttable/ngx-bootstrap/filters";
-import { editing } from "@adapttable/ngx-bootstrap/editing";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+@Component({
+  selector: "people-table",
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="people"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+      [urlSync]="false"
+      tableLabel="People"
+    />
+  `,
+})
+export class PeopleTable {
+  readonly people: Person[] = [{ id: "1", name: "Ada" }];
+  readonly columns: ColumnDef<Person>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+    },
+  ];
+  readonly rowKey = (person: Person) => person.id;
+  readonly features = [filters<Person>([{ key: "name", type: "text" }])];
+}
 ```
 
 Use the same Angular table inputs and Chrome slot contracts as the Angular
@@ -24267,6 +24418,62 @@ Table navigation remains in the binding; no Aria grid integration is claimed.
 Import `@angular/cdk/overlay-prebuilt.css` and
 `@adapttable/angular-aria/styles.css` in the host. Override `--adapt-aria-*`
 tokens or use the common part attributes and class-name hooks.
+
+## Minimal table
+
+Link `@adapttable/angular-aria` and `@adapttable/angular` from the workspace.
+Use Angular 22 common/core/forms/platform-browser peers, RxJS 7 and matching
+`@angular/aria` and `@angular/cdk` 22.2.1 packages. No kit-specific application
+provider is required. Add these imports to the host's global stylesheet:
+
+```css
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "@adapttable/angular-aria/styles.css";
+```
+
+```ts
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-aria";
+import { filters } from "@adapttable/angular-aria/filters";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+@Component({
+  selector: "people-table",
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="people"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+      [urlSync]="false"
+      tableLabel="People"
+    />
+  `,
+})
+export class PeopleTable {
+  readonly people: Person[] = [{ id: "1", name: "Ada" }];
+  readonly columns: ColumnDef<Person>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+    },
+  ];
+  readonly rowKey = (person: Person) => person.id;
+  readonly features = [filters<Person>([{ key: "name", type: "text" }])];
+}
+```
+
+The table uses this adapter's controls on desktop and mobile. The example keeps
+URL state local; see [URL state](./url-state.md) to connect application routes.
 
 ## Feature surface
 

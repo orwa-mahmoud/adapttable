@@ -21,6 +21,62 @@ Import `@angular/cdk/overlay-prebuilt.css` and
 `@adapttable/angular-aria/styles.css` in the host. Override `--adapt-aria-*`
 tokens or use the common part attributes and class-name hooks.
 
+## Minimal table
+
+Link `@adapttable/angular-aria` and `@adapttable/angular` from the workspace.
+Use Angular 22 common/core/forms/platform-browser peers, RxJS 7 and matching
+`@angular/aria` and `@angular/cdk` 22.2.1 packages. No kit-specific application
+provider is required. Add these imports to the host's global stylesheet:
+
+```css
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "@adapttable/angular-aria/styles.css";
+```
+
+```ts
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-aria";
+import { filters } from "@adapttable/angular-aria/filters";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+@Component({
+  selector: "people-table",
+  standalone: true,
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="people"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+      [urlSync]="false"
+      tableLabel="People"
+    />
+  `,
+})
+export class PeopleTable {
+  readonly people: Person[] = [{ id: "1", name: "Ada" }];
+  readonly columns: ColumnDef<Person>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+    },
+  ];
+  readonly rowKey = (person: Person) => person.id;
+  readonly features = [filters<Person>([{ key: "name", type: "text" }])];
+}
+```
+
+The table uses this adapter's controls on desktop and mobile. The example keeps
+URL state local; see [URL state](./url-state.md) to connect application routes.
+
 ## Feature surface
 
 Compose opt-in features from the package's secondary entries, including

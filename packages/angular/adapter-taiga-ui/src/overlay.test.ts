@@ -10,6 +10,8 @@ import { TestBed } from "@angular/core/testing";
 
 import { menuPopover } from "./components/menuPopover";
 import { placeOverlayBelowTrigger } from "./components/overlayPlacement";
+import { TAIGA_CONTROLS } from "./taigaControls";
+import { AdaptTaigaRoot } from "./taigaRoot";
 
 function rect(left: number, right: number, bottom = 20): DOMRect {
   return { left, right, bottom, top: 0, width: right - left } as DOMRect;
@@ -51,18 +53,56 @@ describe("placeOverlayBelowTrigger", () => {
 });
 
 @Component({
+  imports: [AdaptTaigaRoot, ...TAIGA_CONTROLS],
   template: `
-    <div #root>
-      <button #trigger type="button">Open</button>
-      @if (popover.open() && showPanel()) {
-        <div #panel class="panel"><span class="inside">In</span></div>
-      }
-    </div>
-    <span class="outside">Out</span>
+    <adapt-taiga-root [dir]="direction()">
+      <div
+        #root
+        [tuiDropdown]="content"
+        [tuiDropdownOpen]="popover.open()"
+        (tuiDropdownOpenChange)="popover.setOpen($event)"
+      >
+        <button
+          #trigger
+          #tuiDropdownHost
+          tuiButton
+          type="button"
+          class="trigger"
+          [attr.aria-expanded]="popover.open()"
+        >
+          Open
+        </button>
+        <ng-template #content>
+          @if (popover.open() && showPanel()) {
+            <div #panel class="panel">
+              <button tuiButton type="button" class="inside">Inside</button>
+              <button
+                tuiButton
+                type="button"
+                class="nested-trigger"
+                [tuiDropdown]="nestedContent"
+                [tuiDropdownOpen]="nestedOpen()"
+                (tuiDropdownOpenChange)="nestedOpen.set($event)"
+              >
+                Nested
+              </button>
+              <ng-template #nestedContent>
+                <button tuiButton type="button" class="nested-inside">
+                  Nested option
+                </button>
+              </ng-template>
+            </div>
+          }
+        </ng-template>
+      </div>
+      <button tuiButton type="button" class="outside">Outside</button>
+    </adapt-taiga-root>
   `,
 })
 class Host {
+  readonly direction = signal<"ltr" | "rtl">("ltr");
   readonly showPanel = signal(true);
+  readonly nestedOpen = signal(false);
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
   private readonly trigger = viewChild<ElementRef<HTMLElement>>("trigger");
   private readonly panel = viewChild<ElementRef<HTMLElement>>("panel");
@@ -76,20 +116,23 @@ class Host {
   );
 }
 
-describe("menuPopover", () => {
+describe("menuPopover with native Taiga dropdowns", () => {
   async function mount() {
     const fixture = TestBed.createComponent(Host);
-    fixture.autoDetectChanges();
-    await fixture.whenStable();
     const element = fixture.nativeElement as HTMLElement;
     document.body.append(element);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
     const { popover } = fixture.componentInstance;
+    const trigger = element.querySelector<HTMLButtonElement>(".trigger")!;
     const open = async () => {
-      popover.toggle();
+      trigger.focus();
+      trigger.click();
       await fixture.whenStable();
     };
     return {
       element,
+      trigger,
       popover,
       open,
       host: fixture.componentInstance,
@@ -101,50 +144,93 @@ describe("menuPopover", () => {
     document.body.innerHTML = "";
   });
 
-  it("stays open on a press inside, closes on one outside", async () => {
-    const { element, popover, open, settle } = await mount();
+  it("mirrors native open and close events without a second click toggle", async () => {
+    const { element, trigger, popover, open, settle } = await mount();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
     await open();
-    expect(element.querySelector<HTMLElement>(".panel")?.style.top).not.toBe(
-      ""
-    );
-    window.dispatchEvent(new Event("resize"));
-    element
-      .querySelector(".inside")!
-      .dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     expect(popover.open()).toBe(true);
-    element
-      .querySelector(".outside")!
-      .dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(
+      element.querySelector(".panel")?.closest("tui-dropdown")
+    ).toBeInstanceOf(HTMLElement);
+    popover.setOpen(true);
+    await settle();
+    expect(popover.open()).toBe(true);
+    trigger.click();
     await settle();
     expect(popover.open()).toBe(false);
+    expect(element.querySelector(".panel")).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    await open();
+    expect(popover.open()).toBe(true);
+    popover.toggle();
+    await settle();
+    expect(popover.open()).toBe(false);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
-  it("places the panel from the start edge in RTL, and waits for a panel", async () => {
+  it("keeps the native active zone open inside and dismisses outside", async () => {
+    const { element, popover, open, settle } = await mount();
+    await open();
+    const inside = element.querySelector<HTMLButtonElement>(".inside")!;
+    inside.focus();
+    inside.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    inside.click();
+    await settle();
+    expect(popover.open()).toBe(true);
+    const outside = element.querySelector<HTMLButtonElement>(".outside")!;
+    outside.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    outside.focus();
+    outside.click();
+    await settle();
+    expect(popover.open()).toBe(false);
+    expect(document.activeElement).toBe(outside);
+  });
+
+  it("keeps delayed content in its scoped native RTL portal", async () => {
     const { element, popover, open, settle, host } = await mount();
+    host.direction.set("rtl");
     host.showPanel.set(false);
     await open();
     expect(popover.open()).toBe(true);
-    popover.close();
+    expect(element.querySelector(".panel")).toBeNull();
     host.showPanel.set(true);
     await settle();
-    element.querySelector("button")?.setAttribute("style", "direction: rtl");
-    await open();
-    expect(element.querySelector<HTMLElement>(".panel")?.style.left).not.toBe(
-      ""
-    );
+    const panel = element.querySelector(".panel")!;
+    expect(panel.closest("tui-dropdown")).not.toBeNull();
+    expect(
+      panel.closest("[data-adapttable-taiga-root]")?.getAttribute("dir")
+    ).toBe("rtl");
     popover.close();
     await settle();
     expect(popover.open()).toBe(false);
+    expect(element.querySelector(".panel")).toBeNull();
   });
 
-  it("closes on Escape and hands focus back to the trigger", async () => {
-    const { element, popover, open, settle } = await mount();
+  it("dismisses the nested native menu first and restores each trigger on Escape", async () => {
+    const { element, trigger, popover, open, settle, host } = await mount();
     await open();
+    const nested = element.querySelector<HTMLButtonElement>(".nested-trigger")!;
+    nested.focus();
+    nested.click();
+    await settle();
+    expect(host.nestedOpen()).toBe(true);
+    const option = element.querySelector<HTMLButtonElement>(".nested-inside")!;
+    option.focus();
+    option.click();
+    await settle();
+    expect(popover.open()).toBe(true);
+    expect(host.nestedOpen()).toBe(true);
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
     expect(popover.open()).toBe(true);
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     await settle();
+    expect(host.nestedOpen()).toBe(false);
+    expect(popover.open()).toBe(true);
+    expect(document.activeElement).toBe(nested);
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    await settle();
     expect(popover.open()).toBe(false);
-    expect(document.activeElement).toBe(element.querySelector("button"));
+    expect(document.activeElement).toBe(trigger);
   });
 });

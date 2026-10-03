@@ -172,12 +172,26 @@ describe("the Taiga UI Angular toolbar controls", () => {
     const { part, settle } = await mount([
       savedViews({ storageKey: "esc-views", storage: null }),
     ]);
-    part<HTMLButtonElement>("views-button")!.click();
+    const trigger = part<HTMLButtonElement>("views-button")!;
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    trigger.focus();
+    trigger.click();
     await settle();
+    expect(part("views-panel")).not.toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    part<HTMLInputElement>("views-input")!.focus();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     await settle();
     expect(part("views-panel")).toBeNull();
-    expect(document.activeElement).toBe(part("views-button"));
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(trigger);
+    trigger.click();
+    await settle();
+    expect(part("views-panel")).not.toBeNull();
+    trigger.click();
+    await settle();
+    expect(part("views-panel")).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
   it("labels XLSX and PDF buttons, and prints from the toolbar", async () => {

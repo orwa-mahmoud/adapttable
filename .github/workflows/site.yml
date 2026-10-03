@@ -68,6 +68,11 @@ concurrency:
   group: site-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  NG_BUILD_MAX_WORKERS: "1"
+  RAYON_NUM_THREADS: "1"
+  UV_THREADPOOL_SIZE: "1"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -75,7 +80,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Build packages
-        run: pnpm -r --filter './packages/*/*' build
+        run: pnpm -r --workspace-concurrency=1 --filter './packages/*/*' build
       - name: Build docs site
         run: pnpm --filter @adapttable/docs build
       - name: Build live demo (showcase)

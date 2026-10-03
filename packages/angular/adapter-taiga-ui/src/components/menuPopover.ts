@@ -17,6 +17,8 @@ export const MENU_PANEL_STYLE: Readonly<Record<string, string>> = {
 export interface MenuPopover {
   /** Whether the panel shows. */
   readonly open: Signal<boolean>;
+  /** Mirror Taiga's native open and close transitions. */
+  readonly setOpen: (value: boolean) => void;
   /** Open or close the panel. */
   readonly toggle: () => void;
   /** Close the panel. */
@@ -56,6 +58,9 @@ export function menuPopover(
 
   return {
     open: open.asReadonly(),
+    setOpen: (value) => {
+      open.set(value);
+    },
     toggle: () => {
       open.update((value) => !value);
     },

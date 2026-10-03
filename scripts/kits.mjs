@@ -110,7 +110,6 @@ export const KITS = Object.freeze([
   // retain the native part contract, including the fallback-only surfaces.
   { name: "adapter-angular-aria", framework: "angular", role: "native" },
   { name: "adapter-ngx-bootstrap", framework: "angular", role: "shell" },
-  { name: "adapter-clarity", framework: "angular", role: "shell" },
   { name: "adapter-angular-cdk", framework: "angular", role: "native" },
   // PrimeNG remains an unimplemented private placeholder.
   { name: "adapter-primeng", framework: "angular", role: "private" },

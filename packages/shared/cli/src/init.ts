@@ -3,6 +3,7 @@ import {
   detectKit,
   type Framework,
   type Kit,
+  type KitInfo,
   mergeDependencies,
 } from "./detect";
 import {
@@ -85,6 +86,58 @@ function chakraVersionWarning(
   return `   Note: @chakra-ui/react ${chakraSpec} detected — @adapttable/chakra targets Chakra v3. Upgrade @chakra-ui/react to v3, or use @adapttable/unstyled.`;
 }
 
+/** Published install targets, preserving peers the Angular host already owns. */
+function missingPackages(
+  info: KitInfo,
+  framework: Framework,
+  deps: Readonly<Record<string, string>>
+): string[] {
+  return packagesFor(info).filter((specifier) => {
+    if (info.privatePreview && specifier === info.adapter) return false;
+    if (framework !== "angular" || !info.extras.includes(specifier))
+      return true;
+    // Angular extras in KITS carry version ranges; compare their bare names so
+    // an existing host peer is not reinstalled or upgraded by the command.
+    const name = specifier.slice(0, specifier.lastIndexOf("@"));
+    return !Object.hasOwn(deps, name);
+  });
+}
+
+/** Explain the selected framework's host component, providers, and styling. */
+function logHostSetup(io: InitIO, framework: Framework, info: KitInfo): void {
+  if (framework === "angular") {
+    io.log(
+      '3. Import { PeopleTable } from "./peopleTable" in your host component, add PeopleTable to its imports, and render <people-table />.'
+    );
+    const setup: Partial<Record<Kit, string>> = {
+      "angular-aria":
+        "Import @angular/cdk/overlay-prebuilt.css and @adapttable/angular-aria/styles.css. See /angular/aria/.",
+      "angular-cdk":
+        "Import @angular/cdk/overlay-prebuilt.css and @adapttable/angular-cdk/styles.css. See /angular/angular-cdk/.",
+      "ngx-bootstrap":
+        "Use zoneless Angular 22 and import @adapttable/ngx-bootstrap/styles.css. Do not load global Bootstrap CSS or JavaScript. See /angular/ngx-bootstrap/.",
+      "angular-material":
+        "Private workspace preview: configure an Angular Material Sass theme and import @adapttable/angular-material/styles.css plus @angular/cdk/overlay-prebuilt.css. See /angular/material/.",
+      "ng-bootstrap":
+        "Private workspace preview: import @angular/localize/init and @adapttable/ng-bootstrap/styles.css. Do not load global Bootstrap CSS. See /angular/ng-bootstrap/.",
+      spartan:
+        "Private workspace preview: process @adapttable/spartan/styles.css through Tailwind 4 and import @angular/cdk/overlay-prebuilt.css. See /angular/spartan/.",
+      "taiga-ui":
+        "Private workspace preview: register provideAdaptTaiga(), configure Less and serve matching Taiga icons from assets/taiga-ui/icons. See /angular/taiga-ui/.",
+    };
+    if (setup[info.kit]) io.log(`   ${setup[info.kit]}`);
+    if (info.kit === "ng-zorro") {
+      io.log(
+        '   NG-ZORRO requires Angular 22 and ng-zorro-antd 22.1.1-compatible peers. Match any missing Angular peers to your installed Angular version. Add @import "ng-zorro-antd/ng-zorro-antd.min.css"; to your global stylesheet.'
+      );
+    }
+  } else {
+    io.log(
+      "3. Wrap your app in your UI kit's provider (MantineProvider / ThemeProvider / ChakraProvider / ConfigProvider — per its docs), render <PeopleTable />, done."
+    );
+  }
+}
+
 /**
  * Detect the project's UI kit, choose a package manager, write a starter
  * table component, and report the install command — all through injected
@@ -124,15 +177,7 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
     hasComponentsJson: io.exists("components.json"),
   });
   const pm = choosePackageManager(io.listRootFiles());
-  const packages = packagesFor(info).filter((specifier) => {
-    if (info.privatePreview && specifier === info.adapter) return false;
-    if (framework !== "angular" || !info.extras.includes(specifier))
-      return true;
-    // Angular extras in KITS carry version ranges; compare their bare names so
-    // an existing host peer is not reinstalled or upgraded by the command.
-    const name = specifier.slice(0, specifier.lastIndexOf("@"));
-    return !Object.hasOwn(deps, name);
-  });
+  const packages = missingPackages(info, framework, deps);
   const command = installCommand(pm, packages);
 
   const written: string[] = [];
@@ -180,39 +225,7 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
     );
   }
   io.log("");
-  if (framework === "angular") {
-    io.log(
-      '3. Import { PeopleTable } from "./peopleTable" in your host component, add PeopleTable to its imports, and render <people-table />.'
-    );
-    const setup: Partial<Record<Kit, string>> = {
-      "angular-aria":
-        "Import @angular/cdk/overlay-prebuilt.css and @adapttable/angular-aria/styles.css. See /angular/aria/.",
-      "angular-cdk":
-        "Import @angular/cdk/overlay-prebuilt.css and @adapttable/angular-cdk/styles.css. See /angular/angular-cdk/.",
-      clarity:
-        "Configure Angular animation providers and import @adapttable/clarity/styles.css. Do not load global Clarity CSS. See /angular/clarity/.",
-      "ngx-bootstrap":
-        "Use zoneless Angular 22 and import @adapttable/ngx-bootstrap/styles.css. Do not load global Bootstrap CSS or JavaScript. See /angular/ngx-bootstrap/.",
-      "angular-material":
-        "Private workspace preview: configure an Angular Material Sass theme and import @adapttable/angular-material/styles.css plus @angular/cdk/overlay-prebuilt.css. See /angular/material/.",
-      "ng-bootstrap":
-        "Private workspace preview: import @angular/localize/init and @adapttable/ng-bootstrap/styles.css. Do not load global Bootstrap CSS. See /angular/ng-bootstrap/.",
-      spartan:
-        "Private workspace preview: process @adapttable/spartan/styles.css through Tailwind 4 and import @angular/cdk/overlay-prebuilt.css. See /angular/spartan/.",
-      "taiga-ui":
-        "Private workspace preview: register provideAdaptTaiga(), configure Less and serve matching Taiga icons from assets/taiga-ui/icons. See /angular/taiga-ui/.",
-    };
-    if (setup[info.kit]) io.log(`   ${setup[info.kit]}`);
-    if (info.kit === "ng-zorro") {
-      io.log(
-        '   NG-ZORRO requires Angular 22 and ng-zorro-antd 22.1.1-compatible peers. Match any missing Angular peers to your installed Angular version. Add @import "ng-zorro-antd/ng-zorro-antd.min.css"; to your global stylesheet.'
-      );
-    }
-  } else {
-    io.log(
-      "3. Wrap your app in your UI kit's provider (MantineProvider / ThemeProvider / ChakraProvider / ConfigProvider — per its docs), render <PeopleTable />, done."
-    );
-  }
+  logHostSetup(io, framework, info);
   io.log("   Docs: https://github.com/orwa-mahmoud/adapttable");
 
   return {

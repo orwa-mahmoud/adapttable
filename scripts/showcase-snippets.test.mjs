@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -14,7 +20,13 @@ import {
   fillTemplate,
   snippetFor,
 } from "../apps/showcase/matrix.mjs";
-import { packageDir, REPO_ROOT, resolvePackagePath } from "./packages.mjs";
+import { entrySource } from "./feature-entry-source.mjs";
+import {
+  listPackages,
+  packageDir,
+  REPO_ROOT,
+  resolvePackagePath,
+} from "./packages.mjs";
 
 const MANTINE = adapterByKey("mantine");
 if (!MANTINE) throw new Error("mantine adapter missing");
@@ -91,6 +103,29 @@ describe("v3 showcase snippets compile", () => {
   });
 });
 
+/** Resolve every advertised kit entry through its authored ng-packagr source. */
+function angularKitSourcePaths() {
+  const paths = {};
+  for (const pkg of listPackages()) {
+    if (pkg.group !== "angular" || !pkg.name.startsWith("adapter-")) continue;
+    const manifest = JSON.parse(
+      readFileSync(join(pkg.dir, "package.json"), "utf8")
+    );
+    for (const key of Object.keys(manifest.exports ?? {})) {
+      if (key !== "." && key.slice(2).includes(".")) continue;
+      const specifier =
+        key === "." ? manifest.name : `${manifest.name}/${key.slice(2)}`;
+      const source = entrySource(specifier);
+      assert.ok(
+        source,
+        `${specifier} must resolve to an authored source entry`
+      );
+      paths[specifier] = [source];
+    }
+  }
+  return paths;
+}
+
 /**
  * Every Angular kit's page code compiles against the Angular packages' source:
  * written to a scratch project that extends the showcase's Angular tsconfig,
@@ -109,8 +144,6 @@ describe("Angular showcase snippets compile", () => {
     const angular = packageDir("angular");
     const ai = packageDir("ai");
     const aiAngular = packageDir("ai-angular");
-    const kit = packageDir("adapter-angular-unstyled");
-    const ngZorro = packageDir("adapter-ng-zorro");
     const core = packageDir("core");
     const i18n = packageDir("i18n");
     const showcase = join(REPO_ROOT, "apps", "showcase");
@@ -121,7 +154,6 @@ describe("Angular showcase snippets compile", () => {
         noUnusedLocals: false,
         types: [],
         paths: {
-          "@angular/*": [join(showcase, "node_modules", "@angular", "*")],
           "@adapttable/ai": [join(ai, "src", "index.ts")],
           "@adapttable/ai/ag-ui": [join(ai, "src", "agui.ts")],
           "@adapttable/ai/ai-sdk": [join(ai, "src", "aiSdk.ts")],
@@ -130,10 +162,7 @@ describe("Angular showcase snippets compile", () => {
           "@adapttable/ai-angular": [join(aiAngular, "src", "index.ts")],
           "@adapttable/angular": [join(angular, "src", "index.ts")],
           "@adapttable/angular/*": [join(angular, "*", "index.ts")],
-          "@adapttable/angular-unstyled": [join(kit, "src", "index.ts")],
-          "@adapttable/angular-unstyled/*": [join(kit, "*", "index.ts")],
-          "@adapttable/ng-zorro": [join(ngZorro, "src", "index.ts")],
-          "@adapttable/ng-zorro/*": [join(ngZorro, "*", "index.ts")],
+          ...angularKitSourcePaths(),
           "@adapttable/i18n": [join(i18n, "src", "index.ts")],
           "@adapttable/core": [join(core, "src", "index.ts")],
           "@adapttable/core/*": [join(core, "src", "*.ts")],
@@ -144,6 +173,13 @@ describe("Angular showcase snippets compile", () => {
   };
 
   it("type-checks the code on every Angular feature page", () => {
+    // Use real npm export maps for installed peers; AdaptTable's exact aliases
+    // still point at authored source. Cleanup removes only this temporary link.
+    symlinkSync(
+      join(REPO_ROOT, "apps", "showcase", "node_modules"),
+      join(scratch, "node_modules"),
+      "junction"
+    );
     const kits = builtAdapters("angular");
     assert.ok(kits.length > 0, "no Angular kit has pages");
     const written = [];

@@ -508,7 +508,8 @@ describe("private Angular kit discovery", () => {
       JSON.stringify({
         dependencies: { "@angular/core": "22.2.0", "@angular/aria": "22.2.1" },
       }),
-      ["pnpm-lock.yaml"]
+      ["pnpm-lock.yaml"],
+      ["angular.json"]
     );
     const result = runInit(io);
     expect(result.kit).toBe("angular-aria");
@@ -529,10 +530,10 @@ describe("private Angular kit discovery", () => {
     ).toBe("angular-aria");
     expect(
       detectKit(
-        { "@clr/angular": "18.3.0", "@angular/cdk": "22.2.1" },
+        { "@angular/material": "22.2.1", "@angular/cdk": "22.2.1" },
         { framework: "angular" }
       ).kit
-    ).toBe("clarity");
+    ).toBe("angular-material");
   });
 
   it.each([
@@ -542,7 +543,6 @@ describe("private Angular kit discovery", () => {
     ["@taiga-ui/core", "taiga-ui", "@adapttable/taiga-ui"],
     ["@angular/aria", "angular-aria", "@adapttable/angular-aria"],
     ["@angular/cdk", "angular-cdk", "@adapttable/angular-cdk"],
-    ["@clr/angular", "clarity", "@adapttable/clarity"],
     ["ngx-bootstrap", "ngx-bootstrap", "@adapttable/ngx-bootstrap"],
   ])("detects %s only in Angular", (signal, kit, adapter) => {
     expect(

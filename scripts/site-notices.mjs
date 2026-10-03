@@ -9,20 +9,89 @@ import {
 import { dirname, isAbsolute, join, parse, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+/**
+ * @typedef {object} PackageManifest
+ * @property {string} name
+ * @property {string} version
+ * @property {string} [license]
+ * @property {boolean} [private]
+ *
+ * @typedef {{directory: string, data: PackageManifest}} LocatedPackage
+ *
+ * @typedef {object} NoticeFile
+ * @property {string} name
+ * @property {string} text
+ * @property {string} [source]
+ *
+ * @typedef {object} PackageNotice
+ * @property {string} name
+ * @property {string} version
+ * @property {string} license
+ * @property {NoticeFile[]} files
+ *
+ * @typedef {object} FallbackEntry
+ * @property {string[]} files
+ * @property {string} [source]
+ * @property {Record<string, string | undefined>} [sources]
+ *
+ * @typedef {object} NoticeInventory
+ * @property {number} schemaVersion
+ * @property {string[]} assets
+ * @property {PackageNotice[]} packages
+ *
+ * @typedef {object} CollectNoticeOptions
+ * @property {readonly string[]} [extraModules]
+ * @property {string} [fallbackDirectory]
+ *
+ * @typedef {CollectNoticeOptions & {
+ *   extraPackages?: readonly {name: string, via?: string}[]
+ * }} SiteNoticeOptions
+ */
+
+/**
+ * The common Vite/Rolldown and Astro/Rollup hook surface used here. Keeping
+ * these structural avoids importing one app's bundler version into the other
+ * or requiring a root-level Vite dependency just to read notice files.
+ *
+ * @typedef {{type: "chunk", moduleIds?: readonly string[],
+ *   modules?: Record<string, unknown>} | {type: "asset"}} NoticeOutput
+ * @typedef {Record<string, NoticeOutput>} NoticeBundle
+ * @typedef {{type: "asset", fileName: string, source: string}} NoticeAsset
+ *
+ * @typedef {object} NoticePluginContext
+ * @property {{config: {consumer?: "client" | "server",
+ *   build: {ssr?: boolean | string}}}} [environment]
+ * @property {(asset: NoticeAsset) => string} emitFile
+ *
+ * @typedef {object} NoticePlugin
+ * @property {string} name
+ * @property {"build"} apply
+ * @property {"post"} enforce
+ * @property {(config: {root: string}) => void} configResolved
+ * @property {(this: NoticePluginContext, output: unknown,
+ *   bundle: NoticeBundle) => void} generateBundle
+ */
+
 export const NOTICE_TEXT = "third-party-notices.txt";
 export const NOTICE_JSON = "third-party-notices.json";
 const FALLBACKS = new URL("./third-party-licenses/", import.meta.url);
 const NOTICE_FILE =
   /^(?:licen[cs]e|copying|copyright(?:notice)?|notice)(?:[._-]|$)/i;
 
-/** Skip nested package.json files which only set the JavaScript module type. */
+/**
+ * Skip nested package.json files which only set the JavaScript module type.
+ * @param {string} id
+ * @returns {LocatedPackage | undefined}
+ */
 export function packageForModule(id) {
-  const clean = id.split("?")[0];
+  // String.split always supplies its first element, even for an empty ID.
+  const clean = /** @type {string} */ (id.split("?")[0]);
   if (clean.includes("\0") || !isAbsolute(clean)) return undefined;
   let directory = dirname(clean);
   while (directory !== parse(directory).root) {
     const manifest = join(directory, "package.json");
     if (existsSync(manifest)) {
+      /** @type {PackageManifest} */
       const data = JSON.parse(readFileSync(manifest, "utf8"));
       if (data.name) return { directory, data };
     }
@@ -31,7 +100,12 @@ export function packageForModule(id) {
   return undefined;
 }
 
-/** Validate full grants, not SPDX identifiers or links in place of terms. */
+/**
+ * Validate full grants, not SPDX identifiers or links in place of terms.
+ * @param {string} text
+ * @param {string | undefined} identifier
+ * @returns {boolean}
+ */
 export function hasLicenseText(text, identifier) {
   if (text.trim().length < 200) return false;
   if (identifier === "MIT")
@@ -47,8 +121,15 @@ export function hasLicenseText(text, identifier) {
   return /permission|redistribution|licensed|license|licence/i.test(text);
 }
 
+/**
+ * @param {string} name
+ * @param {string} version
+ * @param {string} fallbackDirectory
+ * @returns {NoticeFile[]}
+ */
 function fallbackFiles(name, version, fallbackDirectory) {
   const manifest = join(fallbackDirectory, "manifest.json");
+  /** @type {Record<string, FallbackEntry | undefined>} */
   const entries = existsSync(manifest)
     ? JSON.parse(readFileSync(manifest, "utf8"))
     : {};
@@ -67,6 +148,11 @@ function fallbackFiles(name, version, fallbackDirectory) {
   }));
 }
 
+/**
+ * @param {string} directory
+ * @param {string} name
+ * @returns {NoticeFile[]}
+ */
 function noticeFiles(directory, name) {
   const path = join(directory, name);
   if (statSync(path).isDirectory())
@@ -76,7 +162,12 @@ function noticeFiles(directory, name) {
   return [{ name, text: readFileSync(path, "utf8").trim() }];
 }
 
-/** Preserve all shipped top-level license, copyright and NOTICE files. */
+/**
+ * Preserve all shipped top-level license, copyright and NOTICE files.
+ * @param {LocatedPackage} pkg
+ * @param {string} [fallbackDirectory]
+ * @returns {PackageNotice}
+ */
 export function readPackageNotice(
   pkg,
   fallbackDirectory = fileURLToPath(FALLBACKS)
@@ -112,6 +203,10 @@ export function readPackageNotice(
   };
 }
 
+/**
+ * @param {readonly PackageNotice[]} packages
+ * @returns {string}
+ */
 export function renderNotices(packages) {
   return (
     "AdaptTable website third-party notices\n\n" +
@@ -131,7 +226,12 @@ export function renderNotices(packages) {
   );
 }
 
-/** Resolve installed packages without depending on package.json export maps. */
+/**
+ * Resolve installed packages without depending on package.json export maps.
+ * @param {string} name
+ * @param {string} from
+ * @returns {string}
+ */
 export function installedPackage(name, from) {
   let directory = realpathSync(from);
   while (directory !== parse(directory).root) {
@@ -142,7 +242,12 @@ export function installedPackage(name, from) {
   throw new Error(`site-notices: cannot locate ${name} from ${from}`);
 }
 
-/** Resolve each actual chunk module to its owning package, without dependency guesses. */
+/**
+ * Resolve each actual chunk module to its owning package, without dependency guesses.
+ * @param {NoticeBundle} bundle
+ * @param {CollectNoticeOptions} [options]
+ * @returns {PackageNotice[]}
+ */
 export function collectNotices(
   bundle,
   { extraModules = [], fallbackDirectory } = {}
@@ -152,10 +257,20 @@ export function collectNotices(
     if (chunk.type === "chunk")
       ids.push(...(chunk.moduleIds ?? Object.keys(chunk.modules ?? {})));
   }
+  /** @type {Map<string, PackageNotice>} */
   const packages = new Map();
   for (const id of ids) {
     const pkg = packageForModule(id);
-    if (!pkg || pkg.data.private) continue;
+    if (!pkg) continue;
+    // Private workspace kits can embed copied third-party controls/styles.
+    // Their package-owned NOTICE is still distributable attribution.
+    if (
+      pkg.data.private &&
+      !readdirSync(pkg.directory).some((name) =>
+        /^notice(?:[._-]|$)/i.test(name)
+      )
+    )
+      continue;
     const key = `${pkg.data.name}@${pkg.data.version}`;
     if (!packages.has(key))
       packages.set(key, readPackageNotice(pkg, fallbackDirectory));
@@ -165,8 +280,14 @@ export function collectNotices(
     .map(([, pkg]) => pkg);
 }
 
-/** Vite and Astro use the same hook; SSR-only code is not sent to browsers. */
+/**
+ * Vite and Astro use the same hook; SSR-only code is not sent to browsers.
+ * @param {SiteNoticeOptions} [options]
+ * @returns {NoticePlugin}
+ */
 export function siteNotices(options = {}) {
+  // Vite resolves this before invoking its build hooks.
+  /** @type {string} */
   let root;
   return {
     name: "adapttable-site-notices",
@@ -176,7 +297,11 @@ export function siteNotices(options = {}) {
       root = config.root;
     },
     generateBundle(_output, bundle) {
-      if (this.environment?.config.build.ssr) return;
+      // Vite's Environment API is authoritative: Astro's client environment
+      // can inherit build.ssr=true from the shared prerender configuration.
+      const config = this.environment?.config;
+      if (config?.consumer === "server") return;
+      if (config?.consumer !== "client" && config?.build.ssr) return;
       const extraModules = [...(options.extraModules ?? [])];
       for (const extra of options.extraPackages ?? []) {
         const from = extra.via
@@ -206,8 +331,13 @@ export function siteNotices(options = {}) {
   };
 }
 
-/** Verify a finished build or composed copy has complete matching notice files. */
+/**
+ * Verify a finished build or composed copy has complete matching notice files.
+ * @param {string} directory
+ * @returns {number}
+ */
 export function checkNotices(directory) {
+  /** @type {NoticeInventory} */
   const inventory = JSON.parse(
     readFileSync(join(directory, NOTICE_JSON), "utf8")
   );

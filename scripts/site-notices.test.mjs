@@ -153,6 +153,58 @@ describe("website license notices", () => {
       /missing full license text/
     );
   });
+  it("supplies complete grants for the exact Angular toolkit versions", () => {
+    for (const [name, version, license] of [
+      ["@taiga-ui/icons", "5.26.0", "Apache-2.0"],
+      ["@taiga-ui/design-tokens", "0.320.0", "Apache-2.0"],
+      ["@taiga-ui/font-watcher", "0.6.0", "Apache-2.0"],
+    ]) {
+      const item = pkg(fixture(), name, version);
+      rmSync(join(item.directory, "LICENSE"));
+      const data = { ...item.data, license };
+      const notice = readPackageNotice({ ...item, data });
+      assert.ok(
+        notice.files.some((file) => hasLicenseText(file.text, license)),
+        name
+      );
+      assert.ok(
+        notice.files.every((file) => file.source?.startsWith("https://")),
+        name
+      );
+      assert.throws(
+        () =>
+          readPackageNotice({ ...item, data: { ...data, version: "99.0.0" } }),
+        /missing full license text/
+      );
+    }
+  });
+  it("retains shipped icon terms alongside Apache and Feather MIT supplements", () => {
+    const item = pkg(fixture(), "@taiga-ui/icons", "5.26.0");
+    const supplier = readFileSync(
+      new URL(
+        "./third-party-licenses/taiga-ui-icons-5.26.0-lucide-feather.txt",
+        import.meta.url
+      ),
+      "utf8"
+    );
+    write(item.directory, "LICENSE", supplier);
+    const notice = readPackageNotice({
+      ...item,
+      data: { ...item.data, license: "Apache-2.0" },
+    });
+    assert.equal(
+      notice.files.find((file) => file.name === "LICENSE")?.text,
+      supplier.trim()
+    );
+    const text = renderNotices([notice]);
+    assert.match(text, /ISC License/);
+    assert.match(text, /END OF TERMS AND CONDITIONS/);
+    assert.match(text, /Copyright \(c\) 2013-present Cole Bemis/);
+    assert.match(
+      text,
+      /The MIT License \(MIT\) \(for the icons listed above\)/
+    );
+  });
   it("preserves full MIT terms shipped inside a README", () => {
     const item = pkg(fixture());
     rmSync(join(item.directory, "LICENSE"));
@@ -165,6 +217,11 @@ describe("website license notices", () => {
   });
   it("includes package-owned notices for copied component sources", () => {
     const item = pkg(fixture(), "@adapttable/spartan");
+    write(
+      item.directory,
+      "package.json",
+      JSON.stringify({ ...item.data, private: true })
+    );
     write(item.directory, "NOTICE", "Copied Helm attribution\n" + MIT);
     assert.ok(
       collectNotices(
@@ -191,6 +248,35 @@ describe("website license notices", () => {
       [NOTICE_JSON, NOTICE_TEXT]
     );
     assert.ok(assets[1].source.includes(MIT));
+  });
+  it("emits notices for Astro client consumers with inherited SSR build flags", () => {
+    const item = pkg(fixture());
+    const assets = [];
+    const plugin = siteNotices();
+    plugin.generateBundle.call(
+      {
+        environment: { config: { consumer: "client", build: { ssr: true } } },
+        emitFile: (file) => assets.push(file),
+      },
+      {},
+      bundleFor(join(item.directory, "index.js"))
+    );
+    assert.deepEqual(
+      assets.map((asset) => asset.fileName),
+      [NOTICE_JSON, NOTICE_TEXT]
+    );
+    assert.ok(assets[1].source.includes(MIT));
+    assert.doesNotThrow(() =>
+      plugin.generateBundle.call(
+        {
+          environment: {
+            config: { consumer: "server", build: { ssr: false } },
+          },
+        },
+        {},
+        {}
+      )
+    );
   });
   it("checks matching terms and all listed emitted assets", () => {
     const root = fixture(),

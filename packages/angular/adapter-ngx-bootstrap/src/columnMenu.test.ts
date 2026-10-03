@@ -3,7 +3,7 @@ import { columnMenu } from "@adapttable/ngx-bootstrap/column-menu";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { ngxBootstrapPart } from "../testUtils";
+import { ngxBootstrapPart, pressEscapeFrom } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface City {
@@ -128,7 +128,24 @@ describe("the unstyled Angular Columns menu", () => {
     expect(
       parts("column-menu-label").map((label) => label.textContent)
     ).toEqual(["Name", "Country", "Population"]);
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    const search = part<HTMLInputElement>("column-menu-search")!;
+    expect(search.closest("[data-ngx-bootstrap-overlay]")).not.toBeNull();
+    const documentKeydown = vi.fn();
+    document.addEventListener("keydown", documentKeydown);
+    expect(pressEscapeFrom(search).defaultPrevented).toBe(true);
+    document.removeEventListener("keydown", documentKeydown);
+    expect(documentKeydown).not.toHaveBeenCalled();
+    await settle();
+    expect(part("column-menu-panel")).toBeNull();
+    expect(button?.getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(button);
+    await open();
+    expect(button?.getAttribute("aria-expanded")).toBe("true");
+    expect(parts("column-menu-panel")).toHaveLength(1);
+    expect(
+      pressEscapeFrom(part<HTMLInputElement>("column-menu-search")!)
+        .defaultPrevented
+    ).toBe(true);
     await settle();
     expect(part("column-menu-panel")).toBeNull();
     expect(document.activeElement).toBe(button);

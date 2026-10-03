@@ -380,6 +380,7 @@ export class AdaptColumnMenuEdgeRow {
     @let p = props();
     <div
       #root
+      #menu="bs-dropdown"
       dropdown
       [isAnimated]="false"
       [container]="overlayContainer()"
@@ -402,7 +403,16 @@ export class AdaptColumnMenuEdgeRow {
       >
         {{ p.labels.columns }}
       </button>
-      <div class="dropdown-menu" *dropdownMenu>
+      <div
+        class="dropdown-menu"
+        *dropdownMenu
+        (keydown.escape)="
+          $event.preventDefault();
+          $event.stopPropagation();
+          menu.hide();
+          trigger.focus()
+        "
+      >
         @if (popover.open()) {
           <fieldset
             #panel

@@ -9,6 +9,7 @@ import { sidebarPages, sidebarSlugs } from "../apps/docs/sidebar.mjs";
 import { rewriteDocLinks } from "../apps/docs/sync-docs.mjs";
 import { unlistedDocs } from "./build-llms-full.mjs";
 import { docsFiles } from "./docs-files.mjs";
+import { REPO_ROOT } from "./packages.mjs";
 
 const temporary = [];
 after(() =>
@@ -55,9 +56,14 @@ describe("canonical docs sources", () => {
     assert.deepEqual(sidebarPages(tree), [
       { label: "Filtering", slug: "angular/filtering", group: "Features" },
     ]);
-    assert.equal(
-      sidebarSlugs().filter((slug) => slug.startsWith("angular/")).length,
-      50
+    assert.deepEqual(
+      sidebarSlugs()
+        .filter((slug) => slug.startsWith("angular/"))
+        .sort(),
+      docsFiles(join(REPO_ROOT, "docs"))
+        .filter((file) => file.startsWith("angular/"))
+        .map((file) => file.replace(/\.md$/, ""))
+        .sort()
     );
   });
 });

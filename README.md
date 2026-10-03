@@ -276,8 +276,7 @@ The workspace also contains private, unpublished `0.0.0` adapters for
 [Spartan](docs/angular/spartan.md) (`@adapttable/spartan`) and
 [Taiga UI](docs/angular/taiga-ui.md) (`@adapttable/taiga-ui`),
 [Angular Aria](docs/angular/aria.md) (`@adapttable/angular-aria`) and
-[ngx-bootstrap](docs/angular/ngx-bootstrap.md) (`@adapttable/ngx-bootstrap`),
-[Clarity](docs/angular/clarity.md) (`@adapttable/clarity`) and
+[ngx-bootstrap](docs/angular/ngx-bootstrap.md) (`@adapttable/ngx-bootstrap`) and
 [Angular CDK](docs/angular/angular-cdk.md) (`@adapttable/angular-cdk`). Their local showcase
 pages use the actual kit controls. Use built workspace packages and follow each
 kit's peer, theme and asset setup; npm publication is a separate release step.

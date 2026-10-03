@@ -63,11 +63,8 @@
     "@taiga-ui/icons": "5.26.0",
     "@adapttable/angular-aria": "workspace:*",
     "@adapttable/angular-cdk": "workspace:*",
-    "@adapttable/clarity": "workspace:*",
     "@adapttable/ngx-bootstrap": "workspace:*",
     "@angular/aria": "22.2.1",
-    "@clr/angular": "18.3.0",
-    "@clr/ui": "18.3.0",
     "ngx-bootstrap": "22.0.0"
   },
   "devDependencies": {
@@ -93,7 +90,6 @@
     "@angular/localize": "22.2.0",
     "sass": "^1.105.0",
     "less": "^4.6.3",
-    "@taiga-ui/design-tokens": "~0.320.0",
-    "@angular/animations": "22.2.0"
+    "@taiga-ui/design-tokens": "~0.320.0"
   }
 }

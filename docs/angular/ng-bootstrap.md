@@ -17,7 +17,6 @@ explicitly prepared. Do not substitute a React Bootstrap package.
 
 ```ts
 import "@angular/localize/init";
-import "@adapttable/ng-bootstrap/styles.css";
 import { Component } from "@angular/core";
 import { type ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/ng-bootstrap";
@@ -63,8 +62,13 @@ binding's contracts.
 
 ## Isolated Bootstrap styles
 
-Import only `@adapttable/ng-bootstrap/styles.css` for this kit. Its upstream
-Bootstrap rules are compiled with every selector bounded by
+Load this kit's stylesheet once through the application's global CSS pipeline:
+
+```css
+@import "@adapttable/ng-bootstrap/styles.css";
+```
+
+Its upstream Bootstrap rules are compiled with every selector bounded by
 `.adapttable-ng-bootstrap`, including Reboot, color-mode variables and overlays.
 Animation names are namespaced. The Bootstrap MIT attribution ships alongside
 the stylesheet. Do not import global Bootstrap CSS, RTL CSS or Bootstrap JS into

@@ -5,7 +5,6 @@ export const ANGULAR_KIT_DOCS = Object.freeze([
   "spartan",
   "taiga-ui",
   "angular-cdk",
-  "clarity",
   "ngx-bootstrap",
   "aria",
 ]);

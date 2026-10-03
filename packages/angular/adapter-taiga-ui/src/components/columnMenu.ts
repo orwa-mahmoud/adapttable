@@ -395,7 +395,7 @@ export class AdaptColumnMenuEdgeRow {
     <div
       [tuiDropdown]="menuContent"
       [tuiDropdownOpen]="popover.open()"
-      (tuiDropdownOpenChange)="!$event && popover.close()"
+      (tuiDropdownOpenChange)="popover.setOpen($event)"
       #root
       data-taiga-part="column-menu"
       style="position: relative"
@@ -405,6 +405,7 @@ export class AdaptColumnMenuEdgeRow {
         size="s"
         appearance="secondary"
         #trigger
+        #tuiDropdownHost
         type="button"
         data-adapttable-part="column-menu-button"
         aria-haspopup="true"

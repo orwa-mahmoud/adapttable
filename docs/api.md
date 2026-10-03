@@ -3870,7 +3870,7 @@ Importing the root table does not import the assistant or AI runtime.
 
 ## Angular workspace-preview kits
 
-Eight additional Angular kits are private workspace previews at `0.0.0`, not
+Seven additional Angular kits are private workspace previews at `0.0.0`, not
 published npm packages. They use the same `AdaptDataTable` inputs, public parts,
 and feature-factory contracts described above, with kit-owned controls:
 
@@ -3878,7 +3878,6 @@ and feature-factory contracts described above, with kit-owned controls:
 - [Taiga UI](./angular/taiga-ui.md): `@adapttable/taiga-ui`.
 - [ng-bootstrap](./angular/ng-bootstrap.md): `@adapttable/ng-bootstrap`.
 - [Spartan](./angular/spartan.md): `@adapttable/spartan`.
-- [Clarity](./angular/clarity.md): `@adapttable/clarity`.
 - [ngx-bootstrap](./angular/ngx-bootstrap.md): `@adapttable/ngx-bootstrap`.
 - [Angular Aria](./angular/aria.md): `@adapttable/angular-aria`.
 - [Angular CDK](./angular/angular-cdk.md): `@adapttable/angular-cdk`.
@@ -3921,7 +3920,7 @@ Applications should use the documented table, feature and provider APIs instead.
   `detectKit` accepts `framework` alongside the existing shadcn context, and
   `InitResult.framework` reports the choice. Angular scaffolds a standalone
   `PeopleTable` in `src/app/peopleTable.ts`; React keeps `src/PeopleTable.tsx`.
-  `angular-unstyled` and `ng-zorro` are public npm packages. The eight private
+  `angular-unstyled` and `ng-zorro` are public npm packages. The seven private
   Angular previews above are also detected: `KitInfo.privatePreview` marks
   them, and init prints local-linking guidance rather than an npm install
   command for an unpublished adapter. Init only prints guidance; it does not

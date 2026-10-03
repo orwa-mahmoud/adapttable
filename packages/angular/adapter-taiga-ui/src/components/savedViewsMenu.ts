@@ -40,7 +40,7 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
     <div
       [tuiDropdown]="menuContent"
       [tuiDropdownOpen]="popover.open()"
-      (tuiDropdownOpenChange)="!$event && popover.close()"
+      (tuiDropdownOpenChange)="popover.setOpen($event)"
       #root
       data-taiga-part="views-menu"
       style="position: relative"
@@ -50,6 +50,7 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
         size="s"
         appearance="secondary"
         #trigger
+        #tuiDropdownHost
         type="button"
         aria-haspopup="true"
         data-taiga-part="views-button"

@@ -16,6 +16,7 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
+import { pressEscapeFrom } from "../testUtils";
 
 interface Row {
   name: string;
@@ -140,6 +141,28 @@ afterEach(() => {
 });
 
 describe("AdaptFilterHeaderRow", () => {
+  it("closes a portalled multi-select from a focused choice and reopens cleanly", async () => {
+    const { element, labeled, fixture, host } = await mountRow();
+    const trigger = labeled("Tags").find((node) => node.tagName === "BUTTON")!;
+    for (let cycle = 0; cycle < 2; cycle += 1) {
+      trigger.click();
+      await fixture.whenStable();
+      expect(trigger.getAttribute("aria-expanded")).toBe("true");
+      const checkbox = element.querySelector<HTMLInputElement>(
+        '[data-adapttable-part="filter-header-menu"] input'
+      )!;
+      expect(checkbox.closest("[data-ngx-bootstrap-overlay]")).not.toBeNull();
+      expect(pressEscapeFrom(checkbox).defaultPrevented).toBe(true);
+      await fixture.whenStable();
+      expect(trigger.getAttribute("aria-expanded")).toBe("false");
+      expect(
+        element.querySelector('[data-adapttable-part="filter-header-menu"]')
+      ).toBeNull();
+      expect(document.activeElement).toBe(trigger);
+      expect(host.extra()).toEqual({});
+    }
+  });
+
   it("writes every compact header widget", async () => {
     const { element, labeled, fixture } = await mountRow();
     expect(
@@ -291,11 +314,32 @@ describe("AdaptHeaderFilterTrigger", () => {
     trigger.click();
     await fixture.whenStable();
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    const reopened = boundary.querySelector<HTMLSelectElement>(
+      '[data-adapttable-part="filter-select"]'
+    )!;
+    expect(pressEscapeFrom(reopened).defaultPrevented).toBe(true);
     await fixture.whenStable();
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
     expect(
       boundary.querySelector('[data-adapttable-part="filter-header-cell"]')
     ).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+    expect(extra().team).toBe("Web");
+    trigger.click();
+    await fixture.whenStable();
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(
+      boundary.querySelectorAll('[data-adapttable-part="filter-header-cell"]')
+    ).toHaveLength(1);
+    expect(
+      pressEscapeFrom(
+        boundary.querySelector<HTMLSelectElement>(
+          '[data-adapttable-part="filter-select"]'
+        )!
+      ).defaultPrevented
+    ).toBe(true);
+    await fixture.whenStable();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(trigger);
   });
 });

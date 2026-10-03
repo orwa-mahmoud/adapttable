@@ -76,3 +76,22 @@ export function ngxBootstrapPart(name: string): string {
     : "data-adapttable-part";
   return `[${attribute}="${name}"]`;
 }
+
+/** Keyup follows any focus transfer performed by the Escape keydown handler. */
+export function pressEscapeFrom(control: HTMLElement): KeyboardEvent {
+  control.focus();
+  const keydown = new KeyboardEvent("keydown", {
+    key: "Escape",
+    bubbles: true,
+    cancelable: true,
+  });
+  control.dispatchEvent(keydown);
+  (document.activeElement ?? control).dispatchEvent(
+    new KeyboardEvent("keyup", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    })
+  );
+  return keydown;
+}

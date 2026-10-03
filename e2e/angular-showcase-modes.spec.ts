@@ -1,7 +1,16 @@
 /** Main/lab are actual Angular modes, with stateful same-document kit changes. */
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test, type TestInfo } from "@playwright/test";
 
 import { ANGULAR_KITS } from "./angular-kit";
+
+/** Keep production browser views with the report for visual review. */
+async function attachView(page: Page, testInfo: TestInfo, name: string) {
+  if (testInfo.project.name !== "chromium") return;
+  await testInfo.attach(name, {
+    body: await page.screenshot({ fullPage: true, animations: "disabled" }),
+    contentType: "image/png",
+  });
+}
 
 for (const kit of ANGULAR_KITS) {
   test(`${kit.key}: an invalid edit survives a blocked kit transition`, async ({
@@ -36,7 +45,7 @@ for (const kit of ANGULAR_KITS) {
   });
   test(`${kit.key}: compact and full-options modes mount the real table`, async ({
     page,
-  }) => {
+  }, testInfo) => {
     for (const mode of ["angular-main", "angular-all-options"]) {
       await page.goto(`/${mode}/?kit=${kit.key}`);
       await expect(page.locator(`[data-adapter="${kit.key}"]`)).toBeVisible();
@@ -49,6 +58,7 @@ for (const kit of ANGULAR_KITS) {
       await expect(
         page.getByRole("combobox", { name: "Framework", exact: true })
       ).toHaveValue("angular");
+      await attachView(page, testInfo, `${kit.key}-${mode}`);
       if (mode === "angular-all-options") {
         await page
           .getByRole("button", { name: "Configure options", exact: true })
@@ -56,6 +66,7 @@ for (const kit of ANGULAR_KITS) {
         await expect(
           page.getByRole("dialog", { name: "Feature Lab controls" })
         ).toBeVisible();
+        await attachView(page, testInfo, `${kit.key}-feature-lab-controls`);
         await page.keyboard.press("Escape");
         await expect(
           page.getByRole("dialog", { name: "Feature Lab controls" })

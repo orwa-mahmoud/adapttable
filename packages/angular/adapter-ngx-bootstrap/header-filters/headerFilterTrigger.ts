@@ -46,6 +46,7 @@ import {
   template: `
     @let p = props();
     <div
+      #menu="bs-dropdown"
       dropdown
       [isAnimated]="false"
       [container]="overlayContainer()"
@@ -58,6 +59,7 @@ import {
       (isOpenChange)="overlay.setOpen($event)"
     >
       <button
+        #trigger
         type="button"
         class="btn btn-outline-secondary btn-sm"
         dropdownToggle
@@ -67,7 +69,16 @@ import {
       >
         <svg [adaptIcon]="icon"></svg>
       </button>
-      <div class="dropdown-menu" *dropdownMenu>
+      <div
+        class="dropdown-menu"
+        *dropdownMenu
+        (keydown.escape)="
+          $event.preventDefault();
+          $event.stopPropagation();
+          menu.hide();
+          trigger.focus()
+        "
+      >
         @if (overlay.open()) {
           <div
             data-adapttable-part="filter-header-cell"
