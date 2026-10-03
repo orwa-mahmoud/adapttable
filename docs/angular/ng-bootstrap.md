@@ -1,17 +1,27 @@
 # ng-bootstrap Angular data table
 
-`@adapttable/ng-bootstrap` is a private workspace preview. It uses the Angular
-binding's signals, feature factories and Chrome with ng-bootstrap overlays and
-Bootstrap controls. Publication and final integrated browser acceptance are
-separate from this implementation.
+`@adapttable/ng-bootstrap` uses the Angular binding's signals, feature factories
+and Chrome with ng-bootstrap overlays and Bootstrap controls. It is being
+prepared for its first public **0.1.0** release. Registry installation requires
+the owner-controlled npm publication to complete; release preparation does not
+confirm npm availability.
 
 ## Dependencies
 
 Use Angular 22, ng-bootstrap 21, Bootstrap CSS 5.3.8 and Popper 2.11.8, matching
 [the official compatibility table](https://github.com/ng-bootstrap/ng-bootstrap#dependencies).
 ng-bootstrap also requires `@angular/forms`, `@angular/localize` and RxJS.
-The kit is private `0.0.0`; use its workspace dependency until a public release is
-explicitly prepared. Do not substitute a React Bootstrap package.
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/ng-bootstrap@0.1.0 @adapttable/angular @ng-bootstrap/ng-bootstrap@21.0.0 @popperjs/core@2.11.8 @angular/forms@^22 @angular/localize@^22 rxjs@^7.4.0
+```
+
+Keep the host's Angular Common and Core packages on compatible Angular 22
+versions. The adapter ships its scoped Bootstrap stylesheet, so a separate
+Bootstrap package or JavaScript bundle is not required. Import
+`@angular/localize/init` once in the application's entry before bootstrapping.
+No kit-specific application provider is required.
 
 ## Render the table
 
@@ -100,5 +110,5 @@ The kit includes conformance, feature and native-control regression tests plus a
 selector-by-selector stylesheet isolation test. Final integration must verify
 all package gates and browser interactions, including kit switching, fixed and
 sticky cells, narrow cards, both themes, RTL, Escape, focus restoration and
-repeated overlay opens. Those integrated checks are required before describing
-the preview as ready for public release.
+repeated overlay opens. Those integrated checks are required before public
+release; the registry installation example does not claim they have passed.

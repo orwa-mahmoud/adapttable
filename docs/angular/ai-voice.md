@@ -6,8 +6,8 @@ draft; the reader still chooses Send. Neither function chooses a model provider
 or creates a backend connection by itself.
 
 The AI Angular binding, unstyled Angular kit and NG-ZORRO kit are public npm
-packages. The seven additional Angular adapter previews are private workspace
-packages and are not published to npm.
+packages. The seven additional Angular adapters are prepared for their first
+public `0.1.0` release; registry installation requires publication to complete.
 See [getting started](./getting-started.md) for installation guidance.
 See [Agent capabilities](./agent-capabilities.md) for attaching a live session
 to a mounted table.

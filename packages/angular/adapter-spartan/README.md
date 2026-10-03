@@ -1,7 +1,12 @@
 # @adapttable/spartan
 
+Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**, matching Angular 22.
+
 Angular DataTable with Spartan Brain controls and a package-owned Helm styling
-layer. This kit is under development, private at `0.0.0`, and is not published.
+layer.
+
+Prepared for its first public `0.1.0` release. Publication to npm is a separate
+owner-controlled step; package metadata does not imply registry availability.
 
 ## Integration boundary
 
@@ -27,10 +32,20 @@ CDK peers `>=21.0.0 <23.0.0`. AdaptTable targets Angular 22. The original Sparta
 [version support](https://www.spartan.ng/documentation/version-support) and
 [installation](https://www.spartan.ng/documentation/installation) documentation.
 
-For a workspace checkout, install this private package through the monorepo.
-A future public installation will require Angular 22, `@spartan-ng/brain`,
-Angular CDK and Forms, RxJS, Tailwind CSS 4, and Brain's peer dependencies
-`clsx`, `luxon`, and `tw-animate-css`. Registry availability is not implied.
+The host needs Angular 22, `@spartan-ng/brain`, Angular CDK and Forms,
+RxJS, Tailwind CSS 4, `clsx` and `tw-animate-css`. Brain's Luxon peer is optional
+and only needed for its Luxon integration.
+
+After publication, install the kit and its native peers in an Angular 22 app:
+
+```sh
+pnpm add @adapttable/spartan @adapttable/angular @spartan-ng/brain@^1.5.0 @angular/cdk@^22 @angular/forms@^22 rxjs@^7.8 clsx@^2.1.1 tw-animate-css@^1
+pnpm add -D tailwindcss@^4
+```
+
+Before publication, link `@adapttable/spartan@workspace:*` and
+`@adapttable/angular@workspace:*` from this monorepo instead. AdaptTable package
+versions are independent; the adapter resolves its exact binding/core dependencies.
 
 ## Styles
 
@@ -84,16 +99,37 @@ export class PeopleTable {
 }
 ```
 
-## Feature surface
+## Features
 
-The package provides the same feature entry points as Angular unstyled:
-filtering and header filters; sorting and multi-sort; column menus, groups,
-selection, pinning, fitting and resizing; row selection, actions, detail,
-reordering, pinning and appearance; grouping, tree and pivot; editing, history,
-validation, conflicts and batch editing; virtualization; saved views; export
-and print; density and fullscreen; find, command palette, context menu, side
-panel and status bar; optional assistant and agent approval. Import factories
-from individual secondary entries or `@adapttable/spartan/features`.
+- **Feature composition** through individual kit subpaths, `/features` and
+  `standardPreset()`; import only the behavior you need
+- **Global search, sorting and pagination** for in-memory or host-fetched rows,
+  with URL-synced state and mobile infinite scrolling
+- **Filtering** with an AND/OR filter tree, header filters, custom filter types,
+  removable chips and saved views
+- **Column management** with visibility, ordering, pinning, resizing,
+  multi-sort, fit-to-content and collapsible column groups
+- **Selection and row actions**, including bulk actions, row expansion and
+  nested tables using Angular templates or component renderers
+- **Inline cell editing**, row and batch editing, validation, save/conflict
+  feedback, dirty indicators, undo/redo and keyboard navigation with paste
+  and range fill; writes always go through host callbacks
+- **Row reordering and row pinning**, pinned summary rows,
+  row and column spanning, full-width and separator rows, conditional row styling
+  and heights
+- **Grouping, aggregation and pivot**, tree data and row/column virtualization
+- **Spreadsheet formula engine and sparkline columns** through the Angular
+  binding's formula and sparkline entries
+- **CSV and XLSX export**, PDF export and print layout, with optional custom
+  writers and host print callbacks
+- **Command palette and view controls**: find-in-table, context menus, side
+  panel, density, fullscreen and status bar
+- **Responsive mobile cards**, shared localized labels and RTL support;
+  custom card renderers retain the selection, editing and action shell
+- **Angular SSR and hydration** with deterministic initial data.
+  React Server Components are a React-only integration, not an Angular feature
+- **Optional assistant and approval controls** on `/assistant`, backed by the
+  separately imported AI bindings
 
 Desktop tables retain semantic table markup. `forceMobile` or the responsive
 breakpoint switches to the binding's card presentation with labelled fields,

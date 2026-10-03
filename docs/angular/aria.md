@@ -1,7 +1,9 @@
 # Angular Aria adapter
 
-`@adapttable/angular-aria` is a private, unpublished 0.0.0 workspace preview.
-It targets Angular 22 and the MIT-licensed Angular Aria/CDK 22.2.1 pair.
+`@adapttable/angular-aria` targets Angular 22 and the MIT-licensed Angular
+Aria/CDK 22.2.1 pair. It is being prepared for its first public **0.1.0** release.
+Registry installation requires the owner-controlled npm publication to complete;
+release preparation does not confirm npm availability.
 
 ## Architecture and controls
 
@@ -23,10 +25,16 @@ tokens or use the common part attributes and class-name hooks.
 
 ## Minimal table
 
-Link `@adapttable/angular-aria` and `@adapttable/angular` from the workspace.
-Use Angular 22 common/core/forms/platform-browser peers, RxJS 7 and matching
-`@angular/aria` and `@angular/cdk` 22.2.1 packages. No kit-specific application
-provider is required. Add these imports to the host's global stylesheet:
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/angular-aria@0.1.0 @adapttable/angular @angular/aria@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2
+```
+
+Keep the host's Angular Common, Core and Platform Browser packages on compatible
+Angular 22 versions. Aria and CDK must stay on their matching 22.2.1 versions.
+No kit-specific application provider is required. Add these imports to the
+host's global stylesheet:
 
 ```css
 @import "@angular/cdk/overlay-prebuilt.css";
@@ -92,10 +100,10 @@ interactions; the binding owns table navigation and screen-reader messages.
 ## Verification and release status
 
 The source includes Angular TestBed directive fixtures and the shared adapter
-behavior suite. This preview must pass the integrated Angular compiler,
+behavior suite. The release must pass the integrated Angular compiler,
 coverage, package build and real-browser keyboard/overlay checks before it is
 called release-ready. A workspace manifest or showcase route is not evidence
 of npm publication.
 
-See the [package README](../../packages/angular/adapter-angular-aria/README.md)
+See the [package README](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-angular-aria)
 for usage, feature entries, styling hooks and the precise primitive mapping.

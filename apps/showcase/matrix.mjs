@@ -84,6 +84,8 @@ const SNIPPET_FRAMEWORK = "react";
  * @property {string} pkg The adapter package a consumer installs.
  * @property {string} peer The kit's own packages, which stay peers.
  * @property {string} install The full install line, kit packages included.
+ *   Release-preparation kits include a shell comment stating that publication
+ *   must complete before the command can be used.
  * @property {string} provider The kit's provider component, or "" when the kit
  *   needs none.
  * @property {string} tagline The landing page's promise, one sentence.
@@ -96,7 +98,8 @@ const SNIPPET_FRAMEWORK = "react";
  *   this kit has a page for, where that is not every one of them — a kit whose
  *   framework is still gaining features lists the ones it renders today.
  * @property {boolean} [indexable] `false` keeps the kit's pages out of the
- *   sitemap and out of search indexes while its package is unpublished.
+ *   sitemap and out of search indexes. Indexability describes the demo route,
+ *   not package publication; release-preparation install copy must say so.
  * @property {{ title: string, description: string }} [landing] The landing
  *   page's `<title>` and meta description, where the shared pair would not be
  *   true of this kit. The unstyled family is the case it exists for: shadcn and
@@ -368,7 +371,7 @@ export const SHOWCASE_ADAPTERS = [
     pkg: "@adapttable/angular-material",
     peer: "@angular/material",
     install:
-      "Private workspace preview: @adapttable/angular-material (not on npm)",
+      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/angular-material@0.1.0 @adapttable/angular @angular/material@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.0",
     provider: "",
     tagline:
       "Angular Material controls and overlays with optional features and host-owned data.",
@@ -377,11 +380,11 @@ export const SHOWCASE_ADAPTERS = [
     landing: {
       title: "Angular Material Angular data table examples — AdaptTable",
       description:
-        "Explore the private Angular Material Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+        "Explore the Angular Material adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation.",
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -418,20 +421,21 @@ export const SHOWCASE_ADAPTERS = [
     accentDark: "oklch(0.73 0.14 255)",
     pkg: "@adapttable/ng-bootstrap",
     peer: "@ng-bootstrap/ng-bootstrap",
-    install: "Private workspace preview: @adapttable/ng-bootstrap (not on npm)",
+    install:
+      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/ng-bootstrap@0.1.0 @adapttable/angular @ng-bootstrap/ng-bootstrap@21.0.0 @popperjs/core@2.11.8 @angular/forms@^22 @angular/localize@^22 rxjs@^7.4.0",
     provider: "",
     tagline:
       "ng-bootstrap controls and overlays with optional features and host-owned data.",
     surface:
-      "native ng-bootstrap controls carrying the shared data-adapttable-part hooks",
+      "ng-bootstrap overlays and Bootstrap-styled native controls carrying the shared data-adapttable-part hooks",
     landing: {
       title: "ng-bootstrap Angular data table examples — AdaptTable",
       description:
-        "Explore the private ng-bootstrap Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+        "Explore the ng-bootstrap adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation.",
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -468,7 +472,8 @@ export const SHOWCASE_ADAPTERS = [
     accentDark: "oklch(0.73 0.14 255)",
     pkg: "@adapttable/angular-aria",
     peer: "@angular/aria",
-    install: "Private workspace preview: @adapttable/angular-aria (not on npm)",
+    install:
+      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/angular-aria@0.1.0 @adapttable/angular @angular/aria@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2",
     provider: "",
     tagline:
       "Angular Aria controls and overlays with optional features and host-owned data.",
@@ -477,11 +482,11 @@ export const SHOWCASE_ADAPTERS = [
     landing: {
       title: "Angular Aria Angular data table examples — AdaptTable",
       description:
-        "Explore the private Angular Aria Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+        "Explore the Angular Aria adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation.",
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -519,20 +524,20 @@ export const SHOWCASE_ADAPTERS = [
     pkg: "@adapttable/ngx-bootstrap",
     peer: "ngx-bootstrap",
     install:
-      "Private workspace preview: @adapttable/ngx-bootstrap (not on npm)",
+      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/ngx-bootstrap@0.1.0 @adapttable/angular ngx-bootstrap@22.0.0 @angular/forms@^22 rxjs@^7.4.0",
     provider: "",
     tagline:
       "ngx-bootstrap controls and overlays with optional features and host-owned data.",
     surface:
-      "native ngx-bootstrap controls carrying the shared data-adapttable-part hooks",
+      "ngx-bootstrap overlays and Bootstrap-styled native controls carrying the shared data-adapttable-part hooks",
     landing: {
       title: "ngx-bootstrap Angular data table examples — AdaptTable",
       description:
-        "Explore the private ngx-bootstrap Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+        "Explore the ngx-bootstrap adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation.",
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -569,7 +574,8 @@ export const SHOWCASE_ADAPTERS = [
     accentDark: "oklch(0.73 0.14 255)",
     pkg: "@adapttable/angular-cdk",
     peer: "@angular/cdk",
-    install: "Private workspace preview: @adapttable/angular-cdk (not on npm)",
+    install:
+      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/angular-cdk@0.1.0 @adapttable/angular @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2",
     provider: "",
     tagline:
       "Angular CDK controls and overlays with optional features and host-owned data.",
@@ -578,11 +584,11 @@ export const SHOWCASE_ADAPTERS = [
     landing: {
       title: "Angular CDK Angular data table examples — AdaptTable",
       description:
-        "Explore the private Angular CDK Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+        "Explore the Angular CDK adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation.",
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -619,20 +625,21 @@ export const SHOWCASE_ADAPTERS = [
     accentDark: "oklch(0.73 0.14 255)",
     pkg: "@adapttable/spartan",
     peer: "@spartan-ng/brain",
-    install: "Private workspace preview: @adapttable/spartan (not on npm)",
+    install:
+      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/spartan@0.1.0 @adapttable/angular @spartan-ng/brain@1.5.0 @angular/cdk@^22 @angular/forms@^22 rxjs@^7.8.0 tailwindcss@^4 clsx@^2.1.1 tw-animate-css@^1",
     provider: "",
     tagline:
       "Spartan controls and overlays with optional features and host-owned data.",
     surface:
-      "native Spartan controls carrying the shared data-adapttable-part hooks",
+      "Spartan Brain controls with the adapter-owned Helm layer and shared data-adapttable-part hooks",
     landing: {
       title: "Spartan Angular data table examples — AdaptTable",
       description:
-        "Explore the private Spartan Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+        "Explore the Spartan adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation.",
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -669,8 +676,9 @@ export const SHOWCASE_ADAPTERS = [
     accentDark: "oklch(0.73 0.14 255)",
     pkg: "@adapttable/taiga-ui",
     peer: "@taiga-ui/core",
-    install: "Private workspace preview: @adapttable/taiga-ui (not on npm)",
-    provider: "",
+    install:
+      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/taiga-ui@0.1.0 @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/event-plugins@^5 @taiga-ui/design-tokens@~0.320.0 @angular/cdk@^22 @angular/forms@^22 @angular/router@^22 rxjs@^7.8.2",
+    provider: "AdaptTaigaRoot",
     tagline:
       "Taiga UI controls and overlays with optional features and host-owned data.",
     surface:
@@ -678,11 +686,11 @@ export const SHOWCASE_ADAPTERS = [
     landing: {
       title: "Taiga UI Angular data table examples — AdaptTable",
       description:
-        "Explore the private Taiga UI Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+        "Explore the Taiga UI adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation.",
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,

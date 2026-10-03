@@ -78,16 +78,7 @@ describe("entrypoints", () => {
     const unpublished = [
       ...new Set(ENTRIES.filter((e) => !e.published).map((e) => e.dir)),
     ];
-    assert.deepEqual(unpublished, [
-      "adapter-angular-aria",
-      "adapter-angular-cdk",
-      "adapter-bootstrap",
-      "adapter-material",
-      "adapter-ng-bootstrap",
-      "adapter-ngx-bootstrap",
-      "adapter-spartan",
-      "adapter-taiga-ui",
-    ]);
+    assert.deepEqual(unpublished, ["adapter-bootstrap"]);
     // Publication is a manifest decision, separate from kit participation.
     // Check every subpath so one correct root cannot hide a misfiled feature.
     for (const entry of ENTRIES) {
@@ -99,10 +90,17 @@ describe("entrypoints", () => {
     }
   });
 
-  it("includes every released Angular kit and AI entry in the public contract", () => {
+  it("includes every publishable Angular kit and AI entry in the public contract", () => {
     for (const dir of [
+      "adapter-angular-aria",
+      "adapter-angular-cdk",
       "adapter-angular-unstyled",
+      "adapter-material",
+      "adapter-ng-bootstrap",
       "adapter-ng-zorro",
+      "adapter-ngx-bootstrap",
+      "adapter-spartan",
+      "adapter-taiga-ui",
       "ai-angular",
     ]) {
       const entries = ENTRIES.filter((entry) => entry.dir === dir);
@@ -112,6 +110,12 @@ describe("entrypoints", () => {
         dir
       );
     }
+  });
+
+  it("leaves the unimplemented PrimeNG placeholder without typed entries", () => {
+    assert.equal(packageJson("adapter-primeng").private, true);
+    assert.deepEqual(packageJson("adapter-primeng").exports, {});
+    assert.ok(!ENTRIES.some((entry) => entry.dir === "adapter-primeng"));
   });
 
   it("names a committed report for every entry point", () => {

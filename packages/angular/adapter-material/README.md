@@ -1,25 +1,29 @@
 # @adapttable/angular-material
 
+Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**, matching Angular 22.
+
 Angular Material controls over the headless `@adapttable/angular` binding.
 The binding owns state, feature composition, structural Chrome and localized
 labels; this kit owns buttons, fields, checkboxes, chips, cards, menus and overlays.
 
 ## Availability and compatibility
 
-This package is implemented in the repository but remains **private, version
-0.0.0** while integration and release preparation are completed. It is not
-available on npm. Package publication is a separate step.
+Prepared for its first public `0.1.0` release. Publication to npm is a separate
+owner-controlled step; package metadata does not imply registry availability.
 
 The initial integration targets Angular **22**, Angular Material **22.2.1**
 and CDK **22.2.1**. Material requires the same CDK version. Keep Material and
-CDK together; AdaptTable packages have independent versions. Node.js must meet
-Angular 22's supported floor: 22.22.3+, 24.15.0+, or Node 26+.
+CDK together; AdaptTable packages have independent versions.
 
-From a pnpm workspace containing this package:
+After publication, install the kit and its native peers in an Angular 22 app:
 
 ```sh
-pnpm add @adapttable/angular-material@workspace:* @adapttable/angular@workspace:* @angular/material@22.2.1 @angular/cdk@22.2.1
+pnpm add @adapttable/angular-material @adapttable/angular @angular/material@22.2.1 @angular/cdk@22.2.1
 ```
+
+Before publication, link `@adapttable/angular-material@workspace:*` and
+`@adapttable/angular@workspace:*` from this monorepo instead. AdaptTable package
+versions are independent; the adapter resolves its exact binding/core dependencies.
 
 The host must also provide compatible `@angular/common`, `@angular/core`,
 `@angular/forms`, `@angular/platform-browser` and `rxjs` peers. Use the host's
@@ -126,31 +130,35 @@ aggregated factories and `standardPreset()`. Omitting a feature renders no
 controls for it. All edits, row operations and assistant actions remain host
 callbacks; the table never owns or mutates the application data.
 
-## Supported feature inventory
+## Features
 
 The kit implements the same applicable inventory as Angular unstyled:
 
 - Global search, sorting, multi-sort, pagination, frontend and remote data,
   infinite loading, status and error states, URL-synced query state
-- Text, boolean, choice, multi-choice, checklist, number/date range and custom
-  filters; nested AND/OR builder, header filters, removable chips and saved views
-- Column visibility, ordering, pinning, resizing, fit-to-content, header rename,
-  collapsible column groups and whole-column selection
-- Row selection, bulk actions, row actions, expansion, nested tables,
+- Filtering with text, boolean, choice, multi-choice, checklist, number/date
+  range and custom filter types; nested AND/OR filter tree, header filters,
+  removable chips and saved views
+- Column management: visibility, ordering, pinning, resizing, fit-to-content,
+  header rename, collapsible column groups and whole-column selection
+- Row selection, bulk actions, row actions, row expansion, nested tables,
   row reorder, move confirmation, row pinning and pinned summary rows
-- Inline, row and batch editing; boolean, text, number, date and select editors;
-  validation, dirty/save/conflict state, undo/redo, keyboard navigation, paste,
+- Inline cell editing, row and batch editing; boolean, text, number, date and
+  select editors; validation, dirty/save/conflict state, undo/redo, keyboard navigation, paste,
   range selection and fill; writes go through the existing host callbacks
 - Grouping, aggregation, grouping panel, pivot configuration and pivot tables;
-  tree rows, row/column virtualization, cell spanning, full-width/separator rows,
-  row appearance and conditional row heights
-- CSV/XLSX/PDF export, print, fullscreen, density, find-in-table, command palette,
-  context menu, side panels and selection/status statistics
+  tree data, row/column virtualization, cell spanning, full-width/separator rows,
+  conditional row styling and row heights
+- CSV/XLSX/PDF export, print layout and view controls: fullscreen, density,
+  find-in-table, command palette, context menu, side panels and selection/status
+  statistics
 - Responsive mobile cards, custom cell/card/action templates and component
   renderers, all bundled locales, RTL, accessible labels and announcements
 - Optional `/assistant` controls, agent approval, dictation-language selection
   and example menus using the separately imported AI bindings
-- Formula and sparkline integration through the Angular binding, SSR and hydration
+- Spreadsheet formula engine and sparkline integration through the Angular
+  binding, SSR and hydration
+- Feature composition through individual subpaths, `/features` and `standardPreset()`
 
 React Server Components are not an Angular integration. No Angular feature is
 silently replaced with a React kit or native-HTML fallback.

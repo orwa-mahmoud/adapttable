@@ -20656,10 +20656,11 @@ These controls use NG-ZORRO cards, drawer, buttons, input, tags, menu and
 select; AI sessions and transports remain in the separate AI packages.
 Importing the root table does not import the assistant or AI runtime.
 
-## Angular workspace-preview kits
+## Additional Angular kits
 
-Seven additional Angular kits are private workspace previews at `0.0.0`, not
-published npm packages. They use the same `AdaptDataTable` inputs, public parts,
+Seven additional Angular kits are prepared for their first public `0.1.0`
+release. Registry installation requires that release to have completed. They use
+the same `AdaptDataTable` inputs, public parts,
 and feature-factory contracts described above, with kit-owned controls:
 
 - [Angular Material](./angular/material.md): `@adapttable/angular-material`.
@@ -20672,7 +20673,8 @@ and feature-factory contracts described above, with kit-owned controls:
 
 Aria and CDK combine their behavior primitives with adapter-owned native controls;
 they are not a styled component kit. Follow each guide's peer dependencies,
-styles and provider setup, and link the private workspace package locally.
+styles and provider setup. Built workspace packages can be used before the
+registry release completes.
 
 Material exports `AdaptMaterialCellEditor`, the kit's editable-cell surface,
 and the overlay surfaces `AdaptMaterialDialog` and `AdaptMaterialPopover`.
@@ -23465,26 +23467,34 @@ AdaptTable combines a headless Angular binding with a kit that draws the
 controls. Start with `AdaptDataTable`, an array of rows, column definitions and
 a stable row key. Add feature imports when the table needs them.
 
-## Private kit previews
+## First public releases in preparation
 
-Additional local previews are available for [Angular Material](material.md),
-[ng-bootstrap](ng-bootstrap.md), [Spartan](spartan.md), [Taiga UI](taiga-ui.md),
-[Angular Aria](aria.md), [Angular CDK](angular-cdk.md) and
-[ngx-bootstrap](ngx-bootstrap.md).
-These packages remain private at `0.0.0` and are not published to npm. Each guide
-covers the kit's peers, styling and assets. Their local showcase routes are
-`/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`,
-`/angular-cdk/` and `/ngx-bootstrap/`.
+Seven additional kits are being prepared for their first public **0.1.0**
+releases: [Angular Material](material.md), [ng-bootstrap](ng-bootstrap.md),
+[Spartan](spartan.md), [Taiga UI](taiga-ui.md), [Angular Aria](aria.md),
+[Angular CDK](angular-cdk.md) and [ngx-bootstrap](ngx-bootstrap.md).
+Their registry installation commands apply only after the owner-controlled npm
+publication completes. Release preparation and working showcase routes do not
+confirm npm availability.
+
+Each kit guide includes its registry command, Angular 22 peers, provider setup,
+styling and assets. Use the source showcase while publication is pending; the
+local routes are `/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`,
+`/aria/`, `/angular-cdk/` and `/ngx-bootstrap/`. ngx-bootstrap also has a
+[documented upstream pre-hydration pagination replay limitation](ngx-bootstrap.md#known-upstream-event-replay-limitation).
 
 ## Choose a kit
 
 - `@adapttable/angular-unstyled` uses native HTML. Supply your own CSS or
   Tailwind classes
 - `@adapttable/ng-zorro` uses NG-ZORRO controls, cards and overlays
+- The seven kits linked above add Material, Bootstrap, Spartan, Taiga UI,
+  Angular Aria and CDK presentation choices with their own setup requirements
 - `@adapttable/angular` supplies signals, column types and structural Chrome
-  for either kit or your own renderer
+  for any Angular kit or your own renderer
 
-The Angular binding, both kits and the optional AI binding are available on npm.
+The Angular binding, Unstyled, NG-ZORRO and the optional AI binding are available
+on npm; the seven new kits have the publication requirement described above.
 Package versions are independent; each kit declares its compatible binding and
 engine dependencies. Do not force core, binding and kit to share a version.
 
@@ -23626,11 +23636,11 @@ From your Angular application root (the folder containing `angular.json` and
 npx @adapttable/cli@3.1.0 init
 ```
 
-The CLI recognizes an Angular project when **both** `angular.json` and an
-`@angular/core` dependency are present. It detects NG-ZORRO from `ng-zorro-antd`
-in your dependencies; otherwise it chooses the unstyled Angular kit. Install
-NG-ZORRO before running the command if that is the kit you want. There is no
-`--kit` option.
+The published CLI version shown above recognizes an Angular project when
+**both** `angular.json` and an `@angular/core` dependency are present. It detects
+NG-ZORRO from `ng-zorro-antd` in your dependencies; otherwise it chooses the
+unstyled Angular kit. Install NG-ZORRO before running the command if that is
+the kit you want. There is no `--kit` option.
 
 It writes a standalone `PeopleTable` to `src/app/peopleTable.ts` and prints the
 package installation command. Run that printed command, then import
@@ -23639,7 +23649,8 @@ The CLI does not mount the component or run installation for you. Existing
 scaffold files are skipped; use `init --force` only when you intend to overwrite
 them. The CLI's version does not need to match the table packages.
 
-To test changes to the CLI itself, build it from this repository and invoke its
+The upcoming CLI release also detects the seven new Angular kits. To use this
+release-preparation source, build the CLI from this repository and invoke its
 entry from your Angular application root:
 
 ```sh
@@ -23649,6 +23660,17 @@ pnpm --filter @adapttable/cli build
 # From your Angular application (replace the path with your checkout):
 node /path/to/adapttable/packages/shared/cli/dist/cli.js init
 ```
+
+The source CLI selects the first installed kit in this order: Angular Material,
+ng-bootstrap, Spartan, Taiga UI, NG-ZORRO, Angular Aria, ngx-bootstrap, then
+Angular CDK. It falls back to Angular unstyled when no kit signal is present.
+It still requires both Angular project markers above and has no `--kit` flag.
+
+It prints the registry command for missing dependencies and the chosen kit's
+stylesheet, provider and asset setup instructions. The seven new adapters'
+registry installation still requires their public `0.1.0` publication to
+complete. This added detection is source preparation for an upcoming CLI
+release; it is not a claim about the published `3.1.0` command above.
 
 ## Data and callbacks
 
@@ -23675,25 +23697,26 @@ labels; this kit owns buttons, fields, checkboxes, chips, cards, menus and overl
 
 ## Availability and compatibility
 
-This package is implemented in the repository but remains **private, version
-0.0.0** while integration and release preparation are completed. It is not
-available on npm. Package publication is a separate step.
+`@adapttable/angular-material` is being prepared for its first public **0.1.0**
+release. Registry installation requires the owner-controlled npm publication
+to complete; release preparation does not confirm npm availability.
 
 The initial integration targets Angular **22**, Angular Material **22.2.1**
 and CDK **22.2.1**. Material requires the same CDK version. Keep Material and
 CDK together; AdaptTable packages have independent versions. Node.js must meet
 Angular 22's supported floor: 22.22.3+, 24.15.0+, or Node 26+.
 
-From a pnpm workspace containing this package:
+After publication completes, install in an existing Angular 22 application:
 
 ```sh
-pnpm add @adapttable/angular-material@workspace:* @adapttable/angular@workspace:* @angular/material@22.2.1 @angular/cdk@22.2.1
+npm install @adapttable/angular-material@0.1.0 @adapttable/angular @angular/material@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.0
 ```
 
 The host must also provide compatible `@angular/common`, `@angular/core`,
 `@angular/forms`, `@angular/platform-browser` and `rxjs` peers. Use the host's
 existing Angular application setup; this adapter does not install a second
-Angular runtime or import another adapter.
+Angular runtime or import another adapter. No adapter-specific application
+provider is required.
 
 ## Styling
 
@@ -23866,18 +23889,28 @@ source-level checks alone are not a release-readiness claim.
 
 # ng-bootstrap Angular data table
 
-`@adapttable/ng-bootstrap` is a private workspace preview. It uses the Angular
-binding's signals, feature factories and Chrome with ng-bootstrap overlays and
-Bootstrap controls. Publication and final integrated browser acceptance are
-separate from this implementation.
+`@adapttable/ng-bootstrap` uses the Angular binding's signals, feature factories
+and Chrome with ng-bootstrap overlays and Bootstrap controls. It is being
+prepared for its first public **0.1.0** release. Registry installation requires
+the owner-controlled npm publication to complete; release preparation does not
+confirm npm availability.
 
 ## Dependencies
 
 Use Angular 22, ng-bootstrap 21, Bootstrap CSS 5.3.8 and Popper 2.11.8, matching
 [the official compatibility table](https://github.com/ng-bootstrap/ng-bootstrap#dependencies).
 ng-bootstrap also requires `@angular/forms`, `@angular/localize` and RxJS.
-The kit is private `0.0.0`; use its workspace dependency until a public release is
-explicitly prepared. Do not substitute a React Bootstrap package.
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/ng-bootstrap@0.1.0 @adapttable/angular @ng-bootstrap/ng-bootstrap@21.0.0 @popperjs/core@2.11.8 @angular/forms@^22 @angular/localize@^22 rxjs@^7.4.0
+```
+
+Keep the host's Angular Common and Core packages on compatible Angular 22
+versions. The adapter ships its scoped Bootstrap stylesheet, so a separate
+Bootstrap package or JavaScript bundle is not required. Import
+`@angular/localize/init` once in the application's entry before bootstrapping.
+No kit-specific application provider is required.
 
 ## Render the table
 
@@ -23966,16 +23999,17 @@ The kit includes conformance, feature and native-control regression tests plus a
 selector-by-selector stylesheet isolation test. Final integration must verify
 all package gates and browser interactions, including kit switching, fixed and
 sticky cells, narrow cards, both themes, RTL, Escape, focus restoration and
-repeated overlay opens. Those integrated checks are required before describing
-the preview as ready for public release.
+repeated overlay opens. Those integrated checks are required before public
+release; the registry installation example does not claim they have passed.
 
 ---
 
 # Spartan Angular table
 
 `@adapttable/spartan` renders AdaptTable through Spartan Brain and an owned
-Helm layer. It is currently a private workspace package at `0.0.0`; the package
-has not been published to npm. Release preparation is a separate step.
+Helm layer. It is being prepared for its first public **0.1.0** release.
+Registry installation requires the owner-controlled npm publication to complete;
+release preparation does not confirm npm availability.
 
 ## Architecture and supported versions
 
@@ -23989,10 +24023,15 @@ and CDK compatibility with `>=21.0.0 <23.0.0`. This kit targets Angular 22. See
 
 ## Application setup
 
-In a workspace checkout, add the private `@adapttable/spartan` package and its
-peers. These include Angular 22, Angular CDK and Forms, Spartan Brain 1.5,
-RxJS 7, Tailwind CSS 4, `clsx` and `tw-animate-css`. Brain's Luxon peer is optional
-and is not needed for this kit's native date input.
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/spartan@0.1.0 @adapttable/angular @spartan-ng/brain@1.5.0 @angular/cdk@^22 @angular/forms@^22 rxjs@^7.8.0 tailwindcss@^4 clsx@^2.1.1 tw-animate-css@^1
+```
+
+Keep the host's Angular Common and Core packages on compatible Angular 22
+versions. Brain's Luxon peer is optional and is not needed for this kit's native
+date input. No kit-specific application provider is required.
 
 Use the application's Tailwind 4 CSS processing:
 
@@ -24099,9 +24138,11 @@ remain in the shared engine/binding. Styling does not change those contracts.
 
 # Taiga UI for Angular
 
-`@adapttable/taiga-ui` is a private adapter under development. It is not published
-on npm. It renders the Angular binding's table and feature slots with Taiga UI
-5.26.0. Taiga UI is Apache-2.0; the adapter source is MIT.
+`@adapttable/taiga-ui` renders the Angular binding's table and feature slots
+with Taiga UI 5.26.0. It is being prepared for its first public **0.1.0** release.
+Registry installation requires the owner-controlled npm publication to complete;
+release preparation does not confirm npm availability. Taiga UI is Apache-2.0;
+the adapter source is MIT.
 
 ## Setup
 
@@ -24115,11 +24156,16 @@ bootstrap providers. It enables Taiga's event plugins and stable options without
 writing theme attributes to `document.body`, disabling scrollbars globally, or
 adding document metadata. Use `AdaptTaigaRoot` for the scoped theme instead.
 
-In a workspace checkout, link the private `@adapttable/taiga-ui` and
-`@adapttable/angular` packages. Use Taiga 5.26.0 core/kit/cdk/i18n/styles and
-icons, the styles package's design-tokens dependency, Angular 22
-common/core/forms/router/platform-browser and CDK peers, and RxJS 7.
-Copy `@taiga-ui/icons/src` to the application's `assets/taiga-ui/icons` folder.
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/taiga-ui@0.1.0 @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/event-plugins@^5 @taiga-ui/design-tokens@~0.320.0 @angular/cdk@^22 @angular/forms@^22 @angular/router@^22 rxjs@^7.8.2
+npm install --save-dev less@^4
+```
+
+Keep Angular Common, Core and Platform Browser on compatible Angular 22
+versions. Configure the host build to process Less and copy
+`node_modules/@taiga-ui/icons/src` to `assets/taiga-ui/icons` in its output.
 The adapter compiles its scoped Less theme; do not add a document-wide Taiga reset.
 
 Merge these providers into the config passed to `bootstrapApplication`:
@@ -24210,21 +24256,23 @@ The internal `ɵAdaptTaigaDropdownLabel` export links secondary entries to the
 directive that names Taiga's actual freeform popup host. Applications should use
 the documented feature factories rather than this internal compatibility helper.
 
-## Development status
+## Release verification
 
 The source includes behavior, conformance, SSR, and native-control contract
 fixtures. Full integration compilation, coverage, and browser acceptance are
 required before release. npm publication is a separate release step.
 
 See the [package README](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-taiga-ui)
-for the full entry inventory and workspace setup.
+for the full entry inventory and application setup.
 
 ---
 
 # Angular CDK adapter
 
-`@adapttable/angular-cdk` is a private `0.0.0` Angular 22 adapter, based on
-MIT-licensed `@angular/cdk` 22.2.1. It has not been published to npm.
+`@adapttable/angular-cdk` is an Angular 22 adapter based on MIT-licensed
+`@angular/cdk` 22.2.1. It is being prepared for its first public **0.1.0** release.
+Registry installation requires the owner-controlled npm publication to complete;
+release preparation does not confirm npm availability.
 
 CDK provides accessibility and overlay primitives, not a visual component theme.
 This adapter owns neutral controls, styles, table/card layouts and all required
@@ -24240,9 +24288,14 @@ remain available on the same public elements.
 
 ## Minimal table
 
-Link the private kit from this repository's workspace, alongside
-`@adapttable/angular`, Angular 22 common/core/forms/platform-browser packages,
-CDK 22.2.1 and RxJS 7. Load these imports in the application's global stylesheet:
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/angular-cdk@0.1.0 @adapttable/angular @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2
+```
+
+Keep the host's Angular Common, Core and Platform Browser packages on compatible
+Angular 22 versions. Load these imports in the application's global stylesheet:
 
 ```css
 @import "@angular/cdk/overlay-prebuilt.css";
@@ -24310,8 +24363,9 @@ compiler, coverage and browser verification before any release claim.
 
 # Angular ngx-bootstrap adapter
 
-`@adapttable/ngx-bootstrap` is a private `0.0.0` workspace preview. It is not
-published or advertised as a registry-installable package.
+`@adapttable/ngx-bootstrap` is being prepared for its first public **0.1.0**
+release. Registry installation requires the owner-controlled npm publication
+to complete; release preparation does not confirm npm availability.
 
 ## Setup
 
@@ -24322,9 +24376,15 @@ The adapter compiles Bootstrap **5.3.8** into a host-scoped stylesheet and
 ships its MIT license. Do not add global Bootstrap CSS or its JavaScript bundle.
 No Angular localize initializer or Popper dependency is required by this kit.
 
-Link the private `@adapttable/ngx-bootstrap` and `@adapttable/angular`
-packages from this workspace. Import the scoped stylesheet in the host's global
-styles, alongside its existing application styles:
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/ngx-bootstrap@0.1.0 @adapttable/angular ngx-bootstrap@22.0.0 @angular/forms@^22 rxjs@^7.4.0
+```
+
+Keep the host's Angular Common and Core packages on compatible Angular 22
+versions. Import the scoped stylesheet in the host's global styles, alongside
+its existing application styles:
 
 ```css
 @import "@adapttable/ngx-bootstrap/styles.css";
@@ -24425,14 +24485,16 @@ The package includes native overlay/control fixtures, the feature-conformance
 suite, server-rendering and hydration tests, and CSS isolation/license checks.
 Final acceptance requires the integrated Angular compiler, tests and browser
 checks for mobile, RTL, keyboard focus, portal placement and kit switching.
-This preview's source preparation is not a claim that those gates have passed.
+Release preparation is not a claim that those gates have passed.
 
 ---
 
 # Angular Aria adapter
 
-`@adapttable/angular-aria` is a private, unpublished 0.0.0 workspace preview.
-It targets Angular 22 and the MIT-licensed Angular Aria/CDK 22.2.1 pair.
+`@adapttable/angular-aria` targets Angular 22 and the MIT-licensed Angular
+Aria/CDK 22.2.1 pair. It is being prepared for its first public **0.1.0** release.
+Registry installation requires the owner-controlled npm publication to complete;
+release preparation does not confirm npm availability.
 
 ## Architecture and controls
 
@@ -24454,10 +24516,16 @@ tokens or use the common part attributes and class-name hooks.
 
 ## Minimal table
 
-Link `@adapttable/angular-aria` and `@adapttable/angular` from the workspace.
-Use Angular 22 common/core/forms/platform-browser peers, RxJS 7 and matching
-`@angular/aria` and `@angular/cdk` 22.2.1 packages. No kit-specific application
-provider is required. Add these imports to the host's global stylesheet:
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/angular-aria@0.1.0 @adapttable/angular @angular/aria@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2
+```
+
+Keep the host's Angular Common, Core and Platform Browser packages on compatible
+Angular 22 versions. Aria and CDK must stay on their matching 22.2.1 versions.
+No kit-specific application provider is required. Add these imports to the
+host's global stylesheet:
 
 ```css
 @import "@angular/cdk/overlay-prebuilt.css";
@@ -24523,12 +24591,12 @@ interactions; the binding owns table navigation and screen-reader messages.
 ## Verification and release status
 
 The source includes Angular TestBed directive fixtures and the shared adapter
-behavior suite. This preview must pass the integrated Angular compiler,
+behavior suite. The release must pass the integrated Angular compiler,
 coverage, package build and real-browser keyboard/overlay checks before it is
 called release-ready. A workspace manifest or showcase route is not evidence
 of npm publication.
 
-See the [package README](../../packages/angular/adapter-angular-aria/README.md)
+See the [package README](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-angular-aria)
 for usage, feature entries, styling hooks and the precise primitive mapping.
 
 ---
@@ -30153,8 +30221,8 @@ draft; the reader still chooses Send. Neither function chooses a model provider
 or creates a backend connection by itself.
 
 The AI Angular binding, unstyled Angular kit and NG-ZORRO kit are public npm
-packages. The seven additional Angular adapter previews are private workspace
-packages and are not published to npm.
+packages. The seven additional Angular adapters are prepared for their first
+public `0.1.0` release; registry installation requires publication to complete.
 See [getting started](./getting-started.md) for installation guidance.
 See [Agent capabilities](./agent-capabilities.md) for attaching a live session
 to a mounted table.

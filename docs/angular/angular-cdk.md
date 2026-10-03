@@ -1,7 +1,9 @@
 # Angular CDK adapter
 
-`@adapttable/angular-cdk` is a private `0.0.0` Angular 22 adapter, based on
-MIT-licensed `@angular/cdk` 22.2.1. It has not been published to npm.
+`@adapttable/angular-cdk` is an Angular 22 adapter based on MIT-licensed
+`@angular/cdk` 22.2.1. It is being prepared for its first public **0.1.0** release.
+Registry installation requires the owner-controlled npm publication to complete;
+release preparation does not confirm npm availability.
 
 CDK provides accessibility and overlay primitives, not a visual component theme.
 This adapter owns neutral controls, styles, table/card layouts and all required
@@ -17,9 +19,14 @@ remain available on the same public elements.
 
 ## Minimal table
 
-Link the private kit from this repository's workspace, alongside
-`@adapttable/angular`, Angular 22 common/core/forms/platform-browser packages,
-CDK 22.2.1 and RxJS 7. Load these imports in the application's global stylesheet:
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/angular-cdk@0.1.0 @adapttable/angular @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2
+```
+
+Keep the host's Angular Common, Core and Platform Browser packages on compatible
+Angular 22 versions. Load these imports in the application's global stylesheet:
 
 ```css
 @import "@angular/cdk/overlay-prebuilt.css";

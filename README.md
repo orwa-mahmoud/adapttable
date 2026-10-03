@@ -268,9 +268,9 @@ PRs welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md). This is a friendly, well-
 <sub>Keywords: react data table, headless table, server-side pagination, url state, infinite scroll table, mantine table, mui datagrid alternative, chakra table, ant design table, antd table, tailwind table, shadcn table, rtl table, arabic table, typescript, dark mode.</sub>
 </div>
 
-### Additional Angular kit previews
+### Additional Angular kits
 
-The workspace also contains private, unpublished `0.0.0` adapters for
+Seven additional adapters are prepared for their first public `0.1.0` release:
 [Angular Material](docs/angular/material.md) (`@adapttable/angular-material`),
 [ng-bootstrap](docs/angular/ng-bootstrap.md) (`@adapttable/ng-bootstrap`),
 [Spartan](docs/angular/spartan.md) (`@adapttable/spartan`) and
@@ -279,4 +279,5 @@ The workspace also contains private, unpublished `0.0.0` adapters for
 [ngx-bootstrap](docs/angular/ngx-bootstrap.md) (`@adapttable/ngx-bootstrap`) and
 [Angular CDK](docs/angular/angular-cdk.md) (`@adapttable/angular-cdk`). Their local showcase
 pages use the actual kit controls. Use built workspace packages and follow each
-kit's peer, theme and asset setup; npm publication is a separate release step.
+kit's peer, theme and asset setup. Registry installation requires the public
+release to have completed; the setup guides include the release install commands.

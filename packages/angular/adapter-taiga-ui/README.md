@@ -1,13 +1,26 @@
 # @adapttable/taiga-ui
 
-Taiga UI controls for the headless Angular AdaptTable binding. This is a **private,
-unpublished 0.0.0 package under development**; it is not available from npm.
+Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**, matching Angular 22.
+
+Taiga UI controls for the headless Angular AdaptTable binding.
+
+Prepared for its first public `0.1.0` release. Publication to npm is a separate
+owner-controlled step; package metadata does not imply registry availability.
 
 The adapter uses Taiga UI 5.26.0 (Apache-2.0), with Angular 22 and RxJS 7.
 The adapter's own source remains MIT. No Taiga implementation code is vendored.
-Use a Node version supported by Angular 22: 22.22.3+, 24.15.0+, or 26+.
 
-## Workspace setup
+## Installation and host setup
+
+After publication, install the kit and its Taiga peers in an Angular 22 app:
+
+```sh
+pnpm add @adapttable/taiga-ui @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/design-tokens@~0.320.0 @taiga-ui/event-plugins@^5
+```
+
+Before publication, link `@adapttable/taiga-ui@workspace:*` and
+`@adapttable/angular@workspace:*` from this monorepo instead. AdaptTable package
+versions are independent; the adapter resolves its exact binding/core dependencies.
 
 Use matching 5.26.0 versions of `@taiga-ui/core`, `@taiga-ui/kit`,
 `@taiga-ui/cdk`, `@taiga-ui/i18n`, and `@taiga-ui/styles`, together with their
@@ -75,20 +88,41 @@ page selector.
   preserved. Kit-owned internals use `data-taiga-part`; native-only fallback
   part names are intentionally not advertised as shared contracts.
 
-## Feature entries
+## Features
 
-All applicable Angular kit entries are included: assistant and approvals,
-batch editing, bulk actions, cell navigation and spans, column groups/menu/
-selection, command palette, context menu, density, editing/history, export,
-extra rows, filters, find-in-table, fit columns, fullscreen, grouping and its
-panel, header filters, multi-sort, nested tables, pinned summary rows, pivot,
-print, resize, row actions/appearance/detail/pinning/reorder, saved views,
-selection stats, side panel, status bar, tree, and virtualization. `features`
-and `preset` aggregate the same factories as the existing Angular kits.
+- **Feature composition** through individual kit subpaths, `/features` and
+  `standardPreset()`; import only the behavior you need
+- **Global search, sorting and pagination** for in-memory or host-fetched rows,
+  with URL-synced state and mobile infinite scrolling
+- **Filtering** with an AND/OR filter tree, header filters, custom filter types,
+  removable chips and saved views
+- **Column management** with visibility, ordering, pinning, resizing,
+  multi-sort, fit-to-content and collapsible column groups
+- **Selection and row actions**, including bulk actions, row expansion and
+  nested tables using Angular templates or component renderers
+- **Inline cell editing**, row and batch editing, validation, save/conflict
+  feedback, dirty indicators, undo/redo and keyboard navigation with paste
+  and range fill; writes always go through host callbacks
+- **Row reordering and row pinning**, pinned summary rows,
+  row and column spanning, full-width and separator rows, conditional row styling
+  and heights
+- **Grouping, aggregation and pivot**, tree data and row/column virtualization
+- **Spreadsheet formula engine and sparkline columns** through the Angular
+  binding's formula and sparkline entries
+- **CSV and XLSX export**, PDF export and print layout, with optional custom
+  writers and host print callbacks
+- **Command palette and view controls**: find-in-table, context menus, side
+  panel, density, fullscreen and status bar
+- **Responsive mobile cards**, shared localized labels and RTL support;
+  custom card renderers retain the selection, editing and action shell
+- **Angular SSR and hydration** with deterministic initial data.
+  React Server Components are a React-only integration, not an Angular feature
+- **Optional assistant and approval controls** on `/assistant`, backed by the
+  separately imported AI bindings
 
-Host callbacks continue to own writes. Omitting a feature does not create its
-controls. Locale labels, accessibility announcements, serialization, saved
-state, and headless interactions remain owned by the Angular binding.
+Taiga controls fill the kit's feature slots while the Angular binding retains
+localized labels, accessibility announcements, serialization and saved state.
+Host callbacks own writes; omitting a feature does not create its controls.
 
 ## Theme isolation and responsive layouts
 
@@ -104,5 +138,5 @@ the Angular desktop/mobile-card structure. Consumers may override public classes
 `pnpm test:contracts` checks source boundaries, native control
 coverage, entry parity, and theme isolation. The package also carries Angular
 behavior/conformance and SSR fixtures. Full Angular compilation, interaction,
-coverage, browser, theme, mobile, and RTL acceptance must pass before the package
-is advertised as supported or made publishable.
+coverage, browser, theme, mobile, and RTL acceptance must pass on the final
+integrated release commit; source-level checks alone do not establish release readiness.

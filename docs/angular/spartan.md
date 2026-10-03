@@ -1,8 +1,9 @@
 # Spartan Angular table
 
 `@adapttable/spartan` renders AdaptTable through Spartan Brain and an owned
-Helm layer. It is currently a private workspace package at `0.0.0`; the package
-has not been published to npm. Release preparation is a separate step.
+Helm layer. It is being prepared for its first public **0.1.0** release.
+Registry installation requires the owner-controlled npm publication to complete;
+release preparation does not confirm npm availability.
 
 ## Architecture and supported versions
 
@@ -16,10 +17,15 @@ and CDK compatibility with `>=21.0.0 <23.0.0`. This kit targets Angular 22. See
 
 ## Application setup
 
-In a workspace checkout, add the private `@adapttable/spartan` package and its
-peers. These include Angular 22, Angular CDK and Forms, Spartan Brain 1.5,
-RxJS 7, Tailwind CSS 4, `clsx` and `tw-animate-css`. Brain's Luxon peer is optional
-and is not needed for this kit's native date input.
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/spartan@0.1.0 @adapttable/angular @spartan-ng/brain@1.5.0 @angular/cdk@^22 @angular/forms@^22 rxjs@^7.8.0 tailwindcss@^4 clsx@^2.1.1 tw-animate-css@^1
+```
+
+Keep the host's Angular Common and Core packages on compatible Angular 22
+versions. Brain's Luxon peer is optional and is not needed for this kit's native
+date input. No kit-specific application provider is required.
 
 Use the application's Tailwind 4 CSS processing:
 

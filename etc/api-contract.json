@@ -116,7 +116,294 @@
       "adapter-ng-zorro-side-panel",
       "adapter-ng-zorro-status-bar",
       "adapter-ng-zorro-tree",
-      "adapter-ng-zorro-virtualize"
+      "adapter-ng-zorro-virtualize",
+      "adapter-angular-aria",
+      "adapter-angular-aria-assistant",
+      "adapter-angular-aria-batch-editing",
+      "adapter-angular-aria-bulk-actions",
+      "adapter-angular-aria-cell-navigation",
+      "adapter-angular-aria-cell-span",
+      "adapter-angular-aria-column-groups",
+      "adapter-angular-aria-column-menu",
+      "adapter-angular-aria-column-selection",
+      "adapter-angular-aria-command-palette",
+      "adapter-angular-aria-context-menu",
+      "adapter-angular-aria-density",
+      "adapter-angular-aria-editing",
+      "adapter-angular-aria-export",
+      "adapter-angular-aria-extra-rows",
+      "adapter-angular-aria-features",
+      "adapter-angular-aria-filters",
+      "adapter-angular-aria-find-in-table",
+      "adapter-angular-aria-fit-columns",
+      "adapter-angular-aria-fullscreen",
+      "adapter-angular-aria-grouping",
+      "adapter-angular-aria-grouping-panel",
+      "adapter-angular-aria-header-filters",
+      "adapter-angular-aria-multi-sort",
+      "adapter-angular-aria-nested-table",
+      "adapter-angular-aria-pinned-summary-rows",
+      "adapter-angular-aria-pivot",
+      "adapter-angular-aria-preset",
+      "adapter-angular-aria-print",
+      "adapter-angular-aria-resizable-columns",
+      "adapter-angular-aria-row-actions",
+      "adapter-angular-aria-row-appearance",
+      "adapter-angular-aria-row-detail",
+      "adapter-angular-aria-row-pinning",
+      "adapter-angular-aria-row-reorder",
+      "adapter-angular-aria-saved-views",
+      "adapter-angular-aria-selection-stats",
+      "adapter-angular-aria-side-panel",
+      "adapter-angular-aria-status-bar",
+      "adapter-angular-aria-tree",
+      "adapter-angular-aria-virtualize",
+      "adapter-angular-cdk",
+      "adapter-angular-cdk-assistant",
+      "adapter-angular-cdk-batch-editing",
+      "adapter-angular-cdk-bulk-actions",
+      "adapter-angular-cdk-cell-navigation",
+      "adapter-angular-cdk-cell-span",
+      "adapter-angular-cdk-column-groups",
+      "adapter-angular-cdk-column-menu",
+      "adapter-angular-cdk-column-selection",
+      "adapter-angular-cdk-command-palette",
+      "adapter-angular-cdk-context-menu",
+      "adapter-angular-cdk-density",
+      "adapter-angular-cdk-editing",
+      "adapter-angular-cdk-export",
+      "adapter-angular-cdk-extra-rows",
+      "adapter-angular-cdk-features",
+      "adapter-angular-cdk-filters",
+      "adapter-angular-cdk-find-in-table",
+      "adapter-angular-cdk-fit-columns",
+      "adapter-angular-cdk-fullscreen",
+      "adapter-angular-cdk-grouping",
+      "adapter-angular-cdk-grouping-panel",
+      "adapter-angular-cdk-header-filters",
+      "adapter-angular-cdk-multi-sort",
+      "adapter-angular-cdk-nested-table",
+      "adapter-angular-cdk-pinned-summary-rows",
+      "adapter-angular-cdk-pivot",
+      "adapter-angular-cdk-preset",
+      "adapter-angular-cdk-print",
+      "adapter-angular-cdk-resizable-columns",
+      "adapter-angular-cdk-row-actions",
+      "adapter-angular-cdk-row-appearance",
+      "adapter-angular-cdk-row-detail",
+      "adapter-angular-cdk-row-pinning",
+      "adapter-angular-cdk-row-reorder",
+      "adapter-angular-cdk-saved-views",
+      "adapter-angular-cdk-selection-stats",
+      "adapter-angular-cdk-side-panel",
+      "adapter-angular-cdk-status-bar",
+      "adapter-angular-cdk-tree",
+      "adapter-angular-cdk-virtualize",
+      "adapter-material",
+      "adapter-material-assistant",
+      "adapter-material-batch-editing",
+      "adapter-material-bulk-actions",
+      "adapter-material-cell-navigation",
+      "adapter-material-cell-span",
+      "adapter-material-column-groups",
+      "adapter-material-column-menu",
+      "adapter-material-column-selection",
+      "adapter-material-command-palette",
+      "adapter-material-context-menu",
+      "adapter-material-density",
+      "adapter-material-editing",
+      "adapter-material-export",
+      "adapter-material-extra-rows",
+      "adapter-material-features",
+      "adapter-material-filters",
+      "adapter-material-find-in-table",
+      "adapter-material-fit-columns",
+      "adapter-material-fullscreen",
+      "adapter-material-grouping",
+      "adapter-material-grouping-panel",
+      "adapter-material-header-filters",
+      "adapter-material-multi-sort",
+      "adapter-material-nested-table",
+      "adapter-material-pinned-summary-rows",
+      "adapter-material-pivot",
+      "adapter-material-preset",
+      "adapter-material-print",
+      "adapter-material-resizable-columns",
+      "adapter-material-row-actions",
+      "adapter-material-row-appearance",
+      "adapter-material-row-detail",
+      "adapter-material-row-pinning",
+      "adapter-material-row-reorder",
+      "adapter-material-saved-views",
+      "adapter-material-selection-stats",
+      "adapter-material-side-panel",
+      "adapter-material-status-bar",
+      "adapter-material-tree",
+      "adapter-material-virtualize",
+      "adapter-ng-bootstrap",
+      "adapter-ng-bootstrap-assistant",
+      "adapter-ng-bootstrap-batch-editing",
+      "adapter-ng-bootstrap-bulk-actions",
+      "adapter-ng-bootstrap-cell-navigation",
+      "adapter-ng-bootstrap-cell-span",
+      "adapter-ng-bootstrap-column-groups",
+      "adapter-ng-bootstrap-column-menu",
+      "adapter-ng-bootstrap-column-selection",
+      "adapter-ng-bootstrap-command-palette",
+      "adapter-ng-bootstrap-context-menu",
+      "adapter-ng-bootstrap-density",
+      "adapter-ng-bootstrap-editing",
+      "adapter-ng-bootstrap-export",
+      "adapter-ng-bootstrap-extra-rows",
+      "adapter-ng-bootstrap-features",
+      "adapter-ng-bootstrap-filters",
+      "adapter-ng-bootstrap-find-in-table",
+      "adapter-ng-bootstrap-fit-columns",
+      "adapter-ng-bootstrap-fullscreen",
+      "adapter-ng-bootstrap-grouping",
+      "adapter-ng-bootstrap-grouping-panel",
+      "adapter-ng-bootstrap-header-filters",
+      "adapter-ng-bootstrap-multi-sort",
+      "adapter-ng-bootstrap-nested-table",
+      "adapter-ng-bootstrap-pinned-summary-rows",
+      "adapter-ng-bootstrap-pivot",
+      "adapter-ng-bootstrap-preset",
+      "adapter-ng-bootstrap-print",
+      "adapter-ng-bootstrap-resizable-columns",
+      "adapter-ng-bootstrap-row-actions",
+      "adapter-ng-bootstrap-row-appearance",
+      "adapter-ng-bootstrap-row-detail",
+      "adapter-ng-bootstrap-row-pinning",
+      "adapter-ng-bootstrap-row-reorder",
+      "adapter-ng-bootstrap-saved-views",
+      "adapter-ng-bootstrap-selection-stats",
+      "adapter-ng-bootstrap-side-panel",
+      "adapter-ng-bootstrap-status-bar",
+      "adapter-ng-bootstrap-tree",
+      "adapter-ng-bootstrap-virtualize",
+      "adapter-ngx-bootstrap",
+      "adapter-ngx-bootstrap-assistant",
+      "adapter-ngx-bootstrap-batch-editing",
+      "adapter-ngx-bootstrap-bulk-actions",
+      "adapter-ngx-bootstrap-cell-navigation",
+      "adapter-ngx-bootstrap-cell-span",
+      "adapter-ngx-bootstrap-column-groups",
+      "adapter-ngx-bootstrap-column-menu",
+      "adapter-ngx-bootstrap-column-selection",
+      "adapter-ngx-bootstrap-command-palette",
+      "adapter-ngx-bootstrap-context-menu",
+      "adapter-ngx-bootstrap-density",
+      "adapter-ngx-bootstrap-editing",
+      "adapter-ngx-bootstrap-export",
+      "adapter-ngx-bootstrap-extra-rows",
+      "adapter-ngx-bootstrap-features",
+      "adapter-ngx-bootstrap-filters",
+      "adapter-ngx-bootstrap-find-in-table",
+      "adapter-ngx-bootstrap-fit-columns",
+      "adapter-ngx-bootstrap-fullscreen",
+      "adapter-ngx-bootstrap-grouping",
+      "adapter-ngx-bootstrap-grouping-panel",
+      "adapter-ngx-bootstrap-header-filters",
+      "adapter-ngx-bootstrap-multi-sort",
+      "adapter-ngx-bootstrap-nested-table",
+      "adapter-ngx-bootstrap-pinned-summary-rows",
+      "adapter-ngx-bootstrap-pivot",
+      "adapter-ngx-bootstrap-preset",
+      "adapter-ngx-bootstrap-print",
+      "adapter-ngx-bootstrap-resizable-columns",
+      "adapter-ngx-bootstrap-row-actions",
+      "adapter-ngx-bootstrap-row-appearance",
+      "adapter-ngx-bootstrap-row-detail",
+      "adapter-ngx-bootstrap-row-pinning",
+      "adapter-ngx-bootstrap-row-reorder",
+      "adapter-ngx-bootstrap-saved-views",
+      "adapter-ngx-bootstrap-selection-stats",
+      "adapter-ngx-bootstrap-side-panel",
+      "adapter-ngx-bootstrap-status-bar",
+      "adapter-ngx-bootstrap-tree",
+      "adapter-ngx-bootstrap-virtualize",
+      "adapter-spartan",
+      "adapter-spartan-assistant",
+      "adapter-spartan-batch-editing",
+      "adapter-spartan-bulk-actions",
+      "adapter-spartan-cell-navigation",
+      "adapter-spartan-cell-span",
+      "adapter-spartan-column-groups",
+      "adapter-spartan-column-menu",
+      "adapter-spartan-column-selection",
+      "adapter-spartan-command-palette",
+      "adapter-spartan-context-menu",
+      "adapter-spartan-density",
+      "adapter-spartan-editing",
+      "adapter-spartan-export",
+      "adapter-spartan-extra-rows",
+      "adapter-spartan-features",
+      "adapter-spartan-filters",
+      "adapter-spartan-find-in-table",
+      "adapter-spartan-fit-columns",
+      "adapter-spartan-fullscreen",
+      "adapter-spartan-grouping",
+      "adapter-spartan-grouping-panel",
+      "adapter-spartan-header-filters",
+      "adapter-spartan-multi-sort",
+      "adapter-spartan-nested-table",
+      "adapter-spartan-pinned-summary-rows",
+      "adapter-spartan-pivot",
+      "adapter-spartan-preset",
+      "adapter-spartan-print",
+      "adapter-spartan-resizable-columns",
+      "adapter-spartan-row-actions",
+      "adapter-spartan-row-appearance",
+      "adapter-spartan-row-detail",
+      "adapter-spartan-row-pinning",
+      "adapter-spartan-row-reorder",
+      "adapter-spartan-saved-views",
+      "adapter-spartan-selection-stats",
+      "adapter-spartan-side-panel",
+      "adapter-spartan-status-bar",
+      "adapter-spartan-tree",
+      "adapter-spartan-virtualize",
+      "adapter-taiga-ui",
+      "adapter-taiga-ui-assistant",
+      "adapter-taiga-ui-batch-editing",
+      "adapter-taiga-ui-bulk-actions",
+      "adapter-taiga-ui-cell-navigation",
+      "adapter-taiga-ui-cell-span",
+      "adapter-taiga-ui-column-groups",
+      "adapter-taiga-ui-column-menu",
+      "adapter-taiga-ui-column-selection",
+      "adapter-taiga-ui-command-palette",
+      "adapter-taiga-ui-context-menu",
+      "adapter-taiga-ui-density",
+      "adapter-taiga-ui-editing",
+      "adapter-taiga-ui-export",
+      "adapter-taiga-ui-extra-rows",
+      "adapter-taiga-ui-features",
+      "adapter-taiga-ui-filters",
+      "adapter-taiga-ui-find-in-table",
+      "adapter-taiga-ui-fit-columns",
+      "adapter-taiga-ui-fullscreen",
+      "adapter-taiga-ui-grouping",
+      "adapter-taiga-ui-grouping-panel",
+      "adapter-taiga-ui-header-filters",
+      "adapter-taiga-ui-multi-sort",
+      "adapter-taiga-ui-nested-table",
+      "adapter-taiga-ui-pinned-summary-rows",
+      "adapter-taiga-ui-pivot",
+      "adapter-taiga-ui-preset",
+      "adapter-taiga-ui-print",
+      "adapter-taiga-ui-resizable-columns",
+      "adapter-taiga-ui-row-actions",
+      "adapter-taiga-ui-row-appearance",
+      "adapter-taiga-ui-row-detail",
+      "adapter-taiga-ui-row-pinning",
+      "adapter-taiga-ui-row-reorder",
+      "adapter-taiga-ui-saved-views",
+      "adapter-taiga-ui-selection-stats",
+      "adapter-taiga-ui-side-panel",
+      "adapter-taiga-ui-status-bar",
+      "adapter-taiga-ui-tree",
+      "adapter-taiga-ui-virtualize"
     ],
     "react": [
       "adapter-antd",
@@ -7168,6 +7455,2018 @@
     ],
     "adapter-ng-zorro-virtualize": [
       "virtualize"
+    ],
+    "adapter-angular-aria": [
+      "AdaptAutoFilterForm",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptNativeCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "MenuPopover",
+      "OVERLAY_Z",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps",
+      "menuPopover",
+      "placeOverlayBelowTrigger"
+    ],
+    "adapter-angular-aria-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-angular-aria-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-angular-aria-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-angular-aria-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-angular-aria-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-angular-aria-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-angular-aria-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-angular-aria-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-angular-aria-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-angular-aria-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-angular-aria-density": [
+      "densityChooser"
+    ],
+    "adapter-angular-aria-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-angular-aria-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-angular-aria-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-angular-aria-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-angular-aria-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-angular-aria-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-angular-aria-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-angular-aria-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-angular-aria-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-angular-aria-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-angular-aria-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-angular-aria-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-angular-aria-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-angular-aria-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-angular-aria-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-angular-aria-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-angular-aria-print": [
+      "print"
+    ],
+    "adapter-angular-aria-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-angular-aria-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-angular-aria-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-angular-aria-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-angular-aria-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-angular-aria-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-angular-aria-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-angular-aria-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-angular-aria-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-angular-aria-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-angular-aria-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-angular-aria-virtualize": [
+      "virtualize"
+    ],
+    "adapter-angular-cdk": [
+      "AdaptAutoFilterForm",
+      "AdaptCdkPopover",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptNativeCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "CdkPopoverTriggerContext",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "MenuPopover",
+      "OVERLAY_Z",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps",
+      "menuPopover",
+      "placeOverlayBelowTrigger"
+    ],
+    "adapter-angular-cdk-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-angular-cdk-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-angular-cdk-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-angular-cdk-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-angular-cdk-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-angular-cdk-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-angular-cdk-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-angular-cdk-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-angular-cdk-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-angular-cdk-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-angular-cdk-density": [
+      "densityChooser"
+    ],
+    "adapter-angular-cdk-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-angular-cdk-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-angular-cdk-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-angular-cdk-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-angular-cdk-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-angular-cdk-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-angular-cdk-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-angular-cdk-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-angular-cdk-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-angular-cdk-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-angular-cdk-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-angular-cdk-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-angular-cdk-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-angular-cdk-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-angular-cdk-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-angular-cdk-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-angular-cdk-print": [
+      "print"
+    ],
+    "adapter-angular-cdk-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-angular-cdk-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-angular-cdk-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-angular-cdk-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-angular-cdk-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-angular-cdk-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-angular-cdk-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-angular-cdk-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-angular-cdk-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-angular-cdk-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-angular-cdk-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-angular-cdk-virtualize": [
+      "virtualize"
+    ],
+    "adapter-material": [
+      "AdaptAutoFilterForm",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptMaterialCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "MenuPopover",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps",
+      "menuPopover"
+    ],
+    "adapter-material-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-material-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-material-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-material-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-material-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-material-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-material-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-material-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-material-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-material-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-material-density": [
+      "densityChooser"
+    ],
+    "adapter-material-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-material-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-material-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-material-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-material-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-material-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-material-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-material-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-material-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-material-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-material-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-material-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-material-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-material-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-material-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-material-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-material-print": [
+      "print"
+    ],
+    "adapter-material-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-material-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-material-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-material-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-material-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-material-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-material-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-material-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-material-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-material-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-material-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-material-virtualize": [
+      "virtualize"
+    ],
+    "adapter-ng-bootstrap": [
+      "AdaptAutoFilterForm",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptFilterDrawer",
+      "AdaptFilterPopover",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptNativeCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps"
+    ],
+    "adapter-ng-bootstrap-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-ng-bootstrap-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-ng-bootstrap-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-ng-bootstrap-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-ng-bootstrap-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-ng-bootstrap-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-ng-bootstrap-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-ng-bootstrap-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-ng-bootstrap-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-ng-bootstrap-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-ng-bootstrap-density": [
+      "densityChooser"
+    ],
+    "adapter-ng-bootstrap-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-ng-bootstrap-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-ng-bootstrap-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-ng-bootstrap-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-ng-bootstrap-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-ng-bootstrap-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-ng-bootstrap-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-ng-bootstrap-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-ng-bootstrap-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-ng-bootstrap-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-ng-bootstrap-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-ng-bootstrap-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-ng-bootstrap-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-ng-bootstrap-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-ng-bootstrap-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-ng-bootstrap-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-ng-bootstrap-print": [
+      "print"
+    ],
+    "adapter-ng-bootstrap-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-ng-bootstrap-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-ng-bootstrap-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-ng-bootstrap-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-ng-bootstrap-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-ng-bootstrap-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-ng-bootstrap-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-ng-bootstrap-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-ng-bootstrap-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-ng-bootstrap-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-ng-bootstrap-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-ng-bootstrap-virtualize": [
+      "virtualize"
+    ],
+    "adapter-ngx-bootstrap": [
+      "AdaptAutoFilterForm",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptFilterDrawer",
+      "AdaptFilterPopover",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptNativeCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps"
+    ],
+    "adapter-ngx-bootstrap-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-ngx-bootstrap-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-ngx-bootstrap-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-ngx-bootstrap-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-ngx-bootstrap-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-ngx-bootstrap-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-ngx-bootstrap-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-ngx-bootstrap-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-ngx-bootstrap-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-ngx-bootstrap-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-ngx-bootstrap-density": [
+      "densityChooser"
+    ],
+    "adapter-ngx-bootstrap-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-ngx-bootstrap-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-ngx-bootstrap-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-ngx-bootstrap-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-ngx-bootstrap-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-ngx-bootstrap-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-ngx-bootstrap-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-ngx-bootstrap-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-ngx-bootstrap-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-ngx-bootstrap-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-ngx-bootstrap-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-ngx-bootstrap-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-ngx-bootstrap-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-ngx-bootstrap-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-ngx-bootstrap-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-ngx-bootstrap-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-ngx-bootstrap-print": [
+      "print"
+    ],
+    "adapter-ngx-bootstrap-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-ngx-bootstrap-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-ngx-bootstrap-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-ngx-bootstrap-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-ngx-bootstrap-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-ngx-bootstrap-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-ngx-bootstrap-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-ngx-bootstrap-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-ngx-bootstrap-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-ngx-bootstrap-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-ngx-bootstrap-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-ngx-bootstrap-virtualize": [
+      "virtualize"
+    ],
+    "adapter-spartan": [
+      "AdaptAutoFilterForm",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptNativeCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "MenuPopover",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps",
+      "menuPopover"
+    ],
+    "adapter-spartan-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-spartan-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-spartan-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-spartan-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-spartan-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-spartan-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-spartan-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-spartan-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-spartan-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-spartan-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-spartan-density": [
+      "densityChooser"
+    ],
+    "adapter-spartan-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-spartan-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-spartan-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-spartan-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-spartan-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-spartan-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-spartan-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-spartan-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-spartan-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-spartan-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-spartan-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-spartan-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-spartan-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-spartan-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-spartan-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-spartan-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-spartan-print": [
+      "print"
+    ],
+    "adapter-spartan-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-spartan-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-spartan-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-spartan-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-spartan-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-spartan-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-spartan-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-spartan-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-spartan-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-spartan-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-spartan-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-spartan-virtualize": [
+      "virtualize"
+    ],
+    "adapter-taiga-ui": [
+      "AdaptAutoFilterForm",
+      "AdaptCheckboxCellEditor",
+      "AdaptColumnGroupButton",
+      "AdaptColumnGroupToggle",
+      "AdaptColumnHeaderRename",
+      "AdaptColumnMenu",
+      "AdaptColumnSelectBox",
+      "AdaptColumnSelectCheckbox",
+      "AdaptDataTable",
+      "AdaptEditableCell",
+      "AdaptErrorState",
+      "AdaptExpandToggle",
+      "AdaptFillHandle",
+      "AdaptFillHandleControl",
+      "AdaptGroupHeaderCard",
+      "AdaptGroupHeaderRow",
+      "AdaptGroupMore",
+      "AdaptGroupingPanel",
+      "AdaptNativeCellEditor",
+      "AdaptPivotPanel",
+      "AdaptPivotRowHeader",
+      "AdaptSavedViewsPanel",
+      "AdaptTableRegion",
+      "AdaptTableSkeleton",
+      "AdaptTaigaRoot",
+      "AdaptTreeButton",
+      "AdaptTreeCell",
+      "AdaptTreeToggle",
+      "BodyCellView",
+      "BodyRow",
+      "BodySlot",
+      "DataTableClassNames",
+      "FiltersMode",
+      "FiltersView",
+      "MenuPopover",
+      "OVERLAY_Z",
+      "RowActionsCell",
+      "TableView",
+      "TreeCellSlotProps",
+      "menuPopover",
+      "placeOverlayBelowTrigger",
+      "provideAdaptTaiga"
+    ],
+    "adapter-taiga-ui-assistant": [
+      "AGENT_APPROVAL_SLOTS",
+      "AdaptAgentApproval",
+      "AdaptApprovalAction",
+      "AdaptApprovalButton",
+      "AdaptApprovalList",
+      "AdaptAssistantBadge",
+      "AdaptAssistantButton",
+      "AdaptAssistantInput",
+      "AdaptAssistantLanguageChip",
+      "AdaptAssistantMenu",
+      "AdaptAssistantPanel",
+      "AdaptAssistantSheet",
+      "AdaptAssistantWindow",
+      "AdaptTableAssistant",
+      "TABLE_ASSISTANT_SLOTS",
+      "agentApproval",
+      "tableAssistant"
+    ],
+    "adapter-taiga-ui-batch-editing": [
+      "AdaptBatchEditBar",
+      "batchEditing"
+    ],
+    "adapter-taiga-ui-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-taiga-ui-cell-navigation": [
+      "cellNavigation"
+    ],
+    "adapter-taiga-ui-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-taiga-ui-column-groups": [
+      "ColumnGroup",
+      "ColumnInput",
+      "collapsibleColumnGroups"
+    ],
+    "adapter-taiga-ui-column-menu": [
+      "columnMenu"
+    ],
+    "adapter-taiga-ui-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-taiga-ui-command-palette": [
+      "AdaptCommandPaletteButton",
+      "AdaptCommandPaletteLive",
+      "commandPalette"
+    ],
+    "adapter-taiga-ui-context-menu": [
+      "AdaptContextMenuItem",
+      "AdaptContextMenuLive",
+      "AdaptContextMenuSeparator",
+      "AdaptContextMenuSurface",
+      "contextMenu"
+    ],
+    "adapter-taiga-ui-density": [
+      "densityChooser"
+    ],
+    "adapter-taiga-ui-editing": [
+      "AdaptRowEditActions",
+      "EditHistoryHandle",
+      "EditHistoryOptions",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "rowEditing",
+      "undoRedoButtons"
+    ],
+    "adapter-taiga-ui-export": [
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx"
+    ],
+    "adapter-taiga-ui-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-taiga-ui-features": [
+      "RowActionsFeatureOptions",
+      "agentApproval",
+      "batchEditing",
+      "bulkActions",
+      "cellNavigation",
+      "cellSpan",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "exportCsv",
+      "exportPdf",
+      "exportXlsx",
+      "extraRows",
+      "filterTypes",
+      "filters",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "grouping",
+      "groupingPanel",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "rowActions",
+      "rowAppearance",
+      "rowDetail",
+      "rowEditing",
+      "rowPinning",
+      "rowReorder",
+      "savedViews",
+      "selectionStats",
+      "sidePanel",
+      "statusBar",
+      "tableAssistant",
+      "tree",
+      "undoRedoButtons",
+      "virtualize"
+    ],
+    "adapter-taiga-ui-filters": [
+      "filterTypes",
+      "filters"
+    ],
+    "adapter-taiga-ui-find-in-table": [
+      "AdaptFindBar",
+      "AdaptFindToolbarButton",
+      "findInTable"
+    ],
+    "adapter-taiga-ui-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-taiga-ui-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-taiga-ui-grouping": [
+      "GroupSort",
+      "GroupingExtras",
+      "grouping"
+    ],
+    "adapter-taiga-ui-grouping-panel": [
+      "groupingPanel"
+    ],
+    "adapter-taiga-ui-header-filters": [
+      "AdaptFilterHeaderControl",
+      "AdaptFilterHeaderRow",
+      "headerFilters"
+    ],
+    "adapter-taiga-ui-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-taiga-ui-nested-table": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "nestedTable"
+    ],
+    "adapter-taiga-ui-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-taiga-ui-pivot": [
+      "AdaptPivotPanel",
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "EMPTY_PIVOT_CONFIG",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotConfig",
+      "PivotField",
+      "PivotPanelSlots",
+      "PivotResult",
+      "PivotRow",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "injectPivotUrlState",
+      "pivot",
+      "pivotTableModel"
+    ],
+    "adapter-taiga-ui-preset": [
+      "StandardPresetOptions",
+      "standardPreset"
+    ],
+    "adapter-taiga-ui-print": [
+      "print"
+    ],
+    "adapter-taiga-ui-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-taiga-ui-row-actions": [
+      "RowActionsFeatureOptions",
+      "rowActions"
+    ],
+    "adapter-taiga-ui-row-appearance": [
+      "RowAppearanceOptions",
+      "rowAppearance"
+    ],
+    "adapter-taiga-ui-row-detail": [
+      "NestedTable",
+      "NestedTableContext",
+      "NestedTableDefaults",
+      "NestedTableFor",
+      "RowDetailContext",
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-taiga-ui-row-pinning": [
+      "RowPinningFeatureOptions",
+      "rowPinning"
+    ],
+    "adapter-taiga-ui-row-reorder": [
+      "rowReorder"
+    ],
+    "adapter-taiga-ui-saved-views": [
+      "AdaptSavedViewsPanel",
+      "savedViews"
+    ],
+    "adapter-taiga-ui-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-taiga-ui-side-panel": [
+      "AdaptSidePanelClose",
+      "AdaptSidePanelFrame",
+      "AdaptSidePanelLive",
+      "AdaptSidePanelTab",
+      "sidePanel"
+    ],
+    "adapter-taiga-ui-status-bar": [
+      "AdaptSelectionStatsBar",
+      "AdaptStatusBar",
+      "AdaptStatusBarLive",
+      "statusBar"
+    ],
+    "adapter-taiga-ui-tree": [
+      "TreeFeatureOptions",
+      "tree"
+    ],
+    "adapter-taiga-ui-virtualize": [
+      "virtualize"
     ]
   },
   "entrypoints": {
@@ -8555,6 +10854,867 @@
     },
     "adapter-ng-zorro-virtualize.api.md": {
       "surface": "adapter-ng-zorro-virtualize"
+    },
+    "adapter-angular-aria.api.md": {
+      "surface": "adapter-angular-aria"
+    },
+    "adapter-angular-aria-assistant.api.md": {
+      "surface": "adapter-angular-aria-assistant"
+    },
+    "adapter-angular-aria-batch-editing.api.md": {
+      "surface": "adapter-angular-aria-batch-editing"
+    },
+    "adapter-angular-aria-bulk-actions.api.md": {
+      "surface": "adapter-angular-aria-bulk-actions"
+    },
+    "adapter-angular-aria-cell-navigation.api.md": {
+      "surface": "adapter-angular-aria-cell-navigation"
+    },
+    "adapter-angular-aria-cell-span.api.md": {
+      "reexport": "adapter-angular-aria-cell-span"
+    },
+    "adapter-angular-aria-column-groups.api.md": {
+      "surface": "adapter-angular-aria-column-groups"
+    },
+    "adapter-angular-aria-column-menu.api.md": {
+      "surface": "adapter-angular-aria-column-menu"
+    },
+    "adapter-angular-aria-column-selection.api.md": {
+      "surface": "adapter-angular-aria-column-selection"
+    },
+    "adapter-angular-aria-command-palette.api.md": {
+      "surface": "adapter-angular-aria-command-palette"
+    },
+    "adapter-angular-aria-context-menu.api.md": {
+      "surface": "adapter-angular-aria-context-menu"
+    },
+    "adapter-angular-aria-density.api.md": {
+      "surface": "adapter-angular-aria-density"
+    },
+    "adapter-angular-aria-editing.api.md": {
+      "surface": "adapter-angular-aria-editing"
+    },
+    "adapter-angular-aria-export.api.md": {
+      "surface": "adapter-angular-aria-export"
+    },
+    "adapter-angular-aria-extra-rows.api.md": {
+      "reexport": "adapter-angular-aria-extra-rows"
+    },
+    "adapter-angular-aria-features.api.md": {
+      "surface": "adapter-angular-aria-features"
+    },
+    "adapter-angular-aria-filters.api.md": {
+      "surface": "adapter-angular-aria-filters"
+    },
+    "adapter-angular-aria-find-in-table.api.md": {
+      "surface": "adapter-angular-aria-find-in-table"
+    },
+    "adapter-angular-aria-fit-columns.api.md": {
+      "reexport": "adapter-angular-aria-fit-columns"
+    },
+    "adapter-angular-aria-fullscreen.api.md": {
+      "surface": "adapter-angular-aria-fullscreen"
+    },
+    "adapter-angular-aria-grouping.api.md": {
+      "surface": "adapter-angular-aria-grouping"
+    },
+    "adapter-angular-aria-grouping-panel.api.md": {
+      "surface": "adapter-angular-aria-grouping-panel"
+    },
+    "adapter-angular-aria-header-filters.api.md": {
+      "surface": "adapter-angular-aria-header-filters"
+    },
+    "adapter-angular-aria-multi-sort.api.md": {
+      "reexport": "adapter-angular-aria-multi-sort"
+    },
+    "adapter-angular-aria-nested-table.api.md": {
+      "surface": "adapter-angular-aria-nested-table"
+    },
+    "adapter-angular-aria-pinned-summary-rows.api.md": {
+      "reexport": "adapter-angular-aria-pinned-summary-rows"
+    },
+    "adapter-angular-aria-pivot.api.md": {
+      "surface": "adapter-angular-aria-pivot"
+    },
+    "adapter-angular-aria-preset.api.md": {
+      "surface": "adapter-angular-aria-preset"
+    },
+    "adapter-angular-aria-print.api.md": {
+      "surface": "adapter-angular-aria-print"
+    },
+    "adapter-angular-aria-resizable-columns.api.md": {
+      "reexport": "adapter-angular-aria-resizable-columns"
+    },
+    "adapter-angular-aria-row-actions.api.md": {
+      "surface": "adapter-angular-aria-row-actions"
+    },
+    "adapter-angular-aria-row-appearance.api.md": {
+      "reexport": "adapter-angular-aria-row-appearance"
+    },
+    "adapter-angular-aria-row-detail.api.md": {
+      "surface": "adapter-angular-aria-row-detail"
+    },
+    "adapter-angular-aria-row-pinning.api.md": {
+      "reexport": "adapter-angular-aria-row-pinning"
+    },
+    "adapter-angular-aria-row-reorder.api.md": {
+      "surface": "adapter-angular-aria-row-reorder"
+    },
+    "adapter-angular-aria-saved-views.api.md": {
+      "surface": "adapter-angular-aria-saved-views"
+    },
+    "adapter-angular-aria-selection-stats.api.md": {
+      "surface": "adapter-angular-aria-selection-stats"
+    },
+    "adapter-angular-aria-side-panel.api.md": {
+      "surface": "adapter-angular-aria-side-panel"
+    },
+    "adapter-angular-aria-status-bar.api.md": {
+      "surface": "adapter-angular-aria-status-bar"
+    },
+    "adapter-angular-aria-tree.api.md": {
+      "surface": "adapter-angular-aria-tree"
+    },
+    "adapter-angular-aria-virtualize.api.md": {
+      "surface": "adapter-angular-aria-virtualize"
+    },
+    "adapter-angular-cdk.api.md": {
+      "surface": "adapter-angular-cdk"
+    },
+    "adapter-angular-cdk-assistant.api.md": {
+      "surface": "adapter-angular-cdk-assistant"
+    },
+    "adapter-angular-cdk-batch-editing.api.md": {
+      "surface": "adapter-angular-cdk-batch-editing"
+    },
+    "adapter-angular-cdk-bulk-actions.api.md": {
+      "surface": "adapter-angular-cdk-bulk-actions"
+    },
+    "adapter-angular-cdk-cell-navigation.api.md": {
+      "surface": "adapter-angular-cdk-cell-navigation"
+    },
+    "adapter-angular-cdk-cell-span.api.md": {
+      "reexport": "adapter-angular-cdk-cell-span"
+    },
+    "adapter-angular-cdk-column-groups.api.md": {
+      "surface": "adapter-angular-cdk-column-groups"
+    },
+    "adapter-angular-cdk-column-menu.api.md": {
+      "surface": "adapter-angular-cdk-column-menu"
+    },
+    "adapter-angular-cdk-column-selection.api.md": {
+      "surface": "adapter-angular-cdk-column-selection"
+    },
+    "adapter-angular-cdk-command-palette.api.md": {
+      "surface": "adapter-angular-cdk-command-palette"
+    },
+    "adapter-angular-cdk-context-menu.api.md": {
+      "surface": "adapter-angular-cdk-context-menu"
+    },
+    "adapter-angular-cdk-density.api.md": {
+      "surface": "adapter-angular-cdk-density"
+    },
+    "adapter-angular-cdk-editing.api.md": {
+      "surface": "adapter-angular-cdk-editing"
+    },
+    "adapter-angular-cdk-export.api.md": {
+      "surface": "adapter-angular-cdk-export"
+    },
+    "adapter-angular-cdk-extra-rows.api.md": {
+      "reexport": "adapter-angular-cdk-extra-rows"
+    },
+    "adapter-angular-cdk-features.api.md": {
+      "surface": "adapter-angular-cdk-features"
+    },
+    "adapter-angular-cdk-filters.api.md": {
+      "surface": "adapter-angular-cdk-filters"
+    },
+    "adapter-angular-cdk-find-in-table.api.md": {
+      "surface": "adapter-angular-cdk-find-in-table"
+    },
+    "adapter-angular-cdk-fit-columns.api.md": {
+      "reexport": "adapter-angular-cdk-fit-columns"
+    },
+    "adapter-angular-cdk-fullscreen.api.md": {
+      "surface": "adapter-angular-cdk-fullscreen"
+    },
+    "adapter-angular-cdk-grouping.api.md": {
+      "surface": "adapter-angular-cdk-grouping"
+    },
+    "adapter-angular-cdk-grouping-panel.api.md": {
+      "surface": "adapter-angular-cdk-grouping-panel"
+    },
+    "adapter-angular-cdk-header-filters.api.md": {
+      "surface": "adapter-angular-cdk-header-filters"
+    },
+    "adapter-angular-cdk-multi-sort.api.md": {
+      "reexport": "adapter-angular-cdk-multi-sort"
+    },
+    "adapter-angular-cdk-nested-table.api.md": {
+      "surface": "adapter-angular-cdk-nested-table"
+    },
+    "adapter-angular-cdk-pinned-summary-rows.api.md": {
+      "reexport": "adapter-angular-cdk-pinned-summary-rows"
+    },
+    "adapter-angular-cdk-pivot.api.md": {
+      "surface": "adapter-angular-cdk-pivot"
+    },
+    "adapter-angular-cdk-preset.api.md": {
+      "surface": "adapter-angular-cdk-preset"
+    },
+    "adapter-angular-cdk-print.api.md": {
+      "surface": "adapter-angular-cdk-print"
+    },
+    "adapter-angular-cdk-resizable-columns.api.md": {
+      "reexport": "adapter-angular-cdk-resizable-columns"
+    },
+    "adapter-angular-cdk-row-actions.api.md": {
+      "surface": "adapter-angular-cdk-row-actions"
+    },
+    "adapter-angular-cdk-row-appearance.api.md": {
+      "reexport": "adapter-angular-cdk-row-appearance"
+    },
+    "adapter-angular-cdk-row-detail.api.md": {
+      "surface": "adapter-angular-cdk-row-detail"
+    },
+    "adapter-angular-cdk-row-pinning.api.md": {
+      "reexport": "adapter-angular-cdk-row-pinning"
+    },
+    "adapter-angular-cdk-row-reorder.api.md": {
+      "surface": "adapter-angular-cdk-row-reorder"
+    },
+    "adapter-angular-cdk-saved-views.api.md": {
+      "surface": "adapter-angular-cdk-saved-views"
+    },
+    "adapter-angular-cdk-selection-stats.api.md": {
+      "surface": "adapter-angular-cdk-selection-stats"
+    },
+    "adapter-angular-cdk-side-panel.api.md": {
+      "surface": "adapter-angular-cdk-side-panel"
+    },
+    "adapter-angular-cdk-status-bar.api.md": {
+      "surface": "adapter-angular-cdk-status-bar"
+    },
+    "adapter-angular-cdk-tree.api.md": {
+      "surface": "adapter-angular-cdk-tree"
+    },
+    "adapter-angular-cdk-virtualize.api.md": {
+      "surface": "adapter-angular-cdk-virtualize"
+    },
+    "adapter-material.api.md": {
+      "surface": "adapter-material"
+    },
+    "adapter-material-assistant.api.md": {
+      "surface": "adapter-material-assistant"
+    },
+    "adapter-material-batch-editing.api.md": {
+      "surface": "adapter-material-batch-editing"
+    },
+    "adapter-material-bulk-actions.api.md": {
+      "surface": "adapter-material-bulk-actions"
+    },
+    "adapter-material-cell-navigation.api.md": {
+      "surface": "adapter-material-cell-navigation"
+    },
+    "adapter-material-cell-span.api.md": {
+      "reexport": "adapter-material-cell-span"
+    },
+    "adapter-material-column-groups.api.md": {
+      "surface": "adapter-material-column-groups"
+    },
+    "adapter-material-column-menu.api.md": {
+      "surface": "adapter-material-column-menu"
+    },
+    "adapter-material-column-selection.api.md": {
+      "surface": "adapter-material-column-selection"
+    },
+    "adapter-material-command-palette.api.md": {
+      "surface": "adapter-material-command-palette"
+    },
+    "adapter-material-context-menu.api.md": {
+      "surface": "adapter-material-context-menu"
+    },
+    "adapter-material-density.api.md": {
+      "surface": "adapter-material-density"
+    },
+    "adapter-material-editing.api.md": {
+      "surface": "adapter-material-editing"
+    },
+    "adapter-material-export.api.md": {
+      "surface": "adapter-material-export"
+    },
+    "adapter-material-extra-rows.api.md": {
+      "reexport": "adapter-material-extra-rows"
+    },
+    "adapter-material-features.api.md": {
+      "surface": "adapter-material-features"
+    },
+    "adapter-material-filters.api.md": {
+      "surface": "adapter-material-filters"
+    },
+    "adapter-material-find-in-table.api.md": {
+      "surface": "adapter-material-find-in-table"
+    },
+    "adapter-material-fit-columns.api.md": {
+      "reexport": "adapter-material-fit-columns"
+    },
+    "adapter-material-fullscreen.api.md": {
+      "surface": "adapter-material-fullscreen"
+    },
+    "adapter-material-grouping.api.md": {
+      "surface": "adapter-material-grouping"
+    },
+    "adapter-material-grouping-panel.api.md": {
+      "surface": "adapter-material-grouping-panel"
+    },
+    "adapter-material-header-filters.api.md": {
+      "surface": "adapter-material-header-filters"
+    },
+    "adapter-material-multi-sort.api.md": {
+      "reexport": "adapter-material-multi-sort"
+    },
+    "adapter-material-nested-table.api.md": {
+      "surface": "adapter-material-nested-table"
+    },
+    "adapter-material-pinned-summary-rows.api.md": {
+      "reexport": "adapter-material-pinned-summary-rows"
+    },
+    "adapter-material-pivot.api.md": {
+      "surface": "adapter-material-pivot"
+    },
+    "adapter-material-preset.api.md": {
+      "surface": "adapter-material-preset"
+    },
+    "adapter-material-print.api.md": {
+      "surface": "adapter-material-print"
+    },
+    "adapter-material-resizable-columns.api.md": {
+      "reexport": "adapter-material-resizable-columns"
+    },
+    "adapter-material-row-actions.api.md": {
+      "surface": "adapter-material-row-actions"
+    },
+    "adapter-material-row-appearance.api.md": {
+      "reexport": "adapter-material-row-appearance"
+    },
+    "adapter-material-row-detail.api.md": {
+      "surface": "adapter-material-row-detail"
+    },
+    "adapter-material-row-pinning.api.md": {
+      "reexport": "adapter-material-row-pinning"
+    },
+    "adapter-material-row-reorder.api.md": {
+      "surface": "adapter-material-row-reorder"
+    },
+    "adapter-material-saved-views.api.md": {
+      "surface": "adapter-material-saved-views"
+    },
+    "adapter-material-selection-stats.api.md": {
+      "surface": "adapter-material-selection-stats"
+    },
+    "adapter-material-side-panel.api.md": {
+      "surface": "adapter-material-side-panel"
+    },
+    "adapter-material-status-bar.api.md": {
+      "surface": "adapter-material-status-bar"
+    },
+    "adapter-material-tree.api.md": {
+      "surface": "adapter-material-tree"
+    },
+    "adapter-material-virtualize.api.md": {
+      "surface": "adapter-material-virtualize"
+    },
+    "adapter-ng-bootstrap.api.md": {
+      "surface": "adapter-ng-bootstrap"
+    },
+    "adapter-ng-bootstrap-assistant.api.md": {
+      "surface": "adapter-ng-bootstrap-assistant"
+    },
+    "adapter-ng-bootstrap-batch-editing.api.md": {
+      "surface": "adapter-ng-bootstrap-batch-editing"
+    },
+    "adapter-ng-bootstrap-bulk-actions.api.md": {
+      "surface": "adapter-ng-bootstrap-bulk-actions"
+    },
+    "adapter-ng-bootstrap-cell-navigation.api.md": {
+      "surface": "adapter-ng-bootstrap-cell-navigation"
+    },
+    "adapter-ng-bootstrap-cell-span.api.md": {
+      "reexport": "adapter-ng-bootstrap-cell-span"
+    },
+    "adapter-ng-bootstrap-column-groups.api.md": {
+      "surface": "adapter-ng-bootstrap-column-groups"
+    },
+    "adapter-ng-bootstrap-column-menu.api.md": {
+      "surface": "adapter-ng-bootstrap-column-menu"
+    },
+    "adapter-ng-bootstrap-column-selection.api.md": {
+      "surface": "adapter-ng-bootstrap-column-selection"
+    },
+    "adapter-ng-bootstrap-command-palette.api.md": {
+      "surface": "adapter-ng-bootstrap-command-palette"
+    },
+    "adapter-ng-bootstrap-context-menu.api.md": {
+      "surface": "adapter-ng-bootstrap-context-menu"
+    },
+    "adapter-ng-bootstrap-density.api.md": {
+      "surface": "adapter-ng-bootstrap-density"
+    },
+    "adapter-ng-bootstrap-editing.api.md": {
+      "surface": "adapter-ng-bootstrap-editing"
+    },
+    "adapter-ng-bootstrap-export.api.md": {
+      "surface": "adapter-ng-bootstrap-export"
+    },
+    "adapter-ng-bootstrap-extra-rows.api.md": {
+      "reexport": "adapter-ng-bootstrap-extra-rows"
+    },
+    "adapter-ng-bootstrap-features.api.md": {
+      "surface": "adapter-ng-bootstrap-features"
+    },
+    "adapter-ng-bootstrap-filters.api.md": {
+      "surface": "adapter-ng-bootstrap-filters"
+    },
+    "adapter-ng-bootstrap-find-in-table.api.md": {
+      "surface": "adapter-ng-bootstrap-find-in-table"
+    },
+    "adapter-ng-bootstrap-fit-columns.api.md": {
+      "reexport": "adapter-ng-bootstrap-fit-columns"
+    },
+    "adapter-ng-bootstrap-fullscreen.api.md": {
+      "surface": "adapter-ng-bootstrap-fullscreen"
+    },
+    "adapter-ng-bootstrap-grouping.api.md": {
+      "surface": "adapter-ng-bootstrap-grouping"
+    },
+    "adapter-ng-bootstrap-grouping-panel.api.md": {
+      "surface": "adapter-ng-bootstrap-grouping-panel"
+    },
+    "adapter-ng-bootstrap-header-filters.api.md": {
+      "surface": "adapter-ng-bootstrap-header-filters"
+    },
+    "adapter-ng-bootstrap-multi-sort.api.md": {
+      "reexport": "adapter-ng-bootstrap-multi-sort"
+    },
+    "adapter-ng-bootstrap-nested-table.api.md": {
+      "surface": "adapter-ng-bootstrap-nested-table"
+    },
+    "adapter-ng-bootstrap-pinned-summary-rows.api.md": {
+      "reexport": "adapter-ng-bootstrap-pinned-summary-rows"
+    },
+    "adapter-ng-bootstrap-pivot.api.md": {
+      "surface": "adapter-ng-bootstrap-pivot"
+    },
+    "adapter-ng-bootstrap-preset.api.md": {
+      "surface": "adapter-ng-bootstrap-preset"
+    },
+    "adapter-ng-bootstrap-print.api.md": {
+      "surface": "adapter-ng-bootstrap-print"
+    },
+    "adapter-ng-bootstrap-resizable-columns.api.md": {
+      "reexport": "adapter-ng-bootstrap-resizable-columns"
+    },
+    "adapter-ng-bootstrap-row-actions.api.md": {
+      "surface": "adapter-ng-bootstrap-row-actions"
+    },
+    "adapter-ng-bootstrap-row-appearance.api.md": {
+      "reexport": "adapter-ng-bootstrap-row-appearance"
+    },
+    "adapter-ng-bootstrap-row-detail.api.md": {
+      "surface": "adapter-ng-bootstrap-row-detail"
+    },
+    "adapter-ng-bootstrap-row-pinning.api.md": {
+      "reexport": "adapter-ng-bootstrap-row-pinning"
+    },
+    "adapter-ng-bootstrap-row-reorder.api.md": {
+      "surface": "adapter-ng-bootstrap-row-reorder"
+    },
+    "adapter-ng-bootstrap-saved-views.api.md": {
+      "surface": "adapter-ng-bootstrap-saved-views"
+    },
+    "adapter-ng-bootstrap-selection-stats.api.md": {
+      "surface": "adapter-ng-bootstrap-selection-stats"
+    },
+    "adapter-ng-bootstrap-side-panel.api.md": {
+      "surface": "adapter-ng-bootstrap-side-panel"
+    },
+    "adapter-ng-bootstrap-status-bar.api.md": {
+      "surface": "adapter-ng-bootstrap-status-bar"
+    },
+    "adapter-ng-bootstrap-tree.api.md": {
+      "surface": "adapter-ng-bootstrap-tree"
+    },
+    "adapter-ng-bootstrap-virtualize.api.md": {
+      "surface": "adapter-ng-bootstrap-virtualize"
+    },
+    "adapter-ngx-bootstrap.api.md": {
+      "surface": "adapter-ngx-bootstrap"
+    },
+    "adapter-ngx-bootstrap-assistant.api.md": {
+      "surface": "adapter-ngx-bootstrap-assistant"
+    },
+    "adapter-ngx-bootstrap-batch-editing.api.md": {
+      "surface": "adapter-ngx-bootstrap-batch-editing"
+    },
+    "adapter-ngx-bootstrap-bulk-actions.api.md": {
+      "surface": "adapter-ngx-bootstrap-bulk-actions"
+    },
+    "adapter-ngx-bootstrap-cell-navigation.api.md": {
+      "surface": "adapter-ngx-bootstrap-cell-navigation"
+    },
+    "adapter-ngx-bootstrap-cell-span.api.md": {
+      "reexport": "adapter-ngx-bootstrap-cell-span"
+    },
+    "adapter-ngx-bootstrap-column-groups.api.md": {
+      "surface": "adapter-ngx-bootstrap-column-groups"
+    },
+    "adapter-ngx-bootstrap-column-menu.api.md": {
+      "surface": "adapter-ngx-bootstrap-column-menu"
+    },
+    "adapter-ngx-bootstrap-column-selection.api.md": {
+      "surface": "adapter-ngx-bootstrap-column-selection"
+    },
+    "adapter-ngx-bootstrap-command-palette.api.md": {
+      "surface": "adapter-ngx-bootstrap-command-palette"
+    },
+    "adapter-ngx-bootstrap-context-menu.api.md": {
+      "surface": "adapter-ngx-bootstrap-context-menu"
+    },
+    "adapter-ngx-bootstrap-density.api.md": {
+      "surface": "adapter-ngx-bootstrap-density"
+    },
+    "adapter-ngx-bootstrap-editing.api.md": {
+      "surface": "adapter-ngx-bootstrap-editing"
+    },
+    "adapter-ngx-bootstrap-export.api.md": {
+      "surface": "adapter-ngx-bootstrap-export"
+    },
+    "adapter-ngx-bootstrap-extra-rows.api.md": {
+      "reexport": "adapter-ngx-bootstrap-extra-rows"
+    },
+    "adapter-ngx-bootstrap-features.api.md": {
+      "surface": "adapter-ngx-bootstrap-features"
+    },
+    "adapter-ngx-bootstrap-filters.api.md": {
+      "surface": "adapter-ngx-bootstrap-filters"
+    },
+    "adapter-ngx-bootstrap-find-in-table.api.md": {
+      "surface": "adapter-ngx-bootstrap-find-in-table"
+    },
+    "adapter-ngx-bootstrap-fit-columns.api.md": {
+      "reexport": "adapter-ngx-bootstrap-fit-columns"
+    },
+    "adapter-ngx-bootstrap-fullscreen.api.md": {
+      "surface": "adapter-ngx-bootstrap-fullscreen"
+    },
+    "adapter-ngx-bootstrap-grouping.api.md": {
+      "surface": "adapter-ngx-bootstrap-grouping"
+    },
+    "adapter-ngx-bootstrap-grouping-panel.api.md": {
+      "surface": "adapter-ngx-bootstrap-grouping-panel"
+    },
+    "adapter-ngx-bootstrap-header-filters.api.md": {
+      "surface": "adapter-ngx-bootstrap-header-filters"
+    },
+    "adapter-ngx-bootstrap-multi-sort.api.md": {
+      "reexport": "adapter-ngx-bootstrap-multi-sort"
+    },
+    "adapter-ngx-bootstrap-nested-table.api.md": {
+      "surface": "adapter-ngx-bootstrap-nested-table"
+    },
+    "adapter-ngx-bootstrap-pinned-summary-rows.api.md": {
+      "reexport": "adapter-ngx-bootstrap-pinned-summary-rows"
+    },
+    "adapter-ngx-bootstrap-pivot.api.md": {
+      "surface": "adapter-ngx-bootstrap-pivot"
+    },
+    "adapter-ngx-bootstrap-preset.api.md": {
+      "surface": "adapter-ngx-bootstrap-preset"
+    },
+    "adapter-ngx-bootstrap-print.api.md": {
+      "surface": "adapter-ngx-bootstrap-print"
+    },
+    "adapter-ngx-bootstrap-resizable-columns.api.md": {
+      "reexport": "adapter-ngx-bootstrap-resizable-columns"
+    },
+    "adapter-ngx-bootstrap-row-actions.api.md": {
+      "surface": "adapter-ngx-bootstrap-row-actions"
+    },
+    "adapter-ngx-bootstrap-row-appearance.api.md": {
+      "reexport": "adapter-ngx-bootstrap-row-appearance"
+    },
+    "adapter-ngx-bootstrap-row-detail.api.md": {
+      "surface": "adapter-ngx-bootstrap-row-detail"
+    },
+    "adapter-ngx-bootstrap-row-pinning.api.md": {
+      "reexport": "adapter-ngx-bootstrap-row-pinning"
+    },
+    "adapter-ngx-bootstrap-row-reorder.api.md": {
+      "surface": "adapter-ngx-bootstrap-row-reorder"
+    },
+    "adapter-ngx-bootstrap-saved-views.api.md": {
+      "surface": "adapter-ngx-bootstrap-saved-views"
+    },
+    "adapter-ngx-bootstrap-selection-stats.api.md": {
+      "surface": "adapter-ngx-bootstrap-selection-stats"
+    },
+    "adapter-ngx-bootstrap-side-panel.api.md": {
+      "surface": "adapter-ngx-bootstrap-side-panel"
+    },
+    "adapter-ngx-bootstrap-status-bar.api.md": {
+      "surface": "adapter-ngx-bootstrap-status-bar"
+    },
+    "adapter-ngx-bootstrap-tree.api.md": {
+      "surface": "adapter-ngx-bootstrap-tree"
+    },
+    "adapter-ngx-bootstrap-virtualize.api.md": {
+      "surface": "adapter-ngx-bootstrap-virtualize"
+    },
+    "adapter-spartan.api.md": {
+      "surface": "adapter-spartan"
+    },
+    "adapter-spartan-assistant.api.md": {
+      "surface": "adapter-spartan-assistant"
+    },
+    "adapter-spartan-batch-editing.api.md": {
+      "surface": "adapter-spartan-batch-editing"
+    },
+    "adapter-spartan-bulk-actions.api.md": {
+      "surface": "adapter-spartan-bulk-actions"
+    },
+    "adapter-spartan-cell-navigation.api.md": {
+      "surface": "adapter-spartan-cell-navigation"
+    },
+    "adapter-spartan-cell-span.api.md": {
+      "reexport": "adapter-spartan-cell-span"
+    },
+    "adapter-spartan-column-groups.api.md": {
+      "surface": "adapter-spartan-column-groups"
+    },
+    "adapter-spartan-column-menu.api.md": {
+      "surface": "adapter-spartan-column-menu"
+    },
+    "adapter-spartan-column-selection.api.md": {
+      "surface": "adapter-spartan-column-selection"
+    },
+    "adapter-spartan-command-palette.api.md": {
+      "surface": "adapter-spartan-command-palette"
+    },
+    "adapter-spartan-context-menu.api.md": {
+      "surface": "adapter-spartan-context-menu"
+    },
+    "adapter-spartan-density.api.md": {
+      "surface": "adapter-spartan-density"
+    },
+    "adapter-spartan-editing.api.md": {
+      "surface": "adapter-spartan-editing"
+    },
+    "adapter-spartan-export.api.md": {
+      "surface": "adapter-spartan-export"
+    },
+    "adapter-spartan-extra-rows.api.md": {
+      "reexport": "adapter-spartan-extra-rows"
+    },
+    "adapter-spartan-features.api.md": {
+      "surface": "adapter-spartan-features"
+    },
+    "adapter-spartan-filters.api.md": {
+      "surface": "adapter-spartan-filters"
+    },
+    "adapter-spartan-find-in-table.api.md": {
+      "surface": "adapter-spartan-find-in-table"
+    },
+    "adapter-spartan-fit-columns.api.md": {
+      "reexport": "adapter-spartan-fit-columns"
+    },
+    "adapter-spartan-fullscreen.api.md": {
+      "surface": "adapter-spartan-fullscreen"
+    },
+    "adapter-spartan-grouping.api.md": {
+      "surface": "adapter-spartan-grouping"
+    },
+    "adapter-spartan-grouping-panel.api.md": {
+      "surface": "adapter-spartan-grouping-panel"
+    },
+    "adapter-spartan-header-filters.api.md": {
+      "surface": "adapter-spartan-header-filters"
+    },
+    "adapter-spartan-multi-sort.api.md": {
+      "reexport": "adapter-spartan-multi-sort"
+    },
+    "adapter-spartan-nested-table.api.md": {
+      "surface": "adapter-spartan-nested-table"
+    },
+    "adapter-spartan-pinned-summary-rows.api.md": {
+      "reexport": "adapter-spartan-pinned-summary-rows"
+    },
+    "adapter-spartan-pivot.api.md": {
+      "surface": "adapter-spartan-pivot"
+    },
+    "adapter-spartan-preset.api.md": {
+      "surface": "adapter-spartan-preset"
+    },
+    "adapter-spartan-print.api.md": {
+      "surface": "adapter-spartan-print"
+    },
+    "adapter-spartan-resizable-columns.api.md": {
+      "reexport": "adapter-spartan-resizable-columns"
+    },
+    "adapter-spartan-row-actions.api.md": {
+      "surface": "adapter-spartan-row-actions"
+    },
+    "adapter-spartan-row-appearance.api.md": {
+      "reexport": "adapter-spartan-row-appearance"
+    },
+    "adapter-spartan-row-detail.api.md": {
+      "surface": "adapter-spartan-row-detail"
+    },
+    "adapter-spartan-row-pinning.api.md": {
+      "reexport": "adapter-spartan-row-pinning"
+    },
+    "adapter-spartan-row-reorder.api.md": {
+      "surface": "adapter-spartan-row-reorder"
+    },
+    "adapter-spartan-saved-views.api.md": {
+      "surface": "adapter-spartan-saved-views"
+    },
+    "adapter-spartan-selection-stats.api.md": {
+      "surface": "adapter-spartan-selection-stats"
+    },
+    "adapter-spartan-side-panel.api.md": {
+      "surface": "adapter-spartan-side-panel"
+    },
+    "adapter-spartan-status-bar.api.md": {
+      "surface": "adapter-spartan-status-bar"
+    },
+    "adapter-spartan-tree.api.md": {
+      "surface": "adapter-spartan-tree"
+    },
+    "adapter-spartan-virtualize.api.md": {
+      "surface": "adapter-spartan-virtualize"
+    },
+    "adapter-taiga-ui.api.md": {
+      "surface": "adapter-taiga-ui"
+    },
+    "adapter-taiga-ui-assistant.api.md": {
+      "surface": "adapter-taiga-ui-assistant"
+    },
+    "adapter-taiga-ui-batch-editing.api.md": {
+      "surface": "adapter-taiga-ui-batch-editing"
+    },
+    "adapter-taiga-ui-bulk-actions.api.md": {
+      "surface": "adapter-taiga-ui-bulk-actions"
+    },
+    "adapter-taiga-ui-cell-navigation.api.md": {
+      "surface": "adapter-taiga-ui-cell-navigation"
+    },
+    "adapter-taiga-ui-cell-span.api.md": {
+      "reexport": "adapter-taiga-ui-cell-span"
+    },
+    "adapter-taiga-ui-column-groups.api.md": {
+      "surface": "adapter-taiga-ui-column-groups"
+    },
+    "adapter-taiga-ui-column-menu.api.md": {
+      "surface": "adapter-taiga-ui-column-menu"
+    },
+    "adapter-taiga-ui-column-selection.api.md": {
+      "surface": "adapter-taiga-ui-column-selection"
+    },
+    "adapter-taiga-ui-command-palette.api.md": {
+      "surface": "adapter-taiga-ui-command-palette"
+    },
+    "adapter-taiga-ui-context-menu.api.md": {
+      "surface": "adapter-taiga-ui-context-menu"
+    },
+    "adapter-taiga-ui-density.api.md": {
+      "surface": "adapter-taiga-ui-density"
+    },
+    "adapter-taiga-ui-editing.api.md": {
+      "surface": "adapter-taiga-ui-editing"
+    },
+    "adapter-taiga-ui-export.api.md": {
+      "surface": "adapter-taiga-ui-export"
+    },
+    "adapter-taiga-ui-extra-rows.api.md": {
+      "reexport": "adapter-taiga-ui-extra-rows"
+    },
+    "adapter-taiga-ui-features.api.md": {
+      "surface": "adapter-taiga-ui-features"
+    },
+    "adapter-taiga-ui-filters.api.md": {
+      "surface": "adapter-taiga-ui-filters"
+    },
+    "adapter-taiga-ui-find-in-table.api.md": {
+      "surface": "adapter-taiga-ui-find-in-table"
+    },
+    "adapter-taiga-ui-fit-columns.api.md": {
+      "reexport": "adapter-taiga-ui-fit-columns"
+    },
+    "adapter-taiga-ui-fullscreen.api.md": {
+      "surface": "adapter-taiga-ui-fullscreen"
+    },
+    "adapter-taiga-ui-grouping.api.md": {
+      "surface": "adapter-taiga-ui-grouping"
+    },
+    "adapter-taiga-ui-grouping-panel.api.md": {
+      "surface": "adapter-taiga-ui-grouping-panel"
+    },
+    "adapter-taiga-ui-header-filters.api.md": {
+      "surface": "adapter-taiga-ui-header-filters"
+    },
+    "adapter-taiga-ui-multi-sort.api.md": {
+      "reexport": "adapter-taiga-ui-multi-sort"
+    },
+    "adapter-taiga-ui-nested-table.api.md": {
+      "surface": "adapter-taiga-ui-nested-table"
+    },
+    "adapter-taiga-ui-pinned-summary-rows.api.md": {
+      "reexport": "adapter-taiga-ui-pinned-summary-rows"
+    },
+    "adapter-taiga-ui-pivot.api.md": {
+      "surface": "adapter-taiga-ui-pivot"
+    },
+    "adapter-taiga-ui-preset.api.md": {
+      "surface": "adapter-taiga-ui-preset"
+    },
+    "adapter-taiga-ui-print.api.md": {
+      "surface": "adapter-taiga-ui-print"
+    },
+    "adapter-taiga-ui-resizable-columns.api.md": {
+      "reexport": "adapter-taiga-ui-resizable-columns"
+    },
+    "adapter-taiga-ui-row-actions.api.md": {
+      "surface": "adapter-taiga-ui-row-actions"
+    },
+    "adapter-taiga-ui-row-appearance.api.md": {
+      "reexport": "adapter-taiga-ui-row-appearance"
+    },
+    "adapter-taiga-ui-row-detail.api.md": {
+      "surface": "adapter-taiga-ui-row-detail"
+    },
+    "adapter-taiga-ui-row-pinning.api.md": {
+      "reexport": "adapter-taiga-ui-row-pinning"
+    },
+    "adapter-taiga-ui-row-reorder.api.md": {
+      "surface": "adapter-taiga-ui-row-reorder"
+    },
+    "adapter-taiga-ui-saved-views.api.md": {
+      "surface": "adapter-taiga-ui-saved-views"
+    },
+    "adapter-taiga-ui-selection-stats.api.md": {
+      "surface": "adapter-taiga-ui-selection-stats"
+    },
+    "adapter-taiga-ui-side-panel.api.md": {
+      "surface": "adapter-taiga-ui-side-panel"
+    },
+    "adapter-taiga-ui-status-bar.api.md": {
+      "surface": "adapter-taiga-ui-status-bar"
+    },
+    "adapter-taiga-ui-tree.api.md": {
+      "surface": "adapter-taiga-ui-tree"
+    },
+    "adapter-taiga-ui-virtualize.api.md": {
+      "surface": "adapter-taiga-ui-virtualize"
     }
   }
 }
