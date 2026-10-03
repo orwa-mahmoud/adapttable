@@ -1,0 +1,99 @@
+diff --git a/index.js b/index.js
+index f01e9a16b4781dc24c8f43dc7a4c8e6d1e4ae5eb..6ebef9a1f1b0651e7e514de31300e67ba8140d07 100644
+--- a/index.js
++++ b/index.js
+@@ -399,6 +399,10 @@ module.exports = class CachePolicy {
+             return this._evaluateRequestMissResult(req);
+         }
+ 
++        if (this._requiresRevalidation()) {
++            return this._evaluateRequestMissResult(req);
++        }
++
+         if (!this._requestMatches(req, false)) {
+             return this._evaluateRequestMissResult(req);
+         }
+@@ -485,7 +489,7 @@ module.exports = class CachePolicy {
+         }
+ 
+         // A Vary header field-value of "*" always fails to match
+-        if (this._resHeaders.vary === '*') {
++        if (this._resHeaders.vary && this._resHeaders.vary.split(',').some(field => field.trim() === '*')) {
+             return false;
+         }
+ 
+@@ -612,7 +616,7 @@ module.exports = class CachePolicy {
+             return 0;
+         }
+ 
+-        if (this._resHeaders.vary === '*') {
++        if (this._resHeaders.vary && this._resHeaders.vary.split(',').some(field => field.trim() === '*')) {
+             return 0;
+         }
+ 
+@@ -656,6 +660,22 @@ module.exports = class CachePolicy {
+         return defaultMinTtl;
+     }
+ 
++    /**
++     * Whether response restrictions require validation before reuse.
++     * @returns {boolean}
++     */
++    _requiresRevalidation() {
++        const vary = this._resHeaders.vary;
++        return !!(!this.storable() || this._rescc['no-cache'] ||
++            (this._isShared && (
++                (this._resHeaders['set-cookie'] && !this._rescc.public && !this._rescc.immutable) ||
++                this._rescc['proxy-revalidate']
++            )) ||
++            (vary && vary.split(',').some(field => field.trim() === '*')) ||
++            (this.stale() && (this._rescc['must-revalidate'] ||
++                (this._isShared && this._rescc['s-maxage'] !== undefined))));
++    }
++
+     /**
+      * Remaining time this cache entry may be useful for, in *milliseconds*.
+      * You can use this as an expiration time for your cache storage.
+@@ -665,6 +685,9 @@ module.exports = class CachePolicy {
+      */
+     timeToLive() {
+         const age = this.maxAge() - this.age();
++        if (this._requiresRevalidation()) {
++            return Math.round(Math.max(0, age) * 1000);
++        }
+         const staleIfErrorAge = age + toNumberOrZero(this._rescc['stale-if-error']);
+         const staleWhileRevalidateAge = age + toNumberOrZero(this._rescc['stale-while-revalidate']);
+         return Math.round(Math.max(0, age, staleIfErrorAge, staleWhileRevalidateAge) * 1000);
+@@ -683,7 +706,8 @@ module.exports = class CachePolicy {
+      * @returns {boolean} `true` if `stale-if-error` condition allows use of a stale response.
+      */
+     _useStaleIfError() {
+-        return this.maxAge() + toNumberOrZero(this._rescc['stale-if-error']) > this.age();
++        return !this._requiresRevalidation() &&
++            this.maxAge() + toNumberOrZero(this._rescc['stale-if-error']) > this.age();
+     }
+ 
+     /** See `evaluateRequest()` for a more complete solution
+@@ -691,7 +715,7 @@ module.exports = class CachePolicy {
+      */
+     useStaleWhileRevalidate() {
+         const swr = toNumberOrZero(this._rescc['stale-while-revalidate']);
+-        return swr > 0 && this.maxAge() + swr > this.age();
++        return !this._requiresRevalidation() && swr > 0 && this.maxAge() + swr > this.age();
+     }
+ 
+     /**
+@@ -832,7 +856,12 @@ module.exports = class CachePolicy {
+     revalidatedPolicy(request, response) {
+         this._assertRequestHasHeaders(request);
+ 
+-        if (this._useStaleIfError() && isErrorResponse(response)) {
++        const requestCC = parseCacheControl(request.headers['cache-control']);
++        const requestAllowsReuse = this._requestMatches(request, true) &&
++            !requestCC['no-cache'] && !/no-cache/.test(request.headers.pragma) &&
++            (!requestCC['max-age'] || this.age() <= toNumberOrZero(requestCC['max-age'])) &&
++            (!requestCC['min-fresh'] || this.maxAge() - this.age() >= toNumberOrZero(requestCC['min-fresh']));
++        if (requestAllowsReuse && this._useStaleIfError() && isErrorResponse(response)) {
+           return {
+               policy: this,
+               modified: false,
