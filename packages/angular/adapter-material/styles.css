@@ -227,3 +227,23 @@
   [data-adapttable-part="edit-cell-activate"] {
   --mat-button-text-container-height: 40px;
 }
+
+.adapt-material [data-adapttable-part="grouping-drop-zone"],
+.adapt-material [data-adapttable-part="grouping-remove-zone"] {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px dashed var(--adapt-material-line);
+  border-radius: 8px;
+  color: var(--mat-sys-on-surface-variant, #49454f);
+}
+.adapt-material [data-adapttable-part="grouping-drop-zone"]:not([data-empty]) {
+  padding: 0 2px;
+  border-color: transparent;
+}
+.adapt-material [data-adapttable-part="grouping-drop-zone"][data-drop-active],
+.adapt-material [data-adapttable-part="grouping-remove-zone"][data-active] {
+  border-color: var(--mat-sys-primary, #6750a4);
+  background: var(--mat-sys-primary-container, #eaddff);
+  color: var(--mat-sys-on-primary-container, #21005d);
+}

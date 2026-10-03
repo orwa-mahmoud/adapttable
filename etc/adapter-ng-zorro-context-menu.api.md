@@ -37,13 +37,13 @@ export class AdaptContextMenuItem {
 }
 
 // @public
-export class AdaptContextMenuLive {
+export class AdaptContextMenuLive<TRow> {
     constructor();
     readonly menu: Signal<TableContextMenu>;
-    readonly props: InputSignal<TableContextMenuOptions<unknown>>;
+    readonly props: InputSignal<TableContextMenuOptions<TRow>>;
     readonly slots: ContextMenuSlots;
     // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptContextMenuLive, "adapt-context-menu-live", never, {
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptContextMenuLive<any>, "adapt-context-menu-live", never, {
         "props": {
             "alias": "props";
             "required": true;
@@ -51,7 +51,7 @@ export class AdaptContextMenuLive {
         };
     }, {}, never, never, true, never>;
     // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptContextMenuLive, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptContextMenuLive<any>, never>;
 }
 
 // @public

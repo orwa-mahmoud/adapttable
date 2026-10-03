@@ -87,6 +87,7 @@ import { ColumnMenuRow } from '@adapttable/core';
 import { columnMenuRows } from '@adapttable/core';
 import { ColumnMenuSlotProps } from '@adapttable/core/binding';
 import { ColumnMetadata } from '@adapttable/core';
+import { ColumnModel } from '@adapttable/core';
 import { ColumnResizeHandleProps } from '@adapttable/core';
 import { ColumnSelectCheckboxChromeProps } from '@adapttable/core/binding';
 import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
@@ -115,6 +116,7 @@ import { coreGroupingPanel } from '@adapttable/core/binding';
 import { coreHeaderFilters } from '@adapttable/core/binding';
 import { coreRowActions } from '@adapttable/core/binding';
 import { coreSavedViews } from '@adapttable/core/binding';
+import { CssProperties } from '@adapttable/core';
 import { DEFAULT_SHORTCUTS } from '@adapttable/core';
 import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
@@ -126,6 +128,7 @@ import { devWarn } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
 import { dirtyMarkerView } from '@adapttable/core';
+import { DisplayValue } from '@adapttable/core';
 import { EDITABLE_CELL } from '@adapttable/core/binding';
 import { EditableCellActivateProps as EditableCellActivateProps_2 } from '@adapttable/core/binding';
 import { EditableCellButtonProps } from '@adapttable/core/binding';
@@ -151,6 +154,7 @@ import { editorInputType } from '@adapttable/core';
 import { editorValidationProps } from '@adapttable/core';
 import { EditUnit } from '@adapttable/core';
 import { EditValidationState } from '@adapttable/core';
+import { ElementRef } from '@angular/core';
 import { EnvironmentProviders } from '@angular/core';
 import { estimateBodyItemSize } from '@adapttable/core/binding';
 import { EXPAND_TOGGLE } from '@adapttable/core/binding';
@@ -169,6 +173,7 @@ import { ExtraFilters } from '@adapttable/core';
 import { extraHostFillStyle } from '@adapttable/core/binding';
 import { ExtraRow } from '@adapttable/core';
 import { eyeIcon } from '@adapttable/core/binding';
+import { FacetCounts } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
@@ -182,6 +187,7 @@ import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FeatureStateKey } from '@adapttable/core/binding';
 import { featureStateKey } from '@adapttable/core/binding';
 import { FILL_HANDLE } from '@adapttable/core/binding';
+import { FillHandleCellSlotProps } from '@adapttable/core/binding';
 import { FillHandleSlotProps } from '@adapttable/core/binding';
 import { FILTER_DRAWER } from '@adapttable/core/binding';
 import { FILTER_ENGINE_IMPL } from '@adapttable/core';
@@ -232,6 +238,7 @@ import { GRIP_ICON } from '@adapttable/core/binding';
 import { GROUP_HEADER_CARD } from '@adapttable/core/binding';
 import { GROUP_HEADER_ROW } from '@adapttable/core/binding';
 import { groupAggregateEntries } from '@adapttable/core';
+import { GroupAggregateOps } from '@adapttable/core';
 import { GroupAggregatesFn } from '@adapttable/core';
 import { GroupByInput } from '@adapttable/core';
 import { GroupCollapseState } from '@adapttable/core/binding';
@@ -260,6 +267,8 @@ import { GroupMoreButtonProps } from '@adapttable/core/binding';
 import { GroupMoreButtonSlotProps } from '@adapttable/core/binding';
 import { GroupNode } from '@adapttable/core';
 import { GroupPagingState } from '@adapttable/core/binding';
+import { GroupRowCell } from '@adapttable/core';
+import { GroupRowLayout } from '@adapttable/core';
 import { groupRowLayout } from '@adapttable/core';
 import { groupRowParts } from '@adapttable/core/binding';
 import { groupSelectionState } from '@adapttable/core';
@@ -270,6 +279,7 @@ import { headerFilterInsideSelector } from '@adapttable/core';
 import { HeaderFilterOpenHost } from '@adapttable/core';
 import { HeaderGroupCell } from '@adapttable/core/binding';
 import { HeaderSelectionState } from '@adapttable/core/binding';
+import { HeaderSelectionState as HeaderSelectionState_2 } from '@adapttable/core';
 import { hideAllColumns } from '@adapttable/core/binding';
 import { HighlightedCell } from '@adapttable/core';
 import { HtmlGroupedHeaderCell } from '@adapttable/core/binding';
@@ -308,6 +318,7 @@ import { offersAllMatching } from '@adapttable/core';
 import { OnInit } from '@angular/core';
 import { OPEN_PALETTE_COMMAND } from '@adapttable/core';
 import { orderedCardEntries } from '@adapttable/core';
+import { OutputEmitterRef } from '@angular/core';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
@@ -369,6 +380,7 @@ import { RowEditControlsOptions } from '@adapttable/core';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
 import { RowExpansionState } from '@adapttable/core/binding';
+import { RowGroupRef } from '@adapttable/core';
 import { RowHeight } from '@adapttable/core';
 import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
 import { RowMutationsState } from '@adapttable/core/binding';
@@ -404,7 +416,9 @@ import { Shortcut } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core/binding';
 import { showSimpleFilterFields } from '@adapttable/core';
 import { SIDE_PANEL } from '@adapttable/core/binding';
+import { SidePanelChromeProps } from '@adapttable/core/binding';
 import { SidePanelEntry } from '@adapttable/core/binding';
+import { SidePanelEntry as SidePanelEntry_2 } from '@adapttable/core';
 import { SidePanelModel } from '@adapttable/core';
 import { Signal } from '@angular/core';
 import { SlotFill } from '@adapttable/core/binding';
@@ -417,6 +431,7 @@ import { SpeechInputState } from '@adapttable/core/binding';
 import { SpeechInputStatus } from '@adapttable/core/binding';
 import { splitRelativeToken } from '@adapttable/core';
 import { STATUS_BAR } from '@adapttable/core/binding';
+import { StatusBarChromeProps } from '@adapttable/core/binding';
 import { StatusBarItem } from '@adapttable/core';
 import { stopCellEditKeyboard } from '@adapttable/core';
 import { stopEditKeys } from '@adapttable/core';
@@ -1051,6 +1066,64 @@ export class AdaptAttrs implements AfterViewChecked {
 }
 
 // @public
+export abstract class AdaptAutoFilterFormModel<TRow> {
+    // (undocumented)
+    readonly defs: InputSignal<readonly FilterDef<TRow>[]>;
+    // (undocumented)
+    protected readonly fields: Signal<{
+        def: FilterDef<TRow>;
+        context: {
+            $implicit: FilterWidgetRenderProps<TRow>;
+            def: FilterDef<TRow>;
+            source: FilterFormSource<TRow>;
+            labels: Required<TableLabels>;
+            className?: string;
+        };
+        renderer: ResolvedRenderer<    {
+        $implicit: FilterWidgetRenderProps<TRow>;
+        def: FilterDef<TRow>;
+        source: FilterFormSource<TRow>;
+        labels: Required<TableLabels>;
+        className?: string;
+        }> | null;
+        text: string | null;
+    }[]>;
+    // (undocumented)
+    protected kindOf(def: FilterDef<TRow>): string;
+    // (undocumented)
+    readonly labels: InputSignal<Required<TableLabels>>;
+    // (undocumented)
+    readonly registry: InputSignal<FilterTypeRegistry>;
+    // (undocumented)
+    readonly source: InputSignal<TableSource<TRow>>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptAutoFilterFormModel<any>, never, never, {
+        "defs": {
+            "alias": "defs";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "registry": {
+            "alias": "registry";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptAutoFilterFormModel<any>, never>;
+}
+
+// @public
 export class AdaptBatchEditBarChrome<TRow> {
     readonly batch: InputSignal<BatchEditingState<TRow>>;
     readonly buttonClassName: InputSignal<string | undefined>;
@@ -1184,6 +1257,40 @@ export class AdaptBatchEditCell<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptBatchEditCell<any>, never>;
+}
+
+// @public
+export abstract class AdaptBooleanFilterFieldModel<TRow> {
+    // (undocumented)
+    readonly def: InputSignal<FilterDef<TRow>>;
+    // (undocumented)
+    readonly labels: InputSignal<Required<TableLabels>>;
+    // (undocumented)
+    protected pick(value: string | null): void;
+    // (undocumented)
+    readonly source: InputSignal<TableSource<TRow>>;
+    // (undocumented)
+    protected readonly widget: Signal<BooleanFieldWidget>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptBooleanFilterFieldModel<any>, never, never, {
+        "def": {
+            "alias": "def";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptBooleanFilterFieldModel<any>, never>;
 }
 
 // @public
@@ -1406,6 +1513,165 @@ export class AdaptColumnGroupToggleChrome {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnGroupToggleChrome, never>;
+}
+
+// @public
+export abstract class AdaptColumnMenuEdgeRowModel {
+    // (undocumented)
+    readonly columnKey: InputSignal<string>;
+    // (undocumented)
+    protected readonly eyeOff: IconDescriptor;
+    // (undocumented)
+    protected readonly eyeOn: IconDescriptor;
+    // (undocumented)
+    readonly hideLabel: InputSignal<string>;
+    // (undocumented)
+    readonly layout: InputSignal<ColumnLayout<never>>;
+    // (undocumented)
+    readonly name: InputSignal<string>;
+    // (undocumented)
+    protected readonly pinIcon: IconDescriptor;
+    // (undocumented)
+    readonly pinLabel: InputSignal<string>;
+    // (undocumented)
+    readonly showLabel: InputSignal<string>;
+    // (undocumented)
+    readonly side: InputSignal<"start" | "end">;
+    // (undocumented)
+    readonly unpinLabel: InputSignal<string>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptColumnMenuEdgeRowModel, never, never, {
+        "layout": {
+            "alias": "layout";
+            "required": true;
+            "isSignal": true;
+        };
+        "columnKey": {
+            "alias": "columnKey";
+            "required": true;
+            "isSignal": true;
+        };
+        "side": {
+            "alias": "side";
+            "required": true;
+            "isSignal": true;
+        };
+        "name": {
+            "alias": "name";
+            "required": true;
+            "isSignal": true;
+        };
+        "showLabel": {
+            "alias": "showLabel";
+            "required": true;
+            "isSignal": true;
+        };
+        "hideLabel": {
+            "alias": "hideLabel";
+            "required": true;
+            "isSignal": true;
+        };
+        "pinLabel": {
+            "alias": "pinLabel";
+            "required": true;
+            "isSignal": true;
+        };
+        "unpinLabel": {
+            "alias": "unpinLabel";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnMenuEdgeRowModel, never>;
+}
+
+// @public
+export abstract class AdaptColumnMenuModel {
+    // (undocumented)
+    protected readonly actionsKey = "actions";
+    // (undocumented)
+    protected readonly drag: ColumnDrag;
+    // (undocumented)
+    protected hideAll(): void;
+    // (undocumented)
+    readonly props: InputSignal<ColumnMenuSlotProps<never>>;
+    // (undocumented)
+    protected readonly query: WritableSignal<string>;
+    // (undocumented)
+    protected readonly reorderKey = "reorder";
+    // (undocumented)
+    protected readonly rows: Signal<ColumnMenuRow<never>[]>;
+    // (undocumented)
+    protected showAll(): void;
+    // (undocumented)
+    protected unpinAll(): void;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptColumnMenuModel, never, never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnMenuModel, never>;
+}
+
+// @public
+export abstract class AdaptColumnMenuRowModel {
+    // (undocumented)
+    protected readonly actions: Signal<ColumnMenuItem[]>;
+    // (undocumented)
+    protected asAction(item: ColumnMenuItem): {
+        disabled: boolean;
+    };
+    // (undocumented)
+    protected asChoice(item: ColumnMenuItem): ColumnMenuChoice | undefined;
+    // (undocumented)
+    readonly drag: InputSignal<ColumnDrag>;
+    // (undocumented)
+    protected readonly eyeOff: IconDescriptor;
+    // (undocumented)
+    protected readonly eyeOn: IconDescriptor;
+    // (undocumented)
+    protected readonly gripIcon: IconDescriptor;
+    // (undocumented)
+    protected nextPin(row: ColumnMenuRow<never>): ReturnType<typeof nextPinSide>;
+    // (undocumented)
+    protected readonly open: WritableSignal<boolean>;
+    // (undocumented)
+    protected readonly pinIcon: IconDescriptor;
+    // (undocumented)
+    protected pinLabel(row: ColumnMenuRow<never>, props: ColumnMenuSlotProps<never>): string;
+    // (undocumented)
+    readonly props: InputSignal<ColumnMenuSlotProps<never>>;
+    // (undocumented)
+    protected readonly rename: ColumnRenameEditorState;
+    // (undocumented)
+    readonly row: InputSignal<ColumnMenuRow<never>>;
+    // (undocumented)
+    protected runAction(item: ColumnMenuItem): void;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptColumnMenuRowModel, never, never, {
+        "row": {
+            "alias": "row";
+            "required": true;
+            "isSignal": true;
+        };
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+        "drag": {
+            "alias": "drag";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnMenuRowModel, never>;
 }
 
 // @public
@@ -1650,6 +1916,525 @@ export class AdaptControl<TProps> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptControl<any>, never>;
+}
+
+// @public
+export abstract class AdaptDataTableShell<TRow> implements OnInit {
+    // (undocumented)
+    protected readonly agentApprovalProps: Signal<AgentApprovalProps>;
+    protected readonly agentApprovalSlot: FeatureSlotKey<AgentApprovalProps>;
+    readonly aggregates: InputSignal<readonly QueryAggregate[] | undefined>;
+    readonly assistant: InputSignal<TableAssistantProps | undefined>;
+    // @internal
+    protected readonly batchEditBarSlot: FeatureSlotKey<BatchEditBarProps<never>>;
+    // @internal
+    protected readonly bulkBarSlot: FeatureSlotKey<BulkBarSlotProps<unknown>>;
+    readonly cellNavigation: InputSignal<boolean>;
+    // @internal
+    protected readonly cellTemplates: Signal<readonly AdaptCellTemplate[]>;
+    readonly classNames: InputSignal<DataTableClassNames>;
+    readonly closeHeaderFilterOnSelect: InputSignal<boolean>;
+    readonly columnLayout: InputSignal<ColumnLayoutState | undefined>;
+    readonly columnLayoutChange: OutputEmitterRef<ColumnLayoutState>;
+    // @internal
+    protected readonly columnMenuSlot: FeatureSlotKey<ColumnMenuSlotProps<never>>;
+    readonly columns: InputSignal<readonly ColumnInput<TRow>[]>;
+    // @internal
+    protected readonly commandPaletteSlot: FeatureSlotKey<unknown>;
+    readonly confirm: InputSignal<ConfirmHandler | undefined>;
+    // @internal
+    protected readonly contextMenuSlot: FeatureSlotKey<    {
+    container?: HTMLElement | null;
+    children: (regionProps: Record<string, unknown>) => unknown;
+    }>;
+    readonly data: InputSignal<readonly TRow[] | undefined>;
+    readonly defaultColumnLayout: InputSignal<Partial<ColumnLayoutState> | undefined>;
+    readonly defaults: InputSignal<(Partial<TableQueryParams> & {
+    extra?: ExtraFilters;
+    }) | undefined>;
+    readonly density: InputSignal<TableDensity | undefined>;
+    readonly densityChange: OutputEmitterRef<TableDensity>;
+    // @internal
+    protected readonly desktopTable: Signal<DataTableSurface | undefined>;
+    readonly dir: InputSignal<Direction>;
+    protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
+    protected readonly dockedSide: Signal<"start" | "end">;
+    readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
+    readonly error: InputSignal<Error | null | undefined>;
+    readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
+    readonly facetKeys: InputSignal<readonly string[] | undefined>;
+    readonly facets: InputSignal<Readonly<Record<string, FacetCounts>> | undefined>;
+    readonly features: InputSignal<readonly AdaptTableFeature[]>;
+    // @internal
+    protected readonly filtersIcon: IconDescriptor;
+    // @internal
+    protected readonly filterSlots: {
+        form: FeatureSlotKey<FiltersFormSlotProps<never>>;
+        popover: FeatureSlotKey<FilterOverlaySlotProps<unknown>>;
+        drawer: FeatureSlotKey<FilterOverlaySlotProps<unknown>>;
+        chips: FeatureSlotKey<ActiveFilterChipsSlotProps>;
+        header: FeatureSlotKey<FilterHeaderControlProps<never>>;
+    };
+    readonly filtersMode: InputSignal<FiltersMode>;
+    // @internal
+    protected readonly findBarSlot: FeatureSlotKey<FindBarProps>;
+    readonly forceMobile: InputSignal<boolean | undefined>;
+    // @internal
+    protected readonly groupingPanelSlot: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
+    readonly isCellFlashing: InputSignal<((rowId: string, columnKey: string) => boolean) | undefined>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    readonly loading: InputSignal<boolean | undefined>;
+    readonly maxHeight: InputSignal<string | number | undefined>;
+    // @internal
+    protected readonly mobileCards: Signal<DataTableSurface | undefined>;
+    readonly mode: InputSignal<"frontend" | "server" | undefined>;
+    // (undocumented)
+    ngOnInit(): void;
+    // @internal
+    protected readonly noResults: Signal<boolean>;
+    readonly onCellCut: InputSignal<((range: CellRange) => void) | undefined>;
+    readonly onColumnRename: InputSignal<((key: string, name: string) => void) | undefined>;
+    readonly onEditConflict: InputSignal<EditConflictHandler<TRow> | undefined>;
+    protected onMenuContext(event: MouseEvent): void;
+    protected onMenuKey(event: KeyboardEvent): void;
+    protected onMenuPointerCancel(): void;
+    protected onMenuPointerDown(event: PointerEvent): void;
+    protected onMenuPointerMove(event: PointerEvent): void;
+    protected onMenuPointerUp(): void;
+    readonly onQueryChange: InputSignal<TableQueryHandler | undefined>;
+    readonly onRowClick: InputSignal<((row: TRow) => void) | undefined>;
+    readonly paginationMode: InputSignal<PaginationMode | undefined>;
+    readonly renderCard: InputSignal<MobileCardRenderer<TRow> | undefined>;
+    readonly renderRowActions: InputSignal<RowActionsRenderer<TRow> | undefined>;
+    // @internal
+    protected readonly reorderAnnouncerSlot: FeatureSlotKey<    {
+    announcement: string;
+    }>;
+    readonly responseKey: InputSignal<string | undefined>;
+    readonly rowKey: InputSignal<(row: TRow) => string>;
+    readonly rowVersion: InputSignal<((row: TRow) => string | number) | undefined>;
+    // @internal
+    protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
+    readonly searchable: InputSignal<boolean>;
+    // @internal
+    protected readonly searchIcon: IconDescriptor;
+    readonly searchPlaceholder: InputSignal<string | undefined>;
+    readonly selectable: InputSignal<boolean>;
+    readonly selectedIds: InputSignal<readonly string[] | undefined>;
+    readonly selectionChange: OutputEmitterRef<string[]>;
+    readonly sidePanel: Signal<TemplateRef<unknown> | undefined>;
+    protected readonly sidePanelProps: Signal<{
+        panels: readonly SidePanelPanel[];
+        openPanel: string;
+        onOpenPanel: (key: string) => void;
+        onClose: () => void;
+        side: "start" | "end";
+        labels: TableLabels | undefined;
+    } | undefined>;
+    readonly sidePanelSide: InputSignal<"start" | "end">;
+    // @internal
+    protected readonly sidePanelSlot: FeatureSlotKey<Omit<SidePanelChromeProps<unknown, SidePanelEntry_2, KeyboardEvent>, "slots">>;
+    readonly skeletonRows: InputSignal<number | undefined>;
+    protected sortBy(event: Event | string): void;
+    readonly source: InputSignal<TableSource<TRow> | Signal<TableSource<TRow>> | undefined>;
+    protected readonly statusBarProps: Signal<{
+        enabled: boolean;
+        shown: number;
+        page: number;
+        limit: number;
+        total: number;
+        selected: number;
+        stats: SelectionStats | null;
+        labels: Required<TableLabels>;
+        notices: readonly FeatureNotice_2[];
+    } | undefined>;
+    // @internal
+    protected readonly statusBarSlot: FeatureSlotKey<Omit<StatusBarChromeProps<unknown>, "slots">>;
+    readonly summaryRow: InputSignal<SummaryRowFn<TRow> | undefined>;
+    readonly supports: InputSignal<QuerySupport | undefined>;
+    // (undocumented)
+    protected readonly tableAssistantSlot: FeatureSlotKey<TableAssistantProps_2<unknown>>;
+    readonly tableFooter: Signal<TemplateRef<unknown> | undefined>;
+    readonly tableLabel: InputSignal<string | undefined>;
+    // @internal
+    protected readonly toolbarExtrasSlot: FeatureSlotKey<ToolbarExtrasSlotProps>;
+    readonly total: InputSignal<number | undefined>;
+    readonly urlKey: InputSignal<string | undefined>;
+    readonly urlSync: InputSignal<boolean>;
+    // @internal
+    protected readonly view: WritableSignal<TableView<TRow> | undefined>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptDataTableShell<any>, never, never, {
+        "data": {
+            "alias": "data";
+            "required": false;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": false;
+            "isSignal": true;
+        };
+        "mode": {
+            "alias": "mode";
+            "required": false;
+            "isSignal": true;
+        };
+        "onQueryChange": {
+            "alias": "onQueryChange";
+            "required": false;
+            "isSignal": true;
+        };
+        "total": {
+            "alias": "total";
+            "required": false;
+            "isSignal": true;
+        };
+        "loading": {
+            "alias": "loading";
+            "required": false;
+            "isSignal": true;
+        };
+        "error": {
+            "alias": "error";
+            "required": false;
+            "isSignal": true;
+        };
+        "supports": {
+            "alias": "supports";
+            "required": false;
+            "isSignal": true;
+        };
+        "aggregates": {
+            "alias": "aggregates";
+            "required": false;
+            "isSignal": true;
+        };
+        "responseKey": {
+            "alias": "responseKey";
+            "required": false;
+            "isSignal": true;
+        };
+        "facets": {
+            "alias": "facets";
+            "required": false;
+            "isSignal": true;
+        };
+        "facetKeys": {
+            "alias": "facetKeys";
+            "required": false;
+            "isSignal": true;
+        };
+        "columns": {
+            "alias": "columns";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowKey": {
+            "alias": "rowKey";
+            "required": true;
+            "isSignal": true;
+        };
+        "tableLabel": {
+            "alias": "tableLabel";
+            "required": false;
+            "isSignal": true;
+        };
+        "dir": {
+            "alias": "dir";
+            "required": false;
+            "isSignal": true;
+        };
+        "forceMobile": {
+            "alias": "forceMobile";
+            "required": false;
+            "isSignal": true;
+        };
+        "classNames": {
+            "alias": "classNames";
+            "required": false;
+            "isSignal": true;
+        };
+        "renderCard": {
+            "alias": "renderCard";
+            "required": false;
+            "isSignal": true;
+        };
+        "renderRowActions": {
+            "alias": "renderRowActions";
+            "required": false;
+            "isSignal": true;
+        };
+        "onRowClick": {
+            "alias": "onRowClick";
+            "required": false;
+            "isSignal": true;
+        };
+        "isCellFlashing": {
+            "alias": "isCellFlashing";
+            "required": false;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "searchPlaceholder": {
+            "alias": "searchPlaceholder";
+            "required": false;
+            "isSignal": true;
+        };
+        "searchable": {
+            "alias": "searchable";
+            "required": false;
+            "isSignal": true;
+        };
+        "summaryRow": {
+            "alias": "summaryRow";
+            "required": false;
+            "isSignal": true;
+        };
+        "urlSync": {
+            "alias": "urlSync";
+            "required": false;
+            "isSignal": true;
+        };
+        "urlKey": {
+            "alias": "urlKey";
+            "required": false;
+            "isSignal": true;
+        };
+        "defaults": {
+            "alias": "defaults";
+            "required": false;
+            "isSignal": true;
+        };
+        "paginationMode": {
+            "alias": "paginationMode";
+            "required": false;
+            "isSignal": true;
+        };
+        "maxHeight": {
+            "alias": "maxHeight";
+            "required": false;
+            "isSignal": true;
+        };
+        "skeletonRows": {
+            "alias": "skeletonRows";
+            "required": false;
+            "isSignal": true;
+        };
+        "sidePanelSide": {
+            "alias": "sidePanelSide";
+            "required": false;
+            "isSignal": true;
+        };
+        "selectable": {
+            "alias": "selectable";
+            "required": false;
+            "isSignal": true;
+        };
+        "selectedIds": {
+            "alias": "selectedIds";
+            "required": false;
+            "isSignal": true;
+        };
+        "cellNavigation": {
+            "alias": "cellNavigation";
+            "required": false;
+            "isSignal": true;
+        };
+        "onCellCut": {
+            "alias": "onCellCut";
+            "required": false;
+            "isSignal": true;
+        };
+        "features": {
+            "alias": "features";
+            "required": false;
+            "isSignal": true;
+        };
+        "assistant": {
+            "alias": "assistant";
+            "required": false;
+            "isSignal": true;
+        };
+        "rowVersion": {
+            "alias": "rowVersion";
+            "required": false;
+            "isSignal": true;
+        };
+        "editConflictPolicy": {
+            "alias": "editConflictPolicy";
+            "required": false;
+            "isSignal": true;
+        };
+        "onEditConflict": {
+            "alias": "onEditConflict";
+            "required": false;
+            "isSignal": true;
+        };
+        "columnLayout": {
+            "alias": "columnLayout";
+            "required": false;
+            "isSignal": true;
+        };
+        "defaultColumnLayout": {
+            "alias": "defaultColumnLayout";
+            "required": false;
+            "isSignal": true;
+        };
+        "onColumnRename": {
+            "alias": "onColumnRename";
+            "required": false;
+            "isSignal": true;
+        };
+        "filtersMode": {
+            "alias": "filtersMode";
+            "required": false;
+            "isSignal": true;
+        };
+        "closeHeaderFilterOnSelect": {
+            "alias": "closeHeaderFilterOnSelect";
+            "required": false;
+            "isSignal": true;
+        };
+        "extraChips": {
+            "alias": "extraChips";
+            "required": false;
+            "isSignal": true;
+        };
+        "density": {
+            "alias": "density";
+            "required": false;
+            "isSignal": true;
+        };
+        "confirm": {
+            "alias": "confirm";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {
+        "densityChange": "densityChange";
+        "selectionChange": "selectionChange";
+        "columnLayoutChange": "columnLayoutChange";
+    }, ["cellTemplates", "tableFooter", "sidePanel"], never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDataTableShell<any>, never>;
+}
+
+// @public
+export abstract class AdaptDesktopTableModel<TRow> {
+    // (undocumented)
+    protected readonly columnGroupToggleSlot: FeatureSlotKey<ColumnGroupToggleProps>;
+    // (undocumented)
+    protected columnName(column: {
+        key: string;
+        header?: unknown;
+    }): string;
+    // (undocumented)
+    protected readonly columnSelects: Signal<Map<string, ColumnSelectCheckboxChromeProps>>;
+    // (undocumented)
+    protected readonly columnSelectSlot: FeatureSlotKey<ColumnSelectCheckboxChromeProps>;
+    // (undocumented)
+    protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
+    // (undocumented)
+    protected readonly expandToggleSlot: FeatureSlotKey<ExpandToggleSlotProps>;
+    // (undocumented)
+    protected extraCellStyle(fill: unknown): Record<string, unknown>;
+    // (undocumented)
+    protected readonly extraParts: {
+        readonly separator: {
+            readonly row: "separator-row";
+            readonly cell: "separator-cell";
+        };
+        readonly fullWidth: {
+            readonly row: "full-width-row";
+            readonly cell: "full-width-cell";
+        };
+    };
+    // (undocumented)
+    protected readonly extraRowStyle: CssProperties;
+    // (undocumented)
+    protected readonly fillHandleSlot: FeatureSlotKey<FillHandleCellSlotProps<unknown>>;
+    // (undocumented)
+    protected readonly filterSlots: {
+        header: FeatureSlotKey<FilterHeaderControlProps<never>>;
+    };
+    // (undocumented)
+    protected readonly groupCells: Signal<Map<string, {
+    readonly attrs: Attrs;
+    readonly caption: string | null;
+    readonly toggle: ColumnGroupToggleProps | undefined;
+    }>>;
+    // (undocumented)
+    protected readonly groupHeaderRowSlot: FeatureSlotKey<GroupHeaderRowSlotProps<never, unknown, ColumnModel<never>>>;
+    // (undocumented)
+    protected readonly groupLabelAttrs: Attrs;
+    // (undocumented)
+    protected readonly headerCells: Signal<Map<string, Readonly<Record<string, unknown>>>>;
+    // (undocumented)
+    protected readonly headerPlan: Signal<HtmlGroupedHeaderCell[][] | null>;
+    // (undocumented)
+    readonly maxHeight: InputSignal<string | number | undefined>;
+    // (undocumented)
+    protected readonly noAttrs: Attrs;
+    // (undocumented)
+    protected readonly renameColumn: (key: string, name: string) => void;
+    // (undocumented)
+    protected reorderHandleProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderHandleProps<never>;
+    // (undocumented)
+    protected readonly reorderHandleSlot: FeatureSlotKey<RowReorderHandleProps_2<never, unknown>>;
+    // (undocumented)
+    protected resizeHandle(column: {
+        key: string;
+        header?: unknown;
+    }): Attrs | undefined;
+    // (undocumented)
+    protected readonly rowEditActionsSlot: FeatureSlotKey<RowEditActionsProps<never>>;
+    // (undocumented)
+    protected rowId(row: TRow): string;
+    // (undocumented)
+    readonly rowKey: InputSignal<(row: TRow) => string>;
+    // (undocumented)
+    protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
+    // (undocumented)
+    protected scrollBoxStyle(): Record<string, string> | null;
+    // (undocumented)
+    scrollElement(): HTMLElement | null;
+    // (undocumented)
+    protected sortIndex(column: {
+        key: string;
+    }): number | undefined;
+    // (undocumented)
+    protected spanned(attrs: Attrs, cell: BodyCellView<TRow>): Attrs;
+    // (undocumented)
+    protected treeCellProps(entry: BodyRow<TRow>, columnKey: string, children: TemplateRef<unknown>): TreeCellProps<never> | undefined;
+    // (undocumented)
+    protected readonly treeCellSlot: FeatureSlotKey<TreeCellProps<never, unknown>>;
+    // (undocumented)
+    readonly view: InputSignal<TableView<TRow>>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptDesktopTableModel<any>, never, never, {
+        "view": {
+            "alias": "view";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowKey": {
+            "alias": "rowKey";
+            "required": true;
+            "isSignal": true;
+        };
+        "maxHeight": {
+            "alias": "maxHeight";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDesktopTableModel<any>, never>;
 }
 
 // @public
@@ -2108,6 +2893,22 @@ export class AdaptFilterHeaderControlChrome<TRow> implements OnInit {
 }
 
 // @public
+export abstract class AdaptFilterOptionsModel<TRow> implements OnInit {
+    // (undocumented)
+    protected readonly choices: WritableSignal<Signal<FilterOptionsState> | undefined>;
+    // (undocumented)
+    abstract readonly def: Signal<FilterDef<TRow>>;
+    // (undocumented)
+    ngOnInit(): void;
+    // (undocumented)
+    protected readonly options: Signal<FilterOptionsState>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptFilterOptionsModel<any>, never, never, {}, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterOptionsModel<any>, never>;
+}
+
+// @public
 export class AdaptFilterTreeChrome<TRow> {
     readonly defaultExpanded: InputSignal<boolean>;
     readonly defs: InputSignal<readonly FilterDef<TRow>[]>;
@@ -2229,6 +3030,165 @@ export class AdaptGridFocusAnnouncer {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGridFocusAnnouncer, never>;
+}
+
+// @public
+export abstract class AdaptGroupHeaderCardModel {
+    // (undocumented)
+    protected readonly aggregateOps: Signal<Parameters<typeof groupRowLayout>[2]>;
+    // (undocumented)
+    protected readonly aggregates: Signal<GroupRowCell<never, ColumnDef<never>>[]>;
+    // (undocumented)
+    protected caption(column: ColumnDef<never>): string | undefined;
+    // (undocumented)
+    protected readonly chevron: Signal<IconDescriptor>;
+    // (undocumented)
+    readonly props: InputSignal<GroupHeaderCardSlotProps<never, SelectionState, ColumnDef<never>>>;
+    // (undocumented)
+    protected readonly view: {
+        parts: Signal<{
+            row: string;
+            cell: string;
+            card: string;
+            label: string;
+        }>;
+        plain: Signal<boolean>;
+        expanded: Signal<boolean>;
+        collapsed: Signal<"true" | null>;
+        group: Signal<{
+            kind: "group";
+            key: string;
+            value: unknown;
+            label: string;
+            level: number;
+            groupBy: string;
+            path: readonly string[];
+            group?: RowGroupRef;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            serverCount?: number;
+            aggregateCells?: Partial<Record<string, DisplayValue>>;
+            aggregateOps?: GroupAggregateOps;
+            collapsed: boolean;
+        } | undefined>;
+        footer: Signal<{
+            kind: "groupFooter";
+            key: string;
+            groupKey: string;
+            level: number;
+            groupBy: string;
+            label: string;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            aggregateCells?: Partial<Record<string, DisplayValue>>;
+            aggregateOps?: GroupAggregateOps;
+        } | undefined>;
+        more: Signal<{
+            kind: "groupMore";
+            key: string;
+            groupKey?: string;
+            level: number;
+            scope: "groups" | "rows";
+            remaining: number;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            label: string;
+        } | undefined>;
+        selectState: Signal<HeaderSelectionState_2 | undefined>;
+        count: Signal<number>;
+        aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
+    };
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptGroupHeaderCardModel, never, never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupHeaderCardModel, never>;
+}
+
+// @public
+export abstract class AdaptGroupHeaderRowModel {
+    // (undocumented)
+    protected readonly aggregateOps: Signal<Parameters<typeof groupRowLayout>[2]>;
+    // (undocumented)
+    protected readonly chevron: Signal<IconDescriptor>;
+    // (undocumented)
+    protected readonly labelCellStyle: Signal<{
+        paddingInlineStart?: string;
+        fontWeight: number;
+    }>;
+    // (undocumented)
+    protected readonly layout: Signal<GroupRowLayout<never, ColumnDef<never>>>;
+    // (undocumented)
+    readonly props: InputSignal<GroupHeaderRowSlotProps<never, SelectionState, ColumnDef<never>>>;
+    // (undocumented)
+    protected readonly view: {
+        parts: Signal<{
+            row: string;
+            cell: string;
+            card: string;
+            label: string;
+        }>;
+        plain: Signal<boolean>;
+        expanded: Signal<boolean>;
+        collapsed: Signal<"true" | null>;
+        group: Signal<{
+            kind: "group";
+            key: string;
+            value: unknown;
+            label: string;
+            level: number;
+            groupBy: string;
+            path: readonly string[];
+            group?: RowGroupRef;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            serverCount?: number;
+            aggregateCells?: Partial<Record<string, DisplayValue>>;
+            aggregateOps?: GroupAggregateOps;
+            collapsed: boolean;
+        } | undefined>;
+        footer: Signal<{
+            kind: "groupFooter";
+            key: string;
+            groupKey: string;
+            level: number;
+            groupBy: string;
+            label: string;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            aggregateCells?: Partial<Record<string, DisplayValue>>;
+            aggregateOps?: GroupAggregateOps;
+        } | undefined>;
+        more: Signal<{
+            kind: "groupMore";
+            key: string;
+            groupKey?: string;
+            level: number;
+            scope: "groups" | "rows";
+            remaining: number;
+            leafRows: readonly never[];
+            leafIds: readonly string[];
+            label: string;
+        } | undefined>;
+        selectState: Signal<HeaderSelectionState_2 | undefined>;
+        count: Signal<number>;
+        aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
+    };
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptGroupHeaderRowModel, never, never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupHeaderRowModel, never>;
 }
 
 // @public
@@ -2388,6 +3348,87 @@ export class AdaptLiveRegion {
 }
 
 // @public
+export abstract class AdaptMobileCardsModel<TRow> {
+    // (undocumented)
+    protected caption(column: ColumnDef<TRow>): string | undefined;
+    // (undocumented)
+    protected readonly cardBodies: Signal<Map<string, {
+    readonly attrs: Attrs;
+    readonly context: MobileCardContext<TRow>;
+    readonly content: ReturnType<typeof resolveRenderer<MobileCardContext<TRow>>>;
+    }>>;
+    // (undocumented)
+    protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
+    // (undocumented)
+    protected readonly expandToggleSlot: FeatureSlotKey<ExpandToggleSlotProps>;
+    // (undocumented)
+    protected readonly extraParts: {
+        readonly separator: {
+            readonly row: "separator-row";
+            readonly cell: "separator-cell";
+        };
+        readonly fullWidth: {
+            readonly row: "full-width-row";
+            readonly cell: "full-width-cell";
+        };
+    };
+    // (undocumented)
+    protected readonly groupHeaderCardSlot: FeatureSlotKey<GroupHeaderCardSlotProps<never, unknown, ColumnModel<never>>>;
+    // (undocumented)
+    protected readonly listAttrs: Signal<Readonly<Record<string, unknown>>>;
+    // (undocumented)
+    protected readonly listStyle: Signal<    {
+    maxHeight: string;
+    overflowY: string;
+    } | null>;
+    // (undocumented)
+    readonly maxHeight: InputSignal<string | number | undefined>;
+    // (undocumented)
+    protected reorderButtonsProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderButtonsProps<never>;
+    // (undocumented)
+    protected readonly reorderButtonsSlot: FeatureSlotKey<RowReorderButtonsProps_2<never, unknown>>;
+    // (undocumented)
+    protected readonly rowEditActionsSlot: FeatureSlotKey<RowEditActionsProps<never>>;
+    // (undocumented)
+    protected rowId(row: TRow): string;
+    // (undocumented)
+    readonly rowKey: InputSignal<(row: TRow) => string>;
+    // (undocumented)
+    protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
+    // (undocumented)
+    scrollElement(): HTMLElement | null;
+    // (undocumented)
+    protected readonly treeCards: Signal<Map<string, {
+    readonly toggle: TreeToggleProps<never>;
+    readonly indent: string | null;
+    }>>;
+    // (undocumented)
+    protected readonly treeToggleSlot: FeatureSlotKey<TreeToggleProps<never>>;
+    // (undocumented)
+    readonly view: InputSignal<TableView<TRow>>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptMobileCardsModel<any>, never, never, {
+        "view": {
+            "alias": "view";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowKey": {
+            "alias": "rowKey";
+            "required": true;
+            "isSignal": true;
+        };
+        "maxHeight": {
+            "alias": "maxHeight";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMobileCardsModel<any>, never>;
+}
+
+// @public
 export class AdaptMultiSelectEditorChrome {
     readonly ctrl: InputSignal<EditableCellEditorCtrl>;
     readonly label: InputSignal<string>;
@@ -2429,6 +3470,90 @@ export class AdaptMultiSelectEditorChrome {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMultiSelectEditorChrome, never>;
+}
+
+// @public
+export abstract class AdaptMultiSelectFilterFieldModel<TRow> extends AdaptFilterOptionsModel<TRow> {
+    // (undocumented)
+    protected readonly caption: Signal<string>;
+    // (undocumented)
+    readonly def: InputSignal<FilterDef<TRow>>;
+    // (undocumented)
+    protected readonly id: string;
+    // (undocumented)
+    protected readonly listHeight = 220;
+    // (undocumented)
+    protected readonly selected: Signal<string[]>;
+    // (undocumented)
+    readonly source: InputSignal<TableSource<TRow>>;
+    // (undocumented)
+    protected toggle(value: string, on: boolean): void;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptMultiSelectFilterFieldModel<any>, never, never, {
+        "def": {
+            "alias": "def";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMultiSelectFilterFieldModel<any>, never>;
+}
+
+// @public
+export abstract class AdaptRangeFilterFieldModel<TRow> {
+    // (undocumented)
+    readonly def: InputSignal<FilterDef<TRow>>;
+    // (undocumented)
+    protected readonly id: string;
+    // (undocumented)
+    readonly labels: InputSignal<Required<TableLabels>>;
+    // (undocumented)
+    protected opLabel(op: RangeOp): string;
+    // (undocumented)
+    protected pickCount(value: string): void;
+    // (undocumented)
+    protected pickOp(value: string | null): void;
+    // (undocumented)
+    protected pickPreset(value: string | null): void;
+    // (undocumented)
+    protected presetLabel(preset: RelativePreset): string;
+    // (undocumented)
+    protected readonly presets: readonly RelativePreset[];
+    // (undocumented)
+    protected readonly relative: Signal<{
+        preset: RelativePreset;
+        n: number;
+    }>;
+    // (undocumented)
+    readonly source: InputSignal<TableSource<TRow>>;
+    // (undocumented)
+    protected readonly widget: Signal<RangeFieldWidget>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptRangeFilterFieldModel<any>, never, never, {
+        "def": {
+            "alias": "def";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRangeFilterFieldModel<any>, never>;
 }
 
 // @public
@@ -2901,6 +4026,40 @@ export class AdaptSavedViewsPanelChrome {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSavedViewsPanelChrome, never>;
+}
+
+// @public
+export abstract class AdaptSelectFilterFieldModel<TRow> extends AdaptFilterOptionsModel<TRow> {
+    // (undocumented)
+    protected readonly caption: Signal<string>;
+    // (undocumented)
+    protected readonly current: Signal<string>;
+    // (undocumented)
+    readonly def: InputSignal<FilterDef<TRow>>;
+    // (undocumented)
+    readonly labels: InputSignal<Required<TableLabels>>;
+    // (undocumented)
+    readonly source: InputSignal<TableSource<TRow>>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptSelectFilterFieldModel<any>, never, never, {
+        "def": {
+            "alias": "def";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSelectFilterFieldModel<any>, never>;
 }
 
 // @public
@@ -3400,6 +4559,44 @@ export class AdaptTableStatusAnnouncer {
 }
 
 // @public
+export abstract class AdaptTextFilterFieldModel<TRow> {
+    // (undocumented)
+    readonly def: InputSignal<FilterDef<TRow>>;
+    // (undocumented)
+    protected readonly id: string;
+    // (undocumented)
+    readonly labels: InputSignal<Required<TableLabels>>;
+    // (undocumented)
+    protected opLabel(key: keyof TableLabels): string;
+    // (undocumented)
+    protected pickOp(value: string | null): void;
+    // (undocumented)
+    readonly source: InputSignal<TableSource<TRow>>;
+    // (undocumented)
+    protected readonly widget: Signal<TextFieldWidget>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptTextFilterFieldModel<any>, never, never, {
+        "def": {
+            "alias": "def";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTextFilterFieldModel<any>, never>;
+}
+
+// @public
 export class AdaptTreeCellChrome {
     readonly className: InputSignal<string | undefined>;
     readonly columnKey: InputSignal<string>;
@@ -3685,6 +4882,25 @@ export { BatchEditingState }
 export { BatchRowEdit }
 
 export { bindHeaderFilterDismiss }
+
+// @public
+export interface BodyCellView<TRow> {
+    readonly colSpan: number;
+    readonly column: ColumnDef<TRow>;
+    readonly columnIndex: number;
+    readonly mark: string | undefined;
+    readonly rowSpan: number;
+}
+
+// @public
+export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
+    readonly cardAttrs: Attrs;
+    readonly detailAttrs: Attrs;
+    readonly rowAttrs: Attrs;
+}
+
+// @public
+export type BodySlot<TRow> = ChromeBodySlot<TRow, BodyRow<TRow>>;
 
 export { bodyWindowKind }
 
@@ -4100,6 +5316,9 @@ export function createFeatureResources(parent: Injector): FeatureResources;
 export function createFeatureState(): FeatureState;
 
 // @public
+export function createFilterFieldId(): string;
+
+// @public
 export interface DataTable<TRow> {
     readonly allColumns: Signal<readonly ColumnDef<TRow>[]>;
     readonly autoSizeColumn: (root: Element | null, key: string) => void;
@@ -4164,6 +5383,32 @@ export interface DataTable<TRow> {
 }
 
 // @public
+export interface DataTableClassNames {
+    readonly actionButton?: string;
+    readonly card?: string;
+    readonly cardActions?: string;
+    readonly cardDetail?: string;
+    readonly cardLabel?: string;
+    readonly cardRow?: string;
+    readonly cards?: string;
+    readonly cardValue?: string;
+    readonly checkbox?: string;
+    readonly fullWidthCell?: string;
+    readonly fullWidthRow?: string;
+    readonly rowActionsMenu?: string;
+    readonly rowActionsTrigger?: string;
+    readonly rowReorderButtons?: string;
+    readonly rowReorderDown?: string;
+    readonly rowReorderUp?: string;
+    readonly separatorCell?: string;
+    readonly separatorRow?: string;
+    readonly summaryCard?: string;
+    readonly treeSpacer?: string;
+    readonly treeToggle?: string;
+    readonly virtualSpacer?: string;
+}
+
+// @public
 export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly activeFilterCount?: Signal<number>;
     readonly cellTemplates?: Signal<readonly AdaptCellTemplate[]>;
@@ -4183,6 +5428,12 @@ export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly selection?: RowSelection;
     readonly source: Signal<TableSource<TRow>>;
     readonly tableLabel?: MaybeSignalOptional<string>;
+}
+
+// @public
+export interface DataTableSurface {
+    // (undocumented)
+    readonly scrollElement: () => HTMLElement | null | undefined;
 }
 
 export { DEFAULT_SHORTCUTS }
@@ -4591,6 +5842,54 @@ export { FILTERS_FORM }
 export { FILTERS_ICON }
 
 export { FiltersFormSlotProps }
+
+// @public
+export type FiltersMode = "popover" | "drawer";
+
+// @public
+export interface FiltersView {
+    readonly button: boolean;
+    readonly chips: Signal<ActiveFilterChipsSlotProps>;
+    readonly click: () => void;
+    readonly count: Signal<number>;
+    readonly form: Signal<FiltersFormSlotProps<never>>;
+    readonly header: boolean;
+    readonly headerProps: Signal<ReadonlyMap<string, FilterHeaderControlProps<never>>>;
+    readonly mode: FiltersMode;
+    readonly open: Signal<boolean>;
+    readonly overlay: Signal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
+    readonly pointerDown: () => void;
+    readonly show: () => void;
+}
+
+// @public
+export function filtersViewFor<TRow>(input: FiltersViewInput<TRow>): FiltersView;
+
+// @public
+export interface FiltersViewInput<TRow> {
+    // (undocumented)
+    readonly button: boolean;
+    // (undocumented)
+    readonly closeHeaderFilterOnSelect: boolean;
+    // (undocumented)
+    readonly dir: Signal<Direction>;
+    // (undocumented)
+    readonly extraChips: Signal<readonly ActiveFilterChip[]>;
+    // (undocumented)
+    readonly form: Signal<TemplateRef<unknown> | undefined>;
+    // (undocumented)
+    readonly header: boolean;
+    // (undocumented)
+    readonly mode: FiltersMode;
+    // (undocumented)
+    readonly runtime: Signal<FilterRuntime<TRow>>;
+    // (undocumented)
+    readonly source: Signal<TableSource<TRow>>;
+    // (undocumented)
+    readonly table: DataTable<TRow>;
+    // (undocumented)
+    readonly trigger: Signal<TemplateRef<unknown> | undefined>;
+}
 
 export { FilterTreeButtonProps }
 
@@ -5536,6 +6835,12 @@ export { ROW_REORDER_HANDLE }
 export { RowAction }
 
 // @public
+export interface RowActionsCell<TRow> {
+    readonly actions: readonly RowAction<TRow>[];
+    readonly rowEdit: RowEditActionsProps<never> | undefined;
+}
+
+// @public
 export interface RowActionsContext<TRow> extends Readonly<RowActionsRenderContext<TRow>> {
     readonly $implicit: TRow;
 }
@@ -6201,6 +7506,65 @@ export interface TableUrlStateOptions {
     readonly urlAdapter?: MaybeSignalOptional<UrlStateAdapter>;
     readonly urlKey?: MaybeSignalOptional<string>;
     readonly urlSync?: MaybeSignalOptional<boolean>;
+}
+
+// @public
+export interface TableView<TRow> {
+    readonly actionsCells: Signal<ReadonlyMap<string, RowActionsCell<TRow>>>;
+    readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
+    readonly body: Signal<readonly BodySlot<TRow>[]>;
+    readonly bodyCells: Signal<ReadonlyMap<string, readonly BodyCellView<TRow>[]>>;
+    readonly bodyColSpan: Signal<number>;
+    readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
+    readonly cellSpanAppearance: CellSpanAppearance | undefined;
+    readonly classNames: Signal<DataTableClassNames>;
+    readonly columnIndex: Signal<ReadonlyMap<string, number>>;
+    readonly columnMenu: boolean;
+    readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
+    readonly columns: Signal<readonly ColumnDef<TRow>[]>;
+    readonly columnSelect: boolean;
+    readonly columnSpacers: Signal<{
+        start: number;
+        end: number;
+    } | undefined>;
+    readonly commandPalette: Signal<CommandPaletteInjectOptions>;
+    readonly confirm: ConfirmHandler;
+    readonly contextMenu: Signal<TableContextMenuOptions<TRow> & {
+        readonly children: (regionProps: Record<string, unknown>) => undefined;
+    }>;
+    readonly density: Signal<TableDensity>;
+    readonly detailParent: Signal<NestedTableParent>;
+    readonly editableCells: Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;
+    readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
+    readonly expandToggles: Signal<ReadonlyMap<string, ExpandToggleSlotProps>>;
+    readonly filters: FiltersView | undefined;
+    readonly findBar: Signal<FindBarProps> | undefined;
+    readonly grid: GridFocus<TRow> | undefined;
+    readonly groupHeaders: Signal<{
+        readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
+        readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
+    }>;
+    readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
+    readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
+    readonly isCellFlashing: (rowId: string, columnKey: string) => boolean;
+    readonly markedCellAttrs: (column: ColumnDef<TRow>, index: number, col: number, rowId?: string) => Attrs;
+    readonly renderCard: Signal<MobileCardRenderer<TRow> | undefined>;
+    readonly renderRowActions: Signal<RowActionsRenderer<TRow> | undefined>;
+    readonly reorder: Signal<RowReorderState<TRow>> | undefined;
+    readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
+    readonly rowActionsLayout: RowActionsLayout | undefined;
+    readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
+    readonly rowMutations: Signal<RowMutationsState<TRow>>;
+    readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
+    readonly selection: RowSelection | undefined;
+    readonly showActions: Signal<boolean>;
+    readonly showSummary: Signal<boolean>;
+    readonly summary: Signal<Partial<Record<string, unknown>> | undefined>;
+    readonly table: DataTable<TRow>;
+    readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
+    readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
+    readonly treeCellFilled: boolean;
+    readonly virtualization: Signal<TableVirtualization<TRow>>;
 }
 
 export { TableVirtualization }

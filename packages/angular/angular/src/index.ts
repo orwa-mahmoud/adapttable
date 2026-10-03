@@ -140,6 +140,11 @@ export {
   injectColumnRenameEditor,
 } from "./columns/columnMenu";
 export {
+  AdaptColumnMenuEdgeRowModel,
+  AdaptColumnMenuModel,
+  AdaptColumnMenuRowModel,
+} from "./columns/columnMenuModels";
+export {
   type ColumnResizeHandleProps,
   injectColumnResize,
 } from "./columns/columnResize";
@@ -373,6 +378,16 @@ export {
   nextChecklistViewport,
 } from "./filters/checklistWindow";
 export {
+  AdaptAutoFilterFormModel,
+  AdaptBooleanFilterFieldModel,
+  AdaptFilterOptionsModel,
+  AdaptMultiSelectFilterFieldModel,
+  AdaptRangeFilterFieldModel,
+  AdaptSelectFilterFieldModel,
+  AdaptTextFilterFieldModel,
+  createFilterFieldId,
+} from "./filters/filterFieldModels";
+export {
   AdaptFilterHeaderChrome,
   AdaptFilterHeaderControlChrome,
   type FilterHeaderSlots,
@@ -395,6 +410,12 @@ export {
   type FilterTreeSlots,
 } from "./filters/filterTreeChrome";
 export { injectHeaderFilterOverlay } from "./filters/headerFilterOverlay";
+export {
+  type FiltersMode,
+  type FiltersView,
+  filtersViewFor,
+  type FiltersViewInput,
+} from "./filters/tableFilters";
 export { AdaptFindBarChrome, type FindBarSlots } from "./find/findBar";
 export { type FindInTableOptions, injectFindInTable } from "./find/findInTable";
 export {
@@ -441,6 +462,10 @@ export {
   injectGroupCollapse,
 } from "./grouping/groupCollapse";
 export {
+  AdaptGroupHeaderCardModel,
+  AdaptGroupHeaderRowModel,
+} from "./grouping/groupHeaderModels";
+export {
   AdaptGroupingPanelChrome,
   type AngularGroupingPanelAggregationItemProps,
   type AngularGroupingPanelSurfaceProps,
@@ -467,6 +492,18 @@ export { injectMediaQuery } from "./hooks/mediaQuery";
 export { injectPrefersReducedMotion } from "./hooks/prefersReducedMotion";
 export { AdaptIcon } from "./icon";
 export * from "./kitExports";
+export { type DataTableClassNames } from "./layout/dataTableClassNames";
+export {
+  AdaptDataTableShell,
+  type BodyCellView,
+  type BodyRow,
+  type BodySlot,
+  type DataTableSurface,
+  type RowActionsCell,
+  type TableView,
+} from "./layout/dataTableShell";
+export { AdaptDesktopTableModel } from "./layout/desktopTableModel";
+export { AdaptMobileCardsModel } from "./layout/mobileCardsModel";
 export {
   AdaptSidePanelChrome,
   AdaptSidePanelLayout,

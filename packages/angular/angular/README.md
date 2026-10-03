@@ -102,6 +102,22 @@ them. Provide `ADAPTTABLE_URL_ADAPTER` to keep them somewhere else, or pass
   through dependency injection
 - `fromStore` — any `@adapttable/core` store as a read-only signal
 
+## Shared adapter models
+
+`AdaptDataTableShell` owns signal inputs and outputs, feature lifecycles,
+data and URL composition, editing, filters, focus and body virtualization.
+All nine Angular kits inherit it. `TableView`, `BodyRow`, `BodyCellView`,
+`BodySlot`, `RowActionsCell` and `DataTableClassNames` are shared contracts;
+the existing adapter exports keep resolving to them.
+
+Adapter authors can reuse `AdaptDesktopTableModel`, `AdaptMobileCardsModel`,
+the column-menu and group-header model bases, and filter-field model bases.
+These directives render no controls. Each adapter keeps its native templates,
+controls, renderer slots, styling and overlay integration. Its desktop and
+mobile surface references (`#desktopSurface` and `#mobileSurface`) expose
+`scrollElement()` to the shared shell for virtualization. Filter overlays and
+menus can continue using a kit's own portals, positioning and focus management.
+
 ## License
 
 MIT

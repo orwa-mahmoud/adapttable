@@ -186,6 +186,44 @@ describe("row editing (Spartan Angular)", () => {
     expect(begin.hasAttribute("title")).toBe(false);
   });
 
+  it("renders host icons without changing save and cancel callbacks", async () => {
+    const onRowEdit = vi.fn();
+    const settle = await mount([
+      rowEditing(onRowEdit, {
+        rowEditIcons: { begin: "Change", save: "Keep", cancel: "Discard" },
+      }),
+    ]);
+    const begin = all("row-edit-begin")[0]!;
+    expect(begin.textContent.trim()).toBe("Change");
+    expect(begin.querySelector("svg")).toBeNull();
+    begin.click();
+    await settle();
+    expect(one("row-edit-save").textContent.trim()).toBe("Keep");
+    expect(one("row-edit-cancel").textContent.trim()).toBe("Discard");
+    type(editors()[0]!, "Updated");
+    await settle();
+    one("row-edit-save").click();
+    await settle();
+    expect(onRowEdit).toHaveBeenCalledExactlyOnceWith(ROWS[0], {
+      title: "Updated",
+    });
+    all("row-edit-begin")[1]!.click();
+    await settle();
+    type(editors()[0]!, "Discarded");
+    await settle();
+    one("row-edit-cancel").click();
+    await settle();
+    expect(onRowEdit).toHaveBeenCalledOnce();
+    expect(editors()).toHaveLength(0);
+  });
+
+  it("uses the native glyph when a host icon is explicitly null", async () => {
+    await mount([rowEditing(vi.fn(), { rowEditIcons: { begin: null } })]);
+    const begin = all("row-edit-begin")[0]!;
+    expect(begin.querySelector("svg")).not.toBeNull();
+    expect(begin.getAttribute("aria-label")).toBe("Edit row");
+  });
+
   it("lets a host action that opens the row replace the begin control", async () => {
     const onRowEdit = vi.fn();
     const settle = await mount([

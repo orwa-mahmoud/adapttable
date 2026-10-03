@@ -25,6 +25,7 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
 import {
   clickBootstrapControl,
   ngBootstrapPart,
@@ -382,6 +383,52 @@ describe("the unstyled Angular filters", () => {
     );
     await settle();
     expect(part("filters-panel")).toBeNull();
+  });
+
+  it("lets a standalone native header filter use the built-in registry", async () => {
+    @Component({
+      imports: [AdaptHeaderFilterTrigger],
+      template: `<adapt-header-filter-trigger [props]="props()" />`,
+    })
+    class StandaloneHeader {
+      readonly source = injectFrontendData({
+        data: PEOPLE,
+        columns: COLUMNS,
+        urlSync: false,
+        forceMobile: false,
+      });
+      readonly table = injectDataTable({
+        source: this.source,
+        columns: COLUMNS,
+        rowKey: (row: Person) => row.id,
+      });
+      readonly props = computed(() => ({
+        def: { key: "name", type: "text" },
+        labels: this.table.labels(),
+        source: this.source(),
+      }));
+    }
+    const fixture = TestBed.createComponent(StandaloneHeader);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await settleBootstrap(fixture);
+    const root = fixture.nativeElement as HTMLElement;
+    const trigger = root.querySelector<HTMLButtonElement>(
+      '[data-adapttable-part="filter-header-trigger"] button'
+    )!;
+    trigger.focus();
+    trigger.click();
+    await settleBootstrap(fixture);
+    const field = root.querySelector<HTMLInputElement>(
+      '[data-adapttable-part="filter-input"]'
+    )!;
+    expect(field).not.toBeNull();
+    field.value = "Ada";
+    field.dispatchEvent(new Event("input"));
+    await settleBootstrap(fixture);
+    expect(fixture.componentInstance.source().extra.name).toBe("Ada");
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    fixture.destroy();
   });
 
   it("puts a funnel on each filterable header", async () => {

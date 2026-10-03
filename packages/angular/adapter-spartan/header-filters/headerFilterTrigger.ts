@@ -91,7 +91,7 @@ export class AdaptHeaderFilterTrigger {
   readonly props = input.required<FilterHeaderControlProps<never>>();
 
   protected readonly icon = { ...FILTERS_ICON, width: 14, height: 14 };
-  protected readonly registry = undefined as never;
+  protected readonly registry = defaultFilterRegistry;
   protected readonly caption = computed(() => filterLabel(this.props().def));
   protected readonly active = computed(() =>
     hasActiveHeaderFilter(this.props())

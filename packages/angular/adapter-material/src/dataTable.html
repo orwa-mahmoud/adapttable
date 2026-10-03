@@ -238,6 +238,7 @@
           }
           @case ("mobile") {
             <adapt-mobile-cards
+              #mobileSurface
               [view]="v"
               [rowKey]="rowKey()"
               [maxHeight]="maxHeight()"
@@ -245,6 +246,7 @@
           }
           @case ("desktop") {
             <adapt-desktop-table
+              #desktopSurface
               [view]="v"
               [rowKey]="rowKey()"
               [maxHeight]="maxHeight()"
