@@ -287,6 +287,7 @@ describe("the Taiga UI Angular filters", () => {
     const age = field("Age");
     const rangeOperator = part<HTMLElement>("filter-operator", age)!;
     await chooseTaigaOption(fixture, rangeOperator, "gt");
+    expect((rangeOperator as HTMLInputElement).value).toBe("Greater than");
     await type(parts("filter-input", age)[0], "30");
     expect(ids()).toEqual(["1", "3"]);
     await clearTaigaSelection(fixture, rangeOperator);
@@ -296,6 +297,9 @@ describe("the Taiga UI Angular filters", () => {
       fixture,
       part<HTMLElement>("filter-operator", joined)!,
       "relative"
+    );
+    expect(part<HTMLInputElement>("filter-operator", joined)!.value).toBe(
+      "Relative"
     );
     expect(
       taigaCleaner(parts<HTMLElement>("filter-input", joined)[0]!)

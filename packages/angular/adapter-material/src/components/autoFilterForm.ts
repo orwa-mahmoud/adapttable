@@ -22,7 +22,7 @@ import { CHECKLIST_SLOTS } from "./checklistFilter";
 
 /** A field's column stack: the caption is a flex item, so `gap` applies. */
 const FIELD_STACK =
-  "display: flex; flex-direction: column; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0";
+  "display: flex; flex-direction: column; gap: 8px; grid-column: 1 / -1; min-width: 0; margin: 0; padding: 0; border: 0";
 
 /** A fresh id for a field's caption, which its group is labelled by. */
 
@@ -41,11 +41,13 @@ const FIELD_STACK =
     >
       <div data-adapttable-part="filter-label" [id]="id">{{ w.label }}</div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic"
+        <mat-form-field
+          appearance="outline"
+          subscriptSizing="dynamic"
+          style="flex: 0 0 7rem; min-width: 0"
           ><select
             matNativeControl
             data-adapttable-part="filter-operator"
-            style="flex: 0 0 8.5rem; width: 8.5rem"
             [attr.aria-label]="labels().operator"
             [value]="w.op"
             (change)="pickOp($any($event.target).value)"
@@ -58,7 +60,10 @@ const FIELD_STACK =
           </select></mat-form-field
         >
         @if (w.needsValue) {
-          <mat-form-field appearance="outline" subscriptSizing="dynamic"
+          <mat-form-field
+            appearance="outline"
+            subscriptSizing="dynamic"
+            style="flex: 1 1 7rem; min-width: 0"
             ><input
               matInput
               type="text"
@@ -177,7 +182,7 @@ export class AdaptSelectFilterField<
       <div data-adapttable-part="filter-label" [id]="id">{{ caption() }}</div>
       <div
         class="adapt-material-filter-checkbox-group"
-        style="display: flex; flex-wrap: wrap; gap: 10px; overflow: auto"
+        style="display: flex; flex-direction: column; gap: 10px; overflow: auto"
         [style.max-height.px]="listHeight"
       >
         @if (options().loading) {
@@ -201,7 +206,10 @@ export class AdaptSelectFilterField<
 export class AdaptMultiSelectFilterField<
   TRow,
 > extends AdaptMultiSelectFilterFieldModel<TRow> {
-  protected readonly stack = FIELD_STACK;
+  protected readonly stack = FIELD_STACK.replace(
+    "grid-column: 1 / -1",
+    "grid-column: auto"
+  );
 }
 
 /** An operator-first number or date range. @internal */

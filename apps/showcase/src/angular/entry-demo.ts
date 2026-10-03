@@ -23,6 +23,9 @@ import {
 } from "./demoTransitions.mjs";
 import { SHOWCASE_ASSET_ROOT, SHOWCASE_KIT } from "./showcaseKit";
 
+// Keep the approved Angular presentation separate from React’s showcase.
+document.documentElement.dataset.framework = "angular";
+
 const root = document.getElementById("root");
 if (!root) throw new Error("The showcase has no root");
 const container = root;

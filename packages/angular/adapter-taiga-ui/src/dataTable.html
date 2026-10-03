@@ -43,6 +43,7 @@
             </span>
             <tui-textfield tuiTextfieldSize="s"
               ><input
+                [attr.aria-label]="v.table.labels().search"
                 tuiInput
                 data-adapttable-part="search"
                 [adaptAttrs]="v.table.searchInputAttrs()"

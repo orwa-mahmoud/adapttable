@@ -5031,9 +5031,8 @@
   justify-content: space-between;
 }
 .adapttable-ng-bootstrap [data-adapttable-part="search-field"] {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: stretch;
+  gap: 0;
   flex: 1 1 12rem;
   max-inline-size: 24rem;
   min-inline-size: 0;

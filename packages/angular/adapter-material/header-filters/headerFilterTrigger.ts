@@ -65,6 +65,7 @@ import { MatButtonModule } from "@angular/material/button";
       @if (overlay.open()) {
         <adapt-material-popover
           [origin]="triggerElement()!.nativeElement"
+          align="start"
           (dismiss)="overlay.setOpen(false)"
         >
           <div

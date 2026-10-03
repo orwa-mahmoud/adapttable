@@ -5,6 +5,8 @@ import {
   provideAdaptTaiga,
 } from "@adapttable/taiga-ui";
 import {
+  AdaptAssistantButton,
+  AdaptAssistantLanguageChip,
   AdaptTableAssistant,
   agentApproval,
 } from "@adapttable/taiga-ui/assistant";
@@ -51,6 +53,7 @@ import { inject } from "@angular/core";
 import { TUI_ASSETS_PATH } from "@taiga-ui/core";
 
 import { SHOWCASE_ASSET_ROOT, type ShowcaseKit } from "../showcaseKit";
+import { ShowcaseStatus } from "./taigaUiStatus";
 
 /** Components and feature factories are always from this one kit. */
 export const kit = {
@@ -64,8 +67,11 @@ export const kit = {
     },
   ],
   table: AdaptDataTable,
+  statusCell: ShowcaseStatus,
   pivotPanel: AdaptPivotPanel,
   assistant: AdaptTableAssistant,
+  assistantButton: AdaptAssistantButton,
+  assistantSelect: AdaptAssistantLanguageChip,
   savedViewsPanel: AdaptSavedViewsPanel,
   bulkActions,
   cellNavigation,

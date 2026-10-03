@@ -656,7 +656,21 @@ export function AppNav({
         </label>
         <div className="nav__right">
           <label className="nav__framework">
-            <span aria-hidden="true">⚛</span>
+            <span aria-hidden="true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="-11 -11 22 22"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              >
+                <ellipse rx="10" ry="4" />
+                <ellipse rx="10" ry="4" transform="rotate(60)" />
+                <ellipse rx="10" ry="4" transform="rotate(120)" />
+                <circle r="1.5" fill="currentColor" stroke="none" />
+              </svg>
+            </span>
             <select
               aria-label="Framework"
               value="react"

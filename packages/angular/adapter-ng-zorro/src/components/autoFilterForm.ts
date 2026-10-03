@@ -35,7 +35,7 @@ import { AdaptOverlayOrigin } from "./overlayPlacement";
 
 /** A field's column stack: the caption is a flex item, so `gap` applies. */
 const FIELD_STACK =
-  "display: flex; flex-direction: column; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0";
+  "display: flex; flex-direction: column; gap: 8px; grid-column: 1 / -1; min-width: 0; margin: 0; padding: 0; border: 0";
 
 const HIDDEN_LABEL =
   "position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap";
@@ -62,10 +62,10 @@ const HIDDEN_LABEL =
         }}</label>
         <nz-select
           adaptOverlayOrigin
-          nzSize="small"
+          nzSize="default"
           [nzId]="id + '-operator'"
           data-adapttable-part="filter-operator"
-          style="flex: 0 0 8.5rem; width: 8.5rem"
+          style="flex: 0 0 7rem; width: 7rem"
           [ngModel]="w.op"
           (ngModelChange)="pickOp($event)"
         >
@@ -76,9 +76,10 @@ const HIDDEN_LABEL =
         @if (w.needsValue) {
           <input
             nz-input
-            nzSize="small"
+            nzSize="default"
             type="text"
             data-adapttable-part="filter-input"
+            style="flex: 1 1 7rem; min-width: 0; width: 0"
             [attr.aria-label]="w.label"
             [attr.placeholder]="def().placeholder ?? null"
             [value]="w.value"
@@ -111,7 +112,7 @@ export class AdaptTextFilterField<
       }}</label>
       <nz-select
         adaptOverlayOrigin
-        nzSize="small"
+        nzSize="default"
         data-adapttable-part="filter-select"
         [nzId]="id"
         [ngModel]="w.choice"
@@ -150,7 +151,7 @@ export class AdaptBooleanFilterField<
       }}</label>
       <nz-select
         adaptOverlayOrigin
-        nzSize="small"
+        nzSize="default"
         data-adapttable-part="filter-select"
         [nzId]="id"
         [nzLoading]="options().loading"
@@ -194,7 +195,7 @@ export class AdaptSelectFilterField<
     >
       <div data-adapttable-part="filter-label" [id]="id">{{ caption() }}</div>
       <div
-        style="display: flex; flex-wrap: wrap; gap: 10px; overflow: auto"
+        style="display: flex; flex-direction: column; gap: 8px; overflow: auto"
         [style.max-height.px]="listHeight"
       >
         @if (options().loading) {
@@ -220,7 +221,10 @@ export class AdaptMultiSelectFilterField<
 > extends AdaptMultiSelectFilterFieldModel<TRow> {
   protected readonly hiddenLabel = HIDDEN_LABEL;
 
-  protected readonly stack = FIELD_STACK;
+  protected readonly stack = FIELD_STACK.replace(
+    "grid-column: 1 / -1",
+    "grid-column: auto"
+  );
 }
 
 /** A range bound with a real numeric spinner or themed date input. @internal */
@@ -237,7 +241,7 @@ export class AdaptMultiSelectFilterField<
         [adaptAttrs]="{ 'aria-valuenow': numberValue() }"
         [adaptAttrsTarget]="numberTarget"
         [nzControls]="false"
-        nzSize="small"
+        nzSize="default"
         [nzId]="id"
         [nzPlaceHolder]="label()"
         data-adapttable-part="filter-input"
@@ -248,7 +252,7 @@ export class AdaptMultiSelectFilterField<
     } @else {
       <input
         nz-input
-        nzSize="small"
+        nzSize="default"
         data-adapttable-part="filter-input"
         style="flex: 1 1 7rem; min-width: 7rem"
         [type]="type()"
@@ -312,7 +316,7 @@ export class AdaptRangeFilterValue {
         }}</label>
         <nz-select
           adaptOverlayOrigin
-          nzSize="small"
+          nzSize="default"
           [nzId]="id + '-operator'"
           data-adapttable-part="filter-operator"
           style="flex: 0 0 8.5rem; width: 8.5rem"
@@ -345,7 +349,7 @@ export class AdaptRangeFilterValue {
           }}</label>
           <nz-select
             adaptOverlayOrigin
-            nzSize="small"
+            nzSize="default"
             [nzId]="id + '-preset'"
             data-adapttable-part="filter-input"
             style="flex: 1 1 8.5rem; min-width: 8.5rem"
@@ -365,7 +369,7 @@ export class AdaptRangeFilterValue {
               [adaptAttrs]="{ 'aria-valuenow': token.n }"
               [adaptAttrsTarget]="countTarget"
               [nzControls]="false"
-              nzSize="small"
+              nzSize="default"
               [nzId]="id + '-count'"
               [nzMin]="1"
               data-adapttable-part="filter-input"

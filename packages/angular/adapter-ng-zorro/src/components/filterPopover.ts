@@ -1,9 +1,13 @@
 /** The lightweight, anchored NG-ZORRO filter popover, without a backdrop. */
-import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import {
+  type FilterOverlaySlotProps,
+  injectPopoverSpace,
+} from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   type ElementRef,
   input,
@@ -36,8 +40,8 @@ import {
       (nzPopoverVisibleChange)="onVisibleChange($event)"
       [nzPopoverBackdrop]="false"
       [nzPopoverContent]="content"
-      [nzPopoverPlacement]="p.dir === 'rtl' ? 'bottomLeft' : 'bottomRight'"
-      [nzPopoverOverlayStyle]="overlayStyle"
+      nzPopoverPlacement="bottomRight"
+      [nzPopoverOverlayStyle]="overlayStyle()"
       style="display: inline-flex"
     >
       @if (p.children; as trigger) {
@@ -50,10 +54,13 @@ import {
           #card
           [dir]="p.dir ?? 'ltr'"
           [attr.data-dir]="p.dir ?? 'ltr'"
-          style="width: 380px; max-width: calc(100vw - 40px); max-height: min(560px, calc(100vh - 48px)); overflow-y: auto"
+          [style.max-height.px]="availableHeight()"
+          style="display: flex; flex-direction: column; width: 340px; max-width: calc(100vw - 64px); max-height: min(560px, 70dvh)"
         >
-          <header>
-            <h3>
+          <header
+            style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block-end: 12px"
+          >
+            <h3 style="margin: 0; font-size: 14px; font-weight: 600">
               {{ p.labels.filters
               }}{{
                 p.activeFilterCount > 0 ? " (" + p.activeFilterCount + ")" : ""
@@ -61,6 +68,8 @@ import {
             </h3>
             <button
               nz-button
+              nzType="link"
+              nzSize="small"
               type="button"
               [disabled]="p.activeFilterCount === 0"
               (click)="p.onClearFilters()"
@@ -68,9 +77,23 @@ import {
               <span>{{ p.labels.clearAll }} </span>
             </button>
           </header>
-          <div>
+          <div
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-inline-end: 4px"
+          >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
+          <footer
+            style="display: flex; flex: none; justify-content: flex-end; padding-block-start: 12px"
+          >
+            <button
+              nz-button
+              nzType="primary"
+              type="button"
+              (click)="p.onClose()"
+            >
+              {{ p.labels.filtersDone }}
+            </button>
+          </footer>
         </section>
       }
     </ng-template>
@@ -79,9 +102,17 @@ import {
 export class AdaptFilterPopover {
   readonly props =
     input.required<FilterOverlaySlotProps<TemplateRef<unknown>>>();
-  protected readonly overlayStyle = { zIndex: String(OVERLAY_Z) };
+  protected readonly overlayStyle = computed(() => ({
+    zIndex: String(OVERLAY_Z),
+    maxHeight: this.availableHeight() + 32 + "px",
+  }));
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
+  protected readonly availableHeight = injectPopoverSpace({
+    origin: () => this.anchor()?.nativeElement,
+    open: () => this.props().open,
+    reserve: 64,
+  });
   private readonly card = viewChild<ElementRef<HTMLElement>>("card");
 
   /** Synchronize native dismissal with host state and restore the opener. */

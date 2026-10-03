@@ -231,7 +231,7 @@ export class PeopleAssistant {
   ];
   readonly rowKey = (row: AgentPerson) =&gt; row.id;
   readonly session = signal&lt;AgentSession | undefined&gt;(undefined);
-  readonly open = signal(true);
+  readonly open = signal(false);
   readonly assistant = injectTableAssistant(computed(() =&gt; ({
     session: this.session(), transport,
   })));
@@ -239,7 +239,7 @@ export class PeopleAssistant {
     assistant: this.assistant(),
     open: this.open(),
     onOpenChange: (open) =&gt; this.open.set(open),
-    presentation: &quot;panel&quot;,
+    presentation: &quot;floating&quot;,
   }));
   readonly features = [tableAgent({
     tableId: &quot;people&quot;, approval: &quot;never&quot;,

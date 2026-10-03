@@ -6434,6 +6434,13 @@ export function injectMeasuredWindowScrollMargin(options: MeasuredWindowScrollMa
 export function injectMediaQuery(query: string, injector?: Injector): Signal<boolean>;
 
 // @public
+export function injectPopoverSpace(options: {
+    readonly origin: () => HTMLElement | undefined;
+    readonly open: () => boolean;
+    readonly reserve: number;
+}): Signal<number>;
+
+// @public
 export function injectPrefersReducedMotion(injector?: Injector): Signal<boolean>;
 
 // @public

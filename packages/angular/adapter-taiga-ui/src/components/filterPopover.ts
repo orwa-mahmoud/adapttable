@@ -1,4 +1,7 @@
-import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import {
+  type FilterOverlaySlotProps,
+  injectPopoverSpace,
+} from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
@@ -52,12 +55,14 @@ import { TAIGA_CONTROLS } from "../taigaControls";
       @if (p.open) {
         <div
           #card
+          [style.max-height.px]="availableHeight()"
+          style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
           data-taiga-part="filters-popover"
           [attr.dir]="p.dir ?? 'ltr'"
           [attr.data-dir]="p.dir ?? 'ltr'"
-          [style.width.px]="380"
+          [style.width.px]="340"
           [style.max-width]="'calc(100vw - 16px)'"
-          [style.overflow-y]="'auto'"
+          [style.overflow-y]="'hidden'"
         >
           <header data-taiga-part="filters-header">
             <h3 data-taiga-part="filters-title">
@@ -78,9 +83,25 @@ import { TAIGA_CONTROLS } from "../taigaControls";
               {{ p.labels.clearAll }}
             </button>
           </header>
-          <div data-taiga-part="filters-body">
+          <div
+            data-taiga-part="filters-body"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+          >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
+          <footer
+            style="flex: none; display: flex; justify-content: flex-end; padding-block-start: 12px"
+          >
+            <button
+              tuiButton
+              size="s"
+              appearance="primary"
+              type="button"
+              (click)="p.onClose()"
+            >
+              {{ p.labels.filtersDone }}
+            </button>
+          </footer>
         </div>
       }
     </ng-template>
@@ -93,6 +114,11 @@ export class AdaptFilterPopover {
 
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
+  protected readonly availableHeight = injectPopoverSpace({
+    origin: () => this.anchor()?.nativeElement,
+    open: () => this.props().open,
+    reserve: 32,
+  });
   protected readonly triggerReady = signal(false);
 
   constructor() {

@@ -118,6 +118,11 @@ mobile surface references (`#desktopSurface` and `#mobileSurface`) expose
 `scrollElement()` to the shared shell for virtualization. Filter overlays and
 menus can continue using a kit's own portals, positioning and focus management.
 
+`injectPopoverSpace` measures room below an open overlay's origin and updates
+on resize and scrolling. Adapter authors supply the origin, open state and
+space reserved for their native surface's padding, arrow and viewport gutter.
+The binding renders no controls and does not choose the kit's positioning.
+
 ## License
 
 MIT

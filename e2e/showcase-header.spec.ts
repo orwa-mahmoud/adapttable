@@ -177,3 +177,59 @@ for (const kit of ["material", "angular-cdk"]) {
     await expect(rows.first()).toBeVisible();
   });
 }
+
+test("React retains its package cards and compact page heading", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const cards = page.locator(".adapterbar");
+  await expect(
+    cards.getByRole("button", {
+      name: "Mantine Rounded, friendly, filled controls",
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(cards.locator(".adtab__l small").first()).toBeVisible();
+  await expect(cards.locator(".adtab__dot").first()).toBeVisible();
+  const heading = page.getByRole("heading", { level: 1 });
+  expect(
+    await heading.evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).fontSize)
+    )
+  ).toBeLessThanOrEqual(22);
+  await expect(
+    page.getByRole("combobox", { name: "Framework", exact: true })
+  ).toHaveValue("react");
+});
+
+test("React and Angular retain the original centered content width", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  for (const [route, selector] of [
+    ["/", "#demo.shell"],
+    ["/angular-main/", "main.angular-demo.shell"],
+    ["/angular-all-options/", "main.angular-demo.shell"],
+    ["/ng-zorro/ai/", ".mx-ng.shell"],
+  ]) {
+    await page.goto(route);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.locator(selector!)).toBeVisible();
+    const container = await page.locator(selector!).evaluate((shell) => {
+      const box = shell.getBoundingClientRect();
+      const style = getComputedStyle(shell);
+      return {
+        x: box.x,
+        width: box.width,
+        left: style.paddingLeft,
+        right: style.paddingRight,
+      };
+    });
+    expect(container.width).toBe(1140);
+    expect(
+      Math.abs(container.x - (1920 - container.width) / 2)
+    ).toBeLessThanOrEqual(8);
+    expect(container.left).toBe("28px");
+    expect(container.right).toBe("28px");
+  }
+});

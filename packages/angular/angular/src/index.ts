@@ -504,6 +504,7 @@ export {
 } from "./layout/dataTableShell";
 export { AdaptDesktopTableModel } from "./layout/desktopTableModel";
 export { AdaptMobileCardsModel } from "./layout/mobileCardsModel";
+export { injectPopoverSpace } from "./layout/popoverSpace";
 export {
   AdaptSidePanelChrome,
   AdaptSidePanelLayout,

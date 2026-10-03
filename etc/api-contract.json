@@ -6714,6 +6714,7 @@
       "injectLiveEditConflict",
       "injectMeasuredWindowScrollMargin",
       "injectMediaQuery",
+      "injectPopoverSpace",
       "injectPrefersReducedMotion",
       "injectQuerySource",
       "injectRowDetail",

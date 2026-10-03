@@ -7,6 +7,7 @@
   --adapt-material-surface: var(--mat-sys-surface, #fffbfe);
   --adapt-material-line: var(--mat-sys-outline-variant, #cac4d0);
   --adapt-material-cell-space: 12px 16px;
+  --mat-button-outlined-container-shape: 6px;
 }
 .adapt-material {
   display: block;
@@ -50,7 +51,9 @@
   border-block-start: 1px solid var(--adapt-material-line);
 }
 .adapt-material [data-adapttable-part="search-field"] {
-  flex: 1 1 200px;
+  flex: 1 1 280px;
+  max-inline-size: min(520px, 100%);
+  margin-inline-end: auto;
   flex-wrap: nowrap;
 }
 .adapt-material .mat-mdc-form-field,
@@ -60,6 +63,11 @@
 }
 .adapt-material [data-adapttable-part="search-field"] .mat-mdc-form-field {
   inline-size: 100%;
+  /* Material's supported form-field density tokens; the native outline,
+     focus state and input remain owned by MatFormField and MatInput. */
+  --mat-form-field-container-height: 40px;
+  --mat-form-field-container-vertical-padding: 8px;
+  --mat-form-field-container-text-size: 14px;
 }
 .adapt-material [data-adapttable-part="scroll-box"] {
   overflow: auto;
@@ -89,6 +97,10 @@
   min-inline-size: 0;
   padding-inline: 4px;
   font-weight: inherit;
+  --mat-button-text-label-text-color: var(
+    --mat-sys-on-surface-variant,
+    #49454f
+  );
 }
 .adapt-material th adapt-header-filter-trigger {
   display: inline-flex;
@@ -123,9 +135,9 @@
 .adapt-material [data-adapttable-part="cards"] {
   list-style: none;
   margin: 0;
-  padding: 0;
   display: grid;
   gap: 12px;
+  padding: 12px;
 }
 .adapt-material [data-adapttable-part="card-row"] {
   display: flex;
@@ -219,9 +231,6 @@
   --mat-button-text-label-text-tracking: normal;
   min-inline-size: 0;
 }
-.adapt-material [data-adapttable-part="cards"] {
-  padding: 12px;
-}
 .adapt-material
   [data-adapttable-part="cards"]
   [data-adapttable-part="edit-cell-activate"] {
@@ -246,4 +255,28 @@
   border-color: var(--mat-sys-primary, #6750a4);
   background: var(--mat-sys-primary-container, #eaddff);
   color: var(--mat-sys-on-primary-container, #21005d);
+}
+
+.adapt-material-overlay .mat-mdc-form-field {
+  --mat-form-field-container-height: 40px;
+  --mat-form-field-container-vertical-padding: 8px;
+  --mat-form-field-container-text-size: 14px;
+}
+.adapt-material-overlay .adapt-material-filters-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.adapt-material-overlay {
+  --mat-expansion-container-elevation-shadow: none;
+  --mat-expansion-container-shape: 0px;
+  --mat-expansion-header-collapsed-state-height: 40px;
+  --mat-card-elevated-container-shape: 8px;
+}
+.adapt-material-filters-button {
+  --mat-button-text-container-shape: 6px;
+}
+.adapt-material-overlay .adapt-material-filters-footer {
+  --mat-button-filled-container-shape: 6px;
 }

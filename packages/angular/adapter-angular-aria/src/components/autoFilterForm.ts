@@ -19,7 +19,7 @@ import { CHECKLIST_SLOTS } from "./checklistFilter";
 
 /** A field's column stack: the caption is a flex item, so `gap` applies. */
 const FIELD_STACK =
-  "display: flex; flex-direction: column; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0";
+  "display: flex; flex-direction: column; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; grid-column: 1 / -1";
 
 /** A fresh id for a field's caption, which its group is labelled by. */
 
@@ -39,7 +39,7 @@ const FIELD_STACK =
       <div style="display: flex; flex-wrap: wrap; gap: 12px">
         <select
           data-adapttable-part="filter-operator"
-          style="flex: 0 0 8.5rem; width: 8.5rem"
+          style="flex: 0 1 7rem; min-width: 0; max-width: 100%"
           [attr.aria-label]="labels().operator"
           [value]="w.op"
           (change)="pickOp($any($event.target).value)"
@@ -156,7 +156,7 @@ export class AdaptSelectFilterField<
       <div data-adapttable-part="filter-label" [id]="id">{{ caption() }}</div>
       <div
         data-adapttable-part="filter-checkbox-group"
-        style="display: flex; flex-wrap: wrap; gap: 10px; overflow: auto"
+        style="display: flex; flex-direction: column; gap: 8px; overflow: auto"
         [style.max-height.px]="listHeight"
       >
         @if (options().loading) {
@@ -180,7 +180,7 @@ export class AdaptSelectFilterField<
 export class AdaptMultiSelectFilterField<
   TRow,
 > extends AdaptMultiSelectFilterFieldModel<TRow> {
-  protected readonly stack = FIELD_STACK;
+  protected readonly stack = FIELD_STACK + "; grid-column: auto";
 }
 
 /** An operator-first number or date range. @internal */
@@ -200,7 +200,7 @@ export class AdaptMultiSelectFilterField<
       <div style="display: flex; flex-wrap: wrap; gap: 12px">
         <select
           data-adapttable-part="filter-operator"
-          style="flex: 0 0 8.5rem; width: 8.5rem"
+          style="flex: 0 1 7rem; min-width: 0; max-width: 100%"
           [attr.aria-label]="l.operator"
           [value]="w.op ?? ''"
           (change)="pickOp($any($event.target).value)"

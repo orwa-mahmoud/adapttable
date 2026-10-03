@@ -10,12 +10,19 @@ import { injectTableAssistant, tableAgent } from "@adapttable/ai-angular";
 import type {
   AgentApprovalPending,
   ColumnDef,
+  TableAssistantButtonProps,
+  TableAssistantLanguageChipProps,
   TableAssistantProps,
 } from "@adapttable/angular";
 import { Component, computed, inject, signal } from "@angular/core";
 
 import { SHOWCASE_PRESENTATION } from "./data";
-import { AdaptShowcaseAssistant, AdaptShowcaseTable } from "./kitComponents";
+import {
+  AdaptShowcaseAction,
+  AdaptShowcaseAssistant,
+  AdaptShowcaseChoice,
+  AdaptShowcaseTable,
+} from "./kitComponents";
 import { SHOWCASE_KIT } from "./showcaseKit";
 
 interface AgentPerson {
@@ -57,7 +64,13 @@ const SUGGESTIONS: readonly AssistantSuggestion[] = [
 /** The feature body mounted by the Angular matrix's AI page. */
 @Component({
   selector: "adapt-showcase-ai",
-  imports: [AdaptShowcaseTable, AdaptShowcaseAssistant],
+  imports: [
+    AdaptShowcaseTable,
+    AdaptShowcaseAssistant,
+    AdaptShowcaseAction,
+    AdaptShowcaseChoice,
+  ],
+  styleUrl: "./aiBody.css",
   templateUrl: "./aiBody.html",
 })
 export class AiBody {
@@ -77,7 +90,7 @@ export class AiBody {
   ];
   readonly session = signal<AgentSession | undefined>(undefined);
   readonly pending = signal<AgentApprovalPending | null>(null);
-  readonly open = signal(true);
+  readonly open = signal(false);
   readonly approvalSurface = signal<"widget" | "table" | "modal">("widget");
   readonly log = signal("No host writes yet");
   readonly direction = this.presentation.dir;
@@ -171,7 +184,7 @@ export class AiBody {
     approval: this.pending(),
     open: this.open(),
     onOpenChange: (open) => this.open.set(open),
-    presentation: "panel",
+    presentation: "floating",
     dir: this.direction,
     labels: this.presentation.labels,
     note: "Scripted locally. Table changes and host writes are real.",
@@ -220,13 +233,33 @@ export class AiBody {
     ),
   ];
 
+  readonly showEveryone = computed((): TableAssistantButtonProps => ({
+    label: "Show everyone",
+    part: "demo-show-everyone",
+    variant: "secondary",
+    disabled: this.assistant().busy || !this.session(),
+    onClick: () => this.send("Show everyone"),
+  }));
+
+  readonly surfaceChoice = computed((): TableAssistantLanguageChipProps => ({
+    label: "Approval surface",
+    part: "demo-approval-surface",
+    value: this.approvalSurface(),
+    disabled: this.assistant().busy,
+    options: [
+      { value: "widget", label: "Assistant" },
+      { value: "table", label: "Table" },
+      { value: "modal", label: "Dialog" },
+    ],
+    onChange: (value) => this.changeSurface(value),
+  }));
+
   send(text: string): void {
     this.open.set(true);
     void this.assistant().send(text);
   }
 
-  changeSurface(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
+  changeSurface(value: string): void {
     if (value === "widget" || value === "table" || value === "modal")
       this.approvalSurface.set(value);
   }

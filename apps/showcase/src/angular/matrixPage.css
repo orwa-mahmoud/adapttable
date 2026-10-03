@@ -107,6 +107,8 @@ adapt-showcase-matrix-page *::after {
 
 .mx-ng--unstyled [data-adapttable-part="search-field"] {
   flex: 1 1 200px;
+  max-inline-size: min(520px, 100%);
+  margin-inline-end: auto;
   display: flex;
 }
 

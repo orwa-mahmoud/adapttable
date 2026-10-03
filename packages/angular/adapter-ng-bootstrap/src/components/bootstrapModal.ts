@@ -13,6 +13,7 @@ export function bootstrapModal(options: {
   readonly content: () => TemplateRef<unknown>;
   readonly container: () => HTMLElement;
   readonly titleId: string;
+  readonly sheet?: boolean;
   readonly onClose: () => void;
 }): void {
   const modal = inject(NgbModal);
@@ -37,6 +38,7 @@ export function bootstrapModal(options: {
       keyboard: true,
       ariaLabelledBy: options.titleId,
       scrollable: true,
+      fullscreen: options.sheet ? "sm" : false,
     });
     ref = current;
     const closed = (): void => {

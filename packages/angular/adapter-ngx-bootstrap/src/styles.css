@@ -43,9 +43,8 @@
   justify-content: space-between;
 }
 .adapttable-ngx-bootstrap [data-adapttable-part="search-field"] {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: stretch;
+  gap: 0;
   flex: 1 1 12rem;
   max-inline-size: 24rem;
   min-inline-size: 0;
@@ -264,8 +263,13 @@
   overflow-y: auto;
 }
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-overlay] {
-  position: relative;
+  position: fixed;
+  inset: 0;
   z-index: 1070;
+  pointer-events: none;
+}
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-overlay] > * {
+  pointer-events: auto;
 }
 .adapttable-ngx-bootstrap [dir="rtl"] .dropdown-menu {
   text-align: right;

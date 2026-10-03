@@ -12,6 +12,8 @@ import type {
   ExtraFilters,
   PaginationMode,
   SummaryRowFn,
+  TableAssistantButtonProps,
+  TableAssistantLanguageChipProps,
   TableAssistantProps,
   TableDensity,
   TableLabels,
@@ -55,6 +57,21 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
   readonly skeletonRows = input<number>();
   readonly columns = input.required<readonly ColumnInput<TRow>[]>();
   readonly rowKey = input.required<(row: TRow) => string>();
+  private readonly nativeColumns = computed(() => {
+    const decorate = (
+      columns: readonly ColumnInput<TRow>[]
+    ): readonly ColumnInput<TRow>[] =>
+      columns.map((column) => {
+        if ("children" in column) {
+          return { ...column, children: decorate(column.children) };
+        }
+        if (column.key === "status" && !column.cell) {
+          return { ...column, cell: this.kit.statusCell };
+        }
+        return column;
+      });
+    return decorate(this.columns());
+  });
   readonly tableLabel = input<string>();
   readonly dir = input<Direction>("ltr");
   readonly labels = input<TableLabels>();
@@ -91,7 +108,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
         inputBinding("loading", this.loading),
         inputBinding("error", this.error),
         inputBinding("skeletonRows", this.skeletonRows),
-        inputBinding("columns", this.columns),
+        inputBinding("columns", this.nativeColumns),
         inputBinding("rowKey", this.rowKey),
         inputBinding("tableLabel", this.tableLabel),
         inputBinding("dir", this.dir),
@@ -162,4 +179,36 @@ export class AdaptShowcaseAssistant {
   protected readonly assistantInputs = computed(() => ({
     props: this.props(),
   }));
+}
+
+/** Demo actions use the selected kit's existing public button component. */
+@Component({
+  selector: "adapt-showcase-action",
+  imports: [NgComponentOutlet],
+  template: `<ng-container
+    [ngComponentOutlet]="kit.assistantButton"
+    [ngComponentOutletInputs]="inputs()"
+  />`,
+  host: { style: "display: contents" },
+})
+export class AdaptShowcaseAction {
+  protected readonly kit = inject(SHOWCASE_KIT);
+  readonly props = input.required<TableAssistantButtonProps>();
+  protected readonly inputs = computed(() => ({ props: this.props() }));
+}
+
+/** The kit's existing select also owns the demo's approval destination. */
+@Component({
+  selector: "adapt-showcase-choice",
+  imports: [NgComponentOutlet],
+  template: `<ng-container
+    [ngComponentOutlet]="kit.assistantSelect"
+    [ngComponentOutletInputs]="inputs()"
+  />`,
+  host: { style: "display: contents" },
+})
+export class AdaptShowcaseChoice {
+  protected readonly kit = inject(SHOWCASE_KIT);
+  readonly props = input.required<TableAssistantLanguageChipProps>();
+  protected readonly inputs = computed(() => ({ props: this.props() }));
 }

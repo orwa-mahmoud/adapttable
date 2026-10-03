@@ -90,10 +90,12 @@ export class AdaptMaterialDialog {
           this.dismiss.emit();
         });
       }
-      const backdrop = this.document.querySelector(`.${this.backdropClass}`);
+      const backdrop = this.document.querySelector<HTMLElement>(
+        `.${this.backdropClass}`
+      );
       if (marker && backdrop) {
         backdrop.classList.add(marker);
-        backdrop.setAttribute("data-state", "open");
+        backdrop.dataset.state = "open";
       }
     });
     inject(DestroyRef).onDestroy(() => this.close());

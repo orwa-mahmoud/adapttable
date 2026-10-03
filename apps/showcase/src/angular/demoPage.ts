@@ -427,7 +427,7 @@ export class AdaptShowcaseDemoPage {
     ...(this.editing && enabled("undo-redo", !this.lab)
       ? [this.kit.undoRedoButtons()]
       : []),
-    ...(enabled("columns", this.lab)
+    ...(enabled("columns", true)
       ? [this.kit.columnMenu(), this.kit.resizableColumns()]
       : []),
     ...(enabled("navigation", this.lab) || this.editing

@@ -137,7 +137,7 @@ export class AdaptAssistantPanel {
     [attr.dir]="props().dir"
     [attr.data-adapttable-part]="props().part"
     [class]="props().className"
-    style="max-inline-size:calc(100vw - 2em);max-block-size:calc(100dvh - 2em)"
+    style="inset: auto 0 0; margin: 0 auto; inline-size: min(420px, 100vw); block-size: 85dvh; max-inline-size: 100vw; max-block-size: 85dvh; padding: 16px; box-sizing: border-box; border-width: 1px; border-style: solid; border-color: color-mix(in srgb, CanvasText 16%, Canvas); border-radius: 12px 12px 0 0"
     (cancel)="cancel($event)"
   >
     <ng-container [ngTemplateOutlet]="props().children" />
@@ -223,6 +223,7 @@ export class AdaptAssistantLanguageChip {
     (keydown)="onKeyDown($event)"
   >
     <summary
+      style="display: flex; align-items: center; justify-content: center; list-style: none"
       #trigger
       [attr.aria-label]="props().label"
       [title]="props().label"

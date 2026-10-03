@@ -1,12 +1,13 @@
 /** The real NG-ZORRO kit used by every Angular showcase body. */
 // This module loads only for NG-ZORRO routes; the stylesheet never reaches
 // the native Angular or React entry graphs.
-import "ng-zorro-antd/ng-zorro-antd.min.css";
 import "../ngZorro.css";
 
 import { type LocaleKey, locales } from "@adapttable/i18n";
 import { AdaptDataTable } from "@adapttable/ng-zorro";
 import {
+  AdaptAssistantButton,
+  AdaptAssistantLanguageChip,
   AdaptTableAssistant,
   agentApproval,
 } from "@adapttable/ng-zorro/assistant";
@@ -49,6 +50,13 @@ import { sidePanel } from "@adapttable/ng-zorro/side-panel";
 import { statusBar } from "@adapttable/ng-zorro/status-bar";
 import { tree } from "@adapttable/ng-zorro/tree";
 import { virtualize } from "@adapttable/ng-zorro/virtualize";
+import { DOCUMENT } from "@angular/common";
+import {
+  DestroyRef,
+  effect,
+  inject,
+  provideAppInitializer,
+} from "@angular/core";
 import {
   ar_EG,
   cs_CZ,
@@ -72,9 +80,12 @@ import {
   zh_CN,
   zh_TW,
 } from "ng-zorro-antd/i18n";
+import nativeDarkTheme from "ng-zorro-antd/ng-zorro-antd.dark.min.css?url";
+import nativeLightTheme from "ng-zorro-antd/ng-zorro-antd.min.css?url";
 
 import { SHOWCASE_PRESENTATION } from "../data";
-import type { ShowcaseKit } from "../showcaseKit";
+import { SHOWCASE_DARK, type ShowcaseKit } from "../showcaseKit";
+import { ShowcaseStatus } from "./ngZorroStatus";
 
 /** Match NG-ZORRO's own widget text to every bundled AdaptTable locale. */
 const NZ_LOCALES = {
@@ -108,10 +119,45 @@ const locale = (Object.entries(locales).find(
 /** Components and feature factories are always from this one kit. */
 export const kit = {
   key: "ng-zorro",
-  providers: [provideNzI18n(NZ_LOCALES[locale])],
+  providers: [
+    provideNzI18n(NZ_LOCALES[locale]),
+    provideAppInitializer(() => {
+      const document = inject(DOCUMENT);
+      const dark = inject(SHOWCASE_DARK);
+      const loaded: Promise<void>[] = [];
+      const themes = [nativeLightTheme, nativeDarkTheme].map((href) => {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        link.media = "not all";
+        loaded.push(
+          new Promise<void>((resolve, reject) => {
+            link.onload = () => resolve();
+            link.onerror = () =>
+              reject(new Error("The native NG-ZORRO theme could not load"));
+          })
+        );
+        document.head.prepend(link);
+        return link;
+      });
+      effect(() => {
+        const active = dark() ? 1 : 0;
+        themes.forEach((theme, index) => {
+          theme.media = index === active ? "all" : "not all";
+        });
+      });
+      inject(DestroyRef).onDestroy(() =>
+        themes.forEach((theme) => theme.remove())
+      );
+      return Promise.all(loaded);
+    }),
+  ],
   table: AdaptDataTable,
+  statusCell: ShowcaseStatus,
   pivotPanel: AdaptPivotPanel,
   assistant: AdaptTableAssistant,
+  assistantButton: AdaptAssistantButton,
+  assistantSelect: AdaptAssistantLanguageChip,
   savedViewsPanel: AdaptSavedViewsPanel,
   bulkActions,
   cellNavigation,

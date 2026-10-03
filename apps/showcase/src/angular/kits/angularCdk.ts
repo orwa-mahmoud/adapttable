@@ -3,6 +3,8 @@ import "@adapttable/angular-cdk/styles.css";
 
 import { AdaptDataTable } from "@adapttable/angular-cdk";
 import {
+  AdaptAssistantButton,
+  AdaptAssistantLanguageChip,
   AdaptTableAssistant,
   agentApproval,
 } from "@adapttable/angular-cdk/assistant";
@@ -51,14 +53,18 @@ import { tree } from "@adapttable/angular-cdk/tree";
 import { virtualize } from "@adapttable/angular-cdk/virtualize";
 
 import type { ShowcaseKit } from "../showcaseKit";
+import { ShowcaseStatus } from "./angularCdkStatus";
 
 /** Components and feature factories are always from this one kit. */
 export const kit = {
   key: "angular-cdk",
   providers: [],
   table: AdaptDataTable,
+  statusCell: ShowcaseStatus,
   pivotPanel: AdaptPivotPanel,
   assistant: AdaptTableAssistant,
+  assistantButton: AdaptAssistantButton,
+  assistantSelect: AdaptAssistantLanguageChip,
   savedViewsPanel: AdaptSavedViewsPanel,
   bulkActions,
   cellNavigation,

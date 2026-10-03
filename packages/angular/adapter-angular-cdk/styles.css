@@ -23,16 +23,27 @@
     var(--adapt-cdk-border, color-mix(in srgb, CanvasText 16%, Canvas));
 }
 [data-adapttable-kit="angular-cdk"] [data-adapttable-part="search-field"] {
+  position: relative;
   display: flex;
   flex: 1 1 14rem;
   align-items: center;
   gap: 0.5rem;
   min-inline-size: 0;
+  max-inline-size: min(520px, 100%);
+  margin-inline-end: auto;
 }
-[data-adapttable-kit="angular-cdk"] [data-adapttable-part="search"] {
+[data-adapttable-kit="angular-cdk"]
+  [data-adapttable-part="search"][data-adapttable-cdk-control] {
+  padding-inline-start: 36px;
   inline-size: 100%;
   min-inline-size: 0;
 }
+[data-adapttable-kit="angular-cdk"] [data-adapttable-part="search-icon"] {
+  position: absolute;
+  inset-inline-start: 12px;
+  pointer-events: none;
+}
+
 [data-adapttable-kit="angular-cdk"] [data-adapttable-part="footer"] {
   border-block-start: 1px solid
     var(--adapt-cdk-border, color-mix(in srgb, CanvasText 16%, Canvas));
@@ -68,6 +79,11 @@
 [data-adapttable-kit="angular-cdk"] [data-adapttable-part="table"] th {
   text-align: start;
   font-weight: 600;
+  background: color-mix(
+    in srgb,
+    var(--adapt-cdk-color, CanvasText) 4%,
+    var(--adapt-cdk-background, Canvas)
+  );
 }
 [data-adapttable-kit="angular-cdk"] [data-adapttable-part="cards"] {
   display: grid;
@@ -79,7 +95,7 @@
   max-inline-size: 100%;
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 12px;
 }
 [data-adapttable-kit="angular-cdk"]
   :is([data-adapttable-part="card"], [data-adapttable-part="summary-card"]) {
@@ -217,13 +233,6 @@ textarea[data-adapttable-cdk-control] {
   background: var(--adapt-cdk-background, Canvas);
   color: var(--adapt-cdk-color, CanvasText);
 }
-[data-adapttable-kit="angular-cdk"] [data-adapttable-part="table"] th {
-  background: color-mix(
-    in srgb,
-    var(--adapt-cdk-color, CanvasText) 4%,
-    var(--adapt-cdk-background, Canvas)
-  );
-}
 [data-adapttable-kit="angular-cdk"] [data-adapttable-part="row"]:hover {
   background: color-mix(
     in srgb,
@@ -247,9 +256,6 @@ button[data-adapttable-cdk-control]:hover:not(:disabled) {
   background: var(--adapt-cdk-accent, #3158b6);
   border-color: var(--adapt-cdk-accent, #3158b6);
   color: white;
-}
-[data-adapttable-kit="angular-cdk"] [data-adapttable-part="cards"] {
-  padding: 12px;
 }
 @media (prefers-reduced-motion: reduce) {
   button[data-adapttable-cdk-control] {

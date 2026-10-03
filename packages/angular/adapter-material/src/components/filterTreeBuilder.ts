@@ -110,7 +110,7 @@ export class AdaptTreeButton {
       data-adapttable-part="filter-tree"
       [class]="p.className"
       [expanded]="p.expanded"
-      style="margin-block-end: 4px; padding-block-end: 16px; border-block-end: 1px solid color-mix(in srgb, currentColor 14%, transparent)"
+      style="grid-column: 1 / -1; margin-block-end: 0; padding-block-end: 0; border-block-end: 1px solid color-mix(in srgb, currentColor 14%, transparent)"
       (opened)="p.onExpandedChange(true)"
       (closed)="p.onExpandedChange(false)"
     >
@@ -120,7 +120,6 @@ export class AdaptTreeButton {
         style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 600; font-size: 0.8125rem; padding-block: 4px; list-style: none"
       >
         {{ p.label }}
-        <span aria-hidden="true">{{ p.expanded ? "▴" : "▾" }}</span>
       </mat-expansion-panel-header>
       @if (p.expanded) {
         <ng-container [ngTemplateOutlet]="p.children" />

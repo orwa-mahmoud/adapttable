@@ -22,7 +22,7 @@
         {{
           lab
             ? "Compose real features on one table. Every table and control is rendered by the selected Angular adapter."
-            : "One dataset, one feature set, rendered by each real Angular adapter. Switch the kit, data source and locale."
+            : "One dataset, one feature set, rendered by each real Angular adapter."
         }}
       </p>
     </div>
@@ -57,7 +57,7 @@
           class="adtab angular-kit"
           [class.is-on]="kit.key === adapter.key"
           [style.--c]="kitAccent(adapter, dark())"
-          [title]="adapter.label"
+          [title]="adapter.label + ' — ' + adapter.blurb"
           ><input
             type="radio"
             [attr.aria-label]="adapter.label"
@@ -125,6 +125,7 @@
           <option value="header">Header</option>
         </select></label
       >
+      <div class="angular-options-switches">
       @if (!lab) {
         <label
           ><input
@@ -153,6 +154,7 @@
           data-demo-control="motion"
         />Motion</label
       >
+      </div>
     </div>
     @if (server) {
       <p class="hint">
@@ -285,7 +287,7 @@
         }
       </dialog>
     }
-    <p class="hint" role="status">
+    <p class="hint demo-state" role="status">
       {{ server ? "Server" : large ? "40,000 frontend rows" : "Frontend" }} ·
       {{ pivoted() ? "pivot" : structure }} · {{ editingMode }} editing ·
       {{ filterMode }} filters

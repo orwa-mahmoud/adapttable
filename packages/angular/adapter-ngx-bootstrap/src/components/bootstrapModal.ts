@@ -47,7 +47,10 @@ import { ModalDirective } from "ngx-bootstrap/modal";
       (onHidden)="hidden()"
       (keydown)="onKeyDown($event)"
     >
-      <div class="modal-dialog modal-dialog-scrollable">
+      <div
+        class="modal-dialog modal-dialog-scrollable"
+        [class.modal-fullscreen-sm-down]="sheet()"
+      >
         <div class="modal-content">
           <ng-container [ngTemplateOutlet]="content()" />
         </div>
@@ -59,6 +62,7 @@ class AdaptBootstrapModal {
   readonly content = input.required<TemplateRef<unknown>>();
   readonly titleId = input.required<string>();
   readonly drawer = input(false);
+  readonly sheet = input(false);
   readonly label = input<string | undefined>(undefined);
   readonly dir = input<"ltr" | "rtl">("ltr");
   readonly closed = output<void>();
@@ -163,6 +167,7 @@ export function bootstrapModal(options: {
   readonly content: () => TemplateRef<unknown>;
   readonly container: () => HTMLElement;
   readonly titleId: string;
+  readonly sheet?: boolean;
   readonly onClose: () => void;
   readonly drawer?: boolean;
   readonly label?: () => string;
@@ -199,6 +204,7 @@ export function bootstrapModal(options: {
     current.setInput("titleId", options.titleId);
     current.setInput("label", options.label?.());
     current.setInput("drawer", options.drawer ?? false);
+    current.setInput("sheet", options.sheet ?? false);
     current.setInput("dir", options.dir?.() ?? "ltr");
     current.instance.closed.subscribe(() => {
       if (ref !== current) return;

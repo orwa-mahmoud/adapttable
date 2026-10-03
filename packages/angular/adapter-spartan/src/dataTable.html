@@ -38,6 +38,7 @@
             <svg [adaptIcon]="searchIcon"></svg>
           </span>
           <input
+            [attr.aria-label]="v.table.labels().search"
             adaptHlmInput
             data-adapttable-part="search"
             [adaptAttrs]="v.table.searchInputAttrs()"

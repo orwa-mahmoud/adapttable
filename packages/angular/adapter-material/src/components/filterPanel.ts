@@ -35,16 +35,18 @@ import { AdaptMaterialDialog } from "./materialDialog";
     @let p = props();
     <div
       data-adapttable-part="filters-form"
-      style="display: flex; flex-direction: column; gap: 16px"
+      style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px"
     >
-      <adapt-filter-tree-chrome
-        [defs]="p.defs"
-        [source]="p.source"
-        [labels]="p.labels"
-        [registry]="p.registry"
-        [defaultExpanded]="p.defaultExpanded ?? false"
-        [slots]="treeSlots"
-      />
+      <div style="grid-column: 1 / -1">
+        <adapt-filter-tree-chrome
+          [defs]="p.defs"
+          [source]="p.source"
+          [labels]="p.labels"
+          [registry]="p.registry"
+          [defaultExpanded]="p.defaultExpanded ?? false"
+          [slots]="treeSlots"
+        />
+      </div>
       @if (p.showSimpleFields) {
         <adapt-auto-filter-form
           [defs]="p.defs"
@@ -82,9 +84,9 @@ export class AdaptFiltersForm {
         data-state="open"
         [attr.dir]="p.dir ?? 'ltr'"
         [attr.data-dir]="p.dir ?? 'ltr'"
-        style="padding:24px;max-height:100%;overflow:auto"
+        style="padding:24px;height:100%;max-height:100%;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box"
       >
-        <header class="adapt-material-filters-header">
+        <header class="adapt-material-filters-header" style="flex:none">
           <h3 class="adapt-material-filters-title">
             {{ p.labels.filters
             }}{{
@@ -101,10 +103,13 @@ export class AdaptFiltersForm {
             ×
           </button>
         </header>
-        <div class="adapt-material-filters-body">
+        <div
+          class="adapt-material-filters-body"
+          style="min-height:0;flex:1;overflow-y:auto"
+        >
           <ng-container [ngTemplateOutlet]="p.filters" />
         </div>
-        <footer class="adapt-material-filters-footer">
+        <footer class="adapt-material-filters-footer" style="flex:none">
           <button
             mat-button
             type="button"

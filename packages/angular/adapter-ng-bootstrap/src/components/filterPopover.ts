@@ -1,5 +1,8 @@
 /** ng-bootstrap's anchored, backdrop-free filter overlay. */
-import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import {
+  type FilterOverlaySlotProps,
+  injectPopoverSpace,
+} from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
@@ -27,7 +30,7 @@ import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
       triggers="manual"
       autoClose="outside"
       [animation]="false"
-      [placement]="p.dir === 'rtl' ? 'bottom-end' : 'bottom-start'"
+      [placement]="p.dir === 'rtl' ? 'bottom-start' : 'bottom-end'"
       popoverClass="adapttable-filter-popover"
       (hidden)="closed()"
       (shown)="shown()"
@@ -40,6 +43,8 @@ import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
     <ng-template #content>
       <div
         data-ng-bootstrap-part="filters-popover"
+        [style.max-height.px]="availableHeight()"
+        style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
         [attr.dir]="p.dir ?? 'ltr'"
         [attr.data-dir]="p.dir ?? 'ltr'"
       >
@@ -60,9 +65,23 @@ import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
             {{ p.labels.clearAll }}
           </button>
         </header>
-        <div data-ng-bootstrap-part="filters-body">
+        <div
+          data-ng-bootstrap-part="filters-body"
+          style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+        >
           <ng-container [ngTemplateOutlet]="p.filters" />
         </div>
+        <footer
+          style="flex: none; display: flex; justify-content: flex-end; padding-block-start: 12px"
+        >
+          <button
+            class="btn btn-primary btn-sm"
+            type="button"
+            (click)="p.onClose()"
+          >
+            {{ p.labels.filtersDone }}
+          </button>
+        </footer>
       </div>
     </ng-template>
   `,
@@ -74,6 +93,11 @@ export class AdaptFilterPopover {
   private readonly popover = viewChild.required(NgbPopover);
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
+  protected readonly availableHeight = injectPopoverSpace({
+    origin: () => this.anchor()?.nativeElement,
+    open: () => this.props().open,
+    reserve: 48,
+  });
   private restoreFocus = false;
 
   constructor() {

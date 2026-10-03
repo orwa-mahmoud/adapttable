@@ -8,7 +8,7 @@ import {
   AdaptTextFilterFieldModel,
 } from "@adapttable/angular";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed } from "@angular/core";
 
 import { TAIGA_CONTROLS } from "../taigaControls";
 import { CHECKLIST_SLOTS } from "./checklistFilter";
@@ -21,7 +21,7 @@ import { CHECKLIST_SLOTS } from "./checklistFilter";
 
 /** A field's column stack: the caption is a flex item, so `gap` applies. */
 const FIELD_STACK =
-  "display: flex; flex-direction: column; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0";
+  "display: flex; flex-direction: column; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; grid-column: 1 / -1";
 
 /** A fresh id for a field's caption, which its group is labelled by. */
 
@@ -41,6 +41,8 @@ const FIELD_STACK =
       <div data-adapttable-part="filter-label" [id]="id">{{ w.label }}</div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px">
         <tui-textfield
+          tuiTextfieldSize="s"
+          style="flex: 1 1 7rem; min-width: 0; width: 100%"
           [tuiTextfieldCleaner]="false"
           [stringify]="w.opLabelKeys | taigaLabels: labels()"
           ><input
@@ -60,6 +62,8 @@ const FIELD_STACK =
         >
         @if (w.needsValue) {
           <tui-textfield
+            tuiTextfieldSize="s"
+            style="flex: 1 1 7rem; min-width: 0; width: 100%"
             ><input
               tuiInput
               type="text"
@@ -91,6 +95,8 @@ export class AdaptTextFilterField<
     <label data-adapttable-part="filter-field" [style]="stack">
       <span data-adapttable-part="filter-label">{{ w.label }}</span>
       <tui-textfield
+        tuiTextfieldSize="s"
+        style="min-width: 0; width: 100%"
         [stringify]="
           {
             '': labels().boolAny,
@@ -138,6 +144,8 @@ export class AdaptBooleanFilterField<
     <label data-adapttable-part="filter-field" [style]="stack">
       <span data-adapttable-part="filter-label">{{ caption() }}</span>
       <tui-textfield
+        tuiTextfieldSize="s"
+        style="min-width: 0; width: 100%"
         [stringify]="
           options().options | taigaLabels: { '': labels().filterAll }
         "
@@ -187,7 +195,7 @@ export class AdaptSelectFilterField<
       <div data-adapttable-part="filter-label" [id]="id">{{ caption() }}</div>
       <div
         data-taiga-part="filter-checkbox-group"
-        style="display: flex; flex-wrap: wrap; gap: 10px; overflow: auto"
+        style="display: flex; flex-direction: column; gap: 8px; overflow: auto"
         [style.max-height.px]="listHeight"
       >
         @if (options().loading) {
@@ -213,7 +221,7 @@ export class AdaptSelectFilterField<
 export class AdaptMultiSelectFilterField<
   TRow,
 > extends AdaptMultiSelectFilterFieldModel<TRow> {
-  protected readonly stack = FIELD_STACK;
+  protected readonly stack = FIELD_STACK + "; grid-column: auto";
 }
 
 /** An operator-first number or date range. @internal */
@@ -233,9 +241,13 @@ export class AdaptMultiSelectFilterField<
       <div data-adapttable-part="filter-label" [id]="id">{{ w.label }}</div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px">
         <tui-textfield
+          tuiTextfieldSize="s"
+          style="flex: 1 1 7rem; min-width: 0; width: 100%"
+          [stringify]="w.opLabelKeys | taigaLabels: l"
           ><input
             tuiSelect
             data-adapttable-part="filter-operator"
+            [attr.placeholder]="l.operator"
             style="flex: 0 0 8.5rem; width: 8.5rem"
             [attr.aria-label]="l.operator"
             [ngModel]="w.op ?? ''"
@@ -253,6 +265,8 @@ export class AdaptMultiSelectFilterField<
         >
         @if (w.arity === "two") {
           <tui-textfield
+            tuiTextfieldSize="s"
+            style="flex: 1 1 7rem; min-width: 0; width: 100%"
             ><input
               tuiInput
               data-adapttable-part="filter-input"
@@ -264,6 +278,8 @@ export class AdaptMultiSelectFilterField<
               (input)="w.write(w.op, $any($event.target).value, w.b)"
           /></tui-textfield>
           <tui-textfield
+            tuiTextfieldSize="s"
+            style="flex: 1 1 7rem; min-width: 0; width: 100%"
             ><input
               tuiInput
               data-adapttable-part="filter-input"
@@ -277,7 +293,11 @@ export class AdaptMultiSelectFilterField<
         }
         @if (w.op === "relative") {
           @let token = relative();
-          <tui-textfield [tuiTextfieldCleaner]="false"
+          <tui-textfield
+            tuiTextfieldSize="s"
+            style="flex: 1 1 7rem; min-width: 0; width: 100%"
+            [tuiTextfieldCleaner]="false"
+            [stringify]="presetLabels() | taigaLabels"
             ><input
               tuiSelect
               data-adapttable-part="filter-input"
@@ -295,6 +315,8 @@ export class AdaptMultiSelectFilterField<
           >
           @if (token.preset === "last" || token.preset === "next") {
             <tui-textfield
+              tuiTextfieldSize="s"
+              style="flex: 1 1 7rem; min-width: 0; width: 100%"
               ><input
                 tuiInput
                 type="number"
@@ -314,6 +336,8 @@ export class AdaptMultiSelectFilterField<
           w.arity !== "two"
         ) {
           <tui-textfield
+            tuiTextfieldSize="s"
+            style="flex: 1 1 7rem; min-width: 0; width: 100%"
             ><input
               tuiInput
               data-adapttable-part="filter-input"
@@ -333,6 +357,11 @@ export class AdaptRangeFilterField<
   TRow,
 > extends AdaptRangeFilterFieldModel<TRow> {
   protected readonly stack = FIELD_STACK;
+  protected readonly presetLabels = computed(() =>
+    Object.fromEntries(
+      this.presets.map((preset) => [preset, this.presetLabel(preset)])
+    )
+  );
 }
 
 /**

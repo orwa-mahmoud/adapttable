@@ -3,9 +3,16 @@
  * backdrop, closes on an outside click or Escape, and hands focus back to
  * the button on Escape.
  */
-import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import {
+  type FilterOverlaySlotProps,
+  injectPopoverSpace,
+} from "@adapttable/angular";
 import { Dir } from "@angular/cdk/bidi";
-import { CdkConnectedOverlay, CdkOverlayOrigin } from "@angular/cdk/overlay";
+import {
+  CdkConnectedOverlay,
+  CdkOverlayOrigin,
+  type ConnectedPosition,
+} from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
@@ -49,19 +56,22 @@ import {
         [cdkConnectedOverlayOpen]="p.open"
         [cdkConnectedOverlayHasBackdrop]="false"
         [cdkConnectedOverlayViewportMargin]="8"
-        [cdkConnectedOverlayPush]="true"
+        [cdkConnectedOverlayPush]="false"
+        [cdkConnectedOverlayPositions]="positions"
         (overlayOutsideClick)="outside($event)"
         (overlayKeydown)="key($event)"
       >
         <div
           #card
+          [style.max-height.px]="availableHeight()"
+          style="box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
           class="adapt-aria adapt-aria-popup"
           data-adapttable-part="filters-popover"
           [attr.dir]="p.dir ?? 'ltr'"
           [attr.data-dir]="p.dir ?? 'ltr'"
-          [style.width.px]="380"
+          [style.width.px]="340"
           [style.max-width]="'calc(100vw - 16px)'"
-          [style.overflow-y]="'auto'"
+          [style.overflow-y]="'hidden'"
         >
           <header data-adapttable-part="filters-header">
             <h3 data-adapttable-part="filters-title">
@@ -79,9 +89,19 @@ import {
               {{ p.labels.clearAll }}
             </button>
           </header>
-          <div data-adapttable-part="filters-body">
+          <div
+            data-adapttable-part="filters-body"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+          >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
+          <footer
+            style="flex: none; display: flex; justify-content: flex-end; padding-block-start: 12px"
+          >
+            <button type="button" (click)="p.onClose()">
+              {{ p.labels.filtersDone }}
+            </button>
+          </footer>
         </div>
       </ng-template>
     </span>
@@ -94,6 +114,21 @@ export class AdaptFilterPopover {
 
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
+  protected readonly availableHeight = injectPopoverSpace({
+    origin: () => this.anchor()?.nativeElement,
+    open: () => this.props().open,
+    reserve: 16,
+  });
+
+  protected readonly positions: ConnectedPosition[] = [
+    {
+      originX: "end",
+      originY: "bottom",
+      overlayX: "end",
+      overlayY: "top",
+      offsetY: 4,
+    },
+  ];
 
   private readonly card = viewChild<ElementRef<HTMLElement>>("card");
 

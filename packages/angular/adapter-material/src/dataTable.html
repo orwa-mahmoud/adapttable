@@ -33,11 +33,15 @@
     <div data-adapttable-part="toolbar">
       @if (searchable()) {
         <div data-adapttable-part="search-field">
-          <span data-adapttable-part="search-icon" style="display: inline-flex">
-            <svg [adaptIcon]="searchIcon"></svg>
-          </span>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic"
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <span
+              matPrefix
+              data-adapttable-part="search-icon"
+              style="display: inline-flex; padding-inline: 12px 8px"
+            >
+              <svg [adaptIcon]="searchIcon"></svg> </span
             ><input
+              [attr.aria-label]="v.table.labels().search"
               matInput
               data-adapttable-part="search"
               [adaptAttrs]="v.table.searchInputAttrs()"

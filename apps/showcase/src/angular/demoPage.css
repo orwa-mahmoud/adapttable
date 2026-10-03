@@ -7,15 +7,12 @@ adapt-showcase-demo-page *::after {
   box-sizing: border-box;
 }
 .angular-demo .sec__head {
-  max-width: 900px;
+  max-width: 1100px;
 }
 .angular-kits {
-  display: grid;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
-  margin-block: 20px 12px;
+  display: flex;
 }
 .angular-kit {
-  position: relative;
   cursor: pointer;
 }
 .angular-kit > input {
@@ -25,48 +22,91 @@ adapt-showcase-demo-page *::after {
   height: 1px;
 }
 .angular-kit:focus-within {
-  outline: 2px solid var(--c, var(--brand));
-  outline-offset: 3px;
+  outline: 2px solid var(--brand);
+  outline-offset: -3px;
 }
 .angular-options {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 18px;
-  padding: 16px 18px;
+  justify-content: flex-start;
+  gap: 16px 20px;
+  padding: 14px 16px;
+  background: var(--page-surface);
 }
 .angular-options label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
-  font-size: var(--fs-small);
+  font-size: 12px;
   font-weight: 500;
   color: var(--ink-2);
 }
 .angular-options label:has(select) {
-  flex: 1 1 170px;
-  justify-content: space-between;
+  flex: 1 1 145px;
+  max-width: 180px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  font-size: 11px;
 }
 .angular-options select {
+  appearance: none;
   min-width: 0;
-  max-width: 100%;
+  width: 100%;
   min-height: 34px;
-  background: var(--page-surface);
+  background-color: var(--page-surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23717786' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
   color: var(--ink);
   border: 1px solid var(--page-border);
-  border-radius: var(--r-sm);
-  padding: 5px 8px;
+  border-radius: 6px;
+  padding: 6px 28px 6px 10px;
   font: inherit;
+  font-size: 13px;
 }
-.angular-options input {
-  accent-color: var(--kit, var(--brand));
-  width: 16px;
-  height: 16px;
+[dir="rtl"] .angular-options select {
+  background-position: left 10px center;
+  padding-inline: 10px 28px;
+}
+.angular-options input[type="checkbox"] {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--page-border);
+  cursor: pointer;
   margin: 0;
+  transition: background 0.15s;
+}
+.angular-options input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  inset-block-start: 2px;
+  inset-inline-start: 2px;
+  border-radius: 50%;
+  background: var(--page-surface);
+  box-shadow: 0 1px 2px #0002;
+  transition: inset-inline-start 0.15s;
+}
+.angular-options input[type="checkbox"]:checked {
+  background: var(--brand);
+}
+.angular-options input[type="checkbox"]:checked::before {
+  inset-inline-start: 20px;
+}
+.angular-options input:disabled {
+  cursor: not-allowed;
 }
 .angular-options :is(input, select):focus-visible {
-  outline: 2px solid var(--kit, var(--brand));
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
 .angular-lab-options {
@@ -76,8 +116,9 @@ adapt-showcase-demo-page *::after {
   margin-bottom: 1rem;
 }
 .angular-demo .demo-surface {
-  padding: 12px;
-  border-radius: 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
   overflow: visible;
 }
 @media (max-width: 920px) {
@@ -87,7 +128,7 @@ adapt-showcase-demo-page *::after {
 }
 @media (max-width: 700px) {
   .angular-demo .demo-surface {
-    padding: 6px;
+    padding: 0;
   }
   .angular-options {
     padding: 12px;
@@ -185,8 +226,82 @@ dialog.angular-lab-options .angular-options select {
 }
 
 .controls.angular-options {
-  border-radius: 14px;
+  border-radius: 8px;
 }
 html:has(dialog.angular-lab-options[open]) {
   overflow: hidden;
+}
+
+.angular-options label:has(input[type="checkbox"]) {
+  flex-direction: row-reverse;
+  gap: 10px;
+  font-size: 13px;
+}
+.angular-options-switches {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 20px;
+  padding-inline-start: 20px;
+  border-inline-start: 1px solid var(--page-border);
+}
+.angular-demo .hint {
+  margin-block: 8px 20px;
+  font-size: 12px;
+}
+.angular-demo .demo-surface {
+  margin-block-start: 12px;
+}
+.demo-status[data-tone] {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--demo-status-ink);
+  background: var(--demo-status-bg);
+  --mat-chip-container-height: 24px;
+  --mat-chip-outline-color: transparent;
+  --mat-chip-outline-width: 0px;
+  --mat-chip-container-shape-radius: 4px;
+  --mat-chip-elevated-container-color: var(--demo-status-bg);
+  --mat-chip-label-text-color: var(--demo-status-ink);
+  --mat-chip-label-text-size: 12px;
+}
+.demo-status[data-tone="info"] {
+  --demo-status-bg: light-dark(#e6efff, #1b355d);
+  --demo-status-ink: light-dark(#174fa6, #aacaff);
+}
+.demo-status[data-tone="success"] {
+  --demo-status-bg: light-dark(#dff5e9, #173d2e);
+  --demo-status-ink: light-dark(#176b42, #93e3ba);
+}
+.demo-status[data-tone="error"] {
+  --demo-status-bg: light-dark(#ffe4e6, #4d232b);
+  --demo-status-ink: light-dark(#ac2338, #ffadb9);
+}
+.demo-status[data-tone="neutral"] {
+  --demo-status-bg: light-dark(#e9ebf0, #303746);
+  --demo-status-ink: light-dark(#485367, #cbd3e1);
+}
+mat-chip.demo-status[data-tone] {
+  padding: 0;
+}
+@media (max-width: 700px) {
+  .angular-options label:has(select) {
+    flex: 1 1 calc(50% - 20px);
+  }
+  .angular-options label:has([data-demo-control="grouping"]) {
+    padding-inline-start: 0;
+    border: 0;
+  }
+}
+
+.demo-state {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
