@@ -201,6 +201,8 @@ describe("AdaptEditableCell", () => {
     expect(insert.defaultPrevented).toBe(true);
     expect(select.value).toBe("Web");
 
+    select.focus();
+    expect(document.activeElement).toBe(select);
     select.click();
     await settle();
     const options = [
@@ -227,6 +229,31 @@ describe("AdaptEditableCell", () => {
     await settle();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROW, "team", "core");
     expect(editor()).toBeNull();
+  });
+
+  it("commits a text draft once when focus leaves for an ordinary control", async () => {
+    const onCellEdit = vi.fn();
+    const { settle } = await mount(onCellEdit as CellEditHandler<Shift>);
+    activates()[0]!.dispatchEvent(
+      new MouseEvent("dblclick", { bubbles: true })
+    );
+    await settle();
+    const input = editor() as HTMLInputElement;
+    input.value = "Updated Ada";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.focus();
+    expect(document.activeElement).toBe(input);
+    const outside = document.createElement("button");
+    document.body.append(outside);
+    outside.focus();
+    await settle();
+    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(
+      ROW,
+      "name",
+      "Updated Ada"
+    );
+    expect(editor()).toBeNull();
+    outside.remove();
   });
 
   it("clears a native select draft without committing until the reader confirms", async () => {

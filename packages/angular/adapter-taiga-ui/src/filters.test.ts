@@ -523,6 +523,38 @@ describe("the Taiga UI Angular filters", () => {
     expect(part("filters-panel")).not.toBeNull();
   });
 
+  it("leaves a consumed Escape to the focused field, then closes on the next Escape", async () => {
+    const { part, openFilters, settle } = await mount(
+      [filters(DEFS)],
+      "drawer"
+    );
+    await openFilters();
+    const panel = part("filters-panel")!;
+    const field = panel.querySelector<HTMLInputElement>("input")!;
+    field.focus();
+    // A composed field may use Escape itself. Its prevented event must not
+    // also dismiss the enclosing drawer.
+    field.addEventListener("keydown", (event) => event.preventDefault(), {
+      once: true,
+    });
+    const consumed = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    field.dispatchEvent(consumed);
+    await settle();
+    expect(consumed.defaultPrevented).toBe(true);
+    expect(part("filters-panel")).toBe(panel);
+    expect(document.activeElement).toBe(field);
+    field.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    );
+    await settle();
+    expect(part("filters-panel")).toBeNull();
+    expect(document.activeElement).toBe(part("filters-button"));
+  });
+
   it("offers header funnels without the Filters button", async () => {
     const { part, parts } = await mount([filters(), headerFilters()]);
     expect(part("filters-button")).not.toBeNull();

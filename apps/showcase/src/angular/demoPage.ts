@@ -295,7 +295,7 @@ export class AdaptShowcaseDemoPage {
     if (enabled("column-groups")) {
       const byKey = new Map(columns.map((column) => [column.key, column]));
       const replace = (column: ColumnInput<Person>): ColumnInput<Person> => {
-        let replacement: ColumnInput<Person> = column;
+        let replacement: ColumnInput<Person>;
         if ("children" in column)
           replacement = { ...column, children: column.children.map(replace) };
         else replacement = byKey.get(column.key) ?? column;

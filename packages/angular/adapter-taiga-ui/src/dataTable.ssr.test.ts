@@ -15,6 +15,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
+import { provideAdaptTaiga } from "./taigaRoot";
 
 /**
  * The unstyled table on the server: rendered to HTML with Angular's server
@@ -72,6 +73,7 @@ function renderOnServer(url: string): Promise<string> {
         App,
         {
           providers: [
+            ...provideAdaptTaiga(),
             provideZonelessChangeDetection(),
             provideServerRendering(),
             provideClientHydration(),
@@ -135,19 +137,16 @@ describe("the Taiga UI Angular table on the server", () => {
     { source: "default", url: "/cities", limit: 2 },
     { source: "requested", url: "/cities?limit=25", limit: 25 },
   ])(
-    "serializes the $source page size as the selected option",
+    "serializes the $source page size in the native combobox",
     async ({ url, limit }) => {
       const html = await renderOnServer(url);
-      const select =
-        /<select\b[^>]*data-taiga-part="rows-per-page"[^>]*>([\s\S]*?)<\/select>/.exec(
-          html
-        )?.[1] ?? "";
-      expect(select).not.toBe("");
-      const selected = [...select.matchAll(/<option\b[^>]*>/g)]
-        .map((match) => match[0])
-        .filter((option) => /\sselected(?:=|\s|>)/.test(option));
-      expect(selected).toHaveLength(1);
-      expect(selected[0]).toContain(`value="${String(limit)}"`);
+      const controls =
+        html.match(/<input\b[^>]*data-taiga-part="rows-per-page"[^>]*>/g) ?? [];
+      expect(controls).toHaveLength(1);
+      expect(controls[0]).toContain('role="combobox"');
+      expect(controls[0]).toContain(`value="${String(limit)}"`);
+      expect(controls[0]).toContain('aria-expanded="false"');
+      expect(html).not.toContain("<tui-dropdown");
     }
   );
 });

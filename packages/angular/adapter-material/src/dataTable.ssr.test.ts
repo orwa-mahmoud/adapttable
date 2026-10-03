@@ -137,11 +137,14 @@ describe("the Angular Material table on the server", () => {
     "serializes the $source page size as the selected option",
     async ({ url, limit }) => {
       const html = await renderOnServer(url);
-      const select =
-        /<select\b[^>]*data-adapttable-part="rows-per-page"[^>]*>([\s\S]*?)<\/select>/.exec(
-          html
-        )?.[1] ?? "";
-      expect(select).not.toBe("");
+      const controls = [
+        ...html.matchAll(/<select\b([^>]*)>([\s\S]*?)<\/select>/g),
+      ].filter((match) => {
+        const classes = /\bclass="([^"]*)"/.exec(match[1] ?? "")?.[1];
+        return classes?.split(/\s+/).includes("adapt-material-rows-per-page");
+      });
+      expect(controls).toHaveLength(1);
+      const select = controls[0]![2]!;
       const selected = [...select.matchAll(/<option\b[^>]*>/g)]
         .map((match) => match[0])
         .filter((option) => /\sselected(?:=|\s|>)/.test(option));

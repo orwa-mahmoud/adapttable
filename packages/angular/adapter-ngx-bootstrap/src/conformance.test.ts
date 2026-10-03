@@ -345,9 +345,18 @@ describe("every bundled locale through native Angular controls", () => {
           if (!mobile) {
             screen.getByRole("button", { name: labels.columns }).click();
             await settleLocale(fixture);
-            const menu = within(
-              screen.getByRole("group", { name: labels.columns })
+            // Portalled dropdowns use the same deferred positioning/reveal
+            // lifecycle as popovers. Wait for the actual accessible surface.
+            const menuPanel = await screen.findByRole("group", {
+              name: labels.columns,
+            });
+            expect(menuPanel).toBe(localePart(root, "column-menu-panel"));
+            const nativeContainer = menuPanel.closest("bs-dropdown-container");
+            expect(nativeContainer).not.toBeNull();
+            expect(getComputedStyle(nativeContainer!).visibility).toBe(
+              "visible"
             );
+            const menu = within(menuPanel);
             expect(
               menu.getByRole("searchbox", { name: labels.searchColumns })
             ).toBe(localePart(root, "column-menu-search"));

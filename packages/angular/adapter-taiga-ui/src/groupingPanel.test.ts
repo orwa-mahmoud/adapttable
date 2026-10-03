@@ -290,11 +290,16 @@ describe("AdaptGroupingPanel", () => {
   it("shows the bound aggregation operation and follows it", async () => {
     const fixture = TestBed.createComponent(Host);
     const host = fixture.componentInstance;
+    const changed: [string, string][] = [];
     const withOperation = (operationId: string) =>
       host.panel.update((props) => ({
         ...props,
         state: {
           ...props.state,
+          setAggregateOperation: (key, next) => {
+            changed.push([key, next]);
+            withOperation(next);
+          },
           aggregations: {
             ...props.state.aggregations,
             items: [
@@ -331,6 +336,10 @@ describe("AdaptGroupingPanel", () => {
     await fixture.whenStable();
     expect(operation().value).toBe(options[0]!.textContent.trim());
     expect(options[0]!.getAttribute("aria-selected")).toBe("true");
+    await chooseTaigaOption(fixture, operation(), "avg");
+    expect(changed).toEqual([["budget", "avg"]]);
+    expect(operation().value).toBe(options[1]!.textContent.trim());
+    expect(operation().value).not.toBe("");
   });
 
   it("shows the aggregation picker's placeholder rather than a column", async () => {

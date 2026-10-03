@@ -66,13 +66,6 @@
   text-align: start;
   font-weight: 600;
 }
-[data-adapttable-kit="angular-cdk"] [data-adapttable-part="sort-button"] {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  font-weight: 600;
-  text-align: inherit;
-}
 [data-adapttable-kit="angular-cdk"] [data-adapttable-part="cards"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -140,6 +133,14 @@ textarea[data-adapttable-cdk-control] {
 [data-adapttable-cdk-control]:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+[data-adapttable-kit="angular-cdk"]
+  button[data-adapttable-cdk-control][data-adapttable-part="sort-button"] {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-weight: 600;
+  text-align: inherit;
 }
 .adapt-cdk-surface {
   box-sizing: border-box;

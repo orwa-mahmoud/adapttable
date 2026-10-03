@@ -6,7 +6,11 @@ import { createRequire } from "node:module";
 import { type ColumnDef } from "@adapttable/angular";
 import { standardPreset } from "@adapttable/taiga-ui/preset";
 import { virtualize } from "@adapttable/taiga-ui/virtualize";
-import { Component, provideZonelessChangeDetection } from "@angular/core";
+import {
+  Component,
+  provideZonelessChangeDetection,
+  signal,
+} from "@angular/core";
 import {
   bootstrapApplication,
   provideClientHydration,
@@ -15,6 +19,7 @@ import {
   provideServerRendering,
   renderApplication,
 } from "@angular/platform-server";
+import { TUI_DARK_MODE } from "@taiga-ui/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
@@ -76,6 +81,15 @@ class App {
  */
 const hydration = () => [
   ...provideAdaptTaiga(),
+  {
+    // jsdom has no system media queries. Keep the real native popup while
+    // supplying its supported theme signal, as in the browser unit fixtures.
+    provide: TUI_DARK_MODE,
+    useFactory: () => {
+      const darkMode = signal(false);
+      return Object.assign(darkMode, { reset: () => darkMode.set(false) });
+    },
+  },
   provideZonelessChangeDetection(),
   provideClientHydration(),
 ];

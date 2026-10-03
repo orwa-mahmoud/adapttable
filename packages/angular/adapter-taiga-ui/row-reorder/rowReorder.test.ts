@@ -480,5 +480,19 @@ describe("row reorder kit controls", () => {
     expect(items[1]!.disabled).toBe(true);
     items[0]!.click();
     expect(fixture.componentInstance.onSelect).toHaveBeenCalledOnce();
+    const trigger = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLButtonElement>(
+      '[data-adapttable-part="row-move-menu-trigger"]'
+    )!;
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    await fixture.whenStable();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector(
+        '[data-adapttable-part="row-move-menu-item"]'
+      )
+    ).toBeNull();
+    expect(fixture.componentInstance.onSelect).toHaveBeenCalledOnce();
   });
 });

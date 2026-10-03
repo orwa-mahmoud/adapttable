@@ -1073,6 +1073,8 @@ export class AdaptFilterPopover {
     // (undocumented)
     protected closed(): void;
     // (undocumented)
+    protected keepRemovedContentInside(event: MouseEvent): void;
+    // (undocumented)
     protected readonly overlayContainer: Signal<string | undefined>;
     readonly props: InputSignal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
     // (undocumented)
