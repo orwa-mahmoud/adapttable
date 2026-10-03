@@ -1,5 +1,14 @@
 # @adapttable/ng-zorro
 
+## 0.1.1
+
+### Patch Changes
+
+- 143d5bf: Align the native search prefix and header controls, use compact text-style sort buttons, and give pinned body cells an opaque background so scrolling columns cannot bleed through them.
+- Updated dependencies [143d5bf]
+  - @adapttable/core@3.8.1
+  - @adapttable/angular@0.3.1
+
 ## 0.1.0
 
 ### Minor Changes

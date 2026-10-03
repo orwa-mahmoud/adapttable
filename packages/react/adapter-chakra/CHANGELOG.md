@@ -1,5 +1,15 @@
 # @adapttable/chakra
 
+## 3.3.2
+
+### Patch Changes
+
+- 143d5bf: Bound adapter build memory with sequential JavaScript and production-declaration phases, retaining React Compiler transforms, both module formats, and unchanged full test/typecheck coverage.
+- Updated dependencies [143d5bf]
+- Updated dependencies [143d5bf]
+  - @adapttable/core@3.8.1
+  - @adapttable/react@1.5.1
+
 ## 3.3.1
 
 ### Patch Changes

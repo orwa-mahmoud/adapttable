@@ -1,5 +1,13 @@
 # @adapttable/react
 
+## 1.5.1
+
+### Patch Changes
+
+- 143d5bf: Bound build memory by generating JavaScript and production declarations in sequential processes. Preserve both module formats, public APIs, React Compiler transforms, and complete test/typecheck coverage.
+- Updated dependencies [143d5bf]
+  - @adapttable/core@3.8.1
+
 ## 1.5.0
 
 ### Minor Changes

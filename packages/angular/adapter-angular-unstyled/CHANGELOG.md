@@ -1,5 +1,13 @@
 # @adapttable/angular-unstyled
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [143d5bf]
+  - @adapttable/core@3.8.1
+  - @adapttable/angular@0.3.1
+
 ## 0.1.0
 
 ### Minor Changes

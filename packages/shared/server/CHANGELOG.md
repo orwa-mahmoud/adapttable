@@ -1,5 +1,12 @@
 # @adapttable/server
 
+## 0.4.9
+
+### Patch Changes
+
+- Updated dependencies [143d5bf]
+  - @adapttable/core@3.8.1
+
 ## 0.4.8
 
 ### Patch Changes
