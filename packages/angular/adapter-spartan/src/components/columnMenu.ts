@@ -55,6 +55,7 @@ import {
   HlmNativeOption,
   HlmNativeSelect,
 } from "../helm/controls";
+import { HlmPopoverLabel } from "../helm/popover";
 import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
 
 /** The menu's props, with the row type erased as every slot erases it. */
@@ -399,6 +400,7 @@ export class AdaptColumnMenuEdgeRow {
   selector: "adapt-column-menu",
   imports: [
     BrnPopover,
+    HlmPopoverLabel,
     BrnPopoverContent,
     BrnPopoverTrigger,
     HlmButton,
@@ -412,6 +414,7 @@ export class AdaptColumnMenuEdgeRow {
     <div
       #root
       brnPopover
+      [adaptHlmPopoverLabel]="p.labels.columns"
       [state]="popover.open() ? 'open' : 'closed'"
       (stateChanged)="popover.setOpen($event === 'open')"
       data-spartan-part="column-menu"

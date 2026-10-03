@@ -21,6 +21,7 @@ import {
   ɵHlmInput as HlmInput,
   ɵHlmNativeOption as HlmNativeOption,
   ɵHlmNativeSelect as HlmNativeSelect,
+  ɵHlmPopoverLabel as HlmPopoverLabel,
 } from "@adapttable/spartan";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 import { BrnCheckbox } from "@spartan-ng/brain/checkbox";
@@ -111,13 +112,18 @@ class AdaptHeaderFilterRange {
     HlmCheckbox,
     BrnCheckbox,
     BrnPopover,
+    HlmPopoverLabel,
     BrnPopoverContent,
     BrnPopoverTrigger,
   ],
   selector: "adapt-header-filter-multi",
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div brnPopover style="position: relative; width: 100%">
+    <div
+      brnPopover
+      [adaptHlmPopoverLabel]="props().label"
+      style="position: relative; width: 100%"
+    >
       <button
         adaptHlmButton
         brnPopoverTrigger

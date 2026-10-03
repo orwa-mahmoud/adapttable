@@ -207,6 +207,7 @@ import {
   withRowPinActions,
 } from "@adapttable/angular";
 import { A11yModule } from "@angular/cdk/a11y";
+import { Dir } from "@angular/cdk/bidi";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
@@ -1173,6 +1174,7 @@ export interface TableView<TRow> {
   selector: "adapt-data-table",
   imports: [
     A11yModule,
+    Dir,
     NgTemplateOutlet,
     AdaptAttrs,
     AdaptDesktopTable,

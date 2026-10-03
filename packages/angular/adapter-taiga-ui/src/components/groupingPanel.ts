@@ -17,11 +17,14 @@ import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  inject,
   input,
   viewChild,
 } from "@angular/core";
 import { NgModel } from "@angular/forms";
 
+import { resetTaigaSelect } from "../resetTaigaSelect";
 import { TAIGA_CONTROLS } from "../taigaControls";
 
 /**
@@ -149,6 +152,7 @@ class AdaptGroupingChip {
   template: `
     @let p = props();
     <tui-textfield
+      [tuiTextfieldCleaner]="false"
       [stringify]="p.options | taigaLabels"
       [style.inline-size]="
         p['data-adapttable-part'] === 'grouping-add' ? width(p.label) : null
@@ -180,18 +184,17 @@ class AdaptGroupingChip {
   `,
 })
 class AdaptGroupingSelect {
+  private readonly destroyRef = inject(DestroyRef);
   readonly props = input.required<GroupingPanelSelectProps>();
   protected readonly width = addControlWidth;
   private readonly model = viewChild.required(NgModel);
 
   protected change(value: string | null): void {
+    const model = this.model();
     const props = this.props();
     if (value !== null) props.onChange(value);
     if (props["data-adapttable-part"] === "grouping-add") {
-      this.model().control.setValue(null, {
-        emitEvent: false,
-        emitViewToModelChange: false,
-      });
+      resetTaigaSelect(model, this.destroyRef);
     }
   }
 }
@@ -276,6 +279,7 @@ class AdaptGroupingAggregationRemove {
   template: `
     @let p = props();
     <tui-textfield
+      [tuiTextfieldCleaner]="false"
       [stringify]="available() | taigaLabels"
       [style.inline-size]="width(p.label)"
       ><input
@@ -306,6 +310,7 @@ class AdaptGroupingAggregationRemove {
   `,
 })
 class AdaptGroupingAggregationPicker {
+  private readonly destroyRef = inject(DestroyRef);
   readonly props = input.required<GroupingPanelChecklistProps>();
   protected readonly width = addControlWidth;
   protected readonly available = () =>
@@ -314,11 +319,9 @@ class AdaptGroupingAggregationPicker {
   private readonly model = viewChild.required(NgModel);
 
   protected choose(value: string | null): void {
+    const model = this.model();
     if (value) this.props().onToggle(value, true);
-    this.model().control.setValue(null, {
-      emitEvent: false,
-      emitViewToModelChange: false,
-    });
+    resetTaigaSelect(model, this.destroyRef);
   }
 }
 

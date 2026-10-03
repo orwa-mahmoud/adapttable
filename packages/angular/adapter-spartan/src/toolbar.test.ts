@@ -8,7 +8,7 @@ import { savedViews } from "@adapttable/spartan/saved-views";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { focusAndClick } from "../testUtils";
+import { expectNamedPopover, focusAndClick } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface City {
@@ -185,6 +185,10 @@ describe("the Spartan Angular toolbar controls", () => {
     ]);
     focusAndClick(part<HTMLButtonElement>("views-button")!);
     await settle();
+    expectNamedPopover(
+      part("views-panel")!,
+      part("views-button")!.textContent!.trim()
+    );
     document.body.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", keyCode: 27 })
     );

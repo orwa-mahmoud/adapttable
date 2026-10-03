@@ -37,6 +37,8 @@ import { TAIGA_CONTROLS } from "../taigaControls";
     <span
       #anchor
       [tuiDropdown]="triggerReady() ? content : null"
+      tuiDropdownRole="dialog"
+      [adaptTaigaDropdownLabel]="p.labels.filters"
       [tuiDropdownOpen]="p.open"
       (tuiDropdownOpenChange)="onOpenChange($event)"
       data-taiga-part="filters-anchor"

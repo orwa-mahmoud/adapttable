@@ -23,7 +23,9 @@ import { TAIGA_CONTROLS } from "../taigaControls";
   host: { style: "display: contents" },
   template: `
     @let p = props();
-    <tui-textfield [stringify]="p.options | taigaLabels"
+    <tui-textfield
+      [tuiTextfieldCleaner]="false"
+      [stringify]="p.options | taigaLabels"
       ><input
         tuiSelect
         [attr.aria-label]="p.label"

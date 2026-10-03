@@ -8,11 +8,13 @@ import {
 } from "@adapttable/angular";
 import { AdaptCdkPopover } from "@adapttable/angular-cdk";
 import { A11yModule } from "@angular/cdk/a11y";
+import { Directionality } from "@angular/cdk/bidi";
 import {
   ChangeDetectionStrategy,
   Component,
   effect,
   type ElementRef,
+  inject,
   input,
   viewChild,
 } from "@angular/core";
@@ -45,6 +47,7 @@ const REORDER_BUTTON = {
     @let p = props();
     <span data-adapttable-part="row-move-menu">
       <adapt-cdk-popover
+        [dir]="inheritedDirection.valueSignal()"
         #popover
         [trigger]="triggerTemplate"
         [content]="content"
@@ -122,6 +125,7 @@ const REORDER_BUTTON = {
   `,
 })
 export class AdaptRowMoveMenu {
+  protected readonly inheritedDirection = inject(Directionality);
   /** Menu label, targets and optional confirmation. */
   readonly props = input.required<RowMoveMenuSlotProps>();
 

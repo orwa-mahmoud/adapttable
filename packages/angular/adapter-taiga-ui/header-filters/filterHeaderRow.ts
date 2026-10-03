@@ -61,7 +61,7 @@ class AdaptHeaderFilterSearch {
         [attr.aria-label]="props().label"
         [ngModel]="props().value"
         [class]="props().className"
-        (ngModelChange)="props().onChange($event)"
+        (ngModelChange)="props().onChange($event ?? '')"
       /><tui-data-list *tuiDropdown>
         @for (option of props().options; track option.value) {
           <button tuiOption type="button" [value]="option.value">
@@ -111,6 +111,8 @@ class AdaptHeaderFilterRange {
         appearance="secondary"
         type="button"
         [tuiDropdown]="menuContent"
+        tuiDropdownRole="dialog"
+        [adaptTaigaDropdownLabel]="props().label"
         [tuiDropdownOpen]="menuOpen()"
         (tuiDropdownOpenChange)="menuOpen.set($event)"
         [attr.aria-expanded]="menuOpen()"

@@ -15,12 +15,9 @@ import {
 } from "@adapttable/angular";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
-  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
-  DOCUMENT,
-  inject,
   input,
   viewChild,
 } from "@angular/core";
@@ -31,6 +28,7 @@ import {
 } from "@spartan-ng/brain/popover";
 
 import { HlmButton } from "../helm/controls";
+import { HlmPopoverLabel } from "../helm/popover";
 import type { DataTableClassNames } from "../types";
 
 /**
@@ -42,6 +40,7 @@ import type { DataTableClassNames } from "../types";
   selector: "adapt-row-actions",
   imports: [
     BrnPopover,
+    HlmPopoverLabel,
     BrnPopoverContent,
     BrnPopoverTrigger,
     HlmButton,
@@ -82,19 +81,6 @@ export class AdaptRowActions<TRow> {
   );
 
   private readonly menu = viewChild<BrnPopover>("menu");
-  private readonly document = inject(DOCUMENT);
-
-  constructor() {
-    afterRenderEffect(() => {
-      const menu = this.menu();
-      const label = this.labels().rowActionsMenu;
-      if (menu?.stateComputed() !== "open") return;
-      // Brain exposes the pane's id, but no accessible-name input on popovers.
-      this.document
-        .getElementById(menu.id())
-        ?.setAttribute("aria-label", label);
-    });
-  }
 
   protected readonly items = computed(() =>
     visibleRowActions(this.actions(), this.row()).map((action) => {

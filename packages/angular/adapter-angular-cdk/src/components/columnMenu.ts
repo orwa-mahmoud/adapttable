@@ -31,8 +31,10 @@ import {
   unpinAllColumns,
 } from "@adapttable/angular";
 import { A11yModule } from "@angular/cdk/a11y";
-import { OverlayModule } from "@angular/cdk/overlay";
+import { Dir, Directionality } from "@angular/cdk/bidi";
+import { CdkConnectedOverlay, OverlayModule } from "@angular/cdk/overlay";
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -378,6 +380,7 @@ export class AdaptColumnMenuEdgeRow {
 @Component({
   selector: "adapt-column-menu",
   imports: [
+    Dir,
     OverlayModule,
     A11yModule,
     AdaptColumnMenuRow,
@@ -386,7 +389,12 @@ export class AdaptColumnMenuEdgeRow {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let p = props();
-    <div #root data-adapttable-part="column-menu" style="position: relative">
+    <div
+      #root
+      data-adapttable-part="column-menu"
+      style="position: relative"
+      [dir]="p.dir ?? inheritedDirection.valueSignal()"
+    >
       <button
         cdkMonitorElementFocus
         data-adapttable-cdk-control
@@ -519,6 +527,7 @@ export class AdaptColumnMenuEdgeRow {
   `,
 })
 export class AdaptColumnMenu {
+  protected readonly inheritedDirection = inject(Directionality);
   /** The slot's props. */
   readonly props = input.required<ColumnMenuSlotProps<never>>();
 
@@ -533,6 +542,20 @@ export class AdaptColumnMenu {
       this.query()
     )
   );
+
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+
+  constructor() {
+    afterRenderEffect(() => {
+      const direction =
+        this.props().dir ?? this.inheritedDirection.valueSignal();
+      if (!this.popover.open()) return;
+      const overlay = this.connectedOverlay()?.overlayRef;
+      if (!overlay) return;
+      overlay.setDirection(direction);
+      overlay.updatePosition();
+    });
+  }
 
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
   private readonly trigger = viewChild<ElementRef<HTMLElement>>("trigger");

@@ -25,6 +25,7 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
+import { TuiTitle } from "@taiga-ui/core";
 
 /** Taiga UI assistant controls over the shared Angular Chrome. */
 
@@ -139,25 +140,32 @@ export class AdaptAssistantPanel {
 /** Native modal owns top-layer stacking, focus containment and backdrop. @public */
 @Component({
   selector: "adapt-assistant-sheet",
-  imports: [...TAIGA_CONTROLS, NgTemplateOutlet],
+  imports: [...TAIGA_CONTROLS, NgTemplateOutlet, TuiTitle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
-  template: `<ng-template #title>{{ props().label }}</ng-template
-    ><ng-template
-      [tuiDialog]="props().open"
-      (tuiDialogChange)="!$event && props().onClose()"
-      [tuiDialogOptions]="{ label: title, closable: false }"
+  template: `<ng-template
+    [tuiDialog]="props().open"
+    (tuiDialogChange)="!$event && props().onClose()"
+    [tuiDialogOptions]="{ label: '', closable: false }"
+    let-dialogId="id"
+  >
+    <section
+      [attr.dir]="props().dir"
+      [attr.data-adapttable-part]="props().part"
+      [class]="props().className"
     >
-      <section
-        [attr.dir]="props().dir"
-        [attr.data-adapttable-part]="props().part"
-        [class]="props().className"
-      >
-        <ng-container [ngTemplateOutlet]="props().children" />
-      </section>
-    </ng-template>`,
+      <header>
+        <hgroup tuiTitle>
+          <h2 [id]="dialogId">{{ props().label }}</h2>
+        </hgroup>
+      </header>
+      <ng-container [ngTemplateOutlet]="props().children" />
+    </section>
+  </ng-template>`,
 })
 export class AdaptAssistantSheet {
+  // Native dialog options are captured on open. Its public template context
+  // supplies the modal's aria-labelledby ID so this heading can stay reactive.
   readonly props = input.required<TableAssistantSheetProps>();
 }
 
@@ -189,7 +197,9 @@ export class AdaptAssistantWindow {
   selector: "adapt-assistant-language-chip",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
-  template: `<tui-textfield [stringify]="props().options | taigaLabels"
+  template: `<tui-textfield
+    [tuiTextfieldCleaner]="false"
+    [stringify]="props().options | taigaLabels"
     ><input
       tuiSelect
       [attr.aria-label]="props().label"
@@ -197,7 +207,7 @@ export class AdaptAssistantWindow {
       [class]="props().className"
       [ngModel]="props().value"
       [disabled]="props().disabled === true"
-      (ngModelChange)="changed($any({ target: { value: $event } }))"
+      (ngModelChange)="changed($event)"
     /><tui-data-list *tuiDropdown>
       @for (option of props().options; track option.value) {
         <button tuiOption type="button" [value]="option.value">
@@ -209,8 +219,8 @@ export class AdaptAssistantWindow {
 })
 export class AdaptAssistantLanguageChip {
   readonly props = input.required<TableAssistantLanguageChipProps>();
-  protected changed(event: Event): void {
-    this.props().onChange((event.target as HTMLSelectElement).value);
+  protected changed(value: string | null): void {
+    if (value !== null) this.props().onChange(value);
   }
 }
 
@@ -230,6 +240,8 @@ export class AdaptAssistantLanguageChip {
       appearance="secondary"
       type="button"
       [tuiDropdown]="menuContent"
+      tuiDropdownRole="dialog"
+      [adaptTaigaDropdownLabel]="props().label"
       [tuiDropdownOpen]="menuOpen()"
       [tuiDropdownEnabled]="!props().disabled"
       (tuiDropdownOpenChange)="menuOpen.set($event)"

@@ -6,7 +6,10 @@ import {
   restoreFocusSoon,
   type RowMoveMenuSlotProps,
 } from "@adapttable/angular";
-import { ɵHlmButton as HlmButton } from "@adapttable/spartan";
+import {
+  ɵHlmButton as HlmButton,
+  ɵHlmPopoverLabel as HlmPopoverLabel,
+} from "@adapttable/spartan";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
@@ -43,7 +46,13 @@ const REORDER_BUTTON = {
  * @public
  */
 @Component({
-  imports: [HlmButton, BrnPopover, BrnPopoverContent, BrnPopoverTrigger],
+  imports: [
+    HlmButton,
+    BrnPopover,
+    BrnPopoverContent,
+    BrnPopoverTrigger,
+    HlmPopoverLabel,
+  ],
   selector: "adapt-row-move-menu",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
@@ -51,6 +60,7 @@ const REORDER_BUTTON = {
     @let p = props();
     <div
       brnPopover
+      [adaptHlmPopoverLabel]="p.label"
       #details="brnPopover"
       data-adapttable-part="row-move-menu"
       style="display: inline-block; position: relative"

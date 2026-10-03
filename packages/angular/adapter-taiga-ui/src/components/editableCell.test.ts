@@ -13,6 +13,7 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "../dataTable";
+import { clearTaigaSelection } from "../taigaTestHelpers";
 import {
   AdaptCheckboxCellEditor,
   AdaptEditableCell,
@@ -226,6 +227,28 @@ describe("AdaptEditableCell", () => {
     await settle();
     expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROW, "team", "core");
     expect(editor()).toBeNull();
+  });
+
+  it("clears a native select draft without committing until the reader confirms", async () => {
+    const onCellEdit = vi.fn();
+    const { fixture, settle } = await mount(
+      onCellEdit as CellEditHandler<Shift>
+    );
+    activates()[4]!.dispatchEvent(
+      new MouseEvent("dblclick", { bubbles: true })
+    );
+    await settle();
+    const select = editor() as HTMLInputElement;
+    expect(select.value).toBe("Web");
+    await clearTaigaSelection(fixture, select);
+    expect(select.value).toBe("");
+    expect(onCellEdit).not.toHaveBeenCalled();
+    expect(editor()).toBe(select);
+    select.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+    );
+    await settle();
+    expect(onCellEdit).toHaveBeenCalledExactlyOnceWith(ROW, "team", "");
   });
 
   it("hands the host a number for a number editor", async () => {

@@ -148,7 +148,9 @@ function isChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
                 <span data-taiga-part="column-menu-choice-label">{{
                   choice.label
                 }}</span>
-                <tui-textfield [stringify]="choice.options | taigaLabels"
+                <tui-textfield
+                  [tuiTextfieldCleaner]="false"
+                  [stringify]="choice.options | taigaLabels"
                   ><input
                     tuiSelect
                     data-taiga-part="column-menu-choice-select"
@@ -394,6 +396,8 @@ export class AdaptColumnMenuEdgeRow {
     @let p = props();
     <div
       [tuiDropdown]="menuContent"
+      tuiDropdownRole="dialog"
+      [adaptTaigaDropdownLabel]="p.labels.columns"
       [tuiDropdownOpen]="popover.open()"
       (tuiDropdownOpenChange)="popover.setOpen($event)"
       #root

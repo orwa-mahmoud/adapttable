@@ -15,7 +15,7 @@ import { waitFor } from "@testing-library/dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "../src/dataTable";
-import { focusAndClick } from "../testUtils";
+import { expectNamedPopover, focusAndClick } from "../testUtils";
 import { AdaptRowMoveMenu } from "./rowMoveMenu";
 import { AdaptRowReorderButtons } from "./rowReorderButtons";
 import { AdaptRowReorderGrip } from "./rowReorderGrip";
@@ -334,6 +334,7 @@ async function mountMoveMenu() {
   )!;
   expect(trigger.getAttribute("aria-expanded")).toBe("true");
   expect(dialog.getAttribute("role")).toBe("alertdialog");
+  expectNamedPopover(dialog, "Move to group…");
   return { fixture, trigger, dialog, host: fixture.componentInstance };
 }
 

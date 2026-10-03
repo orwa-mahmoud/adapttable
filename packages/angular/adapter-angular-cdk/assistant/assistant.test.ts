@@ -209,6 +209,28 @@ describe("native assistant", () => {
     await settle(fixture);
     expect(fixture.componentInstance.open()).toBe(false);
   });
+  it("inherits standalone assistant direction in its native examples popup and updates live", async () => {
+    const fixture = await mount(
+      { dir: "rtl" },
+      {
+        suggestions: [{ id: "one", title: "Example" }],
+      }
+    );
+    part<HTMLButtonElement>("assistant-examples-menu")?.click();
+    await settle(fixture);
+    const list = part("assistant-examples-list");
+    if (!list) throw new Error("Assistant examples were not rendered");
+    const overlayHost =
+      list.closest<HTMLElement>(".cdk-overlay-pane")?.parentElement;
+    expect(overlayHost?.dir).toBe("rtl");
+    fixture.componentInstance.extras.set({ dir: "ltr" });
+    await settle(fixture);
+    expect(part("assistant-examples-list")).toBe(list);
+    expect(overlayHost?.dir).toBe("ltr");
+    fixture.componentInstance.extras.set({ dir: "rtl" });
+    await settle(fixture);
+    expect(overlayHost?.dir).toBe("rtl");
+  });
   it("does not open or run examples while the connection is unusable", async () => {
     const runSuggestion = vi.fn();
     const fixture = await mount(

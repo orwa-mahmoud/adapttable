@@ -179,6 +179,34 @@ describe("AdaptGroupingPanel", () => {
     expect(host.added).toEqual(["budget"]);
     expect(add.value).toBe("");
     expect(add.placeholder).toBe("Add grouping column");
+    await chooseTaigaOption(fixture, add, "budget");
+    expect(host.added).toEqual(["budget", "budget"]);
+    expect(add.value).toBe("");
+    expect(add.placeholder).toBe("Add grouping column");
+  });
+
+  it("does not reset a picker after its host removes it during selection", async () => {
+    const { element, host, fixture } = await mountPanel();
+    const add = one<HTMLInputElement>(element, "grouping-add");
+    const chosen: string[] = [];
+    host.panel.update((props) => ({
+      ...props,
+      state: {
+        ...props.state,
+        add: (key) => {
+          chosen.push(key);
+          fixture.destroy();
+        },
+      },
+    }));
+    await fixture.whenStable();
+    const option = (await taigaOptions(fixture, add)).find(
+      (item) => taigaOptionValue(item) === "budget"
+    )!;
+    option.click();
+    await Promise.resolve();
+    expect(chosen).toEqual(["budget"]);
+    expect(add.isConnected).toBe(false);
   });
 
   it("removes a field from its chip", async () => {
@@ -217,6 +245,10 @@ describe("AdaptGroupingPanel", () => {
     const picker = one<HTMLInputElement>(element, "grouping-aggregation-add");
     await chooseTaigaOption(fixture, picker, "budget");
     expect(host.added).toEqual(["agg:budget"]);
+    expect(picker.value).toBe("");
+    expect(picker.placeholder).toBe("Add aggregation column");
+    await chooseTaigaOption(fixture, picker, "budget");
+    expect(host.added).toEqual(["agg:budget", "agg:budget"]);
     expect(picker.value).toBe("");
     expect(picker.placeholder).toBe("Add aggregation column");
     expect(one(element, "grouping-announcer").textContent).toBe(

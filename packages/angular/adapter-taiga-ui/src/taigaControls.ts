@@ -12,11 +12,13 @@ import {
 import { TuiDrawer, TuiSelect, TuiSkeleton, TuiTextarea } from "@taiga-ui/kit";
 
 import { AdaptTaigaLabels } from "./selectLabels";
+import { AdaptTaigaDropdownLabel } from "./taigaDropdownLabel";
 
 /** Native Taiga components shared by the adapter's slot implementations. */
 
 export const TAIGA_CONTROLS = [
   AdaptTaigaLabels,
+  AdaptTaigaDropdownLabel,
   FormsModule,
   TuiButton,
   TuiCheckbox,

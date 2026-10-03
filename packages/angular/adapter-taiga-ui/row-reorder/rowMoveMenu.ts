@@ -54,6 +54,8 @@ const REORDER_BUTTON = {
         appearance="secondary"
         type="button"
         [tuiDropdown]="menuContent"
+        tuiDropdownRole="dialog"
+        [adaptTaigaDropdownLabel]="p.label"
         [tuiDropdownOpen]="menuOpen()"
         (tuiDropdownOpenChange)="onOpenChange($event)"
         [attr.aria-expanded]="menuOpen()"
@@ -65,7 +67,7 @@ const REORDER_BUTTON = {
         ⋮</button
       ><ng-template #menuContent>
         <div
-          role="menu"
+          role="group"
           [attr.aria-label]="p.label"
           data-adapttable-part="row-move-menu-content"
           style="  min-width: 12rem; padding: 0.5rem; border: 1px solid currentColor; border-radius: 0.375rem; background: Canvas; color: CanvasText"
@@ -104,7 +106,6 @@ const REORDER_BUTTON = {
                 size="s"
                 appearance="secondary"
                 type="button"
-                role="menuitem"
                 [disabled]="item.disabled"
                 [attr.title]="item.disabledReason ?? null"
                 data-adapttable-part="row-move-menu-item"

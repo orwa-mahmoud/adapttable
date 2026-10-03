@@ -30,7 +30,9 @@ import { AdaptDataTable } from "./dataTable";
 import { type FiltersMode } from "./tableFilters";
 import {
   chooseTaigaOption,
+  clearTaigaSelection,
   clickOutsideTaiga,
+  taigaCleaner,
   taigaOptions,
 } from "./taigaTestHelpers";
 
@@ -259,6 +261,41 @@ describe("the Taiga UI Angular filters", () => {
     boxes[1]!.click();
     await settle();
     expect(ids()).toEqual(["1", "3"]);
+  });
+
+  it("maps native filter clearing to the binding's empty values", async () => {
+    const { fixture, part, parts, ids, field, type, openFilters } =
+      await mount();
+    await openFilters();
+    const textOperator = part<HTMLElement>("filter-operator", field("Name"))!;
+    expect(taigaCleaner(textOperator)).toBeNull();
+    const city = part<HTMLElement>("filter-select", field("City"))!;
+    await chooseTaigaOption(fixture, city, "Amman");
+    expect(ids()).toEqual(["2"]);
+    await clearTaigaSelection(fixture, city);
+    expect(ids()).toEqual(["1", "2", "3"]);
+    expect((city as HTMLInputElement).value).toBe("All");
+    const active = part<HTMLElement>("filter-select", field("Active"))!;
+    await chooseTaigaOption(fixture, active, "false");
+    expect(ids()).toEqual(["2"]);
+    await clearTaigaSelection(fixture, active);
+    expect(ids()).toEqual(["1", "2", "3"]);
+    const age = field("Age");
+    const rangeOperator = part<HTMLElement>("filter-operator", age)!;
+    await chooseTaigaOption(fixture, rangeOperator, "gt");
+    await type(parts("filter-input", age)[0], "30");
+    expect(ids()).toEqual(["1", "3"]);
+    await clearTaigaSelection(fixture, rangeOperator);
+    expect(ids()).toEqual(["1", "2", "3"]);
+    const joined = field("Joined");
+    await chooseTaigaOption(
+      fixture,
+      part<HTMLElement>("filter-operator", joined)!,
+      "relative"
+    );
+    expect(
+      taigaCleaner(parts<HTMLElement>("filter-input", joined)[0]!)
+    ).toBeNull();
   });
 
   it("filters by a number range and a relative date", async () => {

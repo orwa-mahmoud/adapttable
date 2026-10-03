@@ -22,6 +22,7 @@
       type="button"
       [tuiDropdown]="menuContent"
       tuiDropdownRole="dialog"
+      [adaptTaigaDropdownLabel]="labels().rowActionsMenu"
       [tuiDropdownOpen]="menuOpen()"
       (tuiDropdownOpenChange)="menuOpen.set($event)"
       [attr.aria-expanded]="menuOpen()"

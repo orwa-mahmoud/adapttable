@@ -82,3 +82,6 @@ export {
   HlmNativeSelect as ɵHlmNativeSelect,
   SpartanSelection as ɵSpartanSelection,
 } from "./helm/controls";
+
+/** @internal Native pane naming shared by secondary entries. */
+export { HlmPopoverLabel as ɵHlmPopoverLabel } from "./helm/popover";

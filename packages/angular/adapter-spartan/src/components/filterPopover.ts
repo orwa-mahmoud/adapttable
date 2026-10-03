@@ -10,17 +10,25 @@ import {
 import { BrnPopover, BrnPopoverContent } from "@spartan-ng/brain/popover";
 
 import { HlmButton } from "../helm/controls";
+import { HlmPopoverLabel } from "../helm/popover";
 
 /** The nonmodal filter card. @internal */
 @Component({
   selector: "adapt-filter-popover",
-  imports: [NgTemplateOutlet, BrnPopover, BrnPopoverContent, HlmButton],
+  imports: [
+    NgTemplateOutlet,
+    BrnPopover,
+    BrnPopoverContent,
+    HlmButton,
+    HlmPopoverLabel,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let p = props();
     <span
       #anchor
       brnPopover
+      [adaptHlmPopoverLabel]="p.labels.filters"
       data-spartan-part="filters-anchor"
       [attachTo]="anchor"
       [state]="p.open ? 'open' : 'closed'"

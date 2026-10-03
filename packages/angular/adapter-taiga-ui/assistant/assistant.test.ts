@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { AdaptTaigaRoot } from "../src/taigaRoot";
 import {
   chooseTaigaOption,
+  taigaCleaner,
   taigaOptions,
   taigaPopup,
 } from "../src/taigaTestHelpers";
@@ -452,9 +453,11 @@ describe("native assistant", () => {
     const fixture = await mount({ speech });
     const select = part<HTMLInputElement>("assistant-voice-language")!;
     expect(select.tagName).toBe("INPUT");
+    expect(taigaCleaner(select)).toBeNull();
+    expect(setLanguage).not.toHaveBeenCalled();
     expect(await taigaOptions(fixture, select)).toHaveLength(2);
     await chooseTaigaOption(fixture, select, "fr");
-    expect(setLanguage).toHaveBeenCalledWith("fr");
+    expect(setLanguage).toHaveBeenCalledExactlyOnceWith("fr");
     part("assistant-voice")?.click();
     expect(start).toHaveBeenCalledOnce();
     fixture.componentInstance.extras.set({

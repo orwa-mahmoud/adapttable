@@ -25,7 +25,11 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { focusAndClick, provideFocusLayout } from "../testUtils";
+import {
+  expectNamedPopover,
+  focusAndClick,
+  provideFocusLayout,
+} from "../testUtils";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";
@@ -215,6 +219,7 @@ describe("the Spartan Angular filters", () => {
     await openFilters();
     expect(button?.getAttribute("aria-expanded")).toBe("true");
     expect(part("filters-popover")).not.toBeNull();
+    expectNamedPopover(part("filters-popover")!, "Filters");
     expect(part("filters-backdrop")).toBeNull();
     document.body.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", keyCode: 27 })
@@ -395,6 +400,7 @@ describe("the Spartan Angular filters", () => {
     trigger.querySelector<HTMLButtonElement>("button")!.click();
     await settle();
     expect(part("filter-header-cell")).not.toBeNull();
+    expectNamedPopover(part("filter-header-cell")!, "City");
     await type(part("filter-select", field("City")), "Amman");
     expect(ids()).toEqual(["2"]);
     expect(trigger.querySelector("button")?.hasAttribute("data-active")).toBe(

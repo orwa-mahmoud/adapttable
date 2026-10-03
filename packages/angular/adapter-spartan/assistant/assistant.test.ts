@@ -8,7 +8,7 @@ import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { within } from "@testing-library/dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { focusAndClick } from "../testUtils";
+import { expectNamedPopover, focusAndClick } from "../testUtils";
 import {
   AdaptAssistantBadge,
   AdaptAssistantButton,
@@ -174,6 +174,10 @@ describe("Spartan assistant", () => {
     focusAndClick(part("assistant-examples-menu")!);
     await settle(fixture);
     expect(part("assistant-examples-list")?.tagName).toBe("MENU");
+    expectNamedPopover(
+      part("assistant-examples-list")!,
+      part("assistant-examples-menu")!.getAttribute("aria-label")!
+    );
     expect(part("assistant-examples-item")?.textContent).toContain(
       "Highest first"
     );

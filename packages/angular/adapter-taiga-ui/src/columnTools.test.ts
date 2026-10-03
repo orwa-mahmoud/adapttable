@@ -10,6 +10,7 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
+import { chooseTaigaOption, clearTaigaSelection } from "./taigaTestHelpers";
 
 /**
  * Column tools on the unstyled table: a multi-sort badge, a resize handle,
@@ -307,6 +308,11 @@ describe("the unstyled table's column tools", () => {
     expect(empty?.textContent?.trim()).toBe("—");
     empty!.click();
     await fixture.whenStable();
+    expect(select.value).toBe("—");
+    expect(parts("card")[0]?.textContent).toContain("Dubai");
+    await chooseTaigaOption(fixture, select, "country");
+    expect(parts("card")[0]?.textContent).toContain("Amman");
+    await clearTaigaSelection(fixture, select);
     expect(select.value).toBe("—");
     expect(parts("card")[0]?.textContent).toContain("Dubai");
   });

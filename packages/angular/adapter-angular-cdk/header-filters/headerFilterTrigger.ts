@@ -15,10 +15,12 @@ import {
 } from "@adapttable/angular";
 import { AdaptAutoFilterForm, AdaptCdkPopover } from "@adapttable/angular-cdk";
 import { A11yModule } from "@angular/cdk/a11y";
+import { Directionality } from "@angular/cdk/bidi";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
 } from "@angular/core";
 
@@ -40,6 +42,7 @@ import {
       [attr.data-adapttable-header-filter]="overlay.sessionId"
     >
       <adapt-cdk-popover
+        [dir]="inheritedDirection.valueSignal()"
         [trigger]="trigger"
         [content]="content"
         [open]="overlay.open()"
@@ -77,6 +80,7 @@ import {
   `,
 })
 export class AdaptHeaderFilterTrigger {
+  protected readonly inheritedDirection = inject(Directionality);
   /** The slot's props. */
   readonly props = input.required<FilterHeaderControlProps<never>>();
 

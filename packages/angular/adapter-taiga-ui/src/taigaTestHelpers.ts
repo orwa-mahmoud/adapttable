@@ -55,3 +55,22 @@ export async function clickOutsideTaiga<T>(
   await fixture.whenStable();
   outside.remove();
 }
+
+/** The actual Taiga cleaner; never a synthetic model update. */
+export function taigaCleaner(control: HTMLElement): HTMLButtonElement | null {
+  return (
+    control
+      .closest("tui-textfield")
+      ?.querySelector<HTMLButtonElement>("button[tuiButtonX]") ?? null
+  );
+}
+
+export async function clearTaigaSelection<T>(
+  fixture: ComponentFixture<T>,
+  control: HTMLElement
+): Promise<void> {
+  const cleaner = taigaCleaner(control);
+  if (!cleaner) throw new Error("The Taiga control has no native cleaner");
+  cleaner.click();
+  await fixture.whenStable();
+}

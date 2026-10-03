@@ -31,7 +31,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   type ElementRef,
+  inject,
   input,
   TemplateRef,
   type Type,
@@ -185,7 +187,7 @@ class AdaptEditCellButton {
           [attr.aria-busy]="v['aria-busy'] ?? null"
           [attr.data-conflict]="v['data-conflict'] ?? null"
           [ngModel]="p.draft"
-          (ngModelChange)="p.setDraft($event)"
+          (ngModelChange)="p.setDraft($event ?? '')"
           (keydown)="onKeyDown($event)"
           (blur)="commitOnBlur($event)"
         /><tui-data-list *tuiDropdown>
@@ -293,12 +295,17 @@ export class AdaptNativeCellEditor implements AfterViewInit {
   `,
 })
 class AdaptEditCellOption {
+  private readonly destroyRef = inject(DestroyRef);
   readonly props = input.required<MultiSelectEditorCheckboxProps>();
   private readonly el = viewChild.required<ElementRef<HTMLInputElement>>("el");
 
   constructor() {
     afterNextRender(() => {
-      queueMicrotask(() => this.props().focusRef?.(this.el().nativeElement));
+      const element = this.el().nativeElement;
+      const focus = this.props().focusRef;
+      queueMicrotask(() => {
+        if (!this.destroyRef.destroyed && element.isConnected) focus?.(element);
+      });
     });
   }
 }

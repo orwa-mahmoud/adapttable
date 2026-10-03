@@ -71,9 +71,7 @@ function featuresFor(scenario: ConformanceScenario): AdaptTableFeature[] {
 const driver: ConformanceDriver = {
   name: "angular-aria",
   mount: (scenario) => {
-    const fixture = TestBed.overrideComponent(AdaptDataTable, {
-      add: { providers: fixtureOverlayProviders },
-    }).createComponent(AdaptDataTable<ConformanceRow>);
+    const fixture = TestBed.createComponent(AdaptDataTable<ConformanceRow>);
     const set = (name: string, value: unknown): void => {
       fixture.componentRef.setInput(name, value);
     };
@@ -110,6 +108,11 @@ const driver: ConformanceDriver = {
 };
 
 describe(`table conformance — ${driver.name}`, () => {
+  beforeEach(() => {
+    TestBed.overrideComponent(AdaptDataTable, {
+      add: { providers: fixtureOverlayProviders },
+    });
+  });
   for (const test of tableConformanceTests(driver, {
     expect,
     fireEvent,

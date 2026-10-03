@@ -19,6 +19,7 @@ import {
   ɵHlmInput as HlmInput,
   ɵHlmNativeOption as HlmNativeOption,
   ɵHlmNativeSelect as HlmNativeSelect,
+  ɵHlmPopoverLabel as HlmPopoverLabel,
 } from "@adapttable/spartan";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -235,6 +236,7 @@ export class AdaptAssistantLanguageChip {
     HlmButton,
     AdaptAssistantContent,
     BrnPopover,
+    HlmPopoverLabel,
     BrnPopoverContent,
     BrnPopoverTrigger,
   ],
@@ -242,6 +244,7 @@ export class AdaptAssistantLanguageChip {
   host: { style: "display: contents" },
   template: `<div
     brnPopover
+    [adaptHlmPopoverLabel]="props().label"
     #details="brnPopover"
     data-adapttable-part="assistant-examples"
   >

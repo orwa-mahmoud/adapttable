@@ -1,8 +1,13 @@
 /** Shared CDK disclosure primitive owned by this neutral adapter. */
 import { BidiModule } from "@angular/cdk/bidi";
-import { type ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
+import {
+  CdkConnectedOverlay,
+  type ConnectedPosition,
+  OverlayModule,
+} from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   type ElementRef,
@@ -66,6 +71,19 @@ export class AdaptCdkPopover {
   readonly toggle = (): void => {
     this.open.update((value) => !value);
   };
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+
+  constructor() {
+    afterRenderEffect(() => {
+      const direction = this.dir();
+      if (!this.open()) return;
+      const overlay = this.connectedOverlay()?.overlayRef;
+      if (!overlay) return;
+      overlay.setDirection(direction);
+      overlay.updatePosition();
+    });
+  }
+
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
   protected readonly positions: ConnectedPosition[] = [

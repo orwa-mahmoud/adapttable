@@ -1,3 +1,7 @@
+import { columnMenu } from "@adapttable/angular-cdk/column-menu";
+import { filters } from "@adapttable/angular-cdk/filters";
+import { headerFilters } from "@adapttable/angular-cdk/header-filters";
+import { savedViews } from "@adapttable/angular-cdk/saved-views";
 import { BidiModule } from "@angular/cdk/bidi";
 import {
   CdkConnectedOverlay,
@@ -13,12 +17,14 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
-import { TestBed } from "@angular/core/testing";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { EMPTY } from "rxjs";
 
 import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import { menuPopover } from "./components/menuPopover";
 import { placeOverlayBelowTrigger } from "./components/overlayPlacement";
+import { AdaptDataTable } from "./dataTable";
 
 function rect(left: number, right: number, bottom = 20): DOMRect {
   return {
@@ -191,7 +197,7 @@ describe("menuPopover with native CDK placement", () => {
     await settle();
     await open();
     const overlay = host.overlay().overlayRef;
-    expect(overlay.getConfig().direction).toBe("rtl");
+    expect(overlay.getDirection()).toBe("rtl");
     expect(overlay.hostElement.style.top).toBe("20px");
     expect(overlay.hostElement.style.right).toBe("600px");
     popover.close();
@@ -225,5 +231,126 @@ describe("menuPopover with native CDK placement", () => {
     expect(second.element.querySelectorAll(".panel")).toHaveLength(1);
     second.fixture.destroy();
     expect(second.element.querySelector(".cdk-overlay-container")).toBeNull();
+  });
+});
+
+@Component({
+  imports: [AdaptDataTable],
+  providers: [
+    ...fixtureOverlayProviders,
+    { provide: ViewportRuler, useValue: viewportRuler },
+  ],
+  template: `<adapt-data-table
+    [data]="rows"
+    [columns]="columns"
+    [rowKey]="rowKey"
+    [features]="features"
+    [dir]="dir()"
+    [urlSync]="false"
+    [forceMobile]="false"
+  />`,
+})
+class AdaptedRtlHost {
+  readonly dir = signal<"ltr" | "rtl">("rtl");
+  readonly rows = [{ id: "1", name: "Ada" }];
+  readonly columns = [
+    { key: "name", accessor: (row: { name: string }) => row.name },
+  ];
+  readonly rowKey = (row: { id: string }) => row.id;
+  readonly features = [
+    columnMenu(),
+    filters([{ key: "name", type: "text" }]),
+    headerFilters(),
+    savedViews({ storageKey: "cdk-rtl-overlays", storage: null }),
+  ];
+}
+
+function connectedFor<T>(
+  fixture: ComponentFixture<T>,
+  panel: HTMLElement
+): CdkConnectedOverlay {
+  const overlays = fixture.debugElement.queryAllNodes(
+    By.directive(CdkConnectedOverlay)
+  );
+  const overlay = overlays
+    .map((node) => node.injector.get(CdkConnectedOverlay))
+    .find((candidate) => candidate.overlayRef?.overlayElement.contains(panel));
+  if (!overlay) throw new Error("The adapted panel has no owned CDK overlay");
+  return overlay;
+}
+
+describe("actual adapted CDK overlay direction", () => {
+  it("inherits table RTL in native menus and updates an open header popover live", async () => {
+    const fixture = TestBed.createComponent(AdaptedRtlHost);
+    const element = fixture.nativeElement as HTMLElement;
+    document.body.append(element);
+    const settle = async () => {
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+    const part = (name: string): HTMLElement => {
+      const found = element.querySelector<HTMLElement>(
+        `[data-adapttable-part="${name}"]`
+      );
+      if (!found) throw new Error(`Missing adapted ${name}`);
+      return found;
+    };
+    try {
+      await settle();
+      expect(part("root").dir).toBe("rtl");
+      const columns = part("column-menu-button");
+      columns.getBoundingClientRect = () => rect(300, 400);
+      columns.click();
+      await settle();
+      const columnsPanel = part("column-menu-panel");
+      const columnsOverlay = connectedFor(fixture, columnsPanel).overlayRef;
+      columnsOverlay.overlayElement.getBoundingClientRect = () =>
+        rect(0, 200, 40);
+      columnsOverlay.updatePosition();
+      expect(columnsOverlay.getDirection()).toBe("rtl");
+      expect(columnsOverlay.hostElement.dir).toBe("rtl");
+      expect(columnsOverlay.hostElement.style.top).toBe("20px");
+      expect(columnsOverlay.hostElement.style.right).toBe("600px");
+      fixture.componentInstance.dir.set("ltr");
+      await settle();
+      expect(part("column-menu-panel")).toBe(columnsPanel);
+      expect(columnsOverlay.getDirection()).toBe("ltr");
+      expect(columnsOverlay.hostElement.dir).toBe("ltr");
+      expect(columnsOverlay.hostElement.style.left).toBe("300px");
+      columns.click();
+      fixture.componentInstance.dir.set("rtl");
+      await settle();
+      part("views-button").click();
+      await settle();
+      const viewsOverlay = connectedFor(
+        fixture,
+        part("views-panel")
+      ).overlayRef;
+      expect(viewsOverlay.getDirection()).toBe("rtl");
+      expect(viewsOverlay.hostElement.dir).toBe("rtl");
+      part("views-button").click();
+      await settle();
+      const header = part("filter-header-trigger").querySelector("button");
+      if (!header) throw new Error("Missing native header filter button");
+      header.click();
+      await settle();
+      const headerPanel = part("filter-header-cell");
+      const headerOverlay = connectedFor(fixture, headerPanel).overlayRef;
+      expect(headerOverlay.getDirection()).toBe("rtl");
+      expect(headerOverlay.hostElement.dir).toBe("rtl");
+      fixture.componentInstance.dir.set("ltr");
+      await settle();
+      expect(part("filter-header-cell")).toBe(headerPanel);
+      expect(headerOverlay.getDirection()).toBe("ltr");
+      expect(headerOverlay.hostElement.dir).toBe("ltr");
+      fixture.componentInstance.dir.set("rtl");
+      await settle();
+      expect(headerOverlay.getDirection()).toBe("rtl");
+      expect(headerOverlay.hostElement.dir).toBe("rtl");
+    } finally {
+      fixture.destroy();
+      element.remove();
+    }
   });
 });

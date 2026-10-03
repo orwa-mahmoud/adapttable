@@ -77,7 +77,9 @@ function fieldId(): string {
     >
       <div data-adapttable-part="filter-label" [id]="id">{{ w.label }}</div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px">
-        <tui-textfield [stringify]="w.opLabelKeys | taigaLabels: labels()"
+        <tui-textfield
+          [tuiTextfieldCleaner]="false"
+          [stringify]="w.opLabelKeys | taigaLabels: labels()"
           ><input
             tuiSelect
             data-adapttable-part="filter-operator"
@@ -126,9 +128,10 @@ export class AdaptTextFilterField<TRow> {
   }
 
   /** The select offers only the widget's operators. */
-  protected pickOp(value: string): void {
+  protected pickOp(value: TextOp | null): void {
+    if (value === null) return;
     const w = this.widget();
-    w.write(value as TextOp, w.value);
+    w.write(value, w.value);
   }
 }
 
@@ -183,8 +186,8 @@ export class AdaptBooleanFilterField<TRow> {
   protected readonly widget = booleanFilterFor(this.def, this.source);
 
   /** The select offers only the three choices. */
-  protected pick(value: string): void {
-    this.widget().write(value as "" | "true" | "false");
+  protected pick(value: "" | "true" | "false" | null): void {
+    this.widget().write(value ?? "");
   }
 }
 
@@ -223,7 +226,7 @@ abstract class OptionsField<TRow> implements OnInit {
           tuiSelect
           data-adapttable-part="filter-select"
           [ngModel]="value"
-          (ngModelChange)="source().setExtra(def().key, $event)"
+          (ngModelChange)="source().setExtra(def().key, $event ?? '')"
         /><tui-data-list *tuiDropdown>
           @if (options().loading) {
             <button tuiOption type="button" value="" [disabled]="true">
@@ -381,7 +384,7 @@ export class AdaptMultiSelectFilterField<TRow> extends OptionsField<TRow> {
         }
         @if (w.op === "relative") {
           @let token = relative();
-          <tui-textfield
+          <tui-textfield [tuiTextfieldCleaner]="false"
             ><input
               tuiSelect
               data-adapttable-part="filter-input"
@@ -461,7 +464,7 @@ export class AdaptRangeFilterField<TRow> {
     return this.labels()[RELATIVE_PRESET_LABEL_KEYS[preset]];
   }
 
-  protected pickOp(value: string): void {
+  protected pickOp(value: string | null): void {
     const w = this.widget();
     const next = w.ops.find((op) => op === value);
     w.setOp(next);
@@ -469,13 +472,10 @@ export class AdaptRangeFilterField<TRow> {
   }
 
   /** The select offers only the presets. */
-  protected pickPreset(value: string): void {
+  protected pickPreset(value: RelativePreset | null): void {
+    if (value === null) return;
     const w = this.widget();
-    w.write(
-      w.op,
-      joinRelativeToken(value as RelativePreset, this.relative().n),
-      ""
-    );
+    w.write(w.op, joinRelativeToken(value, this.relative().n), "");
   }
 
   protected pickCount(value: string): void {

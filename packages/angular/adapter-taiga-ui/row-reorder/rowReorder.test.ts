@@ -376,7 +376,9 @@ describe("row reorder kit controls", () => {
     await fixture.whenStable();
     const item = (
       fixture.nativeElement as HTMLElement
-    ).querySelector<HTMLButtonElement>('[role="menuitem"]');
+    ).querySelector<HTMLButtonElement>(
+      '[data-adapttable-part="row-move-menu-item"]'
+    );
     expect(item).not.toBeNull();
     expect(item!.disabled).toBe(true);
   });

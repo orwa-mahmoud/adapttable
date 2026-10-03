@@ -48,6 +48,8 @@ import {
         appearance="secondary"
         type="button"
         [tuiDropdown]="menuContent"
+        tuiDropdownRole="dialog"
+        [adaptTaigaDropdownLabel]="caption()"
         [tuiDropdownOpen]="overlay.open()"
         (tuiDropdownOpenChange)="overlay.setOpen($event)"
         [attr.aria-expanded]="overlay.open()"

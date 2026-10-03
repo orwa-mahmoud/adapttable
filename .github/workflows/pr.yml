@@ -367,8 +367,19 @@ jobs:
       - name: Validate published package configs
         run: pnpm publint
       - name: Check the extracted API reports are current
+        id: api-reports
         if: needs.detect.outputs.runPackage == 'true'
+        env:
+          ADAPTTABLE_API_REPORTS_DIAGNOSTICS_DIR: ${{ runner.temp }}/adapttable-api-reports
         run: pnpm api:check
+      - name: Retain generated API reports after a failed check
+        if: failure() && steps.api-reports.outcome == 'failure'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: api-report-diagnostics
+          path: ${{ runner.temp }}/adapttable-api-reports/*.api.md
+          if-no-files-found: warn
+          retention-days: 7
       - name: Smoke-check built package artifacts
         if: needs.detect.outputs.runPackage == 'true'
         run: pnpm smoke:dist

@@ -12,7 +12,7 @@ import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
 import { AdaptTaigaRoot } from "./taigaRoot";
-import { chooseTaigaOption } from "./taigaTestHelpers";
+import { chooseTaigaOption, clearTaigaSelection } from "./taigaTestHelpers";
 
 /**
  * Native header-filter controls: the same writes the React kit's header
@@ -233,12 +233,15 @@ describe("AdaptFilterHeaderRow", () => {
     document.body.append(fixture.nativeElement as HTMLElement);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const select = (fixture.nativeElement as HTMLElement).querySelector(
-      "input[tuiSelect]"
-    );
+    const select = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLInputElement>("input[tuiSelect]");
     if (!select) throw new Error("Team filter is not rendered");
     await chooseTaigaOption(fixture, select, "Core");
     await fixture.whenStable();
     expect(select.value).toBe("Core");
+    await clearTaigaSelection(fixture, select);
+    expect(fixture.componentInstance.extra().team).toBe("");
+    expect(select.value).toBe(defaultLabels.filterAll);
   });
 });

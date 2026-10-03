@@ -28,12 +28,12 @@ import { TAIGA_CONTROLS } from "../taigaControls";
     <div data-adapttable-part="footer">
       <label>
         {{ v.table.labels().rowsPerPage }}
-        <tui-textfield
+        <tui-textfield [tuiTextfieldCleaner]="false"
           ><input
             tuiSelect
             data-taiga-part="rows-per-page"
             [attr.aria-label]="v.table.labels().rowsPerPage"
-            (ngModelChange)="v.table.setLimit(+$event)"
+            (ngModelChange)="$event !== null && v.table.setLimit($event)"
             [ngModel]="v.table.source().limit"
           /><tui-data-list *tuiDropdown>
             @for (size of v.table.pageSizeOptions(); track size) {

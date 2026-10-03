@@ -3,7 +3,7 @@ import { columnMenu } from "@adapttable/spartan/column-menu";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { clickOutside, focusAndClick } from "../testUtils";
+import { clickOutside, expectNamedPopover, focusAndClick } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface City {
@@ -142,6 +142,7 @@ describe("the Spartan Angular Columns menu", () => {
     await open();
     expect(button?.getAttribute("aria-expanded")).toBe("true");
     expect(part("column-menu-panel")).not.toBeNull();
+    expectNamedPopover(part("column-menu-panel")!, "Columns");
     expect(
       parts("column-menu-label").map((label) => label.textContent)
     ).toEqual(["Name", "Country", "Population"]);

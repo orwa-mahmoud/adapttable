@@ -17,7 +17,13 @@ import {
 } from "@adapttable/angular";
 import { AdaptCdkPopover } from "@adapttable/angular-cdk";
 import { A11yModule } from "@angular/cdk/a11y";
-import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+import { Directionality } from "@angular/cdk/bidi";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+} from "@angular/core";
 
 /** A text search in a header cell. */
 @Component({
@@ -101,7 +107,11 @@ class AdaptHeaderFilterRange {
   selector: "adapt-header-filter-multi",
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <adapt-cdk-popover [trigger]="trigger" [content]="content" />
+    <adapt-cdk-popover
+      [dir]="inheritedDirection.valueSignal()"
+      [trigger]="trigger"
+      [content]="content"
+    />
     <ng-template #trigger let-toggle let-open="open">
       <button
         cdkMonitorElementFocus
@@ -147,6 +157,7 @@ class AdaptHeaderFilterRange {
   `,
 })
 class AdaptHeaderFilterMulti {
+  protected readonly inheritedDirection = inject(Directionality);
   /** The menu's props. */
   readonly props = input.required<FilterHeaderMultiProps>();
 }

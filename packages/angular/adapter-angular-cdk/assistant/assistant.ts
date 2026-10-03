@@ -16,6 +16,7 @@ import {
 } from "@adapttable/angular";
 import { AdaptCdkPopover } from "@adapttable/angular-cdk";
 import { A11yModule } from "@angular/cdk/a11y";
+import { Dir, Directionality } from "@angular/cdk/bidi";
 import { Overlay, OverlayModule } from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -234,7 +235,11 @@ export class AdaptAssistantLanguageChip {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `<span data-adapttable-part="assistant-examples">
-    <adapt-cdk-popover [trigger]="trigger" [content]="content" />
+    <adapt-cdk-popover
+      [dir]="inheritedDirection.valueSignal()"
+      [trigger]="trigger"
+      [content]="content"
+    />
     <ng-template #trigger let-toggle let-open="open">
       <button
         cdkMonitorElementFocus
@@ -281,6 +286,7 @@ export class AdaptAssistantLanguageChip {
   </span>`,
 })
 export class AdaptAssistantMenu {
+  protected readonly inheritedDirection = inject(Directionality);
   readonly props = input.required<TableAssistantMenuProps>();
   private readonly popover = viewChild.required(AdaptCdkPopover);
   protected select(id: string): void {
@@ -305,15 +311,18 @@ export const TABLE_ASSISTANT_SLOTS: TableAssistantSlots = {
 /** A complete native assistant, directly mountable beside a table. @public */
 @Component({
   selector: "adapt-table-assistant",
-  imports: [AdaptTableAssistantChrome],
+  imports: [AdaptTableAssistantChrome, Dir],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
-  template: `<adapt-table-assistant-chrome
-    [props]="accented()"
-    [slots]="slots"
-  />`,
+  template: `<div
+    style="display: contents"
+    [dir]="props().dir ?? inheritedDirection.valueSignal()"
+  >
+    <adapt-table-assistant-chrome [props]="accented()" [slots]="slots" />
+  </div>`,
 })
 export class AdaptTableAssistant {
+  protected readonly inheritedDirection = inject(Directionality);
   readonly props = input.required<TableAssistantProps>();
   protected readonly accented = computed((): TableAssistantProps => ({
     accent: "AccentColor",

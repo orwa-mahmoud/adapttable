@@ -15,6 +15,8 @@ import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
+import { expectNamedPopover } from "../testUtils";
+
 interface Row {
   name: string;
   team: string;
@@ -158,6 +160,12 @@ describe("AdaptFilterHeaderRow", () => {
     if (!tags) throw new Error("Tags filter trigger was not rendered");
     tags.click();
     await fixture.whenStable();
+    expectNamedPopover(
+      document.querySelector<HTMLElement>(
+        '[data-adapttable-part="filter-header-menu"]'
+      )!,
+      "Tags"
+    );
     const box = (caption: string) => {
       const label = [
         ...document.querySelectorAll(".cdk-overlay-container label"),

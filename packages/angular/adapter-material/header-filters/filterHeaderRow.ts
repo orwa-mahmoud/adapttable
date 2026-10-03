@@ -90,7 +90,7 @@ class AdaptHeaderFilterSelect {
     <mat-form-field appearance="outline" subscriptSizing="dynamic"
       ><input
         matInput
-        [attr.type]="props().type"
+        [type]="props().type"
         [attr.aria-label]="props().label"
         [value]="props().value"
         (input)="props().onChange($any($event.target).value)"

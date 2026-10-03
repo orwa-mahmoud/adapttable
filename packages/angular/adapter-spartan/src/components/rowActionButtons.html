@@ -12,6 +12,7 @@
 } @else if (layout() === "menu") {
   <div
     brnPopover
+    [adaptHlmPopoverLabel]="labels().rowActionsMenu"
     #menu="brnPopover"
     data-adapttable-part="row-actions-menu"
     [class]="classNames().rowActionsMenu"

@@ -1,4 +1,5 @@
-import { vi } from "vitest";
+import { within } from "@testing-library/dom";
+import { expect, vi } from "vitest";
 
 /** Native pointer activation focuses its target before clicking it. */
 export function focusAndClick(control: HTMLElement): void {
@@ -35,4 +36,12 @@ export function provideFocusLayout(selector: string): void {
       });
     }
   );
+}
+
+/** Assert the accessible name of Brain's real pane, not just inner content. */
+export function expectNamedPopover(content: HTMLElement, name: string): void {
+  const pane = content.closest<HTMLElement>(".cdk-overlay-pane");
+  expect(pane).not.toBeNull();
+  expect(pane?.getAttribute("role")).toBe("dialog");
+  expect(within(document.body).getByRole("dialog", { name })).toBe(pane);
 }

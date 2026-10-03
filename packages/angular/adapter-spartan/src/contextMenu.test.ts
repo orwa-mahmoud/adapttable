@@ -10,7 +10,7 @@ import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
 import { AdaptContextMenuLive } from "../context-menu/menu";
-import { clickOutside } from "../testUtils";
+import { clickOutside, expectNamedPopover } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface Row {
@@ -118,6 +118,10 @@ describe("context menu (Spartan Angular)", () => {
     await fixture.whenStable();
     expect(part("context-menu-anchor")).not.toBeNull();
     expect(part("context-menu")?.getAttribute("role")).toBe("menu");
+    expectNamedPopover(
+      part("context-menu")!,
+      part("context-menu")!.getAttribute("aria-label")!
+    );
     expect(item("Sort ascending")).toBeTruthy();
     expect(document.activeElement).toBe(item("Sort ascending"));
     part("context-menu")!.dispatchEvent(

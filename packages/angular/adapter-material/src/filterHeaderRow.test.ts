@@ -13,6 +13,8 @@ import {
 } from "@adapttable/core";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { MatInput } from "@angular/material/input";
+import { By } from "@angular/platform-browser";
 import { describe, expect, it } from "vitest";
 
 interface Row {
@@ -189,12 +191,24 @@ describe("AdaptFilterHeaderRow", () => {
     expect(core.value).toBe("true");
 
     const age = labeled("Age")[0] as HTMLInputElement;
+    expect(age.type).toBe("number");
+    expect(
+      fixture.debugElement
+        .query(By.css('input[aria-label="Age"]'))
+        .injector.get(MatInput).type
+    ).toBe("number");
     age.value = "30";
     age.dispatchEvent(new Event("input"));
     await fixture.whenStable();
     expect(age.value).toBe("30");
 
     const hired = labeled("Hired")[0] as HTMLInputElement;
+    expect(hired.type).toBe("date");
+    expect(
+      fixture.debugElement
+        .query(By.css('input[aria-label="Hired"]'))
+        .injector.get(MatInput).type
+    ).toBe("date");
     hired.value = "2024-01-01";
     hired.dispatchEvent(new Event("input"));
     await fixture.whenStable();

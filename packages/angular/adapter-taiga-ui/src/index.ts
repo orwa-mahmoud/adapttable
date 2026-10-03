@@ -82,3 +82,6 @@ export type { DataTableClassNames } from "./types";
 export { TAIGA_CONTROLS as ɵTAIGA_CONTROLS } from "./taigaControls";
 /** @internal Makes the shared labels pipe referenceable across entry points. */
 export { AdaptTaigaLabels as ɵAdaptTaigaLabels } from "./selectLabels";
+
+/** @internal Makes native popup labels referenceable across entry points. */
+export { AdaptTaigaDropdownLabel as ɵAdaptTaigaDropdownLabel } from "./taigaDropdownLabel";

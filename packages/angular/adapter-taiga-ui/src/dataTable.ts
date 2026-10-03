@@ -1536,10 +1536,9 @@ export class AdaptDataTable<TRow> implements OnInit {
   }
 
   /** The phone sort select: a column, or none. */
-  protected sortBy(event: Event): void {
+  protected sortBy(value: string): void {
     const table = this.view();
     if (table === undefined) return;
-    const value = (event.target as HTMLSelectElement).value;
     table.table
       .source()
       .setSort(

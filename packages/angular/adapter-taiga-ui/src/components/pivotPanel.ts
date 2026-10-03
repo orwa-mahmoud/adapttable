@@ -11,12 +11,15 @@ import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  inject,
   input,
   type TemplateRef,
   viewChild,
 } from "@angular/core";
 import { NgModel } from "@angular/forms";
 
+import { resetTaigaSelect } from "../resetTaigaSelect";
 import { TAIGA_CONTROLS } from "../taigaControls";
 
 /**
@@ -159,7 +162,9 @@ class AdaptPivotField {
   imports: [...TAIGA_CONTROLS],
   selector: "adapt-pivot-add",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<tui-textfield [stringify]="props().options | taigaLabels"
+  template: `<tui-textfield
+    [tuiTextfieldCleaner]="false"
+    [stringify]="props().options | taigaLabels"
     ><input
       tuiSelect
       [attr.aria-label]="props().label"
@@ -179,6 +184,7 @@ class AdaptPivotField {
   >`,
 })
 class AdaptPivotAdd {
+  private readonly destroyRef = inject(DestroyRef);
   /** The fields that can still be added. */
   readonly props = input.required<AddProps>();
 
@@ -186,11 +192,9 @@ class AdaptPivotAdd {
   private readonly model = viewChild.required(NgModel);
 
   protected add(key: string | null): void {
+    const model = this.model();
     if (key) this.props().onAdd(key);
-    this.model().control.setValue(null, {
-      emitEvent: false,
-      emitViewToModelChange: false,
-    });
+    resetTaigaSelect(model, this.destroyRef);
   }
 }
 
@@ -199,12 +203,12 @@ class AdaptPivotAdd {
   imports: [...TAIGA_CONTROLS],
   selector: "adapt-pivot-agg",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<tui-textfield
+  template: `<tui-textfield [tuiTextfieldCleaner]="false"
     ><input
       tuiSelect
       [attr.aria-label]="props().label"
       [ngModel]="props().value"
-      (ngModelChange)="change($any({ target: { value: $event } }))"
+      (ngModelChange)="change($event)"
     /><tui-data-list *tuiDropdown>
       @for (option of props().options; track option) {
         <button tuiOption type="button" [value]="option">{{ option }}</button>
@@ -217,9 +221,8 @@ class AdaptPivotAgg {
   readonly props = input.required<AggProps>();
 
   /** Report the chosen aggregation. */
-  protected change(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value as AggregateName;
-    this.props().onChange(value);
+  protected change(value: AggregateName | null): void {
+    if (value !== null) this.props().onChange(value);
   }
 }
 

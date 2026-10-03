@@ -26,6 +26,7 @@ import {
 } from "@spartan-ng/brain/popover";
 
 import { HlmButton, HlmInput } from "../helm/controls";
+import { HlmPopoverLabel } from "../helm/popover";
 import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
 
 /**
@@ -36,6 +37,7 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
 @Component({
   imports: [
     BrnPopover,
+    HlmPopoverLabel,
     BrnPopoverContent,
     BrnPopoverTrigger,
     HlmButton,
@@ -48,6 +50,7 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
     <div
       #root
       brnPopover
+      [adaptHlmPopoverLabel]="l.savedViews"
       [state]="popover.open() ? 'open' : 'closed'"
       (stateChanged)="popover.setOpen($event === 'open')"
       data-spartan-part="views-menu"

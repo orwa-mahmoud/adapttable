@@ -39,6 +39,8 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
     @let l = props().labels;
     <div
       [tuiDropdown]="menuContent"
+      tuiDropdownRole="dialog"
+      [adaptTaigaDropdownLabel]="l.savedViews"
       [tuiDropdownOpen]="popover.open()"
       (tuiDropdownOpenChange)="popover.setOpen($event)"
       #root

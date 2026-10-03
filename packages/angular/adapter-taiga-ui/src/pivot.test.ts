@@ -12,7 +12,7 @@ import { pivotTableModel } from "../pivot/pivotTableModel";
 import { AdaptPivotPanel } from "./components/pivotPanel";
 import { AdaptPivotRowHeader } from "./components/pivotRowHeader";
 import { AdaptTaigaRoot } from "./taigaRoot";
-import { chooseTaigaOption } from "./taigaTestHelpers";
+import { chooseTaigaOption, taigaCleaner } from "./taigaTestHelpers";
 
 /**
  * The native pivot panel, and the row header it draws for a pivot table.
@@ -70,9 +70,13 @@ describe("AdaptPivotPanel", () => {
 
     await chooseTaigaOption(fixture, adds()[0]!, "region");
     fixture.detectChanges();
+    expect(adds()[0]!.value).toBe("");
+    expect(adds()[0]!.placeholder).toBe("Add field");
     await chooseTaigaOption(fixture, adds()[0]!, "team");
     fixture.detectChanges();
     expect(fixture.componentInstance.config().rows).toEqual(["region", "team"]);
+    expect(adds()[0]!.value).toBe("");
+    expect(adds()[0]!.placeholder).toBe("Add field");
     expect(part("pivot-field")?.textContent).toContain("Region");
 
     const button = (label: string) =>
@@ -95,6 +99,7 @@ describe("AdaptPivotPanel", () => {
     const agg = document.querySelector<HTMLInputElement>(
       "[aria-label='Aggregation']"
     )!;
+    expect(taigaCleaner(agg)).toBeNull();
     await chooseTaigaOption(fixture, agg, "avg");
     fixture.detectChanges();
     expect(fixture.componentInstance.config().measures).toEqual([

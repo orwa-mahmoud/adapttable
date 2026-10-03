@@ -15,12 +15,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   input,
   signal,
-  viewChild,
 } from "@angular/core";
-import { TuiDropdownDirective } from "@taiga-ui/core";
 
 import { TAIGA_CONTROLS } from "../taigaControls";
 import { type DataTableClassNames } from "../types";
@@ -43,15 +40,6 @@ import { type DataTableClassNames } from "../types";
 })
 export class AdaptRowActions<TRow> {
   protected readonly menuOpen = signal(false);
-  private readonly dropdown = viewChild(TuiDropdownDirective);
-
-  constructor() {
-    effect(() => {
-      const popup = this.dropdown()?.ref()?.location.nativeElement as
-        HTMLElement | undefined;
-      popup?.setAttribute("aria-label", this.labels().rowActionsMenu);
-    });
-  }
   /** The row. */
   readonly row = input.required<TRow>();
   /** Its actions. */

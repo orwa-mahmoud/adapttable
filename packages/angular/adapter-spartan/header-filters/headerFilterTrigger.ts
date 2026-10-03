@@ -16,6 +16,7 @@ import {
 import {
   AdaptAutoFilterForm,
   ɵHlmButton as HlmButton,
+  ɵHlmPopoverLabel as HlmPopoverLabel,
 } from "@adapttable/spartan";
 import {
   ChangeDetectionStrategy,
@@ -43,6 +44,7 @@ import {
     AdaptIcon,
     HlmButton,
     BrnPopover,
+    HlmPopoverLabel,
     BrnPopoverContent,
     BrnPopoverTrigger,
   ],
@@ -51,6 +53,7 @@ import {
     @let p = props();
     <div
       brnPopover
+      [adaptHlmPopoverLabel]="caption()"
       data-adapttable-part="filter-header-trigger"
       style="position: relative; display: inline-block"
       [attr.data-adapttable-header-filter]="overlay.sessionId"

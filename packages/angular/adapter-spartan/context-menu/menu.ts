@@ -9,7 +9,10 @@ import {
   injectTableContextMenu,
   type TableContextMenuOptions,
 } from "@adapttable/angular";
-import { ɵHlmButton as HlmButton } from "@adapttable/spartan";
+import {
+  ɵHlmButton as HlmButton,
+  ɵHlmPopoverLabel as HlmPopoverLabel,
+} from "@adapttable/spartan";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
@@ -78,10 +81,11 @@ export class AdaptContextMenuSeparator {
 @Component({
   selector: "adapt-context-menu-surface",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AdaptControl, BrnPopover, BrnPopoverContent],
+  imports: [AdaptControl, BrnPopover, BrnPopoverContent, HlmPopoverLabel],
   template: `
     <div
       brnPopover
+      [adaptHlmPopoverLabel]="props().label"
       state="open"
       [attachTo]="props().at"
       (stateChanged)="$event === 'closed' && props().onClose()"

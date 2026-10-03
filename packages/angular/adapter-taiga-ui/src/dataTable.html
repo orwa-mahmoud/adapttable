@@ -60,7 +60,7 @@
                 [attr.aria-label]="v.table.labels().sortBy"
                 [ngModel]="v.table.sortBy() ?? ''"
                 [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="sortBy($any({ target: { value: $event } }))"
+                (ngModelChange)="sortBy($event ?? '')"
               /><tui-data-list *tuiDropdown>
                 <button tuiOption type="button" value="">—</button>
                 @for (option of v.table.sortByOptions(); track option.value) {

@@ -14,7 +14,7 @@ import { TuiCheckbox } from "@taiga-ui/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
-import { chooseTaigaOption } from "./taigaTestHelpers";
+import { chooseTaigaOption, taigaCleaner } from "./taigaTestHelpers";
 
 interface City {
   id: string;
@@ -166,6 +166,7 @@ describe("the Taiga UI Angular table", () => {
     const select = part<HTMLInputElement>("rows-per-page");
     expect(select?.value).toBe("5");
     if (!select) throw new Error("select is not rendered");
+    expect(taigaCleaner(select)).toBeNull();
     await chooseTaigaOption(fixture, select, "10");
     await settle();
     expect(ids()).toHaveLength(10);
