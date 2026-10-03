@@ -189,3 +189,117 @@ test("Material typography keeps a sans-serif fallback in tables and native porta
     );
   }
 });
+
+for (const kit of ANGULAR_KITS) {
+  test(`${kit.key}: phone modes and the full lab drawer remain usable`, async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(60_000);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(() => {
+      localStorage.setItem("adapttable-demo-theme", "light");
+    });
+    const next = ANGULAR_KITS.find((candidate) => candidate.key !== kit.key)!;
+    for (const mode of ["angular-main", "angular-all-options"]) {
+      await page.goto(`/${mode}/?kit=${kit.key}`);
+      const surface = page.locator(`[data-adapter="${kit.key}"]`);
+      await expect(surface).toBeVisible();
+      // The shared 768px breakpoint automatically renders cards at 390px.
+      const cards = surface.locator('[data-adapttable-part="card"]');
+      await expect(cards).toHaveCount(10);
+      await expect(surface.locator('[data-adapttable-part="row"]')).toHaveCount(
+        0
+      );
+      await expect(cards.first()).toBeVisible();
+      await expect(
+        cards.first().locator('[data-adapttable-part="card-value"]').first()
+      ).toHaveText("Ada Lovelace");
+      await expect(
+        cards.first().locator('[data-adapttable-part="card-label"]')
+      ).toHaveText(["Team", "Status", "Timeline", "Budget", "Load"]);
+      // Table scrolling is allowed; the document itself must fit the phone.
+      await expect
+        .poll(() =>
+          page.evaluate(
+            () =>
+              document.documentElement.scrollWidth -
+              document.documentElement.clientWidth
+          )
+        )
+        .toBeLessThanOrEqual(1);
+      const framework = page.getByRole("combobox", {
+        name: "Framework",
+        exact: true,
+      });
+      await framework.scrollIntoViewIfNeeded();
+      await expect(framework).toBeInViewport();
+      await expect(framework).toBeEnabled();
+      await expect(framework).toHaveValue("angular");
+      await expect(framework.locator("option")).toHaveText([
+        "React",
+        "Angular",
+      ]);
+      await framework.focus();
+      await expect(framework).toBeFocused();
+      await framework.press("Tab");
+      await expect(
+        page.getByRole("button", { name: "Dark mode", exact: true })
+      ).toBeFocused();
+      // Exercise a real provider change through the phone's kit controls.
+      await page.getByRole("radio", { name: next.label, exact: true }).check();
+      await expect(page.locator(`[data-adapter="${next.key}"]`)).toBeVisible();
+      await page.getByRole("radio", { name: kit.label, exact: true }).check();
+      await expect(surface).toBeVisible();
+      await expect(
+        page.getByRole("radio", { name: kit.label, exact: true })
+      ).toBeChecked();
+      await expect(cards).toHaveCount(10);
+      await expect(
+        cards.first().locator('[data-adapttable-part="card-value"]').first()
+      ).toHaveText("Ada Lovelace");
+      await attachView(page, testInfo, `${kit.key}-${mode}-phone`);
+      if (mode !== "angular-all-options") continue;
+
+      const configure = page.getByRole("button", {
+        name: "Configure options",
+        exact: true,
+      });
+      const dialog = page.getByRole("dialog", { name: "Feature Lab controls" });
+      await configure.click();
+      await expect(dialog).toBeVisible();
+      await attachView(page, testInfo, `${kit.key}-phone-lab-controls-top`);
+      const finalControl = dialog.getByRole("checkbox", {
+        name: "Mobile cards",
+        exact: true,
+      });
+      await expect(finalControl).toBeEnabled();
+      const scrollExtent = await dialog.evaluate(
+        (element) => element.scrollHeight - element.clientHeight
+      );
+      expect(scrollExtent).toBeGreaterThan(0);
+      await dialog.hover();
+      await page.mouse.wheel(0, scrollExtent);
+      await expect
+        .poll(() =>
+          dialog.evaluate(
+            (element) =>
+              element.scrollHeight - element.clientHeight - element.scrollTop
+          )
+        )
+        .toBeLessThanOrEqual(1);
+      await expect(finalControl).toBeVisible();
+      await expect(finalControl).toBeInViewport({ ratio: 1 });
+      await finalControl.focus();
+      await expect(finalControl).toBeFocused();
+      await attachView(page, testInfo, `${kit.key}-phone-lab-controls-bottom`);
+      // Done is in the header; clicking it scrolls back only after bottom evidence.
+      await dialog.getByRole("button", { name: "Done", exact: true }).click();
+      await expect(dialog).toBeHidden();
+      await configure.click();
+      await expect(dialog).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(dialog).toBeHidden();
+      await expect(surface).toBeVisible();
+    }
+  });
+}

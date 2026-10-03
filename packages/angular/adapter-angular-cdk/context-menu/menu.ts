@@ -10,9 +10,15 @@ import {
   type TableContextMenuOptions,
 } from "@adapttable/angular";
 import { A11yModule } from "@angular/cdk/a11y";
-import { type ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
+import { Directionality } from "@angular/cdk/bidi";
+import {
+  CdkConnectedOverlay,
+  type ConnectedPosition,
+  OverlayModule,
+} from "@angular/cdk/overlay";
 import {
   afterNextRender,
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -151,10 +157,19 @@ export class AdaptContextMenuSurface {
     readonly Separator: ContextMenuSlots["Separator"];
   }>();
   private readonly menu = viewChild<ElementRef<HTMLElement>>("menu");
+  private readonly direction = inject(Directionality);
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
   /** The divider takes no fields. */
   protected readonly separatorProps = SEPARATOR_PROPS;
 
   constructor() {
+    afterRenderEffect(() => {
+      this.direction.valueSignal();
+      const overlay = this.connectedOverlay()?.overlayRef;
+      if (!overlay?.hasAttached()) return;
+      overlay.setDirection(this.direction);
+      overlay.updatePosition();
+    });
     afterNextRender(() => {
       this.entries()[0]?.focus();
     });

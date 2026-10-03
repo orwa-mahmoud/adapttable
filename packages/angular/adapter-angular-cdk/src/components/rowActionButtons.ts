@@ -25,6 +25,7 @@ import {
 } from "@angular/core";
 
 import type { DataTableClassNames } from "../types";
+import { AdaptCdkMenuDirection } from "./cdkMenuDirection";
 
 /**
  * One row's actions: a strip of buttons, or a menu behind a "more" button.
@@ -33,7 +34,13 @@ import type { DataTableClassNames } from "../types";
  */
 @Component({
   selector: "adapt-row-actions",
-  imports: [CdkMenuModule, A11yModule, NgComponentOutlet, NgTemplateOutlet],
+  imports: [
+    CdkMenuModule,
+    A11yModule,
+    AdaptCdkMenuDirection,
+    NgComponentOutlet,
+    NgTemplateOutlet,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   templateUrl: "./rowActionButtons.html",

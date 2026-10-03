@@ -10,8 +10,10 @@ import {
   type SavedViewsState,
 } from "@adapttable/angular";
 import { A11yModule } from "@angular/cdk/a11y";
-import { OverlayModule } from "@angular/cdk/overlay";
+import { Directionality } from "@angular/cdk/bidi";
+import { CdkConnectedOverlay, OverlayModule } from "@angular/cdk/overlay";
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -137,6 +139,8 @@ export class AdaptSavedViewsMenu implements OnInit {
   protected readonly views = signal<SavedViewsState | undefined>(undefined);
 
   private readonly injector = inject(Injector);
+  private readonly direction = inject(Directionality);
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
   private readonly trigger = viewChild<ElementRef<HTMLElement>>("trigger");
   private readonly panel = viewChild<ElementRef<HTMLElement>>("panel");
@@ -151,6 +155,17 @@ export class AdaptSavedViewsMenu implements OnInit {
 
   /** Open the views where the props say they are kept. */
   ngOnInit(): void {
+    afterRenderEffect(
+      () => {
+        this.direction.valueSignal();
+        if (!this.popover.open()) return;
+        const overlay = this.connectedOverlay()?.overlayRef;
+        if (!overlay) return;
+        overlay.setDirection(this.direction);
+        overlay.updatePosition();
+      },
+      { injector: this.injector }
+    );
     this.views.set(
       injectSavedViews(
         computed(() => ({ ...this.props().options, injector: this.injector }))

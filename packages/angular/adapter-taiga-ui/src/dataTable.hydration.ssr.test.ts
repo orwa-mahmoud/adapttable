@@ -111,17 +111,56 @@ const CONTRACT = readFileSync(
 const EARLY_EVENTS = "_ejsas";
 const SHELL = `<html><head></head><body><script id="ng-event-dispatch-contract">${CONTRACT}</script><app-root></app-root></body></html>`;
 
+/** DOM constructor families installed by Angular's Domino server adapter. */
+const SERVER_DOM_TYPE =
+  /^(?:(?:HTML|SVG).*Element|CSSStyleDeclaration|CharacterData|Comment|DOMImplementation|DOMTokenList|Document|DocumentFragment|DocumentType|Element|NamedNodeMap|Node|NodeList|NodeFilter|ProcessingInstruction|Text|Window|Event|UIEvent|MouseEvent|CustomEvent|KeyboardEvent)$/;
+
 /** Load the server's page at `url`, running its scripts as the browser would. */
 async function loadServerPage(url: string): Promise<void> {
-  const html = await renderApplication(
-    (context) =>
-      bootstrapApplication(
-        App,
-        { providers: [...hydration(), provideServerRendering()] },
-        context
-      ),
-    { document: SHELL, url }
-  );
+  const browser = jsdomWindow();
+  // Angular's Domino server adapter assigns its DOM constructors to globalThis.
+  // SSR and a real browser have separate realms; this fixture renders both in
+  // one process, so restore its actual browser constructors before hydration.
+  const browserTypes = Object.getOwnPropertyNames(browser)
+    .filter((name) => SERVER_DOM_TYPE.test(name))
+    .flatMap((name) => {
+      const descriptor = Object.getOwnPropertyDescriptor(globalThis, name);
+      const value: unknown = Reflect.get(globalThis, name);
+      return descriptor && typeof value === "function"
+        ? [{ name, descriptor, value }]
+        : [];
+    });
+  let html: string;
+  try {
+    html = await renderApplication(
+      (context) =>
+        bootstrapApplication(
+          App,
+          { providers: [...hydration(), provideServerRendering()] },
+          context
+        ),
+      { document: SHELL, url }
+    );
+  } finally {
+    for (const { name, descriptor, value } of browserTypes) {
+      if (Reflect.get(globalThis, name) === value) continue;
+      if ("value" in descriptor) {
+        Object.defineProperty(globalThis, name, descriptor);
+      } else {
+        // Vitest exposes browser constructors through accessor-backed globals.
+        Reflect.set(globalThis, name, value);
+      }
+    }
+  }
+  for (const name of [
+    "Element",
+    "Event",
+    "HTMLInputElement",
+    "HTMLTextAreaElement",
+    "HTMLSelectElement",
+  ]) {
+    expect(Reflect.get(globalThis, name)).toBe(Reflect.get(browser, name));
+  }
   history.replaceState(null, "", url);
   const page = new DOMParser().parseFromString(html, "text/html");
   const body = document.importNode(page.body, true);
@@ -174,19 +213,22 @@ describe("the Taiga UI Angular table hydrating over its server render", () => {
     const serverRow = rows()[0];
     expect(names()).toEqual(["Irbid"]);
     const app = await bootstrapApplication(App, { providers: hydration() });
-    await app.whenStable();
-    expect(console.error).not.toHaveBeenCalled();
-    // Hydration keeps the server's elements rather than drawing new ones.
-    expect(rows()[0]).toBe(serverRow);
-    expect(names()).toEqual(["Irbid"]);
+    try {
+      await app.whenStable();
+      expect(console.error).not.toHaveBeenCalled();
+      // Hydration keeps the server's elements rather than drawing new ones.
+      expect(rows()[0]).toBe(serverRow);
+      expect(names()).toEqual(["Irbid"]);
 
-    document
-      .querySelector<HTMLButtonElement>('[data-taiga-part="page-prev"]')!
-      .click();
-    await app.whenStable();
-    expect(names()).toEqual(["Amman", "Dubai"]);
-    expect(new URLSearchParams(location.search).get("page")).toBeNull();
-    app.destroy();
+      document
+        .querySelector<HTMLButtonElement>('[data-taiga-part="page-prev"]')!
+        .click();
+      await app.whenStable();
+      expect(names()).toEqual(["Amman", "Dubai"]);
+      expect(new URLSearchParams(location.search).get("page")).toBeNull();
+    } finally {
+      app.destroy();
+    }
   });
 
   it("replays a click the reader made before the table hydrated", async () => {
@@ -197,11 +239,14 @@ describe("the Taiga UI Angular table hydrating over its server render", () => {
     expect(names()).toEqual(["Irbid"]);
 
     const app = await bootstrapApplication(App, { providers: hydration() });
-    await app.whenStable();
-    await vi.waitFor(() => {
-      expect(names()).toEqual(["Amman", "Dubai"]);
-    });
-    app.destroy();
+    try {
+      await app.whenStable();
+      await vi.waitFor(() => {
+        expect(names()).toEqual(["Amman", "Dubai"]);
+      });
+    } finally {
+      app.destroy();
+    }
   });
 
   it("keeps the requested page size selected before and after hydration", async () => {
@@ -223,11 +268,14 @@ describe("the Taiga UI Angular table hydrating over its server render", () => {
       );
       expect(select.value).toBe("25");
 
+      select.focus();
       select.click();
       await app.whenStable();
+      expect(select.getAttribute("aria-expanded")).toBe("true");
       const popup = document.getElementById(
         select.getAttribute("aria-controls")!
       )!;
+      expect(popup).not.toBeNull();
       const options = [
         ...popup.querySelectorAll<HTMLButtonElement>("button[tuiOption]"),
       ];
